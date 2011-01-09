@@ -858,8 +858,12 @@ void CConsole::PrintResponse(int Level, const char *pFrom, const char *pStr)
 	}
 }
 
-void CConsole::List(const int Level, int Flags)
+void CConsole::List(int Level, int Flags)
 {
+	if (Level < 0)
+		Level = 0;
+	if (Level > 4)
+		Level = 4;
 	switch(Level)
 	{
 		case 4: PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "console", "command cmdlist is not allowed for config files"); return;
@@ -890,7 +894,8 @@ void CConsole::List(const int Level, int Flags)
 				}
 				else
 				{
-					str_format(aBuf, sizeof(aBuf), "%s, %s", aBuf, pCommand->m_pName);
+					str_append(aBuf, ", ", sizeof(aBuf));
+					str_append(aBuf, pCommand->m_pName, sizeof(aBuf));
 					Length += CommandLength + 2;
 				}
 			}
