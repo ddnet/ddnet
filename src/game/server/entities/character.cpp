@@ -778,6 +778,8 @@ void CCharacter::Tick()
 	m_DoSplash = false;
 	if (g_Config.m_SvEndlessDrag || m_EndlessHook)
 		m_Core.m_HookTick = 0;
+	if (m_DeepFreeze && !m_Super)
+		Freeze();
 	if (m_Super && m_Core.m_Jumped > 1)
 		m_Core.m_Jumped = 1;
 	if (m_Super && g_Config.m_SvEndlessSuperHook)
@@ -997,13 +999,28 @@ void CCharacter::HandleTiles(int Index)
 	{
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
 	}
-	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super)
+	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
 	{
 		Freeze(Server()->TickSpeed()*3);
 	}
-	else if((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE))
+	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 	{
 		UnFreeze();
+	}
+	else if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have been deeply freezed");
+		m_DeepFreeze = true;
+	}
+	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have been thawed from deepfreeze");
+
+		if((m_TileIndex != TILE_FREEZE) && (m_TileFIndex != TILE_FREEZE)) {
+			UnFreeze();
+		}
+
+		m_DeepFreeze = false;
 	}
 	else if(((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
 	{

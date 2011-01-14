@@ -57,6 +57,7 @@ public:
 		bool m_aHasWeapon[NUM_WEAPONS];
 		int m_HammerType;
 		bool m_Super;
+		bool m_DeepFreeze;
 		bool m_EndlessHook;
 		int m_PauseTime;
 		int m_Team;
