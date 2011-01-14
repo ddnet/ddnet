@@ -1404,7 +1404,7 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientId1)
 			Addr.port = AddrCheck.port = 0;
 			if(net_addr_comp(&Addr, &AddrCheck) == 0)
 			{
-				pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban yourself");
+				pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can\'t ban yourself");
 				return;
 			}
 		}
@@ -1416,7 +1416,7 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientId1)
 			{
 				if ((((CServer *)pUser)->m_aClients[ClientId1].m_Authed > 0) && ((CServer *)pUser)->m_aClients[ClientId1].m_Authed <= ((CServer *)pUser)->m_aClients[i].m_Authed)
 				{
-					pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban an a player with the higher or same rank!");
+					pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can\'t ban a player with higher or same level");
 					return;
 				}
 			}

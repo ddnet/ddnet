@@ -78,11 +78,43 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData, int Clie
 	if(Seconds < 10)
 		Seconds = 10;
 
-	if(pSelf->m_apPlayers[Victim]->m_Muted < Seconds * pSelf->Server()->TickSpeed())
-	{
+	if(Victim == ClientId) {
+		pSelf->SendChatTarget(ClientId, "You can\'t mute yourself");
+	}
+	else {
+		/*pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
+		str_format(buf, sizeof(buf), "You have been muted by for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
+		pSelf->SendChatTarget(Victim, buf);*/
+
 		pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
 		str_format(buf, sizeof(buf), "%s muted by %s for %d seconds", pSelf->Server()->ClientName(Victim), pSelf->Server()->ClientName(ClientId), Seconds);
 		pSelf->SendChat(-1, CGameContext::CHAT_ALL, buf);
+	}
+}
+
+void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientId)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	char buf[512];
+
+	if(Victim == ClientId) {
+		pSelf->SendChatTarget(ClientId, "You can\'t unmute yourself");
+	}
+	else {
+		if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
+		{
+			pSelf->m_apPlayers[Victim]->m_Muted = 0;
+			str_format(buf, sizeof(buf), "You have been unmuted", pSelf->Server()->ClientName(Victim));
+			pSelf->SendChatTarget(Victim, buf);
+		}
+
+		/*if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
+		{
+			pSelf->m_apPlayers[Victim]->m_Muted = 0;
+			str_format(buf, sizeof(buf), "%s has been unmuted", pSelf->Server()->ClientName(Victim));
+			pSelf->SendChat(-1, CGameContext::CHAT_ALL, buf);
+		}*/
 	}
 }
 
