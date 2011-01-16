@@ -1814,6 +1814,7 @@ void CServer::CheckPass(int ClientId, const char *pPw)
 			{
 				char buf[128]="Authentication successful. Remote console access granted for ClientId=%d with level=%d";
 				SetRconLevel(ClientId,level);
+				SetClientAuthed(ClientId, level);
 				str_format(buf,sizeof(buf),buf,ClientId,level);
 				SendRconLine(ClientId, buf);
 				dbg_msg("server", "'%s' ClientId=%d authed with Level=%d", ClientName(ClientId), ClientId, level);
@@ -1853,6 +1854,7 @@ void CServer::CheckPass(int ClientId, const char *pPw)
 	{
 		char buf[128]="Authentication successful. Remote console access granted for ClientId=%d with level=%d";
 		SetRconLevel(ClientId,0);
+		SetClientAuthed(ClientId, 0);
 		str_format(buf,sizeof(buf),buf,ClientId,0);
 		SendRconLine(ClientId, buf);
 		dbg_msg("server", "'%s' ClientId=%d authed with Level=%d", ClientName(ClientId), ClientId, 0);

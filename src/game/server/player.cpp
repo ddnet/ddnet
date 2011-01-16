@@ -46,7 +46,6 @@ CPlayer::~CPlayer()
 
 void CPlayer::Tick()
 {
-	Server()->SetClientAuthed(m_ClientID, m_Authed);
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
 
