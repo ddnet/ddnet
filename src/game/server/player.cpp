@@ -285,6 +285,7 @@ void CPlayer::LoadCharacter()
 	Character->m_LastWeapon = m_PauseInfo.m_LastWeapon;
 	Character->m_HammerType = m_PauseInfo.m_HammerType;
 	Character->m_Super = m_PauseInfo.m_Super;
+	Character->m_EndlessHook = m_PauseInfo.m_EndlessHook;
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	Controller->m_Teams.m_Core.Team(GetCID(), m_PauseInfo.m_Team);
 	m_PauseInfo.m_Respawn = false;
@@ -315,6 +316,7 @@ void CPlayer::SaveCharacter()
 	m_PauseInfo.m_LastWeapon = Character->m_LastWeapon;
 	m_PauseInfo.m_HammerType = Character->m_HammerType;
 	m_PauseInfo.m_Super = Character->m_Super;
+	m_PauseInfo.m_EndlessHook = Character->m_EndlessHook;
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	m_PauseInfo.m_Team = Controller->m_Teams.m_Core.Team(GetCID());
 	m_PauseInfo.m_PauseTime = Server()->Tick();
