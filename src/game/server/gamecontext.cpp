@@ -329,7 +329,7 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				} else {
-					if(Teams->Team(i) == Team) {
+					if(Teams->Team(i) == Team && m_apPlayers[i]->GetTeam() != CHAT_SPEC) {
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
@@ -763,7 +763,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 		//if(Team)
 		int GameTeam = ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(p->GetCID());
 		if(Team) {
-			Team = (p->GetTeam() == -1) ? CHAT_SPEC : (GameTeam == 0 ? CHAT_ALL : GameTeam);
+			Team = ((p->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
 		} else {
 			Team = CHAT_ALL;
 		}
