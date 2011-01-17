@@ -1761,7 +1761,7 @@ void CServer::SetRconLevel(int ClientId, int Level)
 		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
 		Msg.AddInt(0);
 		SendMsgEx(&Msg, MSGFLAG_VITAL, ClientId, true);
-		m_aClients[ClientId].m_Authed = Level;
+		m_aClients[ClientId].m_Authed = 0;
 	}
 	else
 	{
@@ -1814,7 +1814,6 @@ void CServer::CheckPass(int ClientId, const char *pPw)
 			{
 				char buf[128]="Authentication successful. Remote console access granted for ClientId=%d with level=%d";
 				SetRconLevel(ClientId,level);
-				SetClientAuthed(ClientId, level);
 				str_format(buf,sizeof(buf),buf,ClientId,level);
 				SendRconLine(ClientId, buf);
 				dbg_msg("server", "'%s' ClientId=%d authed with Level=%d", ClientName(ClientId), ClientId, level);
@@ -1854,7 +1853,6 @@ void CServer::CheckPass(int ClientId, const char *pPw)
 	{
 		char buf[128]="Authentication successful. Remote console access granted for ClientId=%d with level=%d";
 		SetRconLevel(ClientId,0);
-		SetClientAuthed(ClientId, 0);
 		str_format(buf,sizeof(buf),buf,ClientId,0);
 		SendRconLine(ClientId, buf);
 		dbg_msg("server", "'%s' ClientId=%d authed with Level=%d", ClientName(ClientId), ClientId, 0);
