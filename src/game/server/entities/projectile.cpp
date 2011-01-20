@@ -22,7 +22,7 @@ CProjectile::CProjectile
 		int Layer,
 		int Number
 	)
-: CEntity(pGameWorld, NETOBJTYPE_PROJECTILE)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Layer = Layer;
 	m_Number = Number;

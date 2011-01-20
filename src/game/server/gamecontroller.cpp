@@ -57,7 +57,7 @@ IGameController::~IGameController()
 float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos)
 {
 	float Score = 0.0f;
-	CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(NETOBJTYPE_CHARACTER));
+	CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 	for(; pC; pC = (CCharacter *)pC->TypeNext())
 	{
 		// team mates are not as dangerous as enemies
@@ -66,10 +66,7 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos)
 			Scoremod = 0.5f;
 
 		float d = distance(Pos, pC->m_Pos);
-		if(d == 0)
-			Score += 1000000000.0f;
-		else
-			Score += 1.0f/d;
+		Score += Scoremod * (d == 0 ? 1000000000.0f : 1.0f/d);
 	}
 
 	return Score;
@@ -840,7 +837,7 @@ bool IGameController::CheckTeamBalance()
 	char aBuf[256];
 	if(absolute(aT[0]-aT[1]) >= 2)
 	{
-		str_format(aBuf, sizeof(aBuf), "Team is NOT balanced (red=%d blue=%d)", aT[0], aT[1]);
+		str_format(aBuf, sizeof(aBuf), "Teams are NOT balanced (red=%d blue=%d)", aT[0], aT[1]);
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 		if(GameServer()->m_pController->m_UnbalancedTick == -1)
 			GameServer()->m_pController->m_UnbalancedTick = Server()->Tick();
@@ -848,7 +845,7 @@ bool IGameController::CheckTeamBalance()
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "Team is balanced (red=%d blue=%d)", aT[0], aT[1]);
+		str_format(aBuf, sizeof(aBuf), "Teams are balanced (red=%d blue=%d)", aT[0], aT[1]);
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 		GameServer()->m_pController->m_UnbalancedTick = -1;
 		return true;

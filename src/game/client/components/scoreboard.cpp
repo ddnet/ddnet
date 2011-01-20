@@ -53,32 +53,26 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	Graphics()->QuadsEnd();
 
 	// render goals
-	//y = ystart+h-54;
-	float tw = 0.0f;
 	if(m_pClient->m_Snap.m_pGameobj)
 	{
 		if(m_pClient->m_Snap.m_pGameobj->m_ScoreLimit)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), m_pClient->m_Snap.m_pGameobj->m_ScoreLimit);
-			TextRender()->Text(0, x+20.0f, y, 22.0f, aBuf, -1);
-			tw += TextRender()->TextWidth(0, 22.0f, aBuf, -1);
+			TextRender()->Text(0, x, y, 20.0f, aBuf, -1);
 		}
 		if(m_pClient->m_Snap.m_pGameobj->m_TimeLimit)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), m_pClient->m_Snap.m_pGameobj->m_TimeLimit);
-			TextRender()->Text(0, x+220.0f, y, 22.0f, aBuf, -1);
-			tw += TextRender()->TextWidth(0, 22.0f, aBuf, -1);
+			TextRender()->Text(0, x+220.0f, y, 20.0f, aBuf, -1);
 		}
 		if(m_pClient->m_Snap.m_pGameobj->m_RoundNum && m_pClient->m_Snap.m_pGameobj->m_RoundCurrent)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s %d/%d", Localize("Round"), m_pClient->m_Snap.m_pGameobj->m_RoundCurrent, m_pClient->m_Snap.m_pGameobj->m_RoundNum);
-			TextRender()->Text(0, x+450.0f, y, 22.0f, aBuf, -1);
-			
-		/*[48c3fd4c][game/scoreboard]: timelimit x:219.428558
-		[48c3fd4c][game/scoreboard]: round x:453.142822*/
+			float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1);
+			TextRender()->Text(0, x+w-tw-20.0f, y, 20.0f, aBuf, -1);
 		}
 	}
 }
@@ -132,13 +126,13 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		return;
 
 	//float ystart = y;
-	float h = 750.0f;
+	float h = 740.0f;
 
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.5f);
-	RenderTools()->DrawRoundRect(x-10.f, y-10.f, w, h, 17.0f);
+	RenderTools()->DrawRoundRect(x-10.f, y, w, h, 17.0f);
 	Graphics()->QuadsEnd();
 
 	// render title
@@ -334,24 +328,7 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 void CScoreboard::OnRender()
 {
-	bool DoScoreBoard = false;
-
-	// if we activly wanna look on the scoreboard	
-	if(m_Active)
-		DoScoreBoard = true;
-		
-	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
-	{
-		// we are not a spectator, check if we are ead
-		if(!m_pClient->m_Snap.m_pLocalCharacter || m_pClient->m_Snap.m_pLocalCharacter->m_Health < 0)
-			DoScoreBoard = true;
-	}
-
-	// if we the game is over
-	if(m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_GameOver)
-		DoScoreBoard = true;
-		
-	if(!DoScoreBoard)
+	if(!Active())
 		return;
 		
 	// if the score board is active, then we should clear the motd message aswell
@@ -371,10 +348,7 @@ void CScoreboard::OnRender()
 		w = 650.0f;
 
 	if(m_pClient->m_Snap.m_pGameobj && !(m_pClient->m_Snap.m_pGameobj->m_Flags&GAMEFLAG_TEAMS))
-	{
 		RenderScoreboard(Width/2-w/2, 150.0f, w, 0, 0);
-		//render_scoreboard(gameobj, 0, 0, -1, 0);
-	}
 	else
 	{
 			
@@ -401,5 +375,20 @@ void CScoreboard::OnRender()
 
 bool CScoreboard::Active()
 {
-	return m_Active | (m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_GameOver);
+	// if we activly wanna look on the scoreboard	
+	if(m_Active)
+		return true;
+		
+	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
+	{
+		// we are not a spectator, check if we are dead
+		if(!m_pClient->m_Snap.m_pLocalCharacter)
+			return true;
+	}
+
+	// if the game is over
+	if(m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_GameOver)
+		return true;
+
+	return false;
 }

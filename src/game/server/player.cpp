@@ -1,11 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
-//#include <stdio.h> //TODO:GFX check if linux still needs this
+#include <engine/shared/config.h>
 #include <engine/server.h>
 #include <engine/server/server.h>
-#include <engine/shared/config.h>
-
 #include "player.h"
 #include "gamecontext.h"
 #include <game/gamecore.h>
@@ -46,6 +44,9 @@ CPlayer::~CPlayer()
 
 void CPlayer::Tick()
 {
+#ifdef CONF_DEBUG
+	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
+#endif
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
 
@@ -94,6 +95,9 @@ void CPlayer::Tick()
 
 void CPlayer::Snap(int SnappingClient)
 {
+#ifdef CONF_DEBUG
+	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
+#endif
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
 
@@ -239,7 +243,7 @@ void CPlayer::TryRespawn()
 
 		// check if the position is occupado
 		CEntity *apEnts[2] = {0};
-		int NumEnts = GameServer()->m_World.FindEntities(SpawnPos, 64, apEnts, 2, NETOBJTYPE_CHARACTER);
+		int NumEnts = GameServer()->m_World.FindEntities(SpawnPos, 64, apEnts, 2, CGameWorld::ENTTYPE_CHARACTER);
 		if(NumEnts < 3)
 		{
 			m_Spawning = false;

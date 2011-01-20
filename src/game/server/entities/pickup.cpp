@@ -5,7 +5,7 @@
 #include "pickup.h"
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number)
-: CEntity(pGameWorld, NETOBJTYPE_PICKUP)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
 	m_Layer = Layer;
 	m_Number = Number;
@@ -121,16 +121,21 @@ void CPickup::Tick()
 					}
 					break;
 				
-				case POWERUP_NINJA:
+			case POWERUP_NINJA:
+				{
+					// activate ninja on target player
+					pChr->GiveNinja();
+					//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+
+					/*// loop through all players, setting their emotes
+					CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
+					for(; pC; pC = (CCharacter *)pC->TypeNext())
 					{
-						// activate ninja on target player
-						//if(!pChr->m_FreezeTime) pChr->GiveNinja();
-						pChr->GiveNinja();
-						//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
-					
-						break;
-					}
-				
+						if (pC != pChr)
+							pC->SetEmote(EMOTE_SURPRISE, Server()->Tick() + Server()->TickSpeed());
+					}*/
+					break;
+				}
 				default:
 					break;
 			};
