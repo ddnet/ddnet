@@ -190,6 +190,8 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 	
 	m_MapReload = 0;
 
+	memset(m_aPrevStates, CClient::STATE_EMPTY, MAX_CLIENTS * sizeof(int));
+
 	m_RconClientId = -1;
 
 	Init();
@@ -591,6 +593,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
 	pThis->m_aClients[ClientId].m_Authed = 0;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aPrevStates[ClientId] = CClient::STATE_EMPTY;
 	memset(&pThis->m_aClients[ClientId].m_Addr, 0, sizeof(NETADDR));
 	pThis->m_aClients[ClientId].m_Snapshots.PurgeAll();
 	return 0;
@@ -1147,6 +1150,11 @@ int CServer::LoadMap(const char *pMapName)
 		io_read(File, m_pCurrentMapData, m_CurrentMapSize);
 		io_close(File);
 	}
+
+	for(int i=0; i<MAX_CLIENTS; i++) {
+		m_aPrevStates[i] = m_aClients[i].m_State;
+	}
+
 	return 1;
 }
 

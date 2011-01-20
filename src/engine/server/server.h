@@ -109,6 +109,7 @@ public:
 	};
 	
 	CClient m_aClients[MAX_CLIENTS];
+	int m_aPrevStates[MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;

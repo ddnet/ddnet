@@ -647,21 +647,24 @@ void CGameContext::OnClientEnter(int ClientId)
 	Score()->PlayerData(ClientId)->m_CurrentTime = Score()->PlayerData(ClientId)->m_BestTime;
 	m_apPlayers[ClientId]->m_Score = (Score()->PlayerData(ClientId)->m_BestTime)?Score()->PlayerData(ClientId)->m_BestTime:-9999;
 
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), m_pController->GetTeamName(m_apPlayers[ClientId]->GetTeam()));
-	SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
-	
-	SendChatTarget(ClientId, "DDRace Mod. Version: " DDRACE_VERSION);
-	SendChatTarget(ClientId, "Official site: DDRace.info");
-	SendChatTarget(ClientId, "For more Info /cmdlist");
-	SendChatTarget(ClientId, "Or visit DDRace.info");
-	SendChatTarget(ClientId, "To see this again say /info");
-	SendChatTarget(ClientId, "Note This is an Alpha release, just for testing, your feedback is important!!");
+	if(((CServer *) Server())->m_aPrevStates[ClientId] < CServer::CClient::STATE_INGAME)
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), m_pController->GetTeamName(m_apPlayers[ClientId]->GetTeam()));
+		SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
 
-	if(g_Config.m_SvWelcome[0]!=0) SendChatTarget(ClientId,g_Config.m_SvWelcome);
-	//str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientId, Server()->ClientName(ClientId), m_apPlayers[ClientId]->GetTeam());
+		SendChatTarget(ClientId, "DDRace Mod. Version: " DDRACE_VERSION);
+		SendChatTarget(ClientId, "Official site: DDRace.info");
+		SendChatTarget(ClientId, "For more Info /cmdlist");
+		SendChatTarget(ClientId, "Or visit DDRace.info");
+		SendChatTarget(ClientId, "To see this again say /info");
+		SendChatTarget(ClientId, "Note This is an Alpha release, just for testing, your feedback is important!!");
+
+		if(g_Config.m_SvWelcome[0]!=0) SendChatTarget(ClientId,g_Config.m_SvWelcome);
+		//str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientId, Server()->ClientName(ClientId), m_apPlayers[ClientId]->GetTeam());
 	
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	}
 
 	m_VoteUpdate = true;
 }
