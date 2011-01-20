@@ -240,7 +240,7 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 	// Find other players
 	vec2 LineDir = normalize(Pos1-Pos0);
 
-	CCharacter *p = (CCharacter *)FindFirst(NETOBJTYPE_CHARACTER);
+	CCharacter *p = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; p; p = (CCharacter *)p->TypeNext())
  	{
 		if(p == pNotThis)
@@ -259,7 +259,7 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 
 void CGameWorld::ReleaseHooked(int ClientId)
 {
-	CCharacter *p = (CCharacter *)CGameWorld::FindFirst(NETOBJTYPE_CHARACTER);
+	CCharacter *p = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 		for(; p; p = (CCharacter *)p->TypeNext())
 			if(p->m_Core.m_HookedPlayer == ClientId && !p->m_Super)
 			{

@@ -13,7 +13,7 @@
 
 
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length, int Layer, int Number)
-: CEntity(pGameWorld, NETOBJTYPE_LASER)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Layer = Layer;
 	m_Number = Number;

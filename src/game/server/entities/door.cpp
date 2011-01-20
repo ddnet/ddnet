@@ -6,7 +6,7 @@
 #include "door.h"
 
 CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length, int Number)
-: CEntity(pGameWorld, NETOBJTYPE_LASER)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Number = Number;
 	m_Pos = Pos;
