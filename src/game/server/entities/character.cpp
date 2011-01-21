@@ -95,7 +95,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	if(m_pPlayer->m_RconFreeze) Freeze(-1);
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	
-	if(GetPlayer()->m_IsUsingDDRaceClient) {
+	if(GetPlayer()->m_IsUsingDDRaceClient)
+	{
 		Controller->m_Teams.SendTeamsState(GetPlayer()->GetCID());
 	}
 
@@ -839,19 +840,20 @@ void CCharacter::Tick()
 	}
 
 	// handle tiles
+	int CurrentIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
 		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 			HandleTiles(*i);
 	else
-		HandleTiles(GameServer()->Collision()->GetPureMapIndex(m_Pos));
+		HandleTiles(CurrentIndex);
 	// handle speedup tiles
-	if(GameServer()->Collision()->IsSpeedup(GameServer()->Collision()->GetPureMapIndex(m_Pos)) == TILE_BOOST)
+	if(GameServer()->Collision()->IsSpeedup(CurrentIndex))
 	{
 		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
 		int Force, MaxSpeed = 0;
 		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-		GameServer()->Collision()->GetSpeedup(GameServer()->Collision()->GetPureMapIndex(m_Pos), &Direction, &Force, &MaxSpeed);
+		GameServer()->Collision()->GetSpeedup(CurrentIndex, &Direction, &Force, &MaxSpeed);
 		if(Force == 255 && MaxSpeed)
 		{
 			m_Core.m_Vel = Direction * (MaxSpeed/5);
@@ -916,7 +918,6 @@ void CCharacter::Tick()
 			//dbg_msg("speedup tile end","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
 		}
 	}
-
 	// handle Weapons
 	HandleWeapons();
 
