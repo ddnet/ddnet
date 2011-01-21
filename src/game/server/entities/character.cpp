@@ -731,8 +731,6 @@ void CCharacter::HandleFly()
 
 void CCharacter::Tick()
 {
-	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	//dbg_msg("Indices","%d",Indices.size());
 	/*if(m_pPlayer->m_ForceBalanced)
 	{
 		char Buf[128];
@@ -741,7 +739,7 @@ void CCharacter::Tick()
 
 		m_pPlayer->m_ForceBalanced = false;
 	}*/
-	m_Armor=(m_FreezeTime != -1)?10-(m_FreezeTime/15):0;
+	m_Armor=(m_FreezeTime >= 0)?10-(m_FreezeTime/15):0;
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
 
@@ -751,7 +749,7 @@ void CCharacter::Tick()
 		{
 			GameServer()->CreateDamageInd(m_Pos, 0, m_FreezeTime / Server()->TickSpeed());
 		}
-		if(m_FreezeTime != -1)
+		if(m_FreezeTime > 0)
 			m_FreezeTime--;
 		else
 			m_Ninja.m_ActivationTick = Server()->Tick();
@@ -765,8 +763,8 @@ void CCharacter::Tick()
 		}
 	}
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true);
 	m_Core.m_Id = GetPlayer()->GetCID();
+	m_Core.Tick(true);
 
 	if (m_DefEmoteReset >= 0 && m_DefEmoteReset <= Server()->Tick())
 	{
@@ -774,18 +772,15 @@ void CCharacter::Tick()
 		m_EmoteType = m_DefEmote = EMOTE_NORMAL;
 		m_EmoteStop = -1;
 	}
-	
+
 	m_DoSplash = false;
-	if (g_Config.m_SvEndlessDrag || m_EndlessHook)
+	if (g_Config.m_SvEndlessDrag || m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
 		m_Core.m_HookTick = 0;
 	if (m_DeepFreeze && !m_Super)
 		Freeze();
 	if (m_Super && m_Core.m_Jumped > 1)
 		m_Core.m_Jumped = 1;
-	if (m_Super && g_Config.m_SvEndlessSuperHook)
-		m_Core.m_HookTick = 0;
-	/*dbg_msg("character","m_TileIndex=%d , m_TileFIndex=%d",m_TileIndex,m_TileFIndex); //REMOVE*/
-	//DDRace
+
 	char aBroadcast[128];
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
@@ -842,18 +837,84 @@ void CCharacter::Tick()
 		}
 		m_RefreshTime = Server()->Tick();
 	}
-//int num =0;
+
+	// handle tiles
+	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
 		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 			HandleTiles(*i);
 	else
 		HandleTiles(GameServer()->Collision()->GetPureMapIndex(m_Pos));
-
-	// kill player when leaving gamelayer
-	if((int)m_Pos.x/32 < -200 || (int)m_Pos.x/32 > GameServer()->Collision()->GetWidth()+200 ||
-		(int)m_Pos.y/32 < -200 || (int)m_Pos.y/32 > GameServer()->Collision()->GetHeight()+200)
+	// handle speedup tiles
+	if(GameServer()->Collision()->IsSpeedup(GameServer()->Collision()->GetPureMapIndex(m_Pos)) == TILE_BOOST)
 	{
-		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
+		int Force, MaxSpeed = 0;
+		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
+		GameServer()->Collision()->GetSpeedup(GameServer()->Collision()->GetPureMapIndex(m_Pos), &Direction, &Force, &MaxSpeed);
+		if(Force == 255 && MaxSpeed)
+		{
+			m_Core.m_Vel = Direction * (MaxSpeed/5);
+		}
+		else
+		{
+			if(MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
+			//dbg_msg("speedup tile start","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
+			if(MaxSpeed > 0)
+			{
+				if(Direction.x > 0.0000001f)
+					SpeederAngle = -atan(Direction.y / Direction.x);
+				else if(Direction.x < 0.0000001f)
+					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+				else if(Direction.y > 0.0000001f)
+					SpeederAngle = asin(1.0f);
+				else
+					SpeederAngle = asin(-1.0f);
+
+				if(SpeederAngle < 0)
+					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+
+				if(TempVel.x > 0.0000001f)
+					TeeAngle = -atan(TempVel.y / TempVel.x);
+				else if(TempVel.x < 0.0000001f)
+					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+				else if(TempVel.y > 0.0000001f)
+					TeeAngle = asin(1.0f);
+				else
+					TeeAngle = asin(-1.0f);
+
+				if(TeeAngle < 0)
+					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+
+				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+
+				DiffAngle = SpeederAngle - TeeAngle;
+				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
+
+				//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
+
+				if(abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					TempVel += Direction * Force;
+				else if(abs(SpeedLeft) > Force)
+					TempVel += Direction * -Force;
+				else
+					TempVel += Direction * SpeedLeft;
+			}
+			else
+				TempVel += Direction * Force;
+
+			if(TempVel.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
+				TempVel.x = 0;
+			if(TempVel.x < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)))
+				TempVel.x = 0;
+			if(TempVel.y < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)))
+				TempVel.y = 0;
+			if(TempVel.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
+				TempVel.y = 0;
+			m_Core.m_Vel = TempVel;
+			//dbg_msg("speedup tile end","(Direction*Force) %f %f   m_Core.m_Vel%f %f",(Direction*Force).x,(Direction*Force).y,m_Core.m_Vel.x,m_Core.m_Vel.y);
+			//dbg_msg("speedup tile end","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
+		}
 	}
 
 	// handle Weapons
@@ -1087,86 +1148,6 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHCLOSE;
 	}
-	// handle speedup tiles
-	if(GameServer()->Collision()->IsSpeedup(PureMapIndex) == TILE_BOOST)
-	{
-		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
-		int Force, MaxSpeed = 0;
-		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-		GameServer()->Collision()->GetSpeedup(MapIndex, &Direction, &Force, &MaxSpeed);
-		if(Force == 255 && MaxSpeed)
-		{
-			m_Core.m_Vel = Direction * (MaxSpeed/5);
-		}
-		else
-		{
-			if(MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
-			//dbg_msg("speedup tile start","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
-			if(
-					((Direction.x < 0) && ((int)GameServer()->Collision()->GetPos(MapIndexL).x) && ((int)GameServer()->Collision()->GetPos(MapIndexL).x < (int)m_Core.m_Pos.x)) ||
-					((Direction.x > 0) && ((int)GameServer()->Collision()->GetPos(MapIndexR).x) && ((int)GameServer()->Collision()->GetPos(MapIndexR).x > (int)m_Core.m_Pos.x)) ||
-					((Direction.y > 0) && ((int)GameServer()->Collision()->GetPos(MapIndexB).y) && ((int)GameServer()->Collision()->GetPos(MapIndexB).y > (int)m_Core.m_Pos.y)) ||
-					((Direction.y < 0) && ((int)GameServer()->Collision()->GetPos(MapIndexT).y) && ((int)GameServer()->Collision()->GetPos(MapIndexT).y < (int)m_Core.m_Pos.y))
-					)
-					m_Core.m_Pos = m_PrevPos;
-			
-			if(MaxSpeed > 0)
-			{
-				if(Direction.x > 0.0000001f)
-					SpeederAngle = -atan(Direction.y / Direction.x);
-				else if(Direction.x < 0.0000001f)
-					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
-				else if(Direction.y > 0.0000001f)
-					SpeederAngle = asin(1.0f);
-				else
-					SpeederAngle = asin(-1.0f);
-
-				if(SpeederAngle < 0)
-					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
-
-				if(TempVel.x > 0.0000001f)
-					TeeAngle = -atan(TempVel.y / TempVel.x);
-				else if(TempVel.x < 0.0000001f)
-					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
-				else if(TempVel.y > 0.0000001f)
-					TeeAngle = asin(1.0f);
-				else
-					TeeAngle = asin(-1.0f);
-
-				if(TeeAngle < 0)
-					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
-
-				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
-
-				DiffAngle = SpeederAngle - TeeAngle;
-				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-
-				//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
-
-				if(abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
-					TempVel += Direction * Force;
-				else if(abs(SpeedLeft) > Force)
-					TempVel += Direction * -Force;
-				else
-					TempVel += Direction * SpeedLeft;
-			}
-			else
-				TempVel += Direction * Force;
-
-			if(TempVel.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
-				TempVel.x = 0;
-			if(TempVel.x < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)))
-				TempVel.x = 0;
-			if(TempVel.y < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)))
-				TempVel.y = 0;
-			if(TempVel.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
-				TempVel.y = 0;
-			m_Core.m_Vel = TempVel;
-			//dbg_msg("speedup tile end","(Direction*Force) %f %f   m_Core.m_Vel%f %f",(Direction*Force).x,(Direction*Force).y,m_Core.m_Vel.x,m_Core.m_Vel.y);
-			//dbg_msg("speedup tile end","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
-		}
-	}
-	m_LastBooster = MapIndex;
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if(z && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 	{

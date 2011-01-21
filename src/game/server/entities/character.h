@@ -181,7 +181,6 @@ public:
 	int m_StartTime;
 	int m_RefreshTime;
 	
-	int m_LastBooster;
 	vec2 m_PrevPos;
 
 	// checkpoints
