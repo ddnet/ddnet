@@ -170,10 +170,10 @@ int CCollision::GetTile(int x, int y)
 	int nx = clamp(x/32, 0, m_Width-1);
 	int ny = clamp(y/32, 0, m_Height-1);
 	if(!m_pTiles || ny < 0 || nx < 0)
-{
+	{
 		//dbg_msg("Collision","Something is terribly wrong, !m_pTiles %d, ny %d, ny %d", !m_pTiles, ny, ny);
 		return 0;
-}
+	}
 	/*dbg_msg("GetTile","m_Index %d",m_pTiles[ny*m_Width+nx].m_Index);//Remove */
 	if(m_pTiles[ny*m_Width+nx].m_Index == COLFLAG_SOLID
 		|| m_pTiles[ny*m_Width+nx].m_Index == (COLFLAG_SOLID|COLFLAG_NOHOOK)
@@ -463,7 +463,7 @@ int CCollision::GetSwitchDelay(int Index)
 	return 0;
 }
 
-int CCollision::IsCp(int x, int y, int* Flags)
+int CCollision::IsMover(int x, int y, int* Flags)
 {
 	int nx = clamp(x/32, 0, m_Width-1);
 	int ny = clamp(y/32, 0, m_Height-1);
@@ -694,7 +694,7 @@ int CCollision::Entity(int x, int y, int Layer)
 			default:
 				str_format(aBuf,sizeof(aBuf), "Unknown");
 		}
-		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at http://DDRace.info, you will need to post the map as well and any steps tht u think may led to this, Please Also Read the News Section every once and a while", aBuf);
+		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at http://DDRace.info, you will need to post the map as well and any steps that u think may have led to this, Please Also Read the News Section every once and a while", aBuf);
 		return 0;
 	}
 	switch (Layer)

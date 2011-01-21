@@ -86,7 +86,7 @@ void CLight::Tick()
 	{
 		int Flags;
 		m_EvalTick=Server()->Tick();
-		int index = GameServer()->Collision()->IsCp(m_Pos.x,m_Pos.y, &Flags);
+		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
 		if (index)
 		{
 			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);
