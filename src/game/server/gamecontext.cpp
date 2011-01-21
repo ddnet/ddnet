@@ -847,6 +847,11 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			{
 				if(str_comp_nocase(pMsg->m_Value, pOption->m_aCommand) == 0)
 				{
+					if(!Console()->LineIsValid(pOption->m_aCommand))
+					{
+						SendChatTarget(ClientId, "Invalid option");
+						return;
+					}
 					//str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientId), pOption->m_aCommand);
 					if(m_apPlayers[ClientId]->m_Authed <= 0 && strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 && time_get() < last_mapvote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 						{
