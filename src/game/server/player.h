@@ -84,6 +84,7 @@ public:
 	int64 m_Last_Emote;
 	int64 m_Last_Kill;
 	int64 m_Last_Pause;
+	int64 m_Last_Team;
 
 	bool m_Invisible;
 	
