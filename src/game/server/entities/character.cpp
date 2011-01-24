@@ -343,7 +343,11 @@ void CCharacter::FireWeapon()
 					continue;
 
 				// set his velocity to fast upward (for now)
-				GameServer()->CreateHammerHit(m_Pos, Teams()->TeamMask(Team()));
+				if(length(pTarget->m_Pos-ProjStartPos) > 0.0f)
+					GameServer()->CreateHammerHit(pTarget->m_Pos-normalize(pTarget->m_Pos-ProjStartPos)*m_ProximityRadius*0.5f, Teams()->TeamMask(Team()));
+				else
+					GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team()));
+				
 				vec2 Dir;
 				if (length(pTarget->m_Pos - m_Pos) > 0.0f)
 					Dir = normalize(pTarget->m_Pos - m_Pos);

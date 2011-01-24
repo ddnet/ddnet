@@ -148,9 +148,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	if(ScrollNum > 0)
 	{
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
-			s_ScrollValue -= 1.0f/ScrollNum;
+			s_ScrollValue -= 3.0f/ScrollNum;
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			s_ScrollValue += 1.0f/ScrollNum;
+			s_ScrollValue += 3.0f/ScrollNum;
 	}
 	else
 		ScrollNum = 0;
@@ -464,7 +464,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_BrFilterPing);
 		static float Offset = 0.0f;
 		DoEditBox(&g_Config.m_BrFilterPing, &EditBox, aBuf, sizeof(aBuf), 12.0f, &Offset);
-		g_Config.m_BrFilterPing = str_toint(aBuf);
+		g_Config.m_BrFilterPing = clamp(str_toint(aBuf), 0, 999);
 	}
 
 	View.HSplitBottom(ms_ButtonHeight, &View, &Button);

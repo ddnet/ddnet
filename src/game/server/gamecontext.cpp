@@ -1318,6 +1318,18 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData, int C
 	pSelf->Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, -1);
 }
 
+void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared votes");
+	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
+	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
+	pSelf->m_pVoteOptionHeap->Reset();
+	pSelf->m_pVoteOptionFirst = 0;
+	pSelf->m_pVoteOptionLast = 0;
+}
+
 void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1359,6 +1371,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "Sends a server message to all players", 3);
 	Console()->Register("set_team", "vi", CFGFLAG_SERVER, ConSetTeam, this, "Changes the team of player i1 to team i2", 2);
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "Adds a vote entry to the clients", 4);
+	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", 3);
 
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Modifies tune parameter s to value i", 4);
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Resets all tuning", 4);

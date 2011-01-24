@@ -5,20 +5,6 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
 
-void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientID)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	pSelf->m_pVoteOptionHeap->Reset();
-	pSelf->m_pVoteOptionFirst = 0;
-	pSelf->m_pVoteOptionLast = 0;
-
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared vote options");
-
-	CNetMsg_Sv_VoteClearOptions ClearOptionsMsg;
-	pSelf->Server()->SendPackMsg(&ClearOptionsMsg, MSGFLAG_VITAL, -1);
-}
-
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientId)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
