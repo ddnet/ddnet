@@ -766,8 +766,10 @@ void CCharacter::Tick()
 		m_Input.m_Hook = 0;
 
 		//m_Input.m_Fire = 0;
-		if (m_FreezeTime == 1) {
+		if (m_FreezeTime == 1)
+		{
 			UnFreeze();
+			m_pPlayer->m_RconFreeze = false;
 		}
 	}
 	m_Core.m_Input = m_Input;
@@ -1070,7 +1072,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
 	{
-		Freeze(Server()->TickSpeed()*3);
+		Freeze();
 	}
 	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 	{
@@ -1155,6 +1157,18 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHCLOSE;
+	}
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
+	{
+		Freeze(GameServer()->Collision()->GetSwitchDelay(MapIndex));
+	}
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+	{
+		m_DeepFreeze = true;
+	}
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+	{
+		m_DeepFreeze = false;
 	}
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if(z && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
@@ -1317,20 +1331,20 @@ void CCharacter::TickDefered()
 	}
 }
 
-bool CCharacter::Freeze(int Time)
+bool CCharacter::Freeze(int Seconds)
 {
-	if ((Time <= 1 || m_Super || m_FreezeTime == -1) && Time != -1)
+	if ((Seconds <= 0 || m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * Server()->TickSpeed()) && Seconds != -1)
 		 return false;
-	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed())  		 
+	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
 	{
-		for(int i=0;i<NUM_WEAPONS;i++)
+		for(int i = 0; i < NUM_WEAPONS; i++)
 			if(m_aWeapons[i].m_Got)
 			 {
 				 m_aWeapons[i].m_Ammo = 0;
 			 }
-		m_Armor=0;
-		m_FreezeTime=Time;
-		m_FreezeTick=Server()->Tick();
+		m_Armor = 0;
+		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
+		m_FreezeTick = Server()->Tick();
 		return true;
 	}
 	return false;
@@ -1338,28 +1352,12 @@ bool CCharacter::Freeze(int Time)
 
 bool CCharacter::Freeze()
 {
-	int Time = Server()->TickSpeed()*3;
-	if (Time <= 1 || m_Super || m_FreezeTime == -1)
-		 return false;
-	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed())
-	{
-		for(int i=0;i<NUM_WEAPONS;i++)
-			if(m_aWeapons[i].m_Got)
-			 {
-				 m_aWeapons[i].m_Ammo = 0;
-			 }
-		m_Armor=0;
-		m_Ninja.m_ActivationTick = Server()->Tick();
-		m_FreezeTime=Time;
-		m_FreezeTick=Server()->Tick();
-		return true;
-	}
-	return false;
+	return Freeze(g_Config.m_SvFreezeDelay);
 }
 
 bool CCharacter::UnFreeze()
 {
-	if (m_FreezeTime>0)
+	if (m_FreezeTime > 0)
 	{
 		m_Armor=10;
 		for(int i=0;i<NUM_WEAPONS;i++)

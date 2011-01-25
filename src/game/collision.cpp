@@ -89,7 +89,7 @@ void CCollision::Init(class CLayers *pLayers)
 			Index = m_pSwitch[i].m_Type;
 			if(Index <= TILE_NPH)
 			{
-				if(Index >= TILE_SWITCHTIMEDOPEN && Index <= TILE_SWITCHCLOSE)
+				if(Index >= TILE_FREEZE && Index <= TILE_SWITCHCLOSE)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
@@ -429,7 +429,7 @@ int CCollision::IsSwitch(int Index)
 	if(!m_pSwitch)
 		return false;
 
-	if(m_pSwitch[Index].m_Type > 0 && m_pSwitch[Index].m_Number > 0)
+	if(m_pSwitch[Index].m_Type > 0)
 		return m_pSwitch[Index].m_Type;
 
 	return 0;
@@ -457,7 +457,7 @@ int CCollision::GetSwitchDelay(int Index)
 	if(!m_pSwitch)
 		return false;
 
-	if(m_pSwitch[Index].m_Type > 0 && m_pSwitch[Index].m_Number > 0)
+	if(m_pSwitch[Index].m_Type > 0)
 		return m_pSwitch[Index].m_Delay;
 
 	return 0;

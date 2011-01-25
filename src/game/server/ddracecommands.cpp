@@ -441,24 +441,32 @@ void CGameContext::ConTimerReStart(IConsole::IResult *pResult, void *pUserData, 
 void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int ClientId)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int time=-1;
+	int Seconds = -1;
 	int Victim = pResult->GetVictim();
 
 	char buf[128];
 
-	if(pResult->NumArguments() >= 1)
-		time = clamp(pResult->GetInteger(1), -1, 29999);
+	if(pResult->NumArguments())
+		Seconds = clamp(pResult->GetInteger(0), -2, 9999);
 	
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
 	
 	if(pSelf->m_apPlayers[Victim])
 	{
-		chr->Freeze(((time!=0&&time!=-1)?(pSelf->Server()->TickSpeed()*time):(-1)));
-		chr->m_pPlayer->m_RconFreeze = true;
+		pChr->Freeze(Seconds);
+		pChr->m_pPlayer->m_RconFreeze = Seconds != -2;
 		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Frozen.", pServ->ClientName(ClientId), Victim);
+		if(Seconds >= 0)
+			str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Frozen for %d.", pServ->ClientName(ClientId), Victim, Seconds);
+		else if(Seconds == -2)
+		{
+			pChr->m_DeepFreeze = true;
+			str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Deep Frozen.", pServ->ClientName(ClientId), Victim);
+		}
+		else
+			str_format(buf, sizeof(buf), "'%s' ClientId=%d is Frozen until you unfreeze him.", pServ->ClientName(ClientId), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
 	}
 
@@ -468,13 +476,24 @@ void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int 
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
-
+	static bool Warning = false;
 	char buf[128];
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
-	chr->m_FreezeTime=2;
-	chr->m_pPlayer->m_RconFreeze = false;
+	if(pChr->m_DeepFreeze && !Warning)
+	{
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "warning", "This client is deeply frozen, repeat the command to defrost him.");
+		Warning = true;
+		return;
+	}
+	if(pChr->m_DeepFreeze && Warning)
+	{
+		pChr->m_DeepFreeze = false;
+		Warning = false;
+	}
+	pChr->m_FreezeTime = 2;
+	pChr->m_pPlayer->m_RconFreeze = false;
 	CServer* pServ = (CServer*)pSelf->Server();
 	str_format(buf, sizeof(buf), "'%s' ClientId=%d has been defrosted.", pServ->ClientName(ClientId), Victim);
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
