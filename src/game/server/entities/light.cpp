@@ -13,7 +13,7 @@
 
 
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length, int Layer, int Number)
-: CEntity(pGameWorld, NETOBJTYPE_LASER)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Layer = Layer;
 	m_Number = Number;
@@ -34,7 +34,7 @@ bool CLight::HitCharacter()
 	for(std::list < CCharacter * >::iterator i = HitCharacters.begin(); i != HitCharacters.end(); i++) {
 		CCharacter * Char = *i;
 		if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]) continue;
-		Char->Freeze(Server()->TickSpeed()*3);
+		Char->Freeze();
 	}
 	return true;
 }
@@ -86,7 +86,7 @@ void CLight::Tick()
 	{
 		int Flags;
 		m_EvalTick=Server()->Tick();
-		int index = GameServer()->Collision()->IsCp(m_Pos.x,m_Pos.y, &Flags);
+		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
 		if (index)
 		{
 			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);

@@ -57,11 +57,8 @@
 class CEntity
 {
 	MACRO_ALLOC_HEAP()
-private:
-	friend class CGameWorld; // thy these?
-	CEntity *m_pPrevEntity;
-	CEntity *m_pNextEntity;
 
+	friend class CGameWorld;	// entity list handling
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
 	
@@ -69,7 +66,7 @@ private:
 protected:
 	bool m_MarkedForDestroy;
 	int m_Id;
-	int m_Objtype;
+	int m_ObjType;
 	int m_Number;
 	int m_Layer;
 public:
@@ -143,7 +140,8 @@ public:
 	*/
 	int NetworkClipped(int SnappingClient);
 	int NetworkClipped(int SnappingClient, vec2 CheckPos);
-		
+	
+	bool GameLayerClipped(vec2 CheckPos);
 
 	/*
 		Variable: proximity_radius

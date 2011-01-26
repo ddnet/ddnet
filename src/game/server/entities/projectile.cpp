@@ -22,7 +22,7 @@ CProjectile::CProjectile
 		int Layer,
 		int Number
 	)
-: CEntity(pGameWorld, NETOBJTYPE_PROJECTILE)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Layer = Layer;
 	m_Number = Number;
@@ -120,7 +120,7 @@ void CProjectile::Tick()
 	{
 			TeamMask = OwnerChar->Teams()->TeamMask( OwnerChar->Team());
 	}
-	if( ((TargetChr && (g_Config.m_SvHit || m_Owner == -1 || TargetChr == OwnerChar)) || Collide) && !isWeaponCollide)//TODO:TEAM
+	if( ((TargetChr && (g_Config.m_SvHit || m_Owner == -1 || TargetChr == OwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)//TODO:TEAM
 	{
 		if(m_Explosive/*??*/ && (!TargetChr || (TargetChr && !m_Freeze)))
 		{
@@ -130,7 +130,7 @@ void CProjectile::Tick()
 			(m_Owner != -1)? TeamMask : -1);
 		}
 		else if(TargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[TargetChr->Team()]) || m_Layer != LAYER_SWITCH))
-			TargetChr->Freeze(Server()->TickSpeed()*3);
+			TargetChr->Freeze();
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = Server()->Tick();

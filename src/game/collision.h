@@ -91,7 +91,7 @@ public:
 	int IsCheckpoint(int Index);
 	int IsFCheckpoint(int Index);
 	
-	int IsCp(int x, int y, int* Flags);
+	int IsMover(int x, int y, int* Flags);
 
 	vec2 CpSpeed(int index, int Flags = 0);
 	

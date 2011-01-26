@@ -122,6 +122,9 @@ public:
 	//DDRace
 	int m_FreezeTime;
 	int m_FreezeTick;
+
+	bool m_DeepFreeze;
+	bool m_EndlessHook;
 	
 	int m_Doored;
 
@@ -178,7 +181,6 @@ public:
 	int m_StartTime;
 	int m_RefreshTime;
 	
-	int m_LastBooster;
 	vec2 m_PrevPos;
 
 	// checkpoints

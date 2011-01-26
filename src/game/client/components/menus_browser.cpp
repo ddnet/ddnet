@@ -148,9 +148,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	if(ScrollNum > 0)
 	{
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
-			s_ScrollValue -= 1.0f/ScrollNum;
+			s_ScrollValue -= 3.0f/ScrollNum;
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			s_ScrollValue += 1.0f/ScrollNum;
+			s_ScrollValue += 3.0f/ScrollNum;
 	}
 	else
 		ScrollNum = 0;
@@ -464,7 +464,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_BrFilterPing);
 		static float Offset = 0.0f;
 		DoEditBox(&g_Config.m_BrFilterPing, &EditBox, aBuf, sizeof(aBuf), 12.0f, &Offset);
-		g_Config.m_BrFilterPing = str_toint(aBuf);
+		g_Config.m_BrFilterPing = clamp(str_toint(aBuf), 0, 999);
 	}
 
 	View.HSplitBottom(ms_ButtonHeight, &View, &Button);
@@ -498,6 +498,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	ServerDetails.HSplitBottom(10.0f, &ServerDetails, 0x0);
 
 	// server details
+	CTextCursor Cursor;
 	const float FontSize = 12.0f;
 	ServerDetails.HSplitTop(20.0f, &ServerHeader, &ServerDetails);
 	RenderTools()->DrawUIRect(&ServerHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
@@ -545,15 +546,21 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		UI()->DoLabelScaled(&Row, pSelectedServer->m_aVersion, FontSize, -1);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = Row.w;
+		TextRender()->TextEx(&Cursor, pSelectedServer->m_aVersion, -1);
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		UI()->DoLabelScaled(&Row, pSelectedServer->m_aGameType, FontSize, -1);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = Row.w;
+		TextRender()->TextEx(&Cursor, pSelectedServer->m_aGameType, -1);
 
 		char aTemp[16];
 		str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_Latency);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		UI()->DoLabelScaled(&Row, aTemp, FontSize, -1);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = Row.w;
+		TextRender()->TextEx(&Cursor, aTemp, -1);
 
 	}
 
@@ -579,11 +586,12 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			ServerScoreBoard.HSplitTop(16.0f, &Row, &ServerScoreBoard);
 
 			str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aPlayers[i].m_Score);
-			UI()->DoLabelScaled(&Row, aTemp, FontSize, -1);
+			TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+			Cursor.m_LineWidth = 25.0f;
+			TextRender()->TextEx(&Cursor, aTemp, -1);
 
 			Row.VSplitLeft(25.0f, 0x0, &Row);
-
-			CTextCursor Cursor;
+	
 			TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 			Cursor.m_LineWidth = Row.w;
 

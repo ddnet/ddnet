@@ -362,18 +362,19 @@ void CCharacterCore::Tick(bool UseInput)
 			// handle player <-> player collision
 			float d = distance(m_Pos, p->m_Pos);
 			vec2 Dir = normalize(m_Pos - p->m_Pos);
-			if (m_pWorld->m_Tuning.m_PlayerCollision) {
-				
+			if (m_pWorld->m_Tuning.m_PlayerCollision)
+			{	
 				if(d < PhysSize*1.25f && d > 1.0f)
 				{
 					float a = (PhysSize*1.45f - d);
-					
+					float v = 0.5f;
 					// make sure that we don't add excess force by checking the
-					// direction against the current velocity
-					vec2 VelDir = normalize(m_Vel);
-					float v = 1-(dot(VelDir, Dir)+1)/2;
-					m_Vel = m_Vel + Dir*a*(v*0.75f);
-					m_Vel = m_Vel * 0.85f;
+					// direction against the current velocity. if not zero.
+					if (length(m_Vel) > 0.0001)
+						v = 1-(dot(normalize(m_Vel), Dir)+1)/2;
+					
+					m_Vel += Dir*a*(v*0.75f);
+					m_Vel *= 0.85f;
 				}
 			}
 			// handle hook influence

@@ -77,6 +77,7 @@ public:
 	virtual void Quit() = 0;
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp) = 0;
+	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual void DemoRecorder_Stop() = 0;
 	virtual void AutoScreenshot_Start() = 0;
 
@@ -129,6 +130,8 @@ public:
 	virtual const char *ErrorString() = 0;
 	virtual const char *LatestVersion() = 0;
 	virtual bool ConnectionProblems() = 0;
+
+	virtual bool SoundInitFailed() = 0;
 };
 
 class IGameClient : public IInterface
@@ -148,6 +151,7 @@ public:
 	virtual void OnConnected() = 0;
 	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker) = 0;
 	virtual void OnPredict() = 0;
+	virtual void OnActivateEditor() = 0;
 	
 	virtual int OnSnapInput(int *pData) = 0;
 	

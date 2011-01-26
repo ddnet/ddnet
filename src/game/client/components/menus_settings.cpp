@@ -3,6 +3,7 @@
 
 #include <base/math.h>
 
+#include <base/tl/string.h>
 
 #include <engine/graphics.h>
 #include <engine/storage.h>

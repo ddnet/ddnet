@@ -1101,7 +1101,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if((l->m_pTiles[y*l->m_Width+x].m_Index >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && l->m_pTiles[y*l->m_Width+x].m_Index <= (ENTITY_DOOR + ENTITY_OFFSET)) || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHOPEN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHCLOSE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDOPEN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDCLOSE)
+			if((l->m_pTiles[y*l->m_Width+x].m_Index >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && l->m_pTiles[y*l->m_Width+x].m_Index <= (ENTITY_DOOR + ENTITY_OFFSET)) || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHOPEN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHCLOSE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDOPEN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDCLOSE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_FREEZE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DFREEZE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DUNFREEZE)
 			{
 				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
 				{
@@ -1142,6 +1142,17 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
+			}
+
+			if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_FREEZE)
+			{
+				m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
+				m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
+			}
+			else if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DFREEZE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DUNFREEZE)
+			{
+				m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
+				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
 			}
 		}
 }

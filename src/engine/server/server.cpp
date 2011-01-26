@@ -190,6 +190,8 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 	
 	m_MapReload = 0;
 
+	memset(m_aPrevStates, CClient::STATE_EMPTY, MAX_CLIENTS * sizeof(int));
+
 	m_RconClientId = -1;
 
 	Init();
@@ -591,6 +593,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
 	pThis->m_aClients[ClientId].m_Authed = 0;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aPrevStates[ClientId] = CClient::STATE_EMPTY;
 	memset(&pThis->m_aClients[ClientId].m_Addr, 0, sizeof(NETADDR));
 	pThis->m_aClients[ClientId].m_Snapshots.PurgeAll();
 	return 0;
@@ -631,14 +634,14 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser)
 
 void CServer::SendRconResponse(const char *pLine, void *pUser)
 {
-  RconResponseInfo *pInfo = (RconResponseInfo *)pUser;
-  CServer *pThis = pInfo->m_Server;
+	RconResponseInfo *pInfo = (RconResponseInfo *)pUser;
+	CServer *pThis = pInfo->m_Server;
 	static volatile int ReentryGuard = 0;
 
 	if(ReentryGuard)
-	  return;
+		return;
 
-  ReentryGuard++;
+	ReentryGuard++;
 
 	if(pThis->m_aClients[pInfo->m_ClientId].m_State != CClient::STATE_EMPTY)
 			pThis->SendRconLine(pInfo->m_ClientId, pLine);
@@ -903,22 +906,24 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 			else
 			{
-				char aHex[] = "0123456789ABCDEF";
-				char aBuf[512];
-
-				for(int b = 0; b < pPacket->m_DataSize && b < 32; b++)
+				if(g_Config.m_Debug)
 				{
-					aBuf[b*3] = aHex[((const unsigned char *)pPacket->m_pData)[b]>>4];
-					aBuf[b*3+1] = aHex[((const unsigned char *)pPacket->m_pData)[b]&0xf];
-					aBuf[b*3+2] = ' ';
-					aBuf[b*3+3] = 0;
-				}
+					char aHex[] = "0123456789ABCDEF";
+					char aBuf[512];
 
-				char aBufMsg[256];
-				str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientId=%d msg=%d data_size=%d", ClientId, Msg, pPacket->m_DataSize);
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBufMsg);
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-				
+					for(int b = 0; b < pPacket->m_DataSize && b < 32; b++)
+					{
+						aBuf[b*3] = aHex[((const unsigned char *)pPacket->m_pData)[b]>>4];
+						aBuf[b*3+1] = aHex[((const unsigned char *)pPacket->m_pData)[b]&0xf];
+						aBuf[b*3+2] = ' ';
+						aBuf[b*3+3] = 0;
+					}
+
+					char aBufMsg[256];
+					str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientId=%d msg=%d data_size=%d", ClientId, Msg, pPacket->m_DataSize);
+					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBufMsg);
+					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
+				}
 			}
 		}
 		else
@@ -1145,6 +1150,11 @@ int CServer::LoadMap(const char *pMapName)
 		io_read(File, m_pCurrentMapData, m_CurrentMapSize);
 		io_close(File);
 	}
+
+	for(int i=0; i<MAX_CLIENTS; i++) {
+		m_aPrevStates[i] = m_aClients[i].m_State;
+	}
+
 	return 1;
 }
 
@@ -1378,7 +1388,7 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientId1)
 	CServer *pServer = (CServer *)pUser;
 	const char *pStr = pResult->GetString(0);
 	int Minutes = 30;
-  	const char *pReason = "No reason given";
+	const char *pReason = "No reason given";
 	
 	if(pResult->NumArguments() > 1)
 		Minutes = pResult->GetInteger(1);
@@ -1394,7 +1404,7 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientId1)
 			Addr.port = AddrCheck.port = 0;
 			if(net_addr_comp(&Addr, &AddrCheck) == 0)
 			{
-				pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban yourself");
+				pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can\'t ban yourself");
 				return;
 			}
 		}
@@ -1406,7 +1416,7 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientId1)
 			{
 				if ((((CServer *)pUser)->m_aClients[ClientId1].m_Authed > 0) && ((CServer *)pUser)->m_aClients[ClientId1].m_Authed <= ((CServer *)pUser)->m_aClients[i].m_Authed)
 				{
-					pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban an a player with the higher or same rank!");
+					pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can\'t ban a player with higher or same level");
 					return;
 				}
 			}
@@ -1761,7 +1771,7 @@ void CServer::SetRconLevel(int ClientId, int Level)
 		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
 		Msg.AddInt(0);
 		SendMsgEx(&Msg, MSGFLAG_VITAL, ClientId, true);
-		m_aClients[ClientId].m_Authed = Level;
+		m_aClients[ClientId].m_Authed = 0;
 	}
 	else
 	{

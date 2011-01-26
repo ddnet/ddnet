@@ -14,7 +14,7 @@ const float ACCEL=1.1f;
 //////////////////////////////////////////////////
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze, bool Explosive, int ResponsibleTeam)
-: CEntity(pGameWorld, NETOBJTYPE_LASER)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos = Pos;
 	m_Core = Dir;
@@ -34,7 +34,7 @@ bool CPlasma::HitCharacter()
 		return false;
 
 	if(Hit->Team() != m_ResponsibleTeam) return false;
-	m_Freeze ? Hit->Freeze(Server()->TickSpeed()*3) : Hit->UnFreeze();
+	m_Freeze ? Hit->Freeze() : Hit->UnFreeze();
 	if(m_Explosive)
 		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true, m_ResponsibleTeam, Hit->Teams()->TeamMask(m_ResponsibleTeam));
 	GameServer()->m_World.DestroyEntity(this);

@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
+#include <base/tl/sorted_array.h>
+
 #include <engine/shared/config.h>
 
 #include <game/collision.h>
@@ -30,6 +32,11 @@ void CControls::OnReset()
 	
 	m_InputDirectionLeft = 0;
 	m_InputDirectionRight = 0;
+}
+
+void CControls::OnRelease()
+{
+	OnReset();
 }
 
 void CControls::OnPlayerDeath()

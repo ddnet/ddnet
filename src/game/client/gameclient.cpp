@@ -200,6 +200,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConServerDummy, 0, "Set team of player to team", 0);
 	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, 0, 0, "Set team of all players to team", 0);
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConServerDummy, 0, "Add a voting option", 0);
+	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConServerDummy, 0, "Clears the voting options", 0);
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConServerDummy, 0, "Force a vote to yes/no", 0);
 
 
@@ -404,7 +405,7 @@ void CGameClient::UpdateLocalCharacterPos()
 {
 	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		if(!m_Snap.m_pLocalCharacter || (m_Snap.m_pLocalCharacter->m_Health < 0) || (m_Snap.m_pGameobj && m_Snap.m_pGameobj->m_GameOver))
+		if(!m_Snap.m_pLocalCharacter || (m_Snap.m_pGameobj && m_Snap.m_pGameobj->m_GameOver))
 		{
 			// don't use predicted
 		}
@@ -631,6 +632,12 @@ void CGameClient::OnGameOver()
 		Client()->AutoScreenshot_Start();
 }
 
+void CGameClient::OnStartGame()
+{
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		Client()->DemoRecorder_HandleAutoStart();
+}
+
 void CGameClient::OnRconLine(const char *pLine)
 {
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
@@ -821,6 +828,8 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_pGameobj = (CNetObj_Game *)pData;
 				if(s_GameOver == 0 && m_Snap.m_pGameobj->m_GameOver != 0)
 					OnGameOver();
+				else if(s_GameOver != 0 && m_Snap.m_pGameobj->m_GameOver == 0)
+					OnStartGame();
 				s_GameOver = m_Snap.m_pGameobj->m_GameOver;
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
@@ -846,6 +855,21 @@ void CGameClient::OnNewSnapshot()
 	}
 	else
 		m_Snap.m_Spectate = true;
+
+	// sort player infos by score
+	mem_copy(m_Snap.m_paInfoByScore, m_Snap.m_paPlayerInfos, sizeof(m_Snap.m_paInfoByScore));
+	for(int k = 0; k < MAX_CLIENTS-1; k++) // ffs, bubblesort
+	{
+		for(int i = 0; i < MAX_CLIENTS-k-1; i++)
+		{
+			if(m_Snap.m_paInfoByScore[i+1] && (!m_Snap.m_paInfoByScore[i] || m_Snap.m_paInfoByScore[i]->m_Score < m_Snap.m_paInfoByScore[i+1]->m_Score))
+			{
+				const CNetObj_PlayerInfo *pTmp = m_Snap.m_paInfoByScore[i];
+				m_Snap.m_paInfoByScore[i] = m_Snap.m_paInfoByScore[i+1];
+				m_Snap.m_paInfoByScore[i+1] = pTmp;
+			}
+		}
+	}
 	
 	CTuningParams StandardTuning;
 	CServerInfo CurrentServerInfo;
@@ -994,6 +1018,11 @@ void CGameClient::OnPredict()
 	}
 	
 	m_PredictedTick = Client()->PredGameTick();
+}
+
+void CGameClient::OnActivateEditor()
+{
+	OnRelease();
 }
 
 void CGameClient::CClientData::UpdateRenderInfo()

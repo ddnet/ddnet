@@ -414,6 +414,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_WindowMustRefocus = 0;
 	m_SnapCrcErrors = 0;
 	m_AutoScreenshotRecycle = false;
+	m_EditorActive = false;
 
 	m_AckGameTick = -1;
 	m_CurrentRecvTick = 0;
@@ -1466,11 +1467,11 @@ void CClient::ProcessPacket(CNetChunk *pPacket)
 						}
 
 						// adjust game time
+						if(m_RecivedSnapshots > 2)
 						{
 							int64 Now = m_GameTime.Get(time_get());
 							int64 TickStart = GameTick*time_freq()/50;
 							int64 TimeLeft = (TickStart-Now)*1000 / time_freq();
-							//st_update(&game_time, (game_tick-1)*time_freq()/50);
 							m_GameTime.Update(&m_GametimeMarginGraph, (GameTick-1)*time_freq()/50, TimeLeft, 0);
 						}
 
@@ -1807,7 +1808,7 @@ void CClient::Run()
 	m_pEditor->Init();
 
 	// init sound, allowed to fail
-	Sound()->Init();
+	m_SoundInitFailed = Sound()->Init() != 0;
 
 	// load data
 	if(!LoadData())
@@ -1919,12 +1920,21 @@ void CClient::Run()
 		// render
 		if(g_Config.m_ClEditor)
 		{
+			if(!m_EditorActive)
+			{
+				GameClient()->OnActivateEditor();
+				m_EditorActive = true;
+			}
+
 			Update();
 			m_pEditor->UpdateAndRender();
 			m_pGraphics->Swap();
 		}
 		else
 		{
+			if(m_EditorActive)
+				m_EditorActive = false;
+
 			Update();
 
 			if(g_Config.m_DbgStress)
@@ -2159,6 +2169,7 @@ void CClient::DemoRecorder_HandleAutoStart()
 {
 	if(g_Config.m_ClAutoDemoRecord)
 	{
+		DemoRecorder_Stop();
 		DemoRecorder_Start("auto/autorecord", true);
 		if(g_Config.m_ClAutoDemoMax)
 		{

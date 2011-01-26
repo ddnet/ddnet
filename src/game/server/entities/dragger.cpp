@@ -12,7 +12,7 @@
 const int LENGTH=700;
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, int CatchedTeam, int Layer, int Number)
-: CEntity(pGameWorld, NETOBJTYPE_LASER)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Layer = Layer;
 	m_Number = Number;
@@ -31,7 +31,7 @@ void CDragger::Move()
 	if(m_Target)
 		return;
 	CCharacter *Ents[16];
-	int Num = GameServer()->m_World.FindEntities(m_Pos,LENGTH, (CEntity**)Ents, 16, NETOBJTYPE_CHARACTER);
+	int Num = GameServer()->m_World.FindEntities(m_Pos,LENGTH, (CEntity**)Ents, 16, CGameWorld::ENTTYPE_CHARACTER);
 	int Id=-1;
 	int MinLen=0;
 	for (int i = 0; i < Num; i++)
@@ -97,7 +97,7 @@ void CDragger::Tick()
 	{
 		int Flags;
 		m_EvalTick=Server()->Tick();
-		int index = GameServer()->Collision()->IsCp(m_Pos.x,m_Pos.y, &Flags);
+		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
 		if (index)
 		{
 			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);

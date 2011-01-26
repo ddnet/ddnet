@@ -286,9 +286,6 @@ Grenade
 Group
 == Groupe
 
-HD
-== HD
-
 Hammer
 == Maillet
 
@@ -900,6 +897,9 @@ Rotation of the envelope
 Shift
 == 
 
+Sound error
+== 
+
 Squares the current quad
 == 
 
@@ -912,6 +912,9 @@ Switch between images and layers managment.
 Switch curve type
 == 
 
+The audio device couldn't be initialised.
+== 
+
 Tiles
 == 
 
@@ -922,6 +925,9 @@ Toggle layer visibility
 == 
 
 Toggles the envelope editor.
+== 
+
+Unable to delete the demo
 == 
 
 Use Clipping

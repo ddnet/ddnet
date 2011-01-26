@@ -109,6 +109,7 @@ public:
 	};
 	
 	CClient m_aClients[MAX_CLIENTS];
+	int m_aPrevStates[MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -180,8 +181,8 @@ public:
 
 	struct RconResponseInfo
 	{
-	  CServer *m_Server;
-	  int m_ClientId;
+		CServer *m_Server;
+		int m_ClientId;
 	};
 
 	void ProcessClientPacket(CNetChunk *pPacket);

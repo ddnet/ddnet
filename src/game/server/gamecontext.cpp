@@ -138,10 +138,10 @@ void CGameContext::CreateExplosion(vec2 P, int Owner, int Weapon, bool NoDamage,
 	/*if(!NoDamage)
 	{*/
 		// deal damage
-		CCharacter *apEnts[64];
+		CCharacter *apEnts[MAX_CLIENTS];
 		float Radius = 135.0f;
 		float InnerRadius = 48.0f;
-		int Num = m_World.FindEntities(P, Radius, (CEntity**)apEnts, 64, NETOBJTYPE_CHARACTER);
+		int Num = m_World.FindEntities(P, Radius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 		for(int i = 0; i < Num; i++)
 		{
 			vec2 Diff = apEnts[i]->m_Pos - P;
@@ -329,7 +329,7 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				} else {
-					if(Teams->Team(i) == Team) {
+					if(Teams->Team(i) == Team && m_apPlayers[i]->GetTeam() != CHAT_SPEC) {
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
@@ -647,21 +647,24 @@ void CGameContext::OnClientEnter(int ClientId)
 	Score()->PlayerData(ClientId)->m_CurrentTime = Score()->PlayerData(ClientId)->m_BestTime;
 	m_apPlayers[ClientId]->m_Score = (Score()->PlayerData(ClientId)->m_BestTime)?Score()->PlayerData(ClientId)->m_BestTime:-9999;
 
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), m_pController->GetTeamName(m_apPlayers[ClientId]->GetTeam()));
-	SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
-	
-	SendChatTarget(ClientId, "DDRace Mod. Version: " DDRACE_VERSION);
-	SendChatTarget(ClientId, "Official site: DDRace.info");
-	SendChatTarget(ClientId, "For more Info /cmdlist");
-	SendChatTarget(ClientId, "Or visit DDRace.info");
-	SendChatTarget(ClientId, "To see this again say /info");
-	SendChatTarget(ClientId, "Note This is an Alpha release, just for testing, your feedback is important!!");
+	if(((CServer *) Server())->m_aPrevStates[ClientId] < CServer::CClient::STATE_INGAME)
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), m_pController->GetTeamName(m_apPlayers[ClientId]->GetTeam()));
+		SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
 
-	if(g_Config.m_SvWelcome[0]!=0) SendChatTarget(ClientId,g_Config.m_SvWelcome);
-	//str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientId, Server()->ClientName(ClientId), m_apPlayers[ClientId]->GetTeam());
+		SendChatTarget(ClientId, "DDRace Mod. Version: " DDRACE_VERSION);
+		SendChatTarget(ClientId, "Official site: DDRace.info");
+		SendChatTarget(ClientId, "For more Info /cmdlist");
+		SendChatTarget(ClientId, "Or visit DDRace.info");
+		SendChatTarget(ClientId, "To see this again say /info");
+		SendChatTarget(ClientId, "Note This is an Alpha release, just for testing, your feedback is important!!");
+
+		if(g_Config.m_SvWelcome[0]!=0) SendChatTarget(ClientId,g_Config.m_SvWelcome);
+		//str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientId, Server()->ClientName(ClientId), m_apPlayers[ClientId]->GetTeam());
 	
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	}
 
 	m_VoteUpdate = true;
 }
@@ -763,7 +766,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 		//if(Team)
 		int GameTeam = ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(p->GetCID());
 		if(Team) {
-			Team = (p->GetTeam() == -1) ? CHAT_SPEC : (GameTeam == 0 ? CHAT_ALL : GameTeam);
+			Team = ((p->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
 		} else {
 			Team = CHAT_ALL;
 		}
@@ -844,6 +847,11 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			{
 				if(str_comp_nocase(pMsg->m_Value, pOption->m_aCommand) == 0)
 				{
+					if(!Console()->LineIsValid(pOption->m_aCommand))
+					{
+						SendChatTarget(ClientId, "Invalid option");
+						return;
+					}
 					//str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientId), pOption->m_aCommand);
 					if(m_apPlayers[ClientId]->m_Authed <= 0 && strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 && time_get() < last_mapvote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 						{
@@ -1310,6 +1318,18 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData, int C
 	pSelf->Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, -1);
 }
 
+void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared votes");
+	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
+	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
+	pSelf->m_pVoteOptionHeap->Reset();
+	pSelf->m_pVoteOptionFirst = 0;
+	pSelf->m_pVoteOptionLast = 0;
+}
+
 void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1351,6 +1371,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "Sends a server message to all players", 3);
 	Console()->Register("set_team", "vi", CFGFLAG_SERVER, ConSetTeam, this, "Changes the team of player i1 to team i2", 2);
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "Adds a vote entry to the clients", 4);
+	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", 3);
 
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Modifies tune parameter s to value i", 4);
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Resets all tuning", 4);

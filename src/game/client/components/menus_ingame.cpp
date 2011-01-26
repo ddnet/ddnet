@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
+#include <base/tl/string.h>
+
 #include <engine/demo.h>
 #include <engine/serverbrowser.h>
 #include <engine/textrender.h>

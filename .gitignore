@@ -1,9 +1,12 @@
+bam
 .bam
 config.lua
 datasrc/__pycache__
 datasrc/*.pyc
 objs
 src/game/generated
+SDL.dll
+autoexec.cfg
 
 crapnet*
 dilate*
@@ -23,7 +26,7 @@ buildlog.txt
 autoexec.cfg
 bam.exe
 *.bat
-DDRace*
+DDRace*
 DDRace-Server*
 .cproject
 .project

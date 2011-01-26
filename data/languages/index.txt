@@ -28,11 +28,17 @@ polish
 portuguese
 == Português
 
+romanian
+== Română
+
 russian
 == Русский
 
 serbian
 == Srpski
+
+spanish
+== Español
 
 swedish
 == Svenska

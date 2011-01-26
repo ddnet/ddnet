@@ -5,7 +5,7 @@
 #include "pickup.h"
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number)
-: CEntity(pGameWorld, NETOBJTYPE_PICKUP)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
 	m_Layer = Layer;
 	m_Number = Number;
@@ -33,7 +33,7 @@ void CPickup::Move()
    if (Server()->Tick()%int(Server()->TickSpeed() * 0.15f) == 0)
    {
 		int Flags;
-		int index = GameServer()->Collision()->IsCp(m_Pos.x,m_Pos.y, &Flags);
+		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
 		if (index)
 		{
 			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);
@@ -61,7 +61,7 @@ void CPickup::Tick()
 	}*/
 	// Check if a player intersected us
 	CCharacter *apEnts[MAX_CLIENTS];
-	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity**)apEnts, 64, NETOBJTYPE_CHARACTER);
+	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity**)apEnts, 64, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; ++i) {
 		CCharacter * pChr = apEnts[i];
 		if(pChr && pChr->IsAlive())
@@ -121,16 +121,21 @@ void CPickup::Tick()
 					}
 					break;
 				
-				case POWERUP_NINJA:
+			case POWERUP_NINJA:
+				{
+					// activate ninja on target player
+					pChr->GiveNinja();
+					//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+
+					/*// loop through all players, setting their emotes
+					CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
+					for(; pC; pC = (CCharacter *)pC->TypeNext())
 					{
-						// activate ninja on target player
-						//if(!pChr->m_FreezeTime) pChr->GiveNinja();
-						pChr->GiveNinja();
-						//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
-					
-						break;
-					}
-				
+						if (pC != pChr)
+							pC->SetEmote(EMOTE_SURPRISE, Server()->Tick() + Server()->TickSpeed());
+					}*/
+					break;
+				}
 				default:
 					break;
 			};

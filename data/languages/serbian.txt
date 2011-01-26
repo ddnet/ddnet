@@ -864,6 +864,9 @@ Select layer. Right click for properties.
 Shift
 == 
 
+Sound error
+== 
+
 Square
 == 
 
@@ -879,6 +882,9 @@ Switch between images and layers managment.
 Switch curve type
 == 
 
+The audio device couldn't be initialised.
+== 
+
 Tiles
 == 
 
@@ -892,6 +898,9 @@ Toggle layer visibility
 == 
 
 Toggles the envelope editor.
+== 
+
+Unable to delete the demo
 == 
 
 Up

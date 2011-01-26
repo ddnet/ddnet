@@ -56,10 +56,12 @@ class CGameContext : public IGameServer
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	
 	static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConLogOut(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConSetlvl1(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConSetlvl2(IConsole::IResult *pResult, void *pUserData, int ClientId);
@@ -100,7 +102,6 @@ class CGameContext : public IGameServer
 	
 	static void ConMove(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConInvisMe(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConVisMe(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConInvis(IConsole::IResult *pResult, void *pUserData, int ClientId);

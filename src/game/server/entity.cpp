@@ -11,15 +11,13 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType)
 {
 	m_pGameWorld = pGameWorld;
 	
-	m_Objtype = ObjType;
+	m_ObjType = ObjType;
 	m_Pos = vec2(0,0);
 	m_ProximityRadius = 0;
 
 	m_MarkedForDestroy = false;	
 	m_Id = Server()->SnapNewID();
 
-	m_pNextEntity = 0;
-	m_pPrevEntity = 0;
 	m_pPrevTypeEntity = 0;
 	m_pNextTypeEntity = 0;
 }
@@ -49,4 +47,10 @@ int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
 	if(distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, CheckPos) > 1100.0f)
 		return 1;
 	return 0;
+}
+
+bool CEntity::GameLayerClipped(vec2 CheckPos)
+{
+	return round(CheckPos.x)/32 < -200 || round(CheckPos.x)/32 > GameServer()->Collision()->GetWidth()+200 ||
+			round(CheckPos.y)/32 < -200 || round(CheckPos.y)/32 > GameServer()->Collision()->GetHeight()+200 ? true : false;
 }

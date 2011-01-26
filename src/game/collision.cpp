@@ -89,7 +89,7 @@ void CCollision::Init(class CLayers *pLayers)
 			Index = m_pSwitch[i].m_Type;
 			if(Index <= TILE_NPH)
 			{
-				if(Index >= TILE_SWITCHTIMEDOPEN && Index <= TILE_SWITCHCLOSE)
+				if(Index >= TILE_FREEZE && Index <= TILE_SWITCHCLOSE)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
@@ -119,7 +119,7 @@ void CCollision::Init(class CLayers *pLayers)
 				}
 
 				// DDRace tiles
-				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index<=TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH))
+				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index<=TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 					m_pFront[i].m_Index = Index;
 			}
 		}
@@ -145,7 +145,7 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 
 			// DDRace tiles
-			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index<=TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH))
+			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index<=TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 				m_pTiles[i].m_Index = Index;
 		}
 	}
@@ -170,10 +170,10 @@ int CCollision::GetTile(int x, int y)
 	int nx = clamp(x/32, 0, m_Width-1);
 	int ny = clamp(y/32, 0, m_Height-1);
 	if(!m_pTiles || ny < 0 || nx < 0)
-{
+	{
 		//dbg_msg("Collision","Something is terribly wrong, !m_pTiles %d, ny %d, ny %d", !m_pTiles, ny, ny);
 		return 0;
-}
+	}
 	/*dbg_msg("GetTile","m_Index %d",m_pTiles[ny*m_Width+nx].m_Index);//Remove */
 	if(m_pTiles[ny*m_Width+nx].m_Index == COLFLAG_SOLID
 		|| m_pTiles[ny*m_Width+nx].m_Index == (COLFLAG_SOLID|COLFLAG_NOHOOK)
@@ -404,14 +404,14 @@ int CCollision::IsSpeedup(int Index)
 		return false;
 
 	if(m_pSpeedup[Index].m_Force > 0)
-		return m_pSpeedup[Index].m_Type;
+		return Index;
 
 	return 0;
 }
 
 void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed)
 {
-	if(Index < 0)
+	if(Index < 0 || !m_pSpeedup)
 		return;
 	vec2 Direction = vec2(1, 0);
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
@@ -429,7 +429,7 @@ int CCollision::IsSwitch(int Index)
 	if(!m_pSwitch)
 		return false;
 
-	if(m_pSwitch[Index].m_Type > 0 && m_pSwitch[Index].m_Number > 0)
+	if(m_pSwitch[Index].m_Type > 0)
 		return m_pSwitch[Index].m_Type;
 
 	return 0;
@@ -457,13 +457,13 @@ int CCollision::GetSwitchDelay(int Index)
 	if(!m_pSwitch)
 		return false;
 
-	if(m_pSwitch[Index].m_Type > 0 && m_pSwitch[Index].m_Number > 0)
+	if(m_pSwitch[Index].m_Type > 0)
 		return m_pSwitch[Index].m_Delay;
 
 	return 0;
 }
 
-int CCollision::IsCp(int x, int y, int* Flags)
+int CCollision::IsMover(int x, int y, int* Flags)
 {
 	int nx = clamp(x/32, 0, m_Width-1);
 	int ny = clamp(y/32, 0, m_Height-1);
@@ -694,7 +694,7 @@ int CCollision::Entity(int x, int y, int Layer)
 			default:
 				str_format(aBuf,sizeof(aBuf), "Unknown");
 		}
-		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at http://DDRace.info, you will need to post the map as well and any steps tht u think may led to this, Please Also Read the News Section every once and a while", aBuf);
+		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at http://DDRace.info, you will need to post the map as well and any steps that u think may have led to this, Please Also Read the News Section every once and a while", aBuf);
 		return 0;
 	}
 	switch (Layer)

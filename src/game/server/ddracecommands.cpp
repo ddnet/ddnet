@@ -5,20 +5,6 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
 
-void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientID)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	pSelf->m_pVoteOptionHeap->Reset();
-	pSelf->m_pVoteOptionFirst = 0;
-	pSelf->m_pVoteOptionLast = 0;
-
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared vote options");
-
-	CNetMsg_Sv_VoteClearOptions ClearOptionsMsg;
-	pSelf->Server()->SendPackMsg(&ClearOptionsMsg, MSGFLAG_VITAL, -1);
-}
-
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientId)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -78,11 +64,43 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData, int Clie
 	if(Seconds < 10)
 		Seconds = 10;
 
-	if(pSelf->m_apPlayers[Victim]->m_Muted < Seconds * pSelf->Server()->TickSpeed())
-	{
+	if(Victim == ClientId) {
+		pSelf->SendChatTarget(ClientId, "You can\'t mute yourself");
+	}
+	else {
+		/*pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
+		str_format(buf, sizeof(buf), "You have been muted by for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
+		pSelf->SendChatTarget(Victim, buf);*/
+
 		pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
 		str_format(buf, sizeof(buf), "%s muted by %s for %d seconds", pSelf->Server()->ClientName(Victim), pSelf->Server()->ClientName(ClientId), Seconds);
 		pSelf->SendChat(-1, CGameContext::CHAT_ALL, buf);
+	}
+}
+
+void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientId)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	char buf[512];
+
+	if(Victim == ClientId) {
+		pSelf->SendChatTarget(ClientId, "You can\'t unmute yourself");
+	}
+	else {
+		if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
+		{
+			pSelf->m_apPlayers[Victim]->m_Muted = 0;
+			str_format(buf, sizeof(buf), "You have been unmuted", pSelf->Server()->ClientName(Victim));
+			pSelf->SendChatTarget(Victim, buf);
+		}
+
+		/*if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
+		{
+			pSelf->m_apPlayers[Victim]->m_Muted = 0;
+			str_format(buf, sizeof(buf), "%s has been unmuted", pSelf->Server()->ClientName(Victim));
+			pSelf->SendChat(-1, CGameContext::CHAT_ALL, buf);
+		}*/
 	}
 }
 
@@ -423,24 +441,32 @@ void CGameContext::ConTimerReStart(IConsole::IResult *pResult, void *pUserData, 
 void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int ClientId)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int time=-1;
+	int Seconds = -1;
 	int Victim = pResult->GetVictim();
 
 	char buf[128];
 
-	if(pResult->NumArguments() >= 1)
-		time = clamp(pResult->GetInteger(1), -1, 29999);
+	if(pResult->NumArguments())
+		Seconds = clamp(pResult->GetInteger(0), -2, 9999);
 	
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
 	
 	if(pSelf->m_apPlayers[Victim])
 	{
-		chr->Freeze(((time!=0&&time!=-1)?(pSelf->Server()->TickSpeed()*time):(-1)));
-		chr->m_pPlayer->m_RconFreeze = true;
+		pChr->Freeze(Seconds);
+		pChr->m_pPlayer->m_RconFreeze = Seconds != -2;
 		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Frozen.", pServ->ClientName(ClientId), Victim);
+		if(Seconds >= 0)
+			str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Frozen for %d.", pServ->ClientName(ClientId), Victim, Seconds);
+		else if(Seconds == -2)
+		{
+			pChr->m_DeepFreeze = true;
+			str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Deep Frozen.", pServ->ClientName(ClientId), Victim);
+		}
+		else
+			str_format(buf, sizeof(buf), "'%s' ClientId=%d is Frozen until you unfreeze him.", pServ->ClientName(ClientId), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
 	}
 
@@ -450,13 +476,24 @@ void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int 
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
-
+	static bool Warning = false;
 	char buf[128];
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
-	chr->m_FreezeTime=2;
-	chr->m_pPlayer->m_RconFreeze = false;
+	if(pChr->m_DeepFreeze && !Warning)
+	{
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "warning", "This client is deeply frozen, repeat the command to defrost him.");
+		Warning = true;
+		return;
+	}
+	if(pChr->m_DeepFreeze && Warning)
+	{
+		pChr->m_DeepFreeze = false;
+		Warning = false;
+	}
+	pChr->m_FreezeTime = 2;
+	pChr->m_pPlayer->m_RconFreeze = false;
 	CServer* pServ = (CServer*)pSelf->Server();
 	str_format(buf, sizeof(buf), "'%s' ClientId=%d has been defrosted.", pServ->ClientName(ClientId), Victim);
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);

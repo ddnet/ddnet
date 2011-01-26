@@ -182,11 +182,13 @@ public:
 	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker);
 	virtual void OnNewSnapshot();
 	virtual void OnPredict();
+	virtual void OnActivateEditor();
 	virtual int OnSnapInput(int *pData);
 	virtual void OnShutdown();
 	virtual void OnEnterGame();
 	virtual void OnRconLine(const char *pLine);
 	virtual void OnGameOver();
+	virtual void OnStartGame();
 	
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();

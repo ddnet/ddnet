@@ -47,7 +47,7 @@ MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" m_pPlayer's part
 CCharacter::CCharacter(CGameWorld *pWorld)
-: CEntity(pWorld, NETOBJTYPE_CHARACTER)
+: CEntity(pWorld, CGameWorld::ENTTYPE_CHARACTER)
 {
 	m_ProximityRadius = ms_PhysSize;
 	m_Health = 0;
@@ -95,10 +95,14 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	if(m_pPlayer->m_RconFreeze) Freeze(-1);
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	
-	if(GetPlayer()->m_IsUsingDDRaceClient) {
+	if(GetPlayer()->m_IsUsingDDRaceClient)
+	{
 		Controller->m_Teams.SendTeamsState(GetPlayer()->GetCID());
 	}
-
+	if(g_Config.m_SvTeam == 1)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Please join a team before you start");
+	}
 	m_DefEmote = EMOTE_NORMAL;
 	m_DefEmoteReset = -1;
 	return true;
@@ -120,7 +124,7 @@ void CCharacter::SetWeapon(int W)
 	m_LastWeapon = m_ActiveWeapon;
 	m_QueuedWeapon = -1;
 	m_ActiveWeapon = W;
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH);
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, Teams()->TeamMask(Team()));
 
 	if(m_ActiveWeapon < 0 || m_ActiveWeapon >= NUM_WEAPONS)
 		m_ActiveWeapon = 0;
@@ -186,11 +190,11 @@ void CCharacter::HandleNinja()
 
 		// check if we Hit anything along the way
 		{
-			CCharacter *aEnts[64];
+			CCharacter *aEnts[MAX_CLIENTS];
 			vec2 Dir = m_Pos - OldPos;
 			float Radius = m_ProximityRadius * 2.0f;
 			vec2 Center = OldPos + Dir * 0.5f;
-			int Num = GameServer()->m_World.FindEntities(Center, Radius, (CEntity**)aEnts, 64, NETOBJTYPE_CHARACTER);
+			int Num = GameServer()->m_World.FindEntities(Center, Radius, (CEntity**)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 			for (int i = 0; i < Num; ++i)
 			{
@@ -212,7 +216,7 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// Hit a m_pPlayer, give him damage and stuffs...
-				GameServer()->CreateSound(aEnts[i]->m_Pos, SOUND_NINJA_HIT);
+				GameServer()->CreateSound(aEnts[i]->m_Pos, SOUND_NINJA_HIT, Teams()->TeamMask(Team()));
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = aEnts[i];
@@ -313,7 +317,7 @@ void CCharacter::FireWeapon()
 		if(m_PainSoundTimer<=0)
 		{
 				m_PainSoundTimer = 1 * Server()->TickSpeed();
-				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
+				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team()));
 		}
 		return;
 	}
@@ -329,39 +333,43 @@ void CCharacter::FireWeapon()
 
 			if (!g_Config.m_SvHit) break;
 
-			CCharacter *aEnts[64];
+			CCharacter *apEnts[MAX_CLIENTS];
 			int Hits = 0;
-			int Num = GameServer()->m_World.FindEntities(ProjStartPos, m_ProximityRadius*0.5f, (CEntity**)aEnts,
-			64, NETOBJTYPE_CHARACTER);
+			int Num = GameServer()->m_World.FindEntities(ProjStartPos, m_ProximityRadius*0.5f, (CEntity**)apEnts,
+														MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 			for (int i = 0; i < Num; ++i)
 			{
-				CCharacter *Target = aEnts[i];
+				CCharacter *pTarget = apEnts[i];
 
-				//for DDRace mod or any other mod, which needs hammer hits through the wall remove second condition
-				if ((Target == this || !CanCollide(Target->GetPlayer()->GetCID())) /*|| GameServer()->Collision()->IntersectLine(ProjStartPos, Target->m_Pos, NULL, NULL)*/)
+				if ((pTarget == this || !CanCollide(pTarget->GetPlayer()->GetCID())) /*|| GameServer()->Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL)*/)
 					continue;
 
 				// set his velocity to fast upward (for now)
-				GameServer()->CreateHammerHit(m_Pos, Teams()->TeamMask(Team()));
-				aEnts[i]->TakeDamage(vec2(0.f, -1.f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
-
+				if(length(pTarget->m_Pos-ProjStartPos) > 0.0f)
+					GameServer()->CreateHammerHit(pTarget->m_Pos-normalize(pTarget->m_Pos-ProjStartPos)*m_ProximityRadius*0.5f, Teams()->TeamMask(Team()));
+				else
+					GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team()));
+				
 				vec2 Dir;
-				if (length(Target->m_Pos - m_Pos) > 0.0f)
-					Dir = normalize(Target->m_Pos - m_Pos);
+				if (length(pTarget->m_Pos - m_Pos) > 0.0f)
+					Dir = normalize(pTarget->m_Pos - m_Pos);
 				else
 					Dir = vec2(0.f, -1.f);
-				vec2 Temp = Target->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f * (m_HammerType + 1);
-				if(Temp.x > 0 && ((Target->m_TileIndex == TILE_STOP && Target->m_TileFlags == ROTATION_270) || (Target->m_TileIndexL == TILE_STOP && Target->m_TileFlagsL == ROTATION_270) || (Target->m_TileIndexL == TILE_STOPS && (Target->m_TileFlagsL == ROTATION_90 || Target->m_TileFlagsL ==ROTATION_270)) || (Target->m_TileIndexL == TILE_STOPA) || (Target->m_TileFIndex == TILE_STOP && Target->m_TileFFlags == ROTATION_270) || (Target->m_TileFIndexL == TILE_STOP && Target->m_TileFFlagsL == ROTATION_270) || (Target->m_TileFIndexL == TILE_STOPS && (Target->m_TileFFlagsL == ROTATION_90 || Target->m_TileFFlagsL == ROTATION_270)) || (Target->m_TileFIndexL == TILE_STOPA) || (Target->m_TileSIndex == TILE_STOP && Target->m_TileSFlags == ROTATION_270) || (Target->m_TileSIndexL == TILE_STOP && Target->m_TileSFlagsL == ROTATION_270) || (Target->m_TileSIndexL == TILE_STOPS && (Target->m_TileSFlagsL == ROTATION_90 || Target->m_TileSFlagsL == ROTATION_270)) || (Target->m_TileSIndexL == TILE_STOPA)))
+					
+				vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f * (m_HammerType + 1);
+				if(Temp.x > 0 && ((pTarget->m_TileIndex == TILE_STOP && pTarget->m_TileFlags == ROTATION_270) || (pTarget->m_TileIndexL == TILE_STOP && pTarget->m_TileFlagsL == ROTATION_270) || (pTarget->m_TileIndexL == TILE_STOPS && (pTarget->m_TileFlagsL == ROTATION_90 || pTarget->m_TileFlagsL ==ROTATION_270)) || (pTarget->m_TileIndexL == TILE_STOPA) || (pTarget->m_TileFIndex == TILE_STOP && pTarget->m_TileFFlags == ROTATION_270) || (pTarget->m_TileFIndexL == TILE_STOP && pTarget->m_TileFFlagsL == ROTATION_270) || (pTarget->m_TileFIndexL == TILE_STOPS && (pTarget->m_TileFFlagsL == ROTATION_90 || pTarget->m_TileFFlagsL == ROTATION_270)) || (pTarget->m_TileFIndexL == TILE_STOPA) || (pTarget->m_TileSIndex == TILE_STOP && pTarget->m_TileSFlags == ROTATION_270) || (pTarget->m_TileSIndexL == TILE_STOP && pTarget->m_TileSFlagsL == ROTATION_270) || (pTarget->m_TileSIndexL == TILE_STOPS && (pTarget->m_TileSFlagsL == ROTATION_90 || pTarget->m_TileSFlagsL == ROTATION_270)) || (pTarget->m_TileSIndexL == TILE_STOPA)))
 					Temp.x = 0;
-				if(Temp.x < 0 && ((Target->m_TileIndex == TILE_STOP && Target->m_TileFlags == ROTATION_90) || (Target->m_TileIndexR == TILE_STOP && Target->m_TileFlagsR == ROTATION_90) || (Target->m_TileIndexR == TILE_STOPS && (Target->m_TileFlagsR == ROTATION_90 || Target->m_TileFlagsR == ROTATION_270)) || (Target->m_TileIndexR == TILE_STOPA) || (Target->m_TileFIndex == TILE_STOP && Target->m_TileFFlags == ROTATION_90) || (Target->m_TileFIndexR == TILE_STOP && Target->m_TileFFlagsR == ROTATION_90) || (Target->m_TileFIndexR == TILE_STOPS && (Target->m_TileFFlagsR == ROTATION_90 || Target->m_TileFFlagsR == ROTATION_270)) || (Target->m_TileFIndexR == TILE_STOPA) || (Target->m_TileSIndex == TILE_STOP && Target->m_TileSFlags == ROTATION_90) || (Target->m_TileSIndexR == TILE_STOP && Target->m_TileSFlagsR == ROTATION_90) || (Target->m_TileSIndexR == TILE_STOPS && (Target->m_TileSFlagsR == ROTATION_90 || Target->m_TileSFlagsR == ROTATION_270)) || (Target->m_TileSIndexR == TILE_STOPA)))
+				if(Temp.x < 0 && ((pTarget->m_TileIndex == TILE_STOP && pTarget->m_TileFlags == ROTATION_90) || (pTarget->m_TileIndexR == TILE_STOP && pTarget->m_TileFlagsR == ROTATION_90) || (pTarget->m_TileIndexR == TILE_STOPS && (pTarget->m_TileFlagsR == ROTATION_90 || pTarget->m_TileFlagsR == ROTATION_270)) || (pTarget->m_TileIndexR == TILE_STOPA) || (pTarget->m_TileFIndex == TILE_STOP && pTarget->m_TileFFlags == ROTATION_90) || (pTarget->m_TileFIndexR == TILE_STOP && pTarget->m_TileFFlagsR == ROTATION_90) || (pTarget->m_TileFIndexR == TILE_STOPS && (pTarget->m_TileFFlagsR == ROTATION_90 || pTarget->m_TileFFlagsR == ROTATION_270)) || (pTarget->m_TileFIndexR == TILE_STOPA) || (pTarget->m_TileSIndex == TILE_STOP && pTarget->m_TileSFlags == ROTATION_90) || (pTarget->m_TileSIndexR == TILE_STOP && pTarget->m_TileSFlagsR == ROTATION_90) || (pTarget->m_TileSIndexR == TILE_STOPS && (pTarget->m_TileSFlagsR == ROTATION_90 || pTarget->m_TileSFlagsR == ROTATION_270)) || (pTarget->m_TileSIndexR == TILE_STOPA)))
 					Temp.x = 0;
-				if(Temp.y < 0 && ((Target->m_TileIndex == TILE_STOP && Target->m_TileFlags == ROTATION_180) || (Target->m_TileIndexB == TILE_STOP && Target->m_TileFlagsB == ROTATION_180) || (Target->m_TileIndexB == TILE_STOPS && (Target->m_TileFlagsB == ROTATION_0 || Target->m_TileFlagsB == ROTATION_180)) || (Target->m_TileIndexB == TILE_STOPA) || (Target->m_TileFIndex == TILE_STOP && Target->m_TileFFlags == ROTATION_180) || (Target->m_TileFIndexB == TILE_STOP && Target->m_TileFFlagsB == ROTATION_180) || (Target->m_TileFIndexB == TILE_STOPS && (Target->m_TileFFlagsB == ROTATION_0 || Target->m_TileFFlagsB == ROTATION_180)) || (Target->m_TileFIndexB == TILE_STOPA) || (Target->m_TileSIndex == TILE_STOP && Target->m_TileSFlags == ROTATION_180) || (Target->m_TileSIndexB == TILE_STOP && Target->m_TileSFlagsB == ROTATION_180) || (Target->m_TileSIndexB == TILE_STOPS && (Target->m_TileSFlagsB == ROTATION_0 || Target->m_TileSFlagsB == ROTATION_180)) || (Target->m_TileSIndexB == TILE_STOPA)))
+				if(Temp.y < 0 && ((pTarget->m_TileIndex == TILE_STOP && pTarget->m_TileFlags == ROTATION_180) || (pTarget->m_TileIndexB == TILE_STOP && pTarget->m_TileFlagsB == ROTATION_180) || (pTarget->m_TileIndexB == TILE_STOPS && (pTarget->m_TileFlagsB == ROTATION_0 || pTarget->m_TileFlagsB == ROTATION_180)) || (pTarget->m_TileIndexB == TILE_STOPA) || (pTarget->m_TileFIndex == TILE_STOP && pTarget->m_TileFFlags == ROTATION_180) || (pTarget->m_TileFIndexB == TILE_STOP && pTarget->m_TileFFlagsB == ROTATION_180) || (pTarget->m_TileFIndexB == TILE_STOPS && (pTarget->m_TileFFlagsB == ROTATION_0 || pTarget->m_TileFFlagsB == ROTATION_180)) || (pTarget->m_TileFIndexB == TILE_STOPA) || (pTarget->m_TileSIndex == TILE_STOP && pTarget->m_TileSFlags == ROTATION_180) || (pTarget->m_TileSIndexB == TILE_STOP && pTarget->m_TileSFlagsB == ROTATION_180) || (pTarget->m_TileSIndexB == TILE_STOPS && (pTarget->m_TileSFlagsB == ROTATION_0 || pTarget->m_TileSFlagsB == ROTATION_180)) || (pTarget->m_TileSIndexB == TILE_STOPA)))
 					Temp.y = 0;
-				if(Temp.y > 0 && ((Target->m_TileIndex == TILE_STOP && Target->m_TileFlags == ROTATION_0) || (Target->m_TileIndexT == TILE_STOP && Target->m_TileFlagsT == ROTATION_0) || (Target->m_TileIndexT == TILE_STOPS && (Target->m_TileFlagsT == ROTATION_0 || Target->m_TileFlagsT == ROTATION_180)) || (Target->m_TileIndexT == TILE_STOPA) || (Target->m_TileFIndex == TILE_STOP && Target->m_TileFFlags == ROTATION_0) || (Target->m_TileFIndexT == TILE_STOP && Target->m_TileFFlagsT == ROTATION_0) || (Target->m_TileFIndexT == TILE_STOPS && (Target->m_TileFFlagsT == ROTATION_0 || Target->m_TileFFlagsT == ROTATION_180)) || (Target->m_TileFIndexT == TILE_STOPA) || (Target->m_TileSIndex == TILE_STOP && Target->m_TileSFlags == ROTATION_0) || (Target->m_TileSIndexT == TILE_STOP && Target->m_TileSFlagsT == ROTATION_0) || (Target->m_TileSIndexT == TILE_STOPS && (Target->m_TileSFlagsT == ROTATION_0 || Target->m_TileSFlagsT == ROTATION_180)) || (Target->m_TileSIndexT == TILE_STOPA)))
+				if(Temp.y > 0 && ((pTarget->m_TileIndex == TILE_STOP && pTarget->m_TileFlags == ROTATION_0) || (pTarget->m_TileIndexT == TILE_STOP && pTarget->m_TileFlagsT == ROTATION_0) || (pTarget->m_TileIndexT == TILE_STOPS && (pTarget->m_TileFlagsT == ROTATION_0 || pTarget->m_TileFlagsT == ROTATION_180)) || (pTarget->m_TileIndexT == TILE_STOPA) || (pTarget->m_TileFIndex == TILE_STOP && pTarget->m_TileFFlags == ROTATION_0) || (pTarget->m_TileFIndexT == TILE_STOP && pTarget->m_TileFFlagsT == ROTATION_0) || (pTarget->m_TileFIndexT == TILE_STOPS && (pTarget->m_TileFFlagsT == ROTATION_0 || pTarget->m_TileFFlagsT == ROTATION_180)) || (pTarget->m_TileFIndexT == TILE_STOPA) || (pTarget->m_TileSIndex == TILE_STOP && pTarget->m_TileSFlags == ROTATION_0) || (pTarget->m_TileSIndexT == TILE_STOP && pTarget->m_TileSFlagsT == ROTATION_0) || (pTarget->m_TileSIndexT == TILE_STOPS && (pTarget->m_TileSFlagsT == ROTATION_0 || pTarget->m_TileSFlagsT == ROTATION_180)) || (pTarget->m_TileSIndexT == TILE_STOPA)))
 					Temp.y = 0;
-				Target->m_Core.m_Vel = Temp;
-				Target->UnFreeze();
+				Temp -= pTarget->m_Core.m_Vel;
+				pTarget->TakeDamage(vec2(0.f, -1.f) + Temp, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+					m_pPlayer->GetCID(), m_ActiveWeapon);
+				pTarget->UnFreeze();
 				Hits++;
 			}
 
@@ -373,7 +381,7 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_GUN:
 		{
-			CProjectile *Proj = new CProjectile
+			CProjectile *pProj = new CProjectile
 				(
 				GameWorld(),
 				WEAPON_GUN,//Type
@@ -390,7 +398,7 @@ void CCharacter::FireWeapon()
 
 			// pack the Projectile and send it to the client Directly
 			CNetObj_Projectile p;
-			Proj->FillInfo(&p);
+			pProj->FillInfo(&p);
 
 			CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 			Msg.AddInt(1);
@@ -405,7 +413,7 @@ void CCharacter::FireWeapon()
 		case WEAPON_SHOTGUN:
 		{
 				new CLaser(&GameServer()->m_World, m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID(), 1);
-				GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE);
+				GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, Teams()->TeamMask(Team()));
 			/*int ShotSpread = 2;
 
 			CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
@@ -418,7 +426,7 @@ void CCharacter::FireWeapon()
 				a += Spreading[i+2];
 				float v = 1-(absolute(i)/(float)ShotSpread);
 				float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
-				CProjectile *Proj = new CProjectile(GameWorld(), WEAPON_SHOTGUN,
+				CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_SHOTGUN,
 					m_pPlayer->GetCID(),
 					ProjStartPos,
 					vec2(cosf(a), sinf(a))*Speed,
@@ -427,7 +435,7 @@ void CCharacter::FireWeapon()
 
 				// pack the Projectile and send it to the client Directly
 				CNetObj_Projectile p;
-				Proj->FillInfo(&p);
+				pProj->FillInfo(&p);
 
 				for(unsigned i = 0; i < sizeof(CNetObj_Projectile)/sizeof(int); i++)
 					Msg.AddInt(((int *)&p)[i]);
@@ -440,7 +448,7 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_GRENADE:
 		{
-				CProjectile *Proj = new CProjectile
+				CProjectile *pProj = new CProjectile
 					(
 					GameWorld(),
 					WEAPON_GRENADE,//Type
@@ -457,7 +465,7 @@ void CCharacter::FireWeapon()
 
 				// pack the Projectile and send it to the client Directly
 				CNetObj_Projectile p;
-				Proj->FillInfo(&p);
+				pProj->FillInfo(&p);
 
 				CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 				Msg.AddInt(1);
@@ -557,7 +565,7 @@ bool CCharacter::GiveWeapon(int Weapon, int Ammo)
 void CCharacter::GiveNinja()
 {
 	if(!m_aWeapons[WEAPON_NINJA].m_Got)
-		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA);
+		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, Teams()->TeamMask(Team()));
 	m_Ninja.m_ActivationTick = Server()->Tick();
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
 	if (!m_FreezeTime) m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
@@ -731,8 +739,6 @@ void CCharacter::HandleFly()
 
 void CCharacter::Tick()
 {
-	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	//dbg_msg("Indices","%d",Indices.size());
 	/*if(m_pPlayer->m_ForceBalanced)
 	{
 		char Buf[128];
@@ -741,7 +747,7 @@ void CCharacter::Tick()
 
 		m_pPlayer->m_ForceBalanced = false;
 	}*/
-	m_Armor=(m_FreezeTime != -1)?10-(m_FreezeTime/15):0;
+	m_Armor=(m_FreezeTime >= 0)?10-(m_FreezeTime/15):0;
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
 
@@ -749,9 +755,9 @@ void CCharacter::Tick()
 	{
 		if (m_FreezeTime % Server()->TickSpeed() == 0 || m_FreezeTime == -1)
 		{
-			GameServer()->CreateDamageInd(m_Pos, 0, m_FreezeTime / Server()->TickSpeed());
+			GameServer()->CreateDamageInd(m_Pos, 0, m_FreezeTime / Server()->TickSpeed(), Teams()->TeamMask(Team()));
 		}
-		if(m_FreezeTime != -1)
+		if(m_FreezeTime > 0)
 			m_FreezeTime--;
 		else
 			m_Ninja.m_ActivationTick = Server()->Tick();
@@ -760,13 +766,15 @@ void CCharacter::Tick()
 		m_Input.m_Hook = 0;
 
 		//m_Input.m_Fire = 0;
-		if (m_FreezeTime == 1) {
+		if (m_FreezeTime == 1)
+		{
 			UnFreeze();
+			m_pPlayer->m_RconFreeze = false;
 		}
 	}
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true);
 	m_Core.m_Id = GetPlayer()->GetCID();
+	m_Core.Tick(true);
 
 	if (m_DefEmoteReset >= 0 && m_DefEmoteReset <= Server()->Tick())
 	{
@@ -774,16 +782,15 @@ void CCharacter::Tick()
 		m_EmoteType = m_DefEmote = EMOTE_NORMAL;
 		m_EmoteStop = -1;
 	}
-	
+
 	m_DoSplash = false;
-	if (g_Config.m_SvEndlessDrag)
+	if (g_Config.m_SvEndlessDrag || m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
 		m_Core.m_HookTick = 0;
+	if (m_DeepFreeze && !m_Super)
+		Freeze();
 	if (m_Super && m_Core.m_Jumped > 1)
 		m_Core.m_Jumped = 1;
-	if (m_Super && g_Config.m_SvEndlessSuperHook)
-		m_Core.m_HookTick = 0;
-	/*dbg_msg("character","m_TileIndex=%d , m_TileFIndex=%d",m_TileIndex,m_TileFIndex); //REMOVE*/
-	//DDRace
+
 	char aBroadcast[128];
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
@@ -840,20 +847,86 @@ void CCharacter::Tick()
 		}
 		m_RefreshTime = Server()->Tick();
 	}
-//int num =0;
+
+	// handle tiles
+	int CurrentIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
 		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 			HandleTiles(*i);
 	else
-		HandleTiles(GameServer()->Collision()->GetPureMapIndex(m_Pos));
-
-	// kill player when leaving gamelayer
-	if((int)m_Pos.x/32 < -200 || (int)m_Pos.x/32 > GameServer()->Collision()->GetWidth()+200 ||
-		(int)m_Pos.y/32 < -200 || (int)m_Pos.y/32 > GameServer()->Collision()->GetHeight()+200)
+		HandleTiles(CurrentIndex);
+	// handle speedup tiles
+	if(GameServer()->Collision()->IsSpeedup(CurrentIndex))
 	{
-		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
-	}
+		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
+		int Force, MaxSpeed = 0;
+		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
+		GameServer()->Collision()->GetSpeedup(CurrentIndex, &Direction, &Force, &MaxSpeed);
+		if(Force == 255 && MaxSpeed)
+		{
+			m_Core.m_Vel = Direction * (MaxSpeed/5);
+		}
+		else
+		{
+			if(MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
+			//dbg_msg("speedup tile start","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
+			if(MaxSpeed > 0)
+			{
+				if(Direction.x > 0.0000001f)
+					SpeederAngle = -atan(Direction.y / Direction.x);
+				else if(Direction.x < 0.0000001f)
+					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+				else if(Direction.y > 0.0000001f)
+					SpeederAngle = asin(1.0f);
+				else
+					SpeederAngle = asin(-1.0f);
 
+				if(SpeederAngle < 0)
+					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+
+				if(TempVel.x > 0.0000001f)
+					TeeAngle = -atan(TempVel.y / TempVel.x);
+				else if(TempVel.x < 0.0000001f)
+					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+				else if(TempVel.y > 0.0000001f)
+					TeeAngle = asin(1.0f);
+				else
+					TeeAngle = asin(-1.0f);
+
+				if(TeeAngle < 0)
+					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+
+				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+
+				DiffAngle = SpeederAngle - TeeAngle;
+				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
+
+				//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
+
+				if(abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					TempVel += Direction * Force;
+				else if(abs(SpeedLeft) > Force)
+					TempVel += Direction * -Force;
+				else
+					TempVel += Direction * SpeedLeft;
+			}
+			else
+				TempVel += Direction * Force;
+
+			if(TempVel.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
+				TempVel.x = 0;
+			if(TempVel.x < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)))
+				TempVel.x = 0;
+			if(TempVel.y < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)))
+				TempVel.y = 0;
+			if(TempVel.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
+				TempVel.y = 0;
+			m_Core.m_Vel = TempVel;
+			//dbg_msg("speedup tile end","(Direction*Force) %f %f   m_Core.m_Vel%f %f",(Direction*Force).x,(Direction*Force).y,m_Core.m_Vel.x,m_Core.m_Vel.y);
+			//dbg_msg("speedup tile end","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
+		}
+	}
 	// handle Weapons
 	HandleWeapons();
 
@@ -874,7 +947,7 @@ void CCharacter::HandleTiles(int Index)
 {//dbg_msg("num","%d",++num);
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	int MapIndex = Index;
-	int PureMapIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+	//int PureMapIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 	float Offset = 4;
 	int MapIndexL = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + (m_ProximityRadius/2)+Offset,m_Pos.y));
 	int MapIndexR = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x - (m_ProximityRadius/2)-Offset,m_Pos.y));
@@ -981,8 +1054,8 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team())))
 	{
 		bool CanBegin = true;
-		if(g_Config.m_SvTeam == 1 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1) ) {
-			GameServer()->SendChat(-1, GetPlayer()->GetCID(),"I already told you that you must find a friend");//need to make this better
+		if(g_Config.m_SvTeam == 1 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1)) {
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(),"I already told you too join a team");
 			CanBegin = false;
 		}
 		if(CanBegin) {
@@ -997,13 +1070,38 @@ void CCharacter::HandleTiles(int Index)
 	{
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
 	}
-	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super)
+	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
 	{
-		Freeze(Server()->TickSpeed()*3);
+		Freeze();
 	}
-	else if((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE))
+	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 	{
 		UnFreeze();
+	}
+	else if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have been deeply frozen");
+		m_DeepFreeze = true;
+	}
+	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have been thawed from deepfreeze");
+
+		if((m_TileIndex != TILE_FREEZE) && (m_TileFIndex != TILE_FREEZE)) {
+			UnFreeze();
+		}
+
+		m_DeepFreeze = false;
+	}
+	else if(((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Endless hook has been activated");
+		m_EndlessHook = true;
+	}
+	else if(((m_TileIndex == TILE_EHOOK_END) || (m_TileFIndex == TILE_EHOOK_END)) && m_EndlessHook)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Endless hook has been deactivated");
+		m_EndlessHook = false;
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
 	{
@@ -1060,86 +1158,18 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHCLOSE;
 	}
-	// handle speedup tiles
-	if(GameServer()->Collision()->IsSpeedup(PureMapIndex) == TILE_BOOST)
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
 	{
-		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
-		int Force, MaxSpeed = 0;
-		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-		GameServer()->Collision()->GetSpeedup(MapIndex, &Direction, &Force, &MaxSpeed);
-		if(Force == 255 && MaxSpeed)
-		{
-			m_Core.m_Vel = Direction * (MaxSpeed/5);
-		}
-		else
-		{
-			if(MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
-			//dbg_msg("speedup tile start","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
-			if(
-					((Direction.x < 0) && ((int)GameServer()->Collision()->GetPos(MapIndexL).x) && ((int)GameServer()->Collision()->GetPos(MapIndexL).x < (int)m_Core.m_Pos.x)) ||
-					((Direction.x > 0) && ((int)GameServer()->Collision()->GetPos(MapIndexR).x) && ((int)GameServer()->Collision()->GetPos(MapIndexR).x > (int)m_Core.m_Pos.x)) ||
-					((Direction.y > 0) && ((int)GameServer()->Collision()->GetPos(MapIndexB).y) && ((int)GameServer()->Collision()->GetPos(MapIndexB).y > (int)m_Core.m_Pos.y)) ||
-					((Direction.y < 0) && ((int)GameServer()->Collision()->GetPos(MapIndexT).y) && ((int)GameServer()->Collision()->GetPos(MapIndexT).y < (int)m_Core.m_Pos.y))
-					)
-					m_Core.m_Pos = m_PrevPos;
-			
-			if(MaxSpeed > 0)
-			{
-				if(Direction.x > 0.0000001f)
-					SpeederAngle = -atan(Direction.y / Direction.x);
-				else if(Direction.x < 0.0000001f)
-					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
-				else if(Direction.y > 0.0000001f)
-					SpeederAngle = asin(1.0f);
-				else
-					SpeederAngle = asin(-1.0f);
-
-				if(SpeederAngle < 0)
-					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
-
-				if(TempVel.x > 0.0000001f)
-					TeeAngle = -atan(TempVel.y / TempVel.x);
-				else if(TempVel.x < 0.0000001f)
-					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
-				else if(TempVel.y > 0.0000001f)
-					TeeAngle = asin(1.0f);
-				else
-					TeeAngle = asin(-1.0f);
-
-				if(TeeAngle < 0)
-					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
-
-				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
-
-				DiffAngle = SpeederAngle - TeeAngle;
-				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-
-				//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
-
-				if(abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
-					TempVel += Direction * Force;
-				else if(abs(SpeedLeft) > Force)
-					TempVel += Direction * -Force;
-				else
-					TempVel += Direction * SpeedLeft;
-			}
-			else
-				TempVel += Direction * Force;
-
-			if(TempVel.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
-				TempVel.x = 0;
-			if(TempVel.x < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)))
-				TempVel.x = 0;
-			if(TempVel.y < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)))
-				TempVel.y = 0;
-			if(TempVel.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
-				TempVel.y = 0;
-			m_Core.m_Vel = TempVel;
-			//dbg_msg("speedup tile end","(Direction*Force) %f %f   m_Core.m_Vel%f %f",(Direction*Force).x,(Direction*Force).y,m_Core.m_Vel.x,m_Core.m_Vel.y);
-			//dbg_msg("speedup tile end","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
-		}
+		Freeze(GameServer()->Collision()->GetSwitchDelay(MapIndex));
 	}
-	m_LastBooster = MapIndex;
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+	{
+		m_DeepFreeze = true;
+	}
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+	{
+		m_DeepFreeze = false;
+	}
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if(z && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 	{
@@ -1166,15 +1196,15 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_Vel = vec2(0,0);
 		return;
 	}
-	// handle death-tiles
+	// handle death-tiles and leaving gamelayer
 	if((GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetFCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetFCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH)&&
+			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH || 
+			GameLayerClipped(m_Pos)) &&
 			!m_Super)
 		{
 			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
@@ -1266,13 +1296,13 @@ void CCharacter::TickDefered()
 	}
 
 	int Events = m_Core.m_TriggeredEvents;
-	int Mask = CmaskAllExceptOne(m_pPlayer->GetCID());
+	//int Mask = CmaskAllExceptOne(m_pPlayer->GetCID());
 
-	if(Events&COREEVENT_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, Mask);
+	if(Events&COREEVENT_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, Teams()->TeamMask(Team()));
 
-	if(Events&COREEVENT_HOOK_ATTACH_PLAYER) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, CmaskAll());
-	if(Events&COREEVENT_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, Mask);
-	if(Events&COREEVENT_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, Mask);
+	if(Events&COREEVENT_HOOK_ATTACH_PLAYER) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team()));
+	if(Events&COREEVENT_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, Teams()->TeamMask(Team()));
+	if(Events&COREEVENT_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, Teams()->TeamMask(Team()));
 
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
@@ -1301,20 +1331,20 @@ void CCharacter::TickDefered()
 	}
 }
 
-bool CCharacter::Freeze(int Time)
+bool CCharacter::Freeze(int Seconds)
 {
-	if ((Time <= 1 || m_Super || m_FreezeTime == -1) && Time != -1)
+	if ((Seconds <= 0 || m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * Server()->TickSpeed()) && Seconds != -1)
 		 return false;
-	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed())  		 
+	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
 	{
-		for(int i=0;i<NUM_WEAPONS;i++)
+		for(int i = 0; i < NUM_WEAPONS; i++)
 			if(m_aWeapons[i].m_Got)
 			 {
 				 m_aWeapons[i].m_Ammo = 0;
 			 }
-		m_Armor=0;
-		m_FreezeTime=Time;
-		m_FreezeTick=Server()->Tick();
+		m_Armor = 0;
+		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
+		m_FreezeTick = Server()->Tick();
 		return true;
 	}
 	return false;
@@ -1322,28 +1352,12 @@ bool CCharacter::Freeze(int Time)
 
 bool CCharacter::Freeze()
 {
-	int Time = Server()->TickSpeed()*3;
-	if (Time <= 1 || m_Super || m_FreezeTime == -1)
-		 return false;
-	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed())
-	{
-		for(int i=0;i<NUM_WEAPONS;i++)
-			if(m_aWeapons[i].m_Got)
-			 {
-				 m_aWeapons[i].m_Ammo = 0;
-			 }
-		m_Armor=0;
-		m_Ninja.m_ActivationTick = Server()->Tick();
-		m_FreezeTime=Time;
-		m_FreezeTick=Server()->Tick();
-		return true;
-	}
-	return false;
+	return Freeze(g_Config.m_SvFreezeDelay);
 }
 
 bool CCharacter::UnFreeze()
 {
-	if (m_FreezeTime>0)
+	if (m_FreezeTime > 0)
 	{
 		m_Armor=10;
 		for(int i=0;i<NUM_WEAPONS;i++)
@@ -1408,7 +1422,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
 	// a nice sound
-	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE);
+	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, Teams()->TeamMask(Team()));
 
 	// this is for auto respawn after 3 secs
 	m_pPlayer->m_DieTick = Server()->Tick();

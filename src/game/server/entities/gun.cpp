@@ -13,7 +13,7 @@ const int RANGE=700;
 // CGun
 //////////////////////////////////////////////////
 CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int Layer, int Number)
-: CEntity(pGameWorld, NETOBJTYPE_LASER)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Layer = Layer;
 	m_Number = Number;
@@ -38,7 +38,7 @@ void CGun::Fire()
 	}
 	
 	int Num = -1;
-	Num =  GameServer()->m_World.FindEntities(m_Pos, RANGE, (CEntity**)Ents, 16, NETOBJTYPE_CHARACTER);
+	Num =  GameServer()->m_World.FindEntities(m_Pos, RANGE, (CEntity**)Ents, 16, CGameWorld::ENTTYPE_CHARACTER);
 
 	for (int i = 0; i < Num; i++)
 	{
@@ -77,7 +77,7 @@ void CGun::Tick()
 	{
 		int Flags;
 		m_EvalTick=Server()->Tick();
-		int index = GameServer()->Collision()->IsCp(m_Pos.x,m_Pos.y, &Flags);
+		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
 		if (index)
 		{
 			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);

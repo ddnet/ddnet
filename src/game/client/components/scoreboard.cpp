@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/tl/string.h>
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
@@ -53,32 +55,26 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	Graphics()->QuadsEnd();
 
 	// render goals
-	//y = ystart+h-54;
-	float tw = 0.0f;
 	if(m_pClient->m_Snap.m_pGameobj)
 	{
 		if(m_pClient->m_Snap.m_pGameobj->m_ScoreLimit)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), m_pClient->m_Snap.m_pGameobj->m_ScoreLimit);
-			TextRender()->Text(0, x+20.0f, y, 22.0f, aBuf, -1);
-			tw += TextRender()->TextWidth(0, 22.0f, aBuf, -1);
+			TextRender()->Text(0, x, y, 20.0f, aBuf, -1);
 		}
 		if(m_pClient->m_Snap.m_pGameobj->m_TimeLimit)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), m_pClient->m_Snap.m_pGameobj->m_TimeLimit);
-			TextRender()->Text(0, x+220.0f, y, 22.0f, aBuf, -1);
-			tw += TextRender()->TextWidth(0, 22.0f, aBuf, -1);
+			TextRender()->Text(0, x+220.0f, y, 20.0f, aBuf, -1);
 		}
 		if(m_pClient->m_Snap.m_pGameobj->m_RoundNum && m_pClient->m_Snap.m_pGameobj->m_RoundCurrent)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s %d/%d", Localize("Round"), m_pClient->m_Snap.m_pGameobj->m_RoundCurrent, m_pClient->m_Snap.m_pGameobj->m_RoundNum);
-			TextRender()->Text(0, x+450.0f, y, 22.0f, aBuf, -1);
-			
-		/*[48c3fd4c][game/scoreboard]: timelimit x:219.428558
-		[48c3fd4c][game/scoreboard]: round x:453.142822*/
+			float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1);
+			TextRender()->Text(0, x+w-tw-20.0f, y, 20.0f, aBuf, -1);
 		}
 	}
 }
@@ -110,7 +106,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 			{
 				if(Count)
 					str_append(aBuffer, ", ", sizeof(aBuffer));
-				if(!str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace"))
+				if(m_GameType.find("Race") != std::string::npos)
 					if (g_Config.m_ClShowIds)
 					{
 						char aId[4];
@@ -128,14 +124,17 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle)
 {
+	if(Team == TEAM_SPECTATORS)
+		return;
+
 	//float ystart = y;
-	float h = 750.0f;
+	float h = 740.0f;
 
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.5f);
-	RenderTools()->DrawRoundRect(x-10.f, y-10.f, w, h, 17.0f);
+	RenderTools()->DrawRoundRect(x-10.f, y, w, h, 17.0f);
 	Graphics()->QuadsEnd();
 
 	// render title
@@ -150,64 +149,23 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float Offset = 80.0f;
 	float DataOffset = 130;
 	float tw = TextRender()->TextWidth(0, 48, pTitle, -1);
+	TextRender()->Text(0, x+10, y, 48, pTitle, -1);
 
-	if(Team == TEAM_SPECTATORS)
-	{
-		TextRender()->Text(0, x+w/2-tw/2, y, 48, pTitle, -1);
-	}
-	else
-	{
-		TextRender()->Text(0, x+10, y, 48, pTitle, -1);
-		if(str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace"))
-			if(m_pClient->m_Snap.m_pGameobj)
-			{
-				char aBuf[128];
-				int Score = Team == TEAM_RED ? m_pClient->m_Snap.m_pGameobj->m_TeamscoreRed : m_pClient->m_Snap.m_pGameobj->m_TeamscoreBlue;
-				str_format(aBuf, sizeof(aBuf), "%d", Score);
-				tw = TextRender()->TextWidth(0, 48, aBuf, -1);
-				TextRender()->Text(0, x+w-tw-30, y, 48, aBuf, -1);
-			}
-	}
+	if(m_GameType.find("Race") == std::string::npos)
+		if(m_pClient->m_Snap.m_pGameobj)
+		{
+			char aBuf[128];
+			int Score = Team == TEAM_RED ? m_pClient->m_Snap.m_pGameobj->m_TeamscoreRed : m_pClient->m_Snap.m_pGameobj->m_TeamscoreBlue;
+			str_format(aBuf, sizeof(aBuf), "%d", Score);
+			tw = TextRender()->TextWidth(0, 48, aBuf, -1);
+			TextRender()->Text(0, x+w-tw-30, y, 48, aBuf, -1);
+		}
 
 	y += 54.0f;
 
-	// find players
-	const CNetObj_PlayerInfo *paPlayers[MAX_CLIENTS] = {0};
-	int NumPlayers = 0;
-	for(int i = 0; i < Client()->SnapNumItems(IClient::SNAP_CURRENT); i++)
-	{
-		IClient::CSnapItem Item;
-		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
-
-		if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
-		{
-			const CNetObj_PlayerInfo *pInfo = (const CNetObj_PlayerInfo *)pData;
-			if(pInfo->m_Team == Team)
-			{
-				paPlayers[NumPlayers] = pInfo;
-				if(++NumPlayers == MAX_CLIENTS)
-					break;
-			}
-		}
-	}
-
-	// sort players
-	for(int k = 0; k < NumPlayers-1; k++) // ffs, bubblesort
-	{
-		for(int i = 0; i < NumPlayers-k-1; i++)
-		{
-			if((str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace") && (paPlayers[i]->m_Score < paPlayers[i+1]->m_Score)) || (!str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace") && (m_pClient->m_aClients[paPlayers[i]->m_ClientId].m_Score == 0 || (m_pClient->m_aClients[paPlayers[i]->m_ClientId].m_Score > m_pClient->m_aClients[paPlayers[i+1]->m_ClientId].m_Score && m_pClient->m_aClients[paPlayers[i+1]->m_ClientId].m_Score != 0))))
-			{
-				const CNetObj_PlayerInfo *pTmp = paPlayers[i];
-				paPlayers[i] = paPlayers[i+1];
-				paPlayers[i+1] = pTmp;
-			}
-		}
-	}
-
 	// render headlines
 	TextRender()->Text(0, x+10, y, 24.0f, Localize("Score"), -1);
-	if(!str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace"))
+	if(m_GameType.find("Race") != std::string::npos)
 	{
 		TextRender()->Text(0, x+125+Offset, y, 24.0f, Localize("Name"), -1);
 		TextRender()->Text(0, x+w-75, y, 24.0f, Localize("Ping"), -1);
@@ -224,7 +182,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float TeeSizeMod = 1.0f;
 	float TeeOffset = 0.0f;
 	
-	if(NumPlayers > 13)
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 13)
 	{
 		FontSize = 30.0f;
 		LineHeight = 40.0f;
@@ -233,9 +191,11 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	}
 	
 	// render player scores
-	for(int i = 0; i < NumPlayers; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		const CNetObj_PlayerInfo *pInfo = paPlayers[i];
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
+		if(!pInfo || pInfo->m_Team != Team)
+			continue;
 
 		// make sure that we render the correct team
 
@@ -252,7 +212,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		float FontSizeResize = FontSize;
 		float Width;
-		if(!str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace"))
+		if(m_GameType.find("Race") != std::string::npos)
 		{
 			const float ScoreWidth = 150.0f;
 			const float PingWidth = 60.0f;
@@ -324,7 +284,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			
 			float size = 64.0f;
 			IGraphics::CQuadItem QuadItem;
-			if(!str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace"))
+			if(m_GameType.find("Race") != std::string::npos)
 				QuadItem = IGraphics::CQuadItem(x+55+DataOffset, y-15, size/2, size);
 			else
 				QuadItem = IGraphics::CQuadItem(x+55, y-15, size/2, size);
@@ -335,7 +295,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientId].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 
-		if(!str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace"))
+		if(m_GameType.find("Race") != std::string::npos)
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+50+DataOffset, y+28+TeeOffset));
 		else
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+90, y+28+TeeOffset));
@@ -370,26 +330,9 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 void CScoreboard::OnRender()
 {
-	bool DoScoreBoard = false;
-
-	// if we activly wanna look on the scoreboard	
-	if(m_Active)
-		DoScoreBoard = true;
-		
-	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
-	{
-		// we are not a spectator, check if we are ead
-		if(!m_pClient->m_Snap.m_pLocalCharacter || m_pClient->m_Snap.m_pLocalCharacter->m_Health < 0)
-			DoScoreBoard = true;
-	}
-
-	// if we the game is over
-	if(m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_GameOver)
-		DoScoreBoard = true;
-		
-	if(!DoScoreBoard)
+	if(!Active())
 		return;
-		
+	m_GameType = std::string(m_pServerInfo.m_aGameType);
 	// if the score board is active, then we should clear the motd message aswell
 	if(m_pClient->m_pMotd->IsActive())
 		m_pClient->m_pMotd->Clear();
@@ -401,16 +344,13 @@ void CScoreboard::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	float w;
-	if(!str_comp_nocase(m_pServerInfo.m_aGameType, "DDRace"))
+	if(m_GameType.find("Race") != std::string::npos)
 		w = 750.0f;
 	else
 		w = 650.0f;
 
 	if(m_pClient->m_Snap.m_pGameobj && !(m_pClient->m_Snap.m_pGameobj->m_Flags&GAMEFLAG_TEAMS))
-	{
 		RenderScoreboard(Width/2-w/2, 150.0f, w, 0, 0);
-		//render_scoreboard(gameobj, 0, 0, -1, 0);
-	}
 	else
 	{
 			
@@ -422,8 +362,8 @@ void CScoreboard::OnRender()
 			else if(m_pClient->m_Snap.m_pGameobj->m_TeamscoreBlue > m_pClient->m_Snap.m_pGameobj->m_TeamscoreRed)
 				pText = Localize("Blue team wins!");
 				
-			float w = TextRender()->TextWidth(0, 92.0f, pText, -1);
-			TextRender()->Text(0, Width/2-w/2, 45, 92.0f, pText, -1);
+			float w = TextRender()->TextWidth(0, 86.0f, pText, -1);
+			TextRender()->Text(0, Width/2-w/2, 39, 86.0f, pText, -1);
 		}
 		
 		RenderScoreboard(Width/2-w-20, 150.0f, w, TEAM_RED, Localize("Red team"));
@@ -437,5 +377,20 @@ void CScoreboard::OnRender()
 
 bool CScoreboard::Active()
 {
-	return m_Active | (m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_GameOver);
+	// if we activly wanna look on the scoreboard	
+	if(m_Active)
+		return true;
+		
+	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
+	{
+		// we are not a spectator, check if we are dead
+		if(!m_pClient->m_Snap.m_pLocalCharacter)
+			return true;
+	}
+
+	// if the game is over
+	if(m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_GameOver)
+		return true;
+
+	return false;
 }
