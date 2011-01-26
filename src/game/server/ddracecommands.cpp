@@ -60,7 +60,7 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData, int Clie
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 	int Seconds = pResult->GetInteger(0);
-	char buf[512];
+	char aBuf[512];
 	if(Seconds < 10)
 		Seconds = 10;
 
@@ -69,12 +69,12 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData, int Clie
 	}
 	else {
 		/*pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
-		str_format(buf, sizeof(buf), "You have been muted by for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
-		pSelf->SendChatTarget(Victim, buf);*/
+		str_format(aBuf, sizeof(aBuf), "You have been muted by for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
+		pSelf->SendChatTarget(Victim, aBuf);*/
 
 		pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
-		str_format(buf, sizeof(buf), "%s muted by %s for %d seconds", pSelf->Server()->ClientName(Victim), pSelf->Server()->ClientName(ClientId), Seconds);
-		pSelf->SendChat(-1, CGameContext::CHAT_ALL, buf);
+		str_format(aBuf, sizeof(aBuf), "%s muted by %s for %d seconds", pSelf->Server()->ClientName(Victim), pSelf->Server()->ClientName(ClientId), Seconds);
+		pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
 }
 
@@ -82,7 +82,7 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int Cl
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
-	char buf[512];
+	char aBuf[512];
 
 	if(Victim == ClientId) {
 		pSelf->SendChatTarget(ClientId, "You can\'t unmute yourself");
@@ -91,15 +91,15 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int Cl
 		if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
 		{
 			pSelf->m_apPlayers[Victim]->m_Muted = 0;
-			str_format(buf, sizeof(buf), "You have been unmuted", pSelf->Server()->ClientName(Victim));
-			pSelf->SendChatTarget(Victim, buf);
+			str_format(aBuf, sizeof(aBuf), "You have been unmuted", pSelf->Server()->ClientName(Victim));
+			pSelf->SendChatTarget(Victim, aBuf);
 		}
 
 		/*if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
 		{
 			pSelf->m_apPlayers[Victim]->m_Muted = 0;
-			str_format(buf, sizeof(buf), "%s has been unmuted", pSelf->Server()->ClientName(Victim));
-			pSelf->SendChat(-1, CGameContext::CHAT_ALL, buf);
+			str_format(aBuf, sizeof(aBuf), "%s has been unmuted", pSelf->Server()->ClientName(Victim));
+			pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 		}*/
 	}
 }
@@ -161,9 +161,9 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData, in
 	if(pSelf->m_apPlayers[Victim])
 	{
 		pSelf->m_apPlayers[Victim]->KillCharacter(WEAPON_GAME);
-		char buf[512];
-		str_format(buf, sizeof(buf), "%s was killed by %s", pSelf->Server()->ClientName(Victim), pSelf->Server()->ClientName(ClientId));
-		pSelf->SendChat(-1, CGameContext::CHAT_ALL, buf);
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "%s was killed by %s", pSelf->Server()->ClientName(Victim), pSelf->Server()->ClientName(ClientId));
+		pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
 }
 
@@ -179,26 +179,26 @@ void CGameContext::ConHammer(IConsole::IResult *pResult, void *pUserData, int Cl
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
-	char buf[128];
-	int type = pResult->GetInteger(0);
+	char aBuf[128];
+	int Type = pResult->GetInteger(0);
 
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	
-	if(!chr)
+	if(!pChr)
 		return;
 	
 	CServer* pServ = (CServer*)pSelf->Server();
-	if(type>3 || type<0)
+	if(Type>3 || Type<0)
 	{
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Select hammer between 0 and 3");
 	}
 	else
 	{
-		chr->m_HammerType = type;
+		pChr->m_HammerType = Type;
 		if(!g_Config.m_SvCheatTime)
-			chr->m_DDRaceState = DDRACE_CHEAT;
-		str_format(buf, sizeof(buf), "Hammer of '%s' ClientId=%d setted to %d", pServ->ClientName(ClientId), Victim, type);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+			pChr->m_DDRaceState = DDRACE_CHEAT;
+		str_format(aBuf, sizeof(aBuf), "Hammer of '%s' ClientId=%d setted to %d", pServ->ClientName(ClientId), Victim, Type);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
@@ -206,16 +206,15 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData, int Cli
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(chr && !chr->m_Super)
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(pChr && !pChr->m_Super)
 	{
-		chr->m_Super = true;
-		chr->UnFreeze();
-		chr->m_TeamBeforeSuper = chr->Team();
-		dbg_msg("Teamb4super","%d",chr->m_TeamBeforeSuper = chr->Team());
-		chr->Teams()->SetCharacterTeam(Victim, TEAM_SUPER);
+		pChr->m_Super = true;
+		pChr->UnFreeze();
+		pChr->m_TeamBeforeSuper = pChr->Team();
+		pChr->Teams()->SetCharacterTeam(Victim, TEAM_SUPER);
 		if(!g_Config.m_SvCheatTime)
-			chr->m_DDRaceState = DDRACE_CHEAT;
+			pChr->m_DDRaceState = DDRACE_CHEAT;
 	}
 }
 
@@ -223,11 +222,11 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData, int C
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(chr && chr->m_Super)
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(pChr && pChr->m_Super)
 	{
-		chr->m_Super = false;
-		chr->Teams()->SetForceCharacterTeam(Victim, chr->m_TeamBeforeSuper);
+		pChr->m_Super = false;
+		pChr->Teams()->SetForceCharacterTeam(Victim, pChr->m_TeamBeforeSuper);
 	}
 }
 
@@ -350,12 +349,12 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData, int 
 	if(pSelf->m_apPlayers[TeleTo])
 	{
 		{
-			CCharacter* chr = pSelf->GetPlayerChar(Victim);
-			if(chr)
+			CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+			if(pChr)
 			{
-				chr->m_Core.m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+				pChr->m_Core.m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
 				if(!g_Config.m_SvCheatTime)
-					chr->m_DDRaceState = DDRACE_CHEAT;
+					pChr->m_DDRaceState = DDRACE_CHEAT;
 			}
 		}
 	}
@@ -367,15 +366,15 @@ void CGameContext::ConTimerStop(IConsole::IResult *pResult, void *pUserData, int
 	CServer* pServ = (CServer*)pSelf->Server();
 	int Victim = pResult->GetVictim();
 
-	char buf[128];
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	char aBuf[128];
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
 	if(pSelf->m_apPlayers[Victim])
 	{
-		chr->m_DDRaceState=DDRACE_CHEAT;
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d Hasn't time now (Timer Stopped)", pServ->ClientName(ClientId), Victim);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+		pChr->m_DDRaceState=DDRACE_CHEAT;
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d Hasn't time now (Timer Stopped)", pServ->ClientName(ClientId), Victim);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
@@ -385,15 +384,15 @@ void CGameContext::ConTimerStart(IConsole::IResult *pResult, void *pUserData, in
 	CServer* pServ = (CServer*)pSelf->Server();
 	int Victim = pResult->GetVictim();
 
-	char buf[128];
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	char aBuf[128];
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
 	if(pSelf->m_apPlayers[Victim])
 	{
-		chr->m_DDRaceState = DDRACE_STARTED;
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d Has time now (Timer Started)", pServ->ClientName(ClientId), Victim);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+		pChr->m_DDRaceState = DDRACE_STARTED;
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d Has time now (Timer Started)", pServ->ClientName(ClientId), Victim);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
@@ -404,17 +403,17 @@ void CGameContext::ConTimerZero(IConsole::IResult *pResult, void *pUserData, int
 	CServer* pServ = (CServer*)pSelf->Server();
 	int Victim = pResult->GetVictim();
 
-	char buf[128];
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	char aBuf[128];
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
 	if(pSelf->m_apPlayers[Victim])
 	{
-		chr->m_StartTime = pSelf->Server()->Tick();
-		chr->m_RefreshTime = pSelf->Server()->Tick();
-		chr->m_DDRaceState=DDRACE_CHEAT;
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d time has been reset & stopped.", pServ->ClientName(ClientId), Victim);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+		pChr->m_StartTime = pSelf->Server()->Tick();
+		pChr->m_RefreshTime = pSelf->Server()->Tick();
+		pChr->m_DDRaceState=DDRACE_CHEAT;
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d time has been reset & stopped.", pServ->ClientName(ClientId), Victim);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
@@ -424,17 +423,17 @@ void CGameContext::ConTimerReStart(IConsole::IResult *pResult, void *pUserData, 
 	int Victim = pResult->GetVictim();
 	CServer* pServ = (CServer*)pSelf->Server();
 
-	char buf[128];
-	CCharacter* chr = pSelf->GetPlayerChar(Victim);
-	if(!chr)
+	char aBuf[128];
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
 		return;
 	if(pSelf->m_apPlayers[Victim])
 	{
-		chr->m_StartTime = pSelf->Server()->Tick();
-		chr->m_RefreshTime = pSelf->Server()->Tick();
-		chr->m_DDRaceState=DDRACE_STARTED;
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d time has been reset & stopped.", pServ->ClientName(ClientId), Victim);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+		pChr->m_StartTime = pSelf->Server()->Tick();
+		pChr->m_RefreshTime = pSelf->Server()->Tick();
+		pChr->m_DDRaceState=DDRACE_STARTED;
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d time has been reset & stopped.", pServ->ClientName(ClientId), Victim);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
@@ -444,7 +443,7 @@ void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int Cl
 	int Seconds = -1;
 	int Victim = pResult->GetVictim();
 
-	char buf[128];
+	char aBuf[128];
 
 	if(pResult->NumArguments())
 		Seconds = clamp(pResult->GetInteger(0), -2, 9999);
@@ -459,15 +458,15 @@ void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int Cl
 		pChr->m_pPlayer->m_RconFreeze = Seconds != -2;
 		CServer* pServ = (CServer*)pSelf->Server();
 		if(Seconds >= 0)
-			str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Frozen for %d.", pServ->ClientName(ClientId), Victim, Seconds);
+			str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d has been Frozen for %d.", pServ->ClientName(ClientId), Victim, Seconds);
 		else if(Seconds == -2)
 		{
 			pChr->m_DeepFreeze = true;
-			str_format(buf, sizeof(buf), "'%s' ClientId=%d has been Deep Frozen.", pServ->ClientName(ClientId), Victim);
+			str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d has been Deep Frozen.", pServ->ClientName(ClientId), Victim);
 		}
 		else
-			str_format(buf, sizeof(buf), "'%s' ClientId=%d is Frozen until you unfreeze him.", pServ->ClientName(ClientId), Victim);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+			str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d is Frozen until you unfreeze him.", pServ->ClientName(ClientId), Victim);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 
 }
@@ -477,7 +476,7 @@ void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int 
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 	static bool Warning = false;
-	char buf[128];
+	char aBuf[128];
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if(!pChr)
 		return;
@@ -495,14 +494,14 @@ void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int 
 	pChr->m_FreezeTime = 2;
 	pChr->m_pPlayer->m_RconFreeze = false;
 	CServer* pServ = (CServer*)pSelf->Server();
-	str_format(buf, sizeof(buf), "'%s' ClientId=%d has been defrosted.", pServ->ClientName(ClientId), Victim);
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+	str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d has been defrosted.", pServ->ClientName(ClientId), Victim);
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 }
 
 void CGameContext::ConInvis(IConsole::IResult *pResult, void *pUserData, int ClientId)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	char buf[128];
+	char aBuf[128];
 	int Victim = pResult->GetVictim();
 
 	if(!pSelf->m_apPlayers[ClientId])
@@ -512,8 +511,8 @@ void CGameContext::ConInvis(IConsole::IResult *pResult, void *pUserData, int Cli
 	{
 		pSelf->m_apPlayers[Victim]->m_Invisible = true;
 		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d is now invisible.", pServ->ClientName(ClientId), Victim);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d is now invisible.", pServ->ClientName(ClientId), Victim);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
@@ -524,13 +523,13 @@ void CGameContext::ConVis(IConsole::IResult *pResult, void *pUserData, int Clien
 
 	if(!pSelf->m_apPlayers[ClientId])
 		return;
-	char buf[128];
+	char aBuf[128];
 	if(pSelf->m_apPlayers[Victim])
 	{
 		pSelf->m_apPlayers[Victim]->m_Invisible = false;
 		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(buf, sizeof(buf), "'%s' ClientId=%d is visible.", pServ->ClientName(ClientId), Victim);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", buf);
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d is visible.", pServ->ClientName(ClientId), Victim);
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
@@ -752,8 +751,8 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 
 	if(g_Config.m_SvPauseable)
 	{
-		CCharacter* chr = pPlayer->GetCharacter();
-		if(!pPlayer->GetTeam() && chr && (!chr->m_aWeapons[WEAPON_NINJA].m_Got || chr->m_FreezeTime) && chr->IsGrounded() && chr->m_Pos==chr->m_PrevPos && !chr->Team() && !pPlayer->m_InfoSaved)
+		CCharacter* pChr = pPlayer->GetCharacter();
+		if(!pPlayer->GetTeam() && pChr && (!pChr->m_aWeapons[WEAPON_NINJA].m_Got || pChr->m_FreezeTime) && pChr->IsGrounded() && pChr->m_Pos==pChr->m_PrevPos && !pChr->Team() && !pPlayer->m_InfoSaved)
 		{
 			if(pPlayer->m_Last_Pause + pSelf->Server()->TickSpeed() * g_Config.m_SvPauseFrequency <= pSelf->Server()->Tick()) {
 				pPlayer->SaveCharacter();
@@ -771,8 +770,8 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 			pPlayer->SetTeam(TEAM_RED);
 			//pPlayer->LoadCharacter();//TODO:Check if this system Works
 		}
-		else if(chr)
-			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", (chr->Team())?"You can't pause while you are in a team":(chr->m_aWeapons[WEAPON_NINJA].m_Got)?"You can't use /pause while you are a ninja":(!chr->IsGrounded())?"You can't use /pause while you are a in air":"You can't use /pause while you are moving");
+		else if(pChr)
+			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", (pChr->Team())?"You can't pause while you are in a team":(pChr->m_aWeapons[WEAPON_NINJA].m_Got)?"You can't use /pause while you are a ninja":(!pChr->IsGrounded())?"You can't use /pause while you are a in air":"You can't use /pause while you are moving");
 		else
 			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "No pause data saved.");
 	}
@@ -840,18 +839,17 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int 
 		{
 			if(((CGameControllerDDRace*)pSelf->m_pController)->m_Teams.SetCharacterTeam(pPlayer->GetCID(), pResult->GetInteger(0)))
 			{
-			if(pPlayer->m_Last_Team + pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay <= pSelf->Server()->Tick())
-			{
-				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "%s joined team %d", pSelf->Server()->ClientName(pPlayer->GetCID()), pResult->GetInteger(0));
-				pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-				pPlayer->m_Last_Team = pSelf->Server()->Tick();
-			}
-			else
-			{
-
-				pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You cant join teams that fast!");
-			}
+				if(pPlayer->m_Last_Team + pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay <= pSelf->Server()->Tick())
+				{
+					char aBuf[512];
+					str_format(aBuf, sizeof(aBuf), "%s joined team %d", pSelf->Server()->ClientName(pPlayer->GetCID()), pResult->GetInteger(0));
+					pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+					pPlayer->m_Last_Team = pSelf->Server()->Tick();
+				}
+				else
+				{
+					pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You can\'t join teams that fast!");
+				}
 			}
 			else
 			{
