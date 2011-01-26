@@ -1,5 +1,7 @@
 /* copyright (c) 2008 rajh and gregwar. Score stuff */
 
+#include <base/tl/sorted_array.h>
+
 #include <engine/shared/config.h>
 #include <sstream>
 #include <fstream>
