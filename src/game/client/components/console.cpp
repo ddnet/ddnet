@@ -5,6 +5,7 @@
 #include <game/generated/client_data.h>
 
 #include <base/system.h>
+#include <base/tl/sorted_array.h>
 
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/config.h>

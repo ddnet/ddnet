@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/tl/string.h>
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
@@ -104,7 +106,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 			{
 				if(Count)
 					str_append(aBuffer, ", ", sizeof(aBuffer));
-				if(m_GameType.find("Race") != -1)
+				if(m_GameType.find("Race") != std::string::npos)
 					if (g_Config.m_ClShowIds)
 					{
 						char aId[4];
@@ -149,7 +151,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float tw = TextRender()->TextWidth(0, 48, pTitle, -1);
 	TextRender()->Text(0, x+10, y, 48, pTitle, -1);
 
-	if(m_GameType.find("Race") == -1)
+	if(m_GameType.find("Race") == std::string::npos)
 		if(m_pClient->m_Snap.m_pGameobj)
 		{
 			char aBuf[128];
@@ -163,7 +165,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	// render headlines
 	TextRender()->Text(0, x+10, y, 24.0f, Localize("Score"), -1);
-	if(m_GameType.find("Race") != -1)
+	if(m_GameType.find("Race") != std::string::npos)
 	{
 		TextRender()->Text(0, x+125+Offset, y, 24.0f, Localize("Name"), -1);
 		TextRender()->Text(0, x+w-75, y, 24.0f, Localize("Ping"), -1);
@@ -210,7 +212,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		float FontSizeResize = FontSize;
 		float Width;
-		if(m_GameType.find("Race") != -1)
+		if(m_GameType.find("Race") != std::string::npos)
 		{
 			const float ScoreWidth = 150.0f;
 			const float PingWidth = 60.0f;
@@ -282,7 +284,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			
 			float size = 64.0f;
 			IGraphics::CQuadItem QuadItem;
-			if(m_GameType.find("Race") != -1)
+			if(m_GameType.find("Race") != std::string::npos)
 				QuadItem = IGraphics::CQuadItem(x+55+DataOffset, y-15, size/2, size);
 			else
 				QuadItem = IGraphics::CQuadItem(x+55, y-15, size/2, size);
@@ -293,7 +295,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientId].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 
-		if(m_GameType.find("Race") != -1)
+		if(m_GameType.find("Race") != std::string::npos)
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+50+DataOffset, y+28+TeeOffset));
 		else
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+90, y+28+TeeOffset));
@@ -342,7 +344,7 @@ void CScoreboard::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	float w;
-	if(m_GameType.find("Race") != -1)
+	if(m_GameType.find("Race") != std::string::npos)
 		w = 750.0f;
 	else
 		w = 650.0f;

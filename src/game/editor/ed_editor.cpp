@@ -3,6 +3,8 @@
 
 #include <base/system.h>
 
+#include <base/tl/array.h>
+
 #include <engine/shared/datafile.h>
 #include <engine/shared/config.h>
 #include <engine/shared/engine.h>

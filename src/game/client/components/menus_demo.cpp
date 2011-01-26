@@ -3,6 +3,8 @@
 
 #include <base/math.h>
 
+#include <base/tl/string.h>
+
 #include <engine/demo.h>
 #include <engine/keys.h>
 #include <engine/graphics.h>
