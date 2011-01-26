@@ -4,7 +4,6 @@
 #define GAME_CLIENT_COMPONENTS_SCOREBOARD_H
 #include <game/client/component.h>
 #include <engine/serverbrowser.h>
-#include <string>
 
 class CScoreboard : public CComponent
 {
@@ -17,7 +16,7 @@ class CScoreboard : public CComponent
 	
 	bool m_Active;
 	CServerInfo m_pServerInfo;
-	std::string m_GameType;
+	bool m_GametypeRace;
 	
 public:
 	CScoreboard();
