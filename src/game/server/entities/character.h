@@ -140,6 +140,7 @@ private:
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
+	void DDRacePostCoreTick();
 	void HandleBroadcast();
 public:
 	CGameTeams* Teams();

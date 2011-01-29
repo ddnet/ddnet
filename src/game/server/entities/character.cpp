@@ -614,6 +614,7 @@ void CCharacter::Tick()
 	// handle Weapons
 	HandleWeapons();
 
+	DDRacePostCoreTick();
 	m_PlayerState = m_Input.m_PlayerState;
 
 	// Previnput
@@ -943,7 +944,7 @@ void CCharacter::OnFinish()
 {
 	//TODO: this ugly
 	float time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
-	if(time < 0.000001) return;
+	if(time < 0.000001f) return;
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
 	char aBuf[128];
 		m_CpActive=-2;
@@ -1126,6 +1127,25 @@ void CCharacter::HandleBroadcast()
 
 void CCharacter::HandleSkippableTiles(int Index)
 {
+
+	// handle death-tiles and leaving gamelayer
+	if((GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
+			GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
+			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
+			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
+			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
+			GameServer()->Collision()->GetFCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
+			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
+			GameLayerClipped(m_Pos)) &&
+			!m_Super)
+		{
+			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+			return;
+		}
+
+	if(Index < 0)
+		return;
+
 	// handle speedup tiles
 	if(GameServer()->Collision()->IsSpeedup(Index))
 	{
@@ -1199,14 +1219,16 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 void CCharacter::HandleTiles(int Index)
 {
+	if(Index < 0)
+		return;
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	int MapIndex = Index;
 	//int PureMapIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-	float Offset = 4;
-	int MapIndexL = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + (m_ProximityRadius/2)+Offset,m_Pos.y));
-	int MapIndexR = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x - (m_ProximityRadius/2)-Offset,m_Pos.y));
-	int MapIndexT = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x,m_Pos.y + (m_ProximityRadius/2)+Offset));
-	int MapIndexB = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x,m_Pos.y - (m_ProximityRadius/2)-Offset));
+	float Offset = 4.0f;
+	int MapIndexL = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + (m_ProximityRadius / 2) + Offset, m_Pos.y));
+	int MapIndexR = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x - (m_ProximityRadius / 2) - Offset, m_Pos.y));
+	int MapIndexT = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x, m_Pos.y + (m_ProximityRadius / 2) + Offset));
+	int MapIndexB = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x, m_Pos.y - (m_ProximityRadius / 2) - Offset));
 	//dbg_msg("","N%d L%d R%d B%d T%d",MapIndex,MapIndexL,MapIndexR,MapIndexB,MapIndexT);
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFlags = GameServer()->Collision()->GetTileFlags(MapIndex);
@@ -1228,22 +1250,22 @@ void CCharacter::HandleTiles(int Index)
 	m_TileFFlagsB = GameServer()->Collision()->GetFTileFlags(MapIndexB);
 	m_TileFIndexT = GameServer()->Collision()->GetFTileIndex(MapIndexT);
 	m_TileFFlagsT = GameServer()->Collision()->GetFTileFlags(MapIndexT);//
-	m_TileSIndex = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndex)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileIndex(MapIndex):0:0;
-	m_TileSFlags = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndex)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileFlags(MapIndex):0:0;
-	m_TileSIndexL = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexL)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileIndex(MapIndexL):0:0;
-	m_TileSFlagsL = (GameServer()->Collision()->m_pSwitchers &&GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexL)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileFlags(MapIndexL):0:0;
-	m_TileSIndexR = (GameServer()->Collision()->m_pSwitchers &&GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexR)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileIndex(MapIndexR):0:0;
-	m_TileSFlagsR = (GameServer()->Collision()->m_pSwitchers &&GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexR)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileFlags(MapIndexR):0:0;
-	m_TileSIndexB = (GameServer()->Collision()->m_pSwitchers &&GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexB)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileIndex(MapIndexB):0:0;
-	m_TileSFlagsB = (GameServer()->Collision()->m_pSwitchers &&GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexB)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileFlags(MapIndexB):0:0;
-	m_TileSIndexT = (GameServer()->Collision()->m_pSwitchers &&GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexT)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileIndex(MapIndexT):0:0;
-	m_TileSFlagsT = (GameServer()->Collision()->m_pSwitchers &&GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexT)].m_Status[Team()])?(Team() != TEAM_SUPER)?GameServer()->Collision()->GetDTileFlags(MapIndexT):0:0;
+	m_TileSIndex = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndex)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileIndex(MapIndex) : 0 : 0;
+	m_TileSFlags = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndex)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileFlags(MapIndex) : 0 : 0;
+	m_TileSIndexL = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexL)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileIndex(MapIndexL) : 0 : 0;
+	m_TileSFlagsL = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexL)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileFlags(MapIndexL) : 0 : 0;
+	m_TileSIndexR = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexR)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileIndex(MapIndexR) : 0 : 0;
+	m_TileSFlagsR = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexR)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileFlags(MapIndexR) : 0 : 0;
+	m_TileSIndexB = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexB)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileIndex(MapIndexB) : 0 : 0;
+	m_TileSFlagsB = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexB)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileFlags(MapIndexB) : 0 : 0;
+	m_TileSIndexT = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexT)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileIndex(MapIndexT) : 0 : 0;
+	m_TileSFlagsT = (GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetDTileNumber(MapIndexT)].m_Status[Team()])?(Team() != TEAM_SUPER)? GameServer()->Collision()->GetDTileFlags(MapIndexT) : 0 : 0;
 	//dbg_msg("Tiles","%d, %d, %d, %d, %d", m_TileSIndex, m_TileSIndexL, m_TileSIndexR, m_TileSIndexB, m_TileSIndexT);
 	//Sensitivity
-	int S1 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f));
-	int S2 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f));
-	int S3 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f));
-	int S4 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f));
+	int S1 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + m_ProximityRadius / 3.f, m_Pos.y - m_ProximityRadius / 3.f));
+	int S2 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + m_ProximityRadius / 3.f, m_Pos.y + m_ProximityRadius / 3.f));
+	int S3 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x - m_ProximityRadius / 3.f, m_Pos.y - m_ProximityRadius / 3.f));
+	int S4 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x - m_ProximityRadius / 3.f, m_Pos.y + m_ProximityRadius / 3.f));
 	int Tile1 = GameServer()->Collision()->GetTileIndex(S1);
 	int Tile2 = GameServer()->Collision()->GetTileIndex(S2);
 	int Tile3 = GameServer()->Collision()->GetTileIndex(S3);
@@ -1260,7 +1282,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		m_CpActive = cp;
 		m_CpCurrent[cp] = m_Time;
-		m_CpTick = Server()->Tick() + Server()->TickSpeed()*2;
+		m_CpTick = Server()->Tick() + Server()->TickSpeed() * 2;
 		if(m_pPlayer->m_IsUsingDDRaceClient) {
 			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
 			CNetMsg_Sv_DDRaceTime Msg;
@@ -1353,7 +1375,7 @@ void CCharacter::HandleTiles(int Index)
 
 		m_DeepFreeze = false;
 	}
-	else if(((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
+	if(((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Endless hook has been activated");
 		m_EndlessHook = true;
@@ -1365,6 +1387,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
 	{
+		//dbg_msg("Left","%f %f",GameServer()->Collision()->GetPos(MapIndexL).x, m_Core.m_Pos.x);
 		if((int)GameServer()->Collision()->GetPos(MapIndexL).x)
 			if((int)GameServer()->Collision()->GetPos(MapIndexL).x < (int)m_Core.m_Pos.x)
 				m_Core.m_Pos = m_PrevPos;
@@ -1372,6 +1395,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)) && m_Core.m_Vel.x < 0)
 	{
+		//dbg_msg("Right","%f %f",GameServer()->Collision()->GetPos(MapIndex).x, m_Core.m_Pos.x);
 		if((int)GameServer()->Collision()->GetPos(MapIndexR).x)
 			if((int)GameServer()->Collision()->GetPos(MapIndexR).x > (int)m_Core.m_Pos.x)
 				m_Core.m_Pos = m_PrevPos;
@@ -1379,6 +1403,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)) && m_Core.m_Vel.y < 0)
 	{
+		//dbg_msg("Bottom","%f %f",GameServer()->Collision()->GetPos(MapIndex).y, m_Core.m_Pos.y);
 		if((int)GameServer()->Collision()->GetPos(MapIndexB).y)
 			if((int)GameServer()->Collision()->GetPos(MapIndexB).y > (int)m_Core.m_Pos.y)
 				m_Core.m_Pos = m_PrevPos;
@@ -1386,7 +1411,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)) && m_Core.m_Vel.y > 0)
 	{
-		//dbg_msg("","%f %f",GameServer()->Collision()->GetPos(MapIndex).y,m_Core.m_Pos.y);
+		//dbg_msg("Top","%f %f",GameServer()->Collision()->GetPos(MapIndex).y, m_Core.m_Pos.y);
 		if((int)GameServer()->Collision()->GetPos(MapIndexT).y)
 			if((int)GameServer()->Collision()->GetPos(MapIndexT).y < (int)m_Core.m_Pos.y)
 				m_Core.m_Pos = m_PrevPos;
@@ -1456,20 +1481,6 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_Vel = vec2(0,0);
 		return;
 	}
-	// handle death-tiles and leaving gamelayer
-	if((GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetFCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH || 
-			GameLayerClipped(m_Pos)) &&
-			!m_Super)
-		{
-			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
-			return;
-		}
 }
 
 void CCharacter::DDRaceTick()
@@ -1497,35 +1508,47 @@ void CCharacter::DDRaceTick()
 			m_pPlayer->m_RconFreeze = false;
 		}
 	}
-	
-	if (m_DefEmoteReset >= 0 && m_DefEmoteReset <= Server()->Tick())
-	{
-		m_DefEmoteReset = -1;
-		m_EmoteType = m_DefEmote = EMOTE_NORMAL;
-		m_EmoteStop = -1;
-	}
-	
-	if (g_Config.m_SvEndlessDrag || m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
-		m_Core.m_HookTick = 0;
-		
-	if (m_DeepFreeze && !m_Super)
-		Freeze();
-		
-	if (m_Super && m_Core.m_Jumped > 1)
-		m_Core.m_Jumped = 1;
-	
-	int CurrentIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-	HandleSkippableTiles(CurrentIndex);
-
-	// handle Anti-Skip tiles
-	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if(!Indices.empty())
-		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-			HandleTiles(*i);
-	else
-		HandleTiles(CurrentIndex);
 		
 	m_Core.m_Id = GetPlayer()->GetCID();
+}
+
+
+void CCharacter::DDRacePostCoreTick()
+{
+	if (m_DefEmoteReset >= 0 && m_DefEmoteReset <= Server()->Tick())
+		{
+			m_DefEmoteReset = -1;
+			m_EmoteType = m_DefEmote = EMOTE_NORMAL;
+			m_EmoteStop = -1;
+		}
+
+		if (g_Config.m_SvEndlessDrag || m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
+			m_Core.m_HookTick = 0;
+
+		if (m_DeepFreeze && !m_Super)
+			Freeze();
+
+		if (m_Super && m_Core.m_Jumped > 1)
+			m_Core.m_Jumped = 1;
+
+		int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
+		HandleSkippableTiles(CurrentIndex);
+
+		// handle Anti-Skip tiles
+		std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
+		if(!Indices.empty())
+			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+			{
+				HandleTiles(*i);
+				//dbg_msg("Running","%d", *i);
+			}
+		else
+		{
+			HandleTiles(CurrentIndex);
+			//dbg_msg("Running","%d", CurrentIndex);
+		}
+
+		HandleBroadcast();
 }
 
 bool CCharacter::Freeze(int Seconds)
