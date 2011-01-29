@@ -240,18 +240,18 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 	// Find other players
 	vec2 LineDir = normalize(Pos1-Pos0);
 
-	CCharacter *p = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
  	{
-		if(p == pNotThis)
+		if(pChr == pNotThis)
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
-		float Len = distance(p->m_Pos, IntersectPos);
-		if(Len < p->m_ProximityRadius+Radius)
+		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, pChr->m_Pos);
+		float Len = distance(pChr->m_Pos, IntersectPos);
+		if(Len < pChr->m_ProximityRadius+Radius)
 		{
-			p->m_Intersection = IntersectPos;
-			listOfChars.push_back(p);
+			pChr->m_Intersection = IntersectPos;
+			listOfChars.push_back(pChr);
 		}
 	}
 	return listOfChars;
@@ -259,13 +259,16 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 
 void CGameWorld::ReleaseHooked(int ClientId)
 {
-	CCharacter *p = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-		for(; p; p = (CCharacter *)p->TypeNext())
-			if(p->m_Core.m_HookedPlayer == ClientId && !p->m_Super)
+	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+		for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
+		{
+			CCharacterCore* Core = pChr->Core();
+			if(Core->m_HookedPlayer == ClientId && !pChr->m_Super)
 			{
-				p->m_Core.m_HookedPlayer = -1;
-				p->m_Core.m_HookState = HOOK_RETRACTED;
-				p->m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				p->m_Core.m_HookState = HOOK_RETRACTED;
+				Core->m_HookedPlayer = -1;
+				Core->m_HookState = HOOK_RETRACTED;
+				Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+				Core->m_HookState = HOOK_RETRACTED;
 			}
+		}
 }

@@ -4,6 +4,7 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
+#include <game/server/gamemodes/DDRace.h>
 #include "plasma.h"
 
 const float ACCEL=1.1f;
@@ -68,7 +69,7 @@ void CPlasma::Tick()
 	if(Res)
 	{
 		if(m_Explosive)
-			GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true, m_ResponsibleTeam, -1);//TODO: Fix mask
+			GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true, m_ResponsibleTeam, ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_ResponsibleTeam));
 		Reset();
 	}
 	
@@ -81,7 +82,7 @@ void CPlasma::Snap(int SnappingClient)
 	CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
 	if(!SnapChar) return;
-	if (SnapChar->m_Alive && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick)) return;
+	if (SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick)) return;
 	if((SnapChar->Team() != m_ResponsibleTeam) && (!SnapChar->GetPlayer()->m_IsUsingDDRaceClient || (GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient && !GameServer()->m_apPlayers[SnappingClient]->m_ShowOthers))) return;
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_Id, sizeof(CNetObj_Laser)));
 	pObj->m_X = (int)m_Pos.x;

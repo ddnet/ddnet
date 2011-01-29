@@ -109,7 +109,7 @@ void CLight::Snap(int SnappingClient)
 	CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%6;
 	if(!Char) return;
-	if (!Char->m_Alive) return;
+	if (!Char->IsAlive()) return;
 	if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (Tick)) return;
 
 	

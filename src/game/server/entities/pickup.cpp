@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
+#include <game/server/teams.h>
 #include "pickup.h"
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number)
@@ -72,37 +73,37 @@ void CPickup::Tick()
 			switch (m_Type)
 			{
 				case POWERUP_HEALTH:
-					if(pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+					if(pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
 					break;
 				
 				case POWERUP_ARMOR:
 					if(pChr->Team() == TEAM_SUPER) continue;
-					for(int i=WEAPON_SHOTGUN;i<NUM_WEAPONS;i++)
+					for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
 					{
-						if (pChr->m_aWeapons[i].m_Got)
+						if(pChr->GetWeaponGot(i))
 						{
 							if(!(pChr->m_FreezeTime && i == WEAPON_NINJA))
 							{
-								pChr->m_aWeapons[i].m_Got = false;
-								pChr->m_aWeapons[i].m_Ammo = 0;
+								pChr->SetWeaponGot(i, false);
+								pChr->SetWeaponAmmo(i, 0);
 								sound = true;
 							}
 						}
 					}
-					pChr->m_Ninja.m_ActivationDir=vec2(0,0);
-					pChr->m_Ninja.m_ActivationTick=-500;
-					pChr->m_Ninja.m_CurrentMoveTime=0;
+					pChr->SetNinjaActivationDir(vec2(0,0));
+					pChr->SetNinjaActivationTick(-500);
+					pChr->SetNinjaCurrentMoveTime(0);
 					if (sound)
 					{
-						pChr->m_LastWeapon = WEAPON_GUN;  
+						pChr->SetLastWeapon(WEAPON_GUN);
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
 					}
-					if(!pChr->m_FreezeTime) pChr->m_ActiveWeapon = WEAPON_HAMMER;
+					if(!pChr->m_FreezeTime) pChr->SetActiveWeapon(WEAPON_HAMMER);
 					break;
 
 				case POWERUP_WEAPON:
 				
-					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->m_aWeapons[m_Subtype].m_Got || (pChr->m_aWeapons[m_Subtype].m_Ammo != -1 && !pChr->m_FreezeTime)))
+					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
 					{
 						if(pChr->GiveWeapon(m_Subtype, -1))
 						{
@@ -161,7 +162,7 @@ void CPickup::Snap(int SnappingClient)
 	*/
 	CCharacter * SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
-	if (SnapChar && SnapChar->m_Alive && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick)) return;
+	if (SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick)) return;
 	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_Id, sizeof(CNetObj_Pickup)));
 	if(!pP)
 		return;

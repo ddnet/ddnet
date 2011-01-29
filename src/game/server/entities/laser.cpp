@@ -3,6 +3,7 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <engine/shared/config.h>
+#include <game/server/teams.h>
 #include "laser.h"
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type)
@@ -34,9 +35,9 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		vec2 Temp;
 		if(!g_Config.m_SvOldLaser)
-			Temp = Hit->m_Core.m_Vel + normalize(m_PrevPos - Hit->m_Core.m_Pos) * 10;
+			Temp = Hit->Core()->m_Vel + normalize(m_PrevPos - Hit->Core()->m_Pos) * 10;
 		else
-			Temp = Hit->m_Core.m_Vel + normalize(OwnerChar->m_Core.m_Pos-Hit->m_Core.m_Pos)*10;
+			Temp = Hit->Core()->m_Vel + normalize(OwnerChar->Core()->m_Pos - Hit->Core()->m_Pos) * 10;
 		if(Temp.x > 0 && ((Hit->m_TileIndex == TILE_STOP && Hit->m_TileFlags == ROTATION_270) || (Hit->m_TileIndexL == TILE_STOP && Hit->m_TileFlagsL == ROTATION_270) || (Hit->m_TileIndexL == TILE_STOPS && (Hit->m_TileFlagsL == ROTATION_90 || Hit->m_TileFlagsL ==ROTATION_270)) || (Hit->m_TileIndexL == TILE_STOPA) || (Hit->m_TileFIndex == TILE_STOP && Hit->m_TileFFlags == ROTATION_270) || (Hit->m_TileFIndexL == TILE_STOP && Hit->m_TileFFlagsL == ROTATION_270) || (Hit->m_TileFIndexL == TILE_STOPS && (Hit->m_TileFFlagsL == ROTATION_90 || Hit->m_TileFFlagsL == ROTATION_270)) || (Hit->m_TileFIndexL == TILE_STOPA) || (Hit->m_TileSIndex == TILE_STOP && Hit->m_TileSFlags == ROTATION_270) || (Hit->m_TileSIndexL == TILE_STOP && Hit->m_TileSFlagsL == ROTATION_270) || (Hit->m_TileSIndexL == TILE_STOPS && (Hit->m_TileSFlagsL == ROTATION_90 || Hit->m_TileSFlagsL == ROTATION_270)) || (Hit->m_TileSIndexL == TILE_STOPA)))
 			Temp.x = 0;
 		if(Temp.x < 0 && ((Hit->m_TileIndex == TILE_STOP && Hit->m_TileFlags == ROTATION_90) || (Hit->m_TileIndexR == TILE_STOP && Hit->m_TileFlagsR == ROTATION_90) || (Hit->m_TileIndexR == TILE_STOPS && (Hit->m_TileFlagsR == ROTATION_90 || Hit->m_TileFlagsR == ROTATION_270)) || (Hit->m_TileIndexR == TILE_STOPA) || (Hit->m_TileFIndex == TILE_STOP && Hit->m_TileFFlags == ROTATION_90) || (Hit->m_TileFIndexR == TILE_STOP && Hit->m_TileFFlagsR == ROTATION_90) || (Hit->m_TileFIndexR == TILE_STOPS && (Hit->m_TileFFlagsR == ROTATION_90 || Hit->m_TileFFlagsR == ROTATION_270)) || (Hit->m_TileFIndexR == TILE_STOPA) || (Hit->m_TileSIndex == TILE_STOP && Hit->m_TileSFlags == ROTATION_90) || (Hit->m_TileSIndexR == TILE_STOP && Hit->m_TileSFlagsR == ROTATION_90) || (Hit->m_TileSIndexR == TILE_STOPS && (Hit->m_TileSFlagsR == ROTATION_90 || Hit->m_TileSFlagsR == ROTATION_270)) || (Hit->m_TileSIndexR == TILE_STOPA)))
@@ -45,7 +46,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			Temp.y = 0;
 		if(Temp.y > 0 && ((Hit->m_TileIndex == TILE_STOP && Hit->m_TileFlags == ROTATION_0) || (Hit->m_TileIndexT == TILE_STOP && Hit->m_TileFlagsT == ROTATION_0) || (Hit->m_TileIndexT == TILE_STOPS && (Hit->m_TileFlagsT == ROTATION_0 || Hit->m_TileFlagsT == ROTATION_180)) || (Hit->m_TileIndexT == TILE_STOPA) || (Hit->m_TileFIndex == TILE_STOP && Hit->m_TileFFlags == ROTATION_0) || (Hit->m_TileFIndexT == TILE_STOP && Hit->m_TileFFlagsT == ROTATION_0) || (Hit->m_TileFIndexT == TILE_STOPS && (Hit->m_TileFFlagsT == ROTATION_0 || Hit->m_TileFFlagsT == ROTATION_180)) || (Hit->m_TileFIndexT == TILE_STOPA) || (Hit->m_TileSIndex == TILE_STOP && Hit->m_TileSFlags == ROTATION_0) || (Hit->m_TileSIndexT == TILE_STOP && Hit->m_TileSFlagsT == ROTATION_0) || (Hit->m_TileSIndexT == TILE_STOPS && (Hit->m_TileSFlagsT == ROTATION_0 || Hit->m_TileSFlagsT == ROTATION_180)) || (Hit->m_TileSIndexT == TILE_STOPA)))
 			Temp.y = 0;
-		Hit->m_Core.m_Vel = Temp;
+		Hit->Core()->m_Vel = Temp;
 	}
 	else if (m_Type == 0)
 	{
@@ -56,6 +57,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 
 void CLaser::DoBounce()
 {
+	CCharacter *OwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_EvalTick = Server()->Tick();
 	
 	if(m_Energy < 0)
@@ -100,7 +102,7 @@ void CLaser::DoBounce()
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
 				m_Energy = -1;
 				
-			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE);
+			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, OwnerChar->Teams()->TeamMask(OwnerChar->Team()));
 		}
 	}
 	else
@@ -136,7 +138,7 @@ void CLaser::Snap(int SnappingClient)
 		OwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if(!SnappingChar || !OwnerChar)
 		return;
-	if(SnappingChar->m_Alive && OwnerChar->m_Alive && SnappingChar->Team() != OwnerChar->Team())
+	if(SnappingChar->IsAlive() && OwnerChar->IsAlive() && SnappingChar->Team() != OwnerChar->Team())
 		return;
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_Id, sizeof(CNetObj_Laser)));
 	if(!pObj)

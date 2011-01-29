@@ -6,6 +6,7 @@
 #include <game/server/entity.h>
 #include <game/generated/server_data.h>
 #include <game/generated/protocol.h>
+
 #include <game/gamecore.h>
 
 class CGameTeams;
@@ -17,21 +18,10 @@ enum
 	WEAPON_WORLD = -1, // death tiles etc
 };
 
-enum 
-{
-	DDRACE_NONE = 0,
-	DDRACE_STARTED,
-	DDRACE_CHEAT, // no time and won't start again unless ordered by a mod or death
-	DDRACE_FINISHED
-};
-
 class CCharacter : public CEntity
 {
 	MACRO_ALLOC_POOL_ID()
-	void HandleFly();
-	void HandleTiles(int Index);
-	float m_Time;
-	int m_LastBroadcast;
+	
 public:
 	//character's size
 	static const int ms_PhysSize = 28;
@@ -45,10 +35,7 @@ public:
 	virtual void Snap(int SnappingClient);
 		
 	bool IsGrounded();
-	//bool m_Paused;
-
-	CGameTeams* Teams();
-
+	
 	void SetWeapon(int W);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
@@ -72,20 +59,21 @@ public:
 	bool GiveWeapon(int Weapon, int Ammo);
 	void GiveNinja();
 	
-	void ResetPos();
-	
-	bool Freeze(int Time);
-	bool Freeze();
-	bool UnFreeze();
-	
-	void GiveAllWeapons();  
-	
 	void SetEmote(int Emote, int Tick);
 	
 	bool IsAlive() const { return m_Alive; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
-		// the player core for the physics	
-	CCharacterCore m_Core;
+	
+private:
+	// player controlling this character
+	class CPlayer *m_pPlayer;
+	
+	bool m_Alive;
+
+	// weapon info
+	CEntity *m_apHitObjects[10];
+	int m_NumObjectsHit;
+	
 	struct WeaponStat
 	{
 		int m_AmmoRegenStart;
@@ -94,53 +82,12 @@ public:
 		bool m_Got;
 		
 	} m_aWeapons[NUM_WEAPONS];
+	
 	int m_ActiveWeapon;
 	int m_LastWeapon;
-	// player controlling this character
-	class CPlayer *m_pPlayer;
-
-	int m_DDRaceState;
-	
-	void OnFinish();
-	int Team();
-	bool CanCollide(int Cid);
-	bool SameTeam(int Cid);
-	
-		struct
-	{
-		vec2 m_ActivationDir;
-		int m_ActivationTick;
-		int m_CurrentMoveTime;
-		
-	} m_Ninja;
-	
-	int m_HammerType;
-	bool m_Super;
-	int m_TeamBeforeSuper;
-	bool m_Fly;
-
-	//DDRace
-	int m_FreezeTime;
-	int m_FreezeTick;
-
-	bool m_DeepFreeze;
-	bool m_EndlessHook;
-	
-	int m_Doored;
-
-	vec2 m_OldPos;
-	vec2 m_OlderPos;
-	
-	bool m_Alive;
-
-	// weapon info
-	CEntity *m_apHitObjects[10];
-	int m_NumObjectsHit;
-
 	int m_QueuedWeapon;
 	
 	int m_ReloadTimer;
-	int m_PainSoundTimer;
 	int m_AttackTick;
 	
 	int m_DamageTaken;
@@ -148,9 +95,6 @@ public:
 	int m_EmoteType;
 	int m_EmoteStop;
 	
-	int m_DefEmote; //used to override the default emote through /emote
-	int m_DefEmoteReset; //tick when it gets reset
-
 	// last tick that the player took any action ie some input
 	int m_LastAction;
 
@@ -170,26 +114,63 @@ public:
 	int m_Armor;
 
 	// ninja
-
+	struct
+	{
+		vec2 m_ActivationDir;
+		int m_ActivationTick;
+		int m_CurrentMoveTime;
+		
+	} m_Ninja;
 
 	int m_PlayerState;// if the client is chatting, accessing a menu or so
+
+	// the player core for the physics	
+	CCharacterCore m_Core;
 	
-	bool m_IsWater;
-	bool m_DoSplash;
+	// info for dead reckoning
+	int m_ReckoningTick; // tick that we are performing dead reckoning From
+	CCharacterCore m_SendCore; // core that we should send
+	CCharacterCore m_ReckoningCore; // the dead reckoning core
+	
+	//DDRace
+	void HandleFly();
+	void HandleTiles(int Index);
+	float m_Time;
+	int m_LastBroadcast;
+	void DDRaceInit();
+	void HandleSkippableTiles(int Index);
+	void DDRaceTick();
+	void HandleBroadcast();
+public:
+	CGameTeams* Teams();
+	bool Freeze(int Time);
+	bool Freeze();
+	bool UnFreeze();
+	void GiveAllWeapons();
+	int m_DDRaceState;
+	void OnFinish();
+	int Team();
+	bool CanCollide(int Cid);
+	bool SameTeam(int Cid);
+	int m_HammerType;
+	bool m_Super;
+	int m_TeamBeforeSuper;
+	bool m_Fly;
+	int m_FreezeTime;
+	int m_FreezeTick;
+	bool m_DeepFreeze;
+	bool m_EndlessHook;
+	int m_PainSoundTimer;
+	int m_DefEmote;
+	int m_DefEmoteReset;
 	int m_LastMove;
-	// DDRace var
 	int m_StartTime;
 	int m_RefreshTime;
-	
 	vec2 m_PrevPos;
-
-	// checkpoints
 	int m_CpTick;
 	int m_CpActive;
 	float m_CpCurrent[25];
-
-	int m_BroadCast;
-
+	bool m_BroadCast;
 	int m_TileIndex;
 	int m_TileFlags;
 	int m_TileFIndex;
@@ -220,13 +201,39 @@ public:
 	int m_TileFFlagsB;
 	int m_TileSIndexB;
 	int m_TileSFlagsB;
-
 	vec2 m_Intersection;
 	bool m_EyeEmote;
-	// info for dead reckoning
-	int m_ReckoningTick; // tick that we are performing dead reckoning From
-	CCharacterCore m_SendCore; // core that we should send
-	CCharacterCore m_ReckoningCore; // the dead reckoning core
+	// Setters/Getters because i don't want to modify vanilla vars access modifiers
+	int GetLastWeapon() { return m_LastWeapon; };
+	void SetLastWeapon(int LastWeap) {m_LastWeapon = LastWeap; };
+	int GetActiveWeapon() { return m_ActiveWeapon; };
+	void SetActiveWeapon(int ActiveWeap) {m_ActiveWeapon = ActiveWeap; };
+	int GetPlayerState() { return m_PlayerState; };
+	void SetPlayerState(int PlayerState) {m_PlayerState = PlayerState; };
+	void SetLastAction(int LastAction) {m_LastAction = LastAction; };
+	int GetArmor() { return m_Armor; };
+	void SetArmor(int Armor) {m_Armor = Armor; };
+	CCharacterCore GetCore() { return m_Core; };
+	void SetCore(CCharacterCore Core) {m_Core = Core; };
+	CCharacterCore* Core() { return &m_Core; };
+	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
+	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
+	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
+	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; };
+	bool IsAlive() { return m_Alive; };
+	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
+	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
+	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
+	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
+	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+
 };
 
+enum 
+{
+	DDRACE_NONE = 0,
+	DDRACE_STARTED,
+	DDRACE_CHEAT, // no time and won't start again unless ordered by a mod or death
+	DDRACE_FINISHED
+};
 #endif

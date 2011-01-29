@@ -77,11 +77,6 @@ public:
 	class CGameContext *GameServer() { return GameWorld()->GameServer(); }
 	class IServer *Server() { return GameWorld()->Server(); }
 	
-	void MarkDestroy() {
-		m_MarkedForDestroy = true;
-	}
-	
-	
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
 
@@ -154,6 +149,11 @@ public:
 			Contains the current posititon of the entity.
 	*/
 	vec2 m_Pos;
+
+	void MarkDestroy()
+	{
+		m_MarkedForDestroy = true;
+	}
 };
 
 #endif

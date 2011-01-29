@@ -48,8 +48,8 @@ void CGameContext::MoveCharacter(int ClientId, int Victim, int X, int Y, bool Ra
 	if(!pChr)
 		return;
 
-	pChr->m_Core.m_Pos.x += ((Raw) ? 1 : 32) * X;
-	pChr->m_Core.m_Pos.y += ((Raw) ? 1 : 32) * Y;
+	pChr->Core()->m_Pos.x += ((Raw) ? 1 : 32) * X;
+	pChr->Core()->m_Pos.y += ((Raw) ? 1 : 32) * Y;
 
 	if(!g_Config.m_SvCheatTime)
 		pChr->m_DDRaceState = DDRACE_CHEAT;
@@ -304,25 +304,25 @@ void CGameContext::ModifyWeapons(int ClientId, int Victim, int Weapon, bool Remo
 	
 	if(Weapon == -1)
 	{
-		if(Remove && (pChr->m_ActiveWeapon == WEAPON_SHOTGUN || pChr->m_ActiveWeapon == WEAPON_GRENADE || pChr->m_ActiveWeapon == WEAPON_RIFLE))
-			pChr->m_ActiveWeapon = WEAPON_GUN;
+		if(Remove && (pChr->GetActiveWeapon() == WEAPON_SHOTGUN || pChr->GetActiveWeapon() == WEAPON_GRENADE || pChr->GetActiveWeapon() == WEAPON_RIFLE))
+			pChr->SetActiveWeapon(WEAPON_GUN);
 		
 		if(Remove)
 		{
-			pChr->m_aWeapons[WEAPON_SHOTGUN].m_Got = false;
-			pChr->m_aWeapons[WEAPON_GRENADE].m_Got = false;
-			pChr->m_aWeapons[WEAPON_RIFLE].m_Got = false;
+			pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
+			pChr->SetWeaponGot(WEAPON_GRENADE, false);
+			pChr->SetWeaponGot(WEAPON_RIFLE, false);
 		}
 		else
 			pChr->GiveAllWeapons();	
 	}
 	else if(Weapon != WEAPON_NINJA)
 	{
-		if(Remove && pChr->m_ActiveWeapon == Weapon)
-			pChr->m_ActiveWeapon = WEAPON_GUN;
+		if(Remove && pChr->GetActiveWeapon() == Weapon)
+			pChr->SetActiveWeapon(WEAPON_GUN);
 		
 		if(Remove)
-			pChr->m_aWeapons[Weapon].m_Got = false;
+			pChr->SetWeaponGot(Weapon, false);
 		else
 			pChr->GiveWeapon(Weapon, -1);
 	}
@@ -352,7 +352,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData, int 
 			CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 			if(pChr)
 			{
-				pChr->m_Core.m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+				pChr->Core()->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
 				if(!g_Config.m_SvCheatTime)
 					pChr->m_DDRaceState = DDRACE_CHEAT;
 			}
@@ -455,7 +455,7 @@ void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int Cl
 	if(pSelf->m_apPlayers[Victim])
 	{
 		pChr->Freeze(Seconds);
-		pChr->m_pPlayer->m_RconFreeze = Seconds != -2;
+		pChr->GetPlayer()->m_RconFreeze = Seconds != -2;
 		CServer* pServ = (CServer*)pSelf->Server();
 		if(Seconds >= 0)
 			str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d has been Frozen for %d.", pServ->ClientName(ClientId), Victim, Seconds);
@@ -492,7 +492,7 @@ void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int 
 		Warning = false;
 	}
 	pChr->m_FreezeTime = 2;
-	pChr->m_pPlayer->m_RconFreeze = false;
+	pChr->GetPlayer()->m_RconFreeze = false;
 	CServer* pServ = (CServer*)pSelf->Server();
 	str_format(aBuf, sizeof(aBuf), "'%s' ClientId=%d has been defrosted.", pServ->ClientName(ClientId), Victim);
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
@@ -752,7 +752,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 	if(g_Config.m_SvPauseable)
 	{
 		CCharacter* pChr = pPlayer->GetCharacter();
-		if(!pPlayer->GetTeam() && pChr && (!pChr->m_aWeapons[WEAPON_NINJA].m_Got || pChr->m_FreezeTime) && pChr->IsGrounded() && pChr->m_Pos==pChr->m_PrevPos && !pChr->Team() && !pPlayer->m_InfoSaved)
+		if(!pPlayer->GetTeam() && pChr && (!pChr->GetWeaponGot(WEAPON_NINJA) || pChr->m_FreezeTime) && pChr->IsGrounded() && pChr->m_Pos==pChr->m_PrevPos && !pChr->Team() && !pPlayer->m_InfoSaved)
 		{
 			if(pPlayer->m_Last_Pause + pSelf->Server()->TickSpeed() * g_Config.m_SvPauseFrequency <= pSelf->Server()->Tick()) {
 				pPlayer->SaveCharacter();
@@ -771,7 +771,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 			//pPlayer->LoadCharacter();//TODO:Check if this system Works
 		}
 		else if(pChr)
-			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", (pChr->Team())?"You can't pause while you are in a team":(pChr->m_aWeapons[WEAPON_NINJA].m_Got)?"You can't use /pause while you are a ninja":(!pChr->IsGrounded())?"You can't use /pause while you are a in air":"You can't use /pause while you are moving");
+			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", (pChr->Team())?"You can't pause while you are in a team":pChr->GetWeaponGot(WEAPON_NINJA)?"You can't use /pause while you are a ninja":(!pChr->IsGrounded())?"You can't use /pause while you are a in air":"You can't use /pause while you are moving");
 		else
 			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "No pause data saved.");
 	}

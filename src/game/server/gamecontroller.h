@@ -4,7 +4,6 @@
 #define GAME_SERVER_GAMECONTROLLER_H
 
 #include <base/vmath.h>
-//#include <game/server/teams.h>
 
 class CDoor;
 /*
@@ -48,7 +47,6 @@ protected:
 	
 	char m_aMapWish[128];
 
-
 	
 	int m_RoundStartTick;
 	int m_GameOverTick;
@@ -66,17 +64,14 @@ protected:
 public:
 	const char *m_pGameType;
 
-	float m_CurrentRecord;
-
 	//bool IsTeamplay() const;
 	
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
 
-	
-
 	//void DoTeamScoreWincheck();
 	//void DoPlayerScoreWincheck();
+	
 	void DoWarmup(int Seconds);
 	
 	void StartRound();
@@ -109,7 +104,6 @@ public:
 			bool?
 	*/
 	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
-	
 	
 	/*
 		Function: on_CCharacter_spawn
@@ -149,6 +143,9 @@ public:
 	int ClampTeam(int Team);
 
 	virtual void PostReset();
+
+	//DDRace
+	float m_CurrentRecord;
 };
 
 #endif

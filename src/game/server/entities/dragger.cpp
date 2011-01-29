@@ -26,7 +26,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, in
 
 void CDragger::Move()
 {
-	if(m_Target && m_Target->m_Alive && (m_Target->m_Super || (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[m_Target->Team()])))
+	if(m_Target && m_Target->IsAlive() && (m_Target->m_Super || (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[m_Target->Team()])))
 		m_Target = 0;
 	if(m_Target)
 		return;
@@ -72,7 +72,7 @@ void CDragger::Drag()
 		else
 			if (length(m_Pos-m_Target->m_Pos)>28)
 			{
-				vec2 Temp = m_Target->m_Core.m_Vel +(normalize(m_Pos-m_Target->m_Pos)*m_Strength);
+				vec2 Temp = m_Target->Core()->m_Vel +(normalize(m_Pos-m_Target->m_Pos)*m_Strength);
 				if(Temp.x > 0 && ((m_Target->m_TileIndex == TILE_STOP && m_Target->m_TileFlags == ROTATION_270) || (m_Target->m_TileIndexL == TILE_STOP && m_Target->m_TileFlagsL == ROTATION_270) || (m_Target->m_TileIndexL == TILE_STOPS && (m_Target->m_TileFlagsL == ROTATION_90 || m_Target->m_TileFlagsL ==ROTATION_270)) || (m_Target->m_TileIndexL == TILE_STOPA) || (m_Target->m_TileFIndex == TILE_STOP && m_Target->m_TileFFlags == ROTATION_270) || (m_Target->m_TileFIndexL == TILE_STOP && m_Target->m_TileFFlagsL == ROTATION_270) || (m_Target->m_TileFIndexL == TILE_STOPS && (m_Target->m_TileFFlagsL == ROTATION_90 || m_Target->m_TileFFlagsL == ROTATION_270)) || (m_Target->m_TileFIndexL == TILE_STOPA) || (m_Target->m_TileSIndex == TILE_STOP && m_Target->m_TileSFlags == ROTATION_270) || (m_Target->m_TileSIndexL == TILE_STOP && m_Target->m_TileSFlagsL == ROTATION_270) || (m_Target->m_TileSIndexL == TILE_STOPS && (m_Target->m_TileSFlagsL == ROTATION_90 || m_Target->m_TileSFlagsL == ROTATION_270)) || (m_Target->m_TileSIndexL == TILE_STOPA)))
 					Temp.x = 0;
 				if(Temp.x < 0 && ((m_Target->m_TileIndex == TILE_STOP && m_Target->m_TileFlags == ROTATION_90) || (m_Target->m_TileIndexR == TILE_STOP && m_Target->m_TileFlagsR == ROTATION_90) || (m_Target->m_TileIndexR == TILE_STOPS && (m_Target->m_TileFlagsR == ROTATION_90 || m_Target->m_TileFlagsR == ROTATION_270)) || (m_Target->m_TileIndexR == TILE_STOPA) || (m_Target->m_TileFIndex == TILE_STOP && m_Target->m_TileFFlags == ROTATION_90) || (m_Target->m_TileFIndexR == TILE_STOP && m_Target->m_TileFFlagsR == ROTATION_90) || (m_Target->m_TileFIndexR == TILE_STOPS && (m_Target->m_TileFFlagsR == ROTATION_90 || m_Target->m_TileFFlagsR == ROTATION_270)) || (m_Target->m_TileFIndexR == TILE_STOPA) || (m_Target->m_TileSIndex == TILE_STOP && m_Target->m_TileSFlags == ROTATION_90) || (m_Target->m_TileSIndexR == TILE_STOP && m_Target->m_TileSFlagsR == ROTATION_90) || (m_Target->m_TileSIndexR == TILE_STOPS && (m_Target->m_TileSFlagsR == ROTATION_90 || m_Target->m_TileSFlagsR == ROTATION_270)) || (m_Target->m_TileSIndexR == TILE_STOPA)))
@@ -81,7 +81,7 @@ void CDragger::Drag()
 					Temp.y = 0;
 				if(Temp.y > 0 && ((m_Target->m_TileIndex == TILE_STOP && m_Target->m_TileFlags == ROTATION_0) || (m_Target->m_TileIndexT == TILE_STOP && m_Target->m_TileFlagsT == ROTATION_0) || (m_Target->m_TileIndexT == TILE_STOPS && (m_Target->m_TileFlagsT == ROTATION_0 || m_Target->m_TileFlagsT == ROTATION_180)) || (m_Target->m_TileIndexT == TILE_STOPA) || (m_Target->m_TileFIndex == TILE_STOP && m_Target->m_TileFFlags == ROTATION_0) || (m_Target->m_TileFIndexT == TILE_STOP && m_Target->m_TileFFlagsT == ROTATION_0) || (m_Target->m_TileFIndexT == TILE_STOPS && (m_Target->m_TileFFlagsT == ROTATION_0 || m_Target->m_TileFFlagsT == ROTATION_180)) || (m_Target->m_TileFIndexT == TILE_STOPA) || (m_Target->m_TileSIndex == TILE_STOP && m_Target->m_TileSFlags == ROTATION_0) || (m_Target->m_TileSIndexT == TILE_STOP && m_Target->m_TileSFlagsT == ROTATION_0) || (m_Target->m_TileSIndexT == TILE_STOPS && (m_Target->m_TileSFlagsT == ROTATION_0 || m_Target->m_TileSFlagsT == ROTATION_180)) || (m_Target->m_TileSIndexT == TILE_STOPA)))
 					Temp.y = 0;
-				m_Target->m_Core.m_Vel = Temp;
+				m_Target->Core()->m_Vel = Temp;
 			}
 	}
 }
@@ -124,8 +124,8 @@ void CDragger::Snap(int SnappingClient)
 
 	CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
-	if (Char && Char->m_Alive && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick))) return;
-	if(Char && Char->m_Alive && m_Target &&  m_Target->m_Alive && Char->Team() != m_Target->Team()) return;
+	if (Char && Char->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick))) return;
+	if(Char && Char->IsAlive() && m_Target &&  m_Target->IsAlive() && Char->Team() != m_Target->Team()) return;
 
 	CNetObj_Laser *obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_Id, sizeof(CNetObj_Laser)));
 
