@@ -203,6 +203,7 @@ public:
 	int m_TileSFlagsB;
 	vec2 m_Intersection;
 	bool m_EyeEmote;
+	int64 m_LastStartWarning;
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };
 	void SetLastWeapon(int LastWeap) {m_LastWeapon = LastWeap; };
