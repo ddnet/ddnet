@@ -980,3 +980,83 @@ Y-axis of the envelope
 Loading DDRace Client
 == Chargement DDRace
 
+Cheats
+==
+
+Cheats off
+==
+
+Cheats on
+==
+
+Cheats with time
+==
+
+Cheats with time off
+==
+
+Cheats with time on
+==
+
+Teams
+==
+
+Teams off
+==
+
+Teams on
+==
+
+Pause
+==
+
+Pause off
+==
+
+Pause on
+==
+
+Pause with time
+==
+
+Pause with time off
+==
+
+Pause with time on
+==
+
+Players Collide
+==
+
+Player Collision off
+==
+
+Player Collision on
+==
+
+Player Hooking
+==
+
+Player Hooking off
+==
+
+Player Hooking on
+==
+
+Player Hitting
+==
+
+Player Hitting off
+==
+
+Player Hitting on
+==
+
+Hooking Ends
+==
+
+Hooking normal
+==
+
+Endless Hooking
+==
