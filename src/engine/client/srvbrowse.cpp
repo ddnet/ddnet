@@ -221,7 +221,7 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterTestServer == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_SERVERTEST)
 			Filtered = 1;
-		else if((!g_Config.m_BrFilterTestServer || g_Config.m_BrFilterTestServer == 2) && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_SERVERTEST))
+		else if(g_Config.m_BrFilterTestServer == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_SERVERTEST))
 			Filtered = 1;
 		else
 		{

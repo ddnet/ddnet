@@ -616,7 +616,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		//UI()->DoLabel(&row, temp, font_size, -1);
 
 		ServerDetails.VSplitLeft(5.0f, 0x0, &ServerDetails);
-		ServerDetails.VSplitLeft(80.0f, &LeftColumn, &RightColumn);
+		ServerDetails.VSplitLeft(75.0f, &LeftColumn, &RightColumn);
 
 		for (unsigned int i = 0; i < sizeof(s_aLabels) / sizeof(s_aLabels[0]); i++)
 		{
@@ -634,7 +634,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		Cursor.m_LineWidth = Row.w;
 		TextRender()->TextEx(&Cursor, pSelectedServer->m_aGameType, -1);
 
-		char aTemp[16];
+		char aTemp[32];
 		str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_Latency);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
@@ -643,7 +643,15 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
 		UI()->DoLabelScaled(&Row, "Cheats", FontSize, -1);
-		str_format(aTemp, sizeof(aTemp), "%s", pSelectedServer->m_Flags&SERVER_FLAG_CHEATS ? "On" : "Off");
+		str_format(aTemp, sizeof(aTemp), "%s", pSelectedServer->m_Flags&SERVER_FLAG_CHEATS ? pSelectedServer->m_Flags&SERVER_FLAG_CHEATTIME? "On & can finish" : "On & can't finish" : "Off");
+		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = Row.w;
+		TextRender()->TextEx(&Cursor, aTemp, -1);
+
+		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
+		UI()->DoLabelScaled(&Row, "Pause", FontSize, -1);
+		str_format(aTemp, sizeof(aTemp), "%s", pSelectedServer->m_Flags&SERVER_FLAG_PAUSE ? pSelectedServer->m_Flags&SERVER_FLAG_PAUSETIME? "On & pauses time" : "On but not time" : "Off");
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Row.w;
