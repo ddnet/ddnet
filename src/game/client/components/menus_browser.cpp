@@ -641,6 +641,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		Cursor.m_LineWidth = Row.w;
 		TextRender()->TextEx(&Cursor, aTemp, -1);
 
+		//DDRace
+
 		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
 		UI()->DoLabelScaled(&Row, "Cheats", FontSize, -1);
 		str_format(aTemp, sizeof(aTemp), "%s", pSelectedServer->m_Flags&SERVER_FLAG_CHEATS ? pSelectedServer->m_Flags&SERVER_FLAG_CHEATTIME? "On & can finish" : "On & can't finish" : "Off");

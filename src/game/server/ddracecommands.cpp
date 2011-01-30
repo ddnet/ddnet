@@ -552,7 +552,7 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData, int Clie
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "DDRace Mod. Version: " DDRACE_VERSION);
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "DDRace Mod. Version: " GAME_VERSION);
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Official site: DDRace.info");
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "For more Info /cmdlist");
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Or visit DDRace.info");

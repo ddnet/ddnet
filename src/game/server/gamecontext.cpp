@@ -604,7 +604,7 @@ void CGameContext::OnClientEnter(int ClientId)
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), m_pController->GetTeamName(m_apPlayers[ClientId]->GetTeam()));
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
 
-		SendChatTarget(ClientId, "DDRace Mod. Version: " DDRACE_VERSION);
+		SendChatTarget(ClientId, "DDRace Mod. Version: " GAME_VERSION);
 		SendChatTarget(ClientId, "Official site: DDRace.info");
 		SendChatTarget(ClientId, "For more Info /cmdlist");
 		SendChatTarget(ClientId, "Or visit DDRace.info");
