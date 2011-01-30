@@ -977,7 +977,7 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 	i |= SERVER_FLAG_VERSION;
 	if(g_Config.m_Password[0])   // password set
 		i |= SERVER_FLAG_PASSWORD;
-	if(g_Config.m_SvTeam)
+	if(g_Config.m_SvTeam >= 0)
 		i |= SERVER_FLAG_TEAMS;
 	if(g_Config.m_SvTeamStrict)
 		i |= SERVER_FLAG_STRICTTEAMS;
@@ -989,9 +989,9 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 		i |= SERVER_FLAG_ENDLESSSUPERHOOKING;
 	if(g_Config.m_SvTimer)
 		i |= SERVER_FLAG_TIMERCOMMANDS;
-	if(g_Config.m_SvCheatTime)
-		i |= SERVER_FLAG_TIMECHEAT;
-	if(g_Config.m_SvPauseTime)
+	if(g_Config.m_SvCheatTime && g_Config.m_SvCheats)
+		i |= SERVER_FLAG_CHEATTIME;
+	if(g_Config.m_SvPauseTime && g_Config.m_SvPauseable)
 		i |= SERVER_FLAG_PAUSETIME;
 	if(GameServer()->PlayerCollision())
 		i |= SERVER_FLAG_PLAYERCOLLISION;

@@ -175,6 +175,54 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterCompatversion && str_comp_num(m_ppServerlist[i]->m_Info.m_aVersion, m_aNetVersion, 3) != 0)
 			Filtered = 1;
+		else if(g_Config.m_BrFilterCheats == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_CHEATS)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterCheats == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_CHEATS))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterCheatTime == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_CHEATTIME)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterCheatTime == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_CHEATTIME))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterTeams == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_TEAMS)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterTeams == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_TEAMS))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterTeamsStrict == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_STRICTTEAMS)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterTeamsStrict == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_STRICTTEAMS))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPause == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PAUSE)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPause == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PAUSE))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPauseTime == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PAUSETIME)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPauseTime == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PAUSETIME))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPlayerCollision == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PLAYERCOLLISION)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPlayerCollision == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PLAYERCOLLISION))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPlayerHooking == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PLAYERHOOKING)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPlayerHooking == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_PLAYERHOOKING))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPlayerHitting == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_HIT)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterPlayerHitting == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_HIT))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterEndlessHooking == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_ENDLESSHOOKING)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterEndlessHooking == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_ENDLESSHOOKING))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterTestMap == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_MAPTEST)
+			Filtered = 1;
+		else if(g_Config.m_BrFilterTestMap == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_MAPTEST))
+			Filtered = 1;
+		else if(g_Config.m_BrFilterTestServer == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_SERVERTEST)
+			Filtered = 1;
+		else if((!g_Config.m_BrFilterTestServer || g_Config.m_BrFilterTestServer == 2) && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_SERVERTEST))
+			Filtered = 1;
 		else
 		{
 			if(g_Config.m_BrFilterString[0] != 0)
@@ -246,6 +294,21 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterPureMap<<10;
 	i |= g_Config.m_BrFilterPing<<16;
 	return i;
+	//TODO: DDRace Add these here after understanding how it works
+	/*
+	 * i |= g_Config.m_BrFilterCheats<<;
+	 * i |= g_Config.m_BrFilterCheatTime<<;
+	 * i |= g_Config.m_BrFilterTeams<<;
+	 * i |= g_Config.m_BrFilterTeamsStrict<<;
+	 * i |= g_Config.m_BrFilterPause<<;
+	 * i |= g_Config.m_BrFilterPauseTime<<;
+	 * i |= g_Config.m_BrFilterPlayerCollision<<;
+	 * i |= g_Config.m_BrFilterPlayerHooking<<;
+	 * i |= g_Config.m_BrFilterPlayerHitting<<;
+	 * i |= g_Config.m_BrFilterEndlessHooking<<;
+	 * i |= g_Config.m_BrFilterTestMap<<;
+	 * i |= g_Config.m_BrFilterTestServer<<;
+	 */
 }
 
 void CServerBrowser::Sort()

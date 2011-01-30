@@ -247,5 +247,8 @@ public:
 	virtual void OnRender();
 	virtual bool OnInput(IInput::CEvent Event);
 	virtual bool OnMouseMove(float x, float y);
+
+	//DDRace
+	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 };
 #endif

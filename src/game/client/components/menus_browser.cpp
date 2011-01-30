@@ -12,6 +12,7 @@
 #include "menus.h"
 #include <game/localization.h>
 #include <game/version.h>
+#include <engine/shared/protocol.h>
 
 void CMenus::RenderServerbrowserServerList(CUIRect View)
 {
@@ -438,7 +439,73 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	//button.VSplitLeft(20.0f, 0, &button);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterPureMap, Localize("Standard map"), g_Config.m_BrFilterPureMap, &Button))
 		g_Config.m_BrFilterPureMap ^= 1;
-	
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterCheats, Localize("Cheats"), g_Config.m_BrFilterCheats, &Button))
+	{
+		g_Config.m_BrFilterCheats = (g_Config.m_BrFilterCheats + 1) % 3;
+		if(g_Config.m_BrFilterCheats == 1)
+			g_Config.m_BrFilterCheatTime = 0;
+	}
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterCheatTime, Localize("Cheats+Time"), (!g_Config.m_BrFilterCheats || g_Config.m_BrFilterCheats == 2) ? g_Config.m_BrFilterCheatTime : 0, &Button))
+	{
+		if(!g_Config.m_BrFilterCheats || g_Config.m_BrFilterCheats == 2)
+			g_Config.m_BrFilterCheatTime = (g_Config.m_BrFilterCheatTime + 1) % 3;
+		else
+			g_Config.m_BrFilterCheatTime = 0;
+	}
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterTeams, Localize("Teams"), g_Config.m_BrFilterTeams, &Button))
+		g_Config.m_BrFilterTeams = (g_Config.m_BrFilterTeams + 1) % 3;
+/*
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterTeamsStrict, Localize("Strict Teams"), g_Config.m_BrFilterTeamsStrict, &Button))
+		g_Config.m_BrFilterTeamsStrict = (g_Config.m_BrFilterTeamsStrict + 1) % 3;
+*/
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterPause, Localize("Pause"), g_Config.m_BrFilterPause, &Button))
+	{
+		g_Config.m_BrFilterPause = (g_Config.m_BrFilterPause + 1) % 3;
+		if(g_Config.m_BrFilterPause == 1)
+			g_Config.m_BrFilterPauseTime = 0;
+	}
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterPauseTime, Localize("Pause + Time"), (!g_Config.m_BrFilterPause || g_Config.m_BrFilterPause == 2) ? g_Config.m_BrFilterPauseTime : 0, &Button))
+	{
+		if(!g_Config.m_BrFilterPause || g_Config.m_BrFilterPause == 2)
+			g_Config.m_BrFilterPauseTime = (g_Config.m_BrFilterPauseTime + 1) % 3;
+		else
+			g_Config.m_BrFilterPauseTime = 0;
+	}
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterPlayerCollision, Localize("Player Collision"), g_Config.m_BrFilterPlayerCollision, &Button))
+		g_Config.m_BrFilterPlayerCollision = (g_Config.m_BrFilterPlayerCollision + 1) % 3;
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterPlayerHooking, Localize("Player Hooking"), g_Config.m_BrFilterPlayerHooking, &Button))
+		g_Config.m_BrFilterPlayerHooking = (g_Config.m_BrFilterPlayerHooking + 1) % 3;
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterPlayerHitting, Localize("Player Hitting"), g_Config.m_BrFilterPlayerHitting, &Button))
+		g_Config.m_BrFilterPlayerHitting = (g_Config.m_BrFilterPlayerHitting + 1) % 3;
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterEndlessHooking, Localize("Endless Hooking"), g_Config.m_BrFilterEndlessHooking, &Button))
+		g_Config.m_BrFilterEndlessHooking = (g_Config.m_BrFilterEndlessHooking + 1) % 3;
+/*
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterTestMap, Localize("Test Map"), g_Config.m_BrFilterTestMap, &Button))
+		g_Config.m_BrFilterTestMap = (g_Config.m_BrFilterTestMap + 1) % 3;
+
+	View.HSplitTop(20.0f, &Button, &View);
+	if (DoButton_CheckBox_DontCare((char *)&g_Config.m_BrFilterTestServer, Localize("Test Server"), g_Config.m_BrFilterTestServer, &Button))
+		g_Config.m_BrFilterTestServer = (g_Config.m_BrFilterTestServer + 1) % 3;
+*/
 	View.HSplitTop(20.0f, &Button, &View);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterGametypeStrict, Localize("Filter gametype strict"), g_Config.m_BrFilterGametypeStrict, &Button))
 		g_Config.m_BrFilterGametypeStrict ^= 1;
@@ -477,10 +544,22 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterGametypeStrict = 0;
 		g_Config.m_BrFilterPing = 999;
 		g_Config.m_BrFilterGametype[0] = 0;
-		g_Config.m_BrFilterCompatversion = 1;
+		g_Config.m_BrFilterCompatversion = 0;
 		g_Config.m_BrFilterString[0] = 0;
-		g_Config.m_BrFilterPure = 1;
-		g_Config.m_BrFilterPureMap = 1;
+		g_Config.m_BrFilterPure = 0;
+		g_Config.m_BrFilterPureMap = 0;
+		g_Config.m_BrFilterCheats = 0;
+		g_Config.m_BrFilterCheatTime = 0;
+		g_Config.m_BrFilterTeams = 0;
+		g_Config.m_BrFilterTeamsStrict = 0;
+		g_Config.m_BrFilterPause = 0;
+		g_Config.m_BrFilterPauseTime = 0;
+		g_Config.m_BrFilterPlayerCollision = 0;
+		g_Config.m_BrFilterPlayerHooking = 0;
+		g_Config.m_BrFilterPlayerHitting = 0;
+		g_Config.m_BrFilterEndlessHooking = 0;
+		g_Config.m_BrFilterTestMap = 0;
+		g_Config.m_BrFilterTestServer = 0;
 	}
 }
 
@@ -557,6 +636,14 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 		char aTemp[16];
 		str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_Latency);
+		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = Row.w;
+		TextRender()->TextEx(&Cursor, aTemp, -1);
+
+		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
+		UI()->DoLabelScaled(&Row, "Cheats", FontSize, -1);
+		str_format(aTemp, sizeof(aTemp), "%s", pSelectedServer->m_Flags&SERVER_FLAG_CHEATS ? "On" : "Off");
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Row.w;

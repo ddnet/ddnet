@@ -1394,3 +1394,18 @@ void CMenus::RenderBackground()
     {CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}	
 }
+
+int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+{
+	switch(Checked)
+	{
+	case 0:
+		return DoButton_CheckBox_Common(pID, pText, "", pRect);
+	case 1:
+		return DoButton_CheckBox_Common(pID, pText, "X", pRect);
+	case 2:
+		return DoButton_CheckBox_Common(pID, pText, "O", pRect);
+	default:
+		return DoButton_CheckBox_Common(pID, pText, "", pRect);
+	}
+}

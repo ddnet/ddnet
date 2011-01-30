@@ -1086,9 +1086,9 @@ void CClient::ProcessPacket(CNetChunk *pPacket)
 					return;
 				
 				if((Info.m_Flags | SERVER_FLAGS_VERSION) != SERVER_FLAG_VERSION || !str_find_nocase(Info.m_aGameType, "DDRace"))
-					Info.m_Flags &= SERVER_FLAGS_DEFAULT;
+					Info.m_Flags |= SERVER_FLAGS_DEFAULT;
 				else
-					Info.m_Flags &= SERVER_FLAGS_ALL;
+					Info.m_Flags |= SERVER_FLAGS_ALL;
 
 				str_format(Info.m_aAddress, sizeof(Info.m_aAddress), "%d.%d.%d.%d:%d",
 					pPacket->m_Address.ip[0], pPacket->m_Address.ip[1], pPacket->m_Address.ip[2],
