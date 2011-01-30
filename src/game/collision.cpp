@@ -539,6 +539,27 @@ int CCollision::GetPureMapIndex(vec2 Pos)
 	return ny*m_Width+nx;
 }
 
+int CCollision::TileExists(int Index)
+{
+	if(
+		(m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_NPH) ||
+		(m_pTiles[Index + 1].m_Index == TILE_STOPA || m_pTiles[Index - 1].m_Index == TILE_STOPA || ((m_pTiles[Index + 1].m_Index == TILE_STOPS || m_pTiles[Index - 1].m_Index == TILE_STOPS) && m_pTiles[Index + 1].m_Flags|ROTATION_270|ROTATION_90)) ||
+		(m_pTiles[Index + m_Width].m_Index == TILE_STOPA || m_pTiles[Index - m_Width].m_Index == TILE_STOPA || ((m_pTiles[Index + m_Width].m_Index == TILE_STOPS || m_pTiles[Index - m_Width].m_Index == TILE_STOPS) && m_pTiles[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0)) ||
+		(m_pFront && (m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH)) ||
+		(m_pFront && (m_pFront[Index + 1].m_Index == TILE_STOPA || m_pFront[Index - 1].m_Index == TILE_STOPA || ((m_pFront[Index + 1].m_Index == TILE_STOPS || m_pFront[Index - 1].m_Index == TILE_STOPS) && m_pFront[Index + 1].m_Flags|ROTATION_270|ROTATION_90))) ||
+		(m_pFront && (m_pFront[Index + m_Width].m_Index == TILE_STOPA || m_pFront[Index - m_Width].m_Index == TILE_STOPA || ((m_pFront[Index + m_Width].m_Index == TILE_STOPS || m_pFront[Index - m_Width].m_Index == TILE_STOPS) && m_pFront[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0))) ||
+		(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELEOUT)) ||
+		(m_pSpeedup && m_pSpeedup[Index].m_Force > 0) ||
+		(m_pDoor && m_pDoor[Index].m_Index) ||
+		(m_pDoor && (m_pDoor[Index + 1].m_Index == TILE_STOPA || m_pDoor[Index - 1].m_Index == TILE_STOPA || ((m_pDoor[Index + 1].m_Index == TILE_STOPS || m_pDoor[Index - 1].m_Index == TILE_STOPS) && m_pDoor[Index + 1].m_Flags|ROTATION_270|ROTATION_90))) ||
+		(m_pDoor && (m_pDoor[Index + m_Width].m_Index == TILE_STOPA || m_pDoor[Index - m_Width].m_Index == TILE_STOPA || ((m_pDoor[Index + m_Width].m_Index == TILE_STOPS || m_pDoor[Index - m_Width].m_Index == TILE_STOPS) && m_pDoor[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0))) ||
+		(m_pSwitch && m_pSwitch[Index].m_Type)
+	)
+		return true;
+	else
+		return false;
+}
+
 int CCollision::GetMapIndex(vec2 Pos)
 {
 	int nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
@@ -548,21 +569,8 @@ int CCollision::GetMapIndex(vec2 Pos)
 	else if (m_pTele && m_pTele[Index].m_Type==TILE_TELEOUT) dbg_msg("TELEOUT","Index %d",Index);
 	else dbg_msg("GetMapIndex(","Index %d",Index);//REMOVE */
 
-	if(
-		(m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_NPH) ||
-		(m_pFront && (m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH)) ||
-		(m_pTiles[Index + 1].m_Index == TILE_STOPA || m_pTiles[Index - 1].m_Index == TILE_STOPA || ((m_pTiles[Index + 1].m_Index == TILE_STOPS || m_pTiles[Index - 1].m_Index == TILE_STOPS) && m_pTiles[Index + 1].m_Flags|ROTATION_270|ROTATION_90)) ||
-		(m_pFront && (m_pFront[Index + 1].m_Index == TILE_STOPA || m_pFront[Index - 1].m_Index == TILE_STOPA || ((m_pFront[Index + 1].m_Index == TILE_STOPS || m_pFront[Index - 1].m_Index == TILE_STOPS) && m_pFront[Index + 1].m_Flags|ROTATION_270|ROTATION_90))) ||
-		(m_pTiles[Index + m_Width].m_Index == TILE_STOPA || m_pTiles[Index - m_Width].m_Index == TILE_STOPA || ((m_pTiles[Index + m_Width].m_Index == TILE_STOPS || m_pTiles[Index - m_Width].m_Index == TILE_STOPS) && m_pTiles[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0)) ||
-		(m_pFront && (m_pFront[Index + m_Width].m_Index == TILE_STOPA || m_pFront[Index - m_Width].m_Index == TILE_STOPA || ((m_pFront[Index + m_Width].m_Index == TILE_STOPS || m_pFront[Index - m_Width].m_Index == TILE_STOPS) && m_pFront[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0))) ||
-		(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELEOUT)) ||
-		(m_pSpeedup && m_pSpeedup[Index].m_Force > 0) ||
-		(m_pDoor && m_pDoor[Index].m_Index) ||
-		(m_pSwitch && m_pSwitch[Index].m_Type)
-	)
-	{
+	if(TileExists(Index))
 		return Index;
-	}
 	else
 		return -1;
 }
@@ -581,18 +589,7 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 		else if (m_pTele && m_pTele[Index].m_Type==TILE_TELEOUT) dbg_msg("TELEOUT","Index %d",Index);
 		else dbg_msg("GetMapIndex(","Index %d",Index);//REMOVE */
 
-		if(
-			(m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_NPH) ||
-			(m_pFront && (m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH)) ||
-			(m_pTiles[Index + 1].m_Index == TILE_STOPA || m_pTiles[Index - 1].m_Index == TILE_STOPA || ((m_pTiles[Index + 1].m_Index == TILE_STOPS || m_pTiles[Index - 1].m_Index == TILE_STOPS) && m_pTiles[Index + 1].m_Flags|ROTATION_270|ROTATION_90)) ||
-			(m_pFront && (m_pFront[Index + 1].m_Index == TILE_STOPA || m_pFront[Index - 1].m_Index == TILE_STOPA || ((m_pFront[Index + 1].m_Index == TILE_STOPS || m_pFront[Index - 1].m_Index == TILE_STOPS) && m_pFront[Index + 1].m_Flags|ROTATION_270|ROTATION_90))) ||
-			(m_pTiles[Index + m_Width].m_Index == TILE_STOPA || m_pTiles[Index - m_Width].m_Index == TILE_STOPA || ((m_pTiles[Index + m_Width].m_Index == TILE_STOPS || m_pTiles[Index - m_Width].m_Index == TILE_STOPS) && m_pTiles[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0)) ||
-			(m_pFront && (m_pFront[Index + m_Width].m_Index == TILE_STOPA || m_pFront[Index - m_Width].m_Index == TILE_STOPA || ((m_pFront[Index + m_Width].m_Index == TILE_STOPS || m_pFront[Index - m_Width].m_Index == TILE_STOPS) && m_pFront[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0))) ||
-			(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELEOUT)) ||
-			(m_pSpeedup && m_pSpeedup[Index].m_Force > 0) ||
-			(m_pDoor && m_pDoor[Index].m_Index) ||
-			(m_pSwitch && m_pSwitch[Index].m_Type)
-		)
+		if(TileExists(Index))
 		{
 			Indices.push_back(Index);
 			return Indices;
@@ -612,21 +609,7 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 		Index = ny * m_Width + nx;
 		//dbg_msg("lastindex","%d",LastIndex);
 		//dbg_msg("index","%d",Index);
-		if(
-			(
-					(m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_NPH) ||
-					(m_pFront && (m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH)) ||
-					(m_pTiles[Index + 1].m_Index == TILE_STOPA || m_pTiles[Index >= 1 ? Index - 1 : Index].m_Index == TILE_STOPA || ((m_pTiles[Index + 1].m_Index == TILE_STOPS || m_pTiles[Index >= 1 ? Index - 1 : Index].m_Index == TILE_STOPS) && m_pTiles[Index + 1].m_Flags|ROTATION_270|ROTATION_90)) ||
-					(m_pFront && (m_pFront[Index + 1].m_Index == TILE_STOPA || m_pFront[Index >= 1 ? Index - 1 : Index].m_Index == TILE_STOPA || ((m_pFront[Index + 1].m_Index == TILE_STOPS || m_pFront[Index >= 1 ? Index - 1 : Index].m_Index == TILE_STOPS) && m_pFront[Index + 1].m_Flags|ROTATION_270|ROTATION_90))) ||
-					(m_pTiles[Index + m_Width].m_Index == TILE_STOPA || m_pTiles[Index - m_Width >= 0 ? Index - m_Width : Index].m_Index == TILE_STOPA || ((m_pTiles[Index + m_Width].m_Index == TILE_STOPS || m_pTiles[Index - m_Width >= 0 ? Index - m_Width : Index].m_Index == TILE_STOPS) && m_pTiles[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0)) ||
-					(m_pFront && (m_pFront[Index + m_Width].m_Index == TILE_STOPA || m_pFront[Index - m_Width >= 0 ? Index - m_Width : Index].m_Index == TILE_STOPA || ((m_pFront[Index + m_Width].m_Index == TILE_STOPS || m_pFront[Index - m_Width >= 0 ? Index - m_Width : Index].m_Index == TILE_STOPS) && m_pFront[Index + m_Width].m_Flags|ROTATION_180|ROTATION_0))) ||
-					(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELEOUT)) ||
-					(m_pSpeedup && m_pSpeedup[Index].m_Force > 0) ||
-					(m_pDoor && m_pDoor[Index].m_Index) ||
-					(m_pSwitch && m_pSwitch[Index].m_Type)
-			) &&
-			LastIndex != Index
-		)
+		if(TileExists(Index) && LastIndex != Index)
 		{
 			if(MaxIndices && Indices.size() > MaxIndices)
 				return Indices;
