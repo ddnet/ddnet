@@ -581,32 +581,37 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 			Indices.push_back(Index);
 			return Indices;
 		}
+		else
+			return Indices;
 	}
-	float a = 0.0f;
-	vec2 Tmp = vec2(0, 0);
-	int nx = 0;
-	int ny = 0;
-	int Index,LastIndex = 0;
-	for(int i = 0; i < End; i++)
+	else
 	{
-		a = i/d;
-		Tmp = mix(PrevPos, Pos, a);
-		nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
-		ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
-		Index = ny * m_Width + nx;
-		//dbg_msg("lastindex","%d",LastIndex);
-		//dbg_msg("index","%d",Index);
-		if(TileExists(Index) && LastIndex != Index)
+		float a = 0.0f;
+		vec2 Tmp = vec2(0, 0);
+		int nx = 0;
+		int ny = 0;
+		int Index,LastIndex = 0;
+		for(int i = 0; i < End; i++)
 		{
-			if(MaxIndices && Indices.size() > MaxIndices)
-				return Indices;
-			Indices.push_back(Index);
-			LastIndex = Index;
-			//dbg_msg("pushed","%d",Index);
+			a = i/d;
+			Tmp = mix(PrevPos, Pos, a);
+			nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
+			ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
+			Index = ny * m_Width + nx;
+			//dbg_msg("lastindex","%d",LastIndex);
+			//dbg_msg("index","%d",Index);
+			if(TileExists(Index) && LastIndex != Index)
+			{
+				if(MaxIndices && Indices.size() > MaxIndices)
+					return Indices;
+				Indices.push_back(Index);
+				LastIndex = Index;
+				//dbg_msg("pushed","%d",Index);
+			}
 		}
-	}
 
-	return Indices;
+		return Indices;
+	}
 }
 
 vec2 CCollision::GetPos(int Index)
