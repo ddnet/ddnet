@@ -1,5 +1,4 @@
-/* copyright (c) 2007 rajh and gregwar. Score stuff */
-
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #ifndef DDRACE_H
 #define DDRACE_H
 #include <game/server/gamecontroller.h>

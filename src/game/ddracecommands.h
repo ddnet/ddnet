@@ -1,3 +1,4 @@
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #ifndef GAME_SERVER_DDRACECOMMANDS_H
 #define GAME_SERVER_DDRACECOMMANDS_H
 #undef GAME_SERVER_DDRACECOMMANDS_H // this file can be included several times
@@ -58,6 +59,11 @@ CONSOLE_COMMAND("rules", "", CFGFLAG_SERVER, ConRules, this, "Shows the server r
 CONSOLE_COMMAND("team", "?i", CFGFLAG_SERVER, ConJoinTeam, this, "Lets you join team i (shows your team if left blank)", -1)
 CONSOLE_COMMAND("top5", "?i", CFGFLAG_SERVER, ConTop5, this, "Shows five ranks of the ladder beginning with rank i (1 by default)", -1)
 CONSOLE_COMMAND("showothers", "", CFGFLAG_SERVER, ConShowOthers, this, "Whether to showplayers from other teams or not (off by default)", -1)
+
+CONSOLE_COMMAND("ask", "s", CFGFLAG_SERVER, ConAsk, this, "Ask to join a player in a team or to start one with him the asker is the leader if the player is not already in a team", -1)
+CONSOLE_COMMAND("yes", "", CFGFLAG_SERVER, ConYes, this, "Reply yes", -1)
+CONSOLE_COMMAND("no", "", CFGFLAG_SERVER, ConNo, this, "Reply no", -1)
+CONSOLE_COMMAND("invite", "s", CFGFLAG_SERVER, ConInvite, this, "Invite a player to your team (You must be the leader)", -1)
 
 #undef CONSOLE_COMMAND
 

@@ -9,18 +9,19 @@ class CGameTeams
 	int m_TeamState[MAX_CLIENTS];
 	int m_MembersCount[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
+	int m_TeamLeader[MAX_CLIENTS];
+	int m_TeeJoinTick[MAX_CLIENTS];
 	
 	class CGameContext * m_pGameContext;
 	
 	
 public:
-	enum
+	enum TeamState
 	{
-		EMPTY, 
-		OPEN,
-		CLOSED,
-		STARTED,
-		FINISHED
+		TEAMSTATE_EMPTY, 
+		TEAMSTATE_OPEN,
+		TEAMSTATE_CLOSED,
+		TEAMSTATE_STARTED
 	};
 	
 	CTeamsCore m_Core;
@@ -28,17 +29,25 @@ public:
 	CGameTeams(CGameContext *pGameContext);
 	
 	//helper methods
-	CCharacter* Character(int id) { return GameServer()->GetPlayerChar(id); }	
+	CCharacter* Character(int ClientID) { return GameServer()->GetPlayerChar(ClientID); }
 
 	class CGameContext *GameServer() { return m_pGameContext; }
 	class IServer *Server() { return m_pGameContext->Server(); }
 	
-	void OnCharacterStart(int id);
-	void OnCharacterFinish(int id);
+	void OnCharacterStart(int ClientID);
+	void OnCharacterFinish(int ClientID);
 	
-	bool SetCharacterTeam(int id, int Team);
+	int SetCharacterTeam(int ClientID, int Team);
+	enum TeamErrors
+	{
+		ERROR_WRONG_PARAMS = -5,
+		ERROR_CLOSED,
+		ERROR_ALREADY_THERE,
+		ERROR_NOT_SUPER,
+		ERROR_STARTED
+	};
 	
-	void ChangeTeamState(int Team, int State);
+	void ChangeTeamState(int Team, int State) { m_TeamState[Team] = State; };
 	
 	bool TeamFinished(int Team);
 
@@ -46,14 +55,20 @@ public:
 	
 	int Count(int Team) const;
 	
-	//need to be very carefull using this method
-	void SetForceCharacterTeam(int id, int Team);
+	//need to be very careful using this method
+	void SetForceCharacterTeam(int ClientID, int Team);
 	
 	void Reset();
 	
-	void SendTeamsState(int Cid);
+	void SendTeamsState(int ClientID);
 
 	int m_LastChat[MAX_CLIENTS];
+
+	bool GetTeamState(int Team) { return m_TeamState[Team]; };
+
+	int GetTeamLeader(int Team) { return m_TeamLeader[Team]; };
+
+	void SetTeamLeader(int Team, int ClientID);
 };
 
 #endif

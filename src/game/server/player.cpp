@@ -37,6 +37,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int CID, int Team)
 	// Variable initialized:
 	m_Last_Pause = 0;
 	m_Last_Team = 0;
+	m_Asker = -1;
 }
 
 CPlayer::~CPlayer()

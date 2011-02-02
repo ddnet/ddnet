@@ -236,6 +236,11 @@ private:
 	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData, int ClientId);
+
+	static void ConAsk(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConYes(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConNo(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConInvite(IConsole::IResult *pResult, void *pUserData, int ClientId);
 public:
 	CLayers *Layers() { return &m_Layers; }
 	class IScore *Score() { return m_pScore; }
@@ -257,6 +262,7 @@ public:
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 };
+
 bool ComparePlayers(CPlayer *pl1, CPlayer *pl2);
 
 inline int CmaskAll() { return -1; }

@@ -1,3 +1,4 @@
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 /*Based on rajh's, Redix's & Sushi Tee's, DDRace mod stuff and tweaked byt btd and GreYFoX@GTi with STL to fit our DDRace needs*/
 #include <engine/server.h>
 #include <game/mapitems.h>
