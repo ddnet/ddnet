@@ -19,6 +19,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int CID, int Team)
 	this->m_ClientID = CID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_LastActionTick = Server()->Tick();
+	m_ChatScore = 0;
 }
 
 CPlayer::~CPlayer()
@@ -34,6 +35,9 @@ void CPlayer::Tick()
 #endif
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
+
+	if (m_ChatScore > 0)
+		m_ChatScore--;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 

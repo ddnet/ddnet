@@ -70,6 +70,8 @@ public:
 		int m_TargetX;
 		int m_TargetY;
 	} m_LatestActivity;
+
+	int m_ChatScore;
 	
 private:
 	CCharacter *Character;

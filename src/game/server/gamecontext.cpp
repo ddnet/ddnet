@@ -600,6 +600,15 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			return;
 		}
 
+		if ((p->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+		{
+			char aIP[16];
+			Server()->GetClientIP(ClientId, aIP, sizeof aIP);
+			Mute(aIP, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientId));
+			p->m_ChatScore = 0;
+			return;
+		}
+
 		// check for invalid chars
 		unsigned char *pMessage = (unsigned char *)pMsg->m_pMessage;
 		while (*pMessage)
