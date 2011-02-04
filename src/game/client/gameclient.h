@@ -218,6 +218,12 @@ public:
 	class CMapImages *m_pMapimages;
 	class CVoting *m_pVoting;
 	class CScoreboard *m_pScoreboard;
+
+	//DDRace
+	//TODO: This is ugly
+	class CRaceDemo *m_pRaceDemo;
+	class CGhost *m_pGhost;
+	bool m_IsRace;
 };
 
 

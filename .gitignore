@@ -47,4 +47,5 @@ DDRace-Server*
 *.user
 *.cmd
 .settings
+*.opensdf
 

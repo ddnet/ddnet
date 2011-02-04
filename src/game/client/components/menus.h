@@ -107,6 +107,7 @@ class CMenus : public CComponent
 		PAGE_NEWS=1,
 		PAGE_GAME,
 		PAGE_SERVER_INFO,
+		PAGE_GHOST,
 		PAGE_CALLVOTE,
 		PAGE_INTERNET,
 		PAGE_LAN,
@@ -180,15 +181,15 @@ class CMenus : public CComponent
 														str_comp_filenames(m_aFilename, Other.m_aFilename) < 0; }
 	};
 	
-	sorted_array<CDemoItem> m_lDemos;
 	char m_aCurrentDemoFolder[256];
 	int m_DemolistSelectedIndex;
 	bool m_DemolistSelectedIsDir;
 	int m_DemolistStorageType;
 	
 	void DemolistOnUpdate(bool Reset);
-	void DemolistPopulate();
 	static void DemolistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
+	
+	static void GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	
 	// found in menus.cpp
 	int Render();
@@ -207,6 +208,7 @@ class CMenus : public CComponent
 	void RenderServerControl(CUIRect MainView);
 	void RenderServerControlKick(CUIRect MainView);
 	void RenderServerControlServer(CUIRect MainView);
+	void RenderGhost(CUIRect MainView);
 	void RenderInGameBrowser(CUIRect MainView);
 	
 	// found in menus_browser.cpp
@@ -250,5 +252,25 @@ public:
 
 	//DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	sorted_array<CDemoItem> m_lDemos;
+	void DemolistPopulate();
+	
+	// ghost
+	struct CGhostItem
+	{
+		char m_aFilename[256];
+		char m_aPlayer[MAX_NAME_LENGTH];
+		
+		float m_Time;
+		
+		bool m_Active;
+		int m_ID;
+		
+		bool operator<(const CGhostItem &Other) { return m_Time < Other.m_Time; }
+	};
+	
+	sorted_array<CGhostItem> m_lGhosts;
+	
+	void GhostlistPopulate();
 };
 #endif

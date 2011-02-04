@@ -44,6 +44,8 @@
 #include "components/skins.h"
 #include "components/sounds.h"
 #include "components/voting.h"
+#include "components/race_demo.h"
+#include "components/ghost.h"
 #include <base/tl/sorted_array.h>
 
 CGameClient g_GameClient;
@@ -69,6 +71,8 @@ static CSounds gs_Sounds;
 static CEmoticon gs_Emoticon;
 static CDamageInd gsDamageInd;
 static CVoting gs_Voting;
+static CRaceDemo gs_RaceDemo;
+static CGhost gs_Ghost;
 
 static CPlayers gs_Players;
 static CNamePlates gs_NamePlates;
@@ -141,6 +145,9 @@ void CGameClient::OnConsoleInit()
 	m_pMapimages = &::gs_MapImages;
 	m_pVoting = &::gs_Voting;
 	m_pScoreboard = &::gs_Scoreboard;
+
+	m_pRaceDemo = &::gs_RaceDemo;
+	m_pGhost = &::gs_Ghost;
 	
 	// make a list of all the systems, make sure to add them in the corrent render order
 	m_All.Add(m_pSkins);
@@ -153,11 +160,13 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pSounds);
 	m_All.Add(m_pVoting);
 	m_All.Add(m_pParticles); // doesn't render anything, just updates all the particles
+	m_All.Add(m_pRaceDemo);
 	
 	m_All.Add(&gs_MapLayersBackGround); // first to render
 	m_All.Add(&m_pParticles->m_RenderTrail);
 	m_All.Add(&gs_Items);
 	m_All.Add(&gs_Players);
+	m_All.Add(m_pGhost);
 	m_All.Add(&gs_MapLayersForeGround);
 	m_All.Add(&m_pParticles->m_RenderExplosions);
 	m_All.Add(&gs_NamePlates);
@@ -308,6 +317,7 @@ void CGameClient::OnInit()
 	
 	m_ServerMode = SERVERMODE_PURE;
 
+	m_IsRace = false;
 	m_DDRaceMsgSent = false;
 }
 
@@ -397,6 +407,7 @@ void CGameClient::OnReset()
 		m_All.m_paComponents[i]->OnReset();
 
 	m_Teams.Reset();
+	m_IsRace = false;
 	m_DDRaceMsgSent = false;
 }
 
@@ -623,7 +634,11 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 		m_All.m_paComponents[i]->OnStateChange(NewState, OldState);
 }
 
-void CGameClient::OnShutdown() {}
+void CGameClient::OnShutdown()
+{
+	m_pRaceDemo->OnShutdown();
+}
+
 void CGameClient::OnEnterGame() {}
 
 void CGameClient::OnGameOver()
@@ -889,6 +904,8 @@ void CGameClient::OnNewSnapshot()
 		CNetMsg_Cl_IsDDRace Msg;
 		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 		m_DDRaceMsgSent = true;
+		if(!m_IsRace)
+			m_IsRace = true;
 	}
 
 }
