@@ -63,6 +63,7 @@ shutil.copy("readme.txt", package_dir)
 shutil.copy("license.txt", package_dir)
 shutil.copy("storage.cfg", package_dir)
 shutil.copy("announcement.txt", package_dir)
+shutil.copy("license_DDRace.txt", package_dir)
 
 if include_data and not use_bundle:
 	os.mkdir(os.path.join(package_dir, "data"))
