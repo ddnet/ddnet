@@ -65,10 +65,10 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData, int Clie
 	if(Seconds < 10)
 		Seconds = 10;
 
-	if(Victim == ClientId) {
-		pSelf->SendChatTarget(ClientId, "You can\'t mute yourself");
-	}
-	else {
+	if(Victim == ClientId)
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You can\'t mute yourself");
+	else
+	{
 		/*pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
 		str_format(aBuf, sizeof(aBuf), "You have been muted by for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
 		pSelf->SendChatTarget(Victim, aBuf);*/
@@ -85,10 +85,10 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int Cl
 	int Victim = pResult->GetVictim();
 	char aBuf[512];
 
-	if(Victim == ClientId) {
-		pSelf->SendChatTarget(ClientId, "You can\'t unmute yourself");
-	}
-	else {
+	if(Victim == ClientId)
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You can\'t unmute yourself");
+	else
+	{
 		if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
 		{
 			pSelf->m_apPlayers[Victim]->m_Muted = 0;
@@ -996,7 +996,7 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData, in
 	if(pSelf->m_apPlayers[ClientId]->m_IsUsingDDRaceClient)
 		pSelf->m_apPlayers[ClientId]->m_ShowOthers = !pSelf->m_apPlayers[ClientId]->m_ShowOthers;
 	else
-		pSelf->SendChatTarget(ClientId, "Showing players from other teams is only available with DDRace Client, http://DDRace.info");
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing players from other teams is only available with DDRace Client, http://DDRace.info");
 }
 
 void CGameContext::ConAsk(IConsole::IResult *pResult, void *pUserData, int ClientId)
@@ -1017,7 +1017,7 @@ void CGameContext::ConAsk(IConsole::IResult *pResult, void *pUserData, int Clien
 			Victim = i;
 			pVictim = pSelf->m_apPlayers[i]->GetCharacter();
 			Matches = 1;
-			pSelf->SendChatTarget(ClientId, "Exact Match found");
+			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Exact Match found");
 			break;
 		}
 		else if(pSelf->m_apPlayers[i] && i != ClientId && str_find_nocase(pServ->ClientName(i), Name))
@@ -1077,7 +1077,7 @@ void CGameContext::ConAsk(IConsole::IResult *pResult, void *pUserData, int Clien
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "hmm, i don't know why but you are not allowed to ask this player");
-	pSelf->SendChatTarget(ClientId, aBuf);
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	return;
 }
 
@@ -1088,9 +1088,7 @@ void CGameContext::ConYes(IConsole::IResult *pResult, void *pUserData, int Clien
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)pSelf->m_pController;
 	char aBuf[512];
 	if((pSelf->m_apPlayers[ClientId]->m_Asker == -1 || pSelf->m_apPlayers[ClientId]->m_Asker != -1) && pSelf->m_apPlayers[ClientId]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
-	{
-			pSelf->SendChatTarget(ClientId, "No valid questions, maybe they timed out.");
-	}
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "No valid questions, maybe they timed out.");
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "\'%s\' has accepted your request.", pServ->ClientName(ClientId));
@@ -1134,9 +1132,7 @@ void CGameContext::ConNo(IConsole::IResult *pResult, void *pUserData, int Client
 	CServer* pServ = (CServer*)pSelf->Server();
 	char aBuf[512];
 	if((pSelf->m_apPlayers[ClientId]->m_Asker == -1 || pSelf->m_apPlayers[ClientId]->m_Asker != -1) && pSelf->m_apPlayers[ClientId]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
-	{
-			pSelf->SendChatTarget(ClientId, "No valid question, maybe it timed out.");
-	}
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "No valid question, maybe it timed out.");
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "\'%s\' has rejected your request.", pServ->ClientName(ClientId));
@@ -1172,7 +1168,7 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData, int Cl
 			Victim = i;
 			pVictim = pSelf->m_apPlayers[i]->GetCharacter();
 			Matches = 1;
-			pSelf->SendChatTarget(ClientId, "Exact Match found");
+			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Exact Match found");
 			break;
 		}
 		else if(pSelf->m_apPlayers[i] && i != ClientId && str_find_nocase(pServ->ClientName(i), Name))
@@ -1217,6 +1213,6 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData, int Cl
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "hmm, i don't know why but you are not allowed to ask this player");
-	pSelf->SendChatTarget(ClientId, aBuf);
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	return;
 }
