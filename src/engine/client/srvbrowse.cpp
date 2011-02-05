@@ -183,9 +183,9 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterCheatTime == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_CHEATTIME))
 			Filtered = 1;
-		else if(g_Config.m_BrFilterTeams == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_TEAMS)
+		else if(g_Config.m_BrFilterTeams == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_TEAMS1)
 			Filtered = 1;
-		else if(g_Config.m_BrFilterTeams == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_TEAMS))
+		else if(g_Config.m_BrFilterTeams == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_TEAMS1))
 			Filtered = 1;
 		else if(g_Config.m_BrFilterTeamsStrict == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_STRICTTEAMS)
 			Filtered = 1;

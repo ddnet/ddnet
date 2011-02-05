@@ -977,11 +977,10 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 	i |= SERVER_FLAG_VERSION;
 	if(g_Config.m_Password[0])   // password set
 		i |= SERVER_FLAG_PASSWORD;
-	/* i commented this because these are going to change and i need them to be sent correctly in all server versions,
-	 * there is not point of publishing different version of those
-	 * until my Internet is back and i can clarify this wih heinrich5991 it will not be sent
-	if(g_Config.m_SvTeam >= 0)
-		i |= SERVER_FLAG_TEAMS;
+	if(g_Config.m_SvTeam == 0)
+		i |= SERVER_FLAG_TEAMS1;
+	else if(g_Config.m_SvTeam == 1)
+		i |= SERVER_FLAG_TEAMS2;
 	if(g_Config.m_SvTeamStrict)
 		i |= SERVER_FLAG_STRICTTEAMS;
 	if(g_Config.m_SvCheats)
@@ -1008,7 +1007,7 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 		i |= SERVER_FLAG_MAPTEST;
 	if(g_Config.m_SvServerTest)
 		i |= SERVER_FLAG_SERVERTEST;
-	*/
+
 	str_format(aBuf, sizeof(aBuf), "%d", i);
 	p.AddString(aBuf, 2);// i don't know why the limit was 11 while there were 16 flags
 
