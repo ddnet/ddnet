@@ -1009,7 +1009,7 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 		i |= SERVER_FLAG_SERVERTEST;
 
 	str_format(aBuf, sizeof(aBuf), "%d", i);
-	p.AddString(aBuf, 2);// i don't know why the limit was 11 while there were 16 flags
+	p.AddString(aBuf, 11);
 
 	// progression
 	str_format(aBuf, sizeof(aBuf), "%d", m_BrowseinfoProgression);

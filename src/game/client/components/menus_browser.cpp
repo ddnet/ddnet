@@ -12,7 +12,6 @@
 #include "menus.h"
 #include <game/localization.h>
 #include <game/version.h>
-#include <engine/shared/protocol.h>
 
 void CMenus::RenderServerbrowserServerList(CUIRect View)
 {

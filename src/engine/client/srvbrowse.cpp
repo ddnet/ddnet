@@ -283,8 +283,7 @@ void CServerBrowser::Filter()
 
 int CServerBrowser::SortHash() const
 {
-	int i = g_Config.m_BrSort&0x7;
-	i |= g_Config.m_BrFilterGametypeStrict<<3;
+	int i = g_Config.m_BrSort&0xf;
 	i |= g_Config.m_BrFilterEmpty<<4;
 	i |= g_Config.m_BrFilterFull<<5;
 	i |= g_Config.m_BrFilterPw<<6;
@@ -294,21 +293,6 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterPureMap<<10;
 	i |= g_Config.m_BrFilterPing<<16;
 	return i;
-	//TODO: DDRace Add these here after understanding how it works
-	/*
-	 * i |= g_Config.m_BrFilterCheats<<;
-	 * i |= g_Config.m_BrFilterCheatTime<<;
-	 * i |= g_Config.m_BrFilterTeams<<;
-	 * i |= g_Config.m_BrFilterTeamsStrict<<;
-	 * i |= g_Config.m_BrFilterPause<<;
-	 * i |= g_Config.m_BrFilterPauseTime<<;
-	 * i |= g_Config.m_BrFilterPlayerCollision<<;
-	 * i |= g_Config.m_BrFilterPlayerHooking<<;
-	 * i |= g_Config.m_BrFilterPlayerHitting<<;
-	 * i |= g_Config.m_BrFilterEndlessHooking<<;
-	 * i |= g_Config.m_BrFilterTestMap<<;
-	 * i |= g_Config.m_BrFilterTestServer<<;
-	 */
 }
 
 void CServerBrowser::Sort()
@@ -350,6 +334,7 @@ void CServerBrowser::Sort()
 	str_copy(m_aFilterGametypeString, g_Config.m_BrFilterGametype, sizeof(m_aFilterGametypeString));
 	str_copy(m_aFilterString, g_Config.m_BrFilterString, sizeof(m_aFilterString));
 	m_Sorthash = SortHash();
+	m_DDRaceSorthash = DDRaceSortHash();
 }
 
 void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
@@ -711,7 +696,7 @@ void CServerBrowser::Update()
 
 	// check if we need to resort
 	// TODO: remove the str_comp
-	if(m_Sorthash != SortHash() || str_comp(m_aFilterString, g_Config.m_BrFilterString) != 0 || str_comp(m_aFilterGametypeString, g_Config.m_BrFilterGametype) != 0)
+	if(m_Sorthash != SortHash() || m_DDRaceSorthash != DDRaceSortHash() || str_comp(m_aFilterString, g_Config.m_BrFilterString) != 0 || str_comp(m_aFilterGametypeString, g_Config.m_BrFilterGametype) != 0)
 		Sort();
 }
 
@@ -813,3 +798,25 @@ void CServerBrowser::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 		pConfig->WriteLine(aBuffer);
 	}
 }
+
+int CServerBrowser::DDRaceSortHash() const
+{
+	int i = g_Config.m_BrSort&0xf;
+	i |= g_Config.m_BrFilterCheats<<4;
+	i |= g_Config.m_BrFilterCheatTime<<5;
+	i |= g_Config.m_BrFilterTeams<<6;
+	i |= g_Config.m_BrFilterTeamsStrict<<7;
+	i |= g_Config.m_BrFilterPause<<8;
+	i |= g_Config.m_BrFilterPauseTime<<9;
+	i |= g_Config.m_BrFilterPlayerCollision<<10;
+	i |= g_Config.m_BrFilterPlayerHooking<<11;
+	i |= g_Config.m_BrFilterPlayerHitting<<12;
+	i |= g_Config.m_BrFilterEndlessHooking<<13;
+	i |= g_Config.m_BrFilterTestMap<<14;
+	i |= g_Config.m_BrFilterTestServer<<15;
+	return i;
+	//TODO: DDRace Add these here after understanding how it works
+
+
+}
+

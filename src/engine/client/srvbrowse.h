@@ -111,6 +111,10 @@ private:
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 
 	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
+
+	//DDRace
+	int DDRaceSortHash() const;
+	int m_DDRaceSorthash;
 };
 
 #endif
