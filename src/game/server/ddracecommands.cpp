@@ -1008,7 +1008,7 @@ void CGameContext::ConAsk(IConsole::IResult *pResult, void *pUserData, int Clien
 	int Matches = 0;
 	int Victim = -1;
 	CCharacter* pAsker = pSelf->m_apPlayers[ClientId]->GetCharacter();
-	CCharacter* pVictim;
+	CCharacter* pVictim = 0;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -1087,7 +1087,7 @@ void CGameContext::ConYes(IConsole::IResult *pResult, void *pUserData, int Clien
 	CServer* pServ = (CServer*)pSelf->Server();
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)pSelf->m_pController;
 	char aBuf[512];
-	if(pSelf->m_apPlayers[ClientId]->m_Asker == -1 || pSelf->m_apPlayers[ClientId]->m_Asker != -1 && pSelf->m_apPlayers[ClientId]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
+	if((pSelf->m_apPlayers[ClientId]->m_Asker == -1 || pSelf->m_apPlayers[ClientId]->m_Asker != -1) && pSelf->m_apPlayers[ClientId]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
 	{
 			pSelf->SendChatTarget(ClientId, "No valid questions, maybe they timed out.");
 	}
@@ -1133,7 +1133,7 @@ void CGameContext::ConNo(IConsole::IResult *pResult, void *pUserData, int Client
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CServer* pServ = (CServer*)pSelf->Server();
 	char aBuf[512];
-	if(pSelf->m_apPlayers[ClientId]->m_Asker == -1 || pSelf->m_apPlayers[ClientId]->m_Asker != -1 && pSelf->m_apPlayers[ClientId]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
+	if((pSelf->m_apPlayers[ClientId]->m_Asker == -1 || pSelf->m_apPlayers[ClientId]->m_Asker != -1) && pSelf->m_apPlayers[ClientId]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
 	{
 			pSelf->SendChatTarget(ClientId, "No valid question, maybe it timed out.");
 	}
@@ -1163,7 +1163,7 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData, int Cl
 	int Matches = 0;
 	int Victim = -1;
 	CCharacter* pAsker = pSelf->m_apPlayers[ClientId]->GetCharacter();
-	CCharacter* pVictim;
+	CCharacter* pVictim = 0;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
