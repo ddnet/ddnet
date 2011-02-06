@@ -1383,7 +1383,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_Core.m_Vel.x > 0)
 		{
 			if((int)GameServer()->Collision()->GetPos(MapIndex).x < (int)m_Core.m_Pos.x)
-				m_Core.m_Pos.x = m_PrevPos.x;
+				m_Core.m_Pos = m_PrevPos;
 			m_Core.m_Vel.x = 0;
 		}
 	}
@@ -1393,7 +1393,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_Core.m_Vel.x < 0)
 		{
 			if((int)GameServer()->Collision()->GetPos(MapIndex).x > (int)m_Core.m_Pos.x)
-				m_Core.m_Pos.x = m_PrevPos.x;
+				m_Core.m_Pos = m_PrevPos;
 			m_Core.m_Vel.x = 0;
 		}
 	}
@@ -1403,7 +1403,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_Core.m_Vel.y < 0)
 		{
 			if((int)GameServer()->Collision()->GetPos(MapIndex).y > (int)m_Core.m_Pos.y)
-				m_Core.m_Pos.y = m_PrevPos.y;
+				m_Core.m_Pos = m_PrevPos;
 			m_Core.m_Vel.y = 0;
 		}
 	}
@@ -1413,7 +1413,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_Core.m_Vel.y > 0)
 		{
 			if((int)GameServer()->Collision()->GetPos(MapIndex).y < (int)m_Core.m_Pos.y)
-				m_Core.m_Pos.y = m_PrevPos.y;
+				m_Core.m_Pos = m_PrevPos;
 			m_Core.m_Vel.y = 0;
 		}
 		m_Core.m_Jumped = 0;
