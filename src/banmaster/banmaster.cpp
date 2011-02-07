@@ -130,7 +130,7 @@ void PurgeBans()
 	}
 }
 
-void ConBan(IConsole::IResult *pResult, void *pUser)
+void ConBan(IConsole::IResult *pResult, void *pUser, int ClientID)
 {
 	NETADDR Addr;
 	const char *pStr = pResult->GetString(0);
@@ -145,12 +145,12 @@ void ConBan(IConsole::IResult *pResult, void *pUser)
 		dbg_msg("banmaster", "invalid network address to ban");
 }
 
-void ConUnbanAll(IConsole::IResult *pResult, void *pUser)
+void ConUnbanAll(IConsole::IResult *pResult, void *pUser, int ClientID)
 {
 	ClearBans();
 }
 
-void ConSetBindAddr(IConsole::IResult *pResult, void *pUser)
+void ConSetBindAddr(IConsole::IResult *pResult, void *pUser, int ClientID)
 {
 	if(m_aBindAddr[0])
 		return;
@@ -174,9 +174,9 @@ int main(int argc, const char **argv) // ignore_convention
 
 	m_pConsole = CreateConsole(CFGFLAG_BANMASTER);
 	m_pConsole->RegisterPrintCallback(StandardOutput, 0);
-	m_pConsole->Register("ban", "s?r", CFGFLAG_BANMASTER, ConBan, 0, "Bans the specified ip");
-	m_pConsole->Register("unban_all", "", CFGFLAG_BANMASTER, ConUnbanAll, 0, "Unbans all ips");
-	m_pConsole->Register("bind", "s", CFGFLAG_BANMASTER, ConSetBindAddr, 0, "Binds to the specified address");
+	m_pConsole->Register("ban", "s?r", CFGFLAG_BANMASTER, ConBan, 0, "Bans the specified ip", 0);
+	m_pConsole->Register("unban_all", "", CFGFLAG_BANMASTER, ConUnbanAll, 0, "Unbans all ips", 0);
+	m_pConsole->Register("bind", "s", CFGFLAG_BANMASTER, ConSetBindAddr, 0, "Binds to the specified address", 0);
 
 	{
 		bool RegisterFail = false;
