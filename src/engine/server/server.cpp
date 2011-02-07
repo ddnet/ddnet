@@ -1246,7 +1246,7 @@ int CServer::Run()
 
 	m_NetServer.SetCallbacks(NewClientCallback, DelClientCallback, this);
 
-	Console()->ExecuteFile(SERVER_BANMASTERFILE);
+	Console()->ExecuteFile(SERVER_BANMASTERFILE, 0, 0, 0, 0, 4);
 		
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
