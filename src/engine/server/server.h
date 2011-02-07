@@ -232,6 +232,9 @@ public:
 	virtual void SnapFreeID(int ID);
 	virtual void *SnapNewItem(int Type, int Id, int Size);
 	void SnapSetStaticsize(int ItemType, int Size);
+	static void ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientId);
+	static void ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientId);
+	static void ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientId);
 };
 
 #endif

@@ -28,6 +28,8 @@
 
 #include <string.h>
 
+#include <banmaster/banmaster.h>
+
 #include "register.h"
 #include "server.h"
 #include "../shared/linereader.h"
@@ -38,6 +40,8 @@
 	#define NOGDI
 	#include <windows.h>
 #endif
+
+static const char SERVER_BANMASTERFILE[] = "banmasters.cfg";
 
 static const char *StrLtrim(const char *pStr)
 {
@@ -1095,6 +1099,33 @@ void CServer::PumpNetwork()
 				{
 					SendServerInfo(&Packet.m_Address, -1);
 				}
+				
+				if(Packet.m_DataSize >= sizeof(BANMASTER_IPOK) &&
+				  mem_comp(Packet.m_pData, BANMASTER_IPOK, sizeof(BANMASTER_IPOK)) == 0 &&
+				  m_NetServer.BanmasterCheck(&Packet.m_Address) != -1)
+				{
+				}
+
+				if(Packet.m_DataSize >= sizeof(BANMASTER_IPBAN) &&
+				  mem_comp(Packet.m_pData, BANMASTER_IPBAN, sizeof(BANMASTER_IPBAN)) == 0 &&
+				  g_Config.m_SvGlobalBantime &&
+				  m_NetServer.BanmasterCheck(&Packet.m_Address) != -1)
+				{
+					CUnpacker Up;
+					char aIp[32];
+					char aReason[256];
+					NETADDR Addr;
+					Up.Reset((unsigned char*)Packet.m_pData + sizeof(BANMASTER_IPBAN), Packet.m_DataSize - sizeof(BANMASTER_IPBAN));
+					str_copy(aIp, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(aIp));
+					str_copy(aReason, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(aReason));
+					if (net_addr_from_str(&Addr, aIp))
+					{
+						dbg_msg("globalbans", "dropped weird message from banmaster");
+						return;
+					}
+					m_NetServer.BanAdd(Addr, g_Config.m_SvGlobalBantime * 60, aReason);
+					dbg_msg("globalbans", "added ban, ip=%d.%d.%d.%d, reason=\"%s\"", Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3], aReason);
+				}
 			}
 		}
 		else
@@ -1214,7 +1245,9 @@ int CServer::Run()
 	}
 
 	m_NetServer.SetCallbacks(NewClientCallback, DelClientCallback, this);
-	
+
+	Console()->ExecuteFile(SERVER_BANMASTERFILE);
+		
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -1633,6 +1666,10 @@ void CServer::RegisterCommands()
 	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "", 3);
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "", 3);
 	
+	Console()->Register("add_banmaster", "s", CFGFLAG_SERVER, ConAddBanmaster, this, "", 4);
+	Console()->Register("banmasters", "", CFGFLAG_SERVER, ConBanmasters, this, "", 3);
+	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "", 4);
+	
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "", 3);
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
@@ -1912,4 +1949,43 @@ NETADDR CServer::GetClientIP(int ClientID)//this may exist already but i couldn'
 {
 	return m_NetServer.ClientAddr(ClientID);
 }
+
+void CServer::ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientId)
+{
+	CServer *pServer = (CServer *)pUser;
+	
+	int Result = pServer->m_NetServer.BanmasterAdd(pResult->GetString(0));
+	
+	if(Result == 0)
+		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "succesfully added banmaster");
+	else if (Result == 1)
+		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "invalid address for banmaster / net lookup failed");
+	else
+		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "too many banmasters");
+}
+
+void CServer::ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientId)
+{
+	CServer *pServer = (CServer *)pUser;
+	int NumBanmasters = pServer->m_NetServer.BanmasterNum();
+	
+	char aBuf[128];
+	char aIpString[64];
+	
+	for(int i = 0; i < NumBanmasters; i++)
+	{
+		NETADDR *pBanmaster = pServer->m_NetServer.BanmasterGet(i);
+		net_addr_str(pBanmaster, aIpString, sizeof(aIpString));
+		str_format(aBuf, sizeof(aBuf), "%d: %s", i, aIpString);
+		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", aBuf);
+	}
+}
+
+void CServer::ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientId)
+{
+	CServer *pServer = (CServer *)pUser;
+	
+	pServer->m_NetServer.BanmastersClear();
+}
+
 

@@ -289,6 +289,20 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
+	int BanmasterAdd(const char *pAddrStr);
+	int BanmasterNum() const;
+	NETADDR* BanmasterGet(int Index);
+	int BanmasterCheck(NETADDR *pAddr);
+	void BanmastersClear();
+	enum
+	{
+		MAX_BANMASTERS=16,
+		NETSERVER_DISABLEBANMASTER=1,
+	};
+	int m_Flags;
+	NETADDR m_aBanmasters[MAX_BANMASTERS];
+	int m_NumBanmasters;
+
 };
 
 
