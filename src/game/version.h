@@ -3,6 +3,6 @@
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
 
-#define GAME_VERSION "0.5 trunk, 1.03a"
+#define GAME_VERSION "0.5 trunk, 1.04a"
 #define GAME_NETVERSION "0.5 b67d1f1a1eea234e"
 #endif

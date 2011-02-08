@@ -12,7 +12,7 @@ CONSOLE_COMMAND("logout", "v", CFGFLAG_SERVER, ConLogOut, this, "Logs player v o
 CONSOLE_COMMAND("helper", "v", CFGFLAG_SERVER, ConSetlvl1, this, "Authenticates player v to the level of 1", 2)
 CONSOLE_COMMAND("moder", "v", CFGFLAG_SERVER, ConSetlvl2, this, "Authenticates player v to the level of 2", 3)
 CONSOLE_COMMAND("admin", "v", CFGFLAG_SERVER, ConSetlvl3, this, "Authenticates player v to the level of 3 (CAUTION: Irreversible, once he is an admin you can't remove his status)", 3)
-6CONSOLE_COMMAND("invis", "v", CFGFLAG_SERVER|CMDFLAG_CHEAT|CMDFLAG_HELPERCMD, ConInvis, this, "Makes player v invisible", 2)
+CONSOLE_COMMAND("invis", "v", CFGFLAG_SERVER|CMDFLAG_CHEAT|CMDFLAG_HELPERCMD, ConInvis, this, "Makes player v invisible", 2)
 CONSOLE_COMMAND("vis", "v", CFGFLAG_SERVER|CMDFLAG_CHEAT|CMDFLAG_HELPERCMD, ConVis, this, "Makes player v visible again", 2)
 CONSOLE_COMMAND("timerstop", "v", CFGFLAG_SERVER|CMDFLAG_TIMER, ConTimerStop, this, "Stops the timer of player v", 2)
 CONSOLE_COMMAND("timerstart", "v", CFGFLAG_SERVER|CMDFLAG_TIMER, ConTimerStart, this, "Starts the timer of player v", 2)
@@ -63,7 +63,7 @@ CONSOLE_COMMAND("yes", "", CFGFLAG_SERVER, ConYes, this, "Reply yes", -1)
 CONSOLE_COMMAND("no", "", CFGFLAG_SERVER, ConNo, this, "Reply no", -1)
 CONSOLE_COMMAND("invite", "s", CFGFLAG_SERVER, ConInvite, this, "Invite a player to your team (You must be the leader)", -1)
 CONSOLE_COMMAND("mute", "", CFGFLAG_SERVER, ConMute, this, "", 2);
-CONSOLE_COMMAND("muteid", "ii", CFGFLAG_SERVER, ConMuteID, this, "", 2);
+CONSOLE_COMMAND("muteid", "vi", CFGFLAG_SERVER, ConMuteID, this, "", 2);
 CONSOLE_COMMAND("muteip", "si", CFGFLAG_SERVER, ConMuteIP, this, "", 2);
 CONSOLE_COMMAND("unmute", "i", CFGFLAG_SERVER, ConUnmute, this, "", 2);
 CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "", 2);
