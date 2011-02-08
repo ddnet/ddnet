@@ -223,6 +223,12 @@ void CCharacter::HandleWeaponSwitch()
 	if(m_QueuedWeapon != -1)
 		WantedWeapon = m_QueuedWeapon;
 	
+	bool Anything;
+	 for(int i = 0; i < NUM_WEAPONS - 1; ++i)
+		 if(m_aWeapons[i].m_Got)
+			 Anything = true;
+	 if(!Anything)
+		 return;
 	// select Weapon
 	int Next = CountInput(m_LatestPrevInput.m_NextWeapon, m_LatestInput.m_NextWeapon).m_Presses;
 	int Prev = CountInput(m_LatestPrevInput.m_PrevWeapon, m_LatestInput.m_PrevWeapon).m_Presses;
