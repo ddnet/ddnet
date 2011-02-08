@@ -24,8 +24,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int CID, int Team)
 	this->m_ClientID = CID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_LastActionTick = Server()->Tick();
-
-	m_Muted = 0;
+	m_ChatScore = 0;
 	m_PauseInfo.m_Respawn = false;
 	
 	GameServer()->Score()->PlayerData(CID)->Reset();
@@ -52,6 +51,9 @@ void CPlayer::Tick()
 #endif
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
+
+	if (m_ChatScore > 0)
+		m_ChatScore--;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 
@@ -93,7 +95,6 @@ void CPlayer::Tick()
 	}
 	else if(m_Spawning && m_RespawnTick <= Server()->Tick())
 		TryRespawn();
-	if(m_Muted > 0) m_Muted--;
 }
 
 void CPlayer::Snap(int SnappingClient)
@@ -140,13 +141,6 @@ void CPlayer::OnDisconnect()
 
 	if(Server()->ClientIngame(m_ClientID))
 	{
-		if(m_Muted > 0)
-		{
-			int Temp = m_Muted;
-			m_Muted = 0;
-			((CServer *)Server())->BanAdd(((CServer *)Server())->GetClientIP(m_ClientID), ((Temp/Server()->TickSpeed())+1), "Mute evasion");
-			return;
-		}
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),  "'%s' has left the game", Server()->ClientName(m_ClientID));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);

@@ -124,11 +124,12 @@ public:
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
 	bool m_Invisible;
-	int m_Muted;
 	int m_Authed;
 	bool m_IsUsingDDRaceClient;
 	bool m_ShowOthers;
 	bool m_RconFreeze;
+
+	int m_ChatScore;
 
 	// necessary for asking mutual exclusion
 	int m_Asker; // who asked this player

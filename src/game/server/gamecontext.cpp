@@ -27,6 +27,8 @@
 #include "score/sql_score.h"
 #endif
 
+struct CMute CGameContext::m_aMutes[MAX_MUTES];
+
 enum
 {
 	RESET,
@@ -47,8 +49,12 @@ void CGameContext::Construct(int Resetting)
 	m_pVoteOptionLast = 0;
 
 	if(Resetting==NO_RESET)
+	{
 		m_pVoteOptionHeap = new CHeap();
 	m_pScore = 0;
+		for(int z = 0; z < MAX_MUTES; ++z)
+			m_aMutes[z].m_IP[0] = 0;
+	}
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -701,6 +707,32 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			return;
 		}
 
+		char aIP[16];
+		int MuteTicks = 0;
+
+		Server()->GetClientIP(ClientId, aIP, sizeof aIP);
+
+		for(int z = 0; z < MAX_MUTES && MuteTicks <= 0; ++z) //find a mute, remove it, if expired.
+			if (m_aMutes[z].m_IP[0] && str_comp(aIP, m_aMutes[z].m_IP) == 0 && (MuteTicks = m_aMutes[z].m_Expire - Server()->Tick()) <= 0)
+					m_aMutes[z].m_IP[0] = 0;
+
+		if (MuteTicks > 0)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", MuteTicks / Server()->TickSpeed());
+			SendChatTarget(ClientId, aBuf);
+			return;
+		}
+
+		if ((p->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+		{
+			char aIP[16];
+			Server()->GetClientIP(ClientId, aIP, sizeof aIP);
+			Mute(aIP, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientId));
+			p->m_ChatScore = 0;
+			return;
+		}
+
 		// check for invalid chars
 		unsigned char *pMessage = (unsigned char *)pMsg->m_pMessage;
 		while (*pMessage)
@@ -718,18 +750,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			Console()->ExecuteLine(pMsg->m_pMessage + 1, ((CServer *) Server())->m_aClients[ClientId].m_Authed, ClientId, CServer::SendRconLineAuthed, Server(), SendChatResponse, &Info);
 		}
 		else
-		{
-			if(m_apPlayers[ClientId]->m_Muted == 0)
-			{
-				SendChat(ClientId, Team, pMsg->m_pMessage, ClientId);
-			}
-			else
-			{
-				char aBuf[64];
-				str_format(aBuf,sizeof(aBuf), "You are muted, Please wait for %d second(s)", m_apPlayers[ClientId]->m_Muted / Server()->TickSpeed());
-				SendChatTarget(ClientId, aBuf);
-			}
-		}
+			SendChat(ClientId, Team, pMsg->m_pMessage, ClientId);
 	}
 	else if(MsgId == NETMSGTYPE_CL_CALLVOTE)
 	{

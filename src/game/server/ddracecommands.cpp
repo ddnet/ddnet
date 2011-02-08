@@ -56,55 +56,6 @@ void CGameContext::MoveCharacter(int ClientId, int Victim, int X, int Y, bool Ra
 		pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
-void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData, int ClientId)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-	int Seconds = pResult->GetInteger(0);
-	char aBuf[512];
-	if(Seconds < 10)
-		Seconds = 10;
-
-	if(Victim == ClientId)
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You can\'t mute yourself");
-	else
-	{
-		/*pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
-		str_format(aBuf, sizeof(aBuf), "You have been muted by for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
-		pSelf->SendChatTarget(Victim, aBuf);*/
-
-		pSelf->m_apPlayers[Victim]->m_Muted = Seconds * pSelf->Server()->TickSpeed();
-		str_format(aBuf, sizeof(aBuf), "%s muted by %s for %d seconds", pSelf->Server()->ClientName(Victim), pSelf->Server()->ClientName(ClientId), Seconds);
-		pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-	}
-}
-
-void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientId)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-	char aBuf[512];
-
-	if(Victim == ClientId)
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You can\'t unmute yourself");
-	else
-	{
-		if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
-		{
-			pSelf->m_apPlayers[Victim]->m_Muted = 0;
-			str_format(aBuf, sizeof(aBuf), "You have been unmuted", pSelf->Server()->ClientName(Victim));
-			pSelf->SendChatTarget(Victim, aBuf);
-		}
-
-		/*if(pSelf->m_apPlayers[Victim]->m_Muted > 0)
-		{
-			pSelf->m_apPlayers[Victim]->m_Muted = 0;
-			str_format(aBuf, sizeof(aBuf), "%s has been unmuted", pSelf->Server()->ClientName(Victim));
-			pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-		}*/
-	}
-}
-
 void CGameContext::ConSetlvl3(IConsole::IResult *pResult, void *pUserData, int ClientId)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1181,7 +1132,7 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData, int Cl
 	if(!pAsker || !pAsker->IsAlive())
 		str_format(aBuf, sizeof(aBuf), "You can\'t invite while dead.");
 	else if(pAsker->Team() == 0)
-		str_format(aBuf, sizeof(aBuf), "You are in team %d, use /leader or /ask.", pAsker->Team());
+		str_format(aBuf, sizeof(aBuf), "You are in team %d, use /ask.", pAsker->Team());
 	else if(pAsker->Team() && ClientId != Controller->m_Teams.GetTeamLeader(pAsker->Team()))
 		str_format(aBuf, sizeof(aBuf), "You already are in team %d, but not leader.", pAsker->Team());
 	else if(Matches > 1)
@@ -1216,3 +1167,97 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData, int Cl
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	return;
 }
+
+void CGameContext::Mute(const char *pIP, int Secs, const char *pDisplayName)
+{
+	char aBuf[128];
+	// purge expired mutes first
+	for(int z = 0; z < MAX_MUTES; ++z)
+		if (m_aMutes[z].m_IP[0] && m_aMutes[z].m_Expire <= Server()->Tick())
+			m_aMutes[z].m_IP[0] = 0;
+
+	int FoundInd = -1;
+	// find a matching mute for this ip, update expiration time if found
+	for(int z = 0; z < MAX_MUTES; ++z)
+		if (m_aMutes[z].m_IP[0] && str_comp(m_aMutes[z].m_IP, pIP) == 0)
+			m_aMutes[FoundInd = z].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+
+	if (FoundInd == -1) // nothing found so far, find a free slot..
+		for(int z = 0; z < MAX_MUTES; ++z) //..in order to add a new mute
+			if (!m_aMutes[z].m_IP[0])
+			{
+				str_copy(m_aMutes[z].m_IP, pIP, str_length(pIP)+1);
+				m_aMutes[FoundInd = z].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+				break;
+			}
+
+	if (FoundInd != -1)
+	{
+		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds.", pDisplayName, Secs);
+		SendChat(-1, CHAT_ALL, aBuf);
+	}
+	else // no free slot found
+		Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "mute array is full");
+}
+
+void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData, int ClientId)
+{
+	((CGameContext *)pUserData)->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Use either 'muteid <client_id> <seconds>' or 'muteip <ip> <seconds>'");
+}
+
+// mute through client id
+void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientId = pResult->GetInteger(0);
+	if (ClientId < 0 || ClientId >= MAX_CLIENTS || !pSelf->m_apPlayers[ClientId])
+		return;
+
+	char aIP[16];
+	pSelf->Server()->GetClientIP(ClientId, aIP, sizeof aIP);
+
+	pSelf->Mute(aIP, clamp(pResult->GetInteger(1), 1, 60*60*24*365), pSelf->Server()->ClientName(ClientId));
+}
+
+// mute through ip, arguments reversed to workaround parsing
+void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData, int ClientId)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Mute(pResult->GetString(0), clamp(pResult->GetInteger(1), 1, 60*60*24*365), pResult->GetString(0));
+}
+
+// unmute by mute list index
+void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	char aBuf[32];
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Ind = pResult->GetInteger(0);
+
+	if (Ind < 0 || Ind >= MAX_MUTES || !m_aMutes[Ind].m_IP[0])
+		return;
+
+	str_format(aBuf, sizeof aBuf, "Unmuted %s" , m_aMutes[Ind].m_IP);
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+
+	m_aMutes[Ind].m_IP[0] = 0;
+}
+
+// list mutes
+void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	char aBuf[128];
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Active mutes:");
+	for(int z = 0; z < MAX_MUTES; ++z)
+		if (m_aMutes[z].m_IP[0])
+		{
+			int Exp = (m_aMutes[z].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed();
+			if (Exp > 0)
+				str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", z, m_aMutes[z].m_IP, Exp);
+			else
+				str_format(aBuf, sizeof aBuf, "%d: \"%s\", expired (pending)", z, m_aMutes[z].m_IP);
+
+			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		}
+}
+

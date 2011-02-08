@@ -15,6 +15,8 @@
 #include "player.h"
 #include "score.h"
 
+#define MAX_MUTES 32
+
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -172,8 +174,8 @@ private:
 
 	//DDRace Console Commands
 
-	static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	//static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	//static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConLogOut(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConSetlvl1(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConSetlvl2(IConsole::IResult *pResult, void *pUserData, int ClientId);
@@ -241,6 +243,14 @@ private:
 	static void ConYes(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConNo(IConsole::IResult *pResult, void *pUserData, int ClientId);
 	static void ConInvite(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConMuteID(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConMutes(IConsole::IResult *pResult, void *pUserData, int ClientID);
+
+	static struct CMute m_aMutes[MAX_MUTES];
+	void Mute(const char *pIP, int Secs, const char *pDisplayName);
 public:
 	CLayers *Layers() { return &m_Layers; }
 	class IScore *Score() { return m_pScore; }
@@ -263,6 +273,10 @@ public:
 	virtual bool PlayerHooking();
 };
 
+struct CMute {
+	char m_IP[16];// TODO ipv6
+	int m_Expire;
+};
 bool ComparePlayers(CPlayer *pl1, CPlayer *pl2);
 
 inline int CmaskAll() { return -1; }
