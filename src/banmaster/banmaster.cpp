@@ -215,7 +215,7 @@ int main(int argc, const char **argv) // ignore_convention
 		CNetChunk p;
 		while(m_Net.Recv(&p))
 		{
-			if(p.m_DataSize >= sizeof(BANMASTER_IPCHECK) &&
+			if(p.m_DataSize >= (int)sizeof(BANMASTER_IPCHECK) &&
 				!mem_comp(p.m_pData, BANMASTER_IPCHECK, sizeof(BANMASTER_IPCHECK)))
 			{
 				char *pAddr = (char*)p.m_pData + sizeof(BANMASTER_IPCHECK);
