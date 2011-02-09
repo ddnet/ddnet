@@ -21,6 +21,12 @@ public:
 		int m_Score;
 	} ;
 
+	enum
+	{
+		FLAG_VERSION_VANILLA=0,
+		FLAG_VERSION_DDRACE
+	};
+
 	int m_SortedIndex;
 	int m_ServerIndex;
 	
@@ -32,6 +38,7 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
+	int m_FlagVersion;
 	int m_Favorite;
 	int m_Latency; // in ms
 	char m_aGameType[16];

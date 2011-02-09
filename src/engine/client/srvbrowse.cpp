@@ -175,6 +175,11 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(g_Config.m_BrFilterCompatversion && str_comp_num(m_ppServerlist[i]->m_Info.m_aVersion, m_aNetVersion, 3) != 0)
 			Filtered = 1;
+		else if((g_Config.m_BrFilterCheats || g_Config.m_BrFilterCheatTime || g_Config.m_BrFilterTeams || g_Config.m_BrFilterTeamsStrict || 
+			g_Config.m_BrFilterPause || g_Config.m_BrFilterPauseTime || g_Config.m_BrFilterPlayerCollision || g_Config.m_BrFilterPlayerHooking || 
+			g_Config.m_BrFilterPlayerHitting || g_Config.m_BrFilterEndlessHooking || g_Config.m_BrFilterTestMap || g_Config.m_BrFilterTestServer) &&
+			(m_ppServerlist[i]->m_Info.m_FlagVersion != CServerInfo::FLAG_VERSION_DDRACE))
+			Filtered = 1;
 		else if(g_Config.m_BrFilterCheats == 1 && m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_CHEATS)
 			Filtered = 1;
 		else if(g_Config.m_BrFilterCheats == 2 && !(m_ppServerlist[i]->m_Info.m_Flags&SERVER_FLAG_CHEATS))
