@@ -178,15 +178,28 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 
 	if(OldTeam != TEAM_FLOCK && OldTeam != TEAM_SUPER && ClientID == GetTeamLeader(OldTeam))
 	{
-		if(Count(OldTeam))
+		if(Count(OldTeam) > 1)
 		{
 			int FirstJoinedID = -1;
 			int Tick = Server()->Tick();
 			for (int LoopCID = 0; LoopCID < MAX_CLIENTS; ++LoopCID)
 				if(m_Core.Team(LoopCID) == OldTeam)
 					if(m_TeeJoinTick[LoopCID] < Tick)
+					{
 						FirstJoinedID = LoopCID;
-			SetTeamLeader(OldTeam, FirstJoinedID);
+						Tick = m_TeeJoinTick[LoopCID];
+					}
+			if(FirstJoinedID != -1)
+				SetTeamLeader(OldTeam, FirstJoinedID);
+		}
+		else if(Count(OldTeam))
+		{
+			for (int LoopCID = 0; LoopCID < MAX_CLIENTS; ++LoopCID)
+				if(m_Core.Team(LoopCID) == OldTeam)
+				{
+					SetTeamLeader(OldTeam, LoopCID);
+					break;
+				}
 		}
 		else
 			SetTeamLeader(OldTeam, -1);
@@ -256,8 +269,10 @@ void CGameTeams::SetTeamLeader(int Team, int ClientID)
 {
 	if(Team == TEAM_FLOCK || Team == TEAM_SUPER)
 		return;
-	char aBuf[64];
 	m_TeamLeader[Team] = ClientID;
+	if(ClientID == -1)
+		return;
+	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "\'%s\' is now the team %d leader.", Server()->ClientName(ClientID), Team);
 	if(Count(Team) > 1)
 		for (int LoopCID = 0; LoopCID < MAX_CLIENTS; ++LoopCID)
