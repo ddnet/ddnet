@@ -361,7 +361,7 @@ if platform == "macosx"  and arch == "ia32" then
 	debug_settings_ppc.link.flags:Add("-arch ppc")
 	debug_settings_ppc.cc.defines:Add("CONF_DEBUG", "CONF_SQL")
 
-	debug_nosql_settings_ppc = debug_sql_settings:Copy()
+	debug_nosql_settings_ppc = debug_settings:Copy()
 	debug_nosql_settings_ppc.config_name = "nosql_debug_ppc"
 	debug_nosql_settings_ppc.config_ext = "_nosql_ppc_d"
 	debug_nosql_settings_ppc.cc.flags:Add("-arch ppc")
@@ -375,7 +375,7 @@ if platform == "macosx"  and arch == "ia32" then
 	release_settings_ppc.link.flags:Add("-arch ppc")
 	release_settings_ppc.cc.defines:Add("CONF_RELEASE", "CONF_SQL")
 	
-	release_nosql_settings_ppc = release_sql_settings:Copy()
+	release_nosql_settings_ppc = release_settings:Copy()
 	release_nosql_settings_ppc.config_name = "nosql_release_ppc"
 	release_nosql_settings_ppc.config_ext = "_nosql_ppc"
 	release_nosql_settings_ppc.cc.flags:Add("-arch ppc")
@@ -389,7 +389,7 @@ if platform == "macosx"  and arch == "ia32" then
 	debug_settings_x86.link.flags:Add("-arch i386")
 	debug_settings_x86.cc.defines:Add("CONF_DEBUG", "CONF_SQL")
 
-	debug_nosql_settings_x86 = debug_sql_settings:Copy()
+	debug_nosql_settings_x86 = debug_settings:Copy()
 	debug_nosql_settings_x86.config_name = "nosql_debug_x86"
 	debug_nosql_settings_x86.config_ext = "_nosql_x86_d"
 	debug_nosql_settings_x86.cc.flags:Add("-arch i386")
@@ -403,7 +403,7 @@ if platform == "macosx"  and arch == "ia32" then
 	release_settings_x86.link.flags:Add("-arch i386")
 	release_settings_x86.cc.defines:Add("CONF_RELEASE", "CONF_SQL")
 	
-	release_nosql_settings_x86 = release_sql_settings:Copy()
+	release_nosql_settings_x86 = release_settings:Copy()
 	release_nosql_settings_x86.config_name = "nosql_release_x86"
 	release_nosql_settings_x86.config_ext = "_nosql_x86"
 	release_nosql_settings_x86.cc.flags:Add("-arch i386")
@@ -412,12 +412,12 @@ if platform == "macosx"  and arch == "ia32" then
 
 	ppc_d = build(debug_settings_ppc)
 	x86_d = build(debug_settings_x86)
-	sql_ppc_d = build(debug_sql_settings_ppc)
-	sql_x86_d = build(debug_sql_settings_x86)
+	sql_ppc_d = build(debug_nosql_settings_ppc)
+	sql_x86_d = build(debug_nosql_settings_x86)
 	ppc_r = build(release_settings_ppc)
 	x86_r = build(release_settings_x86)
-	sql_ppc_r = build(release_sql_settings_ppc)
-	sql_x86_r = build(release_sql_settings_x86)
+	sql_ppc_r = build(release_nosql_settings_ppc)
+	sql_x86_r = build(release_nosql_settings_x86)
 	DefaultTarget("game_debug_x86")
 	PseudoTarget("release", ppc_r, x86_r)
 	PseudoTarget("nosql_release", nosql_ppc_r, nosql_x86_r)
