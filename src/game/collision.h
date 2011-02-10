@@ -71,6 +71,7 @@ public:
 	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0);
 	int GetMapIndex(vec2 Pos);
 	bool TileExists(int Index);
+	bool TileExistsNext(int Index);
 	vec2 GetPos(int Index);
 	int GetTileIndex(int Index);
 	int GetFTileIndex(int Index);
