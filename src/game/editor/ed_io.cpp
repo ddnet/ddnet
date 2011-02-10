@@ -673,6 +673,21 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHCLOSE;
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
 								}
+								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_FREEZE)
+								{
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_FREEZE;
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+								}
+								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_DFREEZE)
+								{
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_DFREEZE;
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+								}
+								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_DUNFREEZE)
+								{
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_DUNFREEZE;
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+								}
 								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
 								{
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type;
