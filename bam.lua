@@ -200,7 +200,11 @@ function build(settings)
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
 			if not string.find(settings.config_name, "nosql") then
-				server_settings.link.libpath:Add("other/mysql/mac/lib32")
+				if arch == "amd64" then
+					server_settings.link.libpath:Add("other/mysql/mac/lib64")
+				else
+					server_settings.link.libpath:Add("other/mysql/mac/lib32")
+				end
 			end
 		else
 			client_settings.link.libs:Add("X11")
@@ -433,4 +437,3 @@ else
 	build(release_nosql_settings)
 	DefaultTarget("game_debug")
 end
-
