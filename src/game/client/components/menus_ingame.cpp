@@ -115,7 +115,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	votearea.HSplitTop(10.0f, 0, &votearea);
 	votearea.HSplitTop(25.0f + 10.0f*3 + 25.0f, &votearea, &bars);
 
-	RenderTools()->DrawUIRect(&votearea, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&votearea, color_tabbar_active, CUI::CORNER_ALL, 10.0f);
 
 	votearea.VMargin(20.0f, &votearea);
 	votearea.HMargin(10.0f, &votearea);
@@ -537,35 +537,27 @@ void CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageTyp
 	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
 	str_copy(Item.m_aPlayer, Header.m_aOwner, sizeof(Item.m_aPlayer));
 	Item.m_Time = Header.m_Time;
-	
 	Item.m_Active = false;
-	Item.m_ID = pSelf->m_lGhosts.size();
-	
-	pSelf->m_lGhosts.add(Item);
+	Item.m_ID = pSelf->m_lGhosts.add(Item);
 }
 
 void CMenus::GhostlistPopulate()
 {
+	m_OwnGhost = 0;
 	m_lGhosts.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "ghosts", GhostlistFetchCallback, this);
 	
-	int OwnTime = -1;
-	int Own = -1;
-	
 	for(int i = 0; i < m_lGhosts.size(); i++)
 	{
-		if(str_comp(m_lGhosts[i].m_aPlayer, g_Config.m_PlayerName) == 0 && (OwnTime == -1 || m_lGhosts[i].m_Time < OwnTime))
-		{
-			OwnTime = m_lGhosts[i].m_Time;
-			Own = i;
-		}
+		if(str_comp(m_lGhosts[i].m_aPlayer, g_Config.m_PlayerName) == 0 && (!m_OwnGhost || m_lGhosts[i] < *m_OwnGhost))
+			m_OwnGhost = &m_lGhosts[i];
 	}
 	
-	if(Own != -1)
+	if(m_OwnGhost)
 	{
-		m_lGhosts[Own].m_ID = -1;
-		m_lGhosts[Own].m_Active = true;
-		m_pClient->m_pGhost->Load(m_lGhosts[Own].m_aFilename, -1);
+		m_OwnGhost->m_ID = -1;
+		m_OwnGhost->m_Active = true;
+		m_pClient->m_pGhost->Load(m_OwnGhost->m_aFilename, -1);
 	}
 }
 
@@ -693,6 +685,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	CUIRect OriginalView = View;
 	View.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
 
+	int NewSelected = -1;
+
 	for (int i = 0; i < NumGhosts; i++)
 	{
 		const CGhostItem *pItem = &m_lGhosts[i];
@@ -723,21 +717,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 			if(UI()->DoButtonLogic(pItem, "", 0, &SelectHitBox))
 			{
-				s_SelectedIndex = i;
-			}
-			
-			if(UI()->MouseInside(&Row) && Input()->MouseDoubleClick())
-			{
-				if(m_lGhosts[s_SelectedIndex].m_Active)
-				{
-					m_lGhosts[s_SelectedIndex].m_Active = false;
-					m_pClient->m_pGhost->Unload(m_lGhosts[s_SelectedIndex].m_ID);
-				}
-				else
-				{
-					m_lGhosts[s_SelectedIndex].m_Active = true;
-					m_pClient->m_pGhost->Load(m_lGhosts[s_SelectedIndex].m_aFilename, m_lGhosts[s_SelectedIndex].m_ID);
-				}
+				NewSelected = i;
 			}
 		}
 
@@ -771,7 +751,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s%s", pItem->m_aPlayer, (pItem->m_ID == -1)?" (own)":"");
+				bool Own = m_OwnGhost && pItem == m_OwnGhost;
+				str_format(aBuf, sizeof(aBuf), "%s%s", pItem->m_aPlayer, Own?" (own)":"");
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 			else if(Id == COL_TIME)
@@ -786,6 +767,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 		}
 	}
+	
+	if(NewSelected != -1)
+		s_SelectedIndex = NewSelected;
+	
+	CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
 
 	UI()->ClipDisable();
 	
@@ -796,20 +782,14 @@ void CMenus::RenderGhost(CUIRect MainView)
 	Status.VSplitRight(120.0f, &Status, &Button);
 	
 	static int s_GhostButton = 0;
-	if(m_lGhosts[s_SelectedIndex].m_Active)
+	const char *pText = pGhost->m_Active ? "Deactivate" : "Activate";
+	
+	if(DoButton_Menu(&s_GhostButton, Localize(pText), 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClick()))
 	{
-		if(DoButton_Menu(&s_GhostButton, Localize("Deactivate"), 0, &Button))
-		{
-			m_lGhosts[s_SelectedIndex].m_Active = false;
-			m_pClient->m_pGhost->Unload(m_lGhosts[s_SelectedIndex].m_ID);
-		}
-	}
-	else
-	{
-		if(DoButton_Menu(&s_GhostButton, Localize("Activate"), 0, &Button))
-		{
-			m_lGhosts[s_SelectedIndex].m_Active = true;
-			m_pClient->m_pGhost->Load(m_lGhosts[s_SelectedIndex].m_aFilename, m_lGhosts[s_SelectedIndex].m_ID);
-		}
+		if(pGhost->m_Active)
+			m_pClient->m_pGhost->Unload(pGhost->m_ID);
+		else
+			m_pClient->m_pGhost->Load(pGhost->m_aFilename, pGhost->m_ID);
+		pGhost->m_Active ^= 1;
 	}
 }

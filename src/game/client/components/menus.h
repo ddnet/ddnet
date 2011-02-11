@@ -267,9 +267,11 @@ public:
 		int m_ID;
 		
 		bool operator<(const CGhostItem &Other) { return m_Time < Other.m_Time; }
+		bool operator==(const CGhostItem &Other) { return m_ID == Other.m_ID; }
 	};
 	
 	sorted_array<CGhostItem> m_lGhosts;
+	CGhostItem *m_OwnGhost;
 	
 	void GhostlistPopulate();
 };
