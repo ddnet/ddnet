@@ -151,8 +151,8 @@ public:
 	int m_DDRaceState;
 	void OnFinish();
 	int Team();
-	bool CanCollide(int Cid);
-	bool SameTeam(int Cid);
+	bool CanCollide(int ClientID);
+	bool SameTeam(int ClientID);
 	int m_HammerType;
 	bool m_Super;
 	int m_TeamBeforeSuper;

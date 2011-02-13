@@ -20,19 +20,19 @@ static struct
 
 static int g_UiNumPopups = 0;
 
-void CEditor::UiInvokePopupMenu(void *Id, int Flags, float x, float y, float w, float h, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra)
+void CEditor::UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra)
 {
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "invoked");
-	if(x + w > UI()->Screen()->w)
-		x -= w;
-	if(y + h > UI()->Screen()->h)
-		y -= h;
-	s_UiPopups[g_UiNumPopups].m_pId = Id;
+	if(X + W > UI()->Screen()->w)
+		X -= W;
+	if(Y + H > UI()->Screen()->h)
+		Y -= H;
+	s_UiPopups[g_UiNumPopups].m_pId = pID;
 	s_UiPopups[g_UiNumPopups].m_IsMenu = Flags;
-	s_UiPopups[g_UiNumPopups].m_Rect.x = x;
-	s_UiPopups[g_UiNumPopups].m_Rect.y = y;
-	s_UiPopups[g_UiNumPopups].m_Rect.w = w;
-	s_UiPopups[g_UiNumPopups].m_Rect.h = h;
+	s_UiPopups[g_UiNumPopups].m_Rect.x = X;
+	s_UiPopups[g_UiNumPopups].m_Rect.y = Y;
+	s_UiPopups[g_UiNumPopups].m_Rect.w = W;
+	s_UiPopups[g_UiNumPopups].m_Rect.h = H;
 	s_UiPopups[g_UiNumPopups].m_pfnFunc = pfnFunc;
 	s_UiPopups[g_UiNumPopups].m_pExtra = pExtra;
 	g_UiNumPopups++;
@@ -517,7 +517,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 	}
 	
 	if(ShowImage >= 0 && ShowImage < pEditor->m_Map.m_lImages.size())
-		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_TexId);
+		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_TexID);
 	else
 		pEditor->Graphics()->TextureSet(-1);
 	pEditor->Graphics()->QuadsBegin();
@@ -544,6 +544,43 @@ int CEditor::PopupSelectImageResult()
 	g_SelectImageCurrent = g_SelectImageSelected;
 	g_SelectImageSelected = -100;
 	return g_SelectImageCurrent;
+}
+static int s_GametileOpSelected = -1;
+
+int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View)
+{
+	/*	This is for scripts/update_localization.py to work, don't remove!
+		Localize("Clear"); Localize("Collision"); Localize("Death"); Localize("Unhookable"); */
+	static const char *s_pButtonNames[] = { "Clear", "Collision", "Death", "Unhookable", "Freeze", "Unfreeze", "Deep Freeze", "Deep Unfreeze" };
+	static unsigned s_NumButtons = sizeof(s_pButtonNames) / sizeof(char*);
+	CUIRect Button;
+
+	for(unsigned i = 0; i < s_NumButtons; ++i)
+	{
+		View.HSplitTop(2.0f, 0, &View);
+		View.HSplitTop(12.0f, &Button, &View);
+		if(pEditor->DoButton_Editor(&s_pButtonNames[i], Localize(s_pButtonNames[i]), 0, &Button, 0, 0))
+			s_GametileOpSelected = i;
+	}
+
+	return 0;
+}
+
+void CEditor::PopupSelectGametileOpInvoke(float x, float y)
+{
+	static int s_SelectGametileOpPopupId = 0;
+	s_GametileOpSelected = -1;
+	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 120.0f, PopupSelectGametileOp);
+}
+
+int CEditor::PopupSelectGameTileOpResult()
+{
+	if(s_GametileOpSelected < 0)
+		return -1;
+	
+	int Result = s_GametileOpSelected;
+	s_GametileOpSelected = -1;
+	return Result;
 }
 
 int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
@@ -635,3 +672,4 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 
 	return 0;
 }
+

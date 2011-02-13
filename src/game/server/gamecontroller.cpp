@@ -537,17 +537,17 @@ void IGameController::DoWarmup(int Seconds)
 		m_Warmup = Seconds*Server()->TickSpeed();
 }
 /*
-bool IGameController::IsFriendlyFire(int Cid1, int Cid2)
+bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
 {
-	if(Cid1 == Cid2)
+	if(ClientID1 == ClientID2)
 		return false;
 	
 	if(IsTeamplay())
 	{
-		if(!GameServer()->m_apPlayers[Cid1] || !GameServer()->m_apPlayers[Cid2])
+		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
 			return false;
 			
-		if(GameServer()->m_apPlayers[Cid1]->GetTeam() == GameServer()->m_apPlayers[Cid2]->GetTeam())
+		if(GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
 			return true;
 	}
 	
@@ -565,7 +565,7 @@ bool IGameController::IsForceBalanced()
 		return false;
 }
 
-bool IGameController::CanBeMovedOnBalance(int Cid)
+bool IGameController::CanBeMovedOnBalance(int ClientID)
 {
 	return true;
 }

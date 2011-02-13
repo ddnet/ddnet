@@ -15,12 +15,12 @@ public:
 	
 	CTeamsCore(void);
 	
-	bool SameTeam(int Cid1, int Cid2);
+	bool SameTeam(int ClientID1, int ClientID2);
 
-	bool CanCollide(int Cid1, int Cid2);
+	bool CanCollide(int ClientID1, int ClientID2);
 	
-	int Team(int Cid);
-	void Team(int Cid, int Team);
+	int Team(int ClientID);
+	void Team(int ClientID, int Team);
 
 	void Reset();
 };

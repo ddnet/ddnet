@@ -78,14 +78,14 @@ public:
 	void EndRound();
 	void ChangeMap(const char *pToMap);
 	
-	bool IsFriendlyFire(int Cid1, int Cid2);
+	bool IsFriendlyFire(int ClientID1, int ClientID2);
 	
 	bool IsForceBalanced();
 
 	/*
 	
 	*/	
-	virtual bool CanBeMovedOnBalance(int Cid);
+	virtual bool CanBeMovedOnBalance(int ClientID);
 
 	virtual void Tick();
 	

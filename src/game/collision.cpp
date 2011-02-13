@@ -165,21 +165,21 @@ void CCollision::Init(class CLayers *pLayers)
 	}
 }
 
-int CCollision::GetTile(int x, int y)
+int CCollision::GetTile(int X, int Y)
 {
-	int nx = clamp(x/32, 0, m_Width-1);
-	int ny = clamp(y/32, 0, m_Height-1);
-	if(!m_pTiles || ny < 0 || nx < 0)
+	int Nx = clamp(X/32, 0, m_Width-1);
+	int Ny = clamp(Y/32, 0, m_Height-1);
+	if(!m_pTiles || Ny < 0 || Nx < 0)
 	{
-		//dbg_msg("Collision","Something is terribly wrong, !m_pTiles %d, ny %d, ny %d", !m_pTiles, ny, ny);
+		//dbg_msg("Collision","Something is terribly wrong, !m_pTiles %d, Ny %d, Ny %d", !m_pTiles, Ny, Ny);
 		return 0;
 	}
-	/*dbg_msg("GetTile","m_Index %d",m_pTiles[ny*m_Width+nx].m_Index);//Remove */
-	if(m_pTiles[ny*m_Width+nx].m_Index == COLFLAG_SOLID
-		|| m_pTiles[ny*m_Width+nx].m_Index == (COLFLAG_SOLID|COLFLAG_NOHOOK)
-		|| m_pTiles[ny*m_Width+nx].m_Index == COLFLAG_DEATH
-		|| m_pTiles[ny*m_Width+nx].m_Index == COLFLAG_NOLASER)
-		return m_pTiles[ny*m_Width+nx].m_Index;
+	/*dbg_msg("GetTile","m_Index %d",m_pTiles[Ny*m_Width+Nx].m_Index);//Remove */
+	if(m_pTiles[Ny*m_Width+Nx].m_Index == COLFLAG_SOLID
+		|| m_pTiles[Ny*m_Width+Nx].m_Index == (COLFLAG_SOLID|COLFLAG_NOHOOK)
+		|| m_pTiles[Ny*m_Width+Nx].m_Index == COLFLAG_DEATH
+		|| m_pTiles[Ny*m_Width+Nx].m_Index == COLFLAG_NOLASER)
+		return m_pTiles[Ny*m_Width+Nx].m_Index;
 	else
 		return 0;
 }
@@ -187,14 +187,14 @@ int CCollision::GetTile(int x, int y)
 /*
 bool CCollision::IsTileSolid(int x, int y)
 {
-	return GetTile(x,y)&COLFLAG_SOLID;
+	return GetTile(X, Y)&COLFLAG_SOLID;
 }
 */
 
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough)
 {
-	float d = distance(Pos0, Pos1);
-	int End(d+1);
+	float D = distance(Pos0, Pos1);
+	int End(D+1);
 	vec2 Last = Pos0;
 	int ix = 0, iy = 0; // Temporary position for checking collision
 	int dx = 0, dy = 0; // Offset for checking the "through" tile
@@ -204,8 +204,8 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		}
 	for(int i = 0; i < End; i++)
 	{
-		float a = i/d;
-		vec2 Pos = mix(Pos0, Pos1, a);
+		float A = i/D;
+		vec2 Pos = mix(Pos0, Pos1, A);
 		ix = round(Pos.x);
 		iy = round(Pos.y);
 		if(CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy)))
@@ -343,12 +343,12 @@ int CCollision::IsSolid(int x, int y)
 
 int CCollision::IsThrough(int x, int y)
 {
-	int nx = clamp(x/32, 0, m_Width-1);
-	int ny = clamp(y/32, 0, m_Height-1);
-	int Index = m_pTiles[ny*m_Width+nx].m_Index;
+	int Nx = clamp(x/32, 0, m_Width-1);
+	int Ny = clamp(y/32, 0, m_Height-1);
+	int Index = m_pTiles[Ny*m_Width+Nx].m_Index;
 	int Findex = 0;
 	if (m_pFront)
-		Findex = m_pFront[ny*m_Width+nx].m_Index;
+		Findex = m_pFront[Ny*m_Width+Nx].m_Index;
 	if (Index == TILE_THROUGH)
 		return Index;
 	else if (Findex == TILE_THROUGH)
@@ -452,10 +452,10 @@ int CCollision::GetSwitchDelay(int Index)
 
 int CCollision::IsMover(int x, int y, int* Flags)
 {
-	int nx = clamp(x/32, 0, m_Width-1);
-	int ny = clamp(y/32, 0, m_Height-1);
-	int Index = m_pTiles[ny*m_Width+nx].m_Index;
-	*Flags = m_pTiles[ny*m_Width+nx].m_Flags;
+	int Nx = clamp(x/32, 0, m_Width-1);
+	int Ny = clamp(y/32, 0, m_Height-1);
+	int Index = m_pTiles[Ny*m_Width+Nx].m_Index;
+	*Flags = m_pTiles[Ny*m_Width+Nx].m_Flags;
 	if(Index < 0)
 		return 0;
 	if (Index == TILE_CP || Index == TILE_CP_F)
@@ -521,9 +521,9 @@ vec2 CCollision::CpSpeed(int Index, int Flags)
 
 int CCollision::GetPureMapIndex(vec2 Pos)
 {
-	int nx = clamp((int)Pos.x/32, 0, m_Width-1);
-	int ny = clamp((int)Pos.y/32, 0, m_Height-1);
-	return ny*m_Width+nx;
+	int Nx = clamp((int)Pos.x/32, 0, m_Width-1);
+	int Ny = clamp((int)Pos.y/32, 0, m_Height-1);
+	return Ny*m_Width+Nx;
 }
 
 bool CCollision::TileExists(int Index)
@@ -590,9 +590,9 @@ bool CCollision::TileExistsNext(int Index)
 
 int CCollision::GetMapIndex(vec2 Pos)
 {
-	int nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
-	int ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
-	int Index = ny*m_Width+nx;
+	int Nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
+	int Ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
+	int Index = Ny*m_Width+Nx;
 	/*if (m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN)) dbg_msg("m_pTele && TELEIN","Index %d",Index);
 	else if (m_pTele && m_pTele[Index].m_Type==TILE_TELEOUT) dbg_msg("TELEOUT","Index %d",Index);
 	else dbg_msg("GetMapIndex(","Index %d",Index);//REMOVE */
@@ -610,9 +610,9 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 	int End(d + 1);
 	if(!d)
 	{
-		int nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
-		int ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
-		int Index = ny * m_Width + nx;
+		int Nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
+		int Ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
+		int Index = Ny * m_Width + Nx;
 		/*if (m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN)) dbg_msg("m_pTele && TELEIN","Index %d",Index);
 		else if (m_pTele && m_pTele[Index].m_Type==TILE_TELEOUT) dbg_msg("TELEOUT","Index %d",Index);
 		else dbg_msg("GetMapIndex(","Index %d",Index);//REMOVE */
@@ -629,16 +629,16 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 	{
 		float a = 0.0f;
 		vec2 Tmp = vec2(0, 0);
-		int nx = 0;
-		int ny = 0;
+		int Nx = 0;
+		int Ny = 0;
 		int Index,LastIndex = 0;
 		for(int i = 0; i < End; i++)
 		{
 			a = i/d;
 			Tmp = mix(PrevPos, Pos, a);
-			nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
-			ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
-			Index = ny * m_Width + nx;
+			Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
+			Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
+			Index = Ny * m_Width + Nx;
 			//dbg_msg("lastindex","%d",LastIndex);
 			//dbg_msg("index","%d",Index);
 			if(TileExists(Index) && LastIndex != Index)
@@ -699,27 +699,27 @@ int CCollision::GetFTileFlags(int Index)
 	return m_pFront[Index].m_Flags;
 }
 
-int CCollision::GetIndex(int nx, int ny)
+int CCollision::GetIndex(int Nx, int Ny)
 {
-	return m_pTiles[ny*m_Width+nx].m_Index;
+	return m_pTiles[Ny*m_Width+Nx].m_Index;
 }
 
-int CCollision::GetFIndex(int nx, int ny)
+int CCollision::GetFIndex(int Nx, int Ny)
 {
 	if(!m_pFront) return 0;
-	return m_pFront[ny*m_Width+nx].m_Index;
+	return m_pFront[Ny*m_Width+Nx].m_Index;
 }
 
 int CCollision::GetFTile(int x, int y)
 {
 	if(!m_pFront)
 	return 0;
-	int nx = clamp(x/32, 0, m_Width-1);
-	int ny = clamp(y/32, 0, m_Height-1);
-	/*dbg_msg("GetFTile","m_Index %d",m_pFront[ny*m_Width+nx].m_Index);//Remove */
-	if(m_pFront[ny*m_Width+nx].m_Index == COLFLAG_DEATH
-		|| m_pFront[ny*m_Width+nx].m_Index == COLFLAG_NOLASER)
-		return m_pFront[ny*m_Width+nx].m_Index;
+	int Nx = clamp(x/32, 0, m_Width-1);
+	int Ny = clamp(y/32, 0, m_Height-1);
+	/*dbg_msg("GetFTile","m_Index %d",m_pFront[Ny*m_Width+Nx].m_Index);//Remove */
+	if(m_pFront[Ny*m_Width+Nx].m_Index == COLFLAG_DEATH
+		|| m_pFront[Ny*m_Width+Nx].m_Index == COLFLAG_NOLASER)
+		return m_pFront[Ny*m_Width+Nx].m_Index;
 	else
 		return 0;
 }
@@ -749,7 +749,7 @@ int CCollision::Entity(int x, int y, int Layer)
 			default:
 				str_format(aBuf,sizeof(aBuf), "Unknown");
 		}
-		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at http://DDRace.info, you will need to post the map as well and any steps that u think may have led to this, Please Also Read the News Section every once and a while", aBuf);
+		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at http://DDRace.info, you will need to post the map as well and aNy steps that u think may have led to this, Please Also Read the News Section every once and a while", aBuf);
 		return 0;
 	}
 	switch (Layer)
@@ -772,22 +772,22 @@ int CCollision::Entity(int x, int y, int Layer)
 
 void CCollision::SetCollisionAt(float x, float y, int flag)
 {
-   int nx = clamp(round(x)/32, 0, m_Width-1);
-   int ny = clamp(round(y)/32, 0, m_Height-1);
+   int Nx = clamp(round(x)/32, 0, m_Width-1);
+   int Ny = clamp(round(y)/32, 0, m_Height-1);
 
-   m_pTiles[ny * m_Width + nx].m_Index = flag;
+   m_pTiles[Ny * m_Width + Nx].m_Index = flag;
 }
 
 void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Number)
 {
 	if(!m_pDoor)
 		return;
-   int nx = clamp(round(x)/32, 0, m_Width-1);
-   int ny = clamp(round(y)/32, 0, m_Height-1);
+   int Nx = clamp(round(x)/32, 0, m_Width-1);
+   int Ny = clamp(round(y)/32, 0, m_Height-1);
 
-   m_pDoor[ny * m_Width + nx].m_Index = Type;
-   m_pDoor[ny * m_Width + nx].m_Flags = Flags;
-   m_pDoor[ny * m_Width + nx].m_Number = Number;
+   m_pDoor[Ny * m_Width + Nx].m_Index = Type;
+   m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
+   m_pDoor[Ny * m_Width + Nx].m_Number = Number;
 }
 
 int CCollision::GetDTileIndex(int Index)
@@ -852,18 +852,18 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 	{
 		float a = f/d;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		int nx = clamp(round(Pos.x)/32, 0, m_Width-1);
-		int ny = clamp(round(Pos.y)/32, 0, m_Height-1);
-		if(GetIndex(nx, ny) == COLFLAG_SOLID 
-			|| GetIndex(nx, ny) == (COLFLAG_SOLID|COLFLAG_NOHOOK) 
-			|| GetIndex(nx, ny) == COLFLAG_NOLASER 
-			|| GetFIndex(nx, ny) == COLFLAG_NOLASER)
+		int Nx = clamp(round(Pos.x)/32, 0, m_Width-1);
+		int Ny = clamp(round(Pos.y)/32, 0, m_Height-1);
+		if(GetIndex(Nx, Ny) == COLFLAG_SOLID
+			|| GetIndex(Nx, Ny) == (COLFLAG_SOLID|COLFLAG_NOHOOK)
+			|| GetIndex(Nx, Ny) == COLFLAG_NOLASER
+			|| GetFIndex(Nx, Ny) == COLFLAG_NOLASER)
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			if (GetFIndex(nx, ny) == COLFLAG_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
+			if (GetFIndex(Nx, Ny) == COLFLAG_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
 			else return GetCollisionAt(Pos.x, Pos.y);
 			
 		}

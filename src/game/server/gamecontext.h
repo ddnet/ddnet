@@ -47,18 +47,18 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
-	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConRestart(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSay(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConAddVote(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConVote(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConRestart(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSay(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConAddVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	
 	CGameContext(int Resetting);
@@ -84,14 +84,14 @@ public:
 	CGameWorld m_World;
 	
 	// helper functions
-	class CCharacter *GetPlayerChar(int ClientId);
+	class CCharacter *GetPlayerChar(int ClientID);
 	
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand);
 	void EndVote();
-	void SendVoteSet(int ClientId);
-	void SendVoteStatus(int ClientId, int Total, int Yes, int No);
-	void AbortVoteKickOnDisconnect(int ClientId);
+	void SendVoteSet(int ClientID);
+	void SendVoteStatus(int ClientID, int Total, int Yes, int No);
+	void AbortVoteKickOnDisconnect(int ClientID);
 	
 	int m_VoteCreator;
 	int64 m_VoteCloseTime;
@@ -137,15 +137,15 @@ public:
 
 	// network
 	void SendChatTarget(int To, const char *pText);
-	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1);
-	void SendEmoticon(int ClientId, int Emoticon);
-	void SendWeaponPickup(int ClientId, int Weapon);
-	void SendBroadcast(const char *pText, int ClientId);
+	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1);
+	void SendEmoticon(int ClientID, int Emoticon);
+	void SendWeaponPickup(int ClientID, int Weapon);
+	void SendBroadcast(const char *pText, int ClientID);
 	
 	
 	//
 	void CheckPureTuning();
-	void SendTuningParams(int ClientId);
+	void SendTuningParams(int ClientID);
 	
 	// engine events
 	virtual void OnInit();
@@ -154,16 +154,16 @@ public:
 	
 	virtual void OnTick();
 	virtual void OnPreSnap();
-	virtual void OnSnap(int ClientId);
+	virtual void OnSnap(int ClientID);
 	virtual void OnPostSnap();
 	
-	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId);
+	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID);
 
-	virtual void OnClientConnected(int ClientId);
-	virtual void OnClientEnter(int ClientId);
-	virtual void OnClientDrop(int ClientId);
-	virtual void OnClientDirectInput(int ClientId, void *pInput);
-	virtual void OnClientPredictedInput(int ClientId, void *pInput);
+	virtual void OnClientConnected(int ClientID);
+	virtual void OnClientEnter(int ClientID);
+	virtual void OnClientDrop(int ClientID);
+	virtual void OnClientDirectInput(int ClientID, void *pInput);
+	virtual void OnClientPredictedInput(int ClientID, void *pInput);
 
 	virtual const char *Version();
 	virtual const char *NetVersion();
@@ -175,75 +175,75 @@ private:
 
 	//DDRace Console Commands
 
-	//static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	//static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConLogOut(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSetlvl1(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSetlvl2(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSetlvl3(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	//static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	//static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConLogOut(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSetlvl1(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSetlvl2(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSetlvl3(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	static void ConNinja(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConHammer(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSuper(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConShotgun(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConGrenade(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConRifle(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConWeapons(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConUnRifle(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConNinja(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConHammer(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSuper(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConShotgun(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConGrenade(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConRifle(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConWeapons(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUnRifle(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	void ModifyWeapons(int ClientId, int Victim, int Weapon, bool Remove);
-	void MoveCharacter(int ClientId, int Victim, int X, int Y, bool Raw = false);
+	void ModifyWeapons(int ClientID, int Victim, int Weapon, bool Remove);
+	void MoveCharacter(int ClientID, int Victim, int X, int Y, bool Raw = false);
 
-	static void ConTeleport(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConPhook(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConTeleport(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConPhook(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	static void ConFreeze(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTimerStop(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTimerStart(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTimerReStart(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTimerZero(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConGoRight(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConGoUp(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConGoDown(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConFreeze(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTimerStop(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTimerStart(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTimerReStart(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTimerZero(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConGoRight(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConGoUp(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConGoDown(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	static void ConMove(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConInvisMe(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConVisMe(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConInvis(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConVis(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConMove(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConInvisMe(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConVisMe(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConInvis(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConVis(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	static void ConCredits(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConInfo(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConHelp(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConSettings(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConRules(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConKill(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConTop5(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConRank(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConToggleFly(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConMe(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConCredits(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConInfo(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConHelp(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSettings(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConRules(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConKill(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTop5(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConRank(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConToggleFly(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConMe(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	static void ConAsk(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConYes(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConNo(IConsole::IResult *pResult, void *pUserData, int ClientId);
-	static void ConInvite(IConsole::IResult *pResult, void *pUserData, int ClientId);
+	static void ConAsk(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConYes(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConNo(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConInvite(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMuteID(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData, int ClientID);
@@ -261,7 +261,7 @@ public:
 		VOTE_ENFORCE_NO_ADMIN = VOTE_ENFORCE_YES + 1,
 		VOTE_ENFORCE_YES_ADMIN
 	};
-	void SendRecord(int ClientId);
+	void SendRecord(int ClientID);
 	static void SendChatResponse(const char *pLine, void *pUser);
 	static void SendChatResponseAll(const char *pLine, void *pUser);
 	struct ChatResponseInfo
@@ -269,7 +269,7 @@ public:
 		CGameContext *m_GameContext;
 		int m_To;
 	};
-	virtual void OnSetAuthed(int ClientId,int Level);
+	virtual void OnSetAuthed(int ClientID,int Level);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 };
@@ -281,7 +281,7 @@ struct CMute {
 bool ComparePlayers(CPlayer *pl1, CPlayer *pl2);
 
 inline int CmaskAll() { return -1; }
-inline int CmaskOne(int ClientId) { return 1<<ClientId; }
-inline int CmaskAllExceptOne(int ClientId) { return 0x7fffffff^CmaskOne(ClientId); }
-inline bool CmaskIsSet(int Mask, int ClientId) { return (Mask&CmaskOne(ClientId)) != 0; }
+inline int CmaskOne(int ClientID) { return 1<<ClientID; }
+inline int CmaskAllExceptOne(int ClientID) { return 0x7fffffff^CmaskOne(ClientID); }
+inline bool CmaskIsSet(int Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
 #endif

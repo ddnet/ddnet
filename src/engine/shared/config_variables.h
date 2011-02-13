@@ -177,7 +177,7 @@ MACRO_CONFIG_INT(SvSlashMe, sv_slash_me, 0, 0, 1, CFGFLAG_SERVER, "Whether /me i
 MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 15, 5, 100, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout", 4)
 
 MACRO_CONFIG_INT(DbgMsg, dbg_msg, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Display or not debug messages", 3)
-MACRO_CONFIG_INT(ClShowIds, cl_show_ids, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Whether to show client ids in scoreboard", -1)
+MACRO_CONFIG_INT(ClShowIDs, cl_show_ids, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Whether to show client ids in scoreboard", -1)
 MACRO_CONFIG_INT(BrFilterGametypeStrict, br_filter_gametype_strict, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter gametype strict", -1)
 MACRO_CONFIG_INT(BrFilterCheats, br_filter_cheats, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering cheats (default: 0 don't care, 1 must be Off, 2 must be On)", -1)
 MACRO_CONFIG_INT(BrFilterCheatTime, br_filter_cheat_time, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering cheats with time (default: 0 don't care, 1 must be Off, 2 must be On)", -1)

@@ -19,7 +19,7 @@ class CSnapIDPool
 {
 	enum
 	{
-		MAX_IDS = 16*1024,//TODO
+		MAX_IDS = 16*1024,
 	};
 
 	class CID
@@ -46,7 +46,7 @@ public:
 	void RemoveFirstTimeout();
 	int NewID();
 	void TimeoutIDs();
-	void FreeID(int Id);
+	void FreeID(int ID);
 };
 
 class CServer : public IServer
@@ -122,7 +122,7 @@ public:
 	//int m_CurrentGameTick;
 	int m_RunServer;
 	int m_MapReload;
-	int m_RconClientId;
+	int m_RconClientID;
 
 	char m_aBrowseinfoGametype[16];
 	int m_BrowseinfoProgression;
@@ -159,22 +159,21 @@ public:
 	int IsAuthed(int ClientID);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
 	void GetClientIP(int ClientID, char *pIPString, int Size);
-	NETADDR GetClientIP(int ClientID);
-	const char *ClientName(int ClientId);
+	const char *ClientName(int ClientID);
 	bool ClientIngame(int ClientID);
 
-	int *LatestInput(int ClientId, int *size);
+	int *LatestInput(int ClientID, int *size);
 
-	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId);
+	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID);
 	int SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System);
 
 	void DoSnapshot();
 
-	static int NewClientCallback(int ClientId, void *pUser);
-	static int DelClientCallback(int ClientId, const char *pReason, void *pUser);
+	static int NewClientCallback(int ClientID, void *pUser);
+	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
-	void SendMap(int ClientId);
-	void SendRconLine(int ClientId, const char *pLine);
+	void SendMap(int ClientID);
+	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser);
 
 	static void SendRconResponse(const char *pLine, void *pUser);
@@ -182,7 +181,7 @@ public:
 	struct RconResponseInfo
 	{
 		CServer *m_Server;
-		int m_ClientId;
+		int m_ClientID;
 	};
 
 	void ProcessClientPacket(CNetChunk *pPacket);
@@ -203,38 +202,39 @@ public:
 	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole);
 	int Run();
 
-	static void ConKick(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConBan(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConUnban(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConBans(IConsole::IResult *pResult, void *pUser, int ClientId);
- 	static void ConStatus(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConShutdown(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConRecord(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConStopRecord(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConMapReload(IConsole::IResult *pResult, void *pUser, int ClientId);
+	static void ConKick(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConBan(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConUnban(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConBans(IConsole::IResult *pResult, void *pUser, int ClientID);
+ 	static void ConStatus(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConShutdown(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConRecord(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConStopRecord(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConMapReload(IConsole::IResult *pResult, void *pUser, int ClientID);
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-	static void ConLogin(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConCmdList(IConsole::IResult *pResult, void *pUser, int ClientId);
+	static void ConLogin(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConCmdList(IConsole::IResult *pResult, void *pUser, int ClientID);
 
-	static bool CompareClients(int ClientId, int Victim, void *pUser);
-	static bool ClientOnline(int ClientId, void *pUser);
+	static bool CompareClients(int ClientID, int Victim, void *pUser);
+	static bool ClientOnline(int ClientID, void *pUser);
 
 	void RegisterCommands();
 	
-	void SetRconLevel(int ClientId, int Level);
-	void CheckPass(int ClientId, const char *pPw);
+	void SetRconLevel(int ClientID, int Level);
+	void CheckPass(int ClientID, const char *pPw);
 	char *GetAnnouncementLine(char const *FileName);
 	unsigned m_AnnouncementLastLine;
 
 	virtual int SnapNewID();
 	virtual void SnapFreeID(int ID);
-	virtual void *SnapNewItem(int Type, int Id, int Size);
+	virtual void *SnapNewItem(int Type, int ID, int Size);
 	void SnapSetStaticsize(int ItemType, int Size);
-	static void ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientId);
-	static void ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientId);
+	static void ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID);
+	NETADDR GetClientIP(int ClientID);
 };
 
 #endif

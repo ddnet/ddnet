@@ -5,25 +5,25 @@ CTeamsCore::CTeamsCore()
 	Reset();
 }
 
-bool CTeamsCore::SameTeam(int Cid1, int Cid2)
+bool CTeamsCore::SameTeam(int ClientID1, int ClientID2)
 {
-	return m_Team[Cid1] == m_Team[Cid2];
+	return m_Team[ClientID1] == m_Team[ClientID2];
 }
 	
-int CTeamsCore::Team(int Cid)
+int CTeamsCore::Team(int ClientID)
 {
-	return m_Team[Cid];
+	return m_Team[ClientID];
 }
 
-void CTeamsCore::Team(int Cid, int Team)
+void CTeamsCore::Team(int ClientID, int Team)
 {
-	m_Team[Cid] = Team;
+	m_Team[ClientID] = Team;
 }
 
-bool CTeamsCore::CanCollide(int Cid1, int Cid2)
+bool CTeamsCore::CanCollide(int ClientID1, int ClientID2)
 {
-	if(m_Team[Cid1] == TEAM_SUPER || m_Team[Cid2] == TEAM_SUPER) return true;
-	return m_Team[Cid1] == m_Team[Cid2];
+	if(m_Team[ClientID1] == TEAM_SUPER || m_Team[ClientID2] == TEAM_SUPER) return true;
+	return m_Team[ClientID1] == m_Team[ClientID2];
 }
 
 void CTeamsCore::Reset()

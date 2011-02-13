@@ -274,10 +274,8 @@ void CServerBrowser::Filter()
 						Filtered = 1;
 				}
 				else 
-				{
-					if (str_comp_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
-						Filtered = 1;
-				}
+				if(!str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
+					Filtered = 1;
 			}
 		}
 
@@ -573,7 +571,7 @@ void CServerBrowser::Refresh(int Type)
 		Packet.m_pData = Buffer;
 		m_BroadcastTime = time_get();
 
-		for(i = 8303; i <= 8330; i++)
+		for(i = 8303; i <= 8310; i++)
 		{
 			Packet.m_Address.port = i;
 			m_pNetClient->Send(&Packet);
@@ -701,7 +699,7 @@ void CServerBrowser::Update()
 
 	// check if we need to resort
 	// TODO: remove the str_comp
-	if(m_Sorthash != SortHash() || m_DDRaceSorthash != DDRaceSortHash() || str_comp(m_aFilterString, g_Config.m_BrFilterString) != 0 || str_comp(m_aFilterGametypeString, g_Config.m_BrFilterGametype) != 0)
+	if(m_Sorthash != SortHash() || str_comp(m_aFilterString, g_Config.m_BrFilterString) != 0 || str_comp(m_aFilterGametypeString, g_Config.m_BrFilterGametype) != 0)
 		Sort();
 }
 
@@ -820,8 +818,5 @@ int CServerBrowser::DDRaceSortHash() const
 	i |= g_Config.m_BrFilterTestMap<<14;
 	i |= g_Config.m_BrFilterTestServer<<15;
 	return i;
-	//TODO: DDRace Add these here after understanding how it works
-
-
 }
 

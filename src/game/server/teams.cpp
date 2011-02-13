@@ -275,10 +275,10 @@ void CGameTeams::SetTeamLeader(int Team, int ClientID)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "\'%s\' is now the team %d leader.", Server()->ClientName(ClientID), Team);
 	if(Count(Team) > 1)
-		for (int LoopCID = 0; LoopCID < MAX_CLIENTS; ++LoopCID)
-			if(LoopCID != ClientID)
-				if(m_Core.Team(LoopCID) == Team)
-					GameServer()->SendChatTarget(LoopCID, aBuf);
+		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+			if(LoopClientID != ClientID)
+				if(m_Core.Team(LoopClientID) == Team)
+					GameServer()->SendChatTarget(LoopClientID, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "You are now the team %d leader.", Team);
 	GameServer()->SendChatTarget(ClientID, aBuf);

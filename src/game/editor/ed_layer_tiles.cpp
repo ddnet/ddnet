@@ -20,7 +20,7 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_Width = w;
 	m_Height = h;
 	m_Image = -1;
-	m_TexId = -1;
+	m_TexID = -1;
 	m_Game = 0;
 	m_Color.r = 255;
 	m_Color.g = 255;
@@ -64,8 +64,8 @@ void CLayerTiles::MakePalette()
 void CLayerTiles::Render()
 {
 	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
-		m_TexId = m_pEditor->m_Map.m_lImages[m_Image]->m_TexId;
-	Graphics()->TextureSet(m_TexId);
+		m_TexID = m_pEditor->m_Map.m_lImages[m_Image]->m_TexID;
+	Graphics()->TextureSet(m_TexID);
 	vec4 Color = vec4(m_Color.r/255.0f, m_Color.g/255.0f, m_Color.b/255.0f, m_Color.a/255.0f);
 	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE|LAYERRENDERFLAG_TRANSPARENT);
 	if(m_Tele)
@@ -151,7 +151,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerTele *pGrabbed = new CLayerTele(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexId = m_TexId;
+		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 
@@ -178,7 +178,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerSpeedup *pGrabbed = new CLayerSpeedup(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexId = m_TexId;
+		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		
@@ -211,7 +211,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerSwitch *pGrabbed = new CLayerSwitch(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexId = m_TexId;
+		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 
@@ -242,7 +242,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	{
 		CLayerTiles *pGrabbed = new CLayerTiles(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_TexId = m_TexId;
+		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 
@@ -462,41 +462,37 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	if(InGameGroup)
 	{
 		static int s_ColclButton = 0;
-		if(m_pEditor->DoButton_Editor(&s_ColclButton, Localize("Clear collision"), 0, &Button, 0, Localize("Removes collision from this layer")))
+		if(m_pEditor->DoButton_Editor(&s_ColclButton, Localize("Game tiles"), 0, &Button, 0, Localize("Constructs game tiles from this layer")))
+			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->UI()->MouseX(), m_pEditor->UI()->MouseY());
+
+		int Result = m_pEditor->PopupSelectGameTileOpResult();
+		switch(Result)
 		{
-			CLayerTiles *gl = m_pEditor->m_Map.m_pGameLayer;
-			int w = min(gl->m_Width, m_Width);
-			int h = min(gl->m_Height, m_Height);
-			for(int y = 0; y < h; y++)
-			{
-				for(int x = 0; x < w; x++)
-				{
-					if(gl->m_pTiles[y*gl->m_Width+x].m_Index <= TILE_SOLID)
-					{
-						if(m_pTiles[y*m_Width+x].m_Index)
-							gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR;
-					}
-				}
-			}
-			return 1;
+			case 4:
+				Result = TILE_FREEZE;
+				break;
+			case 5:
+				Result = TILE_UNFREEZE;
+				break;
+			case 6:
+				Result = TILE_DFREEZE;
+				break;
+			case 7:
+				Result = TILE_DUNFREEZE;
+				break;
+			default:
+				break;
 		}
-		
-		static int s_ColButton = 0;
-		pToolBox->HSplitBottom(5.0f, pToolBox, &Button);
-		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
-		if(m_pEditor->DoButton_Editor(&s_ColButton, Localize("Make collision"), 0, &Button, 0, Localize("Constructs collision from this layer")))
+		if(Result > -1)
 		{
 			CLayerTiles *gl = m_pEditor->m_Map.m_pGameLayer;
 			int w = min(gl->m_Width, m_Width);
 			int h = min(gl->m_Height, m_Height);
 			for(int y = 0; y < h; y++)
-			{
 				for(int x = 0; x < w; x++)
-				{
-					if(gl->m_pTiles[y*gl->m_Width+x].m_Index <= TILE_SOLID)
-						gl->m_pTiles[y*gl->m_Width+x].m_Index = m_pTiles[y*m_Width+x].m_Index?TILE_SOLID:TILE_AIR;
-				}
-			}
+					if((gl->m_pTiles[y*gl->m_Width+x].m_Index >= TILE_AIR && gl->m_pTiles[y*gl->m_Width+x].m_Index <= TILE_NOHOOK) || (gl->m_pTiles[y*gl->m_Width+x].m_Index >= TILE_FREEZE && gl->m_pTiles[y*gl->m_Width+x].m_Index <= TILE_DUNFREEZE && gl->m_pTiles[y*gl->m_Width+x].m_Index != TILE_TELEINEVIL))
+						gl->m_pTiles[y*gl->m_Width+x].m_Index = m_pTiles[y*m_Width+x].m_Index?TILE_AIR+Result:TILE_AIR;
+
 			return 1;
 		}
 	}
@@ -546,7 +542,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	{
 		if (NewVal == -1)
 		{
-			m_TexId = -1;
+			m_TexID = -1;
 			m_Image = -1;
 		}
 		else
@@ -722,21 +718,21 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			
 			if(Empty)
 			{
-                m_pTiles[fy*m_Width+fx].m_Index = 0;
+				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pTeleTile[fy*m_Width+fx].m_Type = 0;
 				m_pTeleTile[fy*m_Width+fx].m_Number = 0;
 			}
-            else
+			else
 			{
-                m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
-                m_pTeleTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
-                if(m_pTiles[fy*m_Width+fx].m_Index > 0)
-                {
+				m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
+				m_pTeleTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
+				if(m_pTiles[fy*m_Width+fx].m_Index > 0)
+				{
 					if((!pLt->m_pTeleTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNum)
 						m_pTeleTile[fy*m_Width+fx].m_Number = m_pEditor->m_TeleNumber;
 					else
 						m_pTeleTile[fy*m_Width+fx].m_Number = pLt->m_pTeleTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number;
-                }
+				}
 			}
 		}
 	}
@@ -903,14 +899,14 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			
 			if(Empty)
 			{
-                m_pTiles[fy*m_Width+fx].m_Index = 0;
+				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
 				m_pSpeedupTile[fy*m_Width+fx].m_Angle = 0;
 			}
-            else
+			else
 			{
-                m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
-                m_pSpeedupTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
+				m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
+				m_pSpeedupTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
 				if(m_pTiles[fy*m_Width+fx].m_Index > 0)
 				{
 					if((!pLt->m_pSpeedupTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Force && m_pEditor->m_SpeedupForce) || m_pEditor->m_SpeedupForce != pLt->m_SpeedupForce)
@@ -1181,16 +1177,16 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 			if(Empty)
 			{
-                m_pTiles[fy*m_Width+fx].m_Index = 0;
-                m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
+				m_pTiles[fy*m_Width+fx].m_Index = 0;
+				m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
 			}
-            else
+				else
 			{
-                m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
-                m_pSwitchTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
-                if(m_pEditor->m_SwitchNum && m_pTiles[fy*m_Width+fx].m_Index > 0)
-                {
+				m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
+				m_pSwitchTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
+				if(m_pEditor->m_SwitchNum && m_pTiles[fy*m_Width+fx].m_Index > 0)
+				{
 					if((!pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number) || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
 						m_pSwitchTile[fy*m_Width+fx].m_Number = m_pEditor->m_SwitchNum;
 					else
@@ -1200,7 +1196,7 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 					else
 						m_pSwitchTile[fy*m_Width+fx].m_Delay = pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Delay;
 					m_pSwitchTile[fy*m_Width+fx].m_Flags = pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Flags;
-                }
+				}
 			}
 		}
 	}

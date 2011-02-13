@@ -72,8 +72,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Pos = Pos;
 	
 	m_Core.Reset();
-
 	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core);
+
 	m_Core.m_Pos = m_Pos;
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 
@@ -93,7 +93,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 void CCharacter::Destroy()
 {
-	//GameServer()->m_World.m_Core.m_apCharacters[m_MarkedId] = 0; This caused the Marked Char for delete to always Delete ID 0 Core
+	//GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	//dbg_msg("CCHaracter::Destroy", "ID %d Player %d m_Core %d", GetPlayer()->GetCID() ,GetPlayer() ,&m_Core);
 	m_Alive = false;
 	CEntity::Destroy();
@@ -223,7 +223,7 @@ void CCharacter::HandleWeaponSwitch()
 	if(m_QueuedWeapon != -1)
 		WantedWeapon = m_QueuedWeapon;
 	
-	bool Anything;
+	bool Anything = false;
 	 for(int i = 0; i < NUM_WEAPONS - 1; ++i)
 		 if(m_aWeapons[i].m_Got)
 			 Anything = true;
@@ -942,14 +942,13 @@ void CCharacter::Snap(int SnappingClient)
 
 	pCharacter->m_PlayerState = m_PlayerState;
 }
-
-bool CCharacter::CanCollide(int Cid)
+bool CCharacter::CanCollide(int ClientID)
 {
-	return Teams()->m_Core.CanCollide(GetPlayer()->GetCID(), Cid);
+	return Teams()->m_Core.CanCollide(GetPlayer()->GetCID(), ClientID);
 }
-bool CCharacter::SameTeam(int Cid)
+bool CCharacter::SameTeam(int ClientID)
 {
-	return Teams()->m_Core.SameTeam(GetPlayer()->GetCID(), Cid);
+	return Teams()->m_Core.SameTeam(GetPlayer()->GetCID(), ClientID);
 }
 
 void CCharacter::OnFinish()
@@ -1024,7 +1023,7 @@ void CCharacter::OnFinish()
 					{
 						CNetMsg_Sv_PlayerTime Msg;
 						Msg.m_Time = time * 100.0;
-						Msg.m_Cid = m_pPlayer->GetCID();
+						Msg.m_ClientID = m_pPlayer->GetCID();
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 					}
 				}
@@ -1365,14 +1364,10 @@ void CCharacter::HandleTiles(int Index)
 		Freeze();
 	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 		UnFreeze();
-	else if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
+	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
 		m_DeepFreeze = true;
 	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
-	{
-		if((m_TileIndex != TILE_FREEZE) && (m_TileFIndex != TILE_FREEZE))
-			UnFreeze();
 		m_DeepFreeze = false;
-	}
 	if(((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Endless hook has been activated");

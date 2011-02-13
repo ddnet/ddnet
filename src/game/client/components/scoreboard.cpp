@@ -109,13 +109,13 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 				if(Count)
 					str_append(aBuffer, ", ", sizeof(aBuffer));
 				if(m_GametypeRace)
-					if (g_Config.m_ClShowIds)
+					if (g_Config.m_ClShowIDs)
 					{
 						char aId[4];
-						str_format(aId,sizeof(aId),"%d:",pInfo->m_ClientId);
+						str_format(aId,sizeof(aId),"%d:",pInfo->m_ClientID);
 						str_append(aBuffer, aId, sizeof(aBuffer));
 					}
-				str_append(aBuffer, m_pClient->m_aClients[pInfo->m_ClientId].m_aName, sizeof(aBuffer));
+				str_append(aBuffer, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, sizeof(aBuffer));
 				Count++;
 			}
 		}
@@ -221,9 +221,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 				// reset time
 			if(pInfo->m_Score == -9999)
-				m_pClient->m_aClients[pInfo->m_ClientId].m_Score = 0;
+				m_pClient->m_aClients[pInfo->m_ClientID].m_Score = 0;
 
-			int Time = m_pClient->m_aClients[pInfo->m_ClientId].m_Score;
+			int Time = m_pClient->m_aClients[pInfo->m_ClientID].m_Score;
 			if(Time > 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "%02d:%02d.%02d", Time/6000, Time/100-(Time/6000*60), Time % 100);
@@ -236,17 +236,17 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			FontSizeResize = FontSize;
 
 
-			while(TextRender()->TextWidth(0, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientId].m_aName, -1) > w-163.0f-Offset-PingWidth)
+			while(TextRender()->TextWidth(0, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1) > w-163.0f-Offset-PingWidth)
 				--FontSizeResize;
-			if (g_Config.m_ClShowIds)
+			if (g_Config.m_ClShowIDs)
 			{
 				char aId[64] = "";
-				str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientId);
-				str_append(aId, m_pClient->m_aClients[pInfo->m_ClientId].m_aName,sizeof(aId));
+				str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientID);
+				str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
 				TextRender()->Text(0, x+128.0f+Offset, y+(FontSize-FontSizeResize)/2, FontSizeResize, aId, -1);
 			}
 			else
-				TextRender()->Text(0, x+128.0f+Offset, y+(FontSize-FontSizeResize)/2, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientId].m_aName, -1);
+				TextRender()->Text(0, x+128.0f+Offset, y+(FontSize-FontSizeResize)/2, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 			FontSizeResize = FontSize;
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, -9999, 9999));
 			while((Width = TextRender()->TextWidth(0, FontSizeResize, aBuf, -1)) > PingWidth)
@@ -263,9 +263,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 
 			FontSizeResize = FontSize;
-			while(TextRender()->TextWidth(0, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientId].m_aName, -1) > w-163.0f-PingWidth)
+			while(TextRender()->TextWidth(0, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1) > w-163.0f-PingWidth)
 				--FontSizeResize;
-			TextRender()->Text(0, x+128.0f, y+(FontSize-FontSizeResize)/2, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientId].m_aName, -1);
+			TextRender()->Text(0, x+128.0f, y+(FontSize-FontSizeResize)/2, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 			FontSizeResize = FontSize;
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, -9999, 9999));
 			while((Width = TextRender()->TextWidth(0, FontSizeResize, aBuf, -1)) > PingWidth)
@@ -274,8 +274,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->Text(0, x+w-35.0f-Width, y+(FontSize-FontSizeResize)/2, FontSizeResize, aBuf, -1);
 
 		// render avatar
-		if((m_pClient->m_Snap.m_paFlags[0] && m_pClient->m_Snap.m_paFlags[0]->m_CarriedBy == pInfo->m_ClientId) ||
-			(m_pClient->m_Snap.m_paFlags[1] && m_pClient->m_Snap.m_paFlags[1]->m_CarriedBy == pInfo->m_ClientId))
+		if((m_pClient->m_Snap.m_paFlags[0] && m_pClient->m_Snap.m_paFlags[0]->m_CarriedBy == pInfo->m_ClientID) ||
+			(m_pClient->m_Snap.m_paFlags[1] && m_pClient->m_Snap.m_paFlags[1]->m_CarriedBy == pInfo->m_ClientID))
 		{
 			Graphics()->BlendNormal();
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
@@ -294,7 +294,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			Graphics()->QuadsEnd();
 		}
 		
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientId].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 
 		if(m_GametypeRace)

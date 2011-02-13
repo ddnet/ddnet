@@ -78,7 +78,7 @@ class CMenus : public CComponent
 		CUIRect m_HitRect;
 	};
 	
-	void UiDoListboxStart(void *pId, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
+	void UiDoListboxStart(void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
 						  int ItemsPerRow, int SelectedIndex, float ScrollValue);
 	CListboxItem UiDoListboxNextItem(void *pID, bool Selected = false);
 	CListboxItem UiDoListboxNextRow();
@@ -180,13 +180,15 @@ class CMenus : public CComponent
 														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
 														str_comp_filenames(m_aFilename, Other.m_aFilename) < 0; }
 	};
-	
+
+	//sorted_array<CDemoItem> m_lDemos;
 	char m_aCurrentDemoFolder[256];
 	int m_DemolistSelectedIndex;
 	bool m_DemolistSelectedIsDir;
 	int m_DemolistStorageType;
 	
 	void DemolistOnUpdate(bool Reset);
+	//void DemolistPopulate();
 	static void DemolistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	
 	static void GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);

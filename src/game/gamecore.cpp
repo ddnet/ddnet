@@ -44,9 +44,9 @@ bool CTuningParams::Get(const char *pName, float *pValue)
 	return false;
 }
 
-float HermiteBasis1(float v)
+float HermiteBasis1(float V)
 {
-	return 2*v*v*v - 3*v*v+1;
+	return 2*V*V*V - 3*V*V+1;
 }
 
 float VelocityRamp(float Value, float Start, float Range, float Curvature)
@@ -139,16 +139,16 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Direction = m_Input.m_Direction;
 
 		// setup angle
-		float a = 0;
+		float A = 0;
 		if(m_Input.m_TargetX == 0)
-			a = atanf((float)m_Input.m_TargetY);
+			A = atanf((float)m_Input.m_TargetY);
 		else
-			a = atanf((float)m_Input.m_TargetY/(float)m_Input.m_TargetX);
+			A = atanf((float)m_Input.m_TargetY/(float)m_Input.m_TargetX);
 			
 		if(m_Input.m_TargetX < 0)
-			a = a+pi;
+			A = A+pi;
 			
-		m_Angle = (int)(a*256.0f);
+		m_Angle = (int)(A*256.0f);
 
 		// handle jump
 		if(m_Input.m_Jump)
@@ -246,30 +246,30 @@ void CCharacterCore::Tick(bool UseInput)
 				GoingToHitGround = true;
 			m_pReset = true;
 		}
-		
+
 		// Check against other players first
 		if(m_pWorld && m_pWorld->m_Tuning.m_PlayerHooking)
 		{
 			float Dist = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
-				CCharacterCore *p = m_pWorld->m_apCharacters[i];
-				if(!p || p == this || !m_pTeams->CanCollide(i, m_Id))
+				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
+				if(!pCharCore || pCharCore == this || !m_pTeams->CanCollide(i, m_Id))
 				{
 					dbg_msg1("GameCore Continue", "ThisId = %d Id = %d Team = %d", m_Id, i, m_pTeams->Team(i));
 					continue;
 				}
 				dbg_msg1("GameCore Past  Continue", "ThisId = %d Id = %d Team = %d", m_Id, i, m_pTeams->Team(i));
 				
-				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, p->m_Pos);
-				if(distance(p->m_Pos, ClosestPoint) < PhysSize+2.0f)
+				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
+				if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize+2.0f)
 				{
-					if (m_HookedPlayer == -1 || distance(m_HookPos, p->m_Pos) < Dist)
+					if (m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Dist)
 					{
 						m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_PLAYER;
 						m_HookState = HOOK_GRABBED;
 						m_HookedPlayer = i;
-						Dist = distance(m_HookPos, p->m_Pos);
+						Dist = distance(m_HookPos, pCharCore->m_Pos);
 						dbg_msg1("GameCore Hooked", "ThisId = %d Id = %d Team = %d", m_Id, i, m_pTeams->Team(i));
 					}
 				}
@@ -298,9 +298,9 @@ void CCharacterCore::Tick(bool UseInput)
 	{
 		if(m_HookedPlayer != -1)
 		{
-			CCharacterCore *p = m_pWorld->m_apCharacters[m_HookedPlayer];
-			if(p)
-				m_HookPos = p->m_Pos;
+			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
+			if(pCharCore)
+				m_HookPos = pCharCore->m_Pos;
 			else
 			{
 				// release hook
@@ -348,25 +348,26 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 	if(m_pWorld/* && m_pWorld->m_Tuning.m_PlayerCollision*/)
+	if(m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			CCharacterCore *p = m_pWorld->m_apCharacters[i];
-			if(!p)
+			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
+			if(!pCharCore)
 				continue;
 			
 			//player *p = (player*)ent;
-			if(p == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i))) { // || !(p->flags&FLAG_ALIVE)
+			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i))) { // || !(p->flags&FLAG_ALIVE)
 				continue; // make sure that we don't nudge our self
 			}
 			// handle player <-> player collision
-			float d = distance(m_Pos, p->m_Pos);
-			vec2 Dir = normalize(m_Pos - p->m_Pos);
+			float D = distance(m_Pos, pCharCore->m_Pos);
+			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 			if (m_pWorld->m_Tuning.m_PlayerCollision)
 			{	
-				if(d < PhysSize*1.25f && d > 1.0f)
+				if(D < PhysSize*1.25f && D > 1.0f)
 				{
-					float a = (PhysSize*1.45f - d);
+					float a = (PhysSize*1.45f - D);
 					float v = 0.5f;
 					// make sure that we don't add excess force by checking the
 					// direction against the current velocity. if not zero.
@@ -380,24 +381,24 @@ void CCharacterCore::Tick(bool UseInput)
 			// handle hook influence
 			if(m_HookedPlayer == i)
 			{
-				if(d > PhysSize*1.50f) // TODO: fix tweakable variable
+				if(D > PhysSize*1.50f) // TODO: fix tweakable variable
 				{
-					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (d/m_pWorld->m_Tuning.m_HookLength);
+					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (D/m_pWorld->m_Tuning.m_HookLength);
 					float DragSpeed = m_pWorld->m_Tuning.m_HookDragSpeed;
-					vec2 Temp = p->m_Vel;
-					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, p->m_Vel.x, Accel*Dir.x*1.5f);
-					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, p->m_Vel.y, Accel*Dir.y*1.5f);
-					if(Temp.x > 0 && ((p->m_TileIndex == TILE_STOP && p->m_TileFlags == ROTATION_270) || (p->m_TileIndexL == TILE_STOP && p->m_TileFlagsL == ROTATION_270) || (p->m_TileIndexL == TILE_STOPS && (p->m_TileFlagsL == ROTATION_90 || p->m_TileFlagsL ==ROTATION_270)) || (p->m_TileIndexL == TILE_STOPA) || (p->m_TileFIndex == TILE_STOP && p->m_TileFFlags == ROTATION_270) || (p->m_TileFIndexL == TILE_STOP && p->m_TileFFlagsL == ROTATION_270) || (p->m_TileFIndexL == TILE_STOPS && (p->m_TileFFlagsL == ROTATION_90 || p->m_TileFFlagsL == ROTATION_270)) || (p->m_TileFIndexL == TILE_STOPA) || (p->m_TileSIndex == TILE_STOP && p->m_TileSFlags == ROTATION_270) || (p->m_TileSIndexL == TILE_STOP && p->m_TileSFlagsL == ROTATION_270) || (p->m_TileSIndexL == TILE_STOPS && (p->m_TileSFlagsL == ROTATION_90 || p->m_TileSFlagsL == ROTATION_270)) || (p->m_TileSIndexL == TILE_STOPA)))
+					vec2 Temp = pCharCore->m_Vel;
+					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel*Dir.x*1.5f);
+					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel*Dir.y*1.5f);
+					if(Temp.x > 0 && ((pCharCore->m_TileIndex == TILE_STOP && pCharCore->m_TileFlags == ROTATION_270) || (pCharCore->m_TileIndexL == TILE_STOP && pCharCore->m_TileFlagsL == ROTATION_270) || (pCharCore->m_TileIndexL == TILE_STOPS && (pCharCore->m_TileFlagsL == ROTATION_90 || pCharCore->m_TileFlagsL ==ROTATION_270)) || (pCharCore->m_TileIndexL == TILE_STOPA) || (pCharCore->m_TileFIndex == TILE_STOP && pCharCore->m_TileFFlags == ROTATION_270) || (pCharCore->m_TileFIndexL == TILE_STOP && pCharCore->m_TileFFlagsL == ROTATION_270) || (pCharCore->m_TileFIndexL == TILE_STOPS && (pCharCore->m_TileFFlagsL == ROTATION_90 || pCharCore->m_TileFFlagsL == ROTATION_270)) || (pCharCore->m_TileFIndexL == TILE_STOPA) || (pCharCore->m_TileSIndex == TILE_STOP && pCharCore->m_TileSFlags == ROTATION_270) || (pCharCore->m_TileSIndexL == TILE_STOP && pCharCore->m_TileSFlagsL == ROTATION_270) || (pCharCore->m_TileSIndexL == TILE_STOPS && (pCharCore->m_TileSFlagsL == ROTATION_90 || pCharCore->m_TileSFlagsL == ROTATION_270)) || (pCharCore->m_TileSIndexL == TILE_STOPA)))
 						Temp.x = 0;
-					if(Temp.x < 0 && ((p->m_TileIndex == TILE_STOP && p->m_TileFlags == ROTATION_90) || (p->m_TileIndexR == TILE_STOP && p->m_TileFlagsR == ROTATION_90) || (p->m_TileIndexR == TILE_STOPS && (p->m_TileFlagsR == ROTATION_90 || p->m_TileFlagsR == ROTATION_270)) || (p->m_TileIndexR == TILE_STOPA) || (p->m_TileFIndex == TILE_STOP && p->m_TileFFlags == ROTATION_90) || (p->m_TileFIndexR == TILE_STOP && p->m_TileFFlagsR == ROTATION_90) || (p->m_TileFIndexR == TILE_STOPS && (p->m_TileFFlagsR == ROTATION_90 || p->m_TileFFlagsR == ROTATION_270)) || (p->m_TileFIndexR == TILE_STOPA) || (p->m_TileSIndex == TILE_STOP && p->m_TileSFlags == ROTATION_90) || (p->m_TileSIndexR == TILE_STOP && p->m_TileSFlagsR == ROTATION_90) || (p->m_TileSIndexR == TILE_STOPS && (p->m_TileSFlagsR == ROTATION_90 || p->m_TileSFlagsR == ROTATION_270)) || (p->m_TileSIndexR == TILE_STOPA)))
+					if(Temp.x < 0 && ((pCharCore->m_TileIndex == TILE_STOP && pCharCore->m_TileFlags == ROTATION_90) || (pCharCore->m_TileIndexR == TILE_STOP && pCharCore->m_TileFlagsR == ROTATION_90) || (pCharCore->m_TileIndexR == TILE_STOPS && (pCharCore->m_TileFlagsR == ROTATION_90 || pCharCore->m_TileFlagsR == ROTATION_270)) || (pCharCore->m_TileIndexR == TILE_STOPA) || (pCharCore->m_TileFIndex == TILE_STOP && pCharCore->m_TileFFlags == ROTATION_90) || (pCharCore->m_TileFIndexR == TILE_STOP && pCharCore->m_TileFFlagsR == ROTATION_90) || (pCharCore->m_TileFIndexR == TILE_STOPS && (pCharCore->m_TileFFlagsR == ROTATION_90 || pCharCore->m_TileFFlagsR == ROTATION_270)) || (pCharCore->m_TileFIndexR == TILE_STOPA) || (pCharCore->m_TileSIndex == TILE_STOP && pCharCore->m_TileSFlags == ROTATION_90) || (pCharCore->m_TileSIndexR == TILE_STOP && pCharCore->m_TileSFlagsR == ROTATION_90) || (pCharCore->m_TileSIndexR == TILE_STOPS && (pCharCore->m_TileSFlagsR == ROTATION_90 || pCharCore->m_TileSFlagsR == ROTATION_270)) || (pCharCore->m_TileSIndexR == TILE_STOPA)))
 						Temp.x = 0;
-					if(Temp.y < 0 && ((p->m_TileIndex == TILE_STOP && p->m_TileFlags == ROTATION_180) || (p->m_TileIndexB == TILE_STOP && p->m_TileFlagsB == ROTATION_180) || (p->m_TileIndexB == TILE_STOPS && (p->m_TileFlagsB == ROTATION_0 || p->m_TileFlagsB == ROTATION_180)) || (p->m_TileIndexB == TILE_STOPA) || (p->m_TileFIndex == TILE_STOP && p->m_TileFFlags == ROTATION_180) || (p->m_TileFIndexB == TILE_STOP && p->m_TileFFlagsB == ROTATION_180) || (p->m_TileFIndexB == TILE_STOPS && (p->m_TileFFlagsB == ROTATION_0 || p->m_TileFFlagsB == ROTATION_180)) || (p->m_TileFIndexB == TILE_STOPA) || (p->m_TileSIndex == TILE_STOP && p->m_TileSFlags == ROTATION_180) || (p->m_TileSIndexB == TILE_STOP && p->m_TileSFlagsB == ROTATION_180) || (p->m_TileSIndexB == TILE_STOPS && (p->m_TileSFlagsB == ROTATION_0 || p->m_TileSFlagsB == ROTATION_180)) || (p->m_TileSIndexB == TILE_STOPA)))
+					if(Temp.y < 0 && ((pCharCore->m_TileIndex == TILE_STOP && pCharCore->m_TileFlags == ROTATION_180) || (pCharCore->m_TileIndexB == TILE_STOP && pCharCore->m_TileFlagsB == ROTATION_180) || (pCharCore->m_TileIndexB == TILE_STOPS && (pCharCore->m_TileFlagsB == ROTATION_0 || pCharCore->m_TileFlagsB == ROTATION_180)) || (pCharCore->m_TileIndexB == TILE_STOPA) || (pCharCore->m_TileFIndex == TILE_STOP && pCharCore->m_TileFFlags == ROTATION_180) || (pCharCore->m_TileFIndexB == TILE_STOP && pCharCore->m_TileFFlagsB == ROTATION_180) || (pCharCore->m_TileFIndexB == TILE_STOPS && (pCharCore->m_TileFFlagsB == ROTATION_0 || pCharCore->m_TileFFlagsB == ROTATION_180)) || (pCharCore->m_TileFIndexB == TILE_STOPA) || (pCharCore->m_TileSIndex == TILE_STOP && pCharCore->m_TileSFlags == ROTATION_180) || (pCharCore->m_TileSIndexB == TILE_STOP && pCharCore->m_TileSFlagsB == ROTATION_180) || (pCharCore->m_TileSIndexB == TILE_STOPS && (pCharCore->m_TileSFlagsB == ROTATION_0 || pCharCore->m_TileSFlagsB == ROTATION_180)) || (pCharCore->m_TileSIndexB == TILE_STOPA)))
 						Temp.y = 0;
-					if(Temp.y > 0 && ((p->m_TileIndex == TILE_STOP && p->m_TileFlags == ROTATION_0) || (p->m_TileIndexT == TILE_STOP && p->m_TileFlagsT == ROTATION_0) || (p->m_TileIndexT == TILE_STOPS && (p->m_TileFlagsT == ROTATION_0 || p->m_TileFlagsT == ROTATION_180)) || (p->m_TileIndexT == TILE_STOPA) || (p->m_TileFIndex == TILE_STOP && p->m_TileFFlags == ROTATION_0) || (p->m_TileFIndexT == TILE_STOP && p->m_TileFFlagsT == ROTATION_0) || (p->m_TileFIndexT == TILE_STOPS && (p->m_TileFFlagsT == ROTATION_0 || p->m_TileFFlagsT == ROTATION_180)) || (p->m_TileFIndexT == TILE_STOPA) || (p->m_TileSIndex == TILE_STOP && p->m_TileSFlags == ROTATION_0) || (p->m_TileSIndexT == TILE_STOP && p->m_TileSFlagsT == ROTATION_0) || (p->m_TileSIndexT == TILE_STOPS && (p->m_TileSFlagsT == ROTATION_0 || p->m_TileSFlagsT == ROTATION_180)) || (p->m_TileSIndexT == TILE_STOPA)))
+					if(Temp.y > 0 && ((pCharCore->m_TileIndex == TILE_STOP && pCharCore->m_TileFlags == ROTATION_0) || (pCharCore->m_TileIndexT == TILE_STOP && pCharCore->m_TileFlagsT == ROTATION_0) || (pCharCore->m_TileIndexT == TILE_STOPS && (pCharCore->m_TileFlagsT == ROTATION_0 || pCharCore->m_TileFlagsT == ROTATION_180)) || (pCharCore->m_TileIndexT == TILE_STOPA) || (pCharCore->m_TileFIndex == TILE_STOP && pCharCore->m_TileFFlags == ROTATION_0) || (pCharCore->m_TileFIndexT == TILE_STOP && pCharCore->m_TileFFlagsT == ROTATION_0) || (pCharCore->m_TileFIndexT == TILE_STOPS && (pCharCore->m_TileFFlagsT == ROTATION_0 || pCharCore->m_TileFFlagsT == ROTATION_180)) || (pCharCore->m_TileFIndexT == TILE_STOPA) || (pCharCore->m_TileSIndex == TILE_STOP && pCharCore->m_TileSFlags == ROTATION_0) || (pCharCore->m_TileSIndexT == TILE_STOP && pCharCore->m_TileSFlagsT == ROTATION_0) || (pCharCore->m_TileSIndexT == TILE_STOPS && (pCharCore->m_TileSFlagsT == ROTATION_0 || pCharCore->m_TileSFlagsT == ROTATION_180)) || (pCharCore->m_TileSIndexT == TILE_STOPA)))
 						Temp.y = 0;
 
 					// add force to the hooked player
-					p->m_Vel = Temp;
+					pCharCore->m_Vel = Temp;
 					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel*Dir.x*0.25f);
 					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel*Dir.y*0.25f);
 					if(Temp.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))

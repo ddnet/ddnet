@@ -552,7 +552,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_ServerInfoButton=0;
 		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage==PAGE_SERVER_INFO, &Button, CUI::CORNER_T))
 			NewPage = PAGE_SERVER_INFO;
-		
+
 		if(m_pClient->m_IsRace)
 		{
 			Box.VSplitLeft(4.0f, 0, &Box);
@@ -644,7 +644,7 @@ void CMenus::RenderLoading(float Percent)
 	Graphics()->QuadsEnd();
 
 
-	const char *pCaption = Localize("Loading DDRace Client");
+	const char *pCaption = Localize("Loading");
 
 	tw = TextRender()->TextWidth(0, 48.0f, pCaption, -1);
 	CUIRect r;
@@ -996,7 +996,7 @@ int CMenus::Render()
 
 					// update download speed
 					float Diff = (Client()->MapDownloadAmount()-m_DownloadLastCheckSize)/1024.0f;
-					m_DownloadSpeed = (m_DownloadSpeed*(1.0f-(1.0f/m_DownloadSpeed))) + (Diff*(1.0f/m_DownloadSpeed));
+					m_DownloadSpeed = absolute((m_DownloadSpeed*(1.0f-(1.0f/m_DownloadSpeed))) + (Diff*(1.0f/m_DownloadSpeed)));
 					m_DownloadLastCheckTime = Now;
 					m_DownloadLastCheckSize = Client()->MapDownloadAmount();
 				}
@@ -1244,10 +1244,10 @@ void CMenus::OnRender()
 
 	CTextCursor cursor;
 	TextRender()->SetCursor(&cursor, 10, 10, 20, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ã‚ˆã�†ã�“ã�� - ã‚¬ã‚¤ãƒ‰", -1);
+	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
 
 	TextRender()->SetCursor(&cursor, 10, 30, 15, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ã‚ˆã�†ã�“ã�� - ã‚¬ã‚¤ãƒ‰", -1);
+	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
 	
 	//Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();

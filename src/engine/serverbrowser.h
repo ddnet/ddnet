@@ -21,12 +21,6 @@ public:
 		int m_Score;
 	} ;
 
-	enum
-	{
-		FLAG_VERSION_VANILLA=0,
-		FLAG_VERSION_DDRACE
-	};
-
 	int m_SortedIndex;
 	int m_ServerIndex;
 	
@@ -38,7 +32,6 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
-	int m_FlagVersion;
 	int m_Favorite;
 	int m_Latency; // in ms
 	char m_aGameType[16];
@@ -47,6 +40,12 @@ public:
 	char m_aVersion[32];
 	char m_aAddress[24];
 	CPlayer m_aPlayers[16];
+	int m_FlagVersion;
+	enum
+	{
+		FLAG_VERSION_VANILLA=0,
+		FLAG_VERSION_DDRACE
+	};
 };
 
 class IServerBrowser : public IInterface

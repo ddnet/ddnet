@@ -60,8 +60,6 @@ bool CNetServer::Open(NETADDR BindAddr, int MaxClients, int MaxClientsPerIP, int
 	m_BanPool[NET_SERVER_MAXBANS-1].m_pPrev = &m_BanPool[NET_SERVER_MAXBANS-2];
 	m_BanPool_FirstFree = &m_BanPool[0];
 
-	m_Flags = Flags;
-
 	return true;
 }
 
@@ -391,7 +389,6 @@ int CNetServer::Recv(CNetChunk *pChunk)
 								m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr);
 								if(m_pfnNewClient)
 									m_pfnNewClient(i, m_UserPtr);
-								
 								break;
 							}
 						}

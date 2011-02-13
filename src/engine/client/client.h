@@ -266,10 +266,10 @@ public:
 
 	// ---
 
-	void *SnapGetItem(int SnapId, int Index, CSnapItem *pItem);
-	void SnapInvalidateItem(int SnapId, int Index);
-	void *SnapFindItem(int SnapId, int Type, int Id);
-	int SnapNumItems(int SnapId);
+	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem);
+	void SnapInvalidateItem(int SnapID, int Index);
+	void *SnapFindItem(int SnapID, int Type, int ID);
+	int SnapNumItems(int SnapID);
 	void SnapSetStaticsize(int ItemType, int Size);
 
 	void Render();
@@ -316,13 +316,6 @@ public:
 	static void Con_Record(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	//DDRace
-	virtual const char* GetCurrentMap();
-	virtual int GetCurrentMapCrc();
-	virtual const char* RaceRecordStart(const char *pFilename);
-	virtual void RaceRecordStop();
-	virtual bool DemoIsRecording();
-
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType);
@@ -334,5 +327,13 @@ public:
 	void AutoScreenshot_Cleanup();
 
 	virtual class CEngine *Engine() { return &m_Engine; }
+
+	// DDRace
+	virtual const char* GetCurrentMap();
+	virtual int GetCurrentMapCrc();
+	virtual const char* RaceRecordStart(const char *pFilename);
+	virtual void RaceRecordStop();
+	virtual bool DemoIsRecording();
+
 };
 #endif
