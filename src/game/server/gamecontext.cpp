@@ -720,21 +720,24 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 			if (m_aMutes[z].m_IP[0] && str_comp(aIP, m_aMutes[z].m_IP) == 0 && (MuteTicks = m_aMutes[z].m_Expire - Server()->Tick()) <= 0)
 					m_aMutes[z].m_IP[0] = 0;
 
-		if (MuteTicks > 0)
+		if(pMsg->m_pMessage[0]!='/')
 		{
-			char aBuf[128];
-			str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", MuteTicks / Server()->TickSpeed());
-			SendChatTarget(ClientID, aBuf);
-			return;
-		}
+			if (MuteTicks > 0)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", MuteTicks / Server()->TickSpeed());
+				SendChatTarget(ClientID, aBuf);
+				return;
+			}
 
-		if ((p->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
-		{
-			char aIP[16];
-			Server()->GetClientIP(ClientID, aIP, sizeof aIP);
-			Mute(aIP, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
-			p->m_ChatScore = 0;
-			return;
+			if ((p->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+			{
+				char aIP[16];
+				Server()->GetClientIP(ClientID, aIP, sizeof aIP);
+				Mute(aIP, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
+				p->m_ChatScore = 0;
+				return;
+			}
 		}
 
 		// check for invalid chars
