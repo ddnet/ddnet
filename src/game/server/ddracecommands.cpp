@@ -5,6 +5,9 @@
 #include <game/server/teams.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
+#if defined(CONF_SQL)
+	#include <game/server/score/sql_score.h>
+#endif
 
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
@@ -706,7 +709,8 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 		CCharacter* pChr = pPlayer->GetCharacter();
 		if(!pPlayer->GetTeam() && pChr && (!pChr->GetWeaponGot(WEAPON_NINJA) || pChr->m_FreezeTime) && pChr->IsGrounded() && pChr->m_Pos==pChr->m_PrevPos && !pChr->Team() && !pPlayer->m_InfoSaved)
 		{
-			if(pPlayer->m_Last_Pause + pSelf->Server()->TickSpeed() * g_Config.m_SvPauseFrequency <= pSelf->Server()->Tick()) {
+			if(pPlayer->m_Last_Pause + pSelf->Server()->TickSpeed() * g_Config.m_SvPauseFrequency <= pSelf->Server()->Tick()) 
+			{
 				pPlayer->SaveCharacter();
 				pPlayer->SetTeam(TEAM_SPECTATORS);
 				pPlayer->m_InfoSaved = true;
@@ -748,6 +752,35 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData, int Clie
 	else
 		pSelf->Score()->ShowTop5(pPlayer->GetCID());
 }
+#if defined(CONF_SQL)
+void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	if(g_Config.m_SvUseSQL)
+	{
+		CGameContext *pSelf = (CGameContext *)pUserData;
+		CSqlScore *pScore = (CSqlScore *)pSelf->Score();
+		CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
+
+		if(pResult->NumArguments() > 0 && pResult->NumArguments() < 3)
+		{
+			if (pResult->NumArguments() == 1)
+			{
+				pScore->ShowTimes(pPlayer->GetCID(), (str_comp(pResult->GetString(0), "me") == 0) ? pSelf->Server()->ClientName(ClientID) : pResult->GetString(0),1);
+				return;
+			}
+			else if (pResult->GetInteger(1) != 0)
+			{
+				pScore->ShowTimes(pPlayer->GetCID(), (str_comp(pResult->GetString(0), "me") == 0) ? pSelf->Server()->ClientName(ClientID) : pResult->GetString(0),pResult->GetInteger(1));
+				return;
+			}
+		}
+			
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "/times needs 1 or 2 parameter. 1. = name, 2. = start with number");
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Example: /times me, /times Hans, /times \"Papa Smurf\" 5");
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");						
+	}	
+}
+#endif
 
 void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
