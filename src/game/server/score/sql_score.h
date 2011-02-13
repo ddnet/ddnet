@@ -15,12 +15,12 @@ class CSqlScore : public IScore
 {
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
-	
+
 	sql::Driver *m_pDriver;
 	sql::Connection *m_pConnection;
 	sql::Statement *m_pStatement;
 	sql::ResultSet *m_pResults;
-	
+
 	// copy of config vars
 	const char* m_pDatabase;
 	const char* m_pPrefix;
@@ -29,34 +29,35 @@ class CSqlScore : public IScore
 	const char* m_pIp;
 	char m_aMap[64];
 	int m_Port;
-	
+
 	CGameContext *GameServer() { return m_pGameServer; }
 	IServer *Server() { return m_pServer; }
-	
+
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void ShowRankThread(void *pUser);
 	static void ShowTop5Thread(void *pUser);
-	
+
 	void Init();
-	
+
 	bool Connect();
 	void Disconnect();
-	
+
 	// anti SQL injection
 	void ClearString(char *pString);
-	
+
 	void NormalizeMapname(char *pString);
-	
+
 public:
-	
+
 	CSqlScore(CGameContext *pGameServer);
 	~CSqlScore();
-	
+
 	virtual void LoadScore(int ClientID);
 	virtual void SaveScore(int ClientID, float Time, CCharacter *pChar);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search=false);
 	virtual void ShowTop5(int ClientID, int Debut=1);
+ 	static void agoTimeToString(int agoTime, char agoStrign[]);
 };
 
 struct CSqlScoreData

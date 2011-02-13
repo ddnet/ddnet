@@ -23,17 +23,17 @@ CFileScore::CFileScore(CGameContext *pGameServer) : m_pGameServer(pGameServer), 
 {
 	if(gs_ScoreLock == 0)
 		gs_ScoreLock = lock_create();
-		
+
 	Init();
 }
 
 CFileScore::~CFileScore()
 {
 	lock_wait(gs_ScoreLock);
-	
+
 	// clear list
 	m_Top.clear();
-	
+
 	lock_release(gs_ScoreLock);
 }
 
@@ -85,14 +85,14 @@ void CFileScore::Save()
 void CFileScore::Init()
 {
 	lock_wait(gs_ScoreLock);
-	
+
 	// create folder if not exist
 	if(g_Config.m_SvScoreFolder[0])
 		fs_makedir(g_Config.m_SvScoreFolder);
-	
+
 	std::fstream f;
 	f.open(SaveFile().c_str(), std::ios::in);
-	
+
 	while(!f.eof() && !f.fail())
 	{
 		std::string TmpName, TmpScore, TmpCpLine;
@@ -118,7 +118,7 @@ void CFileScore::Init()
 	}
 	f.close();
 	lock_release(gs_ScoreLock);
-	
+
 	// save the current best score
 	if(m_Top.size())
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_CurrentRecord = m_Top[0].m_Score;
@@ -157,23 +157,23 @@ CFileScore::CPlayerScore *CFileScore::SearchName(const char *pName, int *pPositi
 void CFileScore::UpdatePlayer(int ID, float Score, float aCpTime[NUM_CHECKPOINTS])
 {
 	const char *pName = Server()->ClientName(ID);
-	
+
 	lock_wait(gs_ScoreLock);
 	CPlayerScore *pPlayer = SearchScore(ID, 0);
-	
+
 	if(pPlayer)
 	{
 		for(int c = 0; c < NUM_CHECKPOINTS; c++)
 				pPlayer->m_aCpTime[c] = aCpTime[c];
-		
+
 		pPlayer->m_Score = Score;
 		str_copy(pPlayer->m_aName, pName, sizeof(pPlayer->m_aName));
-		
+
 		sort(m_Top.all());
 	}
 	else
 		m_Top.add(*new CPlayerScore(pName, Score, aCpTime));
-	
+
 	lock_release(gs_ScoreLock);
 	Save();
 }
@@ -187,7 +187,7 @@ void CFileScore::LoadScore(int ClientID)
 		lock_release(gs_ScoreLock);
 		Save();
 	}
-	
+
 	// set score
 	if(pPlayer)
 		PlayerData(ClientID)->Set(pPlayer->m_Score, pPlayer->m_aCpTime);
@@ -219,12 +219,12 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 	CPlayerScore *pScore;
 	int Pos;
 	char aBuf[512];
-	
+
 	if(!Search)
 		pScore = SearchScore(ClientID, &Pos);
 	else
 		pScore = SearchName(pName, &Pos, 1);
-	
+
 	if(pScore && Pos > -1)
 	{
 		float Time = pScore->m_Score;
@@ -242,6 +242,6 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 		str_format(aBuf, sizeof(aBuf), "Several players were found.");
 	else
 		str_format(aBuf, sizeof(aBuf), "%s is not ranked", Search?pName:Server()->ClientName(ClientID));
-	
+
 	GameServer()->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "rank", aBuf);
 }

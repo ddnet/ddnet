@@ -987,11 +987,13 @@ void CCharacter::OnFinish()
 			}
 		}
 
-		if(!pData->m_BestTime || time < pData->m_BestTime)
+		if(!pData->m_BestTime || time < pData->m_BestTime && !g_Config.m_SvUseSQL)
 		{
 			// update the score
 			pData->Set(time, m_CpCurrent);
-
+		}
+		else
+		{
 			if(str_comp_num(Server()->ClientName(m_pPlayer->GetCID()), "nameless tee", 12) != 0)
 				GameServer()->Score()->SaveScore(m_pPlayer->GetCID(), time, this);
 		}

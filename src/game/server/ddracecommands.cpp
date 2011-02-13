@@ -45,7 +45,7 @@ void CGameContext::ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int C
 void CGameContext::MoveCharacter(int ClientID, int Victim, int X, int Y, bool Raw)
 {
 	CCharacter* pChr = GetPlayerChar(ClientID);
-	
+
 	if(!pChr)
 		return;
 
@@ -135,10 +135,10 @@ void CGameContext::ConHammer(IConsole::IResult *pResult, void *pUserData, int Cl
 	int Type = pResult->GetInteger(0);
 
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	
+
 	if(!pChr)
 		return;
-	
+
 	CServer* pServ = (CServer*)pSelf->Server();
 	if(Type>3 || Type<0)
 	{
@@ -249,16 +249,16 @@ void CGameContext::ModifyWeapons(int ClientID, int Victim, int Weapon, bool Remo
 		Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "invalid weapon id");
 		return;
 	}
-	
+
 	CCharacter* pChr = GetPlayerChar(Victim);
 	if(!pChr)
 		return;
-	
+
 	if(Weapon == -1)
 	{
 		if(Remove && (pChr->GetActiveWeapon() == WEAPON_SHOTGUN || pChr->GetActiveWeapon() == WEAPON_GRENADE || pChr->GetActiveWeapon() == WEAPON_RIFLE))
 			pChr->SetActiveWeapon(WEAPON_GUN);
-		
+
 		if(Remove)
 		{
 			pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
@@ -266,13 +266,13 @@ void CGameContext::ModifyWeapons(int ClientID, int Victim, int Weapon, bool Remo
 			pChr->SetWeaponGot(WEAPON_RIFLE, false);
 		}
 		else
-			pChr->GiveAllWeapons();	
+			pChr->GiveAllWeapons();
 	}
 	else if(Weapon != WEAPON_NINJA)
 	{
 		if(Remove && pChr->GetActiveWeapon() == Weapon)
 			pChr->SetActiveWeapon(WEAPON_GUN);
-		
+
 		if(Remove)
 			pChr->SetWeaponGot(Weapon, false);
 		else
@@ -285,7 +285,7 @@ void CGameContext::ModifyWeapons(int ClientID, int Victim, int Weapon, bool Remo
 			Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "you can't remove ninja");
 			return;
 		}
-		
+
 		pChr->GiveNinja();
 	}
 
@@ -399,11 +399,11 @@ void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int Cl
 
 	if(pResult->NumArguments())
 		Seconds = clamp(pResult->GetInteger(0), -2, 9999);
-	
+
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if(!pChr)
 		return;
-	
+
 	if(pSelf->m_apPlayers[Victim])
 	{
 		pChr->Freeze(Seconds);
@@ -757,7 +757,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData, int Clie
 
 	if(/*g_Config.m_SvSpamprotection && */pPlayer->m_Last_Chat && pPlayer->m_Last_Chat + pSelf->Server()->TickSpeed() + g_Config.m_SvChatDelay > pSelf->Server()->Tick())
 		return;
-	
+
 	pPlayer->m_Last_Chat = pSelf->Server()->Tick();
 
 	if(pResult->NumArguments() > 0)
@@ -771,7 +771,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData, int Clie
 
 void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
-	
+
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)pSelf->m_pController;
 	if(g_Config.m_SvTeam == 0)
@@ -868,7 +868,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData, int Client
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aBuf[256 + 24];
-	
+
 	str_format(aBuf, 256 + 24, "'%s' %s", pSelf->Server()->ClientName(ClientID), pResult->GetString(0));
 	if(g_Config.m_SvSlashMe)
 		pSelf->SendChat(-2, CGameContext::CHAT_ALL, aBuf, ClientID);
@@ -879,7 +879,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData, int Client
 void CGameContext::ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	
+
 	CCharacter *pChr = pSelf->m_apPlayers[ClientID]->GetCharacter();
 
 	if(pChr)
@@ -892,7 +892,7 @@ void CGameContext::ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData
 void CGameContext::ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	
+
 	CCharacter *pChr = pSelf->m_apPlayers[ClientID]->GetCharacter();
 
 	if(pChr)
@@ -902,39 +902,39 @@ void CGameContext::ConToggleBroadcast(IConsole::IResult *pResult, void *pUserDat
 void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	
+
 	CCharacter *pChr = pSelf->m_apPlayers[ClientID]->GetCharacter();
-	
+
 	if (pResult->NumArguments() == 0)
 	{
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain");
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Example: /emote surprise 10 for 10 seconds or /emote surprise (default 1 second)");
 	}
-	else 
+	else
 	{
-	  if (pChr)
+		if (pChr)
 		{
 			if (!str_comp(pResult->GetString(0), "angry"))
-			  pChr->m_DefEmote = EMOTE_ANGRY;
+				pChr->m_DefEmote = EMOTE_ANGRY;
 			else if (!str_comp(pResult->GetString(0), "blink"))
-			  pChr->m_DefEmote = EMOTE_BLINK;
+				pChr->m_DefEmote = EMOTE_BLINK;
 			else if (!str_comp(pResult->GetString(0), "close"))
-			  pChr->m_DefEmote = EMOTE_BLINK;
+				pChr->m_DefEmote = EMOTE_BLINK;
 			else if (!str_comp(pResult->GetString(0), "happy"))
-			  pChr->m_DefEmote = EMOTE_HAPPY;
+				pChr->m_DefEmote = EMOTE_HAPPY;
 			else if (!str_comp(pResult->GetString(0), "pain"))
-			  pChr->m_DefEmote = EMOTE_PAIN;
+				pChr->m_DefEmote = EMOTE_PAIN;
 			else if (!str_comp(pResult->GetString(0), "surprise"))
-			  pChr->m_DefEmote = EMOTE_SURPRISE;
+				pChr->m_DefEmote = EMOTE_SURPRISE;
 			else
 			{
 				pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Unkown emote... Say /emote");
 			}
-			
+
 			int Duration = 1;
 			if (pResult->NumArguments() > 1)
 				Duration = pResult->GetInteger(1);
-			  
+
 			pChr->m_DefEmoteReset = pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed();
 		}
 	}

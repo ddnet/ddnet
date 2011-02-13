@@ -12,14 +12,14 @@
 class CGameControllerDDRace : public IGameController
 {
 public:
-	
+
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace();
-	
+
 	CGameTeams m_Teams;
 
 	std::map < int , std::vector < vec2 > > m_TeleOuts;
-	
+
 	void InitTeleporter();
 	virtual void Tick();
 };
