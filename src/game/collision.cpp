@@ -165,10 +165,10 @@ void CCollision::Init(class CLayers *pLayers)
 	}
 }
 
-int CCollision::GetTile(int X, int Y)
+int CCollision::GetTile(int x, int y)
 {
-	int Nx = clamp(X/32, 0, m_Width-1);
-	int Ny = clamp(Y/32, 0, m_Height-1);
+	int Nx = clamp(x/32, 0, m_Width-1);
+	int Ny = clamp(y/32, 0, m_Height-1);
 	if(!m_pTiles || Ny < 0 || Nx < 0)
 	{
 		//dbg_msg("Collision","Something is terribly wrong, !m_pTiles %d, Ny %d, Ny %d", !m_pTiles, Ny, Ny);
@@ -187,14 +187,14 @@ int CCollision::GetTile(int X, int Y)
 /*
 bool CCollision::IsTileSolid(int x, int y)
 {
-	return GetTile(X, Y)&COLFLAG_SOLID;
+	return GetTile(x, y)&COLFLAG_SOLID;
 }
 */
 
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough)
 {
-	float D = distance(Pos0, Pos1);
-	int End(D+1);
+	float Distance = distance(Pos0, Pos1);
+	int End(Distance+1);
 	vec2 Last = Pos0;
 	int ix = 0, iy = 0; // Temporary position for checking collision
 	int dx = 0, dy = 0; // Offset for checking the "through" tile
@@ -204,8 +204,8 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		}
 	for(int i = 0; i < End; i++)
 	{
-		float A = i/D;
-		vec2 Pos = mix(Pos0, Pos1, A);
+		float a = i/Distance;
+		vec2 Pos = mix(Pos0, Pos1, a);
 		ix = round(Pos.x);
 		iy = round(Pos.y);
 		if(CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy)))
