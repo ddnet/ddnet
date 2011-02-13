@@ -1038,8 +1038,8 @@ void CGameContext::ConYes(IConsole::IResult *pResult, void *pUserData, int Clien
 	CServer* pServ = (CServer*)pSelf->Server();
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)pSelf->m_pController;
 	char aBuf[512];
-	if((pSelf->m_apPlayers[ClientID]->m_Asker == -1 || pSelf->m_apPlayers[ClientID]->m_Asker != -1) && pSelf->m_apPlayers[ClientID]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "No valid questions, maybe they timed out.");
+	if(pSelf->m_apPlayers[ClientID]->m_Asker == -1 || (pSelf->m_apPlayers[ClientID]->m_Asker != -1 && pSelf->m_apPlayers[ClientID]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick()) )
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Couldn't find a valid question, maybe it timed out.");
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "\'%s\' has accepted your request.", pServ->ClientName(ClientID));
@@ -1082,8 +1082,8 @@ void CGameContext::ConNo(IConsole::IResult *pResult, void *pUserData, int Client
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CServer* pServ = (CServer*)pSelf->Server();
 	char aBuf[512];
-	if((pSelf->m_apPlayers[ClientID]->m_Asker == -1 || pSelf->m_apPlayers[ClientID]->m_Asker != -1) && pSelf->m_apPlayers[ClientID]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick() )
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "No valid question, maybe it timed out.");
+	if(pSelf->m_apPlayers[ClientID]->m_Asker == -1 || (pSelf->m_apPlayers[ClientID]->m_Asker != -1 && pSelf->m_apPlayers[ClientID]->m_AskedTick + g_Config.m_SvTeamAskTime > pSelf->Server()->Tick()))
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Couldn't find a valid question, maybe it timed out.");
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "\'%s\' has rejected your request.", pServ->ClientName(ClientID));
