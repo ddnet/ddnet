@@ -239,22 +239,15 @@ void CPlayer::TryRespawn()
 	}
 	else
 	{
-		vec2 SpawnPos = vec2(100.0f, -60.0f);
+		vec2 SpawnPos;
 	
-		if(!GameServer()->m_pController->CanSpawn(this, &SpawnPos))
+		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
 			return;
 
-		// check if the position is occupado
-		CEntity *apEnts[2] = {0};
-		int NumEnts = GameServer()->m_World.FindEntities(SpawnPos, 64, apEnts, 2, CGameWorld::ENTTYPE_CHARACTER);
-	
-		if(NumEnts < 3)
-		{
-			m_Spawning = false;
-			Character = new(m_ClientID) CCharacter(&GameServer()->m_World);
-			Character->Spawn(this, SpawnPos);
-			GameServer()->CreatePlayerSpawn(SpawnPos);
-		} 
+		m_Spawning = false;
+		Character = new(m_ClientID) CCharacter(&GameServer()->m_World);
+		Character->Spawn(this, SpawnPos);
+		GameServer()->CreatePlayerSpawn(SpawnPos);
 	}
 }
 
