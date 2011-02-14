@@ -669,6 +669,20 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(20.0f, 0, &MainView);
 	}
 }
+void CMenus::RenderSettingsDDRace(CUIRect MainView)
+
+{
+	CUIRect Button;
+	MainView.VSplitLeft(300.0f, &MainView, 0);
+	static int s_SndEnable = g_Config.m_ClDDRaceScoreBoard;
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
+	{
+		g_Config.m_ClDDRaceScoreBoard ^= 1;
+	}
+}
+
 
 class CLanguage
 {
@@ -829,7 +843,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Player"),
 		Localize("Controls"),
 		Localize("Graphics"),
-		Localize("Sound")};
+		Localize("Sound"),
+		Localize("DDRace")};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
 
@@ -853,6 +868,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsGraphics(MainView);
 	else if(s_SettingsPage == 4)
 		RenderSettingsSound(MainView);
+	else if(s_SettingsPage == 5)
+	    RenderSettingsDDRace(MainView);
 
 	if(m_NeedRestartGraphics || m_NeedRestartSound)
 		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 15.0f, -1);

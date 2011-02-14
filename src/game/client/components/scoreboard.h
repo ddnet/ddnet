@@ -16,7 +16,7 @@ class CScoreboard : public CComponent
 	
 	bool m_Active;
 	CServerInfo m_pServerInfo;
-	bool m_GametypeRace;
+	bool m_DDRaceScoreBoard;
 	
 public:
 	CScoreboard();
