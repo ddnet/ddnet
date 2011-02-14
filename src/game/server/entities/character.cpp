@@ -1004,7 +1004,6 @@ void CCharacter::OnFinish()
 				GameServer()->m_pController->m_CurrentRecord = time;
 				//dbg_msg("character", "Finish");
 				NeedToSendNewRecord = true;
-				
 			}
 				
 		}
@@ -1340,7 +1339,7 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team())))
 	{
 		bool CanBegin = true;
-		if(g_Config.m_SvTeam == 1 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
+		if(g_Config.m_SvTeam == 2 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
 		{
 			if(m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
 			{
@@ -1351,7 +1350,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		if(CanBegin)
 		{
-			Controller->m_Teams.OnCharacterStart(m_pPlayer->GetCID());
+			Teams()->OnCharacterStart(m_pPlayer->GetCID());
 			m_CpActive = -2;
 		} else {
 			
@@ -1607,7 +1606,7 @@ void CCharacter::DDRaceInit()
 	m_Core.m_Id = GetPlayer()->GetCID();
 	if(m_pPlayer->m_RconFreeze) Freeze(-1);
 	if(GetPlayer()->m_IsUsingDDRaceClient) ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.SendTeamsState(GetPlayer()->GetCID());
-	if(g_Config.m_SvTeam == 1)
+	if(g_Config.m_SvTeam == 2)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Please join a team before you start");
 		m_LastStartWarning = Server()->Tick();

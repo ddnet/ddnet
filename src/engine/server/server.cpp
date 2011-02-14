@@ -955,9 +955,9 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 	i |= SERVER_FLAG_VERSION;
 	if(g_Config.m_Password[0])   // password set
 		i |= SERVER_FLAG_PASSWORD;
-	if(g_Config.m_SvTeam == 0)
+	if(g_Config.m_SvTeam == 1)
 		i |= SERVER_FLAG_TEAMS1;
-	else if(g_Config.m_SvTeam == 1)
+	else if(g_Config.m_SvTeam == 2)
 		i |= SERVER_FLAG_TEAMS2;
 	if(g_Config.m_SvTeamStrict)
 		i |= SERVER_FLAG_STRICTTEAMS;

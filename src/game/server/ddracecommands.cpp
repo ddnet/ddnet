@@ -565,7 +565,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData, int 
 		}
 		else if(str_comp(pArg, "teams") == 0)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s %s", !g_Config.m_SvTeam?"Teams are available on this server":g_Config.m_SvTeam==-1?"Teams are not available on this server":"You have to be in a team to play on this server", !g_Config.m_SvTeamStrict?"and if you die in a team only you die":"and if you die in a team all of you die");
+			str_format(aBuf, sizeof(aBuf), "%s %s", g_Config.m_SvTeam == 1 ? "Teams are available on this server" : !g_Config.m_SvTeam ? "Teams are not available on this server" : "You have to be in a team to play on this server", !g_Config.m_SvTeamStrict ? "and if you die in a team only you die" : "and if you die in a team all of you die");
 			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 		}
 		else if(str_comp(pArg, "collision") == 0)
@@ -774,12 +774,12 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int 
 	
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)pSelf->m_pController;
-	if(g_Config.m_SvTeam == -1)
+	if(g_Config.m_SvTeam == 0)
 	{
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Admin disable teams");
 		return;
 	}
-	else if (g_Config.m_SvTeam == 1)
+	else if(g_Config.m_SvTeam == 2)
 	{
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You must join to any team and play with anybody or you will not play");
 	}
@@ -1164,6 +1164,30 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData, int Cl
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "hmm, i don't know why but you are not allowed to ask this player");
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
+	return;
+}
+
+void CGameContext::ConToggleStrict(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CServer* pServ = (CServer*)pSelf->Server();
+	CGameControllerDDRace* Controller = (CGameControllerDDRace*)pSelf->m_pController;
+	CCharacter* pChar = pSelf->m_apPlayers[ClientID]->GetCharacter();
+	char aBuf[512];
+
+	if(!pChar || !pChar->IsAlive())
+		str_format(aBuf, sizeof(aBuf), "You can\'t while you are dead.");
+	else if(pChar->Team() == 0)
+		str_format(aBuf, sizeof(aBuf), "You are in team %d, that can't be strict!", pChar->Team());
+	else if(pChar->Team() && ClientID != Controller->m_Teams.GetTeamLeader(pChar->Team()))
+		str_format(aBuf, sizeof(aBuf), "You are not the leader of team %, you can't change it's strictness.", pChar->Team());
+	else
+	{
+		Controller->m_Teams.ToggleStrictness(pChar->Team());
+		str_format(aBuf, sizeof(aBuf), "Done.", pChar->Team());
+	}
+
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	return;
 }

@@ -18,6 +18,7 @@ void CGameTeams::Reset()
 		m_LastChat[i] = 0;
 		m_TeamLeader[i] = -1;
 		m_TeeJoinTick[i] = -1;
+		m_TeamStrict[i] = g_Config.m_SvTeamStrict;
 	}
 }
 
@@ -35,6 +36,26 @@ void CGameTeams::OnCharacterStart(int ClientID)
 		StartingChar->m_DDRaceState = DDRACE_STARTED;
 		StartingChar->m_StartTime = Tick;
 		StartingChar->m_RefreshTime = Tick;
+	}
+	else if(Count(Team) == 1)
+	{
+		if(m_TeamState[Team] <= TEAMSTATE_CLOSED)
+		{
+			ChangeTeamState(Team, TEAMSTATE_STARTED);
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				if(Team == m_Core.Team(i))
+				{
+					CCharacter* pChar = Character(i);
+					if(pChar && pChar->IsAlive())
+					{
+						pChar->m_DDRaceState = DDRACE_STARTED;
+						pChar->m_StartTime = Tick;
+						pChar->m_RefreshTime = Tick;
+					}
+				}
+			}
+		}
 	}
 	else
 	{
@@ -103,6 +124,16 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 	{
 		Character(ClientID)->OnFinish();
 	}
+	else if(Count(Team) == 1)
+	{
+		m_TeeFinished[ClientID] = true;
+		if(TeamFinished(Team))
+		{
+			ChangeTeamState(Team, TEAMSTATE_OPEN);
+			Character(ClientID)->OnFinish();
+			m_TeeFinished[ClientID] = false;
+		}
+	}
 	else
 	{
 		m_TeeFinished[ClientID] = true;
@@ -113,7 +144,7 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 			{
 				if(Team == m_Core.Team(i))
 				{
-					CCharacter * pChar = Character(i);
+					CCharacter* pChar = Character(i);
 					if(pChar != 0 && pChar->m_DDRaceState == DDRACE_STARTED)
 					{
 						pChar->OnFinish();
@@ -121,22 +152,24 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 					}
 				}
 			}
-			
 		}
 	}
 }
 
 void CGameTeams::OnCharacterDeath(int ClientID)
 {
-	if(g_Config.m_SvTeamStrict && m_Core.Team(ClientID) != TEAM_FLOCK && m_Core.Team(ClientID) != TEAM_SUPER)
-	for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+	if(m_TeamStrict[m_Core.Team(ClientID)] && m_Core.Team(ClientID) != TEAM_FLOCK && m_Core.Team(ClientID) != TEAM_SUPER)
 	{
-		if(m_Core.Team(ClientID) == m_Core.Team(LoopClientID))
+		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 		{
-			CCharacter* pChar = Character(LoopClientID);
-			if(pChar)
-				pChar->Die(ClientID, WEAPON_SELF);
+			if(m_Core.Team(ClientID) == m_Core.Team(LoopClientID))
+			{
+				CCharacter* pChar = Character(LoopClientID);
+				if(pChar)
+					pChar->Die(ClientID, WEAPON_SELF);
+			}
 		}
+		ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_OPEN);
 	}
 
 	if(!g_Config.m_SvStickyTeams && m_Core.Team(ClientID) != TEAM_FLOCK && m_Core.Team(ClientID) != TEAM_SUPER)
@@ -229,7 +262,10 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 				}
 		}
 		else
+		{
 			SetTeamLeader(OldTeam, -1);
+			m_TeamStrict[OldTeam] = g_Config.m_SvTeamStrict;
+		}
 	}
 
 	dbg_msg1("Teams", "Id = %d Team = %d", ClientID, Team);
@@ -313,4 +349,20 @@ void CGameTeams::SetTeamLeader(int Team, int ClientID)
 
 	str_format(aBuf, sizeof(aBuf), "You are now the team %d leader.", Team);
 	GameServer()->SendChatTarget(ClientID, aBuf);
+}
+
+int CGameTeams::ToggleStrictness(int Team)
+{
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "\'%s\' Toggled Team Strictness to %d.", Server()->ClientName(m_TeamLeader[Team]), m_TeamStrict[Team]);
+	if(Count(Team) > 1)
+	{
+		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+			if(m_Core.Team(LoopClientID) == Team)
+				GameServer()->SendChatTarget(LoopClientID, aBuf);
+	}
+	else
+		GameServer()->SendChatTarget(m_TeamLeader[Team], aBuf);
+
+	return m_TeamStrict[Team] = !m_TeamStrict[Team];
 }

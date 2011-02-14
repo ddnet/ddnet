@@ -244,6 +244,7 @@ private:
 	static void ConYes(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConNo(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConInvite(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConToggleStrict(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMuteID(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData, int ClientID);

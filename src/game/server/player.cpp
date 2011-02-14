@@ -141,6 +141,7 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::OnDisconnect()
 {
+
 	KillCharacter();
 
 	if(Server()->ClientIngame(m_ClientID))
@@ -152,6 +153,8 @@ void CPlayer::OnDisconnect()
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", m_ClientID, Server()->ClientName(m_ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
+	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
+	Controller->m_Teams.m_Core.Team(m_ClientID, 0);
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)

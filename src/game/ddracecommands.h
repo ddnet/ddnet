@@ -61,6 +61,7 @@ CONSOLE_COMMAND("showothers", "", CFGFLAG_SERVER, ConShowOthers, this, "Whether 
 CONSOLE_COMMAND("ask", "s", CFGFLAG_SERVER, ConAsk, this, "Ask to join a player in a team or to start one with him the asker is the leader if the player is not already in a team", -1)
 CONSOLE_COMMAND("yes", "", CFGFLAG_SERVER, ConYes, this, "Reply yes", -1)
 CONSOLE_COMMAND("no", "", CFGFLAG_SERVER, ConNo, this, "Reply no", -1)
+CONSOLE_COMMAND("strict", "", CFGFLAG_SERVER, ConToggleStrict, this, "Toggle Strictness", -1)
 CONSOLE_COMMAND("invite", "s", CFGFLAG_SERVER, ConInvite, this, "Invite a player to your team (You must be the leader)", -1)
 CONSOLE_COMMAND("mute", "", CFGFLAG_SERVER, ConMute, this, "", 2);
 CONSOLE_COMMAND("muteid", "vi", CFGFLAG_SERVER, ConMuteID, this, "", 2);

@@ -11,6 +11,7 @@ class CGameTeams
 	bool m_TeeFinished[MAX_CLIENTS];
 	int m_TeamLeader[MAX_CLIENTS];
 	int m_TeeJoinTick[MAX_CLIENTS];
+	bool m_TeamStrict[MAX_CLIENTS];
 	
 	class CGameContext * m_pGameContext;
 	
@@ -70,6 +71,7 @@ public:
 	int GetTeamLeader(int Team) { return m_TeamLeader[Team]; };
 
 	void SetTeamLeader(int Team, int ClientID);
+	int ToggleStrictness(int Team);
 };
 
 #endif
