@@ -166,6 +166,7 @@ MACRO_CONFIG_STR(SvRulesLine10, sv_rules_line10, 40, "", CFGFLAG_SERVER, "Rules 
 
 MACRO_CONFIG_INT(SvTeam, sv_team, 0, -1, 1, CFGFLAG_SERVER, "Teams configuration", 4)
 MACRO_CONFIG_INT(SvTeamStrict, sv_team_strict, 0, 0, 1, CFGFLAG_SERVER, "Kill or not all team if someone left game in team", 4)
+MACRO_CONFIG_INT(SvStickyTeams, sv_sticky_teams, 1, 0, 1, CFGFLAG_SERVER, "Whether players stays in a team after death or not", 4)
 
 MACRO_CONFIG_STR(SvAnnouncementFileName, sv_announcement_filename, 24, "announcement.txt", CFGFLAG_SERVER, "file which will have the announcement, each one at a line", 3)
 MACRO_CONFIG_INT(SvAnnouncementInterval, sv_announcement_interval, 30, 15, 9999, CFGFLAG_SERVER, "time(minutes) in which the announcement will be displayed from the announcement file", 3)
@@ -205,5 +206,6 @@ MACRO_CONFIG_INT(SvGlobalBantime, sv_global_ban_time, 60, 0, 1440, CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, "chatscore will be increased by this on every message, and decremented by 1 on every tick.", 3)
 MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000 , CFGFLAG_SERVER, "if chatscore exceeds this, the player will be muted for sv_spam_mute_duration seconds", 3)
 MACRO_CONFIG_INT(SvSpamMuteDuration, sv_spam_mute_duration, 60, 0, 3600 , CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off", 3)
+
 
 #endif

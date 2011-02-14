@@ -36,6 +36,7 @@ public:
 	
 	void OnCharacterStart(int ClientID);
 	void OnCharacterFinish(int ClientID);
+	void OnCharacterDeath(int ClientID);
 	
 	int SetCharacterTeam(int ClientID, int Team);
 	enum TeamErrors
