@@ -27,10 +27,7 @@ void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData, 
 	CScoreboard *pSelf = (CScoreboard *)pUserData;
 
 	pSelf->Client()->GetServerInfo(&pSelf->m_pServerInfo);
-	if (g_Config.m_ClDDRaceScoreBoard)
-		pSelf->m_DDRaceScoreBoard = str_find_nocase(pSelf->m_pServerInfo.m_aGameType, GAMETYPES_RACE);
-	else
-		pSelf->m_DDRaceScoreBoard = false;
+	pSelf->m_IsGameTypeRace = str_find_nocase(pSelf->m_pServerInfo.m_aGameType, GAMETYPES_RACE);
 	pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 
@@ -112,7 +109,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 			{
 				if(Count)
 					str_append(aBuffer, ", ", sizeof(aBuffer));
-				if(m_DDRaceScoreBoard)
+				if(m_IsGameTypeRace)
 					if (g_Config.m_ClShowIDs)
 					{
 						char aId[4];
@@ -157,7 +154,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float tw = TextRender()->TextWidth(0, 48, pTitle, -1);
 	TextRender()->Text(0, x+10, y, 48, pTitle, -1);
 
-	if(!m_DDRaceScoreBoard)
+	if(!m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 		if(m_pClient->m_Snap.m_pGameobj)
 		{
 			char aBuf[128];
@@ -171,7 +168,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	// render headlines
 	TextRender()->Text(0, x+10, y, 24.0f, Localize("Score"), -1);
-	if(m_DDRaceScoreBoard)
+	if(m_IsGameTypeRace)
 	{
 		TextRender()->Text(0, x+125+Offset, y, 24.0f, Localize("Name"), -1);
 		TextRender()->Text(0, x+w-75, y, 24.0f, Localize("Ping"), -1);
@@ -218,7 +215,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		float FontSizeResize = FontSize;
 		float Width;
-		if(m_DDRaceScoreBoard)
+		if(m_IsGameTypeRace)
 		{
 			const float ScoreWidth = 150.0f;
 			const float PingWidth = 60.0f;
@@ -242,7 +239,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 			while(TextRender()->TextWidth(0, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1) > w-163.0f-Offset-PingWidth)
 				--FontSizeResize;
-			if (g_Config.m_ClShowIDs)
+			if (m_IsGameTypeRace && g_Config.m_ClShowIDs)
 			{
 				char aId[64] = "";
 				str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientID);
@@ -290,7 +287,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			
 			float size = 64.0f;
 			IGraphics::CQuadItem QuadItem;
-			if(m_DDRaceScoreBoard)
+			if(m_IsGameTypeRace)
 				QuadItem = IGraphics::CQuadItem(x+55+DataOffset, y-15, size/2, size);
 			else
 				QuadItem = IGraphics::CQuadItem(x+55, y-15, size/2, size);
@@ -301,7 +298,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 
-		if(m_DDRaceScoreBoard)
+		if(m_IsGameTypeRace)
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+50+DataOffset, y+28+TeeOffset));
 		else
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+90, y+28+TeeOffset));
@@ -350,7 +347,7 @@ void CScoreboard::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	float w;
-	if(m_DDRaceScoreBoard)
+	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 		w = 750.0f;
 	else
 		w = 650.0f;

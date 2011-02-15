@@ -681,8 +681,13 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClDDRaceScoreBoard ^= 1;
 	}
-}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show Client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
+	{
+		g_Config.m_ClShowIDs ^= 1;
+	}
+}
 
 class CLanguage
 {
