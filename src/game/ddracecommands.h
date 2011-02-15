@@ -57,7 +57,7 @@ CONSOLE_COMMAND("rules", "", CFGFLAG_SERVER, ConRules, this, "Shows the server r
 CONSOLE_COMMAND("team", "?i", CFGFLAG_SERVER, ConJoinTeam, this, "Lets you join team i (shows your team if left blank)", -1)
 CONSOLE_COMMAND("top5", "?i", CFGFLAG_SERVER, ConTop5, this, "Shows five ranks of the ladder beginning with rank i (1 by default)", -1)
 #if defined(CONF_SQL)
-CONSOLE_COMMAND("times", "?si", CFGFLAG_SERVER, ConTimes, this, "Shows last 5 times beginning with time i of player with name s (i = 1 by default)", -1)
+CONSOLE_COMMAND("times", "?s?i", CFGFLAG_SERVER, ConTimes, this, "/times ?s?i shows last 5 times of the server or of a player beginning with name s starting with time i (i = 1 by default)", -1)
 #endif
 CONSOLE_COMMAND("showothers", "", CFGFLAG_SERVER, ConShowOthers, this, "Whether to showplayers from other teams or not (off by default)", -1)
 
