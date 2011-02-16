@@ -257,9 +257,11 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	static int s_DeleteButton = 0;
 	
 	// don't allow deletion of game/front layer
-	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pFrontLayer != pEditor->GetSelectedLayer(0) &&
+	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
 		pEditor->DoButton_Editor(&s_DeleteButton, Localize("Delete layer"), 0, &Button, 0, Localize("Deletes the layer")))
 	{
+		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pFrontLayer)
+			pEditor->m_Map.m_pFrontLayer = 0x0;
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pTeleLayer)
 			pEditor->m_Map.m_pTeleLayer = 0x0;
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pSpeedupLayer)

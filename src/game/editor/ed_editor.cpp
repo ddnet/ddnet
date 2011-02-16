@@ -3291,9 +3291,8 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 	// add game layer and front and reset the tele, speedup and switch layer pointers
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(new CLayerGame(50, 50));
-	MakeFrontLayer(new CLayerFront(50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
-	m_pGameGroup->AddLayer(m_pFrontLayer);
+	m_pFrontLayer = 0x0;
 	m_pTeleLayer = 0x0;
 	m_pSpeedupLayer = 0x0;
 	m_pSwitchLayer = 0x0;
