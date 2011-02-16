@@ -154,7 +154,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float tw = TextRender()->TextWidth(0, 48, pTitle, -1);
 	TextRender()->Text(0, x+10, y, 48, pTitle, -1);
 
-	if(!m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
+	if(!m_IsGameTypeRace || !g_Config.m_ClDDRaceScoreBoard)
 		if(m_pClient->m_Snap.m_pGameobj)
 		{
 			char aBuf[128];
@@ -287,7 +287,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			
 			float size = 64.0f;
 			IGraphics::CQuadItem QuadItem;
-			if(m_IsGameTypeRace)
+			if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 				QuadItem = IGraphics::CQuadItem(x+55+DataOffset, y-15, size/2, size);
 			else
 				QuadItem = IGraphics::CQuadItem(x+55, y-15, size/2, size);
@@ -298,7 +298,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 
-		if(m_IsGameTypeRace)
+		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+50+DataOffset, y+28+TeeOffset));
 		else
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1,0), vec2(x+90, y+28+TeeOffset));
