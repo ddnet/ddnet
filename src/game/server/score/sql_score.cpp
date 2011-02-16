@@ -419,7 +419,7 @@ void CSqlScore::agoTimeToString(int agoTime, char agoString[]){
 		seconds = times[i];
 		strcpy(name,names[i]);
 
-		count = floor(agoTime/seconds);
+		count = floor(double(agoTime/seconds));
 		if(count != 0){
 			break;
 		}
@@ -439,7 +439,7 @@ void CSqlScore::agoTimeToString(int agoTime, char agoString[]){
 		strcpy(name2,names[i+1]);
 
 		// add second piece if it's greater than 0
-		int count2 = floor((agoTime - (seconds * count)) / seconds2);
+		int count2 = floor(double((agoTime - (seconds * count)) / seconds2));
 
 		if (count2 != 0) {
 			if(count2 == 1){
