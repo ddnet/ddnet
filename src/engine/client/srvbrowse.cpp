@@ -58,6 +58,7 @@ CServerBrowser::CServerBrowser()
 
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
+	m_DDRaceSorthash = 0;
 }
 
 void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
@@ -699,7 +700,7 @@ void CServerBrowser::Update()
 
 	// check if we need to resort
 	// TODO: remove the str_comp
-	if(m_Sorthash != SortHash() || str_comp(m_aFilterString, g_Config.m_BrFilterString) != 0 || str_comp(m_aFilterGametypeString, g_Config.m_BrFilterGametype) != 0)
+	if(m_DDRaceSorthash != DDRaceSortHash() || m_Sorthash != SortHash() || str_comp(m_aFilterString, g_Config.m_BrFilterString) != 0 || str_comp(m_aFilterGametypeString, g_Config.m_BrFilterGametype) != 0)
 		Sort();
 }
 
