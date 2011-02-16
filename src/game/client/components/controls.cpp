@@ -36,7 +36,7 @@ void CControls::OnReset()
 
 void CControls::OnRelease()
 {
-	OnReset();
+	//OnReset();
 }
 
 void CControls::OnPlayerDeath()
