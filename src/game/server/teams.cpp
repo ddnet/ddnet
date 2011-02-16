@@ -351,8 +351,9 @@ void CGameTeams::SetTeamLeader(int Team, int ClientID)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-int CGameTeams::ToggleStrictness(int Team)
+void CGameTeams::ToggleStrictness(int Team)
 {
+	m_TeamStrict[Team] = !m_TeamStrict[Team];
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "\'%s\' Toggled Team Strictness to %d.", Server()->ClientName(m_TeamLeader[Team]), m_TeamStrict[Team]);
 	if(Count(Team) > 1)
@@ -363,6 +364,4 @@ int CGameTeams::ToggleStrictness(int Team)
 	}
 	else
 		GameServer()->SendChatTarget(m_TeamLeader[Team], aBuf);
-
-	return m_TeamStrict[Team] = !m_TeamStrict[Team];
 }

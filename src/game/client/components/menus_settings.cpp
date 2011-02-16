@@ -674,7 +674,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 {
 	CUIRect Button;
 	MainView.VSplitLeft(300.0f, &MainView, 0);
-	static int s_SndEnable = g_Config.m_ClDDRaceScoreBoard;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))

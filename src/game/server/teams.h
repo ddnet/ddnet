@@ -71,7 +71,7 @@ public:
 	int GetTeamLeader(int Team) { return m_TeamLeader[Team]; };
 
 	void SetTeamLeader(int Team, int ClientID);
-	int ToggleStrictness(int Team);
+	void ToggleStrictness(int Team);
 };
 
 #endif
