@@ -314,7 +314,6 @@ void CGameClient::OnInit()
 	
 	m_ServerMode = SERVERMODE_PURE;
 
-	m_IsRace = false;
 	m_DDRaceMsgSent = false;
 }
 
@@ -404,7 +403,6 @@ void CGameClient::OnReset()
 		m_All.m_paComponents[i]->OnReset();
 
 	m_Teams.Reset();
-	m_IsRace = false;
 	m_DDRaceMsgSent = false;
 }
 
@@ -901,8 +899,6 @@ void CGameClient::OnNewSnapshot()
 		CNetMsg_Cl_IsDDRace Msg;
 		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 		m_DDRaceMsgSent = true;
-		if(!m_IsRace)
-			m_IsRace = true;
 	}
 
 }

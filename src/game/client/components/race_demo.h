@@ -14,8 +14,6 @@ class CRaceDemo : public CComponent
 	float m_Time;
 	const char *m_pMap;
 	
-	bool m_Active;
-	
 public:
 
 	int m_RaceState;

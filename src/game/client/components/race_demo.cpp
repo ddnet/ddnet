@@ -19,27 +19,27 @@ CRaceDemo::CRaceDemo()
 
 void CRaceDemo::OnRender()
 {
-	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pGameobj || m_pClient->m_Snap.m_Spectate)
-	{
-		m_Active = m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_Active;
+	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pGameobj || m_pClient->m_Snap.m_Spectate || Client()->State() != IClient::STATE_ONLINE)
 		return;
-	}
-
-	// only for race
-	if(!m_pClient->m_IsRace)
-		return;
-	
-	vec2 PlayerPos = m_pClient->m_LocalCharacterPos;
 	
 	// start the demo
-	if(((!m_Active && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_Active)) && m_DemoStartTick < Client()->GameTick())
+	if(m_DemoStartTick < Client()->GameTick())
 	{
-		if(m_RaceState == RACE_STARTED)
-			OnReset();
+		bool start = false;
+		std::list < int > Indices = m_pClient->Collision()->GetMapIndices(m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos);
+		if(!Indices.empty())
+			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+				if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) start = true;
+		else
+			start = m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN;
 		
-		m_pMap = Client()->RaceRecordStart("tmp");
-		m_DemoStartTick = Client()->GameTick() + Client()->GameTickSpeed();
-		m_RaceState = RACE_STARTED;
+		if(start)
+		{
+			OnReset();
+			m_pMap = Client()->RaceRecordStart("tmp");
+			m_DemoStartTick = Client()->GameTick() + Client()->GameTickSpeed();
+			m_RaceState = RACE_STARTED;
+		}
 	}
 	
 	// stop the demo
@@ -49,11 +49,13 @@ void CRaceDemo::OnRender()
 		OnReset();
 	}
 	
-	m_Active = m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_Active;
 }
 
 void CRaceDemo::OnReset()
 {
+	if(Client()->State() != IClient::STATE_ONLINE)
+		return;
+	
 	if(Client()->DemoIsRecording())
 		Client()->RaceRecordStop();
 	
@@ -79,11 +81,7 @@ void CRaceDemo::OnShutdown()
 
 void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(!g_Config.m_ClAutoRaceRecord || m_pClient->m_Snap.m_Spectate)
-		return;
-	
-	// only for race
-	if(!m_pClient->m_IsRace)
+	if(!g_Config.m_ClAutoRaceRecord || Client()->State() != IClient::STATE_ONLINE || m_pClient->m_Snap.m_Spectate)
 		return;
 		
 	// check for messages from server
@@ -199,4 +197,6 @@ void CRaceDemo::SaveDemo(const char* pDemo)
 	str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_tmp.demo", m_pMap);
 	
 	Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
+	
+	dbg_msg("racedemo", "Saved better demo");
 }

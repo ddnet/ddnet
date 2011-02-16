@@ -54,6 +54,7 @@ private:
 	int m_RaceState;
 	float m_BestTime;
 	bool m_NewRecord;
+	bool m_Saving;
 
 	enum
 	{

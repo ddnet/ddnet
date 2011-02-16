@@ -223,7 +223,6 @@ public:
 	//TODO: This is ugly
 	class CRaceDemo *m_pRaceDemo;
 	class CGhost *m_pGhost;
-	bool m_IsRace;
 };
 
 

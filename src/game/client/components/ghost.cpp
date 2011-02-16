@@ -60,29 +60,25 @@ void CGhost::AddInfos(CGhostCharacter Player)
 
 void CGhost::OnRender()
 {
-	// only for race
-	if(!m_pClient->m_IsRace || !g_Config.m_ClRaceGhost)
+	if(!g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
 		return;
 	
 	// Check if the race line is crossed then start the render of the ghost if one
-	if(m_RaceState != RACE_STARTED)
+	bool start = false;
+	
+	std::list < int > Indices = m_pClient->Collision()->GetMapIndices(m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos);
+	if(!Indices.empty())
+		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+			if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) start = true;
+	else
+		start = m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN;
+	
+	if(start)
 	{
-		bool start = false;
-		
-		std::list < int > Indices = m_pClient->Collision()->GetMapIndices(m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos);
-		if(!Indices.empty())
-			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-				if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) start = true;
-		else
-			start = m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN;
-		
-		if(start)
-		{
-			dbg_msg("ghost", "race started");
-			m_RaceState = RACE_STARTED;
-			StartRender();
-			StartRecord();
-		}
+		OnReset();
+		m_RaceState = RACE_STARTED;
+		StartRender();
+		StartRecord();
 	}
 
 	if(m_RaceState == RACE_FINISHED)
@@ -118,7 +114,6 @@ void CGhost::OnRender()
 
 	if(m_lGhosts.size() == 0 || m_CurPos < 0)
 	{
-		//dbg_msg("ghost", "Ghost path done");
 		StopRender();
 		return;
 	}
@@ -397,6 +392,9 @@ void CGhost::Save()
 
 	m_pClient->m_pMenus->m_lGhosts.add(Item);
 	m_pClient->m_pMenus->m_OwnGhost = &find_linear(m_pClient->m_pMenus->m_lGhosts.all(), Item).front();
+	
+	dbg_msg("ghost", "Saved better ghost");
+	m_Saving = false;
 }
 
 bool CGhost::GetHeader(IOHANDLE *pFile, CGhostHeader *pHeader)
@@ -535,8 +533,7 @@ void CGhost::OnConsoleInit()
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)
 {
-	// only for race
-	if(!m_pClient->m_IsRace || !g_Config.m_ClRaceGhost || m_pClient->m_Snap.m_Spectate)
+	if(!g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE || m_pClient->m_Snap.m_Spectate)
 		return;
 	
 	// check for messages from server
@@ -545,7 +542,8 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
 		if(pMsg->m_Victim == m_pClient->m_Snap.m_LocalClientID)
 		{
-			OnReset();
+			if(!m_Saving)
+				OnReset();
 		}
 	}
 	else if(MsgType == NETMSGTYPE_SV_CHAT)
@@ -579,6 +577,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 				{
 					m_NewRecord = true;
 					m_BestTime = CurTime;
+					m_Saving = true;
 				}
 			}
 		}
@@ -593,6 +592,7 @@ void CGhost::OnReset()
 	m_NewRecord = false;
 	m_CurGhost.m_Path.clear();
 	m_StartRenderTick = -1;
+	m_Saving = false;
 }
 
 void CGhost::OnMapLoad()
