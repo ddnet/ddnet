@@ -168,7 +168,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	// render headlines
 	TextRender()->Text(0, x+10, y, 24.0f, Localize("Score"), -1);
-	if(m_IsGameTypeRace)
+	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 	{
 		TextRender()->Text(0, x+125+Offset, y, 24.0f, Localize("Name"), -1);
 		TextRender()->Text(0, x+w-75, y, 24.0f, Localize("Ping"), -1);
@@ -215,7 +215,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		float FontSizeResize = FontSize;
 		float Width;
-		if(m_IsGameTypeRace)
+		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 		{
 			const float ScoreWidth = 150.0f;
 			const float PingWidth = 60.0f;
