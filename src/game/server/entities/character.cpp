@@ -1344,6 +1344,15 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team())))
 	{
 		bool CanBegin = true;
+		if(g_Config.m_SvResetPickus)
+		{
+			for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; ++i)
+			{
+				m_aWeapons[i].m_Got = false;
+				if(m_ActiveWeapon == i)
+					m_ActiveWeapon = WEAPON_GUN;
+			}
+		}
 		if(g_Config.m_SvTeam == 2 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
 		{
 			if(m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
