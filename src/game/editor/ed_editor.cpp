@@ -3274,8 +3274,8 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 	CLayerQuads *pLayer = new CLayerQuads;
 	pLayer->m_pEditor = m_pEditor;
 	CQuad *pQuad = pLayer->NewQuad();
-	const int Width = 800000;
-	const int Height = 600000;
+	const int Width = 3200000;
+	const int Height = 2400000;
 	pQuad->m_aPoints[0].x = pQuad->m_aPoints[2].x = -Width;
 	pQuad->m_aPoints[1].x = pQuad->m_aPoints[3].x = Width;
 	pQuad->m_aPoints[0].y = pQuad->m_aPoints[1].y = -Height;
