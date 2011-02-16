@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/shared/config.h>
+#include <base/tl/string.h>
+#include <engine/serverbrowser.h>
 
 #include <base/math.h>
 #include <game/collision.h>
@@ -52,22 +54,34 @@ void CCamera::OnRender()
 
 void CCamera::OnConsoleInit()
 {
-	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increse", 0);
-	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrese", 0);
+	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase", 0);
+	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease", 0);
 	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset", 0);
 }
 
 const float ZoomStep = 0.75f;
-void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData, int ClientID) {
-	//if(g_Config.m_ClDDRaceCheats == 1 || ((CCamera *)pUserData)->m_pClient->m_IsDDRace)
-		((CCamera *)pUserData)->m_Zoom *= 1/ZoomStep;
-}
-void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData, int ClientID) {
-	//if(g_Config.m_ClDDRaceCheats == 1 || ((CCamera *)pUserData)->m_pClient->m_IsDDRace)
+void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	CServerInfo Info;
+	pSelf->Client()->GetServerInfo(&Info);
+	if(g_Config.m_ClDDRaceCheats == 1 && str_find_nocase(Info.m_aGameType, "race"))
 		((CCamera *)pUserData)->m_Zoom *= ZoomStep;
 }
-void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData, int ClientID) {
-	//if(g_Config.m_ClDDRaceCheats == 1 || ((CCamera *)pUserData)->m_pClient->m_IsDDRace)
+void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	CServerInfo Info;
+	pSelf->Client()->GetServerInfo(&Info);
+	if(g_Config.m_ClDDRaceCheats == 1 && str_find_nocase(Info.m_aGameType, "race"))
+		((CCamera *)pUserData)->m_Zoom *= 1/ZoomStep;
+}
+void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	CServerInfo Info;
+	pSelf->Client()->GetServerInfo(&Info);
+	if(g_Config.m_ClDDRaceCheats == 1 && str_find_nocase(Info.m_aGameType, "race"))
 		((CCamera *)pUserData)->m_Zoom = 1.0f;
 }
 

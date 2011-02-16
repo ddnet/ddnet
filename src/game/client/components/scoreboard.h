@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_SCOREBOARD_H
 #define GAME_CLIENT_COMPONENTS_SCOREBOARD_H
 #include <game/client/component.h>
-#include <engine/serverbrowser.h>
 
 class CScoreboard : public CComponent
 {
@@ -15,7 +14,6 @@ class CScoreboard : public CComponent
 	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	
 	bool m_Active;
-	CServerInfo m_pServerInfo;
 	bool m_IsGameTypeRace;
 	
 public:

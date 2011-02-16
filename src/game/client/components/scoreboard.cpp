@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/tl/string.h>
+#include <engine/serverbrowser.h>
 
 #include <engine/demo.h>
 #include <engine/graphics.h>
@@ -15,8 +16,6 @@
 #include <game/localization.h>
 #include "scoreboard.h"
 
-static const char GAMETYPES_RACE[] = "race";
-
 CScoreboard::CScoreboard()
 {
 	OnReset();
@@ -25,9 +24,10 @@ CScoreboard::CScoreboard()
 void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CScoreboard *pSelf = (CScoreboard *)pUserData;
+	CServerInfo Info;
 
-	pSelf->Client()->GetServerInfo(&pSelf->m_pServerInfo);
-	pSelf->m_IsGameTypeRace = str_find_nocase(pSelf->m_pServerInfo.m_aGameType, GAMETYPES_RACE);
+	pSelf->Client()->GetServerInfo(&Info);
+	pSelf->m_IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race");
 	pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 

@@ -114,6 +114,20 @@ void CBinds::SetDefaults()
 
 	Bind(KEY_F3, "vote yes");
 	Bind(KEY_F4, "vote no");	
+
+	//DDRace
+	if(!g_Config.m_ClDDRaceBinds)
+		return;
+	Bind(KEY_KP_PLUS, "zoom+");
+	Bind(KEY_KP_MINUS, "zoom-");
+	Bind(KEY_KP_MULTIPLY, "zoom");
+	Bind(KEY_HOME, "kill");
+	Bind(KEY_PAUSE, "rcon pause");
+	Bind(KEY_UP, "+jump");
+	Bind(KEY_LEFT, "+left");
+	Bind(KEY_DOWN, "+right");
+	Bind('[', "+prevweapon");
+	Bind(']', "+nextweapon");
 }
 
 void CBinds::OnConsoleInit()

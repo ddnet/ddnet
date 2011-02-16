@@ -686,6 +686,18 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowIDs ^= 1;
 	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceCheats, Localize("Enable DDRace Cheats Like Zoom"), g_Config.m_ClDDRaceCheats, &Button))
+	{
+		g_Config.m_ClDDRaceCheats ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Enable DDRace Binds when pressing Reset Controls"), g_Config.m_ClDDRaceBinds, &Button))
+	{
+		g_Config.m_ClDDRaceBinds ^= 1;
+	}
 }
 
 class CLanguage
