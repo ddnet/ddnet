@@ -986,17 +986,20 @@ void CCharacter::OnFinish()
 				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);//this is private, sent only to the tee
 			}
 		}
+
+		bool pCallSaveScore = false;
+		#if defined(CONF_SQL)
+			pCallSaveScore = g_Config.m_SvUseSQL;
+		#endif
 		
 		if(!pData->m_BestTime || time < pData->m_BestTime)
 		{
 			// update the score
 			pData->Set(time, m_CpCurrent);
+			pCallSaveScore = true;
 		}
-		bool useSQL = false;
-		#if defined(CONF_SQL)
-			useSQL = g_Config.m_SvUseSQL;
-		#endif
-		if(!pData->m_BestTime || time < pData->m_BestTime || useSQL)
+
+		if(pCallSaveScore)
 			if(str_comp_num(Server()->ClientName(m_pPlayer->GetCID()), "nameless tee", 12) != 0)
 				GameServer()->Score()->SaveScore(m_pPlayer->GetCID(), time, this);		
 
@@ -1009,8 +1012,7 @@ void CCharacter::OnFinish()
 				GameServer()->m_pController->m_CurrentRecord = time;
 				//dbg_msg("character", "Finish");
 				NeedToSendNewRecord = true;
-			}
-				
+			}				
 		}
 
 		m_DDRaceState = DDRACE_FINISHED;
