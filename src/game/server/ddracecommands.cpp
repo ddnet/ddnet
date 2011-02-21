@@ -47,7 +47,7 @@ void CGameContext::ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int C
 
 void CGameContext::MoveCharacter(int ClientID, int Victim, int X, int Y, bool Raw)
 {
-	CCharacter* pChr = GetPlayerChar(ClientID);
+	CCharacter* pChr = GetPlayerChar(Victim);
 
 	if(!pChr)
 		return;
