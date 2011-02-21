@@ -1323,7 +1323,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "", 3);
 	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "", 2);
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "", 3);
-	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConSetTeam, this, "", 2);
+	Console()->Register("set_team", "vi", CFGFLAG_SERVER, ConSetTeam, this, "", 2);
 	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "", 2);
 
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "", 4);

@@ -206,7 +206,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("restart", "?i", CFGFLAG_SERVER, ConServerDummy, 0, "Restart in x seconds", 0);
 	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConServerDummy, 0, "Broadcast message", 0);
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConServerDummy, 0, "Say in chat", 0);
-	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConServerDummy, 0, "Set team of player to team", 0);
+	Console()->Register("set_team", "vi", CFGFLAG_SERVER, ConServerDummy, 0, "Set team of player to team", 0);
 	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, 0, 0, "Set team of all players to team", 0);
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConServerDummy, 0, "Add a voting option", 0);
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConServerDummy, 0, "Clears the voting options", 0);
