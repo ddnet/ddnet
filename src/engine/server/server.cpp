@@ -348,7 +348,12 @@ void CServer::GetClientIP(int ClientID, char *pIPString, int Size)
 	}
 }
 	
-
+void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
+{
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+		*pAddr = m_NetServer.ClientAddr(ClientID);
+}
+	
 int *CServer::LatestInput(int ClientID, int *size)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CServer::CClient::STATE_READY)

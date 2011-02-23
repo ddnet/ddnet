@@ -15,8 +15,6 @@
 #include "player.h"
 #include "score.h"
 
-#define MAX_MUTES 32
-
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -141,6 +139,7 @@ public:
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID);
+	int ProcessSpamProtection(int ClientID);
 	
 	
 	//
@@ -254,8 +253,20 @@ private:
 	static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMutes(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	static struct CMute m_aMutes[MAX_MUTES];
-	void Mute(const char *pIP, int Secs, const char *pDisplayName);
+	enum
+	{
+		MAX_MUTES=32,
+	};
+	struct CMute
+	{
+		NETADDR m_Addr;
+		int m_Expire;
+	};
+
+	CMute m_aMutes[MAX_MUTES];
+	int m_NumMutes;
+	void Mute(NETADDR *Addr, int Secs, const char *pDisplayName);
+
 public:
 	CLayers *Layers() { return &m_Layers; }
 	class IScore *Score() { return m_pScore; }
@@ -276,11 +287,6 @@ public:
 	virtual void OnSetAuthed(int ClientID,int Level);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
-};
-
-struct CMute {
-	char m_IP[16];// TODO ipv6
-	int m_Expire;
 };
 
 inline int CmaskAll() { return -1; }

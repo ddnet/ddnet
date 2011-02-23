@@ -27,8 +27,6 @@
 #include "score/sql_score.h"
 #endif
 
-struct CMute CGameContext::m_aMutes[MAX_MUTES];
-
 enum
 {
 	RESET,
@@ -51,9 +49,8 @@ void CGameContext::Construct(int Resetting)
 	if(Resetting==NO_RESET)
 	{
 		m_pVoteOptionHeap = new CHeap();
-	m_pScore = 0;
-		for(int z = 0; z < MAX_MUTES; ++z)
-			m_aMutes[z].m_IP[0] = 0;
+		m_pScore = 0;
+		m_NumMutes = 0;
 	}
 }
 
@@ -242,15 +239,48 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 }
 
 
+int CGameContext::ProcessSpamProtection(int ClientID)
+{
+	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_Last_Chat
+		&& m_apPlayers[ClientID]->m_Last_Chat + Server()->TickSpeed() + g_Config.m_SvChatDelay > Server()->Tick())
+		return 1;
+	else
+		m_apPlayers[ClientID]->m_Last_Chat = Server()->Tick();
+
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	int Muted = 0;
+
+	for(int i = 0; i < m_NumMutes && !Muted; i++)
+	{
+		if(!net_addr_comp(&Addr, &m_aMutes[i].m_Addr))
+			Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+	}
+	
+	if (Muted > 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Muted);
+		SendChatTarget(ClientID, aBuf);
+		return 1;
+	}
+
+	if ((m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+	{
+		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
+		m_apPlayers[ClientID]->m_ChatScore = 0;
+		return 1;
+	}
+
+	return 0;
+}
+
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID)
 {
 	if(SpamProtectionClientID >= 0 && SpamProtectionClientID < MAX_CLIENTS)
 	{
-		if(g_Config.m_SvSpamprotection && m_apPlayers[SpamProtectionClientID]->m_Last_Chat
-			&& m_apPlayers[SpamProtectionClientID]->m_Last_Chat + Server()->TickSpeed() + g_Config.m_SvChatDelay > Server()->Tick())
+		if(ProcessSpamProtection(SpamProtectionClientID))
 			return;
-		else
-			m_apPlayers[SpamProtectionClientID]->m_Last_Chat = Server()->Tick();
 	}
 
 	char aBuf[256], aText[256];
@@ -545,33 +575,41 @@ void CGameContext::OnTick()
 		}
 	}
 	
-
-if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
-{
-	char *Line = ((CServer *) Server())->GetAnnouncementLine(g_Config.m_SvAnnouncementFileName);
-	if(Line)
-		SendChat(-1, CGameContext::CHAT_ALL, Line);
-}
-
-if(Collision()->m_NumSwitchers > 0)
-	for (int i = 0; i < Collision()->m_NumSwitchers+1; ++i)
+	for(int i = 0; i < m_NumMutes; i++)
 	{
-		for (int j = 0; j < 16; ++j)
+		if(m_aMutes[i].m_Expire <= Server()->Tick())
 		{
-			if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
-			{
-				Collision()->m_pSwitchers[i].m_Status[j] = false;
-				Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
-				Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHCLOSE;
-			}
-			else if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
-			{
-				Collision()->m_pSwitchers[i].m_Status[j] = true;
-				Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
-				Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHOPEN;
-			}
+			m_NumMutes--;
+			m_aMutes[i] = m_aMutes[m_NumMutes];
 		}
 	}
+
+	if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
+	{
+		char *Line = ((CServer *) Server())->GetAnnouncementLine(g_Config.m_SvAnnouncementFileName);
+		if(Line)
+			SendChat(-1, CGameContext::CHAT_ALL, Line);
+	}
+
+	if(Collision()->m_NumSwitchers > 0)
+		for (int i = 0; i < Collision()->m_NumSwitchers+1; ++i)
+		{
+			for (int j = 0; j < 16; ++j)
+			{
+				if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
+				{
+					Collision()->m_pSwitchers[i].m_Status[j] = false;
+					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
+					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHCLOSE;
+				}
+				else if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+				{
+					Collision()->m_pSwitchers[i].m_Status[j] = true;
+					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
+					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHOPEN;
+				}
+			}
+		}
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -709,35 +747,6 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 		{
 			SendChatTarget(ClientID, "Your Message is too long");
 			return;
-		}
-
-		char aIP[16];
-		int MuteTicks = 0;
-
-		Server()->GetClientIP(ClientID, aIP, sizeof aIP);
-
-		for(int z = 0; z < MAX_MUTES && MuteTicks <= 0; ++z) //find a mute, remove it, if expired.
-			if (m_aMutes[z].m_IP[0] && str_comp(aIP, m_aMutes[z].m_IP) == 0 && (MuteTicks = m_aMutes[z].m_Expire - Server()->Tick()) <= 0)
-					m_aMutes[z].m_IP[0] = 0;
-
-		if(pMsg->m_pMessage[0]!='/')
-		{
-			if (MuteTicks > 0)
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", MuteTicks / Server()->TickSpeed());
-				SendChatTarget(ClientID, aBuf);
-				return;
-			}
-
-			if ((p->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
-			{
-				char aIP[16];
-				Server()->GetClientIP(ClientID, aIP, sizeof aIP);
-				Mute(aIP, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
-				p->m_ChatScore = 0;
-				return;
-			}
 		}
 
 		// check for invalid chars
