@@ -718,13 +718,13 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Enable show ghos"), g_Config.m_ClRaceShowGhost, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Enable show ghost"), g_Config.m_ClRaceShowGhost, &Button))
 	{
 		g_Config.m_ClRaceShowGhost ^= 1;
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Enable save ghos"), g_Config.m_ClRaceSaveGhost, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Enable save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
 	{
 		g_Config.m_ClRaceSaveGhost ^= 1;
 	}

@@ -266,7 +266,15 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			FontSizeResize = FontSize;
 			while(TextRender()->TextWidth(0, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1) > w-163.0f-PingWidth)
 				--FontSizeResize;
-			TextRender()->Text(0, x+128.0f, y+(FontSize-FontSizeResize)/2, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
+			if (m_IsGameTypeRace && g_Config.m_ClShowIDs)
+			{
+				char aId[64] = "";
+				str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientID);
+				str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
+				TextRender()->Text(0, x+128.0f+Offset, y+(FontSize-FontSizeResize)/2, FontSizeResize, aId, -1);
+			}
+			else
+				TextRender()->Text(0, x+128.0f+Offset, y+(FontSize-FontSizeResize)/2, FontSizeResize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 			FontSizeResize = FontSize;
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, -9999, 9999));
 			while((Width = TextRender()->TextWidth(0, FontSizeResize, aBuf, -1)) > PingWidth)
