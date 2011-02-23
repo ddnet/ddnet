@@ -993,10 +993,10 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData, int 
 				pChr->m_DefEmote = EMOTE_PAIN;
 			else if (!str_comp(pResult->GetString(0), "surprise"))
 				pChr->m_DefEmote = EMOTE_SURPRISE;
+			else if (!str_comp(pResult->GetString(0), "normal"))
+				pChr->m_DefEmote = EMOTE_NORMAL;
 			else
-			{
-				pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Unkown emote... Say /emote");
-			}
+				pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Unknown emote... Say /emote");
 
 			int Duration = 1;
 			if (pResult->NumArguments() > 1)
