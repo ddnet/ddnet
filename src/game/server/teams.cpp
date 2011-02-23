@@ -172,7 +172,7 @@ void CGameTeams::OnCharacterDeath(int ClientID)
 		ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_OPEN);
 	}
 
-	if(!g_Config.m_SvStickyTeams && m_Core.Team(ClientID) != TEAM_FLOCK && m_Core.Team(ClientID) != TEAM_SUPER)
+	if((!g_Config.m_SvStickyTeams && m_Core.Team(ClientID) != TEAM_FLOCK) || m_Core.Team(ClientID) == TEAM_SUPER)
 		SetForceCharacterTeam(ClientID, 0);
 }
 
