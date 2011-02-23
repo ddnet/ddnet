@@ -63,6 +63,7 @@ CMenus::CMenus()
 	
 	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
 	m_aCallvoteReason[0] = 0;
+	m_DDRacePage = PAGE_BROWSER;
 }
 
 vec4 CMenus::ButtonColorMul(const void *pID)
@@ -556,22 +557,14 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitLeft(4.0f, 0, &Box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_GhostButton=0;
-		if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, CUI::CORNER_T))
-			NewPage = PAGE_GHOST;
+		if(DoButton_MenuTab(&s_GhostButton, "DDRace", m_ActivePage==PAGE_DDRace, &Button, CUI::CORNER_T))
+			NewPage = PAGE_DDRace;
 
 		Box.VSplitLeft(4.0f, 0, &Box);
 		Box.VSplitLeft(140.0f, &Button, &Box);
 		static int s_CallVoteButton=0;
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_T))
 			NewPage = PAGE_CALLVOTE;
-
-		Box.VSplitLeft(4.0f, 0, &Box);
-		Box.VSplitLeft(min(100.0f, Box.x - 80.0f - 10.0f - 80.0f - 4.0f), &Button, &Box);
-		static int s_BrowserButton=0;
-		if (DoButton_MenuTab(&s_BrowserButton, Localize("Browser"), m_ActivePage==PAGE_BROWSER, &Button, CUI::CORNER_T))
-			NewPage = PAGE_BROWSER;
-
-		Box.VSplitLeft(30.0f, 0, &Box);
 	}
 		
 	/*
@@ -794,14 +787,16 @@ int CMenus::Render()
 				RenderGame(MainView);
 			else if(m_GamePage == PAGE_SERVER_INFO)
 				RenderServerInfo(MainView);
-			else if(m_GamePage == PAGE_GHOST)
-				RenderGhost(MainView);
 			else if(m_GamePage == PAGE_CALLVOTE)
 				RenderServerControl(MainView);
-			else if(m_GamePage == PAGE_BROWSER)
-				RenderInGameBrowser(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
+			else if(m_GamePage == PAGE_DDRace)
+				RenderInGameDDRace(MainView);
+			else if(m_GamePage == PAGE_GHOST)
+				RenderGhost(MainView);
+			else if(m_GamePage == PAGE_BROWSER)
+				RenderInGameBrowser(MainView);
 		}
 		else if(g_Config.m_UiPage == PAGE_NEWS)
 			RenderNews(MainView);

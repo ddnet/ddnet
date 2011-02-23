@@ -107,7 +107,6 @@ class CMenus : public CComponent
 		PAGE_NEWS=1,
 		PAGE_GAME,
 		PAGE_SERVER_INFO,
-		PAGE_GHOST,
 		PAGE_CALLVOTE,
 		PAGE_INTERNET,
 		PAGE_LAN,
@@ -115,7 +114,9 @@ class CMenus : public CComponent
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
-		PAGE_BROWSER
+		PAGE_DDRace,
+		PAGE_BROWSER,
+		PAGE_GHOST
 	};
 
 	int m_GamePage;
@@ -210,6 +211,7 @@ class CMenus : public CComponent
 	void RenderServerControl(CUIRect MainView);
 	void RenderServerControlKick(CUIRect MainView);
 	void RenderServerControlServer(CUIRect MainView);
+	void RenderInGameDDRace(CUIRect MainView);
 	void RenderGhost(CUIRect MainView);
 	void RenderInGameBrowser(CUIRect MainView);
 	
@@ -275,6 +277,7 @@ public:
 	
 	sorted_array<CGhostItem> m_lGhosts;
 	CGhostItem *m_OwnGhost;
+	int m_DDRacePage;
 	
 	void GhostlistPopulate();
 };
