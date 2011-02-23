@@ -60,41 +60,42 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	else
 	{
 		bool Waiting = false;
-		for(int i = 0; i < MAX_CLIENTS; ++i)
-		{
-			if(Team == m_Core.Team(i))
+		if(Count(Team) > 1)
+			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				CCharacter* pChar = Character(i);
-				if(pChar && pChar->IsAlive() && pChar->m_DDRaceState == DDRACE_FINISHED)
+				if(i != ClientID && Team == m_Core.Team(i))
 				{
-					Waiting = true;
-					if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
+					CCharacter* pChar = Character(i);
+					if(pChar && pChar->IsAlive() && pChar->m_DDRaceState == DDRACE_FINISHED)
 					{
-						char aBuf[128];
-						str_format(aBuf, sizeof(aBuf), "%s has finished and didn't go through start yet, wait for him or join another team.", Server()->ClientName(i));
-						GameServer()->SendChatTarget(ClientID, aBuf);
-						m_LastChat[ClientID] = Tick;
+						Waiting = true;
+						if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
+						{
+							char aBuf[128];
+							str_format(aBuf, sizeof(aBuf), "%s has finished and didn't go through start yet, wait for him or join another team.", Server()->ClientName(i));
+							GameServer()->SendChatTarget(ClientID, aBuf);
+							m_LastChat[ClientID] = Tick;
+						}
+						if(m_LastChat[i] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
+						{
+							char aBuf[128];
+							str_format(aBuf, sizeof(aBuf), "%s wants to start a new round, kill or walk to start.", Server()->ClientName(ClientID));
+							GameServer()->SendChatTarget(i, aBuf);
+							m_LastChat[i] = Tick;
+						}
 					}
-					if(m_LastChat[i] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
+					else if(pChar && pChar->IsAlive() && pChar->m_DDRaceState == DDRACE_STARTED)
 					{
-						char aBuf[128];
-						str_format(aBuf, sizeof(aBuf), "%s wants to start a new round, kill or walk to start.", Server()->ClientName(ClientID));
-						GameServer()->SendChatTarget(i, aBuf);
-						m_LastChat[i] = Tick;
+						Waiting = true;
+						if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
+						{
+							char aBuf[128];
+							str_format(aBuf, sizeof(aBuf), "%s has started, wait for him, ask him to kill or join another team.", Server()->ClientName(i));
+							GameServer()->SendChatTarget(ClientID, aBuf);
+							m_LastChat[ClientID] = Tick;
+						}
 					}
 				}
-				else if(pChar && pChar->IsAlive() && pChar->m_DDRaceState == DDRACE_STARTED)
-				{
-					Waiting = true;
-					if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
-					{
-						char aBuf[128];
-						str_format(aBuf, sizeof(aBuf), "%s has started, wait for him, ask him to kill or join another team.", Server()->ClientName(i));
-						GameServer()->SendChatTarget(ClientID, aBuf);
-						m_LastChat[ClientID] = Tick;
-					}
-				}
-			}
 		}
 
 		if(m_TeamState[Team] <= TEAMSTATE_CLOSED && !Waiting)
@@ -174,6 +175,8 @@ void CGameTeams::OnCharacterDeath(int ClientID)
 
 	if((!g_Config.m_SvStickyTeams && m_Core.Team(ClientID) != TEAM_FLOCK) || m_Core.Team(ClientID) == TEAM_SUPER)
 		SetForceCharacterTeam(ClientID, 0);
+
+	m_TeeFinished[ClientID] = false;
 }
 
 int CGameTeams::SetCharacterTeam(int ClientID, int Team)
