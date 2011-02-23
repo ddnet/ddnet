@@ -90,7 +90,7 @@ enum
 	SERVER_FLAG_MAPTEST             =   0x100000, // O
 	SERVER_FLAG_SERVERTEST          =   0x200000, // P
 
-	SERVER_FLAG_VERSION             = 0x10000000,
+	SERVER_FLAG_VERSION             = 0x20000000,
 
 	SERVER_FLAGS_DEFAULT  =        0x1,
 	SERVER_FLAGS_TEAMS    =       0x70,
