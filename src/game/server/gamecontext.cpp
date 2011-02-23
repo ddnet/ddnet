@@ -700,11 +700,10 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 		p->m_Last_Chat = Server()->Tick();
 */
 		int GameTeam = ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(p->GetCID());
-		if(Team) {
+		if(Team)
 			Team = ((p->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
-		} else {
+		else
 			Team = CHAT_ALL;
-		}
 
 		if(str_length(pMsg->m_pMessage)>370)
 		{
@@ -795,7 +794,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 		if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 		{
 			CVoteOption *pOption = m_pVoteOptionFirst;
-			static int64 last_mapvote = 0; //floff
+			static int64 LastMapVote = 0;
 			while(pOption)
 			{
 				if(str_comp_nocase(pMsg->m_Value, pOption->m_aCommand) == 0)
@@ -805,10 +804,10 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 						SendChatTarget(ClientID, "Invalid option");
 						return;
 					}
-					if(m_apPlayers[ClientID]->m_Authed <= 0 && strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 && time_get() < last_mapvote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+					if(m_apPlayers[ClientID]->m_Authed <= 0 && strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 && time_get() < LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 						{
 							char chatmsg[512] = {0};
-							str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes,Please wait %d Second(s)", g_Config.m_SvVoteMapTimeDelay,((last_mapvote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
+							str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes,Please wait %d Second(s)", g_Config.m_SvVoteMapTimeDelay,((LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
 							SendChatTarget(ClientID, chatmsg);
 
 							return;
@@ -816,7 +815,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 					str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), pOption->m_aCommand);
 					str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aCommand);
 					str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
-					last_mapvote = time_get();
+					LastMapVote = time_get();
 					break;
 				}
 
@@ -839,7 +838,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 				}
 			}
 
-			last_mapvote = time_get();
+			LastMapVote = time_get();
 			m_VoteKick = false;
 		}
 		else if(str_comp_nocase(pMsg->m_Type, "kick") == 0)
@@ -872,12 +871,12 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 			}
 			if(KickId == ClientID)
 			{
-				SendChatTarget(ClientID, "You cant kick yourself");
+				SendChatTarget(ClientID, "You can\'t kick yourself");
 				return;
 			}
-			if(ComparePlayers(m_apPlayers[KickId], p))
+			if(m_apPlayers[KickId]->m_Authed > 0 && m_apPlayers[KickId]->m_Authed >= p->m_Authed)
 			{
-				SendChatTarget(ClientID, "You cant kick admins");
+				SendChatTarget(ClientID, "You can\'t kick admins");
 				m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 				char aBufKick[128];
 				str_format(aBufKick, sizeof(aBufKick), "'%s' called for vote to kick you", Server()->ClientName(ClientID));
@@ -1281,15 +1280,15 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData, in
 void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	bool Private = false;
+	bool Private = true;
 	if(str_comp_nocase(pResult->GetString(0), "yes") == 0)
 		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_YES_ADMIN;
 	else if(str_comp_nocase(pResult->GetString(0), "no") == 0)
 		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 	else
 		return;
-	if(str_comp_nocase(pResult->GetString(1), "yes") == 0)
-		Private = true;
+	if(str_comp_nocase(pResult->GetString(1), "no") == 0)
+		Private = false;
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pResult->GetString(0));
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -1329,7 +1328,7 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "", 4);
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", 3);
-	Console()->Register("vote", "s ?s", CFGFLAG_SERVER, ConVote, this, "Force the vote to yes or no?, Make the forcing of the vote private?", 3);
+	Console()->Register("vote", "s?s", CFGFLAG_SERVER, ConVote, this, "Force the vote to yes or no?, Make the forcing of the vote private?", 3);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, level) m_pConsole->Register(name, params, flags, callback, userdata, help, level);
 #include "game/ddracecommands.h"
@@ -1582,14 +1581,6 @@ void CGameContext::SendChatResponse(const char *pLine, void *pUser)
 	ReentryGuard--;
 }
 
-bool ComparePlayers(CPlayer *pl1, CPlayer *pl2)
-{
-	if(((pl1->m_Authed >= 0) ? pl1->m_Authed : 0) > ((pl2->m_Authed >= 0) ? pl2->m_Authed : 0))
-		return true;
-	else
-		return false;
-}
-
 bool CGameContext::PlayerCollision()
 {
 	float Temp;
@@ -1606,15 +1597,17 @@ bool CGameContext::PlayerHooking()
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
 {
+	CServer* pServ = (CServer*)Server();
 	if(m_apPlayers[ClientID])
 	{
 		m_apPlayers[ClientID]->m_Authed = Level;
-		char buf[11];
-		str_format(buf, sizeof(buf), "ban %d %d", ClientID, g_Config.m_SvVoteKickBantime);
-		if( !strcmp(m_aVoteCommand,buf))
+		char aBuf[512], aIP[20];
+		pServ->GetClientIP(ClientID, aIP, sizeof(aIP));
+		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIP, g_Config.m_SvVoteKickBantime);
+		if(!str_comp_nocase(m_aVoteCommand,aBuf) && Level > 0)
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO;
-			dbg_msg("hooks","Aborting vote");
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "CGameContext", "Aborted vote by admin login.");
 		}
 	}
 }

@@ -282,7 +282,6 @@ struct CMute {
 	char m_IP[16];// TODO ipv6
 	int m_Expire;
 };
-bool ComparePlayers(CPlayer *pl1, CPlayer *pl2);
 
 inline int CmaskAll() { return -1; }
 inline int CmaskOne(int ClientID) { return 1<<ClientID; }
