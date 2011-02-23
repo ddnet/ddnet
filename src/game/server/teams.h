@@ -12,6 +12,7 @@ class CGameTeams
 	int m_TeamLeader[MAX_CLIENTS];
 	int m_TeeJoinTick[MAX_CLIENTS];
 	bool m_TeamStrict[MAX_CLIENTS];
+	bool m_TeePassedStart[MAX_CLIENTS];
 	
 	class CGameContext * m_pGameContext;
 	
@@ -21,7 +22,6 @@ public:
 	{
 		TEAMSTATE_EMPTY, 
 		TEAMSTATE_OPEN,
-		TEAMSTATE_CLOSED,
 		TEAMSTATE_STARTED
 	};
 	
@@ -42,11 +42,12 @@ public:
 	int SetCharacterTeam(int ClientID, int Team);
 	enum TeamErrors
 	{
-		ERROR_WRONG_PARAMS = -5,
+		ERROR_WRONG_PARAMS = -6,
 		ERROR_CLOSED,
 		ERROR_ALREADY_THERE,
 		ERROR_NOT_SUPER,
-		ERROR_STARTED
+		ERROR_STARTED,
+		ERROR_PASSEDSTART
 	};
 	
 	void ChangeTeamState(int Team, int State) { m_TeamState[Team] = State; };

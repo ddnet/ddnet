@@ -872,6 +872,9 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int 
 					case CGameTeams::ERROR_WRONG_PARAMS:
 						pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "The wrong parameters were given.");
 						break;
+					case CGameTeams::ERROR_PASSEDSTART:
+						pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You have passed through a start tile please kill.");
+						break;
 					default:
 						pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You cannot join this team at this time");
 					}
@@ -1125,7 +1128,7 @@ void CGameContext::ConYes(IConsole::IResult *pResult, void *pUserData, int Clien
 			pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 		}
 		else
-			for(int i = 1; i < MAX_CLIENTS; ++i)
+			for(int i = 1; i < TEAM_SUPER; ++i)
 			{
 				if(Controller->m_Teams.GetTeamState(i) == CGameTeams::TEAMSTATE_EMPTY)
 				{
