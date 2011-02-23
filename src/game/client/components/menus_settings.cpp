@@ -682,21 +682,51 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show Client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
 	{
 		g_Config.m_ClShowIDs ^= 1;
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceCheats, Localize("Enable DDRace Cheats Like Zoom"), g_Config.m_ClDDRaceCheats, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceCheats, Localize("Enable DDRace cheats like zoom"), g_Config.m_ClDDRaceCheats, &Button))
 	{
 		g_Config.m_ClDDRaceCheats ^= 1;
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Enable DDRace Binds when pressing Reset Controls"), g_Config.m_ClDDRaceBinds, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Enable DDRace binds when pressing Reset Controls"), g_Config.m_ClDDRaceBinds, &Button))
 	{
 		g_Config.m_ClDDRaceBinds ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClAutoRaceRecord, Localize("Enable save the best demo of each race"), g_Config.m_ClAutoRaceRecord, &Button))
+	{
+		g_Config.m_ClAutoRaceRecord ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClDemoName, Localize("Enable save the player name within the demo"), g_Config.m_ClDemoName, &Button))
+	{
+		g_Config.m_ClDemoName ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Enable ghost"), g_Config.m_ClRaceGhost, &Button))
+	{
+		g_Config.m_ClRaceGhost ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Enable show ghos"), g_Config.m_ClRaceShowGhost, &Button))
+	{
+		g_Config.m_ClRaceShowGhost ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Enable save ghos"), g_Config.m_ClRaceSaveGhost, &Button))
+	{
+		g_Config.m_ClRaceSaveGhost ^= 1;
 	}
 }
 
