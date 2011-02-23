@@ -141,9 +141,10 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
 	}
-
+/*
 	if (!NoDamage)
 	{
+	*/
 		// deal damage
 		CCharacter *apEnts[MAX_CLIENTS];
 		float Radius = 135.0f;
@@ -167,7 +168,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 					if(!g_Config.m_SvHit||NoDamage) break;
 				}
 		}
-	}
+	//}
 }
 
 /*
