@@ -1015,7 +1015,12 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData, in
 		return;
 
 	if(pPlayer->m_IsUsingDDRaceClient)
-		pPlayer->m_ShowOthers = !pPlayer->m_ShowOthers;
+	{
+		if(pResult->NumArguments())
+			pPlayer->m_ShowOthers = pResult->GetInteger(0);
+		else
+			pPlayer->m_ShowOthers = !pPlayer->m_ShowOthers;
+	}
 	else
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing players from other teams is only available with DDRace Client, http://DDRace.info");
 }

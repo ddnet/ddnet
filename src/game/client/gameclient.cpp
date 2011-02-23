@@ -375,7 +375,7 @@ void CGameClient::OnConnected()
 	m_ServerMode = SERVERMODE_PURE;
 	m_LastSendInfo = 0;
 	
-	// send the inital info
+	// send the initial info
 	SendInfo(true);
 }
 
@@ -899,6 +899,11 @@ void CGameClient::OnNewSnapshot()
 		CNetMsg_Cl_IsDDRace Msg;
 		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 		m_DDRaceMsgSent = true;
+
+		if(g_Config.m_ClShowOthers)
+			Console()->ExecuteLine("rcon showothers 1", 4, -1);
+		else
+			Console()->ExecuteLine("rcon showothers 0", 4, -1);
 	}
 
 }

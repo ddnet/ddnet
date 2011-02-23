@@ -728,6 +728,16 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClRaceSaveGhost ^= 1;
 	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show players in other teams"), g_Config.m_ClShowOthers, &Button))
+	{
+		g_Config.m_ClShowOthers ^= 1;
+		if(g_Config.m_ClShowOthers)
+			Console()->ExecuteLine("rcon showothers 1", 4, -1);
+		else
+			Console()->ExecuteLine("rcon showothers 0", 4, -1);
+	}
 }
 
 class CLanguage
