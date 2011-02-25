@@ -1280,16 +1280,6 @@ void CGameContext::ConToggleStrict(IConsole::IResult *pResult, void *pUserData, 
 void CGameContext::Mute(NETADDR *Addr, int Secs, const char *pDisplayName)
 {
 	char aBuf[128];
-	// purge expired mutes first
-	for(int i = 0; i < m_NumMutes; i++)
-	{
-		if(m_aMutes[i].m_Expire <= Server()->Tick())
-		{
-			m_NumMutes--;
-			m_aMutes[i] = m_aMutes[m_NumMutes];
-		}
-	}
-	
 	int Found = 0;
 	// find a matching mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumMutes; i++)
@@ -1307,6 +1297,7 @@ void CGameContext::Mute(NETADDR *Addr, int Secs, const char *pDisplayName)
 		{
 			m_aMutes[m_NumMutes].m_Addr = *Addr;
 			m_aMutes[m_NumMutes].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+			m_NumMutes++;
 			Found = 1;
 		}
 	}
