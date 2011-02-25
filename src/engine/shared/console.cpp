@@ -88,7 +88,19 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			if(!(*pStr)) // error, non optional command needs value
 			{
 				if(!Optional)
+				{
 					Error = 1;
+					break;
+				}
+				while(*(pFormat - 1))
+				{
+					if(*(pFormat - 1) == 'v')
+					{
+						pResult->SetVictim(CResult::VICTIM_ME);
+						break;
+					}
+					pFormat++;
+				}
 				break;
 			}
 			
@@ -902,7 +914,7 @@ bool CConsole::CResult::HasVictim()
 
 void CConsole::CResult::SetVictim(int Victim)
 {
-	m_Victim = clamp<int>(Victim, 0, MAX_CLIENTS);
+	m_Victim = clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
 }
 
 void CConsole::CResult::SetVictim(const char *pVictim)
