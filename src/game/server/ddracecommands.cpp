@@ -152,7 +152,7 @@ void CGameContext::ConHammer(IConsole::IResult *pResult, void *pUserData, int Cl
 		pChr->m_HammerType = Type;
 		if(!g_Config.m_SvCheatTime)
 			pChr->m_DDRaceState = DDRACE_CHEAT;
-		str_format(aBuf, sizeof(aBuf), "Hammer of '%s' ClientID=%d setted to %d", pServ->ClientName(ClientID), Victim, Type);
+		str_format(aBuf, sizeof(aBuf), "Hammer of '%s' ClientID=%d setted to %d", pServ->ClientName(Victim), Victim, Type);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
@@ -328,7 +328,7 @@ void CGameContext::ConTimerStop(IConsole::IResult *pResult, void *pUserData, int
 	if(pSelf->m_apPlayers[Victim])
 	{
 		pChr->m_DDRaceState=DDRACE_CHEAT;
-		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d Hasn't time now (Timer Stopped)", pServ->ClientName(ClientID), Victim);
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d Hasn't time now (Timer Stopped)", pServ->ClientName(Victim), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
@@ -367,7 +367,7 @@ void CGameContext::ConTimerZero(IConsole::IResult *pResult, void *pUserData, int
 		pChr->m_StartTime = pSelf->Server()->Tick();
 		pChr->m_RefreshTime = pSelf->Server()->Tick();
 		pChr->m_DDRaceState=DDRACE_CHEAT;
-		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d time has been reset & stopped.", pServ->ClientName(ClientID), Victim);
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d time has been reset & stopped.", pServ->ClientName(Victim), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
@@ -387,7 +387,7 @@ void CGameContext::ConTimerReStart(IConsole::IResult *pResult, void *pUserData, 
 		pChr->m_StartTime = pSelf->Server()->Tick();
 		pChr->m_RefreshTime = pSelf->Server()->Tick();
 		pChr->m_DDRaceState=DDRACE_STARTED;
-		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d time has been reset & stopped.", pServ->ClientName(ClientID), Victim);
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d time has been reset & stopped.", pServ->ClientName(Victim), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
@@ -413,14 +413,14 @@ void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int Cl
 		pChr->GetPlayer()->m_RconFreeze = Seconds != -2;
 		CServer* pServ = (CServer*)pSelf->Server();
 		if(Seconds >= 0)
-			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been Frozen for %d.", pServ->ClientName(ClientID), Victim, Seconds);
+			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been Frozen for %d.", pServ->ClientName(Victim), Victim, Seconds);
 		else if(Seconds == -2)
 		{
 			pChr->m_DeepFreeze = true;
-			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been Deep Frozen.", pServ->ClientName(ClientID), Victim);
+			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been Deep Frozen.", pServ->ClientName(Victim), Victim);
 		}
 		else
-			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is Frozen until you unfreeze him.", pServ->ClientName(ClientID), Victim);
+			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is Frozen until you unfreeze him.", pServ->ClientName(Victim), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 
@@ -449,7 +449,7 @@ void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int 
 	pChr->m_FreezeTime = 2;
 	pChr->GetPlayer()->m_RconFreeze = false;
 	CServer* pServ = (CServer*)pSelf->Server();
-	str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been defrosted.", pServ->ClientName(ClientID), Victim);
+	str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been defrosted.", pServ->ClientName(Victim), Victim);
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 }
 
@@ -466,7 +466,7 @@ void CGameContext::ConInvis(IConsole::IResult *pResult, void *pUserData, int Cli
 	{
 		pSelf->m_apPlayers[Victim]->m_Invisible = true;
 		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is now invisible.", pServ->ClientName(ClientID), Victim);
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is now invisible.", pServ->ClientName(Victim), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
@@ -483,7 +483,7 @@ void CGameContext::ConVis(IConsole::IResult *pResult, void *pUserData, int Clien
 	{
 		pSelf->m_apPlayers[Victim]->m_Invisible = false;
 		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is visible.", pServ->ClientName(ClientID), Victim);
+		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is visible.", pServ->ClientName(Victim), Victim);
 		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
