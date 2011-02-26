@@ -181,7 +181,7 @@ void CGameTeams::OnCharacterDeath(int ClientID)
 	if((!g_Config.m_SvStickyTeams && OldTeam != TEAM_FLOCK) || OldTeam == TEAM_SUPER)
 		SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 	// Else check if the team state needs changing
-	else
+	else if(OldTeam != TEAM_FLOCK && OldTeam != TEAM_SUPER)
 	{
 		if(Count(OldTeam) > 1)
 		{
@@ -197,7 +197,7 @@ void CGameTeams::OnCharacterDeath(int ClientID)
 		{
 			m_TeamState[OldTeam] = TEAMSTATE_OPEN;
 		}
-		else
+		else if(Count(OldTeam) < 0)
 			dbg_msg("Teams","Please report if you saw this!");
 	}
 
