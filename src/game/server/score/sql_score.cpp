@@ -356,12 +356,12 @@ void CSqlScore::ShowRankThread(void *pUser)
 					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s)", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), agoString);
 
 				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0){
-					pData->m_pSqlData->GameServer()->SendChatTarget(-1, aBuf);
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 					str_format(aBuf, sizeof(aBuf), "Finished: %s ago", agoString);
 				}
 				if(pData->m_Search)
 					strcat(aBuf, pData->m_aRequestingPlayer);
-				pData->m_pSqlData->GameServer()->SendChatTarget(-1, aBuf);
+				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 
 			}
 

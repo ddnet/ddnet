@@ -238,49 +238,16 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 }
 
-
-int CGameContext::ProcessSpamProtection(int ClientID)
-{
-	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_Last_Chat
-		&& m_apPlayers[ClientID]->m_Last_Chat + Server()->TickSpeed() + g_Config.m_SvChatDelay > Server()->Tick())
-		return 1;
-	else
-		m_apPlayers[ClientID]->m_Last_Chat = Server()->Tick();
-
-	NETADDR Addr;
-	Server()->GetClientAddr(ClientID, &Addr);
-	int Muted = 0;
-
-	for(int i = 0; i < m_NumMutes && !Muted; i++)
-	{
-		if(!net_addr_comp(&Addr, &m_aMutes[i].m_Addr))
-			Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-	}
-	
-	if (Muted > 0)
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Muted);
-		SendChatTarget(ClientID, aBuf);
-		return 1;
-	}
-
-	if ((m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
-	{
-		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
-		m_apPlayers[ClientID]->m_ChatScore = 0;
-		return 1;
-	}
-
-	return 0;
-}
-
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID)
 {
 	if(SpamProtectionClientID >= 0 && SpamProtectionClientID < MAX_CLIENTS)
 	{
 		if(ProcessSpamProtection(SpamProtectionClientID))
+		{
+			SendChatTarget(SpamProtectionClientID, "Muted text:");
+			SendChatTarget(SpamProtectionClientID, pText);
 			return;
+		}
 	}
 
 	char aBuf[256], aText[256];
@@ -764,6 +731,7 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID)
 			Info.m_To = ClientID;
 
 			Console()->ExecuteLine(pMsg->m_pMessage + 1, ((CServer *) Server())->m_aClients[ClientID].m_Authed, ClientID, CServer::SendRconLineAuthed, Server(), SendChatResponse, &Info);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", pMsg->m_pMessage);
 		}
 		else
 			SendChat(ClientID, Team, pMsg->m_pMessage, ClientID);
@@ -1621,9 +1589,45 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 	}
 }
 
-void CGameContext::SendRecord(int ClientID) {
+void CGameContext::SendRecord(int ClientID)
+{
 	CNetMsg_Sv_Record RecordsMsg;
 	RecordsMsg.m_PlayerTimeBest = Score()->PlayerData(ClientID)->m_BestTime * 100.0f;//
 	RecordsMsg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f;//TODO: finish this
 	Server()->SendPackMsg(&RecordsMsg, MSGFLAG_VITAL, ClientID);
+}
+
+int CGameContext::ProcessSpamProtection(int ClientID)
+{
+	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_Last_Chat
+		&& m_apPlayers[ClientID]->m_Last_Chat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())
+		return 1;
+	else
+		m_apPlayers[ClientID]->m_Last_Chat = Server()->Tick();
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	int Muted = 0;
+
+	for(int i = 0; i < m_NumMutes && !Muted; i++)
+	{
+		if(!net_addr_comp(&Addr, &m_aMutes[i].m_Addr))
+			Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+	}
+
+	if (Muted > 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Muted);
+		SendChatTarget(ClientID, aBuf);
+		return 1;
+	}
+
+	if ((m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+	{
+		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
+		m_apPlayers[ClientID]->m_ChatScore = 0;
+		return 1;
+	}
+
+	return 0;
 }

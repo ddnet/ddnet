@@ -234,8 +234,10 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 			str_format(aBuf, sizeof(aBuf), "Your time: %d minute(s) %5.2f second(s)", (int)Time/60, Time-((int)Time/60*60));
 		else
 			str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s)", Pos, pScore->m_aName, (int)Time/60, Time-((int)Time/60*60));
-		if (!Search) GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-		else GameServer()->SendChatTarget( ClientID, aBuf);
+		if (!Search)
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
+		else
+			GameServer()->SendChatTarget(ClientID, aBuf);
 		return;
 	}
 	else if(Pos == -1)

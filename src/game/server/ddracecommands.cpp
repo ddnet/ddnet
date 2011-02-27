@@ -805,23 +805,17 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData, int Clie
 	if(!pPlayer)
 		return;
 
-	if(/*g_Config.m_SvSpamprotection && */pPlayer->m_Last_Chat && pPlayer->m_Last_Chat + pSelf->Server()->TickSpeed() + g_Config.m_SvChatDelay > pSelf->Server()->Tick())
-		return;
-
-	pPlayer->m_Last_Chat = pSelf->Server()->Tick();
-
 	if(pResult->NumArguments() > 0)
 		if(!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowRank(pPlayer->GetCID(), pResult->GetString(0), true);
+			pSelf->Score()->ShowRank(ClientID, pResult->GetString(0), true);
 		else
 			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing the rank of other players is not allowed on this server.");
 	else
-		pSelf->Score()->ShowRank(pPlayer->GetCID(), pSelf->Server()->ClientName(ClientID));
+		pSelf->Score()->ShowRank(ClientID, pSelf->Server()->ClientName(ClientID));
 }
 
 void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
-
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)pSelf->m_pController;
 	if(g_Config.m_SvTeam == 0)
