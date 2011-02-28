@@ -68,7 +68,7 @@ struct CSqlScoreData
 	CSqlScore *m_pSqlData;
 	int m_ClientID;
 #if defined(CONF_FAMILY_WINDOWS)
-	char m_aName[47];
+	char m_aName[16]; // Don't edit this, or all your teeth will fall http://bugs.mysql.com/bug.php?id=50046
 #else
 	char m_aName[MAX_NAME_LENGTH*2-1];
 #endif
