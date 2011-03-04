@@ -25,7 +25,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
 	vec2 At;
 	CCharacter *OwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CCharacter *Hit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, m_Bounces != 0 ? 0: OwnerChar, m_Owner);
+	CCharacter *Hit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, g_Config.m_SvOldLaser ? OwnerChar : m_Bounces != 0 ? 0: OwnerChar, m_Owner);
 	if(!Hit || (Hit == OwnerChar && g_Config.m_SvOldLaser))
 		return false;
 	m_From = From;
@@ -70,10 +70,10 @@ void CLaser::DoBounce()
 	vec2 OrgTo = To;
 	vec2 Coltile;
 	
-	int res;
-	res = GameServer()->Collision()->IntersectLine(m_Pos, To, &Coltile, &To,false);
+	int Res;
+	Res = GameServer()->Collision()->IntersectLine(m_Pos, To, &Coltile, &To,false);
 	
-	if(res)
+	if(Res)
 	{
 		if(!HitCharacter(m_Pos, To))
 		{
@@ -85,12 +85,14 @@ void CLaser::DoBounce()
 			vec2 TempDir = m_Dir * 4.0f;
 			
 			int f;
-			if(res == -1) {
+			if(Res == -1)
+			{
 				f = GameServer()->Collision()->GetTile(round(Coltile.x), round(Coltile.y)); 
 				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), CCollision::COLFLAG_SOLID); 
 			}
 			GameServer()->Collision()->MovePoint(&TempPos, &TempDir, 1.0f, 0);
-			if(res == -1) {
+			if(Res == -1)
+			{
 				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), f); 
 			}
 			m_Pos = TempPos;
