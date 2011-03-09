@@ -935,7 +935,7 @@ void CGameClient::OnPredict()
 	// search for players
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(!m_Snap.m_aCharacters[i].m_Active)
+		if(!m_Snap.m_aCharacters[i].m_Active || !m_Snap.m_paPlayerInfos[i])
 			continue;
 			
 		g_GameClient.m_aClients[i].m_Predicted.Init(&World, Collision(), &m_Teams);
