@@ -1079,3 +1079,13 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData, int Cli
 	}
 }
 
+void CGameContext::ConUTF8(IConsole::IResult *pResult, void *pUserData, int ClientID)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CServer* pServ = (CServer*)pSelf->Server();
+	pServ->m_aClients[ClientID].m_IsUsingUTF8Client = !pServ->m_aClients[ClientID].m_IsUsingUTF8Client;
+	if(pServ->m_aClients[ClientID].m_IsUsingUTF8Client)
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "I'm sending you text as UTF8");
+	else
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "I'm sending you text as latin");
+}

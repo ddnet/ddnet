@@ -40,6 +40,7 @@
 	#define NOGDI
 	#include <windows.h>
 #endif
+#include <base/utf8convert.h>
 
 static const char SERVER_BANMASTERFILE[] = "banmasters.cfg";
 
@@ -211,9 +212,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	StrRtrim(aTrimmedName);
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "'%s' -> '%s'", pName, aTrimmedName);
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-	pName = aTrimmedName;
-	
+	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);	
 	
 	// check for empty names
 	if(!pName[0])
@@ -241,15 +240,45 @@ void CServer::SetClientName(int ClientID, const char *pName)
 		
 	if(!pName)
 		return;
+	
+	// dirty hack that does only work if client uses special chars
+	// otherwise its always utf8
+	char aNameUTF8[MAX_NAME_LENGTH];
+	
+	if (str_utf8_check(pName)) 
+	{
+		str_copy(aNameUTF8,pName,MAX_NAME_LENGTH);
+		m_aClients[ClientID].m_IsUsingUTF8Client = true;
+		dbg_msg("Server","Client uses UTF8");
+	}
+	else
+	{
+		Latin1toUTF8(aNameUTF8,pName,MAX_NAME_LENGTH);
+		m_aClients[ClientID].m_IsUsingUTF8Client = false;
+		dbg_msg("Server","Client uses Latin");
+	}
 		
 	char aNameTry[MAX_NAME_LENGTH];
-	str_copy(aNameTry, pName, MAX_NAME_LENGTH);
+	str_copy(aNameTry, aNameUTF8, MAX_NAME_LENGTH);
+	
 	if(TrySetClientName(ClientID, aNameTry))
 	{
 		// auto rename
-		for(int i = 1;; i++)
+		for(int i = 1,j = 0;; i++)
 		{
-			str_format(aNameTry, MAX_NAME_LENGTH, "(%d)%s", i, pName);
+			if (i>9)
+				j = 1;
+			if (aNameUTF8[16-j]&0xF0)
+				aNameUTF8[16-j]='\0';
+			else if (aNameUTF8[17-j]&0xE0)
+				aNameUTF8[17-j]='\0';
+			else if (aNameUTF8[18-j]&0xC0)
+				aNameUTF8[18-j]='\0'; 
+			else if (aNameUTF8[19-j]&0x80)
+				aNameUTF8[19-j]='\0'; 
+				// cut of x-th char if it is utf8 and length would exceed the following chopping length (chopped by str_format)
+				// if we wouldn't do that our utf8 char consisting of maybe 2 bytes would suddenly be a 1 byte fragment
+			str_format(aNameTry, MAX_NAME_LENGTH, "(%d)%s", i, aNameUTF8);
 			if(TrySetClientName(ClientID, aNameTry) == 0)
 				break;
 		}

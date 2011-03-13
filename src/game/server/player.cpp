@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
+#include <base/utf8convert.h>
 #include <engine/shared/config.h>
 #include <engine/server.h>
 #include <engine/server/server.h>
@@ -112,8 +113,14 @@ void CPlayer::Snap(int SnappingClient)
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, m_ClientID, sizeof(CNetObj_ClientInfo)));
 	if(!pClientInfo)
 		return;
+	if (((CServer*)Server())->m_aClients[SnappingClient].m_IsUsingUTF8Client) {
+		StrToInts(&pClientInfo->m_Name0, 6, Server()->ClientName(m_ClientID));
+	}else{
+		char aLatinName[32];
+		UTF8toLatin1(aLatinName,Server()->ClientName(m_ClientID),32);
+		StrToInts(&pClientInfo->m_Name0, 6, aLatinName);
+	}
 
-	StrToInts(&pClientInfo->m_Name0, 6, Server()->ClientName(m_ClientID));
 	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;

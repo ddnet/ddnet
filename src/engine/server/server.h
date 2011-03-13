@@ -102,6 +102,8 @@ public:
 		int m_Score;
 		int m_Authed;
 		int m_AuthTries;
+
+		bool m_IsUsingUTF8Client;
 		
 		NETADDR m_Addr;
 

@@ -26,6 +26,7 @@
 #if defined(CONF_SQL)
 #include "score/sql_score.h"
 #endif
+#include <base/utf8convert.h>
 
 enum
 {
@@ -227,7 +228,6 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, Target);
 }
 
-
 void CGameContext::SendChatTarget(int To, const char *pText)
 {
 	CNetMsg_Sv_Chat Msg;
@@ -249,35 +249,84 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 		}
 	}
 
-	char aBuf[256], aText[256];
+	char aBuf[268], aText[256], aConvertedTextUTF8[512], aConvertedTextLatin[512]; 
+	// just to be safe, a little bit more, cause utf8 chars can consist of up to 4 c-chars (4 bytes vs. 1 byte)
+	bool isUTF8Text;
+	
 	str_copy(aText, pText, sizeof(aText));
+	// chat
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Team, Server()->ClientName(ChatterClientID), aText);
+	// /me chat
 	else if(ChatterClientID == -2)
 	{
 		str_format(aBuf, sizeof(aBuf), "### %s", aText);
 		str_copy(aText, aBuf, sizeof(aText));
 		ChatterClientID = -1;
 	}
+	// /say chat
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", aBuf);
 
+
+	if (str_utf8_check(aText))
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", aBuf);
+		UTF8toLatin1(aConvertedTextLatin,aText,512); // we will need this in a loop soon
+		isUTF8Text = true;
+	}
+	else
+	{
+		Latin1toUTF8(aConvertedTextUTF8,aBuf,512);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", aConvertedTextUTF8);
+		Latin1toUTF8(aConvertedTextUTF8,aText,512); // we will need this in a loop soon
+		isUTF8Text = false;
+	}
+
+		
 	if(Team == CHAT_ALL)
 	{
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = 0;
 		Msg.m_ClientID = ChatterClientID;
-		Msg.m_pMessage = aText;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+		
+		if (!str_utf8_check(aText))
+			((CServer*)Server())->m_aClients[ChatterClientID].m_IsUsingUTF8Client = false;
+		
+
+		for (int i = 0 ; i < MAX_CLIENTS; i++) 
+		{
+			if(m_apPlayers[i] != 0)//m_apPlayers[i]->GetCharacter();->CClient && m_apPlayers[i].m_State == CClient::STATE_INGAME) 
+			{
+				if (((CServer*)Server())->m_aClients[i].m_IsUsingUTF8Client || m_apPlayers[i]->m_IsUsingDDRaceClient) 
+				{
+					if (isUTF8Text) 
+						Msg.m_pMessage = aText;
+					else
+					{
+						Msg.m_pMessage = aConvertedTextUTF8;
+					}
+				}
+				else 
+				{
+					if (isUTF8Text)
+					{
+						Msg.m_pMessage = aConvertedTextLatin;
+					}
+					else
+						Msg.m_pMessage = aText;
+				}				
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+			}
+		}
 	}
+	
 	else
 	{
 		CTeamsCore * Teams = &((CGameControllerDDRace*)m_pController)->m_Teams.m_Core;
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = 1;
 		Msg.m_ClientID = ChatterClientID;
-		Msg.m_pMessage = aText;
 		
 		// pack one for the recording only
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
@@ -286,6 +335,24 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_apPlayers[i] != 0) {
+				if (((CServer*)Server())->m_aClients[i].m_IsUsingUTF8Client || m_apPlayers[i]->m_IsUsingDDRaceClient) 
+				{
+					if (isUTF8Text) 
+						Msg.m_pMessage = aText;				
+					else
+					{
+						Msg.m_pMessage = aConvertedTextUTF8;						
+					}
+				}
+				else 
+				{
+					if (isUTF8Text)
+					{
+						Msg.m_pMessage = aConvertedTextLatin;
+					}
+					else
+						Msg.m_pMessage = aText;
+				}				
 				if(Team == CHAT_SPEC) {
 					if(m_apPlayers[i]->GetTeam() == CHAT_SPEC) {
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
