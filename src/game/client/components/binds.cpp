@@ -122,12 +122,27 @@ void CBinds::SetDefaults()
 	Bind(KEY_KP_MINUS, "zoom-");
 	Bind(KEY_KP_MULTIPLY, "zoom");
 	Bind(KEY_HOME, "kill");
-	Bind(KEY_PAUSE, "rcon pause");
+	Bind(KEY_PAUSE, "say /pause");
 	Bind(KEY_UP, "+jump");
 	Bind(KEY_LEFT, "+left");
-	Bind(KEY_DOWN, "+right");
+	Bind(KEY_RIGHT, "+right");
 	Bind('[', "+prevweapon");
 	Bind(']', "+nextweapon");
+	Bind('c', "say /rank");
+	Bind('v', "say /info");
+	Bind('b', "say /top5");
+	Bind('z', "emote 12");
+	Bind('x', "emote 14");
+	Bind('h', "emote 2");
+	Bind('m', "emote 5");
+	Bind(KEY_PAGEDOWN, "cl_show_entities 0");
+	Bind(KEY_PAGEUP, "cl_show_entities 1");
+	Bind(KEY_KP0, "say /emote normal 999999");
+	Bind(KEY_KP0, "say /emote happy 999999");
+	Bind(KEY_KP0, "say /emote angry 999999");
+	Bind(KEY_KP0, "say /emote pain 999999");
+	Bind(KEY_KP0, "say /emote surprise 999999");
+	Bind(KEY_KP0, "say /emote blink 999999");
 }
 
 void CBinds::OnConsoleInit()
