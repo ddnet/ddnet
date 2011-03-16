@@ -744,6 +744,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		else
 			Console()->ExecuteLine("rcon showothers 0", 4, IConsole::CONSOLELEVEL_USER);
 	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClPredictOldHookthrough, Localize("Predict old Hook through tiles"), g_Config.m_ClPredictOldHookthrough, &Button))
+	{
+		g_Config.m_ClPredictOldHookthrough ^= 1;
+	}
 }
 
 class CLanguage

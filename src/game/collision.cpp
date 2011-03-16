@@ -11,6 +11,7 @@
 #include <game/mapitems.h>
 #include <game/layers.h>
 #include <game/collision.h>
+#include <engine/shared/config.h>
 
 CCollision::CCollision()
 {
@@ -119,7 +120,7 @@ void CCollision::Init(class CLayers *pLayers)
 				}
 
 				// DDRace tiles
-				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index<=TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 					m_pFront[i].m_Index = Index;
 			}
 		}
@@ -145,7 +146,7 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 
 			// DDRace tiles
-			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index<=TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 				m_pTiles[i].m_Index = Index;
 		}
 	}
@@ -349,12 +350,25 @@ int CCollision::IsThrough(int x, int y)
 	int Findex = 0;
 	if (m_pFront)
 		Findex = m_pFront[Ny*m_Width+Nx].m_Index;
-	if (Index == TILE_THROUGH)
-		return Index;
-	else if (Findex == TILE_THROUGH)
-		return Findex;
+	if(!g_Config.m_ClPredictOldHookthrough)
+	{
+		if (Index == TILE_THROUGH)
+			return Index;
+		if (Findex == TILE_THROUGH)
+			return Findex;
+	}
 	else
-		return 0;
+	{
+		if (Index == OLD_THROUGH1)
+			return Index;
+		if (Findex == OLD_THROUGH1)
+			return Findex;
+		if (Index == OLD_THROUGH2)
+			return Index;
+		if (Findex == OLD_THROUGH2)
+			return Findex;
+	}
+	return 0;
 }
 
 int CCollision::IsNoLaser(int x, int y)

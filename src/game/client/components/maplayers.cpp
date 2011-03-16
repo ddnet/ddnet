@@ -179,7 +179,7 @@ void CMapLayers::OnRender()
 				}
 			}			
 			
-			if(Render && !IsGameLayer && !g_Config.m_ClShowEntities || (g_Config.m_ClShowEntities && IsGameLayer))
+			if((Render && !IsGameLayer && !g_Config.m_ClShowEntities) || (g_Config.m_ClShowEntities && IsGameLayer))
 			{
 				//layershot_begin();
 				
