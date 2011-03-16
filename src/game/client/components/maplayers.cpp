@@ -128,6 +128,10 @@ void CMapLayers::OnRender()
 			CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer+l);
 			bool Render = false;
 			bool IsGameLayer = false;
+			bool IsFrontLayer = false;
+			bool IsSwitchLayer = false;
+			bool IsTeleLayer = false;
+			bool IsSpeedupLayer = false;
 			
 			if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
 			{
@@ -135,6 +139,18 @@ void CMapLayers::OnRender()
 				PassedGameLayer = 1;
 			}
 			
+			if(pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
+				IsFrontLayer = true;
+
+			if(pLayer == (CMapItemLayer*)m_pLayers->SwitchLayer())
+				IsSwitchLayer = true;
+
+			if(pLayer == (CMapItemLayer*)m_pLayers->TeleLayer())
+				IsTeleLayer = true;
+
+			if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
+				IsSpeedupLayer = true;
+
 			// skip rendering if detail layers if not wanted
 			if(pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && !IsGameLayer)
 				continue;
@@ -178,8 +194,8 @@ void CMapLayers::OnRender()
 					io_close(File);
 				}
 			}			
-			
-			if((Render && !IsGameLayer && !g_Config.m_ClShowEntities) || (g_Config.m_ClShowEntities && IsGameLayer))
+
+			if((Render && !IsGameLayer && !IsFrontLayer && !IsTeleLayer && !IsSwitchLayer && !IsSpeedupLayer && (!g_Config.m_ClShowEntities || !g_Config.m_ClDDRaceCheats)) || ((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && (IsGameLayer || IsFrontLayer || IsTeleLayer || IsSwitchLayer || IsSpeedupLayer)))
 			{
 				//layershot_begin();
 				
@@ -188,7 +204,7 @@ void CMapLayers::OnRender()
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 					if(pTMap->m_Image == -1)
 					{
-						if(!g_Config.m_ClShowEntities || !g_Config.m_ClDDRaceCheats)
+						if(!g_Config.m_ClShowEntities)
 							Graphics()->TextureSet(-1);
 						else
 							Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());

@@ -23,6 +23,10 @@ void CLayers::Init(class IKernel *pKernel)
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 	
+	m_pTeleLayer = 0;
+	m_pSpeedupLayer = 0;
+	m_pFrontLayer = 0;
+	m_pSwitchLayer = 0;
 	for(int g = 0; g < NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = GetGroup(g);
