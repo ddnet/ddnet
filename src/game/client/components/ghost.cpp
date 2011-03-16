@@ -528,7 +528,7 @@ void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData, int ClientID)
 
 void CGhost::OnConsoleInit()
 {
-	Console()->Register("gplay","", CFGFLAG_CLIENT, ConGPlay, this, "", -1);
+	Console()->Register("gplay","", CFGFLAG_CLIENT, ConGPlay, this, "", IConsole::CONSOLELEVEL_USER);
 }
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)

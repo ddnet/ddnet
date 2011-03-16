@@ -1265,17 +1265,17 @@ int CServer::Run()
 				// load map
 				if(LoadMap(g_Config.m_SvMap))
 				{
-					Console()->ExecuteLine("tune_reset", 4, -1);
-					Console()->ExecuteLine("tune gun_speed 1400", 4, -1);
-					Console()->ExecuteLine("tune shotgun_curvature 0", 4, -1);
-					Console()->ExecuteLine("tune shotgun_speed 500", 4, -1);
-					Console()->ExecuteLine("tune shotgun_speeddiff 0", 4, -1);
-					Console()->ExecuteLine("tune gun_curvature 0", 4, -1);
-					Console()->ExecuteLine("sv_hit 1",4,-1);
-					Console()->ExecuteLine("sv_npc 0",4,-1);
-					Console()->ExecuteLine("sv_phook 1",4,-1);
-					Console()->ExecuteLine("sv_endless_drag 0",4,-1);
-					Console()->ExecuteLine("sv_old_laser 0",4,-1);
+					Console()->ExecuteLine("tune_reset", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("tune gun_speed 1400", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("tune shotgun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("tune shotgun_speed 500", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("tune shotgun_speeddiff 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("tune gun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("sv_hit 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("sv_npc 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("sv_phook 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("sv_endless_drag 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("sv_old_laser 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
 					// new map loaded
 					GameServer()->OnShutdown();
 					
@@ -1596,31 +1596,31 @@ void CServer::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	
-	Console()->Register("kick", "v?t", CFGFLAG_SERVER, ConKick, this, "", 2);
-	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBan, this, "", 2);
-	Console()->Register("unban", "s", CFGFLAG_SERVER|CFGFLAG_STORE, ConUnban, this, "", 2);
-	Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_STORE, ConBans, this, "", 2);
-	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "", 1);
-	Console()->Register("shutdown", "", CFGFLAG_SERVER, ConShutdown, this, "", 3);
+	Console()->Register("kick", "v?t", CFGFLAG_SERVER, ConKick, this, "", IConsole::CONSOLELEVEL_MODERATOR);
+	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBan, this, "", IConsole::CONSOLELEVEL_MODERATOR);
+	Console()->Register("unban", "s", CFGFLAG_SERVER|CFGFLAG_STORE, ConUnban, this, "", IConsole::CONSOLELEVEL_MODERATOR);
+	Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_STORE, ConBans, this, "", IConsole::CONSOLELEVEL_MODERATOR);
+	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "", IConsole::CONSOLELEVEL_MODERATOR);
+	Console()->Register("shutdown", "", CFGFLAG_SERVER, ConShutdown, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
-	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "", 3);
-	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "", 3);
+	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	
-	Console()->Register("add_banmaster", "s", CFGFLAG_SERVER, ConAddBanmaster, this, "", 4);
-	Console()->Register("banmasters", "", CFGFLAG_SERVER, ConBanmasters, this, "", 3);
-	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "", 4);
+	Console()->Register("add_banmaster", "s", CFGFLAG_SERVER, ConAddBanmaster, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("banmasters", "", CFGFLAG_SERVER, ConBanmasters, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	
-	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "", 3);
+	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 
-	Console()->Register("login", "?s", CFGFLAG_SERVER, ConLogin, this, "Allows you access to rcon if no password is given, or changes your level if a password is given", -1);
-	Console()->Register("auth", "?s", CFGFLAG_SERVER, ConLogin, this, "Allows you access to rcon if no password is given, or changes your level if a password is given", -1);
+	Console()->Register("login", "?s", CFGFLAG_SERVER, ConLogin, this, "Allows you access to rcon if no password is given, or changes your level if a password is given", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("auth", "?s", CFGFLAG_SERVER, ConLogin, this, "Allows you access to rcon if no password is given, or changes your level if a password is given", IConsole::CONSOLELEVEL_USER);
 
-	Console()->Register("cmdlist", "?i", CFGFLAG_SERVER, ConCmdList, this, "Shows you the commands available for your remote console access. Specify the level if you want to see other level's commands", -1);
+	Console()->Register("cmdlist", "?i", CFGFLAG_SERVER, ConCmdList, this, "Shows you the commands available for your remote console access. Specify the level if you want to see other level's commands", IConsole::CONSOLELEVEL_USER);
 }	
 
 
@@ -1704,17 +1704,17 @@ int main(int argc, const char **argv) // ignore_convention
 	pServer->RegisterCommands();
 	pGameServer->OnConsoleInit();
 	
-	pConsole->ExecuteLine("tune_reset", 4, -1);
-	pConsole->ExecuteLine("tune gun_speed 1400", 4, -1);
-	pConsole->ExecuteLine("tune shotgun_curvature 0", 4, -1);
-	pConsole->ExecuteLine("tune shotgun_speed 500", 4, -1);
-	pConsole->ExecuteLine("tune shotgun_speeddiff 0", 4, -1);
-	pConsole->ExecuteLine("tune gun_curvature 0", 4, -1);
-	pConsole->ExecuteLine("sv_hit 1",4,-1);
-	pConsole->ExecuteLine("sv_npc 0",4,-1);
-	pConsole->ExecuteLine("sv_phook 1",4,-1);
-	pConsole->ExecuteLine("sv_endless_drag 0",4,-1);
-	pConsole->ExecuteLine("sv_old_laser 0",4,-1);
+	pConsole->ExecuteLine("tune_reset", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("tune gun_speed 1400", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("tune shotgun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("tune shotgun_speed 500", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("tune shotgun_speeddiff 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("tune gun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("sv_hit 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("sv_npc 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("sv_phook 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("sv_endless_drag 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("sv_old_laser 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
 	// execute autoexec file
 	pConsole->ExecuteFile("autoexec.cfg", 0, 0, 0, 0, 4);
 
@@ -1744,15 +1744,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 void CServer::SetRconLevel(int ClientID, int Level)
 {
-	if(Level < 0)
-	{
-		dbg_msg("server", "%s set to level 0. ClientID=%x ip=%d.%d.%d.%d",ClientName(ClientID),	ClientID, m_aClients[ClientID].m_Addr.ip[0], m_aClients[ClientID].m_Addr.ip[1], m_aClients[ClientID].m_Addr.ip[2], m_aClients[ClientID].m_Addr.ip[3]);
-		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-		Msg.AddInt(0);
-		SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
-		m_aClients[ClientID].m_Authed = 0;
-	}
-	else
+	Level = clamp(Level, (int)IConsole::CONSOLELEVEL_USER, (int)IConsole::CONSOLELEVEL_ADMIN);
+	if(Level > IConsole::CONSOLELEVEL_USER)
 	{
 		dbg_msg("server", "%s set to level %d. ClientID=%x ip=%d.%d.%d.%d",ClientName(ClientID), Level, ClientID, m_aClients[ClientID].m_Addr.ip[0], m_aClients[ClientID].m_Addr.ip[1], m_aClients[ClientID].m_Addr.ip[2], m_aClients[ClientID].m_Addr.ip[3]);
 		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
@@ -1763,10 +1756,10 @@ void CServer::SetRconLevel(int ClientID, int Level)
 	}
 }
 
-void CServer::CheckPass(int ClientID, const char *pPw)
+void CServer::CheckPass(int ClientID, const char *pPassword)
 {
 
-	if(pPw[0] != 0)
+	if(pPassword[0] != 0)
 	{
 		if(g_Config.m_SvRconPasswordHelper[0] == 0 &&
 			g_Config.m_SvRconPasswordModer[0] == 0 &&
@@ -1786,26 +1779,22 @@ void CServer::CheckPass(int ClientID, const char *pPw)
 				SendRconLine(ClientID, "Authentication successful. Remote console access granted.");
 				dbg_msg("server", "ClientID=%d authed", ClientID);
 			}*/
-			int level = -1;
-			if(str_comp(pPw, g_Config.m_SvRconPasswordHelper) == 0)
+			int Level = IConsole::CONSOLELEVEL_USER;
+			if(str_comp(pPassword, g_Config.m_SvRconPasswordModer) == 0)
 			{
-				level = 1;
+				Level = IConsole::CONSOLELEVEL_MODERATOR;
 			}
-			else if(str_comp(pPw, g_Config.m_SvRconPasswordModer) == 0)
+			else if(str_comp(pPassword, g_Config.m_SvRconPasswordAdmin) == 0)
 			{
-				level = 2;
+				Level = IConsole::CONSOLELEVEL_ADMIN;
 			}
-			else if(str_comp(pPw, g_Config.m_SvRconPasswordAdmin) == 0)
-			{
-				level = 3;
-			}
-			if(level != -1)
+			if(Level > IConsole::CONSOLELEVEL_USER)
 			{
 				char buf[128]="Authentication successful. Remote console access granted for ClientID=%d with level=%d";
-				SetRconLevel(ClientID,level);
-				str_format(buf,sizeof(buf),buf,ClientID,level);
+				SetRconLevel(ClientID, Level);
+				str_format(buf,sizeof(buf),buf,ClientID,Level);
 				SendRconLine(ClientID, buf);
-				dbg_msg("server", "'%s' ClientID=%d authed with Level=%d", ClientName(ClientID), ClientID, level);
+				dbg_msg("server", "'%s' ClientID=%d authed with Level=%d", ClientName(ClientID), ClientID, Level);
 			}
 			else if(g_Config.m_SvRconMaxTries)
 			{
@@ -1840,18 +1829,18 @@ void CServer::CheckPass(int ClientID, const char *pPw)
 	}*/
 	else
 	{
-		char buf[128]="Authentication successful. Remote console access granted for ClientID=%d with level=%d";
+		char aBuf[128]="Authentication successful. Remote console access granted for ClientID=%d with level=%d";
 		SetRconLevel(ClientID,0);
-		str_format(buf,sizeof(buf),buf,ClientID,0);
-		SendRconLine(ClientID, buf);
+		str_format(aBuf, sizeof(aBuf), aBuf, ClientID, 0);
+		SendRconLine(ClientID, aBuf);
 		dbg_msg("server", "'%s' ClientID=%d authed with Level=%d", ClientName(ClientID), ClientID, 0);
 	}
 }
 
 
-char *CServer::GetAnnouncementLine(char const *FileName)
+char *CServer::GetAnnouncementLine(char const *pFileName)
 {
-	IOHANDLE File = m_pStorage->OpenFile(FileName, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
 	{
 		std::vector<char*> v;

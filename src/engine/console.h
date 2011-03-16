@@ -77,6 +77,15 @@ public:
 
 	virtual void RegisterCompareClientsCallback(FCompareClientsCallback pfnCallback, void *pUserData) = 0;
 	virtual void RegisterClientOnlineCallback(FClientOnlineCallback pfnCallback, void *pUserData) = 0;
+
+	//DDRace
+	enum
+	{
+		CONSOLELEVEL_USER=0,
+		CONSOLELEVEL_MODERATOR,
+		CONSOLELEVEL_ADMIN,
+		CONSOLELEVEL_SUPERADMIN
+	};
 };
 
 extern IConsole *CreateConsole(int FlagMask);

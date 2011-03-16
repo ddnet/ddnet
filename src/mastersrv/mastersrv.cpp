@@ -330,7 +330,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IStorage *pStorage = CreateStorage("Teeworlds", argc, argv);
 
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
-	m_pConsole->Register("ban", "s", CFGFLAG_MASTER, ConAddBan, 0, "Ban IP from mastersrv", 0);
+	m_pConsole->Register("ban", "s", CFGFLAG_MASTER, ConAddBan, 0, "Ban IP from mastersrv", IConsole::CONSOLELEVEL_USER);
 	bool RegisterFail = !pKernel->RegisterInterface(pStorage);
 	RegisterFail |= !pKernel->RegisterInterface(m_pConsole);
 

@@ -505,7 +505,7 @@ void CGameContext::OnTick()
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				Console()->ExecuteLine(m_aVoteCommand, 4, -1, CServer::SendRconLineAuthed, Server(), SendChatResponseAll, this);
+				Console()->ExecuteLine(m_aVoteCommand, IConsole::CONSOLELEVEL_SUPERADMIN, -1, CServer::SendRconLineAuthed, Server(), SendChatResponseAll, this);
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 			
@@ -1291,20 +1291,20 @@ void CGameContext::OnConsoleInit()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "", 4);
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "", 3);
-	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "", 3);
+	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
-	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "", 3);
-	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "", 3);
-	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "", 2);
-	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "", 3);
-	Console()->Register("set_team", "vi", CFGFLAG_SERVER, ConSetTeam, this, "", 2);
-	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "", 2);
+	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("set_team", "vi", CFGFLAG_SERVER, ConSetTeam, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
-	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "", 4);
-	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", 3);
-	Console()->Register("vote", "s?s", CFGFLAG_SERVER, ConVote, this, "Force the vote to yes or no?, Make the forcing of the vote private?", 3);
+	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("vote", "s?s", CFGFLAG_SERVER, ConVote, this, "Force the vote to yes or no?, Make the forcing of the vote private?", IConsole::CONSOLELEVEL_ADMIN);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, level) m_pConsole->Register(name, params, flags, callback, userdata, help, level);
 #include "game/ddracecommands.h"

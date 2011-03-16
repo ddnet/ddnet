@@ -54,9 +54,9 @@ void CCamera::OnRender()
 
 void CCamera::OnConsoleInit()
 {
-	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase", 0);
-	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease", 0);
-	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset", 0);
+	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset", IConsole::CONSOLELEVEL_USER);
 }
 
 const float ZoomStep = 0.75f;

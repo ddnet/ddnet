@@ -87,10 +87,10 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData, int ClientI
 
 void CChat::OnConsoleInit()
 {
-	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat", 0);
-	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat", 0);
-	Console()->Register("chat", "s", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode", 0);
-	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat", 0);
+	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("chat", "s", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat", IConsole::CONSOLELEVEL_USER);
 }
 
 bool CChat::OnInput(IInput::CEvent e)

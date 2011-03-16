@@ -740,9 +740,9 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowOthers ^= 1;
 		if(g_Config.m_ClShowOthers)
-			Console()->ExecuteLine("rcon showothers 1", 4, -1);
+			Console()->ExecuteLine("rcon showothers 1", 4, IConsole::CONSOLELEVEL_USER);
 		else
-			Console()->ExecuteLine("rcon showothers 0", 4, -1);
+			Console()->ExecuteLine("rcon showothers 0", 4, IConsole::CONSOLELEVEL_USER);
 	}
 }
 

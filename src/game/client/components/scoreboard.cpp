@@ -43,7 +43,7 @@ void CScoreboard::OnRelease()
 
 void CScoreboard::OnConsoleInit()
 {
-	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard", 0);
+	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard", IConsole::CONSOLELEVEL_USER);
 }
 
 void CScoreboard::RenderGoals(float x, float y, float w)

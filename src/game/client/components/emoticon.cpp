@@ -30,8 +30,8 @@ void CEmoticon::ConEmote(IConsole::IResult *pResult, void *pUserData, int Client
 
 void CEmoticon::OnConsoleInit()
 {
-	Console()->Register("+emote", "", CFGFLAG_CLIENT, ConKeyEmoticon, this, "Open emote selector", 0);
-	Console()->Register("emote", "i", CFGFLAG_CLIENT, ConEmote, this, "Use emote", 0);
+	Console()->Register("+emote", "", CFGFLAG_CLIENT, ConKeyEmoticon, this, "Open emote selector", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("emote", "i", CFGFLAG_CLIENT, ConEmote, this, "Use emote", IConsole::CONSOLELEVEL_USER);
 }
 
 void CEmoticon::OnReset()

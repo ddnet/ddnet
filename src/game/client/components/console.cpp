@@ -75,7 +75,7 @@ void CGameConsole::CInstance::ClearHistory()
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
-		m_pGameConsole->m_pConsole->ExecuteLine(pLine, 4, -1);
+		m_pGameConsole->m_pConsole->ExecuteLine(pLine, 4, IConsole::CONSOLELEVEL_USER);
 	else
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
@@ -669,12 +669,12 @@ void CGameConsole::OnConsoleInit()
 	//
 	Console()->RegisterPrintCallback(ClientConsolePrintCallback, this);
 	
-	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console", 0);
-	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console", 0);
-	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console", 0);
-	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console", 0);
-	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console", 0);
-	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console", 0);
+	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console", IConsole::CONSOLELEVEL_USER);
 }
 
 void CGameConsole::OnStateChange(int NewState, int OldState)
