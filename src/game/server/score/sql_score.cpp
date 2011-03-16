@@ -6,6 +6,7 @@
 #include "../entities/character.h"
 #include "../gamemodes/DDRace.h"
 #include "sql_score.h"
+#include <engine/shared/console.h>
 
 static LOCK gs_SqlLock = 0;
 
@@ -284,6 +285,9 @@ void CSqlScore::SaveScoreThread(void *pUser)
 
 void CSqlScore::SaveScore(int ClientID, float Time, CCharacter *pChar)
 {
+	CConsole* pCon = (CConsole*)GameServer()->Console();
+	if(pCon->m_Cheated)
+		return;
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), sizeof(Tmp->m_aName));

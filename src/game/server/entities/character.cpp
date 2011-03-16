@@ -953,7 +953,7 @@ bool CCharacter::SameTeam(int ClientID)
 
 void CCharacter::OnFinish()
 {
-	//TODO: this ugly
+	//TODO:DDRace:btd: this ugly
 	float time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 	if(time < 0.000001f) return;
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());

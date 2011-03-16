@@ -552,21 +552,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData, int 
 		float HookTemp;
 		pSelf->m_Tuning.Get("player_collision", &ColTemp);
 		pSelf->m_Tuning.Get("player_hooking", &HookTemp);
-		if(str_comp(pArg, "cheats") == 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s%s",
-					g_Config.m_SvCheats?"People can cheat":"People can't cheat",
-					(g_Config.m_SvCheats)?(g_Config.m_SvCheatTime)?" with time":" without time":"");
-			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
-			if(g_Config.m_SvCheats)
-			{
-				str_format(aBuf, sizeof(aBuf), "%s", g_Config.m_SvEndlessSuperHook?"super can hook you forever":"super can only hook you for limited time");
-				pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
-				str_format(aBuf, sizeof(aBuf), "%s", g_Config.m_SvTimer?"admins have the power to control your time":"admins have no power over your time");
-				pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
-			}
-		}
-		else if(str_comp(pArg, "teams") == 0)
+		if(str_comp(pArg, "teams") == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "%s %s", g_Config.m_SvTeam == 1 ? "Teams are available on this server" : !g_Config.m_SvTeam ? "Teams are not available on this server" : "You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */"and if you die in a team only you die");
 			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);

@@ -965,11 +965,9 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 	else if(g_Config.m_SvTeam == 2)
 		i |= SERVER_FLAG_TEAMS2;
 	/*if(g_Config.m_SvTeamStrict)
-		i |= SERVER_FLAG_STRICTTEAMS;*/
+		i |= SERVER_FLAG_STRICTTEAMS;
 	if(g_Config.m_SvCheats)
 		i |= SERVER_FLAG_CHEATS;
-	if(g_Config.m_SvPauseable)
-		i |= SERVER_FLAG_PAUSE;
 	if(g_Config.m_SvEndlessSuperHook)
 		i |= SERVER_FLAG_ENDLESSSUPERHOOKING;
 	if(g_Config.m_SvTimer)
@@ -977,7 +975,9 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 	if(g_Config.m_SvCheatTime && g_Config.m_SvCheats)
 		i |= SERVER_FLAG_CHEATTIME;
 	if(g_Config.m_SvPauseTime && g_Config.m_SvPauseable)
-		i |= SERVER_FLAG_PAUSETIME;
+		i |= SERVER_FLAG_PAUSETIME;*/
+	if(g_Config.m_SvPauseable)
+		i |= SERVER_FLAG_PAUSE;
 	if(GameServer()->PlayerCollision())
 		i |= SERVER_FLAG_PLAYERCOLLISION;
 	if(GameServer()->PlayerHooking())

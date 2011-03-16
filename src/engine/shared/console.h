@@ -201,6 +201,7 @@ public:
 
 	virtual void Print(int Level, const char *pFrom, const char *pStr);
 	virtual void PrintResponse(int Level, const char *pFrom, const char *pStr);
+	bool m_Cheated;
 };
 
 #endif

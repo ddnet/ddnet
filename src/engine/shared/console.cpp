@@ -335,7 +335,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int Client
 						dbg_msg("server", "helper tried rcon command ('%s') on others without permission. ClientID=%d", pCommand->m_pName, ClientID);
 						ReleaseAlternativePrintResponseCallback();
 					}
-					else if(!g_Config.m_SvCheats && (pCommand->m_Flags & CMDFLAG_CHEAT))
+					else if((g_Config.m_SvCheats && (g_Config.m_SvRegister || !g_Config.m_Password[0])) && (pCommand->m_Flags & CMDFLAG_CHEAT))
 					{
 						RegisterAlternativePrintResponseCallback(pfnAlternativePrintResponseCallback, pResponseUserData);
 						PrintResponse(OUTPUT_LEVEL_STANDARD, "Console", "Cheats are not available on this server");
@@ -351,6 +351,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int Client
 					}
 					else
 					{
+						if(pCommand->m_Flags & CMDFLAG_CHEAT)
+							m_Cheated = true;
 						if (Result.HasVictim())
 						{
 							if(Result.GetVictim() == CResult::VICTIM_ALL)
@@ -663,6 +665,7 @@ CConsole::CConsole(int FlagMask)
 
 	#undef MACRO_CONFIG_INT 
 	#undef MACRO_CONFIG_STR 	
+	m_Cheated = false;
 }
 
 void CConsole::ParseArguments(int NumArgs, const char **ppArguments)

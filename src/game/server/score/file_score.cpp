@@ -8,6 +8,7 @@
 #include <string.h>
 #include "../gamemodes/DDRace.h"
 #include "file_score.h"
+#include <engine/shared/console.h>
 
 static LOCK gs_ScoreLock = 0;
 
@@ -195,7 +196,9 @@ void CFileScore::LoadScore(int ClientID)
 
 void CFileScore::SaveScore(int ClientID, float Time, CCharacter *pChar)
 {
-	UpdatePlayer(ClientID, Time, pChar->m_CpCurrent);
+	CConsole* pCon = (CConsole*)GameServer()->Console();
+	if(!pCon->m_Cheated)
+		UpdatePlayer(ClientID, Time, pChar->m_CpCurrent);
 }
 
 void CFileScore::ShowTop5(int ClientID, int Debut)
