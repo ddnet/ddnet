@@ -1,6 +1,5 @@
 #include "teams.h"
 #include <engine/shared/config.h>
-#include <engine/server/server.h>
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) : m_pGameContext(pGameContext)
 {
@@ -16,99 +15,61 @@ void CGameTeams::Reset()
 		m_TeeFinished[i] = false;
 		m_MembersCount[i] = 0;
 		m_LastChat[i] = 0;
-		m_TeamLeader[i] = -1;
-		m_TeeJoinTick[i] = -1;
-		m_TeamStrict[i] = g_Config.m_SvTeamStrict;
-		m_TeePassedStart[i] = false;
 	}
 }
 
 void CGameTeams::OnCharacterStart(int ClientID)
 {
 	int Tick = Server()->Tick();
-	int Team = m_Core.Team(ClientID);
-	CCharacter* StartingChar = Character(ClientID);
-	m_TeePassedStart[ClientID] = true;
-	if(!StartingChar)
+	CCharacter* pStartingChar = Character(ClientID);
+	if(!pStartingChar)
 		return;
-	if(StartingChar->m_DDRaceState == DDRACE_FINISHED)
-		StartingChar->m_DDRaceState = DDRACE_NONE;
-	if(Team == TEAM_FLOCK || Team == TEAM_SUPER)
+	if(pStartingChar->m_DDRaceState == DDRACE_FINISHED)
+		pStartingChar->m_DDRaceState = DDRACE_NONE;
+	if(m_Core.Team(ClientID) == TEAM_FLOCK || m_Core.Team(ClientID) == TEAM_SUPER)
 	{
-		StartingChar->m_DDRaceState = DDRACE_STARTED;
-		StartingChar->m_StartTime = Tick;
-		StartingChar->m_RefreshTime = Tick;
-	}
-	else if(Count(Team) == 1)
-	{
-		if(m_TeamState[Team] < TEAMSTATE_STARTED)
-		{
-			ChangeTeamState(Team, TEAMSTATE_STARTED);
-			for(int i = 0; i < MAX_CLIENTS; ++i)
-			{
-				if(Team == m_Core.Team(i))
-				{
-					CCharacter* pChar = Character(i);
-					if(pChar && pChar->IsAlive())
-					{
-						pChar->m_DDRaceState = DDRACE_STARTED;
-						pChar->m_StartTime = Tick;
-						pChar->m_RefreshTime = Tick;
-					}
-				}
-			}
-		}
+		pStartingChar->m_DDRaceState = DDRACE_STARTED;
+		pStartingChar->m_StartTime = Tick;
+		pStartingChar->m_RefreshTime = Tick;
 	}
 	else
 	{
 		bool Waiting = false;
-		if(Count(Team) > 1)
-			for(int i = 0; i < MAX_CLIENTS; ++i)
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(m_Core.Team(ClientID) == m_Core.Team(i))
 			{
-				if(i != ClientID && Team == m_Core.Team(i))
+				CCharacter* pChar = Character(i);
+				if(pChar->m_DDRaceState == DDRACE_FINISHED)
 				{
-					CCharacter* pChar = Character(i);
-					if(pChar && pChar->IsAlive() && pChar->m_DDRaceState == DDRACE_FINISHED)
+					Waiting = true;
+					if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
 					{
-						Waiting = true;
-						if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
-						{
-							char aBuf[128];
-							str_format(aBuf, sizeof(aBuf), "%s has finished and didn't go through start yet, wait for him or join another team.", Server()->ClientName(i));
-							GameServer()->SendChatTarget(ClientID, aBuf);
-							m_LastChat[ClientID] = Tick;
-						}
-						if(m_LastChat[i] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
-						{
-							char aBuf[128];
-							str_format(aBuf, sizeof(aBuf), "%s wants to start a new round, kill or walk to start.", Server()->ClientName(ClientID));
-							GameServer()->SendChatTarget(i, aBuf);
-							m_LastChat[i] = Tick;
-						}
+						char aBuf[128];
+						str_format(aBuf, sizeof(aBuf), "%s has finished and didn't go through start yet, wait for him or join another team.", Server()->ClientName(i));
+						GameServer()->SendChatTarget(ClientID, aBuf);
+						m_LastChat[ClientID] = Tick;
 					}
-					else if(pChar && pChar->IsAlive() && pChar->m_DDRaceState == DDRACE_STARTED)
+					if(m_LastChat[i] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
 					{
-						Waiting = true;
-						if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
-						{
-							char aBuf[128];
-							str_format(aBuf, sizeof(aBuf), "%s has started, wait for him, ask him to kill or join another team.", Server()->ClientName(i));
-							GameServer()->SendChatTarget(ClientID, aBuf);
-							m_LastChat[ClientID] = Tick;
-						}
+						char aBuf[128];
+						str_format(aBuf, sizeof(aBuf), "%s wants to start a new round, kill or walk to start.", Server()->ClientName(ClientID));
+						GameServer()->SendChatTarget(i, aBuf);
+						m_LastChat[i] = Tick;
 					}
 				}
+			}
 		}
 
-		if(m_TeamState[Team] < TEAMSTATE_STARTED && !Waiting)
+		if(m_TeamState[m_Core.Team(ClientID)] <= TEAMSTATE_CLOSED && !Waiting)
 		{
-			ChangeTeamState(Team, TEAMSTATE_STARTED);
+			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_STARTED);
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(Team == m_Core.Team(i))
+				if(m_Core.Team(ClientID) == m_Core.Team(i))
 				{
 					CCharacter* pChar = Character(i);
-					if(pChar && pChar->IsAlive())
+					if(pChar)
 					{
 						pChar->m_DDRaceState = DDRACE_STARTED;
 						pChar->m_StartTime = Tick;
@@ -122,201 +83,87 @@ void CGameTeams::OnCharacterStart(int ClientID)
 
 void CGameTeams::OnCharacterFinish(int ClientID)
 {
-	int Team = m_Core.Team(ClientID);
-	if(Team == TEAM_FLOCK || Team == TEAM_SUPER)
+	if(m_Core.Team(ClientID) == TEAM_FLOCK || m_Core.Team(ClientID) == TEAM_SUPER)
 	{
 		Character(ClientID)->OnFinish();
-	}
-	else if(Count(Team) == 1)
-	{
-		m_TeeFinished[ClientID] = true;
-		if(TeamFinished(Team))
-		{
-			ChangeTeamState(Team, TEAMSTATE_OPEN);
-			Character(ClientID)->OnFinish();
-			m_TeeFinished[ClientID] = false;
-		}
 	}
 	else
 	{
 		m_TeeFinished[ClientID] = true;
-		if(TeamFinished(Team))
+		if(TeamFinished(m_Core.Team(ClientID)))
 		{
-			ChangeTeamState(Team, TEAMSTATE_OPEN);
+			//ChangeTeamState(m_Core.Team(id), TEAMSTATE_FINISHED);//TODO: Make it better
+			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_OPEN);
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(Team == m_Core.Team(i))
+				if(m_Core.Team(ClientID) == m_Core.Team(i))
 				{
-					CCharacter* pChar = Character(i);
-					if(pChar != 0 && pChar->m_DDRaceState == DDRACE_STARTED)
+					CCharacter * pChar = Character(i);
+					if(pChar != 0)
 					{
 						pChar->OnFinish();
 						m_TeeFinished[i] = false;
 					}
 				}
 			}
+			
 		}
 	}
 }
 
-void CGameTeams::OnCharacterDeath(int ClientID)
+bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 {
-	int OldTeam = m_Core.Team(ClientID);
-	// int Team = TEAM_FLOCK;
-	m_TeePassedStart[ClientID] = false;
-	if(m_TeamStrict[OldTeam] && OldTeam != TEAM_FLOCK && OldTeam != TEAM_SUPER)
-	{
-		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-		{
-			if(OldTeam == m_Core.Team(LoopClientID))
-			{
-				CCharacter* pChar = Character(LoopClientID);
-				if(pChar)
-					pChar->Die(ClientID, WEAPON_SELF);
-			}
-		}
-		ChangeTeamState(OldTeam, TEAMSTATE_OPEN);
-	}
-	// If teams are sticky, stay in the same team
-	if((!g_Config.m_SvStickyTeams && OldTeam != TEAM_FLOCK) || OldTeam == TEAM_SUPER)
-		SetForceCharacterTeam(ClientID, TEAM_FLOCK);
-	// Else check if the team state needs changing
-	else if(OldTeam != TEAM_FLOCK && OldTeam != TEAM_SUPER)
-	{
-		if(Count(OldTeam) > 1)
-		{
-			bool Started = false;
-			for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-			{
-				if(m_Core.Team(LoopClientID) == OldTeam)
-					if(Character(LoopClientID) && Character(LoopClientID)->m_DDRaceState == DDRACE_STARTED)
-						Started = true;
-			}
-		}
-		else if(Count(OldTeam) == 1)
-		{
-			m_TeamState[OldTeam] = TEAMSTATE_OPEN;
-		}
-		else if(Count(OldTeam) < 0)
-			dbg_msg("Teams","Please report if you saw this!");
-	}
-
-	m_TeeFinished[ClientID] = false;
-}
-
-int CGameTeams::SetCharacterTeam(int ClientID, int Team)
-{
-	// Check on wrong parameters. +1 for TEAM_SUPER
+	//Check on wrong parameters. +1 for TEAM_SUPER
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || Team < 0 || Team >= MAX_CLIENTS + 1)
-		return ERROR_WRONG_PARAMS;
-	// You can join to TEAM_SUPER at any time, but any other group you cannot if it started
-	if(Team != TEAM_SUPER && m_TeamState[Team] == TEAMSTATE_STARTED)
-		return ERROR_CLOSED;
-	// No need to switch team if you there
+		return false;
+	//You can join to TEAM_SUPER at any time, but any other group you cannot if it started
+	if(Team != TEAM_SUPER && m_TeamState[Team] >= TEAMSTATE_CLOSED)
+		return false;
+	//No need to switch team if you there
 	if(m_Core.Team(ClientID) == Team)
-		return ERROR_ALREADY_THERE;
-	// You cannot be in TEAM_SUPER if you not super
-	if(Team == TEAM_SUPER && !Character(ClientID)->m_Super)
-		return ERROR_NOT_SUPER;
-	// If you begin race
-	if(Character(ClientID)->m_DDRaceState != DDRACE_NONE && Team != TEAM_SUPER)
-		return ERROR_STARTED;
-	// If he is past the start, don't let him change teams
-	if(m_TeePassedStart[ClientID])
-		return ERROR_PASSEDSTART;
+		return false;
+	//You cannot be in TEAM_SUPER if you not super
+	if(Team == TEAM_SUPER && !Character(ClientID)->m_Super) return false;
+	//if you begin race
+	if(Character(ClientID)->m_DDRaceState != DDRACE_NONE)
+	{
+		//you will be killed if you try to join FLOCK
+		if(Team == TEAM_FLOCK && m_Core.Team(ClientID) != TEAM_FLOCK)
+			Character(ClientID)->GetPlayer()->KillCharacter(WEAPON_GAME);
+		else if(Team != TEAM_SUPER)
+			return false;
+	}
 	SetForceCharacterTeam(ClientID, Team);
 	
-	return 0;
+	
+	//GameServer()->CreatePlayerSpawn(Character(id)->m_Core.m_Pos, TeamMask());
+	return true;
 }
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
-	char aBuf[64];
-	CServer* pServ = (CServer*)Server();
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	m_TeeFinished[ClientID] = false;
-	int OldTeam = m_Core.Team(ClientID);
-	// If the old team is not Flock nor Super and it's state is not empty
-	if(OldTeam != TEAM_FLOCK && OldTeam != TEAM_SUPER && m_TeamState[OldTeam] != TEAMSTATE_EMPTY)
+	if(m_Core.Team(ClientID) != TEAM_FLOCK 
+		&& m_Core.Team(ClientID) != TEAM_SUPER 
+		&& m_TeamState[m_Core.Team(ClientID)] != TEAMSTATE_EMPTY)
 	{
 		bool NoOneInOldTeam = true;
-		// Make sure it's not empty
 		for(int i = 0; i < MAX_CLIENTS; ++i)
-			if(i != ClientID && OldTeam == m_Core.Team(i))
+			if(i != ClientID && m_Core.Team(ClientID) == m_Core.Team(i))
 			{
 				NoOneInOldTeam = false;//all good exists someone in old team
 				break;
-			}
-		// If it's empty set it's state to empty
+			} 
 		if(NoOneInOldTeam)
-			m_TeamState[OldTeam] = TEAMSTATE_EMPTY;
+			m_TeamState[m_Core.Team(ClientID)] = TEAMSTATE_EMPTY;
 	}
-
-	m_MembersCount[OldTeam]--;
+	if(Count(m_Core.Team(ClientID)) > 0) m_MembersCount[m_Core.Team(ClientID)]--;
 	m_Core.Team(ClientID, Team);
-	
-	// If The new team is not Super
-	if(Team != TEAM_SUPER)
-	{
-		// Announce the player joining the team
-		str_format(aBuf, sizeof(aBuf), "\'%s\' joined team %d.", pServ->ClientName(pPlayer->GetCID()), Team);
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-	}
-
-	// If the new team has a leader and it's not team flock nor super, keep record of when the tee joined
-	if(GetTeamLeader(Team) != -1 && Team != TEAM_FLOCK && Team != TEAM_SUPER)
-		m_TeeJoinTick[ClientID] = Server()->Tick();
-	else
-		m_TeeJoinTick[ClientID] = 0;
-
-	if(Team != TEAM_SUPER)
-		m_MembersCount[Team]++;
-
+	if(m_Core.Team(ClientID) != TEAM_SUPER) m_MembersCount[m_Core.Team(ClientID)]++;
 	if(Team != TEAM_SUPER && m_TeamState[Team] == TEAMSTATE_EMPTY)
 		ChangeTeamState(Team, TEAMSTATE_OPEN);
-
-	// If the player leaving the Old Team is Team Leader
-	if(OldTeam != TEAM_FLOCK && OldTeam != TEAM_SUPER && ClientID == GetTeamLeader(OldTeam))
-	{
-		// And there are more than one in the team
-		if(Count(OldTeam) > 1)
-		{
-			int FirstJoinedID = -1;
-			int Tick = Server()->Tick();
-			//Check who joined first
-			for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-				if(m_Core.Team(LoopClientID) == OldTeam)
-					if(m_TeeJoinTick[LoopClientID] < Tick)
-					{
-						FirstJoinedID = LoopClientID;
-						Tick = m_TeeJoinTick[LoopClientID];
-					}
-			// Make him leader
-			if(FirstJoinedID != -1)
-				SetTeamLeader(OldTeam, FirstJoinedID);
-		}
-		// Else if there is 1 in the team
-		else if(Count(OldTeam))
-		{
-			for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-				if(m_Core.Team(LoopClientID) == OldTeam)
-				{
-					// Make him leader
-					SetTeamLeader(OldTeam, LoopClientID);
-					break;
-				}
-		}
-		else
-		{
-			// No team leader atm.
-			SetTeamLeader(OldTeam, -1);
-			m_TeamStrict[OldTeam] = g_Config.m_SvTeamStrict;
-		}
-	}
-
 	dbg_msg1("Teams", "Id = %d Team = %d", ClientID, Team);
-
-	// Send the Teams state to guys with DDRace Client
+	
 	for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 	{
 		if(Character(LoopClientID) && Character(LoopClientID)->GetPlayer()->m_IsUsingDDRaceClient)
@@ -331,15 +178,16 @@ int CGameTeams::Count(int Team) const
 	return m_MembersCount[Team];
 }
 
+void CGameTeams::ChangeTeamState(int Team, int State)
+{
+	m_TeamState[Team] = State;
+}
+
 bool CGameTeams::TeamFinished(int Team)
 {
 	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		CCharacter *pChar = (GameServer()->m_apPlayers[i]) ? GameServer()->m_apPlayers[i]->GetCharacter() : 0;
-		if(pChar)
-			if(m_Core.Team(i) == Team && (!m_TeeFinished[i] && pChar->m_DDRaceState == DDRACE_STARTED))
-				return false;
-	}
+		if(m_Core.Team(i) == Team && !m_TeeFinished[i])
+			return false;
 	return true;
 }
 
@@ -377,38 +225,4 @@ void CGameTeams::SendTeamsState(int ClientID)
 	
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	
-}
-
-void CGameTeams::SetTeamLeader(int Team, int ClientID)
-{
-	if(Team == TEAM_FLOCK || Team == TEAM_SUPER)
-		return;
-	m_TeamLeader[Team] = ClientID;
-	if(ClientID == -1)
-		return;
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "\'%s\' is now the team %d leader.", Server()->ClientName(ClientID), Team);
-	if(Count(Team) > 1)
-		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-			if(LoopClientID != ClientID)
-				if(m_Core.Team(LoopClientID) == Team)
-					GameServer()->SendChatTarget(LoopClientID, aBuf);
-
-	str_format(aBuf, sizeof(aBuf), "You are now the team %d leader.", Team);
-	GameServer()->SendChatTarget(ClientID, aBuf);
-}
-
-void CGameTeams::ToggleStrictness(int Team)
-{
-	m_TeamStrict[Team] = !m_TeamStrict[Team];
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "\'%s\' Toggled Team Strictness to %d.", Server()->ClientName(m_TeamLeader[Team]), m_TeamStrict[Team]);
-	if(Count(Team) > 1)
-	{
-		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-			if(m_Core.Team(LoopClientID) == Team)
-				GameServer()->SendChatTarget(LoopClientID, aBuf);
-	}
-	else
-		GameServer()->SendChatTarget(m_TeamLeader[Team], aBuf);
 }

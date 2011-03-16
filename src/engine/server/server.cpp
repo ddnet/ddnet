@@ -964,8 +964,8 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token)
 		i |= SERVER_FLAG_TEAMS1;
 	else if(g_Config.m_SvTeam == 2)
 		i |= SERVER_FLAG_TEAMS2;
-	if(g_Config.m_SvTeamStrict)
-		i |= SERVER_FLAG_STRICTTEAMS;
+	/*if(g_Config.m_SvTeamStrict)
+		i |= SERVER_FLAG_STRICTTEAMS;*/
 	if(g_Config.m_SvCheats)
 		i |= SERVER_FLAG_CHEATS;
 	if(g_Config.m_SvPauseable)

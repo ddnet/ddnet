@@ -57,11 +57,6 @@ CONSOLE_COMMAND("team", "?i", CFGFLAG_SERVER, ConJoinTeam, this, "Lets you join 
 CONSOLE_COMMAND("top5", "?i", CFGFLAG_SERVER, ConTop5, this, "Shows five ranks of the ladder beginning with rank i (1 by default)", -1)
 CONSOLE_COMMAND("showothers", "?i", CFGFLAG_SERVER, ConShowOthers, this, "Whether to showplayers from other teams or not (off by default), optional i = 0 for off else for on", -1)
 
-CONSOLE_COMMAND("ask", "s", CFGFLAG_SERVER, ConAsk, this, "Ask to join a player in a team or to start one with him the asker is the leader if the player is not already in a team", -1)
-CONSOLE_COMMAND("yes", "", CFGFLAG_SERVER, ConYes, this, "Reply yes", -1)
-CONSOLE_COMMAND("no", "", CFGFLAG_SERVER, ConNo, this, "Reply no", -1)
-CONSOLE_COMMAND("strict", "", CFGFLAG_SERVER, ConToggleStrict, this, "Toggle Strictness", -1)
-CONSOLE_COMMAND("invite", "s", CFGFLAG_SERVER, ConInvite, this, "Invite a player to your team (You must be the leader)", -1)
 CONSOLE_COMMAND("mute", "", CFGFLAG_SERVER, ConMute, this, "", 2);
 CONSOLE_COMMAND("muteid", "vi", CFGFLAG_SERVER, ConMuteID, this, "", 2);
 CONSOLE_COMMAND("muteip", "si", CFGFLAG_SERVER, ConMuteIP, this, "", 2);
