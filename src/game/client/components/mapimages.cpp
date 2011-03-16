@@ -11,6 +11,7 @@
 CMapImages::CMapImages()
 {
 	m_Count = 0;
+	m_EntitiesTextures = -1;
 }
 
 void CMapImages::OnMapLoad()
@@ -50,3 +51,13 @@ void CMapImages::OnMapLoad()
 	}
 }
 
+int CMapImages::GetEntities()
+{
+	if(m_EntitiesTextures == -1)
+	{
+		m_EntitiesTextures = Graphics()->LoadTexture("editor/entities_clear.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		if(m_EntitiesTextures == -1)
+			m_EntitiesTextures = Graphics()->LoadTexture("editor/entities.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	}
+	return m_EntitiesTextures;
+}

@@ -220,7 +220,7 @@ public:
 	class CScoreboard *m_pScoreboard;
 
 	//DDRace
-	//TODO: This is ugly
+	//TODO:DDRace: This is ugly
 	class CRaceDemo *m_pRaceDemo;
 	class CGhost *m_pGhost;
 };

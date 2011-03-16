@@ -15,6 +15,11 @@ public:
 	int Num() const { return m_Count; }
 
 	virtual void OnMapLoad();
+
+	//DDRace
+	int GetEntities();
+private:
+	int m_EntitiesTextures;
 };
 
 #endif
