@@ -348,7 +348,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 	if(m_pWorld/* && m_pWorld->m_Tuning.m_PlayerCollision*/)
-	if(m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision)
+	//if(m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
