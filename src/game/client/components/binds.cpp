@@ -138,11 +138,11 @@ void CBinds::SetDefaults()
 	Bind(KEY_PAGEDOWN, "cl_show_entities 0");
 	Bind(KEY_PAGEUP, "cl_show_entities 1");
 	Bind(KEY_KP0, "say /emote normal 999999");
-	Bind(KEY_KP0, "say /emote happy 999999");
-	Bind(KEY_KP0, "say /emote angry 999999");
-	Bind(KEY_KP0, "say /emote pain 999999");
-	Bind(KEY_KP0, "say /emote surprise 999999");
-	Bind(KEY_KP0, "say /emote blink 999999");
+	Bind(KEY_KP1, "say /emote happy 999999");
+	Bind(KEY_KP2, "say /emote angry 999999");
+	Bind(KEY_KP3, "say /emote pain 999999");
+	Bind(KEY_KP4, "say /emote surprise 999999");
+	Bind(KEY_KP5, "say /emote blink 999999");
 }
 
 void CBinds::OnConsoleInit()
