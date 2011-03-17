@@ -505,7 +505,7 @@ void CGameContext::OnTick()
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				Console()->ExecuteLine(m_aVoteCommand, IConsole::CONSOLELEVEL_SUPERADMIN, -1, CServer::SendRconLineAuthed, Server(), SendChatResponseAll, this);
+				Console()->ExecuteLine(m_aVoteCommand, IConsole::CONSOLELEVEL_CONFIG, -1, CServer::SendRconLineAuthed, Server(), SendChatResponseAll, this);
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 			

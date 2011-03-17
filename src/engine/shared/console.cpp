@@ -335,10 +335,10 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int Client
 						dbg_msg("server", "helper tried rcon command ('%s') on others without permission. ClientID=%d", pCommand->m_pName, ClientID);
 						ReleaseAlternativePrintResponseCallback();
 					}
-					else if((g_Config.m_SvCheats && (g_Config.m_SvRegister || !g_Config.m_Password[0])) && (pCommand->m_Flags & CMDFLAG_CHEAT))
+					else if((!g_Config.m_SvCheats || g_Config.m_SvRegister || !g_Config.m_Password[0]) && (pCommand->m_Flags & CMDFLAG_CHEAT))
 					{
 						RegisterAlternativePrintResponseCallback(pfnAlternativePrintResponseCallback, pResponseUserData);
-						PrintResponse(OUTPUT_LEVEL_STANDARD, "Console", "Cheats are not available on this server");
+						PrintResponse(OUTPUT_LEVEL_STANDARD, "Console", "Cheats are not allowed on registered or un-passworded servers");
 						dbg_msg("server", "client tried rcon cheat ('%s') with cheats off. ClientID=%d", pCommand->m_pName, ClientID);
 						ReleaseAlternativePrintResponseCallback();
 					}

@@ -1265,17 +1265,17 @@ int CServer::Run()
 				// load map
 				if(LoadMap(g_Config.m_SvMap))
 				{
-					Console()->ExecuteLine("tune_reset", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("tune gun_speed 1400", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("tune shotgun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("tune shotgun_speed 500", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("tune shotgun_speeddiff 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("tune gun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("sv_hit 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("sv_npc 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("sv_phook 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("sv_endless_drag 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-					Console()->ExecuteLine("sv_old_laser 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+					Console()->ExecuteLine("tune_reset", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("tune gun_speed 1400", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("tune shotgun_curvature 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("tune shotgun_speed 500", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("tune shotgun_speeddiff 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("tune gun_curvature 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("sv_hit 1", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("sv_npc 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("sv_phook 1", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("sv_endless_drag 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+					Console()->ExecuteLine("sv_old_laser 0", IConsole::CONSOLELEVEL_CONFIG, -1);
 					// new map loaded
 					GameServer()->OnShutdown();
 					
@@ -1704,17 +1704,17 @@ int main(int argc, const char **argv) // ignore_convention
 	pServer->RegisterCommands();
 	pGameServer->OnConsoleInit();
 	
-	pConsole->ExecuteLine("tune_reset", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("tune gun_speed 1400", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("tune shotgun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("tune shotgun_speed 500", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("tune shotgun_speeddiff 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("tune gun_curvature 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("sv_hit 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("sv_npc 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("sv_phook 1", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("sv_endless_drag 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
-	pConsole->ExecuteLine("sv_old_laser 0", IConsole::CONSOLELEVEL_SUPERADMIN, -1);
+	pConsole->ExecuteLine("tune_reset", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("tune gun_speed 1400", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("tune shotgun_curvature 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("tune shotgun_speed 500", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("tune shotgun_speeddiff 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("tune gun_curvature 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("sv_hit 1", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("sv_npc 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("sv_phook 1", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("sv_endless_drag 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("sv_old_laser 0", IConsole::CONSOLELEVEL_CONFIG, -1);
 	// execute autoexec file
 	pConsole->ExecuteFile("autoexec.cfg", 0, 0, 0, 0, 4);
 
