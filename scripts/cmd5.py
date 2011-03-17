@@ -1,4 +1,4 @@
-import hashlib, sys, re
+import hashlib, sys, re, os
 
 alphanum = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_".encode()
 
@@ -34,3 +34,4 @@ hash = hashlib.md5(f).hexdigest().lower()[16:]
 if hash == "8755162e69711f98":
 	hash = "b67d1f1a1eea234e"
 print('#define GAME_NETVERSION_HASH "%s"' % hash)
+print('#define GIT_SHORTREV_HASH "%s"' % os.popen('git rev-parse HEAD').readline(8))

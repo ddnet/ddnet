@@ -12,6 +12,7 @@
 #include "menus.h"
 #include <game/localization.h>
 #include <game/version.h>
+#include <game/generated/nethash.c>
 
 void CMenus::RenderServerbrowserServerList(CUIRect View)
 {
@@ -910,6 +911,11 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		if(str_comp(Client()->LatestVersion(), "0") != 0)
 			str_format(aBuf, sizeof(aBuf), Localize("Teeworlds %s is out! Download it at www.teeworlds.com!"), Client()->LatestVersion());
 		else
+#if defined( GIT_SHORTREV_HASH )
+		str_format(aBuf, sizeof(aBuf), Localize("Current version: v.%s g.%s"), GAME_VERSION, GIT_SHORTREV_HASH);
+#else
+		str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
+#endif
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
 		UI()->DoLabelScaled(&StatusToolBox, aBuf, 14.0f, -1);
 	}

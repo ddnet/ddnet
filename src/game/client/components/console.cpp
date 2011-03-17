@@ -28,6 +28,7 @@
 #include <game/client/components/menus.h>
 
 #include "console.h"
+#include <game/generated/nethash.c>
 
 enum
 {
@@ -434,7 +435,12 @@ void CGameConsole::OnRender()
 		
 		// render version
 		char aBuf[128];
+#if defined( GIT_SHORTREV_HASH )
+		dbg_msg("GIT Hash", GIT_SHORTREV_HASH);
+		str_format(aBuf, sizeof(aBuf), "v%s %s", GAME_VERSION, GIT_SHORTREV_HASH);
+#else
 		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
+#endif
 		float VersionWidth = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->Text(0, Screen.w-VersionWidth-5, y, FontSize, aBuf, -1);
 

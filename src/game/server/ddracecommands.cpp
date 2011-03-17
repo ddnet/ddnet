@@ -5,6 +5,7 @@
 #include <game/server/teams.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
+#include <game/generated/nethash.c>
 #if defined(CONF_SQL)
 	#include <game/server/score/sql_score.h>
 #endif
@@ -508,6 +509,9 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData, int Clie
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "DDRace Mod. Version: " GAME_VERSION);
+#if defined( GIT_SHORTREV_HASH )
+	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Git revision hash: " GIT_SHORTREV_HASH);
+#endif
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Official site: DDRace.info");
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "For more Info /cmdlist");
 	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Or visit DDRace.info");
