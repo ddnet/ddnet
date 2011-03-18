@@ -436,7 +436,6 @@ void CGameConsole::OnRender()
 		// render version
 		char aBuf[128];
 #if defined( GIT_SHORTREV_HASH )
-		dbg_msg("GIT Hash", GIT_SHORTREV_HASH);
 		str_format(aBuf, sizeof(aBuf), "v%s %s", GAME_VERSION, GIT_SHORTREV_HASH);
 #else
 		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
