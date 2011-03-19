@@ -207,5 +207,6 @@ MACRO_CONFIG_INT(SvResetPickus, sv_reset_pickups, 0, 0, 1, CFGFLAG_SERVER, "Whet
 MACRO_CONFIG_INT(ClShowOthers, cl_show_others, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show players in other teams", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClShowEntities, cl_show_entities, 0, 0, 1, CFGFLAG_CLIENT, "Cheat to show game tiles", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClPredictOldHookthrough, cl_predict_oldht, 0, 0, 1, CFGFLAG_CLIENT, "Client predicts old Hookthrough", IConsole::CONSOLELEVEL_USER)
+MACRO_CONFIG_INT(SvShowOthers, sv_show_others, 1, 0, 1, CFGFLAG_SERVER, "Whether players can user the command showothers or not", IConsole::CONSOLELEVEL_ADMIN)
 
 #endif

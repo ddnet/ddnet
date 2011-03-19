@@ -967,16 +967,20 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData, in
 	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
 	if(!pPlayer)
 		return;
-
-	if(pPlayer->m_IsUsingDDRaceClient)
+	if(g_Config.m_SvShowOthers)
 	{
-		if(pResult->NumArguments())
-			pPlayer->m_ShowOthers = pResult->GetInteger(0);
+		if(pPlayer->m_IsUsingDDRaceClient)
+		{
+			if(pResult->NumArguments())
+				pPlayer->m_ShowOthers = pResult->GetInteger(0);
+			else
+				pPlayer->m_ShowOthers = !pPlayer->m_ShowOthers;
+		}
 		else
-			pPlayer->m_ShowOthers = !pPlayer->m_ShowOthers;
+			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing players from other teams is only available with DDRace Client, http://DDRace.info");
 	}
 	else
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing players from other teams is only available with DDRace Client, http://DDRace.info");
+		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing players from other teams is disabled by the server admin");
 }
 
 void CGameContext::Mute(NETADDR *Addr, int Secs, const char *pDisplayName)
