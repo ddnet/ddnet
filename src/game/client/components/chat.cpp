@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/tl/string.h>
-
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 #include <engine/keys.h>
@@ -19,6 +18,8 @@
 
 #include "chat.h"
 
+#include <base/utf8convert.h>
+#include <base/system.h>
 
 CChat::CChat()
 {
@@ -194,7 +195,14 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
-		AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+		if (!str_utf8_check(pMsg->m_pMessage))
+		{
+			char aUTF8Message[1024];
+			Latin1toUTF8(aUTF8Message,pMsg->m_pMessage,1024);
+			AddLine(pMsg->m_ClientID, pMsg->m_Team, aUTF8Message);
+		}
+		else
+			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
 }
 

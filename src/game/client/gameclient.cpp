@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/utf8convert.h>
+#include <base/system.h>
+
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 #include <engine/sound.h>
@@ -760,6 +763,12 @@ void CGameClient::OnNewSnapshot()
 				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)pData;
 				int ClientID = Item.m_ID;
 				IntsToStr(&pInfo->m_Name0, 6, m_aClients[ClientID].m_aName);
+				if (!str_utf8_check(m_aClients[ClientID].m_aName)) 
+				{
+					char aUTF8Name[50];
+					Latin1toUTF8(aUTF8Name,m_aClients[ClientID].m_aName,50);
+					str_copy(m_aClients[ClientID].m_aName, aUTF8Name,50);
+				}				
 				IntsToStr(&pInfo->m_Skin0, 6, m_aClients[ClientID].m_aSkinName);
 				
 				m_aClients[ClientID].m_UseCustomColor = pInfo->m_UseCustomColor;

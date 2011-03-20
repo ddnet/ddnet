@@ -31,7 +31,7 @@
 	#define NOGDI
 	#include <windows.h>
 #endif
-
+#include <base/utf8convert.h>
 
 void CGraph::Init(float Min, float Max)
 {
@@ -1076,6 +1076,13 @@ void CClient::ProcessPacket(CNetChunk *pPacket)
 					Token = str_toint(Up.GetString());
 				str_copy(Info.m_aVersion, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aVersion));
 				str_copy(Info.m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aName));
+				if (!str_utf8_check(Info.m_aName))
+				{
+					char aUTF8Name[1024];
+					Latin1toUTF8(aUTF8Name,Info.m_aName,1024);
+					str_copy(Info.m_aName, aUTF8Name, 1024);
+				}
+				
 				str_copy(Info.m_aMap, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aMap));
 				str_copy(Info.m_aGameType, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aGameType));
 				Info.m_Flags = str_toint(Up.GetString());
@@ -1105,6 +1112,12 @@ void CClient::ProcessPacket(CNetChunk *pPacket)
 				for(int i = 0; i < Info.m_NumPlayers; i++)
 				{
 					str_copy(Info.m_aPlayers[i].m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aPlayers[i].m_aName));
+					if (!str_utf8_check(Info.m_aPlayers[i].m_aName))
+					{
+						char aUTF8Name[50];
+						Latin1toUTF8(aUTF8Name,Info.m_aPlayers[i].m_aName,50);
+						str_copy(Info.m_aPlayers[i].m_aName, aUTF8Name, 50);
+					}
 					Info.m_aPlayers[i].m_Score = str_toint(Up.GetString());
 				}
 
