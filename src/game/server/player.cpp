@@ -9,6 +9,7 @@
 #include "gamecontext.h"
 #include <game/gamecore.h>
 #include "gamemodes/DDRace.h"
+#include <stdio.h>
 
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
