@@ -131,11 +131,13 @@ public:
 
 	int m_ChatScore;
 
-	// necessary for asking mutual exclusion
-	int m_Asker; // who asked this player
-	int m_AskedTick; // when was this player asked by another player
-	int m_Asked; // who did this player ask
-	int m_AskerTick; // when did this player ask another player
+	void AfkTimer(int new_target_x, int new_target_y);
+	int64 m_LastPlaytime;
+	int m_LastTarget_x;
+	int m_LastTarget_y;
+	int m_SentAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
+	int m_SentAfkWarning2; // afk timer's 2nd warning after 90% of sv_max_afk_time
+	char m_pAfkMsg[160];
 };
 
 #endif
