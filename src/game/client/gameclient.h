@@ -282,9 +282,8 @@ inline vec3 HslToRgb(vec3 HSL)
 		return vec3(HueToRgb(v1, v2, HSL.h + (1.0f/3.0f)), HueToRgb(v1, v2, HSL.h), HueToRgb(v1, v2, HSL.h - (1.0f/3.0f)));
 	}
 }
-
+void ConServerDummy(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
 extern const char *Localize(const char *Str);
 
-void ConServerDummy(IConsole::IResult *pResult, void *pUserData, int ClientID);
 #endif

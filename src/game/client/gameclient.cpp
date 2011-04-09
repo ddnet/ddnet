@@ -1173,7 +1173,7 @@ IGameClient *CreateGameClient()
 
 // DDRace
 
-static void ConServerDummy(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void ConServerDummy(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	dbg_msg("client", "this command is not available on the client");
 }
