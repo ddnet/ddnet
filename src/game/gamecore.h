@@ -10,6 +10,7 @@
 #include "collision.h"
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+
 #include "teamscore.h"
 #include "mapitems.h"
 
@@ -178,8 +179,42 @@ class CCharacterCore
 {
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
-	CTeamsCore* m_pTeams;
+public:
+	vec2 m_Pos;
+	vec2 m_Vel;
+	
+	vec2 m_HookPos;
+	vec2 m_HookDir;
+	int m_HookTick;
+	int m_HookState;
+	int m_HookedPlayer;
+	
+	int m_Jumped;
+	
+	int m_Direction;
+	int m_Angle;
+	CNetObj_PlayerInput m_Input;
+	
+	int m_TriggeredEvents;
+	
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams);
+	void Reset();
+	void Tick(bool UseInput);
+	void Move();
+	
+	void Read(const CNetObj_CharacterCore *pObjCore);
+	void Write(CNetObj_CharacterCore *pObjCore);
+	void Quantize();
 
+	// DDRace
+
+	int m_Id;
+	bool m_pReset;
+	class CCollision *Collision() { return m_pCollision; }
+
+private:
+
+	CTeamsCore* m_pTeams;
 	int m_TileIndex;
 	int m_TileFlags;
 	int m_TileFIndex;
@@ -211,37 +246,6 @@ class CCharacterCore
 	int m_TileSIndexB;
 	int m_TileSFlagsB;
 	bool IsRightTeam(int MapIndex);
-	
-public:
-	int m_Id;
-
-	vec2 m_Pos;
-	vec2 m_Vel;
-	
-	vec2 m_HookPos;
-	vec2 m_HookDir;
-	int m_HookTick;
-	int m_HookState;
-	int m_HookedPlayer;
-	
-	int m_Jumped;
-	
-	int m_Direction;
-	int m_Angle;
-	CNetObj_PlayerInput m_Input;
-	
-	bool m_pReset;
-	int m_TriggeredEvents;
-	class CCollision *Collision() { return m_pCollision; }
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams);
-	void Reset();
-	void Tick(bool UseInput);
-	void HandleFly();
-	void Move();
-	
-	void Read(const CNetObj_CharacterCore *pObjCore);
-	void Write(CNetObj_CharacterCore *pObjCore);
-	void Quantize();
 };
 
 #endif

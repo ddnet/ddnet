@@ -8,13 +8,14 @@
 #include <engine/shared/memheap.h>
 
 #include <game/layers.h>
+#include <game/voting.h>
 
 #include "eventhandler.h"
 #include "gamecontroller.h"
 #include "gameworld.h"
 #include "player.h"
-#include "score.h"
 
+#include "score.h"
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -55,6 +56,8 @@ class CGameContext : public IGameServer
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConForceVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -63,7 +66,6 @@ class CGameContext : public IGameServer
 	void Construct(int Resetting);
 
 	bool m_Resetting;
-	bool m_VoteWillPass;
 public:
 	IServer *Server() const { return m_pServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -85,7 +87,7 @@ public:
 	class CCharacter *GetPlayerChar(int ClientID);
 	
 	// voting
-	void StartVote(const char *pDesc, const char *pCommand);
+	void StartVote(const char *pDesc, const char *pCommand, const char *pReason);
 	void EndVote();
 	void SendVoteSet(int ClientID);
 	void SendVoteStatus(int ClientID, int Total, int Yes, int No);
@@ -95,8 +97,10 @@ public:
 	int64 m_VoteCloseTime;
 	bool m_VoteUpdate;
 	int m_VotePos;
-	char m_aVoteDescription[512];
-	char m_aVoteCommand[512];
+	char m_aVoteDescription[VOTE_DESC_LENGTH];
+	char m_aVoteCommand[VOTE_CMD_LENGTH];
+	char m_aVoteReason[VOTE_REASON_LENGTH];
+	int m_NumVoteOptions;
 	int m_VoteEnforce;
 	enum
 	{
@@ -104,20 +108,13 @@ public:
 		VOTE_ENFORCE_NO,
 		VOTE_ENFORCE_YES,
 	};
-	struct CVoteOption
-	{
-		CVoteOption *m_pNext;
-		CVoteOption *m_pPrev;
-		char m_aCommand[1];
-	};
 	CHeap *m_pVoteOptionHeap;
-	CVoteOption *m_pVoteOptionFirst;
-	CVoteOption *m_pVoteOptionLast;
+	CVoteOptionServer *m_pVoteOptionFirst;
+	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
 	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int Mask=-1);
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int Mask);
-	void CreateSmoke(vec2 Pos, int Mask=-1);
 	void CreateHammerHit(vec2 Pos, int Mask=-1);
 	void CreatePlayerSpawn(vec2 Pos, int Mask=-1);
 	void CreateDeath(vec2 Pos, int Who, int Mask=-1);
@@ -139,7 +136,6 @@ public:
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID);
-	int ProcessSpamProtection(int ClientID);
 	
 	
 	//
@@ -156,19 +152,28 @@ public:
 	virtual void OnSnap(int ClientID);
 	virtual void OnPostSnap();
 	
-	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientID);
+	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
 	virtual void OnClientConnected(int ClientID);
 	virtual void OnClientEnter(int ClientID);
-	virtual void OnClientDrop(int ClientID);
+	virtual void OnClientDrop(int ClientID, const char *pReason);
 	virtual void OnClientDirectInput(int ClientID, void *pInput);
 	virtual void OnClientPredictedInput(int ClientID, void *pInput);
 
+	virtual bool IsClientReady(int ClientID);
+	virtual bool IsClientPlayer(int ClientID);
+
+	virtual const char *GameType();
 	virtual const char *Version();
 	virtual const char *NetVersion();
 
-	//DDRace
+	// DDRace
+
+	int ProcessSpamProtection(int ClientID);
+
 private:
+
+	bool m_VoteWillPass;
 	class IScore *m_pScore;
 	int m_VoteEnforcer;
 
@@ -179,11 +184,9 @@ private:
 	static void ConLogOut(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConSetlvl1(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConSetlvl2(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSetlvl3(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
 	static void ConNinja(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConHammer(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData, int ClientID);
@@ -205,10 +208,6 @@ private:
 
 	static void ConFreeze(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTimerStop(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTimerStart(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTimerReStart(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTimerZero(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConGoRight(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConGoUp(IConsole::IResult *pResult, void *pUserData, int ClientID);
@@ -216,8 +215,6 @@ private:
 
 	static void ConMove(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConInvisMe(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConVisMe(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConInvis(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConVis(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
@@ -233,11 +230,10 @@ private:
 	static void ConTimes(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	#endif
 
-	static void ConUTF8(IConsole::IResult *pResult, void *pUserData, int ClientID);	
+	static void ConUTF8(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConRank(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConToggleFly(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientID);

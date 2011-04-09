@@ -5,7 +5,6 @@
 #include <game/generated/client_data.h>
 
 #include <base/system.h>
-#include <base/tl/sorted_array.h>
 
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/config.h>
@@ -28,7 +27,8 @@
 #include <game/client/components/menus.h>
 
 #include "console.h"
-#include <game/generated/nethash.c>
+
+#include <base/tl/sorted_array.h>
 
 enum
 {
@@ -76,7 +76,7 @@ void CGameConsole::CInstance::ClearHistory()
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
-		m_pGameConsole->m_pConsole->ExecuteLine(pLine, 4, IConsole::CONSOLELEVEL_USER);
+		m_pGameConsole->m_pConsole->ExecuteLine(pLine, IConsole::CONSOLELEVEL_CONFIG, -1);
 	else
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
@@ -401,11 +401,7 @@ void CGameConsole::OnRender()
 		float FontSize = 10.0f;
 		float RowHeight = FontSize*1.25f;
 		float x = 3;
-		float y = ConsoleHeight - RowHeight - 2;
-
-		// render prompt		
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
+		float y = ConsoleHeight - RowHeight - 5.0f;
 
 		CRenderInfo Info;
 		Info.m_pSelf = this;
@@ -414,8 +410,11 @@ void CGameConsole::OnRender()
 		Info.m_Offset = pConsole->m_CompletionRenderOffset;
 		Info.m_Width = Screen.w;
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
-		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+12.0f, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER);
 
+		// render prompt		
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
 		const char *pPrompt = "> ";
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
@@ -429,25 +428,15 @@ void CGameConsole::OnRender()
 			else
 				pPrompt = "NOT CONNECTED> ";
 		}
-
 		TextRender()->TextEx(&Cursor, pPrompt, -1);
-		x = Cursor.m_X;
 		
-		// render version
-		char aBuf[128];
-#if defined( GIT_SHORTREV_HASH )
-		str_format(aBuf, sizeof(aBuf), "v%s %s", GAME_VERSION, GIT_SHORTREV_HASH);
-#else
-		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
-#endif
-		float VersionWidth = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-		TextRender()->Text(0, Screen.w-VersionWidth-5, y, FontSize, aBuf, -1);
+		x = Cursor.m_X;
 
 		// render console input (wrap line)
-		int Lines = TextRender()->TextLineCount(0, FontSize, pConsole->m_Input.GetString(), Screen.w - (VersionWidth + 10 + x));
+		int Lines = TextRender()->TextLineCount(0, FontSize, pConsole->m_Input.GetString(), Screen.w - 10.0f - x);
 		y -= (Lines - 1) * FontSize;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = Screen.w - (VersionWidth + 10 + x);
+		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 		
 		//hide rcon password
 		char aInputString[256];
@@ -494,8 +483,7 @@ void CGameConsole::OnRender()
 		float LineOffset = 1.0f;
 		for(int Page = 0; Page <= pConsole->m_BacklogActPage; ++Page, OffsetY = 0.0f)
 		{
-			//	next page when lines reach the top
-			while(y-OffsetY > RowHeight && pEntry)
+			while(pEntry)
 			{
 				// get y offset (calculate it if we haven't yet)
 				if(pEntry->m_YOffset < 0.0f)
@@ -506,6 +494,11 @@ void CGameConsole::OnRender()
 					pEntry->m_YOffset = Cursor.m_Y+Cursor.m_FontSize+LineOffset;
 				}
 				OffsetY += pEntry->m_YOffset;
+				
+				//	next page when lines reach the top
+				if(y-OffsetY <= RowHeight)
+					break;
+
 				//	just render output from actual backlog page (render bottom up)
 				if(Page == pConsole->m_BacklogActPage)
 				{
@@ -532,6 +525,16 @@ void CGameConsole::OnRender()
 				break;
 			}
 		}
+
+		// render page
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogActPage+1);
+		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
+
+		// render version
+		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
+		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+		TextRender()->Text(0, Screen.w-Width-10.0f, 0.0f, FontSize, aBuf, -1);
 	}	
 }
 

@@ -2,13 +2,13 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
 #include <base/system.h>
-#include <base/math.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 #include "console.h"
 #include "config.h"
-#include "engine.h"
 #include "linereader.h"
+
+#include <base/math.h>
 
 const char *CConsole::CResult::GetString(unsigned Index)
 {
@@ -92,6 +92,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					Error = 1;
 					break;
 				}
+
 				while(*(pFormat - 1))
 				{
 					if(*(pFormat - 1) == 'v')
@@ -162,7 +163,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pStr[0] = 0;
 					pStr++;
 				}
-				
+
 				if (pVictim)
 					pResult->SetVictim(pVictim);
 			}
@@ -242,7 +243,7 @@ bool CConsole::LineIsValid(const char *pStr)
 }
 
 void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback, void *pUserData, FPrintCallback pfnAlternativePrintResponseCallback, void *pResponseUserData)
-{
+{	
 	while(pStr && *pStr)
 	{
 		CResult Result;
@@ -309,7 +310,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int Client
 				{
 					if(Result.GetVictim() == CResult::VICTIM_ME)
 						Result.SetVictim(ClientID);
-					
+
 					if((ClientLevel < pCommand->m_Level && !(pCommand->m_Flags & CMDFLAG_HELPERCMD)) || (ClientLevel < 1 && (pCommand->m_Flags & CMDFLAG_HELPERCMD)))
 					{
 						RegisterAlternativePrintResponseCallback(pfnAlternativePrintResponseCallback, pResponseUserData);
@@ -327,7 +328,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int Client
 						PrintResponse(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
 
 						ReleaseAlternativePrintResponseCallback();
-					}					
+					}
 					else if(ClientLevel == 1 && (pCommand->m_Flags & CMDFLAG_HELPERCMD) && Result.GetVictim() != ClientID)
 					{
 						RegisterAlternativePrintResponseCallback(pfnAlternativePrintResponseCallback, pResponseUserData);
@@ -340,13 +341,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int Client
 						RegisterAlternativePrintResponseCallback(pfnAlternativePrintResponseCallback, pResponseUserData);
 						PrintResponse(OUTPUT_LEVEL_STANDARD, "Console", "Cheats are not allowed on registered or un-passworded servers");
 						dbg_msg("server", "client tried rcon cheat ('%s') with cheats off. ClientID=%d", pCommand->m_pName, ClientID);
-						ReleaseAlternativePrintResponseCallback();
-					}
-					else if(!g_Config.m_SvTimer && (pCommand->m_Flags & CMDFLAG_TIMER))
-					{
-						RegisterAlternativePrintResponseCallback(pfnAlternativePrintResponseCallback, pResponseUserData);
-						PrintResponse(OUTPUT_LEVEL_STANDARD, "Console", "Timer commands are not available on this server");
-						dbg_msg("server", "client tried timer command ('%s') with timer commands off. ClientID=%d", pCommand->m_pName, ClientID);
 						ReleaseAlternativePrintResponseCallback();
 					}
 					else
@@ -415,11 +409,9 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, const int Client
 		else if(Stroke)
 		{
 			RegisterAlternativePrintResponseCallback(pfnAlternativePrintResponseCallback, pResponseUserData);
-
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
 			PrintResponse(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
-
 			ReleaseAlternativePrintResponseCallback();
 		}
 		
@@ -491,7 +483,6 @@ void CConsole::ExecuteFile(const char *pFilename, FPrintCallback pfnAlternativeP
 		CLineReader lr;
 		
 		RegisterAlternativePrintCallback(pfnAlternativePrintCallback, pUserData);
-
 		str_format(aBuf, sizeof(aBuf), "executing '%s'", pFilename);
 		PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		lr.Init(File);
@@ -505,10 +496,8 @@ void CConsole::ExecuteFile(const char *pFilename, FPrintCallback pfnAlternativeP
 	else
 	{
 		RegisterAlternativePrintCallback(pfnAlternativePrintCallback, pUserData);
-
 		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", pFilename);
 		PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-
 		ReleaseAlternativePrintCallback();
 	}
 	
@@ -517,13 +506,12 @@ void CConsole::ExecuteFile(const char *pFilename, FPrintCallback pfnAlternativeP
 
 void CConsole::Con_Echo(IResult *pResult, void *pUserData, int ClientID)
 {
-	((CConsole*)pUserData)->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Console", pResult->GetString(0));
+	((CConsole*)pUserData)->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "Console", pResult->GetString(0));
 }
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData, int ClientID)
 {
 	CConsole *pSelf = (CConsole *)pUserData;
-
 	pSelf->ExecuteFile(pResult->GetString(0), pSelf->m_pfnAlternativePrintCallback, pSelf->m_pAlternativePrintCallbackUserdata, pSelf->m_pfnAlternativePrintResponseCallback, pSelf->m_pAlternativePrintResponseCallbackUserdata);
 }
 
@@ -619,12 +607,10 @@ CConsole::CConsole(int FlagMask)
 	m_ExecutionQueue.Reset();
 	m_pFirstCommand = 0;
 	m_pFirstExec = 0;
-
 	for (int i = 0; i < 5; ++i)
 	{
 		m_aCommandCount[i] = 0;
 	}
-
 	m_pPrintCallbackUserdata = 0;
 	m_pfnPrintCallback = 0;
 	m_pAlternativePrintCallbackUserdata = 0;
@@ -641,12 +627,12 @@ CConsole::CConsole(int FlagMask)
 	m_pfnCompareClientsCallback = 0;
 	m_pClientOnlineUserdata = 0;
 	m_pCompareClientsUserdata = 0;
-
+	
 	m_pStorage = 0;
 	
 	// register some basic commands
-	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", 3);
-	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", 3);
+	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", IConsole::CONSOLELEVEL_ADMIN);
+	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", IConsole::CONSOLELEVEL_ADMIN);
 	
 	// TODO: this should disappear
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,Level) \
@@ -665,6 +651,7 @@ CConsole::CConsole(int FlagMask)
 
 	#undef MACRO_CONFIG_INT 
 	#undef MACRO_CONFIG_STR 	
+
 	m_Cheated = false;
 }
 
@@ -676,7 +663,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
 		{
 			if(NumArgs - i > 1)
-				ExecuteFile(ppArguments[i+1], 0, 0, 0, 0, 4);
+				ExecuteFile(ppArguments[i+1], 0, 0, 0, 0, IConsole::CONSOLELEVEL_CONFIG);
 			i++;
 		}
 		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
@@ -687,7 +674,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		else
 		{
 			// search arguments for overrides
-			ExecuteLine(ppArguments[i], 100, -1);
+			ExecuteLine(ppArguments[i], IConsole::CONSOLELEVEL_CONFIG, -1);
 		}
 	}
 }
@@ -763,20 +750,23 @@ IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask
 
 extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
 
+// DDRace
+
 void CConsole::RegisterAlternativePrintCallback(FPrintCallback pfnAlternativePrintCallback, void *pAlternativeUserData)
 {
-  while (m_pfnAlternativePrintCallback != pfnAlternativePrintCallback && m_PrintUsed)
-    ; // wait for other threads to finish their commands, TODO: implement this with LOCK
+	while (m_pfnAlternativePrintCallback != pfnAlternativePrintCallback && m_PrintUsed)
+		;	// wait for other threads to finish their commands
+		// TODO:DDRace:heinrich5991: implement this with LOCK
 
 	m_pfnAlternativePrintCallback = pfnAlternativePrintCallback;
 	m_pAlternativePrintCallbackUserdata = pAlternativeUserData;
 
-  m_PrintUsed++;
+	m_PrintUsed++;
 }
 
 void CConsole::ReleaseAlternativePrintCallback()
 {
-  m_PrintUsed--;
+	m_PrintUsed--;
 }
 
 void CConsole::RegisterClientOnlineCallback(FClientOnlineCallback pfnCallback, void *pUserData)
@@ -795,7 +785,7 @@ bool CConsole::ClientOnline(int ClientID)
 {
 	if(!m_pfnClientOnlineCallback)
 		return true;
-	
+
 	return m_pfnClientOnlineCallback(ClientID, m_pClientOnlineUserdata);
 }
 
@@ -803,8 +793,8 @@ bool CConsole::CompareClients(int ClientID, int Victim)
 {
 	if(!m_pfnCompareClientsCallback)
 		return true;
-	
-	return m_pfnCompareClientsCallback(ClientID, Victim, m_pCompareClientsUserdata);	
+
+	return m_pfnCompareClientsCallback(ClientID, Victim, m_pCompareClientsUserdata);
 }
 
 void CConsole::RegisterPrintResponseCallback(FPrintCallback pfnPrintResponseCallback, void *pUserData)
@@ -815,13 +805,13 @@ void CConsole::RegisterPrintResponseCallback(FPrintCallback pfnPrintResponseCall
 
 void CConsole::RegisterAlternativePrintResponseCallback(FPrintCallback pfnAlternativePrintResponseCallback, void *pAlternativeUserData)
 {
-  while (m_pfnAlternativePrintResponseCallback != pfnAlternativePrintResponseCallback && m_PrintResponseUsed)
-    ; // wait for other threads to finish their commands, TODO: implement this with LOCK
-
+	while (m_pfnAlternativePrintResponseCallback != pfnAlternativePrintResponseCallback && m_PrintResponseUsed)
+		;	// wait for other threads to finish their commands
+		// TODO:DDRace:heinrich5991: implement this with LOCK
 	m_pfnAlternativePrintResponseCallback = pfnAlternativePrintResponseCallback;
 	m_pAlternativePrintResponseCallbackUserdata = pAlternativeUserData;
 
-  m_PrintResponseUsed++;
+	m_PrintResponseUsed++;
 }
 
 void CConsole::ReleaseAlternativePrintResponseCallback()
@@ -837,9 +827,9 @@ void CConsole::PrintResponse(int Level, const char *pFrom, const char *pStr)
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "[%s]: %s", pFrom, pStr);
 		if (!m_pfnAlternativePrintResponseCallback || m_PrintResponseUsed == 0)
-  		m_pfnPrintResponseCallback(aBuf, m_pPrintResponseCallbackUserdata);
+			m_pfnPrintResponseCallback(aBuf, m_pPrintResponseCallbackUserdata);
   	else
-  	  m_pfnAlternativePrintResponseCallback(aBuf, m_pAlternativePrintResponseCallbackUserdata);
+  		m_pfnAlternativePrintResponseCallback(aBuf, m_pAlternativePrintResponseCallbackUserdata);
 	}
 }
 
@@ -857,11 +847,11 @@ void CConsole::List(int Level, int Flags)
 		case 1: PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "console", "=== cmdlist for helpers ==="); break;
 		default: PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "console", "=== cmdlist ==="); break;
 	}
-	
+
 	char aBuf[50 + 1] = { 0 };
 	CCommand *pCommand = m_pFirstCommand;
 	unsigned Length = 0;
-	
+
 	while(pCommand)
 	{
 		if(str_comp_num(pCommand->m_pName, "sv_", 3) && str_comp_num(pCommand->m_pName, "dbg_", 4))	// ignore configs and debug commands
@@ -887,7 +877,7 @@ void CConsole::List(int Level, int Flags)
 		}
 		pCommand = pCommand->m_pNext;
 	}
-	
+
 	if (aBuf[0])
 		PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "Console", aBuf);
 
@@ -929,4 +919,3 @@ void CConsole::CResult::SetVictim(const char *pVictim)
 	else
 		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
 }
-

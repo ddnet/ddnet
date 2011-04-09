@@ -25,7 +25,6 @@ public:
 
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
-	void SetBouncing(int Value);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -42,9 +41,16 @@ private:
 	float m_Force;
 	int m_StartTick;
 	bool m_Explosive;
+
+	// DDRace
+
 	int m_Bouncing;
 	bool m_Freeze;
 	bool m_Collised;
+
+public:
+
+	void SetBouncing(int Value);
 };
 
 #endif

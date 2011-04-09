@@ -44,9 +44,8 @@ enum
 {
 	NET_VERSION = 2,
 
-	NET_MAX_CHUNKSIZE = 1024,
-	NET_MAX_PAYLOAD = NET_MAX_CHUNKSIZE+16,
-	NET_MAX_PACKETSIZE = NET_MAX_PAYLOAD+16,
+	NET_MAX_PACKETSIZE = 1400,
+	NET_MAX_PAYLOAD = NET_MAX_PACKETSIZE-6,
 	NET_MAX_CHUNKHEADERSIZE = 5,
 	NET_PACKETHEADERSIZE = 3,
 	NET_MAX_CLIENTS = 16,
@@ -75,7 +74,7 @@ enum
 	
 	NET_SERVER_MAXBANS=1024,
 	
-	NET_CONN_BUFFERSIZE=1024*16,
+	NET_CONN_BUFFERSIZE=1024*32,
 	
 	NET_ENUM_TERMINATOR
 };
@@ -290,6 +289,10 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
+
+	// Banmaster
+
+
 	int BanmasterAdd(const char *pAddrStr);
 	int BanmasterNum() const;
 	NETADDR* BanmasterGet(int Index);
@@ -303,7 +306,6 @@ public:
 	int m_Flags;
 	NETADDR m_aBanmasters[MAX_BANMASTERS];
 	int m_NumBanmasters;
-
 };
 
 
@@ -349,7 +351,8 @@ class CNetBase
 	static IOHANDLE ms_DataLogRecv;
 	static CHuffman ms_Huffman;
 public:
-	static void OpenLog(const char *pSentlog, const char *pRecvlog);
+	static void OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv);
+	static void CloseLog();
 	static void Init();
 	static int Compress(const void *pData, int DataSize, void *pOutput, int OutputSize);
 	static int Decompress(const void *pData, int DataSize, void *pOutput, int OutputSize);

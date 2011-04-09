@@ -209,10 +209,7 @@ public:
 		m_lLayers.delete_all();
 	}
 	
-	void AddLayer(CLayer *l)
-	{
-		m_lLayers.add(l);
-	}
+	void AddLayer(CLayer *l);
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 	{
@@ -260,6 +257,7 @@ class CEditorMap
 	void MakeGameLayer(CLayer *pLayer);
 public:
 	CEditor *m_pEditor;
+	bool m_Modified;
 
 	CEditorMap()
 	{
@@ -271,14 +269,11 @@ public:
 	array<CEnvelope*> m_lEnvelopes;
 	
 	class CLayerGame *m_pGameLayer;
-	class CLayerTele *m_pTeleLayer;
-	class CLayerSpeedup *m_pSpeedupLayer;
-	class CLayerFront *m_pFrontLayer;
-	class CLayerSwitch *m_pSwitchLayer;
 	CLayerGroup *m_pGameGroup;
 	
 	CEnvelope *NewEnvelope(int Channels)
 	{
+		m_Modified = true;
 		CEnvelope *e = new CEnvelope(Channels);
 		m_lEnvelopes.add(e);
 		return e;
@@ -288,6 +283,7 @@ public:
 	
 	CLayerGroup *NewGroup()
 	{
+		m_Modified = true;
 		CLayerGroup *g = new CLayerGroup;
 		g->m_pMap = this;
 		m_lGroups.add(g);
@@ -299,6 +295,7 @@ public:
 		if(Index0 < 0 || Index0 >= m_lGroups.size()) return Index0;
 		if(Index1 < 0 || Index1 >= m_lGroups.size()) return Index0;
 		if(Index0 == Index1) return Index0;
+		m_Modified = true;
 		swap(m_lGroups[Index0], m_lGroups[Index1]);
 		return Index1;
 	}
@@ -306,18 +303,21 @@ public:
 	void DeleteGroup(int Index)
 	{
 		if(Index < 0 || Index >= m_lGroups.size()) return;
+		m_Modified = true;
 		delete m_lGroups[Index];
 		m_lGroups.remove_index(Index);
 	}
 	
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
+		m_Modified = true;
 		for(int i = 0; i < m_lGroups.size(); i++)
 			m_lGroups[i]->ModifyImageIndex(pfnFunc);
 	}
 	
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
+		m_Modified = true;
 		for(int i = 0; i < m_lGroups.size(); i++)
 			m_lGroups[i]->ModifyEnvelopeIndex(pfnFunc);
 	}
@@ -328,6 +328,13 @@ public:
 	// io	
 	int Save(class IStorage *pStorage, const char *pFilename);
 	int Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+
+	// DDRace
+
+	class CLayerTele *m_pTeleLayer;
+	class CLayerSpeedup *m_pSpeedupLayer;
+	class CLayerFront *m_pFrontLayer;
+	class CLayerSwitch *m_pSwitchLayer;
 	void MakeTeleLayer(CLayer *pLayer);
 	void MakeSpeedupLayer(CLayer *pLayer);
 	void MakeFrontLayer(CLayer *pLayer);
@@ -388,6 +395,7 @@ public:
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
 	
+	virtual void ShowInfo();
 	virtual int RenderProperties(CUIRect *pToolbox);
 
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc);
@@ -399,15 +407,18 @@ public:
 	
 	int m_TexID;
 	int m_Game;
-	int m_Tele;
-	int m_Speedup;
-	int m_Front;
-	int m_Switch;
 	int m_Image;
 	int m_Width;
 	int m_Height;
 	CColor m_Color;
 	CTile *m_pTiles;
+
+	// DDRace
+
+	int m_Tele;
+	int m_Speedup;
+	int m_Front;
+	int m_Switch;
 	char m_aFileName[512];
 };
 
@@ -447,64 +458,6 @@ public:
 	virtual int RenderProperties(CUIRect *pToolbox);
 };
 
-class CLayerTele : public CLayerTiles
-{
-public:
-	CLayerTele(int w, int h);
-	~CLayerTele();
-	
-	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNum;
-	
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
-};
-
-class CLayerSpeedup : public CLayerTiles
-{
-public:
-	CLayerSpeedup(int w, int h);
-	~CLayerSpeedup();
-	
-	CSpeedupTile *m_pSpeedupTile;
-	unsigned char m_SpeedupForce;
-	unsigned char m_SpeedupMaxSpeed;
-	unsigned char m_SpeedupAngle;
-	
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
-};
-
-class CLayerFront : public CLayerTiles
-{
-public:
-	CLayerFront(int w, int h);
-
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-};
-
-class CLayerSwitch : public CLayerTiles
-{
-public:
-	CLayerSwitch(int w, int h);
-	~CLayerSwitch();
-
-	CSwitchTile *m_pSwitchTile;
-	unsigned char m_SwitchNumber;
-	unsigned char m_SwitchDelay;
-
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
-};
-
 class CEditor : public IEditor
 {
 	class IInput *m_pInput;
@@ -537,7 +490,10 @@ public:
 		m_pTooltip = 0;
 
 		m_aFileName[0] = 0;
+		m_aFileSaveName[0] = 0;
 		m_ValidSaveFilename = false;
+
+		m_PopupEventActivated = false;
 		
 		m_FileDialogStorageType = 0;
 		m_pFileDialogTitle = 0;
@@ -571,6 +527,7 @@ public:
 		m_GuiActive = true;
 		m_ProofBorders = false;
 		
+		m_ShowTileInfo = false;
 		m_ShowDetail = true;
 		m_Animate = false;
 		m_AnimateStart = 0;
@@ -583,17 +540,16 @@ public:
 		ms_BackgroundTexture = 0;
 		ms_CursorTexture = 0;
 		ms_EntitiesTexture = 0;
+		
+		ms_pUiGotContext = 0;
+
 		ms_FrontTexture = 0;
 		ms_TeleTexture = 0;
 		ms_SpeedupTexture = 0;
 		ms_SwitchTexture = 0;
-		
-		ms_pUiGotContext = 0;
-		
 		m_TeleNumber = 1;
 		m_SwitchNum = 1;
 		m_SwitchDelay = 0;
-		
 		m_SpeedupForce = 50;
 		m_SpeedupMaxSpeed = 0;
 		m_SpeedupAngle = 0;
@@ -601,6 +557,7 @@ public:
 	
 	virtual void Init();
 	virtual void UpdateAndRender();
+	virtual bool HasUnsavedData() { return m_Map.m_Modified; }
 	
 	void FilelistPopulate(int StorageType);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
@@ -625,7 +582,19 @@ public:
 	const char *m_pTooltip;
 
 	char m_aFileName[512];
+	char m_aFileSaveName[512];
 	bool m_ValidSaveFilename;
+
+	enum
+	{
+		POPEVENT_EXIT=0,
+		POPEVENT_LOAD,
+		POPEVENT_NEW,
+		POPEVENT_SAVE,
+	};
+
+	int m_PopupEventType;
+	int m_PopupEventActivated;
 
 	enum
 	{
@@ -648,6 +617,8 @@ public:
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
+	char m_FileDialogNewFolderName[64];
+	char m_FileDialogErrString[64];
 
 	struct CFilelistItem
 	{
@@ -681,6 +652,7 @@ public:
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
 	
+	bool m_ShowTileInfo;
 	bool m_ShowDetail;
 	bool m_Animate;
 	int64 m_AnimateStart;
@@ -700,10 +672,6 @@ public:
 	static int ms_BackgroundTexture;
 	static int ms_CursorTexture;
 	static int ms_EntitiesTexture;
-	static int ms_FrontTexture;
-	static int ms_TeleTexture;
-	static int ms_SpeedupTexture;
-	static int ms_SwitchTexture;
 	
 	CLayerGroup m_Brush;
 	CLayerTiles m_TilesetPicker;
@@ -739,14 +707,16 @@ public:
 	static int PopupLayer(CEditor *pEditor, CUIRect View);
 	static int PopupQuad(CEditor *pEditor, CUIRect View);
 	static int PopupPoint(CEditor *pEditor, CUIRect View);
+	static int PopupNewFolder(CEditor *pEditor, CUIRect View);
+	static int PopupEvent(CEditor *pEditor, CUIRect View);
 	static int PopupSelectImage(CEditor *pEditor, CUIRect View);
 	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View);
 	static int PopupImage(CEditor *pEditor, CUIRect View);
 	static int PopupMenuFile(CEditor *pEditor, CUIRect View);
-	static int PopupTele(CEditor *pEditor, CUIRect View);
-	static int PopupSpeedup(CEditor *pEditor, CUIRect View);
-	static int PopupSwitch(CEditor *pEditor, CUIRect View);
 
+	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
+	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
+	static void CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();
@@ -792,9 +762,18 @@ public:
 		int Length = pEnd > pExtractedName ? min(BufferSize, (int)(pEnd-pExtractedName+1)) : BufferSize;
 		str_copy(pName, pExtractedName, Length);
 	}
-	
+
+	// DDRace
+
+	static int ms_FrontTexture;
+	static int ms_TeleTexture;
+	static int ms_SpeedupTexture;
+	static int ms_SwitchTexture;
+	static int PopupTele(CEditor *pEditor, CUIRect View);
+	static int PopupSpeedup(CEditor *pEditor, CUIRect View);
+	static int PopupSwitch(CEditor *pEditor, CUIRect View);
 	unsigned char m_TeleNumber;
-	
+
 	unsigned char m_SpeedupForce;
 	unsigned char m_SpeedupMaxSpeed;
 	short m_SpeedupAngle;
@@ -806,5 +785,65 @@ public:
 // make sure to inline this function
 inline class IGraphics *CLayer::Graphics() { return m_pEditor->Graphics(); }
 inline class ITextRender *CLayer::TextRender() { return m_pEditor->TextRender(); }
+
+// DDRace
+
+class CLayerTele : public CLayerTiles
+{
+public:
+	CLayerTele(int w, int h);
+	~CLayerTele();
+
+	CTeleTile *m_pTeleTile;
+	unsigned char m_TeleNum;
+
+	virtual void Resize(int NewW, int NewH);
+	virtual void Shift(int Direction);
+	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
+	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+};
+
+class CLayerSpeedup : public CLayerTiles
+{
+public:
+	CLayerSpeedup(int w, int h);
+	~CLayerSpeedup();
+
+	CSpeedupTile *m_pSpeedupTile;
+	unsigned char m_SpeedupForce;
+	unsigned char m_SpeedupMaxSpeed;
+	unsigned char m_SpeedupAngle;
+
+	virtual void Resize(int NewW, int NewH);
+	virtual void Shift(int Direction);
+	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
+	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+};
+
+class CLayerFront : public CLayerTiles
+{
+public:
+	CLayerFront(int w, int h);
+
+	virtual void Resize(int NewW, int NewH);
+	virtual void Shift(int Direction);
+	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
+};
+
+class CLayerSwitch : public CLayerTiles
+{
+public:
+	CLayerSwitch(int w, int h);
+	~CLayerSwitch();
+
+	CSwitchTile *m_pSwitchTile;
+	unsigned char m_SwitchNumber;
+	unsigned char m_SwitchDelay;
+
+	virtual void Resize(int NewW, int NewH);
+	virtual void Shift(int Direction);
+	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
+	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+};
 
 #endif

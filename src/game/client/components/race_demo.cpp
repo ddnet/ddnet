@@ -19,7 +19,7 @@ CRaceDemo::CRaceDemo()
 
 void CRaceDemo::OnRender()
 {
-	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pGameobj || m_pClient->m_Snap.m_Spectate || Client()->State() != IClient::STATE_ONLINE)
+	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() != IClient::STATE_ONLINE)
 		return;
 	
 	// start the demo
@@ -81,7 +81,7 @@ void CRaceDemo::OnShutdown()
 
 void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(!g_Config.m_ClAutoRaceRecord || Client()->State() != IClient::STATE_ONLINE || m_pClient->m_Snap.m_Spectate)
+	if(!g_Config.m_ClAutoRaceRecord || Client()->State() != IClient::STATE_ONLINE || m_pClient->m_Snap.m_SpecInfo.m_Active)
 		return;
 		
 	// check for messages from server

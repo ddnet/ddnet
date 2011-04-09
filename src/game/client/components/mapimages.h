@@ -16,9 +16,12 @@ public:
 
 	virtual void OnMapLoad();
 
-	//DDRace
+	// DDRace
+
 	int GetEntities();
+
 private:
+
 	int m_EntitiesTextures;
 };
 

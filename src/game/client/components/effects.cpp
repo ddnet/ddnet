@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/tl/sorted_array.h>
-
 #include <engine/demo.h>
+#include <engine/engine.h>
+
 #include <engine/shared/config.h>
 
 #include <game/generated/client_data.h>
@@ -15,6 +15,8 @@
 #include <game/client/gameclient.h>
 
 #include "effects.h"
+
+#include <base/tl/sorted_array.h>
 
 inline vec2 RandomDir() { return normalize(vec2(frandom()-0.5f, frandom()-0.5f)); }
 
@@ -235,10 +237,10 @@ void CEffects::HammerHit(vec2 Pos)
 	// add the explosion
 	CParticle p;
 	p.SetDefault();
-	p.m_Spr = SPRITE_PART_EXPL01;
+	p.m_Spr = SPRITE_PART_HIT01;
 	p.m_Pos = Pos;
-	p.m_LifeSpan = 0.4f;
-	p.m_StartSize = 150.0f;
+	p.m_LifeSpan = 0.3f;
+	p.m_StartSize = 120.0f;
 	p.m_EndSize = 0;
 	p.m_Rot = frandom()*pi*2;
 	m_pClient->m_pParticles->Add(CParticles::GROUP_EXPLOSIONS, &p);	

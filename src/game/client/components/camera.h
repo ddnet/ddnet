@@ -6,19 +6,31 @@
 #include <game/client/component.h>
 
 class CCamera : public CComponent
-{	
-	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConZoomReset(IConsole::IResult *pResult, void *pUserData, int ClientID);
+{
+	enum
+	{
+		CAMTYPE_UNDEFINED=-1,
+		CAMTYPE_SPEC,
+		CAMTYPE_PLAYER,
+	};
+
+	int m_CamType;
+	vec2 m_PrevCenter;
 
 public:
 	vec2 m_Center;
 	float m_Zoom;
-	bool m_WasSpectator;
 
 	CCamera();
 	virtual void OnRender();
+
+	// DDRace
+
 	virtual void OnConsoleInit();
+private:
+	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConZoomReset(IConsole::IResult *pResult, void *pUserData, int ClientID);
 };
 
 #endif

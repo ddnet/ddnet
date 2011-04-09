@@ -14,8 +14,6 @@ struct CConfiguration
 
 extern CConfiguration g_Config;
 
-void dbg_msg1(const char * where, const char * format, ...);
-
 enum
 {
 	CFGFLAG_SAVE=1,
@@ -23,10 +21,9 @@ enum
 	CFGFLAG_SERVER=4,
 	CFGFLAG_STORE=8,
 	CFGFLAG_MASTER=16,
-	//DDRace
+	// DDRace
 	CMDFLAG_CHEAT=32,
-	CMDFLAG_TIMER=64,
-	CMDFLAG_HELPERCMD=128
+	CMDFLAG_HELPERCMD=64
 };
 
 #endif

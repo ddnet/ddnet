@@ -8,10 +8,11 @@
 #include "././game/variables.h"
 
 
-MACRO_CONFIG_STR(PlayerName, player_name, 24, "nameless tee", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the player", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_STR(ClanName, clan_name, 32, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "(not used)", IConsole::CONSOLELEVEL_USER)
+MACRO_CONFIG_STR(PlayerName, player_name, 16, "nameless tee", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Name of the player", IConsole::CONSOLELEVEL_USER)
+MACRO_CONFIG_STR(PlayerClan, player_clan, 12, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clan of the player", IConsole::CONSOLELEVEL_USER)
+MACRO_CONFIG_INT(PlayerCountry, player_country, -1, -1, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Country of the player", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_STR(Password, password, 32, "", CFGFLAG_CLIENT|CFGFLAG_SERVER, "Password to the server", IConsole::CONSOLELEVEL_ADMIN)
-MACRO_CONFIG_STR(Logfile, logfile, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Filename to log all output to", IConsole::CONSOLELEVEL_ADMIN)
+MACRO_CONFIG_STR(Logfile, logfile, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Filename to log all output to", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ConsoleOutputLevel, console_output_level, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Adjusts the amount of information in the console", IConsole::CONSOLELEVEL_ADMIN)
 
 MACRO_CONFIG_INT(ClCpuThrottle, cl_cpu_throttle, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "", IConsole::CONSOLELEVEL_USER)
@@ -27,12 +28,14 @@ MACRO_CONFIG_INT(ClEventthread, cl_eventthread, 0, 0, 1, CFGFLAG_CLIENT, "Enable
 MACRO_CONFIG_INT(InpGrab, inp_grab, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use forceful input grabbing method", IConsole::CONSOLELEVEL_USER)
 
 MACRO_CONFIG_STR(BrFilterString, br_filter_string, 25, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering string", IConsole::CONSOLELEVEL_USER)
-
 MACRO_CONFIG_INT(BrFilterFull, br_filter_full, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out full server in browser", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(BrFilterEmpty, br_filter_empty, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out empty server in browser", IConsole::CONSOLELEVEL_USER)
+MACRO_CONFIG_INT(BrFilterSpectators, br_filter_spectators, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out spectators from player numbers", IConsole::CONSOLELEVEL_USER)
+MACRO_CONFIG_INT(BrFilterFriends, br_filter_friends, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out servers with no friends", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(BrFilterPw, br_filter_pw, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out password protected servers in browser", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(BrFilterPing, br_filter_ping, 999, 0, 999, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Ping to filter by in the server browser", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_STR(BrFilterGametype, br_filter_gametype, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Game types to filter", IConsole::CONSOLELEVEL_USER)
+MACRO_CONFIG_STR(BrFilterServerAddress, br_filter_serveraddress, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server address to filter", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(BrFilterPure, br_filter_pure, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-standard servers in browser", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(BrFilterPureMap, br_filter_pure_map, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-standard maps in browser", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(BrFilterCompatversion, br_filter_compatversion, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-compatible servers in browser", IConsole::CONSOLELEVEL_USER)
@@ -66,16 +69,16 @@ MACRO_CONFIG_INT(GfxFinish, gfx_finish, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, ""
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 100, 5, 100000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Mouse sensitivity", IConsole::CONSOLELEVEL_USER)
 
-MACRO_CONFIG_STR(SvName, sv_name, 128, "DDRace Test Trunk 0.5 Server", CFGFLAG_SERVER, "Server name", IConsole::CONSOLELEVEL_ADMIN)
+MACRO_CONFIG_STR(SvName, sv_name, 128, "unnamed server", CFGFLAG_SERVER, "Server name", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvBindaddr, sv_bindaddr, 128, "", CFGFLAG_SERVER, "Address to bind the server to", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvPort, sv_port, 8303, 0, 0, CFGFLAG_SERVER, "Port to use for the server", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvExternalPort, sv_external_port, 0, 0, 0, CFGFLAG_SERVER, "External port to report to the master servers", IConsole::CONSOLELEVEL_ADMIN)
-MACRO_CONFIG_STR(SvMap, sv_map, 128, "Test", CFGFLAG_SERVER, "Map to use on the server", IConsole::CONSOLELEVEL_ADMIN)
+MACRO_CONFIG_STR(SvMap, sv_map, 128, "dm1", CFGFLAG_SERVER, "Map to use on the server", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvMaxClients, sv_max_clients, 16, 1, MAX_CLIENTS, CFGFLAG_SERVER, "Maximum number of clients that are allowed on a server", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvMaxClientsPerIP, sv_max_clients_per_ip, 2, 1, MAX_CLIENTS, CFGFLAG_SERVER, "Maximum number of clients with the same IP that can connect to the server", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvHighBandwidth, sv_high_bandwidth, 0, 0, 1, CFGFLAG_SERVER, "Use high bandwidth mode. Doubles the bandwidth required for the server. LAN use only", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvRegister, sv_register, 1, 0, 1, CFGFLAG_SERVER, "Register server with master server for public listing", IConsole::CONSOLELEVEL_ADMIN)
-//MACRO_CONFIG_STR(SvRconPassword, sv_rcon_password, 32, "", CFGFLAG_SERVER, "Remote console password")
+MACRO_CONFIG_STR(SvRconPassword, sv_rcon_password, 32, "", CFGFLAG_SERVER, "Remote console password", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvRconMaxTries, sv_rcon_max_tries, 20, 0, 100, CFGFLAG_SERVER, "Maximum number of tries for remote console authentication", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvRconBantime, sv_rcon_bantime, 5, 0, 1440, CFGFLAG_SERVER, "The time a client gets banned if remote console authentication fails. 0 makes it just use kick", IConsole::CONSOLELEVEL_ADMIN)
 
@@ -88,41 +91,29 @@ MACRO_CONFIG_INT(DbgHitch, dbg_hitch, 0, 0, 0, CFGFLAG_SERVER, "Hitch warnings",
 MACRO_CONFIG_STR(DbgStressServer, dbg_stress_server, 32, "localhost", CFGFLAG_CLIENT, "Server to stress", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(DbgResizable, dbg_resizable, 0, 0, 0, CFGFLAG_CLIENT, "Enables window resizing", IConsole::CONSOLELEVEL_USER)
 
-//DDRace
+// DDRace
+
 MACRO_CONFIG_STR(SvWelcome, sv_welcome, 64, "", CFGFLAG_SERVER, "Message that will be displayed to players who join the server", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvBroadcast, sv_broadcast, 64, "DDRace.info Trunk 0.5", CFGFLAG_SERVER, "The broadcasting message", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvReservedSlots, sv_reserved_slots, 0, 0, 16, CFGFLAG_SERVER, "The number of slots that are reserved for special players", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvReservedSlotsPass, sv_reserved_slots_pass, 32, "", CFGFLAG_SERVER, "The password that is required to use a reserved slot", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvRconPasswordAdmin, sv_admin_pass, 32, "", CFGFLAG_SERVER, "Remote console administrator password", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvRconPasswordModer, sv_mod_pass, 32, "", CFGFLAG_SERVER, "Remote console moderator password", IConsole::CONSOLELEVEL_ADMIN)
-MACRO_CONFIG_STR(SvRconPasswordHelper, sv_helper_pass, 32, "", CFGFLAG_SERVER, "Remote console helper password", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvHit, sv_hit, 1, 0, 1, CFGFLAG_SERVER, "Whether players can hammer/grenade/laser eachother or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvEndlessDrag, sv_endless_drag, 0, 0, 1, CFGFLAG_SERVER, "Turns endless hooking on/off", IConsole::CONSOLELEVEL_ADMIN)
-
-MACRO_CONFIG_INT(SvMapTest, sv_map_test, 0, 0, 1, CFGFLAG_SERVER, "Whether this server is just for map testing", IConsole::CONSOLELEVEL_ADMIN)
-
-#ifndef CONF_DEBUG
-MACRO_CONFIG_INT(SvServerTest, sv_server_test, 0, 0, 0, CFGFLAG_SERVER, "Whether this server is for testing the mod (only available for debug compilation)", IConsole::CONSOLELEVEL_ADMIN)
-#else
-MACRO_CONFIG_INT(SvServerTest, sv_server_test, 1, 0, 1, CFGFLAG_SERVER, "Whether this server is for testing the mod (only available for debug compilation)", IConsole::CONSOLELEVEL_ADMIN)
-#endif
-
 MACRO_CONFIG_INT(SvCheats, sv_cheats, 0, 0, 1, CFGFLAG_SERVER, "Turns cheats on/off", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvFreezeDelay, sv_freeze_delay, 3, 1, 30, CFGFLAG_SERVER, "How many seconds the players will remain frozen (applies to all except delayed freeze in switch layer & deepfreeze)", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(ClDDRaceCheats, cl_race_cheats, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Cheats Such as Zoom",IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClDDRaceBinds, cl_race_binds, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable Default DDrace builds when pressing the reset binds button",IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(SvCheatTime, sv_cheattime, 0, 0, 1, CFGFLAG_SERVER, "Whether the time of players will be stopped on cheating or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvEndlessSuperHook, sv_endless_super_hook, 0, 0, 1, CFGFLAG_SERVER, "Endless hook for super players on/off", IConsole::CONSOLELEVEL_ADMIN)
-
-//MACRO_CONFIG_INT(SvAllowColorChange, sv_allow_color_change, 1, 0, 1, CFGFLAG_SERVER, "Whether color change is allowed (to block rainbow mod)", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvHideScore, sv_hide_score, 0, 0, 1, CFGFLAG_SERVER, "Whether players scores will be announced or not", IConsole::CONSOLELEVEL_ADMIN)
-MACRO_CONFIG_INT(SvTimer, sv_timer, 0, 0, 1, CFGFLAG_SERVER, "Whether timer commands are allowed or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvPauseable, sv_pauseable, 1, 0, 1, CFGFLAG_SERVER, "Whether players can pause their char or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvPauseTime, sv_pause_time, 0, 0, 1, CFGFLAG_SERVER, "Whether '/pause' and 'sv_max_dc_restore' pauses the time of player or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvPauseFrequency, sv_pause_frequency, 5, 0, 9999, CFGFLAG_SERVER, "The minimum allowed delay between pauses", IConsole::CONSOLELEVEL_ADMIN)
 
 MACRO_CONFIG_INT(SvEmotionalTees, sv_emotional_tees, 1, 0, 1, CFGFLAG_SERVER, "Whether eye change of tees is enabled or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvEmoticonDelay, sv_emoticon_delay, 3, 0, 9999, CFGFLAG_SERVER, "The time in seconds between over-head emoticons", IConsole::CONSOLELEVEL_ADMIN)
+
 
 MACRO_CONFIG_INT(SvChatDelay, sv_chat_delay, 1, 0, 9999, CFGFLAG_SERVER, "The time in seconds between chat messages", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvTeamChangeDelay, sv_team_change_delay, 3, 0, 9999, CFGFLAG_SERVER, "The time in seconds between team changes (spectator/in game)", IConsole::CONSOLELEVEL_ADMIN)
@@ -140,7 +131,6 @@ MACRO_CONFIG_INT(SvShotgunBulletSound, sv_shotgun_bullet_sound, 0, 0, 1, CFGFLAG
 
 MACRO_CONFIG_INT(SvCheckpointSave, sv_checkpoint_save, 1, 0, 1, CFGFLAG_SERVER, "Whether to save checkpoint times to the score file", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvScoreFolder, sv_score_folder, 32, "records", CFGFLAG_SERVER, "Folder to save score files to", IConsole::CONSOLELEVEL_ADMIN)
-
 
 #if defined(CONF_SQL)
 MACRO_CONFIG_INT(SvUseSQL, sv_use_sql, 0, 0, 1, CFGFLAG_SERVER, "Enables SQL DB instead of record file", IConsole::CONSOLELEVEL_ADMIN)
@@ -163,7 +153,6 @@ MACRO_CONFIG_STR(SvRulesLine7, sv_rules_line7, 40, "", CFGFLAG_SERVER, "Rules li
 MACRO_CONFIG_STR(SvRulesLine8, sv_rules_line8, 40, "", CFGFLAG_SERVER, "Rules line 8", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvRulesLine9, sv_rules_line9, 40, "", CFGFLAG_SERVER, "Rules line 9", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvRulesLine10, sv_rules_line10, 40, "", CFGFLAG_SERVER, "Rules line 10", IConsole::CONSOLELEVEL_ADMIN)
-//MACRO_CONFIG_INT(SvReconnectTime, sv_reconnect_time,5,0,9999,CFGFLAG_SERVER, "The time in seconds between leaves and joins of clients with the same ip", IConsole::CONSOLELEVEL_ADMIN)
 
 MACRO_CONFIG_INT(SvTeam, sv_team, 1, 0, 2, CFGFLAG_SERVER, "Teams configuration (0 = off, 1 = on but optional, 2 = must play only with teams)", IConsole::CONSOLELEVEL_ADMIN)
 
@@ -175,23 +164,7 @@ MACRO_CONFIG_INT(SvOldLaser, sv_old_laser, 0, 0, 1, CFGFLAG_SERVER, "Whether las
 MACRO_CONFIG_INT(SvSlashMe, sv_slash_me, 0, 0, 1, CFGFLAG_SERVER, "Whether /me is active on the server or not", IConsole::CONSOLELEVEL_ADMIN)
 
 MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 15, 5, 100, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout", IConsole::CONSOLELEVEL_ADMIN)
-
-MACRO_CONFIG_INT(DbgMsg, dbg_msg, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Display or not debug messages", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(ClShowIDs, cl_show_ids, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Whether to show client ids in scoreboard", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterGametypeStrict, br_filter_gametype_strict, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter game type strict", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterCheats, br_filter_cheats, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering cheats (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterCheatTime, br_filter_cheat_time, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering cheats with time (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterTeams, br_filter_teams, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering teams (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterTeamsStrict, br_filter_teams_strict, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering teams strictness (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterPause, br_filter_pause, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering Pause (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterPauseTime, br_filter_pause_time, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering teams Pause with time (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterPlayerCollision, br_filter_player_collision, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering player collision (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterPlayerHooking, br_filter_player_hooking, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering player hooking (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterPlayerHitting, br_filter_player_hitting, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering player hitting (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterEndlessHooking, br_filter_endless_hooking, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering player endless hooking (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterTestMap, br_filter_test_map, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering Test Maps (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(BrFilterTestServer, br_filter_test_server, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Server browser filtering Test Servers (default: 0 don't care, 1 must be Off, 2 must be On)", IConsole::CONSOLELEVEL_USER)
-
 MACRO_CONFIG_INT(ClAutoRaceRecord, cl_auto_race_record, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save the best demo of each race", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClDemoName, cl_demo_name, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save the player name within the demo", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClRaceGhost, cl_race_ghost, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable ghost", IConsole::CONSOLELEVEL_USER)
@@ -199,15 +172,16 @@ MACRO_CONFIG_INT(ClRaceShowGhost, cl_race_show_ghost, 1, 0, 1, CFGFLAG_CLIENT|CF
 MACRO_CONFIG_INT(ClRaceSaveGhost, cl_race_save_ghost, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save ghost", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(SvGlobalBantime, sv_global_ban_time, 60, 0, 1440, CFGFLAG_SERVER, "The time a client gets banned if the ban server reports it. 0 to disable", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(ClDDRaceScoreBoard, cl_ddrace_scoreboard, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable DDRace Scoreboard ", IConsole::CONSOLELEVEL_USER)
-// these might need some fine tuning
-MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, "chat score will be increased by this on every message, and decremented by 1 on every tick.", IConsole::CONSOLELEVEL_ADMIN)
-MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000 , CFGFLAG_SERVER, "if chats core exceeds this, the player will be muted for sv_spam_mute_duration seconds", IConsole::CONSOLELEVEL_ADMIN)
-MACRO_CONFIG_INT(SvSpamMuteDuration, sv_spam_mute_duration, 60, 0, 3600 , CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvResetPickus, sv_reset_pickups, 0, 0, 1, CFGFLAG_SERVER, "Whether the weapons are reset on passing the start tile or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(ClShowOthers, cl_show_others, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show players in other teams", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClShowEntities, cl_show_entities, 0, 0, 1, CFGFLAG_CLIENT, "Cheat to show game tiles", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClPredictOldHookthrough, cl_predict_oldht, 0, 0, 1, CFGFLAG_CLIENT, "Client predicts old Hookthrough", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(SvShowOthers, sv_show_others, 1, 0, 1, CFGFLAG_SERVER, "Whether players can user the command showothers or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvMaxAfkTime, sv_max_afk_time, 0, 0, 9999, CFGFLAG_SERVER, "The time in seconds a player is allowed to be afk (0 = disabled)", IConsole::CONSOLELEVEL_ADMIN)
+
+// these might need some fine tuning
+MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, "chat score will be increased by this on every message, and decremented by 1 on every tick.", IConsole::CONSOLELEVEL_ADMIN)
+MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000 , CFGFLAG_SERVER, "if chats core exceeds this, the player will be muted for sv_spam_mute_duration seconds", IConsole::CONSOLELEVEL_ADMIN)
+MACRO_CONFIG_INT(SvSpamMuteDuration, sv_spam_mute_duration, 60, 0, 3600 , CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off", IConsole::CONSOLELEVEL_ADMIN)
 
 #endif

@@ -533,7 +533,7 @@ void CGhost::OnConsoleInit()
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(!g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE || m_pClient->m_Snap.m_Spectate)
+	if(!g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE || m_pClient->m_Snap.m_SpecInfo.m_Active)
 		return;
 	
 	// check for messages from server

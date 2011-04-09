@@ -2,17 +2,19 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
-#include <game/server/teams.h>
 #include "pickup.h"
+
+#include <game/server/teams.h>
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
-	m_Layer = Layer;
-	m_Number = Number;
 	m_Type = Type;
 	m_Subtype = SubType;
 	m_ProximityRadius = PickupPhysSize;
+
+	m_Layer = Layer;
+	m_Number = Number;
 
 	Reset();
 	
@@ -21,33 +23,17 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int N
 
 void CPickup::Reset()
 {
-	/*
-	if (g_pData->m_aPickups[m_Type].m_Spawndelay > 0)
+	/*if (g_pData->m_aPickups[m_Type].m_Spawndelay > 0)
 		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * g_pData->m_aPickups[m_Type].m_Spawndelay;
 	else
-		m_SpawnTick = -1;
-	*/
-}
-
-void CPickup::Move()
-{
-   if (Server()->Tick()%int(Server()->TickSpeed() * 0.15f) == 0)
-   {
-		int Flags;
-		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
-		if (index)
-		{
-			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);
-		}
-       m_Pos += m_Core;
-	}
+		m_SpawnTick = -1;*/
 }
 
 void CPickup::Tick()
 {
 	Move();
-	// wait for respawn
-	/*if(m_SpawnTick > 0)
+	/*// wait for respawn
+	if(m_SpawnTick > 0)
 	{
 		if(Server()->Tick() > m_SpawnTick)
 		{
@@ -102,13 +88,13 @@ void CPickup::Tick()
 					break;
 
 				case POWERUP_WEAPON:
-				
+
 					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
 					{
 						if(pChr->GiveWeapon(m_Subtype, -1))
 						{
 							//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
-						
+
 							if(m_Subtype == WEAPON_GRENADE)
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE);
 							else if(m_Subtype == WEAPON_SHOTGUN)
@@ -151,18 +137,21 @@ void CPickup::Tick()
 			}*/
 		}
 	}
-	
 }
 
 void CPickup::Snap(int SnappingClient)
 {
-	/*
-	if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
-		return;
-	*/
+	/*if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
+		return;*/
+
 	CCharacter * SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
-	if (SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick)) return;
+	if (SnapChar && SnapChar->IsAlive() &&
+			(m_Layer == LAYER_SWITCH &&
+					!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()])
+					&& (!Tick))
+		return;
+
 	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID, sizeof(CNetObj_Pickup)));
 	if(!pP)
 		return;
@@ -171,4 +160,18 @@ void CPickup::Snap(int SnappingClient)
 	pP->m_Y = (int)m_Pos.y;
 	pP->m_Type = m_Type;
 	pP->m_Subtype = m_Subtype;
+}
+
+void CPickup::Move()
+{
+	if (Server()->Tick()%int(Server()->TickSpeed() * 0.15f) == 0)
+	{
+		int Flags;
+		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
+		if (index)
+		{
+			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);
+		}
+		m_Pos += m_Core;
+	}
 }

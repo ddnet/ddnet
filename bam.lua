@@ -110,17 +110,21 @@ nethash = CHash("src/game/generated/nethash.c", "src/engine/shared/protocol.h", 
 
 client_link_other = {}
 client_depends = {}
+server_link_other = {}
 server_sql_depends = {}
 
 if family == "windows" then
+	table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib\\freetype.dll"))
 	table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\vc2005libs\\SDL.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
-	
+
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
+		server_link_other = {ResCompile("other/icons/teeworlds_srv_cl.rc")}
 	elseif config.compiler.driver == "gcc" then
 		client_link_other = {ResCompile("other/icons/teeworlds_gcc.rc")}
+		server_link_other = {ResCompile("other/icons/teeworlds_srv_gcc.rc")}
 	end
 end
 
@@ -151,7 +155,7 @@ function build(settings)
 	settings.cc.includes:Add("other/mysql/include")
 
 	if family == "unix" then
-		if platform == "macosx" then
+   		if platform == "macosx" then
 			settings.link.frameworks:Add("Carbon")
 			settings.link.frameworks:Add("AppKit")
 		else
@@ -195,10 +199,10 @@ function build(settings)
 		
 		if platform == "macosx" then
 			client_settings.link.frameworks:Add("OpenGL")
-			client_settings.link.frameworks:Add("AGL")
-			client_settings.link.frameworks:Add("Carbon")
-			client_settings.link.frameworks:Add("Cocoa")
-			launcher_settings.link.frameworks:Add("Cocoa")
+            client_settings.link.frameworks:Add("AGL")
+            client_settings.link.frameworks:Add("Carbon")
+            client_settings.link.frameworks:Add("Cocoa")
+            launcher_settings.link.frameworks:Add("Cocoa")
 			if not string.find(settings.config_name, "nosql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/mac/lib64")
@@ -259,16 +263,16 @@ function build(settings)
 	tools = {}
 	for i,v in ipairs(tools_src) do
 		toolname = PathFilename(PathBase(v))
-		tools[i] = Link(settings, toolname, Compile(settings, v), engine, zlib)
+		tools[i] = Link(settings, toolname, Compile(settings, v), engine, zlib, pnglite)
 	end
 	
 	-- build client, server, version server and master server
-	client_exe = Link(client_settings, "DDRace", game_shared, game_client,
+	client_exe = Link(client_settings, "teeworlds", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
 		client_link_other, client_osxlaunch)
 
-	server_exe = Link(server_settings, "DDRace-Server", engine, server,
-		game_shared, game_server, zlib)
+	server_exe = Link(server_settings, "teeworlds_srv", engine, server,
+		game_shared, game_server, zlib, server_link_other)
 
 	serverlaunch = {}
 	if platform == "macosx" then

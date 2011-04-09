@@ -11,6 +11,7 @@
 #include <game/mapitems.h>
 #include <game/layers.h>
 #include <game/collision.h>
+
 #include <engine/shared/config.h>
 
 CCollision::CCollision()
@@ -19,24 +20,7 @@ CCollision::CCollision()
 	m_Width = 0;
 	m_Height = 0;
 	m_pLayers = 0;
-	m_pTele = 0;
-	m_pSpeedup = 0;
-	m_pFront = 0;
-	m_pSwitch = 0;
-	m_pDoor = 0;
-	m_pSwitchers = 0;
-}
 
-void CCollision::Dest()
-{
-	if(m_pDoor)
-		delete[] m_pDoor;
-	if(m_pSwitchers)
-		delete[] m_pSwitchers;
-	m_pTiles = 0;
-	m_Width = 0;
-	m_Height = 0;
-	m_pLayers = 0;
 	m_pTele = 0;
 	m_pSpeedup = 0;
 	m_pFront = 0;
@@ -57,8 +41,10 @@ void CCollision::Init(class CLayers *pLayers)
 
 	if(m_pLayers->TeleLayer())
 		m_pTele = static_cast<CTeleTile *>(m_pLayers->Map()->GetData(m_pLayers->TeleLayer()->m_Tele));
+
 	if(m_pLayers->SpeedupLayer())
 		m_pSpeedup = static_cast<CSpeedupTile *>(m_pLayers->Map()->GetData(m_pLayers->SpeedupLayer()->m_Speedup));
+
 	if(m_pLayers->SwitchLayer())
 	{
 		m_pSwitch = static_cast<CSwitchTile *>(m_pLayers->Map()->GetData(m_pLayers->SwitchLayer()->m_Switch));
@@ -70,11 +56,10 @@ void CCollision::Init(class CLayers *pLayers)
 		m_pDoor = 0;
 		m_pSwitchers = 0;
 	}
+
 	if(m_pLayers->FrontLayer())
-	{
 		m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
 
-	}
 	for(int i = 0; i < m_Width*m_Height; i++)
 	{
 		int Index;
@@ -82,12 +67,14 @@ void CCollision::Init(class CLayers *pLayers)
 		{
 			if(m_pSwitch[i].m_Number > m_NumSwitchers)
 				m_NumSwitchers = m_pSwitch[i].m_Number;
+
 			if(m_pSwitch[i].m_Number)
 				m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
 			else
 				m_pDoor[i].m_Number = 0;
 
 			Index = m_pSwitch[i].m_Type;
+
 			if(Index <= TILE_NPH)
 			{
 				if(Index >= TILE_FREEZE && Index <= TILE_SWITCHCLOSE)
@@ -99,6 +86,7 @@ void CCollision::Init(class CLayers *pLayers)
 		if(m_pFront)
 		{
 			Index = m_pFront[i].m_Index;
+
 			if(Index <= TILE_NPH)
 			{
 				switch(Index)
@@ -153,7 +141,7 @@ void CCollision::Init(class CLayers *pLayers)
 	if(m_NumSwitchers)
 	{
 		m_pSwitchers = new SSwitchers[m_NumSwitchers+1];
-	
+
 		for (int i = 0; i < m_NumSwitchers+1; ++i)
 		{
 			for (int j = 0; j < 16; ++j)
@@ -171,27 +159,22 @@ int CCollision::GetTile(int x, int y)
 	int Nx = clamp(x/32, 0, m_Width-1);
 	int Ny = clamp(y/32, 0, m_Height-1);
 	if(!m_pTiles || Ny < 0 || Nx < 0)
-	{
-		//dbg_msg("Collision","Something is terribly wrong, !m_pTiles %d, Ny %d, Ny %d", !m_pTiles, Ny, Ny);
 		return 0;
-	}
-	/*dbg_msg("GetTile","m_Index %d",m_pTiles[Ny*m_Width+Nx].m_Index);//Remove */
+	
 	if(m_pTiles[Ny*m_Width+Nx].m_Index == COLFLAG_SOLID
 		|| m_pTiles[Ny*m_Width+Nx].m_Index == (COLFLAG_SOLID|COLFLAG_NOHOOK)
 		|| m_pTiles[Ny*m_Width+Nx].m_Index == COLFLAG_DEATH
 		|| m_pTiles[Ny*m_Width+Nx].m_Index == COLFLAG_NOLASER)
 		return m_pTiles[Ny*m_Width+Nx].m_Index;
-	else
-		return 0;
+	return 0;
 }
-
 /*
 bool CCollision::IsTileSolid(int x, int y)
 {
 	return GetTile(x, y)&COLFLAG_SOLID;
 }
 */
-
+// TODO: rewrite this smarter!
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough)
 {
 	float Distance = distance(Pos0, Pos1);
@@ -231,7 +214,7 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 {
 	if(pBounces)
 		*pBounces = 0;
-
+	
 	vec2 Pos = *pInoutPos;
 	vec2 Vel = *pInoutVel;
 	if(CheckPoint(Pos + Vel))
@@ -241,7 +224,7 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 		{
 			pInoutVel->x *= -Elasticity;
 			if(pBounces)
-				(*pBounces)++;
+				(*pBounces)++;			
 			Affected++;
 		}
 
@@ -249,10 +232,10 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 		{
 			pInoutVel->y *= -Elasticity;
 			if(pBounces)
-				(*pBounces)++;
+				(*pBounces)++;			
 			Affected++;
 		}
-
+		
 		if(Affected == 0)
 		{
 			pInoutVel->x *= -Elasticity;
@@ -284,10 +267,10 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 	// do the move
 	vec2 Pos = *pInoutPos;
 	vec2 Vel = *pInoutVel;
-
+	
 	float Distance = length(Vel);
 	int Max = (int)Distance;
-
+	
 	if(Distance > 0.00001f)
 	{
 		//vec2 old_pos = pos;
@@ -297,27 +280,27 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 			//float amount = i/(float)max;
 			//if(max == 0)
 				//amount = 0;
-
+			
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
-
+			
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{
 				int Hits = 0;
-
+				
 				if(TestBox(vec2(Pos.x, NewPos.y), Size))
 				{
 					NewPos.y = Pos.y;
 					Vel.y *= -Elasticity;
 					Hits++;
 				}
-
+				
 				if(TestBox(vec2(NewPos.x, Pos.y), Size))
 				{
 					NewPos.x = Pos.x;
 					Vel.x *= -Elasticity;
 					Hits++;
 				}
-
+				
 				// neither of the tests got a collision.
 				// this is a real _corner case_!
 				if(Hits == 0)
@@ -328,13 +311,33 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 					Vel.x *= -Elasticity;
 				}
 			}
-
+			
 			Pos = NewPos;
 		}
 	}
-
+	
 	*pInoutPos = Pos;
 	*pInoutVel = Vel;
+}
+
+// DDRace
+
+void CCollision::Dest()
+{
+	if(m_pDoor)
+		delete[] m_pDoor;
+	if(m_pSwitchers)
+		delete[] m_pSwitchers;
+	m_pTiles = 0;
+	m_Width = 0;
+	m_Height = 0;
+	m_pLayers = 0;
+	m_pTele = 0;
+	m_pSpeedup = 0;
+	m_pFront = 0;
+	m_pSwitch = 0;
+	m_pDoor = 0;
+	m_pSwitchers = 0;
 }
 
 int CCollision::IsSolid(int x, int y)
@@ -482,7 +485,7 @@ int CCollision::IsCheckpoint(int Index)
 {
 	if(Index < 0)
 		return -1;
-		
+
 	int z = m_pTiles[Index].m_Index;
 	if(z >= 35 && z <= 59)
 		return z-35;
@@ -857,6 +860,7 @@ void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy)
 		}
 	}
 }
+
 int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision)
 {
 	float d = distance(Pos0, Pos1);
@@ -879,7 +883,7 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 				*pOutBeforeCollision = Last;
 			if (GetFIndex(Nx, Ny) == COLFLAG_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
 			else return GetCollisionAt(Pos.x, Pos.y);
-			
+
 		}
 		Last = Pos;
 	}
@@ -946,4 +950,3 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 		*pOutBeforeCollision = Pos1;
 	return 0;
 }
-

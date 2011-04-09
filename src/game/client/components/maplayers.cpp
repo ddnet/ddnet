@@ -97,7 +97,7 @@ void CMapLayers::OnRender()
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
-
+		
 		if(!pGroup)
 		{
 			dbg_msg("MapLayers", "Error:Group was null, Group Number = %d, Total Groups = %d", g, m_pLayers->NumGroups());
@@ -194,7 +194,7 @@ void CMapLayers::OnRender()
 					io_close(File);
 				}
 			}			
-
+			
 			if((Render && !IsGameLayer && !IsFrontLayer && !IsTeleLayer && !IsSwitchLayer && !IsSpeedupLayer && (!g_Config.m_ClShowEntities || !g_Config.m_ClDDRaceCheats)) || ((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && (IsGameLayer || IsFrontLayer || IsTeleLayer || IsSwitchLayer || IsSpeedupLayer)))
 			{
 				//layershot_begin();
@@ -248,3 +248,4 @@ void CMapLayers::OnRender()
 	// reset the screen like it was before
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 }
+

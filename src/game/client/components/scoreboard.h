@@ -13,8 +13,9 @@ class CScoreboard : public CComponent
 
 	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	
+	const char *GetClanName(int Team);
+	
 	bool m_Active;
-	bool m_IsGameTypeRace;
 	
 public:
 	CScoreboard();
@@ -24,6 +25,12 @@ public:
 	virtual void OnRelease();
 
 	bool Active();
+
+	// DDRace
+
+private:
+
+	bool m_IsGameTypeRace;
 };
 
 #endif

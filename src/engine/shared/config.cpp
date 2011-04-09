@@ -3,6 +3,7 @@
 #include <engine/config.h>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
+
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -122,21 +123,5 @@ public:
 		io_write(m_ConfigFile, Newline, sizeof(Newline)-1);			
 	}
 };
-
-void dbg_msg1(const char * where,const char * format, ...) {
-	if(g_Config.m_DbgMsg == 1) {
-		const size_t buffer_size = 1024;//i hope this will be enough
-		char buffer[buffer_size]; 
-		va_list ap;
-		va_start(ap, format);
-		//#if defined(CONF_FAMILY_WINDOWS)
-		//_vsnprintf(buffer, buffer_size, format, ap);
-		//#else
-		vsnprintf(buffer, buffer_size, format, ap);
-		//#endif
-		va_end(ap);
-		dbg_msg(where, buffer);
-	}
-}
 
 IConfig *CreateConfig() { return new CConfig; }

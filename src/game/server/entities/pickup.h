@@ -17,11 +17,14 @@ public:
 	virtual void Snap(int SnappingClient);
 	
 private:
-	
-	void Move();
+
 	int m_Type;
 	int m_Subtype;
 	//int m_SpawnTick;
+
+	// DDRace
+
+	void Move();
 	vec2 m_Core;
 };
 

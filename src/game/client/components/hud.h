@@ -6,9 +6,37 @@
 
 class CHud : public CComponent
 {	
-	float m_Width;
+	float m_Width, m_Height;
 	float m_AverageFPS;
 	
+	void RenderCursor();
+	
+	void RenderFps();
+	void RenderConnectionWarning();
+	void RenderTeambalanceWarning();
+	void RenderVoting();
+	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);
+	void RenderGameTimer();
+	void RenderSuddenDeath();
+	void RenderScoreHud();
+	void RenderSpectatorHud();
+	void RenderWarmupTimer();
+
+	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
+public:
+	CHud();
+	
+	virtual void OnReset();
+	virtual void OnRender();
+
+	// DDRace
+
+	virtual void OnMessage(int MsgType, void *pRawMsg);
+
+private:
+
+	void RenderDDRaceEffects();
+	void RenderRecord();
 	float m_CheckpointDiff;
 	int m_DDRaceTime;
 	int m_LastReceivedTimeTick;
@@ -18,29 +46,6 @@ class CHud : public CComponent
 	float m_ServerRecord;
 	float m_PlayerRecord;
 	bool m_DDRaceTimeReceived;
-	
-	
-	void RenderCursor();
-	
-	void RenderFps();
-	void RenderConnectionWarning();
-	void RenderTeambalanceWarning();
-	void RenderVoting();
-	void RenderHealthAndAmmo();
-	void RenderGameTimer();
-	void RenderSuddenDeath();
-	void RenderScoreHud();
-	void RenderWarmupTimer();
-	void RenderDDRaceEffects();
-	void RenderRecord();
-
-	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
-public:
-	CHud();
-	
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
 };
 
 #endif

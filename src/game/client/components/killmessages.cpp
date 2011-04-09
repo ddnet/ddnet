@@ -70,7 +70,7 @@ void CKillMessages::OnRender()
 		// render victim tee
 		x -= 24.0f;
 		
-		if(m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_Flags&GAMEFLAG_FLAGS)
+		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
 		{
 			if(m_aKillmsgs[r].m_ModeSpecial&1)
 			{
@@ -107,7 +107,7 @@ void CKillMessages::OnRender()
 
 		if(m_aKillmsgs[r].m_VictimID != m_aKillmsgs[r].m_KillerID)
 		{
-			if(m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_Flags&GAMEFLAG_FLAGS)
+			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
 			{
 				if(m_aKillmsgs[r].m_ModeSpecial&2)
 				{
@@ -137,6 +137,6 @@ void CKillMessages::OnRender()
 			TextRender()->Text(0, x, y, FontSize, m_aKillmsgs[r].m_aKillerName, -1);
 		}
 
-		y += 44;
+		y += 46.0f;
 	}
 }

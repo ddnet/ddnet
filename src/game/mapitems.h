@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
+
 #include<engine/shared/protocol.h>
 
 // layer types
@@ -172,31 +173,6 @@ public:
 	unsigned char m_Reserved;
 };
 
-class CTeleTile
-{
-public:
-	unsigned char m_Number;
-	unsigned char m_Type;
-};
-
-class CSpeedupTile
-{
-public:
-	unsigned char m_Force;
-	unsigned char m_MaxSpeed;
-	unsigned char m_Type;
-	short m_Angle;
-};
-
-class CSwitchTile
-{
-public:
-	unsigned char m_Number;
-	unsigned char m_Type;
-	unsigned char m_Flags;
-	unsigned char m_Delay;
-};
-
 struct CMapItemImage
 {
 	int m_Version;
@@ -206,14 +182,6 @@ struct CMapItemImage
 	int m_ImageName;
 	int m_ImageData;
 } ;
-
-class CDoorTile
-{
-public:
-	unsigned char m_Index;
-	unsigned char m_Flags;
-	int m_Number;
-};
 
 struct CMapItemGroup_v1
 {
@@ -261,7 +229,9 @@ struct CMapItemLayerTilemap
 	
 	int m_Image;
 	int m_Data;
-	
+
+	// DDRace
+
 	int m_Tele;
 	int m_Speedup;
 	int m_Front;
@@ -300,5 +270,42 @@ struct CMapItemEnvelope
 	int m_NumPoints;
 	int m_aName[8];
 } ;
+
+// DDRace
+
+
+
+class CTeleTile
+{
+public:
+	unsigned char m_Number;
+	unsigned char m_Type;
+};
+
+class CSpeedupTile
+{
+public:
+	unsigned char m_Force;
+	unsigned char m_MaxSpeed;
+	unsigned char m_Type;
+	short m_Angle;
+};
+
+class CSwitchTile
+{
+public:
+	unsigned char m_Number;
+	unsigned char m_Type;
+	unsigned char m_Flags;
+	unsigned char m_Delay;
+};
+
+class CDoorTile
+{
+public:
+	unsigned char m_Index;
+	unsigned char m_Flags;
+	int m_Number;
+};
 
 #endif

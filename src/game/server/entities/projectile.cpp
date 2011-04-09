@@ -2,9 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
+#include "projectile.h"
+
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
-#include "projectile.h"
 
 CProjectile::CProjectile
 	(
@@ -24,8 +25,6 @@ CProjectile::CProjectile
 	)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
-	m_Layer = Layer;
-	m_Number = Number;
 	m_Type = Type;
 	m_Pos = Pos;
 	m_Direction = Dir;
@@ -33,11 +32,13 @@ CProjectile::CProjectile
 	m_Owner = Owner;
 	m_Force = Force;
 	//m_Damage = Damage;
-	m_Freeze = Freeze;
 	m_SoundImpact = SoundImpact;
 	m_Weapon = Weapon;
 	m_StartTick = Server()->Tick();
 	m_Explosive = Explosive;
+	m_Layer = Layer;
+	m_Number = Number;
+	m_Freeze = Freeze;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -74,10 +75,6 @@ vec2 CProjectile::GetPos(float Time)
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
-void CProjectile::SetBouncing(int Value)
-{
-	m_Bouncing = Value;
-}
 
 void CProjectile::Tick()
 {
@@ -90,12 +87,12 @@ void CProjectile::Tick()
 	vec2 Speed = CurPos - PrevPos;
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos, false);
 	CCharacter *OwnerChar = 0;
-	
 
-	
+
+
 	if(m_Owner >= 0)
 		OwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	
+
 	CCharacter *TargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, (m_Freeze) ? 1.0f : 6.0f, ColPos, OwnerChar);
 
 	if(m_LifeSpan > -1)
@@ -125,7 +122,7 @@ void CProjectile::Tick()
 		{
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!TargetChr ? -1 : TargetChr->Team()),
 			(m_Owner != -1)? TeamMask : -1);
-			GameServer()->CreateSound(ColPos, m_SoundImpact, 
+			GameServer()->CreateSound(ColPos, m_SoundImpact,
 			(m_Owner != -1)? TeamMask : -1);
 		}
 		else if(TargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[TargetChr->Team()]) || m_Layer != LAYER_SWITCH))
@@ -149,7 +146,7 @@ void CProjectile::Tick()
 			if (!m_Freeze)
 				GameServer()->m_World.DestroyEntity(this);
 	}
-	 if (m_LifeSpan == -1)  		 
+	if (m_LifeSpan == -1)
 	{
 		GameServer()->m_World.DestroyEntity(this);
 	}
@@ -171,18 +168,23 @@ void CProjectile::Snap(int SnappingClient)
 	
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
+
 	CCharacter * SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%((m_Explosive)?6:20);
 	if (SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()] && (!Tick))) return;
 
 	if
-	(
-			SnapChar &&
-			m_Owner != -1 &&
-			!SnapChar->CanCollide(m_Owner)
-			)
+	(SnapChar && m_Owner != -1 && !SnapChar->CanCollide(m_Owner))
 		return;
+
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID, sizeof(CNetObj_Projectile)));
 	if(pProj)
 		FillInfo(pProj);
+}
+
+// DDRace
+
+void CProjectile::SetBouncing(int Value)
+{
+	m_Bouncing = Value;
 }

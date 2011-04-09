@@ -2,9 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
+#include "laser.h"
+
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
-#include "laser.h"
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -78,7 +79,7 @@ void CLaser::DoBounce()
 	
 	int Res;
 	Res = GameServer()->Collision()->IntersectLine(m_Pos, To, &Coltile, &To,false);
-	
+
 	if(Res)
 	{
 		if(!HitCharacter(m_Pos, To))
@@ -93,13 +94,13 @@ void CLaser::DoBounce()
 			int f;
 			if(Res == -1)
 			{
-				f = GameServer()->Collision()->GetTile(round(Coltile.x), round(Coltile.y)); 
-				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), CCollision::COLFLAG_SOLID); 
+				f = GameServer()->Collision()->GetTile(round(Coltile.x), round(Coltile.y));
+				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), CCollision::COLFLAG_SOLID);
 			}
 			GameServer()->Collision()->MovePoint(&TempPos, &TempDir, 1.0f, 0);
 			if(Res == -1)
 			{
-				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), f); 
+				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), f);
 			}
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);

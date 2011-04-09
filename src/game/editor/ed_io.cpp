@@ -1,7 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/tl/array.h>
-
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
@@ -9,6 +7,8 @@
 #include <engine/storage.h>
 #include <game/gamecore.h>
 #include "ed_editor.h"
+
+#include <base/tl/array.h>
 
 template<typename T>
 static int MakeVersion(int i, const T &v)
@@ -294,6 +294,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				
 				Item.m_Width = pLayer->m_Width;
 				Item.m_Height = pLayer->m_Height;
+				//Item.m_Flags = pLayer->m_Game;
+
 				if(pLayer->m_Tele)
 					Item.m_Flags = 2;
 				else if(pLayer->m_Speedup)
@@ -304,6 +306,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					Item.m_Flags = 16;
 				else
 					Item.m_Flags = pLayer->m_Game;
+
 				Item.m_Image = pLayer->m_Image;
 				if(pLayer->m_Tele)
 				{
@@ -339,6 +342,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				}
 				else
 					Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), pLayer->m_pTiles);
+				Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), pLayer->m_pTiles);
 				df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 				
 				GItem.m_NumLayers++;
@@ -597,12 +601,12 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						}
 						
 						DataFile.UnloadData(pTilemapItem->m_Data);
-						
+
 						if(pTiles->m_Tele)
 						{
 							void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
 							mem_copy(((CLayerTele*)pTiles)->m_pTeleTile, pTeleData, pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile));
-							
+
 							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 							{
 								if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEIN)
@@ -620,7 +624,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						{
 							void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
 							mem_copy(((CLayerSpeedup*)pTiles)->m_pSpeedupTile, pSpeedupData, pTiles->m_Width*pTiles->m_Height*sizeof(CSpeedupTile));
-							
+
 							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 							{
 								if(((CLayerSpeedup*)pTiles)->m_pSpeedupTile[i].m_Force > 0)
@@ -634,7 +638,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									((CLayerSpeedup*)pTiles)->m_pSpeedupTile[i].m_Type = 0;
 								}
 							}
-							
+
 							DataFile.UnloadData(pTilemapItem->m_Speedup);
 						}
 						else if(pTiles->m_Front)

@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/string.h>
+#include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 #include <engine/keys.h>
@@ -18,8 +18,7 @@
 
 #include "chat.h"
 
-#include <base/utf8convert.h>
-#include <base/system.h>
+#include <base/tl/string.h>
 
 CChat::CChat()
 {
@@ -42,6 +41,7 @@ void CChat::OnReset()
 	m_aCompletionBuffer[0] = 0;
 	m_PlaceholderOffset = 0;
 	m_PlaceholderLength = 0;
+	m_pHistoryEntry = 0x0;
 }
 
 void CChat::OnRelease()
@@ -94,24 +94,29 @@ void CChat::OnConsoleInit()
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat", IConsole::CONSOLELEVEL_USER);
 }
 
-bool CChat::OnInput(IInput::CEvent e)
+bool CChat::OnInput(IInput::CEvent Event)
 {
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(e.m_Flags&IInput::FLAG_PRESS && e.m_Key == KEY_ESCAPE)
+	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
 		m_Mode = MODE_NONE;
 		m_pClient->OnRelease();
 	}
-	else if(e.m_Flags&IInput::FLAG_PRESS && (e.m_Key == KEY_RETURN || e.m_Key == KEY_KP_ENTER))
+	else if(Event.m_Flags&IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
 		if(m_Input.GetString()[0])
+		{
 			Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
+			char *pEntry = m_History.Allocate(m_Input.GetLength()+1);
+			mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength()+1);
+		}
+		m_pHistoryEntry = 0x0;
 		m_Mode = MODE_NONE;
 		m_pClient->OnRelease();
 	}
-	if(e.m_Flags&IInput::FLAG_PRESS && e.m_Key == KEY_TAB)
+	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
 		// fill the completion buffer
 		if(m_CompletionChosen < 0)
@@ -160,12 +165,45 @@ bool CChat::OnInput(IInput::CEvent e)
 	else
 	{
 		// reset name completion process
-		if(e.m_Flags&IInput::FLAG_PRESS && e.m_Key != KEY_TAB)
+		if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key != KEY_TAB)
 			m_CompletionChosen = -1;
 
 		m_OldChatStringLength = m_Input.GetLength();
-		m_Input.ProcessInput(e);
+		m_Input.ProcessInput(Event);
 		m_InputUpdate = true;
+	}
+	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_UP)
+	{
+		if (m_pHistoryEntry)
+		{
+			char *pTest = m_History.Prev(m_pHistoryEntry);
+
+			if (pTest)
+				m_pHistoryEntry = pTest;
+		}
+		else
+			m_pHistoryEntry = m_History.Last();
+
+		if (m_pHistoryEntry)
+		{
+			unsigned int Len = str_length(m_pHistoryEntry);
+			if (Len < sizeof(m_Input) - 1) // TODO: WTF?
+				m_Input.Set(m_pHistoryEntry);
+		}
+	}
+	else if (Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_DOWN)
+	{
+		if (m_pHistoryEntry)
+			m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
+
+		if (m_pHistoryEntry)
+		{
+			unsigned int Len = str_length(m_pHistoryEntry);
+			if (Len < sizeof(m_Input) - 1) // TODO: WTF?
+				m_Input.Set(m_pHistoryEntry);
+		}
+		else
+			m_Input.Clear();
 	}
 	
 	return true;
@@ -195,22 +233,17 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
-		if (!str_utf8_check(pMsg->m_pMessage))
-		{
-			char aUTF8Message[1024];
-			Latin1toUTF8(aUTF8Message,pMsg->m_pMessage,1024);
-			AddLine(pMsg->m_ClientID, pMsg->m_Team, aUTF8Message);
-		}
-		else
-			AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+		AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
 }
 
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
-	if(ClientID != -1 && m_pClient->m_aClients[ClientID].m_aName[0] == '\0') // unknown client
+	if(ClientID != -1 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
+		m_pClient->m_aClients[ClientID].m_ChatIgnore))
 		return;
 	
+	bool Highlighted = false;
 	char *p = const_cast<char*>(pLine);
 	while(*p)
 	{
@@ -233,6 +266,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		m_aLines[m_CurrentLine].m_Team = Team;
 		m_aLines[m_CurrentLine].m_NameColor = -2;
 		m_aLines[m_CurrentLine].m_Highlighted = str_find_nocase(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) != 0;
+		if(m_aLines[m_CurrentLine].m_Highlighted)
+			Highlighted = true;
 
 		if(ClientID == -1) // server message
 		{
@@ -244,7 +279,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			if(m_pClient->m_aClients[ClientID].m_Team == TEAM_SPECTATORS)
 				m_aLines[m_CurrentLine].m_NameColor = TEAM_SPECTATORS;
 
-			if(m_pClient->m_Snap.m_pGameobj && m_pClient->m_Snap.m_pGameobj->m_Flags&GAMEFLAG_TEAMS)
+			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 			{
 				if(m_pClient->m_aClients[ClientID].m_Team == TEAM_RED)
 					m_aLines[m_CurrentLine].m_NameColor = TEAM_RED;
@@ -262,23 +297,26 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 
 	// play sound
-	if(ClientID >= 0)
-		m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0, vec2(0,0));
-	else
+	if(ClientID == -1)
 		m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0, vec2(0,0));
+	else if(Highlighted)
+		m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0, vec2(0.0f, 0.0f));
+	else
+		m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0, vec2(0,0));
 }
 
 void CChat::OnRender()
 {
-	Graphics()->MapScreen(0,0,300*Graphics()->ScreenAspect(),300);
-	float x = 10.0f;
+	float Width = 300.0f*Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0.0f, 0.0f, Width, 300.0f);
+	float x = 5.0f;
 	float y = 300.0f-20.0f;
 	if(m_Mode != MODE_NONE)
 	{
 		// render chat input
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, 8.0f, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = 200.0f;
+		Cursor.m_LineWidth = Width-190.0f;
 		Cursor.m_MaxLines = 2;
 		
 		if(m_Mode == MODE_ALL)
@@ -325,8 +363,8 @@ void CChat::OnRender()
 	y -= 8.0f;
 
 	int64 Now = time_get();
-	float LineWidth = m_pClient->m_pScoreboard->Active() ? 95.0f : 200.0f;
-	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 220.0f : m_Show ? 50.0f : 200.0f;
+	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
+	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
 	float Begin = x;
 	float FontSize = 6.0f;
 	CTextCursor Cursor;

@@ -66,21 +66,23 @@ public:
 	void RenderTilemapGenerateSkip(class CLayers *pLayers);
 
 	// object render methods (gc_render_obj.cpp)
-	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool Alpha=false);
+	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool Alpha = false);
 
 	// map render methods (gc_render_map.cpp)
 	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, float Time, float *pResult);
 	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, void (*pfnEval)(float TimeOffset, int Env, float *pChannels, void *pUser), void *pUser);
 	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int Flags);
-	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale);
-	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale);
-	void RenderFrontmap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int Flags);
-	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale);
 
 	// helpers
 	void MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 		float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);	
-	
+
+	// DDRace
+
+	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale);
+	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale);
+	void RenderFrontmap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int Flags);
+	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale);
 };
 
 #endif

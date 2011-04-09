@@ -4,16 +4,16 @@
 #define ENGINE_SERVER_SERVER_H
 
 #include <engine/server.h>
+
 #include <engine/map.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/network.h>
-#include <engine/shared/engine.h>
 #include <engine/server/register.h>
 #include <engine/shared/console.h>
-
 #include <base/math.h>
+#include <engine/shared/mapchecker.h>
 
 class CSnapIDPool
 {
@@ -58,7 +58,6 @@ public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
-	class CEngine *Engine() { return &m_Engine; }
 
 	class CClient
 	{
@@ -98,20 +97,20 @@ public:
 		int m_CurrentInput;
 		
 		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLANNAME_LENGTH];
+		char m_aClan[MAX_CLAN_LENGTH];
+		int m_Country;
 		int m_Score;
 		int m_Authed;
 		int m_AuthTries;
-
-		bool m_IsUsingUTF8Client;
 		
-		NETADDR m_Addr;
-
 		void Reset();
+
+		// DDRace
+
+		NETADDR m_Addr;
 	};
 	
 	CClient m_aClients[MAX_CLIENTS];
-	int m_aPrevStates[MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -126,29 +125,26 @@ public:
 	int m_MapReload;
 	int m_RconClientID;
 
-	char m_aBrowseinfoGametype[16];
-	int m_BrowseinfoProgression;
-
 	int64 m_Lastheartbeat;
 	//static NETADDR4 master_server;
 
 	char m_aCurrentMap[64];
-	int m_CurrentMapCrc;
+	unsigned m_CurrentMapCrc;
 	unsigned char *m_pCurrentMapData;
 	int m_CurrentMapSize;	
 	
 	CDemoRecorder m_DemoRecorder;
-	CEngine m_Engine;
 	CRegister m_Register;
+	CMapChecker m_MapChecker;
 	
 	CServer();
 	
 	int TrySetClientName(int ClientID, const char *pName);
 
 	virtual void SetClientName(int ClientID, const char *pName);
+	virtual void SetClientClan(int ClientID, char const *pClan);
+	virtual void SetClientCountry(int ClientID, int Country);
 	virtual void SetClientScore(int ClientID, int Score);
-	virtual void SetBrowseInfo(const char *pGameType, int Progression);
-	virtual void SetClientAuthed(int ClientID, int Authed);
 
 	void Kick(int ClientID, const char *pReason);
 
@@ -160,9 +156,10 @@ public:
 
 	int IsAuthed(int ClientID);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
-	void GetClientAddr(int ClientID, NETADDR *pAddr);
-	void GetClientIP(int ClientID, char *pIPString, int Size);
+	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
 	const char *ClientName(int ClientID);
+	const char *ClientClan(int ClientID);
+	int ClientCountry(int ClientID);
 	bool ClientIngame(int ClientID);
 
 	int *LatestInput(int ClientID, int *size);
@@ -176,17 +173,10 @@ public:
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 	void SendMap(int ClientID);
+	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser);
-
-	static void SendRconResponse(const char *pLine, void *pUser);
-
-	struct RconResponseInfo
-	{
-		CServer *m_Server;
-		int m_ClientID;
-	};
-
+	
 	void ProcessClientPacket(CNetChunk *pPacket);
 		
 	void SendServerInfo(NETADDR *pAddr, int Token);
@@ -201,7 +191,6 @@ public:
 	char *GetMapName();
 	int LoadMap(const char *pMapName);
 
-	void InitEngine(const char *pAppname);
 	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole);
 	int Run();
 
@@ -217,27 +206,41 @@ public:
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-	static void ConLogin(IConsole::IResult *pResult, void *pUser, int ClientID);
-	static void ConCmdList(IConsole::IResult *pResult, void *pUser, int ClientID);
-
-	static bool CompareClients(int ClientID, int Victim, void *pUser);
-	static bool ClientOnline(int ClientID, void *pUser);
-
 	void RegisterCommands();
 	
+	
+	virtual int SnapNewID();
+	virtual void SnapFreeID(int ID);
+	virtual void *SnapNewItem(int Type, int ID, int Size);
+	void SnapSetStaticsize(int ItemType, int Size);
+
+	// DDRace
+
+	virtual void SetClientAuthed(int ClientID, int Authed);
+	void GetClientAddr(int ClientID, NETADDR *pAddr);
+	static void SendRconResponse(const char *pLine, void *pUser);
+	int m_aPrevStates[MAX_CLIENTS];
+
+	struct RconResponseInfo
+	{
+		CServer *m_Server;
+		int m_ClientID;
+	};
 	void SetRconLevel(int ClientID, int Level);
 	void CheckPass(int ClientID, const char *pPw);
 	char *GetAnnouncementLine(char const *FileName);
 	unsigned m_AnnouncementLastLine;
 
-	virtual int SnapNewID();
-	virtual void SnapFreeID(int ID);
-	virtual void *SnapNewItem(int Type, int ID, int Size);
-	void SnapSetStaticsize(int ItemType, int Size);
+	static bool CompareClients(int ClientID, int Victim, void *pUser);
+	static bool ClientOnline(int ClientID, void *pUser);
+	static void ConLogin(IConsole::IResult *pResult, void *pUser, int ClientID);
+	static void ConCmdList(IConsole::IResult *pResult, void *pUser, int ClientID);
 	static void ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientID);
 	static void ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID);
 	static void ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID);
-	NETADDR GetClientIP(int ClientID);
+
+private:
+	void DDRaceTunesReset(CConsole* pConsole);
 };
 
 #endif

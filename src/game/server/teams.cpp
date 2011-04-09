@@ -162,7 +162,6 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	if(m_Core.Team(ClientID) != TEAM_SUPER) m_MembersCount[m_Core.Team(ClientID)]++;
 	if(Team != TEAM_SUPER && m_TeamState[Team] == TEAMSTATE_EMPTY)
 		ChangeTeamState(Team, TEAMSTATE_OPEN);
-	dbg_msg1("Teams", "Id = %d Team = %d", ClientID, Team);
 	
 	for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 	{

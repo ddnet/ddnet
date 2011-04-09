@@ -179,6 +179,7 @@ void CGameWorld::Tick()
 
 
 // TODO: should be more general
+//CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis)
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
 {
 	// Find other players
@@ -191,7 +192,10 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
  	{
 		if(p == pNotThis)
 			continue;
-		if(CollideWith != -1 && !p->CanCollide(CollideWith)) continue;
+			
+		if(CollideWith != -1 && !p->CanCollide(CollideWith))
+			continue;
+
 		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
 		float Len = distance(p->m_Pos, IntersectPos);
 		if(Len < p->m_ProximityRadius+Radius)
@@ -203,8 +207,6 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 				ClosestLen = Len;
 				pClosest = p;
 			}
-			if(pThisOnly && p == pThisOnly)
-				return p;
 		}
 	}
 	

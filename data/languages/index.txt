@@ -4,6 +4,9 @@
 bosnian
 == Bosanski
 
+bulgarian
+== Български
+
 czech
 == Česky
 
@@ -36,6 +39,9 @@ russian
 
 serbian
 == Srpski
+
+slovak
+== Slovensky
 
 spanish
 == Español

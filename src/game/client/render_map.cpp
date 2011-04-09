@@ -3,12 +3,13 @@
 #include <math.h>
 #include <base/math.h>
 #include <engine/graphics.h>
+
+#include "render.h"
+
 #include <engine/textrender.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
-
-#include "render.h"
 
 void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, float Time, float *pResult)
 {
@@ -84,8 +85,6 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 
 void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, void (*pfnEval)(float TimeOffset, int Env, float *pChannels, void *pUser), void *pUser)
 {
-	if(g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats)
-		return;
 	Graphics()->QuadsBegin();
 	float Conv = 1/255.0f;
 	for(int i = 0; i < NumQuads; i++)
@@ -306,7 +305,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	
+
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;
 	int EndY = (int)(ScreenY1/Scale)+1;
@@ -317,7 +316,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale)
 		{
 			int mx = x;
 			int my = y;
-			
+
 
 			if(mx<0)
 				continue; // mx = 0;
@@ -327,9 +326,9 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale)
 				continue; // my = 0;
 			if(my>=h)
 				continue; // my = h-1;
-			
+
 			int c = mx + my*w;
-				
+
 			unsigned char Index = pTele[c].m_Number;
 			if(Index)
 			{
@@ -338,7 +337,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale)
 				UI()->TextRender()->Text(0, mx*Scale-2, my*Scale-4, Scale-5, aBuf, -1);
 			}
 		}
-		
+
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
@@ -346,7 +345,7 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float 
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	
+
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;
 	int EndY = (int)(ScreenY1/Scale)+1;
@@ -357,7 +356,7 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float 
 		{
 			int mx = x;
 			int my = y;
-			
+
 			if(mx<0)
 				continue; // mx = 0;
 			if(mx>=w)
@@ -366,23 +365,23 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float 
 				continue; // my = 0;
 			if(my>=h)
 				continue; // my = h-1;
-			
+
 			int c = mx + my*w;
-			
+
 			int Force = (int)pSpeedup[c].m_Force;
 			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
 			if(Force)
-			{	
+			{
 				// draw arrow
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
 				Graphics()->QuadsBegin();
-			
+
 				SelectSprite(SPRITE_SPEEDUP_ARROW);
 				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle*(3.14159265f/180.0f));
 				DrawSprite(mx*Scale+16, my*Scale+16, 35.0f);
-				
+
 				Graphics()->QuadsEnd();
-				
+
 				// draw force
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Force);
@@ -394,7 +393,7 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float 
 				}
 			}
 		}
-		
+
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 

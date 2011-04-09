@@ -8,8 +8,9 @@
 #include <engine/console.h>
 #include <game/layers.h>
 #include <game/gamecore.h>
-#include <game/teamscore.h>
 #include "render.h"
+
+#include <game/teamscore.h>
 
 class CGameClient : public IGameClient
 {
@@ -32,6 +33,7 @@ class CGameClient : public IGameClient
 	CStack m_Input;
 	CNetObjHandler m_NetObjHandler;
 	
+	class IEngine *m_pEngine;
 	class IInput *m_pInput;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
@@ -42,22 +44,21 @@ class CGameClient : public IGameClient
 	class IDemoPlayer *m_pDemoPlayer;
 	class IDemoRecorder *m_pDemoRecorder;
 	class IServerBrowser *m_pServerBrowser;
+	class IEditor *m_pEditor;
+	class IFriends *m_pFriends;
 	
 	CLayers m_Layers;
 	class CCollision m_Collision;
-	class CTeamsCore m_Teams;
 	CUI m_UI;
 	
 	void DispatchInput();
 	void ProcessEvents();
-	void UpdateLocalCharacterPos();
+	void UpdatePositions();
 
 	int m_PredictedTick;
 	int m_LastNewPredictedTick;
 
 	int64 m_LastSendInfo;
-
-	bool m_DDRaceMsgSent;
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData, int ClientID);
@@ -66,6 +67,7 @@ class CGameClient : public IGameClient
 	
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
+	IEngine *Engine() const { return m_pEngine; }
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class IClient *Client() const { return m_pClient; }
 	class CUI *UI() { return &m_UI; }
@@ -80,6 +82,8 @@ public:
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; };
 	class CCollision *Collision() { return &m_Collision; };
+	class IEditor *Editor() { return m_pEditor; }
+	class IFriends *Friends() { return m_pFriends; }
 	
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
@@ -99,6 +103,8 @@ public:
 	};
 	int m_ServerMode;
 
+	int m_DemoSpecID;
+
 	vec2 m_LocalCharacterPos;
 
 	// predicted players
@@ -111,8 +117,12 @@ public:
 		const CNetObj_Character *m_pLocalCharacter;
 		const CNetObj_Character *m_pLocalPrevCharacter;
 		const CNetObj_PlayerInfo *m_pLocalInfo;
+		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
+		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
 		const CNetObj_Flag *m_paFlags[2];
-		const CNetObj_Game *m_pGameobj;
+		const CNetObj_GameInfo *m_pGameInfoObj;
+		const CNetObj_GameData *m_pGameDataObj;
+		int m_GameDataSnapID;
 
 		const CNetObj_PlayerInfo *m_paPlayerInfos[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByScore[MAX_CLIENTS];
@@ -120,7 +130,15 @@ public:
 		int m_LocalClientID;
 		int m_NumPlayers;
 		int m_aTeamSize[2];
-		bool m_Spectate;
+		
+		// spectate data
+		struct CSpectateInfo
+		{
+			bool m_Active;
+			int m_SpectatorID;
+			bool m_UsePosition;
+			vec2 m_Position;
+		} m_SpecInfo;
 		
 		//
 		struct CCharacterInfo
@@ -147,7 +165,9 @@ public:
 		int m_ColorBody;
 		int m_ColorFeet;
 		
-		char m_aName[64];
+		char m_aName[MAX_NAME_LENGTH];
+		char m_aClan[MAX_CLAN_LENGTH];
+		int m_Country;
 		char m_aSkinName[64];
 		int m_SkinID;
 		int m_SkinColor;
@@ -156,14 +176,20 @@ public:
 		int m_EmoticonStart;
 		CCharacterCore m_Predicted;
 		
-		int m_Score;
-
 		CTeeRenderInfo m_SkinInfo; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
 		
 		float m_Angle;
+		bool m_Active;
+		bool m_ChatIgnore;
+		bool m_Friend;
 		
 		void UpdateRenderInfo();
+		void Reset();
+
+		// DDRace
+
+		int m_Score;
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -191,6 +217,7 @@ public:
 	virtual void OnStartGame();
 	
 	virtual const char *GetItemName(int Type);
+	virtual int GetCountryIndex(int Code);
 	virtual const char *Version();
 	virtual const char *NetVersion();
 	
@@ -207,6 +234,7 @@ public:
 	class CParticles *m_pParticles;
 	class CMenus *m_pMenus;
 	class CSkins *m_pSkins;
+	class CCountryFlags *m_pCountryFlags;
 	class CFlow *m_pFlow;
 	class CChat *m_pChat;
 	class CDamageInd *m_pDamageind;
@@ -218,11 +246,17 @@ public:
 	class CMapImages *m_pMapimages;
 	class CVoting *m_pVoting;
 	class CScoreboard *m_pScoreboard;
+	class CItems *m_pItems;
 
-	//DDRace
-	//TODO:DDRace: This is ugly
+	// DDRace
+
 	class CRaceDemo *m_pRaceDemo;
 	class CGhost *m_pGhost;
+
+private:
+
+	class CTeamsCore m_Teams;
+	bool m_DDRaceMsgSent;
 };
 
 
@@ -252,4 +286,5 @@ inline vec3 HslToRgb(vec3 HSL)
 
 extern const char *Localize(const char *Str);
 
+void ConServerDummy(IConsole::IResult *pResult, void *pUserData, int ClientID);
 #endif

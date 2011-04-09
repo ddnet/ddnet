@@ -6,14 +6,14 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
-#include "menus.h"
-#include "skins.h"
-
+#include <engine/config.h>
+#include <engine/editor.h>
+#include <engine/friends.h>
 #include <engine/graphics.h>
-#include <engine/textrender.h>
-#include <engine/serverbrowser.h>
 #include <engine/keys.h>
+#include <engine/serverbrowser.h>
 #include <engine/storage.h>
+#include <engine/textrender.h>
 #include <engine/shared/config.h>
 
 #include <game/version.h>
@@ -24,6 +24,9 @@
 #include <game/client/lineinput.h>
 #include <game/localization.h>
 #include <mastersrv/mastersrv.h>
+
+#include "menus.h"
+#include "skins.h"
 
 vec4 CMenus::ms_GuiColor;
 vec4 CMenus::ms_ColorTabbarInactiveOutgame;
@@ -63,6 +66,9 @@ CMenus::CMenus()
 	
 	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
 	m_aCallvoteReason[0] = 0;
+
+	m_FriendlistSelectedIndex = -1;
+
 	m_DDRacePage = PAGE_BROWSER;
 }
 
@@ -88,18 +94,39 @@ int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 	return 0;
 }
 
+int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect)
+{
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
+	Graphics()->QuadsBegin();
+	RenderTools()->SelectSprite(Checked?SPRITE_GUIBUTTON_ON:SPRITE_GUIBUTTON_OFF);
+	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	if((UI()->HotItem() == pID))
+	{
+		RenderTools()->SelectSprite(SPRITE_GUIBUTTON_HOVER);
+		IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	}
+	Graphics()->QuadsEnd();
+	
+	return UI()->DoButtonLogic(pID, "", Checked, pRect);
+}
 
 int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
-	UI()->DoLabel(pRect, pText, pRect->h*ms_FontmodHeight, 0);
+	CUIRect Temp;
+	pRect->HMargin(pRect->h>=20.0f?2.0f:1.0f, &Temp);
+	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
-	UI()->DoLabel(pRect, pText, pRect->h*ms_FontmodHeight, 0);
+	CUIRect Temp;
+	pRect->HMargin(1.0f, &Temp);
+	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
 }
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners)
@@ -108,7 +135,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarActive, Corners, 10.0f);
 	else
 		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarInactive, Corners, 10.0f);
-	UI()->DoLabel(pRect, pText, pRect->h*ms_FontmodHeight, 0);
+	CUIRect Temp;
+	pRect->HMargin(2.0f, &Temp);
+	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
 	
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
@@ -545,25 +574,28 @@ int CMenus::RenderMenubar(CUIRect r)
 		// online menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static int s_GameButton=0;
-		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage==PAGE_GAME, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage==PAGE_GAME, &Button, CUI::CORNER_TL))
 			NewPage = PAGE_GAME;
 
-		Box.VSplitLeft(4.0f, 0, &Box);
-		Box.VSplitLeft(140.0f, &Button, &Box);
+		Box.VSplitLeft(90.0f, &Button, &Box);
+		static int s_PlayersButton=0;
+		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), m_ActivePage==PAGE_PLAYERS, &Button, 0))
+			NewPage = PAGE_PLAYERS;
+
+		Box.VSplitLeft(130.0f, &Button, &Box);
 		static int s_ServerInfoButton=0;
-		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage==PAGE_SERVER_INFO, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage==PAGE_SERVER_INFO, &Button, 0))
 			NewPage = PAGE_SERVER_INFO;
 
-		Box.VSplitLeft(4.0f, 0, &Box);
+		Box.VSplitLeft(130.0f, &Button, &Box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_GhostButton=0;
 		if(DoButton_MenuTab(&s_GhostButton, "DDRace", m_ActivePage==PAGE_DDRace, &Button, CUI::CORNER_T))
 			NewPage = PAGE_DDRace;
 
 		Box.VSplitLeft(4.0f, 0, &Box);
-		Box.VSplitLeft(140.0f, &Button, &Box);
 		static int s_CallVoteButton=0;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_CALLVOTE;
 	}
 		
@@ -598,9 +630,10 @@ int CMenus::RenderMenubar(CUIRect r)
 	return 0;
 }
 
-void CMenus::RenderLoading(float Percent)
+void CMenus::RenderLoading()
 {
 	static int64 LastLoadRender = 0;
+	float Percent = m_LoadCurrent++/(float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
@@ -634,7 +667,7 @@ void CMenus::RenderLoading(float Percent)
 	Graphics()->QuadsEnd();
 
 
-	const char *pCaption = Localize("Loading DDRace Client");
+	const char *pCaption = Localize("Loading");
 
 	tw = TextRender()->TextWidth(0, 48.0f, pCaption, -1);
 	CUIRect r;
@@ -709,6 +742,13 @@ void CMenus::OnInit()
 	g_Config.m_ClShowWelcome = 0;
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
+	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
+
+	// setup load amount
+	m_LoadCurrent = 0;
+	m_LoadTotal = g_pData->m_NumImages;
+	if(!g_Config.m_ClThreadsoundloading)
+		m_LoadTotal += g_pData->m_NumSounds;
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
@@ -785,6 +825,8 @@ int CMenus::Render()
 		{
 			if(m_GamePage == PAGE_GAME)
 				RenderGame(MainView);
+			else if(m_GamePage == PAGE_PLAYERS)
+				RenderPlayers(MainView);
 			else if(m_GamePage == PAGE_SERVER_INFO)
 				RenderServerInfo(MainView);
 			else if(m_GamePage == PAGE_CALLVOTE)
@@ -859,6 +901,18 @@ int CMenus::Render()
 			pExtraText = Localize("Are you sure that you want to delete the demo?");
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_RENAME_DEMO)
+		{
+			pTitle = Localize("Rename demo");
+			pExtraText = "";
+			ExtraAlign = -1;
+		}
+		else if(m_Popup == POPUP_REMOVE_FRIEND)
+		{
+			pTitle = Localize("Remove friend");
+			pExtraText = Localize("Are you sure that you want to remove the player from your friends list?");
+			ExtraAlign = -1;
+		}
 		else if(m_Popup == POPUP_SOUNDERROR)
 		{
 			pTitle = Localize("Sound error");
@@ -876,6 +930,7 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Quit");
 			pExtraText = Localize("Are you sure that you want to quit?");
+			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
@@ -910,10 +965,20 @@ int CMenus::Render()
 			CUIRect Yes, No;
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
+
+			// additional info
+			Box.HSplitTop(10.0f, 0, &Box);
+			Box.VMargin(20.f/UI()->Scale(), &Box);
+			if(m_pClient->Editor()->HasUnsavedData())
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "%s\n%s", Localize("There's an unsaved map in the editor, you might want to save it before you quit the game."), Localize("Quit anyway?"));
+				UI()->DoLabelScaled(&Box, aBuf, 20.f, -1, Part.w-20.0f);
+			}
+
+			// buttons
 			Part.VMargin(80.0f, &Part);
-			
 			Part.VSplitMid(&No, &Yes);
-			
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
@@ -1071,6 +1136,87 @@ int CMenus::Render()
 					}
 					else
 						PopupMessage(Localize("Error"), Localize("Unable to delete the demo"), Localize("Ok"));
+				}
+			}
+		}
+		else if(m_Popup == POPUP_RENAME_DEMO)
+		{
+			CUIRect Label, TextBox, Ok, Abort;
+			
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			Part.VMargin(80.0f, &Part);
+			
+			Part.VSplitMid(&Abort, &Ok);
+			
+			Ok.VMargin(20.0f, &Ok);
+			Abort.VMargin(20.0f, &Abort);
+			
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonOk = 0;
+			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
+				// rename demo
+				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
+				{
+					char aBufOld[512];
+					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+					int Length = str_length(m_aCurrentDemoFile);
+					char aBufNew[512];
+					if(Length <= 4 || m_aCurrentDemoFile[Length-5] != '.' || str_comp_nocase(m_aCurrentDemoFile+Length-4, "demo"))
+						str_format(aBufNew, sizeof(aBufNew), "%s/%s.demo", m_aCurrentDemoFolder, m_aCurrentDemoFile);
+					else
+						str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
+					if(Storage()->RenameFile(aBufOld, aBufNew, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
+					{
+						DemolistPopulate();
+						DemolistOnUpdate(false);
+					}
+					else
+						PopupMessage(Localize("Error"), Localize("Unable to rename the demo"), Localize("Ok"));
+				}
+			}
+			
+			Box.HSplitBottom(60.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			
+			Part.VSplitLeft(60.0f, 0, &Label);
+			Label.VSplitLeft(120.0f, 0, &TextBox);
+			TextBox.VSplitLeft(20.0f, 0, &TextBox);
+			TextBox.VSplitRight(60.0f, &TextBox, 0);
+			UI()->DoLabel(&Label, Localize("New name:"), 18.0f, -1);
+			static float Offset = 0.0f;
+			DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
+		}
+		else if(m_Popup == POPUP_REMOVE_FRIEND)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			Part.VMargin(80.0f, &Part);
+			
+			Part.VSplitMid(&No, &Yes);
+			
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
+				// remove friend
+				if(m_FriendlistSelectedIndex >= 0)
+				{
+					m_pClient->Friends()->RemoveFriend(m_FriendlistSelectedIndex);
+					Client()->ServerBrowserUpdate();
 				}
 			}
 		}

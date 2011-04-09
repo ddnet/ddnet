@@ -6,6 +6,7 @@
 #include <base/vmath.h>
 
 class CDoor;
+
 /*
 	Class: Game Controller
 		Controls the main game logic. Keeping track of team and player score,
@@ -40,6 +41,7 @@ protected:
 
 	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos);
 	void EvaluateSpawnType(CSpawnEval *pEval, int Type);
+	void FindFreeSpawn(CSpawnEval *pEval, int Type);
 	bool EvaluateSpawn(class CPlayer *pP, vec2 *pPos);
 
 	//void CycleMap();
@@ -103,6 +105,7 @@ public:
 		Returns:
 			bool?
 	*/
+	//virtual bool OnEntity(int Index, vec2 Pos);
 	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
 	
 	/*
@@ -127,7 +130,7 @@ public:
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
 
 
-	//virtual void OnPlayerInfoChange(class CPlayer *pP);
+	virtual void OnPlayerInfoChange(class CPlayer *pP);
 
 	//
 	virtual bool CanSpawn(int Team, vec2 *pPos);
@@ -136,15 +139,16 @@ public:
 	
 	*/	
 	virtual const char *GetTeamName(int Team);
-	virtual int GetAutoTeam(int NotThisId);
-	virtual bool CanJoinTeam(int Team, int NotThisId);
+	virtual int GetAutoTeam(int NotThisID);
+	virtual bool CanJoinTeam(int Team, int NotThisID);
 	//bool CheckTeamBalance();
 	//bool CanChangeTeam(CPlayer *pPplayer, int JoinTeam);
 	int ClampTeam(int Team);
 
 	virtual void PostReset();
 
-	//DDRace
+	// DDRace
+
 	float m_CurrentRecord;
 };
 
