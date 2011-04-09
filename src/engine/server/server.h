@@ -230,6 +230,7 @@ public:
 	void CheckPass(int ClientID, const char *pPw);
 	char *GetAnnouncementLine(char const *FileName);
 	unsigned m_AnnouncementLastLine;
+	void GetClientIP(int ClientID, char *pIPString, int Size);
 
 	static bool CompareClients(int ClientID, int Victim, void *pUser);
 	static bool ClientOnline(int ClientID, void *pUser);

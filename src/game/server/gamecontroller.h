@@ -130,7 +130,7 @@ public:
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
 
 
-	virtual void OnPlayerInfoChange(class CPlayer *pP);
+	//virtual void OnPlayerInfoChange(class CPlayer *pP);
 
 	//
 	virtual bool CanSpawn(int Team, vec2 *pPos);

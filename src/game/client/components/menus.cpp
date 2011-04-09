@@ -587,12 +587,12 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage==PAGE_SERVER_INFO, &Button, 0))
 			NewPage = PAGE_SERVER_INFO;
 
-		Box.VSplitLeft(130.0f, &Button, &Box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_GhostButton=0;
-		if(DoButton_MenuTab(&s_GhostButton, "DDRace", m_ActivePage==PAGE_DDRace, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_GhostButton, "DDRace", m_ActivePage==PAGE_DDRace, &Button, 0))
 			NewPage = PAGE_DDRace;
 
+		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static int s_CallVoteButton=0;
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
@@ -667,7 +667,7 @@ void CMenus::RenderLoading()
 	Graphics()->QuadsEnd();
 
 
-	const char *pCaption = Localize("Loading");
+	const char *pCaption = Localize("Loading DDRace Client");
 
 	tw = TextRender()->TextWidth(0, 48.0f, pCaption, -1);
 	CUIRect r;
@@ -829,12 +829,12 @@ int CMenus::Render()
 				RenderPlayers(MainView);
 			else if(m_GamePage == PAGE_SERVER_INFO)
 				RenderServerInfo(MainView);
+			else if(m_GamePage == PAGE_DDRace)
+				RenderInGameDDRace(MainView);
 			else if(m_GamePage == PAGE_CALLVOTE)
 				RenderServerControl(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
-			else if(m_GamePage == PAGE_DDRace)
-				RenderInGameDDRace(MainView);
 			else if(m_GamePage == PAGE_GHOST)
 				RenderGhost(MainView);
 			else if(m_GamePage == PAGE_BROWSER)

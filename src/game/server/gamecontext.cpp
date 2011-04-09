@@ -1089,7 +1089,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 		pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-		m_pController->OnPlayerInfoChange(pPlayer);
+		//m_pController->OnPlayerInfoChange(pPlayer);
 
 		// send vote options
 		CNetMsg_Sv_VoteClearOptions ClearMsg;
@@ -1195,7 +1195,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 		pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-		m_pController->OnPlayerInfoChange(pPlayer);
+		//m_pController->OnPlayerInfoChange(pPlayer);
 	}
 	else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
 	{
@@ -1901,9 +1901,8 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 	{
 		m_apPlayers[ClientID]->m_Authed = Level;
 		char aBuf[512], aIP[20];
-		NETADDR* Addr;
-		pServ->GetClientAddr(ClientID, Addr);
-		str_format(aBuf, sizeof(aBuf), "ban %d.%d.%d.%d %d Banned by vote", Addr->ip[0], Addr->ip[1], Addr->ip[2], Addr->ip[3], g_Config.m_SvVoteKickBantime);
+		pServ->GetClientIP(ClientID, aIP, sizeof(aIP));
+		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIP, g_Config.m_SvVoteKickBantime);
 		if(!str_comp_nocase(m_aVoteCommand,aBuf) && Level > 0)
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO;
