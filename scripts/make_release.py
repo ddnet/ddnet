@@ -7,7 +7,7 @@ if len(sys.argv) != 3:
 	print(sys.argv[0], "VERSION PLATFORM")
 	sys.exit(-1)
 
-name = "teeworlds"
+name = "DDRace"
 version = sys.argv[1]
 platform = sys.argv[2]
 exe_ext = ""
@@ -75,7 +75,7 @@ if include_data and not use_bundle:
 
 if include_exe and not use_bundle:
 	shutil.copy(name+exe_ext, package_dir)
-	shutil.copy(name+"_srv"+exe_ext, package_dir)
+	shutil.copy(name+"-Server"+exe_ext, package_dir)
 	
 if include_src:
 	for p in ["src", "scripts", "datasrc", "other", "objs"]:
@@ -141,7 +141,7 @@ if use_bundle:
 	os.mkdir(os.path.join(serverbundle_resource_dir, "data/mapres"))
 	copydir("data/maps", serverbundle_resource_dir)
 	shutil.copy("other/icons/Teeworlds_srv.icns", serverbundle_resource_dir)
-	shutil.copy(name+"_srv"+exe_ext, serverbundle_bin_dir)
+	shutil.copy(name+"-Server"+exe_ext, serverbundle_bin_dir)
 	shutil.copy("serverlaunch"+exe_ext, serverbundle_bin_dir + "/"+name+"_server")
 	file(os.path.join(serverbundle_content_dir, "Info.plist"), "w").write("""
 <?xml version="1.0" encoding="UTF-8"?>

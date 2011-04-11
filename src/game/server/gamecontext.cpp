@@ -647,11 +647,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 		SendChatTarget(ClientID, "DDRace Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "Official site: DDRace.info");
-		SendChatTarget(ClientID, "For more Info /cmdlist");
-		SendChatTarget(ClientID, "Or visit DDRace.info");
-		SendChatTarget(ClientID, "To see this again say /info");
-		SendChatTarget(ClientID, "Note This is an Alpha release, just for testing, your feedback is important!!");
+		SendChatTarget(ClientID, "please visit http://DDRace.info or say /info for more info");
 
 		if(g_Config.m_SvWelcome[0]!=0) SendChatTarget(ClientID,g_Config.m_SvWelcome);
 		//str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
@@ -940,7 +936,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(str_comp_nocase(pMsg->m_Type, "spectate") == 0)
 		{
-			if(!g_Config.m_SvVoteSpectate)
+			//if(!g_Config.m_SvVoteSpectate)
 			{
 				SendChatTarget(ClientID, "Server does not allow voting to move players to spectators");
 				return;
@@ -1616,7 +1612,7 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
-	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	//Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
