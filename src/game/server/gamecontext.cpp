@@ -57,7 +57,7 @@ void CGameContext::Construct(int Resetting)
 	Tuning()->Set("gun_curvature", 0);
 	Tuning()->Set("shotgun_speed", 500);
 	Tuning()->Set("shotgun_speeddiff", 0);
-	Tuning()->Set("tune shotgun_curvature", 0);
+	Tuning()->Set("shotgun_curvature", 0);
 	g_Config.m_SvHit = 1;
 	g_Config.m_SvEndlessDrag = 0;
 	g_Config.m_SvOldLaser = 0;
