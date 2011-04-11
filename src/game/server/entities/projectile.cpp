@@ -36,6 +36,7 @@ CProjectile::CProjectile
 	m_Weapon = Weapon;
 	m_StartTick = Server()->Tick();
 	m_Explosive = Explosive;
+
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
@@ -93,7 +94,7 @@ void CProjectile::Tick()
 	if(m_Owner >= 0)
 		OwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	CCharacter *TargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, (m_Freeze) ? 1.0f : 6.0f, ColPos, OwnerChar);
+	CCharacter *TargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, OwnerChar);
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -146,7 +147,7 @@ void CProjectile::Tick()
 			if (!m_Freeze)
 				GameServer()->m_World.DestroyEntity(this);
 	}
-	if (m_LifeSpan == -1)
+	if(m_LifeSpan == -1)
 	{
 		GameServer()->m_World.DestroyEntity(this);
 	}

@@ -186,6 +186,9 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 //bool IGameController::OnEntity(int Index, vec2 Pos)
 bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
 {
+	if (Index < 0)
+		return false;
+
 	int Type = -1;
 	int SubType = 0;
 	
