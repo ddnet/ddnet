@@ -59,7 +59,7 @@ public:
 	virtual void ShowRank(int ClientID, const char* pName, bool Search=false);
 	virtual void ShowTimes(int ClientID, const char* pName, int Debut=1);
 	virtual void ShowTimes(int ClientID, int Debut=1);	
-	virtual void ShowTop5(int ClientID, int Debut=1);
+	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut=1);
  	static void agoTimeToString(int agoTime, char agoStrign[]);
 };
 

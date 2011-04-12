@@ -31,7 +31,7 @@ class CFileScore : public IScore
 	IServer *Server() { return m_pServer; }
 
 	CPlayerScore *SearchScore(int ID, int *pPosition){ return SearchName(Server()->ClientName(ID), pPosition, 0 );};
-;
+
 	CPlayerScore *SearchName(const char *pName, int *pPosition, bool MatchCase);
 	void UpdatePlayer(int ID, float Score, float aCpTime[NUM_CHECKPOINTS]);
 
@@ -47,7 +47,7 @@ public:
 	virtual void LoadScore(int ClientID);
 	virtual void SaveScore(int ClientID, float Time, CCharacter *pChar);
 
-	virtual void ShowTop5(int ClientID, int Debut=1);
+	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut=1);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search=false);
 };
 

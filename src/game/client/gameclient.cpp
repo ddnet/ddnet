@@ -926,9 +926,9 @@ void CGameClient::OnNewSnapshot()
 		m_DDRaceMsgSent = true;
 
 		if(g_Config.m_ClShowOthers)
-			Console()->ExecuteLine("rcon showothers 1", 4, IConsole::CONSOLELEVEL_USER);
+			Console()->ExecuteLine("rcon showothers 1", -1, IConsole::CONSOLELEVEL_USER, 0, 0);
 		else
-			Console()->ExecuteLine("rcon showothers 0", 4, IConsole::CONSOLELEVEL_USER);
+			Console()->ExecuteLine("rcon showothers 0", -1, IConsole::CONSOLELEVEL_USER, 0, 0);
 	}
 }
 

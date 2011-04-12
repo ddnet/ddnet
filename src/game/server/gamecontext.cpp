@@ -531,7 +531,7 @@ void CGameContext::OnTick()
 			
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				Console()->ExecuteLine(m_aVoteCommand, IConsole::CONSOLELEVEL_CONFIG, -1, CServer::SendRconLineAuthed, Server(), SendChatResponseAll, this);
+				Console()->ExecuteLine(m_aVoteCommand, -1, IConsole::CONSOLELEVEL_CONFIG, SendChatResponseAll, this);
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 			
@@ -541,8 +541,8 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by '%s'", (m_VoteEnforcer < 0) ? "Server Administrator" : Server()->ClientName(m_VoteEnforcer));
-				Console()->ExecuteLine(m_aVoteCommand, 3, -1, CServer::SendRconLineAuthed, Server(), SendChatResponseAll, this);
+				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by '%s'", (m_VoteEnforcer < 0) ? "server administrator" : Server()->ClientName(m_VoteEnforcer));
+				Console()->ExecuteLine(m_aVoteCommand, -1, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, this);
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				EndVote();
 				m_VoteEnforcer = -1;
@@ -550,7 +550,7 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by '%s'", (m_VoteEnforcer < 0) ? "Server Administrator" : Server()->ClientName(m_VoteEnforcer));
+				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by '%s'", (m_VoteEnforcer < 0) ? "server administrator" : Server()->ClientName(m_VoteEnforcer));
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			}
@@ -650,7 +650,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChatTarget(ClientID, "please visit http://DDRace.info or say /info for more info");
 
 		if(g_Config.m_SvWelcome[0]!=0) SendChatTarget(ClientID,g_Config.m_SvWelcome);
-		//str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
+			str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 	}
@@ -758,8 +758,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Info.m_To = ClientID;
 
 			Console()->ExecuteLine(pMsg->m_pMessage + 1,
-					((CServer *) Server())->m_aClients[ClientID].m_Authed,
-					ClientID, CServer::SendRconLineAuthed, Server(),
+					ClientID, ((CServer *) Server())->m_aClients[ClientID].m_Authed,
 					SendChatResponse, &Info);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat",
 					pMsg->m_pMessage);
@@ -1263,11 +1262,11 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData, int
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		pSelf->SendTuningParams(-1);
 	}
 	else
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
 }
 
 void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData, int ClientID)
@@ -1276,7 +1275,7 @@ void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData, int
 	CTuningParams TuningParams;
 	*pSelf->Tuning() = TuningParams;
 	pSelf->SendTuningParams(-1);
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
 }
 
 void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData, int ClientID)
@@ -1288,7 +1287,7 @@ void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData, int 
 		float v;
 		pSelf->Tuning()->Get(i, &v);
 		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->m_apNames[i], v);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
 
@@ -1331,7 +1330,7 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData, int C
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "moved client %d to team %d", Victim, Team);
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	pSelf->m_apPlayers[Victim]->SetTeam(Team);
 	//(void)pSelf->m_pController->CheckTeamBalance();
@@ -1344,7 +1343,7 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData, in
 	
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "moved all clients to team %d", Team);
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 		if(pSelf->m_apPlayers[i])
@@ -1361,7 +1360,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData, int C
 
 	if(pSelf->m_NumVoteOptions == MAX_VOTE_OPTIONS)
 	{
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "maximum number of vote options reached");
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "maximum number of vote options reached");
 		return;
 	}
 	
@@ -1370,7 +1369,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData, int C
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "skipped invalid command '%s'", pCommand);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		return;
 	}
 	while(*pDescription && *pDescription == ' ')
@@ -1379,7 +1378,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData, int C
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "skipped invalid option '%s'", pDescription);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		return;
 	}
 	
@@ -1391,7 +1390,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData, int C
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "option '%s' already exists", pDescription);
-			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 			return;
 		}
 		pOption = pOption->m_pNext;
@@ -1414,7 +1413,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData, int C
 	mem_copy(pOption->m_aCommand, pCommand, Len+1);
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "added option '%s' '%s'", pOption->m_aDescription, pOption->m_aCommand);
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	// inform clients about added option
 	CNetMsg_Sv_VoteOptionAdd OptionMsg;
@@ -1439,7 +1438,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData, in
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "option '%s' does not exist", pDescription);
-		pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		return;
 	}
 
@@ -1453,7 +1452,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData, in
 	--pSelf->m_NumVoteOptions;
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "removed option '%s' '%s'", pOption->m_aDescription, pOption->m_aCommand);
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	CHeap *pVoteOptionHeap = new CHeap();
 	CVoteOptionServer *pVoteOptionFirst = 0;
@@ -1504,7 +1503,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData, int
 			{
 				str_format(aBuf, sizeof(aBuf), "admin forced server option '%s' (%s)", pValue, pReason);
 				pSelf->SendChatTarget(-1, aBuf);
-				pSelf->Console()->ExecuteLine(pOption->m_aCommand, IConsole::CONSOLELEVEL_ADMIN, ClientID);
+				pSelf->Console()->ExecuteLine(pOption->m_aCommand, ClientID, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, pSelf);
 				break;
 			}
 
@@ -1514,7 +1513,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData, int
 		if(!pOption)
 		{
 			str_format(aBuf, sizeof(aBuf), "'%s' isn't an option on this server", pValue);
-			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 			return;
 		}
 	}
@@ -1523,21 +1522,21 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData, int
 		int KickID = str_toint(pValue);
 		if(KickID < 0 || KickID >= MAX_CLIENTS || !pSelf->m_apPlayers[KickID])
 		{
-			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to kick");
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to kick");
 			return;
 		}
 
 		if (!g_Config.m_SvVoteKickBantime)
 		{
 			str_format(aBuf, sizeof(aBuf), "kick %d %s", KickID, pReason);
-			pSelf->Console()->ExecuteLine(aBuf, IConsole::CONSOLELEVEL_ADMIN, ClientID);
+			pSelf->Console()->ExecuteLine(aBuf, ClientID, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, pSelf);
 		}
 		else
 		{
 			char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
 			pSelf->Server()->GetClientAddr(KickID, aAddrStr, sizeof(aAddrStr));
 			str_format(aBuf, sizeof(aBuf), "ban %s %d %s", aAddrStr, g_Config.m_SvVoteKickBantime, pReason);
-			pSelf->Console()->ExecuteLine(aBuf, IConsole::CONSOLELEVEL_ADMIN, ClientID);
+			pSelf->Console()->ExecuteLine(aBuf, ClientID, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, pSelf);
 		}
 	}
 	else if(str_comp_nocase(pType, "spectate") == 0)
@@ -1545,12 +1544,12 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData, int
 		int SpectateID = str_toint(pValue);
 		if(SpectateID < 0 || SpectateID >= MAX_CLIENTS || !pSelf->m_apPlayers[SpectateID] || pSelf->m_apPlayers[SpectateID]->GetTeam() == TEAM_SPECTATORS)
 		{
-			pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to move");
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to move");
 			return;
 		}
 		
 		str_format(aBuf, sizeof(aBuf), "set_team %d -1", SpectateID);
-		pSelf->Console()->ExecuteLine(aBuf, IConsole::CONSOLELEVEL_ADMIN, ClientID);
+		pSelf->Console()->ExecuteLine(aBuf, ClientID, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, pSelf);
 	}
 }
 
@@ -1558,7 +1557,7 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData, in
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared votes");
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared votes");
 	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
 	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
 	pSelf->m_pVoteOptionHeap->Reset();
@@ -1576,7 +1575,7 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData, int Clie
 		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pResult->GetString(0));
-	pSelf->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -1643,9 +1642,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	char buf[512];
 	str_format(buf, sizeof(buf), "data/maps/%s.cfg", g_Config.m_SvMap);
-	Console()->ExecuteFile(buf, 0, 0, 0, 0, 4);
+	Console()->ExecuteFile(buf, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 	str_format(buf, sizeof(buf), "data/maps/%s.map.cfg", g_Config.m_SvMap);
-	Console()->ExecuteFile(buf, 0, 0, 0, 0, 4);
+	Console()->ExecuteFile(buf, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 /*	// select gametype
 	if(str_comp(g_Config.m_SvGametype, "mod") == 0)
 		m_pController = new CGameControllerMOD(this);
@@ -1940,7 +1939,7 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 
 	if ((m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
 	{
-		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
+		Mute(0, &Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
 		m_apPlayers[ClientID]->m_ChatScore = 0;
 		return 1;
 	}

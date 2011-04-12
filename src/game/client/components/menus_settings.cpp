@@ -1007,9 +1007,9 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowOthers ^= 1;
 		if(g_Config.m_ClShowOthers)
-			Console()->ExecuteLine("rcon showothers 1", 4, IConsole::CONSOLELEVEL_USER);
+			Console()->ExecuteLine("rcon showothers 1", -1, IConsole::CONSOLELEVEL_USER, 0, 0);
 		else
-			Console()->ExecuteLine("rcon showothers 0", 4, IConsole::CONSOLELEVEL_USER);
+			Console()->ExecuteLine("rcon showothers 0", -1, IConsole::CONSOLELEVEL_USER, 0, 0);
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);

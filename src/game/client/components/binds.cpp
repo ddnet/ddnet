@@ -13,7 +13,7 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 		if(Event.m_Flags&IInput::FLAG_PRESS)
 			Stroke = 1;
 			
-		m_pBinds->GetConsole()->ExecuteLineStroked(Stroke, m_pBinds->m_aaKeyBindings[Event.m_Key], IConsole::CONSOLELEVEL_CONFIG, -1);
+		m_pBinds->GetConsole()->ExecuteLineStroked(Stroke, m_pBinds->m_aaKeyBindings[Event.m_Key], -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 		return true;
 	}
 	
@@ -50,7 +50,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 	int Stroke = 0;
 	if(e.m_Flags&IInput::FLAG_PRESS)
 		Stroke = 1;
-	Console()->ExecuteLineStroked(Stroke, m_aaKeyBindings[e.m_Key], IConsole::CONSOLELEVEL_CONFIG, -1);
+	Console()->ExecuteLineStroked(Stroke, m_aaKeyBindings[e.m_Key], -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 	return true;
 }
 
@@ -173,7 +173,7 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData, int ClientID)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
-		pBinds->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		return;
 	}
 	
@@ -191,7 +191,7 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData, int ClientID
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
-		pBinds->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		return;
 	}
 	
@@ -215,7 +215,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData, int Clien
 		if(pBinds->m_aaKeyBindings[i][0] == 0)
 			continue;
 		str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pBinds->Input()->KeyName(i), i, pBinds->m_aaKeyBindings[i]);
-		pBinds->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 	}
 }
 

@@ -2439,10 +2439,10 @@ int main(int argc, const char **argv) // ignore_convention
 	m_Client.InitInterfaces();
 
 	// execute config file
-	pConsole->ExecuteFile("settings.cfg");
+	pConsole->ExecuteFile("settings.cfg", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 
 	// execute autoexec file
-	pConsole->ExecuteFile("autoexec.cfg");
+	pConsole->ExecuteFile("autoexec.cfg", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention

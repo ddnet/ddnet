@@ -201,10 +201,10 @@ void CFileScore::SaveScore(int ClientID, float Time, CCharacter *pChar)
 		UpdatePlayer(ClientID, Time, pChar->m_CpCurrent);
 }
 
-void CFileScore::ShowTop5(int ClientID, int Debut)
+void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut)
 {
 	char aBuf[512];
-	GameServer()->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "----------- Top 5 -----------");
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "----------- Top 5 -----------");
 	for(int i = 0; i < 5; i++)
 	{
 		if(i+Debut > m_Top.size())
@@ -212,9 +212,9 @@ void CFileScore::ShowTop5(int ClientID, int Debut)
 		CPlayerScore *r = &m_Top[i+Debut-1];
 		str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s)",
 			i+Debut, r->m_aName, (int) r->m_Score/60, r->m_Score-((int)r->m_Score/60*60));
-		GameServer()->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "top5", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", aBuf);
 	}
-	GameServer()->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "------------------------------");
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "------------------------------");
 }
 
 void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
@@ -248,5 +248,5 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 	else
 		str_format(aBuf, sizeof(aBuf), "%s is not ranked", Search?pName:Server()->ClientName(ClientID));
 
-	GameServer()->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "rank", aBuf);
+	GameServer()->SendChatTarget(ClientID, aBuf);
 }

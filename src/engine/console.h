@@ -34,6 +34,7 @@ public:
 
 		// DDRace
 
+		virtual void Print(int Level, const char *pFrom, const char *pStr) = 0;
 		virtual int GetVictim() = 0;
 	};
 	
@@ -76,8 +77,15 @@ public:
 
 	typedef bool (*FCompareClientsCallback)(int ClientLevel, int Victim, void *pUserData);
 	typedef bool (*FClientOnlineCallback)(int ClientID, void *pUserData);
-	virtual void List(const int Level, int Flags) = 0;
-	virtual void ExecuteLine(const char *Sptr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0,  FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0) = 0;
+	virtual void List(IResult *pResult, const int Level, int Flags) = 0;
+
+	virtual void ExecuteLine(const char *pStr, int ClientID, int Level, FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) = 0;
+	virtual void ExecuteLine(const char *pStr, int ClientID, int Level, IResult *pResult) = 0;
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, int Level, FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) = 0;
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, int Level, IResult *pResult) = 0;
+	virtual void ExecuteFile(const char *pFilename, int ClientID, int Level, FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) = 0;
+	virtual void ExecuteFile(const char *pFilename, int ClientID, int Level, IResult *pResult) = 0;
+	/*virtual void ExecuteLine(const char *Sptr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0,  FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0) = 0;
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0) = 0;
 	virtual void ExecuteFile(const char *pFilename, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0, int Level = 3) = 0;
 	virtual void RegisterAlternativePrintCallback(FPrintCallback pfnAlternativePrintCallback, void *pAlternativeUserData) = 0;
@@ -85,7 +93,7 @@ public:
 	virtual void RegisterPrintResponseCallback(FPrintCallback pfnPrintResponseCallback, void *pUserData) = 0;
 	virtual void RegisterAlternativePrintResponseCallback(FPrintCallback pfnAlternativePrintCallback, void *pAlternativeUserData) = 0;
 	virtual void ReleaseAlternativePrintResponseCallback() = 0;
-	virtual void PrintResponse(int Level, const char *pFrom, const char *pStr) = 0;
+	virtual void PrintResponse(int Level, const char *pFrom, const char *pStr) = 0; */
 
 	virtual void RegisterCompareClientsCallback(FCompareClientsCallback pfnCallback, void *pUserData) = 0;
 	virtual void RegisterClientOnlineCallback(FClientOnlineCallback pfnCallback, void *pUserData) = 0;

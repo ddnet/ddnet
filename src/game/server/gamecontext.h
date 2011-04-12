@@ -200,7 +200,7 @@ private:
 	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID);
 
-	void ModifyWeapons(int ClientID, int Victim, int Weapon, bool Remove);
+	void ModifyWeapons(IConsole::IResult *pResult, int ClientID, int Victim, int Weapon, bool Remove);
 	void MoveCharacter(int ClientID, int Victim, int X, int Y, bool Raw = false);
 
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData, int ClientID);
@@ -263,7 +263,7 @@ private:
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
-	void Mute(NETADDR *Addr, int Secs, const char *pDisplayName);
+	void Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName);
 
 public:
 	CLayers *Layers() { return &m_Layers; }

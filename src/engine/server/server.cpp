@@ -850,17 +850,14 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				char aBuf[256];
 				if(m_aClients[ClientID].m_Authed >= 0)
 				{
-					Console()->RegisterAlternativePrintCallback(0, 0);
-
 					str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d Level=%d Rcon='%s'", ClientName(ClientID), ClientID, m_aClients[ClientID].m_Authed, pCmd);
 					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-					Console()->ReleaseAlternativePrintCallback();
 					m_RconClientID = ClientID;
 
 					RconResponseInfo Info;
 					Info.m_Server = this;
 					Info.m_ClientID = ClientID;
-					Console()->ExecuteLine(pCmd, m_aClients[ClientID].m_Authed, ClientID, SendRconLineAuthed, this, SendRconResponse, &Info);
+					Console()->ExecuteLine(pCmd, ClientID, m_aClients[ClientID].m_Authed, SendRconResponse, &Info);
 					m_RconClientID = -1;
 				}
 			}
@@ -1180,7 +1177,6 @@ int CServer::Run()
 
 	//
 	Console()->RegisterPrintCallback(SendRconLineAuthed, this);
-	Console()->RegisterPrintResponseCallback(SendRconLineAuthed, this);
 	Console()->RegisterClientOnlineCallback(ClientOnline, this);
 	Console()->RegisterCompareClientsCallback(CompareClients, this);
 
@@ -1213,7 +1209,7 @@ int CServer::Run()
 	}
 
 	m_NetServer.SetCallbacks(NewClientCallback, DelClientCallback, this);
-	Console()->ExecuteFile(SERVER_BANMASTERFILE, 0, 0, 0, 0, 4);
+	Console()->ExecuteFile(SERVER_BANMASTERFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 	
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
@@ -1395,7 +1391,7 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientID)
 			Addr.port = AddrCheck.port = 0;
 			if(net_addr_comp(&Addr, &AddrCheck) == 0)
 			{
-				pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban yourself");
+				pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban yourself");
 				return;
 			}
 		}
@@ -1407,12 +1403,12 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientID)
 
 		if(Victim < 0 || Victim >= MAX_CLIENTS || pServer->m_aClients[Victim].m_State == CClient::STATE_EMPTY)
 		{
-			pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid client id");
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid client id");
 			return;
 		}
 		else if(pServer->m_RconClientID == Victim)
 		{
-			pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban yourself");
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't ban yourself");
 			return;
 		}
 		if (ClientID != -1 && ((CServer *)pUser)->m_aClients[ClientID].m_Authed <= ((CServer *)pUser)->m_aClients[Victim].m_Authed)
@@ -1423,7 +1419,7 @@ void CServer::ConBan(IConsole::IResult *pResult, void *pUser, int ClientID)
 	}
 	else
 	{
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid network address to ban");
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid network address to ban");
 		return;
  	}
 }
@@ -1441,14 +1437,14 @@ void CServer::ConUnban(IConsole::IResult *pResult, void *pUser, int ClientID)
 
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "unbanned %s", aAddrStr);
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	}
 	else if(StrAllnum(pStr))
 	{
 		int BanIndex = str_toint(pStr);
 		CNetServer::CBanInfo Info;
 		if(BanIndex < 0 || !pServer->m_NetServer.BanGet(BanIndex, &Info))
-			pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid ban index");
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid ban index");
 		else if(!pServer->BanRemove(Info.m_Addr))
 		{
 			char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -1456,11 +1452,11 @@ void CServer::ConUnban(IConsole::IResult *pResult, void *pUser, int ClientID)
 
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "unbanned %s", aAddrStr);
-			pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
 	}
 	else
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid network address");
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid network address");
 }
 
 void CServer::ConBans(IConsole::IResult *pResult, void *pUser, int ClientID)
@@ -1487,10 +1483,10 @@ void CServer::ConBans(IConsole::IResult *pResult, void *pUser, int ClientID)
 			unsigned t = Info.m_Expires - Now;
 			str_format(aBuf, sizeof(aBuf), "#%i %s for %d minutes and %d seconds", i, aAddrStr, t/60, t%60);
 		}
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 	}
 	str_format(aBuf, sizeof(aBuf), "%d ban(s)", Num);
-	pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
+	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 }
 
 void CServer::ConStatus(IConsole::IResult *pResult, void *pUser, int ClientID)
@@ -1512,7 +1508,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser, int ClientID)
 					pServer->m_aClients[i].m_aName, pServer->m_aClients[i].m_Score);
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
-			pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 		}
 	}
 }
@@ -1672,7 +1668,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pGameServer->OnConsoleInit();
 	
 	// execute autoexec file
-	pConsole->ExecuteFile("autoexec.cfg", 0, 0, 0, 0, 4);
+	pConsole->ExecuteFile("autoexec.cfg", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention
@@ -1709,17 +1705,17 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 
 void DDRaceTunesReset(CConsole* pConsole)
 {
-	pConsole->ExecuteLine("tune_reset", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("tune gun_speed 1400", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("tune shotgun_curvature 0", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("tune shotgun_speed 500", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("tune shotgun_speeddiff 0", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("tune gun_curvature 0", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("sv_hit 1", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("sv_npc 0", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("sv_phook 1", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("sv_endless_drag 0", IConsole::CONSOLELEVEL_CONFIG, -1);
-	pConsole->ExecuteLine("sv_old_laser 0", IConsole::CONSOLELEVEL_CONFIG, -1);
+	pConsole->ExecuteLine("tune_reset", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("tune gun_speed 1400", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("tune shotgun_curvature 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("tune shotgun_speed 500", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("tune shotgun_speeddiff 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("tune gun_curvature 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("sv_hit 1", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("sv_npc 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("sv_phook 1", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("sv_endless_drag 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteLine("sv_old_laser 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 }
 
 void CServer::SetRconLevel(int ClientID, int Level)
@@ -1860,11 +1856,11 @@ void CServer::ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int Clien
 	int Result = pServer->m_NetServer.BanmasterAdd(pResult->GetString(0));
 
 	if(Result == 0)
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "succesfully added banmaster");
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "succesfully added banmaster");
 	else if (Result == 1)
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "invalid address for banmaster / net lookup failed");
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "invalid address for banmaster / net lookup failed");
 	else
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "too many banmasters");
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "too many banmasters");
 }
 
 void CServer::ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID)
@@ -1880,7 +1876,7 @@ void CServer::ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientI
 		NETADDR *pBanmaster = pServer->m_NetServer.BanmasterGet(i);
 		net_addr_str(pBanmaster, aIpString, sizeof(aIpString));
 		str_format(aBuf, sizeof(aBuf), "%d: %s", i, aIpString);
-		pServer->Console()->PrintResponse(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", aBuf);
+		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", aBuf);
 	}
 }
 
@@ -1913,11 +1909,11 @@ void CServer::ConCmdList(IConsole::IResult *pResult, void *pUserData, int Client
 	CServer *pSelf = (CServer *)pUserData;
 
 	if(pResult->NumArguments() == 0)
-		pSelf->Console()->List((pSelf->m_aClients[ClientID].m_Authed != 0) ? pSelf->m_aClients[ClientID].m_Authed : -1, CFGFLAG_SERVER);
+		pSelf->Console()->List(pResult, (pSelf->m_aClients[ClientID].m_Authed != 0) ? pSelf->m_aClients[ClientID].m_Authed : -1, CFGFLAG_SERVER);
 	else if (pResult->GetInteger(0) == 0)
-		pSelf->Console()->List(-1, CFGFLAG_SERVER);
+		pSelf->Console()->List(pResult, -1, CFGFLAG_SERVER);
 	else
-		pSelf->Console()->List(pResult->GetInteger(0), CFGFLAG_SERVER);
+		pSelf->Console()->List(pResult, pResult->GetInteger(0), CFGFLAG_SERVER);
 }
 
 void CServer::ConLogin(IConsole::IResult *pResult, void *pUser, int ClientID)
@@ -1935,7 +1931,7 @@ bool CServer::CompareClients(int ClientLevel, int Victim, void *pUser)
 	if(!ClientOnline(Victim, pSelf))
 		return false;
 
-	return clamp(ClientLevel, 0, 4) > clamp(pSelf->m_aClients[Victim].m_Authed, 0, 4);
+	return clamp(ClientLevel, 0, 3) > clamp(pSelf->m_aClients[Victim].m_Authed, 0, 3);
 }
 
 bool CServer::ClientOnline(int ClientID, void *pUser)
@@ -1947,11 +1943,10 @@ bool CServer::ClientOnline(int ClientID, void *pUser)
 	return pSelf->m_aClients[ClientID].m_State != CClient::STATE_EMPTY;
 }
 
-void CServer::SetClientAuthed(int ClientID, int Level) {
+void CServer::SetClientAuthed(int ClientID, int Level)
+{
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CClient::STATE_READY)
-	{
 		return;
-	}
 	m_aClients[ClientID].m_Authed = Level;
 }
 

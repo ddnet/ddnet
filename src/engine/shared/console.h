@@ -52,7 +52,7 @@ class CConsole : public IConsole
 	//void ExecuteLineStroked(int Stroke, const char *pStr);
 	
 	FPrintCallback m_pfnPrintCallback;
-	void *m_pPrintCallbackUserdata;
+	void *m_pPrintCallbackUserData;
 
 	enum
 	{
@@ -116,6 +116,11 @@ class CConsole : public IConsole
 		void SetVictim(int Victim);
 		void SetVictim(const char *pVictim);
 		virtual int GetVictim();
+
+		IConsole::FPrintCallback m_pfnPrintCallback;
+		void *m_pPrintCallbackUserData;
+		virtual void Print(int Level, const char *pFrom, const char *pStr);
+		virtual void SetPrintCallback(IConsole::FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) { m_pfnPrintCallback = pfnPrintCallback; m_pPrintCallbackUserData = pPrintCallbackUserData; }
 	};
 	
 	int ParseStart(CResult *pResult, const char *pString, int Length);
@@ -174,26 +179,31 @@ public:
 
 	// DDRace
 
-	virtual void List(const int Level, int Flags);
-	virtual void ExecuteLine(const char *pStr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0);
+	virtual void List(IConsole::IResult *pResult, int Level, int Flags);
+	/*virtual void ExecuteLine(const char *pStr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0);
 	virtual void ExecuteFile(const char *pFilename, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0, int Level = 3);
 	virtual void RegisterAlternativePrintCallback(FPrintCallback pfnAlternativePrintCallback, void *pAlternativeUserData);
 	virtual void ReleaseAlternativePrintCallback();
 
 	virtual void RegisterPrintResponseCallback(FPrintCallback pfnPrintResponseCallback, void *pUserData);
 	virtual void RegisterAlternativePrintResponseCallback(FPrintCallback pfnAlternativePrintCallback, void *pAlternativeUserData);
-	virtual void ReleaseAlternativePrintResponseCallback();
+	virtual void ReleaseAlternativePrintResponseCallback(); */
 
+	virtual void ExecuteLine(const char *pStr, int ClientID, int Level, IConsole::FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData);
+	virtual void ExecuteLine(const char *pStr, int ClientID, int Level, IConsole::IResult *pResult);
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, int Level, IConsole::FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData);
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, int Level, IConsole::IResult *pResult);
+	virtual void ExecuteFile(const char *pFilename, int ClientID, int Level, IConsole::FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData);
+	virtual void ExecuteFile(const char *pFilename, int ClientID, int Level, IConsole::IResult *pResult);
 	virtual void RegisterCompareClientsCallback(FCompareClientsCallback pfnCallback, void *pUserData);
 	virtual void RegisterClientOnlineCallback(FClientOnlineCallback pfnCallback, void *pUserData);
 
 	virtual bool CompareClients(int ClientLevel, int Victim);
 	virtual bool ClientOnline(int ClientID);
-	virtual void PrintResponse(int Level, const char *pFrom, const char *pStr);
 	bool m_Cheated;
 
 private:
-	void ExecuteFileRecurse(const char *pFilename, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0, int Level = 3);
+	/*void ExecuteFileRecurse(const char *pFilename, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0, int Level = 3);
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0);
 	FPrintCallback m_pfnAlternativePrintCallback;
 	void *m_pAlternativePrintCallbackUserdata;
@@ -202,7 +212,7 @@ private:
 	void *m_pPrintResponseCallbackUserdata;
 	FPrintCallback m_pfnAlternativePrintResponseCallback;
 	void *m_pAlternativePrintResponseCallbackUserdata;
-	int m_PrintResponseUsed;
+	int m_PrintResponseUsed; */
 	FCompareClientsCallback m_pfnCompareClientsCallback;
 	void *m_pCompareClientsUserdata;
 	FClientOnlineCallback m_pfnClientOnlineCallback;

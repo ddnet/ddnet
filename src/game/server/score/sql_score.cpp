@@ -545,7 +545,7 @@ end:
 	lock_release(gs_SqlLock);
 }
 
-void CSqlScore::ShowTop5(int ClientID, int Debut)
+void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;

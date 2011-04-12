@@ -76,7 +76,7 @@ void CGameConsole::CInstance::ClearHistory()
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
-		m_pGameConsole->m_pConsole->ExecuteLine(pLine, IConsole::CONSOLELEVEL_CONFIG, -1);
+		m_pGameConsole->m_pConsole->ExecuteLine(pLine, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 	else
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
