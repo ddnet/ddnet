@@ -1203,9 +1203,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		pPlayer->m_LastEmote = Server()->Tick();
 		
 		SendEmoticon(ClientID, pMsg->m_Emoticon);
-
-		SendEmoticon(ClientID, pMsg->m_Emoticon);
-		CCharacter* pChr = pPlayer->GetCharacter();
+		// TODO:DDRace GreYFoX Rework Emoticons
+		/*CCharacter* pChr = pPlayer->GetCharacter();
 		if(pChr && g_Config.m_SvEmotionalTees && pChr->m_EyeEmote)
 		{
 			switch(pMsg->m_Emoticon)
@@ -1237,7 +1236,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					break;
 			}
 			pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
-		}
+		}*/
 	}
 	else if (MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 	{
