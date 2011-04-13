@@ -541,7 +541,7 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by '%s'", (m_VoteEnforcer < 0) ? "server administrator" : Server()->ClientName(m_VoteEnforcer));
+				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by server administrator");
 				Console()->ExecuteLine(m_aVoteCommand, -1, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, this);
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				EndVote();
@@ -550,7 +550,7 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by '%s'", (m_VoteEnforcer < 0) ? "server administrator" : Server()->ClientName(m_VoteEnforcer));
+				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by server administrator");
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			}
@@ -935,7 +935,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(str_comp_nocase(pMsg->m_Type, "spectate") == 0)
 		{
-			//if(!g_Config.m_SvVoteSpectate)
+			if(!g_Config.m_SvVoteSpectate)
 			{
 				SendChatTarget(ClientID, "Server does not allow voting to move players to spectators");
 				return;
@@ -1610,7 +1610,7 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
-	//Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
