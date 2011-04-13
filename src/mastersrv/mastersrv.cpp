@@ -362,7 +362,7 @@ void ConAddBan(IConsole::IResult *pResult, void *pUser, int ClientID)
 void ReloadBans()
 {
 	m_NumBans = 0;
-	m_pConsole->ExecuteFile("master.cfg");
+	m_pConsole->ExecuteFile("master.cfg", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 }
 
 int main(int argc, const char **argv) // ignore_convention
