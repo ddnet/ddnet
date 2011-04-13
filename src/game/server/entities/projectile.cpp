@@ -54,25 +54,25 @@ vec2 CProjectile::GetPos(float Time)
 {
 	float Curvature = 0;
 	float Speed = 0;
-	
+
 	switch(m_Type)
 	{
 		case WEAPON_GRENADE:
 			Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
 			Speed = GameServer()->Tuning()->m_GrenadeSpeed;
 			break;
-			
+
 		case WEAPON_SHOTGUN:
 			Curvature = GameServer()->Tuning()->m_ShotgunCurvature;
 			Speed = GameServer()->Tuning()->m_ShotgunSpeed;
 			break;
-			
+
 		case WEAPON_GUN:
 			Curvature = GameServer()->Tuning()->m_GunCurvature;
 			Speed = GameServer()->Tuning()->m_GunSpeed;
 			break;
 	}
-	
+
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
@@ -98,7 +98,7 @@ void CProjectile::Tick()
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
-	
+
 	int TeamMask = -1;
 	bool isWeaponCollide = false;
 	if
@@ -166,7 +166,7 @@ void CProjectile::FillInfo(CNetObj_Projectile *pProj)
 void CProjectile::Snap(int SnappingClient)
 {
 	float Ct = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
-	
+
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
 

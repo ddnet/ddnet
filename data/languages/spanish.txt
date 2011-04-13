@@ -657,6 +657,15 @@ no limit
 
 ##### needs translation #####
 
+Play background music
+== 
+
+Spectate next
+== 
+
+Spectate previous
+== 
+
 ##### old translations #####
 
 Page %d of %d

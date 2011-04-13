@@ -18,7 +18,7 @@ class CConsole : public IConsole
 		FCommandCallback m_pfnCallback;
 		void *m_pUserData;
 	};
-		
+
 
 	class CChain
 	{
@@ -27,8 +27,8 @@ class CConsole : public IConsole
 		FCommandCallback m_pfnCallback;
 		void *m_pCallbackUserData;
 		void *m_pUserData;
-	};	
-	
+	};
+
 	int m_FlagMask;
 	bool m_StoreCommands;
 	const char *m_paStrokeStr[2];
@@ -40,7 +40,7 @@ class CConsole : public IConsole
 		const char *m_pFilename;
 		struct CExecFile *m_pPrev;
 	};
-	
+
 	CExecFile *m_pFirstExec;
 	class IStorage *m_pStorage;
 
@@ -50,22 +50,22 @@ class CConsole : public IConsole
 
 	//void ExecuteFileRecurse(const char *pFilename);
 	//void ExecuteLineStroked(int Stroke, const char *pStr);
-	
+
 	FPrintCallback m_pfnPrintCallback;
 	void *m_pPrintCallbackUserData;
 
 	enum
 	{
-		CONSOLE_MAX_STR_LENGTH  = 1024,
+		CONSOLE_MAX_STR_LENGTH = 1024,
 		MAX_PARTS = (CONSOLE_MAX_STR_LENGTH+1)/2
 	};
-	
+
 	class CResult : public IResult
 	{
 	public:
 		char m_aStringStorage[CONSOLE_MAX_STR_LENGTH+1];
 		char *m_pArgsStart;
-		
+
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
 
@@ -91,7 +91,7 @@ class CConsole : public IConsole
 			}
 			return *this;
 		}
-		
+
 		void AddArgument(const char *pArg)
 		{
 			m_apArgs[m_NumArgs++] = pArg;
@@ -122,7 +122,7 @@ class CConsole : public IConsole
 		virtual void Print(int Level, const char *pFrom, const char *pStr);
 		virtual void SetPrintCallback(IConsole::FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) { m_pfnPrintCallback = pfnPrintCallback; m_pPrintCallbackUserData = pPrintCallbackUserData; }
 	};
-	
+
 	int ParseStart(CResult *pResult, const char *pString, int Length);
 	int ParseArgs(CResult *pResult, const char *pFormat);
 
@@ -169,7 +169,7 @@ public:
 	virtual void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp, const int Level);
 	virtual void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser);
 	virtual void StoreCommands(bool Store, int ClientID);
-	
+
 	virtual bool LineIsValid(const char *pStr);
 	//virtual void ExecuteLine(const char *pStr);
 	//virtual void ExecuteFile(const char *pFilename);

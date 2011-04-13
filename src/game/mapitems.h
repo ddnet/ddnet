@@ -12,7 +12,7 @@ enum
 	LAYERTYPE_GAME, // not used
 	LAYERTYPE_TILES,
 	LAYERTYPE_QUADS,
-	
+
 	MAPITEMTYPE_VERSION=0,
 	MAPITEMTYPE_INFO,
 	MAPITEMTYPE_IMAGE,
@@ -20,7 +20,7 @@ enum
 	MAPITEMTYPE_GROUP,
 	MAPITEMTYPE_LAYER,
 	MAPITEMTYPE_ENVPOINTS,
-	
+
 
 	CURVETYPE_STEP=0,
 	CURVETYPE_LINEAR,
@@ -28,7 +28,7 @@ enum
 	CURVETYPE_FAST,
 	CURVETYPE_SMOOTH,
 	NUM_CURVETYPES,
-	
+
 	// game layer tiles
 	ENTITY_NULL=0,
 	ENTITY_SPAWN,
@@ -133,9 +133,9 @@ enum
 	ROTATION_90 = TILEFLAG_ROTATE,
 	ROTATION_180 = (TILEFLAG_VFLIP|TILEFLAG_HFLIP),
 	ROTATION_270 = (TILEFLAG_VFLIP|TILEFLAG_HFLIP|TILEFLAG_ROTATE),
-	
+
 	LAYERFLAG_DETAIL=1,
-	
+
 	ENTITY_OFFSET=255-16*4,
 	OLD_THROUGH1=25,
 	OLD_THROUGH2=26
@@ -156,10 +156,10 @@ struct CQuad
 	CPoint m_aPoints[5];
 	CColor m_aColors[4];
 	CPoint m_aTexcoords[4];
-	
+
 	int m_PosEnv;
 	int m_PosEnvOffset;
-	
+
 	int m_ColorEnv;
 	int m_ColorEnvOffset;
 };
@@ -199,7 +199,7 @@ struct CMapItemGroup_v1
 struct CMapItemGroup : public CMapItemGroup_v1
 {
 	enum { CURRENT_VERSION=2 };
-	
+
 	int m_UseClipping;
 	int m_ClipX;
 	int m_ClipY;
@@ -218,15 +218,15 @@ struct CMapItemLayerTilemap
 {
 	CMapItemLayer m_Layer;
 	int m_Version;
-	
+
 	int m_Width;
 	int m_Height;
 	int m_Flags;
-	
+
 	CColor m_Color;
 	int m_ColorEnv;
 	int m_ColorEnvOffset;
-	
+
 	int m_Image;
 	int m_Data;
 
@@ -242,7 +242,7 @@ struct CMapItemLayerQuads
 {
 	CMapItemLayer m_Layer;
 	int m_Version;
-	
+
 	int m_NumQuads;
 	int m_Data;
 	int m_Image;
@@ -258,7 +258,7 @@ struct CEnvPoint
 	int m_Time; // in ms
 	int m_Curvetype;
 	int m_aValues[4]; // 1-4 depending on envelope (22.10 fixed point)
-	
+
 	bool operator<(const CEnvPoint &Other) { return m_Time < Other.m_Time; }
 } ;
 

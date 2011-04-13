@@ -66,7 +66,7 @@ void CLaser::DoBounce()
 {
 	CCharacter *OwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_EvalTick = Server()->Tick();
-	
+
 	if(m_Energy < 0)
 	{
 		GameServer()->m_World.DestroyEntity(this);
@@ -76,7 +76,7 @@ void CLaser::DoBounce()
 	vec2 To = m_Pos + m_Dir * m_Energy;
 	vec2 OrgTo = To;
 	vec2 Coltile;
-	
+
 	int Res;
 	Res = GameServer()->Collision()->IntersectLine(m_Pos, To, &Coltile, &To,false);
 
@@ -90,7 +90,7 @@ void CLaser::DoBounce()
 
 			vec2 TempPos = m_Pos;
 			vec2 TempDir = m_Dir * 4.0f;
-			
+
 			int f;
 			if(Res == -1)
 			{
@@ -104,13 +104,13 @@ void CLaser::DoBounce()
 			}
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
-			
+
 			m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
 			m_Bounces++;
-			
+
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
 				m_Energy = -1;
-				
+
 			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, OwnerChar->Teams()->TeamMask(OwnerChar->Team()));
 		}
 	}
@@ -125,7 +125,7 @@ void CLaser::DoBounce()
 	}
 	//m_Owner = -1;
 }
-	
+
 void CLaser::Reset()
 {
 	GameServer()->m_World.DestroyEntity(this);

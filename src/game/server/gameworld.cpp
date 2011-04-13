@@ -12,7 +12,7 @@ CGameWorld::CGameWorld()
 {
 	m_pGameServer = 0x0;
 	m_pServer = 0x0;
-	
+
 	m_Paused = false;
 	m_ResetRequested = false;
 	for(int i = 0; i < NUM_ENTTYPES; i++)
@@ -164,7 +164,7 @@ void CGameWorld::Tick()
 				pEnt->Tick();
 				pEnt = m_pNextTraverseEntity;
 			}
-		
+
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
 			{
@@ -192,7 +192,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
  	{
 		if(p == pNotThis)
 			continue;
-			
+
 		if(CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 
@@ -209,7 +209,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 			}
 		}
 	}
-	
+
 	return pClosest;
 }
 
@@ -219,13 +219,13 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 	// Find other players
 	float ClosestRange = Radius*2;
 	CCharacter *pClosest = 0;
-		
+
 	CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(ENTTYPE_CHARACTER);
 	for(; p; p = (CCharacter *)p->TypeNext())
  	{
 		if(p == pNotThis)
 			continue;
-			
+
 		float Len = distance(Pos, p->m_Pos);
 		if(Len < p->m_ProximityRadius+Radius)
 		{
@@ -236,7 +236,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 			}
 		}
 	}
-	
+
 	return pClosest;
 }
 

@@ -17,7 +17,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int N
 	m_Number = Number;
 
 	Reset();
-	
+
 	GameWorld()->InsertEntity(this);
 }
 
@@ -61,7 +61,7 @@ void CPickup::Tick()
 				case POWERUP_HEALTH:
 					if(pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
 					break;
-				
+
 				case POWERUP_ARMOR:
 					if(pChr->Team() == TEAM_SUPER) continue;
 					for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
@@ -107,7 +107,7 @@ void CPickup::Tick()
 						}
 					}
 					break;
-				
+
 			case POWERUP_NINJA:
 				{
 					// activate ninja on target player
@@ -126,8 +126,8 @@ void CPickup::Tick()
 				default:
 					break;
 			};
-	/*
-			if(RespawnTime >= 0)
+
+			/*if(RespawnTime >= 0)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d/%d",

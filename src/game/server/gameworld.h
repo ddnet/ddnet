@@ -34,7 +34,7 @@ private:
 
 	CEntity *m_pNextTraverseEntity;
 	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
-	
+
 	class CGameContext *m_pGameServer;
 	class IServer *m_pServer;
 
@@ -45,18 +45,18 @@ public:
 	bool m_ResetRequested;
 	bool m_Paused;
 	CWorldCore m_Core;
-	
+
 	CGameWorld();
 	~CGameWorld();
-	
+
 	void SetGameServer(CGameContext *pGameServer);
-	
+
 	CEntity *FindFirst(int Type);
-	
+
 	/*
 		Function: find_entities
 			Finds entities close to a position and returns them in a list.
-			
+
 		Arguments:
 			pos - Position.
 			radius - How close the entities have to be.
@@ -64,23 +64,23 @@ public:
 				to the entities.
 			max - Number of entities that fits into the ents array.
 			type - Type of the entities to find.
-			
+
 		Returns:
 			Number of entities found and added to the ents array.
 	*/
 	int FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type);
-	
+
 	/*
 		Function: InterserctCharacters
 			Finds the CCharacters that intersects the line. // made for types lasers=1 and doors=0
-			
+
 		Arguments:
 			pos0 - Start position
 			pos2 - End position
 			radius - How for from the line the CCharacter is allowed to be.
 			new_pos - Intersection position
 			notthis - Entity to ignore intersecting with
-			
+
 		Returns:
 			Returns a pointer to the closest hit or NULL of there is no intersection.
 	*/
@@ -89,12 +89,12 @@ public:
 	/*
 		Function: closest_CCharacter
 			Finds the closest CCharacter to a specific point.
-			
+
 		Arguments:
 			pos - The center position.
 			radius - How far off the CCharacter is allowed to be
 			notthis - Entity to ignore
-			
+
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
@@ -103,7 +103,7 @@ public:
 	/*
 		Function: insert_entity
 			Adds an entity to the world.
-			
+
 		Arguments:
 			entity - Entity to add
 	*/
@@ -112,7 +112,7 @@ public:
 	/*
 		Function: remove_entity
 			Removes an entity from the world.
-			
+
 		Arguments:
 			entity - Entity to remove
 	*/
@@ -121,28 +121,28 @@ public:
 	/*
 		Function: destroy_entity
 			Destroys an entity in the world.
-			
+
 		Arguments:
 			entity - Entity to destroy
 	*/
 	void DestroyEntity(CEntity *pEntity);
-	
+
 	/*
 		Function: snap
 			Calls snap on all the entities in the world to create
 			the snapshot.
-			
+
 		Arguments:
 			snapping_client - ID of the client which snapshot
 			is being created.
 	*/
 	void Snap(int SnappingClient);
-	
+
 	/*
 		Function: tick
 			Calls tick on all the entities in the world to progress
 			the world to the next tick.
-		
+
 	*/
 	void Tick();
 

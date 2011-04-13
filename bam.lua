@@ -23,17 +23,17 @@ end
 
 function CHash(output, ...)
 	local inputs = TableFlatten({...})
-	
+
 	output = Path(output)
-	
+
 	-- compile all the files
 	local cmd = Script("scripts/cmd5.py") .. " "
 	for index, inname in ipairs(inputs) do
-		cmd = cmd .. Path(inname) .. " " 
+		cmd = cmd .. Path(inname) .. " "
 	end
-	
+
 	cmd = cmd .. " > " .. output
-	
+
 	AddJob(output, "cmd5 " .. output, cmd)
 	for index, inname in ipairs(inputs) do
 		AddDependency(output, inname)
@@ -73,7 +73,7 @@ function Dat2c(datafile, sourcefile, arrayname)
 	AddJob(
 		sourcefile,
 		"dat2c " .. PathFilename(sourcefile) .. " = " .. PathFilename(datafile),
-		Script("scripts/dat2c.py")..  "\" " .. sourcefile .. " " .. datafile .. " " .. arrayname
+		Script("scripts/dat2c.py").. "\" " .. sourcefile .. " " .. datafile .. " " .. arrayname
 	)
 	AddDependency(sourcefile, datafile)
 	return sourcefile
@@ -85,7 +85,7 @@ function ContentCompile(action, output)
 		output,
 		action .. " > " .. output,
 		--Script("datasrc/compile.py") .. "\" ".. Path(output) .. " " .. action
-		Script("datasrc/compile.py") .. " " .. action ..  " > " .. Path(output)
+		Script("datasrc/compile.py") .. " " .. action .. " > " .. Path(output)
 	)
 	AddDependency(output, Path("datasrc/content.py")) -- do this more proper
 	AddDependency(output, Path("datasrc/network.py"))
@@ -155,7 +155,7 @@ function build(settings)
 	settings.cc.includes:Add("other/mysql/include")
 
 	if family == "unix" then
-   		if platform == "macosx" then
+		if platform == "macosx" then
 			settings.link.frameworks:Add("Carbon")
 			settings.link.frameworks:Add("AppKit")
 		else
@@ -168,7 +168,7 @@ function build(settings)
 		settings.link.libs:Add("ole32")
 		settings.link.libs:Add("shell32")
 	end
-	
+
 	-- compile zlib if needed
 	if config.zlib.value == 1 then
 		settings.link.libs:Add("z")
@@ -184,7 +184,7 @@ function build(settings)
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
-	
+
 	-- build game components
 	engine_settings = settings:Copy()
 	server_settings = engine_settings:Copy()
@@ -199,10 +199,10 @@ function build(settings)
 		
 		if platform == "macosx" then
 			client_settings.link.frameworks:Add("OpenGL")
-            client_settings.link.frameworks:Add("AGL")
-            client_settings.link.frameworks:Add("Carbon")
-            client_settings.link.frameworks:Add("Cocoa")
-            launcher_settings.link.frameworks:Add("Cocoa")
+			client_settings.link.frameworks:Add("AGL")
+			client_settings.link.frameworks:Add("Carbon")
+			client_settings.link.frameworks:Add("Cocoa")
+			launcher_settings.link.frameworks:Add("Cocoa")
 			if not string.find(settings.config_name, "nosql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/mac/lib64")
@@ -222,7 +222,7 @@ function build(settings)
 				end
 			end
 		end
-		
+
 	elseif family == "windows" then
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
@@ -237,11 +237,11 @@ function build(settings)
 	config.sdl:Apply(client_settings)
 	-- apply freetype settings
 	config.freetype:Apply(client_settings)
-	
+
 	engine = Compile(engine_settings, Collect("src/engine/shared/*.cpp", "src/base/*.c"))
 	client = Compile(client_settings, Collect("src/engine/client/*.cpp"))
 	server = Compile(server_settings, Collect("src/engine/server/*.cpp"))
-	
+
 	versionserver = Compile(settings, Collect("src/versionsrv/*.cpp"))
 	masterserver = Compile(settings, Collect("src/mastersrv/*.cpp"))
 	banmaster = Compile(settings, Collect("src/banmaster/*.cpp"))
@@ -259,13 +259,13 @@ function build(settings)
 		client_osxlaunch = Compile(client_settings, "src/osxlaunch/client.m")
 		server_osxlaunch = Compile(launcher_settings, "src/osxlaunch/server.m")
 	end
-	
+
 	tools = {}
 	for i,v in ipairs(tools_src) do
 		toolname = PathFilename(PathBase(v))
 		tools[i] = Link(settings, toolname, Compile(settings, v), engine, zlib, pnglite)
 	end
-	
+
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDRace", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
@@ -278,7 +278,7 @@ function build(settings)
 	if platform == "macosx" then
 		serverlaunch = Link(launcher_settings, "serverlaunch", server_osxlaunch)
 	end
-		
+
 	versionserver_exe = Link(server_settings, "versionsrv", versionserver,
 		engine, zlib)
 
@@ -357,7 +357,7 @@ else
 	release_nosql_settings.cc.defines:Add("CONF_RELEASE")
 end
 
-if platform == "macosx"  and arch == "ia32" then
+if platform == "macosx" and arch == "ia32" then
 	debug_settings_ppc = debug_settings:Copy()
 	debug_settings_ppc.config_name = "debug_ppc"
 	debug_settings_ppc.config_ext = "_ppc_d"

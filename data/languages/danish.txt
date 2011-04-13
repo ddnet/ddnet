@@ -5,88 +5,88 @@
 == %d Bytes
 
 %d of %d servers, %d players
-== %d av %d servrar, %d spelare
+== %d af %d servere, %d spillere
 
 %d%% loaded
-== %d%% laddat
+== %d%% indlæst
 
 %ds left
-== %d sekunder kvar
+== %d sekunder tilbage
 
 %i minute left
-== %i minut kvar
+== %i minut tilbage
 
 %i minutes left
-== %i minuter kvar
+== %i minutter tilbage
 
 %i second left
-== %i sekund kvar
+== %i sekund tilbage
 
 %i seconds left
-== %i sekunder kvar
+== %i sekunder tilbage
 
 %s wins!
-== %s vinner!
+== %s vinder!
 
 -Page %d-
-== -Sida %d-
+== -Side %d-
 
 Abort
-== Avbryt
+== Afbryd
 
 Add
-== Lägg till
+== Tilføj
 
 Add Friend
-== Lägg till kompis
+== Tilføj ven
 
 Address
-== Adress
+== Adresse
 
 All
-== Alla
+== Alle
 
 Alpha
 == Alpha
 
 Always show name plates
-== Visa alltid namnskyltar
+== Vis altid navneskilte
 
 Are you sure that you want to delete the demo?
-== Är du säker på att du vill ta bort detta demo?
+== Er du sikker på at du vil slette denne demo?
 
 Are you sure that you want to quit?
-== Är du säker på att du vill avsluta?
+== Er du sikker på at du vil afslutte?
 
 Are you sure that you want to remove the player from your friends list?
-== Är du säker på att du vill ta bort denna spelaren från din kompislista?
+== Er du sikker på at du vil fjerne denne spiller fra din venneliste?
 
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Detta är första gången du startar spelet, var vänligen skriv in ditt smeknamn här nedanför. Det är rekommenderat att du kontrollera inställningarna och justerar dom till din preferens innan du börjar spela.
+== Siden dette er første gang du starter spillet, så vær så venlig at skrive dit navn nedenunder. Det anbefales at du kigger på indstillingerne så du kan tilpasse dem inden du kobler dig på en server.
 
 Automatically record demos
-== Spela in demon automatiskt
+== Optag automatisk demoer
 
 Automatically take game over screenshot
-== Ta skärmdumpar vid matchslut
+== Tag  automatisk et game over screenshot
 
 Blue team
-== Blå laget
+== Blå hold
 
 Blue team wins!
-== Blå laget vann!
+== Blåt hold vinder!
 
 Body
-== Kropp
+== Krop
 
 Call vote
-== Röstning
+==  Lav afstemning
 
 Change settings
-== Ändra inställningar
+== Ændre indstillinger
 
 Chat
-== Chatt
+== Chat
 
 Clan
 == Klan
@@ -95,28 +95,28 @@ Client
 == Klient
 
 Close
-== Stäng
+== Luk
 
 Compatible version
 == Kompatibel version
 
 Connect
-== Anslut
+== Tilslut
 
 Connecting to
-== Ansluter till
+== Forbinder til
 
 Connection Problems...
-== Anslutningsproblem...
+== Forbindelsesproblemer...
 
 Console
 == Konsol
 
 Controls
-== Kontroller
+== Taster
 
 Count players only
-== Räkna endast spelare
+== Tæl kun spillere
 
 Country
 == Land
@@ -125,133 +125,133 @@ Crc:
 == Crc:
 
 Created:
-== Skapad:
+== Lavet:
 
 Current
-== Nuvarande
+== Nuværende
 
 Current version: %s
-== Nuvarande version: %s
+== Nuværende version: %s
 
 Custom colors
-== Egna färger
+== Brugerdefinerede farver
 
 Delete
-== Ta bort
+== Slet
 
 Delete demo
-== Ta bort demo
+== Slet demo
 
 Demo details
 == Demoinformation
 
 Demos
-== Demon
+== Demoer
 
 Disconnect
-== Avsluta
+== Frakoble
 
 Disconnected
-== Frånkopplad
+== Frakoblet
 
 Display Modes
-== Skärmlägen
+== Skærmopløsning
 
 Downloading map
-== Laddar ner karta
+== Downloader bane
 
 Draw!
-== Oavgjort!
+== Uafgjort!
 
 Dynamic Camera
 == Dynamisk kamera
 
 Emoticon
-== Känsloikon
+== Humørikoner
 
 Enter
-== Fortsätt
+== Fortsæt
 
 Error
-== Fel
+== Fejl
 
 Error loading demo
-== Kunde inte ladda demot
+== Kunne ikke ikke indlæse demoen
 
 FSAA samples
-== FSAA samplingar
+== FSAA samples
 
 Favorite
 == Favorit
 
 Favorites
-== Favoriter
+== Favoritter
 
 Feet
-== Fötter
+== Fødder
 
 Filter
 == Filter
 
 Fire
-== Skjuta
+== Skyd
 
 Folder
-== Mapp
+== Mappe
 
 Force vote
-== Tvinga omröstning
+== Tving afstemning
 
 Free-View
-== Friläge
+== Free-View
 
 Friends
-== Kompisar
+== Venner
 
 Fullscreen
-== Fullskärm
+== Fuldskærm
 
 Game
-== Spel
+== Spil
 
 Game info
-== Spelinfo
+== Spil info
 
 Game over
-== Slutspelat
+== Game over
 
 Game type
-== Speltyp
+== Spiltype
 
 Game types:
-== Speltyper:
+== Spiltyper:
 
 General
-== Generellt
+== Generelt
 
 Graphics
 == Grafik
 
 Grenade
-== Granater
+== Granatkaster
 
 Hammer
-== Hammare
+== Hammer
 
 Has people playing
-== Har folk som spelar
+== Har folk som spiller
 
 High Detail
 == Extra detaljer
 
 Hook
-== Haken
+== Krog
 
 Host address
-== Serveraddress
+== Værtsadresse
 
 Hue
-== Nyans
+== Farve
 
 Info
 == Info
@@ -260,124 +260,124 @@ Internet
 == Internet
 
 Invalid Demo
-== Ogiltigt deo
+== Ugyldig demo
 
 Join blue
-== Spela i blått
+== Spil for blå
 
 Join game
-== Spela
+== Start spil
 
 Join red
-== Spela i rött
+== Spil for rød
 
 Jump
-== Hoppa
+== Hop
 
 Kick player
-== Kicka spelare
+== Udsmid spiller
 
 LAN
 == LAN
 
 Language
-== Språk
+== Sprog
 
 Length:
-== Längd
+== Længde
 
 Lht.
-== Ljusstyrka
+== Lys
 
 Loading
-== Laddar
+== Indlæser
 
 MOTD
-== Meddelande
+== MOTD
 
 Map
-== Karta
+== Kort
 
 Map:
-== Bana
+== Bane
 
 Max Screenshots
-== Max antal skärmdumpar
+== Max antal screenshots
 
 Max demos
-== Max antal demon
+== Max antal demoer
 
 Maximum ping:
-== Högsta ping:
+== Højeste ping:
 
 Miscellaneous
-== Övrigt
+== Diverse
 
 Mouse sens.
-== Muskänslighet
+== Musfølsomhed
 
 Move left
-== Gå vänster
+== Gå til venstre
 
 Move player to spectators
-== Flytta till åskådarna
+== Flyt spilleren til tilskuerne
 
 Move right
-== Gå höger
+== Gå til højre
 
 Movement
-== Förflyttning
+== Bevægelse
 
 Mute when not active
-== Stäng av ljudet när spelet inte är aktivt
+== Ingen lyd når du ikke er aktiv
 
 Name
-== Namn
+== Navn
 
 Name plates size
-== Storlek på namnskyltar
+== Størrelse på navneskilte
 
 Netversion:
-== Nätversion:
+== Netversion:
 
 New name:
-== Nytt namn:
+== Nyt navn:
 
 News
-== Nyheter
+== Nyheder
 
 Next weapon
-== Nästa vapen
+== Næste våben
 
 Nickname
-== Smeknamn
+== Navn
 
 No
 == Nej
 
 No password
-== Inget lösenord
+== Ingen adgangskode
 
 No servers found
-== Inga servrar hittade
+== Ingen servere fundet
 
 No servers match your filter criteria
-== Inga servrar matchar dina filterkriterer
+== Ingen servere matcher din filterkriterier
 
 Ok
 == Ok
 
 Open
-== Öppna
+== Åben
 
 Parent Folder
-== Uppliggande mapp
+== Overmappe
 
 Password
-== Lösenord
+== Adgangskode
 
 Password incorrect
-== Felaktigt lösenord
+== Forkert adgangskode
 
 Ping
 == Ping
@@ -386,106 +386,106 @@ Pistol
 == Pistol
 
 Play
-== Spela
+== Spil
 
 Player
-== Spelare
+== Spiller
 
 Player options
-== Spelaralternativ
+== Spillermuligheder
 
 Players
-== Spelare
+== Spillere
 
 Please balance teams!
-== Balansera lagen!
+== Venligst balancerer hold!
 
 Prev. weapon
-== Föregående vapen
+== Foregående våben
 
 Quality Textures
-== Kvalitetstexturer
+== Kvalitetsteksturer
 
 Quick search:
-== Snabbsök:
+== Hurtig søg:
 
 Quit
-== Avsluta
+== Afslut
 
 Quit anyway?
-== Avsluta i alla fall?
+== Afslut alligevel?
 
 REC %3d:%02d
 == REC %3d:%02d
 
 Reason:
-== Anledning:
+== Grund:
 
 Record demo
-== Spela in demo
+== Optag demo
 
 Red team
-== Röda laget
+== Rødt hold
 
 Red team wins!
-== Röda laget vann!
+== Rødt hold vinder!
 
 Refresh
-== Uppdatera
+== Opdater
 
 Refreshing master servers
-== Uppdaterar huvudservrar
+== Opdaterer masterservere
 
 Remote console
 == Serverkonsol
 
 Remove
-== Ta bort
+== Fjern
 
 Remove friend
-== Ta bort kompis
+== Fjern ven
 
 Rename
-== Byt namn
+== Omdøb navn
 
 Rename demo
-== Byt namn på demo
+== Omdøb navn på demoen
 
 Reset filter
-== Återställ filter
+== Nulstil filter
 
 Reset to defaults
-== Återställ till standard
+== Sæt til standard
 
 Rifle
-== Gevär
+== Laser
 
 Round
-== Runda
+== Runde
 
 Sample rate
-== Samplingsfrekvens
+== Sample frekvens
 
 Sat.
-== Mättnad
+== Mætning
 
 Score
-== Poäng
+== Score
 
 Score board
-== Poängtavla
+== Resultatliste
 
 Score limit
-== Poängmål
+== Score grænse
 
 Scoreboard
-== Poänglista
+== Resultatliste
 
 Screenshot
-== Skärmdump
+== Screenshot
 
 Server address:
-== Serveradress
+== Serveradresse
 
 Server details
 == Serverdetaljer
@@ -497,118 +497,118 @@ Server info
 == Serverinfo
 
 Server not full
-== Inte full server
+== Ikke fuld server
 
 Settings
-== Inställningar
+== Indstillinger
 
 Shotgun
-== Hagelgevär
+== Haglgevær
 
 Show chat
-== Visa chatt
+== Vis chat
 
 Show friends
-== Visa kompisar
+== Vis venner
 
 Show ingame HUD
-== Visa HUD i spel
+== Vis HUD i spillet
 
 Show name plates
-== Visa namnskyltar
+== Vis navneskilte
 
 Show only supported
-== Visa endast upplösningar som stöds
+== Vis kun understøttede
 
 Size:
-== Storlek:
+== Størrelse:
 
 Skins
-== Utseende
+== Udseende
 
 Sound
-== Ljud
+== Lyd
 
 Sound error
-== Ljudfel
+== Lyd fejl
 
 Sound volume
-== Ljud volym
+== Lydstyrke
 
 Spectate
-== Åskåda
+== Kig på
 
 Spectator mode
-== Åskådarläge
+== Tilskuer mode
 
 Spectators
-== Åskådare
+== Tilskuer
 
 Standard gametype
-== Standard speltyp
+== Standard spilletype
 
 Standard map
-== Standardkarta
+== Standard
 
 Stop record
-== Sluta spela in
+== Stop optagelse
 
 Sudden Death
-== Plötslig död
+== Sudden Death
 
 Switch weapon on pickup
-== Byt vapen vid anskaffning
+== Byt våben ved anskafning
 
 Team
-== Lag
+== Hold
 
 Team chat
-== Lagchatt
+== Holdchat
 
 Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworld %s är släppt! Ladda ner det på www.teeworlds.com!
+== Teeworld %s er ude nu! Download den på www.teeworlds.com!
 
 Texture Compression
-== Texturkompression
+== Teksturkompression
 
 The audio device couldn't be initialised.
-== Ljudet kunde inte startas
+== Lydenheden kunne ikke startes
 
 The server is running a non-standard tuning on a pure game type.
-== Denna server kör inte standardinställningar på standard speltyp.
+== Denne server kører på en ikke-standard tuning på en ren spilletype.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Det finns en osparad bana i redigeraden, du kanske vill spara den innan du avslutar.
+== Der er en ikke-gemt bane i editoren, vil du gemme den før du afslutter?
 
 Time limit
-== Tidsbegränsning
+== Tidsbegrænsning
 
 Time limit: %d min
-== Tidsgräns: %d min
+== Tidsbegrænsning: %d min
 
 Try again
-== Försök igen
+== Forsøg igen
 
 Type
-== Typ
+== Type
 
 Type:
-== Typ:
+== Type:
 
 UI Color
-== Gränssnittfärg
+== Brugergrænsefladefarve
 
 Unable to delete the demo
-== Kunde inte ta bort demot
+== Kunne ikke slette demoen
 
 Unable to rename the demo
-== Kunde inte byta namn på demot
+== Kunne omdøbe demoen
 
 Use sounds
-== Använd ljudeffekter
+== Anvend lydeffekter
 
 Use team colors for name plates
-== Använd lagfärger i namnskyltar
+== Anvend holdfarver til navneskilte
 
 V-Sync
 == V-Sync
@@ -620,40 +620,40 @@ Version:
 == Version:
 
 Vote command:
-== Omröstningskommando:
+== Afstemningsordre:
 
 Vote description:
-== Beskrivning:
+== Afstemningsbeskrivelse:
 
 Vote no
-== Rösta nej
+== Stem nej
 
 Vote yes
-== Rösta ja
+== Stem ja
 
 Voting
-== Röstning
+== Afstemning
 
 Warmup
-== Uppvärmning
+== Opvarmning
 
 Weapon
-== Vapen
+== Våben
 
 Welcome to Teeworlds
-== Välkommen till Teeworlds
+== Velkommen til Teeworlds
 
 Yes
 == Ja
 
 You must restart the game for all settings to take effect.
-== Du måste starta om spelet för att ändringarna skall gälla.
+== Du skal genstarte spillet før alle indstillingerne virker.
 
 Your skin
-== Ditt skin
+== Dit udseende
 
 no limit
-== Ingen gräns
+== Ingen grænse
 
 ##### needs translation #####
 
@@ -667,4 +667,7 @@ Spectate previous
 == 
 
 ##### old translations #####
+
+﻿##### translated strings #####
+== 
 

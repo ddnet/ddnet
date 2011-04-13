@@ -44,7 +44,7 @@ void CEditor::UiDoPopupMenu()
 	{
 		bool Inside = UI()->MouseInside(&s_UiPopups[i].m_Rect);
 		UI()->SetHotItem(&s_UiPopups[i].m_pId);
-		
+
 		if(UI()->ActiveItem() == &s_UiPopups[i].m_pId)
 		{
 			if(!UI()->MouseButton(0))
@@ -59,20 +59,20 @@ void CEditor::UiDoPopupMenu()
 			if(UI()->MouseButton(0))
 				UI()->SetActiveItem(&s_UiPopups[i].m_pId);
 		}
-		
+
 		int Corners = CUI::CORNER_ALL;
 		if(s_UiPopups[i].m_IsMenu)
 			Corners = CUI::CORNER_R|CUI::CORNER_B;
-		
+
 		CUIRect r = s_UiPopups[i].m_Rect;
 		RenderTools()->DrawUIRect(&r, vec4(0.5f,0.5f,0.5f,0.75f), Corners, 3.0f);
 		r.Margin(1.0f, &r);
 		RenderTools()->DrawUIRect(&r, vec4(0,0,0,0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
-		
+
 		if(s_UiPopups[i].m_pfnFunc(this, r))
 			g_UiNumPopups--;
-			
+
 		if(Input()->KeyDown(KEY_ESCAPE))
 			g_UiNumPopups--;
 	}
@@ -85,7 +85,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
-	
+
 	// don't allow deletion of game group
 	if(pEditor->m_Map.m_pGameGroup != pEditor->GetSelectedGroup())
 	{
@@ -230,7 +230,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
 		return 1;
 	}
-	
+
 	enum
 	{
 		PROP_ORDER=0,
@@ -245,7 +245,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		PROP_CLIP_H,
 		NUM_PROPS,
 	};
-	
+
 	CProperty aProps[] = {
 		{"Order", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lGroups.size()-1},
 		{"Pos X", -pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_OffsetX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -260,21 +260,21 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		{"Clip H", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipH, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{0},
 	};
-	
+
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	
+
 	// cut the properties that isn't needed
 	if(pEditor->GetSelectedGroup()->m_GameGroup)
 		aProps[PROP_POS_X].m_pName = 0;
-		
+
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
 	if(Prop == PROP_ORDER)
 		pEditor->m_SelectedGroup = pEditor->m_Map.SwapGroups(pEditor->m_SelectedGroup, NewVal);
-		
+
 	// these can not be changed on the game group
 	if(!pEditor->GetSelectedGroup()->m_GameGroup)
 	{
@@ -288,7 +288,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		else if(Prop == PROP_CLIP_W) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
 		else if(Prop == PROP_CLIP_H) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
 	}
-	
+
 	return 0;
 }
 
@@ -298,7 +298,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
-	
+
 	// don't allow deletion of game layer
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
 		pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer"))
@@ -316,10 +316,10 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	}
 
 	View.HSplitBottom(10.0f, &View, 0);
-	
+
 	CLayerGroup *pCurrentGroup = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup];
 	CLayer *pCurrentLayer = pEditor->GetSelectedLayer(0);
-	
+
 	enum
 	{
 		PROP_GROUP=0,
@@ -327,7 +327,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 		PROP_HQ,
 		NUM_PROPS,
 	};
-	
+
 	CProperty aProps[] = {
 		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lGroups.size()-1},
 		{"Order", pEditor->m_SelectedLayer, PROPTYPE_INT_STEP, 0, pCurrentGroup->m_lLayers.size()},
@@ -341,13 +341,13 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 		aProps[0].m_Type = PROPTYPE_NULL;
 		aProps[2].m_Type = PROPTYPE_NULL;
 	}
-	
+
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
-	
+
 	if(Prop == PROP_ORDER)
 		pEditor->m_SelectedLayer = pCurrentGroup->SwapLayers(pEditor->m_SelectedLayer, NewVal);
 	else if(Prop == PROP_GROUP && pCurrentLayer->m_Type != LAYERTYPE_GAME)
@@ -366,7 +366,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 		if(NewVal)
 			pCurrentLayer->m_Flags |= LAYERFLAG_DETAIL;
 	}
-		
+
 	return pCurrentLayer->RenderProperties(&View);
 }
 
@@ -375,7 +375,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	CQuad *pQuad = pEditor->GetSelectedQuad();
 
 	CUIRect Button;
-	
+
 	// delete button
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
@@ -412,7 +412,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 			}
 
 			int Height = (Right-Left)*pEditor->m_Map.m_lImages[pLayer->m_Image]->m_Height/pEditor->m_Map.m_lImages[pLayer->m_Image]->m_Width;
-			
+
 			pQuad->m_aPoints[0].x = Left; pQuad->m_aPoints[0].y = Top;
 			pQuad->m_aPoints[1].x = Right; pQuad->m_aPoints[1].y = Top;
 			pQuad->m_aPoints[2].x = Left; pQuad->m_aPoints[2].y = Top+Height;
@@ -447,7 +447,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		int Left = pQuad->m_aPoints[0].x;
 		int Bottom = pQuad->m_aPoints[0].y;
 		int Right = pQuad->m_aPoints[0].x;
-		
+
 		for(int k = 1; k < 4; k++)
 		{
 			if(pQuad->m_aPoints[k].y < Top) Top = pQuad->m_aPoints[k].y;
@@ -455,7 +455,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 			if(pQuad->m_aPoints[k].y > Bottom) Bottom = pQuad->m_aPoints[k].y;
 			if(pQuad->m_aPoints[k].x > Right) Right = pQuad->m_aPoints[k].x;
 		}
-		
+
 		pQuad->m_aPoints[0].x = Left; pQuad->m_aPoints[0].y = Top;
 		pQuad->m_aPoints[1].x = Right; pQuad->m_aPoints[1].y = Top;
 		pQuad->m_aPoints[2].x = Left; pQuad->m_aPoints[2].y = Bottom;
@@ -475,7 +475,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		PROP_COLOR_ENV_OFFSET,
 		NUM_PROPS,
 	};
-	
+
 	CProperty aProps[] = {
 		{"Pos X", pQuad->m_aPoints[4].x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", pQuad->m_aPoints[4].y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -483,16 +483,16 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		{"Pos. TO", pQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Color Env", pQuad->m_ColorEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
 		{"Color TO", pQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		
+
 		{0},
 	};
-	
+
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
-	
+
 	if(Prop == PROP_POS_X)
 	{
 		float Offset = NewVal*1000-pQuad->m_aPoints[4].x;
@@ -509,14 +509,14 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	if(Prop == PROP_POS_ENV_OFFSET) pQuad->m_PosEnvOffset = NewVal;
 	if(Prop == PROP_COLOR_ENV) pQuad->m_ColorEnv = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
 	if(Prop == PROP_COLOR_ENV_OFFSET) pQuad->m_ColorEnvOffset = NewVal;
-	
+
 	return 0;
 }
 
 int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 {
 	CQuad *pQuad = pEditor->GetSelectedQuad();
-	
+
 	enum
 	{
 		PROP_POS_X=0,
@@ -524,7 +524,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 		PROP_COLOR,
 		NUM_PROPS,
 	};
-	
+
 	int Color = 0;
 	int x = 0, y = 0;
 
@@ -542,15 +542,15 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 			y = pQuad->m_aPoints[v].y/1000;
 		}
 	}
-	
-	
+
+
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Color", Color, PROPTYPE_COLOR, -1, pEditor->m_Map.m_lEnvelopes.size()},
 		{0},
 	};
-	
+
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
@@ -583,8 +583,8 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 			}
 		}
 	}
-	
-	return 0;	
+
+	return 0;
 }
 
 int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
@@ -597,7 +597,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
 	pEditor->UI()->DoLabel(&Label, "Create new folder", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
-	View.HSplitBottom(20.0f, &View, &ButtonBar);	
+	View.HSplitBottom(20.0f, &View, &ButtonBar);
 
 	if(pEditor->m_FileDialogErrString[0] == 0)
 	{
@@ -628,7 +628,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
 				}
 				else
 					str_copy(pEditor->m_FileDialogErrString, "Unable to create the folder", sizeof(pEditor->m_FileDialogErrString));
-			}	
+			}
 		}
 		ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
 		ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
@@ -653,7 +653,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
 			return 1;
 	}
 
-	return 0;	
+	return 0;
 }
 
 int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
@@ -673,7 +673,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 		pEditor->UI()->DoLabel(&Label, "Save map", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
-	View.HSplitBottom(20.0f, &View, &ButtonBar);	
+	View.HSplitBottom(20.0f, &View, &ButtonBar);
 
 	// notification text
 	View.HSplitTop(30.0f, 0, &View);
@@ -725,18 +725,18 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 	CUIRect ButtonBar, ImageView;
 	View.VSplitLeft(80.0f, &ButtonBar, &View);
 	View.Margin(10.0f, &ImageView);
-	
+
 	int ShowImage = g_SelectImageCurrent;
-	
+
 	for(int i = -1; i < pEditor->m_Map.m_lImages.size(); i++)
 	{
 		CUIRect Button;
 		ButtonBar.HSplitTop(12.0f, &Button, &ButtonBar);
 		ButtonBar.HSplitTop(2.0f, 0, &ButtonBar);
-		
+
 		if(pEditor->UI()->MouseInside(&Button))
 			ShowImage = i;
-			
+
 		if(i == -1)
 		{
 			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lImages[i], "None", i==g_SelectImageCurrent, &Button))
@@ -748,7 +748,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 				g_SelectImageSelected = i;
 		}
 	}
-	
+
 	if(ShowImage >= 0 && ShowImage < pEditor->m_Map.m_lImages.size())
 		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_TexID);
 	else
@@ -773,7 +773,7 @@ int CEditor::PopupSelectImageResult()
 {
 	if(g_SelectImageSelected == -100)
 		return -100;
-		
+
 	g_SelectImageCurrent = g_SelectImageSelected;
 	g_SelectImageSelected = -100;
 	return g_SelectImageCurrent;
@@ -809,7 +809,7 @@ int CEditor::PopupSelectGameTileOpResult()
 {
 	if(s_GametileOpSelected < 0)
 		return -1;
-	
+
 	int Result = s_GametileOpSelected;
 	s_GametileOpSelected = -1;
 	return Result;

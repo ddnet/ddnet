@@ -28,14 +28,14 @@ void CLayers::Init(class IKernel *pKernel)
 	m_pSpeedupLayer = 0;
 	m_pFrontLayer = 0;
 	m_pSwitchLayer = 0;
-	
+
 	for(int g = 0; g < NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = GetGroup(g);
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer+l);
-			
+
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
@@ -49,7 +49,7 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pGameGroup->m_OffsetY = 0;
 					m_pGameGroup->m_ParallaxX = 100;
 					m_pGameGroup->m_ParallaxY = 100;
-					
+
 					if(m_pGameGroup->m_Version >= 2)
 					{
 						m_pGameGroup->m_UseClipping = 0;
@@ -69,7 +69,7 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pFrontLayer = pTilemap;
 				if(pTilemap->m_Flags&16)
 					m_pSwitchLayer = pTilemap;
-			}			
+			}
 		}
 	}
 }

@@ -573,6 +573,9 @@ Open
 Parent Folder
 == 
 
+Play background music
+== 
+
 Player options
 == 
 
@@ -616,6 +619,12 @@ Size:
 == 
 
 Sound error
+== 
+
+Spectate next
+== 
+
+Spectate previous
 == 
 
 Spectator mode

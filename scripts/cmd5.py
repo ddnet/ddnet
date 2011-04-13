@@ -29,5 +29,8 @@ for filename in sys.argv[1:]:
 	f += cstrip([l.strip() for l in open(filename, "rb")])
 
 hash = hashlib.md5(f).hexdigest().lower()[16:]
+#TODO 0.7: improve nethash creation
+if hash == "6e28a475de43adfd":
+	hash = "626fce9a778df4d4"
 print('#define GAME_NETVERSION_HASH "%s"' % hash)
 print('#define GIT_SHORTREV_HASH "%s"' % os.popen('git rev-parse HEAD').readline(8))
