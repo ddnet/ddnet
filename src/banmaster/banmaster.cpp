@@ -188,7 +188,7 @@ int main(int argc, const char **argv) // ignore_convention
 			return -1;
 	}
 
-	m_pConsole->ExecuteFile(BANMASTER_BANFILE);
+	m_pConsole->ExecuteFile(BANMASTER_BANFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 	
 	NETADDR BindAddr;
 	if(m_aBindAddr[0] && net_host_lookup(m_aBindAddr, &BindAddr, NETTYPE_IPV4) == 0)
@@ -239,7 +239,7 @@ int main(int argc, const char **argv) // ignore_convention
 		{
 			ClearBans();
 			LastUpdate = time_get();
-			m_pConsole->ExecuteFile(BANMASTER_BANFILE);
+			m_pConsole->ExecuteFile(BANMASTER_BANFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 		}
 		
 		// be nice to the CPU
