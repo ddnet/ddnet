@@ -595,6 +595,9 @@ CConsole::CConsole(int FlagMask)
 	{
 		m_aCommandCount[i] = 0;
 	}
+
+	m_pfnPrintCallback = 0;
+	m_pPrintCallbackUserData = 0;
 	
 	m_pfnClientOnlineCallback = 0;
 	m_pfnCompareClientsCallback = 0;
@@ -636,7 +639,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
 		{
 			if(NumArgs - i > 1)
-				//ExecuteFile(ppArguments[i+1], -1, IConsole::CONSOLELEVEL_CONFIG); // TODO: DDRace: rework
+				ExecuteFile(ppArguments[i+1], -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 			i++;
 		}
 		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
@@ -647,7 +650,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		else
 		{
 			// search arguments for overrides
-			//ExecuteLine(ppArguments[i], -1, IConsole::CONSOLELEVEL_CONFIG);
+			ExecuteLine(ppArguments[i], -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 		}
 	}
 }
