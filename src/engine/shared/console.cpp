@@ -347,15 +347,19 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, in
 						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", "As a helper you can't use commands on others.");
 						dbg_msg("server", "helper tried rcon command ('%s') on others without permission. ClientID=%d", pCommand->m_pName, ClientID);
 					}
-					else if((!g_Config.m_SvCheats || g_Config.m_SvRegister || !g_Config.m_Password[0]) && (pCommand->m_Flags & CMDFLAG_CHEAT))
+					else if((!g_Config.m_SvCheats || g_Config.m_SvRegister) && (pCommand->m_Flags & CMDFLAG_CHEAT))
 					{
 						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", "Cheats are not allowed on registered or un-passworded servers");
 						dbg_msg("server", "client tried rcon cheat ('%s') with cheats off. ClientID=%d", pCommand->m_pName, ClientID);
 					}
 					else
 					{
-						if(pCommand->m_Flags & CMDFLAG_CHEAT)
+						if(pCommand->m_Flags & CMDFLAG_CHEAT && !m_Cheated)
+						{
 							m_Cheated = true;
+							Result.Print(OUTPUT_LEVEL_STANDARD, "Cheated", "You have cheated, no records will be saved until server shutdown");
+							str_format(g_Config.m_SvBroadcast, sizeof(g_Config.m_SvBroadcast), "Cheated: No records will be saved");
+						}
 						if (Result.HasVictim())
 						{
 							if(Result.GetVictim() == CResult::VICTIM_ALL)
