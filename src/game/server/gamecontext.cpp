@@ -1201,40 +1201,43 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		pPlayer->m_LastEmote = Server()->Tick();
 
 		SendEmoticon(ClientID, pMsg->m_Emoticon);
-		// TODO:DDRace GreYFoX Rework Emoticons
-		/*CCharacter* pChr = pPlayer->GetCharacter();
+		CCharacter* pChr = pPlayer->GetCharacter();
 		if(pChr && g_Config.m_SvEmotionalTees && pChr->m_EyeEmote)
 		{
 			switch(pMsg->m_Emoticon)
 			{
-				case EMOTICON_2:
-				case EMOTICON_8:
+			case EMOTICON_EXCLAMATION:
+			case EMOTICON_QUESTION:
+			case EMOTICON_GHOST:
 					pChr->SetEmoteType(EMOTE_SURPRISE);
 					break;
-				case EMOTICON_1:
-				case EMOTICON_4:
-				case EMOTICON_7:
-				case EMOTICON_13:
+			case EMOTICON_DOTDOT:
+			case EMOTICON_ZZZ:
+			case EMOTICON_DROP:
 					pChr->SetEmoteType(EMOTE_BLINK);
 					break;
-				case EMOTICON_3:
-				case EMOTICON_6:
+			case EMOTICON_MUSIC:
+			case EMOTICON_EYES:
+			case EMOTICON_HEARTS:
 					pChr->SetEmoteType(EMOTE_HAPPY);
 					break;
-				case EMOTICON_9:
-				case EMOTICON_15:
+			case EMOTICON_SUSHI:
+			case EMOTICON_SORRY:
+			case EMOTICON_OOP:
 					pChr->SetEmoteType(EMOTE_PAIN);
 					break;
-				case EMOTICON_10:
-				case EMOTICON_11:
-				case EMOTICON_12:
+			case EMOTICON_WTF:
+			case EMOTICON_SPLATTEE:
+			case EMOTICON_DEVILTEE:
+			case EMOTICON_ZOMG:
 					pChr->SetEmoteType(EMOTE_ANGRY);
 					break;
 				default:
+					pChr->SetEmoteType(EMOTE_NORMAL);
 					break;
 			}
 			pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
-		}*/
+		}
 	}
 	else if (MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 	{
