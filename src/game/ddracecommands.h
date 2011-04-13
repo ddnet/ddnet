@@ -7,7 +7,7 @@
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, level)
 #endif
 
-CONSOLE_COMMAND("kill", "?v", CFGFLAG_SERVER, ConKillPlayer, this, "Kills player v and announces the kill", IConsole::CONSOLELEVEL_ADMIN)
+CONSOLE_COMMAND("kill_pl", "?v", CFGFLAG_SERVER, ConKillPlayer, this, "Kills player v and announces the kill", IConsole::CONSOLELEVEL_ADMIN)
 CONSOLE_COMMAND("logout", "?v", CFGFLAG_SERVER, ConLogOut, this, "Logs player v out from the console", IConsole::CONSOLELEVEL_USER)
 CONSOLE_COMMAND("moder", "v", CFGFLAG_SERVER, ConSetlvl1, this, "Authenticates player v to the level of 1", IConsole::CONSOLELEVEL_ADMIN)
 CONSOLE_COMMAND("admin", "v", CFGFLAG_SERVER, ConSetlvl2, this, "Authenticates player v to the level of 2", IConsole::CONSOLELEVEL_ADMIN)
