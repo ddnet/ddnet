@@ -1607,7 +1607,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "", IConsole::CONSOLELEVEL_ADMIN);
-	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConSetTeam, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("set_team", "vi", CFGFLAG_SERVER, ConSetTeam, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
 	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
