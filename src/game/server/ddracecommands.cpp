@@ -911,15 +911,15 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData, int Cl
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aIpBuf[64];
 	char aBuf[64];
-	int Index = pResult->GetInteger(0);
+	int Victim = pResult->GetVictim();
 
-	if(Index < 0 || Index >= pSelf->m_NumMutes)
+	if(Victim < 0 || Victim >= pSelf->m_NumMutes)
 		return;
 	
 	pSelf->m_NumMutes--;
-	pSelf->m_aMutes[Index] = pSelf->m_aMutes[pSelf->m_NumMutes];
+	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
 
-	net_addr_str(&pSelf->m_aMutes[Index].m_Addr, aIpBuf, sizeof(aIpBuf));
+	net_addr_str(&pSelf->m_aMutes[Victim].m_Addr, aIpBuf, sizeof(aIpBuf));
 	str_format(aBuf, sizeof(aBuf), "Unmuted %s" , aIpBuf);
 	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
 }
