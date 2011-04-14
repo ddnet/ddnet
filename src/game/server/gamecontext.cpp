@@ -1897,8 +1897,8 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 		m_apPlayers[ClientID]->m_Authed = Level;
 		char aBuf[512], aIP[20];
 		pServ->GetClientIP(ClientID, aIP, sizeof(aIP));
-		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIP, g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand,aBuf) && Level > 0)
+		str_format(aBuf, sizeof(aBuf), "ban %s:0 %d Banned by vote", aIP, g_Config.m_SvVoteKickBantime);
+		if(!str_comp_nocase(m_aVoteCommand, aBuf) && Level > 0)
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO;
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "CGameContext", "Aborted vote by admin login.");
