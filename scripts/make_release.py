@@ -89,7 +89,6 @@ if include_src:
 
 if use_bundle:
 	os.system("lipo -create -output "+name+"-Server "+name+"-Server"+"_ppc "+name+"-Server"+"_x86")
-	os.system("lipo -create -output "+name+"-Server_sql "+name+"-Server_sql"+"_ppc "+name+"-Server_sql"+"_x86")
 	os.system("lipo -create -output "+name+" "+name+"_ppc "+name+"_x86")
 	os.system("lipo -create -output serverlaunch serverlaunch_ppc serverlaunch_x86")
 
