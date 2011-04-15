@@ -92,7 +92,7 @@ if use_bundle:
 	os.system("lipo -create -output "+name+"-Server_sql "+name+"-Server_sql"+"_ppc "+name+"-Server_sql"+"_x86")
 	os.system("lipo -create -output "+name+" "+name+"_ppc "+name+"_x86")
 	os.system("lipo -create -output serverlaunch serverlaunch_ppc serverlaunch_x86")
-	os.system("lipo -create -output serverlaunch_sql serverlaunch_sql_ppc serverlaunch_sql_x86")
+	os.system("lipo -create -output serverlaunch_mysql serverlaunch_mysql_ppc serverlaunch_mysql_x86")
 
 	# create Teeworlds appfolder
 	clientbundle_content_dir = os.path.join(package_dir, "DDRace.app/Contents")
@@ -186,7 +186,7 @@ if use_bundle:
 	copydir("data/maps", serverbundle_resource_dir)
 	shutil.copy("other/icons/DDRace-Server.icns", serverbundle_resource_dir)
 	shutil.copy(name+"-Server"+exe_ext, serverbundle_bin_dir)
-	shutil.copy("serverlaunch_sql"+exe_ext, serverbundle_bin_dir + "/"+name+"_server")
+	shutil.copy("serverlaunch_mysql"+exe_ext, serverbundle_bin_dir + "/"+name+"_server")
 	file(os.path.join(serverbundle_content_dir, "Info.plist"), "w").write("""
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
