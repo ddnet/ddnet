@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/tl/string.h>
+
 #include <base/math.h>
 
 #include <engine/engine.h>
@@ -24,8 +26,6 @@
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
-
-#include <base/tl/string.h>
 
 CMenusKeyBinder CMenus::m_Binder;
 

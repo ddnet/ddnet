@@ -94,7 +94,7 @@ void runServer()
 	[window makeKeyAndOrderFront: nil];
 
 	[view listenTo: task];
-	[task setLaunchPath: [mainBundle pathForAuxiliaryExecutable: @"DDRace-Server"]];
+	[task setLaunchPath: [mainBundle pathForAuxiliaryExecutable: @"DDRace-Server_sql"]];
 	[task setArguments: arguments];
 	[task launch];
 	[NSApp run];

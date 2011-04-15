@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include <base/tl/sorted_array.h>
+
 #include <engine/demo.h>
 #include <engine/engine.h>
 
@@ -15,8 +18,6 @@
 #include <game/client/gameclient.h>
 
 #include "effects.h"
-
-#include <base/tl/sorted_array.h>
 
 inline vec2 RandomDir() { return normalize(vec2(frandom()-0.5f, frandom()-0.5f)); }
 

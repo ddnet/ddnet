@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/tl/array.h>
+
 #include <base/system.h>
 
 #include <engine/shared/datafile.h>
@@ -22,8 +24,6 @@
 #include <game/client/lineinput.h>
 
 #include <game/localization.h>
-
-#include <base/tl/array.h>
 
 int CEditor::ms_CheckerTexture;
 int CEditor::ms_BackgroundTexture;

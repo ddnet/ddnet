@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/tl/string.h>
+
 #include <base/math.h>
 
 #include <engine/demo.h>
@@ -18,8 +20,6 @@
 #include <game/generated/client_data.h>
 
 #include "menus.h"
-
-#include <base/tl/string.h>
 
 int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {

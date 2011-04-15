@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include <base/tl/string.h>
+
 #include <engine/shared/config.h>
 
 #include <base/math.h>
@@ -10,7 +13,6 @@
 #include "camera.h"
 #include "controls.h"
 
-#include <base/tl/string.h>
 #include <engine/serverbrowser.h>
 
 CCamera::CCamera()
