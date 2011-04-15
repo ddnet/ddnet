@@ -117,7 +117,6 @@ public:
 		CCharacterCore m_Core;
 		int m_StartTime;
 		int m_DDRaceState;
-		//int m_RefreshTime;
 		int m_FreezeTime;
 		int m_Armor;
 		int m_LastMove;
@@ -126,7 +125,6 @@ public:
 		int m_LastWeapon;
 		bool m_Respawn;
 		bool m_aHasWeapon[NUM_WEAPONS];
-		int m_HammerType;
 		bool m_Super;
 		bool m_DeepFreeze;
 		bool m_EndlessHook;
@@ -139,11 +137,9 @@ public:
 	int64 m_Last_Pause;
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
-	bool m_Invisible;
 	int m_Authed;
 	bool m_IsUsingDDRaceClient;
 	bool m_ShowOthers;
-	bool m_RconFreeze;
 
 	int m_ChatScore;
 

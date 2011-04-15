@@ -342,14 +342,19 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, in
 						}
 						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
 					}
-					else if((!g_Config.m_SvCheats || g_Config.m_SvRegister) && (pCommand->m_Flags & CMDFLAG_CHEAT))
+					else if(!g_Config.m_SvTestingCommands && (pCommand->m_Flags & CMDFLAG_TEST))
 					{
-						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", "Cheats are not allowed on registered or un-passworded servers");
-						dbg_msg("server", "client tried rcon cheat ('%s') with cheats off. ClientID=%d", pCommand->m_pName, ClientID);
+						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", "Testing commands are disabled ( currently sv_test_cmds 0 )");
+						dbg_msg("server", "client tried testing command ('%s') with testing commands off. ClientID=%d", pCommand->m_pName, ClientID);
+					}
+					else if(g_Config.m_SvRegister && (pCommand->m_Flags & CMDFLAG_TEST))
+					{
+						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", "Testing commands are not allowed on registered servers");
+						dbg_msg("server", "client tried testing command ('%s') with registered server. ClientID=%d", pCommand->m_pName, ClientID);
 					}
 					else
 					{
-						if(pCommand->m_Flags & CMDFLAG_CHEAT && !m_Cheated)
+						if(pCommand->m_Flags & CMDFLAG_TEST && !m_Cheated)
 						{
 							m_Cheated = true;
 							Result.Print(OUTPUT_LEVEL_STANDARD, "Cheated", "You have cheated, no records will be saved until server shutdown");

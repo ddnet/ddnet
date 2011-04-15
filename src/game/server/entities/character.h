@@ -152,7 +152,6 @@ public:
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
-	int m_HammerType;
 	bool m_Super;
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;

@@ -13,37 +13,37 @@
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->MoveCharacter(ClientID, pResult->GetVictim(), -1, 0);
+	pSelf->MoveCharacter(ClientID, ClientID, -1, 0);
 }
 
 void CGameContext::ConGoRight(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->MoveCharacter(ClientID, pResult->GetVictim(), 1, 0);
+	pSelf->MoveCharacter(ClientID, ClientID, 1, 0);
 }
 
 void CGameContext::ConGoDown(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->MoveCharacter(ClientID, pResult->GetVictim(), 0, 1);
+	pSelf->MoveCharacter(ClientID, ClientID, 0, 1);
 }
 
 void CGameContext::ConGoUp(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->MoveCharacter(ClientID, pResult->GetVictim(), 0, -1);
+	pSelf->MoveCharacter(ClientID, ClientID, 0, -1);
 }
 
 void CGameContext::ConMove(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->MoveCharacter(ClientID, pResult->GetVictim(), pResult->GetInteger(0), pResult->GetInteger(1));
+	pSelf->MoveCharacter(ClientID, ClientID, pResult->GetInteger(0), pResult->GetInteger(1));
 }
 
 void CGameContext::ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->MoveCharacter(ClientID, pResult->GetVictim(), pResult->GetInteger(0), pResult->GetInteger(1), true);
+	pSelf->MoveCharacter(ClientID, ClientID, pResult->GetInteger(0), pResult->GetInteger(1), true);
 }
 
 void CGameContext::MoveCharacter(int ClientID, int Victim, int X, int Y, bool Raw)
@@ -85,14 +85,9 @@ void CGameContext::ConSetlvl1(IConsole::IResult *pResult, void *pUserData, int C
 void CGameContext::ConLogOut(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
 
 	CServer* pServ = (CServer*)pSelf->Server();
-	if(pSelf->m_apPlayers[Victim])
-	{
-		pSelf->m_apPlayers[Victim]->m_Authed = -1;
-		pServ->SetRconLevel(Victim, -1);
-	}
+	pServ->SetRconLevel(ClientID, -1);
 }
 
 void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData, int ClientID)
@@ -112,20 +107,19 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData, in
 void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), WEAPON_NINJA, false);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, WEAPON_NINJA, false);
 }
 
 void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter* pChr = pSelf->GetPlayerChar(ClientID);
 	if(pChr && !pChr->m_Super)
 	{
 		pChr->m_Super = true;
 		pChr->UnFreeze();
 		pChr->m_TeamBeforeSuper = pChr->Team();
-		pChr->Teams()->SetCharacterTeam(Victim, TEAM_SUPER);
+		pChr->Teams()->SetCharacterTeam(ClientID, TEAM_SUPER);
 		pChr->m_DDRaceState = DDRACE_CHEAT;
 	}
 }
@@ -133,73 +127,72 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData, int Cli
 void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter* pChr = pSelf->GetPlayerChar(ClientID);
 	if(pChr && pChr->m_Super)
 	{
 		pChr->m_Super = false;
-		pChr->Teams()->SetForceCharacterTeam(Victim, pChr->m_TeamBeforeSuper);
+		pChr->Teams()->SetForceCharacterTeam(ClientID, pChr->m_TeamBeforeSuper);
 	}
 }
 
 void CGameContext::ConShotgun(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), WEAPON_SHOTGUN, false);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, WEAPON_SHOTGUN, false);
 }
 
 void CGameContext::ConGrenade(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), WEAPON_GRENADE, false);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, WEAPON_GRENADE, false);
 }
 
 void CGameContext::ConRifle(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), WEAPON_RIFLE, false);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, WEAPON_RIFLE, false);
 }
 
 void CGameContext::ConWeapons(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), -1, false);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, -1, false);
 }
 
 void CGameContext::ConUnShotgun(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), WEAPON_SHOTGUN, true);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, WEAPON_SHOTGUN, true);
 }
 
 void CGameContext::ConUnGrenade(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), WEAPON_GRENADE, true);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, WEAPON_GRENADE, true);
 }
 
 void CGameContext::ConUnRifle(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), WEAPON_RIFLE, true);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, WEAPON_RIFLE, true);
 }
 
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), -1, true);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, -1, true);
 }
 
 void CGameContext::ConAddWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), pResult->GetInteger(0), false);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, pResult->GetInteger(0), false);
 }
 
 void CGameContext::ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, ClientID, pResult->GetVictim(), pResult->GetInteger(0), true);
+	pSelf->ModifyWeapons(pResult, ClientID, ClientID, pResult->GetInteger(0), true);
 }
 
 void CGameContext::ModifyWeapons(IConsole::IResult *pResult, int ClientID, int Victim, int Weapon, bool Remove)
@@ -255,114 +248,17 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, int ClientID, int V
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
 	int TeleTo = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
 	if(pSelf->m_apPlayers[TeleTo])
 	{
 		{
-			CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+			CCharacter* pChr = pSelf->GetPlayerChar(ClientID);
 			if(pChr)
 			{
 				pChr->Core()->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
 				pChr->m_DDRaceState = DDRACE_CHEAT;
 			}
 		}
-	}
-}
-
-void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData, int ClientID)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Seconds = -1;
-	int Victim = pResult->GetVictim();
-
-	char aBuf[128];
-
-	if(pResult->NumArguments())
-		Seconds = clamp(pResult->GetInteger(0), -2, 9999);
-
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if(!pChr)
-		return;
-
-	if(pSelf->m_apPlayers[Victim])
-	{
-		pChr->Freeze(Seconds);
-		pChr->GetPlayer()->m_RconFreeze = Seconds != -2;
-		CServer* pServ = (CServer*)pSelf->Server();
-		if(Seconds >= 0)
-			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been Frozen for %d.", pServ->ClientName(Victim), Victim, Seconds);
-		else if(Seconds == -2)
-		{
-			pChr->m_DeepFreeze = true;
-			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been Deep Frozen.", pServ->ClientName(Victim), Victim);
-		}
-		else
-			str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is Frozen until you unfreeze him.", pServ->ClientName(Victim), Victim);
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
-	}
-
-}
-
-void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData, int ClientID)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-	static bool Warning = false;
-	char aBuf[128];
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if(!pChr)
-		return;
-	if(pChr->m_DeepFreeze && !Warning)
-	{
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "warning", "This client is deeply frozen, repeat the command to defrost him.");
-		Warning = true;
-		return;
-	}
-	if(pChr->m_DeepFreeze && Warning)
-	{
-		pChr->m_DeepFreeze = false;
-		Warning = false;
-	}
-	pChr->m_FreezeTime = 2;
-	pChr->GetPlayer()->m_RconFreeze = false;
-	CServer* pServ = (CServer*)pSelf->Server();
-	str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d has been defrosted.", pServ->ClientName(Victim), Victim);
-	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
-}
-
-void CGameContext::ConInvis(IConsole::IResult *pResult, void *pUserData, int ClientID)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	char aBuf[128];
-	int Victim = pResult->GetVictim();
-
-	if(!pSelf->m_apPlayers[ClientID])
-		return;
-
-	if(pSelf->m_apPlayers[Victim])
-	{
-		pSelf->m_apPlayers[Victim]->m_Invisible = true;
-		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is now invisible.", pServ->ClientName(Victim), Victim);
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
-	}
-}
-
-void CGameContext::ConVis(IConsole::IResult *pResult, void *pUserData, int ClientID)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-
-	if(!pSelf->m_apPlayers[ClientID])
-		return;
-	char aBuf[128];
-	if(pSelf->m_apPlayers[Victim])
-	{
-		pSelf->m_apPlayers[Victim]->m_Invisible = false;
-		CServer* pServ = (CServer*)pSelf->Server();
-		str_format(aBuf, sizeof(aBuf), "'%s' ClientID=%d is visible.", pServ->ClientName(Victim), Victim);
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 	}
 }
 
