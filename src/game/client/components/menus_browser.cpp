@@ -526,10 +526,10 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterPing = 999;
 		g_Config.m_BrFilterGametype[0] = 0;
 		g_Config.m_BrFilterServerAddress[0] = 0;
-		g_Config.m_BrFilterCompatversion = 1;
+		g_Config.m_BrFilterCompatversion = 0;
 		g_Config.m_BrFilterString[0] = 0;
-		g_Config.m_BrFilterPure = 1;
-		g_Config.m_BrFilterPureMap = 1;
+		g_Config.m_BrFilterPure = 0;
+		g_Config.m_BrFilterPureMap = 0;
 		Client()->ServerBrowserUpdate();
 	}
 }
