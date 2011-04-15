@@ -328,7 +328,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, in
 					if(Result.GetVictim() == CResult::VICTIM_ME)
 						Result.SetVictim(ClientID);
 
-					if((Level < pCommand->m_Level && !(pCommand->m_Flags & CMDFLAG_HELPERCMD)) || (Level < 1 && (pCommand->m_Flags & CMDFLAG_HELPERCMD)))
+					if(Level < pCommand->m_Level)
 					{
 						char aBuf[256];
 						if (pCommand->m_Level == 100 && Level < 100)
@@ -341,11 +341,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, in
 							dbg_msg("server", "client tried rcon command ('%s') without permisson. ClientID=%d ", pCommand->m_pName, ClientID);
 						}
 						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
-					}
-					else if(Level == 1 && (pCommand->m_Flags & CMDFLAG_HELPERCMD) && Result.GetVictim() != ClientID)
-					{
-						Result.Print(OUTPUT_LEVEL_STANDARD, "Console", "As a helper you can't use commands on others.");
-						dbg_msg("server", "helper tried rcon command ('%s') on others without permission. ClientID=%d", pCommand->m_pName, ClientID);
 					}
 					else if((!g_Config.m_SvCheats || g_Config.m_SvRegister) && (pCommand->m_Flags & CMDFLAG_CHEAT))
 					{
@@ -777,7 +772,7 @@ void CConsole::List(IConsole::IResult *pResult, int Level, int Flags)
 	{
 		if(str_comp_num(pCommand->m_pName, "sv_", 3) && str_comp_num(pCommand->m_pName, "dbg_", 4))	// ignore configs and debug commands
 		{
-			if((pCommand->m_Flags & Flags) == Flags && (pCommand->m_Level == Level || (Level == 1 && (pCommand->m_Flags & CMDFLAG_HELPERCMD))))
+			if((pCommand->m_Flags & Flags) == Flags && (pCommand->m_Level == Level))
 			{
 				unsigned CommandLength = str_length(pCommand->m_pName);
 				if(Length + CommandLength + 2 >= sizeof(aBuf) || aBuf[0] == 0)
