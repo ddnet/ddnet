@@ -1720,15 +1720,26 @@ void DDRaceTunesReset(CConsole* pConsole)
 
 void CServer::SetRconLevel(int ClientID, int Level)
 {
+	char aBuf[128];
 	Level = clamp(Level, (int)IConsole::CONSOLELEVEL_USER, (int)IConsole::CONSOLELEVEL_ADMIN);
 	if(Level > IConsole::CONSOLELEVEL_USER)
 	{
-		dbg_msg("server", "%s set to level %d. ClientID=%x ip=%d.%d.%d.%d",ClientName(ClientID), Level, ClientID, m_aClients[ClientID].m_Addr.ip[0], m_aClients[ClientID].m_Addr.ip[1], m_aClients[ClientID].m_Addr.ip[2], m_aClients[ClientID].m_Addr.ip[3]);
+		str_format(aBuf, sizeof(aBuf), "%s set to level %d. ClientID=%x ip=%d.%d.%d.%d",ClientName(ClientID), Level, ClientID, m_aClients[ClientID].m_Addr.ip[0], m_aClients[ClientID].m_Addr.ip[1], m_aClients[ClientID].m_Addr.ip[2], m_aClients[ClientID].m_Addr.ip[3]);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
 		Msg.AddInt(1);
 		SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 		m_aClients[ClientID].m_Authed = Level;
 		GameServer()->OnSetAuthed(ClientID, m_aClients[ClientID].m_Authed);
+	}
+	else if(Level == IConsole::CONSOLELEVEL_USER)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s set to level %d. ClientID=%x ip=%d.%d.%d.%d",ClientName(ClientID), Level, ClientID, m_aClients[ClientID].m_Addr.ip[0], m_aClients[ClientID].m_Addr.ip[1], m_aClients[ClientID].m_Addr.ip[2], m_aClients[ClientID].m_Addr.ip[3]);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
+		Msg.AddInt(0);
+		SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
+		m_aClients[ClientID].m_Authed = Level;
 	}
 }
 
