@@ -190,7 +190,6 @@ function build(settings)
 	server_settings = engine_settings:Copy()
 	client_settings = engine_settings:Copy()
 	launcher_settings = engine_settings:Copy()
-	launcher_settings_mysql = engine_settings:Copy()
 
 	if family == "unix" then
 		if string.find(settings.config_name, "sql") then
@@ -204,7 +203,6 @@ function build(settings)
 			client_settings.link.frameworks:Add("Carbon")
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
-			launcher_settings_mysql.link.frameworks:Add("Cocoa")
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/mac/lib64")
@@ -257,11 +255,9 @@ function build(settings)
 
 	client_osxlaunch = {}
 	server_osxlaunch = {}
-	server_osxlaunch_mysql = {}
 	if platform == "macosx" then
 		client_osxlaunch = Compile(client_settings, "src/osxlaunch/client.m")
 		server_osxlaunch = Compile(launcher_settings, "src/osxlaunch/server.m")
-		server_osxlaunch_mysql = Compile(launcher_settings_mysql, "src/osxlaunch/server_mysql.m")
 	end
 
 	tools = {}
@@ -279,10 +275,8 @@ function build(settings)
 		game_shared, game_server, zlib, server_link_other)
 
 	serverlaunch = {}
-	serverlaunch_mysql = {}
 	if platform == "macosx" then
 		serverlaunch = Link(launcher_settings, "serverlaunch", server_osxlaunch)
-		serverlaunch_mysql = Link(launcher_settings_mysql, "serverlaunch_mysql", server_osxlaunch_mysql)
 	end
 
 	versionserver_exe = Link(server_settings, "versionsrv", versionserver,
@@ -297,7 +291,7 @@ function build(settings)
 	-- make targets
 	c = PseudoTarget("client".."_"..settings.config_name, client_exe, client_depends)
 	if string.find(settings.config_name, "sql") then
-		s = PseudoTarget("server".."_"..settings.config_name, server_exe, serverlaunch_mysql, server_sql_depends)
+		s = PseudoTarget("server".."_"..settings.config_name, server_exe, serverlaunch, server_sql_depends)
 	else
 		s = PseudoTarget("server".."_"..settings.config_name, server_exe, serverlaunch)
 	end
