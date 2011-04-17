@@ -1147,7 +1147,7 @@ int CServer::LoadMap(const char *pMapName)
 	str_copy(m_aCurrentMap, pMapName, sizeof(m_aCurrentMap));
 	//map_set(df);
 
-	// load compelate map into memory for download
+	// load compelate map into memory for download // Todo: GreYFoX fix this for vanilla (compelate -> complete)
 	{
 		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
 		m_CurrentMapSize = (int)io_length(File);
