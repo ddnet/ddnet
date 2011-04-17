@@ -616,8 +616,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEINEVIL;
 								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEOUT)
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEOUT;
-								/*else
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;*/
+								else
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
 							}
 							DataFile.UnloadData(pTilemapItem->m_Tele);
 						}
@@ -629,15 +629,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 							{
 								if(((CLayerSpeedup*)pTiles)->m_pSpeedupTile[i].m_Force > 0)
-								{
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_BOOST;
-									((CLayerSpeedup*)pTiles)->m_pSpeedupTile[i].m_Type = TILE_BOOST;
-								}
 								else
-								{
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
-									((CLayerSpeedup*)pTiles)->m_pSpeedupTile[i].m_Type = 0;
-								}
 							}
 
 							DataFile.UnloadData(pTilemapItem->m_Speedup);
@@ -698,7 +692,6 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type;
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
 								}
-
 							}
 							DataFile.UnloadData(pTilemapItem->m_Switch);
 						}
