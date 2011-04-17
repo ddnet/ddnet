@@ -1031,6 +1031,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind Free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
+	{
+		g_Config.m_ClDDRaceBinds ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClPredictOldHookthrough, Localize("Predict old Hook through tiles"), g_Config.m_ClPredictOldHookthrough, &Button))
 	{
 		g_Config.m_ClPredictOldHookthrough ^= 1;

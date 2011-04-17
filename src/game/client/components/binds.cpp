@@ -120,33 +120,8 @@ void CBinds::SetDefaults()
 
 	// DDRace
 
-	if(!g_Config.m_ClDDRaceBinds)
-		return;
-	Bind(KEY_KP_PLUS, "zoom+");
-	Bind(KEY_KP_MINUS, "zoom-");
-	Bind(KEY_KP_MULTIPLY, "zoom");
-	Bind(KEY_HOME, "kill");
-	Bind(KEY_PAUSE, "say /pause");
-	Bind(KEY_UP, "+jump");
-	Bind(KEY_LEFT, "+left");
-	Bind(KEY_RIGHT, "+right");
-	Bind('[', "+prevweapon");
-	Bind(']', "+nextweapon");
-	Bind('c', "say /rank");
-	Bind('v', "say /info");
-	Bind('b', "say /top5");
-	Bind('z', "emote 12");
-	Bind('x', "emote 14");
-	Bind('h', "emote 2");
-	Bind('m', "emote 5");
-	Bind(KEY_PAGEDOWN, "cl_show_entities 0");
-	Bind(KEY_PAGEUP, "cl_show_entities 1");
-	Bind(KEY_KP0, "say /emote normal 999999");
-	Bind(KEY_KP1, "say /emote happy 999999");
-	Bind(KEY_KP2, "say /emote angry 999999");
-	Bind(KEY_KP3, "say /emote pain 999999");
-	Bind(KEY_KP4, "say /emote surprise 999999");
-	Bind(KEY_KP5, "say /emote blink 999999");
+	if(g_Config.m_ClDDRaceBinds)
+		SetDDRaceBinds(false);
 }
 
 void CBinds::OnConsoleInit()
@@ -269,4 +244,99 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 
 		pConfig->WriteLine(aBuffer);
 	}
+}
+
+// DDRace
+
+void CBinds::SetDDRaceBinds(bool FreeOnly)
+{
+	if(!FreeOnly)
+	{
+		Bind(KEY_KP_PLUS, "zoom+");
+		Bind(KEY_KP_MINUS, "zoom-");
+		Bind(KEY_KP_MULTIPLY, "zoom");
+		Bind(KEY_HOME, "kill");
+		Bind(KEY_PAUSE, "say /pause");
+		Bind(KEY_UP, "+jump");
+		Bind(KEY_LEFT, "+left");
+		Bind(KEY_RIGHT, "+right");
+		Bind('[', "+prevweapon");
+		Bind(']', "+nextweapon");
+		Bind('c', "say /rank");
+		Bind('v', "say /info");
+		Bind('b', "say /top5");
+		Bind('z', "emote 12");
+		Bind('x', "emote 14");
+		Bind('h', "emote 2");
+		Bind('m', "emote 5");
+		Bind(KEY_PAGEDOWN, "cl_show_entities 0");
+		Bind(KEY_PAGEUP, "cl_show_entities 1");
+		Bind(KEY_KP0, "say /emote normal 999999");
+		Bind(KEY_KP1, "say /emote happy 999999");
+		Bind(KEY_KP2, "say /emote angry 999999");
+		Bind(KEY_KP3, "say /emote pain 999999");
+		Bind(KEY_KP4, "say /emote surprise 999999");
+		Bind(KEY_KP5, "say /emote blink 999999");
+		Bind(KEY_MOUSE_3, "+spectate");
+	}
+	else
+	{
+		if(!Get(KEY_KP_PLUS)[0])
+			Bind(KEY_KP_PLUS, "zoom+");
+		if(!Get(KEY_KP_MINUS)[0])
+			Bind(KEY_KP_MINUS, "zoom-");
+		if(!Get(KEY_KP_MULTIPLY)[0])
+			Bind(KEY_KP_MULTIPLY, "zoom");
+		if(!Get(KEY_HOME)[0])
+			Bind(KEY_HOME, "kill");
+		if(!Get(KEY_PAUSE)[0])
+			Bind(KEY_PAUSE, "say /pause");
+		if(!Get(KEY_UP)[0])
+			Bind(KEY_UP, "+jump");
+		if(!Get(KEY_LEFT)[0])
+			Bind(KEY_LEFT, "+left");
+		if(!Get(KEY_RIGHT)[0])
+			Bind(KEY_RIGHT, "+right");
+		if(!Get('[')[0])
+			Bind('[', "+prevweapon");
+		if(!Get(']')[0])
+			Bind(']', "+nextweapon");
+		if(!Get('c')[0])
+			Bind('c', "say /rank");
+		if(!Get('v')[0])
+			Bind('v', "say /info");
+		if(!Get('b')[0])
+			Bind('b', "say /top5");
+		if(!Get('z')[0])
+			Bind('z', "emote 12");
+		if(!Get('x')[0])
+			Bind('x', "emote 14");
+		if(!Get(KEY_KP_PLUS)[0])
+			Bind('h', "emote 2");
+		if(!Get('m')[0])
+			Bind('m', "emote 5");
+		if(!Get(KEY_PAGEDOWN)[0])
+			Bind(KEY_PAGEDOWN, "cl_show_entities 0");
+		if(!Get(KEY_PAGEUP)[0])
+			Bind(KEY_PAGEUP, "cl_show_entities 1");
+		if(!Get(KEY_KP0)[0])
+			Bind(KEY_KP0, "say /emote normal 999999");
+		if(!Get(KEY_KP1)[0])
+			Bind(KEY_KP1, "say /emote happy 999999");
+		if(!Get(KEY_KP2)[0])
+			Bind(KEY_KP2, "say /emote angry 999999");
+		if(!Get(KEY_KP3)[0])
+			Bind(KEY_KP3, "say /emote pain 999999");
+		if(!Get(KEY_KP4)[0])
+			Bind(KEY_KP4, "say /emote surprise 999999");
+		if(!Get(KEY_KP5)[0])
+			Bind(KEY_KP5, "say /emote blink 999999");
+		if(!Get(KEY_MOUSE_3)[0])
+			Bind(KEY_MOUSE_3, "+spectate");
+		if(!Get(KEY_MINUS)[0])
+			Bind(KEY_MINUS, "spectate_previous");
+		if(!Get(KEY_EQUALS)[0])
+			Bind(KEY_EQUALS, "spectate_next");
+	}
+		g_Config.m_ClDDRaceBindsSet = 1;
 }

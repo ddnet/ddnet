@@ -290,6 +290,10 @@ void CGameClient::OnInit()
 	m_ServerMode = SERVERMODE_PURE;
 
 	m_DDRaceMsgSent = false;
+
+	// Set free binds to DDRace binds if it's active
+	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
+		gs_Binds.SetDDRaceBinds(true);
 }
 
 void CGameClient::DispatchInput()
