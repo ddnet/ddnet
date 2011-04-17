@@ -88,8 +88,8 @@ CMapItemLayer *CLayers::GetLayer(int Index) const
 
 void CLayers::Dest()
 {
-	m_pTeleLayer = 0;
+	/*m_pTeleLayer = 0;
 	m_pSpeedupLayer = 0;
 	m_pFrontLayer = 0;
-	m_pSwitchLayer = 0;
+	m_pSwitchLayer = 0;*/
 }
