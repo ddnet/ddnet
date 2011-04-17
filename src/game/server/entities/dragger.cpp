@@ -128,7 +128,8 @@ void CDragger::Snap(int SnappingClient)
 	if(Char && Char->IsAlive() && m_Target &&  m_Target->IsAlive() && Char->Team() != m_Target->Team()) return;
 
 	CNetObj_Laser *obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
-
+	if(!obj)
+		return;
 	obj->m_X = (int)m_Pos.x;
 	obj->m_Y = (int)m_Pos.y;
 	if (m_Target)
