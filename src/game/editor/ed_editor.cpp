@@ -3370,7 +3370,7 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 	pQuad->m_aColors[2].b = pQuad->m_aColors[3].b = 255;
 	pGroup->AddLayer(pLayer);
 
-	// add game layer and front and reset the tele, speedup and switch layer pointers
+	// add game layer and reset front, tele, speedup and switch layer pointers
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(new CLayerGame(50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
