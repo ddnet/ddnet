@@ -985,7 +985,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Cheat: Shows Entities in game (can also be toggled via console cl_show_entities)"), g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Cheat: Shows entities in game (can also be toggled via console cl_show_entities)"), g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats, &Button))
 	{
 		g_Config.m_ClShowEntities ^= 1;
 	}
@@ -1031,13 +1031,13 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind Free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
 	{
 		g_Config.m_ClDDRaceBinds ^= 1;
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClPredictOldHookthrough, Localize("Predict old Hook through tiles"), g_Config.m_ClPredictOldHookthrough, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClPredictOldHookthrough, Localize("Predict old hook through tiles"), g_Config.m_ClPredictOldHookthrough, &Button))
 	{
 		g_Config.m_ClPredictOldHookthrough ^= 1;
 	}
