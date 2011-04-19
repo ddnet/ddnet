@@ -709,7 +709,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
 	CPlayer *pPlayer = m_apPlayers[ClientID];
-
+	CGameControllerDDRace* pController = (CGameControllerDDRace*)m_pController;
 	if(!pRawMsg)
 	{
 		char aBuf[256];
@@ -913,7 +913,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if(GetPlayerChar(ClientID) && GetPlayerChar(KickID) && GetPlayerChar(ClientID)->Team() != GetPlayerChar(KickID)->Team())
+			if(GetPlayerChar(ClientID) && GetPlayerChar(KickID) && GetDDRaceTeam(ClientID) != GetDDRaceTeam(KickID))
 			{
 				SendChatTarget(ClientID, "You can kick only your team member");
 				m_apPlayers[ClientID]->m_Last_KickVote = time_get();
@@ -1243,7 +1243,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	}
 	else if (MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 	{
-		if(m_VoteCloseTime && m_VoteCreator == ClientID && pPlayer->GetCharacter()->Team())
+		if(m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID))
 		{
 			SendChatTarget(ClientID, "You are running a vote please try again after the vote is done!");
 			return;
@@ -1949,4 +1949,10 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 	}
 
 	return 0;
+}
+
+int CGameContext::GetDDRaceTeam(int ClientID)
+{
+	CGameControllerDDRace* pController = (CGameControllerDDRace*)m_pController;
+	return pController->m_Teams.m_Core.Team(ClientID);
 }
