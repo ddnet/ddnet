@@ -172,10 +172,10 @@ void CProjectile::Snap(int SnappingClient)
 
 	CCharacter * SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%((m_Explosive)?6:20);
-	if (SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()] && (!Tick))) return;
+	if (SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()] && (!Tick)))
+		return;
 
-	if
-	(SnapChar && m_Owner != -1 && !SnapChar->CanCollide(m_Owner))
+	if(SnapChar && m_Owner != -1 && !SnapChar->CanCollide(m_Owner))
 		return;
 
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID, sizeof(CNetObj_Projectile)));
