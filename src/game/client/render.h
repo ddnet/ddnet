@@ -79,10 +79,12 @@ public:
 
 	// DDRace
 
-	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale);
-	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale);
-	void RenderFrontmap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int Flags);
-	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale);
+	void RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale);
+	void RenderSpeedupOverlay(CSpeedupTile *pTele, int w, int h, float Scale);
+	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale);
+	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, vec4 Color, int RenderFlags);
+	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale, vec4 Color, int RenderFlags);
+	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, vec4 Color, int RenderFlags);
 };
 
 #endif

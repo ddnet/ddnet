@@ -195,7 +195,7 @@ void CMapLayers::OnRender()
 				}
 			}
 
-			if((Render && !IsGameLayer && !IsFrontLayer && !IsTeleLayer && !IsSwitchLayer && !IsSpeedupLayer && (!g_Config.m_ClShowEntities || !g_Config.m_ClDDRaceCheats)) || ((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && (IsGameLayer || IsFrontLayer || IsTeleLayer || IsSwitchLayer || IsSpeedupLayer)))
+			if((Render && !IsGameLayer && (!g_Config.m_ClShowEntities || !g_Config.m_ClDDRaceCheats)) || ((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsGameLayer))
 			{
 				//layershot_begin();
 
@@ -236,6 +236,57 @@ void CMapLayers::OnRender()
 				}
 
 				//layershot_end();
+			}
+			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsFrontLayer)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
+
+				CTile *pFrontTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Front);
+				Graphics()->BlendNone();
+				vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
+				RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
+				Graphics()->BlendNormal();
+				RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
+			}
+			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsSwitchLayer)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
+
+				CSwitchTile *pSwitchTiles = (CSwitchTile *)m_pLayers->Map()->GetData(pTMap->m_Switch);
+				Graphics()->BlendNone();
+				vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
+				RenderTools()->RenderSwitchmap(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
+				Graphics()->BlendNormal();
+				RenderTools()->RenderSwitchmap(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
+				RenderTools()->RenderSwitchOverlay(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f);
+			}
+			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsTeleLayer)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
+
+				CTeleTile *pTeleTiles = (CTeleTile *)m_pLayers->Map()->GetData(pTMap->m_Tele);
+				Graphics()->BlendNone();
+				vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
+				RenderTools()->RenderTelemap(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
+				Graphics()->BlendNormal();
+				RenderTools()->RenderTelemap(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
+				RenderTools()->RenderTeleOverlay(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f);
+			}
+			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsSpeedupLayer)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
+
+				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)m_pLayers->Map()->GetData(pTMap->m_Speedup);
+				Graphics()->BlendNone();
+				vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
+				RenderTools()->RenderSpeedupmap(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
+				Graphics()->BlendNormal();
+				RenderTools()->RenderSpeedupmap(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
+				RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f);
 			}
 		}
 		if(!g_Config.m_GfxNoclip)

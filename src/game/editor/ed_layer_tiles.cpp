@@ -74,11 +74,11 @@ void CLayerTiles::Render()
 
 	// Render DDRace Layers
 	if(m_Tele)
-		m_pEditor->RenderTools()->RenderTelemap(((CLayerTele*)this)->m_pTeleTile, m_Width, m_Height, 32.0f);
+		m_pEditor->RenderTools()->RenderTeleOverlay(((CLayerTele*)this)->m_pTeleTile, m_Width, m_Height, 32.0f);
 	if(m_Speedup)
-		m_pEditor->RenderTools()->RenderSpeedupmap(((CLayerSpeedup*)this)->m_pSpeedupTile, m_Width, m_Height, 32.0f);
+		m_pEditor->RenderTools()->RenderSpeedupOverlay(((CLayerSpeedup*)this)->m_pSpeedupTile, m_Width, m_Height, 32.0f);
 	if(m_Switch)
-		m_pEditor->RenderTools()->RenderSwitchmap(((CLayerSwitch*)this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
+		m_pEditor->RenderTools()->RenderSwitchOverlay(((CLayerSwitch*)this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
 }
 
 int CLayerTiles::ConvertX(float x) const { return (int)(x/32.0f); }
