@@ -216,7 +216,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	if(!Character && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
-
+	AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY);
 	// check for activity
 	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
 		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||
@@ -336,8 +336,7 @@ void CPlayer::LoadCharacter()
 	Character->m_Super = m_PauseInfo.m_Super;
 	Character->m_DeepFreeze = m_PauseInfo.m_DeepFreeze;
 	Character->m_EndlessHook = m_PauseInfo.m_EndlessHook;
-	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-	Controller->m_Teams.m_Core.Team(GetCID(), m_PauseInfo.m_Team);
+	((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core.Team(GetCID(), m_PauseInfo.m_Team);
 	m_PauseInfo.m_Respawn = false;
 	m_InfoSaved = false;
 }
@@ -348,9 +347,7 @@ void CPlayer::SaveCharacter()
 	m_PauseInfo.m_StartTime = Character->m_StartTime;
 	m_PauseInfo.m_DDRaceState = Character->m_DDRaceState;
 	for(int i = 0; i < WEAPON_NINJA; ++i)
-	{
 		m_PauseInfo.m_aHasWeapon[i] = Character->GetWeaponGot(i);
-	}
 	m_PauseInfo.m_FreezeTime=Character->m_FreezeTime;
 	m_PauseInfo.m_Armor = Character->GetArmor();
 	m_PauseInfo.m_LastMove = Character->m_LastMove;
@@ -360,13 +357,12 @@ void CPlayer::SaveCharacter()
 	m_PauseInfo.m_Super = Character->m_Super;
 	m_PauseInfo.m_DeepFreeze = Character->m_DeepFreeze;
 	m_PauseInfo.m_EndlessHook = Character->m_EndlessHook;
-	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-	m_PauseInfo.m_Team = Controller->m_Teams.m_Core.Team(GetCID());
+	m_PauseInfo.m_Team = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core.Team(GetCID());
 	m_PauseInfo.m_PauseTime = Server()->Tick();
 	//m_PauseInfo.m_RefreshTime = Character->m_RefreshTime;
 }
 
-void CPlayer::AfkTimer(int new_target_x, int new_target_y)
+void CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 {
 	/*
 		afk timer (x, y = mouse coordinates)
@@ -376,14 +372,16 @@ void CPlayer::AfkTimer(int new_target_x, int new_target_y)
 		It also works for spectators.
 	*/
 
-	if(m_Authed) return; // don't kick admins
-	if(g_Config.m_SvMaxAfkTime == 0) return; // 0 = disabled
+	if(m_Authed)
+		return; // don't kick admins
+	if(g_Config.m_SvMaxAfkTime == 0)
+		return; // 0 = disabled
 
-	if(new_target_x != m_LastTarget_x || new_target_y != m_LastTarget_y)
+	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
 	{
 		m_LastPlaytime = time_get();
-		m_LastTarget_x = new_target_x;
-		m_LastTarget_y = new_target_y;
+		m_LastTarget_x = NewTargetX;
+		m_LastTarget_y = NewTargetY;
 		m_SentAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
 		m_SentAfkWarning2 = 0;
 
@@ -401,7 +399,8 @@ void CPlayer::AfkTimer(int new_target_x, int new_target_y)
 			);
 			m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
 			m_SentAfkWarning = 1;
-		} else if(m_SentAfkWarning2 == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.9))
+		}
+		else if(m_SentAfkWarning2 == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.9))
 		{
 			sprintf(
 				m_pAfkMsg,
@@ -411,7 +410,8 @@ void CPlayer::AfkTimer(int new_target_x, int new_target_y)
 			);
 			m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
 			m_SentAfkWarning = 1;
-		} else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkTime)
+		}
+		else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkTime)
 		{
 			CServer* serv =	(CServer*)m_pGameServer->Server();
 			serv->Kick(m_ClientID,"Away from keyboard");
