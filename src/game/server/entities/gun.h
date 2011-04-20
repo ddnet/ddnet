@@ -13,11 +13,11 @@ class CGun : public CEntity
 	int m_EvalTick;
 
 	vec2 m_Core;
-	 bool m_Freeze;
-	 bool m_Explosive;
+	bool m_Freeze;
+	bool m_Explosive;
 
 	void Fire();
-	int m_Delay;
+	int m_LastFire;
 	
 public:
 	CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int Layer = 0, int Number = 0);

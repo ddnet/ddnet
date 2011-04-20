@@ -1,13 +1,10 @@
 /* copyright (c) 2007 magnus auvinen, see licence.txt for more info */
 #include <engine/server.h>
-#include <engine/config.h>
+#include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include "gun.h"
 #include "plasma.h"
-
-
-const int RANGE=700;
 
 //////////////////////////////////////////////////
 // CGun
@@ -17,7 +14,7 @@ CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int La
 {
 	m_Layer = Layer;
 	m_Number = Number;
-	m_Delay = Server()->TickSpeed()*0.3f;
+	m_LastFire = Server()->Tick();
 	m_Pos = Pos;
 	m_EvalTick = Server()->Tick();
 	m_Freeze = Freeze;
@@ -32,20 +29,23 @@ void CGun::Fire()
 	CCharacter *Ents[16];
 	int IdInTeam[16]; 
 	int LenInTeam[16];
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++)
+	{
 		IdInTeam[i] = -1;
 		LenInTeam[i] = 0;
 	}
 	
 	int Num = -1;
-	Num =  GameServer()->m_World.FindEntities(m_Pos, RANGE, (CEntity**)Ents, 16, CGameWorld::ENTTYPE_CHARACTER);
+	Num =  GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange, (CEntity**)Ents, 16, CGameWorld::ENTTYPE_CHARACTER);
 
 	for (int i = 0; i < Num; i++)
 	{
 		CCharacter *Target = Ents[i];
 		//now gun doesn't affect on super
-		if(Target->Team() == TEAM_SUPER) continue;
-		if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Target->Team()]) continue;
+		if(Target->Team() == TEAM_SUPER)
+			continue;
+		if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Target->Team()])
+			continue;
 		int res = GameServer()->Collision()->IntersectLine(m_Pos, Target->m_Pos,0,0,false);
 		if (!res)
 		{
@@ -57,10 +57,13 @@ void CGun::Fire()
 			}
 		}
 	}
-	for (int i = 0; i < 16; i++) {
-		if(IdInTeam[i] != -1) {
+	for (int i = 0; i < 16; i++)
+	{
+		if(IdInTeam[i] != -1)
+		{
 			CCharacter *Target = Ents[IdInTeam[i]];
 			new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, i);
+			m_LastFire = Server()->Tick();
 		}
 	}
 	
@@ -83,8 +86,9 @@ void CGun::Tick()
 			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);
 		}
 		m_Pos+=m_Core;
-		Fire();
 	}
+	if (m_LastFire + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec <= Server()->Tick())
+		Fire();
 
 }
 
