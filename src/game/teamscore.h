@@ -3,12 +3,14 @@
 
 #include <engine/shared/protocol.h>
 
-enum {
+enum
+{
 	TEAM_FLOCK = 0,
 	TEAM_SUPER = 16
 };
 
-class CTeamsCore {
+class CTeamsCore
+{
 	
 	int m_Team[MAX_CLIENTS];
 public:

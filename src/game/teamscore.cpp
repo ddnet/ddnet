@@ -22,7 +22,8 @@ void CTeamsCore::Team(int ClientID, int Team)
 
 bool CTeamsCore::CanCollide(int ClientID1, int ClientID2)
 {
-	if(m_Team[ClientID1] == TEAM_SUPER || m_Team[ClientID2] == TEAM_SUPER) return true;
+	if(m_Team[ClientID1] == TEAM_SUPER || m_Team[ClientID2] == TEAM_SUPER)
+		return true;
 	return m_Team[ClientID1] == m_Team[ClientID2];
 }
 
