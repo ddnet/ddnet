@@ -151,7 +151,7 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	pPlayerInfo->m_Local = 0;
 	pPlayerInfo->m_ClientID = m_ClientID;
-	pPlayerInfo->m_Score = m_Score;
+	pPlayerInfo->m_Score = abs(m_Score) * -1;
 	pPlayerInfo->m_Team = m_Team;
 
 	if(m_ClientID == SnappingClient)
@@ -170,9 +170,9 @@ void CPlayer::Snap(int SnappingClient)
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
-		pPlayerInfo->m_Score = 0;
+		pPlayerInfo->m_Score = -9999;
 	else
-		pPlayerInfo->m_Score = m_Score;
+		pPlayerInfo->m_Score = abs(m_Score) * -1;
 
 	pPlayerInfo->m_Team = m_Team;
 }
