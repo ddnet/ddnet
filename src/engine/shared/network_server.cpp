@@ -224,7 +224,8 @@ int CNetServer::BanAdd(NETADDR Addr, int Seconds, const char *pReason)
 		NETADDR BanAddr;
 
 		int Mins = (Seconds + 59) / 60;
-		if(Mins)
+
+		if(Mins && Seconds)
 		{
 			if(Mins == 1)
 				str_format(Buf, sizeof(Buf), "You have been banned for 1 minute (%s)", pReason);
@@ -257,7 +258,7 @@ int CNetServer::Update()
 	}
 
 	// remove expired bans
-	while(m_BanPool_FirstUsed && m_BanPool_FirstUsed->m_Info.m_Expires < Now)
+	while(m_BanPool_FirstUsed && m_BanPool_FirstUsed->m_Info.m_Expires < Now && m_BanPool_FirstUsed->m_Info.m_Expires != -1)
 	{
 		CBan *pBan = m_BanPool_FirstUsed;
 		BanRemoveByObject(pBan);
@@ -309,7 +310,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			{
 				// banned, reply with a message
 				char BanStr[128];
-				if(pBan->m_Info.m_Expires)
+				if(pBan->m_Info.m_Expires && pBan->m_Info.m_Expires != -1)
 				{
 					int Mins = ((pBan->m_Info.m_Expires - Now)+59)/60;
 					if(Mins == 1)
