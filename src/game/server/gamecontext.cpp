@@ -547,7 +547,6 @@ void CGameContext::OnTick()
 				Console()->ExecuteLine(m_aVoteCommand, -1, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, this);
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				EndVote();
-				m_VoteEnforcer = -1;
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN)
 			{
@@ -709,7 +708,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
 	CPlayer *pPlayer = m_apPlayers[ClientID];
-	CGameControllerDDRace* pController = (CGameControllerDDRace*)m_pController;
 	if(!pRawMsg)
 	{
 		char aBuf[256];

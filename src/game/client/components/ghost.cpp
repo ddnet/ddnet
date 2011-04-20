@@ -328,7 +328,7 @@ void CGhost::Save()
 	mem_zero(&Header, sizeof(Header));
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_ActVersion;
-	IntsToStr(&m_CurGhost.m_Info.m_Name0, 6, Header.m_aOwner);
+	IntsToStr(&m_CurGhost.m_Info.m_Name0, 4, Header.m_aOwner);
 	str_copy(Header.m_aMap, Client()->GetCurrentMap(), sizeof(Header.m_aMap));
 	Header.m_aCrc[0] = (Crc>>24)&0xff;
 	Header.m_aCrc[1] = (Crc>>16)&0xff;

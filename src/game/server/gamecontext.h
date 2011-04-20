@@ -176,7 +176,6 @@ private:
 
 	bool m_VoteWillPass;
 	class IScore *m_pScore;
-	int m_VoteEnforcer;
 
 	//DDRace Console Commands
 
