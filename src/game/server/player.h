@@ -147,8 +147,8 @@ public:
 	int64 m_LastPlaytime;
 	int m_LastTarget_x;
 	int m_LastTarget_y;
-	int m_SentAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
-	int m_SentAfkWarning2; // afk timer's 2nd warning after 90% of sv_max_afk_time
+	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
+	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	char m_pAfkMsg[160];
 };
 

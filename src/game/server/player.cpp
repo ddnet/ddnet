@@ -33,8 +33,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_LastPlaytime = time_get();
 	m_LastTarget_x = 0;
 	m_LastTarget_y = 0;
-	m_SentAfkWarning = 0;
-	m_SentAfkWarning2 = 0;
+	m_Sent1stAfkWarning = 0;
+	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
 	m_PauseInfo.m_Respawn = false;
 
@@ -382,14 +382,14 @@ void CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		m_LastPlaytime = time_get();
 		m_LastTarget_x = NewTargetX;
 		m_LastTarget_y = NewTargetY;
-		m_SentAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
-		m_SentAfkWarning2 = 0;
+		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
+		m_Sent2ndAfkWarning = 0;
 
 	}
 	else
 	{
 		// not playing, check how long
-		if(m_SentAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.5))
+		if(m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.5))
 		{
 			sprintf(
 				m_pAfkMsg,
@@ -398,9 +398,9 @@ void CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 				g_Config.m_SvMaxAfkTime
 			);
 			m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-			m_SentAfkWarning = 1;
+			m_Sent1stAfkWarning = 1;
 		}
-		else if(m_SentAfkWarning2 == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.9))
+		else if(m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.9))
 		{
 			sprintf(
 				m_pAfkMsg,
@@ -409,7 +409,7 @@ void CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 				g_Config.m_SvMaxAfkTime
 			);
 			m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-			m_SentAfkWarning = 1;
+			m_Sent2ndAfkWarning = 1;
 		}
 		else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkTime)
 		{
