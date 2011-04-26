@@ -40,7 +40,7 @@ CBan* CheckBan(NETADDR *pCheck)
 
 int SendResponse(NETADDR *pAddr, NETADDR *pCheck)
 {
-	static char aIpBan[sizeof(BANMASTER_IPBAN) + NETADDR_MAXSTRSIZE] = { 0 };
+	static char aIpBan[sizeof(BANMASTER_IPBAN) + NETADDR_MAXSTRSIZE + 256] = { 0 };
 	static char *pIpBanContent = aIpBan + sizeof(BANMASTER_IPBAN);
 	if (!aIpBan[0])
 		mem_copy(aIpBan, BANMASTER_IPBAN, sizeof(BANMASTER_IPBAN));
