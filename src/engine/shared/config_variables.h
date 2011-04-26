@@ -172,7 +172,6 @@ MACRO_CONFIG_INT(ClDemoName, cl_demo_name, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE,
 MACRO_CONFIG_INT(ClRaceGhost, cl_race_ghost, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable ghost", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClRaceShowGhost, cl_race_show_ghost, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ghost", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClRaceSaveGhost, cl_race_save_ghost, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save ghost", IConsole::CONSOLELEVEL_USER)
-MACRO_CONFIG_INT(SvGlobalBantime, sv_global_ban_time, 60, 0, 1440, CFGFLAG_SERVER, "The time a client gets banned if the ban server reports it. 0 to disable", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(ClDDRaceScoreBoard, cl_ddrace_scoreboard, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable DDRace Scoreboard ", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(SvResetPickus, sv_reset_pickups, 0, 0, 1, CFGFLAG_SERVER, "Whether the weapons are reset on passing the start tile or not", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(ClShowOthers, cl_show_others, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show players in other teams", IConsole::CONSOLELEVEL_USER)
@@ -187,5 +186,8 @@ MACRO_CONFIG_INT(SvPlasmaPerSec, sv_plasma_per_sec, 3, 0, 50, CFGFLAG_SERVER, "H
 MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, "chat score will be increased by this on every message, and decremented by 1 on every tick.", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000 , CFGFLAG_SERVER, "if chats core exceeds this, the player will be muted for sv_spam_mute_duration seconds", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvSpamMuteDuration, sv_spam_mute_duration, 60, 0, 3600 , CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off", IConsole::CONSOLELEVEL_ADMIN)
+
+// banmaster
+MACRO_CONFIG_INT(SvGlobalBantime, sv_global_ban_time, 60, 0, 1440, CFGFLAG_SERVER, "The time a client gets banned if the ban server reports it. 0 to disable", IConsole::CONSOLELEVEL_ADMIN)
 
 #endif

@@ -355,23 +355,20 @@ int CNetServer::Recv(CNetChunk *pChunk)
 					// client that wants to connect
 					if(!Found)
 					{
-						if(!(m_Flags & NETSERVER_DISABLEBANMASTER))
+						CNetChunk Packet;
+						char aBuffer[sizeof(BANMASTER_IPCHECK) + NETADDR_MAXSTRSIZE];
+						mem_copy(aBuffer, BANMASTER_IPCHECK, sizeof(BANMASTER_IPCHECK));
+						net_addr_str(&Addr, aBuffer + sizeof(BANMASTER_IPCHECK), sizeof(aBuffer) - sizeof(BANMASTER_IPCHECK));
+
+						Packet.m_ClientID = -1;
+						Packet.m_Flags = NETSENDFLAG_CONNLESS;
+						Packet.m_DataSize = str_length(aBuffer) + 1;
+						Packet.m_pData = aBuffer;
+
+						for(int i = 0; i < m_NumBanmasters; i++)
 						{
-							CNetChunk Packet;
-							char aBuffer[64];
-							mem_copy(aBuffer, BANMASTER_IPCHECK, sizeof(BANMASTER_IPCHECK));
-							net_addr_str(&Addr, aBuffer + sizeof(BANMASTER_IPCHECK), sizeof(aBuffer) - sizeof(BANMASTER_IPCHECK));
-
-							Packet.m_ClientID = -1;
-							Packet.m_Flags = NETSENDFLAG_CONNLESS;
-							Packet.m_DataSize = str_length(aBuffer) + 1;
-							Packet.m_pData = aBuffer;
-
-							for(int i = 0; i < m_NumBanmasters; i++)
-							{
-								Packet.m_Address = m_aBanmasters[i];
-								Send(&Packet);
-							}
+							Packet.m_Address = m_aBanmasters[i];
+							Send(&Packet);
 						}
 
 						// only allow a specific number of players with the same ip
@@ -405,6 +402,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 								m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr);
 								if(m_pfnNewClient)
 									m_pfnNewClient(i, m_UserPtr);
+								
 								break;
 							}
 						}
@@ -488,13 +486,13 @@ int CNetServer::BanmasterAdd(const char *pAddrStr)
 {
 	if(m_NumBanmasters >= MAX_BANMASTERS)
 		return 2;
-
+	
 	if(net_host_lookup(pAddrStr, &m_aBanmasters[m_NumBanmasters], NETTYPE_IPV4))
 		return 1;
-
+	
 	if(m_aBanmasters[m_NumBanmasters].port == 0)
 		m_aBanmasters[m_NumBanmasters].port = BANMASTER_PORT;
-
+	
 	m_NumBanmasters++;
 	return 0;
 }
@@ -508,17 +506,15 @@ NETADDR* CNetServer::BanmasterGet(int Index)
 {
 	if(Index < 0 || Index >= m_NumBanmasters)
 		return 0;
-
+	
 	return &m_aBanmasters[Index];
 }
 
 int CNetServer::BanmasterCheck(NETADDR *pAddr)
 {
 	for(int i = 0; i < m_NumBanmasters; i++)
-	{
-		if(!net_addr_comp(&m_aBanmasters[i], pAddr))
+		if(net_addr_comp(&m_aBanmasters[i], pAddr) == 0)
 			return i;
-	}
 
 	return -1;
 }
@@ -527,3 +523,4 @@ void CNetServer::BanmastersClear()
 {
 	m_NumBanmasters = 0;
 }
+

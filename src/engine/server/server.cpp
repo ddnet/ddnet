@@ -23,6 +23,14 @@
 
 #include <mastersrv/mastersrv.h>
 
+// DDRace
+#include <string.h>
+#include <vector>
+#include <engine/shared/linereader.h>
+
+// banmaster
+#include <banmaster/banmaster.h>
+
 #include "register.h"
 #include "server.h"
 
@@ -31,11 +39,6 @@
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
-
-#include <string.h>
-#include <banmaster/banmaster.h>
-#include "../shared/linereader.h"
-#include <vector>
 
 static const char SERVER_BANMASTERFILE[] = "banmasters.cfg";
 
@@ -1064,35 +1067,37 @@ void CServer::PumpNetwork()
 					SendServerInfo(&Packet.m_Address, ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)]);
 				}
 
-				// Ban Master
-
-				if(Packet.m_DataSize >= (int)sizeof(BANMASTER_IPOK) &&
-						mem_comp(Packet.m_pData, BANMASTER_IPOK, sizeof(BANMASTER_IPOK)) == 0 &&
-						m_NetServer.BanmasterCheck(&Packet.m_Address) != -1)
+				/*if(Packet.m_DataSize >= sizeof(BANMASTER_IPOK) &&
+				  mem_comp(Packet.m_pData, BANMASTER_IPOK, sizeof(BANMASTER_IPOK)) == 0 &&
+				  m_NetServer.BanmasterCheck(&Packet.m_Address) != -1)
 				{
+				}*/
 
-				}
-
-				if(Packet.m_DataSize >= (int)sizeof(BANMASTER_IPBAN) &&
-						mem_comp(Packet.m_pData, BANMASTER_IPBAN, sizeof(BANMASTER_IPBAN)) == 0 &&
-						g_Config.m_SvGlobalBantime && m_NetServer.BanmasterCheck(&Packet.m_Address) != -1)
+				if(Packet.m_DataSize >= sizeof(BANMASTER_IPBAN) &&
+				  mem_comp(Packet.m_pData, BANMASTER_IPBAN, sizeof(BANMASTER_IPBAN)) == 0)
 				{
+					if(!g_Config.m_SvGlobalBantime)
+						return;
+
+					if(m_NetServer.BanmasterCheck(&Packet.m_Address) == -1)
+						return;
+
 					CUnpacker Up;
-					char aIp[32];
+					char aIp[NETADDR_MAXSTRSIZE];
 					char aReason[256];
 					NETADDR Addr;
 					Up.Reset((unsigned char*)Packet.m_pData + sizeof(BANMASTER_IPBAN), Packet.m_DataSize - sizeof(BANMASTER_IPBAN));
 					str_copy(aIp, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(aIp));
 					str_copy(aReason, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(aReason));
-					if (net_addr_from_str(&Addr, aIp))
+					if(net_addr_from_str(&Addr, aIp))
 					{
 						dbg_msg("globalbans", "dropped weird message from banmaster");
 						return;
 					}
-					m_NetServer.BanAdd(Addr, g_Config.m_SvGlobalBantime * 60, aReason);
-					dbg_msg("globalbans", "added ban, ip=%d.%d.%d.%d, reason=\"%s\"", Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3], aReason);
-				}
 
+					m_NetServer.BanAdd(Addr, g_Config.m_SvGlobalBantime * 60, aReason);
+					dbg_msg("globalbans", "added ban, ip=%s, reason='%s'", aIp, aReason);
+				}
 			}
 		}
 		else
@@ -1209,8 +1214,9 @@ int CServer::Run()
 	}
 
 	m_NetServer.SetCallbacks(NewClientCallback, DelClientCallback, this);
-	Console()->ExecuteFile(SERVER_BANMASTERFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 
+	Console()->ExecuteFile(SERVER_BANMASTERFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+		
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -1573,15 +1579,17 @@ void CServer::RegisterCommands()
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	
+	// banmaster
+	Console()->Register("add_banmaster", "s", CFGFLAG_SERVER, ConAddBanmaster, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("banmasters", "", CFGFLAG_SERVER, ConBanmasters, this, "", IConsole::CONSOLELEVEL_ADMIN);
+	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "", IConsole::CONSOLELEVEL_ADMIN);
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 
-	Console()->Register("add_banmaster", "s", CFGFLAG_SERVER, ConAddBanmaster, this, "", IConsole::CONSOLELEVEL_ADMIN);
-	Console()->Register("banmasters", "", CFGFLAG_SERVER, ConBanmasters, this, "", IConsole::CONSOLELEVEL_ADMIN);
-	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("login", "?s", CFGFLAG_SERVER, ConLogin, this, "Allows you access to rcon if no password is given, or changes your level if a password is given", IConsole::CONSOLELEVEL_USER);
 	Console()->Register("auth", "?s", CFGFLAG_SERVER, ConLogin, this, "Allows you access to rcon if no password is given, or changes your level if a password is given", IConsole::CONSOLELEVEL_USER);
 	Console()->Register("cmdlist", "?i", CFGFLAG_SERVER, ConCmdList, this, "Shows you the commands available for your remote console access. Specify the level if you want to see other level's commands", IConsole::CONSOLELEVEL_USER);
@@ -1860,44 +1868,6 @@ char *CServer::GetAnnouncementLine(char const *pFileName)
 	return 0;
 }
 
-void CServer::ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientID)
-{
-	CServer *pServer = (CServer *)pUser;
-
-	int Result = pServer->m_NetServer.BanmasterAdd(pResult->GetString(0));
-
-	if(Result == 0)
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "succesfully added banmaster");
-	else if (Result == 1)
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "invalid address for banmaster / net lookup failed");
-	else
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "too many banmasters");
-}
-
-void CServer::ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID)
-{
-	CServer *pServer = (CServer *)pUser;
-	int NumBanmasters = pServer->m_NetServer.BanmasterNum();
-
-	char aBuf[128];
-	char aIpString[64];
-
-	for(int i = 0; i < NumBanmasters; i++)
-	{
-		NETADDR *pBanmaster = pServer->m_NetServer.BanmasterGet(i);
-		net_addr_str(pBanmaster, aIpString, sizeof(aIpString));
-		str_format(aBuf, sizeof(aBuf), "%d: %s", i, aIpString);
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", aBuf);
-	}
-}
-
-void CServer::ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID)
-{
-	CServer *pServer = (CServer *)pUser;
-
-	pServer->m_NetServer.BanmastersClear();
-}
-
 void CServer::SendRconResponse(const char *pLine, void *pUser)
 {
 	RconResponseInfo *pInfo = (RconResponseInfo *)pUser;
@@ -1969,3 +1939,48 @@ void CServer::GetClientIP(int ClientID, char *pIPString, int Size)
 		str_format(pIPString, Size, "%d.%d.%d.%d", Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3]);
 	}
 }
+
+NETADDR CServer::GetClientIP(int ClientID)//this may exist already but i couldn't find it cause i am tired :D
+{
+	return m_NetServer.ClientAddr(ClientID);
+}
+
+void CServer::ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientID)
+{
+	CServer *pServer = (CServer *)pUser;
+	
+	int Result = pServer->m_NetServer.BanmasterAdd(pResult->GetString(0));
+	
+	if(Result == 0)
+		pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "succesfully added banmaster");
+	else if (Result == 1)
+		pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "invalid address for banmaster / net lookup failed");
+	else
+		pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "too many banmasters");
+}
+
+void CServer::ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID)
+{
+	CServer *pServer = (CServer *)pUser;
+	int NumBanmasters = pServer->m_NetServer.BanmasterNum();
+	
+	char aBuf[128];
+	char aIpString[64];
+	
+	for(int i = 0; i < NumBanmasters; i++)
+	{
+		NETADDR *pBanmaster = pServer->m_NetServer.BanmasterGet(i);
+		net_addr_str(pBanmaster, aIpString, sizeof(aIpString));
+		str_format(aBuf, sizeof(aBuf), "%d: %s", i, aIpString);
+		pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", aBuf);
+	}
+}
+
+void CServer::ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID)
+{
+	CServer *pServer = (CServer *)pUser;
+	
+	pServer->m_NetServer.BanmastersClear();
+	pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server/banmaster", "cleared banmaster list");
+}
+

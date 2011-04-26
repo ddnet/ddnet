@@ -292,7 +292,6 @@ public:
 
 	// Banmaster
 
-
 	int BanmasterAdd(const char *pAddrStr);
 	int BanmasterNum() const;
 	NETADDR* BanmasterGet(int Index);
@@ -300,12 +299,12 @@ public:
 	void BanmastersClear();
 	enum
 	{
-		MAX_BANMASTERS=16,
-		NETSERVER_DISABLEBANMASTER=1,
+		MAX_BANMASTERS=16
 	};
-	int m_Flags;
+private:
 	NETADDR m_aBanmasters[MAX_BANMASTERS];
 	int m_NumBanmasters;
+	
 };
 
 
