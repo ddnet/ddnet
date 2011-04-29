@@ -134,7 +134,7 @@ void PurgeBans()
 	}
 }
 
-void ConBan(IConsole::IResult *pResult, void *pUser)
+void ConBan(IConsole::IResult *pResult, void *pUser, int ClientID)
 {
 	NETADDR Addr;
 	const char *pStr = pResult->GetString(0);
@@ -149,12 +149,12 @@ void ConBan(IConsole::IResult *pResult, void *pUser)
 		dbg_msg("banmaster", "invalid network address to ban, str='%s'", pStr);
 }
 
-void ConUnbanAll(IConsole::IResult *pResult, void *pUser)
+void ConUnbanAll(IConsole::IResult *pResult, void *pUser, int ClientID)
 {
 	ClearBans();
 }
 
-void ConSetBindAddr(IConsole::IResult *pResult, void *pUser)
+void ConSetBindAddr(IConsole::IResult *pResult, void *pUser, int ClientID)
 {
 	if(m_aBindAddr[0])
 		return;
@@ -178,9 +178,9 @@ int main(int argc, const char **argv) // ignore_convention
 
 	m_pConsole = CreateConsole(CFGFLAG_BANMASTER);
 	m_pConsole->RegisterPrintCallback(StandardOutput, 0);
-	m_pConsole->Register("ban", "s?r", CFGFLAG_BANMASTER, ConBan, 0, "Bans the specified ip");
-	m_pConsole->Register("unban_all", "", CFGFLAG_BANMASTER, ConUnbanAll, 0, "Unbans all ips");
-	m_pConsole->Register("bind", "s", CFGFLAG_BANMASTER, ConSetBindAddr, 0, "Binds to the specified address");
+	m_pConsole->Register("ban", "s?r", CFGFLAG_BANMASTER, ConBan, 0, "Bans the specified ip", IConsole::CONSOLELEVEL_USER);
+	m_pConsole->Register("unban_all", "", CFGFLAG_BANMASTER, ConUnbanAll, 0, "Unbans all ips", IConsole::CONSOLELEVEL_USER);
+	m_pConsole->Register("bind", "s", CFGFLAG_BANMASTER, ConSetBindAddr, 0, "Binds to the specified address", IConsole::CONSOLELEVEL_USER);
 
 	{
 		bool RegisterFail = false;
@@ -192,7 +192,7 @@ int main(int argc, const char **argv) // ignore_convention
 			return -1;
 	}
 
-	m_pConsole->ExecuteFile(BANMASTER_BANFILE);
+	m_pConsole->ExecuteFile(BANMASTER_BANFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 	
 	NETADDR BindAddr;
 	if(m_aBindAddr[0] && net_host_lookup(m_aBindAddr, &BindAddr, NETTYPE_IPV4) == 0)
@@ -249,7 +249,7 @@ int main(int argc, const char **argv) // ignore_convention
 		{
 			ClearBans();
 			LastUpdate = time_get();
-			m_pConsole->ExecuteFile(BANMASTER_BANFILE);
+			m_pConsole->ExecuteFile(BANMASTER_BANFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
 		}
 		
 		// be nice to the CPU
