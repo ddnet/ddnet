@@ -143,7 +143,7 @@ public:
 
 	int m_ChatScore;
 
-	void AfkTimer(int new_target_x, int new_target_y);
+	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
 	int64 m_LastPlaytime;
 	int m_LastTarget_x;
 	int m_LastTarget_y;

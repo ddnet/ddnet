@@ -216,7 +216,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	if(!Character && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
-	AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY);
+	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
+		return; // we must return if kicked, as player struct is already deleted
 	// check for activity
 	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
 		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||
@@ -362,7 +363,7 @@ void CPlayer::SaveCharacter()
 	//m_PauseInfo.m_RefreshTime = Character->m_RefreshTime;
 }
 
-void CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
+bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 {
 	/*
 		afk timer (x, y = mouse coordinates)
@@ -370,12 +371,13 @@ void CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		the player's position in the game world, because it can easily be bypassed by just locking a key.
 		Frozen players could be kicked as well, because they can't move.
 		It also works for spectators.
+		returns true if kicked
 	*/
 
 	if(m_Authed)
-		return; // don't kick admins
+		return false; // don't kick admins
 	if(g_Config.m_SvMaxAfkTime == 0)
-		return; // 0 = disabled
+		return false; // 0 = disabled
 
 	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
 	{
@@ -415,6 +417,8 @@ void CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		{
 			CServer* serv =	(CServer*)m_pGameServer->Server();
 			serv->Kick(m_ClientID,"Away from keyboard");
+			return true;
 		}
 	}
+	return false;
 }
