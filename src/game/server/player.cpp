@@ -297,8 +297,8 @@ void CPlayer::TryRespawn()
 {
 	if(m_PauseInfo.m_Respawn)
 	{
-		Character = new(m_ClientID) CCharacter(&GameServer()->m_World);
-		Character->Spawn(this, m_PauseInfo.m_Core.m_Pos);
+		m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+		m_pCharacter->Spawn(this, m_PauseInfo.m_Core.m_Pos);
 		GameServer()->CreatePlayerSpawn(m_PauseInfo.m_Core.m_Pos, ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask((m_PauseInfo.m_Team > 0 && m_PauseInfo.m_Team < TEAM_SUPER) ? m_PauseInfo.m_Team : 0));
 		LoadCharacter();
 	}
@@ -318,33 +318,33 @@ void CPlayer::TryRespawn()
 
 void CPlayer::LoadCharacter()
 {
-	Character->SetCore(m_PauseInfo.m_Core);
+	m_pCharacter->SetCore(m_PauseInfo.m_Core);
 	if(g_Config.m_SvPauseTime)
-		Character->m_StartTime = Server()->Tick() - (m_PauseInfo.m_PauseTime - m_PauseInfo.m_StartTime);
+		m_pCharacter->m_StartTime = Server()->Tick() - (m_PauseInfo.m_PauseTime - m_PauseInfo.m_StartTime);
 	else
-		Character->m_StartTime = m_PauseInfo.m_StartTime;
-	Character->m_DDRaceState = m_PauseInfo.m_DDRaceState;
-	Character->m_RefreshTime = Server()->Tick();
+		m_pCharacter->m_StartTime = m_PauseInfo.m_StartTime;
+	m_pCharacter->m_DDRaceState = m_PauseInfo.m_DDRaceState;
+	m_pCharacter->m_RefreshTime = Server()->Tick();
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
 		if(m_PauseInfo.m_aHasWeapon[i])
 		{
 			if(!m_PauseInfo.m_FreezeTime)
-				Character->GiveWeapon(i, -1);
+				m_pCharacter->GiveWeapon(i, -1);
 			else
-				Character->GiveWeapon(i, 0);
+				m_pCharacter->GiveWeapon(i, 0);
 		}
 	}
-	Character->m_FreezeTime = m_PauseInfo.m_FreezeTime;
-	Character->SetLastAction(Server()->Tick());
-	Character->SetArmor(m_PauseInfo.m_Armor);
-	Character->m_LastMove = m_PauseInfo.m_LastMove;
-	Character->m_PrevPos = m_PauseInfo.m_PrevPos;
-	Character->SetActiveWeapon(m_PauseInfo.m_ActiveWeapon);
-	Character->SetLastWeapon(m_PauseInfo.m_LastWeapon);
-	Character->m_Super = m_PauseInfo.m_Super;
-	Character->m_DeepFreeze = m_PauseInfo.m_DeepFreeze;
-	Character->m_EndlessHook = m_PauseInfo.m_EndlessHook;
+	m_pCharacter->m_FreezeTime = m_PauseInfo.m_FreezeTime;
+	m_pCharacter->SetLastAction(Server()->Tick());
+	m_pCharacter->SetArmor(m_PauseInfo.m_Armor);
+	m_pCharacter->m_LastMove = m_PauseInfo.m_LastMove;
+	m_pCharacter->m_PrevPos = m_PauseInfo.m_PrevPos;
+	m_pCharacter->SetActiveWeapon(m_PauseInfo.m_ActiveWeapon);
+	m_pCharacter->SetLastWeapon(m_PauseInfo.m_LastWeapon);
+	m_pCharacter->m_Super = m_PauseInfo.m_Super;
+	m_pCharacter->m_DeepFreeze = m_PauseInfo.m_DeepFreeze;
+	m_pCharacter->m_EndlessHook = m_PauseInfo.m_EndlessHook;
 	((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core.Team(GetCID(), m_PauseInfo.m_Team);
 	m_PauseInfo.m_Respawn = false;
 	m_InfoSaved = false;
@@ -352,23 +352,23 @@ void CPlayer::LoadCharacter()
 
 void CPlayer::SaveCharacter()
 {
-	m_PauseInfo.m_Core = Character->GetCore();
-	m_PauseInfo.m_StartTime = Character->m_StartTime;
-	m_PauseInfo.m_DDRaceState = Character->m_DDRaceState;
+	m_PauseInfo.m_Core = m_pCharacter->GetCore();
+	m_PauseInfo.m_StartTime = m_pCharacter->m_StartTime;
+	m_PauseInfo.m_DDRaceState = m_pCharacter->m_DDRaceState;
 	for(int i = 0; i < WEAPON_NINJA; ++i)
-		m_PauseInfo.m_aHasWeapon[i] = Character->GetWeaponGot(i);
-	m_PauseInfo.m_FreezeTime=Character->m_FreezeTime;
-	m_PauseInfo.m_Armor = Character->GetArmor();
-	m_PauseInfo.m_LastMove = Character->m_LastMove;
-	m_PauseInfo.m_PrevPos = Character->m_PrevPos;
-	m_PauseInfo.m_ActiveWeapon = Character->GetActiveWeapon();
-	m_PauseInfo.m_LastWeapon = Character->GetLastWeapon();
-	m_PauseInfo.m_Super = Character->m_Super;
-	m_PauseInfo.m_DeepFreeze = Character->m_DeepFreeze;
-	m_PauseInfo.m_EndlessHook = Character->m_EndlessHook;
+		m_PauseInfo.m_aHasWeapon[i] = m_pCharacter->GetWeaponGot(i);
+	m_PauseInfo.m_FreezeTime=m_pCharacter->m_FreezeTime;
+	m_PauseInfo.m_Armor = m_pCharacter->GetArmor();
+	m_PauseInfo.m_LastMove = m_pCharacter->m_LastMove;
+	m_PauseInfo.m_PrevPos = m_pCharacter->m_PrevPos;
+	m_PauseInfo.m_ActiveWeapon = m_pCharacter->GetActiveWeapon();
+	m_PauseInfo.m_LastWeapon = m_pCharacter->GetLastWeapon();
+	m_PauseInfo.m_Super = m_pCharacter->m_Super;
+	m_PauseInfo.m_DeepFreeze = m_pCharacter->m_DeepFreeze;
+	m_PauseInfo.m_EndlessHook = m_pCharacter->m_EndlessHook;
 	m_PauseInfo.m_Team = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core.Team(GetCID());
 	m_PauseInfo.m_PauseTime = Server()->Tick();
-	//m_PauseInfo.m_RefreshTime = Character->m_RefreshTime;
+	//m_PauseInfo.m_RefreshTime = m_pCharacter->m_RefreshTime;
 }
 
 bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
