@@ -656,8 +656,6 @@ void CMenus::RenderLoading()
 
 	RenderBackground();
 
-	float tw;
-
 	float w = 700;
 	float h = 200;
 	float x = Screen.w/2-w/2;
@@ -674,7 +672,6 @@ void CMenus::RenderLoading()
 
 	const char *pCaption = Localize("Loading DDRace Client");
 
-	tw = TextRender()->TextWidth(0, 48.0f, pCaption, -1);
 	CUIRect r;
 	r.x = x;
 	r.y = y+20;
@@ -977,7 +974,7 @@ int CMenus::Render()
 			Box.VMargin(20.f/UI()->Scale(), &Box);
 			if(m_pClient->Editor()->HasUnsavedData())
 			{
-				char aBuf[128];
+				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "%s\n%s", Localize("There's an unsaved map in the editor, you might want to save it before you quit the game."), Localize("Quit anyway?"));
 				UI()->DoLabelScaled(&Box, aBuf, 20.f, -1, Part.w-20.0f);
 			}

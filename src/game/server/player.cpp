@@ -22,8 +22,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_RespawnTick = Server()->Tick();
 	m_DieTick = Server()->Tick();
 	m_ScoreStartTick = Server()->Tick();
-	Character = 0;
-	this->m_ClientID = ClientID;
+	m_pCharacter = 0;
+	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
@@ -50,8 +50,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 CPlayer::~CPlayer()
 {
-	delete Character;
-	Character = 0;
+	delete m_pCharacter;
+	m_pCharacter = 0;
 }
 
 void CPlayer::Tick()
@@ -88,19 +88,19 @@ void CPlayer::Tick()
 		}
 	}
 
-	if(!Character && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
+	if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
 		m_Spawning = true;
 
-	if(Character)
+	if(m_pCharacter)
 	{
-		if(Character->IsAlive())
+		if(m_pCharacter->IsAlive())
 		{
-			m_ViewPos = Character->m_Pos;
+			m_ViewPos = m_pCharacter->m_Pos;
 		}
 		else
 		{
-			delete Character;
-			Character = 0;
+			delete m_pCharacter;
+			m_pCharacter = 0;
 		}
 	}
 	else if(m_Spawning && m_RespawnTick <= Server()->Tick())
@@ -200,21 +200,29 @@ void CPlayer::OnDisconnect(const char *pReason)
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 {
-	if(Character)
-		Character->OnPredictedInput(NewInput);
+	// skip the input if chat is active
+	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
+		return;
+
+	if(m_pCharacter)
+		m_pCharacter->OnPredictedInput(NewInput);
 }
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
+	// skip the input if chat is active
+	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
+		return;
+
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if(Character)
-		Character->OnDirectInput(NewInput);
+	if(m_pCharacter)
+		m_pCharacter->OnDirectInput(NewInput);
 
-	if(!Character && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
 		m_Spawning = true;
 
-	if(!Character && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
+	if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
@@ -231,18 +239,18 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 CCharacter *CPlayer::GetCharacter()
 {
-	if(Character && Character->IsAlive())
-		return Character;
+	if(m_pCharacter && m_pCharacter->IsAlive())
+		return m_pCharacter;
 	return 0;
 }
 
 void CPlayer::KillCharacter(int Weapon)
 {
-	if(Character)
+	if(m_pCharacter)
 	{
-		Character->Die(m_ClientID, Weapon);
-		delete Character;
-		Character = 0;
+		m_pCharacter->Die(m_ClientID, Weapon);
+		delete m_pCharacter;
+		m_pCharacter = 0;
 	}
 }
 
@@ -302,8 +310,8 @@ void CPlayer::TryRespawn()
 			return;
 
 		m_Spawning = false;
-		Character = new(m_ClientID) CCharacter(&GameServer()->m_World);
-		Character->Spawn(this, SpawnPos);
+		m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+		m_pCharacter->Spawn(this, SpawnPos);
 		GameServer()->CreatePlayerSpawn(SpawnPos);
 	}
 }

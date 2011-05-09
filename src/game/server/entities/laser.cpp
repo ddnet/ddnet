@@ -74,7 +74,6 @@ void CLaser::DoBounce()
 	}
 	m_PrevPos = m_Pos;
 	vec2 To = m_Pos + m_Dir * m_Energy;
-	vec2 OrgTo = To;
 	vec2 Coltile;
 
 	int Res;

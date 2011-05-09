@@ -326,9 +326,12 @@ int io_seek(IOHANDLE io, int offset, int origin)
 		break;
 	case IOSEEK_END:
 		real_origin = SEEK_END;
+		break;
+	default:
+		return -1;
 	}
 
-	return fseek((FILE*)io, offset, origin);
+	return fseek((FILE*)io, offset, real_origin);
 }
 
 long int io_tell(IOHANDLE io)
@@ -413,6 +416,17 @@ void thread_sleep(int milliseconds)
 	usleep(milliseconds*1000);
 #elif defined(CONF_FAMILY_WINDOWS)
 	Sleep(milliseconds);
+#else
+	#error not implemented
+#endif
+}
+
+void thread_detach(void *thread)
+{
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)(thread));
+#elif defined(CONF_FAMILY_WINDOWS)
+	CloseHandle(thread);
 #else
 	#error not implemented
 #endif
@@ -581,13 +595,23 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b)
 void net_addr_str(const NETADDR *addr, char *string, int max_length)
 {
 	if(addr->type == NETTYPE_IPV4)
-		str_format(string, max_length, "%d.%d.%d.%d:%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3], addr->port);
+	{
+		if(addr->port != 0)
+			str_format(string, max_length, "%d.%d.%d.%d:%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3], addr->port);
+		else
+			str_format(string, max_length, "%d.%d.%d.%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3]);
+	}
 	else if(addr->type == NETTYPE_IPV6)
 	{
-		str_format(string, max_length, "[%x:%x:%x:%x:%x:%x:%x:%x]:%d",
-			(addr->ip[0]<<8)|addr->ip[1], (addr->ip[2]<<8)|addr->ip[3], (addr->ip[4]<<8)|addr->ip[5], (addr->ip[6]<<8)|addr->ip[7],
-			(addr->ip[8]<<8)|addr->ip[9], (addr->ip[10]<<8)|addr->ip[11], (addr->ip[12]<<8)|addr->ip[13], (addr->ip[14]<<8)|addr->ip[15],
-			addr->port);
+		if(addr->port != 0)
+			str_format(string, max_length, "[%x:%x:%x:%x:%x:%x:%x:%x]:%d",
+				(addr->ip[0]<<8)|addr->ip[1], (addr->ip[2]<<8)|addr->ip[3], (addr->ip[4]<<8)|addr->ip[5], (addr->ip[6]<<8)|addr->ip[7],
+				(addr->ip[8]<<8)|addr->ip[9], (addr->ip[10]<<8)|addr->ip[11], (addr->ip[12]<<8)|addr->ip[13], (addr->ip[14]<<8)|addr->ip[15],
+				addr->port);
+		else
+			str_format(string, max_length, "[%x:%x:%x:%x:%x:%x:%x:%x]",
+				(addr->ip[0]<<8)|addr->ip[1], (addr->ip[2]<<8)|addr->ip[3], (addr->ip[4]<<8)|addr->ip[5], (addr->ip[6]<<8)|addr->ip[7],
+				(addr->ip[8]<<8)|addr->ip[9], (addr->ip[10]<<8)|addr->ip[11], (addr->ip[12]<<8)|addr->ip[13], (addr->ip[14]<<8)|addr->ip[15]);
 	}
 	else
 		str_format(string, max_length, "unknown type %d", addr->type);
