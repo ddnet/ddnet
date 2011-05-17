@@ -1338,6 +1338,9 @@ void CCharacter::HandleTiles(int Index)
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCID());
 		}
 	}
+	int tcp = GameServer()->Collision()->IsTCheckpoint(MapIndex);
+	if(tcp)
+		m_TeleCheckpoint = tcp;
 	if(((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team())))
 	{
 		bool CanBegin = true;
@@ -1481,6 +1484,30 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_Vel = vec2(0,0);
 		return;
 	}
+	if(GameServer()->Collision()->IsCheckTeleport(MapIndex))
+	{
+		if(m_TeleCheckpoint && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleCheckOuts[m_TeleCheckpoint-1].size())
+		{
+			m_Core.m_HookedPlayer = -1;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			int Num = (((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleCheckOuts[m_TeleCheckpoint-1].size());
+			m_Core.m_Pos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleCheckOuts[m_TeleCheckpoint-1][(!Num)?Num:rand() % Num];
+			m_Core.m_HookPos = m_Core.m_Pos;
+			return;
+		}
+		vec2 SpawnPos;
+		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos))
+		{
+			m_Core.m_HookedPlayer = -1;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_Pos = SpawnPos;
+			m_Core.m_HookPos = m_Core.m_Pos;
+		}
+	}
 }
 
 void CCharacter::DDRaceTick()
@@ -1619,4 +1646,5 @@ void CCharacter::DDRaceInit()
 	}
 	m_DefEmote = EMOTE_NORMAL;
 	m_DefEmoteReset = -1;
+	m_TeleCheckpoint = 0;
 }

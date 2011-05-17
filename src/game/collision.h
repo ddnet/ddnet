@@ -71,6 +71,8 @@ public:
 	int GetFTileFlags(int Index);
 	int IsTeleport(int Index);
 	int IsEvilTeleport(int Index);
+	int IsCheckTeleport(int Index);
+	int IsTCheckpoint(int Index);
 	//int IsCheckpoint(int Index);
 	int IsSpeedup(int Index);
 	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed);

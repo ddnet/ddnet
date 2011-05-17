@@ -108,7 +108,7 @@ void CCollision::Init(class CLayers *pLayers)
 				}
 
 				// DDRace tiles
-				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 					m_pFront[i].m_Index = Index;
 			}
 		}
@@ -134,7 +134,7 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 
 			// DDRace tiles
-			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_BOOST) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_EHOOK_START && Index <= TILE_EHOOK_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 				m_pTiles[i].m_Index = Index;
 		}
 	}
@@ -408,6 +408,33 @@ int CCollision::IsEvilTeleport(int Index)
 	return 0;
 }
 
+int CCollision::IsCheckTeleport(int Index)
+{
+	if(Index < 0)
+		return 0;
+	if(!m_pTele)
+		return 0;
+
+	if(m_pTele[Index].m_Type == TILE_TELECHECKIN)
+		return m_pTele[Index].m_Number;
+
+	return 0;
+}
+
+int CCollision::IsTCheckpoint(int Index)
+{
+	if(Index < 0)
+		return 0;
+
+	if(!m_pTele)
+		return 0;
+
+	if(m_pTele[Index].m_Type == TILE_TELECHECK)
+		return m_pTele[Index].m_Number;
+
+	return 0;
+}
+
 int CCollision::IsSpeedup(int Index)
 {
 	if(Index < 0 || !m_pSpeedup)
@@ -481,28 +508,6 @@ int CCollision::IsMover(int x, int y, int* Flags)
 		return 0;
 }
 
-int CCollision::IsCheckpoint(int Index)
-{
-	if(Index < 0)
-		return -1;
-
-	int z = m_pTiles[Index].m_Index;
-	if(z >= 35 && z <= 59)
-		return z-35;
-	return -1;
-}
-
-int CCollision::IsFCheckpoint(int Index)
-{
-	if(Index < 0 || !m_pFront)
-		return -1;
-
-	int z = m_pFront[Index].m_Index;
-	if(z >= 35 && z <= 59)
-		return z-35;
-	return -1;
-}
-
 vec2 CCollision::CpSpeed(int Index, int Flags)
 {
 	if(Index < 0)
@@ -552,7 +557,7 @@ bool CCollision::TileExists(int Index)
 		return true;
 	if(m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH)
 		return true;
-	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL))
+	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
 		return true;
 	if(m_pSpeedup && m_pSpeedup[Index].m_Force > 0)
 		return true;
@@ -949,4 +954,26 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	if(pOutBeforeCollision)
 		*pOutBeforeCollision = Pos1;
 	return 0;
+}
+
+int CCollision::IsCheckpoint(int Index)
+{
+	if(Index < 0)
+		return -1;
+
+	int z = m_pTiles[Index].m_Index;
+	if(z >= 35 && z <= 59)
+		return z-35;
+	return -1;
+}
+
+int CCollision::IsFCheckpoint(int Index)
+{
+	if(Index < 0 || !m_pFront)
+		return -1;
+
+	int z = m_pFront[Index].m_Index;
+	if(z >= 35 && z <= 59)
+		return z-35;
+	return -1;
 }

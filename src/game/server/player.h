@@ -130,6 +130,7 @@ public:
 		bool m_EndlessHook;
 		int m_PauseTime;
 		int m_Team;
+		int m_TeleCheckpoint;
 	} m_PauseInfo;
 	bool m_InfoSaved;
 	void LoadCharacter();
