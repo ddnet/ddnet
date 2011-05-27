@@ -166,7 +166,7 @@ MACRO_CONFIG_INT(SvAnnouncementRandom, sv_announcement_random, 1, 0, 1, CFGFLAG_
 MACRO_CONFIG_INT(SvOldLaser, sv_old_laser, 0, 0, 1, CFGFLAG_SERVER, "Whether lasers can hit you if you shot them and that they pull you towards the bounce origin (0 for DDRace Beta) or lasers can't hit you if you shot them, and they pull others towards the shooter", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvSlashMe, sv_slash_me, 0, 0, 1, CFGFLAG_SERVER, "Whether /me is active on the server or not", IConsole::CONSOLELEVEL_ADMIN)
 
-MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 15, 5, 100, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout", IConsole::CONSOLELEVEL_ADMIN)
+MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 15, 5, 100, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(ClShowIDs, cl_show_ids, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Whether to show client ids in scoreboard", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClAutoRaceRecord, cl_auto_race_record, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save the best demo of each race", IConsole::CONSOLELEVEL_USER)
 MACRO_CONFIG_INT(ClDemoName, cl_demo_name, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save the player name within the demo", IConsole::CONSOLELEVEL_USER)
