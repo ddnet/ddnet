@@ -1704,21 +1704,6 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 		*pAddr = m_NetServer.ClientAddr(ClientID);
 }
 
-void DDRaceTunesReset(CConsole* pConsole)
-{
-	pConsole->ExecuteLine("tune_reset", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("tune gun_speed 1400", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("tune shotgun_curvature 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("tune shotgun_speed 500", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("tune shotgun_speeddiff 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("tune gun_curvature 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("sv_hit 1", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("sv_npc 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("sv_phook 1", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("sv_endless_drag 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-	pConsole->ExecuteLine("sv_old_laser 0", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
-}
-
 void CServer::SetRconLevel(int ClientID, int Level)
 {
 	char aBuf[128];

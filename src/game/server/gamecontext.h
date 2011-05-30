@@ -273,6 +273,8 @@ public:
 	virtual void OnSetAuthed(int ClientID,int Level);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
+
+	void ResetTuning();
 };
 
 inline int CmaskAll() { return -1; }

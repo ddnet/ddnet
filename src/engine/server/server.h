@@ -238,9 +238,6 @@ public:
 	static void ConAddBanmaster(IConsole::IResult *pResult, void *pUser, int ClientID);
 	static void ConBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID);
 	static void ConClearBanmasters(IConsole::IResult *pResult, void *pUser, int ClientID);
-
-private:
-	void DDRaceTunesReset(CConsole* pConsole);
 };
 
 #endif

@@ -53,16 +53,6 @@ void CGameContext::Construct(int Resetting)
 		m_pScore = 0;
 		m_NumMutes = 0;
 	}
-
-	// DDRace Tunes
-	Tuning()->Set("gun_speed", 1400);
-	Tuning()->Set("gun_curvature", 0);
-	Tuning()->Set("shotgun_speed", 500);
-	Tuning()->Set("shotgun_speeddiff", 0);
-	Tuning()->Set("shotgun_curvature", 0);
-	g_Config.m_SvHit = 1;
-	g_Config.m_SvEndlessDrag = 0;
-	g_Config.m_SvOldLaser = 0;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -1275,9 +1265,7 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData, int
 void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CTuningParams TuningParams;
-	*pSelf->Tuning() = TuningParams;
-	pSelf->SendTuningParams(-1);
+	pSelf->ResetTuning();
 	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
 }
 
@@ -1643,6 +1631,12 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	//world = new GAMEWORLD;
 	//players = new CPlayer[MAX_CLIENTS];
 
+	// Reset Tuning
+	ResetTuning();
+	g_Config.m_SvHit = 1;
+	g_Config.m_SvEndlessDrag = 0;
+	g_Config.m_SvOldLaser = 0;
+
 	char buf[512];
 	str_format(buf, sizeof(buf), "data/maps/%s.cfg", g_Config.m_SvMap);
 	Console()->ExecuteFile(buf, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
@@ -1954,4 +1948,16 @@ int CGameContext::GetDDRaceTeam(int ClientID)
 {
 	CGameControllerDDRace* pController = (CGameControllerDDRace*)m_pController;
 	return pController->m_Teams.m_Core.Team(ClientID);
+}
+
+void CGameContext::ResetTuning()
+{
+	CTuningParams TuningParams;
+	m_Tuning = TuningParams;
+	Tuning()->Set("gun_speed", 1400);
+	Tuning()->Set("gun_curvature", 0);
+	Tuning()->Set("shotgun_speed", 500);
+	Tuning()->Set("shotgun_speeddiff", 0);
+	Tuning()->Set("shotgun_curvature", 0);
+	SendTuningParams(-1);
 }
