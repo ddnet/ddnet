@@ -1000,7 +1000,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendChatTarget(ClientID,"Use /pause first then you can kill");
 			else
 			{
-				pPlayer->m_LastSetTeam = Server()->Tick();
+				//pPlayer->m_LastSetTeam = Server()->Tick();
 				if(pPlayer->GetTeam() == TEAM_SPECTATORS || pMsg->m_Team == TEAM_SPECTATORS)
 					m_VoteUpdate = true;
 				pPlayer->SetTeam(pMsg->m_Team);

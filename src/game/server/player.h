@@ -134,7 +134,6 @@ public:
 	bool m_InfoSaved;
 	void LoadCharacter();
 	void SaveCharacter();
-	int64 m_Last_Pause;
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
 	int m_Authed;

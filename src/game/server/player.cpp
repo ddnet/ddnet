@@ -44,7 +44,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_ShowOthers = false;
 
 	// Variable initialized:
-	m_Last_Pause = 0;
 	m_Last_Team = 0;
 }
 
@@ -274,6 +273,7 @@ void CPlayer::SetTeam(int Team)
 	KillCharacter();
 
 	m_Team = Team;
+	m_LastSetTeam = Server()->Tick();
 	m_LastActionTick = Server()->Tick();
 	// we got to wait 0.5 secs before respawning
 	m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
