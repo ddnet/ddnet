@@ -96,7 +96,6 @@ MACRO_CONFIG_INT(DbgResizable, dbg_resizable, 0, 0, 0, CFGFLAG_CLIENT, "Enables 
 // DDRace
 
 MACRO_CONFIG_STR(SvWelcome, sv_welcome, 64, "", CFGFLAG_SERVER, "Message that will be displayed to players who join the server", IConsole::CONSOLELEVEL_ADMIN)
-MACRO_CONFIG_STR(SvBroadcast, sv_broadcast, 64, "DDRace.info Trunk 0.5", CFGFLAG_SERVER, "The broadcasting message", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_INT(SvReservedSlots, sv_reserved_slots, 0, 0, 16, CFGFLAG_SERVER, "The number of slots that are reserved for special players", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvReservedSlotsPass, sv_reserved_slots_pass, 32, "", CFGFLAG_SERVER, "The password that is required to use a reserved slot", IConsole::CONSOLELEVEL_ADMIN)
 MACRO_CONFIG_STR(SvRconPasswordAdmin, sv_admin_pass, 32, "", CFGFLAG_SERVER, "Remote console administrator password", IConsole::CONSOLELEVEL_ADMIN)

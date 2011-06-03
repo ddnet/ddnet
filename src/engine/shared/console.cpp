@@ -358,7 +358,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, in
 						{
 							m_Cheated = true;
 							Result.Print(OUTPUT_LEVEL_STANDARD, "Cheated", "You have cheated, no records will be saved until server shutdown");
-							str_format(g_Config.m_SvBroadcast, sizeof(g_Config.m_SvBroadcast), "Cheated: No records will be saved");
 						}
 						if (Result.HasVictim())
 						{

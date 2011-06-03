@@ -1082,54 +1082,16 @@ void CCharacter::HandleBroadcast()
 	char aBroadcast[128];
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-
-	if(Server()->Tick() - m_RefreshTime >= Server()->TickSpeed())
+	// Todo:DDRace:GreYFoX: optimize these if statements, editing from iphone is not easy
+	if(m_DDRaceState == DDRACE_STARTED && Server()->Tick() - m_RefreshTime >= Server()->TickSpeed())
 	{
-		if (m_DDRaceState == DDRACE_STARTED)
+		if(m_CpActive != -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_IsUsingDDRaceClient)
 		{
-			if(m_CpActive != -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_IsUsingDDRaceClient)
+			if(pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
 			{
-				if(pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
-				{
-					float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
-					str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
-					GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
-					m_LastBroadcast = Server()->Tick();
-				}
-			}
-			else if( g_Config.m_SvBroadcast[0] != 0 && m_BroadCast)
-			{
-				str_format(aBroadcast, sizeof(aBroadcast), "%s", g_Config.m_SvBroadcast);
-
-				if(Server()->Tick() >= (m_LastBroadcast + Server()->TickSpeed()))
-				{
-					GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
-					m_LastBroadcast = Server()->Tick();
-				}
-			}
-		}
-		else
-		{
-			char aTmp[128];
-			if(!m_pPlayer->m_IsUsingDDRaceClient)
-			{
-				if( g_Config.m_SvBroadcast[0] != 0 && (Server()->Tick() > (m_LastBroadcast + (Server()->TickSpeed() * 9))))
-				{
-					char aYourBest[64],aServerBest[64];
-					str_format(aYourBest, sizeof(aYourBest), "Your Best:'%s%d:%s%d'", ((pData->m_BestTime / 60) < 10)?"0":"", (int)(pData->m_BestTime / 60), (((int)pData->m_BestTime % 60) < 10)?"0":"", (int)pData->m_BestTime % 60);
-
-					CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-
-					str_format(aServerBest, sizeof(aServerBest), "Server Best:'%s%d:%s%d'", ((GameServer()->m_pController->m_CurrentRecord / 60) < 10)?"0":"", (int)(GameServer()->m_pController->m_CurrentRecord / 60), (((int)GameServer()->m_pController->m_CurrentRecord % 60) < 10)?"0":"", (int)GameServer()->m_pController->m_CurrentRecord % 60);
-					str_format(aTmp, sizeof(aTmp), "%s %s", (GameServer()->m_pController->m_CurrentRecord)?aServerBest:"", (pData->m_BestTime)?aYourBest:"");
-					GameServer()->SendBroadcast(aTmp, m_pPlayer->GetCID());
-					m_LastBroadcast = Server()->Tick();
-				}
-			}
-			else if( g_Config.m_SvBroadcast[0] != 0 && (Server()->Tick() > (m_LastBroadcast + (Server()->TickSpeed() * 9))))
-			{
-				str_format(aTmp, sizeof(aTmp), "%s", g_Config.m_SvBroadcast);
-				GameServer()->SendBroadcast(aTmp, m_pPlayer->GetCID());
+				float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
+				str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
+				GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
 				m_LastBroadcast = Server()->Tick();
 			}
 		}
