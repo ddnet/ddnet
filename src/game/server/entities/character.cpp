@@ -1076,27 +1076,23 @@ CGameTeams* CCharacter::Teams()
 {
 	return &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams;
 }
-//TODO: DDRace Revise Braodcast, make sure all vars are needed ..etc
+
 void CCharacter::HandleBroadcast()
 {
 	char aBroadcast[128];
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-	// Todo:DDRace:GreYFoX: optimize these if statements, editing from iphone is not easy
-	if(m_DDRaceState == DDRACE_STARTED && Server()->Tick() - m_RefreshTime >= Server()->TickSpeed())
+
+	if((m_DDRaceState == DDRACE_STARTED && Server()->Tick() - m_RefreshTime >= Server()->TickSpeed()) &&
+			m_CpActive != -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_IsUsingDDRaceClient &&
+			pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
 	{
-		if(m_CpActive != -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_IsUsingDDRaceClient)
-		{
-			if(pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
-			{
-				float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
-				str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
-				GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
-				m_LastBroadcast = Server()->Tick();
-			}
-		}
-		m_RefreshTime = Server()->Tick();
+		float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
+		str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
+		GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
+		m_LastBroadcast = Server()->Tick();
 	}
+	m_RefreshTime = Server()->Tick();
 }
 
 void CCharacter::HandleSkippableTiles(int Index)
