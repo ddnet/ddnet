@@ -466,7 +466,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 	if(g_Config.m_SvPauseable)
 	{
 		CCharacter* pChr = pPlayer->GetCharacter();
-		if(!pPlayer->GetTeam() && pChr && (!pChr->GetWeaponGot(WEAPON_NINJA) || pChr->m_FreezeTime) && pChr->IsGrounded() && pChr->m_Pos==pChr->m_PrevPos && !pChr->Team() && !pPlayer->m_InfoSaved)
+		if(!pPlayer->GetTeam() && pChr && (!pChr->GetWeaponGot(WEAPON_NINJA) || pChr->m_FreezeTime) && pChr->IsGrounded() && pChr->m_Pos==pChr->m_PrevPos && !pPlayer->m_InfoSaved)
 		{
 			if(pPlayer->m_LastSetTeam + pSelf->Server()->TickSpeed() * g_Config.m_SvPauseFrequency <= pSelf->Server()->Tick())
 			{
@@ -485,7 +485,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 			//pPlayer->LoadCharacter();//TODO:Check if this system Works
 		}
 		else if(pChr)
-			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", (pChr->Team())?"You can't pause while you are in a team":pChr->GetWeaponGot(WEAPON_NINJA)?"You can't use /pause while you are a ninja":(!pChr->IsGrounded())?"You can't use /pause while you are a in air":"You can't use /pause while you are moving");
+			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", pChr->GetWeaponGot(WEAPON_NINJA)?"You can't use /pause while you are a ninja":(!pChr->IsGrounded())?"You can't use /pause while you are a in air":"You can't use /pause while you are moving");
 		else
 			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", "No pause data saved.");
 	}
@@ -620,13 +620,13 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int 
 	else
 	{
 		char aBuf[512];
-		if(pPlayer->GetCharacter() == 0)
+		if(!pPlayer->IsPlaying())
 		{
 			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You can't check your team while you are dead/a spectator.");
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "You are in team %d", pPlayer->GetCharacter()->Team());
+			str_format(aBuf, sizeof(aBuf), "You are in team %d", ((CGameControllerDDRace*)pSelf->m_pController)->m_Teams.m_Core.Team(ClientID));
 			pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
 		}
 	}

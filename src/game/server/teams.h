@@ -29,6 +29,7 @@ public:
 	
 	//helper methods
 	CCharacter* Character(int ClientID) { return GameServer()->GetPlayerChar(ClientID); }
+	CPlayer* GetPlayer(int ClientID) { return GameServer()->m_apPlayers[ClientID]; }
 
 	class CGameContext *GameServer() { return m_pGameContext; }
 	class IServer *Server() { return m_pGameContext->Server(); }
@@ -54,6 +55,15 @@ public:
 	void SendTeamsState(int Cid);
 
 	int m_LastChat[MAX_CLIENTS];
+
+	int GetDDRaceState(CPlayer* Player);
+	int GetStartTime(CPlayer* Player);
+	float *GetCpCurrent(CPlayer* Player);
+	void SetDDRaceState(CPlayer* Player, int DDRaceState);
+	void SetStartTime(CPlayer* Player, int StartTime);
+	void SetRefreshTime(CPlayer* Player, int RefreshTime);
+	void SetCpActive(CPlayer* Player, int CpActive);
+	void OnFinish(CPlayer* Player);
 };
 
 #endif

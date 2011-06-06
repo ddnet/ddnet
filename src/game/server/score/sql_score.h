@@ -55,7 +55,7 @@ public:
 	~CSqlScore();
 
 	virtual void LoadScore(int ClientID);
-	virtual void SaveScore(int ClientID, float Time, CCharacter *pChar);
+	virtual void SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS]);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search=false);
 	virtual void ShowTimes(int ClientID, const char* pName, int Debut=1);
 	virtual void ShowTimes(int ClientID, int Debut=1);	

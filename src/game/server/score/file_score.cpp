@@ -194,11 +194,11 @@ void CFileScore::LoadScore(int ClientID)
 		PlayerData(ClientID)->Set(pPlayer->m_Score, pPlayer->m_aCpTime);
 }
 
-void CFileScore::SaveScore(int ClientID, float Time, CCharacter *pChar)
+void CFileScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS])
 {
 	CConsole* pCon = (CConsole*)GameServer()->Console();
 	if(!pCon->m_Cheated)
-		UpdatePlayer(ClientID, Time, pChar->m_CpCurrent);
+		UpdatePlayer(ClientID, Time, CpTime);
 }
 
 void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut)

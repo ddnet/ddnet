@@ -283,7 +283,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 	lock_release(gs_SqlLock);
 }
 
-void CSqlScore::SaveScore(int ClientID, float Time, CCharacter *pChar)
+void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS])
 {
 	CConsole* pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
@@ -293,7 +293,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, CCharacter *pChar)
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), sizeof(Tmp->m_aName));
 	Tmp->m_Time = Time;
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
-		Tmp->m_aCpCurrent[i] = pChar->m_CpCurrent[i];
+		Tmp->m_aCpCurrent[i] = CpTime[i];
 	Tmp->m_pSqlData = this;
 
 	void *SaveThread = thread_create(SaveScoreThread, Tmp);
