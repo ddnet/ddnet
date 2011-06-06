@@ -267,7 +267,15 @@ void CPlayer::SetTeam(int Team)
 		return;
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
+	if(m_InfoSaved)
+	{
+		if(Team == TEAM_SPECTATORS)
+			str_format(aBuf, sizeof(aBuf), "'%s' paused", Server()->ClientName(m_ClientID));
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' resumed", Server()->ClientName(m_ClientID));
+	}
+	else
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
 	GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 	KillCharacter();
