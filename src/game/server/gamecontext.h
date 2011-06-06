@@ -219,7 +219,6 @@ private:
 	static void ConKill(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConForcePause(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConForceUnpause(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConTop5(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	#if defined(CONF_SQL)
 	static void ConTimes(IConsole::IResult *pResult, void *pUserData, int ClientID);

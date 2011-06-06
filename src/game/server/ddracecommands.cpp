@@ -478,7 +478,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData, i
 			else
 				pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", "You can\'t pause that often.");
 		}
-		else if(pPlayer->GetTeam()==TEAM_SPECTATORS && pPlayer->m_InfoSaved && pPlayer->m_ForcePauseTime==0)
+		else if(pPlayer->GetTeam()==TEAM_SPECTATORS && pPlayer->m_InfoSaved && pPlayer->m_ForcePauseTime == 0)
 		{
 			pPlayer->m_PauseInfo.m_Respawn = true;
 			pPlayer->SetTeam(TEAM_RED);
@@ -508,20 +508,18 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData, in
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CServer* pServ = (CServer*)pSelf->Server();
 	int Victim = pResult->GetVictim();
-	int Seconds;
+	int Seconds = 0;
 	char aBuf[128];
 
-	if(pResult->NumArguments() > 0)
-		Seconds = pResult->GetInteger(0);
-	else
-		Seconds = g_Config.m_SvVotePauseTime;
+	if(pResult->NumArguments() > 0 && ClientID < 0)
+		Seconds = clamp(pResult->GetInteger(0), 0, 15);
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
-	if(!pPlayer)
+	if(!pPlayer || (!Seconds && ClientID >= 0))
 		return;
 
 	CCharacter* pChr = pPlayer->GetCharacter();
-	if(!pPlayer->GetTeam() && pChr && !pPlayer->m_InfoSaved)
+	if(!pPlayer->GetTeam() && pChr && !pPlayer->m_InfoSaved && ClientID < 0)
 	{
 		pPlayer->SaveCharacter();
 		pPlayer->m_InfoSaved = true;
@@ -535,37 +533,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData, in
 	if(ClientID < 0)
 		str_format(aBuf, sizeof(aBuf), "'%s' has been force-paused for %d seconds", pServ->ClientName(Victim), Seconds);
 	else
-		str_format(aBuf, sizeof(aBuf), "'%s' has been force-paused for %d seconds by '%s'", pServ->ClientName(Victim), Seconds, pServ->ClientName(ClientID));
-	pSelf->SendChat(-1, CHAT_ALL, aBuf);
-}
-
-void CGameContext::ConForceUnpause(IConsole::IResult *pResult, void *pUserData, int ClientID)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CServer* pServ = (CServer*)pSelf->Server();
-	int Victim = pResult->GetVictim();
-	char aBuf[128];
-
-	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
-	if(!pPlayer)
-		return;
-
-	if(pPlayer->GetTeam()==TEAM_SPECTATORS && pPlayer->m_InfoSaved)
-	{
-		pPlayer->m_PauseInfo.m_Respawn = true;
-		pPlayer->SetTeam(TEAM_RED);
-		pPlayer->m_InfoSaved = false;
-		//pPlayer->LoadCharacter();//TODO:Check if this system Works
-		pPlayer->m_ForcePauseTime = 0;
-	}
-	else // Shouldn't be reached
-	{
-		pPlayer->m_ForcePauseTime = 0;
-	}
-	if(ClientID < 0)
-		str_format(aBuf, sizeof(aBuf), "'%s' has been force-unpaused", pServ->ClientName(Victim));
-	else
-		str_format(aBuf, sizeof(aBuf), "'%s' has been force-unpaused by '%s'", pServ->ClientName(Victim), pServ->ClientName(ClientID));
+		str_format(aBuf, sizeof(aBuf), "Force-pause of '%s' have been removed by '%s'", pServ->ClientName(Victim), pServ->ClientName(ClientID));
 	pSelf->SendChat(-1, CHAT_ALL, aBuf);
 }
 
