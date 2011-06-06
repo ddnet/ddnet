@@ -40,6 +40,8 @@ CONSOLE_COMMAND("help", "?r", CFGFLAG_SERVER, ConHelp, this, "Shows help to comm
 CONSOLE_COMMAND("info", "", CFGFLAG_SERVER, ConInfo, this, "Shows info about this server", IConsole::CONSOLELEVEL_USER)
 CONSOLE_COMMAND("me", "r", CFGFLAG_SERVER, ConMe, this, "Like the famous irc command '/me says hi' will display '<yourname> says hi'", IConsole::CONSOLELEVEL_USER)
 CONSOLE_COMMAND("pause", "", CFGFLAG_SERVER, ConTogglePause, this, "Toggles pause on/off (if activated on server)", IConsole::CONSOLELEVEL_USER)
+CONSOLE_COMMAND("force_pause", "v?i", CFGFLAG_SERVER, ConForcePause, this, "Force v to pause for i seconds", IConsole::CONSOLELEVEL_ADMIN)
+CONSOLE_COMMAND("force_unpause", "v", CFGFLAG_SERVER, ConForceUnpause, this, "Force v to unpause", IConsole::CONSOLELEVEL_ADMIN)
 CONSOLE_COMMAND("rank", "?r", CFGFLAG_SERVER, ConRank, this, "Shows the rank of player with name r (your rank by default)", IConsole::CONSOLELEVEL_USER)
 CONSOLE_COMMAND("rules", "", CFGFLAG_SERVER, ConRules, this, "Shows the server rules", IConsole::CONSOLELEVEL_USER)
 CONSOLE_COMMAND("team", "?i", CFGFLAG_SERVER, ConJoinTeam, this, "Lets you join team i (shows your team if left blank)", IConsole::CONSOLELEVEL_USER)

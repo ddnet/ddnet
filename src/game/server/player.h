@@ -134,6 +134,7 @@ public:
 		int m_CpActive;
 		float m_CpCurrent[25];
 	} m_PauseInfo;
+	int m_ForcePauseTime;
 	bool m_InfoSaved;
 	bool IsPlaying();
 	void LoadCharacter();

@@ -64,6 +64,16 @@ void CPlayer::Tick()
 	if (m_ChatScore > 0)
 		m_ChatScore--;
 
+	if (g_Config.m_SvVotePauseAuto && m_ForcePauseTime==1 && GetTeam()==TEAM_SPECTATORS && m_InfoSaved)
+	{
+		m_InfoSaved = false;
+		m_PauseInfo.m_Respawn = true;
+		SetTeam(TEAM_RED);
+	}
+
+	if (m_ForcePauseTime > 0)
+		m_ForcePauseTime--;
+
 	Server()->SetClientScore(m_ClientID, m_Score);
 
 	// do latency stuff
