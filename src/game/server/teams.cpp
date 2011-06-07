@@ -353,19 +353,19 @@ void CGameTeams::OnFinish(CPlayer* Player)
 			}
 		}
 
-		bool pCallSaveScore = false;
+		bool CallSaveScore = false;
 		#if defined(CONF_SQL)
-			pCallSaveScore = g_Config.m_SvUseSQL;
+			CallSaveScore = g_Config.m_SvUseSQL;
 		#endif
 
 		if(!pData->m_BestTime || time < pData->m_BestTime)
 		{
 			// update the score
 			pData->Set(time, GetCpCurrent(Player));
-			pCallSaveScore = true;
+			CallSaveScore = true;
 		}
 
-		if(pCallSaveScore)
+		if(CallSaveScore)
 			if(str_comp_num(Server()->ClientName(Player->GetCID()), "nameless tee", 12) != 0)
 				GameServer()->Score()->SaveScore(Player->GetCID(), time, GetCpCurrent(Player));
 
