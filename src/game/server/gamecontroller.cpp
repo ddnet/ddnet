@@ -791,9 +791,10 @@ void IGameController::Snap(int SnappingClient)
 	//pGameInfoObj->m_TimeLimit = g_Config.m_SvTimelimit;
 	CCharacter *pChar;
 	CPlayer *pPlayer;
-	if ((pPlayer = GameServer()->m_apPlayers[SnappingClient]))
-		if((pChar = pPlayer->GetCharacter()))
-			pGameInfoObj->m_RoundStartTick = (pChar->m_DDRaceState == DDRACE_STARTED)?pChar->m_StartTime:Server()->Tick();
+	if(SnappingClient >= 0)
+		if((pPlayer = GameServer()->m_apPlayers[SnappingClient]))
+			if((pChar = pPlayer->GetCharacter()))
+				pGameInfoObj->m_RoundStartTick = (pChar->m_DDRaceState == DDRACE_STARTED)?pChar->m_StartTime:Server()->Tick();
 
 	pGameInfoObj->m_RoundNum = /*(str_length(g_Config.m_SvMaprotation) && g_Config.m_SvRoundsPerMap) ? g_Config.m_SvRoundsPerMap :*/ 0;
 	pGameInfoObj->m_RoundCurrent = m_RoundCount+1;
