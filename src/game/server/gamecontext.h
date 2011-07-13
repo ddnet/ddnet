@@ -191,6 +191,8 @@ public:
 	//
 	//void SwapTeams();
 
+	void LoadMapSettings();
+
 	// engine events
 	virtual void OnInit();
 	virtual void OnConsoleInit();
