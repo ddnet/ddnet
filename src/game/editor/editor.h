@@ -376,6 +376,12 @@ public:
 	};
 	CMapInfo m_MapInfo;
 
+	struct CSetting
+	{
+		char m_aCommand[64];
+	};
+	array<CSetting> m_lSettings;
+
 	class CLayerGame *m_pGameLayer;
 	CLayerGroup *m_pGameGroup;
 
@@ -678,10 +684,14 @@ public:
 		m_ShowEnvelopeEditor = 0;
 		m_ShowUndo = 0;
 		m_UndoScrollValue = 0.0f;
+		m_ShowServerSettingsEditor = false;
 
 		m_ShowEnvelopePreview = 0;
 		m_SelectedQuadEnvelope = -1;
 		m_SelectedEnvelopePoint = -1;
+
+		m_CommandBox = 0.0f;
+		m_aSettingsCommand[0] = 0;
 
 		ms_CheckerTexture = 0;
 		ms_BackgroundTexture = 0;
@@ -842,6 +852,7 @@ public:
 
 	int m_ShowEnvelopeEditor;
 	int m_ShowEnvelopePreview; //Values: 0-Off|1-Selected Envelope|2-All
+	bool m_ShowServerSettingsEditor;
 	bool m_ShowPicker;
 
 	int m_SelectedLayer;
@@ -870,6 +881,9 @@ public:
 	int m_ShiftBy;
 
 	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
+
+	float m_CommandBox;
+	char m_aSettingsCommand[64];
 
 	void DoMapBorder();
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
@@ -954,6 +968,7 @@ public:
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderUndoList(CUIRect View);
+	void RenderServerSettingsEditor(CUIRect View);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
