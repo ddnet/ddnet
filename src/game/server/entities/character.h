@@ -157,6 +157,7 @@ public:
 	int m_FreezeTick;
 	bool m_DeepFreeze;
 	bool m_EndlessHook;
+	bool m_Hit;
 	int m_PainSoundTimer;
 	int m_DefEmote;
 	int m_DefEmoteReset;
