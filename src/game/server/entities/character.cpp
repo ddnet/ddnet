@@ -954,7 +954,7 @@ bool CCharacter::SameTeam(int ClientID)
 
 int CCharacter::Team()
 {
-	return ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core.Team(m_pPlayer->GetCID());
+	return Teams()->m_Core.Team(m_pPlayer->GetCID());
 }
 
 CGameTeams* CCharacter::Teams()
