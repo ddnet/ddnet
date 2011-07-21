@@ -307,7 +307,7 @@ void CCharacter::FireWeapon()
 			m_NumObjectsHit = 0;
 			GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, Teams()->TeamMask(Team()));
 
-			if (!g_Config.m_SvHit) break;
+			if (!m_Hit) break;
 
 			CCharacter *apEnts[MAX_CLIENTS];
 			int Hits = 0;
@@ -1500,4 +1500,5 @@ void CCharacter::DDRaceInit()
 	m_DefEmote = EMOTE_NORMAL;
 	m_DefEmoteReset = -1;
 	m_TeleCheckpoint = 0;
+	m_Hit = g_Config.m_SvHit;
 }

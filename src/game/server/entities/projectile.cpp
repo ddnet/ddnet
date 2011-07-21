@@ -87,14 +87,14 @@ void CProjectile::Tick()
 	vec2 NewPos;
 	vec2 Speed = CurPos - PrevPos;
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos, false);
-	CCharacter *OwnerChar = 0;
+	CCharacter *pOwnerChar = 0;
 
 
 
 	if(m_Owner >= 0)
-		OwnerChar = GameServer()->GetPlayerChar(m_Owner);
+		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	CCharacter *TargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, OwnerChar);
+	CCharacter *pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar);
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -103,31 +103,31 @@ void CProjectile::Tick()
 	bool isWeaponCollide = false;
 	if
 	(
-			OwnerChar &&
-			TargetChr &&
-			OwnerChar->IsAlive() &&
-			TargetChr->IsAlive() &&
-			!TargetChr->CanCollide(m_Owner)
+			pOwnerChar &&
+			pTargetChr &&
+			pOwnerChar->IsAlive() &&
+			pTargetChr->IsAlive() &&
+			!pTargetChr->CanCollide(m_Owner)
 			)
 	{
 			isWeaponCollide = true;
 			//TeamMask = OwnerChar->Teams()->TeamMask( OwnerChar->Team());
 	}
-	if (OwnerChar && OwnerChar->IsAlive())
+	if (pOwnerChar && pOwnerChar->IsAlive())
 	{
-			TeamMask = OwnerChar->Teams()->TeamMask( OwnerChar->Team());
+			TeamMask = pOwnerChar->Teams()->TeamMask( pOwnerChar->Team());
 	}
-	if( ((TargetChr && (g_Config.m_SvHit || m_Owner == -1 || TargetChr == OwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)//TODO:TEAM
+	if( ((pTargetChr && (pOwnerChar ? pOwnerChar->m_Hit : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)//TODO:TEAM
 	{
-		if(m_Explosive/*??*/ && (!TargetChr || (TargetChr && !m_Freeze)))
+		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && !m_Freeze)))
 		{
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!TargetChr ? -1 : TargetChr->Team()),
+			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
 			(m_Owner != -1)? TeamMask : -1);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 			(m_Owner != -1)? TeamMask : -1);
 		}
-		else if(TargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[TargetChr->Team()]) || m_Layer != LAYER_SWITCH))
-			TargetChr->Freeze();
+		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
+			pTargetChr->Freeze();
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = Server()->Tick();
@@ -170,12 +170,12 @@ void CProjectile::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
 
-	CCharacter * SnapChar = GameServer()->GetPlayerChar(SnappingClient);
+	CCharacter* pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%((m_Explosive)?6:20);
-	if (SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()] && (!Tick)))
+	if (pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
 		return;
 
-	if(SnapChar && m_Owner != -1 && !SnapChar->CanCollide(m_Owner))
+	if(pSnapChar && m_Owner != -1 && !pSnapChar->CanCollide(m_Owner))
 		return;
 
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID, sizeof(CNetObj_Projectile)));
