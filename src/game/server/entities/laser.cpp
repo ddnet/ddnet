@@ -19,6 +19,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Type = Type;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
+	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->Teams()->TeamMask(GameServer()->GetPlayerChar(Owner)->Team()) : 0;
 }
 
 
@@ -109,10 +110,8 @@ void CLaser::DoBounce()
 
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
 				m_Energy = -1;
-			if(OwnerChar)
-				GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, OwnerChar->Teams()->TeamMask(OwnerChar->Team()));
-			else
-				GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, 0);
+
+			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, OwnerChar->Teams()->TeamMask(m_TeamMask));
 		}
 	}
 	else
