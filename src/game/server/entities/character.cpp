@@ -1234,12 +1234,12 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Endless hook has been deactivated");
 		m_EndlessHook = false;
 	}
-	if(((m_TileIndex == TILE_HIT_START) || (m_TileFIndex == TILE_HIT_START)) && !m_EndlessHook)
+	if(((m_TileIndex == TILE_HIT_START) || (m_TileFIndex == TILE_HIT_START)) && !m_Hit)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can hit others");
 		m_Hit = true;
 	}
-	else if(((m_TileIndex == TILE_HIT_END) || (m_TileFIndex == TILE_HIT_END)) && m_EndlessHook)
+	else if(((m_TileIndex == TILE_HIT_END) || (m_TileFIndex == TILE_HIT_END)) && m_Hit)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can't hit others");
 		m_Hit = false;
@@ -1399,7 +1399,7 @@ void CCharacter::DDRacePostCoreTick()
 			m_EmoteStop = -1;
 		}
 
-		if (g_Config.m_SvEndlessDrag || m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
+		if (m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
 			m_Core.m_HookTick = 0;
 
 		if (m_DeepFreeze && !m_Super)
@@ -1500,5 +1500,6 @@ void CCharacter::DDRaceInit()
 	m_DefEmote = EMOTE_NORMAL;
 	m_DefEmoteReset = -1;
 	m_TeleCheckpoint = 0;
+	m_EndlessHook = g_Config.m_SvEndlessDrag;
 	m_Hit = g_Config.m_SvHit;
 }
