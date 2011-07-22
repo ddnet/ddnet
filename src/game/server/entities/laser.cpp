@@ -58,7 +58,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	else if (m_Type == 0)
 	{
-		pHit->UnFreeze();
+		pHit->UnFreeze();b
 	}
 	return true;
 }
@@ -110,7 +110,7 @@ void CLaser::DoBounce()
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
 				m_Energy = -1;
 
-			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, OwnerChar->Teams()->TeamMask(m_TeamMask));
+			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, m_TeamMask);
 		}
 	}
 	else
