@@ -65,7 +65,6 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 
 void CLaser::DoBounce()
 {
-	CCharacter *OwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_EvalTick = Server()->Tick();
 
 	if(m_Energy < 0)
