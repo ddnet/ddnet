@@ -58,7 +58,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	else if (m_Type == 0)
 	{
-		pHit->UnFreeze();b
+		pHit->UnFreeze();
 	}
 	return true;
 }
