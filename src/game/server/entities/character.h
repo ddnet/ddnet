@@ -157,7 +157,15 @@ public:
 	int m_FreezeTick;
 	bool m_DeepFreeze;
 	bool m_EndlessHook;
-	bool m_Hit;
+	enum
+	{
+		HIT_ALL=0,
+		DISABLE_HIT_HAMMER=1,
+		DISABLE_HIT_SHOTGUN=2,
+		DISABLE_HIT_GRENADE=4,
+		DISABLE_HIT_RIFLE=8
+	};
+	int m_Hit;
 	int m_PainSoundTimer;
 	int m_DefEmote;
 	int m_DefEmoteReset;

@@ -697,6 +697,16 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type;
 									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
 								}
+								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_HIT_START)
+								{
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_HIT_START;
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+								}
+								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_HIT_END)
+								{
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_HIT_END;
+									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Switch);
 						}
