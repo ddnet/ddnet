@@ -140,6 +140,7 @@ enum
 	ROTATION_270 = (TILEFLAG_VFLIP|TILEFLAG_HFLIP|TILEFLAG_ROTATE),
 
 	LAYERFLAG_DETAIL=1,
+	TILESLAYERFLAG_GAME=1,
 
 	ENTITY_OFFSET=255-16*4,
 	OLD_THROUGH1=25,
@@ -203,13 +204,15 @@ struct CMapItemGroup_v1
 
 struct CMapItemGroup : public CMapItemGroup_v1
 {
-	enum { CURRENT_VERSION=2 };
+	enum { CURRENT_VERSION=3 };
 
 	int m_UseClipping;
 	int m_ClipX;
 	int m_ClipY;
 	int m_ClipW;
 	int m_ClipH;
+
+	int m_aName[3];
 } ;
 
 struct CMapItemLayer
@@ -235,12 +238,16 @@ struct CMapItemLayerTilemap
 	int m_Image;
 	int m_Data;
 
+<<<<<<< HEAD
 	// DDRace
 
 	int m_Tele;
 	int m_Speedup;
 	int m_Front;
 	int m_Switch;
+=======
+	int m_aName[3];
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 } ;
 
 struct CMapItemLayerQuads
@@ -251,6 +258,8 @@ struct CMapItemLayerQuads
 	int m_NumQuads;
 	int m_Data;
 	int m_Image;
+
+	int m_aName[3];
 } ;
 
 struct CMapItemVersion

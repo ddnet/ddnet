@@ -394,7 +394,8 @@ void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 
 void CGameContext::AbortVoteKickOnDisconnect(int ClientID)
 {
-	if(m_VoteCloseTime && !str_comp_num(m_aVoteCommand, "kick ", 5) && str_toint(&m_aVoteCommand[5]) == ClientID)
+	if(m_VoteCloseTime && ((!str_comp_num(m_aVoteCommand, "kick ", 5) && str_toint(&m_aVoteCommand[5]) == ClientID) ||
+		(!str_comp_num(m_aVoteCommand, "set_team ", 9) && str_toint(&m_aVoteCommand[9]) == ClientID)))
 		m_VoteCloseTime = -1;
 }
 
@@ -942,6 +943,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
+<<<<<<< HEAD
 			if(g_Config.m_SvPauseable && g_Config.m_SvVotePause)
 			{
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to pause '%s' for %d seconds (%s)", Server()->ClientName(ClientID), Server()->ClientName(SpectateID), g_Config.m_SvVotePauseTime, pReason);
@@ -954,6 +956,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aDesc, sizeof(aDesc), "move '%s' to spectators", Server()->ClientName(SpectateID));
 				str_format(aCmd, sizeof(aCmd), "set_team %d -1", SpectateID);
 			}
+=======
+			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to move '%s' to spectators (%s)", Server()->ClientName(ClientID), Server()->ClientName(SpectateID), pReason);
+			str_format(aDesc, sizeof(aDesc), "move '%s' to spectators", Server()->ClientName(SpectateID));
+			str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 		}
 
 		if(aCmd[0])
@@ -990,6 +997,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		if(pPlayer->GetTeam() == pMsg->m_Team || (g_Config.m_SvSpamprotection && pPlayer->m_LastSetTeam && pPlayer->m_LastSetTeam + Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick()))
 			return;
 
+		if(pPlayer->m_TeamChangeTick > Server()->Tick())
+		{
+			pPlayer->m_LastSetTeam = Server()->Tick();
+			int TimeLeft = (pPlayer->m_TeamChangeTick - Server()->Tick())/Server()->TickSpeed();
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Time to wait before changing team: %02d:%02d", TimeLeft/60, TimeLeft%60);
+			SendBroadcast(aBuf, ClientID);
+			return;
+		}
+
 		// Switch team on given client and kill/respawn him
 		if(m_pController->CanJoinTeam(pMsg->m_Team, ClientID))
 		{
@@ -1003,7 +1020,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if(pPlayer->GetTeam() == TEAM_SPECTATORS || pMsg->m_Team == TEAM_SPECTATORS)
 					m_VoteUpdate = true;
 				pPlayer->SetTeam(pMsg->m_Team);
+<<<<<<< HEAD
 				//(void)m_pController->CheckTeamBalance();
+=======
+				(void)m_pController->CheckTeamBalance();
+				pPlayer->m_TeamChangeTick = Server()->Tick();
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 			}
 			//else
 				//SendBroadcast("Teams must be balanced, please join other team", ClientID);
@@ -1328,19 +1350,37 @@ void CGameContext::ConSay(IConsole::IResult *pResult, void *pUserData, int Clien
 void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData, int ClientID)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+<<<<<<< HEAD
 	//int ClientID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
 	int Victim = pResult->GetVictim();
 	int Team = clamp(pResult->GetInteger(0), -1, 1);
+=======
+	int ClientID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
+	int Team = clamp(pResult->GetInteger(1), -1, 1);
+	int Delay = 0;
+	if(pResult->NumArguments() > 2)
+		Delay = pResult->GetInteger(2);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "moved client %d to team %d", ClientID, Team);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
 	if(!pSelf->m_apPlayers[Victim])
 		return;
 
+<<<<<<< HEAD
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "moved client %d to team %d", Victim, Team);
 	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	pSelf->m_apPlayers[Victim]->SetTeam(Team);
 	//(void)pSelf->m_pController->CheckTeamBalance();
+=======
+	pSelf->m_apPlayers[ClientID]->m_TeamChangeTick = pSelf->Server()->Tick()+pSelf->Server()->TickSpeed()*Delay*60;
+	pSelf->m_apPlayers[ClientID]->SetTeam(Team);
+	(void)pSelf->m_pController->CheckTeamBalance();
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 }
 
 void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData, int ClientID)
@@ -1555,8 +1595,15 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData, int
 			return;
 		}
 
+<<<<<<< HEAD
 		str_format(aBuf, sizeof(aBuf), "set_team %d -1", SpectateID);
 		pSelf->Console()->ExecuteLine(aBuf, ClientID, IConsole::CONSOLELEVEL_ADMIN, SendChatResponseAll, pSelf);
+=======
+		str_format(aBuf, sizeof(aBuf), "admin moved '%s' to spectator (%s)", pSelf->Server()->ClientName(SpectateID), pReason);
+		pSelf->SendChatTarget(-1, aBuf);
+		str_format(aBuf, sizeof(aBuf), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
+		pSelf->Console()->ExecuteLine(aBuf);
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	}
 }
 
@@ -1581,6 +1628,8 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData, int Clie
 	else if(str_comp_nocase(pResult->GetString(0), "no") == 0)
 		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "admin forced vote %s", pResult->GetString(0));
+	pSelf->SendChatTarget(-1, aBuf);
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pResult->GetString(0));
 	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
@@ -1604,6 +1653,7 @@ void CGameContext::OnConsoleInit()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
+<<<<<<< HEAD
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "", IConsole::CONSOLELEVEL_ADMIN);
@@ -1620,6 +1670,24 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "", IConsole::CONSOLELEVEL_ADMIN);
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "", IConsole::CONSOLELEVEL_ADMIN);
+=======
+	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
+	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
+	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "Dump tuning");
+
+	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
+	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
+	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
+	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "Say in chat");
+	Console()->Register("set_team", "ii?i", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
+	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
+
+	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
+	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
+	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "Force a voting option");
+	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
+	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 

@@ -54,7 +54,7 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CompletionChosen = -1;
 	m_CompletionRenderOffset = 0.0f;
 
-	m_pCommand = 0x0;
+	m_IsCommand = false;
 }
 
 void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
@@ -130,11 +130,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				m_pHistoryEntry = m_History.Last();
 
 			if (m_pHistoryEntry)
-			{
-				unsigned int Len = str_length(m_pHistoryEntry);
-				if (Len < sizeof(m_Input) - 1) // TODO: WTF?
-					m_Input.Set(m_pHistoryEntry);
-			}
+				m_Input.Set(m_pHistoryEntry);
 			Handled = true;
 		}
 		else if (Event.m_Key == KEY_DOWN)
@@ -143,11 +139,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
 
 			if (m_pHistoryEntry)
-			{
-				unsigned int Len = str_length(m_pHistoryEntry);
-				if (Len < sizeof(m_Input) - 1) // TODO: WTF?
-					m_Input.Set(m_pHistoryEntry);
-			}
+				m_Input.Set(m_pHistoryEntry);
 			else
 				m_Input.Clear();
 			Handled = true;
@@ -158,14 +150,16 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			{
 				m_CompletionChosen++;
 				m_CompletionEnumerationCount = 0;
-				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, PossibleCommandsCompleteCallback, this);
+				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL &&
+					m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
 
 				// handle wrapping
 				if(m_CompletionEnumerationCount && m_CompletionChosen >= m_CompletionEnumerationCount)
 				{
 					m_CompletionChosen %= m_CompletionEnumerationCount;
 					m_CompletionEnumerationCount = 0;
-					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, PossibleCommandsCompleteCallback, this);
+					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL &&
+						m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
 				}
 			}
 		}
@@ -201,7 +195,17 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				aBuf[i] = *pSrc;
 			aBuf[i] = 0;
 
-			m_pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask);
+			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
+				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
+			if(pCommand)
+			{
+				m_IsCommand = true;
+				str_copy(m_aCommandName, pCommand->m_pName, IConsole::TEMPCMD_NAME_LENGTH);
+				str_copy(m_aCommandHelp, pCommand->m_pHelp, IConsole::TEMPCMD_HELP_LENGTH);
+				str_copy(m_aCommandParams, pCommand->m_pParams, IConsole::TEMPCMD_PARAMS_LENGTH);
+			}
+			else
+				m_IsCommand = false;
 		}
 	}
 }
@@ -460,19 +464,19 @@ void CGameConsole::OnRender()
 		{
 			if(pConsole->m_Input.GetString()[0] != 0)
 			{
-				m_pConsole->PossibleCommands(pConsole->m_aCompletionBuffer, pConsole->m_CompletionFlagmask, PossibleCommandsRenderCallback, &Info);
+				m_pConsole->PossibleCommands(pConsole->m_aCompletionBuffer, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL &&
+					Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 				pConsole->m_CompletionRenderOffset = Info.m_Offset;
 
 				if(Info.m_EnumCount <= 0)
 				{
-					if(pConsole->m_pCommand)
+					if(pConsole->m_IsCommand)
 					{
-
 						char aBuf[512];
-						str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_pCommand->m_pHelp);
+						str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_aCommandHelp);
 						TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 						TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1);
-						str_format(aBuf, sizeof(aBuf), "Syntax: %s %s", pConsole->m_pCommand->m_pName, pConsole->m_pCommand->m_pParams);
+						str_format(aBuf, sizeof(aBuf), "Syntax: %s %s", pConsole->m_aCommandName, pConsole->m_aCommandParams);
 						TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 					}
 				}
@@ -661,6 +665,16 @@ void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData)
 	((CGameConsole *)pUserData)->m_LocalConsole.PrintLine(pStr);
 }
 
+void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() == 1)
+	{
+		CGameConsole *pThis = static_cast<CGameConsole *>(pUserData);
+		pThis->Console()->SetPrintOutputLevel(pThis->m_PrintCBIndex, pResult->GetInteger(0));
+	}
+}
+
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_LOCAL)
@@ -678,14 +692,25 @@ void CGameConsole::OnConsoleInit()
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
 	//
-	Console()->RegisterPrintCallback(ClientConsolePrintCallback, this);
+	m_PrintCBIndex = Console()->RegisterPrintCallback(g_Config.m_ConsoleOutputLevel, ClientConsolePrintCallback, this);
 
+<<<<<<< HEAD
 	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console", IConsole::CONSOLELEVEL_USER);
 	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console", IConsole::CONSOLELEVEL_USER);
 	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console", IConsole::CONSOLELEVEL_USER);
 	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console", IConsole::CONSOLELEVEL_USER);
 	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console", IConsole::CONSOLELEVEL_USER);
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console", IConsole::CONSOLELEVEL_USER);
+=======
+	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
+	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
+	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
+	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console");
+	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console");
+	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
+
+	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 }
 
 void CGameConsole::OnStateChange(int NewState, int OldState)

@@ -57,11 +57,15 @@ public:
 	virtual int IsAuthed(int ClientID) = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
 
+<<<<<<< HEAD
 	// DDRace
 
 	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) = 0;
 	virtual void SetRconLevel(int ClientID, int Level) = 0;
 	virtual void SetClientAuthed(int ClientID, int Authed) = 0;
+=======
+	virtual void DemoRecorder_HandleAutoStart() = 0;
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 };
 
 class IGameServer : public IInterface

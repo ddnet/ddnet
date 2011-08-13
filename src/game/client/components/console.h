@@ -33,7 +33,10 @@ class CGameConsole : public CComponent
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
 
-		IConsole::CCommandInfo *m_pCommand;
+		bool m_IsCommand;
+		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
+		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
+		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH];
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
@@ -57,6 +60,7 @@ class CGameConsole : public CComponent
 
 	CInstance *CurrentConsole();
 	float TimeNow();
+	int m_PrintCBIndex;
 
 	int m_ConsoleType;
 	int m_ConsoleState;
@@ -68,12 +72,22 @@ class CGameConsole : public CComponent
 
 	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
 	static void ClientConsolePrintCallback(const char *pStr, void *pUserData);
+<<<<<<< HEAD
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData, int ClientID);
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData, int ClientID);
+=======
+	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
+	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
 public:
 	enum

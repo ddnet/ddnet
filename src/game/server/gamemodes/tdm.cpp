@@ -49,7 +49,6 @@ void CGameControllerTDM::Snap(int SnappingClient)
 
 void CGameControllerTDM::Tick()
 {
-	DoTeamScoreWincheck();
 	IGameController::Tick();
 }
 */

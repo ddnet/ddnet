@@ -45,6 +45,15 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			continue;
 		}
 
+		int CountryCode = str_toint(pReplacement+3);
+		if(CountryCode < CODE_LB || CountryCode > CODE_UB)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "country code '%i' not within valid code range [%i..%i]", CountryCode, CODE_LB, CODE_UB);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
+			continue;
+		}
+
 		// load the graphic file
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
@@ -59,7 +68,8 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 		// add entry
 		CCountryFlag CountryFlag;
-		CountryFlag.m_CountryCode = str_toint(pReplacement+3);
+		CountryFlag.m_CountryCode = CountryCode;
+		str_copy(CountryFlag.m_aCountryCodeString, aOrigin, sizeof(CountryFlag.m_aCountryCodeString));
 		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 		mem_free(Info.m_pData);
 		str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
@@ -67,6 +77,10 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		m_aCountryFlags.add(CountryFlag);
 	}
 	io_close(File);
+
+	mem_zero(m_CodeIndexLUT, sizeof(m_CodeIndexLUT));
+	for(int i = 0; i < m_aCountryFlags.size(); ++i)
+		m_CodeIndexLUT[max(0, (m_aCountryFlags[i].m_CountryCode-CODE_LB)%CODE_RANGE)] = i+1;
 }
 
 void CCountryFlags::OnInit()
@@ -80,6 +94,7 @@ void CCountryFlags::OnInit()
 		CCountryFlag DummyEntry;
 		DummyEntry.m_CountryCode = -1;
 		DummyEntry.m_Texture = -1;
+		mem_zero(DummyEntry.m_aCountryCodeString, sizeof(DummyEntry.m_aCountryCodeString));
 		m_aCountryFlags.add(DummyEntry);
 	}
 }
@@ -89,17 +104,12 @@ int CCountryFlags::Num() const
 	return m_aCountryFlags.size();
 }
 
-const CCountryFlags::CCountryFlag *CCountryFlags::Get(int Index) const
+const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCode) const
 {
-	return &m_aCountryFlags[max(0, Index%m_aCountryFlags.size())];
+	return GetByIndex(m_CodeIndexLUT[max(0, (CountryCode-CODE_LB)%CODE_RANGE)]-1);
 }
 
-int CCountryFlags::Find(int CountryCode) const
+const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(int Index) const
 {
-	for(int i = 0; i < m_aCountryFlags.size(); ++i)
-	{
-		if(m_aCountryFlags[i].m_CountryCode == CountryCode)
-			return i;
-	}
-	return -1;
+	return &m_aCountryFlags[max(0, Index%m_aCountryFlags.size())];
 }

@@ -12,7 +12,6 @@ CGameControllerDM::CGameControllerDM(class CGameContext *pGameServer)
 
 void CGameControllerDM::Tick()
 {
-	DoPlayerScoreWincheck();
 	IGameController::Tick();
 }
 */

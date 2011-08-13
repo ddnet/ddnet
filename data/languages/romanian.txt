@@ -1,3 +1,4 @@
+
 ##### translated strings #####
 
 %d Bytes
@@ -141,11 +142,11 @@ Delete
 Delete demo
 == Șterge demonstrația
 
-Demofile: %s
-== Fișier demo: %s
-
 Demo details
 == Detalii demo
+
+Demofile: %s
+== Fișier demo: %s
 
 Demos
 == Demo
@@ -331,7 +332,7 @@ Movement
 == Mișcare
 
 Mute when not active
-== Mută la inactivate
+== Opreşte sunetul la inactivate
 
 Name
 == Nume
@@ -395,6 +396,9 @@ Play background music
 
 Player
 == Jucător
+
+Player country:
+== Țara jucătorului:
 
 Player options
 == Opțiuni jucător
@@ -513,7 +517,7 @@ Shotgun
 Show chat
 == Afișare chat
 
-Show friends
+Show friends only
 == Arată prietenii
 
 Show ingame HUD

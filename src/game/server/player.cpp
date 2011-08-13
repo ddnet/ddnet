@@ -27,6 +27,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
+<<<<<<< HEAD
 
 	// DDRace
 
@@ -45,6 +46,9 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	// Variable initialized:
 	m_Last_Team = 0;
+=======
+	m_TeamChangeTick = Server()->Tick();
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 }
 
 CPlayer::~CPlayer()
@@ -89,6 +93,9 @@ void CPlayer::Tick()
 			m_Latency.m_AccumMax = 0;
 		}
 	}
+
+	if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
+		m_ViewPos -= vec2(clamp(m_ViewPos.x-m_LatestActivity.m_TargetX, -500.0f, 500.0f), clamp(m_ViewPos.y-m_LatestActivity.m_TargetY, -400.0f, 400.0f));
 
 	if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
 		m_Spawning = true;
@@ -212,9 +219,19 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
-	// skip the input if chat is active
-	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
-		return;
+	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
+	{
+		// skip the input if chat is active
+		if(m_PlayerFlags&PLAYERFLAG_CHATTING)
+			return;
+
+		// reset input
+		if(m_pCharacter)
+			m_pCharacter->ResetInput();
+
+		m_PlayerFlags = NewInput->m_PlayerFlags;
+ 		return;
+	}
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
@@ -224,10 +241,13 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
 		m_Spawning = true;
 
+<<<<<<< HEAD
 	if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
+=======
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	// check for activity
 	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
 		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||

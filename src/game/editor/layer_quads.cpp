@@ -13,30 +13,12 @@
 CLayerQuads::CLayerQuads()
 {
 	m_Type = LAYERTYPE_QUADS;
-	m_pTypeName = "Quads";
+	str_copy(m_aName, "Quads", sizeof(m_aName));
 	m_Image = -1;
 }
 
 CLayerQuads::~CLayerQuads()
 {
-}
-
-static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser)
-{
-	CEditor *pEditor = (CEditor *)pUser;
-	if(Env < 0 || Env > pEditor->m_Map.m_lEnvelopes.size())
-	{
-		pChannels[0] = 0;
-		pChannels[1] = 0;
-		pChannels[2] = 0;
-		pChannels[3] = 0;
-		return;
-	}
-
-	CEnvelope *e = pEditor->m_Map.m_lEnvelopes[Env];
-	float t = pEditor->m_AnimateTime+TimeOffset;
-	t *= pEditor->m_AnimateSpeed;
-	e->Eval(t, pChannels);
 }
 
 void CLayerQuads::Render()
@@ -45,7 +27,7 @@ void CLayerQuads::Render()
 	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
 		Graphics()->TextureSet(m_pEditor->m_Map.m_lImages[m_Image]->m_TexID);
 
-	m_pEditor->RenderTools()->RenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_OPAQUE|LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, m_pEditor);
+	m_pEditor->RenderTools()->RenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_OPAQUE|LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
 }
 
 CQuad *CLayerQuads::NewQuad()

@@ -345,8 +345,12 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
+<<<<<<< HEAD
 	//if(m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision)
 	if(m_pWorld/* && m_pWorld->m_Tuning.m_PlayerCollision*/)
+=======
+	if(m_pWorld)
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -363,11 +367,18 @@ void CCharacterCore::Tick(bool UseInput)
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
+<<<<<<< HEAD
 			if (m_pWorld->m_Tuning.m_PlayerCollision)
 				if(Distance < PhysSize*1.25f && Distance > 0.0f)
 				{
 					float a = (PhysSize*1.45f - Distance);
 					float Velocity = 0.5f;
+=======
+			if(m_pWorld->m_Tuning.m_PlayerCollision && Distance < PhysSize*1.25f && Distance > 0.0f)
+			{
+				float a = (PhysSize*1.45f - Distance);
+				float Velocity = 0.5f;
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
 					// make sure that we don't add excess force by checking the
 					// direction against the current velocity. if not zero.
@@ -379,7 +390,7 @@ void CCharacterCore::Tick(bool UseInput)
 				}
 
 			// handle hook influence
-			if(m_HookedPlayer == i)
+			if(m_HookedPlayer == i && m_pWorld->m_Tuning.m_PlayerHooking)
 			{
 				if(Distance > PhysSize*1.50f) // TODO: fix tweakable variable
 				{
@@ -437,6 +448,10 @@ void CCharacterCore::Move()
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
 		int End = Distance+1;
+<<<<<<< HEAD
+=======
+		vec2 LastPos = m_Pos;
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 		for(int i = 0; i < End; i++)
 		{
 			float a = i/Distance;
@@ -447,15 +462,27 @@ void CCharacterCore::Move()
 				if(!pCharCore || pCharCore == this)
 					continue;
 				float D = distance(Pos, pCharCore->m_Pos);
+<<<<<<< HEAD
 				if(D < 28.0f*1.25f && D > 0.0f)
 				{
 					if(a > 0.0f)
 						m_Pos = Pos;
 					else
+=======
+				if(D < 28.0f && D > 0.0f)
+				{
+					if(a > 0.0f)
+						m_Pos = LastPos;
+					else if(distance(NewPos, pCharCore->m_Pos) > D)
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 						m_Pos = NewPos;
 					return;
 				}
 			}
+<<<<<<< HEAD
+=======
+			LastPos = Pos;
+>>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 		}
 	}
 
