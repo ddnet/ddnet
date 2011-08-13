@@ -19,10 +19,10 @@ class CSpectator : public CComponent
 	int m_SelectedSpectatorID;
 	vec2 m_SelectorMouse;
 
-	static void ConKeySpectator(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSpectate(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSpectateNext(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConKeySpectator(IConsole::IResult *pResult, void *pUserData);
+	static void ConSpectate(IConsole::IResult *pResult, void *pUserData);
+	static void ConSpectateNext(IConsole::IResult *pResult, void *pUserData);
+	static void ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CSpectator();

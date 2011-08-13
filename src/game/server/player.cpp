@@ -27,7 +27,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
-<<<<<<< HEAD
+	m_TeamChangeTick = Server()->Tick();
 
 	// DDRace
 
@@ -46,9 +46,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	// Variable initialized:
 	m_Last_Team = 0;
-=======
-	m_TeamChangeTick = Server()->Tick();
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 }
 
 CPlayer::~CPlayer()
@@ -221,15 +218,15 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
 	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
-		// skip the input if chat is active
+	// skip the input if chat is active
 		if(m_PlayerFlags&PLAYERFLAG_CHATTING)
-			return;
+		return;
 
 		// reset input
 		if(m_pCharacter)
 			m_pCharacter->ResetInput();
 
-		m_PlayerFlags = NewInput->m_PlayerFlags;
+	m_PlayerFlags = NewInput->m_PlayerFlags;
  		return;
 	}
 
@@ -241,13 +238,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
 		m_Spawning = true;
 
-<<<<<<< HEAD
-	if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
-		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
-=======
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	// check for activity
 	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
 		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||
@@ -308,8 +300,8 @@ void CPlayer::SetTeam(int Team)
 	m_LastActionTick = Server()->Tick();
 	// we got to wait 0.5 secs before respawning
 	m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
-	//str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
-	//GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	//GameServer()->m_pController->OnPlayerInfoChange(GameServer()->m_apPlayers[m_ClientID]);
 
@@ -335,15 +327,15 @@ void CPlayer::TryRespawn()
 	}
 	else
 	{
-		vec2 SpawnPos;
+	vec2 SpawnPos;
 
-		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
-			return;
+	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+		return;
 
-		m_Spawning = false;
-		m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
-		m_pCharacter->Spawn(this, SpawnPos);
-		GameServer()->CreatePlayerSpawn(SpawnPos);
+	m_Spawning = false;
+	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_pCharacter->Spawn(this, SpawnPos);
+	GameServer()->CreatePlayerSpawn(SpawnPos);
 	}
 }
 

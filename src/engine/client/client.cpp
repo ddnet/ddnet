@@ -755,7 +755,7 @@ const char *CClient::ErrorString()
 
 void CClient::Render()
 {
-
+	// if(g_Config.m_GfxClear)
 	if(g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats)
 		Graphics()->Clear(0.3f,0.3f,0.6f);
 	else if(g_Config.m_GfxClear)
@@ -1755,7 +1755,7 @@ void CClient::Run()
 	Input()->MouseModeRelative();
 
 	// process pending commands
-	m_pConsole->StoreCommands(false, -1);
+	m_pConsole->StoreCommands(false);
 
 	while (1)
 	{
@@ -1920,31 +1920,31 @@ void CClient::Run()
 }
 
 
-void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0), sizeof(pSelf->m_aCmdConnect));
 }
 
-void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Disconnect();
 }
 
-void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Quit();
 }
 
-void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Graphics()->Minimize();
 }
 
-void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 
@@ -1976,25 +1976,25 @@ void CClient::AutoScreenshot_Cleanup()
 	}
 }
 
-void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Graphics()->TakeScreenshot(0);
 }
 
-void CClient::Con_Rcon(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Rcon(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Rcon(pResult->GetString(0));
 }
 
-void CClient::Con_RconAuth(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_RconAuth(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->RconAuth("", pResult->GetString(0));
 }
 
-void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	NETADDR Addr;
@@ -2002,7 +2002,7 @@ void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData, int C
 		pSelf->m_ServerBrowser.AddFavorite(Addr);
 }
 
-void CClient::Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	NETADDR Addr;
@@ -2062,7 +2062,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	return 0;
 }
 
-void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
@@ -2107,7 +2107,7 @@ void CClient::DemoRecorder_Stop()
 	m_DemoRecorder.Stop();
 }
 
-void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	if(pResult->NumArguments())
@@ -2116,7 +2116,7 @@ void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData, int Client
 		pSelf->DemoRecorder_Start("demo", true);
 }
 
-void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->DemoRecorder_Stop();
@@ -2129,7 +2129,7 @@ void CClient::ServerBrowserUpdate()
 
 void CClient::ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	pfnCallback(pResult, pCallbackUserData, -1);
+	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
 		((CClient *)pUserData)->ServerBrowserUpdate();
 }
@@ -2138,30 +2138,30 @@ void CClient::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	// register server dummy commands for tab completion
-	m_pConsole->Register("kick", "i?r", CFGFLAG_SERVER, 0, 0, "Kick player with specified id for any reason", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("ban", "s?ir", CFGFLAG_SERVER, 0, 0, "Ban player with ip/id for x minutes for any reason", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("unban", "s", CFGFLAG_SERVER, 0, 0, "Unban ip", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("bans", "", CFGFLAG_SERVER, 0, 0, "Show banlist", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("status", "", CFGFLAG_SERVER, 0, 0, "List players", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("shutdown", "", CFGFLAG_SERVER, 0, 0, "Shut down", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("record", "?s", CFGFLAG_SERVER, 0, 0, "Record to a file", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("stoprecord", "", CFGFLAG_SERVER, 0, 0, "Stop recording", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("reload", "", CFGFLAG_SERVER, 0, 0, "Reload the map", IConsole::CONSOLELEVEL_USER);
+	m_pConsole->Register("kick", "i?r", CFGFLAG_SERVER, 0, 0, "Kick player with specified id for any reason");
+	m_pConsole->Register("ban", "s?ir", CFGFLAG_SERVER, 0, 0, "Ban player with ip/id for x minutes for any reason");
+	m_pConsole->Register("unban", "s", CFGFLAG_SERVER, 0, 0, "Unban ip");
+	m_pConsole->Register("bans", "", CFGFLAG_SERVER, 0, 0, "Show banlist");
+	m_pConsole->Register("status", "", CFGFLAG_SERVER, 0, 0, "List players");
+	m_pConsole->Register("shutdown", "", CFGFLAG_SERVER, 0, 0, "Shut down");
+	m_pConsole->Register("record", "?s", CFGFLAG_SERVER, 0, 0, "Record to a file");
+	m_pConsole->Register("stoprecord", "", CFGFLAG_SERVER, 0, 0, "Stop recording");
+	m_pConsole->Register("reload", "", CFGFLAG_SERVER, 0, 0, "Reload the map");
 
-	m_pConsole->Register("quit", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("exit", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Minimize, this, "Minimize Teeworlds", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("connect", "s", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("rcon", "r", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("rcon_auth", "s", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("play", "r", CFGFLAG_CLIENT, Con_Play, this, "Play the file specified", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("record", "?s", CFGFLAG_CLIENT, Con_Record, this, "Record to the file", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("add_favorite", "s", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("remove_favorite", "s", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites", IConsole::CONSOLELEVEL_USER);
+	m_pConsole->Register("quit", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
+	m_pConsole->Register("exit", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
+	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Minimize, this, "Minimize Teeworlds");
+	m_pConsole->Register("connect", "s", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
+	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
+	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
+	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");
+	m_pConsole->Register("rcon", "r", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon");
+	m_pConsole->Register("rcon_auth", "s", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon");
+	m_pConsole->Register("play", "r", CFGFLAG_CLIENT, Con_Play, this, "Play the file specified");
+	m_pConsole->Register("record", "?s", CFGFLAG_CLIENT, Con_Record, this, "Record to the file");
+	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording");
+	m_pConsole->Register("add_favorite", "s", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite");
+	m_pConsole->Register("remove_favorite", "s", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites");
 
 	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
@@ -2170,12 +2170,12 @@ void CClient::RegisterCommands()
 
 	// DDRace
 
-	m_pConsole->Register("login", "?s", CFGFLAG_SERVER, 0, 0, "Allows you access to rcon if no password is given, or changes your level if a password is given", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("auth", "?s", CFGFLAG_SERVER, 0, 0, "Allows you access to rcon if no password is given, or changes your level if a password is given", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("vote", "r", CFGFLAG_SERVER, 0, 0, "Forces the current vote to result in r (Yes/No)", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("cmdlist", "", CFGFLAG_SERVER, 0, 0, "Shows the list of all commands", IConsole::CONSOLELEVEL_USER);
+	m_pConsole->Register("login", "?s", CFGFLAG_SERVER, 0, 0, "Allows you access to rcon if no password is given, or changes your level if a password is given");
+	m_pConsole->Register("auth", "?s", CFGFLAG_SERVER, 0, 0, "Allows you access to rcon if no password is given, or changes your level if a password is given");
+	m_pConsole->Register("vote", "r", CFGFLAG_SERVER, 0, 0, "Forces the current vote to result in r (Yes/No)");
+	m_pConsole->Register("cmdlist", "", CFGFLAG_SERVER, 0, 0, "Shows the list of all commands");
 
-	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, level) m_pConsole->Register(name, params, flags, 0, 0, help, level);
+	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, 0, 0, help);
 	#include <game/ddracecommands.h>
 }
 
@@ -2279,10 +2279,10 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->InitInterfaces();
 
 	// execute config file
-	pConsole->ExecuteFile("settings.cfg", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteFile("settings.cfg");
 
 	// execute autoexec file
-	pConsole->ExecuteFile("autoexec.cfg", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	pConsole->ExecuteFile("autoexec.cfg");
 
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention

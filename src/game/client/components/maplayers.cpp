@@ -251,9 +251,11 @@ void CMapLayers::OnRender()
 				CTile *pFrontTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Front);
 				Graphics()->BlendNone();
 				vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
-				RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
+				RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE,
+						EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 				Graphics()->BlendNormal();
-				RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
+				RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
+						EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 			}
 			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsSwitchLayer)
 			{

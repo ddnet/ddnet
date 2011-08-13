@@ -11,7 +11,7 @@ class CScoreboard : public CComponent
 	void RenderScoreboard(float x, float y, float w, int Team, const char *pTitle);
 	void RenderRecordingNotification(float x);
 
-	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData);
 
 	const char *GetClanName(int Team);
 

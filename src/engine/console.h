@@ -41,11 +41,6 @@ public:
 		virtual const char *GetString(unsigned Index) = 0;
 
 		int NumArguments() const { return m_NumArgs; }
-
-		// DDRace
-
-		virtual void Print(int Level, const char *pFrom, const char *pStr) = 0;
-		virtual int GetVictim() = 0;
 	};
 
 	class CCommandInfo
@@ -59,20 +54,14 @@ public:
 		const char *m_pHelp;
 		const char *m_pParams;
 
-<<<<<<< HEAD
-		// DDRace
-
-		int m_Level;
-=======
 		virtual const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const = 0;
 
 		int GetAccessLevel() const { return m_AccessLevel; }
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	};
 
 	typedef void (*FPrintCallback)(const char *pStr, void *pUser);
 	typedef void (*FPossibleCallback)(const char *pCmd, void *pUser);
-	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData, int ClientID);
+	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
 	typedef void (*FChainCommandCallback)(IResult *pResult, void *pUserData, FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	virtual const CCommandInfo *FirstCommandInfo(int AccessLevel, int Flagmask) const = 0;
@@ -80,64 +69,23 @@ public:
 	virtual void PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
 
-<<<<<<< HEAD
-	virtual void Register(const char *pName, const char *pParams,
-		int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp, const int Level) = 0;
-=======
 	virtual void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) = 0;
 	virtual void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp) = 0;
 	virtual void DeregisterTemp(const char *pName) = 0;
 	virtual void DeregisterTempAll() = 0;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	virtual void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser) = 0;
-	virtual void StoreCommands(bool Store, int ClientID) = 0;
+	virtual void StoreCommands(bool Store) = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
-	//virtual void ExecuteLine(const char *Sptr) = 0;
-	//virtual void ExecuteLineStroked(int Stroke, const char *pStr) = 0;
-	//virtual void ExecuteFile(const char *pFilename) = 0;
+	virtual void ExecuteLine(const char *Sptr) = 0;
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr) = 0;
+	virtual void ExecuteFile(const char *pFilename) = 0;
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;
 	virtual void Print(int Level, const char *pFrom, const char *pStr) = 0;
 
-<<<<<<< HEAD
-
-	//DDRace
-
-	typedef bool (*FCompareClientsCallback)(int ClientLevel, int Victim, void *pUserData);
-	typedef bool (*FClientOnlineCallback)(int ClientID, void *pUserData);
-	virtual void List(IResult *pResult, const int Level, int Flags) = 0;
-
-	virtual void ExecuteLine(const char *pStr, int ClientID, int Level, FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) = 0;
-	virtual void ExecuteLine(const char *pStr, int ClientID, int Level, IResult *pResult) = 0;
-	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, int Level, FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) = 0;
-	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, int Level, IResult *pResult) = 0;
-	virtual void ExecuteFile(const char *pFilename, int ClientID, int Level, FPrintCallback pfnPrintCallback, void *pPrintCallbackUserData) = 0;
-	virtual void ExecuteFile(const char *pFilename, int ClientID, int Level, IResult *pResult) = 0;
-	/*virtual void ExecuteLine(const char *Sptr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0,  FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0) = 0;
-	virtual void ExecuteLineStroked(int Stroke, const char *pStr, const int ClientLevel, const int ClientID, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0) = 0;
-	virtual void ExecuteFile(const char *pFilename, FPrintCallback pfnAlternativePrintCallback = 0, void *pUserData = 0, FPrintCallback pfnAlternativePrintResponseCallback = 0, void *pResponseUserData = 0, int Level = 3) = 0;
-	virtual void RegisterAlternativePrintCallback(FPrintCallback pfnAlternativePrintCallback, void *pAlternativeUserData) = 0;
-	virtual void ReleaseAlternativePrintCallback() = 0;
-	virtual void RegisterPrintResponseCallback(FPrintCallback pfnPrintResponseCallback, void *pUserData) = 0;
-	virtual void RegisterAlternativePrintResponseCallback(FPrintCallback pfnAlternativePrintCallback, void *pAlternativeUserData) = 0;
-	virtual void ReleaseAlternativePrintResponseCallback() = 0;
-	virtual void PrintResponse(int Level, const char *pFrom, const char *pStr) = 0; */
-
-	virtual void RegisterCompareClientsCallback(FCompareClientsCallback pfnCallback, void *pUserData) = 0;
-	virtual void RegisterClientOnlineCallback(FClientOnlineCallback pfnCallback, void *pUserData) = 0;
-
-	enum
-	{
-		CONSOLELEVEL_USER=0,
-		CONSOLELEVEL_MODERATOR,
-		CONSOLELEVEL_ADMIN,
-		CONSOLELEVEL_CONFIG
-	};
-=======
 	virtual void SetAccessLevel(int AccessLevel) = 0;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 };
 
 extern IConsole *CreateConsole(int FlagMask);

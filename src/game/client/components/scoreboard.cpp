@@ -17,7 +17,6 @@
 
 #include "scoreboard.h"
 
-#include <base/tl/string.h>
 #include <engine/serverbrowser.h>
 // TODO:DDRace:GreYFoX:Redo DDRace Scoreboard
 
@@ -26,7 +25,7 @@ CScoreboard::CScoreboard()
 	OnReset();
 }
 
-void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 {
 	CScoreboard *pSelf = (CScoreboard *)pUserData;
 	CServerInfo Info;
@@ -48,7 +47,7 @@ void CScoreboard::OnRelease()
 
 void CScoreboard::OnConsoleInit()
 {
-	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard");
 }
 
 void CScoreboard::RenderGoals(float x, float y, float w)

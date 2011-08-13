@@ -46,20 +46,20 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
-	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConRestart(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSay(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConAddVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConForceVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConVote(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData);
+	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
+	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
+	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
+	static void ConSay(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddVote(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
+	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
+	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
+	static void ConVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	CGameContext(int Resetting);
@@ -176,69 +176,67 @@ private:
 
 	bool m_VoteWillPass;
 	class IScore *m_pScore;
+	int m_ClientID;
 
 	//DDRace Console Commands
 
-	//static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	//static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConLogOut(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSetlvl1(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSetlvl2(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	//static void ConMute(IConsole::IResult *pResult, void *pUserData);
+	//static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConNinja(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSuper(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConShotgun(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConGrenade(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConRifle(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConWeapons(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConUnRifle(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
+	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
+	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
+	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
+	static void ConRifle(IConsole::IResult *pResult, void *pUserData);
+	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnRifle(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
 
-	void ModifyWeapons(IConsole::IResult *pResult, int ClientID, int Victim, int Weapon, bool Remove);
-	void MoveCharacter(int ClientID, int Victim, int X, int Y, bool Raw = false);
-	static void ConGoLeft(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConGoRight(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConGoUp(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConGoDown(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConMove(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
+	void MoveCharacter(int ClientID, int X, int Y, bool Raw = false);
+	static void ConGoLeft(IConsole::IResult *pResult, void *pUserData);
+	static void ConGoRight(IConsole::IResult *pResult, void *pUserData);
+	static void ConGoUp(IConsole::IResult *pResult, void *pUserData);
+	static void ConGoDown(IConsole::IResult *pResult, void *pUserData);
+	static void ConMove(IConsole::IResult *pResult, void *pUserData);
+	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConTeleport(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConCredits(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConInfo(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConHelp(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSettings(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConRules(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConKill(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConForcePause(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConTop5(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConCredits(IConsole::IResult *pResult, void *pUserData);
+	static void ConInfo(IConsole::IResult *pResult, void *pUserData);
+	static void ConHelp(IConsole::IResult *pResult, void *pUserData);
+	static void ConSettings(IConsole::IResult *pResult, void *pUserData);
+	static void ConRules(IConsole::IResult *pResult, void *pUserData);
+	static void ConKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData);
+	static void ConForcePause(IConsole::IResult *pResult, void *pUserData);
+	static void ConTop5(IConsole::IResult *pResult, void *pUserData);
 	#if defined(CONF_SQL)
-	static void ConTimes(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTimes(IConsole::IResult *pResult, void *pUserData);
 	#endif
 
-	static void ConUTF8(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConRank(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConMe(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);
+	static void ConRank(IConsole::IResult *pResult, void *pUserData);
+	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConMe(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData);
+	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData);
+	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConMute(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConMuteID(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConUnmute(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConMutes(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConMute(IConsole::IResult *pResult, void *pUserData);
+	static void ConMuteID(IConsole::IResult *pResult, void *pUserData);
+	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
 
 	enum
 	{

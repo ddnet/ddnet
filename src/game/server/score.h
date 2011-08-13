@@ -46,7 +46,7 @@ public:
 	virtual void LoadScore(int ClientID) = 0;
 	virtual void SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS]) = 0;
 	
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut=1) = 0;
+	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowRank(int ClientID, const char* pName, bool Search=false) = 0;
 };
 

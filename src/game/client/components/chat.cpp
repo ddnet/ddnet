@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/string.h>
-
 #include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
@@ -19,6 +17,7 @@
 #include <game/localization.h>
 
 #include "chat.h"
+
 
 CChat::CChat()
 {
@@ -60,17 +59,17 @@ void CChat::OnStateChange(int NewState, int OldState)
 	}
 }
 
-void CChat::ConSay(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChat*)pUserData)->Say(0, pResult->GetString(0));
 }
 
-void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChat*)pUserData)->Say(1, pResult->GetString(0));
 }
 
-void CChat::ConChat(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 {
 	const char *pMode = pResult->GetString(0);
 	if(str_comp(pMode, "all") == 0)
@@ -81,17 +80,17 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData, int ClientID)
 		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
 }
 
-void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChat *)pUserData)->m_Show = pResult->GetInteger(0) != 0;
 }
 
 void CChat::OnConsoleInit()
 {
-	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("chat", "s", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
+	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
+	Console()->Register("chat", "s", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
+	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)

@@ -28,9 +28,9 @@ public:
 
 	virtual void OnConsoleInit();
 private:
-	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConZoomReset(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
+	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
+	static void ConZoomReset(IConsole::IResult *pResult, void *pUserData);
 };
 
 #endif

@@ -27,25 +27,18 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
 	vec2 At;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-<<<<<<< HEAD
 	CCharacter *pHit;
 
 	if(pOwnerChar ? (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_RIFLE) && m_Type == WEAPON_RIFLE) || (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
 		pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, g_Config.m_SvOldLaser || m_Bounces == 0 ? pOwnerChar : 0, m_Owner);
 	else
 		pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, g_Config.m_SvOldLaser || m_Bounces == 0 ? pOwnerChar : 0, m_Owner, pOwnerChar);
-=======
-	CCharacter *pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pOwnerChar);
-	if(!pHit)
-		return false;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
 	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_RIFLE  && m_Type == WEAPON_RIFLE) || (pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
 		return false;
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;
-<<<<<<< HEAD
 	if (m_Type == WEAPON_SHOTGUN)
 	{
 		vec2 Temp;
@@ -67,9 +60,6 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		pHit->UnFreeze();
 	}
-=======
-	pHit->TakeDamage(vec2(0.f, 0.f), GameServer()->Tuning()->m_LaserDamage, m_Owner, WEAPON_RIFLE);
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	return true;
 }
 

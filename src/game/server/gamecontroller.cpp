@@ -72,11 +72,6 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 	// get spawn point
 	for(int i = 0; i < m_aNumSpawnPoints[Type]; i++)
 	{
-<<<<<<< HEAD
-		/*// check if the position is occupado
-		if(GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, 0, 1, CGameWorld::ENTTYPE_CHARACTER))
-			continue;*/
-=======
 		// check if the position is occupado
 		CCharacter *aEnts[MAX_CLIENTS];
 		int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity**)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
@@ -95,7 +90,6 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 		}
 		if(Result == -1)
 			continue;	// try next spawn point
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
 		vec2 P = m_aaSpawnPoints[Type][i]+Positions[Result];
 		float S = EvaluateSpawnPos(pEval, P);
@@ -136,31 +130,6 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 		EvaluateSpawnType(&Eval, 2);
 	//}
 
-<<<<<<< HEAD
-	// handle crappy maps
-	if(!Eval.m_Got)
-	{
-		/*if(IsTeamplay())
-		{
-			// first try own team spawn, then normal spawn and then enemy
-			FindFreeSpawn(&Eval, 1+(Team&1));
-			if(!Eval.m_Got)
-			{
-				FindFreeSpawn(&Eval, 0);
-				if(!Eval.m_Got)
-					FindFreeSpawn(&Eval, 1+((Team+1)&1));
-			}
-		}
-		else
-		{*/
-			FindFreeSpawn(&Eval, 0);
-			FindFreeSpawn(&Eval, 1);
-			FindFreeSpawn(&Eval, 2);
-		//}
-	}
-
-=======
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
 }
@@ -747,7 +716,7 @@ void IGameController::Tick()
 		}
 	}
 
-	DoWincheck();
+	//DoWincheck();
 }
 
 
@@ -910,36 +879,37 @@ void IGameController::DoWincheck()
 		}
 		else
 		{
-			// gather some stats
-			int Topscore = 0;
-			int TopscoreCount = 0;
-			for(int i = 0; i < MAX_CLIENTS; i++)
+		// gather some stats
+		int Topscore = 0;
+		int TopscoreCount = 0;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(GameServer()->m_apPlayers[i])
 			{
-				if(GameServer()->m_apPlayers[i])
+				if(GameServer()->m_apPlayers[i]->m_Score > Topscore)
 				{
-					if(GameServer()->m_apPlayers[i]->m_Score > Topscore)
-					{
-						Topscore = GameServer()->m_apPlayers[i]->m_Score;
-						TopscoreCount = 1;
-					}
-					else if(GameServer()->m_apPlayers[i]->m_Score == Topscore)
-						TopscoreCount++;
+					Topscore = GameServer()->m_apPlayers[i]->m_Score;
+					TopscoreCount = 1;
 				}
-			}
-
-			// check score win condition
-			if((g_Config.m_SvScorelimit > 0 && Topscore >= g_Config.m_SvScorelimit) ||
-				(g_Config.m_SvTimelimit > 0 && (Server()->Tick()-m_RoundStartTick) >= g_Config.m_SvTimelimit*Server()->TickSpeed()*60))
-			{
-				if(TopscoreCount == 1)
-					EndRound();
-				else
-					m_SuddenDeath = 1;
+				else if(GameServer()->m_apPlayers[i]->m_Score == Topscore)
+					TopscoreCount++;
 			}
 		}
-	}
-}*/
 
+		// check score win condition
+		if((g_Config.m_SvScorelimit > 0 && Topscore >= g_Config.m_SvScorelimit) ||
+			(g_Config.m_SvTimelimit > 0 && (Server()->Tick()-m_RoundStartTick) >= g_Config.m_SvTimelimit*Server()->TickSpeed()*60))
+		{
+			if(TopscoreCount == 1)
+				EndRound();
+			else
+				m_SuddenDeath = 1;
+		}
+		}
+	}
+}
+
+*/
 int IGameController::ClampTeam(int Team)
 {
 	if(Team < 0)

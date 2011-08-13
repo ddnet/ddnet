@@ -10,8 +10,8 @@ class CFriends : public IFriends
 	CFriendInfo m_aFriends[MAX_FRIENDS];
 	int m_NumFriends;
 
-	static void ConAddFriend(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConRemoveFriend(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConAddFriend(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveFriend(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
 

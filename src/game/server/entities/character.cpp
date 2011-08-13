@@ -542,15 +542,10 @@ void CCharacter::GiveNinja()
 {
 	m_Ninja.m_ActivationTick = Server()->Tick();
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
-<<<<<<< HEAD
 	if (!m_FreezeTime)
 		m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
-	m_LastWeapon = m_ActiveWeapon;
-=======
-	m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if (m_ActiveWeapon != WEAPON_NINJA)
-		m_LastWeapon = m_ActiveWeapon;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
+	m_LastWeapon = m_ActiveWeapon;
 	m_ActiveWeapon = WEAPON_NINJA;
 
 	if(!m_aWeapons[WEAPON_NINJA].m_Got)

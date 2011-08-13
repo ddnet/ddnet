@@ -178,9 +178,9 @@ int main(int argc, const char **argv) // ignore_convention
 
 	m_pConsole = CreateConsole(CFGFLAG_BANMASTER);
 	m_pConsole->RegisterPrintCallback(StandardOutput, 0);
-	m_pConsole->Register("ban", "s?r", CFGFLAG_BANMASTER, ConBan, 0, "Bans the specified ip", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("unban_all", "", CFGFLAG_BANMASTER, ConUnbanAll, 0, "Unbans all ips", IConsole::CONSOLELEVEL_USER);
-	m_pConsole->Register("bind", "s", CFGFLAG_BANMASTER, ConSetBindAddr, 0, "Binds to the specified address", IConsole::CONSOLELEVEL_USER);
+	m_pConsole->Register("ban", "s?r", CFGFLAG_BANMASTER, ConBan, 0, "Bans the specified ip");
+	m_pConsole->Register("unban_all", "", CFGFLAG_BANMASTER, ConUnbanAll, 0, "Unbans all ips");
+	m_pConsole->Register("bind", "s", CFGFLAG_BANMASTER, ConSetBindAddr, 0, "Binds to the specified address");
 
 	{
 		bool RegisterFail = false;
@@ -192,7 +192,7 @@ int main(int argc, const char **argv) // ignore_convention
 			return -1;
 	}
 
-	m_pConsole->ExecuteFile(BANMASTER_BANFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	m_pConsole->ExecuteFile(BANMASTER_BANFILE);
 	
 	NETADDR BindAddr;
 	if(m_aBindAddr[0] && net_host_lookup(m_aBindAddr, &BindAddr, NETTYPE_IPV4) == 0)
@@ -249,7 +249,7 @@ int main(int argc, const char **argv) // ignore_convention
 		{
 			ClearBans();
 			LastUpdate = time_get();
-			m_pConsole->ExecuteFile(BANMASTER_BANFILE, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+			m_pConsole->ExecuteFile(BANMASTER_BANFILE);
 		}
 		
 		// be nice to the CPU

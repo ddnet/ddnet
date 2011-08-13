@@ -1,8 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
-#include <base/tl/array.h>
-
 #include <math.h>
 
 #include <base/system.h>
@@ -596,7 +593,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_GhostButton=0;
-		if(DoButton_MenuTab(&s_GhostButton, "DDRace", m_ActivePage==PAGE_DDRace, &Button, 0))
+		if(DoButton_MenuTab(&s_GhostButton, "DDRace", m_ActivePage==PAGE_DDRace, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_DDRace;
 
 		Box.VSplitLeft(100.0f, &Button, &Box);

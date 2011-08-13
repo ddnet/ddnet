@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/string.h>
-
 #include <base/math.h>
 
 #include <engine/engine.h>
@@ -1062,20 +1060,14 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowOthers ^= 1;
 		if(g_Config.m_ClShowOthers)
-			Console()->ExecuteLine("rcon showothers 1", -1, IConsole::CONSOLELEVEL_USER, 0, 0);
+			Console()->ExecuteLine("rcon showothers 1");
 		else
-			Console()->ExecuteLine("rcon showothers 0", -1, IConsole::CONSOLELEVEL_USER, 0, 0);
+			Console()->ExecuteLine("rcon showothers 0");
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
 	{
 		g_Config.m_ClDDRaceBinds ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClPredictOldHookthrough, Localize("Predict old hook through tiles"), g_Config.m_ClPredictOldHookthrough, &Button))
-	{
-		g_Config.m_ClPredictOldHookthrough ^= 1;
 	}
 }

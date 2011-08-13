@@ -54,18 +54,14 @@ public:
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
-	virtual int IsAuthed(int ClientID) = 0;
+	virtual bool IsAuthed(int ClientID) = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
 
-<<<<<<< HEAD
+	virtual void DemoRecorder_HandleAutoStart() = 0;
+
 	// DDRace
 
 	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) = 0;
-	virtual void SetRconLevel(int ClientID, int Level) = 0;
-	virtual void SetClientAuthed(int ClientID, int Authed) = 0;
-=======
-	virtual void DemoRecorder_HandleAutoStart() = 0;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 };
 
 class IGameServer : public IInterface
@@ -96,13 +92,6 @@ public:
 	virtual const char *GameType() = 0;
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
-
-	// DDRace
-
-	virtual void OnSetAuthed(int ClientID,int Level) = 0;
-
-	virtual bool PlayerCollision() = 0;
-	virtual bool PlayerHooking() = 0;
 };
 
 extern IGameServer *CreateGameServer();

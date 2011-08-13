@@ -78,7 +78,7 @@ private:
 	
 	void Save();
 
-	static void ConGPlay(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CGhost();

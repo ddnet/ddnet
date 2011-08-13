@@ -1,11 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-<<<<<<< HEAD
 /*
-=======
 #include <engine/shared/config.h>
 
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 #include <game/mapitems.h>
 
 #include <game/server/entities/character.h>

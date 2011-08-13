@@ -14,7 +14,7 @@
 #include "spectator.h"
 
 
-void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active &&
@@ -22,12 +22,12 @@ void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData, in
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 
-void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 {
 	((CSpectator *)pUserData)->Spectate(pResult->GetInteger(0));
 }
 
-void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
 	int NewSpectatorID;
@@ -74,7 +74,7 @@ void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData, in
 		pSelf->Spectate(NewSpectatorID);
 }
 
-void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
 	int NewSpectatorID;
@@ -128,10 +128,10 @@ CSpectator::CSpectator()
 
 void CSpectator::OnConsoleInit()
 {
-	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("spectate", "i", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector");
+	Console()->Register("spectate", "i", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
+	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
+	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player");
 }
 
 bool CSpectator::OnMouseMove(float x, float y)

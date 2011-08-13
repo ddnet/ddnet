@@ -50,10 +50,10 @@ class CChat : public CComponent
 	char *m_pHistoryEntry;
 	TStaticRingBuffer<char, 64*1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 
-	static void ConSay(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConChat(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConShowChat(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConSay(IConsole::IResult *pResult, void *pUserData);
+	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConChat(IConsole::IResult *pResult, void *pUserData);
+	static void ConShowChat(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CChat();

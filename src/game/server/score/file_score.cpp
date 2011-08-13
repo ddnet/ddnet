@@ -201,10 +201,11 @@ void CFileScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINT
 		UpdatePlayer(ClientID, Time, CpTime);
 }
 
-void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut)
+void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
 {
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aBuf[512];
-	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "----------- Top 5 -----------");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "----------- Top 5 -----------");
 	for(int i = 0; i < 5; i++)
 	{
 		if(i+Debut > m_Top.size())
@@ -212,9 +213,9 @@ void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID, int Debut)
 		CPlayerScore *r = &m_Top[i+Debut-1];
 		str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s)",
 			i+Debut, r->m_aName, (int) r->m_Score/60, r->m_Score-((int)r->m_Score/60*60));
-		pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", aBuf);
 	}
-	pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "------------------------------");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "------------------------------");
 }
 
 void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)

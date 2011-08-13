@@ -335,7 +335,7 @@ bool CheckBan(NETADDR Addr)
 	return false;
 }
 
-void ConAddBan(IConsole::IResult *pResult, void *pUser, int ClientID)
+void ConAddBan(IConsole::IResult *pResult, void *pUser)
 {
 	if(m_NumBans == MAX_BANS)
 	{
@@ -362,7 +362,7 @@ void ConAddBan(IConsole::IResult *pResult, void *pUser, int ClientID)
 void ReloadBans()
 {
 	m_NumBans = 0;
-	m_pConsole->ExecuteFile("master.cfg", -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+	m_pConsole->ExecuteFile("master.cfg");
 }
 
 int main(int argc, const char **argv) // ignore_convention
@@ -398,7 +398,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IStorage *pStorage = CreateStorage("Teeworlds", argc, argv);
 
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
-	m_pConsole->Register("ban", "s", CFGFLAG_MASTER, ConAddBan, 0, "Ban IP from mastersrv", IConsole::CONSOLELEVEL_USER);
+	m_pConsole->Register("ban", "s", CFGFLAG_MASTER, ConAddBan, 0, "Ban IP from mastersrv");
 
 	bool RegisterFail = !pKernel->RegisterInterface(pStorage);
 	RegisterFail |= !pKernel->RegisterInterface(m_pConsole);

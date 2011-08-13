@@ -345,12 +345,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
-<<<<<<< HEAD
-	//if(m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision)
-	if(m_pWorld/* && m_pWorld->m_Tuning.m_PlayerCollision*/)
-=======
 	if(m_pWorld)
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -367,27 +362,19 @@ void CCharacterCore::Tick(bool UseInput)
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
-<<<<<<< HEAD
-			if (m_pWorld->m_Tuning.m_PlayerCollision)
-				if(Distance < PhysSize*1.25f && Distance > 0.0f)
-				{
-					float a = (PhysSize*1.45f - Distance);
-					float Velocity = 0.5f;
-=======
 			if(m_pWorld->m_Tuning.m_PlayerCollision && Distance < PhysSize*1.25f && Distance > 0.0f)
 			{
 				float a = (PhysSize*1.45f - Distance);
 				float Velocity = 0.5f;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
-					// make sure that we don't add excess force by checking the
-					// direction against the current velocity. if not zero.
-					if (length(m_Vel) > 0.0001)
-						Velocity = 1-(dot(normalize(m_Vel), Dir)+1)/2;
+				// make sure that we don't add excess force by checking the
+				// direction against the current velocity. if not zero.
+				if (length(m_Vel) > 0.0001)
+					Velocity = 1-(dot(normalize(m_Vel), Dir)+1)/2;
 
-					m_Vel += Dir*a*(Velocity*0.75f);
-					m_Vel *= 0.85f;
-				}
+				m_Vel += Dir*a*(Velocity*0.75f);
+				m_Vel *= 0.85f;
+			}
 
 			// handle hook influence
 			if(m_HookedPlayer == i && m_pWorld->m_Tuning.m_PlayerHooking)
@@ -396,6 +383,7 @@ void CCharacterCore::Tick(bool UseInput)
 				{
 					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (Distance/m_pWorld->m_Tuning.m_HookLength);
 					float DragSpeed = m_pWorld->m_Tuning.m_HookDragSpeed;
+					// add force to the hooked player
 					vec2 Temp = pCharCore->m_Vel;
 					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel*Dir.x*1.5f);
 					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel*Dir.y*1.5f);
@@ -408,7 +396,7 @@ void CCharacterCore::Tick(bool UseInput)
 					if(Temp.y > 0 && ((pCharCore->m_TileIndex == TILE_STOP && pCharCore->m_TileFlags == ROTATION_0) || (pCharCore->m_TileIndexT == TILE_STOP && pCharCore->m_TileFlagsT == ROTATION_0) || (pCharCore->m_TileIndexT == TILE_STOPS && (pCharCore->m_TileFlagsT == ROTATION_0 || pCharCore->m_TileFlagsT == ROTATION_180)) || (pCharCore->m_TileIndexT == TILE_STOPA) || (pCharCore->m_TileFIndex == TILE_STOP && pCharCore->m_TileFFlags == ROTATION_0) || (pCharCore->m_TileFIndexT == TILE_STOP && pCharCore->m_TileFFlagsT == ROTATION_0) || (pCharCore->m_TileFIndexT == TILE_STOPS && (pCharCore->m_TileFFlagsT == ROTATION_0 || pCharCore->m_TileFFlagsT == ROTATION_180)) || (pCharCore->m_TileFIndexT == TILE_STOPA) || (pCharCore->m_TileSIndex == TILE_STOP && pCharCore->m_TileSFlags == ROTATION_0) || (pCharCore->m_TileSIndexT == TILE_STOP && pCharCore->m_TileSFlagsT == ROTATION_0) || (pCharCore->m_TileSIndexT == TILE_STOPS && (pCharCore->m_TileSFlagsT == ROTATION_0 || pCharCore->m_TileSFlagsT == ROTATION_180)) || (pCharCore->m_TileSIndexT == TILE_STOPA)))
 						Temp.y = 0;
 
-					// add force to the hooked player
+					// add a little bit force to the guy who has the grip
 					pCharCore->m_Vel = Temp;
 					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel*Dir.x*0.25f);
 					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel*Dir.y*0.25f);
@@ -420,7 +408,6 @@ void CCharacterCore::Tick(bool UseInput)
 						Temp.y = 0;
 					if(Temp.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
 						Temp.y = 0;
-					// add a little bit force to the guy who has the grip
 					m_Vel = Temp;
 				}
 			}
@@ -448,10 +435,7 @@ void CCharacterCore::Move()
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
 		int End = Distance+1;
-<<<<<<< HEAD
-=======
 		vec2 LastPos = m_Pos;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 		for(int i = 0; i < End; i++)
 		{
 			float a = i/Distance;
@@ -462,27 +446,16 @@ void CCharacterCore::Move()
 				if(!pCharCore || pCharCore == this)
 					continue;
 				float D = distance(Pos, pCharCore->m_Pos);
-<<<<<<< HEAD
-				if(D < 28.0f*1.25f && D > 0.0f)
-				{
-					if(a > 0.0f)
-						m_Pos = Pos;
-					else
-=======
 				if(D < 28.0f && D > 0.0f)
 				{
 					if(a > 0.0f)
 						m_Pos = LastPos;
 					else if(distance(NewPos, pCharCore->m_Pos) > D)
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 						m_Pos = NewPos;
 					return;
 				}
 			}
-<<<<<<< HEAD
-=======
 			LastPos = Pos;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 		}
 	}
 

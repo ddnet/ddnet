@@ -267,19 +267,19 @@ public:
 	void Run();
 
 
-	static void Con_Connect(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Disconnect(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Quit(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Ping(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_AddFavorite(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Play(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_Record(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Disconnect(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Quit(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
+	static void Con_AddFavorite(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Play(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Record(IConsole::IResult *pResult, void *pUserData);
+	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	void RegisterCommands();

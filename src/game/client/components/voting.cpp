@@ -7,13 +7,13 @@
 #include <game/client/render.h>
 #include "voting.h"
 
-void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
 	CVoting *pSelf = (CVoting*)pUserData;
 	pSelf->Callvote(pResult->GetString(0), pResult->GetString(1), pResult->NumArguments() > 2 ? pResult->GetString(2) : "");
 }
 
-void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData)
 {
 	CVoting *pSelf = (CVoting *)pUserData;
 	if(str_comp_nocase(pResult->GetString(0), "yes") == 0)
@@ -173,8 +173,8 @@ void CVoting::OnReset()
 
 void CVoting::OnConsoleInit()
 {
-	Console()->Register("callvote", "ss?r", CFGFLAG_CLIENT, ConCallvote, this, "Call vote", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("vote", "r", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("callvote", "ss?r", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
+	Console()->Register("vote", "r", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no");
 }
 
 void CVoting::OnMessage(int MsgType, void *pRawMsg)

@@ -595,17 +595,9 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterGametype[0] = 0;
 		g_Config.m_BrFilterGametypeStrict = 0;
 		g_Config.m_BrFilterServerAddress[0] = 0;
-<<<<<<< HEAD
-		g_Config.m_BrFilterCompatversion = 0;
-		g_Config.m_BrFilterString[0] = 0;
 		g_Config.m_BrFilterPure = 0;
 		g_Config.m_BrFilterPureMap = 0;
-		g_Config.m_BrFilterGametypeStrict = 0;
-=======
-		g_Config.m_BrFilterPure = 1;
-		g_Config.m_BrFilterPureMap = 1;
-		g_Config.m_BrFilterCompatversion = 1;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
+		g_Config.m_BrFilterCompatversion = 0;
 		Client()->ServerBrowserUpdate();
 	}
 }
@@ -1069,7 +1061,7 @@ void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserDat
 
 void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	pfnCallback(pResult, pCallbackUserData, -1);
+	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() && g_Config.m_UiPage == PAGE_FAVORITES && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 }

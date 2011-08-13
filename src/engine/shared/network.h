@@ -336,7 +336,6 @@ public:
 private:
 	NETADDR m_aBanmasters[MAX_BANMASTERS];
 	int m_NumBanmasters;
-	
 };
 
 class CNetConsole

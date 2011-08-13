@@ -17,7 +17,7 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) : 
 
 CGameControllerDDRace::~CGameControllerDDRace()
 {
-	//Nothing to clean
+	// Nothing to clean
 }
 
 void CGameControllerDDRace::Tick()

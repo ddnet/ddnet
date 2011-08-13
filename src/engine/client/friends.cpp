@@ -15,13 +15,13 @@ CFriends::CFriends()
 	m_NumFriends = 0;
 }
 
-void CFriends::ConAddFriend(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CFriends::ConAddFriend(IConsole::IResult *pResult, void *pUserData)
 {
 	CFriends *pSelf = (CFriends *)pUserData;
 	pSelf->AddFriend(pResult->GetString(0), pResult->GetString(1));
 }
 
-void CFriends::ConRemoveFriend(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CFriends::ConRemoveFriend(IConsole::IResult *pResult, void *pUserData)
 {
 	CFriends *pSelf = (CFriends *)pUserData;
 	pSelf->RemoveFriend(pResult->GetString(0), pResult->GetString(1));
@@ -36,8 +36,8 @@ void CFriends::Init()
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
 	{
-		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend", IConsole::CONSOLELEVEL_USER);
-		pConsole->Register("remove_Friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend", IConsole::CONSOLELEVEL_USER);
+		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
+		pConsole->Register("remove_Friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
 	}
 }
 

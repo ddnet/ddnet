@@ -223,13 +223,7 @@ int CNetServer::BanAdd(NETADDR Addr, int Seconds, const char *pReason)
 		char Buf[128];
 		NETADDR BanAddr;
 
-<<<<<<< HEAD
-		int Mins = (Seconds + 59) / 60;
-
-		if(Mins && Seconds)
-=======
 		if(Stamp > -1)
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 		{
 			int Mins = (Seconds + 59) / 60;
 			if(Mins <= 1)
@@ -263,11 +257,7 @@ int CNetServer::Update()
 	}
 
 	// remove expired bans
-<<<<<<< HEAD
-	while(m_BanPool_FirstUsed && m_BanPool_FirstUsed->m_Info.m_Expires < Now && m_BanPool_FirstUsed->m_Info.m_Expires != -1)
-=======
 	while(m_BanPool_FirstUsed && m_BanPool_FirstUsed->m_Info.m_Expires > -1 && m_BanPool_FirstUsed->m_Info.m_Expires < Now)
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 	{
 		CBan *pBan = m_BanPool_FirstUsed;
 		BanRemoveByObject(pBan);
@@ -319,11 +309,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			{
 				// banned, reply with a message
 				char BanStr[128];
-<<<<<<< HEAD
-				if(pBan->m_Info.m_Expires && pBan->m_Info.m_Expires != -1)
-=======
 				if(pBan->m_Info.m_Expires > -1)
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 				{
 					int Mins = ((pBan->m_Info.m_Expires - Now)+59)/60;
 					if(Mins <= 1)
@@ -415,7 +401,6 @@ int CNetServer::Recv(CNetChunk *pChunk)
 								m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr);
 								if(m_pfnNewClient)
 									m_pfnNewClient(i, m_UserPtr);
-								
 								break;
 							}
 						}

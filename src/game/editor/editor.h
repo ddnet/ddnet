@@ -788,7 +788,8 @@ public:
 		str_copy(pName, pExtractedName, Length);
 	}
 
-<<<<<<< HEAD
+	int GetLineDistance();
+
 	// DDRace
 
 	static int ms_FrontTexture;
@@ -806,9 +807,6 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
-=======
-	int GetLineDistance();
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 };
 
 // make sure to inline this function

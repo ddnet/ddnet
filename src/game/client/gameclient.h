@@ -60,8 +60,8 @@ class CGameClient : public IGameClient
 
 	int64 m_LastSendInfo;
 
-	static void ConTeam(IConsole::IResult *pResult, void *pUserData, int ClientID);
-	static void ConKill(IConsole::IResult *pResult, void *pUserData, int ClientID);
+	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -283,7 +283,7 @@ inline vec3 HslToRgb(vec3 HSL)
 		return vec3(HueToRgb(v1, v2, HSL.h + (1.0f/3.0f)), HueToRgb(v1, v2, HSL.h), HueToRgb(v1, v2, HSL.h - (1.0f/3.0f)));
 	}
 }
-void ConServerDummy(IConsole::IResult *pResult, void *pUserData, int ClientID);
+
 
 extern const char *Localize(const char *Str);
 

@@ -98,7 +98,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	strftime (timestr,sizeof(timestr),"%y-%m-%d %H:%M:%S",timeinfo);
 	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
-	
+
 	len = strlen(str);
 	msg = (char *)str + len;
 

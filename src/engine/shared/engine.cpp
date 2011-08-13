@@ -23,7 +23,7 @@ public:
 	IStorage *m_pStorage;
 	bool m_Logging;
 
-	static void Con_DbgDumpmem(IConsole::IResult *pResult, void *pUserData, int ClientID)
+	static void Con_DbgDumpmem(IConsole::IResult *pResult, void *pUserData)
 	{
 		CEngine *pEngine = static_cast<CEngine *>(pUserData);
 		char aBuf[32];
@@ -33,7 +33,7 @@ public:
 		mem_debug_dump(pEngine->m_pStorage->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE));
 	}
 
-	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData, int ClientID)
+	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 	{
 		CEngine *pEngine = static_cast<CEngine *>(pUserData);
 
@@ -87,8 +87,8 @@ public:
 		if(!m_pConsole || !m_pStorage)
 			return;
 
-		m_pConsole->Register("dbg_dumpmem", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgDumpmem, this, "Dump the memory", IConsole::CONSOLELEVEL_ADMIN);
-		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network", IConsole::CONSOLELEVEL_ADMIN);
+		m_pConsole->Register("dbg_dumpmem", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgDumpmem, this, "Dump the memory");
+		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");
 	}
 
 	void InitLogfile()

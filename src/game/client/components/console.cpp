@@ -1,8 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
-#include <base/tl/sorted_array.h>
-
 #include <math.h>
 
 #include <game/generated/client_data.h>
@@ -77,7 +74,7 @@ void CGameConsole::CInstance::ClearHistory()
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
-		m_pGameConsole->m_pConsole->ExecuteLine(pLine, -1, IConsole::CONSOLELEVEL_CONFIG, 0, 0);
+		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
 	else
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
@@ -630,32 +627,32 @@ void CGameConsole::Dump(int Type)
 	}
 }
 
-void CGameConsole::ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CGameConsole::ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_LOCAL);
 }
 
-void CGameConsole::ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CGameConsole::ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_REMOTE);
 }
 
-void CGameConsole::ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CGameConsole::ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->m_LocalConsole.ClearBacklog();
 }
 
-void CGameConsole::ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CGameConsole::ConClearRemoteConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->m_RemoteConsole.ClearBacklog();
 }
 
-void CGameConsole::ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CGameConsole::ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_LOCAL);
 }
 
-void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
 }
@@ -694,14 +691,6 @@ void CGameConsole::OnConsoleInit()
 	//
 	m_PrintCBIndex = Console()->RegisterPrintCallback(g_Config.m_ConsoleOutputLevel, ClientConsolePrintCallback, this);
 
-<<<<<<< HEAD
-	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("clear_remote_console", "", CFGFLAG_CLIENT, ConClearRemoteConsole, this, "Clear remote console", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("dump_local_console", "", CFGFLAG_CLIENT, ConDumpLocalConsole, this, "Dump local console", IConsole::CONSOLELEVEL_USER);
-	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console", IConsole::CONSOLELEVEL_USER);
-=======
 	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
 	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
 	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
@@ -710,7 +699,6 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("dump_remote_console", "", CFGFLAG_CLIENT, ConDumpRemoteConsole, this, "Dump remote console");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 }
 
 void CGameConsole::OnStateChange(int NewState, int OldState)

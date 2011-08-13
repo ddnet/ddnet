@@ -521,14 +521,14 @@ void CGhost::Unload(int ID)
 	m_lGhosts.remove_fast(Item);
 }
 
-void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData, int ClientID)
+void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGhost *)pUserData)->StartRender();
 }
 
 void CGhost::OnConsoleInit()
 {
-	Console()->Register("gplay","", CFGFLAG_CLIENT, ConGPlay, this, "", IConsole::CONSOLELEVEL_USER);
+	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "");
 }
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)
