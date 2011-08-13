@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/array.h>
-
 #include <base/system.h>
 
 #include <engine/shared/datafile.h>
@@ -737,12 +735,12 @@ void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 
 	//TODO:DDRace:anyone find out why do we need to save twice for things to work!
 	if(pEditor->Save(pFileName))
-		if(pEditor->Save(pFileName))
-		{
-			str_copy(pEditor->m_aFileName, pFileName, sizeof(pEditor->m_aFileName));
-			pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
-			pEditor->m_Map.m_Modified = false;
-		}
+	if(pEditor->Save(pFileName))
+	{
+		str_copy(pEditor->m_aFileName, pFileName, sizeof(pEditor->m_aFileName));
+		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
+		pEditor->m_Map.m_Modified = false;
+	}
 	
 	pEditor->m_Dialog = DIALOG_NONE;
 }
@@ -971,7 +969,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			if(pT)
 				DoMapBorder();
-<<<<<<< HEAD
 		}
 		// do tele button
 		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
@@ -1001,8 +998,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			static int s_SwitchPopupID = 0;
 			UiInvokePopupMenu(&s_SwitchPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 36, PopupSwitch);
-=======
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 		}
 	}
 
@@ -1521,6 +1516,43 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			if(m_ShowTileInfo)
 				m_TilesetPicker.ShowInfo();
 		}
+		CLayerTele *pTelet = (CLayerTele *)GetSelectedLayerType(0, LAYERTYPE_TELE);
+		if(pTelet)
+		{
+			m_TilesetPicker.m_Image = pTelet->m_Image;
+			m_TilesetPicker.m_TexID = pTelet->m_TexID;
+			m_TilesetPicker.Render();
+			if(m_ShowTileInfo)
+				m_TilesetPicker.ShowInfo();
+		}
+		CLayerSpeedup *pSpeedupt = (CLayerSpeedup *)GetSelectedLayerType(0, LAYERTYPE_SPEEDUP);
+		if(pSpeedupt)
+		{
+			m_TilesetPicker.m_Image = pSpeedupt->m_Image;
+			m_TilesetPicker.m_TexID = pSpeedupt->m_TexID;
+			m_TilesetPicker.Render();
+			if(m_ShowTileInfo)
+				m_TilesetPicker.ShowInfo();
+		}
+		CLayerFront *pFrontt = (CLayerFront *)GetSelectedLayerType(0, LAYERTYPE_FRONT);
+		if(pFrontt)
+		{
+			m_TilesetPicker.m_Image = pFrontt->m_Image;
+			m_TilesetPicker.m_TexID = pFrontt->m_TexID;
+			m_TilesetPicker.Render();
+			if(m_ShowTileInfo)
+				m_TilesetPicker.ShowInfo();
+		}
+		CLayerSwitch *pSwitcht = (CLayerSwitch *)GetSelectedLayerType(0, LAYERTYPE_SWITCH);
+		if(pSwitcht)
+		{
+			m_TilesetPicker.m_Image = pSwitcht->m_Image;
+			m_TilesetPicker.m_TexID = pSwitcht->m_TexID;
+			m_TilesetPicker.Render();
+			if(m_ShowTileInfo)
+				m_TilesetPicker.ShowInfo();
+		}
+
 	}
 
 	static int s_Operation = OP_NONE;

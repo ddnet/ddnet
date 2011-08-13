@@ -353,24 +353,10 @@ int CCollision::IsThrough(int x, int y)
 	int Findex = 0;
 	if (m_pFront)
 		Findex = m_pFront[Ny*m_Width+Nx].m_Index;
-	if(!g_Config.m_ClPredictOldHookthrough)
-	{
-		if (Index == TILE_THROUGH)
-			return Index;
-		if (Findex == TILE_THROUGH)
-			return Findex;
-	}
-	else
-	{
-		if (Index == OLD_THROUGH1)
-			return Index;
-		if (Findex == OLD_THROUGH1)
-			return Findex;
-		if (Index == OLD_THROUGH2)
-			return Index;
-		if (Findex == OLD_THROUGH2)
-			return Findex;
-	}
+	if (Index == TILE_THROUGH)
+		return Index;
+	if (Findex == TILE_THROUGH)
+		return Findex;
 	return 0;
 }
 

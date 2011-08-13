@@ -1,8 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
-#include <base/tl/array.h>
-
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
@@ -295,19 +292,18 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 				Item.m_Width = pLayer->m_Width;
 				Item.m_Height = pLayer->m_Height;
-<<<<<<< HEAD
-				//Item.m_Flags = pLayer->m_Game;
+				// Item.m_Flags = pLayer->m_Game ? TILESLAYERFLAG_GAME : 0;
 
 				if(pLayer->m_Tele)
-					Item.m_Flags = 2;
+					Item.m_Flags = TILESLAYERFLAG_TELE;
 				else if(pLayer->m_Speedup)
-					Item.m_Flags = 4;
+					Item.m_Flags = TILESLAYERFLAG_SPEEDUP;
 				else if(pLayer->m_Front)
-					Item.m_Flags = 8;
+					Item.m_Flags = TILESLAYERFLAG_FRONT;
 				else if(pLayer->m_Switch)
-					Item.m_Flags = 16;
+					Item.m_Flags = TILESLAYERFLAG_SWITCH;
 				else
-					Item.m_Flags = pLayer->m_Game;
+					Item.m_Flags = pLayer->m_Game ? TILESLAYERFLAG_GAME : 0;
 
 				Item.m_Image = pLayer->m_Image;
 				if(pLayer->m_Tele)
@@ -343,16 +339,11 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					delete[] Tiles;
 				}
 				else
-					Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), pLayer->m_pTiles);
-=======
-				Item.m_Flags = pLayer->m_Game ? TILESLAYERFLAG_GAME : 0;
-				Item.m_Image = pLayer->m_Image;
 				Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), pLayer->m_pTiles);
 
 				// save layer name
 				StrToInts(Item.m_aName, sizeof(Item.m_aName)/sizeof(int), pLayer->m_aName);
 
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 				df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
 				GItem.m_NumLayers++;
@@ -573,23 +564,35 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							MakeGameLayer(pTiles);
 							MakeGameGroup(pGroup);
 						}
-						else if(pTilemapItem->m_Flags&2)
+						else if(pTilemapItem->m_Flags&TILESLAYERFLAG_TELE)
 						{
+							if(pTilemapItem->m_Version <= 2)
+								pTilemapItem->m_Tele = *((int*)(pTilemapItem) + 15);
+
 							pTiles = new CLayerTele(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeTeleLayer(pTiles);
 						}
-						else if(pTilemapItem->m_Flags&4)
+						else if(pTilemapItem->m_Flags&TILESLAYERFLAG_SPEEDUP)
 						{
+							if(pTilemapItem->m_Version <= 2)
+								pTilemapItem->m_Speedup = *((int*)(pTilemapItem) + 16);
+
 							pTiles = new CLayerSpeedup(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeSpeedupLayer(pTiles);
 						}
-						else if(pTilemapItem->m_Flags&8)
+						else if(pTilemapItem->m_Flags&TILESLAYERFLAG_FRONT)
 						{
+							if(pTilemapItem->m_Version <= 2)
+								pTilemapItem->m_Front = *((int*)(pTilemapItem) + 17);
+
 							pTiles = new CLayerFront(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeFrontLayer(pTiles);
 						}
-						else if(pTilemapItem->m_Flags&16)
+						else if(pTilemapItem->m_Flags&TILESLAYERFLAG_SWITCH)
 						{
+							if(pTilemapItem->m_Version <= 2)
+								pTilemapItem->m_Switch = *((int*)(pTilemapItem) + 18);
+
 							pTiles = new CLayerSwitch(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeSwitchLayer(pTiles);
 						}

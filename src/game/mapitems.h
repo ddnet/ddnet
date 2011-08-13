@@ -12,6 +12,10 @@ enum
 	LAYERTYPE_GAME, // not used
 	LAYERTYPE_TILES,
 	LAYERTYPE_QUADS,
+	LAYERTYPE_FRONT,
+	LAYERTYPE_TELE,
+	LAYERTYPE_SPEEDUP,
+	LAYERTYPE_SWITCH,
 
 	MAPITEMTYPE_VERSION=0,
 	MAPITEMTYPE_INFO,
@@ -141,10 +145,12 @@ enum
 
 	LAYERFLAG_DETAIL=1,
 	TILESLAYERFLAG_GAME=1,
+	TILESLAYERFLAG_TELE=2,
+	TILESLAYERFLAG_SPEEDUP=4,
+	TILESLAYERFLAG_FRONT=8,
+	TILESLAYERFLAG_SWITCH=16,
 
 	ENTITY_OFFSET=255-16*4,
-	OLD_THROUGH1=25,
-	OLD_THROUGH2=26
 };
 
 struct CPoint
@@ -238,16 +244,14 @@ struct CMapItemLayerTilemap
 	int m_Image;
 	int m_Data;
 
-<<<<<<< HEAD
+	int m_aName[3];
+
 	// DDRace
 
 	int m_Tele;
 	int m_Speedup;
 	int m_Front;
 	int m_Switch;
-=======
-	int m_aName[3];
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 } ;
 
 struct CMapItemLayerQuads

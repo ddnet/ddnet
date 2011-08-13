@@ -334,7 +334,8 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	}
 
 	// layer name
-	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0))
+	// if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0))
+	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pTeleLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pSpeedupLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pFrontLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pSwitchLayer != pEditor->GetSelectedLayer(0))
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
@@ -365,7 +366,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 		{0},
 	};
 
-
+	// if(pEditor->m_Map.m_pGameLayer == pEditor->GetSelectedLayer(0)) // dont use Group and Detail from the selection if this is the game layer
 	if(pEditor->m_Map.m_pGameLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pTeleLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSpeedupLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pFrontLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSwitchLayer == pEditor->GetSelectedLayer(0)) // dont use Group and Detail from the selection if this is the game layer
 	{
 		aProps[0].m_Type = PROPTYPE_NULL;
@@ -880,7 +881,46 @@ int CEditor::PopupSelectGameTileOpResult()
 	return Result;
 }
 
-<<<<<<< HEAD
+static int s_AutoMapConfigSelected = -1;
+
+int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View)
+{
+	CLayerTiles *pLayer = static_cast<CLayerTiles*>(pEditor->GetSelectedLayer(0));
+	CUIRect Button;
+	static int s_AutoMapperConfigButtons[256];
+	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
+	
+	for(int i = 0; i < pAutoMapper->ConfigNamesNum(); ++i)
+	{
+		View.HSplitTop(2.0f, 0, &View);
+		View.HSplitTop(12.0f, &Button, &View);
+		if(pEditor->DoButton_Editor(&s_AutoMapperConfigButtons[i], pAutoMapper->GetConfigName(i), 0, &Button, 0, 0))
+			s_AutoMapConfigSelected = i;
+	}
+
+	return 0;
+}
+
+void CEditor::PopupSelectConfigAutoMapInvoke(float x, float y)
+{
+	static int s_AutoMapConfigSelectID = 0;
+	s_AutoMapConfigSelected = -1;
+	CLayerTiles *pLayer = static_cast<CLayerTiles*>(GetSelectedLayer(0));
+	if(pLayer && pLayer->m_Image >= 0 && pLayer->m_Image < m_Map.m_lImages.size() &&
+		m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum())
+		UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f, 12.0f+14.0f*m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), PopupSelectConfigAutoMap);
+}
+
+int CEditor::PopupSelectConfigAutoMapResult()
+{
+	if(s_AutoMapConfigSelected < 0)
+		return -1;
+	
+	int Result = s_AutoMapConfigSelected;
+	s_AutoMapConfigSelected = -1;
+	return Result;
+}
+
 // DDRace
 
 int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
@@ -905,29 +945,10 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 
 	if(Prop == PROP_TELE)
 		 pEditor->m_TeleNumber = clamp(NewVal, 0, 255);
-=======
-static int s_AutoMapConfigSelected = -1;
-
-int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View)
-{
-	CLayerTiles *pLayer = static_cast<CLayerTiles*>(pEditor->GetSelectedLayer(0));
-	CUIRect Button;
-	static int s_AutoMapperConfigButtons[256];
-	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
-	
-	for(int i = 0; i < pAutoMapper->ConfigNamesNum(); ++i)
-	{
-		View.HSplitTop(2.0f, 0, &View);
-		View.HSplitTop(12.0f, &Button, &View);
-		if(pEditor->DoButton_Editor(&s_AutoMapperConfigButtons[i], pAutoMapper->GetConfigName(i), 0, &Button, 0, 0))
-			s_AutoMapConfigSelected = i;
-	}
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 
 	return 0;
 }
 
-<<<<<<< HEAD
 int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View)
 {
 	CUIRect Button;
@@ -990,24 +1011,4 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 		 pEditor->m_SwitchDelay = clamp(NewVal, 0, 255);
 
 	return 0;
-=======
-void CEditor::PopupSelectConfigAutoMapInvoke(float x, float y)
-{
-	static int s_AutoMapConfigSelectID = 0;
-	s_AutoMapConfigSelected = -1;
-	CLayerTiles *pLayer = static_cast<CLayerTiles*>(GetSelectedLayer(0));
-	if(pLayer && pLayer->m_Image >= 0 && pLayer->m_Image < m_Map.m_lImages.size() &&
-		m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum())
-		UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f, 12.0f+14.0f*m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), PopupSelectConfigAutoMap);
-}
-
-int CEditor::PopupSelectConfigAutoMapResult()
-{
-	if(s_AutoMapConfigSelected < 0)
-		return -1;
-	
-	int Result = s_AutoMapConfigSelected;
-	s_AutoMapConfigSelected = -1;
-	return Result;
->>>>>>> c56cfa12d511559b096579d4e7a80b7cb6bbb6fe
 }
