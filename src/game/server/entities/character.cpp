@@ -926,13 +926,15 @@ void CCharacter::Snap(int SnappingClient)
 
 	if (m_DeepFreeze)
 	{
-		pCharacter->m_Emote = EMOTE_PAIN;
+		if (pCharacter->m_Emote == EMOTE_NORMAL)
+			pCharacter->m_Emote = EMOTE_PAIN;
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 0;
 	}
 	else if (m_FreezeTime > 0 || m_FreezeTime == -1)
 	{
-		pCharacter->m_Emote = EMOTE_BLINK;
+		if (pCharacter->m_Emote == EMOTE_NORMAL)
+			pCharacter->m_Emote = EMOTE_BLINK;
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 0;
 	}
