@@ -762,13 +762,17 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
 			pEditor->CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+		pEditor->m_PopupEventWasActivated = false;
 		return 1;
 	}
 	ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
 	static int s_AbortButton = 0;
 	if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0))
+	{
+		pEditor->m_PopupEventWasActivated = false;
 		return 1;
+	}
 
 	return 0;
 }
@@ -889,7 +893,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View)
 	CUIRect Button;
 	static int s_AutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
-	
+
 	for(int i = 0; i < pAutoMapper->ConfigNamesNum(); ++i)
 	{
 		View.HSplitTop(2.0f, 0, &View);
@@ -915,7 +919,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 {
 	if(s_AutoMapConfigSelected < 0)
 		return -1;
-	
+
 	int Result = s_AutoMapConfigSelected;
 	s_AutoMapConfigSelected = -1;
 	return Result;
