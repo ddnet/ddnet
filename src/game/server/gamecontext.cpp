@@ -638,8 +638,9 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChatTarget(ClientID, "DDRace Mod. Version: " GAME_VERSION);
 		SendChatTarget(ClientID, "please visit http://DDRace.info or say /info for more info");
 
-		if(g_Config.m_SvWelcome[0]!=0) SendChatTarget(ClientID,g_Config.m_SvWelcome);
-			str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
+		if(g_Config.m_SvWelcome[0]!=0)
+			SendChatTarget(ClientID,g_Config.m_SvWelcome);
+		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 	}
