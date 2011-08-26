@@ -1111,7 +1111,7 @@ void CServer::PumpNetwork()
 				{
 				}*/
 
-				if(Packet.m_DataSize >= sizeof(BANMASTER_IPBAN) &&
+				if((unsigned)Packet.m_DataSize >= sizeof(BANMASTER_IPBAN) &&
 					mem_comp(Packet.m_pData, BANMASTER_IPBAN, sizeof(BANMASTER_IPBAN)) == 0)
 				{
 					if(!g_Config.m_SvGlobalBantime)
