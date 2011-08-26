@@ -668,7 +668,7 @@ void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 CLayerTele::CLayerTele(int w, int h)
 : CLayerTiles(w, h)
 {
-	m_Type = LAYERTYPE_TELE;
+	//m_Type = LAYERTYPE_TELE;
 	str_copy(m_aName, "Tele", sizeof(m_aName));
 	m_Tele = 1;
 
@@ -741,6 +741,9 @@ void CLayerTele::Shift(int Direction)
 
 void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
+	if(m_Readonly)
+		return;
+
 	CLayerTele *l = (CLayerTele *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
@@ -786,6 +789,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 			}
 		}
+	m_pEditor->m_Map.m_Modified = true;
 }
 
 void CLayerTele::BrushFlipX()
@@ -897,7 +901,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 CLayerSpeedup::CLayerSpeedup(int w, int h)
 : CLayerTiles(w, h)
 {
-	m_Type = LAYERTYPE_SPEEDUP;
+	//m_Type = LAYERTYPE_SPEEDUP;
 	str_copy(m_aName, "Speedup", sizeof(m_aName));
 	m_Speedup = 1;
 
@@ -970,6 +974,9 @@ void CLayerSpeedup::Shift(int Direction)
 
 void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
+	if(m_Readonly)
+		return;
+
 	CLayerSpeedup *l = (CLayerSpeedup *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
@@ -1030,6 +1037,7 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 			}
 		}
+	m_pEditor->m_Map.m_Modified = true;
 }
 
 void CLayerSpeedup::BrushFlipX()
@@ -1149,7 +1157,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 CLayerFront::CLayerFront(int w, int h)
 : CLayerTiles(w, h)
 {
-	m_Type = LAYERTYPE_FRONT;
+	//m_Type = LAYERTYPE_FRONT;
 	str_copy(m_aName, "Front", sizeof(m_aName));
 	m_Front = 1;
 }
@@ -1223,12 +1231,13 @@ void CLayerFront::BrushDraw(CLayer *pBrush, float wx, float wy)
 				continue;
 			m_pTiles[fy*m_Width+fx] = l->m_pTiles[y*l->m_Width+x];
 		}
+	m_pEditor->m_Map.m_Modified = true;
 }
 
 CLayerSwitch::CLayerSwitch(int w, int h)
 : CLayerTiles(w, h)
 {
-	m_Type = LAYERTYPE_SWITCH;
+	//m_Type = LAYERTYPE_SWITCH;
 	str_copy(m_aName, "Switch", sizeof(m_aName));
 	m_Switch = 1;
 
@@ -1301,6 +1310,9 @@ void CLayerSwitch::Shift(int Direction)
 
 void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
+	if(m_Readonly)
+		return;
+
 	CLayerSwitch *l = (CLayerSwitch *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
@@ -1372,6 +1384,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
 			}
 		}
+	m_pEditor->m_Map.m_Modified = true;
 }
 
 void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)

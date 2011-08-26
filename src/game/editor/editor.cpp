@@ -115,7 +115,9 @@ void CLayerGroup::Render()
 
 	for(int i = 0; i < m_lLayers.size(); i++)
 	{
-		if(m_lLayers[i]->m_Visible && m_lLayers[i] != m_pMap->m_pGameLayer)
+		if(m_lLayers[i]->m_Visible && m_lLayers[i] != m_pMap->m_pGameLayer
+		&& m_lLayers[i] != m_pMap->m_pFrontLayer && m_lLayers[i] != m_pMap->m_pTeleLayer
+		&& m_lLayers[i] != m_pMap->m_pSpeedupLayer && m_lLayers[i] != m_pMap->m_pSwitchLayer)
 		{
 			if(m_pMap->m_pEditor->m_ShowDetail || !(m_lLayers[i]->m_Flags&LAYERFLAG_DETAIL))
 				m_lLayers[i]->Render();
@@ -1727,43 +1729,6 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			if(m_ShowTileInfo)
 				m_TilesetPicker.ShowInfo();
 		}
-		CLayerTele *pTelet = (CLayerTele *)GetSelectedLayerType(0, LAYERTYPE_TELE);
-		if(pTelet)
-		{
-			m_TilesetPicker.m_Image = pTelet->m_Image;
-			m_TilesetPicker.m_TexID = pTelet->m_TexID;
-			m_TilesetPicker.Render();
-			if(m_ShowTileInfo)
-				m_TilesetPicker.ShowInfo();
-		}
-		CLayerSpeedup *pSpeedupt = (CLayerSpeedup *)GetSelectedLayerType(0, LAYERTYPE_SPEEDUP);
-		if(pSpeedupt)
-		{
-			m_TilesetPicker.m_Image = pSpeedupt->m_Image;
-			m_TilesetPicker.m_TexID = pSpeedupt->m_TexID;
-			m_TilesetPicker.Render();
-			if(m_ShowTileInfo)
-				m_TilesetPicker.ShowInfo();
-		}
-		CLayerFront *pFrontt = (CLayerFront *)GetSelectedLayerType(0, LAYERTYPE_FRONT);
-		if(pFrontt)
-		{
-			m_TilesetPicker.m_Image = pFrontt->m_Image;
-			m_TilesetPicker.m_TexID = pFrontt->m_TexID;
-			m_TilesetPicker.Render();
-			if(m_ShowTileInfo)
-				m_TilesetPicker.ShowInfo();
-		}
-		CLayerSwitch *pSwitcht = (CLayerSwitch *)GetSelectedLayerType(0, LAYERTYPE_SWITCH);
-		if(pSwitcht)
-		{
-			m_TilesetPicker.m_Image = pSwitcht->m_Image;
-			m_TilesetPicker.m_TexID = pSwitcht->m_TexID;
-			m_TilesetPicker.Render();
-			if(m_ShowTileInfo)
-				m_TilesetPicker.ShowInfo();
-		}
-
 	}
 
 	static int s_Operation = OP_NONE;
