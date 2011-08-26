@@ -646,7 +646,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 	m_VoteUpdate = true;
 
-	m_apPlayers[ClientID]->m_Authed = IConsole::ACCESS_LEVEL_USER;
+	m_apPlayers[ClientID]->m_Authed = ((CServer*)Server())->m_aClients[ClientID].m_Authed;
 }
 
 void CGameContext::OnClientConnected(int ClientID)
