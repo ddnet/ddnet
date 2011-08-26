@@ -253,7 +253,7 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
-void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
+bool CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 {
 	while(pStr && *pStr)
 	{
@@ -287,10 +287,10 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 		}
 
 		if(ParseStart(&Result, pStr, (pEnd-pStr) + 1) != 0)
-			return;
+			return false;
 
 		if(!*Result.m_pCommand)
-			return;
+			return false;
 
 		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
@@ -322,7 +322,15 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 						m_ExecutionQueue.m_pLast->m_Result = Result;
 					}
 					else
+					{
+						if(pCommand->m_Flags&CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
+							return false;
 						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+						if (pCommand->m_Flags&CMDFLAG_TEST) {
+							m_Cheated = true;
+						}
+						return true;
+					}
 				}
 			}
 			else if(Stroke)
@@ -341,6 +349,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 
 		pStr = pNextPart;
 	}
+	return false;
 }
 
 void CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
@@ -369,10 +378,12 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	return 0x0;
 }
 
-void CConsole::ExecuteLine(const char *pStr, int ClientID)
+bool CConsole::ExecuteLine(const char *pStr, int ClientID)
 {
-	CConsole::ExecuteLineStroked(1, pStr, ClientID); // press it
-	CConsole::ExecuteLineStroked(0, pStr, ClientID); // then release it
+	bool Press = false, Release = false;
+	Press = CConsole::ExecuteLineStroked(1, pStr, ClientID); // press it
+	Release = CConsole::ExecuteLineStroked(0, pStr, ClientID); // then release it
+	return Press || Release;
 }
 
 
