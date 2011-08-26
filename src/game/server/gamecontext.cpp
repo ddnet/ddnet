@@ -747,8 +747,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Info.m_GameContext = this;
 			Info.m_To = ClientID;
 
+			if (pPlayer->m_Authed)
+				Console()->SetAccessLevel(pPlayer->m_Authed == CServer::AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
+			else
+				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 			// Todo(Shereef Marzouk): Follow up on the RCON/Chat redirection
 			Console()->ExecuteLine(pMsg->m_pMessage + 1);
+			Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat",
 					pMsg->m_pMessage);
 		}
