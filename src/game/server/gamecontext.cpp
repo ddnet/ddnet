@@ -645,6 +645,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 	}
 	m_VoteUpdate = true;
+
+	m_apPlayers[ClientID]->m_Authed = IConsole::ACCESS_LEVEL_USER;
 }
 
 void CGameContext::OnClientConnected(int ClientID)
@@ -752,7 +754,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 			// Todo(Shereef Marzouk): Follow up on the RCON/Chat redirection
-			Console()->ExecuteLine(pMsg->m_pMessage + 1);
+			Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID);
 			Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat",
 					pMsg->m_pMessage);

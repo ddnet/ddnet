@@ -92,6 +92,10 @@ public:
 	virtual const char *GameType() = 0;
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
+
+	// DDRace
+
+	virtual void OnSetAuthed(int ClientID, int Level) = 0;
 };
 
 extern IGameServer *CreateGameServer();
