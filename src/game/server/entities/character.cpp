@@ -1546,7 +1546,6 @@ void CCharacter::DDRaceInit()
 {
 	m_DDRaceState = DDRACE_NONE;
 	m_PrevPos = m_Pos;
-	m_BroadCast = true;
 	m_EyeEmote = true;
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;

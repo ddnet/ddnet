@@ -693,6 +693,9 @@ void CConsole::Register(const char *pName, const char *pParams,
 	pCommand->m_Temp = false;
 
 	AddCommandSorted(pCommand);
+
+	if(pCommand->m_Flags&CFGFLAG_CHAT)
+		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
 }
 
 void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, const char *pHelp)

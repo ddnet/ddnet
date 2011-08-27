@@ -49,6 +49,7 @@ void CGameContext::Construct(int Resetting)
 		m_pVoteOptionHeap = new CHeap();
 		m_pScore = 0;
 		m_NumMutes = 0;
+		m_pChatCommands = CreateConsole(CFGFLAG_CHAT);
 	}
 }
 
@@ -754,7 +755,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 			// Todo(Shereef Marzouk): Follow up on the RCON/Chat redirection
-			if(!Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID))
+			if(!m_pChatCommands->ExecuteLine(pMsg->m_pMessage + 1, ClientID))
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "The execution of the line '%s' has been denied (maybe the admin didn't allow the command for users).", pMsg->m_pMessage + 1);
@@ -1659,6 +1660,8 @@ void CGameContext::OnConsoleInit()
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 #include "game/ddracecommands.h"
+#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pChatCommands->Register(name, params, flags, callback, userdata, help);
+#include "ddracechat.h"
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)

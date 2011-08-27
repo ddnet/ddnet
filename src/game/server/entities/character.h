@@ -178,7 +178,6 @@ public:
 	int m_CpTick;
 	int m_CpActive;
 	float m_CpCurrent[25];
-	bool m_BroadCast;
 	int m_TileIndex;
 	int m_TileFlags;
 	int m_TileFIndex;
