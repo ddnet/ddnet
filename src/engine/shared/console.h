@@ -180,7 +180,7 @@ public:
 
 	// DDRace
 
-	static void ConUSerCommandStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
 };
 
 #endif
