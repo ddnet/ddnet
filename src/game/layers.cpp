@@ -40,13 +40,6 @@ void CLayers::Init(class IKernel *pKernel)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 
-				if(pTilemap->m_Version <= 2)
-				{
-					pTilemap->m_Switch = *((int*)(pTilemap) + 18);
-					pTilemap->m_Front = *((int*)(pTilemap) + 17);
-					pTilemap->m_Speedup = *((int*)(pTilemap) + 16);
-					pTilemap->m_Tele = *((int*)(pTilemap) + 15);
-				}
 
 				if(pTilemap->m_Flags&TILESLAYERFLAG_GAME)
 				{
@@ -71,13 +64,37 @@ void CLayers::Init(class IKernel *pKernel)
 					//break;
 				}
 				if(pTilemap->m_Flags&TILESLAYERFLAG_TELE)
+				{
+					if(pTilemap->m_Version <= 2)
+					{
+						pTilemap->m_Tele = *((int*)(pTilemap) + 15);
+					}
 					m_pTeleLayer = pTilemap;
+				}
 				if(pTilemap->m_Flags&TILESLAYERFLAG_SPEEDUP)
+				{
+					if(pTilemap->m_Version <= 2)
+					{
+						pTilemap->m_Speedup = *((int*)(pTilemap) + 16);
+					}
 					m_pSpeedupLayer = pTilemap;
+				}
 				if(pTilemap->m_Flags&TILESLAYERFLAG_FRONT)
+				{
+					if(pTilemap->m_Version <= 2)
+					{
+						pTilemap->m_Front = *((int*)(pTilemap) + 17);
+					}
 					m_pFrontLayer = pTilemap;
+				}
 				if(pTilemap->m_Flags&TILESLAYERFLAG_SWITCH)
+				{
+					if(pTilemap->m_Version <= 2)
+					{
+						pTilemap->m_Switch = *((int*)(pTilemap) + 18);
+					}
 					m_pSwitchLayer = pTilemap;
+				}
 			}
 		}
 	}
