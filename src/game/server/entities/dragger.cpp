@@ -125,7 +125,15 @@ void CDragger::Snap(int SnappingClient)
 	CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
 	if (Char && Char->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick))) return;
-	if(Char && Char->IsAlive() && m_Target &&  m_Target->IsAlive() && Char->Team() != m_Target->Team()) return;
+	if (Char && Char->IsAlive())
+	{
+		if (Char->Team() != m_CatchedTeam) return;
+	}
+	else
+	{
+		// send to spectators only active draggers and some inactive from team 0
+		if (!((m_Target && m_Target->IsAlive()) || m_CatchedTeam == 0)) return;
+	}
 
 	CNetObj_Laser *obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
 	if(!obj)
