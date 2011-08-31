@@ -79,8 +79,8 @@ public:
 	virtual void StoreCommands(bool Store) = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
-	virtual bool ExecuteLine(const char *Sptr, int ClientID = -1) = 0;
-	virtual bool ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1) = 0;
+	virtual void ExecuteLine(const char *Sptr, int ClientID = -1) = 0;
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1) = 0;
 	virtual void ExecuteFile(const char *pFilename, int ClientID = -1) = 0;
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;

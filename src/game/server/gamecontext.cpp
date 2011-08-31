@@ -759,12 +759,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 			// Todo(Shereef Marzouk): Follow up on the RCON/Chat redirection
-			if(!m_pChatCommands->ExecuteLine(pMsg->m_pMessage + 1, ClientID))
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "The execution of the line '%s' has been denied (maybe the admin didn't allow the command for users).", pMsg->m_pMessage + 1);
-				SendChatTarget(ClientID, aBuf);
-			}
+			m_pChatCommands->ExecuteLine(pMsg->m_pMessage + 1, ClientID);
 			Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat",
 					pMsg->m_pMessage);
