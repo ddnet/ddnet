@@ -40,7 +40,6 @@ void CLayers::Init(class IKernel *pKernel)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 
-
 				if(pTilemap->m_Flags&TILESLAYERFLAG_GAME)
 				{
 					m_pGameLayer = pTilemap;

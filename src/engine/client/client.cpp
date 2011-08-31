@@ -2170,10 +2170,6 @@ void CClient::RegisterCommands()
 
 	// DDRace
 
-	m_pConsole->Register("login", "?s", CFGFLAG_SERVER, 0, 0, "Allows you access to rcon if no password is given, or changes your level if a password is given");
-	m_pConsole->Register("auth", "?s", CFGFLAG_SERVER, 0, 0, "Allows you access to rcon if no password is given, or changes your level if a password is given");
-	m_pConsole->Register("vote", "r", CFGFLAG_SERVER, 0, 0, "Forces the current vote to result in r (Yes/No)");
-	m_pConsole->Register("cmdlist", "", CFGFLAG_SERVER, 0, 0, "Shows the list of all commands");
 
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, 0, 0, help);
 	#include <game/ddracecommands.h>

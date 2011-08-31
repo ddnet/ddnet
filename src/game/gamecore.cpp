@@ -383,6 +383,7 @@ void CCharacterCore::Tick(bool UseInput)
 				{
 					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (Distance/m_pWorld->m_Tuning.m_HookLength);
 					float DragSpeed = m_pWorld->m_Tuning.m_HookDragSpeed;
+
 					// add force to the hooked player
 					vec2 Temp = pCharCore->m_Vel;
 					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel*Dir.x*1.5f);
