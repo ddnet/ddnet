@@ -50,8 +50,11 @@
 #include "components/spectator.h"
 #include "components/voting.h"
 
+#include <base/system.h>
 #include "components/race_demo.h"
 #include "components/ghost.h"
+#include <base/tl/sorted_array.h>
+
 CGameClient g_GameClient;
 
 // instanciate all systems

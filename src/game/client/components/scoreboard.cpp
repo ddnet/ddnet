@@ -17,6 +17,7 @@
 
 #include "scoreboard.h"
 
+#include <base/tl/string.h>
 #include <engine/serverbrowser.h>
 // TODO:DDRace:GreYFoX:Redo DDRace Scoreboard
 
