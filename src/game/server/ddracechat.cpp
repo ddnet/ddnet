@@ -264,12 +264,11 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 #if defined(CONF_SQL)
 void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID)) return;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	if(g_Config.m_SvUseSQL)
 	{
-		CGameContext *pSelf = (CGameContext *)pUserData;
 		CSqlScore *pScore = (CSqlScore *)pSelf->Score();
 		CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 		if(!pPlayer)
