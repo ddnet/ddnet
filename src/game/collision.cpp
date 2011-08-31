@@ -362,12 +362,12 @@ int CCollision::IsThrough(int x, int y)
 
 int CCollision::IsNoLaser(int x, int y)
 {
-   return (CCollision::GetTile(x,y) & COLFLAG_NOLASER);
+	return (CCollision::GetTile(x,y) & COLFLAG_NOLASER);
 }
 
 int CCollision::IsFNoLaser(int x, int y)
 {
-   return (CCollision::GetFTile(x,y) & COLFLAG_NOLASER);
+	return (CCollision::GetFTile(x,y) & COLFLAG_NOLASER);
 }
 
 int CCollision::IsTeleport(int Index)

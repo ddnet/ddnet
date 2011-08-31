@@ -49,8 +49,11 @@ void CGameContext::Construct(int Resetting)
 		m_pVoteOptionHeap = new CHeap();
 		m_pScore = 0;
 		m_NumMutes = 0;
-		m_pChatCommands = CreateConsole(CFGFLAG_CHAT);
 	}
+	m_pChatCommands = CreateConsole(CFGFLAG_CHAT);
+
+#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pChatCommands->Register(name, params, flags, callback, userdata, help);
+#include "ddracechat.h"
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -69,6 +72,7 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
+	delete m_pChatCommands;
 }
 
 void CGameContext::Clear()
@@ -1660,8 +1664,6 @@ void CGameContext::OnConsoleInit()
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 #include "game/ddracecommands.h"
-#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pChatCommands->Register(name, params, flags, callback, userdata, help);
-#include "ddracechat.h"
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
