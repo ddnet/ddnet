@@ -174,7 +174,6 @@ public:
 
 private:
 
-	IConsole* m_pChatCommands;
 	bool m_VoteWillPass;
 	class IScore *m_pScore;
 
@@ -265,16 +264,13 @@ public:
 	void SendRecord(int ClientID);
 	static void SendChatResponse(const char *pLine, void *pUser);
 	static void SendChatResponseAll(const char *pLine, void *pUser);
-	struct ChatResponseInfo
-	{
-		CGameContext *m_GameContext;
-		int m_To;
-	};
 	virtual void OnSetAuthed(int ClientID,int Level);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 
 	void ResetTuning();
+
+	int m_ChatResponseTargetID;
 };
 
 inline int CmaskAll() { return -1; }

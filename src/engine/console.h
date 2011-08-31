@@ -92,6 +92,7 @@ public:
 	// DDRace
 
 	bool m_Cheated;
+	virtual void SetFlagMask(int FlagMask) = 0;
 };
 
 extern IConsole *CreateConsole(int FlagMask);
