@@ -205,7 +205,7 @@ void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserD
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aBuf[512];
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "----------- Top 5 -----------");
+	pSelf->SendChatTarget(ClientID, "----------- Top 5 -----------");
 	for(int i = 0; i < 5; i++)
 	{
 		if(i+Debut > m_Top.size())
@@ -213,9 +213,9 @@ void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserD
 		CPlayerScore *r = &m_Top[i+Debut-1];
 		str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s)",
 			i+Debut, r->m_aName, (int) r->m_Score/60, r->m_Score-((int)r->m_Score/60*60));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", aBuf);
+		pSelf->SendChatTarget(ClientID, aBuf);
 	}
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "------------------------------");
+	pSelf->SendChatTarget(ClientID, "------------------------------");
 }
 
 void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)

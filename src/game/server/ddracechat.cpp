@@ -249,10 +249,6 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID)) return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if(!pPlayer)
-		return;
-
 	if(g_Config.m_SvHideScore)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID,"Showing the top 5 is not allowed on this server.");
@@ -260,10 +256,11 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 		if(pResult->NumArguments() > 0)
-			pSelf->Score()->ShowTop5(pResult, pPlayer->GetCID(), pUserData, pResult->GetInteger(0));
+			pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData, pResult->GetInteger(0));
 		else
-			pSelf->Score()->ShowTop5(pResult, pPlayer->GetCID(), pUserData);
+			pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData);
 }
+
 #if defined(CONF_SQL)
 void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 {

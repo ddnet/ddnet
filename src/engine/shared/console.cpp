@@ -377,8 +377,8 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 
 void CConsole::ExecuteLine(const char *pStr, int ClientID)
 {
-	CConsole::ExecuteLineStroked(1, pStr); // press it
-	CConsole::ExecuteLineStroked(0, pStr); // then release it
+	CConsole::ExecuteLineStroked(1, pStr, ClientID); // press it
+	CConsole::ExecuteLineStroked(0, pStr, ClientID); // then release it
 }
 
 
