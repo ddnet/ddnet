@@ -295,30 +295,6 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChat(-1, CHAT_ALL, aBuf);
 }
 
-void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientID(pResult->m_ClientID)) return;
-
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if(!pPlayer)
-		return;
-	if(g_Config.m_SvShowOthers)
-	{
-		if(pPlayer->m_IsUsingDDRaceClient)
-		{
-			if(pResult->NumArguments())
-				pPlayer->m_ShowOthers = pResult->GetInteger(0);
-			else
-				pPlayer->m_ShowOthers = !pPlayer->m_ShowOthers;
-		}
-		else
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing players from other teams is only available with DDRace Client, http://DDRace.info");
-	}
-	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", "Showing players from other teams is disabled by the server admin");
-}
-
 void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName)
 {
 	char aBuf[128];
