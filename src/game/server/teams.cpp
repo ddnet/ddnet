@@ -202,8 +202,8 @@ int CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 	int Mask = 0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 		if(i != ExceptID)
-			if((Asker == i || !m_Core.GetSolo(i)) && (Character(i) && (m_Core.Team(i) == Team || m_Core.Team(i) == TEAM_SUPER))
-				|| (GetPlayer(i) && GetPlayer(i)->GetTeam() == -1))
+			if((Asker == i || !m_Core.GetSolo(i)) && ((Character(i) && (m_Core.Team(i) == Team || m_Core.Team(i) == TEAM_SUPER))
+				|| (GetPlayer(i) && GetPlayer(i)->GetTeam() == -1)))
 				Mask |= 1 << i;
 	return Mask;
 }
