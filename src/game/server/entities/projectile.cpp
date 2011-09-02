@@ -114,7 +114,7 @@ void CProjectile::Tick()
 	}
 	if (pOwnerChar && pOwnerChar->IsAlive())
 	{
-			TeamMask = pOwnerChar->Teams()->TeamMask( pOwnerChar->Team());
+			TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
 	if( ((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)//TODO:TEAM
 	{

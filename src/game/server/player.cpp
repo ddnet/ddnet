@@ -322,7 +322,7 @@ void CPlayer::TryRespawn()
 	{
 		m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 		m_pCharacter->Spawn(this, m_PauseInfo.m_Core.m_Pos);
-		GameServer()->CreatePlayerSpawn(m_PauseInfo.m_Core.m_Pos, ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask((m_PauseInfo.m_Team > 0 && m_PauseInfo.m_Team < TEAM_SUPER) ? m_PauseInfo.m_Team : 0));
+		GameServer()->CreatePlayerSpawn(m_PauseInfo.m_Core.m_Pos, ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask((m_PauseInfo.m_Team > 0 && m_PauseInfo.m_Team < TEAM_SUPER) ? m_PauseInfo.m_Team : 0, -1, m_ClientID));
 		LoadCharacter();
 	}
 	else
@@ -371,6 +371,7 @@ void CPlayer::LoadCharacter()
 	m_pCharacter->m_TeleCheckpoint = m_PauseInfo.m_TeleCheckpoint;
 	m_pCharacter->m_CpActive = m_PauseInfo.m_CpActive;
 	m_pCharacter->m_Hit = m_PauseInfo.m_Hit;
+	m_pCharacter->Teams()->m_Core.SetSolo(m_ClientID, m_PauseInfo.m_Solo);
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		m_pCharacter->m_CpCurrent[i] = m_PauseInfo.m_CpCurrent[i];
 	((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core.Team(GetCID(), m_PauseInfo.m_Team);
@@ -399,6 +400,7 @@ void CPlayer::SaveCharacter()
 	m_PauseInfo.m_TeleCheckpoint = m_pCharacter->m_TeleCheckpoint;
 	m_PauseInfo.m_CpActive = m_pCharacter->m_CpActive;
 	m_PauseInfo.m_Hit = m_pCharacter->m_Hit;
+	m_PauseInfo.m_Solo = m_pCharacter->Teams()->m_Core.GetSolo(m_ClientID);
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		m_PauseInfo.m_CpCurrent[i] = m_pCharacter->m_CpCurrent[i];
 	//m_PauseInfo.m_RefreshTime = m_pCharacter->m_RefreshTime;

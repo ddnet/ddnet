@@ -43,7 +43,7 @@ public:
 	
 	bool TeamFinished(int Team);
 
-	int TeamMask(int Team, int ExceptID = -1);
+	int TeamMask(int Team, int ExceptID = -1, int Asker = -1);
 	
 	int Count(int Team) const;
 	

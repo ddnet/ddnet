@@ -135,6 +135,7 @@ public:
 		int m_CpActive;
 		float m_CpCurrent[25];
 		int m_Hit;
+		bool m_Solo;
 	} m_PauseInfo;
 	int m_ForcePauseTime;
 	bool m_InfoSaved;

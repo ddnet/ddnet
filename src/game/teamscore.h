@@ -11,8 +11,9 @@ enum
 
 class CTeamsCore
 {
-	
+
 	int m_Team[MAX_CLIENTS];
+	bool m_IsSolo[MAX_CLIENTS];
 public:
 	
 	CTeamsCore(void);
@@ -25,6 +26,8 @@ public:
 	void Team(int ClientID, int Team);
 
 	void Reset();
+	void SetSolo(int ClientID, bool Value) { m_IsSolo[ClientID] = Value; };
+	bool GetSolo(int ClientID) { return m_IsSolo[ClientID]; };
 };
 
 #endif
