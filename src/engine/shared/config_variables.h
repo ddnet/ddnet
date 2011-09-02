@@ -194,6 +194,8 @@ MACRO_CONFIG_INT(SvPlasmaRange, sv_plasma_range, 700, 1, 99999, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvPlasmaPerSec, sv_plasma_per_sec, 3, 0, 50, CFGFLAG_SERVER, "How many shots does the plasma gun fire per seconds")
 MACRO_CONFIG_INT(SvVotePause, sv_vote_pause, 1, 0, 1, CFGFLAG_SERVER, "Allow voting to pause players (instead of moving to spectators)")
 MACRO_CONFIG_INT(SvVotePauseTime, sv_vote_pause_time, 10, 0, 360, CFGFLAG_SERVER, "The time (in seconds) players have to wait in pause when paused by vote")
+MACRO_CONFIG_INT(SvTuneReset, sv_tune_reset, 0, 0, 1, CFGFLAG_SERVER, "Whether tuning is reset after each map change or not")
+MACRO_CONFIG_INT(SvDDRaceTuneReset, sv_ddrace_tune_reset, 1, 0, 1, CFGFLAG_SERVER, "Whether DDRace tuning(sv_hit, Sv_Endless_Drag & Sv_Old_Laser) is reset after each map change or not")
 
 
 // these might need some fine tuning

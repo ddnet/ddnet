@@ -1686,10 +1686,17 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	//players = new CPlayer[MAX_CLIENTS];
 
 	// Reset Tuning
-	ResetTuning();
-	g_Config.m_SvHit = 1;
-	g_Config.m_SvEndlessDrag = 0;
-	g_Config.m_SvOldLaser = 0;
+	if(g_Config.m_SvTuneReset)
+	{
+		ResetTuning();
+	}
+
+	if(g_Config.m_SvDDRaceTuneReset)
+	{
+		g_Config.m_SvHit = 1;
+		g_Config.m_SvEndlessDrag = 0;
+		g_Config.m_SvOldLaser = 0;
+	}
 
 	char buf[512];
 	str_format(buf, sizeof(buf), "data/maps/%s.cfg", g_Config.m_SvMap);
