@@ -815,7 +815,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						SendChatTarget(ClientID, "Invalid option");
 						return;
 					}
-					if(!m_apPlayers[ClientID]->m_Authed && strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 && time_get() < LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+					if(!m_apPlayers[ClientID]->m_Authed && (strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 || strncmp(pOption->m_aCommand, "change_map ", 11) == 0) && time_get() < LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 					{
 						char chatmsg[512] = {0};
 						str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes,Please wait %d Second(s)", g_Config.m_SvVoteMapTimeDelay,((LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
