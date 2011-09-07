@@ -1984,6 +1984,8 @@ void CGameContext::SendRecord(int ClientID)
 
 int CGameContext::ProcessSpamProtection(int ClientID)
 {
+	if(!m_apPlayers[ClientID])
+		return 0;
 	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_LastChat
 		&& m_apPlayers[ClientID]->m_LastChat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())
 		return 1;
