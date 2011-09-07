@@ -46,6 +46,9 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	// Variable initialized:
 	m_Last_Team = 0;
+#if defined(CONF_SQL)
+	m_LastSQLQuery = 0;
+#endif
 }
 
 CPlayer::~CPlayer()

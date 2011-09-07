@@ -249,6 +249,12 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID)) return;
 
+#if defined(CONF_SQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+			if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+				return;
+#endif
+
 	if(g_Config.m_SvHideScore)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top5", "Showing the top 5 is not allowed on this server.");
@@ -259,6 +265,11 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 			pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData, pResult->GetInteger(0));
 		else
 			pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData);
+
+#if defined(CONF_SQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+			pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
 }
 
 #if defined(CONF_SQL)
@@ -266,6 +277,12 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 {
 	if(!CheckClientID(pResult->m_ClientID)) return;
 	CGameContext *pSelf = (CGameContext *)pUserData;
+
+#if defined(CONF_SQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+			if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+				return;
+#endif
 
 	if(g_Config.m_SvUseSQL)
 	{
@@ -300,6 +317,11 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
+
+#if defined(CONF_SQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+			pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
 	}	
 }
 #endif
@@ -308,6 +330,12 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID)) return;
+
+#if defined(CONF_SQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+			if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+				return;
+#endif
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if(!pPlayer)
@@ -320,6 +348,11 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rank", "Showing the rank of other players is not allowed on this server.");
 	else
 		pSelf->Score()->ShowRank(pResult->m_ClientID, pSelf->Server()->ClientName(pResult->m_ClientID));
+
+#if defined(CONF_SQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+			pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
 }
 
 void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
