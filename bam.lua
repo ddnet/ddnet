@@ -165,6 +165,11 @@ function build(settings)
 		else
 			settings.link.libs:Add("pthread")
 		end
+		
+		if platform == "solaris" then
+		    settings.link.flags:Add("-lsocket")
+		    settings.link.flags:Add("-lnsl")
+		end
 	elseif family == "windows" then
 		settings.link.libs:Add("gdi32")
 		settings.link.libs:Add("user32")
