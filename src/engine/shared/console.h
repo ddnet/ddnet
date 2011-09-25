@@ -114,6 +114,22 @@ class CConsole : public IConsole
 		virtual const char *GetString(unsigned Index);
 		virtual int GetInteger(unsigned Index);
 		virtual float GetFloat(unsigned Index);
+
+		// DDRace
+
+		enum
+		{
+			VICTIM_NONE=-3,
+			VICTIM_ME=-2,
+			VICTIM_ALL=-1,
+		};
+
+		int m_Victim;
+		void ResetVictim();
+		bool HasVictim();
+		void SetVictim(int Victim);
+		void SetVictim(const char *pVictim);
+		virtual int GetVictim();
 	};
 
 	int ParseStart(CResult *pResult, const char *pString, int Length);

@@ -71,7 +71,7 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID)) return;
-	int Victim = pResult->GetInteger(0);
+	int Victim = pResult->GetVictim();
 
 	if(pSelf->m_apPlayers[Victim])
 	{
@@ -225,23 +225,21 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData, in
 		pChr->GiveNinja();
 	}
 
-	pChr->m_DDRaceState =	DDRACE_CHEAT;
+	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientID(pResult->m_ClientID)) return;
-	int TeleTo = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
+	if(!CheckClientID(pResult->GetVictim())) return;
+	int TeleTo = pResult->GetVictim();
 	if(pSelf->m_apPlayers[TeleTo])
 	{
+		CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+		if(pChr)
 		{
-			CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-			if(pChr)
-			{
-				pChr->Core()->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-				pChr->m_DDRaceState = DDRACE_CHEAT;
-			}
+			pChr->Core()->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+			pChr->m_DDRaceState = DDRACE_CHEAT;
 		}
 	}
 }
@@ -340,7 +338,7 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetInteger(0);
+	int Victim = pResult->GetVictim();
 
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
@@ -366,7 +364,7 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aIpBuf[64];
 	char aBuf[64];
-	int Victim = pResult->GetInteger(0);
+	int Victim = pResult->GetVictim();
 
 	if(Victim < 0 || Victim >= pSelf->m_NumMutes)
 		return;

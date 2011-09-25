@@ -91,6 +91,8 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 	int Optional = 0;
 	int Error = 0;
 
+	pResult->ResetVictim();
+
 	pStr = pResult->m_pArgsStart;
 
 	while(1)
@@ -111,7 +113,20 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			if(!(*pStr)) // error, non optional command needs value
 			{
 				if(!Optional)
+				{
 					Error = 1;
+					break;
+				}
+
+				while(*(pFormat - 1))
+				{
+					if(*(pFormat - 1) == 'v')
+					{
+						pResult->SetVictim(CResult::VICTIM_ME);
+						break;
+					}
+					pFormat++;
+				}
 				break;
 			}
 
@@ -150,10 +165,17 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			}
 			else
 			{
-				pResult->AddArgument(pStr);
+				char* pVictim = 0;
+
+				if (Command != 'v')
+					pResult->AddArgument(pStr);
+				else
+					pVictim = pStr;
 
 				if(Command == 'r') // rest of the string
 					break;
+				else if(Command == 'v') // validate victim
+					pStr = str_skip_to_whitespace(pStr);
 				else if(Command == 'i') // validate int
 					pStr = str_skip_to_whitespace(pStr);
 				else if(Command == 'f') // validate float
@@ -166,6 +188,9 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pStr[0] = 0;
 					pStr++;
 				}
+
+				if (pVictim)
+					pResult->SetVictim(pVictim);
 			}
 		}
 	}
@@ -323,9 +348,28 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 					}
 					else
 					{
+						if(Result.GetVictim() == CResult::VICTIM_ME)
+							Result.SetVictim(ClientID);
+
 						if(pCommand->m_Flags&CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
 							return;
-						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+
+						if (Result.HasVictim())
+						{
+							if(Result.GetVictim() == CResult::VICTIM_ALL)
+							{
+								for (int i = 0; i < MAX_CLIENTS; i++)
+								{
+										Result.SetVictim(i);
+										pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+								}
+							}
+							else
+								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+						}
+						else
+							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+
 						if (pCommand->m_Flags&CMDFLAG_TEST)
 							m_Cheated = true;
 					}
@@ -873,4 +917,34 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	}
 	if(Used > 0)
 		pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+}
+
+int CConsole::CResult::GetVictim()
+{
+	return m_Victim;
+}
+
+void CConsole::CResult::ResetVictim()
+{
+	m_Victim = VICTIM_NONE;
+}
+
+bool CConsole::CResult::HasVictim()
+{
+	return m_Victim != VICTIM_NONE;
+}
+
+void CConsole::CResult::SetVictim(int Victim)
+{
+	m_Victim = clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
+}
+
+void CConsole::CResult::SetVictim(const char *pVictim)
+{
+	if(!str_comp(pVictim, "me"))
+		m_Victim = VICTIM_ME;
+	else if(!str_comp(pVictim, "all"))
+		m_Victim = VICTIM_ALL;
+	else
+		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
 }

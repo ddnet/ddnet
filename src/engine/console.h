@@ -43,6 +43,10 @@ public:
 
 		int NumArguments() const { return m_NumArgs; }
 		int m_ClientID;
+
+		// DDRace
+
+		virtual int GetVictim() = 0;
 	};
 
 	class CCommandInfo
