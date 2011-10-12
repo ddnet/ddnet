@@ -350,6 +350,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 				pData->m_pSqlData->m_pResults->next();
 				int since = (int)pData->m_pSqlData->m_pResults->getInt("Ago");
 				char agoString[40];
+				mem_zero(agoString, sizeof(agoString));
 				agoTimeToString(since,agoString);
 
 				float Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
