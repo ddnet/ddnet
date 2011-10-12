@@ -345,7 +345,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(0), 1, 86400), pSelf->Server()->ClientName(Victim));
+	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400), pSelf->Server()->ClientName(Victim));
 }
 
 // mute through ip, arguments reversed to workaround parsing
