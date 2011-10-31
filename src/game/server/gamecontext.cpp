@@ -756,6 +756,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Console()->SetAccessLevel(pPlayer->m_Authed == CServer::AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
 			else
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
+			Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
 
 			Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID);
 			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", pMsg->m_pMessage);
@@ -1638,7 +1639,7 @@ void CGameContext::OnConsoleInit()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	Console()->RegisterPrintCallback(0, SendChatResponse, this);
+	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(0, SendChatResponse, this);
 
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
