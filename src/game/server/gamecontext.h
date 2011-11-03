@@ -270,6 +270,7 @@ public:
 	void ResetTuning();
 
 	int m_ChatResponseTargetID;
+	int m_ChatPrintCBIndex;
 };
 
 inline int CmaskAll() { return -1; }
