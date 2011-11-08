@@ -82,7 +82,7 @@ void CPickup::Tick()
 					if (sound)
 					{
 						pChr->SetLastWeapon(WEAPON_GUN);
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 					}
 					if(!pChr->m_FreezeTime) pChr->SetActiveWeapon(WEAPON_HAMMER);
 					break;
@@ -96,11 +96,11 @@ void CPickup::Tick()
 							//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
 							if(m_Subtype == WEAPON_GRENADE)
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE);
+								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
 							else if(m_Subtype == WEAPON_SHOTGUN)
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN);
+								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
 							else if(m_Subtype == WEAPON_RIFLE)
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN);
+								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
 
 							if(pChr->GetPlayer())
 								GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
