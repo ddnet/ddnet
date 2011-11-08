@@ -452,6 +452,11 @@ void CGameContext::ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData
 void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(g_Config.m_SvEmotionalTees == -1) {
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "emote", "Server admin disabled emotes.");
+		return;
+	}
+
 	if(!CheckClientID(pResult->m_ClientID)) return;
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
