@@ -43,6 +43,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 				if(pPlayer && pPlayer->IsPlaying() && GetDDRaceState(pPlayer) == DDRACE_FINISHED)
 				{
 					Waiting = true;
+					pStartingChar->m_DDRaceState = DDRACE_NONE;
 					if(m_LastChat[ClientID] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
 					{
 						char aBuf[128];
@@ -94,8 +95,8 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 		m_TeeFinished[ClientID] = true;
 		if(TeamFinished(m_Core.Team(ClientID)))
 		{
-			//ChangeTeamState(m_Core.Team(id), TEAMSTATE_FINISHED);//TODO: Make it better
-			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_OPEN);
+			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_FINISHED);//TODO: Make it better
+			//ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_OPEN);
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				if(m_Core.Team(ClientID) == m_Core.Team(i))
