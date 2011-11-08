@@ -537,7 +537,7 @@ void CGameContext::OnTick()
 			{
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by server administrator");
-				Console()->ExecuteLine(m_aVoteCommand);
+				Console()->ExecuteLine(m_aVoteCommand, m_VoteEnforcer);
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				EndVote();
 			}
@@ -1610,9 +1610,10 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(str_comp_nocase(pResult->GetString(0), "yes") == 0)
-		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_YES;
+		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_YES_ADMIN;
 	else if(str_comp_nocase(pResult->GetString(0), "no") == 0)
-		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO;
+		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
+	pSelf->m_VoteEnforcer = pResult->m_ClientID;
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "admin forced vote %s", pResult->GetString(0));
 	pSelf->SendChatTarget(-1, aBuf);

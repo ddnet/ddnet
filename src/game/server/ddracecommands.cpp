@@ -261,7 +261,7 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientID(pResult->m_ClientID)) return;
+	// if(!CheckClientID(pResult->m_ClientID)) return;
 	CServer* pServ = (CServer*)pSelf->Server();
 	int Victim = pResult->GetInteger(0);
 	int Seconds = 0;
@@ -269,6 +269,8 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments() > 0 && pResult->m_ClientID < 0)
 		Seconds = clamp(pResult->GetInteger(0), 0, 15);
+	//else if(pResult->NumArguments() > 0 && CheckClientID(pResult->m_ClientID))
+		//Seconds = clamp(pResult->GetInteger(1), 0, 360);
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
 	if(!pPlayer || (!Seconds && pResult->m_ClientID >= 0))
