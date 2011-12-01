@@ -1408,6 +1408,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					m_SelectedPoints |= 1<<V;
 				else
 					m_SelectedPoints = 1<<V;
+				s_Moved = true;
 			}
 
 			m_SelectedQuad = QuadIndex;
@@ -3863,18 +3864,26 @@ void CEditorMap::DeleteEnvelope(int Index)
 		for(int j = 0; j < m_lGroups[i]->m_lLayers.size(); ++j)
 			if(m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
 			{
-				CLayerQuads *Layer = static_cast<CLayerQuads *>(m_lGroups[i]->m_lLayers[j]);
-				for(int k = 0; k < Layer->m_lQuads.size(); ++k)
+				CLayerQuads *pLayer = static_cast<CLayerQuads *>(m_lGroups[i]->m_lLayers[j]);
+				for(int k = 0; k < pLayer->m_lQuads.size(); ++k)
 				{
-					if(Layer->m_lQuads[k].m_PosEnv == Index)
-						Layer->m_lQuads[k].m_PosEnv = -1;
-					else if(Layer->m_lQuads[k].m_PosEnv > Index)
-						Layer->m_lQuads[k].m_PosEnv--;
-					if(Layer->m_lQuads[k].m_ColorEnv == Index)
-						Layer->m_lQuads[k].m_ColorEnv = -1;
-					else if(Layer->m_lQuads[k].m_ColorEnv > Index)
-						Layer->m_lQuads[k].m_ColorEnv--;
+					if(pLayer->m_lQuads[k].m_PosEnv == Index)
+						pLayer->m_lQuads[k].m_PosEnv = -1;
+					else if(pLayer->m_lQuads[k].m_PosEnv > Index)
+						pLayer->m_lQuads[k].m_PosEnv--;
+					if(pLayer->m_lQuads[k].m_ColorEnv == Index)
+						pLayer->m_lQuads[k].m_ColorEnv = -1;
+					else if(pLayer->m_lQuads[k].m_ColorEnv > Index)
+						pLayer->m_lQuads[k].m_ColorEnv--;
 				}
+			}
+			else if(m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_TILES)
+			{
+				CLayerTiles *pLayer = static_cast<CLayerTiles *>(m_lGroups[i]->m_lLayers[j]);
+				if(pLayer->m_ColorEnv == Index)
+					pLayer->m_ColorEnv = -1;
+				if(pLayer->m_ColorEnv > Index)
+					pLayer->m_ColorEnv--;
 			}
 
 	m_lEnvelopes.remove_index(Index);
