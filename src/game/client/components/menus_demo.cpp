@@ -19,6 +19,7 @@
 
 #include <game/generated/client_data.h>
 
+#include "maplayers.h"
 #include "menus.h"
 
 int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -119,6 +120,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 					m_pClient->m_SuppressEvents = true;
 					DemoPlayer()->SetPos(Amount);
 					m_pClient->m_SuppressEvents = false;
+					m_pClient->m_pMapLayersBackGround->EnvelopeUpdate();
+					m_pClient->m_pMapLayersForeGround->EnvelopeUpdate();
 				}
 			}
 		}

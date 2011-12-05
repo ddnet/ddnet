@@ -134,6 +134,8 @@ void CGameClient::OnConsoleInit()
 	m_pVoting = &::gs_Voting;
 	m_pScoreboard = &::gs_Scoreboard;
 	m_pItems = &::gs_Items;
+	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
+	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
