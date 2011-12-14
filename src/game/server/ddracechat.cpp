@@ -20,10 +20,10 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Now it is maintained & re-coded by:");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "\'[Egypt]GreYFoX@GTi\' and \'[BlackTee]den\'");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Others Helping on the code: \'heinrich5991\', \'ravomavain\', \'Trust o_0 Aeeeh ?!\', \'noother\', \'<3 fisted <3\' & \'LemonFace\'");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Documentation: Zeta-Hoernchen, Entities: Fisico");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Documentation: Zeta-Hoernchen & Learath2, Entities: Fisico");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Code (in the past): \'3DA\' and \'Fluxid\'");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Please check the changelog on DDRace.info.");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Also the commit log on github.com/GreYFoXGTi/DDRace.");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", "Also the commit log on github.com/GreYFoX/teeworlds .");
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
