@@ -73,6 +73,11 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
 }
 
+void CCamera::OnReset()
+{
+	m_Zoom = 1.0f;
+}
+
 const float ZoomStep = 0.75f;
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 {
@@ -95,6 +100,5 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
-	if(g_Config.m_ClDDRaceCheats == 1 && str_find_nocase(Info.m_aGameType, "race"))
-		((CCamera *)pUserData)->m_Zoom = 1.0f;
+	((CCamera *)pUserData)->m_Zoom = 1.0f;
 }

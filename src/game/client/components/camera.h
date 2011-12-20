@@ -27,6 +27,7 @@ public:
 	// DDRace
 
 	virtual void OnConsoleInit();
+	virtual void OnReset();
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
