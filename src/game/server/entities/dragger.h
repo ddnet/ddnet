@@ -28,9 +28,9 @@ public:
 
 class CDraggerTeam {
 	CDragger * m_Draggers[MAX_CLIENTS];
-	
+
 public:
-	
+
 	CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW=false, int Layer = 0, int Number = 0);
 	//~CDraggerTeam();
 };

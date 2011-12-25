@@ -18,7 +18,6 @@ public:
 	{
 		TEAMSTATE_EMPTY, 
 		TEAMSTATE_OPEN,
-		TEAMSTATE_CLOSED,
 		TEAMSTATE_STARTED,
 		TEAMSTATE_FINISHED
 	};
@@ -40,6 +39,7 @@ public:
 	bool SetCharacterTeam(int ClientID, int Team);
 	
 	void ChangeTeamState(int Team, int State);
+	void onChangeTeamState(int Team, int State, int OldState);
 	
 	bool TeamFinished(int Team);
 

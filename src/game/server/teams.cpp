@@ -62,7 +62,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			}
 		}
 
-		if(m_TeamState[m_Core.Team(ClientID)] <= TEAMSTATE_CLOSED && !Waiting)
+		if(m_TeamState[m_Core.Team(ClientID)] < TEAMSTATE_STARTED && !Waiting)
 		{
 			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_STARTED);
 			for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -120,7 +120,7 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || Team < 0 || Team >= MAX_CLIENTS + 1)
 		return false;
 	//You can join to TEAM_SUPER at any time, but any other group you cannot if it started
-	if(Team != TEAM_SUPER && m_TeamState[Team] >= TEAMSTATE_CLOSED)
+	if(Team != TEAM_SUPER && m_TeamState[Team] > TEAMSTATE_OPEN)
 		return false;
 	//No need to switch team if you there
 	if(m_Core.Team(ClientID) == Team)
@@ -182,7 +182,21 @@ int CGameTeams::Count(int Team) const
 
 void CGameTeams::ChangeTeamState(int Team, int State)
 {
+	int OldState = m_TeamState[Team];
 	m_TeamState[Team] = State;
+	onChangeTeamState(Team, State, OldState);
+}
+
+void CGameTeams::onChangeTeamState(int Team, int State, int OldState)
+{
+	if(OldState != State && State == TEAMSTATE_STARTED)
+	{
+		// OnTeamStateStarting
+	}
+	if(OldState != State && State == TEAMSTATE_FINISHED)
+	{
+		// OnTeamStateFinishing
+	}
 }
 
 bool CGameTeams::TeamFinished(int Team)
