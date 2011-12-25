@@ -1,3 +1,5 @@
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
+/* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
 /* CSqlScore Class by Sushi Tee*/
 #ifndef GAME_SERVER_SQLSCORE_H
 #define GAME_SERVER_SQLSCORE_H

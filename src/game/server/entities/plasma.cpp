@@ -1,4 +1,4 @@
-/* copyright (c) 2007 magnus auvinen, see licence.txt for more info */
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include <engine/server.h>
 #include <engine/config.h>
 #include <game/generated/protocol.h>
@@ -8,11 +8,6 @@
 #include "plasma.h"
 
 const float ACCEL=1.1f;
-
-
-//////////////////////////////////////////////////
-// turret
-//////////////////////////////////////////////////
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze, bool Explosive, int ResponsibleTeam)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)

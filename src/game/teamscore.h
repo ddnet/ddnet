@@ -1,3 +1,4 @@
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #ifndef GAME_TEAMSCORE_H
 #define GAME_TEAMSCORE_H
 

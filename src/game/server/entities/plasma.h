@@ -1,5 +1,4 @@
-/* copyright (c) 2007 magnus auvinen, see licence.txt for more info */
-
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #ifndef PLASMA_TYPE
 #define PLASMA_TYPE
 

@@ -1,16 +1,10 @@
-/* copyright (c) 2007 magnus auvinen, see licence.txt for more info */
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include <engine/config.h>
 #include <engine/server.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include "light.h"
 #include <game/mapitems.h>
-
-//////////////////////////////////////////////////
-// CLight
-//////////////////////////////////////////////////
-
-
 
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length, int Layer, int Number)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)

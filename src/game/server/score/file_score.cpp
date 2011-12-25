@@ -1,5 +1,6 @@
+/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
+/* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
 /* copyright (c) 2008 rajh and gregwar. Score stuff */
-
 #include <base/tl/sorted_array.h>
 
 #include <engine/shared/config.h>
