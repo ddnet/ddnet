@@ -65,6 +65,7 @@ public:
 	void SetCpActive(CPlayer* Player, int CpActive);
 	void OnFinish(CPlayer* Player);
 	bool TeeFinished(int ClientID) { return m_TeeFinished[ClientID]; };
+	int GetTeamState(int Team) { return m_TeamState[Team]; };
 };
 
 #endif
