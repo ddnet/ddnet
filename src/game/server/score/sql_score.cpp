@@ -13,13 +13,13 @@
 static LOCK gs_SqlLock = 0;
 
 CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
-	m_pServer(pGameServer->Server()),
-	m_pDatabase(g_Config.m_SvSqlDatabase),
-	m_pPrefix(g_Config.m_SvSqlPrefix),
-	m_pUser(g_Config.m_SvSqlUser),
-	m_pPass(g_Config.m_SvSqlPw),
-	m_pIp(g_Config.m_SvSqlIp),
-	m_Port(g_Config.m_SvSqlPort)
+		m_pServer(pGameServer->Server()),
+		m_pDatabase(g_Config.m_SvSqlDatabase),
+		m_pPrefix(g_Config.m_SvSqlPrefix),
+		m_pUser(g_Config.m_SvSqlUser),
+		m_pPass(g_Config.m_SvSqlPw),
+		m_pIp(g_Config.m_SvSqlIp),
+		m_Port(g_Config.m_SvSqlPort)
 {
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
 	NormalizeMapname(m_aMap);
@@ -67,31 +67,34 @@ bool CSqlScore::Connect()
 		dbg_msg("SQL", "ERROR: SQL connection failed");
 		return false;
 	}
-	catch (const std::exception& ex) {
+	catch (const std::exception& ex)
+	{
 		// ...
 		dbg_msg("SQL", "1 %s",ex.what());
 
-	} catch (const std::string& ex) {
+	}
+	catch (const std::string& ex)
+	{
 		// ...
 		dbg_msg("SQL", "2 %s",ex.c_str());
 	}
 	catch( int )
 	{
-	dbg_msg("SQL", "3 %s");
+		dbg_msg("SQL", "3 %s");
 	}
 	catch( float )
 	{
-	dbg_msg("SQL", "4 %s");
+		dbg_msg("SQL", "4 %s");
 	}
 
 	catch( char[] )
 	{
-	dbg_msg("SQL", "5 %s");
+		dbg_msg("SQL", "5 %s");
 	}
 
 	catch( char )
 	{
-	dbg_msg("SQL", "6 %s");
+		dbg_msg("SQL", "6 %s");
 	}
 	catch (...)
 	{
@@ -126,7 +129,7 @@ void CSqlScore::Init()
 		{
 			// create tables
 			char aBuf[768];
-			
+
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_race (Name VARCHAR(%d) NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, m_aMap, MAX_NAME_LENGTH);
 			m_pStatement->execute(aBuf);
 
@@ -134,12 +137,13 @@ void CSqlScore::Init()
 			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_race' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
 			m_pResults = m_pStatement->executeQuery(aBuf);
 
-			if(m_pResults->rowsCount() < 1){
+			if(m_pResults->rowsCount() < 1)
+			{
 				// If not... add the column				
 				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_race ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);",m_pPrefix, m_aMap);
 				m_pStatement->execute(aBuf);
 			}
-			
+
 			dbg_msg("SQL", "Tables were created successfully");
 
 			// get the best time
@@ -188,7 +192,6 @@ void CSqlScore::LoadScoreThread(void *pUser)
 			pData->m_pSqlData->ClearString(pData->m_aName);
 
 			char aBuf[512];
-
 
 			str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_%s_race WHERE Name='%s' ORDER BY time ASC LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
@@ -277,7 +280,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 		}
 
 		// disconnect from database
-		pData->m_pSqlData->Disconnect(); //TODO:Check if an exception is caught will this still execute ?
+		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
 	}
 
 	delete pData;
@@ -324,21 +327,21 @@ void CSqlScore::ShowRankThread(void *pUser)
 			char aBuf[600];
 
 			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
-			str_format(aBuf, sizeof(aBuf), 	"SELECT Rank, one_rank.Name, one_rank.Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(r.Timestamp) as Ago, UNIX_TIMESTAMP(r.Timestamp) as stamp "
-											"FROM ("
-												"SELECT * FROM ("
-													"SELECT @rownum := @rownum + 1 AS RANK, Name, Time "
-													"FROM ("
-														"SELECT Name, min(Time) as Time "
-														"FROM %s_%s_race "
-														"Group By Name) as all_top_times "
-													"ORDER BY Time ASC) as all_ranks "
-												"WHERE all_ranks.Name = '%s') as one_rank "
-											"LEFT JOIN %s_%s_race as r "
-											"ON one_rank.Name = r.Name && one_rank.Time = r.Time "
-											"ORDER BY Ago ASC "
-											"LIMIT 0,1"
-											";", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap,pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT Rank, one_rank.Name, one_rank.Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(r.Timestamp) as Ago, UNIX_TIMESTAMP(r.Timestamp) as stamp "
+					"FROM ("
+					"SELECT * FROM ("
+					"SELECT @rownum := @rownum + 1 AS RANK, Name, Time "
+					"FROM ("
+					"SELECT Name, min(Time) as Time "
+					"FROM %s_%s_race "
+					"Group By Name) as all_top_times "
+					"ORDER BY Time ASC) as all_ranks "
+					"WHERE all_ranks.Name = '%s') as one_rank "
+					"LEFT JOIN %s_%s_race as r "
+					"ON one_rank.Name = r.Name && one_rank.Time = r.Time "
+					"ORDER BY Ago ASC "
+					"LIMIT 0,1"
+					";", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap,pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
@@ -362,7 +365,8 @@ void CSqlScore::ShowRankThread(void *pUser)
 				else
 					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s)", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), agoString);
 
-				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0){
+				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
+				{
 					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 					str_format(aBuf, sizeof(aBuf), "Finished: %s ago", agoString);
 				}
@@ -476,22 +480,23 @@ void CSqlScore::ShowTimesThread(void *pUser)
 			char originalName[MAX_NAME_LENGTH];
 			strcpy(originalName,pData->m_aName);
 			pData->m_pSqlData->ClearString(pData->m_aName);
-			
+
 			char aBuf[512];
 
 			if(pData->m_Search) // last 5 times of a player
 				str_format(aBuf, sizeof(aBuf), "SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_%s_race WHERE Name = '%s' ORDER BY Ago ASC LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_Num-1);
-			else // last 5 times of server
+			else// last 5 times of server
 				str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_%s_race ORDER BY Ago ASC LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			// show top5
-			if(pData->m_pSqlData->m_pResults->rowsCount() == 0){
-				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no times in the specified range");				
+			if(pData->m_pSqlData->m_pResults->rowsCount() == 0)
+			{
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no times in the specified range");
 				goto end;
 			}
-			
+
 			str_format(aBuf, sizeof(aBuf), "------------ Last Times No %d - %d ------------",pData->m_Num,pData->m_Num + pData->m_pSqlData->m_pResults->rowsCount() - 1);
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 
@@ -506,20 +511,20 @@ void CSqlScore::ShowTimesThread(void *pUser)
 				pStamp = (int)pData->m_pSqlData->m_pResults->getInt("Stamp");
 				pTime = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 
-				agoTimeToString(pSince,pAgoString);								
-				
+				agoTimeToString(pSince,pAgoString);
+
 				if(pData->m_Search) // last 5 times of a player
 				{
 					if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 						str_format(aBuf, sizeof(aBuf), "%d min %.2f sec, don't know how long ago", (int)(pTime/60), pTime-((int)pTime/60*60));
-					else					
+					else
 						str_format(aBuf, sizeof(aBuf), "%s ago, %d min %.2f sec", pAgoString,(int)(pTime/60), pTime-((int)pTime/60*60));
 				}
 				else // last 5 times of the server
 				{
 					if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 						str_format(aBuf, sizeof(aBuf), "%s, %d m %.2f s, don't know when", pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
-					else					
+					else
 						str_format(aBuf, sizeof(aBuf), "%s, %s ago, %d m %.2f s", pData->m_pSqlData->m_pResults->getString("Name").c_str(), pAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 				}
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
@@ -539,7 +544,7 @@ void CSqlScore::ShowTimesThread(void *pUser)
 			dbg_msg("SQL", aBuf);
 			dbg_msg("SQL", "ERROR: Could not show times");
 		}
-end:
+		end:
 		// disconnect from database
 		pData->m_pSqlData->Disconnect();
 	}
@@ -561,7 +566,6 @@ void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserDa
 #endif
 }
 
-
 void CSqlScore::ShowTimes(int ClientID, int Debut)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
@@ -571,9 +575,9 @@ void CSqlScore::ShowTimes(int ClientID, int Debut)
 	Tmp->m_Search = false;
 
 	void *TimesThread = thread_create(ShowTimesThread, Tmp);
-	#if defined(CONF_FAMILY_UNIX)
-		pthread_detach((pthread_t)TimesThread);
-	#endif	
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)TimesThread);
+#endif
 }
 
 void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
@@ -584,11 +588,11 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
 	Tmp->m_pSqlData = this;
 	Tmp->m_Search = true;
-	
+
 	void *TimesThread = thread_create(ShowTimesThread, Tmp);
-	#if defined(CONF_FAMILY_UNIX)
-		pthread_detach((pthread_t)TimesThread);
-	#endif	
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)TimesThread);
+#endif
 }
 
 // anti SQL injection
@@ -598,17 +602,25 @@ void CSqlScore::ClearString(char *pString)
 	char newString[MAX_NAME_LENGTH*2-1];
 	int pos = 0;
 
-	for(int i=0;i<str_length(pString);i++) {
-		if(pString[i] == '\\') {
+	for(int i=0;i<str_length(pString);i++)
+	{
+		if(pString[i] == '\\')
+		{
 			newString[pos++] = '\\';
 			newString[pos++] = '\\';
-		} else if(pString[i] == '\'') {
+		}
+		else if(pString[i] == '\'')
+		{
 			newString[pos++] = '\\';
 			newString[pos++] = '\'';
-		} else if(pString[i] == '"') {
+		}
+		else if(pString[i] == '"')
+		{
 			newString[pos++] = '\\';
 			newString[pos++] = '"';
-		} else {
+		}
+		else
+		{
 			newString[pos++] = pString[i];
 		}
 	}
@@ -618,35 +630,41 @@ void CSqlScore::ClearString(char *pString)
 	strcpy(pString,newString);
 }
 
-void CSqlScore::NormalizeMapname(char *pString) {
+void CSqlScore::NormalizeMapname(char *pString)
+{
 	std::string validChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_");
 
-	for(int i=0;i<str_length(pString);i++) {
-		if(validChars.find(pString[i]) == std::string::npos) {
+	for(int i=0;i<str_length(pString);i++)
+	{
+		if(validChars.find(pString[i]) == std::string::npos)
+		{
 			pString[i] = '_';
 		}
 	}
 }
 
-void CSqlScore::agoTimeToString(int agoTime, char agoString[]){
+void CSqlScore::agoTimeToString(int agoTime, char agoString[])
+{
 	char aBuf[20];
-	int times[7] = {
-		60 * 60 * 24 * 365 ,
-		60 * 60 * 24 * 30 ,
-		60 * 60 * 24 * 7,
-		60 * 60 * 24 ,
-		60 * 60 ,
-		60 ,
-		1
+	int times[7] =
+	{
+			60 * 60 * 24 * 365 ,
+			60 * 60 * 24 * 30 ,
+			60 * 60 * 24 * 7,
+			60 * 60 * 24 ,
+			60 * 60 ,
+			60 ,
+			1
 	};
-	char names[7][6] = {
-		"year",
-		"month",
-		"week",
-		"day",
-		"hour",
-		"min",
-		"sec"
+	char names[7][6] =
+	{
+			"year",
+			"month",
+			"week",
+			"day",
+			"hour",
+			"min",
+			"sec"
 	};
 
 	int seconds = 0;
@@ -655,24 +673,30 @@ void CSqlScore::agoTimeToString(int agoTime, char agoString[]){
 	int i = 0;
 
 	// finding biggest match
-	for(i = 0; i<7; i++){
+	for(i = 0; i<7; i++)
+	{
 		seconds = times[i];
 		strcpy(name,names[i]);
 
 		count = floor((float)agoTime/(float)seconds);
-		if(count != 0){
+		if(count != 0)
+		{
 			break;
 		}
 	}
 
-	if(count == 1){
+	if(count == 1)
+	{
 		str_format(aBuf, sizeof(aBuf), "%d %s", 1 , name);
-	}else{
+	}
+	else
+	{
 		str_format(aBuf, sizeof(aBuf), "%d %ss", count , name);
 	}
 	strcat(agoString,aBuf);
 
-	if (i + 1 < 7) {
+	if (i + 1 < 7)
+	{
 		// getting second piece now
 		int seconds2 = times[i+1];
 		char name2[6];
@@ -681,10 +705,14 @@ void CSqlScore::agoTimeToString(int agoTime, char agoString[]){
 		// add second piece if it's greater than 0
 		int count2 = floor((float)(agoTime - (seconds * count)) / (float)seconds2);
 
-		if (count2 != 0) {
-			if(count2 == 1){
+		if (count2 != 0)
+		{
+			if(count2 == 1)
+			{
 				str_format(aBuf, sizeof(aBuf), " and %d %s", 1 , name2);
-			}else{
+			}
+			else
+			{
 				str_format(aBuf, sizeof(aBuf), " and %d %ss", count2 , name2);
 			}
 			strcat(agoString,aBuf);

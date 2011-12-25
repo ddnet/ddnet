@@ -13,7 +13,7 @@
 
 #include "../score.h"
 
-class CSqlScore : public IScore
+class CSqlScore: public IScore
 {
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
@@ -32,14 +32,20 @@ class CSqlScore : public IScore
 	char m_aMap[64];
 	int m_Port;
 
-	CGameContext *GameServer() { return m_pGameServer; }
-	IServer *Server() { return m_pServer; }
+	CGameContext *GameServer()
+	{
+		return m_pGameServer;
+	}
+	IServer *Server()
+	{
+		return m_pServer;
+	}
 
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void ShowRankThread(void *pUser);
 	static void ShowTop5Thread(void *pUser);
-	static void ShowTimesThread(void *pUser);	
+	static void ShowTimesThread(void *pUser);
 
 	void Init();
 
@@ -57,12 +63,14 @@ public:
 	~CSqlScore();
 
 	virtual void LoadScore(int ClientID);
-	virtual void SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS]);
-	virtual void ShowRank(int ClientID, const char* pName, bool Search=false);
-	virtual void ShowTimes(int ClientID, const char* pName, int Debut=1);
-	virtual void ShowTimes(int ClientID, int Debut=1);	
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1);
- 	static void agoTimeToString(int agoTime, char agoStrign[]);
+	virtual void SaveScore(int ClientID, float Time,
+			float CpTime[NUM_CHECKPOINTS]);
+	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
+	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
+	virtual void ShowTimes(int ClientID, int Debut = 1);
+	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
+			void *pUserData, int Debut = 1);
+	static void agoTimeToString(int agoTime, char agoStrign[]);
 };
 
 struct CSqlScoreData
@@ -72,7 +80,7 @@ struct CSqlScoreData
 #if defined(CONF_FAMILY_WINDOWS)
 	char m_aName[16]; // Don't edit this, or all your teeth will fall http://bugs.mysql.com/bug.php?id=50046
 #else
-	char m_aName[MAX_NAME_LENGTH*2-1];
+	char m_aName[MAX_NAME_LENGTH * 2 - 1];
 #endif
 
 	float m_Time;

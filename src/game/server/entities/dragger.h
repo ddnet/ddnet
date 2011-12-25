@@ -5,7 +5,7 @@
 #include <game/server/entity.h>
 class CCharacter;
 
-class CDragger : public CEntity
+class CDragger: public CEntity
 {
 	vec2 m_Core;
 	float m_Strength;
@@ -17,20 +17,22 @@ class CDragger : public CEntity
 	int m_CatchedTeam;
 public:
 
-
-	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, int CatchedTeam, int Layer = 0, int Number = 0);
+	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
+			int CatchedTeam, int Layer = 0, int Number = 0);
 
 	virtual void Reset();
 	virtual void Tick();
 	virtual void Snap(int snapping_client);
 };
 
-class CDraggerTeam {
+class CDraggerTeam
+{
 	CDragger * m_Draggers[MAX_CLIENTS];
 
 public:
 
-	CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW=false, int Layer = 0, int Number = 0);
+	CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW =
+			false, int Layer = 0, int Number = 0);
 	//~CDraggerTeam();
 };
 

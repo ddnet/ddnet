@@ -6,7 +6,7 @@
 
 class CGun;
 
-class CPlasma : public CEntity
+class CPlasma: public CEntity
 {
 	vec2 m_Core;
 	int m_EvalTick;
@@ -20,13 +20,12 @@ class CPlasma : public CEntity
 	void Move();
 public:
 
-	CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze, bool Explosive, int ResponsibleTeam);
-
+	CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
+			bool Explosive, int ResponsibleTeam);
 
 	virtual void Reset();
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 };
-
 
 #endif

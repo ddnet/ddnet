@@ -7,10 +7,11 @@
 #include <game/server/gamemodes/DDRace.h>
 #include "plasma.h"
 
-const float ACCEL=1.1f;
+const float ACCEL = 1.1f;
 
-CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze, bool Explosive, int ResponsibleTeam)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
+		bool Explosive, int ResponsibleTeam) :
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos = Pos;
 	m_Core = Dir;
@@ -25,14 +26,17 @@ CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze, bool E
 bool CPlasma::HitCharacter()
 {
 	vec2 To2;
-	CCharacter *Hit = GameServer()->m_World.IntersectCharacter(m_Pos, m_Pos+m_Core, 0.0f,To2);
-	if(!Hit)
+	CCharacter *Hit = GameServer()->m_World.IntersectCharacter(m_Pos,
+			m_Pos + m_Core, 0.0f, To2);
+	if (!Hit)
 		return false;
 
-	if(Hit->Team() != m_ResponsibleTeam) return false;
+	if (Hit->Team() != m_ResponsibleTeam)
+		return false;
 	m_Freeze ? Hit->Freeze() : Hit->UnFreeze();
-	if(m_Explosive)
-		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true, m_ResponsibleTeam, Hit->Teams()->TeamMask(m_ResponsibleTeam));
+	if (m_Explosive)
+		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true,
+				m_ResponsibleTeam, Hit->Teams()->TeamMask(m_ResponsibleTeam));
 	GameServer()->m_World.DestroyEntity(this);
 	return true;
 }
@@ -42,7 +46,7 @@ void CPlasma::Move()
 	m_Pos += m_Core;
 	m_Core *= ACCEL;
 }
-	
+
 void CPlasma::Reset()
 {
 	GameServer()->m_World.DestroyEntity(this);
@@ -50,7 +54,7 @@ void CPlasma::Reset()
 
 void CPlasma::Tick()
 {
-	if (m_LifeTime==0)
+	if (m_LifeTime == 0)
 	{
 		Reset();
 		return;
@@ -59,37 +63,47 @@ void CPlasma::Tick()
 	Move();
 	HitCharacter();
 
-	int Res=0;
-	Res = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos+m_Core,0, 0);
-	if(Res)
+	int Res = 0;
+	Res = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0,
+			0);
+	if (Res)
 	{
-		if(m_Explosive)
-			GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true, m_ResponsibleTeam, ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_ResponsibleTeam));
+		if (m_Explosive)
+			GameServer()->CreateExplosion(
+					m_Pos,
+					-1,
+					WEAPON_GRENADE,
+					true,
+					m_ResponsibleTeam,
+					((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.TeamMask(
+							m_ResponsibleTeam));
 		Reset();
 	}
-	
+
 }
 
 void CPlasma::Snap(int SnappingClient)
-{	
-	if(NetworkClipped(SnappingClient))
+{
+	if (NetworkClipped(SnappingClient))
 		return;
 	CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
+	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 
-	if(SnapChar &&
-			SnapChar->IsAlive() &&
-			(
-					m_Layer == LAYER_SWITCH &&
-					!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) &&
-			(!Tick))
+	if (SnapChar && SnapChar->IsAlive()
+			&& (m_Layer == LAYER_SWITCH
+					&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()])
+			&& (!Tick))
 		return;
-	if(SnapChar && (SnapChar->Team() != m_ResponsibleTeam) && (!SnapChar->GetPlayer()->m_IsUsingDDRaceClient || (GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient && !GameServer()->m_apPlayers[SnappingClient]->m_ShowOthers)))
+	if (SnapChar && (SnapChar->Team() != m_ResponsibleTeam)
+			&& (!SnapChar->GetPlayer()->m_IsUsingDDRaceClient
+					|| (GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient
+							&& !GameServer()->m_apPlayers[SnappingClient]->m_ShowOthers)))
 		return;
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	pObj->m_FromX = (int)m_Pos.x;
-	pObj->m_FromY = (int)m_Pos.y;
+	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
+			NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+	pObj->m_X = (int) m_Pos.x;
+	pObj->m_Y = (int) m_Pos.y;
+	pObj->m_FromX = (int) m_Pos.x;
+	pObj->m_FromY = (int) m_Pos.y;
 	pObj->m_StartTick = m_EvalTick;
 }

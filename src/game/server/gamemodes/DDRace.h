@@ -8,8 +8,7 @@
 #include <vector>
 #include <map>
 
-
-class CGameControllerDDRace : public IGameController
+class CGameControllerDDRace: public IGameController
 {
 public:
 
@@ -18,8 +17,8 @@ public:
 
 	CGameTeams m_Teams;
 
-	std::map < int , std::vector < vec2 > > m_TeleOuts;
-	std::map < int , std::vector < vec2 > > m_TeleCheckOuts;
+	std::map<int, std::vector<vec2> > m_TeleOuts;
+	std::map<int, std::vector<vec2> > m_TeleCheckOuts;
 
 	void InitTeleporter();
 	virtual void Tick();

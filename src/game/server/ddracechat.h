@@ -2,7 +2,6 @@
 #ifndef GAME_SERVER_DDRACECOMMANDS_H
 #define GAME_SERVER_DDRACECOMMANDS_H
 #undef GAME_SERVER_DDRACECOMMANDS_H // this file can be included several times
-
 #ifndef CHAT_COMMAND
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help)
 #endif
