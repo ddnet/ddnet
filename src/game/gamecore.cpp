@@ -455,6 +455,14 @@ void CCharacterCore::Move()
 						m_Pos = NewPos;
 					return;
 				}
+				else if(D <= 0.001f && D >= -0.001f)
+				{
+					if(a > 0.0f)
+						m_Pos = LastPos;
+					else if(distance(NewPos, pCharCore->m_Pos) > D)
+						m_Pos = NewPos;
+					return;
+				}
 			}
 			LastPos = Pos;
 		}
