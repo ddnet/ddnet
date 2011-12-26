@@ -361,10 +361,8 @@ void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 				pDisplayName, Secs);
 		SendChat(-1, CHAT_ALL, aBuf);
 	}
-	else if (pResult) // no free slot found
-		// pResult->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
-		// Todo(Shereef Marzouk: Fix this
-		dbg_msg("mutes", "mute array is full");
+	else // no free slot found
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
 }
 
 void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData)

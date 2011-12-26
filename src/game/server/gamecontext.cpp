@@ -338,6 +338,7 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 
 	// reset votes
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
+	m_VoteEnforcer = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_apPlayers[i])
@@ -525,7 +526,6 @@ void CGameContext::OnTick()
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				// Todo(Shereef Marzouk): make the level different if needed
 				Console()->ExecuteLine(m_aVoteCommand);
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
@@ -732,12 +732,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Team = ((pPlayer->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
 		else
 			Team = CHAT_ALL;
-		// Todo(Shereef Marzouk): check if this is still needed and if it is do it for vanilla
+		/*
 		if(str_length(pMsg->m_pMessage)>370)
 		{
 			SendChatTarget(ClientID, "Your Message is too long");
 			return;
-		}
+		} if it's needed someone will report it! :D, i can't check from here so...*/
 
 		// check for invalid chars
 		unsigned char *pMessage = (unsigned char *)pMsg->m_pMessage;
@@ -1970,7 +1970,7 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIP, g_Config.m_SvVoteKickBantime);
 		if(!str_comp_nocase(m_aVoteCommand, aBuf) && Level > 0)
 		{
-			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO;
+			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "CGameContext", "Aborted vote by admin login.");
 		}
 	}
