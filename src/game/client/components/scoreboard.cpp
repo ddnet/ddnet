@@ -204,7 +204,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		Spacing = 8.0f;
 	}
 
-	float ScoreOffset = x+10.0f, ScoreLength = 60.0f;
+	float ScoreOffset = x+10.0f, ScoreLength = TextRender()->TextWidth(0, 22.0f/*HeadlineFontsize*/, Localize("00:00.00"), -1);
 	float TeeOffset = ScoreOffset+ScoreLength, TeeLength = 60*TeeSizeMod;
 	float NameOffset = TeeOffset+TeeLength, NameLength = 300.0f-TeeLength;
 	float PingOffset = x+610.0f, PingLength = 65.0f;
@@ -214,7 +214,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	// render headlines
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
-	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Score"), -1);
+	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Score"), -1);
+	tw = ScoreLength > ScoreWidth ? ScoreLength : ScoreWidth;
 	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y, HeadlineFontsize, Localize("Score"), -1);
 
 	TextRender()->Text(0, NameOffset, y, HeadlineFontsize, Localize("Name"), -1);
@@ -248,6 +249,13 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// score
+		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
+		{
+			int Time = pInfo->m_Score < 0 ? 0 : pInfo->m_Score;
+			dbg_msg("Time", "%s, %d, %d", m_pClient->m_aClients[pInfo->m_ClientID].m_aName, Time, pInfo->m_Score);
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%02d", Time/6000, Time/100-(Time/6000*60), Time % 100);
+		}
+		else
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 999));
 		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 		TextRender()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
