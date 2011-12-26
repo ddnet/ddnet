@@ -444,14 +444,14 @@ void CHud::OnRender()
 	if(g_Config.m_ClShowhud)
 	{
 		if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+		{
 			RenderHealthAndAmmo(m_pClient->m_Snap.m_pLocalCharacter);
+			RenderDDRaceEffects();
+		}
 		else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 		{
 			if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
-			{
 				RenderHealthAndAmmo(&m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_Cur);
-				RenderDDRaceEffects();
-			}
 			RenderSpectatorHud();
 		}
 
