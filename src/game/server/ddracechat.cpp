@@ -665,6 +665,9 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	{
 		if (pChr)
 		{
+			if(pPlayer->m_LastEyeEmote + g_Config.m_SvEyeEmoteChangeDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+				return;
+
 			if (!str_comp(pResult->GetString(0), "angry"))
 				pChr->m_DefEmote = EMOTE_ANGRY;
 			else if (!str_comp(pResult->GetString(0), "blink"))
@@ -689,6 +692,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 
 			pChr->m_DefEmoteReset = pSelf->Server()->Tick()
 							+ Duration * pSelf->Server()->TickSpeed();
+			pPlayer->m_LastEyeEmote = pSelf->Server()->Tick();
 		}
 	}
 }

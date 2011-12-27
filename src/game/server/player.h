@@ -152,6 +152,7 @@ public:
 
 	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
 	int64 m_LastPlaytime;
+	int64 m_LastEyeEmote;
 	int m_LastTarget_x;
 	int m_LastTarget_y;
 	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
