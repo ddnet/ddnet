@@ -168,8 +168,6 @@ public:
 	};
 	int m_Hit;
 	int m_PainSoundTimer;
-	int m_DefEmote;
-	int m_DefEmoteReset;
 	int m_LastMove;
 	int m_StartTime;
 	int m_RefreshTime;
@@ -209,7 +207,6 @@ public:
 	int m_TileSIndexB;
 	int m_TileSFlagsB;
 	vec2 m_Intersection;
-	bool m_EyeEmote;
 	int64 m_LastStartWarning;
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };

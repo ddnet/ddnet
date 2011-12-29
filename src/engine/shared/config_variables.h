@@ -196,6 +196,9 @@ MACRO_CONFIG_INT(SvVotePauseTime, sv_vote_pause_time, 10, 0, 360, CFGFLAG_SERVER
 MACRO_CONFIG_INT(SvTuneReset, sv_tune_reset, 0, 0, 1, CFGFLAG_SERVER, "Whether tuning is reset after each map change or not")
 MACRO_CONFIG_INT(SvDDRaceTuneReset, sv_ddrace_tune_reset, 1, 0, 1, CFGFLAG_SERVER, "Whether DDRace tuning(sv_hit, Sv_Endless_Drag & Sv_Old_Laser) is reset after each map change or not")
 MACRO_CONFIG_INT(SvNamelessScore, sv_nameless_score, 0, 0, 1, CFGFLAG_SERVER, "Whether nameless tee has a score or not")
+MACRO_CONFIG_INT(SvTimeInBroadcast, sv_time_in_broadcast, 1, 0, 1, CFGFLAG_SERVER, "Whether to display time in broadcast every interval or not by default, later the choice can be changed by players via chat commands")
+MACRO_CONFIG_INT(SvTimeInBroadcastInterval, sv_time_in_broadcast_interval, 1, 0, 60, CFGFLAG_SERVER, "How often to update the broadcast time")
+MACRO_CONFIG_INT(SvTimeInGameTimer, sv_time_in_gametimer, 0, 0, 1, CFGFLAG_SERVER, "Whether to display time in the round/game timer or not by default, later the choice can be changed by players via chat commands")
 
 
 // these might need some fine tuning

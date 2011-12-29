@@ -226,10 +226,18 @@ private:
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
-	static void ConToggleEyeEmote(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetEyeEmote(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData);
+	static void ConSayTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConSayTimeAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetBroadcastTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetServerGameTime(IConsole::IResult *pResult, void *pUserData);
+
+
+
 
 	static void ConMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteID(IConsole::IResult *pResult, void *pUserData);

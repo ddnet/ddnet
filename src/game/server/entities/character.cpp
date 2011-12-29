@@ -920,7 +920,7 @@ void CCharacter::Snap(int SnappingClient)
 	// set emote
 	if (m_EmoteStop < Server()->Tick())
 	{
-		m_EmoteType = m_DefEmote;
+		m_EmoteType = m_pPlayer->m_DefEmote;
 		m_EmoteStop = -1;
 	}
 
@@ -992,17 +992,24 @@ CGameTeams* CCharacter::Teams()
 
 void CCharacter::HandleBroadcast()
 {
-	char aBroadcast[128];
-	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-
 	if((m_DDRaceState == DDRACE_STARTED && Server()->Tick() - m_RefreshTime >= Server()->TickSpeed()) &&
 			m_CpActive != -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_IsUsingDDRaceClient &&
 			pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
 	{
+		char aBroadcast[128];
+		m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 		float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
 		str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
 		GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
+		m_LastBroadcast = Server()->Tick();
+	}
+	else if (m_pPlayer->m_BroadcastTime && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
+	{
+		char aBuftime[64];
+		int IntTime = (int)((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
+		str_format(aBuftime, sizeof(aBuftime), "%s%d:%s%d", ((IntTime/60) > 9)?"":"0", IntTime/60, ((IntTime%60) > 9)?"":"0", IntTime%60);
+		GameServer()->SendBroadcast(aBuftime, m_pPlayer->GetCID());
 		m_LastBroadcast = Server()->Tick();
 	}
 	m_RefreshTime = Server()->Tick();
@@ -1476,10 +1483,10 @@ void CCharacter::DDRaceTick()
 
 void CCharacter::DDRacePostCoreTick()
 {
-	if (m_DefEmoteReset >= 0 && m_DefEmoteReset <= Server()->Tick())
+	if (m_pPlayer->m_DefEmoteReset >= 0 && m_pPlayer->m_DefEmoteReset <= Server()->Tick())
 		{
-			m_DefEmoteReset = -1;
-			m_EmoteType = m_DefEmote = EMOTE_NORMAL;
+		m_pPlayer->m_DefEmoteReset = -1;
+			m_EmoteType = m_pPlayer->m_DefEmote = EMOTE_NORMAL;
 			m_EmoteStop = -1;
 		}
 
@@ -1570,7 +1577,6 @@ void CCharacter::DDRaceInit()
 {
 	m_DDRaceState = DDRACE_NONE;
 	m_PrevPos = m_Pos;
-	m_EyeEmote = true;
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCID();
@@ -1580,8 +1586,6 @@ void CCharacter::DDRaceInit()
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Please join a team before you start");
 		m_LastStartWarning = Server()->Tick();
 	}
-	m_DefEmote = EMOTE_NORMAL;
-	m_DefEmoteReset = -1;
 	m_TeleCheckpoint = 0;
 	m_EndlessHook = g_Config.m_SvEndlessDrag;
 	m_Hit = g_Config.m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
