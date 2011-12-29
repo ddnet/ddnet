@@ -614,6 +614,9 @@ void CCharacter::Tick()
 		m_pPlayer->m_ForceBalanced = false;
 	}*/
 
+	if (m_Paused)
+		return;
+
 	DDRaceTick();
 
 	m_Core.m_Input = m_Input;
@@ -773,8 +776,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	if(!m_pPlayer->m_InfoSaved)
-		((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(m_pPlayer->GetCID(), 0);
+	Teams()->SetForceCharacterTeam(m_pPlayer->GetCID(), 0);
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
@@ -888,7 +890,7 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 
 	CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	if(SnapChar && !SnapChar->m_Super &&
+	if(SnapChar && !SnapChar->m_Super && !SnapChar->IsPaused() &&
 		GameServer()->m_apPlayers[SnappingClient]->GetTeam() != -1 &&
 		!CanCollide(SnappingClient) &&
 		(!GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient ||
@@ -897,6 +899,9 @@ void CCharacter::Snap(int SnappingClient)
 				)
 			)
 		)
+		return;
+
+	if (m_Paused)
 		return;
 
 	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, m_pPlayer->GetCID(), sizeof(CNetObj_Character)));
@@ -1573,8 +1578,24 @@ void CCharacter::GiveAllWeapons()
 	 return;
 }
 
+void CCharacter::Pause(bool Pause)
+{
+	m_Paused = Pause;
+	if(Pause)
+	{
+		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
+		GameServer()->m_World.RemoveEntity(this);
+	}
+	else
+	{
+		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
+		GameServer()->m_World.InsertEntity(this);
+	}
+}
+
 void CCharacter::DDRaceInit()
 {
+	m_Paused = false;
 	m_DDRaceState = DDRACE_NONE;
 	m_PrevPos = m_Pos;
 	m_LastBroadcast = 0;

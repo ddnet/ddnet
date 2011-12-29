@@ -317,67 +317,44 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 		return;
 	char aBuf[128];
 
+	if(!g_Config.m_SvPauseable)
+	{
+		ConToggleSpec(pResult, pUserData);
+		return;
+	}
+
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
 
-	if (g_Config.m_SvPauseable)
+	if (pPlayer->m_Paused == CPlayer::PAUSED_FORCE)
 	{
-		CCharacter* pChr = pPlayer->GetCharacter();
-		if (!pPlayer->GetTeam() && pChr
-				&& (!pChr->GetWeaponGot(WEAPON_NINJA) || pChr->m_FreezeTime)
-				&& pChr->IsGrounded() && pChr->m_Pos == pChr->m_PrevPos
-				&& !pPlayer->m_InfoSaved)
-		{
-			if (pPlayer->m_LastSetTeam
-					+ pSelf->Server()->TickSpeed() * g_Config.m_SvPauseFrequency
-					<= pSelf->Server()->Tick())
-			{
-				pPlayer->SaveCharacter();
-				pPlayer->m_InfoSaved = true;
-				pPlayer->SetTeam(TEAM_SPECTATORS);
-			}
-			else
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
-						"pause", "You can\'t pause that often.");
-		}
-		else if (pPlayer->GetTeam() == TEAM_SPECTATORS && pPlayer->m_InfoSaved
-				&& pPlayer->m_ForcePauseTime == 0)
-		{
-			pPlayer->m_PauseInfo.m_Respawn = true;
-			pPlayer->SetTeam(TEAM_RED);
-			pPlayer->m_InfoSaved = false;
-			//pPlayer->LoadCharacter();//TODO:Check if this system Works
-		}
-		else if (pChr)
-			pSelf->Console()->Print(
-					IConsole::OUTPUT_LEVEL_STANDARD,
-					"pause",
-					pChr->GetWeaponGot(WEAPON_NINJA) ?
-							"You can't use /pause while you are a ninja" :
-							(!pChr->IsGrounded()) ?
-									"You can't use /pause while you are a in air" :
-									"You can't use /pause while you are moving");
-		else if (pPlayer->m_ForcePauseTime > 0)
-		{
-			str_format(aBuf, sizeof(aBuf),
-					"You have been force-paused. %ds left.",
-					pPlayer->m_ForcePauseTime / pSelf->Server()->TickSpeed());
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
-					aBuf);
-		}
-		else if (pPlayer->m_ForcePauseTime < 0)
-		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
-					"You have been force-paused.");
-		}
-		else
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
-					"No pause data saved.");
+		str_format(aBuf, sizeof(aBuf), "You are force-paused. %ds left.", pPlayer->m_ForcePauseTime/pSelf->Server()->TickSpeed());
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause", aBuf);
+		return;
 	}
-	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
-				"Pause isn't allowed on this server.");
+
+	pPlayer->m_Paused = (pPlayer->m_Paused == CPlayer::PAUSED_PAUSED) ? CPlayer::PAUSED_NONE : CPlayer::PAUSED_PAUSED;
+}
+
+void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID)) return;
+	char aBuf[128];
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(pPlayer->m_Paused == CPlayer::PAUSED_FORCE)
+	{
+		str_format(aBuf, sizeof(aBuf), "You are force-paused. %ds left.", pPlayer->m_ForcePauseTime/pSelf->Server()->TickSpeed());
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
+		return;
+	}
+
+	pPlayer->m_Paused = (pPlayer->m_Paused == CPlayer::PAUSED_SPEC) ? CPlayer::PAUSED_NONE : CPlayer::PAUSED_SPEC;
 }
 
 void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)

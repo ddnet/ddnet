@@ -1019,7 +1019,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			//if(m_pController->CanChangeTeam(pPlayer, pMsg->m_Team))
 
-			if(pPlayer->GetTeam()==-1 && pPlayer->m_InfoSaved)
+			if(pPlayer->m_Paused)
 				SendChatTarget(ClientID,"Use /pause first then you can kill");
 			else
 			{
@@ -1082,7 +1082,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	{
 		CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
 
-		if(pPlayer->GetTeam() != TEAM_SPECTATORS || pPlayer->m_SpectatorID == pMsg->m_SpectatorID || ClientID == pMsg->m_SpectatorID ||
+		if((pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->m_Paused) || pPlayer->m_SpectatorID == pMsg->m_SpectatorID || ClientID == pMsg->m_SpectatorID ||
 			(g_Config.m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode+Server()->TickSpeed()*3 > Server()->Tick()))
 			return;
 

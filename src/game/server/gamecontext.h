@@ -215,6 +215,7 @@ private:
 	static void ConRules(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleSpec(IConsole::IResult *pResult, void *pUserData);
 	static void ConForcePause(IConsole::IResult *pResult, void *pUserData);
 	static void ConTop5(IConsole::IResult *pResult, void *pUserData);
 	#if defined(CONF_SQL)

@@ -63,6 +63,7 @@ public:
 	void SetEmote(int Emote, int Tick);
 
 	bool IsAlive() const { return m_Alive; }
+	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 
 private:
@@ -70,6 +71,7 @@ private:
 	class CPlayer *m_pPlayer;
 
 	bool m_Alive;
+	bool m_Paused;
 
 	// weapon info
 	CEntity *m_apHitObjects[10];
@@ -144,6 +146,7 @@ private:
 	void HandleBroadcast();
 public:
 	CGameTeams* Teams();
+	void Pause(bool Pause);
 	bool Freeze(int Time);
 	bool Freeze();
 	bool UnFreeze();

@@ -287,45 +287,19 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameContext *pSelf = (CGameContext *) pUserData;
-	// if(!CheckClientID(pResult->m_ClientID)) return;
-	CServer* pServ = (CServer*) pSelf->Server();
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CServer* pServ = (CServer*)pSelf->Server();
 	int Victim = pResult->GetVictim();
 	int Seconds = 0;
-	char aBuf[128];
-
-	if (pResult->NumArguments() > 0 && pResult->m_ClientID < 0)
-		Seconds = clamp(pResult->GetInteger(0), 0, 15);
-	//else if(pResult->NumArguments() > 0 && CheckClientID(pResult->m_ClientID))
-	//Seconds = clamp(pResult->GetInteger(1), 0, 360);
+	if (pResult->NumArguments() > 0)
+		Seconds = clamp(pResult->GetInteger(0), 0, 360);
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
-	if (!pPlayer || (!Seconds && pResult->m_ClientID >= 0))
+	if (!pPlayer)
 		return;
 
-	CCharacter* pChr = pPlayer->GetCharacter();
-	if (!pPlayer->GetTeam() && pChr && !pPlayer->m_InfoSaved
-			&& pResult->m_ClientID < 0)
-	{
-		pPlayer->SaveCharacter();
-		pPlayer->m_InfoSaved = true;
-		pPlayer->SetTeam(TEAM_SPECTATORS);
-		pPlayer->m_ForcePauseTime = Seconds * pServ->TickSpeed();
-	}
-	else
-	{
-		pPlayer->m_ForcePauseTime = Seconds * pServ->TickSpeed();
-	}
-	if (pResult->m_ClientID < 0)
-		str_format(aBuf, sizeof(aBuf),
-				"'%s' has been force-paused for %d seconds",
-				pServ->ClientName(Victim), Seconds);
-	else
-		str_format(aBuf, sizeof(aBuf),
-				"Force-pause of '%s' have been removed by '%s'",
-				pServ->ClientName(Victim),
-				pServ->ClientName(pResult->m_ClientID));
-	pSelf->SendChat(-1, CHAT_ALL, aBuf);
+	pPlayer->m_ForcePauseTime = Seconds*pServ->TickSpeed();
+	pPlayer->m_Paused = CPlayer::PAUSED_FORCE;
 }
 
 void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,

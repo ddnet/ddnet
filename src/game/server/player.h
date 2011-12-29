@@ -112,36 +112,20 @@ private:
 	// DDRace
 
 public:
-
-	struct PauseInfo
+	enum
 	{
-		CCharacterCore m_Core;
-		int m_StartTime;
-		int m_DDRaceState;
-		int m_FreezeTime;
-		int m_Armor;
-		int m_LastMove;
-		vec2 m_PrevPos;
-		int m_ActiveWeapon;
-		int m_LastWeapon;
-		bool m_Respawn;
-		bool m_aHasWeapon[NUM_WEAPONS];
-		bool m_Super;
-		bool m_DeepFreeze;
-		bool m_EndlessHook;
-		int m_PauseTime;
-		int m_Team;
-		int m_TeleCheckpoint;
-		int m_CpActive;
-		float m_CpCurrent[25];
-		int m_Hit;
-		bool m_Solo;
-	} m_PauseInfo;
+		PAUSED_NONE=0,
+		PAUSED_SPEC,
+		PAUSED_PAUSED,
+		PAUSED_FORCE
+	};
+
+	int m_Paused;
+	int64 m_NextPauseTick;
+
+	void ProcessPause();
 	int m_ForcePauseTime;
-	bool m_InfoSaved;
 	bool IsPlaying();
-	void LoadCharacter();
-	void SaveCharacter();
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
 	int m_Authed;
