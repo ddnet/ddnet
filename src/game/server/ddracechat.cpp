@@ -753,6 +753,8 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	CCharacter* pChr = pPlayer->GetCharacter();
 	if (!pChr)
 		return;
+	if(pChr->m_DDRaceState != DDRACE_STARTED)
+		return;
 
 	char aBuftime[64];
 	int IntTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime)
@@ -774,6 +776,8 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 		return;
 	CCharacter* pChr = pPlayer->GetCharacter();
 	if (!pChr)
+		return;
+	if(pChr->m_DDRaceState != DDRACE_STARTED)
 		return;
 
 	char aBuftime[64];
