@@ -860,8 +860,8 @@ void CGameContext::ConSetServerGameTime(IConsole::IResult *pResult, void *pUserD
 				IConsole::OUTPUT_LEVEL_STANDARD,
 				"emote",
 				(pPlayer->m_GameTimerTime) ?
-						"Time is displayed in broadcast now." :
-						"Time will not be displayed in broadcast now");
+						"Time is displayed in game/round timer now." :
+						"Time will not be displayed in game/round timer now");
 		return;
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
