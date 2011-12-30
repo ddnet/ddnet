@@ -868,7 +868,7 @@ void CGameContext::ConSetServerGameTime(IConsole::IResult *pResult, void *pUserD
 		pPlayer->m_GameTimerTime = true;
 	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
 		pPlayer->m_GameTimerTime = false;
-	else if(str_comp_nocase(pResult->GetString(0), "toggle"))
+	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
 		pPlayer->m_GameTimerTime = !pPlayer->m_GameTimerTime;
 
 	pSelf->Console()->Print(

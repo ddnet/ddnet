@@ -351,7 +351,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 						if(Result.GetVictim() == CResult::VICTIM_ME)
 							Result.SetVictim(ClientID);
 
-						if(pCommand->m_Flags&CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
+						if(pCommand->m_Flags&CMDFLAG_TEST && (!g_Config.m_SvTestingCommands || g_Config.m_SvRegister))
 							return;
 
 						if (Result.HasVictim())
