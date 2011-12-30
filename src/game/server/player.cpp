@@ -40,8 +40,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_PauseInfo.m_Respawn = false;
 	m_EyeEmote = true;
 	m_BroadcastTime = g_Config.m_SvTimeInBroadcast;
-	m_BroadcastTime = g_Config.m_SvTimeInGameTimer;
-	m_GameTimerTime = true;
+	m_GameTimerTime = g_Config.m_SvTimeInGameTimer;
 	m_DefEmote = EMOTE_HAPPY;
 	m_DefEmoteReset = -1;
 

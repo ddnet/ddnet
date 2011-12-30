@@ -23,7 +23,7 @@ CHAT_COMMAND("saytime", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConSayTime, this, "Priv
 CHAT_COMMAND("saytimeall", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConSayTimeAll, this, "Publicly messages everyone your current time in this current running race")
 CHAT_COMMAND("time", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConTime, this, "Privately shows you your current time in this current running race in the broadcast message")
 CHAT_COMMAND("broadcasttime", "?s", CFGFLAG_CHAT|CFGFLAG_SERVER, ConSetBroadcastTime, this, "Personal Setting of showing time in the broadcast, broadcasttime s, where s = on for on, off for off, toggle for toggle and nothing to show current status")
-CHAT_COMMAND("servergametime", "?s", CFGFLAG_CHAT|CFGFLAG_SERVER, ConSetServerGameTime, this, "Personal Setting of showing time in the round/game timer, servergametime s, where s = on for on off for off, toggle for toggle and nothing to show current status")
+CHAT_COMMAND("gametimertime", "?s", CFGFLAG_CHAT|CFGFLAG_SERVER, ConSetServerGameTime, this, "Personal Setting of showing time in the round/game timer, servergametime s, where s = on for on off for off, toggle for toggle and nothing to show current status")
 
 #if defined(CONF_SQL)
 CHAT_COMMAND("times", "?s?i", CFGFLAG_CHAT|CFGFLAG_SERVER, ConTimes, this, "/times ?s?i shows last 5 times of the server or of a player beginning with name s starting with time i (i = 1 by default)")

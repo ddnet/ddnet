@@ -626,11 +626,11 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 						"You don't have any eye emotes, remember to bind some. (until you die)");
 		return;
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "on"))
+	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
 		pPlayer->m_EyeEmote = true;
-	else if(str_comp_nocase(pResult->GetString(0), "off"))
+	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
 		pPlayer->m_EyeEmote = false;
-	else if(str_comp_nocase(pResult->GetString(0), "toggle"))
+	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
 		pPlayer->m_EyeEmote = !pPlayer->m_EyeEmote;
 	pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -831,11 +831,11 @@ void CGameContext::ConSetBroadcastTime(IConsole::IResult *pResult, void *pUserDa
 						"Time will not be displayed in broadcast now");
 		return;
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "on"))
+	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
 		pPlayer->m_BroadcastTime = true;
-	else if(str_comp_nocase(pResult->GetString(0), "off"))
+	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
 		pPlayer->m_BroadcastTime = false;
-	else if(str_comp_nocase(pResult->GetString(0), "toggle"))
+	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
 		pPlayer->m_BroadcastTime = !pPlayer->m_BroadcastTime;
 
 	pSelf->Console()->Print(
@@ -864,9 +864,9 @@ void CGameContext::ConSetServerGameTime(IConsole::IResult *pResult, void *pUserD
 						"Time will not be displayed in broadcast now");
 		return;
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "on"))
+	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
 		pPlayer->m_GameTimerTime = true;
-	else if(str_comp_nocase(pResult->GetString(0), "off"))
+	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
 		pPlayer->m_GameTimerTime = false;
 	else if(str_comp_nocase(pResult->GetString(0), "toggle"))
 		pPlayer->m_GameTimerTime = !pPlayer->m_GameTimerTime;
