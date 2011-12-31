@@ -304,7 +304,7 @@ void CPlayer::Respawn()
 		m_Spawning = true;
 }
 
-void CPlayer::SetTeam(int Team)
+void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
 	// clamp the team
 	Team = GameServer()->m_pController->ClampTeam(Team);
@@ -312,8 +312,11 @@ void CPlayer::SetTeam(int Team)
 		return;
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
-	GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	if(DoChatMsg)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	}
 
 	KillCharacter();
 

@@ -546,6 +546,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	//
 	m_RconAuthed = 0;
+	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
 	m_NetClient.Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
@@ -967,7 +968,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Info.m_NumPlayers < 0 || Info.m_NumPlayers > Info.m_NumClients || Info.m_MaxPlayers < 0 || Info.m_MaxPlayers > Info.m_MaxClients)
 			return;
 
-		net_addr_str(&pPacket->m_Address, Info.m_aAddress, sizeof(Info.m_aAddress));
+		net_addr_str(&pPacket->m_Address, Info.m_aAddress, sizeof(Info.m_aAddress), true);
 
 		for(int i = 0; i < Info.m_NumClients; i++)
 		{
@@ -1156,9 +1157,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			int Result = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
 				m_RconAuthed = Result;
+			int Old = m_UseTempRconCommands;
 			m_UseTempRconCommands = Unpacker.GetInt();
 			if(Unpacker.Error() != 0)
 				m_UseTempRconCommands = 0;
+			if(Old != 0 && m_UseTempRconCommands == 0)
+				m_pConsole->DeregisterTempAll();
 		}
 		else if(Msg == NETMSG_RCON_LINE)
 		{
