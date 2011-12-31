@@ -890,15 +890,14 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 
 	CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	if(SnapChar && !SnapChar->m_Super && !SnapChar->IsPaused() &&
-		GameServer()->m_apPlayers[SnappingClient]->GetTeam() != -1 &&
-		!CanCollide(SnappingClient) &&
-		(!GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient ||
-				(GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient &&
-				!GameServer()->m_apPlayers[SnappingClient]->m_ShowOthers
-				)
-			)
-		)
+	CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+
+	if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID != -1
+		&& !CanCollide(SnapPlayer->m_SpectatorID) && !SnapPlayer->m_ShowOthers)
+		return;
+
+	if( SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->m_Paused && SnapChar && !SnapChar->m_Super
+		&& !CanCollide(SnappingClient) && !SnapPlayer->m_ShowOthers)
 		return;
 
 	if (m_Paused)
