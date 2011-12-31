@@ -23,6 +23,7 @@
 #include "gamemodes/DDRace.h"
 #include "score.h"
 #include "score/file_score.h"
+#include <time.h>
 #if defined(CONF_SQL)
 #include "score/sql_score.h"
 #endif
@@ -644,14 +645,42 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		if(g_Config.m_SvWelcome[0]!=0)
 			SendChatTarget(ClientID,g_Config.m_SvWelcome);
-		SendBroadcast("Happy 2012 From GreYFoX", ClientID);
 		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+		time_t rawtime;
+		struct tm* timeinfo;
+		char d[16], m [16], y[16];
+		int dd, mm, yy;
+
+		time ( &rawtime );
+		timeinfo = localtime ( &rawtime );
+
+		strftime (d,sizeof(y),"%d",timeinfo);
+		strftime (m,sizeof(m),"%m",timeinfo);
+		strftime (y,sizeof(y),"%Y",timeinfo);
+		dd = atoi(d);
+		mm = atoi(m);
+		yy = atoi(y);
+		if((mm == 12 && dd >= 20))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", yy+1);
+			SendBroadcast(aBuf, ClientID);
+		}
+		else if(mm == 1 && dd <= 20)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", yy);
+			SendBroadcast(aBuf, ClientID);
+		}
 	}
 	m_VoteUpdate = true;
 
 	m_apPlayers[ClientID]->m_Authed = ((CServer*)Server())->m_aClients[ClientID].m_Authed;
+
+
 }
 
 void CGameContext::OnClientConnected(int ClientID)
