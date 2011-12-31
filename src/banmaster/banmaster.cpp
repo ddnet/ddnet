@@ -54,7 +54,7 @@ int SendResponse(NETADDR *pAddr, NETADDR *pCheck)
 	CBan* pBan = CheckBan(pCheck);
 	if(pBan)
 	{
-		net_addr_str(pCheck, pIpBanContent, NETADDR_MAXSTRSIZE);
+		net_addr_str(pCheck, pIpBanContent, NETADDR_MAXSTRSIZE, false);
 		char *pIpBanReason = pIpBanContent + (str_length(pIpBanContent) + 1);
 		str_copy(pIpBanReason, pBan->m_aReason, 256);
 		
@@ -80,12 +80,12 @@ void AddBan(NETADDR *pAddr, const char *pReason)
 
 	CBan *pBan = CheckBan(pAddr);
 	char aAddressStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(pAddr, aAddressStr, sizeof(aAddressStr));
+	net_addr_str(pAddr, aAddressStr, sizeof(aAddressStr), false);
 
 	if(pBan)
 	{
 		char aAddressStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(pAddr, aAddressStr, sizeof(aAddressStr));
+		net_addr_str(pAddr, aAddressStr, sizeof(aAddressStr), false);
 		dbg_msg("banmaster", "updated ban, ip=%s oldreason='%s' reason='%s'", aAddressStr, pBan->m_aReason, pReason);
 	
 		str_copy(pBan->m_aReason, pReason, sizeof(m_aBans[m_NumBans].m_aReason));
@@ -124,7 +124,7 @@ void PurgeBans()
 		{
 			// remove ban
 			char aBuf[NETADDR_MAXSTRSIZE];
-			net_addr_str(&m_aBans[i].m_Address, aBuf, sizeof(aBuf));
+			net_addr_str(&m_aBans[i].m_Address, aBuf, sizeof(aBuf), false);
 			dbg_msg("banmaster", "ban expired, ip=%s reason='%s'", aBuf, m_aBans[i].m_aReason);
 			m_aBans[i] = m_aBans[m_NumBans - 1];
 			m_NumBans--;
@@ -220,7 +220,7 @@ int main(int argc, const char **argv) // ignore_convention
 		while(m_Net.Recv(&Packet))
 		{
 			char aAddressStr[NETADDR_MAXSTRSIZE];
-			net_addr_str(&Packet.m_Address, aAddressStr, sizeof(aAddressStr));
+			net_addr_str(&Packet.m_Address, aAddressStr, sizeof(aAddressStr), false);
 
 			if((unsigned)Packet.m_DataSize >= sizeof(BANMASTER_IPCHECK) && mem_comp(Packet.m_pData, BANMASTER_IPCHECK, sizeof(BANMASTER_IPCHECK)) == 0)
 			{
@@ -237,7 +237,7 @@ int main(int argc, const char **argv) // ignore_convention
 					int Banned = SendResponse(&Packet.m_Address, &CheckAddr);
 
 					char aBuf[NETADDR_MAXSTRSIZE];
-					net_addr_str(&CheckAddr, aBuf, sizeof(aBuf));
+					net_addr_str(&CheckAddr, aBuf, sizeof(aBuf), false);
 					dbg_msg("banmaster", "responded to checkmsg, ip=%s checkaddr=%s result=%s", aAddressStr, aBuf, (Banned) ? "ban" : "ok");
 				}
 			}
