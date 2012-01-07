@@ -6,7 +6,7 @@ Please visit http://www.DDRace.info for up-to-date information about
 DDRace, including new versions, custom maps and much more.
 
 Teeworlds README is as follows:
-Copyright (c) 2011 Magnus Auvinen
+Copyright (c) 2012 Magnus Auvinen
 
 
 This software is provided 'as-is', without any express or implied
