@@ -186,7 +186,7 @@ public:
 
 	virtual bool LineIsValid(const char *pStr);
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1);
-	virtual void ExecuteLineFlag(const char *pStr, int FlagMask);
+	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1);
 	virtual void ExecuteFile(const char *pFilename, int ClientID = -1);
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
