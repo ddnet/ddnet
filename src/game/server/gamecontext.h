@@ -239,8 +239,7 @@ private:
 	static void ConSayTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTimeAll(IConsole::IResult *pResult, void *pUserData);
 	static void ConTime(IConsole::IResult *pResult, void *pUserData);
-	static void ConSetBroadcastTime(IConsole::IResult *pResult, void *pUserData);
-	static void ConSetServerGameTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 
 
 

@@ -754,7 +754,7 @@ void IGameController::Snap(int SnappingClient)
 
 	CCharacter *pChr;
 	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
-	if(pPlayer && pPlayer->m_GameTimerTime && SnappingClient >= 0)
+	if(pPlayer && !pPlayer->m_TimerType && SnappingClient >= 0)
 		if((pChr = pPlayer->GetCharacter()))
 			pGameInfoObj->m_RoundStartTick = (pChr->m_DDRaceState == DDRACE_STARTED)?pChr->m_StartTime:m_RoundStartTick;
 }

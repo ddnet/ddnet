@@ -38,9 +38,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
 	m_EyeEmote = true;
-	m_BroadcastTime = g_Config.m_SvTimeInBroadcast;
-	m_GameTimerTime = g_Config.m_SvTimeInGameTimer;
-	m_DefEmote = EMOTE_HAPPY;
+	m_TimerType = g_Config.m_SvDefaultTimerType;
+	m_DefEmote = EMOTE_NORMAL;
 	m_DefEmoteReset = -1;
 
 	GameServer()->Score()->PlayerData(ClientID)->Reset();
