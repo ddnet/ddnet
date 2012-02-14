@@ -10,6 +10,7 @@
 #include <game/gamecore.h>
 #include "gamemodes/DDRace.h"
 #include <stdio.h>
+#include <time.h>
 
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
@@ -39,7 +40,22 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_ChatScore = 0;
 	m_EyeEmote = true;
 	m_TimerType = g_Config.m_SvDefaultTimerType;
-	m_DefEmote = EMOTE_NORMAL;
+
+	//New Year
+	time_t rawtime;
+	struct tm* timeinfo;
+	char d[16], m[16], y[16];
+	int dd, mm, yy;
+	time ( &rawtime );
+	timeinfo = localtime ( &rawtime );
+	strftime (d,sizeof(y),"%d",timeinfo);
+	strftime (m,sizeof(m),"%m",timeinfo);
+	strftime (y,sizeof(y),"%Y",timeinfo);
+	dd = atoi(d);
+	mm = atoi(m);
+	yy = atoi(y);
+
+	m_DefEmote = ((mm == 12 && dd >= 20) || (mm == 1 && dd <= 20)) ? EMOTE_HAPPY : EMOTE_NORMAL;
 	m_DefEmoteReset = -1;
 
 	GameServer()->Score()->PlayerData(ClientID)->Reset();

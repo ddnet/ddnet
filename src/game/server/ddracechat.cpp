@@ -11,6 +11,7 @@
 #endif
 
 bool CheckClientID(int ClientID);
+char* TimerType(int TimerType);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
@@ -718,6 +719,12 @@ bool CheckClientID(int ClientID)
 	return true;
 }
 
+char* TimerType(int TimerType)
+{
+	char msg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
+	char spreenote[10][32] = { "On A Killing Spree", "On A Rampage", "Dominating", "Unstoppable", "Godlike", "Cheating", "Botting", "On Alcohol", "On Drugs", "A Professional!" };
+	return msg[TimerType];
+}
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -801,29 +808,32 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
-	if(pResult->NumArguments() == 0)
-	{
-		pSelf->Console()->Print(
-						IConsole::OUTPUT_LEVEL_STANDARD,
-						"timer",
-						(pPlayer->m_TimerType) ?
-								"Time is displayed in broadcast now." :
-								"Time is displayed in game/round timer now");
+	char aBuf[128];
+	if(pPlayer->m_TimerType <= 2 && pPlayer->m_TimerType >= 0)
+		str_format(aBuf, sizeof(aBuf), "Timer is displayed in", TimerType(pPlayer->m_TimerType));
+	else if(pPlayer->m_TimerType == 3)
+		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
+
+	if(pResult->NumArguments() == 0) {
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 		return;
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0) {
 		pSelf->SendBroadcast("", pResult->m_ClientID);
-		pPlayer->m_TimerType = false;
+		pPlayer->m_TimerType = 0;
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "broadcast") == 0)
-			pPlayer->m_TimerType = true;
-	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
-			pPlayer->m_TimerType = !pPlayer->m_TimerType;
-
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
-			"timer",
-			(pPlayer->m_TimerType) ?
-					"Time is displayed in broadcast now." :
-					"Time is displayed in game/round timer now.");
-
+			pPlayer->m_TimerType = 1;
+	else if(str_comp_nocase(pResult->GetString(0), "both") == 0)
+			pPlayer->m_TimerType = 2;
+	else if(str_comp_nocase(pResult->GetString(0), "none") == 0)
+			pPlayer->m_TimerType = 3;
+	else if(str_comp_nocase(pResult->GetString(0), "cycle") == 0) {
+		if(pPlayer->m_TimerType < 3)
+			pPlayer->m_TimerType++;
+		else if(pPlayer->m_TimerType == 3)
+			pPlayer->m_TimerType = 0;
+	}
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 }
+
