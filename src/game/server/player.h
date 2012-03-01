@@ -143,8 +143,7 @@ public:
 	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	char m_pAfkMsg[160];
 	bool m_EyeEmote;
-	bool m_BroadcastTime;
-	bool m_GameTimerTime;
+	int m_TimerType;
 	int m_DefEmote;
 	int m_DefEmoteReset;
 #if defined(CONF_SQL)

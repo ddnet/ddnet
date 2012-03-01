@@ -1008,7 +1008,7 @@ void CCharacter::HandleBroadcast()
 		GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
 		m_LastBroadcast = Server()->Tick();
 	}
-	else if (m_pPlayer->m_BroadcastTime && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
+	else if ((m_pPlayer->m_TimerType == 1 || m_pPlayer->m_TimerType == 2) && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
 	{
 		char aBuftime[64];
 		int IntTime = (int)((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
