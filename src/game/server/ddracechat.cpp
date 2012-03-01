@@ -722,7 +722,6 @@ bool CheckClientID(int ClientID)
 char* TimerType(int TimerType)
 {
 	char msg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
-	char spreenote[10][32] = { "On A Killing Spree", "On A Rampage", "Dominating", "Unstoppable", "Godlike", "Cheating", "Botting", "On Alcohol", "On Drugs", "A Professional!" };
 	return msg[TimerType];
 }
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
