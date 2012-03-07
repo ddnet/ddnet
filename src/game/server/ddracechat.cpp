@@ -328,6 +328,12 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
+	if (pPlayer->m_Paused == CPlayer::PAUSED_SPEC && g_Config.m_SvPauseable)
+	{
+		ConToggleSpec(pResult, pUserData);
+		return;
+	}
+
 	if (pPlayer->m_Paused == CPlayer::PAUSED_FORCE)
 	{
 		str_format(aBuf, sizeof(aBuf), "You are force-paused. %ds left.", pPlayer->m_ForcePauseTime/pSelf->Server()->TickSpeed());
