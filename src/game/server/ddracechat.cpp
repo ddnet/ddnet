@@ -328,6 +328,17 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
+	if (pPlayer->GetCharacter() == 0)
+	{
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
+	"You can't pause while you are dead/a spectator.");
+	}
+	if (pPlayer->m_Paused == CPlayer::PAUSED_SPEC && g_Config.m_SvPauseable)
+	{
+		ConToggleSpec(pResult, pUserData);
+		return;
+	}
+
 	if (pPlayer->m_Paused == CPlayer::PAUSED_FORCE)
 	{
 		str_format(aBuf, sizeof(aBuf), "You are force-paused. %ds left.", pPlayer->m_ForcePauseTime/pSelf->Server()->TickSpeed());
@@ -347,6 +358,12 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
+
+	if (pPlayer->GetCharacter() == 0)
+	{
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec",
+	"You can't spec while you are dead/a spectator.");
+	}
 
 	if(pPlayer->m_Paused == CPlayer::PAUSED_FORCE)
 	{
