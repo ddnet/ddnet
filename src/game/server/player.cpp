@@ -396,34 +396,37 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 	}
 	else
 	{
-		// not playing, check how long
-		if(m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.5))
+		if(!m_Paused)
 		{
-			sprintf(
-				m_pAfkMsg,
-				"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-				(int)(g_Config.m_SvMaxAfkTime*0.5),
-				g_Config.m_SvMaxAfkTime
-			);
-			m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-			m_Sent1stAfkWarning = 1;
-		}
-		else if(m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.9))
-		{
-			sprintf(
-				m_pAfkMsg,
-				"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-				(int)(g_Config.m_SvMaxAfkTime*0.9),
-				g_Config.m_SvMaxAfkTime
-			);
-			m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
-			m_Sent2ndAfkWarning = 1;
-		}
-		else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkTime)
-		{
-			CServer* serv =	(CServer*)m_pGameServer->Server();
-			serv->Kick(m_ClientID,"Away from keyboard");
-			return true;
+			// not playing, check how long
+			if(m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.5))
+			{
+				sprintf(
+					m_pAfkMsg,
+					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
+					(int)(g_Config.m_SvMaxAfkTime*0.5),
+					g_Config.m_SvMaxAfkTime
+				);
+				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
+				m_Sent1stAfkWarning = 1;
+			}
+			else if(m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.9))
+			{
+				sprintf(
+					m_pAfkMsg,
+					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
+					(int)(g_Config.m_SvMaxAfkTime*0.9),
+					g_Config.m_SvMaxAfkTime
+				);
+				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
+				m_Sent2ndAfkWarning = 1;
+			}
+			else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkTime)
+			{
+				CServer* serv =	(CServer*)m_pGameServer->Server();
+				serv->Kick(m_ClientID,"Away from keyboard");
+				return true;
+			}
 		}
 	}
 	return false;
