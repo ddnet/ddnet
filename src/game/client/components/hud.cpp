@@ -487,8 +487,8 @@ void CHud::OnRender()
 			RenderConnectionWarning();
 		RenderTeambalanceWarning();
 		RenderVoting();
+		RenderRecord();
 	}
-	RenderRecord();
 	RenderCursor();
 }
 
