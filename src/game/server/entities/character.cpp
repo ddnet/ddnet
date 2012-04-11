@@ -1242,6 +1242,7 @@ void CCharacter::HandleTiles(int Index)
 				GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Server admin requires you to be in a team and with other tees to start");
 				m_LastStartWarning = Server()->Tick();
 			}
+			Die(GetPlayer()->GetCID(), WEAPON_WORLD);
 			CanBegin = false;
 		}
 		if(CanBegin)
