@@ -1,7 +1,5 @@
 #pragma once
 
-#include <base/tl/threading.h>
-
 #include <engine/graphics.h>
 
 class CCommandBuffer
@@ -120,6 +118,12 @@ public:
 		BLEND_ADDITIVE,
 	};
 
+	enum
+	{
+		WRAP_REPEAT = 0,
+		WRAP_CLAMP,
+	};
+
 	struct SPoint { float x, y, z; };
 	struct STexCoord { float u, v; };
 	struct SColor { float r, g, b, a; };
@@ -142,6 +146,7 @@ public:
 	struct SState
 	{
 		int m_BlendMode;
+		int m_WrapMode;
 		int m_Texture;
 		SPoint m_ScreenTL;
 		SPoint m_ScreenBR;
@@ -381,6 +386,9 @@ public:
 	virtual void BlendNone();
 	virtual void BlendNormal();
 	virtual void BlendAdditive();
+
+	virtual void WrapNormal();
+	virtual void WrapClamp();
 
 	virtual int MemoryUsage() const;
 

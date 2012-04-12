@@ -1336,7 +1336,7 @@ int CServer::Run()
 
 	// start server
 	NETADDR BindAddr;
-	if(g_Config.m_SvBindaddr[0] && net_host_lookup(g_Config.m_SvBindaddr, &BindAddr, NETTYPE_ALL) == 0)
+	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
 	{
 		// sweet!
 		BindAddr.port = g_Config.m_SvPort;
@@ -1350,7 +1350,7 @@ int CServer::Run()
 
 	if(!m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0))
 	{
-		dbg_msg("server", "couldn't open socket. port might already be in use");
+		dbg_msg("server", "couldn't open socket. port %d might already be in use", g_Config.m_SvPort);
 		return -1;
 	}
 
@@ -1567,6 +1567,11 @@ void CServer::DemoRecorder_HandleAutoStart()
 	}
 }
 
+bool CServer::DemoRecorder_IsRecording()
+{
+	return m_DemoRecorder.IsRecording();
+}
+
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
 	CServer* pServer = (CServer *)pUser;
@@ -1742,7 +1747,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER|CFGFLAG_ECON);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
-	IStorage *pStorage = CreateStorage("Teeworlds", argc, argv); // ignore_convention
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
 
 	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);

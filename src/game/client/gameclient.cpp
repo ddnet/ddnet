@@ -473,7 +473,7 @@ void CGameClient::OnRender()
 	m_NewPredictedTick = false;
 
 	// check if client info has to be resent
-	if(m_LastSendInfo && Client()->State() == IClient::STATE_ONLINE && !m_pMenus->IsActive() && m_LastSendInfo+time_freq()*5 < time_get())
+	if(m_LastSendInfo && Client()->State() == IClient::STATE_ONLINE && m_Snap.m_LocalClientID >= 0 && !m_pMenus->IsActive() && m_LastSendInfo+time_freq()*5 < time_get())
 	{
 		// resend if client info differs
 		if(str_comp(g_Config.m_PlayerName, m_aClients[m_Snap.m_LocalClientID].m_aName) ||
@@ -575,7 +575,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 			pMsg->m_SoundID == SOUND_CTF_GRAB_PL)
 			g_GameClient.m_pSounds->Enqueue(CSounds::CHN_GLOBAL, pMsg->m_SoundID);
 		else
-			g_GameClient.m_pSounds->Play(CSounds::CHN_GLOBAL, pMsg->m_SoundID, 1.0f, vec2(0,0));
+			g_GameClient.m_pSounds->Play(CSounds::CHN_GLOBAL, pMsg->m_SoundID, 1.0f);
 	}
 	else if(MsgId == NETMSGTYPE_CL_TEAMSSTATE)
 	{
@@ -679,7 +679,7 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
 		{
 			CNetEvent_SoundWorld *ev = (CNetEvent_SoundWorld *)pData;
-			g_GameClient.m_pSounds->Play(CSounds::CHN_WORLD, ev->m_SoundID, 1.0f, vec2(ev->m_X, ev->m_Y));
+			g_GameClient.m_pSounds->PlayAt(CSounds::CHN_WORLD, ev->m_SoundID, 1.0f, vec2(ev->m_X, ev->m_Y));
 		}
 	}
 }
@@ -946,6 +946,15 @@ void CGameClient::OnNewSnapshot()
 			m_ServerMode = SERVERMODE_PUREMOD;
 	}
 
+	// add tuning to demo
+	if(DemoRecorder()->IsRecording() && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)
+	{
+		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
+		int *pParams = (int *)&m_Tuning;
+		for(unsigned i = 0; i < sizeof(m_Tuning)/sizeof(int); i++)
+			Msg.AddInt(pParams[i]);
+		Client()->SendMsg(&Msg, MSGFLAG_RECORD|MSGFLAG_NOSEND);
+	}
 	if(!m_DDRaceMsgSent && m_Snap.m_pLocalInfo)
 	{
 		CNetMsg_Cl_IsDDRace Msg;

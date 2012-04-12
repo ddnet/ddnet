@@ -2,6 +2,8 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 
+#include <base/tl/threading.h>
+
 #include "graphics_threaded.h"
 #include "backend_sdl.h"
 
@@ -132,6 +134,20 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 	}
 	else
 		glDisable(GL_TEXTURE_2D);
+
+	switch(State.m_WrapMode)
+	{
+	case CCommandBuffer::WRAP_REPEAT:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		break;
+	case CCommandBuffer::WRAP_CLAMP:
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		break;
+	default:
+		dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+	};
 
 	// screen mapping
 	glMatrixMode(GL_PROJECTION);
@@ -389,6 +405,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int Width, int Height, 
 	}
 
 	const SDL_VideoInfo *pInfo = SDL_GetVideoInfo();
+	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE); // prevent stuck mouse cursor sdl-bug when loosing fullscreen focus in windows
 
 	// set flags
 	int SdlFlags = SDL_OPENGL;

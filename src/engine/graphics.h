@@ -5,7 +5,6 @@
 
 #include "kernel.h"
 
-#include <base/tl/threading.h>
 
 class CImageInfo
 {
@@ -77,6 +76,8 @@ public:
 	virtual void BlendNone() = 0;
 	virtual void BlendNormal() = 0;
 	virtual void BlendAdditive() = 0;
+	virtual void WrapNormal() = 0;
+	virtual void WrapClamp() = 0;
 	virtual int MemoryUsage() const = 0;
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
@@ -137,7 +138,7 @@ public:
 	virtual void Swap() = 0;
 
 	// syncronization
-	virtual void InsertSignal(semaphore *pSemaphore) = 0;
+	virtual void InsertSignal(class semaphore *pSemaphore) = 0;
 	virtual bool IsIdle() = 0;
 	virtual void WaitForIdle() = 0;
 };

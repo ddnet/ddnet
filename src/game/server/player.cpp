@@ -117,39 +117,53 @@ void CPlayer::Tick()
 		}
 	}
 
-	if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
-		m_Spawning = true;
-
-	if(m_pCharacter)
+	if(!GameServer()->m_World.m_Paused)
 	{
-		if(m_pCharacter->IsAlive())
+		if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
+			m_ViewPos -= vec2(clamp(m_ViewPos.x-m_LatestActivity.m_TargetX, -500.0f, 500.0f), clamp(m_ViewPos.y-m_LatestActivity.m_TargetY, -400.0f, 400.0f));
+
+		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
+			m_Spawning = true;
+
+		if(m_pCharacter)
 		{
-			if(m_Paused >= PAUSED_FORCE)
+			if(m_pCharacter->IsAlive())
 			{
-				if(m_ForcePauseTime == 0)
-				m_Paused = PAUSED_NONE;
-				ProcessPause();
-			}
-			else if(m_Paused == PAUSED_PAUSED && m_NextPauseTick < Server()->Tick())
-			{
-				if((!m_pCharacter->GetWeaponGot(WEAPON_NINJA) || m_pCharacter->m_FreezeTime) && m_pCharacter->IsGrounded() && m_pCharacter->m_Pos == m_pCharacter->m_PrevPos)
+				if(m_Paused >= PAUSED_FORCE)
+				{
+					if(m_ForcePauseTime == 0)
+					m_Paused = PAUSED_NONE;
 					ProcessPause();
+				}
+				else if(m_Paused == PAUSED_PAUSED && m_NextPauseTick < Server()->Tick())
+				{
+					if((!m_pCharacter->GetWeaponGot(WEAPON_NINJA) || m_pCharacter->m_FreezeTime) && m_pCharacter->IsGrounded() && m_pCharacter->m_Pos == m_pCharacter->m_PrevPos)
+						ProcessPause();
+				}
+				else if(m_NextPauseTick < Server()->Tick())
+				{
+					ProcessPause();
+				}
+				if(!m_Paused)
+					m_ViewPos = m_pCharacter->m_Pos;
 			}
-			else if(m_NextPauseTick < Server()->Tick())
+			else if(!m_pCharacter->IsPaused())
 			{
-				ProcessPause();
+				delete m_pCharacter;
+				m_pCharacter = 0;
 			}
-			if(!m_Paused)
-				m_ViewPos = m_pCharacter->m_Pos;
 		}
-		else if(!m_pCharacter->IsPaused())
-		{
-			delete m_pCharacter;
-			m_pCharacter = 0;
-		}
+		else if(m_Spawning && m_RespawnTick <= Server()->Tick())
+			TryRespawn();
 	}
-	else if(m_Spawning && m_RespawnTick <= Server()->Tick())
-		TryRespawn();
+	else
+	{
+		++m_RespawnTick;
+		++m_DieTick;
+		++m_ScoreStartTick;
+		++m_LastActionTick;
+		++m_TeamChangeTick;
+ 	}
 }
 
 void CPlayer::PostTick()

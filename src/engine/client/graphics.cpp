@@ -3,6 +3,7 @@
 
 #include <base/detect.h>
 #include <base/math.h>
+#include <base/tl/threading.h>
 
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -195,6 +196,18 @@ void CGraphics_OpenGL::BlendAdditive()
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+}
+
+void CGraphics_OpenGL::WrapNormal()
+{
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+void CGraphics_OpenGL::WrapClamp()
+{
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 int CGraphics_OpenGL::MemoryUsage() const
@@ -752,7 +765,7 @@ int CGraphics_SDL::TryInit()
 	m_ScreenHeight = g_Config.m_GfxScreenHeight;
 
 	const SDL_VideoInfo *pInfo = SDL_GetVideoInfo();
-	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE); // prevent stuck mouse cursor sdl-bug when loosing fullscreen focus in windows
 
 	// set flags
 	int Flags = SDL_OPENGL;
