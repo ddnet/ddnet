@@ -261,7 +261,6 @@ function build(settings)
 
 	versionserver = Compile(settings, Collect("src/versionsrv/*.cpp"))
 	masterserver = Compile(settings, Collect("src/mastersrv/*.cpp"))
-	banmaster = Compile(settings, Collect("src/banmaster/*.cpp"))
 	game_shared = Compile(settings, Collect("src/game/*.cpp"), nethash, network_source)
 	game_client = Compile(settings, CollectRecursive("src/game/client/*.cpp"), client_content_source)
 	game_server = Compile(settings, CollectRecursive("src/game/server/*.cpp"), server_content_source)
@@ -302,9 +301,6 @@ function build(settings)
 	masterserver_exe = Link(server_settings, "mastersrv", masterserver,
 		engine, zlib)
 
-	banmaster_exe = Link(server_settings, "banmaster", banmaster,
-		engine, zlib)
-
 	-- make targets
 	c = PseudoTarget("client".."_"..settings.config_name, client_exe, client_depends)
 	if string.find(settings.config_name, "sql") then
@@ -316,10 +312,9 @@ function build(settings)
 
 	v = PseudoTarget("versionserver".."_"..settings.config_name, versionserver_exe)
 	m = PseudoTarget("masterserver".."_"..settings.config_name, masterserver_exe)
-	b = PseudoTarget("banmaster".."_"..settings.config_name, banmaster_exe)
 	t = PseudoTarget("tools".."_"..settings.config_name, tools)
 
-	all = PseudoTarget(settings.config_name, c, s, v, m, b, t)
+	all = PseudoTarget(settings.config_name, c, s, v, m, t)
 	return all
 end
 
