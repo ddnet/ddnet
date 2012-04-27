@@ -1602,6 +1602,7 @@ void CCharacter::Pause(bool Pause)
 	}
 	else
 	{
+		m_Core.m_Vel = vec2(0,0);
 		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 		GameServer()->m_World.InsertEntity(this);
 	}
