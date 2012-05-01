@@ -284,21 +284,6 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
-
-	// Banmaster
-
-	int BanmasterAdd(const char *pAddrStr);
-	int BanmasterNum() const;
-	NETADDR* BanmasterGet(int Index);
-	int BanmasterCheck(NETADDR *pAddr);
-	void BanmastersClear();
-	enum
-	{
-		MAX_BANMASTERS=16
-	};
-private:
-	NETADDR m_aBanmasters[MAX_BANMASTERS];
-	int m_NumBanmasters;
 };
 
 class CNetConsole
