@@ -250,9 +250,8 @@ public:
 
 	// ----- send functions -----
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags);
-	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1);
+	virtual int SendMsgY(CMsgPacker *pMsg, int Flags, int NetClient=1);
 
-	int SendMsgEx(CMsgPacker *pMsg, int Flags, bool System=true);
 	void SendInfo();
 	void SendEnterGame();
 	void SendReady();
