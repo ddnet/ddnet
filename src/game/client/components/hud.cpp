@@ -758,7 +758,7 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
 	int QuadOffset = (CurWeapon * 2) * 10 + QuadOffsetSixup;
 
-	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon] != -1)
+	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon].IsValid())
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
 

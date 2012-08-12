@@ -594,7 +594,7 @@ public:
 
 		bool IsSixup()
 		{
-			return m_SpriteNinjaBarFullLeft != -1;
+			return m_SpriteNinjaBarFullLeft.IsValid();
 		}
 	};
 
