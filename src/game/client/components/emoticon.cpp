@@ -107,7 +107,7 @@ void CEmoticon::OnRender()
 
 	Graphics()->BlendNormal();
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.3f);
 	DrawCircle(Screen.w/2, Screen.h/2, 190.0f, 64);
@@ -137,7 +137,7 @@ void CEmoticon::OnRender()
 
 	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
 	{
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0,1.0,1.0,0.3f);
 		DrawCircle(Screen.w/2, Screen.h/2, 100.0f, 64);
@@ -163,7 +163,7 @@ void CEmoticon::OnRender()
 			pTeeInfo->m_Size = 64.0f;
 		}
 
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0,0,0,0.3f);
 		DrawCircle(Screen.w/2, Screen.h/2, 30.0f, 64);

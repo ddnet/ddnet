@@ -864,7 +864,7 @@ void CMenus::RenderLoading()
 
 	Graphics()->BlendNormal();
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.50f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
@@ -880,7 +880,7 @@ void CMenus::RenderLoading()
 	r.h = h - 130;
 	UI()->DoLabel(&r, pCaption, 48.0f, 0, -1);
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1,1,1,0.75f);
 	RenderTools()->DrawRoundRect(x+40, y+h-75, (w-80)*Percent, 25, 5.0f);
@@ -926,6 +926,8 @@ void CMenus::OnInit()
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
+
+	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 	// setup load amount
 	m_LoadCurrent = 0;
@@ -1835,20 +1837,14 @@ void CMenus::OnRender()
 	m_NumInputEvents = 0;
 }
 
-static int gs_TextureBlob = -1;
-
 void CMenus::RenderBackground()
 {
-	if(gs_TextureBlob == -1)
-		gs_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-
-
 	float sw = 300*Graphics()->ScreenAspect();
 	float sh = 300;
 	Graphics()->MapScreen(0, 0, sw, sh);
 
 	// render background color
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 		ColorRGBA Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
 		ColorRGBA Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
@@ -1863,7 +1859,7 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsEnd();
 
 	// render the tiles
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 		float Size = 15.0f;
 		float OffsetTime = fmod(Client()->LocalTime()*0.15f, 2.0f);
@@ -1877,7 +1873,7 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsEnd();
 
 	// render border fade
-	Graphics()->TextureSet(gs_TextureBlob);
+	Graphics()->TextureSet(m_TextureBlob);
 	Graphics()->QuadsBegin();
 		Graphics()->SetColor(1,1,1,1);
 		QuadItem = IGraphics::CQuadItem(-100, -100, sw+200, sh+200);
@@ -1927,7 +1923,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	float x = Screen.w/2-w/2;
 	float y = Screen.h/2-h/2;
 
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.50f);
 	RenderTools()->DrawRoundRect(0, y, Screen.w, h, 0.0f);
@@ -1943,7 +1939,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	if(total>0)
 	{
 		float Percent = current/(float)total;
-		Graphics()->TextureSet(-1);
+		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0.15f,0.15f,0.15f,0.75f);
 		RenderTools()->DrawRoundRect(x+40, y+h-75, w-80, 30, 5.0f);

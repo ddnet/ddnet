@@ -17,11 +17,8 @@ CMapImages::CMapImages() : CMapImages(100)
 CMapImages::CMapImages(int TextureSize) 
 {
 	m_Count = 0;
-	m_EntitiesTextures = -1;
-	m_OverlayBottomTexture = -1;
-	m_OverlayTopTexture = -1;
-	m_OverlayCenterTexture = -1;
 	m_TextureScale = TextureSize;
+	m_EntitiesIsLoaded = false;
 }
 
 void CMapImages::OnInit()
@@ -37,7 +34,7 @@ void CMapImages::OnMapLoad()
 	for(int i = 0; i < m_Count; i++)
 	{
 		Graphics()->UnloadTexture(m_aTextures[i]);
-		m_aTextures[i] = -1;
+		m_aTextures[i] = IGraphics::CTextureHandle();
 	}
 	m_Count = 0;
 
@@ -47,8 +44,6 @@ void CMapImages::OnMapLoad()
 	// load new textures
 	for(int i = 0; i < m_Count; i++)
 	{
-		m_aTextures[i] = 0;
-
 		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start+i, 0, 0);
 		if(pImg->m_External)
 		{
@@ -72,7 +67,7 @@ void CMapImages::LoadBackground(class IMap *pMap)
 	for(int i = 0; i < m_Count; i++)
 	{
 		Graphics()->UnloadTexture(m_aTextures[i]);
-		m_aTextures[i] = -1;
+		m_aTextures[i] = IGraphics::CTextureHandle();
 	}
 	m_Count = 0;
 
@@ -82,8 +77,6 @@ void CMapImages::LoadBackground(class IMap *pMap)
 	// load new textures
 	for(int i = 0; i < m_Count; i++)
 	{
-		m_aTextures[i] = 0;
-
 		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start+i, 0, 0);
 		if(pImg->m_External)
 		{
@@ -101,7 +94,7 @@ void CMapImages::LoadBackground(class IMap *pMap)
 	}
 }
 
-int CMapImages::GetEntities()
+IGraphics::CTextureHandle CMapImages::GetEntities()
 {
 	// DDNet default to prevent delay in seeing entities
 	const char *pEntities = "ddnet";
@@ -116,7 +109,7 @@ int CMapImages::GetEntities()
 	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
 		pEntities = "vanilla";
 
-	if(m_EntitiesTextures == -1 || m_pEntitiesGameType != pEntities)
+	if(!m_EntitiesIsLoaded || m_pEntitiesGameType != pEntities)
 	{
 		char aPath[64];
 		str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", pEntities);
@@ -124,23 +117,23 @@ int CMapImages::GetEntities()
 		if(m_EntitiesTextures >= 0)
 			Graphics()->UnloadTexture(m_EntitiesTextures);
 		m_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-
+		m_EntitiesIsLoaded = true;
 		m_pEntitiesGameType = pEntities;
 	}
 	return m_EntitiesTextures;
 }
 
-int CMapImages::GetOverlayBottom()
+IGraphics::CTextureHandle CMapImages::GetOverlayBottom()
 {
 	return m_OverlayBottomTexture;
 }
 
-int CMapImages::GetOverlayTop()
+IGraphics::CTextureHandle CMapImages::GetOverlayTop()
 {
 	return m_OverlayTopTexture;
 }
 
-int CMapImages::GetOverlayCenter()
+IGraphics::CTextureHandle CMapImages::GetOverlayCenter()
 {
 	return m_OverlayCenterTexture;
 }
@@ -158,7 +151,6 @@ void CMapImages::SetTextureScale(int Scale)
 		Graphics()->UnloadTexture(m_OverlayBottomTexture);
 		Graphics()->UnloadTexture(m_OverlayTopTexture);
 		Graphics()->UnloadTexture(m_OverlayCenterTexture);
-		m_OverlayBottomTexture = m_OverlayTopTexture = m_OverlayCenterTexture = -1;
 
 		InitOverlayTextures();
 	}
@@ -169,20 +161,20 @@ int CMapImages::GetTextureScale()
 	return m_TextureScale;
 }
 
-int CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
+IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 {	
 	void *pMem = calloc(1024 * 1024, 1);
-	int TextureID = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
+	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 	free(pMem);
 
-	UpdateEntityLayerText(TextureID, TextureSize, YOffset, 0);
-	UpdateEntityLayerText(TextureID, TextureSize, YOffset, 1);
-	UpdateEntityLayerText(TextureID, TextureSize, YOffset, 2, 255);
+	UpdateEntityLayerText(Texture, TextureSize, YOffset, 0);
+	UpdateEntityLayerText(Texture, TextureSize, YOffset, 1);
+	UpdateEntityLayerText(Texture, TextureSize, YOffset, 2, 255);
 
-	return TextureID;
+	return Texture;
 }
 
-void CMapImages::UpdateEntityLayerText(int TextureID, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
+void CMapImages::UpdateEntityLayerText(IGraphics::CTextureHandle Texture, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
 {
 	char aBuf[4];
 	int DigitsCount = NumbersPower+1;
@@ -199,7 +191,7 @@ void CMapImages::UpdateEntityLayerText(int TextureID, int TextureSize, int YOffs
 
 	if (UniversalSuitableFontSize < 1)
 	{
-		dbg_msg("pFont", "texture with id '%d' will not be loaded. Reason - font is too small", TextureID);
+		dbg_msg("pFont", "texture with id '%d' will not be loaded. Reason - font is too small", (int)Texture);
 	}
 
 	int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
@@ -213,7 +205,7 @@ void CMapImages::UpdateEntityLayerText(int TextureID, int TextureSize, int YOffs
 		float x = (CurrentNumber%16)*64;
 		float y = (CurrentNumber/16)*64;
 
-		TextRender()->UploadEntityLayerText(TextureID, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
+		TextRender()->UploadEntityLayerText(Texture, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
 	}
 }
 

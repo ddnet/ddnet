@@ -3,25 +3,24 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
+#include <engine/graphics.h>
 #include <base/vmath.h>
 #include <base/color.h>
 #include <game/mapitems.h>
 #include "ui.h"
-
 
 class CTeeRenderInfo
 {
 public:
 	CTeeRenderInfo()
 	{
-		m_Texture = -1;
 		m_ColorBody = ColorRGBA(1,1,1);
 		m_ColorFeet = ColorRGBA(1,1,1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
 	};
 
-	int m_Texture;
+	IGraphics::CTextureHandle m_Texture;
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
 	float m_Size;

@@ -102,7 +102,7 @@ public:
 	FT_Face m_FtFace;
 	CFontSizeData m_aFontSizes[NUM_FONT_SIZES];
 
-	int m_aTextures[2];
+	IGraphics::CTextureHandle m_aTextures[2];
 	// keep the full texture, because opengl doesn't provide texture copying
 	unsigned char *m_TextureData[2];
 
@@ -275,7 +275,7 @@ class CTextRender : public IEngineTextRender
 			}
 	}
 
-	int InitTexture(int Width, int Height, void *pUploadData = NULL)
+	IGraphics::CTextureHandle InitTexture(int Width, int Height, void *pUploadData = NULL)
 	{
 		void *pMem = NULL;
 		if(pUploadData)
@@ -287,17 +287,17 @@ class CTextRender : public IEngineTextRender
 			pMem = calloc(Width * Height, 1);
 		}
 
-		int TextureID = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS | IGraphics::TEXLOAD_NO_COMPRESSION);
+		IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS | IGraphics::TEXLOAD_NO_COMPRESSION);
 
 		if(!pUploadData)
 			free(pMem);
 
-		return TextureID;
+		return Texture;
 	}
 
-	void UnloadTexture(int TextureIndex)
+	void UnloadTexture(IGraphics::CTextureHandle Index)
 	{
-		Graphics()->UnloadTexture(TextureIndex);
+		Graphics()->UnloadTexture(Index);
 	}
 
 	void IncreaseFontTexture(CFont *pFont, int TextureIndex)
@@ -848,7 +848,7 @@ public:
 
 			if(Graphics()->IsBufferingEnabled())
 			{
-				Graphics()->TextureSet(-1);
+				Graphics()->TextureClear();
 				Graphics()->TextQuadsBegin();
 				Graphics()->SetColor(m_Color);
 			}
@@ -1620,7 +1620,7 @@ public:
 
 		if(Graphics()->IsBufferingEnabled())
 		{
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			// render buffered text
 			Graphics()->RenderText(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, TextContainer.m_StringInfo.m_QuadNum, pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0], pFont->m_aTextures[1], (float*)pTextColor, (float*)pTextOutlineColor);
 		}
@@ -1698,11 +1698,11 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int FontSize)
+	virtual void UploadEntityLayerText(IGraphics::CTextureHandle Texture, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if (FontSize < 1)
 		{
-			dbg_msg("pFont", "texture with id '%d' will not be updated. Reason - font is too small", TextureID);
+			dbg_msg("pFont", "texture with id '%d' will not be updated. Reason - font is too small", (int)Texture);
 			return;
 		}
 
@@ -1748,7 +1748,7 @@ public:
 							}
 					}
 				
-				Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
+				Graphics()->LoadTextureRawSub(Texture, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
 				WidthLastChars += (SlotW + 1);
 				
 			}

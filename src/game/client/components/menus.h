@@ -306,6 +306,8 @@ class CMenus : public CComponent
 	void RenderSettings(CUIRect MainView);
 
 	void SetActive(bool Active);
+
+	IGraphics::CTextureHandle m_TextureBlob;
 public:
 	void RenderBackground();
 

@@ -1721,7 +1721,7 @@ void CMapLayers::OnRender()
 					if(pTMap->m_Image == -1)
 					{
 						if(!IsGameLayer)
-							Graphics()->TextureSet(-1);
+							Graphics()->TextureClear();
 						else
 							Graphics()->TextureSet(m_pImages->GetEntities());
 					}
@@ -1782,7 +1782,7 @@ void CMapLayers::OnRender()
 				{
 					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 					if(pQLayer->m_Image == -1)
-						Graphics()->TextureSet(-1);
+						Graphics()->TextureClear();
 					else
 						Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));
 

@@ -283,7 +283,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
 		{
 			float Ratio = (pInfo->m_aTimelineMarkers[i]-pInfo->m_FirstTick) / (float)TotalTicks;
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			IGraphics::CQuadItem QuadItem(SeekBar.x + (SeekBar.w-10.0f)*Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
@@ -296,7 +296,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(g_Config.m_ClDemoSliceBegin != -1)
 		{
 			float Ratio = (g_Config.m_ClDemoSliceBegin-pInfo->m_FirstTick) / (float)TotalTicks;
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w-10.0f)*Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
@@ -308,7 +308,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(g_Config.m_ClDemoSliceEnd != -1)
 		{
 			float Ratio = (g_Config.m_ClDemoSliceEnd-pInfo->m_FirstTick) / (float)TotalTicks;
-			Graphics()->TextureSet(-1);
+			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w-10.0f)*Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);

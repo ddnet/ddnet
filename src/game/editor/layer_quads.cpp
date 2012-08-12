@@ -23,9 +23,9 @@ CLayerQuads::~CLayerQuads()
 
 void CLayerQuads::Render(bool QuadPicker)
 {
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
-		Graphics()->TextureSet(m_pEditor->m_Map.m_lImages[m_Image]->m_TexID);
+		Graphics()->TextureSet(m_pEditor->m_Map.m_lImages[m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
 	m_pEditor->RenderTools()->ForceRenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
@@ -93,7 +93,7 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y, Rect.x+Rect.w, Rect.y+Rect.h),
 		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y+Rect.h, Rect.x, Rect.y+Rect.h),
 		IGraphics::CLineItem(Rect.x, Rect.y+Rect.h, Rect.x, Rect.y)};
-	Graphics()->TextureSet(-1);
+	Graphics()->TextureClear();
 	Graphics()->LinesBegin();
 	Graphics()->LinesDraw(Array, 4);
 	Graphics()->LinesEnd();
