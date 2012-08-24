@@ -790,7 +790,8 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	Teams()->SetForceCharacterTeam(m_pPlayer->GetCID(), 0);
+	// moved to DDRaceInit
+	// Teams()->SetForceCharacterTeam(m_pPlayer->GetCID(), 0);
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
@@ -1626,4 +1627,5 @@ void CCharacter::DDRaceInit()
 	m_EndlessHook = g_Config.m_SvEndlessDrag;
 	m_Hit = g_Config.m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
 	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), false);
+	Teams()->SetForceCharacterTeam(m_pPlayer->GetCID(), 0);
 }
