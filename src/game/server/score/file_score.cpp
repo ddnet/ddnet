@@ -44,9 +44,11 @@ CFileScore::~CFileScore()
 std::string SaveFile()
 {
 	std::ostringstream oss;
+	char aBuf[256];
+	str_copy(aBuf, g_Config.m_SvMap, sizeof(aBuf));
+	for(int i = 0; i < 256; i++) if(aBuf[i] == '/') aBuf[i] = '-';
 	if (g_Config.m_SvScoreFolder[0])
-		oss << g_Config.m_SvScoreFolder << "/" << g_Config.m_SvMap
-		<< "_record.dtb";
+		oss << g_Config.m_SvScoreFolder << "/" << aBuf << "_record.dtb";
 	else
 		oss << g_Config.m_SvMap << "_record.dtb";
 	return oss.str();
