@@ -47,7 +47,7 @@ static const char *StrUTF8Ltrim(const char *pStr)
 	{
 		const char *pStrOld = pStr;
 		int Code = str_utf8_decode(&pStr);
-
+		
 		// check if unicode is not empty
 		if(Code > 0x20 && Code != 0xA0 && Code != 0x034F && (Code < 0x2000 || Code > 0x200F) && (Code < 0x2028 || Code > 0x202F) &&
 			(Code < 0x205F || Code > 0x2064) && (Code < 0x206A || Code > 0x206F) && (Code < 0xFE00 || Code > 0xFE0F) &&
@@ -899,7 +899,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				Last = 1;
 			}
 
-			if (lastsent[ClientID]+ChunkSize < m_CurrentMapSize && lastsent[ClientID] < Chunk+g_Config.m_SvMapWindow)
+			if (lastsent[ClientID]+ChunkSize < m_CurrentMapSize && lastsent[ClientID] < Chunk+g_Config.m_SvMapWindow && m_SvFastDownload)
 				return;
 
 			CMsgPacker Msg(NETMSG_MAP_DATA);
@@ -1221,43 +1221,45 @@ void CServer::PumpNetwork()
 		else
 			ProcessClientPacket(&Packet);
 	}
-
-	for (int i=0;i<MAX_CLIENTS;i++)
+	if(g_Config.m_SvFastDownload)
 	{
-		if (m_aClients[i].m_State != CClient::STATE_CONNECTING)
-			continue;
-		if (lastask[i]<lastsent[i]-g_Config.m_SvMapWindow)
-			continue;
-
-		int Chunk = lastsent[i]++;
-		int ChunkSize = 1024-128;
-		int Offset = Chunk * ChunkSize;
-		int Last = 0;
-
-		// drop faulty map data requests
-		if(Chunk < 0 || Offset > m_CurrentMapSize)
-			continue;
-		if(Offset+ChunkSize >= m_CurrentMapSize)
+		for (int i=0;i<MAX_CLIENTS;i++)
 		{
-			ChunkSize = m_CurrentMapSize-Offset;
-			if(ChunkSize < 0)
-				ChunkSize = 0;
-			Last = 1;
-		}
-
-		CMsgPacker Msg(NETMSG_MAP_DATA);
-		Msg.AddInt(Last);
-		Msg.AddInt(m_CurrentMapCrc);
-		Msg.AddInt(Chunk);
-		Msg.AddInt(ChunkSize);
-		Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
-		SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, i, true);
-
-		if(g_Config.m_Debug)
-		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "sending chunk %d with size %d", Chunk, ChunkSize);
-			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
+			if (m_aClients[i].m_State != CClient::STATE_CONNECTING)
+				continue;
+			if (lastask[i]<lastsent[i]-g_Config.m_SvMapWindow)
+				continue;
+	
+			int Chunk = lastsent[i]++;
+			int ChunkSize = 1024-128;
+			int Offset = Chunk * ChunkSize;
+			int Last = 0;
+	
+			// drop faulty map data requests
+			if(Chunk < 0 || Offset > m_CurrentMapSize)
+				continue;
+			if(Offset+ChunkSize >= m_CurrentMapSize)
+			{
+				ChunkSize = m_CurrentMapSize-Offset;
+				if(ChunkSize < 0)
+					ChunkSize = 0;
+				Last = 1;
+			}
+	
+			CMsgPacker Msg(NETMSG_MAP_DATA);
+			Msg.AddInt(Last);
+			Msg.AddInt(m_CurrentMapCrc);
+			Msg.AddInt(Chunk);
+			Msg.AddInt(ChunkSize);
+			Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
+			SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, i, true);
+	
+			if(g_Config.m_Debug)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "sending chunk %d with size %d", Chunk, ChunkSize);
+				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
+			}
 		}
 	}
 
