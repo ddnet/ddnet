@@ -899,7 +899,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				Last = 1;
 			}
 
-			if (lastsent[ClientID]+ChunkSize < m_CurrentMapSize && lastsent[ClientID] < Chunk+g_Config.m_SvMapWindow && m_SvFastDownload)
+			if (lastsent[ClientID]+ChunkSize < m_CurrentMapSize && lastsent[ClientID] < Chunk+g_Config.m_SvMapWindow && g_Config.m_SvFastDownload)
 				return;
 
 			CMsgPacker Msg(NETMSG_MAP_DATA);
