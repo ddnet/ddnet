@@ -260,9 +260,9 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 					Time - ((int) Time / 60 * 60));
 		else
 			str_format(aBuf, sizeof(aBuf),
-					"%d. %s Time: %d minute(s) %5.2f second(s)", Pos,
+					"%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Pos,
 					pScore->m_aName, (int) Time / 60,
-					Time - ((int) Time / 60 * 60));
+					Time - ((int) Time / 60 * 60), aClientName);
 		if (!Search)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
 		else
