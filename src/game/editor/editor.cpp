@@ -2154,8 +2154,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 		if(!apEnvelope[j])
 			continue;
 
-		//QuadParams
-		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size() - 1; i++)
+		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size(); i++)
 			DoQuadEnvPoint(&vQuads[j], j, i);
 	}
 	Graphics()->QuadsEnd();
