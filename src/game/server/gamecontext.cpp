@@ -693,16 +693,10 @@ void CGameContext::OnClientEnter(int ClientID)
 			dd = atoi(d);
 			mm = atoi(m);
 			yy = atoi(y);
-			if((mm == 12 && dd >= 20))
+			if((mm == 12 || mm == 1) && (dd == 31 || dd == 1))
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", yy+1);
-				SendBroadcast(aBuf, ClientID);
-			}
-			else if(mm == 1 && dd <= 20)
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", yy);
+				str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", mm==12?yy+1:yy);
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
