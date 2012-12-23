@@ -55,7 +55,11 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	mm = atoi(m);
 	yy = atoi(y);
 
-	m_DefEmote = ((mm == 12 && dd >= 20) || (mm == 1 && dd <= 20)) ? EMOTE_HAPPY : EMOTE_NORMAL;
+	m_DefEmote = EMOTE_NORMAL;
+	if (g_Config.m_SvEvents)
+	{
+		m_DefEmote = ((mm == 12 && dd >= 20) || (mm == 1 && dd <= 20)) ? EMOTE_HAPPY : EMOTE_NORMAL;
+	}
 	m_DefEmoteReset = -1;
 
 	GameServer()->Score()->PlayerData(ClientID)->Reset();
