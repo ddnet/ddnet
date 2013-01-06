@@ -135,6 +135,10 @@ void CProjectile::Tick()
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y =- m_Direction.y;
+			if (fabs(m_Direction.x) < 1e-6)
+				m_Direction.x = 0;
+			if (fabs(m_Direction.y) < 1e-6)
+				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
 		else if (m_Weapon == WEAPON_GUN)
