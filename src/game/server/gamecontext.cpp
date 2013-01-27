@@ -693,7 +693,7 @@ void CGameContext::OnClientEnter(int ClientID)
 			dd = atoi(d);
 			mm = atoi(m);
 			yy = atoi(y);
-			if((mm == 12 || mm == 1) && (dd == 31 || dd == 1))
+			if((mm == 12 && dd == 31) || (mm == 1 && dd == 1))
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", mm==12?yy+1:yy);
