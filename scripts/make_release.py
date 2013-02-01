@@ -118,9 +118,12 @@ shutil.copy("license_DDRace.txt", package_dir)
 if include_data and not use_bundle:
 	os.mkdir(os.path.join(package_dir, "data"))
 	copydir("data", package_dir)
-	os.chdir(languages_dir)
-	copydir("data", "../"+package_dir)
-	os.chdir("..")
+	try:
+		os.chdir(languages_dir)
+		copydir("data", "../"+package_dir)
+		os.chdir("..")
+	except:
+		print("couldn't find languages")
 	if platform[:3] == "win":
 		shutil.copy("other/config_directory.bat", package_dir)
 		shutil.copy("SDL.dll", package_dir)
