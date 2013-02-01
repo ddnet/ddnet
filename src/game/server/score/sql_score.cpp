@@ -363,7 +363,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 				if(g_Config.m_SvHideScore)
 					str_format(aBuf, sizeof(aBuf), "Your time: %d minute(s) %5.2f second(s)", (int)(Time/60), Time-((int)Time/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), agoString, pData->m_aRequestingPlayer);
+					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
 
 				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
 				{
