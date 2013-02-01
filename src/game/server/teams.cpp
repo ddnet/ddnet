@@ -477,3 +477,15 @@ void CGameTeams::OnFinish(CPlayer* Player)
 		Player->m_Score = TTime;
 
 }
+
+void CGameTeams::OnCharacterSpawn(int ClientID)
+{
+	m_Core.SetSolo(ClientID, false);
+	SetForceCharacterTeam(ClientID, 0);
+}
+
+void CGameTeams::OnCharacterDeath(int ClientID)
+{
+	m_Core.SetSolo(ClientID, false);
+	SetForceCharacterTeam(ClientID, 0);
+}
