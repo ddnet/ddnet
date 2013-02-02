@@ -342,8 +342,11 @@ Messages = [
 	]),
 	
 	NetMessage("Cl_IsDDRace", []),
-	
-	
+
+	NetMessage("Cl_ShowOthers", [
+		NetBool("m_Show"),
+	]),
+
 	NetMessage("Sv_DDRaceTime", [
 		NetIntAny("m_Time"),
 		NetIntAny("m_Check"),

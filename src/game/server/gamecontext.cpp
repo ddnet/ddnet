@@ -1140,6 +1140,15 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 		}
 	}
+	else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
+	{
+		if(g_Config.m_SvShowOthers);
+		{
+			// TODO: prevent spam ?
+			CNetMsg_Cl_ShowOthers *pMsg = (CNetMsg_Cl_ShowOthers *)pRawMsg;
+			pPlayer->m_ShowOthers = (bool)pMsg->m_Show;
+		}
+	}
 	else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
 	{
 		CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;

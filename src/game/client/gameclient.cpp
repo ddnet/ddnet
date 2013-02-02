@@ -285,6 +285,7 @@ void CGameClient::OnInit()
 	m_ServerMode = SERVERMODE_PURE;
 
 	m_DDRaceMsgSent = false;
+	m_ShowOthers = -1;
 
 	// Set free binds to DDRace binds if it's active
 	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
@@ -372,6 +373,7 @@ void CGameClient::OnReset()
 
 	m_Teams.Reset();
 	m_DDRaceMsgSent = false;
+	m_ShowOthers = -1;
 }
 
 
@@ -955,16 +957,26 @@ void CGameClient::OnNewSnapshot()
 			Msg.AddInt(pParams[i]);
 		Client()->SendMsg(&Msg, MSGFLAG_RECORD|MSGFLAG_NOSEND);
 	}
+
 	if(!m_DDRaceMsgSent && m_Snap.m_pLocalInfo)
 	{
 		CNetMsg_Cl_IsDDRace Msg;
 		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 		m_DDRaceMsgSent = true;
+	}
 
-		if(g_Config.m_ClShowOthers)
-			Console()->ExecuteLine("rcon showothers 1");
-		else
-			Console()->ExecuteLine("rcon showothers 0");
+	if(m_ShowOthers == -1 || (m_ShowOthers != -1 && m_ShowOthers != g_Config.m_ClShowOthers))
+	{
+		// no need to send, default settings
+		//if(!(m_ShowOthers == -1 && g_Config.m_ClShowOthers))
+		{
+			CNetMsg_Cl_ShowOthers Msg;
+			Msg.m_Show = g_Config.m_ClShowOthers;
+			Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		}
+
+		// update state
+		m_ShowOthers = g_Config.m_ClShowOthers;
 	}
 }
 
