@@ -144,6 +144,15 @@ function build(settings)
 	--settings.objdir = Path("objs")
 	settings.cc.Output = Intermediate_Output
 
+	cflags = os.getenv("CFLAGS")
+	if cflags then
+		settings.cc.flags:Add(cflags)
+	end
+	ldflags = os.getenv("LDFLAGS")
+	if ldflags then
+		settings.link.flags:Add(ldflags)
+	end
+
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/wd4291")
