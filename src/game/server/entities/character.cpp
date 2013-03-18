@@ -1013,15 +1013,17 @@ CGameTeams* CCharacter::Teams()
 void CCharacter::HandleBroadcast()
 {
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-	if((m_DDRaceState == DDRACE_STARTED && Server()->Tick() - m_RefreshTime >= Server()->TickSpeed()) &&
-			m_CpActive != -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_IsUsingDDRaceClient &&
+
+	if(m_DDRaceState == DDRACE_STARTED && m_CpLastBroadcast != m_CpActive &&
+			m_CpActive > -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_IsUsingDDRaceClient &&
 			pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
 	{
 		char aBroadcast[128];
-		m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 		float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
+		dbg_msg("CHECKPOINT", "%f", Diff);
 		str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
 		GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
+		m_CpLastBroadcast = m_CpActive;
 		m_LastBroadcast = Server()->Tick();
 	}
 	else if ((m_pPlayer->m_TimerType == 1 || m_pPlayer->m_TimerType == 2) && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
@@ -1030,9 +1032,9 @@ void CCharacter::HandleBroadcast()
 		int IntTime = (int)((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
 		str_format(aBuftime, sizeof(aBuftime), "%s%d:%s%d", ((IntTime/60) > 9)?"":"0", IntTime/60, ((IntTime%60) > 9)?"":"0", IntTime%60);
 		GameServer()->SendBroadcast(aBuftime, m_pPlayer->GetCID());
+		m_CpLastBroadcast = m_CpActive;
 		m_LastBroadcast = Server()->Tick();
 	}
-	m_RefreshTime = Server()->Tick();
 }
 
 void CCharacter::HandleSkippableTiles(int Index)
@@ -1504,6 +1506,8 @@ void CCharacter::DDRaceTick()
 
 void CCharacter::DDRacePostCoreTick()
 {
+	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
+
 	if (m_pPlayer->m_DefEmoteReset >= 0 && m_pPlayer->m_DefEmoteReset <= Server()->Tick())
 		{
 		m_pPlayer->m_DefEmoteReset = -1;
