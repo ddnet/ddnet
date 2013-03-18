@@ -174,11 +174,11 @@ public:
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
-	int m_RefreshTime;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;
 	int m_CpTick;
 	int m_CpActive;
+	int m_CpLastBroadcast;
 	float m_CpCurrent[25];
 	int m_TileIndex;
 	int m_TileFlags;

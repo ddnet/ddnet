@@ -33,7 +33,6 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	{
 		pStartingChar->m_DDRaceState = DDRACE_STARTED;
 		pStartingChar->m_StartTime = Tick;
-		pStartingChar->m_RefreshTime = Tick;
 	}
 	else
 	{
@@ -88,7 +87,6 @@ void CGameTeams::OnCharacterStart(int ClientID)
 					{
 						SetDDRaceState(pPlayer, DDRACE_STARTED);
 						SetStartTime(pPlayer, Tick);
-						SetRefreshTime(pPlayer, Tick);
 					}
 				}
 			}
@@ -310,16 +308,6 @@ void CGameTeams::SetStartTime(CPlayer* Player, int StartTime)
 	CCharacter* pChar = Player->GetCharacter();
 	if (pChar)
 		pChar->m_StartTime = StartTime;
-}
-
-void CGameTeams::SetRefreshTime(CPlayer* Player, int RefreshTime)
-{
-	if (!Player)
-		return;
-
-	CCharacter* pChar = Player->GetCharacter();
-	if (pChar)
-		pChar->m_RefreshTime = RefreshTime;
 }
 
 void CGameTeams::SetCpActive(CPlayer* Player, int CpActive)
