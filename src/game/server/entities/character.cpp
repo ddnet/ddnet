@@ -1020,7 +1020,6 @@ void CCharacter::HandleBroadcast()
 	{
 		char aBroadcast[128];
 		float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
-		dbg_msg("CHECKPOINT", "%f", Diff);
 		str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
 		GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
 		m_CpLastBroadcast = m_CpActive;
