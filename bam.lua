@@ -3,6 +3,7 @@ CheckVersion("0.4")
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
 Import("other/freetype/freetype.lua")
+Import("other/curl/curl.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -13,6 +14,7 @@ config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
 config:Add(FreeType.OptFind("freetype", true))
+config:Add(Curl.OptFind("curl", true))
 config:Finalize("config.lua")
 
 -- data compiler
@@ -119,9 +121,18 @@ if family == "windows" then
 	if platform == "win32" then
 		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib32\\freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib32\\SDL.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libcurl.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libeay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libidn-11.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\ssleay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\zlib1.dll"))
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib64\\freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib64\\SDL.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib64\\libcurl.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libeay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\ssleay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\zlib1.dll"))
 	end
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
@@ -312,6 +323,8 @@ function build(settings)
 	config.sdl:Apply(client_settings)
 	-- apply freetype settings
 	config.freetype:Apply(client_settings)
+	-- apply curl settings
+	config.curl:Apply(client_settings)
 
 	engine = Compile(engine_settings, Collect("src/engine/shared/*.cpp", "src/base/*.c"))
 	client = Compile(client_settings, Collect("src/engine/client/*.cpp"))
