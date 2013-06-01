@@ -56,7 +56,7 @@ bool CEditorMap::Save(const char *pFileName)
 	// save version
 	{
 		CMapItemVersion Item;
-		Item.m_Version = 1;
+		Item.m_Version = CMapItemVersion::CURRENT_VERSION;
 		df.AddItem(MAPITEMTYPE_VERSION, 0, sizeof(Item), &Item);
 	}
 
@@ -421,7 +421,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 	{
 		return false;
 	}
-	else if(pItemVersion->m_Version == 1)
+	else if(pItemVersion->m_Version == CMapItemVersion::CURRENT_VERSION)
 	{
 		// load map info
 		{

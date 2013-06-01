@@ -1,7 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "map.h"
+
 #include <engine/storage.h>
+
+#include <game/mapitems.h>
 
 CMap::CMap() = default;
 
@@ -60,7 +63,14 @@ bool CMap::Load(const char *pMapName)
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 	if(!pStorage)
 		return false;
-	return m_DataFile.Open(pStorage, pMapName, IStorage::TYPE_ALL);
+	if(!m_DataFile.Open(pStorage, pMapName, IStorage::TYPE_ALL))
+		return false;
+	// check version
+	const CMapItemVersion *pItem = (CMapItemVersion *)m_DataFile.FindItem(MAPITEMTYPE_VERSION, 0);
+	if(!pItem || pItem->m_Version != CMapItemVersion::CURRENT_VERSION)
+		return false;
+
+	return true;
 }
 
 void CMap::Unload()

@@ -337,6 +337,11 @@ struct CMapItemLayerQuads
 
 struct CMapItemVersion
 {
+	enum
+	{
+		CURRENT_VERSION = 1
+	};
+
 	int m_Version;
 };
 
