@@ -85,7 +85,7 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 
 void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
 {
-	if(g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats)
+	if(!g_Config.m_ClShowQuads || g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats)
 		return;
 
 	Graphics()->QuadsBegin();
