@@ -782,6 +782,14 @@ void CCharacter::Die(int Killer, int Weapon)
 	Msg.m_ModeSpecial = ModeSpecial;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
+	// reset switches if we are the last player in team to prevent door opening cheat:
+	// https://github.com/DDRace/teeworlds/issues/190
+	if (Teams()->Count(Team()) == 1) {
+		for (int i = 0; i <= GameServer()->Collision()->m_NumSwitchers; ++i) {
+			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team()] = true;
+		}
+	}
+
 	// a nice sound
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
