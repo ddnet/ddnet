@@ -771,8 +771,10 @@ void CClient::Render()
 	if(g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats)
 		Graphics()->Clear(0.3f,0.3f,0.6f);
 	else if(g_Config.m_GfxClear) {
-		float bg = ((float) g_Config.m_ClBackground) / 256.0;
-		Graphics()->Clear(bg,bg,bg);
+		float bgr = ((float) g_Config.m_ClBackgroundR) / 256.0;
+		float bgg = ((float) g_Config.m_ClBackgroundG) / 256.0;
+		float bgb = ((float) g_Config.m_ClBackgroundB) / 256.0;
+		Graphics()->Clear(bgr,bgg,bgb);
 	}
 
 	GameClient()->OnRender();
