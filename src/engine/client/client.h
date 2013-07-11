@@ -180,6 +180,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }
 	void GraphicsThread();
+  vec3 GetColorV3(int v);
 
 public:
 	IEngine *Engine() { return m_pEngine; }

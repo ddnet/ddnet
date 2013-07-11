@@ -6,8 +6,11 @@
 #include <stdarg.h>
 
 #include <base/math.h>
+#include <base/vmath.h>
 #include <base/system.h>
 #include <base/tl/threading.h>
+
+#include <game/client/gameclient.h>
 
 #include <engine/client.h>
 #include <engine/config.h>
@@ -767,18 +770,20 @@ const char *CClient::ErrorString()
 
 void CClient::Render()
 {
-	// if(g_Config.m_GfxClear)
 	if(g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats)
 		Graphics()->Clear(0.3f,0.3f,0.6f);
 	else if(g_Config.m_GfxClear) {
-		float bgr = ((float) g_Config.m_ClBackgroundR) / 256.0;
-		float bgg = ((float) g_Config.m_ClBackgroundG) / 256.0;
-		float bgb = ((float) g_Config.m_ClBackgroundB) / 256.0;
-		Graphics()->Clear(bgr,bgg,bgb);
+		vec3 bg = GetColorV3(g_Config.m_ClBackground);
+		Graphics()->Clear(bg.r, bg.g, bg.b);
 	}
 
 	GameClient()->OnRender();
 	DebugRender();
+}
+
+vec3 CClient::GetColorV3(int v)
+{
+	return HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)
