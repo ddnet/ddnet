@@ -1011,6 +1011,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
+			if(GetPlayerChar(ClientID) && GetPlayerChar(SpectateID) && GetDDRaceTeam(ClientID) != GetDDRaceTeam(SpectateID))
+			{
+				SendChatTarget(ClientID, "You can only move your team member to specators");
+				return;
+			}
+
 			if(g_Config.m_SvPauseable && g_Config.m_SvVotePause)
 			{
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to pause '%s' for %d seconds (%s)", Server()->ClientName(ClientID), Server()->ClientName(SpectateID), g_Config.m_SvVotePauseTime, pReason);
