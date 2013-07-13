@@ -971,7 +971,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if(GetPlayerChar(ClientID) && GetPlayerChar(KickID) && GetDDRaceTeam(ClientID) != GetDDRaceTeam(KickID))
+			// Don't allow kicking if a player has no character
+			if(!GetPlayerChar(ClientID) || !GetPlayerChar(KickID) || GetDDRaceTeam(ClientID) != GetDDRaceTeam(KickID))
 			{
 				SendChatTarget(ClientID, "You can kick only your team member");
 				m_apPlayers[ClientID]->m_Last_KickVote = time_get();
@@ -1011,7 +1012,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if(GetPlayerChar(ClientID) && GetPlayerChar(SpectateID) && GetDDRaceTeam(ClientID) != GetDDRaceTeam(SpectateID))
+			if(!GetPlayerChar(ClientID) || GetPlayerChar(SpectateID) || GetDDRaceTeam(ClientID) != GetDDRaceTeam(SpectateID))
 			{
 				SendChatTarget(ClientID, "You can only move your team member to specators");
 				return;
