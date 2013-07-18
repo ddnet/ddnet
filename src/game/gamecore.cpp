@@ -245,10 +245,10 @@ void CCharacterCore::Tick(bool UseInput)
 		bool GoingThroughTele = false;
 		int teleNr = 0;
 		int Hit;
-    if (m_NewHook)
-      Hit = m_pCollision->IntersectLine(m_HookPos, NewPos, &NewPos, 0, true);
-    else
-      Hit = m_pCollision->IntersectLineTele(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
+		if (m_NewHook || !g_Config.m_SvTeleportHook)
+			Hit = m_pCollision->IntersectLine(m_HookPos, NewPos, &NewPos, 0, true);
+		else
+			Hit = m_pCollision->IntersectLineTele(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
 
 		//m_NewHook = false;
 
@@ -257,9 +257,7 @@ void CCharacterCore::Tick(bool UseInput)
 			if(Hit&CCollision::COLFLAG_NOHOOK)
 				GoingToRetract = true;
 			else if (Hit&CCollision::COLFLAG_TELE)
-      {
 				GoingThroughTele = true;
-      }
 			else
 				GoingToHitGround = true;
 			m_pReset = true;
@@ -305,8 +303,8 @@ void CCharacterCore::Tick(bool UseInput)
 
 			if(GoingThroughTele)
 			{
-        m_TriggeredEvents = 0;
-        m_HookedPlayer = -1;
+				m_TriggeredEvents = 0;
+				m_HookedPlayer = -1;
 
 				m_NewHook = true;
 				int Num = m_pTeleOuts[teleNr-1].size();
