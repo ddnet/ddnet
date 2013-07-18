@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamemodes/DDRace.h>
 #include "laser.h"
 
 #include <engine/shared/config.h>
@@ -16,6 +17,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Dir = Direction;
 	m_Bounces = 0;
 	m_EvalTick = 0;
+	m_TelePos = vec2(0,0);
 	m_Type = Type;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
@@ -73,11 +75,20 @@ void CLaser::DoBounce()
 		return;
 	}
 	m_PrevPos = m_Pos;
-	vec2 To = m_Pos + m_Dir * m_Energy;
 	vec2 Coltile;
 
 	int Res;
-	Res = GameServer()->Collision()->IntersectLine(m_Pos, To, &Coltile, &To,false);
+	int z;
+
+	if (m_TelePos[0] != 0 || m_TelePos[1] != 0)
+	{
+		m_Pos = m_TelePos;
+		m_TelePos = vec2(0,0);
+	}
+
+	vec2 To = m_Pos + m_Dir * m_Energy;
+
+	Res = GameServer()->Collision()->IntersectLineTele(m_Pos, To, &Coltile, &To, &z, false);
 
 	if(Res)
 	{
@@ -105,7 +116,16 @@ void CLaser::DoBounce()
 			m_Dir = normalize(TempDir);
 
 			m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
-			m_Bounces++;
+
+			if (Res&CCollision::COLFLAG_TELE)
+			{
+				int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size();
+				m_TelePos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
+			}
+			else
+			{
+				m_Bounces++;
+			}
 
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
 				m_Energy = -1;
