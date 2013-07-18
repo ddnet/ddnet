@@ -3,7 +3,7 @@
 #include "gamecore.h"
 
 #include <engine/shared/config.h>
-
+#include <engine/server/server.h>
 const char *CTuningParams::m_apNames[] =
 {
 	#define MACRO_TUNING_PARAM(Name,ScriptName,Value) #ScriptName,
@@ -57,10 +57,11 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 	return 1.0f/powf(Curvature, (Value-Start)/Range);
 }
 
-void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams)
+void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > pTeleOuts)
 {
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
+	m_pTeleOuts = pTeleOuts;
 
 	m_pTeams = pTeams;
 	m_Id = -1;
@@ -70,6 +71,7 @@ void CCharacterCore::Reset()
 {
 	m_Pos = vec2(0,0);
 	m_Vel = vec2(0,0);
+	m_NewHook = false;
 	m_HookPos = vec2(0,0);
 	m_HookDir = vec2(0,0);
 	m_HookTick = 0;
@@ -229,7 +231,8 @@ void CCharacterCore::Tick(bool UseInput)
 	else if(m_HookState == HOOK_FLYING)
 	{
 		vec2 NewPos = m_HookPos+m_HookDir*m_pWorld->m_Tuning.m_HookFireSpeed;
-		if(distance(m_Pos, NewPos) > m_pWorld->m_Tuning.m_HookLength)
+		if((!m_NewHook && distance(m_Pos, NewPos) > m_pWorld->m_Tuning.m_HookLength)
+		|| (m_NewHook && distance(m_HookTeleBase, NewPos) > m_pWorld->m_Tuning.m_HookLength))
 		{
 			m_HookState = HOOK_RETRACT_START;
 			NewPos = m_Pos + normalize(NewPos-m_Pos) * m_pWorld->m_Tuning.m_HookLength;
@@ -239,11 +242,24 @@ void CCharacterCore::Tick(bool UseInput)
 		// make sure that the hook doesn't go though the ground
 		bool GoingToHitGround = false;
 		bool GoingToRetract = false;
-		int Hit = m_pCollision->IntersectLine(m_HookPos, NewPos, &NewPos, 0, true);
+		bool GoingThroughTele = false;
+		int teleNr = 0;
+		int Hit;
+    if (m_NewHook)
+      Hit = m_pCollision->IntersectLine(m_HookPos, NewPos, &NewPos, 0, true);
+    else
+      Hit = m_pCollision->IntersectLineTele(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
+
+		//m_NewHook = false;
+
 		if(Hit)
 		{
 			if(Hit&CCollision::COLFLAG_NOHOOK)
 				GoingToRetract = true;
+			else if (Hit&CCollision::COLFLAG_TELE)
+      {
+				GoingThroughTele = true;
+      }
 			else
 				GoingToHitGround = true;
 			m_pReset = true;
@@ -260,7 +276,7 @@ void CCharacterCore::Tick(bool UseInput)
 					continue;
 
 				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
-				if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize+2.0f)
+				if(m_HookState != HOOK_RETRACT_START && distance(pCharCore->m_Pos, ClosestPoint) < PhysSize+2.0f)
 				{
 					if (m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
 					{
@@ -287,7 +303,21 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			m_HookPos = NewPos;
+			if(GoingThroughTele)
+			{
+        m_TriggeredEvents = 0;
+        m_HookedPlayer = -1;
+
+				m_NewHook = true;
+				int Num = m_pTeleOuts[teleNr-1].size();
+				m_HookPos = m_pTeleOuts[teleNr-1][(!Num)?Num:rand() % Num]+TargetDirection*PhysSize*1.5f;
+				m_HookDir = TargetDirection;
+        m_HookTeleBase = m_HookPos;
+			}
+			else
+			{
+				m_HookPos = NewPos;
+			}
 		}
 	}
 
@@ -412,6 +442,11 @@ void CCharacterCore::Tick(bool UseInput)
 					m_Vel = Temp;
 				}
 			}
+		}
+
+		if (m_HookState != HOOK_FLYING)
+		{
+			m_NewHook = false;
 		}
 	}
 

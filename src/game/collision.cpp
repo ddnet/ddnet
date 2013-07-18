@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <iostream>
 #include <base/system.h>
 #include <base/math.h>
 #include <base/vmath.h>
@@ -192,7 +193,8 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		vec2 Pos = mix(Pos0, Pos1, a);
 		ix = round(Pos.x);
 		iy = round(Pos.y);
-		if(CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy)))
+
+		if((CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy))))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -200,6 +202,55 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 				*pOutBeforeCollision = Last;
 			return GetCollisionAt(ix, iy);
 		}
+
+		Last = Pos;
+	}
+	if(pOutCollision)
+		*pOutCollision = Pos1;
+	if(pOutBeforeCollision)
+		*pOutBeforeCollision = Pos1;
+	return 0;
+}
+
+int CCollision::IntersectLineTele(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough)
+{
+	float Distance = distance(Pos0, Pos1);
+	int End(Distance+1);
+	vec2 Last = Pos0;
+	int ix = 0, iy = 0; // Temporary position for checking collision
+	int dx = 0, dy = 0; // Offset for checking the "through" tile
+	if (AllowThrough)
+		{
+			ThroughOffset(Pos0, Pos1, &dx, &dy);
+		}
+	for(int i = 0; i < End; i++)
+	{
+		float a = i/Distance;
+		vec2 Pos = mix(Pos0, Pos1, a);
+		ix = round(Pos.x);
+		iy = round(Pos.y);
+
+		int Nx = clamp(ix/32, 0, m_Width-1);
+		int Ny = clamp(iy/32, 0, m_Height-1);
+		*pTeleNr = IsTeleport(Ny*m_Width+Nx);
+		if(*pTeleNr)
+		{
+			if(pOutCollision)
+				*pOutCollision = Pos;
+			if(pOutBeforeCollision)
+				*pOutBeforeCollision = Last;
+			return COLFLAG_TELE;
+		}
+
+		if((CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy))))
+		{
+			if(pOutCollision)
+				*pOutCollision = Pos;
+			if(pOutBeforeCollision)
+				*pOutBeforeCollision = Last;
+			return GetCollisionAt(ix, iy);
+		}
+
 		Last = Pos;
 	}
 	if(pOutCollision)
@@ -709,6 +760,51 @@ int CCollision::GetFTileFlags(int Index)
 int CCollision::GetIndex(int Nx, int Ny)
 {
 	return m_pTiles[Ny*m_Width+Nx].m_Index;
+}
+
+int CCollision::GetIndex(vec2 Pos)
+{
+	int nx = clamp((int)Pos.x/32, 0, m_Width-1);
+	int ny = clamp((int)Pos.y/32, 0, m_Height-1);
+
+	return ny*m_Width+nx;
+}
+
+int CCollision::GetIndex(vec2 PrevPos, vec2 Pos)
+{
+	float Distance = distance(PrevPos, Pos);
+
+	if(!Distance)
+	{
+		int Nx = clamp((int)Pos.x/32, 0, m_Width-1);
+		int Ny = clamp((int)Pos.y/32, 0, m_Height-1);
+		
+		if ((m_pTele) ||
+			(m_pSpeedup && m_pSpeedup[Ny*m_Width+Nx].m_Force > 0))
+		{
+			return Ny*m_Width+Nx;
+		}
+	}
+
+	float a = 0.0f;
+	vec2 Tmp = vec2(0, 0);
+	int Nx = 0;
+	int Ny = 0;
+
+	for(float f = 0; f < Distance; f++)
+	{
+		a = f/Distance;
+		Tmp = mix(PrevPos, Pos, a);
+		Nx = clamp((int)Tmp.x/32, 0, m_Width-1);
+		Ny = clamp((int)Tmp.y/32, 0, m_Height-1);
+		if ((m_pTele) ||
+			(m_pSpeedup && m_pSpeedup[Ny*m_Width+Nx].m_Force > 0))
+		{
+			return Ny*m_Width+Nx;
+		}
+	}
+
+	return -1;
 }
 
 int CCollision::GetFIndex(int Nx, int Ny)

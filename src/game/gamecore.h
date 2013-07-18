@@ -6,6 +6,9 @@
 #include <base/system.h>
 #include <base/math.h>
 
+#include <map>
+#include <vector>
+
 #include <math.h>
 #include "collision.h"
 #include <engine/shared/protocol.h>
@@ -161,6 +164,7 @@ enum
 	COREEVENT_HOOK_ATTACH_GROUND=0x10,
 	COREEVENT_HOOK_HIT_NOHOOK=0x20,
 	COREEVENT_HOOK_RETRACT=0x40,
+	//COREEVENT_HOOK_TELE=0x80,
 };
 
 class CWorldCore
@@ -179,15 +183,21 @@ class CCharacterCore
 {
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
+	std::map<int, std::vector<vec2> > m_pTeleOuts;
 public:
 	vec2 m_Pos;
 	vec2 m_Vel;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;
+	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+
+	bool m_NewHook;
+	vec2 m_NewHookPos;
+	vec2 m_NewHookDir;
 
 	int m_Jumped;
 
@@ -197,7 +207,7 @@ public:
 
 	int m_TriggeredEvents;
 
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams);
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > pTeleOuts);
 	void Reset();
 	void Tick(bool UseInput);
 	void Move();

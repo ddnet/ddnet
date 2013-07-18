@@ -25,7 +25,8 @@ public:
 		COLFLAG_NOHOOK=4,
 		// DDRace
 		COLFLAG_NOLASER=8,
-		COLFLAG_THROUGH=16
+		COLFLAG_THROUGH=16,
+		COLFLAG_TELE=32
 	};
 
 	CCollision();
@@ -36,6 +37,7 @@ public:
 	int GetWidth() { return m_Width; };
 	int GetHeight() { return m_Height; };
 	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough);
+	int IntersectLineTele(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough);
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces);
 	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
 	bool TestBox(vec2 Pos, vec2 Size);
@@ -54,6 +56,8 @@ public:
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int GetIndex(int x, int y);
+	int GetIndex(vec2 Pos);
+	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
 
 	int GetTile(int x, int y);
