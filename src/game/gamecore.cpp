@@ -274,7 +274,7 @@ void CCharacterCore::Tick(bool UseInput)
 					continue;
 
 				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
-				if(m_HookState != HOOK_RETRACT_START && distance(pCharCore->m_Pos, ClosestPoint) < PhysSize+2.0f)
+				if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize+2.0f)
 				{
 					if (m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
 					{
