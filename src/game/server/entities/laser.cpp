@@ -82,6 +82,7 @@ void CLaser::DoBounce()
 
 	if (m_TelePos[0] != 0 || m_TelePos[1] != 0)
 	{
+		m_PrevPos = m_TelePos;
 		m_Pos = m_TelePos;
 		m_TelePos = vec2(0,0);
 	}
