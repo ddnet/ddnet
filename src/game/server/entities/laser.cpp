@@ -18,6 +18,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Bounces = 0;
 	m_EvalTick = 0;
 	m_TelePos = vec2(0,0);
+	m_WasTele = false;
 	m_Type = Type;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
@@ -30,7 +31,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	vec2 At;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	CCharacter *pHit;
-	bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && m_TelePos[0] == 0 && m_TelePos[1] == 0);
+	bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
 	if(pOwnerChar ? (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_RIFLE) && m_Type == WEAPON_RIFLE) || (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
 		pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
@@ -81,7 +82,7 @@ void CLaser::DoBounce()
 	int Res;
 	int z;
 
-	if (m_TelePos[0] != 0 || m_TelePos[1] != 0)
+	if (m_WasTele)
 	{
 		m_PrevPos = m_TelePos;
 		m_Pos = m_TelePos;
@@ -126,10 +127,12 @@ void CLaser::DoBounce()
 			{
 				int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size();
 				m_TelePos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
+				m_WasTele = true;
 			}
 			else
 			{
 				m_Bounces++;
+				m_WasTele = false;
 			}
 
 			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
