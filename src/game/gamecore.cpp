@@ -244,7 +244,11 @@ void CCharacterCore::Tick(bool UseInput)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTele(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
+		int Hit;
+		if (!g_Config.m_SvTeleportHook)
+			Hit = m_pCollision->IntersectLine(m_HookPos, NewPos, &NewPos, 0, true);
+		else
+			Hit = m_pCollision->IntersectLineTele(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
 
 		//m_NewHook = false;
 
