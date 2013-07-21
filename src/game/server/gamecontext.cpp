@@ -1857,6 +1857,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvOldLaser = 0;
 	}
 
+	Console()->ExecuteFile(g_Config.m_SvResetFile);
+
 	char buf[512];
 	str_format(buf, sizeof(buf), "data/maps/%s.cfg", g_Config.m_SvMap);
 	Console()->ExecuteFile(buf);
