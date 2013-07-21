@@ -1121,7 +1121,7 @@ void CSqlScore::ShowPointsThread(void *pUser)
 			}
 
 			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT * FROM ((SELECT @rownum := @rownum + 1 AS Rank, Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) AS r) WHERE Name = '%s';", aBuf2, pData->m_aName);
+			str_format(aBuf, sizeof(aBuf), "SELECT * FROM ((SELECT @rownum := @rownum + 1 as Rank, Name, Points FROM ((SELECT Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) AS r)) AS f) WHERE Name = '%s';", aBuf2, pData->m_aName);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
@@ -1212,8 +1212,7 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 				pBuf += Size;
 			}
 
-			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT @rownum := @rownum + 1 AS Rank, Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC LIMIT %d, 5;", aBuf2, pData->m_Num-1);
+			str_format(aBuf, sizeof(aBuf), "SELECT Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC LIMIT %d, 5;", aBuf2, pData->m_Num-1);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
