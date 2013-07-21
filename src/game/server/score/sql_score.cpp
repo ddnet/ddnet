@@ -3,7 +3,6 @@
 /* CSqlScore class by Sushi */
 #if defined(CONF_SQL)
 #include <string.h>
-#include <iostream>
 #include <fstream>
 #include <algorithm>
 
@@ -180,6 +179,9 @@ void CSqlScore::Init()
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_race (Name VARCHAR(%d) NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, m_aMap, MAX_NAME_LENGTH);
 			m_pStatement->execute(aBuf);
 
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_teamrace (Name VARCHAR(%d) NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, m_aMap, MAX_NAME_LENGTH);
+			m_pStatement->execute(aBuf);
+
 			// Check if table has new column with timestamp
 			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_race' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
 			m_pResults = m_pStatement->executeQuery(aBuf);
@@ -188,6 +190,17 @@ void CSqlScore::Init()
 			{
 				// If not... add the column				
 				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_race ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);",m_pPrefix, m_aMap);
+				m_pStatement->execute(aBuf);
+			}
+
+			// Check if table has new column with timestamp
+			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_teamrace' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
+			m_pResults = m_pStatement->executeQuery(aBuf);
+
+			if(m_pResults->rowsCount() < 1)
+			{
+				// If not... add the column				
+				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_teamrace ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);",m_pPrefix, m_aMap);
 				m_pStatement->execute(aBuf);
 			}
 
@@ -293,6 +306,62 @@ void CSqlScore::LoadScore(int ClientID)
 #endif
 }
 
+void CSqlScore::SaveTeamScoreThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlTeamScoreData *pData = (CSqlTeamScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			char aBuf[2300];
+			//char bBuf[2300];
+			//bBuf[0] = '\0';
+
+			pData->m_pSqlData->m_pStatement->execute("SET @id = UUID();");
+
+			for(unsigned int i = 0; i < pData->m_Size; i++)
+			{
+				pData->m_pSqlData->ClearString(pData->m_aNames[i]);
+				//strcat(bBuf, pData->m_aNames[i]);
+				//if (i < pData->m_Size - 2)
+				//	strcat(bBuf, ", ");
+				//else if (i < pData->m_Size - 1)
+				//	strcat(bBuf, " & ");
+
+			// if no entry found... create a new one
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_%s_teamrace(Name, Timestamp, Time, ID) VALUES ('%s', CURRENT_TIMESTAMP(), '%.2f', @id);", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[i], pData->m_Time);
+				pData->m_pSqlData->m_pStatement->execute(aBuf);
+			}
+
+			//str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_%s_teamrace(Name, Timestamp, Time) VALUES ('%s', CURRENT_TIMESTAMP(), '%.2f');", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, bBuf, pData->m_Time);
+			//pData->m_pSqlData->m_pStatement->execute(aBuf);
+
+			dbg_msg("SQL", "Updating time done");
+
+			// delete results statement
+			delete pData->m_pSqlData->m_pStatement;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not update time");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+	}
+
+	delete pData;
+
+	lock_release(gs_SqlLock);
+}
+
 void CSqlScore::SaveScoreThread(void *pUser)
 {
 	lock_wait(gs_SqlLock);
@@ -352,6 +421,223 @@ void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)SaveThread);
 #endif
+}
+
+void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
+{
+	CConsole* pCon = (CConsole*)GameServer()->Console();
+	if(pCon->m_Cheated)
+		return;
+	CSqlTeamScoreData *Tmp = new CSqlTeamScoreData();
+	for(unsigned int i = 0; i < Size; i++)
+	{
+		Tmp->m_aClientIDs[i] = aClientIDs[i];
+		str_copy(Tmp->m_aNames[i], Server()->ClientName(aClientIDs[i]), sizeof(Tmp->m_aNames[i]));
+	}
+	Tmp->m_Size = Size;
+	Tmp->m_Time = Time;
+	Tmp->m_pSqlData = this;
+
+	void *SaveTeamThread = thread_create(SaveTeamScoreThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)SaveTeamThread);
+#endif
+}
+
+void CSqlScore::ShowTeamRankThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			// check strings
+			char originalName[MAX_NAME_LENGTH];
+			strcpy(originalName,pData->m_aName);
+			pData->m_pSqlData->ClearString(pData->m_aName);
+
+			// check sort methode
+			char aBuf[600];
+			char aNames[2300];
+			aNames[0] = '\0';
+
+			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
+			str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM ((SELECT @rownum := @rownum + 1 AS RANK, ID FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace WHERE Name = '%s' GROUP BY ID) as all_top_times ORDER BY Time ASC LIMIT 1) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Name ASC;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			int Rows = pData->m_pSqlData->m_pResults->rowsCount();
+
+			if(Rows < 1)
+			{
+				str_format(aBuf, sizeof(aBuf), "%s has no team ranks", originalName);
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+			}
+			else
+			{
+				pData->m_pSqlData->m_pResults->first();
+
+				int since = (int)pData->m_pSqlData->m_pResults->getInt("Ago");
+				char agoString[40];
+				mem_zero(agoString, sizeof(agoString));
+				agoTimeToString(since,agoString);
+
+				float Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
+				int Rank = (int)pData->m_pSqlData->m_pResults->getInt("Rank");
+
+				for(int Row = 0; Row < Rows; Row++)
+				{
+					strcat(aNames, pData->m_pSqlData->m_pResults->getString("Name").c_str());
+					pData->m_pSqlData->m_pResults->next();
+
+					if (Row < Rows - 2)
+						strcat(aNames, ", ");
+					else if (Row < Rows - 1)
+						strcat(aNames, " & ");
+				}
+
+				pData->m_pSqlData->m_pResults->first();
+
+				if(g_Config.m_SvHideScore)
+					str_format(aBuf, sizeof(aBuf), "Your team time: %d minute(s) %5.2f second(s)", (int)(Time/60), Time-((int)Time/60*60));
+				else
+					str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %d minute(s) %5.2f second(s), requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
+
+				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
+				{
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+					str_format(aBuf, sizeof(aBuf), "Finished: %s ago", agoString);
+				}
+				if(pData->m_Search)
+					strcat(aBuf, pData->m_aRequestingPlayer);
+				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+
+			}
+
+			dbg_msg("SQL", "Showing teamrank done");
+
+			// delete results and statement
+			delete pData->m_pSqlData->m_pResults;
+			delete pData->m_pSqlData->m_pStatement;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not show team rank");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+	}
+
+	delete pData;
+
+	lock_release(gs_SqlLock);
+}
+
+void CSqlScore::ShowTeamTop5Thread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			// check sort methode
+			char aBuf[512];
+
+			str_format(aBuf, sizeof(aBuf), "SELECT r.ID, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM ((SELECT ID FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace GROUP BY ID) as all_top_times ORDER BY Time ASC LIMIT %d, 5) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, Name ASC, r.ID;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			// show teamtop5
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "------- Team Top 5 -------");
+
+			int Rows = pData->m_pSqlData->m_pResults->rowsCount();
+
+			if (Rows >= 1) {
+				char aID[17];
+				char aID2[17];
+				char aNames[2300];
+				int Rank = pData->m_Num;
+				float Time = 0;
+				int aCuts[Rows];
+				int CutPos = 0;
+
+				aNames[0] = '\0';
+				aCuts[0] = -1;
+
+				pData->m_pSqlData->m_pResults->first();
+				strcpy(aID, pData->m_pSqlData->m_pResults->getString("ID").c_str());
+				for(int Row = 0; Row < Rows; Row++)
+				{
+					strcpy(aID2, pData->m_pSqlData->m_pResults->getString("ID").c_str());
+					if (str_comp(aID, aID2) != 0)
+					{
+						strcpy(aID, aID2);
+						aCuts[CutPos++] = Row - 1;
+					}
+					pData->m_pSqlData->m_pResults->next();
+				}
+				aCuts[CutPos] = Rows - 1;
+
+				CutPos = 0;
+				pData->m_pSqlData->m_pResults->first();
+				for(int Row = 0; Row < Rows; Row++)
+				{
+					strcat(aNames, pData->m_pSqlData->m_pResults->getString("Name").c_str());
+
+					if (Row < aCuts[CutPos] - 1)
+						strcat(aNames, ", ");
+					else if (Row < aCuts[CutPos])
+						strcat(aNames, " & ");
+
+					Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
+
+					if (Row == aCuts[CutPos])
+					{
+						str_format(aBuf, sizeof(aBuf), "%d. %s Team Time: %d minute(s) %.2f second(s)", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
+						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+						Rank++;
+						CutPos++;
+						aNames[0] = '\0';
+					}
+
+					pData->m_pSqlData->m_pResults->next();
+				}
+			}
+
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
+
+			dbg_msg("SQL", "Showing teamtop5 done");
+
+			// delete results and statement
+			delete pData->m_pSqlData->m_pResults;
+			delete pData->m_pSqlData->m_pStatement;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not show top5");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();
+	}
+
+	delete pData;
+
+	lock_release(gs_SqlLock);
 }
 
 void CSqlScore::ShowRankThread(void *pUser)
@@ -444,6 +730,21 @@ void CSqlScore::ShowRankThread(void *pUser)
 	delete pData;
 
 	lock_release(gs_SqlLock);
+}
+
+void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
+{
+	CSqlScoreData *Tmp = new CSqlScoreData();
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	Tmp->m_Search = Search;
+	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
+	Tmp->m_pSqlData = this;
+
+	void *TeamRankThread = thread_create(ShowTeamRankThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)TeamRankThread);
+#endif
 }
 
 void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
@@ -598,6 +899,19 @@ void CSqlScore::ShowTimesThread(void *pUser)
 	delete pData;
 
 	lock_release(gs_SqlLock);
+}
+
+void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
+{
+	CSqlScoreData *Tmp = new CSqlScoreData();
+	Tmp->m_Num = Debut;
+	Tmp->m_ClientID = ClientID;
+	Tmp->m_pSqlData = this;
+
+	void *TeamTop5Thread = thread_create(ShowTeamTop5Thread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)TeamTop5Thread);
+#endif
 }
 
 void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)

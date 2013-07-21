@@ -74,6 +74,7 @@ public:
 	void SetStartTime(CPlayer* Player, int StartTime);
 	void SetRefreshTime(CPlayer* Player, int RefreshTime);
 	void SetCpActive(CPlayer* Player, int CpActive);
+	void OnTeamFinish(CPlayer** Players, unsigned int Size);
 	void OnFinish(CPlayer* Player);
 	bool TeeFinished(int ClientID)
 	{

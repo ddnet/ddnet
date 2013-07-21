@@ -377,6 +377,37 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->m_Paused = (pPlayer->m_Paused == CPlayer::PAUSED_SPEC) ? CPlayer::PAUSED_NONE : CPlayer::PAUSED_SPEC;
 }
 
+void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+#if defined(CONF_SQL)
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
+
+	if (g_Config.m_SvHideScore)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5",
+				"Showing the team top 5 is not allowed on this server.");
+		return;
+	}
+
+	if (pResult->NumArguments() > 0 && pResult->GetInteger(0) >= 0)
+		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData,
+				pResult->GetInteger(0));
+	else
+		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData);
+
+#if defined(CONF_SQL)
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
+}
+
 void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -461,6 +492,41 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 #endif
+
+void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+#if defined(CONF_SQL)
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments() > 0)
+		if (!g_Config.m_SvHideScore)
+			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0),
+					true);
+		else
+			pSelf->Console()->Print(
+					IConsole::OUTPUT_LEVEL_STANDARD,
+					"teamrank",
+					"Showing the team rank of other players is not allowed on this server.");
+	else
+		pSelf->Score()->ShowTeamRank(pResult->m_ClientID,
+				pSelf->Server()->ClientName(pResult->m_ClientID));
+
+#if defined(CONF_SQL)
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
+}
 
 void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 {

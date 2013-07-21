@@ -65,10 +65,15 @@ public:
 	virtual void LoadScore(int ClientID);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);
+	virtual void SaveTeamScore(int* ClientIDs, unsigned int Size, float Time);
 
 	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
+
+	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID,
+			void *pUserData, int Debut = 1);
+	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
 
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut);
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search);

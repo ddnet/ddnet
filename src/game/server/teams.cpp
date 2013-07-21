@@ -110,6 +110,10 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 		{
 			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_FINISHED); //TODO: Make it better
 			//ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_OPEN);
+
+			CPlayer *TeamPlayers[MAX_CLIENTS];
+			unsigned int PlayersCount = 0;
+
 			for (int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				if (m_Core.Team(ClientID) == m_Core.Team(i))
@@ -119,9 +123,13 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 					{
 						OnFinish(pPlayer);
 						m_TeeFinished[i] = false;
+
+						TeamPlayers[PlayersCount++] = pPlayer;
 					}
 				}
 			}
+
+			OnTeamFinish(TeamPlayers, PlayersCount);
 
 		}
 	}
@@ -329,6 +337,30 @@ float *CGameTeams::GetCpCurrent(CPlayer* Player)
 	if (pChar)
 		return pChar->m_CpCurrent;
 	return NULL;
+}
+
+void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size)
+{
+	float time = (float) (Server()->Tick() - GetStartTime(Players[0]))
+			/ ((float) Server()->TickSpeed());
+	if (time < 0.000001f)
+		return;
+
+	bool CallSaveScore = false;
+
+#if defined(CONF_SQL)
+	CallSaveScore = g_Config.m_SvUseSQL;
+#endif
+
+	int PlayerCIDs[Size];
+
+	for(unsigned int i = 0; i < Size; i++)
+	{
+		PlayerCIDs[i] = Players[i]->GetCID();
+	}
+
+	if (CallSaveScore)
+		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, time);
 }
 
 void CGameTeams::OnFinish(CPlayer* Player)

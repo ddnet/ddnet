@@ -226,6 +226,7 @@ private:
 	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleSpec(IConsole::IResult *pResult, void *pUserData);
 	static void ConForcePause(IConsole::IResult *pResult, void *pUserData);
+	static void ConTeamTop5(IConsole::IResult *pResult, void *pUserData);
 	static void ConTop5(IConsole::IResult *pResult, void *pUserData);
 	#if defined(CONF_SQL)
 	static void ConTimes(IConsole::IResult *pResult, void *pUserData);
@@ -234,6 +235,7 @@ private:
 	#endif
 
 	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);
+	static void ConTeamRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
