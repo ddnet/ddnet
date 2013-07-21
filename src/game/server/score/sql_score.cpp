@@ -787,8 +787,10 @@ void CSqlScore::ShowPointsThread(void *pUser)
 			CPointsInfo *PointsInfos = pData->m_pSqlData->m_PointsInfos;
 
 			if (!PointsInfos)
+			{
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no maps configured for points");
 				goto end;
+			}
 
 			char aBuf[600 + 200 * PointsSize];
 			char aBuf2[600 + 200 * PointsSize];
@@ -877,8 +879,10 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 			CPointsInfo *PointsInfos = pData->m_pSqlData->m_PointsInfos;
 
 			if (!PointsInfos)
+			{
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no maps configured for points");
 				goto end;
+			}
 
 			char aBuf[600 + 200 * PointsSize];
 			char aBuf2[600 + 200 * PointsSize];
