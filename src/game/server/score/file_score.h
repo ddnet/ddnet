@@ -69,6 +69,9 @@ public:
 	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
+
+	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut);
+	virtual void ShowPoints(int ClientID, const char* pName, bool Search);
 };
 
 #endif

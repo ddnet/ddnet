@@ -857,3 +857,64 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 }
 
+#if defined(CONF_SQL)
+void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments() > 0)
+		if (!g_Config.m_SvHideScore)
+			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0),
+					true);
+		else
+			pSelf->Console()->Print(
+					IConsole::OUTPUT_LEVEL_STANDARD,
+					"points",
+					"Showing the global points of other players is not allowed on this server.");
+	else
+		pSelf->Score()->ShowPoints(pResult->m_ClientID,
+				pSelf->Server()->ClientName(pResult->m_ClientID));
+
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+}
+#endif
+
+#if defined(CONF_SQL)
+void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+
+	if (g_Config.m_SvHideScore)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "toppoints",
+				"Showing the global top points is not allowed on this server.");
+		return;
+	}
+
+	if (pResult->NumArguments() > 0 && pResult->GetInteger(0) >= 0)
+		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData,
+				pResult->GetInteger(0));
+	else
+		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData);
+
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+}
+#endif

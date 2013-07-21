@@ -3,6 +3,9 @@
 /* CSqlScore class by Sushi */
 #if defined(CONF_SQL)
 #include <string.h>
+#include <iostream>
+#include <fstream>
+#include <algorithm>
 
 #include <engine/shared/config.h>
 #include "../entities/character.h"
@@ -28,6 +31,50 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 		gs_SqlLock = lock_create();
 
 	Init();
+	LoadPointMapList();
+}
+
+int CSqlScore::LoadPointMapList()
+{
+	m_PointsInfos = NULL;
+	m_PointsSize = 0;
+
+	std::ifstream f("points.cfg");
+	if (f.fail())
+		return -1;
+
+	if(!Connect())
+		return -1;
+
+	m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
+	f.seekg(0);
+	m_PointsInfos = new CPointsInfo[m_PointsSize];
+
+	char aBuf[256];
+	unsigned int Position = 0;
+
+	while (f.getline(aBuf, 256) && Position < m_PointsSize)
+	{
+		CPointsInfo& Info = m_PointsInfos[Position];
+		if (sscanf(aBuf, "%u %127[^\t\n]", &Info.m_Points, Info.m_aMapName) == 2)
+		{
+			NormalizeMapname(Info.m_aMapName);
+			str_format(aBuf, sizeof(aBuf), "SELECT Name FROM record_%s_race;", Info.m_aMapName);
+			try
+			{
+				m_pStatement->executeQuery(aBuf);
+			}
+			catch (sql::SQLException &e)
+			{
+				continue;
+			}
+			Position++;
+		}
+	}
+
+	m_PointsSize = Position;
+
+	return 0;
 }
 
 CSqlScore::~CSqlScore()
@@ -363,7 +410,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 				if(g_Config.m_SvHideScore)
 					str_format(aBuf, sizeof(aBuf), "Your time: %d minute(s) %5.2f second(s)", (int)(Time/60), Time-((int)Time/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
+					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s), requested by %s", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
 
 				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
 				{
@@ -405,7 +452,7 @@ void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
 	Tmp->m_Search = Search;
-	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), " (%s)", Server()->ClientName(ClientID));
+	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
 	Tmp->m_pSqlData = this;
 
 	void *RankThread = thread_create(ShowRankThread, Tmp);
@@ -719,4 +766,186 @@ void CSqlScore::agoTimeToString(int agoTime, char agoString[])
 		}
 	}
 }
+
+void CSqlScore::ShowPointsThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			// check strings
+			char originalName[MAX_NAME_LENGTH];
+			strcpy(originalName,pData->m_aName);
+			pData->m_pSqlData->ClearString(pData->m_aName);
+
+			unsigned int PointsSize = pData->m_pSqlData->m_PointsSize;
+			CPointsInfo *PointsInfos = pData->m_pSqlData->m_PointsInfos;
+
+			if (!PointsInfos)
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no maps configured for points");
+				goto end;
+
+			char aBuf[600 + 200 * PointsSize];
+			char aBuf2[600 + 200 * PointsSize];
+			char *pBuf = aBuf2;
+			int Size;
+
+			for(unsigned int i = 0; i < PointsSize; i++)
+			{
+				if (i < PointsSize - 1)
+					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM record_%s_race) UNION ALL ", PointsInfos[i].m_Points, PointsInfos[i].m_aMapName);
+				else
+					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM record_%s_race)", PointsInfos[i].m_Points, PointsInfos[i].m_aMapName);
+				pBuf += Size;
+			}
+
+			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
+			str_format(aBuf, sizeof(aBuf), "SELECT * FROM ((SELECT @rownum := @rownum + 1 AS Rank, Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) AS r) WHERE Name = '%s';", aBuf2, pData->m_aName);
+
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
+			{
+				str_format(aBuf, sizeof(aBuf), "%s has not collected any points so far", originalName);
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+			}
+			else
+			{
+				pData->m_pSqlData->m_pResults->next();
+				int count = (int)pData->m_pSqlData->m_pResults->getInt("Points");
+				int rank = (int)pData->m_pSqlData->m_pResults->getInt("Rank");
+				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
+				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+			}
+
+			dbg_msg("SQL", "Showing points done");
+
+			// delete results and statement
+			delete pData->m_pSqlData->m_pResults;
+			delete pData->m_pSqlData->m_pStatement;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not show points");
+		}
+
+		end:
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+	}
+
+	delete pData;
+
+	lock_release(gs_SqlLock);
+}
+
+void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
+{
+	CSqlScoreData *Tmp = new CSqlScoreData();
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	Tmp->m_Search = Search;
+	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
+	Tmp->m_pSqlData = this;
+
+	void *PointsThread = thread_create(ShowPointsThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)PointsThread);
+#endif
+}
+
+void CSqlScore::ShowTopPointsThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			unsigned int PointsSize = pData->m_pSqlData->m_PointsSize;
+			CPointsInfo *PointsInfos = pData->m_pSqlData->m_PointsInfos;
+
+			if (!PointsInfos)
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no maps configured for points");
+				goto end;
+
+			char aBuf[600 + 200 * PointsSize];
+			char aBuf2[600 + 200 * PointsSize];
+			char *pBuf = aBuf2;
+			int Size;
+
+			for(unsigned int i = 0; i < PointsSize; i++)
+			{
+				if (i < PointsSize - 1)
+					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM record_%s_race) UNION ALL ", PointsInfos[i].m_Points, PointsInfos[i].m_aMapName);
+				else
+					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM record_%s_race)", PointsInfos[i].m_Points, PointsInfos[i].m_aMapName);
+				pBuf += Size;
+			}
+
+			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
+			str_format(aBuf, sizeof(aBuf), "SELECT @rownum := @rownum + 1 AS Rank, Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC LIMIT %d, 5;", aBuf2, pData->m_Num-1);
+
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			// show top points
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------- Top Points --------");
+
+			int Rank = pData->m_Num;
+			while(pData->m_pSqlData->m_pResults->next())
+			{
+				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), pData->m_pSqlData->m_pResults->getInt("Points"));
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+				Rank++;
+			}
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
+
+			dbg_msg("SQL", "Showing toppoints done");
+
+			// delete results and statement
+			delete pData->m_pSqlData->m_pResults;
+			delete pData->m_pSqlData->m_pStatement;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not show toppoints");
+		}
+
+		end:
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();
+	}
+
+	delete pData;
+
+	lock_release(gs_SqlLock);
+}
+
+void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
+{
+	CSqlScoreData *Tmp = new CSqlScoreData();
+	Tmp->m_Num = Debut;
+	Tmp->m_ClientID = ClientID;
+	Tmp->m_pSqlData = this;
+
+	void *TopPointsThread = thread_create(ShowTopPointsThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)TopPointsThread);
+#endif
+}
+
 #endif

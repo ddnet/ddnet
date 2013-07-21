@@ -229,6 +229,8 @@ private:
 	static void ConTop5(IConsole::IResult *pResult, void *pUserData);
 	#if defined(CONF_SQL)
 	static void ConTimes(IConsole::IResult *pResult, void *pUserData);
+	static void ConPoints(IConsole::IResult *pResult, void *pUserData);
+	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
 	#endif
 
 	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);

@@ -760,12 +760,15 @@ int str_length(const char *str);
 		format - printf formating string.
 		... - Parameters for the formating.
 
+	Returns:
+		Length of written string
+
 	Remarks:
 		- See the C manual for syntax for the printf formating string.
 		- The strings are treated as zero-termineted strings.
 		- Garantees that dst string will contain zero-termination.
 */
-void str_format(char *buffer, int buffer_size, const char *format, ...);
+int str_format(char *buffer, int buffer_size, const char *format, ...);
 
 /*
 	Function: str_sanitize_strong

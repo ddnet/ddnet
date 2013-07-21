@@ -13,6 +13,12 @@
 
 #include "../score.h"
 
+struct CPointsInfo
+{
+	char m_aMapName[128];
+	unsigned int m_Points;
+};
+
 class CSqlScore: public IScore
 {
 	CGameContext *m_pGameServer;
@@ -41,11 +47,15 @@ class CSqlScore: public IScore
 		return m_pServer;
 	}
 
+	int LoadPointMapList();
+
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void ShowRankThread(void *pUser);
 	static void ShowTop5Thread(void *pUser);
 	static void ShowTimesThread(void *pUser);
+	static void ShowPointsThread(void *pUser);
+	static void ShowTopPointsThread(void *pUser);
 
 	void Init();
 
@@ -62,6 +72,9 @@ public:
 	CSqlScore(CGameContext *pGameServer);
 	~CSqlScore();
 
+	CPointsInfo* m_PointsInfos;
+	unsigned int m_PointsSize;
+
 	virtual void LoadScore(int ClientID);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);
@@ -70,7 +83,10 @@ public:
 	virtual void ShowTimes(int ClientID, int Debut = 1);
 	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	static void agoTimeToString(int agoTime, char agoStrign[]);
+	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
+	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
+			void *pUserData, int Debut = 1);
+	static void agoTimeToString(int agoTime, char agoString[]);
 };
 
 struct CSqlScoreData
