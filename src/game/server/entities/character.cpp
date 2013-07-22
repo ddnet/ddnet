@@ -1427,7 +1427,7 @@ void CCharacter::HandleTiles(int Index)
 		m_Hit |= DISABLE_HIT_RIFLE;
 	}
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
-	if(z && Controller->m_TeleOuts[z-1].size())
+	if(!g_Config.m_SvTeleportHook && !g_Config.m_SvTeleportWeapons && z && Controller->m_TeleOuts[z-1].size())
 	{
 		m_Core.m_HookedPlayer = -1;
 		m_Core.m_HookState = HOOK_RETRACTED;
@@ -1441,6 +1441,8 @@ void CCharacter::HandleTiles(int Index)
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	if(evilz && !m_Super && Controller->m_TeleOuts[evilz-1].size())
 	{
+		int Num = Controller->m_TeleOuts[evilz-1].size();
+		m_Core.m_Pos = Controller->m_TeleOuts[evilz-1][(!Num)?Num:rand() % Num];
 		if (!g_Config.m_SvTeleportHook && !g_Config.m_SvTeleportWeapons)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -1449,10 +1451,8 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookState = HOOK_RETRACTED;
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 			m_Core.m_Vel = vec2(0,0);
+			m_Core.m_HookPos = m_Core.m_Pos;
 		}
-		int Num = Controller->m_TeleOuts[evilz-1].size();
-		m_Core.m_Pos = Controller->m_TeleOuts[evilz-1][(!Num)?Num:rand() % Num];
-		m_Core.m_HookPos = m_Core.m_Pos;
 		return;
 	}
 	if(GameServer()->Collision()->IsCheckTeleport(MapIndex))
