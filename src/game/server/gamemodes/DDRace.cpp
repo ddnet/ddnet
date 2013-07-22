@@ -1,6 +1,7 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 /* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
 #include <engine/server.h>
+#include <engine/shared/config.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
@@ -11,7 +12,7 @@
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 		IGameController(pGameServer), m_Teams(pGameServer)
 {
-	m_pGameType = GAME_NAME;
+	m_pGameType = g_Config.m_SvTestingCommands ? "TestDDRace" : "DDRace";
 
 	InitTeleporter();
 }

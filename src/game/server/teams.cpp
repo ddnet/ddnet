@@ -352,7 +352,7 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size)
 	CallSaveScore = g_Config.m_SvUseSQL;
 #endif
 
-	int PlayerCIDs[Size];
+	int PlayerCIDs[MAX_CLIENTS];
 
 	for(unsigned int i = 0; i < Size; i++)
 	{

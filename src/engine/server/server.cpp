@@ -1532,6 +1532,13 @@ int CServer::Run()
 	return 0;
 }
 
+void CServer::ConTestingCommands(CConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Value: %d", g_Config.m_SvTestingCommands);
+	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+}
+
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
 	if(pResult->NumArguments() > 1)
@@ -1809,6 +1816,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
+
+	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off");
 
 	// restore empty config strings to their defaults
 	pConfig->RestoreStrings();
