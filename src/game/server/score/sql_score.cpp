@@ -628,7 +628,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
 			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show top5");
+			dbg_msg("SQL", "ERROR: Could not show teamtop5");
 		}
 
 		// disconnect from database
