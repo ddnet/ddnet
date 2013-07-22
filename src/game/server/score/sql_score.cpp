@@ -297,7 +297,7 @@ void CSqlScore::LoadScore(int ClientID)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	Tmp->m_pSqlData = this;
 
 	void *LoadThread = thread_create(LoadScoreThread, Tmp);
@@ -411,7 +411,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS
 		return;
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	Tmp->m_Time = Time;
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		Tmp->m_aCpCurrent[i] = CpTime[i];
@@ -432,7 +432,7 @@ void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
 	for(unsigned int i = 0; i < Size; i++)
 	{
 		Tmp->m_aClientIDs[i] = aClientIDs[i];
-		str_copy(Tmp->m_aNames[i], Server()->ClientName(aClientIDs[i]), sizeof(Tmp->m_aNames[i]));
+		str_copy(Tmp->m_aNames[i], Server()->ClientName(aClientIDs[i]), MAX_NAME_LENGTH);
 	}
 	Tmp->m_Size = Size;
 	Tmp->m_Time = Time;
@@ -736,7 +736,7 @@ void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
 	Tmp->m_Search = Search;
 	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
 	Tmp->m_pSqlData = this;
@@ -751,7 +751,7 @@ void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
 	Tmp->m_Search = Search;
 	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
 	Tmp->m_pSqlData = this;
@@ -946,7 +946,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
 	Tmp->m_pSqlData = this;
 	Tmp->m_Search = true;
 
@@ -963,7 +963,7 @@ void CSqlScore::ClearString(char *pString)
 	char newString[MAX_NAME_LENGTH*2-1];
 	int pos = 0;
 
-	for(int i=0;i<str_length(pString);i++)
+	for(int i=0;i<MAX_NAME_LENGTH;i++)
 	{
 		if(pString[i] == '\\')
 		{
@@ -1167,7 +1167,7 @@ void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
 	Tmp->m_Search = Search;
 	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
 	Tmp->m_pSqlData = this;
