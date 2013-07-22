@@ -57,6 +57,15 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 	return 1.0f/powf(Curvature, (Value-Start)/Range);
 }
 
+void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams)
+{
+	m_pWorld = pWorld;
+	m_pCollision = pCollision;
+
+	m_pTeams = pTeams;
+	m_Id = -1;
+}
+
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > pTeleOuts)
 {
 	m_pWorld = pWorld;
