@@ -5,8 +5,6 @@
 #include <game/server/gamemodes/DDRace.h>
 #include "projectile.h"
 
-#include <iostream>
-
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
 
