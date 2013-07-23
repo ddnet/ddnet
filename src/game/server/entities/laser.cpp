@@ -123,7 +123,7 @@ void CLaser::DoBounce()
 
 			m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
 
-			if (g_Config.m_SvTeleportWeapons && Res&CCollision::COLFLAG_TELE)
+			if (g_Config.m_SvTeleportWeapons && Res&CCollision::COLFLAG_TELE && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 			{
 				int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size();
 				m_TelePos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];

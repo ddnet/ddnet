@@ -160,7 +160,7 @@ void CProjectile::Tick()
 
 	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
 	int z = GameServer()->Collision()->IsTeleport(x);
-	if (g_Config.m_SvTeleportWeapons && z)
+	if (g_Config.m_SvTeleportWeapons && z && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 	{
 		int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size();
 		m_Pos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
