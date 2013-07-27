@@ -701,8 +701,6 @@ void CSqlScore::ShowRankThread(void *pUser)
 					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 					str_format(aBuf, sizeof(aBuf), "Finished: %s ago", agoString);
 				}
-				if(pData->m_Search)
-					strcat(aBuf, pData->m_aRequestingPlayer);
 				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 
 			}
