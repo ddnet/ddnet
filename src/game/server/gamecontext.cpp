@@ -1459,6 +1459,8 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->m_apPlayers[ClientID]->m_TeamChangeTick = pSelf->Server()->Tick()+pSelf->Server()->TickSpeed()*Delay*60;
 	pSelf->m_apPlayers[ClientID]->SetTeam(Team);
+	if(Team == TEAM_SPECTATORS)
+		pSelf->m_apPlayers[ClientID]->m_Paused = CPlayer::PAUSED_NONE;
 	// (void)pSelf->m_pController->CheckTeamBalance();
 }
 
