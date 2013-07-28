@@ -47,8 +47,6 @@ class CSqlScore: public IScore
 		return m_pServer;
 	}
 
-	int LoadPointMapList();
-
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void SaveTeamScoreThread(void *pUser);
@@ -77,6 +75,8 @@ public:
 
 	CPointsInfo* m_PointsInfos;
 	unsigned int m_PointsSize;
+
+	virtual void LoadPointMapList();
 
 	virtual void LoadScore(int ClientID);
 	virtual void SaveScore(int ClientID, float Time,

@@ -33,17 +33,19 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 	LoadPointMapList();
 }
 
-int CSqlScore::LoadPointMapList()
+void CSqlScore::LoadPointMapList()
 {
+	lock_wait(gs_SqlLock);
+
 	m_PointsInfos = NULL;
 	m_PointsSize = 0;
 
 	std::ifstream f("points.cfg");
 	if (f.fail())
-		return -1;
+		return;
 
 	if(!Connect())
-		return -1;
+		return;
 
 	m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
 	f.seekg(0);
@@ -58,7 +60,7 @@ int CSqlScore::LoadPointMapList()
 		if (sscanf(aBuf, "%u %127[^\t\n]", &Info.m_Points, Info.m_aMapName) == 2)
 		{
 			NormalizeMapname(Info.m_aMapName);
-			str_format(aBuf, sizeof(aBuf), "SELECT Name FROM record_%s_race;", Info.m_aMapName);
+			str_format(aBuf, sizeof(aBuf), "SELECT count(Name) FROM record_%s_race;", Info.m_aMapName);
 			try
 			{
 				m_pStatement->executeQuery(aBuf);
@@ -73,7 +75,11 @@ int CSqlScore::LoadPointMapList()
 
 	m_PointsSize = Position;
 
-	return 0;
+	lock_release(gs_SqlLock);
+
+	Disconnect();
+
+	return;
 }
 
 CSqlScore::~CSqlScore()

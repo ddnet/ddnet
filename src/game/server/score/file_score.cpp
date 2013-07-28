@@ -54,6 +54,11 @@ std::string SaveFile()
 	return oss.str();
 }
 
+void CFileScore::LoadPointMapList()
+{
+  // TODO: implement
+}
+
 void CFileScore::SaveScoreThread(void *pUser)
 {
 	CFileScore *pSelf = (CFileScore *) pUser;
