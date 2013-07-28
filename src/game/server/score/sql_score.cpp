@@ -466,7 +466,7 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 			aNames[0] = '\0';
 
 			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM ((SELECT @rownum := @rownum + 1 AS RANK, ID FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace WHERE Name = '%s' GROUP BY ID) as all_top_times ORDER BY Time ASC LIMIT 1) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Name ASC;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM ((SELECT @rownum := @rownum + 1 AS RANK, ID FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace WHERE Name = '%s' GROUP BY ID) as all_top_times ORDER BY Time ASC LIMIT 1) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, l.ID, Name ASC;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
