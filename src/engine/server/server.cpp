@@ -34,6 +34,7 @@
 
 #include "register.h"
 #include "server.h"
+#include "fifoconsole.h"
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
@@ -1824,11 +1825,14 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pEngine->InitLogfile();
 
+	FifoConsole *fifoConsole = new FifoConsole(pConsole);
+
 	// run the server
 	dbg_msg("server", "starting...");
 	pServer->Run();
 
 	// free
+	delete fifoConsole;
 	delete pServer;
 	delete pKernel;
 	delete pEngineMap;
