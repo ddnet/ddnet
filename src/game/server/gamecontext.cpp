@@ -346,6 +346,9 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 	if(m_VoteCloseTime)
 		return;
 
+	if (str_comp(pCommand,"info") == 0)
+		return;
+
 	// reset votes
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
 	m_VoteEnforcer = -1;
