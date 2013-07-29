@@ -1032,7 +1032,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 		}
 
-		if(aCmd[0] && str_comp(pCommand,"info"))
+		if(aCmd[0] && str_comp(aCmd,"info"))
 		{
 			SendChat(-1, CGameContext::CHAT_ALL, aChatmsg);
 			StartVote(aDesc, aCmd, pReason);
