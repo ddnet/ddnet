@@ -346,9 +346,6 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 	if(m_VoteCloseTime)
 		return;
 
-	if (str_comp(pCommand,"info") == 0)
-		return;
-
 	// reset votes
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
 	m_VoteEnforcer = -1;
@@ -1035,7 +1032,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 		}
 
-		if(aCmd[0])
+		if(aCmd[0] && str_comp(pCommand,"info"))
 		{
 			SendChat(-1, CGameContext::CHAT_ALL, aChatmsg);
 			StartVote(aDesc, aCmd, pReason);
