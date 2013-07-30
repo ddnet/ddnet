@@ -812,7 +812,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			m_ChatResponseTargetID = ClientID;
-			Server()->RestrictRconOutput(ClientID);
 			Console()->SetFlagMask(CFGFLAG_CHAT);
 
 			if (pPlayer->m_Authed)
@@ -829,7 +828,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 			Console()->SetFlagMask(CFGFLAG_SERVER);
 			m_ChatResponseTargetID = -1;
-			Server()->RestrictRconOutput(-1);
 		}
 		else
 			SendChat(ClientID, Team, pMsg->m_pMessage, ClientID);
