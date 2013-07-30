@@ -23,8 +23,7 @@ void FifoConsole::ListenFifoThread(void *pUser)
 	if (str_comp(g_Config.m_SvInputFifo, "") == 0)
 		return;
 
-	if (mkfifo(g_Config.m_SvInputFifo, 0600))
-		return;
+	mkfifo(g_Config.m_SvInputFifo, 0600);
 
 	std::ifstream f;
 	char aBuf[256];
