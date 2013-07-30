@@ -259,8 +259,8 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	{
 		if(ProcessSpamProtection(SpamProtectionClientID))
 		{
-			//SendChatTarget(SpamProtectionClientID, "Muted text:");
-			//SendChatTarget(SpamProtectionClientID, pText);
+			SendChatTarget(SpamProtectionClientID, "Muted text:");
+			SendChatTarget(SpamProtectionClientID, pText);
 			return;
 		}
 	}
@@ -802,15 +802,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				*pMessage = ' ';
 			pMessage++;
 		}
-		if(pMsg->m_pMessage[0]=='/')
+		if(pMsg->m_pMessage[0]=='/') // TODO: Add spam protection
 		{
-			if(ProcessSpamProtection(ClientID))
-			{
-				//SendChatTarget(ClientID, "Muted text:");
-				//SendChatTarget(ClientID, pText);
-				return;
-			}
-
 			m_ChatResponseTargetID = ClientID;
 			Console()->SetFlagMask(CFGFLAG_CHAT);
 
