@@ -105,17 +105,64 @@ int CNetServer::Recv(CNetChunk *pChunk)
 		if(Bytes <= 0)
 			break;
 
+		// check if we just should drop the packet
+		char aBuf[128];
+		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
+		{
+			// banned, reply with a message
+			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf)+1);
+			continue;
+		}
+
+		bool Found = false;
+		bool Spam = false;
+		int64 Now = time_get();
+
+		for(int i = 0; i < MaxClients(); i++)
+		{
+			if (net_addr_comp(&m_aTraffics[i].m_Address, &Addr) == 0)
+			{
+				if (Now - m_aTraffics[i].m_TrafficSince > time_freq() * 5)
+				{
+					m_aTraffics[i].m_Traffic = 0;
+					m_aTraffics[i].m_TrafficSince = Now;
+				}
+				else
+				{
+					if ((Now - m_aTraffics[i].m_TrafficSince) / time_freq() > 0 && m_aTraffics[i].m_Traffic / ((Now - m_aTraffics[i].m_TrafficSince) / time_freq()) > 10000 /* * m_MaxClientsPerIP*/)
+					{
+						Spam = true;
+						break;
+					}
+					m_aTraffics[i].m_Traffic += Bytes;
+				}
+				Found = true;
+				break;
+			}
+		}
+
+		if (Spam)
+		{
+			NetBan()->BanAddr(&Addr, 60, "Stressing network");
+			continue;
+		}
+
+		if (!Found)
+		{
+			for(int i = 0; i < MaxClients(); i++)
+			{
+				if (Now - m_aTraffics[i].m_TrafficSince > time_freq() * 5)
+				{
+					m_aTraffics[i].m_Address = Addr;
+					m_aTraffics[i].m_Traffic = 0;
+					m_aTraffics[i].m_TrafficSince = Now;
+					break;
+				}
+			}
+		}
+
 		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{
-			// check if we just should drop the packet
-			char aBuf[128];
-			if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
-			{
-				// banned, reply with a message
-				CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf)+1);
-				continue;
-			}
-
 			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
 			{
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
@@ -130,7 +177,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				// TODO: check size here
 				if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL && m_RecvUnpacker.m_Data.m_aChunkData[0] == NET_CTRLMSG_CONNECT)
 				{
-					bool Found = false;
+					Found = false;
 
 					// check if we already got this client
 					for(int i = 0; i < MaxClients(); i++)
