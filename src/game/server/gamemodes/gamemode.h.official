@@ -1,7 +1,0 @@
-/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-/* This is used for Official Builds of DDRace, if you change the source please don't use the name DDRace */
-#ifndef GAME_MODE_H
-#define GAME_MODE_H
-
-#define GAME_NAME "DDRace"
-#endif
