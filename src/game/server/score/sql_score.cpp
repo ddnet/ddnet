@@ -324,28 +324,93 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 		try
 		{
 			char aBuf[2300];
-			//char bBuf[2300];
-			//bBuf[0] = '\0';
+			char aUpdateID[17];
+			aUpdateID[0] = 0;
 
-			pData->m_pSqlData->m_pStatement->execute("SET @id = UUID();");
+			str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_%s_teamrace WHERE Name = '%s') as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[0], pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			for(unsigned int i = 0; i < pData->m_Size; i++)
 			{
 				pData->m_pSqlData->ClearString(pData->m_aNames[i]);
-				//strcat(bBuf, pData->m_aNames[i]);
-				//if (i < pData->m_Size - 2)
-				//	strcat(bBuf, ", ");
-				//else if (i < pData->m_Size - 1)
-				//	strcat(bBuf, " & ");
-
-			// if no entry found... create a new one
-				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_%s_teamrace(Name, Timestamp, Time, ID) VALUES ('%s', CURRENT_TIMESTAMP(), '%.2f', @id);", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[i], pData->m_Time);
-				pData->m_pSqlData->m_pStatement->execute(aBuf);
 			}
 
-			//str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_%s_teamrace(Name, Timestamp, Time) VALUES ('%s', CURRENT_TIMESTAMP(), '%.2f');", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, bBuf, pData->m_Time);
-			//pData->m_pSqlData->m_pStatement->execute(aBuf);
+			if (pData->m_pSqlData->m_pResults->rowsCount() > 0)
+			{
+				char aID[17];
+				char aID2[17];
+				char aName[64];
+				unsigned int Count = 0;
+				bool ValidNames = true;
 
+				pData->m_pSqlData->m_pResults->first();
+				int64 Time = pData->m_pSqlData->m_pResults->getDouble("Time");
+				strcpy(aID, pData->m_pSqlData->m_pResults->getString("ID").c_str());
+
+				do
+				{
+					strcpy(aID2, pData->m_pSqlData->m_pResults->getString("ID").c_str());
+					strcpy(aName, pData->m_pSqlData->m_pResults->getString("Name").c_str());
+					if (str_comp(aID, aID2) != 0)
+					{
+						if (ValidNames && Count == pData->m_Size)
+						{
+							if (pData->m_Time < Time)
+								strcpy(aUpdateID, aID);
+							else
+								goto end;
+							break;
+						}
+
+						Time = pData->m_pSqlData->m_pResults->getDouble("Time");
+						ValidNames = true;
+						Count = 0;
+						strcpy(aID, aID2);
+					}
+
+					if (!ValidNames)
+						continue;
+
+					ValidNames = false;
+
+					for(unsigned int i = 0; i < pData->m_Size; i++)
+					{
+						if (str_comp(aName, pData->m_aNames[i]) == 0)
+						{
+							ValidNames = true;
+							Count++;
+							break;
+						}
+					}
+				} while (pData->m_pSqlData->m_pResults->next());
+
+				if (ValidNames && Count == pData->m_Size)
+				{
+					if (pData->m_Time < Time)
+						strcpy(aUpdateID, aID);
+					else
+						goto end;
+				}
+			}
+
+			if (aUpdateID[0])
+			{
+				str_format(aBuf, sizeof(aBuf), "UPDATE %s_%s_teamrace SET Time='%.2f' WHERE ID = '%s';", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Time, aUpdateID);
+				pData->m_pSqlData->m_pStatement->execute(aBuf);
+			}
+			else
+			{
+				pData->m_pSqlData->m_pStatement->execute("SET @id = UUID();");
+
+				for(unsigned int i = 0; i < pData->m_Size; i++)
+				{
+				// if no entry found... create a new one
+					str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_%s_teamrace(Name, Timestamp, Time, ID) VALUES ('%s', CURRENT_TIMESTAMP(), '%.2f', @id);", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[i], pData->m_Time);
+					pData->m_pSqlData->m_pStatement->execute(aBuf);
+				}
+			}
+
+			end:
 			dbg_msg("SQL", "Updating time done");
 
 			// delete results statement
