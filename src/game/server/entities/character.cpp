@@ -4,7 +4,6 @@
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 #include <game/mapitems.h>
-#include <iostream>
 
 #include "character.h"
 #include "laser.h"
