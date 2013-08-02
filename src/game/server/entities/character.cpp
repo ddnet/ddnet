@@ -184,6 +184,10 @@ void CCharacter::HandleNinja()
 				if (distance(aEnts[i]->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
 					continue;
 
+				// Don't hit players in other teams
+				if (Team() != aEnts[i]->Team())
+					continue;
+
 				// Hit a player, give him damage and stuffs...
 				GameServer()->CreateSound(aEnts[i]->m_Pos, SOUND_NINJA_HIT, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				// set his velocity to fast upward (for now)
