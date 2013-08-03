@@ -74,6 +74,9 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
+
+	if(m_pScore)
+		delete m_pScore;
 }
 
 void CGameContext::Clear()

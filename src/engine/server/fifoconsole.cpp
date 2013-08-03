@@ -10,10 +10,15 @@
 
 FifoConsole::FifoConsole(IConsole *pConsole)
 {
-	void *fifoThread = thread_create(ListenFifoThread, pConsole);
+	void *m_pFifoThread = thread_create(ListenFifoThread, pConsole);
 #if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)fifoThread);
+	pthread_detach((pthread_t)m_pFifoThread);
 #endif
+}
+
+FifoConsole::~FifoConsole()
+{
+  thread_destroy(m_pFifoThread);
 }
 
 void FifoConsole::ListenFifoThread(void *pUser)

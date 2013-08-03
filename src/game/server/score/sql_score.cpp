@@ -37,7 +37,6 @@ void CSqlScore::LoadPointMapList()
 {
 	lock_wait(gs_SqlLock);
 
-	m_PointsInfos = NULL;
 	m_PointsSize = 0;
 
 	std::ifstream f("points.cfg");
@@ -63,7 +62,8 @@ void CSqlScore::LoadPointMapList()
 			str_format(aBuf, sizeof(aBuf), "SELECT count(Name) FROM record_%s_race;", Info.m_aMapName);
 			try
 			{
-				m_pStatement->executeQuery(aBuf);
+				m_pResults = m_pStatement->executeQuery(aBuf);
+				delete m_pResults;
 			}
 			catch (sql::SQLException &e)
 			{
@@ -162,6 +162,8 @@ void CSqlScore::Disconnect()
 {
 	try
 	{
+		delete m_PointsInfos;
+		delete m_pStatement;
 		delete m_pConnection;
 		dbg_msg("SQL", "SQL connection disconnected");
 	}
@@ -201,6 +203,7 @@ void CSqlScore::Init()
 
 			// Check if table has new column with timestamp
 			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_teamrace' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
+			delete m_pResults;
 			m_pResults = m_pStatement->executeQuery(aBuf);
 
 			if(m_pResults->rowsCount() < 1)
@@ -214,6 +217,7 @@ void CSqlScore::Init()
 
 			// get the best time
 			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_%s_race ORDER BY `Time` ASC LIMIT 0, 1;", m_pPrefix, m_aMap);
+			delete m_pResults;
 			m_pResults = m_pStatement->executeQuery(aBuf);
 
 			if(m_pResults->next())
@@ -221,13 +225,10 @@ void CSqlScore::Init()
 				((CGameControllerDDRace*)GameServer()->m_pController)->m_CurrentRecord = (float)m_pResults->getDouble("Time");
 
 				dbg_msg("SQL", "Getting best time on server done");
-
-				// delete results
-				delete m_pResults;
 			}
 
 			// delete statement
-			delete m_pStatement;
+			delete m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -279,7 +280,6 @@ void CSqlScore::LoadScoreThread(void *pUser)
 			dbg_msg("SQL", "Getting best time done");
 
 			// delete statement and results
-			delete pData->m_pSqlData->m_pStatement;
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
@@ -414,7 +414,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 			dbg_msg("SQL", "Updating time done");
 
 			// delete results statement
-			delete pData->m_pSqlData->m_pStatement;
+			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -474,7 +474,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 			dbg_msg("SQL", "Updating time done");
 
 			// delete results statement
-			delete pData->m_pSqlData->m_pStatement;
+			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -609,7 +609,6 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
-			delete pData->m_pSqlData->m_pStatement;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -708,7 +707,6 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
-			delete pData->m_pSqlData->m_pStatement;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -798,7 +796,6 @@ void CSqlScore::ShowRankThread(void *pUser)
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
-			delete pData->m_pSqlData->m_pStatement;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -881,7 +878,6 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
-			delete pData->m_pSqlData->m_pStatement;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -968,7 +964,6 @@ void CSqlScore::ShowTimesThread(void *pUser)
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
-			delete pData->m_pSqlData->m_pStatement;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -1228,7 +1223,6 @@ void CSqlScore::ShowPointsThread(void *pUser)
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
-			delete pData->m_pSqlData->m_pStatement;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -1317,7 +1311,6 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
-			delete pData->m_pSqlData->m_pStatement;
 		}
 		catch (sql::SQLException &e)
 		{
