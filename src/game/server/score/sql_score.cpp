@@ -84,6 +84,7 @@ void CSqlScore::LoadPointMapList()
 
 CSqlScore::~CSqlScore()
 {
+	delete m_PointsInfos;
 	lock_wait(gs_SqlLock);
 	lock_release(gs_SqlLock);
 }
@@ -162,7 +163,6 @@ void CSqlScore::Disconnect()
 {
 	try
 	{
-		delete m_PointsInfos;
 		delete m_pStatement;
 		delete m_pConnection;
 		dbg_msg("SQL", "SQL connection disconnected");
