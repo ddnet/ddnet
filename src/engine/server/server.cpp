@@ -856,7 +856,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else
 		{
-			if ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq() > 0 && m_aClients[ClientID].m_Traffic / ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq()) > 100000)
+			if ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq() > 0 && m_aClients[ClientID].m_Traffic / ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq()) > g_Config.m_SvNetlimit)
 			{
 				m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 60, "Stressing network");
 				return;
