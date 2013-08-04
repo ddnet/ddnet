@@ -446,6 +446,8 @@ int CServer::Init()
 		m_aClients[i].m_aClan[0] = 0;
 		m_aClients[i].m_Country = -1;
 		m_aClients[i].m_Snapshots.Init();
+		m_aClients[i].m_Traffic = 0;
+		m_aClients[i].m_TrafficSince = 0;
 	}
 
 	m_CurrentGameTick = 0;
@@ -556,7 +558,7 @@ int CServer::SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System)
 		Packet.m_Flags |= NETSENDFLAG_FLUSH;
 
 	// write message to demo recorder
-	if(!(Flags&MSGFLAG_NORECORD))
+	if(m_DemoRecorder.IsRecording() && !(Flags&MSGFLAG_NORECORD))
 		m_DemoRecorder.RecordMessage(pMsg->Data(), pMsg->Size());
 
 	if(!(Flags&MSGFLAG_NOSEND))
@@ -842,6 +844,26 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 	if(Unpacker.Error())
 		return;
+
+	int64 Now = time_get();
+
+	if(Msg != NETMSG_REQUEST_MAP_DATA)
+	{
+		if (Now - m_aClients[ClientID].m_TrafficSince > time_freq() * 5)
+		{
+			m_aClients[ClientID].m_Traffic = 0;
+			m_aClients[ClientID].m_TrafficSince = Now;
+		}
+		else
+		{
+			if ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq() > 0 && m_aClients[ClientID].m_Traffic / ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq()) > g_Config.m_SvNetlimit)
+			{
+				m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 60, "Stressing network");
+				return;
+			}
+			m_aClients[ClientID].m_Traffic += pPacket->m_DataSize;
+		}
+	}
 
 	if(Sys)
 	{

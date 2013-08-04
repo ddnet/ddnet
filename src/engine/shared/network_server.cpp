@@ -105,17 +105,19 @@ int CNetServer::Recv(CNetChunk *pChunk)
 		if(Bytes <= 0)
 			break;
 
+		// check if we just should drop the packet
+		char aBuf[128];
+		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
+		{
+			// banned, reply with a message
+			CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf)+1);
+			continue;
+		}
+
+		bool Found = false;
+
 		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{
-			// check if we just should drop the packet
-			char aBuf[128];
-			if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
-			{
-				// banned, reply with a message
-				CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf)+1);
-				continue;
-			}
-
 			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
 			{
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
@@ -130,7 +132,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				// TODO: check size here
 				if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL && m_RecvUnpacker.m_Data.m_aChunkData[0] == NET_CTRLMSG_CONNECT)
 				{
-					bool Found = false;
+					Found = false;
 
 					// check if we already got this client
 					for(int i = 0; i < MaxClients(); i++)

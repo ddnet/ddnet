@@ -183,6 +183,9 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	if(!m_File)
 		return;
 
+	if(Size > 64*1024)
+		return;
+
 	/* pad the data with 0 so we get an alignment of 4,
 	else the compression won't work and miss some bytes */
 	mem_copy(aBuffer2, pData, Size);
