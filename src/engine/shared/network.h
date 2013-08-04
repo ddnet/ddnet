@@ -249,17 +249,9 @@ class CNetServer
 		CNetConnection m_Connection;
 	};
 
-	struct CTraffic
-	{
-		NETADDR m_Address;
-		int64 m_Traffic;
-		int64 m_TrafficSince;
-	};
-
 	NETSOCKET m_Socket;
 	class CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
-	CTraffic m_aTraffics[NET_MAX_CLIENTS];
 	int m_MaxClients;
 	int m_MaxClientsPerIP;
 

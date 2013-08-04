@@ -118,6 +118,9 @@ public:
 		int m_Latency;
 		int m_SnapRate;
 
+		int64 m_Traffic;
+		int64 m_TrafficSince;
+
 		int m_LastAckedSnapshot;
 		int m_LastInputTick;
 		CSnapshotStorage m_Snapshots;

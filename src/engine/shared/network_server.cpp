@@ -115,51 +115,6 @@ int CNetServer::Recv(CNetChunk *pChunk)
 		}
 
 		bool Found = false;
-		bool Spam = false;
-		int64 Now = time_get();
-
-		for(int i = 0; i < MaxClients(); i++)
-		{
-			if (net_addr_comp(&m_aTraffics[i].m_Address, &Addr) == 0)
-			{
-				if (Now - m_aTraffics[i].m_TrafficSince > time_freq() * 5)
-				{
-					m_aTraffics[i].m_Traffic = 0;
-					m_aTraffics[i].m_TrafficSince = Now;
-				}
-				else
-				{
-					if ((Now - m_aTraffics[i].m_TrafficSince) / time_freq() > 0 && m_aTraffics[i].m_Traffic / ((Now - m_aTraffics[i].m_TrafficSince) / time_freq()) > 10000 /* * m_MaxClientsPerIP*/)
-					{
-						Spam = true;
-						break;
-					}
-					m_aTraffics[i].m_Traffic += Bytes;
-				}
-				Found = true;
-				break;
-			}
-		}
-
-		if (Spam)
-		{
-			NetBan()->BanAddr(&Addr, 60, "Stressing network");
-			continue;
-		}
-
-		if (!Found)
-		{
-			for(int i = 0; i < MaxClients(); i++)
-			{
-				if (Now - m_aTraffics[i].m_TrafficSince > time_freq() * 5)
-				{
-					m_aTraffics[i].m_Address = Addr;
-					m_aTraffics[i].m_Traffic = 0;
-					m_aTraffics[i].m_TrafficSince = Now;
-					break;
-				}
-			}
-		}
 
 		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{

@@ -446,6 +446,8 @@ int CServer::Init()
 		m_aClients[i].m_aClan[0] = 0;
 		m_aClients[i].m_Country = -1;
 		m_aClients[i].m_Snapshots.Init();
+		m_aClients[i].m_Traffic = 0;
+		m_aClients[i].m_TrafficSince = 0;
 	}
 
 	m_CurrentGameTick = 0;
@@ -842,6 +844,26 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 	if(Unpacker.Error())
 		return;
+
+	int64 Now = time_get();
+
+	if(Msg != NETMSG_REQUEST_MAP_DATA)
+	{
+		if (Now - m_aClients[ClientID].m_TrafficSince > time_freq() * 5)
+		{
+			m_aClients[ClientID].m_Traffic = 0;
+			m_aClients[ClientID].m_TrafficSince = Now;
+		}
+		else
+		{
+			if ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq() > 0 && m_aClients[ClientID].m_Traffic / ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq()) > 100000)
+			{
+				m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 60, "Stressing network");
+				return;
+			}
+			m_aClients[ClientID].m_Traffic += pPacket->m_DataSize;
+		}
+	}
 
 	if(Sys)
 	{
