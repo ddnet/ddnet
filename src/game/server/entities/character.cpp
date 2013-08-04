@@ -788,7 +788,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	// reset switches if we are the last player in team to prevent door opening cheat:
 	// https://github.com/DDRace/teeworlds/issues/190
-	if (Team() != TEAM_FLOCK && Team() != TEAM_SUPER && Teams()->Count(Team()) == 1 && GameServer()->Collision()->m_NumSwitchers > 0) {
+	if (Team() > TEAM_FLOCK && Team() < TEAM_SUPER && Teams()->Count(Team()) == 1 && GameServer()->Collision()->m_NumSwitchers > 0) {
 		for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i) {
 			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team()] = true;
 		}
