@@ -558,7 +558,7 @@ int CServer::SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System)
 		Packet.m_Flags |= NETSENDFLAG_FLUSH;
 
 	// write message to demo recorder
-	if(!(Flags&MSGFLAG_NORECORD))
+	if(m_DemoRecorder.IsRecording() && !(Flags&MSGFLAG_NORECORD))
 		m_DemoRecorder.RecordMessage(pMsg->Data(), pMsg->Size());
 
 	if(!(Flags&MSGFLAG_NOSEND))
