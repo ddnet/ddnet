@@ -845,10 +845,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	if(Unpacker.Error())
 		return;
 
-	int64 Now = time_get();
-
-	if(Msg != NETMSG_REQUEST_MAP_DATA)
+	if(g_Config.m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
+		int64 Now = time_get();
+
 		if (Now - m_aClients[ClientID].m_TrafficSince > time_freq() * 5)
 		{
 			m_aClients[ClientID].m_Traffic = 0;
