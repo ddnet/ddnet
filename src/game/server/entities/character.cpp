@@ -165,10 +165,22 @@ void CCharacter::HandleNinja()
 			vec2 Center = OldPos + Dir * 0.5f;
 			int Num = GameServer()->m_World.FindEntities(Center, Radius, (CEntity**)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
+			// check that we're not in solo part
+			if (Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
+				return;
+
 			for (int i = 0; i < Num; ++i)
 			{
 				if (aEnts[i] == this)
 					continue;
+
+				// Don't hit players in other teams
+				if (Team() != aEnts[i]->Team())
+					continue;
+
+				// Don't hit players in solo parts
+				if (Teams()->m_Core.GetSolo(aEnts[i]->m_pPlayer->GetCID()))
+					return;
 
 				// make sure we haven't Hit this object before
 				bool bAlreadyHit = false;
@@ -182,10 +194,6 @@ void CCharacter::HandleNinja()
 
 				// check so we are sufficiently close
 				if (distance(aEnts[i]->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
-					continue;
-
-				// Don't hit players in other teams
-				if (Team() != aEnts[i]->Team())
 					continue;
 
 				// Hit a player, give him damage and stuffs...
