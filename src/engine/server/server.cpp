@@ -848,20 +848,19 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	if(g_Config.m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
 		int64 Now = time_get();
+		int64 Diff = Now - m_aClients[ClientID].m_TrafficSince;
+		float Alpha = g_Config.m_SvNetlimitAlpha / 100.0;
+		float Limit = (float) g_Config.m_SvNetlimit * 1024 / time_freq();
 
-		if (Now - m_aClients[ClientID].m_TrafficSince > time_freq() * 5)
+		if (m_aClients[ClientID].m_Traffic > Limit)
 		{
-			m_aClients[ClientID].m_Traffic = 0;
-			m_aClients[ClientID].m_TrafficSince = Now;
+			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 60, "Stressing network");
+			return;
 		}
-		else
+		if (Diff > 100)
 		{
-			if ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq() > 0 && m_aClients[ClientID].m_Traffic / ((Now - m_aClients[ClientID].m_TrafficSince) / time_freq()) > g_Config.m_SvNetlimit * 1024)
-			{
-				m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 60, "Stressing network");
-				return;
-			}
-			m_aClients[ClientID].m_Traffic += pPacket->m_DataSize;
+			m_aClients[ClientID].m_Traffic = (Alpha * ((float) pPacket->m_DataSize / Diff)) + (1.0 - Alpha) * m_aClients[ClientID].m_Traffic;
+			m_aClients[ClientID].m_TrafficSince = Now;
 		}
 	}
 

@@ -118,7 +118,7 @@ public:
 		int m_Latency;
 		int m_SnapRate;
 
-		int64 m_Traffic;
+		float m_Traffic;
 		int64 m_TrafficSince;
 
 		int m_LastAckedSnapshot;
