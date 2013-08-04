@@ -222,6 +222,6 @@ MACRO_CONFIG_INT(SvGlobalBantime, sv_global_ban_time, 60, 0, 1440, CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvEvents, sv_events, 1, 0, 1, CFGFLAG_SERVER, "Enable triggering of server events, like the happy eyeemotes on some holidays.")
 
 // netlimit
-MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 20, 0, 1000, CFGFLAG_SERVER, "Netlimit: Maximum amount of traffic a client is allowed to use (in kb/s)")
+MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 10, 0, 1000, CFGFLAG_SERVER, "Netlimit: Maximum amount of traffic a client is allowed to use (in kb/s)")
 
 #endif
