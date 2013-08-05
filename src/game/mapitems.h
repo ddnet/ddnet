@@ -126,7 +126,13 @@ enum
 	TILE_NPC,
 	TILE_EHOOK,
 	TILE_NOHIT,
-	TILE_NPH,//Remember to change this in collision.cpp if you add anymore tiles
+	TILE_NPH,
+	TILE_NPC_START = 88,
+	TILE_SUPER_START,
+	TILE_NPH_START = 91,
+	TILE_NPC_END = 104,
+	TILE_SUPER_END,
+	TILE_NPH_END = 107,//Remember to change this in collision.cpp if you add anymore tiles
 	//End of higher tiles
 	//Layers
 	LAYER_GAME=0,

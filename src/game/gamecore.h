@@ -187,6 +187,8 @@ class CCharacterCore
 public:
 	vec2 m_Pos;
 	vec2 m_Vel;
+	bool m_Hook;
+	bool m_Collision;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;

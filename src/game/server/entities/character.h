@@ -157,6 +157,7 @@ public:
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
 	bool m_Super;
+	bool m_SuperJump;
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;
 	int m_FreezeTick;
@@ -171,6 +172,8 @@ public:
 		DISABLE_HIT_RIFLE=8
 	};
 	int m_Hit;
+	int m_Collision;
+	int m_Hook;
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
