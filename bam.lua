@@ -146,6 +146,8 @@ function build(settings)
 
 	--settings.cc.flags:Add("-m32")
 	--settings.link.flags:Add("-m32")
+	settings.link.flags:Add("-static-libgcc")
+	settings.link.flags:Add("-static-libstdc++")
 
 	cflags = os.getenv("CFLAGS")
 	if cflags then
