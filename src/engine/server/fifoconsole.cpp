@@ -18,7 +18,7 @@ FifoConsole::FifoConsole(IConsole *pConsole)
 
 FifoConsole::~FifoConsole()
 {
-  thread_destroy(m_pFifoThread);
+	thread_destroy(m_pFifoThread);
 }
 
 void FifoConsole::ListenFifoThread(void *pUser)
