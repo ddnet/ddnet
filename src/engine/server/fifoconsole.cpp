@@ -8,12 +8,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if defined(CONF_FAMILY_UNIX)
 FifoConsole::FifoConsole(IConsole *pConsole)
 {
 	void *m_pFifoThread = thread_create(ListenFifoThread, pConsole);
-#if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)m_pFifoThread);
-#endif
 }
 
 FifoConsole::~FifoConsole()
@@ -43,3 +42,4 @@ void FifoConsole::ListenFifoThread(void *pUser)
 		f.close();
 	}
 }
+#endif

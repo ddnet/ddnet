@@ -3,6 +3,7 @@
 
 #include <engine/console.h>
 
+#if defined(CONF_FAMILY_UNIX)
 class FifoConsole
 {
 	static void ListenFifoThread(void *pUser);
@@ -12,5 +13,6 @@ public:
 	FifoConsole(IConsole *pConsole);
 	~FifoConsole();
 };
+#endif
 
 #endif // FILE_ENGINE_FIFOCONSOLE_H

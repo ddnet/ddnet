@@ -1852,14 +1852,18 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pEngine->InitLogfile();
 
+#if defined(CONF_FAMILY_UNIX)
 	FifoConsole *fifoConsole = new FifoConsole(pConsole);
+#endif
 
 	// run the server
 	dbg_msg("server", "starting...");
 	pServer->Run();
 
 	// free
+#if defined(CONF_FAMILY_UNIX)
 	delete fifoConsole;
+#endif
 	delete pServer;
 	delete pKernel;
 	delete pEngineMap;
