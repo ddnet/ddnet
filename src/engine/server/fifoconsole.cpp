@@ -4,11 +4,11 @@
 
 #include <fstream>
 
+#if defined(CONF_FAMILY_UNIX)
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(CONF_FAMILY_UNIX)
 FifoConsole::FifoConsole(IConsole *pConsole)
 {
 	void *m_pFifoThread = thread_create(ListenFifoThread, pConsole);
