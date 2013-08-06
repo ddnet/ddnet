@@ -327,13 +327,13 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 			char aUpdateID[17];
 			aUpdateID[0] = 0;
 
-			str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_%s_teamrace WHERE Name = '%s') as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[0], pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
-			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
-
 			for(unsigned int i = 0; i < pData->m_Size; i++)
 			{
 				pData->m_pSqlData->ClearString(pData->m_aNames[i]);
 			}
+
+			str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_%s_teamrace WHERE Name = '%s') as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, firstName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if (pData->m_pSqlData->m_pResults->rowsCount() > 0)
 			{
