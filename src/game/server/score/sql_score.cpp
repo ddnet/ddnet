@@ -641,7 +641,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 			// check sort methode
 			char aBuf[512];
 
-			str_format(aBuf, sizeof(aBuf), "SELECT r.ID, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM ((SELECT ID FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace GROUP BY ID) as all_top_times ORDER BY Time ASC LIMIT %d, 5) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, Name ASC, r.ID;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT r.ID, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM ((SELECT ID FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace GROUP BY ID) as all_top_times ORDER BY Time ASC LIMIT %d, 5) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			// show teamtop5
