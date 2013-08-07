@@ -42,17 +42,17 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-			"DDRace Mod. Version: " GAME_VERSION);
+			"DDRaceNetwork Mod. Version: " GAME_VERSION);
 #if defined( GIT_SHORTREV_HASH )
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"Git revision hash: " GIT_SHORTREV_HASH);
 #endif
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-			"Official site: DDRace.info");
+			"Official site: ddnet.no-ip.info");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"For more Info /cmdlist");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-			"Or visit DDRace.info");
+			"Or visit ddnet.no-ip.info");
 }
 
 void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
