@@ -23,6 +23,7 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 		m_pIp(g_Config.m_SvSqlIp),
 		m_Port(g_Config.m_SvSqlPort)
 {
+	m_pDriver = NULL;
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
 	NormalizeMapname(m_aMap);
 
@@ -87,10 +88,24 @@ CSqlScore::~CSqlScore()
 	delete m_PointsInfos;
 	lock_wait(gs_SqlLock);
 	lock_release(gs_SqlLock);
+
+	try
+	{
+		delete m_pStatement;
+		delete m_pConnection;
+		dbg_msg("SQL", "SQL connection disconnected");
+	}
+	catch (sql::SQLException &e)
+	{
+		dbg_msg("SQL", "ERROR: No SQL connection");
+	}
 }
 
 bool CSqlScore::Connect()
 {
+	if (m_pDriver != NULL)
+		return true;
+
 	try
 	{
 		// Create connection
@@ -98,6 +113,8 @@ bool CSqlScore::Connect()
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "tcp://%s:%d", m_pIp, m_Port);
 		m_pConnection = m_pDriver->connect(aBuf, m_pUser, m_pPass);
+		bool Reconnect = true;
+		m_pConnection->setClientOption("MYSQL_OPT_RECONNECT", &Reconnect);
 
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
@@ -161,16 +178,6 @@ bool CSqlScore::Connect()
 
 void CSqlScore::Disconnect()
 {
-	try
-	{
-		delete m_pStatement;
-		delete m_pConnection;
-		dbg_msg("SQL", "SQL connection disconnected");
-	}
-	catch (sql::SQLException &e)
-	{
-		dbg_msg("SQL", "ERROR: No SQL connection");
-	}
 }
 
 // create tables... should be done only once

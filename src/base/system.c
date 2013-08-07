@@ -703,12 +703,13 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 		hints.ai_family = AF_INET6;
 
 	e = getaddrinfo(host, NULL, &hints, &result);
-	if(e != 0 || !result)
+
+	if(!result || e != 0)
 		return -1;
 
 	sockaddr_to_netaddr(result->ai_addr, addr);
-	freeaddrinfo(result);
 	addr->port = port;
+	freeaddrinfo(result);
 	return 0;
 }
 
