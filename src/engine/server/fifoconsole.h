@@ -11,7 +11,6 @@ class FifoConsole
 
 public:
 	FifoConsole(IConsole *pConsole);
-	~FifoConsole();
 };
 #endif
 

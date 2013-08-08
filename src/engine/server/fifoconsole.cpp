@@ -15,11 +15,6 @@ FifoConsole::FifoConsole(IConsole *pConsole)
 	pthread_detach((pthread_t)m_pFifoThread);
 }
 
-FifoConsole::~FifoConsole()
-{
-	thread_destroy(m_pFifoThread);
-}
-
 void FifoConsole::ListenFifoThread(void *pUser)
 {
 	IConsole *pConsole = (IConsole *)pUser;
