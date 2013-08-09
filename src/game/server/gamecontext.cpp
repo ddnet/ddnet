@@ -813,7 +813,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_copy(pWhisperMsg, pMsg->m_pMessage + 3, 256);
 				Whisper(pPlayer->GetCID(), pWhisperMsg);
 			}
-			else if (str_comp(pMsg->m_pMessage+1, "whisper ") == 0)
+			else if (str_comp_num(pMsg->m_pMessage+1, "whisper ", 8) == 0)
 			{
 				char pWhisperMsg[256];
 				str_copy(pWhisperMsg, pMsg->m_pMessage + 9, 256);
