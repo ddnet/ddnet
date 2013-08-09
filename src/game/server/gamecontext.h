@@ -242,6 +242,7 @@ private:
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
+	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetEyeEmote(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData);
@@ -273,6 +274,7 @@ private:
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
 	void Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName);
+	void Whisper(int ClientID, char *pStr);
 
 public:
 	CLayers *Layers() { return &m_Layers; }

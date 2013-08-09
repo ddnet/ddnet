@@ -805,27 +805,42 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				*pMessage = ' ';
 			pMessage++;
 		}
-		if(pMsg->m_pMessage[0]=='/') // TODO: Add spam protection
+		if(pMsg->m_pMessage[0]=='/')
 		{
-			m_ChatResponseTargetID = ClientID;
-			Server()->RestrictRconOutput(ClientID);
-			Console()->SetFlagMask(CFGFLAG_CHAT);
-
-			if (pPlayer->m_Authed)
-				Console()->SetAccessLevel(pPlayer->m_Authed == CServer::AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
+			if (pMsg->m_pMessage[1]=='w' && pMsg->m_pMessage[2]==' ')
+			{
+				char pWhisperMsg[256];
+				str_copy(pWhisperMsg, pMsg->m_pMessage + 3, 256);
+				Whisper(pPlayer->GetCID(), pWhisperMsg);
+			}
+			else if (str_comp(pMsg->m_pMessage+1, "whisper ") == 0)
+			{
+				char pWhisperMsg[256];
+				str_copy(pWhisperMsg, pMsg->m_pMessage + 9, 256);
+				Whisper(pPlayer->GetCID(), pWhisperMsg);
+			}
 			else
-				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
-			Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
+			{
+				m_ChatResponseTargetID = ClientID;
+				Server()->RestrictRconOutput(ClientID);
+				Console()->SetFlagMask(CFGFLAG_CHAT);
 
-			Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID);
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
-			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
+				if (pPlayer->m_Authed)
+					Console()->SetAccessLevel(pPlayer->m_Authed == CServer::AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
+				else
+					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
+				Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
 
-			Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
-			Console()->SetFlagMask(CFGFLAG_SERVER);
-			m_ChatResponseTargetID = -1;
-			Server()->RestrictRconOutput(-1);
+				Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID);
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
+				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
+
+				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+				Console()->SetFlagMask(CFGFLAG_SERVER);
+				m_ChatResponseTargetID = -1;
+				Server()->RestrictRconOutput(-1);
+			}
 		}
 		else
 			SendChat(ClientID, Team, pMsg->m_pMessage, ClientID);
@@ -2213,4 +2228,102 @@ void CGameContext::ResetTuning()
 	Tuning()->Set("shotgun_speeddiff", 0);
 	Tuning()->Set("shotgun_curvature", 0);
 	SendTuningParams(-1);
+}
+
+bool CheckClientID2(int ClientID)
+{
+	dbg_assert(ClientID >= 0 || ClientID < MAX_CLIENTS,
+			"The Client ID is wrong");
+	if (ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return false;
+	return true;
+}
+
+void CGameContext::Whisper(int ClientID, char *pStr)
+{
+	char *pName;
+	char *pMessage;
+	int Error = 0;
+
+	pStr = str_skip_whitespaces(pStr);
+
+	// add token
+	if(*pStr == '"')
+	{
+		pStr++;
+
+		pName = pStr; // we might have to process escape data
+		while(1)
+		{
+			if(pStr[0] == '"')
+				break;
+			else if(pStr[0] == '\\')
+			{
+				if(pStr[1] == '\\')
+					pStr++; // skip due to escape
+				else if(pStr[1] == '"')
+					pStr++; // skip due to escape
+			}
+			else if(pStr[0] == 0)
+				Error = 1;
+
+			pStr++;
+		}
+
+		// write null termination
+		*pStr = 0;
+		pStr++;
+	}
+	else
+	{
+		pName = pStr;
+		while(1)
+		{
+			if(pStr[0] == ' ')
+			{
+				break;
+			}
+			pStr++;
+		}
+	}
+
+	if(pStr[0] != ' ')
+	{
+		Error = 1;
+	}
+
+	*pStr = 0;
+	pStr++;
+
+	pMessage = pStr;
+
+	if (!CheckClientID2(ClientID))
+		return;
+
+	int Victim;
+	for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
+		if (str_comp(pName, Server()->ClientName(Victim)) == 0)
+			break;
+
+	char aBuf[256];
+
+	if (Error)
+	{
+		str_format(aBuf, sizeof(aBuf), "Invalid whisper");
+		SendChatTarget(ClientID, aBuf);
+		return;
+	}
+
+	if (Victim >= MAX_CLIENTS || !CheckClientID2(Victim))
+	{
+		str_format(aBuf, sizeof(aBuf), "No player with name \"%s\" found", pName);
+		SendChatTarget(ClientID, aBuf);
+		return;
+	}
+
+	str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
+	SendChatTarget(Victim, aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(Victim), pMessage);
+	SendChatTarget(ClientID, aBuf);
 }
