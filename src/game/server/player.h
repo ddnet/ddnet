@@ -62,6 +62,8 @@ public:
 	int m_LastChangeInfo;
 	int m_LastEmote;
 	int m_LastKill;
+	int m_LastCommands[4];
+	int m_LastCommandPos;
 
 	// TODO: clean this up
 	struct

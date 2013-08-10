@@ -821,6 +821,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
+				if(g_Config.m_SvSpamprotection
+					&& pPlayer->m_LastCommands[0] && pPlayer->m_LastCommands[0]+Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[1] && pPlayer->m_LastCommands[1]+Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[2] && pPlayer->m_LastCommands[2]+Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[3] && pPlayer->m_LastCommands[3]+Server()->TickSpeed() > Server()->Tick()
+				)
+					return;
+
+				int64 Now = Server()->Tick();
+				pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
+				pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
+
 				m_ChatResponseTargetID = ClientID;
 				Server()->RestrictRconOutput(ClientID);
 				Console()->SetFlagMask(CFGFLAG_CHAT);

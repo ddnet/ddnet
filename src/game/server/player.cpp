@@ -32,6 +32,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	// DDRace
 
+	m_LastCommandPos = 0;
 	m_LastPlaytime = time_get();
 	m_LastTarget_x = 0;
 	m_LastTarget_y = 0;
