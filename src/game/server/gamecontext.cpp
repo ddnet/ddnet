@@ -2245,6 +2245,9 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 	char *pMessage;
 	int Error = 0;
 
+	if(ProcessSpamProtection(ClientID))
+		return;
+
 	pStr = str_skip_whitespaces(pStr);
 
 	// add token
