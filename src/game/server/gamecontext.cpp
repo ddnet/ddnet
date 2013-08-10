@@ -2294,6 +2294,11 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 		pName = pStr;
 		while(1)
 		{
+			if(pStr[0] == 0)
+			{
+				Error = 1;
+				break;
+			}
 			if(pStr[0] == ' ')
 			{
 				break;
