@@ -240,8 +240,7 @@ int CNetServer::Send(CNetChunk *pChunk)
 		}
 		else
 		{
-			// Don't drop clients.
-			//Drop(pChunk->m_ClientID, "Error sending data");
+			Drop(pChunk->m_ClientID, "Error sending data");
 		}
 	}
 	return 0;
