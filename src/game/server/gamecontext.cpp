@@ -2262,6 +2262,8 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 
 	pStr = str_skip_whitespaces(pStr);
 
+	int Victim;
+
 	// add token
 	if(*pStr == '"')
 	{
@@ -2288,6 +2290,11 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 		// write null termination
 		*pStr = 0;
 		pStr++;
+
+		for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
+			if (str_comp(pName, Server()->ClientName(Victim)) == 0)
+				break;
+
 	}
 	else
 	{
@@ -2301,7 +2308,15 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 			}
 			if(pStr[0] == ' ')
 			{
-				break;
+				pStr[0] = 0;
+				for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
+					if (str_comp(pName, Server()->ClientName(Victim)) == 0)
+						break;
+
+				pStr[0] = ' ';
+
+				if (Victim < MAX_CLIENTS)
+					break;
 			}
 			pStr++;
 		}
@@ -2319,11 +2334,6 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 
 	if (!CheckClientID2(ClientID))
 		return;
-
-	int Victim;
-	for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
-		if (str_comp(pName, Server()->ClientName(Victim)) == 0)
-			break;
 
 	char aBuf[256];
 
