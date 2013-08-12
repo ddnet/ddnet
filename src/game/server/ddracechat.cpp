@@ -48,11 +48,11 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 			"Git revision hash: " GIT_SHORTREV_HASH);
 #endif
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-			"Official site: ddnet.no-ip.info");
+			"Official site: ddnet.tw");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"For more Info /cmdlist");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-			"Or visit ddnet.no-ip.info");
+			"Or visit ddnet.tw");
 }
 
 void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
