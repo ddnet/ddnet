@@ -149,6 +149,7 @@ function build(settings)
 	settings.link.flags:Add("-static-libgcc")
 	settings.link.flags:Add("-static-libstdc++")
 	settings.link.flags:Add("-ldl")
+	settings.link.flags:Add("-lrt")
 
 	cflags = os.getenv("CFLAGS")
 	if cflags then
