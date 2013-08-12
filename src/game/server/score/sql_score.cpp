@@ -5,6 +5,7 @@
 #include <string.h>
 #include <fstream>
 #include <algorithm>
+#include <iostream>
 
 #include <engine/shared/config.h>
 #include "../entities/character.h"
@@ -104,17 +105,36 @@ CSqlScore::~CSqlScore()
 bool CSqlScore::Connect()
 {
 	if (m_pDriver != NULL)
+	{
+		try
+		{
+			// Connect to specific database
+			m_pConnection->setSchema(m_pDatabase);
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+
+			dbg_msg("SQL", "ERROR: SQL connection failed");
+			return false;
+		}
 		return true;
+	}
 
 	try
 	{
+		sql::ConnectOptionsMap connection_properties;
+		connection_properties["hostHame"]      = sql::SQLString(m_pIp);
+		connection_properties["port"]          = m_Port;
+		connection_properties["userName"]      = sql::SQLString(m_pUser);
+		connection_properties["password"]      = sql::SQLString(m_pPass);
+		connection_properties["OPT_RECONNECT"] = true;
+
 		// Create connection
 		m_pDriver = get_driver_instance();
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "tcp://%s:%d", m_pIp, m_Port);
-		m_pConnection = m_pDriver->connect(aBuf, m_pUser, m_pPass);
-		bool Reconnect = true;
-		m_pConnection->setClientOption("MYSQL_OPT_RECONNECT", &Reconnect);
+		m_pConnection = m_pDriver->connect(connection_properties);
 
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
