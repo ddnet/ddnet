@@ -211,7 +211,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	return 0;
 }
 
-int CCollision::IntersectLineTele(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough)
+int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough)
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance+1);
@@ -231,7 +231,61 @@ int CCollision::IntersectLineTele(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec
 
 		int Nx = clamp(ix/32, 0, m_Width-1);
 		int Ny = clamp(iy/32, 0, m_Height-1);
-		*pTeleNr = IsTeleport(Ny*m_Width+Nx);
+		if (g_Config.m_SvOldTeleportHook)
+			*pTeleNr = IsTeleport(Ny*m_Width+Nx);
+		else
+			*pTeleNr = IsTeleportHook(Ny*m_Width+Nx);
+		if(*pTeleNr)
+		{
+			if(pOutCollision)
+				*pOutCollision = Pos;
+			if(pOutBeforeCollision)
+				*pOutBeforeCollision = Last;
+			return COLFLAG_TELE;
+		}
+
+		if((CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy))))
+		{
+			if(pOutCollision)
+				*pOutCollision = Pos;
+			if(pOutBeforeCollision)
+				*pOutBeforeCollision = Last;
+			return GetCollisionAt(ix, iy);
+		}
+
+		Last = Pos;
+	}
+	if(pOutCollision)
+		*pOutCollision = Pos1;
+	if(pOutBeforeCollision)
+		*pOutBeforeCollision = Pos1;
+	return 0;
+}
+
+int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough)
+{
+	float Distance = distance(Pos0, Pos1);
+	int End(Distance+1);
+	vec2 Last = Pos0;
+	int ix = 0, iy = 0; // Temporary position for checking collision
+	int dx = 0, dy = 0; // Offset for checking the "through" tile
+	if (AllowThrough)
+		{
+			ThroughOffset(Pos0, Pos1, &dx, &dy);
+		}
+	for(int i = 0; i < End; i++)
+	{
+		float a = i/Distance;
+		vec2 Pos = mix(Pos0, Pos1, a);
+		ix = round(Pos.x);
+		iy = round(Pos.y);
+
+		int Nx = clamp(ix/32, 0, m_Width-1);
+		int Ny = clamp(iy/32, 0, m_Height-1);
+		if (g_Config.m_SvOldTeleportWeapons)
+			*pTeleNr = IsTeleport(Ny*m_Width+Nx);
+		else
+			*pTeleNr = IsTeleportWeapon(Ny*m_Width+Nx);
 		if(*pTeleNr)
 		{
 			if(pOutCollision)
@@ -470,6 +524,29 @@ int CCollision::IsTCheckpoint(int Index)
 
 	return 0;
 }
+
+int CCollision::IsTeleportWeapon(int Index)
+{
+	if(Index < 0 || !m_pTele)
+		return 0;
+
+	if(m_pTele[Index].m_Type == TILE_TELEINWEAPON)
+		return m_pTele[Index].m_Number;
+
+	return 0;
+}
+
+int CCollision::IsTeleportHook(int Index)
+{
+	if(Index < 0 || !m_pTele)
+		return 0;
+
+	if(m_pTele[Index].m_Type == TILE_TELEINHOOK)
+		return m_pTele[Index].m_Number;
+
+	return 0;
+}
+
 
 int CCollision::IsSpeedup(int Index)
 {

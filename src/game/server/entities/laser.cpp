@@ -91,10 +91,7 @@ void CLaser::DoBounce()
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	if (g_Config.m_SvTeleportWeapons)
-		Res = GameServer()->Collision()->IntersectLineTele(m_Pos, To, &Coltile, &To, &z, false);
-	else
-		Res = GameServer()->Collision()->IntersectLine(m_Pos, To, &Coltile, &To, false);
+	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, false);
 
 	if(Res)
 	{
@@ -123,7 +120,7 @@ void CLaser::DoBounce()
 
 			m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
 
-			if (g_Config.m_SvTeleportWeapons && Res&CCollision::COLFLAG_TELE && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
+			if (Res&CCollision::COLFLAG_TELE && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 			{
 				int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size();
 				m_TelePos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
