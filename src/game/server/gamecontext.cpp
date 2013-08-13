@@ -1044,7 +1044,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if(!GetPlayerChar(ClientID) || GetPlayerChar(SpectateID) || GetDDRaceTeam(ClientID) != GetDDRaceTeam(SpectateID))
+      std::cout << GetDDRaceTeam(ClientID) << " " << GetDDRaceTeam(SpectateID) << std::endl;
+			if(!GetPlayerChar(ClientID) || !GetPlayerChar(SpectateID) || GetDDRaceTeam(ClientID) != GetDDRaceTeam(SpectateID))
 			{
 				SendChatTarget(ClientID, "You can only move your team member to specators");
 				return;
