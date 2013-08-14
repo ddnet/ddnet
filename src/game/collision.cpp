@@ -75,7 +75,7 @@ void CCollision::Init(class CLayers *pLayers)
 
 			Index = m_pSwitch[i].m_Type;
 
-			if(Index <= TILE_NPH_END)
+			if(Index <= TILE_NPH_START)
 			{
 				if(Index >= TILE_FREEZE && Index <= TILE_SWITCHCLOSE)
 					m_pSwitch[i].m_Type = Index;
@@ -87,7 +87,7 @@ void CCollision::Init(class CLayers *pLayers)
 		{
 			Index = m_pFront[i].m_Index;
 
-			if(Index <= TILE_NPH_END)
+			if(Index <= TILE_NPH_START)
 			{
 				switch(Index)
 				{
@@ -108,12 +108,12 @@ void CCollision::Init(class CLayers *pLayers)
 				}
 
 				// DDRace tiles
-				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_END) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_START) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 					m_pFront[i].m_Index = Index;
 			}
 		}
 		Index = m_pTiles[i].m_Index;
-		if(Index <= TILE_NPH_END)
+		if(Index <= TILE_NPH_START)
 		{
 			switch(Index)
 			{
@@ -134,7 +134,7 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 
 			// DDRace tiles
-			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_END) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_START) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 				m_pTiles[i].m_Index = Index;
 		}
 	}
@@ -665,9 +665,9 @@ bool CCollision::TileExists(int Index)
 	if(Index < 0)
 		return false;
 
-	if(m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_NPH_END)
+	if(m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_NPH_START)
 		return true;
-	if(m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH_END)
+	if(m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH_START)
 		return true;
 	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
 		return true;
