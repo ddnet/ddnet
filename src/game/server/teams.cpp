@@ -26,8 +26,8 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	CCharacter* pStartingChar = Character(ClientID);
 	if (!pStartingChar)
 		return;
-	if (pStartingChar->m_DDRaceState == DDRACE_FINISHED)
-		pStartingChar->m_DDRaceState = DDRACE_NONE;
+	if (m_Core.Team(ClientID) != TEAM_FLOCK && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
+		return;
 	if (m_Core.Team(ClientID) == TEAM_FLOCK
 			|| m_Core.Team(ClientID) == TEAM_SUPER)
 	{
