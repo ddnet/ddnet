@@ -183,7 +183,7 @@ class CCharacterCore
 {
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
-	std::map<int, std::vector<vec2> > m_pTeleOuts;
+	std::map<int, std::vector<vec2> > *m_pTeleOuts;
 public:
 	vec2 m_Pos;
 	vec2 m_Vel;
@@ -210,7 +210,7 @@ public:
 	int m_TriggeredEvents;
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams);
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > pTeleOuts);
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > *pTeleOuts);
 	void Reset();
 	void Tick(bool UseInput);
 	void Move();
