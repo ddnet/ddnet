@@ -807,13 +807,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		if(pMsg->m_pMessage[0]=='/')
 		{
-			if (pMsg->m_pMessage[1]=='w' && pMsg->m_pMessage[2]==' ')
+			if (str_comp_nocase_num(pMsg->m_pMessage+1, "w ", 2) == 0)
 			{
 				char pWhisperMsg[256];
 				str_copy(pWhisperMsg, pMsg->m_pMessage + 3, 256);
 				Whisper(pPlayer->GetCID(), pWhisperMsg);
 			}
-			else if (str_comp_num(pMsg->m_pMessage+1, "whisper ", 8) == 0)
+			else if (str_comp_nocase_num(pMsg->m_pMessage+1, "whisper ", 8) == 0)
 			{
 				char pWhisperMsg[256];
 				str_copy(pWhisperMsg, pMsg->m_pMessage + 9, 256);
