@@ -179,7 +179,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		else if (str_comp(pArg, "timeout") == 0)
 		{
 			str_format(aBuf, sizeof(aBuf),
-					"The Server Timeout is currently set to %d",
+					"The Server Timeout is currently set to %d seconds",
 					g_Config.m_ConnTimeout);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 					aBuf);
