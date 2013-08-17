@@ -380,6 +380,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 				{
 					strcpy(aID2, pData->m_pSqlData->m_pResults->getString("ID").c_str());
 					strcpy(aName, pData->m_pSqlData->m_pResults->getString("Name").c_str());
+					pData->m_pSqlData->ClearString(aName);
 					if (str_comp(aID, aID2) != 0)
 					{
 						if (ValidNames && Count == pData->m_Size)
