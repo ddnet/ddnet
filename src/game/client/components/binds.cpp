@@ -118,6 +118,9 @@ void CBinds::SetDefaults()
 	Bind(KEY_F3, "vote yes");
 	Bind(KEY_F4, "vote no");
 
+	Bind('k', "kill");
+	Bind('p', "say /pause");
+
 	// DDRace
 
 	if(g_Config.m_ClDDRaceBinds)
