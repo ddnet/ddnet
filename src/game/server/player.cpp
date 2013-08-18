@@ -42,6 +42,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_EyeEmote = true;
 	m_TimerType = g_Config.m_SvDefaultTimerType;
 	m_DefEmote = EMOTE_NORMAL;
+	m_Afk = false;
 
 	//New Year
 	if (g_Config.m_SvEvents)
@@ -273,6 +274,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
+	AfkVoteTimer(NewInput->m_TargetX, NewInput->m_TargetY);
+
 	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
 	// skip the input if chat is active
@@ -448,6 +451,29 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		}
 	}
 	return false;
+}
+
+void CPlayer::AfkVoteTimer(int NewTargetX, int NewTargetY)
+{
+	if(g_Config.m_SvMaxAfkVoteTime == 0)
+		return;
+
+	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
+	{
+		m_LastPlaytime = time_get();
+		m_LastTarget_x = NewTargetX;
+		m_LastTarget_y = NewTargetY;
+		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
+		m_Sent2ndAfkWarning = 0;
+	}
+	else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkVoteTime)
+	{
+		CServer* serv =	(CServer*)m_pGameServer->Server();
+		m_Afk = true;
+		return;
+	}
+
+	m_Afk = false;
 }
 
 void CPlayer::ProcessPause()

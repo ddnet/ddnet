@@ -516,6 +516,9 @@ void CGameContext::OnTick()
 						GetPlayerChar(m_VoteCreator)->Team() != GetPlayerChar(i)->Team())
 						continue;
 
+					if (m_apPlayers[i]->m_Afk)
+						continue;
+
 					int ActVote = m_apPlayers[i]->m_Vote;
 					int ActVotePos = m_apPlayers[i]->m_VotePos;
 
