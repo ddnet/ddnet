@@ -68,7 +68,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Collision = true;
 }
 
-void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > *pTeleOuts)
+void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > pTeleOuts)
 {
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
@@ -312,14 +312,14 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			if(GoingThroughTele && (*m_pTeleOuts)[teleNr-1].size())
+			if(GoingThroughTele && m_pTeleOuts[teleNr-1].size())
 			{
 				m_TriggeredEvents = 0;
 				m_HookedPlayer = -1;
 
 				m_NewHook = true;
-				int Num = (*m_pTeleOuts)[teleNr-1].size();
-				m_HookPos = (*m_pTeleOuts)[teleNr-1][(!Num)?Num:rand() % Num]+TargetDirection*PhysSize*1.5f;
+				int Num = m_pTeleOuts[teleNr-1].size();
+				m_HookPos = m_pTeleOuts[teleNr-1][(!Num)?Num:rand() % Num]+TargetDirection*PhysSize*1.5f;
 				m_HookDir = TargetDirection;
         m_HookTeleBase = m_HookPos;
 			}
