@@ -2031,6 +2031,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			if(pSwitch)
 			{
 				Index = pSwitch[y*pTileMap->m_Width + x].m_Type;
+				// TODO: Add off by default door here
+				// if (Index == TILE_DOOR_OFF)
 				if(Index >= ENTITY_OFFSET)
 				{
 					vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
