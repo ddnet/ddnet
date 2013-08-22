@@ -799,6 +799,8 @@ void CCharacter::Die(int Killer, int Weapon)
 	if (Team() > TEAM_FLOCK && Team() < TEAM_SUPER && Teams()->Count(Team()) == 1 && GameServer()->Collision()->m_NumSwitchers > 0) {
 		for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i) {
 			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team()] = true;
+			GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team()] = 0;
+			GameServer()->Collision()->m_pSwitchers[i].m_Type[Team()] = TILE_SWITCHOPEN;
 		}
 	}
 
