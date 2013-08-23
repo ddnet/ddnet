@@ -1292,7 +1292,9 @@ void CCharacter::HandleTiles(int Index)
 
 		}
 
+
 	}
+
 	if(((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDRaceState == DDRACE_STARTED)
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
@@ -1392,7 +1394,9 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_Pos = m_PrevPos;
 		m_Core.m_Vel.y = 0;
 		m_Core.m_Jumped = 0;
+		m_Core.m_JumpedTotal = 0;
 	}
+
 	// handle switch tiles
 	if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER)
 	{
@@ -1470,6 +1474,19 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can't shoot others with rifle");
 		m_Hit |= DISABLE_HIT_RIFLE;
 	}
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_JUMP)
+	{
+		int newJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+
+		if (newJumps != m_Core.m_Jumps)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(),aBuf);
+			m_Core.m_Jumps = newJumps;
+		}
+	}
+
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z-1].size())
 	{
@@ -1686,4 +1703,5 @@ void CCharacter::DDRaceInit()
 	m_EndlessHook = g_Config.m_SvEndlessDrag;
 	m_Hit = g_Config.m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
 	m_SuperJump = false;
+	m_Core.m_Jumps = 2;
 }

@@ -91,6 +91,8 @@ void CCharacterCore::Reset()
 	m_HookState = HOOK_IDLE;
 	m_HookedPlayer = -1;
 	m_Jumped = 0;
+	m_JumpedTotal = 0;
+	m_Jumps = 2;
 	m_TriggeredEvents = 0;
 	m_Hook = true;
 	m_Collision = true;
@@ -172,24 +174,34 @@ void CCharacterCore::Tick(bool UseInput)
 		// handle jump
 		if(m_Input.m_Jump)
 		{
-			if(!(m_Jumped&1))
+			if (m_JumpedTotal < m_Jumps - 1 || Grounded && m_Jumps == 1)
 			{
-				if(Grounded)
+				if (m_Jumped > 1)
+					m_Jumped = 1;
+
+				if(!(m_Jumped&1))
 				{
-					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
-					m_Vel.y = -m_pWorld->m_Tuning.m_GroundJumpImpulse;
-					m_Jumped |= 1;
-				}
-				else if(!(m_Jumped&2))
-				{
-					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
-					m_Vel.y = -m_pWorld->m_Tuning.m_AirJumpImpulse;
-					m_Jumped |= 3;
+					if(Grounded)
+					{
+						m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
+						m_Vel.y = -m_pWorld->m_Tuning.m_GroundJumpImpulse;
+						m_Jumped |= 1;
+						m_JumpedTotal = 1;
+					}
+					else if(!(m_Jumped&2))
+					{
+						m_TriggeredEvents |= COREEVENT_AIR_JUMP;
+						m_Vel.y = -m_pWorld->m_Tuning.m_AirJumpImpulse;
+						m_Jumped |= 3;
+						m_JumpedTotal++;
+					}
 				}
 			}
 		}
 		else
+		{
 			m_Jumped &= ~1;
+		}
 
 		// handle hook
 		if(m_Input.m_Hook)
@@ -224,7 +236,10 @@ void CCharacterCore::Tick(bool UseInput)
 	// 1 bit = to keep track if a jump has been made on this input
 	// 2 bit = to keep track if a air-jump has been made
 	if(Grounded)
+	{
 		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
+	}
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)

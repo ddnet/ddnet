@@ -202,6 +202,8 @@ public:
 	vec2 m_NewHookDir;
 
 	int m_Jumped;
+	int m_JumpedTotal;
+	int m_Jumps;
 
 	int m_Direction;
 	int m_Angle;
