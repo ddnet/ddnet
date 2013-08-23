@@ -622,9 +622,9 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 				pData->m_pSqlData->m_pResults->first();
 
 				if(g_Config.m_SvHideScore)
-					str_format(aBuf, sizeof(aBuf), "Your team time: %d minute(s) %5.2f second(s)", (int)(Time/60), Time-((int)Time/60*60));
+					str_format(aBuf, sizeof(aBuf), "Your team time: %d:%5.2f", (int)(Time/60), Time-((int)Time/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %d minute(s) %5.2f second(s), requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
+					str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %d:%5.2f, requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
 
 				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
 				{
@@ -720,7 +720,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 
 					if (Row == aCuts[CutPos])
 					{
-						str_format(aBuf, sizeof(aBuf), "%d. %s Team Time: %d minute(s) %.2f second(s)", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
+						str_format(aBuf, sizeof(aBuf), "%d. %s Team Time: %d:%5.2f", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
 						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 						Rank++;
 						CutPos++;
@@ -809,9 +809,9 @@ void CSqlScore::ShowRankThread(void *pUser)
 				float Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 				int Rank = (int)pData->m_pSqlData->m_pResults->getInt("Rank");
 				if(g_Config.m_SvHideScore)
-					str_format(aBuf, sizeof(aBuf), "Your time: %d minute(s) %5.2f second(s)", (int)(Time/60), Time-((int)Time/60*60));
+					str_format(aBuf, sizeof(aBuf), "Your time: %d:%5.2f", (int)(Time/60), Time-((int)Time/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %5.2f second(s), requested by %s", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
+					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d:%5.2f, requested by %s", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer, agoString);
 
 				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
 				{
@@ -898,7 +898,7 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 			while(pData->m_pSqlData->m_pResults->next())
 			{
 				Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
-				str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d minute(s) %.2f second(s)", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60));
+				str_format(aBuf, sizeof(aBuf), "%d. %s Time: %d%5.2f", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60));
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 				Rank++;
 			}
