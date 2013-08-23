@@ -898,7 +898,7 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 			while(pData->m_pSqlData->m_pResults->next())
 			{
 				Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
-				str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d%05.2f", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60));
+				str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d:%05.2f", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60));
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 				Rank++;
 			}
