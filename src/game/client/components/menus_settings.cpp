@@ -432,6 +432,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Fire", "+fire", 0 },
 	{ "Hook", "+hook", 0 },
 	{ "Hammer", "+weapon1", 0 },
+	{ "Hook Collisions", "+showhookcoll", 0 },
 	{ "Pistol", "+weapon2", 0 },
 	{ "Shotgun", "+weapon3", 0 },
 	{ "Grenade", "+weapon4", 0 },

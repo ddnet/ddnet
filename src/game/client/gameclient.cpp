@@ -16,6 +16,9 @@
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
 
+#include <base/math.h>
+#include <base/vmath.h>
+
 #include <game/localization.h>
 #include <game/version.h>
 #include "render.h"
@@ -1220,4 +1223,41 @@ void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pU
 IGameClient *CreateGameClient()
 {
 	return &g_GameClient;
+}
+
+//H-Client
+// TODO: should be more general
+int CGameClient::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos)
+{
+	// Find other players
+	static const int ProximityRadius = 28;
+	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
+	int ClosestID = -1;
+
+	for (int i=0; i<MAX_CLIENTS; i++)
+	{
+        CClientData cData = m_aClients[i];
+        CNetObj_Character Prev = m_Snap.m_aCharacters[i].m_Prev;
+        CNetObj_Character Player = m_Snap.m_aCharacters[i].m_Cur;
+
+        vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick());
+
+        if (!cData.m_Active || cData.m_Team == TEAM_SPECTATORS || m_Snap.m_LocalClientID == m_Snap.m_paPlayerInfos[i]->m_ClientID)
+            continue;
+
+		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, Position);
+		float Len = distance(Position, IntersectPos);
+		if(Len < ProximityRadius+Radius)
+		{
+			Len = distance(Pos0, IntersectPos);
+			if(Len < ClosestLen)
+			{
+				NewPos = IntersectPos;
+				ClosestLen = Len;
+				ClosestID = i;
+			}
+		}
+	}
+
+	return ClosestID;
 }

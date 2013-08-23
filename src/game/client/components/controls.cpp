@@ -88,6 +88,7 @@ void CControls::OnConsoleInit()
 	Console()->Register("+jump", "", CFGFLAG_CLIENT, ConKeyInputState, &m_InputData.m_Jump, "Jump");
 	Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, &m_InputData.m_Hook, "Hook");
 	Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, &m_InputData.m_Fire, "Fire");
+	Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, &m_ShowHookColl, "Show Hook Collision");
 
 	{ static CInputSet s_Set = {this, &m_InputData.m_WantedWeapon, 1}; Console()->Register("+weapon1", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to hammer"); }
 	{ static CInputSet s_Set = {this, &m_InputData.m_WantedWeapon, 2}; Console()->Register("+weapon2", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to gun"); }
@@ -124,6 +125,9 @@ int CControls::SnapInput(int *pData)
 
 	if(m_pClient->m_pScoreboard->Active())
 		m_InputData.m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
+
+	if (m_pClient->m_pControls->m_ShowHookColl)
+		m_InputData.m_PlayerFlags |= PLAYERFLAG_AIM;
 
 	if(m_LastData.m_PlayerFlags != m_InputData.m_PlayerFlags)
 		Send = true;
