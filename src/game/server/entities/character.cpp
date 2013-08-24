@@ -1592,6 +1592,13 @@ void CCharacter::DDRacePostCoreTick()
 		if (m_DeepFreeze && !m_Super)
 			Freeze();
 
+		if (m_Core.m_Jumps == 0)
+			m_Core.m_Jumped = 3;
+		else if (m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
+			m_Core.m_Jumped = 3;
+		else if (m_Core.m_JumpedTotal < m_Core.m_Jumps - 1 && m_Core.m_Jumped > 1)
+			m_Core.m_Jumped = 1;
+
 		if ((m_Super || m_SuperJump) && m_Core.m_Jumped > 1)
 			m_Core.m_Jumped = 1;
 

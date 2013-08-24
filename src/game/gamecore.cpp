@@ -66,6 +66,8 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Id = -1;
 	m_Hook = true;
 	m_Collision = true;
+	m_JumpedTotal = 0;
+	m_Jumps = 2;
 }
 
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > pTeleOuts)
@@ -78,6 +80,8 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Id = -1;
 	m_Hook = true;
 	m_Collision = true;
+	m_JumpedTotal = 0;
+	m_Jumps = 2;
 }
 
 void CCharacterCore::Reset()
@@ -174,34 +178,26 @@ void CCharacterCore::Tick(bool UseInput)
 		// handle jump
 		if(m_Input.m_Jump)
 		{
-			if (m_JumpedTotal < m_Jumps - 1 || Grounded && m_Jumps == 1)
+			if(!(m_Jumped&1))
 			{
-				if (m_Jumped > 1)
-					m_Jumped = 1;
-
-				if(!(m_Jumped&1))
+				if(Grounded)
 				{
-					if(Grounded)
-					{
-						m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
-						m_Vel.y = -m_pWorld->m_Tuning.m_GroundJumpImpulse;
-						m_Jumped |= 1;
-						m_JumpedTotal = 1;
-					}
-					else if(!(m_Jumped&2))
-					{
-						m_TriggeredEvents |= COREEVENT_AIR_JUMP;
-						m_Vel.y = -m_pWorld->m_Tuning.m_AirJumpImpulse;
-						m_Jumped |= 3;
-						m_JumpedTotal++;
-					}
+					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
+					m_Vel.y = -m_pWorld->m_Tuning.m_GroundJumpImpulse;
+					m_Jumped |= 1;
+					m_JumpedTotal = 1;
+				}
+				else if(!(m_Jumped&2))
+				{
+					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
+					m_Vel.y = -m_pWorld->m_Tuning.m_AirJumpImpulse;
+					m_Jumped |= 3;
+					m_JumpedTotal++;
 				}
 			}
 		}
 		else
-		{
 			m_Jumped &= ~1;
-		}
 
 		// handle hook
 		if(m_Input.m_Hook)
