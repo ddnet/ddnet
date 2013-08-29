@@ -771,8 +771,12 @@ const char *CClient::ErrorString()
 void CClient::Render()
 {
 	if(g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats)
-		Graphics()->Clear(0.3f,0.3f,0.6f);
-	else if(g_Config.m_GfxClear) {
+	{
+		vec3 bg = GetColorV3(g_Config.m_ClBackgroundEntities);
+		Graphics()->Clear(bg.r, bg.g, bg.b);
+	}
+	else if(g_Config.m_GfxClear)
+	{
 		vec3 bg = GetColorV3(g_Config.m_ClBackground);
 		Graphics()->Clear(bg.r, bg.g, bg.b);
 	}
