@@ -1005,7 +1005,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 {
 	CUIRect Button;
-	MainView.VSplitLeft(300.0f, &MainView, 0);
+	//MainView.VSplitLeft(300.0f, &MainView, 0);
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
@@ -1071,5 +1071,61 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
 	{
 		g_Config.m_ClDDRaceBinds ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads (Disabling can improve performance)"), g_Config.m_ClShowQuads, &Button))
+	{
+		g_Config.m_ClShowQuads ^= 1;
+	}
+
+	CUIRect aRects[2];
+	CUIRect Label;
+	MainView.HSplitTop(5.0f, 0, &MainView);
+	MainView.HSplitTop(82.5f, &Label, &MainView);
+
+	Label.VSplitMid(&aRects[0], &aRects[1]);
+	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
+	aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
+
+	int *paColors[2];
+	paColors[0] = &g_Config.m_ClBackground;
+	paColors[1] = &g_Config.m_ClBackgroundEntities;
+
+	const char *paParts[] = {
+		Localize("Background (when quads disabled or zoomed out)"),
+		Localize("Background (when entities are enabled)")};
+	const char *paLabels[] = {
+		Localize("Hue"),
+		Localize("Sat."),
+		Localize("Lht.")};
+	static int s_aColorSlider[2][3] = {{0}};
+
+	for(int i = 0; i < 2; i++)
+	{
+		aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
+		UI()->DoLabelScaled(&Label, paParts[i], 14.0f, -1);
+		aRects[i].VSplitLeft(20.0f, 0, &aRects[i]);
+		aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
+
+		int PrevColor = *paColors[i];
+		int Color = 0;
+		for(int s = 0; s < 3; s++)
+		{
+			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
+			Label.VSplitLeft(100.0f, &Label, &Button);
+			Button.HMargin(2.0f, &Button);
+
+			float k = ((PrevColor>>((2-s)*8))&0xff) / 255.0f;
+			k = DoScrollbarH(&s_aColorSlider[i][s], &Button, k);
+			Color <<= 8;
+			Color += clamp((int)(k*255), 0, 255);
+			UI()->DoLabelScaled(&Label, paLabels[s], 14.0f, -1);
+		}
+
+		if(PrevColor != Color)
+			m_NeedSendinfo = true;
+
+		*paColors[i] = Color;
 	}
 }
