@@ -381,7 +381,18 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			{
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving tiles layer");
 				CLayerTiles *pLayer = (CLayerTiles *)pGroup->m_lLayers[l];
-				pLayer->PrepareForSave();
+				if(pLayer->m_Tele)
+					pLayer->PrepareForSave(sizeof(CTeleTile));
+				else if(pLayer->m_Speedup)
+					pLayer->PrepareForSave(sizeof(CSpeedupTile));
+				else if(pLayer->m_Front)
+					pLayer->PrepareForSave(sizeof(CTile));
+				else if(pLayer->m_Switch)
+					pLayer->PrepareForSave(sizeof(CSwitchTile));
+				else if(pLayer->m_Tune)
+					pLayer->PrepareForSave(sizeof(CTuneTile));
+				else
+					pLayer->PrepareForSave(sizeof(CTile));
 
 				CMapItemLayerTilemap Item;
 				Item.m_Version = 3;

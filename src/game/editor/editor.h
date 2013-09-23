@@ -41,6 +41,8 @@ enum
 
 	DIALOG_NONE=0,
 	DIALOG_FILE,
+
+	MAX_SKIP=(1<<8)-1
 };
 
 class CEnvelope
@@ -548,7 +550,7 @@ public:
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc);
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
 
-	void PrepareForSave();
+	void PrepareForSave(int TileSize);
 
 	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
 
@@ -562,6 +564,8 @@ public:
 	CColor m_Color;
 	int m_ColorEnv;
 	int m_ColorEnvOffset;
+	CTile *m_pSaveTiles;
+	int m_SaveTilesSize;
 	CTile *m_pTiles;
 
 	// DDRace
