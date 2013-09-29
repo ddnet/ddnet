@@ -128,7 +128,7 @@ bool CSqlScore::Connect()
 		char aBuf[256];
 
 		sql::ConnectOptionsMap connection_properties;
-		connection_properties["hostHame"]      = sql::SQLString(m_pIp);
+		connection_properties["hostName"]      = sql::SQLString(m_pIp);
 		connection_properties["port"]          = m_Port;
 		connection_properties["userName"]      = sql::SQLString(m_pUser);
 		connection_properties["password"]      = sql::SQLString(m_pPass);
