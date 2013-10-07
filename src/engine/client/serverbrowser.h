@@ -24,7 +24,7 @@ public:
 
 	enum
 	{
-		MAX_FAVORITES=256
+		MAX_FAVORITES=2048
 	};
 
 	CServerBrowser();
