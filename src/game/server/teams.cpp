@@ -151,14 +151,9 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	if (Team == TEAM_SUPER && !Character(ClientID)->m_Super)
 		return false;
 	//if you begin race
-	if (Character(ClientID)->m_DDRaceState != DDRACE_NONE)
-	{
-		//you will be killed if you try to join FLOCK
-		if (Team == TEAM_FLOCK && m_Core.Team(ClientID) != TEAM_FLOCK)
-			GetPlayer(ClientID)->KillCharacter(WEAPON_GAME);
-		else if (Team != TEAM_SUPER)
-			return false;
-	}
+	if (Character(ClientID)->m_DDRaceState != DDRACE_NONE && Team != TEAM_SUPER)
+		return false;
+
 	SetForceCharacterTeam(ClientID, Team);
 
 	//GameServer()->CreatePlayerSpawn(Character(id)->m_Core.m_Pos, TeamMask());
