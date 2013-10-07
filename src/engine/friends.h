@@ -25,7 +25,7 @@ public:
 		FRIEND_CLAN,
 		FRIEND_PLAYER,
 
-		MAX_FRIENDS=128,
+		MAX_FRIENDS=1024,
 	};
 
 	virtual void Init() = 0;
