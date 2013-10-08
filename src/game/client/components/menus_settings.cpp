@@ -794,6 +794,10 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_SndNonactiveMute, Localize("Mute when not active"), g_Config.m_SndNonactiveMute, &Button))
 		g_Config.m_SndNonactiveMute ^= 1;
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_SndChat, Localize("Enable chat sound"), g_Config.m_SndChat, &Button))
+		g_Config.m_SndChat ^= 1;
+
 	// sample rate box
 	{
 		char aBuf[64];
