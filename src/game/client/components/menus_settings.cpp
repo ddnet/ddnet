@@ -1088,9 +1088,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 	aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
-	int *paColors[2];
-	paColors[0] = &g_Config.m_ClBackground;
-	paColors[1] = &g_Config.m_ClBackgroundEntities;
+	int *pColorSlider[2][3] = {{&g_Config.m_ClBackgroundHue, &g_Config.m_ClBackgroundSat, &g_Config.m_ClBackgroundLht}, {&g_Config.m_ClBackgroundEntitiesHue, &g_Config.m_ClBackgroundEntitiesSat, &g_Config.m_ClBackgroundEntitiesLht}};
 
 	const char *paParts[] = {
 		Localize("Background (when quads disabled or zoomed out)"),
@@ -1108,24 +1106,23 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		aRects[i].VSplitLeft(20.0f, 0, &aRects[i]);
 		aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
 
-		int PrevColor = *paColors[i];
-		int Color = 0;
 		for(int s = 0; s < 3; s++)
 		{
+			//CUIRect Text;
+			//MainView.HSplitTop(19.0f, &Button, &MainView);
+			//Button.VMargin(15.0f, &Button);
+			//Button.VSplitLeft(100.0f, &Text, &Button);
+			////Button.VSplitRight(5.0f, &Button, 0);
+			//Button.HSplitTop(4.0f, 0, &Button);
+
 			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
 			Label.VSplitLeft(100.0f, &Label, &Button);
 			Button.HMargin(2.0f, &Button);
 
-			float k = ((PrevColor>>((2-s)*8))&0xff) / 255.0f;
-			k = DoScrollbarH(&s_aColorSlider[i][s], &Button, k);
-			Color <<= 8;
-			Color += clamp((int)(k*255), 0, 255);
-			UI()->DoLabelScaled(&Label, paLabels[s], 14.0f, -1);
+			float k = (*pColorSlider[i][s]) / 255.0f;
+			k = DoScrollbarH(pColorSlider[i][s], &Button, k);
+			*pColorSlider[i][s] = (int)(k*255.0f);
+			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
-
-		if(PrevColor != Color)
-			m_NeedSendinfo = true;
-
-		*paColors[i] = Color;
 	}
 }
