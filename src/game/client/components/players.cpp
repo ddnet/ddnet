@@ -22,7 +22,10 @@
 #include <game/client/components/sounds.h>
 #include <game/client/components/controls.h>
 
+#include <engine/textrender.h>
+
 #include "players.h"
+#include <stdio.h>
 
 void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset)
 {
@@ -85,11 +88,151 @@ inline float AngularApproach(float Src, float Dst, float Amount)
 	return n;
 }
 
+void CPlayers::Predict(
+	const CNetObj_Character *pPrevChar,
+	const CNetObj_Character *pPlayerChar,
+	const CNetObj_PlayerInfo *pPrevInfo,
+	const CNetObj_PlayerInfo *pPlayerInfo,
+	vec2 &PrevPredPos,
+	vec2 &SmoothPos,
+	int &MoveCnt,
+	vec2 &Position
+	)
+{
+	CNetObj_Character Prev;
+	CNetObj_Character Player;
+	Prev = *pPrevChar;
+	Player = *pPlayerChar;
+
+	CNetObj_PlayerInfo pInfo = *pPlayerInfo;
+
+
+	// set size
+
+	float IntraTick = Client()->IntraGameTick();
+
+
+	//float angle = 0;
+
+	if(pInfo.m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		// just use the direct input if it's local player we are rendering
+	}
+	else
+	{
+		/*
+		float mixspeed = Client()->FrameTime()*2.5f;
+		if(player.attacktick != prev.attacktick) // shooting boosts the mixing speed
+			mixspeed *= 15.0f;
+
+		// move the delta on a constant speed on a x^2 curve
+		float current = g_GameClient.m_aClients[info.cid].angle;
+		float target = player.angle/256.0f;
+		float delta = angular_distance(current, target);
+		float sign = delta < 0 ? -1 : 1;
+		float new_delta = delta - 2*mixspeed*sqrt(delta*sign)*sign + mixspeed*mixspeed;
+
+		// make sure that it doesn't vibrate when it's still
+		if(fabs(delta) < 2/256.0f)
+			angle = target;
+		else
+			angle = angular_approach(current, target, fabs(delta-new_delta));
+
+		g_GameClient.m_aClients[info.cid].angle = angle;*/
+	}
+
+    vec2 NonPredPos = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+
+
+	// use preditect players if needed
+	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+		{
+			// apply predicted results
+			m_pClient->m_aClients[pInfo.m_ClientID].m_Predicted.Write(&Player);
+			m_pClient->m_aClients[pInfo.m_ClientID].m_PrevPredicted.Write(&Prev);
+
+			IntraTick = Client()->PredIntraGameTick();
+		}
+	}
+
+	Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+
+
+	static double ping = 0;
+
+    if(pInfo.m_Local) {
+		ping = mix(ping, (double)pInfo.m_Latency, 0.1);
+    }
+
+    if(!pInfo.m_Local)
+	{
+
+	/*
+	for ping = 260, usual missprediction distances:
+
+	move = 120-140
+	jump = 130
+	dj = 250
+
+	normalized:
+	move = 0.461 - 0.538
+	jump = 0.5
+	dj = .961
+
+	*/
+		//printf("%d\n", m_pClient->m_Snap.m_pLocalInfo->m_Latency);
+
+
+	    if(m_pClient->m_Snap.m_pLocalInfo)
+			ping = mix(ping, (double)m_pClient->m_Snap.m_pLocalInfo->m_Latency, 0.1);
+
+//		printf("%f\n", ping);
+		
+//		static double ping = mix(ping, pInfo.m_Latency, 0.1);
+
+		double d = length(PrevPredPos - Position)/ping;
+
+
+		if((d > 0.4) && (d < 5.))
+		{
+
+//			if(MoveCnt == 0)
+//				printf("[\n");
+			if(MoveCnt == 0)
+				SmoothPos = NonPredPos;
+
+			MoveCnt = 10;
+//			SmoothPos = PrevPredPos;
+//			SmoothPos = mix(NonPredPos, Position, 0.6);
+
+		}
+
+		PrevPredPos = Position;
+
+		if(MoveCnt > 0)
+		{
+
+//			Position = mix(mix(NonPredPos, Position, 0.5), SmoothPos, (((float)MoveCnt))/15);
+//			Position = mix(mix(NonPredPos, Position, 0.5), SmoothPos, 0.5);
+			Position = mix(NonPredPos, Position, 0.5);
+
+			SmoothPos = Position;
+			MoveCnt--;
+//			if(MoveCnt == 0)
+//				printf("]\n\n");
+		}
+	}
+}
+
 void CPlayers::RenderHook(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
 	const CNetObj_PlayerInfo *pPrevInfo,
-	const CNetObj_PlayerInfo *pPlayerInfo
+	const CNetObj_PlayerInfo *pPlayerInfo,
+    const vec2 &parPosition,
+    const vec2 &PositionTo
 	)
 {
 	CNetObj_Character Prev;
@@ -105,23 +248,43 @@ void CPlayers::RenderHook(
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
-
-	// use preditect players if needed
-	if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if (!g_Config.m_ClAntiPing)
 	{
-		if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+		// use preditect players if needed
+		if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
+			if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+			{
+			}
+			else
+			{
+				// apply predicted results
+				m_pClient->m_PredictedChar.Write(&Player);
+				m_pClient->m_PredictedPrevChar.Write(&Prev);
+				IntraTick = Client()->PredIntraGameTick();
+			}
 		}
-		else
+	}
+	else
+	{
+		if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
-			// apply predicted results
-			m_pClient->m_PredictedChar.Write(&Player);
-			m_pClient->m_PredictedPrevChar.Write(&Prev);
-			IntraTick = Client()->PredIntraGameTick();
+			if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+			{
+				// apply predicted results
+				m_pClient->m_aClients[pInfo.m_ClientID].m_Predicted.Write(&Player);
+				m_pClient->m_aClients[pInfo.m_ClientID].m_PrevPredicted.Write(&Prev);
+
+				IntraTick = Client()->PredIntraGameTick();
+			}
 		}
 	}
 
-	vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+	vec2 Position;
+	if (!g_Config.m_ClAntiPing)
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+	else
+		Position = parPosition;
 
 	// draw hook
 	if (Prev.m_HookState>0 && Player.m_HookState>0)
@@ -133,29 +296,39 @@ void CPlayers::RenderHook(
 		vec2 Pos = Position;
 		vec2 HookPos;
 
-		if(pPlayerChar->m_HookedPlayer != -1)
+		if (!g_Config.m_ClAntiPing)
 		{
-			if(m_pClient->m_Snap.m_pLocalInfo && pPlayerChar->m_HookedPlayer == m_pClient->m_Snap.m_pLocalInfo->m_ClientID)
+			if(pPlayerChar->m_HookedPlayer != -1)
 			{
-				if(Client()->State() == IClient::STATE_DEMOPLAYBACK) // only use prediction if needed
-					HookPos = vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y);
+				if(m_pClient->m_Snap.m_pLocalInfo && pPlayerChar->m_HookedPlayer == m_pClient->m_Snap.m_pLocalInfo->m_ClientID)
+				{
+					if(Client()->State() == IClient::STATE_DEMOPLAYBACK) // only use prediction if needed
+						HookPos = vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y);
+					else
+						HookPos = mix(vec2(m_pClient->m_PredictedPrevChar.m_Pos.x, m_pClient->m_PredictedPrevChar.m_Pos.y),
+							vec2(m_pClient->m_PredictedChar.m_Pos.x, m_pClient->m_PredictedChar.m_Pos.y), Client()->PredIntraGameTick());
+				}
+				else if(pInfo.m_Local)
+				{
+					HookPos = mix(vec2(m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Prev.m_X,
+						m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Prev.m_Y),
+						vec2(m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Cur.m_X,
+						m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Cur.m_Y),
+						Client()->IntraGameTick());
+				}
 				else
-					HookPos = mix(vec2(m_pClient->m_PredictedPrevChar.m_Pos.x, m_pClient->m_PredictedPrevChar.m_Pos.y),
-						vec2(m_pClient->m_PredictedChar.m_Pos.x, m_pClient->m_PredictedChar.m_Pos.y), Client()->PredIntraGameTick());
-			}
-			else if(pInfo.m_Local)
-			{
-				HookPos = mix(vec2(m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Prev.m_X,
-					m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Prev.m_Y),
-					vec2(m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Cur.m_X,
-					m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Cur.m_Y),
-					Client()->IntraGameTick());
+					HookPos = mix(vec2(pPrevChar->m_HookX, pPrevChar->m_HookY), vec2(pPlayerChar->m_HookX, pPlayerChar->m_HookY), Client()->IntraGameTick());
 			}
 			else
-				HookPos = mix(vec2(pPrevChar->m_HookX, pPrevChar->m_HookY), vec2(pPlayerChar->m_HookX, pPlayerChar->m_HookY), Client()->IntraGameTick());
+				HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), IntraTick);
 		}
 		else
-			HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), IntraTick);
+		{
+			if(pPrevChar->m_HookedPlayer != -1)
+				HookPos = PositionTo;
+			else
+				HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), IntraTick);
+		}
 
 		float d = distance(Pos, HookPos);
 		vec2 Dir = normalize(Pos-HookPos);
@@ -189,8 +362,12 @@ void CPlayers::RenderPlayer(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
 	const CNetObj_PlayerInfo *pPrevInfo,
-	const CNetObj_PlayerInfo *pPlayerInfo
-	)
+	const CNetObj_PlayerInfo *pPlayerInfo,
+    const vec2 &parPosition
+/*    vec2 &PrevPos,
+    vec2 &SmoothPos,
+    int &MoveCnt
+*/	)
 {
 	CNetObj_Character Prev;
 	CNetObj_Character Player;
@@ -239,24 +416,47 @@ void CPlayers::RenderPlayer(
 		g_GameClient.m_aClients[info.cid].angle = angle;*/
 	}
 
+
 	// use preditect players if needed
-	if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if (!g_Config.m_ClAntiPing)
 	{
-		if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+		if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
+			if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+			{
+			}
+			else
+			{
+				// apply predicted results
+				m_pClient->m_PredictedChar.Write(&Player);
+				m_pClient->m_PredictedPrevChar.Write(&Prev);
+				IntraTick = Client()->PredIntraGameTick();
+				NewTick = m_pClient->m_NewPredictedTick;
+			}
 		}
-		else
+	}
+	else
+	{
+		if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
-			// apply predicted results
-			m_pClient->m_PredictedChar.Write(&Player);
-			m_pClient->m_PredictedPrevChar.Write(&Prev);
-			IntraTick = Client()->PredIntraGameTick();
-			NewTick = m_pClient->m_NewPredictedTick;
+			if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+			{
+				// apply predicted results
+				m_pClient->m_aClients[pInfo.m_ClientID].m_Predicted.Write(&Player);
+				m_pClient->m_aClients[pInfo.m_ClientID].m_PrevPredicted.Write(&Prev);
+
+				IntraTick = Client()->PredIntraGameTick();
+				NewTick = m_pClient->m_NewPredictedTick;
+			}
 		}
 	}
 
 	vec2 Direction = GetDirection((int)(Angle*256.0f));
-	vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+	vec2 Position;
+	if (!g_Config.m_ClAntiPing)
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+	else
+		Position = parPosition;
 	vec2 Vel = mix(vec2(Prev.m_VelX/256.0f, Prev.m_VelY/256.0f), vec2(Player.m_VelX/256.0f, Player.m_VelY/256.0f), IntraTick);
 
 	m_pClient->m_pFlow->Add(Position, Vel*100.0f, 10.0f);
@@ -555,6 +755,45 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsDraw(&QuadItem, 1);
 		Graphics()->QuadsEnd();
 	}
+
+
+	if(g_Config.m_ClNameplates == 1)
+	{
+		float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
+		// render name plate
+		if(!pPlayerInfo->m_Local)
+		{
+			float a = 1;
+			if(g_Config.m_ClNameplatesAlways == 0)
+				a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos, Position)/200.0f,16.0f), 0.0f, 1.0f);
+			
+			const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
+			float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
+			
+			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.5f*a);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, a);
+			if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
+			{
+				if(pPlayerInfo->m_Team == TEAM_RED)
+					TextRender()->TextColor(1.0f, 0.5f, 0.5f, a);
+				else if(pPlayerInfo->m_Team == TEAM_BLUE)
+					TextRender()->TextColor(0.7f, 0.7f, 1.0f, a);
+			}
+			
+			TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f, FontSize, pName, -1);
+			
+			if(g_Config.m_Debug) // render client id when in debug aswell
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
+				TextRender()->Text(0, Position.x, Position.y-90, 28.0f, aBuf, -1);
+			}
+			
+			TextRender()->TextColor(1,1,1,1);
+			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
+		}
+	}
+
 }
 
 void CPlayers::OnRender()
@@ -584,6 +823,60 @@ void CPlayers::OnRender()
 		}
 	}
 
+	static vec2 PrevPos[MAX_CLIENTS];
+	static vec2 SmoothPos[MAX_CLIENTS];
+	static int MoveCnt[MAX_CLIENTS] = {0};
+	static vec2 PredictedPos[MAX_CLIENTS];
+	
+	static vec2 Predictions[100][MAX_CLIENTS];
+	static int predcnt = 0;
+
+	if (g_Config.m_ClAntiPing)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
+				continue;
+			const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, i);
+			const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
+
+			if(pPrevInfo && pInfo)
+			{
+				CNetObj_Character PrevChar = m_pClient->m_Snap.m_aCharacters[i].m_Prev;
+				CNetObj_Character CurChar = m_pClient->m_Snap.m_aCharacters[i].m_Cur;
+
+				Predict(
+						&PrevChar,
+						&CurChar,
+						(const CNetObj_PlayerInfo *)pPrevInfo,
+						(const CNetObj_PlayerInfo *)pInfo,
+						PrevPos[i],
+						SmoothPos[i],
+						MoveCnt[i],
+						PredictedPos[i]
+					);
+
+					Predictions[predcnt][i] = PredictedPos[i];
+			}
+		}
+
+		if(g_Config.m_ClAntiPing && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+			if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+			{
+	//			double ping = m_pClient->m_Snap.m_pLocalInfo->m_Latency;
+	//			static double fps;
+	//			fps = mix(fps, (1. / Client()->RenderFrameTime()), 0.1);
+
+	//			int predmax = (fps * ping / 1000.);
+
+				int predmax = 19;
+	//			if( 0 <= predmax && predmax <= 100)
+						predcnt = (predcnt + 1) % predmax;
+	//			else
+	//			    predcnt = (predcnt + 1) % 2;
+			}
+	}
+
 	// render other players in two passes, first pass we render the other, second pass we render our self
 	for(int p = 0; p < 4; p++)
 	{
@@ -607,19 +900,73 @@ void CPlayers::OnRender()
 				CNetObj_Character CurChar = m_pClient->m_Snap.m_aCharacters[i].m_Cur;
 
 				if(p<2)
-					RenderHook(
-							&PrevChar,
-							&CurChar,
-							(const CNetObj_PlayerInfo *)pPrevInfo,
-							(const CNetObj_PlayerInfo *)pInfo
-						);
+				{
+					if(PrevChar.m_HookedPlayer != -1)
+						RenderHook(
+								&PrevChar,
+								&CurChar,
+								(const CNetObj_PlayerInfo *)pPrevInfo,
+								(const CNetObj_PlayerInfo *)pInfo,
+								PredictedPos[i],
+								PredictedPos[PrevChar.m_HookedPlayer]
+							);
+					else
+						RenderHook(
+								&PrevChar,
+								&CurChar,
+								(const CNetObj_PlayerInfo *)pPrevInfo,
+								(const CNetObj_PlayerInfo *)pInfo,
+								PredictedPos[i],
+								PredictedPos[i]
+							);
+				}
 				else
+				{
 					RenderPlayer(
 							&PrevChar,
 							&CurChar,
 							(const CNetObj_PlayerInfo *)pPrevInfo,
-							(const CNetObj_PlayerInfo *)pInfo
+							(const CNetObj_PlayerInfo *)pInfo,
+							PredictedPos[i]
 						);
+
+
+/*					RenderPlayer(
+							&PrevChar,
+							&CurChar,
+							(const CNetObj_PlayerInfo *)pPrevInfo,
+							(const CNetObj_PlayerInfo *)pInfo,
+							Predictions[predcnt][i]
+						);
+					float IntraTick = Client()->IntraGameTick();
+					RenderPlayer(
+							&PrevChar,
+							&CurChar,
+							(const CNetObj_PlayerInfo *)pPrevInfo,
+							(const CNetObj_PlayerInfo *)pInfo,
+							mix(vec2(PrevChar.m_X, PrevChar.m_Y), vec2(CurChar.m_X, CurChar.m_Y), IntraTick)
+						);
+					const CNetObj_PlayerInfo * pInfo_ = (const CNetObj_PlayerInfo *)pInfo;
+					static double ping = 0;
+				    if(pInfo_->m_Local) {
+						ping = mix(ping, (double)(pInfo_->m_Latency), 0.1);
+					}
+					if(!Local && ping > 0.1)
+					{
+						double d;
+						d = length(Predictions[predcnt][i] - mix(vec2(PrevChar.m_X, PrevChar.m_Y), vec2(CurChar.m_X, CurChar.m_Y), IntraTick))/ping;
+						static double dacc = 0;
+						static int cnt = 1;
+//						printf("%f\n", ping);
+						if((0.1 <= d) && (d < 5.)) {
+							if(dacc > 5.)
+								cnt++;
+							dacc += d;
+							printf("%f\n", dacc/cnt);
+						}
+					}
+*/
+				}
 			}
 		}
 	}

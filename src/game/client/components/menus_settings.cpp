@@ -970,7 +970,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDRace")};
+		Localize("ddnet")};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
 
@@ -1081,6 +1081,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads (Disabling can improve performance)"), g_Config.m_ClShowQuads, &Button))
 	{
 		g_Config.m_ClShowQuads ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing (predict grenades and other players)"), g_Config.m_ClAntiPing, &Button))
+	{
+		g_Config.m_ClAntiPing ^= 1;
 	}
 
 	CUIRect aRects[2];
