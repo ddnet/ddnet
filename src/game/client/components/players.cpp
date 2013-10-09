@@ -756,8 +756,7 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsEnd();
 	}
 
-
-	if(g_Config.m_ClNameplates == 1)
+	if(g_Config.m_ClNameplates && g_Config.m_ClAntiPing)
 	{
 		float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 		// render name plate
@@ -793,7 +792,6 @@ void CPlayers::RenderPlayer(
 			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 		}
 	}
-
 }
 
 void CPlayers::OnRender()
@@ -828,7 +826,6 @@ void CPlayers::OnRender()
 	static int MoveCnt[MAX_CLIENTS] = {0};
 	static vec2 PredictedPos[MAX_CLIENTS];
 	
-	static vec2 Predictions[100][MAX_CLIENTS];
 	static int predcnt = 0;
 
 	if (g_Config.m_ClAntiPing)
@@ -855,8 +852,6 @@ void CPlayers::OnRender()
 						MoveCnt[i],
 						PredictedPos[i]
 					);
-
-					Predictions[predcnt][i] = PredictedPos[i];
 			}
 		}
 
@@ -929,43 +924,6 @@ void CPlayers::OnRender()
 							(const CNetObj_PlayerInfo *)pInfo,
 							PredictedPos[i]
 						);
-
-
-/*					RenderPlayer(
-							&PrevChar,
-							&CurChar,
-							(const CNetObj_PlayerInfo *)pPrevInfo,
-							(const CNetObj_PlayerInfo *)pInfo,
-							Predictions[predcnt][i]
-						);
-					float IntraTick = Client()->IntraGameTick();
-					RenderPlayer(
-							&PrevChar,
-							&CurChar,
-							(const CNetObj_PlayerInfo *)pPrevInfo,
-							(const CNetObj_PlayerInfo *)pInfo,
-							mix(vec2(PrevChar.m_X, PrevChar.m_Y), vec2(CurChar.m_X, CurChar.m_Y), IntraTick)
-						);
-					const CNetObj_PlayerInfo * pInfo_ = (const CNetObj_PlayerInfo *)pInfo;
-					static double ping = 0;
-				    if(pInfo_->m_Local) {
-						ping = mix(ping, (double)(pInfo_->m_Latency), 0.1);
-					}
-					if(!Local && ping > 0.1)
-					{
-						double d;
-						d = length(Predictions[predcnt][i] - mix(vec2(PrevChar.m_X, PrevChar.m_Y), vec2(CurChar.m_X, CurChar.m_Y), IntraTick))/ping;
-						static double dacc = 0;
-						static int cnt = 1;
-//						printf("%f\n", ping);
-						if((0.1 <= d) && (d < 5.)) {
-							if(dacc > 5.)
-								cnt++;
-							dacc += d;
-							printf("%f\n", dacc/cnt);
-						}
-					}
-*/
 				}
 			}
 		}

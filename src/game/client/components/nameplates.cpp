@@ -20,7 +20,6 @@ void CNamePlates::RenderNameplate(
 
 	vec2 Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IntraTick);
 
-
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	// render name plate
 	if(!pPlayerInfo->m_Local)
@@ -58,7 +57,7 @@ void CNamePlates::RenderNameplate(
 
 void CNamePlates::OnRender()
 {
-	if (!g_Config.m_ClNameplates)
+	if (!g_Config.m_ClNameplates || g_Config.m_ClAntiPing)
 		return;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)

@@ -46,7 +46,7 @@
 #include "components/motd.h"
 #include "components/particles.h"
 #include "components/players.h"
-//#include "components/nameplates.h"
+#include "components/nameplates.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
@@ -85,7 +85,7 @@ static CVoting gs_Voting;
 static CSpectator gs_Spectator;
 
 static CPlayers gs_Players;
-//static CNamePlates gs_NamePlates;
+static CNamePlates gs_NamePlates;
 static CItems gs_Items;
 static CMapImages gs_MapImages;
 
@@ -163,7 +163,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pGhost);
 	m_All.Add(&gs_MapLayersForeGround);
 	m_All.Add(&m_pParticles->m_RenderExplosions);
-//	m_All.Add(&gs_NamePlates);
+	m_All.Add(&gs_NamePlates);
 	m_All.Add(&m_pParticles->m_RenderGeneral);
 	m_All.Add(m_pDamageind);
 	m_All.Add(&gs_Hud);
