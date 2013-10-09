@@ -775,7 +775,7 @@ void CClient::Render()
 		vec3 bg = HslToRgb(vec3(g_Config.m_ClBackgroundEntitiesHue/255.0f, g_Config.m_ClBackgroundEntitiesSat/255.0f, g_Config.m_ClBackgroundEntitiesLht/255.0f));
 		Graphics()->Clear(bg.r, bg.g, bg.b);
 	}
-	else if(g_Config.m_GfxClear)
+	else
 	{
 		vec3 bg = HslToRgb(vec3(g_Config.m_ClBackgroundHue/255.0f, g_Config.m_ClBackgroundSat/255.0f, g_Config.m_ClBackgroundLht/255.0f));
 		Graphics()->Clear(bg.r, bg.g, bg.b);
