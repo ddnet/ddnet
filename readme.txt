@@ -1,7 +1,7 @@
 This is the custom DDRace mod of DDraceNetwork.
 
 Hook Collisions from H-Client by unsigned char*.
-AntiPing from TDTW client by Psycho.God <3. & kaddy.
+AntiPing by p, based on TDTW client by Psycho.God <3. & kaddy.
 
 DDRace is a mod for the game Teeworlds and it's being maintained by GreYFoX@GTi & btd with the help of others like heinrich5991, noother & Floff, in the previous versions 3da and Fluxid.
 
