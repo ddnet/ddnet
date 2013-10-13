@@ -85,6 +85,8 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 		((CChat*)pUserData)->EnableMode(1);
 	else
 		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
+
+	((CChat*)pUserData)->m_Input.Set(pResult->GetString(1));
 }
 
 void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
@@ -96,7 +98,7 @@ void CChat::OnConsoleInit()
 {
 	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
 	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
-	Console()->Register("chat", "s", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
+	Console()->Register("chat", "s?r", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 }
 
@@ -345,19 +347,19 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 	else if(Highlighted)
 	{
-		if(Now-m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq()*3/10)
+		if(Now-m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq()*3/10 && g_Config.m_SndChat)
 		{
-			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
-			m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
+			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+			m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 		}
 	}
 	else
 	{
-		if(Now-m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq()*3/10 && g_Config.m_SndChat)
+		if(Now-m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq()*3/10)
 		{
 			if (g_Config.m_SndChat)
-			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
-			m_aLastSoundPlayed[CHAT_CLIENT] = Now;
+				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
+			m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 		}
 	}
 }
