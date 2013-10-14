@@ -37,35 +37,45 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 
 void CSqlScore::LoadPointMapList()
 {
+	void *Thread = thread_create(LoadPointMapListThread, this);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)Thread);
+#endif
+}
+
+void CSqlScore::LoadPointMapListThread(void *pUser)
+{
 	lock_wait(gs_SqlLock);
 
-	m_PointsSize = 0;
+	CSqlScore *pScore = (CSqlScore *)pUser;
+
+	pScore->m_PointsSize = 0;
 
 	std::ifstream f("points.cfg");
 	if (f.fail())
 		return;
 
-	if(!Connect())
+	if(!pScore->Connect())
 		return;
 
-	m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
+	pScore->m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
 	f.seekg(0);
-	m_PointsInfos = new CPointsInfo[m_PointsSize];
+	pScore->m_PointsInfos = new CPointsInfo[pScore->m_PointsSize];
 
 	char aBuf[256];
 	unsigned int Position = 0;
 
-	while (f.getline(aBuf, 256) && Position < m_PointsSize)
+	while (f.getline(aBuf, 256) && Position < pScore->m_PointsSize)
 	{
-		CPointsInfo& Info = m_PointsInfos[Position];
+		CPointsInfo& Info = pScore->m_PointsInfos[Position];
 		if (sscanf(aBuf, "%u %127[^\t\n]", &Info.m_Points, Info.m_aMapName) == 2)
 		{
-			NormalizeMapname(Info.m_aMapName);
+			pScore->NormalizeMapname(Info.m_aMapName);
 			str_format(aBuf, sizeof(aBuf), "SELECT count(Name) FROM record_%s_race;", Info.m_aMapName);
 			try
 			{
-				m_pResults = m_pStatement->executeQuery(aBuf);
-				delete m_pResults;
+				pScore->m_pResults = pScore->m_pStatement->executeQuery(aBuf);
+				delete pScore->m_pResults;
 			}
 			catch (sql::SQLException &e)
 			{
@@ -75,11 +85,11 @@ void CSqlScore::LoadPointMapList()
 		}
 	}
 
-	m_PointsSize = Position;
+	pScore->m_PointsSize = Position;
+
+	pScore->Disconnect();
 
 	lock_release(gs_SqlLock);
-
-	Disconnect();
 
 	return;
 }
@@ -205,59 +215,71 @@ void CSqlScore::Disconnect()
 // create tables... should be done only once
 void CSqlScore::Init()
 {
+	void *Thread = thread_create(InitThread, this);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)Thread);
+#endif
+}
+
+void CSqlScore::InitThread(void* pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScore *pScore = (CSqlScore *)pUser;
+
 	// create connection
-	if(Connect())
+	if(pScore->Connect())
 	{
 		try
 		{
 			// create tables
 			char aBuf[768];
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_race (Name VARCHAR(%d) NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, m_aMap, MAX_NAME_LENGTH);
-			m_pStatement->execute(aBuf);
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_race (Name VARCHAR(%d) NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY Name (Name)) CHARACTER SET utf8 ;", pScore->m_pPrefix, pScore->m_aMap, MAX_NAME_LENGTH);
+			pScore->m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_teamrace (Name VARCHAR(%d) NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, m_aMap, MAX_NAME_LENGTH);
-			m_pStatement->execute(aBuf);
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_teamrace (Name VARCHAR(%d) NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Name (Name)) CHARACTER SET utf8 ;", pScore->m_pPrefix, pScore->m_aMap, MAX_NAME_LENGTH);
+			pScore->m_pStatement->execute(aBuf);
 
 			// Check if table has new column with timestamp
-			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_race' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
-			m_pResults = m_pStatement->executeQuery(aBuf);
+			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_race' AND column_name = 'Timestamp'", pScore->m_pPrefix, pScore->m_aMap);
+			pScore->m_pResults = pScore->m_pStatement->executeQuery(aBuf);
 
-			if(m_pResults->rowsCount() < 1)
+			if(pScore->m_pResults->rowsCount() < 1)
 			{
 				// If not... add the column				
-				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_race ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);",m_pPrefix, m_aMap);
-				m_pStatement->execute(aBuf);
+				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_race ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);", pScore->m_pPrefix, pScore->m_aMap);
+				pScore->m_pStatement->execute(aBuf);
 			}
 
 			// Check if table has new column with timestamp
-			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_teamrace' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
-			delete m_pResults;
-			m_pResults = m_pStatement->executeQuery(aBuf);
+			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_teamrace' AND column_name = 'Timestamp'", pScore->m_pPrefix, pScore->m_aMap);
+			delete pScore->m_pResults;
+			pScore->m_pResults = pScore->m_pStatement->executeQuery(aBuf);
 
-			if(m_pResults->rowsCount() < 1)
+			if(pScore->m_pResults->rowsCount() < 1)
 			{
 				// If not... add the column				
-				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_teamrace ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);",m_pPrefix, m_aMap);
-				m_pStatement->execute(aBuf);
+				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_teamrace ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);", pScore->m_pPrefix, pScore->m_aMap);
+				pScore->m_pStatement->execute(aBuf);
 			}
 
 			dbg_msg("SQL", "Tables were created successfully");
 
 			// get the best time
-			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_%s_race ORDER BY `Time` ASC LIMIT 0, 1;", m_pPrefix, m_aMap);
-			delete m_pResults;
-			m_pResults = m_pStatement->executeQuery(aBuf);
+			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_%s_race ORDER BY `Time` ASC LIMIT 0, 1;", pScore->m_pPrefix, pScore->m_aMap);
+			delete pScore->m_pResults;
+			pScore->m_pResults = pScore->m_pStatement->executeQuery(aBuf);
 
-			if(m_pResults->next())
+			if(pScore->m_pResults->next())
 			{
-				((CGameControllerDDRace*)GameServer()->m_pController)->m_CurrentRecord = (float)m_pResults->getDouble("Time");
+				((CGameControllerDDRace*)pScore->GameServer()->m_pController)->m_CurrentRecord = (float)pScore->m_pResults->getDouble("Time");
 
 				dbg_msg("SQL", "Getting best time on server done");
 			}
 
 			// delete statement
-			delete m_pResults;
+			delete pScore->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -268,8 +290,10 @@ void CSqlScore::Init()
 		}
 
 		// disconnect from database
-		Disconnect();
+		pScore->Disconnect();
 	}
+
+	lock_release(gs_SqlLock);
 }
 
 // update stuff
