@@ -98,36 +98,28 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 32, 32);
 
-	if (g_Config.m_ClAntiPing)
+	if (g_Config.m_ClAntiPingGrenade)
 	{
-		static int Average_Offset = -1;
-		static float Offset_Count = 0;
-		static float Offset_Sum = 0;
-		
-		// Calculate average prediction offset, because client_predtick() gets varial values :(((
-		// Must be there is a normal way to realize it, but I'm too lazy to find it. ^)
-		if (Average_Offset == -1)
+		// Draw shadows of grenades
+		bool LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
+		static float Offset = 1;
+		Offset = mix(Offset, (float)(Client()->PredGameTick() - Client()->GameTick()), 0.05);
+
+		if(LocalPlayerInGame && !m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 		{
-			int Offset = Client()->PredGameTick() - Client()->GameTick();
-			Offset_Sum += Offset;
-			Offset_Count++;
-			
-			if (Offset_Count >= 100)
-			{
-				Average_Offset = round(Offset_Sum / Offset_Count);
-			}
-		}
-		
-		int PredictedTick = Client()->PrevGameTick() + Average_Offset;
-		float PredictedCt = (PredictedTick - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime();
-		
-		if (PredictedCt >= 0)
-		{
+			// Draw shadow only if grenade directed to local player
+			CNetObj_CharacterCore& CurChar = m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Cur;
+			CNetObj_CharacterCore& PrevChar = m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Prev;
+			vec2 ServerPos = mix(vec2(PrevChar.m_X, PrevChar.m_Y), vec2(CurChar.m_X, CurChar.m_Y), Client()->IntraGameTick());
+
+			int PredictedTick = Client()->PrevGameTick() + Offset;
+			float PredictedCt = (PredictedTick - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime();
+
 			int shadow_type = pCurrent->m_Type;
 			RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(shadow_type, 0, NUM_WEAPONS-1)].m_pSpriteProj);
-			
+
 			vec2 PredictedPos = CalcPos(StartPos, StartVel, Curvature, Speed, PredictedCt);
-			
+
 			IGraphics::CQuadItem QuadItem(PredictedPos.x, PredictedPos.y, 32, 32);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 		}
