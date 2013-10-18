@@ -443,6 +443,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Vote no", "vote no", 0 },
 	{ "Chat", "chat all", 0 },
 	{ "Team chat", "chat team", 0 },
+	{ "Converse", "chat all /c ", 0 },
 	{ "Show chat", "+show_chat", 0 },
 	{ "Emoticon", "+emote", 0 },
 	{ "Spectator mode", "+spectate", 0 },
@@ -587,7 +588,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y, 14.0f*UI()->Scale(), Localize("Chat"), -1);
 
 		ChatSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &ChatSettings);
-		UiDoGetButtons(15, 18, ChatSettings);
+		UiDoGetButtons(15, 19, ChatSettings);
 	}
 
 	// misc settings
@@ -599,7 +600,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
 		MiscSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MiscSettings);
-		UiDoGetButtons(18, 27, MiscSettings);
+		UiDoGetButtons(19, 28, MiscSettings);
 	}
 
 }
