@@ -759,6 +759,13 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
 			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 	}
+
+	// update conversation targets
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(m_apPlayers[i] && m_apPlayers[i]->m_LastWhisperTo == ClientID)
+			m_apPlayers[i]->m_LastWhisperTo = -1;
+	}
 }
 
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
@@ -821,6 +828,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				char pWhisperMsg[256];
 				str_copy(pWhisperMsg, pMsg->m_pMessage + 9, 256);
 				Whisper(pPlayer->GetCID(), pWhisperMsg);
+			}
+			else if (str_comp_nocase_num(pMsg->m_pMessage+1, "c ", 2) == 0)
+			{
+				char pWhisperMsg[256];
+				str_copy(pWhisperMsg, pMsg->m_pMessage + 3, 256);
+				Converse(pPlayer->GetCID(), pWhisperMsg);
+			}
+			else if (str_comp_nocase_num(pMsg->m_pMessage+1, "converse ", 9) == 0)
+			{
+				char pWhisperMsg[256];
+				str_copy(pWhisperMsg, pMsg->m_pMessage + 10, 256);
+				Converse(pPlayer->GetCID(), pWhisperMsg);
 			}
 			else
 			{
@@ -2337,9 +2356,6 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 
 	pMessage = pStr;
 
-	if (!CheckClientID2(ClientID))
-		return;
-
 	char aBuf[256];
 
 	if (Error)
@@ -2356,9 +2372,38 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 		return;
 	}
 
-	str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
-	SendChatTarget(Victim, aBuf);
+	WhisperID(ClientID, Victim, pMessage);
+}
 
-	str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(Victim), pMessage);
+void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
+{
+	if (!CheckClientID2(ClientID))
+		return;
+
+	if (!CheckClientID2(VictimID))
+		return;
+
+	m_apPlayers[ClientID]->m_LastWhisperTo = VictimID;
+
+	char aBuf[256];
+
+	str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
+	SendChatTarget(VictimID, aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), pMessage);
 	SendChatTarget(ClientID, aBuf);
+}
+
+void CGameContext::Converse(int ClientID, char *pStr)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->m_LastWhisperTo < 0)
+		SendChatTarget(ClientID, "You do not have an ongoing conversation. Whisper to someone to start one");
+	else
+	{
+		WhisperID(ClientID, pPlayer->m_LastWhisperTo, pStr);
+	}
 }

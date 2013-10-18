@@ -43,6 +43,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_TimerType = g_Config.m_SvDefaultTimerType;
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = false;
+	m_LastWhisperTo = -1;
 
 	//New Year
 	if (g_Config.m_SvEvents)

@@ -698,6 +698,11 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 				"/me is disabled on this server, admin can enable it by using sv_slash_me");
 }
 
+void CGameContext::ConConverse(IConsole::IResult *pResult, void *pUserData)
+{
+	// This will never be called
+}
+
 void CGameContext::ConWhisper(IConsole::IResult *pResult, void *pUserData)
 {
 	// This will never be called

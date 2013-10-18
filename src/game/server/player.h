@@ -64,6 +64,7 @@ public:
 	int m_LastKill;
 	int m_LastCommands[4];
 	int m_LastCommandPos;
+	int m_LastWhisperTo;
 
 	// TODO: clean this up
 	struct
