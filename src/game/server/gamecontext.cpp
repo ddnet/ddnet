@@ -682,6 +682,15 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+		if (g_Config.m_SvShowOthersDefault)
+		{
+			if (g_Config.m_SvShowOthers)
+				SendChatTarget(ClientID, "You can see other players. To disable this use the ddnet client and type /showothers .");
+
+			m_apPlayers[ClientID]->m_ShowOthers = true;
+		}
+
+
 		if (g_Config.m_SvEvents)
 		{
 
@@ -1203,9 +1212,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	}
 	else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 	{
-		if(g_Config.m_SvShowOthers);
+		if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
 		{
-			// TODO: prevent spam ?
 			CNetMsg_Cl_ShowOthers *pMsg = (CNetMsg_Cl_ShowOthers *)pRawMsg;
 			pPlayer->m_ShowOthers = (bool)pMsg->m_Show;
 		}
