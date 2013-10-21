@@ -447,6 +447,10 @@ int CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 	int VoiceID = -1;
 	int i;
 
+	if(SampleID != 109 /* GetSampleID(SOUND_CHAT_HIGHLIGHT) */ && g_Config.m_SndNameOnly)
+		return VoiceID;
+
+
 	lock_wait(m_SoundLock);
 
 	// search for voice
