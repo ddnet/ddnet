@@ -67,7 +67,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	GameServer()->Score()->PlayerData(ClientID)->Reset();
 
 	m_IsUsingDDRaceClient = false;
-	m_ShowOthers = false;
+	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 
 	m_Paused = PAUSED_NONE;
 
