@@ -323,7 +323,7 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			if(GoingThroughTele && m_pTeleOuts[teleNr-1].size())
+			if(GoingThroughTele && m_pTeleOuts.size() && m_pTeleOuts[teleNr-1].size())
 			{
 				m_TriggeredEvents = 0;
 				m_HookedPlayer = -1;
