@@ -1100,6 +1100,18 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClAntiPingGrenade ^= 1;
 	}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("HUD: Show score"), g_Config.m_ClShowhudScore, &Button))
+	{
+		g_Config.m_ClShowhudScore ^= 1;
+	}
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("HUD: Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
+	{
+		g_Config.m_ClShowhudHealthAmmo ^= 1;
+	}
+
 	CUIRect aRects[2];
 	CUIRect Label;
 	MainView.HSplitTop(5.0f, 0, &MainView);
