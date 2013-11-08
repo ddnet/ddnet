@@ -469,7 +469,6 @@ void CPlayer::AfkVoteTimer(int NewTargetX, int NewTargetY)
 	}
 	else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkVoteTime)
 	{
-		CServer* serv =	(CServer*)m_pGameServer->Server();
 		m_Afk = true;
 		return;
 	}

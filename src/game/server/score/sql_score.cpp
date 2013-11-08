@@ -5,7 +5,6 @@
 #include <string.h>
 #include <fstream>
 #include <algorithm>
-#include <iostream>
 
 #include <engine/shared/config.h>
 #include "../entities/character.h"
