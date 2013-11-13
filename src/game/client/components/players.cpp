@@ -363,7 +363,7 @@ void CPlayers::RenderPlayer(
 	const CNetObj_Character *pPlayerChar,
 	const CNetObj_PlayerInfo *pPrevInfo,
 	const CNetObj_PlayerInfo *pPlayerInfo,
-    const vec2 &parPosition
+	const vec2 &parPosition
 /*    vec2 &PrevPos,
     vec2 &SmoothPos,
     int &MoveCnt
