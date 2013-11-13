@@ -78,7 +78,7 @@ void CCamera::OnReset()
 	m_Zoom = 1.0f;
 }
 
-const float ZoomStep = 0.75f;
+const float ZoomStep = 0.866025f;
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
