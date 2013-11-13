@@ -45,4 +45,5 @@ MACRO_TUNING_PARAM(LaserDamage, laser_damage, 5)
 
 MACRO_TUNING_PARAM(PlayerCollision, player_collision, 1)
 MACRO_TUNING_PARAM(PlayerHooking, player_hooking, 1)
+MACRO_TUNING_PARAM(PlayerJetpack, player_jetpack, 0.0f)
 #endif

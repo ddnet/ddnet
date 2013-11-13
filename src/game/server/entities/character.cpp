@@ -281,7 +281,8 @@ void CCharacter::FireWeapon()
 	bool FullAuto = false;
 	if(m_ActiveWeapon == WEAPON_GRENADE || m_ActiveWeapon == WEAPON_SHOTGUN || m_ActiveWeapon == WEAPON_RIFLE)
 		FullAuto = true;
-
+	if (m_pGameWorld->m_Core.m_Tuning.m_PlayerJetpack != 0.0f && m_ActiveWeapon == WEAPON_GUN)
+		FullAuto = true;
 
 	// check if we gonna fire
 	bool WillFire = false;
@@ -397,6 +398,9 @@ void CCharacter::FireWeapon()
 				Msg.AddInt(((int *)&p)[i]);
 
 			Server()->SendMsg(&Msg, 0, m_pPlayer->GetCID());
+
+			if (m_pGameWorld->m_Core.m_Tuning.m_PlayerJetpack != 0.0f)
+				TakeDamage(Direction * -1.0f * m_pGameWorld->m_Core.m_Tuning.m_PlayerJetpack, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		} break;

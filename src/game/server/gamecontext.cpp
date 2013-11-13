@@ -2194,6 +2194,13 @@ bool CGameContext::PlayerHooking()
 	return Temp != 0.0;
 }
 
+float CGameContext::PlayerJetpack()
+{
+	float Temp;
+	m_Tuning.Get("player_jetpack", &Temp);
+	return Temp;
+}
+
 void CGameContext::OnSetAuthed(int ClientID, int Level)
 {
 	CServer* pServ = (CServer*)Server();

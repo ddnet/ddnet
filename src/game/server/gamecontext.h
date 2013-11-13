@@ -295,6 +295,7 @@ public:
 	virtual void OnSetAuthed(int ClientID,int Level);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
+	virtual float PlayerJetpack();
 
 	void ResetTuning();
 

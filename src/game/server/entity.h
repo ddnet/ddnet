@@ -62,8 +62,8 @@ class CEntity
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
 
-	class CGameWorld *m_pGameWorld;
 protected:
+	class CGameWorld *m_pGameWorld;
 	bool m_MarkedForDestroy;
 	int m_ID;
 	int m_ObjType;
