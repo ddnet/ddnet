@@ -376,7 +376,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 				bool ValidNames = true;
 
 				pData->m_pSqlData->m_pResults->first();
-				int64 Time = pData->m_pSqlData->m_pResults->getDouble("Time");
+				float Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 				strcpy(aID, pData->m_pSqlData->m_pResults->getString("ID").c_str());
 
 				do
@@ -395,7 +395,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 							break;
 						}
 
-						Time = pData->m_pSqlData->m_pResults->getDouble("Time");
+						Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 						ValidNames = true;
 						Count = 0;
 						strcpy(aID, aID2);
