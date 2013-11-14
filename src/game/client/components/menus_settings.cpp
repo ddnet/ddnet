@@ -1112,6 +1112,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClShowhudHealthAmmo ^= 1;
 	}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
+	{
+		g_Config.m_ClShowChat ^= 1;
+	}
+
 	CUIRect aRects[2];
 	CUIRect Label;
 	MainView.HSplitTop(5.0f, 0, &MainView);

@@ -366,6 +366,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 void CChat::OnRender()
 {
+	if (!g_Config.m_ClShowChat)
+		return;
+
 	// send pending chat messages
 	if(m_PendingChatCounter > 0 && m_LastChatSend+time_freq() < time_get())
 	{
