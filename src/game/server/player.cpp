@@ -51,7 +51,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 		time_t rawtime;
 		struct tm* timeinfo;
 		char d[16], m[16], y[16];
-		int dd, mm, yy;
+		int dd, mm;
 		time ( &rawtime );
 		timeinfo = localtime ( &rawtime );
 		strftime (d,sizeof(y),"%d",timeinfo);
@@ -59,7 +59,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 		strftime (y,sizeof(y),"%Y",timeinfo);
 		dd = atoi(d);
 		mm = atoi(m);
-		yy = atoi(y);
 		m_DefEmote = ((mm == 12 && dd == 31) || (mm == 1 && dd == 1)) ? EMOTE_HAPPY : EMOTE_NORMAL;
 	}
 	m_DefEmoteReset = -1;

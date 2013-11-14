@@ -1136,7 +1136,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Localize("Hue"),
 		Localize("Sat."),
 		Localize("Lht.")};
-	static int s_aColorSlider[2][3] = {{0}};
 
 	for(int i = 0; i < 2; i++)
 	{
