@@ -293,7 +293,11 @@ void CSqlScore::LoadScoreThread(void *pUser)
 			if(pData->m_pSqlData->m_pResults->next())
 			{
 				// get the best time
-				pData->m_pSqlData->PlayerData(pData->m_ClientID)->m_BestTime = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
+				float time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
+				pData->m_pSqlData->PlayerData(pData->m_ClientID)->m_BestTime = time;
+				pData->m_pSqlData->PlayerData(pData->m_ClientID)->m_CurrentTime = time;
+				pData->m_pSqlData->m_pGameServer->m_apPlayers[pData->m_ClientID]->m_Score = -time;
+
 				char aColumn[8];
 				if(g_Config.m_SvCheckpointSave)
 				{
