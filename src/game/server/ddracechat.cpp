@@ -583,6 +583,37 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 #endif
 }
 
+void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+
+	if(Team > 0 && Team < 16)
+	{
+		if(((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.TeamLocked(Team))
+		{
+			((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, false);
+
+			pSelf->Console()->Print(
+					IConsole::OUTPUT_LEVEL_STANDARD,
+					"lock",
+					"Your team is now unlocked.");
+		}
+		else
+		{
+			((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
+
+			pSelf->Console()->Print(
+					IConsole::OUTPUT_LEVEL_STANDARD,
+					"lock",
+					"Your team is now locked.");
+		}
+	}
+}
+
 void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -630,6 +661,11 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 						"You can\'t change teams that fast!");
+			}
+			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < 16 && ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.TeamLocked(pResult->GetInteger(0)))
+			{
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+						"This team is locked using /lock. Only members of the team can unlock it using /lock.");
 			}
 			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < 16 && ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.Count(pResult->GetInteger(0)) >= g_Config.m_SvTeamMaxSize)
 			{

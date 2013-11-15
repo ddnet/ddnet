@@ -10,6 +10,7 @@ class CGameTeams
 	int m_TeamState[MAX_CLIENTS];
 	int m_MembersCount[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
+	bool m_TeamLocked[MAX_CLIENTS];
 
 	class CGameContext * m_pGameContext;
 
@@ -64,6 +65,7 @@ public:
 	void Reset();
 
 	void SendTeamsState(int Cid);
+	void SetTeamLock(int Team, bool Lock);
 
 	int m_LastChat[MAX_CLIENTS];
 
@@ -84,6 +86,11 @@ public:
 	int GetTeamState(int Team)
 	{
 		return m_TeamState[Team];
+	}
+	;
+	bool TeamLocked(int Team)
+	{
+		return m_TeamLocked[Team];
 	}
 	;
 };

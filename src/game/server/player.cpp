@@ -8,6 +8,7 @@
 #include <engine/server/server.h>
 #include "gamecontext.h"
 #include <game/gamecore.h>
+#include <game/server/teams.h>
 #include "gamemodes/DDRace.h"
 #include <stdio.h>
 #include <time.h>
@@ -328,7 +329,27 @@ void CPlayer::KillCharacter(int Weapon)
 {
 	if(m_pCharacter)
 	{
+		if (m_RespawnTick > Server()->Tick())
+			return;
+
 		m_pCharacter->Die(m_ClientID, Weapon);
+
+		int Team = m_pCharacter->Teams()->m_Core.Team(m_ClientID);
+		m_pCharacter->Teams()->SetForceCharacterTeam(m_ClientID, Team);
+
+		if (m_pCharacter->Teams()->TeamLocked(Team) && m_pCharacter->Teams()->GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+		{
+			for (int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(m_pCharacter->Teams()->m_Core.Team(i) == Team && i != m_ClientID)
+				{
+					m_pGameServer->m_apPlayers[i]->KillCharacter();
+				}
+			}
+		}
+
+		m_pCharacter->Teams()->ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+
 		delete m_pCharacter;
 		m_pCharacter = 0;
 	}
@@ -353,6 +374,9 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
+
+	if(Team == TEAM_SPECTATORS)
+		m_pCharacter->Teams()->SetForceCharacterTeam(m_ClientID, 0);
 
 	KillCharacter();
 

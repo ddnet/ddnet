@@ -1715,4 +1715,23 @@ void CCharacter::DDRaceInit()
 	m_Hit = g_Config.m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
 	m_SuperJump = false;
 	m_Core.m_Jumps = 2;
+
+	int Team = Teams()->m_Core.Team(m_Core.m_Id);
+
+	if(Teams()->TeamLocked(Team))
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(Teams()->m_Core.Team(i) == Team && i != m_Core.m_Id)
+			{
+				CCharacter* pChar = GameServer()->m_apPlayers[i]->GetCharacter();
+
+				if (pChar)
+				{
+					m_DDRaceState = pChar->m_DDRaceState;
+					m_StartTime = pChar->m_StartTime;
+				}
+			}
+		}
+	}
 }

@@ -17,6 +17,7 @@ void CGameTeams::Reset()
 		m_TeeFinished[i] = false;
 		m_MembersCount[i] = 0;
 		m_LastChat[i] = 0;
+		m_TeamLocked[i] = false;
 	}
 }
 
@@ -47,6 +48,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 				{
 					Waiting = true;
 					pStartingChar->m_DDRaceState = DDRACE_NONE;
+
 					if (m_LastChat[ClientID] + Server()->TickSpeed()
 							+ g_Config.m_SvChatDelay < Tick)
 					{
@@ -83,7 +85,8 @@ void CGameTeams::OnCharacterStart(int ClientID)
 				if (m_Core.Team(ClientID) == m_Core.Team(i))
 				{
 					CPlayer* pPlayer = GetPlayer(i);
-					if (pPlayer && pPlayer->IsPlaying())
+					// TODO: THE PROBLEM IS THAT THERE IS NO CHARACTER SO START TIME CAN'T BE SET!
+					if (pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
 					{
 						SetDDRaceState(pPlayer, DDRACE_STARTED);
 						SetStartTime(pPlayer, Tick);
@@ -175,7 +178,12 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 				break;
 			}
 		if (NoOneInOldTeam)
+		{
 			m_TeamState[m_Core.Team(ClientID)] = TEAMSTATE_EMPTY;
+
+			// unlock team when last player leaves
+			SetTeamLock(m_Core.Team(ClientID), false);
+		}
 	}
 	if (Count(m_Core.Team(ClientID)) > 0)
 		m_MembersCount[m_Core.Team(ClientID)]--;
@@ -496,11 +504,20 @@ void CGameTeams::OnFinish(CPlayer* Player)
 void CGameTeams::OnCharacterSpawn(int ClientID)
 {
 	m_Core.SetSolo(ClientID, false);
-	SetForceCharacterTeam(ClientID, 0);
+
+	if (!m_TeamLocked[m_Core.Team(ClientID)])
+		SetForceCharacterTeam(ClientID, 0);
 }
 
 void CGameTeams::OnCharacterDeath(int ClientID)
 {
 	m_Core.SetSolo(ClientID, false);
-	SetForceCharacterTeam(ClientID, 0);
+
+	if (!m_TeamLocked[m_Core.Team(ClientID)])
+		SetForceCharacterTeam(ClientID, 0);
+}
+
+void CGameTeams::SetTeamLock(int Team, bool Lock)
+{
+	m_TeamLocked[Team] = Lock;
 }
