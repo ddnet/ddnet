@@ -591,27 +591,30 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
 
-	if(Team > 0 && Team < 16)
+	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
 	{
 		if(((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.TeamLocked(Team))
 		{
 			((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, false);
 
-			pSelf->Console()->Print(
-					IConsole::OUTPUT_LEVEL_STANDARD,
-					"lock",
-					"Your team is now unlocked.");
+			for (int i = 0; i < MAX_CLIENTS; i++)
+				if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
+					pSelf->SendChatTarget(i, "Your team is now unlocked");
 		}
 		else
 		{
 			((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
 
-			pSelf->Console()->Print(
-					IConsole::OUTPUT_LEVEL_STANDARD,
-					"lock",
-					"Your team is now locked.");
+			for (int i = 0; i < MAX_CLIENTS; i++)
+				if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
+					pSelf->SendChatTarget(i, "Your team is now locked");
 		}
 	}
+	else
+		pSelf->Console()->Print(
+				IConsole::OUTPUT_LEVEL_STANDARD,
+				"print",
+				"This team can't be locked");
 }
 
 void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
