@@ -376,7 +376,10 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	}
 
 	if(Team == TEAM_SPECTATORS)
-		m_pCharacter->Teams()->SetForceCharacterTeam(m_ClientID, 0);
+	{
+		CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
+		Controller->m_Teams.m_Core.Team(m_ClientID, 0);
+	}
 
 	KillCharacter();
 
