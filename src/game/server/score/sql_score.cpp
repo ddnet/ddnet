@@ -680,7 +680,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute("SET @previd := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, (@pos := IF(@previd = r.ID,@pos,@pos+1)) pos, (@previd := r.ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM ((SELECT ID FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace GROUP BY ID) as all_top_times ORDER BY Time ASC LIMIT %d, 5) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, rank, l.Time FROM ((SELECT ID, rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a LIMIT %d, 5) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			// show teamtop5
