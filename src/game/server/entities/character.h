@@ -158,6 +158,7 @@ public:
 	bool SameTeam(int ClientID);
 	bool m_Super;
 	bool m_SuperJump;
+	bool m_Jetpack;
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;
 	int m_FreezeTick;

@@ -281,7 +281,7 @@ void CCharacter::FireWeapon()
 	bool FullAuto = false;
 	if(m_ActiveWeapon == WEAPON_GRENADE || m_ActiveWeapon == WEAPON_SHOTGUN || m_ActiveWeapon == WEAPON_RIFLE)
 		FullAuto = true;
-	if (m_pGameWorld->m_Core.m_Tuning.m_PlayerJetpack != 0.0f && m_ActiveWeapon == WEAPON_GUN)
+	if (m_Jetpack && m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
 
 	// check if we gonna fire
@@ -399,7 +399,7 @@ void CCharacter::FireWeapon()
 
 			Server()->SendMsg(&Msg, 0, m_pPlayer->GetCID());
 
-			if (m_pGameWorld->m_Core.m_Tuning.m_PlayerJetpack != 0.0f)
+			if (m_Jetpack)
 				TakeDamage(Direction * -1.0f * m_pGameWorld->m_Core.m_Tuning.m_PlayerJetpack, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -1334,6 +1334,11 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have infinite air jumps");
 		m_SuperJump = true;
 	}
+	else if(((m_TileIndex == TILE_JETPACK_START) || (m_TileFIndex == TILE_JETPACK_START)) && !m_Jetpack)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have a jetpack gun");
+		m_Jetpack = true;
+	}
 	else if(((m_TileIndex == TILE_NPH_START) || (m_TileFIndex == TILE_NPH_START)) && !m_Core.m_Hook)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can hook others");
@@ -1353,6 +1358,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You don't have infinite air jumps");
 		m_SuperJump = false;
+	}
+	else if(((m_TileIndex == TILE_JETPACK_END) || (m_TileFIndex == TILE_JETPACK_END)) && m_Jetpack)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun");
+		m_Jetpack = false;
 	}
 	else if(((m_TileIndex == TILE_NPH_END) || (m_TileFIndex == TILE_NPH_END)) && m_Core.m_Hook)
 	{
@@ -1714,6 +1724,7 @@ void CCharacter::DDRaceInit()
 	m_EndlessHook = g_Config.m_SvEndlessDrag;
 	m_Hit = g_Config.m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
 	m_SuperJump = false;
+	m_Jetpack = false;
 	m_Core.m_Jumps = 2;
 
 	int Team = Teams()->m_Core.Team(m_Core.m_Id);

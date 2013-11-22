@@ -132,10 +132,12 @@ enum
 	TILE_NPH,
 	TILE_NPC_END = 88,
 	TILE_SUPER_END,
-	TILE_NPH_END = 91,
+	TILE_JETPACK_END,
+	TILE_NPH_END,
 	TILE_NPC_START = 104,
 	TILE_SUPER_START,
-	TILE_NPH_START = 107,//Remember to change this in collision.cpp if you add anymore tiles
+	TILE_JETPACK_START,
+	TILE_NPH_START,//Remember to change this in collision.cpp if you add anymore tiles
 	//End of higher tiles
 	//Layers
 	LAYER_GAME=0,
