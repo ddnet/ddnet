@@ -1231,8 +1231,10 @@ void CSqlScore::ShowPointsThread(void *pUser)
 				pBuf += Size;
 			}
 
-			pData->m_pSqlData->m_pStatement->execute("SET @rownum := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT * FROM ((SELECT @rownum := @rownum + 1 as Rank, Name, Points FROM ((SELECT Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) AS r)) AS f) WHERE Name = '%s';", aBuf2, pData->m_aName);
+			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
+			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
+			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
+			str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Points FROM ((SELECT (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, (@prev := Points) Points, Name FROM ((SELECT Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) AS r)) AS f) WHERE Name = '%s';", aBuf2, pData->m_aName);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
@@ -1245,7 +1247,7 @@ void CSqlScore::ShowPointsThread(void *pUser)
 			{
 				pData->m_pSqlData->m_pResults->next();
 				int count = (int)pData->m_pSqlData->m_pResults->getInt("Points");
-				int rank = (int)pData->m_pSqlData->m_pResults->getInt("Rank");
+				int rank = (int)pData->m_pSqlData->m_pResults->getInt("rank");
 				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
 				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 			}
@@ -1322,19 +1324,20 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 				pBuf += Size;
 			}
 
-			str_format(aBuf, sizeof(aBuf), "SELECT Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC LIMIT %d, 5;", aBuf2, pData->m_Num-1);
+			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
+			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
+			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
+			str_format(aBuf, sizeof(aBuf), "SELECT Name, Points, rank FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) rank, (@prev := Points) Points FROM (SELECT Name, Sum(Points) as Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) as a) as b LIMIT %d, 5;", aBuf2, pData->m_Num-1);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			// show top points
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------- Top Points --------");
 
-			int Rank = pData->m_Num;
 			while(pData->m_pSqlData->m_pResults->next())
 			{
-				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), pData->m_pSqlData->m_pResults->getInt("Points"));
+				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d", pData->m_pSqlData->m_pResults->getInt("rank"), pData->m_pSqlData->m_pResults->getString("Name").c_str(), pData->m_pSqlData->m_pResults->getInt("Points"));
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-				Rank++;
 			}
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
 
