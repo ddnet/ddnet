@@ -466,6 +466,27 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 	lock_release(gs_SqlLock);
 }
 
+void CSqlScore::MapPoints(int ClientID, const char* MapName)
+{
+	char aBuf[768];
+	char NormMapName[64];
+	str_copy(NormMapName, MapName, sizeof(NormMapName));
+	NormalizeMapname(NormMapName);
+
+	for (unsigned int i = 0; i < m_PointsSize; i++)
+	{
+		if (str_comp(m_PointsInfos[i].m_aMapName, NormMapName) == 0)
+		{
+			str_format(aBuf, sizeof(aBuf), "Finishing \"%s\" will give you %d points.", MapName, m_PointsInfos[i].m_Points);
+			GameServer()->SendChatTarget(ClientID, aBuf);
+			return;
+		}
+	}
+
+	str_format(aBuf, sizeof(aBuf), "No map called \"%s\" found.", MapName);
+	GameServer()->SendChatTarget(ClientID, aBuf);
+}
+
 void CSqlScore::SaveScoreThread(void *pUser)
 {
 	lock_wait(gs_SqlLock);

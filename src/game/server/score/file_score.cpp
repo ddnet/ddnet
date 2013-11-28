@@ -59,6 +59,11 @@ void CFileScore::LoadPointMapList()
   // TODO: implement
 }
 
+void CFileScore::MapPoints(int ClientID, const char* MapName)
+{
+  // TODO: implement
+}
+
 void CFileScore::SaveScoreThread(void *pUser)
 {
 	CFileScore *pSelf = (CFileScore *) pUser;

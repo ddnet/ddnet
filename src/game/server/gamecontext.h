@@ -237,6 +237,7 @@ private:
 	#endif
 
 	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);
+	static void ConMapPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeamRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
