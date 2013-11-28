@@ -858,7 +858,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 		if (m_aClients[ClientID].m_Traffic > Limit)
 		{
-			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 60, "Stressing network");
+			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 600, "Stressing network");
 			return;
 		}
 		if (Diff > 100)

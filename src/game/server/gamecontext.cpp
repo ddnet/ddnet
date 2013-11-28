@@ -1928,6 +1928,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvHit = 1;
 		g_Config.m_SvEndlessDrag = 0;
 		g_Config.m_SvOldLaser = 0;
+		g_Config.m_SvOldTeleportHook = 0;
+		g_Config.m_SvOldTeleportWeapons = 0;
 	}
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile);
