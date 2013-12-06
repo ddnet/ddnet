@@ -938,7 +938,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						SendChatTarget(ClientID, "Invalid option");
 						return;
 					}
-					if(!m_apPlayers[ClientID]->m_Authed && (strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 || strncmp(pOption->m_aCommand, "change_map ", 11) == 0) && time_get() < LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+					if(!m_apPlayers[ClientID]->m_Authed && (strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 || strncmp(pOption->m_aCommand, "change_map ", 11) == 0 || strncmp(pOption->m_aCommand, "random_map", 10) == 0) && time_get() < LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 					{
 						char chatmsg[512] = {0};
 						str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes,Please wait %d Second(s)", g_Config.m_SvVoteMapTimeDelay,((LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
@@ -1487,6 +1487,49 @@ void CGameContext::ConChangeMap(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pController->ChangeMap(pResult->NumArguments() ? pResult->GetString(0) : "");
 }
 
+void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int NumMaps = 0;
+	int OurMap;
+	char* pMapName;
+	char pQuotedMapName[64];
+
+	CVoteOptionServer *pOption = pSelf->m_pVoteOptionFirst;
+	while(pOption)
+	{
+		NumMaps++;
+		pOption = pOption->m_pNext;
+	}
+
+	while(true)
+	{
+		OurMap = rand() % NumMaps;
+		pOption = pSelf->m_pVoteOptionFirst;
+
+		while(OurMap > 0)
+		{
+			OurMap--;
+			pOption = pOption->m_pNext;
+		}
+
+		if(strncmp(pOption->m_aCommand, "change_map ", 11) == 0)
+			pMapName = &pOption->m_aCommand[11];
+		else if(strncmp(pOption->m_aCommand, "sv_map ", 7) == 0)
+			pMapName = &pOption->m_aCommand[7];
+		else
+			continue;
+
+		str_format(pQuotedMapName, sizeof(pQuotedMapName), "\"%s\"", g_Config.m_SvMap);
+
+		if(str_comp(pMapName, g_Config.m_SvMap) == 0 || str_comp(pMapName, pQuotedMapName) == 0)
+			continue;
+
+		pSelf->Console()->ExecuteLine(pOption->m_aCommand);
+		break;
+	}
+}
+
 void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1866,6 +1909,7 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
 	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
+	Console()->Register("random_map", "", CFGFLAG_SERVER|CFGFLAG_STORE, ConRandomMap, this, "Random map");
 	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
 	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "Say in chat");
