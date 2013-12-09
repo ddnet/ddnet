@@ -387,11 +387,17 @@ void CGameTeams::OnFinish(CPlayer* Player)
 	else
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
+	float diff = fabs(time - pData->m_BestTime);
+
 	if (time - pData->m_BestTime < 0)
 	{
 		// new record \o/
-		str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
-				fabs(time - pData->m_BestTime));
+		if (diff >= 60)
+			str_format(aBuf, sizeof(aBuf), "New record: %d minute(s) %5.2f second(s) better.",
+					(int) diff / 60, diff - ((int) diff / 60 * 60));
+		else
+			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
+					diff);
 		if (g_Config.m_SvHideScore)
 			GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 		else
@@ -399,16 +405,20 @@ void CGameTeams::OnFinish(CPlayer* Player)
 	}
 	else if (pData->m_BestTime != 0) // tee has already finished?
 	{
-		if (fabs(time - pData->m_BestTime) <= 0.005)
+		if (diff <= 0.005)
 		{
 			GameServer()->SendChatTarget(Player->GetCID(),
 					"You finished with your best time.");
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf),
-					"%5.2f second(s) worse, better luck next time.",
-					fabs(pData->m_BestTime - time));
+			if (diff >= 60)
+				str_format(aBuf, sizeof(aBuf), "%d minute(s) %5.2f second(s) worse, better luck next time.",
+						(int) diff / 60, diff - ((int) diff / 60 * 60));
+			else
+				str_format(aBuf, sizeof(aBuf),
+						"%5.2f second(s) worse, better luck next time.",
+						diff);
 			GameServer()->SendChatTarget(Player->GetCID(), aBuf); //this is private, sent only to the tee
 		}
 	}
