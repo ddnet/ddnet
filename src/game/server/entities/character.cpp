@@ -136,6 +136,15 @@ void CCharacter::HandleNinja()
 		return;
 	}
 
+	int NinjaTime = m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000) - Server()->Tick();
+
+	if (NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
+	{
+		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	}
+
+	m_Armor = 10 - (NinjaTime / 15);
+
 	// force ninja Weapon
 	SetWeapon(WEAPON_NINJA);
 
