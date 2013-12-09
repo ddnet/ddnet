@@ -626,7 +626,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 
 			for (int i = 0; i < MAX_CLIENTS; i++)
 				if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
-					pSelf->SendChatTarget(i, "Your team is now unlocked");
+					pSelf->SendChatTarget(i, "Your team is now unlocked.");
 		}
 		else
 		{
@@ -634,7 +634,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 
 			for (int i = 0; i < MAX_CLIENTS; i++)
 				if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
-					pSelf->SendChatTarget(i, "Your team is now locked");
+					pSelf->SendChatTarget(i, "Your team is now locked. After the race started killing will kill everyone in your team.");
 		}
 	}
 	else
