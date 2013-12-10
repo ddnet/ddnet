@@ -362,7 +362,7 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size)
 		PlayerCIDs[i] = Players[i]->GetCID();
 	}
 
-	if (CallSaveScore)
+	if (CallSaveScore && Size >= 2)
 		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, time);
 }
 
