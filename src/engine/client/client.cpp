@@ -1207,6 +1207,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		{
 			int InputPredTick = Unpacker.GetInt();
 			int TimeLeft = Unpacker.GetInt();
+			int64 Now = time_get();
 
 			// adjust our prediction time
 			int64 Target = 0;
@@ -1214,11 +1215,14 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			{
 				if(m_aInputs[k].m_Tick == InputPredTick)
 				{
-					Target = m_aInputs[k].m_PredictedTime + (time_get() - m_aInputs[k].m_Time);
+					Target = m_aInputs[k].m_PredictedTime + (Now - m_aInputs[k].m_Time);
 					Target = Target - (int64)(((TimeLeft-PREDICTION_MARGIN)/1000.0f)*time_freq());
 					break;
 				}
 			}
+
+			if ((Target - m_GameTime.Get(Now)) / 1000 < g_Config.m_ClSetPing)
+				Target = m_GameTime.Get(Now) + g_Config.m_ClSetPing * 1000;
 
 			if(Target)
 				m_PredictedTime.Update(&m_InputtimeMarginGraph, Target, TimeLeft, 1);
