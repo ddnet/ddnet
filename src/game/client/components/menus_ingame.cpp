@@ -306,7 +306,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		"%s: %s\n"
 		"%s: %s\n",
 		CurrentServerInfo.m_aName,
-		Localize("Address"), g_Config.m_UiServerAddress,
+		Localize("Address"), CurrentServerInfo.m_aAddress,
 		Localize("Ping"), m_pClient->m_Snap.m_pLocalInfo->m_Latency,
 		Localize("Version"), CurrentServerInfo.m_aVersion,
 		Localize("Password"), CurrentServerInfo.m_Flags &1 ? Localize("Yes") : Localize("No")
