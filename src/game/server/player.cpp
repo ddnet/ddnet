@@ -411,10 +411,22 @@ void CPlayer::TryRespawn()
 	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
 		return;
 
+	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
+
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+
+	int NewTeam = 1;
+	if(g_Config.m_SvTeam == 3)
+	{
+		for(; NewTeam < TEAM_SUPER; NewTeam++)
+			if(Controller->m_Teams.Count(NewTeam) == 0)
+				break;
+
+		Controller->m_Teams.SetCharacterTeam(GetCID(), NewTeam);
+	}
 }
 
 bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)

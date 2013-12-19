@@ -115,7 +115,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 					"%s %s",
 					g_Config.m_SvTeam == 1 ?
 							"Teams are available on this server" :
-							!g_Config.m_SvTeam ?
+							(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3) ?
 									"Teams are not available on this server" :
 									"You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */
 									"and if you die in a team only you die");
@@ -660,7 +660,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				"You are running a vote please try again after the vote is done!");
 		return;
 	}
-	else if (g_Config.m_SvTeam == 0)
+	else if (g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 				"Admin has disabled teams");
