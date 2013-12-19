@@ -226,7 +226,7 @@ void CMapLayers::OnRender()
 				}
 			}
 
-			if((Render && !IsGameLayer && (!g_Config.m_ClShowEntities || !g_Config.m_ClDDRaceCheats)) || ((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsGameLayer))
+			if((Render && !IsGameLayer && !g_Config.m_ClShowEntities) || (g_Config.m_ClShowEntities && IsGameLayer))
 			{
 				//layershot_begin();
 
@@ -270,7 +270,7 @@ void CMapLayers::OnRender()
 
 				//layershot_end();
 			}
-			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsFrontLayer)
+			else if(g_Config.m_ClShowEntities && IsFrontLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
@@ -284,7 +284,7 @@ void CMapLayers::OnRender()
 				RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
 						EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 			}
-			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsSwitchLayer)
+			else if(g_Config.m_ClShowEntities && IsSwitchLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
@@ -297,7 +297,7 @@ void CMapLayers::OnRender()
 				RenderTools()->RenderSwitchmap(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 				RenderTools()->RenderSwitchOverlay(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f);
 			}
-			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsTeleLayer)
+			else if(g_Config.m_ClShowEntities && IsTeleLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
@@ -310,7 +310,7 @@ void CMapLayers::OnRender()
 				RenderTools()->RenderTelemap(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 				RenderTools()->RenderTeleOverlay(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f);
 			}
-			else if((g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats) && IsSpeedupLayer)
+			else if(g_Config.m_ClShowEntities && IsSpeedupLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());

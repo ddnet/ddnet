@@ -1029,13 +1029,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceCheats, Localize("Enable DDRace cheats like zoom"), g_Config.m_ClDDRaceCheats, &Button))
-	{
-		g_Config.m_ClDDRaceCheats ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Cheat: Shows entities in game (can also be toggled via console cl_show_entities)"), g_Config.m_ClShowEntities && g_Config.m_ClDDRaceCheats, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Cheat: Shows entities in game (can also be toggled via console cl_show_entities)"), g_Config.m_ClShowEntities, &Button))
 	{
 		g_Config.m_ClShowEntities ^= 1;
 	}
@@ -1116,6 +1110,18 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
 	{
 		g_Config.m_ClShowChat ^= 1;
+	}
+
+  // Set Ping
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClSetPing);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		UI()->DoLabelScaled(&Button, Localize("Set Ping (increase prediction)"), 14.0f, -1);
+		Button.VSplitLeft(300.0f, 0, &Button);
+		static float Offset = 0.0f;
+		DoEditBox(&g_Config.m_ClSetPing, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
+		g_Config.m_ClSetPing = min(900, max(0, str_toint(aBuf)));
 	}
 
 	CUIRect aRects[2];
