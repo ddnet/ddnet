@@ -339,7 +339,7 @@ void CGameClient::OnConnected()
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
 
-	RenderTools()->RenderTilemapGenerateSkip(Layers());
+	//RenderTools()->RenderTilemapGenerateSkip(Layers());
 
 	for(int i = 0; i < m_All.m_Num; i++)
 	{

@@ -64,7 +64,7 @@ public:
 	void DrawUIRect(const CUIRect *pRect, vec4 Color, int Corners, float Rounding);
 
 	// larger rendering methods
-	void RenderTilemapGenerateSkip(class CLayers *pLayers);
+	//void RenderTilemapGenerateSkip(class CLayers *pLayers);
 
 	// object render methods (gc_render_obj.cpp)
 	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool Alpha = false);

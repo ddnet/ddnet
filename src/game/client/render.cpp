@@ -305,9 +305,9 @@ void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[3] = pPoints[1]+Height;
 }
 
+/*
 void CRenderTools::RenderTilemapGenerateSkip(class CLayers *pLayers)
 {
-
 	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = pLayers->GetGroup(g);
@@ -338,3 +338,4 @@ void CRenderTools::RenderTilemapGenerateSkip(class CLayers *pLayers)
 		}
 	}
 }
+*/
