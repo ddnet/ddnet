@@ -70,6 +70,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 
 	m_Paused = PAUSED_NONE;
+	m_DND = false;
 
 	m_NextPauseTick = 0;
 

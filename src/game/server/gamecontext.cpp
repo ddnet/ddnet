@@ -288,7 +288,18 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 		Msg.m_Team = 0;
 		Msg.m_ClientID = ChatterClientID;
 		Msg.m_pMessage = aText;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+
+		// pack one for the recording only
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
+
+		// send to the clients
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i] != 0) {
+				if(!m_apPlayers[i]->m_DND)
+					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+			}
+		}
 	}
 	else
 	{

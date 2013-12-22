@@ -124,6 +124,7 @@ public:
 	};
 
 	int m_Paused;
+	bool m_DND;
 	int64 m_NextPauseTick;
 
 	void ProcessPause();
