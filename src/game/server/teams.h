@@ -7,10 +7,10 @@
 
 class CGameTeams
 {
-	int m_TeamState[MAX_CLIENTS];
-	int m_MembersCount[MAX_CLIENTS];
-	bool m_TeeFinished[MAX_CLIENTS];
-	bool m_TeamLocked[MAX_CLIENTS];
+	bool m_TeeFinished[MAX_CLIENTS+1];
+	int m_TeamState[MAX_CLIENTS+1];
+	int m_MembersCount[MAX_CLIENTS+1];
+	bool m_TeamLocked[MAX_CLIENTS+1];
 
 	class CGameContext * m_pGameContext;
 
