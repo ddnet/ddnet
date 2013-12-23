@@ -409,7 +409,7 @@ void CCharacter::FireWeapon()
 			Server()->SendMsg(&Msg, 0, m_pPlayer->GetCID());
 
 			if (m_Jetpack)
-				TakeDamage(Direction * -1.0f * m_pGameWorld->m_Core.m_Tuning.m_PlayerJetpack, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
+				TakeDamage(Direction * -1.0f * g_Config.m_SvJetpack, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		} break;
