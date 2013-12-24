@@ -35,7 +35,7 @@ int CEntity::NetworkClipped(int SnappingClient)
 
 int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
 {
-	if(SnappingClient == -1 || GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->m_Paused)
+	if(SnappingClient == -1)
 		return 0;
 
 	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x-CheckPos.x;
