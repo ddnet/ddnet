@@ -1,0 +1,1019 @@
+##### authors #####
+#originally created by:
+#	ziltoide
+#modified by:
+#	ziltoide		2011-04-06 23:56:54
+#	ziltoide		2011-07-05 18:31:04
+##### /authors #####
+
+##### translated strings #####
+
+%d%% loaded
+== %d%% ladattu
+
+%ds left
+== %ds jäljellä
+
+%i minute left
+== %i minuutti jäljellä
+
+%i minutes left
+== %i minuuttia jäljellä
+
+%i second left
+== %i sekunti jäljellä
+
+%i seconds left
+== %i sekuntia jäljellä
+
+%s wins!
+== %s voitti!
+
+-Page %d-
+== -Sivu %d-
+
+Abort
+== Keskeytä
+
+Add
+== Lisää
+
+Add Friend
+== Lisää ystävä
+
+Address
+== Osoite
+
+All
+== Kaikki
+
+Always show name plates
+== Näytä nimikyltit aina
+
+Are you sure that you want to delete the demo?
+== Oletko varma, että haluat poistaa demon?
+
+Are you sure that you want to quit?
+== Oletko varma, että haluat lopettaa?
+
+Are you sure that you want to remove the player from your friends list?
+== Oletko varma, että haluat poistaa pelaajan ystävälistaltasi?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Tämä on ensimmäinen kerta kun käynnistät pelin, ole hyvä ja kirjoita nimimerkkisi alle. On suositeltua, että tarkistat asetukset ja muutat niitä mielesi mukaan ennen kuin liityt palvelimille.
+
+Automatically record demos
+== Nauhoita demot automaattisesti
+
+Automatically take game over screenshot
+== Ota pelin jälkeinen kuvankaappaus autom.
+
+Blue team
+== Sininen joukkue
+
+Blue team wins!
+== Sininen joukkue voitti!
+
+Body
+== Vartalo
+
+Call vote
+== Aloita äänestys
+
+Change settings
+== Muuta asetuksia
+
+Chat
+== Chatti
+
+Clan
+== Klaani
+
+Client
+== Asiakasohjelma
+
+Close
+== Sulje
+
+Compatible version
+== Yhteensopiva versio
+
+Connect
+== Yhdistä
+
+Connecting to
+== Yhdistetään
+
+Connection Problems...
+== Yhteysongelmia...
+
+Console
+== Konsoli
+
+Controls
+== Kontrollit
+
+Count players only
+== Laske vain pelaajat
+
+Country
+== Maa
+
+Current
+== Nykyinen
+
+Custom colors
+== Omat värit
+
+Delete
+== Poista
+
+Delete demo
+== Poista demo
+
+Demo details
+== Demon tiedot
+
+Demofile: %s
+== Demotiedosto: %s
+
+Demos
+== Demot
+
+Disconnect
+== Katk. yhteys
+
+Disconnected
+== Yhteys katkaistu
+
+Downloading map
+== Ladataan kenttää
+
+Draw!
+== Tasapeli!
+
+Dynamic Camera
+== Dynaaminen kamera
+
+Emoticon
+== Hymiö
+
+Enter
+== Jatka
+
+Error
+== Virhe
+
+Error loading demo
+== Virhe ladattaessa demoa
+
+Favorite
+== Suosikki
+
+Favorites
+== Suosikit
+
+Feet
+== Jalat
+
+Filter
+== Suotimet
+
+Fire
+== Ammu
+
+Folder
+== Kansio
+
+Force vote
+== Päätä äänestys
+
+Free-View
+== Vapaa näkymä
+
+Friends
+== Ystävät
+
+Fullscreen
+== Koko näyttö
+
+Game
+== Peli
+
+Game info
+== Pelin tiedot
+
+Game over
+== Peli loppui
+
+Game type
+== Pelityyppi
+
+Game types:
+== Pelityypit:
+
+General
+== Yleinen
+
+Graphics
+== Grafiikat
+
+Grenade
+== Kranaatti
+
+Hammer
+== Nuija
+
+Has people playing
+== Ihmisiä pelaamassa
+
+High Detail
+== Korkea yksityiskohtataso
+
+Hook
+== Koukku
+
+Invalid Demo
+== Epäkelpo demo
+
+Join blue
+== Liity sinisiin
+
+Join red
+== Liity punaisiin
+
+Jump
+== Hyppää
+
+Kick player
+== Potkaise pelaaja
+
+Language
+== Kieli
+
+Loading
+== Ladataan
+
+MOTD
+== Palvelimen viesti
+
+Map
+== Kenttä
+
+Maximum ping:
+== Maksimiping:
+
+Mouse sens.
+== Hiiren herkkyys
+
+Move left
+== Liiku vasemmalle
+
+Move player to spectators
+== Siirrä pelaaja katsojaksi
+
+Move right
+== Liiku oikealle
+
+Movement
+== Liike
+
+Mute when not active
+== Mykistä, kun ei aktiivinen
+
+Name
+== Nimi
+
+Next weapon
+== Seuraava ase
+
+Nickname
+== Nimimerkki
+
+No
+== Ei
+
+No password
+== Ei salasanaa
+
+No servers found
+== Palvelimia ei löytynyt
+
+No servers match your filter criteria
+== Yksikään palvelin ei täyttänyt suodinkriteerejäsi
+
+Ok
+== Ok
+
+Open
+== Avaa
+
+Parent Folder
+== Yläkansio
+
+Password
+== Salasana
+
+Password incorrect
+== Väärä salasana
+
+Ping
+== Ping
+
+Pistol
+== Pistooli
+
+Play
+== Toista
+
+Play background music
+== Soita taustamusiikki
+
+Player
+== Pelaaja
+
+Player country:
+== Pelaajan maa:
+
+Player options
+== Pelaajavalinnat
+
+Players
+== Pelaajat
+
+Please balance teams!
+== Ole hyvä ja tasoita joukkueita!
+
+Prev. weapon
+== Edellinen ase
+
+Quality Textures
+== Hyvälaatuiset tekstuurit
+
+Quit
+== Lopeta
+
+REC %3d:%02d
+== REC %3d:%02d
+
+Reason:
+== Syy:
+
+Red team
+== Punainen joukkue
+
+Red team wins!
+== Punainen joukkue voitti!
+
+Refresh
+== Päivitä
+
+Refreshing master servers
+== Päivitetään isäntäpalvelimia
+
+Remote console
+== Etäkonsoli
+
+Remove
+== Poista
+
+Remove friend
+== Poista ystävä
+
+Rename
+== Nimeä
+
+Rename demo
+== Uudelleennimeä demo
+
+Reset filter
+== Nollaa suotimet
+
+Sample rate
+== Näytteenottotaajuus
+
+Score
+== Pisteet
+
+Score board
+== Tulostaulu
+
+Score limit
+== Pisteraja
+
+Scoreboard
+== Tuloslista
+
+Screenshot
+== Kuvankaappaus
+
+Server address:
+== Palvelimen osoite:
+
+Server details
+== Palvelimen yksityiskohdat
+
+Server filter
+== Palvelinsuotimet
+
+Server info
+== Palvelintiedot
+
+Server not full
+== Palvelin ei täysi
+
+Settings
+== Asetukset
+
+Shotgun
+== Haulikko
+
+Show chat
+== Näytä chatti
+
+Show friends only
+== Näytä vain ystävät
+
+Show ingame HUD
+== Näytä peli-HUD
+
+Show name plates
+== Näytä nimikyltit
+
+Show only supported
+== Näytä vain tuetut
+
+Skins
+== Ulkonäkö
+
+Sound
+== Äänet
+
+Sound error
+== Äänivirhe
+
+Spectate
+== Katso
+
+Spectate next
+== Katso seuraavaa
+
+Spectate previous
+== Katso edellistä
+
+Spectator mode
+== Katsojatila
+
+Spectators
+== Katsojat
+
+Standard gametype
+== Standardipelityyppi
+
+Standard map
+== Standardikenttä
+
+Stop record
+== Lopeta nauhoit.
+
+Strict gametype filter
+== Tarkka pelityyppisuodin
+
+Sudden Death
+== Äkkikuolema
+
+Switch weapon on pickup
+== Vaihda asetta nostaessasi uuden
+
+Team
+== Joukkue
+
+Team chat
+== Joukkuechatti
+
+Teeworlds %s is out! Download it at www.teeworlds.com!
+== Teeworlds %s on julkaistu! Lataa se osoitteesta www.teeworlds.com!
+
+Texture Compression
+== Tekstuuripakkaus
+
+The audio device couldn't be initialised.
+== Äänilaitteen alustaminen ei onnistunut.
+
+The server is running a non-standard tuning on a pure game type.
+== Tämä palvelin ajaa ei-standardeja virityksiä standardipelityypillä.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Editorissa on tallentamaton kenttä, saatat haluta tallentaa sen ennen kuin lopetat pelin.
+
+Time limit
+== Aikaraja
+
+Time limit: %d min
+== Aikaraja: %d min
+
+Try again
+== Yritä uudelleen
+
+Type
+== Tyyppi
+
+Unable to delete the demo
+== Demon poistaminen ei onnistunut
+
+Unable to rename the demo
+== Demon nimeäminen ei onnistunut
+
+Use sounds
+== Käytä ääniefektejä
+
+Use team colors for name plates
+== Käytä joukkueiden värejä nimikylteissä
+
+V-Sync
+== V-Sync
+
+Version
+== Versio
+
+Vote command:
+== Äänestyskäsky:
+
+Vote description:
+== Äänestyksen kuvaus:
+
+Vote no
+== Äänestä ei
+
+Vote yes
+== Äänestä kyllä
+
+Voting
+== Äänestys
+
+Warmup
+== Lämmittely
+
+Weapon
+== Ase
+
+Welcome to Teeworlds
+== Tervetuloa Teeworldsiin
+
+Yes
+== Kyllä
+
+You must restart the game for all settings to take effect.
+== Sinun täytyy uudelleenkäynnistää peli, jotta kaikki asetukset tulisivat voimaan.
+
+##### needs translation #####
+
+%.3f KiB
+== 
+
+%d player left
+== 
+
+%d player not ready
+== 
+
+%d players left
+== 
+
+%d players not ready
+== 
+
+%d servers, %d players
+== 
+
+'%s' called for vote to kick '%s' (%s)
+== 
+
+'%s' called for vote to move '%s' to spectators (%s)
+== 
+
+'%s' called vote to change server option '%s' (%s)
+== 
+
+'%s' entered and joined the %s
+== 
+
+'%s' has left the game
+== 
+
+'%s' has left the game (%s)
+== 
+
+'%s' joined the %s
+== 
+
+Admin forced server option '%s' (%s)
+== 
+
+Admin forced vote no
+== 
+
+Admin forced vote yes
+== 
+
+Admin moved '%s' to spectator (%s)
+== 
+
+Alp:
+== 
+
+Anti Aliasing
+== 
+
+Are you sure you want to rename the demo?
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Back
+== 
+
+Basic
+== 
+
+Bodies
+== 
+
+Borderless window
+== 
+
+Color
+== 
+
+Crc
+== 
+
+Created
+== 
+
+Custom
+== 
+
+Customize
+== 
+
+Decoration
+== 
+
+Demo
+== 
+
+Detail
+== 
+
+Editor
+== 
+
+Eyes
+== 
+
+Format
+== 
+
+Game paused
+== 
+
+Game starts in
+== 
+
+Global
+== 
+
+Hands
+== 
+
+Host address:
+== 
+
+Hue:
+== 
+
+Join
+== 
+
+Joined
+== 
+
+Joined blue
+== 
+
+Joined red
+== 
+
+Kick voting requires %d players on the server
+== 
+
+Laser
+== 
+
+Length
+== 
+
+Letterbox
+== 
+
+Lgt:
+== 
+
+Local
+== 
+
+Local server
+== 
+
+Match
+== 
+
+Max
+== 
+
+Misc
+== 
+
+Netversion
+== 
+
+Nickname is empty.
+== 
+
+Normal:
+== 
+
+Only %d active players are allowed
+== 
+
+Personal
+== 
+
+Ready
+== 
+
+Record
+== 
+
+Recorded
+== 
+
+Reset
+== 
+
+Resolutions
+== 
+
+Respawn
+== 
+
+Round over
+== 
+
+Round over!
+== 
+
+Sat:
+== 
+
+Save
+== 
+
+Save skin
+== 
+
+Screen
+== 
+
+Search:
+== 
+
+Server does not allow voting to kick players
+== 
+
+Server does not allow voting to move players to spectators
+== 
+
+Servers
+== 
+
+Show only chat messages from friends
+== 
+
+Size
+== 
+
+Skin
+== 
+
+Spectating
+== 
+
+Spectators aren't allowed to start a vote.
+== 
+
+Standard Gametype
+== 
+
+Tattoo
+== 
+
+Tattoos
+== 
+
+Team:
+== 
+
+Teams are locked
+== 
+
+Teams are locked. Time to wait before changing team: %02d:%02d
+== 
+
+Teams were locked
+== 
+
+Teams were unlocked
+== 
+
+Tee
+== 
+
+Texture
+== 
+
+Volume
+== 
+
+Vote aborted
+== 
+
+Vote failed
+== 
+
+Vote passed
+== 
+
+Wait for current vote to end before calling a new one.
+== 
+
+Wait for next round
+== 
+
+Wide
+== 
+
+You must wait %d seconds before making another vote
+== 
+
+blue
+== 
+
+blue team
+== 
+
+game
+== 
+
+red
+== 
+
+red team
+== 
+
+spectators
+== 
+
+wait for more players
+== 
+
+##### old translations #####
+
+New name:
+== Uusi nimi:
+
+Sat.
+== Kyllästys
+
+Miscellaneous
+== Sekalaista
+
+Internet
+== Internet
+
+Max demos
+== Demomaksimi
+
+News
+== Uutiset
+
+Join game
+== Liity peliin
+
+FSAA samples
+== FSAA näytteet
+
+%d of %d servers, %d players
+== %d/%d palvelinta, %d pelaajaa
+
+Sound volume
+== Äänenvoimakkuus
+
+Created:
+== Luotu:
+
+Max Screenshots
+== Kuvankaappausmaksimi
+
+Length:
+== Pituus:
+
+Skin name
+== 
+
+Rifle
+== Kivääri
+
+Patterns
+== 
+
+Netversion:
+== Yhteysversio:
+
+Map:
+== Kenttä:
+
+%d Bytes
+== %d tavua
+
+Coloration
+== 
+
+Info
+== Info
+
+Hue
+== Värisävy
+
+Record demo
+== Nauhoita demo
+
+Your skin
+== Sinun ulkonäkösi
+
+Size:
+== Koko:
+
+Reset to defaults
+== Palaa oletusasetuksiin
+
+Quit anyway?
+== Lopeta siitä huolimatta?
+
+Display Modes
+== Näyttötilat
+
+Version:
+== Versio:
+
+Round
+== Kierros
+
+Lht.
+== Valoisuus
+
+no limit
+== ei rajaa
+
+Quick search:
+== Pikahaku:
+
+UI Color
+== Käyttöliittymäväri
+
+Host address
+== Palvelimen osoite
+
+Crc:
+== Crc:
+
+Alpha
+== Alfa
+
+Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
+== 
+
+Current version: %s
+== Nykyinen versio: %s
+
+LAN
+== LAN
+
+Name plates size
+== Nimikylttien koko
+
+Type:
+== Tyyppi:
+

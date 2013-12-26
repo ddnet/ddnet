@@ -1,0 +1,1023 @@
+##### authors #####
+#originally created by:
+#	kaddyd
+#modified by:
+#	carzil		2011-04-05 19:19:06
+#	RaZeR[RT]	2011-04-12 17:57:02
+#	BotanEgg	2011-05-02 19:07:35
+#	Bananbl4	2011-07-07 02:03:04
+#	Arion WT	2011-07-07 09:39:05
+#	Arion WT	2011-08-07 12:16:28
+##### /authors #####
+
+##### translated strings #####
+
+%d%% loaded
+== %d%% загружено
+
+%ds left
+== осталось %d сек.
+
+%i minute left
+== Осталась %i минута!
+
+%i minutes left
+== Осталось %i минут!
+
+%i second left
+== Осталась %i секунда!
+
+%i seconds left
+== Осталось %i секунд!
+
+%s wins!
+== %s победил!
+
+-Page %d-
+== -Страница %d-
+
+Abort
+== Отмена
+
+Add
+== Добавить
+
+Add Friend
+== Добавить друга
+
+Address
+== Адрес
+
+All
+== Все
+
+Always show name plates
+== Всегда показывать имена игроков
+
+Are you sure that you want to delete the demo?
+== Вы уверены, что хотите удалить демо?
+
+Are you sure that you want to quit?
+== Вы действительно желаете выйти?
+
+Are you sure that you want to remove the player from your friends list?
+== Вы уверены, что хотите удалить игрока из друзей?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Пожалуйста, введите своё имя. Также рекоммендуется проверить настройки игры и поменять некоторые из них перед тем, как начать играть.
+
+Automatically record demos
+== Автоматически записывать демо
+
+Automatically take game over screenshot
+== Делать снимок результатов игры
+
+Blue team
+== Синие
+
+Blue team wins!
+== Синие победили!
+
+Body
+== Тело
+
+Call vote
+== Голосовать
+
+Change settings
+== Изменить настройки
+
+Chat
+== Чат
+
+Clan
+== Клан
+
+Client
+== Клиент
+
+Close
+== Выход
+
+Compatible version
+== Совместимая версия
+
+Connect
+== Подключиться
+
+Connecting to
+== Подключение к
+
+Connection Problems...
+== Проблемы со связью...
+
+Console
+== Консоль
+
+Controls
+== Управление
+
+Count players only
+== Считать только игроков
+
+Country
+== Флаг вашей страны
+
+Current
+== Текущий
+
+Custom colors
+== Свои цвета
+
+Delete
+== Удалить
+
+Delete demo
+== Удалить демо
+
+Demo details
+== Детали демо
+
+Demofile: %s
+== Демо: %s
+
+Demos
+== Демо
+
+Disconnect
+== Отключить
+
+Disconnected
+== Отключено
+
+Downloading map
+== Скачивание карты
+
+Draw!
+== Ничья!
+
+Dynamic Camera
+== Динамическая камера
+
+Emoticon
+== Эмоции
+
+Enter
+== Вход
+
+Error
+== Ошибка
+
+Error loading demo
+== ошибка при загрузке демо
+
+Favorite
+== Избранный
+
+Favorites
+== Избранные
+
+Feet
+== Ноги
+
+Filter
+== Фильтр
+
+Fire
+== Выстрел
+
+Folder
+== Папка
+
+Force vote
+== Форсировать
+
+Free-View
+== Свободный обзор
+
+Friends
+== Друзья
+
+Fullscreen
+== Полноэкранный режим
+
+Game
+== Игра
+
+Game info
+== Инфо об игре
+
+Game over
+== Игра окончена
+
+Game type
+== Тип игры
+
+Game types:
+== Тип игры:
+
+General
+== Основные
+
+Graphics
+== Графика
+
+Grenade
+== Гранатомёт
+
+Hammer
+== Молот
+
+Has people playing
+== Не пустой сервер
+
+High Detail
+== Высокая детализация
+
+Hook
+== Крюк
+
+Invalid Demo
+== Недопустимое демо
+
+Join blue
+== За синих
+
+Join red
+== За красных
+
+Jump
+== Прыжок
+
+Kick player
+== Забанить игрока
+
+Language
+== Язык
+
+Loading
+== Загрузка
+
+MOTD
+== MOTD
+
+Map
+== Карта
+
+Maximum ping:
+== Макс. пинг:
+
+Mouse sens.
+== Чувств. мыши
+
+Move left
+== Шаг влево
+
+Move player to spectators
+== Сделать наблюдателем
+
+Move right
+== Шаг вправо
+
+Movement
+== Перемещение
+
+Mute when not active
+== Глушить звуки, когда игра неактивна
+
+Name
+== Имя
+
+Next weapon
+== След. оружие
+
+Nickname
+== Имя
+
+No
+== Нет
+
+No password
+== Без пароля
+
+No servers found
+== Сервера не найдены
+
+No servers match your filter criteria
+== Нет серверов, подходящих под ваш фильтр
+
+Ok
+== ОК
+
+Open
+== Открыть
+
+Parent Folder
+== Родительский каталог
+
+Password
+== Пароль
+
+Password incorrect
+== Пароль
+
+Ping
+== Пинг
+
+Pistol
+== Пистолет
+
+Play
+== Просмотр
+
+Play background music
+== Играть фоновую музыку
+
+Player
+== Игрок
+
+Player country:
+== Страна:
+
+Player options
+== Опции игрока
+
+Players
+== Игроки
+
+Please balance teams!
+== Сбалансируйте команды!
+
+Prev. weapon
+== Пред. оружие
+
+Quality Textures
+== Качественные текстуры
+
+Quit
+== Выход
+
+REC %3d:%02d
+== REC %3d:%02d
+
+Reason:
+== Причина:
+
+Red team
+== Красные
+
+Red team wins!
+== Красные победили!
+
+Refresh
+== Обновить
+
+Refreshing master servers
+== Обновление списка мастер-серверов
+
+Remote console
+== Консоль сервера
+
+Remove
+== Удалить
+
+Remove friend
+== Удалить друга
+
+Rename
+== Переименов.
+
+Rename demo
+== Переименовать демо
+
+Reset filter
+== Сбросить фильтры
+
+Sample rate
+== Частота
+
+Score
+== Очки
+
+Score board
+== Табло
+
+Score limit
+== Лимит очков
+
+Scoreboard
+== Табло
+
+Screenshot
+== Снимок
+
+Server address:
+== Адрес сервера
+
+Server details
+== Детали сервера
+
+Server filter
+== Фильтр серверов
+
+Server info
+== Информация
+
+Server not full
+== Сервер не заполнен
+
+Settings
+== Настройки
+
+Shotgun
+== Дробовик
+
+Show chat
+== Показать чат
+
+Show friends only
+== Только с друзьями
+
+Show ingame HUD
+== Показывать внутриигровой HUD
+
+Show name plates
+== Показывать имена игроков
+
+Show only supported
+== Показывать только поддерживаемые разрешения экрана
+
+Skins
+== Скины
+
+Sound
+== Звук
+
+Sound error
+== Звуковая ошибка
+
+Spectate
+== Наблюдать
+
+Spectate next
+== Наблюдать след.
+
+Spectate previous
+== Наблюдать пред.
+
+Spectator mode
+== Наблюдатель
+
+Spectators
+== Наблюдатели
+
+Standard gametype
+== Стандартный тип игры
+
+Standard map
+== Стандартная карта
+
+Stop record
+== Стоп
+
+Strict gametype filter
+== Строгий фильтр р-мов
+
+Sudden Death
+== Быстрая смерть
+
+Switch weapon on pickup
+== Переключать оружие при подборе
+
+Team
+== Команда
+
+Team chat
+== Командный чат
+
+Teeworlds %s is out! Download it at www.teeworlds.com!
+== Вышла Teeworlds %s! Скачивайте на www.teeworlds.com!
+
+Texture Compression
+== Сжатие текстур
+
+The audio device couldn't be initialised.
+== Аудио устройство не может быть инициализировано
+
+The server is running a non-standard tuning on a pure game type.
+== Сервер запущен с нестандартными настройками на стандартном типе игры.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Есть несохранённая карта в редакторе, Вы можете сохранить её перед тем, как выйти.
+
+Time limit
+== Лимит времени
+
+Time limit: %d min
+== Лимит времени: %d
+
+Try again
+== ОК
+
+Type
+== Тип
+
+Unable to delete the demo
+== Невозможно удалить демо
+
+Unable to rename the demo
+== Невозможно переименовать демо
+
+Use sounds
+== Использовать звуки
+
+Use team colors for name plates
+== Командные цвета для имен игроков
+
+V-Sync
+== Вертикальная синхронизация
+
+Version
+== Версия
+
+Vote command:
+== Комманда голосования:
+
+Vote description:
+== Описание голосования:
+
+Vote no
+== Против
+
+Vote yes
+== За
+
+Voting
+== Голосование
+
+Warmup
+== Разминка
+
+Weapon
+== Оружие
+
+Welcome to Teeworlds
+== Добро пожаловать в Teeworlds!
+
+Yes
+== Да
+
+You must restart the game for all settings to take effect.
+== Перезапустите игру для применения изменений.
+
+##### needs translation #####
+
+%.3f KiB
+== 
+
+%d player left
+== 
+
+%d player not ready
+== 
+
+%d players left
+== 
+
+%d players not ready
+== 
+
+%d servers, %d players
+== 
+
+'%s' called for vote to kick '%s' (%s)
+== 
+
+'%s' called for vote to move '%s' to spectators (%s)
+== 
+
+'%s' called vote to change server option '%s' (%s)
+== 
+
+'%s' entered and joined the %s
+== 
+
+'%s' has left the game
+== 
+
+'%s' has left the game (%s)
+== 
+
+'%s' joined the %s
+== 
+
+Admin forced server option '%s' (%s)
+== 
+
+Admin forced vote no
+== 
+
+Admin forced vote yes
+== 
+
+Admin moved '%s' to spectator (%s)
+== 
+
+Alp:
+== 
+
+Anti Aliasing
+== 
+
+Are you sure you want to rename the demo?
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Back
+== 
+
+Basic
+== 
+
+Bodies
+== 
+
+Borderless window
+== 
+
+Color
+== 
+
+Crc
+== 
+
+Created
+== 
+
+Custom
+== 
+
+Customize
+== 
+
+Decoration
+== 
+
+Demo
+== 
+
+Detail
+== 
+
+Editor
+== 
+
+Eyes
+== 
+
+Format
+== 
+
+Game paused
+== 
+
+Game starts in
+== 
+
+Global
+== 
+
+Hands
+== 
+
+Host address:
+== 
+
+Hue:
+== 
+
+Join
+== 
+
+Joined
+== 
+
+Joined blue
+== 
+
+Joined red
+== 
+
+Kick voting requires %d players on the server
+== 
+
+Laser
+== 
+
+Length
+== 
+
+Letterbox
+== 
+
+Lgt:
+== 
+
+Local
+== 
+
+Local server
+== 
+
+Match
+== 
+
+Max
+== 
+
+Misc
+== 
+
+Netversion
+== 
+
+Nickname is empty.
+== 
+
+Normal:
+== 
+
+Only %d active players are allowed
+== 
+
+Personal
+== 
+
+Ready
+== 
+
+Record
+== 
+
+Recorded
+== 
+
+Reset
+== 
+
+Resolutions
+== 
+
+Respawn
+== 
+
+Round over
+== 
+
+Round over!
+== 
+
+Sat:
+== 
+
+Save
+== 
+
+Save skin
+== 
+
+Screen
+== 
+
+Search:
+== 
+
+Server does not allow voting to kick players
+== 
+
+Server does not allow voting to move players to spectators
+== 
+
+Servers
+== 
+
+Show only chat messages from friends
+== 
+
+Size
+== 
+
+Skin
+== 
+
+Spectating
+== 
+
+Spectators aren't allowed to start a vote.
+== 
+
+Standard Gametype
+== 
+
+Tattoo
+== 
+
+Tattoos
+== 
+
+Team:
+== 
+
+Teams are locked
+== 
+
+Teams are locked. Time to wait before changing team: %02d:%02d
+== 
+
+Teams were locked
+== 
+
+Teams were unlocked
+== 
+
+Tee
+== 
+
+Texture
+== 
+
+Volume
+== 
+
+Vote aborted
+== 
+
+Vote failed
+== 
+
+Vote passed
+== 
+
+Wait for current vote to end before calling a new one.
+== 
+
+Wait for next round
+== 
+
+Wide
+== 
+
+You must wait %d seconds before making another vote
+== 
+
+blue
+== 
+
+blue team
+== 
+
+game
+== 
+
+red
+== 
+
+red team
+== 
+
+spectators
+== 
+
+wait for more players
+== 
+
+##### old translations #####
+
+New name:
+== Новое имя
+
+Sat.
+== Контраст
+
+Miscellaneous
+== Дополнительно
+
+Internet
+== Интернет
+
+Max demos
+== Максимальное количество демо
+
+News
+== Новости
+
+Join game
+== Играть
+
+FSAA samples
+== Сэмплов FSAA
+
+%d of %d servers, %d players
+== %d из %d серверов, %d игроков
+
+Sound volume
+== Громкость звука
+
+Created:
+== Создан:
+
+Max Screenshots
+== Максимальное количество снимков
+
+Length:
+== Длина
+
+Skin name
+== 
+
+Rifle
+== Бластер
+
+Patterns
+== 
+
+Netversion:
+== Версия:
+
+Map:
+== Карта:
+
+%d Bytes
+== %d байт
+
+Coloration
+== 
+
+Info
+== Инфо
+
+Hue
+== Оттенок
+
+Record demo
+== Записать демо
+
+Your skin
+== Ваш скин
+
+Size:
+== Размер:
+
+Reset to defaults
+== Сбросить настройки
+
+Quit anyway?
+== Выйти?
+
+Display Modes
+== Разрешение экрана
+
+Version:
+== Версия:
+
+Round
+== Раунд
+
+Lht.
+== Яркость
+
+no limit
+== Без лимита
+
+Quick search:
+== Быстрый поиск:
+
+UI Color
+== Цвет интерфейса
+
+Host address
+== Адрес сервера
+
+Crc:
+== Crc:
+
+Alpha
+== Прозрачн.
+
+Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
+== 
+
+Current version: %s
+== Текущая версия: %s
+
+LAN
+== LAN
+
+Name plates size
+== Размер
+
+Type:
+== Тип:
+

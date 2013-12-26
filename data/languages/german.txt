@@ -1,0 +1,1036 @@
+##### authors #####
+#originally created by:
+#	Dominik Geyer
+#modified by:
+#	Fujnky			2010-06-03 11:30:05
+#	Fujnky			2010-06-03 17:41:45
+#	Fujnky			2010-06-05 23:36:52
+#	Fujnky			2010-06-07 16:17:40
+#	Fujnky			2010-06-11 09:50:47
+#	Sworddragon		2010-11-21 14:25:00
+#	Fujnky			2011-01-02 19:49:22
+#	heinrich5991	2011-01-23 17:53:42
+#	Sworddragon		2011-02-09 12:54:50
+#	heinrich5991	2011-04-03 23:46:51
+#	ghost91			2011-04-04 20:47:01
+#	andi103			2011-05-02 19:12:27
+#	andi103			2011-05-03 23:25:20
+#	heinrich5991	2011-07-02 09:10:21
+#	Yared Hufkens	2012-02-03 19:57:59
+#	andi103			2012-07-14 11:31:11
+##### /authors #####
+
+##### translated strings #####
+
+%d%% loaded
+== %d%% geladen
+
+%ds left
+== Noch %ds
+
+%i minute left
+== Noch %i Minute
+
+%i minutes left
+== Noch %i Minuten
+
+%i second left
+== Noch %i Sekunde
+
+%i seconds left
+== Noch %i Sekunden
+
+%s wins!
+== %s gewinnt!
+
+-Page %d-
+== -Seite %d-
+
+Abort
+== Abbrechen
+
+Add
+== Hinzufügen
+
+Add Friend
+== Freund hinzufügen
+
+Address
+== Adresse
+
+All
+== Alle
+
+Always show name plates
+== Spielernamen immer anzeigen
+
+Are you sure that you want to delete the demo?
+== Möchtest du die Aufnahme wirklich löschen?
+
+Are you sure that you want to quit?
+== Bist du sicher, dass du beenden möchtest?
+
+Are you sure that you want to remove the player from your friends list?
+== Bist du sicher, dass du diesen Spieler aus deiner Freundesliste entfernen möchtest?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Da dies der erste Start des Spiels ist, gib bitte unten deinen Namen ein. Es wird empfohlen die Einstellungen zu überprüfen, um sie deinen Vorstellungen anzupassen, bevor du einem Server beitrittst.
+
+Automatically record demos
+== Automatisch Aufnahmen erstellen
+
+Automatically take game over screenshot
+== Autom. ein Bild vom Spielergebnis erstellen
+
+Blue team
+== Blaues Team
+
+Blue team wins!
+== Blaues Team gewinnt!
+
+Body
+== Körper
+
+Call vote
+== Abstimmen
+
+Change settings
+== Einstellungen ändern
+
+Chat
+== Chat
+
+Clan
+== Clan
+
+Client
+== Client
+
+Close
+== Schließ.
+
+Compatible version
+== Kompatible Version
+
+Connect
+== Verbinden
+
+Connecting to
+== Verbinden mit
+
+Connection Problems...
+== Verbindungsprobleme...
+
+Console
+== Konsole
+
+Controls
+== Steuerung
+
+Count players only
+== Nur Spieler zählen
+
+Country
+== Land
+
+Current
+== Aktuell
+
+Custom colors
+== Eigene Farben
+
+Delete
+== Löschen
+
+Delete demo
+== Aufnahme löschen
+
+Demo details
+== Aufnahmendetails:
+
+Demofile: %s
+== Demodatei: %s
+
+Demos
+== Aufnahm.
+
+Disconnect
+== Trennen
+
+Disconnected
+== Verbindung getrennt
+
+Downloading map
+== Karte herunterladen
+
+Draw!
+== Unentschieden!
+
+Dynamic Camera
+== Dynamische Kamera
+
+Emoticon
+== Emoticon
+
+Enter
+== Starten
+
+Error
+== Fehlgeschlagen
+
+Error loading demo
+== Fehler beim Laden der Aufnahme, die Datei ist ungültig.
+
+Favorite
+== Favorit
+
+Favorites
+== Favoriten
+
+Feet
+== Füße
+
+Filter
+== Filter
+
+Fire
+== Feuern
+
+Folder
+== Ordner
+
+Force vote
+== Erzwingen
+
+Free-View
+== Freie Ansicht
+
+Friends
+== Freunde
+
+Fullscreen
+== Vollbild
+
+Game
+== Spiel
+
+Game info
+== Spielinfo
+
+Game over
+== Spiel vorbei
+
+Game paused
+== Spiel pausiert
+
+Game type
+== Spieltyp
+
+Game types:
+== Spieltypen:
+
+General
+== Allgemein
+
+Graphics
+== Grafik
+
+Grenade
+== Granate
+
+Hammer
+== Hammer
+
+Has people playing
+== Server nicht leer
+
+High Detail
+== Hohe Details
+
+Hook
+== Haken
+
+Invalid Demo
+== Ungültige Aufnahme
+
+Join blue
+== zu Blau
+
+Join red
+== zu Rot
+
+Jump
+== Springen
+
+Kick player
+== Spieler kicken
+
+Language
+== Sprache
+
+Loading
+== Laden
+
+MOTD
+== Nachricht des Tages
+
+Map
+== Karte
+
+Maximum ping:
+== Maximaler Ping:
+
+Mouse sens.
+== Maus-Empfindl.
+
+Move left
+== Nach links
+
+Move player to spectators
+== Spieler zu Zuschauer machen
+
+Move right
+== Nach rechts
+
+Movement
+== Bewegungen
+
+Mute when not active
+== Stumm, wenn inaktiv
+
+Name
+== Name
+
+Next weapon
+== Nächste Waffe
+
+Nickname
+== Spitzname
+
+No
+== Nein
+
+No password
+== Kein Passwort
+
+No servers found
+== Keine Server gefunden
+
+No servers match your filter criteria
+== Kein Server entspricht den Kriterien
+
+Ok
+== OK
+
+Open
+== Öffnen
+
+Parent Folder
+== Übergeordneter Ordner
+
+Password
+== Passwort
+
+Password incorrect
+== Passwort falsch
+
+Ping
+== Ping
+
+Pistol
+== Pistole
+
+Play
+== Abspielen
+
+Play background music
+== Hintergrundmusik abspielen
+
+Player
+== Spieler
+
+Player country:
+== Spielerland:
+
+Player options
+== Spieleroptionen
+
+Players
+== Spieler
+
+Please balance teams!
+== Bitte Teams ausgleichen!
+
+Prev. weapon
+== Vorherige Waffe
+
+Quality Textures
+== Hochauflösende Texturen
+
+Quit
+== Beenden
+
+REC %3d:%02d
+== REC %3d:%02d
+
+Reason:
+== Grund:
+
+Red team
+== Rotes team
+
+Red team wins!
+== Rotes Team gewinnt!
+
+Refresh
+== Erneuern
+
+Refreshing master servers
+== Aktualisiere Masterserver
+
+Remote console
+== Remotekonsole
+
+Remove
+== Löschen
+
+Remove friend
+== Freund entfernen
+
+Rename
+== Umbenennen
+
+Rename demo
+== Aufnahme umbenennen
+
+Reset filter
+== Standardfilter
+
+Respawn
+== Wiederbelebung
+
+Sample rate
+== Abtastrate
+
+Score
+== Score
+
+Score board
+== Punktetafel
+
+Score limit
+== Punktelimit
+
+Scoreboard
+== Punktetafel
+
+Screenshot
+== Bildschirmfoto
+
+Server address:
+== Serveradresse:
+
+Server details
+== Serverdetails
+
+Server filter
+== Filter
+
+Server info
+== Serverinfo
+
+Server not full
+== Server nicht voll
+
+Settings
+== Optionen
+
+Shotgun
+== Schrotflinte
+
+Show chat
+== Chat anzeigen
+
+Show friends only
+== Nur Freunde zeigen
+
+Show ingame HUD
+== Spielanzeigen
+
+Show name plates
+== Zeige Namen
+
+Show only chat messages from friends
+== Nur Nachrichten von Freunden zeigen
+
+Show only supported
+== Zeige nur unterstützte
+
+Skins
+== Skins
+
+Sound
+== Ton
+
+Sound error
+== Audiofehler
+
+Spectate
+== Zuschauen
+
+Spectate next
+== Nächstem zusehen
+
+Spectate previous
+== Vorherigem zusehen
+
+Spectator mode
+== Zuschaueroptionen
+
+Spectators
+== Zuschauer
+
+Standard gametype
+== Standard-Spieltyp
+
+Standard map
+== Standardkarte
+
+Stop record
+== Aufnahme be.
+
+Strict gametype filter
+== Genauer Spieltyp
+
+Sudden Death
+== Sudden Death
+
+Switch weapon on pickup
+== Waffe beim Aufnehmen wechseln
+
+Team
+== Team
+
+Team chat
+== Teamchat
+
+Teeworlds %s is out! Download it at www.teeworlds.com!
+== Teeworld %s ist da! Lade es unter www.teeworlds.com runter!
+
+Texture Compression
+== Texturkompression
+
+The audio device couldn't be initialised.
+== Das Audiosystem konnte nicht gestartet werden.
+
+The server is running a non-standard tuning on a pure game type.
+== Der Server läuft nicht mit Standardeinstellungen.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Im Editor ist noch eine ungespeicherte Karte. Vielleicht möchtest du sie speichern.
+
+Time limit
+== Zeitlimit
+
+Time limit: %d min
+== Zeitlimit: %d min
+
+Try again
+== Nochmal versuchen
+
+Type
+== Typ
+
+Unable to delete the demo
+== Aufnahme konnte nicht gelöscht werden
+
+Unable to rename the demo
+== Aufnahme konnte nicht umbenannt werden
+
+Use sounds
+== Aktiviere Ton
+
+Use team colors for name plates
+== Nutze Teamfarben für Spielernamen
+
+V-Sync
+== V-Sync
+
+Version
+== Version
+
+Vote command:
+== Kommando:
+
+Vote description:
+== Beschreibung:
+
+Vote no
+== Nein
+
+Vote yes
+== Ja
+
+Voting
+== Abstimmung
+
+Warmup
+== Aufwärmen
+
+Weapon
+== Waffe
+
+Welcome to Teeworlds
+== Willkommen bei Teeworlds
+
+Yes
+== Ja
+
+You must restart the game for all settings to take effect.
+== Du musst das Spiel neustarten um die Änderungen zu übernehmen.
+
+##### needs translation #####
+
+%.3f KiB
+== 
+
+%d player left
+== 
+
+%d player not ready
+== 
+
+%d players left
+== 
+
+%d players not ready
+== 
+
+%d servers, %d players
+== 
+
+'%s' called for vote to kick '%s' (%s)
+== 
+
+'%s' called for vote to move '%s' to spectators (%s)
+== 
+
+'%s' called vote to change server option '%s' (%s)
+== 
+
+'%s' entered and joined the %s
+== 
+
+'%s' has left the game
+== 
+
+'%s' has left the game (%s)
+== 
+
+'%s' joined the %s
+== 
+
+Admin forced server option '%s' (%s)
+== 
+
+Admin forced vote no
+== 
+
+Admin forced vote yes
+== 
+
+Admin moved '%s' to spectator (%s)
+== 
+
+Alp:
+== 
+
+Anti Aliasing
+== 
+
+Are you sure you want to rename the demo?
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Back
+== 
+
+Basic
+== 
+
+Bodies
+== 
+
+Borderless window
+== 
+
+Color
+== 
+
+Crc
+== 
+
+Created
+== 
+
+Custom
+== 
+
+Customize
+== 
+
+Decoration
+== 
+
+Demo
+== 
+
+Detail
+== 
+
+Editor
+== 
+
+Eyes
+== 
+
+Format
+== 
+
+Game starts in
+== 
+
+Global
+== 
+
+Hands
+== 
+
+Host address:
+== 
+
+Hue:
+== 
+
+Join
+== 
+
+Joined
+== 
+
+Joined blue
+== 
+
+Joined red
+== 
+
+Kick voting requires %d players on the server
+== 
+
+Laser
+== 
+
+Length
+== 
+
+Letterbox
+== 
+
+Lgt:
+== 
+
+Local
+== 
+
+Local server
+== 
+
+Match
+== 
+
+Max
+== 
+
+Misc
+== 
+
+Netversion
+== 
+
+Nickname is empty.
+== 
+
+Normal:
+== 
+
+Only %d active players are allowed
+== 
+
+Personal
+== 
+
+Ready
+== 
+
+Record
+== 
+
+Recorded
+== 
+
+Reset
+== 
+
+Resolutions
+== 
+
+Round over
+== 
+
+Round over!
+== 
+
+Sat:
+== 
+
+Save
+== 
+
+Save skin
+== 
+
+Screen
+== 
+
+Search:
+== 
+
+Server does not allow voting to kick players
+== 
+
+Server does not allow voting to move players to spectators
+== 
+
+Servers
+== 
+
+Size
+== 
+
+Skin
+== 
+
+Spectating
+== 
+
+Spectators aren't allowed to start a vote.
+== 
+
+Standard Gametype
+== 
+
+Tattoo
+== 
+
+Tattoos
+== 
+
+Team:
+== 
+
+Teams are locked
+== 
+
+Teams are locked. Time to wait before changing team: %02d:%02d
+== 
+
+Teams were locked
+== 
+
+Teams were unlocked
+== 
+
+Tee
+== 
+
+Texture
+== 
+
+Volume
+== 
+
+Vote aborted
+== 
+
+Vote failed
+== 
+
+Vote passed
+== 
+
+Wait for current vote to end before calling a new one.
+== 
+
+Wait for next round
+== 
+
+Wide
+== 
+
+You must wait %d seconds before making another vote
+== 
+
+blue
+== 
+
+blue team
+== 
+
+game
+== 
+
+red
+== 
+
+red team
+== 
+
+spectators
+== 
+
+wait for more players
+== 
+
+##### old translations #####
+
+New name:
+== Neuer Name:
+
+Sat.
+== Sätt.
+
+Miscellaneous
+== Verschiedenes
+
+Internet
+== Internet
+
+Max demos
+== Maximale Anzahl an Aufnahmen
+
+News
+== News
+
+Join game
+== Beitreten
+
+FSAA samples
+== Vollbild Anti-Aliasing
+
+%d of %d servers, %d players
+== %d von %d Servern, %d Spieler
+
+Sound volume
+== Lautstärke
+
+Created:
+== Erstellt:
+
+Max Screenshots
+== Maximale Anzahl an Bildschirmfotos
+
+Length:
+== Länge
+
+Skin name
+== 
+
+Rifle
+== Laser
+
+Patterns
+== 
+
+Netversion:
+== Netversion:
+
+Map:
+== Karte:
+
+%d Bytes
+== %d Bytes
+
+Coloration
+== 
+
+Info
+== Info
+
+Hue
+== Farb.
+
+Record demo
+== Aufnahme sta.
+
+Your skin
+== Dein Skin
+
+Size:
+== Größe:
+
+﻿
+== ## translated strings #####
+
+Reset to defaults
+== Standardeinstellung
+
+Quit anyway?
+== Trotzdem beenden?
+
+Display Modes
+== Auflösungen
+
+Version:
+== Version:
+
+Round
+== Runde
+
+Lht.
+== Hell.
+
+no limit
+== Keine Begrenzung
+
+Quick search:
+== Schnellsuche:
+
+UI Color
+== Menüfarbe
+
+Host address
+== Serveradresse
+
+Crc:
+== Prüfsumme:
+
+Alpha
+== Alpha
+
+Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
+== 
+
+Current version: %s
+== Aktuelle Version: %s
+
+LAN
+== LAN
+
+Name plates size
+== Größe der Spielernamen
+
+Type:
+== Typ:
+

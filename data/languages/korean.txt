@@ -1,0 +1,1006 @@
+##### authors #####
+#originally created by:
+#	ksgcln72
+#modified by:
+#
+##### /authors #####
+
+##### translated strings #####
+
+%d%% loaded
+== %d%% 로딩...
+
+%ds left
+== %d 초 후 취소
+
+%i minute left
+== %i 분 남음
+
+%i minutes left
+== %i 분 남음
+
+%i second left
+== %i 초 남음
+
+%i seconds left
+== %i 초 남음
+
+%s wins!
+== %s (이)가 이김!
+
+-Page %d-
+== -Page %d-
+
+Abort
+== 중단
+
+Add
+== 추가
+
+Add Friend
+== 친구 추가
+
+Address
+== 주소
+
+All
+== 모두
+
+Always show name plates
+== 항상 이름표시
+
+Are you sure that you want to delete the demo?
+== 데모를 삭제하시겠습니까?
+
+Are you sure that you want to quit?
+== 종료하시겠습니까?
+
+Are you sure that you want to remove the player from your friends list?
+== 당신의 친구목록에서 플레이어를 제거하시겠습니까?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 다음 빈칸에 게임에서 사용할 닉네임을 입력해 주세요.
+
+Automatically record demos
+== 자동으로 데모 기록
+
+Automatically take game over screenshot
+== 자동으로 게임 종료 스크린샷 저장
+
+Blue team
+== 블루팀
+
+Blue team wins!
+== 블루팀 승리!
+
+Body
+== 몸
+
+Call vote
+== 투표
+
+Change settings
+== 세팅 바꿈
+
+Chat
+== 채팅
+
+Clan
+== 클랜
+
+Client
+== 클라이언트
+
+Close
+== 닫기
+
+Compatible version
+== 버전 호환
+
+Connect
+== 연결
+
+Connecting to
+== 연결 중
+
+Connection Problems...
+== 연결에 문제가 있음...
+
+Console
+== 콘솔
+
+Controls
+== 조작
+
+Count players only
+== Count players only
+
+Country
+== 국가
+
+Current
+== 현재
+
+Custom colors
+== 사용자 정의 색상
+
+Delete
+== 삭제
+
+Delete demo
+== 데모 삭제
+
+Demo details
+== 데모 세부정보
+
+Demos
+== 데모
+
+Disconnect
+== 연결끊기
+
+Disconnected
+== 연결 끊김
+
+Downloading map
+== 맵 다운로드 중
+
+Draw!
+== 무승부!
+
+Dynamic Camera
+== 다이내믹 카메라
+
+Emoticon
+== 이모티콘
+
+Enter
+== 입력
+
+Error
+== 에러
+
+Error loading demo
+== 데모 로딩 에러
+
+Favorite
+== 즐겨찾기
+
+Favorites
+== 즐겨찾기
+
+Feet
+== 발
+
+Filter
+== 필터
+
+Fire
+== 발사
+
+Folder
+== 폴더
+
+Force vote
+== 강제 투표
+
+Free-View
+== 자유 시점
+
+Friends
+== 친구
+
+Fullscreen
+== 전체화면
+
+Game
+== 게임
+
+Game info
+== 게임 정보
+
+Game over
+== 게임 오버
+
+Game type
+== 게임 종류
+
+Game types:
+== 게임 종류:
+
+General
+== 일반
+
+Graphics
+== 그래픽
+
+Grenade
+== 유탄 발사기
+
+Hammer
+== 해머
+
+Has people playing
+== 적어도 한 플레이어
+
+High Detail
+== 자세한 내용
+
+Hook
+== 갈고리
+
+Invalid Demo
+== 잘못된 데모
+
+Join blue
+== 블루팀에 참가
+
+Join red
+== 레드팀에 참가
+
+Jump
+== 점프
+
+Kick player
+== 플레이어 추방
+
+Language
+== 언어
+
+Loading
+== 로딩
+
+MOTD
+== MOTD
+
+Map
+== 맵
+
+Maximum ping:
+== 최대 핑
+
+Mouse sens.
+== 미우스 감도
+
+Move left
+== 왼쪽으로 이동
+
+Move player to spectators
+== 관전자로 플레이어 이동
+
+Move right
+== 오른쪽으로 이동
+
+Movement
+== 이동
+
+Mute when not active
+== 음소거 때 비활성
+
+Name
+== 이름
+
+Next weapon
+== 다음 무기
+
+Nickname
+== 닉네임
+
+No
+== 아니오
+
+No password
+== 비밀번호 없음
+
+No servers found
+== 서버를 찾을 수 없음
+
+No servers match your filter criteria
+== 필터에 일치하는 서버가 없음
+
+Ok
+== 확인
+
+Open
+== 열기
+
+Parent Folder
+== 상위 폴더
+
+Password
+== 비밀번호
+
+Password incorrect
+== 비밀번호 오류
+
+Ping
+== 핑
+
+Pistol
+== 권총
+
+Play
+== 플레이
+
+Player
+== 플레이어
+
+Player options
+== 플레이어 옵션
+
+Players
+== 유저수
+
+Please balance teams!
+== 팀 밸런스!
+
+Prev. weapon
+== 이전 무기
+
+Quality Textures
+== 텍스처 품질
+
+Quit
+== 종료
+
+REC %3d:%02d
+== 녹화 %3d:%02d
+
+Reason:
+== 이유:
+
+Red team
+== 레드팀
+
+Red team wins!
+== 레드팀 승리!
+
+Refresh
+== 새로고침
+
+Refreshing master servers
+== 마스터 서버를 새로 고치는 중
+
+Remote console
+== 원격 콘솔
+
+Remove
+== 삭제
+
+Remove friend
+== 친구 삭제
+
+Rename
+== 이름 변경
+
+Rename demo
+== 데모 이름 변경
+
+Reset filter
+== 필터 초기화
+
+Sample rate
+== 샘플링 속도
+
+Score
+== 점수
+
+Score board
+== 점수판
+
+Score limit
+== 점수 제한
+
+Scoreboard
+== 점수판
+
+Screenshot
+== 스크린샷
+
+Server address:
+== 서버 주소:
+
+Server details
+== 서버 세부정보
+
+Server filter
+== 서버 필터
+
+Server info
+== 서버 정보
+
+Server not full
+== 빈 방
+
+Settings
+== 세팅
+
+Shotgun
+== 샷건
+
+Show chat
+== 채팅 보기
+
+Show friends only
+== 친구가 있는 방
+
+Show ingame HUD
+== 게임 인터페이스 표시
+
+Show name plates
+== 이름 표시
+
+Show only supported
+== 지원하는 해상도 표시
+
+Skins
+== 스킨
+
+Sound
+== 소리
+
+Sound error
+== 소리 오류
+
+Spectate
+== 관전
+
+Spectator mode
+== 관전 모드
+
+Spectators
+== 관전자
+
+Standard gametype
+== 기본 게임 종류
+
+Standard map
+== 기본 맵
+
+Stop record
+== 기록 중지
+
+Strict gametype filter
+== 엄격한 모드 필터
+
+Sudden Death
+== 서든 데스
+
+Switch weapon on pickup
+== 획득한 무기로 교체
+
+Team
+== 팀
+
+Team chat
+== 팀 채팅
+
+Teeworlds %s is out! Download it at www.teeworlds.com!
+== Teeworlds %s is out! Download it at www.teeworlds.com!
+
+Texture Compression
+== 텍스처 압축
+
+The audio device couldn't be initialised.
+== 오디오 장치를 초기화할 수 없음
+
+The server is running a non-standard tuning on a pure game type.
+== 이 서버는 게임의 표준 형식에 비표준 설정을 사용합니다.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== 맵이 저장되지 않았습니다. 종료하기 전에 저장할 수 있습니다.
+
+Time limit
+== 시간 제한
+
+Time limit: %d min
+== 시간 제한: %d min
+
+Try again
+== 재시도
+
+Type
+== 종류
+
+Unable to delete the demo
+== 데모를 삭제할 수 없음
+
+Unable to rename the demo
+== 데모의 이름을 바꿀 수 없음
+
+Use sounds
+== 소리 사용
+
+Use team colors for name plates
+== 이름에 팀 컬러 사용
+
+V-Sync
+== V-Sync
+
+Version
+== 버전
+
+Vote command:
+== 투표 명령:
+
+Vote description:
+== 투표 설명:
+
+Vote no
+== 아니오
+
+Vote yes
+== 예
+
+Voting
+== 투표 중
+
+Warmup
+== 준비
+
+Weapon
+== 무기
+
+Welcome to Teeworlds
+== Teeworlds 에 오신 것을 환영합니다.
+
+Yes
+== 예
+
+You must restart the game for all settings to take effect.
+== 설정을 적용하기 위해선 게임을 다시 시작해야 합니다.
+
+##### needs translation #####
+
+%.3f KiB
+== 
+
+%d player left
+== 
+
+%d player not ready
+== 
+
+%d players left
+== 
+
+%d players not ready
+== 
+
+%d servers, %d players
+== 
+
+'%s' called for vote to kick '%s' (%s)
+== 
+
+'%s' called for vote to move '%s' to spectators (%s)
+== 
+
+'%s' called vote to change server option '%s' (%s)
+== 
+
+'%s' entered and joined the %s
+== 
+
+'%s' has left the game
+== 
+
+'%s' has left the game (%s)
+== 
+
+'%s' joined the %s
+== 
+
+Admin forced server option '%s' (%s)
+== 
+
+Admin forced vote no
+== 
+
+Admin forced vote yes
+== 
+
+Admin moved '%s' to spectator (%s)
+== 
+
+Alp:
+== 
+
+Anti Aliasing
+== 
+
+Are you sure you want to rename the demo?
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Back
+== 
+
+Basic
+== 
+
+Bodies
+== 
+
+Borderless window
+== 
+
+Color
+== 
+
+Crc
+== 
+
+Created
+== 
+
+Custom
+== 
+
+Customize
+== 
+
+Decoration
+== 
+
+Demo
+== 
+
+Demofile: %s
+== 
+
+Detail
+== 
+
+Editor
+== 
+
+Eyes
+== 
+
+Format
+== 
+
+Game paused
+== 
+
+Game starts in
+== 
+
+Global
+== 
+
+Hands
+== 
+
+Host address:
+== 
+
+Hue:
+== 
+
+Join
+== 
+
+Joined
+== 
+
+Joined blue
+== 
+
+Joined red
+== 
+
+Kick voting requires %d players on the server
+== 
+
+Laser
+== 
+
+Length
+== 
+
+Letterbox
+== 
+
+Lgt:
+== 
+
+Local
+== 
+
+Local server
+== 
+
+Match
+== 
+
+Max
+== 
+
+Misc
+== 
+
+Netversion
+== 
+
+Nickname is empty.
+== 
+
+Normal:
+== 
+
+Only %d active players are allowed
+== 
+
+Personal
+== 
+
+Play background music
+== 
+
+Player country:
+== 
+
+Ready
+== 
+
+Record
+== 
+
+Recorded
+== 
+
+Reset
+== 
+
+Resolutions
+== 
+
+Respawn
+== 
+
+Round over
+== 
+
+Round over!
+== 
+
+Sat:
+== 
+
+Save
+== 
+
+Save skin
+== 
+
+Screen
+== 
+
+Search:
+== 
+
+Server does not allow voting to kick players
+== 
+
+Server does not allow voting to move players to spectators
+== 
+
+Servers
+== 
+
+Show only chat messages from friends
+== 
+
+Size
+== 
+
+Skin
+== 
+
+Spectate next
+== 
+
+Spectate previous
+== 
+
+Spectating
+== 
+
+Spectators aren't allowed to start a vote.
+== 
+
+Standard Gametype
+== 
+
+Tattoo
+== 
+
+Tattoos
+== 
+
+Team:
+== 
+
+Teams are locked
+== 
+
+Teams are locked. Time to wait before changing team: %02d:%02d
+== 
+
+Teams were locked
+== 
+
+Teams were unlocked
+== 
+
+Tee
+== 
+
+Texture
+== 
+
+Volume
+== 
+
+Vote aborted
+== 
+
+Vote failed
+== 
+
+Vote passed
+== 
+
+Wait for current vote to end before calling a new one.
+== 
+
+Wait for next round
+== 
+
+Wide
+== 
+
+You must wait %d seconds before making another vote
+== 
+
+blue
+== 
+
+blue team
+== 
+
+game
+== 
+
+red
+== 
+
+red team
+== 
+
+spectators
+== 
+
+wait for more players
+== 
+
+##### old translations #####
+
+New name:
+== 새 이름:
+
+Max demos
+== 최대 데모
+
+Internet
+== 인터넷
+
+Round
+== 라운드
+
+Quit anyway?
+== 종료하시겠습니까?
+
+News
+== 뉴스
+
+Join game
+== 게임 참가
+
+Crc:
+== Crc:
+
+FSAA samples
+== FSAA 샘플
+
+Sat.
+== 채도
+
+LAN
+== 랜
+
+Sound volume
+== 소리 크기
+
+Created:
+== Created:
+
+%d Bytes
+== %d Bytes
+
+Record demo
+== 데모 녹화
+
+%d of %d servers, %d players
+== %d/%d 서버, %d 플레이어
+
+Miscellaneous
+== 여러가지
+
+Netversion:
+== 넷 버전:
+
+Info
+== 정보
+
+UI Color
+== 메뉴 색깔
+
+Your skin
+== 당신의 스킨
+
+Max Screenshots
+== 최대 스크린샷
+
+Size:
+== 사이즈:
+
+Hue
+== 색조
+
+Reset to defaults
+== 초기화
+
+Rifle
+== 레이저
+
+Display Modes
+== 디스플레이 모드
+
+Version:
+== 버전:
+
+Map:
+== 맵:
+
+Lht.
+== 명도
+
+Quick search:
+== 빠른 검색:
+
+Host address
+== 호스트 주소
+
+Alpha
+== 알파
+
+Length:
+== 길이:
+
+no limit
+== 제한 없음
+
+Current version: %s
+== 현재 버전: %s
+
+Name plates size
+== 크기
+
+Type:
+== 종류:
+
