@@ -37,12 +37,13 @@ void CNetConnection::SetError(const char *pString)
 	str_copy(m_ErrorString, pString, sizeof(m_ErrorString));
 }
 
-void CNetConnection::Init(NETSOCKET Socket)
+void CNetConnection::Init(NETSOCKET Socket, bool BlockCloseMsg)
 {
 	Reset();
 	ResetStats();
 
 	m_Socket = Socket;
+	m_BlockCloseMsg = BlockCloseMsg;
 	mem_zero(m_ErrorString, sizeof(m_ErrorString));
 }
 
@@ -212,24 +213,25 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 				m_State = NET_CONNSTATE_ERROR;
 				m_RemoteClosed = 1;
 
-				if(pPacket->m_DataSize)
+				char Str[128] = {0};
+				if(pPacket->m_DataSize > 1)
 				{
 					// make sure to sanitize the error string form the other party
-					char Str[128];
 					if(pPacket->m_DataSize < 128)
-						str_copy(Str, (char *)pPacket->m_aChunkData, pPacket->m_DataSize);
+						str_copy(Str, (char *)&pPacket->m_aChunkData[1], pPacket->m_DataSize);
 					else
-						str_copy(Str, (char *)pPacket->m_aChunkData, sizeof(Str));
+						str_copy(Str, (char *)&pPacket->m_aChunkData[1], sizeof(Str));
 					str_sanitize_strong(Str);
+				}
 
+				if(!m_BlockCloseMsg)
+				{
 					// set the error string
 					SetError(Str);
 				}
-				else
-					SetError("No reason given");
 
 				if(g_Config.m_Debug)
-					dbg_msg("conn", "closed reason='%s'", ErrorString());
+					dbg_msg("conn", "closed reason='%s'", Str);
 			}
 			return 0;
 		}
@@ -243,6 +245,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 					Reset();
 					m_State = NET_CONNSTATE_PENDING;
 					m_PeerAddr = *pAddr;
+					mem_zero(m_ErrorString, sizeof(m_ErrorString));
 					m_LastSendTime = Now;
 					m_LastRecvTime = Now;
 					m_LastUpdateTime = Now;

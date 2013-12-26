@@ -42,7 +42,7 @@
 	#include <windows.h>
 #endif
 
-static const char *StrUTF8Ltrim(const char *pStr)
+static const char *StrLtrim(const char *pStr)
 {
 	while(*pStr)
 	{
@@ -60,7 +60,7 @@ static const char *StrUTF8Ltrim(const char *pStr)
 	return pStr;
 }
 
-static void StrUTF8Rtrim(char *pStr)
+static void StrRtrim(char *pStr)
 {
 	const char *p = pStr;
 	const char *pEnd = 0;
@@ -68,7 +68,7 @@ static void StrUTF8Rtrim(char *pStr)
 	{
 		const char *pStrOld = p;
 		int Code = str_utf8_decode(&p);
-
+		
 		// check if unicode is not empty
 		if(Code > 0x20 && Code != 0xA0 && Code != 0x034F && (Code < 0x2000 || Code > 0x200F) && (Code < 0x2028 || Code > 0x202F) &&
 			(Code < 0x205F || Code > 0x2064) && (Code < 0x206A || Code > 0x206F) && (Code < 0xFE00 || Code > 0xFE0F) &&
@@ -173,7 +173,7 @@ void CSnapIDPool::FreeID(int ID)
 }
 
 
-void CServerBan::Init(IConsole *pConsole, IStorage *pStorage, CServer* pServer)
+void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* pServer)
 {
 	CNetBan::Init(pConsole, pStorage);
 
@@ -324,8 +324,12 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	char aTrimmedName[64];
 
 	// trim the name
-	str_copy(aTrimmedName, StrUTF8Ltrim(pName), sizeof(aTrimmedName));
-	StrUTF8Rtrim(aTrimmedName);
+	str_copy(aTrimmedName, StrLtrim(pName), sizeof(aTrimmedName));
+	StrRtrim(aTrimmedName);
+
+	// check for empty names
+	if(!aTrimmedName[0])
+		return -1;
 
 	// check if new and old name are the same
 	if(m_aClients[ClientID].m_aName[0] && str_comp(m_aClients[ClientID].m_aName, aTrimmedName) == 0)
@@ -335,11 +339,6 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	str_format(aBuf, sizeof(aBuf), "'%s' -> '%s'", pName, aTrimmedName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 	pName = aTrimmedName;
-
-
-	// check for empty names
-	if(!pName[0])
-		return -1;
 
 	// make sure that two clients doesn't have the same name
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -365,13 +364,13 @@ void CServer::SetClientName(int ClientID, const char *pName)
 		return;
 
 	char aNameTry[MAX_NAME_LENGTH];
-	str_copy(aNameTry, pName, MAX_NAME_LENGTH);
+	str_copy(aNameTry, pName, sizeof(aNameTry));
 	if(TrySetClientName(ClientID, aNameTry))
 	{
 		// auto rename
 		for(int i = 1;; i++)
 		{
-			str_format(aNameTry, MAX_NAME_LENGTH, "(%d)%s", i, pName);
+			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, pName);
 			if(TrySetClientName(ClientID, aNameTry) == 0)
 				break;
 		}
@@ -1392,6 +1391,7 @@ int CServer::Run()
 	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
 	{
 		// sweet!
+		BindAddr.type = NETTYPE_ALL;
 		BindAddr.port = g_Config.m_SvPort;
 	}
 	else
@@ -1591,8 +1591,12 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 		{
 			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
-				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d", i, aAddrStr,
-					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score);
+			{
+				const char *pAuthStr = pThis->m_aClients[i].m_Authed == CServer::AUTHED_ADMIN ? "(Admin)" :
+										pThis->m_aClients[i].m_Authed == CServer::AUTHED_MOD ? "(Mod)" : "";
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d %s", i, aAddrStr,
+					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pAuthStr);
+			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
@@ -1668,6 +1672,7 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 		pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, pServer->m_RconClientID, true);
 
 		pServer->m_aClients[pServer->m_RconClientID].m_Authed = AUTHED_NO;
+		pServer->m_aClients[pServer->m_RconClientID].m_AuthTries = 0;
 		pServer->m_aClients[pServer->m_RconClientID].m_pRconCmdToSend = 0;
 		pServer->SendRconLine(pServer->m_RconClientID, "Logout successful.");
 		char aBuf[32];
@@ -1755,7 +1760,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 
 	// register console commands in sub parts
-	m_ServerBan.Init(Console(), Storage(), this);
+	m_ServerBan.InitServerBan(Console(), Storage(), this);
 	m_pGameServer->OnConsoleInit();
 }
 

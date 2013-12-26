@@ -140,6 +140,7 @@ private:
 
 	int m_Token;
 	int m_RemoteClosed;
+	bool m_BlockCloseMsg;
 
 	TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> m_Buffer;
 
@@ -167,7 +168,7 @@ private:
 	void Resend();
 
 public:
-	void Init(NETSOCKET Socket);
+	void Init(NETSOCKET Socket, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
 	void Disconnect(const char *pReason);
 
@@ -354,7 +355,7 @@ public:
 	int ResetErrorString();
 
 	// error and state
-	int NetType() { return m_Socket.type; }
+	int NetType() const { return m_Socket.type; }
 	int State();
 	int GotProblems();
 	const char *ErrorString();
