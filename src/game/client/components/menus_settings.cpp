@@ -246,7 +246,8 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label;
+	CUIRect Button, Label, Button2;
+	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	// skin info
@@ -283,11 +284,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// custom colour selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(230.0f, &Button, 0);
+	Button.VSplitMid(&Button, &Button2);
 	if(DoButton_CheckBox(&g_Config.m_PlayerColorBody, Localize("Custom colors"), g_Config.m_PlayerUseCustomColor, &Button))
 	{
 		g_Config.m_PlayerUseCustomColor = g_Config.m_PlayerUseCustomColor?0:1;
 		m_NeedSendinfo = true;
+	}
+	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Bandana Brothers skins"), g_Config.m_ClShowSpecialSkins, &Button2))
+	{
+		g_Config.m_ClShowSpecialSkins = g_Config.m_ClShowSpecialSkins?0:1;
+		s_InitSkinlist = true;
 	}
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
@@ -343,7 +349,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
-	static bool s_InitSkinlist = true;
 	static sorted_array<const CSkins::CSkin *> s_paSkinList;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist)
@@ -353,7 +358,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
 			// no special skins
-			if(s->m_aName[0] == 'x' && s->m_aName[1] == '_')
+			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_') || (!g_Config.m_ClShowSpecialSkins && s->m_aName[0] == '0'))
 				continue;
 			s_paSkinList.add(s);
 		}
