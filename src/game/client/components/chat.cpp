@@ -343,7 +343,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		if(pHL)
 		{
 			int Length = str_length(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName);
-			if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || (pHL[Length] == ':' && pHL[Length+1] == ' ')))
+			if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
 				Highlighted = true;
 		}
 		m_aLines[m_CurrentLine].m_Highlighted =  Highlighted;
