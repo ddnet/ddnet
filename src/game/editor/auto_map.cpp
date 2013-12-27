@@ -54,8 +54,9 @@ void CAutoMapper::Load(const char* pTileName)
 					// new index
 					int ID = 0;
 					char aFlip[128] = "";
+					char aFlip2[128] = "";
 
-					sscanf(pLine, "Index %d %127s", &ID, aFlip);
+					sscanf(pLine, "Index %d %127s %127s", &ID, aFlip, aFlip2);
 
 					CIndexRule NewIndexRule;
 					NewIndexRule.m_ID = ID;
@@ -66,9 +67,17 @@ void CAutoMapper::Load(const char* pTileName)
 					if(str_length(aFlip) > 0)
 					{
 						if(!str_comp(aFlip, "XFLIP"))
-							NewIndexRule.m_Flag = TILEFLAG_VFLIP;
+							NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
 						else if(!str_comp(aFlip, "YFLIP"))
-							NewIndexRule.m_Flag = TILEFLAG_HFLIP;
+							NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
+					}
+
+					if(str_length(aFlip2) > 0)
+					{
+						if(!str_comp(aFlip2, "XFLIP"))
+							NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
+						else if(!str_comp(aFlip2, "YFLIP"))
+							NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
 					}
 
 					// add the index rule object and make it current
