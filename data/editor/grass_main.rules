@@ -223,3 +223,81 @@ Index 28
 Pos -1 -1 EMPTY
 Pos -1 0 FULL
 Pos 0 -1 FULL
+
+[Freeze]
+Index 110
+BaseTile
+
+Index 110
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+Index 108
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+
+Index 109
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+
+Index 124
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+
+Index 125
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+[Unfreeze]
+Index 78
+BaseTile
+
+Index 78
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+Index 76
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+
+Index 77
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+
+Index 92
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+
+Index 93
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+[Tele]
+Index 78
+BaseTile
+
+Index 142
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+Index 140
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+
+Index 141
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+
+Index 156
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+
+Index 157
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
