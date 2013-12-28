@@ -420,14 +420,17 @@ void CPlayer::TryRespawn()
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 
-	int NewTeam = 1;
 	if(g_Config.m_SvTeam == 3)
 	{
+		int NewTeam = 0;
 		for(; NewTeam < TEAM_SUPER; NewTeam++)
 			if(Controller->m_Teams.Count(NewTeam) == 0)
 				break;
 
-		Controller->m_Teams.SetCharacterTeam(GetCID(), NewTeam);
+		if(NewTeam == TEAM_SUPER)
+			NewTeam = 0;
+
+		Controller->m_Teams.SetForceCharacterTeam(GetCID(), NewTeam);
 	}
 }
 
