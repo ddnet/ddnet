@@ -80,26 +80,6 @@ void CAutoMapper::Load(const char* pTileName)
 							NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
 					}
 
-					// add default rule for Pos 0 0 if there is none
-					if(pCurrentIndex)
-					{
-						bool Found = false;
-						for(int i = 0; i < pCurrentIndex->m_aRules.size(); ++i)
-						{
-							CPosRule *pRule = &pCurrentIndex->m_aRules[i];
-							if(pRule->m_X == 0 && pRule->m_Y == 0)
-							{
-								Found = true;
-								break;
-							}
-						}
-						if(!Found)
-						{
-							CPosRule NewPosRule = {0, 0, CPosRule::FULL, false};
-							pCurrentIndex->m_aRules.add(NewPosRule);
-						}
-					}
-
 					// add the index rule object and make it current
 					int ArrayID = pCurrentConf->m_aIndexRules.add(NewIndexRule);
 					pCurrentIndex = &pCurrentConf->m_aIndexRules[ArrayID];
@@ -137,22 +117,25 @@ void CAutoMapper::Load(const char* pTileName)
 	}
 
 	// add default rule for Pos 0 0 if there is none
-	if(pCurrentIndex)
+	for (int h = 0; h < m_lConfigs.size(); ++h)
 	{
-		bool Found = false;
-		for(int i = 0; i < pCurrentIndex->m_aRules.size(); ++i)
+		for(int i = 0; i < m_lConfigs[h].m_aIndexRules.size(); ++i)
 		{
-			CPosRule *pRule = &pCurrentIndex->m_aRules[i];
-			if(pRule->m_X == 0 && pRule->m_Y == 0)
+			bool Found = false;
+			for(int j = 0; j < m_lConfigs[h].m_aIndexRules[i].m_aRules.size(); ++j)
 			{
-				Found = true;
-				break;
+				CPosRule *pRule = &m_lConfigs[h].m_aIndexRules[i].m_aRules[j];
+				if(pRule && pRule->m_X == 0 && pRule->m_Y == 0)
+				{
+					Found = true;
+					break;
+				}
 			}
-		}
-		if(!Found)
-		{
-			CPosRule NewPosRule = {0, 0, CPosRule::FULL, false};
-			pCurrentIndex->m_aRules.add(NewPosRule);
+			if(!Found)
+			{
+				CPosRule NewPosRule = {0, 0, CPosRule::FULL, false};
+				m_lConfigs[h].m_aIndexRules[i].m_aRules.add(NewPosRule);
+			}
 		}
 	}
 
