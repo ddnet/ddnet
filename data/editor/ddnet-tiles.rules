@@ -1,0 +1,87 @@
+[DDNet]
+Index 1
+BaseTile
+
+Index 2
+Pos 0 -1 EMPTY
+Pos 0 1 FULL
+Pos 1 0 EMPTY
+Pos 1 -1 EMPTY
+
+Index 2 XFLIP
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos -1 -1 EMPTY
+
+Index 2 YFLIP
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+
+Index 2 XFLIP YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos -1 1 EMPTY
+
+Index 33
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 1 -1 FULL
+Pos -1 1 FULL
+
+Index 33 XFLIP
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 -1 FULL
+Pos 1 1 FULL
+
+Index 33 YFLIP
+Pos 0 0 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos 1 1 FULL
+Pos -1 -1 FULL
+
+Index 33 XFLIP YFLIP
+Pos 0 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 1 -1 FULL
+
+Index 18
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos -1 -1 FULL
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+
+Index 18 XFLIP
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos 1 -1 FULL
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+Pos -1 1 EMPTY
+
+Index 18 YFLIP
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos -1 1 FULL
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 -1 EMPTY
+
+Index 18 XFLIP YFLIP
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 1 FULL
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos -1 -1 EMPTY
