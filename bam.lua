@@ -163,7 +163,7 @@ function build(settings)
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 	else
-		settings.cc.flags:Add("-Wall", "-fno-exceptions")
+		settings.cc.flags:Add("-Wall")
 		if family == "windows" then
 			-- disable visibility attribute support for gcc on windows
 			settings.cc.defines:Add("NO_VIZ")
@@ -188,8 +188,11 @@ function build(settings)
 		if platform == "macosx" then
 			settings.link.frameworks:Add("Carbon")
 			settings.link.frameworks:Add("AppKit")
+			settings.link.libs:Add("dl")
 		else
 			settings.link.libs:Add("pthread")
+			settings.link.libs:Add("dl")
+			settings.link.libs:Add("rt")
 		end
 		
 		if platform == "solaris" then
