@@ -115,7 +115,7 @@ if use_bundle:
 	copydir("data", clientbundle_resource_dir)
 
 
-	shutil.copy("other/icons/DDRace.icns", clientbundle_resource_dir)
+	shutil.copy("other/icons/DDNet.icns", clientbundle_resource_dir)
 	#shutil.copy("other/icons/Teeworlds.icns", clientbundle_resource_dir)
 	shutil.copy(name+exe_ext, clientbundle_bin_dir)
 	os.system("cp -R /Library/Frameworks/SDL.framework " + clientbundle_framework_dir)
@@ -129,7 +129,7 @@ if use_bundle:
         <key>CFBundleExecutable</key>
         <string>DDRace</string>
         <key>CFBundleIconFile</key>
-        <string>DDRace</string>
+        <string>DDNet</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundlePackageType</key>
