@@ -16,26 +16,24 @@ char* TimerType(int TimerType);
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
+	char aBuf[256];
+
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"Teeworlds Team takes most of the credits also");
+		"DDRaceNetwork is developed by deen.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"This mod was originally created by \'3DA\'");
+		"Many ideas from the great community,");
+	str_format(aBuf, sizeof(aBuf),
+		"special thanks to %s.",
+		pSelf->Server()->ClientName(pResult->m_ClientID));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", aBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"Now it is maintained & re-coded by:");
+		"64 player support from eeeeee's ddrace64.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"\'[Egypt]GreYFoX@GTi\' and \'[BlackTee]den\'");
-	pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"credit",
-			"Others Helping on the code: \'heinrich5991\', \'ravomavain\', \'Trust o_0 Aeeeh ?!\', \'noother\', \'<3 fisted <3\' & \'LemonFace\'");
+		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"Documentation: Zeta-Hoernchen & Learath2, Entities: Fisico");
+		"which is a mod of Teeworlds by the Teeworlds developers.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"Code (in the past): \'3DA\' and \'Fluxid\'");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"Please check the changelog on DDRace.info.");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-			"Also the commit log on github.com/GreYFoX/teeworlds .");
+		"Check the changes on ddnet.tw");
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
