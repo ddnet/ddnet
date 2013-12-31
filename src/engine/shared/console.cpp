@@ -373,10 +373,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 
 						if (pCommand->m_Flags&CMDFLAG_TEST)
-						{
 							m_Cheated = true;
-							str_format(g_Config.m_SvBroadcast, sizeof(g_Config.m_SvBroadcast), "Cheated: No records will be saved");
-						}
 						return;
 					}
 				}
