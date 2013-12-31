@@ -186,7 +186,7 @@ void CSpectator::OnRender()
 	Graphics()->QuadsEnd();
 
 	// clamp mouse position to selector area
-	m_SelectorMouse.x = clamp(m_SelectorMouse.x, -280.0f, 280.0f);
+	m_SelectorMouse.x = clamp(m_SelectorMouse.x, -280.0f, 1120.0f);
 	m_SelectorMouse.y = clamp(m_SelectorMouse.y, -280.0f, 280.0f);
 
 	// draw selections
@@ -219,7 +219,9 @@ void CSpectator::OnRender()
 		if(!m_pClient->m_Snap.m_paPlayerInfos[i] || m_pClient->m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
-		if(++Count%9 == 0)
+		++Count;
+
+		if(Count == 9 || (Count > 9 && (Count-1)%8 == 0))
 		{
 			x += 290.0f;
 			y = StartY;
