@@ -151,21 +151,52 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
+	int TotalPlayers = 0;
+
+	for(int i = 0; i  < MAX_CLIENTS; ++i)
+	{
+		if(!m_pClient->m_Snap.m_paInfoByTeam[i])
+			continue;
+
+		int Index = m_pClient->m_Snap.m_paInfoByTeam[i]->m_ClientID;
+
+		if(Index == m_pClient->m_Snap.m_LocalClientID)
+			continue;
+
+		TotalPlayers++;
+	}
+
+	static int s_VoteList = 0;
+	static float s_ScrollValue = 0;
+	CUIRect List = Options;
+	//List.HSplitTop(28.0f, 0, &List);
+	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
+
+	m_CallvoteSelectedOption = UiDoListboxEnd(&s_ScrollValue, 0);
+
 	// options
 	static int s_aPlayerIDs[MAX_CLIENTS][2] = {{0}};
+
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(!m_pClient->m_Snap.m_paInfoByTeam[i])
 			continue;
 
 		int Index = m_pClient->m_Snap.m_paInfoByTeam[i]->m_ClientID;
+		CListboxItem Item = UiDoListboxNextItem(&m_pClient->m_aClients[Index]);
+
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
 
-		Options.HSplitTop(28.0f, &ButtonBar, &Options);
-		if(Count++%2 == 0)
+		Count++;
+
+		if(!Item.m_Visible)
+			continue;
+
+		Item.m_Rect.HSplitTop(24.0f, &ButtonBar, &Item.m_Rect);
+		if(Count%2 == 1)
 			RenderTools()->DrawUIRect(&ButtonBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
-		ButtonBar.VSplitRight(220.0f, &Player, &ButtonBar);
+		ButtonBar.VSplitRight(200.0f, &Player, &ButtonBar);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
