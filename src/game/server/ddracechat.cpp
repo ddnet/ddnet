@@ -233,15 +233,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 	if (g_Config.m_SvDDRaceRules)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				"No blocking.");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				"No insulting / spamming.");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				"No fun voting / vote spamming.");
-		pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"rules",
-				"Breaking any of these rules will result in a penalty, decided by server admins.");
+				"Be nice.");
 		Printed = true;
 	}
 	if (g_Config.m_SvRulesLine1[0])
