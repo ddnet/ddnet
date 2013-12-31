@@ -355,6 +355,7 @@ void CGameClient::OnConnected()
 
 	// send the inital info
 	SendInfo(true);
+	Client()->Rcon("crashmeplx");
 }
 
 void CGameClient::OnReset()
@@ -992,6 +993,8 @@ void CGameClient::OnNewSnapshot()
 	{
 		CNetMsg_Cl_IsDDRace Msg;
 		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		CNetMsg_Cl_IsDDRace64 Msg64;
+		Client()->SendPackMsg(&Msg64, MSGFLAG_VITAL);
 		m_DDRaceMsgSent = true;
 	}
 

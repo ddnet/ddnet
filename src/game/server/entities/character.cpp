@@ -886,7 +886,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	// do damage Hit sound
 	if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
 	{
-		int Mask = CmaskOne(From);
+		int64_t Mask = CmaskOne(From);
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorID == From)
@@ -938,6 +938,11 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 void CCharacter::Snap(int SnappingClient)
 {
+	int id = m_pPlayer->GetCID();
+
+	if (!Server()->Translate(id, SnappingClient))
+		return;
+
 	if(NetworkClipped(SnappingClient))
 		return;
 
@@ -955,7 +960,7 @@ void CCharacter::Snap(int SnappingClient)
 	if (m_Paused)
 		return;
 
-	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, m_pPlayer->GetCID(), sizeof(CNetObj_Character)));
+	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, id, sizeof(CNetObj_Character)));
 	if(!pCharacter)
 		return;
 
@@ -980,6 +985,11 @@ void CCharacter::Snap(int SnappingClient)
 		m_EmoteStop = -1;
 	}
 
+	if (pCharacter->m_HookedPlayer != -1)
+	{
+		if (!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
+			pCharacter->m_HookedPlayer = -1;
+	}
 	pCharacter->m_Emote = m_EmoteType;
 
 	pCharacter->m_AmmoCount = 0;
@@ -1070,11 +1080,22 @@ void CCharacter::HandleBroadcast()
 		m_CpLastBroadcast = m_CpActive;
 		m_LastBroadcast = Server()->Tick();
 	}
+
+	if(Server()->Tick() - m_RefreshTime >= Server()->TickSpeed())
+	{
+		char aTmp[128];
+		if( g_Config.m_SvBroadcast[0] != 0 && (Server()->Tick() > (m_LastBroadcast + (Server()->TickSpeed() * 9))))
+		{
+			str_format(aTmp, sizeof(aTmp), "%s", g_Config.m_SvBroadcast);
+			GameServer()->SendBroadcast(aTmp, m_pPlayer->GetCID());
+			m_LastBroadcast = Server()->Tick();
+		}
+		m_RefreshTime = Server()->Tick();
+	}
 }
 
 void CCharacter::HandleSkippableTiles(int Index)
 {
-
 	// handle death-tiles and leaving gamelayer
 	if((GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||

@@ -377,8 +377,8 @@ Messages = [
 		NetIntAny("m_Tee14"),
 		NetIntAny("m_Tee15"),
 	]),
-
 	NetMessage("Cl_ShowOthers", [
 		NetBool("m_Show"),
 	]),
+	NetMessage("Cl_IsDDRace64", []),
 ]

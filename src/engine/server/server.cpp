@@ -443,6 +443,7 @@ int CServer::Init()
 		m_aClients[i].m_State = CClient::STATE_EMPTY;
 		m_aClients[i].m_aName[0] = 0;
 		m_aClients[i].m_aClan[0] = 0;
+		m_aClients[i].m_CustClt = 0;
 		m_aClients[i].m_Country = -1;
 		m_aClients[i].m_Snapshots.Init();
 		m_aClients[i].m_Traffic = 0;
@@ -476,6 +477,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
+		pInfo->m_CustClt = m_aClients[ClientID].m_CustClt;
 		return 1;
 	}
 	return 0;
@@ -721,9 +723,12 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
+	pThis->m_aClients[ClientID].m_CustClt = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
+	memset(&pThis->m_aClients[ClientID].m_Addr, 0, sizeof(NETADDR));
+	pThis->m_aClients[ClientID].m_CustClt = 0;
 	pThis->m_aClients[ClientID].Reset();
 	return 0;
 }
@@ -1034,7 +1039,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_RCON_CMD)
 		{
 			const char *pCmd = Unpacker.GetString();
-
+			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
+			{
+				SetCustClt(ClientID);
+			} else
 			if(Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
 				char aBuf[256];
@@ -1156,7 +1164,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	}
 }
 
-void CServer::SendServerInfo(const NETADDR *pAddr, int Token)
+void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int Offset)
 {
 	CNetChunk Packet;
 	CPacker p;
@@ -1177,12 +1185,25 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token)
 
 	p.Reset();
 
-	p.AddRaw(SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO));
+	p.AddRaw(Extended?SERVERBROWSE_INFO64:SERVERBROWSE_INFO, sizeof(Extended?SERVERBROWSE_INFO64:SERVERBROWSE_INFO));
 	str_format(aBuf, sizeof(aBuf), "%d", Token);
 	p.AddString(aBuf, 6);
 
 	p.AddString(GameServer()->Version(), 32);
-	p.AddString(g_Config.m_SvName, 64);
+	if (Extended)
+	{
+			p.AddString(g_Config.m_SvName, 256);
+	}
+	else
+	{
+		if (ClientCount < VANILLA_MAX_CLIENTS)
+			p.AddString(g_Config.m_SvName, 64);
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "%s - %d/%d online", g_Config.m_SvName, ClientCount, m_NetServer.MaxClients());
+			p.AddString(aBuf, 64);
+		}
+	}
 	p.AddString(GetMapName(), 32);
 
 	// gametype
@@ -1195,17 +1216,46 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token)
 	str_format(aBuf, sizeof(aBuf), "%d", i);
 	p.AddString(aBuf, 2);
 
+	int MaxClients = m_NetServer.MaxClients();
+	if (!Extended)
+	{
+		if (ClientCount >= VANILLA_MAX_CLIENTS)
+		{
+			if (ClientCount < MaxClients)
+				ClientCount = VANILLA_MAX_CLIENTS - 1;
+			else
+				ClientCount = VANILLA_MAX_CLIENTS;
+		}
+		if (MaxClients > VANILLA_MAX_CLIENTS) MaxClients = VANILLA_MAX_CLIENTS;
+	}
+
+	if (PlayerCount > ClientCount)
+		PlayerCount = ClientCount;
+
 	str_format(aBuf, sizeof(aBuf), "%d", PlayerCount); p.AddString(aBuf, 3); // num players
-	str_format(aBuf, sizeof(aBuf), "%d", max(m_NetServer.MaxClients()-g_Config.m_SvSpectatorSlots-g_Config.m_SvReservedSlots, PlayerCount)); p.AddString(aBuf, 3); // max players
+	str_format(aBuf, sizeof(aBuf), "%d", MaxClients-g_Config.m_SvSpectatorSlots); p.AddString(aBuf, 3); // max players
 	str_format(aBuf, sizeof(aBuf), "%d", ClientCount); p.AddString(aBuf, 3); // num clients
-	str_format(aBuf, sizeof(aBuf), "%d", max(m_NetServer.MaxClients()-g_Config.m_SvReservedSlots, ClientCount)); p.AddString(aBuf, 3); // max clients
+	str_format(aBuf, sizeof(aBuf), "%d", MaxClients); p.AddString(aBuf, 3); // max clients
+
+	if (Extended)
+		p.AddInt(Offset);
+
+	int ClientsPerPacket = Extended ? 24 : VANILLA_MAX_CLIENTS;
+	int Skip = Offset;
+	int Take = ClientsPerPacket;
 
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
+			if (Skip-- > 0)
+				continue;
+			if (--Take < 0)
+				break;
+
 			p.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 			p.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
+
 			str_format(aBuf, sizeof(aBuf), "%d", m_aClients[i].m_Country); p.AddString(aBuf, 6); // client country
 			str_format(aBuf, sizeof(aBuf), "%d", m_aClients[i].m_Score); p.AddString(aBuf, 6); // client score
 			str_format(aBuf, sizeof(aBuf), "%d", GameServer()->IsClientPlayer(i)?1:0); p.AddString(aBuf, 2); // is player?
@@ -1218,6 +1268,9 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token)
 	Packet.m_DataSize = p.Size();
 	Packet.m_pData = p.Data();
 	m_NetServer.Send(&Packet);
+
+	if (Extended && Take < 0)
+		SendServerInfo(pAddr, Token, Extended, Offset + ClientsPerPacket);
 }
 
 void CServer::UpdateServerInfo()
@@ -1248,6 +1301,11 @@ void CServer::PumpNetwork()
 					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
 				{
 					SendServerInfo(&Packet.m_Address, ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)]);
+				}
+				else if(Packet.m_DataSize == sizeof(SERVERBROWSE_GETINFO64)+1 &&
+					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO64, sizeof(SERVERBROWSE_GETINFO64)) == 0)
+				{
+					SendServerInfo(&Packet.m_Address, ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO64)], true);
 				}
 			}
 		}
@@ -1925,3 +1983,12 @@ char *CServer::GetAnnouncementLine(char const *pFileName)
 	return 0;
 }
 
+int* CServer::GetIdMap(int ClientID)
+{
+	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
+}
+
+void CServer::SetCustClt(int ClientID)
+{
+	m_aClients[ClientID].m_CustClt = 1;
+}

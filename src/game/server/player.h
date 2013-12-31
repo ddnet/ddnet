@@ -27,6 +27,7 @@ public:
 	void Tick();
 	void PostTick();
 	void Snap(int SnappingClient);
+	void FakeSnap(int SnappingClient);
 
 	void OnDirectInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
@@ -34,6 +35,8 @@ public:
 
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
+
+	void FindDuplicateSkins();
 
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player
@@ -81,6 +84,7 @@ public:
 	int m_ScoreStartTick;
 	bool m_ForceBalanced;
 	int m_LastActionTick;
+	bool m_StolenSkin;
 	int m_TeamChangeTick;
 	struct
 	{

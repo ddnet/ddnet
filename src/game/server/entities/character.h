@@ -173,6 +173,7 @@ public:
 		DISABLE_HIT_GRENADE=4,
 		DISABLE_HIT_RIFLE=8
 	};
+	int m_RefreshTime;
 	int m_Hit;
 	int m_Collision;
 	int m_Hook;

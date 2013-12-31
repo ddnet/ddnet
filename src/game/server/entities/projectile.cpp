@@ -99,7 +99,7 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int TeamMask = -1;
+	int64_t TeamMask = -1LL;
 	bool isWeaponCollide = false;
 	if
 	(
@@ -122,9 +122,9 @@ void CProjectile::Tick()
 		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && !m_Freeze)))
 		{
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-			(m_Owner != -1)? TeamMask : -1);
+			(m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
-			(m_Owner != -1)? TeamMask : -1);
+			(m_Owner != -1)? TeamMask : -1LL);
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
@@ -144,7 +144,7 @@ void CProjectile::Tick()
 		}
 		else if (m_Weapon == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1)? TeamMask : -1);
+			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->m_World.DestroyEntity(this);
 		}
 		else

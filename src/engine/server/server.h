@@ -139,9 +139,15 @@ public:
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
 		void Reset();
+
+		// DDRace
+
+		NETADDR m_Addr;
+		bool m_CustClt;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
+	int IdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -223,7 +229,7 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
-	void SendServerInfo(const NETADDR *pAddr, int Token);
+	void SendServerInfo(const NETADDR *pAddr, int Token, bool Extended=false, int Offset=0);
 	void UpdateServerInfo();
 
 	void PumpNetwork();
@@ -262,6 +268,9 @@ public:
 	char *GetAnnouncementLine(char const *FileName);
 	unsigned m_AnnouncementLastLine;
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
+
+	virtual int* GetIdMap(int ClientID);
+	virtual void SetCustClt(int ClientID);
 };
 
 #endif
