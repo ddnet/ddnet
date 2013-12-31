@@ -479,7 +479,7 @@ void CServerBrowser::Refresh(int Type)
 	m_pFirstReqServer = 0;
 	m_pLastReqServer = 0;
 	m_NumRequests = 0;
-	m_CurrentMaxRequests = (1<<g_Config.m_BrMaxRequests);
+	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 	// next token
 	m_CurrentToken = (m_CurrentToken+1)&0xff;
 
@@ -593,7 +593,7 @@ void CServerBrowser::Update(bool ForceResort)
 	int64 Now = time_get();
 	int Count;
 	CServerEntry *pEntry, *pNext;
-
+	
 	// do server list requests
 	if(m_NeedRefresh && !m_pMasterServer->IsRefreshing())
 	{
@@ -617,8 +617,11 @@ void CServerBrowser::Update(bool ForceResort)
 			Addr = m_pMasterServer->GetAddr(i);
 			m_pMasterServer->SetCount(i, -1);
 			Packet.m_Address = Addr;
-			m_pNetClient->Send(&Packet);
-			dbg_msg("send to", "%d", i);
+			m_pNetClient->Send(&Packet);		
+			if(g_Config.m_Debug)
+			{			
+				dbg_msg("client_srvbrowse", "Count-Request sent to %d", i);
+			}	
 		}
 	}	
 	
@@ -657,29 +660,16 @@ void CServerBrowser::Update(bool ForceResort)
 			m_pNetClient->Send(&Packet);
 		}
 		if(g_Config.m_Debug)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "requesting server list");
-		dbg_msg("msg", "%d", m_MasterServerCount);
+		{
+			dbg_msg("client_srvbrowse", "ServerCount: %d, requesting server list", m_MasterServerCount);
+		}
 		m_LastPacketTick = 0;
-	}
-	
-	
-	
-	
+	}	
 	if(m_MasterServerCount > m_NumRequests  + m_LastPacketTick)
 	{
 		++m_LastPacketTick;
 		return; //wait for more packets
 	}
-		
-		
-		
-
-		
-
-		
-		
-	
-	
 	pEntry = m_pFirstReqServer;
 	Count = 0;
 	while(1)
@@ -718,7 +708,9 @@ void CServerBrowser::Update(bool ForceResort)
 		}
 		
 		//update max-requests
-		m_CurrentMaxRequests = (m_CurrentMaxRequests>>1);
+		m_CurrentMaxRequests = m_CurrentMaxRequests/2;
+		if(m_CurrentMaxRequests < 1)
+			m_CurrentMaxRequests = 1;
 	}
 	else if(Count == 0 && m_CurrentMaxRequests == 1) //we reached the limit, just release all left requests. IF a server sends us a packet, a new request will be added automatically, so we can delete all
 	{	

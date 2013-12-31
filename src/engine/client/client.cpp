@@ -924,7 +924,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			m_MapChecker.AddMaplist((CMapVersion *)((char*)pPacket->m_pData+sizeof(VERSIONSRV_MAPLIST)), Num);
 		}
 	}
-	
+
 	//server count from master server
 	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{

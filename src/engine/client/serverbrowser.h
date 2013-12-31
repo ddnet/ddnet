@@ -74,8 +74,11 @@ private:
 	int m_NumRequests;
 	int m_MasterServerCount;
 	
+	//used instead of g_Config.br_max_requests to get more servers
+	int m_CurrentMaxRequests;
+	
 	int m_LastPacketTick;
-
+	
 	int m_NeedRefresh;
 
 	int m_NumSortedServers;
