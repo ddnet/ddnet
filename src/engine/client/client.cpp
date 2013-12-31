@@ -924,7 +924,27 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			m_MapChecker.AddMaplist((CMapVersion *)((char*)pPacket->m_pData+sizeof(VERSIONSRV_MAPLIST)), Num);
 		}
 	}
-
+	
+	//server count from master server
+	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
+	{
+		unsigned char *pP = (unsigned char*) pPacket->m_pData;
+		pP += sizeof(SERVERBROWSE_COUNT);				
+		int ServerCount = ((*pP)<<8) | *(pP+1); 
+		int ServerID = -1;
+		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
+		{
+			if(!m_pMasterServer->IsValid(i))
+				continue;			
+			if(net_addr_comp(&pPacket->m_Address, &m_pMasterServer->GetAddr(i)) == 0)
+			{
+				ServerID = i;
+				break;
+			}
+		}
+		if(ServerCount > -1 && ServerID != -1)
+			m_pMasterServer->SetCount(ServerID, ServerCount);
+	}
 	// server list from master server
 	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_LIST) &&
 		mem_comp(pPacket->m_pData, SERVERBROWSE_LIST, sizeof(SERVERBROWSE_LIST)) == 0)

@@ -19,7 +19,7 @@ public:
 		char m_aHostname[128];
 		NETADDR m_Addr;
 		bool m_Valid;
-
+		int m_Count;
 		CHostLookup m_Lookup;
 	};
 
@@ -55,6 +55,7 @@ public:
 		{
 			m_pEngine->HostLookup(&m_aMasterServers[i].m_Lookup, m_aMasterServers[i].m_aHostname, Nettype);
 			m_aMasterServers[i].m_Valid = false;
+			m_aMasterServers[i].m_Count = -1;
 		}
 
 		m_State = STATE_UPDATE;
@@ -101,7 +102,17 @@ public:
 	{
 		return m_aMasterServers[Index].m_Addr;
 	}
-
+	
+	virtual void SetCount(int Index, int Count)
+	{
+		m_aMasterServers[Index].m_Count = Count;
+	}
+	
+	virtual int GetCount(int Index)
+	{
+		return m_aMasterServers[Index].m_Count;
+	}
+	
 	virtual const char *GetName(int Index)
 	{
 		return m_aMasterServers[Index].m_aHostname;
