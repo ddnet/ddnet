@@ -6,7 +6,7 @@
 
 enum
 {
-	TEAM_FLOCK = 0, TEAM_SUPER = 64
+	TEAM_FLOCK = 0, TEAM_SUPER = MAX_CLIENTS
 };
 
 class CTeamsCore
