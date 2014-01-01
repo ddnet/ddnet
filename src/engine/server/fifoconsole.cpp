@@ -24,6 +24,12 @@ void FifoConsole::ListenFifoThread(void *pUser)
 
 	mkfifo(g_Config.m_SvInputFifo, 0600);
 
+	struct stat attribute;
+	stat(g_Config.m_SvInputFifo, &attribute);
+
+	if(!S_ISFIFO(attribute.st_mode))
+		return;
+
 	std::ifstream f;
 	char aBuf[256];
 
