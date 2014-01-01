@@ -1200,7 +1200,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int
 	}
 	else
 	{
-		if (ClientCount < VANILLA_MAX_CLIENTS)
+		if (m_NetServer.MaxClients() <= VANILLA_MAX_CLIENTS)
 			p.AddString(g_Config.m_SvName, 64);
 		else
 		{
