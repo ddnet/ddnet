@@ -27,7 +27,7 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Server()->ClientName(pResult->m_ClientID));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", aBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-		"64 player support from eeeeee's ddrace64.");
+		"64 player support from eeeee's ddrace64.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
