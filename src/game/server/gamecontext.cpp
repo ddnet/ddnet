@@ -625,7 +625,7 @@ void CGameContext::OnTick()
 	if(Collision()->m_NumSwitchers > 0)
 		for (int i = 0; i < Collision()->m_NumSwitchers+1; ++i)
 		{
-			for (int j = 0; j < 16; ++j)
+			for (int j = 0; j < MAX_CLIENTS; ++j)
 			{
 				if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
 				{

@@ -4,6 +4,7 @@
 #define GAME_COLLISION_H
 
 #include <base/vmath.h>
+#include <engine/shared/protocol.h>
 
 #include <list>
 
@@ -113,9 +114,9 @@ private:
 	class CDoorTile *m_pDoor;
 	struct SSwitchers
 	{
-		bool m_Status[16];
-		int m_EndTick[16];
-		int m_Type[16];
+		bool m_Status[MAX_CLIENTS];
+		int m_EndTick[MAX_CLIENTS];
+		int m_Type[MAX_CLIENTS];
 	};
 
 public:

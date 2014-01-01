@@ -26,17 +26,17 @@ CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int La
 
 void CGun::Fire()
 {
-	CCharacter *Ents[16];
-	int IdInTeam[16]; 
-	int LenInTeam[16];
-	for (int i = 0; i < 16; i++)
+	CCharacter *Ents[MAX_CLIENTS];
+	int IdInTeam[MAX_CLIENTS]; 
+	int LenInTeam[MAX_CLIENTS];
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		IdInTeam[i] = -1;
 		LenInTeam[i] = 0;
 	}
 	
 	int Num = -1;
-	Num =  GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange, (CEntity**)Ents, 16, CGameWorld::ENTTYPE_CHARACTER);
+	Num =  GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange, (CEntity**)Ents, 64, CGameWorld::ENTTYPE_CHARACTER);
 
 	for (int i = 0; i < Num; i++)
 	{
@@ -57,7 +57,7 @@ void CGun::Fire()
 			}
 		}
 	}
-	for (int i = 0; i < 16; i++)
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(IdInTeam[i] != -1)
 		{
