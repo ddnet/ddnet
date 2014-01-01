@@ -36,7 +36,7 @@ void CGun::Fire()
 	}
 	
 	int Num = -1;
-	Num =  GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange, (CEntity**)Ents, 64, CGameWorld::ENTTYPE_CHARACTER);
+	Num =  GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange, (CEntity**)Ents, 16, CGameWorld::ENTTYPE_CHARACTER);
 
 	for (int i = 0; i < Num; i++)
 	{

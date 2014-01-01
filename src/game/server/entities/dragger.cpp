@@ -34,7 +34,7 @@ void CDragger::Move()
 		return;
 	CCharacter *Ents[MAX_CLIENTS];
 	int Num = GameServer()->m_World.FindEntities(m_Pos, LENGTH,
-			(CEntity**) Ents, 64, CGameWorld::ENTTYPE_CHARACTER);
+			(CEntity**) Ents, 16, CGameWorld::ENTTYPE_CHARACTER);
 	int Id = -1;
 	int MinLen = 0;
 	for (int i = 0; i < Num; i++)
