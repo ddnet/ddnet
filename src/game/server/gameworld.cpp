@@ -169,12 +169,17 @@ void CGameWorld::UpdatePlayerMaps()
 		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
 			dist[j].second = j;
-			dist[j].first = 1e10;
 			if (!Server()->ClientIngame(j))
+			{
+				dist[j].first = 1e12;
 				continue;
+			}
 			CCharacter* ch = GameServer()->m_apPlayers[j]->GetCharacter();
 			if (!ch)
+			{
+				dist[j].first = 1e11;
 				continue;
+			}
 			// copypasted chunk from character.cpp Snap() follows
 			int SnappingClient = i;
 			CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
@@ -184,9 +189,13 @@ void CGameWorld::UpdatePlayerMaps()
 				(!GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient ||
 					(GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient &&
 					!GameServer()->m_apPlayers[SnappingClient]->m_ShowOthers
-                                	)
+					)
 				)
-                        ) continue;
+			)
+			{
+				dist[j].first = 1e10;
+				continue;
+			}
 
 			dist[j].first = distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->m_ViewPos);
 		}
@@ -203,7 +212,7 @@ void CGameWorld::UpdatePlayerMaps()
 		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
 		{
 			if (map[j] == -1) continue;
-			//if (dist[map[j]].first > 1e9) map[j] = -1;
+			if (dist[map[j]].first > 5e11) map[j] = -1;
 			else rMap[map[j]] = j;
 		}
 
@@ -214,7 +223,7 @@ void CGameWorld::UpdatePlayerMaps()
 		for (int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
 			int k = dist[j].second;
-			if (rMap[k] != -1) continue;
+			if (rMap[k] != -1 || dist[j].first > 5e11) continue;
 			while (mapc < VANILLA_MAX_CLIENTS && map[mapc] != -1) mapc++;
 			if (mapc < VANILLA_MAX_CLIENTS - 1)
 				map[mapc] = k;
