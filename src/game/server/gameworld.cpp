@@ -214,13 +214,13 @@ void CGameWorld::UpdatePlayerMaps()
 		for (int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
 			int k = dist[j].second;
-			if (rMap[k] != -1 || dist[j].first > 1e9) continue;
+			//if (rMap[k] != -1 || dist[j].first > 1e9) continue;
 			while (mapc < VANILLA_MAX_CLIENTS && map[mapc] != -1) mapc++;
 			if (mapc < VANILLA_MAX_CLIENTS - 1)
 				map[mapc] = k;
-			//else
-			//	if (dist[j].first < 4300) // dont bother freeing up space for players which are too far to be displayed anyway
-			//		demand++;
+			else
+				if (dist[j].first < 4300) // dont bother freeing up space for players which are too far to be displayed anyway
+					demand++;
 		}
 		for (int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
 		{
