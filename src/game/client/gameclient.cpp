@@ -355,7 +355,7 @@ void CGameClient::OnConnected()
 
 	// send the inital info
 	SendInfo(true);
-	//Client()->Rcon("crashmeplx");
+	Client()->Rcon("crashmeplx");
 }
 
 void CGameClient::OnReset()
