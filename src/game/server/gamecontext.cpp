@@ -408,6 +408,15 @@ void CGameContext::SendVoteSet(int ClientID)
 
 void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 {
+	CServer* pServ = (CServer*)Server();
+
+	if (!pServ->m_aClients[ClientID].m_CustClt && Total > VANILLA_MAX_CLIENTS)
+	{
+		Yes = float(Yes) * VANILLA_MAX_CLIENTS / float(Total);
+		No = float(Yes) * VANILLA_MAX_CLIENTS / float(Total);
+		Total = VANILLA_MAX_CLIENTS;
+	}
+
 	CNetMsg_Sv_VoteStatus Msg = {0};
 	Msg.m_Total = Total;
 	Msg.m_Yes = Yes;
