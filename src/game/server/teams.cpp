@@ -193,12 +193,12 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	if (Team != TEAM_SUPER && m_TeamState[Team] == TEAMSTATE_EMPTY)
 		ChangeTeamState(Team, TEAMSTATE_OPEN);
 
-	for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-	{
-		if (GetPlayer(LoopClientID)
-				&& GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
-			SendTeamsState(LoopClientID);
-	}
+	//for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+	//{
+	//	if (GetPlayer(LoopClientID)
+	//			&& GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
+	//		SendTeamsState(LoopClientID);
+	//}
 }
 
 int CGameTeams::Count(int Team) const
