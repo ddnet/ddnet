@@ -1207,7 +1207,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
-		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
+		//else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
+		else if (MsgID == NETMSGTYPE_CL_ISDDRACE64)
 		{
 			pPlayer->m_IsUsingDDRaceClient = true;
 
@@ -1244,9 +1245,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Msg.m_ClientID = ClientID;
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 			}
-		}
-		else if (MsgID == NETMSGTYPE_CL_ISDDRACE64)
-		{
+		//}
+		//else if (MsgID == NETMSGTYPE_CL_ISDDRACE64)
+		//{
 			Server()->SetCustClt(ClientID);
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
