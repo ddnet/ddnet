@@ -48,7 +48,7 @@ void CPickup::Tick()
 	}*/
 	// Check if a player intersected us
 	CCharacter *apEnts[MAX_CLIENTS];
-	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity**)apEnts, 64, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; ++i) {
 		CCharacter * pChr = apEnts[i];
 		if(pChr && pChr->IsAlive())
