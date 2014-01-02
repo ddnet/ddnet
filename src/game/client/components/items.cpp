@@ -98,27 +98,24 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 32, 32);
 
-	if (g_Config.m_ClAntiPingGrenade)
+	bool LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
+
+	if (g_Config.m_ClAntiPingGrenade && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		// Draw shadows of grenades
-		bool LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
-		static float Offset = 1;
-		Offset = mix(Offset, (float)(Client()->PredGameTick() - Client()->GameTick()), 0.05);
+		static int Offset = 0;
+		Offset = (int)(0.8f * (float)Offset + 0.2f * (float)(Client()->PredGameTick() - Client()->GameTick()));
 
-		if(LocalPlayerInGame && !m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
-		{
-			// Draw shadow only if grenade directed to local player
-			int PredictedTick = Client()->PrevGameTick() + Offset;
-			float PredictedCt = (PredictedTick - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime();
+		int PredictedTick = Client()->PrevGameTick() + Offset;
+		float PredictedCt = (PredictedTick - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime();
 
-			int shadow_type = pCurrent->m_Type;
-			RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(shadow_type, 0, NUM_WEAPONS-1)].m_pSpriteProj);
+		int shadow_type = pCurrent->m_Type;
+		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(shadow_type, 0, NUM_WEAPONS-1)].m_pSpriteProj);
 
-			vec2 PredictedPos = CalcPos(StartPos, StartVel, Curvature, Speed, PredictedCt);
+		vec2 PredictedPos = CalcPos(StartPos, StartVel, Curvature, Speed, PredictedCt);
 
-			IGraphics::CQuadItem QuadItem(PredictedPos.x, PredictedPos.y, 32, 32);
-			Graphics()->QuadsDraw(&QuadItem, 1);
-		}
+		IGraphics::CQuadItem QuadItem(PredictedPos.x, PredictedPos.y, 32, 32);
+		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 	else
 		Graphics()->QuadsDraw(&QuadItem, 1);
