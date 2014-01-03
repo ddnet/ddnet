@@ -823,7 +823,7 @@ int CGraphics_SDL::TryInit()
 	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, g_Config.m_GfxVsync);
 
 	// set caption
-	SDL_WM_SetCaption("Teeworlds", "Teeworlds");
+	SDL_WM_SetCaption("DDNet Client", "DDNet Client");
 
 	// create window
 	m_pScreenSurface = SDL_SetVideoMode(m_ScreenWidth, m_ScreenHeight, 0, Flags);

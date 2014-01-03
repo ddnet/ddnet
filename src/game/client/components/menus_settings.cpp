@@ -1019,7 +1019,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("ddnet")};
+		Localize("DDNet")};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
 
@@ -1073,7 +1073,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Cheat: Shows entities in game (can also be toggled via console cl_show_entities)"), g_Config.m_ClShowEntities, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Show entities in game (can also be toggled via console cl_show_entities)"), g_Config.m_ClShowEntities, &Button))
 	{
 		g_Config.m_ClShowEntities ^= 1;
 	}

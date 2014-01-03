@@ -676,7 +676,7 @@ void CMenus::RenderLoading()
 	Graphics()->QuadsEnd();
 
 
-	const char *pCaption = Localize("Loading DDRace Client");
+	const char *pCaption = Localize("Loading DDNet Client");
 
 	CUIRect r;
 	r.x = x;
