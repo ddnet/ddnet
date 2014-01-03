@@ -374,7 +374,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 
 						if (pCommand->m_Flags&CMDFLAG_TEST)
 							m_Cheated = true;
-						return;
 					}
 				}
 			}
