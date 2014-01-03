@@ -55,7 +55,9 @@ public:
 		{
 			m_pEngine->HostLookup(&m_aMasterServers[i].m_Lookup, m_aMasterServers[i].m_aHostname, Nettype);
 			m_aMasterServers[i].m_Valid = false;
-			m_aMasterServers[i].m_Count = -1;
+			m_aMasterServers[i].m_Count = 0;
+			
+			//dbg_msg("MasterServer", "Lookup id: %d, name: %s, nettype: %d", i, m_aMasterServers[i].m_aHostname, Nettype);
 		}
 
 		m_State = STATE_UPDATE;
@@ -80,9 +82,15 @@ public:
 					m_aMasterServers[i].m_Addr = m_aMasterServers[i].m_Lookup.m_Addr;
 					m_aMasterServers[i].m_Addr.port = 8300;
 					m_aMasterServers[i].m_Valid = true;
+					
+						//dbg_msg("MasterServer", "Set server %d, name: %s with addr-port: %d addr-ip %s addr-type %d", i, m_aMasterServers[i].m_aHostname, m_aMasterServers[i].m_Addr.port, m_aMasterServers[i].m_Addr.ip, m_aMasterServers[i].m_Addr.type);
 				}
 				else
+				{
 					m_aMasterServers[i].m_Valid = false;
+					
+					//	dbg_msg("MasterServer", "Dropped %d, name: %s with addr-port: %d addr-ip %s addr-type %d", i, m_aMasterServers[i].m_aHostname);
+				}
 			}
 		}
 

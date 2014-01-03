@@ -617,7 +617,7 @@ void CServerBrowser::Update(bool ForceResort)
 			Addr = m_pMasterServer->GetAddr(i);
 			m_pMasterServer->SetCount(i, -1);
 			Packet.m_Address = Addr;
-			m_pNetClient->Send(&Packet);		
+			m_pNetClient->Send(&Packet);
 			if(g_Config.m_Debug)
 			{			
 				dbg_msg("client_srvbrowse", "Count-Request sent to %d", i);
@@ -636,10 +636,14 @@ void CServerBrowser::Update(bool ForceResort)
 				int Count = m_pMasterServer->GetCount(i);
 				if(Count == -1)
 				{
+				/* ignore Server
 					m_MasterServerCount = -1;
-					return; // we don't have the required server information
+					return;
+					// we don't have the required server information
+					*/
 				}
-				m_MasterServerCount += Count;		
+				else
+					m_MasterServerCount += Count;		
 			}
 		//request Server-List
 		NETADDR Addr;
@@ -664,7 +668,31 @@ void CServerBrowser::Update(bool ForceResort)
 			dbg_msg("client_srvbrowse", "ServerCount: %d, requesting server list", m_MasterServerCount);
 		}
 		m_LastPacketTick = 0;
-	}	
+	}
+	else if(m_MasterServerCount > -1)
+	{
+		m_MasterServerCount = 0;
+		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
+			{			
+				if(!m_pMasterServer->IsValid(i))
+					continue;
+				int Count = m_pMasterServer->GetCount(i);
+				if(Count == -1)
+				{
+				/* ignore Server
+					m_MasterServerCount = -1;
+					return;
+					// we don't have the required server information
+					*/
+				}
+				else
+					m_MasterServerCount += Count;		
+			}
+			if(g_Config.m_Debug)
+			{			
+				dbg_msg("client_srvbrowse", "ServerCount2: %d", m_MasterServerCount);
+			}
+	}
 	if(m_MasterServerCount > m_NumRequests  + m_LastPacketTick)
 	{
 		++m_LastPacketTick;
@@ -722,8 +750,8 @@ void CServerBrowser::Update(bool ForceResort)
 			pNext = pEntry->m_pNextReq;				
 			RemoveRequest(pEntry);	//release request
 			pEntry = pNext;
-		}	
-	}	
+		}
+	}
 	
 	// check if we need to resort
 	if(m_Sorthash != SortHash() || ForceResort)

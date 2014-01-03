@@ -935,15 +935,20 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
 		{
 			if(!m_pMasterServer->IsValid(i))
-				continue;			
-			if(net_addr_comp(&pPacket->m_Address, &m_pMasterServer->GetAddr(i)) == 0)
+				continue;
+			NETADDR tmp = m_pMasterServer->GetAddr(i);
+			if(net_addr_comp(&pPacket->m_Address, &tmp) == 0)			
 			{
 				ServerID = i;
 				break;
 			}
 		}
 		if(ServerCount > -1 && ServerID != -1)
+		{
 			m_pMasterServer->SetCount(ServerID, ServerCount);
+			if(g_Config.m_Debug)
+				dbg_msg("MasterCount", "Server %d got %d servers", ServerID, ServerCount);
+		}
 	}
 	// server list from master server
 	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_LIST) &&
