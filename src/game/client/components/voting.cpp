@@ -170,9 +170,6 @@ void CVoting::ClearOptions()
 
 void CVoting::OnReset()
 {
-	if(Client()->State() == IClient::STATE_LOADING)	// do not reset active vote while connecting
-		return;
-
 	m_Closetime = 0;
 	m_aDescription[0] = 0;
 	m_aReason[0] = 0;
