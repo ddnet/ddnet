@@ -408,8 +408,6 @@ void CGameContext::SendVoteSet(int ClientID)
 
 void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 {
-	CServer* pServ = (CServer*)Server();
-
 	if (Total > VANILLA_MAX_CLIENTS)
 	{
 		Yes = float(Yes) * VANILLA_MAX_CLIENTS / float(Total);
