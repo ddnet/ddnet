@@ -197,7 +197,7 @@ void CGameWorld::UpdatePlayerMaps()
 				continue;
 			}
 
-			dist[j].first = distance(GameServer()->m_apPlayers[i]->GetCharacter()->m_Pos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
+			dist[j].first = distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
 		}
 
 		// always send the player himself
