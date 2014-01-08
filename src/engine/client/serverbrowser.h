@@ -90,9 +90,6 @@ private:
 	char m_aFilterString[64];
 	char m_aFilterGametypeString[128];
 	
-	//used instead of g_Config.br_max_requests to get more servers
-	int m_CurrentMaxRequests;
-	
 	// the token is to keep server refresh separated from each other
 	int m_CurrentToken;
 
