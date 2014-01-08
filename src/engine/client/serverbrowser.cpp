@@ -688,10 +688,10 @@ void CServerBrowser::Update(bool ForceResort)
 				else
 					m_MasterServerCount += Count;		
 			}
-			if(g_Config.m_Debug)
-			{			
-				dbg_msg("client_srvbrowse", "ServerCount2: %d", m_MasterServerCount);
-			}
+			//if(g_Config.m_Debug)
+			//{
+			//	dbg_msg("client_srvbrowse", "ServerCount2: %d", m_MasterServerCount);
+			//}
 	}
 	if(m_MasterServerCount > m_NumRequests  + m_LastPacketTick)
 	{
