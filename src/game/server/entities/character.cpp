@@ -809,7 +809,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
 	// reset switches if we are the last player in team to prevent door opening cheat
-	if (Team() > TEAM_FLOCK && Team() < TEAM_SUPER && (Teams()->Count(Team()) < 2 || Teams()->TeamLocked(Team())) && GameServer()->Collision()->m_NumSwitchers > 0) {
+	if (Team() >= TEAM_FLOCK && Team() < TEAM_SUPER && (Teams()->Count(Team()) < 2 || Teams()->TeamLocked(Team())) && GameServer()->Collision()->m_NumSwitchers > 0) {
 		for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i) {
 			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team()] = true;
 			GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team()] = 0;
