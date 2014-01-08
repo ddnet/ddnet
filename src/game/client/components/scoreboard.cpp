@@ -210,7 +210,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float LineHeight = 60.0f;
 	float TeeSizeMod = 1.0f;
 	float Spacing = 16.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 16)
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
 	{
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
@@ -254,7 +254,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	// render player entries
 	y += HeadlineFontsize*2.0f;
 	float FontSize = 24.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 16)
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
 		FontSize = 16.0f;
 	CTextCursor Cursor;
 
@@ -278,7 +278,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			if(m_pClient->m_Snap.m_aTeamSize[Team] > 16)
+			if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
 				RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, 5.0f);
 			else
 				RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, 15.0f);
