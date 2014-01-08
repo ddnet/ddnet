@@ -548,9 +548,39 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 		pEntry->m_RequestTime = time_get();
 }
 
+void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const
+{
+	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO64)+1];
+	CNetChunk Packet;
+
+	if(g_Config.m_Debug)
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf),"requesting server info 64 from %s", aAddrStr);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
+	}
+
+	mem_copy(Buffer, SERVERBROWSE_GETINFO64, sizeof(SERVERBROWSE_GETINFO64));
+	Buffer[sizeof(SERVERBROWSE_GETINFO64)] = m_CurrentToken;
+
+	Packet.m_ClientID = -1;
+	Packet.m_Address = Addr;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_DataSize = sizeof(Buffer);
+	Packet.m_pData = Buffer;
+
+	m_pNetClient->Send(&Packet);
+
+	if(pEntry)
+		pEntry->m_RequestTime = time_get();
+}
+
 void CServerBrowser::Request(const NETADDR &Addr) const
 {
 	RequestImpl(Addr, 0);
+	RequestImpl64(Addr, 0);
 }
 
 
@@ -621,7 +651,10 @@ void CServerBrowser::Update(bool ForceResort)
 			break;
 
 		if(pEntry->m_RequestTime == 0)
+		{
 			RequestImpl(pEntry->m_Addr, pEntry);
+			RequestImpl64(pEntry->m_Addr, pEntry);
+		}
 
 		Count++;
 		pEntry = pEntry->m_pNextReq;

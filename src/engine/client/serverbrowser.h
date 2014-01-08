@@ -51,6 +51,8 @@ public:
 
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
 
+	CServerEntry *Find(const NETADDR &Addr);
+
 private:
 	CNetClient *m_pNetClient;
 	IMasterServer *m_pMasterServer;
@@ -101,13 +103,13 @@ private:
 	void Sort();
 	int SortHash() const;
 
-	CServerEntry *Find(const NETADDR &Addr);
 	CServerEntry *Add(const NETADDR &Addr);
 
 	void RemoveRequest(CServerEntry *pEntry);
 	void QueueRequest(CServerEntry *pEntry);
 
 	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const;
+	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 

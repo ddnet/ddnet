@@ -676,18 +676,24 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 	// server scoreboard
 	ServerScoreBoard.HSplitBottom(20.0f, &ServerScoreBoard, 0x0);
-	ServerScoreBoard.HSplitTop(ms_ListheaderHeight, &ServerHeader, &ServerScoreBoard);
-	RenderTools()->DrawUIRect(&ServerHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
-	RenderTools()->DrawUIRect(&ServerScoreBoard, vec4(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
-	UI()->DoLabelScaled(&ServerHeader, Localize("Scoreboard"), FontSize+2.0f, 0);
 
 	if(pSelectedServer)
 	{
-		ServerScoreBoard.Margin(3.0f, &ServerScoreBoard);
+		static int s_VoteList = 0;
+		static float s_ScrollValue = 0;
+		UiDoListboxStart(&s_VoteList, &ServerScoreBoard, 26.0f, Localize("Scoreboard"), "", pSelectedServer->m_NumClients, 1, -1, s_ScrollValue);
+
+		m_CallvoteSelectedOption = UiDoListboxEnd(&s_ScrollValue, 0);
+
 		for (int i = 0; i < pSelectedServer->m_NumClients; i++)
 		{
+			CListboxItem Item = UiDoListboxNextItem(&pSelectedServer->m_aClients[i]);
+
+			if(!Item.m_Visible)
+				continue;
+
 			CUIRect Name, Clan, Score, Flag;
-			ServerScoreBoard.HSplitTop(25.0f, &Name, &ServerScoreBoard);
+			Item.m_Rect.HSplitTop(25.0f, &Name, &Item.m_Rect);
 			if(UI()->DoButtonLogic(&pSelectedServer->m_aClients[i], "", 0, &Name))
 			{
 				if(pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_PLAYER)
