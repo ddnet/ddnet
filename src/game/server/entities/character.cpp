@@ -922,8 +922,10 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);*/
 
 	if (!m_Jetpack || m_ActiveWeapon != WEAPON_GUN)
-	m_EmoteType = EMOTE_PAIN;
-	m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
+	{
+		m_EmoteType = EMOTE_PAIN;
+		m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
+	}
 
 	vec2 Temp = m_Core.m_Vel + Force;
 	if(Temp.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
@@ -1015,8 +1017,7 @@ void CCharacter::Snap(int SnappingClient)
 	}
 	else if (m_Jetpack && m_ActiveWeapon == WEAPON_GUN)
 	{
-		if (pCharacter->m_Emote == EMOTE_NORMAL)
-			pCharacter->m_Emote = EMOTE_HAPPY,
+		pCharacter->m_Emote = EMOTE_HAPPY,
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 10;
 	}
