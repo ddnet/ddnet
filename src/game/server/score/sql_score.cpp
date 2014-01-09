@@ -32,41 +32,54 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 		gs_SqlLock = lock_create();
 
 	Init();
-	LoadPointMapList();
+	LoadPointMapListThread(this);
 }
 
 void CSqlScore::LoadPointMapList()
 {
+	//CSqlScoreData *Tmp = new CSqlScoreData();
+	//Tmp->m_ClientID = ClientID;
+	//str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
+	//Tmp->m_pSqlData = this;
+
+	void *LoadThread = thread_create(LoadPointMapListThread, this);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)LoadThread);
+#endif
+}
+
+void CSqlScore::LoadPointMapListThread(void *pUser)
+{
 	lock_wait(gs_SqlLock);
 
-	m_PointsSize = 0;
+	CSqlScore *pScore = (CSqlScore *)pUser;
 
 	std::ifstream f("points.cfg");
 	if (f.fail())
 		return;
 
-	if(!Connect())
+	if(!pScore->Connect())
 		return;
 
-	m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
+	pScore->m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
 	f.seekg(0);
-	delete m_PointsInfos;
-	m_PointsInfos = new CPointsInfo[m_PointsSize];
+	delete pScore->m_PointsInfos;
+	pScore->m_PointsInfos = new CPointsInfo[pScore->m_PointsSize];
 
 	char aBuf[256];
 	unsigned int Position = 0;
 
-	while (f.getline(aBuf, 256) && Position < m_PointsSize)
+	while (f.getline(aBuf, 256) && Position < pScore->m_PointsSize)
 	{
-		CPointsInfo& Info = m_PointsInfos[Position];
+		CPointsInfo& Info = pScore->m_PointsInfos[Position];
 		if (sscanf(aBuf, "%u %127[^\t\n]", &Info.m_Points, Info.m_aMapName) == 2)
 		{
-			NormalizeMapname(Info.m_aMapName);
-			str_format(aBuf, sizeof(aBuf), "SELECT count(Name) FROM %s_%s_race;", m_pPrefix, Info.m_aMapName);
+			pScore->NormalizeMapname(Info.m_aMapName);
+			str_format(aBuf, sizeof(aBuf), "SELECT count(Name) FROM %s_%s_race;", pScore->m_pPrefix, Info.m_aMapName);
 			try
 			{
-				m_pResults = m_pStatement->executeQuery(aBuf);
-				delete m_pResults;
+				pScore->m_pResults = pScore->m_pStatement->executeQuery(aBuf);
+				delete pScore->m_pResults;
 			}
 			catch (sql::SQLException &e)
 			{
@@ -76,11 +89,11 @@ void CSqlScore::LoadPointMapList()
 		}
 	}
 
-	m_PointsSize = Position;
+	pScore->m_PointsSize = Position;
 
 	lock_release(gs_SqlLock);
 
-	Disconnect();
+	pScore->Disconnect();
 
 	return;
 }

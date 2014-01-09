@@ -46,6 +46,7 @@ class CSqlScore: public IScore
 		return m_pServer;
 	}
 
+	static void LoadPointMapListThread(void *pUser);
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void SaveTeamScoreThread(void *pUser);
