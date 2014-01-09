@@ -21,7 +21,8 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 		m_pUser(g_Config.m_SvSqlUser),
 		m_pPass(g_Config.m_SvSqlPw),
 		m_pIp(g_Config.m_SvSqlIp),
-		m_Port(g_Config.m_SvSqlPort)
+		m_Port(g_Config.m_SvSqlPort),
+		m_PointsInfos(NULL)
 {
 	m_pDriver = NULL;
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
@@ -49,6 +50,7 @@ void CSqlScore::LoadPointMapList()
 
 	m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
 	f.seekg(0);
+	delete m_PointsInfos;
 	m_PointsInfos = new CPointsInfo[m_PointsSize];
 
 	char aBuf[256];
