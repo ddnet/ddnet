@@ -1008,6 +1008,11 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		CUnpacker Up;
 		CServerInfo Info = {0};
 
+		CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(pPacket->m_Address);
+		// Don't add info if we already got info64
+		if(pEntry->m_Info.m_MaxClients > VANILLA_MAX_CLIENTS)
+			return;
+
 		Up.Reset((unsigned char*)pPacket->m_pData+sizeof(SERVERBROWSE_INFO), pPacket->m_DataSize-sizeof(SERVERBROWSE_INFO));
 		int Token = str_toint(Up.GetString());
 		str_copy(Info.m_aVersion, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aVersion));
