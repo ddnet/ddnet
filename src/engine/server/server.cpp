@@ -1250,7 +1250,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int
 
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY))
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
 			if (Skip-- > 0)
 				continue;
