@@ -34,6 +34,8 @@ public:
 	virtual void TickDefered();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
+	virtual int NetworkClipped(int SnappingClient);
+	virtual int NetworkClipped(int SnappingClient, vec2 CheckPos);
 
 	bool IsGrounded();
 

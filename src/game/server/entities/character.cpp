@@ -1046,6 +1046,16 @@ void CCharacter::Snap(int SnappingClient)
 	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
 }
 
+int CCharacter::NetworkClipped(int SnappingClient)
+{
+	return NetworkClipped(SnappingClient, m_Pos);
+}
+
+int CCharacter::NetworkClipped(int SnappingClient, vec2 CheckPos)
+{
+	return 0;
+}
+
 // DDRace
 
 bool CCharacter::CanCollide(int ClientID)
