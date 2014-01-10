@@ -1010,7 +1010,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 		CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(pPacket->m_Address);
 		// Don't add info if we already got info64
-		if(pEntry->m_Info.m_MaxClients > VANILLA_MAX_CLIENTS)
+		if(pEntry && pEntry->m_Info.m_MaxClients > VANILLA_MAX_CLIENTS)
 			return;
 
 		Up.Reset((unsigned char*)pPacket->m_pData+sizeof(SERVERBROWSE_INFO), pPacket->m_DataSize-sizeof(SERVERBROWSE_INFO));
