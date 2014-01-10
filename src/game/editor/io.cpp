@@ -657,7 +657,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 						pGroup->AddLayer(pTiles);
 						void *pData = DataFile.GetData(pTilemapItem->m_Data);
-						int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Data);
+						unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Data);
 						pTiles->m_Image = pTilemapItem->m_Image;
 						pTiles->m_Game = pTilemapItem->m_Flags&TILESLAYERFLAG_GAME;
 
@@ -684,7 +684,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						if(pTiles->m_Tele)
 						{
 							void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
-							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Tele);
+							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Tele);
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile))
 							{
 								mem_copy(((CLayerTele*)pTiles)->m_pTeleTile, pTeleData, pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile));
@@ -716,7 +716,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						else if(pTiles->m_Speedup)
 						{
 							void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
-							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Speedup);
+							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Speedup);
 
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CSpeedupTile))
 							{
@@ -736,7 +736,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						else if(pTiles->m_Front)
 						{
 							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
-							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Front);
+							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Front);
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTile))
 								mem_copy(((CLayerFront*)pTiles)->m_pTiles, pFrontData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
 
@@ -745,7 +745,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						else if(pTiles->m_Switch)
 						{
 							void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
-							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Switch);
+							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Switch);
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile))
 							{
 								mem_copy(((CLayerSwitch*)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile));
