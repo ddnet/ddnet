@@ -37,7 +37,6 @@ public:
 private:
 
 	void RenderDDRaceEffects();
-	void RenderRecord();
 	float m_CheckpointDiff;
 	int m_DDRaceTime;
 	int m_LastReceivedTimeTick;
