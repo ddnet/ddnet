@@ -153,7 +153,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	int TotalPlayers = 0;
 
-	for(int i = 0; i  < MAX_CLIENTS; ++i)
+	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(!m_pClient->m_Snap.m_paInfoByTeam[i])
 			continue;
@@ -236,10 +236,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			else
 				m_pClient->Friends()->AddFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
 		}
-
-	UiDoListboxEnd(&s_ScrollValue, 0);
 	}
 
+	UiDoListboxEnd(&s_ScrollValue, 0);
 	/*
 	CUIRect bars;
 	votearea.HSplitTop(10.0f, 0, &votearea);
