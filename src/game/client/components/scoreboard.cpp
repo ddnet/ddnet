@@ -150,22 +150,28 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	if(Team == TEAM_SPECTATORS)
 		return;
 
+	bool lower16 = false;
 	bool upper16 = false;
 	bool lower32 = false;
 	bool upper32 = false;
-	if (Team == -3)
+	if(Team == -3)
 	{
 		upper16 = true;
 		Team = 0;
 	}
-	else if (Team == -4)
+	else if(Team == -4)
 	{
 		lower32 = true;
 		Team = 0;
 	}
-	else if (Team == -5)
+	else if(Team == -5)
 	{
 		upper32 = true;
+		Team = 0;
+	}
+	else if(Team == -6)
+	{
+		lower16 = true;
 		Team = 0;
 	}
 
@@ -176,7 +182,12 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.5f);
-	RenderTools()->DrawRoundRect(x, y, w, h, 17.0f);
+	if(upper16 || upper32)
+		RenderTools()->DrawRoundRectExt(x, y, w, h, 17.0f, 10);
+	else if(lower16 || lower32)
+		RenderTools()->DrawRoundRectExt(x, y, w, h, 17.0f, 5);
+	else
+		RenderTools()->DrawRoundRect(x, y, w, h, 17.0f);
 	Graphics()->QuadsEnd();
 
 	// render title
@@ -225,8 +236,13 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			aBuf[0] = 0;
 	}
 
-	float tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1);
-	TextRender()->Text(0, x+w-tw-20.0f, y, TitleFontsize, aBuf, -1);
+	float tw;
+
+	if (!lower16 && !lower32)
+	{
+		tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1);
+		TextRender()->Text(0, x+w-tw-20.0f, y, TitleFontsize, aBuf, -1);
+	}
 
 	// calculate measurements
 	x += 10.0f;
@@ -455,19 +471,14 @@ void CScoreboard::OnRender()
 	{
 		if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS))
 		{
-			char aBuf1[64];
-			char aBuf2[64];
-			str_format(aBuf1, sizeof(aBuf1), "%s (1/2)", Localize("Score board"));
-			str_format(aBuf2, sizeof(aBuf2), "%s (2/2)", Localize("Score board"));
-
 			if(m_pClient->m_Snap.m_aTeamSize[0] > 32)
 			{
-				RenderScoreboard(Width/2-w-5.0f, 150.0f, w, -4, aBuf1);
-				RenderScoreboard(Width/2+5.0f, 150.0f, w, -5, aBuf2);
+				RenderScoreboard(Width/2-w, 150.0f, w, -4, 0);
+				RenderScoreboard(Width/2, 150.0f, w, -5, "");
 			} else if(m_pClient->m_Snap.m_aTeamSize[0] > 16)
 			{
-				RenderScoreboard(Width/2-w-5.0f, 150.0f, w, 0, aBuf1);
-				RenderScoreboard(Width/2+5.0f, 150.0f, w, -3, aBuf2);
+				RenderScoreboard(Width/2-w, 150.0f, w, -6, 0);
+				RenderScoreboard(Width/2, 150.0f, w, -3, "");
 			} else
 			{
 				RenderScoreboard(Width/2-w/2, 150.0f, w, 0, 0);
