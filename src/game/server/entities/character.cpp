@@ -383,36 +383,39 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_GUN:
 		{
-			CProjectile *pProj = new CProjectile
-					(
-					GameWorld(),
-					WEAPON_GUN,//Type
-					m_pPlayer->GetCID(),//Owner
-					ProjStartPos,//Pos
-					Direction,//Dir
-					(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),//Span
-					0,//Freeze
-					0,//Explosive
-					0,//Force
-					-1,//SoundImpact
-					WEAPON_GUN//Weapon
-					);
-
-			// pack the Projectile and send it to the client Directly
-			CNetObj_Projectile p;
-			pProj->FillInfo(&p);
-
-			CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
-			Msg.AddInt(1);
-			for(unsigned i = 0; i < sizeof(CNetObj_Projectile)/sizeof(int); i++)
-				Msg.AddInt(((int *)&p)[i]);
-
-			Server()->SendMsg(&Msg, 0, m_pPlayer->GetCID());
-
 			if (m_Jetpack)
+			{
 				TakeDamage(Direction * -1.0f * (g_Config.m_SvJetpack / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
+			}
+			else
+			{
+				CProjectile *pProj = new CProjectile
+						(
+						GameWorld(),
+						WEAPON_GUN,//Type
+						m_pPlayer->GetCID(),//Owner
+						ProjStartPos,//Pos
+						Direction,//Dir
+						(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),//Span
+						0,//Freeze
+						0,//Explosive
+						0,//Force
+						-1,//SoundImpact
+						WEAPON_GUN//Weapon
+						);
 
-			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+				// pack the Projectile and send it to the client Directly
+				CNetObj_Projectile p;
+				pProj->FillInfo(&p);
+
+				CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
+				Msg.AddInt(1);
+				for(unsigned i = 0; i < sizeof(CNetObj_Projectile)/sizeof(int); i++)
+					Msg.AddInt(((int *)&p)[i]);
+
+				Server()->SendMsg(&Msg, 0, m_pPlayer->GetCID());
+				GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			}
 		} break;
 
 		case WEAPON_SHOTGUN:
@@ -573,7 +576,7 @@ void CCharacter::GiveNinja()
 	if (!m_FreezeTime)
 		m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if (m_ActiveWeapon != WEAPON_NINJA)
-	m_LastWeapon = m_ActiveWeapon;
+		m_LastWeapon = m_ActiveWeapon;
 	m_ActiveWeapon = WEAPON_NINJA;
 
 	if(!m_aWeapons[WEAPON_NINJA].m_Got)
@@ -809,7 +812,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
 	// reset switches if we are the last player in team to prevent door opening cheat
-	if (Team() >= TEAM_FLOCK && Team() < TEAM_SUPER && (Teams()->Count(Team()) < 2 || Teams()->TeamLocked(Team())) && GameServer()->Collision()->m_NumSwitchers > 0) {
+	if ((Team() == TEAM_FLOCK && g_Config.m_SvTeam == 3) || (Team() > TEAM_FLOCK && Team() < TEAM_SUPER && (Teams()->Count(Team()) < 2 || Teams()->TeamLocked(Team())) && GameServer()->Collision()->m_NumSwitchers > 0)) {
 		for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i) {
 			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team()] = true;
 			GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team()] = 0;
@@ -918,8 +921,11 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	else
 		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);*/
 
-	m_EmoteType = EMOTE_PAIN;
-	m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
+	if (!m_Jetpack || m_ActiveWeapon != WEAPON_GUN)
+	{
+		m_EmoteType = EMOTE_PAIN;
+		m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
+	}
 
 	vec2 Temp = m_Core.m_Vel + Force;
 	if(Temp.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
@@ -1008,6 +1014,12 @@ void CCharacter::Snap(int SnappingClient)
 			pCharacter->m_Emote = EMOTE_BLINK;
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 0;
+	}
+	else if (m_Jetpack && m_ActiveWeapon == WEAPON_GUN)
+	{
+		pCharacter->m_Emote = EMOTE_HAPPY,
+		pCharacter->m_Weapon = WEAPON_NINJA;
+		pCharacter->m_AmmoCount = 10;
 	}
 	else
 		pCharacter->m_Weapon = m_ActiveWeapon;
