@@ -172,8 +172,6 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	//List.HSplitTop(28.0f, 0, &List);
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
 
-	m_CallvoteSelectedOption = UiDoListboxEnd(&s_ScrollValue, 0);
-
 	// options
 	static int s_aPlayerIDs[MAX_CLIENTS][2] = {{0}};
 
@@ -238,6 +236,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			else
 				m_pClient->Friends()->AddFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
 		}
+
+	UiDoListboxEnd(&s_ScrollValue, 0);
 	}
 
 	/*

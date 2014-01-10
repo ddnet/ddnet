@@ -675,15 +675,13 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	}
 
 	// server scoreboard
-	ServerScoreBoard.HSplitBottom(20.0f, &ServerScoreBoard, 0x0);
+	//ServerScoreBoard.HSplitBottom(20.0f, &ServerScoreBoard, 0x0);
 
 	if(pSelectedServer)
 	{
 		static int s_VoteList = 0;
 		static float s_ScrollValue = 0;
 		UiDoListboxStart(&s_VoteList, &ServerScoreBoard, 26.0f, Localize("Scoreboard"), "", pSelectedServer->m_NumClients, 1, -1, s_ScrollValue);
-
-		m_CallvoteSelectedOption = UiDoListboxEnd(&s_ScrollValue, 0);
 
 		for (int i = 0; i < pSelectedServer->m_NumClients; i++)
 		{
@@ -771,6 +769,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
 			m_pClient->m_pCountryFlags->Render(pSelectedServer->m_aClients[i].m_Country, &Color, Flag.x, Flag.y, Flag.w, Flag.h);
 		}
+
+		UiDoListboxEnd(&s_ScrollValue, 0);
 	}
 }
 
