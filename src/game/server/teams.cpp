@@ -150,6 +150,8 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	//No need to switch team if you there
 	if (m_Core.Team(ClientID) == Team)
 		return false;
+	if (!Character(ClientID))
+		return false;
 	//You cannot be in TEAM_SUPER if you not super
 	if (Team == TEAM_SUPER && !Character(ClientID)->m_Super)
 		return false;
