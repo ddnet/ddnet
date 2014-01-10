@@ -657,6 +657,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 						pGroup->AddLayer(pTiles);
 						void *pData = DataFile.GetData(pTilemapItem->m_Data);
+						int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Data);
 						pTiles->m_Image = pTilemapItem->m_Image;
 						pTiles->m_Game = pTilemapItem->m_Flags&TILESLAYERFLAG_GAME;
 
@@ -664,14 +665,17 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						if(pTilemapItem->m_Version >= 3)
 							IntsToStr(pTilemapItem->m_aName, sizeof(pTiles->m_aName)/sizeof(int), pTiles->m_aName);
 
-						mem_copy(pTiles->m_pTiles, pData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
-
-						if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
+						if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTile))
 						{
-							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+							mem_copy(pTiles->m_pTiles, pData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
+
+							if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
 							{
-								if(pTiles->m_pTiles[i].m_Index)
-									pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
+								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+								{
+									if(pTiles->m_pTiles[i].m_Index)
+										pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
+								}
 							}
 						}
 
@@ -680,42 +684,51 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						if(pTiles->m_Tele)
 						{
 							void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
-							mem_copy(((CLayerTele*)pTiles)->m_pTeleTile, pTeleData, pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile));
-
-							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Tele);
+							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile))
 							{
-								if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEIN)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEIN;
-								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEINEVIL)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEINEVIL;
-								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEOUT)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEOUT;
-								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECK)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECK;
-								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECKIN)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECKIN;
-								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECKOUT)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECKOUT;
-								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEINWEAPON)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEINWEAPON;
-								else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEINHOOK)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEINHOOK;
-								else
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
+								mem_copy(((CLayerTele*)pTiles)->m_pTeleTile, pTeleData, pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile));
+
+								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+								{
+									if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEIN)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEIN;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEINEVIL)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEINEVIL;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEOUT)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEOUT;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECK)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECK;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECKIN)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECKIN;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECKOUT)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECKOUT;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEINWEAPON)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEINWEAPON;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEINHOOK)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELEINHOOK;
+									else
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
+								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Tele);
 						}
 						else if(pTiles->m_Speedup)
 						{
 							void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
-							mem_copy(((CLayerSpeedup*)pTiles)->m_pSpeedupTile, pSpeedupData, pTiles->m_Width*pTiles->m_Height*sizeof(CSpeedupTile));
+							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Speedup);
 
-							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CSpeedupTile))
 							{
-								if(((CLayerSpeedup*)pTiles)->m_pSpeedupTile[i].m_Force > 0)
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_BOOST;
-								else
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
+								mem_copy(((CLayerSpeedup*)pTiles)->m_pSpeedupTile, pSpeedupData, pTiles->m_Width*pTiles->m_Height*sizeof(CSpeedupTile));
+
+								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+								{
+									if(((CLayerSpeedup*)pTiles)->m_pSpeedupTile[i].m_Force > 0)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_BOOST;
+									else
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
+								}
 							}
 
 							DataFile.UnloadData(pTilemapItem->m_Speedup);
@@ -723,73 +736,79 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						else if(pTiles->m_Front)
 						{
 							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
-							mem_copy(((CLayerFront*)pTiles)->m_pTiles, pFrontData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
+							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Front);
+							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTile))
+								mem_copy(((CLayerFront*)pTiles)->m_pTiles, pFrontData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
 
 							DataFile.UnloadData(pTilemapItem->m_Front);
 						}
 						else if(pTiles->m_Switch)
 						{
 							void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
-							mem_copy(((CLayerSwitch*)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile));
-
-							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+							int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Switch);
+							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile))
 							{
-								if(((((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
-									continue;
-								if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHTIMEDOPEN)
+								mem_copy(((CLayerSwitch*)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile));
+
+								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHTIMEDOPEN;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHTIMEDCLOSE)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHTIMEDCLOSE;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHOPEN)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHOPEN;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHCLOSE)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHCLOSE;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_FREEZE)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_FREEZE;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_DFREEZE)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_DFREEZE;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_DUNFREEZE)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_DUNFREEZE;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_HIT_START)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_HIT_START;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_HIT_END)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_HIT_END;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
-								}
-								else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_JUMP)
-								{
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_JUMP;
-									((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									if(((((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
+										continue;
+									if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHTIMEDOPEN)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHTIMEDOPEN;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHTIMEDCLOSE)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHTIMEDCLOSE;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHOPEN)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHOPEN;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHCLOSE)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_SWITCHCLOSE;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_FREEZE)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_FREEZE;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_DFREEZE)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_DFREEZE;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_DUNFREEZE)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_DUNFREEZE;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_HIT_START)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_HIT_START;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_HIT_END)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_HIT_END;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_JUMP)
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_JUMP;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
 								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Switch);

@@ -40,14 +40,25 @@ void CCollision::Init(class CLayers *pLayers)
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
 
 	if(m_pLayers->TeleLayer())
-		m_pTele = static_cast<CTeleTile *>(m_pLayers->Map()->GetData(m_pLayers->TeleLayer()->m_Tele));
+	{
+		int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->TeleLayer()->m_Tele);
+		if (Size >= m_Width*m_Height*sizeof(CTeleTile))
+			m_pTele = static_cast<CTeleTile *>(m_pLayers->Map()->GetData(m_pLayers->TeleLayer()->m_Tele));
+	}
 
 	if(m_pLayers->SpeedupLayer())
-		m_pSpeedup = static_cast<CSpeedupTile *>(m_pLayers->Map()->GetData(m_pLayers->SpeedupLayer()->m_Speedup));
+	{
+		int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->SpeedupLayer()->m_Speedup);
+		if (Size >= m_Width*m_Height*sizeof(CSpeedupTile))
+			m_pSpeedup = static_cast<CSpeedupTile *>(m_pLayers->Map()->GetData(m_pLayers->SpeedupLayer()->m_Speedup));
+	}
 
 	if(m_pLayers->SwitchLayer())
 	{
-		m_pSwitch = static_cast<CSwitchTile *>(m_pLayers->Map()->GetData(m_pLayers->SwitchLayer()->m_Switch));
+		int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->SwitchLayer()->m_Switch);
+		if (Size >= m_Width*m_Height*sizeof(CSwitchTile))
+			m_pSwitch = static_cast<CSwitchTile *>(m_pLayers->Map()->GetData(m_pLayers->SwitchLayer()->m_Switch));
+
 		m_pDoor = new CDoorTile[m_Width*m_Height];
 		mem_zero(m_pDoor, m_Width * m_Height * sizeof(CDoorTile));
 	}
@@ -58,7 +69,11 @@ void CCollision::Init(class CLayers *pLayers)
 	}
 
 	if(m_pLayers->FrontLayer())
-		m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
+	{
+		int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->FrontLayer()->m_Front);
+		if (Size >= m_Width*m_Height*sizeof(CFrontTile))
+			m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
+	}
 
 	for(int i = 0; i < m_Width*m_Height; i++)
 	{
