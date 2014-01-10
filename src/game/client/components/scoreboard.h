@@ -29,9 +29,12 @@ public:
 
 	// DDRace
 
+	virtual void OnMessage(int MsgType, void *pRawMsg);
+
 private:
 
 	bool m_IsGameTypeRace;
+	float m_ServerRecord;
 };
 
 #endif

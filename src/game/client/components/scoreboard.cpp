@@ -32,18 +32,29 @@ void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 	CServerInfo Info;
 
 	pSelf->Client()->GetServerInfo(&Info);
-	pSelf->m_IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race");
+	pSelf->m_IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
 	pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 
 void CScoreboard::OnReset()
 {
 	m_Active = false;
+	m_ServerRecord = -1.0f;
 }
 
 void CScoreboard::OnRelease()
 {
 	m_Active = false;
+}
+
+void CScoreboard::OnMessage(int MsgType, void *pRawMsg)
+{
+	if(MsgType == NETMSGTYPE_SV_RECORD)
+	{
+		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
+		m_ServerRecord = (float)pMsg->m_ServerTimeBest/100;
+		//m_PlayerRecord = (float)pMsg->m_PlayerTimeBest/100;
+	}
 }
 
 void CScoreboard::OnConsoleInit()
@@ -203,6 +214,17 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
 	}
+
+	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
+	{
+		if (m_ServerRecord > 0)
+		{
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d", round(m_ServerRecord)/60, round(m_ServerRecord)%60);
+		}
+		else
+			aBuf[0] = 0;
+	}
+
 	float tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1);
 	TextRender()->Text(0, x+w-tw-20.0f, y, TitleFontsize, aBuf, -1);
 

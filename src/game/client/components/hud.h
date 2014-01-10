@@ -44,8 +44,6 @@ private:
 	int m_CheckpointTick;
 	int m_DDRaceTick;
 	bool m_FinishTime;
-	float m_ServerRecord;
-	float m_PlayerRecord;
 	bool m_DDRaceTimeReceived;
 };
 

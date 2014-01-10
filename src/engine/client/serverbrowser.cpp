@@ -421,19 +421,17 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo)
 {
 	static int temp = 0;
-	static int temp2 = 0;
 	CServerEntry *pEntry = 0;
 	if(Type == IServerBrowser::SET_MASTER_ADD)
 	{
 		if(m_ServerlistType != IServerBrowser::TYPE_INTERNET)
 			return;
 		m_LastPacketTick = 0;
-		++temp2;
+		++temp;
 		if(!Find(Addr))
 		{
 			pEntry = Add(Addr);
 			QueueRequest(pEntry);
-		//	dbg_msg("Test", "%d, %d", ++temp, temp2);
 		}
 	}
 	else if(Type == IServerBrowser::SET_FAV_ADD)

@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
+#include <engine/serverbrowser.h>
 #include <engine/textrender.h>
 #include <engine/shared/config.h>
 
@@ -33,8 +34,6 @@ void CHud::OnReset()
 	m_CheckpointTick = 0;
 	m_DDRaceTick = 0;
 	m_FinishTime = false;
-	m_ServerRecord = -1.0f;
-	m_PlayerRecord = -1.0f;
 	m_DDRaceTimeReceived = false;
 }
 
@@ -201,7 +200,20 @@ void CHud::RenderScoreHud()
 			for(int t = 0; t < 2; ++t)
 			{
 				if(apPlayerInfo[t])
-					str_format(aScore[t], sizeof(aScore)/2, "%d", apPlayerInfo[t]->m_Score);
+				{
+					CServerInfo Info;
+					Client()->GetServerInfo(&Info);
+					bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
+					if(IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
+					{
+						if (apPlayerInfo[t]->m_Score != -9999)
+							str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d", abs(apPlayerInfo[t]->m_Score)/60, abs(apPlayerInfo[t]->m_Score)%60);
+						else
+							aScore[t][0] = 0;
+					}
+					else
+						str_format(aScore[t], sizeof(aScore)/2, "%d", apPlayerInfo[t]->m_Score);
+				}
 				else
 					aScore[t][0] = 0;
 			}
@@ -490,7 +502,6 @@ void CHud::OnRender()
 			RenderConnectionWarning();
 		RenderTeambalanceWarning();
 		RenderVoting();
-		RenderRecord();
 	}
 	RenderCursor();
 }
@@ -525,12 +536,6 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 			m_CheckpointTick = 0;
 			m_DDRaceTime = 0;
 		}
-	}
-	else if(MsgType == NETMSGTYPE_SV_RECORD)
-	{
-		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
-		m_ServerRecord = (float)pMsg->m_ServerTimeBest/100;
-		m_PlayerRecord = (float)pMsg->m_PlayerTimeBest/100;
 	}
 }
 
@@ -592,25 +597,4 @@ void CHud::RenderDDRaceEffects()
 
 	if(m_DDRaceTick >= 100)
 		m_DDRaceTick = 0;
-}
-
-void CHud::RenderRecord()
-{
-	if(m_ServerRecord > 0 )
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Server best:");
-		TextRender()->Text(0, 5, 40, 6, aBuf, -1);
-		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_ServerRecord/60, m_ServerRecord-((int)m_ServerRecord/60*60));
-		TextRender()->Text(0, 53, 40, 6, aBuf, -1);
-	}
-
-	if(m_PlayerRecord > 0 )
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Personal best:");
-		TextRender()->Text(0, 5, 47, 6, aBuf, -1);
-		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_PlayerRecord/60, m_PlayerRecord-((int)m_PlayerRecord/60*60));
-		TextRender()->Text(0, 53, 47, 6, aBuf, -1);
-	}
 }
