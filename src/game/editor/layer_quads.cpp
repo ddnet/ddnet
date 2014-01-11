@@ -28,9 +28,9 @@ void CLayerQuads::Render()
 		Graphics()->TextureSet(m_pEditor->m_Map.m_lImages[m_Image]->m_TexID);
 
 	Graphics()->BlendNone();
-	m_pEditor->RenderTools()->RenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
+	m_pEditor->RenderTools()->ForceRenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
 	Graphics()->BlendNormal();
-	m_pEditor->RenderTools()->RenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
+	m_pEditor->RenderTools()->ForceRenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
 }
 
 CQuad *CLayerQuads::NewQuad()

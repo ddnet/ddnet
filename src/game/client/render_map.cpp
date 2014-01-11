@@ -88,6 +88,11 @@ void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENV
 	if(!g_Config.m_ClShowQuads || g_Config.m_ClShowEntities)
 		return;
 
+	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser);
+}
+
+void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
+{
 	Graphics()->QuadsBegin();
 	float Conv = 1/255.0f;
 	for(int i = 0; i < NumQuads; i++)
