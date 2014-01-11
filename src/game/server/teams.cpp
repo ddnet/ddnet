@@ -167,7 +167,38 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
+	ForceLeaveTeam(ClientID);
+
+	m_Core.Team(ClientID, Team);
+
+	if (m_Core.Team(ClientID) != TEAM_SUPER)
+		m_MembersCount[m_Core.Team(ClientID)]++;
+	if (Team != TEAM_SUPER && m_TeamState[Team] == TEAMSTATE_EMPTY)
+	{
+		ChangeTeamState(Team, TEAMSTATE_OPEN);
+
+		if (GameServer()->Collision()->m_NumSwitchers > 0) {
+			for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i)
+			{
+				GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = true;
+				GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
+				GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
+			}
+		}
+	}
+
+	//for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+	//{
+	//	if (GetPlayer(LoopClientID)
+	//			&& GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
+	//		SendTeamsState(LoopClientID);
+	//}
+}
+
+void CGameTeams::ForceLeaveTeam(int ClientID)
+{
 	m_TeeFinished[ClientID] = false;
+
 	if (m_Core.Team(ClientID) != TEAM_FLOCK
 			&& m_Core.Team(ClientID) != TEAM_SUPER
 			&& m_TeamState[m_Core.Team(ClientID)] != TEAMSTATE_EMPTY)
@@ -187,20 +218,9 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			SetTeamLock(m_Core.Team(ClientID), false);
 		}
 	}
+
 	if (Count(m_Core.Team(ClientID)) > 0)
 		m_MembersCount[m_Core.Team(ClientID)]--;
-	m_Core.Team(ClientID, Team);
-	if (m_Core.Team(ClientID) != TEAM_SUPER)
-		m_MembersCount[m_Core.Team(ClientID)]++;
-	if (Team != TEAM_SUPER && m_TeamState[Team] == TEAMSTATE_EMPTY)
-		ChangeTeamState(Team, TEAMSTATE_OPEN);
-
-	//for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-	//{
-	//	if (GetPlayer(LoopClientID)
-	//			&& GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
-	//		SendTeamsState(LoopClientID);
-	//}
 }
 
 int CGameTeams::Count(int Team) const

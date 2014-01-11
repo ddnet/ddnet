@@ -419,6 +419,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
+		Controller->m_Teams.ForceLeaveTeam(m_ClientID);
 		Controller->m_Teams.m_Core.Team(m_ClientID, 0);
 	}
 

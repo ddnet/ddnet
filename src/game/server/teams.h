@@ -61,6 +61,7 @@ public:
 
 	//need to be very carefull using this method
 	void SetForceCharacterTeam(int id, int Team);
+	void ForceLeaveTeam(int id);
 
 	void Reset();
 
