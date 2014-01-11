@@ -1048,6 +1048,9 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			if(net_addr_comp(&m_ServerAddress, &pPacket->m_Address) == 0)
 			{
+				if(m_CurrentServerInfo.m_MaxClients > VANILLA_MAX_CLIENTS)
+					return;
+
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
