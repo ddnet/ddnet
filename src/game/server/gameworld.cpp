@@ -192,12 +192,11 @@ void CGameWorld::UpdatePlayerMaps()
 					)
 				)
 			)
-			{
 				dist[j].first = 1e8;
-				continue;
-			}
+			else
+				dist[j].first = 0;
 
-			dist[j].first = distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
+			dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
 		}
 
 		// always send the player himself
@@ -228,8 +227,7 @@ void CGameWorld::UpdatePlayerMaps()
 			if (mapc < VANILLA_MAX_CLIENTS - 1)
 				map[mapc] = k;
 			else
-				if (dist[j].first < 4300) // dont bother freeing up space for players which are too far to be displayed anyway
-					demand++;
+				demand++;
 		}
 		for (int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
 		{
