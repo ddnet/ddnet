@@ -580,8 +580,8 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 
 void CServerBrowser::Request(const NETADDR &Addr) const
 {
-	RequestImpl(Addr, 0);
 	RequestImpl64(Addr, 0);
+	RequestImpl(Addr, 0);
 }
 
 
@@ -713,8 +713,8 @@ void CServerBrowser::Update(bool ForceResort)
 
 		if(pEntry->m_RequestTime == 0)
 		{
-			RequestImpl(pEntry->m_Addr, pEntry);
 			RequestImpl64(pEntry->m_Addr, pEntry);
+			RequestImpl(pEntry->m_Addr, pEntry);
 		}
 
 		Count++;
