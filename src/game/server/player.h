@@ -139,6 +139,7 @@ public:
 	int m_Authed;
 	bool m_IsUsingDDRaceClient;
 	bool m_ShowOthers;
+	bool m_NinjaJetpack;
 	bool m_Afk;
 
 	int m_ChatScore;

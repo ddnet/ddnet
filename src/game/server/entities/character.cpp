@@ -387,7 +387,7 @@ void CCharacter::FireWeapon()
 			{
 				TakeDamage(Direction * -1.0f * (g_Config.m_SvJetpack / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 			}
-			else
+			if (!m_Jetpack || !m_pPlayer->m_NinjaJetpack)
 			{
 				CProjectile *pProj = new CProjectile
 						(
@@ -1015,7 +1015,7 @@ void CCharacter::Snap(int SnappingClient)
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 0;
 	}
-	else if (m_Jetpack && m_ActiveWeapon == WEAPON_GUN)
+	else if (m_pPlayer->m_NinjaJetpack && m_Jetpack && m_ActiveWeapon == WEAPON_GUN)
 	{
 		pCharacter->m_Emote = EMOTE_HAPPY,
 		pCharacter->m_Weapon = WEAPON_NINJA;

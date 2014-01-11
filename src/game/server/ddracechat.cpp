@@ -880,6 +880,21 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConNinjaJetpack(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+	if (pResult->NumArguments())
+		pPlayer->m_NinjaJetpack = pResult->GetInteger(0);
+	else
+		pPlayer->m_NinjaJetpack = !pPlayer->m_NinjaJetpack;
+}
+
 void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
