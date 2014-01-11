@@ -162,66 +162,57 @@ void CPlayers::Predict(
 
 	static double ping = 0;
 
-    if(pInfo.m_Local) {
+	if(pInfo.m_Local) {
 		ping = mix(ping, (double)pInfo.m_Latency, 0.1);
-    }
+	}
 
-    if(!pInfo.m_Local)
+	if(!pInfo.m_Local)
 	{
+		/*
+		for ping = 260, usual missprediction distances:
 
-	/*
-	for ping = 260, usual missprediction distances:
+		move = 120-140
+		jump = 130
+		dj = 250
 
-	move = 120-140
-	jump = 130
-	dj = 250
+		normalized:
+		move = 0.461 - 0.538
+		jump = 0.5
+		dj = .961
 
-	normalized:
-	move = 0.461 - 0.538
-	jump = 0.5
-	dj = .961
-
-	*/
+		*/
 		//printf("%d\n", m_pClient->m_Snap.m_pLocalInfo->m_Latency);
 
 
-	    if(m_pClient->m_Snap.m_pLocalInfo)
+		if(m_pClient->m_Snap.m_pLocalInfo)
 			ping = mix(ping, (double)m_pClient->m_Snap.m_pLocalInfo->m_Latency, 0.1);
-
-//		printf("%f\n", ping);
-		
-//		static double ping = mix(ping, pInfo.m_Latency, 0.1);
 
 		double d = length(PrevPredPos - Position)/ping;
 
-
 		if((d > 0.4) && (d < 5.))
 		{
-
 //			if(MoveCnt == 0)
 //				printf("[\n");
 			if(MoveCnt == 0)
 				SmoothPos = NonPredPos;
 
 			MoveCnt = 10;
-//			SmoothPos = PrevPredPos;
-//			SmoothPos = mix(NonPredPos, Position, 0.6);
-
+//		SmoothPos = PrevPredPos;
+//		SmoothPos = mix(NonPredPos, Position, 0.6);
 		}
 
 		PrevPredPos = Position;
 
 		if(MoveCnt > 0)
 		{
-
-//			Position = mix(mix(NonPredPos, Position, 0.5), SmoothPos, (((float)MoveCnt))/15);
-//			Position = mix(mix(NonPredPos, Position, 0.5), SmoothPos, 0.5);
+//		Position = mix(mix(NonPredPos, Position, 0.5), SmoothPos, (((float)MoveCnt))/15);
+//		Position = mix(mix(NonPredPos, Position, 0.5), SmoothPos, 0.5);
 			Position = mix(NonPredPos, Position, 0.5);
 
 			SmoothPos = Position;
 			MoveCnt--;
-//			if(MoveCnt == 0)
-//				printf("]\n\n");
+//		if(MoveCnt == 0)
+//			printf("]\n\n");
 		}
 	}
 }
@@ -231,8 +222,8 @@ void CPlayers::RenderHook(
 	const CNetObj_Character *pPlayerChar,
 	const CNetObj_PlayerInfo *pPrevInfo,
 	const CNetObj_PlayerInfo *pPlayerInfo,
-    const vec2 &parPosition,
-    const vec2 &PositionTo
+	const vec2 &parPosition,
+	const vec2 &PositionTo
 	)
 {
 	CNetObj_Character Prev;
@@ -522,9 +513,14 @@ void CPlayers::RenderPlayer(
 	{
 		if (Player.m_PlayerFlags&PLAYERFLAG_AIM)
 		{
+			vec2 ExDirection = Direction;
+			
+			if (pPlayerInfo->m_Local)
+				ExDirection = normalize(vec2(m_pClient->m_pControls->m_InputData.m_TargetX, m_pClient->m_pControls->m_InputData.m_TargetY));
+
 			Graphics()->TextureSet(-1);
-			vec2 initPos = Position + Direction * 42.0f;
-			vec2 finishPos = initPos + Direction * (m_pClient->m_Tuning.m_HookLength-60.0f);
+			vec2 initPos = Position + ExDirection * 42.0f;
+			vec2 finishPos = initPos + ExDirection * (m_pClient->m_Tuning.m_HookLength-42.0f);
 			Graphics()->LinesBegin();
 			Graphics()->SetColor(1.00f, 0.0f, 0.0f, 1.00f);
 
@@ -532,12 +528,12 @@ void CPlayers::RenderPlayer(
 			Graphics()->SetColor(1.00f, 0.0f, 0.0f, 1.00f);
 			if (Collision()->IntersectLine(initPos, finishPos, &finishPos, 0x0, true))
 			{
-				vec2 finishPosPost = finishPos+Direction * 1.0f;
+				vec2 finishPosPost = finishPos;
 				if (!(Collision()->GetCollisionAt(finishPosPost.x, finishPosPost.y)&CCollision::COLFLAG_NOHOOK))
 					Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
 			}
 
-			if (m_pClient->IntersectCharacter(initPos, finishPos, 12.0f, finishPos) != -1)
+			if (m_pClient->IntersectCharacter(initPos, finishPos, 2.2f, finishPos) != -1)
 				Graphics()->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
 
 			IGraphics::CLineItem LineItem(Position.x, Position.y, finishPos.x, finishPos.y);
