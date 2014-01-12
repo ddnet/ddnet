@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <iostream>
 #include "gamecore.h"
 
 #include <engine/shared/config.h>
@@ -208,7 +207,6 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				m_HookState = HOOK_FLYING;
 				m_HookPos = m_Pos+TargetDirection*PhysSize*1.5f;
-				std::cout << m_Pos.x << ":" << m_Pos.y << ", " << m_HookPos.x << ":" << m_HookPos.y << std::endl;
 				m_HookDir = TargetDirection;
 				m_HookedPlayer = -1;
 				m_HookTick = 0;
