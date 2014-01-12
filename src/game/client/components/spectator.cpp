@@ -175,6 +175,39 @@ void CSpectator::OnRender()
 	// draw background
 	float Width = 400*3.0f*Graphics()->ScreenAspect();
 	float Height = 400*3.0f;
+	float ObjWidth = 300.0f;
+	float FontSize = 20.0f;
+	float BigFontSize = 20.0f;
+	float StartY = -190.0f;
+	float LineHeight = 60.0f;
+	float TeeSizeMod = 1.0f;
+	float RoundRadius = 30.0f;
+	bool Selected = false;
+	int TotalPlayers = 0;
+	int PerLine = 8;
+	float BoxMove = -10.0f;
+
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(!m_pClient->m_Snap.m_paPlayerInfos[i] || m_pClient->m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+			continue;
+
+		++TotalPlayers;
+	}
+
+	if (TotalPlayers > 32)
+	{
+		FontSize = 18.0f;
+		LineHeight = 30.0f;
+		TeeSizeMod = 0.7f;
+		PerLine = 16;
+		RoundRadius = 10.0f;
+		BoxMove = 3.0f;
+	}
+	if (TotalPlayers > 16)
+	{
+		ObjWidth = 600.0f;
+	}
 
 	Graphics()->MapScreen(0, 0, Width, Height);
 
@@ -182,38 +215,33 @@ void CSpectator::OnRender()
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.3f);
-	RenderTools()->DrawRoundRect(Width/2.0f-300.0f, Height/2.0f-300.0f, 600.0f, 600.0f, 20.0f);
+	RenderTools()->DrawRoundRect(Width/2.0f-ObjWidth, Height/2.0f-300.0f, ObjWidth*2, 600.0f, 20.0f);
 	Graphics()->QuadsEnd();
 
 	// clamp mouse position to selector area
-	m_SelectorMouse.x = clamp(m_SelectorMouse.x, -280.0f, 1120.0f);
+	m_SelectorMouse.x = clamp(m_SelectorMouse.x, -(ObjWidth - 20.0f), ObjWidth - 20.0f);
 	m_SelectorMouse.y = clamp(m_SelectorMouse.y, -280.0f, 280.0f);
 
 	// draw selections
-	float FontSize = 20.0f;
-	float StartY = -190.0f;
-	float LineHeight = 60.0f;
-	bool Selected = false;
-
 	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 	{
 		Graphics()->TextureSet(-1);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-		RenderTools()->DrawRoundRect(Width/2.0f-280.0f, Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
+		RenderTools()->DrawRoundRect(Width/2.0f-(ObjWidth - 20.0f), Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
 		Graphics()->QuadsEnd();
 	}
 
-	if(m_SelectorMouse.x >= -280.0f && m_SelectorMouse.x <= -10.0f &&
+	if(m_SelectorMouse.x >= -(ObjWidth-20.0f) && m_SelectorMouse.x <= -(ObjWidth-300+10.0f) &&
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
 		m_SelectedSpectatorID = SPEC_FREEVIEW;
 		Selected = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-	TextRender()->Text(0, Width/2.0f-240.0f, Height/2.0f-265.0f, FontSize, Localize("Free-View"), -1);
+	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-265.0f, BigFontSize, Localize("Free-View"), -1);
 
-	float x = -270.0f, y = StartY;
+	float x = -(ObjWidth - 30.0f), y = StartY;
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(!m_pClient->m_Snap.m_paPlayerInfos[i] || m_pClient->m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
@@ -221,7 +249,7 @@ void CSpectator::OnRender()
 
 		++Count;
 
-		if(Count == 9 || (Count > 9 && (Count-1)%8 == 0))
+		if(Count == PerLine + 1 || (Count > PerLine + 1 && (Count-1)%PerLine == 0))
 		{
 			x += 290.0f;
 			y = StartY;
@@ -232,13 +260,13 @@ void CSpectator::OnRender()
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			RenderTools()->DrawRoundRect(Width/2.0f+x-10.0f, Height/2.0f+y-10.0f, 270.0f, 60.0f, 20.0f);
+			RenderTools()->DrawRoundRect(Width/2.0f+x-10.0f, Height/2.0f+y+BoxMove, 270.0f, LineHeight, RoundRadius);
 			Graphics()->QuadsEnd();
 		}
 
 		Selected = false;
 		if(m_SelectorMouse.x >= x-10.0f && m_SelectorMouse.x <= x+260.0f &&
-			m_SelectorMouse.y >= y-10.0f && m_SelectorMouse.y <= y+50.0f)
+			m_SelectorMouse.y >= y-(LineHeight/6.0f) && m_SelectorMouse.y <= y+(LineHeight*5.0f/6.0f))
 		{
 			m_SelectedSpectatorID = i;
 			Selected = true;
@@ -264,6 +292,7 @@ void CSpectator::OnRender()
 		}
 
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
+		TeeInfo.m_Size *= TeeSizeMod;
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Width/2.0f+x+20.0f, Height/2.0f+y+20.0f));
 
 		y += LineHeight;
