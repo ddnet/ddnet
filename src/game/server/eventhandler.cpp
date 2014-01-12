@@ -42,8 +42,6 @@ void CEventHandler::Clear()
 
 void CEventHandler::Snap(int SnappingClient)
 {
-	if (SnappingClient != -1 && GameServer()->m_apPlayers[SnappingClient]->m_Paused)
-		SnappingClient = GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID;
 	for(int i = 0; i < m_NumEvents; i++)
 	{
 		if(SnappingClient == -1 || CmaskIsSet(m_aClientMasks[i], SnappingClient))
