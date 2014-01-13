@@ -72,13 +72,24 @@ void CDoor::Snap(int SnappingClient)
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 			NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+
+	if (!pObj)
+		return;
+
 	pObj->m_X = (int) m_Pos.x;
 	pObj->m_Y = (int) m_Pos.y;
 
 	CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
+
+	if((GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
+				|| GameServer()->m_apPlayers[SnappingClient]->m_Paused)
+			&& GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+
 	if (Char == 0)
 		return;
+
 	if (Char->IsAlive()
 			&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
 			&& (!Tick))

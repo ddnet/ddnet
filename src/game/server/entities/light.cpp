@@ -108,28 +108,37 @@ void CLight::Snap(int SnappingClient)
 			&& NetworkClipped(SnappingClient, m_To))
 		return;
 
-	CCharacter * pSnappingCharacter = GameServer()->GetPlayerChar(
-			SnappingClient);
+	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
+
+	if((GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
+				|| GameServer()->m_apPlayers[SnappingClient]->m_Paused)
+			&& GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
 
-	if (pSnappingCharacter && pSnappingCharacter->IsAlive()
+	if (Char && Char->IsAlive()
 			&& m_Layer == LAYER_SWITCH
-			&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnappingCharacter->Team()]
+			&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
 			&& (Tick))
 		return;
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 			NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+
+	if (!pObj)
+		return;
+
 	pObj->m_X = (int) m_Pos.x;
 	pObj->m_Y = (int) m_Pos.y;
 
-	if (pSnappingCharacter && pSnappingCharacter->Team() == TEAM_SUPER)
+	if (Char && Char->Team() == TEAM_SUPER)
 	{
 		pObj->m_FromX = (int) m_Pos.x;
 		pObj->m_FromY = (int) m_Pos.y;
 	}
-	else if (pSnappingCharacter && m_Layer == LAYER_SWITCH
-			&& GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnappingCharacter->Team()])
+	else if (Char && m_Layer == LAYER_SWITCH
+			&& GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 	{
 		pObj->m_FromX = (int) m_To.x;
 		pObj->m_FromY = (int) m_To.y;

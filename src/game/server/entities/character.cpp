@@ -1535,6 +1535,8 @@ void CCharacter::HandleTiles(int Index)
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z-1].size())
 	{
+		if (m_Super)
+			return;
 		m_Core.m_HookedPlayer = -1;
 		m_Core.m_HookState = HOOK_RETRACTED;
 		m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
@@ -1545,8 +1547,10 @@ void CCharacter::HandleTiles(int Index)
 		return;
 	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
-	if(evilz && !m_Super && Controller->m_TeleOuts[evilz-1].size())
+	if(evilz && Controller->m_TeleOuts[evilz-1].size())
 	{
+		if (m_Super)
+			return;
 		int Num = Controller->m_TeleOuts[evilz-1].size();
 		m_Core.m_Pos = Controller->m_TeleOuts[evilz-1][(!Num)?Num:rand() % Num];
 		if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
@@ -1563,6 +1567,8 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(GameServer()->Collision()->IsCheckTeleport(MapIndex))
 	{
+		if (m_Super)
+			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k=m_TeleCheckpoint-1; k >= 0; k--)
 		{

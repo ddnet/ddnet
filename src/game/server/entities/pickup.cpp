@@ -150,11 +150,17 @@ void CPickup::Snap(int SnappingClient)
 	/*if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
 		return;*/
 
-	CCharacter * SnapChar = GameServer()->GetPlayerChar(SnappingClient);
+	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
+
+	if((GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
+				|| GameServer()->m_apPlayers[SnappingClient]->m_Paused)
+			&& GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
-	if (SnapChar && SnapChar->IsAlive() &&
+	if (Char && Char->IsAlive() &&
 			(m_Layer == LAYER_SWITCH &&
-					!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()])
+					!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 					&& (!Tick))
 		return;
 
