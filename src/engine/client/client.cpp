@@ -1093,7 +1093,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 		int Offset = Up.GetInt();
 
-		for(int i = max(Offset, 0); i < Offset + 24 && i < MAX_CLIENTS; i++)
+		for(int i = max(Offset, 0); i < max(Offset, 0) + 24 && i < MAX_CLIENTS; i++)
 		{
 			str_copy(Info.m_aClients[i].m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aName));
 			str_copy(Info.m_aClients[i].m_aClan, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aClan));
@@ -1105,7 +1105,8 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		if(!Up.Error())
 		{
 			// sort players
-			qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreComp);
+			if (Offset + 24 >= Info.m_NumClients)
+				qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreComp);
 
 			if(net_addr_comp(&m_ServerAddress, &pPacket->m_Address) == 0)
 			{
