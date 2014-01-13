@@ -262,9 +262,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 	if (Team == TEAM_SUPER)
 		return -1LL;
 	int Mask = 0;
-	if (m_Core.GetSolo(Asker) && ExceptID == Asker)
-		Mask = 0;
-	if (m_Core.GetSolo(Asker))
+	if (m_Core.GetSolo(Asker) && ExceptID != Asker)
 		Mask = 1LL << Asker;
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 		if (i != ExceptID)
