@@ -1156,6 +1156,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClShowChat ^= 1;
 	}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
+	{
+		g_Config.m_ClShowVotesAfterVoting ^= 1;
+	}
+
   // Set Ping
 	{
 		char aBuf[64];
