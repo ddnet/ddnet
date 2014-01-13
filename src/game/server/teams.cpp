@@ -266,12 +266,12 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		Mask = 1LL << Asker;
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 		if (i != ExceptID)
-			if (((Character(i)
+			if ((Character(i) && !m_Core.GetSolo(Asker)
 							&& ((!m_Core.GetSolo(i) && m_Core.Team(i) == Team)
 									|| m_Core.Team(i) == TEAM_SUPER))
-							|| ((GetPlayer(i) && (GetPlayer(i)->GetTeam() == -1 || GetPlayer(i)->m_Paused))
-									&& (GetPlayer(i)->m_SpectatorID == SPEC_FREEVIEW
-											|| m_Core.Team(GetPlayer(i)->m_SpectatorID) == Team))))
+					|| ((GetPlayer(i) && (GetPlayer(i)->GetTeam() == -1 || GetPlayer(i)->m_Paused))
+							&& (GetPlayer(i)->m_SpectatorID == SPEC_FREEVIEW
+									|| m_Core.Team(GetPlayer(i)->m_SpectatorID) == Team)))
 				Mask |= 1LL << i;
 	return Mask;
 }
