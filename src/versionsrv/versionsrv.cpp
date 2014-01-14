@@ -125,8 +125,8 @@ int main(int argc, char **argv) // ignore_convention
 			}
 		}
 
-		// be nice to the CPU
-		thread_sleep(1);
+		// wait for input
+		net_socket_read_wait(g_NetOp.m_Socket, 1000);
 	}
 
 	return 0;
