@@ -461,7 +461,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// render status
 	char aBuf[128];
 	if(ServerBrowser()->IsRefreshing())
-		str_format(aBuf, sizeof(aBuf), Localize("%d%% loaded"), ServerBrowser()->LoadingProgression());
+	{
+		char aBuf2[64];
+		char aBuf3[64];
+		str_format(aBuf3, sizeof(aBuf3), Localize("%d%% loaded"), ServerBrowser()->LoadingProgression());
+		str_format(aBuf2, sizeof(aBuf2), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
+		str_format(aBuf, sizeof(aBuf), "%s, %s", aBuf3, aBuf2);
+	}
 	else
 		str_format(aBuf, sizeof(aBuf), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
 	Status.VSplitRight(TextRender()->TextWidth(0, 14.0f, aBuf, -1), 0, &Status);
