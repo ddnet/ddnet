@@ -268,10 +268,12 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind('c', "say /rank");
 		Bind('v', "say /info");
 		Bind('b', "say /top5");
+		Bind('p', "say /points");
 		Bind('z', "emote 12");
 		Bind('x', "emote 14");
 		Bind('h', "emote 2");
 		Bind('m', "emote 5");
+		Bind('s', "+showhookcoll");
 		Bind(KEY_PAGEDOWN, "cl_show_entities 0");
 		Bind(KEY_PAGEUP, "cl_show_entities 1");
 		Bind(KEY_KP0, "say /emote normal 999999");
@@ -341,5 +343,6 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		if(!Get(KEY_EQUALS)[0])
 			Bind(KEY_EQUALS, "spectate_next");
 	}
-		g_Config.m_ClDDRaceBindsSet = 1;
+
+	g_Config.m_ClDDRaceBindsSet = 1;
 }
