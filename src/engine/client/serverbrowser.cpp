@@ -580,8 +580,8 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 
 void CServerBrowser::Request(const NETADDR &Addr) const
 {
-	if(g_Config.m_BrFilter64Player)
-		RequestImpl64(Addr, 0);
+	// Call both because we can't know what kind the server is
+	RequestImpl64(Addr, 0);
 	RequestImpl(Addr, 0);
 }
 
@@ -714,9 +714,10 @@ void CServerBrowser::Update(bool ForceResort)
 
 		if(pEntry->m_RequestTime == 0)
 		{
-			if(g_Config.m_BrFilter64Player)
+			if (pEntry->m_Is64)
 				RequestImpl64(pEntry->m_Addr, pEntry);
-			RequestImpl(pEntry->m_Addr, pEntry);
+			else
+				RequestImpl(pEntry->m_Addr, pEntry);
 		}
 
 		Count++;

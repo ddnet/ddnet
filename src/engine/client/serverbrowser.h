@@ -13,6 +13,7 @@ public:
 	public:
 		NETADDR m_Addr;
 		int64 m_RequestTime;
+		bool m_Is64;
 		int m_GotInfo;
 		CServerInfo m_Info;
 
@@ -51,6 +52,8 @@ public:
 
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
 
+	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
+	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
 
 private:
@@ -112,10 +115,8 @@ private:
 	CServerEntry *Add(const NETADDR &Addr);
 
 	void RemoveRequest(CServerEntry *pEntry);
-	void QueueRequest(CServerEntry *pEntry);
 
 	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const;
-	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 

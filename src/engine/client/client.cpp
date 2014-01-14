@@ -4,6 +4,7 @@
 
 #include <stdlib.h> // qsort
 #include <stdarg.h>
+#include <string.h>
 
 #include <base/math.h>
 #include <base/vmath.h>
@@ -1057,6 +1058,17 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			}
 			else
 				m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
+
+			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64"))
+			{
+				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
+				if (pEntry)
+				{
+					pEntry->m_Is64 = true;
+					m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry); // Force a quick update
+					m_ServerBrowser.QueueRequest(pEntry); // If it fails this will cause a retry
+				}
+			}
 		}
 	}
 

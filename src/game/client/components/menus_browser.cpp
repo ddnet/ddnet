@@ -580,10 +580,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 			m_Popup = POPUP_COUNTRY;
 	}
 
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox((char *)&g_Config.m_BrFilter64Player, Localize("64 Player Servers"), g_Config.m_BrFilter64Player, &Button))
-		g_Config.m_BrFilter64Player ^= 1;
-
 	ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
 	ServerFilter.HSplitBottom(ms_ButtonHeight-2.0f, &ServerFilter, &Button);
 	static int s_ClearButton = 0;
