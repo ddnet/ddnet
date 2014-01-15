@@ -691,7 +691,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 		for (int i = 0; i < pSelectedServer->m_NumClients; i++)
 		{
-			CListboxItem Item = UiDoListboxNextItem(&pSelectedServer->m_aClients[i]);
+			CListboxItem Item = UiDoListboxNextItem(&i);
 
 			if(!Item.m_Visible)
 				continue;
