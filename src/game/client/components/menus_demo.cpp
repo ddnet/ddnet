@@ -54,10 +54,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const float Margins = 5.0f;
 	float TotalHeight;
 
-	if(m_MenuActive)
-		TotalHeight = SeekBarHeight+ButtonbarHeight+NameBarHeight+Margins*3;
-	else
-		TotalHeight = SeekBarHeight+Margins*2;
+	if(!m_MenuActive)
+		return;
+
+	TotalHeight = SeekBarHeight+ButtonbarHeight+NameBarHeight+Margins*3;
 
 	MainView.HSplitBottom(TotalHeight, 0, &MainView);
 	MainView.VSplitLeft(50.0f, 0, &MainView);
@@ -72,15 +72,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
 	int TotalTicks = pInfo->m_LastTick - pInfo->m_FirstTick;
 
-	if(m_MenuActive)
-	{
-		MainView.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
-		ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
-		ButtonBar.HSplitBottom(NameBarHeight, &ButtonBar, &NameBar);
-		NameBar.HSplitTop(4.0f, 0, &NameBar);
-	}
-	else
-		SeekBar = MainView;
+	MainView.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
+	ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
+	ButtonBar.HSplitBottom(NameBarHeight, &ButtonBar, &NameBar);
+	NameBar.HSplitTop(4.0f, 0, &NameBar);
 
 	// do seekbar
 	{
@@ -157,76 +152,73 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
 
-	if(m_MenuActive)
+	// do buttons
+	CUIRect Button;
+
+	// combined play and pause button
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static int s_PlayPauseButton = 0;
+	if(!pInfo->m_Paused)
 	{
-		// do buttons
-		CUIRect Button;
-
-		// combined play and pause button
-		ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-		static int s_PlayPauseButton = 0;
-		if(!pInfo->m_Paused)
-		{
-			if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_PAUSE, false, &Button, CUI::CORNER_ALL))
-				DemoPlayer()->Pause();
-		}
-		else
-		{
-			if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_PLAY, false, &Button, CUI::CORNER_ALL))
-				DemoPlayer()->Unpause();
-		}
-
-		// stop button
-
-		ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
-		ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-		static int s_ResetButton = 0;
-		if(DoButton_Sprite(&s_ResetButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_STOP, false, &Button, CUI::CORNER_ALL))
-		{
-			m_pClient->OnReset();
+		if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_PAUSE, false, &Button, CUI::CORNER_ALL))
 			DemoPlayer()->Pause();
-			DemoPlayer()->SetPos(0);
-		}
-
-		// slowdown
-		ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
-		ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-		static int s_SlowDownButton = 0;
-		if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			DecreaseDemoSpeed = true;
-
-		// fastforward
-		ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
-		ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-		static int s_FastForwardButton = 0;
-		if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
-			IncreaseDemoSpeed = true;
-
-		// speed meter
-		ButtonBar.VSplitLeft(Margins*3, 0, &ButtonBar);
-		char aBuffer[64];
-		if(pInfo->m_Speed >= 1.0f)
-			str_format(aBuffer, sizeof(aBuffer), "x%.0f", pInfo->m_Speed);
-		else
-			str_format(aBuffer, sizeof(aBuffer), "x%.2f", pInfo->m_Speed);
-		UI()->DoLabel(&ButtonBar, aBuffer, Button.h*0.7f, -1);
-
-		// close button
-		ButtonBar.VSplitRight(ButtonbarHeight*3, &ButtonBar, &Button);
-		static int s_ExitButton = 0;
-		if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button))
-			Client()->Disconnect();
-
-		// demo name
-		char aDemoName[64] = {0};
-		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y, Button.h*0.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = MainView.w;
-		TextRender()->TextEx(&Cursor, aBuf, -1);
 	}
+	else
+	{
+		if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_PLAY, false, &Button, CUI::CORNER_ALL))
+			DemoPlayer()->Unpause();
+	}
+
+	// stop button
+
+	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static int s_ResetButton = 0;
+	if(DoButton_Sprite(&s_ResetButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_STOP, false, &Button, CUI::CORNER_ALL))
+	{
+		m_pClient->OnReset();
+		DemoPlayer()->Pause();
+		DemoPlayer()->SetPos(0);
+	}
+
+	// slowdown
+	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static int s_SlowDownButton = 0;
+	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+		DecreaseDemoSpeed = true;
+
+	// fastforward
+	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static int s_FastForwardButton = 0;
+	if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
+		IncreaseDemoSpeed = true;
+
+	// speed meter
+	ButtonBar.VSplitLeft(Margins*3, 0, &ButtonBar);
+	char aBuffer[64];
+	if(pInfo->m_Speed >= 1.0f)
+		str_format(aBuffer, sizeof(aBuffer), "x%.0f", pInfo->m_Speed);
+	else
+		str_format(aBuffer, sizeof(aBuffer), "x%.2f", pInfo->m_Speed);
+	UI()->DoLabel(&ButtonBar, aBuffer, Button.h*0.7f, -1);
+
+	// close button
+	ButtonBar.VSplitRight(ButtonbarHeight*3, &ButtonBar, &Button);
+	static int s_ExitButton = 0;
+	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button))
+		Client()->Disconnect();
+
+	// demo name
+	char aDemoName[64] = {0};
+	DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
+	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y, Button.h*0.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	Cursor.m_LineWidth = MainView.w;
+	TextRender()->TextEx(&Cursor, aBuf, -1);
 
 	if(IncreaseDemoSpeed || Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
 	{
