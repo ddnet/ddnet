@@ -1515,8 +1515,8 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	fd_set readfds;
 	int sockid;
 
-	tv.tv_sec = 0;
-	tv.tv_usec = 1000*time;
+	tv.tv_sec = time / 1000;
+	tv.tv_usec = 1000 * (time % 1000);
 	sockid = 0;
 
 	FD_ZERO(&readfds);
@@ -1533,7 +1533,10 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	}
 
 	/* don't care about writefds and exceptfds */
-	select(sockid+1, &readfds, NULL, NULL, &tv);
+	if(time < 0)
+		select(sockid+1, &readfds, NULL, NULL, NULL);
+	else
+		select(sockid+1, &readfds, NULL, NULL, &tv);
 
 	if(sock.ipv4sock >= 0 && FD_ISSET(sock.ipv4sock, &readfds))
 		return 1;
