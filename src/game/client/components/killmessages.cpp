@@ -4,6 +4,7 @@
 #include <engine/textrender.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
+#include <engine/shared/config.h>
 
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
@@ -44,6 +45,9 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 void CKillMessages::OnRender()
 {
+	if (!g_Config.m_ClShowKillMessages)
+		return;
+
 	float Width = 400*3.0f*Graphics()->ScreenAspect();
 	float Height = 400*3.0f;
 
