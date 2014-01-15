@@ -2069,7 +2069,8 @@ void CClient::Run()
 
 		// beNice
 		if(g_Config.m_ClCpuThrottle)
-			thread_sleep(g_Config.m_ClCpuThrottle);
+			net_socket_read_wait(m_NetClient.m_Socket, g_Config.m_ClCpuThrottle);
+			//thread_sleep(g_Config.m_ClCpuThrottle);
 		else if(g_Config.m_DbgStress || !m_pGraphics->WindowActive())
 			thread_sleep(5);
 
