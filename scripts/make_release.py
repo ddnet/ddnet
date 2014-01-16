@@ -62,6 +62,7 @@ print("adding files")
 shutil.copy("readme.txt", package_dir)
 shutil.copy("license.txt", package_dir)
 shutil.copy("storage.cfg", package_dir)
+shutil.copy("example.cfg", package_dir)
 
 # DDRace
 shutil.copy("announcement.txt", package_dir)
@@ -166,7 +167,7 @@ if use_bundle:
         <key>CFBundleDevelopmentRegion</key>
         <string>English</string>
         <key>CFBundleExecutable</key>
-        <string>DDRace-Server</string>
+        <string>DDRace_server</string>
         <key>CFBundleIconFile</key>
         <string>DDRace-Server</string>
         <key>CFBundleInfoDictionaryVersion</key>
