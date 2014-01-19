@@ -618,6 +618,7 @@ public:
 	virtual bool HasUnsavedData() { return m_Map.m_Modified; }
 
 	int64 m_LastUndoUpdateTime;
+	bool m_UndoRunning;
 	void CreateUndoStep();
 	static void CreateUndoStepThread(void *pUser);
 	int UndoStep();

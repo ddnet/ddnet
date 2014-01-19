@@ -141,7 +141,6 @@ void CLayerGroup::Render()
 void CLayerGroup::AddLayer(CLayer *l)
 {
 	m_pMap->m_Modified = true;
-	m_pMap->m_UndoModified++;
 	m_lLayers.add(l);
 }
 
@@ -1219,6 +1218,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		{
 			if(!UI()->MouseButton(1))
 			{
+				m_Map.m_UndoModified++;
+
 				static int s_QuadPopupID = 0;
 				UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
 				m_LockMouse = false;
@@ -1230,6 +1231,11 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		{
 			if(!UI()->MouseButton(0))
 			{
+				if(s_Operation == OP_ROTATE || s_Operation == OP_MOVE_ALL || s_Operation == OP_MOVE_PIVOT)
+				{
+					m_Map.m_UndoModified++;
+				}
+
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -1393,6 +1399,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		{
 			if(!UI()->MouseButton(1))
 			{
+				m_Map.m_UndoModified++;
+
 				static int s_PointPopupID = 0;
 				UiInvokePopupMenu(&s_PointPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
 				UI()->SetActiveItem(0);
@@ -1409,6 +1417,10 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					else
 						m_SelectedPoints = 1<<V;
 				}
+
+				if(s_Operation == OP_MOVEPOINT || s_Operation == OP_MOVEUV)
+					m_Map.m_UndoModified++;
+
 				m_LockMouse = false;
 				UI()->SetActiveItem(0);
 			}
@@ -2068,7 +2080,9 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 				// release mouse
 				if(!UI()->MouseButton(0))
 				{
-					m_Map.m_UndoModified++;
+					if(s_Operation == OP_BRUSH_DRAW || s_Operation == OP_BRUSH_PAINT)
+						m_Map.m_UndoModified++;
+
 					s_Operation = OP_NONE;
 					UI()->SetActiveItem(0);
 				}
@@ -3652,11 +3666,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									pEnvelope->m_lPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY*ValueScale);
 							}
 
+							if (m_SelectedEnvelopePoint != i)
+								m_Map.m_UndoModified++;
+
 							m_SelectedQuadEnvelope = m_SelectedEnvelope;
 							m_ShowEnvelopePreview = 1;
 							m_SelectedEnvelopePoint = i;
 							m_Map.m_Modified = true;
-							m_Map.m_UndoModified++;
 						}
 
 						ColorMod = 100.0f;
@@ -4060,6 +4076,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_Map.m_Modified = false;
 	m_Map.m_UndoModified = 0;
 	m_LastUndoUpdateTime = time_get();
+	m_UndoRunning = false;
 
 	m_ShowEnvelopePreview = 0;
 }
@@ -4269,6 +4286,7 @@ void CEditor::CreateUndoStepThread(void *pUser)
 	pEditor->Save(aBuffer);
 
 	pEditor->m_lUndoSteps.add(NewStep);
+	pEditor->m_UndoRunning = false;
 }
 
 void CEditor::UpdateAndRender()
@@ -4341,7 +4359,12 @@ void CEditor::UpdateAndRender()
 	{
 		m_Map.m_UndoModified = 0;
 		m_LastUndoUpdateTime = time_get();
-		CreateUndoStep();
+
+		if (!m_UndoRunning)
+		{
+			m_UndoRunning = true;
+			CreateUndoStep();
+		}
 	}
 	Render();
 
