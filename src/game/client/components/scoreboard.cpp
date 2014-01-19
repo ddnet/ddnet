@@ -152,28 +152,26 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	bool lower16 = false;
 	bool upper16 = false;
+	bool lower24 = false;
+	bool upper24 = false;
 	bool lower32 = false;
 	bool upper32 = false;
+
 	if(Team == -3)
-	{
 		upper16 = true;
-		Team = 0;
-	}
 	else if(Team == -4)
-	{
 		lower32 = true;
-		Team = 0;
-	}
 	else if(Team == -5)
-	{
 		upper32 = true;
-		Team = 0;
-	}
 	else if(Team == -6)
-	{
 		lower16 = true;
+	else if(Team == -7)
+		lower24 = true;
+	else if(Team == -8)
+		upper24 = true;
+
+	if(Team < -1)
 		Team = 0;
-	}
 
 	float h = 760.0f;
 
@@ -182,9 +180,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.5f);
-	if(upper16 || upper32)
+	if(upper16 || upper32 || upper24)
 		RenderTools()->DrawRoundRectExt(x, y, w, h, 17.0f, 10);
-	else if(lower16 || lower32)
+	else if(lower16 || lower32 || lower24)
 		RenderTools()->DrawRoundRectExt(x, y, w, h, 17.0f, 5);
 	else
 		RenderTools()->DrawRoundRect(x, y, w, h, 17.0f);
@@ -238,7 +236,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	float tw;
 
-	if (!lower16 && !lower32)
+	if (!lower16 && !lower32 && !lower24)
 	{
 		tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1);
 		TextRender()->Text(0, x+w-tw-20.0f, y, TitleFontsize, aBuf, -1);
@@ -249,10 +247,16 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float LineHeight = 60.0f;
 	float TeeSizeMod = 1.0f;
 	float Spacing = 16.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
 	{
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
+		Spacing = 0.0f;
+	}
+	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+	{
+		LineHeight = 27.0f;
+		TeeSizeMod = 0.6f;
 		Spacing = 0.0f;
 	}
 	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 12)
@@ -293,8 +297,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	// render player entries
 	y += HeadlineFontsize*2.0f;
 	float FontSize = 24.0f;
-	if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
 		FontSize = 16.0f;
+	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
+		FontSize = 20.0f;
 	CTextCursor Cursor;
 
 	int rendered = 0;
@@ -302,6 +308,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		rendered = -16;
 	if (upper32)
 		rendered = -32;
+	if (upper24)
+		rendered = -24;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// make sure that we render the correct team
@@ -401,8 +409,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		y += LineHeight+Spacing;
 		if (lower32 || upper32) {
 			if (rendered == 32) break;
-		} else
-		{
+		} else if (lower24 || upper24) {
+			if (rendered == 24) break;
+		} else {
 			if (rendered == 16) break;
 		}
 	}
@@ -476,10 +485,14 @@ void CScoreboard::OnRender()
 	{
 		if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS))
 		{
-			if(m_pClient->m_Snap.m_aTeamSize[0] > 32)
+			if(m_pClient->m_Snap.m_aTeamSize[0] > 48)
 			{
 				RenderScoreboard(Width/2-w, 150.0f, w, -4, 0);
 				RenderScoreboard(Width/2, 150.0f, w, -5, "");
+			} else if(m_pClient->m_Snap.m_aTeamSize[0] > 32)
+			{
+				RenderScoreboard(Width/2-w, 150.0f, w, -7, 0);
+				RenderScoreboard(Width/2, 150.0f, w, -8, "");
 			} else if(m_pClient->m_Snap.m_aTeamSize[0] > 16)
 			{
 				RenderScoreboard(Width/2-w, 150.0f, w, -6, 0);
