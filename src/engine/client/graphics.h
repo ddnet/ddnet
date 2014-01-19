@@ -143,6 +143,7 @@ public:
 	virtual int WindowOpen();
 
 	virtual void TakeScreenshot(const char *pFilename);
+	virtual void TakeCustomScreenshot(const char *pFilename);
 	virtual void Swap();
 
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes);

@@ -65,6 +65,7 @@ public:
 			fs_makedir(GetPath(TYPE_SAVE, "dumps", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "demos", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "demos/auto", aPath, sizeof(aPath)));
+			fs_makedir(GetPath(TYPE_SAVE, "editor", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "ghosts", aPath, sizeof(aPath)));
 		}
 

@@ -398,7 +398,8 @@ public:
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags);
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
 
-	void ScreenshotDirect(const char *pFilename);
+	void ScreenshotDirect();
+	static void ScreenshotDirectThread(void *pData);
 
 	virtual void TextureSet(int TextureID);
 
@@ -431,6 +432,7 @@ public:
 	virtual void Shutdown();
 
 	virtual void TakeScreenshot(const char *pFilename);
+	virtual void TakeCustomScreenshot(const char *pFilename);
 	virtual void Swap();
 
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes);

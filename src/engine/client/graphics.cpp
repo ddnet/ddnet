@@ -949,6 +949,13 @@ void CGraphics_SDL::TakeScreenshot(const char *pFilename)
 	m_DoScreenshot = true;
 }
 
+void CGraphics_SDL::TakeCustomScreenshot(const char *pFilename)
+{
+	str_copy(m_aScreenshotName, pFilename, sizeof(m_aScreenshotName));
+	m_DoScreenshot = true;
+}
+
+
 void CGraphics_SDL::Swap()
 {
 	if(m_DoScreenshot)
