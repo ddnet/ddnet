@@ -610,27 +610,26 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 		else
 			g_GameClient.m_pSounds->Play(CSounds::CHN_GLOBAL, pMsg->m_SoundID, 1.0f);
 	}
-	else if(MsgId == NETMSGTYPE_CL_TEAMSSTATE)
+	else if(MsgId == NETMSGTYPE_SV_TEAMSSTATE)
 	{
-		CNetMsg_Cl_TeamsState *pMsg = (CNetMsg_Cl_TeamsState *)pRawMsg;
-		m_Teams.Team(0, pMsg->m_Tee0);
-		m_Teams.Team(1, pMsg->m_Tee1);
-		m_Teams.Team(2, pMsg->m_Tee2);
-		m_Teams.Team(3, pMsg->m_Tee3);
-		m_Teams.Team(4, pMsg->m_Tee4);
-		m_Teams.Team(5, pMsg->m_Tee5);
-		m_Teams.Team(6, pMsg->m_Tee6);
-		m_Teams.Team(7, pMsg->m_Tee7);
-		m_Teams.Team(8, pMsg->m_Tee8);
-		m_Teams.Team(9, pMsg->m_Tee9);
-		m_Teams.Team(10, pMsg->m_Tee10);
-		m_Teams.Team(11, pMsg->m_Tee11);
-		m_Teams.Team(12, pMsg->m_Tee12);
-		m_Teams.Team(13, pMsg->m_Tee13);
-		m_Teams.Team(14, pMsg->m_Tee14);
-		m_Teams.Team(15, pMsg->m_Tee15);
+		CNetMsg_Sv_TeamsState *pMsg = (CNetMsg_Sv_TeamsState *)pRawMsg;
 
-		m_Teams.m_IsDDRace16 = true;
+		unsigned int i;
+
+		for(i = 0; i < MAX_CLIENTS; i++)
+		{
+			m_Teams.Team(i, pUnpacker->GetInt());
+
+			// check for unpacking errors
+			if(pUnpacker->Error())
+			{
+				m_Teams.Team(i, 0);
+				break;
+			}
+		}
+
+		if (i <= 16)
+			m_Teams.m_IsDDRace16 = true;
 	}
 	else if(MsgId == NETMSGTYPE_SV_PLAYERTIME)
 	{

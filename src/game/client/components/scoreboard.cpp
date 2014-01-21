@@ -377,7 +377,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if (m_IsGameTypeRace && g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientID);
+			str_format(aId, sizeof(aId),"%d:%d:", pInfo->m_ClientID, ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID));
 			str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
 			Cursor.m_LineWidth = NameLength+3;
 			TextRender()->TextEx(&Cursor, aId, -1);

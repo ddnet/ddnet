@@ -1,6 +1,7 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "teams.h"
 #include <engine/shared/config.h>
+#include <engine/server/server.h>
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 		m_pGameContext(pGameContext)
@@ -187,16 +188,10 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		}
 	}
 
-	//for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-	//{
-	//	if (GetPlayer(LoopClientID))
-	//	{
-	//		if (((CServer *) Server())->m_aClients[LoopClientID].m_CustClt)
-	//			SendTeamsState64(LoopClientID);
-	//		else if (GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
-	//			SendTeamsState(LoopClientID);
-	//	}
-	//}
+	for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+		if (GetPlayer(LoopClientID))
+			if (GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
+				SendTeamsState(LoopClientID);
 }
 
 void CGameTeams::ForceLeaveTeam(int ClientID)
@@ -310,25 +305,24 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 
 void CGameTeams::SendTeamsState(int ClientID)
 {
-	CNetMsg_Cl_TeamsState Msg;
-	Msg.m_Tee0 = m_Core.Team(0);
-	Msg.m_Tee1 = m_Core.Team(1);
-	Msg.m_Tee2 = m_Core.Team(2);
-	Msg.m_Tee3 = m_Core.Team(3);
-	Msg.m_Tee4 = m_Core.Team(4);
-	Msg.m_Tee5 = m_Core.Team(5);
-	Msg.m_Tee6 = m_Core.Team(6);
-	Msg.m_Tee7 = m_Core.Team(7);
-	Msg.m_Tee8 = m_Core.Team(8);
-	Msg.m_Tee9 = m_Core.Team(9);
-	Msg.m_Tee10 = m_Core.Team(10);
-	Msg.m_Tee11 = m_Core.Team(11);
-	Msg.m_Tee12 = m_Core.Team(12);
-	Msg.m_Tee13 = m_Core.Team(13);
-	Msg.m_Tee14 = m_Core.Team(14);
-	Msg.m_Tee15 = m_Core.Team(15);
+	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if (((CServer *) Server())->m_aClients[ClientID].m_CustClt)
+	{
+		for(unsigned i = 0; i < MAX_CLIENTS; i++)
+			Msg.AddInt(m_Core.Team(i));
+	}
+	else
+	{
+		for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		{
+			int id = i;
+			Server()->ReverseTranslate(id, ClientID);
+			Msg.AddInt(m_Core.Team(id));
+		}
+	}
+
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 int CGameTeams::GetDDRaceState(CPlayer* Player)

@@ -256,12 +256,12 @@ public:
 
 	class CRaceDemo *m_pRaceDemo;
 	class CGhost *m_pGhost;
+	class CTeamsCore m_Teams;
 
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos);
 
 private:
 
-	class CTeamsCore m_Teams;
 	bool m_DDRaceMsgSent;
 	int m_ShowOthers;
 };
