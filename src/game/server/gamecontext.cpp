@@ -1227,7 +1227,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			dbg_msg("DDRace", aBuf);
 
 			//first update his teams state
-			//((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
+			((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
 
 			//second give him records
 			SendRecord(ClientID);
