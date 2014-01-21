@@ -576,7 +576,7 @@ void CCharacterCore::Quantize()
 bool CCharacterCore::IsRightTeam(int MapIndex)
 {
 	if(Collision()->m_pSwitchers)
-		if(m_pTeams->Team(m_Id) != m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER)
+		if(m_pTeams->Team(m_Id) != (m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
 			return Collision()->m_pSwitchers[Collision()->GetDTileNumber(MapIndex)].m_Status[m_pTeams->Team(m_Id)];
 	return false;
 }
