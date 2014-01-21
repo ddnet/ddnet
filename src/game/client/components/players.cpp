@@ -705,7 +705,18 @@ void CPlayers::RenderPlayer(
 	}
 
 	RenderInfo.m_Size = 64.0f; // force some settings
-	bool Alpha = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+	bool Alpha;
+
+	if (m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		if (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+			Alpha = false;
+		else
+			Alpha = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
+	}
+	else
+		Alpha = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+
 	if (Alpha)
 	{
 		RenderInfo.m_ColorBody.a = 0.5f;
