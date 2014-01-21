@@ -6,7 +6,7 @@
 
 enum
 {
-	TEAM_FLOCK = 0, TEAM_SUPER = MAX_CLIENTS
+	TEAM_FLOCK = 0, TEAM_SUPER = MAX_CLIENTS, VANILLA_TEAM_SUPER = VANILLA_MAX_CLIENTS
 };
 
 class CTeamsCore
@@ -15,6 +15,7 @@ class CTeamsCore
 	int m_Team[MAX_CLIENTS];
 	bool m_IsSolo[MAX_CLIENTS];
 public:
+	bool m_IsDDRace16;
 
 	CTeamsCore(void);
 

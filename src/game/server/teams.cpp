@@ -189,9 +189,13 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 
 	//for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 	//{
-	//	if (GetPlayer(LoopClientID)
-	//			&& GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
-	//		SendTeamsState(LoopClientID);
+	//	if (GetPlayer(LoopClientID))
+	//	{
+	//		if (((CServer *) Server())->m_aClients[LoopClientID].m_CustClt)
+	//			SendTeamsState64(LoopClientID);
+	//		else if (GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
+	//			SendTeamsState(LoopClientID);
+	//	}
 	//}
 }
 
@@ -325,7 +329,6 @@ void CGameTeams::SendTeamsState(int ClientID)
 	Msg.m_Tee15 = m_Core.Team(15);
 
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
-
 }
 
 int CGameTeams::GetDDRaceState(CPlayer* Player)

@@ -629,6 +629,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 		m_Teams.Team(13, pMsg->m_Tee13);
 		m_Teams.Team(14, pMsg->m_Tee14);
 		m_Teams.Team(15, pMsg->m_Tee15);
+
+		m_Teams.m_IsDDRace16 = true;
 	}
 	else if(MsgId == NETMSGTYPE_SV_PLAYERTIME)
 	{
