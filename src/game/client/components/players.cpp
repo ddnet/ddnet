@@ -705,9 +705,19 @@ void CPlayers::RenderPlayer(
 	}
 
 	RenderInfo.m_Size = 64.0f; // force some settings
-	RenderInfo.m_ColorBody.a = 1.0f;
-	RenderInfo.m_ColorFeet.a = 1.0f;
-	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position);
+	bool Alpha = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+	if (Alpha)
+	{
+		RenderInfo.m_ColorBody.a = 0.5f;
+		RenderInfo.m_ColorFeet.a = 0.5f;
+	}
+	else
+	{
+		RenderInfo.m_ColorBody.a = 1.0f;
+		RenderInfo.m_ColorFeet.a = 1.0f;
+	}
+
+	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
