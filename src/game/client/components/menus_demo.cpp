@@ -121,15 +121,34 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			{
 				static float PrevAmount = 0.0f;
 				float Amount = (UI()->MouseX()-SeekBar.x)/(float)SeekBar.w;
-				if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount-Amount) >= 0.01f)
+
+				if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
 				{
-					PrevAmount = Amount;
-					m_pClient->OnReset();
-					m_pClient->m_SuppressEvents = true;
-					DemoPlayer()->SetPos(Amount);
-					m_pClient->m_SuppressEvents = false;
-					m_pClient->m_pMapLayersBackGround->EnvelopeUpdate();
-					m_pClient->m_pMapLayersForeGround->EnvelopeUpdate();
+					Amount = PrevAmount + (Amount-PrevAmount) * 0.05f;
+
+					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount-Amount) >= 0.0001f)
+					{
+						PrevAmount = Amount;
+						m_pClient->OnReset();
+						m_pClient->m_SuppressEvents = true;
+						DemoPlayer()->SetPos(Amount);
+						m_pClient->m_SuppressEvents = false;
+						m_pClient->m_pMapLayersBackGround->EnvelopeUpdate();
+						m_pClient->m_pMapLayersForeGround->EnvelopeUpdate();
+					}
+				}
+				else
+				{
+					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount-Amount) >= 0.001f)
+					{
+						PrevAmount = Amount;
+						m_pClient->OnReset();
+						m_pClient->m_SuppressEvents = true;
+						DemoPlayer()->SetPos(Amount);
+						m_pClient->m_SuppressEvents = false;
+						m_pClient->m_pMapLayersBackGround->EnvelopeUpdate();
+						m_pClient->m_pMapLayersForeGround->EnvelopeUpdate();
+					}
 				}
 			}
 		}
