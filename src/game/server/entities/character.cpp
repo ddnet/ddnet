@@ -1028,6 +1028,9 @@ void CCharacter::Snap(int SnappingClient)
 			pCharacter->m_AmmoCount = (!m_FreezeTime)?m_aWeapons[m_ActiveWeapon].m_Ammo:0;
 	}
 
+	if(GetPlayer()->m_Afk)
+		pCharacter->m_Emote = EMOTE_BLINK;
+
 	if(pCharacter->m_Emote == EMOTE_NORMAL)
 	{
 		if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)
