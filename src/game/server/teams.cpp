@@ -305,6 +305,9 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 
 void CGameTeams::SendTeamsState(int ClientID)
 {
+	if (g_Config.m_SvTeam == 3)
+		return;
+
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 
 	if (((CServer *) Server())->m_aClients[ClientID].m_CustClt)

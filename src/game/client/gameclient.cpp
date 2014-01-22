@@ -967,6 +967,17 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
+	// sort player infos by DDRace Team (and score inbetween)
+	Index = 0;
+	for(int Team = 0; Team < MAX_CLIENTS; ++Team)
+	{
+		for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
+		{
+			if(m_Snap.m_paInfoByScore[i] && m_Teams.Team(m_Snap.m_paInfoByScore[i]->m_ClientID) == Team)
+				m_Snap.m_paInfoByDDTeam[Index++] = m_Snap.m_paInfoByScore[i];
+		}
+	}
+
 	CTuningParams StandardTuning;
 	CServerInfo CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);

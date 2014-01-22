@@ -247,29 +247,34 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float LineHeight = 60.0f;
 	float TeeSizeMod = 1.0f;
 	float Spacing = 16.0f;
+	float RoundRadius = 15.0f;
 	if(m_pClient->m_Snap.m_aTeamSize[Team] > 48)
 	{
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
 		Spacing = 0.0f;
+		RoundRadius = 5.0f;
 	}
 	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
 	{
 		LineHeight = 27.0f;
 		TeeSizeMod = 0.6f;
 		Spacing = 0.0f;
+		RoundRadius = 5.0f;
 	}
 	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 12)
 	{
 		LineHeight = 40.0f;
 		TeeSizeMod = 0.8f;
 		Spacing = 0.0f;
+		RoundRadius = 15.0f;
 	}
 	else if(m_pClient->m_Snap.m_aTeamSize[Team] > 8)
 	{
 		LineHeight = 50.0f;
 		TeeSizeMod = 0.9f;
 		Spacing = 8.0f;
+		RoundRadius = 15.0f;
 	}
 
 	float ScoreOffset = x+10.0f, ScoreLength = TextRender()->TextWidth(0, 22.0f/*HeadlineFontsize*/, "00:00:0", -1);
@@ -310,14 +315,74 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		rendered = -32;
 	if (upper24)
 		rendered = -24;
+
+	int OldDDTeam = 0;
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// make sure that we render the correct team
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeam[i];
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;
 
 		if (rendered++ < 0) continue;
+
+		int DDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID);
+		int NextDDTeam = 0;
+
+		for(int j = i + 1; j < MAX_CLIENTS; j++)
+		{
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+
+			if(!pInfo2 || pInfo2->m_Team != Team)
+				continue;
+
+			NextDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+			break;
+		}
+
+		if (DDTeam != TEAM_FLOCK)
+		{
+			Graphics()->TextureSet(-1);
+			Graphics()->QuadsBegin();
+			float r = (DDTeam % 22) / 22.0f;
+			float g = ((DDTeam - 22) % 22) / 22.0f;
+			float b = ((DDTeam - 44) % 22) / 22.0f;
+			Graphics()->SetColor(r, g, b, 0.5f);
+
+			int Corners = 0;
+
+			if (OldDDTeam != DDTeam)
+				Corners |= CUI::CORNER_TL | CUI::CORNER_TR;
+			if (NextDDTeam != DDTeam)
+				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
+
+			RenderTools()->DrawRoundRectExt(x - 10.0f, y, w, LineHeight + Spacing, RoundRadius, Corners);
+
+			Graphics()->QuadsEnd();
+
+			if (NextDDTeam != DDTeam)
+			{
+				char aBuf[64];
+				if(m_pClient->m_Snap.m_aTeamSize[0] > 12)
+				{
+					str_format(aBuf, sizeof(aBuf),"%d", DDTeam);
+					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+					TextRender()->SetCursor(&Cursor, x - 10.0f, y + Spacing + FontSize - (FontSize/1.5f), FontSize/1.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+					Cursor.m_LineWidth = NameLength+3;
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf),"Team %d", DDTeam);
+					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+					TextRender()->SetCursor(&Cursor, ScoreOffset+w/2.0f-tw/2.0f, y + LineHeight - Spacing/3.0f, FontSize/1.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+					Cursor.m_LineWidth = NameLength+3;
+				}
+				TextRender()->TextEx(&Cursor, aBuf, -1);
+			}
+		}
+
+		OldDDTeam = DDTeam;
 
 		// background so it's easy to find the local player or the followed one in spectator mode
 		if(pInfo->m_Local || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
@@ -325,10 +390,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			if(m_pClient->m_Snap.m_aTeamSize[Team] > 32)
-				RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, 5.0f);
-			else
-				RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, 15.0f);
+			RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, RoundRadius);
 			Graphics()->QuadsEnd();
 		}
 
@@ -377,7 +439,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if (m_IsGameTypeRace && g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			str_format(aId, sizeof(aId),"%d:%d:", pInfo->m_ClientID, ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID));
+			str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientID);
 			str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
 			Cursor.m_LineWidth = NameLength+3;
 			TextRender()->TextEx(&Cursor, aId, -1);
