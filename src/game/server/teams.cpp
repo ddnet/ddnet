@@ -258,8 +258,6 @@ bool CGameTeams::TeamFinished(int Team)
 
 int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
-	if (Team == TEAM_SUPER)
-		return -1LL;
 	int Mask = 0;
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
