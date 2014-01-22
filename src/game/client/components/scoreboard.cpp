@@ -316,7 +316,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	if (upper24)
 		rendered = -24;
 
-	int OldDDTeam = 0;
+	int OldDDTeam = -1;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -339,6 +339,20 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 			NextDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
 			break;
+		}
+
+		if (OldDDTeam == -1)
+		{
+			for (int j = i - 1; j >= 0; j--)
+			{
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+
+				if(!pInfo2 || pInfo2->m_Team != Team)
+					continue;
+
+				OldDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+				break;
+			}
 		}
 
 		if (DDTeam != TEAM_FLOCK)
