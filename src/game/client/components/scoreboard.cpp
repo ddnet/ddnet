@@ -364,7 +364,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			if (NextDDTeam != DDTeam)
 			{
 				char aBuf[64];
-				if(m_pClient->m_Snap.m_aTeamSize[0] > 12)
+				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
 				{
 					str_format(aBuf, sizeof(aBuf),"%d", DDTeam);
 					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
