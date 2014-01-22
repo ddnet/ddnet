@@ -190,8 +190,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 
 	for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 		if (GetPlayer(LoopClientID))
-			if (GetPlayer(LoopClientID)->m_IsUsingDDRaceClient)
-				SendTeamsState(LoopClientID);
+			SendTeamsState(LoopClientID);
 }
 
 void CGameTeams::ForceLeaveTeam(int ClientID)
@@ -306,22 +305,13 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if (g_Config.m_SvTeam == 3)
 		return;
 
+	if (!((CServer *) Server())->m_aClients[ClientID].m_CustClt)
+		return;
+
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 
-	if (((CServer *) Server())->m_aClients[ClientID].m_CustClt)
-	{
-		for(unsigned i = 0; i < MAX_CLIENTS; i++)
-			Msg.AddInt(m_Core.Team(i));
-	}
-	else
-	{
-		for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
-		{
-			int id = i;
-			Server()->ReverseTranslate(id, ClientID);
-			Msg.AddInt(m_Core.Team(id));
-		}
-	}
+	for(unsigned i = 0; i < MAX_CLIENTS; i++)
+		Msg.AddInt(m_Core.Team(i));
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
