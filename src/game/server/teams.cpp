@@ -266,9 +266,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		if (!GetPlayer(i))
 			continue; // Player doesn't exist
 
-		if (GetPlayer(i)->m_ShowOthers)
-		{} // ShowOthers sees all
-		else if (!(GetPlayer(i)->GetTeam() == -1 || GetPlayer(i)->m_Paused))
+		if (!(GetPlayer(i)->GetTeam() == -1 || GetPlayer(i)->m_Paused))
 		{ // Not spectator
 			if (i != Asker)
 			{ // Actions of other players
@@ -284,7 +282,9 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		}
 		else if (GetPlayer(i)->m_SpectatorID != SPEC_FREEVIEW)
 		{ // Spectating specific player
-			if (GetPlayer(i)->m_SpectatorID != Asker)
+			if (GetPlayer(i)->m_ShowOthers)
+			{} // ShowOthers sees all
+			else if (GetPlayer(i)->m_SpectatorID != Asker)
 			{ // Actions of other players
 				if (m_Core.Team(GetPlayer(i)->m_SpectatorID) != Team)
 					continue; // In different teams
