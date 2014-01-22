@@ -128,7 +128,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount-Amount) >= 0.0001f)
 					{
-						PrevAmount = Amount;
+						//PrevAmount = Amount;
 						m_pClient->OnReset();
 						m_pClient->m_SuppressEvents = true;
 						DemoPlayer()->SetPos(Amount);
