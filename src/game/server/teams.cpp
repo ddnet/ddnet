@@ -269,32 +269,38 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		if (!GetPlayer(i))
 			continue; // Player doesn't exist
 
-		if (GetPlayer(i)->m_ShowOthers)
-		{} // ShowOthers sees all
-		else if (!(GetPlayer(i)->GetTeam() == -1 || GetPlayer(i)->m_Paused))
+		if (!(GetPlayer(i)->GetTeam() == -1 || GetPlayer(i)->m_Paused))
 		{ // Not spectator
 			if (i != Asker)
 			{ // Actions of other players
 				if (!Character(i))
 					continue; // Player is currently dead
-				if (m_Core.GetSolo(Asker))
-					continue; // When in solo part don't show others
-				if (m_Core.GetSolo(i))
-					continue; // When in solo part don't show others
-				if (m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
-					continue; // In different teams
+				if (!GetPlayer(i)->m_ShowOthers || g_Config.m_SvTeam != 3)
+				{ // Only for SvTeam 3 because it's buggy otherwise
+					if (m_Core.GetSolo(Asker))
+						continue; // When in solo part don't show others
+					if (m_Core.GetSolo(i))
+						continue; // When in solo part don't show others
+					if (m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+						continue; // In different teams
+				} // ShowOthers
 			} // See everything of yourself
 		}
 		else if (GetPlayer(i)->m_SpectatorID != SPEC_FREEVIEW)
 		{ // Spectating specific player
 			if (GetPlayer(i)->m_SpectatorID != Asker)
 			{ // Actions of other players
-				if (m_Core.Team(GetPlayer(i)->m_SpectatorID) != Team)
-					continue; // In different teams
-				if (m_Core.GetSolo(Asker))
-					continue; // When in solo part don't show others
-				if (m_Core.GetSolo(GetPlayer(i)->m_SpectatorID))
-					continue; // When in solo part don't show others
+				if (!Character(GetPlayer(i)->m_SpectatorID))
+					continue; // Player is currently dead
+				if (!GetPlayer(i)->m_ShowOthers || g_Config.m_SvTeam != 3)
+				{ // Only for SvTeam 3 because it's buggy otherwise
+					if (m_Core.GetSolo(Asker))
+						continue; // When in solo part don't show others
+					if (m_Core.GetSolo(GetPlayer(i)->m_SpectatorID))
+						continue; // When in solo part don't show others
+					if (m_Core.Team(GetPlayer(i)->m_SpectatorID) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorID) != TEAM_SUPER)
+						continue; // In different teams
+				} // ShowOthers
 			} // See everything of player you're spectating
 		} // Freeview sees all
 
