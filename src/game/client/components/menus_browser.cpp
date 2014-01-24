@@ -712,7 +712,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 																								vec4(0.5f, 1.0f, 0.5f, 0.15f+(i%2+1)*0.05f);
 			RenderTools()->DrawUIRect(&Name, Colour, CUI::CORNER_ALL, 4.0f);
 			Name.VSplitLeft(5.0f, 0, &Name);
-			Name.VSplitLeft(30.0f, &Score, &Name);
+			Name.VSplitLeft(34.0f, &Score, &Name);
 			Name.VSplitRight(34.0f, &Name, &Flag);
 			Flag.HMargin(4.0f, &Flag);
 			Name.HSplitTop(11.0f, &Name, &Clan);
@@ -721,7 +721,20 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(pSelectedServer->m_aClients[i].m_Player)
 			{
 				char aTemp[16];
-				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
+
+				if(str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap"))
+				{
+					if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
+						aTemp[0] = 0;
+					else
+					{
+						int Time = abs(pSelectedServer->m_aClients[i].m_Score);
+						str_format(aTemp, sizeof(aTemp), "%02d:%02d", Time/60, Time%60);
+					}
+				}
+				else
+					str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
+
 				TextRender()->SetCursor(&Cursor, Score.x, Score.y+(Score.h-FontSize)/4.0f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Score.w;
 				TextRender()->TextEx(&Cursor, aTemp, -1);
