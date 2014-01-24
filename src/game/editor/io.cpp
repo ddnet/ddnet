@@ -450,10 +450,18 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	{
 		CServerInfo CurrentServerInfo;
 		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
-		char aMapName[128];
-		m_pEditor->ExtractName(pFileName, aMapName, sizeof(aMapName));
-		if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
-			m_pEditor->Client()->Rcon("reload");
+		const unsigned char ipv4Localhost[16] = {127,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0};
+		const unsigned char ipv6Localhost[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
+
+		// and if we're on localhost
+		if(!mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv4Localhost, sizeof(ipv4Localhost))
+		|| !mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv6Localhost, sizeof(ipv6Localhost)))
+		{
+			char aMapName[128];
+			m_pEditor->ExtractName(pFileName, aMapName, sizeof(aMapName));
+			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
+				m_pEditor->Client()->Rcon("reload");
+		}
 	}
 
 	return 1;
