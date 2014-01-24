@@ -20,6 +20,18 @@ void CNamePlates::RenderNameplate(
 
 	vec2 Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IntraTick);
 
+	bool OtherTeam;
+
+	if (m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		if (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+			OtherTeam = false;
+		else
+			OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
+	}
+	else
+		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	// render name plate
 	if(!pPlayerInfo->m_Local)
@@ -31,8 +43,16 @@ void CNamePlates::RenderNameplate(
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 		float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
 
-		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.5f*a);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, a);
+		if (OtherTeam)
+		{
+			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.2f);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.4f);
+		}
+		else
+		{
+			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.5f*a);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, a);
+		}
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 		{
 			if(pPlayerInfo->m_Team == TEAM_RED)

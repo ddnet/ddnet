@@ -236,6 +236,24 @@ void CPlayers::RenderHook(
 
 	float IntraTick = Client()->IntraGameTick();
 
+	bool OtherTeam;
+
+	if (m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		if (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+			OtherTeam = false;
+		else
+			OtherTeam = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
+	}
+	else
+		OtherTeam = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+
+	if (OtherTeam)
+	{
+		RenderInfo.m_ColorBody.a = 0.4f;
+		RenderInfo.m_ColorFeet.a = 0.4f;
+	}
+
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
@@ -329,6 +347,8 @@ void CPlayers::RenderHook(
 		// render head
 		RenderTools()->SelectSprite(SPRITE_HOOK_HEAD);
 		IGraphics::CQuadItem QuadItem(HookPos.x, HookPos.y, 24,16);
+		if (OtherTeam)
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 
 		// render chain
@@ -341,6 +361,8 @@ void CPlayers::RenderHook(
 			Array[i] = IGraphics::CQuadItem(p.x, p.y,24,16);
 		}
 
+		if (OtherTeam)
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		Graphics()->QuadsDraw(Array, i);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->QuadsEnd();
@@ -369,6 +391,18 @@ void CPlayers::RenderPlayer(
 	CTeeRenderInfo RenderInfo = m_aRenderInfo[pInfo.m_ClientID];
 
 	bool NewTick = m_pClient->m_NewTick;
+
+	bool OtherTeam;
+
+	if (m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		if (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+			OtherTeam = false;
+		else
+			OtherTeam = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
+	}
+	else
+		OtherTeam = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
@@ -549,6 +583,9 @@ void CPlayers::RenderPlayer(
 		int iw = clamp(Player.m_Weapon, 0, NUM_WEAPONS-1);
 		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[iw].m_pSpriteBody, Direction.x < 0 ? SPRITE_FLAG_FLIP_Y : 0);
 
+		if (OtherTeam)
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+
 		vec2 Dir = Direction;
 		float Recoil = 0.0f;
 		vec2 p;
@@ -685,6 +722,12 @@ void CPlayers::RenderPlayer(
 		}
 		Graphics()->QuadsEnd();
 
+		if (OtherTeam)
+		{
+			RenderInfo.m_ColorBody.a = 0.4f;
+			RenderInfo.m_ColorFeet.a = 0.4f;
+		}
+
 		switch (Player.m_Weapon)
 		{
 			case WEAPON_GUN: RenderHand(&RenderInfo, p, Direction, -3*pi/4, vec2(-15, 4)); break;
@@ -705,30 +748,14 @@ void CPlayers::RenderPlayer(
 	}
 
 	RenderInfo.m_Size = 64.0f; // force some settings
-	bool Alpha;
 
-	if (m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if (OtherTeam)
 	{
-		if (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
-			Alpha = false;
-		else
-			Alpha = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
-	}
-	else
-		Alpha = m_pClient->m_Teams.Team(pInfo.m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
-
-	if (Alpha)
-	{
-		RenderInfo.m_ColorBody.a = 0.5f;
-		RenderInfo.m_ColorFeet.a = 0.5f;
-	}
-	else
-	{
-		RenderInfo.m_ColorBody.a = 1.0f;
-		RenderInfo.m_ColorFeet.a = 1.0f;
+		RenderInfo.m_ColorBody.a = 0.4f;
+		RenderInfo.m_ColorFeet.a = 0.4f;
 	}
 
-	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
+	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, OtherTeam);
 
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
@@ -786,8 +813,16 @@ void CPlayers::RenderPlayer(
 			const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 			float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
 			
-			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.5f*a);
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, a);
+			if (OtherTeam)
+			{
+				TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.2f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.4f);
+			}
+			else
+			{
+				TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.5f*a);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, a);
+			}
 			if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 			{
 				if(pPlayerInfo->m_Team == TEAM_RED)
