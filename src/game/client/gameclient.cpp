@@ -612,8 +612,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 	}
 	else if(MsgId == NETMSGTYPE_SV_TEAMSSTATE)
 	{
-		CNetMsg_Sv_TeamsState *pMsg = (CNetMsg_Sv_TeamsState *)pRawMsg;
-
 		unsigned int i;
 
 		for(i = 0; i < MAX_CLIENTS; i++)
