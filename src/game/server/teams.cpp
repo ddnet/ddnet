@@ -168,6 +168,8 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
+	int OldTeam = m_Core.Team(ClientID);
+
 	ForceLeaveTeam(ClientID);
 
 	m_Core.Team(ClientID, Team);
@@ -188,9 +190,10 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		}
 	}
 
-	for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
-		if (GetPlayer(LoopClientID))
-			SendTeamsState(LoopClientID);
+	if (OldTeam != Team)
+		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+			if (GetPlayer(LoopClientID))
+				SendTeamsState(LoopClientID);
 }
 
 void CGameTeams::ForceLeaveTeam(int ClientID)
