@@ -137,7 +137,7 @@ int CControls::SnapInput(int *pData)
 	// we freeze the input if chat or menu is activated
 	if(!(m_InputData.m_PlayerFlags&PLAYERFLAG_PLAYING))
 	{
-		OnReset();
+		//OnReset();
 
 		mem_copy(pData, &m_InputData, sizeof(m_InputData));
 
