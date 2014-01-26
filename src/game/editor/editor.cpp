@@ -4355,7 +4355,9 @@ void CEditor::UpdateAndRender()
 	if(Input()->KeyDown(KEY_F10))
 		m_ShowMousePointer = false;
 
-	if ((m_LastUndoUpdateTime + time_freq() * 60 < time_get() && m_Map.m_UndoModified) || m_Map.m_UndoModified >= 10)
+	// Screenshot at most every 5 seconds, at least every 60
+	if ((m_LastUndoUpdateTime + time_freq() * 60 < time_get() && m_Map.m_UndoModified)
+	||  (m_LastUndoUpdateTime + time_freq() *  5 < time_get() && m_Map.m_UndoModified >= 10))
 	{
 		m_Map.m_UndoModified = 0;
 		m_LastUndoUpdateTime = time_get();

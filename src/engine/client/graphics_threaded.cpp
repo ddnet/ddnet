@@ -472,7 +472,7 @@ void CGraphics_Threaded::ScreenshotDirectThread(void *pData)
 
 	// kick the buffer and wait for the result
 	pGraphics->KickCommandBuffer();
-	pGraphics->WaitForIdle();
+	thread_sleep(100);
 
 	if(Image.m_pData)
 	{
