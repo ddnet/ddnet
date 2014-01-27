@@ -98,7 +98,10 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 32, 32);
 
-	bool LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
+	bool LocalPlayerInGame = false;
+
+	if(m_pClient->m_Snap.m_pLocalInfo)
+		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
 
 	if (g_Config.m_ClAntiPingGrenade && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
