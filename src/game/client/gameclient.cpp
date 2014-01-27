@@ -1281,13 +1281,10 @@ IGameClient *CreateGameClient()
 	return &g_GameClient;
 }
 
-//H-Client
-// TODO: should be more general
-int CGameClient::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos)
+int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2)
 {
-	// Find other players
-	static const int ProximityRadius = 28;
-	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
+	float PhysSize = 28.0f;
+	float Distance = 0.0f;
 	int ClosestID = -1;
 
 	for (int i=0; i<MAX_CLIENTS; i++)
@@ -1301,16 +1298,14 @@ int CGameClient::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& Ne
 		if (!cData.m_Active || cData.m_Team == TEAM_SPECTATORS || m_Snap.m_LocalClientID == m_Snap.m_paPlayerInfos[i]->m_ClientID)
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, Position);
-		float Len = distance(Position, IntersectPos);
-		if(Len < ProximityRadius+Radius)
+		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
+		if(distance(Position, ClosestPoint) < PhysSize+2.0f)
 		{
-			Len = distance(Pos0, IntersectPos);
-			if(Len < ClosestLen)
+			if(ClosestID == -1 || distance(HookPos, Position) < Distance)
 			{
-				NewPos = IntersectPos;
-				ClosestLen = Len;
+				NewPos2 = ClosestPoint;
 				ClosestID = i;
+				Distance = distance(HookPos, Position);
 			}
 		}
 	}

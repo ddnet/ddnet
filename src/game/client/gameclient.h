@@ -259,7 +259,7 @@ public:
 	class CGhost *m_pGhost;
 	class CTeamsCore m_Teams;
 
-	int IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos);
+	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2& NewPos);
 
 private:
 

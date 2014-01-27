@@ -548,27 +548,56 @@ void CPlayers::RenderPlayer(
 		if (Player.m_PlayerFlags&PLAYERFLAG_AIM)
 		{
 			vec2 ExDirection = Direction;
-			
+
 			if (pPlayerInfo->m_Local)
 				ExDirection = normalize(vec2(m_pClient->m_pControls->m_InputData.m_TargetX, m_pClient->m_pControls->m_InputData.m_TargetY));
 
 			Graphics()->TextureSet(-1);
-			vec2 initPos = Position + ExDirection * 42.0f;
+			vec2 initPos = Position;
 			vec2 finishPos = initPos + ExDirection * (m_pClient->m_Tuning.m_HookLength-42.0f);
+
 			Graphics()->LinesBegin();
 			Graphics()->SetColor(1.00f, 0.0f, 0.0f, 1.00f);
 
+			float PhysSize = 28.0f;
 
-			Graphics()->SetColor(1.00f, 0.0f, 0.0f, 1.00f);
-			if (Collision()->IntersectLine(initPos, finishPos, &finishPos, 0x0, true))
-			{
-				vec2 finishPosPost = finishPos;
-				if (!(Collision()->GetCollisionAt(finishPosPost.x, finishPosPost.y)&CCollision::COLFLAG_NOHOOK))
-					Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
-			}
+			vec2 OldPos = initPos + ExDirection * PhysSize * 1.5f;;
+			vec2 NewPos = OldPos;
 
-			if (m_pClient->IntersectCharacter(initPos, finishPos, 2.2f, finishPos) != -1)
-				Graphics()->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
+			bool doBreak = false;
+
+			do {
+				OldPos = NewPos;
+				NewPos = OldPos + ExDirection * m_pClient->m_Tuning.m_HookFireSpeed;
+
+				if (distance(Position, NewPos) > m_pClient->m_Tuning.m_HookLength)
+				{
+					NewPos = initPos + normalize(NewPos-initPos) * m_pClient->m_Tuning.m_HookLength;
+					doBreak = true;
+				}
+
+				if (m_pClient->IntersectCharacter(OldPos, NewPos, finishPos) != -1)
+				{
+					Graphics()->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
+					break;
+				}
+
+				int teleNr = 0;
+
+				if (!doBreak && Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr, true))
+				{
+					vec2 finishPosPost = finishPos;
+					if (!(Collision()->GetCollisionAt(finishPosPost.x, finishPosPost.y)&CCollision::COLFLAG_NOHOOK))
+						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
+					break;
+				}
+
+				NewPos.x = round(NewPos.x);
+				NewPos.y = round(NewPos.y);
+
+				ExDirection.x = round(ExDirection.x*256.0f) / 256.0f;
+				ExDirection.y = round(ExDirection.y*256.0f) / 256.0f;
+			} while (!doBreak);
 
 			IGraphics::CLineItem LineItem(Position.x, Position.y, finishPos.x, finishPos.y);
 			Graphics()->LinesDraw(&LineItem, 1);
