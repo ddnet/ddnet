@@ -967,7 +967,7 @@ void CGameClient::OnNewSnapshot()
 
 	// sort player infos by DDRace Team (and score inbetween)
 	Index = 0;
-	for(int Team = 0; Team < MAX_CLIENTS; ++Team)
+	for(int Team = 0; Team <= MAX_CLIENTS; ++Team)
 	{
 		for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
 		{
