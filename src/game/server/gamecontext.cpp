@@ -1547,6 +1547,7 @@ void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int NumMaps = 0;
+	int NumVotes = 0;
 	int OurMap;
 	char* pMapName;
 	char pQuotedMapName[64];
@@ -1554,13 +1555,23 @@ void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
 	CVoteOptionServer *pOption = pSelf->m_pVoteOptionFirst;
 	while(pOption)
 	{
-		NumMaps++;
+		if(strncmp(pOption->m_aCommand, "change_map ", 11) == 0
+		|| strncmp(pOption->m_aCommand, "sv_map ", 7) == 0)
+			NumMaps++;
+
+		NumVotes++;
 		pOption = pOption->m_pNext;
+	}
+
+	if(!NumMaps)
+	{
+		pSelf->SendChat(-1, CGameContext::CHAT_ALL, "random_map called, but no maps available in votes");
+		return;
 	}
 
 	while(true)
 	{
-		OurMap = rand() % NumMaps;
+		OurMap = rand() % NumVotes;
 		pOption = pSelf->m_pVoteOptionFirst;
 
 		while(OurMap > 0)
