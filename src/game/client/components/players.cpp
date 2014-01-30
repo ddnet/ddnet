@@ -565,6 +565,7 @@ void CPlayers::RenderPlayer(
 			vec2 NewPos = OldPos;
 
 			bool doBreak = false;
+			int Hit = 0;
 
 			do {
 				OldPos = NewPos;
@@ -576,21 +577,24 @@ void CPlayers::RenderPlayer(
 					doBreak = true;
 				}
 
-				if (m_pClient->IntersectCharacter(OldPos, NewPos, finishPos) != -1)
+				int teleNr = 0;
+				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr, true);
+
+				if(!doBreak && Hit)
+				{
+					vec2 finishPosPost = finishPos;
+					if (!(Collision()->GetCollisionAt(finishPosPost.x, finishPosPost.y)&CCollision::COLFLAG_NOHOOK))
+						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
+				}
+
+				if (m_pClient->IntersectCharacter(OldPos, finishPos, finishPos, pPlayerInfo->m_ClientID) != -1)
 				{
 					Graphics()->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
 					break;
 				}
 
-				int teleNr = 0;
-
-				if (!doBreak && Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr, true))
-				{
-					vec2 finishPosPost = finishPos;
-					if (!(Collision()->GetCollisionAt(finishPosPost.x, finishPosPost.y)&CCollision::COLFLAG_NOHOOK))
-						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
+				if(Hit)
 					break;
-				}
 
 				NewPos.x = round(NewPos.x);
 				NewPos.y = round(NewPos.y);

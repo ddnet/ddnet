@@ -1281,7 +1281,7 @@ IGameClient *CreateGameClient()
 	return &g_GameClient;
 }
 
-int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2)
+int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, int ownID)
 {
 	float PhysSize = 28.0f;
 	float Distance = 0.0f;
@@ -1295,7 +1295,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2)
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick());
 
-		if (!cData.m_Active || cData.m_Team == TEAM_SPECTATORS)
+		if (!cData.m_Active || cData.m_Team == TEAM_SPECTATORS || i == ownID || !m_Teams.CanCollide(i, ownID) || !m_PredictedChar.m_Collision)
 			continue;
 
 		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
