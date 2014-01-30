@@ -266,7 +266,8 @@ void CPlayer::FakeSnap(int SnappingClient)
 {
 	IServer::CClientInfo info;
 	Server()->GetClientInfo(SnappingClient, &info);
-	if (((CGameContext *) GameServer())->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_OLD)
+	CGameContext *GameContext = (CGameContext *) GameServer();
+	if (GameContext->m_apPlayers[SnappingClient] && GameContext->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_OLD)
 		return;
 
 	int id = VANILLA_MAX_CLIENTS - 1;

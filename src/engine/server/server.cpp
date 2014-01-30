@@ -478,7 +478,8 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
 		CGameContext *GameServer = (CGameContext *) m_pGameServer;
-		pInfo->m_ClientVersion = GameServer->m_apPlayers[ClientID]->m_ClientVersion;
+		if (GameServer->m_apPlayers[ClientID])
+			pInfo->m_ClientVersion = GameServer->m_apPlayers[ClientID]->m_ClientVersion;
 		return 1;
 	}
 	return 0;
@@ -1041,7 +1042,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
 			{
 				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				GameServer->m_apPlayers[ClientID]->m_ClientVersion = VERSION_DDNET_OLD;
+				if (GameServer->m_apPlayers[ClientID])
+					GameServer->m_apPlayers[ClientID]->m_ClientVersion = VERSION_DDNET_OLD;
 			} else
 			if(Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
