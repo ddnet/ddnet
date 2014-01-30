@@ -91,6 +91,9 @@ public:
 	;
 	bool TeamLocked(int Team)
 	{
+		if (Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+			return false;
+
 		return m_TeamLocked[Team];
 	}
 	;
