@@ -314,13 +314,27 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if (g_Config.m_SvTeam == 3)
 		return;
 
-	if (m_pGameContext->m_apPlayers[ClientID] && m_pGameContext->m_apPlayers[ClientID]->m_ClientVersion <= VERSION_DDRACE)
+	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDRACE)
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 
-	for(unsigned i = 0; i < MAX_CLIENTS; i++)
-		Msg.AddInt(m_Core.Team(i));
+	if (m_pGameContext->m_apPlayers[ClientID]->m_ClientVersion == VERSION_DDRACE)
+	{
+		for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		{
+			int target = 0;
+			Server()->ReverseTranslate(target, i);
+			Msg.AddInt(m_Core.Team(target));
+		}
+	}
+	else
+	{
+		for(unsigned i = 0; i < MAX_CLIENTS; i++)
+		{
+			Msg.AddInt(m_Core.Team(i));
+		}
+	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }

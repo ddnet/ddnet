@@ -1042,7 +1042,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
 			{
 				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				if (GameServer->m_apPlayers[ClientID] && GameServer->m_apPlayers[ClientID]->m_ClientVersion < DDNET_OLD)
+				if (GameServer->m_apPlayers[ClientID] && GameServer->m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_OLD)
 					GameServer->m_apPlayers[ClientID]->m_ClientVersion = VERSION_DDNET_OLD;
 			} else
 			if(Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
