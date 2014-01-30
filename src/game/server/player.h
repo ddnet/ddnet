@@ -137,7 +137,7 @@ public:
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
 	int m_Authed;
-	bool m_IsUsingDDRaceClient;
+	int m_ClientVersion;
 	bool m_ShowOthers;
 	bool m_NinjaJetpack;
 	bool m_Afk;

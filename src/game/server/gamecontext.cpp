@@ -245,7 +245,6 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	}
 }
 
-
 void CGameContext::SendChatTarget(int To, const char *pText)
 {
 	CNetMsg_Sv_Chat Msg;
@@ -254,7 +253,6 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 	Msg.m_pMessage = pText;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 }
-
 
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID)
 {
@@ -408,9 +406,7 @@ void CGameContext::SendVoteSet(int ClientID)
 
 void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 {
-	CServer* pServ = (CServer*)Server();
-
-	if (Total > VANILLA_MAX_CLIENTS && !pServ->m_aClients[ClientID].m_CustClt)
+	if (Total > VANILLA_MAX_CLIENTS && m_apPlayers[ClientID]->m_ClientVersion <= VERSION_DDRACE)
 	{
 		Yes = float(Yes) * VANILLA_MAX_CLIENTS / float(Total);
 		No = float(No) * VANILLA_MAX_CLIENTS / float(Total);
@@ -1218,13 +1214,20 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
-		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
+		else if (MsgID == NETMSGTYPE_CL_ISDDNET)
 		{
-			pPlayer->m_IsUsingDDRaceClient = true;
+			int Version = pUnpacker->GetInt();
+
+			if (pUnpacker->Error())
+			{
+				if (pPlayer->m_ClientVersion < VERSION_DDRACE)
+					pPlayer->m_ClientVersion = VERSION_DDRACE;
+			} else
+				pPlayer->m_ClientVersion = Version;
 
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%d use DDRace Client", ClientID);
-			dbg_msg("DDRace", aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
+			dbg_msg("DDNet", aBuf);
 
 			//first update his teams state
 			((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
@@ -1255,10 +1258,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Msg.m_ClientID = ClientID;
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 			}
-		}
-		else if (MsgID == NETMSGTYPE_CL_ISDDRACE64)
-		{
-			Server()->SetCustClt(ClientID);
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
@@ -2520,11 +2519,31 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 
 	char aBuf[256];
 
-	str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
-	SendChatTarget(VictimID, aBuf);
+	if (m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_WHISPER)
+	{
+		CNetMsg_Sv_Chat Msg;
+		Msg.m_Team = CHAT_WHISPER_SEND;
+		Msg.m_ClientID = VictimID;
+		Msg.m_pMessage = pMessage;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	} else
+	{
+		str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), pMessage);
+		SendChatTarget(ClientID, aBuf);
+	}
 
-	str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), pMessage);
-	SendChatTarget(ClientID, aBuf);
+	if (m_apPlayers[VictimID]->m_ClientVersion >= VERSION_DDNET_WHISPER)
+	{
+		CNetMsg_Sv_Chat Msg2;
+		Msg2.m_Team = CHAT_WHISPER_RECV;
+		Msg2.m_ClientID = ClientID;
+		Msg2.m_pMessage = pMessage;
+		Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimID);
+	} else
+	{
+		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
+		SendChatTarget(VictimID, aBuf);
+	}
 }
 
 void CGameContext::Converse(int ClientID, char *pStr)

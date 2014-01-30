@@ -186,8 +186,8 @@ void CGameWorld::UpdatePlayerMaps()
 			if(SnapChar && !SnapChar->m_Super &&
 				GameServer()->m_apPlayers[SnappingClient]->GetTeam() != -1 &&
 				!ch->CanCollide(SnappingClient) &&
-				(!GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient ||
-					(GameServer()->m_apPlayers[SnappingClient]->m_IsUsingDDRaceClient &&
+				(GameServer()->m_apPlayers[SnappingClient]->m_ClientVersion == VERSION_VANILLA ||
+					(GameServer()->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDRACE &&
 					!GameServer()->m_apPlayers[SnappingClient]->m_ShowOthers
 					)
 				)

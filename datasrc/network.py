@@ -229,7 +229,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_Chat", [
-		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
+		NetIntRange("m_Team", -2, 3),
 		NetIntRange("m_ClientID", -1, 'MAX_CLIENTS-1'),
 		NetStringHalfStrict("m_pMessage"),
 	]),
@@ -341,7 +341,7 @@ Messages = [
 		NetStringStrict("m_Reason"),
 	]),
 
-	NetMessage("Cl_IsDDRace", []),
+	NetMessage("Cl_IsDDNet", []),
 
 	NetMessage("Sv_DDRaceTime", [
 		NetIntAny("m_Time"),
@@ -363,7 +363,6 @@ Messages = [
 
 	NetMessage("Cl_ShowOthers", [
 		NetBool("m_Show"),
-	]),
-
-	NetMessage("Cl_IsDDRace64", []),
+	])
+# Can't add any NetMessages here!
 ]

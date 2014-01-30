@@ -142,7 +142,9 @@ public:
 		CHAT_ALL=-2,
 		CHAT_SPEC=-1,
 		CHAT_RED=0,
-		CHAT_BLUE=1
+		CHAT_BLUE=1,
+		CHAT_WHISPER_SEND=2,
+		CHAT_WHISPER_RECV=3
 	};
 
 	// network

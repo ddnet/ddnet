@@ -73,7 +73,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	GameServer()->Score()->PlayerData(ClientID)->Reset();
 
-	m_IsUsingDDRaceClient = false;
+	m_ClientVersion = VERSION_VANILLA;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_NinjaJetpack = false;
 
@@ -266,7 +266,7 @@ void CPlayer::FakeSnap(int SnappingClient)
 {
 	IServer::CClientInfo info;
 	Server()->GetClientInfo(SnappingClient, &info);
-	if (info.m_CustClt)
+	if (((CGameContext *) GameServer())->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_OLD)
 		return;
 
 	int id = VANILLA_MAX_CLIENTS - 1;

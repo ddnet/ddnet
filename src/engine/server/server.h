@@ -143,7 +143,6 @@ public:
 		// DDRace
 
 		NETADDR m_Addr;
-		bool m_CustClt;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -270,7 +269,6 @@ public:
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
 	virtual int* GetIdMap(int ClientID);
-	virtual void SetCustClt(int ClientID);
 };
 
 #endif

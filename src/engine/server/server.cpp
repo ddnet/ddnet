@@ -31,6 +31,7 @@
 #include <string.h>
 #include <vector>
 #include <engine/shared/linereader.h>
+#include <game/server/gamecontext.h>
 
 #include "register.h"
 #include "server.h"
@@ -443,7 +444,6 @@ int CServer::Init()
 		m_aClients[i].m_State = CClient::STATE_EMPTY;
 		m_aClients[i].m_aName[0] = 0;
 		m_aClients[i].m_aClan[0] = 0;
-		m_aClients[i].m_CustClt = 0;
 		m_aClients[i].m_Country = -1;
 		m_aClients[i].m_Snapshots.Init();
 		m_aClients[i].m_Traffic = 0;
@@ -477,7 +477,8 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
-		pInfo->m_CustClt = m_aClients[ClientID].m_CustClt;
+		CGameContext *GameServer = (CGameContext *) m_pGameServer;
+		pInfo->m_ClientVersion = GameServer->m_apPlayers[ClientID]->m_ClientVersion;
 		return 1;
 	}
 	return 0;
@@ -723,12 +724,10 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
-	pThis->m_aClients[ClientID].m_CustClt = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	memset(&pThis->m_aClients[ClientID].m_Addr, 0, sizeof(NETADDR));
-	pThis->m_aClients[ClientID].m_CustClt = 0;
 	pThis->m_aClients[ClientID].Reset();
 	return 0;
 }
@@ -1041,7 +1040,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			const char *pCmd = Unpacker.GetString();
 			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
 			{
-				SetCustClt(ClientID);
+				CGameContext *GameServer = (CGameContext *) m_pGameServer;
+				GameServer->m_apPlayers[ClientID]->m_ClientVersion = VERSION_DDNET_OLD;
 			} else
 			if(Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
@@ -1283,7 +1283,8 @@ void CServer::UpdateServerInfo()
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
-			if (m_aClients[i].m_CustClt)
+			CGameContext *GameServer = (CGameContext *) m_pGameServer;
+			if (GameServer->m_apPlayers[i] && GameServer->m_apPlayers[i]->m_ClientVersion >= VERSION_DDNET_OLD)
 				SendServerInfo(m_NetServer.ClientAddr(i), -1, true);
 			else
 				SendServerInfo(m_NetServer.ClientAddr(i), -1, false);
@@ -2003,9 +2004,4 @@ char *CServer::GetAnnouncementLine(char const *pFileName)
 int* CServer::GetIdMap(int ClientID)
 {
 	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
-}
-
-void CServer::SetCustClt(int ClientID)
-{
-	m_aClients[ClientID].m_CustClt = 1;
 }

@@ -366,13 +366,33 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 					m_aLines[m_CurrentLine].m_NameColor = TEAM_BLUE;
 			}
 
-			str_copy(m_aLines[m_CurrentLine].m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
+			if (Team == 2) // whisper send
+			{
+				str_format(m_aLines[m_CurrentLine].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName), "→ %s", m_pClient->m_aClients[ClientID].m_aName);
+				m_aLines[m_CurrentLine].m_NameColor = TEAM_BLUE;
+				m_aLines[m_CurrentLine].m_Highlighted = false;
+				m_aLines[m_CurrentLine].m_Team = 0;
+				Highlighted = false;
+			}
+			else if (Team == 3) // whisper recv
+			{
+				str_format(m_aLines[m_CurrentLine].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName), "← %s", m_pClient->m_aClients[ClientID].m_aName);
+				m_aLines[m_CurrentLine].m_NameColor = TEAM_RED;
+				m_aLines[m_CurrentLine].m_Highlighted = true;
+				m_aLines[m_CurrentLine].m_Team = 0;
+				Highlighted = true;
+			}
+			else
+			{
+				str_copy(m_aLines[m_CurrentLine].m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
+			}
+
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), ": %s", pLine);
 		}
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_aLines[m_CurrentLine].m_Team?"teamchat":"chat", aBuf);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2?"whisper":(m_aLines[m_CurrentLine].m_Team?"teamchat":"chat"), aBuf);
 	}
 
 	if (!g_Config.m_SndChat && !g_Config.m_SndNameOnly)

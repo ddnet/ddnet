@@ -22,7 +22,7 @@ public:
 	{
 		const char *m_pName;
 		int m_Latency;
-		bool m_CustClt;
+		int m_ClientVersion;
 	};
 
 	int Tick() const { return m_CurrentGameTick; }
@@ -103,7 +103,7 @@ public:
 	{
 		CClientInfo info;
 		GetClientInfo(client, &info);
-		if (info.m_CustClt)
+		if (info.m_ClientVersion >= VERSION_DDNET_OLD)
 			return true;
 		int* map = GetIdMap(client);
 		bool found = false;
@@ -123,7 +123,7 @@ public:
 	{
 		CClientInfo info;
 		GetClientInfo(client, &info);
-		if (info.m_CustClt)
+		if (info.m_ClientVersion >= VERSION_DDNET_OLD)
 			return true;
 		int* map = GetIdMap(client);
 		if (map[target] == -1)
@@ -160,7 +160,6 @@ public:
 	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) = 0;
 
 	virtual int* GetIdMap(int ClientID) = 0;
-	virtual void SetCustClt(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface
