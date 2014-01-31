@@ -950,7 +950,7 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 
 	if( SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->m_Paused && SnapChar && !SnapChar->m_Super
-		&& !CanCollide(SnappingClient) && (!SnapPlayer->m_ShowOthers || Teams()->m_Core.GetSolo(SnappingClient) || Teams()->m_Core.GetSolo(GetPlayer()->GetCID())))
+		&& !CanCollide(SnappingClient) && g_Config.m_SvTeam != 3 && (!SnapPlayer->m_ShowOthers || Teams()->m_Core.GetSolo(SnappingClient) || Teams()->m_Core.GetSolo(GetPlayer()->GetCID())))
 		return;
 
 	if (m_Paused)
