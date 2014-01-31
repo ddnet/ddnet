@@ -1930,6 +1930,11 @@ void CClient::Run()
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 
+	bool LastD = false;
+	bool LastQ = false;
+	bool LastE = false;
+	bool LastG = false;
+
 	while (1)
 	{
 		//
@@ -1980,19 +1985,19 @@ void CClient::Run()
 		}
 
 		// panic quit button
-		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && Input()->KeyPressed('q'))
+		if(CtrlShiftKey('q', LastQ))
 		{
 			Quit();
 			break;
 		}
 
-		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && Input()->KeyDown('d'))
+		if(CtrlShiftKey('d', LastD))
 			g_Config.m_Debug ^= 1;
 
-		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && Input()->KeyDown('g'))
+		if(CtrlShiftKey('g', LastG))
 			g_Config.m_DbgGraphs ^= 1;
 
-		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && Input()->KeyDown('e'))
+		if(CtrlShiftKey('e', LastE))
 		{
 			g_Config.m_ClEditor = g_Config.m_ClEditor^1;
 			Input()->MouseModeRelative();
@@ -2113,6 +2118,18 @@ void CClient::Run()
 	}
 }
 
+bool CClient::CtrlShiftKey(int Key, bool &Last)
+{
+	if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && !Last && Input()->KeyPressed(Key))
+	{
+		Last = true;
+		return true;
+	}
+	else if (Last && !Input()->KeyPressed(Key))
+		Last = false;
+
+	return false;
+}
 
 void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 {
