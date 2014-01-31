@@ -1107,13 +1107,18 @@ void CCharacter::HandleSkippableTiles(int Index)
 			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetFCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
 			GameServer()->Collision()->GetFCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-			GameLayerClipped(m_Pos)) &&
+			GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH) &&
 			!m_Super && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID())))
-		{
-			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
-			return;
-		}
+	{
+		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		return;
+	}
+
+	if (GameLayerClipped(m_Pos) && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID())))
+	{
+		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		return;
+	}
 
 	if(Index < 0)
 		return;
