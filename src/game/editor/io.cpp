@@ -709,6 +709,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECK;
 									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECKIN)
 										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECKIN;
+									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECKINEVIL)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECKINEVIL;
 									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELECHECKOUT)
 										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TELECHECKOUT;
 									else if(((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TILE_TELEINWEAPON)

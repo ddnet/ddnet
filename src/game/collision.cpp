@@ -526,6 +526,19 @@ int CCollision::IsCheckTeleport(int Index)
 	return 0;
 }
 
+int CCollision::IsCheckEvilTeleport(int Index)
+{
+	if(Index < 0)
+		return 0;
+	if(!m_pTele)
+		return 0;
+
+	if(m_pTele[Index].m_Type == TILE_TELECHECKINEVIL)
+		return m_pTele[Index].m_Number;
+
+	return 0;
+}
+
 int CCollision::IsTCheckpoint(int Index)
 {
 	if(Index < 0)
@@ -684,7 +697,7 @@ bool CCollision::TileExists(int Index)
 		return true;
 	if(m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index  <= TILE_NPH_START)
 		return true;
-	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
+	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECKINEVIL ||m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
 		return true;
 	if(m_pSpeedup && m_pSpeedup[Index].m_Force > 0)
 		return true;

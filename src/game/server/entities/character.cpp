@@ -1574,6 +1574,42 @@ void CCharacter::HandleTiles(int Index)
 		}
 		return;
 	}
+	if(GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
+	{
+		if (m_Super)
+			return;
+		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+		for(int k=m_TeleCheckpoint-1; k >= 0; k--)
+		{
+			if(Controller->m_TeleCheckOuts[k].size())
+			{
+				m_Core.m_HookedPlayer = -1;
+				m_Core.m_HookState = HOOK_RETRACTED;
+				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+				m_Core.m_HookState = HOOK_RETRACTED;
+				int Num = Controller->m_TeleCheckOuts[k].size();
+				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
+				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+				m_Core.m_Vel = vec2(0,0);
+				m_Core.m_HookPos = m_Core.m_Pos;
+				return;
+			}
+		}
+		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+		vec2 SpawnPos;
+		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos))
+		{
+			m_Core.m_HookedPlayer = -1;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_Pos = SpawnPos;
+			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+			m_Core.m_Vel = vec2(0,0);
+			m_Core.m_HookPos = m_Core.m_Pos;
+		}
+		return;
+	}
 	if(GameServer()->Collision()->IsCheckTeleport(MapIndex))
 	{
 		if (m_Super)

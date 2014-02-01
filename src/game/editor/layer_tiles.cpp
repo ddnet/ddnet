@@ -180,7 +180,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x] = ((CLayerTele*)this)->m_pTeleTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEIN || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEOUT || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINEVIL || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECK || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKOUT || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKIN || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINWEAPON || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINHOOK)
+					if(pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEIN || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEOUT || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINEVIL || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKINEVIL || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECK || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKOUT || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKIN || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINWEAPON || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELEINHOOK)
 						m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Number;
 				}
 		pGrabbed->m_TeleNum = m_pEditor->m_TeleNumber;
@@ -762,7 +762,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEIN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINEVIL || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEOUT || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECK || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKOUT || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKIN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINWEAPON || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINHOOK)
+			if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEIN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINEVIL || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKINEVIL || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEOUT || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECK || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKOUT || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKIN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINWEAPON || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINHOOK)
 			{
 				if(m_pEditor->m_TeleNumber != l->m_TeleNum)
 				{
