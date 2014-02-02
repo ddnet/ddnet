@@ -273,7 +273,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	{
 		LineHeight = 50.0f;
 		TeeSizeMod = 0.9f;
-		Spacing = 8.0f;
+		Spacing = 5.0f;
 		RoundRadius = 15.0f;
 	}
 
