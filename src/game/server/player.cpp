@@ -300,7 +300,7 @@ void CPlayer::OnDisconnect(const char *pReason)
 	}
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-	Controller->m_Teams.m_Core.Team(m_ClientID, 0);
+	Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
