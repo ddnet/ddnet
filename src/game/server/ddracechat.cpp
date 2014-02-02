@@ -918,6 +918,22 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData)
 				"Showing players from other teams is disabled by the server admin");
 }
 
+void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+		pPlayer->m_ShowAll = pResult->GetInteger(0);
+	else
+		pPlayer->m_ShowAll = !pPlayer->m_ShowAll;
+}
+
 bool CheckClientID(int ClientID)
 {
 	dbg_assert(ClientID >= 0 || ClientID < MAX_CLIENTS,

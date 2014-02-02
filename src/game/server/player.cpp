@@ -75,6 +75,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	m_ClientVersion = VERSION_VANILLA;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
+	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSED_NONE;
