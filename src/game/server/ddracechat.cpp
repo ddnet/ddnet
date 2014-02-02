@@ -12,7 +12,6 @@
 #endif
 
 bool CheckClientID(int ClientID);
-char* TimerType(int TimerType);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
@@ -943,11 +942,6 @@ bool CheckClientID(int ClientID)
 	return true;
 }
 
-char* TimerType(int TimerType)
-{
-	char msg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
-	return msg[TimerType];
-}
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -1031,9 +1025,10 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
+	const char msg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
 	char aBuf[128];
 	if(pPlayer->m_TimerType <= 2 && pPlayer->m_TimerType >= 0)
-		str_format(aBuf, sizeof(aBuf), "Timer is displayed in", TimerType(pPlayer->m_TimerType));
+		str_format(aBuf, sizeof(aBuf), "Timer is displayed in", msg[pPlayer->m_TimerType]);
 	else if(pPlayer->m_TimerType == 3)
 		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
 
