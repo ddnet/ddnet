@@ -181,20 +181,20 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			continue;
 
 		int Index = m_pClient->m_Snap.m_paInfoByTeam[i]->m_ClientID;
-		CListboxItem Item = UiDoListboxNextItem(&m_pClient->m_aClients[Index]);
 
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
+
+		CListboxItem Item = UiDoListboxNextItem(&m_pClient->m_aClients[Index]);
 
 		Count++;
 
 		if(!Item.m_Visible)
 			continue;
 
-		Item.m_Rect.HSplitTop(24.0f, &ButtonBar, &Item.m_Rect);
 		if(Count%2 == 1)
-			RenderTools()->DrawUIRect(&ButtonBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
-		ButtonBar.VSplitRight(200.0f, &Player, &ButtonBar);
+			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+		Item.m_Rect.VSplitRight(200.0f, &Player, &Item.m_Rect);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
@@ -214,8 +214,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
 
 		// ignore button
-		ButtonBar.HMargin(2.0f, &ButtonBar);
-		ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
+		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
+		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
 		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
@@ -225,8 +225,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 				m_pClient->m_aClients[Index].m_ChatIgnore ^= 1;
 
 		// friend button
-		ButtonBar.VSplitLeft(20.0f, &Button, &ButtonBar);
-		ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
+		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
+		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
 		Button.VSplitLeft((Width-Button.h)/4.0f, 0, &Button);
 		Button.VSplitLeft(Button.h, &Button, 0);
 		if(DoButton_Toggle(&s_aPlayerIDs[Index][1], m_pClient->m_aClients[Index].m_Friend, &Button, true))
