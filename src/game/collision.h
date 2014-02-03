@@ -78,6 +78,7 @@ public:
 	int IsTeleport(int Index);
 	int IsEvilTeleport(int Index);
 	int IsCheckTeleport(int Index);
+	int IsCheckEvilTeleport(int Index);
 	int IsTeleportWeapon(int Index);
 	int IsTeleportHook(int Index);
 	int IsTCheckpoint(int Index);

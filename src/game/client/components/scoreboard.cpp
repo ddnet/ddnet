@@ -273,7 +273,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	{
 		LineHeight = 50.0f;
 		TeeSizeMod = 0.9f;
-		Spacing = 8.0f;
+		Spacing = 5.0f;
 		RoundRadius = 15.0f;
 	}
 
@@ -359,10 +359,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		{
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
-			float r = (DDTeam % 22) / 22.0f;
-			float g = ((DDTeam - 22) % 22) / 22.0f;
-			float b = ((DDTeam - 44) % 22) / 22.0f;
-			Graphics()->SetColor(r, g, b, 0.5f);
+			vec3 rgb = HslToRgb(vec3(DDTeam / 64.0f, 1.0f, 0.5f));
+			Graphics()->SetColor(rgb.r, rgb.g, rgb.b, 0.5f);
 
 			int Corners = 0;
 

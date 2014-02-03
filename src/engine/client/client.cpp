@@ -2023,7 +2023,7 @@ void CClient::Run()
 
 			Update();
 			
-			if(!g_Config.m_GfxAsyncRender || m_pGraphics->IsIdle())
+			if(m_pGraphics->WindowOpen() && (!g_Config.m_GfxAsyncRender || m_pGraphics->IsIdle()))
 			{
 				m_RenderFrames++;
 

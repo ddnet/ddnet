@@ -75,6 +75,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	m_ClientVersion = VERSION_VANILLA;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
+	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSED_NONE;
@@ -300,7 +301,7 @@ void CPlayer::OnDisconnect(const char *pReason)
 	}
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-	Controller->m_Teams.m_Core.Team(m_ClientID, 0);
+	Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)

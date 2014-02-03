@@ -139,6 +139,7 @@ public:
 	int m_Authed;
 	int m_ClientVersion;
 	bool m_ShowOthers;
+	bool m_ShowAll;
 	bool m_NinjaJetpack;
 	bool m_Afk;
 
