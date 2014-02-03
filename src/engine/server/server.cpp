@@ -1285,11 +1285,8 @@ void CServer::UpdateServerInfo()
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
-			CGameContext *GameServer = (CGameContext *) m_pGameServer;
-			if (GameServer->m_apPlayers[i] && GameServer->m_apPlayers[i]->m_ClientVersion >= VERSION_DDNET_OLD)
-				SendServerInfo(m_NetServer.ClientAddr(i), -1, true);
-			else
-				SendServerInfo(m_NetServer.ClientAddr(i), -1, false);
+			SendServerInfo(m_NetServer.ClientAddr(i), -1, true);
+			SendServerInfo(m_NetServer.ClientAddr(i), -1, false);
 		}
 	}
 }
