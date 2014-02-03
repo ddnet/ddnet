@@ -484,9 +484,6 @@ void CSqlScore::SaveScoreThread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute(aBuf);
 
 			dbg_msg("SQL", "Updating time done");
-
-			// delete results statement
-			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
