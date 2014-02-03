@@ -1272,7 +1272,6 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 			dbg_msg("SQL", "ERROR: Could not show toppoints");
 		}
 
-		end:
 		// disconnect from database
 		pData->m_pSqlData->Disconnect();
 	}
