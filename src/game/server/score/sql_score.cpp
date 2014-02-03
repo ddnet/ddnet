@@ -21,8 +21,7 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 		m_pUser(g_Config.m_SvSqlUser),
 		m_pPass(g_Config.m_SvSqlPw),
 		m_pIp(g_Config.m_SvSqlIp),
-		m_Port(g_Config.m_SvSqlPort),
-		m_PointsInfos(NULL)
+		m_Port(g_Config.m_SvSqlPort)
 {
 	m_pDriver = NULL;
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
@@ -35,7 +34,6 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 
 CSqlScore::~CSqlScore()
 {
-	delete m_PointsInfos;
 	lock_wait(gs_SqlLock);
 	lock_release(gs_SqlLock);
 
@@ -465,19 +463,21 @@ void CSqlScore::SaveScoreThread(void *pUser)
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 			if(!pData->m_pSqlData->m_pResults->next())
 			{
-				unsigned int PointsSize = pData->m_pSqlData->m_PointsSize;
-				CPointsInfo *PointsInfos = pData->m_pSqlData->m_PointsInfos;
+				delete pData->m_pSqlData->m_pResults;
 
-				for (unsigned int i = 0; i < PointsSize; i++)
+				str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map ='%s'", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+				pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+				if(pData->m_pSqlData->m_pResults->rowsCount() == 1)
 				{
-					if (str_comp(PointsInfos[i].m_aMapName, pData->m_pSqlData->m_aMap) == 0)
-					{
-						str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", PointsInfos[i].m_Points);
-						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-						break;
-					}
+					pData->m_pSqlData->m_pResults->next();
+					int points = (int)pData->m_pSqlData->m_pResults->getInt("Points");
+					str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", points);
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 				}
 			}
+
+				delete pData->m_pSqlData->m_pResults;
 
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_race(Map, Name, Timestamp, Time, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25) VALUES ('%s', '%s', CURRENT_TIMESTAMP(), '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f');", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_Time, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24]);

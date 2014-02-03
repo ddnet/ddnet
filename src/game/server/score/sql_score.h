@@ -12,12 +12,6 @@
 
 #include "../score.h"
 
-struct CPointsInfo
-{
-	char m_aMapName[128];
-	unsigned int m_Points;
-};
-
 class CSqlScore: public IScore
 {
 	CGameContext *m_pGameServer;
@@ -72,9 +66,6 @@ public:
 
 	CSqlScore(CGameContext *pGameServer);
 	~CSqlScore();
-
-	CPointsInfo* m_PointsInfos;
-	unsigned int m_PointsSize;
 
 	virtual void LoadScore(int ClientID);
 	virtual void MapPoints(int ClientID, const char* MapName);
