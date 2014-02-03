@@ -175,7 +175,6 @@ void CSqlScore::Init()
 
 			// get the best time
 			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_race WHERE Map='%s' ORDER BY `Time` ASC LIMIT 0, 1;", m_pPrefix, m_aMap);
-			delete m_pResults;
 			m_pResults = m_pStatement->executeQuery(aBuf);
 
 			if(m_pResults->next())
