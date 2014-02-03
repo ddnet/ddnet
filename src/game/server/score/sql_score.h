@@ -46,7 +46,7 @@ class CSqlScore: public IScore
 		return m_pServer;
 	}
 
-	static void LoadPointMapListThread(void *pUser);
+	static void MapPointsThread(void *pUser);
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void SaveTeamScoreThread(void *pUser);
@@ -76,8 +76,6 @@ public:
 	CPointsInfo* m_PointsInfos;
 	unsigned int m_PointsSize;
 
-	virtual void LoadPointMapList();
-
 	virtual void LoadScore(int ClientID);
 	virtual void MapPoints(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
@@ -95,6 +93,13 @@ public:
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
 	static void agoTimeToString(int agoTime, char agoString[]);
+};
+
+struct CSqlMapData
+{
+	CSqlScore *m_pSqlData;
+	int m_ClientID;
+	char m_aMap[128];
 };
 
 struct CSqlScoreData

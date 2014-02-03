@@ -26,76 +26,11 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 {
 	m_pDriver = NULL;
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
-	NormalizeMapname(m_aMap);
 
 	if(gs_SqlLock == 0)
 		gs_SqlLock = lock_create();
 
 	Init();
-	LoadPointMapListThread(this);
-}
-
-void CSqlScore::LoadPointMapList()
-{
-	//CSqlScoreData *Tmp = new CSqlScoreData();
-	//Tmp->m_ClientID = ClientID;
-	//str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
-	//Tmp->m_pSqlData = this;
-
-	void *LoadThread = thread_create(LoadPointMapListThread, this);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)LoadThread);
-#endif
-}
-
-void CSqlScore::LoadPointMapListThread(void *pUser)
-{
-	lock_wait(gs_SqlLock);
-
-	CSqlScore *pScore = (CSqlScore *)pUser;
-
-	std::ifstream f("points.cfg");
-	if (f.fail())
-		return;
-
-	if(!pScore->Connect())
-		return;
-
-	pScore->m_PointsSize = std::count(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>(), '\n');
-	f.seekg(0);
-	delete pScore->m_PointsInfos;
-	pScore->m_PointsInfos = new CPointsInfo[pScore->m_PointsSize];
-
-	char aBuf[256];
-	unsigned int Position = 0;
-
-	while (f.getline(aBuf, 256) && Position < pScore->m_PointsSize)
-	{
-		CPointsInfo& Info = pScore->m_PointsInfos[Position];
-		if (sscanf(aBuf, "%u %127[^\t\n]", &Info.m_Points, Info.m_aMapName) == 2)
-		{
-			pScore->NormalizeMapname(Info.m_aMapName);
-			str_format(aBuf, sizeof(aBuf), "SELECT count(Name) FROM %s_%s_race;", pScore->m_pPrefix, Info.m_aMapName);
-			try
-			{
-				pScore->m_pResults = pScore->m_pStatement->executeQuery(aBuf);
-				delete pScore->m_pResults;
-			}
-			catch (sql::SQLException &e)
-			{
-				continue;
-			}
-			Position++;
-		}
-	}
-
-	pScore->m_PointsSize = Position;
-
-	lock_release(gs_SqlLock);
-
-	pScore->Disconnect();
-
-	return;
 }
 
 CSqlScore::~CSqlScore()
@@ -227,39 +162,19 @@ void CSqlScore::Init()
 			// create tables
 			char aBuf[768];
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_race (Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, m_aMap, MAX_NAME_LENGTH);
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_race (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
 			m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_%s_teamrace (Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, m_aMap, MAX_NAME_LENGTH);
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_teamrace (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
 			m_pStatement->execute(aBuf);
 
-			// Check if table has new column with timestamp
-			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_race' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
-			m_pResults = m_pStatement->executeQuery(aBuf);
-
-			if(m_pResults->rowsCount() < 1)
-			{
-				// If not... add the column				
-				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_race ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);",m_pPrefix, m_aMap);
-				m_pStatement->execute(aBuf);
-			}
-
-			// Check if table has new column with timestamp
-			str_format(aBuf, sizeof(aBuf), "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s_%s_teamrace' AND column_name = 'Timestamp'",m_pPrefix, m_aMap);
-			delete m_pResults;
-			m_pResults = m_pStatement->executeQuery(aBuf);
-
-			if(m_pResults->rowsCount() < 1)
-			{
-				// If not... add the column				
-				str_format(aBuf, sizeof(aBuf), "ALTER TABLE %s_%s_teamrace ADD Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER Name, ADD INDEX(Name);",m_pPrefix, m_aMap);
-				m_pStatement->execute(aBuf);
-			}
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Points INT DEFAULT 0, KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
+			m_pStatement->execute(aBuf);
 
 			dbg_msg("SQL", "Tables were created successfully");
 
 			// get the best time
-			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_%s_race ORDER BY `Time` ASC LIMIT 0, 1;", m_pPrefix, m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_race WHERE Map='%s' ORDER BY `Time` ASC LIMIT 0, 1;", m_pPrefix, m_aMap);
 			delete m_pResults;
 			m_pResults = m_pStatement->executeQuery(aBuf);
 
@@ -303,7 +218,7 @@ void CSqlScore::LoadScoreThread(void *pUser)
 
 			char aBuf[512];
 
-			str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_%s_race WHERE Name='%s' ORDER BY time ASC LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName);
+			str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_race WHERE Map='%s' AND Name='%s' ORDER BY time ASC LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 			if(pData->m_pSqlData->m_pResults->next())
 			{
@@ -379,7 +294,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 				pData->m_pSqlData->ClearString(pData->m_aNames[i]);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_%s_teamrace WHERE Name = '%s') as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[0], pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_teamrace WHERE Map = '%s' AND Name = '%s') as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[0], pData->m_pSqlData->m_pPrefix);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if (pData->m_pSqlData->m_pResults->rowsCount() > 0)
@@ -443,7 +358,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 
 			if (aUpdateID[0])
 			{
-				str_format(aBuf, sizeof(aBuf), "UPDATE %s_%s_teamrace SET Time='%.2f' WHERE ID = '%s';", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Time, aUpdateID);
+				str_format(aBuf, sizeof(aBuf), "UPDATE %s_teamrace SET Time='%.2f' WHERE ID = '%s';", pData->m_pSqlData->m_pPrefix, pData->m_Time, aUpdateID);
 				pData->m_pSqlData->m_pStatement->execute(aBuf);
 			}
 			else
@@ -453,7 +368,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 				for(unsigned int i = 0; i < pData->m_Size; i++)
 				{
 				// if no entry found... create a new one
-					str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_%s_teamrace(Name, Timestamp, Time, ID) VALUES ('%s', CURRENT_TIMESTAMP(), '%.2f', @id);", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[i], pData->m_Time);
+					str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID) VALUES ('%s', '%s', CURRENT_TIMESTAMP(), '%.2f', @id);", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[i], pData->m_Time);
 					pData->m_pSqlData->m_pStatement->execute(aBuf);
 				}
 			}
@@ -473,7 +388,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 		}
 
 		// disconnect from database
-		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+		pData->m_pSqlData->Disconnect();
 	}
 
 	delete pData;
@@ -483,23 +398,52 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 
 void CSqlScore::MapPoints(int ClientID, const char* MapName)
 {
-	char aBuf[768];
-	char NormMapName[64];
-	str_copy(NormMapName, MapName, sizeof(NormMapName));
-	NormalizeMapname(NormMapName);
+	CSqlMapData *Tmp = new CSqlMapData();
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_aMap, MapName, 128);
+	Tmp->m_pSqlData = this;
 
-	for (unsigned int i = 0; i < m_PointsSize; i++)
+	void *PointsThread = thread_create(MapPointsThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)PointsThread);
+#endif
+}
+
+void CSqlScore::MapPointsThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlMapData *pData = (CSqlMapData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
 	{
-		if (str_comp(m_PointsInfos[i].m_aMapName, NormMapName) == 0)
+		char originalMap[128];
+		strcpy(originalMap,pData->m_aMap);
+		pData->m_pSqlData->ClearString(pData->m_aMap);
+
+		char aBuf[768];
+		str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map ='%s'", pData->m_pSqlData->m_pPrefix, originalMap);
+		pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+		if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
 		{
-			str_format(aBuf, sizeof(aBuf), "Finishing \"%s\" will give you %d points.", MapName, m_PointsInfos[i].m_Points);
-			GameServer()->SendChatTarget(ClientID, aBuf);
-			return;
+			str_format(aBuf, sizeof(aBuf), "No map called \"%s\" found.", originalMap);
 		}
+		else
+		{
+			pData->m_pSqlData->m_pResults->next();
+			int points = (int)pData->m_pSqlData->m_pResults->getInt("Points");
+			str_format(aBuf, sizeof(aBuf), "Finishing \"%s\" will give you %d points.", originalMap, points);
+		}
+
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+		delete pData->m_pSqlData->m_pResults;
+		pData->m_pSqlData->Disconnect();
 	}
 
-	str_format(aBuf, sizeof(aBuf), "No map called \"%s\" found.", MapName);
-	GameServer()->SendChatTarget(ClientID, aBuf);
+	delete pData;
+	lock_release(gs_SqlLock);
 }
 
 void CSqlScore::SaveScoreThread(void *pUser)
@@ -518,7 +462,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 			// check strings
 			pData->m_pSqlData->ClearString(pData->m_aName);
 
-			str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_%s_race WHERE Name='%s' ORDER BY time ASC LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName);
+			str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_race WHERE Map='%s' AND Name='%s' ORDER BY time ASC LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 			if(!pData->m_pSqlData->m_pResults->next())
 			{
@@ -537,7 +481,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 			}
 
 			// if no entry found... create a new one
-			str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_%s_race(Name, Timestamp, Time, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25) VALUES ('%s', CURRENT_TIMESTAMP(), '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f');", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_Time, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24]);
+			str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_race(Map, Name, Timestamp, Time, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25) VALUES ('%s', '%s', CURRENT_TIMESTAMP(), '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f');", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_Time, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24]);
 			pData->m_pSqlData->m_pStatement->execute(aBuf);
 
 			dbg_msg("SQL", "Updating time done");
@@ -554,7 +498,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 		}
 
 		// disconnect from database
-		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+		pData->m_pSqlData->Disconnect();
 	}
 
 	delete pData;
@@ -626,7 +570,7 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM (SELECT Rank, l2.ID FROM ((SELECT ID, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, Time FROM %s_%s_teamrace GROUP BY ID ORDER BY Time) as ll) as l2) LEFT JOIN %s_%s_teamrace as r2 ON l2.ID = r2.ID WHERE Name = '%s' ORDER BY Rank LIMIT 1) as l LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Name;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as stamp FROM (SELECT Rank, l2.ID FROM ((SELECT ID, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY Time) as ll) as l2) LEFT JOIN %s_teamrace as r2 ON l2.ID = r2.ID WHERE Map = '%s' AND Name = '%s' ORDER BY Rank LIMIT 1) as l LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Name;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_pSqlData->m_pPrefix);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
@@ -690,7 +634,7 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 		}
 
 		// disconnect from database
-		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+		pData->m_pSqlData->Disconnect();
 	}
 
 	delete pData;
@@ -716,7 +660,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute("SET @previd := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, rank, l.Time FROM ((SELECT ID, rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_%s_teamrace GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a LIMIT %d, 5) as l) LEFT JOIN %s_%s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, rank, l.Time FROM ((SELECT ID, rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a LIMIT %d, 5) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			// show teamtop5
@@ -822,7 +766,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT Rank, one_rank.Name, one_rank.Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(r.Timestamp) as Ago, UNIX_TIMESTAMP(r.Timestamp) as stamp FROM (SELECT * FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_%s_race Group By Name) as all_top_times ORDER BY Time ASC) as all_ranks WHERE all_ranks.Name = '%s') as one_rank LEFT JOIN %s_%s_race as r ON one_rank.Name = r.Name && one_rank.Time = r.Time ORDER BY Ago ASC LIMIT 0,1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap,pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT Rank, one_rank.Name, one_rank.Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(r.Timestamp) as Ago, UNIX_TIMESTAMP(r.Timestamp) as stamp FROM (SELECT * FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_race WHERE Map = '%s' Group By Name) as all_top_times ORDER BY Time ASC) as all_ranks WHERE all_ranks.Name = '%s') as one_rank LEFT JOIN %s_race as r ON one_rank.Name = r.Name && one_rank.Time = r.Time ORDER BY Ago ASC LIMIT 0,1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap,pData->m_aName, pData->m_pSqlData->m_pPrefix);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
@@ -869,7 +813,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 		}
 
 		// disconnect from database
-		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+		pData->m_pSqlData->Disconnect();
 	}
 
 	delete pData;
@@ -923,7 +867,7 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, rank FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_%s_race GROUP BY Name ORDER BY `Time` ASC) as a) as b LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1);
+			str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, rank FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_race WHERE Map = '%s' GROUP BY Name ORDER BY `Time` ASC) as a) as b LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			// show top5
@@ -980,9 +924,9 @@ void CSqlScore::ShowTimesThread(void *pUser)
 			char aBuf[512];
 
 			if(pData->m_Search) // last 5 times of a player
-				str_format(aBuf, sizeof(aBuf), "SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_%s_race WHERE Name = '%s' ORDER BY Ago ASC LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_Num-1);
+				str_format(aBuf, sizeof(aBuf), "SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' AND Name = '%s' ORDER BY Ago ASC LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_Num-1);
 			else// last 5 times of server
-				str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_%s_race ORDER BY Ago ASC LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1);
+				str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' ORDER BY Ago ASC LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
@@ -1138,19 +1082,6 @@ void CSqlScore::ClearString(char *pString)
 	strcpy(pString,newString);
 }
 
-void CSqlScore::NormalizeMapname(char *pString)
-{
-	std::string validChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_");
-
-	for(int i=0;i<str_length(pString);i++)
-	{
-		if(validChars.find(pString[i]) == std::string::npos)
-		{
-			pString[i] = '_';
-		}
-	}
-}
-
 void CSqlScore::agoTimeToString(int agoTime, char agoString[])
 {
 	char aBuf[20];
@@ -1244,34 +1175,12 @@ void CSqlScore::ShowPointsThread(void *pUser)
 			strcpy(originalName,pData->m_aName);
 			pData->m_pSqlData->ClearString(pData->m_aName);
 
-			unsigned int PointsSize = pData->m_pSqlData->m_PointsSize;
-			CPointsInfo *PointsInfos = pData->m_pSqlData->m_PointsInfos;
-
-			if (!PointsInfos)
-			{
-				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no maps configured for points");
-				goto end;
-			}
-
-			char aBuf[600 + 200 * PointsSize];
-			char aBuf2[600 + 200 * PointsSize];
-			char *pBuf = aBuf2;
-			int Size;
-
-			for(unsigned int i = 0; i < PointsSize; i++)
-			{
-				if (i < PointsSize - 1)
-					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM %s_%s_race) UNION ALL ", PointsInfos[i].m_Points, pData->m_pSqlData->m_pPrefix, PointsInfos[i].m_aMapName);
-				else
-					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM %s_%s_race)", PointsInfos[i].m_Points, pData->m_pSqlData->m_pPrefix, PointsInfos[i].m_aMapName);
-				pBuf += Size;
-			}
-
 			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Points FROM ((SELECT (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, (@prev := Points) Points, Name FROM ((SELECT Name, Sum(Points) As Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) AS r)) AS f) WHERE Name = '%s';", aBuf2, pData->m_aName);
 
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, (@prev := Points) Points, Name from (select Name, sum(Points) as Points from (select distinct Name, Map from %s_race) as l join %s_maps on l.Map = %s_maps.Map group by Name order by sum(Points) desc) as l2) as l3 where Name = '%s';", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_aName);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
@@ -1301,9 +1210,8 @@ void CSqlScore::ShowPointsThread(void *pUser)
 			dbg_msg("SQL", "ERROR: Could not show points");
 		}
 
-		end:
 		// disconnect from database
-		pData->m_pSqlData->Disconnect();//TODO:Check if an exception is caught will this still execute ?
+		pData->m_pSqlData->Disconnect();
 	}
 
 	delete pData;
@@ -1337,33 +1245,11 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 	{
 		try
 		{
-			unsigned int PointsSize = pData->m_pSqlData->m_PointsSize;
-			CPointsInfo *PointsInfos = pData->m_pSqlData->m_PointsInfos;
-
-			if (!PointsInfos)
-			{
-				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no maps configured for points");
-				goto end;
-			}
-
-			char aBuf[600 + 200 * PointsSize];
-			char aBuf2[600 + 200 * PointsSize];
-			char *pBuf = aBuf2;
-			int Size;
-
-			for(unsigned int i = 0; i < PointsSize; i++)
-			{
-				if (i < PointsSize - 1)
-					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM %s_%s_race) UNION ALL ", PointsInfos[i].m_Points, pData->m_pSqlData->m_pPrefix, PointsInfos[i].m_aMapName);
-				else
-					Size = str_format(pBuf, sizeof(aBuf2) - (pBuf - aBuf2), "(SELECT DISTINCT Name, %u AS Points FROM %s_%s_race)", PointsInfos[i].m_Points, pData->m_pSqlData->m_pPrefix, PointsInfos[i].m_aMapName);
-				pBuf += Size;
-			}
-
+			char aBuf[512];
 			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT Name, Points, rank FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) rank, (@prev := Points) Points FROM (SELECT Name, Sum(Points) as Points FROM ((%s) AS t) GROUP BY Name ORDER BY Points DESC) as a) as b LIMIT %d, 5;", aBuf2, pData->m_Num-1);
+			str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, (@prev := Points) Points, Name from (select Name, sum(Points) as Points from (select distinct Name, Map from %s_race) as l join %s_maps on l.Map = %s_maps.Map group by Name order by sum(Points) desc) as l2) as l3 LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_Num-1);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 

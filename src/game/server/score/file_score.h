@@ -62,8 +62,6 @@ public:
 	CFileScore(CGameContext *pGameServer);
 	~CFileScore();
 
-	virtual void LoadPointMapList();
-
 	virtual void LoadScore(int ClientID);
 	virtual void MapPoints(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
