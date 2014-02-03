@@ -561,7 +561,7 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 {
 	m_Core.SetSolo(ClientID, false);
 
-	if (!m_TeamLocked[m_Core.Team(ClientID)])
+	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(ClientID)])
 		SetForceCharacterTeam(ClientID, 0);
 }
 
