@@ -587,7 +587,7 @@ void CPlayers::RenderPlayer(
 						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
 				}
 
-				if (m_pClient->IntersectCharacter(OldPos, finishPos, finishPos, pPlayerInfo->m_ClientID) != -1)
+				if(m_pClient->m_Tuning.m_PlayerHooking && m_pClient->IntersectCharacter(OldPos, finishPos, finishPos, pPlayerInfo->m_ClientID) != -1)
 				{
 					Graphics()->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
 					break;
