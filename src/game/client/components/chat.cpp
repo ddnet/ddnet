@@ -416,7 +416,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 		}
 	}
-	else
+	else if(Team != 2)
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq()*3/10)
 		{
