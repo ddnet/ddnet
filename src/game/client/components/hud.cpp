@@ -35,6 +35,8 @@ void CHud::OnReset()
 	m_DDRaceTick = 0;
 	m_FinishTime = false;
 	m_DDRaceTimeReceived = false;
+	m_ServerRecord = -1.0f;
+	m_PlayerRecord = -1.0f;
 }
 
 void CHud::RenderGameTimer()
@@ -55,8 +57,15 @@ void CHud::RenderGameTimer()
 		else
 			Time = (Client()->GameTick()-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick)/Client()->GameTickSpeed();
 
+		CServerInfo Info;
+		Client()->GetServerInfo(&Info);
+		bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
+		bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
+
 		if(Time <= 0)
 			str_format(Buf, sizeof(Buf), "00:00.0");
+		else if(IsGameTypeRace && !IsGameTypeDDRace && m_ServerRecord >= 0)
+			str_format(Buf, sizeof(Buf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
 		else
 			str_format(Buf, sizeof(Buf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
 		float FontSize = 10.0f;
@@ -502,6 +511,8 @@ void CHud::OnRender()
 			RenderConnectionWarning();
 		RenderTeambalanceWarning();
 		RenderVoting();
+		if (g_Config.m_ClShowRecord)
+			RenderRecord();
 	}
 	RenderCursor();
 }
@@ -536,6 +547,12 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 			m_CheckpointTick = 0;
 			m_DDRaceTime = 0;
 		}
+	}
+	else if(MsgType == NETMSGTYPE_SV_RECORD)
+	{
+		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
+		m_ServerRecord = (float)pMsg->m_ServerTimeBest/100;
+		m_PlayerRecord = (float)pMsg->m_PlayerTimeBest/100;
 	}
 }
 
@@ -597,4 +614,25 @@ void CHud::RenderDDRaceEffects()
 
 	if(m_DDRaceTick >= 100)
 		m_DDRaceTick = 0;
+}
+
+void CHud::RenderRecord()
+{
+	if(m_ServerRecord > 0 )
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Server best:");
+		TextRender()->Text(0, 5, 40, 6, aBuf, -1);
+		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_ServerRecord/60, m_ServerRecord-((int)m_ServerRecord/60*60));
+		TextRender()->Text(0, 53, 40, 6, aBuf, -1);
+	}
+
+	if(m_PlayerRecord > 0 )
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Personal best:");
+		TextRender()->Text(0, 5, 47, 6, aBuf, -1);
+		str_format(aBuf, sizeof(aBuf), "%02d:%05.2f", (int)m_PlayerRecord/60, m_PlayerRecord-((int)m_PlayerRecord/60*60));
+		TextRender()->Text(0, 53, 47, 6, aBuf, -1);
+	}
 }

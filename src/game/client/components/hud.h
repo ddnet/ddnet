@@ -36,8 +36,11 @@ public:
 
 private:
 
+	void RenderRecord();
 	void RenderDDRaceEffects();
 	float m_CheckpointDiff;
+	float m_ServerRecord;
+	float m_PlayerRecord;
 	int m_DDRaceTime;
 	int m_LastReceivedTimeTick;
 	int m_CheckpointTick;
