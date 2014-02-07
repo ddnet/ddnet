@@ -628,7 +628,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static int s_GfxTextureQuality = g_Config.m_GfxTextureQuality;
 	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
-	static int s_GfxThreaded = g_Config.m_GfxThreaded;
 
 	CUIRect ModeList;
 	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
@@ -711,24 +710,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 	
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxThreaded, Localize("Threaded rendering"), g_Config.m_GfxThreaded, &Button))
-	{
-		g_Config.m_GfxThreaded ^= 1;
-		CheckSettings = true;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(g_Config.m_GfxThreaded)
-	{
-		Button.VSplitLeft(20.0f, 0, &Button);
-		if(DoButton_CheckBox(&g_Config.m_GfxAsyncRender, Localize("Handle rendering async from updates"), g_Config.m_GfxAsyncRender, &Button))
-		{
-			g_Config.m_GfxAsyncRender ^= 1;
-			CheckSettings = true;
-		}
-	}
-		
-	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxTextureQuality, Localize("Quality Textures"), g_Config.m_GfxTextureQuality, &Button))
 	{
 		g_Config.m_GfxTextureQuality ^= 1;
@@ -757,8 +738,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxVsync == g_Config.m_GfxVsync &&
 			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 			s_GfxTextureQuality == g_Config.m_GfxTextureQuality &&
-			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
-			s_GfxThreaded == g_Config.m_GfxThreaded)
+			s_GfxTextureCompression == g_Config.m_GfxTextureCompression)
 			m_NeedRestartGraphics = false;
 		else
 			m_NeedRestartGraphics = true;
