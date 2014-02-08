@@ -549,7 +549,7 @@ void CPlayers::RenderPlayer(
 		{
 			vec2 ExDirection = Direction;
 
-			if (pPlayerInfo->m_Local)
+			if (pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 				ExDirection = normalize(vec2(m_pClient->m_pControls->m_InputData.m_TargetX, m_pClient->m_pControls->m_InputData.m_TargetY));
 
 			Graphics()->TextureSet(-1);
