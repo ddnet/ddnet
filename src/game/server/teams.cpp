@@ -571,6 +571,18 @@ void CGameTeams::OnCharacterDeath(int ClientID)
 
 	if (!m_TeamLocked[m_Core.Team(ClientID)])
 		SetForceCharacterTeam(ClientID, 0);
+	else
+	{
+		int Team = m_Core.Team(ClientID);
+		SetForceCharacterTeam(ClientID, Team);
+
+		if (TeamLocked(Team) && GetTeamState(Team) != TEAMSTATE_OPEN)
+			for (int i = 0; i < MAX_CLIENTS; i++)
+				if(m_Core.Team(i) == Team && i != ClientID)
+					GameServer()->m_apPlayers[i]->KillCharacter();
+
+		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+	}
 }
 
 void CGameTeams::SetTeamLock(int Team, bool Lock)

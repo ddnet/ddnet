@@ -377,22 +377,6 @@ void CPlayer::KillCharacter(int Weapon)
 
 		m_pCharacter->Die(m_ClientID, Weapon);
 
-		int Team = m_pCharacter->Teams()->m_Core.Team(m_ClientID);
-		m_pCharacter->Teams()->SetForceCharacterTeam(m_ClientID, Team);
-
-		if (m_pCharacter->Teams()->TeamLocked(Team) && m_pCharacter->Teams()->GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
-		{
-			for (int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_pCharacter->Teams()->m_Core.Team(i) == Team && i != m_ClientID)
-				{
-					m_pGameServer->m_apPlayers[i]->KillCharacter();
-				}
-			}
-		}
-
-		m_pCharacter->Teams()->ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
-
 		delete m_pCharacter;
 		m_pCharacter = 0;
 	}
@@ -421,8 +405,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-		Controller->m_Teams.ForceLeaveTeam(m_ClientID);
-		Controller->m_Teams.m_Core.Team(m_ClientID, 0);
+		Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
 	}
 
 	KillCharacter();
