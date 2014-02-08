@@ -939,8 +939,23 @@ void CGameClient::OnNewSnapshot()
 			m_aClients[i].m_Friend = true;
 	}
 
+	// sort player infos by name
+	mem_copy(m_Snap.m_paInfoByName, m_Snap.m_paPlayerInfos, sizeof(m_Snap.m_paInfoByName));
+	for(int k = 0; k < MAX_CLIENTS-1; k++) // ffs, bubblesort
+	{
+		for(int i = 0; i < MAX_CLIENTS-k-1; i++)
+		{
+			if(m_Snap.m_paInfoByName[i+1] && (!m_Snap.m_paInfoByName[i] || str_comp(m_aClients[m_Snap.m_paInfoByName[i]->m_ClientID].m_aName, m_aClients[m_Snap.m_paInfoByName[i+1]->m_ClientID].m_aName) > 0))
+			{
+				const CNetObj_PlayerInfo *pTmp = m_Snap.m_paInfoByName[i];
+				m_Snap.m_paInfoByName[i] = m_Snap.m_paInfoByName[i+1];
+				m_Snap.m_paInfoByName[i+1] = pTmp;
+			}
+		}
+	}
+
 	// sort player infos by score
-	mem_copy(m_Snap.m_paInfoByScore, m_Snap.m_paPlayerInfos, sizeof(m_Snap.m_paInfoByScore));
+	mem_copy(m_Snap.m_paInfoByScore, m_Snap.m_paInfoByName, sizeof(m_Snap.m_paInfoByScore));
 	for(int k = 0; k < MAX_CLIENTS-1; k++) // ffs, bubblesort
 	{
 		for(int i = 0; i < MAX_CLIENTS-k-1; i++)
@@ -953,6 +968,7 @@ void CGameClient::OnNewSnapshot()
 			}
 		}
 	}
+
 	// sort player infos by team
 	int Teams[3] = { TEAM_RED, TEAM_BLUE, TEAM_SPECTATORS };
 	int Index = 0;
