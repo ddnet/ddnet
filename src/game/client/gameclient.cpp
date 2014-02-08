@@ -616,10 +616,18 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 
 		for(i = 0; i < MAX_CLIENTS; i++)
 		{
-			m_Teams.Team(i, pUnpacker->GetInt());
+			int Team = pUnpacker->GetInt();
+			bool WentWrong = false;
 
-			// check for unpacking errors
 			if(pUnpacker->Error())
+				WentWrong = true;
+
+			if(!WentWrong && Team >= 0 && Team < MAX_CLIENTS)
+				m_Teams.Team(i, Team);
+			else
+				WentWrong = true;
+
+			if(WentWrong)
 			{
 				m_Teams.Team(i, 0);
 				break;
