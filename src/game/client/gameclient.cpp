@@ -624,7 +624,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 
 			if(!WentWrong && Team >= 0 && Team < MAX_CLIENTS)
 				m_Teams.Team(i, Team);
-			else
+			else if (Team != MAX_CLIENTS)
 				WentWrong = true;
 
 			if(WentWrong)
