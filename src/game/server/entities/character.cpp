@@ -1,4 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+#include <iostream>
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
 #include <engine/shared/config.h>
@@ -67,6 +68,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_ActiveWeapon = WEAPON_GUN;
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
+	m_LastPenalty = false;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -1263,7 +1265,10 @@ void CCharacter::HandleTiles(int Index)
 	//dbg_msg("","N%d L%d R%d B%d T%d",m_TileIndex,m_TileIndexL,m_TileIndexR,m_TileIndexB,m_TileIndexT);
 	//dbg_msg("","N%d L%d R%d B%d T%d",m_TileFIndex,m_TileFIndexL,m_TileFIndexR,m_TileFIndexB,m_TileFIndexT);
 	if(Index < 0)
+	{
+		m_LastPenalty = false;
 		return;
+	}
 	int cp = GameServer()->Collision()->IsCheckpoint(MapIndex);
 	if(cp != -1 && m_DDRaceState == DDRACE_STARTED && cp > m_CpActive)
 	{
@@ -1550,6 +1555,19 @@ void CCharacter::HandleTiles(int Index)
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(),aBuf);
 			m_Core.m_Jumps = newJumps;
 		}
+	}
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_PENALTY && !m_LastPenalty)
+	{
+		int min = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		int sec = GameServer()->Collision()->GetSwitchNumber(MapIndex);
+		m_StartTime -= (min * 60 + sec) * Server()->TickSpeed();
+		m_LastPenalty = true;
+	}
+
+	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_PENALTY)
+	{
+		std::cout << "a" << std::endl;
+		m_LastPenalty = false;
 	}
 
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
