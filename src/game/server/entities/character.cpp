@@ -1560,7 +1560,24 @@ void CCharacter::HandleTiles(int Index)
 	{
 		int min = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 		int sec = GameServer()->Collision()->GetSwitchNumber(MapIndex);
+		int Team = Teams()->m_Core.Team(m_Core.m_Id);
+
 		m_StartTime -= (min * 60 + sec) * Server()->TickSpeed();
+
+		if (Team != TEAM_FLOCK && Team != TEAM_SUPER)
+		{
+			for (int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(Teams()->m_Core.Team(i) == Team && i != m_Core.m_Id)
+				{
+					CCharacter* pChar = GameServer()->m_apPlayers[i]->GetCharacter();
+
+					if (pChar)
+						pChar->m_StartTime = m_StartTime;
+				}
+			}
+		}
+
 		m_LastPenalty = true;
 	}
 
