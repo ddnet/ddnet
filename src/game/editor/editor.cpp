@@ -4025,7 +4025,7 @@ void CEditor::Render()
 static int UndoStepsListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	IStorage *pStorage = (IStorage *)pUser;
-	if (str_comp_nocase_num(pName, "undo_", 0) == 0)
+	if (str_comp_nocase_num(pName, "undo_", 5) == 0)
 	{
 		char aBuffer[1024];
 		pStorage->GetCompletePath(IStorage::TYPE_SAVE, "editor/", aBuffer, sizeof(aBuffer));
