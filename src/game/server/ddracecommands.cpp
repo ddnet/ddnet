@@ -266,6 +266,24 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	unsigned int TeleTo = pResult->GetInteger(0);
+
+	if (((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size())
+	{
+		int Num = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size();
+		vec2 TelePos = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1][(!Num)?Num:rand() % Num];
+		CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+		if (pChr)
+		{
+			pChr->Core()->m_Pos = TelePos;
+			pChr->m_DDRaceState = DDRACE_CHEAT;
+		}
+	}
+}
+
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

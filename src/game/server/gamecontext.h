@@ -228,6 +228,7 @@ private:
 	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConToTeleporter(IConsole::IResult *pResult, void *pUserData);
+	static void ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConCredits(IConsole::IResult *pResult, void *pUserData);
