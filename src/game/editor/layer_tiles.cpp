@@ -558,18 +558,42 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			case 7:
 				Result = TILE_DUNFREEZE;
 				break;
+			case 8:
+				Result = TILE_TELECHECKIN;
+				break;
+			case 9:
+				Result = TILE_TELECHECKINEVIL;
+				break;
 			default:
 				break;
 		}
 		if(Result > -1)
 		{
-			CLayerTiles *gl = m_pEditor->m_Map.m_pGameLayer;
-			int w = min(gl->m_Width, m_Width);
-			int h = min(gl->m_Height, m_Height);
-			for(int y = 0; y < h; y++)
-				for(int x = 0; x < w; x++)
-					if(m_pTiles[y*m_Width+x].m_Index)
-						gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR+Result;
+			if (Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
+			{
+				CLayerTiles *gl = m_pEditor->m_Map.m_pGameLayer;
+
+				int w = min(gl->m_Width, m_Width);
+				int h = min(gl->m_Height, m_Height);
+				for(int y = 0; y < h; y++)
+					for(int x = 0; x < w; x++)
+						if(m_pTiles[y*m_Width+x].m_Index)
+							gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR+Result;
+			}
+			else if (m_pEditor->m_Map.m_pTeleLayer)
+			{
+				CLayerTele *gl = m_pEditor->m_Map.m_pTeleLayer;
+
+				int w = min(gl->m_Width, m_Width);
+				int h = min(gl->m_Height, m_Height);
+				for(int y = 0; y < h; y++)
+					for(int x = 0; x < w; x++)
+						if(m_pTiles[y*m_Width+x].m_Index)
+						{
+							gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR+Result;
+							gl->m_pTeleTile[y*gl->m_Width+x].m_Number = 1;
+						}
+			}
 
 			return 1;
 		}
