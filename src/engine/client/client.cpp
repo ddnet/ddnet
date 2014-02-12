@@ -2020,7 +2020,7 @@ void CClient::Run()
 
 			Update();
 			
-			if(m_pGraphics->WindowOpen() && m_pGraphics->IsIdle())
+			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && m_pGraphics->IsIdle())
 			{
 				m_RenderFrames++;
 
