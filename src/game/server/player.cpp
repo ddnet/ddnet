@@ -34,7 +34,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	int* idMap = Server()->GetIdMap(ClientID);
 	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
 	{
-	    idMap[i] = -1;
+		idMap[i] = -1;
 	}
 	idMap[0] = ClientID;
 
