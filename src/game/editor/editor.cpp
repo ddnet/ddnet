@@ -3203,11 +3203,14 @@ void CEditor::RenderStatusbar(CUIRect View)
 	if(DoButton_Editor(&s_EnvelopeButton, "Envelopes", m_ShowEnvelopeEditor, &Button, 0, "Toggles the envelope editor."))
 		m_ShowEnvelopeEditor = (m_ShowEnvelopeEditor+1)%4;
 
-	View.VSplitRight(5.0f, &View, &Button);
-	View.VSplitRight(60.0f, &View, &Button);
-	static int s_UndolistButton = 0;
-	if(DoButton_Editor(&s_UndolistButton, "Undolist", m_ShowUndo, &Button, 0, "Toggles the undo list."))
-		m_ShowUndo = (m_ShowUndo + 1) % 2;
+	if (g_Config.m_ClEditorUndo)
+	{
+		View.VSplitRight(5.0f, &View, &Button);
+		View.VSplitRight(60.0f, &View, &Button);
+		static int s_UndolistButton = 0;
+		if(DoButton_Editor(&s_UndolistButton, "Undolist", m_ShowUndo, &Button, 0, "Toggles the undo list."))
+			m_ShowUndo = (m_ShowUndo + 1) % 2;
+	}
 
 	if(m_pTooltip)
 	{
@@ -4355,17 +4358,20 @@ void CEditor::UpdateAndRender()
 	if(Input()->KeyDown(KEY_F10))
 		m_ShowMousePointer = false;
 
-	// Screenshot at most every 5 seconds, at least every 60
-	if ((m_LastUndoUpdateTime + time_freq() * 60 < time_get() && m_Map.m_UndoModified)
-	||  (m_LastUndoUpdateTime + time_freq() *  5 < time_get() && m_Map.m_UndoModified >= 10))
+	if (g_Config.m_ClEditorUndo)
 	{
-		m_Map.m_UndoModified = 0;
-		m_LastUndoUpdateTime = time_get();
-
-		if (!m_UndoRunning)
+		// Screenshot at most every 5 seconds, at least every 60
+		if ((m_LastUndoUpdateTime + time_freq() * 60 < time_get() && m_Map.m_UndoModified)
+		||  (m_LastUndoUpdateTime + time_freq() *  5 < time_get() && m_Map.m_UndoModified >= 10))
 		{
-			m_UndoRunning = true;
-			CreateUndoStep();
+			m_Map.m_UndoModified = 0;
+			m_LastUndoUpdateTime = time_get();
+
+			if (!m_UndoRunning)
+			{
+				m_UndoRunning = true;
+				CreateUndoStep();
+			}
 		}
 	}
 	Render();

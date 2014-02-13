@@ -1148,6 +1148,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClShowVotesAfterVoting ^= 1;
 	}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
+	{
+		g_Config.m_ClEditorUndo ^= 1;
+	}
+
 	CUIRect aRects[2];
 	CUIRect Label;
 	MainView.HSplitTop(5.0f, 0, &MainView);
