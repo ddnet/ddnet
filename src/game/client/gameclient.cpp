@@ -355,7 +355,10 @@ void CGameClient::OnConnected()
 
 	// send the inital info
 	SendInfo(true);
-	//Client()->Rcon("crashmeplx");
+	// we should keep this in for now, because otherwise you can't spectate
+	// people at start as the other info 64 packet is only sent after the first
+	// snap
+	Client()->Rcon("crashmeplx");
 }
 
 void CGameClient::OnReset()

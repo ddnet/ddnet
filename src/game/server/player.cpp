@@ -265,6 +265,8 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::FakeSnap(int SnappingClient)
 {
+	// This is problematic when it's sent before we know whether it's a non-64-player-client
+	// Then we can't spectate players at the start
 	IServer::CClientInfo info;
 	Server()->GetClientInfo(SnappingClient, &info);
 	CGameContext *GameContext = (CGameContext *) GameServer();
