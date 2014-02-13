@@ -1,5 +1,4 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-#include <iostream>
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
 #include <engine/shared/config.h>
@@ -1583,7 +1582,6 @@ void CCharacter::HandleTiles(int Index)
 
 	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_PENALTY)
 	{
-		std::cout << "a" << std::endl;
 		m_LastPenalty = false;
 	}
 
