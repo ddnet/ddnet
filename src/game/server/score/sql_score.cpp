@@ -25,6 +25,7 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 {
 	m_pDriver = NULL;
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
+	ClearString(m_aMap);
 
 	if(gs_SqlLock == 0)
 		gs_SqlLock = lock_create();
