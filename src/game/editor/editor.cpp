@@ -3305,19 +3305,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		CUIRect Button;
 		CEnvelope *pNewEnv = 0;
 
-		// Delete button
-		if(m_Map.m_lEnvelopes.size())
-		{
-			ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
-			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
-			static int s_DelButton = 0;
-			if(DoButton_Editor(&s_DelButton, Localize("Delete"), 0, &Button, 0, Localize("Delete this envelope")))
-				m_Map.DeleteEnvelope(m_SelectedEnvelope);
-
-			// little space
-			ToolBar.VSplitRight(10.0f, &ToolBar, &Button);
-		}
-
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New4dButton = 0;
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
