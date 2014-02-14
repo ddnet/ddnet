@@ -420,23 +420,34 @@ void CSqlScore::MapPointsThread(void *pUser)
 		strcpy(originalMap,pData->m_aMap);
 		pData->m_pSqlData->ClearString(pData->m_aMap);
 
-		char aBuf[768];
-		str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map ='%s'", pData->m_pSqlData->m_pPrefix, originalMap);
-		pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
-
-		if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
+		try
 		{
-			str_format(aBuf, sizeof(aBuf), "No map called \"%s\" found.", originalMap);
+			char aBuf[768];
+			str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map ='%s'", pData->m_pSqlData->m_pPrefix, pData->m_aMap);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
+			{
+				str_format(aBuf, sizeof(aBuf), "No map called \"%s\" found.", originalMap);
+			}
+			else
+			{
+				pData->m_pSqlData->m_pResults->next();
+				int points = (int)pData->m_pSqlData->m_pResults->getInt("Points");
+				str_format(aBuf, sizeof(aBuf), "Finishing \"%s\" will give you %d points.", originalMap, points);
+			}
+
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+			delete pData->m_pSqlData->m_pResults;
 		}
-		else
+		catch (sql::SQLException &e)
 		{
-			pData->m_pSqlData->m_pResults->next();
-			int points = (int)pData->m_pSqlData->m_pResults->getInt("Points");
-			str_format(aBuf, sizeof(aBuf), "Finishing \"%s\" will give you %d points.", originalMap, points);
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not update time");
 		}
 
-		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-		delete pData->m_pSqlData->m_pResults;
 		pData->m_pSqlData->Disconnect();
 	}
 
@@ -1048,10 +1059,10 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 
 void CSqlScore::ClearString(char *pString)
 {
-	char newString[MAX_NAME_LENGTH*2-1];
+	char newString[32*2-1];
 	int pos = 0;
 
-	for(int i=0;i<MAX_NAME_LENGTH;i++)
+	for(int i=0;i<32;i++)
 	{
 		if(pString[i] == '\\')
 		{
