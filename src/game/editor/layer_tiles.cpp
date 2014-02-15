@@ -592,6 +592,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 						{
 							gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR+Result;
 							gl->m_pTeleTile[y*gl->m_Width+x].m_Number = 1;
+							gl->m_pTeleTile[y*gl->m_Width+x].m_Type = TILE_AIR+Result;
 						}
 			}
 
