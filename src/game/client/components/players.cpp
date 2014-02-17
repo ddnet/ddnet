@@ -599,6 +599,9 @@ void CPlayers::RenderPlayer(
 				NewPos.x = round(NewPos.x);
 				NewPos.y = round(NewPos.y);
 
+				if (OldPos == NewPos)
+					break;
+
 				ExDirection.x = round(ExDirection.x*256.0f) / 256.0f;
 				ExDirection.y = round(ExDirection.y*256.0f) / 256.0f;
 			} while (!doBreak);
