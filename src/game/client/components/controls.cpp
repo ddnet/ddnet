@@ -24,7 +24,7 @@ CControls::CControls()
 void CControls::OnReset()
 {
 	m_LastData.m_Direction = 0;
-	m_LastData.m_Hook = 0;
+	//m_LastData.m_Hook = 0;
 	// simulate releasing the fire button
 	if((m_LastData.m_Fire&1) != 0)
 		m_LastData.m_Fire++;
@@ -137,7 +137,7 @@ int CControls::SnapInput(int *pData)
 	// we freeze the input if chat or menu is activated
 	if(!(m_InputData.m_PlayerFlags&PLAYERFLAG_PLAYING))
 	{
-		//OnReset();
+		OnReset();
 
 		mem_copy(pData, &m_InputData, sizeof(m_InputData));
 

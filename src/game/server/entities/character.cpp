@@ -625,13 +625,13 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::ResetInput()
 {
-	//m_Input.m_Direction = 0;
+	m_Input.m_Direction = 0;
 	//m_Input.m_Hook = 0;
 	// simulate releasing the fire button
-	//if((m_Input.m_Fire&1) != 0)
-	//	m_Input.m_Fire++;
-	//m_Input.m_Fire &= INPUT_STATE_MASK;
-	//m_Input.m_Jump = 0;
+	if((m_Input.m_Fire&1) != 0)
+		m_Input.m_Fire++;
+	m_Input.m_Fire &= INPUT_STATE_MASK;
+	m_Input.m_Jump = 0;
 	m_LatestPrevInput = m_LatestInput = m_Input;
 }
 
@@ -1017,8 +1017,7 @@ void CCharacter::Snap(int SnappingClient)
 		pCharacter->m_Weapon = m_ActiveWeapon;
 	pCharacter->m_AttackTick = m_AttackTick;
 
-	if (!m_Paused)
-		pCharacter->m_Direction = m_Input.m_Direction;
+	pCharacter->m_Direction = m_Input.m_Direction;
 
 	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
 		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
