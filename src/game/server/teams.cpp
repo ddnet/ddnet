@@ -471,7 +471,7 @@ void CGameTeams::OnFinish(CPlayer* Player)
 
 	bool CallSaveScore = false;
 #if defined(CONF_SQL)
-	CallSaveScore = g_Config.m_SvUseSQL;
+	CallSaveScore = g_Config.m_SvUseSQL && g_Config.m_SvSaveWorseScores;
 #endif
 
 	if (!pData->m_BestTime || time < pData->m_BestTime)
