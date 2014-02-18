@@ -87,15 +87,21 @@ inline T length(const vector2_base<T> &a)
 }
 
 template<typename T>
-inline T distance(const vector2_base<T> a, const vector2_base<T> &b)
+inline T distance(const vector2_base<T> &a, const vector2_base<T> &b)
 {
 	return length(a - b);
 }
 
 template<typename T>
-inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
+inline T dot(const vector2_base<T> &a, const vector2_base<T> &b)
 {
 	return a.x * b.x + a.y * b.y;
+}
+
+template<typename T>
+inline T angle(const vector2_base<T> &a)
+{
+	return atan2f(a.y, a.x);
 }
 
 template<typename T>
@@ -109,6 +115,12 @@ template<typename T>
 inline vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
 {
 	return vector2_base<T>(v.x / len, v.y / len);
+}
+
+template<typename T>
+inline vector2_base<T> direction(T angle)
+{
+	return vector2_base<T>(cosf(angle), sinf(angle));
 }
 
 typedef vector2_base<float> vec2;
