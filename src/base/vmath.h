@@ -99,6 +99,19 @@ inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
 }
 
 template<typename T>
+inline T angle(const vector2_base<T> &a)
+{
+	if(a.x == 0 && a.y == 0)
+		return 0.0f;
+	else if(a.x == 0)
+		return a.y < 0 ? -pi / 2 : pi / 2;
+	float result = atanf(a.y / a.x);
+	if(a.x < 0)
+		result = result + pi;
+	return result;
+}
+
+template<typename T>
 inline vector2_base<T> normalize(const vector2_base<T> &v)
 {
 	T l = (T)(1.0f / sqrtf(v.x * v.x + v.y * v.y));
@@ -109,6 +122,12 @@ template<typename T>
 inline vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
 {
 	return vector2_base<T>(v.x / len, v.y / len);
+}
+
+template<typename T>
+inline vector2_base<T> direction(T angle)
+{
+	return vector2_base<T>(cosf(angle), sinf(angle));
 }
 
 typedef vector2_base<float> vec2;
