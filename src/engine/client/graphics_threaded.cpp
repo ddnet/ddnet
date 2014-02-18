@@ -769,7 +769,7 @@ int CGraphics_Threaded::Init()
 
 	// create command buffers
 	for(int i = 0; i < NUM_CMDBUFFERS; i++)
-		m_apCommandBuffers[i] = new CCommandBuffer(128*1024, 2*1024*1024);
+		m_apCommandBuffers[i] = new CCommandBuffer(256*1024, 2*1024*1024);
 	m_pCommandBuffer = m_apCommandBuffers[0];
 
 	// create null texture, will get id=0
