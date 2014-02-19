@@ -18,6 +18,12 @@ enum
 	WEAPON_WORLD = -1, // death tiles etc
 };
 
+enum
+{
+	FAKETUNE_FREEZE = 1,
+	FAKETUNE_SOLO = 2,
+};
+
 class CCharacter : public CEntity
 {
 	MACRO_ALLOC_POOL_ID()

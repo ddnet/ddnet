@@ -1777,8 +1777,11 @@ bool CCharacter::Freeze(int Seconds)
 		m_Armor = 0;
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
-		m_NeededFaketuning |= 1;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
+		if(!(m_NeededFaketuning & FAKETUNE_FREEZE))
+		{
+			m_NeededFaketuning |= FAKETUNE_FREEZE;
+			GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
+		}
 		return true;
 	}
 	return false;
@@ -1804,9 +1807,12 @@ bool CCharacter::UnFreeze()
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
 		if (m_ActiveWeapon==WEAPON_HAMMER) m_ReloadTimer = 0;
-		m_NeededFaketuning ^= 1; // set freeze state to false
-		GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
-		 return true;
+		if(m_NeededFaketuning & FAKETUNE_FREEZE)
+		{
+			m_NeededFaketuning ^= FAKETUNE_FREEZE; // set freeze state to false
+			GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
+		}
+		return true;
 	}
 	return false;
 }

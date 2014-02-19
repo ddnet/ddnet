@@ -472,7 +472,7 @@ void CGameContext::SendTuningParams(int ClientID)
 		{
 			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter() && m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning()) // need to send faketunings ?
 			{
-				if (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & 1) // is the character frozen ?
+				if (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_FREEZE)
 				{
 					if(i==0 || i==1 || i==3 || i==4 || i==5 || i==6) // which tunings to fake
 						Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
