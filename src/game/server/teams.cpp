@@ -428,7 +428,7 @@ void CGameTeams::OnFinish(CPlayer* Player)
 			"%s finished in: %d minute(s) %5.2f second(s)",
 			Server()->ClientName(Player->GetCID()), (int) time / 60,
 			time - ((int) time / 60 * 60));
-	if (g_Config.m_SvHideScore || g_Config.m_SvSaveWorseScores)
+	if (g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 		GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 	else
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
@@ -444,7 +444,7 @@ void CGameTeams::OnFinish(CPlayer* Player)
 		else
 			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
 					diff);
-		if (g_Config.m_SvHideScore || g_Config.m_SvSaveWorseScores)
+		if (g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 			GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 		else
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
