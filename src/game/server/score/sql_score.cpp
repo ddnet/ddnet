@@ -429,7 +429,8 @@ void CSqlScore::MapVoteThread(void *pUser)
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
 			{
-				str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found.", originalMap);
+				str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found. Try adding a '%%' at the start if you don't know the first character. Example: /map %%castle for \"Out of Castle\"", originalMap);
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 			}
 			else
 			{
