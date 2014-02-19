@@ -14,6 +14,7 @@
 #include <game/generated/client_data.h>
 
 #include <game/localization.h>
+#include <game/client/components/countryflags.h>
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
@@ -117,7 +118,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 void CMenus::RenderPlayers(CUIRect MainView)
 {
-	CUIRect Button, ButtonBar, Options, Player;
+	CUIRect Button, Button2, ButtonBar, Options, Player;
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
 	// player options
@@ -194,7 +195,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 		if(Count%2 == 1)
 			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
-		Item.m_Rect.VSplitRight(200.0f, &Player, &Item.m_Rect);
+		Item.m_Rect.VSplitRight(300.0f, &Player, &Item.m_Rect);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
@@ -204,6 +205,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 		Player.HSplitTop(1.5f, 0, &Player);
 		Player.VSplitMid(&Player, &Button);
+		Item.m_Rect.VSplitRight(200.0f, &Button2, &Item.m_Rect);
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, Player.x, Player.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
@@ -212,6 +214,12 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		TextRender()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
+
+		//TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		//Cursor.m_LineWidth = Button.w;
+		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
+		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[Index].m_Country, &Color,
+			Button2.x, Button2.y + Button2.h/2.0f - 0.75*Button2.h/2.0f, 1.5f*Button2.h, 0.75f*Button2.h);
 
 		// ignore button
 		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
