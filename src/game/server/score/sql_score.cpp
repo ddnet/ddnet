@@ -394,6 +394,74 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 	lock_release(gs_SqlLock);
 }
 
+void CSqlScore::MapVote(int ClientID, const char* MapName)
+{
+	CSqlMapData *Tmp = new CSqlMapData();
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_aMap, MapName, 128);
+	Tmp->m_pSqlData = this;
+
+	void *VoteThread = thread_create(MapVoteThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)VoteThread);
+#endif
+}
+
+void CSqlScore::MapVoteThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlMapData *pData = (CSqlMapData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		char originalMap[128];
+		strcpy(originalMap,pData->m_aMap);
+		pData->m_pSqlData->ClearString(pData->m_aMap);
+		pData->m_pSqlData->FuzzyString(pData->m_aMap);
+
+		try
+		{
+			char aBuf[768];
+			str_format(aBuf, sizeof(aBuf), "SELECT Map, Server FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_aMap);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
+			{
+				str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found.", originalMap);
+			}
+			else
+			{
+				pData->m_pSqlData->m_pResults->next();
+				char aMap[128];
+				strcpy(aMap, pData->m_pSqlData->m_pResults->getString("Map").c_str());
+				char aServer[32];
+				strcpy(aServer, pData->m_pSqlData->m_pResults->getString("Server").c_str());
+				char aCmd[256];
+				str_format(aCmd, sizeof(aCmd), "sv_reset_file types/%s/flexreset.cfg; change_map %s", aServer, aMap);
+				char aChatmsg[512];
+				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", pData->m_pSqlData->GameServer()->Server()->ClientName(pData->m_ClientID), aMap, "/map");
+				pData->m_pSqlData->GameServer()->CallVote(pData->m_ClientID, aMap, aCmd, "/map", aChatmsg);
+			}
+
+			delete pData->m_pSqlData->m_pResults;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not update time");
+		}
+
+		pData->m_pSqlData->Disconnect();
+	}
+
+	delete pData;
+	lock_release(gs_SqlLock);
+}
+
 void CSqlScore::MapPoints(int ClientID, const char* MapName)
 {
 	CSqlMapData *Tmp = new CSqlMapData();
@@ -401,9 +469,9 @@ void CSqlScore::MapPoints(int ClientID, const char* MapName)
 	str_copy(Tmp->m_aMap, MapName, 128);
 	Tmp->m_pSqlData = this;
 
-	void *PointsThread = thread_create(MapPointsThread, Tmp);
+	void *InfoThread = thread_create(MapPointsThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)PointsThread);
+	pthread_detach((pthread_t)InfoThread);
 #endif
 }
 
@@ -419,22 +487,28 @@ void CSqlScore::MapPointsThread(void *pUser)
 		char originalMap[128];
 		strcpy(originalMap,pData->m_aMap);
 		pData->m_pSqlData->ClearString(pData->m_aMap);
+		pData->m_pSqlData->FuzzyString(pData->m_aMap);
 
 		try
 		{
 			char aBuf[768];
-			str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map ='%s'", pData->m_pSqlData->m_pPrefix, pData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT Map, Server, Points FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_aMap);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
 			{
-				str_format(aBuf, sizeof(aBuf), "No map called \"%s\" found.", originalMap);
+				str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found.", originalMap);
 			}
 			else
 			{
 				pData->m_pSqlData->m_pResults->next();
 				int points = (int)pData->m_pSqlData->m_pResults->getInt("Points");
-				str_format(aBuf, sizeof(aBuf), "Finishing \"%s\" will give you %d points.", originalMap, points);
+				char aMap[128];
+				strcpy(aMap, pData->m_pSqlData->m_pResults->getString("Map").c_str());
+				char aServer[32];
+				strcpy(aServer, pData->m_pSqlData->m_pResults->getString("Server").c_str());
+				aServer[0] = toupper(aServer[0]);
+				str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d points)", aMap, aServer, points);
 			}
 
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
@@ -1055,8 +1129,25 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 #endif
 }
 
-// anti SQL injection
+void CSqlScore::FuzzyString(char *pString)
+{
+	char newString[32*4-1];
+	int pos = 0;
 
+	for(int i=0;i<64;i++)
+	{
+		if(!pString[i])
+			break;
+
+		newString[pos++] = pString[i];
+		newString[pos++] = '%';
+	}
+
+	newString[pos] = '\0';
+	strcpy(pString, newString);
+}
+
+// anti SQL injection
 void CSqlScore::ClearString(char *pString)
 {
 	char newString[32*2-1];

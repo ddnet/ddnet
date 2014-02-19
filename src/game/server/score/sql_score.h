@@ -41,6 +41,7 @@ class CSqlScore: public IScore
 	}
 
 	static void MapPointsThread(void *pUser);
+	static void MapVoteThread(void *pUser);
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void SaveTeamScoreThread(void *pUser);
@@ -57,6 +58,7 @@ class CSqlScore: public IScore
 	bool Connect();
 	void Disconnect();
 
+	void FuzzyString(char *pString);
 	// anti SQL injection
 	void ClearString(char *pString);
 
@@ -69,6 +71,7 @@ public:
 
 	virtual void LoadScore(int ClientID);
 	virtual void MapPoints(int ClientID, const char* MapName);
+	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);
 	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time);

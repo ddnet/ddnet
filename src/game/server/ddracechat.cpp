@@ -504,6 +504,37 @@ void CGameContext::ConDND(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if (pResult->NumArguments() <= 0)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "map", "Example: /map adr3 to call vote for Adrenaline 3");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "map", "This means that the map name must start with 'a' and contain the characters 'd', 'r' and '3' in that order");
+		return;
+	}
+
+#if defined(CONF_SQL)
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	pSelf->Score()->MapVote(pResult->m_ClientID, pResult->GetString(0));
+
+#if defined(CONF_SQL)
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
+}
+
 void CGameContext::ConMapPoints(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

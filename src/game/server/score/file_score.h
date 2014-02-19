@@ -64,6 +64,7 @@ public:
 
 	virtual void LoadScore(int ClientID);
 	virtual void MapPoints(int ClientID, const char* MapName);
+	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);
 	virtual void SaveTeamScore(int* ClientIDs, unsigned int Size, float Time);
