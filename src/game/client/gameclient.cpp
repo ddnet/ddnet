@@ -1029,7 +1029,7 @@ void CGameClient::OnNewSnapshot()
 	if(!m_DDRaceMsgSent && m_Snap.m_pLocalInfo)
 	{
 		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
-		Msg.AddInt(221);
+		Msg.AddInt(CLIENT_VERSIONNR);
 		Client()->SendMsg(&Msg, MSGFLAG_VITAL);
 		m_DDRaceMsgSent = true;
 	}
