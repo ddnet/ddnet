@@ -275,8 +275,8 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			{ // Actions of other players
 				if (!Character(i))
 					continue; // Player is currently dead
-				if (!GetPlayer(i)->m_ShowOthers || g_Config.m_SvTeam != 3)
-				{ // Only for SvTeam 3 because it's buggy otherwise
+				if (!GetPlayer(i)->m_ShowOthers)
+				{
 					if (m_Core.GetSolo(Asker))
 						continue; // When in solo part don't show others
 					if (m_Core.GetSolo(i))
@@ -292,8 +292,8 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			{ // Actions of other players
 				if (!Character(GetPlayer(i)->m_SpectatorID))
 					continue; // Player is currently dead
-				if (!GetPlayer(i)->m_ShowOthers || g_Config.m_SvTeam != 3)
-				{ // Only for SvTeam 3 because it's buggy otherwise
+				if (!GetPlayer(i)->m_ShowOthers)
+				{
 					if (m_Core.GetSolo(Asker))
 						continue; // When in solo part don't show others
 					if (m_Core.GetSolo(GetPlayer(i)->m_SpectatorID))

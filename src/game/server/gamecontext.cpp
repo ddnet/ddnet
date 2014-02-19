@@ -484,7 +484,14 @@ void CGameContext::SendTuningParams(int ClientID)
 					else
 						Msg.AddInt(pParams[i]);
 				}
-	        }
+				if (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO)
+				{
+					if(i==31 || i==32) // collision and hooking
+						Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+					else
+						Msg.AddInt(pParams[i]);
+				}
+			}
 			else
 				Msg.AddInt(pParams[i]); // if everything is normal just send true tunings
 		}

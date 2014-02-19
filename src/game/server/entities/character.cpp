@@ -953,7 +953,7 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 
 	if( SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->m_Paused && SnapChar && !SnapChar->m_Super
-		&& !CanCollide(SnappingClient) && (!SnapPlayer->m_ShowOthers || (g_Config.m_SvTeam != 3 && (Teams()->m_Core.GetSolo(SnappingClient) || Teams()->m_Core.GetSolo(GetPlayer()->GetCID())))))
+		&& !CanCollide(SnappingClient) && !SnapPlayer->m_ShowOthers)
 		return;
 
 	if (m_Paused)
@@ -1429,11 +1429,15 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now in a solo part.");
 		Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), true);
+		m_NeededFaketuning |= FAKETUNE_SOLO;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
 	}
 	else if(((m_TileIndex == TILE_SOLO_END) || (m_TileFIndex == TILE_SOLO_END)) && Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now out of the solo part.");
 		Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), false);
+		m_NeededFaketuning ^= FAKETUNE_SOLO;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
 	{
