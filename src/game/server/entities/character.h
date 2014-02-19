@@ -65,6 +65,7 @@ public:
 
 	void SetEmote(int Emote, int Tick);
 
+	int NeededFaketuning() {return m_NeededFaketuning;}
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
@@ -75,6 +76,7 @@ private:
 
 	bool m_Alive;
 	bool m_Paused;
+	int m_NeededFaketuning;
 
 	// weapon info
 	CEntity *m_apHitObjects[10];

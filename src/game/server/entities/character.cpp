@@ -794,6 +794,8 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
+	m_NeededFaketuning = 0; // reset fake tunings on death and send the client
+	GameServer()->SendTuningParams(m_pPlayer->GetCID());
 	// we got to wait 0.5 secs before respawning
 	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
@@ -1775,6 +1777,8 @@ bool CCharacter::Freeze(int Seconds)
 		m_Armor = 0;
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
+		m_NeededFaketuning |= 1;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
 		return true;
 	}
 	return false;
@@ -1800,6 +1804,8 @@ bool CCharacter::UnFreeze()
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
 		if (m_ActiveWeapon==WEAPON_HAMMER) m_ReloadTimer = 0;
+		m_NeededFaketuning ^= 1; // set freeze state to false
+		GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
 		 return true;
 	}
 	return false;

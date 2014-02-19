@@ -469,8 +469,26 @@ void CGameContext::SendTuningParams(int ClientID)
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 	int *pParams = (int *)&m_Tuning;
 	for(unsigned i = 0; i < sizeof(m_Tuning)/sizeof(int); i++)
-		Msg.AddInt(pParams[i]);
-	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		{
+			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter() && m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning()) // need to send faketunings ?
+			{
+				if (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & 1) // is the character frozen ?
+				{
+					if(i==0 || i==1 || i==3 || i==4 || i==5 || i==6) // which tunings to fake
+						Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+					else if(i == 9 // bug in old ddnet versions
+					&& (m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDRACE
+					|| m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_GOODHOOK))
+						// bug: hook_fire_speed 0 causes bugs even on vanilla, so we use hook_fire_speed 1 instead
+						Msg.AddInt(1);
+					else
+						Msg.AddInt(pParams[i]);
+				}
+	        }
+			else
+				Msg.AddInt(pParams[i]); // if everything is normal just send true tunings
+		}
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 /*
 void CGameContext::SwapTeams()
