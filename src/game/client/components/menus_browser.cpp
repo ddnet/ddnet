@@ -718,27 +718,26 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			Name.HSplitTop(11.0f, &Name, &Clan);
 
 			// score
-			if(pSelectedServer->m_aClients[i].m_Player)
+			char aTemp[16];
+
+			if(!pSelectedServer->m_aClients[i].m_Player)
+				str_copy(aTemp, "SPEC", sizeof(aTemp));
+			else if(str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap"))
 			{
-				char aTemp[16];
-
-				if(str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap"))
-				{
-					if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
-						aTemp[0] = 0;
-					else
-					{
-						int Time = abs(pSelectedServer->m_aClients[i].m_Score);
-						str_format(aTemp, sizeof(aTemp), "%02d:%02d", Time/60, Time%60);
-					}
-				}
+				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
+					aTemp[0] = 0;
 				else
-					str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
-
-				TextRender()->SetCursor(&Cursor, Score.x, Score.y+(Score.h-FontSize)/4.0f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-				Cursor.m_LineWidth = Score.w;
-				TextRender()->TextEx(&Cursor, aTemp, -1);
+				{
+					int Time = abs(pSelectedServer->m_aClients[i].m_Score);
+					str_format(aTemp, sizeof(aTemp), "%02d:%02d", Time/60, Time%60);
+				}
 			}
+			else
+				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
+
+			TextRender()->SetCursor(&Cursor, Score.x, Score.y+(Score.h-FontSize)/4.0f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+			Cursor.m_LineWidth = Score.w;
+			TextRender()->TextEx(&Cursor, aTemp, -1);
 
 			// name
 			TextRender()->SetCursor(&Cursor, Name.x, Name.y, FontSize-2, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
