@@ -477,14 +477,6 @@ void CGameContext::SendTuningParams(int ClientID)
 				{
 					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
 				}
-				else if(i == 9 // bug in old ddnet versions
-				&& (m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDRACE
-				|| m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_GOODHOOK)
-				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_FREEZE)
-				{
-					// bug: hook_fire_speed 0 causes bugs even on vanilla, so we use hook_fire_speed 1 instead
-					Msg.AddInt(1);
-				}
 				else if((i==31 || i==32) // collision and hooking
 				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO)
 				{
