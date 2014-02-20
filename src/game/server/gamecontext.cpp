@@ -472,24 +472,27 @@ void CGameContext::SendTuningParams(int ClientID)
 		{
 			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter() && m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning()) // need to send faketunings ?
 			{
-				if (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_FREEZE)
+				if((i==0 || i==1 || i==3 || i==4 || i==5 || i==6) // which tunings to fake
+				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_FREEZE)
 				{
-					if(i==0 || i==1 || i==3 || i==4 || i==5 || i==6) // which tunings to fake
-						Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
-					else if(i == 9 // bug in old ddnet versions
-					&& (m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDRACE
-					|| m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_GOODHOOK))
-						// bug: hook_fire_speed 0 causes bugs even on vanilla, so we use hook_fire_speed 1 instead
-						Msg.AddInt(1);
-					else
-						Msg.AddInt(pParams[i]);
+					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
 				}
-				if (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO)
+				else if(i == 9 // bug in old ddnet versions
+				&& (m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDRACE
+				|| m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_GOODHOOK)
+				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_FREEZE)
 				{
-					if(i==31 || i==32) // collision and hooking
-						Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
-					else
-						Msg.AddInt(pParams[i]);
+					// bug: hook_fire_speed 0 causes bugs even on vanilla, so we use hook_fire_speed 1 instead
+					Msg.AddInt(1);
+				}
+				else if((i==31 || i==32) // collision and hooking
+				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO)
+				{
+					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+				}
+				else
+				{
+					Msg.AddInt(pParams[i]);
 				}
 			}
 			else
