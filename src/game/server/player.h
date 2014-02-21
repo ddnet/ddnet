@@ -146,11 +146,12 @@ public:
 	int m_ChatScore;
 
 	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
-	void AfkVoteTimer(int new_target_x, int new_target_y);
+	void AfkVoteTimer(CNetObj_PlayerInput *NewTarget);
 	int64 m_LastPlaytime;
 	int64 m_LastEyeEmote;
 	int m_LastTarget_x;
 	int m_LastTarget_y;
+	CNetObj_PlayerInput m_LastTarget;
 	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
 	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	char m_pAfkMsg[160];

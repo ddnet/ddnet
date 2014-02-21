@@ -42,8 +42,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	m_LastCommandPos = 0;
 	m_LastPlaytime = time_get();
-	m_LastTarget_x = 0;
-	m_LastTarget_y = 0;
 	m_Sent1stAfkWarning = 0;
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
@@ -312,6 +310,8 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
 		return;
 
+	AfkVoteTimer(NewInput);
+
 	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnPredictedInput(NewInput);
 }
@@ -320,7 +320,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
-	AfkVoteTimer(NewInput->m_TargetX, NewInput->m_TargetY);
+	AfkVoteTimer(NewInput);
 
 	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
@@ -525,18 +525,15 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 	return false;
 }
 
-void CPlayer::AfkVoteTimer(int NewTargetX, int NewTargetY)
+void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 {
 	if(g_Config.m_SvMaxAfkVoteTime == 0)
 		return;
 
-	if(NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
+	if(mem_comp(NewTarget, &m_LastTarget, sizeof(CNetObj_PlayerInput)) != 0)
 	{
 		m_LastPlaytime = time_get();
-		m_LastTarget_x = NewTargetX;
-		m_LastTarget_y = NewTargetY;
-		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
-		m_Sent2ndAfkWarning = 0;
+		mem_copy(&m_LastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
 	}
 	else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkVoteTime)
 	{
