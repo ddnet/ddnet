@@ -988,7 +988,7 @@ void CGameClient::ProcessEvents()
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
 		{
 			CNetEvent_DamageInd *ev = (CNetEvent_DamageInd *)pData;
-			g_GameClient.m_pEffects->DamageIndicator(vec2(ev->m_X, ev->m_Y), vec2(direction(ev->m_Angle/256.0f)));
+			g_GameClient.m_pEffects->DamageIndicator(vec2(ev->m_X, ev->m_Y), direction(ev->m_Angle / 256.0f));
 		}
 		else if(Item.m_Type == NETEVENTTYPE_EXPLOSION)
 		{
@@ -2177,17 +2177,14 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownID) || IsOneSolo || OwnClientData.m_NoHookHit))
 			continue;
 
-		vec2 ClosestPoint;
-		if(closest_point_on_line(HookPos, NewPos, Position, ClosestPoint))
+		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
+		if(distance(Position, ClosestPoint) < PhysSize + 2.0f)
 		{
-			if(distance(Position, ClosestPoint) < PhysSize + 2.0f)
+			if(ClosestID == -1 || distance(HookPos, Position) < Distance)
 			{
-				if(ClosestID == -1 || distance(HookPos, Position) < Distance)
-				{
-					NewPos2 = ClosestPoint;
-					ClosestID = i;
-					Distance = distance(HookPos, Position);
-				}
+				NewPos2 = ClosestPoint;
+				ClosestID = i;
+				Distance = distance(HookPos, Position);
 			}
 		}
 	}

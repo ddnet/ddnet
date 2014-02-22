@@ -235,17 +235,16 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	ColorRGBA RGB;
 	vec2 Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
 	vec2 From = vec2(pCurrent->m_FromX, pCurrent->m_FromY);
+	vec2 Dir = normalize(Pos - From);
+
 	float Len = distance(Pos, From);
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineColor));
 	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerColor));
 	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 
-	vec2 Dir;
 	if(Len > 0)
 	{
-		Dir = normalize_pre_length(Pos - From, Len);
-
 		float Ticks;
 		if(IsPredicted)
 			Ticks = (float)(Client()->PredGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
