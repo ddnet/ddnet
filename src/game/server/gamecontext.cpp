@@ -472,12 +472,7 @@ void CGameContext::SendTuningParams(int ClientID)
 		{
 			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter() && m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning()) // need to send faketunings ?
 			{
-				if((i==0 || i==1 || i==3 || i==4 || i==5 || i==6) // which tunings to fake
-				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_FREEZE)
-				{
-					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
-				}
-				else if((i==31 || i==32) // collision and hooking
+				if((i==31 || i==32) // collision and hooking
 				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO)
 				{
 					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
