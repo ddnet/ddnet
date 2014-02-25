@@ -52,7 +52,7 @@ CSqlScore::~CSqlScore()
 
 bool CSqlScore::Connect()
 {
-	if (m_pDriver != NULL)
+	if (m_pDriver != NULL && m_pConnection != NULL)
 	{
 		try
 		{
