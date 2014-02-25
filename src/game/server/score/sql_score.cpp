@@ -509,7 +509,10 @@ void CSqlScore::MapPointsThread(void *pUser)
 				char aServer[32];
 				strcpy(aServer, pData->m_pSqlData->m_pResults->getString("Server").c_str());
 				aServer[0] = toupper(aServer[0]);
-				str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d points)", aMap, aServer, points);
+				if (points == 1)
+					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d point)", aMap, aServer, points);
+				else
+					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d points)", aMap, aServer, points);
 			}
 
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
@@ -559,7 +562,10 @@ void CSqlScore::SaveScoreThread(void *pUser)
 				{
 					pData->m_pSqlData->m_pResults->next();
 					int points = (int)pData->m_pSqlData->m_pResults->getInt("Points");
-					str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", points);
+					if (points == 1)
+						str_format(aBuf, sizeof(aBuf), "You earned %d point for finishing this map!", points);
+					else
+						str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", points);
 					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 				}
 			}
