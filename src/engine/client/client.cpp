@@ -1345,6 +1345,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			int CompleteSize = 0;
 			const char *pData = 0;
 
+			// only allow packets from the server we actually want
+			if(net_addr_comp(&pPacket->m_Address, &m_ServerAddress))
+				return;
+
 			// we are not allowed to process snapshot yet
 			if(State() < IClient::STATE_LOADING)
 				return;
