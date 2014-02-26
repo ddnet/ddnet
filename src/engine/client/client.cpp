@@ -1062,11 +1062,10 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64"))
 			{
 				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
-				if (pEntry)
+				if (pEntry && m_ServerBrowser.IsRefreshing())
 				{
 					pEntry->m_Is64 = true;
 					m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry); // Force a quick update
-					m_ServerBrowser.QueueRequest(pEntry); // If it fails this will cause a retry
 				}
 			}
 		}
