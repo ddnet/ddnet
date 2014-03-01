@@ -50,51 +50,30 @@ Format: 1.4
 # --------------------------------------------------------------------------
 
 
-Group: Engine  {
+Group: Client  {
 
-   File: Messaging  (/home/kma/code/teeworlds/trunk/src/engine/e_if_msg.h)
+   Group: Overview  {
 
-   Group: Client  {
+      File: Time on the client  (/media/ddrace/src/engine/docs/client_time.txt)
+      File: Prediction  (/media/ddrace/src/engine/docs/prediction.txt)
+      File: Snapshots  (/media/ddrace/src/engine/docs/snapshots.txt)
+      File: Server Operation  (/media/ddrace/src/engine/docs/server_op.txt)
+      }  # Group: Overview
 
-      Group: Overview  {
+   Group: Reference  {
 
-         File: Time on the client  (/home/kma/code/teeworlds/trunk/src/engine/docs/client_time.txt)
-         File: Prediction  (/home/kma/code/teeworlds/trunk/src/engine/docs/prediction.txt)
-         File: Snapshots  (/home/kma/code/teeworlds/trunk/src/engine/docs/snapshots.txt)
-         File: Server Operation  (/home/kma/code/teeworlds/trunk/src/engine/docs/server_op.txt)
-         }  # Group: Overview
+      File: CClientInfo  (/media/ddrace/src/engine/server.h)
+      File: Client States  (/media/ddrace/src/engine/client.h)
+      File: CServerInfo  (/media/ddrace/src/engine/serverbrowser.h)
+      File: graphics.h  (/media/ddrace/src/engine/graphics.h)
+      File: shared/huffman.h  (/media/ddrace/src/engine/shared/huffman.h)
+      }  # Group: Reference
 
-      Group: Reference  {
+   }  # Group: Client
 
-         File: Client Hooks  (/home/kma/code/teeworlds/trunk/src/engine/e_if_modc.h)
-         File: Client Interface  (/home/kma/code/teeworlds/trunk/src/engine/e_if_client.h)
-         File: e_huffman.h  (/home/kma/code/teeworlds/trunk/src/engine/e_huffman.h)
-         File: Engine Interface  (/home/kma/code/teeworlds/trunk/src/engine/e_if_other.h)
-         File: Graphics  (/home/kma/code/teeworlds/trunk/src/engine/e_if_gfx.h)
-         File: Input  (/home/kma/code/teeworlds/trunk/src/engine/e_if_inp.h)
-         File: Sound  (/home/kma/code/teeworlds/trunk/src/engine/e_if_snd.h)
-         }  # Group: Reference
-
-      }  # Group: Client
-
-   Group: Server  {
-
-      Group: Reference  {
-
-         File: Server Hooks  (/home/kma/code/teeworlds/trunk/src/engine/e_if_mods.h)
-         File: Server Interface  (/home/kma/code/teeworlds/trunk/src/engine/e_if_server.h)
-         }  # Group: Reference
-
-      }  # Group: Server
-
-   }  # Group: Engine
-
-Group: Game  {
-
-   File: Entity  (/home/kma/code/teeworlds/trunk/src/game/server/entity.hpp)
-   File: Game Controller  (/home/kma/code/teeworlds/trunk/src/game/server/gamecontroller.hpp)
-   File: Game World  (/home/kma/code/teeworlds/trunk/src/game/server/gameworld.hpp)
-   }  # Group: Game
+File: Entity  (/media/ddrace/src/game/server/entity.h)
+File: Game Controller  (/media/ddrace/src/game/server/gamecontroller.h)
+File: Game World  (/media/ddrace/src/game/server/gameworld.h)
 
 Group: Index  {
 
@@ -109,5 +88,5 @@ Group: Index  {
 
 
 ##### Do not change or remove these lines. #####
-Data: 1(D3333RuEG3AEp39ufG3tGG7uHof63tHN\A36H93`pEG)
-Data: 1(h3333RuEG3AEp39ufG3tGG7uHof63tHN\A36H93G\`8\G)
+Data: 1(D3333EGf8p3ffHp9G36H93`pEG)
+Data: 1(h3333EGf8p3ffHp9G36H93G\`8\G)
