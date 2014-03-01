@@ -1390,6 +1390,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have infinite air jumps");
 		m_SuperJump = true;
+		if (m_Core.m_Jumps == 0)
+		{
+			m_NeededFaketuning ^= FAKETUNE_NOJUMP;
+			GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
+		}
 	}
 	else if(((m_TileIndex == TILE_JETPACK_START) || (m_TileFIndex == TILE_JETPACK_START)) && !m_Jetpack)
 	{
@@ -1415,6 +1420,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You don't have infinite air jumps");
 		m_SuperJump = false;
+		if (m_Core.m_Jumps == 0)
+		{
+			m_NeededFaketuning |= FAKETUNE_NOJUMP;
+			GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
+		}
 	}
 	else if(((m_TileIndex == TILE_JETPACK_END) || (m_TileFIndex == TILE_JETPACK_END)) && m_Jetpack)
 	{
@@ -1559,6 +1569,12 @@ void CCharacter::HandleTiles(int Index)
 			str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(),aBuf);
 			m_Core.m_Jumps = newJumps;
+
+			if (newJumps == 0 && !m_SuperJump)
+				m_NeededFaketuning |= FAKETUNE_NOJUMP;
+			else
+				m_NeededFaketuning ^= FAKETUNE_NOJUMP;
+			GameServer()->SendTuningParams(m_pPlayer->GetCID()); // update tunings
 		}
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_PENALTY && !m_LastPenalty)
