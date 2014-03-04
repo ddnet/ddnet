@@ -193,6 +193,7 @@ public:
 
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
+	int64 m_LastMapVote;
 
 private:
 

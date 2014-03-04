@@ -47,6 +47,7 @@ void CGameContext::Construct(int Resetting)
 	m_pVoteOptionFirst = 0;
 	m_pVoteOptionLast = 0;
 	m_NumVoteOptions = 0;
+	m_LastMapVote = 0;
 	//m_LockTeams = 0;
 
 	if(Resetting==NO_RESET)
@@ -991,7 +992,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 			{
 				CVoteOptionServer *pOption = m_pVoteOptionFirst;
-				static int64 LastMapVote = 0;
 				while(pOption)
 				{
 					if(str_comp_nocase(pMsg->m_Value, pOption->m_aDescription) == 0)
@@ -1001,10 +1001,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							SendChatTarget(ClientID, "Invalid option");
 							return;
 						}
-						if(!m_apPlayers[ClientID]->m_Authed && (strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 || strncmp(pOption->m_aCommand, "change_map ", 11) == 0 || strncmp(pOption->m_aCommand, "random_map", 10) == 0) && time_get() < LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+						if(!m_apPlayers[ClientID]->m_Authed && (strncmp(pOption->m_aCommand, "sv_map ", 7) == 0 || strncmp(pOption->m_aCommand, "change_map ", 11) == 0 || strncmp(pOption->m_aCommand, "random_map", 10) == 0) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 						{
 							char chatmsg[512] = {0};
-							str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes,Please wait %d Second(s)", g_Config.m_SvVoteMapTimeDelay,((LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
+							str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay,((m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
 							SendChatTarget(ClientID, chatmsg);
 
 							return;
@@ -1013,7 +1013,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 									pOption->m_aDescription, pReason);
 						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
 						str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
-						LastMapVote = time_get();
+						m_LastMapVote = time_get();
 						break;
 					}
 
@@ -1036,7 +1036,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					}
 				}
 
-				LastMapVote = time_get();
+				m_LastMapVote = time_get();
 				m_VoteKick = false;
 			}
 			else if(str_comp_nocase(pMsg->m_Type, "kick") == 0)
