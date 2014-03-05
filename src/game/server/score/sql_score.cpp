@@ -432,6 +432,12 @@ void CSqlScore::MapVoteThread(void *pUser)
 				str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found. Try adding a '%%' at the start if you don't know the first character. Example: /map %%castle for \"Out of Castle\"", originalMap);
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 			}
+			else if(time_get() < pData->m_pSqlData->GameServer()->m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+			{
+				char chatmsg[512] = {0};
+				str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay,((pData->m_pSqlData->GameServer()->m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, chatmsg);
+			}
 			else
 			{
 				pData->m_pSqlData->m_pResults->next();
@@ -444,14 +450,6 @@ void CSqlScore::MapVoteThread(void *pUser)
 				char aChatmsg[512];
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", pData->m_pSqlData->GameServer()->Server()->ClientName(pData->m_ClientID), aMap, "/map");
 
-				if(time_get() < pData->m_pSqlData->GameServer()->m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
-				{
-					char chatmsg[512] = {0};
-					str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay,((pData->m_pSqlData->GameServer()->m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
-					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, chatmsg);
-
-					return;
-				}
 				pData->m_pSqlData->GameServer()->CallVote(pData->m_ClientID, aMap, aCmd, "/map", aChatmsg);
 				pData->m_pSqlData->GameServer()->m_LastMapVote = time_get();
 			}
