@@ -168,6 +168,7 @@ void CMapLayers::OnRender()
 			bool IsSwitchLayer = false;
 			bool IsTeleLayer = false;
 			bool IsSpeedupLayer = false;
+			bool IsTuneLayer = false;
 
 			if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
 			{
@@ -186,6 +187,9 @@ void CMapLayers::OnRender()
 
 			if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
 				IsSpeedupLayer = true;
+			
+			if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
+				IsTuneLayer = true;
 
 			// skip rendering if detail layers if not wanted
 			if(pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && !IsGameLayer)
@@ -346,6 +350,24 @@ void CMapLayers::OnRender()
 					Graphics()->BlendNormal();
 					RenderTools()->RenderSpeedupmap(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 					RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f);
+				}
+			}
+			else if(g_Config.m_ClShowEntities && IsTuneLayer)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
+
+				CTuneTile *pTuneTiles = (CTuneTile *)m_pLayers->Map()->GetData(pTMap->m_Tune);
+				unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(pTMap->m_Tune);
+
+				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTuneTile))
+				{
+					Graphics()->BlendNone();
+					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
+					RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
+					Graphics()->BlendNormal();
+					RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
+					RenderTools()->RenderTuneOverlay(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f);
 				}
 			}
 		}
