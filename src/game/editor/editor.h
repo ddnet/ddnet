@@ -207,8 +207,43 @@ public:
 
 	bool IsEmpty() const
 	{
-		return m_lLayers.size() == 0;
+		return m_lLayers.size() == 0; // stupid function, since its bad for Fillselection: TODO add a function for Fillselection that returns whether a specific tile is used in the given layer
 	}
+	
+	/*bool IsUsedInThisLayer(int Layer, int Index) // <--------- this is what i meant but cause i dont know which Indexes belongs to which layers i cant finish yet
+	{
+		switch Layer
+		{
+			case LAYERTYPE_GAME: // security
+				return true;
+			case LAYERTYPE_FRONT:
+				return true;
+			case LAYERTYPE_TELE:
+			{
+				if (Index ==) // you could add an 2D array into mapitems.h which defines which Indexes belong to which layer(s)
+			}
+			case LAYERTYPE_SPEEDUP:
+			{
+				if (Index == TILE_BOOST)
+					return true;
+				else
+					return false;
+			}
+			case LAYERTYPE_SWITCH:
+			{
+				
+			}
+			case LAYERTYPE_TUNE:
+			{
+				if (Index == TILE_TUNE1)
+					return true;
+				else
+					return false;
+			}
+			default:
+				return false;
+		}
+	}*/
 
 	void Clear()
 	{
@@ -378,10 +413,12 @@ public:
 	class CLayerSpeedup *m_pSpeedupLayer;
 	class CLayerFront *m_pFrontLayer;
 	class CLayerSwitch *m_pSwitchLayer;
+	class CLayerTune *m_pTuneLayer;
 	void MakeTeleLayer(CLayer *pLayer);
 	void MakeSpeedupLayer(CLayer *pLayer);
 	void MakeFrontLayer(CLayer *pLayer);
 	void MakeSwitchLayer(CLayer *pLayer);
+	void MakeTuneLayer(CLayer *pLayer);
 };
 
 
@@ -464,6 +501,7 @@ public:
 	int m_Speedup;
 	int m_Front;
 	int m_Switch;
+	int m_Tune;
 	char m_aFileName[512];
 };
 
@@ -605,8 +643,10 @@ public:
 		ms_TeleTexture = 0;
 		ms_SpeedupTexture = 0;
 		ms_SwitchTexture = 0;
+		ms_TuneTexture = 0;
 		m_TeleNumber = 1;
 		m_SwitchNum = 1;
+		m_TuningNum = 1;
 		m_SwitchDelay = 0;
 		m_SpeedupForce = 50;
 		m_SpeedupMaxSpeed = 0;
@@ -867,10 +907,14 @@ public:
 	static int ms_TeleTexture;
 	static int ms_SpeedupTexture;
 	static int ms_SwitchTexture;
+	static int ms_TuneTexture;
 	static int PopupTele(CEditor *pEditor, CUIRect View);
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View);
 	static int PopupSwitch(CEditor *pEditor, CUIRect View);
+	static int PopupTune(CEditor *pEditor, CUIRect View);
 	unsigned char m_TeleNumber;
+	
+	unsigned char m_TuningNum;
 
 	unsigned char m_SpeedupForce;
 	unsigned char m_SpeedupMaxSpeed;
@@ -949,5 +993,24 @@ public:
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
 };
+
+class CLayerTune : public CLayerTiles
+{
+public:
+	CLayerTune(int w, int h);
+	~CLayerTune();
+
+	CTuneTile *m_pTuneTile;
+	unsigned char m_TuningNumber;
+
+	virtual void Resize(int NewW, int NewH);
+	virtual void Shift(int Direction);
+	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
+	virtual void BrushFlipX();
+	virtual void BrushFlipY();
+	virtual void BrushRotate(float Amount);
+	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+};
+
 
 #endif
