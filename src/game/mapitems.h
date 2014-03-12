@@ -17,6 +17,7 @@ enum
 	LAYERTYPE_TELE,
 	LAYERTYPE_SPEEDUP,
 	LAYERTYPE_SWITCH,
+	LAYERTYPE_TUNE,
 
 	MAPITEMTYPE_VERSION=0,
 	MAPITEMTYPE_INFO,
@@ -35,6 +36,7 @@ enum
 	NUM_CURVETYPES,
 
 	// game layer tiles
+	// TODO define which Layer uses which tiles (needed for mapeditor)
 	ENTITY_NULL=0,
 	ENTITY_SPAWN,
 	ENTITY_SPAWN_RED,
@@ -126,6 +128,7 @@ enum
 	TILE_TELECHECKINEVIL = 63,
 	TILE_CP = 64,
 	TILE_CP_F,
+	TILE_TUNE1 = 68,
 	TILE_OLDLASER = 71,
 	TILE_NPC,
 	TILE_EHOOK,
@@ -147,6 +150,7 @@ enum
 	LAYER_TELE,
 	LAYER_SPEEDUP,
 	LAYER_SWITCH,
+	LAYER_TUNE,
 	NUM_LAYERS,
 	//Flags
 	TILEFLAG_VFLIP=1,
@@ -165,6 +169,7 @@ enum
 	TILESLAYERFLAG_SPEEDUP=4,
 	TILESLAYERFLAG_FRONT=8,
 	TILESLAYERFLAG_SWITCH=16,
+	TILESLAYERFLAG_TUNE=32,
 
 	ENTITY_OFFSET=255-16*4,
 };
@@ -277,6 +282,7 @@ struct CMapItemLayerTilemap
 	int m_Speedup;
 	int m_Front;
 	int m_Switch;
+	int m_Tune;
 } ;
 
 struct CMapItemLayerQuads
@@ -354,6 +360,13 @@ public:
 	unsigned char m_Index;
 	unsigned char m_Flags;
 	int m_Number;
+};
+
+class CTuneTile
+{
+public:
+	unsigned char m_Number;
+	unsigned char m_Type;
 };
 
 #endif
