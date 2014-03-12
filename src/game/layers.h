@@ -33,6 +33,7 @@ public:
 	CMapItemLayerTilemap *SpeedupLayer() const { return m_pSpeedupLayer; };
 	CMapItemLayerTilemap *FrontLayer() const { return m_pFrontLayer; };
 	CMapItemLayerTilemap *SwitchLayer() const { return m_pSwitchLayer; };
+	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; };
 
 private:
 
@@ -40,6 +41,7 @@ private:
 	CMapItemLayerTilemap *m_pSpeedupLayer;
 	CMapItemLayerTilemap *m_pFrontLayer;
 	CMapItemLayerTilemap *m_pSwitchLayer;
+	CMapItemLayerTilemap *m_pTuneLayer;
 };
 
 #endif
