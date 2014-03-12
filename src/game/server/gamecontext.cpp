@@ -11,8 +11,8 @@
 #include "gamecontext.h"
 #include <game/version.h>
 #include <game/collision.h>
-/*#include <game/gamecore.h>
-#include "gamemodes/dm.h"
+#include <game/gamecore.h>
+/*#include "gamemodes/dm.h"
 #include "gamemodes/tdm.h"
 #include "gamemodes/ctf.h"
 #include "gamemodes/mod.h"*/
@@ -463,12 +463,18 @@ void CGameContext::CheckPureTuning()
 	}
 }
 
-void CGameContext::SendTuningParams(int ClientID)
+void CGameContext::SendTuningParams(int ClientID, int Zone)
 {
 	CheckPureTuning();
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-	int *pParams = (int *)&m_Tuning;
+	int *pParams = 0;
+	if (Zone == 0)
+		pParams = (int *)&m_Tuning;
+	else
+		pParams = (int *)&(m_TuningList[Zone]);
+	
+	
 	for(unsigned i = 0; i < sizeof(m_Tuning)/sizeof(int); i++)
 		{
 			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter() && m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning()) // need to send faketunings ?
@@ -1548,6 +1554,93 @@ void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int List = pResult->GetInteger(0);
+	const char *pParamName = pResult->GetString(1);
+	float NewValue = pResult->GetFloat(2);
+	
+	if (List <= 256 && List >= 0)
+	{
+		if((pSelf->TuningList()+List)->Set(pParamName, NewValue))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%s in zone %d changed to %.2f", pParamName, List, NewValue);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			//pSelf->SendTuningParams(-1);
+		}
+		else
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+	}
+}
+
+void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int List = pResult->GetInteger(0);
+	char aBuf[256];
+	if (List <= 256 && List >= 0)
+	for(int i = 0; i < (pSelf->TuningList()+List)->Num(); i++)
+	{
+		float v;
+		(pSelf->TuningList()+List)->Get(i, &v);
+		str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, (pSelf->TuningList()+List)->m_apNames[i], v);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+}
+
+void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CTuningParams TuningParams;
+	if (pResult->NumArguments())
+	{
+		int List = pResult->GetInteger(0);
+		if (List >= 0 && List <= 256)
+		{
+			*(pSelf->TuningList()+List) = TuningParams;
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Tunezone %d resetted", List);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 256; i++)	
+			*(pSelf->TuningList()+i) = TuningParams;
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "All Tunezones resetted");
+	}
+	
+	//pSelf->SendTuningParams(-1);
+}
+
+void CGameContext::ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (pResult->NumArguments())
+	{
+		int List = pResult->GetInteger(0);
+		if (List >= 0 && List <= 256)
+		{
+			str_format(pSelf->m_ZoneEnterMsg [List], sizeof(pSelf->m_ZoneEnterMsg [List]), pResult->GetString(1));
+		}
+	}
+}
+
+void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (pResult->NumArguments())
+	{
+		int List = pResult->GetInteger(0);
+		if (List >= 0 && List <= 256)
+		{
+			str_format(pSelf->m_ZoneLeaveMsg [List], sizeof(pSelf->m_ZoneLeaveMsg [List]), pResult->GetString(1));
+		}
+	}
+}
+
 void CGameContext::ConPause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1994,7 +2087,11 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
 	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "Dump tuning");
-
+	Console()->Register("tune_zone", "isi", CFGFLAG_SERVER, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("tune_zone_dump", "i", CFGFLAG_SERVER, ConTuneDumpZone, this, "Dump zone tuning in zone x");
+	Console()->Register("tune_zone_reset", "?i", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
+	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use -1 for normal area");
+	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use -1 for normal area");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
 	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
 	Console()->Register("random_map", "", CFGFLAG_SERVER|CFGFLAG_STORE, ConRandomMap, this, "Random map");
@@ -2041,7 +2138,23 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	//world = new GAMEWORLD;
 	//players = new CPlayer[MAX_CLIENTS];
 
-	// Reset Tuning
+	// Reset Tunezones
+	CTuningParams TuningParams;
+	for (int i = 0; i < 256; i++)
+	{
+		*(TuningList()+i) = TuningParams;
+		//str_format(m_ZoneEnterMsg [i], sizeof(m_ZoneEnterMsg [i]), "You have entered Tuningzone %d", i);
+		//str_format(m_ZoneLeaveMsg [i], sizeof(m_ZoneLeaveMsg [i]), "You have left Tuningzone %d", i);	
+	}
+	//str_format(m_ZoneEnterMsg [0], sizeof(m_ZoneEnterMsg [0]), "You have entered standard physics area");
+	//str_format(m_ZoneLeaveMsg [0], sizeof(m_ZoneLeaveMsg [0]), "You have left standard physics area");
+	
+	for (int i = 0; i < 256; i++) // decided to send no text on changing Tunezones for now
+	{
+		str_format(m_ZoneEnterMsg [i], sizeof(m_ZoneEnterMsg [i]), "", i);
+		str_format(m_ZoneLeaveMsg [i], sizeof(m_ZoneLeaveMsg [i]), "", i);	
+	}
+	// Reste Tuning
 	if(g_Config.m_SvTuneReset)
 	{
 		ResetTuning();
