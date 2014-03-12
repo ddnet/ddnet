@@ -27,6 +27,7 @@ CCollision::CCollision()
 	m_pSwitch = 0;
 	m_pDoor = 0;
 	m_pSwitchers = 0;
+	m_pTune = 0;
 }
 
 void CCollision::Init(class CLayers *pLayers)
@@ -68,6 +69,13 @@ void CCollision::Init(class CLayers *pLayers)
 		m_pSwitchers = 0;
 	}
 
+	if(m_pLayers->TuneLayer())
+		{
+		unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->TuneLayer()->m_Tune);
+		if (Size >= m_Width*m_Height*sizeof(CTuneTile))
+			m_pTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
+		}
+	
 	if(m_pLayers->FrontLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->FrontLayer()->m_Front);
@@ -455,6 +463,7 @@ void CCollision::Dest()
 	m_pSpeedup = 0;
 	m_pFront = 0;
 	m_pSwitch = 0;
+	m_pTune = 0;
 	m_pDoor = 0;
 	m_pSwitchers = 0;
 }
@@ -587,6 +596,17 @@ int CCollision::IsSpeedup(int Index)
 	return 0;
 }
 
+int CCollision::IsTune(int Index)
+{
+	if(Index < 0 || !m_pTune)
+		return -1;
+
+	if(m_pTune[Index].m_Type)
+		return m_pTune[Index].m_Number;
+
+	return -1;
+}
+
 void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed)
 {
 	if(Index < 0 || !m_pSpeedup)
@@ -705,6 +725,8 @@ bool CCollision::TileExists(int Index)
 		return true;
 	if(m_pSwitch && m_pSwitch[Index].m_Type)
 		return true;
+	if(m_pTune && m_pTune[Index].m_Type)
+			return true;
 	return TileExistsNext(Index);
 }
 
@@ -953,6 +975,9 @@ int CCollision::Entity(int x, int y, int Layer)
 			case LAYER_SPEEDUP:
 				str_format(aBuf,sizeof(aBuf), "Speedup");
 				break;
+			case LAYER_TUNE:
+				str_format(aBuf,sizeof(aBuf), "Tune");
+				break;
 			default:
 				str_format(aBuf,sizeof(aBuf), "Unknown");
 		}
@@ -971,6 +996,8 @@ int CCollision::Entity(int x, int y, int Layer)
 			return m_pTele[y*m_Width+x].m_Type - ENTITY_OFFSET;
 		case LAYER_SPEEDUP:
 			return m_pSpeedup[y*m_Width+x].m_Type - ENTITY_OFFSET;
+		case LAYER_TUNE:
+			return m_pTune[y*m_Width+x].m_Type - ENTITY_OFFSET;
 		default:
 			return 0;
 			break;
