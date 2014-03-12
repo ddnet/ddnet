@@ -178,7 +178,8 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		m_MembersCount[m_Core.Team(ClientID)]++;
 	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
 	{
-		ChangeTeamState(Team, TEAMSTATE_OPEN);
+		if (!m_TeamLocked[Team])
+			ChangeTeamState(Team, TEAMSTATE_OPEN);
 
 		if (GameServer()->Collision()->m_NumSwitchers > 0) {
 			for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i)
