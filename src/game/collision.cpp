@@ -599,12 +599,12 @@ int CCollision::IsSpeedup(int Index)
 int CCollision::IsTune(int Index)
 {
 	if(Index < 0 || !m_pTune)
-		return -1;
+		return 0;
 
 	if(m_pTune[Index].m_Type)
 		return m_pTune[Index].m_Number;
 
-	return -1;
+	return 0;
 }
 
 void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed)
