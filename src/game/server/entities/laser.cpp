@@ -23,6 +23,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->Teams()->TeamMask(GameServer()->GetPlayerChar(Owner)->Team(), -1, m_Owner) : 0;
+	m_TuneZone = GameServer()->GetPlayerChar(m_Owner)->m_TuneZone;
 }
 
 
@@ -118,7 +119,10 @@ void CLaser::DoBounce()
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
 
-			m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
+			if (!m_TuneZone)
+				m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
+			else
+				m_Energy -= distance(m_From, m_Pos) + (GameServer()->TuningList()+m_TuneZone)->m_LaserBounceCost;
 
 			if (Res&CCollision::COLFLAG_TELE && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 			{
@@ -131,8 +135,12 @@ void CLaser::DoBounce()
 				m_Bounces++;
 				m_WasTele = false;
 			}
-
-			if(m_Bounces > GameServer()->Tuning()->m_LaserBounceNum)
+			
+			int BounceNum = GameServer()->Tuning()->m_LaserBounceNum;
+			if (!m_TuneZone)
+				BounceNum = (GameServer()->TuningList()+m_TuneZone)->m_LaserBounceNum;
+			
+			if(m_Bounces > BounceNum)
 				m_Energy = -1;
 
 			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_BOUNCE, m_TeamMask);
@@ -157,8 +165,16 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
-	if(Server()->Tick() > m_EvalTick+(Server()->TickSpeed()*GameServer()->Tuning()->m_LaserBounceDelay)/1000.0f)
-		DoBounce();
+	if (!m_TuneZone)
+	{
+		if(Server()->Tick() > m_EvalTick+(Server()->TickSpeed()*GameServer()->Tuning()->m_LaserBounceDelay)/1000.0f)
+			DoBounce();
+	}
+	else
+	{
+		if(Server()->Tick() > m_EvalTick+(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_LaserBounceDelay)/1000.0f)
+			DoBounce();	
+	}
 }
 
 void CLaser::TickPaused()
