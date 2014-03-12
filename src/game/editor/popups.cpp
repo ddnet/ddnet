@@ -174,6 +174,23 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 			return 1;
 		}
 	}
+	
+	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pTuneLayer)
+		{
+			// new tune layer
+			View.HSplitBottom(10.0f, &View, &Button);
+			View.HSplitBottom(12.0f, &View, &Button);
+			static int s_NewSwitchLayerButton = 0;
+			if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add Tune Layer", 0, &Button, 0, "Creates a new tuning layer"))
+			{
+				CLayer *l = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+				pEditor->m_Map.MakeTuneLayer(l);
+				pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+				pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+				pEditor->m_Brush.Clear();
+				return 1;
+			}
+		}
 
 	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pFrontLayer)
 	{
@@ -329,13 +346,15 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 			pEditor->m_Map.m_pSpeedupLayer = 0x0;
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pSwitchLayer)
 			pEditor->m_Map.m_pSwitchLayer = 0x0;
+		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pTuneLayer)
+			pEditor->m_Map.m_pTuneLayer = 0x0;
 		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->DeleteLayer(pEditor->m_SelectedLayer);
 		return 1;
 	}
 
 	// layer name
 	// if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0))
-	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pTeleLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pSpeedupLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pFrontLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pSwitchLayer != pEditor->GetSelectedLayer(0))
+	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pTeleLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pSpeedupLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pFrontLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pSwitchLayer != pEditor->GetSelectedLayer(0) && pEditor->m_Map.m_pTuneLayer != pEditor->GetSelectedLayer(0))
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
@@ -367,7 +386,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	};
 
 	// if(pEditor->m_Map.m_pGameLayer == pEditor->GetSelectedLayer(0)) // dont use Group and Detail from the selection if this is the game layer
-	if(pEditor->m_Map.m_pGameLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pTeleLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSpeedupLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pFrontLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSwitchLayer == pEditor->GetSelectedLayer(0)) // dont use Group and Detail from the selection if this is the game layer
+	if(pEditor->m_Map.m_pGameLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pTeleLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSpeedupLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pFrontLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSwitchLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pTuneLayer == pEditor->GetSelectedLayer(0)) // dont use Group and Detail from the selection if this is the game layer
 	{
 		aProps[0].m_Type = PROPTYPE_NULL;
 		aProps[2].m_Type = PROPTYPE_NULL;
@@ -1081,6 +1100,32 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 		 pEditor->m_SwitchNum = clamp(NewVal, 0, 255);
 	if(Prop == PROP_SwitchDelay)
 		 pEditor->m_SwitchDelay = clamp(NewVal, 0, 255);
+
+	return 0;
+}
+
+int CEditor::PopupTune(CEditor *pEditor, CUIRect View)
+{
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	enum
+	{
+		PROP_TUNE=0,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"Zone", pEditor->m_TuningNum, PROPTYPE_INT_STEP, 1, 255},
+		{0},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+
+	if(Prop == PROP_TUNE)
+		 pEditor->m_TuningNum = clamp(NewVal, 1, 255);
 
 	return 0;
 }
