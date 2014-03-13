@@ -181,6 +181,7 @@ public:
 
 class CCharacterCore
 {
+	friend class CCharacter;
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
 	std::map<int, std::vector<vec2> > *m_pTeleOuts;
