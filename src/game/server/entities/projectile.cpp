@@ -42,7 +42,7 @@ CProjectile::CProjectile
 	m_Number = Number;
 	m_Freeze = Freeze;
 	
-	m_TuneZone = GameServer()->GetPlayerChar(m_Owner)->m_TuneZone;
+	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
 	GameWorld()->InsertEntity(this);
 }

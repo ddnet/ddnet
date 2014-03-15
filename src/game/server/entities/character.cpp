@@ -460,7 +460,13 @@ void CCharacter::FireWeapon()
 			Server()->SendMsg(&Msg, 0,m_pPlayer->GetCID());
 
 			GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE);*/
-			new CLaser(&GameServer()->m_World, m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
+			float LaserReach;
+			if (!m_TuneZone)
+				LaserReach = GameServer()->Tuning()->m_LaserReach;
+			else
+				LaserReach = (GameServer()->TuningList()+m_TuneZone)->m_LaserReach;
+			
+			new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 			GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		} break;
 
@@ -470,7 +476,7 @@ void CCharacter::FireWeapon()
 			if (!m_TuneZone)
 				Lifetime = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime);
 			else
-			Lifetime = 	(int)(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_GrenadeLifetime);
+				Lifetime = (int)(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_GrenadeLifetime);
 			
 			CProjectile *pProj = new CProjectile
 					(
@@ -502,11 +508,11 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_RIFLE:
 		{
-			int LaserReach;
+			float LaserReach;
 			if (!m_TuneZone)
-				LaserReach = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_LaserReach);
+				LaserReach = GameServer()->Tuning()->m_LaserReach;
 			else
-				LaserReach = (int)(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_LaserReach);
+				LaserReach = (GameServer()->TuningList()+m_TuneZone)->m_LaserReach;
 			
 			new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_RIFLE);
 			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
