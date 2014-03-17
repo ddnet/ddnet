@@ -2143,6 +2143,11 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	for (int i = 0; i < 256; i++)
 	{
 		*(TuningList()+i) = TuningParams;
+		(TuningList()+i)->Set("gun_curvature", 0);
+		(TuningList()+i)->Set("gun_speed", 1400);
+		(TuningList()+i)->Set("shotgun_curvature", 0);
+		(TuningList()+i)->Set("shotgun_speed", 500);
+		(TuningList()+i)->Set("shotgun_speeddiff", 0);
 		//str_format(m_ZoneEnterMsg [i], sizeof(m_ZoneEnterMsg [i]), "You have entered Tuningzone %d", i);
 		//str_format(m_ZoneLeaveMsg [i], sizeof(m_ZoneLeaveMsg [i]), "You have left Tuningzone %d", i);	
 	}
@@ -2154,7 +2159,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		str_format(m_ZoneEnterMsg [i], sizeof(m_ZoneEnterMsg [i]), "", i);
 		str_format(m_ZoneLeaveMsg [i], sizeof(m_ZoneLeaveMsg [i]), "", i);	
 	}
-	// Reste Tuning
+	// Reset Tuning
 	if(g_Config.m_SvTuneReset)
 	{
 		ResetTuning();
