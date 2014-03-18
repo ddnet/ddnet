@@ -943,7 +943,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(Empty)
+			if(Empty || !(pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index)
 			{
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pTeleTile[fy*m_Width+fx].m_Type = 0;
