@@ -374,13 +374,13 @@ void CLayerTiles::BrushFlipY()
 
 void CLayerTiles::BrushRotate(float Amount)
 {
-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
+	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0Â°, 1=90Â°, 2=180Â°, 3=270Â°
 	if(Rotation < 0)
 		Rotation +=4;
 
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90° rotation
+		// 90Â° rotation
 		CTile *pTempData = new CTile[m_Width*m_Height];
 		mem_copy(pTempData, m_pTiles, m_Width*m_Height*sizeof(CTile));
 		CTile *pDst = m_pTiles;
@@ -849,13 +849,13 @@ void CLayerTele::BrushFlipY()
 
 void CLayerTele::BrushRotate(float Amount)
 {
-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
+	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0Â°, 1=90Â°, 2=180Â°, 3=270Â°
 	if(Rotation < 0)
 		Rotation +=4;
 
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90° rotation
+		// 90Â° rotation
 		CTeleTile *pTempData1 = new CTeleTile[m_Width*m_Height];
 		CTile *pTempData2 = new CTile[m_Width*m_Height];
 		mem_copy(pTempData1, m_pTeleTile, m_Width*m_Height*sizeof(CTeleTile));
@@ -888,6 +888,8 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	if(m_Readonly)
 		return;
 
+	Snap(&Rect);
+
 	int sx = ConvertX(Rect.x);
 	int sy = ConvertY(Rect.y);
 	int w = ConvertX(Rect.w);
@@ -895,9 +897,9 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerTele *pLt = static_cast<CLayerTele*>(pBrush);
 
-	for(int y = 0; y <= h; y++)
+	for(int y = 0; y < h; y++)
 	{
-		for(int x = 0; x <= w; x++)
+		for(int x = 0; x < w; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
@@ -905,7 +907,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(Empty)
+			if(Empty || !(pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index) // air chosen: reset
 			{
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pTeleTile[fy*m_Width+fx].m_Type = 0;
@@ -1097,13 +1099,13 @@ void CLayerSpeedup::BrushFlipY()
 
 void CLayerSpeedup::BrushRotate(float Amount)
 {
-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
+	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0Â°, 1=90Â°, 2=180Â°, 3=270Â°
 	if(Rotation < 0)
 		Rotation +=4;
 
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90° rotation
+		// 90Â° rotation
 		CSpeedupTile *pTempData1 = new CSpeedupTile[m_Width*m_Height];
 		CTile *pTempData2 = new CTile[m_Width*m_Height];
 		mem_copy(pTempData1, m_pSpeedupTile, m_Width*m_Height*sizeof(CSpeedupTile));
@@ -1136,6 +1138,8 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	if(m_Readonly)
 		return;
 
+	Snap(&Rect);
+
 	int sx = ConvertX(Rect.x);
 	int sy = ConvertY(Rect.y);
 	int w = ConvertX(Rect.w);
@@ -1143,9 +1147,9 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerSpeedup *pLt = static_cast<CLayerSpeedup*>(pBrush);
 
-	for(int y = 0; y <= h; y++)
+	for(int y = 0; y < h; y++)
 	{
-		for(int x = 0; x <= w; x++)
+		for(int x = 0; x < w; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
@@ -1153,7 +1157,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(Empty)
+			if(Empty || (pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index != TILE_BOOST) // no speed up tile choosen: reset
 			{
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
@@ -1418,6 +1422,8 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	if(m_Readonly)
 		return;
 
+	Snap(&Rect);
+
 	int sx = ConvertX(Rect.x);
 	int sy = ConvertY(Rect.y);
 	int w = ConvertX(Rect.w);
@@ -1425,9 +1431,9 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerSwitch *pLt = static_cast<CLayerSwitch*>(pBrush);
 
-	for(int y = 0; y <= h; y++)
+	for(int y = 0; y < h; y++)
 	{
-		for(int x = 0; x <= w; x++)
+		for(int x = 0; x < w; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
@@ -1435,11 +1441,12 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(Empty)
+			if(Empty || !(pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index) // at least reset the tile if air is choosen
 			{
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
+				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
 			}
 				else
 			{
