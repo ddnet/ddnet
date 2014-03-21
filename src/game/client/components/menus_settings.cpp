@@ -1154,6 +1154,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClEditorUndo ^= 1;
 	}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClUnpredictedShadow, Localize("Show unpredicted shadow tee to estimate your delay"), g_Config.m_ClUnpredictedShadow, &Button))
+	{
+		g_Config.m_ClUnpredictedShadow ^= 1;
+	}
+
 	CUIRect aRects[2];
 	CUIRect Label;
 	MainView.HSplitTop(5.0f, 0, &MainView);

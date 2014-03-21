@@ -774,7 +774,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// render the "shadow" tee
-	if(pInfo.m_Local && g_Config.m_Debug)
+	if(pInfo.m_Local && (g_Config.m_Debug || g_Config.m_ClUnpredictedShadow))
 	{
 		vec2 GhostPosition = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
 		CTeeRenderInfo Ghost = RenderInfo;
