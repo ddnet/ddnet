@@ -965,7 +965,27 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	int ClientID;
+	char aBufname[MAX_NAME_LENGTH];
+
+	if (pResult->NumArguments() > 0)
+	{
+		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+			if (str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientID)) == 0)
+				break;
+
+		if(ClientID == MAX_CLIENTS)
+			return;
+
+		str_format(aBufname, sizeof(aBufname), "%s's", pSelf->Server()->ClientName(ClientID));
+	}
+	else
+	{
+		str_copy(aBufname, "Your", sizeof(aBufname));
+		ClientID = pResult->m_ClientID;
+	}
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
 	if (!pPlayer)
 		return;
 	CCharacter* pChr = pPlayer->GetCharacter();
@@ -977,7 +997,8 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	char aBuftime[64];
 	int IntTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime)
 			/ ((float) pSelf->Server()->TickSpeed()));
-	str_format(aBuftime, sizeof(aBuftime), "Your Time is %s%d:%s%d",
+	str_format(aBuftime, sizeof(aBuftime), "%s time is %s%d:%s%d",
+			aBufname,
 			((IntTime / 60) > 9) ? "" : "0", IntTime / 60,
 			((IntTime % 60) > 9) ? "" : "0", IntTime % 60);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "time", aBuftime);
@@ -1025,7 +1046,7 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 	char aBuftime[64];
 	int IntTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime)
 			/ ((float) pSelf->Server()->TickSpeed()));
-	str_format(aBuftime, sizeof(aBuftime), "Your Time is %s%d:%s%d",
+	str_format(aBuftime, sizeof(aBuftime), "Your time is %s%d:%s%d",
 				((IntTime / 60) > 9) ? "" : "0", IntTime / 60,
 				((IntTime % 60) > 9) ? "" : "0", IntTime % 60);
 	pSelf->SendBroadcast(aBuftime, pResult->m_ClientID);
