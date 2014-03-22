@@ -447,7 +447,22 @@ int CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 	int VoiceID = -1;
 	int i;
 
-	if(SampleID != 109 /* GetSampleID(SOUND_CHAT_HIGHLIGHT) */ && g_Config.m_SndNameOnly)
+	if(SampleID == 107) // GetSampleID(SOUND_CHAT_SERVER)
+	{
+		if(!g_Config.m_SndServerMessage)
+			return VoiceID;
+	}
+	else if(SampleID == 108) // GetSampleID(SOUND_CHAT_CLIENT)
+	{
+		if(!g_Config.m_SndChat)
+			return VoiceID;
+	}
+	else if(SampleID == 109) // GetSampleID(SOUND_CHAT_HIGHLIGHT)
+	{
+		if(!g_Config.m_SndHighlight)
+			return VoiceID;
+	}
+	else if(!g_Config.m_SndGame)
 		return VoiceID;
 
 

@@ -395,9 +395,6 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2?"whisper":(m_aLines[m_CurrentLine].m_Team?"teamchat":"chat"), aBuf);
 	}
 
-	if (!g_Config.m_SndChat && !g_Config.m_SndNameOnly)
-		return;
-
 	// play sound
 	int64 Now = time_get();
 	if(ClientID == -1)
