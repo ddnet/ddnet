@@ -2090,8 +2090,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("tune_zone", "isi", CFGFLAG_SERVER, ConTuneZone, this, "Tune in zone a variable to value");
 	Console()->Register("tune_zone_dump", "i", CFGFLAG_SERVER, ConTuneDumpZone, this, "Dump zone tuning in zone x");
 	Console()->Register("tune_zone_reset", "?i", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
-	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use -1 for normal area");
-	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use -1 for normal area");
+	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
+	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
 	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
 	Console()->Register("random_map", "", CFGFLAG_SERVER|CFGFLAG_STORE, ConRandomMap, this, "Random map");
