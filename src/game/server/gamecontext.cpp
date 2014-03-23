@@ -2144,22 +2144,18 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	CTuningParams TuningParams;
 	for (int i = 0; i < 256; i++)
 	{
-		*(TuningList()+i) = TuningParams;
-		(TuningList()+i)->Set("gun_curvature", 0);
-		(TuningList()+i)->Set("gun_speed", 1400);
-		(TuningList()+i)->Set("shotgun_curvature", 0);
-		(TuningList()+i)->Set("shotgun_speed", 500);
-		(TuningList()+i)->Set("shotgun_speeddiff", 0);
-		//str_format(m_ZoneEnterMsg [i], sizeof(m_ZoneEnterMsg [i]), "You have entered Tuningzone %d", i);
-		//str_format(m_ZoneLeaveMsg [i], sizeof(m_ZoneLeaveMsg [i]), "You have left Tuningzone %d", i);	
+		TuningList()[i] = TuningParams;
+		TuningList()[i].Set("gun_curvature", 0);
+		TuningList()[i].Set("gun_speed", 1400);
+		TuningList()[i].Set("shotgun_curvature", 0);
+		TuningList()[i].Set("shotgun_speed", 500);
+		TuningList()[i].Set("shotgun_speeddiff", 0);
 	}
-	//str_format(m_ZoneEnterMsg [0], sizeof(m_ZoneEnterMsg [0]), "You have entered standard physics area");
-	//str_format(m_ZoneLeaveMsg [0], sizeof(m_ZoneLeaveMsg [0]), "You have left standard physics area");
-	
+
 	for (int i = 0; i < 256; i++) // decided to send no text on changing Tunezones for now
 	{
-		str_format(m_ZoneEnterMsg [i], sizeof(m_ZoneEnterMsg [i]), "", i);
-		str_format(m_ZoneLeaveMsg [i], sizeof(m_ZoneLeaveMsg [i]), "", i);	
+		str_format(m_ZoneEnterMsg[i], sizeof(m_ZoneEnterMsg[i]), "", i);
+		str_format(m_ZoneLeaveMsg[i], sizeof(m_ZoneLeaveMsg[i]), "", i);
 	}
 	// Reset Tuning
 	if(g_Config.m_SvTuneReset)
