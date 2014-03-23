@@ -84,6 +84,7 @@ public:
 	int IsTCheckpoint(int Index);
 	//int IsCheckpoint(int Index);
 	int IsSpeedup(int Index);
+	int IsTune(int Index);
 	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed);
 	int IsSwitch(int Index);
 	int GetSwitchNumber(int Index);
@@ -103,6 +104,7 @@ public:
 
 	class CTeleTile *TeleLayer() { return m_pTele; }
 	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
+	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
 
@@ -112,6 +114,7 @@ private:
 	class CSpeedupTile *m_pSpeedup;
 	class CTile *m_pFront;
 	class CSwitchTile *m_pSwitch;
+	class CTuneTile *m_pTune;
 	class CDoorTile *m_pDoor;
 	struct SSwitchers
 	{

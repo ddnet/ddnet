@@ -39,6 +39,7 @@ int CEditor::ms_FrontTexture;
 int CEditor::ms_TeleTexture;
 int CEditor::ms_SpeedupTexture;
 int CEditor::ms_SwitchTexture;
+int CEditor::ms_TuneTexture;
 
 enum
 {
@@ -128,7 +129,7 @@ void CLayerGroup::Render()
 	{
 		if(m_lLayers[i]->m_Visible && m_lLayers[i] != m_pMap->m_pGameLayer
 		&& m_lLayers[i] != m_pMap->m_pFrontLayer && m_lLayers[i] != m_pMap->m_pTeleLayer
-		&& m_lLayers[i] != m_pMap->m_pSpeedupLayer && m_lLayers[i] != m_pMap->m_pSwitchLayer)
+		&& m_lLayers[i] != m_pMap->m_pSpeedupLayer && m_lLayers[i] != m_pMap->m_pSwitchLayer && m_lLayers[i] != m_pMap->m_pTuneLayer)
 		{
 			if(m_pMap->m_pEditor->m_ShowDetail || !(m_lLayers[i]->m_Flags&LAYERFLAG_DETAIL))
 				m_lLayers[i]->Render();
@@ -991,7 +992,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 
 		// no border for tele layer, speedup, front and switch
-		if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front))
+		if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front || pT->m_Tune))
 			pT = 0;
 
 		if(DoButton_Editor(&s_BorderBut, "Border", pT?0:-1, &Button, 0, "Adds border tiles"))
@@ -1027,6 +1028,15 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			static int s_SwitchPopupID = 0;
 			UiInvokePopupMenu(&s_SwitchPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 36, PopupSwitch);
+		}
+		// do tuning button
+		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+		static int s_TuneButton = 0;
+		if(DoButton_Ex(&s_TuneButton, "Tune", (pS && pS->m_Tune)?0:-1, &Button, 0, "Tune", CUI::CORNER_ALL))
+		{
+			static int s_TunePopupID = 0;
+			UiInvokePopupMenu(&s_TunePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 90, PopupTune);
 		}
 	}
 
@@ -1730,7 +1740,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					m_Map.m_lGroups[g] == (CLayerGroup *)m_Map.m_pFrontLayer ||
 					m_Map.m_lGroups[g] == (CLayerGroup *)m_Map.m_pTeleLayer ||
 					m_Map.m_lGroups[g] == (CLayerGroup *)m_Map.m_pSpeedupLayer ||
-					m_Map.m_lGroups[g] == (CLayerGroup *)m_Map.m_pSwitchLayer
+					m_Map.m_lGroups[g] == (CLayerGroup *)m_Map.m_pSwitchLayer ||
+					m_Map.m_lGroups[g] == (CLayerGroup *)m_Map.m_pTuneLayer
 					)
 				continue;
 			if(m_Map.m_lGroups[g]->m_Visible)
@@ -1738,7 +1749,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			//UI()->ClipEnable(&view);
 		}
 
-		// render the game, tele, speedup, front and switch above everything else
+		// render the game, tele, speedup, front, tune and switch above everything else
 		if(m_Map.m_pGameGroup->m_Visible)
 		{
 			m_Map.m_pGameGroup->MapScreen();
@@ -1752,7 +1763,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 								m_Map.m_pGameGroup->m_lLayers[i] == m_Map.m_pFrontLayer ||
 								m_Map.m_pGameGroup->m_lLayers[i] == m_Map.m_pTeleLayer ||
 								m_Map.m_pGameGroup->m_lLayers[i] == m_Map.m_pSpeedupLayer ||
-								m_Map.m_pGameGroup->m_lLayers[i] == m_Map.m_pSwitchLayer
+								m_Map.m_pGameGroup->m_lLayers[i] == m_Map.m_pSwitchLayer ||
+								m_Map.m_pGameGroup->m_lLayers[i] == m_Map.m_pTuneLayer
 								)
 								)
 					m_Map.m_pGameGroup->m_lLayers[i]->Render();
@@ -4160,6 +4172,7 @@ void CEditorMap::Clean()
 	m_pSpeedupLayer = 0x0;
 	m_pFrontLayer = 0x0;
 	m_pSwitchLayer = 0x0;
+	m_pTuneLayer = 0x0;
 }
 
 void CEditorMap::CreateDefault(int EntitiesTexture)
@@ -4185,7 +4198,7 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 	pQuad->m_aColors[2].b = pQuad->m_aColors[3].b = 255;
 	pGroup->AddLayer(pLayer);
 
-	// add game layer and reset front, tele, speedup and switch layer pointers
+	// add game layer and reset front, tele, speedup, tune and switch layer pointers
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(new CLayerGame(50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
@@ -4194,6 +4207,7 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 	m_pTeleLayer = 0x0;
 	m_pSpeedupLayer = 0x0;
 	m_pSwitchLayer = 0x0;
+	m_pTuneLayer = 0x0;
 }
 
 void CEditor::Init()
@@ -4218,6 +4232,7 @@ void CEditor::Init()
 	ms_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	ms_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	ms_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	ms_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 	m_TilesetPicker.m_pEditor = this;
 	m_TilesetPicker.MakePalette();
@@ -4402,4 +4417,11 @@ void CEditorMap::MakeSwitchLayer(CLayer *pLayer)
 	m_pSwitchLayer = (CLayerSwitch *)pLayer;
 	m_pSwitchLayer->m_pEditor = m_pEditor;
 	m_pSwitchLayer->m_TexID = m_pEditor->ms_SwitchTexture;
+}
+
+void CEditorMap::MakeTuneLayer(CLayer *pLayer)
+{
+	m_pTuneLayer = (CLayerTune *)pLayer;
+	m_pTuneLayer->m_pEditor = m_pEditor;
+	m_pTuneLayer->m_TexID = m_pEditor->ms_TuneTexture;
 }

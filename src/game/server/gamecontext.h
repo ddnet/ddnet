@@ -53,10 +53,16 @@ class CGameContext : public IGameServer
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
+	CTuningParams m_TuningList[256];
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneResetZone(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUserData);
 	static void ConPause(IConsole::IResult *pResult, void *pUserData);
 	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
@@ -84,6 +90,7 @@ public:
 	class IConsole *Console() { return m_pConsole; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
+	CTuningParams *TuningList() { return &m_TuningList[0]; }
 
 	CGameContext();
 	~CGameContext();
@@ -117,6 +124,9 @@ public:
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_NumVoteOptions;
 	int m_VoteEnforce;
+	char m_ZoneEnterMsg[64][256]; // 0 is used for switching from or to area without tunings
+	char m_ZoneLeaveMsg[64][256];
+	
 	enum
 	{
 		VOTE_ENFORCE_UNKNOWN=0,
@@ -159,7 +169,7 @@ public:
 
 	//
 	void CheckPureTuning();
-	void SendTuningParams(int ClientID);
+	void SendTuningParams(int ClientID, int Zone = -1);
 
 	//
 	//void SwapTeams();

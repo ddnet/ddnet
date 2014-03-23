@@ -50,6 +50,9 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = false;
 	m_LastWhisperTo = -1;
+	
+	m_TuneZone = 0;
+	m_TuneZoneOld = m_TuneZone;
 
 	//New Year
 	if (g_Config.m_SvEvents)
@@ -252,6 +255,15 @@ void CPlayer::Snap(int SnappingClient)
 		pSpectatorInfo->m_SpectatorID = m_SpectatorID;
 		pSpectatorInfo->m_X = m_ViewPos.x;
 		pSpectatorInfo->m_Y = m_ViewPos.y;
+		
+		m_TuneZoneOld = m_TuneZone; // we want correct tunings also for spectators
+		int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
+		m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
+		
+		if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
+		{
+			GameServer()->SendTuningParams(SnappingClient, m_TuneZone);
+		}
 	}
 
 	// send 0 if times of others are not shown

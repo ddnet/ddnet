@@ -157,6 +157,7 @@ private:
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
+	void HandleTuneLayer();
 public:
 	CGameTeams* Teams();
 	void Pause(bool Pause);
@@ -187,6 +188,8 @@ public:
 	};
 	int m_Hit;
 	int m_Collision;
+	int m_TuneZone;
+	int m_TuneZoneOld;
 	int m_Hook;
 	int m_PainSoundTimer;
 	int m_LastMove;

@@ -330,6 +330,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					Item.m_Flags = TILESLAYERFLAG_FRONT;
 				else if(pLayer->m_Switch)
 					Item.m_Flags = TILESLAYERFLAG_SWITCH;
+				else if(pLayer->m_Tune)
+					Item.m_Flags = TILESLAYERFLAG_TUNE;
 				else
 					Item.m_Flags = pLayer->m_Game ? TILESLAYERFLAG_GAME : 0;
 
@@ -364,6 +366,14 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					mem_zero(Tiles, pLayer->m_Width*pLayer->m_Height*sizeof(CTile));
 					Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), Tiles);
 					Item.m_Switch = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CSwitchTile), ((CLayerSwitch *)pLayer)->m_pSwitchTile);
+					delete[] Tiles;
+				}
+				else if(pLayer->m_Tune)
+				{
+					CTile *Tiles = new CTile[pLayer->m_Width*pLayer->m_Height];
+					mem_zero(Tiles, pLayer->m_Width*pLayer->m_Height*sizeof(CTile));
+					Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), Tiles);
+					Item.m_Tune = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTuneTile), ((CLayerTune *)pLayer)->m_pTuneTile);
 					delete[] Tiles;
 				}
 				else
@@ -652,6 +662,14 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pTiles = new CLayerSwitch(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeSwitchLayer(pTiles);
 						}
+						else if(pTilemapItem->m_Flags&TILESLAYERFLAG_TUNE)
+						{
+							if(pTilemapItem->m_Version <= 2)
+								pTilemapItem->m_Tune = *((int*)(pTilemapItem) + 19);
+
+							pTiles = new CLayerTune(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							MakeTuneLayer(pTiles);
+						}
 						else
 						{
 							pTiles = new CLayerTiles(pTilemapItem->m_Width, pTilemapItem->m_Height);
@@ -827,6 +845,24 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Switch);
+						}
+						else if(pTiles->m_Tune)
+						{
+							void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
+							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Tune);
+							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTuneTile))
+							{
+								mem_copy(((CLayerTune*)pTiles)->m_pTuneTile, pTuneData, pTiles->m_Width*pTiles->m_Height*sizeof(CTuneTile));
+
+								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+								{
+									if(((CLayerTune*)pTiles)->m_pTuneTile[i].m_Type == TILE_TUNE1)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TUNE1;
+									else
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
+								}
+							}
+							DataFile.UnloadData(pTilemapItem->m_Tune);
 						}
 					}
 					else if(pLayerItem->m_Type == LAYERTYPE_QUADS)
