@@ -53,7 +53,7 @@ class CGameContext : public IGameServer
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
-	CTuningParams m_TuningList [256];
+	CTuningParams m_TuningList[256];
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
@@ -124,8 +124,8 @@ public:
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_NumVoteOptions;
 	int m_VoteEnforce;
-	char m_ZoneEnterMsg [257] [64]; // 0 is used for switching from or to area without tunings
-	char m_ZoneLeaveMsg [257] [64];
+	char m_ZoneEnterMsg[64][256]; // 0 is used for switching from or to area without tunings
+	char m_ZoneLeaveMsg[64][256];
 	
 	enum
 	{

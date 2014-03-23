@@ -1561,9 +1561,9 @@ void CGameContext::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 	const char *pParamName = pResult->GetString(1);
 	float NewValue = pResult->GetFloat(2);
 	
-	if (List <= 256 && List >= 0)
+	if (List >= 0 && List < 256)
 	{
-		if((pSelf->TuningList()+List)->Set(pParamName, NewValue))
+		if(pSelf->TuningList()[List].Set(pParamName, NewValue))
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%s in zone %d changed to %.2f", pParamName, List, NewValue);
@@ -1580,13 +1580,15 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int List = pResult->GetInteger(0);
 	char aBuf[256];
-	if (List <= 256 && List >= 0)
-	for(int i = 0; i < (pSelf->TuningList()+List)->Num(); i++)
+	if (List >= 0 && List < 256)
 	{
-		float v;
-		(pSelf->TuningList()+List)->Get(i, &v);
-		str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, (pSelf->TuningList()+List)->m_apNames[i], v);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		for(int i = 0; i < pSelf->TuningList()[List].Num(); i++)
+		{
+			float v;
+			pSelf->TuningList()[List].Get(i, &v);
+			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].m_apNames[i], v);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		}
 	}
 }
 
@@ -1597,9 +1599,9 @@ void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 	if (pResult->NumArguments())
 	{
 		int List = pResult->GetInteger(0);
-		if (List >= 0 && List <= 256)
+		if (List >= 0 && List < 256)
 		{
-			*(pSelf->TuningList()+List) = TuningParams;
+			pSelf->TuningList()[List] = TuningParams;
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "Tunezone %d resetted", List);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -1621,9 +1623,9 @@ void CGameContext::ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUse
 	if (pResult->NumArguments())
 	{
 		int List = pResult->GetInteger(0);
-		if (List >= 0 && List <= 256)
+		if (List >= 0 && List < 256)
 		{
-			str_format(pSelf->m_ZoneEnterMsg [List], sizeof(pSelf->m_ZoneEnterMsg [List]), pResult->GetString(1));
+			str_format(pSelf->m_ZoneEnterMsg[List], sizeof(pSelf->m_ZoneEnterMsg[List]), pResult->GetString(1));
 		}
 	}
 }
@@ -1634,9 +1636,9 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 	if (pResult->NumArguments())
 	{
 		int List = pResult->GetInteger(0);
-		if (List >= 0 && List <= 256)
+		if (List >= 0 && List < 256)
 		{
-			str_format(pSelf->m_ZoneLeaveMsg [List], sizeof(pSelf->m_ZoneLeaveMsg [List]), pResult->GetString(1));
+			str_format(pSelf->m_ZoneLeaveMsg[List], sizeof(pSelf->m_ZoneLeaveMsg[List]), pResult->GetString(1));
 		}
 	}
 }
