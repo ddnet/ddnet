@@ -406,13 +406,13 @@ void CLayerTiles::BrushFlipY()
 
 void CLayerTiles::BrushRotate(float Amount)
 {
-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0�, 1=90�, 2=180�, 3=270�
+	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
 	if(Rotation < 0)
 		Rotation +=4;
 
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90� rotation
+		// 90° rotation
 		CTile *pTempData = new CTile[m_Width*m_Height];
 		mem_copy(pTempData, m_pTiles, m_Width*m_Height*sizeof(CTile));
 		CTile *pDst = m_pTiles;
@@ -885,13 +885,13 @@ void CLayerTele::BrushFlipY()
 
 void CLayerTele::BrushRotate(float Amount)
 {
-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0�, 1=90�, 2=180�, 3=270�
+	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
 	if(Rotation < 0)
 		Rotation +=4;
 
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90� rotation
+		// 90° rotation
 		CTeleTile *pTempData1 = new CTeleTile[m_Width*m_Height];
 		CTile *pTempData2 = new CTile[m_Width*m_Height];
 		mem_copy(pTempData1, m_pTeleTile, m_Width*m_Height*sizeof(CTeleTile));
@@ -1135,13 +1135,13 @@ void CLayerSpeedup::BrushFlipY()
 
 void CLayerSpeedup::BrushRotate(float Amount)
 {
-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0�, 1=90�, 2=180�, 3=270�
+	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
 	if(Rotation < 0)
 		Rotation +=4;
 
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90� rotation
+		// 90° rotation
 		CSpeedupTile *pTempData1 = new CSpeedupTile[m_Width*m_Height];
 		CTile *pTempData2 = new CTile[m_Width*m_Height];
 		mem_copy(pTempData1, m_pSpeedupTile, m_Width*m_Height*sizeof(CSpeedupTile));
@@ -1665,13 +1665,13 @@ void CLayerTune::BrushFlipY()
 
 void CLayerTune::BrushRotate(float Amount)
 {
-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0�, 1=90�, 2=180�, 3=270�
+	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
 	if(Rotation < 0)
 		Rotation +=4;
 
 	if(Rotation == 1 || Rotation == 3)
 	{
-		// 90� rotation
+		// 90° rotation
 		CTuneTile *pTempData1 = new CTuneTile[m_Width*m_Height];
 		CTile *pTempData2 = new CTile[m_Width*m_Height];
 		mem_copy(pTempData1, m_pTuneTile, m_Width*m_Height*sizeof(CTuneTile));
