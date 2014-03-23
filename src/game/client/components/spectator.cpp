@@ -242,6 +242,9 @@ void CSpectator::OnRender()
 	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-265.0f, BigFontSize, Localize("Free-View"), -1);
 
 	float x = -(ObjWidth - 30.0f), y = StartY;
+
+	int OldDDTeam = -1;
+
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(!m_pClient->m_Snap.m_paInfoByDDTeam[i] || m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_Team == TEAM_SPECTATORS)
@@ -254,6 +257,56 @@ void CSpectator::OnRender()
 			x += 290.0f;
 			y = StartY;
 		}
+
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeam[i];
+		int DDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID);
+		int NextDDTeam = 0;
+
+		for(int j = i + 1; j < MAX_CLIENTS; j++)
+		{
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+
+			if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
+				continue;
+
+			NextDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+			break;
+		}
+
+		if (OldDDTeam == -1)
+		{
+			for (int j = i - 1; j >= 0; j--)
+			{
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeam[j];
+
+				if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
+					continue;
+
+				OldDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+				break;
+			}
+		}
+
+		if (DDTeam != TEAM_FLOCK)
+		{
+			Graphics()->TextureSet(-1);
+			Graphics()->QuadsBegin();
+			vec3 rgb = HslToRgb(vec3(DDTeam / 64.0f, 1.0f, 0.5f));
+			Graphics()->SetColor(rgb.r, rgb.g, rgb.b, 0.5f);
+
+			int Corners = 0;
+
+			if (OldDDTeam != DDTeam)
+				Corners |= CUI::CORNER_TL | CUI::CORNER_TR;
+			if (NextDDTeam != DDTeam)
+				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
+
+			RenderTools()->DrawRoundRectExt(Width/2.0f+x-10.0f, Height/2.0f+y+BoxMove, 270.0f, LineHeight, RoundRadius, Corners);
+
+			Graphics()->QuadsEnd();
+		}
+
+		OldDDTeam = DDTeam;
 
 		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID)
 		{
