@@ -318,7 +318,7 @@ void CSpectator::OnRender()
 		}
 
 		Selected = false;
-		if(m_SelectorMouse.x >= x-10.0f && m_SelectorMouse.x <= x+260.0f &&
+		if(m_SelectorMouse.x >= x-10.0f && m_SelectorMouse.x < x+260.0f &&
 			m_SelectorMouse.y >= y-(LineHeight/6.0f) && m_SelectorMouse.y <= y+(LineHeight*5.0f/6.0f))
 		{
 			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
