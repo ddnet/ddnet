@@ -468,7 +468,7 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	while(pCharacter->m_Tick < Tick)
 	{
 		pCharacter->m_Tick++;
-		TempCore.Tick(false);
+		TempCore.Tick(false, true);
 		TempCore.Move();
 		TempCore.Quantize();
 	}
@@ -1108,10 +1108,10 @@ void CGameClient::OnPredict()
 				int *pInput = Client()->GetInput(Tick);
 				if(pInput)
 					World.m_apCharacters[c]->m_Input = *((CNetObj_PlayerInput*)pInput);
-				World.m_apCharacters[c]->Tick(true);
+				World.m_apCharacters[c]->Tick(true, true);
 			}
 			else
-				World.m_apCharacters[c]->Tick(false);
+				World.m_apCharacters[c]->Tick(false, true);
 
 		}
 

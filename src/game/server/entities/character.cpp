@@ -679,7 +679,7 @@ void CCharacter::Tick()
 	DDRaceTick();
 	
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true);
+	m_Core.Tick(true, false);
 
 	/*// handle death-tiles and leaving gamelayer
 	if(GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
@@ -710,7 +710,7 @@ void CCharacter::TickDefered()
 		CWorldCore TempWorld;
 		m_ReckoningCore.Init(&TempWorld, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
 		m_ReckoningCore.m_Id = m_pPlayer->GetCID();
-		m_ReckoningCore.Tick(false);
+		m_ReckoningCore.Tick(false, false);
 		m_ReckoningCore.Move();
 		m_ReckoningCore.Quantize();
 	}
