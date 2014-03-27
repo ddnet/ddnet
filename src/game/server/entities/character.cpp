@@ -91,6 +91,9 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 
 	DDRaceInit();
+	
+	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
+	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 	return true;
 }
@@ -821,8 +824,6 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
-	m_NeededFaketuning = 0; // reset fake tunings on death and send the client
-	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 	// we got to wait 0.5 secs before respawning
 	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
