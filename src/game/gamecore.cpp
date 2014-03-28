@@ -473,7 +473,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		}
 		
 		int Index = MapIndex;
-		if(IsClient && m_pCollision->IsSpeedup(Index))
+		if(g_Config.m_ClPredictDDRace && IsClient && m_pCollision->IsSpeedup(Index))
 		{
 			vec2 Direction, MaxVel, TempVel = m_Vel;
 			int Force, MaxSpeed = 0;
@@ -545,7 +545,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			}
 		}
 
-		if(IsClient)
+		if(g_Config.m_ClPredictDDRace && IsClient)
 		{
 			if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Vel.x > 0)
 			{
