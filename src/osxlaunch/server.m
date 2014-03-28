@@ -83,7 +83,7 @@ void runServer()
 		backing: NSBackingStoreBuffered
 		defer: NO];
 
-	[window setTitle: @"DDRace Server"];
+	[window setTitle: @"DDNet Server"];
 
 	view = [[[ServerView alloc] initWithFrame: graphicsRect] autorelease];
 	[view setEditable: NO];
@@ -94,7 +94,7 @@ void runServer()
 	[window makeKeyAndOrderFront: nil];
 
 	[view listenTo: task];
-	[task setLaunchPath: [mainBundle pathForAuxiliaryExecutable: @"DDRace-Server"]];
+	[task setLaunchPath: [mainBundle pathForAuxiliaryExecutable: @"DDNet-Server"]];
 	[task setArguments: arguments];
 	[task launch];
 	[NSApp run];

@@ -7,7 +7,7 @@ if len(sys.argv) != 3:
 	print(sys.argv[0], "VERSION PLATFORM")
 	sys.exit(-1)
 
-name = "DDRace"
+name = "DDNet"
 version = sys.argv[1]
 platform = sys.argv[2]
 exe_ext = ""
@@ -75,13 +75,13 @@ if include_data and not use_bundle:
 		shutil.copy("other/config_directory.bat", package_dir)
 		shutil.copy("SDL.dll", package_dir)
 		shutil.copy("freetype.dll", package_dir)
-		shutil.copy("libmysql.dll", package_dir)
-		shutil.copy("mysqlcppconn.dll", package_dir)
+		#shutil.copy("libmysql.dll", package_dir)
+		#shutil.copy("mysqlcppconn.dll", package_dir)
 
 if include_exe and not use_bundle:
 	shutil.copy(name+exe_ext, package_dir)
 	shutil.copy(name+"-Server"+exe_ext, package_dir)
-	shutil.copy(name+"-Server_sql"+exe_ext, package_dir)
+	#shutil.copy(name+"-Server_sql"+exe_ext, package_dir)
 	
 if include_src:
 	for p in ["src", "scripts", "datasrc", "other", "objs"]:
@@ -103,12 +103,12 @@ if use_bundle:
 			os.system("lipo -create -output "+bin+" "+" ".join(to_lipo))
 
 	# create Teeworlds appfolder
-	clientbundle_content_dir = os.path.join(package_dir, "DDRace.app/Contents")
+	clientbundle_content_dir = os.path.join(package_dir, "DDNet.app/Contents")
 	clientbundle_bin_dir = os.path.join(clientbundle_content_dir, "MacOS")
 	clientbundle_resource_dir = os.path.join(clientbundle_content_dir, "Resources")
 	clientbundle_framework_dir = os.path.join(clientbundle_content_dir, "Frameworks")
 	binary_path = clientbundle_bin_dir + "/" + name+exe_ext
-	os.mkdir(os.path.join(package_dir, "DDRace.app"))
+	os.mkdir(os.path.join(package_dir, "DDNet.app"))
 	os.mkdir(clientbundle_content_dir)
 	os.mkdir(clientbundle_bin_dir)
 	os.mkdir(clientbundle_resource_dir)
@@ -132,7 +132,7 @@ if use_bundle:
         <key>CFBundleDevelopmentRegion</key>
         <string>English</string>
         <key>CFBundleExecutable</key>
-        <string>DDRace</string>
+        <string>DDNet</string>
         <key>CFBundleIconFile</key>
         <string>DDNet</string>
         <key>CFBundleInfoDictionaryVersion</key>
@@ -149,10 +149,10 @@ if use_bundle:
 	file(os.path.join(clientbundle_content_dir, "PkgInfo"), "w").write("APPL????")
 
 	# create Teeworlds Server appfolder
-	serverbundle_content_dir = os.path.join(package_dir, "DDRace-Server.app/Contents")
+	serverbundle_content_dir = os.path.join(package_dir, "DDNet-Server.app/Contents")
 	serverbundle_bin_dir = os.path.join(serverbundle_content_dir, "MacOS")
 	serverbundle_resource_dir = os.path.join(serverbundle_content_dir, "Resources")
-	os.mkdir(os.path.join(package_dir, "DDRace-Server.app"))
+	os.mkdir(os.path.join(package_dir, "DDNet-Server.app"))
 	os.mkdir(serverbundle_content_dir)
 	os.mkdir(serverbundle_bin_dir)
 	os.mkdir(serverbundle_resource_dir)
@@ -160,7 +160,7 @@ if use_bundle:
 	os.mkdir(os.path.join(serverbundle_resource_dir, "data/maps"))
 	os.mkdir(os.path.join(serverbundle_resource_dir, "data/mapres"))
 	copydir("data/maps", serverbundle_resource_dir)
-	shutil.copy("other/icons/DDRace-Server.icns", serverbundle_resource_dir)
+	shutil.copy("other/icons/DDNet-Server.icns", serverbundle_resource_dir)
 	shutil.copy(name+"-Server"+exe_ext, serverbundle_bin_dir)
 	shutil.copy("serverlaunch"+exe_ext, serverbundle_bin_dir + "/"+name+"_server")
 	file(os.path.join(serverbundle_content_dir, "Info.plist"), "w").write("""
@@ -171,9 +171,9 @@ if use_bundle:
         <key>CFBundleDevelopmentRegion</key>
         <string>English</string>
         <key>CFBundleExecutable</key>
-        <string>DDRace_server</string>
+        <string>DDNet_server</string>
         <key>CFBundleIconFile</key>
-        <string>DDRace-Server</string>
+        <string>DDNet-Server</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundlePackageType</key>
@@ -205,7 +205,7 @@ if use_gz:
 if use_dmg:
 	print("making disk image")
 	os.system("rm -f %s.dmg %s_temp.dmg" % (package, package))
-	os.system("hdiutil create -srcfolder %s -volname DDRace -quiet %s_temp" % (package_dir, package))
+	os.system("hdiutil create -srcfolder %s -volname DDNet -quiet %s_temp" % (package_dir, package))
 	os.system("hdiutil convert %s_temp.dmg -format UDBZ -o %s.dmg -quiet" % (package, package))
 	os.system("rm -f %s_temp.dmg" % package)
 	
