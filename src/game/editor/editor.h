@@ -738,6 +738,9 @@ public:
 	int m_FilesSelectedIndex;
 	char m_FileDialogNewFolderName[64];
 	char m_FileDialogErrString[64];
+	int m_FilePreviewImage;
+	CImageInfo m_FilePreviewImageInfo;
+
 
 	struct CFilelistItem
 	{
