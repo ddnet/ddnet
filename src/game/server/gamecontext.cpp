@@ -780,9 +780,11 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 	m_VoteUpdate = true;
 
+	// send active vote
+	if(m_VoteCloseTime)
+		SendVoteSet(ClientID);
+
 	m_apPlayers[ClientID]->m_Authed = ((CServer*)Server())->m_aClients[ClientID].m_Authed;
-
-
 }
 
 void CGameContext::OnClientConnected(int ClientID)
@@ -803,10 +805,6 @@ void CGameContext::OnClientConnected(int ClientID)
 			return;
 	}
 #endif
-
-	// send active vote
-	if(m_VoteCloseTime)
-		SendVoteSet(ClientID);
 
 	// send motd
 	CNetMsg_Sv_Motd Msg;
