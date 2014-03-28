@@ -332,9 +332,6 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 	int EndY = (int)(ScreenY1/Scale)+1;
 	int EndX = (int)(ScreenX1/Scale)+1;
 	
-	if(EndX - StartX > g_Config.m_GfxScreenWidth / g_Config.m_GfxTextOverlay || EndY - StartY > g_Config.m_GfxScreenHeight / g_Config.m_GfxTextOverlay)
-		return; // its useless to render text at this distance
-
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
 		{
@@ -375,9 +372,6 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 	int EndY = (int)(ScreenY1/Scale)+1;
 	int EndX = (int)(ScreenX1/Scale)+1;
 	
-	if(EndX - StartX > g_Config.m_GfxScreenWidth / g_Config.m_GfxTextOverlay || EndY - StartY > g_Config.m_GfxScreenHeight / g_Config.m_GfxTextOverlay)
-		return; // its useless to render text at this distance
-
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
 		{
@@ -434,9 +428,6 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 	int EndY = (int)(ScreenY1/Scale)+1;
 	int EndX = (int)(ScreenX1/Scale)+1;
 	
-	if(EndX - StartX > g_Config.m_GfxScreenWidth / g_Config.m_GfxTextOverlay || EndY - StartY > g_Config.m_GfxScreenHeight / g_Config.m_GfxTextOverlay)
-		return; // its useless to render text at this distance
-
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
 		{
@@ -485,7 +476,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	int EndY = (int)(ScreenY1/Scale)+1;
 	int EndX = (int)(ScreenX1/Scale)+1;
 	
-	if(EndX - StartX > g_Config.m_GfxScreenWidth / g_Config.m_GfxTextOverlay || EndY - StartY > g_Config.m_GfxScreenHeight / g_Config.m_GfxTextOverlay)
+	if(EndX - StartX > g_Config.m_GfxScreenWidth / g_Config.m_GfxTuneOverlay || EndY - StartY > g_Config.m_GfxScreenHeight / g_Config.m_GfxTuneOverlay)
 		return; // its useless to render text at this distance
 
 	for(int y = StartY; y < EndY; y++)
