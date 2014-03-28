@@ -99,6 +99,9 @@ if use_bundle:
 			fname = bin+'_'+p
 			if os.path.isfile(fname):
 				to_lipo.append(fname)
+				if bin == name:
+					os.system("install_name_tool -change /opt/X11/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib " + fname)
+					os.system("install_name_tool -change /Library/Frameworks/SDL.framework/SDL @executable_path/../Frameworks/SDL.framework/SDL  " + fname)
 		if to_lipo:
 			os.system("lipo -create -output "+bin+" "+" ".join(to_lipo))
 
@@ -120,6 +123,7 @@ if use_bundle:
 	#shutil.copy("other/icons/Teeworlds.icns", clientbundle_resource_dir)
 	shutil.copy(name+exe_ext, clientbundle_bin_dir)
 	os.system("cp -R /Library/Frameworks/SDL.framework " + clientbundle_framework_dir)
+	os.system("cp /opt/X11/lib/libfreetype.6.dylib " + clientbundle_framework_dir)
 	file(os.path.join(clientbundle_content_dir, "Info.plist"), "w").write("""
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
