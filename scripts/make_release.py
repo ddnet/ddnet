@@ -99,9 +99,6 @@ if use_bundle:
 			fname = bin+'_'+p
 			if os.path.isfile(fname):
 				to_lipo.append(fname)
-				if bin == name:
-					os.system("install_name_tool -change /opt/X11/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib " + fname)
-					os.system("install_name_tool -change /Library/Frameworks/SDL.framework/SDL @executable_path/../Frameworks/SDL.framework/SDL  " + fname)
 		if to_lipo:
 			os.system("lipo -create -output "+bin+" "+" ".join(to_lipo))
 
@@ -110,6 +107,7 @@ if use_bundle:
 	clientbundle_bin_dir = os.path.join(clientbundle_content_dir, "MacOS")
 	clientbundle_resource_dir = os.path.join(clientbundle_content_dir, "Resources")
 	clientbundle_framework_dir = os.path.join(clientbundle_content_dir, "Frameworks")
+	binary_path = clientbundle_bin_dir + "/" + name+exe_ext
 	os.mkdir(os.path.join(package_dir, "DDRace.app"))
 	os.mkdir(clientbundle_content_dir)
 	os.mkdir(clientbundle_bin_dir)
@@ -122,6 +120,8 @@ if use_bundle:
 	shutil.copy("other/icons/DDNet.icns", clientbundle_resource_dir)
 	#shutil.copy("other/icons/Teeworlds.icns", clientbundle_resource_dir)
 	shutil.copy(name+exe_ext, clientbundle_bin_dir)
+	os.system("install_name_tool -change /opt/X11/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib " + binary_path)
+	os.system("install_name_tool -change /Library/Frameworks/SDL.framework/SDL @executable_path/../Frameworks/SDL.framework/SDL  " + binary_path)
 	os.system("cp -R /Library/Frameworks/SDL.framework " + clientbundle_framework_dir)
 	os.system("cp /opt/X11/lib/libfreetype.6.dylib " + clientbundle_framework_dir)
 	file(os.path.join(clientbundle_content_dir, "Info.plist"), "w").write("""
