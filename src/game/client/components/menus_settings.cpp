@@ -1168,6 +1168,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClUnpredictedShadow ^= 1;
 	}
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowNinja, Localize("Show ninja skin when players have ninja or are in freeze"), g_Config.m_ClShowNinja, &Button))
+	{
+		g_Config.m_ClShowNinja ^= 1;
+	}
+
 	CUIRect aRects[2];
 	CUIRect Label;
 	MainView.HSplitTop(5.0f, 0, &MainView);
