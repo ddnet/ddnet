@@ -465,6 +465,26 @@ void CGameContext::CheckPureTuning()
 
 void CGameContext::SendTuningParams(int ClientID, int Zone)
 {
+	if (ClientID == -1)
+	{
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				if (m_apPlayers[i])
+				{
+					if(m_apPlayers[i]->GetCharacter())
+					{
+						if (m_apPlayers[i]->GetCharacter()->m_TuneZone == Zone)
+							SendTuningParams(i, Zone);
+					}
+					else if (m_apPlayers[i]->m_TuneZone == Zone)
+					{
+						SendTuningParams(i, Zone);
+					}
+				}
+			}
+			return;
+	}
+	
 	CheckPureTuning();
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
@@ -1569,7 +1589,7 @@ void CGameContext::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%s in zone %d changed to %.2f", pParamName, List, NewValue);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
-			//pSelf->SendTuningParams(-1);
+			pSelf->SendTuningParams(-1, List);
 		}
 		else
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
@@ -1606,16 +1626,18 @@ void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "Tunezone %d resetted", List);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->SendTuningParams(-1, List);
 		}
 	}
 	else
 	{
-		for (int i = 0; i < 256; i++)	
+		for (int i = 0; i < 256; i++)
+		{
 			*(pSelf->TuningList()+i) = TuningParams;
+			pSelf->SendTuningParams(-1, i);
+		}
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "All Tunezones resetted");
 	}
-	
-	//pSelf->SendTuningParams(-1);
 }
 
 void CGameContext::ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUserData)
