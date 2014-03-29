@@ -399,7 +399,6 @@ public:
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType);
 
 	void ScreenshotDirect();
-	static void ScreenshotDirectThread(void *pData);
 
 	virtual void TextureSet(int TextureID);
 

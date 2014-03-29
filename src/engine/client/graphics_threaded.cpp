@@ -452,27 +452,17 @@ void CGraphics_Threaded::KickCommandBuffer()
 
 void CGraphics_Threaded::ScreenshotDirect()
 {
-	void *ScreenshotThread = thread_create(ScreenshotDirectThread, this);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)ScreenshotThread);
-#endif
-}
-
-void CGraphics_Threaded::ScreenshotDirectThread(void *pData)
-{
-	CGraphics_Threaded *pGraphics = (CGraphics_Threaded *) pData;
-
 	// add swap command
 	CImageInfo Image;
 	mem_zero(&Image, sizeof(Image));
 
 	CCommandBuffer::SCommand_Screenshot Cmd;
 	Cmd.m_pImage = &Image;
-	pGraphics->m_pCommandBuffer->AddCommand(Cmd);
+	m_pCommandBuffer->AddCommand(Cmd);
 
 	// kick the buffer and wait for the result
-	pGraphics->KickCommandBuffer();
-	thread_sleep(100);
+	KickCommandBuffer();
+	WaitForIdle();
 
 	if(Image.m_pData)
 	{
@@ -480,14 +470,14 @@ void CGraphics_Threaded::ScreenshotDirectThread(void *pData)
 		char aWholePath[1024];
 		png_t Png; // ignore_convention
 
-		IOHANDLE File = pGraphics->m_pStorage->OpenFile(pGraphics->m_aScreenshotName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
+		IOHANDLE File = m_pStorage->OpenFile(m_aScreenshotName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
 		if(File)
 			io_close(File);
 
 		// save png
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
-		pGraphics->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		png_open_file_write(&Png, aWholePath); // ignore_convention
 		png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR, (unsigned char *)Image.m_pData); // ignore_convention
 		png_close_file(&Png); // ignore_convention
