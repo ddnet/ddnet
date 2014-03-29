@@ -169,7 +169,7 @@ public:
 
 	//
 	void CheckPureTuning();
-	void SendTuningParams(int ClientID, int Zone = -1);
+	void SendTuningParams(int ClientID, int Zone = 0);
 
 	//
 	//void SwapTeams();
