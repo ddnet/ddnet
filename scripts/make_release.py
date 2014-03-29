@@ -59,7 +59,7 @@ shutil.rmtree(package_dir, True)
 os.mkdir(package_dir)
 
 print("adding files")
-shutil.copy("readme.txt", package_dir)
+#shutil.copy("readme.txt", package_dir)
 shutil.copy("license.txt", package_dir)
 shutil.copy("storage.cfg", package_dir)
 shutil.copy("example.cfg", package_dir)
