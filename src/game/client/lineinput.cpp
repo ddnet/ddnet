@@ -49,7 +49,7 @@ bool CLineInput::Manipulate(IInput::CEvent e, char *pStr, int StrMaxSize, int St
 		char Tmp[8];
 		int CharSize = str_utf8_encode(Tmp, Code);
 
-		if (Len < StrMaxChars - CharSize && CursorPos < StrMaxSize - CharSize - Len && NumChars < StrMaxChars)
+		if (Len < StrMaxSize - CharSize && CursorPos < StrMaxSize - CharSize && NumChars < StrMaxChars)
 		{
 			mem_move(pStr + CursorPos + CharSize, pStr + CursorPos, Len-CursorPos+1); // +1 == null term
 			for(int i = 0; i < CharSize; i++)

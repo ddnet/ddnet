@@ -438,7 +438,7 @@ void CGameConsole::OnRender()
 		x = Cursor.m_X;
 
 		//hide rcon password
-		char aInputString[256];
+		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(), sizeof(aInputString));
 		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed())
 		{
