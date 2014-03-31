@@ -32,7 +32,6 @@ CProjectile::CProjectile
 	m_LifeSpan = Span;
 	m_Owner = Owner;
 	m_Force = Force;
-	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
 	m_Weapon = Weapon;
 	m_StartTick = Server()->Tick();
@@ -41,7 +40,7 @@ CProjectile::CProjectile
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
-	
+
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
 	GameWorld()->InsertEntity(this);
@@ -177,7 +176,10 @@ void CProjectile::Tick()
 		}
 		else if (m_Weapon == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1)? TeamMask : -1LL);
+			if (g_Config.m_SvPistolDamage && pTargetChr)
+				pTargetChr->TakeDamageOrig(m_Direction * max(0.001f, m_Force), 1, m_Owner, m_Weapon);
+			else
+				GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->m_World.DestroyEntity(this);
 		}
 		else
