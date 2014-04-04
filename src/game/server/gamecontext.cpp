@@ -2201,6 +2201,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvOldLaser = 0;
 		g_Config.m_SvOldTeleportHook = 0;
 		g_Config.m_SvOldTeleportWeapons = 0;
+		g_Config.m_SvTeleportHoldHook = 0;
 		g_Config.m_SvJetpack = 400;
 	}
 
