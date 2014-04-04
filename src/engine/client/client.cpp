@@ -1047,17 +1047,17 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			// sort players
 			qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreComp);
 
+			m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
+
 			if(net_addr_comp(&m_ServerAddress, &pPacket->m_Address) == 0)
 			{
-				if(m_CurrentServerInfo.m_MaxClients > VANILLA_MAX_CLIENTS)
-					return;
-
-				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
-				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
-				m_CurrentServerInfoRequestTime = -1;
+				if(m_CurrentServerInfo.m_MaxClients <= VANILLA_MAX_CLIENTS)
+				{
+					mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
+					m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
+					m_CurrentServerInfoRequestTime = -1;
+				}
 			}
-			else
-				m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
 
 			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64"))
 			{
@@ -1119,15 +1119,14 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			if (Offset + 24 >= Info.m_NumClients)
 				qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreComp);
 
+			m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
+
 			if(net_addr_comp(&m_ServerAddress, &pPacket->m_Address) == 0)
 			{
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
 			}
-			else
-				//m_ServerBrowser.SetInfo(pEntry, Info);
-				m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
 		}
 	}
 }
