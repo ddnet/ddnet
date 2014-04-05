@@ -145,7 +145,7 @@ void CProjectile::Tick()
 	{
 			TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
-	else
+	else if (m_Owner >= 0)
 	{
 		GameServer()->m_World.DestroyEntity(this);
 	}
