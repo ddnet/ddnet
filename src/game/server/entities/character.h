@@ -23,6 +23,8 @@ enum
 	FAKETUNE_FREEZE = 1,
 	FAKETUNE_SOLO = 2,
 	FAKETUNE_NOJUMP = 4,
+	FAKETUNE_NOCOLL = 8,
+	FAKETUNE_NOHOOK = 16,
 };
 
 class CCharacter : public CEntity

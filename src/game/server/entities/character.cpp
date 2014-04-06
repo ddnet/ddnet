@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <iostream>
 #include <new>
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
@@ -1412,6 +1413,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can collide with others");
 		m_Core.m_Collision = true;
+		m_NeededFaketuning &= ~FAKETUNE_NOCOLL;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_SUPER_START) || (m_TileFIndex == TILE_SUPER_START)) && !m_SuperJump)
 	{
@@ -1419,7 +1422,7 @@ void CCharacter::HandleTiles(int Index)
 		m_SuperJump = true;
 		if (m_Core.m_Jumps == 0)
 		{
-			m_NeededFaketuning ^= FAKETUNE_NOJUMP;
+			m_NeededFaketuning &= ~FAKETUNE_NOJUMP;
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 		}
 	}
@@ -1432,6 +1435,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can hook others");
 		m_Core.m_Hook = true;
+		m_NeededFaketuning &= ~FAKETUNE_NOHOOK;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_HIT_END) || (m_TileFIndex == TILE_HIT_END)) && m_Hit != (DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN))
 	{
@@ -1442,6 +1447,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't collide with others");
 		m_Core.m_Collision = false;
+		m_NeededFaketuning |= FAKETUNE_NOCOLL;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_SUPER_END) || (m_TileFIndex == TILE_SUPER_END)) && m_SuperJump)
 	{
@@ -1462,6 +1469,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hook others");
 		m_Core.m_Hook = false;
+		m_NeededFaketuning |= FAKETUNE_NOHOOK;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	if(((m_TileIndex == TILE_SOLO_START) || (m_TileFIndex == TILE_SOLO_START)) && !Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{
@@ -1474,7 +1483,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now out of the solo part.");
 		Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), false);
-		m_NeededFaketuning ^= FAKETUNE_SOLO;
+		m_NeededFaketuning &= ~FAKETUNE_SOLO;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
@@ -1549,7 +1558,7 @@ void CCharacter::HandleTiles(int Index)
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_START && m_Hit&DISABLE_HIT_HAMMER && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can hammer hit others");
-		m_Hit ^= DISABLE_HIT_HAMMER;
+		m_Hit &= ~DISABLE_HIT_HAMMER;
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_END && !(m_Hit&DISABLE_HIT_HAMMER) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
@@ -1559,7 +1568,7 @@ void CCharacter::HandleTiles(int Index)
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_START && m_Hit&DISABLE_HIT_SHOTGUN && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can shoot others with shotgun");
-		m_Hit ^= DISABLE_HIT_SHOTGUN;
+		m_Hit &= ~DISABLE_HIT_SHOTGUN;
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_END && !(m_Hit&DISABLE_HIT_SHOTGUN) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
@@ -1569,7 +1578,7 @@ void CCharacter::HandleTiles(int Index)
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_START && m_Hit&DISABLE_HIT_GRENADE && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can shoot others with grenade");
-		m_Hit ^= DISABLE_HIT_GRENADE;
+		m_Hit &= ~DISABLE_HIT_GRENADE;
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_END && !(m_Hit&DISABLE_HIT_GRENADE) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
@@ -1579,7 +1588,7 @@ void CCharacter::HandleTiles(int Index)
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_START && m_Hit&DISABLE_HIT_RIFLE && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_RIFLE)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You can shoot others with rifle");
-		m_Hit ^= DISABLE_HIT_RIFLE;
+		m_Hit &= ~DISABLE_HIT_RIFLE;
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_END && !(m_Hit&DISABLE_HIT_RIFLE) && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_RIFLE)
 	{
@@ -1595,13 +1604,19 @@ void CCharacter::HandleTiles(int Index)
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(),aBuf);
-			m_Core.m_Jumps = newJumps;
 
 			if (newJumps == 0 && !m_SuperJump)
+			{
 				m_NeededFaketuning |= FAKETUNE_NOJUMP;
-			else
-				m_NeededFaketuning ^= FAKETUNE_NOJUMP;
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+			}
+			else if (m_Core.m_Jumps == 0)
+			{
+				m_NeededFaketuning &= ~FAKETUNE_NOJUMP;
+				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+			}
+
+			m_Core.m_Jumps = newJumps;
 		}
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_PENALTY && !m_LastPenalty)
