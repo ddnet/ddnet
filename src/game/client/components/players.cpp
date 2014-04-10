@@ -545,7 +545,7 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if (Player.m_PlayerFlags&PLAYERFLAG_AIM)
+		if (Player.m_PlayerFlags&PLAYERFLAG_AIM && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))
 		{
 			vec2 ExDirection = Direction;
 
