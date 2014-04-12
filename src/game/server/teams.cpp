@@ -566,21 +566,23 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 		SetForceCharacterTeam(ClientID, 0);
 }
 
-void CGameTeams::OnCharacterDeath(int ClientID)
+void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 {
 	m_Core.SetSolo(ClientID, false);
 
-	if (!m_TeamLocked[m_Core.Team(ClientID)])
+	int Team = m_Core.Team(ClientID);
+	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
+
+	if (!Locked)
 		SetForceCharacterTeam(ClientID, 0);
 	else
 	{
-		int Team = m_Core.Team(ClientID);
 		SetForceCharacterTeam(ClientID, Team);
 
-		if (TeamLocked(Team) && GetTeamState(Team) != TEAMSTATE_OPEN)
+		if (GetTeamState(Team) != TEAMSTATE_OPEN)
 			for (int i = 0; i < MAX_CLIENTS; i++)
 				if(m_Core.Team(i) == Team && i != ClientID)
-					GameServer()->m_apPlayers[i]->KillCharacter();
+					GameServer()->m_apPlayers[i]->KillCharacter(-2);
 
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 	}

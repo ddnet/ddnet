@@ -46,7 +46,7 @@ public:
 	void OnCharacterStart(int ClientID);
 	void OnCharacterFinish(int ClientID);
 	void OnCharacterSpawn(int ClientID);
-	void OnCharacterDeath(int ClientID);
+	void OnCharacterDeath(int ClientID, int Weapon);
 
 	bool SetCharacterTeam(int ClientID, int Team);
 
