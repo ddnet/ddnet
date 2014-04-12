@@ -561,11 +561,13 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 		CTuningParams NewTuning;
 		int *pParams = (int *)&NewTuning;
 		for(unsigned i = 0; i < sizeof(CTuningParams)/sizeof(int); i++)
+		{
 			pParams[i] = pUnpacker->GetInt();
 
-		// check for unpacking errors
-		if(pUnpacker->Error())
-			return;
+			// check for unpacking errors
+			if(pUnpacker->Error())
+				break;
+		}
 
 		m_ServerMode = SERVERMODE_PURE;
 

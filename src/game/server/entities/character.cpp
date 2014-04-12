@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <iostream>
 #include <new>
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
@@ -393,7 +392,7 @@ void CCharacter::FireWeapon()
 		{
 			if (m_Jetpack)
 			{
-				TakeDamage(Direction * -1.0f * (g_Config.m_SvJetpack / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
+				TakeDamage(Direction * -1.0f * (GameServer()->Tuning()->m_JetpackStrength / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 			}
 			if (!m_Jetpack || !m_pPlayer->m_NinjaJetpack)
 			{

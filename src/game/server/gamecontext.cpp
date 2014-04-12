@@ -494,8 +494,11 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	else
 		pParams = (int *)&(m_TuningList[Zone]);
 	
+	unsigned int last = sizeof(m_Tuning)/sizeof(int);
+	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_EXTRATUNES)
+		last = 33;
 	
-	for(unsigned i = 0; i < sizeof(m_Tuning)/sizeof(int); i++)
+	for(unsigned i = 0; i < last; i++)
 		{
 			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter() && m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning()) // need to send faketunings ?
 			{
@@ -2209,7 +2212,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvOldTeleportHook = 0;
 		g_Config.m_SvOldTeleportWeapons = 0;
 		g_Config.m_SvTeleportHoldHook = 0;
-		g_Config.m_SvJetpack = 400;
 	}
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile);
