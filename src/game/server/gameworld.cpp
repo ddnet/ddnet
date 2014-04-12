@@ -181,15 +181,14 @@ void CGameWorld::UpdatePlayerMaps()
 				continue;
 			}
 			// copypasted chunk from character.cpp Snap() follows
-			int SnappingClient = i;
-			CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
+			CCharacter* SnapChar = GameServer()->GetPlayerChar(i);
 			if(SnapChar && !SnapChar->m_Super &&
-				GameServer()->m_apPlayers[SnappingClient]->GetTeam() != -1 &&
-				!ch->CanCollide(SnappingClient) &&
-				(!GameServer()->m_apPlayers[SnappingClient] ||
-					GameServer()->m_apPlayers[SnappingClient]->m_ClientVersion == VERSION_VANILLA ||
-					(GameServer()->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDRACE &&
-					!GameServer()->m_apPlayers[SnappingClient]->m_ShowOthers
+				!GameServer()->m_apPlayers[i]->m_Paused && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
+				!ch->CanCollide(i) &&
+				(!GameServer()->m_apPlayers[i] ||
+					GameServer()->m_apPlayers[i]->m_ClientVersion == VERSION_VANILLA ||
+					(GameServer()->m_apPlayers[i]->m_ClientVersion >= VERSION_DDRACE &&
+					!GameServer()->m_apPlayers[i]->m_ShowOthers
 					)
 				)
 			)
