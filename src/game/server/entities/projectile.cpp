@@ -68,8 +68,8 @@ vec2 CProjectile::GetPos(float Time)
 			}
 			else
 			{
-				Curvature = (GameServer()->TuningList()+m_TuneZone)->m_GrenadeCurvature;
-				Speed = (GameServer()->TuningList()+m_TuneZone)->m_GrenadeSpeed;
+				Curvature = GameServer()->TuningList()[m_TuneZone].m_GrenadeCurvature;
+				Speed = GameServer()->TuningList()[m_TuneZone].m_GrenadeSpeed;
 			}
 				
 			break;
@@ -82,8 +82,8 @@ vec2 CProjectile::GetPos(float Time)
 			}
 			else
 			{
-				Curvature = (GameServer()->TuningList()+m_TuneZone)->m_ShotgunCurvature;
-				Speed = (GameServer()->TuningList()+m_TuneZone)->m_ShotgunSpeed;
+				Curvature = GameServer()->TuningList()[m_TuneZone].m_ShotgunCurvature;
+				Speed = GameServer()->TuningList()[m_TuneZone].m_ShotgunSpeed;
 			}
 			
 			break;
@@ -96,8 +96,8 @@ vec2 CProjectile::GetPos(float Time)
 			}
 			else
 			{
-				Curvature = (GameServer()->TuningList()+m_TuneZone)->m_GunCurvature;
-				Speed = (GameServer()->TuningList()+m_TuneZone)->m_GunSpeed;
+				Curvature = GameServer()->TuningList()[m_TuneZone].m_GunCurvature;
+				Speed = GameServer()->TuningList()[m_TuneZone].m_GunSpeed;
 			}
 			break;
 	}

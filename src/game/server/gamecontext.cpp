@@ -169,7 +169,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			if (Owner == -1 || !m_apPlayers[Owner]->m_TuneZone)
 				Strength = Tuning()->m_ExplosionStrength;
 			else
-				Strength = (TuningList()+m_apPlayers[Owner]->m_TuneZone)->m_ExplosionStrength;
+				Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
 
 			float Dmg = Strength * l;
 			if((int)Dmg)

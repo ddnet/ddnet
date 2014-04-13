@@ -52,7 +52,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		if (!m_TuneZone)
 			Strength = GameServer()->Tuning()->m_ShotgunStrength;
 		else
-			Strength = (GameServer()->TuningList()+m_TuneZone)->m_ShotgunStrength;
+			Strength = GameServer()->TuningList()[m_TuneZone].m_ShotgunStrength;
 
 		if(!g_Config.m_SvOldLaser)
 			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
@@ -129,7 +129,7 @@ void CLaser::DoBounce()
 			if (!m_TuneZone)
 				m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
 			else
-				m_Energy -= distance(m_From, m_Pos) + (GameServer()->TuningList()+m_TuneZone)->m_LaserBounceCost;
+				m_Energy -= distance(m_From, m_Pos) + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
 
 			if (Res&CCollision::COLFLAG_TELE && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 			{
@@ -145,7 +145,7 @@ void CLaser::DoBounce()
 			
 			int BounceNum = GameServer()->Tuning()->m_LaserBounceNum;
 			if (m_TuneZone)
-				BounceNum = (GameServer()->TuningList()+m_TuneZone)->m_LaserBounceNum;
+				BounceNum = GameServer()->TuningList()[m_TuneZone].m_LaserBounceNum;
 			
 			if(m_Bounces > BounceNum)
 				m_Energy = -1;
@@ -174,7 +174,7 @@ void CLaser::Tick()
 {
 	float Delay;
 	if (m_TuneZone)
-		Delay = (GameServer()->TuningList()+m_TuneZone)->m_LaserBounceDelay;
+		Delay = GameServer()->TuningList()[m_TuneZone].m_LaserBounceDelay;
 	else
 		Delay = GameServer()->Tuning()->m_LaserBounceDelay;
 		

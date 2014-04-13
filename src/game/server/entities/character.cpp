@@ -396,7 +396,7 @@ void CCharacter::FireWeapon()
 				if (!m_TuneZone)
 					Strength = GameServer()->Tuning()->m_JetpackStrength;
 				else
-					Strength = (GameServer()->TuningList()+m_TuneZone)->m_JetpackStrength;
+					Strength = GameServer()->TuningList()[m_TuneZone].m_JetpackStrength;
 
 				TakeDamage(Direction * -1.0f * (Strength / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 			}
@@ -406,7 +406,7 @@ void CCharacter::FireWeapon()
 				if (!m_TuneZone)
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime);
 				else
-					Lifetime = (int)(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_GunLifetime);
+					Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GunLifetime);
 				
 				CProjectile *pProj = new CProjectile
 						(
@@ -473,7 +473,7 @@ void CCharacter::FireWeapon()
 			if (!m_TuneZone)
 				LaserReach = GameServer()->Tuning()->m_LaserReach;
 			else
-				LaserReach = (GameServer()->TuningList()+m_TuneZone)->m_LaserReach;
+				LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 			
 			new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 			GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -485,7 +485,7 @@ void CCharacter::FireWeapon()
 			if (!m_TuneZone)
 				Lifetime = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime);
 			else
-				Lifetime = (int)(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_GrenadeLifetime);
+				Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
 			
 			CProjectile *pProj = new CProjectile
 					(
@@ -521,7 +521,7 @@ void CCharacter::FireWeapon()
 			if (!m_TuneZone)
 				LaserReach = GameServer()->Tuning()->m_LaserReach;
 			else
-				LaserReach = (GameServer()->TuningList()+m_TuneZone)->m_LaserReach;
+				LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 			
 			new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_RIFLE);
 			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -1767,32 +1767,25 @@ void CCharacter::HandleTiles(int Index)
 void CCharacter::HandleTuneLayer()
 {
 	
-	m_TuneZoneOld = m_TuneZone; 
+	m_TuneZoneOld = m_TuneZone;
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
-			
-	if(m_TuneZone) 
-		m_Core.m_pWorld->m_Tuning = *(GameServer()->TuningList()+m_TuneZone); // throw tunings from specific zone into gamecore
+
+	if(m_TuneZone)
+		m_Core.m_pWorld->m_Tuning = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
 		m_Core.m_pWorld->m_Tuning = *GameServer()->Tuning();
-			
+
 	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
 	{
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // send specific tunings
-			
-			
 		// send zone leave msg
-	
 		if (GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld])
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld]);
-			
 		// send zone enter msg
 		if (GameServer()->m_ZoneEnterMsg[m_TuneZone])
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), GameServer()->m_ZoneEnterMsg[m_TuneZone]);
-			
-		//dbg_msg("Tunelayer", "zone %d", m_TuneZone);
 	}
-	
 }
 
 void CCharacter::DDRaceTick()
