@@ -25,6 +25,7 @@ enum
 	FAKETUNE_NOJUMP = 4,
 	FAKETUNE_NOCOLL = 8,
 	FAKETUNE_NOHOOK = 16,
+	FAKETUNE_JETPACK = 32,
 };
 
 class CCharacter : public CEntity
@@ -54,6 +55,7 @@ public:
 
 	void HandleWeapons();
 	void HandleNinja();
+	void HandleJetpack();
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);

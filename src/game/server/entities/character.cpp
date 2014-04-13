@@ -91,7 +91,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 
 	DDRaceInit();
-	
+
 	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
@@ -127,6 +127,44 @@ bool CCharacter::IsGrounded()
 	return false;
 }
 
+void CCharacter::HandleJetpack()
+{
+	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
+
+	bool FullAuto = false;
+	if(m_ActiveWeapon == WEAPON_GRENADE || m_ActiveWeapon == WEAPON_SHOTGUN || m_ActiveWeapon == WEAPON_RIFLE)
+		FullAuto = true;
+	if (m_Jetpack && m_ActiveWeapon == WEAPON_GUN)
+		FullAuto = true;
+
+	// check if we gonna fire
+	bool WillFire = false;
+	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+		WillFire = true;
+
+	if(FullAuto && (m_LatestInput.m_Fire&1) && m_aWeapons[m_ActiveWeapon].m_Ammo)
+		WillFire = true;
+
+	if(!WillFire)
+		return;
+
+	// check for ammo
+	if(!m_aWeapons[m_ActiveWeapon].m_Ammo)
+	{
+		return;
+	}
+
+	switch(m_ActiveWeapon)
+	{
+		case WEAPON_GUN:
+		{
+			if (m_Jetpack)
+			{
+				TakeDamage(Direction * -1.0f * (GameServer()->Tuning()->m_JetpackStrength / 100.0f / 6.12f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
+			}
+		}
+	}
+}
 
 void CCharacter::HandleNinja()
 {
@@ -396,16 +434,6 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_GUN:
 		{
-			if (m_Jetpack)
-			{
-				float Strength;
-				if (!m_TuneZone)
-					Strength = GameServer()->Tuning()->m_JetpackStrength;
-				else
-					Strength = GameServer()->TuningList()[m_TuneZone].m_JetpackStrength;
-
-				TakeDamage(Direction * -1.0f * (Strength / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
-			}
 			if (!m_Jetpack || !m_pPlayer->m_NinjaJetpack)
 			{
 				int Lifetime;
@@ -560,6 +588,7 @@ void CCharacter::HandleWeapons()
 {
 	//ninja
 	HandleNinja();
+	HandleJetpack();
 
 	if(m_PainSoundTimer > 0)
 		m_PainSoundTimer--;
@@ -1441,6 +1470,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have a jetpack gun");
 		m_Jetpack = true;
+		m_NeededFaketuning |= FAKETUNE_JETPACK;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPH_START) || (m_TileFIndex == TILE_NPH_START)) && !m_Core.m_Hook)
 	{
@@ -1475,6 +1506,8 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun");
 		m_Jetpack = false;
+		m_NeededFaketuning &= ~FAKETUNE_JETPACK;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPH_END) || (m_TileFIndex == TILE_NPH_END)) && m_Core.m_Hook)
 	{
@@ -1786,11 +1819,13 @@ void CCharacter::HandleTuneLayer()
 	{
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // send specific tunings
 		// send zone leave msg
+
 		if (GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld])
 		{
 			const char* cur = GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld];
 			const char* pos;
-			while ((pos = str_find(cur, "\\n"))) {
+			while ((pos = str_find(cur, "\\n")))
+			{
 				char aBuf[256];
 				str_copy(aBuf, cur, pos - cur + 1);
 				aBuf[pos - cur + 1] = '\0';
@@ -1804,7 +1839,8 @@ void CCharacter::HandleTuneLayer()
 		{
 			const char* cur = GameServer()->m_ZoneEnterMsg[m_TuneZone];
 			const char* pos;
-			while ((pos = str_find(cur, "\\n"))) {
+			while ((pos = str_find(cur, "\\n")))
+			{
 				char aBuf[256];
 				str_copy(aBuf, cur, pos - cur + 1);
 				aBuf[pos - cur + 1] = '\0';

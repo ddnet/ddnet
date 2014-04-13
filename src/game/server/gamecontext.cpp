@@ -506,7 +506,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	
 	for(unsigned i = 0; i < last; i++)
 		{
-			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter() && m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning()) // need to send faketunings ?
+			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
 			{
 				if((i==31) // collision
 				&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
@@ -522,6 +522,11 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 				}
 				else if((i==3) // ground jump impulse
 				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOJUMP)
+				{
+					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+				}
+				else if((i==33) // ground jump impulse
+				&& !(m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK))
 				{
 					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
 				}
@@ -1287,7 +1292,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				if (pPlayer->m_ClientVersion < VERSION_DDRACE)
 					pPlayer->m_ClientVersion = VERSION_DDRACE;
-			} else
+			}
+			else
 				pPlayer->m_ClientVersion = Version;
 
 			char aBuf[128];
@@ -1299,7 +1305,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			//second give him records
 			SendRecord(ClientID);
-
 
 			//third give him others current time for table score
 			if(g_Config.m_SvHideScore) return;
@@ -1316,13 +1321,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 			}
 			//also send its time to others
-			if(Score()->PlayerData(ClientID)->m_CurrentTime > 0) {
+			if(Score()->PlayerData(ClientID)->m_CurrentTime > 0)
+			{
 				//TODO: make function for this fucking steps
 				CNetMsg_Sv_PlayerTime Msg;
 				Msg.m_Time = Score()->PlayerData(ClientID)->m_CurrentTime * 100;
 				Msg.m_ClientID = ClientID;
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 			}
+
+			//and give him correct tunings
+			if (Version >= VERSION_DDNET_EXTRATUNES)
+				SendTuningParams(ClientID);
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
