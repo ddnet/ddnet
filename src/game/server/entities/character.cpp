@@ -1787,10 +1787,32 @@ void CCharacter::HandleTuneLayer()
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // send specific tunings
 		// send zone leave msg
 		if (GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld])
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld]);
+		{
+			const char* cur = GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld];
+			const char* pos;
+			while ((pos = str_find(cur, "\\n"))) {
+				char aBuf[256];
+				str_copy(aBuf, cur, pos - cur + 1);
+				aBuf[pos - cur + 1] = '\0';
+				cur = pos + 2;
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+			}
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
+		}
 		// send zone enter msg
 		if (GameServer()->m_ZoneEnterMsg[m_TuneZone])
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), GameServer()->m_ZoneEnterMsg[m_TuneZone]);
+		{
+			const char* cur = GameServer()->m_ZoneEnterMsg[m_TuneZone];
+			const char* pos;
+			while ((pos = str_find(cur, "\\n"))) {
+				char aBuf[256];
+				str_copy(aBuf, cur, pos - cur + 1);
+				aBuf[pos - cur + 1] = '\0';
+				cur = pos + 2;
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+			}
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
+		}
 	}
 }
 
