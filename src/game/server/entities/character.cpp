@@ -392,7 +392,13 @@ void CCharacter::FireWeapon()
 		{
 			if (m_Jetpack)
 			{
-				TakeDamage(Direction * -1.0f * (GameServer()->Tuning()->m_JetpackStrength / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
+				float Strength;
+				if (!m_TuneZone)
+					Strength = GameServer()->Tuning()->m_JetpackStrength;
+				else
+					Strength = (GameServer()->TuningList()+m_TuneZone)->m_JetpackStrength;
+
+				TakeDamage(Direction * -1.0f * (Strength / 100.0f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 			}
 			if (!m_Jetpack || !m_pPlayer->m_NinjaJetpack)
 			{
@@ -400,7 +406,7 @@ void CCharacter::FireWeapon()
 				if (!m_TuneZone)
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime);
 				else
-					Lifetime = 	(int)(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_GunLifetime);
+					Lifetime = (int)(Server()->TickSpeed()*(GameServer()->TuningList()+m_TuneZone)->m_GunLifetime);
 				
 				CProjectile *pProj = new CProjectile
 						(

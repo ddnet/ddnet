@@ -47,5 +47,7 @@ MACRO_TUNING_PARAM(PlayerCollision, player_collision, 1)
 MACRO_TUNING_PARAM(PlayerHooking, player_hooking, 1)
 
 //ddnet tuning
-MACRO_TUNING_PARAM(JetpackStrength, jetpack_strength, 400)
+MACRO_TUNING_PARAM(JetpackStrength, jetpack_strength, 400.0f)
+MACRO_TUNING_PARAM(ShotgunStrength, shotgun_strength, 10.0f)
+MACRO_TUNING_PARAM(ExplosionStrength, explosion_strength, 6.0f)
 #endif
