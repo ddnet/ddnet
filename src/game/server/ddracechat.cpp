@@ -22,12 +22,10 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 		"DDRaceNetwork is developed by deen.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Many ideas from the great community,");
-	str_format(aBuf, sizeof(aBuf),
-		"special thanks to %s.",
-		pSelf->Server()->ClientName(pResult->m_ClientID));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit", aBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"64 player support from eeeee's ddrace64.");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
+		"Lots of awesome help and code by HMH.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
