@@ -50,4 +50,5 @@ MACRO_TUNING_PARAM(PlayerHooking, player_hooking, 1)
 MACRO_TUNING_PARAM(JetpackStrength, jetpack_strength, 400.0f)
 MACRO_TUNING_PARAM(ShotgunStrength, shotgun_strength, 10.0f)
 MACRO_TUNING_PARAM(ExplosionStrength, explosion_strength, 6.0f)
+MACRO_TUNING_PARAM(HammerStrength, hammer_strength, 1.0f)
 #endif

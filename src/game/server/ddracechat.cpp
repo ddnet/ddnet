@@ -16,7 +16,6 @@ bool CheckClientID(int ClientID);
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	char aBuf[256];
 
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"DDRaceNetwork is developed by deen.");
