@@ -545,7 +545,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			}
 		}
 
-		if( IsClient && UseInput && (m_Input.m_Fire&1) /* && (m_Input.m_WantedWeapon - 1 == WEAPON_GUN) */ ) {
+		if(IsClient && UseInput && (m_Input.m_Fire&1) && (m_Input.m_WantedWeapon - 1 == WEAPON_GUN)) {
 			m_Vel += TargetDirection * -1.0f * (m_pWorld->m_Tuning.m_JetpackStrength / 100.0f / 6.12f);
 		}
 		if(g_Config.m_ClPredictDDRace && IsClient)
