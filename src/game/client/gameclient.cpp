@@ -464,6 +464,7 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	mem_zero(&TempTeams, sizeof(TempTeams));
 	TempCore.Init(&TempWorld, g_GameClient.Collision(), &TempTeams);
 	TempCore.Read(pCharacter);
+	TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
 
 	while(pCharacter->m_Tick < Tick)
 	{
@@ -1065,9 +1066,15 @@ void CGameClient::OnPredict()
 	if(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED)
 	{
 		if(m_Snap.m_pLocalCharacter)
+		{
 			m_PredictedChar.Read(m_Snap.m_pLocalCharacter);
+			m_PredictedChar.m_ActiveWeapon = m_Snap.m_pLocalCharacter->m_Weapon;
+		}
 		if(m_Snap.m_pLocalPrevCharacter)
+		{
 			m_PredictedPrevChar.Read(m_Snap.m_pLocalPrevCharacter);
+			m_PredictedPrevChar.m_ActiveWeapon = m_Snap.m_pLocalPrevCharacter->m_Weapon;
+		}
 		return;
 	}
 
@@ -1085,6 +1092,7 @@ void CGameClient::OnPredict()
 		World.m_apCharacters[i] = &g_GameClient.m_aClients[i].m_Predicted;
 		World.m_apCharacters[i]->m_Id = m_Snap.m_paPlayerInfos[i]->m_ClientID;
 		g_GameClient.m_aClients[i].m_Predicted.Read(&m_Snap.m_aCharacters[i].m_Cur);
+		g_GameClient.m_aClients[i].m_Predicted.m_ActiveWeapon = m_Snap.m_aCharacters[i].m_Cur.m_Weapon;
 	}
 
 	// predict

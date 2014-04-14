@@ -197,6 +197,7 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+	int m_ActiveWeapon;
 
 	bool m_NewHook;
 	vec2 m_NewHookPos;
