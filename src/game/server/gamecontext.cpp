@@ -525,7 +525,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 				{
 					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
 				}
-				else if((i==33) // ground jump impulse
+				else if((i==33) // jetpack
 				&& !(m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK))
 				{
 					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
