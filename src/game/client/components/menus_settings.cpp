@@ -1045,147 +1045,166 @@ void CMenus::RenderSettings(CUIRect MainView)
 void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 {
-	CUIRect Button;
-	//MainView.VSplitLeft(300.0f, &MainView, 0);
+	CUIRect Button, Left, Right, HUD, Demo, Gameplay, Miscellaneous, Label;
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	MainView.HSplitTop(130.0f, &HUD , &MainView);
+
+	HUD.HSplitTop(30.0f, &Label, &HUD);
+	UI()->DoLabelScaled(&Label, Localize("HUD"), 20.0f, -1);
+	HUD.Margin(5.0f, &HUD);
+	HUD.VSplitMid(&Left, &Right);
+	Left.VSplitRight(5.0f, &Left, 0);
+	Right.VMargin(5.0f, &Right);
+
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
 	{
 		g_Config.m_ClDDRaceScoreBoard ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
 	{
 		g_Config.m_ClShowIDs ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Show entities in game (can also be toggled via console cl_show_entities)"), g_Config.m_ClShowEntities, &Button))
-	{
-		g_Config.m_ClShowEntities ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClAutoRaceRecord, Localize("Enable save the best demo of each race"), g_Config.m_ClAutoRaceRecord, &Button))
-	{
-		g_Config.m_ClAutoRaceRecord ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClDemoName, Localize("Enable save the player name within the demo"), g_Config.m_ClDemoName, &Button))
-	{
-		g_Config.m_ClDemoName ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Enable ghost"), g_Config.m_ClRaceGhost, &Button))
-	{
-		g_Config.m_ClRaceGhost ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Enable show ghost"), g_Config.m_ClRaceShowGhost, &Button))
-	{
-		g_Config.m_ClRaceShowGhost ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Enable save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
-	{
-		g_Config.m_ClRaceSaveGhost ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show players in other teams"), g_Config.m_ClShowOthers, &Button))
-	{
-		g_Config.m_ClShowOthers ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
-	{
-		g_Config.m_ClDDRaceBinds ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads (Disabling can improve performance)"), g_Config.m_ClShowQuads, &Button))
-	{
-		g_Config.m_ClShowQuads ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing (predict other players)"), g_Config.m_ClAntiPing, &Button))
-	{
-		g_Config.m_ClAntiPing ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPingGrenade, Localize("AntiPing (predict grenades)"), g_Config.m_ClAntiPingGrenade, &Button))
-	{
-		g_Config.m_ClAntiPingGrenade ^= 1;
-	}
-
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("HUD: Show score"), g_Config.m_ClShowhudScore, &Button))
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
 	{
 		g_Config.m_ClShowhudScore ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("HUD: Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
 	{
 		g_Config.m_ClShowhudHealthAmmo ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
 	{
 		g_Config.m_ClShowChat ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
+	{
+		g_Config.m_ClChatTeamColors ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
 	{
 		g_Config.m_ClShowKillMessages ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
 	{
 		g_Config.m_ClShowVotesAfterVoting ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
+	MainView.HSplitTop(90.0f, &Demo , &MainView);
+
+	Demo.HSplitTop(30.0f, &Label, &Demo);
+	UI()->DoLabelScaled(&Label, Localize("Demo"), 20.0f, -1);
+	Demo.Margin(5.0f, &Demo);
+	Demo.VSplitMid(&Left, &Right);
+	Left.VSplitRight(5.0f, &Left, 0);
+	Right.VMargin(5.0f, &Right);
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClAutoRaceRecord, Localize("Save the best demo of each race"), g_Config.m_ClAutoRaceRecord, &Button))
 	{
-		g_Config.m_ClEditorUndo ^= 1;
+		g_Config.m_ClAutoRaceRecord ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClUnpredictedShadow, Localize("Show unpredicted shadow tee to estimate your delay"), g_Config.m_ClUnpredictedShadow, &Button))
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClDemoName, Localize("Save the player name within the demo"), g_Config.m_ClDemoName, &Button))
+	{
+		g_Config.m_ClDemoName ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Ghost"), g_Config.m_ClRaceGhost, &Button))
+	{
+		g_Config.m_ClRaceGhost ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
+	{
+		g_Config.m_ClRaceShowGhost ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
+	{
+		g_Config.m_ClRaceSaveGhost ^= 1;
+	}
+
+	MainView.HSplitTop(210.0f, &Gameplay , &MainView);
+
+	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
+	UI()->DoLabelScaled(&Label, Localize("Gameplay"), 20.0f, -1);
+	Gameplay.Margin(5.0f, &Gameplay);
+	Gameplay.VSplitMid(&Left, &Right);
+	Left.VSplitRight(5.0f, &Left, 0);
+	Right.VMargin(5.0f, &Right);
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Show entities"), g_Config.m_ClShowEntities, &Button))
+	{
+		g_Config.m_ClShowEntities ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show players in other teams"), g_Config.m_ClShowOthers, &Button))
+	{
+		g_Config.m_ClShowOthers ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads (Disabling can improve performance)"), g_Config.m_ClShowQuads, &Button))
+	{
+		g_Config.m_ClShowQuads ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing (predict other players)"), g_Config.m_ClAntiPing, &Button))
+	{
+		g_Config.m_ClAntiPing ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPingGrenade, Localize("AntiPing (predict grenades)"), g_Config.m_ClAntiPingGrenade, &Button))
+	{
+		g_Config.m_ClAntiPingGrenade ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClUnpredictedShadow, Localize("Show unpredicted shadow tee"), g_Config.m_ClUnpredictedShadow, &Button))
 	{
 		g_Config.m_ClUnpredictedShadow ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowNinja, Localize("Show ninja skin when players have ninja or are in freeze"), g_Config.m_ClShowNinja, &Button))
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClShowNinja, Localize("Show ninja skin"), g_Config.m_ClShowNinja, &Button))
 	{
 		g_Config.m_ClShowNinja ^= 1;
 	}
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowOtherHookColl, Localize("Show other players' hook collision lines"), g_Config.m_ClShowOtherHookColl, &Button))
 	{
 		g_Config.m_ClShowOtherHookColl ^= 1;
 	}
 
 	CUIRect aRects[2];
-	CUIRect Label;
-	MainView.HSplitTop(5.0f, 0, &MainView);
-	MainView.HSplitTop(82.5f, &Label, &MainView);
-
-	Label.VSplitMid(&aRects[0], &aRects[1]);
+	Left.HSplitTop(5.0f, &Button, &Left);
+	Right.HSplitTop(5.0f, &Button, &Right);
+	aRects[0] = Left;
+	aRects[1] = Right;
 	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 	aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
@@ -1208,13 +1227,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 		for(int s = 0; s < 3; s++)
 		{
-			//CUIRect Text;
-			//MainView.HSplitTop(19.0f, &Button, &MainView);
-			//Button.VMargin(15.0f, &Button);
-			//Button.VSplitLeft(100.0f, &Text, &Button);
-			////Button.VSplitRight(5.0f, &Button, 0);
-			//Button.HSplitTop(4.0f, 0, &Button);
-
 			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
 			Label.VSplitLeft(100.0f, &Label, &Button);
 			Button.HMargin(2.0f, &Button);
@@ -1224,5 +1236,24 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 			*pColorSlider[i][s] = (int)(k*255.0f);
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
+	}
+
+	MainView.HSplitTop(30.0f, &Label, &Miscellaneous);
+	UI()->DoLabelScaled(&Label, Localize("Miscellaneous"), 20.0f, -1);
+	Miscellaneous.Margin(5.0f, &Miscellaneous);
+	Miscellaneous.VSplitMid(&Left, &Right);
+	Left.VSplitRight(5.0f, &Left, 0);
+	Right.VMargin(5.0f, &Right);
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
+	{
+		g_Config.m_ClDDRaceBinds ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
+	{
+		g_Config.m_ClEditorUndo ^= 1;
 	}
 }
