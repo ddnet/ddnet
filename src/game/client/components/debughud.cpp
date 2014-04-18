@@ -80,7 +80,7 @@ void CDebugHud::RenderTuning()
 
 	Graphics()->MapScreen(0, 0, 300*Graphics()->ScreenAspect(), 300);
 
-	float y = 50.0f;
+	float y = 27.0f;
 	int Count = 0;
 	for(int i = 0; i < m_pClient->m_Tuning.Num(); i++)
 	{
