@@ -72,7 +72,7 @@ class CConsole : public IConsole
 
 	enum
 	{
-		CONSOLE_MAX_STR_LENGTH = 1024,
+		CONSOLE_MAX_STR_LENGTH = 8192,
 		MAX_PARTS = (CONSOLE_MAX_STR_LENGTH+1)/2
 	};
 

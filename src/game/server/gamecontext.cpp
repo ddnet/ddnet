@@ -1774,7 +1774,26 @@ void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConBroadcast(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SendBroadcast(pResult->GetString(0), -1);
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
+
+	int i, j;
+	for(i = 0, j = 0; aBuf[i]; i++, j++)
+	{
+		if(aBuf[i] == '\\' && aBuf[i+1] == 'n')
+		{
+			aBuf[j] = '\n';
+			i++;
+		}
+		else if (i != j)
+		{
+			aBuf[j] = aBuf[i];
+		}
+	}
+	aBuf[j] = '\0';
+
+	pSelf->SendBroadcast(aBuf, -1);
 }
 
 void CGameContext::ConSay(IConsole::IResult *pResult, void *pUserData)

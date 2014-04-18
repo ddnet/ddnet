@@ -31,12 +31,12 @@ void FifoConsole::ListenFifoThread(void *pUser)
 		return;
 
 	std::ifstream f;
-	char aBuf[256];
+	char aBuf[8192];
 
 	while (true)
 	{
 		f.open(g_Config.m_SvInputFifo);
-		while (f.getline(aBuf, 256))
+		while (f.getline(aBuf, sizeof(aBuf)))
 		{
 			pConsole->ExecuteLineFlag(aBuf, CFGFLAG_SERVER, -1);
 		}
