@@ -181,6 +181,16 @@ void CPlayer::Tick()
 		++m_LastActionTick;
 		++m_TeamChangeTick;
  	}
+	
+	m_TuneZoneOld = m_TuneZone; // determine needed tunings with viewpos
+	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
+	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
+	
+	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
+	{
+		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
+	}
+	
 }
 
 void CPlayer::PostTick()
@@ -255,15 +265,6 @@ void CPlayer::Snap(int SnappingClient)
 		pSpectatorInfo->m_SpectatorID = m_SpectatorID;
 		pSpectatorInfo->m_X = m_ViewPos.x;
 		pSpectatorInfo->m_Y = m_ViewPos.y;
-		
-		m_TuneZoneOld = m_TuneZone; // we want correct tunings also for spectators
-		int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
-		m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
-		
-		if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
-		{
-			GameServer()->SendTuningParams(SnappingClient, m_TuneZone);
-		}
 	}
 
 	// send 0 if times of others are not shown

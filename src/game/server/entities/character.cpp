@@ -1818,7 +1818,6 @@ void CCharacter::HandleTuneLayer()
 
 	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
 	{
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // send specific tunings
 		// send zone msgs
 		SendZoneMsgs();
 	}
