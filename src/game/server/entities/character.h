@@ -161,6 +161,7 @@ private:
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
+	void SendZoneMsgs();
 public:
 	CGameTeams* Teams();
 	void Pause(bool Pause);

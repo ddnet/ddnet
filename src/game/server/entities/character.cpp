@@ -67,9 +67,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
 	m_LastPenalty = false;
-	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
-	m_TuneZoneOld = m_TuneZone;
-
+	
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
@@ -91,8 +89,11 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 
 	DDRaceInit();
-
+	
+	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
+	m_TuneZoneOld = -1; // no zone leave msg on spawn
 	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
+	SendZoneMsgs(); // we want a entermessage also on spawn
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 	return true;
@@ -1818,37 +1819,42 @@ void CCharacter::HandleTuneLayer()
 	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
 	{
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // send specific tunings
-		// send zone leave msg
+		// send zone msgs
+		SendZoneMsgs();
+	}
+}
 
-		if (GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld])
+void CCharacter::SendZoneMsgs()
+{
+	// send zone leave msg
+	if (m_TuneZoneOld >= 0 && GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld]) // m_TuneZoneOld >= 0: avoid zone leave msgs on spawn
+	{
+		const char* cur = GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld];
+		const char* pos;
+		while ((pos = str_find(cur, "\\n")))
 		{
-			const char* cur = GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld];
-			const char* pos;
-			while ((pos = str_find(cur, "\\n")))
-			{
-				char aBuf[256];
-				str_copy(aBuf, cur, pos - cur + 1);
-				aBuf[pos - cur + 1] = '\0';
-				cur = pos + 2;
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-			}
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
+			char aBuf[256];
+			str_copy(aBuf, cur, pos - cur + 1);
+			aBuf[pos - cur + 1] = '\0';
+			cur = pos + 2;
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 		}
-		// send zone enter msg
-		if (GameServer()->m_ZoneEnterMsg[m_TuneZone])
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
+	}
+	// send zone enter msg
+	if (GameServer()->m_ZoneEnterMsg[m_TuneZone])
+	{
+		const char* cur = GameServer()->m_ZoneEnterMsg[m_TuneZone];
+		const char* pos;
+		while ((pos = str_find(cur, "\\n")))
 		{
-			const char* cur = GameServer()->m_ZoneEnterMsg[m_TuneZone];
-			const char* pos;
-			while ((pos = str_find(cur, "\\n")))
-			{
-				char aBuf[256];
-				str_copy(aBuf, cur, pos - cur + 1);
-				aBuf[pos - cur + 1] = '\0';
-				cur = pos + 2;
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-			}
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
+			char aBuf[256];
+			str_copy(aBuf, cur, pos - cur + 1);
+			aBuf[pos - cur + 1] = '\0';
+			cur = pos + 2;
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 		}
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
 	}
 }
 
