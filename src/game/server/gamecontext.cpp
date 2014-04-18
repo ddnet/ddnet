@@ -1332,7 +1332,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			//and give him correct tunings
 			if (Version >= VERSION_DDNET_EXTRATUNES)
-				SendTuningParams(ClientID);
+				SendTuningParams(ClientID, pPlayer->m_TuneZone);
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
@@ -1550,7 +1550,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			// send tuning parameters to client
-			SendTuningParams(ClientID);
+			SendTuningParams(ClientID, pPlayer->m_TuneZone);
 
 			// client is ready to enter
 			pPlayer->m_IsReady = true;
