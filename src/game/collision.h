@@ -32,9 +32,9 @@ public:
 
 	CCollision();
 	void Init(class CLayers *pLayers);
-	bool CheckPoint(float x, float y) { return IsSolid(round(x), round(y)); }
+	bool CheckPoint(float x, float y) { return IsSolid(round_to_int(x), round_to_int(y)); }
 	bool CheckPoint(vec2 Pos) { return CheckPoint(Pos.x, Pos.y); }
-	int GetCollisionAt(float x, float y) { return GetTile(round(x), round(y)); }
+	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
 	int GetWidth() { return m_Width; };
 	int GetHeight() { return m_Height; };
 	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough);
@@ -53,7 +53,7 @@ public:
 	int GetDTileIndex(int Index);
 	int GetDTileFlags(int Index);
 	int GetDTileNumber(int Index);
-	int GetFCollisionAt(float x, float y) { return GetFTile(round(x), round(y)); }
+	int GetFCollisionAt(float x, float y) { return GetFTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);

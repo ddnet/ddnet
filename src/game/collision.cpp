@@ -213,8 +213,8 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	{
 		float a = i/Distance;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round(Pos.x);
-		iy = round(Pos.y);
+		ix = round_to_int(Pos.x);
+		iy = round_to_int(Pos.y);
 
 		if((CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy))))
 		{
@@ -249,8 +249,8 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	{
 		float a = i/Distance;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round(Pos.x);
-		iy = round(Pos.y);
+		ix = round_to_int(Pos.x);
+		iy = round_to_int(Pos.y);
 
 		int Nx = clamp(ix/32, 0, m_Width-1);
 		int Ny = clamp(iy/32, 0, m_Height-1);
@@ -300,8 +300,8 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 	{
 		float a = i/Distance;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round(Pos.x);
-		iy = round(Pos.y);
+		ix = round_to_int(Pos.x);
+		iy = round_to_int(Pos.y);
 
 		int Nx = clamp(ix/32, 0, m_Width-1);
 		int Ny = clamp(iy/32, 0, m_Height-1);
@@ -1006,8 +1006,8 @@ int CCollision::Entity(int x, int y, int Layer)
 
 void CCollision::SetCollisionAt(float x, float y, int flag)
 {
-   int Nx = clamp(round(x)/32, 0, m_Width-1);
-   int Ny = clamp(round(y)/32, 0, m_Height-1);
+   int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
+   int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 
    m_pTiles[Ny * m_Width + Nx].m_Index = flag;
 }
@@ -1016,8 +1016,8 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 {
 	if(!m_pDoor)
 		return;
-   int Nx = clamp(round(x)/32, 0, m_Width-1);
-   int Ny = clamp(round(y)/32, 0, m_Height-1);
+   int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
+   int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 
    m_pDoor[Ny * m_Width + Nx].m_Index = Type;
    m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
@@ -1087,8 +1087,8 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 	{
 		float a = f/d;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		int Nx = clamp(round(Pos.x)/32, 0, m_Width-1);
-		int Ny = clamp(round(Pos.y)/32, 0, m_Height-1);
+		int Nx = clamp(round_to_int(Pos.x)/32, 0, m_Width-1);
+		int Ny = clamp(round_to_int(Pos.y)/32, 0, m_Height-1);
 		if(GetIndex(Nx, Ny) == COLFLAG_SOLID
 			|| GetIndex(Nx, Ny) == (COLFLAG_SOLID|COLFLAG_NOHOOK)
 			|| GetIndex(Nx, Ny) == COLFLAG_NOLASER
@@ -1120,13 +1120,13 @@ int CCollision::IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, ve
 	{
 		float a = f/d;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		if(IsNoLaser(round(Pos.x), round(Pos.y)) || IsFNoLaser(round(Pos.x), round(Pos.y)))
+		if(IsNoLaser(round_to_int(Pos.x), round_to_int(Pos.y)) || IsFNoLaser(round_to_int(Pos.x), round_to_int(Pos.y)))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			if(IsNoLaser(round(Pos.x), round(Pos.y))) return GetCollisionAt(Pos.x, Pos.y);
+			if(IsNoLaser(round_to_int(Pos.x), round_to_int(Pos.y))) return GetCollisionAt(Pos.x, Pos.y);
 			else return  GetFCollisionAt(Pos.x, Pos.y);
 		}
 		Last = Pos;
@@ -1147,17 +1147,17 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	{
 		float a = f/d;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		if(IsSolid(round(Pos.x), round(Pos.y)) || (!GetTile(round(Pos.x), round(Pos.y)) && !GetFTile(round(Pos.x), round(Pos.y))))
+		if(IsSolid(round_to_int(Pos.x), round_to_int(Pos.y)) || (!GetTile(round_to_int(Pos.x), round_to_int(Pos.y)) && !GetFTile(round_to_int(Pos.x), round_to_int(Pos.y))))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			if(!GetTile(round(Pos.x), round(Pos.y)) && !GetFTile(round(Pos.x), round(Pos.y)))
+			if(!GetTile(round_to_int(Pos.x), round_to_int(Pos.y)) && !GetFTile(round_to_int(Pos.x), round_to_int(Pos.y)))
 				return -1;
 			else
-				if (!GetTile(round(Pos.x), round(Pos.y))) return GetTile(round(Pos.x), round(Pos.y));
-				else return GetFTile(round(Pos.x), round(Pos.y));
+				if (!GetTile(round_to_int(Pos.x), round_to_int(Pos.y))) return GetTile(round_to_int(Pos.x), round_to_int(Pos.y));
+				else return GetFTile(round_to_int(Pos.x), round_to_int(Pos.y));
 		}
 		Last = Pos;
 	}
