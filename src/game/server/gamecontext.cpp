@@ -2758,6 +2758,9 @@ void CGameContext::Converse(int ClientID, char *pStr)
 	if (!pPlayer)
 		return;
 
+	if(ProcessSpamProtection(ClientID))
+		return;
+
 	if (pPlayer->m_LastWhisperTo < 0)
 		SendChatTarget(ClientID, "You do not have an ongoing conversation. Whisper to someone to start one");
 	else
