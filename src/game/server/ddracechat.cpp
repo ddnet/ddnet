@@ -520,21 +520,32 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
 
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
+
+	if(time_get() < pSelf->m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+	{
+		char chatmsg[512] = {0};
+		str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay,((pSelf->m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
+		pSelf->SendChatTarget(pResult->m_ClientID, chatmsg);
+
+		return;
+	}
+
+	pSelf->m_LastMapVote = time_get();
+
 	pSelf->Score()->MapVote(pResult->m_ClientID, pResult->GetString(0));
 
 #if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+	if(g_Config.m_SvUseSQL)
+		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 #endif
 }
 
@@ -544,15 +555,15 @@ void CGameContext::ConMapPoints(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
+
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
 
 	if (pResult->NumArguments() > 0)
 		pSelf->Score()->MapPoints(pResult->m_ClientID, pResult->GetString(0));
@@ -560,8 +571,8 @@ void CGameContext::ConMapPoints(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Score()->MapPoints(pResult->m_ClientID, g_Config.m_SvMap);
 
 #if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+	if(g_Config.m_SvUseSQL)
+		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 #endif
 }
 
@@ -571,15 +582,15 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
+
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
@@ -595,8 +606,8 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 				pSelf->Server()->ClientName(pResult->m_ClientID));
 
 #if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+	if(g_Config.m_SvUseSQL)
+		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 #endif
 }
 
@@ -606,15 +617,15 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 
-#if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-#endif
-
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
+
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
@@ -630,8 +641,8 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 				pSelf->Server()->ClientName(pResult->m_ClientID));
 
 #if defined(CONF_SQL)
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+	if(g_Config.m_SvUseSQL)
+		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 #endif
 }
 
@@ -676,6 +687,8 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
 
 	if (pSelf->m_VoteCloseTime && pSelf->m_VoteCreator == pResult->m_ClientID)
 	{
