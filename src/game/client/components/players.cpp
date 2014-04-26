@@ -785,6 +785,29 @@ void CPlayers::RenderPlayer(
 		RenderInfo.m_ColorFeet.a = 0.4f;
 	}
 
+	if (g_Config.m_ClShowDirection && (!pInfo.m_Local || DemoPlayer()->IsPlaying()))
+	{
+		if (Player.m_Direction != 0)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsBegin();
+			IGraphics::CQuadItem QuadItem(Position.x-15, Position.y - 70, 22, 22);
+			if (Player.m_Direction == -1)
+				Graphics()->QuadsSetRotation(GetAngle(vec2(1,0))+pi);
+			Graphics()->QuadsDraw(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+		if (Player.m_Jumped&1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsBegin();
+			IGraphics::CQuadItem QuadItem(Position.x+15, Position.y - 70, 22, 22);
+			Graphics()->QuadsSetRotation(GetAngle(vec2(0,1))+pi);
+			Graphics()->QuadsDraw(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+	}
+
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, OtherTeam);
 
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)

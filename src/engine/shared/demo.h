@@ -121,7 +121,7 @@ public:
 	int Update();
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
-	int IsPlaying() const { return m_File != 0; }
+	virtual bool IsPlaying() const { return m_File != 0; }
 };
 
 #endif

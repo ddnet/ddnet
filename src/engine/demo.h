@@ -59,6 +59,7 @@ public:
 	virtual int SetPos(float Percent) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;
+	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
 	virtual void GetDemoName(char *pBuffer, int BufferSize) const = 0;
 	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader) const = 0;
