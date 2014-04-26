@@ -530,17 +530,6 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 			return;
 #endif
 
-	if(time_get() < pSelf->m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
-	{
-		char chatmsg[512] = {0};
-		str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay,((pSelf->m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
-		pSelf->SendChatTarget(pResult->m_ClientID, chatmsg);
-
-		return;
-	}
-
-	pSelf->m_LastMapVote = time_get();
-
 	pSelf->Score()->MapVote(pResult->m_ClientID, pResult->GetString(0));
 
 #if defined(CONF_SQL)

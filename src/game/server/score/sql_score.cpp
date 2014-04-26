@@ -427,10 +427,21 @@ void CSqlScore::MapVoteThread(void *pUser)
 			str_format(aBuf, sizeof(aBuf), "SELECT Map, Server FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_aMap);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
+			CPlayer *pPlayer = pData->m_pSqlData->m_pGameServer->m_apPlayers[pData->m_ClientID];
+			int64 Now = pData->m_pSqlData->Server()->Tick();
+			int Timeleft = pPlayer->m_LastVoteCall + pData->m_pSqlData->Server()->TickSpeed()*60 - Now;
+
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
 			{
 				str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found. Try adding a '%%' at the start if you don't know the first character. Example: /map %%castle for \"Out of Castle\"", originalMap);
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+			}
+			else if(pPlayer->m_LastVoteCall && Timeleft > 0)
+			{
+				char aChatmsg[512] = {0};
+				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote", (Timeleft/pData->m_pSqlData->Server()->TickSpeed())+1);
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aChatmsg);
+				return;
 			}
 			else if(time_get() < pData->m_pSqlData->GameServer()->m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 			{
