@@ -533,15 +533,12 @@ void CClient::Connect(const char *pAddress)
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
 	ServerInfoRequest();
-	for(int i=0;i<1;i++)
+	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[0].NetType()) != 0)
 	{
-		if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[i].NetType()) != 0)
-		{
-			char aBufMsg[256];
-			str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
-			net_host_lookup("localhost", &m_ServerAddress, m_NetClient[i].NetType());
-		}
+		char aBufMsg[256];
+		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
+		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
 
 	m_RconAuthed = 0;
@@ -1669,7 +1666,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 void CClient::PumpNetwork()
 {
-	for(int i=0; i<64; i++)
+	for(int i=0; i<2; i++)
 	{
 		m_NetClient[i].Update();
 	}
@@ -1698,9 +1695,8 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i=0; i < 64; i++)
+	for(int i=0; i < 2; i++)
 	{
-		// wichtig
 		while(m_NetClient[i].Recv(&Packet))
 		{
 			if(Packet.m_ClientID == -1 || i > 1)
@@ -1956,10 +1952,7 @@ void CClient::VersionUpdate()
 			Packet.m_DataSize = sizeof(VERSIONSRV_GETVERSION);
 			Packet.m_Flags = NETSENDFLAG_CONNLESS;
 
-			for(int i = 0; i < 64;i++)
-			{
-				m_NetClient[i].Send(&Packet);
-			}
+			m_NetClient[0].Send(&Packet);
 			m_VersionInfo.m_State = CVersionInfo::STATE_READY;
 		}
 	}
@@ -2040,7 +2033,7 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(int i = 0; i < 64; i++)
+		for(int i = 0; i < 2; i++)
 		{
 			if(!m_NetClient[i].Open(BindAddr, 0))
 			{
@@ -2057,10 +2050,7 @@ void CClient::Run()
 	Input()->Init();
 
 	// start refreshing addresses while we load
-	for(int i=0;i<64;i++)
-	{
-		MasterServer()->RefreshAddresses(m_NetClient[i].NetType());
-	}
+	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
 
 	// init the editor
 	m_pEditor->Init();
