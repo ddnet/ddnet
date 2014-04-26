@@ -1242,7 +1242,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' directions"), g_Config.m_ClShowDirection, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection, &Button))
 	{
 		g_Config.m_ClShowDirection ^= 1;
 	}
