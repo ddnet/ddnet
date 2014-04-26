@@ -114,6 +114,22 @@ void CMenus::RenderGame(CUIRect MainView)
 		else
 			Client()->DemoRecorder_Stop();
 	}
+
+	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(170.0f, &Button, &ButtonBar);
+
+	static int s_DummyButton = 0;
+	if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? "Disconnect dummy" : "Connect dummy"), 0, &Button))
+	{
+		if(!Client()->DummyConnected())
+		{
+			Client()->DummyConnect(false);
+		}
+		else
+		{
+			Client()->DummyDisconnect(0);
+		}
+	}
 }
 
 void CMenus::RenderPlayers(CUIRect MainView)

@@ -183,19 +183,38 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CUIRect Button, Label;
+	CUIRect Button, Label, Dummy;
 	MainView.HSplitTop(10.0f, 0, &MainView);
+
+	static bool s_Dummy = false;
+
+	char *Name = g_Config.m_PlayerName;
+	char *Clan = g_Config.m_PlayerClan;
+	int *Country = &g_Config.m_PlayerCountry;
+
+	if(s_Dummy)
+	{
+		Name = g_Config.m_DummyName;
+		Clan = g_Config.m_DummyClan;
+		Country = &g_Config.m_DummyCountry;
+	}
 
 	// player name
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(80.0f, &Label, &Button);
+	Button.VSplitLeft(200.0f, &Button, &Dummy);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetName = 0.0f;
-	if(DoEditBox(g_Config.m_PlayerName, &Button, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
+	if(DoEditBox(Name, &Button, Name, sizeof(Name), 14.0f, &s_OffsetName))
 		m_NeedSendinfo = true;
+
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy Settings"), s_Dummy, &Dummy))
+	{
+		s_Dummy ^= 1;
+	}
 
 	// player clan
 	MainView.HSplitTop(5.0f, 0, &MainView);
@@ -205,7 +224,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetClan = 0.0f;
-	if(DoEditBox(g_Config.m_PlayerClan, &Button, g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
+	if(DoEditBox(Clan, &Button, Clan, sizeof(Clan), 14.0f, &s_OffsetClan))
 		m_NeedSendinfo = true;
 
 	// country flag selector
@@ -217,7 +236,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
-		if(pEntry->m_CountryCode == g_Config.m_PlayerCountry)
+		if(pEntry->m_CountryCode == *Country)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i);
@@ -239,25 +258,39 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		g_Config.m_PlayerCountry = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
+		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
 		m_NeedSendinfo = true;
 	}
 }
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2;
+	CUIRect Button, Label, Button2, Dummy;
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
+	static bool s_Dummy = false;
+	char *Skin = g_Config.m_PlayerSkin;
+	int *UseCustomColor = &g_Config.m_PlayerUseCustomColor;
+	int *ColorBody = &g_Config.m_PlayerColorBody;
+	int *ColorFeet = &g_Config.m_PlayerColorFeet;
+
+	if(s_Dummy)
+	{
+		Skin = g_Config.m_DummySkin;
+		UseCustomColor = &g_Config.m_DummyUseCustomColor;
+		ColorBody = &g_Config.m_DummyColorBody;
+		ColorFeet = &g_Config.m_DummyColorFeet;
+	}
+
 	// skin info
-	const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(g_Config.m_PlayerSkin));
+	const CSkins::CSkin *pOwnSkin = m_pClient->m_pSkins->Get(m_pClient->m_pSkins->Find(Skin));
 	CTeeRenderInfo OwnSkinInfo;
-	if(g_Config.m_PlayerUseCustomColor)
+	if(*UseCustomColor)
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
-		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(g_Config.m_PlayerColorBody);
-		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(g_Config.m_PlayerColorFeet);
+		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
+		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
 	}
 	else
 	{
@@ -268,10 +301,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	OwnSkinInfo.m_Size = 50.0f*UI()->Scale();
 
 	MainView.HSplitTop(20.0f, &Label, &MainView);
+	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy Settings"), s_Dummy, &Dummy))
+	{
+		s_Dummy ^= 1;
+	}
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
@@ -279,15 +318,15 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
 	Label.HSplitTop(15.0f, 0, &Label);;
 	Label.VSplitLeft(70.0f, 0, &Label);
-	UI()->DoLabelScaled(&Label, g_Config.m_PlayerSkin, 14.0f, -1, 150.0f);
+	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
 
 	// custom colour selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitMid(&Button, &Button2);
-	if(DoButton_CheckBox(&g_Config.m_PlayerColorBody, Localize("Custom colors"), g_Config.m_PlayerUseCustomColor, &Button))
+	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
-		g_Config.m_PlayerUseCustomColor = g_Config.m_PlayerUseCustomColor?0:1;
+		*UseCustomColor = *UseCustomColor?0:1;
 		m_NeedSendinfo = true;
 	}
 	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Bandana Brothers skins"), g_Config.m_ClShowSpecialSkins, &Button2))
@@ -298,7 +337,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(82.5f, &Label, &MainView);
-	if(g_Config.m_PlayerUseCustomColor)
+	if(*UseCustomColor)
 	{
 		CUIRect aRects[2];
 		Label.VSplitMid(&aRects[0], &aRects[1]);
@@ -306,8 +345,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
 		int *paColors[2];
-		paColors[0] = &g_Config.m_PlayerColorBody;
-		paColors[1] = &g_Config.m_PlayerColorFeet;
+		paColors[0] = ColorBody;
+		paColors[1] = ColorFeet;
 
 		const char *paParts[] = {
 			Localize("Body"),
@@ -374,18 +413,18 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		if(s == 0)
 			continue;
 
-		if(str_comp(s->m_aName, g_Config.m_PlayerSkin) == 0)
+		if(str_comp(s->m_aName, Skin) == 0)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info;
-			if(g_Config.m_PlayerUseCustomColor)
+			if(*UseCustomColor)
 			{
 				Info.m_Texture = s->m_ColorTexture;
-				Info.m_ColorBody = m_pClient->m_pSkins->GetColorV4(g_Config.m_PlayerColorBody);
-				Info.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(g_Config.m_PlayerColorFeet);
+				Info.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
+				Info.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
 			}
 			else
 			{
@@ -400,7 +439,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			if(g_Config.m_Debug)
 			{
-				vec3 BloodColor = g_Config.m_PlayerUseCustomColor ? m_pClient->m_pSkins->GetColorV3(g_Config.m_PlayerColorBody) : s->m_BloodColor;
+				vec3 BloodColor = *UseCustomColor ? m_pClient->m_pSkins->GetColorV3(*ColorBody) : s->m_BloodColor;
 				Graphics()->TextureSet(-1);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
@@ -414,7 +453,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(g_Config.m_PlayerSkin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_PlayerSkin));
+		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(Skin));
 		m_NeedSendinfo = true;
 	}
 }
@@ -459,6 +498,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Screenshot", "screenshot", 0 },
 	{ "Scoreboard", "+scoreboard", 0 },
 	{ "Respawn", "kill", 0 },
+	{ "Toggle Dummy", "toggle cl_dummy 0 1", 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
@@ -588,7 +628,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		ChatSettings.HSplitTop(10.0f, 0, &ChatSettings);
 		ChatSettings.HSplitTop(MainView.h/3-45.0f, &ChatSettings, &MiscSettings);
 		RenderTools()->DrawUIRect(&ChatSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
-		ChatSettings.Margin(10.0f, &ChatSettings);
+		ChatSettings.VMargin(10.0f, &ChatSettings);
 
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y, 14.0f*UI()->Scale(), Localize("Chat"), -1);
 
@@ -600,12 +640,12 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		MiscSettings.HSplitTop(10.0f, 0, &MiscSettings);
 		RenderTools()->DrawUIRect(&MiscSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
-		MiscSettings.Margin(10.0f, &MiscSettings);
+		MiscSettings.VMargin(10.0f, &MiscSettings);
 
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
 		MiscSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MiscSettings);
-		UiDoGetButtons(19, 28, MiscSettings);
+		UiDoGetButtons(19, 29, MiscSettings);
 	}
 
 }
@@ -1007,7 +1047,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDNet")};
+		Localize("DDNet")
+	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
 
@@ -1165,7 +1206,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads (Disabling can improve performance)"), g_Config.m_ClShowQuads, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads"), g_Config.m_ClShowQuads, &Button))
 	{
 		g_Config.m_ClShowQuads ^= 1;
 	}
@@ -1211,8 +1252,8 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	int *pColorSlider[2][3] = {{&g_Config.m_ClBackgroundHue, &g_Config.m_ClBackgroundSat, &g_Config.m_ClBackgroundLht}, {&g_Config.m_ClBackgroundEntitiesHue, &g_Config.m_ClBackgroundEntitiesSat, &g_Config.m_ClBackgroundEntitiesLht}};
 
 	const char *paParts[] = {
-		Localize("Background (when quads disabled or zoomed out)"),
-		Localize("Background (when entities are enabled)")};
+		Localize("Background (regular)"),
+		Localize("Background (entities)")};
 	const char *paLabels[] = {
 		Localize("Hue"),
 		Localize("Sat."),
@@ -1246,7 +1287,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Right.VMargin(5.0f, &Right);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace pre-configured binds"), g_Config.m_ClDDRaceBinds, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace binds"), g_Config.m_ClDDRaceBinds, &Button))
 	{
 		g_Config.m_ClDDRaceBinds ^= 1;
 	}

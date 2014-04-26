@@ -274,6 +274,7 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind('h', "emote 2");
 		Bind('m', "emote 5");
 		Bind('s', "+showhookcoll");
+		Bind('x', "toggle cl_dummy 0 1");
 		Bind(KEY_PAGEDOWN, "cl_show_entities 0");
 		Bind(KEY_PAGEUP, "cl_show_entities 1");
 		Bind(KEY_KP0, "say /emote normal 999999");
@@ -312,6 +313,8 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 			Bind('v', "say /info");
 		if(!Get('b')[0])
 			Bind('b', "say /top5");
+		if(!Get('p')[0])
+			Bind('p', "say /points");
 		if(!Get('z')[0])
 			Bind('z', "emote 12");
 		if(!Get('x')[0])
@@ -320,6 +323,10 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 			Bind('h', "emote 2");
 		if(!Get('m')[0])
 			Bind('m', "emote 5");
+		if(!Get('s')[0])
+			Bind('s', "+showhookcoll");
+		if(!Get('x')[0])
+			Bind('x', "toggle cl_dummy 0 1");
 		if(!Get(KEY_PAGEDOWN)[0])
 			Bind(KEY_PAGEDOWN, "cl_show_entities 0");
 		if(!Get(KEY_PAGEUP)[0])

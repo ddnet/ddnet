@@ -74,6 +74,12 @@ public:
 	// actions
 	virtual void Connect(const char *pAddress) = 0;
 	virtual void Disconnect() = 0;
+
+	// dummy
+	virtual void DummyDisconnect(const char *pReason) = 0;
+	virtual void DummyConnect(bool Info = true, int NetClient = 1) = 0;
+	virtual bool DummyConnected() = 0;
+
 	virtual void Quit() = 0;
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp) = 0;

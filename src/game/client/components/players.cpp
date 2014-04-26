@@ -590,14 +590,14 @@ void CPlayers::RenderPlayer(
 				if(Hit)
 					break;
 
-				NewPos.x = round(NewPos.x);
-				NewPos.y = round(NewPos.y);
+				NewPos.x = round_to_int(NewPos.x);
+				NewPos.y = round_to_int(NewPos.y);
 
 				if (OldPos == NewPos)
 					break;
 
-				ExDirection.x = round(ExDirection.x*256.0f) / 256.0f;
-				ExDirection.y = round(ExDirection.y*256.0f) / 256.0f;
+				ExDirection.x = round_to_int(ExDirection.x*256.0f) / 256.0f;
+				ExDirection.y = round_to_int(ExDirection.y*256.0f) / 256.0f;
 			} while (!doBreak);
 
 			IGraphics::CLineItem LineItem(Position.x, Position.y, finishPos.x, finishPos.y);
