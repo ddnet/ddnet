@@ -1,4 +1,3 @@
-#if !defined(CONF_PLATFORM_MACOSX)
 /*
     unsigned char*
 */
@@ -36,5 +35,4 @@ protected:
 	bool CanUpdate(const char *pFile);
 };
 
-#endif
 #endif

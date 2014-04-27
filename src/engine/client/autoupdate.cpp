@@ -1,4 +1,3 @@
-#if !defined(CONF_PLATFORM_MACOSX)
 #include <base/math.h>
 #include <base/system.h>
 #include <game/version.h>
@@ -20,10 +19,6 @@
 	#include <arpa/inet.h>
 
 	#include <dirent.h>
-
-	#if defined(CONF_PLATFORM_MACOSX)
-		#include <Carbon/Carbon.h>
-	#endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -375,4 +370,3 @@ bool CAutoUpdate::SelfDelete()
 
 	return false;
 }
-#endif

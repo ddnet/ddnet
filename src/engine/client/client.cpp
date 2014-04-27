@@ -1968,7 +1968,9 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder));
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
+#if !defined(CONF_PLATFORM_MACOSX)
 	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
+#endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 }
 
@@ -1983,7 +1985,9 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
+#if !defined(CONF_PLATFORM_MACOSX)
 	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
+#endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	for(int i=0;i<2;i++)
@@ -2693,7 +2697,9 @@ int main(int argc, const char **argv) // ignore_convention
 	// write down the config and quit
 	pConfig->Save();
 
+#if !defined(CONF_PLATFORM_MACOSX)
 	pClient->AutoUpdate()->ExecuteExit();
+#endif
 
 	return 0;
 }

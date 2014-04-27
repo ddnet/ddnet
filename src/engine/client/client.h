@@ -63,7 +63,9 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IEngineMap *m_pMap;
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
+#if !defined(CONF_PLATFORM_MACOSX)
 	IAutoUpdate *m_pAutoUpdate;
+#endif
 	IEngineMasterServer *m_pMasterServer;
 
 	enum
@@ -76,7 +78,9 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder;
 	class CServerBrowser m_ServerBrowser;
+#if !defined(CONF_PLATFORM_MACOSX)
 	class CAutoUpdate m_AutoUpdate;
+#endif
 	class CFriends m_Friends;
 	class CMapChecker m_MapChecker;
 
@@ -190,7 +194,9 @@ public:
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
+#if !defined(CONF_PLATFORM_MACOSX)
 	IAutoUpdate *AutoUpdate() { return m_pAutoUpdate; }
+#endif
 
 	CClient();
 

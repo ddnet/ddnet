@@ -1,4 +1,3 @@
-#if !defined(CONF_PLATFORM_MACOSX)
 /*
     unsigned char*
 */
@@ -19,5 +18,4 @@ public:
 	virtual void ExecuteExit() = 0;
 };
 
-#endif
 #endif
