@@ -277,7 +277,7 @@ void CGameClient::OnInit()
 	char aBuf[256];
 	if (g_Config.m_hcAutoUpdate)
 	{
-		str_format(aBuf, sizeof(aBuf), "Checking updates, please wait....");
+		str_format(aBuf, sizeof(aBuf), "Checking for updates");
 		g_GameClient.m_pMenus->RenderUpdating(aBuf);
 		AutoUpdate()->CheckUpdates(m_pMenus);
 		if (AutoUpdate()->Updated())
@@ -289,13 +289,13 @@ void CGameClient::OnInit()
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "H-Client updated successfully :)");
+				str_format(aBuf, sizeof(aBuf), "DDNet Client updated successfully");
 				g_GameClient.m_pMenus->RenderUpdating(aBuf);
 			}
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "Not need be update :)");
+			str_format(aBuf, sizeof(aBuf), "No updates available");
 			g_GameClient.m_pMenus->RenderUpdating(aBuf);
 		}
 	}

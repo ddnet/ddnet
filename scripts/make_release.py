@@ -62,7 +62,7 @@ print("adding files")
 #shutil.copy("readme.txt", package_dir)
 shutil.copy("license.txt", package_dir)
 shutil.copy("storage.cfg", package_dir)
-shutil.copy("example.cfg", package_dir)
+shutil.copy("autoexec.cfg", package_dir)
 
 # DDRace
 shutil.copy("announcement.txt", package_dir)
