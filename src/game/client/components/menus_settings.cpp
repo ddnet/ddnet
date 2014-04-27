@@ -1290,7 +1290,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 	MainView.HSplitTop(30.0f, &Label, &Miscellaneous);
 	UI()->DoLabelScaled(&Label, Localize("Miscellaneous"), 20.0f, -1);
-	Miscellaneous.Margin(5.0f, &Miscellaneous);
+	Miscellaneous.VMargin(5.0f, &Miscellaneous);
 	Miscellaneous.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
@@ -1308,11 +1308,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	// Auto Update
+#if !defined(CONF_PLATFORM_MACOSX)
 	CUIRect HUDItem;
 	Left.HSplitTop(20.0f, &HUDItem, &Left);
 	HUDItem.VSplitMid(&HUDItem, &Button);
-	if(DoButton_CheckBox(&g_Config.m_hcAutoUpdate, Localize("Auto-Update"), g_Config.m_hcAutoUpdate, &HUDItem))
-		g_Config.m_hcAutoUpdate ^= 1;
+	if(DoButton_CheckBox(&g_Config.m_ClAutoUpdate, Localize("Auto-Update"), g_Config.m_ClAutoUpdate, &HUDItem))
+		g_Config.m_ClAutoUpdate ^= 1;
 	Button.Margin(2.0f, &Button);
 	static int s_ButtonAutoUpdate = 0;
 	if (DoButton_Menu((void*)&s_ButtonAutoUpdate, Localize("Check now"), 0, &Button))
@@ -1339,4 +1340,5 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 			RenderUpdating(aBuf);
 		}
 	}
+#endif
 }

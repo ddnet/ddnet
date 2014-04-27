@@ -274,8 +274,9 @@ void CGameClient::OnInit()
 		m_All.m_paComponents[i]->OnInit();
 
 	// auto update
+#if !defined(CONF_PLATFORM_MACOSX)
 	char aBuf[256];
-	if (g_Config.m_hcAutoUpdate)
+	if (g_Config.m_ClAutoUpdate)
 	{
 		str_format(aBuf, sizeof(aBuf), "Checking for updates");
 		g_GameClient.m_pMenus->RenderUpdating(aBuf);
@@ -299,6 +300,7 @@ void CGameClient::OnInit()
 			g_GameClient.m_pMenus->RenderUpdating(aBuf);
 		}
 	}
+#endif
 
 	// setup load amount// load textures
 	for(int i = 0; i < g_pData->m_NumImages; i++)
