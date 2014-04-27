@@ -209,7 +209,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetName = 0.0f;
-	if(DoEditBox(Name, &Button, Name, sizeof(Name), 14.0f, &s_OffsetName))
+	if(DoEditBox(Name, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
 		m_NeedSendinfo = true;
 
 	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy Settings"), s_Dummy, &Dummy))
@@ -225,7 +225,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetClan = 0.0f;
-	if(DoEditBox(Clan, &Button, Clan, sizeof(Clan), 14.0f, &s_OffsetClan))
+	if(DoEditBox(Clan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 		m_NeedSendinfo = true;
 
 	// country flag selector
@@ -454,7 +454,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(Skin));
+		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_PlayerSkin));
 		m_NeedSendinfo = true;
 	}
 }
