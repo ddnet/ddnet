@@ -44,7 +44,9 @@ class CGameClient : public IGameClient
 	class IDemoPlayer *m_pDemoPlayer;
 	class IDemoRecorder *m_pDemoRecorder;
 	class IServerBrowser *m_pServerBrowser;
-	class IAutoUpdate *m_pAutoUpdate; //H-Client
+#if !defined(CONF_PLATFORM_MACOSX)
+	class IAutoUpdate *m_pAutoUpdate;
+#endif
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 
@@ -80,7 +82,9 @@ public:
 	class IDemoPlayer *DemoPlayer() const { return m_pDemoPlayer; }
 	class IDemoRecorder *DemoRecorder() const { return m_pDemoRecorder; }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
+#if !defined(CONF_PLATFORM_MACOSX)
 	class IAutoUpdate *AutoUpdate() const { return m_pAutoUpdate; }
+#endif
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; };
 	class CCollision *Collision() { return &m_Collision; };
