@@ -266,8 +266,8 @@ public:
 
 private:
 
-	bool m_DDRaceMsgSent;
-	int m_ShowOthers;
+	bool m_DDRaceMsgSent[2];
+	int m_ShowOthers[2];
 };
 
 

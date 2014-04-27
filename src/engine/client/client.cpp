@@ -274,7 +274,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 
 	m_AckGameTick = -1;
 	m_CurrentRecvTick = 0;
-	m_RconAuthed = 0;
+	m_RconAuthed[0] = 0;
+	m_RconAuthed[1] = 0;
 
 	// version-checking
 	m_aVersionStr[0] = '0';
@@ -382,8 +383,8 @@ void CClient::SendReady()
 
 void CClient::RconAuth(const char *pName, const char *pPassword)
 {
-	//if(RconAuthed())
-	//	return;
+	if(RconAuthed())
+		return;
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH);
 	Msg.AddString(pName, 32);
@@ -543,7 +544,7 @@ void CClient::Connect(const char *pAddress)
 		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
 
-	m_RconAuthed = 0;
+	m_RconAuthed[0] = 0;
 	if(m_ServerAddress.port == 0)
 		m_ServerAddress.port = Port;
 	m_NetClient[0].Connect(&m_ServerAddress);
@@ -567,7 +568,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	DemoRecorder_Stop();
 
 	//
-	m_RconAuthed = 0;
+	m_RconAuthed[0] = 0;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
 	m_NetClient[0].Disconnect(pReason);
@@ -630,6 +631,7 @@ void CClient::DummyConnect(bool Info, int NetClient)
 	}
 
 	ServerAddr.port = Port;
+	m_RconAuthed[1] = 0;
 
 	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[1].NetType()) != 0)
 	{
@@ -682,6 +684,7 @@ void CClient::DummyDisconnect(const char *pReason)
 {
 	m_NetClient[1].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
+	m_RconAuthed[1] = 0;
 	m_DummyConnected = 0;
 }
 
@@ -1423,7 +1426,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		{
 			int Result = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
-				m_RconAuthed = Result;
+				m_RconAuthed[g_Config.m_ClDummy] = Result;
 			int Old = m_UseTempRconCommands;
 			m_UseTempRconCommands = Unpacker.GetInt();
 			if(Unpacker.Error() != 0)

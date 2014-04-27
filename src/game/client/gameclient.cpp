@@ -316,8 +316,10 @@ void CGameClient::OnInit()
 
 	m_ServerMode = SERVERMODE_PURE;
 
-	m_DDRaceMsgSent = false;
-	m_ShowOthers = -1;
+	m_DDRaceMsgSent[0] = false;
+	m_DDRaceMsgSent[1] = false;
+	m_ShowOthers[0] = -1;
+	m_ShowOthers[1] = -1;
 
 	// Set free binds to DDRace binds if it's active
 	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
@@ -408,8 +410,10 @@ void CGameClient::OnReset()
 	m_Tuning = CTuningParams();
 
 	m_Teams.Reset();
-	m_DDRaceMsgSent = false;
-	m_ShowOthers = -1;
+	m_DDRaceMsgSent[0] = false;
+	m_DDRaceMsgSent[1] = false;
+	m_ShowOthers[0] = -1;
+	m_ShowOthers[1] = -1;
 }
 
 
@@ -1058,15 +1062,15 @@ void CGameClient::OnNewSnapshot()
 		Client()->SendMsg(&Msg, MSGFLAG_RECORD|MSGFLAG_NOSEND);
 	}
 
-	if(!m_DDRaceMsgSent && m_Snap.m_pLocalInfo)
+	if(!m_DDRaceMsgSent[g_Config.m_ClDummy] && m_Snap.m_pLocalInfo)
 	{
 		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
 		Msg.AddInt(CLIENT_VERSIONNR);
 		Client()->SendMsg(&Msg, MSGFLAG_VITAL);
-		m_DDRaceMsgSent = true;
+		m_DDRaceMsgSent[g_Config.m_ClDummy] = true;
 	}
 
-	if(m_ShowOthers == -1 || (m_ShowOthers != -1 && m_ShowOthers != g_Config.m_ClShowOthers))
+	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
 		// no need to send, default settings
 		//if(!(m_ShowOthers == -1 && g_Config.m_ClShowOthers))
@@ -1077,7 +1081,7 @@ void CGameClient::OnNewSnapshot()
 		}
 
 		// update state
-		m_ShowOthers = g_Config.m_ClShowOthers;
+		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
 }
 
