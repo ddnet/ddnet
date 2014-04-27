@@ -1,3 +1,4 @@
+#if !defined(CONF_PLATFORM_MACOSX)
 #include <base/math.h>
 #include <base/system.h>
 #include <game/version.h>
@@ -374,3 +375,4 @@ bool CAutoUpdate::SelfDelete()
 
 	return false;
 }
+#endif

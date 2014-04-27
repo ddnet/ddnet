@@ -273,9 +273,10 @@ void CGameClient::OnInit()
 	for(int i = m_All.m_Num-1; i >= 0; --i)
 		m_All.m_paComponents[i]->OnInit();
 
+	char aBuf[256];
+
 	// auto update
 #if !defined(CONF_PLATFORM_MACOSX)
-	char aBuf[256];
 	if (g_Config.m_ClAutoUpdate)
 	{
 		str_format(aBuf, sizeof(aBuf), "Checking for updates");
