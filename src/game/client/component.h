@@ -27,6 +27,7 @@ protected:
 	class IDemoPlayer *DemoPlayer() const { return m_pClient->DemoPlayer(); }
 	class IDemoRecorder *DemoRecorder() const { return m_pClient->DemoRecorder(); }
 	class IServerBrowser *ServerBrowser() const { return m_pClient->ServerBrowser(); }
+	class IAutoUpdate *AutoUpdate() const { return m_pClient->AutoUpdate(); } //H-Client
 	class CLayers *Layers() const { return m_pClient->Layers(); }
 	class CCollision *Collision() const { return m_pClient->Collision(); }
 public:

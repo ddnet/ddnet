@@ -19,6 +19,8 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <engine/autoupdate.h>
+
 #include <game/localization.h>
 #include <game/version.h>
 #include "render.h"
@@ -114,6 +116,7 @@ void CGameClient::OnConsoleInit()
 	m_pDemoPlayer = Kernel()->RequestInterface<IDemoPlayer>();
 	m_pDemoRecorder = Kernel()->RequestInterface<IDemoRecorder>();
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
+	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 
@@ -270,6 +273,33 @@ void CGameClient::OnInit()
 	for(int i = m_All.m_Num-1; i >= 0; --i)
 		m_All.m_paComponents[i]->OnInit();
 
+	// auto update
+	char aBuf[256];
+	if (g_Config.m_hcAutoUpdate)
+	{
+		str_format(aBuf, sizeof(aBuf), "Checking updates, please wait....");
+		g_GameClient.m_pMenus->RenderUpdating(aBuf);
+		AutoUpdate()->CheckUpdates(m_pMenus);
+		if (AutoUpdate()->Updated())
+		{
+			if (AutoUpdate()->NeedResetClient())
+			{
+				Client()->Quit();
+				return;
+			}
+			else
+			{
+				str_format(aBuf, sizeof(aBuf), "H-Client updated successfully :)");
+				g_GameClient.m_pMenus->RenderUpdating(aBuf);
+			}
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "Not need be update :)");
+			g_GameClient.m_pMenus->RenderUpdating(aBuf);
+		}
+	}
+
 	// setup load amount// load textures
 	for(int i = 0; i < g_pData->m_NumImages; i++)
 	{
@@ -281,7 +311,6 @@ void CGameClient::OnInit()
 		m_All.m_paComponents[i]->OnReset();
 
 	int64 End = time_get();
-	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
 

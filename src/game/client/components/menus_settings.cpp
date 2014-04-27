@@ -9,6 +9,7 @@
 #include <engine/graphics.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/autoupdate.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
@@ -1304,5 +1305,38 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
 	{
 		g_Config.m_ClEditorUndo ^= 1;
+	}
+
+	// Auto Update
+	CUIRect HUDItem;
+	Left.HSplitTop(20.0f, &HUDItem, &Left);
+	HUDItem.VSplitMid(&HUDItem, &Button);
+	if(DoButton_CheckBox(&g_Config.m_hcAutoUpdate, Localize("Auto-Update"), g_Config.m_hcAutoUpdate, &HUDItem))
+		g_Config.m_hcAutoUpdate ^= 1;
+	Button.Margin(2.0f, &Button);
+	static int s_ButtonAutoUpdate = 0;
+	if (DoButton_Menu((void*)&s_ButtonAutoUpdate, Localize("Check now"), 0, &Button))
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Checking for an update");
+		RenderUpdating(aBuf);
+		AutoUpdate()->CheckUpdates(this);
+		if (AutoUpdate()->Updated())
+		{
+			if (AutoUpdate()->NeedResetClient())
+			{
+				Client()->Quit();
+				return;
+			}
+			else
+				str_format(aBuf, sizeof(aBuf), "DDNet Client updated");
+
+			RenderUpdating(aBuf);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "No update available");
+			RenderUpdating(aBuf);
+		}
 	}
 }

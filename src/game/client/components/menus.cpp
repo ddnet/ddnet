@@ -1643,3 +1643,56 @@ int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int C
 		return DoButton_CheckBox_Common(pID, pText, "", pRect);
 	}
 }
+
+void CMenus::RenderUpdating(const char *pCaption, int current, int total)
+{
+	// make sure that we don't render for each little thing we load
+	// because that will slow down loading if we have vsync
+	static int64 LastLoadRender = 0;
+	if(time_get()-LastLoadRender < time_freq()/60)
+		return;
+	LastLoadRender = time_get();
+
+	// need up date this here to get correct
+	vec3 Rgb = HslToRgb(vec3(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
+	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
+
+	CUIRect Screen = *UI()->Screen();
+	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+
+	RenderBackground();
+
+	float w = 700;
+	float h = 200;
+	float x = Screen.w/2-w/2;
+	float y = Screen.h/2-h/2;
+
+	Graphics()->BlendNormal();
+
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0,0,0,0.50f);
+	RenderTools()->DrawRoundRect(0, y, Screen.w, h, 0.0f);
+	Graphics()->QuadsEnd();
+
+	CUIRect r;
+	r.x = x;
+	r.y = y+20;
+	r.w = w;
+	r.h = h;
+	UI()->DoLabel(&r, Localize(pCaption), 32.0f, 0, -1);
+
+	if (total>0)
+	{
+		float Percent = current/(float)total;
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0.15f,0.15f,0.15f,0.75f);
+		RenderTools()->DrawRoundRect(x+40, y+h-75, w-80, 30, 5.0f);
+		Graphics()->SetColor(1,1,1,0.75f);
+		RenderTools()->DrawRoundRect(x+45, y+h-70, (w-85)*Percent, 20, 5.0f);
+		Graphics()->QuadsEnd();
+	}
+
+	Graphics()->Swap();
+}

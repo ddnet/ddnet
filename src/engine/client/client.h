@@ -63,6 +63,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IEngineMap *m_pMap;
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
+	IAutoUpdate *m_pAutoUpdate;
 	IEngineMasterServer *m_pMasterServer;
 
 	enum
@@ -75,6 +76,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder;
 	class CServerBrowser m_ServerBrowser;
+	class CAutoUpdate m_AutoUpdate;
 	class CFriends m_Friends;
 	class CMapChecker m_MapChecker;
 
@@ -188,6 +190,7 @@ public:
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
+	IAutoUpdate *AutoUpdate() { return m_pAutoUpdate; }
 
 	CClient();
 
