@@ -657,6 +657,7 @@ void CClient::DummyConnect()
 
 	//connecting to the server
 	m_DummyConnected = 1;
+	m_DummyConnecting = 1;
 	m_NetClient[1].Connect(&m_ServerAddress);
 
 	// send client info
@@ -1294,6 +1295,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 			if(Unpacker.Error())
 				return;
+
+			if(m_DummyConnecting)
+			{
+				m_DummyConnecting = 0;
+			}
+			else
+			{
+				m_DummyConnected = 0;
+				g_Config.m_ClDummy = 0;
+			}
 
 			// check for valid standard map
 			if(!m_MapChecker.IsMapValid(pMap, MapCrc, MapSize))

@@ -245,6 +245,7 @@ public:
 	virtual bool DummyConnected();
 	void DummyInfo();
 	int m_DummyConnected;
+	int m_DummyConnecting;
 	int m_LastDummyConnectTime;
 
 	virtual void GetServerInfo(CServerInfo *pServerInfo);
