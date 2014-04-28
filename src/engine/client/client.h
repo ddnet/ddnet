@@ -249,6 +249,8 @@ public:
 	int m_DummyConnected;
 	int m_DummyConnecting;
 	int m_LastDummyConnectTime;
+	int m_LocalIDs[2];
+	int m_Fire;
 
 	virtual void GetServerInfo(CServerInfo *pServerInfo);
 	void ServerInfoRequest();
