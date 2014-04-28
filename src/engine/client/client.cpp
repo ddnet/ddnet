@@ -495,7 +495,7 @@ void CClient::SendInput()
 			mem_zero(&DummyData, sizeof(DummyData));
 
 			DummyData.m_Fire = (int) ((float) m_Fire / 12.5);
-			DummyData.m_WantedWeapon = WEAPON_HAMMER;
+			DummyData.m_WantedWeapon = 1;
 
 			CNetObj_Character Main = ((CGameClient *)GameClient())->m_Snap.m_aCharacters[m_LocalIDs[g_Config.m_ClDummy]].m_Cur;
 			CNetObj_Character Dummy = ((CGameClient *)GameClient())->m_Snap.m_aCharacters[m_LocalIDs[!g_Config.m_ClDummy]].m_Cur;
