@@ -179,7 +179,7 @@ void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 							#endif
 								dbg_msg("autoupdate", "Error downloading new version");
 						}
-						if (!m_NeedUpdateClient && ReadData.substr(2).compare("UPDATE_SERVER") == 0)
+						if (ReadData.substr(2).compare("UPDATE_SERVER") == 0)
 						{
 							str_format(aBuf, sizeof(aBuf), "Updating DDNet Server to %s", last_version);
 							pMenus->RenderUpdating(aBuf);
