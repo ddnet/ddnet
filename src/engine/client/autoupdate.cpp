@@ -179,6 +179,23 @@ void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 							#endif
 								dbg_msg("autoupdate", "Error downloading new version");
 						}
+						if (!m_NeedUpdateClient && ReadData.substr(2).compare("UPDATE_SERVER") == 0)
+						{
+							str_format(aBuf, sizeof(aBuf), "Updating DDNet Server to %s", last_version);
+							pMenus->RenderUpdating(aBuf);
+
+							m_NeedUpdateClient = true;
+							m_NeedResetClient = true;
+							dbg_msg("autoupdate", "Updating server");
+							#if defined(CONF_FAMILY_WINDOWS)
+							if (!GetFile("DDNet-Server.exe", "DDNet-Server.exe"))
+							#elif defined(CONF_ARCH_AMD64)
+							if (!GetFile("DDNet-Server64", "DDNet-Server"))
+							#else
+							if (!GetFile("DDNet-Server", "DDNet-Server"))
+							#endif
+								dbg_msg("autoupdate", "Error downloading new version");
+						}
 						else if (!m_NeedUpdateClient && ReadData.substr(2).compare("RESET_CLIENT") == 0)
 							m_NeedResetClient = true;
 					}
