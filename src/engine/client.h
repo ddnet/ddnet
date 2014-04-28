@@ -179,6 +179,7 @@ public:
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
 
+	virtual void OnDummyDisconnect() = 0;
 };
 
 extern IGameClient *CreateGameClient();

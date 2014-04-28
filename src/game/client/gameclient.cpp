@@ -580,6 +580,12 @@ void CGameClient::OnRender()
 	}
 }
 
+void CGameClient::OnDummyDisconnect()
+{
+	m_DDRaceMsgSent[1] = false;
+	m_ShowOthers[1] = -1;
+}
+
 void CGameClient::OnRelease()
 {
 	// release all systems
@@ -1081,12 +1087,20 @@ void CGameClient::OnNewSnapshot()
 		Client()->SendMsg(&Msg, MSGFLAG_RECORD|MSGFLAG_NOSEND);
 	}
 
-	if(!m_DDRaceMsgSent[g_Config.m_ClDummy] && m_Snap.m_pLocalInfo)
+	if(!m_DDRaceMsgSent[0] && m_Snap.m_pLocalInfo)
 	{
 		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
 		Msg.AddInt(CLIENT_VERSIONNR);
-		Client()->SendMsg(&Msg, MSGFLAG_VITAL);
-		m_DDRaceMsgSent[g_Config.m_ClDummy] = true;
+		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 0);
+		m_DDRaceMsgSent[0] = true;
+	}
+
+	if(!m_DDRaceMsgSent[1] && m_Snap.m_pLocalInfo && Client()->DummyConnected())
+	{
+		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNET);
+		Msg.AddInt(CLIENT_VERSIONNR);
+		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL,false, 1);
+		m_DDRaceMsgSent[1] = true;
 	}
 
 	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))

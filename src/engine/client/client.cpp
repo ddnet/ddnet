@@ -650,6 +650,8 @@ void CClient::DummyConnect()
 	// send enter game an finish the connection
 	CMsgPacker MsgEnter(NETMSG_ENTERGAME);
 	SendMsgExY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
+
+	g_Config.m_ClDummy = 1;
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -658,6 +660,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	g_Config.m_ClDummy = 0;
 	m_RconAuthed[1] = 0;
 	m_DummyConnected = 0;
+	GameClient()->OnDummyDisconnect();
 }
 
 int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)

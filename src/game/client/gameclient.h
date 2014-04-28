@@ -214,6 +214,7 @@ public:
 	// hooks
 	virtual void OnConnected();
 	virtual void OnRender();
+	virtual void OnDummyDisconnect();
 	virtual void OnRelease();
 	virtual void OnInit();
 	virtual void OnConsoleInit();
