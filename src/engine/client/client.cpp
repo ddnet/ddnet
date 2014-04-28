@@ -5,6 +5,7 @@
 #include <stdlib.h> // qsort
 #include <stdarg.h>
 #include <string.h>
+#include <climits>
 
 #include <base/math.h>
 #include <base/vmath.h>
@@ -305,6 +306,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_CurrentServerInfoRequestTime = -1;
 
 	m_CurrentInput = 0;
+	m_LastDummy = 0;
 
 	m_State = IClient::STATE_OFFLINE;
 	m_aServerAddressStr[0] = 0;
@@ -421,7 +423,6 @@ void CClient::DirectInput(int *pInput, int Size)
 	SendMsgEx(&Msg, 0);
 }
 
-
 void CClient::SendInput()
 {
 	int64 Now = time_get();
@@ -454,26 +455,51 @@ void CClient::SendInput()
 
 	SendMsgEx(&Msg, MSGFLAG_FLUSH);
 
-	/*if(m_DummyConnected)
+	if(m_LastDummy != g_Config.m_ClDummy)
 	{
+		mem_copy(&DummyInput, &m_aInputs[(m_CurrentInput-2)%200], sizeof(DummyInput));
+		m_LastDummy = g_Config.m_ClDummy;
+	}
+
+	if(m_DummyConnected)
+	{
+		// pack input
+		CMsgPacker Msg(NETMSG_INPUT);
+		Msg.AddInt(INT_MAX);
+		Msg.AddInt(INT_MAX);
+		Msg.AddInt(sizeof(DummyInput));
+
+		// pack it
+		for(unsigned int i = 0; i < sizeof(DummyInput)/4; i++)
+			Msg.AddInt(((int*) &DummyInput)[i]);
+
+		SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
+	}
+
+	/*if(m_DummyConnected && !g_Config.m_ClDummy)
+	{
+		static int s_Fire = 0;
 		CNetObj_PlayerInput DummyData;
-		DummyData.m_Direction = 1;
+		mem_zero(&DummyData, sizeof(DummyData));
+
+		DummyData.m_Fire = s_Fire / 4.8;
+		DummyData.m_WantedWeapon = WEAPON_HAMMER;
+		DummyData.m_TargetX = 0;
+		DummyData.m_TargetY = -10;
+
+		s_Fire++;
 
 		// pack input
 		CMsgPacker Msg(NETMSG_INPUT);
-		Msg.AddInt(m_AckGameTick);
-		Msg.AddInt(m_PredTick);
+		Msg.AddInt(m_AckGameTick[g_Config.m_ClDummy]);
+		Msg.AddInt(m_PredTick[g_Config.m_ClDummy]);
 		Msg.AddInt(sizeof(DummyData));
-
-		m_aInputs[m_CurrentInput].m_Tick = m_PredTick;
-		m_aInputs[m_CurrentInput].m_PredictedTime = m_PredictedTime.Get(Now);
-		m_aInputs[m_CurrentInput].m_Time = Now;
 
 		// pack it
 		for(unsigned int i = 0; i < sizeof(DummyData)/4; i++)
 			Msg.AddInt(((int*) &DummyData)[i]);
 
-		SendMsgExY(&Msg, MSGFLAG_FLUSH, false, 1);
+		SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
 	}*/
 }
 
