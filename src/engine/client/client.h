@@ -104,8 +104,8 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
 
-	int m_AckGameTick;
-	int m_CurrentRecvTick;
+	int m_AckGameTick[2];
+	int m_CurrentRecvTick[2];
 	int m_RconAuthed[2];
 	int m_UseTempRconCommands;
 
@@ -132,8 +132,8 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_MapdownloadTotalsize;
 
 	// time
-	CSmoothTime m_GameTime;
-	CSmoothTime m_PredictedTime;
+	CSmoothTime m_GameTime[2];
+	CSmoothTime m_PredictedTime[2];
 
 	// input
 	struct // TODO: handle input better
