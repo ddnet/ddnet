@@ -243,6 +243,8 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("dummy_color_feet", ConchainSpecialDummyInfoupdate, this);
 	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
 
+	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
+
 	//
 	m_SuppressEvents = false;
 }
@@ -554,6 +556,9 @@ void CGameClient::OnRender()
 	// clear new tick flags
 	m_NewTick = false;
 	m_NewPredictedTick = false;
+
+	if(g_Config.m_ClDummy && !Client()->DummyConnected())
+		g_Config.m_ClDummy = 0;
 
 	// check if client info has to be resent
 	if(m_LastSendInfo && Client()->State() == IClient::STATE_ONLINE && m_Snap.m_LocalClientID >= 0 && !m_pMenus->IsActive() && m_LastSendInfo+time_freq()*6 < time_get())
@@ -1404,6 +1409,14 @@ void CGameClient::ConchainSpecialDummyInfoupdate(IConsole::IResult *pResult, voi
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
 		((CGameClient*)pUserData)->SendDummyInfo(false);
+}
+
+void CGameClient::ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+		if(g_Config.m_ClDummy && !((CGameClient*)pUserData)->Client()->DummyConnected())
+			g_Config.m_ClDummy = 0;
 }
 
 IGameClient *CreateGameClient()
