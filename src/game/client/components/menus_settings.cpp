@@ -524,7 +524,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Scoreboard", "+scoreboard", 0 },
 	{ "Respawn", "kill", 0 },
 	{ "Toggle Dummy", "toggle cl_dummy 0 1", 0 },
-	{ "Hammerfly Dummy", "toggle cl_dummy_hammerfly 0 1", 0 },
+	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
