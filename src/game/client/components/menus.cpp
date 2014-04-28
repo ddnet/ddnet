@@ -59,6 +59,7 @@ CMenus::CMenus()
 	m_NeedRestartGraphics = false;
 	m_NeedRestartSound = false;
 	m_NeedSendinfo = false;
+	m_NeedSendDummyinfo = false;
 	m_MenuActive = true;
 	m_UseMouseButtons = true;
 
@@ -1350,6 +1351,12 @@ void CMenus::SetActive(bool Active)
 		{
 			m_pClient->SendInfo(false);
 			m_NeedSendinfo = false;
+		}
+
+		if(m_NeedSendDummyinfo)
+		{
+			m_pClient->SendDummyInfo(false);
+			m_NeedSendDummyinfo = false;
 		}
 
 		if(Client()->State() == IClient::STATE_ONLINE)

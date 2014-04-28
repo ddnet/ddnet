@@ -202,6 +202,7 @@ public:
 
 	// ----- send functions -----
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags);
+	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1);
 
 	int SendMsgEx(CMsgPacker *pMsg, int Flags, bool System=true);
 	void SendInfo();
@@ -240,12 +241,11 @@ public:
 	virtual void Disconnect();
 
 	virtual void DummyDisconnect(const char *pReason);
-	virtual void DummyConnect(bool Info = true, int NetClient = 1);
+	virtual void DummyConnect();
 	virtual bool DummyConnected();
 	void DummyInfo();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
-	int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1);
 
 	virtual void GetServerInfo(CServerInfo *pServerInfo);
 	void ServerInfoRequest();

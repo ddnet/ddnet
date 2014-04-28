@@ -606,14 +606,14 @@ bool CClient::DummyConnected()
 	return m_DummyConnected;
 }
 
-void CClient::DummyConnect(bool Info, int NetClient)
+void CClient::DummyConnect()
 {
 	if(m_LastDummyConnectTime > GameTick())
 		return;
 
 	char aBuf[512];
 
-	m_NetClient[NetClient].Disconnect(0);
+	m_NetClient[1].Disconnect(0);
 
 	str_copy(aBuf, g_Config.m_UiServerAddress, sizeof(aBuf));
 
@@ -629,41 +629,27 @@ void CClient::DummyConnect(bool Info, int NetClient)
 
 	//connecting to the server
 	m_DummyConnected = 1;
-	m_NetClient[NetClient].Connect(&m_ServerAddress);
+	m_NetClient[1].Connect(&m_ServerAddress);
 
 	// send client info
 	CMsgPacker MsgInfo(NETMSG_INFO);
 	MsgInfo.AddString(GameClient()->NetVersion(), 128);
 	MsgInfo.AddString(g_Config.m_Password, 128);
-	SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, NetClient);
+	SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 
 	// update netclient
-	m_NetClient[NetClient].Update();
+	m_NetClient[1].Update();
 
 	// send ready
 	CMsgPacker MsgReady(NETMSG_READY);
-	SendMsgExY(&MsgReady, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, NetClient);
+	SendMsgExY(&MsgReady, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 
 	// startinfo
-	if(Info)
-		DummyInfo();
-	{
-		CNetMsg_Cl_StartInfo Msg;
-		Msg.m_pName = g_Config.m_DummyName;
-		Msg.m_pClan = g_Config.m_DummyClan;
-		Msg.m_Country = g_Config.m_DummyCountry;
-		Msg.m_pSkin = g_Config.m_DummySkin;
-		Msg.m_UseCustomColor = g_Config.m_DummyUseCustomColor;
-		Msg.m_ColorBody = g_Config.m_DummyColorBody;
-		Msg.m_ColorFeet = g_Config.m_DummyColorFeet;
-		CMsgPacker Packer(Msg.MsgID());
-		Msg.Pack(&Packer);
-		SendMsgExY(&Packer, MSGFLAG_VITAL,false, NetClient);
-	}
+	GameClient()->SendDummyInfo(true);
 
 	// send enter game an finish the connection
 	CMsgPacker MsgEnter(NETMSG_ENTERGAME);
-	SendMsgExY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, NetClient);
+	SendMsgExY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -706,7 +692,7 @@ void CClient::DummyInfo()
 	CNetMsg_Cl_ChangeInfo Msg;
 	Msg.m_pName = g_Config.m_DummyName;
 	Msg.m_pClan = g_Config.m_DummyClan;
-	Msg.m_Country = g_Config.m_PlayerCountry;
+	Msg.m_Country = g_Config.m_DummyCountry;
 	Msg.m_pSkin = g_Config.m_DummySkin;
 	Msg.m_UseCustomColor = g_Config.m_DummyUseCustomColor;
 	Msg.m_ColorBody = g_Config.m_DummyColorBody;
@@ -2297,7 +2283,7 @@ void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_DummyConnect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DummyConnect(false);
+	pSelf->DummyConnect();
 }
 
 void CClient::Con_DummyDisconnect(IConsole::IResult *pResult, void *pUserData)

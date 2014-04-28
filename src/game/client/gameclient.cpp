@@ -235,6 +235,14 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("player_color_feet", ConchainSpecialInfoupdate, this);
 	Console()->Chain("player_skin", ConchainSpecialInfoupdate, this);
 
+	Console()->Chain("dummy_name", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy_clan", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy_country", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy_use_custom_color", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy_color_body", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy_color_feet", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
+
 	//
 	m_SuppressEvents = false;
 }
@@ -560,7 +568,8 @@ void CGameClient::OnRender()
 			g_Config.m_PlayerColorBody != m_aClients[m_Snap.m_LocalClientID].m_ColorBody ||
 			g_Config.m_PlayerColorFeet != m_aClients[m_Snap.m_LocalClientID].m_ColorFeet)))
 		{
-			SendInfo(false);
+			if (!g_Config.m_ClDummy)
+				SendInfo(false);
 		}
 		m_LastSendInfo = 0;
 	}
@@ -1307,7 +1316,9 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_PlayerUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_PlayerColorBody;
 		Msg.m_ColorFeet = g_Config.m_PlayerColorFeet;
-		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		CMsgPacker Packer(Msg.MsgID());
+		Msg.Pack(&Packer);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 0);
 	}
 	else
 	{
@@ -1319,11 +1330,49 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_PlayerUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_PlayerColorBody;
 		Msg.m_ColorFeet = g_Config.m_PlayerColorFeet;
-		Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		CMsgPacker Packer(Msg.MsgID());
+		Msg.Pack(&Packer);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 0);
 
 		// activate timer to resend the info if it gets filtered
 		if(!m_LastSendInfo || m_LastSendInfo+time_freq()*5 < time_get())
 			m_LastSendInfo = time_get();
+	}
+}
+
+void CGameClient::SendDummyInfo(bool Start)
+{
+	if(Start)
+	{
+		CNetMsg_Cl_StartInfo Msg;
+		Msg.m_pName = g_Config.m_DummyName;
+		Msg.m_pClan = g_Config.m_DummyClan;
+		Msg.m_Country = g_Config.m_DummyCountry;
+		Msg.m_pSkin = g_Config.m_DummySkin;
+		Msg.m_UseCustomColor = g_Config.m_DummyUseCustomColor;
+		Msg.m_ColorBody = g_Config.m_DummyColorBody;
+		Msg.m_ColorFeet = g_Config.m_DummyColorFeet;
+		CMsgPacker Packer(Msg.MsgID());
+		Msg.Pack(&Packer);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
+	}
+	else
+	{
+		CNetMsg_Cl_ChangeInfo Msg;
+		Msg.m_pName = g_Config.m_DummyName;
+		Msg.m_pClan = g_Config.m_DummyClan;
+		Msg.m_Country = g_Config.m_DummyCountry;
+		Msg.m_pSkin = g_Config.m_DummySkin;
+		Msg.m_UseCustomColor = g_Config.m_DummyUseCustomColor;
+		Msg.m_ColorBody = g_Config.m_DummyColorBody;
+		Msg.m_ColorFeet = g_Config.m_DummyColorFeet;
+		CMsgPacker Packer(Msg.MsgID());
+		Msg.Pack(&Packer);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
+
+		// activate timer to resend the info if it gets filtered
+		//if(!m_LastSendInfo || m_LastSendInfo+time_freq()*5 < time_get())
+		//	m_LastSendInfo = time_get();
 	}
 }
 
@@ -1348,6 +1397,13 @@ void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pU
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
 		((CGameClient*)pUserData)->SendInfo(false);
+}
+
+void CGameClient::ConchainSpecialDummyInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+		((CGameClient*)pUserData)->SendDummyInfo(false);
 }
 
 IGameClient *CreateGameClient()

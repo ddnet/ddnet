@@ -123,7 +123,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	{
 		if(!Client()->DummyConnected())
 		{
-			Client()->DummyConnect(false);
+			Client()->DummyConnect();
 		}
 		else
 		{

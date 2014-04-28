@@ -210,7 +210,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetName = 0.0f;
 	if(DoEditBox(Name, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
-		m_NeedSendinfo = true;
+		if(s_Dummy)
+			m_NeedSendDummyinfo = true;
+		else
+			m_NeedSendinfo = true;
 
 	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy Settings"), s_Dummy, &Dummy))
 	{
@@ -226,7 +229,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
 	static float s_OffsetClan = 0.0f;
 	if(DoEditBox(Clan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
-		m_NeedSendinfo = true;
+		if(s_Dummy)
+			m_NeedSendDummyinfo = true;
+		else
+			m_NeedSendinfo = true;
 
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
@@ -260,7 +266,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
-		m_NeedSendinfo = true;
+		if(s_Dummy)
+			m_NeedSendDummyinfo = true;
+		else
+			m_NeedSendinfo = true;
 	}
 }
 
@@ -328,7 +337,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor?0:1;
-		m_NeedSendinfo = true;
+		if(s_Dummy)
+			m_NeedSendDummyinfo = true;
+		else
+			m_NeedSendinfo = true;
 	}
 	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Bandana Brothers skins"), g_Config.m_ClShowSpecialSkins, &Button2))
 	{
@@ -381,7 +393,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			}
 
 			if(PrevColor != Color)
-				m_NeedSendinfo = true;
+			{
+				if(s_Dummy)
+					m_NeedSendDummyinfo = true;
+				else
+					m_NeedSendinfo = true;
+			}
 
 			*paColors[i] = Color;
 		}
@@ -455,7 +472,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_PlayerSkin));
-		m_NeedSendinfo = true;
+		if(s_Dummy)
+			m_NeedSendDummyinfo = true;
+		else
+			m_NeedSendinfo = true;
 	}
 }
 

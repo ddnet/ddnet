@@ -77,7 +77,7 @@ public:
 
 	// dummy
 	virtual void DummyDisconnect(const char *pReason) = 0;
-	virtual void DummyConnect(bool Info = true, int NetClient = 1) = 0;
+	virtual void DummyConnect() = 0;
 	virtual bool DummyConnected() = 0;
 
 	virtual void Quit() = 0;
@@ -124,6 +124,7 @@ public:
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags) = 0;
+	virtual int SendMsgExY(CMsgPacker *pMsg, int Flags, bool System=true, int NetClient=1) = 0;
 
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags)
@@ -172,6 +173,7 @@ public:
 	virtual void OnActivateEditor() = 0;
 
 	virtual int OnSnapInput(int *pData) = 0;
+	virtual void SendDummyInfo(bool Start) = 0;
 
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;
