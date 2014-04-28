@@ -643,9 +643,14 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
 
+	bool Lock = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.TeamLocked(Team);
+
+	if (pResult->NumArguments() > 0)
+		Lock = !pResult->GetInteger(0);
+
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
 	{
-		if(((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.TeamLocked(Team))
+		if(Lock)
 		{
 			((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, false);
 
