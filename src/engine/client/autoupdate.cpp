@@ -172,6 +172,8 @@ void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 							dbg_msg("autoupdate", "Updating client");
 							#if defined(CONF_FAMILY_WINDOWS)
 							if (!GetFile("DDNet.exe", "DDNet_tmp.exe"))
+							#elif defined(CONF_ARCH_AMD64)
+							if (!GetFile("DDNet64", "DDNet_tmp"))
 							#else
 							if (!GetFile("DDNet", "DDNet_tmp"))
 							#endif
@@ -322,7 +324,7 @@ bool CAutoUpdate::GetFile(const char *pFile, const char *dst)
 					continue;
 				}
 				else if (aNetBuff[i]!='\r')
-				    enterCtrl=0;
+					enterCtrl=0;
 
 				NetData+=aNetBuff[i];
 			}
