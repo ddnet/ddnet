@@ -441,7 +441,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 				char aChatmsg[512] = {0};
 				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote", (Timeleft/pData->m_pSqlData->Server()->TickSpeed())+1);
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aChatmsg);
-				return;
+				goto end;
 			}
 			else if(time_get() < pData->m_pSqlData->GameServer()->m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 			{
@@ -465,6 +465,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 				pData->m_pSqlData->GameServer()->m_LastMapVote = time_get();
 			}
 
+			end:
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
