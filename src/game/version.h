@@ -3,8 +3,8 @@
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
 #include "generated/nethash.cpp"
-#define GAME_VERSION "0.6.2, 3.5"
+#define GAME_VERSION "0.6.2, 3.6"
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
-static const char GAME_RELEASE_VERSION[8] = "3.5";
-#define CLIENT_VERSIONNR 305
+static const char GAME_RELEASE_VERSION[8] = "3.6";
+#define CLIENT_VERSIONNR 306
 #endif
