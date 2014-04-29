@@ -479,8 +479,8 @@ void CClient::SendInput()
 		{
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
-			Msg.AddInt(INT_MAX);
-			Msg.AddInt(INT_MAX);
+			Msg.AddInt(m_AckGameTick[g_Config.m_ClDummy]);
+			Msg.AddInt(m_PredTick[g_Config.m_ClDummy]);
 			Msg.AddInt(sizeof(DummyInput));
 
 			// pack it
@@ -505,8 +505,8 @@ void CClient::SendInput()
 
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
-			Msg.AddInt(INT_MAX);
-			Msg.AddInt(INT_MAX);
+			Msg.AddInt(m_AckGameTick[g_Config.m_ClDummy]);
+			Msg.AddInt(m_PredTick[g_Config.m_ClDummy]);
 			Msg.AddInt(sizeof(DummyData));
 
 			// pack it
