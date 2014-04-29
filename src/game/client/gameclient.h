@@ -102,7 +102,7 @@ public:
 	int m_FlagDropTick[2];
 
 	// TODO: move this
-	CTuningParams m_Tuning;
+	CTuningParams m_Tuning[2];
 
 	enum
 	{

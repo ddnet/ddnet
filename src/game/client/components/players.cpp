@@ -548,7 +548,7 @@ void CPlayers::RenderPlayer(
 
 			Graphics()->TextureSet(-1);
 			vec2 initPos = Position;
-			vec2 finishPos = initPos + ExDirection * (m_pClient->m_Tuning.m_HookLength-42.0f);
+			vec2 finishPos = initPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength-42.0f);
 
 			Graphics()->LinesBegin();
 			Graphics()->SetColor(1.00f, 0.0f, 0.0f, 1.00f);
@@ -563,11 +563,11 @@ void CPlayers::RenderPlayer(
 
 			do {
 				OldPos = NewPos;
-				NewPos = OldPos + ExDirection * m_pClient->m_Tuning.m_HookFireSpeed;
+				NewPos = OldPos + ExDirection * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookFireSpeed;
 
-				if (distance(Position, NewPos) > m_pClient->m_Tuning.m_HookLength)
+				if (distance(Position, NewPos) > m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength)
 				{
-					NewPos = initPos + normalize(NewPos-initPos) * m_pClient->m_Tuning.m_HookLength;
+					NewPos = initPos + normalize(NewPos-initPos) * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength;
 					doBreak = true;
 				}
 
@@ -581,7 +581,7 @@ void CPlayers::RenderPlayer(
 						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
 				}
 
-				if(m_pClient->m_Tuning.m_PlayerHooking && m_pClient->IntersectCharacter(OldPos, finishPos, finishPos, pPlayerInfo->m_ClientID) != -1)
+				if(m_pClient->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking && m_pClient->IntersectCharacter(OldPos, finishPos, finishPos, pPlayerInfo->m_ClientID) != -1)
 				{
 					Graphics()->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
 					break;

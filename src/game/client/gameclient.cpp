@@ -422,7 +422,8 @@ void CGameClient::OnReset()
 	m_DemoSpecID = SPEC_FREEVIEW;
 	m_FlagDropTick[TEAM_RED] = 0;
 	m_FlagDropTick[TEAM_BLUE] = 0;
-	m_Tuning = CTuningParams();
+	m_Tuning[0] = CTuningParams();
+	m_Tuning[1] = CTuningParams();
 
 	m_Teams.Reset();
 	m_DDRaceMsgSent[0] = false;
@@ -631,7 +632,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 		m_ServerMode = SERVERMODE_PURE;
 
 		// apply new tuning
-		m_Tuning = NewTuning;
+		m_Tuning[g_Config.m_ClDummy] = NewTuning;
 		return;
 	}
 
@@ -1071,18 +1072,18 @@ void CGameClient::OnNewSnapshot()
 	{
 		if(str_comp(CurrentServerInfo.m_aGameType, "DM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "TDM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "CTF") != 0)
 			m_ServerMode = SERVERMODE_MOD;
-		else if(mem_comp(&StandardTuning, &m_Tuning, 33) == 0)
+		else if(mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], 33) == 0)
 			m_ServerMode = SERVERMODE_PURE;
 		else
 			m_ServerMode = SERVERMODE_PUREMOD;
 	}
 
 	// add tuning to demo
-	if(DemoRecorder()->IsRecording() && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)
+	if(DemoRecorder()->IsRecording() && mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], sizeof(CTuningParams)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-		int *pParams = (int *)&m_Tuning;
-		for(unsigned i = 0; i < sizeof(m_Tuning)/sizeof(int); i++)
+		int *pParams = (int *)&m_Tuning[g_Config.m_ClDummy];
+		for(unsigned i = 0; i < sizeof(m_Tuning[0])/sizeof(int); i++)
 			Msg.AddInt(pParams[i]);
 		Client()->SendMsg(&Msg, MSGFLAG_RECORD|MSGFLAG_NOSEND);
 	}
@@ -1146,7 +1147,7 @@ void CGameClient::OnPredict()
 
 	// repredict character
 	CWorldCore World;
-	World.m_Tuning = m_Tuning;
+	World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
 
 	// search for players
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1444,7 +1445,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
-	if (!m_Tuning.m_PlayerHooking)
+	if (!m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
 		return ClosestID;
 
 	for (int i=0; i<MAX_CLIENTS; i++)
