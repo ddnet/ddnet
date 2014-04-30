@@ -422,8 +422,7 @@ void CGameClient::OnReset()
 	m_DemoSpecID = SPEC_FREEVIEW;
 	m_FlagDropTick[TEAM_RED] = 0;
 	m_FlagDropTick[TEAM_BLUE] = 0;
-	m_Tuning[0] = CTuningParams();
-	m_Tuning[1] = CTuningParams();
+	m_Tuning[g_Config.m_ClDummy] = CTuningParams();
 
 	m_Teams.Reset();
 	m_DDRaceMsgSent[0] = false;
