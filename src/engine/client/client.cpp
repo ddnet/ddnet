@@ -474,6 +474,10 @@ void CClient::SendInput()
 		if(!g_Config.m_ClDummyHammer)
 		{
 			m_Fire = 25;
+
+			if(!Size && (!DummyInput.m_Direction && !DummyInput.m_Jump && !DummyInput.m_Hook))
+				return;
+
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
 			Msg.AddInt(m_AckGameTick[g_Config.m_ClDummy]);

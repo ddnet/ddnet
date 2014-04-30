@@ -200,6 +200,10 @@ int CControls::SnapInput(int *pData)
 		// send at at least 10hz
 		if(time_get() > LastSendTime + time_freq()/25)
 			Send = true;
+
+		if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalCharacter->m_Weapon == WEAPON_NINJA
+			&& (m_InputData.m_Direction || m_InputData.m_Jump || m_InputData.m_Hook))
+			Send = true;
 	}
 
 	// copy and return size
