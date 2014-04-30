@@ -787,13 +787,20 @@ void CPlayers::RenderPlayer(
 
 	if (g_Config.m_ClShowDirection && (!pInfo.m_Local || DemoPlayer()->IsPlaying()))
 	{
-		if (Player.m_Direction != 0)
+		if (Player.m_Direction == -1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
-			IGraphics::CQuadItem QuadItem(Position.x-15, Position.y - 70, 22, 22);
-			if (Player.m_Direction == -1)
-				Graphics()->QuadsSetRotation(GetAngle(vec2(1,0))+pi);
+			IGraphics::CQuadItem QuadItem(Position.x-30, Position.y - 70, 22, 22);
+			Graphics()->QuadsSetRotation(GetAngle(vec2(1,0))+pi);
+			Graphics()->QuadsDraw(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+		else if (Player.m_Direction == 1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsBegin();
+			IGraphics::CQuadItem QuadItem(Position.x+30, Position.y - 70, 22, 22);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -801,7 +808,7 @@ void CPlayers::RenderPlayer(
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
-			IGraphics::CQuadItem QuadItem(Position.x+15, Position.y - 70, 22, 22);
+			IGraphics::CQuadItem QuadItem(Position.x, Position.y - 70, 22, 22);
 			Graphics()->QuadsSetRotation(GetAngle(vec2(0,1))+pi);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 			Graphics()->QuadsEnd();
