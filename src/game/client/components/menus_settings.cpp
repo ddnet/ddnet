@@ -1221,13 +1221,11 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 	{
 		CUIRect Button, Label;
-		Left.HSplitTop(5.0f, &Button, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		Button.VSplitLeft(190.0f, &Label, &Button);
+		Button.VSplitLeft(120.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, -1);
 		g_Config.m_ClOverlayEntities = (int)(DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities/100.0f)*100.0f);
-		Left.HSplitTop(20.0f, 0, &Left);
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
