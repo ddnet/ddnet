@@ -1219,10 +1219,15 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
 
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowEntities, Localize("Show entities"), g_Config.m_ClShowEntities, &Button))
 	{
-		g_Config.m_ClShowEntities ^= 1;
+		CUIRect Button, Label;
+		Left.HSplitTop(5.0f, &Button, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(190.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, -1);
+		g_Config.m_ClOverlayEntities = (int)(DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities/100.0f)*100.0f);
+		Left.HSplitTop(20.0f, 0, &Left);
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
