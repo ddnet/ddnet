@@ -133,7 +133,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 	// time
 	CSmoothTime m_GameTime[2];
-	CSmoothTime m_PredictedTime[2];
+	CSmoothTime m_PredictedTime;
 
 	// input
 	struct // TODO: handle input better
@@ -146,6 +146,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 	int m_CurrentInput;
 	bool m_LastDummy;
+	bool m_LastDummy2;
 	CNetObj_PlayerInput DummyInput;
 	CNetObj_PlayerInput HammerInput;
 
