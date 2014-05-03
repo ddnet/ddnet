@@ -1735,6 +1735,37 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	}
 }
 
+void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
+{
+	CUnpacker Unpacker;
+	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
+
+	// unpack msgid and system flag
+	int Msg = Unpacker.GetInt();
+	int Sys = Msg&1;
+	Msg >>= 1;
+
+	if(Unpacker.Error())
+		return;
+
+	if(Sys)
+	{
+		// system message
+		if(Msg == NETMSG_MAP_CHANGE || Msg == NETMSG_MAP_DATA || Msg == NETMSG_PING || Msg == NETMSG_RCON_CMD_ADD || Msg == NETMSG_RCON_CMD_REM || Msg == NETMSG_RCON_AUTH_STATUS || Msg == NETMSG_RCON_LINE || Msg == NETMSG_PING_REPLY || Msg == NETMSG_INPUTTIMING || Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
+		{
+			return; // no need of all that stuff for the dummy
+		}
+		else if(Msg == NETMSG_CON_READY)
+		{
+			GameClient()->OnConnected();
+		}
+	}
+	else
+	{
+		GameClient()->OnMessage(Msg, &Unpacker, 1);
+	}
+}
+
 void CClient::PumpNetwork()
 {
 	for(int i=0; i<2; i++)
@@ -1779,12 +1810,12 @@ void CClient::PumpNetwork()
 				if(g_Config.m_ClDummy)
 					ProcessServerPacket(&Packet); //self
 				else
-					ProcessConnlessPacket(&Packet); //multiclient
+					ProcessServerPacketDummy(&Packet); //multiclient
 			}
 			else
 			{
 				if(g_Config.m_ClDummy)
-					ProcessConnlessPacket(&Packet); //multiclient
+					ProcessServerPacketDummy(&Packet); //multiclient
 				else
 					ProcessServerPacket(&Packet); //self
 			}

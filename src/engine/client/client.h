@@ -280,6 +280,7 @@ public:
 
 	void ProcessConnlessPacket(CNetChunk *pPacket);
 	void ProcessServerPacket(CNetChunk *pPacket);
+	void ProcessServerPacketDummy(CNetChunk *pPacket);
 
 	virtual int MapDownloadAmount() { return m_MapdownloadAmount; }
 	virtual int MapDownloadTotalsize() { return m_MapdownloadTotalsize; }

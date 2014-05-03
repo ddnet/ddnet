@@ -593,10 +593,10 @@ void CGameClient::OnRelease()
 		m_All.m_paComponents[i]->OnRelease();
 }
 
-void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
+void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 {
 	// special messages
-	if(MsgId == NETMSGTYPE_SV_EXTRAPROJECTILE)
+	if(MsgId == NETMSGTYPE_SV_EXTRAPROJECTILE && !IsDummy)
 	{
 		int Num = pUnpacker->GetInt();
 
@@ -631,9 +631,12 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 		m_ServerMode = SERVERMODE_PURE;
 
 		// apply new tuning
-		m_Tuning[g_Config.m_ClDummy] = NewTuning;
+		m_Tuning[IsDummy ? !g_Config.m_ClDummy : g_Config.m_ClDummy] = NewTuning;
 		return;
 	}
+	
+	if(IsDummy)
+		return; // no need of all that stuff for the dummy
 
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
