@@ -217,7 +217,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			m_NeedSendinfo = true;
 	}
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy Settings"), s_Dummy, &Dummy))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &Dummy))
 	{
 		s_Dummy ^= 1;
 	}
@@ -321,7 +321,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy Settings"), s_Dummy, &Dummy))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &Dummy))
 	{
 		s_Dummy ^= 1;
 	}
