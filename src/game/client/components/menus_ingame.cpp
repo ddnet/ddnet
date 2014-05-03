@@ -50,7 +50,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
-			ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 			static int s_SpectateButton = 0;
 			if(DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
@@ -64,7 +64,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
-				ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				static int s_SpectateButton = 0;
 				if(DoButton_Menu(&s_SpectateButton, Localize("Join red"), 0, &Button))
@@ -76,7 +76,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_BLUE)
 			{
-				ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				static int s_SpectateButton = 0;
 				if(DoButton_Menu(&s_SpectateButton, Localize("Join blue"), 0, &Button))
@@ -90,7 +90,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != 0)
 			{
-				ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				static int s_SpectateButton = 0;
 				if(DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
@@ -102,7 +102,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	ButtonBar.VSplitLeft(100.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(150.0f, &Button, &ButtonBar);
 
 	static int s_DemoButton = 0;
@@ -115,7 +115,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			Client()->DemoRecorder_Stop();
 	}
 
-	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(170.0f, &Button, &ButtonBar);
 
 	static int s_DummyButton = 0;
