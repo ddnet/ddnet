@@ -400,7 +400,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			else if(ID == COL_PING)
 			{
 				str_format(aTemp, sizeof(aTemp), "%i", pItem->m_Latency);
+				if (g_Config.m_UiColorizePing)
+				{
+					vec3 rgb = HslToRgb(vec3((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+				}
+
 				UI()->DoLabelScaled(&Button, aTemp, 12.0f, 1);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else if(ID == COL_VERSION)
 			{
@@ -412,9 +419,40 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f*UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
-				TextRender()->TextEx(&Cursor, pItem->m_aGameType, -1);
-			}
 
+				if (g_Config.m_UiColorizeGametype)
+				{
+					vec3 hsl = vec3(1.0f, 1.0f, 1.0f);
+
+					if (!str_comp(pItem->m_aGameType, "DM")
+							|| !str_comp(pItem->m_aGameType, "TDM")
+							|| !str_comp(pItem->m_aGameType, "CTF"))
+						hsl = vec3(0.33f, 1.0f, 0.75f); // Vanilla
+					else if (str_find_nocase(pItem->m_aGameType, "catch"))
+						hsl = vec3(0.17f, 1.0f, 0.75f); // Catch
+					else if (str_find_nocase(pItem->m_aGameType, "idm")
+							|| str_find_nocase(pItem->m_aGameType, "itdm")
+							|| str_find_nocase(pItem->m_aGameType, "ictf"))
+						hsl = vec3(0.00f, 1.0f, 0.75f); // Instagib
+					else if (str_find_nocase(pItem->m_aGameType, "fng"))
+						hsl = vec3(0.83f, 1.0f, 0.75f); // FNG
+					else if (str_find_nocase(pItem->m_aGameType, "ddracenetwo"))
+						hsl = vec3(0.58f, 1.0f, 0.75f); // DDNet
+					else if (str_find_nocase(pItem->m_aGameType, "ddrace")
+							|| str_find_nocase(pItem->m_aGameType, "mkrace"))
+						hsl = vec3(0.75f, 1.0f, 0.75f); // DDRace
+					else if (str_find_nocase(pItem->m_aGameType, "race")
+							|| !str_comp(pItem->m_aGameType, "FastCap"))
+						hsl = vec3(0.46f, 1.0f, 0.75f); // Races
+
+					vec3 rgb = HslToRgb(hsl);
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					TextRender()->TextEx(&Cursor, pItem->m_aGameType, -1);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				}
+				else
+					TextRender()->TextEx(&Cursor, pItem->m_aGameType, -1);
+			}
 		}
 	}
 
@@ -579,6 +617,14 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
 			m_Popup = POPUP_COUNTRY;
 	}
+
+	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+	if (DoButton_CheckBox((char *)&g_Config.m_UiColorizeGametype, Localize("Colorize gametype"), g_Config.m_UiColorizeGametype, &Button))
+		g_Config.m_UiColorizeGametype ^= 1;
+
+	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+	if (DoButton_CheckBox((char *)&g_Config.m_UiColorizePing, Localize("Colorize ping"), g_Config.m_UiColorizePing, &Button))
+		g_Config.m_UiColorizePing ^= 1;
 
 	ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
 	ServerFilter.HSplitBottom(ms_ButtonHeight-2.0f, &ServerFilter, &Button);
