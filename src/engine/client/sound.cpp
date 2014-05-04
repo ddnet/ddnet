@@ -453,10 +453,7 @@ int CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 			return VoiceID;
 	}
 	else if(SampleID == 108) // GetSampleID(SOUND_CHAT_CLIENT)
-	{
-		if(!g_Config.m_SndChat)
-			return VoiceID;
-	}
+	{}
 	else if(SampleID == 109) // GetSampleID(SOUND_CHAT_HIGHLIGHT)
 	{
 		if(!g_Config.m_SndHighlight)
