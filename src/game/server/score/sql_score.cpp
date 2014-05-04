@@ -429,7 +429,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 
 			CPlayer *pPlayer = pData->m_pSqlData->m_pGameServer->m_apPlayers[pData->m_ClientID];
 			int64 Now = pData->m_pSqlData->Server()->Tick();
-			int Timeleft = pPlayer->m_LastVoteCall + pData->m_pSqlData->Server()->TickSpeed()*60 - Now;
+			int Timeleft = pPlayer->m_LastVoteCall + pData->m_pSqlData->Server()->TickSpeed()*g_Config.m_SvVoteDelay - Now;
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
 			{
