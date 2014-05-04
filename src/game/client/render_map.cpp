@@ -357,6 +357,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx*Scale-2, my*Scale-4, Scale-5, aBuf, -1);
+				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 
@@ -410,11 +411,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 				str_format(aBuf, sizeof(aBuf), "%d", Force);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx*Scale, my*Scale+16, Scale-20, aBuf, -1);
+				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 				if(MaxSpeed)
 				{
 					str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 					UI()->TextRender()->Text(0, mx*Scale, my*Scale-2, Scale-20, aBuf, -1);
+					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 			}
 		}
@@ -457,6 +460,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx*Scale, my*Scale+16, Scale-20, aBuf, -1);
+				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 
 			unsigned char Delay = pSwitch[c].m_Delay;
@@ -466,6 +470,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx*Scale, my*Scale-2, Scale-20, aBuf, -1);
+				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 
@@ -510,6 +515,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				UI()->TextRender()->Text(0, mx*Scale+11.f, my*Scale+6.f, Scale/1.5f-5.f, aBuf, -1); // numbers shouldnt be too big and in the center of the tile
+				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 
