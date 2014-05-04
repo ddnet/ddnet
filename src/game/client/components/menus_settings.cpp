@@ -1233,7 +1233,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show players in other teams"), g_Config.m_ClShowOthers, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show players in other teams by default"), g_Config.m_ClShowOthers, &Button))
 	{
 		g_Config.m_ClShowOthers ^= 1;
 	}
