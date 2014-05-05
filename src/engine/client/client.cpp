@@ -479,7 +479,7 @@ void CClient::SendInput()
 			if(m_Fire != 25)
 			{
 				DummyInput.m_Fire = HammerInput.m_Fire;
-				m_Fire = 25;
+				m_Fire = (m_Fire / 25 + 1) * 25;
 			}
 
 			if(!Size && (!DummyInput.m_Direction && !DummyInput.m_Jump && !DummyInput.m_Hook))
