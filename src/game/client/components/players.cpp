@@ -791,6 +791,8 @@ void CPlayers::RenderPlayer(
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
+			if (OtherTeam)
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 			IGraphics::CQuadItem QuadItem(Position.x-30, Position.y - 70, 22, 22);
 			Graphics()->QuadsSetRotation(GetAngle(vec2(1,0))+pi);
 			Graphics()->QuadsDraw(&QuadItem, 1);
@@ -800,6 +802,8 @@ void CPlayers::RenderPlayer(
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
+			if (OtherTeam)
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 			IGraphics::CQuadItem QuadItem(Position.x+30, Position.y - 70, 22, 22);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 			Graphics()->QuadsEnd();
@@ -808,6 +812,8 @@ void CPlayers::RenderPlayer(
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
+			if (OtherTeam)
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 			IGraphics::CQuadItem QuadItem(Position.x, Position.y - 70, 22, 22);
 			Graphics()->QuadsSetRotation(GetAngle(vec2(0,1))+pi);
 			Graphics()->QuadsDraw(&QuadItem, 1);
