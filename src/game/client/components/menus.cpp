@@ -618,13 +618,13 @@ int CMenus::RenderMenubar(CUIRect r)
 	box.VSplitRight(30.0f, &box, 0);
 	*/
 
-	Box.VSplitRight(90.0f, &Box, &Button);
+	Box.VSplitRight(80.0f, &Box, &Button);
 	static int s_QuitButton=0;
 	if(DoButton_MenuTab(&s_QuitButton, Localize("Quit"), 0, &Button, CUI::CORNER_T))
 		m_Popup = POPUP_QUIT;
 
-	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(130.0f, &Box, &Button);
+	Box.VSplitRight(5.0f, &Box, &Button);
+	Box.VSplitRight(110.0f, &Box, &Button);
 	static int s_SettingsButton=0;
 	if(DoButton_MenuTab(&s_SettingsButton, Localize("Settings"), m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
 		NewPage = PAGE_SETTINGS;
@@ -825,7 +825,7 @@ int CMenus::Render()
 	{
 		// do tab bar
 		Screen.HSplitTop(24.0f, &TabBar, &MainView);
-		TabBar.VMargin(20.0f, &TabBar);
+		TabBar.VMargin(10.0f, &TabBar);
 		RenderMenubar(TabBar);
 
 		// news is not implemented yet
