@@ -561,6 +561,10 @@ void CPlayers::RenderPlayer(
 			bool doBreak = false;
 			int Hit = 0;
 
+			float Alpha = 1.0f;
+			if (OtherTeam)
+				Alpha = 0.4f;
+
 			do {
 				OldPos = NewPos;
 				NewPos = OldPos + ExDirection * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookFireSpeed;
@@ -578,12 +582,12 @@ void CPlayers::RenderPlayer(
 				{
 					vec2 finishPosPost = finishPos;
 					if (!(Collision()->GetCollisionAt(finishPosPost.x, finishPosPost.y)&CCollision::COLFLAG_NOHOOK))
-						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, 1.0f);
+						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, Alpha);
 				}
 
 				if(m_pClient->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking && m_pClient->IntersectCharacter(OldPos, finishPos, finishPos, pPlayerInfo->m_ClientID) != -1)
 				{
-					Graphics()->SetColor(1.0f, 1.0f, 0.0f, 1.0f);
+					Graphics()->SetColor(1.0f, 1.0f, 0.0f, Alpha);
 					break;
 				}
 
