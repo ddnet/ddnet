@@ -1268,6 +1268,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClShowNinja ^= 1;
 	}
 
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClOldGunPosition, Localize("Old gun position"), g_Config.m_ClOldGunPosition, &Button))
+	{
+		g_Config.m_ClOldGunPosition ^= 1;
+	}
+
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowOtherHookColl, Localize("Show other players' hook collision lines"), g_Config.m_ClShowOtherHookColl, &Button))
 	{
@@ -1279,8 +1285,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowDirection ^= 1;
 	}
-
-	Right.HSplitTop(20.0f, &Button, &Right);
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
