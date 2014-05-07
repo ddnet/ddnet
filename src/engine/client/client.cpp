@@ -310,7 +310,10 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_LastDummy2 = 0;
 	m_LocalIDs[0] = -1;
 	m_LocalIDs[1] = -1;
-	m_Fire = 25;
+	m_Fire = 0;
+
+	mem_zero(&HammerInput, sizeof(HammerInput));
+	HammerInput.m_Fire = 0;
 
 	m_State = IClient::STATE_OFFLINE;
 	m_aServerAddressStr[0] = 0;
@@ -476,10 +479,10 @@ void CClient::SendInput()
 	{
 		if(!g_Config.m_ClDummyHammer)
 		{
-			if(m_Fire != 25)
+			if(m_Fire != 0)
 			{
 				DummyInput.m_Fire = HammerInput.m_Fire;
-				m_Fire = (m_Fire / 25 + 1) * 25;
+				m_Fire = 0;
 			}
 
 			if(!Size && (!DummyInput.m_Direction && !DummyInput.m_Jump && !DummyInput.m_Hook))
@@ -506,9 +509,7 @@ void CClient::SendInput()
 			}
 			m_Fire++;
 
-			mem_zero(&HammerInput, sizeof(HammerInput));
-
-			HammerInput.m_Fire = (int) ((float) m_Fire / 12.5);
+			HammerInput.m_Fire+=2;
 			HammerInput.m_WantedWeapon = 1;
 
 			vec2 Main = ((CGameClient *)GameClient())->m_LocalCharacterPos;
