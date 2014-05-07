@@ -298,6 +298,8 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 		if (pChr && pSelf->GetPlayerChar(TeleTo))
 		{
 			pChr->Core()->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+			pChr->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+			pChr->m_PrevPos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
 			pChr->m_DDRaceState = DDRACE_CHEAT;
 		}
 	}
