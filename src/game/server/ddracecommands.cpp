@@ -261,8 +261,8 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 		if (pChr)
 		{
 			pChr->Core()->m_Pos = TelePos;
-			pChr->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-			pChr->m_PrevPos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+			pChr->m_Pos = TelePos;
+			pChr->m_PrevPos = TelePos;
 			pChr->m_DDRaceState = DDRACE_CHEAT;
 		}
 	}
@@ -281,8 +281,8 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 		if (pChr)
 		{
 			pChr->Core()->m_Pos = TelePos;
-			pChr->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-			pChr->m_PrevPos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+			pChr->m_Pos = TelePos;
+			pChr->m_PrevPos = TelePos;
 			pChr->m_DDRaceState = DDRACE_CHEAT;
 		}
 	}
