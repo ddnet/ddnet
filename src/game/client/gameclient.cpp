@@ -635,9 +635,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		return;
 	}
 	
-	if(IsDummy)
-		return; // no need of all that stuff for the dummy
-
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
 	{
@@ -645,6 +642,25 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgId), MsgId, m_NetObjHandler.FailedMsgOn());
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 		return;
+	}
+
+	if(IsDummy)
+	{
+		if(MsgId == NETMSGTYPE_SV_CHAT
+			&& Client()->m_LocalIDs[0] >= 0
+			&& Client()->m_LocalIDs[1] >= 0)
+		{
+			CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
+
+			if((pMsg->m_Team == 1
+					&& (m_aClients[Client()->m_LocalIDs[0]].m_Team != m_aClients[Client()->m_LocalIDs[1]].m_Team
+						|| m_Teams.Team(Client()->m_LocalIDs[0]) != m_Teams.Team(Client()->m_LocalIDs[1])))
+				|| pMsg->m_Team > 1)
+			{
+				m_pChat->OnMessage(MsgId, pRawMsg);
+			}
+		}
+		return; // no need of all that stuff for the dummy
 	}
 
 	// TODO: this should be done smarter
