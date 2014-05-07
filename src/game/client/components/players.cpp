@@ -569,7 +569,7 @@ void CPlayers::RenderPlayer(
 				OldPos = NewPos;
 				NewPos = OldPos + ExDirection * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookFireSpeed;
 
-				if (distance(Position, NewPos) > m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength)
+				if (distance(initPos, NewPos) > m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength)
 				{
 					NewPos = initPos + normalize(NewPos-initPos) * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength;
 					doBreak = true;
@@ -578,10 +578,8 @@ void CPlayers::RenderPlayer(
 				int teleNr = 0;
 				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr, true);
 
-				if(!doBreak && Hit)
-				{
-					vec2 finishPosPost = finishPos;
-					if (!(Collision()->GetCollisionAt(finishPosPost.x, finishPosPost.y)&CCollision::COLFLAG_NOHOOK))
+				if(!doBreak && Hit) {
+					if (!(Hit&CCollision::COLFLAG_NOHOOK))
 						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, Alpha);
 				}
 
@@ -604,7 +602,7 @@ void CPlayers::RenderPlayer(
 				ExDirection.y = round_to_int(ExDirection.y*256.0f) / 256.0f;
 			} while (!doBreak);
 
-			IGraphics::CLineItem LineItem(Position.x, Position.y, finishPos.x, finishPos.y);
+			IGraphics::CLineItem LineItem(initPos.x, initPos.y, finishPos.x, finishPos.y);
 			Graphics()->LinesDraw(&LineItem, 1);
 			Graphics()->LinesEnd();
 		}
