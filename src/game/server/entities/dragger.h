@@ -15,6 +15,9 @@ class CDragger: public CEntity
 	CCharacter * m_Target;
 	bool m_NW;
 	int m_CatchedTeam;
+
+	CCharacter * m_SoloEnts[MAX_CLIENTS];
+	int m_SoloIDs[MAX_CLIENTS];
 public:
 
 	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,

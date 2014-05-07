@@ -21,6 +21,11 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	m_NW = NW;
 	m_CatchedTeam = CatchedTeam;
 	GameWorld()->InsertEntity(this);
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_SoloIDs[i] = -1;
+	}
 }
 
 void CDragger::Move()
@@ -30,177 +35,214 @@ void CDragger::Move()
 					|| (m_Layer == LAYER_SWITCH
 							&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[m_Target->Team()])))
 		m_Target = 0;
-	if (m_Target)
-		return;
-	CCharacter *Ents[MAX_CLIENTS];
+	mem_zero(m_SoloEnts, sizeof(m_SoloEnts));
 	int Num = GameServer()->m_World.FindEntities(m_Pos, LENGTH,
-			(CEntity**) Ents, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			(CEntity**) m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	int Id = -1;
 	int MinLen = 0;
+	CCharacter *Temp;
 	for (int i = 0; i < Num; i++)
 	{
-		m_Target = Ents[i];
-		if (m_Target->Team() != m_CatchedTeam)
+		Temp = m_SoloEnts[i];
+		if (Temp->Team() != m_CatchedTeam)
+		{
+			m_SoloEnts[i] = 0;
 			continue;
+		}
 		if (m_Layer == LAYER_SWITCH
-				&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[m_Target->Team()])
+				&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
+		{
+			m_SoloEnts[i] = 0;
 			continue;
+		}
 		int Res =
 				m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
-								m_Target->m_Pos, 0, 0) :
+								Temp->m_Pos, 0, 0) :
 						GameServer()->Collision()->IntersectNoLaser(m_Pos,
-								m_Target->m_Pos, 0, 0);
+								Temp->m_Pos, 0, 0);
 
 		if (Res == 0)
 		{
-			int Len = length(m_Target->m_Pos - m_Pos);
+			int Len = length(Temp->m_Pos - m_Pos);
 			if (MinLen == 0 || MinLen > Len)
 			{
 				MinLen = Len;
 				Id = i;
 			}
+
+			if (!Temp->Teams()->m_Core.GetSolo(Temp->GetPlayer()->GetCID()))
+				m_SoloEnts[i] = 0;
+		}
+		else
+		{
+			m_SoloEnts[i] = 0;
 		}
 	}
-	m_Target = Id != -1 ? Ents[Id] : 0;
+
+	if (!m_Target)
+		m_Target = Id != -1 ? m_SoloEnts[Id] : 0;
+
+	if (m_Target)
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (m_SoloEnts[i] == m_Target)
+				m_SoloEnts[i] = 0;
+		}
+	}
 }
 
 void CDragger::Drag()
 {
 	if (m_Target)
 	{
+		CCharacter *Target = m_Target;
 
-		int Res = 0;
-		if (!m_NW)
-			Res = GameServer()->Collision()->IntersectNoLaser(m_Pos,
-					m_Target->m_Pos, 0, 0);
-		else
-			Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
-					m_Target->m_Pos, 0, 0);
-		if (Res || length(m_Pos - m_Target->m_Pos) > 700)
+		for (int i = -1; i < MAX_CLIENTS; i++)
 		{
-			m_Target = 0;
-		}
-		else if (length(m_Pos - m_Target->m_Pos) > 28)
-		{
-			vec2 Temp = m_Target->Core()->m_Vel
-					+ (normalize(m_Pos - m_Target->m_Pos) * m_Strength);
-			if (Temp.x > 0
-					&& ((m_Target->m_TileIndex == TILE_STOP
-							&& m_Target->m_TileFlags == ROTATION_270)
-							|| (m_Target->m_TileIndexL == TILE_STOP
-									&& m_Target->m_TileFlagsL == ROTATION_270)
-							|| (m_Target->m_TileIndexL == TILE_STOPS
-									&& (m_Target->m_TileFlagsL == ROTATION_90
-											|| m_Target->m_TileFlagsL
-													== ROTATION_270))
-							|| (m_Target->m_TileIndexL == TILE_STOPA)
-							|| (m_Target->m_TileFIndex == TILE_STOP
-									&& m_Target->m_TileFFlags == ROTATION_270)
-							|| (m_Target->m_TileFIndexL == TILE_STOP
-									&& m_Target->m_TileFFlagsL == ROTATION_270)
-							|| (m_Target->m_TileFIndexL == TILE_STOPS
-									&& (m_Target->m_TileFFlagsL == ROTATION_90
-											|| m_Target->m_TileFFlagsL
-													== ROTATION_270))
-							|| (m_Target->m_TileFIndexL == TILE_STOPA)
-							|| (m_Target->m_TileSIndex == TILE_STOP
-									&& m_Target->m_TileSFlags == ROTATION_270)
-							|| (m_Target->m_TileSIndexL == TILE_STOP
-									&& m_Target->m_TileSFlagsL == ROTATION_270)
-							|| (m_Target->m_TileSIndexL == TILE_STOPS
-									&& (m_Target->m_TileSFlagsL == ROTATION_90
-											|| m_Target->m_TileSFlagsL
-													== ROTATION_270))
-							|| (m_Target->m_TileSIndexL == TILE_STOPA)))
-				Temp.x = 0;
-			if (Temp.x < 0
-					&& ((m_Target->m_TileIndex == TILE_STOP
-							&& m_Target->m_TileFlags == ROTATION_90)
-							|| (m_Target->m_TileIndexR == TILE_STOP
-									&& m_Target->m_TileFlagsR == ROTATION_90)
-							|| (m_Target->m_TileIndexR == TILE_STOPS
-									&& (m_Target->m_TileFlagsR == ROTATION_90
-											|| m_Target->m_TileFlagsR
-													== ROTATION_270))
-							|| (m_Target->m_TileIndexR == TILE_STOPA)
-							|| (m_Target->m_TileFIndex == TILE_STOP
-									&& m_Target->m_TileFFlags == ROTATION_90)
-							|| (m_Target->m_TileFIndexR == TILE_STOP
-									&& m_Target->m_TileFFlagsR == ROTATION_90)
-							|| (m_Target->m_TileFIndexR == TILE_STOPS
-									&& (m_Target->m_TileFFlagsR == ROTATION_90
-											|| m_Target->m_TileFFlagsR
-													== ROTATION_270))
-							|| (m_Target->m_TileFIndexR == TILE_STOPA)
-							|| (m_Target->m_TileSIndex == TILE_STOP
-									&& m_Target->m_TileSFlags == ROTATION_90)
-							|| (m_Target->m_TileSIndexR == TILE_STOP
-									&& m_Target->m_TileSFlagsR == ROTATION_90)
-							|| (m_Target->m_TileSIndexR == TILE_STOPS
-									&& (m_Target->m_TileSFlagsR == ROTATION_90
-											|| m_Target->m_TileSFlagsR
-													== ROTATION_270))
-							|| (m_Target->m_TileSIndexR == TILE_STOPA)))
-				Temp.x = 0;
-			if (Temp.y < 0
-					&& ((m_Target->m_TileIndex == TILE_STOP
-							&& m_Target->m_TileFlags == ROTATION_180)
-							|| (m_Target->m_TileIndexB == TILE_STOP
-									&& m_Target->m_TileFlagsB == ROTATION_180)
-							|| (m_Target->m_TileIndexB == TILE_STOPS
-									&& (m_Target->m_TileFlagsB == ROTATION_0
-											|| m_Target->m_TileFlagsB
-													== ROTATION_180))
-							|| (m_Target->m_TileIndexB == TILE_STOPA)
-							|| (m_Target->m_TileFIndex == TILE_STOP
-									&& m_Target->m_TileFFlags == ROTATION_180)
-							|| (m_Target->m_TileFIndexB == TILE_STOP
-									&& m_Target->m_TileFFlagsB == ROTATION_180)
-							|| (m_Target->m_TileFIndexB == TILE_STOPS
-									&& (m_Target->m_TileFFlagsB == ROTATION_0
-											|| m_Target->m_TileFFlagsB
-													== ROTATION_180))
-							|| (m_Target->m_TileFIndexB == TILE_STOPA)
-							|| (m_Target->m_TileSIndex == TILE_STOP
-									&& m_Target->m_TileSFlags == ROTATION_180)
-							|| (m_Target->m_TileSIndexB == TILE_STOP
-									&& m_Target->m_TileSFlagsB == ROTATION_180)
-							|| (m_Target->m_TileSIndexB == TILE_STOPS
-									&& (m_Target->m_TileSFlagsB == ROTATION_0
-											|| m_Target->m_TileSFlagsB
-													== ROTATION_180))
-							|| (m_Target->m_TileSIndexB == TILE_STOPA)))
-				Temp.y = 0;
-			if (Temp.y > 0
-					&& ((m_Target->m_TileIndex == TILE_STOP
-							&& m_Target->m_TileFlags == ROTATION_0)
-							|| (m_Target->m_TileIndexT == TILE_STOP
-									&& m_Target->m_TileFlagsT == ROTATION_0)
-							|| (m_Target->m_TileIndexT == TILE_STOPS
-									&& (m_Target->m_TileFlagsT == ROTATION_0
-											|| m_Target->m_TileFlagsT
-													== ROTATION_180))
-							|| (m_Target->m_TileIndexT == TILE_STOPA)
-							|| (m_Target->m_TileFIndex == TILE_STOP
-									&& m_Target->m_TileFFlags == ROTATION_0)
-							|| (m_Target->m_TileFIndexT == TILE_STOP
-									&& m_Target->m_TileFFlagsT == ROTATION_0)
-							|| (m_Target->m_TileFIndexT == TILE_STOPS
-									&& (m_Target->m_TileFFlagsT == ROTATION_0
-											|| m_Target->m_TileFFlagsT
-													== ROTATION_180))
-							|| (m_Target->m_TileFIndexT == TILE_STOPA)
-							|| (m_Target->m_TileSIndex == TILE_STOP
-									&& m_Target->m_TileSFlags == ROTATION_0)
-							|| (m_Target->m_TileSIndexT == TILE_STOP
-									&& m_Target->m_TileSFlagsT == ROTATION_0)
-							|| (m_Target->m_TileSIndexT == TILE_STOPS
-									&& (m_Target->m_TileSFlagsT == ROTATION_0
-											|| m_Target->m_TileSFlagsT
-													== ROTATION_180))
-							|| (m_Target->m_TileSIndexT == TILE_STOPA)))
-				Temp.y = 0;
-			m_Target->Core()->m_Vel = Temp;
+			if (i >= 0)
+				Target = m_SoloEnts[i];
+
+			if (!Target)
+				continue;
+
+			int Res = 0;
+			if (!m_NW)
+				Res = GameServer()->Collision()->IntersectNoLaser(m_Pos,
+						Target->m_Pos, 0, 0);
+			else
+				Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
+						Target->m_Pos, 0, 0);
+			if (Res || length(m_Pos - Target->m_Pos) > 700)
+			{
+				Target = 0;
+				if (i == -1)
+					m_Target = 0;
+				else
+					m_SoloEnts[i] = 0;
+			}
+			else if (length(m_Pos - Target->m_Pos) > 28)
+			{
+				vec2 Temp = Target->Core()->m_Vel
+						+ (normalize(m_Pos - Target->m_Pos) * m_Strength);
+				if (Temp.x > 0
+						&& ((Target->m_TileIndex == TILE_STOP
+								&& Target->m_TileFlags == ROTATION_270)
+								|| (Target->m_TileIndexL == TILE_STOP
+										&& Target->m_TileFlagsL == ROTATION_270)
+								|| (Target->m_TileIndexL == TILE_STOPS
+										&& (Target->m_TileFlagsL == ROTATION_90
+												|| Target->m_TileFlagsL
+														== ROTATION_270))
+								|| (Target->m_TileIndexL == TILE_STOPA)
+								|| (Target->m_TileFIndex == TILE_STOP
+										&& Target->m_TileFFlags == ROTATION_270)
+								|| (Target->m_TileFIndexL == TILE_STOP
+										&& Target->m_TileFFlagsL == ROTATION_270)
+								|| (Target->m_TileFIndexL == TILE_STOPS
+										&& (Target->m_TileFFlagsL == ROTATION_90
+												|| Target->m_TileFFlagsL
+														== ROTATION_270))
+								|| (Target->m_TileFIndexL == TILE_STOPA)
+								|| (Target->m_TileSIndex == TILE_STOP
+										&& Target->m_TileSFlags == ROTATION_270)
+								|| (Target->m_TileSIndexL == TILE_STOP
+										&& Target->m_TileSFlagsL == ROTATION_270)
+								|| (Target->m_TileSIndexL == TILE_STOPS
+										&& (Target->m_TileSFlagsL == ROTATION_90
+												|| Target->m_TileSFlagsL
+														== ROTATION_270))
+								|| (Target->m_TileSIndexL == TILE_STOPA)))
+					Temp.x = 0;
+				if (Temp.x < 0
+						&& ((Target->m_TileIndex == TILE_STOP
+								&& Target->m_TileFlags == ROTATION_90)
+								|| (Target->m_TileIndexR == TILE_STOP
+										&& Target->m_TileFlagsR == ROTATION_90)
+								|| (Target->m_TileIndexR == TILE_STOPS
+										&& (Target->m_TileFlagsR == ROTATION_90
+												|| Target->m_TileFlagsR
+														== ROTATION_270))
+								|| (Target->m_TileIndexR == TILE_STOPA)
+								|| (Target->m_TileFIndex == TILE_STOP
+										&& Target->m_TileFFlags == ROTATION_90)
+								|| (Target->m_TileFIndexR == TILE_STOP
+										&& Target->m_TileFFlagsR == ROTATION_90)
+								|| (Target->m_TileFIndexR == TILE_STOPS
+										&& (Target->m_TileFFlagsR == ROTATION_90
+												|| Target->m_TileFFlagsR
+														== ROTATION_270))
+								|| (Target->m_TileFIndexR == TILE_STOPA)
+								|| (Target->m_TileSIndex == TILE_STOP
+										&& Target->m_TileSFlags == ROTATION_90)
+								|| (Target->m_TileSIndexR == TILE_STOP
+										&& Target->m_TileSFlagsR == ROTATION_90)
+								|| (Target->m_TileSIndexR == TILE_STOPS
+										&& (Target->m_TileSFlagsR == ROTATION_90
+												|| Target->m_TileSFlagsR
+														== ROTATION_270))
+								|| (Target->m_TileSIndexR == TILE_STOPA)))
+					Temp.x = 0;
+				if (Temp.y < 0
+						&& ((Target->m_TileIndex == TILE_STOP
+								&& Target->m_TileFlags == ROTATION_180)
+								|| (Target->m_TileIndexB == TILE_STOP
+										&& Target->m_TileFlagsB == ROTATION_180)
+								|| (Target->m_TileIndexB == TILE_STOPS
+										&& (Target->m_TileFlagsB == ROTATION_0
+												|| Target->m_TileFlagsB
+														== ROTATION_180))
+								|| (Target->m_TileIndexB == TILE_STOPA)
+								|| (Target->m_TileFIndex == TILE_STOP
+										&& Target->m_TileFFlags == ROTATION_180)
+								|| (Target->m_TileFIndexB == TILE_STOP
+										&& Target->m_TileFFlagsB == ROTATION_180)
+								|| (Target->m_TileFIndexB == TILE_STOPS
+										&& (Target->m_TileFFlagsB == ROTATION_0
+												|| Target->m_TileFFlagsB
+														== ROTATION_180))
+								|| (Target->m_TileFIndexB == TILE_STOPA)
+								|| (Target->m_TileSIndex == TILE_STOP
+										&& Target->m_TileSFlags == ROTATION_180)
+								|| (Target->m_TileSIndexB == TILE_STOP
+										&& Target->m_TileSFlagsB == ROTATION_180)
+								|| (Target->m_TileSIndexB == TILE_STOPS
+										&& (Target->m_TileSFlagsB == ROTATION_0
+												|| Target->m_TileSFlagsB
+														== ROTATION_180))
+								|| (Target->m_TileSIndexB == TILE_STOPA)))
+					Temp.y = 0;
+				if (Temp.y > 0
+						&& ((Target->m_TileIndex == TILE_STOP
+								&& Target->m_TileFlags == ROTATION_0)
+								|| (Target->m_TileIndexT == TILE_STOP
+										&& Target->m_TileFlagsT == ROTATION_0)
+								|| (Target->m_TileIndexT == TILE_STOPS
+										&& (Target->m_TileFlagsT == ROTATION_0
+												|| Target->m_TileFlagsT
+														== ROTATION_180))
+								|| (Target->m_TileIndexT == TILE_STOPA)
+								|| (Target->m_TileFIndex == TILE_STOP
+										&& Target->m_TileFFlags == ROTATION_0)
+								|| (Target->m_TileFIndexT == TILE_STOP
+										&& Target->m_TileFFlagsT == ROTATION_0)
+								|| (Target->m_TileFIndexT == TILE_STOPS
+										&& (Target->m_TileFFlagsT == ROTATION_0
+												|| Target->m_TileFFlagsT
+														== ROTATION_180))
+								|| (Target->m_TileFIndexT == TILE_STOPA)
+								|| (Target->m_TileSIndex == TILE_STOP
+										&& Target->m_TileSFlags == ROTATION_0)
+								|| (Target->m_TileSIndexT == TILE_STOP
+										&& Target->m_TileSFlagsT == ROTATION_0)
+								|| (Target->m_TileSIndexT == TILE_STOPS
+										&& (Target->m_TileSFlagsT == ROTATION_0
+												|| Target->m_TileSFlagsT
+														== ROTATION_180))
+								|| (Target->m_TileSIndexT == TILE_STOPA)))
+					Temp.y = 0;
+				Target->Core()->m_Vel = Temp;
+			}
 		}
 	}
 }
@@ -238,63 +280,99 @@ void CDragger::Snap(int SnappingClient)
 	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(
 			m_CatchedTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
-	if (m_Target)
+
+	CCharacter *Target= m_Target;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (NetworkClipped(SnappingClient, m_Pos)
-				&& NetworkClipped(SnappingClient, m_Target->m_Pos))
+		if (m_SoloIDs[i] == -1)
+			break;
+
+		Server()->SnapFreeID(m_SoloIDs[i]);
+		m_SoloIDs[i] = -1;
+	}
+
+	int pos = 0;
+
+	for (int i = -1; i < MAX_CLIENTS; i++)
+	{
+		if (i >= 0)
+			Target = m_SoloEnts[i];
+
+		if (!Target)
+			continue;
+
+		if (Target)
+		{
+			if (NetworkClipped(SnappingClient, m_Pos)
+					&& NetworkClipped(SnappingClient, Target->m_Pos))
+				return;
+		}
+		else if (NetworkClipped(SnappingClient, m_Pos))
 			return;
-	}
-	else if (NetworkClipped(SnappingClient, m_Pos))
-		return;
 
-	CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
+		CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 
-	if((GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
-				|| GameServer()->m_apPlayers[SnappingClient]->m_Paused)
-			&& GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
-		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+		if((GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
+					|| GameServer()->m_apPlayers[SnappingClient]->m_Paused)
+				&& GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-	if (Char && Char->IsAlive()
-			&& (m_Layer == LAYER_SWITCH
-					&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
-					&& (!Tick)))
-		return;
-	if (Char && Char->IsAlive())
-	{
-		if (Char->Team() != m_CatchedTeam)
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
+		if (Char && Char->IsAlive()
+				&& (m_Layer == LAYER_SWITCH
+						&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
+						&& (!Tick)))
 			return;
-	}
-	else
-	{
-		// send to spectators only active draggers and some inactive from team 0
-		if (!((m_Target && m_Target->IsAlive()) || m_CatchedTeam == 0))
+		if (Char && Char->IsAlive())
+		{
+			if (Char->Team() != m_CatchedTeam)
+				return;
+		}
+		else
+		{
+			// send to spectators only active draggers and some inactive from team 0
+			if (!((Target && Target->IsAlive()) || m_CatchedTeam == 0))
+				return;
+		}
+
+		CNetObj_Laser *obj;
+
+		if (i == -1)
+		{
+			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
+					NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
+		}
+		else
+		{
+			m_SoloIDs[pos] = Server()->SnapNewID();
+			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem( // TODO: Have to free IDs again?
+					NETOBJTYPE_LASER, m_SoloIDs[pos], sizeof(CNetObj_Laser)));
+			pos++;
+		}
+
+		if (!obj)
 			return;
-	}
+		obj->m_X = (int) m_Pos.x;
+		obj->m_Y = (int) m_Pos.y;
+		if (Target)
+		{
+			obj->m_FromX = (int) Target->m_Pos.x;
+			obj->m_FromY = (int) Target->m_Pos.y;
+		}
+		else
+		{
+			obj->m_FromX = (int) m_Pos.x;
+			obj->m_FromY = (int) m_Pos.y;
+		}
 
-	CNetObj_Laser *obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-			NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
-	if (!obj)
-		return;
-	obj->m_X = (int) m_Pos.x;
-	obj->m_Y = (int) m_Pos.y;
-	if (m_Target)
-	{
-		obj->m_FromX = (int) m_Target->m_Pos.x;
-		obj->m_FromY = (int) m_Target->m_Pos.y;
+		int StartTick = m_EvalTick;
+		if (StartTick < Server()->Tick() - 4)
+			StartTick = Server()->Tick() - 4;
+		else if (StartTick > Server()->Tick())
+			StartTick = Server()->Tick();
+		obj->m_StartTick = StartTick;
 	}
-	else
-	{
-		obj->m_FromX = (int) m_Pos.x;
-		obj->m_FromY = (int) m_Pos.y;
-	}
-
-	int StartTick = m_EvalTick;
-	if (StartTick < Server()->Tick() - 4)
-		StartTick = Server()->Tick() - 4;
-	else if (StartTick > Server()->Tick())
-		StartTick = Server()->Tick();
-	obj->m_StartTick = StartTick;
 }
 
 CDraggerTeam::CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength,

@@ -3,6 +3,8 @@
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
+#include <game/server/teams.h>
+
 #include "gun.h"
 #include "plasma.h"
 
@@ -64,6 +66,22 @@ void CGun::Fire()
 			CCharacter *Target = Ents[IdInTeam[i]];
 			new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, i);
 			m_LastFire = Server()->Tick();
+		}
+	}
+	for (int i = 0; i < Num; i++)
+	{
+		CCharacter *Target = Ents[i];
+		if (Target->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID()))
+		{
+			if (IdInTeam[Target->Team()] != i)
+			{
+				int res = GameServer()->Collision()->IntersectLine(m_Pos, Target->m_Pos,0,0,false);
+				if (!res)
+				{
+					new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, Target->Team());
+					m_LastFire = Server()->Tick();
+				}
+			}
 		}
 	}
 	
