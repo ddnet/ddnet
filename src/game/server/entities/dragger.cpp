@@ -35,9 +35,14 @@ void CDragger::Move()
 					|| (m_Layer == LAYER_SWITCH
 							&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[m_Target->Team()])))
 		m_Target = 0;
+
 	mem_zero(m_SoloEnts, sizeof(m_SoloEnts));
+	CCharacter *TempEnts[MAX_CLIENTS];
+
 	int Num = GameServer()->m_World.FindEntities(m_Pos, LENGTH,
 			(CEntity**) m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	mem_copy(TempEnts, m_SoloEnts, sizeof(TempEnts));
+
 	int Id = -1;
 	int MinLen = 0;
 	CCharacter *Temp;
@@ -80,7 +85,7 @@ void CDragger::Move()
 	}
 
 	if (!m_Target)
-		m_Target = Id != -1 ? m_SoloEnts[Id] : 0;
+		m_Target = Id != -1 ? TempEnts[Id] : 0;
 
 	if (m_Target)
 	{
@@ -281,7 +286,7 @@ void CDragger::Snap(int SnappingClient)
 			m_CatchedTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 
-	CCharacter *Target= m_Target;
+	CCharacter *Target = m_Target;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -297,19 +302,21 @@ void CDragger::Snap(int SnappingClient)
 	for (int i = -1; i < MAX_CLIENTS; i++)
 	{
 		if (i >= 0)
+		{
 			Target = m_SoloEnts[i];
 
-		if (!Target)
-			continue;
+			if (!Target)
+				continue;
+		}
 
 		if (Target)
 		{
 			if (NetworkClipped(SnappingClient, m_Pos)
 					&& NetworkClipped(SnappingClient, Target->m_Pos))
-				return;
+				continue;
 		}
 		else if (NetworkClipped(SnappingClient, m_Pos))
-			return;
+			continue;
 
 		CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 
@@ -323,17 +330,17 @@ void CDragger::Snap(int SnappingClient)
 				&& (m_Layer == LAYER_SWITCH
 						&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
 						&& (!Tick)))
-			return;
+			continue;
 		if (Char && Char->IsAlive())
 		{
 			if (Char->Team() != m_CatchedTeam)
-				return;
+				continue;
 		}
 		else
 		{
 			// send to spectators only active draggers and some inactive from team 0
 			if (!((Target && Target->IsAlive()) || m_CatchedTeam == 0))
-				return;
+				continue;
 		}
 
 		CNetObj_Laser *obj;
@@ -352,7 +359,7 @@ void CDragger::Snap(int SnappingClient)
 		}
 
 		if (!obj)
-			return;
+			continue;
 		obj->m_X = (int) m_Pos.x;
 		obj->m_Y = (int) m_Pos.y;
 		if (Target)
