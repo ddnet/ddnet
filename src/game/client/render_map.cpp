@@ -88,10 +88,10 @@ void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENV
 	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
 		return;
 
-	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser);
+	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100-g_Config.m_ClOverlayEntities)/100.0f);
 }
 
-void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
+void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha)
 {
 	Graphics()->QuadsBegin();
 	float Conv = 1/255.0f;
@@ -141,10 +141,6 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			OffsetY = aChannels[1];
 			Rot = aChannels[2]/360.0f*pi*2;
 		}
-
-		float Alpha = (100-g_Config.m_ClOverlayEntities)/100.0f;
-		if (g_Config.m_ClOverlayEntities == 100) // We're in editor
-			Alpha = 1.0f;
 
 		IGraphics::CColorVertex Array[4] = {
 			IGraphics::CColorVertex(0, q->m_aColors[0].r*Conv*r, q->m_aColors[0].g*Conv*g, q->m_aColors[0].b*Conv*b, q->m_aColors[0].a*Conv*a*Alpha),
