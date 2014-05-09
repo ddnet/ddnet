@@ -708,8 +708,6 @@ void CClient::DummyConnect()
 	}
 
 	//connecting to the server
-	m_DummyConnected = 1;
-	m_DummyConnecting = 1;
 	m_NetClient[1].Connect(&m_ServerAddress);
 
 	// send client info
@@ -731,8 +729,6 @@ void CClient::DummyConnect()
 	// send enter game an finish the connection
 	CMsgPacker MsgEnter(NETMSG_ENTERGAME);
 	SendMsgExY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
-
-	g_Config.m_ClDummy = 1;
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -1348,16 +1344,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Unpacker.Error())
 				return;
 
-			if(m_DummyConnecting)
-			{
-				m_DummyConnecting = 0;
-			}
-			else
-			{
-				m_DummyConnected = 0;
-				g_Config.m_ClDummy = 0;
-			}
-
 			// check for valid standard map
 			if(!m_MapChecker.IsMapValid(pMap, MapCrc, MapSize))
 				pError = "invalid standard map";
@@ -1752,7 +1738,9 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	{
 		if(Msg == NETMSG_CON_READY)
 		{
-			GameClient()->OnConnected();
+			//GameClient()->OnConnected();
+			m_DummyConnected = true;
+			g_Config.m_ClDummy = 1;
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{

@@ -249,7 +249,6 @@ public:
 	virtual bool DummyConnected();
 	void DummyInfo();
 	int m_DummyConnected;
-	int m_DummyConnecting;
 	int m_LastDummyConnectTime;
 	int m_Fire;
 
