@@ -237,9 +237,9 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	}
 }
 
-static void logger_stdout(const char *line)
-{
 #if defined(CONF_FAMILY_WINDOWS)
+static void logger_win_console(const char *line)
+{
 	#define _MAX_LENGTH 1024
 	#define _MAX_LENGTH_ERROR (_MAX_LENGTH+32)
 
@@ -314,7 +314,11 @@ static void logger_stdout(const char *line)
 
 	#undef _MAX_LENGTH
 	#undef _MAX_LENGTH_ERROR
-#else
+}
+#endif
+
+static void logger_stdout(const char *line)
+{
 	printf("%s\n", line);
 	fflush(stdout);
 #if defined(__ANDROID__)
@@ -339,7 +343,18 @@ static void logger_file(const char *line)
 	io_flush(logfile);
 }
 
-void dbg_logger_stdout() { dbg_logger(logger_stdout); }
+void dbg_logger_stdout()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_CHAR)
+	{
+		dbg_logger(logger_win_console);
+		return;
+	}
+#endif
+	dbg_logger(logger_stdout);
+}
+
 void dbg_logger_debugger() { dbg_logger(logger_debugger); }
 void dbg_logger_file(const char *filename)
 {
