@@ -115,13 +115,13 @@ void CLaser::DoBounce()
 			int f = 0;
 			if(Res == -1)
 			{
-				f = GameServer()->Collision()->GetTile(round(Coltile.x), round(Coltile.y));
-				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), CCollision::COLFLAG_SOLID);
+				f = GameServer()->Collision()->GetTile(round_to_int(Coltile.x), round_to_int(Coltile.y));
+				GameServer()->Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), CCollision::COLFLAG_SOLID);
 			}
 			GameServer()->Collision()->MovePoint(&TempPos, &TempDir, 1.0f, 0);
 			if(Res == -1)
 			{
-				GameServer()->Collision()->SetCollisionAt(round(Coltile.x), round(Coltile.y), f);
+				GameServer()->Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), f);
 			}
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
