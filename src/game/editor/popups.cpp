@@ -923,7 +923,10 @@ void CEditor::PopupSelectImageInvoke(int Current, float x, float y)
 	static int s_SelectImagePopupId = 0;
 	g_SelectImageSelected = -100;
 	g_SelectImageCurrent = Current;
-	UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 400, 300, PopupSelectImage);
+	if (m_Map.m_lImages.size() > 20)
+		UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, 50, 400, m_Map.m_lImages.size() * 15, PopupSelectImage);
+	else
+		UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 400, 300, PopupSelectImage);
 }
 
 int CEditor::PopupSelectImageResult()
