@@ -693,7 +693,7 @@ bool CClient::DummyConnected()
 
 void CClient::DummyConnect()
 {
-	if(m_LastDummyConnectTime > GameTick())
+	if(m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
 		return;
 
 	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
@@ -744,7 +744,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	m_NetClient[1].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
 	m_RconAuthed[1] = 0;
-	m_DummyConnected = 0;
+	m_DummyConnected = false;
 	GameClient()->OnDummyDisconnect();
 }
 
@@ -1751,6 +1751,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 		{
 			//GameClient()->OnConnected();
 			m_DummyConnected = true;
+			m_LastDummyConnectTime = GameTick();
 			g_Config.m_ClDummy = 1;
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
