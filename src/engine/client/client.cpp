@@ -2303,7 +2303,10 @@ void CClient::Run()
 
 	// init graphics
 	{
-		m_pGraphics = CreateEngineGraphicsThreaded();
+		if(g_Config.m_GfxThreadedOld)
+			m_pGraphics = CreateEngineGraphicsThreaded();
+		else
+			m_pGraphics = CreateEngineGraphics();
 
 		bool RegisterFail = false;
 		RegisterFail = RegisterFail || !Kernel()->RegisterInterface(static_cast<IEngineGraphics*>(m_pGraphics)); // register graphics as both
@@ -2476,7 +2479,7 @@ void CClient::Run()
 
 			Update();
 			
-			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && m_pGraphics->IsIdle())
+			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
 			{
 				m_RenderFrames++;
 
