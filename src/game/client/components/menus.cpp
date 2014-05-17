@@ -955,12 +955,14 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
+#if !defined(CONF_PLATFORM_MACOSX)
 		else if(m_Popup == POPUP_AUTOUPDATE)
 		{
 			pTitle = Localize("Auto-Update");
 			pExtraText = Localize("An update to DDNet client is available. Do you want to update now? This may restart the client. If an update fails, make sure the client has permissions to modify files.");
 			ExtraAlign = -1;
 		}
+#endif
 
 		CUIRect Box, Part;
 		Box = Screen;
@@ -1012,6 +1014,7 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Quit();
 		}
+#if !defined(CONF_PLATFORM_MACOSX)
 		else if(m_Popup == POPUP_AUTOUPDATE)
 		{
 			CUIRect Yes, No;
@@ -1032,6 +1035,7 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				m_pClient->AutoUpdate()->DoUpdates(this);
 		}
+#endif
 		else if(m_Popup == POPUP_PASSWORD)
 		{
 			CUIRect Label, TextBox, TryAgain, Abort;
