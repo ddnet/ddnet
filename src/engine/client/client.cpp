@@ -703,21 +703,9 @@ void CClient::DummyConnect()
 	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
 		return;
 
-	char aBuf[512];
-
 	m_NetClient[1].Disconnect(0);
 
-	str_copy(aBuf, g_Config.m_UiServerAddress, sizeof(aBuf));
-
 	m_RconAuthed[1] = 0;
-
-	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[1].NetType()) != 0)
-	{
-		char aBufMsg[256];
-		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
-		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[1].NetType());
-	}
 
 	//connecting to the server
 	m_NetClient[1].Connect(&m_ServerAddress);
