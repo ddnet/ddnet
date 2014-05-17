@@ -148,12 +148,41 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 	m_pEditor->m_Map.m_Modified = true;
 }
 
+void Swap(CPoint& a, CPoint& b)
+{
+	CPoint tmp;
+	tmp.x = a.x;
+	tmp.y = a.y;
+
+	a.x = b.x;
+	a.y = b.y;
+
+	b.x = tmp.x;
+	b.y = tmp.y;
+}
+
 void CLayerQuads::BrushFlipX()
 {
+	for(int i = 0; i < m_lQuads.size(); i++)
+	{
+		CQuad *q = &m_lQuads[i];
+
+		Swap(q->m_aPoints[0], q->m_aPoints[1]);
+		Swap(q->m_aPoints[2], q->m_aPoints[3]);
+	}
+	m_pEditor->m_Map.m_Modified = true;
 }
 
 void CLayerQuads::BrushFlipY()
 {
+	for(int i = 0; i < m_lQuads.size(); i++)
+	{
+		CQuad *q = &m_lQuads[i];
+
+		Swap(q->m_aPoints[0], q->m_aPoints[2]);
+		Swap(q->m_aPoints[1], q->m_aPoints[3]);
+	}
+	m_pEditor->m_Map.m_Modified = true;
 }
 
 void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
