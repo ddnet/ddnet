@@ -347,12 +347,15 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				Highlighted = true;
 		}
 
-		pHL = str_find_nocase(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName);
-		if(pHL)
+		if(m_pClient->Client()->DummyConnected())
 		{
-			int Length = str_length(m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName);
-			if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
-				Highlighted = true;
+			pHL = str_find_nocase(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName);
+			if(pHL)
+			{
+				int Length = str_length(m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName);
+				if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
+					Highlighted = true;
+			}
 		}
 
 		m_aLines[m_CurrentLine].m_Highlighted = Highlighted;
