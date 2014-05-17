@@ -334,6 +334,8 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if (pResult->NumArguments() > 0)
+		pPlayer->m_SpectatorID = pResult->GetInteger(0);
 	pPlayer->m_Paused = (pPlayer->m_Paused == CPlayer::PAUSED_PAUSED) ? CPlayer::PAUSED_NONE : CPlayer::PAUSED_PAUSED;
 }
 
@@ -361,6 +363,8 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if (pResult->NumArguments() > 0)
+		pPlayer->m_SpectatorID = pResult->GetInteger(0);
 	pPlayer->m_Paused = (pPlayer->m_Paused == CPlayer::PAUSED_SPEC) ? CPlayer::PAUSED_NONE : CPlayer::PAUSED_SPEC;
 }
 
