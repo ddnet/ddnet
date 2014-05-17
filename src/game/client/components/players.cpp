@@ -247,8 +247,8 @@ void CPlayers::RenderHook(
 
 	if (OtherTeam)
 	{
-		RenderInfo.m_ColorBody.a = 0.4f;
-		RenderInfo.m_ColorFeet.a = 0.4f;
+		RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+		RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
 	// set size
@@ -345,7 +345,7 @@ void CPlayers::RenderHook(
 		RenderTools()->SelectSprite(SPRITE_HOOK_HEAD);
 		IGraphics::CQuadItem QuadItem(HookPos.x, HookPos.y, 24,16);
 		if (OtherTeam)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 
 		// render chain
@@ -359,7 +359,7 @@ void CPlayers::RenderHook(
 		}
 
 		if (OtherTeam)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 		Graphics()->QuadsDraw(Array, i);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->QuadsEnd();
@@ -563,7 +563,7 @@ void CPlayers::RenderPlayer(
 
 			float Alpha = 1.0f;
 			if (OtherTeam)
-				Alpha = 0.4f;
+				Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 
 			do {
 				OldPos = NewPos;
@@ -616,7 +616,7 @@ void CPlayers::RenderPlayer(
 		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[iw].m_pSpriteBody, Direction.x < 0 ? SPRITE_FLAG_FLIP_Y : 0);
 
 		if (OtherTeam)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 
 		vec2 Dir = Direction;
 		float Recoil = 0.0f;
@@ -758,8 +758,8 @@ void CPlayers::RenderPlayer(
 
 		if (OtherTeam)
 		{
-			RenderInfo.m_ColorBody.a = 0.4f;
-			RenderInfo.m_ColorFeet.a = 0.4f;
+			RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+			RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
 		}
 
 		switch (Player.m_Weapon)
@@ -785,8 +785,8 @@ void CPlayers::RenderPlayer(
 
 	if (OtherTeam)
 	{
-		RenderInfo.m_ColorBody.a = 0.4f;
-		RenderInfo.m_ColorFeet.a = 0.4f;
+		RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+		RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
 	if (g_Config.m_ClShowDirection && (!pInfo.m_Local || DemoPlayer()->IsPlaying()))
@@ -796,7 +796,7 @@ void CPlayers::RenderPlayer(
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
 			if (OtherTeam)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			IGraphics::CQuadItem QuadItem(Position.x-30, Position.y - 70, 22, 22);
 			Graphics()->QuadsSetRotation(GetAngle(vec2(1,0))+pi);
 			Graphics()->QuadsDraw(&QuadItem, 1);
@@ -807,7 +807,7 @@ void CPlayers::RenderPlayer(
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
 			if (OtherTeam)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			IGraphics::CQuadItem QuadItem(Position.x+30, Position.y - 70, 22, 22);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 			Graphics()->QuadsEnd();
@@ -817,7 +817,7 @@ void CPlayers::RenderPlayer(
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsBegin();
 			if (OtherTeam)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			IGraphics::CQuadItem QuadItem(Position.x, Position.y - 70, 22, 22);
 			Graphics()->QuadsSetRotation(GetAngle(vec2(0,1))+pi);
 			Graphics()->QuadsDraw(&QuadItem, 1);
@@ -890,7 +890,7 @@ void CPlayers::RenderPlayer(
 			if (OtherTeam)
 			{
 				TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.2f);
-				TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 0.4f);
+				TextRender()->TextColor(rgb.r, rgb.g, rgb.b, g_Config.m_ClShowOthersAlpha / 100.0f);
 			}
 			else
 			{

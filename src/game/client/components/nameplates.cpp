@@ -47,7 +47,7 @@ void CNamePlates::RenderNameplate(
 		if (OtherTeam)
 		{
 			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.2f);
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 0.4f);
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, g_Config.m_ClShowOthersAlpha / 100.0f);
 		}
 		else
 		{

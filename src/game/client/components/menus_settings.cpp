@@ -1232,10 +1232,13 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClOverlayEntities = (int)(DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities/100.0f)*100.0f);
 	}
 
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show players in other teams by default"), g_Config.m_ClShowOthers, &Button))
 	{
-		g_Config.m_ClShowOthers ^= 1;
+		CUIRect Button, Label;
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(120.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Other teams"), 14.0f, -1);
+		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
