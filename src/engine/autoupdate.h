@@ -13,6 +13,7 @@ class IAutoUpdate : public IInterface
 	MACRO_INTERFACE("autoupdate", 0)
 public:
 	virtual void CheckUpdates(CMenus *pMenus) = 0;
+	virtual void DoUpdates(CMenus *pMenus) = 0;
 	virtual bool Updated() = 0;
 	virtual bool NeedResetClient() = 0;
 	virtual void ExecuteExit() = 0;

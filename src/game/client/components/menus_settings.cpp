@@ -1358,23 +1358,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), "Checking for an update");
 		RenderUpdating(aBuf);
 		AutoUpdate()->CheckUpdates(this);
-		if (AutoUpdate()->Updated())
-		{
-			if (AutoUpdate()->NeedResetClient())
-			{
-				Client()->Quit();
-				return;
-			}
-			else
-				str_format(aBuf, sizeof(aBuf), "DDNet Client updated");
-
-			RenderUpdating(aBuf);
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "No update available");
-			RenderUpdating(aBuf);
-		}
 	}
 #endif
 }

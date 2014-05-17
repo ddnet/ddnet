@@ -294,24 +294,6 @@ void CGameClient::OnInit()
 		str_format(aBuf, sizeof(aBuf), "Checking for updates");
 		g_GameClient.m_pMenus->RenderUpdating(aBuf);
 		AutoUpdate()->CheckUpdates(m_pMenus);
-		if (AutoUpdate()->Updated())
-		{
-			if (AutoUpdate()->NeedResetClient())
-			{
-				Client()->Quit();
-				return;
-			}
-			else
-			{
-				str_format(aBuf, sizeof(aBuf), "DDNet Client updated successfully");
-				g_GameClient.m_pMenus->RenderUpdating(aBuf);
-			}
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "No updates available");
-			g_GameClient.m_pMenus->RenderUpdating(aBuf);
-		}
 	}
 #endif
 

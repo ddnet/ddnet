@@ -53,6 +53,7 @@ void CAutoUpdate::Reset()
 	m_NeedUpdate = false;
 	m_NeedUpdateBackground = false;
 	m_NeedUpdateClient = false;
+	m_NeedUpdateServer = false;
 	m_NeedResetClient = false;
 	m_Updated = false;
 	m_vFiles.clear();
@@ -112,14 +113,61 @@ void CAutoUpdate::ExecuteExit()
 void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 {
 	char aReadBuf[512];
-	char aBuf[512];
-
 	dbg_msg("autoupdate", "Checking for updates");
 	if (!GetFile("ddnet.upd", "ddnet.upd"))
 	{
 		dbg_msg("autoupdate", "Error downloading update list");
 		return;
 	}
+
+	dbg_msg("autoupdate", "Processing data");
+
+	Reset();
+	IOHANDLE updFile = io_open("ddnet.upd", IOFLAG_READ);
+	if (!updFile)
+		return;
+
+	//read data
+	std::string ReadData;
+	char last_version[15];
+	char cmd;
+	while (io_read(updFile, aReadBuf, sizeof(aReadBuf)) > 0)
+	{
+		for (size_t i=0; i<sizeof(aReadBuf); i++)
+		{
+			if (aReadBuf[i]=='\n')
+			{
+				if (i>0 && aReadBuf[i-1] == '\r')
+					ReadData = ReadData.substr(0, -2);
+
+				//Parse Command
+				cmd = ReadData[0];
+				if (cmd == '#')
+				{
+					str_copy(last_version, ReadData.substr(1).c_str(), sizeof(last_version));
+
+					if (ReadData.substr(1).compare(GAME_RELEASE_VERSION) != 0)
+						pMenus->setPopup(CMenus::POPUP_AUTOUPDATE);
+					else
+						dbg_msg("autoupdate", "Version match");
+
+					io_close(updFile);
+					return;
+				}
+				ReadData.clear();
+			}
+
+			ReadData+=aReadBuf[i];
+		}
+	}
+	
+	io_close(updFile);
+}
+
+void CAutoUpdate::DoUpdates(CMenus *pMenus)
+{
+	char aReadBuf[512];
+	char aBuf[512];
 
 	dbg_msg("autoupdate", "Processing data");
 
@@ -152,7 +200,7 @@ void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 					else
 					{
 						dbg_msg("autoupdate", "Version match");
-						break;
+						goto finish;
 					}
 
 					str_copy(current_version, ReadData.substr(1).c_str(), sizeof(current_version));
@@ -179,13 +227,12 @@ void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 							#endif
 								dbg_msg("autoupdate", "Error downloading new version");
 						}
-						if (ReadData.substr(2).compare("UPDATE_SERVER") == 0)
+						if (!m_NeedUpdateServer && ReadData.substr(2).compare("UPDATE_SERVER") == 0)
 						{
 							str_format(aBuf, sizeof(aBuf), "Updating DDNet Server to %s", last_version);
 							pMenus->RenderUpdating(aBuf);
 
-							m_NeedUpdateClient = true;
-							m_NeedResetClient = true;
+							m_NeedUpdateServer = true;
 							dbg_msg("autoupdate", "Updating server");
 							#if defined(CONF_FAMILY_WINDOWS)
 							if (!GetFile("DDNet-Server.exe", "DDNet-Server.exe"))
@@ -245,7 +292,8 @@ void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 		if (!m_NeedUpdate)
 			break;
 	}
-	
+
+	finish:
 	if (m_NeedUpdate)
 	{
 		m_Updated = true;
@@ -260,7 +308,25 @@ void CAutoUpdate::CheckUpdates(CMenus *pMenus)
 		dbg_msg("autoupdate", "No updates available");
 
 	io_close(updFile);
-	remove("ddnet.upd");
+
+	if (m_Updated)
+	{
+		if (m_NeedUpdateClient)
+		{
+			pMenus->setPopup(CMenus::POPUP_QUIT);
+			return;
+		}
+
+		str_format(aBuf, sizeof(aBuf), "DDNet Client updated successfully");
+		pMenus->RenderUpdating(aBuf);
+		thread_sleep(200);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "No update available");
+		pMenus->RenderUpdating(aBuf);
+		thread_sleep(200);
+	}
 }
 
 bool CAutoUpdate::GetFile(const char *pFile, const char *dst)

@@ -17,6 +17,7 @@ public:
 	void Reset();
 
 	void CheckUpdates(CMenus *pMenus);
+	void DoUpdates(CMenus *pMenus);
 	bool Updated() { return m_Updated; }
 	bool NeedResetClient() { return m_NeedResetClient; }
 	void ExecuteExit();
@@ -26,6 +27,7 @@ private:
 	bool m_NeedUpdate;
 	bool m_NeedUpdateBackground;
 	bool m_NeedUpdateClient;
+	bool m_NeedUpdateServer;
 	bool m_NeedResetClient;
 	std::list<std::string> m_vFiles;
 
