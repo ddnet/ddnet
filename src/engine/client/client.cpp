@@ -1098,6 +1098,15 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			if(!VersionMatch)
 			{
 				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
+
+#if !defined(CONF_PLATFORM_MACOSX)
+				if (g_Config.m_ClAutoUpdate)
+				{
+					str_format(aBuf, sizeof(aBuf), "Checking for updates");
+					((CGameClient *) GameClient())->m_pMenus->RenderUpdating(aBuf);
+					((CGameClient *) GameClient())->AutoUpdate()->CheckUpdates(((CGameClient *) GameClient())->m_pMenus);
+				}
+#endif
 			}
 
 			// request the map version list now
