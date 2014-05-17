@@ -645,11 +645,11 @@ void CServerBrowser::Update(bool ForceResort)
 					*/
 				}
 				else
-					m_MasterServerCount += Count;		
+					m_MasterServerCount += Count;
 			}
 		//request Server-List
 		NETADDR Addr;
-		CNetChunk Packet;		
+		CNetChunk Packet;
 		mem_zero(&Packet, sizeof(Packet));
 		Packet.m_ClientID = -1;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS;

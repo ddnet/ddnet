@@ -1270,6 +1270,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				{
 					pEntry->m_Is64 = true;
 					m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry); // Force a quick update
+					m_ServerBrowser.QueueRequest(pEntry);
 				}
 			}
 		}
