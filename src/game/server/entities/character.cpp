@@ -1676,7 +1676,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			for (int i = 0; i < MAX_CLIENTS; i++)
 			{
-				if(Teams()->m_Core.Team(i) == Team && i != m_Core.m_Id)
+				if(Teams()->m_Core.Team(i) == Team && i != m_Core.m_Id && GameServer()->m_apPlayers[i])
 				{
 					CCharacter* pChar = GameServer()->m_apPlayers[i]->GetCharacter();
 
@@ -2029,7 +2029,7 @@ void CCharacter::DDRaceInit()
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(Teams()->m_Core.Team(i) == Team && i != m_Core.m_Id)
+			if(Teams()->m_Core.Team(i) == Team && i != m_Core.m_Id && GameServer()->m_apPlayers[i])
 			{
 				CCharacter* pChar = GameServer()->m_apPlayers[i]->GetCharacter();
 

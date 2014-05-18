@@ -169,7 +169,7 @@ void CGameWorld::UpdatePlayerMaps()
 		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
 			dist[j].second = j;
-			if (!Server()->ClientIngame(j))
+			if (!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
 			{
 				dist[j].first = 1e10;
 				continue;

@@ -224,7 +224,8 @@ void CSqlScore::LoadScoreThread(void *pUser)
 				float time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 				pData->m_pSqlData->PlayerData(pData->m_ClientID)->m_BestTime = time;
 				pData->m_pSqlData->PlayerData(pData->m_ClientID)->m_CurrentTime = time;
-				pData->m_pSqlData->m_pGameServer->m_apPlayers[pData->m_ClientID]->m_Score = -time;
+				if(pData->m_pSqlData->m_pGameServer->m_apPlayers[pData->m_ClientID])
+					pData->m_pSqlData->m_pGameServer->m_apPlayers[pData->m_ClientID]->m_Score = -time;
 
 				char aColumn[8];
 				if(g_Config.m_SvCheckpointSave)
@@ -428,6 +429,10 @@ void CSqlScore::MapVoteThread(void *pUser)
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			CPlayer *pPlayer = pData->m_pSqlData->m_pGameServer->m_apPlayers[pData->m_ClientID];
+
+			if(!pPlayer)
+				goto end;
+
 			int64 Now = pData->m_pSqlData->Server()->Tick();
 			int Timeleft = pPlayer->m_LastVoteCall + pData->m_pSqlData->Server()->TickSpeed()*g_Config.m_SvVoteDelay - Now;
 
@@ -465,6 +470,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 				pData->m_pSqlData->GameServer()->CallVote(pData->m_ClientID, aMap, aCmd, "/map", aChatmsg);
 			}
 
+			end:
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)

@@ -117,8 +117,6 @@ void CProjectile::Tick()
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos, false);
 	CCharacter *pOwnerChar = 0;
 
-
-
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 

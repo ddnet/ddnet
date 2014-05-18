@@ -558,6 +558,9 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 
 void CPlayer::ProcessPause()
 {
+	if(!m_pCharacter)
+		return;
+
 	char aBuf[128];
 	if(m_Paused >= PAUSED_PAUSED)
 	{

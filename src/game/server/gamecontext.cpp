@@ -166,7 +166,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				ForceDir = normalize(Diff);
 			l = 1-clamp((l-InnerRadius)/(Radius-InnerRadius), 0.0f, 1.0f);
 			float Strength;
-			if (Owner == -1 || !m_apPlayers[Owner]->m_TuneZone)
+			if (Owner == -1 || !m_apPlayers[Owner] || !!m_apPlayers[Owner]->m_TuneZone)
 				Strength = Tuning()->m_ExplosionStrength;
 			else
 				Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
@@ -260,6 +260,10 @@ void CGameContext::CallVote(int ClientID, const char *aDesc, const char *aCmd, c
 
 	int64 Now = Server()->Tick();
 	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	if(!pPlayer)
+		return;
+
 	SendChat(-1, CGameContext::CHAT_ALL, aChatmsg);
 	StartVote(aDesc, aCmd, pReason);
 	pPlayer->m_Vote = 1;
@@ -2720,7 +2724,8 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 	if (!CheckClientID2(VictimID))
 		return;
 
-	m_apPlayers[ClientID]->m_LastWhisperTo = VictimID;
+	if (m_apPlayers[ClientID])
+		m_apPlayers[ClientID]->m_LastWhisperTo = VictimID;
 
 	char aBuf[256];
 
