@@ -186,6 +186,22 @@ void CProjectile::Tick()
 	}
 	if(m_LifeSpan == -1)
 	{
+		if(m_Explosive)
+		{
+			if(m_Owner >= 0)
+				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+
+			int64_t TeamMask = -1LL;
+			if (pOwnerChar && pOwnerChar->IsAlive())
+			{
+					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+			}
+
+			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
+			(m_Owner != -1)? TeamMask : -1LL);
+			GameServer()->CreateSound(ColPos, m_SoundImpact,
+			(m_Owner != -1)? TeamMask : -1LL);
+		}
 		GameServer()->m_World.DestroyEntity(this);
 	}
 
