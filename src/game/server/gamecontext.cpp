@@ -1226,16 +1226,20 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(!m_VoteCloseTime)
 				return;
 
-			if(pPlayer->m_Vote == 0)
-			{
-				CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
-				if(!pMsg->m_Vote)
-					return;
+			if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry+Server()->TickSpeed()*3 > Server()->Tick())
+				return;
 
-				pPlayer->m_Vote = pMsg->m_Vote;
-				pPlayer->m_VotePos = ++m_VotePos;
-				m_VoteUpdate = true;
-			}
+			int64 Now = Server()->Tick();
+
+			pPlayer->m_LastVoteTry = Now;
+
+			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
+			if(!pMsg->m_Vote)
+				return;
+
+			pPlayer->m_Vote = pMsg->m_Vote;
+			pPlayer->m_VotePos = ++m_VotePos;
+			m_VoteUpdate = true;
 		}
 		else if (MsgID == NETMSGTYPE_CL_SETTEAM && !m_World.m_Paused)
 		{
