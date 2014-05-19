@@ -394,7 +394,7 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 	}
 
 	// start vote
-	m_VoteCloseTime = time_get() + time_freq()*25;
+	m_VoteCloseTime = time_get() + time_freq() * g_Config.m_SvVoteTime;
 	str_copy(m_aVoteDescription, pDesc, sizeof(m_aVoteDescription));
 	str_copy(m_aVoteCommand, pCommand, sizeof(m_aVoteCommand));
 	str_copy(m_aVoteReason, pReason, sizeof(m_aVoteReason));
