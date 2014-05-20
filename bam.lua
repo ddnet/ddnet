@@ -233,6 +233,7 @@ function build(settings)
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libs:Add("mysqlcppconn-static")
 			server_settings.link.libs:Add("mysqlclient")
+			server_settings.link.libs:Add("dl")
 		end
 		
 		if platform == "macosx" then
