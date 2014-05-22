@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
 #include <base/tl/sorted_array.h>
 
 #include <base/math.h>
@@ -172,7 +171,6 @@ int CControls::SnapInput(int *pData)
 	}
 	else
 	{
-
 		m_InputData[g_Config.m_ClDummy].m_TargetX = (int)m_MousePos[g_Config.m_ClDummy].x;
 		m_InputData[g_Config.m_ClDummy].m_TargetY = (int)m_MousePos[g_Config.m_ClDummy].y;
 		if(!m_InputData[g_Config.m_ClDummy].m_TargetX && !m_InputData[g_Config.m_ClDummy].m_TargetY)
