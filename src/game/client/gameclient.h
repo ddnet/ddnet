@@ -59,7 +59,7 @@ class CGameClient : public IGameClient
 	void UpdatePositions();
 
 	int m_PredictedTick;
-	int m_LastNewPredictedTick;
+	int m_LastNewPredictedTick[2];
 
 	int64 m_LastSendInfo;
 

@@ -382,7 +382,8 @@ void CGameClient::OnConnected()
 void CGameClient::OnReset()
 {
 	// clear out the invalid pointers
-	m_LastNewPredictedTick = -1;
+	m_LastNewPredictedTick[0] = -1;
+	m_LastNewPredictedTick[1] = -1;
 	mem_zero(&g_GameClient.m_Snap, sizeof(g_GameClient.m_Snap));
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -556,6 +557,7 @@ void CGameClient::OnDummyDisconnect()
 {
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[1] = -1;
+	m_LastNewPredictedTick[1] = -1;
 }
 
 void CGameClient::OnRelease()
@@ -1193,9 +1195,9 @@ void CGameClient::OnPredict()
 		}
 
 		// check if we want to trigger effects
-		if(Tick > m_LastNewPredictedTick)
+		if(Tick > m_LastNewPredictedTick[g_Config.m_ClDummy])
 		{
-			m_LastNewPredictedTick = Tick;
+			m_LastNewPredictedTick[g_Config.m_ClDummy] = Tick;
 			m_NewPredictedTick = true;
 
 			if(m_Snap.m_LocalClientID != -1 && World.m_apCharacters[m_Snap.m_LocalClientID])
