@@ -31,7 +31,7 @@ void CCamera::OnRender()
 	{
 		if(m_CamType != CAMTYPE_SPEC)
 		{
-			m_LastPos = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+			m_LastPos[g_Config.m_ClDummy] = m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
 			m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_PrevCenter;
 			m_pClient->m_pControls->ClampMousePos();
 			m_CamType = CAMTYPE_SPEC;
@@ -42,7 +42,7 @@ void CCamera::OnRender()
 	{
 		if(m_CamType != CAMTYPE_PLAYER)
 		{
-			m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_LastPos;
+			m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_LastPos[g_Config.m_ClDummy];
 			m_pClient->m_pControls->ClampMousePos();
 			m_CamType = CAMTYPE_PLAYER;
 		}

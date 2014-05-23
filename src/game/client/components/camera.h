@@ -15,7 +15,7 @@ class CCamera : public CComponent
 	};
 
 	int m_CamType;
-	vec2 m_LastPos;
+	vec2 m_LastPos[2];
 	vec2 m_PrevCenter;
 
 public:
