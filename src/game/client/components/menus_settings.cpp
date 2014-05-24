@@ -1363,4 +1363,15 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		AutoUpdate()->CheckUpdates(this);
 	}
 #endif
+
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ConnTimeout);
+		Right.HSplitTop(20.0f, &Button, &Right);
+		UI()->DoLabelScaled(&Button, Localize("Timeout (in seconds)"), 14.0f, -1);
+		Button.VSplitLeft(190.0f, 0, &Button);
+		static float Offset = 0.0f;
+		DoEditBox(&g_Config.m_ConnTimeout, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
+		g_Config.m_ConnTimeout = clamp(str_toint(aBuf), 5, 1000);
+	}
 }
