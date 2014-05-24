@@ -703,7 +703,8 @@ void CClient::DummyConnect()
 	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
 		return;
 
-	m_NetClient[1].Disconnect(0);
+	if(m_DummyConnected)
+		return;
 
 	m_RconAuthed[1] = 0;
 
@@ -733,6 +734,9 @@ void CClient::DummyConnect()
 
 void CClient::DummyDisconnect(const char *pReason)
 {
+	if(!m_DummyConnected)
+		return;
+
 	m_NetClient[1].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
 	m_RconAuthed[1] = 0;
