@@ -1116,7 +1116,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 void CMenus::RenderSettingsDDRace(CUIRect MainView)
 
 {
-	CUIRect Button, Left, Right, HUD, Demo, Gameplay, Miscellaneous, Label;
+	CUIRect Button, Left, Right, LeftLeft, HUD, Demo, Gameplay, Miscellaneous, Label;
 
 	MainView.HSplitTop(130.0f, &HUD , &MainView);
 
@@ -1235,10 +1235,17 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
-		Button.VSplitLeft(120.0f, &Label, &Button);
+		Button.VSplitMid(&LeftLeft, &Button);
+
+		Button.VSplitLeft(60.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Show others"), 14.0f, -1);
+		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
 		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
+
+		if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers, &LeftLeft))
+		{
+			g_Config.m_ClShowOthers ^= 1;
+		}
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);

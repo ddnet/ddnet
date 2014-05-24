@@ -1096,18 +1096,18 @@ void CGameClient::OnNewSnapshot()
 		m_DDRaceMsgSent[1] = true;
 	}
 
-	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && ((m_ShowOthers[g_Config.m_ClDummy] && !g_Config.m_ClShowOthersAlpha) || (!m_ShowOthers[g_Config.m_ClDummy] && g_Config.m_ClShowOthersAlpha))))
+	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
 		// no need to send, default settings
 		//if(!(m_ShowOthers == -1 && g_Config.m_ClShowOthers))
 		{
 			CNetMsg_Cl_ShowOthers Msg;
-			Msg.m_Show = g_Config.m_ClShowOthersAlpha ? 1 : 0;
+			Msg.m_Show = g_Config.m_ClShowOthers;
 			Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 		}
 
 		// update state
-		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthersAlpha ? 1 : 0;
+		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
 }
 
