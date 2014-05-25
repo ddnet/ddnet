@@ -228,7 +228,7 @@ void CFileScore::SaveScore(int ClientID, float Time,
 		float CpTime[NUM_CHECKPOINTS])
 {
 	CConsole* pCon = (CConsole*) GameServer()->Console();
-	if (!pCon->m_Cheated)
+	if (!pCon->m_Cheated || g_Config.m_SvRankCheats)
 		UpdatePlayer(ClientID, Time, CpTime);
 }
 
