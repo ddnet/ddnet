@@ -479,34 +479,36 @@ void CLayerTiles::Resize(int NewW, int NewH)
 
 void CLayerTiles::Shift(int Direction)
 {
+	int o = m_pEditor->m_ShiftBy;
+
 	switch(Direction)
 	{
 	case 1:
 		{
 			// left
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTiles[y*m_Width], &m_pTiles[y*m_Width+1], (m_Width-1)*sizeof(CTile));
+				mem_move(&m_pTiles[y*m_Width], &m_pTiles[y*m_Width+o], (m_Width-o)*sizeof(CTile));
 		}
 		break;
 	case 2:
 		{
 			// right
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTiles[y*m_Width+1], &m_pTiles[y*m_Width], (m_Width-1)*sizeof(CTile));
+				mem_move(&m_pTiles[y*m_Width+o], &m_pTiles[y*m_Width], (m_Width-o)*sizeof(CTile));
 		}
 		break;
 	case 4:
 		{
 			// up
-			for(int y = 0; y < m_Height-1; ++y)
-				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y+1)*m_Width], m_Width*sizeof(CTile));
+			for(int y = 0; y < m_Height-o; ++y)
+				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y+o)*m_Width], m_Width*sizeof(CTile));
 		}
 		break;
 	case 8:
 		{
 			// down
-			for(int y = m_Height-1; y > 0; --y)
-				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y-1)*m_Width], m_Width*sizeof(CTile));
+			for(int y = m_Height-o; y >= o; --y)
+				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y-o)*m_Width], m_Width*sizeof(CTile));
 		}
 	}
 }
@@ -641,6 +643,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		PROP_WIDTH=0,
 		PROP_HEIGHT,
 		PROP_SHIFT,
+		PROP_SHIFT_BY,
 		PROP_IMAGE,
 		PROP_COLOR,
 		PROP_COLOR_ENV,
@@ -658,6 +661,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Width", m_Width, PROPTYPE_INT_SCROLL, 1, 1000000000},
 		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 1000000000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
+		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 1000000000},
 		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Color Env", m_ColorEnv+1, PROPTYPE_INT_STEP, 0, m_pEditor->m_Map.m_lEnvelopes.size()+1},
@@ -667,8 +671,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	if(m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this) // remove the image and color properties if this is the game/tele/speedup/front/switch layer
 	{
-		aProps[3].m_pName = 0;
 		aProps[4].m_pName = 0;
+		aProps[5].m_pName = 0;
 	}
 
 	static int s_aIds[NUM_PROPS] = {0};
@@ -683,6 +687,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		Resize(m_Width, NewVal);
 	else if(Prop == PROP_SHIFT)
 		Shift(NewVal);
+	else if(Prop == PROP_SHIFT_BY)
+		m_pEditor->m_ShiftBy = NewVal;
 	else if(Prop == PROP_IMAGE)
 	{
 		if (NewVal == -1)
@@ -771,6 +777,7 @@ void CLayerTele::Resize(int NewW, int NewH)
 void CLayerTele::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
+	int o = m_pEditor->m_ShiftBy;
 
 	switch(Direction)
 	{
@@ -778,28 +785,28 @@ void CLayerTele::Shift(int Direction)
 		{
 			// left
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTeleTile[y*m_Width], &m_pTeleTile[y*m_Width+1], (m_Width-1)*sizeof(CTeleTile));
+				mem_move(&m_pTeleTile[y*m_Width], &m_pTeleTile[y*m_Width+o], (m_Width-o)*sizeof(CTeleTile));
 		}
 		break;
 	case 2:
 		{
 			// right
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTeleTile[y*m_Width+1], &m_pTeleTile[y*m_Width], (m_Width-1)*sizeof(CTeleTile));
+				mem_move(&m_pTeleTile[y*m_Width+o], &m_pTeleTile[y*m_Width], (m_Width-o)*sizeof(CTeleTile));
 		}
 		break;
 	case 4:
 		{
 			// up
-			for(int y = 0; y < m_Height-1; ++y)
-				mem_copy(&m_pTeleTile[y*m_Width], &m_pTeleTile[(y+1)*m_Width], m_Width*sizeof(CTeleTile));
+			for(int y = 0; y < m_Height-o; ++y)
+				mem_copy(&m_pTeleTile[y*m_Width], &m_pTeleTile[(y+o)*m_Width], m_Width*sizeof(CTeleTile));
 		}
 		break;
 	case 8:
 		{
 			// down
-			for(int y = m_Height-1; y > 0; --y)
-				mem_copy(&m_pTeleTile[y*m_Width], &m_pTeleTile[(y-1)*m_Width], m_Width*sizeof(CTeleTile));
+			for(int y = m_Height-o; y >= o; --y)
+				mem_copy(&m_pTeleTile[y*m_Width], &m_pTeleTile[(y-o)*m_Width], m_Width*sizeof(CTeleTile));
 		}
 	}
 }
@@ -1008,6 +1015,7 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 void CLayerSpeedup::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
+	int o = m_pEditor->m_ShiftBy;
 
 	switch(Direction)
 	{
@@ -1015,28 +1023,28 @@ void CLayerSpeedup::Shift(int Direction)
 		{
 			// left
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pSpeedupTile[y*m_Width], &m_pSpeedupTile[y*m_Width+1], (m_Width-1)*sizeof(CSpeedupTile));
+				mem_move(&m_pSpeedupTile[y*m_Width], &m_pSpeedupTile[y*m_Width+o], (m_Width-o)*sizeof(CSpeedupTile));
 		}
 		break;
 	case 2:
 		{
 			// right
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pSpeedupTile[y*m_Width+1], &m_pSpeedupTile[y*m_Width], (m_Width-1)*sizeof(CSpeedupTile));
+				mem_move(&m_pSpeedupTile[y*m_Width+o], &m_pSpeedupTile[y*m_Width], (m_Width-o)*sizeof(CSpeedupTile));
 		}
 		break;
 	case 4:
 		{
 			// up
-			for(int y = 0; y < m_Height-1; ++y)
-				mem_copy(&m_pSpeedupTile[y*m_Width], &m_pSpeedupTile[(y+1)*m_Width], m_Width*sizeof(CSpeedupTile));
+			for(int y = 0; y < m_Height-o; ++y)
+				mem_copy(&m_pSpeedupTile[y*m_Width], &m_pSpeedupTile[(y+o)*m_Width], m_Width*sizeof(CSpeedupTile));
 		}
 		break;
 	case 8:
 		{
 			// down
-			for(int y = m_Height-1; y > 0; --y)
-				mem_copy(&m_pSpeedupTile[y*m_Width], &m_pSpeedupTile[(y-1)*m_Width], m_Width*sizeof(CSpeedupTile));
+			for(int y = m_Height-o; y >= o; --y)
+				mem_copy(&m_pSpeedupTile[y*m_Width], &m_pSpeedupTile[(y-o)*m_Width], m_Width*sizeof(CSpeedupTile));
 		}
 	}
 }
@@ -1248,6 +1256,7 @@ void CLayerFront::Resize(int NewW, int NewH)
 void CLayerFront::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
+	int o = m_pEditor->m_ShiftBy;
 
 	switch(Direction)
 	{
@@ -1255,28 +1264,28 @@ void CLayerFront::Shift(int Direction)
 		{
 			// left
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTiles[y*m_Width], &m_pTiles[y*m_Width+1], (m_Width-1)*sizeof(CTile));
+				mem_move(&m_pTiles[y*m_Width], &m_pTiles[y*m_Width+o], (m_Width-o)*sizeof(CTile));
 		}
 		break;
 	case 2:
 		{
 			// right
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTiles[y*m_Width+1], &m_pTiles[y*m_Width], (m_Width-1)*sizeof(CTile));
+				mem_move(&m_pTiles[y*m_Width+o], &m_pTiles[y*m_Width], (m_Width-o)*sizeof(CTile));
 		}
 		break;
 	case 4:
 		{
 			// up
-			for(int y = 0; y < m_Height-1; ++y)
-				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y+1)*m_Width], m_Width*sizeof(CTile));
+			for(int y = 0; y < m_Height-o; ++y)
+				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y+o)*m_Width], m_Width*sizeof(CTile));
 		}
 		break;
 	case 8:
 		{
 			// down
-			for(int y = m_Height-1; y > 0; --y)
-				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y-1)*m_Width], m_Width*sizeof(CTile));
+			for(int y = m_Height-o; y >= o; --y)
+				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y-o)*m_Width], m_Width*sizeof(CTile));
 		}
 	}
 }
@@ -1345,6 +1354,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 void CLayerSwitch::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
+	int o = m_pEditor->m_ShiftBy;
 
 	switch(Direction)
 	{
@@ -1352,28 +1362,28 @@ void CLayerSwitch::Shift(int Direction)
 		{
 			// left
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pSwitchTile[y*m_Width], &m_pSwitchTile[y*m_Width+1], (m_Width-1)*sizeof(CSwitchTile));
+				mem_move(&m_pSwitchTile[y*m_Width], &m_pSwitchTile[y*m_Width+o], (m_Width-o)*sizeof(CSwitchTile));
 		}
 		break;
 	case 2:
 		{
 			// right
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pSwitchTile[y*m_Width+1], &m_pSwitchTile[y*m_Width], (m_Width-1)*sizeof(CSwitchTile));
+				mem_move(&m_pSwitchTile[y*m_Width+o], &m_pSwitchTile[y*m_Width], (m_Width-o)*sizeof(CSwitchTile));
 		}
 		break;
 	case 4:
 		{
 			// up
-			for(int y = 0; y < m_Height-1; ++y)
-				mem_copy(&m_pSwitchTile[y*m_Width], &m_pSwitchTile[(y+1)*m_Width], m_Width*sizeof(CSwitchTile));
+			for(int y = 0; y < m_Height-o; ++y)
+				mem_copy(&m_pSwitchTile[y*m_Width], &m_pSwitchTile[(y+o)*m_Width], m_Width*sizeof(CSwitchTile));
 		}
 		break;
 	case 8:
 		{
 			// down
-			for(int y = m_Height-1; y > 0; --y)
-				mem_copy(&m_pSwitchTile[y*m_Width], &m_pSwitchTile[(y-1)*m_Width], m_Width*sizeof(CSwitchTile));
+			for(int y = m_Height-o; y >= o; --y)
+				mem_copy(&m_pSwitchTile[y*m_Width], &m_pSwitchTile[(y-o)*m_Width], m_Width*sizeof(CSwitchTile));
 		}
 	}
 }
@@ -1554,6 +1564,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 void CLayerTune::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
+	int o = m_pEditor->m_ShiftBy;
 
 	switch(Direction)
 	{
@@ -1561,28 +1572,28 @@ void CLayerTune::Shift(int Direction)
 		{
 			// left
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTuneTile[y*m_Width], &m_pTuneTile[y*m_Width+1], (m_Width-1)*sizeof(CTuneTile));
+				mem_move(&m_pTuneTile[y*m_Width], &m_pTuneTile[y*m_Width+o], (m_Width-o)*sizeof(CTuneTile));
 		}
 		break;
 	case 2:
 		{
 			// right
 			for(int y = 0; y < m_Height; ++y)
-				mem_move(&m_pTuneTile[y*m_Width+1], &m_pTuneTile[y*m_Width], (m_Width-1)*sizeof(CTuneTile));
+				mem_move(&m_pTuneTile[y*m_Width+o], &m_pTuneTile[y*m_Width], (m_Width-o)*sizeof(CTuneTile));
 		}
 		break;
 	case 4:
 		{
 			// up
-			for(int y = 0; y < m_Height-1; ++y)
-				mem_copy(&m_pTuneTile[y*m_Width], &m_pTuneTile[(y+1)*m_Width], m_Width*sizeof(CTuneTile));
+			for(int y = 0; y < m_Height-o; ++y)
+				mem_copy(&m_pTuneTile[y*m_Width], &m_pTuneTile[(y+o)*m_Width], m_Width*sizeof(CTuneTile));
 		}
 		break;
 	case 8:
 		{
 			// down
-			for(int y = m_Height-1; y > 0; --y)
-				mem_copy(&m_pTuneTile[y*m_Width], &m_pTuneTile[(y-1)*m_Width], m_Width*sizeof(CTuneTile));
+			for(int y = m_Height-o; y >= o; --y)
+				mem_copy(&m_pTuneTile[y*m_Width], &m_pTuneTile[(y-o)*m_Width], m_Width*sizeof(CTuneTile));
 		}
 	}
 }

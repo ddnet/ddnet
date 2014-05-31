@@ -4122,6 +4122,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_UndoRunning = false;
 
 	m_ShowEnvelopePreview = 0;
+	m_ShiftBy = 1;
 }
 
 int CEditor::GetLineDistance()

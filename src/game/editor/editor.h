@@ -805,6 +805,7 @@ public:
 	static const void *ms_pUiGotContext;
 
 	CEditorMap m_Map;
+	int m_ShiftBy;
 
 	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
 
