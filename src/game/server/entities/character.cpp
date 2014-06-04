@@ -161,7 +161,12 @@ void CCharacter::HandleJetpack()
 		{
 			if (m_Jetpack)
 			{
-				TakeDamage(Direction * -1.0f * (GameServer()->Tuning()->m_JetpackStrength / 100.0f / 6.11f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
+				float Strength;
+				if (!m_TuneZone)
+					Strength = GameServer()->Tuning()->m_JetpackStrength;
+				else
+					Strength = GameServer()->TuningList()[m_TuneZone].m_JetpackStrength;
+				TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
 			}
 		}
 	}
