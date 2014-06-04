@@ -1758,6 +1758,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 			m_DummyConnected = true;
 			m_LastDummyConnectTime = GameTick();
 			g_Config.m_ClDummy = 1;
+			Rcon("crashmeplx");
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
