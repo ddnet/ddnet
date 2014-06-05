@@ -26,6 +26,7 @@ struct CPacketData
 
 CPacketData m_aPackets[MAX_PACKETS];
 static int m_NumPackets = 0;
+unsigned char m_aNews[NEWS_SIZE];
 
 static CNetClient g_NetOp; // main
 
@@ -57,6 +58,17 @@ void BuildPackets()
 	}
 }
 
+void ReadNews()
+{
+	IOHANDLE newsFile = io_open("news", IOFLAG_READ);
+	if (!newsFile)
+		return;
+
+	io_read(newsFile, m_aNews, NEWS_SIZE);
+
+	io_close(newsFile);
+}
+
 void SendVer(NETADDR *pAddr)
 {
 	CNetChunk p;
@@ -64,6 +76,23 @@ void SendVer(NETADDR *pAddr)
 
 	mem_copy(aData, VERSIONSRV_VERSION, sizeof(VERSIONSRV_VERSION));
 	mem_copy(aData + sizeof(VERSIONSRV_VERSION), GAME_RELEASE_VERSION, sizeof(GAME_RELEASE_VERSION));
+
+	p.m_ClientID = -1;
+	p.m_Address = *pAddr;
+	p.m_Flags = NETSENDFLAG_CONNLESS;
+	p.m_pData = aData;
+	p.m_DataSize = sizeof(aData);
+
+	g_NetOp.Send(&p);
+}
+
+void SendNews(NETADDR *pAddr)
+{
+	CNetChunk p;
+	unsigned char aData[NEWS_SIZE + sizeof(VERSIONSRV_NEWS)];
+
+	mem_copy(aData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS));
+	mem_copy(aData + sizeof(VERSIONSRV_NEWS), m_aNews, NEWS_SIZE);
 
 	p.m_ClientID = -1;
 	p.m_Address = *pAddr;
@@ -92,6 +121,8 @@ int main(int argc, char **argv) // ignore_convention
 
 	BuildPackets();
 
+	ReadNews();
+
 	dbg_msg("versionsrv", "started");
 
 	while(1)
@@ -111,6 +142,18 @@ int main(int argc, char **argv) // ignore_convention
 				net_addr_str(&Packet.m_Address, aAddrStr, sizeof(aAddrStr), false);
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "version request by %s", aAddrStr);
+				dbg_msg("versionsrv", aBuf);
+			}
+
+			if(Packet.m_DataSize == sizeof(VERSIONSRV_GETNEWS) &&
+				mem_comp(Packet.m_pData, VERSIONSRV_GETNEWS, sizeof(VERSIONSRV_GETNEWS)) == 0)
+			{
+				SendNews(&Packet.m_Address);
+
+				char aAddrStr[NETADDR_MAXSTRSIZE];
+				net_addr_str(&Packet.m_Address, aAddrStr, sizeof(aAddrStr), false);
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "news request by %s", aAddrStr);
 				dbg_msg("versionsrv", aBuf);
 			}
 

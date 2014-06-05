@@ -6,6 +6,7 @@
 
 #include "message.h"
 #include <engine/shared/config.h>
+#include <versionsrv/versionsrv.h>
 
 class IClient : public IInterface
 {
@@ -29,6 +30,7 @@ protected:
 	int m_GameTickSpeed;
 public:
 	int m_LocalIDs[2];
+	char m_aNews[NEWS_SIZE];
 
 	class CSnapItem
 	{

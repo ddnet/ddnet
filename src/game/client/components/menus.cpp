@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/tl/array.h>
+#include <sstream>
+#include <string>
 
 #include <math.h>
 
@@ -30,6 +32,7 @@
 #include <game/client/lineinput.h>
 #include <game/localization.h>
 #include <mastersrv/mastersrv.h>
+#include <versionsrv/versionsrv.h>
 
 #include "countryflags.h"
 #include "menus.h"
@@ -536,14 +539,11 @@ int CMenus::RenderMenubar(CUIRect r)
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		// offline menus
-		if(0) // this is not done yet
-		{
-			Box.VSplitLeft(90.0f, &Button, &Box);
-			static int s_NewsButton=0;
-			if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, 0))
-				NewPage = PAGE_NEWS;
-			Box.VSplitLeft(30.0f, 0, &Box);
-		}
+		Box.VSplitLeft(90.0f, &Button, &Box);
+		static int s_NewsButton=0;
+		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
+			NewPage = PAGE_NEWS;
+		Box.VSplitLeft(10.0f, 0, &Box);
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_InternetButton=0;
@@ -554,7 +554,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		}
 
 		//Box.VSplitLeft(4.0f, 0, &Box);
-		Box.VSplitLeft(80.0f, &Button, &Box);
+		Box.VSplitLeft(70.0f, &Button, &Box);
 		static int s_LanButton=0;
 		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
 		{
@@ -571,7 +571,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			NewPage = PAGE_FAVORITES;
 		}
 
-		Box.VSplitLeft(4.0f*5, 0, &Box);
+		Box.VSplitLeft(10.0f, 0, &Box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_DemosButton=0;
 		if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage==PAGE_DEMOS, &Button, CUI::CORNER_T))
@@ -698,7 +698,31 @@ void CMenus::RenderLoading()
 
 void CMenus::RenderNews(CUIRect MainView)
 {
+	// TODO: Like the settings with big fonts
+	// Make it work WITHOUT version updates
+	// Show news once after each version or news update
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+
+	MainView.HSplitTop(15.0f, 0, &MainView);
+	MainView.VSplitLeft(15.0f, 0, &MainView);
+
+	CUIRect Label;
+
+	std::istringstream f(Client()->m_aNews);
+	std::string line;
+	while (std::getline(f, line))
+	{
+		if(line.size() > 0 && line.at(0) == '|' && line.at(line.size()-1) == '|')
+		{
+			MainView.HSplitTop(30.0f, &Label, &MainView);
+			UI()->DoLabelScaled(&Label, Localize(line.substr(1, line.size()-2).c_str()), 20.0f, -1);
+		}
+		else
+		{
+			MainView.HSplitTop(20.0f, &Label, &MainView);
+			UI()->DoLabelScaled(&Label, line.c_str(), 15.f, -1, MainView.w-30.0f);
+		}
+	}
 }
 
 void CMenus::OnInit()
@@ -830,7 +854,7 @@ int CMenus::Render()
 		RenderMenubar(TabBar);
 
 		// news is not implemented yet
-		if(g_Config.m_UiPage <= PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
+		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			g_Config.m_UiPage = PAGE_INTERNET;

@@ -11,6 +11,7 @@
 #include <base/vmath.h>
 #include <base/system.h>
 
+#include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
 
 #include <engine/client.h>
@@ -1076,7 +1077,6 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		// version info
 		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_VERSION, sizeof(VERSIONSRV_VERSION)) == 0)
-
 		{
 			char *pVersionData = (char*)pPacket->m_pData + sizeof(VERSIONSRV_VERSION);
 			int VersionMatch = !mem_comp(pVersionData, GAME_RELEASE_VERSION, sizeof(GAME_RELEASE_VERSION));
@@ -1105,8 +1105,17 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 #endif
 			}
 
-			// request the map version list now
+			// request the news
 			CNetChunk Packet;
+			mem_zero(&Packet, sizeof(Packet));
+			Packet.m_ClientID = -1;
+			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
+			Packet.m_pData = VERSIONSRV_GETNEWS;
+			Packet.m_DataSize = sizeof(VERSIONSRV_GETNEWS);
+			Packet.m_Flags = NETSENDFLAG_CONNLESS;
+			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
+
+			// request the map version list now
 			mem_zero(&Packet, sizeof(Packet));
 			Packet.m_ClientID = -1;
 			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
@@ -1114,6 +1123,24 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Packet.m_DataSize = sizeof(VERSIONSRV_GETMAPLIST);
 			Packet.m_Flags = NETSENDFLAG_CONNLESS;
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
+		}
+
+		// news
+		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
+			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
+		{
+			if (mem_comp(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
+				g_Config.m_UiPage = CMenus::PAGE_NEWS;
+
+			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
+
+			IOHANDLE newsFile = io_open("news", IOFLAG_WRITE);
+			if (!newsFile)
+				return;
+
+			io_write(newsFile, m_aNews, sizeof(m_aNews));
+
+			io_close(newsFile);
 		}
 
 		// map version list
@@ -2290,6 +2317,14 @@ void CClient::InitInterfaces()
 		m_ServerBrowser.SetBaseInfo(&m_NetClient[i], m_pGameClient->NetVersion());
 	}
 	m_Friends.Init();
+
+	IOHANDLE newsFile = io_open("news", IOFLAG_READ);
+	if (!newsFile)
+		return;
+
+	io_read(newsFile, m_aNews, NEWS_SIZE);
+
+	io_close(newsFile);
 }
 
 void CClient::Run()

@@ -92,24 +92,6 @@ class CMenus : public CComponent
 	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
 	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
 
-	enum
-	{
-		PAGE_NEWS=1,
-		PAGE_GAME,
-		PAGE_PLAYERS,
-		PAGE_SERVER_INFO,
-		PAGE_CALLVOTE,
-		PAGE_INTERNET,
-		PAGE_LAN,
-		PAGE_FAVORITES,
-		PAGE_DEMOS,
-		PAGE_SETTINGS,
-		PAGE_SYSTEM,
-		PAGE_DDRace,
-		PAGE_BROWSER,
-		PAGE_GHOST
-	};
-
 	int m_GamePage;
 	int m_Popup;
 	int m_ActivePage;
@@ -281,6 +263,24 @@ public:
 	virtual void OnRender();
 	virtual bool OnInput(IInput::CEvent Event);
 	virtual bool OnMouseMove(float x, float y);
+
+	enum
+	{
+		PAGE_NEWS=1,
+		PAGE_GAME,
+		PAGE_PLAYERS,
+		PAGE_SERVER_INFO,
+		PAGE_CALLVOTE,
+		PAGE_INTERNET,
+		PAGE_LAN,
+		PAGE_FAVORITES,
+		PAGE_DEMOS,
+		PAGE_SETTINGS,
+		PAGE_SYSTEM,
+		PAGE_DDRace,
+		PAGE_BROWSER,
+		PAGE_GHOST
+	};
 
 	// DDRace
 
