@@ -274,7 +274,8 @@ void CGhost::StartRecord()
 	m_Recording = true;
 	m_CurGhost.m_Path.clear();
 	CNetObj_ClientInfo *pInfo = (CNetObj_ClientInfo *) Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_CLIENTINFO, m_pClient->m_Snap.m_LocalClientID);
-	m_CurGhost.m_Info = *pInfo;
+	if (pInfo)
+		m_CurGhost.m_Info = *pInfo;
 }
 
 void CGhost::StopRecord()
