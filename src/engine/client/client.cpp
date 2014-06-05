@@ -1134,13 +1134,12 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
 
-			IOHANDLE newsFile = io_open("news", IOFLAG_WRITE);
-			if (!newsFile)
-				return;
-
-			io_write(newsFile, m_aNews, sizeof(m_aNews));
-
-			io_close(newsFile);
+			IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			if (newsFile)
+			{
+				io_write(newsFile, m_aNews, sizeof(m_aNews));
+				io_close(newsFile);
+			}
 		}
 
 		// map version list
@@ -2318,13 +2317,12 @@ void CClient::InitInterfaces()
 	}
 	m_Friends.Init();
 
-	IOHANDLE newsFile = io_open("news", IOFLAG_READ);
-	if (!newsFile)
-		return;
-
-	io_read(newsFile, m_aNews, NEWS_SIZE);
-
-	io_close(newsFile);
+	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
+	if (newsFile)
+	{
+		io_read(newsFile, m_aNews, NEWS_SIZE);
+		io_close(newsFile);
+	}
 }
 
 void CClient::Run()
