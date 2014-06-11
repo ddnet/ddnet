@@ -2840,8 +2840,8 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 		Graphics()->LinesEnd();
 	}
 
-	if(ImageCur + 27.0f > ImageStopAt)
-		return;
+	//if(ImageCur + 27.0f > ImageStopAt)
+	//	return;
 
 	CUIRect Slot;
 	ToolBox.HSplitTop(5.0f, &Slot, &ToolBox);
