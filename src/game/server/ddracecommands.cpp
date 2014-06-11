@@ -128,6 +128,15 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	pChr->Teams()->m_Core.SetSolo(pResult->m_ClientID, false);
+}
+
 void CGameContext::ConShotgun(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

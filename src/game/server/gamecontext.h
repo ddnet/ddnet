@@ -217,6 +217,7 @@ private:
 	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
