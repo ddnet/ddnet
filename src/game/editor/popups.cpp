@@ -875,11 +875,53 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 
 	int ShowImage = g_SelectImageCurrent;
 
+	static int s_ScrollBar = 0;
+	static float s_ScrollValue = 0;
+	float ImagesHeight = pEditor->m_Map.m_lImages.size() * 14;
+	float ScrollDifference = ImagesHeight - ButtonBar.h;
+
+	if(pEditor->m_Map.m_lImages.size() > 20) // Do we need a scrollbar?
+	{
+		CUIRect Scroll;
+		ButtonBar.VSplitRight(15.0f, &ButtonBar, &Scroll);
+		ButtonBar.VSplitRight(3.0f, &ButtonBar, 0);	// extra spacing
+		Scroll.HMargin(5.0f, &Scroll);
+		s_ScrollValue = pEditor->UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+
+		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
+		{
+			int ScrollNum = (int)((ImagesHeight-ButtonBar.h)/14.0f)+1;
+			if(ScrollNum > 0)
+			{
+				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+					s_ScrollValue = clamp(s_ScrollValue - 1.0f/ScrollNum, 0.0f, 1.0f);
+				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+					s_ScrollValue = clamp(s_ScrollValue + 1.0f/ScrollNum, 0.0f, 1.0f);
+			}
+			else
+				ScrollNum = 0;
+		}
+	}
+
+	float ImageStartAt = ScrollDifference * s_ScrollValue;
+	if(ImageStartAt < 0.0f)
+		ImageStartAt = 0.0f;
+
+	float ImageStopAt = ImagesHeight - ScrollDifference * (1 - s_ScrollValue);
+	float ImageCur = 0.0f;
 	for(int i = -1; i < pEditor->m_Map.m_lImages.size(); i++)
 	{
+		if(ImageCur > ImageStopAt)
+			break;
+		if(ImageCur < ImageStartAt)
+		{
+			ImageCur += 14.0f;
+			continue;
+		}
+		ImageCur += 14.0f;
+
 		CUIRect Button;
-		ButtonBar.HSplitTop(12.0f, &Button, &ButtonBar);
-		ButtonBar.HSplitTop(2.0f, 0, &ButtonBar);
+		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
 
 		if(pEditor->UI()->MouseInside(&Button))
 			ShowImage = i;
@@ -923,10 +965,7 @@ void CEditor::PopupSelectImageInvoke(int Current, float x, float y)
 	static int s_SelectImagePopupId = 0;
 	g_SelectImageSelected = -100;
 	g_SelectImageCurrent = Current;
-	if (m_Map.m_lImages.size() > 20)
-		UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, 50, 400, m_Map.m_lImages.size() * 15, PopupSelectImage);
-	else
-		UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 400, 300, PopupSelectImage);
+	UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 400, 300, PopupSelectImage);
 }
 
 int CEditor::PopupSelectImageResult()
