@@ -1292,50 +1292,6 @@ void CLayerFront::Resize(int NewW, int NewH)
 void CLayerFront::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
-	int o = m_pEditor->m_ShiftBy;
-
-	switch(Direction)
-	{
-	case 1:
-		{
-			// left
-			for(int y = 0; y < m_Height; ++y)
-			{
-				mem_move(&m_pTiles[y*m_Width], &m_pTiles[y*m_Width+o], (m_Width-o)*sizeof(CTile));
-				mem_zero(&m_pTiles[y*m_Width + (m_Width-o)], o*sizeof(CTile));
-			}
-		}
-		break;
-	case 2:
-		{
-			// right
-			for(int y = 0; y < m_Height; ++y)
-			{
-				mem_move(&m_pTiles[y*m_Width+o], &m_pTiles[y*m_Width], (m_Width-o)*sizeof(CTile));
-				mem_zero(&m_pTiles[y*m_Width], o*sizeof(CTile));
-			}
-		}
-		break;
-	case 4:
-		{
-			// up
-			for(int y = 0; y < m_Height-o; ++y)
-			{
-				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y+o)*m_Width], m_Width*sizeof(CTile));
-				mem_zero(&m_pTiles[(y+o)*m_Width], m_Width*sizeof(CTile));
-			}
-		}
-		break;
-	case 8:
-		{
-			// down
-			for(int y = m_Height-1; y >= o; --y)
-			{
-				mem_copy(&m_pTiles[y*m_Width], &m_pTiles[(y-o)*m_Width], m_Width*sizeof(CTile));
-				mem_zero(&m_pTiles[(y-o)*m_Width], m_Width*sizeof(CTile));
-			}
-		}
-	}
 }
 
 void CLayerFront::BrushDraw(CLayer *pBrush, float wx, float wy)
