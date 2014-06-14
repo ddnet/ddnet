@@ -134,7 +134,8 @@ void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-	pChr->Teams()->m_Core.SetSolo(pResult->m_ClientID, false);
+	if (pChr)
+		pChr->Teams()->m_Core.SetSolo(pResult->m_ClientID, false);
 }
 
 void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
@@ -143,7 +144,8 @@ void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
 	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-	pChr->m_DeepFreeze = false;
+	if (pChr)
+		pChr->m_DeepFreeze = false;
 }
 
 void CGameContext::ConShotgun(IConsole::IResult *pResult, void *pUserData)
