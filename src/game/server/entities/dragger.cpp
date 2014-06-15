@@ -343,6 +343,12 @@ void CDragger::Snap(int SnappingClient)
 				continue;
 		}
 
+		if (Char && Char->IsAlive() && Target && Target->GetPlayer()->GetCID() != SnappingClient && !Char->GetPlayer()->m_ShowOthers &&
+			(Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID())))
+		{
+			continue;
+		}
+
 		CNetObj_Laser *obj;
 
 		if (i == -1)

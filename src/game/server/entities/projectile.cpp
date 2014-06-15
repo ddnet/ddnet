@@ -141,7 +141,7 @@ void CProjectile::Tick()
 	}
 	if (pOwnerChar && pOwnerChar->IsAlive())
 	{
-			TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
 	else if (m_Owner >= 0)
 	{
