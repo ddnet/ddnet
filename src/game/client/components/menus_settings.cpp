@@ -185,6 +185,19 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 			g_Config.m_ClAutoScreenshotMax = static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoScreenshotMax, &Button, g_Config.m_ClAutoScreenshotMax/1000.0f)*1000.0f+0.1f);
 		}
+
+		Left.HSplitTop(20.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Button.VSplitRight(20.0f, &Button, 0);
+		char aBuf[64];
+		if(g_Config.m_ClCpuThrottle)
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("CPU Throttle"), g_Config.m_ClCpuThrottle);
+		else
+			str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("CPU Throttle"), Localize("none"));
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+		Left.HSplitTop(20.0f, &Button, 0);
+		Button.HMargin(2.0f, &Button);
+		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 	}
 }
 
