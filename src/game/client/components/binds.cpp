@@ -99,7 +99,6 @@ void CBinds::SetDefaults()
 	Bind(KEY_MOUSE_1, "+fire");
 	Bind(KEY_MOUSE_2, "+hook");
 	Bind(KEY_LSHIFT, "+emote");
-	Bind(KEY_RSHIFT, "+spectate");
 #if defined(__ANDROID__)
 	Bind(KEY_RCTRL, "+fire");
 	Bind(KEY_RETURN, "+hook");
@@ -109,9 +108,12 @@ void CBinds::SetDefaults()
 	Bind(KEY_DOWN, "+hook");
 	Bind(KEY_PAGEUP, "+prevweapon");
 	Bind(KEY_PAGEDOWN, "+nextweapon");
+	Bind(KEY_F5, "spectate_previous");
+	Bind(KEY_F6, "spectate_next");
 #else
 	Bind(KEY_RIGHT, "spectate_next");
 	Bind(KEY_LEFT, "spectate_previous");
+	Bind(KEY_RSHIFT, "+spectate");
 #endif
 
 

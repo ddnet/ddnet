@@ -134,6 +134,7 @@ void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData
 CSpectator::CSpectator()
 {
 	OnReset();
+	m_OldMouseX = m_OldMouseY = 0.0f;
 }
 
 void CSpectator::OnConsoleInit()
@@ -151,6 +152,12 @@ bool CSpectator::OnMouseMove(float x, float y)
 
 #if defined(__ANDROID__) // No relative mouse on Android
 	m_SelectorMouse = vec2(x,y);
+	if( m_OldMouseX != x || m_OldMouseY != y )
+	{
+		m_OldMouseX = x;
+		m_OldMouseY = y;
+		m_SelectorMouse = vec2((x - g_Config.m_GfxScreenWidth/2), (y - g_Config.m_GfxScreenHeight/2));
+	}
 #else
 	UI()->ConvertMouseMove(&x, &y);
 	m_SelectorMouse += vec2(x,y);
