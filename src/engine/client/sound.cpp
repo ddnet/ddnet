@@ -205,7 +205,7 @@ int CSound::Init()
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	SDL_AudioSpec Format;
+	SDL_AudioSpec Format, FormatOut;
 
 	m_SoundLock = lock_create();
 
@@ -229,7 +229,7 @@ int CSound::Init()
 	Format.userdata = NULL; // ignore_convention
 
 	// Open the audio device and start playing sound!
-	if(SDL_OpenAudio(&Format, NULL) < 0)
+	if(SDL_OpenAudio(&Format, &FormatOut) < 0)
 	{
 		dbg_msg("client/sound", "unable to open audio: %s", SDL_GetError());
 		return -1;
@@ -237,7 +237,7 @@ int CSound::Init()
 	else
 		dbg_msg("client/sound", "sound init successful");
 
-	m_MaxFrames = g_Config.m_SndBufferSize*2;
+	m_MaxFrames = FormatOut.samples*2;
 	m_pMixBuffer = (int *)mem_alloc(m_MaxFrames*2*sizeof(int), 1);
 
 	SDL_PauseAudio(0);

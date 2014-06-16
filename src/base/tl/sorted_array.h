@@ -3,8 +3,8 @@
 #ifndef BASE_TL_SORTED_ARRAY_H
 #define BASE_TL_SORTED_ARRAY_H
 
-#include "algorithm.h"
-#include "array.h"
+#include "base/tl/algorithm.h"
+#include "base/tl/array.h"
 
 template <class T, class ALLOCATOR = allocator_default<T> >
 class sorted_array : public array<T, ALLOCATOR>

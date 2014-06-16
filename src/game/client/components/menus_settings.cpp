@@ -56,7 +56,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
 	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client;
-	MainView.HSplitTop(150.0f, &Game, &Client);
+	MainView.HSplitTop(180.0f, &Game, &Client);
 
 	// game
 	{
@@ -92,6 +92,12 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeapons, Localize("Switch weapon on pickup"), g_Config.m_ClAutoswitchWeapons, &Button))
 			g_Config.m_ClAutoswitchWeapons ^= 1;
+
+		// weapon out of ammo autoswitch
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeaponsOutOfAmmo, Localize("Switch weapon when out of ammo"), g_Config.m_ClAutoswitchWeaponsOutOfAmmo, &Button))
+			g_Config.m_ClAutoswitchWeaponsOutOfAmmo ^= 1;
 
 		// show hud
 		Left.HSplitTop(5.0f, 0, &Left);
@@ -1025,7 +1031,11 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	int OldSelected = s_SelectedLanguage;
 
+#if defined(__ANDROID__)
+	UiDoListboxStart(&s_LanguageList , &MainView, 50.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
+#else
 	UiDoListboxStart(&s_LanguageList , &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
+#endif
 
 	for(sorted_array<CLanguage>::range r = s_Languages.all(); !r.empty(); r.pop_front())
 	{
@@ -1354,7 +1364,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	// Auto Update
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	CUIRect HUDItem;
 	Left.HSplitTop(20.0f, &HUDItem, &Left);
 	HUDItem.VSplitMid(&HUDItem, &Button);

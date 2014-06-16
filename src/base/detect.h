@@ -43,7 +43,11 @@
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_LINUX 1
-	#define CONF_PLATFORM_STRING "linux"
+	#if defined(__ANDROID__)
+		#define CONF_PLATFORM_STRING "android"
+	#else
+		#define CONF_PLATFORM_STRING "linux"
+	#endif
 #endif
 
 #if defined(__GNU__) || defined(__gnu__)
@@ -133,6 +137,17 @@
 	#endif
 #endif
 
+#if defined(__ARMEB__)
+	#define CONF_ARCH_ARM 1
+	#define CONF_ARCH_STRING "arm"
+	#define CONF_ARCH_ENDIAN_BIG 1
+#endif
+
+#if defined(__ARMEL__)
+	#define CONF_ARCH_ARM 1
+	#define CONF_ARCH_STRING "arm"
+	#define CONF_ARCH_ENDIAN_LITTLE 1
+#endif
 
 #ifndef CONF_FAMILY_STRING
 #define CONF_FAMILY_STRING "unknown"

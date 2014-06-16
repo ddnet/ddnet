@@ -30,6 +30,10 @@
 	#if defined(CONF_PLATFORM_MACOSX)
 		#include <Carbon/Carbon.h>
 	#endif
+	
+	#if defined(__ANDROID__)
+		#include <android/log.h>
+	#endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -120,6 +124,9 @@ static void logger_stdout(const char *line)
 {
 	printf("%s\n", line);
 	fflush(stdout);
+#if defined(__ANDROID__)
+	__android_log_print(ANDROID_LOG_INFO, "DDNet", "%s", line);
+#endif
 }
 
 static void logger_debugger(const char *line)

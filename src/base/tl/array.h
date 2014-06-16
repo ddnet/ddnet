@@ -3,8 +3,8 @@
 #ifndef BASE_TL_ARRAY_H
 #define BASE_TL_ARRAY_H
 
-#include "range.h"
-#include "allocator.h"
+#include "base/tl/range.h"
+#include "base/tl/allocator.h"
 
 
 /*

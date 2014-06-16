@@ -267,6 +267,7 @@ void CChat::EnableMode(int Team)
 		m_Input.Clear();
 		Input()->ClearEvents();
 		m_CompletionChosen = -1;
+		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
 	}
 }
 
@@ -515,12 +516,19 @@ void CChat::OnRender()
 	}
 
 	y -= 8.0f;
+#if defined(__ANDROID__)
+	x += 120.0f;
+#endif
 
 	int64 Now = time_get();
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
 	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
 	float Begin = x;
+#if defined(__ANDROID__)
+	float FontSize = 10.0f;
+#else
 	float FontSize = 6.0f;
+#endif
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 	for(int i = 0; i < MAX_LINES; i++)
@@ -585,6 +593,37 @@ void CChat::OnRender()
 	}
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+#if defined(__ANDROID__)
+	static int deferEvent = 0;
+	if( UI()->AndroidTextInputShown() )
+	{
+		if(m_Mode == MODE_NONE)
+		{
+			deferEvent++;
+			if( deferEvent > 2 )
+				EnableMode(0);
+		}
+		else
+			deferEvent = 0;
+	}
+	else
+	{
+		if(m_Mode != MODE_NONE)
+		{
+			deferEvent++;
+			if( deferEvent > 2 )
+			{
+				IInput::CEvent Event;
+				Event.m_Flags = IInput::FLAG_PRESS;
+				Event.m_Key = KEY_RETURN;
+				OnInput(Event);
+			}
+		}
+		else
+			deferEvent = 0;
+	}
+#endif
 }
 
 void CChat::Say(int Team, const char *pLine)

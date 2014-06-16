@@ -120,6 +120,7 @@ class CMenus : public CComponent
 	// some settings
 	static float ms_ButtonHeight;
 	static float ms_ListheaderHeight;
+	static float ms_ListitemAdditionalHeight;
 	static float ms_FontmodHeight;
 
 	// for settings
@@ -221,6 +222,7 @@ class CMenus : public CComponent
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
+	int m_DoubleClickIndex;
 	int m_ScrollOffset;
 	void RenderServerbrowserServerList(CUIRect View);
 	void RenderServerbrowserServerDetail(CUIRect View);

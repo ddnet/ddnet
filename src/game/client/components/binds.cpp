@@ -100,8 +100,20 @@ void CBinds::SetDefaults()
 	Bind(KEY_MOUSE_2, "+hook");
 	Bind(KEY_LSHIFT, "+emote");
 	Bind(KEY_RSHIFT, "+spectate");
+#if defined(__ANDROID__)
+	Bind(KEY_RCTRL, "+fire");
+	Bind(KEY_RETURN, "+hook");
+	Bind(KEY_RIGHT, "+right");
+	Bind(KEY_LEFT, "+left");
+	Bind(KEY_UP, "+jump");
+	Bind(KEY_DOWN, "+hook");
+	Bind(KEY_PAGEUP, "+prevweapon");
+	Bind(KEY_PAGEDOWN, "+nextweapon");
+#else
 	Bind(KEY_RIGHT, "spectate_next");
 	Bind(KEY_LEFT, "spectate_previous");
+#endif
+
 
 	Bind('1', "+weapon1");
 	Bind('2', "+weapon2");
@@ -275,8 +287,10 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind('m', "emote 5");
 		Bind('s', "+showhookcoll");
 		Bind('x', "toggle cl_dummy 0 1");
+#if !defined(__ANDROID__)
 		Bind(KEY_PAGEDOWN, "cl_show_entities 0");
 		Bind(KEY_PAGEUP, "cl_show_entities 1");
+#endif
 		Bind(KEY_KP0, "say /emote normal 999999");
 		Bind(KEY_KP1, "say /emote happy 999999");
 		Bind(KEY_KP2, "say /emote angry 999999");

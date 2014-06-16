@@ -4,6 +4,8 @@
 
 #include <base/math.h>
 
+#include <SDL.h>
+
 #include <engine/shared/config.h>
 
 #include <game/collision.h>
@@ -15,11 +17,34 @@
 
 #include "controls.h"
 
+enum { LEFT_JOYSTICK_X = 0, LEFT_JOYSTICK_Y = 1,
+	RIGHT_JOYSTICK_X = 2, RIGHT_JOYSTICK_Y = 3,
+	SECOND_RIGHT_JOYSTICK_X = 20, SECOND_RIGHT_JOYSTICK_Y = 21,
+	NUM_JOYSTICK_AXES = 22 };
+
 CControls::CControls()
 {
 	mem_zero(&m_LastData, sizeof(m_LastData));
 	m_LastDummy = 0;
 	m_OtherFire = 0;
+
+	SDL_Init(SDL_INIT_JOYSTICK);
+	m_Joystick = SDL_JoystickOpen(0);
+	if( m_Joystick && SDL_JoystickNumAxes(m_Joystick) < NUM_JOYSTICK_AXES )
+	{
+		SDL_JoystickClose(m_Joystick);
+		m_Joystick = NULL;
+	}
+
+	m_Gamepad = SDL_JoystickOpen(2);
+
+	SDL_JoystickEventState(SDL_QUERY);
+
+	m_UsingGamepad = false;
+#if defined(CONF_FAMILY_UNIX)
+	if( getenv("OUYA") )
+		m_UsingGamepad = true;
+#endif
 }
 
 void CControls::OnReset()
@@ -35,6 +60,13 @@ void CControls::OnReset()
 
 	m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 	m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+
+	m_JoystickFirePressed = false;
+	m_JoystickRunPressed = false;
+	m_JoystickTapTime = 0;
+	for( int i = 0; i < NUM_WEAPONS; i++ )
+		m_AmmoCount[i] = 0;
+	m_OldMouseX = m_OldMouseY = 0.0f;
 }
 
 void CControls::OnRelease()
@@ -45,6 +77,9 @@ void CControls::OnRelease()
 void CControls::OnPlayerDeath()
 {
 	m_LastData[g_Config.m_ClDummy].m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
+	for( int i = 0; i < NUM_WEAPONS; i++ )
+		m_AmmoCount[i] = 0;
+	m_JoystickTapTime = 0; // Do not launch hook on first tap
 }
 
 struct CInputState
@@ -131,6 +166,8 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 		CNetMsg_Sv_WeaponPickup *pMsg = (CNetMsg_Sv_WeaponPickup *)pRawMsg;
 		if(g_Config.m_ClAutoswitchWeapons)
 			m_InputData[g_Config.m_ClDummy].m_WantedWeapon = pMsg->m_Weapon+1;
+		// We don't really know ammo count, until we'll switch to that weapon, but any non-zero count will suffice here
+		m_AmmoCount[pMsg->m_Weapon%NUM_WEAPONS] = 10;
 	}
 }
 
@@ -149,6 +186,9 @@ int CControls::SnapInput(int *pData)
 
 	if(m_pClient->m_pScoreboard->Active())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
+
+	if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)
+		m_JoystickTapTime = 0; // Do not launch hook on first tap
 
 	if (m_pClient->m_pControls->m_ShowHookColl[g_Config.m_ClDummy])
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_AIM;
@@ -232,6 +272,142 @@ int CControls::SnapInput(int *pData)
 
 void CControls::OnRender()
 {
+	enum {
+		JOYSTICK_RUN_DISTANCE = 65536 / 8,
+		GAMEPAD_DEAD_ZONE = 65536 / 8,
+	};
+
+	int64 CurTime = time_get();
+	bool FireWasPressed = false;
+
+	if( m_Joystick )
+	{
+		// Get input from left joystick
+		int RunX = SDL_JoystickGetAxis(m_Joystick, LEFT_JOYSTICK_X);
+		int RunY = SDL_JoystickGetAxis(m_Joystick, LEFT_JOYSTICK_Y);
+		bool RunPressed = (RunX != 0 || RunY != 0);
+		// Get input from right joystick
+		int AimX = SDL_JoystickGetAxis(m_Joystick, SECOND_RIGHT_JOYSTICK_X);
+		int AimY = SDL_JoystickGetAxis(m_Joystick, SECOND_RIGHT_JOYSTICK_Y);
+		bool AimPressed = (AimX != 0 || AimY != 0);
+		// Get input from another right joystick
+		int HookX = SDL_JoystickGetAxis(m_Joystick, RIGHT_JOYSTICK_X);
+		int HookY = SDL_JoystickGetAxis(m_Joystick, RIGHT_JOYSTICK_Y);
+		bool HookPressed = (HookX != 0 || HookY != 0);
+
+		if( m_JoystickRunPressed != RunPressed )
+		{
+			if( RunPressed )
+			{
+				if( m_JoystickTapTime + time_freq() > CurTime ) // Tap in less than 1 second to jump
+					m_InputData[g_Config.m_ClDummy].m_Jump = 1;
+			}
+			else
+				m_InputData[g_Config.m_ClDummy].m_Jump = 0;
+			m_JoystickTapTime = CurTime;
+		}
+
+		m_JoystickRunPressed = RunPressed;
+
+		if( RunPressed )
+		{
+			m_InputDirectionLeft[g_Config.m_ClDummy] = (RunX < -JOYSTICK_RUN_DISTANCE);
+			m_InputDirectionRight[g_Config.m_ClDummy] = (RunX > JOYSTICK_RUN_DISTANCE);
+		}
+
+		// Move 500ms in the same direction, to prevent speed bump when tapping
+		if( !RunPressed && m_JoystickTapTime + time_freq() / 2 > CurTime )
+		{
+			m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+			m_InputDirectionRight[g_Config.m_ClDummy] = 0;
+		}
+
+		//dbg_msg("dbg", "RunPressed %d m_JoystickSwipeJumpClear %lld m_JoystickSwipeJumpY %d RunY %d cond %d",
+		//		RunPressed, m_JoystickSwipeJumpClear, (int)m_JoystickSwipeJumpY, RunY,
+		//		(int)((!m_JoystickSwipeJumpY && RunY > SWIPE_JUMP_THRESHOLD) || (m_JoystickSwipeJumpY && RunY < -SWIPE_JUMP_THRESHOLD)));
+
+		if( HookPressed )
+		{
+			m_MousePos[g_Config.m_ClDummy] = vec2(HookX / 30, HookY / 30);
+			ClampMousePos();
+			m_InputData[g_Config.m_ClDummy].m_Hook = 1;
+		}
+		else
+		{
+			m_InputData[g_Config.m_ClDummy].m_Hook = 0;
+		}
+
+		if( AimPressed )
+		{
+			m_MousePos[g_Config.m_ClDummy] = vec2(AimX / 30, AimY / 30);
+			ClampMousePos();
+		}
+
+		if( AimPressed != m_JoystickFirePressed )
+		{
+			// Fire when releasing joystick
+			if( !AimPressed )
+			{
+				m_InputData[g_Config.m_ClDummy].m_Fire ++;
+				if( m_InputData[g_Config.m_ClDummy].m_Fire % 2 != AimPressed )
+					m_InputData[g_Config.m_ClDummy].m_Fire ++;
+				FireWasPressed = true;
+			}
+		}
+
+		m_JoystickFirePressed = AimPressed;
+	}
+
+	if( m_Gamepad )
+	{
+		// Get input from left joystick
+		int RunX = SDL_JoystickGetAxis(m_Gamepad, LEFT_JOYSTICK_X);
+		int RunY = SDL_JoystickGetAxis(m_Gamepad, LEFT_JOYSTICK_Y);
+		if( m_UsingGamepad )
+		{
+			m_InputDirectionLeft[g_Config.m_ClDummy] = (RunX < -GAMEPAD_DEAD_ZONE);
+			m_InputDirectionRight[g_Config.m_ClDummy] = (RunX > GAMEPAD_DEAD_ZONE);
+		}
+
+		// Get input from right joystick
+		int AimX = SDL_JoystickGetAxis(m_Gamepad, RIGHT_JOYSTICK_X);
+		int AimY = SDL_JoystickGetAxis(m_Gamepad, RIGHT_JOYSTICK_Y);
+		if( abs(AimX) > GAMEPAD_DEAD_ZONE || abs(AimY) > GAMEPAD_DEAD_ZONE )
+		{
+			m_MousePos[g_Config.m_ClDummy] = vec2(AimX / 30, AimY / 30);
+			ClampMousePos();
+		}
+
+		if( !m_UsingGamepad && (abs(AimX) > GAMEPAD_DEAD_ZONE || abs(AimY) > GAMEPAD_DEAD_ZONE || abs(RunX) > GAMEPAD_DEAD_ZONE || abs(RunY) > GAMEPAD_DEAD_ZONE) )
+		{
+			UI()->AndroidShowScreenKeys(false);
+			m_UsingGamepad = true;
+		}
+	}
+
+	if( g_Config.m_ClAutoswitchWeaponsOutOfAmmo && m_pClient->m_Snap.m_pLocalCharacter )
+	{
+		// Keep track of ammo count, we know weapon ammo only when we switch to that weapon, this is tracked on server and protocol does not track that
+		m_AmmoCount[m_pClient->m_Snap.m_pLocalCharacter->m_Weapon%NUM_WEAPONS] = m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
+		// Autoswitch weapon if we're out of ammo
+		if( (m_InputData[g_Config.m_ClDummy].m_Fire % 2 != 0 || FireWasPressed) &&
+			m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount == 0 &&
+			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER &&
+			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA )
+		{
+			int w;
+			for( w = WEAPON_RIFLE; w > WEAPON_GUN; w-- )
+			{
+				if( w == m_pClient->m_Snap.m_pLocalCharacter->m_Weapon )
+					continue;
+				if( m_AmmoCount[w] > 0 )
+					break;
+			}
+			if( w != m_pClient->m_Snap.m_pLocalCharacter->m_Weapon )
+				m_InputData[g_Config.m_ClDummy].m_WantedWeapon = w+1;
+		}
+	}
+
 	// update target pos
 	if(m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 		m_TargetPos[g_Config.m_ClDummy] = m_pClient->m_LocalCharacterPos + m_MousePos[g_Config.m_ClDummy];
@@ -247,8 +423,19 @@ bool CControls::OnMouseMove(float x, float y)
 		(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_pChat->IsActive()))
 		return false;
 
+#if defined(__ANDROID__) // No relative mouse on Android
+	// We're using joystick on Android, mouse is disabled
+	if( m_OldMouseX != x || m_OldMouseY != y )
+	{
+		m_OldMouseX = x;
+		m_OldMouseY = y;
+		m_MousePos[g_Config.m_ClDummy] = vec2((x - g_Config.m_GfxScreenWidth/2), (y - g_Config.m_GfxScreenHeight/2));
+		ClampMousePos();
+	}
+#else
 	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
 	ClampMousePos();
+#endif
 
 	return true;
 }
@@ -259,7 +446,6 @@ void CControls::ClampMousePos()
 	{
 		m_MousePos[g_Config.m_ClDummy].x = clamp(m_MousePos[g_Config.m_ClDummy].x, 200.0f, Collision()->GetWidth()*32-200.0f);
 		m_MousePos[g_Config.m_ClDummy].y = clamp(m_MousePos[g_Config.m_ClDummy].y, 200.0f, Collision()->GetHeight()*32-200.0f);
-
 	}
 	else
 	{

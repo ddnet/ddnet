@@ -352,7 +352,18 @@ void CHud::RenderVoting()
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.40f);
+
+#if defined(__ANDROID__)
+	static const float TextX = 265;
+	static const float TextY = 1;
+	static const float TextW = 200;
+	static const float TextH = 42;
+	RenderTools()->DrawRoundRect(TextX-5, TextY, TextW+15, TextH, 5.0f);
+	RenderTools()->DrawRoundRect(TextX-5, TextY+TextH+2, TextW/2-10, 20, 5.0f);
+	RenderTools()->DrawRoundRect(TextX+TextW/2+20, TextY+TextH+2, TextW/2-10, 20, 5.0f);
+#else
 	RenderTools()->DrawRoundRect(-10, 60-2, 100+10+4+5, 46, 5.0f);
+#endif
 	Graphics()->QuadsEnd();
 
 	TextRender()->TextColor(1,1,1,1);
@@ -360,12 +371,22 @@ void CHud::RenderVoting()
 	CTextCursor Cursor;
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), m_pClient->m_pVoting->SecondsLeft());
+#if defined(__ANDROID__)
+	float tw = TextRender()->TextWidth(0x0, 10, aBuf, -1);
+	TextRender()->SetCursor(&Cursor, TextX+TextW-tw, 0.0f, 10.0f, TEXTFLAG_RENDER);
+#else
 	float tw = TextRender()->TextWidth(0x0, 6, aBuf, -1);
 	TextRender()->SetCursor(&Cursor, 5.0f+100.0f-tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
+#endif
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
+#if defined(__ANDROID__)
+	TextRender()->SetCursor(&Cursor, TextX, 23.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	Cursor.m_LineWidth = TextW;
+#else
 	TextRender()->SetCursor(&Cursor, 5.0f, 60.0f, 6.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = 100.0f-tw;
+#endif
 	Cursor.m_MaxLines = 3;
 	TextRender()->TextEx(&Cursor, m_pClient->m_pVoting->VoteDescription(), -1);
 
@@ -375,9 +396,31 @@ void CHud::RenderVoting()
 	Cursor.m_LineWidth = 100.0f;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
+#if defined(__ANDROID__)
+	CUIRect Base = {TextX, TextH - 8, TextW, 4};
+#else
 	CUIRect Base = {5, 88, 100, 4};
+#endif
 	m_pClient->m_pVoting->RenderBars(Base, false);
 
+#if defined(__ANDROID__)
+	Base.y += Base.h+6;
+	UI()->DoLabel(&Base, Localize("Vote yes"), 16.0f, -1);
+	UI()->DoLabel(&Base, Localize("Vote no"), 16.0f, 1);
+	if( Input()->KeyDown(KEY_MOUSE_1) )
+	{
+		float mx, my;
+		Input()->MouseRelative(&mx, &my);
+		mx *= m_Width / Graphics()->ScreenWidth();
+		my *= m_Height / Graphics()->ScreenHeight();
+		if( my > TextY+TextH-40 && my < TextY+TextH+20 ) {
+			if( mx > TextX-5 && mx < TextX-5+TextW/2-10 )
+				m_pClient->m_pVoting->Vote(1);
+			if( mx > TextX+TextW/2+20 && mx < TextX+TextW/2+20+TextW/2-10 )
+				m_pClient->m_pVoting->Vote(-1);
+		}
+	}
+#else
 	const char *pYesKey = m_pClient->m_pBinds->GetKey("vote yes");
 	const char *pNoKey = m_pClient->m_pBinds->GetKey("vote no");
 	str_format(aBuf, sizeof(aBuf), "%s - %s", pYesKey, Localize("Vote yes"));
@@ -386,6 +429,7 @@ void CHud::RenderVoting()
 
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), pNoKey);
 	UI()->DoLabel(&Base, aBuf, 6.0f, 1);
+#endif
 }
 
 void CHud::RenderCursor()

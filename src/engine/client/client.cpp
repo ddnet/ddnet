@@ -1095,7 +1095,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			{
 				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
 
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 				if (g_Config.m_ClAutoUpdate)
 				{
 					str_format(aBuf, sizeof(aBuf), "Checking for updates");
@@ -2289,7 +2289,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder));
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
 #endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
@@ -2306,7 +2306,7 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -2559,6 +2559,12 @@ void CClient::Run()
 					}
 					m_pGraphics->Swap();
 				}
+			}
+			if(Input()->VideoRestartNeeded())
+			{
+				m_pGraphics->Init();
+				LoadData();
+				GameClient()->OnInit();
 			}
 		}
 
@@ -2928,7 +2934,7 @@ static CClient *CreateClient()
 		Upstream latency
 */
 
-#if defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_PLATFORM_MACOSX) || defined(__ANDROID__)
 extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
 {
 	const char **argv = const_cast<const char **>(argv_);
@@ -3028,7 +3034,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// write down the config and quit
 	pConfig->Save();
 
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	pClient->AutoUpdate()->ExecuteExit();
 #endif
 

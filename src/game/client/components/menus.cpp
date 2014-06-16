@@ -37,6 +37,7 @@
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
+#include "controls.h"
 
 vec4 CMenus::ms_GuiColor;
 vec4 CMenus::ms_ColorTabbarInactiveOutgame;
@@ -46,8 +47,14 @@ vec4 CMenus::ms_ColorTabbarActive = vec4(0,0,0,0.5f);
 vec4 CMenus::ms_ColorTabbarInactiveIngame;
 vec4 CMenus::ms_ColorTabbarActiveIngame;
 
+#if defined(__ANDROID__)
+float CMenus::ms_ButtonHeight = 50.0f;
+float CMenus::ms_ListheaderHeight = 50.0f;
+float CMenus::ms_ListitemAdditionalHeight = 33.0f;
+#else
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
+#endif
 float CMenus::ms_FontmodHeight = 0.8f;
 
 IInput::CEvent CMenus::m_aInputEvents[MAX_INPUTEVENTS];
@@ -78,6 +85,7 @@ CMenus::CMenus()
 	m_aCallvoteReason[0] = 0;
 
 	m_FriendlistSelectedIndex = -1;
+	m_DoubleClickIndex = -1;
 
 	m_DDRacePage = PAGE_BROWSER;
 }
@@ -129,7 +137,13 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(pRect->h>=20.0f?2.0f:1.0f, &Temp);
+#if defined(__ANDROID__)
+	float TextH = min(22.0f, Temp.h);
+	Temp.y += (Temp.h - TextH) / 2;
+	UI()->DoLabel(&Temp, pText, TextH*ms_FontmodHeight, 0);
+#else
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+#endif
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -149,7 +163,13 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		RenderTools()->DrawUIRect(pRect, ms_ColorTabbarInactive, Corners, 10.0f);
 	CUIRect Temp;
 	pRect->HMargin(2.0f, &Temp);
+#if defined(__ANDROID__)
+	float TextH = min(22.0f, Temp.h);
+	Temp.y += (Temp.h - TextH) / 2;
+	UI()->DoLabel(&Temp, pText, TextH*ms_FontmodHeight, 0);
+#else
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
+#endif
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
@@ -161,7 +181,12 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
+#if defined(__ANDROID__)
+	float TextH = min(20.0f, pRect->h);
+	UI()->DoLabel(&t, pText, TextH*ms_FontmodHeight, -1);
+#else
 	UI()->DoLabel(&t, pText, pRect->h*ms_FontmodHeight, -1);
+#endif
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -280,7 +305,16 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	}
 
 	if(Inside)
+	{
 		UI()->SetHotItem(pID);
+#if defined(__ANDROID__)
+		if(UI()->ActiveItem() == pID && UI()->MouseButtonClicked(0))
+		{
+			s_AtIndex = 0;
+			UI()->AndroidBlockAndGetTextInput(pStr, StrSize, "");
+		}
+#endif
+	}
 
 	CUIRect Textbox = *pRect;
 	RenderTools()->DrawUIRect(&Textbox, vec4(1, 1, 1, 0.5f), Corners, 3.0f);
@@ -350,7 +384,11 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 {
 	CUIRect Handle;
 	static float OffsetY;
+#if defined(__ANDROID__)
+	pRect->HSplitTop(50, &Handle, 0);
+#else
 	pRect->HSplitTop(33, &Handle, 0);
+#endif
 
 	Handle.y += (pRect->h-Handle.h)*Current;
 
@@ -542,7 +580,10 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static int s_NewsButton=0;
 		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
+		{
 			NewPage = PAGE_NEWS;
+			m_DoubleClickIndex = -1;
+		}
 		Box.VSplitLeft(10.0f, 0, &Box);
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
@@ -551,6 +592,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			NewPage = PAGE_INTERNET;
+			m_DoubleClickIndex = -1;
 		}
 
 		//Box.VSplitLeft(4.0f, 0, &Box);
@@ -560,6 +602,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			NewPage = PAGE_LAN;
+			m_DoubleClickIndex = -1;
 		}
 
 		//box.VSplitLeft(4.0f, 0, &box);
@@ -569,6 +612,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			NewPage = PAGE_FAVORITES;
+			m_DoubleClickIndex = -1;
 		}
 
 		Box.VSplitLeft(10.0f, 0, &Box);
@@ -578,6 +622,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			DemolistPopulate();
 			NewPage = PAGE_DEMOS;
+			m_DoubleClickIndex = -1;
 		}
 	}
 	else
@@ -818,6 +863,7 @@ int CMenus::Render()
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		m_pClient->m_pSounds->Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
 		s_First = false;
+		m_DoubleClickIndex = -1;
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE)
@@ -849,7 +895,11 @@ int CMenus::Render()
 	if(m_Popup == POPUP_NONE)
 	{
 		// do tab bar
+#if defined(__ANDROID__)
+		Screen.HSplitTop(100.0f, &TabBar, &MainView);
+#else
 		Screen.HSplitTop(24.0f, &TabBar, &MainView);
+#endif
 		TabBar.VMargin(20.0f, &TabBar);
 		RenderMenubar(TabBar);
 
@@ -858,6 +908,7 @@ int CMenus::Render()
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			g_Config.m_UiPage = PAGE_INTERNET;
+			m_DoubleClickIndex = -1;
 		}
 
 		// render current page
@@ -979,7 +1030,7 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		else if(m_Popup == POPUP_AUTOUPDATE)
 		{
 			pTitle = Localize("Auto-Update");
@@ -991,7 +1042,11 @@ int CMenus::Render()
 		CUIRect Box, Part;
 		Box = Screen;
 		Box.VMargin(150.0f/UI()->Scale(), &Box);
+#if defined(__ANDROID__)
+		Box.HMargin(100.0f/UI()->Scale(), &Box);
+#else
 		Box.HMargin(150.0f/UI()->Scale(), &Box);
+#endif
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
@@ -1012,7 +1067,11 @@ int CMenus::Render()
 		{
 			CUIRect Yes, No;
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 
 			// additional info
 			Box.HSplitTop(10.0f, 0, &Box);
@@ -1038,7 +1097,7 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Quit();
 		}
-#if !defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		else if(m_Popup == POPUP_AUTOUPDATE)
 		{
 			CUIRect Yes, No;
@@ -1065,7 +1124,11 @@ int CMenus::Render()
 			CUIRect Label, TextBox, TryAgain, Abort;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Part.VMargin(80.0f, &Part);
 
 			Part.VSplitMid(&Abort, &TryAgain);
@@ -1084,7 +1147,11 @@ int CMenus::Render()
 			}
 
 			Box.HSplitBottom(60.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 
 			Part.VSplitLeft(60.0f, 0, &Label);
 			Label.VSplitLeft(100.0f, 0, &TextBox);
@@ -1100,7 +1167,11 @@ int CMenus::Render()
 			Box.VMargin(150.0f, &Box);
 			Box.HMargin(150.0f, &Box);
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
@@ -1165,10 +1236,18 @@ int CMenus::Render()
 		{
 			Box = Screen;
 			Box.VMargin(150.0f, &Box);
+#if defined(__ANDROID__)
+			Box.HMargin(20.0f, &Box);
+#else
 			Box.HMargin(150.0f, &Box);
+#endif
 			Box.HSplitTop(20.f, &Part, &Box);
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Box.HSplitBottom(20.f, &Box, 0);
 			Box.VMargin(20.0f, &Box);
 			RenderLanguageSelection(Box);
@@ -1182,10 +1261,18 @@ int CMenus::Render()
 		{
 			Box = Screen;
 			Box.VMargin(150.0f, &Box);
+#if defined(__ANDROID__)
+			Box.HMargin(20.0f, &Box);
+#else
 			Box.HMargin(150.0f, &Box);
+#endif
 			Box.HSplitTop(20.f, &Part, &Box);
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Box.HSplitBottom(20.f, &Box, 0);
 			Box.VMargin(20.0f, &Box);
 
@@ -1241,7 +1328,11 @@ int CMenus::Render()
 		{
 			CUIRect Yes, No;
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Part.VMargin(80.0f, &Part);
 
 			Part.VSplitMid(&No, &Yes);
@@ -1277,7 +1368,11 @@ int CMenus::Render()
 			CUIRect Label, TextBox, Ok, Abort;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Part.VMargin(80.0f, &Part);
 
 			Part.VSplitMid(&Abort, &Ok);
@@ -1315,7 +1410,11 @@ int CMenus::Render()
 			}
 
 			Box.HSplitBottom(60.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 
 			Part.VSplitLeft(60.0f, 0, &Label);
 			Label.VSplitLeft(120.0f, 0, &TextBox);
@@ -1329,7 +1428,11 @@ int CMenus::Render()
 		{
 			CUIRect Yes, No;
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Part.VMargin(80.0f, &Part);
 
 			Part.VSplitMid(&No, &Yes);
@@ -1360,7 +1463,11 @@ int CMenus::Render()
 			CUIRect Label, TextBox;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Part.VMargin(80.0f, &Part);
 
 			static int s_EnterButton = 0;
@@ -1368,7 +1475,11 @@ int CMenus::Render()
 				m_Popup = POPUP_NONE;
 
 			Box.HSplitBottom(40.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 
 			Part.VSplitLeft(60.0f, 0, &Label);
 			Label.VSplitLeft(100.0f, 0, &TextBox);
@@ -1381,7 +1492,11 @@ int CMenus::Render()
 		else
 		{
 			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
 			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
@@ -1400,6 +1515,9 @@ int CMenus::Render()
 void CMenus::SetActive(bool Active)
 {
 	m_MenuActive = Active;
+#if defined(__ANDROID__)
+	UI()->AndroidShowScreenKeys(!m_MenuActive && !m_pClient->m_pControls->m_UsingGamepad);
+#endif
 	if(!m_MenuActive)
 	{
 		if(m_NeedSendinfo)
@@ -1436,9 +1554,14 @@ bool CMenus::OnMouseMove(float x, float y)
 	if(!m_MenuActive)
 		return false;
 
+#if defined(__ANDROID__) // No relative mouse on Android
+	m_MousePos.x = x;
+	m_MousePos.y = y;
+#else
 	UI()->ConvertMouseMove(&x, &y);
 	m_MousePos.x += x;
 	m_MousePos.y += y;
+#endif
 	if(m_MousePos.x < 0) m_MousePos.x = 0;
 	if(m_MousePos.y < 0) m_MousePos.y = 0;
 	if(m_MousePos.x > Graphics()->ScreenWidth()) m_MousePos.x = Graphics()->ScreenWidth();
@@ -1600,7 +1723,14 @@ void CMenus::OnRender()
 		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
 	}
 
+#if defined(__ANDROID__)
+	static int ButtonsOneFrameDelay = 0; // For Android touch input
+
+	UI()->Update(mx,my,mx*3.0f,my*3.0f,ButtonsOneFrameDelay);
+	ButtonsOneFrameDelay = Buttons;
+#else
 	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
+#endif
 
 	// render
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
