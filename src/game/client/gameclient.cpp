@@ -382,7 +382,8 @@ void CGameClient::OnConnected()
 	// we should keep this in for now, because otherwise you can't spectate
 	// people at start as the other info 64 packet is only sent after the first
 	// snap
-	Client()->Rcon("crashmeplx");
+	if(!str_comp(CurrentServerInfo.m_aGameType, "DDWar"))
+		Client()->Rcon("crashmeplx");
 }
 
 void CGameClient::OnReset()
