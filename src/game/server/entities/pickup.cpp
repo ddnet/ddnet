@@ -84,7 +84,8 @@ void CPickup::Tick()
 						pChr->SetLastWeapon(WEAPON_GUN);
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 					}
-					if(!pChr->m_FreezeTime) pChr->SetActiveWeapon(WEAPON_HAMMER);
+					if(!pChr->m_FreezeTime && pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
+						pChr->SetActiveWeapon(WEAPON_HAMMER);
 					break;
 
 				case POWERUP_WEAPON:
