@@ -1431,4 +1431,72 @@ void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pU
 #endif
 }
 
+void CSqlScore::RandomUnfinishedMapThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			char originalName[MAX_NAME_LENGTH];
+			strcpy(originalName,pData->m_aName);
+			pData->m_pSqlData->ClearString(pData->m_aName);
+
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "select * from %s_maps where Server = \"%s\" and not exists (select * from %s_race where Name = \"%s\" and %s_race.Map = %s_maps.Map) order by RAND() limit 1;", pData->m_pSqlData->m_pPrefix, g_Config.m_SvServerType, pData->m_pSqlData->m_pPrefix, pData->m_aName, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
+			{
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have no unfinished maps on this server!");
+			}
+			else
+			{
+				pData->m_pSqlData->m_pResults->next();
+				char aMap[128];
+				strcpy(aMap, pData->m_pSqlData->m_pResults->getString("Map").c_str());
+
+				str_format(aBuf, sizeof(aBuf), "change_map \"%s\"", aMap);
+				pData->m_pSqlData->GameServer()->Console()->ExecuteLine(aBuf);
+			}
+
+			dbg_msg("SQL", "Voting random unfinished map done");
+
+			// delete results and statement
+			delete pData->m_pSqlData->m_pResults;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not vote random unfinished map");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();
+	}
+
+	delete pData;
+
+	lock_release(gs_SqlLock);
+}
+
+void CSqlScore::RandomUnfinishedMap(int ClientID)
+{
+	CSqlScoreData *Tmp = new CSqlScoreData();
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_aName, GameServer()->Server()->ClientName(ClientID), MAX_NAME_LENGTH);
+	Tmp->m_pSqlData = this;
+
+	void *RandomUnfinishedThread = thread_create(RandomUnfinishedMapThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)RandomUnfinishedThread);
+#endif
+}
+
 #endif

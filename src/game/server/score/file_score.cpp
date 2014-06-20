@@ -320,3 +320,10 @@ void CFileScore::ShowPoints(int ClientID, const char* pName, bool Search)
 	str_format(aBuf, sizeof(aBuf), "Points not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
+
+void CFileScore::RandomUnfinishedMap(int ClientID)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Random unfinished map not supported in file based servers");
+	GameServer()->SendChatTarget(ClientID, aBuf);
+}

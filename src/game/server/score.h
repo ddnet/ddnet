@@ -58,6 +58,8 @@ public:
 
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search=false) = 0;
+
+	virtual void RandomUnfinishedMap(int ClientID) = 0;
 };
 
 #endif

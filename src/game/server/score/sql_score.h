@@ -52,6 +52,7 @@ class CSqlScore: public IScore
 	static void ShowTimesThread(void *pUser);
 	static void ShowPointsThread(void *pUser);
 	static void ShowTopPointsThread(void *pUser);
+	static void RandomUnfinishedMapThread(void *pUser);
 
 	void Init();
 
@@ -86,6 +87,7 @@ public:
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
+	virtual void RandomUnfinishedMap(int ClientID);
 	static void agoTimeToString(int agoTime, char agoString[]);
 };
 
