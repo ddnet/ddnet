@@ -92,6 +92,7 @@ public:
 
 	int IsSolid(int x, int y);
 	int IsThrough(int x, int y);
+	int IsWallJump(int Index);
 	int IsNoLaser(int x, int y);
 	int IsFNoLaser(int x, int y);
 
@@ -107,6 +108,7 @@ public:
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
+	int m_Colliding;
 
 private:
 

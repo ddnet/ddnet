@@ -131,7 +131,7 @@ void CCollision::Init(class CLayers *pLayers)
 				}
 
 				// DDRace tiles
-				if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_START) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+				if(Index == TILE_THROUGH || Index == TILE_WALLJUMP || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_START) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 					m_pFront[i].m_Index = Index;
 			}
 		}
@@ -157,7 +157,7 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 
 			// DDRace tiles
-			if(Index == TILE_THROUGH || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_START) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
+			if(Index == TILE_THROUGH || Index == TILE_WALLJUMP || (Index >= TILE_FREEZE && Index <= TILE_UNFREEZE) || (Index >= TILE_SWITCHOPEN && Index <= TILE_TELECHECKIN) || (Index >= TILE_BEGIN && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH_START) || (Index >= TILE_EHOOK_START && Index <= TILE_SOLO_END) || (Index >= TILE_DFREEZE && Index <= TILE_DUNFREEZE))
 				m_pTiles[i].m_Index = Index;
 		}
 	}
@@ -410,6 +410,8 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
 
+			m_Colliding = 0;
+
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{
 				int Hits = 0;
@@ -423,6 +425,10 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 				if(TestBox(vec2(NewPos.x, Pos.y), Size))
 				{
+					if(NewPos.x > Pos.x)
+						m_Colliding = 1;
+					else if(NewPos.x < Pos.x)
+						m_Colliding = 2;
 					NewPos.x = Pos.x;
 					Vel.x *= -Elasticity;
 					Hits++;
@@ -436,6 +442,10 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 					Vel.y *= -Elasticity;
 					NewPos.x = Pos.x;
 					Vel.x *= -Elasticity;
+					if(NewPos.x > Pos.x)
+						m_Colliding = 1;
+					else if(NewPos.x < Pos.x)
+						m_Colliding = 2;
 				}
 			}
 
@@ -486,6 +496,14 @@ int CCollision::IsThrough(int x, int y)
 	if (Findex == TILE_THROUGH)
 		return Findex;
 	return 0;
+}
+
+int CCollision::IsWallJump(int Index)
+{
+	if(Index < 0)
+		return 0;
+
+	return m_pTiles[Index].m_Index == TILE_WALLJUMP;
 }
 
 int CCollision::IsNoLaser(int x, int y)

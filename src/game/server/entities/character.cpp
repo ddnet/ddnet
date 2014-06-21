@@ -1699,6 +1699,14 @@ void CCharacter::HandleTiles(int Index)
 		m_LastPenalty = false;
 	}
 
+	if((m_Jumped & 1) && m_Core.m_Vel.x > 0
+		&& ((GameServer()->Collision()->IsWallJump(MapIndex-1) && GameServer()->Collision()->m_Colliding & 1)
+		 || (GameServer()->Collision()->IsWallJump(MapIndex+1) && GameServer()->Collision()->m_Colliding & 2)))
+	{
+		m_Core.m_JumpedTotal++;
+		m_Core.m_Jumped |= 3;
+	}
+
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z-1].size())
 	{
