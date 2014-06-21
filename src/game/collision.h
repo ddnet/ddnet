@@ -108,7 +108,6 @@ public:
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
-	int m_Colliding;
 
 private:
 

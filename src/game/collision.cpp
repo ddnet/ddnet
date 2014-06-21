@@ -410,8 +410,6 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
 
-			m_Colliding = 0;
-
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{
 				int Hits = 0;
@@ -425,10 +423,6 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 				if(TestBox(vec2(NewPos.x, Pos.y), Size))
 				{
-					if(NewPos.x > Pos.x)
-						m_Colliding = 1;
-					else if(NewPos.x < Pos.x)
-						m_Colliding = 2;
 					NewPos.x = Pos.x;
 					Vel.x *= -Elasticity;
 					Hits++;
@@ -442,10 +436,6 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 					Vel.y *= -Elasticity;
 					NewPos.x = Pos.x;
 					Vel.x *= -Elasticity;
-					if(NewPos.x > Pos.x)
-						m_Colliding = 1;
-					else if(NewPos.x < Pos.x)
-						m_Colliding = 2;
 				}
 			}
 

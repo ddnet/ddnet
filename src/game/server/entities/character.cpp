@@ -1508,6 +1508,15 @@ void CCharacter::HandleTiles(int Index)
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 		}
 	}
+	else if((m_TileIndex == TILE_WALLJUMP) || (m_TileFIndex == TILE_WALLJUMP))
+	{
+		if(m_Core.m_Jumps == m_Core.m_JumpedTotal + 1 && m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_DirectionChanged)
+		{
+			m_Core.m_DirectionChanged = false;
+			m_Core.m_JumpedTotal--;
+			m_Core.m_Jumped = 1;
+		}
+	}
 	else if(((m_TileIndex == TILE_JETPACK_END) || (m_TileFIndex == TILE_JETPACK_END)) && m_Jetpack)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun");
@@ -1697,14 +1706,6 @@ void CCharacter::HandleTiles(int Index)
 	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_PENALTY)
 	{
 		m_LastPenalty = false;
-	}
-
-	if((m_Jumped & 1) && m_Core.m_Vel.x > 0
-		&& ((GameServer()->Collision()->IsWallJump(MapIndex-1) && GameServer()->Collision()->m_Colliding & 1)
-		 || (GameServer()->Collision()->IsWallJump(MapIndex+1) && GameServer()->Collision()->m_Colliding & 2)))
-	{
-		m_Core.m_JumpedTotal++;
-		m_Core.m_Jumped |= 3;
 	}
 
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
@@ -1904,46 +1905,46 @@ void CCharacter::DDRacePostCoreTick()
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 
 	if (m_pPlayer->m_DefEmoteReset >= 0 && m_pPlayer->m_DefEmoteReset <= Server()->Tick())
+	{
+	m_pPlayer->m_DefEmoteReset = -1;
+		m_EmoteType = m_pPlayer->m_DefEmote = EMOTE_NORMAL;
+		m_EmoteStop = -1;
+	}
+
+	if (m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
+		m_Core.m_HookTick = 0;
+
+	if (m_DeepFreeze && !m_Super)
+		Freeze();
+
+	if (m_Core.m_Jumps == 0 && !m_Super)
+		m_Core.m_Jumped = 3;
+	else if (m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
+		m_Core.m_Jumped = 3;
+	else if (m_Core.m_JumpedTotal < m_Core.m_Jumps - 1 && m_Core.m_Jumped > 1)
+		m_Core.m_Jumped = 1;
+
+	if ((m_Super || m_SuperJump) && m_Core.m_Jumped > 1)
+		m_Core.m_Jumped = 1;
+
+	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
+	HandleSkippableTiles(CurrentIndex);
+
+	// handle Anti-Skip tiles
+	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	if(!Indices.empty())
+		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 		{
-		m_pPlayer->m_DefEmoteReset = -1;
-			m_EmoteType = m_pPlayer->m_DefEmote = EMOTE_NORMAL;
-			m_EmoteStop = -1;
+			HandleTiles(*i);
+			//dbg_msg("Running","%d", *i);
 		}
+	else
+	{
+		HandleTiles(CurrentIndex);
+		//dbg_msg("Running","%d", CurrentIndex);
+	}
 
-		if (m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
-			m_Core.m_HookTick = 0;
-
-		if (m_DeepFreeze && !m_Super)
-			Freeze();
-
-		if (m_Core.m_Jumps == 0 && !m_Super)
-			m_Core.m_Jumped = 3;
-		else if (m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
-			m_Core.m_Jumped = 3;
-		else if (m_Core.m_JumpedTotal < m_Core.m_Jumps - 1 && m_Core.m_Jumped > 1)
-			m_Core.m_Jumped = 1;
-
-		if ((m_Super || m_SuperJump) && m_Core.m_Jumped > 1)
-			m_Core.m_Jumped = 1;
-
-		int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
-		HandleSkippableTiles(CurrentIndex);
-
-		// handle Anti-Skip tiles
-		std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
-		if(!Indices.empty())
-			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-			{
-				HandleTiles(*i);
-				//dbg_msg("Running","%d", *i);
-			}
-		else
-		{
-			HandleTiles(CurrentIndex);
-			//dbg_msg("Running","%d", CurrentIndex);
-		}
-
-		HandleBroadcast();
+	HandleBroadcast();
 }
 
 bool CCharacter::Freeze(int Seconds)

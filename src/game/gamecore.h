@@ -229,6 +229,10 @@ public:
 	bool m_pReset;
 	class CCollision *Collision() { return m_pCollision; }
 
+	vec2 m_LastVel;
+	int m_Colliding;
+	bool m_DirectionChanged;
+
 private:
 
 	CTeamsCore* m_pTeams;
