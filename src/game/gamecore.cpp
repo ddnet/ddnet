@@ -604,7 +604,7 @@ void CCharacterCore::Move()
 	vec2 OldVel = m_Vel;
 	m_pCollision->MoveBox(&NewPos, &m_Vel, vec2(28.0f, 28.0f), 0);
 
-	if(m_Vel.x < 0.001 && m_Vel.x > -0.001)
+	if(OldVel.x != m_Vel.x && m_Vel.x < 0.001 && m_Vel.x > -0.001)
 	{
 		if(OldVel.x > 0)
 			m_Colliding = 1;
