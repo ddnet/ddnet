@@ -50,6 +50,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = false;
 	m_LastWhisperTo = -1;
+	m_LastSetSpectatorMode = 0;
 	
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
