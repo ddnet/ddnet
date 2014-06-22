@@ -1772,7 +1772,7 @@ void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_pScore->RandomUnfinishedMap(pResult->m_ClientID);
+	pSelf->m_pScore->RandomUnfinishedMap(pSelf->m_VoteCreator);
 }
 
 void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
