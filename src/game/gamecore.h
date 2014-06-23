@@ -231,7 +231,7 @@ public:
 
 	vec2 m_LastVel;
 	int m_Colliding;
-	bool m_DirectionChanged;
+	bool m_LeftWall;
 
 private:
 

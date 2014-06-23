@@ -595,12 +595,6 @@ void CCharacterCore::Move()
 
 	vec2 NewPos = m_Pos;
 
-	if((m_Vel.x < 0 && m_LastVel.x >= 0) || (m_Vel.x > 0 && m_LastVel.x <= 0))
-	{
-		m_DirectionChanged = true;
-		m_LastVel = m_Vel;
-	}
-
 	vec2 OldVel = m_Vel;
 	m_pCollision->MoveBox(&NewPos, &m_Vel, vec2(28.0f, 28.0f), 0);
 
@@ -612,6 +606,8 @@ void CCharacterCore::Move()
 		else if(OldVel.x < 0)
 			m_Colliding = 2;
 	}
+	else
+		m_LeftWall = true;
 
 	m_Vel.x = m_Vel.x*(1.0f/RampValue);
 
