@@ -1510,10 +1510,10 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if((m_TileIndex == TILE_WALLJUMP) || (m_TileFIndex == TILE_WALLJUMP))
 	{
-		if(m_Core.m_Jumps == m_Core.m_JumpedTotal + 1 && m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
+		if(m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
 		{
 			m_Core.m_LeftWall = false;
-			m_Core.m_JumpedTotal--;
+			m_Core.m_JumpedTotal = m_Core.m_Jumps - 1;
 			m_Core.m_Jumped = 1;
 		}
 	}
