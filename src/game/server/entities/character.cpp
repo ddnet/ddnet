@@ -1661,7 +1661,10 @@ void CCharacter::HandleTiles(int Index)
 		if (newJumps != m_Core.m_Jumps)
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
+			if(newJumps == 1)
+				str_format(aBuf, sizeof(aBuf), "You can jump %d time", newJumps);
+			else
+				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(),aBuf);
 
 			if (newJumps == 0 && !m_SuperJump)
