@@ -285,7 +285,7 @@ public:
 	};
 
 	// DDRace
-
+	int64 _my_rtime; // reconnect time
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	sorted_array<CDemoItem> m_lDemos;
 	void DemolistPopulate();
@@ -341,5 +341,6 @@ private:
 
 	// found in menus_settings.cpp
 	void RenderSettingsDDRace(CUIRect MainView);
+	void RenderSettingsDDRaceTwo(CUIRect MainView);
 };
 #endif

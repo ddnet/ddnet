@@ -1100,7 +1100,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDNet")
+		Localize("DDNet 1/2"),
+		Localize("DDNet 2/2")
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1131,6 +1132,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsSound(MainView);
 	else if(s_SettingsPage == 7)
 		RenderSettingsDDRace(MainView);
+	else if (s_SettingsPage == 8)
+		RenderSettingsDDRaceTwo(MainView);
 
 	if(m_NeedRestartGraphics || m_NeedRestartSound)
 		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 15.0f, -1);
@@ -1403,5 +1406,71 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		static float Offset = 0.0f;
 		DoEditBox(&g_Config.m_ConnTimeout, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
 		g_Config.m_ConnTimeout = clamp(str_toint(aBuf), 5, 1000);
+	}
+}
+void CMenus::RenderSettingsDDRaceTwo(CUIRect MainView)
+{
+	CUIRect AutoReconnect, Label, Button, Left, Right;
+	MainView.HSplitTop(130.0f, &AutoReconnect, &MainView);
+
+	AutoReconnect.HSplitTop(30.0f, &Label, &AutoReconnect);
+
+	UI()->DoLabelScaled(&Label, Localize("Auto reconnecting"), 20.0f, -1);
+
+	AutoReconnect.Margin(5.0f, &AutoReconnect);
+	AutoReconnect.VSplitMid(&Left, &Right);
+	Left.VSplitRight(5.0f, &Left, 0);
+	Right.VMargin(5.0f, &Right);
+
+	{
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if (DoButton_CheckBox(&g_Config.m_ReconnectFullEnable, Localize("Reconnect when server is full"), g_Config.m_ReconnectFullEnable, &Button))
+		{
+			g_Config.m_ReconnectFullEnable ^= 1;
+		}
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if (DoButton_CheckBox(&g_Config.m_ReconnectBanEnable, Localize("Reconnect when you are banned"), g_Config.m_ReconnectBanEnable, &Button))
+		{
+			g_Config.m_ReconnectBanEnable ^= 1;
+		}
+
+		Left.HSplitTop(10.0f, 0, &Left);
+		Left.VSplitLeft(20.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Button.VSplitRight(20.0f, &Button, 0);
+		char aBuf[64];
+		if (g_Config.m_ReconnectBanTimeout == 1)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectBanTimeout, Localize("second"));
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectBanTimeout, Localize("seconds"));
+		}
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+		Left.HSplitTop(20.0f, &Button, 0);
+		Button.HMargin(2.0f, &Button);
+		g_Config.m_ReconnectBanTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ReconnectBanTimeout, &Button, g_Config.m_ReconnectBanTimeout / 120.0f) * 120.0f);
+		if (g_Config.m_ReconnectBanTimeout < 5)
+			g_Config.m_ReconnectBanTimeout = 5;
+		Right.HSplitTop(10.0f, 0, &Right);
+		Right.VSplitLeft(20.0f, 0, &Right);
+		Right.HSplitTop(20.0f, &Label, &Right);
+		Button.VSplitRight(20.0f, &Button, 0);
+		if (g_Config.m_ReconnectFullTimeout == 1)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectFullTimeout, Localize("second"));
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectFullTimeout, Localize("seconds"));
+		}
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+		Right.HSplitTop(20.0f, &Button, 0);
+		Button.HMargin(2.0f, &Button);
+		g_Config.m_ReconnectFullTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ReconnectFullTimeout, &Button, g_Config.m_ReconnectFullTimeout / 120.0f) * 120.0f);
+		if (g_Config.m_ReconnectFullTimeout < 1)
+			g_Config.m_ReconnectFullTimeout = 1;
 	}
 }
