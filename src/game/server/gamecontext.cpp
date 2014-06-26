@@ -503,11 +503,11 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		pParams = (int *)&m_Tuning;
 	else
 		pParams = (int *)&(m_TuningList[Zone]);
-	
+
 	unsigned int last = sizeof(m_Tuning)/sizeof(int);
 	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_EXTRATUNES)
 		last = 33;
-	
+
 	for(unsigned i = 0; i < last; i++)
 		{
 			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
@@ -516,23 +516,23 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 				&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
 				 || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
 				{
-					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+					Msg.AddInt(0);
 				}
 				else if((i==32) // hooking
 				&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
 				 || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHOOK))
 				{
-					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+					Msg.AddInt(0);
 				}
 				else if((i==3) // ground jump impulse
 				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOJUMP)
 				{
-					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+					Msg.AddInt(0);
 				}
 				else if((i==33) // jetpack
 				&& !(m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK))
 				{
-					Msg.AddInt(0); // send fake tunings selected above to the clients that they think they cant move
+					Msg.AddInt(0);
 				}
 				else
 				{
