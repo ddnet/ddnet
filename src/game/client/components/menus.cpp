@@ -972,12 +972,36 @@ int CMenus::Render()
 				pExtraText = "";
 			}
 		}
-		else if(m_Popup == POPUP_DISCONNECTED)
+		else if (m_Popup == POPUP_DISCONNECTED)
 		{
 			pTitle = Localize("Disconnected");
 			pExtraText = Client()->ErrorString();
 			pButtonText = Localize("Ok");
-			ExtraAlign = -1;
+			if ((str_find_nocase(Client()->ErrorString(), "full")) || (str_find_nocase(Client()->ErrorString(), "reserved")))
+			{
+				if (g_Config.m_ReconnectFullEnable)
+				{
+					if (_my_rtime == 0)
+						_my_rtime = time_get();
+					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ReconnectFullTimeout));
+					pTitle = Client()->ErrorString();
+					pExtraText = aBuf;
+					pButtonText = Localize("Abort");
+				}
+			}
+			else if (str_find_nocase(Client()->ErrorString(), "ban"))
+			{
+				if (g_Config.m_ReconnectBanEnable)
+				{
+					if (_my_rtime == 0)
+						_my_rtime = time_get();
+					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ReconnectBanTimeout));
+					pTitle = Client()->ErrorString();
+					pExtraText = aBuf;
+					pButtonText = Localize("Abort");
+				}
+			}
+			ExtraAlign = 0;
 		}
 		else if(m_Popup == POPUP_PURE)
 		{
@@ -1508,6 +1532,22 @@ int CMenus::Render()
 			UI()->SetActiveItem(0);
 	}
 
+	if (m_Popup == POPUP_DISCONNECTED && ((g_Config.m_ReconnectFullEnable) || (g_Config.m_ReconnectBanEnable)))
+	{
+		if ((str_find_nocase(Client()->ErrorString(), "full")) || (str_find_nocase(Client()->ErrorString(), "reserved")))
+		{
+			if (time_get() > _my_rtime + time_freq() * g_Config.m_ReconnectFullTimeout)
+				Client()->Connect(g_Config.m_UiServerAddress);
+		}
+		else if (str_find_nocase(Client()->ErrorString(), "ban"))
+		{
+			if (time_get() > _my_rtime + time_freq() * g_Config.m_ReconnectBanTimeout)
+				Client()->Connect(g_Config.m_UiServerAddress);
+		}
+	}
+	else if (_my_rtime != 0) {
+		_my_rtime = 0;
+	}
 	return 0;
 }
 
