@@ -1100,8 +1100,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDNet 1/2"),
-		Localize("DDNet 2/2")
+		Localize("DDNet₁"),
+		Localize("DDNet₂")
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1424,15 +1424,15 @@ void CMenus::RenderSettingsDDRaceTwo(CUIRect MainView)
 
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ReconnectFullEnable, Localize("Reconnect when server is full"), g_Config.m_ReconnectFullEnable, &Button))
+		if (DoButton_CheckBox(&g_Config.m_ClReconnectFull, Localize("Reconnect when server is full"), g_Config.m_ClReconnectFull, &Button))
 		{
-			g_Config.m_ReconnectFullEnable ^= 1;
+			g_Config.m_ClReconnectFull ^= 1;
 		}
 
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if (DoButton_CheckBox(&g_Config.m_ReconnectBanEnable, Localize("Reconnect when you are banned"), g_Config.m_ReconnectBanEnable, &Button))
+		if (DoButton_CheckBox(&g_Config.m_ClReconnectBan, Localize("Reconnect when you are banned"), g_Config.m_ClReconnectBan, &Button))
 		{
-			g_Config.m_ReconnectBanEnable ^= 1;
+			g_Config.m_ClReconnectBan ^= 1;
 		}
 
 		Left.HSplitTop(10.0f, 0, &Left);
@@ -1440,37 +1440,37 @@ void CMenus::RenderSettingsDDRaceTwo(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Label, &Left);
 		Button.VSplitRight(20.0f, &Button, 0);
 		char aBuf[64];
-		if (g_Config.m_ReconnectBanTimeout == 1)
+		if (g_Config.m_ClReconnectBanTimeout == 1)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectBanTimeout, Localize("second"));
+			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("second"));
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectBanTimeout, Localize("seconds"));
+			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("seconds"));
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
-		g_Config.m_ReconnectBanTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ReconnectBanTimeout, &Button, g_Config.m_ReconnectBanTimeout / 120.0f) * 120.0f);
-		if (g_Config.m_ReconnectBanTimeout < 5)
-			g_Config.m_ReconnectBanTimeout = 5;
+		g_Config.m_ClReconnectBanTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectBanTimeout, &Button, g_Config.m_ClReconnectBanTimeout / 120.0f) * 120.0f);
+		if (g_Config.m_ClReconnectBanTimeout < 5)
+			g_Config.m_ClReconnectBanTimeout = 5;
 		Right.HSplitTop(10.0f, 0, &Right);
 		Right.VSplitLeft(20.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Label, &Right);
 		Button.VSplitRight(20.0f, &Button, 0);
-		if (g_Config.m_ReconnectFullTimeout == 1)
+		if (g_Config.m_ClReconnectFullTimeout == 1)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectFullTimeout, Localize("second"));
+			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectFullTimeout, Localize("second"));
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %i %s", Localize("Wait before try for"), g_Config.m_ReconnectFullTimeout, Localize("seconds"));
+			str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectFullTimeout, Localize("seconds"));
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 		Right.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
-		g_Config.m_ReconnectFullTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ReconnectFullTimeout, &Button, g_Config.m_ReconnectFullTimeout / 120.0f) * 120.0f);
-		if (g_Config.m_ReconnectFullTimeout < 1)
-			g_Config.m_ReconnectFullTimeout = 1;
+		g_Config.m_ClReconnectFullTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectFullTimeout, &Button, g_Config.m_ClReconnectFullTimeout / 120.0f) * 120.0f);
+		if (g_Config.m_ClReconnectFullTimeout < 1)
+			g_Config.m_ClReconnectFullTimeout = 1;
 	}
 }
