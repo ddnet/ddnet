@@ -240,6 +240,7 @@ public:
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 
+	virtual void ResetDummyInput();
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
 	virtual const char *NetVersion();

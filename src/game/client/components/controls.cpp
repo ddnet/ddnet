@@ -69,6 +69,24 @@ void CControls::OnReset()
 	m_OldMouseX = m_OldMouseY = 0.0f;
 }
 
+void CControls::ResetDummyInput()
+{
+	m_LastData[!g_Config.m_ClDummy].m_Direction = 0;
+	if(m_LastData[!g_Config.m_ClDummy].m_Fire & 1)
+		m_LastData[!g_Config.m_ClDummy].m_Fire++;
+	m_LastData[!g_Config.m_ClDummy].m_Hook = 0;
+	m_LastData[!g_Config.m_ClDummy].m_Jump = 0;
+
+	m_InputData[!g_Config.m_ClDummy].m_Direction = 0;
+	if(m_InputData[!g_Config.m_ClDummy].m_Fire & 1)
+		m_InputData[!g_Config.m_ClDummy].m_Fire++;
+	m_InputData[!g_Config.m_ClDummy].m_Hook = 0;
+	m_InputData[!g_Config.m_ClDummy].m_Jump = 0;
+
+	m_InputDirectionLeft[!g_Config.m_ClDummy] = 0;
+	m_InputDirectionRight[!g_Config.m_ClDummy] = 0;
+}
+
 void CControls::OnRelease()
 {
 	//OnReset();
