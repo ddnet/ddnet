@@ -12,6 +12,16 @@
 
 #include <game/teamscore.h>
 
+#define MIN3(x,y,z)  ((y) <= (z) ? \
+	((x) <= (y) ? (x) : (y)) \
+	: \
+	((x) <= (z) ? (x) : (z)))
+
+#define MAX3(x,y,z)  ((y) >= (z) ? \
+	((x) >= (y) ? (x) : (y)) \
+	: \
+	((x) >= (z) ? (x) : (z)))
+
 class CGameClient : public IGameClient
 {
 	class CStack
@@ -300,6 +310,39 @@ inline vec3 HslToRgb(vec3 HSL)
 
 		return vec3(HueToRgb(v1, v2, HSL.h + (1.0f/3.0f)), HueToRgb(v1, v2, HSL.h), HueToRgb(v1, v2, HSL.h - (1.0f/3.0f)));
 	}
+}
+
+inline vec3 RgbToHsl(vec3 RGB)
+{
+	vec3 HSL;
+	float maxColor = MAX3(RGB.r, RGB.g, RGB.b);
+	float minColor = MIN3(RGB.r, RGB.g, RGB.b);
+	if (minColor == maxColor)
+		return vec3(0.0f, 0.0f, RGB.g * 255.0f);
+	else
+	{
+		HSL.l = (minColor + maxColor) / 2;
+
+		if (HSL.l < 0.5)
+			HSL.s = (maxColor - minColor) / (maxColor + minColor);
+		else 
+			HSL.s = (maxColor - minColor) / (2.0 - maxColor - minColor);
+
+		if (RGB.r == maxColor)
+			HSL.h = (RGB.g - RGB.b) / (maxColor - minColor);
+		else if (RGB.g == maxColor)
+			HSL.h = 2.0 + (RGB.b - RGB.r) / (maxColor - minColor);
+		else 
+			HSL.h = 4.0 + (RGB.r - RGB.g) / (maxColor - minColor);
+
+		HSL.h /= 6; //to bring it to a number between 0 and 1
+		if (HSL.h < 0) HSL.h++;
+	}
+	HSL.h = int(HSL.h * 255.0);
+	HSL.s = int(HSL.s * 255.0);
+	HSL.l = int(HSL.l * 255.0);
+	return HSL;
+
 }
 
 

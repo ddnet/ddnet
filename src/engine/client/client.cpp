@@ -468,7 +468,7 @@ void CClient::SendInput()
 		SendMsgEx(&Msg, MSGFLAG_FLUSH);
 	}
 
-	if(m_LastDummy != g_Config.m_ClDummy)
+	if(m_LastDummy != (bool)g_Config.m_ClDummy)
 	{
 		mem_copy(&DummyInput, &m_aInputs[!g_Config.m_ClDummy][(m_CurrentInput[!g_Config.m_ClDummy]+200-1)%200], sizeof(DummyInput));
 		m_LastDummy = g_Config.m_ClDummy;
@@ -2154,7 +2154,7 @@ void CClient::Update()
 					m_CurGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
 					m_PrevGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 
-					if(m_LastDummy2 == g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+					if (m_LastDummy2 == (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 					{
 						GameClient()->OnNewSnapshot();
 						Repredict = 1;
@@ -2167,7 +2167,7 @@ void CClient::Update()
 				break;
 		}
 
-		if(m_LastDummy2 != g_Config.m_ClDummy)
+		if (m_LastDummy2 != (bool)g_Config.m_ClDummy)
 		{
 			m_LastDummy2 = g_Config.m_ClDummy;
 		}

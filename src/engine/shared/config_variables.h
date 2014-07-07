@@ -225,6 +225,30 @@ MACRO_CONFIG_INT(ClReconnectFull, cl_reconnect_full, 1, 0, 1, CFGFLAG_CLIENT | C
 MACRO_CONFIG_INT(ClReconnectBanTimeout, cl_reconnect_ban_timeout, 30, 5, 120, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (when banned)")
 MACRO_CONFIG_INT(ClReconnectFullTimeout, cl_reconnect_full_timeout, 5, 1, 120, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (when server is full)")
 
+MACRO_CONFIG_INT(ClMessageSystemHue, cl_message_system_hue, 42, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color hue")
+MACRO_CONFIG_INT(ClMessageSystemSat, cl_message_system_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color saturation")
+MACRO_CONFIG_INT(ClMessageSystemLht, cl_message_system_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color lightness")
+
+MACRO_CONFIG_INT(ClMessageHighlightHue, cl_message_highlight_hue, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color hue")
+MACRO_CONFIG_INT(ClMessageHighlightSat, cl_message_highlight_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color saturation")
+MACRO_CONFIG_INT(ClMessageHighlightLht, cl_message_highlight_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color lightness")
+
+MACRO_CONFIG_INT(ClMessageTeamHue, cl_message_team_hue, 85, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color hue")
+MACRO_CONFIG_INT(ClMessageTeamSat, cl_message_team_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color saturation")
+MACRO_CONFIG_INT(ClMessageTeamLht, cl_message_team_lht, 212, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color lightness")
+
+MACRO_CONFIG_INT(ClMessageHue, cl_message_hue, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color hue")
+MACRO_CONFIG_INT(ClMessageSat, cl_message_sat, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color saturation")
+MACRO_CONFIG_INT(ClMessageLht, cl_message_lht, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color lightness")
+
+MACRO_CONFIG_INT(ClLaserInnerHue, cl_laser_inner_hue, 170, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color hue")
+MACRO_CONFIG_INT(ClLaserInnerSat, cl_laser_inner_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color saturation")
+MACRO_CONFIG_INT(ClLaserInnerLht, cl_laser_inner_lht, 191, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color lightness")
+
+MACRO_CONFIG_INT(ClLaserOutlineHue, cl_laser_outline_hue, 170, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color hue")
+MACRO_CONFIG_INT(ClLaserOutlineSat, cl_laser_outline_sat, 137, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color saturation")
+MACRO_CONFIG_INT(ClLaserOutlineLht, cl_laser_outline_lht, 41, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color lightness")
+
 MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 100, 5, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout")
 MACRO_CONFIG_INT(ClShowIDs, cl_show_ids, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Whether to show client ids in scoreboard")
 MACRO_CONFIG_INT(ClAutoRaceRecord, cl_auto_race_record, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save the best demo of each race")

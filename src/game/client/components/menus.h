@@ -341,5 +341,6 @@ private:
 
 	// found in menus_settings.cpp
 	void RenderSettingsDDRace(CUIRect MainView);
+	void RenderSettingsHUD(CUIRect MainView);
 };
 #endif
