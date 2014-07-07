@@ -1159,6 +1159,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("General"),
 		Localize("Player"),
 		("Tee"),
+		Localize("HUD"),
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
@@ -1186,24 +1187,24 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(s_SettingsPage == 3)
 		RenderSettingsTee(MainView);
 	else if(s_SettingsPage == 4)
-		RenderSettingsControls(MainView);
+		RenderSettingsHUD(MainView);
 	else if(s_SettingsPage == 5)
-		RenderSettingsGraphics(MainView);
+		RenderSettingsControls(MainView);
 	else if(s_SettingsPage == 6)
-		RenderSettingsSound(MainView);
+		RenderSettingsGraphics(MainView);
 	else if(s_SettingsPage == 7)
+		RenderSettingsSound(MainView);
+	else if(s_SettingsPage == 8)
 		RenderSettingsDDRace(MainView);
 
 	if(m_NeedRestartGraphics || m_NeedRestartSound)
 		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 15.0f, -1);
 }
-
-void CMenus::RenderSettingsDDRace(CUIRect MainView)
-
+void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
-	CUIRect Button, Left, Right, LeftLeft, HUD, Demo, Gameplay, Miscellaneous, Label;
+	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser;
 
-	MainView.HSplitTop(130.0f, &HUD , &MainView);
+	MainView.HSplitTop(130.0f, &HUD, &MainView);
 
 	HUD.HSplitTop(30.0f, &Label, &HUD);
 	UI()->DoLabelScaled(&Label, Localize("HUD"), 20.0f, -1);
@@ -1213,52 +1214,431 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Right.VMargin(5.0f, &Right);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
 	{
 		g_Config.m_ClDDRaceScoreBoard ^= 1;
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
 	{
 		g_Config.m_ClShowIDs ^= 1;
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
 	{
 		g_Config.m_ClShowhudScore ^= 1;
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
 	{
 		g_Config.m_ClShowhudHealthAmmo ^= 1;
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
 	{
 		g_Config.m_ClShowChat ^= 1;
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
 	{
 		g_Config.m_ClChatTeamColors ^= 1;
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
 	{
 		g_Config.m_ClShowKillMessages ^= 1;
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
+	if (DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
 	{
 		g_Config.m_ClShowVotesAfterVoting ^= 1;
 	}
+	MainView.HSplitTop(130.0f, &Messages, &MainView);
+	Messages.HSplitTop(30.0f, &Label, &Messages);
+	Label.VSplitMid(&Label, &Button);
+	UI()->DoLabelScaled(&Label, Localize("Messages"), 20.0f, -1);
+	Messages.Margin(5.0f, &Messages);
+	Messages.VSplitMid(&Left, &Right);
+	Left.VSplitRight(5.0f, &Left, 0);
+	Right.VMargin(5.0f, &Right);
+	{
+		char aBuf[64];
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Label.VSplitRight(50.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
+		{
+			static int s_DefaultButton = 0;
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
+				g_Config.m_ClMessageSystemHue = HSL.h;
+				g_Config.m_ClMessageSystemSat = HSL.s;
+				g_Config.m_ClMessageSystemLht = HSL.l;
+			}
+		}
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
+		g_Config.m_ClMessageSystemHue = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemHue, &Button, g_Config.m_ClMessageSystemHue / 255.0f)*255.0f);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
+		g_Config.m_ClMessageSystemSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemSat, &Button, g_Config.m_ClMessageSystemSat / 255.0f)*255.0f);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
+		g_Config.m_ClMessageSystemLht = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemLht, &Button, g_Config.m_ClMessageSystemLht / 255.0f)*255.0f);
+
+		Left.HSplitTop(10.0f, &Label, &Left);
+	
+		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
+		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+
+
+		char name[16];
+		str_copy(name, g_Config.m_PlayerName, sizeof(name));
+		str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
+		while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Label.w)
+		{
+			name[str_length(name) - 1] = 0;
+			str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
+		}
+		UI()->DoLabelScaled(&Label, aBuf, 12.0f, -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Left.HSplitTop(20.0f, 0, &Left);
+	}
+	{
+		char aBuf[64];
+		Right.HSplitTop(20.0f, &Label, &Right);
+		Label.VSplitRight(50.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Highlighted message"), 16.0f, -1);
+		{
+			static int s_DefaultButton = 0;
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
+				g_Config.m_ClMessageHighlightHue = HSL.h;
+				g_Config.m_ClMessageHighlightSat = HSL.s;
+				g_Config.m_ClMessageHighlightLht = HSL.l;
+			}
+		}
+		Right.HSplitTop(20.0f, &Button, &Right);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
+		g_Config.m_ClMessageHighlightHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightHue, &Button, g_Config.m_ClMessageHighlightHue / 255.0f)*255.0f);
+
+		Right.HSplitTop(20.0f, &Button, &Right);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
+		g_Config.m_ClMessageHighlightSat = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightSat, &Button, g_Config.m_ClMessageHighlightSat / 255.0f)*255.0f);
+
+		Right.HSplitTop(20.0f, &Button, &Right);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
+		g_Config.m_ClMessageHighlightLht = (int)(DoScrollbarH(&g_Config.m_ClMessageHighlightLht, &Button, g_Config.m_ClMessageHighlightLht / 255.0f)*255.0f);
+
+		Right.HSplitTop(10.0f, &Label, &Right);
+
+		TextRender()->TextColor(0.75f, 0.5f, 0.75f, 1.0f);
+		float tw = TextRender()->TextWidth(0, 12.0f, Localize("Spectator"), -1);
+		Label.VSplitLeft(tw, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Spectator"), 12.0f, -1);
+
+		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
+		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+		char name[16];
+		str_copy(name, g_Config.m_PlayerName, sizeof(name));
+		str_format(aBuf, sizeof(aBuf), ": %s: %s!", name, Localize ("This is highlighted message"));
+		while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Button.w)
+		{
+			name[str_length(name) - 1] = 0;
+			str_format(aBuf, sizeof(aBuf), ": %s: %s!", name, Localize("This is highlighted message"));
+		}
+		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Right.HSplitTop(20.0f, 0, &Right);
+	}
+	{
+		char aBuf[64];
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Label.VSplitRight(50.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Team message"), 16.0f, -1);
+		{
+			static int s_DefaultButton = 0;
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
+				g_Config.m_ClMessageTeamHue = HSL.h;
+				g_Config.m_ClMessageTeamSat = HSL.s;
+				g_Config.m_ClMessageTeamLht = HSL.l;
+			}
+		}
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
+		g_Config.m_ClMessageTeamHue = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamHue, &Button, g_Config.m_ClMessageTeamHue / 255.0f)*255.0f);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
+		g_Config.m_ClMessageTeamSat = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamSat, &Button, g_Config.m_ClMessageTeamSat / 255.0f)*255.0f);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
+		g_Config.m_ClMessageTeamLht = (int)(DoScrollbarH(&g_Config.m_ClMessageTeamLht, &Button, g_Config.m_ClMessageTeamLht / 255.0f)*255.0f);
+
+		Left.HSplitTop(10.0f, &Label, &Left);
+
+		TextRender()->TextColor(0.45f, 0.9f, 0.45f, 1.0f);
+		float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1);
+		Label.VSplitLeft(tw, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
+
+		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+		str_format(aBuf, sizeof(aBuf), ": %s!",  Localize("We will win"));
+		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Left.HSplitTop(20.0f, 0, &Left);
+	}
+	{
+		char aBuf[64];
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Label.VSplitRight(50.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Normal message"), 16.0f, -1);
+		{
+			static int s_DefaultButton = 0;
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
+				g_Config.m_ClMessageHue = HSL.h;
+				g_Config.m_ClMessageSat = HSL.s;
+				g_Config.m_ClMessageLht = HSL.l;
+			}
+		}
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
+		g_Config.m_ClMessageHue = (int)(DoScrollbarH(&g_Config.m_ClMessageHue, &Button, g_Config.m_ClMessageHue / 255.0f)*255.0f);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
+		g_Config.m_ClMessageSat = (int)(DoScrollbarH(&g_Config.m_ClMessageSat, &Button, g_Config.m_ClMessageSat / 255.0f)*255.0f);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
+		g_Config.m_ClMessageLht = (int)(DoScrollbarH(&g_Config.m_ClMessageLht, &Button, g_Config.m_ClMessageLht / 255.0f)*255.0f);
+
+		Left.HSplitTop(10.0f, &Label, &Left);
+
+		TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
+		float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1);
+		Label.VSplitLeft(tw, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
+
+		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
+		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+		str_format(aBuf, sizeof(aBuf), ": %s :D", Localize("Hello and welcome"));
+		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	{
+		Right.HSplitTop(220.0f, &Laser, &Right);
+		RenderTools()->DrawUIRect(&Laser, vec4(1.0f, 1.0f, 1.0f, 0.1f), CUI::CORNER_ALL, 5.0f);
+		Laser.Margin(10.0f, &Laser);
+		Laser.HSplitTop(30.0f, &Label, &Laser);
+		Label.VSplitLeft(TextRender()->TextWidth(0, 20.0f, Localize("Laser"), -1) + 5.0f, &Label, &Weapon);
+		UI()->DoLabelScaled(&Label, Localize("Laser"), 20.0f, -1);
+
+		Laser.HSplitTop(20.0f, &Label, &Laser);
+		Label.VSplitLeft(5.0f, 0, &Label);
+		Label.VSplitRight(50.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Inner color"), 16.0f, -1);
+		{
+			static int s_DefaultButton = 0;
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
+				g_Config.m_ClLaserInnerHue = HSL.h;
+				g_Config.m_ClLaserInnerSat = HSL.s;
+				g_Config.m_ClLaserInnerLht = HSL.l;
+			}
+		}
+
+		Laser.HSplitTop(20.0f, &Button, &Laser);
+		Button.VSplitLeft(20.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
+		g_Config.m_ClLaserInnerHue = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerHue, &Button, g_Config.m_ClLaserInnerHue / 255.0f)*255.0f);
+		Laser.HSplitTop(20.0f, &Button, &Laser);
+		Button.VSplitLeft(20.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
+		g_Config.m_ClLaserInnerSat = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerSat, &Button, g_Config.m_ClLaserInnerSat / 255.0f)*255.0f);
+		Laser.HSplitTop(20.0f, &Button, &Laser);
+		Button.VSplitLeft(20.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
+		g_Config.m_ClLaserInnerLht = (int)(DoScrollbarH(&g_Config.m_ClLaserInnerLht, &Button, g_Config.m_ClLaserInnerLht / 255.0f)*255.0f);
+
+		Laser.HSplitTop(10.0f, 0, &Laser);
+
+		Laser.HSplitTop(20.0f, &Label, &Laser);
+		Label.VSplitLeft(5.0f, 0, &Label);
+		Label.VSplitRight(50.0f, &Label, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Outline color"), 16.0f, -1);
+		{
+			static int s_DefaultButton = 0;
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
+				g_Config.m_ClLaserOutlineHue = HSL.h;
+				g_Config.m_ClLaserOutlineSat = HSL.s;
+				g_Config.m_ClLaserOutlineLht = HSL.l;
+			}
+		}
+
+		Laser.HSplitTop(20.0f, &Button, &Laser);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Hue"), 12.0f, -1);
+		g_Config.m_ClLaserOutlineHue = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineHue, &Button, g_Config.m_ClLaserOutlineHue / 255.0f)*255.0f);
+		Laser.HSplitTop(20.0f, &Button, &Laser);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Sat."), 12.0f, -1);
+		g_Config.m_ClLaserOutlineSat = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineSat, &Button, g_Config.m_ClLaserOutlineSat / 255.0f)*255.0f);
+		Laser.HSplitTop(20.0f, &Button, &Laser);
+		Button.VSplitLeft(15.0f, 0, &Button);
+		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		UI()->DoLabelScaled(&Label, Localize("Lht."), 12.0f, -1);
+		g_Config.m_ClLaserOutlineLht = (int)(DoScrollbarH(&g_Config.m_ClLaserOutlineLht, &Button, g_Config.m_ClLaserOutlineLht / 255.0f)*255.0f);
+
+
+		//Laser.HSplitTop(8.0f, &Weapon, &Laser);
+		Weapon.VSplitLeft(30.0f, 0, &Weapon);
+
+		vec3 RGB;
+		vec2 From = vec2(Weapon.x, Weapon.y + Weapon.h / 2.0f);
+		vec2 Pos = vec2(Weapon.x + Weapon.w - 10.0f, Weapon.y + Weapon.h / 2.0f);
+
+		vec2 Out, Border;
+
+		Graphics()->BlendNormal();
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+
+		// do outline
+		RGB = HslToRgb(vec3(g_Config.m_ClLaserOutlineHue / 255.0f, g_Config.m_ClLaserOutlineSat / 255.0f, g_Config.m_ClLaserOutlineLht / 255.0f));
+		vec4 OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
+		Graphics()->SetColor(RGB.r, RGB.g, RGB.b, 1.0f); // outline
+		Out = vec2(0.0f, -1.0f) * (3.15f);
+
+		IGraphics::CFreeformItem Freeform(
+			From.x - Out.x, From.y - Out.y,
+			From.x + Out.x, From.y + Out.y,
+			Pos.x - Out.x, Pos.y - Out.y,
+			Pos.x + Out.x, Pos.y + Out.y);
+		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+
+		// do inner	
+		RGB = HslToRgb(vec3(g_Config.m_ClLaserInnerHue / 255.0f, g_Config.m_ClLaserInnerSat / 255.0f, g_Config.m_ClLaserInnerLht / 255.0f));
+		vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
+		Out = vec2(0.0f, -1.0f) * (2.25f);
+		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
+
+		Freeform = IGraphics::CFreeformItem(
+			From.x - Out.x, From.y - Out.y,
+			From.x + Out.x, From.y + Out.y,
+			Pos.x - Out.x, Pos.y - Out.y,
+			Pos.x + Out.x, Pos.y + Out.y);
+		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+
+		Graphics()->QuadsEnd();
+
+		// render head
+		{
+			Graphics()->BlendNormal();
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
+			Graphics()->QuadsBegin();
+
+			int Sprites[] = { SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03 };
+			RenderTools()->SelectSprite(Sprites[time_get() % 3]);
+			Graphics()->QuadsSetRotation(time_get());
+			Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
+			IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 24, 24);
+			Graphics()->QuadsDraw(&QuadItem, 1);
+			Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
+			QuadItem = IGraphics::CQuadItem(Pos.x, Pos.y, 20, 20);
+			Graphics()->QuadsDraw(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+		// draw laser weapon
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		Graphics()->QuadsBegin();
+
+		RenderTools()->SelectSprite(SPRITE_WEAPON_RIFLE_BODY);
+		RenderTools()->DrawSprite(Weapon.x, Weapon.y + Weapon.h / 2.0f, 60.0f);
+
+		Graphics()->QuadsEnd();
+	}
+	/*
+	Left.VSplitLeft(20.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Label, &Left);
+	Button.VSplitRight(20.0f, &Button, 0);
+	char aBuf[64];
+	if (g_Config.m_ClReconnectBanTimeout == 1)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("second"));
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("seconds"));
+	}
+	UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+	Left.HSplitTop(20.0f, &Button, 0);
+	Button.HMargin(2.0f, &Button);
+	g_Config.m_ClReconnectBanTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectBanTimeout, &Button, g_Config.m_ClReconnectBanTimeout / 120.0f) * 120.0f);
+	if (g_Config.m_ClReconnectBanTimeout < 5)
+		g_Config.m_ClReconnectBanTimeout = 5;*/
+}
+
+void CMenus::RenderSettingsDDRace(CUIRect MainView)
+{
+	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label;
 
 	MainView.HSplitTop(90.0f, &Demo , &MainView);
 
