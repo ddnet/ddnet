@@ -52,7 +52,10 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
 	static int s_DisconnectButton = 0;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
-		Client()->Disconnect();
+	{
+		m_Popup = POPUP_DISCONNECT;
+		//Client()->Disconnect();
+	}
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
 	{

@@ -664,16 +664,24 @@ int CMenus::RenderMenubar(CUIRect r)
 	box.VSplitRight(30.0f, &box, 0);
 	*/
 
-	Box.VSplitRight(90.0f, &Box, &Button);
+	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_QuitButton=0;
-	if(DoButton_MenuTab(&s_QuitButton, Localize("Quit"), 0, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_QuitButton, "×", 0, &Button, CUI::CORNER_T))
 		m_Popup = POPUP_QUIT;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(130.0f, &Box, &Button);
+	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_SettingsButton=0;
-	if(DoButton_MenuTab(&s_SettingsButton, Localize("Settings"), m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_SettingsButton, "⚙", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
 		NewPage = PAGE_SETTINGS;
+
+	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(30.0f, &Box, &Button);
+	static int s_EditorButton=0;
+	if(DoButton_MenuTab(&s_EditorButton, Localize("✎"), 0, &Button, CUI::CORNER_T))
+	{
+		g_Config.m_ClEditor = 1;
+	}
 
 	if(NewPage != -1)
 	{
@@ -1047,6 +1055,12 @@ int CMenus::Render()
 			pExtraText = Localize("Are you sure that you want to quit?");
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_DISCONNECT)
+		{
+			pTitle = Localize("Disconnect");
+			pExtraText = Localize("Are you sure that you want to disconnect?");
+			ExtraAlign = -1;
+		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
 			pTitle = Localize("Welcome to Teeworlds");
@@ -1120,6 +1134,30 @@ int CMenus::Render()
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Quit();
+		}
+		if(m_Popup == POPUP_DISCONNECT)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+
+			// buttons
+			Part.VMargin(80.0f, &Part);
+			Part.VSplitMid(&No, &Yes);
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+				Client()->Disconnect();
 		}
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		else if(m_Popup == POPUP_AUTOUPDATE)

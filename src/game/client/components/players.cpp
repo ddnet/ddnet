@@ -541,6 +541,10 @@ void CPlayers::RenderPlayer(
 	{
 		if (Player.m_PlayerFlags&PLAYERFLAG_AIM && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))
 		{
+			float Alpha = 1.0f;
+			if (OtherTeam)
+				Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+
 			vec2 ExDirection = Direction;
 
 			if (pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -551,7 +555,7 @@ void CPlayers::RenderPlayer(
 			vec2 finishPos = initPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength-42.0f);
 
 			Graphics()->LinesBegin();
-			Graphics()->SetColor(1.00f, 0.0f, 0.0f, 1.00f);
+			Graphics()->SetColor(1.00f, 0.0f, 0.0f, Alpha);
 
 			float PhysSize = 28.0f;
 
@@ -560,10 +564,6 @@ void CPlayers::RenderPlayer(
 
 			bool doBreak = false;
 			int Hit = 0;
-
-			float Alpha = 1.0f;
-			if (OtherTeam)
-				Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 
 			do {
 				OldPos = NewPos;
