@@ -63,8 +63,11 @@ void CMenus::RenderGame(CUIRect MainView)
 			static int s_SpectateButton = 0;
 			if(DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
-				m_pClient->SendSwitchTeam(TEAM_SPECTATORS);
-				SetActive(false);
+				if(g_Config.m_ClDummy == 0 || m_pClient->Client()->DummyConnected())
+				{
+					m_pClient->SendSwitchTeam(TEAM_SPECTATORS);
+					SetActive(false);
+				}
 			}
 		}
 
