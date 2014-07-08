@@ -1135,7 +1135,7 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Quit();
 		}
-		if(m_Popup == POPUP_DISCONNECT)
+		else if(m_Popup == POPUP_DISCONNECT)
 		{
 			CUIRect Yes, No;
 			Box.HSplitBottom(20.f, &Box, &Part);
