@@ -604,7 +604,9 @@ void CChat::OnRender()
 		}
 		else 
 		{
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Blend);
+			//TextRender()->TextColor(1.0f, 1.0f, 1.0f, Blend);
+			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
 			
 
