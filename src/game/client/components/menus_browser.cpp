@@ -528,7 +528,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// render quick search
 	CUIRect QuickSearch, Button;
 	Status.VSplitLeft(240.0f, &QuickSearch, &Status);
-	const char *pLabel = Localize("Quick search:");
+	const char *pLabel = Localize("Search:");
 	UI()->DoLabelScaled(&QuickSearch, pLabel, 12.0f, -1);
 	float w = TextRender()->TextWidth(0, 12.0f, pLabel, -1);
 	QuickSearch.VSplitLeft(w, 0, &QuickSearch);

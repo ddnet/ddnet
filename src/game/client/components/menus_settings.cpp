@@ -1365,11 +1365,11 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 		char name[16];
 		str_copy(name, g_Config.m_PlayerName, sizeof(name));
-		str_format(aBuf, sizeof(aBuf), ": %s: %s!", name, Localize ("This is a highlighted message"));
+		str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize ("Look out!"));
 		while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Button.w)
 		{
 			name[str_length(name) - 1] = 0;
-			str_format(aBuf, sizeof(aBuf), ": %s: %s!", name, Localize("This is a highlighted message"));
+			str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize("Look out!"));
 		}
 		UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
