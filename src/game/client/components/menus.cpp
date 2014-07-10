@@ -31,6 +31,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
 #include <game/localization.h>
+#include <game/editor/editor.h>
 #include <mastersrv/mastersrv.h>
 #include <versionsrv/versionsrv.h>
 
@@ -1068,6 +1069,12 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_DELETE_FILE)
+		{
+			pTitle = Localize("Delete file");
+			pExtraText = Localize("Are you sure that you want to delete the file?");
+			ExtraAlign = -1;
+		}
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		else if(m_Popup == POPUP_AUTOUPDATE)
 		{
@@ -1550,6 +1557,45 @@ int CMenus::Render()
 			UI()->DoLabel(&Label, Localize("Nickname"), 18.0f, -1);
 			static float Offset = 0.0f;
 			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset);
+		}
+		else if(m_Popup == POPUP_DELETE_FILE)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+			Part.VMargin(80.0f, &Part);
+
+			Part.VSplitMid(&No, &Yes);
+
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				m_Popup = POPUP_NONE;
+				// delete file
+				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
+				{
+					char aBuf[512];
+					str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+					if(Storage()->RemoveFile(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
+					{
+						static_cast<CEditor *>(m_pClient->Editor())->FilelistPopulate();
+						//DemolistOnUpdate(false);
+					}
+					else
+						PopupMessage(Localize("Error"), Localize("Unable to delete the file"), Localize("Ok"));
+				}
+			}
 		}
 		else
 		{
