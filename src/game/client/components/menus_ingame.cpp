@@ -53,8 +53,10 @@ void CMenus::RenderGame(CUIRect MainView)
 	static int s_DisconnectButton = 0;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
 	{
-		m_Popup = POPUP_DISCONNECT;
-		//Client()->Disconnect();
+		if(g_Config.m_ClConfirmDisconnect)
+			m_Popup = POPUP_DISCONNECT;
+		else
+			Client()->Disconnect();
 	}
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
