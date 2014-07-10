@@ -452,6 +452,20 @@ vec4 CEditor::GetButtonColor(const void *pID, int Checked)
 	if(Checked < 0)
 		return vec4(0,0,0,0.5f);
 
+	if(Checked > 2)
+	{
+		if(UI()->HotItem() == pID)
+			return vec4(1,0.5,0,0.75f);
+		return vec4(1,0.5,0,0.5f);
+	}
+
+	if(Checked > 1)
+	{
+		if(UI()->HotItem() == pID)
+			return vec4(0,1,0,0.5f);
+		return vec4(0,1,0,0.33f);
+	}
+
 	if(Checked > 0)
 	{
 		if(UI()->HotItem() == pID)
@@ -494,6 +508,8 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 	TextRender()->SetCursor(&Cursor, NewRect.x + NewRect.w/2-tw/2, NewRect.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = NewRect.w;
 	TextRender()->TextEx(&Cursor, pText, -1);
+	if(Checked > 1)
+		Checked -= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -2795,7 +2811,30 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			str_copy(aBuf, m_Map.m_lImages[i]->m_aName, sizeof(aBuf));
 			ToolBox.HSplitTop(12.0f, &Slot, &ToolBox);
 
-			if(int Result = DoButton_Editor(&m_Map.m_lImages[i], aBuf, m_SelectedImage == i, &Slot,
+			int Selected = m_SelectedImage == i;
+			for(int x = 0; x < m_Map.m_lGroups.size(); ++x)
+				for(int j = 0; j < m_Map.m_lGroups[x]->m_lLayers.size(); ++j)
+					if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
+					{
+						CLayerQuads *pLayer = static_cast<CLayerQuads *>(m_Map.m_lGroups[x]->m_lLayers[j]);
+						if(pLayer->m_Image == i)
+						{
+							Selected = 2 + Selected;
+							goto done;
+						}
+					}
+					else if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_TILES)
+					{
+						CLayerTiles *pLayer = static_cast<CLayerTiles *>(m_Map.m_lGroups[x]->m_lLayers[j]);
+						if(pLayer->m_Image == i)
+						{
+							Selected = 2 + Selected;
+							goto done;
+						}
+					}
+
+			done:
+			if(int Result = DoButton_Editor(&m_Map.m_lImages[i], aBuf, Selected, &Slot,
 				BUTTON_CONTEXT, "Select image"))
 			{
 				m_SelectedImage = i;
