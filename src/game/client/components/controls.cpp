@@ -367,7 +367,7 @@ void CControls::OnRender()
 			if( !AimPressed )
 			{
 				m_InputData[g_Config.m_ClDummy].m_Fire ++;
-				if( m_InputData[g_Config.m_ClDummy].m_Fire % 2 != AimPressed )
+				if( (bool)(m_InputData[g_Config.m_ClDummy].m_Fire % 2) != AimPressed )
 					m_InputData[g_Config.m_ClDummy].m_Fire ++;
 				FireWasPressed = true;
 			}
