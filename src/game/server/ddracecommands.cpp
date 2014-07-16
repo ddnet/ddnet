@@ -493,3 +493,39 @@ void CGameContext::ConList(IConsole::IResult *pResult, void *pUserData)
 	else
 		pSelf->List(ClientID, &zerochar);
 }
+
+void CGameContext::ConFreezeHammer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	int Victim = pResult->GetVictim();
+
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+
+	if (!pChr)
+		return;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof aBuf, "'%s' got freeze hammer!",
+			pSelf->Server()->ClientName(Victim));
+	pSelf->SendChat(-1, CHAT_ALL, aBuf);
+
+	pChr->m_FreezeHammer = true;
+}
+
+void CGameContext::ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	int Victim = pResult->GetVictim();
+
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+
+	if (!pChr)
+		return;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof aBuf, "'%s' lost freeze hammer!",
+			pSelf->Server()->ClientName(Victim));
+	pSelf->SendChat(-1, CHAT_ALL, aBuf);
+
+	pChr->m_FreezeHammer = false;
+}

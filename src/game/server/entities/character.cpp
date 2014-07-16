@@ -429,6 +429,10 @@ void CCharacter::FireWeapon()
 				pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 					m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
 				pTarget->UnFreeze();
+
+				if(m_FreezeHammer)
+					pTarget->Freeze();
+
 				Hits++;
 			}
 
@@ -2039,6 +2043,7 @@ void CCharacter::DDRaceInit()
 	m_SuperJump = false;
 	m_Jetpack = false;
 	m_Core.m_Jumps = 2;
+	m_FreezeHammer = false;
 
 	int Team = Teams()->m_Core.Team(m_Core.m_Id);
 

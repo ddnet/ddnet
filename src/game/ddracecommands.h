@@ -44,6 +44,9 @@ CONSOLE_COMMAND("muteid", "vi", CFGFLAG_SERVER, ConMuteID, this, "");
 CONSOLE_COMMAND("muteip", "si", CFGFLAG_SERVER, ConMuteIP, this, "");
 CONSOLE_COMMAND("unmute", "v", CFGFLAG_SERVER, ConUnmute, this, "");
 CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "");
+
+CONSOLE_COMMAND("freezehammer", "v", CFGFLAG_SERVER, ConFreezeHammer, this, "Gives a player Freeze Hammer")
+CONSOLE_COMMAND("unfreezehammer", "v", CFGFLAG_SERVER, ConUnFreezeHammer, this, "Removes Freeze Hammer from a player")
 #undef CONSOLE_COMMAND
 
 #endif

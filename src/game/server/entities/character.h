@@ -182,6 +182,7 @@ public:
 	int m_FreezeTick;
 	bool m_DeepFreeze;
 	bool m_EndlessHook;
+	bool m_FreezeHammer;
 	enum
 	{
 		HIT_ALL=0,
