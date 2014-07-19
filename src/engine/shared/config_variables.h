@@ -219,6 +219,7 @@ MACRO_CONFIG_INT(SvAnnouncementRandom, sv_announcement_random, 1, 0, 1, CFGFLAG_
 
 MACRO_CONFIG_INT(SvOldLaser, sv_old_laser, 0, 0, 1, CFGFLAG_SERVER, "Whether lasers can hit you if you shot them and that they pull you towards the bounce origin (0 for DDRace Beta) or lasers can't hit you if you shot them, and they pull others towards the shooter")
 MACRO_CONFIG_INT(SvSlashMe, sv_slash_me, 0, 0, 1, CFGFLAG_SERVER, "Whether /me is active on the server or not")
+MACRO_CONFIG_INT(SvRejoinTeam0, sv_rejoin_team_0, 1, 0, 1, CFGFLAG_SERVER, "Make a team automatically rejoin team 0 after finish (only if not locked)")
 
 MACRO_CONFIG_INT(ClReconnectBan, cl_reconnect_ban, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Auto reconnect when banned")
 MACRO_CONFIG_INT(ClReconnectFull, cl_reconnect_full, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Auto reconnect when server is full")
