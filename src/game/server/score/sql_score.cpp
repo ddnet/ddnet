@@ -1174,7 +1174,8 @@ void CSqlScore::FuzzyString(char *pString)
 			break;
 
 		newString[pos++] = pString[i];
-		newString[pos++] = '%';
+		if (pString[i] != '\\')
+			newString[pos++] = '%';
 	}
 
 	newString[pos] = '\0';
