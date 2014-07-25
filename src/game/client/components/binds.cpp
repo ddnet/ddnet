@@ -290,8 +290,8 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind('s', "+showhookcoll");
 		Bind('x', "toggle cl_dummy 0 1");
 #if !defined(__ANDROID__)
-		Bind(KEY_PAGEDOWN, "cl_show_entities 0");
-		Bind(KEY_PAGEUP, "cl_show_entities 1");
+		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1");
+		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100");
 #endif
 		Bind(KEY_KP0, "say /emote normal 999999");
 		Bind(KEY_KP1, "say /emote happy 999999");
