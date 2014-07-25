@@ -330,7 +330,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 
 	m_VersionInfo.m_State = CVersionInfo::STATE_INIT;
 
-	m_LastDummyConnectTime = 0;
+	if (g_Config.m_ClDummy == 0)
+		m_LastDummyConnectTime = 0;
 }
 
 // ----- send functions -----
@@ -611,7 +612,8 @@ void CClient::OnEnterGame()
 	m_CurGameTick[g_Config.m_ClDummy] = 0;
 	m_PrevGameTick[g_Config.m_ClDummy] = 0;
 
-	m_LastDummyConnectTime = 0;
+	if (g_Config.m_ClDummy == 0)
+		m_LastDummyConnectTime = 0;
 }
 
 void CClient::EnterGame()
@@ -710,7 +712,7 @@ bool CClient::DummyConnected()
 
 void CClient::DummyConnect()
 {
-	if(m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
+	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
 		return;
 
 	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
@@ -718,6 +720,8 @@ void CClient::DummyConnect()
 
 	if(m_DummyConnected)
 		return;
+
+	m_LastDummyConnectTime = GameTick();
 
 	m_RconAuthed[1] = 0;
 
@@ -1794,7 +1798,6 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 		if(Msg == NETMSG_CON_READY)
 		{
 			m_DummyConnected = true;
-			m_LastDummyConnectTime = GameTick();
 			g_Config.m_ClDummy = 1;
 			Rcon("crashmeplx");
 		}
