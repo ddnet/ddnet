@@ -1653,7 +1653,7 @@ void CSqlScore::LoadTeamThread(void *pUser)
 				Num = SavedTeam->LoadString(pData->m_pSqlData->m_pResults->getString("Savegame").c_str());
 
 				if(Num)
-					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to load Savegame: datas corrupted");
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to load savegame: data corrupted");
 				else
 				{
 
@@ -1664,7 +1664,7 @@ void CSqlScore::LoadTeamThread(void *pUser)
 						{ found = true; break; }
 					}
 					if (!found)
-						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You don't belong to this Team");
+						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You don't belong to this team");
 					else
 					{
 
@@ -1684,7 +1684,7 @@ void CSqlScore::LoadTeamThread(void *pUser)
 
 						if(Num == 1)
 						{
-							pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+							pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
 						}
 						else if(Num >= 10 && Num < 100)
 						{
