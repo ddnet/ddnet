@@ -165,6 +165,8 @@ void CSaveTee::load(CCharacter* pchr, int Team)
 	{
 		pchr->m_Core.m_HookState = m_HookState;
 	}
+
+	pchr->GameServer()->SendTuningParams(pchr->m_pPlayer->GetCID(), m_TuneZone);
 }
 
 char* CSaveTee::GetString()
