@@ -281,6 +281,13 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 }
 
+void CGameContext::SendChatTeam(int Team, const char *pText)
+{
+	for(int i = 0; i<MAX_CLIENTS; i++)
+		if(((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(i) == Team)
+			SendChatTarget(i, pText);
+}
+
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, int SpamProtectionClientID)
 {
 	if(SpamProtectionClientID >= 0 && SpamProtectionClientID < MAX_CLIENTS)

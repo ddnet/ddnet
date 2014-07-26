@@ -60,6 +60,9 @@ public:
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search=false) = 0;
 
 	virtual void RandomUnfinishedMap(int ClientID) = 0;
+	
+	virtual void SaveTeam(int Team, const char* Code, int ClientID) = 0;
+	virtual void LoadTeam(const char* Code, int ClientID) = 0;
 };
 
 #endif

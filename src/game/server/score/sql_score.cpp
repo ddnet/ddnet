@@ -11,6 +11,7 @@
 #include "../gamemodes/DDRace.h"
 #include "sql_score.h"
 #include <engine/shared/console.h>
+#include "../save.h"
 
 static LOCK gs_SqlLock = 0;
 
@@ -168,6 +169,9 @@ void CSqlScore::Init()
 			m_pStatement->execute(aBuf);
 
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
+			m_pStatement->execute(aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
 			m_pStatement->execute(aBuf);
 
 			dbg_msg("SQL", "Tables were created successfully");
@@ -1183,12 +1187,12 @@ void CSqlScore::FuzzyString(char *pString)
 }
 
 // anti SQL injection
-void CSqlScore::ClearString(char *pString)
+void CSqlScore::ClearString(char *pString, int size)
 {
-	char newString[32*2-1];
+	char newString[size*2-1];
 	int pos = 0;
 
-	for(int i=0;i<32;i++)
+	for(int i=0;i<size;i++)
 	{
 		if(pString[i] == '\\')
 		{
@@ -1498,6 +1502,239 @@ void CSqlScore::RandomUnfinishedMap(int ClientID)
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)RandomUnfinishedThread);
 #endif
+}
+
+void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID)
+{
+	CSqlTeamSave *Tmp = new CSqlTeamSave();
+	Tmp->m_Team = Team;
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_Code, Code, 32);
+	Tmp->m_pSqlData = this;
+
+	void *SaveThread = thread_create(SaveTeamThread, Tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)SaveThread);
+#endif
+}
+
+void CSqlScore::SaveTeamThread(void *pUser)
+{
+	CSaveTeam* SavedTeam = 0;
+	CSqlTeamSave *pData = (CSqlTeamSave *)pUser;
+
+
+	char TeamString[65536];
+	int Team = pData->m_Team;
+	char OriginalCode[32];
+	str_copy(OriginalCode, pData->m_Code, sizeof(OriginalCode));
+	pData->m_pSqlData->ClearString(pData->m_Code, sizeof(pData->m_Code));
+	char Map[128];
+	str_copy(Map, g_Config.m_SvMap, 128);
+	pData->m_pSqlData->ClearString(Map, sizeof(Map));
+
+	int Num = -1;
+
+	if(Team > 0 && Team < 64 && ((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.Count(Team) > 0)
+	{
+		SavedTeam = new CSaveTeam(pData->m_pSqlData->GameServer()->m_pController);
+		Num = SavedTeam->save(Team);
+		switch (Num)
+		{
+			case 1:
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+			case 2:
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Could not find your Team");
+			case 3:
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to find all Characters");
+			default:
+				;
+		}
+		str_copy(TeamString, SavedTeam->GetString(), sizeof(TeamString));
+		pData->m_pSqlData->ClearString(TeamString, sizeof(TeamString));
+	}
+	else
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+
+	lock_wait(gs_SqlLock);
+	// Connect to database
+	if(!Num && pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "select Savegame from %s_saves where Code = '%s' and Map = '%s';",  pData->m_pSqlData->m_pPrefix, pData->m_Code, Map);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			if (pData->m_pSqlData->m_pResults->rowsCount() == 0)
+			{
+				// delete results and statement
+				delete pData->m_pSqlData->m_pResults;
+
+				char aBuf[65536];
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP())",  pData->m_pSqlData->m_pPrefix, TeamString, Map, pData->m_Code);
+				pData->m_pSqlData->m_pStatement->execute(aBuf);
+
+				char aBuf2[256];
+				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved. Use '/load %s' to continue", OriginalCode);
+				pData->m_pSqlData->GameServer()->SendChatTeam(Team, aBuf2);
+				((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.KillTeam(Team);
+			}
+			else
+			{
+				dbg_msg("SQL", "ERROR: This save-code already exists");
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "This save-code already exists");
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf2[256];
+			str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf2);
+			dbg_msg("SQL", "ERROR: Could not save the team");
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not save the team");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();
+	}
+	else if(!Num)
+	{
+		dbg_msg("SQL", "connection failed");
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "ERROR: Unable to connect to SQL-Server");
+	}
+
+	delete pData;
+	if(SavedTeam)
+		delete SavedTeam;
+
+	lock_release(gs_SqlLock);
+}
+
+void CSqlScore::LoadTeam(const char* Code, int ClientID)
+{
+	CSqlTeamLoad *Tmp = new CSqlTeamLoad();
+	str_copy(Tmp->m_Code, Code, 32);
+	Tmp->m_ClientID = ClientID;
+	Tmp->m_pSqlData = this;
+
+	void *LoadThread = thread_create(LoadTeamThread, Tmp);
+	#if defined(CONF_FAMILY_UNIX)
+		pthread_detach((pthread_t)LoadThread);
+	#endif
+}
+
+void CSqlScore::LoadTeamThread(void *pUser)
+{
+	CSaveTeam* SavedTeam;
+	CSqlTeamLoad *pData = (CSqlTeamLoad *)pUser;
+
+	SavedTeam = new CSaveTeam(pData->m_pSqlData->GameServer()->m_pController);
+
+	pData->m_pSqlData->ClearString(pData->m_Code, sizeof(pData->m_Code));
+	char Map[128];
+	str_copy(Map, g_Config.m_SvMap, 128);
+	pData->m_pSqlData->ClearString(Map, sizeof(Map));
+	int Num;
+
+	lock_wait(gs_SqlLock);
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			char aBuf[768];
+			str_format(aBuf, sizeof(aBuf), "select Savegame from %s_saves where Code = '%s' and Map = '%s';",  pData->m_pSqlData->m_pPrefix, pData->m_Code, Map);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+
+			if (pData->m_pSqlData->m_pResults->rowsCount() > 0)
+			{
+				pData->m_pSqlData->m_pResults->first();
+				Num = SavedTeam->LoadString(pData->m_pSqlData->m_pResults->getString("Savegame").c_str());
+
+				if(Num)
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to load Savegame: datas corrupted");
+				else
+				{
+
+					bool found = false;
+					for (int i = 0; i < SavedTeam->GetMembersCount(); i++)
+					{
+						if(str_comp(SavedTeam->SavedTees[i].GetName(), pData->m_pSqlData->Server()->ClientName(pData->m_ClientID)) == 0)
+						{ found = true; break; }
+					}
+					if (!found)
+						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You don't belong to this Team");
+					else
+					{
+
+						int n;
+						for(n = 1; n<64; n++)
+						{
+							if(((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.Count(n) == 0)
+								break;
+						}
+
+						if(((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.Count(n) > 0)
+						{
+							n = ((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.m_Core.Team(pData->m_ClientID); // if all Teams are full your the only one in your team
+						}
+
+						Num = SavedTeam->load(n);
+
+						if(Num == 1)
+						{
+							pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+						}
+						else if(Num >= 10 && Num < 100)
+						{
+							char aBuf[256];
+							str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam->SavedTees[Num-10].GetName());
+							pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+						}
+						else if(Num >= 100)
+						{
+							char aBuf[256];
+							str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam->SavedTees[Num-100].GetName());
+							pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+						}
+						else
+						{
+							pData->m_pSqlData->GameServer()->SendChatTeam(n, "Loading successfully done");
+							char aBuf[512];
+							str_format(aBuf, sizeof(aBuf), "DELETE from %s_saves where Code='%s' and Map='%s';", pData->m_pSqlData->m_pPrefix, pData->m_Code, Map);
+							pData->m_pSqlData->m_pStatement->execute(aBuf);
+						}
+					}
+				}
+			}
+			else
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "No such savegame for this map");
+			// delete results and statement
+			delete pData->m_pSqlData->m_pResults;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf2[256];
+			str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf2);
+			dbg_msg("SQL", "ERROR: Could not load the team");
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not load the team");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();
+	}
+	else
+	{
+		dbg_msg("SQL", "connection failed");
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "ERROR: Unable to connect to SQL-Server");
+	}
+
+	delete pData;
+	delete SavedTeam;
+
+	lock_release(gs_SqlLock);
 }
 
 #endif

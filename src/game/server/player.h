@@ -11,6 +11,8 @@
 class CPlayer
 {
 	MACRO_ALLOC_POOL_ID()
+	
+	friend class CSaveTee;
 
 public:
 	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
@@ -20,6 +22,7 @@ public:
 
 	void TryRespawn();
 	void Respawn();
+	CCharacter* ForceSpawn(vec2 Pos); // required for loading savegames
 	void SetTeam(int Team, bool DoChatMsg=true);
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };

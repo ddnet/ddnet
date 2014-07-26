@@ -79,6 +79,7 @@ public:
 	void SetCpActive(CPlayer* Player, int CpActive);
 	void OnTeamFinish(CPlayer** Players, unsigned int Size);
 	void OnFinish(CPlayer* Player);
+	void KillTeam(int Team);
 	bool TeeFinished(int ClientID)
 	{
 		return m_TeeFinished[ClientID];
@@ -95,6 +96,11 @@ public:
 			return false;
 
 		return m_TeamLocked[Team];
+	}
+	;
+	void SetFinished(int ClientID, bool finished)
+	{
+		m_TeeFinished[ClientID] = finished;
 	}
 	;
 };

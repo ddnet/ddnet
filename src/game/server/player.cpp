@@ -403,6 +403,15 @@ void CPlayer::Respawn()
 		m_Spawning = true;
 }
 
+CCharacter* CPlayer::ForceSpawn(vec2 Pos)
+{
+    m_Spawning = false;
+	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_pCharacter->Spawn(this, Pos);
+    m_Team = 0;
+    return m_pCharacter;
+}
+
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
 	// clamp the team

@@ -53,6 +53,8 @@ class CSqlScore: public IScore
 	static void ShowPointsThread(void *pUser);
 	static void ShowTopPointsThread(void *pUser);
 	static void RandomUnfinishedMapThread(void *pUser);
+	static void SaveTeamThread(void *pUser);
+	static void LoadTeamThread(void *pUser);
 
 	void Init();
 
@@ -61,7 +63,7 @@ class CSqlScore: public IScore
 
 	void FuzzyString(char *pString);
 	// anti SQL injection
-	void ClearString(char *pString);
+	void ClearString(char *pString, int size = 32);
 
 	void NormalizeMapname(char *pString);
 
@@ -88,6 +90,8 @@ public:
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
 	virtual void RandomUnfinishedMap(int ClientID);
+	virtual void SaveTeam(int Team, const char* Code, int ClientID);
+	virtual void LoadTeam(const char* Code, int ClientID);
 	static void agoTimeToString(int agoTime, char agoString[]);
 };
 
@@ -131,6 +135,21 @@ struct CSqlTeamScoreData
 	int m_Num;
 	bool m_Search;
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+};
+
+struct CSqlTeamSave
+{
+	int m_Team;
+	int m_ClientID;
+	char m_Code[128];
+	CSqlScore *m_pSqlData;
+};
+
+struct CSqlTeamLoad
+{
+	char m_Code[128];
+	int m_ClientID;
+	CSqlScore *m_pSqlData;
 };
 
 #endif

@@ -565,6 +565,70 @@ void CGameContext::ConMapPoints(IConsole::IResult *pResult, void *pUserData)
 #endif
 }
 
+void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+#if defined(CONF_SQL)
+	if(!g_Config.m_SvSaveGames)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
+		return;
+	}
+
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
+
+	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+	pSelf->Score()->SaveTeam(Team, pResult->GetString(0), pResult->m_ClientID);
+
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
+}
+
+void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+#if defined(CONF_SQL)
+	if(!g_Config.m_SvSaveGames)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
+		return;
+	}
+
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
+
+	if (pResult->NumArguments() > 0)
+		pSelf->Score()->LoadTeam(pResult->GetString(0), pResult->m_ClientID);
+	else
+		return;
+
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
+}
+
 void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
