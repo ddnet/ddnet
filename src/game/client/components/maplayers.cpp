@@ -168,7 +168,7 @@ void CMapLayers::OnRender()
 			bool IsSwitchLayer = false;
 			bool IsTeleLayer = false;
 			bool IsSpeedupLayer = false;
-			//bool IsTuneLayer = false;
+			bool IsTuneLayer = false;
 
 			if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
 			{
@@ -188,10 +188,8 @@ void CMapLayers::OnRender()
 			if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
 				IsSpeedupLayer = true;
 
-			/*
 			if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
 				IsTuneLayer = true;
-			*/
 
 			// skip rendering if detail layers if not wanted
 			if(pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && !IsGameLayer)
@@ -366,7 +364,6 @@ void CMapLayers::OnRender()
 					RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
 				}
 			}
-			/*
 			else if(g_Config.m_ClOverlayEntities && IsTuneLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
@@ -384,10 +381,9 @@ void CMapLayers::OnRender()
 					RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
 					Graphics()->BlendNormal();
 					RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
-					RenderTools()->RenderTuneOverlay(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
+					//RenderTools()->RenderTuneOverlay(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
 				}
 			}
-			*/
 		}
 		if(!g_Config.m_GfxNoclip)
 			Graphics()->ClipDisable();
