@@ -1021,7 +1021,7 @@ void CGameClient::OnNewSnapshot()
 	{
 		for(int i = 0; i < MAX_CLIENTS-k-1; i++)
 		{
-			if(m_Snap.m_paInfoByName[i+1] && (!m_Snap.m_paInfoByName[i] || str_comp(m_aClients[m_Snap.m_paInfoByName[i]->m_ClientID].m_aName, m_aClients[m_Snap.m_paInfoByName[i+1]->m_ClientID].m_aName) > 0))
+			if(m_Snap.m_paInfoByName[i+1] && (!m_Snap.m_paInfoByName[i] || str_comp_nocase(m_aClients[m_Snap.m_paInfoByName[i]->m_ClientID].m_aName, m_aClients[m_Snap.m_paInfoByName[i+1]->m_ClientID].m_aName) > 0))
 			{
 				const CNetObj_PlayerInfo *pTmp = m_Snap.m_paInfoByName[i];
 				m_Snap.m_paInfoByName[i] = m_Snap.m_paInfoByName[i+1];
