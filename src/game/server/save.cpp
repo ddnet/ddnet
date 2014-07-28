@@ -208,7 +208,7 @@ CSaveTeam::~CSaveTeam()
 
 int CSaveTeam::save(int Team)
 {
-	if(Team > 0 && Team < 64)
+	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < 64))
 	{
 		CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
 		
@@ -253,7 +253,7 @@ int CSaveTeam::save(int Team)
 		return 0;
 	}
 	else
-	    return 1;
+		return 1;
 }
 
 int CSaveTeam::load(int Team)
