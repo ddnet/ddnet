@@ -844,7 +844,10 @@ void CGameContext::OnClientConnected(int ClientID)
 	// Check which team the player should be on
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	if (!m_apPlayers[ClientID])
+		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	else
+		m_apPlayers[ClientID]
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 

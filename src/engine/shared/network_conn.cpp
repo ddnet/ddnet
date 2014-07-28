@@ -3,6 +3,7 @@
 #include <base/system.h>
 #include "config.h"
 #include "network.h"
+#include <iostream>
 
 void CNetConnection::ResetStats()
 {
@@ -237,10 +238,12 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 		}
 		else
 		{
-			if(State() == NET_CONNSTATE_OFFLINE)
+			if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
 			{
+				m_State = NET_CONNSTATE_OFFLINE;
 				if(CtrlMsg == NET_CTRLMSG_CONNECT)
 				{
+					std::cout << "HERE" << std::endl;
 					// send response and init connection
 					Reset();
 					m_State = NET_CONNSTATE_PENDING;

@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <iostream>
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -75,10 +76,10 @@ int CNetServer::Update()
 		m_aSlots[i].m_Connection.Update();
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
 		{
-			if (Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() / 5 && NetBan())
-				NetBan()->BanAddr(ClientAddr(i), 60, "Too many connections");
-			else
-			Drop(i, m_aSlots[i].m_Connection.ErrorString());
+			//if (Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() / 5 && NetBan())
+			//	NetBan()->BanAddr(ClientAddr(i), 60, "Too many connections");
+			//else
+			//Drop(i, m_aSlots[i].m_Connection.ErrorString());
 		}
 	}
 
@@ -141,6 +142,13 @@ int CNetServer::Recv(CNetChunk *pChunk)
 							net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
 						{
 							Found = true; // silent ignore.. we got this client already
+							if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
+							{
+								std::cout << "TOO: " << Found << std::endl;
+								m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr);
+								if(m_pfnNewClient)
+									m_pfnNewClient(i, m_UserPtr);
+							}
 							break;
 						}
 					}
