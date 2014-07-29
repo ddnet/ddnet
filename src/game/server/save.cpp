@@ -344,8 +344,11 @@ char* CSaveTeam::GetString()
 		for(int i=1; i < m_NumSwitchers+1; i++)
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_Switchers[i].m_EndTime, m_Switchers[i].m_Type);
-			str_append(m_String, aBuf, sizeof(m_String));
+			if (m_Switchers)
+			{
+				str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_Switchers[i].m_EndTime, m_Switchers[i].m_Type);
+				str_append(m_String, aBuf, sizeof(m_String));
+			}
 		}
 
 	return m_String;
