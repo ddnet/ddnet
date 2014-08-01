@@ -56,7 +56,7 @@ void CSaveTee::save(CCharacter* pchr)
 	m_Hook = pchr->m_Hook;
 
 	if(pchr->m_StartTime)
-		m_Time = pchr->Server()->Tick() - pchr->m_StartTime;
+		m_Time = pchr->Server()->Tick() - pchr->m_StartTime + 60 * pchr->Server()->TickSpeed();
 
 	m_Pos = pchr->m_Pos;
 	m_PrevPos = pchr->m_PrevPos;
