@@ -409,7 +409,13 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size)
 		PlayerCIDs[i] = Players[i]->GetCID();
 
 		if(g_Config.m_SvRejoinTeam0 && g_Config.m_SvTeam != 3 && (m_Core.Team(Players[i]->GetCID()) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(Players[i]->GetCID())]))
+		{
 			SetForceCharacterTeam(Players[i]->GetCID(), 0);
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "%s joined team 0",
+					GameServer()->Server()->ClientName(Players[i]->GetCID()));
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		}
 	}
 
 	if (CallSaveScore && Size >= 2)
