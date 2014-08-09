@@ -167,6 +167,8 @@ private:
 	void Resend();
 
 public:
+	bool m_TimeoutProtected;
+
 	void Reset();
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
@@ -289,6 +291,7 @@ public:
 	//
 	void SetMaxClientsPerIP(int Max);
 	bool SetTimedOut(int ClientID, int OrigID);
+	void SetTimeoutProtected(int ClientID);
 };
 
 class CNetConsole

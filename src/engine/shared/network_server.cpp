@@ -75,8 +75,9 @@ int CNetServer::Update()
 	{
 		m_aSlots[i].m_Connection.Update();
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
-			str_comp(m_aSlots[i].m_Connection.ErrorString(), "Pre-Timeout") &&
-			str_comp_num(m_aSlots[i].m_Connection.ErrorString(), "Too weak connection", 19))
+			(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
+			 (str_comp(m_aSlots[i].m_Connection.ErrorString(), "Timeout") &&
+			  str_comp_num(m_aSlots[i].m_Connection.ErrorString(), "Too weak connection", 19))))
 		{
 			if (Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() / 5 && NetBan())
 				NetBan()->BanAddr(ClientAddr(i), 60, "Too many connections");
@@ -275,4 +276,9 @@ bool CNetServer::SetTimedOut(int ClientID, int OrigID)
 	m_aSlots[ClientID].m_Connection.SetTimedOut(ClientAddr(OrigID), m_aSlots[OrigID].m_Connection.SeqSequence(), m_aSlots[OrigID].m_Connection.AckSequence());
 	m_aSlots[OrigID].m_Connection.Reset();
 	return true;
+}
+
+void CNetServer::SetTimeoutProtected(int ClientID)
+{
+	m_aSlots[ClientID].m_Connection.m_TimeoutProtected = true;
 }

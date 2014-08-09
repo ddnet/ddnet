@@ -589,6 +589,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		}
 	}
 
+	((CServer *)pSelf->Server())->m_NetServer.SetTimeoutProtected(pResult->m_ClientID);
 	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
 }
 

@@ -15,6 +15,7 @@ void CNetConnection::Reset()
 	m_Sequence = 0;
 	m_Ack = 0;
 	m_RemoteClosed = 0;
+	m_TimeoutProtected = false;
 
 	m_State = NET_CONNSTATE_OFFLINE;
 	m_LastSendTime = 0;
@@ -296,7 +297,7 @@ int CNetConnection::Update()
 	int64 Now = time_get();
 
 	if(State() == NET_CONNSTATE_ERROR && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
-		SetError("Timeout");
+		SetError("Timeout Protection over");
 
 	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
 		return 0;
@@ -307,7 +308,7 @@ int CNetConnection::Update()
 		(Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeout)
 	{
 		m_State = NET_CONNSTATE_ERROR;
-		SetError("Pre-Timeout");
+		SetError("Timeout");
 	}
 
 	// fix resends
