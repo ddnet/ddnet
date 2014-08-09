@@ -74,7 +74,7 @@ int CNetServer::Update()
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		m_aSlots[i].m_Connection.Update();
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR && str_comp(m_aSlots[i].m_Connection.ErrorString(), "Timeout"))
+		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR && str_comp(m_aSlots[i].m_Connection.ErrorString(), "Pre-Timeout"))
 		{
 			if (Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() / 5 && NetBan())
 				NetBan()->BanAddr(ClientAddr(i), 60, "Too many connections");
