@@ -310,5 +310,6 @@ MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 0, 0, 1, CFGFLAG_SAVE|CFGFL
 MACRO_CONFIG_INT(ClAutoUpdate, cl_auto_update, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Auto-Update")
 MACRO_CONFIG_INT(ClOldGunPosition, cl_old_gun_position, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Tees hold gun a bit higher like in TW 0.6.1 and older")
 MACRO_CONFIG_INT(ClConfirmDisconnect, cl_confirm_disconnect, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Confirmation popup before disconnecting")
+MACRO_CONFIG_STR(ClTimeoutCode, cl_timeout_code, 64, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Timeout code to use")
 
 #endif
