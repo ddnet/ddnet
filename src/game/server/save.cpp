@@ -50,10 +50,8 @@ void CSaveTee::save(CCharacter* pchr)
 	m_DDRaceState = pchr->m_DDRaceState;
 
 	m_Hit = pchr->m_Hit;
-	m_Collision = pchr->m_Collision;
 	m_TuneZone = pchr->m_TuneZone;
 	m_TuneZoneOld = pchr->m_TuneZoneOld;
-	m_Hook = pchr->m_Hook;
 
 	if(pchr->m_StartTime)
 		m_Time = pchr->Server()->Tick() - pchr->m_StartTime + 60 * pchr->Server()->TickSpeed();
@@ -75,6 +73,8 @@ void CSaveTee::save(CCharacter* pchr)
 	// Core
 	m_CorePos = pchr->m_Core.m_Pos;
 	m_Vel = pchr->m_Core.m_Vel;
+	m_Hook = pchr->m_Core.m_Hook;
+	m_Collision = pchr->m_Core.m_Collision;
 	m_ActiveWeapon = pchr->m_Core.m_ActiveWeapon;
 	m_Jumped = pchr->m_Core.m_Jumped;
 	m_JumpedTotal = pchr->m_Core.m_JumpedTotal;
@@ -122,10 +122,8 @@ void CSaveTee::load(CCharacter* pchr, int Team)
 	pchr->m_DDRaceState = m_DDRaceState;
 
 	pchr->m_Hit = m_Hit;
-	pchr->m_Collision = m_Collision;
 	pchr->m_TuneZone = m_TuneZone;
 	pchr->m_TuneZoneOld = m_TuneZoneOld;
-	pchr->m_Hook = m_Hook;
 
 	if(m_Time)
 		pchr->m_StartTime = pchr->Server()->Tick() - m_Time;
@@ -147,6 +145,8 @@ void CSaveTee::load(CCharacter* pchr, int Team)
 	// Core
 	pchr->m_Core.m_Pos = m_CorePos;
 	pchr->m_Core.m_Vel = m_Vel;
+	pchr->m_Core.m_Hook = m_Hook;
+	pchr->m_Core.m_Collision = m_Collision;
 	pchr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
 	pchr->m_Core.m_Jumped = m_Jumped;
 	pchr->m_Core.m_JumpedTotal = m_JumpedTotal;
