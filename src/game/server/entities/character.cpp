@@ -1035,6 +1035,10 @@ void CCharacter::Snap(int SnappingClient)
 		&& !CanCollide(SnappingClient) && !SnapPlayer->m_ShowOthers)
 		return;
 
+	if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID == -1
+		&& !CanCollide(SnappingClient) && SnapPlayer->m_SpecTeam)
+		return;
+
 	if (m_Paused)
 		return;
 

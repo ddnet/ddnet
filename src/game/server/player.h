@@ -146,6 +146,7 @@ public:
 	int m_ClientVersion;
 	bool m_ShowOthers;
 	bool m_ShowAll;
+	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;
 

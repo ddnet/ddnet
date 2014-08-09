@@ -1049,6 +1049,22 @@ void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
 		pPlayer->m_ShowAll = !pPlayer->m_ShowAll;
 }
 
+void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+		pPlayer->m_SpecTeam = pResult->GetInteger(0);
+	else
+		pPlayer->m_SpecTeam = !pPlayer->m_SpecTeam;
+}
+
 bool CheckClientID(int ClientID)
 {
 	dbg_assert(ClientID >= 0 || ClientID < MAX_CLIENTS,

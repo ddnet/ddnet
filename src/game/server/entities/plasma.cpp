@@ -107,6 +107,12 @@ void CPlasma::Snap(int SnappingClient)
 		&& !SnapPlayer->m_ShowOthers)
 		return;
 
+	if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID == -1
+		&& SnapChar
+		&& SnapChar->Team() != m_ResponsibleTeam
+		&& SnapPlayer->m_SpecTeam)
+		return;
+
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 			NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
 
