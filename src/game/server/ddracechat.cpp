@@ -1,4 +1,5 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
+#include <iostream>
 #include "gamecontext.h"
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -563,6 +564,31 @@ void CGameContext::ConMapPoints(IConsole::IResult *pResult, void *pUserData)
 	if(g_Config.m_SvUseSQL)
 		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 #endif
+}
+
+void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	for(int i = 0; i < pSelf->Server()->MaxClients(); i++)
+	{
+		if (i == pResult->m_ClientID) continue;
+		if (!pSelf->m_apPlayers[i]) continue;
+		if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pResult->GetString(0))) continue;
+		if (((CServer *)pSelf->Server())->m_NetServer.SetTimedOut(i, pResult->m_ClientID))
+		{
+			std::cout << "FOUND TIMED OUT GUY" << std::endl;
+			break;
+		}
+	}
+
+	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)

@@ -135,6 +135,7 @@ public:
 	int m_Paused;
 	bool m_DND;
 	int64 m_NextPauseTick;
+	char m_TimeoutCode[64];
 
 	void ProcessPause();
 	int m_ForcePauseTime;

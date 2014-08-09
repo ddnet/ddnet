@@ -74,7 +74,9 @@ int CNetServer::Update()
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		m_aSlots[i].m_Connection.Update();
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR && str_comp(m_aSlots[i].m_Connection.ErrorString(), "Pre-Timeout"))
+		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
+			str_comp(m_aSlots[i].m_Connection.ErrorString(), "Pre-Timeout") &&
+			str_comp_num(m_aSlots[i].m_Connection.ErrorString(), "Too weak connection", 19))
 		{
 			if (Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() / 5 && NetBan())
 				NetBan()->BanAddr(ClientAddr(i), 60, "Too many connections");
@@ -263,4 +265,14 @@ void CNetServer::SetMaxClientsPerIP(int Max)
 		Max = NET_MAX_CLIENTS;
 
 	m_MaxClientsPerIP = Max;
+}
+
+bool CNetServer::SetTimedOut(int ClientID, int OrigID)
+{
+	if (m_aSlots[ClientID].m_Connection.State() != NET_CONNSTATE_ERROR)
+		return false;
+
+	m_aSlots[ClientID].m_Connection.SetTimedOut(ClientAddr(OrigID));
+	m_aSlots[OrigID].m_Connection.Reset();
+	return true;
 }

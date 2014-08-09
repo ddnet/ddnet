@@ -357,3 +357,15 @@ int CNetConnection::Update()
 
 	return 0;
 }
+
+void CNetConnection::SetTimedOut(const NETADDR *pAddr)
+{
+	int64 Now = time_get();
+	m_State = NET_CONNSTATE_ONLINE;
+	m_PeerAddr = *pAddr;
+	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+	m_LastSendTime = Now;
+	m_LastRecvTime = Now;
+	m_LastUpdateTime = Now;
+	m_Buffer.Init();
+}
