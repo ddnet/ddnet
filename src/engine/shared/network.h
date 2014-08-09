@@ -191,7 +191,8 @@ public:
 	int64 ConnectTime() const { return m_LastUpdateTime; }
 
 	int AckSequence() const { return m_Ack; }
-	void SetTimedOut(const NETADDR *pAddr);
+	int SeqSequence() const { return m_Sequence; }
+	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack);
 };
 
 class CConsoleNetConnection

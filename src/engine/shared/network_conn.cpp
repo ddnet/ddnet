@@ -358,9 +358,14 @@ int CNetConnection::Update()
 	return 0;
 }
 
-void CNetConnection::SetTimedOut(const NETADDR *pAddr)
+void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack)
 {
 	int64 Now = time_get();
+
+	m_Sequence = Sequence;
+	m_Ack = Ack;
+	m_RemoteClosed = 0;
+
 	m_State = NET_CONNSTATE_ONLINE;
 	m_PeerAddr = *pAddr;
 	mem_zero(m_ErrorString, sizeof(m_ErrorString));

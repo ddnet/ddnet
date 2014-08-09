@@ -584,7 +584,8 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		if (((CServer *)pSelf->Server())->m_NetServer.SetTimedOut(i, pResult->m_ClientID))
 		{
 			std::cout << "FOUND TIMED OUT GUY" << std::endl;
-			break;
+			((CServer *)pSelf->Server())->DelClientCallback(pResult->m_ClientID, "Timeout Protection used", ((CServer *)pSelf->Server()));
+			return;
 		}
 	}
 
