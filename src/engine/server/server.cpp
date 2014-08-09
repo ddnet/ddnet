@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <iostream>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -720,7 +719,6 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_AUTH;
-	std::cout << "RESETTING NAME" << std::endl;
 	pThis->m_aClients[ClientID].m_aName[0] = 0;
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
@@ -878,10 +876,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		// system message
 		if(Msg == NETMSG_INFO)
 		{
-			std::cout << "NETMSG_INFO, State is: " << m_aClients[ClientID].m_State << std::endl;
 			if(m_aClients[ClientID].m_State == CClient::STATE_AUTH)
 			{
-				std::cout << "STATE_AUTH" << std::endl;
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 				if(str_comp(pVersion, GameServer()->NetVersion()) != 0)
 				{

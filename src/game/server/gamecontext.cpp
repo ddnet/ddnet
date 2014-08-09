@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <iostream>
 #include <base/tl/sorted_array.h>
 
 #include <new>
@@ -1482,7 +1481,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	}
 	if (MsgID == NETMSGTYPE_CL_STARTINFO)
 	{
-		std::cout << "STARTINFO" << std::endl;
 		//if(pPlayer->m_IsReady)
 		//	return;
 

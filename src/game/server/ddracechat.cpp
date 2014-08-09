@@ -1,5 +1,4 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include <iostream>
 #include "gamecontext.h"
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -583,7 +582,6 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pResult->GetString(0))) continue;
 		if (((CServer *)pSelf->Server())->m_NetServer.SetTimedOut(i, pResult->m_ClientID))
 		{
-			std::cout << "FOUND TIMED OUT GUY" << std::endl;
 			((CServer *)pSelf->Server())->DelClientCallback(pResult->m_ClientID, "Timeout Protection used", ((CServer *)pSelf->Server()));
 			return;
 		}

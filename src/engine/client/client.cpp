@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
-#include <iostream>
 
 #include <stdlib.h> // qsort
 #include <stdarg.h>
@@ -1393,7 +1392,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		// system message
 		if(Msg == NETMSG_MAP_CHANGE)
 		{
-			std::cout << "MAP_CHANGE" << std::endl;
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			int MapCrc = Unpacker.GetInt();
 			int MapSize = Unpacker.GetInt();
@@ -1514,7 +1512,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_CON_READY)
 		{
-			std::cout << "CONNECTED" << std::endl;
 			GameClient()->OnConnected();
 		}
 		else if(Msg == NETMSG_PING)

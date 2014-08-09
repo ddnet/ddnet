@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <iostream>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/friends.h>
@@ -366,7 +365,6 @@ int CGameClient::OnSnapInput(int *pData)
 
 void CGameClient::OnConnected()
 {
-	std::cout << "ONCONNECTED" << std::endl;
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
 
