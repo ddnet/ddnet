@@ -21,6 +21,7 @@ CHAT_COMMAND("pause", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConTogglePause, this, "To
 CHAT_COMMAND("spec", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConToggleSpec, this, "Toggles spec")
 CHAT_COMMAND("dnd", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConDND, this, "Toggle Do Not Disturb (no chat and server messages)")
 CHAT_COMMAND("mapinfo", "?r", CFGFLAG_CHAT|CFGFLAG_SERVER, ConMapPoints, this, "Show info about the map with name r gives (current map by default)")
+CHAT_COMMAND("timeout", "s", CFGFLAG_CHAT|CFGFLAG_SERVER, ConTimeout, this, "Set timeout protection code s")
 CHAT_COMMAND("save", "s", CFGFLAG_CHAT|CFGFLAG_SERVER, ConSave, this, "Save team with code s")
 CHAT_COMMAND("load", "s", CFGFLAG_CHAT|CFGFLAG_SERVER, ConLoad, this, "Load with code s")
 CHAT_COMMAND("map", "?r", CFGFLAG_CHAT|CFGFLAG_SERVER, ConMap, this, "Vote a map by name")

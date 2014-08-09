@@ -320,6 +320,17 @@ void CGameClient::OnInit()
 	// Set free binds to DDRace binds if it's active
 	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
 		gs_Binds.SetDDRaceBinds(true);
+
+	if(g_Config.m_ClTimeoutCode[0] == '\0')
+	{
+		for(unsigned int i = 0; i < 16; i++)
+		{
+			if (rand() % 2)
+				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 97;
+			else
+				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 65;
+		}
+	}
 }
 
 void CGameClient::DispatchInput()
@@ -704,6 +715,17 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 		if (i <= 16)
 			m_Teams.m_IsDDRace16 = true;
+		else if (!m_Teams.m_IsDDRace64)
+		{
+			m_Teams.m_IsDDRace64 = true;
+
+			CNetMsg_Cl_Say Msg;
+			Msg.m_Team = 0;
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "/timeout %s", g_Config.m_ClTimeoutCode);
+			Msg.m_pMessage = aBuf;
+			Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		}
 	}
 	else if(MsgId == NETMSGTYPE_SV_PLAYERTIME)
 	{

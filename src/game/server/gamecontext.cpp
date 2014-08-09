@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
 #include <base/tl/sorted_array.h>
 
 #include <new>
@@ -844,7 +843,16 @@ void CGameContext::OnClientConnected(int ClientID)
 	// Check which team the player should be on
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	if (!m_apPlayers[ClientID])
+		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	else
+	{
+		//delete m_apPlayers[ClientID];
+		//m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+		//m_apPlayers[ClientID]->Reset();
+		//((CServer*)Server())->m_aClients[ClientID].Reset();
+		((CServer*)Server())->m_aClients[ClientID].m_State = 4;
+	}
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 
@@ -1471,102 +1479,102 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->KillCharacter(WEAPON_SELF);
 		}
 	}
-	else
+	if (MsgID == NETMSGTYPE_CL_STARTINFO)
 	{
-		if (MsgID == NETMSGTYPE_CL_STARTINFO)
+		//if(pPlayer->m_IsReady)
+		//	return;
+
+		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
+		pPlayer->m_LastChangeInfo = Server()->Tick();
+
+		// set start infos
+		Server()->SetClientName(ClientID, pMsg->m_pName);
+		Server()->SetClientClan(ClientID, pMsg->m_pClan);
+		Server()->SetClientCountry(ClientID, pMsg->m_Country);
+		str_copy(pPlayer->m_TeeInfos.m_SkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_SkinName));
+		pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
+		pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
+		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
+		//m_pController->OnPlayerInfoChange(pPlayer);
+
+		// send vote options
+		CNetMsg_Sv_VoteClearOptions ClearMsg;
+		Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
+
+		CNetMsg_Sv_VoteOptionListAdd OptionMsg;
+		int NumOptions = 0;
+		OptionMsg.m_pDescription0 = "";
+		OptionMsg.m_pDescription1 = "";
+		OptionMsg.m_pDescription2 = "";
+		OptionMsg.m_pDescription3 = "";
+		OptionMsg.m_pDescription4 = "";
+		OptionMsg.m_pDescription5 = "";
+		OptionMsg.m_pDescription6 = "";
+		OptionMsg.m_pDescription7 = "";
+		OptionMsg.m_pDescription8 = "";
+		OptionMsg.m_pDescription9 = "";
+		OptionMsg.m_pDescription10 = "";
+		OptionMsg.m_pDescription11 = "";
+		OptionMsg.m_pDescription12 = "";
+		OptionMsg.m_pDescription13 = "";
+		OptionMsg.m_pDescription14 = "";
+		CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
+		while(pCurrent)
 		{
-			if(pPlayer->m_IsReady)
-				return;
-
-			CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
-			pPlayer->m_LastChangeInfo = Server()->Tick();
-
-			// set start infos
-			Server()->SetClientName(ClientID, pMsg->m_pName);
-			Server()->SetClientClan(ClientID, pMsg->m_pClan);
-			Server()->SetClientCountry(ClientID, pMsg->m_Country);
-			str_copy(pPlayer->m_TeeInfos.m_SkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_SkinName));
-			pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
-			pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
-			pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-			//m_pController->OnPlayerInfoChange(pPlayer);
-
-			// send vote options
-			CNetMsg_Sv_VoteClearOptions ClearMsg;
-			Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
-
-			CNetMsg_Sv_VoteOptionListAdd OptionMsg;
-			int NumOptions = 0;
-			OptionMsg.m_pDescription0 = "";
-			OptionMsg.m_pDescription1 = "";
-			OptionMsg.m_pDescription2 = "";
-			OptionMsg.m_pDescription3 = "";
-			OptionMsg.m_pDescription4 = "";
-			OptionMsg.m_pDescription5 = "";
-			OptionMsg.m_pDescription6 = "";
-			OptionMsg.m_pDescription7 = "";
-			OptionMsg.m_pDescription8 = "";
-			OptionMsg.m_pDescription9 = "";
-			OptionMsg.m_pDescription10 = "";
-			OptionMsg.m_pDescription11 = "";
-			OptionMsg.m_pDescription12 = "";
-			OptionMsg.m_pDescription13 = "";
-			OptionMsg.m_pDescription14 = "";
-			CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
-			while(pCurrent)
+			switch(NumOptions++)
 			{
-				switch(NumOptions++)
+			case 0: OptionMsg.m_pDescription0 = pCurrent->m_aDescription; break;
+			case 1: OptionMsg.m_pDescription1 = pCurrent->m_aDescription; break;
+			case 2: OptionMsg.m_pDescription2 = pCurrent->m_aDescription; break;
+			case 3: OptionMsg.m_pDescription3 = pCurrent->m_aDescription; break;
+			case 4: OptionMsg.m_pDescription4 = pCurrent->m_aDescription; break;
+			case 5: OptionMsg.m_pDescription5 = pCurrent->m_aDescription; break;
+			case 6: OptionMsg.m_pDescription6 = pCurrent->m_aDescription; break;
+			case 7: OptionMsg.m_pDescription7 = pCurrent->m_aDescription; break;
+			case 8: OptionMsg.m_pDescription8 = pCurrent->m_aDescription; break;
+			case 9: OptionMsg.m_pDescription9 = pCurrent->m_aDescription; break;
+			case 10: OptionMsg.m_pDescription10 = pCurrent->m_aDescription; break;
+			case 11: OptionMsg.m_pDescription11 = pCurrent->m_aDescription; break;
+			case 12: OptionMsg.m_pDescription12 = pCurrent->m_aDescription; break;
+			case 13: OptionMsg.m_pDescription13 = pCurrent->m_aDescription; break;
+			case 14:
 				{
-				case 0: OptionMsg.m_pDescription0 = pCurrent->m_aDescription; break;
-				case 1: OptionMsg.m_pDescription1 = pCurrent->m_aDescription; break;
-				case 2: OptionMsg.m_pDescription2 = pCurrent->m_aDescription; break;
-				case 3: OptionMsg.m_pDescription3 = pCurrent->m_aDescription; break;
-				case 4: OptionMsg.m_pDescription4 = pCurrent->m_aDescription; break;
-				case 5: OptionMsg.m_pDescription5 = pCurrent->m_aDescription; break;
-				case 6: OptionMsg.m_pDescription6 = pCurrent->m_aDescription; break;
-				case 7: OptionMsg.m_pDescription7 = pCurrent->m_aDescription; break;
-				case 8: OptionMsg.m_pDescription8 = pCurrent->m_aDescription; break;
-				case 9: OptionMsg.m_pDescription9 = pCurrent->m_aDescription; break;
-				case 10: OptionMsg.m_pDescription10 = pCurrent->m_aDescription; break;
-				case 11: OptionMsg.m_pDescription11 = pCurrent->m_aDescription; break;
-				case 12: OptionMsg.m_pDescription12 = pCurrent->m_aDescription; break;
-				case 13: OptionMsg.m_pDescription13 = pCurrent->m_aDescription; break;
-				case 14:
-					{
-						OptionMsg.m_pDescription14 = pCurrent->m_aDescription;
-						OptionMsg.m_NumOptions = NumOptions;
-						Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
-						OptionMsg = CNetMsg_Sv_VoteOptionListAdd();
-						NumOptions = 0;
-						OptionMsg.m_pDescription1 = "";
-						OptionMsg.m_pDescription2 = "";
-						OptionMsg.m_pDescription3 = "";
-						OptionMsg.m_pDescription4 = "";
-						OptionMsg.m_pDescription5 = "";
-						OptionMsg.m_pDescription6 = "";
-						OptionMsg.m_pDescription7 = "";
-						OptionMsg.m_pDescription8 = "";
-						OptionMsg.m_pDescription9 = "";
-						OptionMsg.m_pDescription10 = "";
-						OptionMsg.m_pDescription11 = "";
-						OptionMsg.m_pDescription12 = "";
-						OptionMsg.m_pDescription13 = "";
-						OptionMsg.m_pDescription14 = "";
-					}
+					OptionMsg.m_pDescription14 = pCurrent->m_aDescription;
+					OptionMsg.m_NumOptions = NumOptions;
+					Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
+					OptionMsg = CNetMsg_Sv_VoteOptionListAdd();
+					NumOptions = 0;
+					OptionMsg.m_pDescription1 = "";
+					OptionMsg.m_pDescription2 = "";
+					OptionMsg.m_pDescription3 = "";
+					OptionMsg.m_pDescription4 = "";
+					OptionMsg.m_pDescription5 = "";
+					OptionMsg.m_pDescription6 = "";
+					OptionMsg.m_pDescription7 = "";
+					OptionMsg.m_pDescription8 = "";
+					OptionMsg.m_pDescription9 = "";
+					OptionMsg.m_pDescription10 = "";
+					OptionMsg.m_pDescription11 = "";
+					OptionMsg.m_pDescription12 = "";
+					OptionMsg.m_pDescription13 = "";
+					OptionMsg.m_pDescription14 = "";
 				}
-				pCurrent = pCurrent->m_pNext;
 			}
-			if(NumOptions > 0)
-			{
-				OptionMsg.m_NumOptions = NumOptions;
-				Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
-				NumOptions = 0;
-			}
+			pCurrent = pCurrent->m_pNext;
+		}
+		if(NumOptions > 0)
+		{
+			OptionMsg.m_NumOptions = NumOptions;
+			Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
+			NumOptions = 0;
+		}
 
-			// send tuning parameters to client
-			SendTuningParams(ClientID, pPlayer->m_TuneZone);
+		// send tuning parameters to client
+		SendTuningParams(ClientID, pPlayer->m_TuneZone);
 
-			// client is ready to enter
+		// client is ready to enter
+		if (!pPlayer->m_IsReady)
+		{
 			pPlayer->m_IsReady = true;
 			CNetMsg_Sv_ReadyToEnter m;
 			Server()->SendPackMsg(&m, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);

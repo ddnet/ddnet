@@ -157,7 +157,6 @@ private:
 	NETSTATS m_Stats;
 
 	//
-	void Reset();
 	void ResetStats();
 	void SetError(const char *pString);
 	void AckChunks(int Ack);
@@ -168,6 +167,9 @@ private:
 	void Resend();
 
 public:
+	bool m_TimeoutProtected;
+
+	void Reset();
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
 	void Disconnect(const char *pReason);
@@ -191,6 +193,8 @@ public:
 	int64 ConnectTime() const { return m_LastUpdateTime; }
 
 	int AckSequence() const { return m_Ack; }
+	int SeqSequence() const { return m_Sequence; }
+	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack);
 };
 
 class CConsoleNetConnection
@@ -286,6 +290,8 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
+	bool SetTimedOut(int ClientID, int OrigID);
+	void SetTimeoutProtected(int ClientID);
 };
 
 class CNetConsole

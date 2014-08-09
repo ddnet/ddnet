@@ -1852,4 +1852,13 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		DoEditBox(&g_Config.m_ConnTimeout, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
 		g_Config.m_ConnTimeout = clamp(str_toint(aBuf), 5, 1000);
 	}
+
+	// player name
+	Right.HSplitTop(20.0f, &Button, &Right);
+	Button.VSplitLeft(190.0f, &Label, &Button);
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Timeout code"));
+	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+	static float s_OffsetCode = 0.0f;
+	DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode);
 }

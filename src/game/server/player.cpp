@@ -98,6 +98,82 @@ CPlayer::~CPlayer()
 	m_pCharacter = 0;
 }
 
+void CPlayer::Reset()
+{
+	//m_pGameServer = pGameServer;
+	m_RespawnTick = Server()->Tick();
+	m_DieTick = Server()->Tick();
+	m_ScoreStartTick = Server()->Tick();
+	delete m_pCharacter;
+	m_pCharacter = 0;
+	//m_ClientID = ClientID;
+	m_Team = GameServer()->m_pController->ClampTeam(m_Team);
+	m_SpectatorID = SPEC_FREEVIEW;
+	m_LastActionTick = Server()->Tick();
+	m_TeamChangeTick = Server()->Tick();
+
+	int* idMap = Server()->GetIdMap(m_ClientID);
+	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
+	{
+		idMap[i] = -1;
+	}
+	idMap[0] = m_ClientID;
+
+	// DDRace
+
+	m_LastCommandPos = 0;
+	m_LastPlaytime = time_get();
+	m_Sent1stAfkWarning = 0;
+	m_Sent2ndAfkWarning = 0;
+	m_ChatScore = 0;
+	m_EyeEmote = true;
+	m_TimerType = g_Config.m_SvDefaultTimerType;
+	m_DefEmote = EMOTE_NORMAL;
+	m_Afk = false;
+	m_LastWhisperTo = -1;
+	m_LastSetSpectatorMode = 0;
+	m_TimeoutCode[0] = '\0';
+
+	m_TuneZone = 0;
+	m_TuneZoneOld = m_TuneZone;
+
+	//New Year
+	if (g_Config.m_SvEvents)
+	{	
+		time_t rawtime;
+		struct tm* timeinfo;
+		char d[16], m[16], y[16];
+		int dd, mm;
+		time ( &rawtime );
+		timeinfo = localtime ( &rawtime );
+		strftime (d,sizeof(y),"%d",timeinfo);
+		strftime (m,sizeof(m),"%m",timeinfo);
+		strftime (y,sizeof(y),"%Y",timeinfo);
+		dd = atoi(d);
+		mm = atoi(m);
+		m_DefEmote = ((mm == 12 && dd == 31) || (mm == 1 && dd == 1)) ? EMOTE_HAPPY : EMOTE_NORMAL;
+	}
+	m_DefEmoteReset = -1;
+
+	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
+
+	m_ClientVersion = VERSION_VANILLA;
+	m_ShowOthers = g_Config.m_SvShowOthersDefault;
+	m_ShowAll = g_Config.m_SvShowAllDefault;
+	m_NinjaJetpack = false;
+
+	m_Paused = PAUSED_NONE;
+	m_DND = false;
+
+	m_NextPauseTick = 0;
+
+	// Variable initialized:
+	m_Last_Team = 0;
+#if defined(CONF_SQL)
+	m_LastSQLQuery = 0;
+#endif
+}
+
 void CPlayer::Tick()
 {
 #ifdef CONF_DEBUG

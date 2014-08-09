@@ -14,6 +14,7 @@ void CNetConnection::Reset()
 	m_Sequence = 0;
 	m_Ack = 0;
 	m_RemoteClosed = 0;
+	m_TimeoutProtected = false;
 
 	m_State = NET_CONNSTATE_OFFLINE;
 	m_LastSendTime = 0;
@@ -237,8 +238,9 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 		}
 		else
 		{
-			if(State() == NET_CONNSTATE_OFFLINE)
+			if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
 			{
+				m_State = NET_CONNSTATE_OFFLINE;
 				if(CtrlMsg == NET_CTRLMSG_CONNECT)
 				{
 					// send response and init connection
@@ -291,6 +293,9 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 int CNetConnection::Update()
 {
 	int64 Now = time_get();
+
+	if(State() == NET_CONNSTATE_ERROR && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
+		SetError("Timeout Protection over");
 
 	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
 		return 0;
@@ -350,4 +355,21 @@ int CNetConnection::Update()
 	}
 
 	return 0;
+}
+
+void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack)
+{
+	int64 Now = time_get();
+
+	m_Sequence = Sequence;
+	m_Ack = Ack;
+	m_RemoteClosed = 0;
+
+	m_State = NET_CONNSTATE_ONLINE;
+	m_PeerAddr = *pAddr;
+	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+	m_LastSendTime = Now;
+	m_LastRecvTime = Now;
+	m_LastUpdateTime = Now;
+	m_Buffer.Init();
 }

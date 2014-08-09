@@ -18,7 +18,7 @@ public:
 	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
 	~CPlayer();
 
-	void Init(int CID);
+	void Reset();
 
 	void TryRespawn();
 	void Respawn();
@@ -135,6 +135,7 @@ public:
 	int m_Paused;
 	bool m_DND;
 	int64 m_NextPauseTick;
+	char m_TimeoutCode[64];
 
 	void ProcessPause();
 	int m_ForcePauseTime;
