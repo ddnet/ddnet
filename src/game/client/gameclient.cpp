@@ -258,6 +258,8 @@ void CGameClient::OnInit()
 {
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 
+	srand(time(NULL));
+
 	// propagate pointers
 	m_UI.SetGraphics(Graphics(), TextRender());
 	m_RenderTools.m_pGraphics = Graphics();
@@ -321,7 +323,7 @@ void CGameClient::OnInit()
 	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
 		gs_Binds.SetDDRaceBinds(true);
 
-	if(g_Config.m_ClTimeoutCode[0] == '\0')
+	if(g_Config.m_ClTimeoutCode[0] == '\0' || str_comp(g_Config.m_ClTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
 	{
 		for(unsigned int i = 0; i < 16; i++)
 		{
