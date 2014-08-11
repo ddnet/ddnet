@@ -168,6 +168,7 @@ private:
 
 public:
 	bool m_TimeoutProtected;
+	bool m_TimeoutSituation;
 
 	void Reset();
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);

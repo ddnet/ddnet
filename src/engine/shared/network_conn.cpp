@@ -15,6 +15,7 @@ void CNetConnection::Reset()
 	m_Ack = 0;
 	m_RemoteClosed = 0;
 	m_TimeoutProtected = false;
+	m_TimeoutSituation = false;
 
 	m_State = NET_CONNSTATE_OFFLINE;
 	m_LastSendTime = 0;
@@ -294,7 +295,7 @@ int CNetConnection::Update()
 {
 	int64 Now = time_get();
 
-	if(State() == NET_CONNSTATE_ERROR && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
+	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
 		SetError("Timeout Protection over");
 
 	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
@@ -307,6 +308,7 @@ int CNetConnection::Update()
 	{
 		m_State = NET_CONNSTATE_ERROR;
 		SetError("Timeout");
+		m_TimeoutSituation = true;
 	}
 
 	// fix resends
@@ -321,6 +323,7 @@ int CNetConnection::Update()
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "Too weak connection (not acked for %d seconds)", g_Config.m_ConnTimeout);
 			SetError(aBuf);
+			m_TimeoutSituation = true;
 		}
 		else
 		{

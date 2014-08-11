@@ -75,8 +75,7 @@ int CNetServer::Update()
 		m_aSlots[i].m_Connection.Update();
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
 			(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
-			 (str_comp(m_aSlots[i].m_Connection.ErrorString(), "Timeout") &&
-			  str_comp_num(m_aSlots[i].m_Connection.ErrorString(), "Too weak connection", 19))))
+			 !m_aSlots[i].m_Connection.m_TimeoutSituation))
 		{
 			if (Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() / 5 && NetBan())
 				NetBan()->BanAddr(ClientAddr(i), 60, "Too many connections");
