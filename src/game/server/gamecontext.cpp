@@ -2281,9 +2281,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	Console()->ExecuteFile(g_Config.m_SvResetFile);
 
 	char buf[512];
-	str_format(buf, sizeof(buf), "data/maps/%s.cfg", g_Config.m_SvMap);
+	str_format(buf, sizeof(buf), "maps/%s.cfg", g_Config.m_SvMap);
 	Console()->ExecuteFile(buf);
-	str_format(buf, sizeof(buf), "data/maps/%s.map.cfg", g_Config.m_SvMap);
+	str_format(buf, sizeof(buf), "maps/%s.map.cfg", g_Config.m_SvMap);
 	Console()->ExecuteFile(buf);
 /*	// select gametype
 	if(str_comp(g_Config.m_SvGametype, "mod") == 0)
