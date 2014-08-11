@@ -433,7 +433,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		else
 			m_NeedSendinfo = true;
 	}
-	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Bandana Brothers skins"), g_Config.m_ClShowSpecialSkins, &Button2))
+	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Custom skins"), g_Config.m_ClShowSpecialSkins, &Button2))
 	{
 		g_Config.m_ClShowSpecialSkins = g_Config.m_ClShowSpecialSkins?0:1;
 		s_InitSkinlist = true;
