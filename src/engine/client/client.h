@@ -77,6 +77,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CNetClient m_NetClient[2];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder;
+	class CDemoEditor m_DemoEditor;
 	class CServerBrowser m_ServerBrowser;
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	class CAutoUpdate m_AutoUpdate;
@@ -317,6 +318,10 @@ public:
 	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
+	static void Con_DemoSliceStart(IConsole::IResult *pResult, void *pUserData);
+	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);
 
 	void RegisterCommands();
 
