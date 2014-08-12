@@ -649,7 +649,8 @@ void CGameContext::OnTick()
 						No++;
 				}
 
-				if(g_Config.m_SvVoteMaxTotal && Total > g_Config.m_SvVoteMaxTotal)
+				if(g_Config.m_SvVoteMaxTotal && Total > g_Config.m_SvVoteMaxTotal &&
+						(m_VoteKick || m_VoteSpec))
 					Total = g_Config.m_SvVoteMaxTotal;
 
 				//if(Yes >= Total/2+1)
@@ -1105,6 +1106,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				m_LastMapVote = time_get();
 				m_VoteKick = false;
+				m_VoteSpec = false;
 			}
 			else if(str_comp_nocase(pMsg->m_Type, "kick") == 0)
 			{
@@ -1189,6 +1191,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 				m_VoteKick = true;
+				m_VoteSpec = false;
 			}
 			else if(str_comp_nocase(pMsg->m_Type, "spectate") == 0)
 			{
@@ -1231,6 +1234,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					str_format(aDesc, sizeof(aDesc), "move '%s' to spectators", Server()->ClientName(SpectateID));
 				str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
 				}
+				m_VoteKick = false;
+				m_VoteSpec = true;
 			}
 
 			if(aCmd[0] && str_comp(aCmd,"info"))

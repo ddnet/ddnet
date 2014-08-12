@@ -327,6 +327,7 @@ public:
 	CLayers *Layers() { return &m_Layers; }
 	class IScore *Score() { return m_pScore; }
 	bool m_VoteKick;
+	bool m_VoteSpec;
 	enum
 	{
 		VOTE_ENFORCE_NO_ADMIN = VOTE_ENFORCE_YES + 1,
