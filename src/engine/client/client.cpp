@@ -2002,7 +2002,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 
 void CClient::PumpNetwork()
 {
-	for(int i=0; i<2; i++)
+	for(int i=0; i<3; i++)
 	{
 		m_NetClient[i].Update();
 	}
@@ -2031,7 +2031,7 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i=0; i < 2; i++)
+	for(int i=0; i < 3; i++)
 	{
 		while(m_NetClient[i].Recv(&Packet))
 		{
@@ -2326,10 +2326,7 @@ void CClient::InitInterfaces()
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	for(int i=0;i<2;i++)
-	{
-		m_ServerBrowser.SetBaseInfo(&m_NetClient[i], m_pGameClient->NetVersion());
-	}
+	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 	m_Friends.Init();
 
 	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
@@ -2390,12 +2387,12 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(int i = 0; i < 2; i++)
+		for(int i = 0; i < 3; i++)
 		{
-			if(!m_NetClient[i].Open(BindAddr, 0))
+			BindAddr.port = (rand() % 64511) + 1024;
+			while(!m_NetClient[i].Open(BindAddr, 0))
 			{
-				dbg_msg("client", "couldn't open socket");
-				return;
+				BindAddr.port = (rand() % 64511) + 1024;
 			}
 		}
 	}
