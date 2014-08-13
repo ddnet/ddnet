@@ -725,6 +725,8 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].m_NonceCount = 0;
+	pThis->m_aClients[ClientID].m_LastNonceCount = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	memset(&pThis->m_aClients[ClientID].m_Addr, 0, sizeof(NETADDR));
@@ -903,12 +905,64 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
-				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
-				SendMap(ClientID);
+				if(g_Config.m_SvSpoofProtection)
+				{
+					//set nonce
+					m_aClients[ClientID].m_Nonce = rand()%5+5;//5-9
+					m_aClients[ClientID].m_LastNonceCount = Tick();
+					m_aClients[ClientID].m_State = CClient::STATE_SPOOFCHECK;
+
+					CMsgPacker Msg(NETMSG_MAP_CHANGE);
+					Msg.AddString("", 0);//mapname
+					Msg.AddInt(0);//crc
+					Msg.AddInt(0);//size
+					SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
+				}
+				else
+				{
+					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
+					SendMap(ClientID);
+				}
 			}
 		}
 		else if(Msg == NETMSG_REQUEST_MAP_DATA)
 		{
+			if(g_Config.m_SvSpoofProtection)
+			{
+				if(m_aClients[ClientID].m_State == CClient::STATE_SPOOFCHECK)
+				{
+					int Chunk = Unpacker.GetInt();
+					if(m_aClients[ClientID].m_NonceCount != Chunk || m_aClients[ClientID].m_LastNonceCount+TickSpeed() < Tick())//wrong number sent
+						m_NetServer.Drop(ClientID, "Kicked by spoofprotection. Please try again!");
+
+					m_aClients[ClientID].m_LastNonceCount = Tick();
+
+					if(m_aClients[ClientID].m_NonceCount != m_aClients[ClientID].m_Nonce)
+					{
+						CMsgPacker Msg(NETMSG_MAP_DATA);
+						Msg.AddInt(0);//last
+						Msg.AddInt(0);//crc
+						Msg.AddInt(m_aClients[ClientID].m_NonceCount);//chunk
+						Msg.AddInt(1);//size
+						Msg.AddRaw("a", 1);//data
+						SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
+						m_aClients[ClientID].m_NonceCount++;
+					}
+					else//done. continue as usual
+					{
+						m_aClients[ClientID].m_State = CClient::STATE_POSTSPOOFCHECK;
+						dbg_msg(0, "done");
+					}
+
+					return;
+				}
+				else if(m_aClients[ClientID].m_State == CClient::STATE_POSTSPOOFCHECK)
+				{//Too many noncenumbers sent
+					m_NetServer.Drop(ClientID, "Kicked by spoofprotection. Please try again!");
+					return;
+				}
+			}
+
 			if(m_aClients[ClientID].m_State < CClient::STATE_CONNECTING)
 				return; // no map w/o password, sorry guys
 
@@ -1369,6 +1423,20 @@ void CServer::PumpNetwork()
 
 	m_ServerBan.Update();
 	m_Econ.Update();
+
+	if(g_Config.m_SvSpoofProtection)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_aClients[i].m_State == CClient::STATE_POSTSPOOFCHECK)
+			//if(m_aClients[i].m_State == CClient::STATE_POSTSPOOFCHECK &&
+			//	m_aClients[i].m_LastNonceCount+TickSpeed() < Tick())
+			{ // when the time is over: continue joining process
+				m_aClients[i].m_State = CClient::STATE_CONNECTING;
+				SendMap(i);
+			}
+		}
+	}
 }
 
 char *CServer::GetMapName()
