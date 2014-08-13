@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
 
+#include <time.h>
 #include <stdlib.h> // qsort
 #include <stdarg.h>
 #include <string.h>
