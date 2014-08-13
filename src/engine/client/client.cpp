@@ -2342,6 +2342,8 @@ void CClient::Run()
 	m_LocalStartTime = time_get();
 	m_SnapshotParts = 0;
 
+	srand(time(NULL));
+
 	// init SDL
 	{
 		if(SDL_Init(0) < 0)
