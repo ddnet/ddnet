@@ -1691,7 +1691,12 @@ int CServer::Run()
 
 			// wait for incoming data
 			if (NonActive)
-				net_socket_read_wait(m_NetServer.Socket(), 1000);
+			{
+				if(g_Config.m_SvShutdownWhenEmpty)
+					m_RunServer = false;
+				else
+					net_socket_read_wait(m_NetServer.Socket(), 1000);
+			}
 			else
 				net_socket_read_wait(m_NetServer.Socket(), 5);
 		}
