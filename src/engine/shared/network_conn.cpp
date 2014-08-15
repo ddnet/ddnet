@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <iostream>
 #include <base/system.h>
 #include "config.h"
 #include "network.h"
@@ -296,7 +297,10 @@ int CNetConnection::Update()
 	int64 Now = time_get();
 
 	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
+	{
 		SetError("Timeout Protection over");
+		m_TimeoutSituation = false;
+	}
 
 	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
 		return 0;
@@ -327,6 +331,7 @@ int CNetConnection::Update()
 		}
 		else
 		{
+			m_TimeoutSituation = false;
 			// resend packet if we havn't got it acked in 1 second
 			if(Now-pResend->m_LastSendTime > time_freq())
 				ResendChunk(pResend);
@@ -336,6 +341,7 @@ int CNetConnection::Update()
 	// send keep alives if nothing has happend for 250ms
 	if(State() == NET_CONNSTATE_ONLINE)
 	{
+		m_TimeoutSituation = false;
 		if(time_get()-m_LastSendTime > time_freq()/2) // flush connection after 500ms if needed
 		{
 			int NumFlushedChunks = Flush();
@@ -348,11 +354,13 @@ int CNetConnection::Update()
 	}
 	else if(State() == NET_CONNSTATE_CONNECT)
 	{
+		m_TimeoutSituation = false;
 		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect every 500ms
 			SendControl(NET_CTRLMSG_CONNECT, 0, 0);
 	}
 	else if(State() == NET_CONNSTATE_PENDING)
 	{
+		m_TimeoutSituation = false;
 		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect/accept every 500ms
 			SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
 	}
