@@ -281,6 +281,7 @@ public:
 	void ProcessServerPacket(CNetChunk *pPacket);
 	void ProcessServerPacketDummy(CNetChunk *pPacket);
 
+	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
 	virtual int MapDownloadAmount() { return m_MapdownloadAmount; }
 	virtual int MapDownloadTotalsize() { return m_MapdownloadTotalsize; }
 
