@@ -905,7 +905,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
-				if(g_Config.m_SvSpoofProtection)
+				bool SpoofProtectedAlready = false;
+				NETADDR ThisAddr = *m_NetServer.ClientAddr(ClientID);
+				ThisAddr.port = 0;
+				for(int i = 0; i < m_NetServer.MaxClients(); i++)
+				{
+					NETADDR OtherAddr = *m_NetServer.ClientAddr(i);
+					OtherAddr.port = 0;
+					if (m_aClients[i].m_State == CClient::STATE_INGAME && net_addr_comp(&ThisAddr, &OtherAddr) == 0)
+						SpoofProtectedAlready = true;
+				}
+
+				if(g_Config.m_SvSpoofProtection && !SpoofProtectedAlready)
 				{
 					//set nonce
 					m_aClients[ClientID].m_Nonce = rand()%5+5;//5-9
