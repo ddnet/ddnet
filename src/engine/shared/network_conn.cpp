@@ -296,13 +296,14 @@ int CNetConnection::Update()
 
 	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
 	{
+		m_TimeoutSituation = false;
 		SetError("Timeout Protection over");
 	}
 
-	m_TimeoutSituation = false;
-
 	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
 		return 0;
+
+	m_TimeoutSituation = false;
 
 	// check for timeout
 	if(State() != NET_CONNSTATE_OFFLINE &&
