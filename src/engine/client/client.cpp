@@ -1401,8 +1401,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Unpacker.Error())
 				return;
 
-			g_Config.m_ClDummy = 0;
-			m_DummyConnected = false;
+			if(m_DummyConnected)
+				DummyDisconnect(0);
 
 			// check for valid standard map
 			if(!m_MapChecker.IsMapValid(pMap, MapCrc, MapSize))
