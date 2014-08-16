@@ -143,12 +143,12 @@ int CNetServer::Recv(CNetChunk *pChunk)
 							net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
 						{
 							Found = true; // silent ignore.. we got this client already
-							if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
-							{
-								m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr);
-								if(m_pfnNewClient)
-									m_pfnNewClient(i, m_UserPtr);
-							}
+							//if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
+							//{
+							//	m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr);
+							//	if(m_pfnNewClient)
+							//		m_pfnNewClient(i, m_UserPtr);
+							//}
 							break;
 						}
 					}

@@ -844,16 +844,16 @@ void CGameContext::OnClientConnected(int ClientID)
 	// Check which team the player should be on
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
-	if (!m_apPlayers[ClientID])
-		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
-	else
-	{
-		//delete m_apPlayers[ClientID];
-		//m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
-		//m_apPlayers[ClientID]->Reset();
-		//((CServer*)Server())->m_aClients[ClientID].Reset();
-		((CServer*)Server())->m_aClients[ClientID].m_State = 4;
-	}
+	//if (!m_apPlayers[ClientID])
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	//else
+	//{
+	//	//delete m_apPlayers[ClientID];
+	//	//m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	//	//m_apPlayers[ClientID]->Reset();
+	//	//((CServer*)Server())->m_aClients[ClientID].Reset();
+	//	((CServer*)Server())->m_aClients[ClientID].m_State = 4;
+	//}
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 
