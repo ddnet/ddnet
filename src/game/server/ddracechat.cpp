@@ -583,6 +583,8 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		if (((CServer *)pSelf->Server())->m_NetServer.SetTimedOut(i, pResult->m_ClientID))
 		{
 			((CServer *)pSelf->Server())->DelClientCallback(pResult->m_ClientID, "Timeout Protection used", ((CServer *)pSelf->Server()));
+			if (pSelf->m_apPlayers[i]->GetCharacter())
+			((CGameContext *)(((CServer *)pSelf->Server())->GameServer()))->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
 			return;
 		}
 	}
