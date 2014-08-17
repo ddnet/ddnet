@@ -28,23 +28,29 @@ CControls::CControls()
 	m_LastDummy = 0;
 	m_OtherFire = 0;
 
-	SDL_Init(SDL_INIT_JOYSTICK);
-	m_Joystick = SDL_JoystickOpen(0);
-	if( m_Joystick && SDL_JoystickNumAxes(m_Joystick) < NUM_JOYSTICK_AXES )
+	if (g_Config.m_InpJoystick)
 	{
-		SDL_JoystickClose(m_Joystick);
-		m_Joystick = NULL;
-	}
+		SDL_Init(SDL_INIT_JOYSTICK);
+		m_Joystick = SDL_JoystickOpen(0);
+		if( m_Joystick && SDL_JoystickNumAxes(m_Joystick) < NUM_JOYSTICK_AXES )
+		{
+			SDL_JoystickClose(m_Joystick);
+			m_Joystick = NULL;
+		}
 
-	m_Gamepad = SDL_JoystickOpen(2);
+		m_Gamepad = SDL_JoystickOpen(2);
 
-	SDL_JoystickEventState(SDL_QUERY);
+		SDL_JoystickEventState(SDL_QUERY);
 
-	m_UsingGamepad = false;
+		m_UsingGamepad = false;
 #if defined(CONF_FAMILY_UNIX)
-	if( getenv("OUYA") )
-		m_UsingGamepad = true;
+		if( getenv("OUYA") )
+			m_UsingGamepad = true;
 #endif
+	}
+	else
+		m_Joystick = NULL;
+		m_UsingGamepad = false;
 }
 
 void CControls::OnReset()
