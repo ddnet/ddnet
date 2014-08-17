@@ -213,6 +213,14 @@ void CPlayer::Tick()
 		}
 	}
 
+	if(((CServer *)Server())->m_NetServer.ErrorString(m_ClientID)[0])
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		((CServer *)(Server()))->m_NetServer.ResetErrorString(m_ClientID);
+	}
+
 	if(!GameServer()->m_World.m_Paused)
 	{
 		if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)

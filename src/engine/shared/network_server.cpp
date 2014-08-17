@@ -279,3 +279,14 @@ void CNetServer::SetTimeoutProtected(int ClientID)
 {
 	m_aSlots[ClientID].m_Connection.m_TimeoutProtected = true;
 }
+
+int CNetServer::ResetErrorString(int ClientID)
+{
+	m_aSlots[ClientID].m_Connection.ResetErrorString();
+	return 0;
+}
+
+const char *CNetServer::ErrorString(int ClientID)
+{
+	return m_aSlots[ClientID].m_Connection.ErrorString();
+}
