@@ -119,6 +119,8 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	char m_aCurrentMap[256];
 	unsigned m_CurrentMapCrc;
 
+	bool m_TimeoutCodeSent[2];
+
 	//
 	char m_aCmdConnect[256];
 

@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
+#include <iostream>
 
 #include <time.h>
 #include <stdlib.h> // qsort
@@ -628,6 +629,8 @@ void CClient::EnterGame()
 	OnEnterGame();
 
 	ServerInfoRequest(); // fresh one for timeout protection
+	m_TimeoutCodeSent[0] = false;
+	m_TimeoutCodeSent[1] = false;
 }
 
 void CClient::Connect(const char *pAddress)
@@ -1373,10 +1376,11 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
 
-				if(State() == IClient::STATE_ONLINE)
+				if(State() == IClient::STATE_ONLINE && !m_TimeoutCodeSent[g_Config.m_ClDummy])
 				{
 					if(str_find_nocase(Info.m_aGameType, "ddracenetw"))
 					{
+						m_TimeoutCodeSent[g_Config.m_ClDummy] = true;
 						CNetMsg_Cl_Say Msg;
 						Msg.m_Team = 0;
 						char aBuf[256];
