@@ -626,6 +626,8 @@ void CClient::EnterGame()
 	// to finish the connection
 	SendEnterGame();
 	OnEnterGame();
+
+	ServerInfoRequest(); // fresh one for timeout protection
 }
 
 void CClient::Connect(const char *pAddress)
@@ -1370,6 +1372,21 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
+
+				if(State() == IClient::STATE_ONLINE)
+				{
+					if(str_find_nocase(Info.m_aGameType, "ddracenetw"))
+					{
+						CNetMsg_Cl_Say Msg;
+						Msg.m_Team = 0;
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "/timeout %s", g_Config.m_ClDummy ? g_Config.m_ClDummyTimeoutCode : g_Config.m_ClTimeoutCode);
+						Msg.m_pMessage = aBuf;
+						CMsgPacker Packer(Msg.MsgID());
+						Msg.Pack(&Packer);
+						SendMsgExY(&Packer, MSGFLAG_VITAL, false, g_Config.m_ClDummy);
+					}
+				}
 			}
 		}
 	}

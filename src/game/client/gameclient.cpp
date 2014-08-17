@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <iostream>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/friends.h>
@@ -329,6 +330,17 @@ void CGameClient::OnInit()
 				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 97;
 			else
 				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 65;
+		}
+	}
+
+	if(g_Config.m_ClDummyTimeoutCode[0] == '\0' || str_comp(g_Config.m_ClDummyTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
+	{
+		for(unsigned int i = 0; i < 16; i++)
+		{
+			if (rand() % 2)
+				g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 97;
+			else
+				g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 65;
 		}
 	}
 }
@@ -715,17 +727,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 		if (i <= 16)
 			m_Teams.m_IsDDRace16 = true;
-		else if (!m_Teams.m_IsDDRace64)
-		{
-			m_Teams.m_IsDDRace64 = true;
-
-			CNetMsg_Cl_Say Msg;
-			Msg.m_Team = 0;
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "/timeout %s", g_Config.m_ClTimeoutCode);
-			Msg.m_pMessage = aBuf;
-			Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
-		}
 	}
 	else if(MsgId == NETMSGTYPE_SV_PLAYERTIME)
 	{
@@ -1346,7 +1347,24 @@ void CGameClient::SendSwitchTeam(int Team)
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 
 	if (Team != TEAM_SPECTATORS)
+	{
 		m_pCamera->OnReset();
+
+		CServerInfo Info;
+		Client()->GetServerInfo(&Info);
+
+		if(str_find_nocase(Info.m_aGameType, "ddracenetw"))
+		{
+			CNetMsg_Cl_Say Msg;
+			Msg.m_Team = 0;
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "/timeout %s", g_Config.m_ClDummy ? g_Config.m_ClDummyTimeoutCode : g_Config.m_ClTimeoutCode);
+			Msg.m_pMessage = aBuf;
+			CMsgPacker Packer(Msg.MsgID());
+			Msg.Pack(&Packer);
+			Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, g_Config.m_ClDummy);
+		}
+	}
 }
 
 void CGameClient::SendInfo(bool Start)
@@ -1363,7 +1381,7 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_ColorFeet = g_Config.m_PlayerColorFeet;
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 0);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
 	}
 	else
 	{
@@ -1377,7 +1395,7 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_ColorFeet = g_Config.m_PlayerColorFeet;
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 0);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
 
 		// activate timer to resend the info if it gets filtered
 		if(!m_LastSendInfo || m_LastSendInfo+time_freq()*5 < time_get())
@@ -1399,7 +1417,7 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_ColorFeet = g_Config.m_DummyColorFeet;
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
-		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
+		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 1);
 	}
 	else
 	{
