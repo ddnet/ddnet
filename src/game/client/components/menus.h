@@ -124,6 +124,7 @@ class CMenus : public CComponent
 	static float ms_FontmodHeight;
 
 	// for settings
+	bool m_NeedRestartSkins;
 	bool m_NeedRestartGraphics;
 	bool m_NeedRestartSound;
 	bool m_NeedSendinfo;
