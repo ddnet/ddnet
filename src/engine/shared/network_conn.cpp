@@ -239,9 +239,8 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 		}
 		else
 		{
-			if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
+			if(State() == NET_CONNSTATE_OFFLINE)
 			{
-				m_State = NET_CONNSTATE_OFFLINE;
 				if(CtrlMsg == NET_CTRLMSG_CONNECT)
 				{
 					// send response and init connection

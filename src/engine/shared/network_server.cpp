@@ -140,6 +140,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 					for(int i = 0; i < MaxClients(); i++)
 					{
 						if(m_aSlots[i].m_Connection.State() != NET_CONNSTATE_OFFLINE &&
+							m_aSlots[i].m_Connection.State() != NET_CONNSTATE_ERROR &&
 							net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
 						{
 							Found = true; // silent ignore.. we got this client already
@@ -205,6 +206,9 @@ int CNetServer::Recv(CNetChunk *pChunk)
 					{
 						if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
 						{
+							if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE ||
+								m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
+								continue;
 							if(m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
 							{
 								if(m_RecvUnpacker.m_Data.m_DataSize)
