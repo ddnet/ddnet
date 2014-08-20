@@ -3996,10 +3996,10 @@ void CEditor::Render()
 	}
 	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
 	m_WorldZoom = m_ZoomLevel/100.0f;
+	float Brightness = 0.25f;
 
 	if(m_GuiActive)
 	{
-		float Brightness = 0.25f;
 		RenderBackground(MenuBar, ms_BackgroundTexture, 128.0f, Brightness*0);
 		MenuBar.Margin(2.0f, &MenuBar);
 
@@ -4012,11 +4012,18 @@ void CEditor::Render()
 
 		RenderBackground(StatusBar, ms_BackgroundTexture, 128.0f, Brightness);
 		StatusBar.Margin(2.0f, &StatusBar);
+	}
+	else
+	{
+		ToolBar.y = -300;
+	}
 
-		// do the toolbar
-		if(m_Mode == MODE_LAYERS)
-			DoToolbar(ToolBar);
+	// do the toolbar
+	if(m_Mode == MODE_LAYERS)
+		DoToolbar(ToolBar);
 
+	if(m_GuiActive)
+	{
 		if(m_ShowEnvelopeEditor)
 		{
 			RenderBackground(EnvelopeEditor, ms_BackgroundTexture, 128.0f, Brightness);
