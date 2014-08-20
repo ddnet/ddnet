@@ -1807,8 +1807,6 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 	// fetch mouse position
 	float wx = UI()->MouseWorldX();
 	float wy = UI()->MouseWorldY();
-	float mx = UI()->MouseX();
-	float my = UI()->MouseY();
 
 	static float s_StartWx = 0;
 	static float s_StartWy = 0;
@@ -1832,17 +1830,34 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 		float h = Size*(Screen.h/View.h);
 		float x = -(View.x/Screen.w)*w;
 		float y = -(View.y/Screen.h)*h;
-		wx = x+w*mx/Screen.w;
-		wy = y+h*my/Screen.h;
-		Graphics()->MapScreen(x, y, x+w, y+h);
 		CLayerTiles *t = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 		if(t)
 		{
+			Graphics()->MapScreen(x, y, x+w, y+h);
 			m_TilesetPicker.m_Image = t->m_Image;
 			m_TilesetPicker.m_TexID = t->m_TexID;
 			m_TilesetPicker.Render();
 			if(m_ShowTileInfo)
 				m_TilesetPicker.ShowInfo();
+		}
+		else
+		{
+			CLayerQuads *t = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+			if(t)
+			{
+				m_QuadsetPicker.m_Image = t->m_Image;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = (int) View.x << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = (int) View.y << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = (int) (View.x+View.w) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].y = (int) View.y << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].x = (int) View.x << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = (int) (View.y+View.h) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = (int) (View.x+View.w) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = (int) (View.y+View.h) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = (int) (View.x+View.w/2) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = (int) (View.y+View.h/2) << 10;
+				m_QuadsetPicker.Render();
+			}
 		}
 	}
 
@@ -1853,9 +1868,14 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 	int NumEditLayers = 0;
 	NumEditLayers = 0;
 
-	if(m_ShowPicker)
+	if(m_ShowPicker && GetSelectedLayer(0)->m_Type == LAYERTYPE_TILES)
 	{
 		pEditLayers[0] = &m_TilesetPicker;
+		NumEditLayers++;
+	}
+	else if (m_ShowPicker)
+	{
+		pEditLayers[0] = &m_QuadsetPicker;
 		NumEditLayers++;
 	}
 	else
@@ -4325,6 +4345,10 @@ void CEditor::Init()
 	m_TilesetPicker.m_pEditor = this;
 	m_TilesetPicker.MakePalette();
 	m_TilesetPicker.m_Readonly = true;
+
+	m_QuadsetPicker.m_pEditor = this;
+	m_QuadsetPicker.NewQuad();
+	m_QuadsetPicker.m_Readonly = true;
 
 	m_Brush.m_pMap = &m_Map;
 
