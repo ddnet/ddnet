@@ -1307,7 +1307,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				}
 			}
 
-			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64"))
+			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64") || strstr(Info.m_aGameType, "DDraceNet"))
 			{
 				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
 				if (pEntry && m_ServerBrowser.IsRefreshing())
