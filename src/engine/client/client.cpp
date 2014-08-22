@@ -282,6 +282,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_CurrentRecvTick[1] = 0;
 	m_RconAuthed[0] = 0;
 	m_RconAuthed[1] = 0;
+	m_RconPassword[0] = '\0';
 
 	// version-checking
 	m_aVersionStr[0] = '0';
@@ -408,6 +409,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	if(RconAuthed())
 		return;
 
+	str_copy(m_RconPassword, pPassword, sizeof(m_RconPassword));
+
 	CMsgPacker Msg(NETMSG_RCON_AUTH);
 	Msg.AddString(pName, 32);
 	Msg.AddString(pPassword, 32);
@@ -417,6 +420,15 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 
 void CClient::Rcon(const char *pCmd)
 {
+	if(RconAuthed())
+	{ // Against IP spoofing on DDNet servers
+		CMsgPacker Msg(NETMSG_RCON_AUTH);
+		Msg.AddString("", 32);
+		Msg.AddString(m_RconPassword, 32);
+		Msg.AddInt(1);
+		SendMsgEx(&Msg, MSGFLAG_VITAL);
+	}
+
 	CMsgPacker Msg(NETMSG_RCON_CMD);
 	Msg.AddString(pCmd, 256);
 	SendMsgEx(&Msg, MSGFLAG_VITAL);

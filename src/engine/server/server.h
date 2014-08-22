@@ -136,6 +136,7 @@ public:
 		int m_Country;
 		int m_Score;
 		int m_Authed;
+		int m_LastAuthed;
 		int m_AuthTries;
 
 		int m_Nonce; // number to reach

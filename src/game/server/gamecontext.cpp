@@ -1321,7 +1321,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if (pPlayer->m_ClientVersion < VERSION_DDRACE)
 					pPlayer->m_ClientVersion = VERSION_DDRACE;
 			}
-			else
+			else if(pPlayer->m_ClientVersion < Version)
 				pPlayer->m_ClientVersion = Version;
 
 			char aBuf[128];
