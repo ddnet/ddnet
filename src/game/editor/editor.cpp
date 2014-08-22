@@ -1807,6 +1807,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 	// fetch mouse position
 	float wx = UI()->MouseWorldX();
 	float wy = UI()->MouseWorldY();
+	float mx = UI()->MouseX();
+	float my = UI()->MouseY();
 
 	static float s_StartWx = 0;
 	static float s_StartWy = 0;
@@ -1830,6 +1832,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 		float h = Size*(Screen.h/View.h);
 		float x = -(View.x/Screen.w)*w;
 		float y = -(View.y/Screen.h)*h;
+		wx = x+w*mx/Screen.w;
+		wy = y+h*my/Screen.h;
 		CLayerTiles *t = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 		if(t)
 		{
