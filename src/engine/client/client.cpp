@@ -1322,7 +1322,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64") || strstr(Info.m_aGameType, "DDraceNet"))
 			{
 				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
-				if (pEntry && m_ServerBrowser.IsRefreshing())
+				if (pEntry)
 				{
 					pEntry->m_Is64 = true;
 					m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry); // Force a quick update
