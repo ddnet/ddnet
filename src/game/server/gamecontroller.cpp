@@ -766,9 +766,22 @@ void IGameController::Snap(int SnappingClient)
 
 	CCharacter *pChr;
 	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
+	CPlayer *pPlayer2;
+
 	if(pPlayer && (pPlayer->m_TimerType == 0 || pPlayer->m_TimerType == 2) && SnappingClient >= 0)
-		if((pChr = pPlayer->GetCharacter()))
+	{
+		if((pPlayer->GetTeam() == -1 || pPlayer->m_Paused)
+			&& pPlayer->m_SpectatorID != SPEC_FREEVIEW
+			&& (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
+		{
+			if((pChr = pPlayer2->GetCharacter()))
+				pGameInfoObj->m_RoundStartTick = (pChr->m_DDRaceState == DDRACE_STARTED)?pChr->m_StartTime:m_RoundStartTick;
+		}
+		else if((pChr = pPlayer->GetCharacter()))
+		{
 			pGameInfoObj->m_RoundStartTick = (pChr->m_DDRaceState == DDRACE_STARTED)?pChr->m_StartTime:m_RoundStartTick;
+		}
+	}
 }
 
 int IGameController::GetAutoTeam(int NotThisID)
