@@ -44,6 +44,7 @@
 	#include <fcntl.h>
 	#include <direct.h>
 	#include <errno.h>
+	#include <process.h>
 #else
 	#error NOT IMPLEMENTED
 #endif
@@ -2031,6 +2032,15 @@ unsigned str_quickhash(const char *str)
 	for(; *str; str++)
 		hash = ((hash << 5) + hash) + (*str); /* hash * 33 + c */
 	return hash;
+}
+
+int pid()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return _getpid();
+#else
+	return getpid();
+#endif
 }
 
 
