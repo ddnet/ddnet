@@ -158,7 +158,7 @@ public:
 
 	virtual void DemoSliceBegin() = 0;
 	virtual void DemoSliceEnd() = 0;
-	virtual void DemoSlice() = 0;
+	virtual void DemoSlice(const char *pDstPath) = 0;
 };
 
 class IGameClient : public IInterface

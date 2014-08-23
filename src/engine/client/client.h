@@ -346,6 +346,6 @@ public:
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
-	virtual void DemoSlice();
+	virtual void DemoSlice(const char *pDstPath);
 };
 #endif

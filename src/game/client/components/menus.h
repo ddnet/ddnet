@@ -311,6 +311,8 @@ public:
 	void GhostlistPopulate();
 	void setPopup(int Popup) { m_Popup = Popup; }
 
+	int m_DemoPlayerState;
+
 	enum
 	{
 		POPUP_NONE=0,
@@ -328,7 +330,11 @@ public:
 		POPUP_PASSWORD,
 		POPUP_QUIT,
 		POPUP_AUTOUPDATE,
-		POPUP_DISCONNECT
+		POPUP_DISCONNECT,
+
+		// demo player states
+		DEMOPLAYER_NONE=0,
+		DEMOPLAYER_SLICE_SAVE,
 	};
 
 private:

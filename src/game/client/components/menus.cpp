@@ -88,6 +88,8 @@ CMenus::CMenus()
 	m_DoubleClickIndex = -1;
 
 	m_DDRacePage = PAGE_BROWSER;
+
+	m_DemoPlayerState = DEMOPLAYER_NONE;
 }
 
 vec4 CMenus::ButtonColorMul(const void *pID)
