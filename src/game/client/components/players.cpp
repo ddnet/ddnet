@@ -832,6 +832,8 @@ void CPlayers::RenderPlayer(
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 		Graphics()->QuadsBegin();
 		RenderTools()->SelectSprite(SPRITE_DOTDOT);
+		if (OtherTeam)
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 		IGraphics::CQuadItem QuadItem(Position.x + 24, Position.y - 40, 64,64);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 		Graphics()->QuadsEnd();
@@ -863,6 +865,8 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(pi/6*WiggleAngle);
 
 		Graphics()->SetColor(1.0f,1.0f,1.0f,a);
+		if (OtherTeam)
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * (float) g_Config.m_ClShowOthersAlpha / 100.0f);
 		// client_datas::emoticon is an offset from the first emoticon
 		RenderTools()->SelectSprite(SPRITE_OOP + m_pClient->m_aClients[pInfo.m_ClientID].m_Emoticon);
 		IGraphics::CQuadItem QuadItem(Position.x, Position.y - 23 - 32*h, 64, 64*h);

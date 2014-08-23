@@ -1,7 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
+#include <iostream>
 
+#include <time.h>
 #include <stdlib.h> // qsort
 #include <stdarg.h>
 #include <string.h>
@@ -280,6 +282,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_CurrentRecvTick[1] = 0;
 	m_RconAuthed[0] = 0;
 	m_RconAuthed[1] = 0;
+	m_RconPassword[0] = '\0';
 
 	// version-checking
 	m_aVersionStr[0] = '0';
@@ -406,6 +409,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	if(RconAuthed())
 		return;
 
+	str_copy(m_RconPassword, pPassword, sizeof(m_RconPassword));
+
 	CMsgPacker Msg(NETMSG_RCON_AUTH);
 	Msg.AddString(pName, 32);
 	Msg.AddString(pPassword, 32);
@@ -415,6 +420,15 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 
 void CClient::Rcon(const char *pCmd)
 {
+	if(RconAuthed())
+	{ // Against IP spoofing on DDNet servers
+		CMsgPacker Msg(NETMSG_RCON_AUTH);
+		Msg.AddString("", 32);
+		Msg.AddString(m_RconPassword, 32);
+		Msg.AddInt(1);
+		SendMsgEx(&Msg, MSGFLAG_VITAL);
+	}
+
 	CMsgPacker Msg(NETMSG_RCON_CMD);
 	Msg.AddString(pCmd, 256);
 	SendMsgEx(&Msg, MSGFLAG_VITAL);
@@ -625,6 +639,10 @@ void CClient::EnterGame()
 	// to finish the connection
 	SendEnterGame();
 	OnEnterGame();
+
+	ServerInfoRequest(); // fresh one for timeout protection
+	m_TimeoutCodeSent[0] = false;
+	m_TimeoutCodeSent[1] = false;
 }
 
 void CClient::Connect(const char *pAddress)
@@ -1301,7 +1319,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				}
 			}
 
-			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64"))
+			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64") || strstr(Info.m_aGameType, "DDraceNet"))
 			{
 				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
 				if (pEntry && m_ServerBrowser.IsRefreshing())
@@ -1369,6 +1387,22 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
+
+				if(State() == IClient::STATE_ONLINE && !m_TimeoutCodeSent[g_Config.m_ClDummy])
+				{
+					if(str_find_nocase(Info.m_aGameType, "ddracenetw"))
+					{
+						m_TimeoutCodeSent[g_Config.m_ClDummy] = true;
+						CNetMsg_Cl_Say Msg;
+						Msg.m_Team = 0;
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "/timeout %s", g_Config.m_ClDummy ? g_Config.m_ClDummyTimeoutCode : g_Config.m_ClTimeoutCode);
+						Msg.m_pMessage = aBuf;
+						CMsgPacker Packer(Msg.MsgID());
+						Msg.Pack(&Packer);
+						SendMsgExY(&Packer, MSGFLAG_VITAL, false, g_Config.m_ClDummy);
+					}
+				}
 			}
 		}
 	}
@@ -1400,8 +1434,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Unpacker.Error())
 				return;
 
-			g_Config.m_ClDummy = 0;
-			m_DummyConnected = false;
+			if(m_DummyConnected)
+				DummyDisconnect(0);
 
 			// check for valid standard map
 			if(!m_MapChecker.IsMapValid(pMap, MapCrc, MapSize))
@@ -2002,7 +2036,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 
 void CClient::PumpNetwork()
 {
-	for(int i=0; i<2; i++)
+	for(int i=0; i<3; i++)
 	{
 		m_NetClient[i].Update();
 	}
@@ -2031,7 +2065,7 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i=0; i < 2; i++)
+	for(int i=0; i < 3; i++)
 	{
 		while(m_NetClient[i].Recv(&Packet))
 		{
@@ -2326,12 +2360,11 @@ void CClient::InitInterfaces()
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 
-	for(int i=0;i<2;i++)
-	{
-		m_ServerBrowser.SetBaseInfo(&m_NetClient[i], m_pGameClient->NetVersion());
-	}
+	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
+	
+	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
+
 	m_Friends.Init();
 
 	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
@@ -2346,6 +2379,8 @@ void CClient::Run()
 {
 	m_LocalStartTime = time_get();
 	m_SnapshotParts = 0;
+
+	srand(time(NULL));
 
 	// init SDL
 	{
@@ -2392,12 +2427,12 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(int i = 0; i < 2; i++)
+		for(int i = 0; i < 3; i++)
 		{
-			if(!m_NetClient[i].Open(BindAddr, 0))
+			BindAddr.port = (rand() % 64511) + 1024;
+			while(!m_NetClient[i].Open(BindAddr, 0))
 			{
-				dbg_msg("client", "couldn't open socket");
-				return;
+				BindAddr.port = (rand() % 64511) + 1024;
 			}
 		}
 	}

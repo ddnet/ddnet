@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
@@ -36,7 +37,9 @@ void CRaceDemo::OnRender()
 		if(start)
 		{
 			OnReset();
-			m_pMap = Client()->RaceRecordStart("tmp");
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "tmp_%d", pid());
+			m_pMap = Client()->RaceRecordStart(aBuf);
 			m_DemoStartTick = Client()->GameTick() + Client()->GameTickSpeed();
 			m_RaceState = RACE_STARTED;
 		}
@@ -60,7 +63,7 @@ void CRaceDemo::OnReset()
 		Client()->RaceRecordStop();
 	
 	char aFilename[512];
-	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp.demo", m_pMap);
+	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
 	Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 
 	m_Time = 0;
@@ -75,7 +78,7 @@ void CRaceDemo::OnShutdown()
 		Client()->RaceRecordStop();
 		
 	char aFilename[512];
-	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp.demo", m_pMap);
+	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
 	Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 }
 
@@ -134,7 +137,7 @@ void CRaceDemo::CheckDemo()
 	Client()->RaceRecordStop();
 	
 	char aTmpDemoName[128];
-	str_format(aTmpDemoName, sizeof(aTmpDemoName), "%s_tmp", m_pMap);
+	str_format(aTmpDemoName, sizeof(aTmpDemoName), "%s_tmp_%d", m_pMap, pid());
 	
 	// loop through demo files
 	m_pClient->m_pMenus->DemolistPopulate();
@@ -194,7 +197,7 @@ void CRaceDemo::SaveDemo(const char* pDemo)
 	else
 		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%5.2f.demo", pDemo, m_Time);
 	
-	str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_tmp.demo", m_pMap);
+	str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
 	
 	Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
 	

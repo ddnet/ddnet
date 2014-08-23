@@ -98,6 +98,8 @@ public:
 			STATE_EMPTY = 0,
 			STATE_AUTH,
 			STATE_CONNECTING,
+			STATE_SPOOFCHECK,
+			STATE_POSTSPOOFCHECK,
 			STATE_READY,
 			STATE_INGAME,
 
@@ -134,7 +136,12 @@ public:
 		int m_Country;
 		int m_Score;
 		int m_Authed;
+		int m_LastAuthed;
 		int m_AuthTries;
+
+		int m_Nonce; // number to reach
+		int m_NonceCount; // current num
+		int64 m_LastNonceCount;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 

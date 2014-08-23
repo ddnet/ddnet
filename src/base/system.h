@@ -1296,6 +1296,8 @@ int str_utf8_encode(char *ptr, int chr);
 */
 int str_utf8_check(const char *str);
 
+int pid();
+
 #ifdef __cplusplus
 }
 #endif

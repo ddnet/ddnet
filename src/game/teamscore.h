@@ -16,7 +16,6 @@ class CTeamsCore
 	bool m_IsSolo[MAX_CLIENTS];
 public:
 	bool m_IsDDRace16;
-	bool m_IsDDRace64;
 
 	CTeamsCore(void);
 

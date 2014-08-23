@@ -239,9 +239,8 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 		}
 		else
 		{
-			if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
+			if(State() == NET_CONNSTATE_OFFLINE)
 			{
-				m_State = NET_CONNSTATE_OFFLINE;
 				if(CtrlMsg == NET_CTRLMSG_CONNECT)
 				{
 					// send response and init connection
@@ -296,10 +295,15 @@ int CNetConnection::Update()
 	int64 Now = time_get();
 
 	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
+	{
+		m_TimeoutSituation = false;
 		SetError("Timeout Protection over");
+	}
 
 	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
 		return 0;
+
+	m_TimeoutSituation = false;
 
 	// check for timeout
 	if(State() != NET_CONNSTATE_OFFLINE &&

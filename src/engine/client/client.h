@@ -74,7 +74,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 		PREDICTION_MARGIN=1000/50/2, // magic network prediction value
 	};
 
-	class CNetClient m_NetClient[2];
+	class CNetClient m_NetClient[3];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder;
 	class CDemoEditor m_DemoEditor;
@@ -108,6 +108,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_AckGameTick[2];
 	int m_CurrentRecvTick[2];
 	int m_RconAuthed[2];
+	char m_RconPassword[32];
 	int m_UseTempRconCommands;
 
 	// version-checking
@@ -119,6 +120,8 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	//
 	char m_aCurrentMap[256];
 	unsigned m_CurrentMapCrc;
+
+	bool m_TimeoutCodeSent[2];
 
 	//
 	char m_aCmdConnect[256];
@@ -282,6 +285,7 @@ public:
 	void ProcessServerPacket(CNetChunk *pPacket);
 	void ProcessServerPacketDummy(CNetChunk *pPacket);
 
+	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
 	virtual int MapDownloadAmount() { return m_MapdownloadAmount; }
 	virtual int MapDownloadTotalsize() { return m_MapdownloadTotalsize; }
 

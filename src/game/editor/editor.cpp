@@ -1834,15 +1834,34 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 		float y = -(View.y/Screen.h)*h;
 		wx = x+w*mx/Screen.w;
 		wy = y+h*my/Screen.h;
-		Graphics()->MapScreen(x, y, x+w, y+h);
 		CLayerTiles *t = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 		if(t)
 		{
+			Graphics()->MapScreen(x, y, x+w, y+h);
 			m_TilesetPicker.m_Image = t->m_Image;
 			m_TilesetPicker.m_TexID = t->m_TexID;
 			m_TilesetPicker.Render();
 			if(m_ShowTileInfo)
 				m_TilesetPicker.ShowInfo();
+		}
+		else
+		{
+			CLayerQuads *t = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+			if(t)
+			{
+				m_QuadsetPicker.m_Image = t->m_Image;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = (int) View.x << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = (int) View.y << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = (int) (View.x+View.w) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].y = (int) View.y << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].x = (int) View.x << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = (int) (View.y+View.h) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = (int) (View.x+View.w) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = (int) (View.y+View.h) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = (int) (View.x+View.w/2) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = (int) (View.y+View.h/2) << 10;
+				m_QuadsetPicker.Render();
+			}
 		}
 	}
 
@@ -1853,9 +1872,14 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 	int NumEditLayers = 0;
 	NumEditLayers = 0;
 
-	if(m_ShowPicker)
+	if(m_ShowPicker && GetSelectedLayer(0)->m_Type == LAYERTYPE_TILES)
 	{
 		pEditLayers[0] = &m_TilesetPicker;
+		NumEditLayers++;
+	}
+	else if (m_ShowPicker)
+	{
+		pEditLayers[0] = &m_QuadsetPicker;
 		NumEditLayers++;
 	}
 	else
@@ -2153,7 +2177,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 	}
 
 	// render screen sizes
-	if(m_ProofBorders)
+	if(m_ProofBorders && !m_ShowPicker)
 	{
 		CLayerGroup *g = m_Map.m_pGameGroup;
 		g->MapScreen();
@@ -3996,10 +4020,10 @@ void CEditor::Render()
 	}
 	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
 	m_WorldZoom = m_ZoomLevel/100.0f;
+	float Brightness = 0.25f;
 
 	if(m_GuiActive)
 	{
-		float Brightness = 0.25f;
 		RenderBackground(MenuBar, ms_BackgroundTexture, 128.0f, Brightness*0);
 		MenuBar.Margin(2.0f, &MenuBar);
 
@@ -4012,11 +4036,18 @@ void CEditor::Render()
 
 		RenderBackground(StatusBar, ms_BackgroundTexture, 128.0f, Brightness);
 		StatusBar.Margin(2.0f, &StatusBar);
+	}
+	else
+	{
+		ToolBar.y = -300;
+	}
 
-		// do the toolbar
-		if(m_Mode == MODE_LAYERS)
-			DoToolbar(ToolBar);
+	// do the toolbar
+	if(m_Mode == MODE_LAYERS)
+		DoToolbar(ToolBar);
 
+	if(m_GuiActive)
+	{
 		if(m_ShowEnvelopeEditor)
 		{
 			RenderBackground(EnvelopeEditor, ms_BackgroundTexture, 128.0f, Brightness);
@@ -4318,6 +4349,10 @@ void CEditor::Init()
 	m_TilesetPicker.m_pEditor = this;
 	m_TilesetPicker.MakePalette();
 	m_TilesetPicker.m_Readonly = true;
+
+	m_QuadsetPicker.m_pEditor = this;
+	m_QuadsetPicker.NewQuad();
+	m_QuadsetPicker.m_Readonly = true;
 
 	m_Brush.m_pMap = &m_Map;
 

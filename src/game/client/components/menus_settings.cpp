@@ -366,7 +366,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy;
+	CUIRect Button, Label, Button2, Dummy, DummyLabel;
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
@@ -408,9 +408,27 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &Dummy))
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &DummyLabel))
 	{
 		s_Dummy ^= 1;
+	}
+
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
+	if(DoButton_CheckBox(&g_Config.m_ClShowNewSkins, Localize("Show new skins ingame"), g_Config.m_ClShowNewSkins, &DummyLabel))
+	{
+		g_Config.m_ClShowNewSkins ^= 1;
+		m_NeedRestartSkins = true;
+	}
+
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
+	if(DoButton_CheckBox(&g_Config.m_ClShowCustomSkins, Localize("Show custom skins ingame"), g_Config.m_ClShowCustomSkins, &DummyLabel))
+	{
+		g_Config.m_ClShowCustomSkins ^= 1;
+		m_NeedRestartSkins = true;
 	}
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
@@ -433,7 +451,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		else
 			m_NeedSendinfo = true;
 	}
-	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Custom skins"), g_Config.m_ClShowSpecialSkins, &Button2))
+	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Custom skins in selection"), g_Config.m_ClShowSpecialSkins, &Button2))
 	{
 		g_Config.m_ClShowSpecialSkins = g_Config.m_ClShowSpecialSkins?0:1;
 		s_InitSkinlist = true;
@@ -1203,7 +1221,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(s_SettingsPage == 8)
 		RenderSettingsDDRace(MainView);
 
-	if(m_NeedRestartGraphics || m_NeedRestartSound)
+	if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound)
 		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 15.0f, -1);
 }
 void CMenus::RenderSettingsHUD(CUIRect MainView)
@@ -1846,19 +1864,30 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ConnTimeout);
 		Right.HSplitTop(20.0f, &Button, &Right);
-		UI()->DoLabelScaled(&Button, Localize("Timeout (in seconds)"), 14.0f, -1);
+		UI()->DoLabelScaled(&Button, Localize("Timeout (in seconds):"), 14.0f, -1);
 		Button.VSplitLeft(190.0f, 0, &Button);
 		static float Offset = 0.0f;
 		DoEditBox(&g_Config.m_ConnTimeout, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
 		g_Config.m_ConnTimeout = clamp(str_toint(aBuf), 5, 1000);
 	}
 
-	// player name
-	Right.HSplitTop(20.0f, &Button, &Right);
-	Button.VSplitLeft(190.0f, &Label, &Button);
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Timeout code"));
-	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
-	static float s_OffsetCode = 0.0f;
-	DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode);
+	{
+		Right.HSplitTop(20.0f, &Button, &Right);
+		Button.VSplitLeft(190.0f, &Label, &Button);
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Timeout code"));
+		UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+		static float s_OffsetCode = 0.0f;
+		DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode);
+	}
+
+	{
+		Right.HSplitTop(20.0f, &Button, &Right);
+		Button.VSplitLeft(190.0f, &Label, &Button);
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Dummy Timeout code"));
+		UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+		static float s_OffsetCode = 0.0f;
+		DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode);
+	}
 }

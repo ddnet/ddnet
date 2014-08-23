@@ -723,8 +723,11 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
+	pThis->m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].m_NonceCount = 0;
+	pThis->m_aClients[ClientID].m_LastNonceCount = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	memset(&pThis->m_aClients[ClientID].m_Addr, 0, sizeof(NETADDR));
@@ -751,6 +754,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
+	pThis->m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
@@ -903,12 +907,75 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
-				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
-				SendMap(ClientID);
+				bool SpoofProtectedAlready = false;
+				NETADDR ThisAddr = *m_NetServer.ClientAddr(ClientID);
+				ThisAddr.port = 0;
+				for(int i = 0; i < m_NetServer.MaxClients(); i++)
+				{
+					NETADDR OtherAddr = *m_NetServer.ClientAddr(i);
+					OtherAddr.port = 0;
+					if (m_aClients[i].m_State == CClient::STATE_INGAME && net_addr_comp(&ThisAddr, &OtherAddr) == 0)
+						SpoofProtectedAlready = true;
+				}
+
+				if(g_Config.m_SvSpoofProtection && !SpoofProtectedAlready)
+				{
+					//set nonce
+					m_aClients[ClientID].m_Nonce = rand()%5+5;//5-9
+					m_aClients[ClientID].m_LastNonceCount = Tick();
+					m_aClients[ClientID].m_State = CClient::STATE_SPOOFCHECK;
+
+					CMsgPacker Msg(NETMSG_MAP_CHANGE);
+					Msg.AddString("", 0);//mapname
+					Msg.AddInt(0);//crc
+					Msg.AddInt(0);//size
+					SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
+				}
+				else
+				{
+					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
+					SendMap(ClientID);
+				}
 			}
 		}
 		else if(Msg == NETMSG_REQUEST_MAP_DATA)
 		{
+			if(g_Config.m_SvSpoofProtection)
+			{
+				if(m_aClients[ClientID].m_State == CClient::STATE_SPOOFCHECK)
+				{
+					int Chunk = Unpacker.GetInt();
+					if(m_aClients[ClientID].m_NonceCount != Chunk || m_aClients[ClientID].m_LastNonceCount+TickSpeed() < Tick())//wrong number sent
+						m_NetServer.Drop(ClientID, "Kicked by spoofprotection. Please try again!");
+
+					m_aClients[ClientID].m_LastNonceCount = Tick();
+
+					if(m_aClients[ClientID].m_NonceCount != m_aClients[ClientID].m_Nonce)
+					{
+						CMsgPacker Msg(NETMSG_MAP_DATA);
+						Msg.AddInt(0);//last
+						Msg.AddInt(0);//crc
+						Msg.AddInt(m_aClients[ClientID].m_NonceCount);//chunk
+						Msg.AddInt(1);//size
+						Msg.AddRaw("a", 1);//data
+						SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
+						m_aClients[ClientID].m_NonceCount++;
+					}
+					else//done. continue as usual
+					{
+						m_aClients[ClientID].m_State = CClient::STATE_POSTSPOOFCHECK;
+						dbg_msg(0, "done");
+					}
+
+					return;
+				}
+				else if(m_aClients[ClientID].m_State == CClient::STATE_POSTSPOOFCHECK)
+				{//Too many noncenumbers sent
+					m_NetServer.Drop(ClientID, "Kicked by spoofprotection. Please try again!");
+					return;
+				}
+			}
+
 			if(m_aClients[ClientID].m_State < CClient::STATE_CONNECTING)
 				return; // no map w/o password, sorry guys
 
@@ -1046,16 +1113,21 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			} else
 			if(Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-				m_RconClientID = ClientID;
-				m_RconAuthLevel = m_aClients[ClientID].m_Authed;
-				Console()->SetAccessLevel(m_aClients[ClientID].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientID].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_USER);
-				Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientID);
-				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
-				m_RconClientID = IServer::RCON_CID_SERV;
-				m_RconAuthLevel = AUTHED_ADMIN;
+				CGameContext *GameServer = (CGameContext *) m_pGameServer;
+				if (GameServer->m_apPlayers[ClientID] && (GameServer->m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_RCONPROTECT || m_aClients[ClientID].m_LastAuthed))
+				{
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+					m_RconClientID = ClientID;
+					m_RconAuthLevel = m_aClients[ClientID].m_Authed;
+					Console()->SetAccessLevel(m_aClients[ClientID].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientID].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_USER);
+					Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientID);
+					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+					m_RconClientID = IServer::RCON_CID_SERV;
+					m_RconAuthLevel = AUTHED_ADMIN;
+					m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
+				}
 			}
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
@@ -1072,43 +1144,49 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 				else if(g_Config.m_SvRconPassword[0] && str_comp(pPw, g_Config.m_SvRconPassword) == 0)
 				{
-					CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-					Msg.AddInt(1);	//authed
-					Msg.AddInt(1);	//cmdlist
-					SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
+					m_aClients[ClientID].m_LastAuthed = AUTHED_ADMIN;
+					if(m_aClients[ClientID].m_Authed != AUTHED_ADMIN)
+					{
+						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
+						Msg.AddInt(1);	//authed
+						Msg.AddInt(1);	//cmdlist
+						SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 
-					m_aClients[ClientID].m_Authed = AUTHED_ADMIN;
-					int SendRconCmds = Unpacker.GetInt();
-					if(Unpacker.Error() == 0 && SendRconCmds)
-						m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_ADMIN, CFGFLAG_SERVER);
-					SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (admin)", ClientID);
-					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+						m_aClients[ClientID].m_Authed = AUTHED_ADMIN;
+						int SendRconCmds = Unpacker.GetInt();
+						if(Unpacker.Error() == 0 && SendRconCmds)
+							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_ADMIN, CFGFLAG_SERVER);
+						SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (admin)", ClientID);
+						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
-					// DDRace
-
-					GameServer()->OnSetAuthed(ClientID, AUTHED_ADMIN);
+						// DDRace
+						GameServer()->OnSetAuthed(ClientID, AUTHED_ADMIN);
+					}
 				}
 				else if(g_Config.m_SvRconModPassword[0] && str_comp(pPw, g_Config.m_SvRconModPassword) == 0)
 				{
-					CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-					Msg.AddInt(1);	//authed
-					Msg.AddInt(1);	//cmdlist
-					SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
+					m_aClients[ClientID].m_LastAuthed = AUTHED_MOD;
+					if(m_aClients[ClientID].m_Authed != AUTHED_MOD)
+					{
+						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
+						Msg.AddInt(1);	//authed
+						Msg.AddInt(1);	//cmdlist
+						SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 
-					m_aClients[ClientID].m_Authed = AUTHED_MOD;
-					int SendRconCmds = Unpacker.GetInt();
-					if(Unpacker.Error() == 0 && SendRconCmds)
-						m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_MOD, CFGFLAG_SERVER);
-					SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (moderator)", ClientID);
-					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+						m_aClients[ClientID].m_Authed = AUTHED_MOD;
+						int SendRconCmds = Unpacker.GetInt();
+						if(Unpacker.Error() == 0 && SendRconCmds)
+							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_MOD, CFGFLAG_SERVER);
+						SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (moderator)", ClientID);
+						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
-					// DDRace
-
-					GameServer()->OnSetAuthed(ClientID, AUTHED_MOD);
+						// DDRace
+						GameServer()->OnSetAuthed(ClientID, AUTHED_MOD);
+					}
 				}
 				else if(g_Config.m_SvRconMaxTries)
 				{
@@ -1369,6 +1447,20 @@ void CServer::PumpNetwork()
 
 	m_ServerBan.Update();
 	m_Econ.Update();
+
+	if(g_Config.m_SvSpoofProtection)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_aClients[i].m_State == CClient::STATE_POSTSPOOFCHECK)
+			//if(m_aClients[i].m_State == CClient::STATE_POSTSPOOFCHECK &&
+			//	m_aClients[i].m_LastNonceCount+TickSpeed() < Tick())
+			{ // when the time is over: continue joining process
+				m_aClients[i].m_State = CClient::STATE_CONNECTING;
+				SendMap(i);
+			}
+		}
+	}
 }
 
 char *CServer::GetMapName()
@@ -1612,7 +1704,12 @@ int CServer::Run()
 
 			// wait for incoming data
 			if (NonActive)
-				net_socket_read_wait(m_NetServer.Socket(), 1000);
+			{
+				if(g_Config.m_SvShutdownWhenEmpty)
+					m_RunServer = false;
+				else
+					net_socket_read_wait(m_NetServer.Socket(), 1000);
+			}
 			else
 				net_socket_read_wait(m_NetServer.Socket(), 5);
 		}
@@ -1746,6 +1843,7 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 		pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, pServer->m_RconClientID, true);
 
 		pServer->m_aClients[pServer->m_RconClientID].m_Authed = AUTHED_NO;
+		pServer->m_aClients[pServer->m_RconClientID].m_LastAuthed = AUTHED_NO;
 		pServer->m_aClients[pServer->m_RconClientID].m_AuthTries = 0;
 		pServer->m_aClients[pServer->m_RconClientID].m_pRconCmdToSend = 0;
 		pServer->SendRconLine(pServer->m_RconClientID, "Logout successful.");
