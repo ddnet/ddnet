@@ -53,11 +53,118 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const float NameBarHeight = 20.0f;
 	const float Margins = 5.0f;
 	float TotalHeight;
+	static int64 LastSpeedChange = 0;
+
+	// render popups
+	if (m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
+	{
+		CUIRect Screen = *UI()->Screen();
+		CUIRect Box, Part;
+		Box = Screen;
+		Box.VMargin(150.0f/UI()->Scale(), &Box);
+#if defined(__ANDROID__)
+		Box.HMargin(100.0f/UI()->Scale(), &Box);
+#else
+		Box.HMargin(150.0f/UI()->Scale(), &Box);
+#endif
+
+		// render the box
+		RenderTools()->DrawUIRect(&Box, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
+
+		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
+		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
+		UI()->DoLabelScaled(&Part, "Select a name", 24.f, 0);
+		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
+		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
+		Part.VMargin(20.f/UI()->Scale(), &Part);
+
+
+		CUIRect Label, TextBox, Ok, Abort;
+
+		Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+		Box.HSplitBottom(60.f, &Box, &Part);
+#else
+		Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+		Part.VMargin(80.0f, &Part);
+
+		Part.VSplitMid(&Abort, &Ok);
+
+		Ok.VMargin(20.0f, &Ok);
+		Abort.VMargin(20.0f, &Abort);
+
+		static int s_ButtonAbort = 0;
+		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+			m_DemoPlayerState = DEMOPLAYER_NONE;
+
+		static int s_ButtonOk = 0;
+		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
+		{
+			m_DemoPlayerState = DEMOPLAYER_NONE;
+		
+			char aPath[512];
+			str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
+			Client()->DemoSlice(aPath);
+		}
+
+		Box.HSplitBottom(60.f, &Box, &Part);
+#if defined(__ANDROID__)
+		Box.HSplitBottom(60.f, &Box, &Part);
+#else
+		Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+
+		Part.VSplitLeft(60.0f, 0, &Label);
+		Label.VSplitLeft(120.0f, 0, &TextBox);
+		TextBox.VSplitLeft(20.0f, 0, &TextBox);
+		TextBox.VSplitRight(60.0f, &TextBox, 0);
+		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, -1);
+		static float Offset = 0.0f;
+		DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
+
+	}
+
+	// handle mousewheel independent of active menu
+	if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+	{
+		if(pInfo->m_Speed < 0.1f) DemoPlayer()->SetSpeed(0.1f);
+		else if(pInfo->m_Speed < 0.25f) DemoPlayer()->SetSpeed(0.25f);
+		else if(pInfo->m_Speed < 0.5f) DemoPlayer()->SetSpeed(0.5f);
+		else if(pInfo->m_Speed < 0.75f) DemoPlayer()->SetSpeed(0.75f);
+		else if(pInfo->m_Speed < 1.0f) DemoPlayer()->SetSpeed(1.0f);
+		else if(pInfo->m_Speed < 2.0f) DemoPlayer()->SetSpeed(2.0f);
+		else if(pInfo->m_Speed < 4.0f) DemoPlayer()->SetSpeed(4.0f);
+		else DemoPlayer()->SetSpeed(8.0f);
+		LastSpeedChange = time_get();
+	}
+	else if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+	{
+		if(pInfo->m_Speed > 4.0f) DemoPlayer()->SetSpeed(4.0f);
+		else if(pInfo->m_Speed > 2.0f) DemoPlayer()->SetSpeed(2.0f);
+		else if(pInfo->m_Speed > 1.0f) DemoPlayer()->SetSpeed(1.0f);
+		else if(pInfo->m_Speed > 0.75f) DemoPlayer()->SetSpeed(0.75f);
+		else if(pInfo->m_Speed > 0.5f) DemoPlayer()->SetSpeed(0.5f);
+		else if(pInfo->m_Speed > 0.25f) DemoPlayer()->SetSpeed(0.25f);
+		else if(pInfo->m_Speed > 0.1f) DemoPlayer()->SetSpeed(0.1f);
+		else DemoPlayer()->SetSpeed(0.05f);
+		LastSpeedChange = time_get();
+	}
+
+	TotalHeight = SeekBarHeight+ButtonbarHeight+NameBarHeight+Margins*3;
+
+	// render speed info
+	if (g_Config.m_ClDemoShowSpeed && time_get() - LastSpeedChange < time_freq() * 1)
+	{
+		CUIRect Screen = *UI()->Screen();
+
+		char aSpeedBuf[256];
+		str_format(aSpeedBuf, sizeof(aSpeedBuf), "x%.2f", pInfo->m_Speed);
+		TextRender()->Text(0, 120.0f, Screen.y+Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1);
+	}
 
 	if(!m_MenuActive)
 		return;
-
-	TotalHeight = SeekBarHeight+ButtonbarHeight+NameBarHeight+Margins*3;
 
 	MainView.HSplitBottom(TotalHeight, 0, &MainView);
 	MainView.VSplitLeft(50.0f, 0, &MainView);
@@ -100,6 +207,31 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			IGraphics::CQuadItem QuadItem(SeekBar.x + (SeekBar.w-10.0f)*Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+
+		// draw slice markers
+		// begin
+		if (g_Config.m_ClDemoSliceBegin != -1)
+		{
+			float Ratio = (g_Config.m_ClDemoSliceBegin-pInfo->m_FirstTick) / (float)TotalTicks;
+			Graphics()->TextureSet(-1);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w-10.0f)*Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+
+		// end
+		if (g_Config.m_ClDemoSliceEnd != -1)
+		{
+			float Ratio = (g_Config.m_ClDemoSliceEnd-pInfo->m_FirstTick) / (float)TotalTicks;
+			Graphics()->TextureSet(-1);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w-10.0f)*Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -223,6 +355,31 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		str_format(aBuffer, sizeof(aBuffer), "x%.2f", pInfo->m_Speed);
 	UI()->DoLabel(&ButtonBar, aBuffer, Button.h*0.7f, -1);
 
+	// slice begin button
+	ButtonBar.VSplitLeft(Margins*10, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static int s_SliceBeginButton = 0;
+	if(DoButton_Sprite(&s_SliceBeginButton, IMAGE_DEMOBUTTONS2, SPRITE_DEMOBUTTON_SLICE_BEGIN, 0, &Button, CUI::CORNER_ALL))
+		Client()->DemoSliceBegin();
+
+	// slice end button
+	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static int s_SliceEndButton = 0;
+	if(DoButton_Sprite(&s_SliceEndButton, IMAGE_DEMOBUTTONS2, SPRITE_DEMOBUTTON_SLICE_END, 0, &Button, CUI::CORNER_ALL))
+		Client()->DemoSliceEnd();
+
+	// slice save button
+	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static int s_SliceSaveButton = 0;
+	if(DoButton_Sprite(&s_SliceSaveButton, IMAGE_FILEICONS, SPRITE_FILE_DEMO2, 0, &Button, CUI::CORNER_ALL))
+	{
+		str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
+		//Client()->DemoSlice();
+	}
+
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight*3, &ButtonBar, &Button);
 	static int s_ExitButton = 0;
@@ -239,7 +396,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	Cursor.m_LineWidth = MainView.w;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
-	if(IncreaseDemoSpeed || Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+	if(IncreaseDemoSpeed)
 	{
 		if(pInfo->m_Speed < 0.1f) DemoPlayer()->SetSpeed(0.1f);
 		else if(pInfo->m_Speed < 0.25f) DemoPlayer()->SetSpeed(0.25f);
@@ -249,8 +406,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		else if(pInfo->m_Speed < 2.0f) DemoPlayer()->SetSpeed(2.0f);
 		else if(pInfo->m_Speed < 4.0f) DemoPlayer()->SetSpeed(4.0f);
 		else DemoPlayer()->SetSpeed(8.0f);
+		LastSpeedChange = time_get();
 	}
-	else if(DecreaseDemoSpeed || Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+	else if(DecreaseDemoSpeed)
 	{
 		if(pInfo->m_Speed > 4.0f) DemoPlayer()->SetSpeed(4.0f);
 		else if(pInfo->m_Speed > 2.0f) DemoPlayer()->SetSpeed(2.0f);
@@ -260,6 +418,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		else if(pInfo->m_Speed > 0.25f) DemoPlayer()->SetSpeed(0.25f);
 		else if(pInfo->m_Speed > 0.1f) DemoPlayer()->SetSpeed(0.1f);
 		else DemoPlayer()->SetSpeed(0.05f);
+		LastSpeedChange = time_get();
 	}
 }
 

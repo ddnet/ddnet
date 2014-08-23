@@ -156,6 +156,10 @@ public:
 	virtual const char* RaceRecordStart(const char *pFilename) = 0;
 	virtual void RaceRecordStop() = 0;
 	virtual bool DemoIsRecording() = 0;
+
+	virtual void DemoSliceBegin() = 0;
+	virtual void DemoSliceEnd() = 0;
+	virtual void DemoSlice(const char *pDstPath) = 0;
 };
 
 class IGameClient : public IInterface

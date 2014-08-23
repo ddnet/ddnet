@@ -77,6 +77,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CNetClient m_NetClient[3];
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder;
+	class CDemoEditor m_DemoEditor;
 	class CServerBrowser m_ServerBrowser;
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	class CAutoUpdate m_AutoUpdate;
@@ -322,6 +323,10 @@ public:
 	static void Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
+	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
+	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);
+
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType);
@@ -342,5 +347,9 @@ public:
 	virtual const char* RaceRecordStart(const char *pFilename);
 	virtual void RaceRecordStop();
 	virtual bool DemoIsRecording();
+
+	virtual void DemoSliceBegin();
+	virtual void DemoSliceEnd();
+	virtual void DemoSlice(const char *pDstPath);
 };
 #endif

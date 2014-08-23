@@ -2360,7 +2360,11 @@ void CClient::InitInterfaces()
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
+
+	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
+	
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
+
 	m_Friends.Init();
 
 	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
@@ -2783,6 +2787,39 @@ void CClient::Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_ServerBrowser.RemoveFavorite(Addr);
 }
 
+void CClient::DemoSliceBegin()
+{
+	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
+	g_Config.m_ClDemoSliceBegin = pInfo->m_Info.m_CurrentTick;
+}
+
+void CClient::DemoSliceEnd()
+{
+	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
+	g_Config.m_ClDemoSliceEnd = pInfo->m_Info.m_CurrentTick;
+}
+
+void CClient::Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->DemoSliceBegin();	
+}
+
+void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->DemoSliceEnd();
+}
+
+void CClient::DemoSlice(const char *pDstPath)
+{
+	if (m_DemoPlayer.IsPlaying())
+	{
+		const char *pDemoFileName = m_DemoPlayer.GetDemoFileName();
+		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd);
+	}
+}
+
 const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
 	int Crc;
@@ -2950,6 +2987,8 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("add_demomarker", "", CFGFLAG_CLIENT, Con_AddDemoMarker, this, "Add demo timeline marker");
 	m_pConsole->Register("add_favorite", "s", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite");
 	m_pConsole->Register("remove_favorite", "s", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites");
+	m_pConsole->Register("demo_slice_start", "", CFGFLAG_CLIENT, Con_DemoSliceBegin, this, "");
+	m_pConsole->Register("demo_slice_end", "", CFGFLAG_CLIENT, Con_DemoSliceEnd, this, "");
 
 	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
