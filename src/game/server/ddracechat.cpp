@@ -1221,16 +1221,15 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	int CurrTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime) / ((float) pSelf->Server()->TickSpeed()));
-	if(g_Config.m_SvKillProtectionDelay != 0 && CurrTime >= (60 * g_Config.m_SvKillProtectionDelay) && pPlayer->GetCharacter()->m_DDRaceState == DDRACE_STARTED)
+	if(g_Config.m_SvKillProtectionDelay != 0 && CurrTime >= (60 * g_Config.m_SvKillProtectionDelay) && pChr->m_DDRaceState == DDRACE_STARTED)
 	{
 			pPlayer->KillCharacter(WEAPON_SELF);
 
-			char aBuf[64];
+			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "You killed yourself in: %s%d:%s%d",
-					pSelf->Server()->ClientName(pPlayer->GetCID()),
 					((CurrTime / 60) > 9) ? "" : "0", CurrTime / 60,
 					((CurrTime % 60) > 9) ? "" : "0", CurrTime % 60);
-			pSelf->SendChatTarget(pPlayer->GetCID(), aBuf);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
 #if defined(CONF_SQL)
