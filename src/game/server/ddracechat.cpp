@@ -1225,7 +1225,7 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	{
 			pPlayer->KillCharacter(WEAPON_SELF);
 
-			char aBuf[128];
+			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "You killed yourself in: %s%d:%s%d",
 					((CurrTime / 60) > 9) ? "" : "0", CurrTime / 60,
 					((CurrTime % 60) > 9) ? "" : "0", CurrTime % 60);
