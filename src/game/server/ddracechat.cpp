@@ -1209,7 +1209,30 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	}
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 }
+void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData){
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+	CCharacter* pChr = pPlayer->GetCharacter();
+	if (!pChr)
+		return;
 
+	int CurrTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime) / ((float) pSelf->Server()->TickSpeed()));
+	if(g_Config.m_SvKillProtectionDelay != 0 && CurrTime >= (60 * g_Config.m_SvKillProtectionDelay) && pPlayer->GetCharacter()->m_DDRaceState == DDRACE_STARTED)
+	{
+			pPlayer->KillCharacter(WEAPON_SELF);
+
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "You killed yourself in: %s%d:%s%d",
+					pSelf->Server()->ClientName(pPlayer->GetCID()),
+					((CurrTime / 60) > 9) ? "" : "0", CurrTime / 60,
+					((CurrTime % 60) > 9) ? "" : "0", CurrTime % 60);
+			pSelf->SendChatTarget(pPlayer->GetCID(), aBuf);
+	}
+}
 #if defined(CONF_SQL)
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {
