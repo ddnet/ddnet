@@ -313,6 +313,7 @@ public:
 	void setPopup(int Popup) { m_Popup = Popup; }
 
 	int m_DemoPlayerState;
+	char m_aDemoPlayerPopupHint[256];
 
 	enum
 	{
