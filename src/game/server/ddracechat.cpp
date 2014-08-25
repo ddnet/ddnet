@@ -22,9 +22,7 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Many ideas from the great community,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-		"64 player support from eeeee's ddrace64.");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-		"Help and code by HMH, east, CookieMichal & many others.");
+		"Help and code by eeeee, HMH, east, CookieMichal, Savander & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
@@ -298,7 +296,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 				"No Rules Defined, Kill em all!!");
 }
 
-void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
@@ -307,7 +305,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 
 	if(!g_Config.m_SvPauseable)
 	{
-		ConToggleSpec(pResult, pUserData);
+		ConTogglePause(pResult, pUserData);
 		return;
 	}
 
@@ -318,12 +316,12 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 	if (pPlayer->GetCharacter() == 0)
 	{
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "pause",
-	"You can't pause while you are dead/a spectator.");
+	"You can't spec while you are dead/a spectator.");
 	return;
 	}
 	if (pPlayer->m_Paused == CPlayer::PAUSED_SPEC && g_Config.m_SvPauseable)
 	{
-		ConToggleSpec(pResult, pUserData);
+		ConTogglePause(pResult, pUserData);
 		return;
 	}
 
@@ -337,7 +335,7 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->m_Paused = (pPlayer->m_Paused == CPlayer::PAUSED_PAUSED) ? CPlayer::PAUSED_NONE : CPlayer::PAUSED_PAUSED;
 }
 
-void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID)) return;
@@ -350,7 +348,7 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 	if (pPlayer->GetCharacter() == 0)
 	{
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec",
-	"You can't spec while you are dead/a spectator.");
+	"You can't pause while you are dead/a spectator.");
 	return;
 	}
 
@@ -1209,7 +1207,29 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	}
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 }
+void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData){
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+	CCharacter* pChr = pPlayer->GetCharacter();
+	if (!pChr)
+		return;
 
+	int CurrTime = (pSelf->Server()->Tick() - pChr->m_StartTime) / pSelf->Server()->TickSpeed();
+	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
+	{
+			pPlayer->KillCharacter(WEAPON_SELF);
+
+			//char aBuf[64];
+			//str_format(aBuf, sizeof(aBuf), "You killed yourself in: %s%d:%s%d",
+			//		((CurrTime / 60) > 9) ? "" : "0", CurrTime / 60,
+			//		((CurrTime % 60) > 9) ? "" : "0", CurrTime % 60);
+			//pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+}
 #if defined(CONF_SQL)
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {

@@ -128,13 +128,12 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 		if(Multiple)
 			str_append(aBuffer, ", ", sizeof(aBuffer));
-		if(m_IsGameTypeRace)
-			if (g_Config.m_ClShowIDs)
-			{
-				char aId[4];
-				str_format(aId,sizeof(aId),"%d:",pInfo->m_ClientID);
-				str_append(aBuffer, aId, sizeof(aBuffer));
-			}
+		if(g_Config.m_ClShowIDs)
+		{
+			char aId[4];
+			str_format(aId,sizeof(aId),"%d:",pInfo->m_ClientID);
+			str_append(aBuffer, aId, sizeof(aBuffer));
+		}
 		str_append(aBuffer, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, sizeof(aBuffer));
 		Multiple = true;
 	}
@@ -448,7 +447,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		if (m_IsGameTypeRace && g_Config.m_ClShowIDs)
+		if(g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
 			str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientID);

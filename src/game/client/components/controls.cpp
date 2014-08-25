@@ -100,7 +100,7 @@ void CControls::OnRelease()
 
 void CControls::OnPlayerDeath()
 {
-	m_LastData[g_Config.m_ClDummy].m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
+	//m_LastData[g_Config.m_ClDummy].m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon = 0;
 	for( int i = 0; i < NUM_WEAPONS; i++ )
 		m_AmmoCount[i] = 0;
 	m_JoystickTapTime = 0; // Do not launch hook on first tap
