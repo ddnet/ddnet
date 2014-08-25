@@ -1480,9 +1480,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pPlayer->m_Paused)
 				return;
 
+			CCharacter* pChr = pPlayer->GetCharacter();
+			if(!pChr)
+				return;
+
 			//Kill Protection
-			int CurrTime = (Server()->Tick() - pPlayer->GetCharacter()->m_StartTime) / Server()->TickSpeed();
-			if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pPlayer->GetCharacter()->m_DDRaceState == DDRACE_STARTED)
+			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
+			if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 			{
 				SendChatTarget(ClientID, "Kill Protection enabled. If you really want to kill, write /kill");
 				return;
