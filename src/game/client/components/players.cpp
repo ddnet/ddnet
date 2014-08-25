@@ -234,6 +234,10 @@ void CPlayers::RenderHook(
 	CNetObj_PlayerInfo pInfo = *pPlayerInfo;
 	CTeeRenderInfo RenderInfo = m_aRenderInfo[pInfo.m_ClientID];
 
+	// don't render hooks to not active character cores
+	if (pPlayerChar->m_HookedPlayer != -1 && !m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Active)
+		return;
+
 	float IntraTick = Client()->IntraGameTick();
 
 	bool OtherTeam;
