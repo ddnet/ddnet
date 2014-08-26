@@ -17,7 +17,6 @@ protected:
 	class IKernel *Kernel() const { return m_pClient->Kernel(); }
 	class IGraphics *Graphics() const { return m_pClient->Graphics(); }
 	class ITextRender *TextRender() const { return m_pClient->TextRender(); }
-	class IClient *Client() const { return m_pClient->Client(); }
 	class IInput *Input() const { return m_pClient->Input(); }
 	class IStorage *Storage() const { return m_pClient->Storage(); }
 	class CUI *UI() const { return m_pClient->UI(); }
@@ -34,6 +33,7 @@ protected:
 	class CCollision *Collision() const { return m_pClient->Collision(); }
 public:
 	virtual ~CComponent() {}
+	class IClient *Client() const { return m_pClient->Client(); }
 
 	virtual void OnStateChange(int NewState, int OldState) {};
 	virtual void OnConsoleInit() {};

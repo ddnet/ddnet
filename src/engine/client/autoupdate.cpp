@@ -313,7 +313,7 @@ void CAutoUpdate::DoUpdates(CMenus *pMenus)
 	{
 		if (m_NeedUpdateClient)
 		{
-			pMenus->setPopup(CMenus::POPUP_QUIT);
+			pMenus->Client()->Quit();
 			return;
 		}
 

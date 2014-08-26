@@ -1075,7 +1075,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_AUTOUPDATE)
 		{
 			pTitle = Localize("Auto-Update");
-			pExtraText = Localize("An update to DDNet client is available. Do you want to update now? This may restart the client. If an update fails, make sure the client has permissions to modify files.");
+			pExtraText = Localize("An update to DDNet client is available. Do you want to update now? This will restart the client. If an update fails, make sure the client has permissions to modify files.");
 			ExtraAlign = -1;
 		}
 #endif
