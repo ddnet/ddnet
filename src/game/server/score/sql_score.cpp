@@ -174,6 +174,9 @@ void CSqlScore::Init()
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
 			m_pStatement->execute(aBuf);
 
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
+			m_pStatement->execute(aBuf);
+
 			dbg_msg("SQL", "Tables were created successfully");
 
 			// get the best time
@@ -599,6 +602,9 @@ void CSqlScore::SaveScoreThread(void *pUser)
 					else
 						str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", points);
 					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+
+					str_format(aBuf, sizeof(aBuf), "INSERT INTO %s_points(Name, Points) VALUES ('%s', '%d') ON duplicate key UPDATE Name=VALUES(Name), Points=Points+VALUES(Points);", pData->m_pSqlData->m_pPrefix, pData->m_aName, points);
+					pData->m_pSqlData->m_pStatement->execute(aBuf);
 				}
 			}
 
