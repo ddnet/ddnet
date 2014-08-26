@@ -3102,7 +3102,16 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->InitInterfaces();
 
 	// execute config file
-	pConsole->ExecuteFile("settings.cfg");
+	IOHANDLE file = pStorage->OpenFile("settings_ddnet.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
+	if(file)
+	{
+		io_close(file);
+		pConsole->ExecuteFile("settings_ddnet.cfg");
+	}
+	else // fallback
+	{
+		pConsole->ExecuteFile("settings.cfg");
+	}
 
 	// execute autoexec file
 	pConsole->ExecuteFile("autoexec.cfg");
