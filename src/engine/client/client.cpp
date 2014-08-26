@@ -420,7 +420,9 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 
 void CClient::Rcon(const char *pCmd)
 {
-	if(RconAuthed())
+	CServerInfo Info;
+	GetServerInfo(&Info);
+	if(RconAuthed() && str_find_nocase(Info.m_aGameType, "ddracenetw"))
 	{ // Against IP spoofing on DDNet servers
 		CMsgPacker Msg(NETMSG_RCON_AUTH);
 		Msg.AddString("", 32);
