@@ -28,7 +28,9 @@ CControls::CControls()
 	m_LastDummy = 0;
 	m_OtherFire = 0;
 
+#if !defined(__ANDROID__)
 	if (g_Config.m_InpJoystick)
+#endif
 	{
 		SDL_Init(SDL_INIT_JOYSTICK);
 		m_Joystick = SDL_JoystickOpen(0);
@@ -48,12 +50,14 @@ CControls::CControls()
 			m_UsingGamepad = true;
 #endif
 	}
+#if !defined(__ANDROID__)
 	else
 	{
 		m_Joystick = NULL;
 		m_Gamepad = NULL;
 		m_UsingGamepad = false;
 	}
+#endif
 }
 
 void CControls::OnReset()
