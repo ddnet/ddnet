@@ -49,8 +49,11 @@ CControls::CControls()
 #endif
 	}
 	else
+	{
 		m_Joystick = NULL;
+		m_Gamepad = NULL;
 		m_UsingGamepad = false;
+	}
 }
 
 void CControls::OnReset()
