@@ -43,6 +43,7 @@
 #include <engine/shared/protocol.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/fifoconsole.h>
 
 #include <game/version.h>
 
@@ -66,6 +67,8 @@
 #ifdef main
 #undef main
 #endif
+
+bool IsClient = true;
 
 void CGraph::Init(float Min, float Max)
 {
@@ -3125,9 +3128,17 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pClient->Engine()->InitLogfile();
 
+#if defined(CONF_FAMILY_UNIX)
+        FifoConsole *fifoConsole = new FifoConsole(pConsole);
+#endif
+
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
+
+#if defined(CONF_FAMILY_UNIX)
+	delete fifoConsole;
+#endif
 
 	// write down the config and quit
 	pConfig->Save();

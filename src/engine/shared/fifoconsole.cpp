@@ -5,9 +5,12 @@
 #include <fstream>
 
 #if defined(CONF_FAMILY_UNIX)
+
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+extern bool IsClient;
 
 FifoConsole::FifoConsole(IConsole *pConsole)
 {
@@ -19,13 +22,19 @@ void FifoConsole::ListenFifoThread(void *pUser)
 {
 	IConsole *pConsole = (IConsole *)pUser;
 
-	if (str_comp(g_Config.m_SvInputFifo, "") == 0)
+        char *fifofile;
+	if (IsClient)
+		fifofile = g_Config.m_ClInputFifo;
+        else
+                fifofile = g_Config.m_SvInputFifo;
+
+	if (str_comp(fifofile, "") == 0)
 		return;
 
-	mkfifo(g_Config.m_SvInputFifo, 0600);
+	mkfifo(fifofile, 0600);
 
 	struct stat attribute;
-	stat(g_Config.m_SvInputFifo, &attribute);
+	stat(fifofile, &attribute);
 
 	if(!S_ISFIFO(attribute.st_mode))
 		return;
@@ -35,10 +44,13 @@ void FifoConsole::ListenFifoThread(void *pUser)
 
 	while (true)
 	{
-		f.open(g_Config.m_SvInputFifo);
+		f.open(fifofile);
 		while (f.getline(aBuf, sizeof(aBuf)))
 		{
-			pConsole->ExecuteLineFlag(aBuf, CFGFLAG_SERVER, -1);
+			if (IsClient)
+				pConsole->ExecuteLineFlag(aBuf, CFGFLAG_CLIENT, -1);
+			else
+				pConsole->ExecuteLineFlag(aBuf, CFGFLAG_SERVER, -1);
 		}
 		f.close();
 	}
