@@ -10,31 +10,26 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-extern bool IsClient;
-
-FifoConsole::FifoConsole(IConsole *pConsole)
+FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 {
-	void *m_pFifoThread = thread_create(ListenFifoThread, pConsole);
+	void *m_pFifoThread = thread_create(ListenFifoThread, this);
+	m_pConsole = pConsole;
+	m_pFifoFile = pFifoFile;
+	m_flag = flag;
 	pthread_detach((pthread_t)m_pFifoThread);
 }
 
 void FifoConsole::ListenFifoThread(void *pUser)
 {
-	IConsole *pConsole = (IConsole *)pUser;
+	FifoConsole *pData = (FifoConsole *)pUser;
 
-        char *fifofile;
-	if (IsClient)
-		fifofile = g_Config.m_ClInputFifo;
-        else
-                fifofile = g_Config.m_SvInputFifo;
-
-	if (str_comp(fifofile, "") == 0)
+	if (str_comp(pData->m_pFifoFile, "") == 0)
 		return;
 
-	mkfifo(fifofile, 0600);
+	mkfifo(pData->m_pFifoFile, 0600);
 
 	struct stat attribute;
-	stat(fifofile, &attribute);
+	stat(pData->m_pFifoFile, &attribute);
 
 	if(!S_ISFIFO(attribute.st_mode))
 		return;
@@ -44,14 +39,9 @@ void FifoConsole::ListenFifoThread(void *pUser)
 
 	while (true)
 	{
-		f.open(fifofile);
+		f.open(pData->m_pFifoFile);
 		while (f.getline(aBuf, sizeof(aBuf)))
-		{
-			if (IsClient)
-				pConsole->ExecuteLineFlag(aBuf, CFGFLAG_CLIENT, -1);
-			else
-				pConsole->ExecuteLineFlag(aBuf, CFGFLAG_SERVER, -1);
-		}
+			pData->m_pConsole->ExecuteLineFlag(aBuf, pData->m_flag, -1);
 		f.close();
 	}
 }

@@ -68,8 +68,6 @@
 #undef main
 #endif
 
-bool IsClient = true;
-
 void CGraph::Init(float Min, float Max)
 {
 	m_Min = Min;
@@ -3129,7 +3127,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->Engine()->InitLogfile();
 
 #if defined(CONF_FAMILY_UNIX)
-        FifoConsole *fifoConsole = new FifoConsole(pConsole);
+	FifoConsole *fifoConsole = new FifoConsole(pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 #endif
 
 	// run the client

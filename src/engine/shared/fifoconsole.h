@@ -8,10 +8,13 @@
 class FifoConsole
 {
 	static void ListenFifoThread(void *pUser);
+	IConsole *m_pConsole;
 	void *m_pFifoThread;
+	char *m_pFifoFile;
+	int m_flag;
 
 public:
-	FifoConsole(IConsole *pConsole);
+	FifoConsole(IConsole *pConsole, char *pFifoFile, int flag);
 };
 #endif
 

@@ -42,8 +42,6 @@
 	#include <windows.h>
 #endif
 
-bool IsClient = false;
-
 static const char *StrLtrim(const char *pStr)
 {
 	while(*pStr)
@@ -2032,7 +2030,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pEngine->InitLogfile();
 
 #if defined(CONF_FAMILY_UNIX)
-	FifoConsole *fifoConsole = new FifoConsole(pConsole);
+	FifoConsole *fifoConsole = new FifoConsole(pConsole, g_Config.m_SvInputFifo, CFGFLAG_SERVER);
 #endif
 
 	// run the server
