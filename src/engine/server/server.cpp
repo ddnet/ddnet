@@ -23,6 +23,7 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/fifoconsole.h>
 
 #include <mastersrv/mastersrv.h>
 
@@ -34,13 +35,14 @@
 
 #include "register.h"
 #include "server.h"
-#include "fifoconsole.h"
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
+
+bool IsClient = false;
 
 static const char *StrLtrim(const char *pStr)
 {

@@ -4,6 +4,7 @@
 #include <engine/console.h>
 
 #if defined(CONF_FAMILY_UNIX)
+
 class FifoConsole
 {
 	static void ListenFifoThread(void *pUser);
