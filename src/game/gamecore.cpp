@@ -472,6 +472,79 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			m_NewHook = false;
 		}
 		
+		int Index = MapIndex;
+		if(g_Config.m_ClPredictDDRace && IsClient && m_pCollision->IsSpeedup(Index))
+		{
+			vec2 Direction, MaxVel, TempVel = m_Vel;
+			int Force, MaxSpeed = 0;
+			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
+			m_pCollision->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
+			if(Force == 255 && MaxSpeed)
+			{
+				m_Vel = Direction * (MaxSpeed/5);
+			}
+			else
+			{
+				if(MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
+				//dbg_msg("speedup tile start","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
+				if(MaxSpeed > 0)
+				{
+					if(Direction.x > 0.0000001f)
+						SpeederAngle = -atan(Direction.y / Direction.x);
+					else if(Direction.x < 0.0000001f)
+						SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+					else if(Direction.y > 0.0000001f)
+						SpeederAngle = asin(1.0f);
+					else
+						SpeederAngle = asin(-1.0f);
+
+					if(SpeederAngle < 0)
+						SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+
+					if(TempVel.x > 0.0000001f)
+						TeeAngle = -atan(TempVel.y / TempVel.x);
+					else if(TempVel.x < 0.0000001f)
+						TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+					else if(TempVel.y > 0.0000001f)
+						TeeAngle = asin(1.0f);
+					else
+						TeeAngle = asin(-1.0f);
+
+					if(TeeAngle < 0)
+						TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+
+					TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+
+					DiffAngle = SpeederAngle - TeeAngle;
+					SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
+					//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
+					if(abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+						TempVel += Direction * Force;
+					else if(abs(SpeedLeft) > Force)
+						TempVel += Direction * -Force;
+					else
+						TempVel += Direction * SpeedLeft;
+				}
+				else
+					TempVel += Direction * Force;
+
+
+				if(TempVel.x > 0 && ((this->m_TileIndex == TILE_STOP && this->m_TileFlags == ROTATION_270) || (this->m_TileIndexL == TILE_STOP && this->m_TileFlagsL == ROTATION_270) || (this->m_TileIndexL == TILE_STOPS && (this->m_TileFlagsL == ROTATION_90 || this->m_TileFlagsL ==ROTATION_270)) || (this->m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
+					TempVel.x = 0;
+				if(TempVel.x < 0 && ((this->m_TileIndex == TILE_STOP && this->m_TileFlags == ROTATION_90) || (this->m_TileIndexR == TILE_STOP && this->m_TileFlagsR == ROTATION_90) || (this->m_TileIndexR == TILE_STOPS && (this->m_TileFlagsR == ROTATION_90 || this->m_TileFlagsR == ROTATION_270)) || (this->m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)))
+					TempVel.x = 0;
+				if(TempVel.y < 0 && ((this->m_TileIndex == TILE_STOP && this->m_TileFlags == ROTATION_180) || (this->m_TileIndexB == TILE_STOP && this->m_TileFlagsB == ROTATION_180) || (this->m_TileIndexB == TILE_STOPS && (this->m_TileFlagsB == ROTATION_0 || this->m_TileFlagsB == ROTATION_180)) || (this->m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)))
+					TempVel.y = 0;
+				if(TempVel.y > 0 && ((this->m_TileIndex == TILE_STOP && this->m_TileFlags == ROTATION_0) || (this->m_TileIndexT == TILE_STOP && this->m_TileFlagsT == ROTATION_0) || (this->m_TileIndexT == TILE_STOPS && (this->m_TileFlagsT == ROTATION_0 || this->m_TileFlagsT == ROTATION_180)) || (this->m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
+					TempVel.y = 0;
+
+
+				m_Vel = TempVel;
+				//dbg_msg("speedup tile end","(Direction*Force) %f %f   m_Vel%f %f",(Direction*Force).x,(Direction*Force).y,m_Vel.x,m_Vel.y);
+				//dbg_msg("speedup tile end","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
+			}
+		}
+
 		if(IsClient && UseInput && (m_Input.m_Fire&1) && m_ActiveWeapon == WEAPON_GUN) {
 			m_Vel += TargetDirection * -1.0f * (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_JetpackStrength / 100.0f / 6.11f);
 		}

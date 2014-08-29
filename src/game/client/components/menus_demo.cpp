@@ -165,7 +165,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		CUIRect Screen = *UI()->Screen();
 
 		char aSpeedBuf[256];
-		str_format(aSpeedBuf, sizeof(aSpeedBuf), "x%.2f", pInfo->m_Speed);
+		str_format(aSpeedBuf, sizeof(aSpeedBuf), "×%.2f", pInfo->m_Speed);
 		TextRender()->Text(0, 120.0f, Screen.y+Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1);
 	}
 
@@ -356,9 +356,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins*3, 0, &ButtonBar);
 	char aBuffer[64];
 	if(pInfo->m_Speed >= 1.0f)
-		str_format(aBuffer, sizeof(aBuffer), "x%.0f", pInfo->m_Speed);
+		str_format(aBuffer, sizeof(aBuffer), "×%.0f", pInfo->m_Speed);
 	else
-		str_format(aBuffer, sizeof(aBuffer), "x%.2f", pInfo->m_Speed);
+		str_format(aBuffer, sizeof(aBuffer), "×%.2f", pInfo->m_Speed);
 	UI()->DoLabel(&ButtonBar, aBuffer, Button.h*0.7f, -1);
 
 	// slice begin button
