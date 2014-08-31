@@ -754,7 +754,7 @@ int CDemoPlayer::SetPos(float Percent)
 	m_Info.m_PreviousTick = -1;
 
 	// playback everything until we hit our tick
-	while(m_Info.m_PreviousTick < WantedTick)
+	while(m_Info.m_PreviousTick < WantedTick && IsPlaying())
 		DoTick();
 
 	Play();
