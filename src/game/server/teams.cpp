@@ -616,5 +616,5 @@ void CGameTeams::KillTeam(int Team)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 			GameServer()->m_apPlayers[i]->KillCharacter(-2);
 
-	ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+	ChangeTeamState(Team, CGameTeams::TEAMSTATE_EMPTY);
 }
