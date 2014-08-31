@@ -234,6 +234,7 @@ function build(settings)
 			server_settings.link.libs:Add("mysqlcppconn-static")
 			server_settings.link.libs:Add("mysqlclient")
 			server_settings.link.libs:Add("dl")
+			server_settings.link.libs:Add("rt")
 		end
 		
 		if platform == "macosx" then
