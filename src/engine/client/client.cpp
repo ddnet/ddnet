@@ -631,6 +631,8 @@ void CClient::OnEnterGame()
 
 	if (g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
+
+	GameClient()->OnEnterGame();
 }
 
 void CClient::EnterGame()

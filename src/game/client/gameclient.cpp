@@ -751,7 +751,10 @@ void CGameClient::OnShutdown()
 	m_pRaceDemo->OnShutdown();
 }
 
-void CGameClient::OnEnterGame() {}
+void CGameClient::OnEnterGame()
+{
+	g_GameClient.m_pEffects->ResetDamageIndicator();
+}
 
 void CGameClient::OnGameOver()
 {

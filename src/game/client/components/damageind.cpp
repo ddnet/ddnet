@@ -83,5 +83,10 @@ void CDamageInd::OnRender()
 	Graphics()->QuadsEnd();
 }
 
-
-
+void CDamageInd::Reset()
+{
+	for(int i = 0; i < m_NumItems;)
+	{
+		DestroyI(&m_aItems[i]);
+	}
+}
