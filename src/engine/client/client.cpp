@@ -736,7 +736,7 @@ void CClient::DummyConnect()
 	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick())
 		return;
 
-	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE)
+	if(m_NetClient[0].State() != NET_CONNSTATE_ONLINE && m_NetClient[0].State() != NET_CONNSTATE_PENDING)
 		return;
 
 	if(m_DummyConnected)
