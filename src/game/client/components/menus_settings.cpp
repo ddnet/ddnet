@@ -57,7 +57,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
 	MainView.HSplitTop(180.0f, &Game, &Client);
-	Client.HSplitTop(165.0f, &Client, &AutoReconnect);
+	Client.HSplitTop(180.0f, &Client, &AutoReconnect);
 
 	// game
 	{
@@ -120,7 +120,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(g_Config.m_ClNameplates)
 		{
 			Right.HSplitTop(2.5f, 0, &Right);
-			Right.VSplitLeft(30.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClNameplatesAlways, Localize("Always show name plates"), g_Config.m_ClNameplatesAlways, &Button))
 				g_Config.m_ClNameplatesAlways ^= 1;
@@ -160,7 +159,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				g_Config.m_ClAutoScreenshot ^= 1;
 
 			Left.HSplitTop(10.0f, 0, &Left);
-			Left.VSplitLeft(20.0f, 0, &Left);
 			Left.HSplitTop(20.0f, &Label, &Left);
 			Button.VSplitRight(20.0f, &Button, 0);
 			char aBuf[64];
@@ -174,7 +172,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			g_Config.m_ClAutoDemoMax = static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoDemoMax, &Button, g_Config.m_ClAutoDemoMax/1000.0f)*1000.0f+0.1f);
 
 			Right.HSplitTop(10.0f, 0, &Right);
-			Right.VSplitLeft(20.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Button.VSplitRight(20.0f, &Button, 0);
 			if(g_Config.m_ClAutoScreenshotMax)
@@ -237,7 +234,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 
 		Left.HSplitTop(10.0f, 0, &Left);
-		Left.VSplitLeft(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		Button.VSplitRight(20.0f, &Button, 0);
 		char aBuf[64];
@@ -256,7 +252,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if (g_Config.m_ClReconnectBanTimeout < 5)
 			g_Config.m_ClReconnectBanTimeout = 5;
 		Right.HSplitTop(10.0f, 0, &Right);
-		Right.VSplitLeft(20.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Label, &Right);
 		Button.VSplitRight(20.0f, &Button, 0);
 		if (g_Config.m_ClReconnectFullTimeout == 1)
