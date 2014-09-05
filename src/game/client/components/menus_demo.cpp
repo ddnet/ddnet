@@ -390,7 +390,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitRight(ButtonbarHeight*3, &ButtonBar, &Button);
 	static int s_ExitButton = 0;
 	if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button))
+	{
 		Client()->Disconnect();
+		DemolistPopulate();
+		DemolistOnUpdate(false);
+	}
 
 	// demo name
 	char aDemoName[64] = {0};
