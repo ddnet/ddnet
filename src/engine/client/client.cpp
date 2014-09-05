@@ -2635,7 +2635,7 @@ void CClient::Run()
 		if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle);
 			//thread_sleep(g_Config.m_ClCpuThrottle);
-		else if(g_Config.m_DbgStress || !m_pGraphics->WindowActive())
+		else if(g_Config.m_DbgStress || (g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive()))
 			thread_sleep(5);
 
 		if(g_Config.m_DbgHitch)

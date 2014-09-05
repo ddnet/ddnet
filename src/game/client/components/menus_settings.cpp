@@ -207,6 +207,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 	}
 
+	Left.HSplitTop(20.0f, 0, &Left);
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if (DoButton_CheckBox(&g_Config.m_ClCpuThrottleInactive, Localize("CPU Throttle when window is inactive"), g_Config.m_ClCpuThrottleInactive, &Button))
+	{
+		g_Config.m_ClCpuThrottleInactive ^= 1;
+	}
+
 	AutoReconnect.HSplitTop(30.0f, &Label, &AutoReconnect);
 
 	UI()->DoLabelScaled(&Label, Localize("Reconnecting"), 20.0f, -1);
