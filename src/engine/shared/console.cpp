@@ -339,7 +339,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 					{
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
-						Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+						Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 					}
 					else if(m_StoreCommands && pCommand->m_Flags&CFGFLAG_STORE)
 					{
@@ -381,14 +381,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", Result.m_pCommand);
-				Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			}
 		}
 		else if(Stroke)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
-			Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+			Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 
 		pStr = pNextPart;
@@ -484,7 +484,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID)
 
 void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 {
-	((CConsole*)pUserData)->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Console", pResult->GetString(0));
+	((CConsole*)pUserData)->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", pResult->GetString(0));
 }
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
@@ -503,20 +503,20 @@ void CConsole::ConModCommandAccess(IResult *pResult, void *pUser)
 		{
 			pCommand->SetAccessLevel(pResult->GetInteger(1));
 			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
-			pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
 		}
 		else
 		{
 			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
-			pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
 		}
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(0));
 
-	pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+	pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 void CConsole::ConModCommandStatus(IResult *pResult, void *pUser)
@@ -543,7 +543,7 @@ void CConsole::ConModCommandStatus(IResult *pResult, void *pUser)
 			}
 			else
 			{
-				pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+				pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				mem_zero(aBuf, sizeof(aBuf));
 				str_copy(aBuf, pCommand->m_pName, sizeof(aBuf));
 				Used = Length;
@@ -551,7 +551,7 @@ void CConsole::ConModCommandStatus(IResult *pResult, void *pUser)
 		}
 	}
 	if(Used > 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 struct CIntVariableData
@@ -592,7 +592,7 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
 
@@ -627,7 +627,7 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "Value: %s", pData->m_pStr);
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
 
@@ -664,7 +664,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(0));
 
 	if(aBuf[0] != 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
@@ -697,7 +697,7 @@ void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(1));
 
 	if(aBuf[0] != 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 CConsole::CConsole(int FlagMask)
@@ -997,7 +997,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 			}
 			else
 			{
-				pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+				pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				mem_zero(aBuf, sizeof(aBuf));
 				str_copy(aBuf, pCommand->m_pName, sizeof(aBuf));
 				Used = Length;
@@ -1005,7 +1005,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 		}
 	}
 	if(Used > 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 int CConsole::CResult::GetVictim()
