@@ -33,6 +33,7 @@ protected:
 	class CCollision *Collision() const { return m_pClient->Collision(); }
 public:
 	virtual ~CComponent() {}
+	class CGameClient *GameClient() const { return m_pClient; }
 	class IClient *Client() const { return m_pClient->Client(); }
 
 	virtual void OnStateChange(int NewState, int OldState) {};

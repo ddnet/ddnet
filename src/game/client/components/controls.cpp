@@ -123,6 +123,10 @@ struct CInputState
 static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputState *pState = (CInputState *)pUserData;
+
+	if (pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
+		return;
+
 	if (g_Config.m_ClDummy)
 		*pState->m_pVariable2 = pResult->GetInteger(0);
 	else
@@ -132,6 +136,10 @@ static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputState *pState = (CInputState *)pUserData;
+
+	if (pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
+		return;
+
 	int *v;
 	if (g_Config.m_ClDummy)
 		v = pState->m_pVariable2;
