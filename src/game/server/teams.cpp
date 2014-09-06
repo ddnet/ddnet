@@ -617,4 +617,7 @@ void CGameTeams::KillTeam(int Team)
 			GameServer()->m_apPlayers[i]->KillCharacter(-2);
 
 	ChangeTeamState(Team, CGameTeams::TEAMSTATE_EMPTY);
+
+	// unlock team when last player leaves
+	SetTeamLock(m_Core.Team(ClientID), false);
 }
