@@ -619,5 +619,5 @@ void CGameTeams::KillTeam(int Team)
 	ChangeTeamState(Team, CGameTeams::TEAMSTATE_EMPTY);
 
 	// unlock team when last player leaves
-	SetTeamLock(m_Core.Team(ClientID), false);
+	SetTeamLock(Team, false);
 }
