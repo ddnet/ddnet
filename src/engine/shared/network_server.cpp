@@ -77,9 +77,6 @@ int CNetServer::Update()
 			(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
 			 !m_aSlots[i].m_Connection.m_TimeoutSituation))
 		{
-			if (Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() / 5 && NetBan())
-				NetBan()->BanAddr(ClientAddr(i), 60, "Too many connections");
-			else
 			Drop(i, m_aSlots[i].m_Connection.ErrorString());
 		}
 	}
