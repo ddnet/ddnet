@@ -3045,6 +3045,8 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 #endif
 
+	dbg_enable_threaded();
+
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient);

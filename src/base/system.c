@@ -88,12 +88,36 @@ void dbg_break()
 	*((volatile unsigned*)0) = 0x0;
 }
 
+#define QUEUE_SIZE 16
+
+typedef struct
+{
+	char q[QUEUE_SIZE][1024*4];
+	int begin;
+	int end;
+	LOCK mutex;
+	LOCK notempty;
+	LOCK notfull;
+} Queue;
+
+static int dbg_msg_threaded = 0;
+static Queue log_queue;
+
+int queue_empty(Queue *q)
+{
+	return q->begin == q->end;
+}
+
+int queue_full(Queue *q)
+{
+	return ((q->end+1) % QUEUE_SIZE) == q->begin;
+}
+
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
 	va_list args;
-	char str[1024*4];
 	char *msg;
-	int i, len;
+	int len;
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	time_t rawtime;
@@ -104,21 +128,101 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	timeinfo = localtime ( &rawtime );
 
 	strftime (timestr,sizeof(timestr),"%y-%m-%d %H:%M:%S",timeinfo);
-	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
 
-	len = strlen(str);
-	msg = (char *)str + len;
+	if(dbg_msg_threaded)
+	{
+		lock_wait(log_queue.notfull);
+		lock_wait(log_queue.mutex);
+		int e = queue_empty(&log_queue);
 
-	va_start(args, fmt);
+		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
+
+		len = strlen(log_queue.q[log_queue.end]);
+		msg = (char *)log_queue.q[log_queue.end] + len;
+
+		va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(msg, sizeof(str)-len, fmt, args);
+		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #else
-	vsnprintf(msg, sizeof(str)-len, fmt, args);
+		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #endif
-	va_end(args);
+		va_end(args);
 
-	for(i = 0; i < num_loggers; i++)
-		loggers[i](str);
+		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
+
+		if(e)
+			lock_release(log_queue.notempty);
+
+		if(!queue_full(&log_queue))
+			lock_release(log_queue.notfull);
+
+		lock_release(log_queue.mutex);
+	}
+	else
+	{
+		char str[1024*4];
+		str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
+
+		len = strlen(str);
+		msg = (char *)str + len;
+
+		va_start(args, fmt);
+#if defined(CONF_FAMILY_WINDOWS)
+		_vsnprintf(msg, sizeof(str)-len, fmt, args);
+#else
+		vsnprintf(msg, sizeof(str)-len, fmt, args);
+#endif
+		va_end(args);
+
+		int i;
+		for(i = 0; i < num_loggers; i++)
+			loggers[i](str);
+	}
+}
+
+void dbg_msg_thread(void *v)
+{
+	char str[1024*4];
+	while(1)
+	{
+		lock_wait(log_queue.notempty);
+		lock_wait(log_queue.mutex);
+		int f = queue_full(&log_queue);
+
+		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
+
+		log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
+
+		if(f)
+			lock_release(log_queue.notfull);
+
+		if(!queue_empty(&log_queue))
+			lock_release(log_queue.notempty);
+
+		lock_release(log_queue.mutex);
+
+		int i;
+		for(i = 0; i < num_loggers; i++)
+			loggers[i](str);
+	}
+}
+
+void dbg_enable_threaded()
+{
+	Queue *q = &log_queue;
+	q->begin = 0;
+	q->end = 0;
+	q->mutex = lock_create();
+	q->notempty = lock_create();
+	q->notfull = lock_create();
+	lock_wait(q->notempty);
+
+	dbg_msg_threaded = 1;
+
+	void *Thread = thread_create(dbg_msg_thread, 0);
+	#if defined(CONF_FAMILY_UNIX)
+		pthread_detach((pthread_t)Thread);
+	#endif
 }
 
 static void logger_stdout(const char *line)
