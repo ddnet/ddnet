@@ -46,6 +46,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 		m_BroadcastRenderOffset = 150*Graphics()->ScreenAspect()-Cursor.m_X/2;
 		m_BroadcastTime = time_get()+time_freq()*10;
+		//m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", m_aBroadcastText);
 	}
 }
 
