@@ -95,9 +95,9 @@ typedef struct
 	char q[QUEUE_SIZE][1024*4];
 	int begin;
 	int end;
-	LOCK mutex;
-	LOCK notempty;
-	LOCK notfull;
+	SEMAPHORE mutex;
+	SEMAPHORE notempty;
+	SEMAPHORE notfull;
 } Queue;
 
 static int dbg_msg_threaded = 0;
@@ -132,8 +132,8 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	if(dbg_msg_threaded)
 	{
-		lock_wait(log_queue.notfull);
-		lock_wait(log_queue.mutex);
+		semaphore_wait(&log_queue.notfull);
+		semaphore_wait(&log_queue.mutex);
 		e = queue_empty(&log_queue);
 
 		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
@@ -152,12 +152,12 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
 
 		if(e)
-			lock_release(log_queue.notempty);
+			semaphore_signal(&log_queue.notempty);
 
 		if(!queue_full(&log_queue))
-			lock_release(log_queue.notfull);
+			semaphore_signal(&log_queue.notfull);
 
-		lock_release(log_queue.mutex);
+		semaphore_signal(&log_queue.mutex);
 	}
 	else
 	{
@@ -189,8 +189,8 @@ void dbg_msg_thread(void *v)
 	int f;
 	while(1)
 	{
-		lock_wait(log_queue.notempty);
-		lock_wait(log_queue.mutex);
+		semaphore_wait(&log_queue.notempty);
+		semaphore_wait(&log_queue.mutex);
 		f = queue_full(&log_queue);
 
 		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
@@ -198,12 +198,12 @@ void dbg_msg_thread(void *v)
 		log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
 
 		if(f)
-			lock_release(log_queue.notfull);
+			semaphore_signal(&log_queue.notfull);
 
 		if(!queue_empty(&log_queue))
-			lock_release(log_queue.notempty);
+			semaphore_signal(&log_queue.notempty);
 
-		lock_release(log_queue.mutex);
+		semaphore_signal(&log_queue.mutex);
 
 		for(i = 0; i < num_loggers; i++)
 			loggers[i](str);
@@ -218,10 +218,11 @@ void dbg_enable_threaded()
 	q = &log_queue;
 	q->begin = 0;
 	q->end = 0;
-	q->mutex = lock_create();
-	q->notempty = lock_create();
-	q->notfull = lock_create();
-	lock_wait(q->notempty);
+	semaphore_init(&q->mutex);
+	semaphore_init(&q->notempty);
+	semaphore_init(&q->notfull);
+	semaphore_signal(&q->mutex);
+	semaphore_signal(&q->notfull);
 
 	dbg_msg_threaded = 1;
 
