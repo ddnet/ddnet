@@ -69,7 +69,6 @@ int CNetServer::Drop(int ClientID, const char *pReason)
 
 int CNetServer::Update()
 {
-	int64 Now = time_get();
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		m_aSlots[i].m_Connection.Update();
