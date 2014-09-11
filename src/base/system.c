@@ -118,6 +118,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	va_list args;
 	char *msg;
 	int len;
+	int e;
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	time_t rawtime;
@@ -133,7 +134,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	{
 		lock_wait(log_queue.notfull);
 		lock_wait(log_queue.mutex);
-		int e = queue_empty(&log_queue);
+		e = queue_empty(&log_queue);
 
 		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
 
@@ -161,6 +162,8 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	else
 	{
 		char str[1024*4];
+		int i;
+
 		str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
 
 		len = strlen(str);
@@ -174,7 +177,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #endif
 		va_end(args);
 
-		int i;
 		for(i = 0; i < num_loggers; i++)
 			loggers[i](str);
 	}
@@ -183,11 +185,13 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 void dbg_msg_thread(void *v)
 {
 	char str[1024*4];
+	int i;
+	int f;
 	while(1)
 	{
 		lock_wait(log_queue.notempty);
 		lock_wait(log_queue.mutex);
-		int f = queue_full(&log_queue);
+		f = queue_full(&log_queue);
 
 		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
 
@@ -201,7 +205,6 @@ void dbg_msg_thread(void *v)
 
 		lock_release(log_queue.mutex);
 
-		int i;
 		for(i = 0; i < num_loggers; i++)
 			loggers[i](str);
 	}
@@ -209,7 +212,10 @@ void dbg_msg_thread(void *v)
 
 void dbg_enable_threaded()
 {
-	Queue *q = &log_queue;
+	Queue *q;
+	void *Thread;
+
+	q = &log_queue;
 	q->begin = 0;
 	q->end = 0;
 	q->mutex = lock_create();
@@ -219,7 +225,7 @@ void dbg_enable_threaded()
 
 	dbg_msg_threaded = 1;
 
-	void *Thread = thread_create(dbg_msg_thread, 0);
+	Thread = thread_create(dbg_msg_thread, 0);
 	#if defined(CONF_FAMILY_UNIX)
 		pthread_detach((pthread_t)Thread);
 	#endif
