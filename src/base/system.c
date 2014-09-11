@@ -88,6 +88,7 @@ void dbg_break()
 	*((volatile unsigned*)0) = 0x0;
 }
 
+#if !defined(CONF_PLATFORM_MACOSX)
 #define QUEUE_SIZE 16
 
 typedef struct
@@ -111,75 +112,6 @@ int queue_empty(Queue *q)
 int queue_full(Queue *q)
 {
 	return ((q->end+1) % QUEUE_SIZE) == q->begin;
-}
-
-void dbg_msg(const char *sys, const char *fmt, ...)
-{
-	va_list args;
-	char *msg;
-	int len;
-	int e;
-
-	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
-	time_t rawtime;
-	struct tm* timeinfo;
-	char timestr [80];
-
-	time ( &rawtime );
-	timeinfo = localtime ( &rawtime );
-
-	strftime (timestr,sizeof(timestr),"%y-%m-%d %H:%M:%S",timeinfo);
-
-	if(dbg_msg_threaded)
-	{
-		semaphore_wait(&log_queue.notfull);
-		semaphore_wait(&log_queue.mutex);
-		e = queue_empty(&log_queue);
-
-		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
-
-		len = strlen(log_queue.q[log_queue.end]);
-		msg = (char *)log_queue.q[log_queue.end] + len;
-
-		va_start(args, fmt);
-#if defined(CONF_FAMILY_WINDOWS)
-		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
-#else
-		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
-#endif
-		va_end(args);
-
-		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
-
-		if(e)
-			semaphore_signal(&log_queue.notempty);
-
-		if(!queue_full(&log_queue))
-			semaphore_signal(&log_queue.notfull);
-
-		semaphore_signal(&log_queue.mutex);
-	}
-	else
-	{
-		char str[1024*4];
-		int i;
-
-		str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
-
-		len = strlen(str);
-		msg = (char *)str + len;
-
-		va_start(args, fmt);
-#if defined(CONF_FAMILY_WINDOWS)
-		_vsnprintf(msg, sizeof(str)-len, fmt, args);
-#else
-		vsnprintf(msg, sizeof(str)-len, fmt, args);
-#endif
-		va_end(args);
-
-		for(i = 0; i < num_loggers; i++)
-			loggers[i](str);
-	}
 }
 
 void dbg_msg_thread(void *v)
@@ -230,6 +162,78 @@ void dbg_enable_threaded()
 	#if defined(CONF_FAMILY_UNIX)
 		pthread_detach((pthread_t)Thread);
 	#endif
+}
+#endif
+
+void dbg_msg(const char *sys, const char *fmt, ...)
+{
+	va_list args;
+	char *msg;
+	int len;
+	int e;
+
+	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
+	time_t rawtime;
+	struct tm* timeinfo;
+	char timestr [80];
+
+	time ( &rawtime );
+	timeinfo = localtime ( &rawtime );
+
+	strftime (timestr,sizeof(timestr),"%y-%m-%d %H:%M:%S",timeinfo);
+
+#if !defined(CONF_PLATFORM_MACOSX)
+	if(dbg_msg_threaded)
+	{
+		semaphore_wait(&log_queue.notfull);
+		semaphore_wait(&log_queue.mutex);
+		e = queue_empty(&log_queue);
+
+		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
+
+		len = strlen(log_queue.q[log_queue.end]);
+		msg = (char *)log_queue.q[log_queue.end] + len;
+
+		va_start(args, fmt);
+#if defined(CONF_FAMILY_WINDOWS)
+		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+#else
+		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+#endif
+		va_end(args);
+
+		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
+
+		if(e)
+			semaphore_signal(&log_queue.notempty);
+
+		if(!queue_full(&log_queue))
+			semaphore_signal(&log_queue.notfull);
+
+		semaphore_signal(&log_queue.mutex);
+	}
+	else
+#endif
+	{
+		char str[1024*4];
+		int i;
+
+		str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
+
+		len = strlen(str);
+		msg = (char *)str + len;
+
+		va_start(args, fmt);
+#if defined(CONF_FAMILY_WINDOWS)
+		_vsnprintf(msg, sizeof(str)-len, fmt, args);
+#else
+		vsnprintf(msg, sizeof(str)-len, fmt, args);
+#endif
+		va_end(args);
+
+		for(i = 0; i < num_loggers; i++)
+			loggers[i](str);
+	}
 }
 
 static void logger_stdout(const char *line)

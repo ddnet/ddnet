@@ -1964,7 +1964,9 @@ static CServer *CreateServer() { return new CServer(); }
 
 int main(int argc, const char **argv) // ignore_convention
 {
+#if !defined(CONF_PLATFORM_MACOSX)
 	dbg_enable_threaded();
+#endif
 #if defined(CONF_FAMILY_WINDOWS)
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{

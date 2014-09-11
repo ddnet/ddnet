@@ -3045,7 +3045,9 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 #endif
 
+#if !defined(CONF_PLATFORM_MACOSX)
 	dbg_enable_threaded();
+#endif
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();

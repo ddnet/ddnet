@@ -1176,7 +1176,9 @@ void swap_endian(void *data, unsigned elem_size, unsigned num);
 typedef void (*DBG_LOGGER)(const char *line);
 void dbg_logger(DBG_LOGGER logger);
 
+#if !defined(CONF_PLATFORM_MACOSX)
 void dbg_enable_threaded();
+#endif
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
