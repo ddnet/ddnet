@@ -332,6 +332,6 @@ class NetBool(NetIntRange):
 	def __init__(self, name):
 		NetIntRange.__init__(self,name,0,1)
 
-class NetTick(NetIntRange):
+class NetTick(NetIntAny):
 	def __init__(self, name):
-		NetIntRange.__init__(self,name,0,'max_int')
+		NetIntAny.__init__(self,name)
