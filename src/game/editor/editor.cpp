@@ -3939,8 +3939,10 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		(void)0;
 		*/
 
-	CUIRect Info;
+	CUIRect Info, Close;
 	MenuBar.VSplitLeft(40.0f, 0, &MenuBar);
+	MenuBar.VSplitRight(20.0f, &MenuBar, &Close);
+	Close.VSplitLeft(5.0f, 0, &Close);
 	MenuBar.VSplitLeft(MenuBar.w*0.75f, &MenuBar, &Info);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "File: %s", m_aFileName);
@@ -3948,6 +3950,18 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	str_format(aBuf, sizeof(aBuf), "Z: %i, A: %.1f, G: %i", m_ZoomLevel, m_AnimateSpeed, m_GridFactor);
 	UI()->DoLabel(&Info, aBuf, 10.0f, 1, -1);
+
+	static int s_CloseButton = 0;
+	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor"))
+	{
+		if(HasUnsavedData())
+		{
+			m_PopupEventType = POPEVENT_EXIT;
+			m_PopupEventActivated = true;
+		}
+		else
+			g_Config.m_ClEditor = 0;
+	}
 }
 
 void CEditor::Render()
