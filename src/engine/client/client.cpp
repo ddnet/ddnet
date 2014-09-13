@@ -1154,6 +1154,15 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Packet.m_Flags = NETSENDFLAG_CONNLESS;
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 
+			// request ddnet server list
+			mem_zero(&Packet, sizeof(Packet));
+			Packet.m_ClientID = -1;
+			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
+			Packet.m_pData = VERSIONSRV_GETDDNETLIST;
+			Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST);
+			Packet.m_Flags = NETSENDFLAG_CONNLESS;
+			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
+
 			// request the map version list now
 			mem_zero(&Packet, sizeof(Packet));
 			Packet.m_ClientID = -1;
@@ -1178,6 +1187,21 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			{
 				io_write(newsFile, m_aNews, sizeof(m_aNews));
 				io_close(newsFile);
+			}
+		}
+
+		// ddnet server list
+		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + DDNETLIST_SIZE) &&
+			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0)
+		{
+			char aBuf[DDNETLIST_SIZE];
+			mem_copy(aBuf, (char*)pPacket->m_pData + sizeof(VERSIONSRV_DDNETLIST), DDNETLIST_SIZE);
+
+			IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			if (File)
+			{
+				io_write(File, aBuf, sizeof(aBuf));
+				io_close(File);
 			}
 		}
 

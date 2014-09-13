@@ -9,11 +9,13 @@
 #include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/linereader.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/friends.h>
 #include <engine/masterserver.h>
+#include <engine/storage.h>
 
 #include <mastersrv/mastersrv.h>
 
@@ -35,6 +37,7 @@ CServerBrowser::CServerBrowser()
 	m_pSortedServerlist = 0;
 
 	m_NumFavoriteServers = 0;
+	m_NumDDNetServers = 0;
 
 	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
 
@@ -237,6 +240,29 @@ void CServerBrowser::Filter()
 					Filtered = 1;
 			}
 		}
+
+		// check for ddnet country filters
+		if(m_ServerlistType == TYPE_DDNET)
+		{
+			#define ISVALID(expr, conf) (str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, expr) && conf)
+
+			if(ISVALID("DDNET GER", g_Config.m_BrFilterGer) ||
+				ISVALID("DDNET FRA", g_Config.m_BrFilterFra) ||
+				ISVALID("DDNET USA", g_Config.m_BrFilterUsa) ||
+				ISVALID("DDNET RUS", g_Config.m_BrFilterRus) ||
+				ISVALID("DDNET CHILE", g_Config.m_BrFilterChile) ||
+				ISVALID("DDNET CHN", g_Config.m_BrFilterChn) ||
+				ISVALID("DDNET PERSIAN", g_Config.m_BrFilterPersia) ||
+				ISVALID("DDNET SOUTH AFRICA", g_Config.m_BrFilterSouthAfrica))
+				{
+					// valid
+				}
+			else
+				Filtered = 1;
+
+			#undef ISVALID
+		}
+
 
 		if(Filtered == 0)
 		{
@@ -445,6 +471,17 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			QueueRequest(pEntry);
 		}
 	}
+	else if(Type == IServerBrowser::SET_DDNET_ADD)
+	{
+		if(m_ServerlistType != IServerBrowser::TYPE_DDNET)
+			return;
+
+		if(!Find(Addr))
+		{
+			pEntry = Add(Addr);
+			QueueRequest(pEntry);
+		}
+	}
 	else if(Type == IServerBrowser::SET_TOKEN)
 	{
 		if(Token != m_CurrentToken)
@@ -520,6 +557,12 @@ void CServerBrowser::Refresh(int Type)
 	{
 		for(int i = 0; i < m_NumFavoriteServers; i++)
 			Set(m_aFavoriteServers[i], IServerBrowser::SET_FAV_ADD, -1, 0);
+	}
+	else if(Type == IServerBrowser::TYPE_DDNET)
+	{
+		LoadDDNet();
+		for(int i = 0; i < m_NumDDNetServers; i++)
+			Set(m_aDDNetServers[i], IServerBrowser::SET_DDNET_ADD, -1, 0);
 	}
 }
 
@@ -823,6 +866,37 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 
 			return;
 		}
+	}
+}
+
+void CServerBrowser::LoadDDNet()
+{
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+	IOHANDLE File = pStorage->OpenFile("ddnet-servers.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+
+	// reset ddnet server list
+	m_NumDDNetServers = 0;
+
+	if(File)
+	{
+		char *pLine;
+		CLineReader lr;
+
+		lr.Init(File);
+
+		for(int i = 0; i < MAX_DDNET && (pLine = lr.Get()); i++)
+		{
+			NETADDR Addr;
+			if(net_addr_from_str(&Addr, pLine) == 0)
+			{
+				m_aDDNetServers[i] = Addr;
+				m_NumDDNetServers++;
+			}
+			else
+				break; // failed to parse ip:port
+		}
+
+		io_close(File);	
 	}
 }
 
