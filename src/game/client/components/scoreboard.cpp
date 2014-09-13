@@ -131,7 +131,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 		if(g_Config.m_ClShowIDs)
 		{
 			char aId[4];
-			str_format(aId,sizeof(aId),"%d:",pInfo->m_ClientID);
+			str_format(aId,sizeof(aId),"%d ",pInfo->m_ClientID);
 			str_append(aBuffer, aId, sizeof(aBuffer));
 		}
 		str_append(aBuffer, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, sizeof(aBuffer));
@@ -450,7 +450,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			str_format(aId, sizeof(aId),"%d:", pInfo->m_ClientID);
+			str_format(aId, sizeof(aId),"%d ", pInfo->m_ClientID);
 			str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
 			Cursor.m_LineWidth = NameLength+3;
 			TextRender()->TextEx(&Cursor, aId, -1);
