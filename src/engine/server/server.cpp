@@ -1906,6 +1906,68 @@ void CServer::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void 
 	}
 }
 
+void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() == 1)
+	{
+		CServer *pServer = (CServer *)pUserData;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(pServer->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+				continue;
+			if(pServer->m_aClients[i].m_Authed == AUTHED_ADMIN)
+			{
+				CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
+				Msg.AddInt(0);	//authed
+				Msg.AddInt(0);	//cmdlist
+				pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
+				
+				pServer->m_aClients[i].m_Authed = AUTHED_NO;
+				pServer->m_aClients[i].m_LastAuthed = AUTHED_NO;
+				pServer->m_aClients[i].m_AuthTries = 0;
+				pServer->m_aClients[i].m_pRconCmdToSend = 0;
+				
+				pServer->SendRconLine(i, "Logged out by password change.");
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
+				pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			}
+		}
+	}
+}
+
+void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() == 1)
+	{
+		CServer *pServer = (CServer *)pUserData;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(pServer->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+				continue;
+			if(pServer->m_aClients[i].m_Authed == AUTHED_MOD)
+			{
+				CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
+				Msg.AddInt(0);	//authed
+				Msg.AddInt(0);	//cmdlist
+				pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
+				
+				pServer->m_aClients[i].m_Authed = AUTHED_NO;
+				pServer->m_aClients[i].m_LastAuthed = AUTHED_NO;
+				pServer->m_aClients[i].m_AuthTries = 0;
+				pServer->m_aClients[i].m_pRconCmdToSend = 0;
+				
+				pServer->SendRconLine(i, "Logged out by password change.");
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
+				pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			}
+		}
+	}
+}
+
 void CServer::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -1930,6 +1992,9 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("mod_command", ConchainModCommandUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
+	
+	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
+	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 
 	// register console commands in sub parts
 	m_ServerBan.InitServerBan(Console(), Storage(), this);
