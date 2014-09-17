@@ -230,7 +230,7 @@ void CMapLayers::OnRender()
 				}
 			}
 
-			if((Render && g_Config.m_ClOverlayEntities < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer) || (g_Config.m_ClOverlayEntities && IsGameLayer))
+			if((Render && g_Config.m_ClOverlayEntities < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (g_Config.m_ClOverlayEntities && IsGameLayer))
 			{
 				//layershot_begin();
 
