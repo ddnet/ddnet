@@ -124,7 +124,7 @@ void CCollision::Init(class CLayers *pLayers)
 					m_pFront[i].m_Index = 0;
 					break;
 				case TILE_NOLASER:
-					m_pFront[i].m_Index = COLFLAG_NOLASER;
+					m_pFront[i].m_Index = TILE_NOLASER;
 					break;
 				default:
 					m_pFront[i].m_Index = 0;
@@ -150,7 +150,7 @@ void CCollision::Init(class CLayers *pLayers)
 				m_pTiles[i].m_Index = COLFLAG_SOLID|COLFLAG_NOHOOK;
 				break;
 			case TILE_NOLASER:
-				m_pTiles[i].m_Index = COLFLAG_NOLASER;
+				m_pTiles[i].m_Index = TILE_NOLASER;
 				break;
 			default:
 				m_pTiles[i].m_Index = 0;
@@ -189,7 +189,7 @@ int CCollision::GetTile(int x, int y)
 	if(m_pTiles[pos].m_Index == COLFLAG_SOLID
 		|| m_pTiles[pos].m_Index == (COLFLAG_SOLID|COLFLAG_NOHOOK)
 		|| m_pTiles[pos].m_Index == COLFLAG_DEATH
-		|| m_pTiles[pos].m_Index == COLFLAG_NOLASER)
+		|| m_pTiles[pos].m_Index == TILE_NOLASER)
 		return m_pTiles[pos].m_Index;
 	return 0;
 }
@@ -500,12 +500,12 @@ int CCollision::IsWallJump(int Index)
 
 int CCollision::IsNoLaser(int x, int y)
 {
-	return (CCollision::GetTile(x,y) & COLFLAG_NOLASER);
+	return (CCollision::GetTile(x,y) == TILE_NOLASER);
 }
 
 int CCollision::IsFNoLaser(int x, int y)
 {
-	return (CCollision::GetFTile(x,y) & COLFLAG_NOLASER);
+	return (CCollision::GetFTile(x,y) == TILE_NOLASER);
 }
 
 int CCollision::IsTeleport(int Index)
@@ -957,7 +957,7 @@ int CCollision::GetFTile(int x, int y)
 	int Ny = clamp(y/32, 0, m_Height-1);
 	/*dbg_msg("GetFTile","m_Index %d",m_pFront[Ny*m_Width+Nx].m_Index);//Remove */
 	if(m_pFront[Ny*m_Width+Nx].m_Index == COLFLAG_DEATH
-		|| m_pFront[Ny*m_Width+Nx].m_Index == COLFLAG_NOLASER)
+		|| m_pFront[Ny*m_Width+Nx].m_Index == TILE_NOLASER)
 		return m_pFront[Ny*m_Width+Nx].m_Index;
 	else
 		return 0;
@@ -1101,14 +1101,14 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 		int Ny = clamp(round_to_int(Pos.y)/32, 0, m_Height-1);
 		if(GetIndex(Nx, Ny) == COLFLAG_SOLID
 			|| GetIndex(Nx, Ny) == (COLFLAG_SOLID|COLFLAG_NOHOOK)
-			|| GetIndex(Nx, Ny) == COLFLAG_NOLASER
-			|| GetFIndex(Nx, Ny) == COLFLAG_NOLASER)
+			|| GetIndex(Nx, Ny) == TILE_NOLASER
+			|| GetFIndex(Nx, Ny) == TILE_NOLASER)
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			if (GetFIndex(Nx, Ny) == COLFLAG_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
+			if (GetFIndex(Nx, Ny) == TILE_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
 			else return GetCollisionAt(Pos.x, Pos.y);
 
 		}

@@ -25,8 +25,8 @@ public:
 		COLFLAG_DEATH=2,
 		COLFLAG_NOHOOK=4,
 		// DDRace
-		COLFLAG_NOLASER=8,
-		COLFLAG_THROUGH=16,
+		//COLFLAG_NOLASER=8, // Unused, now used for TimedSwitchActivation
+		//COLFLAG_THROUGH=16, // Unused, now used for WallJump
 		COLFLAG_TELE=32
 	};
 

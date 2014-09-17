@@ -765,6 +765,9 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 			unsigned char Index = pSwitchTile[c].m_Type;
 			if(Index)
 			{
+				if(Index == TILE_SWITCHTIMEDOPEN)
+					Index = 8;
+
 				unsigned char Flags = pSwitchTile[c].m_Flags;
 
 				bool Render = false;
