@@ -19,6 +19,8 @@
 
 #include <mastersrv/mastersrv.h>
 
+#include <engine/external/json-parser/json.h>
+
 #include "serverbrowser.h"
 class SortWrap
 {
@@ -37,7 +39,6 @@ CServerBrowser::CServerBrowser()
 	m_pSortedServerlist = 0;
 
 	m_NumFavoriteServers = 0;
-	m_NumDDNetServers = 0;
 
 	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
 
@@ -240,29 +241,6 @@ void CServerBrowser::Filter()
 					Filtered = 1;
 			}
 		}
-
-		// check for ddnet country filters
-		if(m_ServerlistType == TYPE_DDNET)
-		{
-			#define ISVALID(expr, conf) (str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, expr) && conf)
-
-			if(ISVALID("DDNET GER", g_Config.m_BrFilterGer) ||
-				ISVALID("DDNET FRA", g_Config.m_BrFilterFra) ||
-				ISVALID("DDNET USA", g_Config.m_BrFilterUsa) ||
-				ISVALID("DDNET RUS", g_Config.m_BrFilterRus) ||
-				ISVALID("DDNET CHILE", g_Config.m_BrFilterChile) ||
-				ISVALID("DDNET CHN", g_Config.m_BrFilterChn) ||
-				ISVALID("DDNET PERSIAN", g_Config.m_BrFilterPersia) ||
-				ISVALID("DDNET SOUTH AFRICA", g_Config.m_BrFilterSouthAfrica))
-				{
-					// valid
-				}
-			else
-				Filtered = 1;
-
-			#undef ISVALID
-		}
-
 
 		if(Filtered == 0)
 		{
@@ -561,8 +539,8 @@ void CServerBrowser::Refresh(int Type)
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
 		LoadDDNet();
-		for(int i = 0; i < m_NumDDNetServers; i++)
-			Set(m_aDDNetServers[i], IServerBrowser::SET_DDNET_ADD, -1, 0);
+		/*for(int i = 0; i < m_NumDDNetServers; i++)
+			Set(m_aDDNetServers[i], IServerBrowser::SET_DDNET_ADD, -1, 0);*/
 	}
 }
 
@@ -871,32 +849,53 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 
 void CServerBrowser::LoadDDNet()
 {
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-	IOHANDLE File = pStorage->OpenFile("ddnet-servers.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+	// reset servers / countries
+	m_NumDDNetCountries = 0;	
 
-	// reset ddnet server list
-	m_NumDDNetServers = 0;
+	// load ddnet server list
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+	IOHANDLE File = pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_ALL);
 
 	if(File)
 	{
-		char *pLine;
-		CLineReader lr;
+		char aBuf[4096*4];
+		mem_zero(aBuf, sizeof(aBuf));	
+		
+		io_read(File, aBuf, sizeof(aBuf));
+		io_close(File);
 
-		lr.Init(File);
 
-		for(int i = 0; i < MAX_DDNET && (pLine = lr.Get()); i++)
+		// parse JSON
+		json_value *pCountries = json_parse(aBuf);
+
+		if (pCountries->type == json_array)
 		{
-			NETADDR Addr;
-			if(net_addr_from_str(&Addr, pLine) == 0)
+			for (int i = 0; i < json_array_length(pCountries) && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
 			{
-				m_aDDNetServers[i] = Addr;
-				m_NumDDNetServers++;
-			}
-			else
-				break; // failed to parse ip:port
-		}
+				// pSrv - { name, flagId, servers }
+				const json_value *pSrv = json_array_get(pCountries, i);
+				const json_value *pAddrs = json_object_get(pSrv, "servers");
+				const json_value *pName = json_object_get(pSrv, "name");
+				const json_value *pFlagID = json_object_get(pSrv, "flagId");
+	
+				// build structure
+				CDDNetCountry *pCntr = &m_aDDNetCountries[m_NumDDNetCountries];
+				str_copy(pCntr->m_aName, json_string_get(pName), sizeof(pCntr->m_aName));
+				pCntr->m_FlagId = json_int_get(pFlagID);
 
-		io_close(File);	
+				// add addresses
+				for (int srv = 0; srv < json_array_length(pAddrs); srv++)
+				{
+					const json_value *pAddr = json_array_get(pAddrs, srv);
+					const char *pStr = json_string_get(pAddr);
+
+					res = net_addr_from_str(&pCntr->m_aServers[i], pStr);
+					pCntr->m_NumServers++;
+				}
+
+				m_NumDDNetCountries++;
+			}
+		}
 	}
 }
 

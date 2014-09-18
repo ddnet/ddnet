@@ -567,64 +567,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	UI()->DoLabelScaled(&Status, aBuf, 14.0f, -1);
 }
 
-void CMenus::RenderServerbrowserFiltersDDNet(CUIRect View)
-{
-	Client()->ServerBrowserUpdate();
-
-	CUIRect ServerFilter = View, FilterHeader;
-	const float FontSize = 12.0f;
-	ServerFilter.HSplitBottom(42.5f, &ServerFilter, 0);
-
-	// server filter
-	ServerFilter.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFilter);
-	RenderTools()->DrawUIRect(&FilterHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
-	RenderTools()->DrawUIRect(&ServerFilter, vec4(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
-	UI()->DoLabelScaled(&FilterHeader, Localize("Server filter"), FontSize+2.0f, 0);
-	CUIRect Button;
-
-	ServerFilter.VSplitLeft(5.0f, 0, &ServerFilter);
-	ServerFilter.Margin(3.0f, &ServerFilter);
-	ServerFilter.VMargin(5.0f, &ServerFilter);
-
-	// countries
-	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
-	UI()->DoLabelScaled(&Button, Localize("Countries:"), FontSize, -1);
-	Button.VSplitRight(60.0f, 0, &Button);
-	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
-
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterGer, Localize("Germany"), g_Config.m_BrFilterGer, &Button))
-		g_Config.m_BrFilterGer ^= 1;
-	
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterFra, Localize("France"), g_Config.m_BrFilterFra, &Button))
-		g_Config.m_BrFilterFra ^= 1;
-	
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterUsa, Localize("USA"), g_Config.m_BrFilterUsa, &Button))
-		g_Config.m_BrFilterUsa ^= 1;
-
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterChn, Localize("China"), g_Config.m_BrFilterChn, &Button))
-		g_Config.m_BrFilterChn ^= 1;
-	
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterRus, Localize("Russia"), g_Config.m_BrFilterRus, &Button))
-		g_Config.m_BrFilterRus ^= 1;
-	
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterSouthAfrica, Localize("South Africa"), g_Config.m_BrFilterSouthAfrica, &Button))
-		g_Config.m_BrFilterSouthAfrica ^= 1;
-	
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterChile, Localize("Chile"), g_Config.m_BrFilterChile, &Button))
-		g_Config.m_BrFilterChile ^= 1;
-	
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterPersia, Localize("Persia"), g_Config.m_BrFilterPersia, &Button))
-		g_Config.m_BrFilterPersia ^= 1;
-}
-
 void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
 	CUIRect ServerFilter = View, FilterHeader;
@@ -1166,12 +1108,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 
 		if(ToolboxPage == 0)
-		{
-			if (m_ActivePage == PAGE_DDNET)
-				RenderServerbrowserFiltersDDNet(ToolBox);
-			else
-				RenderServerbrowserFilters(ToolBox);
-		}
+			RenderServerbrowserFilters(ToolBox);
 		else if(ToolboxPage == 1)
 			RenderServerbrowserServerDetail(ToolBox);
 		else if(ToolboxPage == 2)

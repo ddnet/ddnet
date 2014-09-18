@@ -23,10 +23,27 @@ public:
 		CServerEntry *m_pNextReq;
 	};
 
+	class CDDNetCountry
+	{
+	public:
+		enum
+		{
+			MAX_SERVERS = 1024
+		};
+
+		char m_aName[256];
+		int m_FlagId;
+		NETADDR m_aServers[MAX_SERVERS];
+		int m_NumServers;
+
+		void Reset() { m_NumServers = 0; };
+		void Add(NETADDR Addr) { if (m_NumServers < MAX_SERVERS) m_aServers[m_NumServers++] = Addr; };
+	};
+
 	enum
 	{
 		MAX_FAVORITES=2048,
-		MAX_DDNET=2048
+		MAX_DDNET_COUNTRIES=16,
 	};
 
 	CServerBrowser();
@@ -73,8 +90,8 @@ private:
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
 	int m_NumFavoriteServers;
 
-	NETADDR m_aDDNetServers[MAX_DDNET];
-	int m_NumDDNetServers;
+	CDDNetCountry m_aDDNetCountries[MAX_DDNET_COUNTRIES];
+	int m_NumDDNetCountries;
 
 	CServerEntry *m_aServerlistIp[256]; // ip hash list
 

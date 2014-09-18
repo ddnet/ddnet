@@ -228,7 +228,6 @@ class CMenus : public CComponent
 	void RenderServerbrowserServerList(CUIRect View);
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
-	void RenderServerbrowserFiltersDDNet(CUIRect View);
 	void RenderServerbrowserFriends(CUIRect View);
 	void RenderServerbrowser(CUIRect MainView);
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
