@@ -165,7 +165,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 	if(!pConf->m_aIndexRules.size())
 		return;
 
-	int BaseTile = 1;
+	int BaseTile = -1;
 
 	CLayerTiles newLayer(pLayer->m_Width, pLayer->m_Height);
 
@@ -194,7 +194,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		for(int x = 0; x < pLayer->m_Width; x++)
 		{
 			CTile *pTile = &(newLayer.m_pTiles[y*pLayer->m_Width+x]);
-			if(pTile->m_Index != 0)
+			if(pTile->m_Index != 0 && BaseTile >= 0)
 				pTile->m_Index = BaseTile;
 			m_pEditor->m_Map.m_Modified = true;
 
