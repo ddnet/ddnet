@@ -803,32 +803,6 @@ void CGameContext::OnClientEnter(int ClientID)
 
 			m_apPlayers[ClientID]->m_ShowOthers = true;
 		}
-
-
-		if (g_Config.m_SvEvents)
-		{
-
-			time_t rawtime;
-			struct tm* timeinfo;
-			char d[16], m [16], y[16];
-			int dd, mm, yy;
-
-			time ( &rawtime );
-			timeinfo = localtime ( &rawtime );
-
-			strftime (d,sizeof(y),"%d",timeinfo);
-			strftime (m,sizeof(m),"%m",timeinfo);
-			strftime (y,sizeof(y),"%Y",timeinfo);
-			dd = atoi(d);
-			mm = atoi(m);
-			yy = atoi(y);
-			if((mm == 12 && dd == 31) || (mm == 1 && dd == 1))
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", mm==12?yy+1:yy);
-				SendBroadcast(aBuf, ClientID);
-			}
-		}
 	}
 	m_VoteUpdate = true;
 

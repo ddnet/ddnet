@@ -21,76 +21,10 @@ IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 {
 	m_pGameServer = pGameServer;
-	m_RespawnTick = Server()->Tick();
-	m_DieTick = Server()->Tick();
-	m_ScoreStartTick = Server()->Tick();
-	m_pCharacter = 0;
 	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
-	m_SpectatorID = SPEC_FREEVIEW;
-	m_LastActionTick = Server()->Tick();
-	m_TeamChangeTick = Server()->Tick();
-
-	int* idMap = Server()->GetIdMap(ClientID);
-	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
-	{
-		idMap[i] = -1;
-	}
-	idMap[0] = ClientID;
-
-	// DDRace
-
-	m_LastCommandPos = 0;
-	m_LastPlaytime = time_get();
-	m_Sent1stAfkWarning = 0;
-	m_Sent2ndAfkWarning = 0;
-	m_ChatScore = 0;
-	m_EyeEmote = true;
-	m_TimerType = g_Config.m_SvDefaultTimerType;
-	m_DefEmote = EMOTE_NORMAL;
-	m_Afk = false;
-	m_LastWhisperTo = -1;
-	m_LastSetSpectatorMode = 0;
-	
-	m_TuneZone = 0;
-	m_TuneZoneOld = m_TuneZone;
-
-	//New Year
-	if (g_Config.m_SvEvents)
-	{	
-		time_t rawtime;
-		struct tm* timeinfo;
-		char d[16], m[16], y[16];
-		int dd, mm;
-		time ( &rawtime );
-		timeinfo = localtime ( &rawtime );
-		strftime (d,sizeof(y),"%d",timeinfo);
-		strftime (m,sizeof(m),"%m",timeinfo);
-		strftime (y,sizeof(y),"%Y",timeinfo);
-		dd = atoi(d);
-		mm = atoi(m);
-		m_DefEmote = ((mm == 12 && dd == 31) || (mm == 1 && dd == 1)) ? EMOTE_HAPPY : EMOTE_NORMAL;
-	}
-	m_DefEmoteReset = -1;
-
-	GameServer()->Score()->PlayerData(ClientID)->Reset();
-
-	m_ClientVersion = VERSION_VANILLA;
-	m_ShowOthers = g_Config.m_SvShowOthersDefault;
-	m_ShowAll = g_Config.m_SvShowAllDefault;
-	m_SpecTeam = 0;
-	m_NinjaJetpack = false;
-
-	m_Paused = PAUSED_NONE;
-	m_DND = false;
-
-	m_NextPauseTick = 0;
-
-	// Variable initialized:
-	m_Last_Team = 0;
-#if defined(CONF_SQL)
-	m_LastSQLQuery = 0;
-#endif
+	m_pCharacter = 0;
+	Reset();
 }
 
 CPlayer::~CPlayer()
@@ -101,14 +35,12 @@ CPlayer::~CPlayer()
 
 void CPlayer::Reset()
 {
-	//m_pGameServer = pGameServer;
 	m_RespawnTick = Server()->Tick();
 	m_DieTick = Server()->Tick();
 	m_ScoreStartTick = Server()->Tick();
-	delete m_pCharacter;
+	if (m_pCharacter)
+		delete m_pCharacter;
 	m_pCharacter = 0;
-	//m_ClientID = ClientID;
-	m_Team = GameServer()->m_pController->ClampTeam(m_Team);
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
 	m_TeamChangeTick = Server()->Tick();
@@ -137,8 +69,8 @@ void CPlayer::Reset()
 
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
+	m_Halloween = false;
 
-	//New Year
 	if (g_Config.m_SvEvents)
 	{	
 		time_t rawtime;
@@ -152,7 +84,19 @@ void CPlayer::Reset()
 		strftime (y,sizeof(y),"%Y",timeinfo);
 		dd = atoi(d);
 		mm = atoi(m);
-		m_DefEmote = ((mm == 12 && dd == 31) || (mm == 1 && dd == 1)) ? EMOTE_HAPPY : EMOTE_NORMAL;
+		if ((mm == 12 && dd == 31) || (mm == 1 && dd == 1))
+		{ // New Year
+			m_DefEmote = EMOTE_HAPPY;
+		}
+		else if ((mm == 10 && dd == 31) || (mm == 11 && dd == 1))
+		{ // Halloween
+			m_DefEmote = EMOTE_ANGRY;
+			m_Halloween = true;
+		}
+		else
+		{
+			m_DefEmote = EMOTE_NORMAL;
+		}
 	}
 	m_DefEmoteReset = -1;
 

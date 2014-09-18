@@ -1123,6 +1123,14 @@ void CCharacter::Snap(int SnappingClient)
 			pCharacter->m_Emote = EMOTE_BLINK;
 	}
 
+	if(m_pPlayer->m_Halloween)
+	{
+		if(1200 - ((Server()->Tick() - m_LastAction)%(1200)) < 5)
+		{
+			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
+		}
+	}
+
 	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
 }
 
