@@ -7,6 +7,7 @@
 #include <SDL.h>
 
 #include <engine/shared/config.h>
+#include <engine/serverbrowser.h>
 
 #include <game/collision.h>
 #include <game/client/gameclient.h>
@@ -124,7 +125,12 @@ static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputState *pState = (CInputState *)pUserData;
 
-	if (pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
+	CServerInfo Info;
+	pState->m_pControls->GameClient()->Client()->GetServerInfo(&Info);
+	bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
+	bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
+
+	if ((IsGameTypeRace || IsGameTypeDDRace) && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return;
 
 	if (g_Config.m_ClDummy)
@@ -137,7 +143,12 @@ static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputState *pState = (CInputState *)pUserData;
 
-	if (pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
+	CServerInfo Info;
+	pState->m_pControls->GameClient()->Client()->GetServerInfo(&Info);
+	bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
+	bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
+
+	if ((IsGameTypeRace || IsGameTypeDDRace) && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return;
 
 	int *v;

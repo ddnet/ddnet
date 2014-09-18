@@ -680,7 +680,7 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by server administrator");
+				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by server moderator");
 				Console()->ExecuteLine(m_aVoteCommand, m_VoteEnforcer);
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				EndVote();
@@ -688,7 +688,7 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by server administrator");
+				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by server moderator");
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			}
@@ -802,32 +802,6 @@ void CGameContext::OnClientEnter(int ClientID)
 				SendChatTarget(ClientID, "You can see other players. To disable this use the ddnet client and type /showothers .");
 
 			m_apPlayers[ClientID]->m_ShowOthers = true;
-		}
-
-
-		if (g_Config.m_SvEvents)
-		{
-
-			time_t rawtime;
-			struct tm* timeinfo;
-			char d[16], m [16], y[16];
-			int dd, mm, yy;
-
-			time ( &rawtime );
-			timeinfo = localtime ( &rawtime );
-
-			strftime (d,sizeof(y),"%d",timeinfo);
-			strftime (m,sizeof(m),"%m",timeinfo);
-			strftime (y,sizeof(y),"%Y",timeinfo);
-			dd = atoi(d);
-			mm = atoi(m);
-			yy = atoi(y);
-			if((mm == 12 && dd == 31) || (mm == 1 && dd == 1))
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Happy %d from GreYFoX", mm==12?yy+1:yy);
-				SendBroadcast(aBuf, ClientID);
-			}
 		}
 	}
 	m_VoteUpdate = true;
