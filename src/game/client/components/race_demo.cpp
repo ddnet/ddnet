@@ -30,9 +30,17 @@ void CRaceDemo::OnRender()
 		std::list < int > Indices = m_pClient->Collision()->GetMapIndices(m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos);
 		if(!Indices.empty())
 			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+			{
 				if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) start = true;
+				if(m_pClient->Collision()->GetFTileIndex(*i) == TILE_BEGIN) start = true;
+			}
 		else
-			start = m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN;
+		{
+			if(m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN) start = true;
+			if(m_pClient->Collision()->GetFTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN) start = true;
+		}
+
+
 		
 		if(start)
 		{
