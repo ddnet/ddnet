@@ -194,6 +194,8 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	void GraphicsThread();
   vec3 GetColorV3(int v);
 
+	char m_aDDNetSrvListToken[4];
+
 public:
 	IEngine *Engine() { return m_pEngine; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
@@ -351,5 +353,7 @@ public:
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath);
+
+	void RequestDDNetSrvList();
 };
 #endif

@@ -1219,7 +1219,11 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			else if(g_Config.m_UiPage == PAGE_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			else if(g_Config.m_UiPage == PAGE_DDNET)
+			{
+				// start a new serverlist request
+				Client()->RequestDDNetSrvList();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			}
 			m_DoubleClickIndex = -1;
 		}
 

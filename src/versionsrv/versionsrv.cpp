@@ -27,6 +27,7 @@ struct CPacketData
 CPacketData m_aPackets[MAX_PACKETS];
 static int m_NumPackets = 0;
 unsigned char m_aNews[NEWS_SIZE];
+unsigned char m_aServerList[DDNETLIST_SIZE];
 
 static CNetClient g_NetOp; // main
 
@@ -69,6 +70,17 @@ void ReadNews()
 	io_close(newsFile);
 }
 
+void ReadServerList()
+{
+	IOHANDLE File = io_open("serverlist.json", IOFLAG_READ);
+	if (!File)
+		return;
+
+	io_read(File, m_aServerList, DDNETLIST_SIZE);
+
+	io_close(File);
+}
+
 void SendVer(NETADDR *pAddr)
 {
 	CNetChunk p;
@@ -103,6 +115,24 @@ void SendNews(NETADDR *pAddr)
 	g_NetOp.Send(&p);
 }
 
+void SendServerList(NETADDR *pAddr, const char *Token)
+{
+	CNetChunk p;
+	unsigned char aData[DDNETLIST_SIZE + sizeof(VERSIONSRV_DDNETLIST) + 4];
+
+	mem_copy(aData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST));
+	mem_copy(aData + sizeof(VERSIONSRV_NEWS), Token, 4); // send back token
+	mem_copy(aData + sizeof(VERSIONSRV_NEWS) + 4, m_aServerList, DDNETLIST_SIZE);
+
+	p.m_ClientID = -1;
+	p.m_Address = *pAddr;
+	p.m_Flags = NETSENDFLAG_CONNLESS;
+	p.m_pData = aData;
+	p.m_DataSize = sizeof(aData);
+
+	g_NetOp.Send(&p);
+}
+
 int main(int argc, char **argv) // ignore_convention
 {
 	NETADDR BindAddr;
@@ -122,6 +152,7 @@ int main(int argc, char **argv) // ignore_convention
 	BuildPackets();
 
 	ReadNews();
+	ReadServerList();
 
 	dbg_msg("versionsrv", "started");
 
@@ -171,6 +202,15 @@ int main(int argc, char **argv) // ignore_convention
 					p.m_pData = &m_aPackets[i].m_Data;
 					g_NetOp.Send(&p);
 				}
+			}
+
+			if(Packet.m_DataSize == sizeof(VERSIONSRV_GETDDNETLIST) + 4 &&
+				mem_comp(Packet.m_pData, VERSIONSRV_GETDDNETLIST, sizeof(VERSIONSRV_GETDDNETLIST)) == 0)
+			{
+				char aToken[4];
+				mem_copy(aToken, (char*)Packet.m_pData+sizeof(VERSIONSRV_GETDDNETLIST), 4);
+
+				SendServerList(&Packet.m_Address, aToken);
 			}
 		}
 

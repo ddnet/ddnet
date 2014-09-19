@@ -1154,14 +1154,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Packet.m_Flags = NETSENDFLAG_CONNLESS;
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 
-			// request ddnet server list
-			mem_zero(&Packet, sizeof(Packet));
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETDDNETLIST;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
+			RequestDDNetSrvList();
 
 			// request the map version list now
 			mem_zero(&Packet, sizeof(Packet));
@@ -1191,13 +1184,14 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		}
 
 		// ddnet server list
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + DDNETLIST_SIZE) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0)
+		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + 4 + DDNETLIST_SIZE) &&
+			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0 &&
+			mem_comp((char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST), m_aDDNetSrvListToken, 4) == 0)
 		{
 			char aBuf[DDNETLIST_SIZE];
-			mem_copy(aBuf, (char*)pPacket->m_pData + sizeof(VERSIONSRV_DDNETLIST), DDNETLIST_SIZE);
+			mem_copy(aBuf, (char*)pPacket->m_pData + sizeof(VERSIONSRV_DDNETLIST) + 4, DDNETLIST_SIZE);
 
-			IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
 			if (File)
 			{
 				io_write(File, aBuf, sizeof(aBuf));
@@ -3212,4 +3206,25 @@ void CClient::RaceRecordStop()
 bool CClient::DemoIsRecording()
 {
 	return m_DemoRecorder.IsRecording();
+}
+
+void CClient::RequestDDNetSrvList()
+{
+	// request ddnet server list
+	// generate new token
+	for (int i = 0; i < 4; i++)
+		m_aDDNetSrvListToken[i] = rand()&0xff;
+
+	char aData[sizeof(VERSIONSRV_GETDDNETLIST)+4];
+	mem_copy(aData, VERSIONSRV_GETDDNETLIST, sizeof(VERSIONSRV_GETDDNETLIST));
+	mem_copy(aData+sizeof(VERSIONSRV_GETDDNETLIST), m_aDDNetSrvListToken, 4); // add token
+
+	CNetChunk Packet;
+	mem_zero(&Packet, sizeof(Packet));
+	Packet.m_ClientID = -1;
+	Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
+	Packet.m_pData = aData;
+	Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST)+4;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 }
