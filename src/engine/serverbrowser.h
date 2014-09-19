@@ -98,6 +98,13 @@ public:
 	virtual bool IsFavorite(const NETADDR &Addr) const = 0;
 	virtual void AddFavorite(const NETADDR &Addr) = 0;
 	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
+
+	virtual int NumDDNetCountries() = 0;
+	virtual int GetDDNetCountryFlag(int Index) = 0;
+	virtual const char *GetDDNetCountryName(int Index) = 0;
+	virtual void DDNetCountryFilterAdd(const char *pName) = 0;
+	virtual void DDNetCountryFilterRem(const char *pName) = 0;
+	virtual bool DDNetCountryFiltered(const char *pName) = 0;
 };
 
 #endif

@@ -32,11 +32,11 @@ public:
 		};
 
 		char m_aName[256];
-		int m_FlagId;
+		int m_FlagID;
 		NETADDR m_aServers[MAX_SERVERS];
 		int m_NumServers;
 
-		void Reset() { m_NumServers = 0; };
+		void Reset() { m_NumServers = 0; m_FlagID = -1; m_aName[0] = '\0'; };
 		void Add(NETADDR Addr) { if (m_NumServers < MAX_SERVERS) m_aServers[m_NumServers++] = Addr; };
 	};
 
@@ -64,7 +64,14 @@ public:
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNet();
-
+	int NumDDNetCountries() { return m_NumDDNetCountries; };
+	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; };
+	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; };
+	void DDNetCountryFilterAdd(const char *pName);
+	void DDNetCountryFilterRem(const char *pName);
+	bool DDNetCountryFiltered(const char *pName);
+	void DDNetCountryFilterClean();
+	
 	//
 	void Update(bool ForceResort);
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
