@@ -777,7 +777,7 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 	static int s_DDNetButton=0;
 	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
 	{
-		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_FAVORITES) ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_DDNET) ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 		LastServersPage = PAGE_DDNET;
 		NewPage  = PAGE_DDNET;
 	}
