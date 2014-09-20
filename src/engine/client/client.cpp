@@ -1200,8 +1200,8 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			if (pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + 8 + CompLength))
 			{
-				char aBuf[PlainLength];
-				uLongf DstLen = PlainLength;
+				char aBuf[16384];
+				uLongf DstLen = sizeof(aBuf);
 				const char *pComp = (char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST)+8;
 
 				// do decompression of serverlist

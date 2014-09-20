@@ -31,6 +31,10 @@
 #ifndef _JSON_H
 #define _JSON_H
 
+#if defined(CONF_FAMILY_WINDOWS)
+   #define inline __inline
+#endif
+
 #include <string.h>
 
 #ifndef json_char
@@ -186,10 +190,11 @@ void json_value_free (json_value *);
 
 inline const struct _json_value *json_object_get (const json_value * object, const char * index)
 { 
+   unsigned int i;
+
    if (object->type != json_object)
       return &json_value_none;
 
-   unsigned int i;
    for (i = 0; i < object->u.object.length; ++ i)
       if (!strcmp (object->u.object.values [i].name, index))
          return object->u.object.values [i].value;

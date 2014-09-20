@@ -85,9 +85,9 @@ void ReadServerList()
 		return;
 
 	int PlainLength = io_length(File);
-	char aPlain[PlainLength];
+	char aPlain[16384];
 
-	io_read(File, aPlain, PlainLength);
+	io_read(File, aPlain, sizeof(aPlain));
 	io_close(File);
 
 	// compress
