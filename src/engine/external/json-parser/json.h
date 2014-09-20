@@ -31,7 +31,7 @@
 #ifndef _JSON_H
 #define _JSON_H
 
-#if defined(CONF_FAMILY_WINDOWS)
+#ifdef _MSC_VER
    #define inline __inline
 #endif
 
