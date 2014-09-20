@@ -1207,12 +1207,29 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				// do decompression of serverlist
 				if (uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
 				{
-					// decompression successful, write plain file
-					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+					bool ListChanged = true;
+
+					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_SAVE);
 					if (File)
 					{
-						io_write(File, aBuf, PlainLength);
+						char aBuf2[16384];
+						io_read(File, aBuf2, sizeof(aBuf2));
 						io_close(File);
+						if (str_comp(aBuf, aBuf2) == 0)
+							ListChanged = false;
+					}
+
+					// decompression successful, write plain file
+					if (ListChanged)
+					{
+						IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+						if (File)
+						{
+							io_write(File, aBuf, PlainLength);
+							io_close(File);
+						}
+						if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
+							m_ServerBrowser.Refresh(IServerBrowser::TYPE_DDNET);
 					}
 				}
 			}
