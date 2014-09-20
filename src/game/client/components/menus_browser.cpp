@@ -687,7 +687,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		// add more space
 		ServerFilter.HSplitTop(10.0f, &Button, &ServerFilter);
 		
-		ServerFilter.HSplitTop(40.0f, &Button, &ServerFilter);
+		ServerFilter.HSplitTop(30.0f, &Button, &ServerFilter);
 		UI()->DoLabelScaled(&Button, Localize("DDNet Countries:"), FontSize, -1);
 		
 		vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);

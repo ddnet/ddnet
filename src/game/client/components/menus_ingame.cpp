@@ -765,11 +765,21 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 	//box.VSplitLeft(4.0f, 0, &box);
 	Box.VSplitLeft(110.0f, &Button, &Box);
 	static int s_FavoritesButton=0;
-	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), ActivePage==PAGE_FAVORITES, &Button, CUI::CORNER_TR))
+	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), ActivePage==PAGE_FAVORITES, &Button, 0))
 	{
 		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_FAVORITES) ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		LastServersPage = PAGE_FAVORITES;
 		NewPage  = PAGE_FAVORITES;
+	}
+
+	//box.VSplitLeft(4.0f, 0, &box);
+	Box.VSplitLeft(110.0f, &Button, &Box);
+	static int s_DDNetButton=0;
+	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
+	{
+		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_FAVORITES) ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+		LastServersPage = PAGE_DDNET;
+		NewPage  = PAGE_DDNET;
 	}
 
 	if(NewPage != -1)
