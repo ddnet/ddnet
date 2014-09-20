@@ -139,7 +139,7 @@ void SendNews(NETADDR *pAddr)
 void SendServerList(NETADDR *pAddr, const char *Token)
 {
 	CNetChunk p;
-	unsigned char aData[sizeof(VERSIONSRV_DDNETLIST) + 4 + 2 + 2 + m_ServerListCompLength];
+	unsigned char aData[16384];
 	short WordCompLength = m_ServerListCompLength;
 	short WordPlainLength = m_ServerListPlainLength;
 
@@ -147,14 +147,13 @@ void SendServerList(NETADDR *pAddr, const char *Token)
 	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST), Token, 4); // send back token
 	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST)+4, &WordCompLength, 2); // compressed length
 	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST)+6, &WordPlainLength, 2); // plain length
-
-	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST) + 8, m_aServerList, m_ServerListCompLength);
+	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST)+8, m_aServerList, m_ServerListCompLength);
 
 	p.m_ClientID = -1;
 	p.m_Address = *pAddr;
 	p.m_Flags = NETSENDFLAG_CONNLESS;
 	p.m_pData = aData;
-	p.m_DataSize = sizeof(aData);
+	p.m_DataSize = sizeof(VERSIONSRV_DDNETLIST) + 4 + 2 + 2 + m_ServerListCompLength;
 
 	g_NetOp.Send(&p);
 }
