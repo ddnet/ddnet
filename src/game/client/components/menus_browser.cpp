@@ -487,7 +487,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						hsl = vec3(0.00f, 1.0f, 0.75f); // Instagib
 					else if (str_find_nocase(pItem->m_aGameType, "fng"))
 						hsl = vec3(0.83f, 1.0f, 0.75f); // FNG
-					else if (str_find_nocase(pItem->m_aGameType, "ddracenetwo"))
+					else if (str_find_nocase(pItem->m_aGameType, "ddracenetw")
+							|| str_find_nocase(pItem->m_aGameType, "ddnet"))
 						hsl = vec3(0.58f, 1.0f, 0.75f); // DDNet
 					else if (str_find_nocase(pItem->m_aGameType, "ddrace")
 							|| str_find_nocase(pItem->m_aGameType, "mkrace"))
