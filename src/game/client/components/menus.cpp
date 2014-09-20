@@ -839,7 +839,7 @@ void CMenus::OnInit()
 	if(g_Config.m_ClShowWelcome)
 	{
 		m_Popup = POPUP_LANGUAGE;
-		str_copy(g_Config.m_BrFilterString, "DDraceNetwork", sizeof(g_Config.m_BrFilterString));
+		str_copy(g_Config.m_BrFilterString, "Novice - [DDraceNetwork]", sizeof(g_Config.m_BrFilterString));
 	}
 	g_Config.m_ClShowWelcome = 0;
 
