@@ -467,12 +467,12 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		pEntry = Find(Addr);
 		if(!pEntry)
 			pEntry = Add(Addr);
-		if(pEntry)
+		if(pEntry && pEntry->m_RequestTime > 9)
 		{
 			SetInfo(pEntry, *pInfo);
 			if(m_ServerlistType == IServerBrowser::TYPE_LAN)
 				pEntry->m_Info.m_Latency = min(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
-			else if (pEntry->m_RequestTime > 0)
+			else
 			{
 				pEntry->m_Info.m_Latency = min(static_cast<int>((time_get()-pEntry->m_RequestTime)*1000/time_freq()), 999);
 				pEntry->m_RequestTime = -1; // Request has been answered
