@@ -31,6 +31,10 @@
 #ifndef _JSON_H
 #define _JSON_H
 
+#if defined(CONF_FAMILY_WINDOWS)
+   #define inline __inline
+#endif
+
 #include <string.h>
 
 #ifndef json_char
@@ -184,14 +188,10 @@ json_value * json_parse_ex
 
 void json_value_free (json_value *);
 
-#if defined(CONF_FAMILY_WINDOWS)
-__inline const struct _json_value *json_object_get (const json_value * object, const char * index)
-#else
 inline const struct _json_value *json_object_get (const json_value * object, const char * index)
-#endif
 { 
    unsigned int i;
-	 
+
    if (object->type != json_object)
       return &json_value_none;
 
@@ -202,11 +202,7 @@ inline const struct _json_value *json_object_get (const json_value * object, con
    return &json_value_none;
 }
 
-#if defined(CONF_FAMILY_WINDOWS)
-__inline const struct _json_value *json_array_get (const json_value * array, int index)
-#else
 inline const struct _json_value *json_array_get (const json_value * array, int index)
-#endif
 {
    if (array->type != json_array || index >= (int)array->u.array.length)
       return &json_value_none;
@@ -214,15 +210,9 @@ inline const struct _json_value *json_array_get (const json_value * array, int i
    return array->u.array.values[index];
 }
 
-#if defined(CONF_FAMILY_WINDOWS)
-__inline int json_array_length (const json_value * array) { return array->u.array.length; }
-__inline const char * json_string_get (const json_value * string) { return string->u.string.ptr; }
-__inline int json_int_get (const json_value * integer) { return integer->u.integer; }
-#else
 inline int json_array_length (const json_value * array) { return array->u.array.length; }
 inline const char * json_string_get (const json_value * string) { return string->u.string.ptr; }
 inline int json_int_get (const json_value * integer) { return integer->u.integer; }
-#endif
 
 #ifdef __cplusplus
    } /* extern "C" */
