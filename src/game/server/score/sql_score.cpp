@@ -528,7 +528,7 @@ void CSqlScore::MapPointsThread(void *pUser)
 		try
 		{
 			char aBuf[768];
-			str_format(aBuf, sizeof(aBuf), "SELECT Map, Server, Points FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_aMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Points, count(*) as Finishes FROM ((SELECT Map, Server, Points FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1) as l) LEFT JOIN %s_race as r on l.Map = r.Map;", pData->m_pSqlData->m_pPrefix, pData->m_aMap, pData->m_pSqlData->m_pPrefix);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
@@ -539,15 +539,16 @@ void CSqlScore::MapPointsThread(void *pUser)
 			{
 				pData->m_pSqlData->m_pResults->next();
 				int points = (int)pData->m_pSqlData->m_pResults->getInt("Points");
+				int finishes = (int)pData->m_pSqlData->m_pResults->getInt("Finishes");
 				char aMap[128];
 				strcpy(aMap, pData->m_pSqlData->m_pResults->getString("Map").c_str());
 				char aServer[32];
 				strcpy(aServer, pData->m_pSqlData->m_pResults->getString("Server").c_str());
 				aServer[0] = toupper(aServer[0]);
 				if (points == 1)
-					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d point)", aMap, aServer, points);
+					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d point, %d finishes)", aMap, aServer, points, finishes);
 				else
-					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d points)", aMap, aServer, points);
+					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%d points, %d finishes)", aMap, aServer, points, finishes);
 			}
 
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
