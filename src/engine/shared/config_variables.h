@@ -52,16 +52,6 @@ MACRO_CONFIG_INT(BrFilterCompatversion, br_filter_compatversion, 0, 0, 1, CFGFLA
 
 MACRO_CONFIG_STR(BrFilterExcludeCountries, br_filter_exclude_countries, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out ddnet servers by country")
 
-// DDNet filters
-MACRO_CONFIG_INT(BrFilterGer, br_filter_ger, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(BrFilterFra, br_filter_fra, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(BrFilterUsa, br_filter_usa, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(BrFilterRus, br_filter_rus, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(BrFilterChn, br_filter_chn, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(BrFilterChile, br_filter_chile, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(BrFilterSouthAfrica, br_filter_southafrica, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(BrFilterPersia, br_filter_persia, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
-
 MACRO_CONFIG_INT(BrSort, br_sort, 1, 0, 256, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(BrSortOrder, br_sort_order, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(BrMaxRequests, br_max_requests, 25, 0, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Number of requests to use when refreshing server browser")

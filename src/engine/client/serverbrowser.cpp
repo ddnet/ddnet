@@ -9,7 +9,6 @@
 #include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
-#include <engine/shared/linereader.h>
 
 #include <engine/config.h>
 #include <engine/console.h>

@@ -571,7 +571,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
 	CUIRect ServerFilter = View, FilterHeader;
 	const float FontSize = 12.0f;
-	ServerFilter.HSplitBottom(/*42.5f*/ 0.0f, &ServerFilter, 0);
+	ServerFilter.HSplitBottom(0.0f, &ServerFilter, 0);
 
 	// server filter
 	ServerFilter.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFilter);
