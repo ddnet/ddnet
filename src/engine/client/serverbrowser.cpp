@@ -881,7 +881,7 @@ void CServerBrowser::LoadDDNet()
 		// parse JSON
 		json_value *pCountries = json_parse(aBuf);
 
-		if (pCountries->type == json_array)
+		if (pCountries && pCountries->type == json_array)
 		{
 			for (int i = 0; i < json_array_length(pCountries) && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
 			{

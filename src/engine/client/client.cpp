@@ -57,6 +57,8 @@
 #include "autoupdate.h"
 #include "client.h"
 
+#include <zlib.h>
+
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
 	#define WIN32_LEAN_AND_MEAN
@@ -336,6 +338,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 
 	if (g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
+
+	m_DDNetSrvListTokenSet = false;
 }
 
 // ----- send functions -----
@@ -1184,18 +1188,33 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		}
 
 		// ddnet server list
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + 4 + DDNETLIST_SIZE) &&
+		// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length] 
+		if(pPacket->m_DataSize >= (int)(sizeof(VERSIONSRV_DDNETLIST) + 8) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0 &&
 			mem_comp((char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST), m_aDDNetSrvListToken, 4) == 0)
 		{
-			char aBuf[DDNETLIST_SIZE];
-			mem_copy(aBuf, (char*)pPacket->m_pData + sizeof(VERSIONSRV_DDNETLIST) + 4, DDNETLIST_SIZE);
+			// reset random token
+			m_DDNetSrvListTokenSet = false;
+			int CompLength = *(short*)((char*)pPacket->m_pData+(sizeof(VERSIONSRV_DDNETLIST)+4));
+			int PlainLength = *(short*)((char*)pPacket->m_pData+(sizeof(VERSIONSRV_DDNETLIST)+6));
 
-			IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
-			if (File)
+			if (pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + 8 + CompLength))
 			{
-				io_write(File, aBuf, sizeof(aBuf));
-				io_close(File);
+				char aBuf[PlainLength];
+				uLongf DstLen = PlainLength;
+				const char *pComp = (char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST)+8;
+
+				// do decompression of serverlist
+				if (uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
+				{
+					// decompression successful, write plain file
+					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+					if (File)
+					{
+						io_write(File, aBuf, PlainLength);
+						io_close(File);
+					}
+				}
 			}
 		}
 
@@ -3214,6 +3233,7 @@ void CClient::RequestDDNetSrvList()
 	// generate new token
 	for (int i = 0; i < 4; i++)
 		m_aDDNetSrvListToken[i] = rand()&0xff;
+	m_DDNetSrvListTokenSet = true;
 
 	char aData[sizeof(VERSIONSRV_GETDDNETLIST)+4];
 	mem_copy(aData, VERSIONSRV_GETDDNETLIST, sizeof(VERSIONSRV_GETDDNETLIST));

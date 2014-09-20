@@ -195,6 +195,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
   vec3 GetColorV3(int v);
 
 	char m_aDDNetSrvListToken[4];
+	bool m_DDNetSrvListTokenSet;
 
 public:
 	IEngine *Engine() { return m_pEngine; }

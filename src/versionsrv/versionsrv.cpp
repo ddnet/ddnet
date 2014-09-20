@@ -9,6 +9,8 @@
 #include "versionsrv.h"
 #include "mapversions.h"
 
+#include <zlib.h>
+
 enum {
 	MAX_MAPS_PER_PACKET=48,
 	MAX_PACKETS=16,
@@ -27,7 +29,11 @@ struct CPacketData
 CPacketData m_aPackets[MAX_PACKETS];
 static int m_NumPackets = 0;
 unsigned char m_aNews[NEWS_SIZE];
+
 unsigned char m_aServerList[DDNETLIST_SIZE];
+int m_ServerListPlainLength = 0;
+int m_ServerListCompLength = 0;
+bool m_ServerListLoaded = false;
 
 static CNetClient g_NetOp; // main
 
@@ -72,13 +78,27 @@ void ReadNews()
 
 void ReadServerList()
 {
+	mem_zero(m_aServerList, sizeof(m_aServerList));
+
 	IOHANDLE File = io_open("serverlist.json", IOFLAG_READ);
 	if (!File)
 		return;
 
-	io_read(File, m_aServerList, DDNETLIST_SIZE);
+	int PlainLength = io_length(File);
+	char aPlain[PlainLength];
 
+	io_read(File, aPlain, PlainLength);
 	io_close(File);
+
+	// compress
+	uLongf DstLen = DDNETLIST_SIZE;
+
+	if (compress((Bytef*)m_aServerList, &DstLen, (Bytef*)aPlain, PlainLength) == Z_OK)
+	{
+		m_ServerListLoaded = true;
+		m_ServerListPlainLength = PlainLength;
+		m_ServerListCompLength = DstLen;
+	}
 }
 
 void SendVer(NETADDR *pAddr)
@@ -115,14 +135,20 @@ void SendNews(NETADDR *pAddr)
 	g_NetOp.Send(&p);
 }
 
+// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length] 
 void SendServerList(NETADDR *pAddr, const char *Token)
 {
 	CNetChunk p;
-	unsigned char aData[DDNETLIST_SIZE + sizeof(VERSIONSRV_DDNETLIST) + 4];
+	unsigned char aData[sizeof(VERSIONSRV_DDNETLIST) + 4 + 2 + 2 + m_ServerListCompLength];
+	short WordCompLength = m_ServerListCompLength;
+	short WordPlainLength = m_ServerListPlainLength;
 
 	mem_copy(aData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST));
-	mem_copy(aData + sizeof(VERSIONSRV_NEWS), Token, 4); // send back token
-	mem_copy(aData + sizeof(VERSIONSRV_NEWS) + 4, m_aServerList, DDNETLIST_SIZE);
+	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST), Token, 4); // send back token
+	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST)+4, &WordCompLength, 2); // compressed length
+	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST)+6, &WordPlainLength, 2); // plain length
+
+	mem_copy(aData + sizeof(VERSIONSRV_DDNETLIST) + 8, m_aServerList, m_ServerListCompLength);
 
 	p.m_ClientID = -1;
 	p.m_Address = *pAddr;
@@ -204,7 +230,8 @@ int main(int argc, char **argv) // ignore_convention
 				}
 			}
 
-			if(Packet.m_DataSize == sizeof(VERSIONSRV_GETDDNETLIST) + 4 &&
+			if(m_ServerListLoaded &&
+				Packet.m_DataSize == sizeof(VERSIONSRV_GETDDNETLIST) + 4 &&
 				mem_comp(Packet.m_pData, VERSIONSRV_GETDDNETLIST, sizeof(VERSIONSRV_GETDDNETLIST)) == 0)
 			{
 				char aToken[4];
