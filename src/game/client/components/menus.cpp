@@ -610,10 +610,20 @@ int CMenus::RenderMenubar(CUIRect r)
 		//box.VSplitLeft(4.0f, 0, &box);
 		Box.VSplitLeft(110.0f, &Button, &Box);
 		static int s_FavoritesButton=0;
-		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, CUI::CORNER_TR))
+		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			NewPage = PAGE_FAVORITES;
+			m_DoubleClickIndex = -1;
+		}
+
+		//box.VSplitLeft(4.0f, 0, &box);
+		Box.VSplitLeft(110.0f, &Button, &Box);
+		static int s_DDNetButton=0;
+		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
+		{
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			NewPage = PAGE_DDNET;
 			m_DoubleClickIndex = -1;
 		}
 
@@ -871,6 +881,8 @@ int CMenus::Render()
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		else if(g_Config.m_UiPage == PAGE_FAVORITES)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+		else if(g_Config.m_UiPage == PAGE_DDNET)
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 		m_pClient->m_pSounds->Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
 		s_First = false;
 		m_DoubleClickIndex = -1;
@@ -950,6 +962,8 @@ int CMenus::Render()
 		else if(g_Config.m_UiPage == PAGE_DEMOS)
 			RenderDemoList(MainView);
 		else if(g_Config.m_UiPage == PAGE_FAVORITES)
+			RenderServerbrowser(MainView);
+		else if(g_Config.m_UiPage == PAGE_DDNET)
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);

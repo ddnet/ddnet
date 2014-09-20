@@ -571,7 +571,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
 	CUIRect ServerFilter = View, FilterHeader;
 	const float FontSize = 12.0f;
-	ServerFilter.HSplitBottom(42.5f, &ServerFilter, 0);
+	ServerFilter.HSplitBottom(0.0f, &ServerFilter, 0);
 
 	// server filter
 	ServerFilter.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFilter);
@@ -680,6 +680,75 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_UiColorizePing, Localize("Colorize ping"), g_Config.m_UiColorizePing, &Button))
 		g_Config.m_UiColorizePing ^= 1;
+	
+	// ddnet country filters
+	if(g_Config.m_UiPage == PAGE_DDNET)
+	{
+		// add more space
+		ServerFilter.HSplitTop(10.0f, &Button, &ServerFilter);
+		
+		ServerFilter.HSplitTop(40.0f, &Button, &ServerFilter);
+		UI()->DoLabelScaled(&Button, Localize("DDNet Countries:"), FontSize, -1);
+		
+		vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+		const float FlagWidth = 40.0f;
+		const float FlagHeight = 20.0f;
+
+		int MaxFlags = ServerBrowser()->NumDDNetCountries();
+		int NumFlags = ServerBrowser()->NumDDNetCountries();
+
+		CUIRect FlagsRect;
+
+		static int s_aFlagButtons[64];
+
+		while(NumFlags > 0)
+		{
+			ServerFilter.HSplitTop(30.0f, &FlagsRect, &ServerFilter);
+			
+			for(int i = 0; i < 3 && NumFlags > 0; i++)
+			{
+				int CountryIndex = MaxFlags - NumFlags;
+				const char *pName = ServerBrowser()->GetDDNetCountryName(CountryIndex);
+				bool Active = !ServerBrowser()->DDNetCountryFiltered(pName);
+				int FlagID = ServerBrowser()->GetDDNetCountryFlag(CountryIndex);
+
+				vec2 Pos = vec2(FlagsRect.x+FlagsRect.w*((i+0.5f)/3.0f), FlagsRect.y);
+
+				// correct pos
+				Pos.x -= FlagWidth / 2.0f;
+				Pos.y -= FlagHeight / 2.0f;
+
+				// create button logic
+				CUIRect Rect;
+
+				Rect.x = Pos.x;
+				Rect.y = Pos.y;
+				Rect.w = FlagWidth;
+				Rect.h = FlagHeight;
+
+				if (UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect))
+				{
+					// toggle flag filter
+					if (Active)
+						ServerBrowser()->DDNetCountryFilterAdd(pName);
+					else
+						ServerBrowser()->DDNetCountryFilterRem(pName);
+
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+				}
+
+				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+				if (!Active)
+					Color.a = 0.2f;
+
+				m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
+
+				NumFlags--;
+			}
+		}
+	}
 
 	ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
 	ServerFilter.HSplitBottom(ms_ButtonHeight-2.0f, &ServerFilter, &Button);
@@ -1149,6 +1218,12 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			else if(g_Config.m_UiPage == PAGE_FAVORITES)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			else if(g_Config.m_UiPage == PAGE_DDNET)
+			{
+				// start a new serverlist request
+				Client()->RequestDDNetSrvList();
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			}
 			m_DoubleClickIndex = -1;
 		}
 
@@ -1186,6 +1261,6 @@ void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserDat
 void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() && g_Config.m_UiPage == PAGE_FAVORITES && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
+	if(pResult->NumArguments() && (g_Config.m_UiPage == PAGE_FAVORITES || g_Config.m_UiPage == PAGE_DDNET) && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 }

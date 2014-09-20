@@ -23,9 +23,27 @@ public:
 		CServerEntry *m_pNextReq;
 	};
 
+	class CDDNetCountry
+	{
+	public:
+		enum
+		{
+			MAX_SERVERS = 1024
+		};
+
+		char m_aName[256];
+		int m_FlagID;
+		NETADDR m_aServers[MAX_SERVERS];
+		int m_NumServers;
+
+		void Reset() { m_NumServers = 0; m_FlagID = -1; m_aName[0] = '\0'; };
+		void Add(NETADDR Addr) { if (m_NumServers < MAX_SERVERS) m_aServers[m_NumServers++] = Addr; };
+	};
+
 	enum
 	{
-		MAX_FAVORITES=2048
+		MAX_FAVORITES=2048,
+		MAX_DDNET_COUNTRIES=16,
 	};
 
 	CServerBrowser();
@@ -45,6 +63,15 @@ public:
 	void AddFavorite(const NETADDR &Addr);
 	void RemoveFavorite(const NETADDR &Addr);
 
+	void LoadDDNet();
+	int NumDDNetCountries() { return m_NumDDNetCountries; };
+	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; };
+	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; };
+	void DDNetCountryFilterAdd(const char *pName);
+	void DDNetCountryFilterRem(const char *pName);
+	bool DDNetCountryFiltered(const char *pName);
+	void DDNetCountryFilterClean();
+	
 	//
 	void Update(bool ForceResort);
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
@@ -69,6 +96,9 @@ private:
 
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
 	int m_NumFavoriteServers;
+
+	CDDNetCountry m_aDDNetCountries[MAX_DDNET_COUNTRIES];
+	int m_NumDDNetCountries;
 
 	CServerEntry *m_aServerlistIp[256]; // ip hash list
 
