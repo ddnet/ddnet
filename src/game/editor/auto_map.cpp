@@ -63,6 +63,7 @@ void CAutoMapper::Load(const char* pTileName)
 					NewIndexRule.m_Flag = 0;
 					NewIndexRule.m_RandomValue = 0;
 					NewIndexRule.m_BaseTile = false;
+					NewIndexRule.m_DefaultRule = true;
 
 					if(str_length(aFlip) > 0)
 					{
@@ -112,6 +113,10 @@ void CAutoMapper::Load(const char* pTileName)
 				{
 					sscanf(pLine, "Random %d", &pCurrentIndex->m_RandomValue);
 				}
+				else if(!str_comp_num(pLine, "CheckEmptyTiles", 15) && pCurrentIndex)
+				{
+					pCurrentIndex->m_DefaultRule = false;
+				}
 			}
 		}
 	}
@@ -131,7 +136,7 @@ void CAutoMapper::Load(const char* pTileName)
 					break;
 				}
 			}
-			if(!Found)
+			if(!Found && m_lConfigs[h].m_aIndexRules[i].m_DefaultRule)
 			{
 				CPosRule NewPosRule = {0, 0, CPosRule::FULL, false};
 				m_lConfigs[h].m_aIndexRules[i].m_aRules.add(NewPosRule);
