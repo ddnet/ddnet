@@ -94,15 +94,17 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeapons, Localize("Switch weapon on pickup"), g_Config.m_ClAutoswitchWeapons, &Button))
 			g_Config.m_ClAutoswitchWeapons ^= 1;
 
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
-		        g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
-
 		// weapon out of ammo autoswitch
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeaponsOutOfAmmo, Localize("Switch weapon when out of ammo"), g_Config.m_ClAutoswitchWeaponsOutOfAmmo, &Button))
 			g_Config.m_ClAutoswitchWeaponsOutOfAmmo ^= 1;
+
+		// weapon reset on death
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
+		        g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
 
 		// show hud
 		Left.HSplitTop(5.0f, 0, &Left);
@@ -111,8 +113,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			g_Config.m_ClShowhud ^= 1;
 
 		// chat messages
-		Left.HSplitTop(5.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Right);
+		Right.HSplitTop(5.0f, 0, &Right);
+		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClShowChatFriends, Localize("Show only chat messages from friends"), g_Config.m_ClShowChatFriends, &Button))
 			g_Config.m_ClShowChatFriends ^= 1;
 
