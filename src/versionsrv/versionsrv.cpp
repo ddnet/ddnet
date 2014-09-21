@@ -205,12 +205,6 @@ int main(int argc, char **argv) // ignore_convention
 				mem_comp(Packet.m_pData, VERSIONSRV_GETNEWS, sizeof(VERSIONSRV_GETNEWS)) == 0)
 			{
 				SendNews(&Packet.m_Address);
-
-				char aAddrStr[NETADDR_MAXSTRSIZE];
-				net_addr_str(&Packet.m_Address, aAddrStr, sizeof(aAddrStr), false);
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "news request by %s", aAddrStr);
-				dbg_msg("versionsrv", aBuf);
 			}
 
 			if(Packet.m_DataSize == sizeof(VERSIONSRV_GETMAPLIST) &&
