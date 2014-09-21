@@ -1898,4 +1898,9 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		static float s_OffsetCode = 0.0f;
 		DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode);
 	}
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
+	{
+		g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
+	}
 }
