@@ -1934,6 +1934,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					s_Operation = OP_PAN_WORLD;
 				UI()->SetActiveItem(s_pEditorID);
 			}
+			else
+				s_Operation = OP_NONE;
 		}
 
 		// brush editing
