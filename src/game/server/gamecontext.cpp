@@ -1252,11 +1252,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			//Kill Protection
 			CCharacter* pChr = pPlayer->GetCharacter();
-			if(pChr){
+			if(pChr)
+			{
 				int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
 				if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 				{
-					SendChatTarget(ClientID, "Kill Protection enabled. If you really want join to spectators, first type /kill");
+					SendChatTarget(ClientID, "Kill Protection enabled. If you really want to join the spectators, first type /kill");
 					return;
 				}
 			}
