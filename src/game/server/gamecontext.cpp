@@ -1250,6 +1250,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}*/
 
+			//Kill Protection
+			CCharacter* pChr = pPlayer->GetCharacter();
+			if(pChr){
+				int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
+				if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
+				{
+					SendChatTarget(ClientID, "Kill Protection enabled. If you really want join to spectators, first type /kill");
+					return;
+				}
+			}
+
 			if(pPlayer->m_TeamChangeTick > Server()->Tick())
 			{
 				pPlayer->m_LastSetTeam = Server()->Tick();
@@ -1462,7 +1473,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
 			if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 			{
-				SendChatTarget(ClientID, "Kill Protection enabled. If you really want to kill, write /kill");
+				SendChatTarget(ClientID, "Kill Protection enabled. If you really want to kill, type /kill");
 				return;
 			}
 
@@ -2755,7 +2766,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	} else
 	{
-		str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), pMessage);
+		str_format(aBuf, sizeof(aBuf), "[â†’ %s] %s", Server()->ClientName(VictimID), pMessage);
 		SendChatTarget(ClientID, aBuf);
 	}
 
@@ -2768,7 +2779,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimID);
 	} else
 	{
-		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
+		str_format(aBuf, sizeof(aBuf), "[â†� %s] %s", Server()->ClientName(ClientID), pMessage);
 		SendChatTarget(VictimID, aBuf);
 	}
 }
