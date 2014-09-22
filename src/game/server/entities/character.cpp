@@ -393,7 +393,7 @@ void CCharacter::FireWeapon()
 				CCharacter *pTarget = apEnts[i];
 
 				//if ((pTarget == this) || GameServer()->Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
-				if((pTarget == this || !CanCollide(pTarget->GetPlayer()->GetCID())))
+				if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetPlayer()->GetCID()))))
 					continue;
 
 				// set his velocity to fast upward (for now)
