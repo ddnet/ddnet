@@ -2766,7 +2766,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	} else
 	{
-		str_format(aBuf, sizeof(aBuf), "[â†’ %s] %s", Server()->ClientName(VictimID), pMessage);
+		str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), pMessage);
 		SendChatTarget(ClientID, aBuf);
 	}
 
@@ -2779,7 +2779,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimID);
 	} else
 	{
-		str_format(aBuf, sizeof(aBuf), "[â†� %s] %s", Server()->ClientName(ClientID), pMessage);
+		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
 		SendChatTarget(VictimID, aBuf);
 	}
 }
