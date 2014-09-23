@@ -193,8 +193,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClConfirmDisconnect, Localize("Confirm disconnect from server"), g_Config.m_ClConfirmDisconnect, &Button))
-			g_Config.m_ClConfirmDisconnect ^= 1;
+		  g_Config.m_ClConfirmDisconnect ^= 1;
 
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if (DoButton_CheckBox(&g_Config.m_ClOutputBroadcast, Localize("Output broadcast to console"), g_Config.m_ClOutputBroadcast, &Button))
+		  {
+		    g_Config.m_ClOutputBroadcast ^= 1;
+		  }
 
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
