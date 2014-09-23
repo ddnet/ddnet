@@ -11,6 +11,7 @@
 #include <game/client/components/motd.h>
 #include <game/client/components/scoreboard.h>
 
+#include <string.h>
 #include "broadcast.h"
 
 void CBroadcast::OnReset()
@@ -46,7 +47,21 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 		m_BroadcastRenderOffset = 150*Graphics()->ScreenAspect()-Cursor.m_X/2;
 		m_BroadcastTime = time_get()+time_freq()*10;
-		//m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", m_aBroadcastText);
+		if (g_Config.m_ClOutputBroadcast)
+		  {
+		    char tmp[1024];
+		    unsigned int i, ii;
+		    for (i = 0, ii = 0; i < strlen(m_aBroadcastText); i++, ii++)
+		      {
+			if (m_aBroadcastText[i] == '\n')
+			  {
+			    tmp[ii] = '\0';
+			    ii = 0;
+			    m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", tmp);
+			  }
+			else
+			  tmp[ii] = m_aBroadcastText[i];
+		      }
+		  }
 	}
 }
-
