@@ -51,7 +51,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 		  {
 		    char tmp[1024];
 		    unsigned int i, ii;
-		    for (i = 0, ii = 0; i < strlen(m_aBroadcastText); i++, ii++)
+		    for (i = 0, ii = 0; i < strlen(m_aBroadcastText); i++)
 		      {
 			if (m_aBroadcastText[i] == '\n')
 			  {
@@ -60,7 +60,10 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 			    m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", tmp);
 			  }
 			else
-			  tmp[ii] = m_aBroadcastText[i];
+			  {
+			    tmp[ii] = m_aBroadcastText[i];
+			    ii++;
+			  }
 		      }
 		  }
 	}
