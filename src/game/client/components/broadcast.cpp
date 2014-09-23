@@ -11,7 +11,6 @@
 #include <game/client/components/motd.h>
 #include <game/client/components/scoreboard.h>
 
-#include <string.h>
 #include "broadcast.h"
 
 void CBroadcast::OnReset()
