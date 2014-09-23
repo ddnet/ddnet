@@ -476,11 +476,11 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	static int aPlayerIDs[MAX_CLIENTS];
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByTeam[i])
+		if(!m_pClient->m_Snap.m_paInfoByName[i])
 			continue;
 
-		int Index = m_pClient->m_Snap.m_paInfoByTeam[i]->m_ClientID;
-		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && m_pClient->m_Snap.m_paInfoByTeam[i]->m_Team == TEAM_SPECTATORS))
+		int Index = m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID;
+		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && m_pClient->m_Snap.m_paInfoByName[i]->m_Team == TEAM_SPECTATORS))
 			continue;
 		if(m_CallvoteSelectedPlayer == Index)
 			Selected = NumOptions;
