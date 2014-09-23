@@ -119,6 +119,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			g_Config.m_ClShowChatFriends ^= 1;
 
 		// name plates
+		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClNameplates, Localize("Show name plates"), g_Config.m_ClNameplates, &Button))
 			g_Config.m_ClNameplates ^= 1;
@@ -195,11 +196,12 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_CheckBox(&g_Config.m_ClConfirmDisconnect, Localize("Confirm disconnect from server"), g_Config.m_ClConfirmDisconnect, &Button))
 		  g_Config.m_ClConfirmDisconnect ^= 1;
 
+		Right.HSplitTop(5.0f, 0, &Right);
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClOutputBroadcast, Localize("Output broadcast to console"), g_Config.m_ClOutputBroadcast, &Button))
-		  {
-		    g_Config.m_ClOutputBroadcast ^= 1;
-		  }
+		if (DoButton_CheckBox(&g_Config.m_ClPrintBroadcasts, Localize("Print broadcasts to console"), g_Config.m_ClPrintBroadcasts, &Button))
+		{
+			g_Config.m_ClPrintBroadcasts ^= 1;
+		}
 
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);

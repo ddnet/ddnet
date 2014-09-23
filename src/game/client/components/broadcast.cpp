@@ -46,24 +46,26 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 		m_BroadcastRenderOffset = 150*Graphics()->ScreenAspect()-Cursor.m_X/2;
 		m_BroadcastTime = time_get()+time_freq()*10;
-		if (g_Config.m_ClOutputBroadcast)
-		  {
-		    char tmp[1024];
-		    unsigned int i, ii;
-		    for (i = 0, ii = 0; i < strlen(m_aBroadcastText); i++)
-		      {
-			if (m_aBroadcastText[i] == '\n')
-			  {
-			    tmp[ii] = '\0';
-			    ii = 0;
-			    m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", tmp);
-			  }
-			else
-			  {
-			    tmp[ii] = m_aBroadcastText[i];
-			    ii++;
-			  }
-		      }
-		  }
+		if (g_Config.m_ClPrintBroadcasts)
+		{
+			char aBuf[1024];
+			int i, ii;
+			for (i = 0, ii = 0; i < str_length(m_aBroadcastText); i++)
+			{
+				if (m_aBroadcastText[i] == '\n')
+				{
+					aBuf[ii] = '\0';
+					ii = 0;
+					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf);
+				}
+				else
+				{
+					aBuf[ii] = m_aBroadcastText[i];
+					ii++;
+				}
+			}
+			aBuf[ii] = '\0';
+			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf);
+		}
 	}
 }
