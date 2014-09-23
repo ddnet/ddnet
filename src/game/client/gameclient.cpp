@@ -1072,16 +1072,16 @@ void CGameClient::OnNewSnapshot()
 	}
 
 	// sort player infos by team
-	int Teams[3] = { TEAM_RED, TEAM_BLUE, TEAM_SPECTATORS };
+	//int Teams[3] = { TEAM_RED, TEAM_BLUE, TEAM_SPECTATORS };
 	int Index = 0;
-	for(int Team = 0; Team < 3; ++Team)
-	{
-		for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
-		{
-			if(m_Snap.m_paPlayerInfos[i] && m_Snap.m_paPlayerInfos[i]->m_Team == Teams[Team])
-				m_Snap.m_paInfoByTeam[Index++] = m_Snap.m_paPlayerInfos[i];
-		}
-	}
+	//for(int Team = 0; Team < 3; ++Team)
+	//{
+	//	for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
+	//	{
+	//		if(m_Snap.m_paPlayerInfos[i] && m_Snap.m_paPlayerInfos[i]->m_Team == Teams[Team])
+	//			m_Snap.m_paInfoByTeam[Index++] = m_Snap.m_paPlayerInfos[i];
+	//	}
+	//}
 
 	// sort player infos by DDRace Team (and score inbetween)
 	Index = 0;

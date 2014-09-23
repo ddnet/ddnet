@@ -188,10 +188,10 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByTeam[i])
+		if(!m_pClient->m_Snap.m_paInfoByName[i])
 			continue;
 
-		int Index = m_pClient->m_Snap.m_paInfoByTeam[i]->m_ClientID;
+		int Index = m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID;
 
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
