@@ -140,7 +140,8 @@ void CGameTeams::CheckTeamFinished(int Team)
 			}
 		}
 
-		OnTeamFinish(TeamPlayers, PlayersCount);
+		if (PlayersCount > 0)
+			OnTeamFinish(TeamPlayers, PlayersCount);
 	}
 }
 
