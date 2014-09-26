@@ -48,6 +48,7 @@ public:
 	void OnCharacterSpawn(int ClientID);
 	void OnCharacterDeath(int ClientID, int Weapon);
 
+	void CheckTeamFinished(int ClientID);
 	bool SetCharacterTeam(int ClientID, int Team);
 
 	void ChangeTeamState(int Team, int State);

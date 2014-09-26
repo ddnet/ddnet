@@ -110,32 +110,37 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 	else
 	{
 		m_TeeFinished[ClientID] = true;
-		if (TeamFinished(m_Core.Team(ClientID)))
+
+		CheckTeamFinished(m_Core.Team(ClientID));
+	}
+}
+
+void CGameTeams::CheckTeamFinished(int Team)
+{
+	if (TeamFinished(Team))
+	{
+		ChangeTeamState(Team, TEAMSTATE_FINISHED); //TODO: Make it better
+		//ChangeTeamState(Team, TEAMSTATE_OPEN);
+
+		CPlayer *TeamPlayers[MAX_CLIENTS];
+		unsigned int PlayersCount = 0;
+
+		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_FINISHED); //TODO: Make it better
-			//ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_OPEN);
-
-			CPlayer *TeamPlayers[MAX_CLIENTS];
-			unsigned int PlayersCount = 0;
-
-			for (int i = 0; i < MAX_CLIENTS; ++i)
+			if (Team == m_Core.Team(i))
 			{
-				if (m_Core.Team(ClientID) == m_Core.Team(i))
+				CPlayer* pPlayer = GetPlayer(i);
+				if (pPlayer && pPlayer->IsPlaying())
 				{
-					CPlayer* pPlayer = GetPlayer(i);
-					if (pPlayer && pPlayer->IsPlaying())
-					{
-						OnFinish(pPlayer);
-						m_TeeFinished[i] = false;
+					OnFinish(pPlayer);
+					m_TeeFinished[i] = false;
 
-						TeamPlayers[PlayersCount++] = pPlayer;
-					}
+					TeamPlayers[PlayersCount++] = pPlayer;
 				}
 			}
-
-			OnTeamFinish(TeamPlayers, PlayersCount);
-
 		}
+
+		OnTeamFinish(TeamPlayers, PlayersCount);
 	}
 }
 
@@ -599,7 +604,10 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
 
 	if (!Locked)
+	{
 		SetForceCharacterTeam(ClientID, 0);
+		CheckTeamFinished(Team);
+	}
 	else
 	{
 		SetForceCharacterTeam(ClientID, Team);
