@@ -177,7 +177,8 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
 	int OldTeam = m_Core.Team(ClientID);
 
-	ForceLeaveTeam(ClientID);
+	if (Team != m_Core.Team(ClientID))
+		ForceLeaveTeam(ClientID);
 
 	m_Core.Team(ClientID, Team);
 
