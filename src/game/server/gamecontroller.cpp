@@ -767,10 +767,10 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_RoundCurrent = m_RoundCount+1;
 
 	CCharacter *pChr;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
+	CPlayer *pPlayer = SnappingClient > -1 ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	CPlayer *pPlayer2;
 
-	if(pPlayer && (pPlayer->m_TimerType == 0 || pPlayer->m_TimerType == 2) && SnappingClient >= 0)
+	if(pPlayer && (pPlayer->m_TimerType == 0 || pPlayer->m_TimerType == 2))
 	{
 		if((pPlayer->GetTeam() == -1 || pPlayer->m_Paused)
 			&& pPlayer->m_SpectatorID != SPEC_FREEVIEW

@@ -87,7 +87,7 @@ void CPlasma::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 	CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	CPlayer* SnapPlayer = SnappingClient > -1 ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 
 	if (SnapChar && SnapChar->IsAlive()
@@ -96,18 +96,18 @@ void CPlasma::Snap(int SnappingClient)
 			&& (!Tick))
 		return;
 
-	if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID != -1
+	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID != -1
 		&& GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)
 		&& GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)->Team() != m_ResponsibleTeam
 		&& !SnapPlayer->m_ShowOthers)
 		return;
 
-	if( SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->m_Paused && SnapChar
+	if(SnapPlayer && SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->m_Paused && SnapChar
 		&& SnapChar && SnapChar->Team() != m_ResponsibleTeam
 		&& !SnapPlayer->m_ShowOthers)
 		return;
 
-	if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID == -1
+	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID == -1
 		&& SnapChar
 		&& SnapChar->Team() != m_ResponsibleTeam
 		&& SnapPlayer->m_SpecTeam)

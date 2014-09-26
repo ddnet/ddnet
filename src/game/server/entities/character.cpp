@@ -1023,26 +1023,29 @@ void CCharacter::Snap(int SnappingClient)
 {
 	int id = m_pPlayer->GetCID();
 
-	if (!Server()->Translate(id, SnappingClient))
+	if(SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
 		return;
 
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	if(SnappingClient > -1)
+	{
+		CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
+		CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-	if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID != -1
-		&& !CanCollide(SnapPlayer->m_SpectatorID) && !SnapPlayer->m_ShowOthers)
-		return;
+		if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID != -1
+			&& !CanCollide(SnapPlayer->m_SpectatorID) && !SnapPlayer->m_ShowOthers)
+			return;
 
-	if( SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->m_Paused && SnapChar && !SnapChar->m_Super
-		&& !CanCollide(SnappingClient) && !SnapPlayer->m_ShowOthers)
-		return;
+		if( SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->m_Paused && SnapChar && !SnapChar->m_Super
+			&& !CanCollide(SnappingClient) && !SnapPlayer->m_ShowOthers)
+			return;
 
-	if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID == -1
-		&& !CanCollide(SnappingClient) && SnapPlayer->m_SpecTeam)
-		return;
+		if((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->m_Paused) && SnapPlayer->m_SpectatorID == -1
+			&& !CanCollide(SnappingClient) && SnapPlayer->m_SpecTeam)
+			return;
+	}
 
 	if (m_Paused)
 		return;

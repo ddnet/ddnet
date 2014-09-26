@@ -249,7 +249,7 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	int id = m_ClientID;
-	if (!Server()->Translate(id, SnappingClient)) return;
+	if (SnappingClient > -1 && !Server()->Translate(id, SnappingClient)) return;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
 
@@ -311,7 +311,7 @@ void CPlayer::FakeSnap(int SnappingClient)
 	IServer::CClientInfo info;
 	Server()->GetClientInfo(SnappingClient, &info);
 	CGameContext *GameContext = (CGameContext *) GameServer();
-	if (GameContext->m_apPlayers[SnappingClient] && GameContext->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_OLD)
+	if (SnappingClient > -1 && GameContext->m_apPlayers[SnappingClient] && GameContext->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_OLD)
 		return;
 
 	int id = VANILLA_MAX_CLIENTS - 1;
