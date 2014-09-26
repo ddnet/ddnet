@@ -277,7 +277,10 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 	Msg.m_Team = 0;
 	Msg.m_ClientID = -1;
 	Msg.m_pMessage = pText;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+	if(g_Config.m_SvDemoChat)
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+	else
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, To);
 }
 
 void CGameContext::SendChatTeam(int Team, const char *pText)
@@ -321,7 +324,8 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 		Msg.m_pMessage = aText;
 
 		// pack one for the recording only
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
+		if(g_Config.m_SvDemoChat)
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -341,7 +345,8 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 		Msg.m_pMessage = aText;
 
 		// pack one for the recording only
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
+		if(g_Config.m_SvDemoChat)
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2764,8 +2769,12 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		Msg.m_Team = CHAT_WHISPER_SEND;
 		Msg.m_ClientID = VictimID;
 		Msg.m_pMessage = pMessage;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
-	} else
+		if(g_Config.m_SvDemoChat)
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		else
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	}
+	else
 	{
 		str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimID), pMessage);
 		SendChatTarget(ClientID, aBuf);
@@ -2777,8 +2786,12 @@ void CGameContext::WhisperID(int ClientID, int VictimID, char *pMessage)
 		Msg2.m_Team = CHAT_WHISPER_RECV;
 		Msg2.m_ClientID = ClientID;
 		Msg2.m_pMessage = pMessage;
-		Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimID);
-	} else
+		if(g_Config.m_SvDemoChat)
+			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimID);
+		else
+			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL|MSGFLAG_NORECORD, VictimID);
+	}
+	else
 	{
 		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientID), pMessage);
 		SendChatTarget(VictimID, aBuf);
