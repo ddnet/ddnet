@@ -119,9 +119,6 @@ void CGameTeams::CheckTeamFinished(int Team)
 {
 	if (TeamFinished(Team))
 	{
-		ChangeTeamState(Team, TEAMSTATE_FINISHED); //TODO: Make it better
-		//ChangeTeamState(Team, TEAMSTATE_OPEN);
-
 		CPlayer *TeamPlayers[MAX_CLIENTS];
 		unsigned int PlayersCount = 0;
 
@@ -141,7 +138,11 @@ void CGameTeams::CheckTeamFinished(int Team)
 		}
 
 		if (PlayersCount > 0)
+		{
+			ChangeTeamState(Team, TEAMSTATE_FINISHED); //TODO: Make it better
+			//ChangeTeamState(Team, TEAMSTATE_OPEN);
 			OnTeamFinish(TeamPlayers, PlayersCount);
+		}
 	}
 }
 
