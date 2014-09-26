@@ -456,6 +456,8 @@ void CGameTeams::OnFinish(CPlayer* Player)
 	if (time - pData->m_BestTime < 0)
 	{
 		// new record \o/
+		Server()->SaveDemo(Player->GetCID(), time);
+
 		if (diff >= 60)
 			str_format(aBuf, sizeof(aBuf), "New record: %d minute(s) %5.2f second(s) better.",
 					(int) diff / 60, diff - ((int) diff / 60 * 60));
@@ -469,6 +471,8 @@ void CGameTeams::OnFinish(CPlayer* Player)
 	}
 	else if (pData->m_BestTime != 0) // tee has already finished?
 	{
+		Server()->StopRecord(Player->GetCID());
+
 		if (diff <= 0.005)
 		{
 			GameServer()->SendChatTarget(Player->GetCID(),
@@ -485,6 +489,10 @@ void CGameTeams::OnFinish(CPlayer* Player)
 						diff);
 			GameServer()->SendChatTarget(Player->GetCID(), aBuf); //this is private, sent only to the tee
 		}
+	}
+	else
+	{
+		Server()->SaveDemo(Player->GetCID(), time);
 	}
 
 	bool CallSaveScore = false;

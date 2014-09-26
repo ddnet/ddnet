@@ -180,7 +180,7 @@ public:
 	unsigned char *m_pCurrentMapData;
 	int m_CurrentMapSize;
 
-	CDemoRecorder m_DemoRecorder;
+	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
 	CMapChecker m_MapChecker;
 
@@ -242,6 +242,11 @@ public:
 
 	char *GetMapName();
 	int LoadMap(const char *pMapName);
+
+	void SaveDemo(int ClientID, float Time);
+	void StartRecord(int ClientID);
+	void StopRecord(int ClientID);
+	bool IsRecording(int ClientID);
 
 	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole);
 	int Run();

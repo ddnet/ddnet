@@ -96,6 +96,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	SendZoneMsgs(); // we want a entermessage also on spawn
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
+	if(Server()->IsRecording(m_pPlayer->GetCID()))
+		Server()->StopRecord(m_pPlayer->GetCID());
+	Server()->StartRecord(m_pPlayer->GetCID());
+
 	return true;
 }
 

@@ -157,6 +157,11 @@ public:
 
 	// DDRace
 
+	virtual void SaveDemo(int ClientID, float Time) = 0;
+	virtual void StartRecord(int ClientID) = 0;
+	virtual void StopRecord(int ClientID) = 0;
+	virtual bool IsRecording(int ClientID) = 0;
+
 	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) = 0;
 
 	virtual int* GetIdMap(int ClientID) = 0;
