@@ -53,10 +53,11 @@ void CAutoMapper::Load(const char* pTileName)
 				{
 					// new index
 					int ID = 0;
-					char aFlip[128] = "";
-					char aFlip2[128] = "";
+					char aOrientation1[128] = "";
+					char aOrientation2[128] = "";
+					char aOrientation3[128] = "";
 
-					sscanf(pLine, "Index %d %127s %127s", &ID, aFlip, aFlip2);
+					sscanf(pLine, "Index %d %127s %127s %127s", &ID, aOrientation1, aOrientation2, aOrientation3);
 
 					CIndexRule NewIndexRule;
 					NewIndexRule.m_ID = ID;
@@ -65,20 +66,34 @@ void CAutoMapper::Load(const char* pTileName)
 					NewIndexRule.m_BaseTile = false;
 					NewIndexRule.m_DefaultRule = true;
 
-					if(str_length(aFlip) > 0)
+					if(str_length(aOrientation1) > 0)
 					{
-						if(!str_comp(aFlip, "XFLIP"))
+						if(!str_comp(aOrientation1, "XFLIP"))
 							NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
-						else if(!str_comp(aFlip, "YFLIP"))
+						else if(!str_comp(aOrientation1, "YFLIP"))
 							NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
+						else if(!str_comp(aOrientation1, "ROTATE"))
+							NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 					}
 
-					if(str_length(aFlip2) > 0)
+					if(str_length(aOrientation2) > 0)
 					{
-						if(!str_comp(aFlip2, "XFLIP"))
+						if(!str_comp(aOrientation2, "XFLIP"))
 							NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
-						else if(!str_comp(aFlip2, "YFLIP"))
+						else if(!str_comp(aOrientation2, "YFLIP"))
 							NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
+						else if(!str_comp(aOrientation2, "ROTATE"))
+							NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
+					}
+
+					if(str_length(aOrientation3) > 0)
+					{
+						if(!str_comp(aOrientation3, "XFLIP"))
+							NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
+						else if(!str_comp(aOrientation3, "YFLIP"))
+							NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
+						else if(!str_comp(aOrientation3, "ROTATE"))
+							NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 					}
 
 					// add the index rule object and make it current
@@ -113,7 +128,7 @@ void CAutoMapper::Load(const char* pTileName)
 				{
 					sscanf(pLine, "Random %d", &pCurrentIndex->m_RandomValue);
 				}
-				else if(!str_comp_num(pLine, "CheckEmptyTiles", 15) && pCurrentIndex)
+				else if(!str_comp_num(pLine, "NoDefaultRule", 13) && pCurrentIndex)
 				{
 					pCurrentIndex->m_DefaultRule = false;
 				}
