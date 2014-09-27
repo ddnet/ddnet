@@ -4016,11 +4016,11 @@ void CEditor::Render()
 		DoMapEditor(View, ToolBar);
 
 	// do zooming
-	if(Input()->KeyDown(KEY_KP_MINUS))
+	if(Input()->KeyDown(KEY_KP_MINUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 		m_ZoomLevel += 50;
-	if(Input()->KeyDown(KEY_KP_PLUS))
+	if(Input()->KeyDown(KEY_KP_PLUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 		m_ZoomLevel -= 50;
-	if(Input()->KeyDown(KEY_KP_MULTIPLY))
+	if(Input()->KeyDown(KEY_KP_MULTIPLY) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
 		m_EditorOffsetX = 0;
 		m_EditorOffsetY = 0;
