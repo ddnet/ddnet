@@ -4089,7 +4089,7 @@ void CEditor::Render()
 		RenderMenubar(MenuBar);
 
 		RenderModebar(CModeBar);
-		if(m_ShowEnvelopeEditor)
+		if(m_ShowEnvelopeEditor && !m_ShowPicker)
 			RenderEnvelopeEditor(EnvelopeEditor);
 		if(m_ShowUndo)
 			RenderUndoList(UndoList);
