@@ -1488,7 +1488,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(((m_TileIndex == TILE_SUPER_START) || (m_TileFIndex == TILE_SUPER_START)) && !m_SuperJump)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have infinite air jumps");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have unlimited air jumps");
 		m_SuperJump = true;
 		if (m_Core.m_Jumps == 0)
 		{
@@ -1524,7 +1524,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(((m_TileIndex == TILE_SUPER_END) || (m_TileFIndex == TILE_SUPER_END)) && m_SuperJump)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You don't have infinite air jumps");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You don't have unlimited air jumps");
 		m_SuperJump = false;
 		if (m_Core.m_Jumps == 0)
 		{
