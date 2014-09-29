@@ -157,7 +157,10 @@ void CMapLayers::OnRender()
 				(int)((x1-x0)*Graphics()->ScreenWidth()), (int)((y1-y0)*Graphics()->ScreenHeight()));
 		}
 
-		MapScreenToGroup(Center.x, Center.y, pGroup, m_pClient->m_pCamera->m_Zoom);
+		if(!g_Config.m_ClZoomBackgroundLayers && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
+			MapScreenToGroup(Center.x, Center.y, pGroup, 1.0);
+		else
+			MapScreenToGroup(Center.x, Center.y, pGroup, m_pClient->m_pCamera->m_Zoom);
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{

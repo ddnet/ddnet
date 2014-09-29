@@ -1724,7 +1724,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClRaceSaveGhost ^= 1;
 	}
 
-	MainView.HSplitTop(230.0f, &Gameplay , &MainView);
+	MainView.HSplitTop(250.0f, &Gameplay , &MainView);
 
 	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
 	UI()->DoLabelScaled(&Label, Localize("Gameplay"), 20.0f, -1);
@@ -1792,6 +1792,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClOldGunPosition, Localize("Old gun position"), g_Config.m_ClOldGunPosition, &Button))
 	{
 		g_Config.m_ClOldGunPosition ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClZoomBackgroundLayers, Localize("Zoom background layers"), g_Config.m_ClZoomBackgroundLayers, &Button))
+	{
+		g_Config.m_ClZoomBackgroundLayers ^= 1;
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);

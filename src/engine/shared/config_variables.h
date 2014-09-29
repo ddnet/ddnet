@@ -273,6 +273,7 @@ MACRO_CONFIG_INT(ClShowOthers, cl_show_others, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_S
 MACRO_CONFIG_INT(ClShowOthersAlpha, cl_show_others_alpha, 40, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show players in other teams (alpha value, 0 invisible, 100 fully visible)")
 MACRO_CONFIG_INT(ClOverlayEntities, cl_overlay_entities, 0, 0, 100, CFGFLAG_CLIENT, "Overlay game tiles with a percentage of opacity")
 MACRO_CONFIG_INT(ClShowQuads, cl_show_quads, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show quads")
+MACRO_CONFIG_INT(ClZoomBackgroundLayers, cl_zoom_background_layers, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom background layers")
 MACRO_CONFIG_INT(ClBackgroundHue, cl_background_hue, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color hue")
 MACRO_CONFIG_INT(ClBackgroundSat, cl_background_sat, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color saturation")
 MACRO_CONFIG_INT(ClBackgroundLht, cl_background_lht, 128, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color lightness")
