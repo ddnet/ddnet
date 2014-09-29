@@ -611,6 +611,10 @@ public:
 		m_MouseDeltaY = 0;
 		m_MouseDeltaWx = 0;
 		m_MouseDeltaWy = 0;
+#if defined(__ANDROID__)
+		m_OldMouseX = 0;
+		m_OldMouseY = 0;
+#endif
 
 		m_GuiActive = true;
 		m_ProofBorders = false;
@@ -773,6 +777,10 @@ public:
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
+#if defined(__ANDROID__)
+	float m_OldMouseX;
+	float m_OldMouseY;
+#endif
 
 	bool m_ShowTileInfo;
 	bool m_ShowDetail;

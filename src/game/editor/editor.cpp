@@ -4442,6 +4442,22 @@ void CEditor::UpdateAndRender()
 	float rx, ry;
 	{
 		Input()->MouseRelative(&rx, &ry);
+#if defined(__ANDROID__)
+		float tx, ty;
+		tx = s_MouseX;
+		ty = s_MouseY;
+
+		s_MouseX = (rx / (float)g_Config.m_GfxScreenWidth) * UI()->Screen()->w;
+		s_MouseY = (ry / (float)g_Config.m_GfxScreenHeight) * UI()->Screen()->h;
+
+		s_MouseX = clamp(s_MouseX, 0.0f, UI()->Screen()->w);
+		s_MouseY = clamp(s_MouseY, 0.0f, UI()->Screen()->h);
+
+		m_MouseDeltaX = s_MouseX - m_OldMouseX;
+		m_MouseDeltaY = s_MouseY - m_OldMouseY;
+		m_OldMouseX = tx;
+		m_OldMouseY = ty;
+#else
 		UI()->ConvertMouseMove(&rx, &ry);
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;
@@ -4454,6 +4470,7 @@ void CEditor::UpdateAndRender()
 
 		s_MouseX = clamp(s_MouseX, 0.0f, UI()->Screen()->w);
 		s_MouseY = clamp(s_MouseY, 0.0f, UI()->Screen()->h);
+#endif
 
 		// update the ui
 		mx = s_MouseX;
@@ -4482,7 +4499,14 @@ void CEditor::UpdateAndRender()
 		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
 		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
 
+#if defined(__ANDROID__)
+	static int ButtonsOneFrameDelay = 0; // For Android touch input
+
+	UI()->Update(mx,my,Mwx,Mwy,ButtonsOneFrameDelay);
+	ButtonsOneFrameDelay = Buttons;
+#else
 		UI()->Update(mx,my,Mwx,Mwy,Buttons);
+#endif
 	}
 
 	// toggle gui
