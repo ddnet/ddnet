@@ -179,10 +179,16 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 
 	if (Team != m_Core.Team(ClientID))
 		ForceLeaveTeam(ClientID);
+	else
+	{
+		m_TeeFinished[ClientID] = false;
+		if (Count(m_Core.Team(ClientID)) > 0)
+			m_MembersCount[m_Core.Team(ClientID)]--;
+	}
 
 	m_Core.Team(ClientID, Team);
 
-	if (m_Core.Team(ClientID) != TEAM_SUPER && m_Core.Team(ClientID) != Team)
+	if (m_Core.Team(ClientID) != TEAM_SUPER)
 		m_MembersCount[m_Core.Team(ClientID)]++;
 	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
 	{
