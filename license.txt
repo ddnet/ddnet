@@ -1,4 +1,4 @@
-Copyright (C) 2007-2012 Magnus Auvinen
+Copyright (C) 2007-2014 Magnus Auvinen
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -15,6 +15,11 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
   misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
+
+------------------------------------------------------------------------
+
+All content under 'data' except the font (which has its own license) is
+released under CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
 
 ------------------------------------------------------------------------
 
