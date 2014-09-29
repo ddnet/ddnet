@@ -182,7 +182,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 
 	m_Core.Team(ClientID, Team);
 
-	if (m_Core.Team(ClientID) != TEAM_SUPER)
+	if (m_Core.Team(ClientID) != TEAM_SUPER && m_Core.Team(ClientID) != Team)
 		m_MembersCount[m_Core.Team(ClientID)]++;
 	if (Team != TEAM_SUPER && (m_TeamState[Team] == TEAMSTATE_EMPTY || m_TeamLocked[Team]))
 	{
