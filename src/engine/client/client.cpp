@@ -1894,6 +1894,8 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 			m_DummyConnected = true;
 			g_Config.m_ClDummy = 1;
 			Rcon("crashmeplx");
+			if(m_RconAuthed[0])
+				RconAuth("", m_RconPassword);
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
