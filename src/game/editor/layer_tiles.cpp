@@ -382,10 +382,9 @@ void CLayerTiles::BrushFlipX()
 			m_pTiles[y*m_Width+m_Width-1-x] = Tmp;
 		}
 
-	if(!m_Game && !m_Tele && !m_Speedup && !m_Tune)
-		for(int y = 0; y < m_Height; y++)
-			for(int x = 0; x < m_Width; x++)
-				m_pTiles[y*m_Width+x].m_Flags ^= m_pTiles[y*m_Width+x].m_Flags&TILEFLAG_ROTATE ? TILEFLAG_HFLIP : TILEFLAG_VFLIP;
+	for(int y = 0; y < m_Height; y++)
+		for(int x = 0; x < m_Width; x++)
+			m_pTiles[y*m_Width+x].m_Flags ^= m_pTiles[y*m_Width+x].m_Flags&TILEFLAG_ROTATE ? TILEFLAG_HFLIP : TILEFLAG_VFLIP;
 }
 
 void CLayerTiles::BrushFlipY()
@@ -398,10 +397,9 @@ void CLayerTiles::BrushFlipY()
 			m_pTiles[(m_Height-1-y)*m_Width+x] = Tmp;
 		}
 
-	if(!m_Game && !m_Tele && !m_Speedup && !m_Tune)
-		for(int y = 0; y < m_Height; y++)
-			for(int x = 0; x < m_Width; x++)
-				m_pTiles[y*m_Width+x].m_Flags ^= m_pTiles[y*m_Width+x].m_Flags&TILEFLAG_ROTATE ? TILEFLAG_VFLIP : TILEFLAG_HFLIP;
+	for(int y = 0; y < m_Height; y++)
+		for(int x = 0; x < m_Width; x++)
+			m_pTiles[y*m_Width+x].m_Flags ^= m_pTiles[y*m_Width+x].m_Flags&TILEFLAG_ROTATE ? TILEFLAG_VFLIP : TILEFLAG_HFLIP;
 }
 
 void CLayerTiles::BrushRotate(float Amount)
@@ -420,12 +418,9 @@ void CLayerTiles::BrushRotate(float Amount)
 			for(int y = m_Height-1; y >= 0; --y, ++pDst)
 			{
 				*pDst = pTempData[y*m_Width+x];
-				if(!m_Game && !m_Tele && !m_Speedup && !m_Tune)
-				{
-					if(pDst->m_Flags&TILEFLAG_ROTATE)
-						pDst->m_Flags ^= (TILEFLAG_HFLIP|TILEFLAG_VFLIP);
-					pDst->m_Flags ^= TILEFLAG_ROTATE;
-				}
+				if(pDst->m_Flags&TILEFLAG_ROTATE)
+					pDst->m_Flags ^= (TILEFLAG_HFLIP|TILEFLAG_VFLIP);
+				pDst->m_Flags ^= TILEFLAG_ROTATE;
 			}
 
 		int Temp = m_Width;
