@@ -548,7 +548,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	int OldSelected = -1;
 	UiDoListboxStart(&s_InitSkinlist, &MainView, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
-
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
 		const CSkins::CSkin *s = s_paSkinList[i];
@@ -559,6 +558,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(&s_paSkinList[i], OldSelected == i);
+		char aBuf[128];
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info;
@@ -577,8 +577,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			Info.m_Size = UI()->Scale()*50.0f;
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x+Item.m_Rect.w/2, Item.m_Rect.y+Item.m_Rect.h/2));
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x+30, Item.m_Rect.y+Item.m_Rect.h/2));
 
+
+			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
+			Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
+			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
+			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1,Item.m_Rect.w);
 			if(g_Config.m_Debug)
 			{
 				vec3 BloodColor = *UseCustomColor ? m_pClient->m_pSkins->GetColorV3(*ColorBody) : s->m_BloodColor;
