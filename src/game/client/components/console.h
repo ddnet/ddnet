@@ -32,6 +32,7 @@ class CGameConsole : public CComponent
 		int m_CompletionChosen;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
+		bool m_ReverseTAB;
 
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];

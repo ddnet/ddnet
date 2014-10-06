@@ -53,6 +53,7 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_aCompletionBuffer[0] = 0;
 	m_CompletionChosen = -1;
 	m_CompletionRenderOffset = 0.0f;
+	m_ReverseTAB = false;
 
 	m_IsCommand = false;
 }
@@ -148,15 +149,18 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
-				m_CompletionChosen++;
+				if(m_ReverseTAB)
+					 m_CompletionChosen--;
+				else
+					m_CompletionChosen++;
 				m_CompletionEnumerationCount = 0;
 				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL &&
 					m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
 
 				// handle wrapping
-				if(m_CompletionEnumerationCount && m_CompletionChosen >= m_CompletionEnumerationCount)
+				if(m_CompletionEnumerationCount && (m_CompletionChosen >= m_CompletionEnumerationCount || m_CompletionChosen <0))
 				{
-					m_CompletionChosen %= m_CompletionEnumerationCount;
+					m_CompletionChosen= (m_CompletionChosen + m_CompletionEnumerationCount) %  m_CompletionEnumerationCount;
 					m_CompletionEnumerationCount = 0;
 					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL &&
 						m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(),	PossibleCommandsCompleteCallback, this);
@@ -173,6 +177,16 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			if(m_BacklogActPage < 0)
 				m_BacklogActPage = 0;
 		}
+		else if(Event.m_Key == KEY_LSHIFT)
+		{
+			m_ReverseTAB = true;
+			Handled = true;
+		}
+	}
+	if(Event.m_Flags&IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
+	{
+	m_ReverseTAB = false;
+	Handled = true;
 	}
 
 	if(!Handled)
@@ -180,7 +194,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{
-		if(Event.m_Key != KEY_TAB)
+		if((Event.m_Key != KEY_TAB) && (Event.m_Key != KEY_LSHIFT))
 		{
 			m_CompletionChosen = -1;
 			str_copy(m_aCompletionBuffer, m_Input.GetString(), sizeof(m_aCompletionBuffer));
