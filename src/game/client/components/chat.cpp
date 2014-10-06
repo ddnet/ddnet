@@ -181,22 +181,24 @@ bool CChat::OnInput(IInput::CEvent Event)
 			}
 
 
-			if(!m_pClient->m_Snap.m_paPlayerInfos[Index])
+			if(!m_pClient->m_Snap.m_paInfoByName[Index])
 				continue;
+
+			int Index2 = m_pClient->m_Snap.m_paInfoByName[Index]->m_ClientID;
 
 			bool Found = false;
 			if(SearchType == 1)
 			{
-				if(str_comp_nocase_num(m_pClient->m_aClients[Index].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
-					str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aCompletionBuffer))
+				if(str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
+					str_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
 					Found = true;
 			}
-			else if(!str_comp_nocase_num(m_pClient->m_aClients[Index].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
+			else if(!str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
 				Found = true;
 
 			if(Found)
 			{
-				pCompletionString = m_pClient->m_aClients[Index].m_aName;
+				pCompletionString = m_pClient->m_aClients[Index2].m_aName;
 				m_CompletionChosen = Index+SearchType*MAX_CLIENTS;
 				break;
 			}
