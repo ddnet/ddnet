@@ -913,6 +913,7 @@ public:
 	}
 
 	int GetLineDistance();
+	void ZoomMouseTarget(float ZoomFactor);
 
 	// DDRace
 
