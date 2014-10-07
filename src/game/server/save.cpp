@@ -212,14 +212,14 @@ int CSaveTeam::save(int Team)
 	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < 64))
 	{
 		CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
-		
-		if(Teams->Count(Team) <= 0)
+	
+		m_MembersCount = Teams->Count(Team);
+		if(m_MembersCount <= 0)
 		{
 			return 2;
 		}
 
 		m_TeamState = Teams->GetTeamState(Team);
-		m_MembersCount = Teams->Count(Team);
 		m_NumSwitchers = m_pController->GameServer()->Collision()->m_NumSwitchers;
 		m_TeamLocked = Teams->TeamLocked(Team);
 
