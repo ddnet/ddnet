@@ -33,6 +33,7 @@ enum
 {
 	MODE_LAYERS=0,
 	MODE_IMAGES,
+	MODE_SOUNDS,
 
 	DIALOG_NONE=0,
 	DIALOG_FILE,
@@ -294,6 +295,19 @@ public:
 	class CAutoMapper m_AutoMapper;
 };
 
+class CEditorSound
+{
+public:
+	CEditorSound()
+	{
+		m_aName[0] = 0;
+		m_External = 0;
+	}
+
+	int m_External;
+	char m_aName[128];
+};
+
 class CEditorMap
 {
 	void MakeGameGroup(CLayerGroup *pGroup);
@@ -311,6 +325,7 @@ public:
 	array<CLayerGroup*> m_lGroups;
 	array<CEditorImage*> m_lImages;
 	array<CEnvelope*> m_lEnvelopes;
+	array<CEditorSound*> m_lSounds;
 
 	class CMapInfo
 	{
@@ -723,6 +738,7 @@ public:
 	{
 		FILETYPE_MAP,
 		FILETYPE_IMG,
+		FILETYPE_SOUND,
 
 		MAX_PATH_LENGTH = 512
 	};
@@ -801,6 +817,7 @@ public:
 	int m_SelectedEnvelopePoint;
 	int m_SelectedQuadEnvelope;
 	int m_SelectedImage;
+	int m_SelectedSound;
 
 	static int ms_CheckerTexture;
 	static int ms_BackgroundTexture;
@@ -855,6 +872,7 @@ public:
 	static int PopupImage(CEditor *pEditor, CUIRect View);
 	static int PopupMenuFile(CEditor *pEditor, CUIRect View);
 	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View);
+	static int PopupSound(CEditor *pEditor, CUIRect View);
 
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -883,9 +901,11 @@ public:
 
 	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);
 	static void AddImage(const char *pFilename, int StorageType, void *pUser);
+	static void AddSound(const char *pFileName, int StorageType, void *pUser);
 
 	void RenderImages(CUIRect Toolbox, CUIRect Toolbar, CUIRect View);
 	void RenderLayers(CUIRect Toolbox, CUIRect Toolbar, CUIRect View);
+	void RenderSounds(CUIRect Toolbox, CUIRect Toolbar, CUIRect View);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
