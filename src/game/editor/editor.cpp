@@ -2660,9 +2660,6 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	/*CEditorImage ImgInfo(pEditor);
-	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
-		return;*/
 
 	// check if we have that image already
 	char aBuf[128];
@@ -2673,14 +2670,18 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 			return;
 	}
 
+	// load sound
+	int SoundId = pEditor->Sound()->LoadWV(pFileName);
+	if(SoundId == -1)
+		return;
+
+	// add sound
 	CEditorSound *pSound = new CEditorSound();
-	//*pImg = ImgInfo;
-	//pImg->m_TexID = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
-	//ImgInfo.m_pData = 0;
+	pSound->m_SoundID = SoundId;
 	pSound->m_External = 1;	// external by default
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
 	pEditor->m_Map.m_lSounds.add(pSound);
-	//pEditor->SortImages();
+
 	if(pEditor->m_SelectedSound > -1 && pEditor->m_SelectedSound < pEditor->m_Map.m_lSounds.size())
 	{
 		for(int i = 0; i <= pEditor->m_SelectedSound; ++i)
@@ -2690,6 +2691,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 				break;
 			}
 	}
+	
 	pEditor->m_Dialog = DIALOG_NONE;
 }
 
@@ -4610,6 +4612,7 @@ void CEditor::Init()
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_RenderTools.m_pGraphics = m_pGraphics;
 	m_RenderTools.m_pUI = &m_UI;
 	m_UI.SetGraphics(m_pGraphics, m_pTextRender);

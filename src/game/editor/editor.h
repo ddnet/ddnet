@@ -21,6 +21,7 @@
 #include <engine/shared/datafile.h>
 #include <engine/editor.h>
 #include <engine/graphics.h>
+#include <engine/sound.h>
 
 #include "auto_map.h"
 
@@ -302,8 +303,10 @@ public:
 	{
 		m_aName[0] = 0;
 		m_External = 0;
+		m_SoundID = 0;
 	}
 
+	int m_SoundID;
 	int m_External;
 	char m_aName[128];
 };
@@ -563,6 +566,7 @@ class CEditor : public IEditor
 	class IConsole *m_pConsole;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
+	class ISound *m_pSound;
 	class IStorage *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
@@ -571,6 +575,7 @@ public:
 	class IClient *Client() { return m_pClient; };
 	class IConsole *Console() { return m_pConsole; };
 	class IGraphics *Graphics() { return m_pGraphics; };
+	class ISound *Sound() { return m_pSound; }
 	class ITextRender *TextRender() { return m_pTextRender; };
 	class IStorage *Storage() { return m_pStorage; };
 	CUI *UI() { return &m_UI; }
@@ -582,6 +587,7 @@ public:
 		m_pClient = 0;
 		m_pGraphics = 0;
 		m_pTextRender = 0;
+		m_pSound = 0;
 
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
