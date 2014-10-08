@@ -2416,6 +2416,24 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				Change = i;
 			}
 		}
+		else if(pProps[i].m_Type == PROPTYPE_SOUND)
+		{
+			char aBuf[64];
+			if(pProps[i].m_Value < 0)
+				str_copy(aBuf, "None", sizeof(aBuf));
+			else
+				str_format(aBuf, sizeof(aBuf),"%s", m_Map.m_lSounds[pProps[i].m_Value]->m_aName);
+
+			if(DoButton_Editor(&pIDs[i], aBuf, 0, &Shifter, 0, 0))
+				PopupSelectSoundInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
+
+			int r = PopupSelectSoundResult();
+			if(r >= -1)
+			{
+				*pNewVal = r;
+				Change = i;
+			}
+		}
 	}
 
 	return Change;
@@ -2513,7 +2531,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 
 					static int s_GroupPopupId = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 220, PopupGroup);
+						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 230, PopupGroup);
 
 					if(m_Map.m_lGroups[g]->m_lLayers.size() && Input()->MouseDoubleClick())
 						m_Map.m_lGroups[g]->m_Collapse ^= 1;

@@ -3,7 +3,7 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
-#include<engine/shared/protocol.h>
+#include <engine/shared/protocol.h>
 
 // layer types
 enum
@@ -18,6 +18,7 @@ enum
 	LAYERTYPE_SPEEDUP,
 	LAYERTYPE_SWITCH,
 	LAYERTYPE_TUNE,
+	LAYERTYPE_SOUNDS,
 
 	MAPITEMTYPE_VERSION=0,
 	MAPITEMTYPE_INFO,

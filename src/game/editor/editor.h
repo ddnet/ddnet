@@ -459,6 +459,7 @@ enum
 	PROPTYPE_IMAGE,
 	PROPTYPE_ENVELOPE,
 	PROPTYPE_SHIFT,
+	PROPTYPE_SOUND,
 };
 
 typedef struct
@@ -874,6 +875,7 @@ public:
 	static int PopupMapInfo(CEditor *pEditor, CUIRect View);
 	static int PopupEvent(CEditor *pEditor, CUIRect View);
 	static int PopupSelectImage(CEditor *pEditor, CUIRect View);
+	static int PopupSelectSound(CEditor *pEditor, CUIRect View);
 	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View);
 	static int PopupImage(CEditor *pEditor, CUIRect View);
 	static int PopupMenuFile(CEditor *pEditor, CUIRect View);
@@ -892,6 +894,9 @@ public:
 
 	void PopupSelectConfigAutoMapInvoke(float x, float y);
 	int PopupSelectConfigAutoMapResult();
+
+	void PopupSelectSoundInvoke(int Current, float x, float y);
+	int PopupSelectSoundResult(); 
 
 	vec4 ButtonColorMul(const void *pID);
 
@@ -1050,6 +1055,27 @@ public:
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+};
+
+class CLayerSounds : public CLayer
+{
+public:
+	CLayerSounds();
+	~CLayerSounds();
+
+	virtual void Render();
+
+	virtual void BrushSelecting(CUIRect Rect);
+	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
+	virtual void BrushPlace(CLayer *pBrush, float wx, float wy);
+
+	virtual int RenderProperties(CUIRect *pToolbox);
+
+	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc);
+
+	void GetSize(float *w, float *h);
+
+	int m_Sound;
 };
 
 
