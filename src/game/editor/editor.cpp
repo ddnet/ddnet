@@ -4028,12 +4028,22 @@ void CEditor::Render()
 	}
 	if(m_Dialog == DIALOG_NONE && UI()->MouseInside(&View))
 	{
+		// Determines in which direction to zoom.
+		int Zoom = 0;
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
-			m_ZoomLevel -= 20;
-
+			Zoom--;
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			m_ZoomLevel += 20;
+			Zoom++;
+
+		if(Zoom != 0)
+		{
+			float OldLevel = m_ZoomLevel;
+			m_ZoomLevel = clamp(m_ZoomLevel + Zoom * 20, 50, 2000);
+			if(g_Config.m_EdZoomTarget)
+				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
+		}
 	}
+
 	m_ZoomLevel = clamp(m_ZoomLevel, 50, 2000);
 	m_WorldZoom = m_ZoomLevel/100.0f;
 	float Brightness = 0.25f;
@@ -4227,6 +4237,26 @@ int CEditor::GetLineDistance()
 		LineDistance = 256;
 
 	return LineDistance;
+}
+
+void CEditor::ZoomMouseTarget(float ZoomFactor)
+{
+	// zoom to the current mouse position
+	// get absolute mouse position
+	float aPoints[4];
+	RenderTools()->MapscreenToWorld(
+		m_WorldOffsetX, m_WorldOffsetY,
+		1.0f, 1.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
+
+	float WorldWidth = aPoints[2]-aPoints[0];
+	float WorldHeight = aPoints[3]-aPoints[1];
+
+	float Mwx = aPoints[0] + WorldWidth * (UI()->MouseX()/UI()->Screen()->w);
+	float Mwy = aPoints[1] + WorldHeight * (UI()->MouseY()/UI()->Screen()->h);
+
+	// adjust camera
+	m_WorldOffsetX += (Mwx-m_WorldOffsetX) * (1-ZoomFactor);
+	m_WorldOffsetY += (Mwy-m_WorldOffsetY) * (1-ZoomFactor);
 }
 
 void CEditorMap::DeleteEnvelope(int Index)
