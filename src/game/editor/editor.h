@@ -1064,6 +1064,7 @@ public:
 	~CLayerSounds();
 
 	virtual void Render();
+	CSoundSource *NewSource();
 
 	virtual void BrushSelecting(CUIRect Rect);
 	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
@@ -1073,9 +1074,8 @@ public:
 
 	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc);
 
-	void GetSize(float *w, float *h);
-
 	int m_Sound;
+	array<CSoundSource> m_lSources;
 };
 
 

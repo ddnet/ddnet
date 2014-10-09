@@ -427,7 +427,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					Item.m_Layer.m_Type = pLayer->m_Type;
 					Item.m_Sound = pLayer->m_Sound;
 
-					// TODO: add the data
+					// add the data
+					Item.m_NumSources = pLayer->m_lSources.size();
+					Item.m_Data = df.AddDataSwapped(pLayer->m_lSources.size()*sizeof(CSoundSource), pLayer->m_lSources.base_ptr());
 
 					// save layer name
 					StrToInts(Item.m_aName, sizeof(Item.m_aName)/sizeof(int), pLayer->m_aName);
@@ -921,9 +923,12 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						if(pSoundsItem->m_Version >= 1)
 							IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName)/sizeof(int), pSounds->m_aName);
 
-						// TODO: load data
-
+						// load data
+						void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
 						pGroup->AddLayer(pSounds);
+						pSounds->m_lSources.set_size(pSoundsItem->m_NumSources);
+						mem_copy(pSounds->m_lSources.base_ptr(), pData, sizeof(CSoundSource)*pSoundsItem->m_NumSources);
+						DataFile.UnloadData(pSoundsItem->m_Data);
 					}
 
 					if(pLayer)

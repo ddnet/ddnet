@@ -328,12 +328,22 @@ struct CMapItemEnvelope : public CMapItemEnvelope_v1
 	int m_Synchronized;
 };
 
+struct CSoundSource
+{
+	CPoint m_Position;
+	int m_Global;
+	int m_Loop;
+};
+
 struct CMapItemLayerSounds
 {
 	enum { CURRENT_VERSION=1 };
 
 	CMapItemLayer m_Layer;
 	int m_Version;
+
+	int m_NumSources;
+	int m_Data;
 	int m_Sound;
 
 	int m_aName[3];
