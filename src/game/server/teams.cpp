@@ -628,10 +628,10 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		str_format(aBuf, sizeof(aBuf), "'%s' joined team 0.", Server()->ClientName(ClientID));
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-				if(m_Core.Team(i) == Team && i!= ClientID &&GameServer()->m_apPlayers[i])
-				{
-					GameServer()->SendChatTarget(i, aBuf);
-				}
+			if(m_Core.Team(i) == Team && i!= ClientID &&GameServer()->m_apPlayers[i])
+			{
+				GameServer()->SendChatTarget(i, aBuf);
+			}
 		}
 	}
 	else
@@ -658,9 +658,10 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 				if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 				{
 					if(i!= ClientID)
+					{
 						GameServer()->m_apPlayers[i]->KillCharacter(-2);
-
-					GameServer()->SendChatTarget(i, aBuf);
+						GameServer()->SendChatTarget(i, aBuf);
+					}
 				}
 
 		}
