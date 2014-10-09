@@ -328,6 +328,17 @@ struct CMapItemEnvelope : public CMapItemEnvelope_v1
 	int m_Synchronized;
 };
 
+struct CMapItemLayerSounds
+{
+	enum { CURRENT_VERSION=1 };
+
+	CMapItemLayer m_Layer;
+	int m_Version;
+	int m_Sound;
+
+	int m_aName[3];
+};
+
 
 // DDRace
 
