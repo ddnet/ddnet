@@ -89,7 +89,7 @@ public:
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	virtual void RandomUnfinishedMap(int ClientID);
+	virtual void RandomUnfinishedMap(int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID);
 	virtual void LoadTeam(const char* Code, int ClientID);
 	static void agoTimeToString(int agoTime, char agoString[]);

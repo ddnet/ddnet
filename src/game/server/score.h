@@ -59,7 +59,7 @@ public:
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search=false) = 0;
 
-	virtual void RandomUnfinishedMap(int ClientID) = 0;
+	virtual void RandomUnfinishedMap(int ClientID, int stars) = 0;
 	
 	virtual void SaveTeam(int Team, const char* Code, int ClientID) = 0;
 	virtual void LoadTeam(const char* Code, int ClientID) = 0;

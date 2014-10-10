@@ -79,7 +79,7 @@ public:
 
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut);
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search);
-	virtual void RandomUnfinishedMap(int ClientID);
+	virtual void RandomUnfinishedMap(int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID);
 	virtual void LoadTeam(const char* Code, int ClientID);
 };
