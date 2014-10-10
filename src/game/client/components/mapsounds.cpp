@@ -41,8 +41,13 @@ void CMapSounds::OnMapLoad()
 				if(!pSources)
 					continue;
 
-				for(int i = 0; i < pSoundLayer->m_NumSources; i++)
-					m_SourceQueue.add(&pSources[i]);
+				for(int i = 0; i < pSoundLayer->m_NumSources; i++) {
+					// dont add sources which are too much delayed
+					// TODO: use duration of the source sample
+					if(pSources[i].m_Loop || (Client()->LocalTime()-pSources[i].m_TimeDelay) < 2.0f)
+						m_SourceQueue.add(&pSources[i]);
+				}
+					
 			}
 		}
 	}
@@ -64,11 +69,19 @@ void CMapSounds::OnRender()
 			continue;
 		}
 
-		if(pSource->m_TimeDelay*1000.0f <= Client()->LocalTime())
+		if(pSource->m_TimeDelay <= Client()->LocalTime())
 		{
-			m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_AMBIENT, 1, 1.0f, vec2(fx2f(pSource->m_Position.x), fx2f(pSource->m_Position.y)), ISound::FLAG_LOOP);
+			{
+				int Flags = 0;
+				if(pSource->m_Loop) Flags |= ISound::FLAG_LOOP;
+
+				if(pSource->m_Global)
+					m_pClient->m_pSounds->PlaySample(CSounds::CHN_AMBIENT, 1, 1.0f, Flags);
+				else
+					m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_AMBIENT, 1, 1.0f, vec2(fx2f(pSource->m_Position.x), fx2f(pSource->m_Position.y)), Flags);
+			}
+
 			m_SourceQueue.remove(pSource);
-		}
-			
+		}			
 	}
 }

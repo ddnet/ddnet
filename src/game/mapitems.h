@@ -333,7 +333,7 @@ struct CSoundSource
 	CPoint m_Position;
 	int m_Global;
 	int m_Loop;
-	int m_TimeDelay; // in ms
+	int m_TimeDelay; // in s
 };
 
 struct CMapItemLayerSounds
