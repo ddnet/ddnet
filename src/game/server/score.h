@@ -13,7 +13,7 @@ public:
 	{
 		Reset();
 	}
-	
+
 	void Reset()
 	{
 		m_BestTime = 0;
@@ -21,14 +21,14 @@ public:
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 			m_aBestCpTime[i] = 0;
 	}
-	
+
 	void Set(float Time, float CpTime[NUM_CHECKPOINTS])
 	{
 		m_BestTime = Time;
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 			m_aBestCpTime[i] = CpTime[i];
 	}
-	
+
 	float m_BestTime;
 	float m_CurrentTime;
 	float m_aBestCpTime[NUM_CHECKPOINTS];
@@ -37,19 +37,19 @@ public:
 class IScore
 {
 	CPlayerData m_aPlayerData[MAX_CLIENTS];
-	
+
 public:
 	virtual ~IScore() {}
-	
+
 	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
-	
+
 	virtual void MapPoints(int ClientID, const char* MapName) = 0;
 	virtual void MapVote(int ClientID, const char* MapName) = 0;
 	virtual void LoadScore(int ClientID) = 0;
 	virtual void SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS]) = 0;
 
 	virtual void SaveTeamScore(int* ClientIDs, unsigned int Size, float Time) = 0;
-	
+
 	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowRank(int ClientID, const char* pName, bool Search=false) = 0;
 
@@ -59,8 +59,9 @@ public:
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search=false) = 0;
 
+	virtual void RandomMap(int ClientID, int stars) = 0;
 	virtual void RandomUnfinishedMap(int ClientID, int stars) = 0;
-	
+
 	virtual void SaveTeam(int Team, const char* Code, int ClientID) = 0;
 	virtual void LoadTeam(const char* Code, int ClientID) = 0;
 };
