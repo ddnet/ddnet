@@ -274,6 +274,8 @@ public:
 	class CMapLayers *m_pMapLayersBackGround;
 	class CMapLayers *m_pMapLayersForeGround;
 
+	class CMapSounds *m_pMapSounds;
+
 	// DDRace
 
 	class CRaceDemo *m_pRaceDemo;

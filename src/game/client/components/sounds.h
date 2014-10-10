@@ -30,6 +30,7 @@ public:
 		CHN_MUSIC,
 		CHN_WORLD,
 		CHN_GLOBAL,
+		CHN_AMBIENT,
 	};
 
 	virtual void OnInit();
@@ -43,6 +44,9 @@ public:
 	void PlayAt(int Channel, int SetId, float Vol, vec2 Pos);
 	void PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos);
 	void Stop(int SetId);
+
+	void PlaySample(int Channel, int SampleId, float Vol, int Flags = 0);
+	void PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags = 0);
 };
 
 

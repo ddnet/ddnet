@@ -68,6 +68,7 @@ void CSounds::OnInit()
 	Sound()->SetChannel(CSounds::CHN_MUSIC, 1.0f, 0.0f);
 	Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f, 1.0f);
 	Sound()->SetChannel(CSounds::CHN_GLOBAL, 1.0f, 0.0f);
+	Sound()->SetChannel(CSounds::CHN_AMBIENT, 0.7f, 1.0f);
 
 	Sound()->SetListenerPos(0.0f, 0.0f);
 
@@ -203,4 +204,26 @@ void CSounds::Stop(int SetId)
 
 	for(int i = 0; i < pSet->m_NumSounds; i++)
 		Sound()->Stop(pSet->m_aSounds[i].m_Id);
+}
+
+void CSounds::PlaySample(int Chn, int SampleId, float Vol, int Flags)
+{
+	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+		return;
+
+	if(Chn == CHN_MUSIC)
+		Flags |= ISound::FLAG_LOOP;
+
+	Sound()->Play(Chn, SampleId, Flags);
+}
+
+void CSounds::PlaySampleAt(int Chn, int SampleId, float Vol, vec2 Pos, int Flags)
+{
+	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+		return;
+
+	if(Chn == CHN_MUSIC)
+		Flags |= ISound::FLAG_LOOP;
+
+	Sound()->PlayAt(Chn, SampleId, Flags, Pos.x, Pos.y);
 }

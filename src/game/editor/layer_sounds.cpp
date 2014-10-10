@@ -1,7 +1,7 @@
 
 #include "editor.h"
 
-static const float s_SourceVisualSize = 32.0f;
+static const float s_SourceVisualSize = 50.0f;
 
 CLayerSounds::CLayerSounds()
 {
@@ -45,6 +45,7 @@ CSoundSource *CLayerSounds::NewSource()
 
 	pSource->m_Global = 0;
 	pSource->m_Loop = 1;
+	pSource->m_TimeDelay = 0;
 
 	return pSource;
 }
