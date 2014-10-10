@@ -731,6 +731,16 @@ CQuad *CEditor::GetSelectedQuad()
 	return 0;
 }
 
+CSoundSource *CEditor::GetSelectedSource()
+{
+	CLayerSounds *pSounds = (CLayerSounds *)GetSelectedLayerType(0, LAYERTYPE_SOUNDS);
+	if(!pSounds)
+		return 0;
+	if(m_SelectedSource >= 0 && m_SelectedSource < pSounds->m_lSources.size())
+		return &pSounds->m_lSources[m_SelectedSource];
+	return 0;
+}
+
 void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor*)pUser;
@@ -1134,6 +1144,136 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	int y = pPoint->y - pCenter->y;
 	pPoint->x = (int)(x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
 	pPoint->y = (int)(x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
+}
+
+void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
+{
+	enum
+	{
+		OP_NONE=0,
+		OP_MOVE,
+		OP_CONTEXT_MENU,
+	};
+
+	void *pID = &pSource->m_Position;
+
+	static float s_LastWx;
+	static float s_LastWy;
+	static int s_Operation = OP_NONE;
+
+	float wx = UI()->MouseWorldX();
+	float wy = UI()->MouseWorldY();
+
+	float CenterX = fx2f(pSource->m_Position.x);
+	float CenterY = fx2f(pSource->m_Position.y);
+
+	float dx = (CenterX - wx)/m_WorldZoom;
+	float dy = (CenterY - wy)/m_WorldZoom;
+	if(dx*dx+dy*dy < 50)
+		UI()->SetHotItem(pID);
+
+	bool IgnoreGrid;
+	if(Input()->KeyPressed(KEY_LALT) || Input()->KeyPressed(KEY_RALT))
+		IgnoreGrid = true;
+	else
+		IgnoreGrid = false;
+
+	if(UI()->ActiveItem() == pID)
+	{
+		if(m_MouseDeltaWx*m_MouseDeltaWx+m_MouseDeltaWy*m_MouseDeltaWy > 0.5f)
+		{
+			if(s_Operation == OP_MOVE)
+			{
+				if(m_GridActive && !IgnoreGrid)
+				{
+					int LineDistance = GetLineDistance();
+
+					float x = 0.0f;
+					float y = 0.0f;
+					if(wx >= 0)
+						x = (int)((wx+(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+					else
+						x = (int)((wx-(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+					if(wy >= 0)
+						y = (int)((wy+(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+					else
+						y = (int)((wy-(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+
+					pSource->m_Position.x = f2fx(x);
+					pSource->m_Position.y = f2fx(y);
+				}
+				else
+				{
+					pSource->m_Position.x += f2fx(wx-s_LastWx);
+					pSource->m_Position.y += f2fx(wy-s_LastWy);
+				}
+			}
+		}
+
+		s_LastWx = wx;
+		s_LastWy = wy;
+
+		if(s_Operation == OP_CONTEXT_MENU)
+		{
+			if(!UI()->MouseButton(1))
+			{
+				m_Map.m_UndoModified++;
+
+				static int s_SourcePopupID = 0;
+				UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupSource);
+				m_LockMouse = false;
+				s_Operation = OP_NONE;
+				UI()->SetActiveItem(0);
+			}
+		}
+		else
+		{
+			if(!UI()->MouseButton(0))
+			{
+				if(s_Operation == OP_MOVE)
+				{
+					m_Map.m_UndoModified++;
+				}
+
+				m_LockMouse = false;
+				s_Operation = OP_NONE;
+				UI()->SetActiveItem(0);
+			}
+		}
+
+		Graphics()->SetColor(1,1,1,1);
+	}
+	else if(UI()->HotItem() == pID)
+	{
+		ms_pUiGotContext = pID;
+
+		Graphics()->SetColor(1,1,1,1);
+		m_pTooltip = "Left mouse button to move. Hold alt to ignore grid.";
+
+		if(UI()->MouseButton(0))
+		{
+			s_Operation = OP_MOVE;
+
+			UI()->SetActiveItem(pID);
+			m_SelectedSource = Index;
+			s_LastWx = wx;
+			s_LastWy = wy;
+		}
+
+		if(UI()->MouseButton(1))
+		{
+			m_SelectedSource = Index;
+			s_Operation = OP_CONTEXT_MENU;
+			UI()->SetActiveItem(pID);
+		}
+	}
+	else
+	{
+		Graphics()->SetColor(0,1,0,1);
+	}
+
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f*m_WorldZoom, 5.0f*m_WorldZoom);
+	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
 void CEditor::DoQuad(CQuad *q, int Index)
@@ -2108,7 +2248,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			}
 		}
 
-		// quad editing
+		// quad & sound editing
 		{
 			if(!m_ShowPicker && m_Brush.IsEmpty())
 			{
@@ -2137,36 +2277,51 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 						}
 						Graphics()->QuadsEnd();
 					}
+
+					if(pEditLayers[k]->m_Type == LAYERTYPE_SOUNDS)
+					{
+						CLayerSounds *pLayer = (CLayerSounds *)pEditLayers[k];
+
+						Graphics()->TextureSet(-1);
+						Graphics()->QuadsBegin();
+						for(int i = 0; i < pLayer->m_lSources.size(); i++)
+						{
+							DoSoundSource(&pLayer->m_lSources[i], i);
+						}
+						Graphics()->QuadsEnd();
+					}
 				}
 
 				Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 			}
+		}
 
-			// do panning
-			if(UI()->ActiveItem() == s_pEditorID)
+		// do panning
+		if(UI()->ActiveItem() == s_pEditorID)
+		{
+			if(s_Operation == OP_PAN_WORLD)
 			{
-				if(s_Operation == OP_PAN_WORLD)
-				{
-					m_WorldOffsetX -= m_MouseDeltaX*m_WorldZoom;
-					m_WorldOffsetY -= m_MouseDeltaY*m_WorldZoom;
-				}
-				else if(s_Operation == OP_PAN_EDITOR)
-				{
-					m_EditorOffsetX -= m_MouseDeltaX*m_WorldZoom;
-					m_EditorOffsetY -= m_MouseDeltaY*m_WorldZoom;
-				}
+				m_WorldOffsetX -= m_MouseDeltaX*m_WorldZoom;
+				m_WorldOffsetY -= m_MouseDeltaY*m_WorldZoom;
+			}
+			else if(s_Operation == OP_PAN_EDITOR)
+			{
+				m_EditorOffsetX -= m_MouseDeltaX*m_WorldZoom;
+				m_EditorOffsetY -= m_MouseDeltaY*m_WorldZoom;
+			}
 
-				// release mouse
-				if(!UI()->MouseButton(0))
-				{
-					if(s_Operation == OP_BRUSH_DRAW || s_Operation == OP_BRUSH_PAINT)
-						m_Map.m_UndoModified++;
+			// release mouse
+			if(!UI()->MouseButton(0))
+			{
+				if(s_Operation == OP_BRUSH_DRAW || s_Operation == OP_BRUSH_PAINT)
+					m_Map.m_UndoModified++;
 
-					s_Operation = OP_NONE;
-					UI()->SetActiveItem(0);
-				}
+				s_Operation = OP_NONE;
+				UI()->SetActiveItem(0);
 			}
 		}
+
+		
 	}
 	else if(UI()->ActiveItem() == s_pEditorID)
 	{
@@ -4477,6 +4632,8 @@ void CEditor::Reset(bool CreateDefault)
 	m_SelectedPoints = 0;
 	m_SelectedEnvelope = 0;
 	m_SelectedImage = 0;
+	m_SelectedSound = 0;
+	m_SelectedSource = -1;
 
 	m_WorldOffsetX = 0;
 	m_WorldOffsetY = 0;

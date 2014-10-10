@@ -603,6 +603,62 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
+int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
+{
+	CSoundSource *pSource = pEditor->GetSelectedSource();
+
+	CUIRect Button;
+
+	// delete button
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_DeleteButton = 0;
+	if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, "Deletes the current source"))
+	{
+		CLayerSounds *pLayer = (CLayerSounds *)pEditor->GetSelectedLayerType(0, LAYERTYPE_SOUNDS);
+		if(pLayer)
+		{
+			pEditor->m_Map.m_Modified = true;
+			pLayer->m_lSources.remove_index(pEditor->m_SelectedSource);
+			pEditor->m_SelectedSource--;
+		}
+		return 1;
+	}
+
+	enum
+	{
+		PROP_POS_X=0,
+		PROP_POS_Y,
+		PROP_GLOBAL,
+		PROP_LOOP,
+		PROP_TIME_DELAY,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"Pos X", pSource->m_Position.x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", pSource->m_Position.y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Global", pSource->m_Global, PROPTYPE_BOOL, 0, 1},
+		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
+		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
+
+		{0},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+	if(Prop != -1)
+		pEditor->m_Map.m_Modified = true;
+
+	if(Prop == PROP_POS_X) pSource->m_Position.x = NewVal*1000;
+	if(Prop == PROP_POS_Y) pSource->m_Position.y = NewVal*1000;
+	if(Prop == PROP_GLOBAL) pSource->m_Global = NewVal;
+	if(Prop == PROP_LOOP) pSource->m_Loop = NewVal;
+	if(Prop == PROP_TIME_DELAY) pSource->m_TimeDelay = NewVal;
+
+	return 0;
+}
+
 int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 {
 	CQuad *pQuad = pEditor->GetSelectedQuad();

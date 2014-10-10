@@ -714,6 +714,7 @@ public:
 	CLayer *GetSelectedLayerType(int Index, int Type);
 	CLayer *GetSelectedLayer(int Index);
 	CLayerGroup *GetSelectedGroup();
+	CSoundSource *GetSelectedSource();
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 color = vec4(1,1,1,0.5f));
 
@@ -825,6 +826,7 @@ public:
 	int m_SelectedQuadEnvelope;
 	int m_SelectedImage;
 	int m_SelectedSound;
+	int m_SelectedSource;
 
 	static int ms_CheckerTexture;
 	static int ms_BackgroundTexture;
@@ -881,6 +883,7 @@ public:
 	static int PopupMenuFile(CEditor *pEditor, CUIRect View);
 	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View);
 	static int PopupSound(CEditor *pEditor, CUIRect View);
+	static int PopupSource(CEditor *pEditor, CUIRect View);
 
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -903,6 +906,8 @@ public:
 	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, int TexID = -1);
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
+
+	void DoSoundSource(CSoundSource *pSource, int Index);
 
 	void DoMapEditor(CUIRect View, CUIRect Toolbar);
 	void DoToolbar(CUIRect Toolbar);
