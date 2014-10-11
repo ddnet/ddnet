@@ -37,6 +37,9 @@ public:
 	virtual void SetListenerPos(float x, float y);
 	virtual void SetChannel(int ChannelID, float Vol, float Pan);
 
+	virtual void SetVoiceVolume(int VoiceId, float Volume);
+	virtual void SetVoiceMaxDistance(int VoiceId, int Distance);
+
 	int Play(int ChannelID, int SampleID, int Flags, float x, float y);
 	virtual int PlayAt(int ChannelID, int SampleID, int Flags, float x, float y);
 	virtual int Play(int ChannelID, int SampleID, int Flags);

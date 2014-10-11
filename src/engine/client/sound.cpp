@@ -47,6 +47,7 @@ struct CVoice
 	CChannel *m_pChannel;
 	int m_Tick;
 	int m_Vol; // 0 - 255
+	int m_FalloffDistance; // 0 - inifintee (well int)
 	int m_Flags;
 	int m_X, m_Y;
 } ;
@@ -70,6 +71,8 @@ static unsigned m_MaxFrames = 0;
 static const void *ms_pWVBuffer = 0x0;
 static int ms_WVBufferPosition = 0;
 static int ms_WVBufferSize = 0;
+
+const int DefaultDistance = 1500;
 
 // TODO: there should be a faster way todo this
 static short Int2Short(int i)
@@ -113,8 +116,8 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 			unsigned End = v->m_pSample->m_NumFrames-v->m_Tick;
 
-			int Rvol = v->m_pChannel->m_Vol;
-			int Lvol = v->m_pChannel->m_Vol;
+			int Rvol = (int)(v->m_pChannel->m_Vol*(v->m_Vol/255.0f));
+			int Lvol = (int)(v->m_pChannel->m_Vol*(v->m_Vol/255.0f));
 
 			// make sure that we don't go outside the sound data
 			if(Frames < End)
@@ -128,11 +131,11 @@ static void Mix(short *pFinalOut, unsigned Frames)
 			if(v->m_Flags&ISound::FLAG_POS && v->m_pChannel->m_Pan)
 			{
 				// TODO: we should respect the channel panning value
-				const int Range = 1500; // magic value, remove
 				int dx = v->m_X - m_CenterX;
 				int dy = v->m_Y - m_CenterY;
 				int Dist = (int)sqrtf((float)dx*dx+dy*dy); // float here. nasty
 				int p = IntAbs(dx);
+				int Range = v->m_FalloffDistance;
 				if(Dist >= 0 && Dist < Range)
 				{
 					// panning
@@ -494,6 +497,25 @@ void CSound::SetListenerPos(float x, float y)
 	m_CenterY = (int)y;
 }
 
+void CSound::SetVoiceVolume(int VoiceID, float Volume)
+{
+	if(VoiceID < 0 || VoiceID >= NUM_VOICES)
+		return;
+
+	Volume = clamp(Volume, 0.0f, 1.0f);
+	m_aVoices[VoiceID].m_Vol = (int)(Volume*255.0f);
+}
+
+void CSound::SetVoiceMaxDistance(int VoiceID, int Distance)
+{
+	if(VoiceID < 0 || VoiceID >= NUM_VOICES)
+		return;
+
+	if(Distance < 0)
+		return;
+
+	m_aVoices[VoiceID].m_FalloffDistance = Distance;
+}
 
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)
 {
@@ -549,6 +571,7 @@ int CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 		m_aVoices[VoiceID].m_Flags = Flags;
 		m_aVoices[VoiceID].m_X = (int)x;
 		m_aVoices[VoiceID].m_Y = (int)y;
+		m_aVoices[VoiceID].m_FalloffDistance = DefaultDistance;
 	}
 
 	lock_release(m_SoundLock);
