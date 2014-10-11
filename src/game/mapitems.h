@@ -335,6 +335,7 @@ struct CSoundSource
 	int m_Global;
 	int m_Loop;
 	int m_TimeDelay; // in s
+	int m_FalloffDistance;
 
 	int m_SoundEnv;
 };

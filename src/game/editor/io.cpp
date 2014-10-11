@@ -443,7 +443,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			{
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving sounds layer");
 				CLayerSounds *pLayer = (CLayerSounds *)pGroup->m_lLayers[l];
-				//if(pLayer->m_lSoundSources.size())
+				if(pLayer->m_lSources.size())
 				{
 					CMapItemLayerSounds Item;
 					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
@@ -994,7 +994,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						pLayer = pSounds;
 						pSounds->m_Sound = pSoundsItem->m_Sound;
 
-						// TODO: validate m_Sound
+						// validate m_Sound
+						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= m_lSounds.size())
+							pSounds->m_Sound = -1;
 
 						// load layer name
 						if(pSoundsItem->m_Version >= 1)

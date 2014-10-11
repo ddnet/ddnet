@@ -63,6 +63,8 @@ public:
 
 	void DrawUIRect(const CUIRect *pRect, vec4 Color, int Corners, float Rounding);
 
+	void DrawCircle(float x, float y, float r, int Segments);
+
 	// larger rendering methods
 	void RenderTilemapGenerateSkip(class CLayers *pLayers);
 

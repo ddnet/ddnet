@@ -21,13 +21,23 @@ void CLayerSounds::Render()
 	Graphics()->BlendNormal();
 	Graphics()->QuadsBegin();
 
-	Graphics()->SetColor(1.0f, 0.0f, 1.0f, 1.0f);
-
+	// draw falloff distance
+	Graphics()->SetColor(0.6f, 0.8f, 1.0f, 0.4f);
 	for(int i = 0; i < m_lSources.size(); i++)
 	{
 		CSoundSource *pSource = &m_lSources[i];
 
-		IGraphics::CQuadItem QuadItem(fx2f(pSource->m_Position.x), fx2f(pSource->m_Position.y),s_SourceVisualSize, s_SourceVisualSize);
+		m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x), fx2f(pSource->m_Position.y), pSource->m_FalloffDistance, 32);
+	}
+
+
+	// draw handles
+	Graphics()->SetColor(1.0f, 0.0f, 1.0f, 1.0f);
+	for(int i = 0; i < m_lSources.size(); i++)
+	{
+		CSoundSource *pSource = &m_lSources[i];
+
+		IGraphics::CQuadItem QuadItem(fx2f(pSource->m_Position.x), fx2f(pSource->m_Position.y), s_SourceVisualSize, s_SourceVisualSize);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -46,6 +56,7 @@ CSoundSource *CLayerSounds::NewSource()
 	pSource->m_Global = 0;
 	pSource->m_Loop = 1;
 	pSource->m_TimeDelay = 0;
+	pSource->m_FalloffDistance = 1500;
 
 	pSource->m_SoundEnv = -1;
 

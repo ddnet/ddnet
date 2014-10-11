@@ -3879,7 +3879,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_Map.m_Modified = true;
 			m_Map.m_UndoModified++;
-			pNewEnv = m_Map.NewEnvelope(2);
+			pNewEnv = m_Map.NewEnvelope(1);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
@@ -3990,14 +3990,16 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 
-			static const char *s_paNames[3][4] = {
-				{"V", "D", "", ""},
+			static const char *s_paNames[4][4] = {
+				{"V", "", "", ""},
+				{"", "", "", ""},
 				{"X", "Y", "R", ""},
 				{"R", "G", "B", "A"},
 			};
 
-			const char *paDescriptions[3][4] = {
-				{"Volume of the envelope", "Distance value of the envelope", "", ""},
+			const char *paDescriptions[4][4] = {
+				{"Volume of the envelope", "", "", ""},
+				{"", "", "", ""},
 				{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", ""},
 				{"Red value of the envelope", "Green value of the envelope", "Blue value of the envelope", "Alpha value of the envelope"},
 			};
@@ -4014,7 +4016,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				else if(i == envelope->channels-1) draw_func = draw_editor_button_r;
 				else draw_func = draw_editor_button_m;*/
 
-				if(DoButton_Editor(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Channels-2][i], s_ActiveChannels&Bit, &Button, 0, paDescriptions[pEnvelope->m_Channels-2][i]))
+				if(DoButton_Editor(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Channels-1][i], s_ActiveChannels&Bit, &Button, 0, paDescriptions[pEnvelope->m_Channels-1][i]))
 					s_ActiveChannels ^= Bit;
 			}
 
