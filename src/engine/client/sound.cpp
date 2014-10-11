@@ -432,7 +432,6 @@ int CSound::LoadWV(const char *pFilename)
 	int DataSize = io_length(ms_File);
 	char *pData = new char[DataSize];
 	io_read(ms_File, pData, DataSize);
-	io_close(ms_File);
 
 	SampleID = DecodeWV(SampleID, pData, DataSize);
 
