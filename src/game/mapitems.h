@@ -355,9 +355,6 @@ struct CMapItemSound
 {
 	int m_Version;
 
-	int m_NumFrames;
-	int m_NumChannels;
-
 	int m_External;
 
 	int m_SoundName;

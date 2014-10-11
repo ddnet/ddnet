@@ -278,9 +278,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 		CMapItemSound Item;
 		Item.m_Version = 1;
-
-		Item.m_NumFrames = -1; // TODO;
-		Item.m_NumChannels = -1; // TODO;
+		
 		Item.m_External = pSound->m_External;
 		Item.m_SoundName = df.AddData(str_length(pSound->m_aName)+1, pSound->m_aName);
 		if(pSound->m_External)

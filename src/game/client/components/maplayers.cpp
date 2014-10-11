@@ -283,25 +283,6 @@ void CMapLayers::OnRender()
 					Graphics()->BlendNormal();
 					RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, this);
 				}
-				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-				{
-					CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
-					CSoundSource *pSources = (CSoundSource *)m_pLayers->Map()->GetDataSwapped(pSoundLayer->m_Data);
-
-					Graphics()->TextureSet(-1);
-					Graphics()->BlendNormal();
-					Graphics()->QuadsBegin();
-
-					Graphics()->SetColor(1.0f, 0.0f, 1.0f, 1.0f);
-
-					for(int i = 0; i < pSoundLayer->m_NumSources; i++)
-					{
-						IGraphics::CQuadItem QuadItem(fx2f(pSources[i].m_Position.x), fx2f(pSources[i].m_Position.y), 32.0f, 32.0f);
-						Graphics()->QuadsDraw(&QuadItem, 1);
-					}
-
-					Graphics()->QuadsEnd();
-				}
 
 				//layershot_end();
 			}
