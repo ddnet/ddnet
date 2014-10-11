@@ -271,6 +271,29 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		df.AddItem(MAPITEMTYPE_IMAGE, i, sizeof(Item), &Item);
 	}
 
+	// save sounds
+	for(int i = 0; i < m_lSounds.size(); i++)
+	{
+		CEditorSound *pSound = m_lSounds[i];
+
+		CMapItemSound Item;
+		Item.m_Version = 1;
+
+		Item.m_NumFrames = -1; // TODO;
+		Item.m_NumChannels = -1; // TODO;
+		Item.m_External = pSound->m_External;
+		Item.m_SoundName = df.AddData(str_length(pSound->m_aName)+1, pSound->m_aName);
+		if(pSound->m_External)
+			Item.m_SoundData = -1;
+		else
+		{
+			// TODO
+			// Item.m_ImageData = df.AddData(Item.m_Width*Item.m_Height*4, pImg->m_pData);
+		}
+			
+		df.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
+	}
+
 	// save layers
 	int LayerCount = 0, GroupCount = 0;
 	for(int g = 0; g < m_lGroups.size(); g++)
@@ -600,6 +623,54 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				// unload image
 				DataFile.UnloadData(pItem->m_ImageData);
 				DataFile.UnloadData(pItem->m_ImageName);
+			}
+		}
+
+		// load sounds
+		{
+			int Start, Num;
+			DataFile.GetType( MAPITEMTYPE_SOUND, &Start, &Num);
+			for(int i = 0; i < Num; i++)
+			{
+				CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start+i, 0, 0);
+				char *pName = (char *)DataFile.GetData(pItem->m_SoundName);
+
+				// copy base info
+				CEditorSound *pSound = new CEditorSound(m_pEditor);
+				pSound->m_External = pItem->m_External;
+
+				if(pItem->m_External)
+				{
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf),"mapres/%s.wv", pName);
+
+					// load external
+					pSound->m_SoundID = m_pEditor->Sound()->LoadWV(aBuf);
+				}
+				else
+				{
+					/*
+					pImg->m_Width = pItem->m_Width;
+					pImg->m_Height = pItem->m_Height;
+					pImg->m_Format = CImageInfo::FORMAT_RGBA;
+
+					// copy image data
+					void *pData = DataFile.GetData(pItem->m_ImageData);
+					pImg->m_pData = mem_alloc(pImg->m_Width*pImg->m_Height*4, 1);
+					mem_copy(pImg->m_pData, pData, pImg->m_Width*pImg->m_Height*4);
+					pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
+					*/
+				}
+
+				// copy image name
+				if(pName)
+					str_copy(pSound->m_aName, pName, sizeof(pSound->m_aName));
+
+				m_lSounds.add(pSound);
+
+				// unload image
+				DataFile.UnloadData(pItem->m_SoundData);
+				DataFile.UnloadData(pItem->m_SoundName);
 			}
 		}
 

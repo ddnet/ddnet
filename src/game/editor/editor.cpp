@@ -56,6 +56,11 @@ CEditorImage::~CEditorImage()
 	}
 }
 
+CEditorSound::~CEditorSound()
+{
+	m_pEditor->Sound()->UnloadSample(m_SoundID);
+}
+
 CLayerGroup::CLayerGroup()
 {
 	m_aName[0] = 0;
@@ -2874,7 +2879,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 		return;
 
 	// add sound
-	CEditorSound *pSound = new CEditorSound();
+	CEditorSound *pSound = new CEditorSound(pEditor);
 	pSound->m_SoundID = SoundId;
 	pSound->m_External = 1;	// external by default
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
@@ -2997,7 +3002,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 		delete pSound;
 		pEditor->m_Map.m_lSounds.remove_index(pEditor->m_SelectedSound);
 		gs_ModifyIndexDeletedIndex = pEditor->m_SelectedSound;
-		pEditor->m_Map.ModifyImageIndex(ModifyIndexDeleted);
+		pEditor->m_Map.ModifySoundIndex(ModifyIndexDeleted);
 		return 1;
 	}
 
@@ -3282,22 +3287,12 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 
 			
 			int Selected = m_SelectedSound == i;
-			/*
 			for(int x = 0; x < m_Map.m_lGroups.size(); ++x)
 				for(int j = 0; j < m_Map.m_lGroups[x]->m_lLayers.size(); ++j)
-					if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
+					if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_SOUNDS)
 					{
-						CLayerQuads *pLayer = static_cast<CLayerQuads *>(m_Map.m_lGroups[x]->m_lLayers[j]);
-						if(pLayer->m_Image == i)
-						{
-							Selected = 2 + Selected;
-							goto done;
-						}
-					}
-					else if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_TILES)
-					{
-						CLayerTiles *pLayer = static_cast<CLayerTiles *>(m_Map.m_lGroups[x]->m_lLayers[j]);
-						if(pLayer->m_Image == i)
+						CLayerSounds *pLayer = static_cast<CLayerSounds *>(m_Map.m_lGroups[x]->m_lLayers[j]);
+						if(pLayer->m_Sound == i)
 						{
 							Selected = 2 + Selected;
 							goto done;
@@ -3305,7 +3300,6 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 					}
 
 			done:
-			*/
 			if(int Result = DoButton_Editor(&m_Map.m_lSounds[i], aBuf, Selected, &Slot,
 				BUTTON_CONTEXT, "Select sound"))
 			{
@@ -3356,7 +3350,12 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 	if(IsDir)
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pName);
 	else
-		str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-3));
+	{
+		if(pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND)
+			str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-2));
+		else
+			str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-3));
+	}
 	Item.m_IsDir = IsDir != 0;
 	Item.m_IsLink = false;
 	Item.m_StorageType = StorageType;

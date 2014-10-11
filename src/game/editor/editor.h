@@ -157,6 +157,7 @@ public:
 
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
+	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 
 	virtual void GetSize(float *w, float *h) { *w = 0; *h = 0;}
 
@@ -265,6 +266,12 @@ public:
 		for(int i = 0; i < m_lLayers.size(); i++)
 			m_lLayers[i]->ModifyEnvelopeIndex(Func);
 	}
+
+	void ModifySoundIndex(INDEX_MODIFY_FUNC Func)
+	{
+		for(int i = 0; i < m_lLayers.size(); i++)
+			m_lLayers[i]->ModifySoundIndex(Func);
+	}
 };
 
 class CEditorImage : public CImageInfo
@@ -299,12 +306,17 @@ public:
 class CEditorSound
 {
 public:
-	CEditorSound()
+	CEditor *m_pEditor;
+	
+	CEditorSound(CEditor *pEditor)
 	{
+		m_pEditor = pEditor;
 		m_aName[0] = 0;
 		m_External = 0;
 		m_SoundID = 0;
 	}
+
+	~CEditorSound();
 
 	int m_SoundID;
 	int m_External;
@@ -416,6 +428,14 @@ public:
 		m_UndoModified++;
 		for(int i = 0; i < m_lGroups.size(); i++)
 			m_lGroups[i]->ModifyEnvelopeIndex(pfnFunc);
+	}
+
+	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
+	{
+		m_Modified = true;
+		m_UndoModified++;
+		for(int i = 0; i < m_lGroups.size(); i++)
+			m_lGroups[i]->ModifySoundIndex(pfnFunc);
 	}
 
 	void Clean();
