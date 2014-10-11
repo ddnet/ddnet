@@ -440,6 +440,14 @@ void CSound::UnloadSample(int SampleID)
 	m_aSamples[SampleID].m_pData = 0x0;
 }
 
+float CSound::GetSampleDuration(int SampleID)
+{
+	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+		return 0.0f;
+
+	return (m_aSamples[SampleID].m_NumFrames/m_aSamples[SampleID].m_Rate);
+}
+
 void CSound::SetListenerPos(float x, float y)
 {
 	m_CenterX = (int)x;

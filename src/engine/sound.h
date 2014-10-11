@@ -21,6 +21,8 @@ public:
 	virtual int LoadWV(const char *pFilename) = 0;
 	virtual void UnloadSample(int SampleID) = 0;
 
+	virtual float GetSampleDuration(int SampleID) = 0; // in s
+
 	virtual void SetChannel(int ChannelID, float Volume, float Panning) = 0;
 	virtual void SetListenerPos(float x, float y) = 0;
 

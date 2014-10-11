@@ -30,6 +30,8 @@ public:
 	virtual int LoadWV(const char *pFilename);
 	virtual void UnloadSample(int SampleID);
 
+	virtual float GetSampleDuration(int SampleID); // in s
+
 	virtual void SetListenerPos(float x, float y);
 	virtual void SetChannel(int ChannelID, float Vol, float Pan);
 

@@ -80,8 +80,7 @@ void CMapSounds::OnMapLoad()
 
 				for(int i = 0; i < pSoundLayer->m_NumSources; i++) {
 					// dont add sources which are too much delayed
-					// TODO: use duration of the source sample
-					if(pSources[i].m_Loop || (Client()->LocalTime()-pSources[i].m_TimeDelay) < 2.0f)
+					if(pSources[i].m_Loop || (Client()->LocalTime() >= pSources[i].m_TimeDelay + Sound()->GetSampleDuration(pSoundLayer->m_Sound)))
 					{
 						CSource source;
 						source.m_Sound = pSoundLayer->m_Sound;
