@@ -130,7 +130,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 			str_append(aBuffer, ", ", sizeof(aBuffer));
 		if(g_Config.m_ClShowIDs)
 		{
-			char aId[4];
+			char aId[5];
 			str_format(aId,sizeof(aId),"%d: ",pInfo->m_ClientID);
 			str_append(aBuffer, aId, sizeof(aBuffer));
 		}
