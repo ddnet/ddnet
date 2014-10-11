@@ -54,7 +54,7 @@ std::string SaveFile()
 	return oss.str();
 }
 
-void CFileScore::MapPoints(int ClientID, const char* MapName)
+void CFileScore::MapInfo(int ClientID, const char* MapName)
 {
   // TODO: implement
 }

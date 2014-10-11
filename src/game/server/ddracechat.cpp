@@ -538,7 +538,7 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 #endif
 }
 
-void CGameContext::ConMapPoints(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
@@ -555,9 +555,9 @@ void CGameContext::ConMapPoints(IConsole::IResult *pResult, void *pUserData)
 #endif
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->MapPoints(pResult->m_ClientID, pResult->GetString(0));
+		pSelf->Score()->MapInfo(pResult->m_ClientID, pResult->GetString(0));
 	else
-		pSelf->Score()->MapPoints(pResult->m_ClientID, g_Config.m_SvMap);
+		pSelf->Score()->MapInfo(pResult->m_ClientID, g_Config.m_SvMap);
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)

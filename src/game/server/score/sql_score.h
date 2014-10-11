@@ -40,7 +40,7 @@ class CSqlScore: public IScore
 		return m_pServer;
 	}
 
-	static void MapPointsThread(void *pUser);
+	static void MapInfoThread(void *pUser);
 	static void MapVoteThread(void *pUser);
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
@@ -74,7 +74,7 @@ public:
 	~CSqlScore();
 
 	virtual void LoadScore(int ClientID);
-	virtual void MapPoints(int ClientID, const char* MapName);
+	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);

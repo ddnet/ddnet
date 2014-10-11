@@ -172,7 +172,7 @@ void CSqlScore::Init()
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_teamrace (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
 			m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Mapper VARCHAR(128) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
 			m_pStatement->execute(aBuf);
 
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
@@ -502,20 +502,20 @@ void CSqlScore::MapVoteThread(void *pUser)
 	lock_release(gs_SqlLock);
 }
 
-void CSqlScore::MapPoints(int ClientID, const char* MapName)
+void CSqlScore::MapInfo(int ClientID, const char* MapName)
 {
 	CSqlMapData *Tmp = new CSqlMapData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aMap, MapName, 128);
 	Tmp->m_pSqlData = this;
 
-	void *InfoThread = thread_create(MapPointsThread, Tmp);
+	void *InfoThread = thread_create(MapInfoThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)InfoThread);
 #endif
 }
 
-void CSqlScore::MapPointsThread(void *pUser)
+void CSqlScore::MapInfoThread(void *pUser)
 {
 	lock_wait(gs_SqlLock);
 
@@ -532,7 +532,7 @@ void CSqlScore::MapPointsThread(void *pUser)
 		try
 		{
 			char aBuf[768];
-			str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Points, Stars, count(*) as Finishes FROM ((SELECT Map, Server, Points, Stars FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1) as l) LEFT JOIN %s_race as r on l.Map = r.Map;", pData->m_pSqlData->m_pPrefix, pData->m_aMap, pData->m_pSqlData->m_pPrefix);
+			str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Mapper, Points, Stars, count(*) as Finishes FROM ((SELECT Map, Server, Mapper, Points, Stars FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1) as l) LEFT JOIN %s_race as r on l.Map = r.Map;", pData->m_pSqlData->m_pPrefix, pData->m_aMap, pData->m_pSqlData->m_pPrefix);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
@@ -549,6 +549,8 @@ void CSqlScore::MapPointsThread(void *pUser)
 				strcpy(aMap, pData->m_pSqlData->m_pResults->getString("Map").c_str());
 				char aServer[32];
 				strcpy(aServer, pData->m_pSqlData->m_pResults->getString("Server").c_str());
+				char aMapper[128];
+				strcpy(aMapper, pData->m_pSqlData->m_pResults->getString("Mapper").c_str());
 
 				char aStars[20];
 				switch(stars)
@@ -563,9 +565,9 @@ void CSqlScore::MapPointsThread(void *pUser)
 
 				aServer[0] = toupper(aServer[0]);
 				if (points == 1)
-					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%s, %d point, %d finishes)", aMap, aServer, aStars, points, finishes);
+					str_format(aBuf, sizeof(aBuf), "\"%s\" by %s on %s (%s, %d point, %d finishes)", aMap, aMapper, aServer, aStars, points, finishes);
 				else
-					str_format(aBuf, sizeof(aBuf), "\"%s\" on %s (%s, %d points, %d finishes)", aMap, aServer, aStars, points, finishes);
+					str_format(aBuf, sizeof(aBuf), "\"%s\" by %s on %s (%s, %d points, %d finishes)", aMap, aMapper, aServer, aStars, points, finishes);
 			}
 
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
