@@ -284,11 +284,14 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		Item.m_External = pSound->m_External;
 		Item.m_SoundName = df.AddData(str_length(pSound->m_aName)+1, pSound->m_aName);
 		if(pSound->m_External)
+		{
+			Item.m_SoundDataSize = 0;
 			Item.m_SoundData = -1;
+		}
 		else
 		{
-			// TODO
-			// Item.m_ImageData = df.AddData(Item.m_Width*Item.m_Height*4, pImg->m_pData);
+			Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
+			Item.m_SoundDataSize = pSound->m_DataSize;
 		}
 			
 		df.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
@@ -645,21 +648,26 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					str_format(aBuf, sizeof(aBuf),"mapres/%s.wv", pName);
 
 					// load external
-					pSound->m_SoundID = m_pEditor->Sound()->LoadWV(aBuf);
+					IOHANDLE SoundFile = pStorage->OpenFile(pName, IOFLAG_READ, IStorage::TYPE_ALL);
+					if(SoundFile)
+					{
+						// read the whole file into memory
+						pSound->m_DataSize = io_length(SoundFile);
+						pSound->m_pData = new char[pSound->m_DataSize];
+						io_read(SoundFile, pSound->m_pData, pSound->m_DataSize);
+						io_close(SoundFile);
+						pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize);
+					}
 				}
 				else
 				{
-					/*
-					pImg->m_Width = pItem->m_Width;
-					pImg->m_Height = pItem->m_Height;
-					pImg->m_Format = CImageInfo::FORMAT_RGBA;
+					pSound->m_DataSize = pItem->m_SoundDataSize;
 
-					// copy image data
-					void *pData = DataFile.GetData(pItem->m_ImageData);
-					pImg->m_pData = mem_alloc(pImg->m_Width*pImg->m_Height*4, 1);
-					mem_copy(pImg->m_pData, pData, pImg->m_Width*pImg->m_Height*4);
-					pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
-					*/
+					// copy sample data
+					void *pData = DataFile.GetData(pItem->m_SoundData);
+					pSound->m_pData = mem_alloc(pSound->m_DataSize, 1);
+					mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
+					pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize);
 				}
 
 				// copy image name

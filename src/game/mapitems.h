@@ -362,6 +362,7 @@ struct CMapItemSound
 
 	int m_SoundName;
 	int m_SoundData;
+	int m_SoundDataSize;
 } ;
 
 

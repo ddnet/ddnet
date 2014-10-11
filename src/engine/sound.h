@@ -19,6 +19,7 @@ public:
 	virtual bool IsSoundEnabled() = 0;
 
 	virtual int LoadWV(const char *pFilename) = 0;
+	virtual int LoadWVFromMem(const void *pData, unsigned DataSize) = 0;
 	virtual void UnloadSample(int SampleID) = 0;
 
 	virtual float GetSampleDuration(int SampleID) = 0; // in s

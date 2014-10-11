@@ -59,6 +59,11 @@ CEditorImage::~CEditorImage()
 CEditorSound::~CEditorSound()
 {
 	m_pEditor->Sound()->UnloadSample(m_SoundID);
+	if(m_pData)
+	{
+		delete[] m_pData;
+		m_pData = 0x0;
+	}
 }
 
 CLayerGroup::CLayerGroup()
@@ -2873,8 +2878,19 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 			return;
 	}
 
+	// load external
+	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!SoundFile)
+		return;
+
+	// read the whole file into memory
+	unsigned DataSize = io_length(SoundFile);
+	void *pData = new char[DataSize];
+	io_read(SoundFile, pData, DataSize);
+	io_close(SoundFile);
+
 	// load sound
-	int SoundId = pEditor->Sound()->LoadWV(pFileName);
+	int SoundId = pEditor->Sound()->LoadWVFromMem(pData, DataSize);
 	if(SoundId == -1)
 		return;
 
@@ -2882,6 +2898,8 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	CEditorSound *pSound = new CEditorSound(pEditor);
 	pSound->m_SoundID = SoundId;
 	pSound->m_External = 1;	// external by default
+	pSound->m_DataSize = DataSize;
+	pSound->m_pData = pData;
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
 	pEditor->m_Map.m_lSounds.add(pSound);
 

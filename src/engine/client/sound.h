@@ -24,10 +24,12 @@ public:
 	// TODO: Refactor: clean this mess up
 	static IOHANDLE ms_File;
 	static int ReadData(void *pBuffer, int Size);
+	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
 
 	virtual bool IsSoundEnabled() { return m_SoundEnabled != 0; }
 
 	virtual int LoadWV(const char *pFilename);
+	virtual int LoadWVFromMem(const void *pData, unsigned DataSize);
 	virtual void UnloadSample(int SampleID);
 
 	virtual float GetSampleDuration(int SampleID); // in s

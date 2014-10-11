@@ -42,11 +42,9 @@ void CMapSounds::OnMapLoad()
 		}
 		else
 		{
-			/*
-			void *pData = pMap->GetData(pImg->m_ImageData);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, CImageInfo::FORMAT_RGBA, pData, CImageInfo::FORMAT_RGBA, 0);
-			pMap->UnloadData(pImg->m_ImageData);
-			*/
+			void *pData = pMap->GetData(pSound->m_SoundData);
+			m_aSounds[i] = Sound()->LoadWVFromMem(pData, pSound->m_SoundDataSize);
+			pMap->UnloadData(pSound->m_SoundData);
 		}
 	}
 

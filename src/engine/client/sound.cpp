@@ -67,6 +67,10 @@ static int m_NextVoice = 0;
 static int *m_pMixBuffer = 0;	// buffer only used by the thread callback function
 static unsigned m_MaxFrames = 0;
 
+static const void *ms_pWVBuffer = 0x0;
+static int ms_WVBufferPosition = 0;
+static int ms_WVBufferSize = 0;
+
 // TODO: there should be a faster way todo this
 static short Int2Short(int i)
 {
@@ -330,23 +334,85 @@ void CSound::RateConvert(int SampleID)
 
 int CSound::ReadData(void *pBuffer, int Size)
 {
-	return io_read(ms_File, pBuffer, Size);
+	int ChunkSize = min(Size, ms_WVBufferSize - ms_WVBufferPosition);
+	mem_copy(pBuffer, (const char *)ms_pWVBuffer + ms_WVBufferPosition, ChunkSize);
+	ms_WVBufferPosition += ChunkSize;
+	return ChunkSize;
+}
+
+int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
+{
+	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+		return -1;
+
+	CSample *pSample = &m_aSamples[SampleID];
+	char aError[100];
+	WavpackContext *pContext;
+
+	ms_pWVBuffer = pData;
+	ms_WVBufferSize = DataSize;
+	ms_WVBufferPosition = 0;
+
+	pContext = WavpackOpenFileInput(ReadData, aError);
+	if (pContext)
+	{
+		int NumSamples = WavpackGetNumSamples(pContext);
+		int BitsPerSample = WavpackGetBitsPerSample(pContext);
+		unsigned int SampleRate = WavpackGetSampleRate(pContext);
+		int NumChannels = WavpackGetNumChannels(pContext);
+		int *pSrc;
+		short *pDst;
+		int i;
+
+		pSample->m_Channels = NumChannels;
+		pSample->m_Rate = SampleRate;
+
+		if(pSample->m_Channels > 2)
+		{
+			dbg_msg("sound/wv", "file is not mono or stereo.");
+			return -1;
+		}
+
+		if(BitsPerSample != 16)
+		{
+			dbg_msg("sound/wv", "bps is %d, not 16", BitsPerSample);
+			return -1;
+		}
+
+		int *pBuffer = (int *)mem_alloc(4*NumSamples*NumChannels, 1);
+		WavpackUnpackSamples(pContext, pBuffer, NumSamples); // TODO: check return value
+		pSrc = pBuffer;
+
+		pSample->m_pData = (short *)mem_alloc(2*NumSamples*NumChannels, 1);
+		pDst = pSample->m_pData;
+
+		for (i = 0; i < NumSamples*NumChannels; i++)
+			*pDst++ = (short)*pSrc++;
+
+		mem_free(pBuffer);
+
+		pSample->m_NumFrames = NumSamples;
+		pSample->m_LoopStart = -1;
+		pSample->m_LoopEnd = -1;
+		pSample->m_PausedAt = 0;
+	}
+	else
+	{
+		dbg_msg("sound/wv", "failed to decode sample (%s)", aError);
+	}
+
+	return SampleID;
 }
 
 int CSound::LoadWV(const char *pFilename)
 {
-	CSample *pSample;
-	int SampleID = -1;
-	char aError[100];
-	WavpackContext *pContext;
-
 	// don't waste memory on sound when we are stress testing
 	if(g_Config.m_DbgStress)
 		return -1;
 
 	// no need to load sound when we are running with no sound
 	if(!m_SoundEnabled)
-		return 1;
+		return -1;
 
 	if(!m_pStorage)
 		return -1;
@@ -358,72 +424,47 @@ int CSound::LoadWV(const char *pFilename)
 		return -1;
 	}
 
-	SampleID = AllocID();
+	int SampleID = AllocID();
 	if(SampleID < 0)
 		return -1;
-	pSample = &m_aSamples[SampleID];
+	
+	// read the whole file into memory
+	int DataSize = io_length(ms_File);
+	char *pData = new char[DataSize];
+	io_read(ms_File, pData, DataSize);
+	io_close(ms_File);
 
-	pContext = WavpackOpenFileInput(ReadData, aError);
-	if (pContext)
-	{
-		int m_aSamples = WavpackGetNumSamples(pContext);
-		int BitsPerSample = WavpackGetBitsPerSample(pContext);
-		unsigned int SampleRate = WavpackGetSampleRate(pContext);
-		int m_aChannels = WavpackGetNumChannels(pContext);
-		int *pData;
-		int *pSrc;
-		short *pDst;
-		int i;
+	SampleID = DecodeWV(SampleID, pData, DataSize);
 
-		pSample->m_Channels = m_aChannels;
-		pSample->m_Rate = SampleRate;
-
-		if(pSample->m_Channels > 2)
-		{
-			dbg_msg("sound/wv", "file is not mono or stereo. filename='%s'", pFilename);
-			return -1;
-		}
-
-		/*
-		if(snd->rate != 44100)
-		{
-			dbg_msg("sound/wv", "file is %d Hz, not 44100 Hz. filename='%s'", snd->rate, filename);
-			return -1;
-		}*/
-
-		if(BitsPerSample != 16)
-		{
-			dbg_msg("sound/wv", "bps is %d, not 16, filname='%s'", BitsPerSample, pFilename);
-			return -1;
-		}
-
-		pData = (int *)mem_alloc(4*m_aSamples*m_aChannels, 1);
-		WavpackUnpackSamples(pContext, pData, m_aSamples); // TODO: check return value
-		pSrc = pData;
-
-		pSample->m_pData = (short *)mem_alloc(2*m_aSamples*m_aChannels, 1);
-		pDst = pSample->m_pData;
-
-		for (i = 0; i < m_aSamples*m_aChannels; i++)
-			*pDst++ = (short)*pSrc++;
-
-		mem_free(pData);
-
-		pSample->m_NumFrames = m_aSamples;
-		pSample->m_LoopStart = -1;
-		pSample->m_LoopEnd = -1;
-		pSample->m_PausedAt = 0;
-	}
-	else
-	{
-		dbg_msg("sound/wv", "failed to open %s: %s", pFilename, aError);
-	}
-
+	delete[] pData;
 	io_close(ms_File);
 	ms_File = NULL;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
+
+	RateConvert(SampleID);
+	return SampleID;
+}
+
+int CSound::LoadWVFromMem(const void *pData, unsigned DataSize)
+{
+	// don't waste memory on sound when we are stress testing
+	if(g_Config.m_DbgStress)
+		return -1;
+
+	// no need to load sound when we are running with no sound
+	if(!m_SoundEnabled)
+		return -1;
+
+	if(!pData)
+		return -1;
+
+	int SampleID = AllocID();
+	if(SampleID < 0)
+		return -1;
+
+	SampleID = DecodeWV(SampleID, pData, DataSize);
 
 	RateConvert(SampleID);
 	return SampleID;
