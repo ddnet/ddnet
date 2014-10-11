@@ -10,14 +10,19 @@ class CMapSounds : public CComponent
 	int m_aSounds[64];
 	int m_Count;
 
-	array<CSoundSource *> m_SourceQueue;
+	struct CSource
+	{
+		int m_Sound;
+		CSoundSource *m_pSource;
+
+		bool operator ==(const CSource &Other) const { return (m_Sound == Other.m_Sound) && (m_pSource == Other.m_pSource); }
+	};
+
+	array<CSource> m_SourceQueue;
 
 public:
 	CMapSounds();
 
 	virtual void OnMapLoad();
 	virtual void OnRender();
-
-	int Get(int Index) const { return m_aSounds[Index]; }
-	int Num() const { return m_Count; }
 };

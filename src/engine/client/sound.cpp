@@ -429,6 +429,17 @@ int CSound::LoadWV(const char *pFilename)
 	return SampleID;
 }
 
+void CSound::UnloadSample(int SampleID)
+{
+	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+		return;
+
+	Stop(SampleID);
+	mem_free(m_aSamples[SampleID].m_pData);
+
+	m_aSamples[SampleID].m_pData = 0x0;
+}
+
 void CSound::SetListenerPos(float x, float y)
 {
 	m_CenterX = (int)x;

@@ -27,6 +27,7 @@ enum
 	MAPITEMTYPE_GROUP,
 	MAPITEMTYPE_LAYER,
 	MAPITEMTYPE_ENVPOINTS,
+	MAPITEMTYPE_SOUND,
 
 
 	CURVETYPE_STEP=0,
@@ -349,6 +350,19 @@ struct CMapItemLayerSounds
 
 	int m_aName[3];
 };
+
+struct CMapItemSound
+{
+	int m_Version;
+
+	int m_NumFrames;
+	int m_NumChannels;
+
+	int m_External;
+
+	int m_SoundName;
+	int m_SoundData;
+} ;
 
 
 // DDRace
