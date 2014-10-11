@@ -631,6 +631,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		PROP_GLOBAL,
 		PROP_LOOP,
 		PROP_TIME_DELAY,
+		PROP_SOUND_ENV,
 		NUM_PROPS,
 	};
 
@@ -640,6 +641,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		{"Global", pSource->m_Global, PROPTYPE_BOOL, 0, 1},
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
+		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
 
 		{0},
 	};
@@ -655,6 +657,20 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 	if(Prop == PROP_GLOBAL) pSource->m_Global = NewVal;
 	if(Prop == PROP_LOOP) pSource->m_Loop = NewVal;
 	if(Prop == PROP_TIME_DELAY) pSource->m_TimeDelay = NewVal;
+	if(Prop == PROP_SOUND_ENV)
+	{
+		int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
+		int Step = (Index-pSource->m_SoundEnv)%2;
+		if(Step != 0)
+		{
+			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
+				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 2)
+				{
+					pSource->m_SoundEnv = Index;
+					break;
+				}
+		}
+	}
 
 	return 0;
 }

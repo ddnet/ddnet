@@ -3872,6 +3872,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		CUIRect Button;
 		CEnvelope *pNewEnv = 0;
 
+
+		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
+		static int s_NewSoundButton = 0;
+		if(DoButton_Editor(&s_NewSoundButton, "Sound.+", 0, &Button, 0, "Creates a new sound envelope"))
+		{
+			m_Map.m_Modified = true;
+			m_Map.m_UndoModified++;
+			pNewEnv = m_Map.NewEnvelope(2);
+		}
+
+		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New4dButton = 0;
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
@@ -3979,12 +3990,14 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 
-			static const char *s_paNames[2][4] = {
+			static const char *s_paNames[3][4] = {
+				{"V", "D", "", ""},
 				{"X", "Y", "R", ""},
 				{"R", "G", "B", "A"},
 			};
 
-			const char *paDescriptions[2][4] = {
+			const char *paDescriptions[3][4] = {
+				{"Volume of the envelope", "Distance value of the envelope", "", ""},
 				{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", ""},
 				{"Red value of the envelope", "Green value of the envelope", "Blue value of the envelope", "Alpha value of the envelope"},
 			};
@@ -4001,7 +4014,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				else if(i == envelope->channels-1) draw_func = draw_editor_button_r;
 				else draw_func = draw_editor_button_m;*/
 
-				if(DoButton_Editor(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Channels-3][i], s_ActiveChannels&Bit, &Button, 0, paDescriptions[pEnvelope->m_Channels-3][i]))
+				if(DoButton_Editor(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Channels-2][i], s_ActiveChannels&Bit, &Button, 0, paDescriptions[pEnvelope->m_Channels-2][i]))
 					s_ActiveChannels ^= Bit;
 			}
 

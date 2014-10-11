@@ -505,7 +505,7 @@ public:
 
 	void MakePalette();
 	virtual void Render();
-
+	
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
 	void Convert(CUIRect Rect, RECTi *pOut);
@@ -1103,6 +1103,7 @@ public:
 
 	virtual int RenderProperties(CUIRect *pToolbox);
 
+	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
 	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc);
 
 	int m_Sound;

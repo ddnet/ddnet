@@ -47,6 +47,8 @@ CSoundSource *CLayerSounds::NewSource()
 	pSource->m_Loop = 1;
 	pSource->m_TimeDelay = 0;
 
+	pSource->m_SoundEnv = -1;
+
 	return pSource;
 }
 
@@ -139,7 +141,13 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	return 0;
 }
 
-void CLayerSounds::ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
+void CLayerSounds::ModifySoundIndex(INDEX_MODIFY_FUNC Func)
 {
+	Func(&m_Sound);
+}
 
+void CLayerSounds::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
+{
+	for(int i = 0; i < m_lSources.size(); i++)
+		Func(&m_lSources[i].m_SoundEnv);
 }
