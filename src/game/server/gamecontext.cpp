@@ -804,7 +804,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		if (g_Config.m_SvShowOthersDefault)
 		{
 			if (g_Config.m_SvShowOthers)
-				SendChatTarget(ClientID, "You can see other players. To disable this use the ddnet client and type /showothers .");
+				SendChatTarget(ClientID, "You can see other players. To disable this use the DDNet client and type /showothers .");
 
 			m_apPlayers[ClientID]->m_ShowOthers = true;
 		}
