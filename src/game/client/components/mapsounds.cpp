@@ -149,5 +149,14 @@ void CMapSounds::OnRender()
 
 			Sound()->SetVoiceLocation(pVoice->m_Voice, fx2f(pVoice->m_pSource->m_Position.x)+OffsetX, fx2f(pVoice->m_pSource->m_Position.y)+OffsetY);
 		}
+
+		if(pVoice->m_pSource->m_SoundEnv >= 0)
+		{
+			float aChannels[4];
+			CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset/1000.0f, pVoice->m_pSource->m_SoundEnv, aChannels, m_pClient->m_pMapLayersBackGround);
+			float Volume = clamp(aChannels[0], 0.0f, 1.0f);
+
+			Sound()->SetVoiceVolume(pVoice->m_Voice, Volume);
+		}
 	}
 }
