@@ -37,12 +37,13 @@ public:
 	virtual void SetListenerPos(float x, float y);
 	virtual void SetChannel(int ChannelID, float Vol, float Pan);
 
-	virtual void SetVoiceVolume(int VoiceId, float Volume);
-	virtual void SetVoiceMaxDistance(int VoiceId, int Distance);
+	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume);
+	virtual void SetVoiceMaxDistance(CVoiceHandle Voice, int Distance);
+	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y);
 
-	int Play(int ChannelID, int SampleID, int Flags, float x, float y);
-	virtual int PlayAt(int ChannelID, int SampleID, int Flags, float x, float y);
-	virtual int Play(int ChannelID, int SampleID, int Flags);
+	CVoiceHandle Play(int ChannelID, int SampleID, int Flags, float x, float y);
+	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y);
+	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags);
 	virtual void Stop(int SampleID);
 	virtual void StopAll();
 };

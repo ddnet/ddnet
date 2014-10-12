@@ -206,24 +206,24 @@ void CSounds::Stop(int SetId)
 		Sound()->Stop(pSet->m_aSounds[i].m_Id);
 }
 
-void CSounds::PlaySample(int Chn, int SampleId, float Vol, int Flags)
+ISound::CVoiceHandle CSounds::PlaySample(int Chn, int SampleId, float Vol, int Flags)
 {
 	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
-		return;
+		return ISound::CVoiceHandle();
 
 	if(Chn == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	Sound()->Play(Chn, SampleId, Flags);
+	return Sound()->Play(Chn, SampleId, Flags);
 }
 
-void CSounds::PlaySampleAt(int Chn, int SampleId, float Vol, vec2 Pos, int Flags)
+ISound::CVoiceHandle CSounds::PlaySampleAt(int Chn, int SampleId, float Vol, vec2 Pos, int Flags)
 {
 	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
-		return;
+		return ISound::CVoiceHandle();
 
 	if(Chn == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	Sound()->PlayAt(Chn, SampleId, Flags, Pos.x, Pos.y);
+	return Sound()->PlayAt(Chn, SampleId, Flags, Pos.x, Pos.y);
 }

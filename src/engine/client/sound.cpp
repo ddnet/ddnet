@@ -45,6 +45,7 @@ struct CVoice
 {
 	CSample *m_pSample;
 	CChannel *m_pChannel;
+	int m_Age; // increases when reused
 	int m_Tick;
 	int m_Vol; // 0 - 255
 	int m_FalloffDistance; // 0 - inifintee (well int)
@@ -171,7 +172,10 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				if(v->m_Flags&ISound::FLAG_LOOP)
 					v->m_Tick = 0;
 				else
+				{
 					v->m_pSample = 0;
+					v->m_Age++;
+				}
 			}
 		}
 	}
@@ -497,18 +501,28 @@ void CSound::SetListenerPos(float x, float y)
 	m_CenterY = (int)y;
 }
 
-void CSound::SetVoiceVolume(int VoiceID, float Volume)
+void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 {
-	if(VoiceID < 0 || VoiceID >= NUM_VOICES)
+	if(!Voice.IsValid())
+		return;
+
+	int VoiceID = Voice.Id();
+
+	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
 	Volume = clamp(Volume, 0.0f, 1.0f);
 	m_aVoices[VoiceID].m_Vol = (int)(Volume*255.0f);
 }
 
-void CSound::SetVoiceMaxDistance(int VoiceID, int Distance)
+void CSound::SetVoiceMaxDistance(CVoiceHandle Voice, int Distance)
 {
-	if(VoiceID < 0 || VoiceID >= NUM_VOICES)
+	if(!Voice.IsValid())
+		return;
+
+	int VoiceID = Voice.Id();
+
+	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
 	if(Distance < 0)
@@ -517,31 +531,46 @@ void CSound::SetVoiceMaxDistance(int VoiceID, int Distance)
 	m_aVoices[VoiceID].m_FalloffDistance = Distance;
 }
 
+void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
+{
+	if(!Voice.IsValid())
+		return;
+
+	int VoiceID = Voice.Id();
+
+	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+		return;
+
+	m_aVoices[VoiceID].m_X = x;
+	m_aVoices[VoiceID].m_Y = y;
+}
+
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)
 {
 	m_aChannels[ChannelID].m_Vol = (int)(Vol*255.0f);
 	m_aChannels[ChannelID].m_Pan = (int)(Pan*255.0f); // TODO: this is only on and off right now
 }
 
-int CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 {
 	int VoiceID = -1;
+	int Age = -1;
 	int i;
 
 	if(SampleID == 107) // GetSampleID(SOUND_CHAT_SERVER)
 	{
 		if(!g_Config.m_SndServerMessage)
-			return VoiceID;
+			return CVoiceHandle();
 	}
 	else if(SampleID == 108) // GetSampleID(SOUND_CHAT_CLIENT)
 	{}
 	else if(SampleID == 109) // GetSampleID(SOUND_CHAT_HIGHLIGHT)
 	{
 		if(!g_Config.m_SndHighlight)
-			return VoiceID;
+			return CVoiceHandle();
 	}
 	else if(!g_Config.m_SndGame)
-		return VoiceID;
+		return CVoiceHandle();
 
 
 	lock_wait(m_SoundLock);
@@ -572,18 +601,19 @@ int CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 		m_aVoices[VoiceID].m_X = (int)x;
 		m_aVoices[VoiceID].m_Y = (int)y;
 		m_aVoices[VoiceID].m_FalloffDistance = DefaultDistance;
+		Age = m_aVoices[VoiceID].m_Age;
 	}
 
 	lock_release(m_SoundLock);
-	return VoiceID;
+	return CreateVoiceHandle(VoiceID, Age);
 }
 
-int CSound::PlayAt(int ChannelID, int SampleID, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::PlayAt(int ChannelID, int SampleID, int Flags, float x, float y)
 {
 	return Play(ChannelID, SampleID, Flags|ISound::FLAG_POS, x, y);
 }
 
-int CSound::Play(int ChannelID, int SampleID, int Flags)
+ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags)
 {
 	return Play(ChannelID, SampleID, Flags, 0, 0);
 }
