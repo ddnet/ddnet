@@ -8,6 +8,7 @@
 #include <engine/server/server.h>
 #include "gamecontext.h"
 #include <game/gamecore.h>
+#include <game/version.h>
 #include <game/server/teams.h>
 #include "gamemodes/DDRace.h"
 #include <stdio.h>
@@ -361,9 +362,9 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 		if(g_Config.m_SvClientSuggestion)
 		{
 			if(m_ClientVersion <= VERSION_DDNET_OLD)
-				GameServer()->SendBroadcast("Get the client from ddnet.tw to use all features on DDNet.", m_ClientID);
+				GameServer()->SendBroadcast(g_Config.m_SvClientSuggestionOther, m_ClientID);
 			if(m_ClientVersion < CLIENT_VERSIONNR)
-				GameServer()->SendBroadcast("Your client version is old. Update it for new features!", m_ClientID);
+				GameServer()->SendBroadcast(g_Config.m_SvClientSuggestionOld, m_ClientID);
 			m_FirstPacket = false;
 		}
 	}

@@ -310,6 +310,9 @@ MACRO_CONFIG_INT(SvShutdownWhenEmpty, sv_shutdown_when_empty, 0, 0, 1, CFGFLAG_S
 MACRO_CONFIG_INT(SvKillProtection, sv_kill_protection, 20, 0, 9999, CFGFLAG_SERVER, "0 - Disable, 1-9999 minutes")
 MACRO_CONFIG_INT(SvClientSuggestion, sv_client_suggestion, 1, 0, 1, CFGFLAG_SERVER, "Enable suggestion to use DDNet client when joining a server")
 
+MACRO_CONFIG_STR(SvClientSuggestionOther, sv_client_suggestion_other, 128, "Get the client from ddnet.tw to use all features on DDNet.", CFGFLAG_SERVER, "Broadcast to display to players without DDNet client")
+MACRO_CONFIG_STR(SvClientSuggestionOld, sv_client_suggestion_old, 128, "Your client version is old. Update it on ddnet.tw for new features!", CFGFLAG_SERVER, "Broadcast to display to players with an old version of DDNet client")
+
 // netlimit
 MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 0, 0, 10000, CFGFLAG_SERVER, "Netlimit: Maximum amount of traffic a client is allowed to use (in kb/s)")
 MACRO_CONFIG_INT(SvNetlimitAlpha, sv_netlimit_alpha, 50, 1, 100, CFGFLAG_SERVER, "Netlimit: Alpha of Exponention moving average")
