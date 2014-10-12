@@ -337,7 +337,11 @@ struct CSoundSource
 	int m_TimeDelay; // in s
 	int m_FalloffDistance;
 
+	int m_PosEnv;
+	int m_PosEnvOffset;
 	int m_SoundEnv;
+	int m_SoundEnvOffset;
+
 };
 
 struct CMapItemLayerSounds

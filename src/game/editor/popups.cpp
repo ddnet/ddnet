@@ -632,7 +632,10 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		PROP_LOOP,
 		PROP_TIME_DELAY,
 		PROP_DISTANCE,
+		PROP_POS_ENV,
+		PROP_POS_ENV_OFFSET,
 		PROP_SOUND_ENV,
+		PROP_SOUND_ENV_OFFSET,
 		NUM_PROPS,
 	};
 
@@ -643,7 +646,10 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Distance", pSource->m_FalloffDistance, PROPTYPE_INT_SCROLL, 0, 1000000},
+		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Sound. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
 	};
@@ -660,6 +666,21 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 	if(Prop == PROP_LOOP) pSource->m_Loop = NewVal;
 	if(Prop == PROP_TIME_DELAY) pSource->m_TimeDelay = NewVal;
 	if(Prop == PROP_DISTANCE) pSource->m_FalloffDistance = NewVal;
+	if(Prop == PROP_POS_ENV)
+	{
+		int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
+		int Step = (Index-pSource->m_PosEnv)%2;
+		if(Step != 0)
+		{
+			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
+				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 3)
+				{
+					pSource->m_PosEnv = Index;
+					break;
+				}
+		}
+	}
+	if(Prop == PROP_POS_ENV_OFFSET) pSource->m_PosEnvOffset = NewVal;
 	if(Prop == PROP_SOUND_ENV)
 	{
 		int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
@@ -667,13 +688,14 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		if(Step != 0)
 		{
 			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 2)
+				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 1)
 				{
 					pSource->m_SoundEnv = Index;
 					break;
 				}
 		}
 	}
+	if(Prop == PROP_SOUND_ENV_OFFSET) pSource->m_SoundEnvOffset = NewVal;
 
 	return 0;
 }

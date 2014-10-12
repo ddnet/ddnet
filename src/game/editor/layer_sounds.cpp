@@ -27,7 +27,18 @@ void CLayerSounds::Render()
 	{
 		CSoundSource *pSource = &m_lSources[i];
 
-		m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x), fx2f(pSource->m_Position.y), pSource->m_FalloffDistance, 32);
+		float OffsetX = 0;
+		float OffsetY = 0;
+
+		if(pSource->m_PosEnv >= 0)
+		{
+			float aChannels[4];
+			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset/1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
+			OffsetX = aChannels[0];
+			OffsetY = aChannels[1];
+		}
+
+		m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, pSource->m_FalloffDistance, 32);
 	}
 
 
@@ -37,7 +48,18 @@ void CLayerSounds::Render()
 	{
 		CSoundSource *pSource = &m_lSources[i];
 
-		IGraphics::CQuadItem QuadItem(fx2f(pSource->m_Position.x), fx2f(pSource->m_Position.y), s_SourceVisualSize, s_SourceVisualSize);
+		float OffsetX = 0;
+		float OffsetY = 0;
+
+		if(pSource->m_PosEnv >= 0)
+		{
+			float aChannels[4];
+			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset/1000.0f, pSource->m_PosEnv, aChannels, m_pEditor);
+			OffsetX = aChannels[0];
+			OffsetY = aChannels[1];
+		}
+
+		IGraphics::CQuadItem QuadItem(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, s_SourceVisualSize, s_SourceVisualSize);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -58,7 +80,10 @@ CSoundSource *CLayerSounds::NewSource()
 	pSource->m_TimeDelay = 0;
 	pSource->m_FalloffDistance = 1500;
 
+	pSource->m_PosEnv = -1;
+	pSource->m_PosEnvOffset = 0;
 	pSource->m_SoundEnv = -1;
+	pSource->m_SoundEnvOffset = 0;
 
 	return pSource;
 }
