@@ -23,6 +23,8 @@ class CSounds : public CComponent
 	
 	int GetSampleId(int SetId);
 
+	float m_AmbientVolume;
+
 public:
 	// sound channels
 	enum
