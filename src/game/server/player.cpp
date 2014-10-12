@@ -362,6 +362,8 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 		{
 			if(m_ClientVersion <= VERSION_DDNET_OLD)
 				GameServer()->SendBroadcast("Get the client from ddnet.tw to use all features on DDNet.", m_ClientID);
+			if(m_ClientVersion < CLIENT_VERSIONNR)
+				GameServer()->SendBroadcast("Your client version is old. Update it for new features!", m_ClientID);
 			m_FirstPacket = false;
 		}
 	}
