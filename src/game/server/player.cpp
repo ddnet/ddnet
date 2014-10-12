@@ -358,9 +358,12 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 	if(m_FirstPacket)
 	{
-		if(m_ClientVersion <= VERSION_DDNET_OLD)
-			GameServer()->SendBroadcast("Get the client from ddnet.tw to use all features on DDNet.", m_ClientID);
-		m_FirstPacket = false;
+		if(g_Config.m_SvClientSuggestion)
+		{
+			if(m_ClientVersion <= VERSION_DDNET_OLD)
+				GameServer()->SendBroadcast("Get the client from ddnet.tw to use all features on DDNet.", m_ClientID);
+			m_FirstPacket = false;
+		}
 	}
 
 	if(m_pCharacter && !m_Paused)
