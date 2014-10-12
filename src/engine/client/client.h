@@ -146,9 +146,9 @@ class CClient : public IClient, public CDemoPlayer::IListner
 		int m_Tick; // the tick that the input is for
 		int64 m_PredictedTime; // prediction latency when we sent this input
 		int64 m_Time;
-	} m_aInputs[2][200];
+	} m_aInputs[200];
 
-	int m_CurrentInput[2];
+	int m_CurrentInput;
 	bool m_LastDummy;
 	bool m_LastDummy2;
 	CNetObj_PlayerInput DummyInput;
