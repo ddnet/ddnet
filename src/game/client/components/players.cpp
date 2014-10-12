@@ -414,7 +414,7 @@ void CPlayers::RenderPlayer(
 	if(pInfo.m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's local player we are rendering
-		Angle = GetAngle(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
+		Angle = GetAngle(m_pClient->m_pControls->m_MousePos);
 	}
 	else
 	{
@@ -552,7 +552,7 @@ void CPlayers::RenderPlayer(
 			vec2 ExDirection = Direction;
 
 			if (pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				ExDirection = normalize(vec2(m_pClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetX, m_pClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetY));
+				ExDirection = normalize(vec2(m_pClient->m_pControls->m_InputData.m_TargetX, m_pClient->m_pControls->m_InputData.m_TargetY));
 
 			Graphics()->TextureSet(-1);
 			vec2 initPos = Position;
@@ -886,7 +886,7 @@ void CPlayers::RenderPlayer(
 		{
 			float a = 1;
 			if(g_Config.m_ClNameplatesAlways == 0)
-				a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
+				a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos, Position)/200.0f,16.0f), 0.0f, 1.0f);
 			
 			const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 			float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
