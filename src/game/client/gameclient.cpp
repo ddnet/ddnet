@@ -106,7 +106,7 @@ const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjNa
 
 void CGameClient::ResetDummyInput()
 {
-	m_pControls->ResetDummyInput();
+	//m_pControls->ResetDummyInput();
 }
 
 void CGameClient::OnConsoleInit()
