@@ -167,6 +167,7 @@ public:
 	int m_DefEmote;
 	int m_DefEmoteReset;
 	bool m_Halloween;
+	bool m_FirstPacket;
 #if defined(CONF_SQL)
 	int64 m_LastSQLQuery;
 #endif

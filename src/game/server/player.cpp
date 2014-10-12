@@ -70,9 +70,10 @@ void CPlayer::Reset()
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
+	m_FirstPacket = true;
 
 	if (g_Config.m_SvEvents)
-	{	
+	{
 		time_t rawtime;
 		struct tm* timeinfo;
 		char d[16], m[16], y[16];
@@ -354,6 +355,13 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 		return;
 
 	AfkVoteTimer(NewInput);
+
+	if(m_FirstPacket)
+	{
+		if(m_ClientVersion <= VERSION_DDNET_OLD)
+			GameServer()->SendBroadcast("Get the client from ddnet.tw to use all features on DDNet.", m_ClientID);
+		m_FirstPacket = false;
+	}
 
 	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnPredictedInput(NewInput);
