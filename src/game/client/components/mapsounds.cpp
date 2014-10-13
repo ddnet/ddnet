@@ -2,6 +2,7 @@
 #include <engine/engine.h>
 #include <engine/sound.h>
 
+#include <game/client/components/camera.h>
 #include <game/client/components/maplayers.h> // envelope
 #include <game/client/components/sounds.h>
 
@@ -120,10 +121,7 @@ void CMapSounds::OnRender()
 			CSourceVoice Voice;
 			Voice.m_pSource = pSource->m_pSource;
 
-			if(pSource->m_pSource->m_Global)
-				Voice.m_Voice = m_pClient->m_pSounds->PlaySample(CSounds::CHN_AMBIENT, m_aSounds[pSource->m_Sound], 1.0f, Flags);
-			else
-				Voice.m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_AMBIENT, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
+			Voice.m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_AMBIENT, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
 
 			Sound()->SetVoiceMaxDistance(Voice.m_Voice, pSource->m_pSource->m_FalloffDistance);
 
@@ -132,31 +130,72 @@ void CMapSounds::OnRender()
 		}
 	}
 
-	// update voices
-	for(int i = 0; i < m_lVoices.size(); i++)
+	vec2 Center = m_pClient->m_pCamera->m_Center;
+	for(int g = 0; g < Layers()->NumGroups(); g++)
 	{
-		CSourceVoice *pVoice = &m_lVoices[i];;
+		CMapItemGroup *pGroup = Layers()->GetGroup(g);
 
-		if(!pVoice->m_Voice.IsValid())
+		if(!pGroup)
 			continue;
 
-		if(pVoice->m_pSource->m_PosEnv >= 0)
+		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			float aChannels[4];
-			CMapLayers::EnvelopeEval(pVoice->m_pSource->m_PosEnvOffset/1000.0f, pVoice->m_pSource->m_PosEnv, aChannels, m_pClient->m_pMapLayersBackGround);
-			float OffsetX = aChannels[0];
-			float OffsetY = aChannels[1];
+			CMapItemLayer *pLayer = Layers()->GetLayer(pGroup->m_StartLayer+l);
 
-			Sound()->SetVoiceLocation(pVoice->m_Voice, fx2f(pVoice->m_pSource->m_Position.x)+OffsetX, fx2f(pVoice->m_pSource->m_Position.y)+OffsetY);
-		}
+			if(!pLayer)
+				continue;
 
-		if(pVoice->m_pSource->m_SoundEnv >= 0)
-		{
-			float aChannels[4];
-			CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset/1000.0f, pVoice->m_pSource->m_SoundEnv, aChannels, m_pClient->m_pMapLayersBackGround);
-			float Volume = clamp(aChannels[0], 0.0f, 1.0f);
+			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			{
+				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
 
-			Sound()->SetVoiceVolume(pVoice->m_Voice, Volume);
+				CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
+
+				if(!pSources)
+					continue;
+
+				for(int s = 0; s < pSoundLayer->m_NumSources; s++) {
+					for(int i = 0; i < m_lVoices.size(); i++)
+					{
+						CSourceVoice *pVoice = &m_lVoices[i];
+
+						if(pVoice->m_pSource != &pSources[s])
+							continue;
+
+						if(!pVoice->m_Voice.IsValid())
+							continue;
+
+						float OffsetX = 0, OffsetY = 0;
+
+						if(pVoice->m_pSource->m_PosEnv >= 0)
+						{
+							float aChannels[4];
+							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_PosEnvOffset/1000.0f, pVoice->m_pSource->m_PosEnv, aChannels, m_pClient->m_pMapLayersBackGround);
+							OffsetX = aChannels[0];
+							OffsetY = aChannels[1];
+						}
+
+						float x = fx2f(pVoice->m_pSource->m_Position.x)+OffsetX;
+						float y = fx2f(pVoice->m_pSource->m_Position.y)+OffsetY;
+
+						x += Center.x*(1.0f-pGroup->m_ParallaxX/100.0f);
+						y += Center.y*(1.0f-pGroup->m_ParallaxY/100.0f);
+
+						x -= pGroup->m_OffsetX; y -= pGroup->m_OffsetY;
+
+						Sound()->SetVoiceLocation(pVoice->m_Voice, x, y);
+
+						if(pVoice->m_pSource->m_SoundEnv >= 0)
+						{
+							float aChannels[4];
+							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset/1000.0f, pVoice->m_pSource->m_SoundEnv, aChannels, m_pClient->m_pMapLayersBackGround);
+							float Volume = clamp(aChannels[0], 0.0f, 1.0f);
+
+							Sound()->SetVoiceVolume(pVoice->m_Voice, Volume);
+						}
+					}	
+				}	
+			}
 		}
 	}
 }

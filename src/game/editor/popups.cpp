@@ -628,7 +628,6 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 	{
 		PROP_POS_X=0,
 		PROP_POS_Y,
-		PROP_GLOBAL,
 		PROP_LOOP,
 		PROP_TIME_DELAY,
 		PROP_DISTANCE,
@@ -642,7 +641,6 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 	CProperty aProps[] = {
 		{"Pos X", pSource->m_Position.x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", pSource->m_Position.y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Global", pSource->m_Global, PROPTYPE_BOOL, 0, 1},
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Distance", pSource->m_FalloffDistance, PROPTYPE_INT_SCROLL, 0, 1000000},
@@ -662,7 +660,6 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 
 	if(Prop == PROP_POS_X) pSource->m_Position.x = NewVal*1000;
 	if(Prop == PROP_POS_Y) pSource->m_Position.y = NewVal*1000;
-	if(Prop == PROP_GLOBAL) pSource->m_Global = NewVal;
 	if(Prop == PROP_LOOP) pSource->m_Loop = NewVal;
 	if(Prop == PROP_TIME_DELAY) pSource->m_TimeDelay = NewVal;
 	if(Prop == PROP_DISTANCE) pSource->m_FalloffDistance = NewVal;

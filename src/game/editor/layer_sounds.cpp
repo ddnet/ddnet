@@ -75,7 +75,6 @@ CSoundSource *CLayerSounds::NewSource()
 	pSource->m_Position.x = 0;
 	pSource->m_Position.y = 0;
 
-	pSource->m_Global = 0;
 	pSource->m_Loop = 1;
 	pSource->m_TimeDelay = 0;
 	pSource->m_FalloffDistance = 1500;

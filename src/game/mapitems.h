@@ -332,7 +332,6 @@ struct CMapItemEnvelope : public CMapItemEnvelope_v1
 struct CSoundSource
 {
 	CPoint m_Position;
-	int m_Global;
 	int m_Loop;
 	int m_TimeDelay; // in s
 	int m_FalloffDistance;
