@@ -92,12 +92,8 @@ void CGraphics_OpenGL::Flush()
 	if(m_RenderEnable)
 	{
 		if(m_Drawing == DRAWING_QUADS)
-#if defined(__ANDROID__)
 			for( unsigned i = 0, j = m_NumVertices; i < j; i += 4 )
 				glDrawArrays(GL_TRIANGLE_FAN, i, 4);
-#else
-			glDrawArrays(GL_QUADS, 0, m_NumVertices);
-#endif
 		else if(m_Drawing == DRAWING_LINES)
 			glDrawArrays(GL_LINES, 0, m_NumVertices);
 	}
