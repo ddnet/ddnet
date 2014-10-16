@@ -322,12 +322,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	switch(pCommand->m_PrimType)
 	{
 	case CCommandBuffer::PRIMTYPE_QUADS:
-#if defined(__ANDROID__)
 		for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
 			glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
-#else
-		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount*4);
-#endif
 		break;
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
