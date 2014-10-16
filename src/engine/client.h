@@ -8,6 +8,14 @@
 #include <engine/shared/config.h>
 #include <versionsrv/versionsrv.h>
 
+enum
+{
+	RECORDER_MANUAL=0,
+	RECORDER_AUTO=1,
+	RECORDER_RACE=2,
+	RECORDER_MAX=3,
+};
+
 class IClient : public IInterface
 {
 	MACRO_INTERFACE("client", 0)
@@ -86,9 +94,10 @@ public:
 
 	virtual void Quit() = 0;
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
-	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp) = 0;
+	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
-	virtual void DemoRecorder_Stop() = 0;
+	virtual void DemoRecorder_Stop(int Recorder) = 0;
+	virtual class IDemoRecorder *DemoRecorder(int Recorder) = 0;
 	virtual void AutoScreenshot_Start() = 0;
 	virtual void ServerBrowserUpdate() = 0;
 
@@ -155,7 +164,7 @@ public:
 	virtual int GetCurrentMapCrc() = 0;
 	virtual const char* RaceRecordStart(const char *pFilename) = 0;
 	virtual void RaceRecordStop() = 0;
-	virtual bool DemoIsRecording() = 0;
+	virtual bool RaceRecordIsRecording() = 0;
 
 	virtual void DemoSliceBegin() = 0;
 	virtual void DemoSliceEnd() = 0;

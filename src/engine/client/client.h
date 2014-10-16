@@ -76,7 +76,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 	class CNetClient m_NetClient[3];
 	class CDemoPlayer m_DemoPlayer;
-	class CDemoRecorder m_DemoRecorder;
+	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
 	class CServerBrowser m_ServerBrowser;
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
@@ -333,10 +333,11 @@ public:
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType);
-	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp);
+	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder);
 	void DemoRecorder_HandleAutoStart();
-	void DemoRecorder_Stop();
-	void DemoRecorder_AddDemoMarker();
+	void DemoRecorder_Stop(int Recorder);
+	void DemoRecorder_AddDemoMarker(int Recorder);
+	class IDemoRecorder *DemoRecorder(int Recorder);
 
 	void AutoScreenshot_Start();
 	void AutoScreenshot_Cleanup();
@@ -349,7 +350,7 @@ public:
 	virtual int GetCurrentMapCrc();
 	virtual const char* RaceRecordStart(const char *pFilename);
 	virtual void RaceRecordStop();
-	virtual bool DemoIsRecording();
+	virtual bool RaceRecordIsRecording();
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();

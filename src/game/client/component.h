@@ -24,7 +24,7 @@ protected:
 	class CRenderTools *RenderTools() const { return m_pClient->RenderTools(); }
 	class IConsole *Console() const { return m_pClient->Console(); }
 	class IDemoPlayer *DemoPlayer() const { return m_pClient->DemoPlayer(); }
-	class IDemoRecorder *DemoRecorder() const { return m_pClient->DemoRecorder(); }
+	class IDemoRecorder *DemoRecorder(int Recorder) const { return m_pClient->DemoRecorder(Recorder); }
 	class IServerBrowser *ServerBrowser() const { return m_pClient->ServerBrowser(); }
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	class IAutoUpdate *AutoUpdate() const { return m_pClient->AutoUpdate(); }

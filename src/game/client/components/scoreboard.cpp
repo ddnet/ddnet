@@ -513,7 +513,7 @@ void CScoreboard::RenderLocalTime(float x)
 
 void CScoreboard::RenderRecordingNotification(float x)
 {
-	if(!m_pClient->DemoRecorder()->IsRecording())
+	if(!m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording())
 		return;
 
 	//draw the box
@@ -532,7 +532,7 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 	//draw the text
 	char aBuf[64];
-	int Seconds = m_pClient->DemoRecorder()->Length();
+	int Seconds = m_pClient->DemoRecorder(RECORDER_MANUAL)->Length();
 	str_format(aBuf, sizeof(aBuf), Localize("REC %3d:%02d"), Seconds/60, Seconds%60);
 	TextRender()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
 }

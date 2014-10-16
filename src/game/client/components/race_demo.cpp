@@ -67,7 +67,7 @@ void CRaceDemo::OnReset()
 	if(Client()->State() != IClient::STATE_ONLINE)
 		return;
 	
-	if(Client()->DemoIsRecording())
+	if(Client()->RaceRecordIsRecording())
 		Client()->RaceRecordStop();
 	
 	char aFilename[512];
@@ -82,7 +82,7 @@ void CRaceDemo::OnReset()
 
 void CRaceDemo::OnShutdown()
 {
-	if(Client()->DemoIsRecording())
+	if(Client()->RaceRecordIsRecording())
 		Client()->RaceRecordStop();
 		
 	char aFilename[512];

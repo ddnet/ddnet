@@ -119,7 +119,6 @@ void CGameClient::OnConsoleInit()
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pDemoPlayer = Kernel()->RequestInterface<IDemoPlayer>();
-	m_pDemoRecorder = Kernel()->RequestInterface<IDemoRecorder>();
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
@@ -1107,7 +1106,14 @@ void CGameClient::OnNewSnapshot()
 	}
 
 	// add tuning to demo
-	if(DemoRecorder()->IsRecording() && mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], sizeof(CTuningParams)) != 0)
+	bool AnyRecording = false;
+	for(int i = 0; i < RECORDER_MAX; i++)
+		if(DemoRecorder(i)->IsRecording())
+		{
+			AnyRecording = true;
+			break;
+		}
+	if(AnyRecording && mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], sizeof(CTuningParams)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_Tuning[g_Config.m_ClDummy];

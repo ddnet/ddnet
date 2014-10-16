@@ -52,7 +52,6 @@ class CGameClient : public IGameClient
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
 	class IDemoPlayer *m_pDemoPlayer;
-	class IDemoRecorder *m_pDemoRecorder;
 	class IServerBrowser *m_pServerBrowser;
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	class IAutoUpdate *m_pAutoUpdate;
@@ -92,7 +91,7 @@ public:
 	class IConsole *Console() { return m_pConsole; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
 	class IDemoPlayer *DemoPlayer() const { return m_pDemoPlayer; }
-	class IDemoRecorder *DemoRecorder() const { return m_pDemoRecorder; }
+	class IDemoRecorder *DemoRecorder(int Recorder) const { return Client()->DemoRecorder(Recorder); }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	class IAutoUpdate *AutoUpdate() const { return m_pAutoUpdate; }

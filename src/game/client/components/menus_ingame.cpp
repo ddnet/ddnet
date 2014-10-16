@@ -122,13 +122,13 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitLeft(150.0f, &Button, &ButtonBar);
 
 	static int s_DemoButton = 0;
-	bool Recording = DemoRecorder()->IsRecording();
+	bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
 	if(DoButton_Menu(&s_DemoButton, Localize(Recording ? "Stop record" : "Record demo"), 0, &Button))	// Localize("Stop record");Localize("Record demo");
 	{
 		if(!Recording)
-			Client()->DemoRecorder_Start("demo", true);
+			Client()->DemoRecorder_Start("demo", true, RECORDER_MANUAL);
 		else
-			Client()->DemoRecorder_Stop();
+			Client()->DemoRecorder_Stop(RECORDER_MANUAL);
 	}
 
 	ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
