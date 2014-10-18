@@ -44,6 +44,7 @@
 #include "components/killmessages.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
+#include "components/mapsounds.h"
 #include "components/menus.h"
 #include "components/motd.h"
 #include "components/particles.h"
@@ -93,6 +94,8 @@ static CMapImages gs_MapImages;
 
 static CMapLayers gs_MapLayersBackGround(CMapLayers::TYPE_BACKGROUND);
 static CMapLayers gs_MapLayersForeGround(CMapLayers::TYPE_FOREGROUND);
+
+static CMapSounds gs_MapSounds;
 
 static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;
@@ -148,6 +151,8 @@ void CGameClient::OnConsoleInit()
 	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
 	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
 
+	m_pMapSounds = &::gs_MapSounds;
+
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
@@ -164,6 +169,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pVoting);
 	m_All.Add(m_pParticles); // doesn't render anything, just updates all the particles
 	m_All.Add(m_pRaceDemo);
+	m_All.Add(m_pMapSounds);
 
 	m_All.Add(&gs_MapLayersBackGround); // first to render
 	m_All.Add(&m_pParticles->m_RenderTrail);
