@@ -271,6 +271,30 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		df.AddItem(MAPITEMTYPE_IMAGE, i, sizeof(Item), &Item);
 	}
 
+	// save sounds
+	for(int i = 0; i < m_lSounds.size(); i++)
+	{
+		CEditorSound *pSound = m_lSounds[i];
+
+		CMapItemSound Item;
+		Item.m_Version = 1;
+		
+		Item.m_External = pSound->m_External;
+		Item.m_SoundName = df.AddData(str_length(pSound->m_aName)+1, pSound->m_aName);
+		if(pSound->m_External)
+		{
+			Item.m_SoundDataSize = 0;
+			Item.m_SoundData = -1;
+		}
+		else
+		{
+			Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
+			Item.m_SoundDataSize = pSound->m_DataSize;
+		}
+			
+		df.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
+	}
+
 	// save layers
 	int LayerCount = 0, GroupCount = 0;
 	for(int g = 0; g < m_lGroups.size(); g++)
@@ -411,6 +435,30 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					// clean up
 					//mem_free(quads);
 
+					GItem.m_NumLayers++;
+					LayerCount++;
+				}
+			}
+			else if(pGroup->m_lLayers[l]->m_Type == LAYERTYPE_SOUNDS)
+			{
+				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving sounds layer");
+				CLayerSounds *pLayer = (CLayerSounds *)pGroup->m_lLayers[l];
+				if(pLayer->m_lSources.size())
+				{
+					CMapItemLayerSounds Item;
+					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
+					Item.m_Layer.m_Flags = pLayer->m_Flags;
+					Item.m_Layer.m_Type = pLayer->m_Type;
+					Item.m_Sound = pLayer->m_Sound;
+
+					// add the data
+					Item.m_NumSources = pLayer->m_lSources.size();
+					Item.m_Data = df.AddDataSwapped(pLayer->m_lSources.size()*sizeof(CSoundSource), pLayer->m_lSources.base_ptr());
+
+					// save layer name
+					StrToInts(Item.m_aName, sizeof(Item.m_aName)/sizeof(int), pLayer->m_aName);
+
+					df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 					GItem.m_NumLayers++;
 					LayerCount++;
 				}
@@ -576,6 +624,59 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				// unload image
 				DataFile.UnloadData(pItem->m_ImageData);
 				DataFile.UnloadData(pItem->m_ImageName);
+			}
+		}
+
+		// load sounds
+		{
+			int Start, Num;
+			DataFile.GetType( MAPITEMTYPE_SOUND, &Start, &Num);
+			for(int i = 0; i < Num; i++)
+			{
+				CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start+i, 0, 0);
+				char *pName = (char *)DataFile.GetData(pItem->m_SoundName);
+
+				// copy base info
+				CEditorSound *pSound = new CEditorSound(m_pEditor);
+				pSound->m_External = pItem->m_External;
+
+				if(pItem->m_External)
+				{
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf),"mapres/%s.wv", pName);
+
+					// load external
+					IOHANDLE SoundFile = pStorage->OpenFile(pName, IOFLAG_READ, IStorage::TYPE_ALL);
+					if(SoundFile)
+					{
+						// read the whole file into memory
+						pSound->m_DataSize = io_length(SoundFile);
+						pSound->m_pData = new char[pSound->m_DataSize];
+						io_read(SoundFile, pSound->m_pData, pSound->m_DataSize);
+						io_close(SoundFile);
+						pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize);
+					}
+				}
+				else
+				{
+					pSound->m_DataSize = pItem->m_SoundDataSize;
+
+					// copy sample data
+					void *pData = DataFile.GetData(pItem->m_SoundData);
+					pSound->m_pData = mem_alloc(pSound->m_DataSize, 1);
+					mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
+					pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize);
+				}
+
+				// copy image name
+				if(pName)
+					str_copy(pSound->m_aName, pName, sizeof(pSound->m_aName));
+
+				m_lSounds.add(pSound);
+
+				// unload image
+				DataFile.UnloadData(pItem->m_SoundData);
+				DataFile.UnloadData(pItem->m_SoundName);
 			}
 		}
 
@@ -884,6 +985,29 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						pQuads->m_lQuads.set_size(pQuadsItem->m_NumQuads);
 						mem_copy(pQuads->m_lQuads.base_ptr(), pData, sizeof(CQuad)*pQuadsItem->m_NumQuads);
 						DataFile.UnloadData(pQuadsItem->m_Data);
+					}
+					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
+					{
+						CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
+						CLayerSounds *pSounds = new CLayerSounds;
+						pSounds->m_pEditor = m_pEditor;
+						pLayer = pSounds;
+						pSounds->m_Sound = pSoundsItem->m_Sound;
+
+						// validate m_Sound
+						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= m_lSounds.size())
+							pSounds->m_Sound = -1;
+
+						// load layer name
+						if(pSoundsItem->m_Version >= 1)
+							IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName)/sizeof(int), pSounds->m_aName);
+
+						// load data
+						void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
+						pGroup->AddLayer(pSounds);
+						pSounds->m_lSources.set_size(pSoundsItem->m_NumSources);
+						mem_copy(pSounds->m_lSources.base_ptr(), pData, sizeof(CSoundSource)*pSoundsItem->m_NumSources);
+						DataFile.UnloadData(pSoundsItem->m_Data);
 					}
 
 					if(pLayer)

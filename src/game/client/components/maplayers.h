@@ -13,7 +13,6 @@ class CMapLayers : public CComponent
 	bool m_EnvelopeUpdate;
 
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
-	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
 public:
 	enum
 	{
@@ -26,6 +25,8 @@ public:
 	virtual void OnRender();
 
 	void EnvelopeUpdate();
+
+	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
 };
 
 #endif
