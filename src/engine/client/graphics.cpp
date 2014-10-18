@@ -6,6 +6,7 @@
 #include <base/tl/threading.h>
 
 #include "SDL.h"
+#include "SDL_syswm.h"
 #if defined(__ANDROID__)
 	#define GL_GLEXT_PROTOTYPES
 	#include <GLES/gl.h>
@@ -953,6 +954,29 @@ int CGraphics_SDL::WindowActive()
 int CGraphics_SDL::WindowOpen()
 {
 	return SDL_GetAppState()&SDL_APPACTIVE;
+}
+
+void CGraphics_SDL::NotifyWindow()
+{
+	// get window handle
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+	if(!SDL_GetWMInfo(&info))
+	{
+		dbg_msg("gfx", "unable to obtain window handle");
+		return;
+	}
+
+	#if defined(CONF_FAMILY_WINDOWS)
+		FLASHWINFO desc;
+		desc.cbSize = sizeof(desc);
+		desc.hwnd = info.window;
+		desc.dwFlags = FLASHW_TRAY;
+		desc.uCount = 3; // flash 3 times
+		desc.dwTimeout = 0;
+
+		FlashWindowEx(&desc);
+	#endif
 
 }
 
