@@ -40,12 +40,14 @@ public:
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume);
 	virtual void SetVoiceMaxDistance(CVoiceHandle Voice, int Distance);
 	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y);
+	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset); // in s
 
 	CVoiceHandle Play(int ChannelID, int SampleID, int Flags, float x, float y);
 	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y);
 	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags);
 	virtual void Stop(int SampleID);
 	virtual void StopAll();
+	virtual void StopVoice(CVoiceHandle Voice);
 };
 
 #endif

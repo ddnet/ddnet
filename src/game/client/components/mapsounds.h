@@ -15,23 +15,20 @@ class CMapSounds : public CComponent
 	struct CSourceQueueEntry
 	{
 		int m_Sound;
+		ISound::CVoiceHandle m_Voice;
 		CSoundSource *m_pSource;
 
-		bool operator ==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_pSource == Other.m_pSource); }
+		bool operator ==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_Voice == Other.m_Voice) && (m_pSource == Other.m_pSource); }
 	};
 
 	array<CSourceQueueEntry> m_lSourceQueue;
 
-	struct CSourceVoice
-	{
-		ISound::CVoiceHandle m_Voice;
-		CSoundSource *m_pSource;
-	};
-	array<CSourceVoice> m_lVoices;
+	void Clear();
 
 public:
 	CMapSounds();
 
 	virtual void OnMapLoad();
 	virtual void OnRender();
+	virtual void OnStateChange(int NewState, int OldState);
 };

@@ -17,13 +17,7 @@ void CMapSounds::OnMapLoad()
 {
 	IMap *pMap = Kernel()->RequestInterface<IMap>();
 
-	// unload all samples
-	for(int i = 0; i < m_Count; i++)
-	{
-		Sound()->UnloadSample(m_aSounds[i]);
-		m_aSounds[i] = -1;
-	}
-	m_Count = 0;
+	Clear();
 
 	// load samples
 	int Start;
@@ -79,22 +73,18 @@ void CMapSounds::OnMapLoad()
 					continue;
 
 				for(int i = 0; i < pSoundLayer->m_NumSources; i++) {
-					// dont add sources which are too much delayed
-					if(pSources[i].m_Loop || (Client()->LocalTime() >= pSources[i].m_TimeDelay + Sound()->GetSampleDuration(pSoundLayer->m_Sound)))
-					{
-						CSourceQueueEntry source;
-						source.m_Sound = pSoundLayer->m_Sound;
-						source.m_pSource = &pSources[i];
-						m_lSourceQueue.add(source);
-					}
-						
-				}
-					
+					CSourceQueueEntry source;
+					source.m_Sound = pSoundLayer->m_Sound;
+					source.m_pSource = &pSources[i];
+
+					if(!source.m_pSource || source.m_Sound == -1)
+						continue;
+
+					m_lSourceQueue.add(source);		
+				}	
 			}
 		}
 	}
-
-	m_lVoices.clear();
 }
 
 void CMapSounds::OnRender()
@@ -107,26 +97,37 @@ void CMapSounds::OnRender()
 	{
 		CSourceQueueEntry *pSource = &m_lSourceQueue[i];
 
-		if(!pSource->m_pSource || pSource->m_Sound == -1)
+		static float s_Time = 0.0f;
+		if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 		{
-			m_lSourceQueue.remove_index(i);
-			continue;
+			s_Time = mix((Client()->PrevGameTick()-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
+								(Client()->GameTick()-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
+								Client()->IntraGameTick());
 		}
-
-		if(pSource->m_pSource->m_TimeDelay <= Client()->LocalTime())
+		float offset = s_Time-pSource->m_pSource->m_TimeDelay;
+		if(offset >= 0.0f)
 		{
-			int Flags = 0;
-			if(pSource->m_pSource->m_Loop) Flags |= ISound::FLAG_LOOP;
+			if(pSource->m_Voice.IsValid())
+			{
+				// currently playing, set offset
+				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);
+			}
+			else
+			{
+				// need to enqueue
+				int Flags = 0;
+				if(pSource->m_pSource->m_Loop) Flags |= ISound::FLAG_LOOP;
 
-			CSourceVoice Voice;
-			Voice.m_pSource = pSource->m_pSource;
-
-			Voice.m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_AMBIENT, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
-
-			Sound()->SetVoiceMaxDistance(Voice.m_Voice, pSource->m_pSource->m_FalloffDistance);
-
-			m_lVoices.add(Voice);
-			m_lSourceQueue.remove_index(i);
+				pSource->m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_AMBIENT, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
+				Sound()->SetVoiceMaxDistance(pSource->m_Voice, pSource->m_pSource->m_FalloffDistance);
+				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);
+			}
+		}
+		else
+		{
+			// stop voice
+			Sound()->StopVoice(pSource->m_Voice);
+			pSource->m_Voice = ISound::CVoiceHandle();
 		}
 	}
 
@@ -155,9 +156,9 @@ void CMapSounds::OnRender()
 					continue;
 
 				for(int s = 0; s < pSoundLayer->m_NumSources; s++) {
-					for(int i = 0; i < m_lVoices.size(); i++)
+					for(int i = 0; i < m_lSourceQueue.size(); i++)
 					{
-						CSourceVoice *pVoice = &m_lVoices[i];
+						CSourceQueueEntry *pVoice = &m_lSourceQueue[i];
 
 						if(pVoice->m_pSource != &pSources[s])
 							continue;
@@ -198,4 +199,21 @@ void CMapSounds::OnRender()
 			}
 		}
 	}
+}
+
+void CMapSounds::Clear()
+{
+	// unload all samples
+	for(int i = 0; i < m_Count; i++)
+	{
+		Sound()->UnloadSample(m_aSounds[i]);
+		m_aSounds[i] = -1;
+	}
+	m_Count = 0;
+}
+
+void CMapSounds::OnStateChange(int NewState, int OldState)
+{
+	if(NewState < IClient::STATE_ONLINE)
+		Clear();
 }

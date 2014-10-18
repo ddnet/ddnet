@@ -337,6 +337,7 @@ void CSound::RateConvert(int SampleID)
 	mem_free(pSample->m_pData);
 	pSample->m_pData = pNewData;
 	pSample->m_NumFrames = NumFrames;
+	pSample->m_Rate = m_MixingRate;
 }
 
 int CSound::ReadData(void *pBuffer, int Size)
@@ -545,6 +546,34 @@ void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
 	m_aVoices[VoiceID].m_Y = y;
 }
 
+void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
+{
+	if(!Voice.IsValid())
+		return;
+
+	int VoiceID = Voice.Id();
+
+	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+		return;
+
+	lock_wait(m_SoundLock);
+	{
+		if(m_aVoices[VoiceID].m_pSample)
+		{
+			int TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * offset;
+			if(m_aVoices[VoiceID].m_Flags&ISound::FLAG_POS)
+				TickOffset = TickOffset%m_aVoices[VoiceID].m_pSample->m_NumFrames;
+			else
+				TickOffset = clamp(TickOffset, 0, m_aVoices[VoiceID].m_pSample->m_NumFrames);
+
+			// at least 2sec off
+			if(abs(m_aVoices[VoiceID].m_Tick-TickOffset) > 2*m_aVoices[VoiceID].m_pSample->m_Rate)
+				m_aVoices[VoiceID].m_Tick = TickOffset;
+		}
+	}
+	lock_release(m_SoundLock);
+}
+
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)
 {
 	m_aChannels[ChannelID].m_Vol = (int)(Vol*255.0f);
@@ -654,6 +683,25 @@ void CSound::StopAll()
 	}
 	lock_release(m_SoundLock);
 }
+
+void CSound::StopVoice(CVoiceHandle Voice)
+{
+	if(!Voice.IsValid())
+		return;
+
+	int VoiceID = Voice.Id();
+
+	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+		return;
+
+	lock_wait(m_SoundLock);
+	{
+		m_aVoices[VoiceID].m_pSample = 0;
+		m_aVoices[VoiceID].m_Age++;
+	}
+	lock_release(m_SoundLock);
+}
+
 
 IOHANDLE CSound::ms_File = 0;
 
