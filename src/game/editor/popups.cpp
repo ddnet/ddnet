@@ -1095,7 +1095,7 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View)
 	View.VSplitLeft(80.0f, &ButtonBar, &View);
 	View.Margin(10.0f, &SoundView);
 
-	int ShowSound = g_SelectSoundCurrent;
+	//int ShowSound = g_SelectSoundCurrent;
 
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
@@ -1145,8 +1145,8 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View)
 		CUIRect Button;
 		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
 
-		if(pEditor->UI()->MouseInside(&Button))
-			ShowSound = i;
+		//if(pEditor->UI()->MouseInside(&Button))
+		//	ShowSound = i;
 
 		if(i == -1)
 		{

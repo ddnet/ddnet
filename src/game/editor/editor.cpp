@@ -61,7 +61,7 @@ CEditorSound::~CEditorSound()
 	m_pEditor->Sound()->UnloadSample(m_SoundID);
 	if(m_pData)
 	{
-		delete[] m_pData;
+		mem_free(m_pData);
 		m_pData = 0x0;
 	}
 }
@@ -2978,7 +2978,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View)
 
 int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 {
-	static int s_ReplaceButton = 0;
+	//static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 
 	CUIRect Slot;
