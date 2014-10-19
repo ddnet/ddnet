@@ -148,8 +148,6 @@ function build(settings)
 
 	--settings.cc.flags:Add("-m32")
 	--settings.link.flags:Add("-m32")
-	settings.link.flags:Add("-static-libgcc")
-	settings.link.flags:Add("-static-libstdc++")
 
 	cflags = os.getenv("CFLAGS")
 	if cflags then
@@ -162,7 +160,10 @@ function build(settings)
 
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
+		settings.cc.flags:Add("/EHsc")
 	else
+		settings.link.flags:Add("-static-libgcc")
+		settings.link.flags:Add("-static-libstdc++")
 		settings.cc.flags:Add("-Wall")
 		if family == "windows" then
 			-- disable visibility attribute support for gcc on windows
