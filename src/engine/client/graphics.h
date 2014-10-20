@@ -142,6 +142,8 @@ public:
 	virtual int WindowActive();
 	virtual int WindowOpen();
 
+	virtual void NotifyWindow();
+
 	virtual void TakeScreenshot(const char *pFilename);
 	virtual void TakeCustomScreenshot(const char *pFilename);
 	virtual void Swap();

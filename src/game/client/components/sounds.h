@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SOUNDS_H
 #define GAME_CLIENT_COMPONENTS_SOUNDS_H
+#include <engine/sound.h>
 #include <game/client/component.h>
 
 class CSounds : public CComponent
@@ -22,6 +23,8 @@ class CSounds : public CComponent
 	
 	int GetSampleId(int SetId);
 
+	float m_AmbientVolume;
+
 public:
 	// sound channels
 	enum
@@ -30,6 +33,7 @@ public:
 		CHN_MUSIC,
 		CHN_WORLD,
 		CHN_GLOBAL,
+		CHN_AMBIENT,
 	};
 
 	virtual void OnInit();
@@ -43,6 +47,9 @@ public:
 	void PlayAt(int Channel, int SetId, float Vol, vec2 Pos);
 	void PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos);
 	void Stop(int SetId);
+
+	ISound::CVoiceHandle PlaySample(int Channel, int SampleId, float Vol, int Flags = 0);
+	ISound::CVoiceHandle PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags = 0);
 };
 
 

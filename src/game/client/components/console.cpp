@@ -720,6 +720,4 @@ void CGameConsole::OnConsoleInit()
 
 void CGameConsole::OnStateChange(int NewState, int OldState)
 {
-	if(NewState == IClient::STATE_OFFLINE)
-		m_RemoteConsole.ClearHistory();
 }
