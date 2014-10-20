@@ -1,6 +1,5 @@
 [Jungle]
 Index 1
-BaseTile
 
 #random bricks
 Index 66
@@ -171,9 +170,10 @@ Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos -1 1 FULL
 
+
+
 [Jungle dark]
 Index 13
-BaseTile
 
 #random bricks
 Index 42
@@ -203,7 +203,6 @@ Pos 0 -1 FULL
 Pos 1 0 FULL
 Pos -1 0 FULL
 Random 150
-#---------
 
 #top
 Index 26

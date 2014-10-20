@@ -1,6 +1,5 @@
 [Desert]
 Index 1
-BaseTile
 
 #random
 Index 2
@@ -77,9 +76,10 @@ Pos -1 -1 EMPTY
 Pos -1 0 FULL
 Pos 0 -1 FULL
 
+
+
 [Mine]
 Index 81
-BaseTile
 
 #random
 Index 82

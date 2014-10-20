@@ -1,6 +1,5 @@
 [Grass]
 Index 1
-BaseTile
 
 #random bones
 Index 2
@@ -37,7 +36,6 @@ Pos 0 -1 FULL
 Pos 1 0 FULL
 Pos -1 0 FULL
 Random 150
-#---------
 
 #top
 Index 16
@@ -123,9 +121,10 @@ Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos -1 1 FULL
 
+
+
 [Cave]
 Index 13
-BaseTile
 
 #random bones
 Index 29
@@ -162,7 +161,6 @@ Pos 0 -1 FULL
 Pos 1 0 FULL
 Pos -1 0 FULL
 Random 150
-#---------
 
 #top
 Index 26
@@ -224,15 +222,10 @@ Pos -1 -1 EMPTY
 Pos -1 0 FULL
 Pos 0 -1 FULL
 
+
+
 [Freeze]
 Index 110
-BaseTile
-
-Index 110
-Pos 0 -1 EMPTY
-Pos -1 0 EMPTY
-Pos 0 1 EMPTY
-Pos 1 0 EMPTY
 
 Index 108
 Pos 0 -1 EMPTY
@@ -250,15 +243,16 @@ Index 125
 Pos 0 1 EMPTY
 Pos 1 0 EMPTY
 
-[Unfreeze]
-Index 78
-BaseTile
-
-Index 78
+Index 110
 Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos 0 1 EMPTY
 Pos 1 0 EMPTY
+
+
+
+[Unfreeze]
+Index 78
 
 Index 76
 Pos 0 -1 EMPTY
@@ -276,15 +270,16 @@ Index 93
 Pos 0 1 EMPTY
 Pos 1 0 EMPTY
 
-[Tele]
 Index 78
-BaseTile
-
-Index 142
 Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos 0 1 EMPTY
 Pos 1 0 EMPTY
+
+
+
+[Tele]
+Index 142
 
 Index 140
 Pos 0 -1 EMPTY
@@ -299,5 +294,11 @@ Pos -1 0 EMPTY
 Pos 0 1 EMPTY
 
 Index 157
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+Index 142
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
 Pos 0 1 EMPTY
 Pos 1 0 EMPTY

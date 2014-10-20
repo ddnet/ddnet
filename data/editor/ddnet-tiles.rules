@@ -1,6 +1,5 @@
 [DDNet]
 Index 110
-BaseTile
 
 Index 94
 Pos 0 -1 EMPTY
@@ -37,42 +36,6 @@ Pos -1 0 FULL
 Pos -1 1 EMPTY
 Pos 1 -1 EMPTY
 Pos 1 1 EMPTY
-
-Index 95
-Pos 0 0 EMPTY
-Pos 0 -1 EMPTY
-Pos -1 0 EMPTY
-Pos 0 1 FULL
-Pos 1 0 FULL
-Pos 1 -1 FULL
-Pos -1 1 FULL
-
-Index 95 XFLIP
-Pos 0 0 EMPTY
-Pos 0 -1 EMPTY
-Pos 1 0 EMPTY
-Pos 0 1 FULL
-Pos -1 0 FULL
-Pos -1 -1 FULL
-Pos 1 1 FULL
-
-Index 95 XFLIP YFLIP
-Pos 0 0 EMPTY
-Pos 0 1 EMPTY
-Pos 1 0 EMPTY
-Pos 0 -1 FULL
-Pos -1 0 FULL
-Pos -1 1 FULL
-Pos 1 -1 FULL
-
-Index 95 XFLIP YFLIP
-Pos 0 0 EMPTY
-Pos 0 1 EMPTY
-Pos 1 0 EMPTY
-Pos 0 -1 FULL
-Pos -1 0 FULL
-Pos -1 1 FULL
-Pos 1 -1 FULL
 
 Index 108
 Pos 0 0 EMPTY

@@ -1,6 +1,5 @@
 [Grass]
 Index 1
-BaseTile
 
 #random bones
 Index 2
@@ -44,7 +43,6 @@ Pos 0 -1 FULL
 Pos 1 0 FULL
 Pos -1 0 FULL
 Random 200
-#---------
 
 #top
 Index 16
@@ -92,7 +90,6 @@ Pos -1 -1 FULL
 Pos -1 1 EMPTY
 Pos 1 -1 FULL
 Pos 1 1 FULL
-
 
 #inside corner top-left
 Index 53
@@ -417,9 +414,10 @@ Pos -1 1 EMPTY
 Pos 1 -1 FULL
 Pos 1 1 FULL
 
+
+
 [Cave]
 Index 13
-BaseTile
 
 #random bones
 Index 29
@@ -463,7 +461,6 @@ Pos 0 -1 FULL
 Pos 1 0 FULL
 Pos -1 0 FULL
 Random 200
-#---------
 
 #top
 Index 26
