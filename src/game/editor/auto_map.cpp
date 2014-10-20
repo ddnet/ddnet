@@ -63,7 +63,6 @@ void CAutoMapper::Load(const char* pTileName)
 					NewIndexRule.m_ID = ID;
 					NewIndexRule.m_Flag = 0;
 					NewIndexRule.m_RandomValue = 0;
-					NewIndexRule.m_BaseTile = false;
 					NewIndexRule.m_DefaultRule = true;
 
 					if(str_length(aOrientation1) > 0)
@@ -99,10 +98,6 @@ void CAutoMapper::Load(const char* pTileName)
 					// add the index rule object and make it current
 					int ArrayID = pCurrentConf->m_aIndexRules.add(NewIndexRule);
 					pCurrentIndex = &pCurrentConf->m_aIndexRules[ArrayID];
-				}
-				else if(!str_comp_num(pLine, "BaseTile", 8) && pCurrentIndex)
-				{
-					pCurrentIndex->m_BaseTile = true;
 				}
 				else if(!str_comp_num(pLine, "Pos", 3) && pCurrentIndex)
 				{
@@ -185,8 +180,6 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 	if(!pConf->m_aIndexRules.size())
 		return;
 
-	int BaseTile = -1;
-
 	CLayerTiles newLayer(pLayer->m_Width, pLayer->m_Height);
 
 	for(int y = 0; y < pLayer->m_Height; y++)
@@ -198,24 +191,12 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 			out->m_Flags = in->m_Flags;
 		}
 
-	// find base tile if there is one
-	for(int i = 0; i < pConf->m_aIndexRules.size(); ++i)
-	{
-		if(pConf->m_aIndexRules[i].m_BaseTile)
-		{
-			BaseTile = pConf->m_aIndexRules[i].m_ID;
-			break;
-		}
-	}
-
 	// auto map !
 	int MaxIndex = pLayer->m_Width*pLayer->m_Height;
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
 		{
 			CTile *pTile = &(newLayer.m_pTiles[y*pLayer->m_Width+x]);
-			if(pTile->m_Index != 0 && BaseTile >= 0)
-				pTile->m_Index = BaseTile;
 			m_pEditor->m_Map.m_Modified = true;
 
 			if(y == 0 || y == pLayer->m_Height-1 || x == 0 || x == pLayer->m_Width-1)
@@ -223,9 +204,6 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 
 			for(int i = 0; i < pConf->m_aIndexRules.size(); ++i)
 			{
-				if(pConf->m_aIndexRules[i].m_BaseTile)
-					continue;
-
 				bool RespectRules = true;
 				for(int j = 0; j < pConf->m_aIndexRules[i].m_aRules.size() && RespectRules; ++j)
 				{
