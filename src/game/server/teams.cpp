@@ -616,55 +616,17 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 	{
 		SetForceCharacterTeam(ClientID, 0);
 		CheckTeamFinished(Team);
-
-		char aBuf[256];
-		// console output
-		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=0", ClientID, Server()->ClientName(ClientID));			
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-		// output for died player
-		str_format(aBuf, sizeof(aBuf), "You are back to team 0.");			
-		GameServer()->SendChatTarget(ClientID, aBuf);
-		// output for players of same team
-		str_format(aBuf, sizeof(aBuf), "'%s' joined team 0.", Server()->ClientName(ClientID));
-		for (int i = 0; i < MAX_CLIENTS; i++)
-		{
-				if(m_Core.Team(i) == Team && i!= ClientID &&GameServer()->m_apPlayers[i])
-				{
-					GameServer()->SendChatTarget(i, aBuf);
-				}
-		}
 	}
 	else
 	{
 		SetForceCharacterTeam(ClientID, Team);
 
-
 		if (GetTeamState(Team) != TEAMSTATE_OPEN)
-		{
-			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
-
-			char aBuf[256];
-			// console output
-			str_format(aBuf, sizeof(aBuf), "team_restart team=%d cid=%d name='%s'", Team, ClientID,Server()->ClientName(ClientID));
-			GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-			// output for Team Killer
-			str_format(aBuf, sizeof(aBuf), "You killed the whole team because it is locked", Server()->ClientName(ClientID));	
-			GameServer()->SendChatTarget(ClientID, aBuf);
-
-			// output for whole Team, people dont care which team they are joining
-			str_format(aBuf, sizeof(aBuf), "Your team was killed by %s because team is locked", Server()->ClientName(ClientID));	
 			for (int i = 0; i < MAX_CLIENTS; i++)
-				if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-				{
-					if(i!= ClientID)
-						GameServer()->m_apPlayers[i]->KillCharacter(-2);
+				if(m_Core.Team(i) == Team && i != ClientID && GameServer()->m_apPlayers[i])
+					GameServer()->m_apPlayers[i]->KillCharacter(-2);
 
-					GameServer()->SendChatTarget(i, aBuf);
-				}
-
-		}
-
+		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 	}
 }
 
