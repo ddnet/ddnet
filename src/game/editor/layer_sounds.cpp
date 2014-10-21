@@ -1,7 +1,9 @@
 
+#include <game/generated/client_data.h>
+
 #include "editor.h"
 
-static const float s_SourceVisualSize = 50.0f;
+static const float s_SourceVisualSize = 32.0f;
 
 CLayerSounds::CLayerSounds()
 {
@@ -41,9 +43,15 @@ void CLayerSounds::Render()
 		m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, pSource->m_FalloffDistance, 32);
 	}
 
+	Graphics()->QuadsEnd();
+
 
 	// draw handles
-	Graphics()->SetColor(1.0f, 0.0f, 1.0f, 1.0f);
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_AUDIO_SOURCE].m_Id);
+	Graphics()->QuadsBegin();
+
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pEditor->RenderTools()->SelectSprite(SPRITE_AUDIO_SOURCE);
 	for(int i = 0; i < m_lSources.size(); i++)
 	{
 		CSoundSource *pSource = &m_lSources[i];
@@ -59,8 +67,7 @@ void CLayerSounds::Render()
 			OffsetY = aChannels[1];
 		}
 
-		IGraphics::CQuadItem QuadItem(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, s_SourceVisualSize, s_SourceVisualSize);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		m_pEditor->RenderTools()->DrawSprite(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, s_SourceVisualSize*m_pEditor->m_WorldZoom);
 	}
 
 	Graphics()->QuadsEnd();
