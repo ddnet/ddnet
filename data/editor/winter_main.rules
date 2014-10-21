@@ -1,6 +1,5 @@
 [Winter]
 Index 1
-BaseTile
 
 #top
 Index 17
@@ -130,9 +129,10 @@ Pos 1 0 FULL
 Pos 0 -1 FULL
 Pos 1 1 EMPTY
 
+
+
 [Winter dark]
 Index 177
-BaseTile
 
 #bottom
 Index 194

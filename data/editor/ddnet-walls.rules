@@ -1,52 +1,38 @@
 [Basic Walls]
-
 Index 16
-BaseTile
-
 
 #1W2W3W4W
 Index 17
-Pos 0 0 FULL
 Pos 0 -1 EMPTY
 Pos 0 1 EMPTY
-
 Pos -1 0 EMPTY
 Pos 1 0 EMPTY
-
 
 #1W2W3S4W
 Index 18
-Pos 0 0 FULL
-Pos 0 -1 EMPTY
-
+Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos 0 1 FULL
 Pos 1 0 EMPTY
 
-
 #1W2W3S4W
 Index 18 YFLIP
-Pos 0 0 FULL
-Pos 0 -1 FULL
+Pos 0 -1 FULL
 Pos -1 0 EMPTY
 Pos 0 1 EMPTY
 Pos 1 0 EMPTY
 
-
 #1W2S3S4W
 Index 19
-Pos 0 0 FULL
-Pos 0 -1 EMPTY
+Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos 0 1 FULL
 Pos 1 0 FULL
-
 Pos 1 1 FULL
 
 #1W2S3S4W
 Index 19 YFLIP
-Pos 0 0 FULL
-Pos 0 -1 FULL
+Pos 0 -1 FULL
 Pos -1 0 EMPTY
 Pos 0 1 EMPTY
 Pos 1 0 FULL
@@ -54,18 +40,15 @@ Pos 1 -1 FULL
 
 #1W2S3S4W
 Index 19 XFLIP
-Pos 0 0 FULL
-Pos 0 -1 EMPTY
+Pos 0 -1 EMPTY
 Pos 0 1 FULL
 Pos -1 0 FULL
 Pos 1 0 EMPTY
-
 Pos -1 1 FULL
 
 #1W2S3S4W
 Index 19 XFLIP YFLIP
-Pos 0 0 FULL
-Pos -1 -1 FULL
+Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos -1 0 FULL
 Pos 1 0 EMPTY
@@ -73,7 +56,6 @@ Pos 0 1 EMPTY
 
 #1W2S3W4S
 Index 20
-Pos 0 0 FULL
 Pos -1 0 FULL
 Pos 1 0 FULL
 Pos 0 -1 EMPTY
@@ -81,33 +63,24 @@ Pos 0 1 EMPTY
 
 #1W2S3S4S
 Index 21
-Pos 0 0 FULL
 Pos -1 1 FULL
-
 Pos 0 1 FULL
 Pos 1 1 FULL
-
-
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 -1 EMPTY
 
-
 #1W2S3S4S
 Index 21 YFLIP
-Pos 0 0 FULL
 Pos -1 -1 FULL
-
 Pos 1 -1 FULL
 Pos 0 -1 FULL
-
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 1 EMPTY
 
 #1D2D3D4D
 Index 32
-Pos 0 0 FULL
 Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
@@ -119,7 +92,6 @@ Pos 1 1 EMPTY
 
 #1D2S3D4D
 Index 33
-Pos 0 0 FULL
 Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
@@ -131,7 +103,6 @@ Pos 1 1 FULL
 
 #1D2S3D4D
 Index 33 XFLIP
-Pos 0 0 FULL
 Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
@@ -143,7 +114,6 @@ Pos 1 1 EMPTY
 
 #1D2S3D4D
 Index 33 YFLIP
-Pos 0 0 FULL
 Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 FULL
@@ -155,7 +125,6 @@ Pos 1 1 EMPTY
 
 #1D2S3D4D
 Index 33 XFLIP YFLIP
-Pos 0 0 FULL
 Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
@@ -171,7 +140,6 @@ Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 FULL
 Pos 0 1 FULL
@@ -183,7 +151,6 @@ Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos 1 -1 FULL
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 EMPTY
 Pos 0 1 FULL
@@ -195,7 +162,6 @@ Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 FULL
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 FULL
 Pos 0 1 FULL
@@ -207,7 +173,6 @@ Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 FULL
 Pos 0 1 FULL
@@ -219,7 +184,6 @@ Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos 1 -1 FULL
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 EMPTY
 Pos 0 1 FULL
@@ -231,7 +195,6 @@ Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos 1 -1 FULL
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 FULL
 Pos 0 1 FULL
@@ -243,7 +206,6 @@ Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 FULL
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 FULL
 Pos 0 1 FULL
@@ -255,7 +217,6 @@ Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 EMPTY
 Pos 0 1 FULL
@@ -267,7 +228,6 @@ Pos -1 -1 EMPTY
 Pos 0 -1 FULL
 Pos 1 -1 FULL
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 EMPTY
 Pos 0 1 FULL
@@ -279,7 +239,6 @@ Pos -1 -1 FULL
 Pos 0 -1 FULL
 Pos 1 -1 EMPTY
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 FULL
 Pos -1 1 FULL
 Pos 0 1 FULL
@@ -287,7 +246,6 @@ Pos 1 1 EMPTY
 
 #1W2D3S4W
 Index 48
-Pos 0 0 FULL
 Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos 0 1 FULL
@@ -296,7 +254,6 @@ Pos 1 0 FULL
 
 #1W2D3S4W
 Index 48 XFLIP
-Pos 0 0 FULL
 Pos 0 -1 EMPTY
 Pos 1 0 EMPTY
 Pos -1 1 EMPTY
@@ -305,7 +262,6 @@ Pos -1 0 FULL
 
 #1W2D3S4W
 Index 48 YFLIP
-Pos 0 0 FULL
 Pos -1 0 EMPTY
 Pos 0 1 EMPTY
 Pos 1 -1 EMPTY
@@ -314,7 +270,6 @@ Pos 1 0 FULL
 
 #1W2D3S4W
 Index 48 XFLIP YFLIP
-Pos 0 0 FULL
 Pos 1 0 EMPTY
 Pos 0 1 EMPTY
 Pos -1 -1 EMPTY
@@ -324,86 +279,59 @@ Pos -1 0 FULL
 #1W2D3D4S
 Index 49
 Pos -1 1 EMPTY
-
 Pos 0 1 FULL
 Pos 1 1 EMPTY
-
-
-Pos 0 0 FULL
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 -1 EMPTY
-
-
 
 #1W2D3D4S
 Index 49 YFLIP
 Pos -1 -1 EMPTY
-
 Pos 1 -1 EMPTY
 Pos 0 -1 FULL
-
-Pos 0 0 FULL
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 1 EMPTY
 
 #1W2S3D4S
 Index 50
 Pos -1 1 EMPTY
-
 Pos 0 1 FULL
 Pos 1 1 FULL
-
-
-Pos 0 0 FULL
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 -1 EMPTY
 
 #1W2S3D4S
 Index 50 XFLIP
 Pos -1 1 FULL
-
 Pos 0 1 FULL
 Pos 1 1 EMPTY
-
-
-Pos 0 0 FULL
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 -1 EMPTY
-
-
 
 #1W2S3D4S
 Index 50 YFLIP
 Pos -1 -1 EMPTY
-
 Pos 1 -1 FULL
 Pos 0 -1 FULL
-
-Pos 0 0 FULL
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 1 EMPTY
-
 
 #1W2S3D4S
 Index 50 XFLIP YFLIP
 Pos -1 -1 FULL
-
 Pos 1 -1 EMPTY
 Pos 0 -1 FULL
-
-Pos 0 0 FULL
-Pos 1 0 FULL
+Pos 1 0 FULL
 Pos -1 0 FULL
 Pos 0 1 EMPTY
 
 #1S2W3S4W
 Index 51
-Pos 0 0 FULL
 Pos -1 0 EMPTY
 Pos 1 0 EMPTY
 Pos 0 -1 FULL
@@ -411,143 +339,86 @@ Pos 0 1 FULL
 
 #1W2S3W4W
 Index 52
-Pos 0 -1 EMPTY
-
+Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
-Pos 0 0 FULL
 Pos 1 0 FULL
-
-
-Pos 0 1 EMPTY
-
+Pos 0 1 EMPTY
 
 #1W2S3W4W
 Index 52 XFLIP
-Pos 0 -1 EMPTY
-
+Pos 0 -1 EMPTY
 Pos -1 0 FULL
-Pos 0 0 FULL
 Pos 1 0 EMPTY
-
-
-Pos 0 1 EMPTY
-
+Pos 0 1 EMPTY
 
 #1S2S3S4W
 Index 53
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 0 EMPTY
 Pos 1 0 FULL
-
-
-Pos 0 0 FULL
-Pos 0 1 FULL
+Pos 0 1 FULL
 Pos 1 -1 FULL
 Pos 1 1 FULL
 
-
 #1S2S3S4W
 Index 53 XFLIP
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 -1 FULL
 Pos -1 0 FULL
-
 Pos -1 1 FULL
-Pos 0 0 FULL
-
 Pos 1 0 EMPTY
-
-
-Pos 0 1 FULL
-
+Pos 0 1 FULL
 
 #1D2D3S4W
 Index 64
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 0 EMPTY
 Pos 1 0 FULL
-
-
-Pos 0 0 FULL
-Pos 0 1 FULL
+Pos 0 1 FULL
 Pos 1 -1 EMPTY
 Pos 1 1 EMPTY
 
-
 #1D2D3S4W
 Index 64 XFLIP
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 -1 EMPTY
 Pos -1 0 FULL
-
 Pos -1 1 EMPTY
-Pos 0 0 FULL
-
 Pos 1 0 EMPTY
-
-
-Pos 0 1 FULL
-
+Pos 0 1 FULL
 
 #1S2W3D4S
 Index 65
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 -1 FULL
 Pos -1 0 FULL
-
 Pos -1 1 EMPTY
-Pos 0 0 FULL
-
 Pos 1 0 EMPTY
-
-
-Pos 0 1 FULL
-
+Pos 0 1 FULL
 
 #1S2W3D4S
 Index 65 XFLIP
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 0 EMPTY
 Pos 1 0 FULL
-
-
-Pos 0 0 FULL
-Pos 0 1 FULL
+Pos 0 1 FULL
 Pos 1 -1 FULL
 Pos 1 1 EMPTY
 
-
 #1S2W3D4S
 Index 65 YFLIP
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 -1 EMPTY
 Pos -1 0 FULL
-
 Pos -1 1 FULL
-Pos 0 0 FULL
-
 Pos 1 0 EMPTY
-
-
-Pos 0 1 FULL
-
+Pos 0 1 FULL
 
 #1S2W3D4S
 Index 65 XFLIP YFLIP
-Pos 0 -1 FULL
-
+Pos 0 -1 FULL
 Pos -1 0 EMPTY
 Pos 1 0 FULL
-
-
-Pos 0 0 FULL
-Pos 0 1 FULL
+Pos 0 1 FULL
 Pos 1 -1 EMPTY
 Pos 1 1 FULL

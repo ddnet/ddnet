@@ -1,12 +1,5 @@
 [Fadeout]
 Index 6
-BaseTile
-
-Index 6
-Pos 0 -1 EMPTY
-Pos -1 0 EMPTY
-Pos 0 1 EMPTY
-Pos 1 0 EMPTY
 
 Index 7
 Pos 0 -1 FULL
