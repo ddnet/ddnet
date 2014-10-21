@@ -642,6 +642,10 @@ void CGameTeams::KillSavedTeam(int Team)
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+			m_TeeFinished[i] = false;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 			GameServer()->m_apPlayers[i]->KillCharacter(-2);
 
 	ChangeTeamState(Team, CGameTeams::TEAMSTATE_EMPTY);
