@@ -80,7 +80,7 @@ public:
 	void SetCpActive(CPlayer* Player, int CpActive);
 	void OnTeamFinish(CPlayer** Players, unsigned int Size);
 	void OnFinish(CPlayer* Player);
-	void KillTeam(int Team);
+	void KillSavedTeam(int Team);
 	bool TeeFinished(int ClientID)
 	{
 		return m_TeeFinished[ClientID];

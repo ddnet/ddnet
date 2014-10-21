@@ -1677,7 +1677,7 @@ void CSqlScore::SaveTeamThread(void *pUser)
 				char aBuf2[256];
 				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved. Use '/load %s' to continue", OriginalCode);
 				pData->m_pSqlData->GameServer()->SendChatTeam(Team, aBuf2);
-				((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.KillTeam(Team);
+				((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.KillSavedTeam(Team);
 			}
 			else
 			{
