@@ -1286,6 +1286,7 @@ void CGameClient::OnPredict()
 		}
 
 		// handle weapons
+		do
 		{
 			if(!g_Config.m_ClAntiPingWeapons)
 				break;
@@ -1378,7 +1379,7 @@ void CGameClient::OnPredict()
 				default:
 					break;
 			}
-		}
+		} while(false);
 
 		if(ReloadTimer)
 			ReloadTimer--;
