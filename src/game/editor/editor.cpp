@@ -1295,6 +1295,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		OP_MOVE_PIVOT,
 		OP_ROTATE,
 		OP_CONTEXT_MENU,
+		OP_DELETE,
 	};
 
 	// some basic values
@@ -1428,6 +1429,20 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				UI()->SetActiveItem(0);
 			}
 		}
+		else if(s_Operation == OP_DELETE)
+		{
+			if(!UI()->MouseButton(1))
+			{
+				m_Map.m_UndoModified++;
+				m_LockMouse = false;
+				m_Map.m_Modified = true;
+				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+				if(pLayer)
+					pLayer->m_lQuads.remove_index(m_SelectedQuad);
+				s_Operation = OP_NONE;
+				UI()->SetActiveItem(0);
+			}
+		}
 		else
 		{
 			if(!UI()->MouseButton(0))
@@ -1450,7 +1465,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		ms_pUiGotContext = pID;
 
 		Graphics()->SetColor(1,1,1,1);
-		m_pTooltip = "Left mouse button to move. Hold shift to move pivot. Hold ctrl to rotate. Hold alt to ignore grid.";
+		m_pTooltip = "Left mouse button to move. Hold shift to move pivot. Hold ctrl to rotate. Hold alt to ignore grid. Hold shift and right click to delete.";
 
 		if(UI()->MouseButton(0))
 		{
@@ -1479,11 +1494,22 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 		if(UI()->MouseButton(1))
 		{
-			if(m_SelectedQuad != Index)
-				m_SelectedPoints = 0;
-			m_SelectedQuad = Index;
-			s_Operation = OP_CONTEXT_MENU;
-			UI()->SetActiveItem(pID);
+			if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+			{
+				if(m_SelectedQuad != Index)
+					m_SelectedPoints = 0;
+				m_SelectedQuad = Index;
+				s_Operation = OP_DELETE;
+				UI()->SetActiveItem(pID);
+			}
+			else
+			{
+				if(m_SelectedQuad != Index)
+					m_SelectedPoints = 0;
+				m_SelectedQuad = Index;
+				s_Operation = OP_CONTEXT_MENU;
+				UI()->SetActiveItem(pID);
+			}
 		}
 	}
 	else
