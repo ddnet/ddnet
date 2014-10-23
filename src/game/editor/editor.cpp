@@ -2885,7 +2885,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 
 	// read the whole file into memory
 	unsigned DataSize = io_length(SoundFile);
-	void *pData = new char[DataSize];
+	void *pData = mem_alloc(DataSize, 1);
 	io_read(SoundFile, pData, DataSize);
 	io_close(SoundFile);
 
@@ -2984,7 +2984,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 	CUIRect Slot;
 	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	CEditorSound *pSound = pEditor->m_Map.m_lSounds[pEditor->m_SelectedImage];
+	CEditorSound *pSound = pEditor->m_Map.m_lSounds[pEditor->m_SelectedSound];
 
 	static int s_ExternalButton = 0;
 	if(pSound->m_External)
@@ -3263,15 +3263,15 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 		SoundStartAt = 0.0f;
 
 	float SoundStopAt = SoundsHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ImageCur = 0.0f;
+	float SoundCur = 0.0f;
 
 	for(int e = 0; e < 2; e++) // two passes, first embedded, then external
 	{
 		CUIRect Slot;
 
-		if(ImageCur > SoundStopAt)
+		if(SoundCur > SoundStopAt)
 			break;
-		else if(ImageCur >= SoundStartAt)
+		else if(SoundCur >= SoundStartAt)
 		{
 
 			ToolBox.HSplitTop(15.0f, &Slot, &ToolBox);
@@ -3280,7 +3280,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			else
 				UI()->DoLabel(&Slot, "External", 12.0f, 0);
 		}
-		ImageCur += 15.0f;
+		SoundCur += 15.0f;
 
 		for(int i = 0; i < m_Map.m_lSounds.size(); i++)
 		{
@@ -3290,14 +3290,14 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 				continue;
 			}
 
-			if(ImageCur > SoundStopAt)
+			if(SoundCur > SoundStopAt)
 				break;
-			else if(ImageCur < SoundStartAt)
+			else if(SoundCur < SoundStartAt)
 			{
-				ImageCur += 14.0f;
+				SoundCur += 14.0f;
 				continue;
 			}
-			ImageCur += 14.0f;
+			SoundCur += 14.0f;
 
 			char aBuf[128];
 			str_copy(aBuf, m_Map.m_lSounds[i]->m_aName, sizeof(aBuf));
@@ -3333,7 +3333,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 
 		// separator
 		ToolBox.HSplitTop(5.0f, &Slot, &ToolBox);
-		ImageCur += 5.0f;
+		SoundCur += 5.0f;
 		IGraphics::CLineItem LineItem(Slot.x, Slot.y+Slot.h/2, Slot.x+Slot.w, Slot.y+Slot.h/2);
 		Graphics()->TextureSet(-1);
 		Graphics()->LinesBegin();
