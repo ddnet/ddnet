@@ -561,8 +561,8 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 		if(m_aVoices[VoiceID].m_pSample)
 		{
 			int TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * offset;
-			if(m_aVoices[VoiceID].m_Flags&ISound::FLAG_POS)
-				TickOffset = TickOffset%m_aVoices[VoiceID].m_pSample->m_NumFrames;
+			if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && m_aVoices[VoiceID].m_Flags&ISound::FLAG_POS)
+				TickOffset = TickOffset % m_aVoices[VoiceID].m_pSample->m_NumFrames;
 			else
 				TickOffset = clamp(TickOffset, 0, m_aVoices[VoiceID].m_pSample->m_NumFrames);
 
