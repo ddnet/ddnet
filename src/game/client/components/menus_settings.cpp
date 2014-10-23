@@ -1068,8 +1068,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Ambient volume"), 14.0f, -1);
-		g_Config.m_SndAmbientVolume = (int)(DoScrollbarH(&g_Config.m_SndAmbientVolume, &Button, g_Config.m_SndAmbientVolume/100.0f)*100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Map Sound volume"), 14.0f, -1);
+		g_Config.m_SndMapSoundVolume = (int)(DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume/100.0f)*100.0f);
 		MainView.HSplitTop(20.0f, 0, &MainView);
 	}
 }

@@ -23,7 +23,7 @@ class CSounds : public CComponent
 	
 	int GetSampleId(int SetId);
 
-	float m_AmbientVolume;
+	float m_MapSoundVolume;
 
 public:
 	// sound channels
@@ -33,7 +33,7 @@ public:
 		CHN_MUSIC,
 		CHN_WORLD,
 		CHN_GLOBAL,
-		CHN_AMBIENT,
+		CHN_MAPSOUND,
 	};
 
 	virtual void OnInit();
