@@ -1222,8 +1222,6 @@ void CGameClient::OnPredict()
 			const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
 			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
 			{
-				const CNetObj_Projectile *pInfo = (const CNetObj_Projectile *)pData;
-
 				TempProjectiles[NumProjectiles].Init(this, &World, Collision(), (const CNetObj_Projectile *)pData);
 
 				int Index = TempProjectiles[NumProjectiles].m_StartTick % 64;
