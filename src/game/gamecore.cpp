@@ -697,10 +697,80 @@ void CCharacterCore::Quantize()
 
 // DDRace
 
+bool HasExtraInfo(const CNetObj_Projectile *pProj)
+{
+    return ((abs(pProj->m_VelY) & (1<<9)) != 0);
+}
+
+void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel)
+{
+    if(!StartPos || !StartVel)
+        return;
+    if(!HasExtraInfo(pProj))
+    {
+        StartPos->x = pProj->m_X + 0.5f * sign(pProj->m_X);
+        StartPos->y = pProj->m_Y + 0.5f * sign(pProj->m_Y);
+        StartVel->x = pProj->m_VelX + 0.5f *sign(pProj->m_VelX);
+        StartVel->y = pProj->m_VelY + 0.5f *sign(pProj->m_VelY);
+        //StartVel->x = pProj->m_VelX/100.0f;
+        //StartVel->y = pProj->m_VelY/100.0f;
+    }
+    else
+    {
+        StartPos->x = (pProj->m_X + 0.5f * sign(pProj->m_X))/1000.0f;
+        StartPos->y = (pProj->m_Y + 0.5f * sign(pProj->m_Y))/1000.0f;
+        float Angle = (pProj->m_VelX + 0.5f * sign(pProj->m_VelX))/1000000.0f;
+        StartVel->x = sin(-Angle);
+        StartVel->y = cos(-Angle);
+    }
+	*StartVel = normalize(*StartVel);
+}
+
+void ExtractExtraInfo(const CNetObj_Projectile *pProj, int *Owner, int *LifeSpan, bool *Explosive, int *Bouncing = 0, bool *Freeze = 0)
+{
+	if(!HasExtraInfo(pProj))
+		return;
+	int Data = pProj->m_VelY;
+	if(Owner)
+	{
+		*Owner = Data & 255;
+		if((Data>>8) & 1)
+			*Owner = -(*Owner);
+	}
+	// HasExtraInfo = ((Data>>9) & 1);
+	if(LifeSpan)
+	{
+		*LifeSpan = (Data>>10) & 255;
+		if((Data >> 18) & 1)
+			*LifeSpan = -(*LifeSpan);
+	}
+    if(Explosive)
+        *Explosive = (Data>>19) & 1;
+    if(Bouncing)
+        *Bouncing = (Data>>20) & 3;
+	if(Freeze)
+		*Freeze = (Data>>22) & 1;
+}
+
 bool CCharacterCore::IsRightTeam(int MapIndex)
 {
 	if(Collision()->m_pSwitchers)
 		if(m_pTeams->Team(m_Id) != (m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
 			return Collision()->m_pSwitchers[Collision()->GetDTileNumber(MapIndex)].m_Status[m_pTeams->Team(m_Id)];
 	return false;
+}
+
+
+void CCharacterCore::TakeDamage(vec2 Force)
+{
+	vec2 Temp = m_Vel + Force;
+	if(Temp.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
+		Temp.x = 0;
+	if(Temp.x < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)))
+		Temp.x = 0;
+	if(Temp.y < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)))
+		Temp.y = 0;
+	if(Temp.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
+		Temp.y = 0;
+	m_Vel = Temp;
 }

@@ -233,6 +233,8 @@ public:
 	int m_Colliding;
 	bool m_LeftWall;
 
+	void TakeDamage(vec2 Force);
+
 private:
 
 	CTeamsCore* m_pTeams;
@@ -268,5 +270,36 @@ private:
 	int m_TileSFlagsB;
 	bool IsRightTeam(int MapIndex);
 };
+
+bool HasExtraInfo(const CNetObj_Projectile *pProj);
+void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel);
+void ExtractExtraInfo(const CNetObj_Projectile *pProj, int *Owner, int *m_LifeSpan, bool *Explosive, int *Bouncing, bool *Freeze);
+
+//input count
+struct CInputCount
+{
+	int m_Presses;
+	int m_Releases;
+};
+
+inline CInputCount CountInput(int Prev, int Cur)
+{
+	CInputCount c = {0, 0};
+	Prev &= INPUT_STATE_MASK;
+	Cur &= INPUT_STATE_MASK;
+	int i = Prev;
+
+	while(i != Cur)
+	{
+		i = (i+1)&INPUT_STATE_MASK;
+		if(i&1)
+			c.m_Presses++;
+		else
+			c.m_Releases++;
+	}
+
+	return c;
+}
+
 
 #endif
