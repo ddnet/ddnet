@@ -1222,14 +1222,17 @@ void CGameClient::OnPredict()
 			const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
 			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
 			{
-				TempProjectiles[NumProjectiles].Init(this, &World, Collision(), (const CNetObj_Projectile *)pData);
+			   if(((const CNetObj_Projectile*)pData)->m_Type == WEAPON_GRENADE)
+			   {
+				   TempProjectiles[NumProjectiles].Init(this, &World, Collision(), (const CNetObj_Projectile *)pData);
 
-				int Index = TempProjectiles[NumProjectiles].m_StartTick % 64;
-				if(m_aLocalProjectiles[Index].m_Active)
-					if(m_aLocalProjectiles[Index].m_StartTick == TempProjectiles[NumProjectiles].m_StartTick)
-						if(distance(m_aLocalProjectiles[Index].m_Pos, TempProjectiles[NumProjectiles].m_Pos) < 3)
-							TempProjectiles[NumProjectiles] = m_aLocalProjectiles[Index];
-				NumProjectiles++;
+				   int Index = TempProjectiles[NumProjectiles].m_StartTick % 64;
+				   if(m_aLocalProjectiles[Index].m_Active)
+					   if(m_aLocalProjectiles[Index].m_StartTick == TempProjectiles[NumProjectiles].m_StartTick)
+						   if(distance(m_aLocalProjectiles[Index].m_Pos, TempProjectiles[NumProjectiles].m_Pos) < 3)
+							   TempProjectiles[NumProjectiles] = m_aLocalProjectiles[Index];
+				   NumProjectiles++;
+			   }
 			}
 		}
 	}
@@ -1318,6 +1321,8 @@ void CGameClient::OnPredict()
 			{
 				case WEAPON_GRENADE:
 					{
+						if(NumProjectiles >= 64)
+							break;
 						TempProjectiles[NumProjectiles].Init(
 								this, &World, Collision(),
 								Direction, //StartDir
