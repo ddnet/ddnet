@@ -2910,13 +2910,21 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 		return;
 
 	// read the whole file into memory
-	unsigned DataSize = io_length(SoundFile);
-	void *pData = mem_alloc(DataSize, 1);
-	io_read(SoundFile, pData, DataSize);
+	int DataSize = io_length(SoundFile);
+
+	if(DataSize <= 0)
+	{
+		io_close(SoundFile);
+		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFileName);
+		return;
+	}
+
+	void *pData = mem_alloc((unsigned) DataSize, 1);
+	io_read(SoundFile, pData, (unsigned) DataSize);
 	io_close(SoundFile);
 
 	// load sound
-	int SoundId = pEditor->Sound()->LoadWVFromMem(pData, DataSize);
+	int SoundId = pEditor->Sound()->LoadWVFromMem(pData, (unsigned) DataSize);
 	if(SoundId == -1)
 		return;
 
@@ -2924,7 +2932,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	CEditorSound *pSound = new CEditorSound(pEditor);
 	pSound->m_SoundID = SoundId;
 	pSound->m_External = 1;	// external by default
-	pSound->m_DataSize = DataSize;
+	pSound->m_DataSize = (unsigned) DataSize;
 	pSound->m_pData = pData;
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
 	pEditor->m_Map.m_lSounds.add(pSound);
@@ -3725,6 +3733,11 @@ void CEditor::FilelistPopulate(int StorageType)
 	m_FilesSelectedIndex = m_FileList.size() ? 0 : -1;
 	m_FilePreviewImage = 0;
 	m_aFileDialogActivate = false;
+
+	if(m_FilesSelectedIndex >= 0)
+		str_copy(m_aFileDialogFileName, m_FileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
+	else
+		m_aFileDialogFileName[0] = 0;
 }
 
 void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,

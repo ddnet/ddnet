@@ -435,9 +435,17 @@ int CSound::LoadWV(const char *pFilename)
 	int SampleID = AllocID();
 	if(SampleID < 0)
 		return -1;
-	
+
 	// read the whole file into memory
 	int DataSize = io_length(ms_File);
+
+	if(DataSize <= 0)
+	{
+		io_close(ms_File);
+		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
+		return -1;
+	}
+
 	char *pData = new char[DataSize];
 	io_read(ms_File, pData, DataSize);
 

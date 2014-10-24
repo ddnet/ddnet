@@ -651,10 +651,17 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					{
 						// read the whole file into memory
 						pSound->m_DataSize = io_length(SoundFile);
-						pSound->m_pData = mem_alloc(pSound->m_DataSize, 1);
-						io_read(SoundFile, pSound->m_pData, pSound->m_DataSize);
+
+						if(pSound->m_DataSize > 0)
+						{
+							pSound->m_pData = mem_alloc(pSound->m_DataSize, 1);
+							io_read(SoundFile, pSound->m_pData, pSound->m_DataSize);
+						}
 						io_close(SoundFile);
-						pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize);
+						if(pSound->m_DataSize > 0)
+						{
+							pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize);
+						}
 					}
 				}
 				else
