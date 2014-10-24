@@ -2895,7 +2895,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
 
-	// check if we have that image already
+	// check if we have that sound already
 	char aBuf[128];
 	ExtractName(pFileName, aBuf, sizeof(aBuf));
 	for(int i = 0; i < pEditor->m_Map.m_lSounds.size(); ++i)
@@ -3901,7 +3901,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_NewSoundButton = 0;
-		if(DoButton_Editor(&s_NewSoundButton, "Sound.+", 0, &Button, 0, "Creates a new sound envelope"))
+		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Creates a new sound envelope"))
 		{
 			m_Map.m_Modified = true;
 			m_Map.m_UndoModified++;
