@@ -29,7 +29,7 @@ public:
 	virtual bool IsSoundEnabled() { return m_SoundEnabled != 0; }
 
 	virtual int LoadWV(const char *pFilename);
-	virtual int LoadWVFromMem(const void *pData, unsigned DataSize);
+	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor);
 	virtual void UnloadSample(int SampleID);
 
 	virtual float GetSampleDuration(int SampleID); // in s

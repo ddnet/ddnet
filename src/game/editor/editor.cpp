@@ -2927,7 +2927,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	io_close(SoundFile);
 
 	// load sound
-	int SoundId = pEditor->Sound()->LoadWVFromMem(pData, (unsigned) DataSize);
+	int SoundId = pEditor->Sound()->LoadWVFromMem(pData, (unsigned) DataSize, true);
 	if(SoundId == -1)
 		return;
 
