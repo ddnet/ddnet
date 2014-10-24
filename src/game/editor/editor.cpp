@@ -2905,9 +2905,12 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	// load external
-	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
 	if(!SoundFile)
+	{
+		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFileName);
 		return;
+	}
 
 	// read the whole file into memory
 	int DataSize = io_length(SoundFile);
