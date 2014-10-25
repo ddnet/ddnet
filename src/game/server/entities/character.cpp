@@ -451,7 +451,9 @@ void CCharacter::FireWeapon()
 					Msg.AddInt(((int *)&p)[i]);
 
 				Server()->SendMsg(&Msg, 0, m_pPlayer->GetCID());
-				GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+				if(!m_Jetpack)
+					GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+
 			}
 		} break;
 
