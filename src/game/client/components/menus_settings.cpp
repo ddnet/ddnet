@@ -1017,6 +1017,10 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		g_Config.m_SndGame ^= 1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_SndGun, Localize("Enable gun sound"), g_Config.m_SndGun, &Button))
+		g_Config.m_SndGun ^= 1;
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_SndServerMessage, Localize("Enable server message sound"), g_Config.m_SndServerMessage, &Button))
 		g_Config.m_SndServerMessage ^= 1;
 
