@@ -444,8 +444,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_SERVER] >= time_freq()*3/10)
 		{
-			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
-			m_aLastSoundPlayed[CHAT_SERVER] = Now;
+			if(g_Config.m_SndServerMessage)
+			{
+				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
+				m_aLastSoundPlayed[CHAT_SERVER] = Now;
+			}
 		}
 	}
 	else if(Highlighted)
@@ -453,8 +456,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		if(Now-m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq()*3/10)
 		{
 			Graphics()->NotifyWindow();
-			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
-			m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
+			if(g_Config.m_SndHighlight)
+			{
+				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
+			}
 		}
 	}
 	else if(Team != 2)

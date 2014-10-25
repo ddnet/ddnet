@@ -594,20 +594,20 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 	int Age = -1;
 	int i;
 
-	if(SampleID == 107) // GetSampleID(SOUND_CHAT_SERVER)
-	{
-		if(!g_Config.m_SndServerMessage)
-			return CVoiceHandle();
-	}
-	else if(SampleID == 108) // GetSampleID(SOUND_CHAT_CLIENT)
-	{}
-	else if(SampleID == 109) // GetSampleID(SOUND_CHAT_HIGHLIGHT)
-	{
-		if(!g_Config.m_SndHighlight)
-			return CVoiceHandle();
-	}
-	else if(!g_Config.m_SndGame)
-		return CVoiceHandle();
+	//if(SampleID == 107) // GetSampleID(SOUND_CHAT_SERVER)
+	//{
+	//	if(!g_Config.m_SndServerMessage)
+	//		return CVoiceHandle();
+	//}
+	//else if(SampleID == 108) // GetSampleID(SOUND_CHAT_CLIENT)
+	//{}
+	//else if(SampleID == 109) // GetSampleID(SOUND_CHAT_HIGHLIGHT)
+	//{
+	//	if(!g_Config.m_SndHighlight)
+	//		return CVoiceHandle();
+	//}
+	//else if(!g_Config.m_SndGame)
+	//	return CVoiceHandle();
 
 
 	lock_wait(m_SoundLock);
