@@ -1743,12 +1743,21 @@ void CSqlScore::LoadTeamThread(void *pUser)
 		try
 		{
 			char aBuf[768];
-			str_format(aBuf, sizeof(aBuf), "select Savegame from %s_saves where Code = '%s' and Map = '%s';",  pData->m_pSqlData->m_pPrefix, pData->m_Code, Map);
+			str_format(aBuf, sizeof(aBuf), "select Savegame, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago from %s_saves where Code = '%s' and Map = '%s';",  pData->m_pSqlData->m_pPrefix, pData->m_Code, Map);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if (pData->m_pSqlData->m_pResults->rowsCount() > 0)
 			{
 				pData->m_pSqlData->m_pResults->first();
+				int since = (int)pData->m_pSqlData->m_pResults->getInt("Ago");
+
+				if(since < g_Config.m_SvSaveGamesDelay)
+				{
+					str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can load this savegame", g_Config.m_SvSaveGamesDelay - since);
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+					goto end;
+				}
+
 				Num = SavedTeam->LoadString(pData->m_pSqlData->m_pResults->getString("Savegame").c_str());
 
 				if(Num)
@@ -1809,6 +1818,7 @@ void CSqlScore::LoadTeamThread(void *pUser)
 			}
 			else
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "No such savegame for this map");
+			end:
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
