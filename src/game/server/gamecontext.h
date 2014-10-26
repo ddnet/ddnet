@@ -175,6 +175,9 @@ public:
 	void CheckPureTuning();
 	void SendTuningParams(int ClientID, int Zone = 0);
 
+	class CVoteOptionServer *GetVoteOption(int Index);
+	void ProgressVoteOptions(int ClientID);
+
 	//
 	//void SwapTeams();
 
