@@ -197,6 +197,9 @@ function build(settings)
 	opusfile_settings.cc.includes:Add("src/engine/external/ogg/")
 	opusfile_settings.cc.includes:Add("src/engine/external/opusfile/")
 
+	settings.cc.includes:Add("src/engine/external/opus/")
+	settings.cc.includes:Add("src/engine/external/ogg/")
+
 	-- set some platform specific settings
 	settings.cc.includes:Add("src")
 	settings.cc.includes:Add("other/mysql/include")

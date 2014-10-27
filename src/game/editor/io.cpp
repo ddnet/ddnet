@@ -643,7 +643,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				if(pItem->m_External)
 				{
 					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf),"mapres/%s.wv", pName);
+					str_format(aBuf, sizeof(aBuf),"mapres/%s.opus", pName);
 
 					// load external
 					IOHANDLE SoundFile = pStorage->OpenFile(pName, IOFLAG_READ, IStorage::TYPE_ALL);
@@ -660,7 +660,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						io_close(SoundFile);
 						if(pSound->m_DataSize > 0)
 						{
-							pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize, true);
+							pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 						}
 					}
 				}
@@ -672,7 +672,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					void *pData = DataFile.GetData(pItem->m_SoundData);
 					pSound->m_pData = mem_alloc(pSound->m_DataSize, 1);
 					mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
-					pSound->m_SoundID = m_pEditor->Sound()->LoadWVFromMem(pSound->m_pData, pSound->m_DataSize, true);
+					pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 				}
 
 				// copy image name
