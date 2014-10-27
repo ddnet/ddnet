@@ -794,10 +794,10 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 	CPlayer *pPl = m_apPlayers[ClientID];
 
 	if (pPl->m_SendVoteIndex == -1)
-		return;
+		return; // we didn't start sending options yet
 
-	//TODO: removing votes can cause this
-	dbg_assert(pPl->m_SendVoteIndex <= m_NumVoteOptions, "m_SendVoteIndex invalid");
+	if (pPl->m_SendVoteIndex > m_NumVoteOptions)
+		return; // shouldn't happen / fail silently
 
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
 	int NumVotesToSend = min(g_Config.m_SvVotesPerTick, VotesLeft);
@@ -2015,10 +2015,17 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	// inform clients about removed option
-	CNetMsg_Sv_VoteOptionRemove OptionMsg;
-	OptionMsg.m_pDescription = pOption->m_aDescription;
-	pSelf->Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, -1);
+	// start reloading vote option list
+	// clear vote options
+	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
+	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
+
+	// reset sending of vote options
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i])
+			pSelf->m_apPlayers[i]->m_SendVoteIndex = 0;
+	}
 
 	// TODO: improve this
 	// remove the option
