@@ -2402,8 +2402,7 @@ void CClient::VersionUpdate()
 
 void CClient::RegisterInterfaces()
 {
-	for(int i = 0; i < RECORDER_MAX; i++)
-		Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[i]));
+	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[RECORDER_MANUAL]));
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)

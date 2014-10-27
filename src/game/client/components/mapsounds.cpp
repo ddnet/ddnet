@@ -33,13 +33,13 @@ void CMapSounds::OnMapLoad()
 		{
 			char Buf[256];
 			char *pName = (char *)pMap->GetData(pSound->m_SoundName);
-			str_format(Buf, sizeof(Buf), "mapres/%s.wv", pName);
-			m_aSounds[i] = Sound()->LoadWV(Buf);
+			str_format(Buf, sizeof(Buf), "mapres/%s.opus", pName);
+			m_aSounds[i] = Sound()->LoadOpus(Buf);
 		}
 		else
 		{
 			void *pData = pMap->GetData(pSound->m_SoundData);
-			m_aSounds[i] = Sound()->LoadWVFromMem(pData, pSound->m_SoundDataSize);
+			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, pSound->m_SoundDataSize);
 			pMap->UnloadData(pSound->m_SoundData);
 		}
 	}

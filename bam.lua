@@ -181,6 +181,25 @@ function build(settings)
 		end
 	end
 
+	opus_settings = settings:Copy()
+	opus_settings.cc.flags:Add("-DHAVE_CONFIG_H")
+	opus_settings.cc.includes:Add("src/engine/external/opus/")
+	opus_settings.cc.includes:Add("src/engine/external/opus/celt/")
+	opus_settings.cc.includes:Add("src/engine/external/opus/silk/")
+	opus_settings.cc.includes:Add("src/engine/external/opus/silk/float/")
+	opus_settings.cc.includes:Add("src/engine/external/opus/silk/fixed/")
+	opus_settings.cc.includes:Add("src/engine/external/opus/silk/arm/")
+	opus_settings.cc.includes:Add("src/engine/external/opus/celt/arm/")
+	opus_settings.cc.includes:Add("src/engine/external/opus/celt/x86/")
+
+	opusfile_settings = settings:Copy()
+	opusfile_settings.cc.includes:Add("src/engine/external/opus/")
+	opusfile_settings.cc.includes:Add("src/engine/external/ogg/")
+	opusfile_settings.cc.includes:Add("src/engine/external/opusfile/")
+
+	settings.cc.includes:Add("src/engine/external/opus/")
+	settings.cc.includes:Add("src/engine/external/ogg/")
+
 	-- set some platform specific settings
 	settings.cc.includes:Add("src")
 	settings.cc.includes:Add("other/mysql/include")
@@ -224,6 +243,9 @@ function build(settings)
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
 	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
+	ogg = Compile(settings, Collect("src/engine/external/ogg/*.c"))
+	opus = Compile(opus_settings, Collect("src/engine/external/opus/*.c", "src/engine/external/opus/celt/*.c", "src/engine/external/opus/silk/*.c"))
+	opusfile = Compile(opusfile_settings, Collect("src/engine/external/opusfile/*.c"))
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -309,7 +331,7 @@ function build(settings)
 
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
-		engine, client, game_editor, zlib, pnglite, wavpack,
+		engine, client, game_editor, zlib, pnglite, wavpack, ogg, opus, opusfile,
 		client_link_other, client_osxlaunch, jsonparser)
 
 	server_exe = Link(server_settings, "DDNet-Server", engine, server,
