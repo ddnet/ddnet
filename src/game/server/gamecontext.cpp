@@ -800,7 +800,7 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 		return; // shouldn't happen / fail silently
 
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
-	int NumVotesToSend = min(g_Config.m_SvVotesPerTick, VotesLeft);
+	int NumVotesToSend = min(g_Config.m_SvSendVotesPerTick, VotesLeft);
 
 	if (!VotesLeft)
 	{
