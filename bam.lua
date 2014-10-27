@@ -224,6 +224,7 @@ function build(settings)
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
 	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
+	ogg = Compile(settings, Collect("src/engine/external/ogg/*.c"))
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -309,7 +310,7 @@ function build(settings)
 
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
-		engine, client, game_editor, zlib, pnglite, wavpack,
+		engine, client, game_editor, zlib, pnglite, wavpack, ogg,
 		client_link_other, client_osxlaunch, jsonparser)
 
 	server_exe = Link(server_settings, "DDNet-Server", engine, server,
