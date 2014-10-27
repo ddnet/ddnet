@@ -16,6 +16,33 @@
 #include <game/server/score.h>
 #include "light.h"
 
+//input count
+struct CInputCount
+{
+	int m_Presses;
+	int m_Releases;
+};
+
+CInputCount CountInput(int Prev, int Cur)
+{
+	CInputCount c = {0, 0};
+	Prev &= INPUT_STATE_MASK;
+	Cur &= INPUT_STATE_MASK;
+	int i = Prev;
+
+	while(i != Cur)
+	{
+		i = (i+1)&INPUT_STATE_MASK;
+		if(i&1)
+			c.m_Presses++;
+		else
+			c.m_Releases++;
+	}
+
+	return c;
+}
+
+
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
@@ -345,6 +372,7 @@ void CCharacter::FireWeapon()
 		}
 		return;
 	}
+
 	vec2 ProjStartPos = m_Pos+Direction*m_ProximityRadius*0.75f;
 
 	switch(m_Core.m_ActiveWeapon)
@@ -522,10 +550,7 @@ void CCharacter::FireWeapon()
 
 			// pack the Projectile and send it to the client Directly
 			CNetObj_Projectile p;
-			if(m_pPlayer && m_pPlayer->m_ClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE)
-				pProj->FillExtraInfo(&p);
-			else
-				pProj->FillInfo(&p);
+			pProj->FillInfo(&p);
 
 			CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 			Msg.AddInt(1);
@@ -588,7 +613,7 @@ void CCharacter::HandleWeapons()
 	}
 
 	// fire Weapon, if wanted
-	//FireWeapon();
+	FireWeapon();
 /*
 	// ammo regen
 	int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Ammoregentime;
@@ -818,8 +843,6 @@ void CCharacter::TickDefered()
 			m_Core.m_pReset = false;
 		}
 	}
-
-	FireWeapon();
 }
 
 void CCharacter::TickPaused()
