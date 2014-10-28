@@ -127,10 +127,10 @@ if family == "windows" then
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
 
 	--copy opus libs
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libgcc_s_sjlj-1.dll"))
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libogg-0.dll"))
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libopus-0.dll"))
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libopusfile-0.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libgcc_s_sjlj-1.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libogg-0.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopus-0.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopusfile-0.dll"))
 
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
