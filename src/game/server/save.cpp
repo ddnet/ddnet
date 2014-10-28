@@ -67,7 +67,7 @@ void CSaveTee::save(CCharacter* pchr)
 	m_CpActive = pchr->m_CpActive;
 	m_CpLastBroadcast = pchr->m_CpLastBroadcast;
 
-	for(int i = 0; i<=25; i++)
+	for(int i = 0; i < 25; i++)
 		m_CpCurrent[i] = pchr->m_CpCurrent[i];
 
 	// Core
@@ -139,8 +139,8 @@ void CSaveTee::load(CCharacter* pchr, int Team)
 	pchr->m_CpActive  = m_CpActive;
 	pchr->m_CpLastBroadcast = m_CpLastBroadcast;
 
-	for(int i = 0; i<=25; i++)
-		pchr->m_CpCurrent[i] =m_CpCurrent[i];
+	for(int i = 0; i < 25; i++)
+		pchr->m_CpCurrent[i] = m_CpCurrent[i];
 
 	// Core
 	pchr->m_Core.m_Pos = m_CorePos;
