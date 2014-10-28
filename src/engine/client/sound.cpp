@@ -14,7 +14,7 @@
 
 extern "C" { // wavpack
 	#include <engine/external/wavpack/wavpack.h>
-	#include <engine/external/opusfile/opusfile.h>
+	#include <opusfile.h>
 }
 #include <math.h>
 

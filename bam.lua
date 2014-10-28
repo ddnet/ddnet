@@ -126,6 +126,12 @@ if family == "windows" then
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
 
+	--copy opus libs
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libgcc_s_sjlj-1.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libogg-0.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libopus-0.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\lib32\\libopusfile-0.dll"))
+
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
 		server_link_other = {ResCompile("other/icons/teeworlds_srv_cl.rc")}
@@ -181,28 +187,11 @@ function build(settings)
 		end
 	end
 
-	-- opus settings
-	opus_settings = settings:Copy()
-	opus_settings.cc.flags:Add("-DHAVE_CONFIG_H")
-	opus_settings.cc.includes:Add("src/engine/external/opus")
-	opus_settings.cc.includes:Add("src/engine/external/opus/celt")
-	opus_settings.cc.includes:Add("src/engine/external/opus/silk")
-	opus_settings.cc.includes:Add("src/engine/external/opus/silk/float")
-	opus_settings.cc.includes:Add("src/engine/external/opus/silk/fixed")
-	opus_settings.cc.includes:Add("src/engine/external/opus/silk/arm")
-	opus_settings.cc.includes:Add("src/engine/external/opus/celt/arm")
-	opus_settings.cc.includes:Add("src/engine/external/opus/celt/x86")
-
-	opusfile_settings = settings:Copy()
-	opusfile_settings.cc.includes:Add("src/engine/external")
-	opusfile_settings.cc.includes:Add("src/engine/external/ogg")
-	opusfile_settings.cc.includes:Add("src/engine/external/opus")
-	opusfile_settings.cc.includes:Add("src/engine/external/opusfile")
-
 	settings.cc.includes:Add("src")
 	settings.cc.includes:Add("src/engine/external")
 	settings.cc.includes:Add("src/engine/external/ogg")
-	settings.cc.includes:Add("src/engine/external/opus")
+	settings.cc.includes:Add("other/opus/include")
+	settings.cc.includes:Add("other/opus/include/opus")
 	settings.cc.includes:Add("other/mysql/include")
 
 	-- set some platform specific settings
@@ -246,8 +235,6 @@ function build(settings)
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
 	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
 	ogg = Compile(settings, Collect("src/engine/external/ogg/*.c"))
-	opus = Compile(opus_settings, Collect("src/engine/external/opus/*.c", "src/engine/external/opus/celt/*.c", "src/engine/external/opus/silk/*.c"))
-	opusfile = Compile(opusfile_settings, Collect("src/engine/external/opusfile/*.c"))
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -293,6 +280,7 @@ function build(settings)
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
+		client_settings.link.libs:Add("other/opus/lib32/libopusfile-0")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")
@@ -333,7 +321,7 @@ function build(settings)
 
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
-		engine, client, game_editor, zlib, pnglite, wavpack, ogg, opus, opusfile,
+		engine, client, game_editor, zlib, pnglite, wavpack,
 		client_link_other, client_osxlaunch, jsonparser)
 
 	server_exe = Link(server_settings, "DDNet-Server", engine, server,
