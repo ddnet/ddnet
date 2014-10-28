@@ -34,7 +34,6 @@ bam.exe
 *.log
 *.exe
 *.res
-*.dll
 *.patch
 *.prefs
 *.lnk
