@@ -588,7 +588,7 @@ void CCharacter::HandleWeapons()
 	}
 
 	// fire Weapon, if wanted
-	//FireWeapon();
+	FireWeapon();
 /*
 	// ammo regen
 	int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Ammoregentime;
@@ -818,8 +818,6 @@ void CCharacter::TickDefered()
 			m_Core.m_pReset = false;
 		}
 	}
-
-	FireWeapon();
 }
 
 void CCharacter::TickPaused()
