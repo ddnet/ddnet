@@ -687,7 +687,7 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 		desc.dwTimeout = 0;
 
 		FlashWindowEx(&desc);
-	#elif defined(SDL_VIDEO_DRIVER_X11)
+	#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 		Display *dpy = info.info.x11.display;
 		Window win;
 		if(m_pScreenSurface->flags & SDL_FULLSCREEN)
