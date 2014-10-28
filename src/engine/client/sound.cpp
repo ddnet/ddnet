@@ -379,9 +379,15 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 
 		pSample->m_pData = (short *)mem_alloc(UncompressedSize, 1);
 
-		int Read = op_read(OpusFile, pSample->m_pData, UncompressedSize, NULL);
+		int Read;
+		int Pos = 0;
+		do
+		{
+			Read = op_read(OpusFile, pSample->m_pData + Pos, UncompressedSize / 2 - Pos, NULL);
+			Pos += Read;
+		} while (Read > 0);
 
-		pSample->m_NumFrames = Read / NumChannels;
+		pSample->m_NumFrames = UncompressedSize / NumChannels / 2; // ?
 		pSample->m_LoopStart = -1;
 		pSample->m_LoopEnd = -1;
 		pSample->m_PausedAt = 0;
