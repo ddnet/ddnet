@@ -287,7 +287,7 @@ function build(settings)
 		end
 
 	elseif family == "windows" then
-		client_settings.link.libpath:Add(".")
+		client_settings.link.libpath:Add("other/opus/windows/lib32")
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
