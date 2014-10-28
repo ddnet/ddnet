@@ -267,7 +267,7 @@ void CGameClient::OnInit()
 	m_UI.SetGraphics(Graphics(), TextRender());
 	m_RenderTools.m_pGraphics = Graphics();
 	m_RenderTools.m_pUI = UI();
-	
+
 	int64 Start = time_get();
 
 	// set the language
@@ -440,6 +440,9 @@ void CGameClient::OnReset()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+
+	for(int i=0; i<64; i++)
+		m_aLocalProjectiles[i].Deactivate();
 }
 
 
@@ -474,7 +477,7 @@ void CGameClient::UpdatePositions()
 			vec2(m_Snap.m_pLocalPrevCharacter->m_X, m_Snap.m_pLocalPrevCharacter->m_Y),
 			vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y), Client()->IntraGameTick());
 	}
-	
+
 	if (g_Config.m_ClAntiPing)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
@@ -646,7 +649,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		m_Tuning[IsDummy ? !g_Config.m_ClDummy : g_Config.m_ClDummy] = NewTuning;
 		return;
 	}
-	
+
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
 	{
@@ -1168,6 +1171,9 @@ void CGameClient::OnNewSnapshot()
 
 void CGameClient::OnPredict()
 {
+	float PhysSize = 28.0f;
+	float ProximityRadius = PhysSize;
+
 	// store the previous values so we can detect prediction errors
 	CCharacterCore BeforePrevChar = m_PredictedPrevChar;
 	CCharacterCore BeforeChar = m_PredictedChar;
@@ -1209,6 +1215,42 @@ void CGameClient::OnPredict()
 		g_GameClient.m_aClients[i].m_Predicted.m_ActiveWeapon = m_Snap.m_aCharacters[i].m_Cur.m_Weapon;
 	}
 
+	class CLocalProjectile TempProjectiles[64];
+	int NumProjectiles = 0;
+
+	if(g_Config.m_ClAntiPingWeapons)
+	{
+		for(int Index=0; Index<64; Index++)
+			TempProjectiles[Index].Deactivate();
+		int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
+		for(int Index = 0; Index < Num && NumProjectiles < 64; Index++)
+		{
+			IClient::CSnapItem Item;
+			const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
+			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
+			{
+			   if(((const CNetObj_Projectile*)pData)->m_Type == WEAPON_GRENADE)
+			   {
+				   TempProjectiles[NumProjectiles].Init(this, &World, Collision(), (const CNetObj_Projectile *)pData);
+
+				   int Index = TempProjectiles[NumProjectiles].m_StartTick % 64;
+				   if(m_aLocalProjectiles[Index].m_Active)
+					   if(m_aLocalProjectiles[Index].m_StartTick == TempProjectiles[NumProjectiles].m_StartTick)
+						   if(distance(m_aLocalProjectiles[Index].m_Pos, TempProjectiles[NumProjectiles].m_Pos) < 3)
+							   TempProjectiles[NumProjectiles] = m_aLocalProjectiles[Index];
+				   NumProjectiles++;
+			   }
+			}
+		}
+	}
+
+	int ReloadTimer;
+	if(World.m_apCharacters[m_Snap.m_LocalClientID]->m_ActiveWeapon == WEAPON_HAMMER)
+		ReloadTimer = SERVER_TICK_SPEED / 3 - (Client()->GameTick() - m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_AttackTick);
+	else
+		ReloadTimer = g_pData->m_Weapons.m_aId[World.m_apCharacters[m_Snap.m_LocalClientID]->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000 - (Client()->GameTick() - m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_AttackTick);
+	ReloadTimer = max(ReloadTimer, 0);
+
 	// predict
 	for(int Tick = Client()->GameTick()+1; Tick <= Client()->PredGameTick(); Tick++)
 	{
@@ -1216,27 +1258,160 @@ void CGameClient::OnPredict()
 		if(Tick == Client()->PredGameTick() && World.m_apCharacters[m_Snap.m_LocalClientID])
 			m_PredictedPrevChar = *World.m_apCharacters[m_Snap.m_LocalClientID];
 
-		// first calculate where everyone should move
 		for(int c = 0; c < MAX_CLIENTS; c++)
 		{
 			if(!World.m_apCharacters[c])
 				continue;
-			
+
 			if(g_Config.m_ClAntiPing && Tick == Client()->PredGameTick())
 				g_GameClient.m_aClients[c].m_PrevPredicted = *World.m_apCharacters[c];
+		}
+
+		// input
+		CNetObj_PlayerInput Input;
+		CNetObj_PlayerInput PrevInput;
+		for(int c = 0; c < MAX_CLIENTS; c++)
+		{
+			if(!World.m_apCharacters[c])
+				continue;
 
 			mem_zero(&World.m_apCharacters[c]->m_Input, sizeof(World.m_apCharacters[c]->m_Input));
 			if(m_Snap.m_LocalClientID == c)
 			{
 				// apply player input
+				mem_zero(&Input, sizeof(Input));
+				mem_zero(&PrevInput, sizeof(PrevInput));
 				int *pInput = Client()->GetInput(Tick);
 				if(pInput)
+				{
 					World.m_apCharacters[c]->m_Input = *((CNetObj_PlayerInput*)pInput);
+					Input = *((CNetObj_PlayerInput*)pInput);
+				}
+				int *pPrevInput = Client()->GetInput(Tick-1);
+				if(pPrevInput)
+					PrevInput = *((CNetObj_PlayerInput*)pPrevInput);
+			}
+		}
+
+		// handle weapons
+		do
+		{
+			if(!g_Config.m_ClAntiPingWeapons)
+				break;
+			if(ReloadTimer)
+				break;
+			if(!World.m_apCharacters[m_Snap.m_LocalClientID])
+				break;
+			CCharacterCore *Local = World.m_apCharacters[m_Snap.m_LocalClientID];
+
+			//DoWeaponSwitch();
+
+			bool FullAuto = false;
+			if(Local->m_ActiveWeapon == WEAPON_GRENADE || Local->m_ActiveWeapon == WEAPON_SHOTGUN || Local->m_ActiveWeapon == WEAPON_RIFLE)
+				FullAuto = true;
+
+			bool WillFire = false;
+
+			if(CountInput(PrevInput.m_Fire, Input.m_Fire).m_Presses)
+				WillFire = true;
+			if(FullAuto && (Input.m_Fire&1))
+				WillFire = true;
+			if(!WillFire)
+				break;
+			//if(!m_pControls->m_AmmoCount[Local->m_ActiveWeapon%NUM_WEAPONS]) break;
+			vec2 Direction = normalize(vec2(Input.m_TargetX, Input.m_TargetY));
+			vec2 Pos = Local->m_Pos;
+			vec2 ProjStartPos = Pos + Direction * ProximityRadius * 0.75f;
+
+			ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
+			switch(Local->m_ActiveWeapon)
+			{
+				case WEAPON_GRENADE:
+					{
+						if(NumProjectiles >= 64)
+							break;
+						TempProjectiles[NumProjectiles].Init(
+								this, &World, Collision(),
+								Direction, //StartDir
+								ProjStartPos, //StartPos
+								Tick-1, //StartTick
+								WEAPON_GRENADE, //Type
+								m_Snap.m_LocalClientID, //Owner
+								WEAPON_GRENADE, //Weapon
+								1000, //LifeSpan
+								1, 0, 0, 1); //Explosive, Bouncing, Freeze, ExtraInfo
+						m_aLocalProjectiles[(Tick-1)%64] = TempProjectiles[NumProjectiles];
+						NumProjectiles++;
+					} break;
+
+				case WEAPON_HAMMER:
+					{
+						vec2 ProjPos = ProjStartPos;
+						float Radius = ProximityRadius*0.5f;
+
+						int Hits = 0;
+						bool OwnerCanProbablyHitOthers = (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+						if(!OwnerCanProbablyHitOthers)
+							break;
+						for(int i = 0; i < MAX_CLIENTS; i++)
+						{
+							if(!World.m_apCharacters[i])
+								continue;
+							if(i == m_Snap.m_LocalClientID)
+								continue;
+							if(!(distance(World.m_apCharacters[i]->m_Pos, ProjPos) < Radius+ProximityRadius))
+								continue;;
+
+							CCharacterCore *pTarget = World.m_apCharacters[i];
+
+							if(m_aClients[i].m_Active && !m_Teams.CanCollide(i, m_Snap.m_LocalClientID))
+								continue;
+
+							vec2 Dir;
+							if (length(pTarget->m_Pos - Pos) > 0.0f)
+								Dir = normalize(pTarget->m_Pos - Pos);
+							else
+								Dir = vec2(0.f, -1.f);
+
+							float Strength;
+							Strength = World.m_Tuning[g_Config.m_ClDummy].m_HammerStrength;
+
+							vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+
+							Temp -= pTarget->m_Vel;
+							pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength);
+							Hits++;
+						}
+						// if we Hit anything, we have to wait for the reload
+						//if(Hits)
+							//ReloadTimer = SERVER_TICK_SPEED/3;
+					} break;
+				default:
+					break;
+			}
+		} while(false);
+
+		if(ReloadTimer)
+			ReloadTimer--;
+
+		// projectiles
+		if(g_Config.m_ClAntiPingWeapons)
+			for(int g = 0; g < 64; g++)
+				if(TempProjectiles[g].m_Active)
+					TempProjectiles[g].Tick(Tick, Client()->GameTickSpeed(), m_Snap.m_LocalClientID);
+
+		// first calculate where everyone should move
+		for(int c = 0; c < MAX_CLIENTS; c++)
+		{
+			if(!World.m_apCharacters[c])
+				continue;
+
+			if(m_Snap.m_LocalClientID == c)
+			{
 				World.m_apCharacters[c]->Tick(true, true);
 			}
 			else
 				World.m_apCharacters[c]->Tick(false, true);
-
 		}
 
 		// move all players and quantize their data
@@ -1281,6 +1456,7 @@ void CGameClient::OnPredict()
 			}
 		}
 
+
 		if(Tick == Client()->PredGameTick() && World.m_apCharacters[m_Snap.m_LocalClientID])
 		{
 			m_PredictedChar = *World.m_apCharacters[m_Snap.m_LocalClientID];
@@ -1297,6 +1473,7 @@ void CGameClient::OnPredict()
 			}
 		}
 	}
+
 
 	if(g_Config.m_Debug && g_Config.m_ClPredict && m_PredictedTick == Client()->PredGameTick())
 	{
@@ -1492,6 +1669,7 @@ IGameClient *CreateGameClient()
 	return &g_GameClient;
 }
 
+
 int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, int ownID)
 {
 	float PhysSize = 28.0f;
@@ -1523,6 +1701,214 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 			}
 		}
 	}
-
 	return ClosestID;
+}
+
+int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2 *NewPos2, int ownID, CWorldCore *World)
+{
+
+	float PhysSize = 28.0f;
+	float Distance = 0.0f;
+	int ClosestID = -1;
+
+	if(!World)
+		return ClosestID;
+
+	for (int i=0; i<MAX_CLIENTS; i++)
+	{
+		if(!World->m_apCharacters[i])
+			continue;
+		CClientData cData = m_aClients[i];
+
+		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID))
+			continue;
+		vec2 Position = World->m_apCharacters[i]->m_Pos;
+		vec2 ClosestPoint = closest_point_on_line(OldPos, NewPos, Position);
+		if(distance(Position, ClosestPoint) < PhysSize+Radius)
+		{
+			if(ClosestID == -1 || distance(OldPos, Position) < Distance)
+			{
+				*NewPos2 = ClosestPoint;
+				ClosestID = i;
+				Distance = distance(OldPos, Position);
+			}
+		}
+	}
+	return ClosestID;
+}
+
+void CLocalProjectile::Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, const CNetObj_Projectile *pProj)
+{
+	m_Active = 1;
+	m_pGameClient = pGameClient;
+	m_pWorld = pWorld;
+	m_pCollision = pCollision;
+	m_StartTick = pProj->m_StartTick;
+	m_Type = pProj->m_Type;
+	m_Weapon = m_Type;
+
+	ExtractInfo(pProj, &m_Pos, &m_Direction);
+
+	if(HasExtraInfo(pProj))
+	{
+		ExtractExtraInfo(pProj, &m_Owner, &m_LifeSpan, &m_Explosive, &m_Bouncing, &m_Freeze);
+		m_ExtraInfo = true;
+	}
+	else
+	{
+		m_Owner = -1;
+		m_Explosive = (m_Type == WEAPON_GRENADE ? true : false);
+		m_Bouncing = 0;
+		m_Freeze = 0;
+		m_LifeSpan = -2;
+		m_ExtraInfo = false;
+	}
+}
+
+void CLocalProjectile::Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, vec2 Direction, vec2 Pos, int StartTick, int Type, int Owner, int Weapon, int LifeSpan, bool Explosive, int Bouncing, bool Freeze, bool ExtraInfo)
+{
+	m_Active = 1;
+	m_pGameClient = pGameClient;
+	m_pWorld = pWorld;
+	m_pCollision = pCollision;
+	m_Direction = Direction;
+	m_Pos = Pos;
+	m_StartTick = StartTick;
+	m_Type = Type;
+	m_Weapon = Weapon;
+	m_LifeSpan = LifeSpan;
+	m_Owner = Owner;
+	m_Explosive = Explosive;
+	m_Bouncing = Bouncing;
+	m_Freeze = Freeze;
+	m_ExtraInfo = ExtraInfo;
+}
+
+vec2 CLocalProjectile::GetPos(float Time)
+{
+	float Curvature = 0;
+	float Speed = 0;
+
+	switch(m_Type)
+	{
+		case WEAPON_GRENADE:
+			Curvature = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_GrenadeCurvature;
+			Speed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_GrenadeSpeed;
+			break;
+
+		case WEAPON_SHOTGUN:
+			Curvature = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_ShotgunCurvature;
+			Speed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_ShotgunSpeed;
+			break;
+
+		case WEAPON_GUN:
+			Curvature = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_GunCurvature;
+			Speed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_GunSpeed;
+			break;
+	}
+
+	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
+}
+
+bool CLocalProjectile::GameLayerClipped(vec2 CheckPos)
+{
+	return round_to_int(CheckPos.x)/32 < -200 || round_to_int(CheckPos.x)/32 > m_pCollision->GetWidth()+200 ||
+		round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > m_pCollision->GetHeight()+200 ? true : false;
+}
+
+
+void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientID)
+{
+	if(!m_pWorld)
+		return;
+	float Pt = (CurrentTick-m_StartTick-1)/(float)GameTickSpeed;
+	float Ct = (CurrentTick-m_StartTick)/(float)GameTickSpeed;
+
+	vec2 PrevPos = GetPos(Pt);
+	vec2 CurPos = GetPos(Ct);
+	vec2 ColPos;
+	vec2 NewPos;
+	int Collide = 0;
+	if(m_pCollision)
+		Collide = m_pCollision->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos, false);
+	int Target = m_pGameClient->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, &ColPos, m_Owner, m_pWorld);
+
+	if(m_LifeSpan > -1)
+		m_LifeSpan--;
+
+	bool isWeaponCollide = false;
+	if
+		(
+		 m_Owner >= 0 &&
+		 Target >= 0 &&
+		 m_pGameClient->m_aClients[m_Owner].m_Active &&
+		 m_pGameClient->m_aClients[Target].m_Active &&
+		 !m_pGameClient->m_Teams.CanCollide(m_Owner, Target)
+		)
+			isWeaponCollide = true;
+
+	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+
+	if(((Target >= 0 && (m_Owner >= 0 ? OwnerCanProbablyHitOthers : 1 || Target == m_Owner)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
+	{
+		if(m_Explosive && (Target < 0 || (Target >= 0 && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
+			CreateExplosion(ColPos, m_Owner);
+		if(Collide && m_Bouncing != 0)
+		{
+			m_StartTick = CurrentTick;
+			m_Pos = NewPos+(-(m_Direction*4));
+			if (m_Bouncing == 1)
+				m_Direction.x = -m_Direction.x;
+			else if(m_Bouncing == 2)
+				m_Direction.y =- m_Direction.y;
+			if (fabs(m_Direction.x) < 1e-6)
+				m_Direction.x = 0;
+			if (fabs(m_Direction.y) < 1e-6)
+				m_Direction.y = 0;
+			m_Pos += m_Direction;
+		}
+		else if(!m_Bouncing)
+			Deactivate();
+	}
+	//if(m_LifeSpan == -1)
+	//{
+	//if(m_Explosive)
+	//{
+	//CreateExplosion(ColPos, LocalClientID);
+	//}
+	//Deactivate();
+	//}
+}
+
+void CLocalProjectile::CreateExplosion(vec2 Pos, int LocalClientID)
+{
+	if(!m_pWorld)
+		return;
+	float Radius = 135.0f;
+	float InnerRadius = 48.0f;
+
+	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+
+	for(int c = 0; c < MAX_CLIENTS; c++)
+	{
+		if(!m_pWorld->m_apCharacters[c])
+			continue;
+		if(m_Owner >= 0 && c >= 0)
+			if(m_pGameClient->m_aClients[c].m_Active && !m_pGameClient->m_Teams.CanCollide(c, m_Owner))
+				continue;
+		if(c != LocalClientID && !OwnerCanProbablyHitOthers)
+			continue;
+		vec2 Diff = m_pWorld->m_apCharacters[c]->m_Pos - Pos;
+		vec2 ForceDir(0,1);
+		float l = length(Diff);
+		if(l)
+			ForceDir = normalize(Diff);
+		l = 1-clamp((l-InnerRadius)/(Radius-InnerRadius), 0.0f, 1.0f);
+
+		float Strength = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_ExplosionStrength;
+		float Dmg = Strength * l;
+
+		if((int)Dmg)
+			m_pWorld->m_apCharacters[c]->TakeDamage(ForceDir*Dmg*2);
+	}
 }
