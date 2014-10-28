@@ -355,11 +355,6 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 		return -1;
 
 	CSample *pSample = &m_aSamples[SampleID];
-	char aError[100];
-
-	ms_pWVBuffer = pData;
-	ms_WVBufferSize = DataSize;
-	ms_WVBufferPosition = 0;
 
 	OggOpusFile *OpusFile = op_open_memory((const unsigned char *) pData, DataSize, NULL);
 	if (OpusFile)
@@ -393,7 +388,8 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 	}
 	else
 	{
-		dbg_msg("sound/opus", "failed to decode sample (%s)", aError);
+		dbg_msg("sound/opus", "failed to decode sample");
+		return -1;
 	}
 
 	return SampleID;
@@ -458,6 +454,7 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	else
 	{
 		dbg_msg("sound/wv", "failed to decode sample (%s)", aError);
+		return -1;
 	}
 
 	return SampleID;
