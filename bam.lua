@@ -181,6 +181,7 @@ function build(settings)
 		end
 	end
 
+	-- opus settings
 	opus_settings = settings:Copy()
 	opus_settings.cc.flags:Add("-DHAVE_CONFIG_H")
 	opus_settings.cc.includes:Add("src/engine/external/opus")
@@ -198,15 +199,13 @@ function build(settings)
 	opusfile_settings.cc.includes:Add("src/engine/external/opus")
 	opusfile_settings.cc.includes:Add("src/engine/external/opusfile")
 
-	settings.cc.includes:Add("src/engine/external/opus")
-	settings.cc.includes:Add("src/engine/external/ogg")
-
-	-- set some platform specific settings
 	settings.cc.includes:Add("src")
 	settings.cc.includes:Add("src/engine/external")
+	settings.cc.includes:Add("src/engine/external/ogg")
 	settings.cc.includes:Add("src/engine/external/opus")
 	settings.cc.includes:Add("other/mysql/include")
 
+	-- set some platform specific settings
 	if family == "unix" then
 		if platform == "macosx" then
 			settings.link.frameworks:Add("Carbon")
@@ -219,8 +218,8 @@ function build(settings)
 		end
 		
 		if platform == "solaris" then
-		    settings.link.flags:Add("-lsocket")
-		    settings.link.flags:Add("-lnsl")
+			settings.link.flags:Add("-lsocket")
+			settings.link.flags:Add("-lnsl")
 		end
 	elseif family == "windows" then
 		settings.link.libs:Add("gdi32")
