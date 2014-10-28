@@ -25,6 +25,7 @@ public:
 
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
+	void FillExtraInfo(CNetObj_Projectile *pProj);
 
 	virtual void Reset();
 	virtual void Tick();
