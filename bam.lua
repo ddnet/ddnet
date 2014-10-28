@@ -287,10 +287,11 @@ function build(settings)
 		end
 
 	elseif family == "windows" then
+		client_settings.link.libpath:Add(".")
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
-		client_settings.link.libs:Add("other/opus/windows/lib32/libopusfile-0")
+		client_settings.link.libs:Add("libopusfile-0")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")
