@@ -267,6 +267,16 @@ function build(settings)
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
+			client_settings.link.libs:Add("opusfile")
+			client_settings.link.libs:Add("opus")
+			client_settings.link.libs:Add("ogg")
+
+			if arch == "amd64" then
+				client_settings.link.libpath:Add("other/opus/linux/lib64")
+			else
+				client_settings.link.libpath:Add("other/opus/linux/lib32")
+			end
+
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/linux/lib64")
@@ -280,7 +290,7 @@ function build(settings)
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
-		client_settings.link.libs:Add("other/opus/lib32/libopusfile-0")
+		client_settings.link.libs:Add("other/opus/windows/lib32/libopusfile-0")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")
