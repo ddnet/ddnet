@@ -256,6 +256,13 @@ function build(settings)
 			client_settings.link.frameworks:Add("Carbon")
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
+
+			if arch == "amd64" then
+				client_settings.link.libpath:Add("other/opus/mac/lib64")
+			else
+				client_settings.link.libpath:Add("other/opus/mac/lib32")
+			end
+
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/mac/lib64")
