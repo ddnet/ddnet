@@ -2908,7 +2908,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
 	if(!SoundFile)
 	{
-		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFileName);
+		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
 		return;
 	}
 
@@ -2918,7 +2918,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	if(DataSize <= 0)
 	{
 		io_close(SoundFile);
-		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFileName);
+		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
 		return;
 	}
 
@@ -2927,7 +2927,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	io_close(SoundFile);
 
 	// load sound
-	int SoundId = pEditor->Sound()->LoadWVFromMem(pData, (unsigned) DataSize, true);
+	int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, (unsigned) DataSize, true);
 	if(SoundId == -1)
 		return;
 
@@ -3397,7 +3397,7 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 		(pName[1] == '.' && pName[2] == 0 && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))) ||
 		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && (Length < 4 || str_comp(pName+Length-4, ".map"))) ||
 		(pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && (Length < 4 || str_comp(pName+Length-4, ".png"))) ||
-		(pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && (Length < 3 || str_comp(pName+Length-3, ".wv"))))))
+		(pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && (Length < 5 || str_comp(pName+Length-5, ".opus"))))))
 		return 0;
 
 	CEditor::CFilelistItem Item;
@@ -3407,7 +3407,7 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 	else
 	{
 		if(pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND)
-			str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-2));
+			str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-4));
 		else
 			str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-3));
 	}

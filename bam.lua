@@ -126,6 +126,12 @@ if family == "windows" then
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
 
+	--copy opus libs
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libgcc_s_sjlj-1.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libogg-0.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopus-0.dll"))
+	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopusfile-0.dll"))
+
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
 		server_link_other = {ResCompile("other/icons/teeworlds_srv_cl.rc")}
@@ -181,10 +187,14 @@ function build(settings)
 		end
 	end
 
-	-- set some platform specific settings
 	settings.cc.includes:Add("src")
+	settings.cc.includes:Add("src/engine/external")
+	settings.cc.includes:Add("src/engine/external/ogg")
+	settings.cc.includes:Add("other/opus/include")
+	settings.cc.includes:Add("other/opus/include/opus")
 	settings.cc.includes:Add("other/mysql/include")
 
+	-- set some platform specific settings
 	if family == "unix" then
 		if platform == "macosx" then
 			settings.link.frameworks:Add("Carbon")
@@ -197,8 +207,8 @@ function build(settings)
 		end
 		
 		if platform == "solaris" then
-		    settings.link.flags:Add("-lsocket")
-		    settings.link.flags:Add("-lnsl")
+			settings.link.flags:Add("-lsocket")
+			settings.link.flags:Add("-lnsl")
 		end
 	elseif family == "windows" then
 		settings.link.libs:Add("gdi32")
@@ -245,6 +255,17 @@ function build(settings)
 			client_settings.link.frameworks:Add("Carbon")
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
+
+			client_settings.link.libs:Add("opusfile")
+			client_settings.link.libs:Add("opus")
+			client_settings.link.libs:Add("ogg")
+
+			if string.find(settings.config_name, "64") then
+				client_settings.link.libpath:Add("other/opus/mac/lib64")
+			else
+				client_settings.link.libpath:Add("other/opus/mac/lib32")
+			end
+
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/mac/lib64")
@@ -256,6 +277,16 @@ function build(settings)
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
+			client_settings.link.libs:Add("opusfile")
+			client_settings.link.libs:Add("opus")
+			client_settings.link.libs:Add("ogg")
+
+			if arch == "amd64" then
+				client_settings.link.libpath:Add("other/opus/linux/lib64")
+			else
+				client_settings.link.libpath:Add("other/opus/linux/lib32")
+			end
+
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/linux/lib64")
@@ -266,9 +297,11 @@ function build(settings)
 		end
 
 	elseif family == "windows" then
+		client_settings.link.libpath:Add("other/opus/windows/lib32")
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
+		client_settings.link.libs:Add("libopusfile-0")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")

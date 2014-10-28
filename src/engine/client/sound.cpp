@@ -14,6 +14,7 @@
 
 extern "C" { // wavpack
 	#include <engine/external/wavpack/wavpack.h>
+	#include <opusfile.h>
 }
 #include <math.h>
 
@@ -348,6 +349,56 @@ int CSound::ReadData(void *pBuffer, int Size)
 	return ChunkSize;
 }
 
+int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
+{
+	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+		return -1;
+
+	CSample *pSample = &m_aSamples[SampleID];
+	char aError[100];
+
+	ms_pWVBuffer = pData;
+	ms_WVBufferSize = DataSize;
+	ms_WVBufferPosition = 0;
+
+	OggOpusFile *OpusFile = op_open_memory((const unsigned char *) pData, DataSize, NULL);
+	if (OpusFile)
+	{
+		int NumChannels = op_channel_count(OpusFile, -1);
+		int NumSamples = op_pcm_total(OpusFile, -1); // per channel!
+
+		pSample->m_Channels = NumChannels;
+
+		if(pSample->m_Channels > 2)
+		{
+			dbg_msg("sound/opus", "file is not mono or stereo.");
+			return -1;
+		}
+
+		pSample->m_pData = (short *)mem_alloc(NumSamples * sizeof(short) * NumChannels, 1);
+
+		int Read;
+		int Pos = 0;
+		while (Pos < NumSamples)
+		{
+			Read = op_read(OpusFile, pSample->m_pData + Pos*NumChannels, NumSamples*NumChannels, NULL);
+			Pos += Read;
+		}
+
+		pSample->m_NumFrames = NumSamples; // ?
+		pSample->m_Rate = 48000;
+		pSample->m_LoopStart = -1;
+		pSample->m_LoopEnd = -1;
+		pSample->m_PausedAt = 0;
+	}
+	else
+	{
+		dbg_msg("sound/opus", "failed to decode sample (%s)", aError);
+	}
+
+	return SampleID;
+}
+
 int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 {
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
@@ -412,6 +463,57 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	return SampleID;
 }
 
+int CSound::LoadOpus(const char *pFilename)
+{
+	// don't waste memory on sound when we are stress testing
+	if(g_Config.m_DbgStress)
+		return -1;
+
+	// no need to load sound when we are running with no sound
+	if(!m_SoundEnabled)
+		return -1;
+
+	if(!m_pStorage)
+		return -1;
+
+	ms_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!ms_File)
+	{
+		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
+		return -1;
+	}
+
+	int SampleID = AllocID();
+	if(SampleID < 0)
+		return -1;
+
+	// read the whole file into memory
+	int DataSize = io_length(ms_File);
+
+	if(DataSize <= 0)
+	{
+		io_close(ms_File);
+		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
+		return -1;
+	}
+
+	char *pData = new char[DataSize];
+	io_read(ms_File, pData, DataSize);
+
+	SampleID = DecodeOpus(SampleID, pData, DataSize);
+
+	delete[] pData;
+	io_close(ms_File);
+	ms_File = NULL;
+
+	if(g_Config.m_Debug)
+		dbg_msg("sound/opus", "loaded %s", pFilename);
+
+	RateConvert(SampleID);
+	return SampleID;
+}
+
+
 int CSound::LoadWV(const char *pFilename)
 {
 	// don't waste memory on sound when we are stress testing
@@ -457,6 +559,29 @@ int CSound::LoadWV(const char *pFilename)
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
+
+	RateConvert(SampleID);
+	return SampleID;
+}
+
+int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false)
+{
+	// don't waste memory on sound when we are stress testing
+	if(g_Config.m_DbgStress)
+		return -1;
+
+	// no need to load sound when we are running with no sound
+	if(!m_SoundEnabled && !FromEditor)
+		return -1;
+
+	if(!pData)
+		return -1;
+
+	int SampleID = AllocID();
+	if(SampleID < 0)
+		return -1;
+
+	SampleID = DecodeOpus(SampleID, pData, DataSize);
 
 	RateConvert(SampleID);
 	return SampleID;
