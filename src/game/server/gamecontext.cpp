@@ -588,6 +588,9 @@ void CGameContext::OnTick()
 	{
 		if(m_apPlayers[i])
 		{
+			// send vote options
+			ProgressVoteOptions(i);
+
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
 		}
@@ -772,6 +775,92 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 {
 	if(!m_World.m_Paused)
 		m_apPlayers[ClientID]->OnPredictedInput((CNetObj_PlayerInput *)pInput);
+}
+
+class CVoteOptionServer *CGameContext::GetVoteOption(int Index)
+{
+	CVoteOptionServer *pCurrent;
+	for (pCurrent = m_pVoteOptionFirst;
+			Index > 0 && pCurrent;
+			Index--, pCurrent = pCurrent->m_pNext);
+
+	if (Index > 0)
+		return 0;
+	return pCurrent;
+}
+
+void CGameContext::ProgressVoteOptions(int ClientID)
+{
+	CPlayer *pPl = m_apPlayers[ClientID];
+
+	if (pPl->m_SendVoteIndex == -1)
+		return; // we didn't start sending options yet
+
+	if (pPl->m_SendVoteIndex > m_NumVoteOptions)
+		return; // shouldn't happen / fail silently
+
+	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
+	int NumVotesToSend = min(g_Config.m_SvSendVotesPerTick, VotesLeft);
+
+	if (!VotesLeft)
+	{
+		// player has up to date vote option list
+		return;
+	}
+
+	// build vote option list msg
+	int CurIndex = 0;
+
+	CNetMsg_Sv_VoteOptionListAdd OptionMsg;
+	OptionMsg.m_pDescription0 = "";
+	OptionMsg.m_pDescription1 = "";
+	OptionMsg.m_pDescription2 = "";
+	OptionMsg.m_pDescription3 = "";
+	OptionMsg.m_pDescription4 = "";
+	OptionMsg.m_pDescription5 = "";
+	OptionMsg.m_pDescription6 = "";
+	OptionMsg.m_pDescription7 = "";
+	OptionMsg.m_pDescription8 = "";
+	OptionMsg.m_pDescription9 = "";
+	OptionMsg.m_pDescription10 = "";
+	OptionMsg.m_pDescription11 = "";
+	OptionMsg.m_pDescription12 = "";
+	OptionMsg.m_pDescription13 = "";
+	OptionMsg.m_pDescription14 = "";
+
+	// get current vote option by index
+	CVoteOptionServer *pCurrent = GetVoteOption(pPl->m_SendVoteIndex);
+
+	while(CurIndex < NumVotesToSend)
+	{
+		switch(CurIndex)
+		{
+			case 0: OptionMsg.m_pDescription0 = pCurrent->m_aDescription; break;
+			case 1: OptionMsg.m_pDescription1 = pCurrent->m_aDescription; break;
+			case 2: OptionMsg.m_pDescription2 = pCurrent->m_aDescription; break;
+			case 3: OptionMsg.m_pDescription3 = pCurrent->m_aDescription; break;
+			case 4: OptionMsg.m_pDescription4 = pCurrent->m_aDescription; break;
+			case 5: OptionMsg.m_pDescription5 = pCurrent->m_aDescription; break;
+			case 6: OptionMsg.m_pDescription6 = pCurrent->m_aDescription; break;
+			case 7: OptionMsg.m_pDescription7 = pCurrent->m_aDescription; break;
+			case 8: OptionMsg.m_pDescription8 = pCurrent->m_aDescription; break;
+			case 9: OptionMsg.m_pDescription9 = pCurrent->m_aDescription; break;
+			case 10: OptionMsg.m_pDescription10 = pCurrent->m_aDescription; break;
+			case 11: OptionMsg.m_pDescription11 = pCurrent->m_aDescription; break;
+			case 12: OptionMsg.m_pDescription12 = pCurrent->m_aDescription; break;
+			case 13: OptionMsg.m_pDescription13 = pCurrent->m_aDescription; break;
+			case 14: OptionMsg.m_pDescription14 = pCurrent->m_aDescription; break;
+		}
+
+		CurIndex++;
+		pCurrent = pCurrent->m_pNext;
+	}
+
+	// send msg
+	OptionMsg.m_NumOptions = NumVotesToSend;
+	Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
+
+	pPl->m_SendVoteIndex += NumVotesToSend;
 }
 
 void CGameContext::OnClientEnter(int ClientID)
@@ -1516,77 +1605,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
 		//m_pController->OnPlayerInfoChange(pPlayer);
 
-		// send vote options
+		// send clear vote options
 		CNetMsg_Sv_VoteClearOptions ClearMsg;
 		Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
 
-		CNetMsg_Sv_VoteOptionListAdd OptionMsg;
-		int NumOptions = 0;
-		OptionMsg.m_pDescription0 = "";
-		OptionMsg.m_pDescription1 = "";
-		OptionMsg.m_pDescription2 = "";
-		OptionMsg.m_pDescription3 = "";
-		OptionMsg.m_pDescription4 = "";
-		OptionMsg.m_pDescription5 = "";
-		OptionMsg.m_pDescription6 = "";
-		OptionMsg.m_pDescription7 = "";
-		OptionMsg.m_pDescription8 = "";
-		OptionMsg.m_pDescription9 = "";
-		OptionMsg.m_pDescription10 = "";
-		OptionMsg.m_pDescription11 = "";
-		OptionMsg.m_pDescription12 = "";
-		OptionMsg.m_pDescription13 = "";
-		OptionMsg.m_pDescription14 = "";
-		CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
-		while(pCurrent)
-		{
-			switch(NumOptions++)
-			{
-			case 0: OptionMsg.m_pDescription0 = pCurrent->m_aDescription; break;
-			case 1: OptionMsg.m_pDescription1 = pCurrent->m_aDescription; break;
-			case 2: OptionMsg.m_pDescription2 = pCurrent->m_aDescription; break;
-			case 3: OptionMsg.m_pDescription3 = pCurrent->m_aDescription; break;
-			case 4: OptionMsg.m_pDescription4 = pCurrent->m_aDescription; break;
-			case 5: OptionMsg.m_pDescription5 = pCurrent->m_aDescription; break;
-			case 6: OptionMsg.m_pDescription6 = pCurrent->m_aDescription; break;
-			case 7: OptionMsg.m_pDescription7 = pCurrent->m_aDescription; break;
-			case 8: OptionMsg.m_pDescription8 = pCurrent->m_aDescription; break;
-			case 9: OptionMsg.m_pDescription9 = pCurrent->m_aDescription; break;
-			case 10: OptionMsg.m_pDescription10 = pCurrent->m_aDescription; break;
-			case 11: OptionMsg.m_pDescription11 = pCurrent->m_aDescription; break;
-			case 12: OptionMsg.m_pDescription12 = pCurrent->m_aDescription; break;
-			case 13: OptionMsg.m_pDescription13 = pCurrent->m_aDescription; break;
-			case 14:
-				{
-					OptionMsg.m_pDescription14 = pCurrent->m_aDescription;
-					OptionMsg.m_NumOptions = NumOptions;
-					Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
-					OptionMsg = CNetMsg_Sv_VoteOptionListAdd();
-					NumOptions = 0;
-					OptionMsg.m_pDescription1 = "";
-					OptionMsg.m_pDescription2 = "";
-					OptionMsg.m_pDescription3 = "";
-					OptionMsg.m_pDescription4 = "";
-					OptionMsg.m_pDescription5 = "";
-					OptionMsg.m_pDescription6 = "";
-					OptionMsg.m_pDescription7 = "";
-					OptionMsg.m_pDescription8 = "";
-					OptionMsg.m_pDescription9 = "";
-					OptionMsg.m_pDescription10 = "";
-					OptionMsg.m_pDescription11 = "";
-					OptionMsg.m_pDescription12 = "";
-					OptionMsg.m_pDescription13 = "";
-					OptionMsg.m_pDescription14 = "";
-				}
-			}
-			pCurrent = pCurrent->m_pNext;
-		}
-		if(NumOptions > 0)
-		{
-			OptionMsg.m_NumOptions = NumOptions;
-			Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
-			NumOptions = 0;
-		}
+		// begin sending vote options
+		pPlayer->m_SendVoteIndex = 0;
 
 		// send tuning parameters to client
 		SendTuningParams(ClientID, pPlayer->m_TuneZone);
@@ -1968,11 +1992,6 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "added option '%s' '%s'", pOption->m_aDescription, pOption->m_aCommand);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-
-	// inform clients about added option
-	CNetMsg_Sv_VoteOptionAdd OptionMsg;
-	OptionMsg.m_pDescription = pOption->m_aDescription;
-	pSelf->Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, -1);
 }
 
 void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
@@ -1996,10 +2015,17 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	// inform clients about removed option
-	CNetMsg_Sv_VoteOptionRemove OptionMsg;
-	OptionMsg.m_pDescription = pOption->m_aDescription;
-	pSelf->Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, -1);
+	// start reloading vote option list
+	// clear vote options
+	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
+	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
+
+	// reset sending of vote options
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i])
+			pSelf->m_apPlayers[i]->m_SendVoteIndex = 0;
+	}
 
 	// TODO: improve this
 	// remove the option
@@ -2120,6 +2146,13 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pVoteOptionFirst = 0;
 	pSelf->m_pVoteOptionLast = 0;
 	pSelf->m_NumVoteOptions = 0;
+
+	// reset sending of vote options
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i])
+			pSelf->m_apPlayers[i]->m_SendVoteIndex = 0;
+	}
 }
 
 void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
