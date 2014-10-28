@@ -98,8 +98,17 @@ void CGraphics_OpenGL::Flush()
 	if(m_RenderEnable)
 	{
 		if(m_Drawing == DRAWING_QUADS)
-			for( unsigned i = 0, j = m_NumVertices; i < j; i += 4 )
-				glDrawArrays(GL_TRIANGLE_FAN, i, 4);
+		{
+			if(g_Config.m_GfxQuadsAsTriangles)
+			{
+				for( unsigned i = 0, j = m_NumVertices; i < j; i += 4 )
+					glDrawArrays(GL_TRIANGLE_FAN, i, 4);
+			}
+			else
+			{
+				glDrawArrays(GL_QUADS, 0, m_NumVertices);
+			}
+		}
 		else if(m_Drawing == DRAWING_LINES)
 			glDrawArrays(GL_LINES, 0, m_NumVertices);
 	}

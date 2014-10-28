@@ -17,6 +17,7 @@
 	#include <X11/Xlib.h>
 #endif
 
+#include <engine/shared/config.h>
 #include <base/tl/threading.h>
 
 #include "graphics_threaded.h"
@@ -328,8 +329,15 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	switch(pCommand->m_PrimType)
 	{
 	case CCommandBuffer::PRIMTYPE_QUADS:
-		for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
-			glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
+		if(g_Config.m_GfxQuadsAsTriangles)
+		{
+			for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
+				glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
+		}
+		else
+		{
+			glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount*4);
+		}
 		break;
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
