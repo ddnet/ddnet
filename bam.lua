@@ -257,7 +257,11 @@ function build(settings)
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
 
-			if arch == "amd64" then
+			client_settings.link.libs:Add("opusfile")
+			client_settings.link.libs:Add("opus")
+			client_settings.link.libs:Add("ogg")
+
+			if string.find(settings.config_name, "64") then
 				client_settings.link.libpath:Add("other/opus/mac/lib64")
 			else
 				client_settings.link.libpath:Add("other/opus/mac/lib32")
