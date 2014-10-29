@@ -30,7 +30,7 @@ CAutofire::CAutofire
 void CAutofire::Tick()
 {
 	m_Time++;
-	if (m_Time > m_Delay) {
+	if (m_Time >= m_Delay) {
 		m_Time = 0;
 
 		switch(m_Weapon)
