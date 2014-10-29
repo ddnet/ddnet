@@ -15,6 +15,7 @@
 #include "entities/projectile.h"
 #include "entities/plasma.h"
 #include "entities/door.h"
+#include "entities/autofire.h"
 #include <game/layers.h>
 
 
@@ -138,7 +139,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 
 
 //bool IGameController::OnEntity(int Index, vec2 Pos)
-bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
+bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number, int Delay)
 {
 	if (Index < 0)
 		return false;
@@ -352,7 +353,28 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		new CGun(&GameServer()->m_World, Pos, false, false, Layer, Number);
 	}
-	
+	else if(Index >= ENTITY_AF_SHOTGUN && Index <= ENTITY_AF_RIFLE && Layer == LAYER_SWITCH && Number > 0 && Delay > 0)
+	{
+		int Del = Delay * 50;
+		vec2 Dir(1, -1);
+		
+		switch(Number % 8) {
+			case 1: Dir.x = 1; Dir.y = 0; break;
+			case 2: Dir.x = 1; Dir.y = 1; break;
+			case 3: Dir.x = 0; Dir.y = 1; break;
+			case 4: Dir.x = -1; Dir.y = 1; break;
+			case 5: Dir.x = -1; Dir.y = 0; break;
+			case 6: Dir.x = -1; Dir.y = -1; break;
+			case 7: Dir.x = 0; Dir.y = -1; break;
+		}
+
+		switch(Index) {
+			case ENTITY_AF_SHOTGUN: new CAutofire(&GameServer()->m_World, WEAPON_SHOTGUN, Pos, Dir, Del); break;
+			case ENTITY_AF_GRENADE: new CAutofire(&GameServer()->m_World, WEAPON_GRENADE, Pos, Dir, Del); break;
+			case ENTITY_AF_RIFLE: new CAutofire(&GameServer()->m_World, WEAPON_RIFLE, Pos, Dir, Del); break;
+		}
+	}
+
 	if(Type != -1)
 	{
 		//CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType);
