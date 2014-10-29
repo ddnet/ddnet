@@ -356,15 +356,15 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	else if(Index >= ENTITY_AF_SHOTGUN && Index <= ENTITY_AF_RIFLE && Layer == LAYER_SWITCH && Number > 0 && Delay > 0)
 	{
 		int Del = Delay * 50;
-		vec2 Dir(1, -1);
+		vec2 Dir(0.707107, -0.707107);
 		
 		switch(Number % 8) {
 			case 1: Dir.x = 1; Dir.y = 0; break;
-			case 2: Dir.x = 1; Dir.y = 1; break;
+			case 2: Dir.x = 0.707107; Dir.y = 0.707107; break;
 			case 3: Dir.x = 0; Dir.y = 1; break;
-			case 4: Dir.x = -1; Dir.y = 1; break;
+			case 4: Dir.x = -0.707107; Dir.y = 0.707107; break;
 			case 5: Dir.x = -1; Dir.y = 0; break;
-			case 6: Dir.x = -1; Dir.y = -1; break;
+			case 6: Dir.x = -0.707107; Dir.y = -0.707107; break;
 			case 7: Dir.x = 0; Dir.y = -1; break;
 		}
 
