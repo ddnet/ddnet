@@ -111,6 +111,7 @@ public:
 
 	// input
 	virtual int *GetInput(int Tick) = 0;
+	virtual bool InputExists(int Tick) = 0;
 
 	// remote console
 	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
