@@ -51,18 +51,21 @@
 
 #include <engine/client/serverbrowser.h>
 
-#include "friends.h"
-#include "serverbrowser.h"
-#include "autoupdate.h"
-#include "client.h"
-
-#include <zlib.h>
-
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
+
+#include "friends.h"
+#include "serverbrowser.h"
+#include "fetcher.h"
+#include "autoupdate.h"
+#include "client.h"
+
+#include <zlib.h>
+
+
 
 #include "SDL.h"
 #ifdef main
@@ -410,6 +413,16 @@ void CClient::SendEnterGame()
 void CClient::SendReady()
 {
 	CMsgPacker Msg(NETMSG_READY);
+	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+}
+
+void CClient::SendMapRequest()
+{
+	if(m_MapdownloadFile)
+		io_close(m_MapdownloadFile);
+	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
+	Msg.AddInt(m_MapdownloadChunk);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
@@ -1534,22 +1547,15 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 					m_MapdownloadChunk = 0;
 					str_copy(m_aMapdownloadName, pMap, sizeof(m_aMapdownloadName));
-					if(m_MapdownloadFile)
-						io_close(m_MapdownloadFile);
-					m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+
 					m_MapdownloadCrc = MapCrc;
 					m_MapdownloadTotalsize = MapSize;
 					m_MapdownloadAmount = 0;
 
-					CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
-					Msg.AddInt(m_MapdownloadChunk);
-					SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
-
-					if(g_Config.m_Debug)
-					{
-						str_format(aBuf, sizeof(aBuf), "requested chunk %d", m_MapdownloadChunk);
-						m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client/network", aBuf);
-					}
+					char aUrl[256];
+					str_format(aUrl, sizeof(aUrl), "https://learath2.info/maps/%s_%08x.map", pMap, MapCrc);
+					m_pMapdownloadTask = new CFetchTask;
+					Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 				}
 			}
 		}
@@ -1570,26 +1576,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			m_MapdownloadAmount += Size;
 
 			if(Last)
-			{
-				const char *pError;
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
-
-				if(m_MapdownloadFile)
-					io_close(m_MapdownloadFile);
-				m_MapdownloadFile = 0;
-				m_MapdownloadAmount = 0;
-				m_MapdownloadTotalsize = -1;
-
-				// load map
-				pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
-				if(!pError)
-				{
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
-					SendReady();
-				}
-				else
-					DisconnectWithReason(pError);
-			}
+				FinishMapDownload();
 			else
 			{
 				// request new chunk
@@ -2120,6 +2107,37 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	}
 }
 
+void CClient::ResetMapDownload()
+{
+	if(m_pMapdownloadTask){
+		delete m_pMapdownloadTask;
+		m_pMapdownloadTask = NULL;
+	}
+	if(m_MapdownloadFile)
+		io_close(m_MapdownloadFile);
+	m_MapdownloadFile = 0;
+	m_MapdownloadAmount = 0;
+}
+
+void CClient::FinishMapDownload()
+{
+	const char *pError;
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
+
+	ResetMapDownload();
+	m_MapdownloadTotalsize = -1;
+
+	// load map
+	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
+	if(!pError)
+	{
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
+		SendReady();
+	}
+	else
+		DisconnectWithReason(pError);
+}
+
 void CClient::PumpNetwork()
 {
 	for(int i=0; i<3; i++)
@@ -2381,6 +2399,16 @@ void CClient::Update()
 
 	// pump the network
 	PumpNetwork();
+	if(m_pMapdownloadTask){
+		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
+			FinishMapDownload();
+		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR){
+			dbg_msg("webdl", "HTTP failed falling back to gameserver.");
+			ResetMapDownload();
+			SendMapRequest();
+		}
+	}
+
 
 	// update the maser server registry
 	MasterServer()->Update();
@@ -2424,6 +2452,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[RECORDER_MANUAL]));
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
+	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher));
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
 #endif
@@ -2441,6 +2470,7 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
+	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
 #endif
@@ -2450,6 +2480,8 @@ void CClient::InitInterfaces()
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 	
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
+
+	m_Fetcher.Init();
 
 	m_Friends.Init();
 
@@ -2563,7 +2595,7 @@ void CClient::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
-
+	
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
