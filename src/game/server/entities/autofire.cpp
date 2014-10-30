@@ -30,7 +30,7 @@ CAutofire::CAutofire
 void CAutofire::Tick()
 {
 	m_Time++;
-	if (m_Time > m_Delay) {
+	if (m_Time >= m_Delay) {
 		m_Time = 0;
 
 		switch(m_Weapon)
@@ -55,6 +55,8 @@ void CAutofire::Tick()
 				else
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
 
+				int64_t TeamMask = ((CGameControllerDDRace*)GameWorld()->GameServer()->m_pController)->m_Teams.TeamMask(0, -1, -1);
+
 				CProjectile *pProj = new CProjectile
 					(
 					&GameServer()->m_World,
@@ -67,7 +69,10 @@ void CAutofire::Tick()
 					true,
 					0,
 					SOUND_GRENADE_EXPLODE,
-					WEAPON_GRENADE
+					WEAPON_GRENADE,
+					0,
+					0,
+					TeamMask
 					);
 
 				CNetObj_Projectile p;

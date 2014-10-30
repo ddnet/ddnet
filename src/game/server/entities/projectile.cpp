@@ -22,7 +22,8 @@ CProjectile::CProjectile
 		int SoundImpact,
 		int Weapon,
 		int Layer,
-		int Number
+		int Number,
+		int64_t TeamMask
 	)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
@@ -31,6 +32,7 @@ CProjectile::CProjectile
 	m_Direction = Dir;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
+	m_TeamMask = TeamMask;
 	m_Force = Force;
 	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
@@ -125,7 +127,7 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64_t TeamMask = -1LL;
+	int64_t TeamMask = m_TeamMask;
 	bool isWeaponCollide = false;
 	if
 	(
@@ -189,7 +191,7 @@ void CProjectile::Tick()
 			if(m_Owner >= 0)
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-			int64_t TeamMask = -1LL;
+			int64_t TeamMask = m_TeamMask;
 			if (pOwnerChar && pOwnerChar->IsAlive())
 			{
 					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
@@ -272,7 +274,7 @@ void CProjectile::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = 0;
-	int64_t TeamMask = -1LL;
+	int64_t TeamMask = m_TeamMask;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);

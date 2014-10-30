@@ -20,7 +20,8 @@ public:
 		int SoundImpact,
 		int Weapon,
 		int Layer = 0,
-		int Number = 0
+		int Number = 0,
+		int64_t TeamMask = -1LL
 	);
 
 	vec2 GetPos(float Time);
@@ -36,6 +37,7 @@ private:
 	vec2 m_Direction;
 	int m_LifeSpan;
 	int m_Owner;
+	int64_t m_TeamMask;
 	int m_Type;
 	//int m_Damage;
 	int m_SoundImpact;
