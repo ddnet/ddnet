@@ -888,7 +888,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
-									if(((((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
+									if((((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type > (ENTITY_AF_RIFLE + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET) || ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == (ENTITY_DRAGGER_STRONG_NW + 1 + ENTITY_OFFSET))
 										continue;
 									if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_SWITCHTIMEDOPEN)
 									{
@@ -948,6 +948,11 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type == TILE_PENALTY)
 									{
 										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_PENALTY;
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
+									}
+									else if(((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type >= (ENTITY_AF_SHOTGUN + ENTITY_OFFSET) && ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type <= (ENTITY_AF_RIFLE + ENTITY_OFFSET))
+									{
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Type;
 										((CLayerTiles*)pTiles)->m_pTiles[i].m_Flags = ((CLayerSwitch*)pTiles)->m_pSwitchTile[i].m_Flags;
 									}
 								}

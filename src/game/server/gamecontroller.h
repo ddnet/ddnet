@@ -115,7 +115,7 @@ public:
 			bool?
 	*/
 	//virtual bool OnEntity(int Index, vec2 Pos);
-	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
+	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0, int Delay = 0);
 
 	/*
 		Function: on_CCharacter_spawn

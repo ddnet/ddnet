@@ -22,7 +22,8 @@ CProjectile::CProjectile
 		int SoundImpact,
 		int Weapon,
 		int Layer,
-		int Number
+		int Number,
+		int Team
 	)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
@@ -41,6 +42,12 @@ CProjectile::CProjectile
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
+
+	m_Team = Team;
+	if(m_Team == -1)
+		m_TeamMask = -1LL;
+	else
+		m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_Team, -1, -1);
 	
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
@@ -125,7 +132,7 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64_t TeamMask = -1LL;
+	int64_t TeamMask = m_TeamMask;
 	bool isWeaponCollide = false;
 	if
 	(
@@ -133,7 +140,8 @@ void CProjectile::Tick()
 			pTargetChr &&
 			pOwnerChar->IsAlive() &&
 			pTargetChr->IsAlive() &&
-			!pTargetChr->CanCollide(m_Owner)
+			!pTargetChr->CanCollide(m_Owner) &&
+			m_TeamMask == pTargetChr->Teams()->TeamMask(pTargetChr->Team(), -1, pTargetChr->GetPlayer()->GetCID())
 			)
 	{
 			isWeaponCollide = true;
@@ -152,8 +160,12 @@ void CProjectile::Tick()
 	{
 		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
 		{
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-			(m_Owner != -1)? TeamMask : -1LL);
+			if(m_Team == -1)
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+				(m_Owner != -1)? TeamMask : -1LL);
+			else
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, m_Team,
+				(m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 			(m_Owner != -1)? TeamMask : -1LL);
 		}
@@ -189,14 +201,18 @@ void CProjectile::Tick()
 			if(m_Owner >= 0)
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-			int64_t TeamMask = -1LL;
+			int64_t TeamMask = m_TeamMask;
 			if (pOwnerChar && pOwnerChar->IsAlive())
 			{
 					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 			}
 
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-			(m_Owner != -1)? TeamMask : -1LL);
+			if(m_Team == -1)
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
+				(m_Owner != -1)? TeamMask : -1LL);
+			else
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, m_Team,
+				(m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 			(m_Owner != -1)? TeamMask : -1LL);
 		}
@@ -272,7 +288,7 @@ void CProjectile::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = 0;
-	int64_t TeamMask = -1LL;
+	int64_t TeamMask = m_TeamMask;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
