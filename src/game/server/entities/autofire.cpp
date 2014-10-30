@@ -55,7 +55,7 @@ void CAutofire::Tick()
 				else
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
 
-				int64_t TeamMask = ((CGameControllerDDRace*)GameWorld()->GameServer()->m_pController)->m_Teams.TeamMask(0, -1, -1);
+				//int64_t TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(0, -1, -1);
 
 				CProjectile *pProj = new CProjectile
 					(
@@ -72,7 +72,7 @@ void CAutofire::Tick()
 					WEAPON_GRENADE,
 					0,
 					0,
-					TeamMask
+					0
 					);
 
 				CNetObj_Projectile p;

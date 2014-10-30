@@ -21,7 +21,7 @@ public:
 		int Weapon,
 		int Layer = 0,
 		int Number = 0,
-		int64_t TeamMask = -1LL
+		int Team = -1
 	);
 
 	vec2 GetPos(float Time);
@@ -37,7 +37,6 @@ private:
 	vec2 m_Direction;
 	int m_LifeSpan;
 	int m_Owner;
-	int64_t m_TeamMask;
 	int m_Type;
 	//int m_Damage;
 	int m_SoundImpact;
@@ -52,6 +51,9 @@ private:
 	bool m_Freeze;
 	bool m_Collised;
 	int m_TuneZone;
+
+	int m_Team;
+	int64_t m_TeamMask;
 
 public:
 

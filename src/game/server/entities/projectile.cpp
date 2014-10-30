@@ -23,7 +23,7 @@ CProjectile::CProjectile
 		int Weapon,
 		int Layer,
 		int Number,
-		int64_t TeamMask
+		int Team
 	)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
@@ -32,7 +32,6 @@ CProjectile::CProjectile
 	m_Direction = Dir;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
-	m_TeamMask = TeamMask;
 	m_Force = Force;
 	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
@@ -43,6 +42,12 @@ CProjectile::CProjectile
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
+
+	m_Team = Team;
+	if(m_Team)
+		m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_Team, -1, -1);
+	else
+		m_TeamMask = -1LL;
 	
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
@@ -154,8 +159,12 @@ void CProjectile::Tick()
 	{
 		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
 		{
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-			(m_Owner != -1)? TeamMask : -1LL);
+			if(!m_Team)
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+				(m_Owner != -1)? TeamMask : -1LL);
+			else
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, m_Team,
+				(m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 			(m_Owner != -1)? TeamMask : -1LL);
 		}
@@ -197,8 +206,12 @@ void CProjectile::Tick()
 					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 			}
 
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-			(m_Owner != -1)? TeamMask : -1LL);
+			if(!m_Team)
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
+				(m_Owner != -1)? TeamMask : -1LL);
+			else
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, m_Team,
+				(m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 			(m_Owner != -1)? TeamMask : -1LL);
 		}
