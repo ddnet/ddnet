@@ -44,10 +44,10 @@ CProjectile::CProjectile
 	m_Freeze = Freeze;
 
 	m_Team = Team;
-	if(m_Team)
-		m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_Team, -1, -1);
-	else
+	if(m_Team == -1)
 		m_TeamMask = -1LL;
+	else
+		m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_Team, -1, -1);
 	
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
@@ -140,7 +140,8 @@ void CProjectile::Tick()
 			pTargetChr &&
 			pOwnerChar->IsAlive() &&
 			pTargetChr->IsAlive() &&
-			!pTargetChr->CanCollide(m_Owner)
+			!pTargetChr->CanCollide(m_Owner) &&
+			m_TeamMask == pTargetChr->Teams()->TeamMask(pTargetChr->Team(), -1, pTargetChr->GetPlayer()->GetCID())
 			)
 	{
 			isWeaponCollide = true;
@@ -159,7 +160,7 @@ void CProjectile::Tick()
 	{
 		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
 		{
-			if(!m_Team)
+			if(m_Team == -1)
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
 				(m_Owner != -1)? TeamMask : -1LL);
 			else
@@ -206,7 +207,7 @@ void CProjectile::Tick()
 					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 			}
 
-			if(!m_Team)
+			if(m_Team == -1)
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
 				(m_Owner != -1)? TeamMask : -1LL);
 			else

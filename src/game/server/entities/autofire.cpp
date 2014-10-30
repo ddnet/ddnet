@@ -43,7 +43,7 @@ void CAutofire::Tick()
 				else
 					LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 
-				new CLaser(&GameServer()->m_World, m_Position, m_Direction, LaserReach, -1, WEAPON_SHOTGUN);
+				new CLaser(&GameServer()->m_World, m_Position, m_Direction, LaserReach, -1, WEAPON_SHOTGUN, 0);
 				GameServer()->CreateSound(m_Position, SOUND_SHOTGUN_FIRE, -1);
 			} break;
 
@@ -54,8 +54,6 @@ void CAutofire::Tick()
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime);
 				else
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
-
-				//int64_t TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(0, -1, -1);
 
 				CProjectile *pProj = new CProjectile
 					(
@@ -94,7 +92,7 @@ void CAutofire::Tick()
 				else
 					LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 				
-				new CLaser(&GameServer()->m_World, m_Position, m_Direction, LaserReach, -1, WEAPON_RIFLE);
+				new CLaser(&GameServer()->m_World, m_Position, m_Direction, LaserReach, -1, WEAPON_RIFLE, 0);
 				GameServer()->CreateSound(m_Position, SOUND_RIFLE_FIRE, -1);
 			} break;
 		}
