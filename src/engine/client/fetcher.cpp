@@ -51,10 +51,10 @@ void CFetcher::FetcherThread(void *pUser)
 		CFetchTask *pTask = pFetcher->m_pFirst;
 		pFetcher->m_pFirst = pTask->m_pNext;
 	lock_release(pFetcher->m_Lock);
-	FetchFile(pFetcher, pTask);
+	pFetcher->FetchFile(pTask);
 }
 
-void CFetcher::FetchFile(CFetcher *pFetcher, CFetchTask *pTask)
+void CFetcher::FetchFile(CFetchTask *pTask)
 {
 	IOHANDLE File = io_open(pTask->m_pDest, IOFLAG_WRITE);
 

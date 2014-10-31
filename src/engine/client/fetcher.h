@@ -5,6 +5,19 @@
 #include "curl/easy.h"
 #include <engine/fetcher.h>
 
+class CFetchTask
+{
+public:	
+	CFetchTask *m_pNext;
+	char *m_pUrl;
+	char *m_pDest;
+	unsigned m_Num;
+	PROGFUNC m_pfnProgressCallback;
+	CFetchTask();
+
+	static int ProgressCallback(void *pUser, curl_off_t dltotal, curl_off_t dlnow, curl_off_t, curl_off_t);
+};
+
 class CFetcher : public IFetcher
 {
 private:
