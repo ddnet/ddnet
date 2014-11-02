@@ -1242,7 +1242,7 @@ void CGameClient::OnPredict()
 			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
 			{
 				CNetObj_Projectile* pProj = (CNetObj_Projectile*) pData;
-				if(pProj->m_Type == WEAPON_GRENADE || (pProj->m_Type == WEAPON_SHOTGUN && HasExtraInfo(pProj)))
+				if(pProj->m_Type == WEAPON_GRENADE)
 				{
 					CLocalProjectile NewProj;
 					NewProj.Init(this, &World, Collision(), pProj);
