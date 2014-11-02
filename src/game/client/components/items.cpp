@@ -49,10 +49,8 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	if(Ct < 0)
 		return; // projectile havn't been shot yet
 
-	vec2 StartPos, StartVel;
-	ExtractInfo(pCurrent, &StartPos, &StartVel);
-	//vec2 StartPos(pCurrent->m_X, pCurrent->m_Y);
-	//vec2 StartVel(pCurrent->m_VelX/100.00000f, pCurrent->m_VelY/100.00000f);
+	vec2 StartPos(pCurrent->m_X, pCurrent->m_Y);
+	vec2 StartVel(pCurrent->m_VelX/100.0f, pCurrent->m_VelY/100.0f);
 	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct-0.001f);
 
