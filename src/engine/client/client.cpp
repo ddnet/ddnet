@@ -595,14 +595,6 @@ int *CClient::GetInput(int Tick)
 	return 0;
 }
 
-bool CClient::InputExists(int Tick)
-{
-	for(int i = 0; i < 200; i++)
-		if(m_aInputs[g_Config.m_ClDummy][i].m_Tick == Tick)
-			return true;
-	return false;
-}
-
 // ------ state handling -----
 void CClient::SetState(int s)
 {

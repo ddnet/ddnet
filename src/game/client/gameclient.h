@@ -319,7 +319,6 @@ public:
 	int IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2* NewPos2, int ownID, CWorldCore *World);
 
 	class CLocalProjectile m_aLocalProjectiles[64];
-	CLocalProjectile *FindLocalProjectile(CLocalProjectile *pProj);
 
 private:
 

@@ -236,7 +236,6 @@ public:
 
 	// TODO: OPT: do this alot smarter!
 	virtual int *GetInput(int Tick);
-	virtual bool InputExists(int Tick);
 
 	const char *LatestVersion();
 	void VersionUpdate();

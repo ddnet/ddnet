@@ -625,18 +625,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 				return;
 
 			g_GameClient.m_pItems->AddExtraProjectile(&Proj);
-
-			if(!HasExtraInfo(&Proj))
-			{
-				CLocalProjectile NewProj;
-				NewProj.Init(this, 0, Collision(), &Proj);
-				NewProj.m_Owner = m_Snap.m_LocalClientID;
-				CLocalProjectile *LocalProj = FindLocalProjectile(&NewProj);
-				if(LocalProj)
-					NewProj = *LocalProj;
-				else
-					m_aLocalProjectiles[NewProj.m_StartTick % 64] = NewProj;
-			}
 		}
 
 		return;
@@ -1241,21 +1229,17 @@ void CGameClient::OnPredict()
 			const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
 			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
 			{
-				CNetObj_Projectile* pProj = (CNetObj_Projectile*) pData;
-				if(pProj->m_Type == WEAPON_GRENADE)
-				{
-					CLocalProjectile NewProj;
-					NewProj.Init(this, &World, Collision(), pProj);
-					if(!NewProj.m_ExtraInfo)
-					{
-						CLocalProjectile *LocalProj = FindLocalProjectile(&NewProj);
-						if(LocalProj)
-							NewProj = *LocalProj;
-					}
-					NewProj.m_pWorld = &World;
-					TempProjectiles[NumProjectiles] = NewProj;
-					NumProjectiles++;
-				}
+			   if(((const CNetObj_Projectile*)pData)->m_Type == WEAPON_GRENADE)
+			   {
+				   TempProjectiles[NumProjectiles].Init(this, &World, Collision(), (const CNetObj_Projectile *)pData);
+
+				   int Index = TempProjectiles[NumProjectiles].m_StartTick % 64;
+				   if(m_aLocalProjectiles[Index].m_Active)
+					   if(m_aLocalProjectiles[Index].m_StartTick == TempProjectiles[NumProjectiles].m_StartTick)
+						   if(distance(m_aLocalProjectiles[Index].m_Pos, TempProjectiles[NumProjectiles].m_Pos) < 3)
+							   TempProjectiles[NumProjectiles] = m_aLocalProjectiles[Index];
+				   NumProjectiles++;
+			   }
 			}
 		}
 	}
@@ -1339,15 +1323,7 @@ void CGameClient::OnPredict()
 			vec2 Pos = Local->m_Pos;
 			vec2 ProjStartPos = Pos + Direction * ProximityRadius * 0.75f;
 
-			int ExpectedStartTick = Tick-1;
 			ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
-
-			bool DirectInput = Client()->InputExists(Tick);
-			if(!DirectInput)
-			{
-				ReloadTimer++;
-				ExpectedStartTick++;
-			}
 			switch(Local->m_ActiveWeapon)
 			{
 				case WEAPON_GRENADE:
@@ -1358,16 +1334,13 @@ void CGameClient::OnPredict()
 								this, &World, Collision(),
 								Direction, //StartDir
 								ProjStartPos, //StartPos
-								ExpectedStartTick, //StartTick
+								Tick-1, //StartTick
 								WEAPON_GRENADE, //Type
 								m_Snap.m_LocalClientID, //Owner
 								WEAPON_GRENADE, //Weapon
 								1000, //LifeSpan
 								1, 0, 0, 1); //Explosive, Bouncing, Freeze, ExtraInfo
-
-						m_aLocalProjectiles[ExpectedStartTick%64] = TempProjectiles[NumProjectiles];
-						m_aLocalProjectiles[ExpectedStartTick%64].m_pWorld = 0;
-
+						m_aLocalProjectiles[(Tick-1)%64] = TempProjectiles[NumProjectiles];
 						NumProjectiles++;
 					} break;
 
@@ -1848,8 +1821,6 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 {
 	if(!m_pWorld)
 		return;
-	if(CurrentTick <= m_StartTick)
-		return;
 	float Pt = (CurrentTick-m_StartTick-1)/(float)GameTickSpeed;
 	float Ct = (CurrentTick-m_StartTick)/(float)GameTickSpeed;
 
@@ -1940,14 +1911,4 @@ void CLocalProjectile::CreateExplosion(vec2 Pos, int LocalClientID)
 		if((int)Dmg)
 			m_pWorld->m_apCharacters[c]->TakeDamage(ForceDir*Dmg*2);
 	}
-}
-
-CLocalProjectile *CGameClient::FindLocalProjectile(CLocalProjectile *pProj)
-{
-	int Index = pProj->m_StartTick % 64;
-	if(m_aLocalProjectiles[Index].m_Active)
-		if(m_aLocalProjectiles[Index].m_StartTick == pProj->m_StartTick)
-			if(distance(m_aLocalProjectiles[Index].m_Pos, pProj->m_Pos) < 3)
-				return &m_aLocalProjectiles[Index];
-	return 0;
 }
