@@ -93,9 +93,6 @@ class CGameClient : public IGameClient
 	class IStorage *m_pStorage;
 	class IDemoPlayer *m_pDemoPlayer;
 	class IServerBrowser *m_pServerBrowser;
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	class IAutoUpdate *m_pAutoUpdate;
-#endif
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 
@@ -133,9 +130,6 @@ public:
 	class IDemoPlayer *DemoPlayer() const { return m_pDemoPlayer; }
 	class IDemoRecorder *DemoRecorder(int Recorder) const { return Client()->DemoRecorder(Recorder); }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	class IAutoUpdate *AutoUpdate() const { return m_pAutoUpdate; }
-#endif
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; };
 	class CCollision *Collision() { return &m_Collision; };

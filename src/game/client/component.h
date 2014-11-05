@@ -26,9 +26,6 @@ protected:
 	class IDemoPlayer *DemoPlayer() const { return m_pClient->DemoPlayer(); }
 	class IDemoRecorder *DemoRecorder(int Recorder) const { return m_pClient->DemoRecorder(Recorder); }
 	class IServerBrowser *ServerBrowser() const { return m_pClient->ServerBrowser(); }
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	class IAutoUpdate *AutoUpdate() const { return m_pClient->AutoUpdate(); }
-#endif
 	class CLayers *Layers() const { return m_pClient->Layers(); }
 	class CCollision *Collision() const { return m_pClient->Collision(); }
 public:
