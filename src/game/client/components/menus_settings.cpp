@@ -9,7 +9,6 @@
 #include <engine/graphics.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <engine/autoupdate.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
@@ -1783,24 +1782,17 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Miscellaneous.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
-
-	// Auto Update
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	CUIRect HUDItem;
-	Left.HSplitTop(20.0f, &HUDItem, &Left);
-	HUDItem.VSplitMid(&HUDItem, &Button);
-	if(DoButton_CheckBox(&g_Config.m_ClAutoUpdate, Localize("Auto-Update"), g_Config.m_ClAutoUpdate, &HUDItem))
-		g_Config.m_ClAutoUpdate ^= 1;
-	Button.Margin(2.0f, &Button);
-	static int s_ButtonAutoUpdate = 0;
-	if (DoButton_Menu((void*)&s_ButtonAutoUpdate, Localize("Check now"), 0, &Button))
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace binds"), g_Config.m_ClDDRaceBinds, &Button))
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Checking for an update");
-		RenderUpdating(aBuf);
-		AutoUpdate()->CheckUpdates(this);
+		g_Config.m_ClDDRaceBinds ^= 1;
 	}
-#endif
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
+	{
+		g_Config.m_ClEditorUndo ^= 1;
+	}
 
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);

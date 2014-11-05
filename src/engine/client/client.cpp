@@ -26,7 +26,6 @@
 #include <engine/map.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
-#include <engine/autoupdate.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -60,12 +59,9 @@
 #include "friends.h"
 #include "serverbrowser.h"
 #include "fetcher.h"
-#include "autoupdate.h"
 #include "client.h"
 
 #include <zlib.h>
-
-
 
 #include "SDL.h"
 #ifdef main
@@ -1158,15 +1154,6 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			if(!VersionMatch)
 			{
 				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-				if (g_Config.m_ClAutoUpdate)
-				{
-					str_format(aBuf, sizeof(aBuf), "Checking for updates");
-					((CGameClient *) GameClient())->m_pMenus->RenderUpdating(aBuf);
-					((CGameClient *) GameClient())->AutoUpdate()->CheckUpdates(((CGameClient *) GameClient())->m_pMenus);
-				}
-#endif
 			}
 
 			// request the news
@@ -2428,9 +2415,6 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
 	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher));
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
-#endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 }
 
@@ -2446,11 +2430,7 @@ void CClient::InitInterfaces()
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
-#endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
-
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 	
@@ -3222,11 +3202,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	pClient->AutoUpdate()->ExecuteExit();
-#endif
-
+	
 	return 0;
 }
 

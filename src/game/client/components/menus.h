@@ -332,7 +332,6 @@ public:
 		POPUP_SOUNDERROR,
 		POPUP_PASSWORD,
 		POPUP_QUIT,
-		POPUP_AUTOUPDATE,
 		POPUP_DISCONNECT,
 
 		// demo player states

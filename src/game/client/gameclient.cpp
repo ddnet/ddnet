@@ -19,8 +19,6 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
-#include <engine/autoupdate.h>
-
 #include <game/localization.h>
 #include <game/version.h>
 #include "render.h"
@@ -123,9 +121,6 @@ void CGameClient::OnConsoleInit()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pDemoPlayer = Kernel()->RequestInterface<IDemoPlayer>();
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
-#endif
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 
