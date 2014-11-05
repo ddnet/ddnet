@@ -1,3 +1,10 @@
+#include <base/detect.h>
+
+#if defined(CONF_FAMILY_WINDOWS)
+	// For FlashWindowEx, FLASHWINFO, FLASHW_TRAY
+	#define _WIN32_WINNT 0x0501
+	#define WINVER 0x0501
+#endif
 
 #include "SDL.h"
 #include "SDL_syswm.h"
