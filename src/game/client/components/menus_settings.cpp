@@ -440,12 +440,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowCustomSkins, Localize("Show custom skins ingame"), g_Config.m_ClShowCustomSkins, &DummyLabel))
-	{
-		g_Config.m_ClShowCustomSkins ^= 1;
-		m_NeedRestartSkins = true;
-	}
-
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
 	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
@@ -465,11 +459,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
-	}
-	if(DoButton_CheckBox(&g_Config.m_ClShowSpecialSkins, Localize("Show Custom skins in selection"), g_Config.m_ClShowSpecialSkins, &Button2))
-	{
-		g_Config.m_ClShowSpecialSkins = g_Config.m_ClShowSpecialSkins?0:1;
-		s_InitSkinlist = true;
 	}
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
@@ -539,7 +528,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
 			// no special skins
-			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_') || (!g_Config.m_ClShowSpecialSkins && s->m_aName[0] == '0'))
+			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_'))
 				continue;
 			s_paSkinList.add(s);
 		}

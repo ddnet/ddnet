@@ -18,9 +18,6 @@ const char* vanillaSkins[] = {"bluekitty.png", "bluestripe.png", "brownbear.png"
 
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	if(!g_Config.m_ClShowCustomSkins && pName[0] == '0')
-		return 0;
-
 	if(!g_Config.m_ClShowNewSkins)
 	{
 		bool found = false;

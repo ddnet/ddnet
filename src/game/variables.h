@@ -61,7 +61,6 @@ MACRO_CONFIG_STR(ClDDNetVersionServer, cl_ddnet_version_server, 100, "version.dd
 MACRO_CONFIG_STR(ClDDNetUpdateServer, cl_ddnet_update_server, 100, "update.ddnet.tw", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Server to use to update new ddnet versions")
 
 MACRO_CONFIG_STR(ClLanguagefile, cl_languagefile, 255, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "What language file to use")
-MACRO_CONFIG_INT(ClShowSpecialSkins, cl_show_special_skins, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show special skins in UI")
 MACRO_CONFIG_INT(ClShowNewSkins, cl_show_new_skins, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show new skins ingame")
 MACRO_CONFIG_INT(ClShowCustomSkins, cl_show_custom_skins, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show custom skins ingame")
 
