@@ -532,7 +532,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 		try
 		{
 			char aBuf[768];
-			str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Mapper, Points, Stars, count(*) as Finishes FROM ((SELECT Map, Server, Mapper, Points, Stars FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1) as l) LEFT JOIN %s_race as r on l.Map = r.Map;", pData->m_pSqlData->m_pPrefix, pData->m_aMap, pData->m_pSqlData->m_pPrefix);
+			str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Mapper, Points, Stars, count(Name) as Finishes FROM ((SELECT Map, Server, Mapper, Points, Stars FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY LENGTH(Map), Map LIMIT 1) as l) LEFT JOIN %s_race as r on l.Map = r.Map;", pData->m_pSqlData->m_pPrefix, pData->m_aMap, pData->m_pSqlData->m_pPrefix);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
