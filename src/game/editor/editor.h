@@ -942,6 +942,7 @@ public:
 	vec4 GetButtonColor(const void *pID, int Checked);
 
 	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);
+	static void ReplaceSound(const char *pFileName, int StorageType, void *pUser);
 	static void AddImage(const char *pFilename, int StorageType, void *pUser);
 	static void AddSound(const char *pFileName, int StorageType, void *pUser);
 
