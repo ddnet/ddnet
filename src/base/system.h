@@ -435,6 +435,9 @@ __extension__ typedef long long int64;
 #else
 typedef long long int64;
 #endif
+
+void set_new_tick();
+
 /*
 	Function: time_get
 		Fetches a sample from a high resolution timer.

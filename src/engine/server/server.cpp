@@ -1614,6 +1614,7 @@ int CServer::Run()
 
 		while(m_RunServer)
 		{
+			set_new_tick();
 			int64 t = time_get();
 			int NewTicks = 0;
 

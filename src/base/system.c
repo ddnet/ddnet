@@ -635,16 +635,27 @@ void lock_release(LOCK lock)
 	#endif
 #endif
 
+static int new_tick = 1;
+
+void set_new_tick()
+{
+	new_tick = 1;
+}
 
 /* -----  time ----- */
 int64 time_get()
 {
+	static int64 last = 0;
+	if(!new_tick)
+		return last;
+	new_tick = 0;
+
 #if defined(CONF_FAMILY_UNIX)
 	struct timeval val;
 	gettimeofday(&val, NULL);
-	return (int64)val.tv_sec*(int64)1000000+(int64)val.tv_usec;
+	last = (int64)val.tv_sec*(int64)1000000+(int64)val.tv_usec;
+	return last;
 #elif defined(CONF_FAMILY_WINDOWS)
-	static int64 last = 0;
 	int64 t;
 	QueryPerformanceCounter((PLARGE_INTEGER)&t);
 	if(t<last) /* for some reason, QPC can return values in the past */
