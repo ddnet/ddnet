@@ -1345,7 +1345,7 @@ void CSqlScore::ShowPointsThread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
 
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, (@prev := Points) Points, Name from %s_points order by Points desc) as l where Name = '%s';", pData->m_pSqlData->m_pPrefix, pData->m_aName);
+			str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, Points, Name from (select (@prev := Points) Points, Name from %s_points order by Points desc) as ll) as l where Name = '%s';", pData->m_pSqlData->m_pPrefix, pData->m_aName);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
@@ -1414,7 +1414,7 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
 			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
 			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, (@prev := Points) Points, Name from %s_points order by Points desc) as l LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_Num-1);
+			str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, Points, Name from (select (@prev := Points) Points, Name from %s_points order by Points desc) as ll) as l LIMIT %d, 5;", pData->m_pSqlData->m_pPrefix, pData->m_Num-1);
 
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
