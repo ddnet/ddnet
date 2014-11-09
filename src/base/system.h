@@ -437,6 +437,7 @@ typedef long long int64;
 #endif
 
 void set_new_tick();
+void set_uncached_time_get();
 
 /*
 	Function: time_get

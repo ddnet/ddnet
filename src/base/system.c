@@ -642,13 +642,19 @@ void set_new_tick()
 	new_tick = 1;
 }
 
+void set_uncached_time_get()
+{
+	new_tick = -1;
+}
+
 /* -----  time ----- */
 int64 time_get()
 {
 	static int64 last = 0;
 	if(!new_tick)
 		return last;
-	new_tick = 0;
+	if(new_tick != -1)
+		new_tick = 0;
 
 #if defined(CONF_FAMILY_UNIX)
 	struct timeval val;
