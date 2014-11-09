@@ -2953,6 +2953,54 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	pEditor->m_Dialog = DIALOG_NONE;
 }
 
+void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
+{
+	CEditor *pEditor = (CEditor *)pUser;
+	
+	// load external
+	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
+	if(!SoundFile)
+	{
+		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
+		return;
+	}
+
+	// read the whole file into memory
+	int DataSize = io_length(SoundFile);
+
+	if(DataSize <= 0)
+	{
+		io_close(SoundFile);
+		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
+		return;
+	}
+
+	void *pData = mem_alloc((unsigned) DataSize, 1);
+	io_read(SoundFile, pData, (unsigned) DataSize);
+	io_close(SoundFile);
+
+	// 
+	CEditorSound *pSound = pEditor->m_Map.m_lSounds[pEditor->m_SelectedSound];
+	int External = pSound->m_External;
+
+	// unload sample
+	pEditor->Sound()->UnloadSample(pSound->m_SoundID);
+	if(pSound->m_pData)
+	{
+		mem_free(pSound->m_pData);
+		pSound->m_pData = 0x0;
+	}
+
+	// replace sound
+	pSound->m_External = External;
+	pEditor->ExtractName(pFileName, pSound->m_aName, sizeof(pSound->m_aName));
+	pSound->m_SoundID = pEditor->Sound()->LoadOpusFromMem(pData, (unsigned) DataSize, true);
+	pSound->m_pData = pData;
+	pSound->m_DataSize = DataSize;
+
+	pEditor->m_Dialog = DIALOG_NONE;
+}
+
 
 static int gs_ModifyIndexDeletedIndex;
 static void ModifyIndexDeleted(int *pIndex)
@@ -3015,7 +3063,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View)
 
 int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 {
-	//static int s_ReplaceButton = 0;
+	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 
 	CUIRect Slot;
@@ -3041,14 +3089,14 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 		}
 	}
 
-	/*
+	
 	View.HSplitTop(10.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
 	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace sound", "Replace", "mapres", "", Replacesound, pEditor);
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Replace sound", "Replace", "mapres", "", ReplaceSound, pEditor);
 		return 1;
-	}*/
+	}
 
 	View.HSplitTop(10.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
