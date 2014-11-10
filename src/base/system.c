@@ -662,12 +662,14 @@ int64 time_get()
 	last = (int64)val.tv_sec*(int64)1000000+(int64)val.tv_usec;
 	return last;
 #elif defined(CONF_FAMILY_WINDOWS)
-	int64 t;
-	QueryPerformanceCounter((PLARGE_INTEGER)&t);
-	if(t<last) /* for some reason, QPC can return values in the past */
-		return last;
-	last = t;
-	return t;
+	{
+		int64 t;
+		QueryPerformanceCounter((PLARGE_INTEGER)&t);
+		if(t<last) /* for some reason, QPC can return values in the past */
+			return last;
+		last = t;
+		return t;
+	}
 #else
 	#error not implemented
 #endif
