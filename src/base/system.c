@@ -1636,8 +1636,8 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	fd_set readfds;
 	int sockid;
 
-	tv.tv_sec = time / 1000;
-	tv.tv_usec = 1000 * (time % 1000);
+	tv.tv_sec = time / 1000000;
+	tv.tv_usec = time % 1000000;
 	sockid = 0;
 
 	FD_ZERO(&readfds);

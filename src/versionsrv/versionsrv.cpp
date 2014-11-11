@@ -235,7 +235,7 @@ int main(int argc, char **argv) // ignore_convention
 		}
 
 		// wait for input
-		net_socket_read_wait(g_NetOp.m_Socket, 1000);
+		net_socket_read_wait(g_NetOp.m_Socket, 1000000);
 	}
 
 	return 0;
