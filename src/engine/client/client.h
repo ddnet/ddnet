@@ -63,6 +63,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IEngineMap *m_pMap;
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
+	IFetcher *m_pFetcher;
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	IAutoUpdate *m_pAutoUpdate;
 #endif
@@ -79,6 +80,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
 	class CServerBrowser m_ServerBrowser;
+	class CFetcher m_Fetcher;
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	class CAutoUpdate m_AutoUpdate;
 #endif
@@ -205,6 +207,7 @@ public:
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
+	IFetcher *Fetcher() { return m_pFetcher; }
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	IAutoUpdate *AutoUpdate() { return m_pAutoUpdate; }
 #endif

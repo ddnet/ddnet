@@ -10,7 +10,7 @@ class IFetcher : public IInterface
 	MACRO_INTERFACE("fetcher", 0)
 public:
 	virtual bool Init() = 0;
-	virtual int QueueAdd(char *pUrl, char *pDest, PROGFUNC pfnProgCb) = 0;
+	virtual int QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb = NULL) = 0;
 };
 
 #endif

@@ -9,8 +9,8 @@ class CFetchTask
 {
 public:	
 	CFetchTask *m_pNext;
-	char *m_pUrl;
-	char *m_pDest;
+	const char *m_pUrl;
+	const char *m_pDest;
 	unsigned m_Num;
 	PROGFUNC m_pfnProgressCallback;
 	CFetchTask();
@@ -30,8 +30,9 @@ private:
 public:
 	CFetcher();
 	bool Init();
+	~CFetcher();
 
-	int QueueAdd(char *pUrl, char *pDest, PROGFUNC pfnProgCb);
+	int QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb = NULL);
 	static void FetcherThread(void *pUser);
 	void FetchFile(CFetchTask *pTask);
 	static void WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);
