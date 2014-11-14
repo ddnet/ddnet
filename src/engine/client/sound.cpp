@@ -697,9 +697,11 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 			else
 				Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceID].m_pSample->m_NumFrames);
 
-			// at least 2sec off
-			if(abs(m_aVoices[VoiceID].m_Tick-Tick) > 2*m_aVoices[VoiceID].m_pSample->m_Rate)
+			// at least 200msec off
+			if(abs(m_aVoices[VoiceID].m_Tick-Tick) > 0.2*m_aVoices[VoiceID].m_pSample->m_Rate)
+			{
 				m_aVoices[VoiceID].m_Tick = Tick;
+			}
 		}
 	}
 	lock_release(m_SoundLock);
