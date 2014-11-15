@@ -1727,15 +1727,18 @@ int CServer::Run()
 				if(g_Config.m_SvShutdownWhenEmpty)
 					m_RunServer = false;
 				else
-					net_socket_read_wait(m_NetServer.Socket(), 1000000);
+					net_socket_read_wait(m_NetServer.Socket(), time_freq());
 			}
 			else
 			{
 				set_new_tick();
 				int64 t = time_get();
-				int x = TickStartTime(m_CurrentGameTick+1) - t + 1;
+				int x = (TickStartTime(m_CurrentGameTick+1) - t) * 1000000 / time_freq() + 1;
+
 				if(x > 0)
+				{
 					net_socket_read_wait(m_NetServer.Socket(), x);
+				}
 			}
 		}
 	}
