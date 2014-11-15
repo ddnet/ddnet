@@ -999,7 +999,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 
 			// drop faulty map data requests
-			if(Chunk < 0 || Offset > m_CurrentMapSize)
+			if(Chunk < 0 || Offset < 0 || Offset > m_CurrentMapSize)
 				return;
 
 			if(Offset+ChunkSize >= m_CurrentMapSize)
