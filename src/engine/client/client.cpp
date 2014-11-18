@@ -3116,8 +3116,6 @@ int main(int argc, const char **argv) // ignore_convention
 	dbg_enable_threaded();
 #endif
 
-	set_uncached_time_get();
-
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient);

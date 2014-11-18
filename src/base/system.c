@@ -635,16 +635,11 @@ void lock_release(LOCK lock)
 	#endif
 #endif
 
-static int new_tick = 1;
+static int new_tick = -1;
 
 void set_new_tick()
 {
 	new_tick = 1;
-}
-
-void set_uncached_time_get()
-{
-	new_tick = -1;
 }
 
 /* -----  time ----- */
