@@ -3164,6 +3164,9 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 	float ImagesHeight = 30.0f + 14.0f * m_Map.m_lImages.size() + 27.0f;
 	float ScrollDifference = ImagesHeight - ToolBox.h;
 
+	if(!m_GuiActive)
+		return;
+
 	if(ImagesHeight > ToolBox.h)	// Do we even need a scrollbar?
 	{
 		CUIRect Scroll;
@@ -3319,6 +3322,9 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 	static float s_ScrollValue = 0;
 	float SoundsHeight = 30.0f + 14.0f * m_Map.m_lSounds.size() + 27.0f;
 	float ScrollDifference = SoundsHeight - ToolBox.h;
+
+	if(!m_GuiActive)
+		return;
 
 	if(SoundsHeight > ToolBox.h)	// Do we even need a scrollbar?
 	{
