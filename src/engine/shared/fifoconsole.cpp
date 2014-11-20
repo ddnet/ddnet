@@ -23,7 +23,7 @@ void FifoConsole::ListenFifoThread(void *pUser)
 {
 	FifoConsole *pData = (FifoConsole *)pUser;
 
-	if (str_comp(pData->m_pFifoFile, "") == 0)
+	if (!pData->m_pFifoFile || str_comp(pData->m_pFifoFile, "") == 0)
 		return;
 
 	mkfifo(pData->m_pFifoFile, 0600);
