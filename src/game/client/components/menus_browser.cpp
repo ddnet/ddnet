@@ -698,6 +698,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		int MaxFlags = ServerBrowser()->NumDDNetCountries();
 		int NumFlags = ServerBrowser()->NumDDNetCountries();
+		int PerLine = MaxFlags > 9 ? 4 : 3;
 
 		CUIRect FlagsRect;
 
@@ -706,15 +707,15 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		while(NumFlags > 0)
 		{
 			ServerFilter.HSplitTop(30.0f, &FlagsRect, &ServerFilter);
-			
-			for(int i = 0; i < 3 && NumFlags > 0; i++)
+
+			for(int i = 0; i < PerLine && NumFlags > 0; i++)
 			{
 				int CountryIndex = MaxFlags - NumFlags;
 				const char *pName = ServerBrowser()->GetDDNetCountryName(CountryIndex);
 				bool Active = !ServerBrowser()->DDNetCountryFiltered(pName);
 				int FlagID = ServerBrowser()->GetDDNetCountryFlag(CountryIndex);
 
-				vec2 Pos = vec2(FlagsRect.x+FlagsRect.w*((i+0.5f)/3.0f), FlagsRect.y);
+				vec2 Pos = vec2(FlagsRect.x+FlagsRect.w*((i+0.5f)/(float) PerLine), FlagsRect.y);
 
 				// correct pos
 				Pos.x -= FlagWidth / 2.0f;
