@@ -1,16 +1,17 @@
 ##### authors #####
 #originally created by:
-#	slinack
+# slinack
 #modified by:
-#	yemDX				2010-05-29 17:22:42
-#	yemDX				2010-05-30 02:51:34
-#	slinack				2010-06-02 20:57:46
-#	slinack				2011-05-02 18:24:12
-#	Isadora				2011-05-09 17:26:02
-#	slinack				2011-07-03 00:23:26
-#	Ryomou Hentai Girl	2011-07-11 11:33:42
-#	Isadora				2011-07-20 21:47:11
-#	HeroiAmarelo		2012-08-01 15:50:18
+# yemDX               2010-05-29 17:22:42
+# yemDX               2010-05-30 02:51:34
+# slinack             2010-06-02 20:57:46
+# slinack             2011-05-02 18:24:12
+# Isadora             2011-05-09 17:26:02
+# slinack             2011-07-03 00:23:26
+# Ryomou Hentai Girl  2011-07-11 11:33:42
+# Isadora             2011-07-20 21:47:11
+# HeroiAmarelo        2012-08-01 15:50:18
+# Rafael Ferreira     2014-11-21 13:31:06
 ##### /authors #####
 
 ##### translated strings #####
@@ -34,7 +35,7 @@
 == Faltam %i segundos
 
 %s wins!
-== %s vence!
+== Vitória de %s!
 
 -Page %d-
 == -Página %d-
@@ -214,7 +215,7 @@ Game over
 == Fim do jogo
 
 Game paused
-== Game Pausado
+== Game pausado
 
 Game type
 == Tipo de jogo
@@ -244,7 +245,7 @@ Hook
 == Gancho
 
 Invalid Demo
-== Demo inválido
+== Demo inválida
 
 Join blue
 == Azul
@@ -280,7 +281,7 @@ Move left
 == Esquerda
 
 Move player to spectators
-== Mover jogador para espectadores
+== Mover jogador para observadores
 
 Move right
 == Direita
@@ -400,7 +401,7 @@ Reset filter
 == Resetar filtro
 
 Respawn
-== Respawn
+== Reaparecer
 
 Sample rate
 == Frequência do som
@@ -478,10 +479,10 @@ Spectate previous
 == Observar anterior
 
 Spectator mode
-== Modo espectador
+== Modo observador
 
 Spectators
-== Espectadores
+== Observadores
 
 Standard gametype
 == Tipo de jogo padrão
@@ -496,7 +497,7 @@ Strict gametype filter
 == Filtrar tipo de jogo exato
 
 Sudden Death
-== Morte Súbita
+== Morte súbita
 
 Switch weapon on pickup
 == Equipar arma ao pegá-la
@@ -559,10 +560,10 @@ Vote description:
 == Descrição da votação:
 
 Vote no
-== Votar Não
+== Votar não
 
 Vote yes
-== Votar Sim
+== Votar sim
 
 Voting
 == Votação
@@ -582,445 +583,314 @@ Yes
 You must restart the game for all settings to take effect.
 == Você deve reiniciar o jogo para que todas as alterações tenham efeito.
 
-##### needs translation #####
-
 %.3f KiB
-== 
+== %.3f KB
 
 %d player left
-== 
+== Falta %d jogador
 
 %d player not ready
-== 
+== %d jogador não está pronto
 
 %d players left
-== 
+== Faltam %d jogadores
 
 %d players not ready
-== 
+== %d jogadores não estão prontos
 
 %d servers, %d players
-== 
+== %d servidores, %d jogadores
 
 '%s' called for vote to kick '%s' (%s)
-== 
+== '%s' convocou votação para expulsar '%s' (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
-== 
+== '%s' convocou votação para mover '%s' para observador (%s)
 
 '%s' called vote to change server option '%s' (%s)
-== 
+== '%s' convocou votação para mudar opção '%s' do observador (%s)
 
 '%s' entered and joined the %s
-== 
+== '%s' entrou no %s
 
 '%s' has left the game
-== 
+== '%s' saiu do jogo
 
 '%s' has left the game (%s)
-== 
+== '%s' saiu do jogo (%s)
 
 '%s' joined the %s
-== 
+== '%s' entrou no %s
 
 Admin forced server option '%s' (%s)
-== 
+== Administrador forçou a opção '%s' do servidor (%s)
 
 Admin forced vote no
-== 
+== Administrador forçou votação não
 
 Admin forced vote yes
-== 
+== Administrador forçou votação sim
 
 Admin moved '%s' to spectator (%s)
-== 
+== Administrador moveu '%s' para observador (%s)
 
 Alp:
-== 
+== Alp:
 
 Anti Aliasing
-== 
+== Suavização
 
 Are you sure you want to rename the demo?
-== 
+== Tem certeza que deseja renomear o demo?
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Tem certeza que deseja salvar sua skin? Se uma skin com este nome já existir, ela será substituída.
 
 Back
-== 
+== Voltar
 
 Basic
-== 
+== Básico
 
 Bodies
-== 
+== Corpos
 
 Borderless window
-== 
+== Janela sem borda
 
 Color
-== 
+== Cor
 
 Crc
-== 
+== Crc
 
 Created
-== 
+== Criado
 
 Custom
-== 
+== Personalizado
 
 Customize
-== 
+== Personalizar
 
 Decoration
-== 
+== Decoração
 
 Demo
-== 
+== Demo
 
 Detail
-== 
+== Detalhes
 
 Editor
-== 
+== Editor
 
 Eyes
-== 
+== Olhos
 
 Format
-== 
+== Formato
 
 Game starts in
-== 
+== Jogo começa em
 
 Global
-== 
+== global
 
 Hands
-== 
+== Mãos
 
 Host address:
-== 
+== Servidor:
 
 Hue:
-== 
+== Matiz:
 
 Join
-== 
+== Entrar
 
 Joined
-== 
+== Entrou
 
 Joined blue
-== 
+== Azul
 
 Joined red
-== 
+== Vermelho
 
 Kick voting requires %d players on the server
-== 
+== Votação para expulsar requer %d jogadores no servidor
 
 Laser
-== 
-
-Length
-== 
-
-Letterbox
-== 
-
-Lgt:
-== 
-
-Local
-== 
-
-Local server
-== 
-
-Match
-== 
-
-Max
-== 
-
-Misc
-== 
-
-Netversion
-== 
-
-Nickname is empty.
-== 
-
-Normal:
-== 
-
-Only %d active players are allowed
-== 
-
-Personal
-== 
-
-Ready
-== 
-
-Record
-== 
-
-Recorded
-== 
-
-Reset
-== 
-
-Resolutions
-== 
-
-Round over
-== 
-
-Round over!
-== 
-
-Sat:
-== 
-
-Save
-== 
-
-Save skin
-== 
-
-Screen
-== 
-
-Search:
-== 
-
-Server does not allow voting to kick players
-== 
-
-Server does not allow voting to move players to spectators
-== 
-
-Servers
-== 
-
-Size
-== 
-
-Skin
-== 
-
-Spectating
-== 
-
-Spectators aren't allowed to start a vote.
-== 
-
-Standard Gametype
-== 
-
-Tattoo
-== 
-
-Tattoos
-== 
-
-Team:
-== 
-
-Teams are locked
-== 
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== 
-
-Teams were locked
-== 
-
-Teams were unlocked
-== 
-
-Tee
-== 
-
-Texture
-== 
-
-Volume
-== 
-
-Vote aborted
-== 
-
-Vote failed
-== 
-
-Vote passed
-== 
-
-Wait for current vote to end before calling a new one.
-== 
-
-Wait for next round
-== 
-
-Wide
-== 
-
-You must wait %d seconds before making another vote
-== 
-
-blue
-== 
-
-blue team
-== 
-
-game
-== 
-
-red
-== 
-
-red team
-== 
-
-spectators
-== 
-
-wait for more players
-== 
-
-##### old translations #####
-
-New name:
-== Novo nome:
-
-Sat.
-== Saturação
-
-Miscellaneous
-== Diversos
-
-Internet
-== Internet
-
-Max demos
-== Máximo de demos
-
-News
-== Novidades
-
-Join game
-== Entrar no jogo
-
-FSAA samples
-== Amostras FSAA
-
-%d of %d servers, %d players
-== %d de %d servidores, %d jogadores
-
-Sound volume
-== Volume do som
-
-Created:
-== Criado:
-
-Max Screenshots
-== Máximo de capturas de tela
-
-Length:
-== Duração:
-
-Skin name
-== 
-
-Rifle
 == Laser
 
-Patterns
-== 
+Length
+== Duração
 
-Netversion:
+Letterbox
+== Letterbox
+
+Lgt:
+== Lgt:
+
+Local
+== Local
+
+Local server
+== Servidor local
+
+Match
+== Partida
+
+Max
+== Máx.
+
+Misc
+== Diversos
+
+Netversion
 == Netversion
 
-Map:
-== Mapa:
+Nickname is empty.
+== Apelido está vazido.
 
-%d Bytes
-== %d Bytes
+Normal:
+== Normal:
 
-Coloration
-== 
+Only %d active players are allowed
+== Apenas %d jogadores ativos são permitidos
 
-Info
-== Informações
+Personal
+== Pessoal
 
-Hue
-== Matiz
+Ready
+== Pronto
 
-Record demo
-== Gravar demo
+Record
+== Gravar
 
-Your skin
-== Sua skin
+Recorded
+== Gravado
 
-Size:
-== Tamanho:
+Reset
+== Reiniciar
 
-Reset to defaults
-== Resetar configurações
+Resolutions
+== Resoluções
 
-Quit anyway?
-== Sair mesmo assim?
+Round over
+== Acabar rodada
 
-Display Modes
-== Modos de exibição
+Round over!
+== Rodada acabou!
 
-Version:
-== Versão
+Sat:
+== Sat:
 
-Round
-== Rodada
+Save
+== Salvar
 
-Lht.
-== Luminos.
+Save skin
+== Salvar skin
 
-no limit
-== sem limite
+Screen
+== Tela
 
-Quick search:
-== Pesquisa rápida:
+Search:
+== Pesquisar:
 
-UI Color
-== Cor do menu
+Server does not allow voting to kick players
+== Servidor não permite votação para expulsar jogadores
 
-Host address
-== Endereço do servidor
+Server does not allow voting to move players to spectators
+== Servidor não permite votação para mover jogadores para observadores
 
-Crc:
-== Crc:
+Servers
+== Servidores
 
-Alpha
-== Alpha
+Size
+== Tamanho
 
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 
+Skin
+== Skin
 
-Current version: %s
-== Versão atual: %s
+Spectating
+== Observando
 
-LAN
-== LAN
+Spectators aren't allowed to start a vote.
+== Observadores não podem iniciar uma votação.
 
-Name plates size
-== Tamanho dos apelidos
+Standard Gametype
+== Tipo de jogo padrão
 
-Type:
-== Tipo:
+Tattoo
+== Tatuagem
 
+Tattoos
+== Tatuagens
+
+Team:
+== Time:
+
+Teams are locked
+== Times estão travados
+
+Teams are locked. Time to wait before changing team: %02d:%02d
+== Times estão travados. Tempo de espera até a troca de time : %02d:%02d
+
+Teams were locked
+== Times foram travados
+
+Teams were unlocked
+== Times foram destravados
+
+Tee
+== Tee
+
+Texture
+== Textura
+
+Volume
+== Volume
+
+Vote aborted
+== Votação cancelada
+
+Vote failed
+== Votação falhou
+
+Vote passed
+== Votação passou
+
+Wait for current vote to end before calling a new one.
+== Espere a votação atual acabar antes de convocar outra.
+
+Wait for next round
+== Espere pela próxima rodada
+
+Wide
+== Wide
+
+You must wait %d seconds before making another vote
+== Você tem que esperar %d segundos antes de fazer outra votação
+
+blue
+== azul
+
+blue team
+== time azul
+
+game
+== jogo
+
+red
+== vermelho
+
+red team
+== time vermelho
+
+spectators
+== observadores
+
+wait for more players
+== espere por jogadores
