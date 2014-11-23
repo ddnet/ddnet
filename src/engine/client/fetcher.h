@@ -15,7 +15,7 @@ public:
 	PROGFUNC m_pfnProgressCallback;
 	CFetchTask();
 
-	static int ProgressCallback(void *pUser, curl_off_t dltotal, curl_off_t dlnow, curl_off_t, curl_off_t);
+	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
 };
 
 class CFetcher : public IFetcher
@@ -32,7 +32,7 @@ public:
 	bool Init();
 	~CFetcher();
 
-	int QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb = NULL);
+	void QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb = NULL);
 	static void FetcherThread(void *pUser);
 	void FetchFile(CFetchTask *pTask);
 	static void WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);

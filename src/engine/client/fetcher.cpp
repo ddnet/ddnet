@@ -31,17 +31,14 @@ CFetcher::~CFetcher()
 	curl_global_cleanup();
 }
 
-int CFetcher::QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb)
+void CFetcher::QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb)
 {
 	CFetchTask *pTask = new CFetchTask;
 	pTask->m_pUrl = pUrl;
 	pTask->m_pDest = pDest;
 	pTask->m_pfnProgressCallback = pfnProgCb;
-	pTask->m_Num = m_NumTasks++;
 
-	dbg_msg("fetcher", "Main Waiting for lock");
 	lock_wait(m_Lock);
-	dbg_msg("fetcher", "Main Got lock");
 	if(!m_pFirst){
 		void *pHandle = thread_create(&FetcherThread, this);
 		thread_detach(pHandle);
@@ -53,29 +50,24 @@ int CFetcher::QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb)
 		m_pLast = pTask;
 	}
 	lock_release(m_Lock);
-	dbg_msg("fetcher", "Main Released lock");
-
-	return pTask->m_Num;
 }
 
 void CFetcher::FetcherThread(void *pUser)
 {
 	CFetcher *pFetcher = (CFetcher *) pUser;
-	dbg_msg("fetcher", "Thread start");
+	dbg_msg("fetcher", "Thread started...");
 	while(1){
-		dbg_msg("fetcher", "Thread Waiting for lock");
 		lock_wait(pFetcher->m_Lock);
-			dbg_msg("fetcher", "Thread Got lock");
 			CFetchTask *pTask = pFetcher->m_pFirst;
-			pFetcher->m_pFirst = pTask->m_pNext;
+			if(pTask)
+				pFetcher->m_pFirst = pTask->m_pNext;
 		lock_release(pFetcher->m_Lock);
-		dbg_msg("fetcher", "Thread Released lock");
 		if(pTask){
-			dbg_msg("fetcher", "Task got %s", pTask->m_pUrl);
+			dbg_msg("fetcher", "Task got %s:%s", pTask->m_pUrl, pTask->m_pDest);
 			pFetcher->FetchFile(pTask);
 		}
 		else{
-			dbg_msg("fetcher", "No Task");
+			dbg_msg("fetcher", "No task. Killing the thread...");
 			break;
 		}
 	}
@@ -89,10 +81,13 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);
 	if(pTask->m_pfnProgressCallback){
+		curl_easy_setopt(m_pHandle, CURLOPT_NOPROGRESS, 0);
 		curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSDATA, pTask);
 		curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSFUNCTION, &CFetchTask::ProgressCallback);
 	}
+	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	curl_easy_perform(m_pHandle);
+	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
 }
 
 void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
@@ -100,9 +95,9 @@ void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
 	io_write((IOHANDLE)pFile, pData, size*nmemb);
 }
 
-int CFetchTask::ProgressCallback(void *pUser, curl_off_t DlTotal, curl_off_t DlCurr, curl_off_t UlTotal, curl_off_t UlCurr)
+int CFetchTask::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
 	CFetchTask *pTask = (CFetchTask *)pUser;
-	pTask->m_pfnProgressCallback(pTask->m_Num, DlTotal, DlCurr, UlTotal, UlCurr);
+	pTask->m_pfnProgressCallback(pTask->m_pDest, DlTotal, DlCurr, UlTotal, UlCurr);
 	return 0;
 }

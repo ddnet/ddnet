@@ -3,14 +3,14 @@
 
 #include "kernel.h"
 
-typedef void (*PROGFUNC)(unsigned JobNum, unsigned DlTotal, unsigned DlCurr, unsigned UlTotal, unsigned Dltotal);
+typedef void (*PROGFUNC)(const char *pDest, double DlTotal, double DlCurr, double UlTotal, double Dltotal);
 
 class IFetcher : public IInterface
 {
 	MACRO_INTERFACE("fetcher", 0)
 public:
 	virtual bool Init() = 0;
-	virtual int QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb = NULL) = 0;
+	virtual void QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb = NULL) = 0;
 };
 
 #endif

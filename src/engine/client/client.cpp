@@ -2570,10 +2570,7 @@ void CClient::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
-
-	dbg_msg("fetcher", "Testing fetcher");
-	Fetcher()->QueueAdd("http://ipv4.download.thinkbroadband.com/5MB.zip", "test.zip");
-
+	
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
