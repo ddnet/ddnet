@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "system.h"
+#include "confusables.h"
 
 #if defined(CONF_FAMILY_UNIX)
 	#include <sys/time.h>
@@ -1960,16 +1961,6 @@ char str_uppercase(char c)
 int str_toint(const char *str) { return atoi(str); }
 float str_tofloat(const char *str) { return atof(str); }
 
-
-int str_utf8_is_confusable(int smaller, int bigger)
-{
-	switch(smaller)
-	{
-	// TODO: Autocreate this from unicode confusables
-	case 90: return bigger != 100 && bigger != 120;
-	default: return 0;
-	}
-}
 
 int str_utf8_comp_names(const char *a, const char *b)
 {
