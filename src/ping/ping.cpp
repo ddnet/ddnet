@@ -16,7 +16,7 @@ int main(int argc, char **argv) // ignore_convention
 
 	if(argc != 2)
 	{
-		fprintf(stderr, "usage: %s server:port\n", argv[0]);
+		fprintf(stderr, "usage: %s server[:port] (default port: 8303)\n", argv[0]);
 		return 1;
 	}
 
@@ -26,6 +26,9 @@ int main(int argc, char **argv) // ignore_convention
 		fprintf(stderr, "host lookup failed\n");
 		return 1;
 	}
+
+	if(Addr.port == 0)
+		Addr.port = 8303;
 
 	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO)+1];
 	CNetChunk Packet;
