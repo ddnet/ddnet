@@ -1266,21 +1266,55 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	// status box
 	{
-		CUIRect Button, ButtonArea;
+		CUIRect Button, ButtonArea, Part;
 		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
 
 		// version note
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
-		if(str_comp(Client()->LatestVersion(), "0") != 0)
+		static int s_State = 0;
+		if((s_State == 0 || s_State == 1) && str_comp(Client()->LatestVersion(), "0") != 0)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out! Download it at ddnet.tw!"), Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), "DDNet %s is out! Download?", Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+			s_State = 1;
 		}
-		else
+		else if(s_State <= 0)
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
+		else if(s_State == 2)
+			str_format(aBuf, sizeof(aBuf), "Downloading example.dat:");
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Button, &Part);
+
+		if(s_State == 1){
+			CUIRect Yes, No;
+			Part.VSplitLeft(30.0f, &Yes, &No);
+			No.VMargin(5.0f, &No);
+			No.VSplitLeft(30.0f, &No, 0);
+
+			static int s_ButtonUpdate = 0;
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Yes"), 0, &Yes)){
+				dbg_msg("Test", "OHMIGODITWERKZ");
+				s_State = 2;
+			}
+
+			static int s_ButtonNUpdate = 0;
+			if(DoButton_Menu(&s_ButtonNUpdate, Localize("No"), 0, &No)){
+				dbg_msg("Test", "OHMIGODITWERKZ");
+				s_State = -1;
+			}
+		}
+		else if(s_State == 2){
+			CUIRect ProgressBar, Percent;
+			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);	
+			ProgressBar.y += 2.0f;
+			ProgressBar.HMargin(1.0f, &ProgressBar);
+			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+			ProgressBar.w = 50.0f;
+			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
+		}
 
 		// button area
 		//StatusBox.VSplitRight(80.0f, &StatusBox, 0);
