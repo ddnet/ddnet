@@ -1,4 +1,4 @@
-#include <iostream>
+#include <stdio.h>
 #include <base/system.h>
 #include <base/math.h>
 #include <mastersrv/mastersrv.h>
@@ -10,19 +10,20 @@ static CNetClient g_NetOp; // main
 int main(int argc, char **argv) // ignore_convention
 {
 	NETADDR BindAddr;
+	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;
 	g_NetOp.Open(BindAddr, 0);
 
 	if(argc != 2)
 	{
-		dbg_msg("ping", "wrong parameters");
+		fprintf(stderr, "usage: %s server:port", argv[0]);
 		return 1;
 	}
 
 	NETADDR Addr;
 	if (net_host_lookup(argv[1], &Addr, NETTYPE_ALL))
 	{
-		dbg_msg("ping", "host lookup failed");
+		fprintf(stderr, "host lookup failed");
 		return 1;
 	}
 
@@ -61,7 +62,7 @@ int main(int argc, char **argv) // ignore_convention
 				continue;
 
 			int64 endTime = time_get();
-			std::cout << (double)(endTime - startTime) / 1000 << " ms" << std::endl;
+			printf("%g ms\n", (double)(endTime - startTime) / 1000);
 		}
 	}
 }
