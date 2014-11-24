@@ -151,10 +151,10 @@ void CRaceDemo::CheckDemo()
 	m_pClient->m_pMenus->DemolistPopulate();
 	for(int i = 0; i < m_pClient->m_pMenus->m_lDemos.size(); i++)
 	{
-		if(!str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, m_pMap, str_length(m_pMap)) && str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, aTmpDemoName, str_length(aTmpDemoName)))
+		if(!str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, m_pMap, str_length(m_pMap)) && str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, aTmpDemoName, str_length(aTmpDemoName)) && str_length(m_pClient->m_pMenus->m_lDemos[i].m_aName) > str_length(m_pMap) && m_pClient->m_pMenus->m_lDemos[i].m_aName[str_length(m_pMap)] == '_')
 		{
 			const char *pDemo = m_pClient->m_pMenus->m_lDemos[i].m_aName;
-			
+
 			// set cursor
 			pDemo += str_length(m_pMap)+1;
 			float DemoTime = str_tofloat(pDemo);
