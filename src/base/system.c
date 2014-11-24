@@ -1961,6 +1961,36 @@ int str_toint(const char *str) { return atoi(str); }
 float str_tofloat(const char *str) { return atof(str); }
 
 
+int str_utf8_is_confusable(int smaller, int bigger)
+{
+	switch(smaller)
+	{
+	// TODO: Autocreate this from unicode confusables
+	case 90: return bigger != 100 && bigger != 120;
+	default: return 0;
+	}
+}
+
+int str_utf8_comp_names(const char *a, const char *b)
+{
+	int codeA;
+	int codeB;
+	int diff;
+
+	while(*a && *b)
+	{
+		codeA = str_utf8_decode(&a);
+		codeB = str_utf8_decode(&b);
+		diff = codeA - codeB;
+
+		if((diff < 0 && !str_utf8_is_confusable(codeA, codeB))
+		|| (diff > 0 && !str_utf8_is_confusable(codeB, codeA)))
+			return diff;
+	}
+
+	return *a - *b;
+}
+
 int str_utf8_isspace(int code)
 {
 	return code > 0x20 && code != 0xA0 && code != 0x034F && code != 0x2800 &&

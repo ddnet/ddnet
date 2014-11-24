@@ -343,7 +343,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(i != ClientID && m_aClients[i].m_State >= CClient::STATE_READY)
 		{
-			if(str_comp(pName, m_aClients[i].m_aName) == 0)
+			if(str_utf8_comp_names(pName, m_aClients[i].m_aName) == 0)
 				return -1;
 		}
 

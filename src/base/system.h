@@ -1222,6 +1222,8 @@ unsigned str_quickhash(const char *str);
 */
 void gui_messagebox(const char *title, const char *message);
 
+int str_utf8_comp_names(const char *a, const char *b);
+
 int str_utf8_isspace(int code);
 
 const char *str_utf8_skip_whitespaces(const char *str);
