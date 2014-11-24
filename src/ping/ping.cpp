@@ -16,14 +16,14 @@ int main(int argc, char **argv) // ignore_convention
 
 	if(argc != 2)
 	{
-		fprintf(stderr, "usage: %s server:port", argv[0]);
+		fprintf(stderr, "usage: %s server:port\n", argv[0]);
 		return 1;
 	}
 
 	NETADDR Addr;
 	if (net_host_lookup(argv[1], &Addr, NETTYPE_ALL))
 	{
-		fprintf(stderr, "host lookup failed");
+		fprintf(stderr, "host lookup failed\n");
 		return 1;
 	}
 
