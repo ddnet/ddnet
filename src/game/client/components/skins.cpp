@@ -34,9 +34,19 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	}
 
 	CSkins *pSelf = (CSkins *)pUser;
+
 	int l = str_length(pName);
 	if(l < 4 || IsDir || str_comp(pName+l-4, ".png") != 0)
 		return 0;
+
+	// Don't add duplicate skins (one from user's config directory, other from
+	// client itself)
+	for(int i = 0; i < pSelf->Num(); i++)
+	{
+		const char* pExName = pSelf->Get(i)->m_aName;
+		if(str_comp_num(pExName, pName, l-4) == 0 && str_length(pExName) == l-4)
+			return 0;
+	}
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
