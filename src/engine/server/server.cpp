@@ -1600,7 +1600,6 @@ int CServer::Run()
 
 	// start game
 	{
-		int ReportInterval = 3;
 		bool NonActive = false;
 
 		m_Lastheartbeat = 0;

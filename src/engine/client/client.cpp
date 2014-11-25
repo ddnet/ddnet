@@ -2706,23 +2706,6 @@ void CClient::Run()
 			g_Config.m_DbgHitch = 0;
 		}
 
-		/*
-		if(ReportTime < time_get())
-		{
-			if(0 && g_Config.m_Debug)
-			{
-				dbg_msg("client/report", "fps=%.02f (%.02f %.02f) netstate=%d",
-					m_Frames/(float)(ReportInterval/time_freq()),
-					1.0f/m_RenderFrameTimeHigh,
-					1.0f/m_RenderFrameTimeLow,
-					m_NetClient.State());
-			}
-			m_RenderFrameTimeLow = 1;
-			m_RenderFrameTimeHigh = 0;
-			m_RenderFrames = 0;
-			ReportTime += ReportInterval;
-		}*/
-
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
 	}
