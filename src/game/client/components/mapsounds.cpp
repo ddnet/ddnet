@@ -1,4 +1,3 @@
-
 #include <engine/engine.h>
 #include <engine/sound.h>
 
@@ -76,12 +75,13 @@ void CMapSounds::OnMapLoad()
 					CSourceQueueEntry source;
 					source.m_Sound = pSoundLayer->m_Sound;
 					source.m_pSource = &pSources[i];
+					source.m_HighDetail = pLayer->m_Flags&LAYERFLAG_DETAIL;
 
 					if(!source.m_pSource || source.m_Sound == -1)
 						continue;
 
-					m_lSourceQueue.add(source);		
-				}	
+					m_lSourceQueue.add(source);
+				}
 			}
 		}
 	}
@@ -105,7 +105,7 @@ void CMapSounds::OnRender()
 								Client()->IntraGameTick());
 		}
 		float offset = s_Time-pSource->m_pSource->m_TimeDelay;
-		if(offset >= 0.0f && g_Config.m_SndEnable)
+		if(offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !pSource->m_HighDetail))
 		{
 			if(pSource->m_Voice.IsValid())
 			{
