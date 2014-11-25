@@ -25,6 +25,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_pCharacter = 0;
+	m_NumInputs = 0;
 	Reset();
 }
 
@@ -359,20 +360,20 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 	AfkVoteTimer(NewInput);
 
-	if(m_FirstPacket)
-	{
-		if(g_Config.m_SvClientSuggestion)
-		{
-			if(m_ClientVersion <= VERSION_DDNET_OLD)
-				GameServer()->SendBroadcast(g_Config.m_SvClientSuggestionOther, m_ClientID);
-			//if(m_ClientVersion < CLIENT_VERSIONNR)
-			//	GameServer()->SendBroadcast(g_Config.m_SvClientSuggestionOld, m_ClientID);
-			m_FirstPacket = false;
-		}
-	}
+	m_NumInputs++;
 
 	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnPredictedInput(NewInput);
+
+	// Magic number when we can hope that client has successfully identified itself
+	if(m_NumInputs == 10)
+	{
+		if(g_Config.m_SvClientSuggestion[0] != '\0' && m_ClientVersion <= VERSION_DDNET_OLD)
+			GameServer()->SendBroadcast(g_Config.m_SvClientSuggestion, m_ClientID);
+
+		//if(g_Config.m_SvClientSuggestionOld[0] != '\0' && m_ClientVersion < CLIENT_VERSIONNR)
+		//	GameServer()->SendBroadcast(g_Config.m_SvClientSuggestionOld, m_ClientID);
+	}
 }
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
@@ -391,8 +392,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		if(m_pCharacter)
 			m_pCharacter->ResetInput();
 
-	m_PlayerFlags = NewInput->m_PlayerFlags;
- 		return;
+		m_PlayerFlags = NewInput->m_PlayerFlags;
+		return;
 	}
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;

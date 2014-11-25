@@ -112,6 +112,7 @@ public:
 
 private:
 	CCharacter *m_pCharacter;
+	int m_NumInputs;
 	CGameContext *m_pGameServer;
 
 	CGameContext *GameServer() const { return m_pGameServer; }
