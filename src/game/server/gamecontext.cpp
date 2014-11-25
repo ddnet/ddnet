@@ -2288,6 +2288,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvOldTeleportHook = 0;
 		g_Config.m_SvOldTeleportWeapons = 0;
 		g_Config.m_SvTeleportHoldHook = 0;
+		g_Config.m_SvTeam = 1;
+		g_Config.m_SvShowOthersDefault = 0;
 	}
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile);
@@ -2308,6 +2310,21 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		m_pController = new CGameControllerDM(this);*/
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
+
+	if(g_Config.m_SvSoloServer)
+	{
+		g_Config.m_SvTeam = 3;
+		g_Config.m_SvShowOthersDefault = 1;
+
+		Tuning()->Set("player_collision", 0);
+		Tuning()->Set("player_hooking", 0);
+
+		for (int i = 0; i < 256; i++)
+		{
+			TuningList()[i].Set("player_collision", 0);
+			TuningList()[i].Set("player_hooking", 0);
+		}
+	}
 
 	// delete old score object
 	if(m_pScore)
