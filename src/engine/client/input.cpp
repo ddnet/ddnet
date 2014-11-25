@@ -98,7 +98,7 @@ void CInput::MouseModeRelative()
 
 int CInput::MouseDoubleClick()
 {
-	if(m_ReleaseDelta >= 0 && m_ReleaseDelta < (time_freq() >> 2))
+	if(m_ReleaseDelta >= 0 && m_ReleaseDelta < (time_freq() / 3))
 	{
 		m_LastRelease = 0;
 		m_ReleaseDelta = -1;
