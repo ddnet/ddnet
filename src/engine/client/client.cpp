@@ -839,6 +839,9 @@ void CClient::DummyInfo()
 void CClient::GetServerInfo(CServerInfo *pServerInfo)
 {
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
+
+	if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
+		str_copy(pServerInfo->m_aGameType, "DDraceNetwork", 14);
 }
 
 void CClient::ServerInfoRequest()

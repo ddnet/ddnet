@@ -1696,7 +1696,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 {
 	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label;
 
-	MainView.HSplitTop(100.0f, &Demo , &MainView);
+	MainView.HSplitTop(125.0f, &Demo , &MainView);
 
 	Demo.HSplitTop(30.0f, &Label, &Demo);
 	UI()->DoLabelScaled(&Label, Localize("Demo"), 20.0f, -1);
@@ -1721,6 +1721,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClDemoShowSpeed, Localize("Show demo speed on change"), g_Config.m_ClDemoShowSpeed, &Button))
 	{
 		g_Config.m_ClDemoShowSpeed ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClDemoAssumeRace, Localize("Assume race demos (time in scoreboard)"), g_Config.m_ClDemoAssumeRace, &Button))
+	{
+		g_Config.m_ClDemoAssumeRace ^= 1;
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
