@@ -45,6 +45,12 @@ typedef unsigned __int64 uint64_t;
 			All players (CPlayer::snap)
 
 */
+
+enum
+{
+	NUM_TUNINGZONES = 256
+};
+
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
@@ -53,7 +59,7 @@ class CGameContext : public IGameServer
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
-	CTuningParams m_TuningList[256];
+	CTuningParams m_TuningList[NUM_TUNINGZONES];
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
@@ -127,8 +133,8 @@ public:
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_NumVoteOptions;
 	int m_VoteEnforce;
-	char m_ZoneEnterMsg[256][256]; // 0 is used for switching from or to area without tunings
-	char m_ZoneLeaveMsg[256][256];
+	char m_ZoneEnterMsg[NUM_TUNINGZONES][256]; // 0 is used for switching from or to area without tunings
+	char m_ZoneLeaveMsg[NUM_TUNINGZONES][256];
 	
 	enum
 	{
