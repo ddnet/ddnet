@@ -1,5 +1,5 @@
-#ifndef ENGINE_SHARED_FETCHER_H
-#define ENGINE_SHARED_FETCHER_H
+#ifndef ENGINE_CLIENT_FETCHER_H
+#define ENGINE_CLIENT_FETCHER_H
 
 #include "curl/curl.h"
 #include "curl/easy.h"
