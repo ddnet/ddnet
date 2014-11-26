@@ -2061,8 +2061,18 @@ int str_utf8_comp_names(const char *a, const char *b)
 
 	while(*a && *b)
 	{
-		codeA = str_utf8_decode(&a);
-		codeB = str_utf8_decode(&b);
+		do
+		{
+			codeA = str_utf8_decode(&a);
+		}
+		while(*a && !str_utf8_isspace(codeA));
+
+		do
+		{
+			codeB = str_utf8_decode(&b);
+		}
+		while(*b && !str_utf8_isspace(codeB));
+
 		diff = codeA - codeB;
 
 		if((diff < 0 && !str_utf8_is_confusable(codeA, codeB))
