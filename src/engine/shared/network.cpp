@@ -161,7 +161,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	// check the size
 	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
 	{
-		dbg_msg("", "packet too small, %d", Size);
+		//dbg_msg("", "packet too small, %d", Size);
 		return -1;
 	}
 
