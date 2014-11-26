@@ -185,7 +185,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	{
 		if(Size < 6)
 		{
-			dbg_msg("", "connection less packet too small, %d", Size);
+			//dbg_msg("", "connection less packet too small, %d", Size);
 			return -1;
 		}
 
