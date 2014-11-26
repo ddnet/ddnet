@@ -23,6 +23,8 @@ void FifoConsole::ListenFifoThread(void *pUser)
 {
 	FifoConsole *pData = (FifoConsole *)pUser;
 
+	// This should fix the problem where sometimes the fifo thread runs at a bad
+	// time and can't open the fifo immediately.
 	while (!pData->m_pFifoFile || str_comp(pData->m_pFifoFile, "") == 0)
 		thread_sleep(1000);
 
