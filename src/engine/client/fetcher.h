@@ -9,8 +9,8 @@ class CFetchTask
 {
 public:	
 	CFetchTask *m_pNext;
-	const char *m_pUrl;
-	const char *m_pDest;
+	char m_pUrl[256];
+	char m_pDest[128];
 	unsigned m_Num;
 	PROGFUNC m_pfnProgressCallback;
 	CFetchTask();

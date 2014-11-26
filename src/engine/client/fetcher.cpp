@@ -4,8 +4,6 @@
 CFetchTask::CFetchTask()
 {
 	m_pNext = NULL;
-	m_pUrl = NULL;
-	m_pDest = NULL;
 }
 
 CFetcher::CFetcher()
@@ -34,8 +32,8 @@ CFetcher::~CFetcher()
 void CFetcher::QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb)
 {
 	CFetchTask *pTask = new CFetchTask;
-	pTask->m_pUrl = pUrl;
-	pTask->m_pDest = pDest;
+	str_copy(pTask->m_pUrl, pUrl, sizeof(pTask->m_pUrl));
+	str_copy(pTask->m_pDest, pDest, sizeof(pTask->m_pDest));
 	pTask->m_pfnProgressCallback = pfnProgCb;
 
 	lock_wait(m_Lock);
@@ -65,6 +63,7 @@ void CFetcher::FetcherThread(void *pUser)
 		if(pTask){
 			dbg_msg("fetcher", "Task got %s:%s", pTask->m_pUrl, pTask->m_pDest);
 			pFetcher->FetchFile(pTask);
+			delete pTask;
 		}
 		else{
 			dbg_msg("fetcher", "No task. Killing the thread...");
