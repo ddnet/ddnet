@@ -3,7 +3,7 @@
 
 #include "kernel.h"
 
-typedef void (*PROGFUNC)(const char *pDest, double DlTotal, double DlCurr, double UlTotal, double Dltotal);
+typedef void (*PROGFUNC)(const char *pDest, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
 
 class IFetcher : public IInterface
 {
