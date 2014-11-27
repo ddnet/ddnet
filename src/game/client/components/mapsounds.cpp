@@ -63,6 +63,9 @@ void CMapSounds::OnMapLoad()
 			{
 				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
 
+				if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+					continue;
+
 				if(pSoundLayer->m_Sound == -1)
 					continue;
 
@@ -149,6 +152,9 @@ void CMapSounds::OnRender()
 			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
 				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
+				
+				if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+					continue;
 
 				CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
 
