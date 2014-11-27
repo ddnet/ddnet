@@ -29,13 +29,14 @@ CFetcher::~CFetcher()
 	curl_global_cleanup();
 }
 
-void CFetcher::QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
+void CFetcher::QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb, void *pUser)
 {
 	CFetchTask *pTask = new CFetchTask;
 	str_copy(pTask->m_pUrl, pUrl, sizeof(pTask->m_pUrl));
 	str_copy(pTask->m_pDest, pDest, sizeof(pTask->m_pDest));
 	pTask->m_pfnProgressCallback = pfnProgCb;
 	pTask->m_pfnCompCallback = pfnCompCb;
+	pTask->m_pUser;
 
 	lock_wait(m_Lock);
 	if(!m_pFirst){
@@ -88,7 +89,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	curl_easy_perform(m_pHandle);
 	if(pTask->m_pfnCompCallback)
-		pTask->m_pfnCompCallback(pTask->m_pDest);
+		pTask->m_pfnCompCallback(pTask->m_pDest, pTask->m_pUser);
 	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
 }
 
@@ -100,6 +101,6 @@ void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
 int CFetchTask::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
 	CFetchTask *pTask = (CFetchTask *)pUser;
-	pTask->m_pfnProgressCallback(pTask->m_pDest, DlTotal, DlCurr, UlTotal, UlCurr);
+	pTask->m_pfnProgressCallback(pTask->m_pDest, pTask->m_pUser, DlTotal, DlCurr, UlTotal, UlCurr);
 	return 0;
 }
