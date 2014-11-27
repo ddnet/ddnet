@@ -13,6 +13,7 @@ public:
 	char m_pDest[128];
 	unsigned m_Num;
 	PROGFUNC m_pfnProgressCallback;
+	COMPFUNC m_pfnCompCallback;
 	CFetchTask();
 
 	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
@@ -32,7 +33,7 @@ public:
 	bool Init();
 	~CFetcher();
 
-	void QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb = NULL);
+	void QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb = NULL, PROGFUNC pfnProgCb = NULL);
 	static void FetcherThread(void *pUser);
 	void FetchFile(CFetchTask *pTask);
 	static void WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);

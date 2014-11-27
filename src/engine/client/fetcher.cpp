@@ -29,12 +29,13 @@ CFetcher::~CFetcher()
 	curl_global_cleanup();
 }
 
-void CFetcher::QueueAdd(const char *pUrl, const char *pDest, PROGFUNC pfnProgCb)
+void CFetcher::QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
 {
 	CFetchTask *pTask = new CFetchTask;
 	str_copy(pTask->m_pUrl, pUrl, sizeof(pTask->m_pUrl));
 	str_copy(pTask->m_pDest, pDest, sizeof(pTask->m_pDest));
 	pTask->m_pfnProgressCallback = pfnProgCb;
+	pTask->m_pfnCompCallback = pfnCompCb;
 
 	lock_wait(m_Lock);
 	if(!m_pFirst){
@@ -86,6 +87,8 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	}
 	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	curl_easy_perform(m_pHandle);
+	if(pTask->m_pfnCompCallback)
+		pTask->m_pfnCompCallback(pTask->m_pDest);
 	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
 }
 
