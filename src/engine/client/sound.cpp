@@ -49,7 +49,7 @@ struct CVoice
 	int m_Age; // increases when reused
 	int m_Tick;
 	int m_Vol; // 0 - 255
-	int m_FalloffDistance; // 0 - inifintee (well int)
+	int m_FalloffDistance; // 0 - inifinitee (well int)
 	int m_Flags;
 	int m_X, m_Y;
 } ;
@@ -691,16 +691,22 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 		if(m_aVoices[VoiceID].m_pSample)
 		{
 			int Tick = 0;
+			bool IsLooping = m_aVoices[VoiceID].m_Flags&ISound::FLAG_LOOP;
 			uint64_t TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * offset;
-			if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && m_aVoices[VoiceID].m_Flags&ISound::FLAG_POS)
+			if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && IsLooping)
 				Tick = TickOffset % m_aVoices[VoiceID].m_pSample->m_NumFrames;
 			else
 				Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceID].m_pSample->m_NumFrames);
 
-			// at least 200msec off
-			if(abs(m_aVoices[VoiceID].m_Tick-Tick) > 0.2*m_aVoices[VoiceID].m_pSample->m_Rate)
+			// at least 200msec off, else depend on buffer size
+			float Threshold = max(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
+			if(abs(m_aVoices[VoiceID].m_Tick-Tick) > Threshold)
 			{
-				m_aVoices[VoiceID].m_Tick = Tick;
+				// take care of looping (modulo!)
+				if( !(IsLooping && (min(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - max(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))
+				{
+					m_aVoices[VoiceID].m_Tick = Tick;
+				}
 			}
 		}
 	}
