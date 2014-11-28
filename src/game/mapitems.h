@@ -334,7 +334,7 @@ struct CSoundShape
 {
 	enum
 	{
-		SHAPE_RECTANGLE,
+		SHAPE_RECTANGLE = 0,
 		SHAPE_CIRCLE,
 		NUM_SHAPES,
 	};
