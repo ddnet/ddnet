@@ -341,14 +341,12 @@ struct CSoundShape
 
 	struct CRectangle
 	{
-		int m_PosX, m_PosY; // fxp 22.10
 		int m_Width, m_Height; // fxp 22.10
 	};
 
 	struct CCircle
 	{
-		int m_PosX, m_PosY; // fxp 22.10
-		int m_Radius; // fxp 22.10
+		int m_Radius;
 	};
 
 	int m_Type;
