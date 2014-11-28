@@ -40,7 +40,7 @@ void CLayerSounds::Render()
 			OffsetY = aChannels[1];
 		}
 
-		m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, pSource->m_FalloffDistance, 32);
+		m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, 2500.0f, 32); // fix 
 	}
 
 	Graphics()->QuadsEnd();
@@ -84,7 +84,6 @@ CSoundSource *CLayerSounds::NewSource()
 
 	pSource->m_Loop = 1;
 	pSource->m_TimeDelay = 0;
-	pSource->m_FalloffDistance = 1500;
 
 	pSource->m_PosEnv = -1;
 	pSource->m_PosEnvOffset = 0;

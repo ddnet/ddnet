@@ -643,7 +643,6 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		{"Pos Y", pSource->m_Position.y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
-		{"Distance", pSource->m_FalloffDistance, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
 		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Sound Env", pSource->m_SoundEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
@@ -662,7 +661,6 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 	if(Prop == PROP_POS_Y) pSource->m_Position.y = NewVal*1000;
 	if(Prop == PROP_LOOP) pSource->m_Loop = NewVal;
 	if(Prop == PROP_TIME_DELAY) pSource->m_TimeDelay = NewVal;
-	if(Prop == PROP_DISTANCE) pSource->m_FalloffDistance = NewVal;
 	if(Prop == PROP_POS_ENV)
 	{
 		int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);

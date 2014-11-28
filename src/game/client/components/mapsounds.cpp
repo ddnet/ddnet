@@ -122,7 +122,6 @@ void CMapSounds::OnRender()
 				if(pSource->m_pSource->m_Loop) Flags |= ISound::FLAG_LOOP;
 
 				pSource->m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
-				Sound()->SetVoiceMaxDistance(pSource->m_Voice, pSource->m_pSource->m_FalloffDistance);
 				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);
 			}
 		}

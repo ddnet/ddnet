@@ -41,7 +41,6 @@ public:
 	virtual void SetChannel(int ChannelID, float Vol, float Pan);
 
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume);
-	virtual void SetVoiceMaxDistance(CVoiceHandle Voice, int Distance);
 	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y);
 	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset); // in s
 

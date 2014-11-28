@@ -49,7 +49,6 @@ struct CVoice
 	int m_Age; // increases when reused
 	int m_Tick;
 	int m_Vol; // 0 - 255
-	int m_FalloffDistance; // 0 - inifinitee (well int)
 	int m_Flags;
 	int m_X, m_Y;
 } ;
@@ -137,7 +136,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				int dy = v->m_Y - m_CenterY;
 				int Dist = (int)sqrtf((float)dx*dx+dy*dy); // float here. nasty
 				int p = IntAbs(dx);
-				int Range = v->m_FalloffDistance;
+				int Range = DefaultDistance;
 				if(Dist >= 0 && Dist < Range)
 				{
 					// panning
@@ -646,22 +645,6 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 	m_aVoices[VoiceID].m_Vol = (int)(Volume*255.0f);
 }
 
-void CSound::SetVoiceMaxDistance(CVoiceHandle Voice, int Distance)
-{
-	if(!Voice.IsValid())
-		return;
-
-	int VoiceID = Voice.Id();
-
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
-		return;
-
-	if(Distance < 0)
-		return;
-
-	m_aVoices[VoiceID].m_FalloffDistance = Distance;
-}
-
 void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
 {
 	if(!Voice.IsValid())
@@ -752,7 +735,6 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 		m_aVoices[VoiceID].m_Flags = Flags;
 		m_aVoices[VoiceID].m_X = (int)x;
 		m_aVoices[VoiceID].m_Y = (int)y;
-		m_aVoices[VoiceID].m_FalloffDistance = DefaultDistance;
 		Age = m_aVoices[VoiceID].m_Age;
 	}
 
