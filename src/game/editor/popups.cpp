@@ -782,7 +782,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 				pEditor->m_Map.m_Modified = true;
 
 			if(Prop == PROP_RECTANGLE_WIDTH) pSource->m_Shape.m_Rectangle.m_Width = NewVal*1024;
-			//if(Prop == PROP_RECTANGLE_HEIGHT) pSource->m_Shape.m_Rectangle.m_Height = NewVal*1024;
+			if(Prop == PROP_RECTANGLE_HEIGHT) pSource->m_Shape.m_Rectangle.m_Height = NewVal*1024;
 
 			break;
 		}

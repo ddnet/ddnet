@@ -41,8 +41,12 @@ public:
 	virtual void SetChannel(int ChannelID, float Vol, float Pan);
 
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume);
+	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff);
 	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y);
 	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset); // in s
+
+	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius);
+	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height);
 
 	CVoiceHandle Play(int ChannelID, int SampleID, int Flags, float x, float y);
 	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y);

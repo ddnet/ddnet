@@ -123,6 +123,21 @@ void CMapSounds::OnRender()
 
 				pSource->m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
 				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);
+				Sound()->SetVoiceFalloff(pSource->m_Voice, pSource->m_pSource->m_Falloff/255.0f);
+				switch(pSource->m_pSource->m_Shape.m_Type)
+				{
+				case CSoundShape::SHAPE_CIRCLE:
+					{
+						Sound()->SetVoiceCircle(pSource->m_Voice, pSource->m_pSource->m_Shape.m_Circle.m_Radius);
+						break;
+					}
+
+				case CSoundShape::SHAPE_RECTANGLE:
+					{
+						Sound()->SetVoiceRectangle(pSource->m_Voice, fx2f(pSource->m_pSource->m_Shape.m_Rectangle.m_Width), fx2f(pSource->m_pSource->m_Shape.m_Rectangle.m_Height));
+						break;
+					}
+				};
 			}
 		}
 		else
