@@ -46,6 +46,11 @@ void CLayerSounds::Render()
 			{
 				m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY,
 													pSource->m_Shape.m_Circle.m_Radius, 32);
+
+				float Falloff = ((float)pSource->m_Falloff/255.0f);
+				if(Falloff > 0.0f)
+					m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY,
+													pSource->m_Shape.m_Circle.m_Radius*Falloff, 32);
 				break;
 			}
 		case CSoundShape::SHAPE_RECTANGLE:
@@ -54,6 +59,11 @@ void CLayerSounds::Render()
 				float Height = fx2f(pSource->m_Shape.m_Rectangle.m_Height);
 				m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x)+OffsetX - Width/2, fx2f(pSource->m_Position.y)+OffsetY - Height/2,
 														Width, Height, 0.0f);
+
+				float Falloff = ((float)pSource->m_Falloff/255.0f);
+				if(Falloff > 0.0f)
+					m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x)+OffsetX - Falloff*Width/2, fx2f(pSource->m_Position.y)+OffsetY - Falloff*Height/2,
+														Width*Falloff, Height*Falloff, 0.0f);
 				break;
 			}
 		}

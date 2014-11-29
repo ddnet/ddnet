@@ -626,7 +626,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 
 	// Sound shape button
 	CUIRect ShapeButton;
-	View.HSplitBottom(5.0f, &View, 0x0);
+	View.HSplitBottom(3.0f, &View, 0x0);
 	View.HSplitBottom(12.0f, &View, &ShapeButton);
 	static int s_ShapeTypeButton = 0;
 
@@ -760,6 +760,30 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		
 	case CSoundShape::SHAPE_RECTANGLE:
 		{
+			enum
+			{
+				PROP_RECTANGLE_WIDTH=0,
+				PROP_RECTANGLE_HEIGHT,
+				NUM_RECTANGLE_PROPS,
+			};
+			
+			CProperty aRectangleProps[] = {
+				{"Width", pSource->m_Shape.m_Rectangle.m_Width/1024, PROPTYPE_INT_SCROLL, 0, 1000000},
+				{"Height", pSource->m_Shape.m_Rectangle.m_Height/1024, PROPTYPE_INT_SCROLL, 0, 1000000},
+
+				{0},
+			};
+
+			static int s_aRectangleIds[NUM_RECTANGLE_PROPS] = {0};
+			
+			NewVal = 0;
+			Prop = pEditor->DoProperties(&View, aRectangleProps, s_aRectangleIds, &NewVal);
+			if(Prop != -1)
+				pEditor->m_Map.m_Modified = true;
+
+			if(Prop == PROP_RECTANGLE_WIDTH) pSource->m_Shape.m_Rectangle.m_Width = NewVal*1024;
+			//if(Prop == PROP_RECTANGLE_HEIGHT) pSource->m_Shape.m_Rectangle.m_Height = NewVal*1024;
+
 			break;
 		}
 	}
