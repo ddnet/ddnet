@@ -40,7 +40,33 @@ void CLayerSounds::Render()
 			OffsetY = aChannels[1];
 		}
 
-		m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY, pSource->m_FalloffDistance, 32);
+		switch(pSource->m_Shape.m_Type)
+		{
+		case CSoundShape::SHAPE_CIRCLE:
+			{
+				m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY,
+													pSource->m_Shape.m_Circle.m_Radius, 32);
+
+				float Falloff = ((float)pSource->m_Falloff/255.0f);
+				if(Falloff > 0.0f)
+					m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x)+OffsetX, fx2f(pSource->m_Position.y)+OffsetY,
+													pSource->m_Shape.m_Circle.m_Radius*Falloff, 32);
+				break;
+			}
+		case CSoundShape::SHAPE_RECTANGLE:
+			{
+				float Width = fx2f(pSource->m_Shape.m_Rectangle.m_Width);
+				float Height = fx2f(pSource->m_Shape.m_Rectangle.m_Height);
+				m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x)+OffsetX - Width/2, fx2f(pSource->m_Position.y)+OffsetY - Height/2,
+														Width, Height, 0.0f);
+
+				float Falloff = ((float)pSource->m_Falloff/255.0f);
+				if(Falloff > 0.0f)
+					m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x)+OffsetX - Falloff*Width/2, fx2f(pSource->m_Position.y)+OffsetY - Falloff*Height/2,
+														Width*Falloff, Height*Falloff, 0.0f);
+				break;
+			}
+		}
 	}
 
 	Graphics()->QuadsEnd();
@@ -84,12 +110,21 @@ CSoundSource *CLayerSounds::NewSource()
 
 	pSource->m_Loop = 1;
 	pSource->m_TimeDelay = 0;
-	pSource->m_FalloffDistance = 1500;
 
 	pSource->m_PosEnv = -1;
 	pSource->m_PosEnvOffset = 0;
 	pSource->m_SoundEnv = -1;
 	pSource->m_SoundEnvOffset = 0;
+
+	pSource->m_Falloff = 255;
+	/*
+	pSource->m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
+	pSource->m_Shape.m_Circle.m_Radius = 1500;
+	*/
+
+	pSource->m_Shape.m_Type = CSoundShape::SHAPE_RECTANGLE;
+	pSource->m_Shape.m_Rectangle.m_Width = f2fx(1500.0f);
+	pSource->m_Shape.m_Rectangle.m_Height = f2fx(1000.0f);
 
 	return pSource;
 }

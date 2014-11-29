@@ -16,6 +16,23 @@ public:
 		FLAG_ALL=3
 	};
 
+	enum
+	{
+		SHAPE_CIRCLE,
+		SHAPE_RECTANGLE,
+	};
+
+	struct CVoiceShapeCircle
+	{
+		float m_Radius;
+	};
+
+	struct CVoiceShapeRectangle
+	{
+		float m_Width;
+		float m_Height;
+	};
+
 	class CVoiceHandle
 	{
 		friend class ISound;
@@ -48,9 +65,12 @@ public:
 	virtual void SetListenerPos(float x, float y) = 0;
 
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume) = 0;
-	virtual void SetVoiceMaxDistance(CVoiceHandle Voice, int Distance) = 0;
+	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) = 0;
 	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y) = 0;
 	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset) = 0; // in s
+
+	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
+	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;
 
 	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) = 0;
 	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags) = 0;

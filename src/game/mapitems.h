@@ -18,6 +18,7 @@ enum
 	LAYERTYPE_SPEEDUP,
 	LAYERTYPE_SWITCH,
 	LAYERTYPE_TUNE,
+	LAYERTYPE_SOUNDS_DEPRECATED, // deprecated! do not use this, this is just for compatibility reasons
 	LAYERTYPE_SOUNDS,
 
 	MAPITEMTYPE_VERSION=0,
@@ -329,23 +330,52 @@ struct CMapItemEnvelope : public CMapItemEnvelope_v1
 	int m_Synchronized;
 };
 
+struct CSoundShape
+{
+	enum
+	{
+		SHAPE_RECTANGLE = 0,
+		SHAPE_CIRCLE,
+		NUM_SHAPES,
+	};
+
+	struct CRectangle
+	{
+		int m_Width, m_Height; // fxp 22.10
+	};
+
+	struct CCircle
+	{
+		int m_Radius;
+	};
+
+	int m_Type;
+
+	union
+	{
+		CRectangle m_Rectangle;
+		CCircle m_Circle;
+	};
+};
+
 struct CSoundSource
 {
 	CPoint m_Position;
 	int m_Loop;
 	int m_TimeDelay; // in s
-	int m_FalloffDistance;
+	int m_Falloff; // [0,255] // 0 - No falloff, 255 - full
 
 	int m_PosEnv;
 	int m_PosEnvOffset;
 	int m_SoundEnv;
 	int m_SoundEnvOffset;
 
+	CSoundShape m_Shape;
 };
 
 struct CMapItemLayerSounds
 {
-	enum { CURRENT_VERSION=1 };
+	enum { CURRENT_VERSION=2 };
 
 	CMapItemLayer m_Layer;
 	int m_Version;

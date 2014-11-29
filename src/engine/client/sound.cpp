@@ -40,7 +40,7 @@ struct CChannel
 {
 	int m_Vol;
 	int m_Pan;
-} ;
+};
 
 struct CVoice
 {
@@ -49,10 +49,17 @@ struct CVoice
 	int m_Age; // increases when reused
 	int m_Tick;
 	int m_Vol; // 0 - 255
-	int m_FalloffDistance; // 0 - inifinitee (well int)
 	int m_Flags;
 	int m_X, m_Y;
-} ;
+	float m_Falloff; // [0.0, 1.0]
+
+	int m_Shape;
+	union
+	{
+		ISound::CVoiceShapeCircle m_Circle;
+		ISound::CVoiceShapeRectangle m_Rectangle;
+	};
+};
 
 static CSample m_aSamples[NUM_SAMPLES] = { {0} };
 static CVoice m_aVoices[NUM_VOICES] = { {0} };
@@ -135,20 +142,79 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				// TODO: we should respect the channel panning value
 				int dx = v->m_X - m_CenterX;
 				int dy = v->m_Y - m_CenterY;
-				int Dist = (int)sqrtf((float)dx*dx+dy*dy); // float here. nasty
+				//
 				int p = IntAbs(dx);
-				int Range = v->m_FalloffDistance;
-				if(Dist >= 0 && Dist < Range)
+				float FalloffX = 0.0f;
+				float FalloffY = 0.0f;
+
+				int RangeX = 0; // for panning
+				bool InVoiceField = false;
+
+				switch(v->m_Shape)
+				{
+				case ISound::SHAPE_CIRCLE:
+					{
+						float r = v->m_Circle.m_Radius;
+						RangeX = r;
+
+						int Dist = (int)sqrtf((float)dx*dx+dy*dy); // nasty float
+						if(Dist < r)
+						{
+							InVoiceField = true;
+
+							// falloff
+							int FalloffDistance = r*v->m_Falloff;
+							if(Dist > FalloffDistance)
+								FalloffX = FalloffY = (r-Dist)/(r-FalloffDistance);
+							else
+								FalloffX = FalloffY = 1.0f;
+						}
+						else
+							InVoiceField = false;
+
+						break;
+					}
+
+				case ISound::SHAPE_RECTANGLE:
+					{
+						RangeX = v->m_Rectangle.m_Width/2.0f;
+
+						int abs_dx = abs(dx);
+						int abs_dy = abs(dy);
+
+						int w = v->m_Rectangle.m_Width/2.0f;
+						int h = v->m_Rectangle.m_Height/2.0f;
+
+						if(abs_dx < w && abs_dy < h)
+						{
+							InVoiceField = true;
+
+							// falloff
+							int fx = v->m_Falloff * w;
+							int fy = v->m_Falloff * h;
+
+							FalloffX = abs_dx > fx ? (float)(w-abs_dx)/(w-fx) : 1.0f;
+							FalloffY = abs_dy > fy ? (float)(h-abs_dy)/(h-fy) : 1.0f;
+						}
+						else
+							InVoiceField = false;
+
+						break;
+					}
+				};
+
+				if(InVoiceField)
 				{
 					// panning
 					if(dx > 0)
-						Lvol = ((Range-p)*Lvol)/Range;
+						Lvol = ((RangeX-p)*Lvol)/RangeX;
 					else
-						Rvol = ((Range-p)*Rvol)/Range;
+						Rvol = ((RangeX-p)*Rvol)/RangeX;
 
-					// falloff
-					Lvol = (Lvol*(Range-Dist))/Range;
-					Rvol = (Rvol*(Range-Dist))/Range;
+					{
+						Lvol *= FalloffX;
+						Rvol *= FalloffY;
+					}
 				}
 				else
 				{
@@ -646,7 +712,7 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 	m_aVoices[VoiceID].m_Vol = (int)(Volume*255.0f);
 }
 
-void CSound::SetVoiceMaxDistance(CVoiceHandle Voice, int Distance)
+void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
 {
 	if(!Voice.IsValid())
 		return;
@@ -656,10 +722,8 @@ void CSound::SetVoiceMaxDistance(CVoiceHandle Voice, int Distance)
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
-	if(Distance < 0)
-		return;
-
-	m_aVoices[VoiceID].m_FalloffDistance = Distance;
+	Falloff = clamp(Falloff, 0.0f, 1.0f);
+	m_aVoices[VoiceID].m_Falloff = Falloff;
 }
 
 void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
@@ -713,6 +777,35 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 	lock_release(m_SoundLock);
 }
 
+void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
+{
+	if(!Voice.IsValid())
+		return;
+
+	int VoiceID = Voice.Id();
+
+	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+		return;
+
+	m_aVoices[VoiceID].m_Shape = ISound::SHAPE_CIRCLE;
+	m_aVoices[VoiceID].m_Circle.m_Radius = max(0.0f, Radius);
+}
+
+void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
+{
+	if(!Voice.IsValid())
+		return;
+
+	int VoiceID = Voice.Id();
+
+	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+		return;
+
+	m_aVoices[VoiceID].m_Shape = ISound::SHAPE_RECTANGLE;
+	m_aVoices[VoiceID].m_Rectangle.m_Width = max(0.0f, Width);
+	m_aVoices[VoiceID].m_Rectangle.m_Height = max(0.0f, Height);
+}
+
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)
 {
 	m_aChannels[ChannelID].m_Vol = (int)(Vol*255.0f);
@@ -752,7 +845,9 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 		m_aVoices[VoiceID].m_Flags = Flags;
 		m_aVoices[VoiceID].m_X = (int)x;
 		m_aVoices[VoiceID].m_Y = (int)y;
-		m_aVoices[VoiceID].m_FalloffDistance = DefaultDistance;
+		m_aVoices[VoiceID].m_Falloff = 0.0f;
+		m_aVoices[VoiceID].m_Shape = ISound::SHAPE_CIRCLE;
+		m_aVoices[VoiceID].m_Circle.m_Radius = DefaultDistance;
 		Age = m_aVoices[VoiceID].m_Age;
 	}
 

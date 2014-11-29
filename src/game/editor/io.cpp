@@ -996,6 +996,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
 					{
 						CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
+						if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+							continue;
+
 						CLayerSounds *pSounds = new CLayerSounds;
 						pSounds->m_pEditor = m_pEditor;
 						pLayer = pSounds;
