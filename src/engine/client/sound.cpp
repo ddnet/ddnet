@@ -206,10 +206,13 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				if(InVoiceField)
 				{
 					// panning
-					if(dx > 0)
-						Lvol = ((RangeX-p)*Lvol)/RangeX;
-					else
-						Rvol = ((RangeX-p)*Rvol)/RangeX;
+					if(!(v->m_Flags&ISound::FLAG_NO_PANNING))
+					{
+						if(dx > 0)
+							Lvol = ((RangeX-p)*Lvol)/RangeX;
+						else
+							Rvol = ((RangeX-p)*Rvol)/RangeX;
+					}
 
 					{
 						Lvol *= FalloffX;

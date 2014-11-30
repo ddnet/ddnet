@@ -1230,7 +1230,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 				m_Map.m_UndoModified++;
 
 				static int s_SourcePopupID = 0;
-				UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupSource);
+				UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
