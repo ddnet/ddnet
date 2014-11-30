@@ -109,6 +109,7 @@ CSoundSource *CLayerSounds::NewSource()
 	pSource->m_Position.y = 0;
 
 	pSource->m_Loop = 1;
+	pSource->m_Pan = 1;
 	pSource->m_TimeDelay = 0;
 
 	pSource->m_PosEnv = -1;
@@ -116,15 +117,16 @@ CSoundSource *CLayerSounds::NewSource()
 	pSource->m_SoundEnv = -1;
 	pSource->m_SoundEnvOffset = 0;
 
-	pSource->m_Falloff = 255;
-	/*
+	pSource->m_Falloff = 80;
+
 	pSource->m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
 	pSource->m_Shape.m_Circle.m_Radius = 1500;
-	*/
 
+	/*
 	pSource->m_Shape.m_Type = CSoundShape::SHAPE_RECTANGLE;
 	pSource->m_Shape.m_Rectangle.m_Width = f2fx(1500.0f);
 	pSource->m_Shape.m_Rectangle.m_Height = f2fx(1000.0f);
+	*/
 
 	return pSource;
 }

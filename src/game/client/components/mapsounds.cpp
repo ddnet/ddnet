@@ -120,6 +120,7 @@ void CMapSounds::OnRender()
 				// need to enqueue
 				int Flags = 0;
 				if(pSource->m_pSource->m_Loop) Flags |= ISound::FLAG_LOOP;
+				if(!pSource->m_pSource->m_Pan) Flags |= ISound::FLAG_NO_PANNING;
 
 				pSource->m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
 				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);

@@ -662,6 +662,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		PROP_POS_X=0,
 		PROP_POS_Y,
 		PROP_LOOP,
+		PROP_PAN,
 		PROP_TIME_DELAY,
 		PROP_FALLOFF,
 		PROP_POS_ENV,
@@ -675,6 +676,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		{"Pos X", pSource->m_Position.x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", pSource->m_Position.y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
+		{"Pan", pSource->m_Pan, PROPTYPE_BOOL, 0, 1},
 		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Falloff", pSource->m_Falloff, PROPTYPE_INT_SCROLL, 0, 255},
 		{"Pos. Env", pSource->m_PosEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
@@ -696,6 +698,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 	if(Prop == PROP_POS_X) pSource->m_Position.x = NewVal*1000;
 	if(Prop == PROP_POS_Y) pSource->m_Position.y = NewVal*1000;
 	if(Prop == PROP_LOOP) pSource->m_Loop = NewVal;
+	if(Prop == PROP_PAN) pSource->m_Pan = NewVal;
 	if(Prop == PROP_TIME_DELAY) pSource->m_TimeDelay = NewVal;
 	if(Prop == PROP_FALLOFF) pSource->m_Falloff = NewVal;
 	if(Prop == PROP_POS_ENV)
