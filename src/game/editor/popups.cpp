@@ -635,6 +635,8 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		"Circle"
 	};
 
+	pSource->m_Shape.m_Type = pSource->m_Shape.m_Type%CSoundShape::NUM_SHAPES; // prevent out of array errors
+
 	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_aShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, 0, "Change shape"))
 	{
 		pSource->m_Shape.m_Type = (pSource->m_Shape.m_Type+1)%CSoundShape::NUM_SHAPES;
