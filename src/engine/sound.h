@@ -11,9 +11,10 @@ class ISound : public IInterface
 public:
 	enum
 	{
-		FLAG_LOOP=1,
-		FLAG_POS=2,
-		FLAG_ALL=3
+		FLAG_LOOP=1<<0,
+		FLAG_POS=1<<1,
+		FLAG_NO_PANNING=1<<2,
+		FLAG_ALL=FLAG_LOOP|FLAG_POS|FLAG_NO_PANNING,
 	};
 
 	enum
