@@ -767,3 +767,26 @@ void ExtractExtraInfo(const CNetObj_Projectile *pProj, int *Owner, bool *Explosi
 	if(Freeze)
 		*Freeze = (Data>>13) & 1;
 }
+
+void SnapshotRemoveExtraInfo(unsigned char *pData)
+{
+	CSnapshot *pSnap = (CSnapshot*) pData;
+	for(int Index = 0; Index < pSnap->NumItems(); Index++)
+	{
+		CSnapshotItem *pItem = pSnap->GetItem(Index);
+		if(pItem->Type() == NETOBJTYPE_PROJECTILE)
+		{
+			CNetObj_Projectile* pProj = (CNetObj_Projectile*) ((void*)pItem->Data());
+			if(UseExtraInfo(pProj))
+			{
+				vec2 Pos;
+				vec2 Vel;
+				ExtractInfo(pProj, &Pos, &Vel, 1);
+				pProj->m_X = Pos.x;
+				pProj->m_Y = Pos.y;
+				pProj->m_VelX = (int)(Vel.x*100.0f);
+				pProj->m_VelY = (int)(Vel.y*100.0f);
+			}
+		}
+	}
+}

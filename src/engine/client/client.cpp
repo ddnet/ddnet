@@ -1839,13 +1839,22 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					// add new
 					m_SnapshotStorage[g_Config.m_ClDummy].Add(GameTick, time_get(), SnapSize, pTmpBuffer3, 1);
 
+					// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
+					unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
+					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
+					CServerInfo Info;
+					GetServerInfo(&Info);
+					bool IsDDNet = str_find_nocase(Info.m_aGameType, "ddracenetw") || str_find_nocase(Info.m_aGameType, "ddnet");
+					if(IsDDNet)
+						SnapshotRemoveExtraInfo(aExtraInfoRemoved);
+
 					// add snapshot to demo
 					for(int i = 0; i < RECORDER_MAX; i++)
 					{
 						if(m_DemoRecorder[i].IsRecording())
 						{
 							// write snapshot
-							m_DemoRecorder[i].RecordSnapshot(GameTick, pTmpBuffer3, SnapSize);
+							m_DemoRecorder[i].RecordSnapshot(GameTick, aExtraInfoRemoved, SnapSize);
 						}
 					}
 
