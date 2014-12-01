@@ -258,7 +258,12 @@ void CProjectile::Snap(int SnappingClient)
 
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID, sizeof(CNetObj_Projectile)));
 	if(pProj)
-		FillInfo(pProj);
+	{
+		if(SnappingClient > -1 && GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE)
+			FillExtraInfo(pProj);
+		else
+			FillInfo(pProj);
+	}
 }
 
 // DDRace
@@ -266,4 +271,28 @@ void CProjectile::Snap(int SnappingClient)
 void CProjectile::SetBouncing(int Value)
 {
 	m_Bouncing = Value;
+}
+
+void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
+{
+	//Send additional/modified info, by modifiying the fields of the netobj
+	float Angle = -atan2f(m_Direction.x, m_Direction.y);
+
+	int Data = 0;
+	Data |= (abs(m_Owner) & 255)<<0;
+	if(m_Owner < 0)
+		Data |= 1<<8;
+	Data |= 1<<9; //This bit tells the client to use the extra info
+	Data |= (m_Bouncing & 3)<<10;
+	if(m_Explosive)
+		Data |= 1<<12;
+	if(m_Freeze)
+		Data |= 1<<13;
+
+	pProj->m_X = (int)(m_Pos.x * 1000.0f);
+	pProj->m_Y = (int)(m_Pos.y * 1000.0f);
+	pProj->m_VelX = (int)(Angle * 1000000.0f);
+	pProj->m_VelY = Data;
+	pProj->m_StartTick = m_StartTick;
+	pProj->m_Type = m_Type;
 }
