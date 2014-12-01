@@ -1265,7 +1265,7 @@ void CGameClient::OnPredict()
 				{
 					CLocalProjectile NewProj;
 					NewProj.Init(this, &World, Collision(), pProj);
-					if(fabs(1.0f - length(NewProj.m_Direction)) < 0.01)
+					if(fabs(1.0f - length(NewProj.m_Direction)) < 0.015)
 					{
 						if(!NewProj.m_ExtraInfo)
 						{
@@ -1857,7 +1857,7 @@ void CLocalProjectile::Init(CGameClient *pGameClient, CWorldCore *pWorld, CColli
 	}
 	else
 	{
-		bool StandardVel = (fabs(length(m_Direction) - 1.0f) < 0.01);
+		bool StandardVel = (fabs(1.0f - length(m_Direction)) < 0.015);
 		m_Owner = -1;
 		m_Explosive = ((m_Type == WEAPON_GRENADE && StandardVel) ? true : false);
 		m_Bouncing = 0;
