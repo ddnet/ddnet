@@ -600,8 +600,12 @@ void CServer::DoSnapshot()
 		GameServer()->OnSnap(-1);
 		SnapshotSize = m_SnapshotBuilder.Finish(aData);
 
+		// for antiping: if the projectile netobjects contains extra data, this is removed and the original content restored before recording demo
+		unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
+		mem_copy(aExtraInfoRemoved, aData, SnapshotSize);
+		SnapshotRemoveExtraInfo(aExtraInfoRemoved);
 		// write snapshot
-		m_aDemoRecorder[MAX_CLIENTS].RecordSnapshot(Tick(), aData, SnapshotSize);
+		m_aDemoRecorder[MAX_CLIENTS].RecordSnapshot(Tick(), aExtraInfoRemoved, SnapshotSize);
 	}
 
 	// create snapshots for all clients
@@ -640,7 +644,14 @@ void CServer::DoSnapshot()
 			SnapshotSize = m_SnapshotBuilder.Finish(pData);
 
 			if(m_aDemoRecorder[i].IsRecording())
-				m_aDemoRecorder[i].RecordSnapshot(Tick(), aData, SnapshotSize);
+			{
+				// for antiping: if the projectile netobjects contains extra data, this is removed and the original content restored before recording demo
+				unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
+				mem_copy(aExtraInfoRemoved, aData, SnapshotSize);
+				SnapshotRemoveExtraInfo(aExtraInfoRemoved);
+				// write snapshot
+				m_aDemoRecorder[i].RecordSnapshot(Tick(), aExtraInfoRemoved, SnapshotSize);
+			}
 
 			Crc = pData->Crc();
 
