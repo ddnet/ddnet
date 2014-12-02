@@ -30,7 +30,7 @@ int CSnapshot::GetItemIndex(int Key)
 
 int CSnapshot::Crc()
 {
-	unsigned int Crc = 0;
+	int Crc = 0;
 
 	for(int i = 0; i < m_NumItems; i++)
 	{

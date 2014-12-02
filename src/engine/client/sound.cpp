@@ -260,8 +260,8 @@ static void Mix(short *pFinalOut, unsigned Frames)
 		for(unsigned i = 0; i < Frames; i++)
 		{
 			int j = i<<1;
-			unsigned int vl = (((unsigned int) m_pMixBuffer[j]*MasterVol)/101)>>8;
-			unsigned int vr = (((unsigned int) m_pMixBuffer[j+1]*MasterVol)/101)>>8;
+			int vl = ((m_pMixBuffer[j]*MasterVol)/101)>>8;
+			int vr = ((m_pMixBuffer[j+1]*MasterVol)/101)>>8;
 
 			pFinalOut[j] = Int2Short(vl);
 			pFinalOut[j+1] = Int2Short(vr);
