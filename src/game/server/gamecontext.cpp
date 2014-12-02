@@ -2524,6 +2524,7 @@ void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
 	CGameContext *pSelf = (CGameContext *)pUser;
 
 	static volatile int ReentryGuard = 0;
+	const char *pLineOrig = pLine;
 
 	if(ReentryGuard)
 		return;
@@ -2532,7 +2533,7 @@ void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
 	if(*pLine == '[')
 	do
 		pLine++;
-	while(*(pLine - 2) != ':' && *pLine != 0);//remove the category (e.g. [Console]: No Such Command)
+	while((pLine - 2 < pLineOrig || *(pLine - 2) != ':') && *pLine != 0);//remove the category (e.g. [Console]: No Such Command)
 
 	pSelf->SendChat(-1, CHAT_ALL, pLine);
 
@@ -2547,6 +2548,8 @@ void CGameContext::SendChatResponse(const char *pLine, void *pUser)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
 		return;
 
+	const char *pLineOrig = pLine;
+
 	static volatile int ReentryGuard = 0;
 
 	if(ReentryGuard)
@@ -2556,7 +2559,7 @@ void CGameContext::SendChatResponse(const char *pLine, void *pUser)
 	if(*pLine == '[')
 	do
 		pLine++;
-	while(*(pLine - 2) != ':' && *pLine != 0); // remove the category (e.g. [Console]: No Such Command)
+	while((pLine - 2 < pLineOrig || *(pLine - 2) != ':') && *pLine != 0); // remove the category (e.g. [Console]: No Such Command)
 
 	pSelf->SendChatTarget(ClientID, pLine);
 
