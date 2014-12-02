@@ -62,14 +62,22 @@ void CHud::RenderGameTimer()
 		bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
 		bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
 
-		if(Time <= 0)
+		if(Time <= 0 && g_Config.m_ClShowCentisecs)
 			str_format(Buf, sizeof(Buf), "00:00.0");
+		else if(Time <= 0)
+			str_format(Buf, sizeof(Buf), "00:00");
 		else if(IsGameTypeRace && !IsGameTypeDDRace && m_ServerRecord >= 0)
 			str_format(Buf, sizeof(Buf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
-		else
+		else if(g_Config.m_ClShowCentisecs)
 			str_format(Buf, sizeof(Buf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
+		else
+			str_format(Buf, sizeof(Buf), "%02d:%02d", Time/60, Time%60);
 		float FontSize = 10.0f;
-		float w = TextRender()->TextWidth(0, 12,"00:00.0",-1);
+		float w;
+		if(g_Config.m_ClShowCentisecs)
+			w = TextRender()->TextWidth(0, 12,"00:00.0",-1);
+		else
+			w = TextRender()->TextWidth(0, 12,"00:00",-1);
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && !m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer)
 		{
