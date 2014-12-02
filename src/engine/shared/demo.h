@@ -29,7 +29,7 @@ public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize = 0, unsigned char *pMapData = NULL);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize = 0, unsigned char *pMapData = 0);
 	int Stop(bool Finalize = false);
 	void AddDemoMarker();
 
