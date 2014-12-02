@@ -275,6 +275,13 @@ void CProjectile::SetBouncing(int Value)
 
 void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
 {
+	const int MaxPos = 0x7fffffff/100;
+	if(abs(m_Pos.y)+1 >= MaxPos || abs(m_Pos.x)+1 >= MaxPos)
+	{
+		//If the modified data would be too large to fit in an integer, send normal data instead
+		FillInfo(pProj);
+		return;
+	}
 	//Send additional/modified info, by modifiying the fields of the netobj
 	float Angle = -atan2f(m_Direction.x, m_Direction.y);
 
@@ -289,8 +296,8 @@ void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
 	if(m_Freeze)
 		Data |= 1<<13;
 
-	pProj->m_X = (int)(m_Pos.x * 1000.0f);
-	pProj->m_Y = (int)(m_Pos.y * 1000.0f);
+	pProj->m_X = (int)(m_Pos.x * 100.0f);
+	pProj->m_Y = (int)(m_Pos.y * 100.0f);
 	pProj->m_VelX = (int)(Angle * 1000000.0f);
 	pProj->m_VelY = Data;
 	pProj->m_StartTick = m_StartTick;

@@ -743,8 +743,8 @@ void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel
 	}
 	else
 	{
-		StartPos->x = pProj->m_X/1000.0f;
-		StartPos->y = pProj->m_Y/1000.0f;
+		StartPos->x = pProj->m_X/100.0f;
+		StartPos->y = pProj->m_Y/100.0f;
 		float Angle = pProj->m_VelX/1000000.0f;
 		StartVel->x = sin(-Angle);
 		StartVel->y = cos(-Angle);
