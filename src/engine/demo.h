@@ -72,7 +72,7 @@ class IDemoRecorder : public IInterface
 public:
 	~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
-	virtual int Stop() = 0;
+	virtual int Stop(bool Finalize = false) = 0;
 	virtual int Length() const = 0;
 };
 

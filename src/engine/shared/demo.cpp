@@ -21,16 +21,29 @@ static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
 
 
-CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta)
+CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData)
 {
 	m_File = 0;
 	m_LastTickMarker = -1;
 	m_pSnapshotDelta = pSnapshotDelta;
+	m_DelayedMapData = DelayedMapData;
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData)
 {
+	m_MapSize = MapSize;
+	m_pMapData = pMapData;
+
+	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!DemoFile)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for recording", pFilename);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+		return -1;
+	}
+
 	CDemoHeader Header;
 	CTimelineMarkers TimelineMarkers;
 	if(m_File)
@@ -38,42 +51,36 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	m_pConsole = pConsole;
 
-	// open mapfile
-	char aMapFilename[128];
-	// try the normal maps folder
-	str_format(aMapFilename, sizeof(aMapFilename), "maps/%s.map", pMap);
-	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(!MapFile)
-	{
-		// try the downloaded maps
-		str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
-		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
-	}
-	if(!MapFile)
-	{
-		// search for the map within subfolders
-		char aBuf[512];
-		str_format(aMapFilename, sizeof(aMapFilename), "%s.map", pMap);
-		if(pStorage->FindFile(aMapFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
-			MapFile = pStorage->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-	}
-	if(!MapFile)
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Unable to open mapfile '%s'", pMap);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
-		return -1;
-	}
+	IOHANDLE MapFile = NULL;
 
-	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(!DemoFile)
+	if(!m_DelayedMapData)
 	{
-		io_close(MapFile);
-		MapFile = 0;
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for recording", pFilename);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
-		return -1;
+		// open mapfile
+		char aMapFilename[128];
+		// try the normal maps folder
+		str_format(aMapFilename, sizeof(aMapFilename), "maps/%s.map", pMap);
+		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+		if(!MapFile)
+		{
+			// try the downloaded maps
+			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
+			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+		}
+		if(!MapFile)
+		{
+			// search for the map within subfolders
+			char aBuf[512];
+			str_format(aMapFilename, sizeof(aMapFilename), "%s.map", pMap);
+			if(pStorage->FindFile(aMapFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
+				MapFile = pStorage->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+		}
+		if(!MapFile)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unable to open mapfile '%s'", pMap);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+			return -1;
+		}
 	}
 
 	// write header
@@ -82,7 +89,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	Header.m_Version = gs_ActVersion;
 	str_copy(Header.m_aNetversion, pNetVersion, sizeof(Header.m_aNetversion));
 	str_copy(Header.m_aMapName, pMap, sizeof(Header.m_aMapName));
-	unsigned MapSize = io_length(MapFile);
+	if(!m_DelayedMapData)
+		MapSize = io_length(MapFile);
 	Header.m_aMapSize[0] = (MapSize>>24)&0xff;
 	Header.m_aMapSize[1] = (MapSize>>16)&0xff;
 	Header.m_aMapSize[2] = (MapSize>>8)&0xff;
@@ -97,16 +105,23 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	io_write(DemoFile, &Header, sizeof(Header));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
 
-	// write map data
-	while(1)
+	if(m_DelayedMapData)
 	{
-		unsigned char aChunk[1024*64];
-		int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
-		if(Bytes <= 0)
-			break;
-		io_write(DemoFile, &aChunk, Bytes);
+		io_seek(DemoFile, MapSize, IOSEEK_CUR);
 	}
-	io_close(MapFile);
+	else
+	{
+		// write map data
+		while(1)
+		{
+			unsigned char aChunk[1024*64];
+			int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
+			if(Bytes <= 0)
+				break;
+			io_write(DemoFile, &aChunk, Bytes);
+		}
+		io_close(MapFile);
+	}
 
 	m_LastKeyFrame = -1;
 	m_LastTickMarker = -1;
@@ -261,7 +276,7 @@ void CDemoRecorder::RecordMessage(const void *pData, int Size)
 	Write(CHUNKTYPE_MESSAGE, pData, Size);
 }
 
-int CDemoRecorder::Stop()
+int CDemoRecorder::Stop(bool Finalize)
 {
 	if(!m_File)
 		return -1;
@@ -293,6 +308,12 @@ int CDemoRecorder::Stop()
 		aMarker[2] = (Marker>>8)&0xff;
 		aMarker[3] = (Marker)&0xff;
 		io_write(m_File, aMarker, sizeof(aMarker));
+	}
+
+	if(Finalize && m_DelayedMapData)
+	{
+		io_seek(m_File, gs_NumMarkersOffset + sizeof(CTimelineMarkers), IOSEEK_START);
+		io_write(m_File, m_pMapData, m_MapSize);
 	}
 
 	io_close(m_File);
