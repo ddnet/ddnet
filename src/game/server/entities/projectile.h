@@ -53,6 +53,7 @@ private:
 public:
 
 	void SetBouncing(int Value);
+	void FillExtraInfo(CNetObj_Projectile *pProj);
 };
 
 #endif

@@ -16,6 +16,8 @@
 
 #include "items.h"
 #include <stdio.h>
+
+#include <engine/serverbrowser.h>
 void CItems::OnReset()
 {
 	m_NumExtraProjectiles = 0;
@@ -49,8 +51,14 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	if(Ct < 0)
 		return; // projectile havn't been shot yet
 
-	vec2 StartPos(pCurrent->m_X, pCurrent->m_Y);
-	vec2 StartVel(pCurrent->m_VelX/100.0f, pCurrent->m_VelY/100.0f);
+	vec2 StartPos;
+	vec2 StartVel;
+
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+	bool IsDDNet = str_find_nocase(Info.m_aGameType, "ddracenetw") || str_find_nocase(Info.m_aGameType, "ddnet");
+	ExtractInfo(pCurrent, &StartPos, &StartVel, IsDDNet);
+
 	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct-0.001f);
 

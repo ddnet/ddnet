@@ -704,3 +704,89 @@ bool CCharacterCore::IsRightTeam(int MapIndex)
 			return Collision()->m_pSwitchers[Collision()->GetDTileNumber(MapIndex)].m_Status[m_pTeams->Team(m_Id)];
 	return false;
 }
+
+void CCharacterCore::LimitForce(vec2 *Force)
+{
+	vec2 Temp = *Force;
+	if(Temp.x > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)))
+		Temp.x = 0;
+	if(Temp.x < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)))
+		Temp.x = 0;
+	if(Temp.y < 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)))
+		Temp.y = 0;
+	if(Temp.y > 0 && ((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)))
+		Temp.y = 0;
+	*Force = Temp;
+}
+
+void CCharacterCore::ApplyForce(vec2 Force)
+{
+	vec2 Temp = m_Vel + Force;
+	LimitForce(&Temp);
+	m_Vel = Temp;
+}
+
+bool UseExtraInfo(const CNetObj_Projectile *pProj)
+{
+	bool ExtraInfoFlag = ((abs(pProj->m_VelY) & (1<<9)) != 0);
+	return ExtraInfoFlag;
+}
+
+void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel, bool IsDDNet)
+{
+	if(!UseExtraInfo(pProj) || !IsDDNet)
+	{
+		StartPos->x = pProj->m_X;
+		StartPos->y = pProj->m_Y;
+		StartVel->x = pProj->m_VelX/100.0f;
+		StartVel->y = pProj->m_VelY/100.0f;
+	}
+	else
+	{
+		StartPos->x = pProj->m_X/100.0f;
+		StartPos->y = pProj->m_Y/100.0f;
+		float Angle = pProj->m_VelX/1000000.0f;
+		StartVel->x = sin(-Angle);
+		StartVel->y = cos(-Angle);
+	}
+}
+
+void ExtractExtraInfo(const CNetObj_Projectile *pProj, int *Owner, bool *Explosive, int *Bouncing, bool *Freeze)
+{
+	int Data = pProj->m_VelY;
+	if(Owner)
+	{
+		*Owner = Data & 255;
+		if((Data>>8) & 1)
+			*Owner = -(*Owner);
+	}
+	if(Bouncing)
+		*Bouncing = (Data>>10) & 3;
+	if(Explosive)
+		*Explosive = (Data>>12) & 1;
+	if(Freeze)
+		*Freeze = (Data>>13) & 1;
+}
+
+void SnapshotRemoveExtraInfo(unsigned char *pData)
+{
+	CSnapshot *pSnap = (CSnapshot*) pData;
+	for(int Index = 0; Index < pSnap->NumItems(); Index++)
+	{
+		CSnapshotItem *pItem = pSnap->GetItem(Index);
+		if(pItem->Type() == NETOBJTYPE_PROJECTILE)
+		{
+			CNetObj_Projectile* pProj = (CNetObj_Projectile*) ((void*)pItem->Data());
+			if(UseExtraInfo(pProj))
+			{
+				vec2 Pos;
+				vec2 Vel;
+				ExtractInfo(pProj, &Pos, &Vel, 1);
+				pProj->m_X = Pos.x;
+				pProj->m_Y = Pos.y;
+				pProj->m_VelX = (int)(Vel.x*100.0f);
+				pProj->m_VelY = (int)(Vel.y*100.0f);
+			}
+		}
+	}
+}
