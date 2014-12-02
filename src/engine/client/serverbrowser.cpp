@@ -914,6 +914,9 @@ void CServerBrowser::LoadDDNet()
 				m_NumDDNetCountries++;
 			}
 		}
+
+		if (pCountries)
+			json_value_free(pCountries);
 	}
 }
 
