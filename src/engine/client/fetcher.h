@@ -31,10 +31,10 @@ private:
 	unsigned m_NumTasks;
 public:
 	CFetcher();
-	bool Init();
+	virtual bool Init();
 	~CFetcher();
 
-	void QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb = NULL, PROGFUNC pfnProgCb = NULL, void *pUser = NULL);
+	virtual void QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb = NULL, PROGFUNC pfnProgCb = NULL, void *pUser = NULL);
 	static void FetcherThread(void *pUser);
 	void FetchFile(CFetchTask *pTask);
 	static void WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);
