@@ -1794,7 +1794,13 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPingGrenade, Localize("AntiPing (predict grenades)"), g_Config.m_ClAntiPingGrenade, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPingWeapons, Localize("AntiPing (predict weapons)"), g_Config.m_ClAntiPingWeapons, &Button))
+	{
+		g_Config.m_ClAntiPingWeapons ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPingGrenade, Localize("AntiPing (predict grenade paths)"), g_Config.m_ClAntiPingGrenade, &Button))
 	{
 		g_Config.m_ClAntiPingGrenade ^= 1;
 	}
