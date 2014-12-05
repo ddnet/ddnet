@@ -824,6 +824,34 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 										pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
 								}
 							}
+
+							// Convert race stoppers to ddrace stoppers
+							/*if(pTiles->m_Game)
+							{
+								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+								{
+									if(pTiles->m_pTiles[i].m_Index == 29)
+									{
+										pTiles->m_pTiles[i].m_Index = 60;
+										pTiles->m_pTiles[i].m_Flags = TILEFLAG_HFLIP|TILEFLAG_VFLIP|TILEFLAG_ROTATE;
+									}
+									else if(pTiles->m_pTiles[i].m_Index == 30)
+									{
+										pTiles->m_pTiles[i].m_Index = 60;
+										pTiles->m_pTiles[i].m_Flags = TILEFLAG_ROTATE;
+									}
+									else if(pTiles->m_pTiles[i].m_Index == 31)
+									{
+										pTiles->m_pTiles[i].m_Index = 60;
+										pTiles->m_pTiles[i].m_Flags = TILEFLAG_HFLIP|TILEFLAG_VFLIP;
+									}
+									else if(pTiles->m_pTiles[i].m_Index == 32)
+									{
+										pTiles->m_pTiles[i].m_Index = 60;
+										pTiles->m_pTiles[i].m_Flags = 0;
+									}
+								}
+							}*/
 						}
 
 						DataFile.UnloadData(pTilemapItem->m_Data);
