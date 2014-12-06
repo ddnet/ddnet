@@ -359,5 +359,7 @@ static const unsigned gs_aFreqTable[256+1] = {
 
 void CNetBase::Init()
 {
+#ifndef FUZZING
 	ms_Huffman.Init(gs_aFreqTable);
+#endif
 }
