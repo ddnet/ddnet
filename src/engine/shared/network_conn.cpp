@@ -249,8 +249,10 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 					mem_copy(&nAddr, pAddr, sizeof(nAddr));
 					nAddr.port = 0;
 					m_PeerAddr.port = 0;
+#ifndef FUZZING
 					if(net_addr_comp(&m_PeerAddr, &nAddr) == 0 && time_get() - m_LastUpdateTime < time_freq() * 3)
 						return 0;
+#endif
 
 					// send response and init connection
 					Reset();
