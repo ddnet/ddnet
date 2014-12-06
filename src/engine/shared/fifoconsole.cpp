@@ -10,7 +10,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-static volatile bool stopFifoThread = false;
+static LOCK gs_FifoLock = 0;
+static volatile bool gs_stopFifoThread = false;
 
 FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 {
@@ -19,22 +20,29 @@ FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 	m_pFifoFile = pFifoFile;
 	m_flag = flag;
 
-	stopFifoThread = false;
+	gs_stopFifoThread = false;
+	if(gs_FifoLock == 0)
+		gs_FifoLock = lock_create();
 
 	pthread_detach((pthread_t)m_pFifoThread);
 }
 
 FifoConsole::~FifoConsole()
 {
-	stopFifoThread = true;
-	//pthread_wait((pthread_t)m_pFifoThread, NULL);
+	lock_wait(gs_FifoLock);
+	gs_stopFifoThread = true;
+	lock_release(gs_FifoLock);
+	gs_FifoLock = 0;
 }
 
 void FifoConsole::ListenFifoThread(void *pUser)
 {
 	FifoConsole *pData = (FifoConsole *)pUser;
 
-	if(stopFifoThread)
+	if(!gs_FifoLock)
+		return;
+	lock_wait(gs_FifoLock);
+	if(gs_stopFifoThread)
 		return;
 
 	// This should fix the problem where sometimes the fifo thread runs at a bad
@@ -48,6 +56,8 @@ void FifoConsole::ListenFifoThread(void *pUser)
 
 	struct stat attribute;
 	stat(pData->m_pFifoFile, &attribute);
+
+	lock_release(gs_FifoLock);
 
 	if(!S_ISFIFO(attribute.st_mode))
 		return;
