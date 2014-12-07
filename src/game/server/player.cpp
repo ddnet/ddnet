@@ -26,6 +26,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_pCharacter = 0;
 	m_NumInputs = 0;
+	m_KillMe = 0;
 	Reset();
 }
 
@@ -43,6 +44,7 @@ void CPlayer::Reset()
 	if (m_pCharacter)
 		delete m_pCharacter;
 	m_pCharacter = 0;
+	m_KillMe = 0;
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
 	m_TeamChangeTick = Server()->Tick();
@@ -132,6 +134,13 @@ void CPlayer::Tick()
 #endif
 	if(!Server()->ClientIngame(m_ClientID))
 		return;
+
+	if(m_KillMe != 0)
+	{
+		KillCharacter(m_KillMe);
+		m_KillMe = 0;
+		return;
+	}
 
 	if (m_ChatScore > 0)
 		m_ChatScore--;
@@ -428,6 +437,11 @@ CCharacter *CPlayer::GetCharacter()
 	if(m_pCharacter && m_pCharacter->IsAlive())
 		return m_pCharacter;
 	return 0;
+}
+
+void CPlayer::ThreadKillCharacter(int Weapon)
+{
+	m_KillMe = Weapon;
 }
 
 void CPlayer::KillCharacter(int Weapon)
