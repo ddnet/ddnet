@@ -451,7 +451,7 @@ void CGameClient::UpdatePositions()
 	// local character position
 	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		if (!g_Config.m_ClAntiPing)
+		if (!g_Config.m_ClAntiPingPlayers)
 		{
 			if(!m_Snap.m_pLocalCharacter || (m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 			{
@@ -478,7 +478,7 @@ void CGameClient::UpdatePositions()
 			vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y), Client()->IntraGameTick());
 	}
 
-	if (g_Config.m_ClAntiPing)
+	if (g_Config.m_ClAntiPingPlayers)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -569,6 +569,14 @@ void CGameClient::OnRender()
 	// clear new tick flags
 	m_NewTick = false;
 	m_NewPredictedTick = false;
+
+	if(g_Config.m_ClAntiPing != m_CurrentAntiPing)
+	{
+		g_Config.m_ClAntiPingPlayers = g_Config.m_ClAntiPing;
+		g_Config.m_ClAntiPingGrenade = g_Config.m_ClAntiPing;
+		g_Config.m_ClAntiPingWeapons = g_Config.m_ClAntiPing;
+		m_CurrentAntiPing = g_Config.m_ClAntiPing;
+	}
 
 	if(g_Config.m_ClDummy && !Client()->DummyConnected())
 		g_Config.m_ClDummy = 0;
@@ -1309,7 +1317,7 @@ void CGameClient::OnPredict()
 			if(!World.m_apCharacters[c])
 				continue;
 
-			if(g_Config.m_ClAntiPing && Tick == Client()->PredGameTick())
+			if(g_Config.m_ClAntiPingPlayers && Tick == Client()->PredGameTick())
 				g_GameClient.m_aClients[c].m_PrevPredicted = *World.m_apCharacters[c];
 		}
 
@@ -1563,7 +1571,7 @@ void CGameClient::OnPredict()
 		{
 			m_PredictedChar = *World.m_apCharacters[m_Snap.m_LocalClientID];
 
-			if (g_Config.m_ClAntiPing)
+			if (g_Config.m_ClAntiPingPlayers)
 			{
 				for (int c = 0; c < MAX_CLIENTS; c++)
 				{

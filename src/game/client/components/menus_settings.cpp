@@ -1747,7 +1747,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClRaceSaveGhost ^= 1;
 	}
 
-	MainView.HSplitTop(250.0f, &Gameplay , &MainView);
+	MainView.HSplitTop(270.0f, &Gameplay , &MainView);
 
 	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
 	UI()->DoLabelScaled(&Label, Localize("Gameplay"), 20.0f, -1);
@@ -1788,9 +1788,15 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing (predict other players)"), g_Config.m_ClAntiPing, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
 	{
 		g_Config.m_ClAntiPing ^= 1;
+	}
+
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPingPlayers, Localize("AntiPing (predict other players)"), g_Config.m_ClAntiPingPlayers, &Button))
+	{
+		g_Config.m_ClAntiPingPlayers ^= 1;
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
@@ -1840,6 +1846,9 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowDirection ^= 1;
 	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
+	// Empty space here
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);

@@ -78,7 +78,7 @@ void CNamePlates::RenderNameplate(
 
 void CNamePlates::OnRender()
 {
-	if (!g_Config.m_ClNameplates || g_Config.m_ClAntiPing)
+	if (!g_Config.m_ClNameplates || g_Config.m_ClAntiPingPlayers)
 		return;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
