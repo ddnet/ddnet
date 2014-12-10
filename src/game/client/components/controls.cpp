@@ -128,10 +128,8 @@ static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 
 	CServerInfo Info;
 	pState->m_pControls->GameClient()->Client()->GetServerInfo(&Info);
-	bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
-	bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
 
-	if ((IsGameTypeRace || IsGameTypeDDRace) && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
+	if ((IsRace(&Info) || IsDDRace(&Info)) && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return;
 
 	if (g_Config.m_ClDummy)
@@ -146,10 +144,8 @@ static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
 
 	CServerInfo Info;
 	pState->m_pControls->GameClient()->Client()->GetServerInfo(&Info);
-	bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
-	bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
 
-	if ((IsGameTypeRace || IsGameTypeDDRace) && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
+	if ((IsRace(&Info) || IsDDRace(&Info)) && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return;
 
 	int *v;
@@ -438,10 +434,8 @@ void CControls::OnRender()
 
 	CServerInfo Info;
 	GameClient()->Client()->GetServerInfo(&Info);
-	bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
-	bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
 
-	if( g_Config.m_ClAutoswitchWeaponsOutOfAmmo && !IsGameTypeRace && !IsGameTypeDDRace && m_pClient->m_Snap.m_pLocalCharacter )
+	if( g_Config.m_ClAutoswitchWeaponsOutOfAmmo && !IsRace(&Info) && !IsDDRace(&Info) && m_pClient->m_Snap.m_pLocalCharacter )
 	{
 		// Keep track of ammo count, we know weapon ammo only when we switch to that weapon, this is tracked on server and protocol does not track that
 		m_AmmoCount[m_pClient->m_Snap.m_pLocalCharacter->m_Weapon%NUM_WEAPONS] = m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount;

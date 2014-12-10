@@ -431,7 +431,7 @@ void CClient::Rcon(const char *pCmd)
 {
 	CServerInfo Info;
 	GetServerInfo(&Info);
-	if(RconAuthed() && (str_find_nocase(Info.m_aGameType, "ddracenetw") || str_find_nocase(Info.m_aGameType, "ddnet")))
+	if(RconAuthed() && IsDDNet(&Info))
 	{ // Against IP spoofing on DDNet servers
 		CMsgPacker Msg(NETMSG_RCON_AUTH);
 		Msg.AddString("", 32);
@@ -1398,7 +1398,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				}
 			}
 
-			if (strstr(Info.m_aGameType, "64") || strstr(Info.m_aName, "64") || strstr(Info.m_aGameType, "DDraceNet") || strstr(Info.m_aGameType, "DDNet"))
+			if (Is64Player(&Info))
 			{
 				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
 				if (pEntry)
@@ -1831,8 +1831,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
 					CServerInfo Info;
 					GetServerInfo(&Info);
-					bool IsDDNet = str_find_nocase(Info.m_aGameType, "ddracenetw") || str_find_nocase(Info.m_aGameType, "ddnet");
-					if(IsDDNet)
+					if(IsDDNet(&Info))
 						SnapshotRemoveExtraInfo(aExtraInfoRemoved);
 
 					// add snapshot to demo
@@ -1875,8 +1874,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 					if(m_RecivedSnapshots[g_Config.m_ClDummy] > 50 && !m_TimeoutCodeSent[g_Config.m_ClDummy])
 					{
-						if(str_find_nocase(m_CurrentServerInfo.m_aGameType, "ddracenetw")
-							|| str_find_nocase(m_CurrentServerInfo.m_aGameType, "ddnet"))
+						if(IsDDNet(&m_CurrentServerInfo))
 						{
 							m_TimeoutCodeSent[g_Config.m_ClDummy] = true;
 							CNetMsg_Cl_Say Msg;

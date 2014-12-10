@@ -1249,7 +1249,6 @@ void CGameClient::OnPredict()
 
 	CServerInfo Info;
 	Client()->GetServerInfo(&Info);
-	bool IsRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
 	const int MaxProjectiles = 128;
 	class CLocalProjectile PredictedProjectiles[MaxProjectiles];
 	int NumProjectiles = 0;
@@ -1383,7 +1382,7 @@ void CGameClient::OnPredict()
 					WillFire = true;
 				if(!WillFire)
 					break;
-				if(!IsRace && !m_Snap.m_pLocalCharacter->m_AmmoCount && Local->m_ActiveWeapon != WEAPON_HAMMER)
+				if(!IsRace(&Info) && !m_Snap.m_pLocalCharacter->m_AmmoCount && Local->m_ActiveWeapon != WEAPON_HAMMER)
 					break;
 
 				int ExpectedStartTick = Tick-1;

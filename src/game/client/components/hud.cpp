@@ -59,14 +59,12 @@ void CHud::RenderGameTimer()
 
 		CServerInfo Info;
 		Client()->GetServerInfo(&Info);
-		bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
-		bool IsGameTypeDDRace = str_find_nocase(Info.m_aGameType, "ddrace") || str_find_nocase(Info.m_aGameType, "mkrace");
 
 		if(Time <= 0 && g_Config.m_ClShowDecisecs)
 			str_format(Buf, sizeof(Buf), "00:00.0");
 		else if(Time <= 0)
 			str_format(Buf, sizeof(Buf), "00:00");
-		else if(IsGameTypeRace && !IsGameTypeDDRace && m_ServerRecord >= 0)
+		else if(IsRace(&Info) && !IsDDRace(&Info) && m_ServerRecord >= 0)
 			str_format(Buf, sizeof(Buf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
 		else if(g_Config.m_ClShowDecisecs)
 			str_format(Buf, sizeof(Buf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
@@ -220,8 +218,7 @@ void CHud::RenderScoreHud()
 				{
 					CServerInfo Info;
 					Client()->GetServerInfo(&Info);
-					bool IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
-					if(IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
+					if(IsRace(&Info) && g_Config.m_ClDDRaceScoreBoard)
 					{
 						if (apPlayerInfo[t]->m_Score != -9999)
 							str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d", abs(apPlayerInfo[t]->m_Score)/60, abs(apPlayerInfo[t]->m_Score)%60);

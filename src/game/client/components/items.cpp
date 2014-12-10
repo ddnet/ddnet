@@ -75,8 +75,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	CServerInfo Info;
 	Client()->GetServerInfo(&Info);
-	bool IsDDNet = str_find_nocase(Info.m_aGameType, "ddracenetw") || str_find_nocase(Info.m_aGameType, "ddnet");
-	ExtractInfo(pCurrent, &StartPos, &StartVel, IsDDNet);
+	ExtractInfo(pCurrent, &StartPos, &StartVel, IsDDNet(&Info));
 
 	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct-0.001f);

@@ -51,6 +51,11 @@ public:
 	CClient m_aClients[MAX_CLIENTS];
 };
 
+bool IsRace(const CServerInfo *pInfo);
+bool IsDDRace(const CServerInfo *pInfo);
+bool IsDDNet(const CServerInfo *pInfo);
+bool Is64Player(const CServerInfo *pInfo);
+
 class IServerBrowser : public IInterface
 {
 	MACRO_INTERFACE("serverbrowser", 0)

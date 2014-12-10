@@ -487,15 +487,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						hsl = vec3(0.00f, 1.0f, 0.75f); // Instagib
 					else if (str_find_nocase(pItem->m_aGameType, "fng"))
 						hsl = vec3(0.83f, 1.0f, 0.75f); // FNG
-					else if (str_find_nocase(pItem->m_aGameType, "ddracenetw")
-							|| str_find_nocase(pItem->m_aGameType, "ddnet"))
+					else if (IsDDNet(pItem))
 						hsl = vec3(0.58f, 1.0f, 0.75f); // DDNet
-					else if (str_find_nocase(pItem->m_aGameType, "ddrace")
-							|| str_find_nocase(pItem->m_aGameType, "mkrace"))
+					else if (IsDDRace(pItem))
 						hsl = vec3(0.75f, 1.0f, 0.75f); // DDRace
-					else if (str_find_nocase(pItem->m_aGameType, "race")
-							|| !str_comp(pItem->m_aGameType, "FastCap"))
-						hsl = vec3(0.46f, 1.0f, 0.75f); // Races
+					else if (IsRace(pItem))
+						hsl = vec3(0.46f, 1.0f, 0.75f); // Race
 
 					vec3 rgb = HslToRgb(hsl);
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
@@ -894,7 +891,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			if(!pSelectedServer->m_aClients[i].m_Player)
 				str_copy(aTemp, "SPEC", sizeof(aTemp));
-			else if(str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap"))
+			else if(IsRace(pSelectedServer))
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
 					aTemp[0] = 0;

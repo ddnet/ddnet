@@ -32,7 +32,7 @@ void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 	CServerInfo Info;
 
 	pSelf->Client()->GetServerInfo(&Info);
-	pSelf->m_IsGameTypeRace = str_find_nocase(Info.m_aGameType, "race") || str_find_nocase(Info.m_aGameType, "fastcap");
+	pSelf->m_IsGameTypeRace = IsRace(&Info);
 	pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 
