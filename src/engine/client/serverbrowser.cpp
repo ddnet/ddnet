@@ -239,6 +239,26 @@ void CServerBrowser::Filter()
 				if(!MatchFound)
 					Filtered = 1;
 			}
+
+			if(!Filtered && g_Config.m_BrExcludeString[0] != 0)
+			{
+				int MatchFound = 0;
+
+				// match against server name
+				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrExcludeString))
+				{
+					MatchFound = 1;
+				}
+
+				// match against map
+				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrExcludeString))
+				{
+					MatchFound = 1;
+				}
+
+				if(MatchFound)
+					Filtered = 1;
+			}
 		}
 
 		if(Filtered == 0)

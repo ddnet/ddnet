@@ -523,25 +523,30 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
+	CUIRect QuickSearch, QuickExclude, Button, Status2, Status3;
+	Status.VSplitRight(240.0f, &Status2, &Status3);
+
+	Status2.VSplitMid(&QuickSearch, &QuickExclude);
+	QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 	// render quick search
-	CUIRect QuickSearch, Button;
-	Status.VSplitLeft(240.0f, &QuickSearch, &Status);
-	const char *pLabel = Localize("Search:");
-	UI()->DoLabelScaled(&QuickSearch, pLabel, 12.0f, -1);
-	float w = TextRender()->TextWidth(0, 12.0f, pLabel, -1);
-	QuickSearch.VSplitLeft(w, 0, &QuickSearch);
-	QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-	QuickSearch.VSplitLeft(240.0f-w-22.0f, &QuickSearch, &Button);
-	static float Offset = 0.0f;
-	if(DoEditBox(&g_Config.m_BrFilterString, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_L))
-		Client()->ServerBrowserUpdate();
+	{
+		const char *pLabel = Localize("⚲");
+		UI()->DoLabelScaled(&QuickSearch, pLabel, 12.0f, -1);
+		float w = TextRender()->TextWidth(0, 12.0f, pLabel, -1);
+		QuickSearch.VSplitLeft(w, 0, &QuickSearch);
+		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
+		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button);
+		static float Offset = 0.0f;
+		if(DoEditBox(&g_Config.m_BrFilterString, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_L))
+			Client()->ServerBrowserUpdate();
+	}
 
 	// clear button
 	{
 		static int s_ClearButton = 0;
 		RenderTools()->DrawUIRect(&Button, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-		UI()->DoLabel(&Button, "x", Button.h*ms_FontmodHeight, 0);
-		if(UI()->DoButtonLogic(&s_ClearButton, "x", 0, &Button))
+		UI()->DoLabel(&Button, "×", Button.h*ms_FontmodHeight, 0);
+		if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button))
 		{
 			g_Config.m_BrFilterString[0] = 0;
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
@@ -549,20 +554,37 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 	}
 
+	// render quick exclude
+	{
+		const char *pLabel = Localize("✗");
+		UI()->DoLabelScaled(&QuickExclude, pLabel, 12.0f, -1);
+		float w = TextRender()->TextWidth(0, 12.0f, pLabel, -1);
+		QuickExclude.VSplitLeft(w, 0, &QuickExclude);
+		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
+		QuickExclude.VSplitLeft(QuickExclude.w-15.0f, &QuickExclude, &Button);
+		static float Offset = 0.0f;
+		if(DoEditBox(&g_Config.m_BrExcludeString, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_L))
+			Client()->ServerBrowserUpdate();
+	}
+
+	// clear button
+	{
+		static int s_ClearButton = 0;
+		RenderTools()->DrawUIRect(&Button, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
+		UI()->DoLabel(&Button, "×", Button.h*ms_FontmodHeight, 0);
+		if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button))
+		{
+			g_Config.m_BrExcludeString[0] = 0;
+			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
+			Client()->ServerBrowserUpdate();
+		}
+	}
+
 	// render status
 	char aBuf[128];
-	if(ServerBrowser()->IsRefreshing())
-	{
-		char aBuf2[64];
-		char aBuf3[64];
-		str_format(aBuf3, sizeof(aBuf3), Localize("%d%% loaded"), ServerBrowser()->LoadingProgression());
-		str_format(aBuf2, sizeof(aBuf2), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
-		str_format(aBuf, sizeof(aBuf), "%s, %s", aBuf3, aBuf2);
-	}
-	else
-		str_format(aBuf, sizeof(aBuf), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
-	Status.VSplitRight(TextRender()->TextWidth(0, 14.0f, aBuf, -1), 0, &Status);
-	UI()->DoLabelScaled(&Status, aBuf, 14.0f, -1);
+	str_format(aBuf, sizeof(aBuf), Localize("%d of %d servers, %d players"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers(), NumPlayers);
+	Status3.VSplitRight(TextRender()->TextWidth(0, 14.0f, aBuf, -1), 0, &Status3);
+	UI()->DoLabelScaled(&Status3, aBuf, 14.0f, -1);
 }
 
 void CMenus::RenderServerbrowserFilters(CUIRect View)
@@ -755,6 +777,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if(DoButton_Menu(&s_ClearButton, Localize("Reset filter"), 0, &Button))
 	{
 		g_Config.m_BrFilterString[0] = 0;
+		g_Config.m_BrExcludeString[0] = 0;
 		g_Config.m_BrFilterFull = 0;
 		g_Config.m_BrFilterEmpty = 0;
 		g_Config.m_BrFilterSpectators = 0;
@@ -1202,14 +1225,19 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// button area
-		StatusBox.VSplitRight(80.0f, &StatusBox, 0);
+		//StatusBox.VSplitRight(80.0f, &StatusBox, 0);
 		StatusBox.VSplitRight(170.0f, &StatusBox, &ButtonArea);
-		ButtonArea.VSplitRight(150.0f, 0, &ButtonArea);
+		//ButtonArea.VSplitRight(150.0f, 0, &ButtonArea);
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
-		Button.VMargin(2.0f, &Button);
+		Button.VMargin(20.0f, &Button);
 
 		static int s_RefreshButton = 0;
-		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Button))
+		if(ServerBrowser()->IsRefreshing())
+			str_format(aBuf, sizeof(aBuf), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
+		else
+			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
+
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -1228,7 +1256,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 		ButtonArea.HSplitTop(5.0f, 0, &ButtonArea);
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
-		Button.VMargin(2.0f, &Button);
+		Button.VMargin(20.0f, &Button);
 
 		static int s_JoinButton = 0;
 		if(DoButton_Menu(&s_JoinButton, Localize("Connect"), 0, &Button) || m_EnterPressed)
