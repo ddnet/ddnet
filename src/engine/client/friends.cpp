@@ -73,7 +73,7 @@ bool CFriends::IsFriend(const char *pName, const char *pClan, bool PlayersOnly) 
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if(m_aFriends[i].m_ClanHash == ClanHash &&
+		if((g_Config.m_ClFriendsIgnoreClan || m_aFriends[i].m_ClanHash == ClanHash) &&
 			((!PlayersOnly && m_aFriends[i].m_aName[0] == 0) || m_aFriends[i].m_NameHash == NameHash))
 			return true;
 	}

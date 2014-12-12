@@ -203,6 +203,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			g_Config.m_ClPrintBroadcasts ^= 1;
 		}
 
+		Right.HSplitTop(5.0f, 0, &Right);
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if (DoButton_CheckBox(&g_Config.m_ClFriendsIgnoreClan, Localize("Ignore clan tag for friends"), g_Config.m_ClFriendsIgnoreClan, &Button))
+		{
+			g_Config.m_ClFriendsIgnoreClan ^= 1;
+		}
+
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
 		Button.VSplitRight(20.0f, &Button, 0);
@@ -217,7 +224,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 	}
 
-	Left.HSplitTop(20.0f, 0, &Left);
+	Left.HSplitTop(30.0f, 0, &Left);
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if (DoButton_CheckBox(&g_Config.m_ClCpuThrottleInactive, Localize("CPU Throttle when window is inactive"), g_Config.m_ClCpuThrottleInactive, &Button))
 	{
