@@ -693,14 +693,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 			m_Popup = POPUP_COUNTRY;
 	}
 
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox((char *)&g_Config.m_UiColorizeGametype, Localize("Colorize gametype"), g_Config.m_UiColorizeGametype, &Button))
-		g_Config.m_UiColorizeGametype ^= 1;
-
-	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox((char *)&g_Config.m_UiColorizePing, Localize("Colorize ping"), g_Config.m_UiColorizePing, &Button))
-		g_Config.m_UiColorizePing ^= 1;
-
 	CUIRect ResetButton;
 
 	//ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
