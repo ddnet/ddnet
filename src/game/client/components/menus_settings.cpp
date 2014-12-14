@@ -1806,6 +1806,8 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode);
 	}
 
+	Right.HSplitTop(5.0f, &Button, &Right);
+
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(190.0f, &Label, &Button);
