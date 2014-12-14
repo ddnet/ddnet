@@ -34,16 +34,25 @@ public:
 		char m_aName[256];
 		int m_FlagID;
 		NETADDR m_aServers[MAX_SERVERS];
+		char m_aTypes[MAX_SERVERS][32];
 		int m_NumServers;
 
 		void Reset() { m_NumServers = 0; m_FlagID = -1; m_aName[0] = '\0'; };
-		void Add(NETADDR Addr) { if (m_NumServers < MAX_SERVERS) m_aServers[m_NumServers++] = Addr; };
+		/*void Add(NETADDR Addr, char* pType) {
+			if (m_NumServers < MAX_SERVERS)
+			{
+				m_aServers[m_NumServers] = Addr;
+				str_copy(m_aTypes[m_NumServers], pType, sizeof(m_aTypes[0]));
+				m_NumServers++;
+			}
+		};*/
 	};
 
 	enum
 	{
 		MAX_FAVORITES=2048,
 		MAX_DDNET_COUNTRIES=16,
+		MAX_DDNET_TYPES=32,
 	};
 
 	CServerBrowser();
@@ -67,11 +76,16 @@ public:
 	int NumDDNetCountries() { return m_NumDDNetCountries; };
 	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; };
 	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; };
-	void DDNetCountryFilterAdd(const char *pName);
-	void DDNetCountryFilterRem(const char *pName);
-	bool DDNetCountryFiltered(const char *pName);
+
+	int NumDDNetTypes() { return m_NumDDNetTypes; };
+	const char *GetDDNetType(int Index) { return m_aDDNetTypes[Index]; };
+
+	void DDNetFilterAdd(char *pFilter, const char *pName);
+	void DDNetFilterRem(char *pFilter, const char *pName);
+	bool DDNetFiltered(char *pFilter, const char *pName);
 	void DDNetCountryFilterClean();
-	
+	void DDNetTypeFilterClean();
+
 	//
 	void Update(bool ForceResort);
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
@@ -99,6 +113,9 @@ private:
 
 	CDDNetCountry m_aDDNetCountries[MAX_DDNET_COUNTRIES];
 	int m_NumDDNetCountries;
+
+	char m_aDDNetTypes[MAX_DDNET_TYPES][32];
+	int m_NumDDNetTypes;
 
 	CServerEntry *m_aServerlistIp[256]; // ip hash list
 

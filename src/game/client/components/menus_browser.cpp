@@ -598,7 +598,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	RenderTools()->DrawUIRect(&FilterHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
 	RenderTools()->DrawUIRect(&ServerFilter, vec4(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
 	UI()->DoLabelScaled(&FilterHeader, Localize("Server filter"), FontSize+2.0f, 0);
-	CUIRect Button;
+	CUIRect Button, Button2;
 
 	ServerFilter.VSplitLeft(5.0f, 0, &ServerFilter);
 	ServerFilter.Margin(3.0f, &ServerFilter);
@@ -700,81 +700,165 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_UiColorizePing, Localize("Colorize ping"), g_Config.m_UiColorizePing, &Button))
 		g_Config.m_UiColorizePing ^= 1;
-	
+
+	CUIRect ResetButton;
+
+	//ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
+	ServerFilter.HSplitBottom(ms_ButtonHeight-2.0f, &ServerFilter, &ResetButton);
+
 	// ddnet country filters
 	if(g_Config.m_UiPage == PAGE_DDNET)
 	{
 		// add more space
-		ServerFilter.HSplitTop(10.0f, &Button, &ServerFilter);
-		
-		ServerFilter.HSplitTop(30.0f, &Button, &ServerFilter);
-		UI()->DoLabelScaled(&Button, Localize("DDNet Countries:"), FontSize, -1);
-		
-		vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+		ServerFilter.HSplitTop(10.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+		ServerFilter.HSplitTop(95.0f, &ServerFilter, 0);
 
-		const float FlagWidth = 40.0f;
-		const float FlagHeight = 20.0f;
+		RenderTools()->DrawUIRect(&ServerFilter, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
-		int MaxFlags = ServerBrowser()->NumDDNetCountries();
-		int NumFlags = ServerBrowser()->NumDDNetCountries();
-		int PerLine = MaxFlags > 9 ? 4 : 3;
+		Button.VSplitMid(&Button, &Button2);
 
-		CUIRect FlagsRect;
+		static int s_ActivePage = 0;
 
-		static int s_aFlagButtons[64];
-
-		while(NumFlags > 0)
+		static int s_CountriesButton = 0;
+		if(DoButton_MenuTab(&s_CountriesButton, Localize("Countries"), s_ActivePage == 0, &Button, CUI::CORNER_TL))
 		{
-			ServerFilter.HSplitTop(30.0f, &FlagsRect, &ServerFilter);
+			s_ActivePage = 0;
+		}
 
-			for(int i = 0; i < PerLine && NumFlags > 0; i++)
+		static int s_TypesButton = 0;
+		if(DoButton_MenuTab(&s_TypesButton, Localize("Types"), s_ActivePage == 1, &Button2, CUI::CORNER_TR))
+		{
+			s_ActivePage = 1;
+		}
+
+		if(s_ActivePage == 1)
+		{
+			int MaxTypes = ServerBrowser()->NumDDNetTypes();
+			int NumTypes = ServerBrowser()->NumDDNetTypes();
+			int PerLine = 3;
+
+			if(MaxTypes <= 12)
+				ServerFilter.HSplitTop(8.0f, 0, &ServerFilter);
+
+			const float TypesWidth = 40.0f;
+			const float TypesHeight = MaxTypes > 12 ? 15.0f : 20.0f;
+
+			CUIRect TypesRect, Left, Right;
+
+			static int s_aTypeButtons[64];
+
+			while(NumTypes > 0)
 			{
-				int CountryIndex = MaxFlags - NumFlags;
-				const char *pName = ServerBrowser()->GetDDNetCountryName(CountryIndex);
-				bool Active = !ServerBrowser()->DDNetCountryFiltered(pName);
-				int FlagID = ServerBrowser()->GetDDNetCountryFlag(CountryIndex);
+				ServerFilter.HSplitTop(TypesHeight, &TypesRect, &ServerFilter);
+				TypesRect.VSplitMid(&Left, &Right);
 
-				vec2 Pos = vec2(FlagsRect.x+FlagsRect.w*((i+0.5f)/(float) PerLine), FlagsRect.y);
-
-				// correct pos
-				Pos.x -= FlagWidth / 2.0f;
-				Pos.y -= FlagHeight / 2.0f;
-
-				// create button logic
-				CUIRect Rect;
-
-				Rect.x = Pos.x;
-				Rect.y = Pos.y;
-				Rect.w = FlagWidth;
-				Rect.h = FlagHeight;
-
-				if (UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect))
+				for(int i = 0; i < PerLine && NumTypes > 0; i++, NumTypes--)
 				{
-					// toggle flag filter
-					if (Active)
-						ServerBrowser()->DDNetCountryFilterAdd(pName);
-					else
-						ServerBrowser()->DDNetCountryFilterRem(pName);
+					int TypeIndex = MaxTypes - NumTypes;
+					const char *pName = ServerBrowser()->GetDDNetType(TypeIndex);
+					bool Active = !ServerBrowser()->DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pName);
 
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+					vec2 Pos = vec2(TypesRect.x+TypesRect.w*((i+0.5f)/(float) PerLine), TypesRect.y);
+
+					// correct pos
+					Pos.x -= TypesWidth / 2.0f;
+
+					// create button logic
+					CUIRect Rect;
+
+					Rect.x = Pos.x;
+					Rect.y = Pos.y;
+					Rect.w = TypesWidth;
+					Rect.h = TypesHeight;
+
+					if (UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect))
+					{
+						// toggle flag filter
+						if (Active)
+							ServerBrowser()->DDNetFilterAdd(g_Config.m_BrFilterExcludeTypes, pName);
+						else
+							ServerBrowser()->DDNetFilterRem(g_Config.m_BrFilterExcludeTypes, pName);
+
+						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+					}
+
+					vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+					if (!Active)
+						Color.a = 0.2f;
+					TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+					UI()->DoLabelScaled(&Rect, pName, FontSize, 0);
+					TextRender()->TextColor(1.0, 1.0, 1.0, 1.0f);
 				}
+			}
+		}
+		else
+		{
+			ServerFilter.HSplitTop(17.0f, &ServerFilter, &ServerFilter);
 
-				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
 
-				if (!Active)
-					Color.a = 0.2f;
+			const float FlagWidth = 40.0f;
+			const float FlagHeight = 20.0f;
 
-				m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
+			int MaxFlags = ServerBrowser()->NumDDNetCountries();
+			int NumFlags = ServerBrowser()->NumDDNetCountries();
+			int PerLine = MaxFlags > 9 ? 4 : 3;
 
-				NumFlags--;
+			CUIRect FlagsRect;
+
+			static int s_aFlagButtons[64];
+
+			while(NumFlags > 0)
+			{
+				ServerFilter.HSplitTop(30.0f, &FlagsRect, &ServerFilter);
+
+				for(int i = 0; i < PerLine && NumFlags > 0; i++, NumFlags--)
+				{
+					int CountryIndex = MaxFlags - NumFlags;
+					const char *pName = ServerBrowser()->GetDDNetCountryName(CountryIndex);
+					bool Active = !ServerBrowser()->DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pName);
+					int FlagID = ServerBrowser()->GetDDNetCountryFlag(CountryIndex);
+
+					vec2 Pos = vec2(FlagsRect.x+FlagsRect.w*((i+0.5f)/(float) PerLine), FlagsRect.y);
+
+					// correct pos
+					Pos.x -= FlagWidth / 2.0f;
+					Pos.y -= FlagHeight / 2.0f;
+
+					// create button logic
+					CUIRect Rect;
+
+					Rect.x = Pos.x;
+					Rect.y = Pos.y;
+					Rect.w = FlagWidth;
+					Rect.h = FlagHeight;
+
+					if (UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect))
+					{
+						// toggle flag filter
+						if (Active)
+							ServerBrowser()->DDNetFilterAdd(g_Config.m_BrFilterExcludeCountries, pName);
+						else
+							ServerBrowser()->DDNetFilterRem(g_Config.m_BrFilterExcludeCountries, pName);
+
+						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+					}
+
+					vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+					if (!Active)
+						Color.a = 0.2f;
+
+					m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
+				}
 			}
 		}
 	}
 
-	ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
-	ServerFilter.HSplitBottom(ms_ButtonHeight-2.0f, &ServerFilter, &Button);
 	static int s_ClearButton = 0;
-	if(DoButton_Menu(&s_ClearButton, Localize("Reset filter"), 0, &Button))
+	if(DoButton_Menu(&s_ClearButton, Localize("Reset filter"), 0, &ResetButton))
 	{
 		g_Config.m_BrFilterString[0] = 0;
 		g_Config.m_BrExcludeString[0] = 0;

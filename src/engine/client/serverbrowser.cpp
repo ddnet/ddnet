@@ -561,17 +561,21 @@ void CServerBrowser::Refresh(int Type)
 
 		// remove unknown elements of exclude list
 		DDNetCountryFilterClean();
-		
+		DDNetTypeFilterClean();
+
 		for(int i = 0; i < m_NumDDNetCountries; i++)
 		{
 			CDDNetCountry *pCntr = &m_aDDNetCountries[i];
 
 			// check for filter
-			if (DDNetCountryFiltered(pCntr->m_aName))
+			if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pCntr->m_aName))
 				continue;
 
 			for(int g = 0; g < pCntr->m_NumServers; g++)
-				Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0);
+			{
+				if(!DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pCntr->m_aTypes[g]))
+					Set(pCntr->m_aServers[g], IServerBrowser::SET_DDNET_ADD, -1, 0);
+			}
 		}
 	}
 }
@@ -674,12 +678,12 @@ void CServerBrowser::Update(bool ForceResort)
 			Packet.m_Address = Addr;
 			m_pNetClient->Send(&Packet);
 			if(g_Config.m_Debug)
-			{			
+			{
 				dbg_msg("client_srvbrowse", "Count-Request sent to %d", i);
-			}	
+			}
 		}
-	}	
-	
+	}
+
 	//Check if all server counts arrived
 	if(m_MasterServerCount == -1)
 	{		
@@ -882,7 +886,8 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 void CServerBrowser::LoadDDNet()
 {
 	// reset servers / countries
-	m_NumDDNetCountries = 0;	
+	m_NumDDNetCountries = 0;
+	m_NumDDNetTypes = 0;
 
 	// load ddnet server list
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
@@ -906,12 +911,15 @@ void CServerBrowser::LoadDDNet()
 			{
 				// pSrv - { name, flagId, servers }
 				const json_value *pSrv = json_array_get(pCountries, i);
-				const json_value *pAddrs = json_object_get(pSrv, "servers");
+				const json_value *pTypes = json_object_get(pSrv, "servers");
 				const json_value *pName = json_object_get(pSrv, "name");
 				const json_value *pFlagID = json_object_get(pSrv, "flagId");
 
-				if (pSrv->type != json_object || pAddrs->type != json_array || pName->type != json_string || pFlagID->type != json_integer)
-					continue; // invalid attributes
+				if (pSrv->type != json_object || pTypes->type != json_object || pName->type != json_string || pFlagID->type != json_integer)
+				{
+					dbg_msg("client_srvbrowse", "Invalid attributes");
+					continue;
+				}
 
 				// build structure
 				CDDNetCountry *pCntr = &m_aDDNetCountries[m_NumDDNetCountries];
@@ -921,14 +929,36 @@ void CServerBrowser::LoadDDNet()
 				str_copy(pCntr->m_aName, json_string_get(pName), sizeof(pCntr->m_aName));
 				pCntr->m_FlagID = json_int_get(pFlagID);
 
-				// add addresses
-				for (int g = 0; g < json_array_length(pAddrs); g++)
+				// add country
+				for (unsigned int t = 0; t < pTypes->u.object.length; t++)
 				{
-					const json_value *pAddr = json_array_get(pAddrs, g);
-					const char *pStr = json_string_get(pAddr);
+					const char *pType = pTypes->u.object.values[t].name;
+					const json_value *pAddrs = pTypes->u.object.values[t].value;
 
-					net_addr_from_str(&pCntr->m_aServers[g], pStr);
-					pCntr->m_NumServers++;
+					// add type
+					if(json_array_length(pAddrs) > 0 && m_NumDDNetTypes < MAX_DDNET_TYPES)
+					{
+						int pos;
+						for(pos = 0; pos < m_NumDDNetTypes; pos++)
+						{
+							if(!str_comp(m_aDDNetTypes[pos], pType))
+								break;
+						}
+						if(pos == m_NumDDNetTypes)
+						{
+							str_copy(m_aDDNetTypes[m_NumDDNetTypes], pType, sizeof(m_aDDNetTypes[m_NumDDNetTypes]));
+							m_NumDDNetTypes++;
+						}
+					}
+
+					// add addresses
+					for (int g = 0; g < json_array_length(pAddrs); g++, pCntr->m_NumServers++)
+					{
+						const json_value *pAddr = json_array_get(pAddrs, g);
+						const char* pStr = json_string_get(pAddr);
+						net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
+						str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
+					}
 				}
 
 				m_NumDDNetCountries++;
@@ -976,27 +1006,27 @@ void CServerBrowser::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 	}
 }
 
-void CServerBrowser::DDNetCountryFilterAdd(const char *pName)
+void CServerBrowser::DDNetFilterAdd(char *pFilter, const char *pName)
 {
-	if (DDNetCountryFiltered(pName))
+	if (DDNetFiltered(pFilter, pName))
 		return;
 	
-	char aBuf[256];
+	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), ",%s", pName);
-	str_append(g_Config.m_BrFilterExcludeCountries, aBuf, sizeof(g_Config.m_BrFilterExcludeCountries));
+	str_append(pFilter, aBuf, 128);
 }
 
-void CServerBrowser::DDNetCountryFilterRem(const char *pName)
+void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
 {
-	if (!DDNetCountryFiltered(pName))
+	if (!DDNetFiltered(pFilter, pName))
 		return;
 
 	// rewrite exclude/filter list
-	char aBuf[256];
+	char aBuf[128];
 	char *p;
 
-	str_copy(aBuf, g_Config.m_BrFilterExcludeCountries, sizeof(aBuf));
-	g_Config.m_BrFilterExcludeCountries[0] = '\0';
+	str_copy(aBuf, pFilter, sizeof(aBuf));
+	pFilter[0] = '\0';
 
 	p = strtok(aBuf, ",");
 
@@ -1004,21 +1034,21 @@ void CServerBrowser::DDNetCountryFilterRem(const char *pName)
 	{
 		if(str_comp_nocase(pName, p) != 0)
 		{
-			char aBuf2[256];
+			char aBuf2[128];
 			str_format(aBuf2, sizeof(aBuf2), ",%s", p);
-			str_append(g_Config.m_BrFilterExcludeCountries, aBuf2, sizeof(g_Config.m_BrFilterExcludeCountries));
+			str_append(pFilter, aBuf2, 128);
 		}
 
 		p = strtok(NULL, ",");
 	}
 }
 
-bool CServerBrowser::DDNetCountryFiltered(const char *pName)
+bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)
 {
-	char aBuf[256];
+	char aBuf[128];
 	char *p;
 
-	str_copy(aBuf, g_Config.m_BrFilterExcludeCountries, sizeof(aBuf));
+	str_copy(aBuf, pFilter, sizeof(aBuf));
 
 	p = strtok(aBuf, ",");
 
@@ -1035,18 +1065,36 @@ bool CServerBrowser::DDNetCountryFiltered(const char *pName)
 
 void CServerBrowser::DDNetCountryFilterClean()
 {
-	char aNewList[256];
+	char aNewList[128];
 	
 	for(int i = 0; i < m_NumDDNetCountries; i++)
 	{
 		const char *pName = m_aDDNetCountries[i].m_aName;
-		if(DDNetCountryFiltered(pName))
+		if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pName))
 		{
-			char aBuf[256];
+			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), ",%s", pName);
 			str_append(aNewList, aBuf, sizeof(aNewList));
 		}
 	}
 
 	str_copy(g_Config.m_BrFilterExcludeCountries, aNewList, sizeof(g_Config.m_BrFilterExcludeCountries));
+}
+
+void CServerBrowser::DDNetTypeFilterClean()
+{
+	char aNewList[128];
+	
+	for(int i = 0; i < m_NumDDNetTypes; i++)
+	{
+		const char *pName = m_aDDNetTypes[i];
+		if(DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pName))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), ",%s", pName);
+			str_append(aNewList, aBuf, sizeof(aNewList));
+		}
+	}
+
+	str_copy(g_Config.m_BrFilterExcludeTypes, aNewList, sizeof(g_Config.m_BrFilterExcludeTypes));
 }

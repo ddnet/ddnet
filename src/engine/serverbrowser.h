@@ -107,9 +107,13 @@ public:
 	virtual int NumDDNetCountries() = 0;
 	virtual int GetDDNetCountryFlag(int Index) = 0;
 	virtual const char *GetDDNetCountryName(int Index) = 0;
-	virtual void DDNetCountryFilterAdd(const char *pName) = 0;
-	virtual void DDNetCountryFilterRem(const char *pName) = 0;
-	virtual bool DDNetCountryFiltered(const char *pName) = 0;
+
+	virtual int NumDDNetTypes() = 0;
+	virtual const char *GetDDNetType(int Index) = 0;
+
+	virtual void DDNetFilterAdd(char *pFilter, const char *pName) = 0;
+	virtual void DDNetFilterRem(char *pFilter, const char *pName) = 0;
+	virtual bool DDNetFiltered(char *pFilter, const char *pName) = 0;
 };
 
 #endif
