@@ -50,7 +50,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		SPACER=2,
 
 		COL_FLAG_LOCK=0,
-		COL_FLAG_PURE,
 		COL_FLAG_FAV,
 		COL_NAME,
 		COL_GAMETYPE,
@@ -63,7 +62,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	static CColumn s_aCols[] = {
 		{-1,			-1,						" ",		-1, 2.0f, 0, {0}, {0}},
 		{COL_FLAG_LOCK,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
-		{COL_FLAG_PURE,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
 		{COL_FLAG_FAV,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
 		{COL_NAME,		IServerBrowser::SORT_NAME,		"Name",		0, 300.0f, 0, {0}, {0}},	// Localize - these strings are localized within CLocConstString
 		{COL_GAMETYPE,	IServerBrowser::SORT_GAMETYPE,	"Type",		1, 50.0f, 0, {0}, {0}},
@@ -328,24 +326,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 #endif
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
 					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_LOCK, &Button);
-			}
-			else if(ID == COL_FLAG_PURE)
-			{
-#if defined(__ANDROID__)
-				Button.h = Button.w;
-				Button.y += ms_ListitemAdditionalHeight / 2;
-#endif
-				if(	str_comp(pItem->m_aGameType, "DM") == 0 ||
-					str_comp(pItem->m_aGameType, "TDM") == 0 ||
-					str_comp(pItem->m_aGameType, "CTF") == 0)
-				{
-					// pure server
-				}
-				else
-				{
-					// unpure
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_UNPURE, &Button);
-				}
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
