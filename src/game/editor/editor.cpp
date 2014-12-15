@@ -29,6 +29,14 @@
 #include "auto_map.h"
 #include "editor.h"
 
+const char* vanillaImages[] = {"bg_cloud1", "bg_cloud2", "bg_cloud3",
+	"desert_doodads", "desert_main", "desert_mountains", "desert_mountains2",
+	"desert_sun", "generic_deathtiles", "generic_unhookable", "grass_doodads",
+	"grass_main", "jungle_background", "jungle_deathtiles", "jungle_doodads",
+	"jungle_main", "jungle_midground", "jungle_unhookables", "moon", "mountains"
+	"snow", "stars", "sun", "winter_doodads", "winter_main", "winter_mountains",
+	"winter_mountains2", "winter_mountains3"};
+
 int CEditor::ms_CheckerTexture;
 int CEditor::ms_BackgroundTexture;
 int CEditor::ms_CursorTexture;
@@ -462,30 +470,38 @@ vec4 CEditor::GetButtonColor(const void *pID, int Checked)
 	if(Checked < 0)
 		return vec4(0,0,0,0.5f);
 
-	if(Checked > 2)
+	switch(Checked)
 	{
+	case 5: // selected + image/sound should be embedded
 		if(UI()->HotItem() == pID)
-			return vec4(1,0.5,0,0.75f);
-		return vec4(1,0.5,0,0.5f);
-	}
+			return vec4(0.894,0.345,0.020,1.0f);
+		return vec4(0.580,0.080,0.080,1.0f);
 
-	if(Checked > 1)
-	{
+	case 4: // image/sound should be embedded
 		if(UI()->HotItem() == pID)
-			return vec4(0,1,0,0.5f);
-		return vec4(0,1,0,0.33f);
-	}
+			return vec4(0.788,0.039,0.039,1.0f);
+		return vec4(0.576,0.078,0.078,1.0f);
 
-	if(Checked > 0)
-	{
+	case 3: // selected + unused image/sound
 		if(UI()->HotItem() == pID)
-			return vec4(1,0,0,0.75f);
-		return vec4(1,0,0,0.5f);
-	}
+			return vec4(0.710,0.702,0.502,1.0f);
+		return vec4(0.620,0.533,0.451,1.0f);
 
-	if(UI()->HotItem() == pID)
-		return vec4(1,1,1,0.75f);
-	return vec4(1,1,1,0.5f);
+	case 2: // unused image/sound
+		if(UI()->HotItem() == pID)
+			return vec4(0.416,0.757,1.0,1.0f);
+		return vec4(0.290,0.608,0.902,1.0f);
+
+	case 1: // selected
+		if(UI()->HotItem() == pID)
+			return vec4(1.0,0.647,0,1.0f);
+		return vec4(0.949,0.455,0,1.0f);
+
+	default: // regular
+		if(UI()->HotItem() == pID)
+			return vec4(1,1,1,0.75f);
+		return vec4(1,1,1,0.5f);
+	}
 }
 
 int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
@@ -518,8 +534,7 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 	TextRender()->SetCursor(&Cursor, NewRect.x + NewRect.w/2-tw/2, NewRect.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = NewRect.w;
 	TextRender()->TextEx(&Cursor, pText, -1);
-	if(Checked > 1)
-		Checked -= 2;
+	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -3236,28 +3251,39 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			ToolBox.HSplitTop(12.0f, &Slot, &ToolBox);
 
 			int Selected = m_SelectedImage == i;
+
 			for(int x = 0; x < m_Map.m_lGroups.size(); ++x)
 				for(int j = 0; j < m_Map.m_lGroups[x]->m_lLayers.size(); ++j)
 					if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
 					{
 						CLayerQuads *pLayer = static_cast<CLayerQuads *>(m_Map.m_lGroups[x]->m_lLayers[j]);
 						if(pLayer->m_Image == i)
-						{
-							Selected = 2 + Selected;
 							goto done;
-						}
 					}
 					else if(m_Map.m_lGroups[x]->m_lLayers[j]->m_Type == LAYERTYPE_TILES)
 					{
 						CLayerTiles *pLayer = static_cast<CLayerTiles *>(m_Map.m_lGroups[x]->m_lLayers[j]);
 						if(pLayer->m_Image == i)
-						{
-							Selected = 2 + Selected;
 							goto done;
-						}
 					}
 
+			Selected += 2; // Image is unused
 			done:
+			if(Selected < 2 && e == 1)
+			{
+				bool found = false;
+				for(unsigned int k = 0; k < sizeof(vanillaImages) / sizeof(vanillaImages[0]); k++)
+				{
+					if(str_comp(m_Map.m_lImages[i]->m_aName, vanillaImages[k]) == 0)
+					{
+						found = true;
+						break;
+					}
+				}
+				if(!found)
+					Selected += 4; // Image should be embedded
+			}
+
 			if(int Result = DoButton_Editor(&m_Map.m_lImages[i], aBuf, Selected, &Slot,
 				BUTTON_CONTEXT, "Select image"))
 			{
@@ -3402,13 +3428,14 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 					{
 						CLayerSounds *pLayer = static_cast<CLayerSounds *>(m_Map.m_lGroups[x]->m_lLayers[j]);
 						if(pLayer->m_Sound == i)
-						{
-							Selected = 2 + Selected;
 							goto done;
-						}
 					}
 
+			Selected += 2; // Sound is unused
 			done:
+			if(Selected < 2 && e == 1)
+				Selected += 4; // Sound should be embedded
+
 			if(int Result = DoButton_Editor(&m_Map.m_lSounds[i], aBuf, Selected, &Slot,
 				BUTTON_CONTEXT, "Select sound"))
 			{
