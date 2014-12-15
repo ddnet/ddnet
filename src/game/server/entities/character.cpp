@@ -2002,6 +2002,13 @@ void CCharacter::Pause(bool Pause)
 	{
 		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 		GameServer()->m_World.RemoveEntity(this);
+
+		if (m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
+		{
+			m_Core.m_HookedPlayer = -1;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+		}
 	}
 	else
 	{
