@@ -1720,7 +1720,6 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
 		return;
@@ -1741,7 +1740,6 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
 				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				m_Core.m_HookState = HOOK_RETRACTED;
 				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 				m_Core.m_HookPos = m_Core.m_Pos;
 			}
@@ -1760,7 +1758,6 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
 				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				m_Core.m_HookState = HOOK_RETRACTED;
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
 				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
@@ -1776,7 +1773,6 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_Pos = SpawnPos;
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 			m_Core.m_Vel = vec2(0,0);
@@ -1796,7 +1792,6 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
 				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-				m_Core.m_HookState = HOOK_RETRACTED;
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
 				m_Core.m_HookPos = m_Core.m_Pos;
@@ -1810,7 +1805,6 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_Pos = SpawnPos;
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
@@ -1993,12 +1987,12 @@ bool CCharacter::UnFreeze()
 
 void CCharacter::GiveAllWeapons()
 {
-	 for(int i=1;i<NUM_WEAPONS-1;i++)
-	 {
-		 m_aWeapons[i].m_Got = true;
-		 if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
-	 }
-	 return;
+	for(int i=1;i<NUM_WEAPONS-1;i++)
+	{
+		m_aWeapons[i].m_Got = true;
+		if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
+	}
+	return;
 }
 
 void CCharacter::Pause(bool Pause)
