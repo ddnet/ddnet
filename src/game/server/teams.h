@@ -11,6 +11,7 @@ class CGameTeams
 	int m_MembersCount[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
+	bool m_IsSaving[MAX_CLIENTS];
 
 	class CGameContext * m_pGameContext;
 
@@ -81,16 +82,17 @@ public:
 	void OnTeamFinish(CPlayer** Players, unsigned int Size);
 	void OnFinish(CPlayer* Player);
 	void KillSavedTeam(int Team);
+
 	bool TeeFinished(int ClientID)
 	{
 		return m_TeeFinished[ClientID];
 	}
-	;
+
 	int GetTeamState(int Team)
 	{
 		return m_TeamState[Team];
 	}
-	;
+
 	bool TeamLocked(int Team)
 	{
 		if (Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
@@ -98,12 +100,21 @@ public:
 
 		return m_TeamLocked[Team];
 	}
-	;
+
 	void SetFinished(int ClientID, bool finished)
 	{
 		m_TeeFinished[ClientID] = finished;
 	}
-	;
+
+	void SetSaving(int TeamID, bool Value)
+	{
+		m_IsSaving[TeamID] = Value;
+	}
+
+	bool GetSaving(int TeamID)
+	{
+		return m_IsSaving[TeamID];
+	}
 };
 
 #endif

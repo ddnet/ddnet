@@ -175,7 +175,7 @@ void CSqlScore::Init()
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Mapper VARCHAR(128) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
 			m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
+			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Server CHAR(3), UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
 			m_pStatement->execute(aBuf);
 
 			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
@@ -1611,6 +1611,15 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID)
 	str_copy(Tmp->m_Code, Code, 32);
 	Tmp->m_pSqlData = this;
 
+	if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.Count(Team) > 0)
+	{
+		if(((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.GetSaving(Team))
+			return;
+		((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.SetSaving(Team, true);
+	}
+	else
+		return;
+
 	void *SaveThread = thread_create(SaveTeamThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)SaveThread);
@@ -1634,7 +1643,7 @@ void CSqlScore::SaveTeamThread(void *pUser)
 
 	int Num = -1;
 
-	if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < 64)) && ((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.Count(Team) > 0)
+	if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.Count(Team) > 0)
 	{
 		SavedTeam = new CSaveTeam(pData->m_pSqlData->GameServer()->m_pController);
 		Num = SavedTeam->save(Team);
@@ -1671,7 +1680,7 @@ void CSqlScore::SaveTeamThread(void *pUser)
 				delete pData->m_pSqlData->m_pResults;
 
 				char aBuf[65536];
-				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP())",  pData->m_pSqlData->m_pPrefix, TeamString, Map, pData->m_Code);
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pData->m_pSqlData->m_pPrefix, TeamString, Map, pData->m_Code, g_Config.m_SvSqlServerName);
 				pData->m_pSqlData->m_pStatement->execute(aBuf);
 
 				char aBuf2[256];
@@ -1706,6 +1715,8 @@ void CSqlScore::SaveTeamThread(void *pUser)
 	delete pData;
 	if(SavedTeam)
 		delete SavedTeam;
+
+	((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
 
 	lock_release(gs_SqlLock);
 }
@@ -1743,12 +1754,22 @@ void CSqlScore::LoadTeamThread(void *pUser)
 		try
 		{
 			char aBuf[768];
-			str_format(aBuf, sizeof(aBuf), "select Savegame, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago from %s_saves where Code = '%s' and Map = '%s';",  pData->m_pSqlData->m_pPrefix, pData->m_Code, Map);
+			str_format(aBuf, sizeof(aBuf), "select Savegame, Server, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago from %s_saves where Code = '%s' and Map = '%s';",  pData->m_pSqlData->m_pPrefix, pData->m_Code, Map);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if (pData->m_pSqlData->m_pResults->rowsCount() > 0)
 			{
 				pData->m_pSqlData->m_pResults->first();
+				char ServerName[4];
+				str_copy(ServerName, pData->m_pSqlData->m_pResults->getString("Server").c_str(), sizeof(ServerName));
+				if(str_comp(ServerName, g_Config.m_SvSqlServerName))
+				{
+					str_format(aBuf, sizeof(aBuf), "You have to be on the '%s' server to load this savegame", ServerName);
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+					goto end;
+				}
+
+				pData->m_pSqlData->m_pResults->getInt("Ago");
 				int since = (int)pData->m_pSqlData->m_pResults->getInt("Ago");
 
 				if(since < g_Config.m_SvSaveGamesDelay)

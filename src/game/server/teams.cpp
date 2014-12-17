@@ -19,6 +19,7 @@ void CGameTeams::Reset()
 		m_MembersCount[i] = 0;
 		m_LastChat[i] = 0;
 		m_TeamLocked[i] = false;
+		m_IsSaving[i] = false;
 	}
 }
 

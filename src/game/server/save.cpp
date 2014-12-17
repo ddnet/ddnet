@@ -209,7 +209,7 @@ CSaveTeam::~CSaveTeam()
 
 int CSaveTeam::save(int Team)
 {
-	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < 64))
+	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS))
 	{
 		CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
 	
@@ -225,7 +225,7 @@ int CSaveTeam::save(int Team)
 
 		SavedTees = new CSaveTee[m_MembersCount];
 		int j = 0;
-		for (int i = 0; i<64; i++)
+		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(Teams->m_Core.Team(i) == Team)
 			{
@@ -259,53 +259,52 @@ int CSaveTeam::save(int Team)
 
 int CSaveTeam::load(int Team)
 {
-	if(Team > 0 && Team < 64)
+	if(Team < 0 || Team >= MAX_CLIENTS)
+		return 1;
+
+	CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
+
+	Teams->ChangeTeamState(Team, m_TeamState);
+	Teams->SetTeamLock(Team, m_TeamLocked);
+
+	CCharacter* pchr;
+
+	for (int i = 0; i<m_MembersCount; i++)
 	{
-		CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
-
-		Teams->ChangeTeamState(Team, m_TeamState);
-		Teams->SetTeamLock(Team, m_TeamLocked);
-
-		CCharacter* pchr;
-
-		for (int i = 0; i<m_MembersCount; i++)
+		int ID = MatchPlayer(SavedTees[i].GetName());
+		if(ID == -1) // first check if team can be loaded / do not load half teams
 		{
-			int ID = MatchPlayer(SavedTees[i].GetName());
-			if(ID == -1) // first check if team can be loaded / do not load half teams
-			{
-				return i+10; // +10 to let space for other return-values
-			}
-			else if (m_pController->GameServer()->m_apPlayers[ID]->GetCharacter() && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter()->m_DDRaceState)
-			{
-				return i+100; // +100 to let space for other return-values
-			}
+			return i+10; // +10 to let space for other return-values
 		}
-
-		for (int i = 0; i<m_MembersCount; i++)
+		else if (m_pController->GameServer()->m_apPlayers[ID]->GetCharacter() && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter()->m_DDRaceState)
 		{
-			pchr = MatchCharacter(SavedTees[i].GetName(), i);
-			if(pchr)
-			{
-				SavedTees[i].load(pchr, Team);
-			}
+			return i+100; // +100 to let space for other return-values
 		}
-
-		if(m_pController->GameServer()->Collision()->m_NumSwitchers)
-			for(int i=1; i < m_pController->GameServer()->Collision()->m_NumSwitchers+1; i++)
-			{
-				m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = m_Switchers[i].m_Status;
-				if(m_Switchers[i].m_EndTime)
-					m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_Switchers[i].m_EndTime;
-				m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = m_Switchers[i].m_Type;
-			}
-		return 0;
 	}
-	return 1;
+
+	for (int i = 0; i<m_MembersCount; i++)
+	{
+		pchr = MatchCharacter(SavedTees[i].GetName(), i);
+		if(pchr)
+		{
+			SavedTees[i].load(pchr, Team);
+		}
+	}
+
+	if(m_pController->GameServer()->Collision()->m_NumSwitchers)
+		for(int i=1; i < m_pController->GameServer()->Collision()->m_NumSwitchers+1; i++)
+		{
+			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = m_Switchers[i].m_Status;
+			if(m_Switchers[i].m_EndTime)
+				m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_Switchers[i].m_EndTime;
+			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = m_Switchers[i].m_Type;
+		}
+	return 0;
 }
 
 int CSaveTeam::MatchPlayer(char name[16])
 {
-	for (int i = 0; i<64; i++)
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(str_comp(m_pController->Server()->ClientName(i), name) == 0)
 		{
@@ -356,7 +355,7 @@ char* CSaveTeam::GetString()
 
 int CSaveTeam::LoadString(const char* String)
 {
-	char TeamStats[64];
+	char TeamStats[MAX_CLIENTS];
 	char Switcher[64];
 	char SaveTee[1024];
 
