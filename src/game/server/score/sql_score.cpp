@@ -760,10 +760,10 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 
 				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
 				{
-					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1);
 					str_format(aBuf, sizeof(aBuf), "Finished: %s ago", agoString);
 				}
-				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1);
 
 			}
 
@@ -939,10 +939,10 @@ void CSqlScore::ShowRankThread(void *pUser)
 
 				if(pData->m_pSqlData->m_pResults->getInt("stamp") != 0)
 				{
-					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1);
 					str_format(aBuf, sizeof(aBuf), "Finished: %s ago", agoString);
 				}
-				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1);
 
 			}
 
@@ -1359,7 +1359,7 @@ void CSqlScore::ShowPointsThread(void *pUser)
 				int count = (int)pData->m_pSqlData->m_pResults->getInt("Points");
 				int rank = (int)pData->m_pSqlData->m_pResults->getInt("rank");
 				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
-				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1);
 			}
 
 			dbg_msg("SQL", "Showing points done");
