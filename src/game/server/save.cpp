@@ -259,7 +259,7 @@ int CSaveTeam::save(int Team)
 
 int CSaveTeam::load(int Team)
 {
-	if(Team < 0 || Team >= MAX_CLIENTS)
+	if(Team <= 0 || Team >= MAX_CLIENTS)
 		return 1;
 
 	CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);

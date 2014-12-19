@@ -1598,7 +1598,10 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 		((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.SetSaving(Team, true);
 	}
 	else
+	{
+		GameServer()->SendChatTarget(ClientID, "You have to be in a Team (from 1-63)");
 		return;
+	}
 
 	void *SaveThread = thread_create(SaveTeamThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
@@ -1631,15 +1634,19 @@ void CSqlScore::SaveTeamThread(void *pUser)
 		{
 			case 1:
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+				break;
 			case 2:
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Could not find your Team");
+				break;
 			case 3:
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to find all Characters");
-			default:
-				;
+				break;
 		}
-		str_copy(TeamString, SavedTeam->GetString(), sizeof(TeamString));
-		pData->m_pSqlData->ClearString(TeamString, sizeof(TeamString));
+		if(!Num)
+		{
+			str_copy(TeamString, SavedTeam->GetString(), sizeof(TeamString));
+			pData->m_pSqlData->ClearString(TeamString, sizeof(TeamString));
+		}
 	}
 	else
 		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
