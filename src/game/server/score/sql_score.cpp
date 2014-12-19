@@ -1603,12 +1603,13 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
 #endif
 }
 
-void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID)
+void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
 {
 	CSqlTeamSave *Tmp = new CSqlTeamSave();
 	Tmp->m_Team = Team;
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_Code, Code, 32);
+	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
 	Tmp->m_pSqlData = this;
 
 	if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.Count(Team) > 0)
@@ -1680,7 +1681,7 @@ void CSqlScore::SaveTeamThread(void *pUser)
 				delete pData->m_pSqlData->m_pResults;
 
 				char aBuf[65536];
-				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pData->m_pSqlData->m_pPrefix, TeamString, Map, pData->m_Code, g_Config.m_SvSqlServerName);
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pData->m_pSqlData->m_pPrefix, TeamString, Map, pData->m_Code, pData->m_Server);
 				pData->m_pSqlData->m_pStatement->execute(aBuf);
 
 				char aBuf2[256];

@@ -81,7 +81,7 @@ public:
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search);
 	virtual void RandomMap(int ClientID, int stars);
 	virtual void RandomUnfinishedMap(int ClientID, int stars);
-	virtual void SaveTeam(int Team, const char* Code, int ClientID);
+	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
 };
 

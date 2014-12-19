@@ -62,7 +62,7 @@ public:
 	virtual void RandomMap(int ClientID, int stars) = 0;
 	virtual void RandomUnfinishedMap(int ClientID, int stars) = 0;
 
-	virtual void SaveTeam(int Team, const char* Code, int ClientID) = 0;
+	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server) = 0;
 	virtual void LoadTeam(const char* Code, int ClientID) = 0;
 };
 

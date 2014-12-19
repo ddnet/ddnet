@@ -617,7 +617,21 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 #endif
 
 	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
-	pSelf->Score()->SaveTeam(Team, pResult->GetString(0), pResult->m_ClientID);
+
+	const char* pCode = pResult->GetString(0);
+	char aCountry[4];
+	if(str_length(pCode) > 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
+		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z' && pCode[3] == ' ')
+	{
+		str_copy(aCountry, pCode, 4);
+		pCode = pCode + 4;
+	}
+	else
+	{
+		str_copy(aCountry, g_Config.m_SvSqlServerName, 4);
+	}
+
+	pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
