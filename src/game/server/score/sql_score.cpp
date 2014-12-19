@@ -1699,11 +1699,11 @@ void CSqlScore::SaveTeamThread(void *pUser)
 		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "ERROR: Unable to connect to SQL-Server");
 	}
 
+	((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
+
 	delete pData;
 	if(SavedTeam)
 		delete SavedTeam;
-
-	((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
 
 	lock_release(gs_SqlLock);
 }
