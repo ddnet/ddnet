@@ -614,7 +614,6 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 	if(g_Config.m_SvUseSQL)
 		if(pPlayer->m_LastSQLQuery + pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
 			return;
-#endif
 
 	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
 
@@ -633,7 +632,6 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
 
-#if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
 		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 #endif
