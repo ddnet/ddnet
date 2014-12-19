@@ -1584,13 +1584,6 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
 
 void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
 {
-	CSqlTeamSave *Tmp = new CSqlTeamSave();
-	Tmp->m_Team = Team;
-	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_Code, Code, 32);
-	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
-	Tmp->m_pSqlData = this;
-
 	if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.Count(Team) > 0)
 	{
 		if(((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.GetSaving(Team))
@@ -1602,6 +1595,13 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 		GameServer()->SendChatTarget(ClientID, "You have to be in a Team (from 1-63)");
 		return;
 	}
+
+	CSqlTeamSave *Tmp = new CSqlTeamSave();
+	Tmp->m_Team = Team;
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_Code, Code, 32);
+	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
+	Tmp->m_pSqlData = this;
 
 	void *SaveThread = thread_create(SaveTeamThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
