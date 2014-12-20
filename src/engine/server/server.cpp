@@ -812,7 +812,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 	SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 }
 
-void CServer::SendRconLineAuthed(const char *pLine, void *pUser)
+void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted)
 {
 	CServer *pThis = (CServer *)pUser;
 	static volatile int ReentryGuard = 0;

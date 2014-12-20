@@ -227,7 +227,7 @@ public:
 	void SendMap(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
-	static void SendRconLineAuthed(const char *pLine, void *pUser);
+	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted = false);
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);

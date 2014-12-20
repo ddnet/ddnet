@@ -2540,7 +2540,7 @@ void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
 	ReentryGuard--;
 }
 
-void CGameContext::SendChatResponse(const char *pLine, void *pUser)
+void CGameContext::SendChatResponse(const char *pLine, void *pUser, bool Highlighted)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
 	int ClientID = pSelf->m_ChatResponseTargetID;
