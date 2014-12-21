@@ -848,6 +848,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterPure = 0;
 		g_Config.m_BrFilterPureMap = 0;
 		g_Config.m_BrFilterCompatversion = 0;
+		g_Config.m_BrFilterExcludeCountries[0] = 0;
+		g_Config.m_BrFilterExcludeTypes[0] = 0;
 		Client()->ServerBrowserUpdate();
 	}
 }
