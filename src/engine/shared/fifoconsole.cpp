@@ -15,7 +15,7 @@ static volatile bool gs_stopFifoThread = false;
 
 FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 {
-	void *m_pFifoThread = thread_create(ListenFifoThread, this);
+	m_pFifoThread = thread_create(ListenFifoThread, this);
 	m_pConsole = pConsole;
 	m_pFifoFile = pFifoFile;
 	m_flag = flag;
