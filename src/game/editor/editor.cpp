@@ -474,13 +474,13 @@ vec4 CEditor::GetButtonColor(const void *pID, int Checked)
 	{
 	case 5: // selected + image/sound should be embedded
 		if(UI()->HotItem() == pID)
-			return vec4(1,1,0,0.75f);
-		return vec4(1,1,0,0.5f);
+			return vec4(1,0,0,0.75f);
+		return vec4(1,0,0,0.5f);
 
 	case 4: // image/sound should be embedded
 		if(UI()->HotItem() == pID)
-			return vec4(0,1,0,0.75f);
-		return vec4(0,1,0,0.5f);
+			return vec4(1,0,0,1.0f);
+		return vec4(1,0,0,0.875f);
 
 	case 3: // selected + unused image/sound
 		if(UI()->HotItem() == pID)
