@@ -33,7 +33,7 @@ const char* vanillaImages[] = {"bg_cloud1", "bg_cloud2", "bg_cloud3",
 	"desert_doodads", "desert_main", "desert_mountains", "desert_mountains2",
 	"desert_sun", "generic_deathtiles", "generic_unhookable", "grass_doodads",
 	"grass_main", "jungle_background", "jungle_deathtiles", "jungle_doodads",
-	"jungle_main", "jungle_midground", "jungle_unhookables", "moon", "mountains"
+	"jungle_main", "jungle_midground", "jungle_unhookables", "moon", "mountains",
 	"snow", "stars", "sun", "winter_doodads", "winter_main", "winter_mountains",
 	"winter_mountains2", "winter_mountains3"};
 
