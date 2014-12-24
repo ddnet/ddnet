@@ -256,7 +256,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					unsigned ClanHash = str_quickhash(pItem->m_aClients[j].m_aClan);
 					for(int f = 0; f < m_lFriends.size(); ++f)
 					{
-						if(ClanHash == m_lFriends[f].m_pFriendInfo->m_ClanHash &&
+						if(((g_Config.m_ClFriendsIgnoreClan && m_lFriends[f].m_pFriendInfo->m_aName[0]) || ClanHash == m_lFriends[f].m_pFriendInfo->m_ClanHash) &&
 							(!m_lFriends[f].m_pFriendInfo->m_aName[0] || NameHash == m_lFriends[f].m_pFriendInfo->m_NameHash))
 						{
 							m_lFriends[f].m_NumFound++;
@@ -1131,7 +1131,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				for(int j = 0; j < pItem->m_NumClients && !Found; ++j)
 				{
 					if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO &&
-						str_quickhash(pItem->m_aClients[j].m_aClan) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash &&
+						((g_Config.m_ClFriendsIgnoreClan && m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
 						(!m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
 						str_quickhash(pItem->m_aClients[j].m_aName) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
 					{
