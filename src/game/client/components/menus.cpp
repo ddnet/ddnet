@@ -223,7 +223,7 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 
-int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
+int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
 {
 	int Inside = UI()->MouseInside(pRect);
 	bool ReturnValue = false;
@@ -326,9 +326,15 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	const char *pDisplayStr = pStr;
 	char aStars[128];
 
+	if(pDisplayStr[0] == '\0')
+	{
+		pDisplayStr = pEmptyText;
+		TextRender()->TextColor(1, 1, 1, 0.75f);
+	}
+
 	if(Hidden)
 	{
-		unsigned s = str_length(pStr);
+		unsigned s = str_length(pDisplayStr);
 		if(s >= sizeof(aStars))
 			s = sizeof(aStars)-1;
 		for(unsigned int i = 0; i < s; ++i)
@@ -365,6 +371,8 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	Textbox.x -= *Offset;
 
 	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1);
+
+	TextRender()->TextColor(1, 1, 1, 1);
 
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
