@@ -135,7 +135,7 @@ void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
 		return;
 	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (pChr)
-		pChr->Teams()->m_Core.SetSolo(pResult->m_ClientID, false);
+		pChr->SetSolo(false);
 }
 
 void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
