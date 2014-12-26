@@ -1628,9 +1628,7 @@ int CServer::Run()
 			if(NonActive)
 				PumpNetwork();
 
-#ifndef CONF_FAMILY_WINDOWS
 			set_new_tick();
-#endif
 
 			int64 t = time_get();
 			int NewTicks = 0;
@@ -1724,9 +1722,7 @@ int CServer::Run()
 			}
 			else
 			{
-#ifndef CONF_FAMILY_WINDOWS
 				set_new_tick();
-#endif
 				int64 t = time_get();
 				int x = (TickStartTime(m_CurrentGameTick+1) - t) * 1000000 / time_freq() + 1;
 
