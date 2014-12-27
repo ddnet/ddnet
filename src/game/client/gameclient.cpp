@@ -670,11 +670,13 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		int *pParams = (int *)&NewTuning;
 		for(unsigned i = 0; i < sizeof(CTuningParams)/sizeof(int); i++)
 		{
-			pParams[i] = pUnpacker->GetInt();
+			int value = pUnpacker->GetInt();
 
 			// check for unpacking errors
 			if(pUnpacker->Error())
 				break;
+
+			pParams[i] = value;
 		}
 
 		m_ServerMode = SERVERMODE_PURE;

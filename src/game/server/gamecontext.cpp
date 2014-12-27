@@ -518,6 +518,8 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	unsigned int last = sizeof(m_Tuning)/sizeof(int);
 	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_EXTRATUNES)
 		last = 33;
+	else if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_HOOKDURATION_TUNE)
+		last = 37;
 
 	for(unsigned i = 0; i < last; i++)
 		{
