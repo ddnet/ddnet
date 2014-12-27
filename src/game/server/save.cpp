@@ -229,7 +229,7 @@ int CSaveTeam::save(int Team)
 		{
 			if(Teams->m_Core.Team(i) == Team)
 			{
-				if(m_pController->GameServer()->m_apPlayers[i]->GetCharacter())
+				if(m_pController->GameServer()->m_apPlayers[i] && m_pController->GameServer()->m_apPlayers[i]->GetCharacter())
 					SavedTees[j].save(m_pController->GameServer()->m_apPlayers[i]->GetCharacter());
 				else
 					return 3;
@@ -276,7 +276,7 @@ int CSaveTeam::load(int Team)
 		{
 			return i+10; // +10 to let space for other return-values
 		}
-		else if (m_pController->GameServer()->m_apPlayers[ID]->GetCharacter() && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter()->m_DDRaceState)
+		else if (m_pController->GameServer()->m_apPlayers[ID] && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter() && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter()->m_DDRaceState)
 		{
 			return i+100; // +100 to let space for other return-values
 		}
@@ -317,7 +317,7 @@ int CSaveTeam::MatchPlayer(char name[16])
 CCharacter* CSaveTeam::MatchCharacter(char name[16], int SaveID)
 {
 	int ID = MatchPlayer(name);
-	if(ID >= 0)
+	if(ID >= 0 && m_pController->GameServer()->m_apPlayers[ID])
 	{
 		if(m_pController->GameServer()->m_apPlayers[ID]->GetCharacter())
 			return m_pController->GameServer()->m_apPlayers[ID]->GetCharacter();
