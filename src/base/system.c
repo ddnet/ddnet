@@ -900,7 +900,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 {
 	struct addrinfo hints;
-	struct addrinfo *result;
+	struct addrinfo *result = NULL;
 	int e;
 	char host[256];
 	int port = 0;
@@ -921,8 +921,14 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 
 	e = getaddrinfo(host, NULL, &hints, &result);
 
-	if(!result || e != 0)
+	if(!result)
 		return -1;
+
+	if(e != 0)
+	{
+		freeaddrinfo(result);
+		return -1;
+	}
 
 	sockaddr_to_netaddr(result->ai_addr, addr);
 	addr->port = port;
