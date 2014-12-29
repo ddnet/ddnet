@@ -232,8 +232,8 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		m_Vel.x *= Friction;
 
 	// handle jumping
-	// 1 bit = to keep track if a jump has been made on this input
-	// 2 bit = to keep track if a air-jump has been made
+	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
+	// 2 bit = to keep track if a air-jump has been made (tee gets dark feet)
 	if(Grounded)
 	{
 		m_Jumped &= ~2;
