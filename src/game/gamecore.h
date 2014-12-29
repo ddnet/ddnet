@@ -200,8 +200,6 @@ public:
 	int m_ActiveWeapon;
 
 	bool m_NewHook;
-	vec2 m_NewHookPos;
-	vec2 m_NewHookDir;
 
 	int m_Jumped;
 	int m_JumpedTotal;
