@@ -333,7 +333,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 
 				m_NewHook = true;
 				int Num = (*m_pTeleOuts)[teleNr-1].size();
-				m_HookPos = (*m_pTeleOuts)[teleNr-1][(!Num)?Num:rand() % Num]+TargetDirection*PhysSize*1.5f;
+				m_HookPos = (*m_pTeleOuts)[teleNr-1][(Num==1)?0:rand() % Num]+TargetDirection*PhysSize*1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
 			}
