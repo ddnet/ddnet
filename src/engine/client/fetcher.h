@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_FETCHER_H
 #define ENGINE_CLIENT_FETCHER_H
 
+#define WIN32_LEAN_AND_MEAN
 #include "curl/curl.h"
 #include "curl/easy.h"
 #include <engine/fetcher.h>
@@ -28,7 +29,7 @@ private:
 	LOCK m_Lock;
 	CFetchTask *m_pFirst;
 	CFetchTask *m_pLast;
-	unsigned m_NumTasks;
+	class IStorage *m_pStorage;
 public:
 	CFetcher();
 	virtual bool Init();

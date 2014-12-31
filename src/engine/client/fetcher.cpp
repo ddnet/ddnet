@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/storage.h>
 #include "fetcher.h"
 
 CFetchTask::CFetchTask()
@@ -8,15 +9,16 @@ CFetchTask::CFetchTask()
 
 CFetcher::CFetcher()
 {
+	m_pStorage = NULL;
 	m_pHandle = NULL;
 	m_Lock = lock_create();
 	m_pFirst = NULL;
 	m_pLast = NULL;
-	m_NumTasks = 0;
 }
 
 bool CFetcher::Init()
 {
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	if(!curl_global_init(CURL_GLOBAL_DEFAULT) && (m_pHandle = curl_easy_init()))
 		return true;
 	return false;
@@ -36,7 +38,7 @@ void CFetcher::QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb,
 	str_copy(pTask->m_pDest, pDest, sizeof(pTask->m_pDest));
 	pTask->m_pfnProgressCallback = pfnProgCb;
 	pTask->m_pfnCompCallback = pfnCompCb;
-	pTask->m_pUser;
+	pTask->m_pUser = pUser;
 
 	lock_wait(m_Lock);
 	if(!m_pFirst){
@@ -76,8 +78,18 @@ void CFetcher::FetcherThread(void *pUser)
 
 void CFetcher::FetchFile(CFetchTask *pTask)
 {
+	for(int i = 0; pTask->m_pDest[i] != '\0'; i++){
+		if(pTask->m_pDest[i] == '/'){
+			pTask->m_pDest[i] = '\0';
+			m_pStorage->CreateFolder(pTask->m_pDest,2);
+			pTask->m_pDest[i] = '/';
+		}
+	}
+
 	IOHANDLE File = io_open(pTask->m_pDest, IOFLAG_WRITE);
 
+	curl_easy_setopt(m_pHandle, CURLOPT_VERBOSE, 1L);
+	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, "cacert.pem");
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pTask->m_pUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);
@@ -88,6 +100,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	}
 	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	curl_easy_perform(m_pHandle);
+	io_close(File);
 	if(pTask->m_pfnCompCallback)
 		pTask->m_pfnCompCallback(pTask->m_pDest, pTask->m_pUser);
 	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
