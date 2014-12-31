@@ -1016,6 +1016,18 @@ void CClient::DebugRender()
 	}
 }
 
+void CClient::Restart()
+{
+	char aBuf[512];
+#if defined(CONF_FAMILY_WINDOWS)
+    Storage()->GetCompletePath(2, "DDNet.exe", aBuf, sizeof aBuf);
+#elif defined(CONF_FAMILY_UNIX)
+    Storage()->GetCompletePath(2, "DDNet", aBuf, sizeof aBuf);
+#endif
+    shell_execute(aBuf, aBuf);
+    Quit();
+}
+
 void CClient::Quit()
 {
 	SetState(IClient::STATE_QUITING);
