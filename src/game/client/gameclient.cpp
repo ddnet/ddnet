@@ -10,6 +10,7 @@
 #include <engine/storage.h>
 #include <engine/sound.h>
 #include <engine/serverbrowser.h>
+#include <engine/autoupdate.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/config.h>
 
@@ -123,6 +124,7 @@ void CGameClient::OnConsoleInit()
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
+	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
 
 	// setup pointers
 	m_pBinds = &::gs_Binds;
