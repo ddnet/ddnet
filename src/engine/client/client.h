@@ -274,6 +274,7 @@ public:
 	void Render();
 	void DebugRender();
 
+	virtual void Restart();
 	virtual void Quit();
 
 	virtual const char *ErrorString();

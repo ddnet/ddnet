@@ -1285,8 +1285,11 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Downloading %s:", AutoUpdate()->GetCurrentFile());
 		else if(State == IAutoUpdate::NEED_RESTART){
-			str_format(aBuf, sizeof(aBuf), "Restart client to finish update");
+			static float s_Counter = Client()->LocalTime() + 5.0f;
+			str_format(aBuf, sizeof(aBuf), "DDNet Client will restart in %d", (int)(s_Counter - Client()->LocalTime()));
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+			if(Client()->LocalTime() > s_Counter)
+				Client()->Restart();
 		}
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
