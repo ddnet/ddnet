@@ -35,6 +35,9 @@ public:
     static void ProgressCallback(const char *pDest, void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
     static void CompletionCallback(const char *pDest, void *pUser);
 
+    int GetCurrentState() { return m_State; };
+    char *GetCurrentFile() { return m_Status; };
+    int GetCurrentPercent() { return m_Percent; };
 
     virtual void InitiateUpdate();
     void IgnoreUpdate();   
