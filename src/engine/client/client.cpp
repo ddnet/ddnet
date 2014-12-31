@@ -59,6 +59,7 @@
 #include "friends.h"
 #include "serverbrowser.h"
 #include "fetcher.h"
+#include "autoupdate.h"
 #include "client.h"
 
 #include <zlib.h>
@@ -1152,9 +1153,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			// assume version is out of date when version-data doesn't match
 			if(!VersionMatch)
-			{
 				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
-			}
 
 			// request the news
 			CNetChunk Packet;
@@ -2415,6 +2414,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
 	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher));
+	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 }
 
@@ -2430,6 +2430,7 @@ void CClient::InitInterfaces()
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
@@ -2437,6 +2438,7 @@ void CClient::InitInterfaces()
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
 	m_Fetcher.Init();
+	m_AutoUpdate.Init();
 
 	m_Friends.Init();
 
@@ -2572,6 +2574,8 @@ void CClient::Run()
 		// update input
 		if(Input()->Update())
 			break;	// SDL_QUIT
+
+		AutoUpdate()->Update();
 
 		// update sound
 		Sound()->Update();
