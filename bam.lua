@@ -244,7 +244,7 @@ function build(settings)
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
-	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
+	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.cpp"))
 
 	-- build game components
 	engine_settings = settings:Copy()
