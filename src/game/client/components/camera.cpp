@@ -17,16 +17,23 @@
 
 CCamera::CCamera()
 {
-	m_Zoom = 1.0f;
 	m_CamType = CAMTYPE_UNDEFINED;
+	m_Zoom = 1.0;
 }
 
 void CCamera::OnRender()
 {
 	CServerInfo Info;
 	Client()->GetServerInfo(&Info);
+
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
-		m_Zoom = 1.0f;
+	{
+		m_Zoom = 1.0;
+	}
+	else if(m_Zoom == 1.0 && g_Config.m_ClDefaultZoom != 10)
+	{
+		OnReset();
+	}
 
 	// update camera center
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && !m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
@@ -77,12 +84,22 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
 }
 
+const float ZoomStep = 0.866025f;
+
 void CCamera::OnReset()
 {
 	m_Zoom = 1.0f;
+
+	for (int i = g_Config.m_ClDefaultZoom; i < 10; i++)
+	{
+		m_Zoom *= 1/ZoomStep;
+	}
+	for (int i = g_Config.m_ClDefaultZoom; i > 10; i--)
+	{
+		m_Zoom *= ZoomStep;
+	}
 }
 
-const float ZoomStep = 0.866025f;
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
@@ -104,5 +121,5 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
-	((CCamera *)pUserData)->m_Zoom = 1.0f;
+	((CCamera *)pUserData)->OnReset();
 }

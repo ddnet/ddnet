@@ -66,6 +66,8 @@ MACRO_CONFIG_STR(ClLanguagefile, cl_languagefile, 255, "", CFGFLAG_CLIENT|CFGFLA
 MACRO_CONFIG_INT(ClShowNewSkins, cl_show_new_skins, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show new skins ingame")
 MACRO_CONFIG_INT(ClShowCustomSkins, cl_show_custom_skins, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show custom skins ingame")
 
+MACRO_CONFIG_INT(ClDefaultZoom, cl_default_zoom, 10, 0, 20, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Default zoom level (10 default, min 0, max 20)")
+
 MACRO_CONFIG_INT(PlayerUseCustomColor, player_use_custom_color, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors")
 MACRO_CONFIG_INT(PlayerColorBody, player_color_body, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player body color")
 MACRO_CONFIG_INT(PlayerColorFeet, player_color_feet, 65408, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player feet color")

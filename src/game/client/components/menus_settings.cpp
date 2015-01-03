@@ -1670,7 +1670,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitMid(&LeftLeft, &Button);
 
-		Button.VSplitLeft(60.0f, &Label, &Button);
+		Button.VSplitLeft(50.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
 		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
@@ -1686,6 +1686,15 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowQuads ^= 1;
 	}
+
+	Right.HSplitTop(20.0f, &Label, &Right);
+	Label.VSplitLeft(130.0f, &Label, &Button);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	//Right.HSplitTop(20.0f, &Button, 0);
+	Button.HMargin(2.0f, &Button);
+	g_Config.m_ClDefaultZoom= static_cast<int>(DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom/20.0f)*20.0f+0.1f);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
@@ -1729,9 +1738,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowDirection ^= 1;
 	}
-
-	Right.HSplitTop(20.0f, &Button, &Right);
-	// Empty space here
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
