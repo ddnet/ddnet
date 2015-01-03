@@ -6,21 +6,6 @@
 #include "curl/easy.h"
 #include <engine/fetcher.h>
 
-class CFetchTask
-{
-public:	
-	CFetchTask *m_pNext;
-	char m_pUrl[256];
-	char m_pDest[128];
-	unsigned m_Num;
-	PROGFUNC m_pfnProgressCallback;
-	COMPFUNC m_pfnCompCallback;
-	void *m_pUser;
-	CFetchTask();
-
-	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
-};
-
 class CFetcher : public IFetcher
 {
 private:
@@ -35,10 +20,11 @@ public:
 	virtual bool Init();
 	~CFetcher();
 
-	virtual void QueueAdd(const char *pUrl, const char *pDest, COMPFUNC pfnCompCb = NULL, PROGFUNC pfnProgCb = NULL, void *pUser = NULL);
+	virtual void QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
 	static void FetcherThread(void *pUser);
-	void FetchFile(CFetchTask *pTask);
+	bool FetchFile(CFetchTask *pTask);
 	static void WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);
+	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
 };
 
 #endif
