@@ -34,7 +34,7 @@ void CAutoUpdate::Init()
 void CAutoUpdate::ProgressCallback(const char *pDest, void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
     CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
-    str_copy(pUpdate->m_Status, pDest, sizeof(m_Status));
+    str_copy(pUpdate->m_Status, pDest, sizeof(pUpdate->m_Status));
     pUpdate->m_Percent = (100*DlCurr)/(DlTotal ? DlTotal : 1);
 }
 
@@ -150,11 +150,16 @@ void CAutoUpdate::PerformUpdate()
     dbg_msg("autoupdate", "Parsing update.json");
     ParseUpdate();
     m_State = DOWNLOADING;
-
+    
+    const char *aLastFile;
     if(m_ClientUpdate)
-        str_copy(m_aLastFile, "DDNet.tmp", sizeof(m_aLastFile));
+        aLastFile = "DDNet.tmp";
+    else if(!m_AddedFiles.empty())
+        aLastFile= m_AddedFiles.front().c_str();
     else
-        str_copy(m_aLastFile, m_AddedFiles.front().c_str(), sizeof(m_aLastFile));
+        aLastFile = "";
+
+    str_copy(m_aLastFile, aLastFile, sizeof(m_aLastFile));
 
     while(!m_AddedFiles.empty()){
         FetchFile(m_AddedFiles.back().c_str());
