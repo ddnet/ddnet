@@ -31,10 +31,11 @@ CFetcher::~CFetcher()
 	curl_global_cleanup();
 }
 
-void CFetcher::QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
+void CFetcher::QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, int StorageType, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
 {
 	str_copy(pTask->m_pUrl, pUrl, sizeof(pTask->m_pUrl));
 	str_copy(pTask->m_pDest, pDest, sizeof(pTask->m_pDest));
+	pTask->m_StorageType = StorageType;
 	pTask->m_pfnProgressCallback = pfnProgCb;
 	pTask->m_pfnCompCallback = pfnCompCb;
 	pTask->m_pUser = pUser;
@@ -86,7 +87,7 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 		}
 	}
 
-	IOHANDLE File = io_open(pTask->m_pDest, IOFLAG_WRITE);
+	IOHANDLE File = m_pStorage->OpenFile(pTask->m_pDest, IOFLAG_WRITE, pTask->m_StorageType);
 
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
