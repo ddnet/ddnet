@@ -38,6 +38,7 @@ void CFetcher::QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, v
 	pTask->m_pfnProgressCallback = pfnProgCb;
 	pTask->m_pfnCompCallback = pfnCompCb;
 	pTask->m_pUser = pUser;
+	pTask->m_Size = pTask->m_Progress = pTask->m_RespCode = 0;
 
 	lock_wait(m_Lock);
 	if(!m_pFirst){
@@ -106,8 +107,8 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 		pTask->m_State = CFetchTask::STATE_ERROR;
 		return false;
 	}
-	else
-		pTask->m_State = CFetchTask::STATE_DONE;
+	curl_easy_getinfo(m_pHandle, CURLINFO_RESPONSE_CODE, &pTask->m_RespCode);
+	pTask->m_State = CFetchTask::STATE_DONE;
 	io_close(File);
 	if(pTask->m_pfnCompCallback)
 		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);

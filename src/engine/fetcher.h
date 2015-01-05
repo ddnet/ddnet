@@ -23,6 +23,7 @@ class CFetchTask
 	int m_Size;
 	int m_Progress;
 	int m_State;
+	long m_RespCode;
 public:	
 	CFetchTask();
 
@@ -38,6 +39,7 @@ public:
 	const int Size() const { return m_Size; };
 	const int State() const { return m_State; };
 	const char *Dest() const { return m_pDest; };
+	const long RespCode() const { return m_RespCode; };
 };
 
 class IFetcher : public IInterface
