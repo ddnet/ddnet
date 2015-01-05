@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+class CFetchTask;
+
 class CAutoUpdate : public IAutoUpdate
 {
     class IClient *m_pClient;
@@ -12,7 +14,7 @@ class CAutoUpdate : public IAutoUpdate
     class IFetcher *m_pFetcher;
 
     int m_State;
-    char m_Status[256];
+    char m_aCurrent[256];
     int m_Percent;
     char m_aLastFile[256];
 
@@ -32,11 +34,11 @@ class CAutoUpdate : public IAutoUpdate
 
 public: 
     CAutoUpdate();
-    static void ProgressCallback(const char *pDest, void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
-    static void CompletionCallback(const char *pDest, void *pUser);
+    static void ProgressCallback(CFetchTask *pTask, void *pUser);
+    static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
     int GetCurrentState() { return m_State; };
-    char *GetCurrentFile() { return m_Status; };
+    char *GetCurrentFile() { return m_aCurrent; };
     int GetCurrentPercent() { return m_Percent; };
 
     virtual void InitiateUpdate();

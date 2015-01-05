@@ -31,33 +31,35 @@ void CAutoUpdate::Init()
     m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 }
 
-void CAutoUpdate::ProgressCallback(const char *pDest, void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
+void CAutoUpdate::ProgressCallback(CFetchTask *pTask, void *pUser)
 {
     CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
-    str_copy(pUpdate->m_Status, pDest, sizeof(pUpdate->m_Status));
-    pUpdate->m_Percent = (100*DlCurr)/(DlTotal ? DlTotal : 1);
+    str_copy(pUpdate->m_aCurrent, pTask->Dest(), sizeof(pUpdate->m_aCurrent));
+    pUpdate->m_Percent = pTask->Progress();
 }
 
-void CAutoUpdate::CompletionCallback(const char *pDest, void *pUser)
+void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
 {
     CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
-    if(!str_comp(pDest, "update.json")){
+    if(!str_comp(pTask->Dest(), "update.json")){
         pUpdate->m_State = GOT_MANIFEST;
     }
-    else if(!str_comp(pDest, pUpdate->m_aLastFile)){
+    else if(!str_comp(pTask->Dest(), pUpdate->m_aLastFile)){
         if(pUpdate->m_ClientUpdate)
             pUpdate->ReplaceExecutable();
         pUpdate->m_State = NEED_RESTART;
     }
+    delete pTask;
 }
 
 void CAutoUpdate::FetchFile(const char *pFile, const char *pDestPath)
 {
+    CFetchTask *pTask = new CFetchTask;
     char aBuf[256];
     str_format(aBuf, sizeof(aBuf), "https://learath2.info/%s", pFile);
     if(!pDestPath)
         pDestPath = pFile;
-    m_pFetcher->QueueAdd(aBuf, pDestPath, &CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback, this);
+    m_pFetcher->QueueAdd(pTask, aBuf, pDestPath, this,&CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback);
 }
 
 void CAutoUpdate::Update()
