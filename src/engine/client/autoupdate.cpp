@@ -59,7 +59,7 @@ void CAutoUpdate::FetchFile(const char *pFile, const char *pDestPath)
     str_format(aBuf, sizeof(aBuf), "https://learath2.info/%s", pFile);
     if(!pDestPath)
         pDestPath = pFile;
-    m_pFetcher->QueueAdd(pTask, aBuf, pDestPath, this,&CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback);
+    m_pFetcher->QueueAdd(pTask, aBuf, pDestPath, 2, this, &CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback);
 }
 
 void CAutoUpdate::Update()
