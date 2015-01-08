@@ -56,6 +56,18 @@ void CFetcher::QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, i
 	lock_release(m_Lock);
 }
 
+long CFetcher::HTTPResponse(const char *pUrl)
+{	
+	long resp;
+	CURL *pHandle = curl_easy_init();
+	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "cacert.pem");
+	curl_easy_setopt(pHandle, CURLOPT_NOBODY, true);
+	curl_easy_setopt(pHandle, CURLOPT_URL, pUrl);
+	curl_easy_perform(pHandle);
+	curl_easy_getinfo(pHandle, CURLINFO_RESPONSE_CODE, &resp);
+	return resp;
+}
+
 void CFetcher::FetcherThread(void *pUser)
 {
 	CFetcher *pFetcher = (CFetcher *) pUser;
@@ -109,7 +121,6 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 		pTask->m_State = CFetchTask::STATE_ERROR;
 		return false;
 	}
-	curl_easy_getinfo(m_pHandle, CURLINFO_RESPONSE_CODE, &pTask->m_RespCode);
 	pTask->m_State = CFetchTask::STATE_DONE;
 	io_close(File);
 	if(pTask->m_pfnCompCallback)

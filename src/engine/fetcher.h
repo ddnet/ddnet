@@ -25,7 +25,6 @@ class CFetchTask
 	double m_Size;
 	int m_Progress;
 	int m_State;
-	long m_RespCode;
 public:	
 	CFetchTask();
 
@@ -42,7 +41,6 @@ public:
 	const int Progress() const { return m_Progress; };
 	const int State() const { return m_State; };
 	const char *Dest() const { return m_pDest; };
-	const long RespCode() const { return m_RespCode; };
 };
 
 class IFetcher : public IInterface
@@ -51,6 +49,7 @@ class IFetcher : public IInterface
 public:
 	virtual bool Init() = 0;
 	virtual void QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, int StorageType = 2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
+	virtual long HTTPResponse(const char *pUrl) = 0;
 };
 
 #endif
