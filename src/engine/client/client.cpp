@@ -1537,20 +1537,32 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 					m_MapdownloadChunk = 0;
 					str_copy(m_aMapdownloadName, pMap, sizeof(m_aMapdownloadName));
-					if(m_MapdownloadFile)
-						io_close(m_MapdownloadFile);
-					m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+
 					m_MapdownloadCrc = MapCrc;
 					m_MapdownloadTotalsize = MapSize;
 					m_MapdownloadAmount = 0;
 
-					CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
-					Msg.AddInt(m_MapdownloadChunk);
-					SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+					char aUrl[256];
+					str_format(aUrl, sizeof(aUrl), "https://learath2.info/maps/%s_%08x.map", pMap, MapCrc);
+					if(Fetcher()->HTTPResponse(aUrl) == 200)
+					{
+						dbg_msg("webdl", "Map exists on HTTP");
+						m_pMapdownloadTask = new CFetchTask;
+						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+					}
+					else
+					{
+						if(m_MapdownloadFile)
+							io_close(m_MapdownloadFile);
+						m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+						CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
+						Msg.AddInt(m_MapdownloadChunk);
+						SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+					}
 
 					if(g_Config.m_Debug)
 					{
-						str_format(aBuf, sizeof(aBuf), "requested chunk %d", m_MapdownloadChunk);
+							str_format(aBuf, sizeof(aBuf), "requested chunk %d", m_MapdownloadChunk);
 						m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client/network", aBuf);
 					}
 				}
@@ -1573,26 +1585,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			m_MapdownloadAmount += Size;
 
 			if(Last)
-			{
-				const char *pError;
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
-
-				if(m_MapdownloadFile)
-					io_close(m_MapdownloadFile);
-				m_MapdownloadFile = 0;
-				m_MapdownloadAmount = 0;
-				m_MapdownloadTotalsize = -1;
-
-				// load map
-				pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
-				if(!pError)
-				{
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
-					SendReady();
-				}
-				else
-					DisconnectWithReason(pError);
-			}
+				FinishMapDownload();
 			else
 			{
 				// request new chunk
@@ -2123,6 +2116,32 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	}
 }
 
+void CClient::FinishMapDownload()
+{
+	const char *pError;
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
+
+	if(m_pMapdownloadTask){
+		delete m_pMapdownloadTask;
+		m_pMapdownloadTask = NULL;
+	}
+	if(m_MapdownloadFile)
+		io_close(m_MapdownloadFile);
+	m_MapdownloadFile = 0;
+	m_MapdownloadAmount = 0;
+	m_MapdownloadTotalsize = -1;
+
+	// load map
+	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
+	if(!pError)
+	{
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
+		SendReady();
+	}
+	else
+		DisconnectWithReason(pError);
+}
+
 void CClient::PumpNetwork()
 {
 	for(int i=0; i<3; i++)
@@ -2384,6 +2403,9 @@ void CClient::Update()
 
 	// pump the network
 	PumpNetwork();
+	if(m_pMapdownloadTask && m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
+		FinishMapDownload();
+
 
 	// update the maser server registry
 	MasterServer()->Update();

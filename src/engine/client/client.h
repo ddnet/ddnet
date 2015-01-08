@@ -129,6 +129,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	char m_aCmdConnect[256];
 
 	// map download
+	CFetchTask *m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadName[256];
 	IOHANDLE m_MapdownloadFile;
@@ -292,9 +293,12 @@ public:
 	void ProcessServerPacket(CNetChunk *pPacket);
 	void ProcessServerPacketDummy(CNetChunk *pPacket);
 
+	void FinishMapDownload();
+
+	virtual CFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
 	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
-	virtual int MapDownloadAmount() { return m_MapdownloadAmount; }
-	virtual int MapDownloadTotalsize() { return m_MapdownloadTotalsize; }
+	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
+	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
 
 	void PumpNetwork();
 
