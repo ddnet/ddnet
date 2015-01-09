@@ -39,7 +39,7 @@ void CFetcher::QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, i
 	pTask->m_pfnProgressCallback = pfnProgCb;
 	pTask->m_pfnCompCallback = pfnCompCb;
 	pTask->m_pUser = pUser;
-	pTask->m_Size = pTask->m_Progress = pTask->m_RespCode = 0;
+	pTask->m_Size = pTask->m_Progress = 0;
 
 	lock_wait(m_Lock);
 	if(!m_pFirst){
