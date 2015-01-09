@@ -668,6 +668,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		// unpack the new tuning
 		CTuningParams NewTuning;
 		int *pParams = (int *)&NewTuning;
+		// No jetpack on DDNet incompatible servers:
+		NewTuning.m_JetpackStrength = 0;
 		for(unsigned i = 0; i < sizeof(CTuningParams)/sizeof(int); i++)
 		{
 			int value = pUnpacker->GetInt();
