@@ -416,6 +416,16 @@ void CClient::SendReady()
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
+void CClient::SendMapRequest()
+{
+	if(m_MapdownloadFile)
+		io_close(m_MapdownloadFile);
+	m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
+	Msg.AddInt(m_MapdownloadChunk);
+	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
+}
+
 void CClient::RconAuth(const char *pName, const char *pPassword)
 {
 	if(RconAuthed())
@@ -1544,27 +1554,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 					char aUrl[256];
 					str_format(aUrl, sizeof(aUrl), "https://learath2.info/maps/%s_%08x.map", pMap, MapCrc);
-					if(Fetcher()->HTTPResponse(aUrl) == 200)
-					{
-						dbg_msg("webdl", "Map exists on HTTP");
-						m_pMapdownloadTask = new CFetchTask;
-						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
-					}
-					else
-					{
-						if(m_MapdownloadFile)
-							io_close(m_MapdownloadFile);
-						m_MapdownloadFile = Storage()->OpenFile(m_aMapdownloadFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-						CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA);
-						Msg.AddInt(m_MapdownloadChunk);
-						SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
-					}
-
-					if(g_Config.m_Debug)
-					{
-							str_format(aBuf, sizeof(aBuf), "requested chunk %d", m_MapdownloadChunk);
-						m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client/network", aBuf);
-					}
+					m_pMapdownloadTask = new CFetchTask;
+					Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 				}
 			}
 		}
@@ -2116,11 +2107,8 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 	}
 }
 
-void CClient::FinishMapDownload()
+void CClient::ResetMapDownload()
 {
-	const char *pError;
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
-
 	if(m_pMapdownloadTask){
 		delete m_pMapdownloadTask;
 		m_pMapdownloadTask = NULL;
@@ -2129,6 +2117,14 @@ void CClient::FinishMapDownload()
 		io_close(m_MapdownloadFile);
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
+}
+
+void CClient::FinishMapDownload()
+{
+	const char *pError;
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
+
+	ResetMapDownload();
 	m_MapdownloadTotalsize = -1;
 
 	// load map
@@ -2403,8 +2399,15 @@ void CClient::Update()
 
 	// pump the network
 	PumpNetwork();
-	if(m_pMapdownloadTask && m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
-		FinishMapDownload();
+	if(m_pMapdownloadTask){
+		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
+			FinishMapDownload();
+		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR){
+			dbg_msg("webdl", "HTTP failed falling back to gameserver.");
+			ResetMapDownload();
+			SendMapRequest();
+		}
+	}
 
 
 	// update the maser server registry

@@ -223,6 +223,7 @@ public:
 	void SendInfo();
 	void SendEnterGame();
 	void SendReady();
+	void SendMapRequest();
 
 	virtual bool RconAuthed() { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
 	virtual bool UseTempRconCommands() { return m_UseTempRconCommands != 0; }
@@ -293,6 +294,7 @@ public:
 	void ProcessServerPacket(CNetChunk *pPacket);
 	void ProcessServerPacketDummy(CNetChunk *pPacket);
 
+	void ResetMapDownload();
 	void FinishMapDownload();
 
 	virtual CFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
