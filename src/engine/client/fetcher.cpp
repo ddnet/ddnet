@@ -82,10 +82,8 @@ void CFetcher::FetcherThread(void *pUser)
 			dbg_msg("fetcher", "Task got %s:%s", pTask->m_pUrl, pTask->m_pDest);
 			pFetcher->FetchFile(pTask);
 		}
-		else{
-			dbg_msg("fetcher", "No task. Killing the thread...");
-			break;
-		}
+		else
+			thread_sleep(10);
 	}
 }
 
