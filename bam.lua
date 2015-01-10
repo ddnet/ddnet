@@ -152,8 +152,8 @@ function build(settings)
 	--settings.objdir = Path("objs")
 	settings.cc.Output = Intermediate_Output
 
-	--settings.cc.flags:Add("-m32")
-	--settings.link.flags:Add("-m32")
+	settings.cc.flags:Add("-m32")
+	settings.link.flags:Add("-m32")
 
 	cflags = os.getenv("CFLAGS")
 	if cflags then
@@ -281,11 +281,11 @@ function build(settings)
 			client_settings.link.libs:Add("opus")
 			client_settings.link.libs:Add("ogg")
 
-			if arch == "amd64" then
-				client_settings.link.libpath:Add("other/opus/linux/lib64")
-			else
+			--if arch == "amd64" then
+			--	client_settings.link.libpath:Add("other/opus/linux/lib64")
+			--else
 				client_settings.link.libpath:Add("other/opus/linux/lib32")
-			end
+			--end
 
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then

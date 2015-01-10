@@ -20,6 +20,7 @@ class CCamera : public CComponent
 
 public:
 	vec2 m_Center;
+	bool m_ZoomSet;
 	float m_Zoom;
 
 	CCamera();

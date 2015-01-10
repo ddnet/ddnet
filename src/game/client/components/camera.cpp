@@ -18,6 +18,7 @@
 CCamera::CCamera()
 {
 	m_CamType = CAMTYPE_UNDEFINED;
+	m_ZoomSet = false;
 	m_Zoom = 1.0;
 }
 
@@ -28,10 +29,12 @@ void CCamera::OnRender()
 
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
+		m_ZoomSet = false;
 		m_Zoom = 1.0;
 	}
-	else if(m_Zoom == 1.0 && g_Config.m_ClDefaultZoom != 10)
+	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
 	{
+		m_ZoomSet = true;
 		OnReset();
 	}
 
