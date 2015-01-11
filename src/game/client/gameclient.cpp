@@ -1234,6 +1234,10 @@ void CGameClient::OnPredict()
 		return;
 	}
 
+	static bool IsWeaker[2][MAX_CLIENTS] = {0};
+	if(g_Config.m_ClAntiPingPlayers)
+		FindWeaker(IsWeaker);
+
 	// repredict character
 	CWorldCore World;
 	World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
@@ -1513,18 +1517,34 @@ void CGameClient::OnPredict()
 					PredictedProjectiles[g].Tick(Tick, Client()->GameTickSpeed(), m_Snap.m_LocalClientID);
 		}
 
-		// first calculate where everyone should move
-		for(int c = 0; c < MAX_CLIENTS; c++)
+		// calculate where everyone should move
+		if(g_Config.m_ClAntiPingPlayers)
 		{
-			if(!World.m_apCharacters[c])
-				continue;
-
-			if(m_Snap.m_LocalClientID == c)
+			//first apply Tick to weaker players (players that the local client has strong hook against), then local, then stronger players
+			for(int h = 0; h < 3; h++)
 			{
-				World.m_apCharacters[c]->Tick(true, true);
+				if(h == 1)
+				{
+					if(World.m_apCharacters[m_Snap.m_LocalClientID])
+						World.m_apCharacters[m_Snap.m_LocalClientID]->Tick(true, true);
+				}
+				else
+					for(int c = 0; c < MAX_CLIENTS; c++)
+						if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && ((h == 0 && IsWeaker[g_Config.m_ClDummy][c]) || (h == 2 && !IsWeaker[g_Config.m_ClDummy][c])))
+							World.m_apCharacters[c]->Tick(false, true);
 			}
-			else
-				World.m_apCharacters[c]->Tick(false, true);
+		}
+		else
+		{
+			for(int c = 0; c < MAX_CLIENTS; c++)
+			{
+				if(!World.m_apCharacters[c])
+					continue;
+				if(m_Snap.m_LocalClientID == c)
+					World.m_apCharacters[c]->Tick(true, true);
+				else
+					World.m_apCharacters[c]->Tick(false, true);
+			}
 		}
 
 		// move all players and quantize their data
@@ -2033,4 +2053,59 @@ CWeaponData *CGameClient::FindWeaponData(int TargetTick)
 			if(pData->m_Tick == TargetTick + TickDiff[i])
 				return GetWeaponData(TargetTick + TickDiff[i]);
 	return NULL;
+}
+
+void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
+{
+	// attempts to detect strong/weak against the player we are hooking
+	static int DirAccumulated[2][MAX_CLIENTS] = {0};
+	if(!m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Active || !m_Snap.m_paPlayerInfos[m_Snap.m_LocalClientID])
+		return;
+	int HookedPlayer = m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev.m_HookedPlayer;
+	if(HookedPlayer >= 0 && m_Snap.m_aCharacters[HookedPlayer].m_Active && m_Snap.m_paPlayerInfos[HookedPlayer])
+	{
+		CCharacterCore OtherCharCur;
+		OtherCharCur.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Cur);
+		float PredictErr[2];
+		for(int dir = 0; dir < 2; dir++)
+		{
+			CWorldCore World;
+			World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
+
+			CCharacterCore OtherChar;
+			OtherChar.Init(&World, Collision(), &m_Teams);
+			World.m_apCharacters[HookedPlayer] = &OtherChar;
+			OtherChar.Read(&m_Snap.m_aCharacters[HookedPlayer].m_Prev);
+
+			CCharacterCore LocalChar;
+			LocalChar.Init(&World, Collision(), &m_Teams);
+			World.m_apCharacters[m_Snap.m_LocalClientID] = &LocalChar;
+			LocalChar.Read(&m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev);
+
+			for(int Tick = Client()->PrevGameTick(); Tick < Client()->GameTick(); Tick++)
+			{
+				if(dir == 0)
+				{
+					LocalChar.Tick(false, true);
+					OtherChar.Tick(false, true);
+				}
+				else
+				{
+					OtherChar.Tick(false, true);
+					LocalChar.Tick(false, true);
+				}
+				LocalChar.Move();
+				LocalChar.Quantize();
+				OtherChar.Move();
+				OtherChar.Quantize();
+			}
+			PredictErr[dir] = distance(OtherChar.m_Vel, OtherCharCur.m_Vel);
+		}
+		const float Low = 0.0001, High = 0.07;
+		if(PredictErr[1] < Low && PredictErr[0] > High)
+			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], 1);
+		else if(PredictErr[0] < Low && PredictErr[1] > High)
+			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], -1);
+		IsWeaker[g_Config.m_ClDummy][HookedPlayer] = (DirAccumulated[g_Config.m_ClDummy][HookedPlayer] > 0);
+	}
 }
