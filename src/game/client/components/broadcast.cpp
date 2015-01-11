@@ -20,7 +20,7 @@ void CBroadcast::OnReset()
 
 void CBroadcast::OnRender()
 {
-	if(m_pClient->m_pScoreboard->Active() || m_pClient->m_pMotd->IsActive())
+	if(m_pClient->m_pScoreboard->Active() || m_pClient->m_pMotd->IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 
 	Graphics()->MapScreen(0, 0, 300*Graphics()->ScreenAspect(), 300);
