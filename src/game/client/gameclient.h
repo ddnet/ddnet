@@ -329,6 +329,8 @@ public:
 	CWeaponData *GetWeaponData(int Tick) { return &m_aWeaponData[((Tick%150)+150)%150]; }
 	CWeaponData *FindWeaponData(int TargetTick);
 
+	void FindWeaker(bool IsWeaker[2][MAX_CLIENTS]);
+
 private:
 
 	bool m_DDRaceMsgSent[2];
