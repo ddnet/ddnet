@@ -29,6 +29,12 @@
 	#include <dirent.h>
 
 	#if defined(CONF_PLATFORM_MACOSX)
+		// some lock and pthread functions are already defined in headers
+		// included from Carbon.h
+		// this prevents having duplicate definitions of those
+		#define _lock_set_user_
+		#define _task_user_
+
 		#include <Carbon/Carbon.h>
 	#endif
 	
