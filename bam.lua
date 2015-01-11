@@ -179,8 +179,8 @@ function build(settings)
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
 	else
-		settings.link.flags:Add("-static-libgcc")
-		settings.link.flags:Add("-static-libstdc++")
+		--settings.link.flags:Add("-static-libgcc")
+		--settings.link.flags:Add("-static-libstdc++")
 		settings.cc.flags:Add("-Wall")
 		if family == "windows" then
 			-- disable visibility attribute support for gcc on windows
