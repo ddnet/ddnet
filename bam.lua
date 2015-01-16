@@ -10,6 +10,7 @@ config:Add(OptCCompiler("compiler"))
 config:Add(OptTestCompileC("stackprotector", "int main(){return 0;}", "-fstack-protector -fstack-protector-all"))
 config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk"))
 config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
+config:Add(OptTestCompileC("staticlibgcc", "int main(){return 0;}", "-static-libgcc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
 config:Add(FreeType.OptFind("freetype", true))
@@ -168,7 +169,9 @@ function build(settings)
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
 	else
-		settings.link.flags:Add("-static-libgcc")
+		if config.staticlibgcc.value then
+			settings.link.flags:Add("-static-libgcc")
+		end
 		settings.link.flags:Add("-static-libstdc++")
 		settings.cc.flags:Add("-Wall")
 		if family == "windows" then
