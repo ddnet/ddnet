@@ -168,10 +168,12 @@ function build(settings)
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
 	else
-		settings.link.flags:Add("-static-libgcc")
-		settings.link.flags:Add("-static-libstdc++")
 		settings.cc.flags:Add("-Wall")
 		if family == "windows" then
+			if config.compiler.driver == "gcc" then
+				settings.link.flags:Add("-static-libgcc")
+				settings.link.flags:Add("-static-libstdc++")
+			end
 			-- disable visibility attribute support for gcc on windows
 			settings.cc.defines:Add("NO_VIZ")
 		elseif platform == "macosx" then
