@@ -39,6 +39,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastNoAmmoSound = -1;
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
+	m_LastRefillJumps = false;
 	m_LastPenalty = false;
 	
 	m_pPlayer = pPlayer;
@@ -1350,6 +1351,7 @@ void CCharacter::HandleTiles(int Index)
 	//dbg_msg("","N%d L%d R%d B%d T%d",m_TileFIndex,m_TileFIndexL,m_TileFIndexR,m_TileFIndexB,m_TileFIndexT);
 	if(Index < 0)
 	{
+		m_LastRefillJumps = false;
 		m_LastPenalty = false;
 		return;
 	}
@@ -1406,6 +1408,8 @@ void CCharacter::HandleTiles(int Index)
 	int tcp = GameServer()->Collision()->IsTCheckpoint(MapIndex);
 	if(tcp)
 		m_TeleCheckpoint = tcp;
+
+	// start
 	if(((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team())))
 	{
 		bool CanBegin = true;
@@ -1439,16 +1443,23 @@ void CCharacter::HandleTiles(int Index)
 
 	}
 
+	// finish
 	if(((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDRaceState == DDRACE_STARTED)
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
+
+	// freeze
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
 		Freeze();
 	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 		UnFreeze();
+
+	// deep freeze
 	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
 		m_DeepFreeze = true;
 	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
 		m_DeepFreeze = false;
+
+	// endless hook
 	if(((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Endless hook has been activated");
@@ -1459,10 +1470,26 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Endless hook has been deactivated");
 		m_EndlessHook = false;
 	}
-	if(((m_TileIndex == TILE_HIT_START) || (m_TileFIndex == TILE_HIT_START)) && m_Hit != HIT_ALL)
+
+	// hit others
+	if(((m_TileIndex == TILE_HIT_END) || (m_TileFIndex == TILE_HIT_END)) && m_Hit != (DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN))
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hit others");
+		m_Hit = DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
+	}
+	else if(((m_TileIndex == TILE_HIT_START) || (m_TileFIndex == TILE_HIT_START)) && m_Hit != HIT_ALL)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hit others");
 		m_Hit = HIT_ALL;
+	}
+
+	// collide with others
+	if(((m_TileIndex == TILE_NPC_END) || (m_TileFIndex == TILE_NPC_END)) && m_Core.m_Collision)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't collide with others");
+		m_Core.m_Collision = false;
+		m_NeededFaketuning |= FAKETUNE_NOCOLL;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPC_START) || (m_TileFIndex == TILE_NPC_START)) && !m_Core.m_Collision)
 	{
@@ -1471,21 +1498,13 @@ void CCharacter::HandleTiles(int Index)
 		m_NeededFaketuning &= ~FAKETUNE_NOCOLL;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
-	else if(((m_TileIndex == TILE_SUPER_START) || (m_TileFIndex == TILE_SUPER_START)) && !m_SuperJump)
+
+	// hook others
+	if(((m_TileIndex == TILE_NPH_END) || (m_TileFIndex == TILE_NPH_END)) && m_Core.m_Hook)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have unlimited air jumps");
-		m_SuperJump = true;
-		if (m_Core.m_Jumps == 0)
-		{
-			m_NeededFaketuning &= ~FAKETUNE_NOJUMP;
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
-		}
-	}
-	else if(((m_TileIndex == TILE_JETPACK_START) || (m_TileFIndex == TILE_JETPACK_START)) && !m_Jetpack)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have a jetpack gun");
-		m_Jetpack = true;
-		m_NeededFaketuning |= FAKETUNE_JETPACK;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hook others");
+		m_Core.m_Hook = false;
+		m_NeededFaketuning |= FAKETUNE_NOHOOK;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPH_START) || (m_TileFIndex == TILE_NPH_START)) && !m_Core.m_Hook)
@@ -1495,17 +1514,17 @@ void CCharacter::HandleTiles(int Index)
 		m_NeededFaketuning &= ~FAKETUNE_NOHOOK;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
-	else if(((m_TileIndex == TILE_HIT_END) || (m_TileFIndex == TILE_HIT_END)) && m_Hit != (DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN))
+
+	// unlimited air jumps
+	if(((m_TileIndex == TILE_SUPER_START) || (m_TileFIndex == TILE_SUPER_START)) && !m_SuperJump)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hit others");
-		m_Hit = DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
-	}
-	else if(((m_TileIndex == TILE_NPC_END) || (m_TileFIndex == TILE_NPC_END)) && m_Core.m_Collision)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't collide with others");
-		m_Core.m_Collision = false;
-		m_NeededFaketuning |= FAKETUNE_NOCOLL;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have unlimited air jumps");
+		m_SuperJump = true;
+		if (m_Core.m_Jumps == 0)
+		{
+			m_NeededFaketuning &= ~FAKETUNE_NOJUMP;
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+		}
 	}
 	else if(((m_TileIndex == TILE_SUPER_END) || (m_TileFIndex == TILE_SUPER_END)) && m_SuperJump)
 	{
@@ -1517,7 +1536,9 @@ void CCharacter::HandleTiles(int Index)
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 		}
 	}
-	else if((m_TileIndex == TILE_WALLJUMP) || (m_TileFIndex == TILE_WALLJUMP))
+
+	// walljump
+	if((m_TileIndex == TILE_WALLJUMP) || (m_TileFIndex == TILE_WALLJUMP))
 	{
 		if(m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
 		{
@@ -1526,6 +1547,15 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_Jumped = 1;
 		}
 	}
+
+	// jetpack gun
+	if(((m_TileIndex == TILE_JETPACK_START) || (m_TileFIndex == TILE_JETPACK_START)) && !m_Jetpack)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have a jetpack gun");
+		m_Jetpack = true;
+		m_NeededFaketuning |= FAKETUNE_JETPACK;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+	}
 	else if(((m_TileIndex == TILE_JETPACK_END) || (m_TileFIndex == TILE_JETPACK_END)) && m_Jetpack)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun");
@@ -1533,13 +1563,8 @@ void CCharacter::HandleTiles(int Index)
 		m_NeededFaketuning &= ~FAKETUNE_JETPACK;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
-	else if(((m_TileIndex == TILE_NPH_END) || (m_TileFIndex == TILE_NPH_END)) && m_Core.m_Hook)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hook others");
-		m_Core.m_Hook = false;
-		m_NeededFaketuning |= FAKETUNE_NOHOOK;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
-	}
+
+	// solo part
 	if(((m_TileIndex == TILE_SOLO_START) || (m_TileFIndex == TILE_SOLO_START)) && !Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now in a solo part.");
@@ -1550,6 +1575,19 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now out of the solo part.");
 		SetSolo(false);
 	}
+
+	// refill jumps
+	if(((m_TileIndex == TILE_REFILL_JUMPS) || (m_TileFIndex == TILE_REFILL_JUMPS)) && !m_LastRefillJumps)
+	{
+		m_Core.m_JumpedTotal = 0;
+		m_LastRefillJumps = true;
+	}
+	if((m_TileIndex != TILE_REFILL_JUMPS) && (m_TileFIndex != TILE_REFILL_JUMPS))
+	{
+		m_LastRefillJumps = false;
+	}
+
+	// stopper
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
 	{
 		if((int)GameServer()->Collision()->GetPos(MapIndexL).x)

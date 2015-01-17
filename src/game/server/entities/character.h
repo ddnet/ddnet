@@ -238,6 +238,7 @@ public:
 	int m_TileSFlagsB;
 	vec2 m_Intersection;
 	int64 m_LastStartWarning;
+	bool m_LastRefillJumps;
 	bool m_LastPenalty;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
