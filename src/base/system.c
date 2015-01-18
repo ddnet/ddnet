@@ -52,6 +52,7 @@
 	#include <direct.h>
 	#include <errno.h>
 	#include <process.h>
+	#include <shellapi.h>
 #else
 	#error NOT IMPLEMENTED
 #endif
@@ -2261,6 +2262,16 @@ int pid()
 #endif
 }
 
+void shell_execute(const char *file, const char *argv)
+{
+	#if defined(CONF_FAMILY_WINDOWS)
+        ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
+    #elif defined(CONF_FAMILY_UNIX)
+        pid_t pid = fork();
+        if(!pid)
+            execv(file, argv);
+    #endif
+}
 
 #if defined(__cplusplus)
 }

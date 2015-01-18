@@ -81,6 +81,7 @@ if include_data and not use_bundle:
 		shutil.copy("libopusfile-0.dll", package_dir)
 		#shutil.copy("libmysql.dll", package_dir)
 		#shutil.copy("mysqlcppconn.dll", package_dir)
+		shutil.copy("libcurl.dll", package_dir)
 
 if include_exe and not use_bundle:
 	shutil.copy(name+exe_ext, package_dir)

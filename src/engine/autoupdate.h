@@ -1,22 +1,30 @@
-/*
-    unsigned char*
-*/
 #ifndef ENGINE_AUTOUPDATE_H
 #define ENGINE_AUTOUPDATE_H
 
 #include "kernel.h"
-#include <game/client/components/menus.h>
-#include <string>
 
 class IAutoUpdate : public IInterface
 {
-	MACRO_INTERFACE("autoupdate", 0)
+    MACRO_INTERFACE("autoupdate", 0)
 public:
-	virtual void CheckUpdates(CMenus *pMenus) = 0;
-	virtual void DoUpdates(CMenus *pMenus) = 0;
-	virtual bool Updated() = 0;
-	virtual bool NeedResetClient() = 0;
-	virtual void ExecuteExit() = 0;
+    enum
+    {
+        IGNORED = -1,
+        CLEAN,
+        GETTING_MANIFEST,
+        GOT_MANIFEST,
+        PARSING_UPDATE,
+        DOWNLOADING,
+        NEED_RESTART,
+    };
+
+    virtual void Update() = 0;
+    virtual void InitiateUpdate() = 0;
+    virtual void IgnoreUpdate() = 0;
+
+    virtual int GetCurrentState() = 0;
+    virtual char *GetCurrentFile() = 0;
+    virtual int GetCurrentPercent() = 0;
 };
 
 #endif

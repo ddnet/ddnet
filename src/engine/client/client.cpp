@@ -26,7 +26,6 @@
 #include <engine/map.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
-#include <engine/autoupdate.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -51,18 +50,19 @@
 
 #include <engine/client/serverbrowser.h>
 
-#include "friends.h"
-#include "serverbrowser.h"
-#include "autoupdate.h"
-#include "client.h"
-
-#include <zlib.h>
-
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
+
+#include "friends.h"
+#include "serverbrowser.h"
+#include "fetcher.h"
+#include "autoupdate.h"
+#include "client.h"
+
+#include <zlib.h>
 
 #include "SDL.h"
 #ifdef main
@@ -1016,6 +1016,18 @@ void CClient::DebugRender()
 	}
 }
 
+void CClient::Restart()
+{
+	char aBuf[512];
+#if defined(CONF_FAMILY_WINDOWS)
+    Storage()->GetCompletePath(2, "DDNet.exe", aBuf, sizeof aBuf);
+#elif defined(CONF_FAMILY_UNIX)
+    Storage()->GetCompletePath(2, "DDNet", aBuf, sizeof aBuf);
+#endif
+    shell_execute(aBuf, aBuf);
+    Quit();
+}
+
 void CClient::Quit()
 {
 	SetState(IClient::STATE_QUITING);
@@ -1153,18 +1165,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			// assume version is out of date when version-data doesn't match
 			if(!VersionMatch)
-			{
 				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-				if (g_Config.m_ClAutoUpdate)
-				{
-					str_format(aBuf, sizeof(aBuf), "Checking for updates");
-					((CGameClient *) GameClient())->m_pMenus->RenderUpdating(aBuf);
-					((CGameClient *) GameClient())->AutoUpdate()->CheckUpdates(((CGameClient *) GameClient())->m_pMenus);
-				}
-#endif
-			}
 
 			// request the news
 			CNetChunk Packet;
@@ -2424,9 +2425,8 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[RECORDER_MANUAL]));
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher));
 	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
-#endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 }
 
@@ -2441,15 +2441,16 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
-#endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
-
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 	
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
+
+	m_Fetcher.Init();
+	m_AutoUpdate.Init();
 
 	m_Friends.Init();
 
@@ -2563,7 +2564,7 @@ void CClient::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
-
+	
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
@@ -2585,6 +2586,8 @@ void CClient::Run()
 		// update input
 		if(Input()->Update())
 			break;	// SDL_QUIT
+
+		AutoUpdate()->Update();
 
 		// update sound
 		Sound()->Update();
@@ -3215,11 +3218,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	pClient->AutoUpdate()->ExecuteExit();
-#endif
-
+	
 	return 0;
 }
 

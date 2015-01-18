@@ -1,40 +1,51 @@
-/*
-    unsigned char*
-*/
 #ifndef ENGINE_CLIENT_AUTOUPDATE_H
 #define ENGINE_CLIENT_AUTOUPDATE_H
 
-#include <base/system.h>
 #include <engine/autoupdate.h>
+#include <vector>
 #include <string>
-#include <list>
+
+class CFetchTask;
 
 class CAutoUpdate : public IAutoUpdate
 {
-public:
-	CAutoUpdate();
+    class IClient *m_pClient;
+    class IStorage *m_pStorage;
+    class IFetcher *m_pFetcher;
 
-	void Reset();
+    int m_State;
+    char m_aCurrent[256];
+    int m_Percent;
+    char m_aLastFile[256];
 
-	void CheckUpdates(CMenus *pMenus);
-	void DoUpdates(CMenus *pMenus);
-	bool Updated() { return m_Updated; }
-	bool NeedResetClient() { return m_NeedResetClient; }
-	void ExecuteExit();
+    bool m_ClientUpdate;
+    bool m_ServerUpdate;
 
-private:
-	bool m_Updated;
-	bool m_NeedUpdate;
-	bool m_NeedUpdateBackground;
-	bool m_NeedUpdateClient;
-	bool m_NeedUpdateServer;
-	bool m_NeedResetClient;
-	std::list<std::string> m_vFiles;
+    std::vector<std::string> m_AddedFiles;
+    std::vector<std::string> m_RemovedFiles;
 
-protected:
-	bool SelfDelete();
-	bool GetFile(const char *pFile, const char *dst);
-	bool CanUpdate(const char *pFile);
+    void AddNewFile(const char *pFile);
+    void AddRemovedFile(const char *pFile);
+    void FetchFile(const char *pFile, const char *pDestPath = 0);
+
+    void ParseUpdate();
+    void PerformUpdate();
+    void ReplaceExecutable();
+
+public: 
+    CAutoUpdate();
+    static void ProgressCallback(CFetchTask *pTask, void *pUser);
+    static void CompletionCallback(CFetchTask *pTask, void *pUser);
+
+    int GetCurrentState() { return m_State; };
+    char *GetCurrentFile() { return m_aCurrent; };
+    int GetCurrentPercent() { return m_Percent; };
+
+    virtual void InitiateUpdate();
+    void IgnoreUpdate();   
+    void Init();
+    virtual void Update();
+    void Restart();
 };
 
 #endif

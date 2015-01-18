@@ -1308,6 +1308,8 @@ int str_utf8_check(const char *str);
 
 int pid();
 
+void shell_execute(const char *file, const char *argv);
+
 #ifdef __cplusplus
 }
 #endif
