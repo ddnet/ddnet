@@ -20,7 +20,7 @@ public:
 	virtual bool Init();
 	~CFetcher();
 
-	virtual void QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, int StorageType = 2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
+	virtual void QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = 2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
 	virtual long HTTPResponse(const char *pUrl);
 	static void FetcherThread(void *pUser);
 	bool FetchFile(CFetchTask *pTask);
