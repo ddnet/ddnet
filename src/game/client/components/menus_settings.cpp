@@ -1802,6 +1802,12 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 #endif
 
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
+	{
+		g_Config.m_ClHttpMapDownload ^= 1;
+	}
+
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(190.0f, &Label, &Button);
