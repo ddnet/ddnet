@@ -2134,6 +2134,11 @@ void CClient::FinishMapDownload()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 		SendReady();
 	}
+	else if(m_pMapdownloadTask)
+	{
+		ResetMapDownload();
+		SendMapRequest();
+	}
 	else
 		DisconnectWithReason(pError);
 }
