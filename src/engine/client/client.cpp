@@ -1576,7 +1576,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			m_MapdownloadAmount += Size;
 
 			if(Last)
+			{
+				if(m_MapdownloadFile)
+					io_close(m_MapdownloadFile);
 				FinishMapDownload();
+			}
 			else
 			{
 				// request new chunk
@@ -2113,8 +2117,6 @@ void CClient::ResetMapDownload()
 		delete m_pMapdownloadTask;
 		m_pMapdownloadTask = NULL;
 	}
-	if(m_MapdownloadFile)
-		io_close(m_MapdownloadFile);
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
 }
@@ -2124,23 +2126,29 @@ void CClient::FinishMapDownload()
 	const char *pError;
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
 
-	ResetMapDownload();
+	int prev = m_MapdownloadTotalsize;
 	m_MapdownloadTotalsize = -1;
 
 	// load map
 	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
 	if(!pError)
 	{
+		ResetMapDownload();
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 		SendReady();
 	}
 	else if(m_pMapdownloadTask)
 	{
 		ResetMapDownload();
+		m_MapdownloadTotalsize = prev;
 		SendMapRequest();
 	}
-	else
+	else{
+		if(m_MapdownloadFile)
+			io_close(m_MapdownloadFile);
+		ResetMapDownload();
 		DisconnectWithReason(pError);
+	}
 }
 
 void CClient::PumpNetwork()
