@@ -126,11 +126,11 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 		pTask->m_State = CFetchTask::STATE_ERROR;
 		return false;
 	}
-	pTask->m_State = CFetchTask::STATE_DONE;
 	io_close(File);
 	if(pTask->m_pfnCompCallback)
 		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
 	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
+	pTask->m_State = CFetchTask::STATE_DONE;
 	return true;
 }
 
