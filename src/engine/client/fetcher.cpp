@@ -60,7 +60,7 @@ long CFetcher::HTTPResponse(const char *pUrl)
 {	
 	long resp;
 	CURL *pHandle = curl_easy_init();
-	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "cacert.pem");
+	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/ca-ddnet.pem");
 	curl_easy_setopt(pHandle, CURLOPT_NOBODY, true);
 	curl_easy_setopt(pHandle, CURLOPT_URL, pUrl);
 	curl_easy_perform(pHandle);
@@ -104,7 +104,7 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 
 	curl_easy_setopt(m_pHandle, CURLOPT_VERBOSE, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
-	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, "cacert.pem");
+	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, "data/ca-ddnet.pem");
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pTask->m_pUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);
@@ -135,7 +135,7 @@ void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
 int CFetcher::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
 	CFetchTask *pTask = (CFetchTask *)pUser;
-	dbg_msg("fetcher", "DlCurr:%f, DlTotal:%f", DlCurr, DlTotal);
+	//dbg_msg("fetcher", "DlCurr:%f, DlTotal:%f", DlCurr, DlTotal);
 	pTask->m_Current = DlCurr;
 	if(!pTask->m_Size)
 		pTask->m_Size = DlTotal;

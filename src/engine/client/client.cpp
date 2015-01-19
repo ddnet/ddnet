@@ -1553,7 +1553,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					m_MapdownloadAmount = 0;
 
 					char aUrl[256];
-					str_format(aUrl, sizeof(aUrl), "https://learath2.info/maps/%s_%08x.map", pMap, MapCrc);
+					str_format(aUrl, sizeof(aUrl), "https://%s/%s_%08x.map", g_Config.m_ClDDNetMapServer, pMap, MapCrc);
 					m_pMapdownloadTask = new CFetchTask;
 					Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 				}
