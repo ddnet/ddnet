@@ -474,7 +474,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 				char aServer[32];
 				strcpy(aServer, pData->m_pSqlData->m_pResults->getString("Server").c_str());
 				char aCmd[256];
-				str_format(aCmd, sizeof(aCmd), "sv_reset_file types/%s/flexreset.cfg; change_map %s", aServer, aMap);
+				str_format(aCmd, sizeof(aCmd), "sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"", aServer, aMap);
 				char aChatmsg[512];
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", pData->m_pSqlData->GameServer()->Server()->ClientName(pData->m_ClientID), aMap, "/map");
 
