@@ -517,8 +517,6 @@ void CGameConsole::OnRender()
 			{
 				if(pEntry->m_Highlighted)
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
-				else
-					TextRender()->TextColor(1,1,1,1);
 
 				// get y offset (calculate it if we haven't yet)
 				if(pEntry->m_YOffset < 0.0f)
@@ -542,6 +540,9 @@ void CGameConsole::OnRender()
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 				}
 				pEntry = pConsole->m_Backlog.Prev(pEntry);
+
+				// reset color
+				TextRender()->TextColor(1,1,1,1);
 			}
 
 			//	actual backlog page number is too high, render last available page (current checked one, render top down)
