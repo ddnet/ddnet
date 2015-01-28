@@ -310,6 +310,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	// map download
 	m_aMapdownloadFilename[0] = 0;
 	m_aMapdownloadName[0] = 0;
+	m_pMapdownloadTask = 0;
 	m_MapdownloadFile = 0;
 	m_MapdownloadChunk = 0;
 	m_MapdownloadCrc = 0;
@@ -735,6 +736,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	// disable all downloads
 	m_MapdownloadChunk = 0;
+	if(m_pMapdownloadTask)
+		m_pMapdownloadTask->Abort();
 	if(m_MapdownloadFile)
 		io_close(m_MapdownloadFile);
 	m_MapdownloadFile = 0;
@@ -1552,6 +1555,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					m_MapdownloadTotalsize = MapSize;
 					m_MapdownloadAmount = 0;
 
+					ResetMapDownload();
+
 					if(g_Config.m_ClHttpMapDownload)
 					{
 						char aUrl[256];
@@ -1560,10 +1565,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 					}
 					else
-					{
-						ResetMapDownload();
 						SendMapRequest();
-					}
 				}
 			}
 		}
@@ -2420,13 +2422,20 @@ void CClient::Update()
 
 	// pump the network
 	PumpNetwork();
-	if(m_pMapdownloadTask){
+	if(m_pMapdownloadTask)
+	{
 		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR){
+		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
+		{
 			dbg_msg("webdl", "HTTP failed falling back to gameserver.");
 			ResetMapDownload();
 			SendMapRequest();
+		}
+		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
+		{
+			delete m_pMapdownloadTask;
+			m_pMapdownloadTask = 0;
 		}
 	}
 

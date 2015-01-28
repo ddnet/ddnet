@@ -40,6 +40,7 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	pTask->m_pfnCompCallback = pfnCompCb;
 	pTask->m_pUser = pUser;
 	pTask->m_Size = pTask->m_Progress = 0;
+	pTask->m_Abort = false;
 
 	lock_wait(m_Lock);
 	if(!m_pFirst)
@@ -122,10 +123,11 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 
 	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;
-	if(curl_easy_perform(m_pHandle) != CURLE_OK)
+	int ret = curl_easy_perform(m_pHandle);
+	if(ret != CURLE_OK)
 	{
 		dbg_msg("fetcher", "Task failed. libcurl error: %s", aErr);
-		pTask->m_State = CFetchTask::STATE_ERROR;
+		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? CFetchTask::STATE_ABORTED : CFetchTask::STATE_ERROR;
 		return false;
 	}
 	io_close(File);
@@ -146,10 +148,9 @@ int CFetcher::ProgressCallback(void *pUser, double DlTotal, double DlCurr, doubl
 	CFetchTask *pTask = (CFetchTask *)pUser;
 	//dbg_msg("fetcher", "DlCurr:%f, DlTotal:%f", DlCurr, DlTotal);
 	pTask->m_Current = DlCurr;
-	if(!pTask->m_Size)
-		pTask->m_Size = DlTotal;
+	pTask->m_Size = DlTotal;
 	pTask->m_Progress = (100 * DlCurr) / (DlTotal ? DlTotal : 1);
 	if(pTask->m_pfnProgressCallback)
 		pTask->m_pfnProgressCallback(pTask, pTask->m_pUser);
-	return 0;
+	return pTask->m_Abort ? -1 : 0;
 }
