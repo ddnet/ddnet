@@ -25,6 +25,7 @@ class CFetchTask
 	double m_Size;
 	int m_Progress;
 	int m_State;
+	bool m_Abort;
 public:	
 	CFetchTask();
 
@@ -34,6 +35,7 @@ public:
 		STATE_QUEUED,
 		STATE_RUNNING,
 		STATE_DONE,
+		STATE_ABORTED,
 	};
 
 	const double Current() const { return m_Current; };
@@ -41,6 +43,8 @@ public:
 	const int Progress() const { return m_Progress; };
 	const int State() const { return m_State; };
 	const char *Dest() const { return m_pDest; };
+
+	void Abort() { m_Abort = true; };
 };
 
 class IFetcher : public IInterface
@@ -48,7 +52,7 @@ class IFetcher : public IInterface
 	MACRO_INTERFACE("fetcher", 0)
 public:
 	virtual bool Init() = 0;
-	virtual void QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = 2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
+	virtual void QueueAdd(CFetchTask *pTask,const char *pUrl, const char *pDest, int StorageType = 2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
 	virtual long HTTPResponse(const char *pUrl) = 0;
 };
 
