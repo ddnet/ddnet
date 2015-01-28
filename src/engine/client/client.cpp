@@ -1555,6 +1555,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					m_MapdownloadTotalsize = MapSize;
 					m_MapdownloadAmount = 0;
 
+					ResetMapDownload();
+
 					if(g_Config.m_ClHttpMapDownload)
 					{
 						char aUrl[256];
@@ -1563,10 +1565,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 					}
 					else
-					{
-						ResetMapDownload();
 						SendMapRequest();
-					}
 				}
 			}
 		}
