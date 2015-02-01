@@ -517,6 +517,8 @@ void CGameConsole::OnRender()
 			{
 				if(pEntry->m_Highlighted)
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
+				else
+					TextRender()->TextColor(1,1,1,1);
 
 				// get y offset (calculate it if we haven't yet)
 				if(pEntry->m_YOffset < 0.0f)
