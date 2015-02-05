@@ -109,7 +109,7 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
 
-	curl_easy_setopt(m_pHandle, CURLOPT_VERBOSE, 1L);
+	//curl_easy_setopt(m_pHandle, CURLOPT_VERBOSE, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
