@@ -22,7 +22,7 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Many ideas from the great community,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-		"Help and code by eeeee, HMH, east, CookieMichal,");
+		"Help and code by eeeee, HMH, east, CookieMichal, Learath2,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Savander, laxa, Tobii, BeaR, Wohoo, nuborn, DoNe & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
