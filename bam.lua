@@ -121,27 +121,33 @@ if family == "windows" then
 	if platform == "win32" then
 		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib32\\freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib32\\SDL.dll"))
+
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libcurl.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libeay32.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libidn-11.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\ssleay32.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\zlib1.dll"))
+
+		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libgcc_s_sjlj-1.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libogg-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopus-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopusfile-0.dll"))
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib64\\freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib64\\SDL.dll"))
+
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib64\\libcurl.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\libeay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\ssleay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib32\\zlib1.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib64\\libeay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib64\\ssleay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\lib64\\zlib1.dll"))
+
+		--table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libgcc_s_sjlj-1.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libogg-0.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libopus-0.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libopusfile-0.dll"))
 	end
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
-
-	--copy opus libs
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libgcc_s_sjlj-1.dll"))
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libogg-0.dll"))
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopus-0.dll"))
-	table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopusfile-0.dll"))
 
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
@@ -205,6 +211,7 @@ function build(settings)
 	settings.cc.includes:Add("src/engine/external/ogg")
 	settings.cc.includes:Add("other/opus/include")
 	settings.cc.includes:Add("other/opus/include/opus")
+	settings.cc.includes:Add("other/curl/include")
 	settings.cc.includes:Add("other/mysql/include")
 
 	-- set some platform specific settings
@@ -272,11 +279,14 @@ function build(settings)
 			client_settings.link.libs:Add("opusfile")
 			client_settings.link.libs:Add("opus")
 			client_settings.link.libs:Add("ogg")
+			client_settings.link.libs:Add("curl")
 
 			if string.find(settings.config_name, "64") then
 				client_settings.link.libpath:Add("other/opus/mac/lib64")
+				client_settings.link.libpath:Add("other/curl/mac/lib64")
 			else
 				client_settings.link.libpath:Add("other/opus/mac/lib32")
+				client_settings.link.libpath:Add("other/curl/mac/lib32")
 			end
 
 			if string.find(settings.config_name, "sql") then
@@ -293,11 +303,14 @@ function build(settings)
 			client_settings.link.libs:Add("opusfile")
 			client_settings.link.libs:Add("opus")
 			client_settings.link.libs:Add("ogg")
+			client_settings.link.libs:Add("curl")
 
 			if arch == "amd64" then
 				client_settings.link.libpath:Add("other/opus/linux/lib64")
+				client_settings.link.libpath:Add("other/curl/linux/lib64")
 			else
 				client_settings.link.libpath:Add("other/opus/linux/lib32")
+				client_settings.link.libpath:Add("other/curl/linux/lib32")
 			end
 
 			if string.find(settings.config_name, "sql") then
@@ -311,10 +324,12 @@ function build(settings)
 
 	elseif family == "windows" then
 		client_settings.link.libpath:Add("other/opus/windows/lib32")
+		client_settings.link.libpath:Add("other/curl/windows/lib32")
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
 		client_settings.link.libs:Add("libopusfile-0")
+		client_settings.link.libs:Add("curl")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")
