@@ -299,8 +299,8 @@ public:
 
 	virtual CFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
 	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
-	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
-	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
+	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : m_pMapdownloadTask->Current(); }
+	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : m_pMapdownloadTask->Size(); }
 
 	void PumpNetwork();
 

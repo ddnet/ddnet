@@ -25,7 +25,7 @@ public:
 	static void FetcherThread(void *pUser);
 	bool FetchFile(CFetchTask *pTask);
 	static void WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);
-	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
+	static int ProgressCallback(void *pUser, curl_off_t DlTotal, curl_off_t DlCurr, curl_off_t UlTotal, curl_off_t UlCurr);
 };
 
 #endif

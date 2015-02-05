@@ -118,8 +118,8 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);
 	curl_easy_setopt(m_pHandle, CURLOPT_NOPROGRESS, 0);
-	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSDATA, pTask);
-	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSFUNCTION, &CFetcher::ProgressCallback);
+	curl_easy_setopt(m_pHandle, CURLOPT_XFERINFODATA, pTask);
+	curl_easy_setopt(m_pHandle, CURLOPT_XFERINFOFUNCTION, &CFetcher::ProgressCallback);
 
 	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;
@@ -143,12 +143,15 @@ void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
 	io_write((IOHANDLE)pFile, pData, size*nmemb);
 }
 
-int CFetcher::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
+int CFetcher::ProgressCallback(void *pUser, curl_off_t DlTotal, curl_off_t DlCurr, curl_off_t UlTotal, curl_off_t UlCurr)
 {
 	CFetchTask *pTask = (CFetchTask *)pUser;
 	//dbg_msg("fetcher", "DlCurr:%f, DlTotal:%f", DlCurr, DlTotal);
+	if(DlTotal <= INT_MAX)
+		pTask->m_Size = DlTotal;
+	else
+		pTask->m_Abort = true;
 	pTask->m_Current = DlCurr;
-	pTask->m_Size = DlTotal;
 	pTask->m_Progress = (100 * DlCurr) / (DlTotal ? DlTotal : 1);
 	if(pTask->m_pfnProgressCallback)
 		pTask->m_pfnProgressCallback(pTask, pTask->m_pUser);

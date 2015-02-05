@@ -21,8 +21,8 @@ class CFetchTask
 	COMPFUNC m_pfnCompCallback;
 	void *m_pUser;
 
-	double m_Current;
-	double m_Size;
+	int m_Current;
+	int m_Size;
 	int m_Progress;
 	int m_State;
 	bool m_Abort;
@@ -38,8 +38,8 @@ public:
 		STATE_ABORTED,
 	};
 
-	const double Current() const { return m_Current; };
-	const double Size() const { return m_Size; };
+	const int Current() const { return m_Current; };
+	const int Size() const { return m_Size; };
 	const int Progress() const { return m_Progress; };
 	const int State() const { return m_State; };
 	const char *Dest() const { return m_pDest; };
