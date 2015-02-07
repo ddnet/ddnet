@@ -13,6 +13,7 @@ config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
 config:Add(FreeType.OptFind("freetype", true))
+config:Add(OptString("websockets", false))
 config:Finalize("config.lua")
 
 -- data compiler
@@ -179,6 +180,10 @@ function build(settings)
 		settings.link.flags:Add(ldflags)
 	end
 
+	if config.websockets.value then
+		settings.cc.defines:Add("WEBSOCKETS")
+	end
+
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 		settings.cc.flags:Add("/EHsc")
@@ -253,6 +258,9 @@ function build(settings)
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
 	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.cpp"))
+	if config.websockets.value then
+		libwebsockets = Compile(settings, Collect("src/engine/external/libwebsockets/*.c"))
+	end
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -374,10 +382,10 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
-		client_link_other, client_osxlaunch, jsonparser)
+		client_link_other, client_osxlaunch, jsonparser, libwebsockets)
 
 	server_exe = Link(server_settings, "DDNet-Server", engine, server,
-		game_shared, game_server, zlib, server_link_other)
+		game_shared, game_server, zlib, server_link_other, libwebsockets)
 
 	serverlaunch = {}
 	if platform == "macosx" then
@@ -385,7 +393,7 @@ function build(settings)
 	end
 
 	versionserver_exe = Link(server_settings, "versionsrv", versionserver,
-		engine, zlib)
+		engine, zlib, libwebsockets)
 
 	masterserver_exe = Link(server_settings, "mastersrv", masterserver,
 		engine, zlib)
