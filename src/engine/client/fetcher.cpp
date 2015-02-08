@@ -99,7 +99,7 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 		if(pTask->m_pDest[i] == '/')
 		{
 			pTask->m_pDest[i] = '\0';
-			m_pStorage->CreateFolder(pTask->m_pDest, 2);
+			m_pStorage->CreateFolder(pTask->m_pDest, pTask->m_StorageType);
 			pTask->m_pDest[i] = '/';
 		}
 	}
