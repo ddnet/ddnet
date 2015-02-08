@@ -59,18 +59,6 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	lock_release(m_Lock);
 }
 
-long CFetcher::HTTPResponse(const char *pUrl)
-{
-	long resp;
-	CURL *pHandle = curl_easy_init();
-	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/ca-ddnet.pem");
-	curl_easy_setopt(pHandle, CURLOPT_NOBODY, true);
-	curl_easy_setopt(pHandle, CURLOPT_URL, pUrl);
-	curl_easy_perform(pHandle);
-	curl_easy_getinfo(pHandle, CURLINFO_RESPONSE_CODE, &resp);
-	return resp;
-}
-
 void CFetcher::FetcherThread(void *pUser)
 {
 	CFetcher *pFetcher = (CFetcher *)pUser;
