@@ -10,6 +10,10 @@
 #include "system.h"
 #include "confusables.h"
 
+#if defined(WEBSOCKETS)
+	#include "engine/shared/websockets.h"
+#endif
+
 #if defined(CONF_FAMILY_UNIX)
 	#include <sys/time.h>
 	#include <unistd.h>
@@ -81,6 +85,8 @@ static NETSTATS network_stats = {0};
 static MEMSTATS memory_stats = {0};
 
 static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
+
+#define AF_WEBSOCKET_INET (0xee)
 
 void dbg_logger(DBG_LOGGER logger)
 {
@@ -701,7 +707,7 @@ int64 time_freq()
 static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 {
 	mem_zero(dest, sizeof(struct sockaddr_in));
-	if(src->type != NETTYPE_IPV4)
+	if(src->type != NETTYPE_IPV4 && src->type != NETTYPE_WEBSOCKET_IPV4)
 	{
 		dbg_msg("system", "couldn't convert NETADDR of type %d to ipv4", src->type);
 		return;
@@ -735,6 +741,13 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 		dst->port = htons(((struct sockaddr_in*)src)->sin_port);
 		mem_copy(dst->ip, &((struct sockaddr_in*)src)->sin_addr.s_addr, 4);
 	}
+	else if(src->sa_family == AF_WEBSOCKET_INET)
+	{
+		mem_zero(dst, sizeof(NETADDR));
+		dst->type = NETTYPE_WEBSOCKET_IPV4;
+		dst->port = htons(((struct sockaddr_in*)src)->sin_port);
+		mem_copy(dst->ip, &((struct sockaddr_in*)src)->sin_addr.s_addr, 4);
+	}
 	else if(src->sa_family == AF_INET6)
 	{
 		mem_zero(dst, sizeof(NETADDR));
@@ -756,7 +769,7 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b)
 
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)
 {
-	if(addr->type == NETTYPE_IPV4)
+	if(addr->type == NETTYPE_IPV4 || addr->type == NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(add_port != 0)
 			str_format(string, max_length, "%d.%d.%d.%d:%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3], addr->port);
@@ -988,6 +1001,16 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 		sock.type &= ~NETTYPE_IPV4;
 	}
 
+#if defined(WEBSOCKETS)
+	/* close down websocket_ipv4 */
+	if(sock.web_ipv4sock >= 0)
+	{
+		websocket_destroy(sock.web_ipv4sock);
+		sock.web_ipv4sock = -1;
+		sock.type &= ~NETTYPE_WEBSOCKET_IPV4;
+	}
+#endif
+
 	/* close down ipv6 */
 	if(sock.ipv6sock >= 0)
 	{
@@ -1084,6 +1107,25 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
+#if defined(WEBSOCKETS)
+	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
+	{
+		int socket = -1;
+
+		/* bind, we should check for error */
+		tmpbindaddr.type = NETTYPE_WEBSOCKET_IPV4;
+
+		char addr_str[NETADDR_MAXSTRSIZE];
+		net_addr_str(&tmpbindaddr, addr_str, sizeof(addr_str), 0);
+		socket = websocket_create(addr_str, tmpbindaddr.port);
+
+		if (socket >= 0) {
+			sock.type |= NETTYPE_WEBSOCKET_IPV4;
+			sock.web_ipv4sock = socket;
+		}
+	}
+#endif
+
 	if(bindaddr.type&NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
@@ -1154,6 +1196,16 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			dbg_msg("net", "can't sent ipv4 traffic to this socket");
 	}
 
+#if defined(WEBSOCKETS)
+	if(addr->type&NETTYPE_WEBSOCKET_IPV4)
+	{
+		if(sock.web_ipv4sock >= 0)
+			d = websocket_send(sock.web_ipv4sock, (const unsigned char*)data, size, addr->port);
+		else
+			dbg_msg("net", "can't sent websocket_ipv4 traffic to this socket");
+	}
+#endif
+
 	if(addr->type&NETTYPE_IPV6)
 	{
 		if(sock.ipv6sock >= 0)
@@ -1218,6 +1270,15 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
 		fromlen = sizeof(struct sockaddr_in6);
 		bytes = recvfrom(sock.ipv6sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
 	}
+
+#if defined(WEBSOCKETS)
+	if(bytes <= 0 && sock.web_ipv4sock >= 0)
+	{
+		fromlen = sizeof(struct sockaddr);
+		bytes = websocket_recv(sock.web_ipv4sock, data, maxsize, (struct sockaddr_in *)&sockaddrbuf, fromlen);
+		((struct sockaddr_in *)&sockaddrbuf)->sin_family = AF_WEBSOCKET_INET;
+	}
+#endif
 
 	if(bytes > 0)
 	{
@@ -1720,6 +1781,14 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 		if(sock.ipv6sock > sockid)
 			sockid = sock.ipv6sock;
 	}
+#if defined(WEBSOCKETS)
+	if(sock.web_ipv4sock >= 0)
+	{
+		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
+		if (maxfd > sockid)
+			sockid = maxfd;
+	}
+#endif
 
 	/* don't care about writefds and exceptfds */
 	if(time < 0)
