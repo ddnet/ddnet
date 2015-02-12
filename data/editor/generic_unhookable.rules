@@ -1,0 +1,1172 @@
+[Random Silver]
+
+Index 16
+
+Index 1
+Random 32
+
+Index 1 XFLIP
+Random 32
+
+Index 1 YFLIP
+Random 32
+
+Index 1 YFLIP XFLIP
+Random 32
+
+Index 2
+Random 32
+
+Index 2 XFLIP
+Random 32
+
+Index 2 YFLIP
+Random 32
+
+Index 2 YFLIP XFLIP
+Random 32
+
+Index 16 XFLIP
+Random 32
+
+Index 16 YFLIP
+Random 32
+
+Index 16 YFLIP XFLIP
+Random 32
+
+Index 17
+Random 32
+
+Index 17 XFLIP
+Random 32
+
+Index 17 YFLIP
+Random 32
+
+Index 17 YFLIP XFLIP
+Random 32
+
+Index 18
+Random 32
+
+Index 18 XFLIP
+Random 32
+
+Index 18 YFLIP
+Random 32
+
+Index 18 YFLIP XFLIP
+Random 32
+
+Index 32
+Random 32
+
+Index 32 XFLIP
+Random 32
+
+Index 32 YFLIP
+Random 32
+
+Index 32 YFLIP XFLIP
+Random 32
+
+Index 33
+Random 32
+
+Index 33 XFLIP
+Random 32
+
+Index 33 YFLIP
+Random 32
+
+Index 33 YFLIP XFLIP
+Random 32
+
+Index 34
+Random 32
+
+Index 34 XFLIP
+Random 32
+
+Index 34 YFLIP
+Random 32
+
+Index 34 YFLIP XFLIP
+Random 32
+
+[Random Gold]
+
+Index 23
+
+Index 8
+Random 32
+
+Index 8 XFLIP
+Random 32
+
+Index 8 YFLIP
+Random 32
+
+Index 8 YFLIP XFLIP
+Random 32
+
+Index 9
+Random 32
+
+Index 9 XFLIP
+Random 32
+
+Index 9 YFLIP
+Random 32
+
+Index 9 YFLIP XFLIP
+Random 32
+
+Index 23 XFLIP
+Random 32
+
+Index 23 YFLIP
+Random 32
+
+Index 23 YFLIP XFLIP
+Random 32
+
+Index 24
+Random 32
+
+Index 24 XFLIP
+Random 32
+
+Index 24 YFLIP
+Random 32
+
+Index 24 YFLIP XFLIP
+Random 32
+
+Index 25
+Random 32
+
+Index 25 XFLIP
+Random 32
+
+Index 25 YFLIP
+Random 32
+
+Index 25 YFLIP XFLIP
+Random 32
+
+Index 39
+Random 32
+
+Index 39 XFLIP
+Random 32
+
+Index 39 YFLIP
+Random 32
+
+Index 39 YFLIP XFLIP
+Random 32
+
+Index 40
+Random 32
+
+Index 40 XFLIP
+Random 32
+
+Index 40 YFLIP
+Random 32
+
+Index 40 YFLIP XFLIP
+Random 32
+
+Index 41
+Random 32
+
+Index 41 XFLIP
+Random 32
+
+Index 41 YFLIP
+Random 32
+
+Index 41 YFLIP XFLIP
+Random 32
+
+[Random Copper]
+
+Index 144
+
+Index 129
+Random 32
+
+Index 129 XFLIP
+Random 32
+
+Index 129 YFLIP
+Random 32
+
+Index 129 YFLIP XFLIP
+Random 32
+
+Index 130
+Random 32
+
+Index 130 XFLIP
+Random 32
+
+Index 130 YFLIP
+Random 32
+
+Index 130 YFLIP XFLIP
+Random 32
+
+Index 144 XFLIP
+Random 32
+
+Index 144 YFLIP
+Random 32
+
+Index 144 YFLIP XFLIP
+Random 32
+
+Index 145
+Random 32
+
+Index 145 XFLIP
+Random 32
+
+Index 145 YFLIP
+Random 32
+
+Index 145 YFLIP XFLIP
+Random 32
+
+Index 146
+Random 32
+
+Index 146 XFLIP
+Random 32
+
+Index 146 YFLIP
+Random 32
+
+Index 146 YFLIP XFLIP
+Random 32
+
+Index 160
+Random 32
+
+Index 160 XFLIP
+Random 32
+
+Index 160 YFLIP
+Random 32
+
+Index 160 YFLIP XFLIP
+Random 32
+
+Index 161
+Random 32
+
+Index 161 XFLIP
+Random 32
+
+Index 161 YFLIP
+Random 32
+
+Index 161 YFLIP XFLIP
+Random 32
+
+Index 162
+Random 32
+
+Index 162 XFLIP
+Random 32
+
+Index 162 YFLIP
+Random 32
+
+Index 162 YFLIP XFLIP
+Random 32
+
+[Silver/Gold-Mix]
+
+#Silver
+Index 16
+
+Index 1
+Random 64
+
+Index 1 XFLIP
+Random 64
+
+Index 1 YFLIP
+Random 64
+
+Index 1 YFLIP XFLIP
+Random 64
+
+Index 2
+Random 64
+
+Index 2 XFLIP
+Random 64
+
+Index 2 YFLIP
+Random 64
+
+Index 2 YFLIP XFLIP
+Random 64
+
+Index 16 XFLIP
+Random 64
+
+Index 16 YFLIP
+Random 64
+
+Index 16 YFLIP XFLIP
+Random 64
+
+Index 17
+Random 64
+
+Index 17 XFLIP
+Random 64
+
+Index 17 YFLIP
+Random 64
+
+Index 17 YFLIP XFLIP
+Random 64
+
+Index 18
+Random 64
+
+Index 18 XFLIP
+Random 64
+
+Index 18 YFLIP
+Random 64
+
+Index 18 YFLIP XFLIP
+Random 64
+
+Index 32
+Random 64
+
+Index 32 XFLIP
+Random 64
+
+Index 32 YFLIP
+Random 64
+
+Index 32 YFLIP XFLIP
+Random 64
+
+Index 33
+Random 64
+
+Index 33 XFLIP
+Random 64
+
+Index 33 YFLIP
+Random 64
+
+Index 33 YFLIP XFLIP
+Random 64
+
+Index 34
+Random 64
+
+Index 34 XFLIP
+Random 64
+
+Index 34 YFLIP
+Random 64
+
+Index 34 YFLIP XFLIP
+Random 64
+
+#Gold
+
+Index 8
+Random 64
+
+Index 8 XFLIP
+Random 64
+
+Index 8 YFLIP
+Random 64
+
+Index 8 YFLIP XFLIP
+Random 64
+
+Index 9
+Random 64
+
+Index 9 XFLIP
+Random 64
+
+Index 9 YFLIP
+Random 64
+
+Index 9 YFLIP XFLIP
+Random 64
+
+Index 23
+Random 64
+
+Index 23 XFLIP
+Random 64
+
+Index 23 YFLIP
+Random 64
+
+Index 23 YFLIP XFLIP
+Random 64
+
+Index 24
+Random 64
+
+Index 24 XFLIP
+Random 64
+
+Index 24 YFLIP
+Random 64
+
+Index 24 YFLIP XFLIP
+Random 64
+
+Index 25
+Random 64
+
+Index 25 XFLIP
+Random 64
+
+Index 25 YFLIP
+Random 64
+
+Index 25 YFLIP XFLIP
+Random 64
+
+Index 39
+Random 64
+
+Index 39 XFLIP
+Random 64
+
+Index 39 YFLIP
+Random 64
+
+Index 39 YFLIP XFLIP
+Random 64
+
+Index 40
+Random 64
+
+Index 40 XFLIP
+Random 64
+
+Index 40 YFLIP
+Random 64
+
+Index 40 YFLIP XFLIP
+Random 64
+
+Index 41
+Random 64
+
+Index 41 XFLIP
+Random 64
+
+Index 41 YFLIP
+Random 64
+
+Index 41 YFLIP XFLIP
+Random 64
+
+[Copper/Silver-Mix]
+
+#Copper
+Index 144
+
+Index 129
+Random 64
+
+Index 129 XFLIP
+Random 64
+
+Index 129 YFLIP
+Random 64
+
+Index 129 YFLIP XFLIP
+Random 64
+
+Index 130
+Random 64
+
+Index 130 XFLIP
+Random 64
+
+Index 130 YFLIP
+Random 64
+
+Index 130 YFLIP XFLIP
+Random 64
+
+Index 144 XFLIP
+Random 64
+
+Index 144 YFLIP
+Random 64
+
+Index 144 YFLIP XFLIP
+Random 64
+
+Index 145
+Random 64
+
+Index 145 XFLIP
+Random 64
+
+Index 145 YFLIP
+Random 64
+
+Index 145 YFLIP XFLIP
+Random 64
+
+Index 146
+Random 64
+
+Index 146 XFLIP
+Random 64
+
+Index 146 YFLIP
+Random 64
+
+Index 146 YFLIP XFLIP
+Random 64
+
+Index 160
+Random 64
+
+Index 160 XFLIP
+Random 64
+
+Index 160 YFLIP
+Random 64
+
+Index 160 YFLIP XFLIP
+Random 64
+
+Index 161
+Random 64
+
+Index 161 XFLIP
+Random 64
+
+Index 161 YFLIP
+Random 64
+
+Index 161 YFLIP XFLIP
+Random 64
+
+Index 162
+Random 64
+
+Index 162 XFLIP
+Random 64
+
+Index 162 YFLIP
+Random 64
+
+Index 162 YFLIP XFLIP
+Random 64
+
+#Silver
+
+Index 1
+Random 64
+
+Index 1 XFLIP
+Random 64
+
+Index 1 YFLIP
+Random 64
+
+Index 1 YFLIP XFLIP
+Random 64
+
+Index 2
+Random 64
+
+Index 2 XFLIP
+Random 64
+
+Index 2 YFLIP
+Random 64
+
+Index 2 YFLIP XFLIP
+Random 64
+
+Index 16
+Random 64
+
+Index 16 XFLIP
+Random 64
+
+Index 16 YFLIP
+Random 64
+
+Index 16 YFLIP XFLIP
+Random 64
+
+Index 17
+Random 64
+
+Index 17 XFLIP
+Random 64
+
+Index 17 YFLIP
+Random 64
+
+Index 17 YFLIP XFLIP
+Random 64
+
+Index 18
+Random 64
+
+Index 18 XFLIP
+Random 64
+
+Index 18 YFLIP
+Random 64
+
+Index 18 YFLIP XFLIP
+Random 64
+
+Index 32
+Random 64
+
+Index 32 XFLIP
+Random 64
+
+Index 32 YFLIP
+Random 64
+
+Index 32 YFLIP XFLIP
+Random 64
+
+Index 33
+Random 64
+
+Index 33 XFLIP
+Random 64
+
+Index 33 YFLIP
+Random 64
+
+Index 33 YFLIP XFLIP
+Random 64
+
+Index 34
+Random 64
+
+Index 34 XFLIP
+Random 64
+
+Index 34 YFLIP
+Random 64
+
+Index 34 YFLIP XFLIP
+Random 64
+
+[Gold/Copper-Mix]
+
+#Gold
+Index 23
+
+Index 8
+Random 64
+
+Index 8 XFLIP
+Random 64
+
+Index 8 YFLIP
+Random 64
+
+Index 8 YFLIP XFLIP
+Random 64
+
+Index 9
+Random 64
+
+Index 9 XFLIP
+Random 64
+
+Index 9 YFLIP
+Random 64
+
+Index 9 YFLIP XFLIP
+Random 64
+
+Index 23 XFLIP
+Random 64
+
+Index 23 YFLIP
+Random 64
+
+Index 23 YFLIP XFLIP
+Random 64
+
+Index 24
+Random 64
+
+Index 24 XFLIP
+Random 64
+
+Index 24 YFLIP
+Random 64
+
+Index 24 YFLIP XFLIP
+Random 64
+
+Index 25
+Random 64
+
+Index 25 XFLIP
+Random 64
+
+Index 25 YFLIP
+Random 64
+
+Index 25 YFLIP XFLIP
+Random 64
+
+Index 39
+Random 64
+
+Index 39 XFLIP
+Random 64
+
+Index 39 YFLIP
+Random 64
+
+Index 39 YFLIP XFLIP
+Random 64
+
+Index 40
+Random 64
+
+Index 40 XFLIP
+Random 64
+
+Index 40 YFLIP
+Random 64
+
+Index 40 YFLIP XFLIP
+Random 64
+
+Index 41
+Random 64
+
+Index 41 XFLIP
+Random 64
+
+Index 41 YFLIP
+Random 64
+
+Index 41 YFLIP XFLIP
+Random 64
+
+#Copper
+
+Index 129
+Random 64
+
+Index 129 XFLIP
+Random 64
+
+Index 129 YFLIP
+Random 64
+
+Index 129 YFLIP XFLIP
+Random 64
+
+Index 130
+Random 64
+
+Index 130 XFLIP
+Random 64
+
+Index 130 YFLIP
+Random 64
+
+Index 130 YFLIP XFLIP
+Random 64
+
+Index 144
+Random 64
+
+Index 144 XFLIP
+Random 64
+
+Index 144 YFLIP
+Random 64
+
+Index 144 YFLIP XFLIP
+Random 64
+
+Index 145
+Random 64
+
+Index 145 XFLIP
+Random 64
+
+Index 145 YFLIP
+Random 64
+
+Index 145 YFLIP XFLIP
+Random 64
+
+Index 146
+Random 64
+
+Index 146 XFLIP
+Random 64
+
+Index 146 YFLIP
+Random 64
+
+Index 146 YFLIP XFLIP
+Random 64
+
+Index 160
+Random 64
+
+Index 160 XFLIP
+Random 64
+
+Index 160 YFLIP
+Random 64
+
+Index 160 YFLIP XFLIP
+Random 64
+
+Index 161
+Random 64
+
+Index 161 XFLIP
+Random 64
+
+Index 161 YFLIP
+Random 64
+
+Index 161 YFLIP XFLIP
+Random 64
+
+Index 162
+Random 64
+
+Index 162 XFLIP
+Random 64
+
+Index 162 YFLIP
+Random 64
+
+Index 162 YFLIP XFLIP
+Random 64
+
+[Mix All]
+
+#Silver
+Index 16
+
+Index 1
+Random 96
+
+Index 1 XFLIP
+Random 96
+
+Index 1 YFLIP
+Random 96
+
+Index 1 YFLIP XFLIP
+Random 96
+
+Index 2
+Random 96
+
+Index 2 XFLIP
+Random 96
+
+Index 2 YFLIP
+Random 96
+
+Index 2 YFLIP XFLIP
+Random 96
+
+Index 16 XFLIP
+Random 96
+
+Index 16 YFLIP
+Random 96
+
+Index 16 YFLIP XFLIP
+Random 96
+
+Index 17
+Random 96
+
+Index 17 XFLIP
+Random 96
+
+Index 17 YFLIP
+Random 96
+
+Index 17 YFLIP XFLIP
+Random 96
+
+Index 18
+Random 96
+
+Index 18 XFLIP
+Random 96
+
+Index 18 YFLIP
+Random 96
+
+Index 18 YFLIP XFLIP
+Random 96
+
+Index 32
+Random 96
+
+Index 32 XFLIP
+Random 96
+
+Index 32 YFLIP
+Random 96
+
+Index 32 YFLIP XFLIP
+Random 96
+
+Index 33
+Random 96
+
+Index 33 XFLIP
+Random 96
+
+Index 33 YFLIP
+Random 96
+
+Index 33 YFLIP XFLIP
+Random 96
+
+Index 34
+Random 96
+
+Index 34 XFLIP
+Random 96
+
+Index 34 YFLIP
+Random 96
+
+Index 34 YFLIP XFLIP
+Random 96
+
+#Gold
+
+Index 8
+Random 96
+
+Index 8 XFLIP
+Random 96
+
+Index 8 YFLIP
+Random 96
+
+Index 8 YFLIP XFLIP
+Random 96
+
+Index 9
+Random 96
+
+Index 9 XFLIP
+Random 96
+
+Index 9 YFLIP
+Random 96
+
+Index 9 YFLIP XFLIP
+Random 96
+
+Index 23
+Random 96
+
+Index 23 XFLIP
+Random 96
+
+Index 23 YFLIP
+Random 96
+
+Index 23 YFLIP XFLIP
+Random 96
+
+Index 24
+Random 96
+
+Index 24 XFLIP
+Random 96
+
+Index 24 YFLIP
+Random 96
+
+Index 24 YFLIP XFLIP
+Random 96
+
+Index 25
+Random 96
+
+Index 25 XFLIP
+Random 96
+
+Index 25 YFLIP
+Random 96
+
+Index 25 YFLIP XFLIP
+Random 96
+
+Index 39
+Random 96
+
+Index 39 XFLIP
+Random 96
+
+Index 39 YFLIP
+Random 96
+
+Index 39 YFLIP XFLIP
+Random 96
+
+Index 40
+Random 96
+
+Index 40 XFLIP
+Random 96
+
+Index 40 YFLIP
+Random 96
+
+Index 40 YFLIP XFLIP
+Random 96
+
+Index 41
+Random 96
+
+Index 41 XFLIP
+Random 96
+
+Index 41 YFLIP
+Random 96
+
+Index 41 YFLIP XFLIP
+Random 96
+
+#Copper
+
+Index 129
+Random 96
+
+Index 129 XFLIP
+Random 96
+
+Index 129 YFLIP
+Random 96
+
+Index 129 YFLIP XFLIP
+Random 96
+
+Index 130
+Random 96
+
+Index 130 XFLIP
+Random 96
+
+Index 130 YFLIP
+Random 96
+
+Index 130 YFLIP XFLIP
+Random 96
+
+Index 144
+Random 96
+
+Index 144 XFLIP
+Random 96
+
+Index 144 YFLIP
+Random 96
+
+Index 144 YFLIP XFLIP
+Random 96
+
+Index 145
+Random 96
+
+Index 145 XFLIP
+Random 96
+
+Index 145 YFLIP
+Random 96
+
+Index 145 YFLIP XFLIP
+Random 96
+
+Index 146
+Random 96
+
+Index 146 XFLIP
+Random 96
+
+Index 146 YFLIP
+Random 96
+
+Index 146 YFLIP XFLIP
+Random 96
+
+Index 160
+Random 96
+
+Index 160 XFLIP
+Random 96
+
+Index 160 YFLIP
+Random 96
+
+Index 160 YFLIP XFLIP
+Random 96
+
+Index 161
+Random 96
+
+Index 161 XFLIP
+Random 96
+
+Index 161 YFLIP
+Random 96
+
+Index 161 YFLIP XFLIP
+Random 96
+
+Index 162
+Random 96
+
+Index 162 XFLIP
+Random 96
+
+Index 162 YFLIP
+Random 96
+
+Index 162 YFLIP XFLIP
+Random 96
