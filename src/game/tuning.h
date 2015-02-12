@@ -52,4 +52,11 @@ MACRO_TUNING_PARAM(ShotgunStrength, shotgun_strength, 10.0f)
 MACRO_TUNING_PARAM(ExplosionStrength, explosion_strength, 6.0f)
 MACRO_TUNING_PARAM(HammerStrength, hammer_strength, 1.0f)
 MACRO_TUNING_PARAM(HookDuration, hook_duration, 1.25f)
+
+MACRO_TUNING_PARAM(HammerFireDelay, hammer_fire_delay, 125)
+MACRO_TUNING_PARAM(GunFireDelay, gun_fire_delay, 125)
+MACRO_TUNING_PARAM(ShotgunFireDelay, shotgun_fire_delay, 500)
+MACRO_TUNING_PARAM(GrenadeFireDelay, grenade_fire_delay, 500)
+MACRO_TUNING_PARAM(RifleFireDelay, rifle_fire_delay, 800)
+MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800)
 #endif

@@ -579,7 +579,14 @@ void CCharacter::FireWeapon()
 		m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo--;*/
 
 	if(!m_ReloadTimer)
-		m_ReloadTimer = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Firedelay * Server()->TickSpeed() / 1000;
+	{
+		float FireDelay;
+		if (!m_TuneZone)
+			GameServer()->Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		else
+			GameServer()->TuningList()[m_TuneZone].Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+	}
 }
 
 void CCharacter::HandleWeapons()
