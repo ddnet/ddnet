@@ -59,6 +59,13 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	lock_release(m_Lock);
 }
 
+void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
+{
+	char *pEsc = curl_easy_escape(0, pStr, 0);
+	str_copy(pBuf, pEsc, size);
+	curl_free(pEsc);
+}
+
 void CFetcher::FetcherThread(void *pUser)
 {
 	CFetcher *pFetcher = (CFetcher *)pUser;
