@@ -7,6 +7,7 @@
 #include "message.h"
 #include <engine/shared/config.h>
 #include <versionsrv/versionsrv.h>
+#include <game/generated/protocol.h>
 
 enum
 {
@@ -39,6 +40,8 @@ protected:
 public:
 	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
+
+	CNetObj_PlayerInput DummyInput;
 
 	class CSnapItem
 	{
