@@ -349,7 +349,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		if(m_HookedPlayer != -1)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
-			if(pCharCore)
+			if(pCharCore && m_Id >= 0 && pCharCore->m_Id >= 0 && m_pTeams->SameTeam(m_Id, pCharCore->m_Id))
 				m_HookPos = pCharCore->m_Pos;
 			else
 			{
