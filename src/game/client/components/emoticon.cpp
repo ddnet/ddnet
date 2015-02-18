@@ -147,4 +147,11 @@ void CEmoticon::Emote(int Emoticon)
 	CNetMsg_Cl_Emoticon Msg;
 	Msg.m_Emoticon = Emoticon;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+
+	if(g_Config.m_ClDummyCopyMoves)
+	{
+		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON);
+		Msg.AddInt(Emoticon);
+		Client()->SendMsgExY(&Msg, MSGFLAG_VITAL, false, !g_Config.m_ClDummy);
+	}
 }
