@@ -37,9 +37,14 @@ class CAutoMapper
 		bool m_DefaultRule;
 	};
 
-	struct CConfiguration
+	struct CRun
 	{
 		array<CIndexRule> m_aIndexRules;
+	};
+
+	struct CConfiguration
+	{
+		array<CRun> m_aRuns;
 		char m_aName[128];
 	};
 
