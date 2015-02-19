@@ -103,21 +103,102 @@ void CAutoMapper::Load(const char* pTileName)
 				{
 					int x = 0, y = 0;
 					char aValue[128];
-					int Value = CPosRule::EMPTY;
-					bool IndexValue = false;
+					int Value = CPosRule::NORULE;
+					array<CIndexInfo> NewIndexList;
 
 					sscanf(pLine, "Pos %d %d %127s", &x, &y, aValue);
 
-					if(!str_comp(aValue, "FULL"))
-						Value = CPosRule::FULL;
-					else if(!str_comp_num(aValue, "INDEX", 5))
+					if(!str_comp(aValue, "EMPTY"))
 					{
-						sscanf(pLine, "Pos %*d %*d INDEX %d", &Value);
-						IndexValue = true;
+						Value = CPosRule::EMPTY;
+					}
+					else if(!str_comp(aValue, "FULL"))
+					{
+						Value = CPosRule::FULL;
+					}
+					else if(!str_comp_num(aValue, "INDEX", 5) || !str_comp_num(aValue, "NOTINDEX", 8))
+					{
+						if(!str_comp_num(aValue, "INDEX", 5))
+							Value = CPosRule::INDEX;
+						else
+							Value = CPosRule::NOTINDEX;
+
+						int pWord = 4;
+						while(true) {
+							int ID = 0;
+							char aOrientation1[128] = "";
+							char aOrientation2[128] = "";
+							char aOrientation3[128] = "";
+							char aOrientation4[128] = "";
+							sscanf(str_trim_words(pLine, pWord), "%d %127s %127s %127s %127s", &ID, aOrientation1, aOrientation2, aOrientation3, aOrientation4);
+
+							CIndexInfo NewIndexInfo;
+							NewIndexInfo.m_ID = ID;
+							NewIndexInfo.m_Flag = 0;
+
+							if(!str_comp(aOrientation1, "OR")) {
+								NewIndexList.add(NewIndexInfo);
+								pWord += 2;
+								continue;
+							} else if(str_length(aOrientation1) > 0) {
+								if(!str_comp(aOrientation1, "XFLIP"))
+									NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
+								else if(!str_comp(aOrientation1, "YFLIP"))
+									NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
+								else if(!str_comp(aOrientation1, "ROTATE"))
+									NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
+							} else {
+								NewIndexList.add(NewIndexInfo);
+								break;
+							}
+
+							if(!str_comp(aOrientation2, "OR")) {
+								NewIndexList.add(NewIndexInfo);
+								pWord += 3;
+								continue;
+							} else if(str_length(aOrientation2) > 0) {
+								if(!str_comp(aOrientation2, "XFLIP"))
+									NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
+								else if(!str_comp(aOrientation2, "YFLIP"))
+									NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
+								else if(!str_comp(aOrientation2, "ROTATE"))
+									NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
+							} else {
+								NewIndexList.add(NewIndexInfo);
+								break;
+							}
+
+							if(!str_comp(aOrientation3, "OR")) {
+								NewIndexList.add(NewIndexInfo);
+								pWord += 4;
+								continue;
+							} else if(str_length(aOrientation3) > 0) {
+								if(!str_comp(aOrientation3, "XFLIP"))
+									NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
+								else if(!str_comp(aOrientation3, "YFLIP"))
+									NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
+								else if(!str_comp(aOrientation3, "ROTATE"))
+									NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
+							} else {
+								NewIndexList.add(NewIndexInfo);
+								break;
+							}
+
+							if(!str_comp(aOrientation4, "OR")) {
+								NewIndexList.add(NewIndexInfo);
+								pWord += 5;
+								continue;
+							} else {
+								NewIndexList.add(NewIndexInfo);
+								break;
+							}
+						}
 					}
 
-					CPosRule NewPosRule = {x, y, Value, IndexValue};
-					pCurrentIndex->m_aRules.add(NewPosRule);
+					if(Value != CPosRule::NORULE) {
+						CPosRule NewPosRule = {x, y, Value, NewIndexList};
+						pCurrentIndex->m_aRules.add(NewPosRule);
+					}
 				}
 				else if(!str_comp_num(pLine, "Random", 6) && pCurrentIndex)
 				{
@@ -148,7 +229,8 @@ void CAutoMapper::Load(const char* pTileName)
 			}
 			if(!Found && m_lConfigs[h].m_aIndexRules[i].m_DefaultRule)
 			{
-				CPosRule NewPosRule = {0, 0, CPosRule::FULL, false};
+				array<CIndexInfo> NewIndexList;
+				CPosRule NewPosRule = {0, 0, CPosRule::FULL, NewIndexList};
 				m_lConfigs[h].m_aIndexRules[i].m_aRules.add(NewPosRule);
 			}
 		}
@@ -199,9 +281,6 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 			CTile *pTile = &(newLayer.m_pTiles[y*pLayer->m_Width+x]);
 			m_pEditor->m_Map.m_Modified = true;
 
-			if(y == 0 || y == pLayer->m_Height-1 || x == 0 || x == pLayer->m_Width-1)
-				continue;
-
 			for(int i = 0; i < pConf->m_aIndexRules.size(); ++i)
 			{
 				bool RespectRules = true;
@@ -214,17 +293,34 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 						RespectRules = false;
 					else
 					{
- 						if(pRule->m_IndexValue)
+						if(pRule->m_Value == CPosRule::EMPTY)
 						{
-							if(pLayer->m_pTiles[CheckIndex].m_Index != pRule->m_Value)
+							if(pLayer->m_pTiles[CheckIndex].m_Index > 0)
 								RespectRules = false;
 						}
-						else
+						else if(pRule->m_Value == CPosRule::FULL)
 						{
-							if(pLayer->m_pTiles[CheckIndex].m_Index > 0 && pRule->m_Value == CPosRule::EMPTY)
+							if(pLayer->m_pTiles[CheckIndex].m_Index == 0)
 								RespectRules = false;
-
-							if(pLayer->m_pTiles[CheckIndex].m_Index == 0 && pRule->m_Value == CPosRule::FULL)
+						}
+ 						else if(pRule->m_Value == CPosRule::INDEX)
+						{
+							bool PosRuleTest = false;
+							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+								if(pLayer->m_pTiles[CheckIndex].m_Index == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || pLayer->m_pTiles[CheckIndex].m_Flags == pRule->m_aIndexList[i].m_Flag))
+									PosRuleTest = true;
+							}
+							if(!PosRuleTest)
+								RespectRules = false;
+						}
+ 						else if(pRule->m_Value == CPosRule::NOTINDEX)
+						{
+							bool PosRuleTest = true;
+							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+								if(pLayer->m_pTiles[CheckIndex].m_Index == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || pLayer->m_pTiles[CheckIndex].m_Flags == pRule->m_aIndexList[i].m_Flag))
+									PosRuleTest = false;
+							}
+							if(!PosRuleTest)
 								RespectRules = false;
 						}
 					}
