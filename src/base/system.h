@@ -785,6 +785,22 @@ int str_length(const char *str);
 int str_format(char *buffer, int buffer_size, const char *format, ...);
 
 /*
+	Function: str_trim_words
+		Trims specific number of words at the start of a string.
+
+	Parameters:
+		str - String to trim the words from.
+		words - Count of words to trim.
+
+	Returns:
+		Trimmed string
+
+	Remarks:
+		- The strings are treated as zero-termineted strings.
+*/
+char *str_trim_words(char *str, int words);
+
+/*
 	Function: str_sanitize_strong
 		Replaces all characters below 32 and above 127 with whitespace.
 

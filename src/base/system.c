@@ -1856,6 +1856,19 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 	return ret;
 }
 
+char *str_trim_words(char *str, int words)
+{
+    while (words && *str)
+    {
+        if (isspace(*str) && !isspace(*(str + 1)))
+        {
+            words--;
+        }
+        str++;
+    }
+    return str;
+}
+
 
 
 /* makes sure that the string only contains the characters between 32 and 127 */

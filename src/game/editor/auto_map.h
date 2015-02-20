@@ -5,17 +5,26 @@
 
 class CAutoMapper
 {
+	struct CIndexInfo
+	{
+		int m_ID;
+		int m_Flag;
+	};
+
 	struct CPosRule
 	{
 		int m_X;
 		int m_Y;
 		int m_Value;
-		bool m_IndexValue;
+		array<CIndexInfo> m_aIndexList;
 
 		enum
 		{
-			EMPTY=0,
-			FULL
+			NORULE=0,
+			EMPTY,
+			FULL,
+			INDEX,
+			NOTINDEX
 		};
 	};
 
@@ -28,9 +37,14 @@ class CAutoMapper
 		bool m_DefaultRule;
 	};
 
-	struct CConfiguration
+	struct CRun
 	{
 		array<CIndexRule> m_aIndexRules;
+	};
+
+	struct CConfiguration
+	{
+		array<CRun> m_aRuns;
 		char m_aName[128];
 	};
 
