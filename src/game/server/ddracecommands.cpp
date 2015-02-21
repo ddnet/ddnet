@@ -304,6 +304,7 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 			pChr->m_Pos = TelePos;
 			pChr->m_PrevPos = TelePos;
 			pChr->m_DDRaceState = DDRACE_CHEAT;
+			pChr->m_TeleCheckpoint = TeleTo;
 		}
 	}
 }
