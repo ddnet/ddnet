@@ -21,6 +21,7 @@ struct CDemoHeader
 	char m_aType[8];
 	char m_aLength[4];
 	char m_aTimestamp[20];
+	char m_aInfo[64];
 };
 
 struct CTimelineMarkers

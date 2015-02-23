@@ -14,11 +14,12 @@
 #include "network.h"
 #include "snapshot.h"
 
-static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
+static const unsigned char gs_aHeaderMarker[7] = {'D', 'D', 'D', 'E', 'M', 'O', 0};
 static const unsigned char gs_ActVersion = 4;
 static const unsigned char gs_OldVersion = 3;
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
+static const char *gs_pHeaderInfo = "DDNet 7.2 demo (http://ddnet.tw)";
 
 
 CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData)
@@ -102,6 +103,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	str_copy(Header.m_aType, pType, sizeof(Header.m_aType));
 	// Header.m_Length - add this on stop
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
+	str_copy(Header.m_aInfo, gs_pHeaderInfo, sizeof(Header.m_aInfo));
 	io_write(DemoFile, &Header, sizeof(Header));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
 
