@@ -349,11 +349,8 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		if(m_HookedPlayer != -1)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
-			if(pCharCore && (IsClient
-				|| m_Id == (m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER)
-				|| pCharCore->m_Id == (m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER)
-				|| (m_Id >= 0 && pCharCore->m_Id >= 0 && m_pTeams->SameTeam(m_Id, pCharCore->m_Id))))
-					m_HookPos = pCharCore->m_Pos;
+			if(IsClient || (pCharCore && m_pTeams->CanCollide(m_Id, pCharCore->m_Id)))
+				m_HookPos = pCharCore->m_Pos;
 			else
 			{
 				// release hook
