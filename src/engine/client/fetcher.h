@@ -11,6 +11,8 @@ class CFetcher : public IFetcher
 private:
 	CURL *m_pHandle;
 
+	void *m_pThHandle;
+
 	LOCK m_Lock;
 	CFetchTask *m_pFirst;
 	CFetchTask *m_pLast;

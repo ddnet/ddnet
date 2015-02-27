@@ -2,6 +2,7 @@
 #define ENGINE_FETCHER_H
 
 #include "kernel.h"
+#include "stddef.h"
 
 class CFetchTask;
 
