@@ -9,11 +9,17 @@
 using std::string;
 using std::vector;
 
+#define CLIENT_EXEC "DDNet"
+#define SERVER_EXEC "DDNet-Server"
+
 #if defined(CONF_FAMILY_WINDOWS)
-    #define PLAT_EXEC_NAME "DDNet.exe"
+    #define PLAT_EXT ".exe"
 #elif defined(CONF_FAMILY_UNIX)
-    #define PLAT_EXEC_NAME "DDNet"
+    #define PLAT_EXT ""
 #endif
+
+#define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
+#define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
 CAutoUpdate::CAutoUpdate()
 {
@@ -31,24 +37,25 @@ void CAutoUpdate::Init()
     m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 }
 
-void CAutoUpdate::ProgressCallback(const char *pDest, void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
+void CAutoUpdate::ProgressCallback(CFetchTask *pTask, void *pUser)
 {
     CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
-    str_copy(pUpdate->m_Status, pDest, sizeof(pUpdate->m_Status));
-    pUpdate->m_Percent = (100*DlCurr)/(DlTotal ? DlTotal : 1);
+    str_copy(pUpdate->m_Status, pTask->Dest(), sizeof(pUpdate->m_Status));
+    pUpdate->m_Percent = pTask->Progress();
 }
 
-void CAutoUpdate::CompletionCallback(const char *pDest, void *pUser)
+void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
 {
     CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
-    if(!str_comp(pDest, "update.json")){
+    if(!str_comp(pTask->Dest(), "update.json")){
         pUpdate->m_State = GOT_MANIFEST;
     }
-    else if(!str_comp(pDest, pUpdate->m_aLastFile)){
+    else if(!str_comp(pTask->Dest(), pUpdate->m_aLastFile)){
         if(pUpdate->m_ClientUpdate)
             pUpdate->ReplaceExecutable();
         pUpdate->m_State = NEED_RESTART;
     }
+    delete pTask;
 }
 
 void CAutoUpdate::FetchFile(const char *pFile, const char *pDestPath)
@@ -57,7 +64,8 @@ void CAutoUpdate::FetchFile(const char *pFile, const char *pDestPath)
     str_format(aBuf, sizeof(aBuf), "https://learath2.info/%s", pFile);
     if(!pDestPath)
         pDestPath = pFile;
-    m_pFetcher->QueueAdd(aBuf, pDestPath, &CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback, this);
+    CFetchTask *Task = new CFetchTask;
+    m_pFetcher->QueueAdd(Task, aBuf, pDestPath, 2, this, &CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback);
 }
 
 void CAutoUpdate::Update()
@@ -72,6 +80,7 @@ void CAutoUpdate::Update()
 
 void CAutoUpdate::AddNewFile(const char *pFile)
 {
+	//Check if already on the download list
     for(vector<string>::iterator it = m_AddedFiles.begin(); it < m_AddedFiles.end(); ++it)
         if(!str_comp(it->c_str(), pFile))
             return;
@@ -92,9 +101,11 @@ void CAutoUpdate::AddRemovedFile(const char *pFile)
 
 void CAutoUpdate::ReplaceExecutable()
 {
-    dbg_msg("autoupdate", "Replacing" PLAT_EXEC_NAME);
-    m_pStorage->RenameFile(PLAT_EXEC_NAME, "DDNet.old", 2);
-    m_pStorage->RenameFile("DDNet.tmp", PLAT_EXEC_NAME, 2);
+    dbg_msg("autoupdate", "Replacing" PLAT_CLIENT_EXEC);
+
+    //Replace running executable by renaming twice...
+    m_pStorage->RenameFile(PLAT_CLIENT_EXEC, "DDNet.old", 2);
+    m_pStorage->RenameFile("DDNet.tmp", PLAT_CLIENT_EXEC, 2);
 }
 
 void CAutoUpdate::ParseUpdate()
@@ -169,6 +180,8 @@ void CAutoUpdate::PerformUpdate()
         m_pStorage->RemoveFile(m_RemovedFiles.back().c_str(), IStorage::TYPE_SAVE);
         m_RemovedFiles.pop_back();
     }
+    if(m_ServerUpdate)
+    	FetchFile(PLAT_SERVER_EXEC);
     if(m_ClientUpdate)
-        FetchFile(PLAT_EXEC_NAME, "DDNet.tmp");
+        FetchFile(PLAT_CLIENT_EXEC, "DDNet.tmp");
 }

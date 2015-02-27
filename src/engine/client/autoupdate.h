@@ -2,6 +2,7 @@
 #define ENGINE_CLIENT_AUTOUPDATE_H
 
 #include <engine/autoupdate.h>
+#include <engine/fetcher.h>
 #include <vector>
 #include <string>
 
@@ -32,8 +33,8 @@ class CAutoUpdate : public IAutoUpdate
 
 public: 
     CAutoUpdate();
-    static void ProgressCallback(const char *pDest, void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
-    static void CompletionCallback(const char *pDest, void *pUser);
+    static void ProgressCallback(CFetchTask *pTask, void *pUser);
+    static void CompletionCallback(CFetchTask *pTask, void *pUser);
 
     int GetCurrentState() { return m_State; };
     char *GetCurrentFile() { return m_Status; };
