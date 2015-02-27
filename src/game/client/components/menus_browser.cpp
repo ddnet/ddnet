@@ -1271,6 +1271,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
 
 		// version note
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
 		int State = AutoUpdate()->GetCurrentState();
@@ -1319,7 +1320,19 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			ProgressBar.w = (float)AutoUpdate()->GetCurrentPercent();
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 		}
-
+#else
+		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
+		char aBuf[64];
+		if(str_comp(Client()->LatestVersion(), "0") != 0)
+		{
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out! Download it at ddnet.tw!"), Client()->LatestVersion());
+			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+		}
+		else
+			str_format(aBuf, sizeof(aBuf), Localize("Current Version: %s"), GAME_VERSION);
+		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+#endif
 		// button area
 		//StatusBox.VSplitRight(80.0f, &StatusBox, 0);
 		StatusBox.VSplitRight(170.0f, &StatusBox, &ButtonArea);

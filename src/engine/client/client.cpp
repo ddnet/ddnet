@@ -2485,7 +2485,9 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer));
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
 	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher));
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
+#endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 }
 
@@ -2501,7 +2503,9 @@ void CClient::InitInterfaces()
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
+#endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
@@ -2509,7 +2513,10 @@ void CClient::InitInterfaces()
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
 	m_Fetcher.Init();
+
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_AutoUpdate.Init();
+#endif
 
 	m_Friends.Init();
 
@@ -2645,8 +2652,9 @@ void CClient::Run()
 		// update input
 		if(Input()->Update())
 			break;	// SDL_QUIT
-
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 		AutoUpdate()->Update();
+#endif
 
 		// update sound
 		Sound()->Update();
