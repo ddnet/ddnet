@@ -20,6 +20,7 @@ public:
 
 	bool SameTeam(int ClientID1, int ClientID2);
 
+	bool CanKeepHook(int ClientID1, int ClientID2);
 	bool CanCollide(int ClientID1, int ClientID2);
 
 	int Team(int ClientID);
