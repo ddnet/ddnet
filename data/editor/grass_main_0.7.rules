@@ -39,14 +39,9 @@ Pos 1 0 EMPTY
 
 #inside corner top-right
 Index 54
-Pos 0 -1 FULL
-Pos 0 1 FULL
-Pos -1 0 FULL
-Pos 1 0 FULL
-Pos -1 -1 FULL
 Pos -1 1 EMPTY
-Pos 1 -1 FULL
-Pos 1 1 FULL
+Pos -1 0 FULL
+Pos 0 1 FULL
 
 #inside corner top-left
 Index 53
@@ -54,7 +49,7 @@ Pos 1 1 EMPTY
 Pos 1 0 FULL
 Pos 0 1 FULL
 
-#single gras
+#single tile
 Index 84
 Pos -1 0 EMPTY
 Pos 0 -1 EMPTY
@@ -383,26 +378,50 @@ NewRun
 #random bones
 Index 2
 Pos 0 0 INDEX 1
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 250
 
 Index 3
 Pos 0 0 INDEX 1
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 250
 
 Index 66
 Pos 0 0 INDEX 1
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 250
 
 Index 67
 Pos 0 0 INDEX 1
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 250
 
 Index 68
 Pos 0 0 INDEX 1
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 250
 
 Index 83
 Pos 0 0 INDEX 1
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 250
 
 NewRun
@@ -413,6 +432,10 @@ Pos 0 0 INDEX 1
 Pos 1 0 INDEX 1
 Pos 0 1 INDEX 1
 Pos 1 1 INDEX 1
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 1 NOTINDEX -1
 Random 500
 
 Index 69
@@ -420,6 +443,10 @@ Pos 0 0 INDEX 1
 Pos 1 0 INDEX 1
 Pos 0 1 INDEX 1
 Pos 1 1 INDEX 1
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 1 NOTINDEX -1
 Random 500
 
 NewRun
@@ -437,6 +464,7 @@ Index 85
 Pos 0 -1 INDEX 69
 Index 86
 Pos -1 -1 INDEX 69
+
 
 
 [Cave]
@@ -507,26 +535,50 @@ NewRun
 #random bones
 Index 29
 Pos 0 0 INDEX 13
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 200
 
 Index 42
 Pos 0 0 INDEX 13
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 200
 
 Index 43
 Pos 0 0 INDEX 13
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 200
 
 Index 44
 Pos 0 0 INDEX 13
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 200
 
 Index 45
 Pos 0 0 INDEX 13
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 200
 
 Index 61
 Pos 0 0 INDEX 13
+Pos 0 1 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
 Random 200
 
 NewRun
@@ -537,6 +589,10 @@ Pos 0 0 INDEX 13
 Pos 1 0 INDEX 13
 Pos 0 1 INDEX 13
 Pos 1 1 INDEX 13
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 1 NOTINDEX -1
 Random 400
 
 Index 46
@@ -544,6 +600,10 @@ Pos 0 0 INDEX 13
 Pos 1 0 INDEX 13
 Pos 0 1 INDEX 13
 Pos 1 1 INDEX 13
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 1 NOTINDEX -1
 Random 400
 
 NewRun
@@ -561,4 +621,3 @@ Index 62
 Pos 0 -1 INDEX 46
 Index 63
 Pos -1 -1 INDEX 46
-

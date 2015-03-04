@@ -119,11 +119,17 @@ void CAutoMapper::Load(const char* pTileName)
 
 				if(!str_comp(aValue, "EMPTY"))
 				{
-					Value = CPosRule::EMPTY;
+					Value = CPosRule::INDEX;
+					CIndexInfo NewIndexInfo = {0, 0};
+					NewIndexList.add(NewIndexInfo);
 				}
 				else if(!str_comp(aValue, "FULL"))
 				{
-					Value = CPosRule::FULL;
+					Value = CPosRule::NOTINDEX;
+					CIndexInfo NewIndexInfo1 = {0, 0};
+					CIndexInfo NewIndexInfo2 = {-1, 0};
+					NewIndexList.add(NewIndexInfo1);
+					NewIndexList.add(NewIndexInfo2);
 				}
 				else if(!str_comp(aValue, "INDEX") || !str_comp(aValue, "NOTINDEX"))
 				{
@@ -240,7 +246,9 @@ void CAutoMapper::Load(const char* pTileName)
 				if(!Found && m_lConfigs[g].m_aRuns[h].m_aIndexRules[i].m_DefaultRule)
 				{
 					array<CIndexInfo> NewIndexList;
-					CPosRule NewPosRule = {0, 0, CPosRule::FULL, NewIndexList};
+					CIndexInfo NewIndexInfo = {0, 0};
+					NewIndexList.add(NewIndexInfo);
+					CPosRule NewPosRule = {0, 0, CPosRule::NOTINDEX, NewIndexList};
 					m_lConfigs[g].m_aRuns[h].m_aIndexRules[i].m_aRules.add(NewPosRule);
 				}
 			}
@@ -287,7 +295,6 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		}
 
 		// auto map
-		int MaxIndex = pLayer->m_Width*pLayer->m_Height;
 		for(int y = 0; y < pLayer->m_Height; y++)
 			for(int x = 0; x < pLayer->m_Width; x++)
 			{
@@ -300,42 +307,38 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 					for(int j = 0; j < pRun->m_aIndexRules[i].m_aRules.size() && RespectRules; ++j)
 					{
 						CPosRule *pRule = &pRun->m_aIndexRules[i].m_aRules[j];
-						int CheckIndex = (y+pRule->m_Y)*pLayer->m_Width+(x+pRule->m_X);
+
+						int CheckIndex, CheckFlags;
+						int CheckX = x + pRule->m_X;
+						int CheckY = y + pRule->m_Y;
+						if(CheckX >= 0 && CheckX < pLayer->m_Width && CheckY >= 0 && CheckY < pLayer->m_Height) {
+							int CheckTile = CheckY * pLayer->m_Width + CheckX;
+							CheckIndex = pLayer->m_pTiles[CheckTile].m_Index;
+							CheckFlags = pLayer->m_pTiles[CheckTile].m_Flags;
+						} else {
+							CheckIndex = -1;
+							CheckFlags = 0;
+						}
 	
-						if(CheckIndex < 0 || CheckIndex >= MaxIndex)
-							RespectRules = false;
-						else
+	 					 if(pRule->m_Value == CPosRule::INDEX)
 						{
-							if(pRule->m_Value == CPosRule::EMPTY)
-							{
-								if(pLayer->m_pTiles[CheckIndex].m_Index > 0)
-									RespectRules = false;
+							bool PosRuleTest = false;
+							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+									PosRuleTest = true;
 							}
-							else if(pRule->m_Value == CPosRule::FULL)
-							{
-								if(pLayer->m_pTiles[CheckIndex].m_Index == 0)
-									RespectRules = false;
+							if(!PosRuleTest)
+								RespectRules = false;
+						}
+	 					else if(pRule->m_Value == CPosRule::NOTINDEX)
+						{
+							bool PosRuleTest = true;
+							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+									PosRuleTest = false;
 							}
-	 						else if(pRule->m_Value == CPosRule::INDEX)
-							{
-								bool PosRuleTest = false;
-								for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
-									if(pLayer->m_pTiles[CheckIndex].m_Index == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || pLayer->m_pTiles[CheckIndex].m_Flags == pRule->m_aIndexList[i].m_Flag))
-										PosRuleTest = true;
-								}
-								if(!PosRuleTest)
-									RespectRules = false;
-							}
-	 						else if(pRule->m_Value == CPosRule::NOTINDEX)
-							{
-								bool PosRuleTest = true;
-								for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
-									if(pLayer->m_pTiles[CheckIndex].m_Index == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || pLayer->m_pTiles[CheckIndex].m_Flags == pRule->m_aIndexList[i].m_Flag))
-										PosRuleTest = false;
-								}
-								if(!PosRuleTest)
-									RespectRules = false;
-							}
+							if(!PosRuleTest)
+								RespectRules = false;
 						}
 					}
 
