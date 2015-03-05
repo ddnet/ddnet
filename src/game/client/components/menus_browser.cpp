@@ -6,6 +6,7 @@
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
 #include <engine/textrender.h>
+#include <engine/autoupdate.h>
 #include <engine/shared/config.h>
 
 #include <game/generated/client_data.h>
@@ -1266,10 +1267,60 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	// status box
 	{
-		CUIRect Button, ButtonArea;
+		CUIRect Button, ButtonArea, Part;
 		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
 
 		// version note
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
+		char aBuf[64];
+		int State = AutoUpdate()->GetCurrentState();
+		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+		if(State == IAutoUpdate::CLEAN && NeedUpdate)
+		{
+			str_format(aBuf, sizeof(aBuf), "DDNet %s is out! Download?", Client()->LatestVersion());
+			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+		}
+		else if(State == IAutoUpdate::CLEAN || State == IAutoUpdate::IGNORED)
+			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
+		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
+			str_format(aBuf, sizeof(aBuf), "Downloading %s:", AutoUpdate()->GetCurrentFile());
+		else if(State == IAutoUpdate::NEED_RESTART){
+			static float s_Counter = Client()->LocalTime() + 5.0f;
+			str_format(aBuf, sizeof(aBuf), "DDNet Client will restart in %d", (int)(s_Counter - Client()->LocalTime()));
+			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+			if(Client()->LocalTime() > s_Counter)
+				Client()->Restart();
+		}
+		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Button, &Part);
+
+		if(State == IAutoUpdate::CLEAN && NeedUpdate){
+			CUIRect Yes, No;
+			Part.VSplitLeft(30.0f, &Yes, &No);
+			No.VMargin(5.0f, &No);
+			No.VSplitLeft(30.0f, &No, 0);
+
+			static int s_ButtonUpdate = 0;
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Yes"), 0, &Yes))
+				AutoUpdate()->InitiateUpdate();
+
+			static int s_ButtonNUpdate = 0;
+			if(DoButton_Menu(&s_ButtonNUpdate, Localize("No"), 0, &No))
+				AutoUpdate()->IgnoreUpdate();
+		}
+		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART){
+			CUIRect ProgressBar, Percent;
+			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);	
+			ProgressBar.y += 2.0f;
+			ProgressBar.HMargin(1.0f, &ProgressBar);
+			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+			ProgressBar.w = (float)AutoUpdate()->GetCurrentPercent();
+			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
+		}
+#else
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
 		if(str_comp(Client()->LatestVersion(), "0") != 0)
@@ -1278,10 +1329,10 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else
-			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
+			str_format(aBuf, sizeof(aBuf), Localize("Current Version: %s"), GAME_VERSION);
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-
+#endif
 		// button area
 		//StatusBox.VSplitRight(80.0f, &StatusBox, 0);
 		StatusBox.VSplitRight(170.0f, &StatusBox, &ButtonArea);

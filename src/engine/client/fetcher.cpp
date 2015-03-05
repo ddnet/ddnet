@@ -43,10 +43,14 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	pTask->m_Abort = false;
 
 	lock_wait(m_Lock);
+	if(!m_pThHandle)
+	{
+		m_pThHandle = thread_create(&FetcherThread, this);
+		thread_detach(m_pThHandle);
+	}
+
 	if(!m_pFirst)
 	{
-		void *pHandle = thread_create(&FetcherThread, this);
-		thread_detach(pHandle);
 		m_pFirst = pTask;
 		m_pLast = m_pFirst;
 	}
@@ -99,7 +103,10 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 		}
 	}
 
-	IOHANDLE File = m_pStorage->OpenFile(pTask->m_pDest, IOFLAG_WRITE, pTask->m_StorageType);
+	char aPath[256];
+	m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_pDest, aPath, sizeof(aPath));
+	IOHANDLE File = io_open(aPath, IOFLAG_WRITE);
+
 
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
@@ -126,10 +133,10 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 		return false;
 	}
 	io_close(File);
+	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
+	pTask->m_State = CFetchTask::STATE_DONE;	
 	if(pTask->m_pfnCompCallback)
 		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
-	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
-	pTask->m_State = CFetchTask::STATE_DONE;
 	return true;
 }
 

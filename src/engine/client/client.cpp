@@ -26,7 +26,6 @@
 #include <engine/map.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
-#include <engine/autoupdate.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -64,8 +63,6 @@
 #include "client.h"
 
 #include <zlib.h>
-
-
 
 #include "SDL.h"
 #ifdef main
@@ -1032,6 +1029,18 @@ void CClient::DebugRender()
 	}
 }
 
+void CClient::Restart()
+{
+	char aBuf[512];
+#if defined(CONF_FAMILY_WINDOWS)
+    Storage()->GetCompletePath(2, "DDNet.exe", aBuf, sizeof aBuf);
+#elif defined(CONF_FAMILY_UNIX)
+    Storage()->GetCompletePath(2, "DDNet", aBuf, sizeof aBuf);
+#endif
+    shell_execute(aBuf, aBuf);
+    Quit();
+}
+
 void CClient::Quit()
 {
 	SetState(IClient::STATE_QUITING);
@@ -1169,18 +1178,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			// assume version is out of date when version-data doesn't match
 			if(!VersionMatch)
-			{
 				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-				if (g_Config.m_ClAutoUpdate)
-				{
-					str_format(aBuf, sizeof(aBuf), "Checking for updates");
-					((CGameClient *) GameClient())->m_pMenus->RenderUpdating(aBuf);
-					((CGameClient *) GameClient())->AutoUpdate()->CheckUpdates(((CGameClient *) GameClient())->m_pMenus);
-				}
-#endif
-			}
 
 			// request the news
 			CNetChunk Packet;
@@ -2510,12 +2508,15 @@ void CClient::InitInterfaces()
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 	
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
 	m_Fetcher.Init();
+
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+	m_AutoUpdate.Init();
+#endif
 
 	m_Friends.Init();
 
@@ -2651,6 +2652,9 @@ void CClient::Run()
 		// update input
 		if(Input()->Update())
 			break;	// SDL_QUIT
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+		AutoUpdate()->Update();
+#endif
 
 		// update sound
 		Sound()->Update();
@@ -3281,11 +3285,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
-
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	pClient->AutoUpdate()->ExecuteExit();
-#endif
-
+	
 	return 0;
 }
 

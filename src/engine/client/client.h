@@ -64,9 +64,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	IFetcher *m_pFetcher;
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	IAutoUpdate *m_pAutoUpdate;
-#endif
 	IEngineMasterServer *m_pMasterServer;
 
 	enum
@@ -81,9 +79,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CDemoEditor m_DemoEditor;
 	class CServerBrowser m_ServerBrowser;
 	class CFetcher m_Fetcher;
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	class CAutoUpdate m_AutoUpdate;
-#endif
 	class CFriends m_Friends;
 	class CMapChecker m_MapChecker;
 
@@ -208,9 +204,7 @@ public:
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
 	IFetcher *Fetcher() { return m_pFetcher; }
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	IAutoUpdate *AutoUpdate() { return m_pAutoUpdate; }
-#endif
 
 	CClient();
 
@@ -280,6 +274,7 @@ public:
 	void Render();
 	void DebugRender();
 
+	virtual void Restart();
 	virtual void Quit();
 
 	virtual const char *ErrorString();

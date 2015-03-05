@@ -93,11 +93,9 @@ class CGameClient : public IGameClient
 	class IStorage *m_pStorage;
 	class IDemoPlayer *m_pDemoPlayer;
 	class IServerBrowser *m_pServerBrowser;
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	class IAutoUpdate *m_pAutoUpdate;
-#endif
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
+	class IAutoUpdate *m_pAutoUpdate;
 
 	CLayers m_Layers;
 	class CCollision m_Collision;
@@ -133,14 +131,12 @@ public:
 	class IDemoPlayer *DemoPlayer() const { return m_pDemoPlayer; }
 	class IDemoRecorder *DemoRecorder(int Recorder) const { return Client()->DemoRecorder(Recorder); }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	class IAutoUpdate *AutoUpdate() const { return m_pAutoUpdate; }
-#endif
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; };
 	class CCollision *Collision() { return &m_Collision; };
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
+	class IAutoUpdate *AutoUpdate() { return m_pAutoUpdate; }
 
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
