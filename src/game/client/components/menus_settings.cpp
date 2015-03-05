@@ -9,6 +9,7 @@
 #include <engine/graphics.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/autoupdate.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
@@ -1790,6 +1791,24 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
 
+	{
+		Left.HSplitTop(20.0f, &Label, &Left);
+		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+		char aBuf[256];
+		if(NeedUpdate)
+		{
+			str_format(aBuf, sizeof(aBuf), "DDNet %s is available:", Client()->LatestVersion());
+			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+			Button.VSplitLeft(150.0f, &Button, 0);
+			static int s_ButtonUpdate = 0;
+			if(DoButton_Menu(&s_ButtonUpdate, "Update Now", 0, &Button))
+				AutoUpdate()->InitiateUpdate();
+		}
+		else
+			UI()->DoLabelScaled(&Label, "No updates available", 14.0f, -1);
+	}
+	
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(190.0f, &Label, &Button);
