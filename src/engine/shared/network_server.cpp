@@ -30,28 +30,13 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	m_MaxClientsPerIP = MaxClientsPerIP;
 
-	IOHANDLE urandom = io_open("/dev/urandom", IOFLAG_READ);
-	if (urandom) {
-		io_read(urandom, m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
-		io_close(urandom);
-	}
-	else
+	if(secure_random_init() != 0)
 	{
-		dbg_msg("security", "/dev/urandom is not available. using sv_rcon_password for security token seed, make sure you have a long password!");
-		str_copy(m_SecurityTokenSeed, g_Config.m_SvRconPassword, sizeof(m_SecurityTokenSeed));
-		long timestamp = time_get();
-		md5_state_t md5;
-		md5_byte_t digest[16];
-		// do over 9000 rounds of md5 on the rcon password, to make it harder to recover the password from the token values
-		for (int i = 0; i < 1000000; i++)
-		{
-			md5_init(&md5);
-			md5_append(&md5, (unsigned char*)m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
-			md5_append(&md5, (unsigned char*)&timestamp, sizeof(timestamp));
-			md5_finish(&md5, digest);
-			mem_copy(m_SecurityTokenSeed, digest, sizeof(m_SecurityTokenSeed) < sizeof(digest) ? sizeof(m_SecurityTokenSeed) : sizeof(digest));
-		}
+		dbg_msg("secure", "could not initialize secure RNG");
+		return false;
 	}
+
+	secure_random_fill(m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
 
 	for(int i = 0; i < NET_MAX_CLIENTS; i++)
 		m_aSlots[i].m_Connection.Init(m_Socket, true);

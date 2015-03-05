@@ -275,7 +275,7 @@ class CNetServer
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	void *m_UserPtr;
 
-	char m_SecurityTokenSeed[16];
+	unsigned char m_SecurityTokenSeed[16];
 
 	CNetRecvUnpacker m_RecvUnpacker;
 
