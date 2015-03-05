@@ -1783,17 +1783,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Miscellaneous.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace binds"), g_Config.m_ClDDRaceBinds, &Button))
-	{
-		g_Config.m_ClDDRaceBinds ^= 1;
-	}
-
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
-	{
-		g_Config.m_ClEditorUndo ^= 1;
-	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
