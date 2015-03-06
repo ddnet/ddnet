@@ -9,6 +9,7 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
+#include "stddef.h"
 
 #ifdef __cplusplus
 extern "C" {
