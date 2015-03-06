@@ -451,6 +451,20 @@ Random 500
 
 NewRun
 
+Index 1
+Pos 0 0 INDEX 64 OR 69
+Pos -1 0 INDEX 64 OR 69
+
+Index 1
+Pos 0 0 INDEX 64 OR 69
+Pos -1 -1 INDEX 64 OR 69
+
+Index 1
+Pos 0 0 INDEX 64 OR 69
+Pos 0 -1 INDEX 64 OR 69
+
+NewRun
+
 Index 65
 Pos -1 0 INDEX 64
 Index 80
@@ -605,6 +619,20 @@ Pos 0 -1 NOTINDEX -1
 Pos 0 2 NOTINDEX -1
 Pos 2 1 NOTINDEX -1
 Random 400
+
+NewRun
+
+Index 1
+Pos 0 0 INDEX 14 OR 46
+Pos -1 0 INDEX 14 OR 46
+
+Index 1
+Pos 0 0 INDEX 14 OR 46
+Pos -1 -1 INDEX 14 OR 46
+
+Index 1
+Pos 0 0 INDEX 14 OR 46
+Pos 0 -1 INDEX 14 OR 46
 
 NewRun
 

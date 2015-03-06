@@ -139,11 +139,47 @@ Pos 1 1 INDEX 1
 Pos -1 0 NOTINDEX -1
 Pos 0 -1 NOTINDEX -1
 Pos 0 2 NOTINDEX -1
-Pos 2 1 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
 Random 300
 
 NewRun
 
+#Remove overlaps
+Index 1
+Pos 0 0 INDEX 64
+Pos -1 -1 INDEX 64
+
+Index 1
+Pos 0 0 INDEX 64
+Pos 0 -1 INDEX 64
+
+Index 1
+Pos 0 0 INDEX 64
+Pos 1 -1 INDEX 64
+
+Index 1
+Pos 0 0 INDEX 64
+Pos -1 0 INDEX 64
+
+Index 1
+Pos 0 0 INDEX 64
+Pos 1 0 INDEX 64
+
+Index 1
+Pos 0 0 INDEX 64
+Pos -1 1 INDEX 64
+
+Index 1
+Pos 0 0 INDEX 64
+Pos 0 1 INDEX 64
+
+Index 1
+Pos 0 0 INDEX 64
+Pos 1 1 INDEX 64
+
+NewRun
+
+#Fill bones
 Index 65
 Pos -1 0 INDEX 64
 Index 80
