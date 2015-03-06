@@ -1328,6 +1328,27 @@ int pid();
 
 void shell_execute(const char *file, const char *argv);
 
+/*
+	Function: secure_random_init
+		Initializes the secure random module.
+		You *MUST* check the return value of this function.
+
+	Returns:
+		0 - Initialization succeeded.
+		1 - Initialization failed.
+*/
+int secure_random_init();
+
+/*
+	Function: secure_random_fill
+		Fills the buffer with the specified amount of random bytes.
+
+	Parameters:
+		buffer - Pointer to the start of the buffer.
+		length - Length of the buffer.
+*/
+void secure_random_fill(unsigned char *bytes, size_t length);
+
 #ifdef __cplusplus
 }
 #endif
