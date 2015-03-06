@@ -200,17 +200,17 @@ void CNetConnection::Disconnect(const char *pReason)
 
 int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken)
 {
-	if (m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
+	if (State() != NET_CONNSTATE_OFFLINE && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
 		// supposed to have a valid token in this packet, check it
 		if (pPacket->m_DataSize < sizeof(m_SecurityToken))
-			return -1;
+			return 0;
 		pPacket->m_DataSize -= sizeof(m_SecurityToken);
 		if (m_SecurityToken != *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize])
 		{
 			if(g_Config.m_Debug)
 				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize]);
-			return -1;
+			return 0;
 		}
 	}
 
@@ -418,7 +418,7 @@ int CNetConnection::Update()
 	return 0;
 }
 
-void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack)
+void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken)
 {
 	int64 Now = time_get();
 
@@ -432,5 +432,6 @@ void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack)
 	m_LastSendTime = Now;
 	m_LastRecvTime = Now;
 	m_LastUpdateTime = Now;
+	m_SecurityToken = SecurityToken;
 	m_Buffer.Init();
 }

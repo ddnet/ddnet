@@ -205,7 +205,8 @@ public:
 
 	int AckSequence() const { return m_Ack; }
 	int SeqSequence() const { return m_Sequence; }
-	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack);
+	int SecurityToken() const { return m_SecurityToken; }
+	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken);
 };
 
 class CConsoleNetConnection
