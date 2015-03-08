@@ -1276,6 +1276,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		char aBuf[64];
 		int State = AutoUpdate()->GetCurrentState();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+		static bool Initiated = false;
 		if(State == IAutoUpdate::CLEAN && NeedUpdate)
 		{
 			str_format(aBuf, sizeof(aBuf), "DDNet %s is out! Download?", Client()->LatestVersion());
@@ -1285,19 +1286,25 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
 		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Downloading %s:", AutoUpdate()->GetCurrentFile());
-		else if(State == IAutoUpdate::NEED_RESTART){
+		else if(State == IAutoUpdate::NEED_RESTART && Initiated)
+		{
 			static float s_Counter = Client()->LocalTime() + 5.0f;
 			str_format(aBuf, sizeof(aBuf), "DDNet Client will restart in %d", (int)(s_Counter - Client()->LocalTime()));
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 			if(Client()->LocalTime() > s_Counter)
 				Client()->Restart();
 		}
+		else if(State == IAutoUpdate::NEED_RESTART && !Initiated){
+			str_format(aBuf, sizeof(aBuf), "DDNet Client needs to be restarted to complete update!");
+			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+		}
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Button, &Part);
 
-		if(State == IAutoUpdate::CLEAN && NeedUpdate){
+		if(State == IAutoUpdate::CLEAN && NeedUpdate)
+		{
 			CUIRect Yes, No;
 			Part.VSplitLeft(30.0f, &Yes, &No);
 			No.VMargin(5.0f, &No);
@@ -1305,13 +1312,17 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Yes"), 0, &Yes))
+			{
 				AutoUpdate()->InitiateUpdate();
+				Initiated = true;
+			}
 
 			static int s_ButtonNUpdate = 0;
 			if(DoButton_Menu(&s_ButtonNUpdate, Localize("No"), 0, &No))
 				AutoUpdate()->IgnoreUpdate();
 		}
-		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART){
+		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
+		{
 			CUIRect ProgressBar, Percent;
 			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);	
 			ProgressBar.y += 2.0f;
