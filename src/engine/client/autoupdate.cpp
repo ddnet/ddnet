@@ -104,6 +104,7 @@ void CAutoUpdate::ReplaceExecutable()
     dbg_msg("autoupdate", "Replacing" PLAT_CLIENT_EXEC);
 
     //Replace running executable by renaming twice...
+    m_pStorage->RemoveFile("DDNet.old", 2);
     m_pStorage->RenameFile(PLAT_CLIENT_EXEC, "DDNet.old", 2);
     m_pStorage->RenameFile("DDNet.tmp", PLAT_CLIENT_EXEC, 2);
 }
