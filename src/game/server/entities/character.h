@@ -240,6 +240,7 @@ public:
 	int64 m_LastStartWarning;
 	bool m_LastRefillJumps;
 	bool m_LastPenalty;
+	bool m_LastBonus;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };

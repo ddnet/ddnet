@@ -41,6 +41,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
 	m_LastPenalty = false;
+	m_LastBonus = false;
 	
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -1360,6 +1361,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		m_LastRefillJumps = false;
 		m_LastPenalty = false;
+		m_LastBonus = false;
 		return;
 	}
 	int cp = GameServer()->Collision()->IsCheckpoint(MapIndex);
@@ -1755,10 +1757,41 @@ void CCharacter::HandleTiles(int Index)
 
 		m_LastPenalty = true;
 	}
+	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_BONUS && !m_LastBonus)
+	{
+		int min = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		int sec = GameServer()->Collision()->GetSwitchNumber(MapIndex);
+		int Team = Teams()->m_Core.Team(m_Core.m_Id);
+
+		m_StartTime += (min * 60 + sec) * Server()->TickSpeed();
+		if (m_StartTime > Server()->Tick())
+			m_StartTime = Server()->Tick();
+
+		if (Team != TEAM_FLOCK && Team != TEAM_SUPER)
+		{
+			for (int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(Teams()->m_Core.Team(i) == Team && i != m_Core.m_Id && GameServer()->m_apPlayers[i])
+				{
+					CCharacter* pChar = GameServer()->m_apPlayers[i]->GetCharacter();
+
+					if (pChar)
+						pChar->m_StartTime = m_StartTime;
+				}
+			}
+		}
+
+		m_LastBonus = true;
+	}
 
 	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_PENALTY)
 	{
 		m_LastPenalty = false;
+	}
+
+	if(GameServer()->Collision()->IsSwitch(MapIndex) != TILE_BONUS)
+	{
+		m_LastBonus = false;
 	}
 
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);

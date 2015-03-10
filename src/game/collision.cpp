@@ -100,7 +100,7 @@ void CCollision::Init(class CLayers *pLayers)
 
 			if(Index <= TILE_NPH_START)
 			{
-				if(Index >= TILE_JUMP && Index <= TILE_PENALTY)
+				if(Index >= TILE_JUMP && Index <= TILE_BONUS)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
