@@ -21,8 +21,6 @@ class CAutoMapper
 		enum
 		{
 			NORULE=0,
-			EMPTY,
-			FULL,
 			INDEX,
 			NOTINDEX
 		};

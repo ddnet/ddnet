@@ -9,6 +9,7 @@
 #include <engine/graphics.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/autoupdate.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
@@ -1109,9 +1110,10 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	// render background
 	CUIRect Temp, TabBar, RestartWarning;
-	MainView.HSplitBottom(15.0f, &MainView, &RestartWarning);
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B|CUI::CORNER_TL, 10.0f);
+	MainView.Margin(10.0f, &MainView);
+	MainView.HSplitBottom(15.0f, &MainView, &RestartWarning);
 	TabBar.HSplitTop(50.0f, &Temp, &TabBar);
 	RenderTools()->DrawUIRect(&Temp, ms_ColorTabbarActive, CUI::CORNER_R, 10.0f);
 
@@ -1162,8 +1164,14 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(s_SettingsPage == 8)
 		RenderSettingsDDRace(MainView);
 
-	if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound)
-		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 15.0f, -1);
+	if(m_NeedRestartUpdate)
+	{
+		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+		UI()->DoLabelScaled(&RestartWarning, "DDNet Client needs to be restarted to complete update!", 14.0f, -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound)
+		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
@@ -1783,17 +1791,6 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	Miscellaneous.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
 	Right.VMargin(5.0f, &Right);
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClDDRaceBinds, Localize("Bind free keys with DDRace binds"), g_Config.m_ClDDRaceBinds, &Button))
-	{
-		g_Config.m_ClDDRaceBinds ^= 1;
-	}
-
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClEditorUndo, Localize("Undo function in editor (could be buggy)"), g_Config.m_ClEditorUndo, &Button))
-	{
-		g_Config.m_ClEditorUndo ^= 1;
-	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
@@ -1801,6 +1798,35 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
 
+	//AutoUpdate
+	{
+		Left.HSplitTop(20.0f, &Label, &Left);
+		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+		char aBuf[256];
+		int State = AutoUpdate()->GetCurrentState();
+
+		//Update Button
+		if(NeedUpdate && State <= IAutoUpdate::CLEAN)
+		{
+			str_format(aBuf, sizeof(aBuf), "DDNet %s is available:", Client()->LatestVersion());
+			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
+			Button.VSplitLeft(150.0f, &Button, 0);
+			static int s_ButtonUpdate = 0;
+			if(DoButton_Menu(&s_ButtonUpdate, "Update Now", 0, &Button))
+				AutoUpdate()->InitiateUpdate();
+		}
+		else if(State >= IAutoUpdate::CLEAN && State < IAutoUpdate::NEED_RESTART)
+			str_format(aBuf, sizeof(aBuf), "Updating...");
+		else if(State == IAutoUpdate::NEED_RESTART){
+			str_format(aBuf, sizeof(aBuf), "Done");
+			m_NeedRestartUpdate = true;
+		}
+		else
+			str_format(aBuf, sizeof(aBuf), "No updates available");
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(190.0f, &Label, &Button);
