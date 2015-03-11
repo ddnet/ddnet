@@ -15,8 +15,9 @@
 #include "snapshot.h"
 
 static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
-static const unsigned char gs_ActVersion = 4;
+static const unsigned char gs_ActVersion = 5;
 static const unsigned char gs_OldVersion = 3;
+static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
 
@@ -155,6 +156,7 @@ enum
 	CHUNKTICKFLAG_TICK_COMPRESSED = 0x20, // when we store the tick value in the first chunk
 
 	CHUNKMASK_TICK = 0x1f,
+	CHUNKMASK_TICK_LEGACY = 0x3f,
 	CHUNKMASK_TYPE = 0x60,
 	CHUNKMASK_SIZE = 0x1f,
 
@@ -372,9 +374,14 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 	if(Chunk&CHUNKTYPEFLAG_TICKMARKER)
 	{
 		// decode tick marker
+		int Tickdelta_legacy = Chunk&(CHUNKMASK_TICK_LEGACY); // compatibility
 		*pType = Chunk&(CHUNKTYPEFLAG_TICKMARKER|CHUNKTICKFLAG_KEYFRAME);
 
-		if(Chunk&(CHUNKTICKFLAG_TICK_COMPRESSED))
+		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
+		{
+			*pTick += Tickdelta_legacy;
+		}
+		else if(Chunk&(CHUNKTICKFLAG_TICK_COMPRESSED))
 		{
 			int Tickdelta = Chunk&(CHUNKMASK_TICK);
 			*pTick += Tickdelta;
