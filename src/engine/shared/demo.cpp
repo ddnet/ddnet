@@ -15,8 +15,9 @@
 #include "snapshot.h"
 
 static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
-static const unsigned char gs_ActVersion = 4;
+static const unsigned char gs_ActVersion = 5;
 static const unsigned char gs_OldVersion = 3;
+static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
 
@@ -152,8 +153,10 @@ enum
 {
 	CHUNKTYPEFLAG_TICKMARKER = 0x80,
 	CHUNKTICKFLAG_KEYFRAME = 0x40, // only when tickmarker is set
+	CHUNKTICKFLAG_TICK_COMPRESSED = 0x20, // when we store the tick value in the first chunk
 
-	CHUNKMASK_TICK = 0x3f,
+	CHUNKMASK_TICK = 0x1f,
+	CHUNKMASK_TICK_LEGACY = 0x3f,
 	CHUNKMASK_TYPE = 0x60,
 	CHUNKMASK_SIZE = 0x1f,
 
@@ -166,7 +169,7 @@ enum
 
 void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 {
-	if(m_LastTickMarker == -1 || Tick-m_LastTickMarker > 63 || Keyframe)
+	if(m_LastTickMarker == -1 || Tick-m_LastTickMarker > CHUNKMASK_TICK || Keyframe)
 	{
 		unsigned char aChunk[5];
 		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER;
@@ -183,7 +186,7 @@ void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 	else
 	{
 		unsigned char aChunk[1];
-		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER | (Tick-m_LastTickMarker);
+		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_TICK_COMPRESSED | (Tick-m_LastTickMarker);
 		io_write(m_File, aChunk, sizeof(aChunk));
 	}
 
@@ -371,19 +374,24 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 	if(Chunk&CHUNKTYPEFLAG_TICKMARKER)
 	{
 		// decode tick marker
-		int Tickdelta = Chunk&(CHUNKMASK_TICK);
+		int Tickdelta_legacy = Chunk&(CHUNKMASK_TICK_LEGACY); // compatibility
 		*pType = Chunk&(CHUNKTYPEFLAG_TICKMARKER|CHUNKTICKFLAG_KEYFRAME);
 
-		if(Tickdelta == 0)
+		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
+		{
+			*pTick += Tickdelta_legacy;
+		}
+		else if(Chunk&(CHUNKTICKFLAG_TICK_COMPRESSED))
+		{
+			int Tickdelta = Chunk&(CHUNKMASK_TICK);
+			*pTick += Tickdelta;
+		}
+		else
 		{
 			unsigned char aTickdata[4];
 			if(io_read(m_File, aTickdata, sizeof(aTickdata)) != sizeof(aTickdata))
 				return -1;
 			*pTick = (aTickdata[0]<<24) | (aTickdata[1]<<16) | (aTickdata[2]<<8) | aTickdata[3];
-		}
-		else
-		{
-			*pTick += Tickdelta;
 		}
 
 	}
