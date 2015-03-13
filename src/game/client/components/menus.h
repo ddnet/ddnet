@@ -146,6 +146,7 @@ class CMenus : public CComponent
 	int m_CallvoteSelectedOption;
 	int m_CallvoteSelectedPlayer;
 	char m_aCallvoteReason[VOTE_REASON_LENGTH];
+	char m_aFilterString[25];
 
 	// demo
 	struct CDemoItem
