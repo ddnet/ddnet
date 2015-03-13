@@ -1819,7 +1819,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		else if(State >= IAutoUpdate::CLEAN && State < IAutoUpdate::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Updating...");
 		else if(State == IAutoUpdate::NEED_RESTART){
-			str_format(aBuf, sizeof(aBuf), "Done");
+			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
 			m_NeedRestartUpdate = true;
 		}
 		else
