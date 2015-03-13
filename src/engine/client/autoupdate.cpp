@@ -181,11 +181,6 @@ void CAutoUpdate::InitiateUpdate()
 	FetchFile("update.json");
 }
 
-void CAutoUpdate::IgnoreUpdate()
-{
-	m_State = IGNORED;
-}
-
 void CAutoUpdate::PerformUpdate()
 {
 	m_State = PARSING_UPDATE;

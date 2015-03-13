@@ -64,7 +64,6 @@ public:
 	int GetCurrentPercent() { return m_Percent; };
 
 	virtual void InitiateUpdate();
-	void IgnoreUpdate();
 	void Init();
 	virtual void Update();
 	void Restart();

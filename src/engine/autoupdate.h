@@ -9,8 +9,7 @@ class IAutoUpdate : public IInterface
 public:
     enum
     {
-        IGNORED = -1,
-        CLEAN,
+        CLEAN = 0,
         GETTING_MANIFEST,
         GOT_MANIFEST,
         PARSING_UPDATE,
@@ -21,7 +20,6 @@ public:
 
     virtual void Update() = 0;
     virtual void InitiateUpdate() = 0;
-    virtual void IgnoreUpdate() = 0;
 
     virtual int GetCurrentState() = 0;
     virtual char *GetCurrentFile() = 0;
