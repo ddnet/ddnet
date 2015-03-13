@@ -570,7 +570,38 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// vote menu
 	{
-		CUIRect Button;
+		CUIRect Button, Button2, QuickSearch;
+
+		// render quick search
+		{
+			Bottom.VSplitLeft(240.0f, &QuickSearch, &Bottom);
+			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
+			const char *pSearchLabel = Localize("⚲");
+			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
+			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
+			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
+			QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button2);
+			static float Offset = 0.0f;
+			static char aFilterString[25];
+			if(DoEditBox(&aFilterString, &QuickSearch, aFilterString, sizeof(aFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search"))) {
+				// TODO: Implement here
+			}
+
+			// clear button
+			{
+				static int s_ClearButton = 0;
+				RenderTools()->DrawUIRect(&Button2, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
+				UI()->DoLabel(&Button2, "×", Button2.h*ms_FontmodHeight, 0);
+				if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button2))
+				{
+					aFilterString[0] = 0;
+					UI()->SetActiveItem(&aFilterString);
+					Client()->ServerBrowserUpdate();
+				}
+			}
+		}
+
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
 		static int s_CallVoteButton = 0;
