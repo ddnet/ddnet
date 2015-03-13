@@ -1811,7 +1811,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		{
 			str_format(aBuf, sizeof(aBuf), "DDNet %s is available:", Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
-			Button.VSplitLeft(150.0f, &Button, 0);
+			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, "Update Now", 0, &Button))
 				AutoUpdate()->InitiateUpdate();
