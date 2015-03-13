@@ -2345,15 +2345,18 @@ int pid()
 #endif
 }
 
-void shell_execute(const char *file, const char *argv)
+void shell_execute(const char *file)
 {
 	#if defined(CONF_FAMILY_WINDOWS)
-        ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
-    #elif defined(CONF_FAMILY_UNIX)
-        pid_t pid = fork();
-        if(!pid)
-            execv(file, argv);
-    #endif
+		ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
+	#elif defined(CONF_FAMILY_UNIX)
+		char* argv[2];
+		argv[0] = (char*) file;
+		argv[1] = NULL;
+		pid_t pid = fork();
+		if(!pid)
+			execv(file, argv);
+	#endif
 }
 
 struct SECURE_RANDOM_DATA

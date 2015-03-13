@@ -1119,6 +1119,12 @@ void CCharacter::Snap(int SnappingClient)
 	if(GetPlayer()->m_Afk || GetPlayer()->m_Paused)
 		pCharacter->m_Emote = EMOTE_BLINK;
 
+	if(GetPlayer()->m_Afk || GetPlayer()->m_Paused)
+	{
+		if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)
+			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_ZZZ);
+	}
+
 	if(pCharacter->m_Emote == EMOTE_NORMAL)
 	{
 		if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)

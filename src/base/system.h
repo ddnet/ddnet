@@ -1327,7 +1327,7 @@ int str_utf8_check(const char *str);
 
 int pid();
 
-void shell_execute(const char *file, const char *argv);
+void shell_execute(const char *file);
 
 /*
 	Function: secure_random_init

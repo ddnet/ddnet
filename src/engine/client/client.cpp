@@ -1032,13 +1032,9 @@ void CClient::DebugRender()
 void CClient::Restart()
 {
 	char aBuf[512];
-#if defined(CONF_FAMILY_WINDOWS)
-    Storage()->GetCompletePath(2, "DDNet.exe", aBuf, sizeof aBuf);
-#elif defined(CONF_FAMILY_UNIX)
-    Storage()->GetCompletePath(2, "DDNet", aBuf, sizeof aBuf);
-#endif
-    shell_execute(aBuf, aBuf);
-    Quit();
+	Storage()->GetCompletePath(2, PLAT_CLIENT_EXEC, aBuf, sizeof aBuf);
+	shell_execute(aBuf);
+	Quit();
 }
 
 void CClient::Quit()

@@ -316,6 +316,8 @@ function build(settings)
 			client_settings.link.libs:Add("opus")
 			client_settings.link.libs:Add("ogg")
 			client_settings.link.libs:Add("curl")
+			client_settings.link.libs:Add("ssl")
+			client_settings.link.libs:Add("crypto")
 
 			if arch == "amd64" then
 				client_settings.link.libpath:Add("other/opus/linux/lib64")

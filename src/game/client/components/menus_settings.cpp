@@ -1799,6 +1799,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	//AutoUpdate
+#if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	{
 		Left.HSplitTop(20.0f, &Label, &Left);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
@@ -1826,7 +1827,8 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	
+#endif
+
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
 		Button.VSplitLeft(190.0f, &Label, &Button);

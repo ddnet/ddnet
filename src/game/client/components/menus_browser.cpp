@@ -1278,33 +1278,29 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
 
 		// version note
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+#if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
 		int State = AutoUpdate()->GetCurrentState();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
-		static bool Initiated = false;
 		if(State == IAutoUpdate::CLEAN && NeedUpdate)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet %s is out! Download?", Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), "DDNet %s is out! Update?", Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IAutoUpdate::CLEAN || State == IAutoUpdate::IGNORED)
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
 		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Downloading %s:", AutoUpdate()->GetCurrentFile());
-		else if(State == IAutoUpdate::NEED_RESTART && Initiated)
+		else if(State == IAutoUpdate::NEED_RESTART)
 		{
-			static float s_Counter = Client()->LocalTime() + 5.0f;
-			str_format(aBuf, sizeof(aBuf), "DDNet Client will restart in %d", (int)(s_Counter - Client()->LocalTime()));
-			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-			if(Client()->LocalTime() > s_Counter)
-				Client()->Restart();
-		}
-		else if(State == IAutoUpdate::NEED_RESTART && !Initiated){
-			str_format(aBuf, sizeof(aBuf), "DDNet Client needs to be restarted to complete update!");
+			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
+		//else if(State == IAutoUpdate::NEED_RESTART && !Initiated){
+		//	str_format(aBuf, sizeof(aBuf), "DDNet Client needs to be restarted to complete update!");
+		//	TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+		//}
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -1321,12 +1317,22 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Yes"), 0, &Yes))
 			{
 				AutoUpdate()->InitiateUpdate();
-				Initiated = true;
 			}
 
 			static int s_ButtonNUpdate = 0;
 			if(DoButton_Menu(&s_ButtonNUpdate, Localize("No"), 0, &No))
 				AutoUpdate()->IgnoreUpdate();
+		}
+		else if(State == IAutoUpdate::NEED_RESTART)
+		{
+			CUIRect Restart;
+			Part.VSplitLeft(50.0f, &Restart, &Part);
+
+			static int s_ButtonUpdate = 0;
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Restart"), 0, &Restart))
+			{
+				Client()->Restart();
+			}
 		}
 		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
 		{
