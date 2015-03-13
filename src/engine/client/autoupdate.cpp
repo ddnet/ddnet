@@ -209,6 +209,4 @@ void CAutoUpdate::PerformUpdate()
 		FetchFile(PLAT_SERVER_DOWN, "DDNet-Server.tmp");
 	if(m_ClientUpdate)
 		FetchFile(PLAT_CLIENT_DOWN, "DDNet.tmp");
-
-	m_State = IGNORED;
 }
