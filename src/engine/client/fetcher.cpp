@@ -91,7 +91,7 @@ void CFetcher::FetcherThread(void *pUser)
 	}
 }
 
-bool CFetcher::FetchFile(CFetchTask *pTask)
+void CFetcher::FetchFile(CFetchTask *pTask)
 {
 	for(int i = 0; pTask->m_pDest[i] != '\0'; i++)
 	{
@@ -126,18 +126,20 @@ bool CFetcher::FetchFile(CFetchTask *pTask)
 	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;
 	int ret = curl_easy_perform(m_pHandle);
+	io_close(File);	
 	if(ret != CURLE_OK)
 	{
 		dbg_msg("fetcher", "Task failed. libcurl error: %s", aErr);
 		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? CFetchTask::STATE_ABORTED : CFetchTask::STATE_ERROR;
-		return false;
 	}
-	io_close(File);
-	dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
-	pTask->m_State = CFetchTask::STATE_DONE;	
+	else
+	{
+		dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
+		pTask->m_State = CFetchTask::STATE_DONE;
+
+	}
 	if(pTask->m_pfnCompCallback)
 		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
-	return true;
 }
 
 void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
