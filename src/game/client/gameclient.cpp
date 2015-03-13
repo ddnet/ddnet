@@ -933,6 +933,8 @@ void CGameClient::OnNewSnapshot()
 				IntsToStr(&pInfo->m_Name0, 4, m_aClients[ClientID].m_aName);
 				IntsToStr(&pInfo->m_Clan0, 3, m_aClients[ClientID].m_aClan);
 				m_aClients[ClientID].m_Country = pInfo->m_Country;
+				char aOldSkinName[64];
+				str_copy(aOldSkinName, m_aClients[ClientID].m_aSkinName, sizeof(aOldSkinName));
 				IntsToStr(&pInfo->m_Skin0, 6, m_aClients[ClientID].m_aSkinName);
 
 				m_aClients[ClientID].m_UseCustomColor = pInfo->m_UseCustomColor;
@@ -948,7 +950,9 @@ void CGameClient::OnNewSnapshot()
 				m_aClients[ClientID].m_SkinInfo.m_Size = 64;
 
 				// find new skin
-				m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find(m_aClients[ClientID].m_aSkinName);
+
+				if(str_comp(aOldSkinName, m_aClients[ClientID].m_aSkinName) != 0)
+					m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find(m_aClients[ClientID].m_aSkinName);
 				if(m_aClients[ClientID].m_SkinID < 0)
 				{
 					m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find("default");
