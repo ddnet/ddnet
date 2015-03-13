@@ -1285,7 +1285,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		if(State == IAutoUpdate::CLEAN && NeedUpdate)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet %s is out! Update?", Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), "DDNet %s is out!", Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IAutoUpdate::CLEAN || State == IAutoUpdate::IGNORED)
@@ -1313,20 +1313,14 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 		if(State == IAutoUpdate::CLEAN && NeedUpdate)
 		{
-			CUIRect Yes, No;
-			Part.VSplitLeft(30.0f, &Yes, &No);
-			No.VMargin(5.0f, &No);
-			No.VSplitLeft(30.0f, &No, 0);
+			CUIRect Update;
+			Part.VSplitLeft(50.0f, &Update, NULL);
 
 			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, Localize("Yes"), 0, &Yes))
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update"), 0, &Update))
 			{
 				AutoUpdate()->InitiateUpdate();
 			}
-
-			static int s_ButtonNUpdate = 0;
-			if(DoButton_Menu(&s_ButtonNUpdate, Localize("No"), 0, &No))
-				AutoUpdate()->IgnoreUpdate();
 		}
 		else if(State == IAutoUpdate::NEED_RESTART)
 		{
