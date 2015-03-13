@@ -16,6 +16,7 @@ public:
         PARSING_UPDATE,
         DOWNLOADING,
         NEED_RESTART,
+        FAIL_MANIFEST,
     };
 
     virtual void Update() = 0;

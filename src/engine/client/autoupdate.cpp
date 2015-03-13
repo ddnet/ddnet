@@ -39,7 +39,10 @@ void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
 	CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
 	if(!str_comp(pTask->Dest(), "update.json"))
 	{
-		pUpdate->m_State = GOT_MANIFEST;
+		if(pTask->State() == CFetchTask::STATE_DONE)
+			pUpdate->m_State = GOT_MANIFEST;
+		else if(pTask->State() == CFetchTask::STATE_ERROR)
+			pUpdate->m_State = FAIL_MANIFEST;
 	}
 	else if(!str_comp(pTask->Dest(), pUpdate->m_aLastFile))
 	{
