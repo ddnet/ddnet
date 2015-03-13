@@ -42,15 +42,20 @@ void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
 		if(pTask->State() == CFetchTask::STATE_DONE)
 			pUpdate->m_State = GOT_MANIFEST;
 		else if(pTask->State() == CFetchTask::STATE_ERROR)
-			pUpdate->m_State = FAIL_MANIFEST;
+			pUpdate->m_State = FAIL;
 	}
 	else if(!str_comp(pTask->Dest(), pUpdate->m_aLastFile))
 	{
-		if(pUpdate->m_ClientUpdate)
-			pUpdate->ReplaceClient();
-		if(pUpdate->m_ServerUpdate)
-			pUpdate->ReplaceServer();
-		pUpdate->m_State = NEED_RESTART;
+		if(pTask->State() == CFetchTask::STATE_DONE)
+		{
+			if(pUpdate->m_ClientUpdate)
+				pUpdate->ReplaceClient();
+			if(pUpdate->m_ServerUpdate)
+				pUpdate->ReplaceServer();
+			pUpdate->m_State = NEED_RESTART;
+		}
+		else if(pTask->State() == CFetchTask::STATE_ERROR)
+			pUpdate->m_State = FAIL;
 	}
 	delete pTask;
 }
