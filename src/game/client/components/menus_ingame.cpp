@@ -452,17 +452,21 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
-	static int s_NumVoteOptions = m_pClient->m_pVoting->m_NumVoteOptions;
+	static int Total = m_pClient->m_pVoting->m_NumVoteOptions;
+	int aIndices[Total];
+	static int s_CurVoteOption = 0;
 
 #if defined(__ANDROID__)
-	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", s_NumVoteOptions, 1, m_CallvoteSelectedOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", Total, 1, s_CurVoteOption, s_ScrollValue);
 #else
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", s_NumVoteOptions, 1, m_CallvoteSelectedOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", Total, 1, s_CurVoteOption, s_ScrollValue);
 #endif
 
-	s_NumVoteOptions = 0;
+	int NumVoteOptions = 0;
+	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
+		i++;
 		if(!str_find_nocase(pOption->m_aDescription, m_aFilterString))
 			continue;
 
@@ -471,10 +475,14 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 		if(Item.m_Visible)
 			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, -1);
 
-		s_NumVoteOptions++;
+		if(NumVoteOptions < Total)
+			aIndices[NumVoteOptions] = i;
+		NumVoteOptions++;
 	}
 
-	m_CallvoteSelectedOption = UiDoListboxEnd(&s_ScrollValue, 0);
+	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, 0);
+	if(s_CurVoteOption < Total)
+		m_CallvoteSelectedOption = aIndices[s_CurVoteOption];
 }
 
 void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
