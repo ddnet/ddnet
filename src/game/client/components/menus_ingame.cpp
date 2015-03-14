@@ -452,12 +452,15 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
+	static int s_NumVoteOptions = m_pClient->m_pVoting->m_NumVoteOptions;
+
 #if defined(__ANDROID__)
-	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", m_pClient->m_pVoting->m_NumVoteOptions, 1, m_CallvoteSelectedOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", s_NumVoteOptions, 1, m_CallvoteSelectedOption, s_ScrollValue);
 #else
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", m_pClient->m_pVoting->m_NumVoteOptions, 1, m_CallvoteSelectedOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", s_NumVoteOptions, 1, m_CallvoteSelectedOption, s_ScrollValue);
 #endif
 
+	s_NumVoteOptions = 0;
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
 		if(!str_find_nocase(pOption->m_aDescription, m_aFilterString))
@@ -467,6 +470,8 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 
 		if(Item.m_Visible)
 			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 16.0f, -1);
+
+		s_NumVoteOptions++;
 	}
 
 	m_CallvoteSelectedOption = UiDoListboxEnd(&s_ScrollValue, 0);
@@ -485,6 +490,10 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		int Index = m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID;
 		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && m_pClient->m_Snap.m_paInfoByName[i]->m_Team == TEAM_SPECTATORS))
 			continue;
+
+		if(!str_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
+			continue;
+
 		if(m_CallvoteSelectedPlayer == Index)
 			Selected = NumOptions;
 		aPlayerIDs[NumOptions++] = Index;
