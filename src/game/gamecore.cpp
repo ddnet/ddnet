@@ -545,9 +545,11 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			}
 		}
 
-		if(IsClient && UseInput && (m_Input.m_Fire&1) && m_ActiveWeapon == WEAPON_GUN) {
+		// jetpack and ninjajetpack prediction
+		if(IsClient && UseInput && (m_Input.m_Fire&1) && (m_ActiveWeapon == WEAPON_GUN || m_ActiveWeapon == WEAPON_NINJA)) {
 			m_Vel += TargetDirection * -1.0f * (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_JetpackStrength / 100.0f / 6.11f);
 		}
+
 		if(g_Config.m_ClPredictDDRace && IsClient)
 		{
 			if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Vel.x > 0)
