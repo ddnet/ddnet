@@ -70,7 +70,7 @@ void CAutoUpdate::FetchFile(const char *pFile, const char *pDestPath)
 	if(!pDestPath)
 		pDestPath = pFile;
 	CFetchTask *Task = new CFetchTask;
-	m_pFetcher->QueueAdd(Task, aBuf, pDestPath, 2, this, &CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback);
+	m_pFetcher->QueueAdd(Task, aBuf, pDestPath, -2, this, &CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback);
 }
 
 void CAutoUpdate::Update()
@@ -113,11 +113,15 @@ void CAutoUpdate::ReplaceClient()
 	dbg_msg("autoupdate", "Replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
-	m_pStorage->RemoveFile("DDNet.old", 2);
-	m_pStorage->RenameFile(PLAT_CLIENT_EXEC, "DDNet.old", 2);
-	m_pStorage->RenameFile("DDNet.tmp", PLAT_CLIENT_EXEC, 2);
+	m_pStorage->RemoveBinaryFile("DDNet.old");
+	m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
+	m_pStorage->RenameBinaryFile("DDNet.tmp", PLAT_CLIENT_EXEC);
 	#if !defined(CONF_FAMILY_WINDOWS)
-		if (system("chmod +x " PLAT_CLIENT_EXEC))
+		char aPath[512];
+		m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
+		char aBuf[512];
+		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+		if (system(aBuf))
 			dbg_msg("autoupdate", "Error setting client executable bit");
 	#endif
 }
@@ -127,18 +131,23 @@ void CAutoUpdate::ReplaceServer()
 	dbg_msg("autoupdate", "Replacing " PLAT_SERVER_EXEC);
 
 	//Replace running executable by renaming twice...
-	m_pStorage->RemoveFile("DDNet-Server.old", 2);
-	m_pStorage->RenameFile(PLAT_SERVER_EXEC, "DDNet-Server.old", 2);
-	m_pStorage->RenameFile("DDNet-Server.tmp", PLAT_SERVER_EXEC, 2);
+	m_pStorage->RemoveBinaryFile("DDNet-Server.old");
+	m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, "DDNet-Server.old");
+	m_pStorage->RenameBinaryFile("DDNet-Server.tmp", PLAT_SERVER_EXEC);
 	#if !defined(CONF_FAMILY_WINDOWS)
-		if (system("chmod +x " PLAT_SERVER_EXEC))
+		char aPath[512];
+		m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
+		char aBuf[512];
+		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+		if (system(aBuf))
 			dbg_msg("autoupdate", "Error setting server executable bit");
 	#endif
 }
 
 void CAutoUpdate::ParseUpdate()
 {
-	IOHANDLE File = m_pStorage->OpenFile("update.json", IOFLAG_READ, IStorage::TYPE_ALL);
+	char aPath[512];
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
 	{
 		char aBuf[4096*4];
@@ -208,7 +217,7 @@ void CAutoUpdate::PerformUpdate()
 	}
 	while(!m_RemovedFiles.empty())
 	{
-		m_pStorage->RemoveFile(m_RemovedFiles.back().c_str(), IStorage::TYPE_SAVE);
+		m_pStorage->RemoveBinaryFile(m_RemovedFiles.back().c_str());
 		m_RemovedFiles.pop_back();
 	}
 	if(m_ServerUpdate)

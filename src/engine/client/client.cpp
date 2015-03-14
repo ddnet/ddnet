@@ -1032,8 +1032,7 @@ void CClient::DebugRender()
 void CClient::Restart()
 {
 	char aBuf[512];
-	Storage()->GetCompletePath(2, PLAT_CLIENT_EXEC, aBuf, sizeof aBuf);
-	shell_execute(aBuf);
+	shell_execute(Storage()->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
 	Quit();
 }
 

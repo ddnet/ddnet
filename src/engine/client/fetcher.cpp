@@ -93,20 +93,15 @@ void CFetcher::FetcherThread(void *pUser)
 
 void CFetcher::FetchFile(CFetchTask *pTask)
 {
-	for(int i = 0; pTask->m_pDest[i] != '\0'; i++)
-	{
-		if(pTask->m_pDest[i] == '/')
-		{
-			pTask->m_pDest[i] = '\0';
-			m_pStorage->CreateFolder(pTask->m_pDest, pTask->m_StorageType);
-			pTask->m_pDest[i] = '/';
-		}
-	}
-
-	char aPath[256];
-	m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_pDest, aPath, sizeof(aPath));
+	char aPath[512];
+	if(pTask->m_StorageType == -2)
+		m_pStorage->GetBinaryPath(pTask->m_pDest, aPath, sizeof(aPath));
+	else
+		m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_pDest, aPath, sizeof(aPath));
 	IOHANDLE File = io_open(aPath, IOFLAG_WRITE);
 
+	char aCAFile[512];
+	m_pStorage->GetBinaryPath("data/ca-ddnet.pem", aCAFile, sizeof aCAFile);
 
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
@@ -115,7 +110,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
-	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, "data/ca-ddnet.pem");
+	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, aCAFile);
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pTask->m_pUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);

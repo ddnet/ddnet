@@ -22,7 +22,7 @@ public:
 	virtual bool Init();
 	~CFetcher();
 
-	virtual void QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = 2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
+	virtual void QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
 	virtual void Escape(char *pBud, size_t size, const char *pStr);
 	static void FetcherThread(void *pUser);
 	void FetchFile(CFetchTask *pTask);

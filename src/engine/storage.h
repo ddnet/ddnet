@@ -26,6 +26,10 @@ public:
 	virtual bool RenameFile(const char* pOldFilename, const char* pNewFilename, int Type) = 0;
 	virtual bool CreateFolder(const char *pFoldername, int Type) = 0;
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
+
+	virtual bool RemoveBinaryFile(const char *pFilename) = 0;
+	virtual bool RenameBinaryFile(const char* pOldFilename, const char* pNewFilename) = 0;
+	virtual const char* GetBinaryPath(const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
 };
 
 extern IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);
