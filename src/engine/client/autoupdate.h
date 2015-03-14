@@ -21,6 +21,9 @@
 	#else
 		#define PLAT_NAME CONF_PLATFORM_STRING "-unsupported"
 	#endif
+#else
+	#define PLAT_EXT ""
+	#define PLAT_NAME "unsupported-unsupported"
 #endif
 
 #define PLAT_CLIENT_DOWN CLIENT_EXEC "-" PLAT_NAME PLAT_EXT
