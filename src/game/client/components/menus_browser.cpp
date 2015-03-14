@@ -1340,7 +1340,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			ProgressBar.y += 2.0f;
 			ProgressBar.HMargin(1.0f, &ProgressBar);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-			ProgressBar.w = (float)AutoUpdate()->GetCurrentPercent();
+			ProgressBar.w = clamp((float)AutoUpdate()->GetCurrentPercent(), 10.0f, 100.0f);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 		}
 #else
