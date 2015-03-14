@@ -52,7 +52,10 @@ void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
 				pUpdate->ReplaceClient();
 			if(pUpdate->m_ServerUpdate)
 				pUpdate->ReplaceServer();
-			pUpdate->m_State = NEED_RESTART;
+			if(pUpdate->m_pClient->State() == IClient::STATE_ONLINE || pUpdate->m_pClient->EditorHasUnsavedData())
+				pUpdate->m_State = NEED_RESTART;
+			else
+				pUpdate->m_pClient->Restart();
 		}
 		else if(pTask->State() == CFetchTask::STATE_ERROR)
 			pUpdate->m_State = FAIL;

@@ -1302,10 +1302,6 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
-		//else if(State == IAutoUpdate::NEED_RESTART && !Initiated){
-		//	str_format(aBuf, sizeof(aBuf), "DDNet Client needs to be restarted to complete update!");
-		//	TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		//}
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 

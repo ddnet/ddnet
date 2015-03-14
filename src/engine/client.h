@@ -178,6 +178,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath) = 0;
 
 	virtual void RequestDDNetSrvList() = 0;
+	virtual bool EditorHasUnsavedData() = 0;
 };
 
 class IGameClient : public IInterface

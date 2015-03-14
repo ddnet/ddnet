@@ -362,5 +362,6 @@ public:
 	virtual void DemoSlice(const char *pDstPath);
 
 	void RequestDDNetSrvList();
+	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 };
 #endif
