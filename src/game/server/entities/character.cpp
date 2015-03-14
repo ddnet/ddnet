@@ -1068,43 +1068,64 @@ void CCharacter::Snap(int SnappingClient)
 		m_EmoteType = m_pPlayer->m_DefEmote;
 		m_EmoteStop = -1;
 	}
+	pCharacter->m_Emote = m_EmoteType;
 
 	if (pCharacter->m_HookedPlayer != -1)
 	{
 		if (!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
 			pCharacter->m_HookedPlayer = -1;
 	}
-	pCharacter->m_Emote = m_EmoteType;
 
+	pCharacter->m_AttackTick = m_AttackTick;
+	pCharacter->m_Direction = m_Input.m_Direction;
+	pCharacter->m_Weapon = m_Core.m_ActiveWeapon;
 	pCharacter->m_AmmoCount = 0;
 	pCharacter->m_Health = 0;
 	pCharacter->m_Armor = 0;
 
+	// change eyes and use ninja graphic if player is freeze
 	if (m_DeepFreeze)
 	{
 		if (pCharacter->m_Emote == EMOTE_NORMAL)
 			pCharacter->m_Emote = EMOTE_PAIN;
 		pCharacter->m_Weapon = WEAPON_NINJA;
-		pCharacter->m_AmmoCount = 0;
 	}
 	else if (m_FreezeTime > 0 || m_FreezeTime == -1)
 	{
 		if (pCharacter->m_Emote == EMOTE_NORMAL)
 			pCharacter->m_Emote = EMOTE_BLINK;
 		pCharacter->m_Weapon = WEAPON_NINJA;
-		pCharacter->m_AmmoCount = 0;
 	}
-	else if (m_pPlayer->m_NinjaJetpack && m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+
+	// jetpack and ninjajetpack prediction
+	if (m_pPlayer->GetCID() == SnappingClient)
 	{
-		pCharacter->m_Emote = EMOTE_HAPPY,
+		if (m_Jetpack && pCharacter->m_Weapon != WEAPON_NINJA)
+		{
+			if (!(m_NeededFaketuning & FAKETUNE_JETPACK))
+			{
+				m_NeededFaketuning |= FAKETUNE_JETPACK;
+				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+			}
+		}
+		else
+		{
+			if (m_NeededFaketuning & FAKETUNE_JETPACK)
+			{
+				m_NeededFaketuning &= ~FAKETUNE_JETPACK;
+				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+			}
+		}
+	}
+
+	// change eyes, use ninja graphic and set ammo count if player has ninjajetpack
+	if (m_pPlayer->m_NinjaJetpack && m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN && !m_DeepFreeze && !(m_FreezeTime > 0 || m_FreezeTime == -1))
+	{
+		if (pCharacter->m_Emote == EMOTE_NORMAL)
+			pCharacter->m_Emote = EMOTE_HAPPY;
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 10;
 	}
-	else
-		pCharacter->m_Weapon = m_Core.m_ActiveWeapon;
-	pCharacter->m_AttackTick = m_AttackTick;
-
-	pCharacter->m_Direction = m_Input.m_Direction;
 
 	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
 		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
@@ -1562,15 +1583,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have a jetpack gun");
 		m_Jetpack = true;
-		m_NeededFaketuning |= FAKETUNE_JETPACK;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_JETPACK_END) || (m_TileFIndex == TILE_JETPACK_END)) && m_Jetpack)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun");
 		m_Jetpack = false;
-		m_NeededFaketuning &= ~FAKETUNE_JETPACK;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 
 	// solo part
