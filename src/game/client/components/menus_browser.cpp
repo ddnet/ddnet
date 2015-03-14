@@ -185,9 +185,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(m_aInputEvents[i].m_Key == KEY_TAB)
 				{
 					if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
-						g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage - 1) % 3;
+						g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
 					else
-						g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 1) % 3;
+						g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
 				}
 			}
 			if(NewIndex > -1 && NewIndex < NumServers)
