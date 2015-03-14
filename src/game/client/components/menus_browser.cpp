@@ -1314,10 +1314,10 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		if(State == IAutoUpdate::CLEAN && NeedUpdate)
 		{
 			CUIRect Update;
-			Part.VSplitLeft(50.0f, &Update, NULL);
+			Part.VSplitLeft(100.0f, &Update, NULL);
 
 			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update"), 0, &Update))
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Update))
 			{
 				AutoUpdate()->InitiateUpdate();
 			}

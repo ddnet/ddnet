@@ -238,6 +238,7 @@ public:
 
 	const char *LatestVersion();
 	void VersionUpdate();
+	void CheckVersionUpdate();
 
 	// ------ state handling -----
 	void SetState(int s);

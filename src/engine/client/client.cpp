@@ -2475,6 +2475,11 @@ void CClient::VersionUpdate()
 	}
 }
 
+void CClient::CheckVersionUpdate()
+{
+	m_VersionInfo.m_State = CVersionInfo::STATE_START;
+}
+
 void CClient::RegisterInterfaces()
 {
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[RECORDER_MANUAL]));

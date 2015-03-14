@@ -1813,17 +1813,26 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, "Update Now", 0, &Button))
+			if(DoButton_Menu(&s_ButtonUpdate, "Update now", 0, &Button))
 				AutoUpdate()->InitiateUpdate();
 		}
-		else if(State >= IAutoUpdate::CLEAN && State < IAutoUpdate::NEED_RESTART)
+		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Updating...");
 		else if(State == IAutoUpdate::NEED_RESTART){
 			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
 			m_NeedRestartUpdate = true;
 		}
 		else
+		{
 			str_format(aBuf, sizeof(aBuf), "No updates available");
+			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
+			Button.VSplitLeft(100.0f, &Button, 0);
+			static int s_ButtonUpdate = 0;
+			if(DoButton_Menu(&s_ButtonUpdate, "Check now", 0, &Button))
+			{
+				Client()->CheckVersionUpdate();
+			}
+		}
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}

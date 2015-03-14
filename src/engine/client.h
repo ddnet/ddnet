@@ -126,6 +126,8 @@ public:
 	// server info
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) = 0;
 
+	virtual void CheckVersionUpdate() = 0;
+
 	// snapshot interface
 
 	enum
