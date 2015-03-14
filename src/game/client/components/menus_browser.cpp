@@ -1288,6 +1288,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "DDNet %s is out!", Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
+		else if(State == IAutoUpdate::CLEAN)
+			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
 		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Downloading %s:", AutoUpdate()->GetCurrentFile());
 		else if(State == IAutoUpdate::FAIL)
