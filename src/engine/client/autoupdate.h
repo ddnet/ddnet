@@ -18,6 +18,8 @@
 		#define PLAT_NAME CONF_PLATFORM_STRING "-x86"
 	#elif defined(CONF_ARCH_AMD64)
 		#define PLAT_NAME CONF_PLATFORM_STRING "-x86_64"
+	#else
+		#define PLAT_NAME CONF_PLATFORM_STRING "-unsupported"
 	#endif
 #endif
 
