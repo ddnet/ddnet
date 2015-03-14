@@ -1288,6 +1288,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "DDNet %s is out!", Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
+		else if(State == IAutoUpdate::CLEAN)
+			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
 		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Downloading %s:", AutoUpdate()->GetCurrentFile());
 		else if(State == IAutoUpdate::FAIL)
@@ -1338,7 +1340,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			ProgressBar.y += 2.0f;
 			ProgressBar.HMargin(1.0f, &ProgressBar);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-			ProgressBar.w = (float)AutoUpdate()->GetCurrentPercent();
+			ProgressBar.w = clamp((float)AutoUpdate()->GetCurrentPercent(), 10.0f, 100.0f);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 		}
 #else
