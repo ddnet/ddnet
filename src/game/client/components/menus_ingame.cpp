@@ -454,7 +454,7 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	CUIRect List = MainView;
 	static int Total = m_pClient->m_pVoting->m_NumVoteOptions;
 	static int NumVoteOptions = Total;
-	int aIndices[Total];
+	static int aIndices[MAX_VOTE_OPTIONS];
 	static int s_CurVoteOption = 0;
 
 #if defined(__ANDROID__)
