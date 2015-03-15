@@ -468,7 +468,7 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
 		i++;
-		if(!str_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(m_aFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aFilterString))
 			continue;
 
 		CListboxItem Item = UiDoListboxNextItem(pOption);
