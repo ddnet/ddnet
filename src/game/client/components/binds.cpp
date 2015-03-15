@@ -128,6 +128,7 @@ void CBinds::SetDefaults()
 
 	Bind('t', "chat all");
 	Bind('y', "chat team");
+	Bind('i', "chat all /c ");
 
 	Bind(KEY_F3, "vote yes");
 	Bind(KEY_F4, "vote no");
