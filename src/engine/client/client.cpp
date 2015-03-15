@@ -1160,7 +1160,10 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			mem_comp(pPacket->m_pData, VERSIONSRV_VERSION, sizeof(VERSIONSRV_VERSION)) == 0)
 		{
 			char *pVersionData = (char*)pPacket->m_pData + sizeof(VERSIONSRV_VERSION);
-			int VersionMatch = !mem_comp(pVersionData, GAME_RELEASE_VERSION, sizeof(GAME_RELEASE_VERSION));
+			int aCurVersion[] = {0,0,0}, aNewVersion[] = {0,0,0};
+			sscanf(pVersionData, "%d.%d.%d", aNewVersion, aNewVersion+1, aNewVersion+2);
+			sscanf(GAME_RELEASE_VERSION, "%d.%d.%d", aCurVersion, aCurVersion+1, aCurVersion+2);
+			bool VersionMatch = mem_comp(aCurVersion, aNewVersion, sizeof aCurVersion) >= 0;
 
 			char aVersion[sizeof(GAME_RELEASE_VERSION)];
 			str_copy(aVersion, pVersionData, sizeof(aVersion));
