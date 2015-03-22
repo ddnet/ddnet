@@ -1606,6 +1606,7 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_REFILL_JUMPS) || (m_TileFIndex == TILE_REFILL_JUMPS)) && !m_LastRefillJumps)
 	{
 		m_Core.m_JumpedTotal = 0;
+		m_Core.m_Jumped = 0;
 		m_LastRefillJumps = true;
 	}
 	if((m_TileIndex != TILE_REFILL_JUMPS) && (m_TileFIndex != TILE_REFILL_JUMPS))
