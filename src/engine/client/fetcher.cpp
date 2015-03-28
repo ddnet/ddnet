@@ -84,7 +84,9 @@ void CFetcher::FetcherThread(void *pUser)
 		if(pTask)
 		{
 			dbg_msg("fetcher", "Task got %s:%s", pTask->m_pUrl, pTask->m_pDest);
-			pFetcher->FetchFile(pTask);
+			pFetcher->FetchFile(pTask);	
+			if(pTask->m_pfnCompCallback)
+				pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
 		}
 		else
 			thread_sleep(10);
@@ -137,10 +139,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	{
 		dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
 		pTask->m_State = CFetchTask::STATE_DONE;
-
 	}
-	if(pTask->m_pfnCompCallback)
-		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
 }
 
 void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
