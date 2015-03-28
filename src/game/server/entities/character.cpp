@@ -1241,7 +1241,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		return;
 	}
 
-	if (GameLayerClipped(m_Pos) && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID())))
+	if (GameLayerClipped(m_Pos))
 	{
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
 		return;
