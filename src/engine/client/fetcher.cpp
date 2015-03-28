@@ -100,6 +100,12 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 		m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_pDest, aPath, sizeof(aPath));
 	IOHANDLE File = io_open(aPath, IOFLAG_WRITE);
 
+	if(!File){
+		dbg_msg("fetcher", "I/O Error cannot open file: %s", pTask->m_pDest);
+		pTask->m_State = CFetchTask::STATE_ERROR;
+		return;
+	}
+
 	char aCAFile[512];
 	m_pStorage->GetBinaryPath("data/ca-ddnet.pem", aCAFile, sizeof aCAFile);
 
