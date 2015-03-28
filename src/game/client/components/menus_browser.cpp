@@ -512,7 +512,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	Status.Margin(5.0f, &Status);
 
 	CUIRect QuickSearch, QuickExclude, Button, Status2, Status3;
-	Status.VSplitRight(240.0f, &Status2, &Status3);
+	Status.VSplitRight(250.0f, &Status2, &Status3);
 
 	Status2.VSplitMid(&QuickSearch, &QuickExclude);
 	QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
