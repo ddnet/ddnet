@@ -3284,8 +3284,12 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 					Selected += 4; // Image should be embedded
 			}
 
-			if(int Result = DoButton_Editor(&m_Map.m_lImages[i], aBuf, Selected, &Slot,
-				BUTTON_CONTEXT, "Select image"))
+			float FontSize = 10.0f;
+			while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Slot.w)
+				FontSize--;
+
+			if(int Result = DoButton_Ex(&m_Map.m_lImages[i], aBuf, Selected, &Slot,
+				BUTTON_CONTEXT, "Select image", 0, FontSize))
 			{
 				m_SelectedImage = i;
 
@@ -3436,8 +3440,12 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			if(Selected < 2 && e == 1)
 				Selected += 4; // Sound should be embedded
 
-			if(int Result = DoButton_Editor(&m_Map.m_lSounds[i], aBuf, Selected, &Slot,
-				BUTTON_CONTEXT, "Select sound"))
+			float FontSize = 10.0f;
+			while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Slot.w)
+				FontSize--;
+
+			if(int Result = DoButton_Ex(&m_Map.m_lSounds[i], aBuf, Selected, &Slot,
+				BUTTON_CONTEXT, "Select sound", 0, FontSize))
 			{
 				m_SelectedSound = i;
 
