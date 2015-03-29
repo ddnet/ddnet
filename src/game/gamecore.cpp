@@ -6,7 +6,7 @@
 #include <engine/server/server.h>
 const char *CTuningParams::m_apNames[] =
 {
-	#define MACRO_TUNING_PARAM(Name,ScriptName,Value) #ScriptName,
+	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) #ScriptName,
 	#include "tuning.h"
 	#undef MACRO_TUNING_PARAM
 };
