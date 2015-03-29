@@ -1108,7 +1108,11 @@ int CMenus::Render()
 
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
-		UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
+		Part.VMargin(20.f/UI()->Scale(), &Part);
+		if(TextRender()->TextWidth(0, 24.f, pTitle, -1) > Part.w)
+			UI()->DoLabelScaled(&Part, pTitle, 24.f, -1, (int)Part.w);
+		else
+			UI()->DoLabelScaled(&Part, pTitle, 24.f, 0);
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f/UI()->Scale(), &Part);
