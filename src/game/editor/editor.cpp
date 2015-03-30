@@ -1,7 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <iostream>
-
 #include <base/tl/array.h>
 
 #include <base/system.h>
@@ -664,98 +662,98 @@ void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brig
 
 int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip)
 {
-   // logic
-   static float s_Value;
-   static char s_NumStr[64];
-   static bool s_TextMode = false;
-   static void* s_LastTextpID = pID;
-   int Inside = UI()->MouseInside(pRect);
+	// logic
+	static float s_Value;
+	static char s_NumStr[64];
+	static bool s_TextMode = false;
+	static void* s_LastTextpID = pID;
+	int Inside = UI()->MouseInside(pRect);
 
-   if(UI()->MouseButton(1) && UI()->HotItem() == pID)
-   {
-      s_LastTextpID = pID;
-      s_TextMode = true;
-      str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
-   }
+	if(UI()->MouseButton(1) && UI()->HotItem() == pID)
+	{
+		s_LastTextpID = pID;
+		s_TextMode = true;
+		str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
+	}
 
-   if(s_TextMode && s_LastTextpID == pID)
-   {
-      m_pTooltip = "Type your number";
+	if(s_TextMode && s_LastTextpID == pID)
+	{
+		m_pTooltip = "Type your number";
 
-      static float s_NumberBoxID = 0;
-      DoEditBox(&s_NumberBoxID, pRect, s_NumStr, sizeof(s_NumStr), 10.0f, &s_NumberBoxID);
+		static float s_NumberBoxID = 0;
+		DoEditBox(&s_NumberBoxID, pRect, s_NumStr, sizeof(s_NumStr), 10.0f, &s_NumberBoxID);
 
-      UI()->SetActiveItem(&s_NumberBoxID);
+		UI()->SetActiveItem(&s_NumberBoxID);
 
-      if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER))
-      {
-         Current = clamp(str_toint(s_NumStr), Min, Max);
-         UI()->SetActiveItem(0);
-         s_TextMode = false;
-      }
+		if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER))
+		{
+			Current = clamp(str_toint(s_NumStr), Min, Max);
+			UI()->SetActiveItem(0);
+			s_TextMode = false;
+		}
 
-      if(Input()->KeyPressed(KEY_ESCAPE))
-      {
-         UI()->SetActiveItem(0);
-         s_TextMode = false;
-      }
-   }
-   else
-   {
-      if(UI()->ActiveItem() == pID)
-      {
-         if(!UI()->MouseButton(0))
-         {
-            m_LockMouse = false;
-            UI()->SetActiveItem(0);
-         }
-         else
-         {
-            if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
-               s_Value += m_MouseDeltaX*0.05f;
-            else
-               s_Value += m_MouseDeltaX;
+		if(Input()->KeyPressed(KEY_ESCAPE))
+		{
+			UI()->SetActiveItem(0);
+			s_TextMode = false;
+		}
+	}
+	else
+	{
+		if(UI()->ActiveItem() == pID)
+		{
+			if(!UI()->MouseButton(0))
+			{
+				m_LockMouse = false;
+				UI()->SetActiveItem(0);
+			}
+			else
+			{
+				if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+					s_Value += m_MouseDeltaX*0.05f;
+				else
+					s_Value += m_MouseDeltaX;
 
-            if(absolute(s_Value) > Scale)
-            {
-               int Count = (int)(s_Value/Scale);
-               s_Value = fmod(s_Value, Scale);
-               Current += Step*Count;
-               Current = clamp(Current, Min, Max);
-            }
-         }
-         if(pToolTip && !s_TextMode)
-            m_pTooltip = pToolTip;
-      }
-      else if(UI()->HotItem() == pID)
-      {
-         if(UI()->MouseButton(0))
-         {
-            m_LockMouse = true;
-            s_Value = 0;
-            UI()->SetActiveItem(pID);
-         }
-         if(pToolTip && !s_TextMode)
-            m_pTooltip = pToolTip;
+				if(absolute(s_Value) > Scale)
+				{
+					int Count = (int)(s_Value/Scale);
+					s_Value = fmod(s_Value, Scale);
+					Current += Step*Count;
+					Current = clamp(Current, Min, Max);
+				}
+			}
+			if(pToolTip && !s_TextMode)
+				m_pTooltip = pToolTip;
+		}
+		else if(UI()->HotItem() == pID)
+		{
+			if(UI()->MouseButton(0))
+			{
+				m_LockMouse = true;
+				s_Value = 0;
+				UI()->SetActiveItem(pID);
+			}
+			if(pToolTip && !s_TextMode)
+				m_pTooltip = pToolTip;
+			
+			if(!Inside)
+			{
+				UI()->SetActiveItem(0);
+				s_TextMode = false;
+			}
+		}
 
-         if(!Inside)
-         {
-            UI()->SetActiveItem(0);
-            s_TextMode = false;
-         }
-      }
+		if(Inside)
+			UI()->SetHotItem(pID);
 
-      if(Inside)
-         UI()->SetHotItem(pID);
-
-      // render
-      char aBuf[128];
-      str_format(aBuf, sizeof(aBuf),"%s %d", pLabel, Current);
-      RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
-      pRect->y += pRect->h/2.0f-7.0f;
-      UI()->DoLabel(pRect, aBuf, 10, 0, -1);
-   }
-
+		// render
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf),"%s %d", pLabel, Current);
+		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
+		pRect->y += pRect->h/2.0f-7.0f;
+		UI()->DoLabel(pRect, aBuf, 10, 0, -1);
+	}
+	
 	return Current;
 }
 
@@ -2601,7 +2599,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_INT_SCROLL)
 		{
-         int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.");
+			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.");
 			if(NewValue != pProps[i].m_Value)
 			{
 				*pNewVal = NewValue;
@@ -2617,7 +2615,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			for(int c = 0; c < 4; c++)
 			{
 				int v = (pProps[i].m_Value >> s_aShift[c])&0xff;
-            NewColor |= UiDoValueSelector(((char *)&pIDs[i])+c, &Shifter, s_paTexts[c], v, 0, 255, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.")<<s_aShift[c];
+				NewColor |= UiDoValueSelector(((char *)&pIDs[i])+c, &Shifter, s_paTexts[c], v, 0, 255, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.")<<s_aShift[c];
 
 				if(c != 3)
 				{
@@ -4351,13 +4349,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		// render handles
 
+		// keep track of last Env
+		static void* s_pID = 0;
 
-      // keep track of last Env
-      static void* s_pID = 0;
-
-      // chars for textinput
-      static char s_aStrCurTime[32] = "0.000";
-      static char s_aStrCurValue[32] = "0.000";
+		// chars for textinput
+		static char s_aStrCurTime[32] = "0.000";
+		static char s_aStrCurValue[32] = "0.000";
 
 		{
 			int CurrentValue = 0, CurrentTime = 0;
@@ -4427,7 +4424,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							m_SelectedQuadEnvelope = m_SelectedEnvelope;
 							m_ShowEnvelopePreview = 1;
 							m_SelectedEnvelopePoint = i;
-                     m_Map.m_Modified = true;
+							m_Map.m_Modified = true;
 						}
 
 						ColorMod = 100.0f;
@@ -4440,51 +4437,51 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							Selection.clear();
 							Selection.add(i);
 							UI()->SetActiveItem(pID);
-                     // track it
-                     s_pID = pID;
+							// track it
+							s_pID = pID;
 						}
 
 						// remove point
-                  if(UI()->MouseButtonClicked(1))
+						if(UI()->MouseButtonClicked(1))
 						{
 							pEnvelope->m_lPoints.remove_index(i);
 							m_Map.m_Modified = true;
-                     m_Map.m_UndoModified++;
+							m_Map.m_UndoModified++;
 						}
 
 						m_ShowEnvelopePreview = 1;
 						ColorMod = 100.0f;
 						Graphics()->SetColor(1,0.75f,0.75f,1);
-                  m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point aswell. Right click to delete.";
+						m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point aswell. Right click to delete.";
 					}
 
-               if(pID == s_pID && (Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER)))
-               {
-                  if(i != 0)
-                  {
-                     pEnvelope->m_lPoints[i].m_Time = str_tofloat(s_aStrCurTime) * 1000.0f;
+					if(pID == s_pID && (Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER)))
+					{
+						if(i != 0)
+						{
+							pEnvelope->m_lPoints[i].m_Time = str_tofloat(s_aStrCurTime) * 1000.0f;
 
-                     if(pEnvelope->m_lPoints[i].m_Time < pEnvelope->m_lPoints[i-1].m_Time)
-                        pEnvelope->m_lPoints[i].m_Time = pEnvelope->m_lPoints[i-1].m_Time + 1;
-                     if(i+1 != pEnvelope->m_lPoints.size() && pEnvelope->m_lPoints[i].m_Time > pEnvelope->m_lPoints[i+1].m_Time)
-                        pEnvelope->m_lPoints[i].m_Time = pEnvelope->m_lPoints[i+1].m_Time - 1;
-                  }
-                  else
-                     pEnvelope->m_lPoints[i].m_Time = 0.0f;
+							if(pEnvelope->m_lPoints[i].m_Time < pEnvelope->m_lPoints[i-1].m_Time)
+								pEnvelope->m_lPoints[i].m_Time = pEnvelope->m_lPoints[i-1].m_Time + 1;
+							if(i+1 != pEnvelope->m_lPoints.size() && pEnvelope->m_lPoints[i].m_Time > pEnvelope->m_lPoints[i+1].m_Time)
+								pEnvelope->m_lPoints[i].m_Time = pEnvelope->m_lPoints[i+1].m_Time - 1;
+						}
+						else
+							pEnvelope->m_lPoints[i].m_Time = 0.0f;
 
-                  str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "%.3f", pEnvelope->m_lPoints[i].m_Time/1000.0f);
+						str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "%.3f", pEnvelope->m_lPoints[i].m_Time/1000.0f);
 
-                  pEnvelope->m_lPoints[i].m_aValues[c] = f2fx(str_tofloat(s_aStrCurValue));
-               }
+						pEnvelope->m_lPoints[i].m_aValues[c] = f2fx(str_tofloat(s_aStrCurValue));
+					}
 
-               if(UI()->ActiveItem() == pID/* || UI()->HotItem() == pID*/)
-               {
+					if(UI()->ActiveItem() == pID/* || UI()->HotItem() == pID*/)
+					{
 						CurrentTime = pEnvelope->m_lPoints[i].m_Time;
 						CurrentValue = pEnvelope->m_lPoints[i].m_aValues[c];
 
-                  // update displayed text
-                  str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "%.3f", CurrentTime/1000.0f);
-                  str_format(s_aStrCurValue, sizeof(s_aStrCurValue), "%.3f", fx2f(CurrentValue));
+						// update displayed text
+						str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "%.3f", CurrentTime/1000.0f);
+						str_format(s_aStrCurValue, sizeof(s_aStrCurValue), "%.3f", fx2f(CurrentValue));
 					}
 
 					if (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == i)
@@ -4497,28 +4494,27 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 
-         static float s_ValNumber = 0;
-         static float s_TimeNumber = 0;
+			static float s_ValNumber = 0;
+			static float s_TimeNumber = 0;
 
-         CUIRect ToolBar1;
-         CUIRect ToolBar2;
+			CUIRect ToolBar1;
+			CUIRect ToolBar2;
 
-         ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
-         ToolBar1.VMargin(10.0f, &ToolBar1);
-         ToolBar2.VMargin(10.0f, &ToolBar2);
+			ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
+			ToolBar1.VMargin(10.0f, &ToolBar1);
+			ToolBar2.VMargin(10.0f, &ToolBar2);
 
-         CUIRect Label1;
-         CUIRect Label2;
+			CUIRect Label1;
+			CUIRect Label2;
 
-         ToolBar1.VSplitMid(&Label1, &ToolBar1);
-         ToolBar2.VSplitMid(&Label2, &ToolBar2);
+			ToolBar1.VSplitMid(&Label1, &ToolBar1);
+			ToolBar2.VSplitMid(&Label2, &ToolBar2);
 
+			UI()->DoLabel(&Label1, "Value:", 10.0f, -1, -1);
+			UI()->DoLabel(&Label2, "Time (in s):", 10.0f, -1, -1);
 
-         UI()->DoLabel(&Label1, "Value:", 10.0f, -1, -1);
-         UI()->DoLabel(&Label2, "Time (in s):", 10.0f, -1, -1);
-
-         DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
-         DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
+			DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
+			DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
 		}
 	}
 }
