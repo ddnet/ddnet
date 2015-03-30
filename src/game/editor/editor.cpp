@@ -2601,7 +2601,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_INT_SCROLL)
 		{
-			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise.");
+         int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.");
 			if(NewValue != pProps[i].m_Value)
 			{
 				*pNewVal = NewValue;
@@ -2617,7 +2617,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			for(int c = 0; c < 4; c++)
 			{
 				int v = (pProps[i].m_Value >> s_aShift[c])&0xff;
-				NewColor |= UiDoValueSelector(((char *)&pIDs[i])+c, &Shifter, s_paTexts[c], v, 0, 255, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise.")<<s_aShift[c];
+            NewColor |= UiDoValueSelector(((char *)&pIDs[i])+c, &Shifter, s_paTexts[c], v, 0, 255, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.")<<s_aShift[c];
 
 				if(c != 3)
 				{
@@ -4472,6 +4472,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
                   else
                      pEnvelope->m_lPoints[i].m_Time = 0.0f;
 
+                  str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "%.3f", pEnvelope->m_lPoints[i].m_Time/1000.0f);
+
                   pEnvelope->m_lPoints[i].m_aValues[c] = f2fx(str_tofloat(s_aStrCurValue));
                }
 
@@ -4495,26 +4497,28 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 
-         static CUIRect s_ToolBar1;
-         static CUIRect s_ToolBar2;
-
-         s_ToolBar1.x = ToolBar.x;
-         s_ToolBar1.y = ToolBar.y;
-         s_ToolBar1.h = ToolBar.h;
-         s_ToolBar1.w = ToolBar.w / 2;
-         s_ToolBar1.VMargin(10.0f, &s_ToolBar1);
-
-         s_ToolBar2.x = ToolBar.x + ToolBar.w / 2;
-         s_ToolBar2.y = ToolBar.y;
-         s_ToolBar2.h = ToolBar.h;
-         s_ToolBar2.w = ToolBar.w / 2;
-         s_ToolBar2.VMargin(10.0f, &s_ToolBar2);
-
          static float s_ValNumber = 0;
          static float s_TimeNumber = 0;
 
-         DoEditBox(&s_ValNumber, &s_ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
-         DoEditBox(&s_TimeNumber, &s_ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
+         CUIRect ToolBar1;
+         CUIRect ToolBar2;
+
+         ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
+         ToolBar1.VMargin(10.0f, &ToolBar1);
+         ToolBar2.VMargin(10.0f, &ToolBar2);
+
+         CUIRect Label1;
+         CUIRect Label2;
+
+         ToolBar1.VSplitMid(&Label1, &ToolBar1);
+         ToolBar2.VSplitMid(&Label2, &ToolBar2);
+
+
+         UI()->DoLabel(&Label1, "Value:", 10.0f, -1, -1);
+         UI()->DoLabel(&Label2, "Time (in s):", 10.0f, -1, -1);
+
+         DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
+         DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
 		}
 	}
 }
