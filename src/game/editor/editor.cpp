@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <iostream>
 
 #include <base/tl/array.h>
 
@@ -663,59 +664,97 @@ void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brig
 
 int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip)
 {
-	// logic
-	static float s_Value;
-	int Inside = UI()->MouseInside(pRect);
+   // logic
+   static float s_Value;
+   static char s_NumStr[64];
+   static bool s_TextMode = false;
+   static void* s_LastTextpID = pID;
+   int Inside = UI()->MouseInside(pRect);
 
-	if(UI()->ActiveItem() == pID)
-	{
-		if(!UI()->MouseButton(0))
-		{
-			m_LockMouse = false;
-			UI()->SetActiveItem(0);
-		}
-		else
-		{
-			if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
-				s_Value += m_MouseDeltaX*0.05f;
-			else
-				s_Value += m_MouseDeltaX;
+   if(UI()->MouseButton(1) && UI()->HotItem() == pID)
+   {
+      s_LastTextpID = pID;
+      s_TextMode = true;
+      str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
+   }
 
-			if(absolute(s_Value) > Scale)
-			{
-				int Count = (int)(s_Value/Scale);
-				s_Value = fmod(s_Value, Scale);
-				Current += Step*Count;
-				if(Current < Min)
-					Current = Min;
-				if(Current > Max)
-					Current = Max;
-			}
-		}
-		if(pToolTip)
-			m_pTooltip = pToolTip;
-	}
-	else if(UI()->HotItem() == pID)
-	{
-		if(UI()->MouseButton(0))
-		{
-			m_LockMouse = true;
-			s_Value = 0;
-			UI()->SetActiveItem(pID);
-		}
-		if(pToolTip)
-			m_pTooltip = pToolTip;
-	}
+   if(s_TextMode && s_LastTextpID == pID)
+   {
+      m_pTooltip = "Type your number";
 
-	if(Inside)
-		UI()->SetHotItem(pID);
+      static float s_NumberBoxID = 0;
+      DoEditBox(&s_NumberBoxID, pRect, s_NumStr, sizeof(s_NumStr), 10.0f, &s_NumberBoxID);
 
-	// render
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf),"%s %d", pLabel, Current);
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
-	pRect->y += pRect->h/2.0f-7.0f;
-	UI()->DoLabel(pRect, aBuf, 10, 0, -1);
+      UI()->SetActiveItem(&s_NumberBoxID);
+
+      if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER))
+      {
+         Current = clamp(str_toint(s_NumStr), Min, Max);
+         UI()->SetActiveItem(0);
+         s_TextMode = false;
+      }
+
+      if(Input()->KeyPressed(KEY_ESCAPE))
+      {
+         UI()->SetActiveItem(0);
+         s_TextMode = false;
+      }
+   }
+   else
+   {
+      if(UI()->ActiveItem() == pID)
+      {
+         if(!UI()->MouseButton(0))
+         {
+            m_LockMouse = false;
+            UI()->SetActiveItem(0);
+         }
+         else
+         {
+            if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+               s_Value += m_MouseDeltaX*0.05f;
+            else
+               s_Value += m_MouseDeltaX;
+
+            if(absolute(s_Value) > Scale)
+            {
+               int Count = (int)(s_Value/Scale);
+               s_Value = fmod(s_Value, Scale);
+               Current += Step*Count;
+               Current = clamp(Current, Min, Max);
+            }
+         }
+         if(pToolTip && !s_TextMode)
+            m_pTooltip = pToolTip;
+      }
+      else if(UI()->HotItem() == pID)
+      {
+         if(UI()->MouseButton(0))
+         {
+            m_LockMouse = true;
+            s_Value = 0;
+            UI()->SetActiveItem(pID);
+         }
+         if(pToolTip && !s_TextMode)
+            m_pTooltip = pToolTip;
+
+         if(!Inside)
+         {
+            UI()->SetActiveItem(0);
+            s_TextMode = false;
+         }
+      }
+
+      if(Inside)
+         UI()->SetHotItem(pID);
+
+      // render
+      char aBuf[128];
+      str_format(aBuf, sizeof(aBuf),"%s %d", pLabel, Current);
+      RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
+      pRect->y += pRect->h/2.0f-7.0f;
+      UI()->DoLabel(pRect, aBuf, 10, 0, -1);
+   }
 
 	return Current;
 }
@@ -1878,7 +1917,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	else
 		IgnoreGrid = false;
 
-	if(UI()->ActiveItem() == pID && s_ActQIndex == QIndex)
+   if(UI()->ActiveItem() == pID && s_ActQIndex == QIndex)
 	{
 		if(s_Operation == OP_MOVE)
 		{
