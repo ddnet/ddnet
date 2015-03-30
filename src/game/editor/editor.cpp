@@ -4350,6 +4350,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		// render handles
+
+
+      // keep track of last Env
+      static void* s_pID = 0;
+
+      // chars for textinput
+      static char s_aStrCurTime[32] = "0.000";
+      static char s_aStrCurValue[32] = "0.000";
+
 		{
 			int CurrentValue = 0, CurrentTime = 0;
 
@@ -4418,7 +4427,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							m_SelectedQuadEnvelope = m_SelectedEnvelope;
 							m_ShowEnvelopePreview = 1;
 							m_SelectedEnvelopePoint = i;
-							m_Map.m_Modified = true;
+                     m_Map.m_Modified = true;
 						}
 
 						ColorMod = 100.0f;
@@ -4431,26 +4440,49 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							Selection.clear();
 							Selection.add(i);
 							UI()->SetActiveItem(pID);
+                     // track it
+                     s_pID = pID;
 						}
 
 						// remove point
-						if(UI()->MouseButtonClicked(1))
+                  if(UI()->MouseButtonClicked(1))
 						{
 							pEnvelope->m_lPoints.remove_index(i);
 							m_Map.m_Modified = true;
-							m_Map.m_UndoModified++;
+                     m_Map.m_UndoModified++;
 						}
 
 						m_ShowEnvelopePreview = 1;
 						ColorMod = 100.0f;
 						Graphics()->SetColor(1,0.75f,0.75f,1);
-						m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point aswell. Right click to delete.";
+                  m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point aswell. Right click to delete.";
 					}
 
-					if(UI()->ActiveItem() == pID || UI()->HotItem() == pID)
-					{
+               if(pID == s_pID && (Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER)))
+               {
+                  if(i != 0)
+                  {
+                     pEnvelope->m_lPoints[i].m_Time = str_tofloat(s_aStrCurTime) * 1000.0f;
+
+                     if(pEnvelope->m_lPoints[i].m_Time < pEnvelope->m_lPoints[i-1].m_Time)
+                        pEnvelope->m_lPoints[i].m_Time = pEnvelope->m_lPoints[i-1].m_Time + 1;
+                     if(i+1 != pEnvelope->m_lPoints.size() && pEnvelope->m_lPoints[i].m_Time > pEnvelope->m_lPoints[i+1].m_Time)
+                        pEnvelope->m_lPoints[i].m_Time = pEnvelope->m_lPoints[i+1].m_Time - 1;
+                  }
+                  else
+                     pEnvelope->m_lPoints[i].m_Time = 0.0f;
+
+                  pEnvelope->m_lPoints[i].m_aValues[c] = f2fx(str_tofloat(s_aStrCurValue));
+               }
+
+               if(UI()->ActiveItem() == pID/* || UI()->HotItem() == pID*/)
+               {
 						CurrentTime = pEnvelope->m_lPoints[i].m_Time;
 						CurrentValue = pEnvelope->m_lPoints[i].m_aValues[c];
+
+                  // update displayed text
+                  str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "%.3f", CurrentTime/1000.0f);
+                  str_format(s_aStrCurValue, sizeof(s_aStrCurValue), "%.3f", fx2f(CurrentValue));
 					}
 
 					if (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == i)
@@ -4463,9 +4495,26 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf),"%.3f %.3f", CurrentTime/1000.0f, fx2f(CurrentValue));
-			UI()->DoLabel(&ToolBar, aBuf, 10.0f, 0, -1);
+         static CUIRect s_ToolBar1;
+         static CUIRect s_ToolBar2;
+
+         s_ToolBar1.x = ToolBar.x;
+         s_ToolBar1.y = ToolBar.y;
+         s_ToolBar1.h = ToolBar.h;
+         s_ToolBar1.w = ToolBar.w / 2;
+         s_ToolBar1.VMargin(10.0f, &s_ToolBar1);
+
+         s_ToolBar2.x = ToolBar.x + ToolBar.w / 2;
+         s_ToolBar2.y = ToolBar.y;
+         s_ToolBar2.h = ToolBar.h;
+         s_ToolBar2.w = ToolBar.w / 2;
+         s_ToolBar2.VMargin(10.0f, &s_ToolBar2);
+
+         static float s_ValNumber = 0;
+         static float s_TimeNumber = 0;
+
+         DoEditBox(&s_ValNumber, &s_ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
+         DoEditBox(&s_TimeNumber, &s_ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
 		}
 	}
 }
