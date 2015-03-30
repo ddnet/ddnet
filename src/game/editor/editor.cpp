@@ -4039,6 +4039,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	ToolBar.Margin(2.0f, &ToolBar);
 	CurveBar.Margin(2.0f, &CurveBar);
 
+	bool CurrentEnvelopeSwitched = false;
+
 	// do the toolbar
 	{
 		CUIRect Button;
@@ -4116,11 +4118,23 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		static int s_PrevButton = 0;
 		if(DoButton_ButtonDec(&s_PrevButton, 0, 0, &Dec, 0, "Previous Envelope"))
+		{
 			m_SelectedEnvelope--;
+			if(m_SelectedEnvelope < 0)
+				CurrentEnvelopeSwitched = false;
+			else
+				CurrentEnvelopeSwitched = true;
+		}
 
 		static int s_NextButton = 0;
 		if(DoButton_ButtonInc(&s_NextButton, 0, 0, &Inc, 0, "Next Envelope"))
+		{
 			m_SelectedEnvelope++;
+			if(m_SelectedEnvelope >= m_Map.m_lEnvelopes.size())
+				CurrentEnvelopeSwitched = false;
+			else
+				CurrentEnvelopeSwitched = true;
+		}
 
 		if(pEnvelope)
 		{
@@ -4356,6 +4370,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static char s_aStrCurTime[32] = "0.000";
 		static char s_aStrCurValue[32] = "0.000";
 
+		if(CurrentEnvelopeSwitched)
+		{
+			s_pID = 0;
+
+			// update displayed text
+			str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "0.000");
+			str_format(s_aStrCurValue, sizeof(s_aStrCurValue), "0.000");
+		}
+
 		{
 			int CurrentValue = 0, CurrentTime = 0;
 
@@ -4444,6 +4467,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						// remove point
 						if(UI()->MouseButtonClicked(1))
 						{
+							if(s_pID == pID)
+							{
+								s_pID = 0;
+
+								// update displayed text
+								str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "0.000");
+								str_format(s_aStrCurValue, sizeof(s_aStrCurValue), "0.000");
+							}
+
 							pEnvelope->m_lPoints.remove_index(i);
 							m_Map.m_Modified = true;
 							m_Map.m_UndoModified++;
