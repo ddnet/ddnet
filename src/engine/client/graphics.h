@@ -64,7 +64,7 @@ protected:
 
 	void Flush();
 	void AddVertices(int Count);
-	void Rotate4(const CPoint &rCenter, CVertex *pPoints);
+	void Rotate(const CPoint &rCenter, CVertex *pPoints, int NumPoints);
 
 	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
 	static unsigned char *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);

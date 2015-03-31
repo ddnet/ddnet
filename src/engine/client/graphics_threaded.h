@@ -105,6 +105,7 @@ public:
 		PRIMTYPE_INVALID = 0,
 		PRIMTYPE_LINES,	
 		PRIMTYPE_QUADS,
+		PRIMTYPE_TRIANGLES,
 	};
 
 	enum
@@ -363,7 +364,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	void FlushVertices();
 	void AddVertices(int Count);
-	void Rotate4(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints);
+	void Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints, int NumPoints);
 
 	void KickCommandBuffer();
 

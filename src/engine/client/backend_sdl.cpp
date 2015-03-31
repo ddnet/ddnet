@@ -336,22 +336,18 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	switch(pCommand->m_PrimType)
 	{
 	case CCommandBuffer::PRIMTYPE_QUADS:
-#if !defined(__ANDROID__)
-		if(g_Config.m_GfxQuadsAsTriangles)
-#endif
-		{
-			for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
-				glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
-		}
-#if !defined(__ANDROID__)
-		else
-		{
-			glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount*4);
-		}
+#if defined(__ANDROID__)
+		for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
+			glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
+#else
+		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount*4);
 #endif
 		break;
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
+		break;
+	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount*3);
 		break;
 	default:
 		dbg_msg("render", "unknown primtype %d\n", pCommand->m_Cmd);
