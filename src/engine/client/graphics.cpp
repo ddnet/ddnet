@@ -105,18 +105,14 @@ void CGraphics_OpenGL::Flush()
 	{
 		if(m_Drawing == DRAWING_QUADS)
 		{
-#if !defined(__ANDROID__)
+#if defined(__ANDROID__)
+			for( unsigned i = 0, j = m_NumVertices; i < j; i += 4 )
+				glDrawArrays(GL_TRIANGLE_FAN, i, 4);
+#else
 			if(g_Config.m_GfxQuadsAsTriangles)
-#endif
-			{
-				for( unsigned i = 0, j = m_NumVertices; i < j; i += 4 )
-					glDrawArrays(GL_TRIANGLE_FAN, i, 4);
-			}
-#if !defined(__ANDROID__)
+				glDrawArrays(GL_TRIANGLES, 0, m_NumVertices);
 			else
-			{
 				glDrawArrays(GL_QUADS, 0, m_NumVertices);
-			}
 #endif
 		}
 		else if(m_Drawing == DRAWING_LINES)
@@ -134,14 +130,14 @@ void CGraphics_OpenGL::AddVertices(int Count)
 		Flush();
 }
 
-void CGraphics_OpenGL::Rotate4(const CPoint &rCenter, CVertex *pPoints)
+void CGraphics_OpenGL::Rotate(const CPoint &rCenter, CVertex *pPoints, int NumPoints)
 {
 	float c = cosf(m_Rotation);
 	float s = sinf(m_Rotation);
 	float x, y;
 	int i;
 
-	for(i = 0; i < 4; i++)
+	for(i = 0; i < NumPoints; i++)
 	{
 		x = pPoints[i].m_Pos.x - rCenter.x;
 		y = pPoints[i].m_Pos.y - rCenter.y;
@@ -674,68 +670,158 @@ void CGraphics_OpenGL::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	for(int i = 0; i < Num; ++i)
+	if(g_Config.m_GfxQuadsAsTriangles)
 	{
-		m_aVertices[m_NumVertices + 4*i].m_Pos.x = pArray[i].m_X;
-		m_aVertices[m_NumVertices + 4*i].m_Pos.y = pArray[i].m_Y;
-		m_aVertices[m_NumVertices + 4*i].m_Tex = m_aTexture[0];
-		m_aVertices[m_NumVertices + 4*i].m_Color = m_aColor[0];
-
-		m_aVertices[m_NumVertices + 4*i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
-		m_aVertices[m_NumVertices + 4*i + 1].m_Pos.y = pArray[i].m_Y;
-		m_aVertices[m_NumVertices + 4*i + 1].m_Tex = m_aTexture[1];
-		m_aVertices[m_NumVertices + 4*i + 1].m_Color = m_aColor[1];
-
-		m_aVertices[m_NumVertices + 4*i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
-		m_aVertices[m_NumVertices + 4*i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-		m_aVertices[m_NumVertices + 4*i + 2].m_Tex = m_aTexture[2];
-		m_aVertices[m_NumVertices + 4*i + 2].m_Color = m_aColor[2];
-
-		m_aVertices[m_NumVertices + 4*i + 3].m_Pos.x = pArray[i].m_X;
-		m_aVertices[m_NumVertices + 4*i + 3].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-		m_aVertices[m_NumVertices + 4*i + 3].m_Tex = m_aTexture[3];
-		m_aVertices[m_NumVertices + 4*i + 3].m_Color = m_aColor[3];
-
-		if(m_Rotation != 0)
+		for(int i = 0; i < Num; ++i)
 		{
-			Center.x = pArray[i].m_X + pArray[i].m_Width/2;
-			Center.y = pArray[i].m_Y + pArray[i].m_Height/2;
+			// first triangle
+			m_aVertices[m_NumVertices + 6*i].m_Pos.x = pArray[i].m_X;
+			m_aVertices[m_NumVertices + 6*i].m_Pos.y = pArray[i].m_Y;
+			m_aVertices[m_NumVertices + 6*i].m_Tex = m_aTexture[0];
+			m_aVertices[m_NumVertices + 6*i].m_Color = m_aColor[0];
 
-			Rotate4(Center, &m_aVertices[m_NumVertices + 4*i]);
+			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.y = pArray[i].m_Y;
+			m_aVertices[m_NumVertices + 6*i + 1].m_Tex = m_aTexture[1];
+			m_aVertices[m_NumVertices + 6*i + 1].m_Color = m_aColor[1];
+
+			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X;
+			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[3];
+			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[3];
+
+			// second triangle
+			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y;
+			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[1];
+			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[1];
+
+			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			m_aVertices[m_NumVertices + 6*i + 4].m_Tex = m_aTexture[2];
+			m_aVertices[m_NumVertices + 6*i + 4].m_Color = m_aColor[2];
+
+			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.x = pArray[i].m_X;
+			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			m_aVertices[m_NumVertices + 6*i + 5].m_Tex = m_aTexture[3];
+			m_aVertices[m_NumVertices + 6*i + 5].m_Color = m_aColor[3];
+
+			if(m_Rotation != 0)
+			{
+				Center.x = pArray[i].m_X + pArray[i].m_Width/2;
+				Center.y = pArray[i].m_Y + pArray[i].m_Height/2;
+
+				Rotate(Center, &m_aVertices[m_NumVertices + 6*i], 6);
+			}
 		}
-	}
 
-	AddVertices(4*Num);
+		AddVertices(3*2*Num);
+	}
+	else
+	{
+		for(int i = 0; i < Num; ++i)
+		{
+			m_aVertices[m_NumVertices + 4*i].m_Pos.x = pArray[i].m_X;
+			m_aVertices[m_NumVertices + 4*i].m_Pos.y = pArray[i].m_Y;
+			m_aVertices[m_NumVertices + 4*i].m_Tex = m_aTexture[0];
+			m_aVertices[m_NumVertices + 4*i].m_Color = m_aColor[0];
+
+			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.y = pArray[i].m_Y;
+			m_aVertices[m_NumVertices + 4*i + 1].m_Tex = m_aTexture[1];
+			m_aVertices[m_NumVertices + 4*i + 1].m_Color = m_aColor[1];
+
+			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			m_aVertices[m_NumVertices + 4*i + 2].m_Tex = m_aTexture[2];
+			m_aVertices[m_NumVertices + 4*i + 2].m_Color = m_aColor[2];
+
+			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.x = pArray[i].m_X;
+			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			m_aVertices[m_NumVertices + 4*i + 3].m_Tex = m_aTexture[3];
+			m_aVertices[m_NumVertices + 4*i + 3].m_Color = m_aColor[3];
+
+			if(m_Rotation != 0)
+			{
+				Center.x = pArray[i].m_X + pArray[i].m_Width/2;
+				Center.y = pArray[i].m_Y + pArray[i].m_Height/2;
+
+				Rotate(Center, &m_aVertices[m_NumVertices + 4*i], 4);
+			}
+		}
+
+		AddVertices(4*Num);
+	}
 }
 
 void CGraphics_OpenGL::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	for(int i = 0; i < Num; ++i)
+	if(g_Config.m_GfxQuadsAsTriangles)
 	{
-		m_aVertices[m_NumVertices + 4*i].m_Pos.x = pArray[i].m_X0;
-		m_aVertices[m_NumVertices + 4*i].m_Pos.y = pArray[i].m_Y0;
-		m_aVertices[m_NumVertices + 4*i].m_Tex = m_aTexture[0];
-		m_aVertices[m_NumVertices + 4*i].m_Color = m_aColor[0];
+		for(int i = 0; i < Num; ++i)
+		{
+			m_aVertices[m_NumVertices + 6*i].m_Pos.x = pArray[i].m_X0;
+			m_aVertices[m_NumVertices + 6*i].m_Pos.y = pArray[i].m_Y0;
+			m_aVertices[m_NumVertices + 6*i].m_Tex = m_aTexture[0];
+			m_aVertices[m_NumVertices + 6*i].m_Color = m_aColor[0];
 
-		m_aVertices[m_NumVertices + 4*i + 1].m_Pos.x = pArray[i].m_X1;
-		m_aVertices[m_NumVertices + 4*i + 1].m_Pos.y = pArray[i].m_Y1;
-		m_aVertices[m_NumVertices + 4*i + 1].m_Tex = m_aTexture[1];
-		m_aVertices[m_NumVertices + 4*i + 1].m_Color = m_aColor[1];
+			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.x = pArray[i].m_X1;
+			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.y = pArray[i].m_Y1;
+			m_aVertices[m_NumVertices + 6*i + 1].m_Tex = m_aTexture[1];
+			m_aVertices[m_NumVertices + 6*i + 1].m_Color = m_aColor[1];
 
-		m_aVertices[m_NumVertices + 4*i + 2].m_Pos.x = pArray[i].m_X3;
-		m_aVertices[m_NumVertices + 4*i + 2].m_Pos.y = pArray[i].m_Y3;
-		m_aVertices[m_NumVertices + 4*i + 2].m_Tex = m_aTexture[3];
-		m_aVertices[m_NumVertices + 4*i + 2].m_Color = m_aColor[3];
+			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X2;
+			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y2;
+			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[2];
+			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[2];
 
-		m_aVertices[m_NumVertices + 4*i + 3].m_Pos.x = pArray[i].m_X2;
-		m_aVertices[m_NumVertices + 4*i + 3].m_Pos.y = pArray[i].m_Y2;
-		m_aVertices[m_NumVertices + 4*i + 3].m_Tex = m_aTexture[2];
-		m_aVertices[m_NumVertices + 4*i + 3].m_Color = m_aColor[2];
+			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X1;
+			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y1;
+			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[1];
+			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[1];
+
+			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.x = pArray[i].m_X3;
+			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.y = pArray[i].m_Y3;
+			m_aVertices[m_NumVertices + 6*i + 4].m_Tex = m_aTexture[3];
+			m_aVertices[m_NumVertices + 6*i + 4].m_Color = m_aColor[3];
+
+			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.x = pArray[i].m_X2;
+			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.y = pArray[i].m_Y2;
+			m_aVertices[m_NumVertices + 6*i + 5].m_Tex = m_aTexture[2];
+			m_aVertices[m_NumVertices + 6*i + 5].m_Color = m_aColor[2];
+		}
+
+		AddVertices(3*2*Num);
 	}
+	else
+	{
+		for(int i = 0; i < Num; ++i)
+		{
+			m_aVertices[m_NumVertices + 4*i].m_Pos.x = pArray[i].m_X0;
+			m_aVertices[m_NumVertices + 4*i].m_Pos.y = pArray[i].m_Y0;
+			m_aVertices[m_NumVertices + 4*i].m_Tex = m_aTexture[0];
+			m_aVertices[m_NumVertices + 4*i].m_Color = m_aColor[0];
 
-	AddVertices(4*Num);
+			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.x = pArray[i].m_X1;
+			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.y = pArray[i].m_Y1;
+			m_aVertices[m_NumVertices + 4*i + 1].m_Tex = m_aTexture[1];
+			m_aVertices[m_NumVertices + 4*i + 1].m_Color = m_aColor[1];
+
+			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.x = pArray[i].m_X3;
+			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.y = pArray[i].m_Y3;
+			m_aVertices[m_NumVertices + 4*i + 2].m_Tex = m_aTexture[3];
+			m_aVertices[m_NumVertices + 4*i + 2].m_Color = m_aColor[3];
+
+			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.x = pArray[i].m_X2;
+			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.y = pArray[i].m_Y2;
+			m_aVertices[m_NumVertices + 4*i + 3].m_Tex = m_aTexture[2];
+			m_aVertices[m_NumVertices + 4*i + 3].m_Color = m_aColor[2];
+		}
+
+		AddVertices(4*Num);
+	}
 }
 
 void CGraphics_OpenGL::QuadsText(float x, float y, float Size, const char *pText)
