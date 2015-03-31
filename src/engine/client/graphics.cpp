@@ -685,16 +685,16 @@ void CGraphics_OpenGL::QuadsDrawTL(const CQuadItem *pArray, int Num)
 			m_aVertices[m_NumVertices + 6*i + 1].m_Tex = m_aTexture[1];
 			m_aVertices[m_NumVertices + 6*i + 1].m_Color = m_aColor[1];
 
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X;
+			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
 			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[3];
-			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[3];
+			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[2];
+			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[2];
 
 			// second triangle
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X;
 			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[1];
-			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[1];
+			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[0];
+			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[0];
 
 			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
 			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
@@ -772,15 +772,15 @@ void CGraphics_OpenGL::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 			m_aVertices[m_NumVertices + 6*i + 1].m_Tex = m_aTexture[1];
 			m_aVertices[m_NumVertices + 6*i + 1].m_Color = m_aColor[1];
 
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X2;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y2;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[2];
-			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[2];
+			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X3;
+			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y3;
+			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[3];
+			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[3];
 
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X1;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y1;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[1];
-			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[1];
+			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X0;
+			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y0;
+			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[0];
+			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[0];
 
 			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.x = pArray[i].m_X3;
 			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.y = pArray[i].m_Y3;
