@@ -59,7 +59,7 @@ void CGraphics_Threaded::FlushVertices()
 
 	if(m_Drawing == DRAWING_QUADS)
 	{
-		if(g_Config.m_GfxQuadsAsTriangles)
+		if(g_Config.m_GfxQuadAsTriangle)
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			Cmd.m_PrimCount = NumVerts/3;
@@ -596,7 +596,7 @@ void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadsAsTriangles)
+	if(g_Config.m_GfxQuadAsTriangle)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -684,7 +684,7 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadsAsTriangles)
+	if(g_Config.m_GfxQuadAsTriangle)
 	{
 		for(int i = 0; i < Num; ++i)
 		{

@@ -109,7 +109,7 @@ void CGraphics_OpenGL::Flush()
 			for( unsigned i = 0, j = m_NumVertices; i < j; i += 4 )
 				glDrawArrays(GL_TRIANGLE_FAN, i, 4);
 #else
-			if(g_Config.m_GfxQuadsAsTriangles)
+			if(g_Config.m_GfxQuadAsTriangle)
 				glDrawArrays(GL_TRIANGLES, 0, m_NumVertices);
 			else
 				glDrawArrays(GL_QUADS, 0, m_NumVertices);
@@ -670,7 +670,7 @@ void CGraphics_OpenGL::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadsAsTriangles)
+	if(g_Config.m_GfxQuadAsTriangle)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -758,7 +758,7 @@ void CGraphics_OpenGL::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadsAsTriangles)
+	if(g_Config.m_GfxQuadAsTriangle)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
