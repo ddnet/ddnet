@@ -452,15 +452,15 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
-	static int Total = m_pClient->m_pVoting->m_NumVoteOptions;
-	static int NumVoteOptions = Total;
-	static int aIndices[MAX_VOTE_OPTIONS];
+	int Total = m_pClient->m_pVoting->m_NumVoteOptions;
+	int NumVoteOptions = Total;
+	int aIndices[MAX_VOTE_OPTIONS];
 	static int s_CurVoteOption = 0;
 
 #if defined(__ANDROID__)
-	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", NumVoteOptions, 1, s_CurVoteOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", Total, 1, s_CurVoteOption, s_ScrollValue);
 #else
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", NumVoteOptions, 1, s_CurVoteOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", Total, 1, s_CurVoteOption, s_ScrollValue);
 #endif
 
 	NumVoteOptions = 0;
