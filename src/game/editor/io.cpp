@@ -282,9 +282,23 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		else
 		{
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
-				Item.m_ImageData = df.AddData(Item.m_Width*Item.m_Height*3, pImg->m_pData);
+			{
+				// Convert to RGBA
+				unsigned char *pData = (unsigned char*) mem_alloc(Item.m_Width*Item.m_Height*4, 1);
+				for(int i = 0; i < Item.m_Width*Item.m_Height; i++)
+				{
+					pData[i*4] = ((unsigned char*)(pImg->m_pData))[i*3];
+					pData[i*4+1] = ((unsigned char*)(pImg->m_pData))[i*3+1];
+					pData[i*4+2] = ((unsigned char*)(pImg->m_pData))[i*3+2];
+					pData[i*4+3] = 255;
+				}
+				Item.m_ImageData = df.AddData(Item.m_Width*Item.m_Height*4, pData);
+				mem_free(pData);
+			}
 			else
+			{
 				Item.m_ImageData = df.AddData(Item.m_Width*Item.m_Height*4, pImg->m_pData);
+			}
 		}
 		df.AddItem(MAPITEMTYPE_IMAGE, i, sizeof(Item), &Item);
 	}
