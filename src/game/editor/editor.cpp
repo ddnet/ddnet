@@ -685,7 +685,8 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
-		if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER))
+		if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER) ||
+				((UI()->MouseButton(1) || UI()->MouseButton(0)) && !Inside))
 		{
 			Current = clamp(str_toint(s_NumStr), Min, Max);
 			UI()->SetActiveItem(0);
