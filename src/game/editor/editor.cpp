@@ -3337,28 +3337,6 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			}
 
 			ToolBox.HSplitTop(2.0f, 0, &ToolBox);
-
-			// render image
-			if(m_SelectedImage == i)
-			{
-				CUIRect r;
-				View.Margin(10.0f, &r);
-				if(r.h < r.w)
-					r.w = r.h;
-				else
-					r.h = r.w;
-				float Max = (float)(max(m_Map.m_lImages[i]->m_Width, m_Map.m_lImages[i]->m_Height));
-				r.w *= m_Map.m_lImages[i]->m_Width/Max;
-				r.h *= m_Map.m_lImages[i]->m_Height/Max;
-				Graphics()->TextureSet(m_Map.m_lImages[i]->m_TexID);
-				Graphics()->BlendNormal();
-				Graphics()->WrapClamp();
-				Graphics()->QuadsBegin();
-				IGraphics::CQuadItem QuadItem(r.x, r.y, r.w, r.h);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-				Graphics()->QuadsEnd();
-				Graphics()->WrapNormal();
-			}
 		}
 
 		// separator
@@ -3371,6 +3349,27 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 		Graphics()->LinesEnd();
 	}
 
+	// render image
+	{
+		int i = m_SelectedImage;
+		CUIRect r;
+		View.Margin(10.0f, &r);
+		if(r.h < r.w)
+			r.w = r.h;
+		else
+			r.h = r.w;
+		float Max = (float)(max(m_Map.m_lImages[i]->m_Width, m_Map.m_lImages[i]->m_Height));
+		r.w *= m_Map.m_lImages[i]->m_Width/Max;
+		r.h *= m_Map.m_lImages[i]->m_Height/Max;
+		Graphics()->TextureSet(m_Map.m_lImages[i]->m_TexID);
+		Graphics()->BlendNormal();
+		Graphics()->WrapClamp();
+		Graphics()->QuadsBegin();
+		IGraphics::CQuadItem QuadItem(r.x, r.y, r.w, r.h);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+		Graphics()->WrapNormal();
+	}
 	//if(ImageCur + 27.0f > ImageStopAt)
 	//	return;
 
