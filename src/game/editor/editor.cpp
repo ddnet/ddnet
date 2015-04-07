@@ -685,7 +685,8 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
-		if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER))
+		if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER) ||
+				((UI()->MouseButton(1) || UI()->MouseButton(0)) && !Inside))
 		{
 			Current = clamp(str_toint(s_NumStr), Min, Max);
 			UI()->SetActiveItem(0);
@@ -4533,17 +4534,20 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			CUIRect ToolBar2;
 
 			ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
-			ToolBar1.VMargin(10.0f, &ToolBar1);
-			ToolBar2.VMargin(10.0f, &ToolBar2);
+			if (ToolBar.w > ToolBar.h * 21)
+			{
+				ToolBar1.VMargin(3.0f, &ToolBar1);
+				ToolBar2.VMargin(3.0f, &ToolBar2);
 
-			CUIRect Label1;
-			CUIRect Label2;
+				CUIRect Label1;
+				CUIRect Label2;
 
-			ToolBar1.VSplitMid(&Label1, &ToolBar1);
-			ToolBar2.VSplitMid(&Label2, &ToolBar2);
+				ToolBar1.VSplitMid(&Label1, &ToolBar1);
+				ToolBar2.VSplitMid(&Label2, &ToolBar2);
 
-			UI()->DoLabel(&Label1, "Value:", 10.0f, -1, -1);
-			UI()->DoLabel(&Label2, "Time (in s):", 10.0f, -1, -1);
+				UI()->DoLabel(&Label1, "Value:", 10.0f, -1, -1);
+				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, -1, -1);
+			}
 
 			DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
 			DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
