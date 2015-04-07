@@ -5156,7 +5156,7 @@ void CEditor::DoMapBorder()
 
 void CEditor::CreateUndoStep()
 {
-	void *CreateThread = thread_create(CreateUndoStepThread, this);
+	void *CreateThread = thread_init(CreateUndoStepThread, this);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)CreateThread);
 #endif

@@ -179,7 +179,7 @@ void dbg_enable_threaded()
 
 	dbg_msg_threaded = 1;
 
-	Thread = thread_create(dbg_msg_thread, 0);
+	Thread = thread_init(dbg_msg_thread, 0);
 	#if defined(CONF_FAMILY_UNIX)
 		pthread_detach((pthread_t)Thread);
 	#endif
@@ -504,7 +504,7 @@ int io_flush(IOHANDLE io)
 	return 0;
 }
 
-void *thread_create(void (*threadfunc)(void *), void *u)
+void *thread_init(void (*threadfunc)(void *), void *u)
 {
 #if defined(CONF_FAMILY_UNIX)
 	pthread_t id;
@@ -608,7 +608,7 @@ void lock_destroy(LOCK lock)
 	mem_free(lock);
 }
 
-int lock_try(LOCK lock)
+int lock_trylock(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
 	return pthread_mutex_trylock((LOCKINTERNAL *)lock);
@@ -630,7 +630,7 @@ void lock_wait(LOCK lock)
 #endif
 }
 
-void lock_release(LOCK lock)
+void lock_unlock(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
 	pthread_mutex_unlock((LOCKINTERNAL *)lock);

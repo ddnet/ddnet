@@ -37,7 +37,7 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 CSqlScore::~CSqlScore()
 {
 	lock_wait(gs_SqlLock);
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 
 	try
 	{
@@ -268,7 +268,7 @@ void CSqlScore::LoadScoreThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::LoadScore(int ClientID)
@@ -278,7 +278,7 @@ void CSqlScore::LoadScore(int ClientID)
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	Tmp->m_pSqlData = this;
 
-	void *LoadThread = thread_create(LoadScoreThread, Tmp);
+	void *LoadThread = thread_init(LoadScoreThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)LoadThread);
 #endif
@@ -403,7 +403,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::MapVote(int ClientID, const char* MapName)
@@ -413,7 +413,7 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 	str_copy(Tmp->m_aMap, MapName, 128);
 	Tmp->m_pSqlData = this;
 
-	void *VoteThread = thread_create(MapVoteThread, Tmp);
+	void *VoteThread = thread_init(MapVoteThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)VoteThread);
 #endif
@@ -499,7 +499,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 	}
 
 	delete pData;
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::MapInfo(int ClientID, const char* MapName)
@@ -509,7 +509,7 @@ void CSqlScore::MapInfo(int ClientID, const char* MapName)
 	str_copy(Tmp->m_aMap, MapName, 128);
 	Tmp->m_pSqlData = this;
 
-	void *InfoThread = thread_create(MapInfoThread, Tmp);
+	void *InfoThread = thread_init(MapInfoThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)InfoThread);
 #endif
@@ -585,7 +585,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 	}
 
 	delete pData;
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::SaveScoreThread(void *pUser)
@@ -650,7 +650,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS])
@@ -666,7 +666,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS
 		Tmp->m_aCpCurrent[i] = CpTime[i];
 	Tmp->m_pSqlData = this;
 
-	void *SaveThread = thread_create(SaveScoreThread, Tmp);
+	void *SaveThread = thread_init(SaveScoreThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)SaveThread);
 #endif
@@ -687,7 +687,7 @@ void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
 	Tmp->m_Time = Time;
 	Tmp->m_pSqlData = this;
 
-	void *SaveTeamThread = thread_create(SaveTeamScoreThread, Tmp);
+	void *SaveTeamThread = thread_init(SaveTeamScoreThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)SaveTeamThread);
 #endif
@@ -775,7 +775,7 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTeamTop5Thread(void *pUser)
@@ -877,7 +877,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowRankThread(void *pUser)
@@ -944,7 +944,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
@@ -956,7 +956,7 @@ void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
 	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
 	Tmp->m_pSqlData = this;
 
-	void *TeamRankThread = thread_create(ShowTeamRankThread, Tmp);
+	void *TeamRankThread = thread_init(ShowTeamRankThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)TeamRankThread);
 #endif
@@ -971,7 +971,7 @@ void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
 	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
 	Tmp->m_pSqlData = this;
 
-	void *RankThread = thread_create(ShowRankThread, Tmp);
+	void *RankThread = thread_init(ShowRankThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)RankThread);
 #endif
@@ -1030,7 +1030,7 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTimesThread(void *pUser)
@@ -1115,7 +1115,7 @@ void CSqlScore::ShowTimesThread(void *pUser)
 	}
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
@@ -1125,7 +1125,7 @@ void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUs
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_pSqlData = this;
 
-	void *TeamTop5Thread = thread_create(ShowTeamTop5Thread, Tmp);
+	void *TeamTop5Thread = thread_init(ShowTeamTop5Thread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)TeamTop5Thread);
 #endif
@@ -1138,7 +1138,7 @@ void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserDa
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_pSqlData = this;
 
-	void *Top5Thread = thread_create(ShowTop5Thread, Tmp);
+	void *Top5Thread = thread_init(ShowTop5Thread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)Top5Thread);
 #endif
@@ -1152,7 +1152,7 @@ void CSqlScore::ShowTimes(int ClientID, int Debut)
 	Tmp->m_pSqlData = this;
 	Tmp->m_Search = false;
 
-	void *TimesThread = thread_create(ShowTimesThread, Tmp);
+	void *TimesThread = thread_init(ShowTimesThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)TimesThread);
 #endif
@@ -1167,7 +1167,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 	Tmp->m_pSqlData = this;
 	Tmp->m_Search = true;
 
-	void *TimesThread = thread_create(ShowTimesThread, Tmp);
+	void *TimesThread = thread_init(ShowTimesThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)TimesThread);
 #endif
@@ -1360,7 +1360,7 @@ void CSqlScore::ShowPointsThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
@@ -1372,7 +1372,7 @@ void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
 	str_format(Tmp->m_aRequestingPlayer, sizeof(Tmp->m_aRequestingPlayer), "%s", Server()->ClientName(ClientID));
 	Tmp->m_pSqlData = this;
 
-	void *PointsThread = thread_create(ShowPointsThread, Tmp);
+	void *PointsThread = thread_init(ShowPointsThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)PointsThread);
 #endif
@@ -1426,7 +1426,7 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
@@ -1436,7 +1436,7 @@ void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pU
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_pSqlData = this;
 
-	void *TopPointsThread = thread_create(ShowTopPointsThread, Tmp);
+	void *TopPointsThread = thread_init(ShowTopPointsThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)TopPointsThread);
 #endif
@@ -1493,7 +1493,7 @@ void CSqlScore::RandomMapThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::RandomUnfinishedMapThread(void *pUser)
@@ -1551,7 +1551,7 @@ void CSqlScore::RandomUnfinishedMapThread(void *pUser)
 
 	delete pData;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::RandomMap(int ClientID, int stars)
@@ -1562,7 +1562,7 @@ void CSqlScore::RandomMap(int ClientID, int stars)
 	str_copy(Tmp->m_aName, GameServer()->Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	Tmp->m_pSqlData = this;
 
-	void *RandomThread = thread_create(RandomMapThread, Tmp);
+	void *RandomThread = thread_init(RandomMapThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)RandomThread);
 #endif
@@ -1576,7 +1576,7 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
 	str_copy(Tmp->m_aName, GameServer()->Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	Tmp->m_pSqlData = this;
 
-	void *RandomUnfinishedThread = thread_create(RandomUnfinishedMapThread, Tmp);
+	void *RandomUnfinishedThread = thread_init(RandomUnfinishedMapThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)RandomUnfinishedThread);
 #endif
@@ -1603,7 +1603,7 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
 	Tmp->m_pSqlData = this;
 
-	void *SaveThread = thread_create(SaveTeamThread, Tmp);
+	void *SaveThread = thread_init(SaveTeamThread, Tmp);
 #if defined(CONF_FAMILY_UNIX)
 	pthread_detach((pthread_t)SaveThread);
 #endif
@@ -1705,7 +1705,7 @@ void CSqlScore::SaveTeamThread(void *pUser)
 	if(SavedTeam)
 		delete SavedTeam;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::LoadTeam(const char* Code, int ClientID)
@@ -1715,7 +1715,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_pSqlData = this;
 
-	void *LoadThread = thread_create(LoadTeamThread, Tmp);
+	void *LoadThread = thread_init(LoadTeamThread, Tmp);
 	#if defined(CONF_FAMILY_UNIX)
 		pthread_detach((pthread_t)LoadThread);
 	#endif
@@ -1851,7 +1851,7 @@ void CSqlScore::LoadTeamThread(void *pUser)
 	delete pData;
 	delete SavedTeam;
 
-	lock_release(gs_SqlLock);
+	lock_unlock(gs_SqlLock);
 }
 
 #endif

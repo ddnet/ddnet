@@ -45,7 +45,7 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	lock_wait(m_Lock);
 	if(!m_pThHandle)
 	{
-		m_pThHandle = thread_create(&FetcherThread, this);
+		m_pThHandle = thread_init(&FetcherThread, this);
 		thread_detach(m_pThHandle);
 	}
 
@@ -60,7 +60,7 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 		m_pLast = pTask;
 	}
 	pTask->m_State = CFetchTask::STATE_QUEUED;
-	lock_release(m_Lock);
+	lock_unlock(m_Lock);
 }
 
 void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
@@ -80,7 +80,7 @@ void CFetcher::FetcherThread(void *pUser)
 		CFetchTask *pTask = pFetcher->m_pFirst;
 		if(pTask)
 			pFetcher->m_pFirst = pTask->m_pNext;
-		lock_release(pFetcher->m_Lock);
+		lock_unlock(pFetcher->m_Lock);
 		if(pTask)
 		{
 			dbg_msg("fetcher", "Task got %s:%s", pTask->m_pUrl, pTask->m_pDest);
