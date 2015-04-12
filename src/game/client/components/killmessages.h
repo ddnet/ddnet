@@ -13,6 +13,7 @@ public:
 		int m_Weapon;
 		int m_VictimID;
 		int m_VictimTeam;
+		int m_VictimDDTeam;
 		char m_aVictimName[64];
 		CTeeRenderInfo m_VictimRenderInfo;
 		int m_KillerID;

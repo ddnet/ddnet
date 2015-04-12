@@ -27,6 +27,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		CKillMsg Kill;
 		Kill.m_VictimID = pMsg->m_Victim;
 		Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
+		Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
 		str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName, sizeof(Kill.m_aVictimName));
 		Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
 		Kill.m_KillerID = pMsg->m_Killer;
@@ -69,7 +70,17 @@ void CKillMessages::OnRender()
 
 		// render victim name
 		x -= VictimNameW;
+		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
+		{
+			vec3 rgb = HslToRgb(vec3(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0);
+		}
+		else
+		{
+			TextRender()->TextColor(1.0, 1.0, 1.0, 1.0);
+		}
 		TextRender()->Text(0, x, y, FontSize, m_aKillmsgs[r].m_aVictimName, -1);
+		TextRender()->TextColor(1.0, 1.0, 1.0, 1.0);
 
 		// render victim tee
 		x -= 24.0f;
