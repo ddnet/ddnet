@@ -75,10 +75,6 @@ void CKillMessages::OnRender()
 			vec3 rgb = HslToRgb(vec3(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0);
 		}
-		else
-		{
-			TextRender()->TextColor(1.0, 1.0, 1.0, 1.0);
-		}
 		TextRender()->Text(0, x, y, FontSize, m_aKillmsgs[r].m_aVictimName, -1);
 		TextRender()->TextColor(1.0, 1.0, 1.0, 1.0);
 
