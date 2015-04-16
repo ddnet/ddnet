@@ -79,6 +79,8 @@ public:
 
 	void SetEmote(int Emote, int Tick);
 
+	void Rescue();
+
 	int NeededFaketuning() {return m_NeededFaketuning;}
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
@@ -165,6 +167,10 @@ private:
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();
+
+	bool m_SetSavePos;
+	vec2 m_PrevSavePos;
+
 public:
 	CGameTeams* Teams();
 	void Pause(bool Pause);

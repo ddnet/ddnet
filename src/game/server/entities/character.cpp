@@ -114,6 +114,17 @@ bool CCharacter::IsGrounded()
 		return true;
 	if(GameServer()->Collision()->CheckPoint(m_Pos.x-m_ProximityRadius/2, m_Pos.y+m_ProximityRadius/2+5))
 		return true;
+
+	int index = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x, m_Pos.y+m_ProximityRadius/2+4));
+	int tile = GameServer()->Collision()->GetTileIndex(index);
+	int flags = GameServer()->Collision()->GetTileFlags(index);
+	if(tile == TILE_STOPA || (tile == TILE_STOP && flags == ROTATION_0) || (tile ==TILE_STOPS && (flags == ROTATION_0 || flags == ROTATION_180)))
+		return true;
+	tile = GameServer()->Collision()->GetFTileIndex(index);
+	flags = GameServer()->Collision()->GetFTileFlags(index);
+	if(tile == TILE_STOPA || (tile == TILE_STOP && flags == ROTATION_0) || (tile ==TILE_STOPS && (flags == ROTATION_0 || flags == ROTATION_180)))
+		return true;
+
 	return false;
 }
 
@@ -1993,7 +2004,18 @@ void CCharacter::DDRaceTick()
 	}
 	
 	HandleTuneLayer(); // need this before coretick
-	
+
+	// look for save position for rescue feature
+	if(g_Config.m_SvAllowRescue) {
+		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+		int tile = GameServer()->Collision()->GetTileIndex(index);
+		int ftile = GameServer()->Collision()->GetFTileIndex(index);
+		if(IsGrounded() && tile != TILE_FREEZE && tile != TILE_DFREEZE && ftile != TILE_FREEZE && ftile != TILE_DFREEZE) {
+			m_PrevSavePos = m_Pos;
+			m_SetSavePos = true;
+		}
+	}
+
 	m_Core.m_Id = GetPlayer()->GetCID();
 }
 
@@ -2127,6 +2149,7 @@ void CCharacter::DDRaceInit()
 	m_Paused = false;
 	m_DDRaceState = DDRACE_NONE;
 	m_PrevPos = m_Pos;
+	m_SetSavePos = false;
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCID();
@@ -2159,6 +2182,22 @@ void CCharacter::DDRaceInit()
 					m_StartTime = pChar->m_StartTime;
 				}
 			}
+		}
+	}
+}
+
+void CCharacter::Rescue()
+{
+	if (m_SetSavePos && !m_Super && !m_DeepFreeze && IsGrounded() && m_Pos == m_PrevPos) {
+		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+		if (GameServer()->Collision()->GetTileIndex(index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(index) == TILE_FREEZE) {
+			m_Core.m_Pos =m_PrevSavePos;
+			m_Core.m_Vel = vec2(0, 0);
+			m_Core.m_HookedPlayer = -1;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+			m_Core.m_HookPos = m_Core.m_Pos;
 		}
 	}
 }
