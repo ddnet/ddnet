@@ -2191,13 +2191,16 @@ void CCharacter::Rescue()
 	if (m_SetSavePos && !m_Super && !m_DeepFreeze && IsGrounded() && m_Pos == m_PrevPos) {
 		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 		if (GameServer()->Collision()->GetTileIndex(index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(index) == TILE_FREEZE) {
-			m_Core.m_Pos =m_PrevSavePos;
+			m_Core.m_Pos = m_PrevSavePos;
+			m_Pos = m_PrevSavePos;
+			m_PrevPos = m_PrevSavePos;
 			m_Core.m_Vel = vec2(0, 0);
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 			m_Core.m_HookPos = m_Core.m_Pos;
+			UnFreeze();
 		}
 	}
 }
