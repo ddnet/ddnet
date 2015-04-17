@@ -246,6 +246,7 @@ public:
 	int Run();
 
 	static void ConTestingCommands(IConsole::IResult *pResult, void *pUser);
+	static void ConAllowRescue(IConsole::IResult *pResult, void *pUser);
 	static void ConKick(IConsole::IResult *pResult, void *pUser);
 	static void ConStatus(IConsole::IResult *pResult, void *pUser);
 	static void ConShutdown(IConsole::IResult *pResult, void *pUser);

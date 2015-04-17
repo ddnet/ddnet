@@ -1678,6 +1678,13 @@ void CServer::ConTestingCommands(CConsole::IResult *pResult, void *pUser)
 	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
+void CServer::ConAllowRescue(CConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Value: %d", g_Config.m_SvAllowRescue);
+	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
 	if(pResult->NumArguments() > 1)
@@ -2072,7 +2079,8 @@ int main(int argc, const char **argv) // ignore_convention
 	if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
-	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off");
+	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off");
+	pConsole->Register("sv_allow_rescue", "", CFGFLAG_SERVER, CServer::ConAllowRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze");
 
 	// restore empty config strings to their defaults
 	pConfig->RestoreStrings();
