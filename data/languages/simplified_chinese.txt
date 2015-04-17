@@ -2,7 +2,7 @@
 #originally created by:
 #	MK124
 #modified by:
-#
+#   Tom 2015-04-17
 ##### /authors #####
 
 ##### translated strings #####
@@ -577,244 +577,244 @@ You must restart the game for all settings to take effect.
 ##### needs translation #####
 
 %.3f KiB
-== 
+== %.3f KiB
 
 %d player left
-== 
+== %d个玩家离开
 
 %d player not ready
-== 
+== %d个玩家未准备好
 
 %d players left
-== 
+== %d个玩家离开
 
 %d players not ready
-== 
+== %d个玩家未准备好
 
 %d servers, %d players
-== 
+== %d个服务器，%d个玩家
 
 '%s' called for vote to kick '%s' (%s)
-== 
+== '%s' 发起了踢出 '%s' 的投票 (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
-== 
+== '%s' 发起了将 '%s' 移动到旁观者的投票 (%s)
 
 '%s' called vote to change server option '%s' (%s)
-== 
+== '%s' 发起了切换服务器选项 '%s' 的投票 (%s)
 
 '%s' entered and joined the %s
-== 
+== '%s' 进入并加入了 %s
 
 '%s' has left the game
-== 
+== '%s' 离开了游戏
 
 '%s' has left the game (%s)
-== 
+== '%s' 离开了游戏 (%s)
 
 '%s' joined the %s
-== 
+== '%s' 加入了 %s
 
 Admin forced server option '%s' (%s)
-== 
+== 管理员设置了服务器选项'%s' (%s)
 
 Admin forced vote no
-== 
+== 管理员设置了不允许投票
 
 Admin forced vote yes
-== 
+== 管理员设置了允许投票
 
 Admin moved '%s' to spectator (%s)
-== 
+== 管理员移动 '%s' 到观察者 (%s)
 
 Alp:
-== 
+== Alp:
 
 Anti Aliasing
-== 
+== 抗锯齿
 
 Are you sure you want to rename the demo?
-== 
+== 你确定要重命名这个录像么？
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== 你确定要保存你的皮肤么？如果相同名字的皮肤已经存在，它将会被覆盖掉已有的皮肤。
 
 Back
-== 
+== 返回
 
 Basic
-== 
+== 基础
 
 Bodies
-== 
+== Bodies
 
 Borderless window
-== 
+== 无边框窗口
 
 Color
-== 
+== 颜色
 
 Crc
-== 
+== Crc
 
 Created
-== 
+== 创建
 
 Custom
-== 
+== 自定义
 
 Customize
-== 
+== 定制
 
 Decoration
-== 
+== 装饰
 
 Demo
-== 
+== 录像
 
 Detail
-== 
+== 详细
 
 Editor
-== 
+== 编辑器
 
 Eyes
-== 
+== 眼睛
 
 Format
-== 
+== 格式
 
 Game starts in
-== 
+== 游戏开始于
 
 Global
-== 
+== 全局
 
 Hands
-== 
+== 手
 
 Host address:
-== 
+== 主机地址：
 
 Hue:
-== 
+== 色彩：
 
 Join
-== 
+== 加入
 
 Joined
-== 
+== 加入了
 
 Joined blue
-== 
+== 加入了蓝队
 
 Joined red
-== 
+== 加入了红队
 
 Kick voting requires %d players on the server
-== 
+== 发起踢人投票需要服务器有%d个玩家
 
 Laser
-== 
+== 激光
 
 Length
-== 
+== 长度
 
 Letterbox
-== 
+== Letterbox
 
 Lgt:
-== 
+== Lgt
 
 Local
-== 
+== 本地
 
 Local server
-== 
+== 本地服务器
 
 Match
-== 
+== 匹配
 
 Max
-== 
+== 最大
 
 Misc
-== 
+== Misc
 
 Netversion
-== 
+== 网络版本
 
 Nickname is empty.
-== 
+== 昵称为空。
 
 Normal:
-== 
+== 标准：
 
 Only %d active players are allowed
-== 
+== 最多允许%d个活跃玩家
 
 Personal
-== 
+== 个人
 
 Ready
-== 
+== 准备
 
 Record
-== 
+== 记录
 
 Recorded
-== 
+== 已记录
 
 Reset
-== 
+== 重置
 
 Resolutions
 == 
 
 Round over
-== 
+== 回合结束
 
 Round over!
-== 
+== 回合结束！
 
 Sat:
 == 
 
 Save
-== 
+== 保存
 
 Save skin
-== 
+== 保存皮肤
 
 Screen
-== 
+== 屏幕
 
 Search:
-== 
+== 搜索
 
 Server does not allow voting to kick players
-== 
+== 服务器不支持投票踢出玩家
 
 Server does not allow voting to move players to spectators
-== 
+== 服务器不支持投票将用户移动到观察者
 
 Servers
-== 
+== 服务器
 
 Size
-== 
+== 大小
 
 Skin
-== 
+== 皮肤
 
 Spectating
-== 
+== 观察中
 
 Spectators aren't allowed to start a vote.
-== 
+== 观察者不允许发起一个投票
 
 Standard Gametype
-== 
+== 标准游戏类型
 
 Tattoo
 == 
@@ -823,70 +823,70 @@ Tattoos
 == 
 
 Team:
-== 
+== 队伍：
 
 Teams are locked
-== 
+== 队伍已经锁定
 
 Teams are locked. Time to wait before changing team: %02d:%02d
-== 
+== 队伍已经锁定。在改变队伍前需要等待： %02d:%02d
 
 Teams were locked
-== 
+== 队伍已经锁定
 
 Teams were unlocked
-== 
+== 对于已经解除锁定
 
 Tee
 == 
 
 Texture
-== 
+== 组织
 
 Volume
-== 
+== 量
 
 Vote aborted
-== 
+== 投票取消
 
 Vote failed
-== 
+== 投票失败
 
 Vote passed
-== 
+== 投票通过
 
 Wait for current vote to end before calling a new one.
-== 
+== 在开始一个新投票前需要等待当前投票结束
 
 Wait for next round
-== 
+== 等待下一回合
 
 Wide
-== 
+== 宽
 
 You must wait %d seconds before making another vote
-== 
+== 在发起另外一个投票前你必须等待%d秒
 
 blue
-== 
+== 蓝
 
 blue team
-== 
+== 蓝队
 
 game
-== 
+== 游戏
 
 red
-== 
+== 红
 
 red team
-== 
+== 红队
 
 spectators
-== 
+== 观察者
 
 wait for more players
-== 
+== 等待更多的玩家
 
 ##### old translations #####
 
