@@ -1222,7 +1222,29 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	}
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 }
-void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData){
+
+void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+	CCharacter* pChr = pPlayer->GetCharacter();
+	if (!pChr)
+		return;
+
+	if (!g_Config.m_SvAllowRescue) {
+		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server");
+		return;
+	}
+
+	pChr->Rescue();
+}
+
+void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
+{
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
 		return;
