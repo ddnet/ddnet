@@ -3350,8 +3350,9 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 	}
 
 	// render image
+	int i = m_SelectedImage;
+	if(i < m_Map.m_lImages.size())
 	{
-		int i = m_SelectedImage;
 		CUIRect r;
 		View.Margin(10.0f, &r);
 		if(r.h < r.w)
