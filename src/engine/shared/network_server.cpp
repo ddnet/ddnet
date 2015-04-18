@@ -201,7 +201,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 									md5_append(&md5, (unsigned char*)&Addr, sizeof(Addr));
 									md5_append(&md5, (unsigned char*)&timestamp, sizeof(timestamp));
 									md5_finish(&md5, digest);
-									securityToken = *(SECURITY_TOKEN*)digest;
+									securityToken = (SECURITY_TOKEN)*digest;
 									timestamp++;
 								}
 								while (securityToken == NET_SECURITY_TOKEN_UNKNOWN || securityToken == NET_SECURITY_TOKEN_UNSUPPORTED);

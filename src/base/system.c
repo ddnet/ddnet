@@ -2377,6 +2377,8 @@ int os_compare_version(int major, int minor)
 		return 0;
 	else
 		return -1;
+#else
+	return 0; // unimplemented
 #endif
 }
 

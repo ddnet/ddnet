@@ -203,13 +203,13 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 	if (State() != NET_CONNSTATE_OFFLINE && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
 		// supposed to have a valid token in this packet, check it
-		if (pPacket->m_DataSize < sizeof(m_SecurityToken))
+		if (pPacket->m_DataSize < (int)sizeof(m_SecurityToken))
 			return 0;
 		pPacket->m_DataSize -= sizeof(m_SecurityToken);
-		if (m_SecurityToken != *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize])
+		if (m_SecurityToken != (SECURITY_TOKEN)(pPacket->m_aChunkData[pPacket->m_DataSize]))
 		{
 			if(g_Config.m_Debug)
-				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize]);
+				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, (SECURITY_TOKEN)(pPacket->m_aChunkData[pPacket->m_DataSize]));
 			return 0;
 		}
 	}
@@ -278,7 +278,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 					m_LastRecvTime = Now;
 					m_LastUpdateTime = Now;
 					if (m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN
-						&& pPacket->m_DataSize >= 1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)
+						&& pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken))
 						&& !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
 					{
 						m_SecurityToken = SecurityToken;
@@ -302,10 +302,10 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 				if(CtrlMsg == NET_CTRLMSG_CONNECTACCEPT)
 				{
 					if (m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN
-						&& pPacket->m_DataSize >= 1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)
+						&& pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken))
 						&& !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
 					{
-						m_SecurityToken = *(SECURITY_TOKEN*)(&pPacket->m_aChunkData[1 + sizeof(SECURITY_TOKEN_MAGIC)]);
+						m_SecurityToken = (SECURITY_TOKEN)*(&pPacket->m_aChunkData[1 + sizeof(SECURITY_TOKEN_MAGIC)]);
 						if(g_Config.m_Debug)
 							dbg_msg("security", "got token %d", m_SecurityToken);
 					}
