@@ -2371,16 +2371,12 @@ int os_compare_version(int major, int minor)
 	mem_zero(&ver, sizeof(OSVERSIONINFO));
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&ver);
-	if(ver.dwMajorVersion > major && ver.dwMinorVersion > minor)
+	if(ver.dwMajorVersion > major || (ver.dwMajorVersion == major && ver.dwMinorVersion > minor))
 		return 1;
 	else if(ver.dwMajorVersion == major && ver.dwMinorVersion == minor)
 		return 0;
-	else if(ver.dwMajorVersion < major && ver.dwMinorVersion < minor)
+	else
 		return -1;
-	else 
-		return -2;
-#else
-	#error not implemented
 #endif
 }
 

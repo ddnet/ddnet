@@ -25,7 +25,7 @@ void CAutoUpdate::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
-	m_IsWinXP = (os_compare_version(5, 0) == 1 && os_compare_version(6, 0) == -1);
+	m_IsWinXP = os_compare_version(5, 1) <= 0;
 }
 
 void CAutoUpdate::ProgressCallback(CFetchTask *pTask, void *pUser)
