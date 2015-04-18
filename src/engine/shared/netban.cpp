@@ -205,6 +205,12 @@ void CNetBan::CBanPool<T, HashCount>::Update(CBan<CDataType> *pBan, const CBanIn
 	}
 }
 
+void CNetBan::UnbanAll()
+{
+	m_BanAddrPool.Reset();
+	m_BanRangePool.Reset();
+}
+
 template<class T, int HashCount>
 void CNetBan::CBanPool<T, HashCount>::Reset()
 {
