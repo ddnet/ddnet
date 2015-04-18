@@ -1,7 +1,7 @@
-#ifndef ENGINE_CLIENT_AUTOUPDATE_H
-#define ENGINE_CLIENT_AUTOUPDATE_H
+#ifndef ENGINE_CLIENT_UPDATER_H
+#define ENGINE_CLIENT_UPDATER_H
 
-#include <engine/autoupdate.h>
+#include <engine/updater.h>
 #include <engine/fetcher.h>
 #include <vector>
 #include <string>
@@ -32,7 +32,7 @@
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
-class CAutoUpdate : public IAutoUpdate
+class CUpdater : public IUpdater
 {
 	class IClient *m_pClient;
 	class IStorage *m_pStorage;
@@ -62,7 +62,7 @@ class CAutoUpdate : public IAutoUpdate
 	void ReplaceServer();
 
 public:
-	CAutoUpdate();
+	CUpdater();
 	static void ProgressCallback(CFetchTask *pTask, void *pUser);
 	static void CompletionCallback(CFetchTask *pTask, void *pUser);
 

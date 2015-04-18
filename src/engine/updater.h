@@ -1,11 +1,11 @@
-#ifndef ENGINE_AUTOUPDATE_H
-#define ENGINE_AUTOUPDATE_H
+#ifndef ENGINE_UPDATER_H
+#define ENGINE_UPDATER_H
 
 #include "kernel.h"
 
-class IAutoUpdate : public IInterface
+class IUpdater : public IInterface
 {
-    MACRO_INTERFACE("autoupdate", 0)
+    MACRO_INTERFACE("updater", 0)
 public:
     enum
     {

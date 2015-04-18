@@ -10,7 +10,7 @@
 #include <engine/storage.h>
 #include <engine/sound.h>
 #include <engine/serverbrowser.h>
-#include <engine/autoupdate.h>
+#include <engine/updater.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/config.h>
 
@@ -125,7 +125,7 @@ void CGameClient::OnConsoleInit()
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
-	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
+	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 
 	// setup pointers

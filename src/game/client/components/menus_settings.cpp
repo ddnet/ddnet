@@ -9,7 +9,7 @@
 #include <engine/graphics.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <engine/autoupdate.h>
+#include <engine/updater.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
@@ -1798,27 +1798,27 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
 
-	//AutoUpdate
+	//Updater
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	{
 		Left.HSplitTop(20.0f, &Label, &Left);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		char aBuf[256];
-		int State = AutoUpdate()->GetCurrentState();
+		int State = Updater()->GetCurrentState();
 
 		//Update Button
-		if(NeedUpdate && State <= IAutoUpdate::CLEAN)
+		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
 			str_format(aBuf, sizeof(aBuf), "DDNet %s is available:", Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, "Update now", 0, &Button))
-				AutoUpdate()->InitiateUpdate();
+				Updater()->InitiateUpdate();
 		}
-		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
+		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), "Updating...");
-		else if(State == IAutoUpdate::NEED_RESTART){
+		else if(State == IUpdater::NEED_RESTART){
 			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
 			m_NeedRestartUpdate = true;
 		}

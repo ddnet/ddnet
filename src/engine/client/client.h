@@ -64,7 +64,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	IFetcher *m_pFetcher;
-	IAutoUpdate *m_pAutoUpdate;
+	IUpdater *m_pUpdater;
 	IEngineMasterServer *m_pMasterServer;
 
 	enum
@@ -79,7 +79,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CDemoEditor m_DemoEditor;
 	class CServerBrowser m_ServerBrowser;
 	class CFetcher m_Fetcher;
-	class CAutoUpdate m_AutoUpdate;
+	class CUpdater m_Updater;
 	class CFriends m_Friends;
 	class CMapChecker m_MapChecker;
 
@@ -204,7 +204,7 @@ public:
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
 	IFetcher *Fetcher() { return m_pFetcher; }
-	IAutoUpdate *AutoUpdate() { return m_pAutoUpdate; }
+	IUpdater *Updater() { return m_pUpdater; }
 
 	CClient();
 

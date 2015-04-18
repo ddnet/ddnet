@@ -6,7 +6,7 @@
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
 #include <engine/textrender.h>
-#include <engine/autoupdate.h>
+#include <engine/updater.h>
 #include <engine/shared/config.h>
 
 #include <game/generated/client_data.h>
@@ -1281,23 +1281,23 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
-		int State = AutoUpdate()->GetCurrentState();
+		int State = Updater()->GetCurrentState();
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
-		if(State == IAutoUpdate::CLEAN && NeedUpdate)
+		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
 			str_format(aBuf, sizeof(aBuf), "DDNet %s is out!", Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
-		else if(State == IAutoUpdate::CLEAN)
+		else if(State == IUpdater::CLEAN)
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
-		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
-			str_format(aBuf, sizeof(aBuf), "Downloading %s:", AutoUpdate()->GetCurrentFile());
-		else if(State == IAutoUpdate::FAIL)
+		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
+			str_format(aBuf, sizeof(aBuf), "Downloading %s:", Updater()->GetCurrentFile());
+		else if(State == IUpdater::FAIL)
 		{
 			str_format(aBuf, sizeof(aBuf), "Failed to download a file! Restart client to retry...");
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
-		else if(State == IAutoUpdate::NEED_RESTART)
+		else if(State == IUpdater::NEED_RESTART)
 		{
 			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
@@ -1307,7 +1307,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 		Button.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Button, &Part);
 
-		if(State == IAutoUpdate::CLEAN && NeedUpdate)
+		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
 			CUIRect Update;
 			Part.VSplitLeft(100.0f, &Update, NULL);
@@ -1315,10 +1315,10 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Update))
 			{
-				AutoUpdate()->InitiateUpdate();
+				Updater()->InitiateUpdate();
 			}
 		}
-		else if(State == IAutoUpdate::NEED_RESTART)
+		else if(State == IUpdater::NEED_RESTART)
 		{
 			CUIRect Restart;
 			Part.VSplitLeft(50.0f, &Restart, &Part);
@@ -1329,14 +1329,14 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 				Client()->Restart();
 			}
 		}
-		else if(State >= IAutoUpdate::GETTING_MANIFEST && State < IAutoUpdate::NEED_RESTART)
+		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 		{
 			CUIRect ProgressBar, Percent;
 			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);	
 			ProgressBar.y += 2.0f;
 			ProgressBar.HMargin(1.0f, &ProgressBar);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-			ProgressBar.w = clamp((float)AutoUpdate()->GetCurrentPercent(), 10.0f, 100.0f);
+			ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 		}
 #else

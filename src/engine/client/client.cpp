@@ -59,7 +59,7 @@
 #include "friends.h"
 #include "serverbrowser.h"
 #include "fetcher.h"
-#include "autoupdate.h"
+#include "updater.h"
 #include "client.h"
 
 #include <zlib.h>
@@ -2489,7 +2489,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser));
 	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher));
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	Kernel()->RegisterInterface(static_cast<IAutoUpdate*>(&m_AutoUpdate));
+	Kernel()->RegisterInterface(static_cast<IUpdater*>(&m_Updater));
 #endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
 }
@@ -2507,7 +2507,7 @@ void CClient::InitInterfaces()
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	m_pAutoUpdate = Kernel()->RequestInterface<IAutoUpdate>();
+	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
@@ -2518,7 +2518,7 @@ void CClient::InitInterfaces()
 	m_Fetcher.Init();
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-	m_AutoUpdate.Init();
+	m_Updater.Init();
 #endif
 
 	m_Friends.Init();
@@ -2656,7 +2656,7 @@ void CClient::Run()
 		if(Input()->Update())
 			break;	// SDL_QUIT
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
-		AutoUpdate()->Update();
+		Updater()->Update();
 #endif
 
 		// update sound

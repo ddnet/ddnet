@@ -1,4 +1,4 @@
-#include "autoupdate.h"
+#include "updater.h"
 #include <base/system.h>
 #include <engine/fetcher.h>
 #include <engine/storage.h>
@@ -11,7 +11,7 @@
 using std::string;
 using std::vector;
 
-CAutoUpdate::CAutoUpdate()
+CUpdater::CUpdater()
 {
 	m_pClient = NULL;
 	m_pStorage = NULL;
@@ -20,7 +20,7 @@ CAutoUpdate::CAutoUpdate()
 	m_Percent = 0;
 }
 
-void CAutoUpdate::Init()
+void CUpdater::Init()
 {
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -28,16 +28,16 @@ void CAutoUpdate::Init()
 	m_IsWinXP = os_compare_version(5, 1) <= 0;
 }
 
-void CAutoUpdate::ProgressCallback(CFetchTask *pTask, void *pUser)
+void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
 {
-	CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
+	CUpdater *pUpdate = (CUpdater *)pUser;
 	str_copy(pUpdate->m_Status, pTask->Dest(), sizeof(pUpdate->m_Status));
 	pUpdate->m_Percent = pTask->Progress();
 }
 
-void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
+void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 {
-	CAutoUpdate *pUpdate = (CAutoUpdate *)pUser;
+	CUpdater *pUpdate = (CUpdater *)pUser;
 	if(!str_comp(pTask->Dest(), "update.json"))
 	{
 		if(pTask->State() == CFetchTask::STATE_DONE)
@@ -68,17 +68,17 @@ void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
 	delete pTask;
 }
 
-void CAutoUpdate::FetchFile(const char *pFile, const char *pDestPath)
+void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdateServer, pFile);
 	if(!pDestPath)
 		pDestPath = pFile;
 	CFetchTask *Task = new CFetchTask;
-	m_pFetcher->QueueAdd(Task, aBuf, pDestPath, -2, this, &CAutoUpdate::CompletionCallback, &CAutoUpdate::ProgressCallback);
+	m_pFetcher->QueueAdd(Task, aBuf, pDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
-void CAutoUpdate::Update()
+void CUpdater::Update()
 {
 	switch(m_State)
 	{
@@ -89,7 +89,7 @@ void CAutoUpdate::Update()
 	}
 }
 
-void CAutoUpdate::AddNewFile(const char *pFile)
+void CUpdater::AddNewFile(const char *pFile)
 {
 	//Check if already on the download list
 	for(vector<string>::iterator it = m_AddedFiles.begin(); it < m_AddedFiles.end(); ++it)
@@ -100,7 +100,7 @@ void CAutoUpdate::AddNewFile(const char *pFile)
 	m_AddedFiles.push_back(string(pFile));
 }
 
-void CAutoUpdate::AddRemovedFile(const char *pFile)
+void CUpdater::AddRemovedFile(const char *pFile)
 {
 	//First remove from to be downloaded list
 	for(vector<string>::iterator it = m_AddedFiles.begin(); it < m_AddedFiles.end(); ++it)
@@ -113,9 +113,9 @@ void CAutoUpdate::AddRemovedFile(const char *pFile)
 	m_RemovedFiles.push_back(string(pFile));
 }
 
-void CAutoUpdate::ReplaceClient()
+void CUpdater::ReplaceClient()
 {
-	dbg_msg("autoupdate", "Replacing " PLAT_CLIENT_EXEC);
+	dbg_msg("updater", "Replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
 	if(m_IsWinXP)
@@ -130,13 +130,13 @@ void CAutoUpdate::ReplaceClient()
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 		if (system(aBuf))
-			dbg_msg("autoupdate", "Error setting client executable bit");
+			dbg_msg("updater", "Error setting client executable bit");
 	#endif
 }
 
-void CAutoUpdate::ReplaceServer()
+void CUpdater::ReplaceServer()
 {
-	dbg_msg("autoupdate", "Replacing " PLAT_SERVER_EXEC);
+	dbg_msg("updater", "Replacing " PLAT_SERVER_EXEC);
 
 	//Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile("DDNet-Server.old");
@@ -148,11 +148,11 @@ void CAutoUpdate::ReplaceServer()
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 		if (system(aBuf))
-			dbg_msg("autoupdate", "Error setting server executable bit");
+			dbg_msg("updater", "Error setting server executable bit");
 	#endif
 }
 
-void CAutoUpdate::ParseUpdate()
+void CUpdater::ParseUpdate()
 {
 	char aPath[512];
 	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ALL);
@@ -195,16 +195,16 @@ void CAutoUpdate::ParseUpdate()
 	}
 }
 
-void CAutoUpdate::InitiateUpdate()
+void CUpdater::InitiateUpdate()
 {
 	m_State = GETTING_MANIFEST;
 	FetchFile("update.json");
 }
 
-void CAutoUpdate::PerformUpdate()
+void CUpdater::PerformUpdate()
 {
 	m_State = PARSING_UPDATE;
-	dbg_msg("autoupdate", "Parsing update.json");
+	dbg_msg("updater", "Parsing update.json");
 	ParseUpdate();
 	m_State = DOWNLOADING;
 
@@ -234,7 +234,7 @@ void CAutoUpdate::PerformUpdate()
 		FetchFile(PLAT_CLIENT_DOWN, "DDNet.tmp");
 }
 
-void CAutoUpdate::WinXpRestart()
+void CUpdater::WinXpRestart()
 {		
 		char aBuf[512];
 		IOHANDLE bhFile = io_open(m_pStorage->GetBinaryPath("du.bat", aBuf, sizeof aBuf), IOFLAG_WRITE);

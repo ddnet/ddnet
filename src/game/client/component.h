@@ -28,7 +28,7 @@ protected:
 	class IServerBrowser *ServerBrowser() const { return m_pClient->ServerBrowser(); }
 	class CLayers *Layers() const { return m_pClient->Layers(); }
 	class CCollision *Collision() const { return m_pClient->Collision(); }
-	class IAutoUpdate *AutoUpdate() const { return m_pClient->AutoUpdate(); }
+	class IUpdater *Updater() const { return m_pClient->Updater(); }
 public:
 	virtual ~CComponent() {}
 	class CGameClient *GameClient() const { return m_pClient; }
