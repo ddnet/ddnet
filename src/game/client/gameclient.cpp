@@ -1233,7 +1233,7 @@ void CGameClient::OnPredict()
 		return;
 	}
 
-	static bool IsWeaker[2][MAX_CLIENTS] = {0};
+	static bool IsWeaker[2][MAX_CLIENTS] = {{0}};
 	if(g_Config.m_ClAntiPingPlayers)
 		FindWeaker(IsWeaker);
 
@@ -1986,7 +1986,7 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 			if (m_Bouncing == 1)
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
-				m_Direction.y =- m_Direction.y;
+				m_Direction.y = -m_Direction.y;
 			if (fabs(m_Direction.x) < 1e-6)
 				m_Direction.x = 0;
 			if (fabs(m_Direction.y) < 1e-6)
@@ -2063,7 +2063,7 @@ CWeaponData *CGameClient::FindWeaponData(int TargetTick)
 void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 {
 	// attempts to detect strong/weak against the player we are hooking
-	static int DirAccumulated[2][MAX_CLIENTS] = {0};
+	static int DirAccumulated[2][MAX_CLIENTS] = {{0}};
 	if(!m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Active || !m_Snap.m_paPlayerInfos[m_Snap.m_LocalClientID])
 		return;
 	int HookedPlayer = m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Prev.m_HookedPlayer;

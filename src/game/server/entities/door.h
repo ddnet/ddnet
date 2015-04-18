@@ -13,7 +13,6 @@ class CDoor: public CEntity
 	void ResetCollision();
 	int m_Length;
 	vec2 m_Direction;
-	int m_Angle;
 
 public:
 	void Open(int Tick, bool ActivatedTeam[]);

@@ -1215,7 +1215,7 @@ void CCharacter::HandleBroadcast()
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
 
 	if(m_DDRaceState == DDRACE_STARTED && m_CpLastBroadcast != m_CpActive &&
-			m_CpActive > -1 && m_CpTick > Server()->Tick() && !m_pPlayer->m_ClientVersion >= VERSION_DDRACE &&
+			m_CpActive > -1 && m_CpTick > Server()->Tick() && (!m_pPlayer->m_ClientVersion) >= VERSION_DDRACE &&
 			pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
 	{
 		char aBroadcast[128];
@@ -1307,9 +1307,9 @@ void CCharacter::HandleSkippableTiles(int Index)
 				DiffAngle = SpeederAngle - TeeAngle;
 				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
 				//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
-				if(abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+				if(abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 					TempVel += Direction * Force;
-				else if(abs(SpeedLeft) > Force)
+				else if(abs((int)SpeedLeft) > Force)
 					TempVel += Direction * -Force;
 				else
 					TempVel += Direction * SpeedLeft;

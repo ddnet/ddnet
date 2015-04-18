@@ -13,7 +13,6 @@
 
 #include "mastersrv.h"
 
-
 enum {
 	MTU = 1400,
 	MAX_SERVERS_PER_PACKET=75,

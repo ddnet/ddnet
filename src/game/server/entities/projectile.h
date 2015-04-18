@@ -47,7 +47,6 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
-	bool m_Collised;
 	int m_TuneZone;
 
 public:

@@ -166,7 +166,7 @@ void CProjectile::Tick()
 			if (m_Bouncing == 1)
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
-				m_Direction.y =- m_Direction.y;
+				m_Direction.y = -m_Direction.y;
 			if (fabs(m_Direction.x) < 1e-6)
 				m_Direction.x = 0;
 			if (fabs(m_Direction.y) < 1e-6)
@@ -276,7 +276,7 @@ void CProjectile::SetBouncing(int Value)
 void CProjectile::FillExtraInfo(CNetObj_Projectile *pProj)
 {
 	const int MaxPos = 0x7fffffff/100;
-	if(abs(m_Pos.y)+1 >= MaxPos || abs(m_Pos.x)+1 >= MaxPos)
+	if(abs((int)m_Pos.y)+1 >= MaxPos || abs((int)m_Pos.x)+1 >= MaxPos)
 	{
 		//If the modified data would be too large to fit in an integer, send normal data instead
 		FillInfo(pProj);

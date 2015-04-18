@@ -518,9 +518,9 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 					DiffAngle = SpeederAngle - TeeAngle;
 					SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
 					//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
-					if(abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					if(abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
-					else if(abs(SpeedLeft) > Force)
+					else if(abs((int)SpeedLeft) > Force)
 						TempVel += Direction * -Force;
 					else
 						TempVel += Direction * SpeedLeft;
