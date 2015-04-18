@@ -25,6 +25,7 @@ void CAutoUpdate::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+	m_IsWinXP = (os_compare_version(5, 0) == 1 && os_compare_version(6, 0) == -1);
 }
 
 void CAutoUpdate::ProgressCallback(CFetchTask *pTask, void *pUser)
@@ -54,8 +55,12 @@ void CAutoUpdate::CompletionCallback(CFetchTask *pTask, void *pUser)
 				pUpdate->ReplaceServer();
 			if(pUpdate->m_pClient->State() == IClient::STATE_ONLINE || pUpdate->m_pClient->EditorHasUnsavedData())
 				pUpdate->m_State = NEED_RESTART;
-			else
-				pUpdate->m_pClient->Restart();
+			else{
+				if(!pUpdate->m_IsWinXP)
+					pUpdate->m_pClient->Restart();
+				else
+					pUpdate->WinXpRestart();
+			}
 		}
 		else if(pTask->State() == CFetchTask::STATE_ERROR)
 			pUpdate->m_State = FAIL;
@@ -113,11 +118,12 @@ void CAutoUpdate::ReplaceClient()
 	dbg_msg("autoupdate", "Replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
-	#if !defined(WINXP)
+	if(m_IsWinXP)
+	{
 		m_pStorage->RemoveBinaryFile("DDNet.old");
 		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
 		m_pStorage->RenameBinaryFile("DDNet.tmp", PLAT_CLIENT_EXEC);
-	#endif
+	}
 	#if !defined(CONF_FAMILY_WINDOWS)
 		char aPath[512];
 		m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
@@ -226,4 +232,18 @@ void CAutoUpdate::PerformUpdate()
 		FetchFile(PLAT_SERVER_DOWN, "DDNet-Server.tmp");
 	if(m_ClientUpdate)
 		FetchFile(PLAT_CLIENT_DOWN, "DDNet.tmp");
+}
+
+void CAutoUpdate::WinXpRestart()
+{		
+		char aBuf[512];
+		IOHANDLE bhFile = io_open(m_pStorage->GetBinaryPath("du.bat", aBuf, sizeof aBuf), IOFLAG_WRITE);
+		if(!bhFile)
+			return;
+		char bBuf[512];
+		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\nrename \"DDNet.tmp\" \"DDNet.exe\"\r\n:_T\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
+		io_write(bhFile, bBuf, str_length(bBuf));
+		io_close(bhFile);
+		shell_execute(aBuf);
+		m_pClient->Quit();
 }

@@ -1327,7 +1327,26 @@ int str_utf8_check(const char *str);
 
 int pid();
 
+/*
+	Function: shell_execute
+		Executes a given file.
+*/
 void shell_execute(const char *file);
+
+/*
+	Function: os_compare_version
+		Compares the OS version to a given major and minor.
+
+	Parameters:
+		major - Major version to compare to.
+		minor - Minor version to compare to.
+
+	Returns:
+		1 - OS version higher.
+		0 - OS version same.
+		-1 - OS version lower.
+*/
+int os_compare_version(int major, int minor);
 
 /*
 	Function: secure_random_init

@@ -2352,16 +2352,36 @@ int pid()
 
 void shell_execute(const char *file)
 {
-	#if defined(CONF_FAMILY_WINDOWS)
-		ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
-	#elif defined(CONF_FAMILY_UNIX)
-		char* argv[2];
-		argv[0] = (char*) file;
-		argv[1] = NULL;
-		pid_t pid = fork();
-		if(!pid)
-			execv(file, argv);
-	#endif
+#if defined(CONF_FAMILY_WINDOWS)
+	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
+#elif defined(CONF_FAMILY_UNIX)
+	char* argv[2];
+	argv[0] = (char*) file;
+	argv[1] = NULL;
+	pid_t pid = fork();
+	if(!pid)
+		execv(file, argv);
+#endif
+}
+
+int os_compare_version(int major, int minor)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	OSVERSIONINFO ver;
+	mem_zero(&ver, sizeof(OSVERSIONINFO));
+	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&ver);
+	if(ver.dwMajorVersion > major && ver.dwMinorVersion > minor)
+		return 1;
+	else if(ver.dwMajorVersion == major && ver.dwMinorVersion == minor)
+		return 0;
+	else if(ver.dwMajorVersion < major && ver.dwMinorVersion < minor)
+		return -1;
+	else 
+		return -2;
+#else
+	#error not implemented
+#endif
 }
 
 struct SECURE_RANDOM_DATA
