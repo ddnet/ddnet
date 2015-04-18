@@ -113,9 +113,11 @@ void CAutoUpdate::ReplaceClient()
 	dbg_msg("autoupdate", "Replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
-	m_pStorage->RemoveBinaryFile("DDNet.old");
-	m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
-	m_pStorage->RenameBinaryFile("DDNet.tmp", PLAT_CLIENT_EXEC);
+	#if !defined(WINXP)
+		m_pStorage->RemoveBinaryFile("DDNet.old");
+		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
+		m_pStorage->RenameBinaryFile("DDNet.tmp", PLAT_CLIENT_EXEC);
+	#endif
 	#if !defined(CONF_FAMILY_WINDOWS)
 		char aPath[512];
 		m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);

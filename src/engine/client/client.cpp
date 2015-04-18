@@ -1032,8 +1032,20 @@ void CClient::DebugRender()
 void CClient::Restart()
 {
 	char aBuf[512];
-	shell_execute(Storage()->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
-	Quit();
+	#if defined(WINXP)
+		IOHANDLE bhFile = io_open(Storage()->GetBinaryPath("du.bat", aBuf, sizeof aBuf);, IOFLAG_WRITE);
+		if(!bhFile)
+			return false;
+
+		char bBuf[512];
+		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\nrename \"DDNet.tmp\" \"DDNet.exe\"\r\n:_T\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
+		io_write(bhFile, bBuf, str_length(bBuf));
+		io_close(bhFile);
+		ShellExecuteA(0, 0, aBuf, 0, 0, SW_HIDE);
+	#else
+		shell_execute(Storage()->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+		Quit();
+	#endif
 }
 
 void CClient::Quit()
@@ -3288,7 +3300,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
-	
+
 	return 0;
 }
 
