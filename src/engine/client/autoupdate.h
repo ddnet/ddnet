@@ -38,6 +38,8 @@ class CAutoUpdate : public IAutoUpdate
 	class IStorage *m_pStorage;
 	class IFetcher *m_pFetcher;
 
+	bool m_IsWinXP;
+
 	int m_State;
 	char m_Status[256];
 	int m_Percent;
@@ -71,7 +73,7 @@ public:
 	virtual void InitiateUpdate();
 	void Init();
 	virtual void Update();
-	void Restart();
+	void WinXpRestart();
 };
 
 #endif
