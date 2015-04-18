@@ -1106,8 +1106,6 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f/ScrollNum, 0.0f, 1.0f);
 			}
-			else
-				ScrollNum = 0;
 		}
 	}
 
@@ -1219,8 +1217,6 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View)
 				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f/ScrollNum, 0.0f, 1.0f);
 			}
-			else
-				ScrollNum = 0;
 		}
 	}
 

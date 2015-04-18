@@ -378,7 +378,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
 				{
 					str_format(aBuf, sizeof(aBuf),"%d", DDTeam);
-					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 					TextRender()->SetCursor(&Cursor, x - 10.0f, y + Spacing + FontSize - (FontSize/1.5f), FontSize/1.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = NameLength+3;
 				}

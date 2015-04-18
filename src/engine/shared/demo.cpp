@@ -949,8 +949,6 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	while (m_pDemoPlayer->IsPlaying() && !m_Stop) {
 		m_pDemoPlayer->Update(false);
 
-		pInfo = m_pDemoPlayer->Info();
-
 		if (pInfo->m_Info.m_Paused)
 			break;
 	}

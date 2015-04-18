@@ -453,7 +453,7 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
 	int Total = m_pClient->m_pVoting->m_NumVoteOptions;
-	int NumVoteOptions = Total;
+	int NumVoteOptions = 0;
 	int aIndices[MAX_VOTE_OPTIONS];
 	static int s_CurVoteOption = 0;
 
@@ -463,7 +463,6 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", Total, 1, s_CurVoteOption, s_ScrollValue);
 #endif
 
-	NumVoteOptions = 0;
 	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
