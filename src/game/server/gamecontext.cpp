@@ -629,9 +629,9 @@ void CGameContext::OnTick()
 									aVoteChecked[i])	// don't count in votes by spectators if the admin doesn't want it
 						continue;
 
-					if(m_VoteKick &&
-						GetPlayerChar(m_VoteCreator) && GetPlayerChar(i) &&
-						GetPlayerChar(m_VoteCreator)->Team() != GetPlayerChar(i)->Team())
+					if(m_VoteKick && ((!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS) ||
+						 (GetPlayerChar(m_VoteCreator) && GetPlayerChar(i) &&
+						  GetPlayerChar(m_VoteCreator)->Team() != GetPlayerChar(i)->Team())))
 						continue;
 
 					if (m_apPlayers[i]->m_Afk)
