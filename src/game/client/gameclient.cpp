@@ -108,7 +108,7 @@ const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjNa
 
 void CGameClient::ResetDummyInput()
 {
-	m_pControls->ResetDummyInput();
+	m_pControls->ResetInput(!g_Config.m_ClDummy);
 }
 
 void CGameClient::OnConsoleInit()
@@ -581,7 +581,7 @@ void CGameClient::OnRender()
 
 	// resend player and dummy info if it was filtered by server
 	if(Client()->State() == IClient::STATE_ONLINE && !m_pMenus->IsActive()) {
-		if(m_CheckInfo == 0) {
+		if(m_CheckInfo[0] == 0) {
 			if(
 			str_comp(m_aClients[Client()->m_LocalIDs[0]].m_aName, g_Config.m_PlayerName) ||
 			str_comp(m_aClients[Client()->m_LocalIDs[0]].m_aClan, g_Config.m_PlayerClan) ||
@@ -593,14 +593,14 @@ void CGameClient::OnRender()
 			)
 				SendInfo(false);
 			else
-				m_CheckInfo = -1;
+				m_CheckInfo[0] = -1;
 		}
 
-		if(m_CheckInfo > 0)
-			m_CheckInfo--;
+		if(m_CheckInfo[0] > 0)
+			m_CheckInfo[0]--;
 
 		if(Client()->DummyConnected()) {
-			if(m_CheckDummyInfo == 0) {
+			if(m_CheckInfo[1] == 0) {
 				if(
 				str_comp(m_aClients[Client()->m_LocalIDs[1]].m_aName, g_Config.m_DummyName) ||
 				str_comp(m_aClients[Client()->m_LocalIDs[1]].m_aClan, g_Config.m_DummyClan) ||
@@ -612,11 +612,11 @@ void CGameClient::OnRender()
 				)
 					SendDummyInfo(false);
 				else
-					m_CheckDummyInfo = -1;
+					m_CheckInfo[1] = -1;
 			}
 
-			if(m_CheckDummyInfo > 0)
-				m_CheckDummyInfo--;
+			if(m_CheckInfo[1] > 0)
+				m_CheckInfo[1]--;
 		}
 	}
 }
@@ -1721,7 +1721,7 @@ void CGameClient::SendInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
-		m_CheckInfo = -1;
+		m_CheckInfo[0] = -1;
 	}
 	else
 	{
@@ -1736,7 +1736,7 @@ void CGameClient::SendInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
-		m_CheckInfo = Client()->GameTickSpeed();
+		m_CheckInfo[0] = Client()->GameTickSpeed();
 	}
 }
 
@@ -1755,7 +1755,7 @@ void CGameClient::SendDummyInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 1);
-		m_CheckDummyInfo = -1;
+		m_CheckInfo[1] = -1;
 	}
 	else
 	{
@@ -1770,7 +1770,7 @@ void CGameClient::SendDummyInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
-		m_CheckDummyInfo = Client()->GameTickSpeed();
+		m_CheckInfo[1] = Client()->GameTickSpeed();
 	}
 }
 

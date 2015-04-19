@@ -108,8 +108,7 @@ class CGameClient : public IGameClient
 	int m_PredictedTick;
 	int m_LastNewPredictedTick[2];
 
-	int m_CheckInfo;
-	int m_CheckDummyInfo;
+	int m_CheckInfo[2];
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
