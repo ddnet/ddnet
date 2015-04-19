@@ -252,6 +252,7 @@ public:
 	virtual void DummyDisconnect(const char *pReason);
 	virtual void DummyConnect();
 	virtual bool DummyConnected();
+	virtual bool DummyConnecting();
 	void DummyInfo();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;

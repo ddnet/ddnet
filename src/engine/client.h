@@ -94,6 +94,7 @@ public:
 	virtual void DummyDisconnect(const char *pReason) = 0;
 	virtual void DummyConnect() = 0;
 	virtual bool DummyConnected() = 0;
+	virtual bool DummyConnecting() = 0;
 
 	virtual void Restart() = 0;
 	virtual void Quit() = 0;

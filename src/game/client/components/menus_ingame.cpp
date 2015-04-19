@@ -61,6 +61,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 	static int s_SpectateButton = 0;
 	static int s_SpectateButton2 = 0;
+	bool DummyConnecting = m_pClient->Client()->DummyConnecting();
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
 	{
@@ -68,7 +69,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-			if(DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
+			if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
 				if(g_Config.m_ClDummy == 0 || m_pClient->Client()->DummyConnected())
 				{
@@ -84,7 +85,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-				if(DoButton_Menu(&s_SpectateButton, Localize("Join red"), 0, &Button))
+				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Join red"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_RED);
 					SetActive(false);
@@ -95,7 +96,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-				if(DoButton_Menu(&s_SpectateButton2, Localize("Join blue"), 0, &Button))
+				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton2, Localize("Join blue"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_BLUE);
 					SetActive(false);
@@ -108,7 +109,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-				if(DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
+				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(0);
 					SetActive(false);
@@ -134,7 +135,11 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitLeft(170.0f, &Button, &ButtonBar);
 
 	static int s_DummyButton = 0;
-	if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? "Disconnect dummy" : "Connect dummy"), 0, &Button))
+	if(DummyConnecting)
+	{
+		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
+	}
+	else if(DoButton_Menu(&s_DummyButton, Localize(Client()->DummyConnected() ? "Disconnect dummy" : "Connect dummy"), 0, &Button))
 	{
 		if(!Client()->DummyConnected())
 		{
