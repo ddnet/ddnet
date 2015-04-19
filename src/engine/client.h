@@ -43,6 +43,8 @@ public:
 
 	CNetObj_PlayerInput DummyInput;
 
+	bool m_DummySendConnInfo;
+
 	class CSnapItem
 	{
 	public:
