@@ -406,7 +406,6 @@ void CGameClient::OnConnected()
 	Client()->GetServerInfo(&CurrentServerInfo);
 
 	m_ServerMode = SERVERMODE_PURE;
-	m_LastSendInfo = 0;
 
 	// send the inital info
 	SendInfo(true);
@@ -580,23 +579,45 @@ void CGameClient::OnRender()
 	if(g_Config.m_ClDummy && !Client()->DummyConnected())
 		g_Config.m_ClDummy = 0;
 
-	// check if client info has to be resent
-	if(m_LastSendInfo && Client()->State() == IClient::STATE_ONLINE && m_Snap.m_LocalClientID >= 0 && !m_pMenus->IsActive() && m_LastSendInfo+time_freq()*6 < time_get())
-	{
-		// resend if client info differs
-		if(str_comp(g_Config.m_PlayerName, m_aClients[m_Snap.m_LocalClientID].m_aName) ||
-			str_comp(g_Config.m_PlayerClan, m_aClients[m_Snap.m_LocalClientID].m_aClan) ||
-			g_Config.m_PlayerCountry != m_aClients[m_Snap.m_LocalClientID].m_Country ||
-			str_comp(g_Config.m_PlayerSkin, m_aClients[m_Snap.m_LocalClientID].m_aSkinName) ||
-			(m_Snap.m_pGameInfoObj && !(m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS) &&	// no teamgame?
-			(g_Config.m_PlayerUseCustomColor != m_aClients[m_Snap.m_LocalClientID].m_UseCustomColor ||
-			g_Config.m_PlayerColorBody != m_aClients[m_Snap.m_LocalClientID].m_ColorBody ||
-			g_Config.m_PlayerColorFeet != m_aClients[m_Snap.m_LocalClientID].m_ColorFeet)))
-		{
-			if (!g_Config.m_ClDummy)
+	// resend player and dummy info if it was filtered by server
+	if(Client()->State() == IClient::STATE_ONLINE && !m_pMenus->IsActive()) {
+		if(m_CheckInfo == 0) {
+			if(
+			str_comp(m_aClients[Client()->m_LocalIDs[0]].m_aName, g_Config.m_PlayerName) ||
+			str_comp(m_aClients[Client()->m_LocalIDs[0]].m_aClan, g_Config.m_PlayerClan) ||
+			m_aClients[Client()->m_LocalIDs[0]].m_Country != g_Config.m_PlayerCountry ||
+			str_comp(m_aClients[Client()->m_LocalIDs[0]].m_aSkinName, g_Config.m_PlayerSkin) ||
+			m_aClients[Client()->m_LocalIDs[0]].m_UseCustomColor != g_Config.m_PlayerUseCustomColor ||
+			m_aClients[Client()->m_LocalIDs[0]].m_ColorBody != g_Config.m_PlayerColorBody ||
+			m_aClients[Client()->m_LocalIDs[0]].m_ColorFeet != g_Config.m_PlayerColorFeet
+			)
 				SendInfo(false);
+			else
+				m_CheckInfo = -1;
 		}
-		m_LastSendInfo = 0;
+
+		if(m_CheckInfo > 0)
+			m_CheckInfo--;
+
+		if(Client()->DummyConnected()) {
+			if(m_CheckDummyInfo == 0) {
+				if(
+				str_comp(m_aClients[Client()->m_LocalIDs[1]].m_aName, g_Config.m_DummyName) ||
+				str_comp(m_aClients[Client()->m_LocalIDs[1]].m_aClan, g_Config.m_DummyClan) ||
+				m_aClients[Client()->m_LocalIDs[1]].m_Country != g_Config.m_DummyCountry ||
+				str_comp(m_aClients[Client()->m_LocalIDs[1]].m_aSkinName, g_Config.m_DummySkin) ||
+				m_aClients[Client()->m_LocalIDs[1]].m_UseCustomColor != g_Config.m_DummyUseCustomColor ||
+				m_aClients[Client()->m_LocalIDs[1]].m_ColorBody != g_Config.m_DummyColorBody ||
+				m_aClients[Client()->m_LocalIDs[1]].m_ColorFeet != g_Config.m_DummyColorFeet
+				)
+					SendDummyInfo(false);
+				else
+					m_CheckDummyInfo = -1;
+			}
+
+			if(m_CheckDummyInfo > 0)
+				m_CheckDummyInfo--;
+		}
 	}
 }
 
@@ -1700,6 +1721,7 @@ void CGameClient::SendInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+		m_CheckInfo = -1;
 	}
 	else
 	{
@@ -1714,10 +1736,7 @@ void CGameClient::SendInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
-
-		// activate timer to resend the info if it gets filtered
-		if(!m_LastSendInfo || m_LastSendInfo+time_freq()*5 < time_get())
-			m_LastSendInfo = time_get();
+		m_CheckInfo = Client()->GameTickSpeed();
 	}
 }
 
@@ -1736,6 +1755,7 @@ void CGameClient::SendDummyInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 1);
+		m_CheckDummyInfo = -1;
 	}
 	else
 	{
@@ -1750,10 +1770,7 @@ void CGameClient::SendDummyInfo(bool Start)
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
-
-		// activate timer to resend the info if it gets filtered
-		//if(!m_LastSendInfo || m_LastSendInfo+time_freq()*5 < time_get())
-		//	m_LastSendInfo = time_get();
+		m_CheckDummyInfo = Client()->GameTickSpeed();
 	}
 }
 
