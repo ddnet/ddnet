@@ -341,6 +341,7 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 		}
 		m_SnapshotCurrent = Type;
 
+		if(m_SnapshotCurrent < 0 || m_SnapshotCurrent > 0xFFFF) return -3;
 		if(RangeCheck(pEnd, pData, ItemSize) || ItemSize < 0) return -3;
 
 		Key = (Type<<16)|ID;
