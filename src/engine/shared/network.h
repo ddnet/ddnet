@@ -384,7 +384,7 @@ public:
 	int GotProblems();
 	const char *ErrorString();
 
-	bool HasSecurityToken() { return m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNKNOWN && m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
+	bool SecurityTokenUnknown() { return m_Connection.SecurityToken() == NET_SECURITY_TOKEN_UNKNOWN; }
 };
 
 
