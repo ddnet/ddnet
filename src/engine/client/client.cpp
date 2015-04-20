@@ -784,28 +784,10 @@ void CClient::DummyConnect()
 
 	m_RconAuthed[1] = 0;
 
+	m_DummySendConnInfo = true;
+
 	//connecting to the server
 	m_NetClient[1].Connect(&m_ServerAddress);
-
-	// send client info
-	CMsgPacker MsgInfo(NETMSG_INFO);
-	MsgInfo.AddString(GameClient()->NetVersion(), 128);
-	MsgInfo.AddString(g_Config.m_Password, 128);
-	SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
-
-	// update netclient
-	m_NetClient[1].Update();
-
-	// send ready
-	CMsgPacker MsgReady(NETMSG_READY);
-	SendMsgExY(&MsgReady, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
-
-	// startinfo
-	GameClient()->SendDummyInfo(true);
-
-	// send enter game an finish the connection
-	CMsgPacker MsgEnter(NETMSG_ENTERGAME);
-	SendMsgExY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -2655,6 +2637,32 @@ void CClient::Run()
 			str_copy(g_Config.m_UiServerAddress, m_aCmdConnect, sizeof(g_Config.m_UiServerAddress));
 			Connect(m_aCmdConnect);
 			m_aCmdConnect[0] = 0;
+		}
+
+		// progress on dummy connect if token available
+		if (m_DummySendConnInfo && m_NetClient[1].HasSecurityToken())
+		{
+			m_DummySendConnInfo = false;
+
+			// send client info
+			CMsgPacker MsgInfo(NETMSG_INFO);
+			MsgInfo.AddString(GameClient()->NetVersion(), 128);
+			MsgInfo.AddString(g_Config.m_Password, 128);
+			SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
+
+			// update netclient
+			m_NetClient[1].Update();
+
+			// send ready
+			CMsgPacker MsgReady(NETMSG_READY);
+			SendMsgExY(&MsgReady, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
+
+			// startinfo
+			GameClient()->SendDummyInfo(true);
+
+			// send enter game an finish the connection
+			CMsgPacker MsgEnter(NETMSG_ENTERGAME);
+			SendMsgExY(&MsgEnter, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 		}
 
 		// update input

@@ -383,6 +383,8 @@ public:
 	int State();
 	int GotProblems();
 	const char *ErrorString();
+
+	bool HasSecurityToken() { return m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNKNOWN && m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 };
 
 
