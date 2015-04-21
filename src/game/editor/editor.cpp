@@ -3934,7 +3934,10 @@ void CEditor::RenderStatusbar(CUIRect View)
 	CUIRect Button;
 	View.VSplitRight(60.0f, &View, &Button);
 	static int s_EnvelopeButton = 0;
-	if(DoButton_Editor(&s_EnvelopeButton, "Envelopes", m_ShowEnvelopeEditor, &Button, 0, "Toggles the envelope editor."))
+	int MouseButton = DoButton_Editor(&s_EnvelopeButton, "Envelopes", m_ShowEnvelopeEditor, &Button, 0, "Toggles the envelope editor.");
+	if(MouseButton == 2)
+		m_ShowEnvelopeEditor = (m_ShowEnvelopeEditor+3)%4;
+	else if(MouseButton == 1)
 		m_ShowEnvelopeEditor = (m_ShowEnvelopeEditor+1)%4;
 
 	if (g_Config.m_ClEditorUndo)
