@@ -2639,8 +2639,8 @@ void CClient::Run()
 			m_aCmdConnect[0] = 0;
 		}
 
-		// progress on dummy connect if token available
-		if (m_DummySendConnInfo && m_NetClient[1].HasSecurityToken())
+		// progress on dummy connect if security token handshake skipped/passed
+		if (m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
 		{
 			m_DummySendConnInfo = false;
 
