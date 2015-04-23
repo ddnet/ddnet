@@ -207,6 +207,7 @@ void CGameClient::OnConsoleInit()
 	// add the some console commands
 	Console()->Register("team", "i", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
+    Console()->Register("kill_dummy", "", CFGFLAG_CLIENT, ConKillDummy, this, "Kill your dummy");
 
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "si", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
@@ -1777,7 +1778,7 @@ void CGameClient::SendDummyInfo(bool Start)
 void CGameClient::SendKill(int ClientID)
 {
 	CNetMsg_Cl_Kill Msg;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+    Client()->SendPackMsgExY(&Msg, MSGFLAG_VITAL, ClientID);
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
@@ -1793,7 +1794,12 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameClient*)pUserData)->SendKill(-1);
+	((CGameClient*)pUserData)->SendKill(g_Config.m_ClDummy);
+}
+
+void CGameClient::ConKillDummy(IConsole::IResult *pResult, void *pUserData)
+{
+	((CGameClient*)pUserData)->SendKill(!g_Config.m_ClDummy);
 }
 
 void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

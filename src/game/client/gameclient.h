@@ -112,6 +112,7 @@ class CGameClient : public IGameClient
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
+    static void ConKillDummy(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialDummyInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -371,14 +372,14 @@ inline vec3 RgbToHsl(vec3 RGB)
 
 		if (HSL.l < 0.5)
 			HSL.s = (maxColor - minColor) / (maxColor + minColor);
-		else 
+		else
 			HSL.s = (maxColor - minColor) / (2.0 - maxColor - minColor);
 
 		if (RGB.r == maxColor)
 			HSL.h = (RGB.g - RGB.b) / (maxColor - minColor);
 		else if (RGB.g == maxColor)
 			HSL.h = 2.0 + (RGB.b - RGB.r) / (maxColor - minColor);
-		else 
+		else
 			HSL.h = 4.0 + (RGB.r - RGB.g) / (maxColor - minColor);
 
 		HSL.h /= 6; //to bring it to a number between 0 and 1
