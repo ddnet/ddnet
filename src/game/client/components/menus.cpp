@@ -1120,7 +1120,12 @@ int CMenus::Render()
 		if(ExtraAlign == -1)
 			UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
 		else
-			UI()->DoLabelScaled(&Part, pExtraText, 20.f, 0, -1);
+		{
+			if(TextRender()->TextWidth(0, 20.f, pExtraText, -1) > Part.w)
+				UI()->DoLabelScaled(&Part, pExtraText, 20.f, -1, (int)Part.w);
+			else
+				UI()->DoLabelScaled(&Part, pExtraText, 20.f, 0, -1);
+		}
 
 		if(m_Popup == POPUP_QUIT)
 		{
