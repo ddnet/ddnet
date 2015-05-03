@@ -1568,14 +1568,37 @@ void CGameClient::OnPredict()
 		}
 
 		// move all players and quantize their data
-		for(int c = 0; c < MAX_CLIENTS; c++)
-		{
-			if(!World.m_apCharacters[c])
-				continue;
-
-			World.m_apCharacters[c]->Move();
-			World.m_apCharacters[c]->Quantize();
-		}
+        if(g_Config.m_ClAntiPingPlayers)
+        {
+            for(int h = 0; h < 3; h++)
+            {
+                if(h == 1)
+                {
+                    if(World.m_apCharacters[m_Snap.m_LocalClientID])
+                    {
+                        World.m_apCharacters[m_Snap.m_LocalClientID]->Move();
+                        World.m_apCharacters[m_Snap.m_LocalClientID]->Quantize();
+                    }
+                }
+                else
+                    for(int c = 0; c < MAX_CLIENTS; c++)
+                        if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && ((h == 0 && IsWeaker[g_Config.m_ClDummy][c]) || (h == 2 && !IsWeaker[g_Config.m_ClDummy][c])))
+                        {
+                            World.m_apCharacters[c]->Move();
+                            World.m_apCharacters[c]->Quantize();
+                        }
+            }
+        }
+        else
+        {
+            for(int c = 0; c < MAX_CLIENTS; c++)
+            {
+                if(!World.m_apCharacters[c])
+                    continue;
+                World.m_apCharacters[c]->Move();
+                World.m_apCharacters[c]->Quantize();
+            }
+        }
 
 		// check if we want to trigger effects
 		if(Tick > m_LastNewPredictedTick[g_Config.m_ClDummy])
