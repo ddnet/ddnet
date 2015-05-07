@@ -16,9 +16,12 @@ static volatile bool gs_stopFifoThread = false;
 
 FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 {
+	m_pFifoFile = pFifoFile;
+	if(m_pFifoFile[0] == '\0')
+		return;
+
 	m_pFifoThread = thread_init(ListenFifoThread, this);
 	m_pConsole = pConsole;
-	m_pFifoFile = pFifoFile;
 	m_flag = flag;
 
 	gs_stopFifoThread = false;
@@ -30,6 +33,9 @@ FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 
 FifoConsole::~FifoConsole()
 {
+	if(m_pFifoFile[0] == '\0')
+		return;
+
 	lock_wait(gs_FifoLock);
 	gs_stopFifoThread = true;
 	lock_unlock(gs_FifoLock);
