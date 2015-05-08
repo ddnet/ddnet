@@ -25,7 +25,11 @@ void CUpdater::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+	#if defined(CONF_FAMILY_WINDOWS)
 	m_IsWinXP = os_compare_version(5, 1) <= 0;
+	#else
+	m_IsWinXP = false;
+	#endif
 }
 
 void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
@@ -56,14 +60,10 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			if(pUpdate->m_pClient->State() == IClient::STATE_ONLINE || pUpdate->m_pClient->EditorHasUnsavedData())
 				pUpdate->m_State = NEED_RESTART;
 			else{
-				#if defined(CONF_FAMILY_WINDOWS)
-					if(!pUpdate->m_IsWinXP)
-						pUpdate->m_pClient->Restart();
-					else
-						pUpdate->WinXpRestart();
-				#else
+				if(!pUpdate->m_IsWinXP)
 					pUpdate->m_pClient->Restart();
-				#endif
+				else
+					pUpdate->WinXpRestart();
 			}
 		}
 		else if(pTask->State() == CFetchTask::STATE_ERROR)
@@ -122,9 +122,7 @@ void CUpdater::ReplaceClient()
 	dbg_msg("updater", "Replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
-	#if defined(CONF_FAMILY_WINDOWS)
 	if(!m_IsWinXP)
-	#endif
 	{
 		m_pStorage->RemoveBinaryFile("DDNet.old");
 		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
