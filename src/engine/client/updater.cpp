@@ -56,10 +56,14 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 			if(pUpdate->m_pClient->State() == IClient::STATE_ONLINE || pUpdate->m_pClient->EditorHasUnsavedData())
 				pUpdate->m_State = NEED_RESTART;
 			else{
-				if(!pUpdate->m_IsWinXP)
+				#if defined(CONF_FAMILY_WINDOWS)
+					if(!pUpdate->m_IsWinXP)
+						pUpdate->m_pClient->Restart();
+					else
+						pUpdate->WinXpRestart();
+				#else
 					pUpdate->m_pClient->Restart();
-				else
-					pUpdate->WinXpRestart();
+				#endif
 			}
 		}
 		else if(pTask->State() == CFetchTask::STATE_ERROR)
@@ -118,7 +122,9 @@ void CUpdater::ReplaceClient()
 	dbg_msg("updater", "Replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
+	#if defined(CONF_FAMILY_WINDOWS)
 	if(!m_IsWinXP)
+	#endif
 	{
 		m_pStorage->RemoveBinaryFile("DDNet.old");
 		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
