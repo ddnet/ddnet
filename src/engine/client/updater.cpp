@@ -118,7 +118,7 @@ void CUpdater::ReplaceClient()
 	dbg_msg("updater", "Replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
-	if(m_IsWinXP)
+	if(!m_IsWinXP)
 	{
 		m_pStorage->RemoveBinaryFile("DDNet.old");
 		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
