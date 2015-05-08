@@ -174,7 +174,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	MainView.HSplitBottom(TotalHeight, 0, &MainView);
 	MainView.VSplitLeft(50.0f, 0, &MainView);
-	MainView.VSplitRight(450.0f, &MainView, 0);
+	MainView.VSplitLeft(450.0f, &MainView, 0);
 
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_T, 10.0f);
 
