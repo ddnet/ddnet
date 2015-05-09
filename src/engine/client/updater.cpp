@@ -78,7 +78,7 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 	str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdateServer, pFile);
 	if(!pDestPath)
 		pDestPath = pFile;
-	CFetchTask *Task = new CFetchTask;
+	CFetchTask *Task = new CFetchTask(false);
 	m_pFetcher->QueueAdd(Task, aBuf, pDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 

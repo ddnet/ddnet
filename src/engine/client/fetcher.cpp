@@ -3,9 +3,10 @@
 #include <engine/shared/config.h>
 #include "fetcher.h"
 
-CFetchTask::CFetchTask()
+CFetchTask::CFetchTask(bool canTimeout)
 {
 	m_pNext = NULL;
+	m_CanTimeout = canTimeout;
 }
 
 CFetcher::CFetcher()
@@ -116,9 +117,18 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
 
 	//curl_easy_setopt(m_pHandle, CURLOPT_VERBOSE, 1L);
-	curl_easy_setopt(m_pHandle, CURLOPT_CONNECTTIMEOUT_MS, (long)g_Config.m_ClHTTPConnectTimeoutMs);
-	curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_LIMIT, (long)g_Config.m_ClHTTPLowSpeedLimit);
-	curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_TIME, (long)g_Config.m_ClHTTPLowSpeedTime);
+	if(pTask->m_CanTimeout)
+	{
+		curl_easy_setopt(m_pHandle, CURLOPT_CONNECTTIMEOUT_MS, (long)g_Config.m_ClHTTPConnectTimeoutMs);
+		curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_LIMIT, (long)g_Config.m_ClHTTPLowSpeedLimit);
+		curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_TIME, (long)g_Config.m_ClHTTPLowSpeedTime);
+	}
+	else
+	{
+		curl_easy_setopt(m_pHandle, CURLOPT_CONNECTTIMEOUT_MS, 0);
+		curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_LIMIT, 0);
+		curl_easy_setopt(m_pHandle, CURLOPT_LOW_SPEED_TIME, 0);
+	}
 	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);

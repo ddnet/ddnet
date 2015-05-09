@@ -1548,7 +1548,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
 						Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
 						str_format(aUrl, sizeof(aUrl), "http://%s/%s", g_Config.m_ClDDNetMapServer, aEscaped);
-						m_pMapdownloadTask = new CFetchTask;
+						m_pMapdownloadTask = new CFetchTask(true);
 						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 					}
 					else

@@ -26,9 +26,10 @@ class CFetchTask
 	int m_Progress;
 	int m_State;
 	bool m_Abort;
+	bool m_CanTimeout;
 	int m_StorageType;
 public:	
-	CFetchTask();
+	CFetchTask(bool canTimeout);
 
 	enum
 	{
