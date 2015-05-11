@@ -85,6 +85,7 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
 	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
+	Console()->Register("toggle_dynamic_camera", "", CFGFLAG_CLIENT, ConToggleDynamic, this, "Turn dynamic camera on/off");
 }
 
 const float ZoomStep = 0.866025f;
@@ -125,4 +126,25 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
 	((CCamera *)pUserData)->OnReset();
+}
+
+void CCamera::ToggleDynamic()
+{
+	if(g_Config.m_ClMouseDeadzone)
+	{
+		g_Config.m_ClMouseFollowfactor = 0;
+		g_Config.m_ClMouseMaxDistance = 400;
+		g_Config.m_ClMouseDeadzone = 0;
+	}
+	else
+	{
+		g_Config.m_ClMouseFollowfactor = g_Config.m_DynCamFollowFactor;
+		g_Config.m_ClMouseMaxDistance = g_Config.m_DynCamMaxDistance;
+		g_Config.m_ClMouseDeadzone = g_Config.m_DynCamDeadZone;
+	}
+}
+
+void CCamera::ConToggleDynamic(IConsole::IResult *pResult, void *pUserData)
+{
+	ToggleDynamic();
 }

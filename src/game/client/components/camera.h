@@ -30,10 +30,13 @@ public:
 
 	virtual void OnConsoleInit();
 	virtual void OnReset();
+
+	static void ToggleDynamic();
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleDynamic(IConsole::IResult *pResult, void *pUserData);
 };
 
 #endif
