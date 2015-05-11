@@ -24,6 +24,7 @@
 #include <game/localization.h>
 
 #include "binds.h"
+#include "camera.h"
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
@@ -74,18 +75,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_DynamicCameraButton = 0;
 		if(DoButton_CheckBox(&s_DynamicCameraButton, Localize("Dynamic Camera"), g_Config.m_ClMouseDeadzone != 0, &Button))
 		{
-			if(g_Config.m_ClMouseDeadzone)
-			{
-				g_Config.m_ClMouseFollowfactor = 0;
-				g_Config.m_ClMouseMaxDistance = 400;
-				g_Config.m_ClMouseDeadzone = 0;
-			}
-			else
-			{
-				g_Config.m_ClMouseFollowfactor = 60;
-				g_Config.m_ClMouseMaxDistance = 1000;
-				g_Config.m_ClMouseDeadzone = 300;
-			}
+			CCamera::ToggleDynamic();
 		}
 
 		// weapon pickup
