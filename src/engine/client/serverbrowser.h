@@ -96,6 +96,7 @@ public:
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
+	int GetCurrentType() { return m_ServerlistType; };
 
 private:
 	CNetClient *m_pNetClient;

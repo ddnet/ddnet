@@ -599,7 +599,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_InternetButton=0;
 		if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			NewPage = PAGE_INTERNET;
 			m_DoubleClickIndex = -1;
 		}
@@ -609,7 +610,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_LanButton=0;
 		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			NewPage = PAGE_LAN;
 			m_DoubleClickIndex = -1;
 		}
@@ -619,7 +621,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_FavoritesButton=0;
 		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			NewPage = PAGE_FAVORITES;
 			m_DoubleClickIndex = -1;
 		}
@@ -629,7 +632,8 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_DDNetButton=0;
 		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 			NewPage = PAGE_DDNET;
 			m_DoubleClickIndex = -1;
 		}

@@ -114,6 +114,7 @@ public:
 	virtual void DDNetFilterAdd(char *pFilter, const char *pName) = 0;
 	virtual void DDNetFilterRem(char *pFilter, const char *pName) = 0;
 	virtual bool DDNetFiltered(char *pFilter, const char *pName) = 0;
+	virtual int GetCurrentType() = 0;
 };
 
 #endif
