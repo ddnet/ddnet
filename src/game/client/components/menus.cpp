@@ -937,6 +937,7 @@ int CMenus::Render()
 		TabBar.VMargin(20.0f, &TabBar);
 		RenderMenubar(TabBar);
 
+		// news is not implemented yet
 		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

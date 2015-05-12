@@ -189,8 +189,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					else
 						g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
 				}
-				if(m_aInputEvents[i].m_Key == 'r')
-					ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 			}
 			if(NewIndex > -1 && NewIndex < NumServers)
 			{
