@@ -406,8 +406,15 @@ int CNetBan::UnbanByIndex(int Index)
 	return Result;
 }
 
-bool CNetBan::IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize) const
+bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize) const
 {
+	NETADDR addr;
+	NETADDR *pAddr = pOrigAddr;
+	if (pOrigAddr->type == NETTYPE_WEBSOCKET_IPV4) {
+		mem_copy(&addr, pOrigAddr, sizeof(NETADDR));
+		pAddr = &addr;
+		addr.type = NETTYPE_IPV4;
+	}
 	CNetHash aHash[17];
 	int Length = CNetHash::MakeHashArray(pAddr, aHash);
 
