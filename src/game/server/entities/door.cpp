@@ -90,7 +90,7 @@ void CDoor::Snap(int SnappingClient)
 	if (Char == 0)
 		return;
 
-	if (Char->IsAlive()
+	if (Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0
 			&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
 			&& (!Tick))
 		return;
@@ -100,7 +100,8 @@ void CDoor::Snap(int SnappingClient)
 		pObj->m_FromX = (int) m_Pos.x;
 		pObj->m_FromY = (int) m_Pos.y;
 	}
-	else if (GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+	else if (Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0
+		&& GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 	{
 		pObj->m_FromX = (int) m_To.x;
 		pObj->m_FromY = (int) m_To.y;
