@@ -566,6 +566,7 @@ void CGameConsole::OnRender()
 
 		// render page
 		char aBuf[128];
+		TextRender()->TextColor(1,1,1,1);
 		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogActPage+1);
 		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
 
