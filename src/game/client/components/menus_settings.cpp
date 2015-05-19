@@ -516,7 +516,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Fire", "+fire", 0 },
 	{ "Hook", "+hook", 0 },
 	{ "Hook Collisions", "+showhookcoll", 0 },
-	{ "Dynamic Camera", "toggle cl_mouse_deadzone 300 0; toggle cl_mouse_followfactor 60 0; toggle cl_mouse_max_distance 1000 400", 0 },
+	{ "Dynamic Camera", "toggle_dynamic_camera", 0 },
 	{ "Hammer", "+weapon1", 0 },
 	{ "Pistol", "+weapon2", 0 },
 	{ "Shotgun", "+weapon3", 0 },
