@@ -106,6 +106,7 @@ public:
 	virtual void DemoRecorder_Stop(int Recorder) = 0;
 	virtual class IDemoRecorder *DemoRecorder(int Recorder) = 0;
 	virtual void AutoScreenshot_Start() = 0;
+	virtual void AutoStatScreenshot_Start() = 0;
 	virtual void ServerBrowserUpdate() = 0;
 
 	// networking

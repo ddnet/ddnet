@@ -97,6 +97,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_WindowMustRefocus;
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
+	bool m_AutoStatScreenshotRecycle;
 	bool m_EditorActive;
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
@@ -344,7 +345,9 @@ public:
 	class IDemoRecorder *DemoRecorder(int Recorder);
 
 	void AutoScreenshot_Start();
+	void AutoStatScreenshot_Start();
 	void AutoScreenshot_Cleanup();
+	void AutoStatScreenshot_Cleanup();
 
 	void ServerBrowserUpdate();
 

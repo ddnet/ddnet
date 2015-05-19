@@ -35,6 +35,7 @@
 #include "components/countryflags.h"
 #include "components/damageind.h"
 #include "components/debughud.h"
+#include "components/detailed_stats.h"
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
@@ -80,6 +81,7 @@ static CDebugHud gs_DebugHud;
 static CControls gs_Controls;
 static CEffects gs_Effects;
 static CScoreboard gs_Scoreboard;
+static CDetailedStats gs_DetailedStats;
 static CSounds gs_Sounds;
 static CEmoticon gs_Emoticon;
 static CDamageInd gsDamageInd;
@@ -146,6 +148,7 @@ void CGameClient::OnConsoleInit()
 	m_pMapimages = &::gs_MapImages;
 	m_pVoting = &::gs_Voting;
 	m_pScoreboard = &::gs_Scoreboard;
+	m_pDetailedStats = &::gs_DetailedStats;
 	m_pItems = &::gs_Items;
 	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
 	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
@@ -155,7 +158,7 @@ void CGameClient::OnConsoleInit()
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
-	// make a list of all the systems, make sure to add them in the corrent render order
+	// make a list of all the systems, make sure to add them in the correct render order
 	m_All.Add(m_pSkins);
 	m_All.Add(m_pCountryFlags);
 	m_All.Add(m_pMapimages);
@@ -188,6 +191,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Broadcast);
 	m_All.Add(&gs_DebugHud);
 	m_All.Add(&gs_Scoreboard);
+	m_All.Add(&gs_DetailedStats);
 	m_All.Add(m_pMotd);
 	m_All.Add(m_pMenus);
 	m_All.Add(m_pGameConsole);
@@ -941,6 +945,9 @@ void CGameClient::OnNewSnapshot()
 	{
 		m_Snap.m_aTeamSize[TEAM_RED] = m_Snap.m_aTeamSize[TEAM_BLUE] = 0;
 
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			m_aStats[i].m_Active = false;
+
 		int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
 		{
@@ -1012,7 +1019,10 @@ void CGameClient::OnNewSnapshot()
 
 				// calculate team-balance
 				if(pInfo->m_Team != TEAM_SPECTATORS)
+				{
 					m_Snap.m_aTeamSize[pInfo->m_Team]++;
+					m_aStats[pInfo->m_ClientID].m_Active = true;
+				}
 
 			}
 			else if(Item.m_Type == NETOBJTYPE_CHARACTER)
@@ -1068,6 +1078,16 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
 				m_Snap.m_paFlags[Item.m_ID%2] = (const CNetObj_Flag *)pData;
+		}
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_aStats[i].m_Active && !m_aStats[i].m_WasActive)
+			{
+				m_aStats[i].Reset(); // Client connected, reset stats.
+				m_aStats[i].m_Active = true;
+				m_aStats[i].m_JoinDate = Client()->GameTick();
+			}
+			m_aStats[i].m_WasActive = m_aStats[i].m_Active;
 		}
 	}
 
@@ -1685,6 +1705,48 @@ void CGameClient::OnPredict()
 void CGameClient::OnActivateEditor()
 {
 	OnRelease();
+}
+
+CGameClient::CClientStats::CClientStats()
+{
+	m_JoinDate = 0;
+	m_Active = false;
+	m_WasActive = false;
+	m_Frags = 0;
+	m_Deaths = 0;
+	m_Suicides = 0;
+	for(int j = 0; j < NUM_WEAPONS; j++)
+	{
+		m_aFragsWith[j] = 0;
+		m_aDeathsFrom[j] = 0;
+	}
+	m_FlagGrabs = 0;
+	m_FlagCaptures = 0;
+	m_CarriersKilled = 0;
+	m_KillsCarrying = 0;
+	m_DeathsCarrying = 0;
+}
+
+void CGameClient::CClientStats::Reset()
+{
+	m_JoinDate = 0;
+	m_Active = false;
+	m_WasActive = false;
+	m_Frags = 0;
+	m_Deaths = 0;
+	m_Suicides = 0;
+	m_BestSpree = 0;
+	m_CurrentSpree = 0;
+	for(int j = 0; j < NUM_WEAPONS; j++)
+	{
+		m_aFragsWith[j] = 0;
+		m_aDeathsFrom[j] = 0;
+	}
+	m_FlagGrabs = 0;
+	m_FlagCaptures = 0;
+	m_CarriersKilled = 0;
+	m_KillsCarrying = 0;
+	m_DeathsCarrying = 0;
 }
 
 void CGameClient::CClientData::UpdateRenderInfo()
