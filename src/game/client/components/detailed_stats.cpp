@@ -121,16 +121,13 @@ void CDetailedStats::OnMessage(int MsgType, void *pRawMsg)
 
 void CDetailedStats::OnRender()
 {
-	// auto stat screenshot stuff
 	if(g_Config.m_ClDsStatScreenshot)
 	{
 		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
-			m_ScreenshotTime = time_get()+time_freq()*3;
-
+			m_ScreenshotTime = time_get() + time_freq() * 3;
 		if(m_ScreenshotTime > -1 && m_ScreenshotTime < time_get())
 			m_Active = true;
-
-		if(!m_ScreenshotTaken && m_ScreenshotTime > -1 && m_ScreenshotTime+time_freq()/5 < time_get())
+		if(!m_ScreenshotTaken && m_ScreenshotTime > -1 && m_ScreenshotTime + time_freq() / 5 < time_get())
 		{
 			AutoStatScreenshot();
 			m_ScreenshotTaken = true;
@@ -184,31 +181,19 @@ void CDetailedStats::RenderGlobalStats()
 	}
 
 	for(i = 0; i < 9; i++)
-		if(g_Config.m_ClDsStatboardInfos & (1<<i))
-		{
-			if((1<<i) == (DETAILED_STATS_BESTSPREE))
-				w += 140;
-			else
-				w += 100;
-		}
+	{
+		if(i == 7) // Best Spree
+			w += 140;
+		else
+			w += 100;
+	}
 
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS && g_Config.m_ClDsStatboardInfos&DETAILED_STATS_FLAGCAPTURES)
+	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
 		w += 100;
 
-	bool aDisplayWeapon[NUM_WEAPONS] = {false};
-	if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_WEAPS)
-	{
-		w += 10;
-		for(i=0; i<NumPlayers; i++)
-		{
-			const CGameClient::CClientStats pStats = m_pClient->m_aStats[apPlayers[i]->m_ClientID];
-			for(int j=0; j<NUM_WEAPONS; j++)
-				aDisplayWeapon[j] = aDisplayWeapon[j] || pStats.m_aFragsWith[j] || pStats.m_aDeathsFrom[j];
-		}
-		for(i=0; i<NUM_WEAPONS; i++)
-			if(aDisplayWeapon[i])
-				w += 80;
-	}
+	w += 10;
+	for(i=0; i<NUM_WEAPONS - 1; i++) // No katana
+		w += 80;
 
 	float x = Width/2-w/2;
 	float y = 200.0f;
@@ -228,36 +213,29 @@ void CDetailedStats::RenderGlobalStats()
 	TextRender()->Text(0, x+10, y-5, 24.0f, Localize("Name"), -1);
 	const char *apHeaders[] = { Localize("Frags"), Localize("Deaths"), Localize("Suicides"), Localize("Ratio"), Localize("Net"), Localize("FPM"), Localize("Spree"), Localize("Best spree"), Localize("Grabs") };
 	for(i = 0; i < 9; i++)
-		if(g_Config.m_ClDsStatboardInfos & (1<<i))
-		{
-			if(1<<i == DETAILED_STATS_BESTSPREE)
-				px += 40.0f;
-			tw = TextRender()->TextWidth(0, 24.0f, apHeaders[i], -1);
-			TextRender()->Text(0, x+px-tw, y-5, 24.0f, apHeaders[i], -1);
-			px += 100;
-		}
-
-	if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_WEAPS)
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-		Graphics()->QuadsBegin();
-		for(i = 0, px-=40; i < NUM_WEAPONS; i++)
-		{
-			if(!aDisplayWeapon[i])
-				continue;
-
-			RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody);
-			if(i == 0)
-				RenderTools()->DrawSprite(x+px, y+10, g_pData->m_Weapons.m_aId[i].m_VisualSize*0.8);
-			else
-				RenderTools()->DrawSprite(x+px, y+10, g_pData->m_Weapons.m_aId[i].m_VisualSize);
-			px += 80;
-		}
-		Graphics()->QuadsEnd();
-		px += 40;
+		if(i == 7) // Best Spree
+			px += 40.0f;
+		tw = TextRender()->TextWidth(0, 24.0f, apHeaders[i], -1);
+		TextRender()->Text(0, x+px-tw, y-5, 24.0f, apHeaders[i], -1);
+		px += 100;
 	}
 
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS && g_Config.m_ClDsStatboardInfos&DETAILED_STATS_FLAGCAPTURES)
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+	Graphics()->QuadsBegin();
+	for(i = 0, px-=40; i < NUM_WEAPONS - 1; i++) // No katana
+	{
+		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody);
+		if(i == 0)
+			RenderTools()->DrawSprite(x+px, y+10, g_pData->m_Weapons.m_aId[i].m_VisualSize*0.8);
+		else
+			RenderTools()->DrawSprite(x+px, y+10, g_pData->m_Weapons.m_aId[i].m_VisualSize);
+		px += 80;
+	}
+	Graphics()->QuadsEnd();
+	px += 40;
+
+	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
 	{
 		px -= 40;
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
@@ -303,12 +281,6 @@ void CDetailedStats::RenderGlobalStats()
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &Teeinfo, EMOTE_NORMAL, vec2(1,0), vec2(x+28, y+28+TeeOffset));
 
 		char aBuf[128];
-		if(g_Config.m_ClDsStatId)
-		{
-			str_format(aBuf, sizeof(aBuf), "%d", pInfo->m_ClientID);
-			TextRender()->Text(0, x, y, FontSize, aBuf, -1);
-		}
-
 		CTextCursor Cursor;
 		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 		TextRender()->SetCursor(&Cursor, x+64, y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
@@ -317,28 +289,28 @@ void CDetailedStats::RenderGlobalStats()
 
 		px = 325;
 
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_FRAGS)
+		// DETAILED_STATS_FRAGS
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_Frags);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_DEATHS)
+		// DETAILED_STATS_DEATHS
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_SUICIDES)
+		// DETAILED_STATS_SUICIDES
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_Suicides);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_RATIO)
+		// DETAILED_STATS_RATIO
 		{
 			if(Stats.m_Deaths == 0)
 				str_format(aBuf, sizeof(aBuf), "--");
@@ -348,14 +320,14 @@ void CDetailedStats::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_NET)
+		// DETAILED_STATS_NET
 		{
 			str_format(aBuf, sizeof(aBuf), "%+d", Stats.m_Frags-Stats.m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_FPM)
+		// DETAILED_STATS_FPM
 		{
 			float Fpm = (float)(Stats.m_Frags*60)/((float)(Client()->GameTick()-Stats.m_JoinDate)/Client()->GameTickSpeed());
 			str_format(aBuf, sizeof(aBuf), "%.1f", Fpm);
@@ -363,14 +335,14 @@ void CDetailedStats::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_SPREE)
+		// DETAILED_STATS_SPREE
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_CurrentSpree);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(g_Config.m_ClDsStatboardInfos & DETAILED_STATS_BESTSPREE)
+		// DETAILED_STATS_BESTSPREE
 		{
 			px += 40;
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_BestSpree);
@@ -378,24 +350,21 @@ void CDetailedStats::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS && g_Config.m_ClDsStatboardInfos&DETAILED_STATS_FLAGGRABS)
+		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_FlagGrabs);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		for(i = 0, px=px-40; i < NUM_WEAPONS; i++)
+		for(i = 0, px=px-40; i < NUM_WEAPONS - 1; i++) // No katana
 		{
-			if(!aDisplayWeapon[i])
-				continue;
-
 			str_format(aBuf, sizeof(aBuf), "%d/%d", Stats.m_aFragsWith[i], Stats.m_aDeathsFrom[i]);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x+px-tw/2, y, FontSize, aBuf, -1);
 			px += 80;
 		}
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS && g_Config.m_ClDsStatboardInfos&DETAILED_STATS_FLAGCAPTURES)
+		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_FlagCaptures);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
