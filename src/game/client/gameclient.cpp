@@ -435,6 +435,9 @@ void CGameClient::OnReset()
 	m_DemoSpecID = SPEC_FREEVIEW;
 	m_FlagDropTick[TEAM_RED] = 0;
 	m_FlagDropTick[TEAM_BLUE] = 0;
+	m_LastRoundStartTick = -1;
+	m_LastFlagCarrierRed = -4;
+	m_LastFlagCarrierBlue = -4;
 	m_Tuning[g_Config.m_ClDummy] = CTuningParams();
 
 	m_Teams.Reset();
@@ -841,6 +844,16 @@ void CGameClient::OnStartGame()
 {
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Client()->DemoRecorder_HandleAutoStart();
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		m_aStats[i].Reset();
+}
+
+void CGameClient::OnFlagGrab(int TeamID)
+{
+	if(TeamID == TEAM_RED)
+		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierRed].m_FlagGrabs++;
+	else
+		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierBlue].m_FlagGrabs++;
 }
 
 void CGameClient::OnRconLine(const char *pLine)
@@ -1053,8 +1066,14 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
 				if(!s_GameOver && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 					OnGameOver();
-				else if(s_GameOver && !(m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+				// this check includes the case when game is restarted -- game is not
+				// over but new round is started
+				else if(!(m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
+						&& m_LastRoundStartTick != m_Snap.m_pGameInfoObj->m_RoundStartTick)
+				{
+					m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 					OnStartGame();
+				}
 				s_GameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
@@ -1075,10 +1094,18 @@ void CGameClient::OnNewSnapshot()
 				}
 				else if(m_FlagDropTick[TEAM_BLUE] != 0)
 						m_FlagDropTick[TEAM_BLUE] = 0;
+				if(m_LastFlagCarrierRed == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierRed >= 0)
+					OnFlagGrab(TEAM_RED);
+				else if(m_LastFlagCarrierBlue == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierBlue >= 0)
+					OnFlagGrab(TEAM_BLUE);
+
+				m_LastFlagCarrierRed = m_Snap.m_pGameDataObj->m_FlagCarrierRed;
+				m_LastFlagCarrierBlue = m_Snap.m_pGameDataObj->m_FlagCarrierBlue;
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
 				m_Snap.m_paFlags[Item.m_ID%2] = (const CNetObj_Flag *)pData;
 		}
+
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_aStats[i].m_Active && !m_aStats[i].m_WasActive)

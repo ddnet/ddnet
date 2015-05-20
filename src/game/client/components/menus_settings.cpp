@@ -538,6 +538,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Remote console", "toggle_remote_console", 0 },
 	{ "Screenshot", "screenshot", 0 },
 	{ "Scoreboard", "+scoreboard", 0 },
+	{ "Statboard", "+statboard", 0 },
 	{ "Respawn", "kill", 0 },
 	{ "Toggle Dummy", "toggle cl_dummy 0 1", 0 },
 	{ "Dummy Copy", "toggle cl_dummy_copy_moves 0 1", 0 },
@@ -797,7 +798,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples-1 +17)%17;
 			CheckSettings = true;
 		}
-	
+
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxTextureQuality, Localize("Quality Textures"), g_Config.m_GfxTextureQuality, &Button))
 	{
@@ -1271,7 +1272,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		g_Config.m_ClMessageSystemLht = (int)(DoScrollbarH(&g_Config.m_ClMessageSystemLht, &Button, g_Config.m_ClMessageSystemLht / 255.0f)*255.0f);
 
 		Left.HSplitTop(10.0f, &Label, &Left);
-	
+
 		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 
@@ -1543,7 +1544,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Pos.x + Out.x, Pos.y + Out.y);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
-		// do inner	
+		// do inner
 		RGB = HslToRgb(vec3(g_Config.m_ClLaserInnerHue / 255.0f, g_Config.m_ClLaserInnerSat / 255.0f, g_Config.m_ClLaserInnerLht / 255.0f));
 		vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 		Out = vec2(0.0f, -1.0f) * (2.25f);

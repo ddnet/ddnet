@@ -108,6 +108,11 @@ class CGameClient : public IGameClient
 	int m_PredictedTick;
 	int m_LastNewPredictedTick[2];
 
+	int m_LastRoundStartTick;
+
+	int m_LastFlagCarrierRed;
+	int m_LastFlagCarrierBlue;
+
 	int m_CheckInfo[2];
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
@@ -302,6 +307,7 @@ public:
 	virtual void OnRconLine(const char *pLine);
 	virtual void OnGameOver();
 	virtual void OnStartGame();
+	virtual void OnFlagGrab(int TeamID);
 
 	virtual void ResetDummyInput();
 	virtual const char *GetItemName(int Type);

@@ -31,7 +31,7 @@ void CDetailedStats::ConKeyStats(IConsole::IResult *pResult, void *pUserData)
 
 void CDetailedStats::OnConsoleInit()
 {
-	Console()->Register("+stats", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
+	Console()->Register("+statboard", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
 }
 
 bool CDetailedStats::IsActive()
