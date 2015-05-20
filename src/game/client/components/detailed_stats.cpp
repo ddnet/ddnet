@@ -6,11 +6,11 @@
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
 #include <game/client/components/detailed_stats.h>
+#include <game/client/components/motd.h>
 
 CDetailedStats::CDetailedStats()
 {
-	m_Mode = 0;
-	m_StatsClientID = -1;
+	m_Active = false;
 	m_ScreenshotTaken = false;
 	m_ScreenshotTime = -1;
 }
@@ -19,62 +19,24 @@ void CDetailedStats::OnReset()
 {
 	for(int i=0; i<MAX_CLIENTS; i++)
 		m_pClient->m_aStats[i].Reset();
-	m_Mode = 0;
-	m_StatsClientID = -1;
+	m_Active = false;
 	m_ScreenshotTaken = false;
 	m_ScreenshotTime = -1;
 }
 
 void CDetailedStats::ConKeyStats(IConsole::IResult *pResult, void *pUserData)
 {
-	if(pResult->GetInteger(0) != 0)
-		((CDetailedStats *)pUserData)->m_Mode = pResult->GetInteger(1);
-	else
-		((CDetailedStats *)pUserData)->m_Mode = 0;
-}
-
-void CDetailedStats::ConKeyNext(IConsole::IResult *pResult, void *pUserData)
-{
-	CDetailedStats *pStats = (CDetailedStats *)pUserData;
-	if(pStats->m_Mode != 2)
-		return;
-
-	if(pResult->GetInteger(0) == 0)
-	{
-		pStats->m_StatsClientID++;
-		pStats->m_StatsClientID %= MAX_CLIENTS;
-		pStats->CheckStatsClientID();
-	}
+	((CDetailedStats *)pUserData)->m_Active = pResult->GetInteger(0) != 0;
 }
 
 void CDetailedStats::OnConsoleInit()
 {
-	Console()->Register("+stats", "i", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
-	Console()->Register("+next_stats", "", CFGFLAG_CLIENT, ConKeyNext, this, "Next player Stats");
+	Console()->Register("+stats", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
 }
 
 bool CDetailedStats::IsActive()
 {
-	return (m_Mode > 0);
-}
-
-void CDetailedStats::CheckStatsClientID()
-{
-	if(m_StatsClientID == -1)
-		m_StatsClientID = m_pClient->m_Snap.m_LocalClientID;
-
-	int Prev = m_StatsClientID;
-	while(!m_pClient->m_aStats[m_StatsClientID].m_Active)
-	{
-		m_StatsClientID++;
-		m_StatsClientID %= MAX_CLIENTS;
-		if(m_StatsClientID == Prev)
-		{
-			m_StatsClientID = -1;
-			m_Mode = 0;
-			break;
-		}
-	}
+	return m_Active;
 }
 
 void CDetailedStats::OnMessage(int MsgType, void *pRawMsg)
@@ -166,7 +128,7 @@ void CDetailedStats::OnRender()
 			m_ScreenshotTime = time_get()+time_freq()*3;
 
 		if(m_ScreenshotTime > -1 && m_ScreenshotTime < time_get())
-			m_Mode = 1;
+			m_Active = true;
 
 		if(!m_ScreenshotTaken && m_ScreenshotTime > -1 && m_ScreenshotTime+time_freq()/5 < time_get())
 		{
@@ -175,21 +137,15 @@ void CDetailedStats::OnRender()
 		}
 	}
 
-	switch(m_Mode)
-	{
-		case 1:
-			RenderGlobalStats();
-			break;
-		case 2:
-			RenderIndividualStats();
-			break;
-	}
+	if(IsActive())
+		RenderGlobalStats();
 }
 
 void CDetailedStats::RenderGlobalStats()
 {
-	if(m_Mode != 1)
-		return;
+	//clear motd if it is active
+	if(m_pClient->m_pMotd->IsActive())
+		m_pClient->m_pMotd->Clear();
 
 	float Width = 400*3.0f*Graphics()->ScreenAspect();
 	float Height = 400*3.0f;
@@ -358,7 +314,6 @@ void CDetailedStats::RenderGlobalStats()
 		TextRender()->SetCursor(&Cursor, x+64, y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 220;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
-		//TextRender()->Text(0, x+64, y, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 
 		px = 325;
 
@@ -447,171 +402,6 @@ void CDetailedStats::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		y += LineHeight;
-	}
-}
-
-void CDetailedStats::RenderIndividualStats()
-{
-	if(m_Mode != 2)
-		return;
-	CheckStatsClientID();
-	if(m_Mode != 2)
-		return;
-	int m_ClientID = m_StatsClientID;
-	float Width = 400*3.0f*Graphics()->ScreenAspect();
-	float Height = 400*3.0f;
-	float w = 1200.0f;
-	float x = Width/2-w/2;
-	float y = 100.0f;
-	float xo = 200.0f;
-	float FontSize = 30.0f;
-	float LineHeight = 40.0f;
-	const CGameClient::CClientStats m_aStats = m_pClient->m_aStats[m_ClientID];
-
-	Graphics()->MapScreen(0, 0, Width, Height);
-
-	// header with name and score
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.5f);
-	RenderTools()->DrawRoundRect(x-10.f, y-10.f, w, 120.0f, 17.0f);
-	Graphics()->QuadsEnd();
-
-	CTeeRenderInfo Teeinfo = m_pClient->m_aClients[m_ClientID].m_RenderInfo;
-	Teeinfo.m_Size *= 1.5f;
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &Teeinfo, EMOTE_NORMAL, vec2(1,0), vec2(x+xo+32, y+36));
-	TextRender()->Text(0, x+xo+128, y, 48.0f, m_pClient->m_aClients[m_ClientID].m_aName, -1);
-
-	char aBuf[64];
-	if(g_Config.m_ClDsStatId)
-	{
-		str_format(aBuf, sizeof(aBuf), "%d", m_ClientID);
-		TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-	}
-
-	str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score"), m_pClient->m_Snap.m_paPlayerInfos[m_ClientID]->m_Score);
-	TextRender()->Text(0, x+xo, y+64, FontSize, aBuf, -1);
-	int Seconds = (float)(Client()->GameTick()-m_aStats.m_JoinDate)/Client()->GameTickSpeed();
-	str_format(aBuf, sizeof(aBuf), "%s: %02d:%02d", Localize("Time played"), Seconds/60, Seconds%60);
-	TextRender()->Text(0, x+xo+256, y+64, FontSize, aBuf, -1);
-
-	y += 150.0f;
-
-	// Frags, etc. stats
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.5f);
-	RenderTools()->DrawRoundRect(x-10.f, y-10.f, w, 100.0f, 17.0f);
-	Graphics()->QuadsEnd();
-
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.0f,1.0f,1.0f,1.0f);
-	RenderTools()->SelectSprite(SPRITE_EYES);
-	IGraphics::CQuadItem QuadItem(x+xo/2, y+40, 128, 128);
-	Graphics()->QuadsDraw(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-
-	str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Frags"), m_aStats.m_Frags);
-	TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-	str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Deaths"), m_aStats.m_Deaths);
-	TextRender()->Text(0, x+xo+200.0f, y, FontSize, aBuf, -1);
-	str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Suicides"), m_aStats.m_Suicides);
-	TextRender()->Text(0, x+xo+400.0f, y, FontSize, aBuf, -1);
-	str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Spree"), m_aStats.m_CurrentSpree);
-	TextRender()->Text(0, x+xo+600.0f, y, FontSize, aBuf, -1);
-	y += LineHeight;
-
-	if(m_aStats.m_Deaths == 0)
-		str_format(aBuf, sizeof(aBuf), "%s: --", Localize("Ratio"));
-	else
-		str_format(aBuf, sizeof(aBuf), "%s: %.2f", Localize("Ratio"), (float)(m_aStats.m_Frags)/m_aStats.m_Deaths);
-	TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-	str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Net"), m_aStats.m_Frags-m_aStats.m_Deaths);
-	TextRender()->Text(0, x+xo+200.0f, y, FontSize, aBuf, -1);
-	float Fpm = (float)(m_aStats.m_Frags*60)/((float)(Client()->GameTick()-m_aStats.m_JoinDate)/Client()->GameTickSpeed());
-	str_format(aBuf, sizeof(aBuf), "%s: %.1f", Localize("FPM"), Fpm);
-	TextRender()->Text(0, x+xo+400.0f, y, FontSize, aBuf, -1);
-	str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Best spree"), m_aStats.m_BestSpree);
-	TextRender()->Text(0, x+xo+600.0f, y, FontSize, aBuf, -1);
-	y+= LineHeight + 30.0f;
-
-	// Weapon stats
-	bool aDisplayWeapon[NUM_WEAPONS] = {false};
-	int NumWeaps = 0;
-	for(int i=0; i<NUM_WEAPONS; i++)
-		if(m_aStats.m_aFragsWith[i] || m_aStats.m_aDeathsFrom[i])
-		{
-			aDisplayWeapon[i] = true;
-			NumWeaps++;
-		}
-
-	if(NumWeaps)
-	{
-		Graphics()->BlendNormal();
-		Graphics()->TextureSet(-1);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0,0,0,0.5f);
-		RenderTools()->DrawRoundRect(x-10.f, y-10.f, w, LineHeight*(1+NumWeaps)+20.0f, 17.0f);
-		Graphics()->QuadsEnd();
-
-		TextRender()->Text(0, x+xo, y, FontSize, Localize("Frags"), -1);
-		TextRender()->Text(0, x+xo+200.0f, y, FontSize, Localize("Deaths"), -1);
-		y += LineHeight;
-
-		for(int i=0; i<NUM_WEAPONS; i++)
-		{
-			if(!aDisplayWeapon[i])
-				continue;
-
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-			Graphics()->QuadsBegin();
-			RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, 0);
-			RenderTools()->DrawSprite(x+xo/2, y+24, g_pData->m_Weapons.m_aId[i].m_VisualSize);
-			Graphics()->QuadsEnd();
-
-			str_format(aBuf, sizeof(aBuf), "%d", m_aStats.m_aFragsWith[i]);
-			TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-			str_format(aBuf, sizeof(aBuf), "%d", m_aStats.m_aDeathsFrom[i]);
-			TextRender()->Text(0, x+xo+200.0f, y, FontSize, aBuf, -1);
-			y += LineHeight;
-		}
-		y += 30.0f;
-	}
-
-	// Flag stats
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
-	{
-		Graphics()->BlendNormal();
-		Graphics()->TextureSet(-1);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0,0,0,0.5f);
-		RenderTools()->DrawRoundRect(x-10.f, y-10.f, w, LineHeight*5+20.0f, 17.0f);
-		Graphics()->QuadsEnd();
-
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-		Graphics()->QuadsBegin();
-		RenderTools()->SelectSprite(SPRITE_FLAG_RED);
-		RenderTools()->DrawSprite(x+xo/2, y+100.0f, 192);
-		Graphics()->QuadsEnd();
-
-		str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Grabs"), m_aStats.m_FlagGrabs);
-		TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-		y += LineHeight;
-		str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Captures"), m_aStats.m_FlagCaptures);
-		TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-		y += LineHeight;
-		str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Kills holding flag"), m_aStats.m_KillsCarrying);
-		TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-		y += LineHeight;
-		str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Deaths with flag"), m_aStats.m_DeathsCarrying);
-		TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
-		y += LineHeight;
-		str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Carriers killed"), m_aStats.m_CarriersKilled);
-		TextRender()->Text(0, x+xo, y, FontSize, aBuf, -1);
 		y += LineHeight;
 	}
 }
