@@ -134,10 +134,6 @@ void CStatboard::OnRender()
 
 void CStatboard::RenderGlobalStats()
 {
-	//clear motd if it is active
-	if(m_pClient->m_pMotd->IsActive())
-		m_pClient->m_pMotd->Clear();
-
 	float Width = 400*3.0f*Graphics()->ScreenAspect();
 	float Height = 400*3.0f;
 	float w = 250.0f;
@@ -173,6 +169,15 @@ void CStatboard::RenderGlobalStats()
 			NumPlayers++;
 		}
 	}
+
+	// Dirty hack. Do not show scoreboard if there are more than 16 players
+	// remove as soon as support of more than 16 players is required
+	if(NumPlayers > 16)
+		return;
+
+	//clear motd if it is active
+	if(m_pClient->m_pMotd->IsActive())
+		m_pClient->m_pMotd->Clear();
 
 	for(i = 0; i < 9; i++)
 	{
