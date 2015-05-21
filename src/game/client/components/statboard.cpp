@@ -121,7 +121,7 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 
 void CStatboard::OnRender()
 {
-	if(g_Config.m_ClStatboardScreenshot)
+	if(g_Config.m_ClAutoStatboardScreenshot)
 	{
 		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 			m_ScreenshotTime = time_get() + time_freq() * 3;

@@ -14,6 +14,7 @@
 #include <game/client/render.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/components/motd.h>
+#include <game/client/components/statboard.h>
 
 #include "scoreboard.h"
 
@@ -616,7 +617,10 @@ void CScoreboard::OnRender()
 
 bool CScoreboard::Active()
 {
-	// if we activly wanna look on the scoreboard
+	// if statboard is active dont show scoreboard
+	if(m_pClient->m_pStatboard->IsActive())
+		return false;
+
 	if(m_Active)
 		return true;
 

@@ -2894,7 +2894,7 @@ void CClient::AutoScreenshot_Start()
 
 void CClient::AutoStatScreenshot_Start()
 {
-	if(g_Config.m_ClStatboardScreenshot)
+	if(g_Config.m_ClAutoStatboardScreenshot)
 	{
 		Graphics()->TakeScreenshot("auto/stats/autoscreen");
 		m_AutoStatScreenshotRecycle = true;
@@ -2919,11 +2919,11 @@ void CClient::AutoStatScreenshot_Cleanup()
 {
 	if(m_AutoStatScreenshotRecycle)
 	{
-		if(g_Config.m_ClStatboardScreenshotMax)
+		if(g_Config.m_ClAutoStatboardScreenshotMax)
 		{
 			// clean up auto taken screens
 			CFileCollection AutoScreens;
-			AutoScreens.Init(Storage(), "screenshots/auto/stats", "autoscreen", ".png", g_Config.m_ClStatboardScreenshotMax);
+			AutoScreens.Init(Storage(), "screenshots/auto/stats", "autoscreen", ".png", g_Config.m_ClAutoStatboardScreenshotMax);
 		}
 		m_AutoStatScreenshotRecycle = false;
 	}
