@@ -197,7 +197,7 @@ void CStatboard::RenderGlobalStats()
 	{
 		const CGameClient::CClientStats pStats = m_pClient->m_aStats[apPlayers[i]->m_ClientID];
 		for(int j=0; j<NUM_WEAPONS; j++)
-			aDisplayWeapon[j] = pStats.m_aFragsWith[j] || pStats.m_aDeathsFrom[j];
+			aDisplayWeapon[j] = aDisplayWeapon[j] || pStats.m_aFragsWith[j] || pStats.m_aDeathsFrom[j];
 	}
 	for(i=0; i<NUM_WEAPONS; i++)
 		if(aDisplayWeapon[i])
