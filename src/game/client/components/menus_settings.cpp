@@ -141,7 +141,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				g_Config.m_ClAutoDemoRecord ^= 1;
 
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
+			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over scoreboard screenshot"), g_Config.m_ClAutoScreenshot, &Button))
 				g_Config.m_ClAutoScreenshot ^= 1;
 
 			Left.HSplitTop(10.0f, 0, &Left);
@@ -182,6 +182,34 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, 0);
 		Button.HMargin(2.0f, &Button);
 		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
+
+		// auto stat screenshot
+		{
+			Right.HSplitTop(20.0f, 0, &Right); //
+			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClAutoStatboardScreenshot,
+						Localize("Automatically take game over statboard screenshot"),
+						g_Config.m_ClAutoStatboardScreenshot, &Button))
+			{
+				g_Config.m_ClAutoStatboardScreenshot ^= 1;
+			}
+
+			Right.HSplitTop(10.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Label, &Right);
+			Button.VSplitRight(20.0f, &Button, 0);
+			if(g_Config.m_ClAutoStatboardScreenshotMax)
+				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max Screenshots"), g_Config.m_ClAutoStatboardScreenshotMax);
+			else
+				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max Screenshots"), Localize("no limit"));
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			Right.HSplitTop(20.0f, &Button, 0);
+			Button.HMargin(2.0f, &Button);
+			g_Config.m_ClAutoStatboardScreenshotMax =
+				static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoStatboardScreenshotMax,
+							&Button,
+							g_Config.m_ClAutoStatboardScreenshotMax/1000.0f)*1000.0f+0.1f);
+		}
 	}
 }
 
