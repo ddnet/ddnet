@@ -183,7 +183,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 
-		// auto stat screenshot
+		// auto statboard screenshot
 		{
 			Right.HSplitTop(20.0f, 0, &Right); //
 			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural

@@ -280,7 +280,7 @@ public:
 			void Reset();
 	};
 
- CClientStats m_aStats[MAX_CLIENTS];
+	CClientStats m_aStats[MAX_CLIENTS];
 
 	CRenderTools m_RenderTools;
 
