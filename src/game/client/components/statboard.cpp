@@ -183,6 +183,8 @@ void CStatboard::RenderGlobalStats()
 	{
 		if(i == 7) // Best Spree
 			w += 140;
+		else if(i == 2) // Suicides
+			w += 110;
 		else
 			w += 100;
 	}
@@ -221,6 +223,8 @@ void CStatboard::RenderGlobalStats()
 	const char *apHeaders[] = { Localize("Frags"), Localize("Deaths"), Localize("Suicides"), Localize("Ratio"), Localize("Net"), Localize("FPM"), Localize("Spree"), Localize("Best spree"), Localize("Grabs") };
 	for(i = 0; i < 9; i++)
 	{
+		if(i == 2)
+			px += 10.0f; // Suicides
 		if(i == 7) // Best Spree
 			px += 40.0f;
 		tw = TextRender()->TextWidth(0, 24.0f, apHeaders[i], -1);
@@ -314,6 +318,7 @@ void CStatboard::RenderGlobalStats()
 		}
 		// DETAILED_STATS_SUICIDES
 		{
+			px += 10;
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_Suicides);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
