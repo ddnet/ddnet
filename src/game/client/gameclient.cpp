@@ -35,7 +35,6 @@
 #include "components/countryflags.h"
 #include "components/damageind.h"
 #include "components/debughud.h"
-#include "components/detailed_stats.h"
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
@@ -54,6 +53,7 @@
 #include "components/skins.h"
 #include "components/sounds.h"
 #include "components/spectator.h"
+#include "components/statboard.h"
 #include "components/voting.h"
 
 #include <base/system.h>
@@ -81,7 +81,7 @@ static CDebugHud gs_DebugHud;
 static CControls gs_Controls;
 static CEffects gs_Effects;
 static CScoreboard gs_Scoreboard;
-static CDetailedStats gs_DetailedStats;
+static CStatboard gs_Statboard;
 static CSounds gs_Sounds;
 static CEmoticon gs_Emoticon;
 static CDamageInd gsDamageInd;
@@ -148,7 +148,7 @@ void CGameClient::OnConsoleInit()
 	m_pMapimages = &::gs_MapImages;
 	m_pVoting = &::gs_Voting;
 	m_pScoreboard = &::gs_Scoreboard;
-	m_pDetailedStats = &::gs_DetailedStats;
+	m_pStatboard = &::gs_Statboard;
 	m_pItems = &::gs_Items;
 	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
 	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
@@ -191,7 +191,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Broadcast);
 	m_All.Add(&gs_DebugHud);
 	m_All.Add(&gs_Scoreboard);
-	m_All.Add(&gs_DetailedStats);
+	m_All.Add(&gs_Statboard);
 	m_All.Add(m_pMotd);
 	m_All.Add(m_pMenus);
 	m_All.Add(m_pGameConsole);
@@ -844,8 +844,7 @@ void CGameClient::OnStartGame()
 {
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Client()->DemoRecorder_HandleAutoStart();
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aStats[i].Reset();
+	m_pStatboard->OnReset();
 }
 
 void CGameClient::OnFlagGrab(int TeamID)

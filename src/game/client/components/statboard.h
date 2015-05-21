@@ -1,6 +1,6 @@
 #include <game/client/component.h>
 
-class CDetailedStats: public CComponent
+class CStatboard: public CComponent
 {
 	private:
 		bool m_Active;
@@ -11,7 +11,7 @@ class CDetailedStats: public CComponent
 		void AutoStatScreenshot();
 
 	public:
-		CDetailedStats();
+		CStatboard();
 		virtual void OnReset();
 		virtual void OnConsoleInit();
 		virtual void OnRender();

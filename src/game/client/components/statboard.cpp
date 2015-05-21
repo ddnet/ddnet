@@ -5,17 +5,17 @@
 #include <game/generated/client_data.h>
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
-#include <game/client/components/detailed_stats.h>
 #include <game/client/components/motd.h>
+#include <game/client/components/statboard.h>
 
-CDetailedStats::CDetailedStats()
+CStatboard::CStatboard()
 {
 	m_Active = false;
 	m_ScreenshotTaken = false;
 	m_ScreenshotTime = -1;
 }
 
-void CDetailedStats::OnReset()
+void CStatboard::OnReset()
 {
 	for(int i=0; i<MAX_CLIENTS; i++)
 		m_pClient->m_aStats[i].Reset();
@@ -24,22 +24,22 @@ void CDetailedStats::OnReset()
 	m_ScreenshotTime = -1;
 }
 
-void CDetailedStats::ConKeyStats(IConsole::IResult *pResult, void *pUserData)
+void CStatboard::ConKeyStats(IConsole::IResult *pResult, void *pUserData)
 {
-	((CDetailedStats *)pUserData)->m_Active = pResult->GetInteger(0) != 0;
+	((CStatboard *)pUserData)->m_Active = pResult->GetInteger(0) != 0;
 }
 
-void CDetailedStats::OnConsoleInit()
+void CStatboard::OnConsoleInit()
 {
 	Console()->Register("+statboard", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
 }
 
-bool CDetailedStats::IsActive()
+bool CStatboard::IsActive()
 {
 	return m_Active;
 }
 
-void CDetailedStats::OnMessage(int MsgType, void *pRawMsg)
+void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 {
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
@@ -119,9 +119,9 @@ void CDetailedStats::OnMessage(int MsgType, void *pRawMsg)
 	}
 }
 
-void CDetailedStats::OnRender()
+void CStatboard::OnRender()
 {
-	if(g_Config.m_ClDsStatScreenshot)
+	if(g_Config.m_ClStatboardScreenshot)
 	{
 		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 			m_ScreenshotTime = time_get() + time_freq() * 3;
@@ -138,7 +138,7 @@ void CDetailedStats::OnRender()
 		RenderGlobalStats();
 }
 
-void CDetailedStats::RenderGlobalStats()
+void CStatboard::RenderGlobalStats()
 {
 	//clear motd if it is active
 	if(m_pClient->m_pMotd->IsActive())
@@ -191,9 +191,17 @@ void CDetailedStats::RenderGlobalStats()
 	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
 		w += 100;
 
+	bool aDisplayWeapon[NUM_WEAPONS] = {false};
 	w += 10;
-	for(i=0; i<NUM_WEAPONS - 1; i++) // No katana
-		w += 80;
+	for(i=0; i<NumPlayers; i++)
+	{
+		const CGameClient::CClientStats pStats = m_pClient->m_aStats[apPlayers[i]->m_ClientID];
+		for(int j=0; j<NUM_WEAPONS; j++)
+			aDisplayWeapon[j] = pStats.m_aFragsWith[j] || pStats.m_aDeathsFrom[j];
+	}
+	for(i=0; i<NUM_WEAPONS; i++)
+		if(aDisplayWeapon[i])
+			w += 80;
 
 	float x = Width/2-w/2;
 	float y = 200.0f;
@@ -223,8 +231,10 @@ void CDetailedStats::RenderGlobalStats()
 
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 	Graphics()->QuadsBegin();
-	for(i = 0, px-=40; i < NUM_WEAPONS - 1; i++) // No katana
+	for(i = 0, px-=40; i < NUM_WEAPONS; i++)
 	{
+		if(!aDisplayWeapon[i])
+			continue;
 		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody);
 		if(i == 0)
 			RenderTools()->DrawSprite(x+px, y+10, g_pData->m_Weapons.m_aId[i].m_VisualSize*0.8);
@@ -357,8 +367,11 @@ void CDetailedStats::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		for(i = 0, px=px-40; i < NUM_WEAPONS - 1; i++) // No katana
+		for(i = 0, px=px-40; i < NUM_WEAPONS; i++)
 		{
+			if(!aDisplayWeapon[i])
+				continue;
+
 			str_format(aBuf, sizeof(aBuf), "%d/%d", Stats.m_aFragsWith[i], Stats.m_aDeathsFrom[i]);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x+px-tw/2, y, FontSize, aBuf, -1);
@@ -375,7 +388,7 @@ void CDetailedStats::RenderGlobalStats()
 	}
 }
 
-void CDetailedStats::AutoStatScreenshot()
+void CStatboard::AutoStatScreenshot()
 {
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Client()->AutoStatScreenshot_Start();
