@@ -1109,7 +1109,6 @@ void CGameClient::OnNewSnapshot()
 		{
 			if(m_aStats[i].m_Active && !m_aStats[i].m_WasActive)
 			{
-				m_aStats[i].Reset(); // Client connected, reset stats.
 				m_aStats[i].m_Active = true;
 				m_aStats[i].m_JoinDate = Client()->GameTick();
 			}
