@@ -276,9 +276,6 @@ public:
 
 			int m_FlagGrabs;
 			int m_FlagCaptures;
-			int m_CarriersKilled;
-			int m_KillsCarrying;
-			int m_DeathsCarrying;
 
 			void Reset();
 	};

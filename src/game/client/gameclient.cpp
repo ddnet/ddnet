@@ -1757,9 +1757,6 @@ CGameClient::CClientStats::CClientStats()
 	}
 	m_FlagGrabs = 0;
 	m_FlagCaptures = 0;
-	m_CarriersKilled = 0;
-	m_KillsCarrying = 0;
-	m_DeathsCarrying = 0;
 }
 
 void CGameClient::CClientStats::Reset()
@@ -1779,9 +1776,6 @@ void CGameClient::CClientStats::Reset()
 	}
 	m_FlagGrabs = 0;
 	m_FlagCaptures = 0;
-	m_CarriersKilled = 0;
-	m_KillsCarrying = 0;
-	m_DeathsCarrying = 0;
 }
 
 void CGameClient::CClientData::UpdateRenderInfo()
