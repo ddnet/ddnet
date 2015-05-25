@@ -53,6 +53,7 @@
 #include "components/skins.h"
 #include "components/sounds.h"
 #include "components/spectator.h"
+#include "components/statboard.h"
 #include "components/voting.h"
 
 #include <base/system.h>
@@ -80,6 +81,7 @@ static CDebugHud gs_DebugHud;
 static CControls gs_Controls;
 static CEffects gs_Effects;
 static CScoreboard gs_Scoreboard;
+static CStatboard gs_Statboard;
 static CSounds gs_Sounds;
 static CEmoticon gs_Emoticon;
 static CDamageInd gsDamageInd;
@@ -146,6 +148,7 @@ void CGameClient::OnConsoleInit()
 	m_pMapimages = &::gs_MapImages;
 	m_pVoting = &::gs_Voting;
 	m_pScoreboard = &::gs_Scoreboard;
+	m_pStatboard = &::gs_Statboard;
 	m_pItems = &::gs_Items;
 	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
 	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
@@ -155,7 +158,7 @@ void CGameClient::OnConsoleInit()
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
-	// make a list of all the systems, make sure to add them in the corrent render order
+	// make a list of all the systems, make sure to add them in the correct render order
 	m_All.Add(m_pSkins);
 	m_All.Add(m_pCountryFlags);
 	m_All.Add(m_pMapimages);
@@ -188,6 +191,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Broadcast);
 	m_All.Add(&gs_DebugHud);
 	m_All.Add(&gs_Scoreboard);
+	m_All.Add(&gs_Statboard);
 	m_All.Add(m_pMotd);
 	m_All.Add(m_pMenus);
 	m_All.Add(m_pGameConsole);
@@ -431,6 +435,9 @@ void CGameClient::OnReset()
 	m_DemoSpecID = SPEC_FREEVIEW;
 	m_FlagDropTick[TEAM_RED] = 0;
 	m_FlagDropTick[TEAM_BLUE] = 0;
+	m_LastRoundStartTick = -1;
+	m_LastFlagCarrierRed = -4;
+	m_LastFlagCarrierBlue = -4;
 	m_Tuning[g_Config.m_ClDummy] = CTuningParams();
 
 	m_Teams.Reset();
@@ -837,6 +844,15 @@ void CGameClient::OnStartGame()
 {
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		Client()->DemoRecorder_HandleAutoStart();
+	m_pStatboard->OnReset();
+}
+
+void CGameClient::OnFlagGrab(int TeamID)
+{
+	if(TeamID == TEAM_RED)
+		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierRed].m_FlagGrabs++;
+	else
+		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierBlue].m_FlagGrabs++;
 }
 
 void CGameClient::OnRconLine(const char *pLine)
@@ -941,6 +957,9 @@ void CGameClient::OnNewSnapshot()
 	{
 		m_Snap.m_aTeamSize[TEAM_RED] = m_Snap.m_aTeamSize[TEAM_BLUE] = 0;
 
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			m_aStats[i].m_Active = false;
+
 		int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
 		{
@@ -1012,7 +1031,10 @@ void CGameClient::OnNewSnapshot()
 
 				// calculate team-balance
 				if(pInfo->m_Team != TEAM_SPECTATORS)
+				{
 					m_Snap.m_aTeamSize[pInfo->m_Team]++;
+					m_aStats[pInfo->m_ClientID].m_Active = true;
+				}
 
 			}
 			else if(Item.m_Type == NETOBJTYPE_CHARACTER)
@@ -1040,12 +1062,28 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFO)
 			{
 				static bool s_GameOver = 0;
+				static bool s_GamePaused = 0;
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
-				if(!s_GameOver && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
+
+				bool CurrentTickPaused = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED;
+				// update last round start tick after pause to avoid OnStartGame call
+				if(!CurrentTickPaused && s_GamePaused)
+				{
+					m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				}
+
+				bool CurrentTickGameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
+				if(!s_GameOver && CurrentTickGameOver)
 					OnGameOver();
-				else if(s_GameOver && !(m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+				else if(!(CurrentTickGameOver || CurrentTickPaused) // not in game over or pause state
+						&& (m_LastRoundStartTick != m_Snap.m_pGameInfoObj->m_RoundStartTick // and (new round started
+							|| (s_GameOver && !CurrentTickGameOver))) // or game was over and now is not over)
+				{
+					m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 					OnStartGame();
-				s_GameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
+				}
+				s_GameOver = CurrentTickGameOver;
+				s_GamePaused = CurrentTickPaused;
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
@@ -1065,9 +1103,26 @@ void CGameClient::OnNewSnapshot()
 				}
 				else if(m_FlagDropTick[TEAM_BLUE] != 0)
 						m_FlagDropTick[TEAM_BLUE] = 0;
+				if(m_LastFlagCarrierRed == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierRed >= 0)
+					OnFlagGrab(TEAM_RED);
+				else if(m_LastFlagCarrierBlue == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierBlue >= 0)
+					OnFlagGrab(TEAM_BLUE);
+
+				m_LastFlagCarrierRed = m_Snap.m_pGameDataObj->m_FlagCarrierRed;
+				m_LastFlagCarrierBlue = m_Snap.m_pGameDataObj->m_FlagCarrierBlue;
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
 				m_Snap.m_paFlags[Item.m_ID%2] = (const CNetObj_Flag *)pData;
+		}
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_aStats[i].m_Active && !m_aStats[i].m_WasActive)
+			{
+				m_aStats[i].m_Active = true;
+				m_aStats[i].m_JoinDate = Client()->GameTick();
+			}
+			m_aStats[i].m_WasActive = m_aStats[i].m_Active;
 		}
 	}
 
@@ -1685,6 +1740,42 @@ void CGameClient::OnPredict()
 void CGameClient::OnActivateEditor()
 {
 	OnRelease();
+}
+
+CGameClient::CClientStats::CClientStats()
+{
+	m_JoinDate = 0;
+	m_Active = false;
+	m_WasActive = false;
+	m_Frags = 0;
+	m_Deaths = 0;
+	m_Suicides = 0;
+	for(int j = 0; j < NUM_WEAPONS; j++)
+	{
+		m_aFragsWith[j] = 0;
+		m_aDeathsFrom[j] = 0;
+	}
+	m_FlagGrabs = 0;
+	m_FlagCaptures = 0;
+}
+
+void CGameClient::CClientStats::Reset()
+{
+	m_JoinDate = 0;
+	m_Active = false;
+	m_WasActive = false;
+	m_Frags = 0;
+	m_Deaths = 0;
+	m_Suicides = 0;
+	m_BestSpree = 0;
+	m_CurrentSpree = 0;
+	for(int j = 0; j < NUM_WEAPONS; j++)
+	{
+		m_aFragsWith[j] = 0;
+		m_aDeathsFrom[j] = 0;
+	}
+	m_FlagGrabs = 0;
+	m_FlagCaptures = 0;
 }
 
 void CGameClient::CClientData::UpdateRenderInfo()

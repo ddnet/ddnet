@@ -89,6 +89,7 @@ void CBinds::SetDefaults()
 	Bind(KEY_F1, "toggle_local_console");
 	Bind(KEY_F2, "toggle_remote_console");
 	Bind(KEY_TAB, "+scoreboard");
+	Bind(KEY_BACKQUOTE, "+statboard");
 	Bind('u', "+show_chat");
 	Bind(KEY_F10, "screenshot");
 
