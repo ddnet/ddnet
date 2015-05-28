@@ -60,7 +60,8 @@ void CMenus::RenderGame(CUIRect MainView)
 	}
 
 	static int s_SpectateButton = 0;
-	static int s_SpectateButton2 = 0;
+	static int s_JoinRedButton = 0;
+	static int s_JoinBlueButton = 0;
 	bool DummyConnecting = m_pClient->Client()->DummyConnecting();
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
@@ -85,7 +86,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Join red"), 0, &Button))
+				if(!DummyConnecting && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_RED);
 					SetActive(false);
@@ -96,7 +97,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton2, Localize("Join blue"), 0, &Button))
+				if(!DummyConnecting && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_BLUE);
 					SetActive(false);
