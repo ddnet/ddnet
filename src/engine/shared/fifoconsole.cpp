@@ -20,13 +20,13 @@ FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 	if(m_pFifoFile[0] == '\0')
 		return;
 
-	m_pFifoThread = thread_init(ListenFifoThread, this);
-	m_pConsole = pConsole;
-	m_flag = flag;
-
 	gs_stopFifoThread = false;
 	if(gs_FifoLock == 0)
 		gs_FifoLock = lock_create();
+
+	m_pFifoThread = thread_init(ListenFifoThread, this);
+	m_pConsole = pConsole;
+	m_flag = flag;
 
 	pthread_detach((pthread_t)m_pFifoThread);
 }
