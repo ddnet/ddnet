@@ -604,7 +604,7 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View)
 			if(NewId != 0)
 				m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand);
 		}
-		View.HSplitTop(5.0f, 0, &View);
+		View.HSplitTop(2.0f, 0, &View);
 	}
 }
 
@@ -717,7 +717,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
 		MiscSettings.HSplitTop(14.0f+5.0f, 0, &MiscSettings);
-		UiDoGetButtons(20, 32, MiscSettings);
+		UiDoGetButtons(20, 33, MiscSettings);
 	}
 
 }
