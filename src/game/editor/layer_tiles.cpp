@@ -1466,7 +1466,6 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_FREEZE)
 			{
-				m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
 			}
 			else if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DFREEZE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DUNFREEZE)
