@@ -676,6 +676,16 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
 	}
 
+	if(UI()->ActiveItem() == pID)
+	{
+		if(!UI()->MouseButton(0))
+		{
+			m_LockMouse = false;
+			UI()->SetActiveItem(0);
+			s_TextMode = false;
+		}
+	}
+
 	if(s_TextMode && s_LastTextpID == pID)
 	{
 		m_pTooltip = "Type your number";
@@ -689,12 +699,14 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 				((UI()->MouseButton(1) || UI()->MouseButton(0)) && !Inside))
 		{
 			Current = clamp(str_toint(s_NumStr), Min, Max);
+			m_LockMouse = false;
 			UI()->SetActiveItem(0);
 			s_TextMode = false;
 		}
 
 		if(Input()->KeyPressed(KEY_ESCAPE))
 		{
+			m_LockMouse = false;
 			UI()->SetActiveItem(0);
 			s_TextMode = false;
 		}
@@ -703,12 +715,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		if(UI()->ActiveItem() == pID)
 		{
-			if(!UI()->MouseButton(0))
-			{
-				m_LockMouse = false;
-				UI()->SetActiveItem(0);
-			}
-			else
+			if(UI()->MouseButton(0))
 			{
 				if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
 					s_Value += m_MouseDeltaX*0.05f;
@@ -736,12 +743,6 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			}
 			if(pToolTip && !s_TextMode)
 				m_pTooltip = pToolTip;
-			
-			if(!Inside)
-			{
-				UI()->SetActiveItem(0);
-				s_TextMode = false;
-			}
 		}
 
 		if(Inside)
