@@ -835,7 +835,7 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 	// get current vote option by index
 	CVoteOptionServer *pCurrent = GetVoteOption(pPl->m_SendVoteIndex);
 
-	while(CurIndex < NumVotesToSend)
+	while(CurIndex < NumVotesToSend && pCurrent != NULL)
 	{
 		switch(CurIndex)
 		{
