@@ -190,7 +190,6 @@ void CStatboard::RenderGlobalStats()
 			w += 110;
 		else if(i == 8 && !gameWithFlags) // Don't draw "Grabs" in game with no flag
 			continue;
-
 		else
 			w += 100;
 	}
