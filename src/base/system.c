@@ -1043,6 +1043,16 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 		return -1;
 	}
 
+#if defined(CONF_FAMILY_UNIX)
+	/* on tcp sockets set SO_REUSEADDR
+		to fix port rebind on restart */
+	if (domain == AF_INET && type == SOCK_STREAM)
+	{
+		int option = 1;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+	}
+#endif
+
 	/* set to IPv6 only if thats what we are creating */
 #if defined(IPV6_V6ONLY)	/* windows sdk 6.1 and higher */
 	if(domain == AF_INET6)
