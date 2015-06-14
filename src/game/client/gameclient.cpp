@@ -1073,15 +1073,18 @@ void CGameClient::OnNewSnapshot()
 				}
 
 				bool CurrentTickGameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
+				CServerInfo Info;
+				Client()->GetServerInfo(&Info);
 				if(!s_GameOver && CurrentTickGameOver)
 					OnGameOver();
 				else if(!(CurrentTickGameOver || CurrentTickPaused) // not in game over or pause state
-						&& (m_LastRoundStartTick != m_Snap.m_pGameInfoObj->m_RoundStartTick // and (new round started
+						&& !IsRace(&Info) // and not playing race (race_demo.cpp handles that case)
+						&& (m_Snap.m_pGameInfoObj->m_RoundStartTick - m_LastRoundStartTick > 2 // and (round start tick was updated more than 2 ticks ago
 							|| (s_GameOver && !CurrentTickGameOver))) // or game was over and now is not over)
 				{
-					m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 					OnStartGame();
 				}
+				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_GameOver = CurrentTickGameOver;
 				s_GamePaused = CurrentTickPaused;
 			}

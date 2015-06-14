@@ -115,7 +115,7 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 
 void CStatboard::OnRender()
 {
-	if(g_Config.m_ClAutoStatboardScreenshot)
+	if(g_Config.m_ClAutoStatboardScreenshot && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 			m_ScreenshotTime = time_get() + time_freq() * 3;
@@ -134,23 +134,20 @@ void CStatboard::OnRender()
 
 void CStatboard::RenderGlobalStats()
 {
-	float Width = 400*3.0f*Graphics()->ScreenAspect();
-	float Height = 400*3.0f;
-	float w = 250.0f;
-	float h = 750.0f;
+	const float StatboardWidth = 400*3.0f*Graphics()->ScreenAspect();
+	const float StatboardHeight = 400*3.0f;
+	float StatboardContentWidth = 250.0f;
+	float StatboardContentHeight = 750.0f;
 
 	const CNetObj_PlayerInfo *apPlayers[MAX_CLIENTS] = {0};
 	int NumPlayers = 0;
-	int i = 0;
 
 	// sort red or dm players by score
-	for(i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
-
 		if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].m_Active || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_RED)
 			continue;
-
 		apPlayers[NumPlayers] = pInfo;
 		NumPlayers++;
 	}
@@ -158,13 +155,11 @@ void CStatboard::RenderGlobalStats()
 	// sort blue players by score after
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 	{
-		for(i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
-
 			if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].m_Active || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_BLUE)
 				continue;
-
 			apPlayers[NumPlayers] = pInfo;
 			NumPlayers++;
 		}
@@ -179,54 +174,54 @@ void CStatboard::RenderGlobalStats()
 	if(m_pClient->m_pMotd->IsActive())
 		m_pClient->m_pMotd->Clear();
 
-	for(i = 0; i < 9; i++)
-	{
-		if(i == 7) // Best Spree
-			w += 140;
-		else if(i == 2) // Suicides
-			w += 110;
-		else
-			w += 100;
-	}
+	bool gameWithFlags = m_pClient->m_Snap.m_pGameInfoObj &&
+		m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS;
 
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
-		w += 100;
+	StatboardContentWidth += 6 * 100 + 110 + 140; // Best spree 140; Suicides 110; other labels 100
+
+	if(gameWithFlags)
+		StatboardContentWidth += 200; // Grabs & Flags
 
 	bool aDisplayWeapon[NUM_WEAPONS] = {false};
-	w += 10;
-	for(i=0; i<NumPlayers; i++)
+	for(int i = 0; i < NumPlayers; i++)
 	{
 		const CGameClient::CClientStats pStats = m_pClient->m_aStats[apPlayers[i]->m_ClientID];
 		for(int j=0; j<NUM_WEAPONS; j++)
 			aDisplayWeapon[j] = aDisplayWeapon[j] || pStats.m_aFragsWith[j] || pStats.m_aDeathsFrom[j];
 	}
-	for(i=0; i<NUM_WEAPONS; i++)
+	for(int i = 0; i < NUM_WEAPONS; i++)
 		if(aDisplayWeapon[i])
-			w += 80;
+			StatboardContentWidth += 80;
 
-	float x = Width/2-w/2;
+	float x = StatboardWidth/2-StatboardContentWidth/2;
 	float y = 200.0f;
 
-	Graphics()->MapScreen(0, 0, Width, Height);
+	Graphics()->MapScreen(0, 0, StatboardWidth, StatboardHeight);
 
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0,0,0,0.5f);
-	RenderTools()->DrawRoundRect(x-10.f, y-10.f, w, h, 17.0f);
+	RenderTools()->DrawRoundRect(x-10.f, y-10.f, StatboardContentWidth, StatboardContentHeight, 17.0f);
 	Graphics()->QuadsEnd();
 
 	float tw;
 	int px = 325;
 
 	TextRender()->Text(0, x+10, y-5, 24.0f, Localize("Name"), -1);
-	const char *apHeaders[] = { Localize("Frags"), Localize("Deaths"), Localize("Suicides"), Localize("Ratio"), Localize("Net"), Localize("FPM"), Localize("Spree"), Localize("Best spree"), Localize("Grabs") };
-	for(i = 0; i < 9; i++)
+	const char *apHeaders[] = {
+		Localize("Frags"), Localize("Deaths"), Localize("Suicides"),
+		Localize("Ratio"), Localize("Net"), Localize("FPM"),
+		Localize("Spree"), Localize("Best spree"), Localize("Grabs")
+	};
+	for(int i = 0; i < 9; i++)
 	{
 		if(i == 2)
 			px += 10.0f; // Suicides
 		if(i == 7) // Best Spree
 			px += 40.0f;
+		if(i == 8 && !gameWithFlags) // Don't draw "Grabs" in game with no flag
+			continue;
 		tw = TextRender()->TextWidth(0, 24.0f, apHeaders[i], -1);
 		TextRender()->Text(0, x+px-tw, y-5, 24.0f, apHeaders[i], -1);
 		px += 100;
@@ -234,7 +229,8 @@ void CStatboard::RenderGlobalStats()
 
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 	Graphics()->QuadsBegin();
-	for(i = 0, px-=40; i < NUM_WEAPONS; i++)
+	px -= 40;
+	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
 		if(!aDisplayWeapon[i])
 			continue;
@@ -246,17 +242,19 @@ void CStatboard::RenderGlobalStats()
 		px += 80;
 	}
 	Graphics()->QuadsEnd();
-	px += 40;
 
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
+	if(gameWithFlags)
 	{
-		px -= 40;
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 		Graphics()->QuadsBegin();
 		Graphics()->QuadsSetRotation(0.78f);
 		RenderTools()->SelectSprite(SPRITE_FLAG_RED);
 		RenderTools()->DrawSprite(x+px, y+15, 48);
 		Graphics()->QuadsEnd();
+	}
+	else
+	{
+		px += 40;
 	}
 
 	y += 29.0f;
@@ -279,13 +277,14 @@ void CStatboard::RenderGlobalStats()
 		const CNetObj_PlayerInfo *pInfo = apPlayers[j];
 		const CGameClient::CClientStats Stats = m_pClient->m_aStats[pInfo->m_ClientID];
 
-		if(m_pClient->m_Snap.m_LocalClientID == pInfo->m_ClientID || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
+		if(m_pClient->m_Snap.m_LocalClientID == pInfo->m_ClientID
+				|| (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
 			// background so it's easy to find the local player
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1,1,1,0.25f);
-			RenderTools()->DrawRoundRect(x, y, w-20, LineHeight*0.95f, 17.0f);
+			RenderTools()->DrawRoundRect(x, y, StatboardContentWidth-20, LineHeight*0.95f, 17.0f);
 			Graphics()->QuadsEnd();
 		}
 
@@ -302,21 +301,21 @@ void CStatboard::RenderGlobalStats()
 
 		px = 325;
 
-		// DETAILED_STATS_FRAGS
+		// FRAGS
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_Frags);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		// DETAILED_STATS_DEATHS
+		// DEATHS
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		// DETAILED_STATS_SUICIDES
+		// SUICIDES
 		{
 			px += 10;
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_Suicides);
@@ -324,7 +323,7 @@ void CStatboard::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		// DETAILED_STATS_RATIO
+		// RATIO
 		{
 			if(Stats.m_Deaths == 0)
 				str_format(aBuf, sizeof(aBuf), "--");
@@ -334,14 +333,14 @@ void CStatboard::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		// DETAILED_STATS_NET
+		// NET
 		{
 			str_format(aBuf, sizeof(aBuf), "%+d", Stats.m_Frags-Stats.m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		// DETAILED_STATS_FPM
+		// FPM
 		{
 			float Fpm = (float)(Stats.m_Frags*60)/((float)(Client()->GameTick()-Stats.m_JoinDate)/Client()->GameTickSpeed());
 			str_format(aBuf, sizeof(aBuf), "%.1f", Fpm);
@@ -349,14 +348,14 @@ void CStatboard::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		// DETAILED_STATS_SPREE
+		// SPREE
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_CurrentSpree);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		// DETAILED_STATS_BESTSPREE
+		// BEST SPREE
 		{
 			px += 40;
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_BestSpree);
@@ -364,14 +363,17 @@ void CStatboard::RenderGlobalStats()
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
+		// GRABS
+		if(gameWithFlags)
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_FlagGrabs);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
 			px += 100;
 		}
-		for(i = 0, px=px-40; i < NUM_WEAPONS; i++)
+		// WEAPONS
+		px -= 40;
+		for(int i = 0; i < NUM_WEAPONS; i++)
 		{
 			if(!aDisplayWeapon[i])
 				continue;
@@ -381,7 +383,8 @@ void CStatboard::RenderGlobalStats()
 			TextRender()->Text(0, x+px-tw/2, y, FontSize, aBuf, -1);
 			px += 80;
 		}
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS)
+		// FLAGS
+		if(gameWithFlags)
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", Stats.m_FlagCaptures);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
