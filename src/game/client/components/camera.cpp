@@ -133,7 +133,7 @@ void CCamera::ToggleDynamic()
 	if(g_Config.m_ClMouseDeadzone)
 	{
 		g_Config.m_ClMouseFollowfactor = 0;
-		g_Config.m_ClMouseMaxDistance = 400;
+		g_Config.m_ClMouseMaxDistance = g_Config.m_DefaultMouseMaxDistance;
 		g_Config.m_ClMouseDeadzone = 0;
 	}
 	else
