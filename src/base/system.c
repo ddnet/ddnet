@@ -1205,7 +1205,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			d = sendto((int)sock.ipv4sock, (const char*)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
-			dbg_msg("net", "can't sent ipv4 traffic to this socket");
+			dbg_msg("net", "can't send ipv4 traffic to this socket");
 	}
 
 #if defined(WEBSOCKETS)
@@ -1214,7 +1214,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		if(sock.web_ipv4sock >= 0)
 			d = websocket_send(sock.web_ipv4sock, (const unsigned char*)data, size, addr->port);
 		else
-			dbg_msg("net", "can't sent websocket_ipv4 traffic to this socket");
+			dbg_msg("net", "can't send websocket_ipv4 traffic to this socket");
 	}
 #endif
 
@@ -1238,11 +1238,11 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			d = sendto((int)sock.ipv6sock, (const char*)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
-			dbg_msg("net", "can't sent ipv6 traffic to this socket");
+			dbg_msg("net", "can't send ipv6 traffic to this socket");
 	}
 	/*
 	else
-		dbg_msg("net", "can't sent to network of type %d", addr->type);
+		dbg_msg("net", "can't send to network of type %d", addr->type);
 		*/
 
 	/*if(d < 0)
