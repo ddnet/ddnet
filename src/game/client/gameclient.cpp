@@ -1062,28 +1062,12 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFO)
 			{
 				static bool s_GameOver = 0;
-				static bool s_GamePaused = 0;
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
-
-				bool CurrentTickPaused = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED;
-				// update last round start tick after pause to avoid OnStartGame call
-				if(!CurrentTickPaused && s_GamePaused)
-				{
-					m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				}
-
-				bool CurrentTickGameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
-				if(!s_GameOver && CurrentTickGameOver)
+				if(!s_GameOver && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 					OnGameOver();
-				else if(!(CurrentTickGameOver || CurrentTickPaused) // not in game over or pause state
-						&& (m_LastRoundStartTick != m_Snap.m_pGameInfoObj->m_RoundStartTick // and (new round started
-							|| (s_GameOver && !CurrentTickGameOver))) // or game was over and now is not over)
-				{
-					m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				else if(s_GameOver && !(m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 					OnStartGame();
-				}
-				s_GameOver = CurrentTickGameOver;
-				s_GamePaused = CurrentTickPaused;
+				s_GameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
