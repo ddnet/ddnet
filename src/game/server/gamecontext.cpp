@@ -1591,9 +1591,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	}
 	if (MsgID == NETMSGTYPE_CL_STARTINFO)
 	{
-		//if(pPlayer->m_IsReady)
-		//	return;
-		if(g_Config.m_SvSpamprotection && pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo+Server()->TickSpeed()*g_Config.m_SvInfoChangeDelay > Server()->Tick())
+		if(pPlayer->m_IsReady)
 			return;
 
 		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
