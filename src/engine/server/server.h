@@ -174,6 +174,8 @@ public:
 	unsigned char *m_pCurrentMapData;
 	unsigned int m_CurrentMapSize;
 
+	int m_GeneratedRconPassword;
+
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
 	CMapChecker m_MapChecker;
@@ -199,6 +201,8 @@ public:
 	//int TickSpeed()
 
 	int Init();
+
+	void InitRconPasswordIfEmpty();
 
 	void SetRconCID(int ClientID);
 	bool IsAuthed(int ClientID);
