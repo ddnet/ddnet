@@ -1049,6 +1049,12 @@ void CClient::Render()
 
 	GameClient()->OnRender();
 	DebugRender();
+
+	if(State() == IClient::STATE_ONLINE && g_Config.m_ClAntiPingLimit)
+	{
+		int64 Now = time_get();
+		g_Config.m_ClAntiPing = (m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq() > g_Config.m_ClAntiPingLimit;
+	}
 }
 
 vec3 CClient::GetColorV3(int v)
