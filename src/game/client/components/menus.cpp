@@ -48,7 +48,7 @@ vec4 CMenus::ms_ColorTabbarActiveIngame;
 
 #if defined(__ANDROID__)
 float CMenus::ms_ButtonHeight = 50.0f;
-float CMenus::ms_ListheaderHeight = 50.0f;
+float CMenus::ms_ListheaderHeight = 17.0f;
 float CMenus::ms_ListitemAdditionalHeight = 33.0f;
 #else
 float CMenus::ms_ButtonHeight = 25.0f;
