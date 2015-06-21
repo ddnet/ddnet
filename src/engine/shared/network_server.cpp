@@ -30,12 +30,6 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	m_MaxClientsPerIP = MaxClientsPerIP;
 
-	if(secure_random_init() != 0)
-	{
-		dbg_msg("secure", "could not initialize secure RNG");
-		return false;
-	}
-
 	secure_random_fill(m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
 
 	for(int i = 0; i < NET_MAX_CLIENTS; i++)
