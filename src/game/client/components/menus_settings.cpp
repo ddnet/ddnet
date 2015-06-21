@@ -57,7 +57,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
 	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
-	MainView.HSplitTop(160.0f, &Game, &Client);
+	MainView.HSplitTop(180.0f, &Game, &Client);
 	Client.HSplitTop(160.0f, &Client, &AutoReconnect);
 
 	// game
@@ -121,7 +121,12 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
 				g_Config.m_ClNameplatesTeamcolors ^= 1;
-		}
+
+			Right.HSplitTop(5.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClNameplatesClan, Localize("Show clan above name plates"), g_Config.m_ClNameplatesClan, &Button))
+				g_Config.m_ClNameplatesClan ^= 1;
+			}
 	}
 
 	// client
@@ -1773,6 +1778,8 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	{
 		g_Config.m_ClShowDirection ^= 1;
 	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
