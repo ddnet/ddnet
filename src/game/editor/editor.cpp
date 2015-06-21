@@ -893,8 +893,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			if(!m_PopupEventWasActivated)
 			{
 				str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
-				m_PopupEventType = POPEVENT_SAVE;
-				m_PopupEventActivated = true;
+				CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
 			}
 		}
 		else
