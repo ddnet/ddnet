@@ -38,9 +38,7 @@ void CNamePlates::RenderNameplate(
 			a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
 
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
-		const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
 		float tw = TextRender()->TextWidth(0, FontSize, pName, -1);
-		float tw_clan = TextRender()->TextWidth(0, FontSize, pClan, -1);
 
 		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID))
@@ -67,7 +65,11 @@ void CNamePlates::RenderNameplate(
 		TextRender()->Text(0, Position.x-tw/2.0f, Position.y-FontSize-38.0f, FontSize, pName, -1);
 
 		if(g_Config.m_ClNameplatesClan)
+		{
+			const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
+			float tw_clan = TextRender()->TextWidth(0, FontSize, pClan, -1);
 			TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y-FontSize*2-38.0f, FontSize, pClan, -1);
+		}
 
 		if(g_Config.m_Debug) // render client id when in debug aswell
 		{
