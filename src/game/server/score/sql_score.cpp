@@ -554,11 +554,12 @@ void CSqlScore::MapInfoThread(void *pUser)
 				int stamp = (int)pData->m_pSqlData->m_pResults->getInt("Stamp");
 				int ago = (int)pData->m_pSqlData->m_pResults->getInt("Ago");
 
-				char pAgoString[51] = "\0";
+				char pAgoString[40];
+				char pReleasedString[60];
 				if(stamp != 0)
 				{
-					strcpy(pAgoString, ", released ");
-					agoTimeToString(ago, pAgoString+11);
+					agoTimeToString(ago, pAgoString);
+					str_format(pReleasedString, sizeof(pReleasedString), ", released %s ago", pAgoString);
 				}
 
 				char aStars[20];
