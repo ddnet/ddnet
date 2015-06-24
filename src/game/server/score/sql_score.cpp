@@ -554,7 +554,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 				int stamp = (int)pData->m_pSqlData->m_pResults->getInt("Stamp");
 				int ago = (int)pData->m_pSqlData->m_pResults->getInt("Ago");
 
-				char pAgoString[40];
+				char pAgoString[40] = "\0";
 				char pReleasedString[60];
 				if(stamp != 0)
 				{
@@ -574,7 +574,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 				}
 
 				aServer[0] = toupper(aServer[0]);
-				str_format(aBuf, sizeof(aBuf), "\"%s\" by %s on %s (%s, %d %s, %d %s%s)", aMap, aMapper, aServer, aStars, points, points == 1 ? "point" : "points", finishes, finishes == 1 ? "finish" : "finishes", pAgoString);
+				str_format(aBuf, sizeof(aBuf), "\"%s\" by %s on %s (%s, %d %s, %d %s%s)", aMap, aMapper, aServer, aStars, points, points == 1 ? "point" : "points", finishes, finishes == 1 ? "finish" : "finishes", pReleasedString);
 			}
 
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
