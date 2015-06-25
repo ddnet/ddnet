@@ -555,7 +555,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 				int ago = (int)pData->m_pSqlData->m_pResults->getInt("Ago");
 
 				char pAgoString[40] = "\0";
-				char pReleasedString[60];
+				char pReleasedString[60] = "\0";
 				if(stamp != 0)
 				{
 					agoTimeToString(ago, pAgoString);
