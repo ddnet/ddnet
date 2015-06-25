@@ -419,8 +419,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 999));
 		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-		TextRender()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = ScoreLength;
+		TextRender()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 
 		// flag
