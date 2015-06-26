@@ -586,238 +586,238 @@ You must restart the game for all settings to take effect.
 == 
 
 %d servers, %d players
-== 
+== %d serwerów, %d graczy
 
 '%s' called for vote to kick '%s' (%s)
-== 
+== '%s' zagłosowal za wywaleniem '%s' (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
-== 
+== '%s' zagłosował za przesunięciem '%s' do obserwatorow (%s)
 
 '%s' called vote to change server option '%s' (%s)
-== 
+== '%s' zagłosował na zmiane opcji serwera '%s' (%s)
 
 '%s' entered and joined the %s
-== 
+== '%s' wszedł oraz dołączył do %s
 
 '%s' has left the game
-== 
+== '%s' opuścił gre
 
 '%s' has left the game (%s)
-== 
+== '%s' opuścił gre (%s)
 
 '%s' joined the %s
-== 
+== '%s' dołączyl do %s
 
 Admin forced server option '%s' (%s)
-== 
+== Admin wymusil opcje serwera '%s' (%s)
 
 Admin forced vote no
-== 
+== Admin wymusił głos na nie
 
 Admin forced vote yes
-== 
+== Admin wymusil glos na tak
 
 Admin moved '%s' to spectator (%s)
-== 
+== Admin przesunął '%s' do obserwatorów (%s)
 
 Alp:
-== 
+== Alfa
 
 Anti Aliasing
-== 
+== Antyaliasing
 
 Are you sure you want to rename the demo?
-== 
+== Jesteś pewny że chcesz zmienić nazwe dema?
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Jestes pewny że chcesz zapisac skin? Jeśli skin z taka nazwą istnieje, zostanie on podmieniony przez twój.
 
 Back
-== 
+== Wróć
 
 Basic
-== 
+== Podstawowe
 
 Bodies
-== 
+== Ciała
 
 Borderless window
 == 
 
 Color
-== 
+== Kolor
 
 Crc
 == 
 
 Created
-== 
+== Stworzone
 
 Custom
-== 
+== Niestandardowe
 
 Customize
-== 
+== Dostosuj
 
 Decoration
-== 
+== Dekoracje
 
 Demo
-== 
+== Demo
 
 Detail
-== 
+== Detale
 
 Editor
-== 
+== Edytor
 
 Eyes
-== 
+== Oczy
 
 Format
-== 
+== Format
 
 Game paused
-== 
+== Gra zatrzymana
 
 Game starts in
-== 
+== Gra zacznie sie za
 
 Global
-== 
+== Globalne
 
 Hands
-== 
+== Ręce
 
 Host address:
-== 
+== Adres hosta:
 
 Hue:
-== 
+== Barwa 
 
 Join
-== 
+== Dołącz
 
 Joined
-== 
+== Dołączył
 
 Joined blue
-== 
+== Dołączył do niebieskich
 
 Joined red
-== 
+== Dołączył do czerwonych
 
 Kick voting requires %d players on the server
-== 
+== Głosowanie na wywalenie potrzebuje conajmniej %d graczy na serwerze.
 
 Laser
-== 
+== Laser
 
 Length
-== 
+== Długość
 
 Letterbox
 == 
 
 Lgt:
-== 
+== Jasność
 
 Local
-== 
+== Lokalne
 
 Local server
-== 
+== Serwer lokalny
 
 Match
-== 
+== Mecz
 
 Max
-== 
+== Maksymalnie
 
 Misc
-== 
+== Różne
 
 Netversion
 == 
 
 Nickname is empty.
-== 
+== Nazwa jest pusta.
 
 Normal:
-== 
+== Normalny:
 
 Only %d active players are allowed
-== 
+== Dozwolono tylko %d graczy.
 
 Personal
-== 
+== Osobiste
 
 Ready
-== 
+== Gotowy
 
 Record
-== 
+== Nagrywaj
 
 Recorded
-== 
+== Nagrane
 
 Reset
-== 
+== Reset
 
 Resolutions
-== 
+== Rozdzielczości
 
 Respawn
-== 
+== Odrodzenie
 
 Round over
-== 
+== Koniec rundy
 
 Round over!
-== 
+== Koniec rundy!
 
 Sat:
-== 
+== Nasycenie:
 
 Save
-== 
+== Zapisz
 
 Save skin
-== 
+== Zapisz skin
 
 Screen
-== 
+== Ekran
 
 Search:
-== 
+== Szukaj:
 
 Server does not allow voting to kick players
-== 
+== Serwer nie pozwala głosować na wywalanie graczy
 
 Server does not allow voting to move players to spectators
-== 
+== Serwer nie pozwala głosowac na przesuwanie graczy do obserwatoró
 
 Servers
-== 
+== Serwery
 
 Show only chat messages from friends
-== 
+== Pokazuj tylko wiadomości od znajomych
 
 Size
-== 
+== Rozmiar
 
 Skin
-== 
+== Skin
 
 Spectating
-== 
+== Obserwowanie
 
 Spectators aren't allowed to start a vote.
-== 
+== Obserwatorzy nie moga głosować.
 
 Standard Gametype
-== 
+== Standardowy typ gry 
 
 Tattoo
 == 
@@ -826,70 +826,70 @@ Tattoos
 == 
 
 Team:
-== 
+== Drużyna
 
 Teams are locked
-== 
+== Drużyny są zablokowane
 
 Teams are locked. Time to wait before changing team: %02d:%02d
-== 
+== Drużyny są zablokowane. Czas, zanim będzie można zmienić drużynę: %02d:%02d
 
 Teams were locked
-== 
+== Drużyny zostaly zablokowane
 
 Teams were unlocked
-== 
+== Drużyny zostały odblokowane
 
 Tee
 == 
 
 Texture
-== 
+== Tekstura
 
 Volume
-== 
+== Głośnośc
 
 Vote aborted
-== 
+== Głosowanie anulowane
 
 Vote failed
-== 
+== Głosowanie się nie powiodło
 
 Vote passed
-== 
+== Głosowanie się powiodło
 
 Wait for current vote to end before calling a new one.
-== 
+== Poczekaj aż skończy się obecne głosowanie zanim rozpoczniesz nowe.
 
 Wait for next round
-== 
+== Czekaj na następną rundę
 
 Wide
-== 
+== Szeroki
 
 You must wait %d seconds before making another vote
-== 
+== Musisz poczekać %d sekund zanim rozpoczniesz inne głosowanie
 
 blue
-== 
+== niebieski
 
 blue team
-== 
+== drużyny niebieskiej
 
 game
-== 
+== gra
 
 red
-== 
+== czerwony
 
 red team
-== 
+== drużyny czerwonej
 
 spectators
-== 
+== obserwatorów
 
 wait for more players
-== 
+== czekać na więcej graczy
 
 ##### old translations #####
 
@@ -1022,3 +1022,194 @@ Name plates size
 Type:
 == Typ:
 
+Show others
+== Pokaż innych
+
+Show quads
+== Pokaż quady
+
+Show other players' hook collision lines
+== Pokaż linie kolizyjne innych graczy
+
+Show other players' key presses
+== Pokaż naciśnięcia klawiszy innych graczy
+
+Background (regular)
+== Tło (regularne)
+
+Background (entities)
+== Tło (entities)
+
+Try fast HTTP map download first
+== Spróbuj naprzód ściągać mapy z serwera HTTP.
+
+Gameplay
+== Rozgrywka
+
+AntiPing
+== AntyPing
+
+AntiPing: predict other players
+== AntyPing: Przewiduj ruchy graczy
+
+AntiPing: predict weapons
+== AntyPing: Przewiduj bronie
+
+AntiPing: predict grenade paths
+== AntyPing: Przewiduj lot granatów
+
+Save the best demo of each race
+== Zapisuj najlepsze demo każdego wyścigu.
+
+Ghost
+== Duszek
+
+Save ghost
+== Zapisuj duszka
+
+Show ghost
+== Pokazuj duszka
+
+Default zoom
+== Domyślny zoom
+
+Overlay entities
+== Pokaż entities
+
+Select a name
+== Wybierz nazwę
+
+Switch weapon when out of ammo
+== Zmień broń gdy skończy się amunicja
+
+Reset wanted weapon on death
+== Zresetuj broń którą chcesz podnieść po śmierci
+
+Automatically take game over scoreboard screenshot
+== Automatycznie zrób screenshot tabeli wyników na końcu gry
+
+Automatically take game over statboard screenshot
+== Automatycznie zrób screenshot tabeli statystyk na końcu gry
+
+Dummy settings
+== Ustawienia dummy
+
+Show new skins ingame
+== Pokazuj nowe skiny w grze
+
+Show score
+== Pokazuj wyniki
+
+Show health + ammo
+== Pokazuj życie i ammo
+
+Show names in chat in team colors
+== Pokazuj nicki na czacie w kolorach teamu
+
+Show votes window after voting
+== Pokazuj okno głosowania, po zagłosowaniu
+
+Highlighted message
+== Wyróżniona wiadomość
+
+System message
+== Wiadomość systemowa
+
+Team message
+== Wiadomość w drużynie
+
+Normal message
+== Wiadomość standardowa
+
+Inner color
+== Wewnętrzny kolor
+
+Outline color
+== Zewnętrzny kolor
+
+Use DDRace Scoreboard
+== Użyj tabeli wyników z DDRace
+
+Show kill messages
+== Pokazuj wiadomości śmierci
+
+Show client IDs in Scoreboard
+== Pokazuj ID graczy w tabeli wyników
+
+Hook collision: 
+== Linia kolizyjna
+
+Countries
+== Kraje
+
+Types
+== Typy
+
+Exclude
+== Wyklucz
+
+Search
+== Wyszukaj
+
+Enable game sounds
+== Włącz dźwięki gry
+
+Enable gun sound
+== Włącz dźwięk pistoletu
+
+Enable server message sound
+== Włącz dźwięk wiadomości serwerowych
+
+Enable regular chat sound
+== Włącz dźwięk czatu standardowego
+
+Enable team chat sound
+== Włącz dźwięk czatu teamowego
+
+Enable highlighted chat sound
+== Włącz dźwięk wyróżnionej wiadomości
+
+Threaded sound loading
+== Wątkowe ładowanie dźwięku
+
+Map sound volume
+== Glośność dźwięków z map
+
+No updates available
+== Brak dostępnych aktualizacji
+
+DDNet %s is available:
+== DDNet %s jest dostępny:
+
+Update now
+== Aktualizuj
+
+Updating...
+== Aktualizuje...
+
+DDNet Client updated!
+== DDNet Client został zaktualizowany!
+
+Check now
+== Sprawdź
+
+*** '%s' entered and joined the spectators
+== *** '%s' wszedł i dołączył do obserwatorów
+
+Look out!
+== Uważaj!
+
+Spectator
+== Obserwator
+
+We will win
+== Wygramy to
+
+Hello and welcome
+== Cześć i siema
+
+CPU Throttle
+== Ograniczenie CPU
+
+none
+== żadne
