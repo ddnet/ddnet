@@ -1191,7 +1191,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	if(m_NeedRestartUpdate)
 	{
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		UI()->DoLabelScaled(&RestartWarning, "DDNet Client needs to be restarted to complete update!", 14.0f, -1);
+		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound)
@@ -1843,26 +1843,26 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		//Update Button
 		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet %s is available:", Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is available:"), Client()->LatestVersion());
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, "Update now", 0, &Button))
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
 				Updater()->InitiateUpdate();
 		}
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-			str_format(aBuf, sizeof(aBuf), "Updating...");
+			str_format(aBuf, sizeof(aBuf), Localize("Updating..."));
 		else if(State == IUpdater::NEED_RESTART){
-			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
 			m_NeedRestartUpdate = true;
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "No updates available");
+			str_format(aBuf, sizeof(aBuf), Localize("No updates available"));
 			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static int s_ButtonUpdate = 0;
-			if(DoButton_Menu(&s_ButtonUpdate, "Check now", 0, &Button))
+			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
 				Client()->CheckVersionUpdate();
 			}
