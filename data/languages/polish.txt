@@ -1,4 +1,4 @@
-##### authors #####
+﻿##### authors #####
 #originally created by:
 #	Łukasz D
 #modified by:
@@ -1192,9 +1192,6 @@ DDNet Client updated!
 
 Check now
 == Sprawdź
-
-*** '%s' entered and joined the spectators
-== *** '%s' wszedł i dołączył do obserwatorów
 
 Look out!
 == Uważaj!
