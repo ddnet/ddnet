@@ -1,4 +1,10 @@
-[DDNet]
+[DDnets]
+
+Index 0
+Pos 0 0 INDEX 33 OR 33 XFLIP OR 33 YFLIP OR 33 XFLIP YFLIP
+
+NewRun
+
 Index 1
 
 Index 2
