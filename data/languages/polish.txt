@@ -1107,7 +1107,7 @@ Show names in chat in team colors
 == Pokazuj nicki na czacie w kolorach teamu
 
 Show votes window after voting
-== Pokazuj okno głosowania, po zagłosowaniu
+== Pokazuj okno głosowania po zagłosowaniu
 
 Highlighted message
 == Wyróżniona wiadomość
@@ -1213,3 +1213,6 @@ CPU Throttle
 
 none
 == żadne
+
+DDNet Client needs to be restarted to complete update!
+== DDNet Client potrzebuje restartu do pełnej aktualizacji!
