@@ -16,6 +16,10 @@ bulgarian
 == Български
 == 100
 
+catalan
+== Català
+== -1
+
 czech
 == Česky
 == 203
