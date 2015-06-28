@@ -4150,9 +4150,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_SelectedEnvelope--;
 			if(m_SelectedEnvelope < 0)
-				CurrentEnvelopeSwitched = false;
-			else
-				CurrentEnvelopeSwitched = true;
+				m_SelectedEnvelope = m_Map.m_lEnvelopes.size() - 1;
+			CurrentEnvelopeSwitched = true;
 		}
 
 		static int s_NextButton = 0;
@@ -4160,9 +4159,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_SelectedEnvelope++;
 			if(m_SelectedEnvelope >= m_Map.m_lEnvelopes.size())
-				CurrentEnvelopeSwitched = false;
-			else
-				CurrentEnvelopeSwitched = true;
+				m_SelectedEnvelope = 0;
+			CurrentEnvelopeSwitched = true;
 		}
 
 		if(pEnvelope)

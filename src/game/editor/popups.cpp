@@ -1380,7 +1380,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 
 	if(Prop == PROP_TELE)
 	{
-		NewVal = clamp(NewVal, 0, 255);
+		NewVal = (NewVal + 256) % 256;
 
 		CLayerTele *gl = pEditor->m_Map.m_pTeleLayer;
 		for(int y = 0; y < gl->m_Height; ++y)
@@ -1463,7 +1463,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 
 	if(Prop == PROP_SwitchNumber)
 	{
-		NewVal = clamp(NewVal, 0, 255);
+		NewVal = (NewVal + 256) % 256;
 
 		CLayerSwitch *gl = pEditor->m_Map.m_pSwitchLayer;
 		for(int y = 0; y < gl->m_Height; ++y)
@@ -1484,7 +1484,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 		pEditor->m_SwitchNum = NewVal;
 	}
 	if(Prop == PROP_SwitchDelay)
-		pEditor->m_SwitchDelay = clamp(NewVal, 0, 255);
+		pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 
 	return 0;
 }
@@ -1510,7 +1510,7 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View)
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
 	if(Prop == PROP_TUNE)
-		 pEditor->m_TuningNum = clamp(NewVal, 1, 255);
+		pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
 
 	return 0;
 }
