@@ -65,7 +65,7 @@ As this is the first time you launch the game, please enter your nick name below
 == To pierwsze uruchomienie gry, podaj swój nick poniżej. Zalecane jest też sprawdzenie ustawień i dopasowanie ich do swoich upodobań przed dołączeniem do gry.
 
 Automatically record demos
-== Automatycznie rejestruj dema
+== Automatycznie nagrywaj dema
 
 Automatically take game over screenshot
 == Automatycznie zrób zrzut ekranu końca gry
@@ -80,13 +80,13 @@ Body
 == Ciało
 
 Call vote
-== Głosowanie
+== Głosuj
 
 Change settings
 == Zmień ustawienia
 
 Chat
-== Chat
+== Czat
 
 Clan
 == Klan
@@ -224,7 +224,7 @@ Grenade
 == Granatnik
 
 Hammer
-== Młot
+== Młotek
 
 Has people playing
 == Nie pokazuj pustych
@@ -389,7 +389,7 @@ Rename demo
 == Zmień nazwę dema
 
 Reset filter
-== Domyślne filtry
+== Przywróć domyślne
 
 Sample rate
 == Częstotliwość próbkowania
@@ -407,7 +407,7 @@ Scoreboard
 == Tablica wyników
 
 Screenshot
-== Screenshot
+== Zrzut ekranu
 
 Server address:
 == Adres serwera:
@@ -431,13 +431,13 @@ Shotgun
 == Shotgun
 
 Show chat
-== Pokaż chat
+== Pokaż czat
 
 Show friends only
 == Pokaż tylko znajomych
 
 Show ingame HUD
-== Pokaż wewnętrzny HUD
+== Pokaż HUD
 
 Show name plates
 == Pokaż nicki
@@ -476,7 +476,7 @@ Standard map
 == Standardowa mapa
 
 Stop record
-== Zakończ REC
+== Zakończ nagrywanie
 
 Strict gametype filter
 == Szczegółowy filtr typu gry
@@ -491,22 +491,22 @@ Team
 == Drużyna
 
 Team chat
-== Chat drużynowy
+== Czat drużynowy
 
 Teeworlds %s is out! Download it at www.teeworlds.com!
-== Nowa wersja Teeworlds %s jest dostępna! Do ściągnięcia z www.teeworlds.com!
+== Nowa wersja Teeworlds %s jest dostępna! Do ściągnięcia na www.teeworlds.com!
 
 Texture Compression
 == Kompresja tekstur
 
 The audio device couldn't be initialised.
-== Urządzenie dźwiękowe nie mogło zostać zainicjowane
+== Urządzenie dźwiękowe nie mogło zostać zainicjowane.
 
 The server is running a non-standard tuning on a pure game type.
 == Ten serwer korzysta z niestandardowych ustawień.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== W edytorze jest niezapisana mapa! Zapisz ją, jeśli nie chcesz
+== W edytorze jest niezapisana mapa! Możesz ją zapisać zanim wyjdziesz.
 
 Time limit
 == Limit czasu
@@ -557,7 +557,7 @@ Warmup
 == Rozgrzewka
 
 Weapon
-== Bronie
+== Broń
 
 Welcome to Teeworlds
 == Witaj w Teeworlds
@@ -566,7 +566,7 @@ Yes
 == Tak
 
 You must restart the game for all settings to take effect.
-== Uruchom ponownie grę, aby użyć nowych ustawieńn
+== Uruchom ponownie grę, aby użyć nowych ustawień.
 
 ##### needs translation #####
 
@@ -589,34 +589,34 @@ You must restart the game for all settings to take effect.
 == %d serwerów, %d graczy
 
 '%s' called for vote to kick '%s' (%s)
-== '%s' zagłosowal za wywaleniem '%s' (%s)
+== '%s' zagłosował za wyrzuceniem '%s' (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
-== '%s' zagłosował za przesunięciem '%s' do obserwatorow (%s)
+== '%s' zagłosował za przesunięciem '%s' do obserwatorów (%s)
 
 '%s' called vote to change server option '%s' (%s)
-== '%s' zagłosował na zmiane opcji serwera '%s' (%s)
+== '%s' zagłosował za zmianą opcji serwera '%s' (%s)
 
 '%s' entered and joined the %s
-== '%s' wszedł oraz dołączył do %s
+== '%s' wszedł i dołączył do %s
 
 '%s' has left the game
-== '%s' opuścił gre
+== '%s' opuścił grę
 
 '%s' has left the game (%s)
-== '%s' opuścił gre (%s)
+== '%s' opuścił grę (%s)
 
 '%s' joined the %s
-== '%s' dołączyl do %s
+== '%s' dołączył do %s
 
 Admin forced server option '%s' (%s)
-== Admin wymusil opcje serwera '%s' (%s)
+== Admin wymusił opcję serwera '%s' (%s)
 
 Admin forced vote no
 == Admin wymusił głos na nie
 
 Admin forced vote yes
-== Admin wymusil glos na tak
+== Admin wymusił głos na tak
 
 Admin moved '%s' to spectator (%s)
 == Admin przesunął '%s' do obserwatorów (%s)
@@ -628,10 +628,10 @@ Anti Aliasing
 == Antyaliasing
 
 Are you sure you want to rename the demo?
-== Jesteś pewny że chcesz zmienić nazwe dema?
+== Czy na pewno chcesz zmienić nazwę dema?
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== Jestes pewny że chcesz zapisac skin? Jeśli skin z taka nazwą istnieje, zostanie on podmieniony przez twój.
+== Czy na pewno chcesz zapisać skin? Jeśli skin z taką nazwą już istnieje, zostanie on podmieniony przez twój.
 
 Back
 == Wróć
@@ -679,10 +679,10 @@ Format
 == Format
 
 Game paused
-== Gra zatrzymana
+== Gra wstrzymana
 
 Game starts in
-== Gra zacznie sie za
+== Gra zacznie się za
 
 Global
 == Globalne
@@ -691,7 +691,7 @@ Hands
 == Ręce
 
 Host address:
-== Adres hosta:
+== Adres serwera:
 
 Hue:
 == Barwa 
@@ -709,7 +709,7 @@ Joined red
 == Dołączył do czerwonych
 
 Kick voting requires %d players on the server
-== Głosowanie na wywalenie potrzebuje conajmniej %d graczy na serwerze.
+== Głosowanie za wyrzuceniem wymaga co najmniej %d graczy na serwerze.
 
 Laser
 == Laser
@@ -739,10 +739,10 @@ Misc
 == Różne
 
 Netversion
-== 
+== Wersja sieciowa
 
 Nickname is empty.
-== Nazwa jest pusta.
+== Nick jest pusty.
 
 Normal:
 == Normalny:
@@ -793,16 +793,16 @@ Search:
 == Szukaj:
 
 Server does not allow voting to kick players
-== Serwer nie pozwala głosować na wywalanie graczy
+== Serwer nie pozwala głosować za wyrzucaniem graczy
 
 Server does not allow voting to move players to spectators
-== Serwer nie pozwala głosowac na przesuwanie graczy do obserwatoró
+== Serwer nie pozwala głosować za przesuwaniem graczy do obserwatorów
 
 Servers
 == Serwery
 
 Show only chat messages from friends
-== Pokazuj tylko wiadomości od znajomych
+== Pokazuj wiadomości tylko od znajomych
 
 Size
 == Rozmiar
@@ -814,16 +814,16 @@ Spectating
 == Obserwowanie
 
 Spectators aren't allowed to start a vote.
-== Obserwatorzy nie moga głosować.
+== Obserwatorzy nie mogą głosować.
 
 Standard Gametype
 == Standardowy typ gry 
 
 Tattoo
-== 
+== Tatuaż
 
 Tattoos
-== 
+== Tatuaże
 
 Team:
 == Drużyna
@@ -835,7 +835,7 @@ Teams are locked. Time to wait before changing team: %02d:%02d
 == Drużyny są zablokowane. Czas, zanim będzie można zmienić drużynę: %02d:%02d
 
 Teams were locked
-== Drużyny zostaly zablokowane
+== Drużyny zostały zablokowane
 
 Teams were unlocked
 == Drużyny zostały odblokowane
@@ -847,7 +847,7 @@ Texture
 == Tekstura
 
 Volume
-== Głośnośc
+== Głośność
 
 Vote aborted
 == Głosowanie anulowane
@@ -859,7 +859,7 @@ Vote passed
 == Głosowanie się powiodło
 
 Wait for current vote to end before calling a new one.
-== Poczekaj aż skończy się obecne głosowanie zanim rozpoczniesz nowe.
+== Poczekaj aż skończy się obecne głosowanie, zanim rozpoczniesz nowe.
 
 Wait for next round
 == Czekaj na następną rundę
@@ -868,7 +868,7 @@ Wide
 == Szeroki
 
 You must wait %d seconds before making another vote
-== Musisz poczekać %d sekund zanim rozpoczniesz inne głosowanie
+== Musisz poczekać %d sekund, zanim rozpoczniesz inne głosowanie
 
 blue
 == niebieski
@@ -923,20 +923,20 @@ FSAA samples
 Sound volume
 == Głośność
 
-utracić swojej pracy!
+
 == 
 
 Created:
 == Utworzono:
 
 Max Screenshots
-== Maksymalnie screenshotów
+== Maksymalnie zrzutów ekranu
 
 Length:
 == Długość:
 
 Skin name
-== 
+== Nazwa skina
 
 Rifle
 == Laser
@@ -1008,7 +1008,7 @@ Alpha
 == Alfa
 
 Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 
+== Czy na pewno chcesz zapisać skin? Jeśli skin z taką nazwą już istnieje, zostanie on podmieniony przez twój.
 
 Current version: %s
 == Aktualna wersja: %s
@@ -1041,7 +1041,7 @@ Background (entities)
 == Tło (entities)
 
 Try fast HTTP map download first
-== Spróbuj naprzód ściągać mapy z serwera HTTP.
+== Próbuj najpierw ściągać mapy z serwera HTTP.
 
 Gameplay
 == Rozgrywka
@@ -1080,16 +1080,16 @@ Select a name
 == Wybierz nazwę
 
 Switch weapon when out of ammo
-== Zmień broń gdy skończy się amunicja
+== Zmień broń, gdy skończy się amunicja
 
 Reset wanted weapon on death
-== Zresetuj broń którą chcesz podnieść po śmierci
+== Zresetuj broń, którą chcesz podnieść po śmierci
 
 Automatically take game over scoreboard screenshot
-== Automatycznie zrób screenshot tabeli wyników na końcu gry
+== Automatycznie zrób zrzut ekranu tabeli wyników po grze
 
 Automatically take game over statboard screenshot
-== Automatycznie zrób screenshot tabeli statystyk na końcu gry
+== Automatycznie zrób zrzut ekranu tabeli statystyk po grze
 
 Dummy settings
 == Ustawienia dummy
@@ -1101,13 +1101,13 @@ Show score
 == Pokazuj wyniki
 
 Show health + ammo
-== Pokazuj życie i ammo
+== Pokazuj życie i amunicję
 
 Show names in chat in team colors
 == Pokazuj nicki na czacie w kolorach teamu
 
 Show votes window after voting
-== Pokazuj okno głosowania po zagłosowaniu
+== Nadal pokazuj okno głosowania po oddaniu głosu
 
 Highlighted message
 == Wyróżniona wiadomość
@@ -1149,7 +1149,7 @@ Exclude
 == Wyklucz
 
 Search
-== Wyszukaj
+== Szukaj
 
 Enable game sounds
 == Włącz dźwięki gry
@@ -1164,7 +1164,7 @@ Enable regular chat sound
 == Włącz dźwięk czatu standardowego
 
 Enable team chat sound
-== Włącz dźwięk czatu teamowego
+== Włącz dźwięk czatu drużynowego
 
 Enable highlighted chat sound
 == Włącz dźwięk wyróżnionej wiadomości
@@ -1212,4 +1212,4 @@ none
 == żadne
 
 DDNet Client needs to be restarted to complete update!
-== DDNet Client potrzebuje restartu do pełnej aktualizacji!
+== DDNet Client wymaga ponownego uruchomienia, aby zakończyć aktualizację!
