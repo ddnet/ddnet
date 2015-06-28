@@ -173,6 +173,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	else
 		ScrollNum = 0;
 
+	if(Input()->KeyDown(KEY_TAB))
+	{
+		if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
+		else
+			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
+	}
 	if(m_SelectedIndex > -1)
 	{
 		for(int i = 0; i < m_NumInputEvents; i++)
@@ -182,13 +189,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_SelectedIndex + 1;
 				if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_SelectedIndex - 1;
-				if(m_aInputEvents[i].m_Key == KEY_TAB)
-				{
-					if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
-						g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
-					else
-						g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
-				}
 			}
 			if(NewIndex > -1 && NewIndex < NumServers)
 			{
