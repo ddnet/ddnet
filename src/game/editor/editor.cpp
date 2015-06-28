@@ -471,6 +471,16 @@ vec4 CEditor::GetButtonColor(const void *pID, int Checked)
 
 	switch(Checked)
 	{
+	case 7: // selected + game layers
+		if(UI()->HotItem() == pID)
+			return vec4(1,0,0,0.4f);
+		return vec4(1,0,0,0.2f);
+
+	case 6: // game layers
+		if(UI()->HotItem() == pID)
+			return vec4(1,1,1,0.4f);
+		return vec4(1,1,1,0.2f);
+
 	case 5: // selected + image/sound should be embedded
 		if(UI()->HotItem() == pID)
 			return vec4(1,0,0,0.75f);
@@ -2844,7 +2854,17 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 				float FontSize = 10.0f;
 				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Button.w)
 					FontSize--;
-				if(int Result = DoButton_Ex(m_Map.m_lGroups[g]->m_lLayers[i], aBuf, g==m_SelectedGroup&&i==m_SelectedLayer, &Button,
+				int Checked = g == m_SelectedGroup && i == m_SelectedLayer;
+				if(m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pGameLayer ||
+					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pFrontLayer ||
+					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pSwitchLayer ||
+					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pTuneLayer ||
+					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pSpeedupLayer ||
+					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pTeleLayer)
+				{
+					Checked += 6;
+				}
+				if(int Result = DoButton_Ex(m_Map.m_lGroups[g]->m_lLayers[i], aBuf, Checked, &Button,
 					BUTTON_CONTEXT, "Select layer.", 0, FontSize))
 				{
 					m_SelectedLayer = i;
