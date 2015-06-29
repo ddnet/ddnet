@@ -30,6 +30,7 @@ void CNamePlates::RenderNameplate(
 		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
+	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 	// render name plate
 	if(!pPlayerInfo->m_Local)
 	{
@@ -67,15 +68,15 @@ void CNamePlates::RenderNameplate(
 		if(g_Config.m_ClNameplatesClan)
 		{
 			const char *pClan = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aClan;
-			float tw_clan = TextRender()->TextWidth(0, FontSize, pClan, -1);
-			TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y-FontSize*2-38.0f, FontSize, pClan, -1);
+			float tw_clan = TextRender()->TextWidth(0, FontSizeClan, pClan, -1);
+			TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y-FontSize-FontSizeClan-38.0f, FontSizeClan, pClan, -1);
 		}
 
 		if(g_Config.m_Debug) // render client id when in debug aswell
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);
-			float Offset = g_Config.m_ClNameplatesClan ? FontSize * 3 : FontSize * 2;
+			float Offset = g_Config.m_ClNameplatesClan ? (FontSize * 2 + FontSizeClan) : (FontSize * 2);
 			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
 		}
