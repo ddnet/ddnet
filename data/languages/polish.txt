@@ -923,9 +923,6 @@ FSAA samples
 Sound volume
 == Głośność
 
-
-== 
-
 Created:
 == Utworzono:
 

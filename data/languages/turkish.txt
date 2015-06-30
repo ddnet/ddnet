@@ -968,8 +968,7 @@ Your skin
 Size:
 == Boyut:
 
-﻿
-== ## translated strings #####
+##### translated strings #####
 
 Reset to defaults
 == Varsayılanlara getir
