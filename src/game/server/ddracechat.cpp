@@ -1235,7 +1235,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	if (!pChr)
 		return;
 
-	if (!g_Config.m_SvAllowRescue) {
+	if (!g_Config.m_SvRescue) {
 		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server");
 		return;
 	}

@@ -244,6 +244,7 @@ public:
 	int m_TileSFlagsB;
 	vec2 m_Intersection;
 	int64 m_LastStartWarning;
+	int64 m_LastRescue;
 	bool m_LastRefillJumps;
 	bool m_LastPenalty;
 	bool m_LastBonus;
