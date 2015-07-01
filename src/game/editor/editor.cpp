@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/tl/array.h>
-
 #include <base/system.h>
+#include <time.h>
 
 #if defined(CONF_FAMILY_UNIX)
 #include <pthread.h>
