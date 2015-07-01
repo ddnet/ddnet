@@ -75,7 +75,10 @@ if include_data and not use_bundle:
 		shutil.copy("other/config_directory.bat", package_dir)
 		shutil.copy("SDL.dll", package_dir)
 		shutil.copy("freetype.dll", package_dir)
-		shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
+		if platform == "win32":
+		    shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
+		elif platform == "win64":
+		    shutil.copy("libgcc_s_seh-1.dll", package_dir)
 		shutil.copy("libogg-0.dll", package_dir)
 		shutil.copy("libopus-0.dll", package_dir)
 		shutil.copy("libopusfile-0.dll", package_dir)
