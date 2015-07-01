@@ -157,7 +157,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				g_Config.m_ClAutoDemoRecord ^= 1;
 
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over scoreboard screenshot"), g_Config.m_ClAutoScreenshot, &Button))
+			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
 				g_Config.m_ClAutoScreenshot ^= 1;
 
 			Left.HSplitTop(10.0f, 0, &Left);
@@ -205,7 +205,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoStatboardScreenshot,
-						Localize("Automatically take game over statboard screenshot"),
+						Localize("Automatically take statboard screenshot"),
 						g_Config.m_ClAutoStatboardScreenshot, &Button))
 			{
 				g_Config.m_ClAutoStatboardScreenshot ^= 1;
