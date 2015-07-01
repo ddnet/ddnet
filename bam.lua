@@ -258,7 +258,7 @@ function build(settings)
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
-	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.cpp"))
+	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
 	md5 = Compile(settings, "src/engine/external/md5/md5.c")
 	if config.websockets.value then
 		libwebsockets = Compile(settings, Collect("src/engine/external/libwebsockets/*.c"))

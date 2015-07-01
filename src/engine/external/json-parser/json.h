@@ -213,7 +213,7 @@ inline const struct _json_value *json_array_get (const json_value * array, int i
 inline int json_array_length (const json_value * array) { return array->u.array.length; }
 inline const char * json_string_get (const json_value * string) { return string->u.string.ptr; }
 inline int json_int_get (const json_value * integer) { return integer->u.integer; }
-inline bool json_boolean_get(const json_value * boolean) { return boolean->u.boolean != 0; }
+inline int json_boolean_get(const json_value * boolean) { return boolean->u.boolean != 0; }
 
 #ifdef __cplusplus
    } /* extern "C" */
