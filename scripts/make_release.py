@@ -77,6 +77,7 @@ if include_data and not use_bundle:
 		shutil.copy("freetype.dll", package_dir)
 		if platform == "win32":
 		    shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
+		    shutil.copy("libidn-11.dll", package_dir)
 		elif platform == "win64":
 		    shutil.copy("libgcc_s_seh-1.dll", package_dir)
 		shutil.copy("libogg-0.dll", package_dir)
@@ -86,7 +87,6 @@ if include_data and not use_bundle:
 		#shutil.copy("mysqlcppconn.dll", package_dir)
 		shutil.copy("libcurl.dll", package_dir)
 		shutil.copy("libeay32.dll", package_dir)
-		shutil.copy("libidn-11.dll", package_dir)
 		shutil.copy("ssleay32.dll", package_dir)
 		shutil.copy("zlib1.dll", package_dir)
 
