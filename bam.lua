@@ -140,6 +140,7 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\ssleay32.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\zlib1.dll"))
 
+		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libwinpthread-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libgcc_s_seh-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libogg-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libopus-0.dll"))

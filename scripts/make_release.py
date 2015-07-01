@@ -79,6 +79,7 @@ if include_data and not use_bundle:
 		    shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
 		    shutil.copy("libidn-11.dll", package_dir)
 		elif platform == "win64":
+		    shutil.copy("libwinpthread-1.dll", package_dir)
 		    shutil.copy("libgcc_s_seh-1.dll", package_dir)
 		shutil.copy("libogg-0.dll", package_dir)
 		shutil.copy("libopus-0.dll", package_dir)
