@@ -379,9 +379,6 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 	{
 		if(g_Config.m_SvClientSuggestion[0] != '\0' && m_ClientVersion <= VERSION_DDNET_OLD)
 			GameServer()->SendBroadcast(g_Config.m_SvClientSuggestion, m_ClientID);
-
-		//if(g_Config.m_SvClientSuggestionOld[0] != '\0' && m_ClientVersion < CLIENT_VERSIONNR)
-		//	GameServer()->SendBroadcast(g_Config.m_SvClientSuggestionOld, m_ClientID);
 	}
 }
 
