@@ -1,4 +1,4 @@
-[DDraceNetwork](http://ddnet.tw) [![Build Status](https://circleci.com/gh/def-/ddnet.png)](https://circleci.com/gh/def-/ddnet)
+[![DDraceNetwork](http://ddnet.tw/ddnet-small.png)](http://ddnet.tw) [![Build Status](https://circleci.com/gh/def-/ddnet.png)](https://circleci.com/gh/def-/ddnet)
 ================================
 
 Our own flavor of DDRace, a Teeworlds mod. See the [website](http://ddnet.tw) for more information.
