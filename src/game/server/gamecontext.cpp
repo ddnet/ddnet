@@ -725,7 +725,7 @@ void CGameContext::OnTick()
 			{
 				EndVote();
 				if(VetoStop || (m_VoteWillPass && Veto))
-					SendChat(-1, CGameContext::CHAT_ALL, "Vote failed because of veto");
+					SendChat(-1, CGameContext::CHAT_ALL, "Vote failed because of veto. Find an empty server instead");
 				else
 					SendChat(-1, CGameContext::CHAT_ALL, "Vote failed");
 			}
