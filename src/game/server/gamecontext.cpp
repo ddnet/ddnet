@@ -612,6 +612,7 @@ void CGameContext::OnTick()
 		else
 		{
 			int Total = 0, Yes = 0, No = 0;
+			bool Veto = false, VetoStop = false;
 			if(m_VoteUpdate)
 			{
 				// count votes
@@ -629,7 +630,7 @@ void CGameContext::OnTick()
 									aVoteChecked[i])	// don't count in votes by spectators if the admin doesn't want it
 						continue;
 
-					if(m_VoteKick && ((!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS) ||
+					if((m_VoteKick || m_VoteSpec) && ((!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS) ||
 						 (GetPlayerChar(m_VoteCreator) && GetPlayerChar(i) &&
 						  GetPlayerChar(m_VoteCreator)->Team() != GetPlayerChar(i)->Team())))
 						continue;
@@ -659,24 +660,39 @@ void CGameContext::OnTick()
 						Yes++;
 					else if(ActVote < 0)
 						No++;
+
+					// veto right for players with much progress and who're not afk
+					if(!m_VoteKick && !m_VoteSpec && !m_apPlayers[i]->m_Afk &&
+						m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
+						m_apPlayers[i]->GetCharacter() &&
+						m_apPlayers[i]->GetCharacter()->m_DDRaceState == DDRACE_STARTED &&
+						g_Config.m_SvVoteVetoTime &&
+						(Server()->Tick() - m_apPlayers[i]->GetCharacter()->m_StartTime) / (Server()-(>TickSpeed() * 60) > g_Config.m_SvVoteVetoTime)
+					{
+						if(ActVote == 0)
+							Veto = true;
+						else if(ActVote < 0)
+							VetoStop = true;
+					}
 				}
 
 				if(g_Config.m_SvVoteMaxTotal && Total > g_Config.m_SvVoteMaxTotal &&
 						(m_VoteKick || m_VoteSpec))
 					Total = g_Config.m_SvVoteMaxTotal;
 
-				//if(Yes >= Total/2+1)
-				if(Yes > Total / (100.0 / g_Config.m_SvVoteYesPercentage))
+				if((Yes > Total / (100.0 / g_Config.m_SvVoteYesPercentage)) && !Veto)
 					m_VoteEnforce = VOTE_ENFORCE_YES;
-				//else if(No >= (Total+1)/2)
 				else if(No >= Total - Total / (100.0 / g_Config.m_SvVoteYesPercentage))
+					m_VoteEnforce = VOTE_ENFORCE_NO;
+
+				if(VetoStop)
 					m_VoteEnforce = VOTE_ENFORCE_NO;
 
 				m_VoteWillPass = Yes > (Yes + No) / (100.0 / g_Config.m_SvVoteYesPercentage);
 			}
 
 			if(time_get() > m_VoteCloseTime && !g_Config.m_SvVoteMajority)
-				m_VoteEnforce = (m_VoteWillPass) ? VOTE_ENFORCE_YES : VOTE_ENFORCE_NO;
+				m_VoteEnforce = (m_VoteWillPass && !Veto) ? VOTE_ENFORCE_YES : VOTE_ENFORCE_NO;
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
@@ -708,7 +724,10 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO || (time_get() > m_VoteCloseTime && g_Config.m_SvVoteMajority))
 			{
 				EndVote();
-				SendChat(-1, CGameContext::CHAT_ALL, "Vote failed");
+				if(VetoStop || (m_VoteWillPass && Veto))
+					SendChat(-1, CGameContext::CHAT_ALL, "Vote failed because of veto");
+				else
+					SendChat(-1, CGameContext::CHAT_ALL, "Vote failed");
 			}
 			else if(m_VoteUpdate)
 			{
