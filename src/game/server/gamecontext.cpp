@@ -667,7 +667,7 @@ void CGameContext::OnTick()
 						m_apPlayers[i]->GetCharacter() &&
 						m_apPlayers[i]->GetCharacter()->m_DDRaceState == DDRACE_STARTED &&
 						g_Config.m_SvVoteVetoTime &&
-						(Server()->Tick() - m_apPlayers[i]->GetCharacter()->m_StartTime) / (Server()-(>TickSpeed() * 60) > g_Config.m_SvVoteVetoTime)
+						(Server()->Tick() - m_apPlayers[i]->GetCharacter()->m_StartTime) / (Server()->TickSpeed() * 60) > g_Config.m_SvVoteVetoTime)
 					{
 						if(ActVote == 0)
 							Veto = true;
