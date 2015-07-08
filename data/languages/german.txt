@@ -18,12 +18,10 @@
 #	heinrich5991	2011-07-02 09:10:21
 #	Yared Hufkens	2012-02-03 19:57:59
 #	andi103			2012-07-14 11:31:11
+#   DoNe            2014-06-30 18:26:59
 ##### /authors #####
 
 ##### translated strings #####
-
-%d%% loaded
-== %d%% geladen
 
 %ds left
 == Noch %ds
@@ -61,9 +59,6 @@ Address
 All
 == Alle
 
-Always show name plates
-== Spielernamen immer anzeigen
-
 Are you sure that you want to delete the demo?
 == Möchtest du die Aufnahme wirklich löschen?
 
@@ -78,9 +73,6 @@ As this is the first time you launch the game, please enter your nick name below
 
 Automatically record demos
 == Automatisch Aufnahmen erstellen
-
-Automatically take game over screenshot
-== Autom. ein Bild vom Spielergebnis erstellen
 
 Blue team
 == Blaues Team
@@ -268,9 +260,6 @@ Kick player
 Language
 == Sprache
 
-Loading
-== Laden
-
 MOTD
 == Nachricht des Tages
 
@@ -442,9 +431,6 @@ Server info
 Server not full
 == Server nicht voll
 
-Settings
-== Optionen
-
 Shotgun
 == Schrotflinte
 
@@ -514,9 +500,6 @@ Team
 Team chat
 == Teamchat
 
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworld %s ist da! Lade es unter www.teeworlds.com runter!
-
 Texture Compression
 == Texturkompression
 
@@ -578,7 +561,7 @@ Warmup
 == Aufwärmen
 
 Weapon
-== Waffe
+== Waffen
 
 Welcome to Teeworlds
 == Willkommen bei Teeworlds
@@ -590,320 +573,6 @@ You must restart the game for all settings to take effect.
 == Du musst das Spiel neustarten um die Änderungen zu übernehmen.
 
 ##### needs translation #####
-
-%.3f KiB
-== 
-
-%d player left
-== 
-
-%d player not ready
-== 
-
-%d players left
-== 
-
-%d players not ready
-== 
-
-%d servers, %d players
-== 
-
-'%s' called for vote to kick '%s' (%s)
-== 
-
-'%s' called for vote to move '%s' to spectators (%s)
-== 
-
-'%s' called vote to change server option '%s' (%s)
-== 
-
-'%s' entered and joined the %s
-== 
-
-'%s' has left the game
-== 
-
-'%s' has left the game (%s)
-== 
-
-'%s' joined the %s
-== 
-
-Admin forced server option '%s' (%s)
-== 
-
-Admin forced vote no
-== 
-
-Admin forced vote yes
-== 
-
-Admin moved '%s' to spectator (%s)
-== 
-
-Alp:
-== 
-
-Anti Aliasing
-== 
-
-Are you sure you want to rename the demo?
-== 
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
-
-Back
-== 
-
-Basic
-== 
-
-Bodies
-== 
-
-Borderless window
-== 
-
-Color
-== 
-
-Crc
-== 
-
-Created
-== 
-
-Custom
-== 
-
-Customize
-== 
-
-Decoration
-== 
-
-Demo
-== 
-
-Detail
-== 
-
-Editor
-== 
-
-Eyes
-== 
-
-Format
-== 
-
-Game starts in
-== 
-
-Global
-== 
-
-Hands
-== 
-
-Host address:
-== 
-
-Hue:
-== 
-
-Join
-== 
-
-Joined
-== 
-
-Joined blue
-== 
-
-Joined red
-== 
-
-Kick voting requires %d players on the server
-== 
-
-Laser
-== 
-
-Length
-== 
-
-Letterbox
-== 
-
-Lgt:
-== 
-
-Local
-== 
-
-Local server
-== 
-
-Match
-== 
-
-Max
-== 
-
-Misc
-== 
-
-Netversion
-== 
-
-Nickname is empty.
-== 
-
-Normal:
-== 
-
-Only %d active players are allowed
-== 
-
-Personal
-== 
-
-Ready
-== 
-
-Record
-== 
-
-Recorded
-== 
-
-Reset
-== 
-
-Resolutions
-== 
-
-Round over
-== 
-
-Round over!
-== 
-
-Sat:
-== 
-
-Save
-== 
-
-Save skin
-== 
-
-Screen
-== 
-
-Search:
-== 
-
-Server does not allow voting to kick players
-== 
-
-Server does not allow voting to move players to spectators
-== 
-
-Servers
-== 
-
-Size
-== 
-
-Skin
-== 
-
-Spectating
-== 
-
-Spectators aren't allowed to start a vote.
-== 
-
-Standard Gametype
-== 
-
-Tattoo
-== 
-
-Tattoos
-== 
-
-Team:
-== 
-
-Teams are locked
-== 
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== 
-
-Teams were locked
-== 
-
-Teams were unlocked
-== 
-
-Tee
-== 
-
-Texture
-== 
-
-Volume
-== 
-
-Vote aborted
-== 
-
-Vote failed
-== 
-
-Vote passed
-== 
-
-Wait for current vote to end before calling a new one.
-== 
-
-Wait for next round
-== 
-
-Wide
-== 
-
-You must wait %d seconds before making another vote
-== 
-
-blue
-== 
-
-blue team
-== 
-
-game
-== 
-
-red
-== 
-
-red team
-== 
-
-spectators
-== 
-
-wait for more players
-== 
-
-##### old translations #####
 
 New name:
 == Neuer Name:
@@ -944,26 +613,14 @@ Max Screenshots
 Length:
 == Länge
 
-Skin name
-== 
-
 Rifle
 == Laser
-
-Patterns
-== 
 
 Netversion:
 == Netversion:
 
 Map:
 == Karte:
-
-%d Bytes
-== %d Bytes
-
-Coloration
-== 
 
 Info
 == Info
@@ -981,7 +638,7 @@ Size:
 == Größe:
 
 ﻿
-== ## translated strings #####
+##### translated strings #####
 
 Reset to defaults
 == Standardeinstellung
@@ -1004,9 +661,6 @@ Lht.
 no limit
 == Keine Begrenzung
 
-Quick search:
-== Schnellsuche:
-
 UI Color
 == Menüfarbe
 
@@ -1018,9 +672,6 @@ Crc:
 
 Alpha
 == Alpha
-
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 
 
 Current version: %s
 == Aktuelle Version: %s
@@ -1034,3 +685,251 @@ Name plates size
 Type:
 == Typ:
 
+Automatically take game over statboard screenshot
+== Automatisch Screenshots vom Statboard am Spielende erstellen
+
+Ratio
+== Ratio
+
+Dummy settings
+== Einstellungen für Dummy
+
+AntiPing
+== AntiPing
+
+Show quads
+== Quads anzeigen
+
+✎
+== ✎
+
+Map sound volume
+== Lautstärke von Mapsounds
+
+✗
+== ✗
+
+Countries
+== Ländern
+
+Inner color
+== Innere Farbe
+
+CPU Throttle
+== CPU Limit
+
+\n\nReconnect in %d sec
+== Neu verbinden in %d Sekunden
+
+Background (entities)
+== Hintergrund (Entities)
+
+Show kill messages
+== Kill-Nachrichten anzeigen
+
+Show ghost
+== Geist anzeigen
+
+No updates available
+== Keine neuen Versionen verfügbar
+
+Update now
+== Jetzt aktualisieren
+
+Enable server message sound
+== Aktiviere Ton für Server-Nachrichten
+
+second
+== Sekunde
+
+Show votes window after voting
+== Zeige Vote-Fenster nach dem Voten
+
+HUD
+== Aussehen
+
+Look out!
+== Pass auf!
+
+Show names in chat in team colors
+== Nutze Teamfarben im Chat
+
+Enable team chat sound
+== Aktiviere Ton für Team-Nachrichten
+
+Show other players' hook collision lines
+== Hook-Collision von anderen Spielern anzeigen
+
+We will win
+== Wir werden gewinnen
+
+Deaths
+== Tode
+
+Enable game sounds
+== Aktiviere Ton im Spiel
+
+DDNet Client needs to be restarted to complete update!
+== Der DDNet Client muss neu gestarted werden um das Update abzuschließen!
+
+Spectator
+== Zuschauer
+
+Show others
+== Andere Teams zeigen
+
+Restart
+== Neustart
+
+Browser
+== Browser
+
+Automatically take game over scoreboard screenshot
+== Automatisch Screenshots vom Scoreboard am Spielende erstellen
+
+⚲
+== ⚲
+
+Enable gun sound
+== Aktiviere Pistolen-Ton
+
+Show health + ammo
+== Gesundheit und Munition anzeigen
+
+Team message
+== Team-Nachricht
+
+Save the best demo of each race
+== Speichere die beste Aufnahme von jedem Race
+
+Outline color
+== Äußere Farbe
+
+Are you sure that you want to disconnect?
+== Bist du sicher, dass du die Verbindung trennen möchtest?
+
+Ghost
+== Geist
+
+Check now
+== Aktualisieren
+
+DDNet Client updated!
+== Der DDNet Client wurde aktualisiert!
+
+Background (regular)
+== Hintergrund (Normal)
+
+AntiPing: predict other players
+== AntiPing: Berechne andere Spieler vor
+
+Show other players' key presses
+== Tastendrücke von anderen Spielern anzeigen
+
+System message
+== Server-Nachricht
+
+DDNet %s is available:
+== DDNet %s ist verfügbar:
+
+Updating...
+== Aktualisieren...
+
+Overlay entities
+== Entities Overlay
+
+Messages
+== Nachrichten
+
+%.2f MiB
+== %.2f MiB
+
+Dummy Timeout code
+== Timeout-Code für Dummy
+
+Suicides
+== Selbstmorde
+
+Timeout code
+== Timeout-Code
+
+Use DDRace Scoreboard
+== Benutze das DDRace Scoreboard
+
+DDNet %s is out! Download it at ddnet.tw!
+== DDNet %s ist jetzt auf ddnet.tw verfügbar!
+
+Loading DDNet Client
+== Lade DDNet Client
+
+Default zoom
+== Normal-Zoom
+
+Show score
+== Score anzeigen
+
+Spree
+== Killfolge
+
+Show client IDs in Scoreboard
+== Client IDs im Scoreboard anzeigen
+
+seconds
+== Sekunden
+
+Show new skins ingame
+== Zeige neue Skins im Spiel
+
+%.2f KiB
+== %.2f KiB
+
+Try fast HTTP map download first
+== Probiere schnelleres Downloaden über HTTP
+
+Enable regular chat sound
+== Aktiviere Ton für normale Nachrichten
+
+DDNet
+== DDNet
+
+Normal message
+== Normale Nachricht
+
+Best spree
+== Beste Killfolge
+
+AntiPing: predict grenade paths
+== AntiPing: Berechne Granaten-Flugkurve vor
+
+Search
+== Suche
+
+Connecting dummy
+== Dummy verbindet sich
+
+Show clan above name plates
+== Clan über Spielernamen anzeigen
+
+Save ghost
+== Geist speichern
+
+Enable highlighted chat sound
+== Aktiviere Ton für Nachrichten an dich
+
+AntiPing: predict weapons
+== AntiPing: Berechne Waffen vor
+
+Hello and welcome
+== Hallo und willkommen
+
+Highlighted message
+== Nachricht an dich
+
+Reset wanted weapon on death
+== Waffe beim Tod zurücksetzen
+
+Switch weapon when out of ammo
+== Waffe wechseln wenn die Munition leer ist
+
+AntiPing limit
+== AntiPing-Limit

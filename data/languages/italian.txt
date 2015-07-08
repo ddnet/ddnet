@@ -969,8 +969,7 @@ Your skin
 Size:
 == Dimensione:
 
-﻿
-== ## translated strings #####
+##### translated strings #####
 
 Reset to defaults
 == Reimposta
