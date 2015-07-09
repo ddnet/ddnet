@@ -167,7 +167,7 @@ void CMapSounds::OnRender()
 			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
 				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
-				
+
 				if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
 					continue;
 
@@ -215,8 +215,8 @@ void CMapSounds::OnRender()
 
 							Sound()->SetVoiceVolume(pVoice->m_Voice, Volume);
 						}
-					}	
-				}	
+					}
+				}
 			}
 		}
 	}

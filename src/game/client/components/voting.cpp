@@ -121,7 +121,7 @@ void CVoting::Vote(int v)
 CVoting::CVoting()
 {
 	ClearOptions();
-	
+
 	m_Closetime = 0;
 	m_aDescription[0] = 0;
 	m_aReason[0] = 0;

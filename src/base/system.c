@@ -41,7 +41,7 @@
 
 		#include <Carbon/Carbon.h>
 	#endif
-	
+
 	#if defined(__ANDROID__)
 		#include <android/log.h>
 	#endif
@@ -1739,7 +1739,7 @@ int fs_remove(const char *filename)
 }
 
 int fs_rename(const char *oldname, const char *newname)
-{	
+{
 #if defined(CONF_FAMILY_WINDOWS)
 	if(MoveFile(oldname, newname) != 0)
 		return 1;

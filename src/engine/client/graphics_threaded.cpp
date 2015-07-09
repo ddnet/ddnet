@@ -68,7 +68,7 @@ void CGraphics_Threaded::FlushVertices()
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_QUADS;
 			Cmd.m_PrimCount = NumVerts/4;
-		}	
+		}
 	}
 	else if(m_Drawing == DRAWING_LINES)
 	{
@@ -97,7 +97,7 @@ void CGraphics_Threaded::FlushVertices()
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
-		
+
 		Cmd.m_pVertices = (CCommandBuffer::SVertex *)m_pCommandBuffer->AllocData(sizeof(CCommandBuffer::SVertex)*NumVerts);
 		if(Cmd.m_pVertices == 0x0)
 		{

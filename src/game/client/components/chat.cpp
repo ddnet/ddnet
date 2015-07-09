@@ -322,7 +322,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	const char *pStr = pLine;
 	const char *pEnd = 0;
 	while(*pStr)
- 	{
+	{
 		const char *pStrOld = pStr;
 		int Code = str_utf8_decode(&pStr);
 
@@ -339,7 +339,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			*(const_cast<char *>(pStr)) = 0;
 			break;
 		}
- 	}
+	}
 	if(pEnd != 0)
 		*(const_cast<char *>(pEnd)) = 0;
 
@@ -637,13 +637,13 @@ void CChat::OnRender()
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
-		else 
+		else
 		{
 			//TextRender()->TextColor(1.0f, 1.0f, 1.0f, Blend);
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
-			
+
 
 		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
 	}

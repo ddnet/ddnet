@@ -135,7 +135,7 @@ public:
 	int m_VoteEnforce;
 	char m_ZoneEnterMsg[NUM_TUNINGZONES][256]; // 0 is used for switching from or to area without tunings
 	char m_ZoneLeaveMsg[NUM_TUNINGZONES][256];
-	
+
 	enum
 	{
 		VOTE_ENFORCE_UNKNOWN=0,

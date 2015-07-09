@@ -212,7 +212,7 @@ int CSaveTeam::save(int Team)
 	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS))
 	{
 		CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
-	
+
 		m_MembersCount = Teams->Count(Team);
 		if(m_MembersCount <= 0)
 		{

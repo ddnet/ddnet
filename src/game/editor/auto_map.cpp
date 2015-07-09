@@ -319,7 +319,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 							CheckIndex = -1;
 							CheckFlags = 0;
 						}
-	
+
 	 					 if(pRule->m_Value == CPosRule::INDEX)
 						{
 							bool PosRuleTest = false;

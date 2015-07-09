@@ -141,8 +141,7 @@ void CPlayers::Predict(
 		g_GameClient.m_aClients[info.cid].angle = angle;*/
 	}
 
-    vec2 NonPredPos = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
-
+vec2 NonPredPos = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 
 	// use preditect players if needed
 	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -378,9 +377,9 @@ void CPlayers::RenderPlayer(
 	const CNetObj_PlayerInfo *pPrevInfo,
 	const CNetObj_PlayerInfo *pPlayerInfo,
 	const vec2 &parPosition
-/*    vec2 &PrevPos,
-    vec2 &SmoothPos,
-    int &MoveCnt
+/*	vec2 &PrevPos,
+	vec2 &SmoothPos,
+	int &MoveCnt
 */	)
 {
 	CNetObj_Character Prev;
@@ -932,7 +931,7 @@ void CPlayers::RenderPlayer(
 				float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 				TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
 			}
-			
+
 			TextRender()->TextColor(1,1,1,1);
 			TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 		}
@@ -970,7 +969,7 @@ void CPlayers::OnRender()
 	static vec2 SmoothPos[MAX_CLIENTS];
 	static int MoveCnt[MAX_CLIENTS] = {0};
 	static vec2 PredictedPos[MAX_CLIENTS];
-	
+
 	static int predcnt = 0;
 
 	if (g_Config.m_ClAntiPingPlayers)

@@ -135,7 +135,7 @@ void SendNews(NETADDR *pAddr)
 	g_NetOp.Send(&p);
 }
 
-// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length] 
+// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length]
 void SendServerList(NETADDR *pAddr, const char *Token)
 {
 	CNetChunk p;

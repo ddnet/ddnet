@@ -18,7 +18,7 @@ public:
 		int m_NumShots;
 		float m_Time;
 	};
-	
+
 private:
 	struct CGhostCharacter
 	{
@@ -34,16 +34,16 @@ private:
 		int m_HookY;
 		int m_AttackTick;
 	};
-	
+
 	struct CGhostItem
 	{
 		int m_ID;
 		CNetObj_ClientInfo m_Info;
 		array<CGhostCharacter> m_Path;
-		
+
 		bool operator==(const CGhostItem &Other) { return m_ID == Other.m_ID; }
 	};
-	
+
 	array<CGhostItem> m_lGhosts;
 	CGhostItem m_CurGhost;
 
@@ -62,20 +62,20 @@ private:
 		RACE_STARTED,
 		RACE_FINISHED,
 	};
-	
+
 	void AddInfos(CGhostCharacter Player);
-	
+
 	CGhostCharacter GetGhostCharacter(CNetObj_Character Char);
-	
+
 	void StartRecord();
 	void StopRecord();
 	void StartRender();
 	void StopRender();
 	void RenderGhost(CGhostCharacter Player, CGhostCharacter Prev, CNetObj_ClientInfo Info);
 	void RenderGhostHook(CGhostCharacter Player, CGhostCharacter Prev);
-	
+
 	bool GetHeader(IOHANDLE *pFile, CGhostHeader *pHeader);
-	
+
 	void Save();
 
 	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
@@ -88,10 +88,10 @@ public:
 	virtual void OnReset();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnMapLoad();
-	
+
 	void Load(const char* pFilename, int ID);
 	void Unload(int ID);
-	
+
 	bool GetInfo(const char* pFilename, CGhostHeader *pHeader);
 };
 

@@ -52,8 +52,8 @@ public:
 
 	// events
 	int NumEvents() const { return m_NumEvents; }
-	void ClearEvents() 
-	{ 
+	void ClearEvents()
+	{
 		m_NumEvents = 0;
 		m_InputDispatched = true;
 	}

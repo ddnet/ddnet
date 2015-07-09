@@ -1300,7 +1300,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 		{
 			CUIRect ProgressBar, Percent;
-			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);	
+			Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
 			ProgressBar.y += 2.0f;
 			ProgressBar.HMargin(1.0f, &ProgressBar);
 			RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);

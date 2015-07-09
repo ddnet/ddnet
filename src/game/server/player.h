@@ -11,7 +11,7 @@
 class CPlayer
 {
 	MACRO_ALLOC_POOL_ID()
-	
+
 	friend class CSaveTee;
 
 public:

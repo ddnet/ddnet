@@ -48,7 +48,7 @@ static const char *StrLtrim(const char *pStr)
 	{
 		const char *pStrOld = pStr;
 		int Code = str_utf8_decode(&pStr);
-		
+
 		// check if unicode is not empty
 		if(str_utf8_isspace(Code))
 		{
@@ -66,7 +66,7 @@ static void StrRtrim(char *pStr)
 	{
 		const char *pStrOld = p;
 		int Code = str_utf8_decode(&p);
-		
+
 		// check if unicode is not empty
 		if(str_utf8_isspace(Code))
 		{
@@ -411,12 +411,12 @@ void CServer::Kick(int ClientID, const char *pReason)
 	else if(m_RconClientID == ClientID)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick yourself");
- 		return;
+		return;
 	}
 	else if(m_aClients[ClientID].m_Authed > m_RconAuthLevel)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "kick command denied");
- 		return;
+		return;
 	}
 
 	m_NetServer.Drop(ClientID, pReason);
@@ -1394,12 +1394,12 @@ void CServer::PumpNetwork()
 			}
 			if (lastask[i]<lastsent[i]-g_Config.m_SvMapWindow)
 				continue;
-	
+
 			int Chunk = lastsent[i]++;
 			unsigned int ChunkSize = 1024-128;
 			unsigned int Offset = Chunk * ChunkSize;
 			int Last = 0;
-	
+
 			// drop faulty map data requests
 			if(Chunk < 0 || Offset > m_CurrentMapSize)
 				continue;
@@ -1408,7 +1408,7 @@ void CServer::PumpNetwork()
 				ChunkSize = m_CurrentMapSize-Offset;
 				Last = 1;
 			}
-	
+
 			CMsgPacker Msg(NETMSG_MAP_DATA);
 			Msg.AddInt(Last);
 			Msg.AddInt(m_CurrentMapCrc);
@@ -1416,7 +1416,7 @@ void CServer::PumpNetwork()
 			Msg.AddInt(ChunkSize);
 			Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
 			SendMsgEx(&Msg, MSGFLAG_FLUSH, i, true);
-	
+
 			if(g_Config.m_Debug)
 			{
 				char aBuf[256];
@@ -1945,12 +1945,12 @@ void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUser
 				Msg.AddInt(0);	//authed
 				Msg.AddInt(0);	//cmdlist
 				pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
-				
+
 				pServer->m_aClients[i].m_Authed = AUTHED_NO;
 				pServer->m_aClients[i].m_LastAuthed = AUTHED_NO;
 				pServer->m_aClients[i].m_AuthTries = 0;
 				pServer->m_aClients[i].m_pRconCmdToSend = 0;
-				
+
 				pServer->SendRconLine(i, "Logged out by password change.");
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
@@ -1976,12 +1976,12 @@ void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pU
 				Msg.AddInt(0);	//authed
 				Msg.AddInt(0);	//cmdlist
 				pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
-				
+
 				pServer->m_aClients[i].m_Authed = AUTHED_NO;
 				pServer->m_aClients[i].m_LastAuthed = AUTHED_NO;
 				pServer->m_aClients[i].m_AuthTries = 0;
 				pServer->m_aClients[i].m_pRconCmdToSend = 0;
-				
+
 				pServer->SendRconLine(i, "Logged out by password change.");
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
@@ -2015,7 +2015,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("mod_command", ConchainModCommandUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	
+
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 

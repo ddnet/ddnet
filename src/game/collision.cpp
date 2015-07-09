@@ -75,7 +75,7 @@ void CCollision::Init(class CLayers *pLayers)
 		if (Size >= m_Width*m_Height*sizeof(CTuneTile))
 			m_pTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
 		}
-	
+
 	if(m_pLayers->FrontLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->FrontLayer()->m_Front);
@@ -707,8 +707,8 @@ vec2 CCollision::CpSpeed(int Index, int Flags)
 			break;
 		}
 	if(Index == TILE_CP_F)
-       target*=4;
-   return target;
+		target*=4;
+	return target;
 }
 
 int CCollision::GetPureMapIndex(vec2 Pos)
@@ -914,7 +914,7 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos)
 	{
 		int Nx = clamp((int)Pos.x/32, 0, m_Width-1);
 		int Ny = clamp((int)Pos.y/32, 0, m_Height-1);
-		
+
 		if ((m_pTele) ||
 			(m_pSpeedup && m_pSpeedup[Ny*m_Width+Nx].m_Force > 0))
 		{
@@ -1016,22 +1016,22 @@ int CCollision::Entity(int x, int y, int Layer)
 
 void CCollision::SetCollisionAt(float x, float y, int flag)
 {
-   int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
-   int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
+	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
+	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 
-   m_pTiles[Ny * m_Width + Nx].m_Index = flag;
+	m_pTiles[Ny * m_Width + Nx].m_Index = flag;
 }
 
 void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Number)
 {
 	if(!m_pDoor)
 		return;
-   int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
-   int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
+	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
+	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 
-   m_pDoor[Ny * m_Width + Nx].m_Index = Type;
-   m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
-   m_pDoor[Ny * m_Width + Nx].m_Number = Number;
+	m_pDoor[Ny * m_Width + Nx].m_Index = Type;
+	m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
+	m_pDoor[Ny * m_Width + Nx].m_Number = Number;
 }
 
 int CCollision::GetDTileIndex(int Index)

@@ -308,7 +308,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 						y3 = y2;
 						y2 = y1;
 						y1 = Tmp;
- 					}
+					}
 
 					Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
 					IGraphics::CQuadItem QuadItem(x*Scale, y*Scale, Scale, Scale);
@@ -838,7 +838,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 						y3 = y2;
 						y2 = y1;
 						y1 = Tmp;
- 					}
+					}
 
 					Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
 					IGraphics::CQuadItem QuadItem(x*Scale, y*Scale, Scale, Scale);

@@ -253,7 +253,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_SwitchDelay = m_pEditor->m_SwitchDelay;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
-	
+
 	else if(m_pEditor->GetSelectedLayer(0) == m_pEditor->m_Map.m_pTuneLayer)
 		{
 		CLayerTune *pGrabbed = new CLayerTune(r.w, r.h);
@@ -262,7 +262,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
 		pBrush->AddLayer(pGrabbed);
-		
+
 		// copy the tiles
 				for(int y = 0; y < r.h; y++)
 					for(int x = 0; x < r.w; x++)
@@ -466,7 +466,7 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	// resize switch layer if available
 	if(m_Game && m_pEditor->m_Map.m_pSwitchLayer && (m_pEditor->m_Map.m_pSwitchLayer->m_Width != NewW || m_pEditor->m_Map.m_pSwitchLayer->m_Height != NewH))
 		m_pEditor->m_Map.m_pSwitchLayer->Resize(NewW, NewH);
-	
+
 	// resize tune layer if available
 	if(m_Game && m_pEditor->m_Map.m_pTuneLayer && (m_pEditor->m_Map.m_pTuneLayer->m_Width != NewW || m_pEditor->m_Map.m_pTuneLayer->m_Height != NewH))
 			m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
@@ -949,7 +949,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 		return;
-	
+
 	Snap(&Rect); // corrects Rect; no need of <=
 
 	Snap(&Rect);
@@ -1214,7 +1214,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 		return;
-	
+
 	Snap(&Rect); // corrects Rect; no need of <=
 
 	Snap(&Rect);
@@ -1481,7 +1481,7 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 		return;
-	
+
 	Snap(&Rect); // corrects Rect; no need of <=
 
 	Snap(&Rect);
@@ -1743,7 +1743,7 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 			return;
-	
+
 	Snap(&Rect); // corrects Rect; no need of <=
 
 		int sx = ConvertX(Rect.x);

@@ -931,13 +931,13 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	m_pDemoPlayer->SetListner(this);
 
-	m_SliceFrom = StartTick;	
+	m_SliceFrom = StartTick;
 	m_SliceTo = EndTick;
 	m_Stop = false;
 
 	if (m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL) == -1)
 		return;
-	
+
 	const CDemoPlayer::CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
 	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client") == -1)
 		return;

@@ -97,12 +97,12 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pSwitchLayer = pTilemap;
 				}
 				if(pTilemap->m_Flags&TILESLAYERFLAG_TUNE)
-				{				
-					if(pTilemap->m_Version <= 2)				
-					{			
-						pTilemap->m_Tune = *((int*)(pTilemap) + 19);		
-					}				
-					m_pTuneLayer = pTilemap;								
+				{
+					if(pTilemap->m_Version <= 2)
+					{
+						pTilemap->m_Tune = *((int*)(pTilemap) + 19);
+					}
+					m_pTuneLayer = pTilemap;
 				}
 			}
 		}

@@ -82,7 +82,7 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
-		
+
 		if(!pInfo->m_Paused || pThis->m_EnvelopeUpdate)
 		{
 			if(pThis->m_CurrentLocalTick != pInfo->m_CurrentTick)

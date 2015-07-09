@@ -107,7 +107,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			else
 			{
 				m_DemoPlayerState = DEMOPLAYER_NONE;
-				
+
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 				Client()->DemoSlice(aPath);

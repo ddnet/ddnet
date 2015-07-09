@@ -124,12 +124,12 @@ private:
 	CServerEntry *m_pLastReqServer;
 	int m_NumRequests;
 	int m_MasterServerCount;
-	
+
 	//used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
-	
+
 	int m_LastPacketTick;
-	
+
 	int m_NeedRefresh;
 
 	int m_NumSortedServers;
@@ -140,7 +140,7 @@ private:
 	int m_Sorthash;
 	char m_aFilterString[64];
 	char m_aFilterGametypeString[128];
-	
+
 	// the token is to keep server refresh separated from each other
 	int m_CurrentToken;
 

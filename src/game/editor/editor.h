@@ -212,7 +212,7 @@ public:
 	{
 		return m_lLayers.size() == 0; // stupid function, since its bad for Fillselection: TODO add a function for Fillselection that returns whether a specific tile is used in the given layer
 	}
-	
+
 	/*bool IsUsedInThisLayer(int Layer, int Index) // <--------- this is what i meant but cause i dont know which Indexes belongs to which layers i cant finish yet
 	{
 		switch Layer
@@ -234,7 +234,7 @@ public:
 			}
 			case LAYERTYPE_SWITCH:
 			{
-				
+
 			}
 			case LAYERTYPE_TUNE:
 			{
@@ -307,7 +307,7 @@ class CEditorSound
 {
 public:
 	CEditor *m_pEditor;
-	
+
 	CEditorSound(CEditor *pEditor)
 	{
 		m_pEditor = pEditor;
@@ -506,7 +506,7 @@ public:
 
 	void MakePalette();
 	virtual void Render();
-	
+
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
 	void Convert(CUIRect Rect, RECTi *pOut);
@@ -926,7 +926,7 @@ public:
 	int PopupSelectConfigAutoMapResult();
 
 	void PopupSelectSoundInvoke(int Current, float x, float y);
-	int PopupSelectSoundResult(); 
+	int PopupSelectSoundResult();
 
 	vec4 ButtonColorMul(const void *pID);
 
@@ -991,7 +991,7 @@ public:
 	static int PopupSwitch(CEditor *pEditor, CUIRect View);
 	static int PopupTune(CEditor *pEditor, CUIRect View);
 	unsigned char m_TeleNumber;
-	
+
 	unsigned char m_TuningNum;
 
 	unsigned char m_SpeedupForce;

@@ -14,7 +14,7 @@ MACRO_TUNING_PARAM(AirControlSpeed, air_control_speed, 250.0f / TicksPerSecond, 
 MACRO_TUNING_PARAM(AirControlAccel, air_control_accel, 1.5f, "Acceleration speed in air")
 MACRO_TUNING_PARAM(AirFriction, air_friction, 0.95f, "Friction in the air")
 MACRO_TUNING_PARAM(HookLength, hook_length, 380.0f, "Length of the hook")
-MACRO_TUNING_PARAM(HookFireSpeed, hook_fire_speed, 80.0f, "How fast the hook is fired") 
+MACRO_TUNING_PARAM(HookFireSpeed, hook_fire_speed, 80.0f, "How fast the hook is fired")
 MACRO_TUNING_PARAM(HookDragAccel, hook_drag_accel, 3.0f, "Acceleration when hook is stuck")
 MACRO_TUNING_PARAM(HookDragSpeed, hook_drag_speed, 15.0f, "Drag speed of the hook")
 MACRO_TUNING_PARAM(Gravity, gravity, 0.5f, "Gravity of the teeworld")

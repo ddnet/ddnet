@@ -41,7 +41,7 @@ CProjectile::CProjectile
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
-	
+
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
 	GameWorld()->InsertEntity(this);
@@ -71,7 +71,7 @@ vec2 CProjectile::GetPos(float Time)
 				Curvature = GameServer()->TuningList()[m_TuneZone].m_GrenadeCurvature;
 				Speed = GameServer()->TuningList()[m_TuneZone].m_GrenadeSpeed;
 			}
-				
+
 			break;
 
 		case WEAPON_SHOTGUN:
@@ -85,7 +85,7 @@ vec2 CProjectile::GetPos(float Time)
 				Curvature = GameServer()->TuningList()[m_TuneZone].m_ShotgunCurvature;
 				Speed = GameServer()->TuningList()[m_TuneZone].m_ShotgunSpeed;
 			}
-			
+
 			break;
 
 		case WEAPON_GUN:

@@ -18,7 +18,7 @@ class CGun : public CEntity
 
 	void Fire();
 	int m_LastFire;
-	
+
 public:
 	CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int Layer = 0, int Number = 0);
 

@@ -647,17 +647,17 @@ void CServerBrowser::Request(const NETADDR &Addr) const
 
 
 void CServerBrowser::Update(bool ForceResort)
-{	
+{
 	int64 Timeout = time_freq();
 	int64 Now = time_get();
 	int Count;
 	CServerEntry *pEntry, *pNext;
-	
+
 	// do server list requests
 	if(m_NeedRefresh && !m_pMasterServer->IsRefreshing())
 	{
 		NETADDR Addr;
-		CNetChunk Packet;		
+		CNetChunk Packet;
 		int i = 0;
 
 		m_NeedRefresh = 0;
@@ -686,10 +686,10 @@ void CServerBrowser::Update(bool ForceResort)
 
 	//Check if all server counts arrived
 	if(m_MasterServerCount == -1)
-	{		
+	{
 		m_MasterServerCount = 0;
 		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
-			{			
+			{
 				if(!m_pMasterServer->IsValid(i))
 					continue;
 				int Count = m_pMasterServer->GetCount(i);
@@ -732,7 +732,7 @@ void CServerBrowser::Update(bool ForceResort)
 	{
 		m_MasterServerCount = 0;
 		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
-			{			
+			{
 				if(!m_pMasterServer->IsValid(i))
 					continue;
 				int Count = m_pMasterServer->GetCount(i);
@@ -745,7 +745,7 @@ void CServerBrowser::Update(bool ForceResort)
 					*/
 				}
 				else
-					m_MasterServerCount += Count;		
+					m_MasterServerCount += Count;
 			}
 			//if(g_Config.m_Debug)
 			//{
@@ -783,7 +783,7 @@ void CServerBrowser::Update(bool ForceResort)
 		Count++;
 		pEntry = pEntry->m_pNextReq;
 	}
-	
+
 	if(m_pFirstReqServer && Count == 0 && m_CurrentMaxRequests > 1) //NO More current Server Requests
 	{
 		//reset old ones
@@ -792,28 +792,28 @@ void CServerBrowser::Update(bool ForceResort)
 		{
 			if(!pEntry) // no more entries
 				break;
-			pEntry->m_RequestTime = 0;			
-			pEntry = pEntry->m_pNextReq;		
+			pEntry->m_RequestTime = 0;
+			pEntry = pEntry->m_pNextReq;
 		}
-		
+
 		//update max-requests
 		m_CurrentMaxRequests = m_CurrentMaxRequests/2;
 		if(m_CurrentMaxRequests < 1)
 			m_CurrentMaxRequests = 1;
 	}
 	else if(Count == 0 && m_CurrentMaxRequests == 1) //we reached the limit, just release all left requests. IF a server sends us a packet, a new request will be added automatically, so we can delete all
-	{	
+	{
 		pEntry = m_pFirstReqServer;
 		while(1)
 		{
 			if(!pEntry) // no more entries
-				break;				
-			pNext = pEntry->m_pNextReq;				
+				break;
+			pNext = pEntry->m_pNextReq;
 			RemoveRequest(pEntry);	//release request
 			pEntry = pNext;
 		}
 	}
-	
+
 	// check if we need to resort
 	if(m_Sorthash != SortHash() || ForceResort)
 		Sort();
@@ -896,8 +896,8 @@ void CServerBrowser::LoadDDNet()
 	if(File)
 	{
 		char aBuf[4096*4];
-		mem_zero(aBuf, sizeof(aBuf));	
-		
+		mem_zero(aBuf, sizeof(aBuf));
+
 		io_read(File, aBuf, sizeof(aBuf));
 		io_close(File);
 
@@ -1010,7 +1010,7 @@ void CServerBrowser::DDNetFilterAdd(char *pFilter, const char *pName)
 {
 	if (DDNetFiltered(pFilter, pName))
 		return;
-	
+
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), ",%s", pName);
 	str_append(pFilter, aBuf, 128);
@@ -1066,7 +1066,7 @@ bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)
 void CServerBrowser::DDNetCountryFilterClean()
 {
 	char aNewList[128];
-	
+
 	for(int i = 0; i < m_NumDDNetCountries; i++)
 	{
 		const char *pName = m_aDDNetCountries[i].m_aName;
@@ -1084,7 +1084,7 @@ void CServerBrowser::DDNetCountryFilterClean()
 void CServerBrowser::DDNetTypeFilterClean()
 {
 	char aNewList[128];
-	
+
 	for(int i = 0; i < m_NumDDNetTypes; i++)
 	{
 		const char *pName = m_aDDNetTypes[i];

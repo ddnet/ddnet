@@ -310,7 +310,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 		CMapItemSound Item;
 		Item.m_Version = 1;
-		
+
 		Item.m_External = pSound->m_External;
 		Item.m_SoundName = df.AddData(str_length(pSound->m_aName)+1, pSound->m_aName);
 		if(pSound->m_External)
@@ -323,7 +323,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
 			Item.m_SoundDataSize = pSound->m_DataSize;
 		}
-			
+
 		df.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
 	}
 

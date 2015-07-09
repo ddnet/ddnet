@@ -23,7 +23,7 @@ typedef unsigned __int64 uint64_t;
 class IGameController
 {
 	friend class CSaveTeam; // need acces to GameServer() and Server()
-	
+
 	vec2 m_aaSpawnPoints[3][64];
 	int m_aNumSpawnPoints[3];
 

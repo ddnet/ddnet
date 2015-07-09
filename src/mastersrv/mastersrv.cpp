@@ -333,7 +333,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 	IConfig *pConfig = CreateConfig();
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
-	
+
 	bool RegisterFail = !pKernel->RegisterInterface(pStorage);
 	RegisterFail |= !pKernel->RegisterInterface(m_pConsole);
 	RegisterFail |= !pKernel->RegisterInterface(pConfig);

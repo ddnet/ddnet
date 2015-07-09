@@ -352,7 +352,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		new CGun(&GameServer()->m_World, Pos, false, false, Layer, Number);
 	}
-	
+
 	if(Type != -1)
 	{
 		//CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType);

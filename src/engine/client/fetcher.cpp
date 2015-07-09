@@ -86,7 +86,7 @@ void CFetcher::FetcherThread(void *pUser)
 		if(pTask)
 		{
 			dbg_msg("fetcher", "Task got %s:%s", pTask->m_pUrl, pTask->m_pDest);
-			pFetcher->FetchFile(pTask);	
+			pFetcher->FetchFile(pTask);
 			if(pTask->m_pfnCompCallback)
 				pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
 		}
@@ -143,7 +143,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;
 	int ret = curl_easy_perform(m_pHandle);
-	io_close(File);	
+	io_close(File);
 	if(ret != CURLE_OK)
 	{
 		dbg_msg("fetcher", "Task failed. libcurl error: %s", aErr);

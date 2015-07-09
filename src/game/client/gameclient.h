@@ -36,30 +36,30 @@ public:
 class CLocalProjectile
 {
 public:
-    int m_Active;
+	int m_Active;
 	CGameClient *m_pGameClient;
-    CWorldCore *m_pWorld;
-    CCollision *m_pCollision;
+	CWorldCore *m_pWorld;
+	CCollision *m_pCollision;
 
-    vec2 m_Direction;
-    vec2 m_Pos;
-    int m_StartTick;
-    int m_Type;
+	vec2 m_Direction;
+	vec2 m_Pos;
+	int m_StartTick;
+	int m_Type;
 
-    int m_Owner;
-    int m_Weapon;
-    bool m_Explosive;
-    int m_Bouncing;
+	int m_Owner;
+	int m_Weapon;
+	bool m_Explosive;
+	int m_Bouncing;
 	bool m_Freeze;
-    bool m_ExtraInfo;
+	bool m_ExtraInfo;
 
-    vec2 GetPos(float Time);
-    void CreateExplosion(vec2 Pos, int LocalClientID);
-    void Tick(int CurrentTick, int GameTickSpeed, int LocalClientID);
-    void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, const CNetObj_Projectile *pProj);
+	vec2 GetPos(float Time);
+	void CreateExplosion(vec2 Pos, int LocalClientID);
+	void Tick(int CurrentTick, int GameTickSpeed, int LocalClientID);
+	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, const CNetObj_Projectile *pProj);
 	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, vec2 Vel, vec2 Pos, int StartTick, int Type, int Owner, int Weapon, bool Explosive, int Bouncing, bool Freeze, bool ExtraInfo);
 	bool GameLayerClipped(vec2 CheckPos);
-    void Deactivate() { m_Active = 0; }
+	void Deactivate() { m_Active = 0; }
 };
 
 class CGameClient : public IGameClient
@@ -403,14 +403,14 @@ inline vec3 RgbToHsl(vec3 RGB)
 
 		if (HSL.l < 0.5)
 			HSL.s = (maxColor - minColor) / (maxColor + minColor);
-		else 
+		else
 			HSL.s = (maxColor - minColor) / (2.0 - maxColor - minColor);
 
 		if (RGB.r == maxColor)
 			HSL.h = (RGB.g - RGB.b) / (maxColor - minColor);
 		else if (RGB.g == maxColor)
 			HSL.h = 2.0 + (RGB.b - RGB.r) / (maxColor - minColor);
-		else 
+		else
 			HSL.h = 4.0 + (RGB.r - RGB.g) / (maxColor - minColor);
 
 		HSL.h /= 6; //to bring it to a number between 0 and 1

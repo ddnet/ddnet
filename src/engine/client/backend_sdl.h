@@ -91,7 +91,7 @@
 			SEL selector = sel_registerName("drain");
 			objc_msgSend(m_Pool, selector);
 		}
-	};							
+	};
 
 #elif defined(CONF_FAMILY_UNIX)
 
@@ -178,7 +178,7 @@ public:
 	virtual void RunBuffer(CCommandBuffer *pBuffer);
 	virtual bool IsIdle() const;
 	virtual void WaitForIdle();
-		
+
 protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
 	void StopProcessor();
@@ -284,10 +284,10 @@ public:
 // command processor impelementation, uses the fragments to combine into one processor
 class CCommandProcessor_SDL_OpenGL : public CGraphicsBackend_Threaded::ICommandProcessor
 {
- 	CCommandProcessorFragment_OpenGL m_OpenGL;
- 	CCommandProcessorFragment_SDL m_SDL;
- 	CCommandProcessorFragment_General m_General;
- public:
+	CCommandProcessorFragment_OpenGL m_OpenGL;
+	CCommandProcessorFragment_SDL m_SDL;
+	CCommandProcessorFragment_General m_General;
+public:
 	virtual void RunBuffer(CCommandBuffer *pBuffer);
 };
 

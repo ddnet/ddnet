@@ -770,7 +770,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		pRect->y += pRect->h/2.0f-7.0f;
 		UI()->DoLabel(pRect, aBuf, 10, 0, -1);
 	}
-	
+
 	return Current;
 }
 
@@ -1819,7 +1819,7 @@ void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, int TexID)
 	//Draw Quads
 	Graphics()->TextureSet(TexID);
 	Graphics()->QuadsBegin();
-	
+
 	for(int j = 0; j < Num; j++)
 	{
 		if(!apEnvelope[j])
@@ -1932,7 +1932,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	else
 		IgnoreGrid = false;
 
-   if(UI()->ActiveItem() == pID && s_ActQIndex == QIndex)
+	if(UI()->ActiveItem() == pID && s_ActQIndex == QIndex)
 	{
 		if(s_Operation == OP_MOVE)
 		{
@@ -2426,7 +2426,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			}
 		}
 
-		
+
 	}
 	else if(UI()->ActiveItem() == s_pEditorID)
 	{
@@ -3038,14 +3038,14 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 				break;
 			}
 	}
-	
+
 	pEditor->m_Dialog = DIALOG_NONE;
 }
 
 void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	
+
 	// load external
 	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
 	if(!SoundFile)
@@ -3068,7 +3068,7 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	io_read(SoundFile, pData, (unsigned) DataSize);
 	io_close(SoundFile);
 
-	// 
+	//
 	CEditorSound *pSound = pEditor->m_Map.m_lSounds[pEditor->m_SelectedSound];
 	int External = pSound->m_External;
 
@@ -3178,7 +3178,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 		}
 	}
 
-	
+
 	View.HSplitTop(10.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
@@ -3494,7 +3494,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			str_copy(aBuf, m_Map.m_lSounds[i]->m_aName, sizeof(aBuf));
 			ToolBox.HSplitTop(12.0f, &Slot, &ToolBox);
 
-			
+
 			int Selected = m_SelectedSound == i;
 			for(int x = 0; x < m_Map.m_lGroups.size(); ++x)
 				for(int j = 0; j < m_Map.m_lGroups[x]->m_lLayers.size(); ++j)

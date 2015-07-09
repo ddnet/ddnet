@@ -42,7 +42,7 @@ int CSounds::GetSampleId(int SetId)
 {
 	if(!g_Config.m_SndEnable || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
 		return -1;
-	
+
 	CDataSoundset *pSet = &g_pData->m_aSounds[SetId];
 	if(!pSet->m_NumSounds)
 		return -1;
@@ -193,7 +193,7 @@ void CSounds::PlayAt(int Chn, int SetId, float Vol, vec2 Pos)
 {
 	if(Chn == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
-	
+
 	int SampleId = GetSampleId(SetId);
 	if(SampleId == -1)
 		return;

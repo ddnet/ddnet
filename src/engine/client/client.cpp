@@ -1212,7 +1212,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		}
 
 		// ddnet server list
-		// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length] 
+		// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length]
 		if(pPacket->m_DataSize >= (int)(sizeof(VERSIONSRV_DDNETLIST) + 8) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0 &&
 			mem_comp((char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST), m_aDDNetSrvListToken, 4) == 0)
@@ -1273,15 +1273,15 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{
 		unsigned char *pP = (unsigned char*) pPacket->m_pData;
-		pP += sizeof(SERVERBROWSE_COUNT);				
-		int ServerCount = ((*pP)<<8) | *(pP+1); 
+		pP += sizeof(SERVERBROWSE_COUNT);
+		int ServerCount = ((*pP)<<8) | *(pP+1);
 		int ServerID = -1;
 		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
 		{
 			if(!m_pMasterServer->IsValid(i))
 				continue;
 			NETADDR tmp = m_pMasterServer->GetAddr(i);
-			if(net_addr_comp(&pPacket->m_Address, &tmp) == 0)			
+			if(net_addr_comp(&pPacket->m_Address, &tmp) == 0)
 			{
 				ServerID = i;
 				break;
@@ -2504,7 +2504,7 @@ void CClient::InitInterfaces()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
-	
+
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
 	m_Fetcher.Init();
@@ -2625,7 +2625,7 @@ void CClient::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
-	
+
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
@@ -2747,7 +2747,7 @@ void CClient::Run()
 				m_EditorActive = false;
 
 			Update();
-			
+
 			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
 			{
 				m_RenderFrames++;
@@ -2985,7 +2985,7 @@ void CClient::DemoSliceEnd()
 void CClient::Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoSliceBegin();	
+	pSelf->DemoSliceBegin();
 }
 
 void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)

@@ -56,12 +56,12 @@ std::string SaveFile()
 
 void CFileScore::MapInfo(int ClientID, const char* MapName)
 {
-  // TODO: implement
+	// TODO: implement
 }
 
 void CFileScore::MapVote(int ClientID, const char* MapName)
 {
-  // TODO: implement
+	// TODO: implement
 }
 
 void CFileScore::SaveScoreThread(void *pUser)
@@ -221,7 +221,7 @@ void CFileScore::LoadScore(int ClientID)
 
 void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
 {
-  dbg_msg("FileScore", "SaveTeamScore not implemented for FileScore");
+	dbg_msg("FileScore", "SaveTeamScore not implemented for FileScore");
 }
 
 void CFileScore::SaveScore(int ClientID, float Time,

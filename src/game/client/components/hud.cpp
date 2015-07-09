@@ -252,7 +252,7 @@ void CHud::RenderScoreHud()
 				TextRender()->Text(0, Whole-ScoreWidthMax+(ScoreWidthMax-aScoreWidth[t])/2-Split, StartY+t*20, 14.0f, aScore[t], -1);
 
 				if(apPlayerInfo[t])
- 				{
+				{
 					// draw name
 					int ID = apPlayerInfo[t]->m_ClientID;
 					if(ID >= 0 && ID < MAX_CLIENTS)

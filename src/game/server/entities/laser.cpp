@@ -142,11 +142,11 @@ void CLaser::DoBounce()
 				m_Bounces++;
 				m_WasTele = false;
 			}
-			
+
 			int BounceNum = GameServer()->Tuning()->m_LaserBounceNum;
 			if (m_TuneZone)
 				BounceNum = GameServer()->TuningList()[m_TuneZone].m_LaserBounceNum;
-			
+
 			if(m_Bounces > BounceNum)
 				m_Energy = -1;
 
@@ -177,9 +177,9 @@ void CLaser::Tick()
 		Delay = GameServer()->TuningList()[m_TuneZone].m_LaserBounceDelay;
 	else
 		Delay = GameServer()->Tuning()->m_LaserBounceDelay;
-		
+
 	if(Server()->Tick() > m_EvalTick+(Server()->TickSpeed()*Delay/1000.0f))
-		DoBounce();	
+		DoBounce();
 }
 
 void CLaser::TickPaused()

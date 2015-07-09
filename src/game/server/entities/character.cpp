@@ -42,7 +42,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastRefillJumps = false;
 	m_LastPenalty = false;
 	m_LastBonus = false;
-	
+
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
@@ -64,7 +64,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 
 	DDRaceInit();
-	
+
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn
 	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
@@ -451,7 +451,7 @@ void CCharacter::FireWeapon()
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime);
 				else
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GunLifetime);
-				
+
 				CProjectile *pProj = new CProjectile
 						(
 						GameWorld(),
@@ -518,7 +518,7 @@ void CCharacter::FireWeapon()
 				LaserReach = GameServer()->Tuning()->m_LaserReach;
 			else
 				LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
-			
+
 			new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 			GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		} break;
@@ -530,7 +530,7 @@ void CCharacter::FireWeapon()
 				Lifetime = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime);
 			else
 				Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
-			
+
 			CProjectile *pProj = new CProjectile
 					(
 					GameWorld(),
@@ -566,7 +566,7 @@ void CCharacter::FireWeapon()
 				LaserReach = GameServer()->Tuning()->m_LaserReach;
 			else
 				LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
-			
+
 			new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_RIFLE);
 			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		} break;
@@ -738,7 +738,7 @@ void CCharacter::Tick()
 		return;
 
 	DDRaceTick();
-	
+
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true, false);
 
@@ -1930,7 +1930,7 @@ void CCharacter::HandleTiles(int Index)
 
 void CCharacter::HandleTuneLayer()
 {
-	
+
 	m_TuneZoneOld = m_TuneZone;
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
@@ -2003,7 +2003,7 @@ void CCharacter::DDRaceTick()
 		if (m_FreezeTime == 1)
 			UnFreeze();
 	}
-	
+
 	HandleTuneLayer(); // need this before coretick
 
 	// look for save position for rescue feature

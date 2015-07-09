@@ -239,7 +239,7 @@ void CUpdater::PerformUpdate()
 }
 
 void CUpdater::WinXpRestart()
-{		
+{
 		char aBuf[512];
 		IOHANDLE bhFile = io_open(m_pStorage->GetBinaryPath("du.bat", aBuf, sizeof aBuf), IOFLAG_WRITE);
 		if(!bhFile)

@@ -87,7 +87,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int64 m_LocalStartTime;
 
 	int m_DebugFont;
-	
+
 	int64 m_LastRenderTime;
 	float m_RenderFrameTimeLow;
 	float m_RenderFrameTimeHigh;
@@ -189,7 +189,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }
 	void GraphicsThread();
-  vec3 GetColorV3(int v);
+	vec3 GetColorV3(int v);
 
 	char m_aDDNetSrvListToken[4];
 	bool m_DDNetSrvListTokenSet;

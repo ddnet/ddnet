@@ -471,7 +471,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		{
 			m_NewHook = false;
 		}
-		
+
 		int Index = MapIndex;
 		if(g_Config.m_ClPredictDDRace && IsClient && m_pCollision->IsSpeedup(Index))
 		{
