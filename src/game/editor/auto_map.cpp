@@ -127,9 +127,9 @@ void CAutoMapper::Load(const char* pTileName)
 				{
 					Value = CPosRule::NOTINDEX;
 					CIndexInfo NewIndexInfo1 = {0, 0};
-					CIndexInfo NewIndexInfo2 = {-1, 0};
+					//CIndexInfo NewIndexInfo2 = {-1, 0};
 					NewIndexList.add(NewIndexInfo1);
-					NewIndexList.add(NewIndexInfo2);
+					//NewIndexList.add(NewIndexInfo2);
 				}
 				else if(!str_comp(aValue, "INDEX") || !str_comp(aValue, "NOTINDEX"))
 				{
