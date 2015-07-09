@@ -796,7 +796,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
-	if (pSelf->m_VoteCloseTime && pSelf->m_VoteCreator == pResult->m_ClientID)
+	if (pSelf->m_VoteCloseTime && pSelf->m_VoteCreator == pResult->m_ClientID && (pSelf->m_VoteKick || pSelf->m_VoteSpec))
 	{
 		pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
