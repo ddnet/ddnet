@@ -512,15 +512,45 @@ void CScoreboard::RenderLocalTime(float x)
 
 void CScoreboard::RenderRecordingNotification(float x)
 {
-	if(!m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording())
+	if(!m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording() &&
+	   !m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording() &&
+	   !m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
+	{
 		return;
+	}
+
+	//draw the text
+	char aBuf[64] = "\0";
+	char aBuf2[64];
+	int Seconds;
+
+	if(m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording())
+	{
+		Seconds = m_pClient->DemoRecorder(RECORDER_MANUAL)->Length();
+		str_format(aBuf2, sizeof(aBuf2), Localize("Manual %3d:%02d  "), Seconds/60, Seconds%60);
+		str_append(aBuf, aBuf2, sizeof(aBuf));
+	}
+	if(m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
+	{
+		Seconds = m_pClient->DemoRecorder(RECORDER_RACE)->Length();
+		str_format(aBuf2, sizeof(aBuf2), Localize("Race %3d:%02d  "), Seconds/60, Seconds%60);
+		str_append(aBuf, aBuf2, sizeof(aBuf));
+	}
+	if(m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording())
+	{
+		Seconds = m_pClient->DemoRecorder(RECORDER_AUTO)->Length();
+		str_format(aBuf2, sizeof(aBuf2), Localize("Auto %3d:%02d  "), Seconds/60, Seconds%60);
+		str_append(aBuf, aBuf2, sizeof(aBuf));
+	}
+
+	float w = TextRender()->TextWidth(0, 20.0f, aBuf, -1);
 
 	//draw the box
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(x, 0.0f, 180.0f, 50.0f, 15.0f, CUI::CORNER_B);
+	RenderTools()->DrawRoundRectExt(x, 0.0f, w+60.0f, 50.0f, 15.0f, CUI::CORNER_B);
 	Graphics()->QuadsEnd();
 
 	//draw the red dot
@@ -529,10 +559,6 @@ void CScoreboard::RenderRecordingNotification(float x)
 	RenderTools()->DrawRoundRect(x+20, 15.0f, 20.0f, 20.0f, 10.0f);
 	Graphics()->QuadsEnd();
 
-	//draw the text
-	char aBuf[64];
-	int Seconds = m_pClient->DemoRecorder(RECORDER_MANUAL)->Length();
-	str_format(aBuf, sizeof(aBuf), Localize("REC %3d:%02d"), Seconds/60, Seconds%60);
 	TextRender()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
 }
 
