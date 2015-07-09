@@ -847,9 +847,6 @@ Messages
 Dummy Timeout code
 == Timeout-Code für Dummy
 
-Suicides
-== Selbstmorde
-
 Timeout code
 == Timeout-Code
 
@@ -867,9 +864,6 @@ Default zoom
 
 Show score
 == Score anzeigen
-
-Spree
-== Killfolge
 
 Show client IDs in Scoreboard
 == Client IDs im Scoreboard anzeigen
@@ -894,9 +888,6 @@ DDNet
 
 Normal message
 == Normale Nachricht
-
-Best spree
-== Beste Killfolge
 
 AntiPing: predict grenade paths
 == AntiPing: Berechne Granaten-Flugkurve vor
