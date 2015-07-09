@@ -24,6 +24,11 @@ void CStatboard::OnReset()
 	m_ScreenshotTime = -1;
 }
 
+void CStatboard::OnRelease()
+{
+	m_Active = false;
+}
+
 void CStatboard::ConKeyStats(IConsole::IResult *pResult, void *pUserData)
 {
 	((CStatboard *)pUserData)->m_Active = pResult->GetInteger(0) != 0;

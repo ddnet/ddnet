@@ -15,6 +15,7 @@ class CStatboard: public CComponent
 		virtual void OnReset();
 		virtual void OnConsoleInit();
 		virtual void OnRender();
+		virtual void OnRelease();
 		virtual void OnMessage(int MsgType, void *pRawMsg);
 		bool IsActive();
 };
