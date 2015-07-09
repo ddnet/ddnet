@@ -1625,7 +1625,6 @@ void CSqlScore::SaveTeamThread(void *pUser)
 	CSaveTeam* SavedTeam = 0;
 	CSqlTeamSave *pData = (CSqlTeamSave *)pUser;
 
-
 	char TeamString[65536];
 	int Team = pData->m_Team;
 	char OriginalCode[32];
@@ -1651,6 +1650,9 @@ void CSqlScore::SaveTeamThread(void *pUser)
 				break;
 			case 3:
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to find all Characters");
+				break;
+			case 4:
+				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Your team is not started yet");
 				break;
 		}
 		if(!Num)

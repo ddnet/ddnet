@@ -220,6 +220,12 @@ int CSaveTeam::save(int Team)
 		}
 
 		m_TeamState = Teams->GetTeamState(Team);
+
+		if(m_TeamState != CGameTeams::TEAMSTATE_STARTED)
+		{
+			return 4;
+		}
+
 		m_NumSwitchers = m_pController->GameServer()->Collision()->m_NumSwitchers;
 		m_TeamLocked = Teams->TeamLocked(Team);
 
