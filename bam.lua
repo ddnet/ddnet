@@ -22,7 +22,7 @@ config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
 config:Add(Opus.OptFind("opus", true))
 config:Add(Ogg.OptFind("ogg", true))
-config:Add(Mysql.OptFind("mysql", true))
+config:Add(Mysql.OptFind("mysql", false))
 config:Add(OptString("websockets", false))
 config:Finalize("config.lua")
 
