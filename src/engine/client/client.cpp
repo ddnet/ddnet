@@ -1129,7 +1129,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
 	return pError;
 }
 
-int CClient::PlayerScoreComp(const void *a, const void *b)
+int CClient::PlayerScoreNameComp(const void *a, const void *b)
 {
 	CServerInfo::CClient *p0 = (CServerInfo::CClient *)a;
 	CServerInfo::CClient *p1 = (CServerInfo::CClient *)b;
@@ -1137,11 +1137,11 @@ int CClient::PlayerScoreComp(const void *a, const void *b)
 		return -1;
 	if(!p0->m_Player && p1->m_Player)
 		return 1;
-	if(p0->m_Score == p1->m_Score)
-		return 0;
+	if(p0->m_Score > p1->m_Score)
+		return -1;
 	if(p0->m_Score < p1->m_Score)
 		return 1;
-	return -1;
+	return str_comp_nocase(p0->m_aName, p1->m_aName);
 }
 
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
@@ -1388,7 +1388,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		if(!Up.Error())
 		{
 			// sort players
-			qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreComp);
+			qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
 
 			pEntry = m_ServerBrowser.Find(pPacket->m_Address);
 			if (!pEntry || !pEntry->m_GotInfo)
@@ -1463,7 +1463,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		{
 			// sort players
 			if (Offset + 24 >= Info.m_NumClients)
-				qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreComp);
+				qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
 
 			m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
 
