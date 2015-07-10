@@ -277,10 +277,6 @@ function build(settings)
 	launcher_settings = engine_settings:Copy()
 
 	if family == "unix" then
-		if string.find(settings.config_name, "sql") then
-			config.mysql:Apply(server_settings)
-		end
-		
 		if platform == "macosx" then
 			client_settings.link.frameworks:Add("OpenGL")
 			client_settings.link.frameworks:Add("AGL")
@@ -414,6 +410,9 @@ release_sql_settings.config_ext = "_sql"
 release_sql_settings.debug = 0
 release_sql_settings.optimize = 1
 release_sql_settings.cc.defines:Add("CONF_RELEASE", "CONF_SQL")
+
+config.mysql:Apply(debug_sql_settings)
+config.mysql:Apply(release_sql_settings)
 
 if platform == "macosx" then
 	debug_settings_ppc = debug_settings:Copy()
