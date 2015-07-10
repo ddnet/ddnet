@@ -141,7 +141,7 @@ void CStatboard::RenderGlobalStats()
 {
 	const float StatboardWidth = 400*3.0f*Graphics()->ScreenAspect();
 	const float StatboardHeight = 400*3.0f;
-	float StatboardContentWidth = 210.0f;
+	float StatboardContentWidth = 260.0f;
 	float StatboardContentHeight = 750.0f;
 
 	const CNetObj_PlayerInfo *apPlayers[MAX_CLIENTS] = {0};
@@ -185,7 +185,7 @@ void CStatboard::RenderGlobalStats()
 	StatboardContentWidth += 7 * 85 + 95; // Suicides 95; other labels 85
 
 	if(gameWithFlags)
-		StatboardContentWidth += 200; // Grabs & Flags
+		StatboardContentWidth += 150; // Grabs & Flags
 
 	bool aDisplayWeapon[NUM_WEAPONS] = {false};
 	for(int i = 0; i < NumPlayers; i++)
