@@ -7,6 +7,7 @@ Import("other/curl/curl.lua")
 Import("other/opus/opusfile.lua")
 Import("other/opus/opus.lua")
 Import("other/opus/ogg.lua")
+Import("other/mysql/mysql.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -21,6 +22,7 @@ config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
 config:Add(Opus.OptFind("opus", true))
 config:Add(Ogg.OptFind("ogg", true))
+config:Add(Mysql.OptFind("mysql", true))
 config:Add(OptString("websockets", false))
 config:Finalize("config.lua")
 
@@ -220,7 +222,6 @@ function build(settings)
 
 	settings.cc.includes:Add("src")
 	settings.cc.includes:Add("src/engine/external")
-	settings.cc.includes:Add("other/mysql/include")
 
 	-- set some platform specific settings
 	if family == "unix" then
@@ -277,10 +278,7 @@ function build(settings)
 
 	if family == "unix" then
 		if string.find(settings.config_name, "sql") then
-			server_settings.link.libs:Add("mysqlcppconn-static")
-			server_settings.link.libs:Add("mysqlclient")
-			server_settings.link.libs:Add("dl")
-			server_settings.link.libs:Add("rt")
+			config.mysql:Apply(server_settings)
 		end
 		
 		if platform == "macosx" then
@@ -289,27 +287,11 @@ function build(settings)
 			client_settings.link.frameworks:Add("Carbon")
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
-
-			if string.find(settings.config_name, "sql") then
-				if arch == "amd64" then
-					server_settings.link.libpath:Add("other/mysql/mac/lib64")
-				else
-					server_settings.link.libpath:Add("other/mysql/mac/lib32")
-				end
-			end
 		else
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
 			client_settings.link.libs:Add("dl")
-
-			if string.find(settings.config_name, "sql") then
-				if arch == "amd64" then
-					server_settings.link.libpath:Add("other/mysql/linux/lib64")
-				else
-					server_settings.link.libpath:Add("other/mysql/linux/lib32")
-				end
-			end
 		end
 
 	elseif family == "windows" then
