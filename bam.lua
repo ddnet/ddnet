@@ -3,6 +3,10 @@ CheckVersion("0.4")
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
 Import("other/freetype/freetype.lua")
+Import("other/curl/curl.lua")
+Import("other/opus/opusfile.lua")
+Import("other/opus/opus.lua")
+Import("other/opus/ogg.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -13,6 +17,10 @@ config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
 config:Add(FreeType.OptFind("freetype", true))
+config:Add(Curl.OptFind("curl", true))
+config:Add(Opusfile.OptFind("opusfile", true))
+config:Add(Opus.OptFind("opus", true))
+config:Add(Ogg.OptFind("ogg", true))
 config:Add(OptString("websockets", false))
 config:Finalize("config.lua")
 
@@ -212,10 +220,6 @@ function build(settings)
 
 	settings.cc.includes:Add("src")
 	settings.cc.includes:Add("src/engine/external")
-	settings.cc.includes:Add("src/engine/external/ogg")
-	settings.cc.includes:Add("other/opus/include")
-	settings.cc.includes:Add("other/opus/include/opus")
-	settings.cc.includes:Add("other/curl/include")
 	settings.cc.includes:Add("other/mysql/include")
 
 	-- set some platform specific settings
@@ -286,22 +290,6 @@ function build(settings)
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
 
-			client_settings.link.libs:Add("crypto")
-			client_settings.link.libs:Add("ssl")
-
-			client_settings.link.libs:Add("opusfile")
-			client_settings.link.libs:Add("opus")
-			client_settings.link.libs:Add("ogg")
-			client_settings.link.libs:Add("curl")
-
-			if string.find(settings.config_name, "64") then
-				client_settings.link.libpath:Add("other/opus/mac/lib64")
-				client_settings.link.libpath:Add("other/curl/mac/lib64")
-			else
-				client_settings.link.libpath:Add("other/opus/mac/lib32")
-				client_settings.link.libpath:Add("other/curl/mac/lib32")
-			end
-
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then
 					server_settings.link.libpath:Add("other/mysql/mac/lib64")
@@ -313,21 +301,7 @@ function build(settings)
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
-			client_settings.link.libs:Add("opusfile")
-			client_settings.link.libs:Add("opus")
-			client_settings.link.libs:Add("ogg")
-			client_settings.link.libs:Add("curl")
-			client_settings.link.libs:Add("ssl")
-			client_settings.link.libs:Add("crypto")
 			client_settings.link.libs:Add("dl")
-
-			if arch == "amd64" then
-				client_settings.link.libpath:Add("other/opus/linux/lib64")
-				client_settings.link.libpath:Add("other/curl/linux/lib64")
-			else
-				client_settings.link.libpath:Add("other/opus/linux/lib32")
-				client_settings.link.libpath:Add("other/curl/linux/lib32")
-			end
 
 			if string.find(settings.config_name, "sql") then
 				if arch == "amd64" then
@@ -340,10 +314,8 @@ function build(settings)
 
 	elseif family == "windows" then
 		if arch == "amd64" then
-			client_settings.link.libpath:Add("other/opus/windows/lib64")
 			client_settings.link.libpath:Add("other/curl/windows/lib64")
 		else
-			client_settings.link.libpath:Add("other/opus/windows/lib32")
 			client_settings.link.libpath:Add("other/curl/windows/lib32")
 		end
 		client_settings.link.libs:Add("opengl32")
@@ -357,10 +329,12 @@ function build(settings)
 		end
 	end
 
-	-- apply sdl settings
 	config.sdl:Apply(client_settings)
-	-- apply freetype settings
 	config.freetype:Apply(client_settings)
+	config.curl:Apply(client_settings)
+	config.opusfile:Apply(client_settings)
+	config.opus:Apply(client_settings)
+	config.ogg:Apply(client_settings)
 
 	engine = Compile(engine_settings, Collect("src/engine/shared/*.cpp", "src/base/*.c"))
 	client = Compile(client_settings, Collect("src/engine/client/*.cpp"))
