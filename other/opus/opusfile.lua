@@ -31,7 +31,7 @@ Opusfile = {
 				option.value = true
 			elseif platform == "macosx" and string.find(settings.config_name, "64") then
 				option.value = true
-			elseif platform == "linux" and arch == "x86" then
+			elseif platform == "linux" and arch == "ia32" then
 				option.value = true
 			elseif platform == "linux" and arch == "amd64" then
 				option.value = true
@@ -58,7 +58,7 @@ Opusfile = {
 					client_settings.link.libpath:Add("other/opus/mac/lib32")
 				elseif platform == "macosx" and string.find(settings.config_name, "64") then
 					client_settings.link.libpath:Add("other/opus/mac/lib64")
-				elseif platform == "linux" and arch == "x86" then
+				elseif platform == "linux" and arch == "ia32" then
 					client_settings.link.libpath:Add("other/opus/linux/lib32")
 				elseif platform == "linux" and arch == "amd64" then
 					client_settings.link.libpath:Add("other/opus/linux/lib64")

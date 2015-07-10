@@ -31,7 +31,7 @@ Curl = {
 				option.value = true
 			elseif platform == "macosx" and string.find(settings.config_name, "64") then
 				option.value = true
-			elseif platform == "linux" and arch == "x86" then
+			elseif platform == "linux" and arch == "ia32" then
 				option.value = true
 			elseif platform == "linux" and arch == "amd64" then
 				option.value = true
@@ -59,7 +59,7 @@ Curl = {
 					settings.link.libpath:Add("other/curl/mac/lib32")
 				elseif platform == "macosx" and string.find(settings.config_name, "64") then
 					settings.link.libpath:Add("other/curl/mac/lib64")
-				elseif platform == "linux" and arch == "x86" then
+				elseif platform == "linux" and arch == "ia32" then
 					settings.link.libpath:Add("other/curl/linux/lib32")
 				elseif platform == "linux" and arch == "amd64" then
 					settings.link.libpath:Add("other/curl/linux/lib64")
