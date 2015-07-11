@@ -1245,6 +1245,8 @@ int str_utf8_comp_names(const char *a, const char *b);
 
 int str_utf8_isspace(int code);
 
+int str_utf8_isstart(char c);
+
 const char *str_utf8_skip_whitespaces(const char *str);
 
 /*
