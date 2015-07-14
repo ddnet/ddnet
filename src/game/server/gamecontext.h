@@ -137,6 +137,9 @@ public:
 	char m_ZoneEnterMsg[NUM_TUNINGZONES][256]; // 0 is used for switching from or to area without tunings
 	char m_ZoneLeaveMsg[NUM_TUNINGZONES][256];
 
+	char m_aDeleteTempfile[128];
+	void DeleteTempfile();
+
 	enum
 	{
 		VOTE_ENFORCE_UNKNOWN=0,
@@ -191,6 +194,7 @@ public:
 	// engine events
 	virtual void OnInit();
 	virtual void OnConsoleInit();
+	virtual void OnMapChange(char *pNewMapName, int MapNameSize);
 	virtual void OnShutdown();
 
 	virtual void OnTick();

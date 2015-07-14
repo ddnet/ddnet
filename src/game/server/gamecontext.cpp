@@ -7,6 +7,9 @@
 #include <engine/shared/config.h>
 #include <engine/map.h>
 #include <engine/console.h>
+#include <engine/shared/datafile.h>
+#include <engine/shared/linereader.h>
+#include <engine/storage.h>
 #include "gamecontext.h"
 #include <game/version.h>
 #include <game/collision.h>
@@ -56,6 +59,7 @@ void CGameContext::Construct(int Resetting)
 		m_NumMutes = 0;
 	}
 	m_ChatResponseTargetID = -1;
+	m_aDeleteTempfile[0] = 0;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -2285,6 +2289,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 
+	DeleteTempfile();
+
 	//if(!data) // only load once
 		//data = load_data_from_memory(internal_data);
 
@@ -2514,8 +2520,120 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 #endif
 }
 
+void CGameContext::DeleteTempfile()
+{
+	if(m_aDeleteTempfile[0] != 0)
+	{
+		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+		pStorage->RemoveFile(m_aDeleteTempfile, IStorage::TYPE_SAVE);
+		m_aDeleteTempfile[0] = 0;
+	}
+}
+
+void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
+{
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+
+	char aConfig[128];
+	char aTemp[128];
+	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
+	str_format(aTemp, sizeof(aTemp), "%s.temp.%d", pNewMapName, pid(), pNewMapName);
+
+	IOHANDLE File = pStorage->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		// No map-specific config, just return.
+		return;
+	}
+	CLineReader LineReader;
+	LineReader.Init(File);
+
+	array<char *> aLines;
+	char *pLine;
+	int TotalLength = 0;
+	while((pLine = LineReader.Get()))
+	{
+		int Length = str_length(pLine) + 1;
+		char *pCopy = (char *)mem_alloc(Length, 1);
+		mem_copy(pCopy, pLine, Length);
+		aLines.add(pCopy);
+		TotalLength += Length;
+	}
+
+	char *pSettings = (char *)mem_alloc(TotalLength, 1);
+	int Offset = 0;
+	for(int i = 0; i < aLines.size(); i++)
+	{
+		int Length = str_length(aLines[i]) + 1;
+		mem_copy(pSettings + Offset, aLines[i], Length);
+		mem_free(aLines[i]);
+	}
+
+	CDataFileReader Reader;
+	Reader.Open(pStorage, pNewMapName, IStorage::TYPE_ALL);
+
+	CDataFileWriter Writer;
+	Writer.Open(pStorage, aTemp);
+
+	int SettingsIndex = Reader.NumData();
+	for(int i = 0; i < Reader.NumItems(); i++)
+	{
+		int TypeID;
+		int ItemID;
+		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
+		// GetItemSize returns item size including header, remove that.
+		int Size = Reader.GetItemSize(i) - sizeof(int) * 2;
+		CMapItemInfoSettings MapInfo;
+		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
+		{
+			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
+			if(Size >= (int)sizeof(CMapItemInfoSettings))
+			{
+				SettingsIndex = pInfo->m_Settings;
+				char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
+				int DataSize = Reader.GetUncompressedDataSize(SettingsIndex);
+				if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, Size) == 0)
+				{
+					// Configs coincide, no need to update map.
+					return;
+				}
+				Reader.UnloadData(pInfo->m_Settings);
+			}
+			else
+			{
+				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pInfo;
+				MapInfo.m_Settings = SettingsIndex;
+				pData = (int *)&MapInfo;
+				Size = sizeof(MapInfo);
+			}
+		}
+		Writer.AddItem(TypeID, ItemID, Size, pData);
+	}
+
+	for(int i = 0; i < Reader.NumData() || i == SettingsIndex; i++)
+	{
+		if(i == SettingsIndex)
+		{
+			Writer.AddData(TotalLength, pSettings);
+			continue;
+		}
+		unsigned char *pData = (unsigned char *)Reader.GetData(i);
+		int Size = Reader.GetUncompressedDataSize(i);
+		Writer.AddData(Size, pData);
+		Reader.UnloadData(i);
+	}
+
+	dbg_msg("mapchange", "imported settings");
+	Reader.Close();
+	Writer.Finish();
+
+	str_copy(pNewMapName, aTemp, MapNameSize);
+	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
+}
+
 void CGameContext::OnShutdown()
 {
+	DeleteTempfile();
 	Layers()->Dest();
 	Collision()->Dest();
 	delete m_pController;
