@@ -73,7 +73,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
-		UI()->DoLabelScaled(&Part, "Select a name", 24.f, 0);
+		UI()->DoLabelScaled(&Part, Localize("Select a name"), 24.f, 0);
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f/UI()->Scale(), &Part);
