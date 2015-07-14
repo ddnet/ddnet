@@ -1447,6 +1447,7 @@ int CServer::LoadMap(const char *pMapName)
 	//DATAFILE *df;
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
+	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
 
 	/*df = datafile_load(buf);
 	if(!df)

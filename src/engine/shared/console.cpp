@@ -458,7 +458,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID)
 	// exec the file
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 
-	char aBuf[8192];
+	char aBuf[128];
 	if(File)
 	{
 		char *pLine;
