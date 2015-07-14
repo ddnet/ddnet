@@ -103,10 +103,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
 		{
 			if (str_comp(m_lDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
-				str_copy(m_aDemoPlayerPopupHint, "Please use a different name", sizeof(m_aDemoPlayerPopupHint));
+				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"), sizeof(m_aDemoPlayerPopupHint));
 			else
 			{
 				m_DemoPlayerState = DEMOPLAYER_NONE;
+
+				int len = str_length(m_aCurrentDemoFile);
+				if(len < 5 || str_comp_nocase(&m_aCurrentDemoFile[len-5], ".demo"))
+					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
