@@ -26,6 +26,9 @@ public:
 		TEMPCMD_PARAMS_LENGTH=16,
 
 		MAX_PRINT_CB=4,
+
+		CLIENT_ID_GAME=-2,
+		CLIENT_ID_NO_GAME=-3,
 	};
 
 	// TODO: rework this interface to reduce the amount of virtual calls
@@ -93,6 +96,8 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false) = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
+
+	virtual void ResetServerGameSettings() = 0;
 
 	// DDRace
 
