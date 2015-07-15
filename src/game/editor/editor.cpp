@@ -3987,6 +3987,7 @@ void CEditor::RenderStatusbar(CUIRect View)
 	if(MouseButton == 2)
 		m_ShowEnvelopeEditor = (m_ShowEnvelopeEditor+3)%4;
 	else if(MouseButton == 1)
+		m_ShowEnvelopeEditor = (m_ShowEnvelopeEditor+1)%4;
 
 	if(MouseButton)
 	{
