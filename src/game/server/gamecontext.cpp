@@ -2545,6 +2545,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	{
 		int Length = str_length(aLines[i]) + 1;
 		mem_copy(pSettings + Offset, aLines[i], Length);
+		Offset += Length;
 		mem_free(aLines[i]);
 	}
 
