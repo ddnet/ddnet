@@ -2228,14 +2228,14 @@ void CGameContext::OnConsoleInit()
 
 	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(0, SendChatResponse, this);
 
-	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
-	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "Dump tuning");
-	Console()->Register("tune_zone", "isi", CFGFLAG_SERVER, ConTuneZone, this, "Tune in zone a variable to value");
-	Console()->Register("tune_zone_dump", "i", CFGFLAG_SERVER, ConTuneDumpZone, this, "Dump zone tuning in zone x");
-	Console()->Register("tune_zone_reset", "?i", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
-	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
-	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
+	Console()->Register("tune", "si", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
+	Console()->Register("tune_reset", "", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneReset, this, "Reset tuning");
+	Console()->Register("tune_dump", "", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneDump, this, "Dump tuning");
+	Console()->Register("tune_zone", "isi", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("tune_zone_dump", "i", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneDumpZone, this, "Dump zone tuning in zone x");
+	Console()->Register("tune_zone_reset", "?i", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
+	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
+	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
 	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
 	Console()->Register("random_map", "?i", CFGFLAG_SERVER, ConRandomMap, this, "Random map");
@@ -2280,8 +2280,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
-
-	LoadMapSettings();
 
 	// reset everything here
 	//world = new GAMEWORLD;
@@ -2332,11 +2330,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile);
 
-	char buf[512];
-	str_format(buf, sizeof(buf), "maps/%s.cfg", g_Config.m_SvMap);
-	Console()->ExecuteFile(buf);
-	str_format(buf, sizeof(buf), "maps/%s.map.cfg", g_Config.m_SvMap);
-	Console()->ExecuteFile(buf);
+	LoadMapSettings();
+
 /*	// select gametype
 	if(str_comp(g_Config.m_SvGametype, "mod") == 0)
 		m_pController = new CGameControllerMOD(this);
@@ -2614,6 +2609,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 void CGameContext::OnShutdown()
 {
 	DeleteTempfile();
+	Console()->ResetServerGameSettings();
 	Layers()->Dest();
 	Collision()->Dest();
 	delete m_pController;
@@ -2645,11 +2641,15 @@ void CGameContext::LoadMapSettings()
 		while(pNext < pSettings + Size)
 		{
 			int StrSize = str_length(pNext) + 1;
-			Console()->ExecuteLine(pNext);
+			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
 			pNext += StrSize;
 		}
 		pMap->UnloadData(pItem->m_Settings);
 	}
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "maps/%s.map.cfg", g_Config.m_SvMap);
+	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
 }
 
 void CGameContext::OnSnap(int ClientID)

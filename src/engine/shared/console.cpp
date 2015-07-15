@@ -323,7 +323,29 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 
 		if(pCommand)
 		{
-			if(pCommand->GetAccessLevel() >= m_AccessLevel)
+			if(ClientID == IConsole::CLIENT_ID_GAME
+				&& !(pCommand->m_Flags & CFGFLAG_GAME))
+			{
+				if(Stroke)
+				{
+					char aBuf[96];
+					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", Result.m_pCommand);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				}
+			}
+			else if(ClientID == IConsole::CLIENT_ID_NO_GAME
+				&& pCommand->m_Flags & CFGFLAG_GAME)
+			{
+				if(Stroke)
+				{
+					char aBuf[96];
+					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				}
+			}
+			else if(pCommand->GetAccessLevel() >= m_AccessLevel)
 			{
 				int IsStrokeCommand = 0;
 				if(Result.m_pCommand[0] == '+')
@@ -560,6 +582,7 @@ struct CIntVariableData
 	int *m_pVariable;
 	int m_Min;
 	int m_Max;
+	int m_OldValue;
 };
 
 struct CStrVariableData
@@ -567,6 +590,7 @@ struct CStrVariableData
 	IConsole *m_pConsole;
 	char *m_pStr;
 	int m_MaxSize;
+	char *m_pOldValue;
 };
 
 static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
@@ -587,10 +611,12 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		}
 
 		*(pData->m_pVariable) = Val;
+		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Val;
 	}
 	else
 	{
-		char aBuf[1024];
+		char aBuf[32];
 		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
@@ -622,6 +648,9 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 			str_copy(pData->m_pStr, pString, pData->m_MaxSize);
+
+		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize);
 	}
 	else
 	{
@@ -732,13 +761,14 @@ CConsole::CConsole(int FlagMask)
 	// TODO: this should disappear
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max }; \
+		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def }; \
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
 	}
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
-		static CStrVariableData Data = { this, g_Config.m_##Name, Len }; \
+		static char OldValue[Len] = Def; \
+		static CStrVariableData Data = { this, g_Config.m_##Name, Len, OldValue }; \
 		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc); \
 	}
 
@@ -1006,6 +1036,50 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	}
 	if(Used > 0)
 		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
+void CConsole::ResetServerGameSettings()
+{
+	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+	{ \
+		if((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME) && str_comp(#ScriptName, "sv_test_cmds") != 0) \
+		{ \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			void *pUserData = pCommand->m_pUserData; \
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
+			while(pfnCallback == Con_Chain) \
+			{ \
+				CChain *pChainInfo = (CChain *)pUserData; \
+				pUserData = pChainInfo->m_pCallbackUserData; \
+				pfnCallback = pChainInfo->m_pfnCallback; \
+			} \
+			CIntVariableData *pData = (CIntVariableData *)pUserData; \
+			*pData->m_pVariable = pData->m_OldValue; \
+		} \
+	}
+
+	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
+	{ \
+		if((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) \
+		{ \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			void *pUserData = pCommand->m_pUserData; \
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
+			while(pfnCallback == Con_Chain) \
+			{ \
+				CChain *pChainInfo = (CChain *)pUserData; \
+				pUserData = pChainInfo->m_pCallbackUserData; \
+				pfnCallback = pChainInfo->m_pfnCallback; \
+			} \
+			CStrVariableData *pData = (CStrVariableData *)pUserData; \
+			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize); \
+		} \
+	}
+
+	#include "config_variables.h"
+
+	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_STR
 }
 
 int CConsole::CResult::GetVictim()

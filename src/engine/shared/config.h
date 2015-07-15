@@ -25,7 +25,8 @@ enum
 	// DDRace
 
 	CMDFLAG_TEST=64,
-	CFGFLAG_CHAT = 128
+	CFGFLAG_CHAT=128,
+	CFGFLAG_GAME=256,
 };
 
 #endif
