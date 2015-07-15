@@ -1042,7 +1042,7 @@ void CConsole::ResetServerGameSettings()
 {
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		if((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME) && str_comp(#ScriptName, "sv_test_cmds") != 0) \
+		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
 		{ \
 			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
 			void *pUserData = pCommand->m_pUserData; \
@@ -1060,7 +1060,7 @@ void CConsole::ResetServerGameSettings()
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
-		if((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) \
+		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
 		{ \
 			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
 			void *pUserData = pCommand->m_pUserData; \
