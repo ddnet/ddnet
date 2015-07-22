@@ -17,8 +17,7 @@
 void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active &&
-		(pSelf->Client()->State() != IClient::STATE_DEMOPLAYBACK || pSelf->DemoPlayer()->GetDemoType() == IDemoPlayer::DEMOTYPE_SERVER))
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active)
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 

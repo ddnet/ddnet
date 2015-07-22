@@ -432,7 +432,7 @@ void CGameClient::OnReset()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
 
-	m_DemoSpecID = SPEC_FREEVIEW;
+	m_DemoSpecID = -2;
 	m_FlagDropTick[TEAM_RED] = 0;
 	m_FlagDropTick[TEAM_BLUE] = 0;
 	m_LastRoundStartTick = -1;
@@ -500,7 +500,7 @@ void CGameClient::UpdatePositions()
 	// spectator position
 	if(m_Snap.m_SpecInfo.m_Active)
 	{
-		if(Client()->State() == IClient::STATE_DEMOPLAYBACK && DemoPlayer()->GetDemoType() == IDemoPlayer::DEMOTYPE_SERVER &&
+		if(Client()->State() == IClient::STATE_DEMOPLAYBACK &&
 			m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		{
 			m_Snap.m_SpecInfo.m_Position = mix(
@@ -1126,13 +1126,15 @@ void CGameClient::OnNewSnapshot()
 			m_pControls->OnPlayerDeath();
 		}
 	}
-	else
+
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_Snap.m_SpecInfo.m_Active = true;
-		if(Client()->State() == IClient::STATE_DEMOPLAYBACK && DemoPlayer()->GetDemoType() == IDemoPlayer::DEMOTYPE_SERVER &&
-			m_DemoSpecID != SPEC_FREEVIEW && m_Snap.m_aCharacters[m_DemoSpecID].m_Active)
+		if(m_DemoSpecID == -2 && m_Snap.m_LocalClientID >= 0)
+			m_Snap.m_SpecInfo.m_SpectatorID = m_Snap.m_LocalClientID;
+		if(m_DemoSpecID > SPEC_FREEVIEW && m_Snap.m_aCharacters[m_DemoSpecID].m_Active)
 			m_Snap.m_SpecInfo.m_SpectatorID = m_DemoSpecID;
-		else
+		else if(m_DemoSpecID != -2)
 			m_Snap.m_SpecInfo.m_SpectatorID = SPEC_FREEVIEW;
 	}
 
