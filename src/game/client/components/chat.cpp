@@ -310,6 +310,22 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	}
 }
 
+bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
+{
+	const char *pHL = str_find_nocase(pLine, pName);
+
+	if (pHL)
+	{
+		int Length = str_length(m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName);
+
+		if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
+			return true;
+
+	}
+
+	return false;
+}
+
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
 	if(*pLine == 0 || (ClientID != -1 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
@@ -368,24 +384,23 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		m_aLines[m_CurrentLine].m_NameColor = -2;
 
 		// check for highlighted name
-		const char *pHL = str_find_nocase(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName);
-		if(pHL)
+		if (Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
-			int Length = str_length(m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName);
-			if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
+			// main character
+			if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName))
+				Highlighted = true;
+			// dummy
+			if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName)) 
+				Highlighted = true;
+		}
+		else
+		{
+			// on demo playback use local id from snap directly,
+			// since m_LocalIDs isn't valid there
+			if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName))
 				Highlighted = true;
 		}
 
-		if(m_pClient->Client()->DummyConnected())
-		{
-			pHL = str_find_nocase(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName);
-			if(pHL)
-			{
-				int Length = str_length(m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName);
-				if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
-					Highlighted = true;
-			}
-		}
 
 		m_aLines[m_CurrentLine].m_Highlighted = Highlighted;
 

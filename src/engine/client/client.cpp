@@ -3129,6 +3129,8 @@ void CClient::Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->DemoRecorder_AddDemoMarker(RECORDER_MANUAL);
+	pSelf->DemoRecorder_AddDemoMarker(RECORDER_RACE);
+	pSelf->DemoRecorder_AddDemoMarker(RECORDER_AUTO);
 }
 
 void CClient::ServerBrowserUpdate()
