@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_CONFIG_H
 #define ENGINE_SHARED_CONFIG_H
 
+#define CONFIG_FILE "settings_ddnet.cfg"
+
 struct CConfiguration
 {
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) int m_##Name;

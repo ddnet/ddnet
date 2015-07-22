@@ -3292,11 +3292,11 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->InitInterfaces();
 
 	// execute config file
-	IOHANDLE file = pStorage->OpenFile("settings_ddnet.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE file = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(file)
 	{
 		io_close(file);
-		pConsole->ExecuteFile("settings_ddnet.cfg");
+		pConsole->ExecuteFile(CONFIG_FILE);
 	}
 	else // fallback
 	{

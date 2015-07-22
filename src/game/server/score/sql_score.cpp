@@ -384,7 +384,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 			}
 
 			end:
-			dbg_msg("SQL", "Updating time done");
+			dbg_msg("SQL", "Updating team time done");
 
 			// delete results statement
 			delete pData->m_pSqlData->m_pResults;
