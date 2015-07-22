@@ -71,6 +71,8 @@ class CChat : public CComponent
 	static void ConChat(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowChat(IConsole::IResult *pResult, void *pUserData);
 
+	bool LineShouldHighlight(const char *pLine, const char *pName);
+
 public:
 	CChat();
 
