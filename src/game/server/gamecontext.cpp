@@ -1785,6 +1785,20 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 	}
 }
 
+void CGameContext::ConSwitchOpen(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Switch = pResult->GetInteger(0);
+
+	if (pSelf->Collision()->m_NumSwitchers > 0 && Switch >= 0 && Switch < pSelf->Collision()->m_NumSwitchers+1)
+	{
+		pSelf->Collision()->m_pSwitchers[Switch].m_Initial = false;
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "switch %d opened by default", Switch);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	}
+}
+
 void CGameContext::ConPause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2232,6 +2246,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("tune_zone_reset", "?i", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
 	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
 	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
+	Console()->Register("switch_open", "i", CFGFLAG_SERVER, ConSwitchOpen, this, "Whether a switch is open by default (otherwise closed)");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
 	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
 	Console()->Register("random_map", "?i", CFGFLAG_SERVER, ConRandomMap, this, "Random map");
@@ -2320,6 +2335,10 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvTeleportHoldHook = 0;
 		g_Config.m_SvTeam = 1;
 		g_Config.m_SvShowOthersDefault = 0;
+
+		if(Collision()->m_NumSwitchers > 0)
+			for (int i = 0; i < Collision()->m_NumSwitchers+1; ++i)
+				Collision()->m_pSwitchers[i].m_Initial = true;
 	}
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile);

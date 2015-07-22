@@ -167,6 +167,7 @@ void CCollision::Init(class CLayers *pLayers)
 
 		for (int i = 0; i < m_NumSwitchers+1; ++i)
 		{
+			m_pSwitchers[i].m_Initial = true;
 			for (int j = 0; j < MAX_CLIENTS; ++j)
 			{
 				m_pSwitchers[i].m_Status[j] = true;

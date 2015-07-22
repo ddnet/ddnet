@@ -120,6 +120,7 @@ private:
 	struct SSwitchers
 	{
 		bool m_Status[MAX_CLIENTS];
+		bool m_Initial;
 		int m_EndTick[MAX_CLIENTS];
 		int m_Type[MAX_CLIENTS];
 	};
