@@ -95,6 +95,7 @@ class CGameClient : public IGameClient
 	class IServerBrowser *m_pServerBrowser;
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
+	class IFriends *m_pFoes;
 	class IUpdater *m_pUpdater;
 
 	CLayers m_Layers;
@@ -141,6 +142,7 @@ public:
 	class CCollision *Collision() { return &m_Collision; };
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
+	class IFriends *Foes() { return m_pFoes; }
 	class IUpdater *Updater() { return m_pUpdater; }
 
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
@@ -246,6 +248,7 @@ public:
 		bool m_Active;
 		bool m_ChatIgnore;
 		bool m_Friend;
+		bool m_Foe;
 
 		void UpdateRenderInfo();
 		void Reset();

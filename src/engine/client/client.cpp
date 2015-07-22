@@ -2484,6 +2484,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IUpdater*>(&m_Updater));
 #endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends));
+	Kernel()->ReregisterInterface(static_cast<IFriends*>(&m_Foes));
 }
 
 void CClient::InitInterfaces()
@@ -2514,6 +2515,7 @@ void CClient::InitInterfaces()
 #endif
 
 	m_Friends.Init();
+	m_Foes.Init(true);
 
 	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
 	if (newsFile)

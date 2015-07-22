@@ -79,6 +79,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	class CFetcher m_Fetcher;
 	class CUpdater m_Updater;
 	class CFriends m_Friends;
+	class CFriends m_Foes;
 	class CMapChecker m_MapChecker;
 
 	char m_aServerAddressStr[256];
@@ -365,5 +366,7 @@ public:
 
 	void RequestDDNetSrvList();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
+
+	virtual IFriends* Foes() {return &m_Foes; }
 };
 #endif

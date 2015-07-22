@@ -28,7 +28,7 @@ public:
 		MAX_FRIENDS=1024,
 	};
 
-	virtual void Init() = 0;
+	virtual void Init(bool Foes = false) = 0;
 
 	virtual int NumFriends() const = 0;
 	virtual const CFriendInfo *GetFriend(int Index) const = 0;

@@ -330,7 +330,8 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
 	if(*pLine == 0 || (ClientID != -1 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
 		m_pClient->m_aClients[ClientID].m_ChatIgnore ||
-		(m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend))))
+		(m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
+		(m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))))
 		return;
 
 	// trim right and set maximum length to 256 utf8-characters

@@ -126,6 +126,7 @@ void CGameClient::OnConsoleInit()
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
+	m_pFoes = Client()->Foes();
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -1152,6 +1153,15 @@ void CGameClient::OnNewSnapshot()
 			m_aClients[i].m_Friend = false;
 		else
 			m_aClients[i].m_Friend = true;
+	}
+
+	// update foe state
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(i == m_Snap.m_LocalClientID || !m_Snap.m_paPlayerInfos[i] || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true))
+			m_aClients[i].m_Foe = false;
+		else
+			m_aClients[i].m_Foe = true;
 	}
 
 	// sort player infos by name

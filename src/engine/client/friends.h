@@ -8,6 +8,7 @@
 class CFriends : public IFriends
 {
 	CFriendInfo m_aFriends[MAX_FRIENDS];
+	int m_Foes;
 	int m_NumFriends;
 
 	static void ConAddFriend(IConsole::IResult *pResult, void *pUserData);
@@ -18,7 +19,7 @@ class CFriends : public IFriends
 public:
 	CFriends();
 
-	void Init();
+	void Init(bool Foes = false);
 
 	int NumFriends() const { return m_NumFriends; }
 	const CFriendInfo *GetFriend(int Index) const;

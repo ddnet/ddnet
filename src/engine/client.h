@@ -5,6 +5,7 @@
 #include "kernel.h"
 
 #include "message.h"
+#include <engine/friends.h>
 #include <engine/shared/config.h>
 #include <versionsrv/versionsrv.h>
 #include <game/generated/protocol.h>
@@ -183,6 +184,8 @@ public:
 
 	virtual void RequestDDNetSrvList() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
+
+	virtual IFriends* Foes() = 0;
 };
 
 class IGameClient : public IInterface

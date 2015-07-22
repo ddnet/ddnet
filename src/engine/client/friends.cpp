@@ -13,6 +13,7 @@ CFriends::CFriends()
 {
 	mem_zero(m_aFriends, sizeof(m_aFriends));
 	m_NumFriends = 0;
+	m_Foes = false;
 }
 
 void CFriends::ConAddFriend(IConsole::IResult *pResult, void *pUserData)
@@ -27,8 +28,10 @@ void CFriends::ConRemoveFriend(IConsole::IResult *pResult, void *pUserData)
 	pSelf->RemoveFriend(pResult->GetString(0), pResult->GetString(1));
 }
 
-void CFriends::Init()
+void CFriends::Init(bool Foes)
 {
+	m_Foes = Foes;
+
 	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
 	if(pConfig)
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
@@ -36,8 +39,16 @@ void CFriends::Init()
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
 	{
-		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
-		pConsole->Register("remove_friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
+		if(Foes)
+		{
+			pConsole->Register("add_foe", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a foe");
+			pConsole->Register("remove_foe", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a foe");
+		}
+		else
+		{
+			pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
+			pConsole->Register("remove_friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
+		}
 	}
 }
 
@@ -132,7 +143,7 @@ void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 	const char *pEnd = aBuf+sizeof(aBuf)-4;
 	for(int i = 0; i < pSelf->m_NumFriends; ++i)
 	{
-		str_copy(aBuf, "add_friend ", sizeof(aBuf));
+		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ", sizeof(aBuf));
 
 		const char *pSrc = pSelf->m_aFriends[i].m_aName;
 		char *pDst = aBuf+str_length(aBuf);
