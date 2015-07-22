@@ -2289,7 +2289,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			}
 			else
 			{
-				if(UI()->MouseButton(1))
+				if(UI()->MouseButtonClicked(1))
 					m_Brush.Clear();
 
 				if(UI()->MouseButton(0) && s_Operation == OP_NONE)
@@ -4788,9 +4788,9 @@ void CEditor::Render()
 		DoMapEditor(View, ToolBar);
 
 	// do zooming
-	if(Input()->KeyDown(KEY_KP_MINUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
+	if(Input()->KeyPresses(KEY_KP_MINUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 		m_ZoomLevel += 50;
-	if(Input()->KeyDown(KEY_KP_PLUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
+	if(Input()->KeyPresses(KEY_KP_PLUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 		m_ZoomLevel -= 50;
 	if(Input()->KeyDown(KEY_KP_MULTIPLY) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
