@@ -1,4 +1,4 @@
-This is how I build DDNet for Android:
+# This is how I build DDNet for Android:
 
 # Cloning the building repo with the SDL port for Android by Pelya
 cd /media

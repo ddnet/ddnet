@@ -1,3 +1,0 @@
-Copyright (c) 2010-2011 Shereef Marzouk
-This code was originally by Magnus Auvinen and we work also under the same license.
-available to you in license.txt
