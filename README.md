@@ -14,4 +14,6 @@ To compile DDNet yourself, you can follow the [instructions for compiling Teewor
 
 DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). Instead you can install these libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default: `libcurl, libogg, libopus, libopusfile`
 
-The MySQL server can be built with `bam server_sql_release`. It requires `libmariadbclient-dev` and `libmysqlcppconn-dev`, which are also bundled for the common platforms.
+If you have the libraries installed, but still want to use the bundled ones instead, you can specify so by running `bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false`.
+
+The MySQL server is not included in the binary releases and can be built with `bam server_sql_release`. It requires `libmariadbclient-dev` and `libmysqlcppconn-dev`, which are also bundled for the common platforms.
