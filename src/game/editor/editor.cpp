@@ -2289,7 +2289,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			}
 			else
 			{
-				if(UI()->MouseButtonClicked(1))
+				if(UI()->MouseButton(1))
 					m_Brush.Clear();
 
 				if(UI()->MouseButton(0) && s_Operation == OP_NONE)
