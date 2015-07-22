@@ -477,6 +477,10 @@ void CSqlScore::MapVoteThread(void *pUser)
 				strcpy(aMap, pData->m_pSqlData->m_pResults->getString("Map").c_str());
 				char aServer[32];
 				strcpy(aServer, pData->m_pSqlData->m_pResults->getString("Server").c_str());
+
+				for(char *p = aServer; *p; p++)
+					*p = tolower(*p);
+
 				char aCmd[256];
 				str_format(aCmd, sizeof(aCmd), "sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"", aServer, aMap);
 				char aChatmsg[512];
