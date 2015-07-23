@@ -17,6 +17,7 @@
 #include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/client/components/countryflags.h>
+#include <game/client/components/console.h>
 
 #include "menus.h"
 
@@ -173,7 +174,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	else
 		ScrollNum = 0;
 
-	if(Input()->KeyDown(KEY_TAB))
+	if(Input()->KeyDown(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
 	{
 		if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
