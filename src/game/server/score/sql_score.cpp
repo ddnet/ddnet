@@ -576,6 +576,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 				char aStars[20];
 				switch(stars)
 				{
+					case 0: strcpy(aStars, "✰✰✰✰✰"); break;
 					case 1: strcpy(aStars, "★✰✰✰✰"); break;
 					case 2: strcpy(aStars, "★★✰✰✰"); break;
 					case 3: strcpy(aStars, "★★★✰✰"); break;
