@@ -547,6 +547,24 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
+int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, vec3 BaseColor)
+{
+	float bright = Checked ? 1.0f : 0.5f;
+	float alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
+	vec4 color = vec4(BaseColor.r*bright, BaseColor.g*bright, BaseColor.b*bright, alpha);
+
+	RenderTools()->DrawUIRect(pRect, color, CUI::CORNER_ALL, 3.0f);
+	CUIRect NewRect = *pRect;
+	NewRect.y += NewRect.h/2.0f-7.0f;
+	float tw = min(TextRender()->TextWidth(0, 10.0f, pText, -1), NewRect.w);
+	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, NewRect.x + NewRect.w/2-tw/2, NewRect.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	Cursor.m_LineWidth = NewRect.w;
+	TextRender()->TextEx(&Cursor, pText, -1);
+	Checked %= 2;
+	return DoButton_Editor_Common(pID, pText, Checked, pRect, 0, pToolTip);
+}
+
 int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(Checked)
@@ -4215,6 +4233,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int sEnvelopeEditorID = 0;
 		static int s_ActiveChannels = 0xf;
 
+		vec3 aColors[] = {vec3(1,0.2f,0.2f), vec3(0.2f,1,0.2f), vec3(0.2f,0.2f,1), vec3(1,1,0.2f)};
+
 		if(pEnvelope)
 		{
 			CUIRect Button;
@@ -4246,8 +4266,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				/*if(i == 0) draw_func = draw_editor_button_l;
 				else if(i == envelope->channels-1) draw_func = draw_editor_button_r;
 				else draw_func = draw_editor_button_m;*/
-
-				if(DoButton_Editor(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Channels-1][i], s_ActiveChannels&Bit, &Button, 0, paDescriptions[pEnvelope->m_Channels-1][i]))
+				if(DoButton_Env(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Channels-1][i], s_ActiveChannels&Bit, &Button, paDescriptions[pEnvelope->m_Channels-1][i], aColors[i]))
 					s_ActiveChannels ^= Bit;
 			}
 
@@ -4305,8 +4324,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				m_pTooltip = "Press right mouse button to create a new point";
 			}
 		}
-
-		vec3 aColors[] = {vec3(1,0.2f,0.2f), vec3(0.2f,1,0.2f), vec3(0.2f,0.2f,1), vec3(1,1,0.2f)};
 
 		// render lines
 		{
