@@ -849,6 +849,17 @@ void CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pU
 
 	pEditor->m_Dialog = DIALOG_NONE;
 }
+void CEditor::CallbackCompareMap(const char *pFileName, int StorageType, void *pUser)
+{
+	CEditor *pEditor = (CEditor*)pUser;
+	if(pEditor->Compare(pFileName, StorageType))
+		pEditor->m_aFileName[0] = 0;
+	else
+		pEditor->SortImages();
+
+	pEditor->m_Dialog = DIALOG_NONE;
+	pEditor->m_CompareMode = true;
+}
 void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = static_cast<CEditor*>(pUser);
@@ -1086,6 +1097,19 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 					q->m_aPoints[i].y += AddY;
 				}
 			}
+		}
+	}
+
+	//Comparison
+	if(m_CompareMode)
+	{
+        TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
+        TB_Top.VSplitLeft(100.0f, &Button, &TB_Top);
+        static int s_AbortCompareButton = 0;
+
+		if(DoButton_Editor(&s_AbortCompareButton, "Stop comparison", 1, &Button, 0, "Stop comparison mode"))
+		{
+		    m_CompareMode = false;
 		}
 	}
 
@@ -2290,7 +2314,22 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			else
 			{
 				if(UI()->MouseButtonClicked(1))
-					m_Brush.Clear();
+                {
+                    if(!m_CompareMode)
+                        m_Brush.Clear();
+                    else if(!m_Brush.IsEmpty())
+                    {
+                        m_Brush.Clear();
+                        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "brush cleared in compare mode");
+                    }
+                    else
+                    {
+                        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "switching");
+                        SwitchMaps();
+                    }
+                }
+
+
 
 				if(UI()->MouseButton(0) && s_Operation == OP_NONE)
 				{
@@ -4607,6 +4646,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 	static int s_OpenButton = 0;
 	static int s_AppendButton = 0;
 	static int s_ExitButton = 0;
+	static int s_CompareButton = 0;
 
 	CUIRect Slot;
 	View.HSplitTop(2.0f, &Slot, &View);
@@ -4645,6 +4685,14 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 	if(pEditor->DoButton_MenuItem(&s_AppendButton, "Append", 0, &Slot, 0, "Opens a map and adds everything from that map to the current one"))
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", "", pEditor->CallbackAppendMap, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_CompareButton, "Compare", 0, &Slot, 0, "Opens a map and compare it to the current one"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Compare map", "Compare", "maps", "", pEditor->CallbackCompareMap, pEditor);
 		return 1;
 	}
 
@@ -5352,6 +5400,14 @@ void CEditor::UpdateAndRender()
 }
 
 IEditor *CreateEditor() { return new CEditor; }
+
+void CEditor::SwitchMaps()
+{
+    CEditorMap tmp;
+    tmp = m_Map;
+    m_Map = m_ComparedMap;
+    m_ComparedMap = tmp;
+}
 
 // DDRace
 

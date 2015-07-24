@@ -1222,3 +1222,32 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	// all done \o/
 	return 0;
 }
+
+int CEditor::Compare(const char *pFileName, int StorageType)
+{
+	m_ComparedMap.m_pEditor = this;
+
+	int Err;
+	Err = m_ComparedMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	if(!Err)
+		return Err;
+
+    Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "Comparison mode enabled");
+
+    bool same = true;
+
+    for(int i = 0; i < m_ComparedMap.m_lGroups.size(); ++i)
+    {
+        if(m_ComparedMap.m_lGroups[i] != m_Map.m_lGroups[i])
+            same = false;
+    }
+
+    if(same)
+        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "Maps are identical");
+    else
+        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "Maps are different");
+
+	return 0;
+}
+//editor.cpp line 2316+4836+5400
+//editor.h line 707+1007
