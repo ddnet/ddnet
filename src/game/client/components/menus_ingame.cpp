@@ -461,11 +461,19 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 	int NumVoteOptions = 0;
 	int aIndices[MAX_VOTE_OPTIONS];
 	static int s_CurVoteOption = 0;
+	int TotalShown = 0;
+
+	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
+	{
+		if(m_aFilterString[0] != '\0' && !str_find_nocase(pOption->m_aDescription, m_aFilterString))
+			continue;
+		TotalShown++;
+	}
 
 #if defined(__ANDROID__)
-	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", Total, 1, s_CurVoteOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
 #else
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", Total, 1, s_CurVoteOption, s_ScrollValue);
+	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
 #endif
 
 	int i = -1;
