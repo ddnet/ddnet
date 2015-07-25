@@ -414,6 +414,11 @@ class CTeleTile
 public:
 	unsigned char m_Number;
 	unsigned char m_Type;
+
+	bool operator==(const CTeleTile& other)
+	{
+	    return m_Number == other.m_Number && m_Type == other.m_Type;
+	}
 };
 
 class CSpeedupTile
@@ -423,6 +428,11 @@ public:
 	unsigned char m_MaxSpeed;
 	unsigned char m_Type;
 	short m_Angle;
+
+	bool operator==(const CSpeedupTile& other)
+	{
+	    return m_Force == other.m_Force && m_MaxSpeed == other.m_MaxSpeed && m_Type == other.m_Type && m_Angle == other.m_Angle;
+	}
 };
 
 class CSwitchTile
@@ -432,6 +442,11 @@ public:
 	unsigned char m_Type;
 	unsigned char m_Flags;
 	unsigned char m_Delay;
+
+	bool operator==(const CSwitchTile& other)
+	{
+	    return m_Number == other.m_Number && m_Type == other.m_Type && m_Flags == other.m_Flags && m_Delay == other.m_Delay;
+	}
 };
 
 class CDoorTile
@@ -440,6 +455,11 @@ public:
 	unsigned char m_Index;
 	unsigned char m_Flags;
 	int m_Number;
+
+	bool operator==(const CDoorTile& other)
+	{
+	    return m_Index == other.m_Index && m_Flags == other.m_Flags && m_Number == other.m_Number;
+	}
 };
 
 class CTuneTile
@@ -447,6 +467,11 @@ class CTuneTile
 public:
 	unsigned char m_Number;
 	unsigned char m_Type;
+
+	bool operator==(const CTuneTile& other)
+	{
+	    return m_Number == other.m_Number && m_Type == other.m_Type;
+	}
 };
 
 #endif

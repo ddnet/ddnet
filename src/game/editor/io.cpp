@@ -1297,14 +1297,42 @@ int CEditor::Compare(const char *pFileName, int StorageType)
             else
             {
                 ++differente;
+                same = false;
             }
         }
         char aBuf[256];
-        str_format(aBuf, sizeof(aBuf),"%d tiles are different", differente);
+        str_format(aBuf, sizeof(aBuf),"%d tiles are different on game layer", differente);
         Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
-        str_format(aBuf, sizeof(aBuf),"%d tiles are identical", identique);
+        str_format(aBuf, sizeof(aBuf),"%d tiles are identical on game layer", identique);
         Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
     }
+    if(TeleLayer && ComparedTeleLayer)
+    {
+        int identique = 0, differente = 0;
+        size = TeleLayer->m_Width*TeleLayer->m_Height < ComparedTeleLayer->m_Width*ComparedTeleLayer->m_Height?TeleLayer->m_Width*TeleLayer->m_Height:ComparedTeleLayer->m_Width*ComparedTeleLayer->m_Height;
+        for(int i = 0; i < size; ++i)
+        {
+            if(TeleLayer->m_pTiles[i] == ComparedTeleLayer->m_pTiles[i] && TeleLayer->m_pTeleTile[i] == ComparedTeleLayer->m_pTeleTile[i])
+            {
+                ++identique;
+            }
+            else
+            {
+                ++differente;
+                same = false;
+                char aBuf[256];
+                str_format(aBuf, sizeof(aBuf),"%d %d changed to %d %d on tele layer", TeleLayer->m_pTeleTile[i].m_Number,
+                           ComparedTeleLayer->m_pTeleTile[i].m_Number, TeleLayer->m_pTeleTile[i].m_Type, ComparedTeleLayer->m_pTeleTile[i].m_Type);
+                Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+            }
+        }
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf),"%d tiles are different on tele layer", differente);
+        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+        str_format(aBuf, sizeof(aBuf),"%d tiles are identical on tele layer", identique);
+        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+    }
+
 
     if(same)
         Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "Maps are identical");
