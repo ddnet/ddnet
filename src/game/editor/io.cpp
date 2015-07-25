@@ -1235,11 +1235,75 @@ int CEditor::Compare(const char *pFileName, int StorageType)
     Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "Comparison mode enabled");
 
     bool same = true;
+    CLayerTiles* CurrentLayer;
+    CLayerTiles* GameLayer = 0;
+    CLayerTele* TeleLayer = 0;
+    CLayerTune* TuneLayer = 0;
+    CLayerFront* FrontLayer = 0;
+    CLayerSpeedup* SpeedupLayer = 0;
+    CLayerSwitch* SwitchLayer = 0;
+    CLayerTiles* ComparedGameLayer = 0;
+    CLayerTele* ComparedTeleLayer = 0;
+    CLayerTune* ComparedTuneLayer = 0;
+    CLayerFront* ComparedFrontLayer = 0;
+    CLayerSpeedup* ComparedSpeedupLayer = 0;
+    CLayerSwitch* ComparedSwitchLayer = 0;
 
-    for(int i = 0; i < m_ComparedMap.m_lGroups.size(); ++i)
+    for(int i = 0; i < m_ComparedMap.m_pGameGroup->m_lLayers.size(); ++i)
     {
-        if(m_ComparedMap.m_lGroups[i] != m_Map.m_lGroups[i])
-            same = false;
+        CurrentLayer = (CLayerTiles*)(m_ComparedMap.m_pGameGroup->m_lLayers[i]);
+
+        if(CurrentLayer->m_Game)
+            ComparedGameLayer = CurrentLayer;
+        else if(CurrentLayer->m_Tele)
+            ComparedTeleLayer = (CLayerTele*)CurrentLayer;
+        else if(CurrentLayer->m_Tune)
+            ComparedTuneLayer = (CLayerTune*)CurrentLayer;
+        else if(CurrentLayer->m_Front)
+            ComparedFrontLayer = (CLayerFront*)CurrentLayer;
+        else if(CurrentLayer->m_Speedup)
+            ComparedSpeedupLayer = (CLayerSpeedup*)CurrentLayer;
+        else if(CurrentLayer->m_Switch)
+            ComparedSwitchLayer = (CLayerSwitch*)CurrentLayer;
+    }
+    for(int i = 0; i < m_Map.m_pGameGroup->m_lLayers.size(); ++i)
+    {
+        CurrentLayer = (CLayerTiles*)(m_Map.m_pGameGroup->m_lLayers[i]);
+        if(CurrentLayer->m_Game)
+            GameLayer = CurrentLayer;
+        else if(CurrentLayer->m_Tele)
+            TeleLayer = (CLayerTele*)CurrentLayer;
+        else if(CurrentLayer->m_Tune)
+            TuneLayer = (CLayerTune*)CurrentLayer;
+        else if(CurrentLayer->m_Front)
+            FrontLayer = (CLayerFront*)CurrentLayer;
+        else if(CurrentLayer->m_Speedup)
+            SpeedupLayer = (CLayerSpeedup*)CurrentLayer;
+        else if(CurrentLayer->m_Switch)
+            SwitchLayer = (CLayerSwitch*)CurrentLayer;
+    }
+
+    int size;
+    if(GameLayer && ComparedGameLayer)
+    {
+        int identique = 0, differente = 0;
+        size = GameLayer->m_Width*GameLayer->m_Height < ComparedGameLayer->m_Width*ComparedGameLayer->m_Height?GameLayer->m_Width*GameLayer->m_Height:ComparedGameLayer->m_Width*ComparedGameLayer->m_Height;
+        for(int i = 0; i < size; ++i)
+        {
+            if(GameLayer->m_pTiles[i] == ComparedGameLayer->m_pTiles[i])
+            {
+                ++identique;
+            }
+            else
+            {
+                ++differente;
+            }
+        }
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf),"%d tiles are different", differente);
+        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+        str_format(aBuf, sizeof(aBuf),"%d tiles are identical", identique);
+        Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
     }
 
     if(same)

@@ -210,6 +210,11 @@ public:
 	unsigned char m_Flags;
 	unsigned char m_Skip;
 	unsigned char m_Reserved;
+
+	bool operator==(const CTile& other)
+	{
+	    return m_Index == other.m_Index && m_Flags == other.m_Flags && m_Skip == other.m_Skip && m_Reserved == other.m_Reserved;
+	}
 };
 
 struct CMapItemInfo
