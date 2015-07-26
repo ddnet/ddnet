@@ -433,7 +433,7 @@ void CGameClient::OnReset()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
 
-	m_DemoSpecID = -2;
+	m_DemoSpecID = SPEC_FOLLOW;
 	m_FlagDropTick[TEAM_RED] = 0;
 	m_FlagDropTick[TEAM_BLUE] = 0;
 	m_LastRoundStartTick = -1;
@@ -501,8 +501,7 @@ void CGameClient::UpdatePositions()
 	// spectator position
 	if(m_Snap.m_SpecInfo.m_Active)
 	{
-		if(Client()->State() == IClient::STATE_DEMOPLAYBACK &&
-			m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_DemoSpecID != SPEC_FOLLOW && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		{
 			m_Snap.m_SpecInfo.m_Position = mix(
 				vec2(m_Snap.m_aCharacters[m_Snap.m_SpecInfo.m_SpectatorID].m_Prev.m_X, m_Snap.m_aCharacters[m_Snap.m_SpecInfo.m_SpectatorID].m_Prev.m_Y),
@@ -510,7 +509,7 @@ void CGameClient::UpdatePositions()
 				Client()->IntraGameTick());
 			m_Snap.m_SpecInfo.m_UsePosition = true;
 		}
-		else if(m_Snap.m_pSpectatorInfo && (Client()->State() == IClient::STATE_DEMOPLAYBACK || m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW))
+		else if(m_Snap.m_pSpectatorInfo && ((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_DemoSpecID == SPEC_FOLLOW) || (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)))
 		{
 			if(m_Snap.m_pPrevSpectatorInfo)
 				m_Snap.m_SpecInfo.m_Position = mix(vec2(m_Snap.m_pPrevSpectatorInfo->m_X, m_Snap.m_pPrevSpectatorInfo->m_Y),
@@ -1127,16 +1126,17 @@ void CGameClient::OnNewSnapshot()
 			m_pControls->OnPlayerDeath();
 		}
 	}
-
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_Snap.m_SpecInfo.m_Active = true;
-		if(m_DemoSpecID == -2 && m_Snap.m_LocalClientID >= 0)
+		if(m_DemoSpecID != SPEC_FOLLOW)
+		{
+			m_Snap.m_SpecInfo.m_Active = true;
 			m_Snap.m_SpecInfo.m_SpectatorID = m_Snap.m_LocalClientID;
-		if(m_DemoSpecID > SPEC_FREEVIEW && m_Snap.m_aCharacters[m_DemoSpecID].m_Active)
-			m_Snap.m_SpecInfo.m_SpectatorID = m_DemoSpecID;
-		else if(m_DemoSpecID != -2)
-			m_Snap.m_SpecInfo.m_SpectatorID = SPEC_FREEVIEW;
+			if(m_DemoSpecID > SPEC_FREEVIEW && m_Snap.m_aCharacters[m_DemoSpecID].m_Active)
+				m_Snap.m_SpecInfo.m_SpectatorID = m_DemoSpecID;
+			else
+				m_Snap.m_SpecInfo.m_SpectatorID = SPEC_FREEVIEW;
+		}
 	}
 
 	// clear out unneeded client data
