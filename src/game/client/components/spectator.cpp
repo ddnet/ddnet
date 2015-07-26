@@ -370,7 +370,18 @@ void CSpectator::OnRender()
 			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID;
 			Selected = true;
 		}
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
+		float TeeAlpha;
+		if(Client()->State() == IClient::STATE_DEMOPLAYBACK &&
+			!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_Active)
+		{
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.25f);
+			TeeAlpha = 0.5f;
+		}
+		else
+		{
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
+			TeeAlpha = 1.0f;
+		}
 		TextRender()->Text(0, Width/2.0f+x+50.0f, Height/2.0f+y+5.0f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_aName, 220.0f);
 
 		// flag
@@ -391,8 +402,10 @@ void CSpectator::OnRender()
 		}
 
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_RenderInfo;
+		TeeInfo.m_ColorBody.a = TeeAlpha;
+		TeeInfo.m_ColorFeet.a = TeeAlpha;
 		TeeInfo.m_Size *= TeeSizeMod;
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Width/2.0f+x+20.0f, Height/2.0f+y+20.0f));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(Width/2.0f+x+20.0f, Height/2.0f+y+20.0f), true);
 
 		y += LineHeight;
 	}
