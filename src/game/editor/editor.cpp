@@ -857,6 +857,7 @@ void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUse
 		pEditor->m_aFileName[0] = 0;
 	}
 }
+
 void CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor*)pUser;
@@ -867,6 +868,7 @@ void CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pU
 
 	pEditor->m_Dialog = DIALOG_NONE;
 }
+
 void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = static_cast<CEditor*>(pUser);
@@ -879,8 +881,6 @@ void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 		pFileName = aBuf;
 	}
 
-	//TODO:DDRace:anyone find out why do we need to save twice for things to work!
-	if(pEditor->Save(pFileName))
 	if(pEditor->Save(pFileName))
 	{
 		str_copy(pEditor->m_aFileName, pFileName, sizeof(pEditor->m_aFileName));
