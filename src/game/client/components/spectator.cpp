@@ -260,11 +260,11 @@ void CSpectator::OnRender()
 		Graphics()->TextureSet(-1);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-		RenderTools()->DrawRoundRect(Width/2.0f+(ObjWidth-300), Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
+		RenderTools()->DrawRoundRect(Width/2.0f-(ObjWidth - 310.0f), Height/2.0f-280.0f, 270.0f, 60.0f, 20.0f);
 		Graphics()->QuadsEnd();
 	}
 
-	if(m_SelectorMouse.x >= -(ObjWidth-20.0f) && m_SelectorMouse.x <= -(ObjWidth-300+10.0f) &&
+	if(m_SelectorMouse.x >= -(ObjWidth-20.0f) && m_SelectorMouse.x <= -(ObjWidth-290+10.0f) &&
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
 		m_SelectedSpectatorID = SPEC_FREEVIEW;
@@ -273,17 +273,17 @@ void CSpectator::OnRender()
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
 	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-265.0f, BigFontSize, Localize("Free-View"), -1);
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK) // TODO: Demo
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		Selected = false;
-		if(m_SelectorMouse.x > -(ObjWidth-300+10.0f) && m_SelectorMouse.x <= ObjWidth-20.0f &&
+		if(m_SelectorMouse.x > -(ObjWidth-290.0f) && m_SelectorMouse.x <= -(ObjWidth-590.0f) &&
 			m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 		{
 			m_SelectedSpectatorID = SPEC_FOLLOW;
 			Selected = true;
 		}
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-		TextRender()->Text(0, Width/2.0f+(ObjWidth-300+20.f), Height/2.0f-265.0f, BigFontSize, Localize("Follow"), -1);
+		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-265.0f, BigFontSize, Localize("Follow"), -1);
 	}
 
 	float x = -(ObjWidth - 30.0f), y = StartY;
