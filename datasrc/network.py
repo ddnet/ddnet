@@ -29,6 +29,7 @@ enum
 	FLAG_TAKEN,
 
 	SPEC_FREEVIEW=-1,
+	SPEC_FOLLOW=-2,
 };
 '''
 
