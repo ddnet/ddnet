@@ -40,6 +40,7 @@ void CChat::OnReset()
 	}
 
 	m_ReverseTAB = false;
+	m_Mode = MODE_NONE;
 	m_Show = false;
 	m_InputUpdate = false;
 	m_ChatStringOffset = 0;
