@@ -1,7 +1,7 @@
-[Freeze]
+[Freeze soft corners]
 
 Index 0
-Pos 0 0 NOTINDEX 4 OR 19 OR 20 OR 52 OR 35 OR 36
+Pos 0 0 NOTINDEX 3 OR 4 OR 19 OR 20 OR 52 OR 35 OR 36
 
 NewRun
 
@@ -94,6 +94,206 @@ Pos 1 0 EMPTY
 Pos 1 1 EMPTY
 
 Index 19 ROTATE XFLIP YFLIP
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+Pos -1 1 EMPTY
+
+Index 20
+Pos -1 0 EMPTY
+Pos -1 -1 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 1 0 EMPTY
+
+Index 20 ROTATE
+Pos 0 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+Pos 0 1 EMPTY
+
+Index 20 XFLIP YFLIP
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 1 EMPTY
+Pos -1 0 EMPTY
+
+Index 20 ROTATE XFLIP YFLIP
+Pos 0 -1 EMPTY
+Pos -1 -1 EMPTY
+Pos -1 0 EMPTY
+Pos -1 1 EMPTY
+Pos 0 1 EMPTY
+
+Index 52
+Pos 1 -1 FULL
+Pos -1 1 FULL
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+Pos 0 1 EMPTY
+Pos 0 -1 EMPTY
+Pos -1 -1 EMPTY
+Pos -1 0 EMPTY
+
+Index 52 ROTATE
+Pos -1 -1 FULL
+Pos 1 1 FULL
+Pos 0 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 1 0 EMPTY
+Pos -1 0 EMPTY
+Pos -1 1 EMPTY
+Pos 0 1 EMPTY
+
+Index 35
+Pos -1 1 FULL
+Pos -1 -1 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+
+Index 35 ROTATE
+Pos -1 -1 FULL
+Pos 0 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 1 EMPTY
+Pos -1 0 EMPTY
+
+Index 35 XFLIP YFLIP
+Pos 1 -1 FULL
+Pos -1 -1 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 1 EMPTY
+Pos -1 0 EMPTY
+
+Index 35 ROTATE XFLIP YFLIP
+Pos 1 1 FULL
+Pos -1 -1 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+Pos -1 1 EMPTY
+Pos -1 0 EMPTY
+
+Index 36
+Pos -1 -1 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 1 EMPTY
+Pos -1 0 EMPTY
+
+
+
+[Freeze round corners]
+
+Index 0
+Pos 0 0 NOTINDEX 3 OR 4 OR 19 OR 20 OR 52 OR 35 OR 36
+
+NewRun
+
+Index 4
+
+Index 17
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+Pos -1 0 FULL
+Pos 0 -1 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
+
+Index 17 ROTATE
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 -1 NOTINDEX -1
+Pos 1 0 NOTINDEX -1
+
+Index 17 XFLIP YFLIP
+Pos 0 0 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 NOTINDEX -1
+Pos 0 1 NOTINDEX -1
+
+Index 17 ROTATE XFLIP YFLIP
+Pos 0 0 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos 0 1 NOTINDEX -1
+Pos -1 0 NOTINDEX -1
+
+Index 18
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos 0 1 EMPTY
+Pos -1 0 FULL
+
+Index 18 ROTATE
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos -1 0 EMPTY
+
+Index 18 XFLIP YFLIP
+Pos 0 0 EMPTY
+Pos 0 -1 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos -1 0 FULL
+
+Index 18 ROTATE XFLIP YFLIP
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+
+Index 34
+Pos 0 0 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos -1 0 FULL
+
+Index 3
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos -1 -1 EMPTY
+
+Index 3 ROTATE
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 -1 EMPTY
+
+Index 3 XFLIP YFLIP
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+Pos 1 1 EMPTY
+
+Index 3 ROTATE XFLIP YFLIP
 Pos 0 1 EMPTY
 Pos -1 0 EMPTY
 Pos -1 1 EMPTY
