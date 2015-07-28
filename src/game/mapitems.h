@@ -521,8 +521,8 @@ static const char* Tile(int Index)
     case TILE_SOLO_END:
         return "TILE_SOLO_END";
 	//Switches
-    case TILE_SWITCHTIMEDOPEN:
-        return "TILE_SWITCHTIMEDOPEN";
+    /*case TILE_SWITCHTIMEDOPEN:
+        return "TILE_SWITCHTIMEDOPEN";*/
     case TILE_SWITCHTIMEDCLOSE:
         return "TILE_SWITCHTIMEDCLOSE";
     case TILE_SWITCHOPEN:

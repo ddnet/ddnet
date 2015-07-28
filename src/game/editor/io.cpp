@@ -1321,11 +1321,127 @@ int CEditor::Compare(const char *pFileName, int StorageType)
                 ++differente;
                 same = false;
                 char aBuf[256];
-                str_format(aBuf, sizeof(aBuf),"%d %d changed to %d %d on tele layer", TeleLayer->m_pTeleTile[i].m_Number,
-                           ComparedTeleLayer->m_pTeleTile[i].m_Number, TeleLayer->m_pTeleTile[i].m_Type, ComparedTeleLayer->m_pTeleTile[i].m_Type);
+                /*str_format(aBuf, sizeof(aBuf),"%d %d changed to %d %d on tile %d", TeleLayer->m_pTeleTile[i].m_Number,
+                           ComparedTeleLayer->m_pTeleTile[i].m_Number, TeleLayer->m_pTeleTile[i].m_Type, ComparedTeleLayer->m_pTeleTile[i].m_Type,
+                           i);
                 Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+                str_format(aBuf, sizeof(aBuf), "%d %d %d %d changed to %d %d %d %d", TeleLayer->m_pTiles[i].m_Index,
+                           TeleLayer->m_pTiles[i].m_Flags, TeleLayer->m_pTiles[i].m_Skip, TeleLayer->m_pTiles[i].m_Reserved,
+                           ComparedTeleLayer->m_pTiles[i].m_Index, ComparedTeleLayer->m_pTiles[i].m_Flags, ComparedTeleLayer->m_pTiles[i].m_Skip,
+                           ComparedTeleLayer->m_pTiles[i].m_Reserved);
+                Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);*/
+
+                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+                /*switch(TeleLayer->m_pTiles[i].m_Index)
+                {
+                case TILE_AIR:              // = 0
+                    str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+                case TILE_TELEIN:           // = 26
+                    str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+                case TILE_TELEOUT:          // = 27
+                    str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+                case TILE_TELECHECK:        // = 29
+                    str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_TELECHECKOUT:     // = 30
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_TELECHECKIN:      // = 31
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_TELECHECKINEVIL:  // = 63
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_CP:               // = 64
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_CP_F:             // = 65
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_TELEINWEAPON:     // = 14
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_TELEINHOOK:       // = 15
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+	            case TILE_TELEINEVIL:       // = 10
+	                str_format(aBuf, sizeof(aBuf), "%s on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+                default:
+                    str_format(aBuf, sizeof(aBuf), "Unknown on tile %d changed to %s", Tile(TeleLayer->m_pTiles[i].m_Index), i,
+                               Tile(ComparedTeleLayer->m_pTiles[i].m_Index));
+                    break;
+                }*/
+
             }
         }
+        /***
+Num Type
+1 0 changed to 26 0 on tile 51
+Index, Flags, Skip, Reserved
+26 0 0 0 changed to 0 0 0 0
+1 2 changed to 26 26 on tile 52
+26 0 0 0 changed to 26 0 0 0
+1 2 changed to 26 31 on tile 53
+26 0 0 0 changed to 31 0 0 0
+2 0 changed to 10 0 on tile 101
+10 0 0 0 changed to 0 0 0 0
+2 1 changed to 10 10 on tile 102
+10 0 0 0 changed to 10 0 0 0
+2 1 changed to 10 63 on tile 103
+10 0 0 0 changed to 63 0 0 0
+3 0 changed to 29 0 on tile 151
+29 0 0 0 changed to 0 0 0 0
+3 1 changed to 29 29 on tile 152
+29 0 0 0 changed to 29 0 0 0
+3 1 changed to 29 29 on tile 153
+29 0 0 0 changed to 29 0 0 0
+4 0 changed to 14 0 on tile 201
+14 0 0 0 changed to 0 0 0 0
+4 1 changed to 14 14 on tile 202
+14 0 0 0 changed to 14 0 0 0
+5 0 changed to 15 0 on tile 251
+15 0 0 0 changed to 0 0 0 0
+5 1 changed to 15 15 on tile 252
+15 0 0 0 changed to 15 0 0 0
+6 0 changed to 31 0 on tile 301
+31 0 0 0 changed to 0 0 0 0
+6 1 changed to 31 26 on tile 302
+31 0 0 0 changed to 26 0 0 0
+6 0 changed to 63 0 on tile 351
+63 0 0 0 changed to 0 0 0 0
+6 1 changed to 63 10 on tile 352
+63 0 0 0 changed to 10 0 0 0
+6 0 changed to 29 0 on tile 401
+29 0 0 0 changed to 0 0 0 0
+6 1 changed to 29 29 on tile 405
+29 0 0 0 changed to 29 0 0 0
+6 0 changed to 27 0 on tile 451
+27 0 0 0 changed to 0 0 0 0
+6 1 changed to 27 27 on tile 452
+27 0 0 0 changed to 27 0 0 0
+6 0 changed to 30 0 on tile 501
+30 0 0 0 changed to 0 0 0 0
+6 1 changed to 30 30 on tile 502
+30 0 0 0 changed to 30 0 0 0
+*/
         char aBuf[256];
         str_format(aBuf, sizeof(aBuf),"%d tiles are different on tele layer", differente);
         Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
