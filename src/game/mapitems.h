@@ -474,4 +474,126 @@ public:
 	}
 };
 
+static const char* Tile(int Index)
+{
+    switch(Index)
+    {
+    case TILE_AIR:
+        return "TILE_AIR";
+	case TILE_SOLID:
+        return "TILE_SOLID";
+	case TILE_DEATH:
+	    return "TILE_DEATH";
+	case TILE_NOHOOK:
+	    return "TILE_NOHOOK";
+	case TILE_NOLASER:
+	    return "TILE_NOLASER";
+    case TILE_THROUGH:
+        return "TILE_THROUGH";
+    case TILE_JUMP:
+        return "TILE_JUMP";
+    case TILE_FREEZE:
+        return "TILE_FREEZE";
+    case TILE_TELEINEVIL:
+        return "TILE_TELEINEVIL";
+    case TILE_UNFREEZE:
+        return "TILE_UNFREEZE";
+    case TILE_DFREEZE:
+        return "TILE_DFREEZE";
+    case TILE_DUNFREEZE:
+        return "TILE_DUNFREEZE";
+    case TILE_TELEINWEAPON:
+        return "TILE_TELEINWEAPON";
+    case TILE_TELEINHOOK:
+        return "TILE_TELEINHOOK";
+    case TILE_WALLJUMP:
+        return "TILE_WALLJUMP";
+    case TILE_EHOOK_START:
+        return "TILE_EHOOK_START";
+    case TILE_EHOOK_END:
+        return "TILE_EHOOK_END";
+    case TILE_HIT_START:
+        return "TILE_HIT_START";
+    case TILE_HIT_END:
+        return "TILE_HIT_END";
+    case TILE_SOLO_START:
+        return "TILE_SOLO_START";
+    case TILE_SOLO_END:
+        return "TILE_SOLO_END";
+	//Switches
+    case TILE_SWITCHTIMEDOPEN:
+        return "TILE_SWITCHTIMEDOPEN";
+    case TILE_SWITCHTIMEDCLOSE:
+        return "TILE_SWITCHTIMEDCLOSE";
+    case TILE_SWITCHOPEN:
+        return "TILE_SWITCHOPEN";
+    case TILE_SWITCHCLOSE:
+        return "TILE_SWITCHCLOSE";
+    case TILE_TELEIN:
+        return "TILE_TELEIN";
+    case TILE_TELEOUT:
+        return "TILE_TELEOUT";
+    case TILE_BOOST:
+        return "TILE_BOOST";
+    case TILE_TELECHECK:
+        return "TILE_TELECHECK";
+    case TILE_TELECHECKOUT:
+        return "TILE_TELECHECKOUT";
+    case TILE_TELECHECKIN:
+        return "TILE_TELECHECKIN";
+    case TILE_REFILL_JUMPS:
+        return "TILE_REFILL_JUMPS";
+    case TILE_BEGIN:
+        return "TILE_BEGIN";
+    case TILE_END:
+        return "TILE_END";
+    case TILE_STOP:
+        return "TILE_STOP";
+    case TILE_STOPS:
+        return "TILE_STOPS";
+    case TILE_STOPA:
+        return "TILE_STOPA";
+    case TILE_TELECHECKINEVIL:
+        return "TILE_TELECHECKINEVIL";
+    case TILE_CP:
+        return "TILE_CP";
+    case TILE_CP_F:
+        return "TILE_CP_F";
+    case TILE_TUNE1:
+        return "TILE_TUNE1";
+    case TILE_OLDLASER:
+        return "TILE_OLDLASER";
+    case TILE_NPC:
+        return "TILE_NPC";
+    case TILE_EHOOK:
+        return "TILE_EHOOK";
+    case TILE_NOHIT:
+        return "TILE_NOHIT";
+    case TILE_NPH:
+        return "TILE_NPH";
+    case TILE_PENALTY:
+        return "TILE_PENALTY";
+    case TILE_NPC_END:
+        return "TILE_NPC_END";
+    case TILE_SUPER_END:
+        return "TILE_SUPER_END";
+    case TILE_JETPACK_END:
+        return "TILE_JETPACK_END";
+    case TILE_NPH_END:
+        return "TILE_NPH_END";
+    case TILE_BONUS:
+        return "TILE_BONUS";
+    case TILE_NPC_START:
+        return "TILE_NPC_START";
+    case TILE_SUPER_START:
+        return "TILE_SUPER_START";
+    case TILE_JETPACK_START:
+        return "TILE_JETPACK_START";
+    case TILE_NPH_START:
+        return "TILE_NPH_START";
+    default:
+        return "TILE_UNKNOWN";
+    }
+}
+
 #endif
