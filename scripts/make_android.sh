@@ -6,10 +6,10 @@ git clone https://github.com/pelya/commandergenius.git
 
 # Get the most recent DDNet source
 cd /media/commandergenius/project/jni/application/teeworlds
-rm -rf src DDRace64.zip*
-wget "https://github.com/def-/teeworlds/archive/DDRace64.zip"
-unzip DDRace64.zip
-mv teeworlds-DDRace64 src
+rm -rf src master.zip*
+wget "https://github.com/def-/ddnet/archive/master.zip"
+unzip ddnet-master.zip
+mv ddnet-master src
 mkdir src/src/game/generated
 # Also the generated files don't get generated, copy them by hand
 cp /media/ddrace/src/game/generated/* src/src/game/generated
