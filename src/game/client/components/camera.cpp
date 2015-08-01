@@ -130,17 +130,27 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 
 void CCamera::ToggleDynamic()
 {
+	static int s_OldMousesens = 0;
 	if(g_Config.m_ClMouseDeadzone)
 	{
 		g_Config.m_ClMouseFollowfactor = 0;
 		g_Config.m_ClMouseMaxDistance = g_Config.m_DefaultMouseMaxDistance;
 		g_Config.m_ClMouseDeadzone = 0;
+		if(g_Config.m_ClDynCamMousesens && s_OldMousesens)
+		{
+			g_Config.m_InpMousesens = s_OldMousesens;
+		}
 	}
 	else
 	{
+		s_OldMousesens = g_Config.m_InpMousesens;
 		g_Config.m_ClMouseFollowfactor = g_Config.m_DynCamFollowFactor;
 		g_Config.m_ClMouseMaxDistance = g_Config.m_DynCamMaxDistance;
 		g_Config.m_ClMouseDeadzone = g_Config.m_DynCamDeadZone;
+		if(g_Config.m_ClDynCamMousesens)
+		{
+			g_Config.m_InpMousesens = g_Config.m_ClDynCamMousesens;
+		}
 	}
 }
 
