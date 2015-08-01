@@ -54,6 +54,7 @@ MACRO_CONFIG_INT(ClMouseMaxDistance, cl_mouse_max_distance, 800, 0, 0, CFGFLAG_C
 
 MACRO_CONFIG_INT(DynCamMaxDistance, cl_dyn_cam_max_distance, 1000, 0, 2000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Maximal dynamic camera distance")
 MACRO_CONFIG_INT(DefaultMouseMaxDistance, cl_default_mouse_max_distance, 400, 0, 2000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Default mouse max distance. Dyncam switches back to it")
+MACRO_CONFIG_INT(ClDynCamMousesens, cl_dyn_cam_mouse_sens, 0, 5, 100000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Mouse sens used when dyncam is toggled on")
 MACRO_CONFIG_INT(DynCamDeadZone, cl_dyn_cam_dead_zone, 300, 1, 1300, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dynamic camera dead zone")
 MACRO_CONFIG_INT(DynCamFollowFactor, cl_dyn_cam_follow_factor, 60, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dynamic camera follow factor")
 
