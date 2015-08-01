@@ -136,7 +136,7 @@ void CCamera::ToggleDynamic()
 		g_Config.m_ClMouseFollowfactor = 0;
 		g_Config.m_ClMouseMaxDistance = g_Config.m_DefaultMouseMaxDistance;
 		g_Config.m_ClMouseDeadzone = 0;
-		if(g_Config.m_ClDynCamMousesens)
+		if(g_Config.m_ClDynCamMousesens && s_OldMousesens)
 		{
 			g_Config.m_InpMousesens = s_OldMousesens;
 		}
