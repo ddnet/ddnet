@@ -345,6 +345,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 		m_LastDummyConnectTime = 0;
 
 	m_DDNetSrvListTokenSet = false;
+
+	m_TexIDBg = -1;
 }
 
 // ----- send functions -----
@@ -1040,6 +1042,15 @@ void CClient::Render()
 	{
 		vec3 bg = HslToRgb(vec3(g_Config.m_ClBackgroundEntitiesHue/255.0f, g_Config.m_ClBackgroundEntitiesSat/255.0f, g_Config.m_ClBackgroundEntitiesLht/255.0f));
 		Graphics()->Clear(bg.r, bg.g, bg.b);
+		if(g_Config.m_ClOverlayEntities == 100 && m_TexIDBg != -1)
+        {
+            Graphics()->MapScreen(0,0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
+            Graphics()->TextureSet(m_TexIDBg);
+            Graphics()->QuadsBegin();
+            IGraphics::CQuadItem QuadItem((Graphics()->ScreenWidth()-m_pBgImg->m_Width)/2.,(Graphics()->ScreenHeight()-m_pBgImg->m_Height)/2., m_pBgImg->m_Width, m_pBgImg->m_Height);
+            Graphics()->QuadsDrawTL(&QuadItem, 1);
+            Graphics()->QuadsEnd();
+        }
 	}
 	else
 	{
@@ -2632,6 +2643,18 @@ void CClient::Run()
 	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
+
+    if(g_Config.m_ClBackgroundEntities)
+    {
+        m_pBgImg = new CImageInfo;
+        if(str_length(g_Config.m_ClBackgroundEntities) < 3)
+            m_TexIDBg = -1;
+        else if(Graphics()->LoadPNG(m_pBgImg, g_Config.m_ClBackgroundEntities, IStorage::TYPE_ALL))
+        {
+            m_TexIDBg = Graphics()->LoadTextureRaw(m_pBgImg->m_Width, m_pBgImg->m_Height, m_pBgImg->m_Format, m_pBgImg->m_pData, m_pBgImg->m_Format, 0); //much faster with nomipmaps
+            mem_free(m_pBgImg->m_pData);
+        }
+    }
 
 	while (1)
 	{

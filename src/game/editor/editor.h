@@ -704,6 +704,8 @@ public:
 		m_SpeedupForce = 50;
 		m_SpeedupMaxSpeed = 0;
 		m_SpeedupAngle = 0;
+
+		m_CompareMode = false;
 	}
 
 	virtual void Init();
@@ -735,6 +737,7 @@ public:
 	int Save(const char *pFilename);
 	int Load(const char *pFilename, int StorageType);
 	int Append(const char *pFilename, int StorageType);
+	int Compare(const char *pFilename, int StorageType);
 	void Render();
 
 	CQuad *GetSelectedQuad();
@@ -916,7 +919,9 @@ public:
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
+	static void CallbackCompareMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
+
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();
@@ -1002,6 +1007,10 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
+
+	bool m_CompareMode;
+	CEditorMap m_ComparedMap;
+	void SwitchMaps();
 };
 
 // make sure to inline this function
