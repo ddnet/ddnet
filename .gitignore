@@ -5,6 +5,7 @@ datasrc/__pycache__
 datasrc/*.pyc
 objs
 src/game/generated
+data/*
 SDL.dll
 freetype.dll
 autoexec.cfg
