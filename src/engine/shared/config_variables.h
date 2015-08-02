@@ -296,7 +296,6 @@ MACRO_CONFIG_INT(ClBackgroundLht, cl_background_lht, 128, 0, 255, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClBackgroundEntitiesHue, cl_background_entities_hue, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color hue")
 MACRO_CONFIG_INT(ClBackgroundEntitiesSat, cl_background_entities_sat, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color saturation")
 MACRO_CONFIG_INT(ClBackgroundEntitiesLht, cl_background_entities_lht, 128, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color lightness")
-MACRO_CONFIG_STR(ClBackgroundEntities, cl_background_entities, 100, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities)")
 MACRO_CONFIG_INT(SvShowOthers, sv_show_others, 1, 0, 1, CFGFLAG_SERVER, "Whether players can user the command showothers or not")
 MACRO_CONFIG_INT(SvShowOthersDefault, sv_show_others_default, 0, 0, 1, CFGFLAG_SERVER, "Whether players see others by default")
 MACRO_CONFIG_INT(SvShowAllDefault, sv_show_all_default, 0, 0, 1, CFGFLAG_SERVER, "Whether players see all tees by default")
