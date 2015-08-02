@@ -61,6 +61,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Motd *pMsg = (CNetMsg_Sv_Motd *)pRawMsg;
 
+		char* pLast = m_aServerMotd;
 		// process escaping
 		str_copy(m_aServerMotd, pMsg->m_pMessage, sizeof(m_aServerMotd));
 		for(int i = 0; m_aServerMotd[i]; i++)
@@ -69,12 +70,17 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 			{
 				if(m_aServerMotd[i+1] == 'n')
 				{
+					m_aServerMotd[i] = '\0';
+					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 					m_aServerMotd[i] = ' ';
 					m_aServerMotd[i+1] = '\n';
 					i++;
+					pLast = m_aServerMotd+i+1;
 				}
 			}
 		}
+		if(*pLast)
+			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
 			m_ServerMotdTime = time_get()+time_freq()*g_Config.m_ClMotdTime;

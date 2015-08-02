@@ -6,6 +6,14 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+enum
+{
+	CONSOLE_CLOSED,
+	CONSOLE_OPENING,
+	CONSOLE_OPEN,
+	CONSOLE_CLOSING,
+};
+
 class CGameConsole : public CComponent
 {
 	class CInstance
@@ -99,5 +107,7 @@ public:
 	virtual void OnRender();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Events);
+
+	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
 };
 #endif

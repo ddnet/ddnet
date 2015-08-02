@@ -576,6 +576,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 				char aStars[20];
 				switch(stars)
 				{
+					case 0: strcpy(aStars, "✰✰✰✰✰"); break;
 					case 1: strcpy(aStars, "★✰✰✰✰"); break;
 					case 2: strcpy(aStars, "★★✰✰✰"); break;
 					case 3: strcpy(aStars, "★★★✰✰"); break;
@@ -641,7 +642,6 @@ void CSqlScore::SaveScoreThread(void *pUser)
 					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 
 					str_format(aBuf, sizeof(aBuf), "INSERT INTO %s_points(Name, Points) VALUES ('%s', '%d') ON duplicate key UPDATE Name=VALUES(Name), Points=Points+VALUES(Points);", pData->m_pSqlData->m_pPrefix, pData->m_aName, points);
-					dbg_msg("SQL", aBuf);
 					pData->m_pSqlData->m_pStatement->execute(aBuf);
 				}
 			}

@@ -123,7 +123,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	bool Multiple = false;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paPlayerInfos[i];
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByName[i];
 		if(!pInfo || pInfo->m_Team != TEAM_SPECTATORS)
 			continue;
 

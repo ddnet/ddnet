@@ -13,6 +13,7 @@ class CFriends : public IFriends
 
 	static void ConAddFriend(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveFriend(IConsole::IResult *pResult, void *pUserData);
+	static void ConFriends(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
 
@@ -29,6 +30,7 @@ public:
 	void AddFriend(const char *pName, const char *pClan);
 	void RemoveFriend(const char *pName, const char *pClan);
 	void RemoveFriend(int Index);
+	void Friends();
 };
 
 #endif

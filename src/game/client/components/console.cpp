@@ -31,14 +31,6 @@
 
 #include "console.h"
 
-enum
-{
-	CONSOLE_CLOSED,
-	CONSOLE_OPENING,
-	CONSOLE_OPEN,
-	CONSOLE_CLOSING,
-};
-
 CGameConsole::CInstance::CInstance(int Type)
 {
 	m_pHistoryEntry = 0x0;
