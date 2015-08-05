@@ -111,6 +111,7 @@ void CBinds::SetDefaults()
 	Bind(KEY_F5, "spectate_previous");
 	Bind(KEY_F6, "spectate_next");
 #else
+	Bind(KEY_RETURN, "+show_chat; chat all");
 	Bind(KEY_RIGHT, "spectate_next");
 	Bind(KEY_LEFT, "spectate_previous");
 	Bind(KEY_RSHIFT, "+spectate");
