@@ -107,6 +107,44 @@ function ContentCompile(action, output)
 	return output
 end
 
+-- These functions are only necessary on windows!
+if family == "windows" then
+	function file_exists(name)
+		local f=io.open(name,"r") -- Check if the file exist (seems very hackish, though)
+		if f ~= nil then io.close(f) return true else return false end
+	end
+
+	function Download(conf, arch, dependency, ...)
+		local inputs = TableFlatten({...})
+
+		output = Path(dependency)
+		if file_exists(output) == true or dependency == "" then -- Do not download what we have already
+			return -1
+		end
+		
+		-- Download the stuff for 'other' and the .dll's
+		local cmd = Script("scripts/download.py")
+		local jobs = ""
+		for index, inname in ipairs(inputs) do
+			cmd = cmd .. " " .. inname
+			jobs = jobs .. " " .. inname -- Just to print what we'll download
+		end
+		
+		if conf ~= "" and conf ~= false then
+			cmd = cmd .. " --conf " .. conf
+		end
+		if arch == "x86" or arch == "x86_64" then
+			cmd = cmd .. " --arch " .. arch
+		end
+		
+		Execute("echo Downloading" .. jobs .."...")
+		return Execute(cmd)
+		
+		--AddJob(output, "downloading " .. jobs , cmd) --I guess we don't need this
+		--AddDependency(output, "scripts/download.py")
+	end
+end
+
 -- Content Compile
 network_source = ContentCompile("network_source", "src/game/generated/protocol.cpp")
 network_header = ContentCompile("network_header", "src/game/generated/protocol.h")
@@ -127,37 +165,38 @@ server_link_other = {}
 server_sql_depends = {}
 
 if family == "windows" then
+	 -- Download the .dll's we need to run the client
 	if platform == "win32" then
-		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib32\\freetype.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib32\\SDL.dll"))
-
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\libcurl.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\libeay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\libidn-11.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\ssleay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\zlib1.dll"))
-
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libgcc_s_sjlj-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libogg-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopus-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopusfile-0.dll"))
+		Download(config.settings.config_name, "x86", "other\\freetype\\lib32\\freetype.dll", "freetype")
+		Download(config.settings.config_name, "x86", "other\\opus\\windows\\lib32\\libopusfile-0.dll", "libopusfile-0.dll")
+		Download(config.settings.config_name, "x86", "other\\opus\\windows\\lib32\\libopus-0.dll", "libopus-0.dll")
+		Download(config.settings.config_name, "x86", "other\\opus\\windows\\lib32\\libogg-0.dll", "libogg-0.dll")
+		Download(config.settings.config_name, "x86", "other\\opus\\windows\\lib32\\libgcc_s_sjlj-1.dll", "libgcc_s_sjlj-1.dll")
+		Download(config.settings.config_name, "x86", "other\\curl\\windows\\lib32\\zlib1.dll", "zlib1.dll")
+		Download(config.settings.config_name, "x86", "other\\curl\\windows\\lib32\\ssleay32.dll", "ssleay32.dll")
+		Download(config.settings.config_name, "x86", "other\\curl\\windows\\lib32\\libidn-11.dll", "libidn-11.dll")
+		Download(config.settings.config_name, "x86", "other\\curl\\windows\\lib32\\libeay32.dll", "libeay32.dll")
+		Download(config.settings.config_name, "x86", "other\\curl\\windows\\lib32\\libcurl.dll", "libcurl.dll")
+		Download(config.settings.config_name, "x86", "other\\sdl\\lib32\\SDL.lib", "sdl")		
 	else
-		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib64\\freetype.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib64\\SDL.dll"))
-
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\libcurl.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\libeay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\ssleay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\zlib1.dll"))
-
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libwinpthread-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libgcc_s_seh-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libogg-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libopus-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libopusfile-0.dll"))
+		Download(config.settings.config_name, "x86_64", "other\\freetype\\lib64\\freetype.dll", "freetype")
+		Download(config.settings.config_name, "x86_64", "other\\curl\\windows\\lib64\\zlib1.dll", "zlib1.dll")
+		Download(config.settings.config_name, "x86_64", "other\\curl\\windows\\lib64\\ssleay32.dll", "ssleay32.dll")
+		Download(config.settings.config_name, "x86_64", "other\\curl\\windows\\lib64\\libeay32.dll", "libeay32.dll")
+		Download(config.settings.config_name, "x86_64", "other\\curl\\windows\\lib64\\libcurl.dll", "libcurl.dll")
+		Download(config.settings.config_name, "x86_64", "other\\sdl\\lib64\\SDL.lib", "sdl")
 	end
-	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\mysqlcppconn.dll"))
-	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
+	
+	-- These two are platform independent
+	Download(config.settings.config_name, "", "other\\mysql\\vc2005libs\\libmysql.dll", "mysql")
+	Download(config.settings.config_name, "", "other\\mysql\\vc2005libs\\mysqlcppconn.dll", "mysql")
+	
+	-- Download the includes we need to compile the client
+	Download(config.settings.config_name, "", "other\\sdl\\include\\SDL.h", "sdl")
+	Download(config.settings.config_name, "", "other\\freetype\\include\\ft2build.h", "freetype")
+	Download(config.settings.config_name, "", "other\\opus\\include\\opusfile.h", "opus")
+	Download(config.settings.config_name, "", "other\\mysql\\include\\mysql_driver.h", "mysql")
+	Download(config.settings.config_name, "", "other\\curl\\include\\curl\\curl.h", "curl")
 
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
