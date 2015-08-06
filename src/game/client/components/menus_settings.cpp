@@ -242,9 +242,9 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 	if(s_Dummy)
 	{
-		Name = g_Config.m_DummyName;
-		Clan = g_Config.m_DummyClan;
-		Country = &g_Config.m_DummyCountry;
+		Name = g_Config.m_ClDummyName;
+		Clan = g_Config.m_ClDummyClan;
+		Country = &g_Config.m_ClDummyCountry;
 	}
 
 	// player name
@@ -331,17 +331,17 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	static bool s_Dummy = false;
-	char *Skin = g_Config.m_PlayerSkin;
-	int *UseCustomColor = &g_Config.m_PlayerUseCustomColor;
-	int *ColorBody = &g_Config.m_PlayerColorBody;
-	int *ColorFeet = &g_Config.m_PlayerColorFeet;
+	char *Skin = g_Config.m_ClPlayerSkin;
+	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
+	int *ColorBody = &g_Config.m_ClPlayerColorBody;
+	int *ColorFeet = &g_Config.m_ClPlayerColorFeet;
 
 	if(s_Dummy)
 	{
-		Skin = g_Config.m_DummySkin;
-		UseCustomColor = &g_Config.m_DummyUseCustomColor;
-		ColorBody = &g_Config.m_DummyColorBody;
-		ColorFeet = &g_Config.m_DummyColorFeet;
+		Skin = g_Config.m_ClDummySkin;
+		UseCustomColor = &g_Config.m_ClDummyUseCustomColor;
+		ColorBody = &g_Config.m_ClDummyColorBody;
+		ColorFeet = &g_Config.m_ClDummyColorFeet;
 	}
 
 	// skin info
@@ -534,7 +534,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_PlayerSkin));
+		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_ClPlayerSkin));
 		if(s_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
