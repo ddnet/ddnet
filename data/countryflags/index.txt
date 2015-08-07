@@ -18,6 +18,12 @@ XSC
 XWA
 == 904
 
+XEU
+== 905
+
+XCA
+== 906
+
 #south sudan, non official code#
 SS
 == 737
