@@ -833,13 +833,13 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 void CClient::DummyInfo()
 {
 	CNetMsg_Cl_ChangeInfo Msg;
-	Msg.m_pName = g_Config.m_DummyName;
-	Msg.m_pClan = g_Config.m_DummyClan;
-	Msg.m_Country = g_Config.m_DummyCountry;
-	Msg.m_pSkin = g_Config.m_DummySkin;
-	Msg.m_UseCustomColor = g_Config.m_DummyUseCustomColor;
-	Msg.m_ColorBody = g_Config.m_DummyColorBody;
-	Msg.m_ColorFeet = g_Config.m_DummyColorFeet;
+	Msg.m_pName = g_Config.m_ClDummyName;
+	Msg.m_pClan = g_Config.m_ClDummyClan;
+	Msg.m_Country = g_Config.m_ClDummyCountry;
+	Msg.m_pSkin = g_Config.m_ClDummySkin;
+	Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
+	Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
+	Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
 	CMsgPacker Packer(Msg.MsgID());
 	Msg.Pack(&Packer);
 	SendMsgExY(&Packer, MSGFLAG_VITAL);
