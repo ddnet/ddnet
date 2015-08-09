@@ -577,7 +577,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 				char pAverageString[60] = "\0";
 				if(average > 0)
 				{
-					str_format(pAverageString, sizeof(pAverageString), " in %d:%d average", average / 60, average % 60);
+					str_format(pAverageString, sizeof(pAverageString), " in %d:%02d average", average / 60, average % 60);
 				}
 
 				char aStars[20];
