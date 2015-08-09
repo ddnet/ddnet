@@ -18,7 +18,7 @@ bulgarian
 
 catalan
 == Català
-== -1
+== 905
 
 czech
 == Česky
