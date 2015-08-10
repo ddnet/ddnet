@@ -22,10 +22,10 @@
 == %i segons restants
 
 %s wins!
-== Â¡%s guanya!
+== ¡%s guanya!
 
 '%s' entered and joined the %s
-== '%s' hha entrar i s'ha unit al %s
+== '%s' ha entrat i s'ha unit al %s
 
 '%s' has left the game
 == '%s' ha sortit del joc
@@ -34,7 +34,7 @@
 == '%s' ha sortit del joc (%s)
 
 -Page %d-
-== -PÃ gina %d-
+== -Pàgina %d-
 
 Abort
 == Cancelar
@@ -43,10 +43,10 @@ Add
 == Afegir
 
 Add Friend
-== Afegir com a amic
+== Afegir a amics
 
 Address
-== DirecciÃ³
+== Direcció
 
 All
 == Tots
@@ -55,21 +55,21 @@ Always show name plates
 == Veure sempre els noms
 
 Are you sure that you want to delete the demo?
-== EstÃ s segur que vols eliminar la repeticiÃ³?
+== Estàs segur que vols eliminar la repetició?
 
 Are you sure that you want to quit?
-== EstÃ s que vols sortir?
+== Estàs segur que vols sortir?
 
 Are you sure that you want to remove the player from your friends list?
-== EstÃ s seguro de que vols eliminar a aquest jugador de la lista de amics?
+== Estàs segur que vols eliminar a aquest jugador de la lista d'amics?
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Com Ã©s el primer cop que obres el joc, si us plau, posa el teu nom. Es recomenable que verifiquis la teva configuracio de les preferencias abans d'unirte a un servidor.
+== Com és el primer cop que obres el joc, si us plau, posa el teu nom. Es recomenable que verifiquis la configuració del joc abans d'unirte a un servidor.
 
 Automatically record demos
-== Grabar repeticions automÃ ticament
+== Grabar repeticions automàticament
 
 Automatically take game over screenshot
-== Captura de pantalla al final de la partida
+== Fer una foto de la pantalla al final de la partida
 
 Blue team
 == Equip blau
@@ -84,10 +84,10 @@ Call vote
 == Votar
 
 Change settings
-== Cambiar la configuraciÃ³
+== Cambiar la configuració
 
 Chat
-== ConversaciÃ³
+== Conversació
 
 Clan
 == Clan
@@ -99,16 +99,16 @@ Close
 == Tancar
 
 Compatible version
-== VersiÃ³ compatible
+== Versió compatible
 
 Connect
 == Connectar
 
 Connecting to
-== Connectant amb
+== T'estas unint a
 
 Connection Problems...
-== Problemas de conexiÃ³...
+== Problemes de conexió...
 
 Console
 == Consola
@@ -120,22 +120,22 @@ Count players only
 == Nomes contar jugadors
 
 Country
-== PaÃ­s
+== País
 
 Current
 == Actual
 
 Custom colors
-== Colores personalizats
+== Colors personalizats
 
 Delete
 == Borrar
 
 Delete demo
-== Borrar repeticiÃ³
+== Borrar repetició
 
 Demo details
-== Detalls de la repeticiÃ³
+== Detalls de la repetició
 
 Demofile: %s
 == Archiu: %s
@@ -156,10 +156,10 @@ Draw!
 == Empat!
 
 Dynamic Camera
-== CÃ mara dinÃ mica
+== Càmara dinàmica
 
 Emoticon
-== EmoticÃ³
+== Emoticó
 
 Enter
 == Entrar
@@ -168,7 +168,7 @@ Error
 == Error
 
 Error loading demo
-== Error al cargar la repeticio
+== Error al carregar la repetició
 
 Favorite
 == Preferit
@@ -188,7 +188,7 @@ Folder
 == Carpeta
 
 Force vote
-== ForÃ§ar
+== Forçar
 
 Free-View
 == Vista lliure
@@ -203,7 +203,7 @@ Game
 == Joc
 
 Game info
-== InformaciÃ³ del joc
+== Informació de la partida
 
 Game over
 == Fi de la partida
@@ -212,16 +212,16 @@ Game paused
 == Joc en pausa
 
 Game type
-== Mode
+== Mode de joc
 
 Game types:
-== Tipus de joc:
+== Modes de joc:
 
 General
 == General
 
 Graphics
-== GrÃ fics
+== Gràfics
 
 Grenade
 == Granada
@@ -239,7 +239,7 @@ Hook
 == Ganxo
 
 Invalid Demo
-== RepeticiÃ³ invÃ lida
+== Repetició invàlida
 
 Join blue
 == Unir-se al blau
@@ -266,10 +266,10 @@ Map
 == Mapa
 
 Maximum ping:
-== Ping mÃ xim:
+== Ping màxim:
 
 Mouse sens.
-== Sensibilitat del ratolÃ­
+== Sensibilitat del ratolí
 
 Move left
 == Moures a l'esquerra
@@ -284,13 +284,13 @@ Movement
 == Moviment
 
 Mute when not active
-== Silenciar si no estÃ  actiu
+== Silenciar si no està actiu
 
 Name
 == Nom
 
 Next weapon
-== Arma segÃ¼ent
+== Arma següent
 
 Nickname
 == Nom
@@ -308,7 +308,7 @@ No servers match your filter criteria
 == Cap servidor correspon als criteris de filtrat
 
 Ok
-== Acceptar
+== Ok
 
 Open
 == Obrir
@@ -332,22 +332,22 @@ Play
 == Reproduir
 
 Play background music
-== Reproduir mÃºsica de fons
+== Reproduir música de fons
 
 Player
 == Jugador
 
 Player country:
-== PaÃ­s del jugador
+== País del jugador
 
 Player options
-== Opciones del jugador
+== Opcions del jugador
 
 Players
 == Jugadors
 
 Please balance teams!
-== Si us plau, quilibreu els equips!
+== Si us plau, equilibreu els equips!
 
 Prev. weapon
 == Arma anterior
@@ -389,13 +389,13 @@ Rename
 == Renombrar
 
 Rename demo
-== Renombrar repeticiÃ³
+== Renombrar repetició
 
 Reset filter
 == Reiniciar filtre
 
 Respawn
-== Reapareixer
+== Reaparéixer
 
 Sample rate
 == Frecuencia de la imatge
@@ -404,16 +404,16 @@ Score
 == Punts
 
 Score board
-== PuntuaciÃ³
+== Puntuació
 
 Score limit
-== LÃ­mit de punts
+== Límit de punts
 
 Scoreboard
-== PuntuaciÃ³
+== Puntuació
 
 Screenshot
-== Captura de pantalla
+== Foto de pantalla
 
 Server address:
 == IP del servidor:
@@ -431,13 +431,13 @@ Server not full
 == Servidor sense omplir
 
 Settings
-== ConfiguraciÃ³
+== Configuració
 
 Shotgun
 == Escopeta
 
 Show chat
-== Veure conversaciÃ³
+== Veure conversació
 
 Show friends only
 == Nomes veure amics
@@ -446,13 +446,13 @@ Show ingame HUD
 == Veure HUD en el joc
 
 Show name plates
-== Mostrar apodos
+== Mostrar noms
 
 Show only chat messages from friends
-== Rebre missatges nomes d'amics
+== Rebre nomes missatges d'amics
 
 Show only supported
-== Veure Ãºnicament modes suportats
+== Veure únicament modes compatibles
 
 Skins
 == Skins
@@ -467,7 +467,7 @@ Spectate
 == Asistir
 
 Spectate next
-== Observar segÃ¼ent
+== Observar següent
 
 Spectate previous
 == Observar anterior
@@ -479,19 +479,19 @@ Spectators
 == Espectadors
 
 Standard gametype
-== Tipo de joc estÃ ndar
+== Tipo de joc estàndar
 
 Standard map
-== Mapa estÃ ndar
+== Mapa estàndar
 
 Stop record
-== Parar grabaciÃ³
+== Parar grabació
 
 Strict gametype filter
 == Tipo de joc del filtre
 
 Sudden Death
-== Mort sÃºbita
+== Mort súbita
 
 Switch weapon on pickup
 == Cambiar al arma rellida
@@ -503,40 +503,40 @@ Team chat
 == En equip
 
 Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworlds %s ha sortit! Â¡DescÃ rgal a www.teeworlds.com!
+== Teeworlds %s ha sortit! ¡Descàrgal a www.teeworlds.com!
 
 Texture Compression
-== CompresiÃ³ de textures
+== Compresió de textures
 
 The audio device couldn't be initialised.
 == El dispositiu de audio no pot ser inicialitzat.
 
 The server is running a non-standard tuning on a pure game type.
-== El servidor estÃ¡ ejecutant una configuraciÃ³ no estÃ¡ndar en un tipo de juoc pur.
+== El servidor está ejecutant una configuració no estándar en un tipo de juoc pur.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
 == Tens un mapa sense guardar en el editor, alomillor vols guardarlo abans de sortir.
 
 Time limit
-== Temps lÃ­mite
+== Temps límit
 
 Time limit: %d min
-== Temps lÃ­mite: %d minuts
+== Temps límit: %d minuts
 
 Try again
-== Intentar de nou
+== Intenta de nou
 
 Type
 == Tipus
 
 Unable to delete the demo
-== No es pot eliminar la repeticiÃ³
+== No es pot eliminar la repetició
 
 Unable to rename the demo
-== No es pot reanomenar la repeticiÃ³
+== No es pot reanomenar la repetició
 
 Use sounds
-== Usar sons
+== Fer servir sons
 
 Use team colors for name plates
 == Fe servir els colors dels equips en els noms
@@ -545,13 +545,13 @@ V-Sync
 == V-Sync
 
 Version
-== VersiÃ³
+== Versió
 
 Vote command:
-== Command de votaciÃ³n:
+== Command de votació:
 
 Vote description:
-== DescripciÃ³ de la votaciÃ³:
+== Descripció de la votació:
 
 Vote no
 == Votar no
@@ -560,7 +560,7 @@ Vote yes
 == Votar si
 
 Voting
-== VotaciÃ³
+== Votació
 
 Warmup
 == Calentament
@@ -569,13 +569,13 @@ Weapon
 == Arma
 
 Welcome to Teeworlds
-== Â¡Benvingut/da a Teeworlds!
+== ¡Benvingut/da a Teeworlds!
 
 Yes
 == Si
 
 You must restart the game for all settings to take effect.
-== Tens que reiniciar el joc perque els canvist tinguin efecte
+== Tens que reiniciar el joc perque els canvis fagin efecte
 
 ##### needs translation #####
 
@@ -610,16 +610,16 @@ You must restart the game for all settings to take effect.
 == '%s' s'ha unit al %s
 
 Admin forced server option '%s' (%s)
-== 
+== Un admin a forçat la opció '%s' (%s)
 
 Admin forced vote no
-== 
+== Un admin a forçat votar no
 
 Admin forced vote yes
-== 
+== Un admin a forçat votar si
 
 Admin moved '%s' to spectator (%s)
-== 
+== Un admin ha mogut '%s' als espectadors
 
 Alp:
 == 
@@ -628,7 +628,7 @@ Anti Aliasing
 == 
 
 Are you sure you want to rename the demo?
-== Estas segur que vols cambiar el nom de la repeticiÃ³?
+== Estas segur que vols cambiar el nom de la repetició?
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
 == 
@@ -637,7 +637,7 @@ Back
 == Enderrere
 
 Basic
-== BÃ sic
+== Bàsic
 
 Bodies
 == Cos
@@ -652,7 +652,7 @@ Crc
 == 
 
 Created
-== 
+== Creat
 
 Custom
 == Personalitzat
@@ -661,10 +661,10 @@ Customize
 == Personalitza
 
 Decoration
-== Decoracio
+== Decoració
 
 Demo
-== Repeticio
+== Repetició
 
 Detail
 == Detall
@@ -679,13 +679,13 @@ Format
 == 
 
 Game starts in
-== El joc comenÃ§a en
+== El joc comença en
 
 Global
 == 
 
 Hands
-== 
+== Mans
 
 Host address:
 == Direccio del host
@@ -694,7 +694,7 @@ Hue:
 == 
 
 Join
-== Entra
+== Entrar
 
 Joined
 == Ha entrat
@@ -709,10 +709,10 @@ Kick voting requires %d players on the server
 == Votar per expulsar requereix &d jugadors al servidor
 
 Laser
-== 
+== Làser
 
 Length
-== 
+== Longitud
 
 Letterbox
 == 
@@ -724,13 +724,13 @@ Local
 == 
 
 Local server
-== 
+== Servidor local
 
 Match
 == Partida
 
 Max
-== 
+== Màxim
 
 Misc
 == 
@@ -751,7 +751,7 @@ Personal
 == Personal
 
 Ready
-== Llest
+== A punt
 
 Record
 == Grabar
@@ -760,7 +760,7 @@ Recorded
 == Grabat
 
 Reset
-== 
+== Reiniciat
 
 Resolutions
 == Resolucions
@@ -808,7 +808,7 @@ Spectators aren't allowed to start a vote.
 == Els espectadors no tenen permes votar
 
 Standard Gametype
-== Mode de joc estÃ ndar
+== Mode de joc estàndar
 
 Tattoo
 == 
@@ -853,7 +853,7 @@ Wait for current vote to end before calling a new one.
 == Espera a que acabi la votacio actual
 
 Wait for next round
-== Espera a la segÃ¼ent ronda
+== Espera a la següent ronda
 
 Wide
 == Amplitud
@@ -888,19 +888,19 @@ New name:
 == Nom nou:
 
 Sat.
-== SaturaciÃ³
+== Saturació
 
 Miscellaneous
-== MiscelÃ¡nea
+== Miscelánea
 
 Internet
 == Internet
 
 Max demos
-== NÃºmeru maxim de repeticions
+== Númeru maxim de repeticions
 
 News
-== Noticies
+== Notícies
 
 Join game
 == Unir-se
@@ -918,7 +918,7 @@ Created:
 == Creat:
 
 Max Screenshots
-== NÃºmero mÃ¡xim de capturas
+== Número máxim de capturas
 
 Length:
 == Longitud:
@@ -927,13 +927,13 @@ Skin name
 == 
 
 Rifle
-== LÃ¡ser
+== Láser
 
 Patterns
 == 
 
 Netversion:
-== VersiÃ³ Net
+== Versió Net
 
 Map:
 == Mapa:
@@ -942,16 +942,16 @@ Map:
 == %d bytes
 
 Coloration
-== ColoraciÃ³
+== Coloració
 
 Info
-== InformaciÃ³
+== Informació
 
 Hue
 == Matis
 
 Record demo
-== Grabar repeticiÃ³
+== Grabar repetició
 
 Your skin
 == La teva skin
@@ -969,7 +969,7 @@ Display Modes
 == Modes de video
 
 Version:
-== VersiÃ³:
+== Versió:
 
 Round
 == Ronda
@@ -978,16 +978,16 @@ Lht.
 == Luminositat
 
 no limit
-== sense lÃ­mit
+== sense límit
 
 Quick search:
-== Cerca rÃ pida:
+== Cerca ràpida:
 
 UI Color
-== Color del menÃº
+== Color del menú
 
 Host address
-== DirecciÃ³ del host
+== Direcció del host
 
 Crc:
 == CRC:
@@ -999,13 +999,13 @@ Are you sure you want to save your skin ? If a skin with this name already exist
 == 
 
 Current version: %s
-== VersiÃ³ actual: %s
+== Versió actual: %s
 
 LAN
 == LAN
 
 Name plates size
-== Tamany de la font dels noms
+== Mida de la font dels noms
 
 Type:
-== Tipu:
+== Tipus:
