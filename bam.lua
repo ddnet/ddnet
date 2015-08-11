@@ -283,6 +283,7 @@ function build(settings)
 			client_settings.link.frameworks:Add("Carbon")
 			client_settings.link.frameworks:Add("Cocoa")
 			launcher_settings.link.frameworks:Add("Cocoa")
+			client_settings.cc.flags:Add("-I/opt/X11/include")
 		else
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
@@ -329,9 +330,14 @@ function build(settings)
 	-- build tools (TODO: fix this so we don't get double _d_d stuff)
 	tools_src = Collect("src/tools/*.cpp", "src/tools/*.c")
 
+	client_notification = {}
 	client_osxlaunch = {}
 	server_osxlaunch = {}
 	if platform == "macosx" then
+		notification_settings = client_settings:Copy()
+		notification_settings.cc.flags:Add("-x objective-c++")
+		notification_settings.cc.flags:Add("-I/System/Library/Frameworks/Foundation.framework/Versions/C/Headers")
+		client_notification = Compile(notification_settings, "src/osx/notification.m")
 		client_osxlaunch = Compile(client_settings, "src/osxlaunch/client.m")
 		server_osxlaunch = Compile(launcher_settings, "src/osxlaunch/server.m")
 	end
@@ -345,7 +351,7 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
-		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5)
+		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification)
 
 	server_exe = Link(server_settings, "DDNet-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)
