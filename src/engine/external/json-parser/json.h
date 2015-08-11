@@ -145,7 +145,7 @@ typedef struct _json_value
          }
 
          inline const struct _json_value &operator [] (const char * index) const
-         { 
+         {
             if (type != json_object)
                return json_value_none;
 
@@ -157,7 +157,7 @@ typedef struct _json_value
          }
 
          inline operator const char * () const
-         {  
+         {
             switch (type)
             {
                case json_string:
@@ -188,37 +188,18 @@ json_value * json_parse_ex
 
 void json_value_free (json_value *);
 
-inline const struct _json_value *json_object_get (const json_value * object, const char * index)
-{ 
-   unsigned int i;
+const struct _json_value *json_object_get (const json_value * object, const char * index);
 
-   if (object->type != json_object)
-      return &json_value_none;
+const struct _json_value *json_array_get (const json_value * array, int index);
 
-   for (i = 0; i < object->u.object.length; ++ i)
-      if (!strcmp (object->u.object.values [i].name, index))
-         return object->u.object.values [i].value;
-
-   return &json_value_none;
-}
-
-inline const struct _json_value *json_array_get (const json_value * array, int index)
-{
-   if (array->type != json_array || index >= (int)array->u.array.length)
-      return &json_value_none;
-
-   return array->u.array.values[index];
-}
-
-inline int json_array_length (const json_value * array) { return array->u.array.length; }
-inline const char * json_string_get (const json_value * string) { return string->u.string.ptr; }
-inline int json_int_get (const json_value * integer) { return integer->u.integer; }
-inline int json_boolean_get(const json_value * boolean) { return boolean->u.boolean != 0; }
+int json_array_length (const json_value * array);
+const char * json_string_get (const json_value * string);
+int json_int_get (const json_value * integer);
+int json_boolean_get(const json_value * boolean);
 
 #ifdef __cplusplus
    } /* extern "C" */
 #endif
 
 #endif
-
 
