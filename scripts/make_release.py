@@ -152,6 +152,8 @@ if use_bundle:
         <string>????</string>
         <key>CFBundleVersion</key>
         <string>%s</string>
+        <key>CFBundleIdentifier</key>
+        <string>org.DDNetClient.app</string>
 </dict>
 </plist>
 	""" % (version))
