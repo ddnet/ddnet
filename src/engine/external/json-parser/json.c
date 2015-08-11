@@ -185,9 +185,9 @@ static int new_value
    do { if (!state.first_pass) string [string_length] = b;  ++ string_length; } while (0);
 
 const static long
-   flag_next = 1,  flag_reproc = 2,  flag_need_comma = 4,  flag_seek_value = 8, 
+   flag_next = 1,  flag_reproc = 2,  flag_need_comma = 4,  flag_seek_value = 8,
    flag_escaped = 16,  flag_string = 32,  flag_need_colon = 64,  flag_done = 128,
-   flag_num_negative = 256,  flag_num_zero = 512,  flag_num_e = 1024,  
+   flag_num_negative = 256,  flag_num_zero = 512,  flag_num_e = 1024,
    flag_num_e_got_sign = 2048,  flag_num_e_negative = 4096;
 
 json_value * json_parse_ex (json_settings * settings, const json_char * json, char * error_buf)
@@ -345,7 +345,7 @@ json_value * json_parse_ex (json_settings * settings, const json_char * json, ch
                      if (state.first_pass)
                         (*(json_char **) &top->u.object.values) += string_length + 1;
                      else
-                     {  
+                     {
                         top->u.object.values [top->u.object.length].name
                            = (json_char *) top->_reserved.object_mem;
 
@@ -524,7 +524,7 @@ json_value * json_parse_ex (json_settings * settings, const json_char * json, ch
             switch (top->type)
             {
             case json_object:
-               
+
                switch (b)
                {
                   whitespace:
@@ -544,7 +544,7 @@ json_value * json_parse_ex (json_settings * settings, const json_char * json, ch
                      string_length = 0;
 
                      break;
-                  
+
                   case '}':
 
                      flags = (flags & ~ flag_need_comma) | flag_next;
@@ -700,7 +700,7 @@ json_value * json_parse_ex (json_settings * settings, const json_char * json, ch
 
             if (top->parent->type == json_array)
                flags |= flag_seek_value;
-               
+
             if (!state.first_pass)
             {
                json_value * parent = top->parent;
@@ -838,4 +838,29 @@ void json_value_free (json_value * value)
       free (cur_value);
    }
 }
+inline const struct _json_value *json_object_get (const json_value * object, const char * index)
+{
+   unsigned int i;
 
+   if (object->type != json_object)
+      return &json_value_none;
+
+   for (i = 0; i < object->u.object.length; ++ i)
+      if (!strcmp (object->u.object.values [i].name, index))
+         return object->u.object.values [i].value;
+
+   return &json_value_none;
+}
+
+inline const struct _json_value *json_array_get (const json_value * array, int index)
+{
+   if (array->type != json_array || index >= (int)array->u.array.length)
+      return &json_value_none;
+
+   return array->u.array.values[index];
+}
+
+inline int json_array_length (const json_value * array) { return array->u.array.length; }
+inline const char * json_string_get (const json_value * string) { return string->u.string.ptr; }
+inline int json_int_get (const json_value * integer) { return integer->u.integer; }
+inline int json_boolean_get(const json_value * boolean) { return boolean->u.boolean != 0; }
