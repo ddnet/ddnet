@@ -7,7 +7,6 @@ objs
 src/game/generated
 SDL.dll
 freetype.dll
-autoexec.cfg
 
 crapnet*
 dilate*
@@ -25,7 +24,6 @@ Debug
 bam
 build server.bat
 buildlog.txt
-autoexec.cfg
 bam.exe
 *.bat
 .cproject
