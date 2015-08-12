@@ -3063,6 +3063,20 @@ void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
 }
 
+void CClient::Con_PlayDemo(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pSelf->m_DemoPlayer.BaseInfo()->m_Paused){
+		pSelf->m_DemoPlayer.Unpause();
+	}
+	else{
+		pSelf->m_DemoPlayer.Pause();
+	}
+	if(!pSelf->m_DemoPlayer.IsPlaying()){
+		pSelf->m_DemoPlayer.Play();
+	}
+}
+
 void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder)
 {
 	if(State() != IClient::STATE_ONLINE)
@@ -3181,6 +3195,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("remove_favorite", "s", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites");
 	m_pConsole->Register("demo_slice_start", "", CFGFLAG_CLIENT, Con_DemoSliceBegin, this, "");
 	m_pConsole->Register("demo_slice_end", "", CFGFLAG_CLIENT, Con_DemoSliceEnd, this, "");
+	m_pConsole->Register("playdemo", "", CFGFLAG_CLIENT, Con_PlayDemo, this, "Play demo");
 
 	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
