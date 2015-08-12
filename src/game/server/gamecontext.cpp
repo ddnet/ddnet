@@ -1247,8 +1247,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 
 				int KickID = str_toint(pMsg->m_Value);
-				if (!Server()->ReverseTranslate(KickID, ClientID))
-					return;
 
 				if(KickID < 0 || KickID >= MAX_CLIENTS || !m_apPlayers[KickID])
 				{
@@ -1258,6 +1256,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if(KickID == ClientID)
 				{
 					SendChatTarget(ClientID, "You can't kick yourself");
+					return;
+				}
+				if (!Server()->ReverseTranslate(KickID, ClientID))
+				{
 					return;
 				}
 				//if(Server()->IsAuthed(KickID))
@@ -1302,8 +1304,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 
 				int SpectateID = str_toint(pMsg->m_Value);
-				if (!Server()->ReverseTranslate(SpectateID, ClientID))
-					return;
 
 				if(SpectateID < 0 || SpectateID >= MAX_CLIENTS || !m_apPlayers[SpectateID] || m_apPlayers[SpectateID]->GetTeam() == TEAM_SPECTATORS)
 				{
@@ -1313,6 +1313,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if(SpectateID == ClientID)
 				{
 					SendChatTarget(ClientID, "You can't move yourself");
+					return;
+				}
+				if (!Server()->ReverseTranslate(SpectateID, ClientID))
+				{
 					return;
 				}
 
