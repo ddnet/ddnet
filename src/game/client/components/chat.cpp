@@ -91,7 +91,8 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 	else
 		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
 
-	((CChat*)pUserData)->m_Input.Set(pResult->GetString(1));
+	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
+		((CChat*)pUserData)->m_Input.Set(pResult->GetString(1));
 }
 
 void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
@@ -116,6 +117,8 @@ bool CChat::OnInput(IInput::CEvent Event)
 	{
 		m_Mode = MODE_NONE;
 		m_pClient->OnRelease();
+		if(g_Config.m_ClChatReset)
+			m_Input.Clear();
 	}
 	else if(Event.m_Flags&IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
@@ -144,6 +147,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_pHistoryEntry = 0x0;
 		m_Mode = MODE_NONE;
 		m_pClient->OnRelease();
+		m_Input.Clear();
 	}
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
@@ -298,7 +302,6 @@ void CChat::EnableMode(int Team)
 		else
 			m_Mode = MODE_ALL;
 
-		m_Input.Clear();
 		Input()->ClearEvents();
 		m_CompletionChosen = -1;
 		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
