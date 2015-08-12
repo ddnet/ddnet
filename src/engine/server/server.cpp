@@ -2113,7 +2113,16 @@ int main(int argc, const char **argv) // ignore_convention
 	pServer->RegisterCommands();
 
 	// execute autoexec file
-	pConsole->ExecuteFile("autoexec.cfg");
+	IOHANDLE file = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(file)
+	{
+		io_close(file);
+		pConsole->ExecuteFile(AUTOEXEC_SERVER_FILE);
+	}
+	else // fallback
+	{
+		pConsole->ExecuteFile(AUTOEXEC_FILE);
+	}
 
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention
