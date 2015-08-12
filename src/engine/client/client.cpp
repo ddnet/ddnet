@@ -3066,14 +3066,13 @@ void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_PlayDemo(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	if(pSelf->m_DemoPlayer.BaseInfo()->m_Paused){
-		pSelf->m_DemoPlayer.Unpause();
-	}
-	else{
-		pSelf->m_DemoPlayer.Pause();
-	}
-	if(!pSelf->m_DemoPlayer.IsPlaying()){
-		pSelf->m_DemoPlayer.Play();
+	if(pSelf->m_DemoPlayer.IsPlaying()){
+		if(pSelf->m_DemoPlayer.BaseInfo()->m_Paused){
+			pSelf->m_DemoPlayer.Unpause();
+		}
+		else{
+			pSelf->m_DemoPlayer.Pause();
+		}
 	}
 }
 
