@@ -838,7 +838,7 @@ void json_value_free (json_value * value)
       free (cur_value);
    }
 }
-inline const struct _json_value *json_object_get (const json_value * object, const char * index)
+const struct _json_value *json_object_get (const json_value * object, const char * index)
 {
    unsigned int i;
 
@@ -852,7 +852,7 @@ inline const struct _json_value *json_object_get (const json_value * object, con
    return &json_value_none;
 }
 
-inline const struct _json_value *json_array_get (const json_value * array, int index)
+const struct _json_value *json_array_get (const json_value * array, int index)
 {
    if (array->type != json_array || index >= (int)array->u.array.length)
       return &json_value_none;
@@ -860,7 +860,7 @@ inline const struct _json_value *json_array_get (const json_value * array, int i
    return array->u.array.values[index];
 }
 
-inline int json_array_length (const json_value * array) { return array->u.array.length; }
-inline const char * json_string_get (const json_value * string) { return string->u.string.ptr; }
-inline int json_int_get (const json_value * integer) { return integer->u.integer; }
-inline int json_boolean_get(const json_value * boolean) { return boolean->u.boolean != 0; }
+int json_array_length (const json_value * array) { return array->u.array.length; }
+const char * json_string_get (const json_value * string) { return string->u.string.ptr; }
+int json_int_get (const json_value * integer) { return integer->u.integer; }
+int json_boolean_get(const json_value * boolean) { return boolean->u.boolean != 0; }
