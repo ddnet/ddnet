@@ -220,6 +220,7 @@ public:
 	void DoSnapshot();
 
 	static int NewClientCallback(int ClientID, void *pUser);
+	static int NewClientNoAuthCallback(int ClientID, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 	void SendMap(int ClientID);

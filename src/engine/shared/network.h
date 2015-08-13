@@ -6,6 +6,10 @@
 #include "ringbuffer.h"
 #include "huffman.h"
 
+#include <base/math.h>
+
+#include <engine/message.h>
+
 /*
 
 CURRENT:
@@ -92,6 +96,7 @@ enum
 
 typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char* pReason, void *pUser);
 typedef int (*NETFUNC_NEWCLIENT)(int ClientID, void *pUser);
+typedef int (*NETFUNC_NEWCLIENT_NOAUTH)(int ClientID, void *pUser);
 
 struct CNetChunk
 {
@@ -280,6 +285,7 @@ class CNetServer
 	int m_MaxClientsPerIP;
 
 	NETFUNC_NEWCLIENT m_pfnNewClient;
+	NETFUNC_NEWCLIENT_NOAUTH m_pfnNewClientNoAuth;
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	void *m_UserPtr;
 
@@ -288,15 +294,17 @@ class CNetServer
 	CNetRecvUnpacker m_RecvUnpacker;
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
-	void OnPreConnMsg(NETADDR &Addr, const CNetPacketConstruct &Packet);
+	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
 	bool ClientExists(const NETADDR &Addr);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
 
-	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken);
+	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool NoAuth=false);
 	int NumClientsWithAddr(NETADDR Addr);
+	void SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num);
 
 public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
+	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
 	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, int Flags);
@@ -327,6 +335,8 @@ public:
 
 	// anti spoof
 	SECURITY_TOKEN GetToken(const NETADDR &Addr);
+	// vanilla token/gametick shouldn't be negative
+	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr) { return absolute(GetToken(Addr)); }
 };
 
 class CNetConsole

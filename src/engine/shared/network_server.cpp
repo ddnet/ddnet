@@ -9,6 +9,9 @@
 #include "network.h"
 #include <engine/external/md5/md5.h>
 
+const int DummyMapCrc = 0xF2774639;
+static const unsigned char g_aDummyMapData[] = {0x44, 0x41, 0x54, 0x41, 0x4, 0x0, 0x0, 0x0, 0xd0, 0x0, 0x0, 0x0, 0xd0, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x94, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x44, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4, 0x0, 0x3c, 0x0, 0x0, 0x0, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x64, 0x0, 0x0, 0x0, 0x64, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xe5, 0xed, 0xe1, 0xc7, 0x80, 0x80, 0x80, 0x80, 0x0, 0x80, 0x80, 0x80, 0x0, 0x0, 0x5, 0x0, 0x48, 0x0, 0x0, 0x0, 0x50, 0x74, 0xae, 0x57, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0xff, 0x0, 0x0, 0x0, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0, 0x0, 0x0, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0, 0x0, 0x0, 0xe5, 0xed, 0xe1, 0xc7, 0x80, 0x80, 0x80, 0x80, 0x0, 0x80, 0x80, 0x80};
+
 static SECURITY_TOKEN ToSecurityToken(const unsigned char* pData)
 {
 	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
@@ -46,6 +49,15 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
 {
 	m_pfnNewClient = pfnNewClient;
+	m_pfnDelClient = pfnDelClient;
+	m_UserPtr = pUser;
+	return 0;
+}
+
+int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
+{
+	m_pfnNewClient = pfnNewClient;
+	m_pfnNewClientNoAuth = pfnNewClientNoAuth;
 	m_pfnDelClient = pfnDelClient;
 	m_UserPtr = pUser;
 	return 0;
@@ -138,8 +150,11 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 }
 
 
-int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken)
+int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool NoAuth)
 {
+	if (g_Config.m_Debug)
+		dbg_msg("security", "try to accept client");
+
 	// check for sv_max_clients_per_ip
 	if (NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIP)
 	{
@@ -170,15 +185,132 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken)
 	// init connection slot
 	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken);
 
-	if(m_pfnNewClient)
+	if (g_Config.m_Debug)
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
+		dbg_msg("security", "Client accepted %s", aAddrStr);
+	}
+
+
+	if (NoAuth)
+		m_pfnNewClientNoAuth(Slot, m_UserPtr);
+	else
 		m_pfnNewClient(Slot, m_UserPtr);
 
 	return Slot; // done
 }
 
-void CNetServer::OnPreConnMsg(NETADDR &Addr, const CNetPacketConstruct &Packet)
+void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num)
 {
-	dbg_msg("asd", "onpreconn");
+	CNetPacketConstruct m_Construct;
+	mem_zero(&m_Construct, sizeof(m_Construct));
+	unsigned char *pChunkData = &m_Construct.m_aChunkData[m_Construct.m_DataSize];
+
+	for (int i = 0; i < num; i++)
+	{
+		const CMsgPacker *pMsg = Msgs[i];
+		CNetChunkHeader Header;
+		Header.m_Flags = 0;
+		Header.m_Size = pMsg->Size();
+		Header.m_Sequence = 0;
+		pChunkData = Header.Pack(pChunkData);
+		mem_copy(pChunkData, pMsg->Data(), pMsg->Size());
+		*((unsigned char*)pChunkData) <<= 1;
+		*((unsigned char*)pChunkData) |= 1;
+		pChunkData += pMsg->Size();
+		m_Construct.m_NumChunks++;
+	}
+
+	//
+	m_Construct.m_DataSize = (int)(pChunkData-m_Construct.m_aChunkData);
+	CNetBase::SendPacket(m_Socket, &Addr, &m_Construct, GetToken(Addr));
+}
+
+// connection-less msg packet without token-support
+void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
+{
+	bool IsCtrl = Packet.m_Flags&NET_PACKETFLAG_CONTROL;
+	int CtrlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];
+
+	if (IsCtrl && CtrlMsg == NET_CTRLMSG_CONNECT)
+	{
+		// simulate accept
+		SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC,
+					sizeof(SECURITY_TOKEN_MAGIC), NET_SECURITY_TOKEN_UNSUPPORTED);
+
+		// Begin vanilla compatible token handshake
+		// The idea is to pack a security token in the gametick
+		// parameter of NETMSG_SNAPEMPTY. The Client then will
+		// return the token/gametick in NETMSG_INPUT, allowing
+		// us to validate the token.
+		// https://github.com/eeeee/ddnet/commit/b8e40a244af4e242dc568aa34854c5754c75a39a
+
+		// Before we can send NETMSG_SNAPEMPTY, the client needs
+		// to load a map, otherwise it might crash. The map
+		// should be as small as is possible and directly available
+		// to the client. Therefor a dummy map is sent in the same
+		// packet.
+
+		// send mapchange + map data + con_ready + 3 x empty snap (with token)
+		CMsgPacker MapChangeMsg(NETMSG_MAP_CHANGE);
+
+		MapChangeMsg.AddString("dummy", 0);
+		MapChangeMsg.AddInt(DummyMapCrc);
+		MapChangeMsg.AddInt(sizeof(g_aDummyMapData));
+
+		CMsgPacker MapDataMsg(NETMSG_MAP_DATA);
+
+		MapDataMsg.AddInt(1); // last chunk
+		MapDataMsg.AddInt(DummyMapCrc); // crc
+		MapDataMsg.AddInt(0); // chunk index
+		MapDataMsg.AddInt(sizeof(g_aDummyMapData)); // map size
+		MapDataMsg.AddRaw(g_aDummyMapData, sizeof(g_aDummyMapData)); // map data
+
+		CMsgPacker ConReadyMsg(NETMSG_CON_READY);
+
+		CMsgPacker SnapEmptyMsg(NETMSG_SNAPEMPTY);
+		SECURITY_TOKEN SecurityToken = GetVanillaToken(Addr);
+		SnapEmptyMsg.AddInt((int)SecurityToken);
+		SnapEmptyMsg.AddInt((int)SecurityToken + 1);
+
+		// send all chunks/msgs in one packet
+		const CMsgPacker *Msgs[] = {&MapChangeMsg, &MapDataMsg, &ConReadyMsg,
+									&SnapEmptyMsg, &SnapEmptyMsg, &SnapEmptyMsg};
+		SendMsgs(Addr, Msgs, 6);
+	}
+	else if(!IsCtrl)
+	{
+		CNetChunkHeader h;
+
+		unsigned char *pData = Packet.m_aChunkData;
+		pData = h.Unpack(pData);
+		CUnpacker Unpacker;
+		Unpacker.Reset(pData, h.m_Size);
+		int Msg = Unpacker.GetInt() >> 1;
+
+		if (Msg == NETMSG_INPUT)
+		{
+			SECURITY_TOKEN SecurityToken = Unpacker.GetInt();
+			if (SecurityToken == GetVanillaToken(Addr))
+			{
+				if (g_Config.m_Debug)
+					dbg_msg("security", "token correct (vanilla handshake)");
+				// try to accept client skipping auth state
+				TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED, true);
+			}
+			else if (g_Config.m_Debug)
+				dbg_msg("security", "invalid token (vanilla handshake)");
+
+		}
+		else
+		{
+			if (g_Config.m_Debug)
+			{
+				dbg_msg("security", "invalid preconn msg %d", Msg);
+			}
+		}
+	}
 }
 
 void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet)
