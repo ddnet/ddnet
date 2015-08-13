@@ -289,6 +289,9 @@ class CNetServer
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	void *m_UserPtr;
 
+
+	int m_NumConAttempts; // log flooding attacks
+	int64 m_TimeNumConAttempts;
 	unsigned char m_SecurityTokenSeed[16];
 
 	CNetRecvUnpacker m_RecvUnpacker;

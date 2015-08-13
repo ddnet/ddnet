@@ -40,6 +40,9 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	m_MaxClientsPerIP = MaxClientsPerIP;
 
+	m_NumConAttempts = 0;
+	m_TimeNumConAttempts = time_get();
+
 	secure_random_fill(m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
 
 	for(int i = 0; i < NET_MAX_CLIENTS; i++)
@@ -234,6 +237,28 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 {
 	bool IsCtrl = Packet.m_Flags&NET_PACKETFLAG_CONTROL;
 	int CtrlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];
+
+	// log flooding
+	//TODO: remove
+	if (g_Config.m_Debug)
+	{
+		int64 Now = time_get();
+
+		if (Now - m_TimeNumConAttempts > time_freq())
+			// reset
+			m_NumConAttempts = 0;
+
+		m_NumConAttempts++;
+
+		if (m_NumConAttempts > 100)
+		{
+			dbg_msg("security", "flooding detected");
+
+			m_TimeNumConAttempts = Now;
+			m_NumConAttempts = 0;
+		}
+	}
+
 
 	if (IsCtrl && CtrlMsg == NET_CTRLMSG_CONNECT)
 	{
