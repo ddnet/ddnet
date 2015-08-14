@@ -221,6 +221,7 @@ public:
 	// anti spoof
 	void DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken);
 	void SetUnknownSeq() { m_UnknownSeq = true; }
+	SECURITY_TOKEN SecurityToken() const { return m_SecurityToken; }
 };
 
 class CConsoleNetConnection
@@ -325,6 +326,7 @@ public:
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientID) const { return m_aSlots[ClientID].m_Connection.PeerAddress(); }
+	bool HasSecurityToken(int ClientID) const { return m_aSlots[ClientID].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 	NETSOCKET Socket() const { return m_Socket; }
 	class CNetBan *NetBan() const { return m_pNetBan; }
 	int NetType() const { return m_Socket.type; }

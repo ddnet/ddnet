@@ -1024,7 +1024,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%x addr=%s", ClientID, aAddrStr);
+				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%x addr=%s secure=%s", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID)?"yes":"no");
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_READY;
 				GameServer()->OnClientConnected(ClientID);
@@ -1758,8 +1758,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			{
 				const char *pAuthStr = pThis->m_aClients[i].m_Authed == CServer::AUTHED_ADMIN ? "(Admin)" :
 										pThis->m_aClients[i].m_Authed == CServer::AUTHED_MOD ? "(Mod)" : "";
-				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d %s", i, aAddrStr,
-					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pAuthStr);
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
+					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", pAuthStr);
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
