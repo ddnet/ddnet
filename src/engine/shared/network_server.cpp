@@ -157,9 +157,6 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 
 int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool NoAuth)
 {
-	if (g_Config.m_Debug)
-		dbg_msg("security", "try to accept client");
-
 	// check for sv_max_clients_per_ip
 	if (NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIP)
 	{
@@ -267,51 +264,62 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 
 	if (IsCtrl && CtrlMsg == NET_CTRLMSG_CONNECT)
 	{
-		// simulate accept
-		SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC,
-					sizeof(SECURITY_TOKEN_MAGIC), NET_SECURITY_TOKEN_UNSUPPORTED);
+		if (g_Config.m_SvVanillaAntiSpoof)
+		{
+			// simulate accept
+			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC,
+						sizeof(SECURITY_TOKEN_MAGIC), NET_SECURITY_TOKEN_UNSUPPORTED);
 
-		// Begin vanilla compatible token handshake
-		// The idea is to pack a security token in the gametick
-		// parameter of NETMSG_SNAPEMPTY. The Client then will
-		// return the token/gametick in NETMSG_INPUT, allowing
-		// us to validate the token.
-		// https://github.com/eeeee/ddnet/commit/b8e40a244af4e242dc568aa34854c5754c75a39a
+			// Begin vanilla compatible token handshake
+			// The idea is to pack a security token in the gametick
+			// parameter of NETMSG_SNAPEMPTY. The Client then will
+			// return the token/gametick in NETMSG_INPUT, allowing
+			// us to validate the token.
+			// https://github.com/eeeee/ddnet/commit/b8e40a244af4e242dc568aa34854c5754c75a39a
 
-		// Before we can send NETMSG_SNAPEMPTY, the client needs
-		// to load a map, otherwise it might crash. The map
-		// should be as small as is possible and directly available
-		// to the client. Therefor a dummy map is sent in the same
-		// packet.
+			// Before we can send NETMSG_SNAPEMPTY, the client needs
+			// to load a map, otherwise it might crash. The map
+			// should be as small as is possible and directly available
+			// to the client. Therefor a dummy map is sent in the same
+			// packet.
 
-		// send mapchange + map data + con_ready + 3 x empty snap (with token)
-		CMsgPacker MapChangeMsg(NETMSG_MAP_CHANGE);
+			// send mapchange + map data + con_ready + 3 x empty snap (with token)
+			CMsgPacker MapChangeMsg(NETMSG_MAP_CHANGE);
 
-		MapChangeMsg.AddString("dummy", 0);
-		MapChangeMsg.AddInt(DummyMapCrc);
-		MapChangeMsg.AddInt(sizeof(g_aDummyMapData));
+			MapChangeMsg.AddString("dummy", 0);
+			MapChangeMsg.AddInt(DummyMapCrc);
+			MapChangeMsg.AddInt(sizeof(g_aDummyMapData));
 
-		CMsgPacker MapDataMsg(NETMSG_MAP_DATA);
+			CMsgPacker MapDataMsg(NETMSG_MAP_DATA);
 
-		MapDataMsg.AddInt(1); // last chunk
-		MapDataMsg.AddInt(DummyMapCrc); // crc
-		MapDataMsg.AddInt(0); // chunk index
-		MapDataMsg.AddInt(sizeof(g_aDummyMapData)); // map size
-		MapDataMsg.AddRaw(g_aDummyMapData, sizeof(g_aDummyMapData)); // map data
+			MapDataMsg.AddInt(1); // last chunk
+			MapDataMsg.AddInt(DummyMapCrc); // crc
+			MapDataMsg.AddInt(0); // chunk index
+			MapDataMsg.AddInt(sizeof(g_aDummyMapData)); // map size
+			MapDataMsg.AddRaw(g_aDummyMapData, sizeof(g_aDummyMapData)); // map data
 
-		CMsgPacker ConReadyMsg(NETMSG_CON_READY);
+			CMsgPacker ConReadyMsg(NETMSG_CON_READY);
 
-		CMsgPacker SnapEmptyMsg(NETMSG_SNAPEMPTY);
-		SECURITY_TOKEN SecurityToken = GetVanillaToken(Addr);
-		SnapEmptyMsg.AddInt((int)SecurityToken);
-		SnapEmptyMsg.AddInt((int)SecurityToken + 1);
+			CMsgPacker SnapEmptyMsg(NETMSG_SNAPEMPTY);
+			SECURITY_TOKEN SecurityToken = GetVanillaToken(Addr);
+			SnapEmptyMsg.AddInt((int)SecurityToken);
+			SnapEmptyMsg.AddInt((int)SecurityToken + 1);
 
-		// send all chunks/msgs in one packet
-		const CMsgPacker *Msgs[] = {&MapChangeMsg, &MapDataMsg, &ConReadyMsg,
-									&SnapEmptyMsg, &SnapEmptyMsg, &SnapEmptyMsg};
-		SendMsgs(Addr, Msgs, 6);
+			// send all chunks/msgs in one packet
+			const CMsgPacker *Msgs[] = {&MapChangeMsg, &MapDataMsg, &ConReadyMsg,
+										&SnapEmptyMsg, &SnapEmptyMsg, &SnapEmptyMsg};
+			SendMsgs(Addr, Msgs, 6);
+		}
+		else
+		{
+			// accept client directy
+			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC,
+						sizeof(SECURITY_TOKEN_MAGIC), NET_SECURITY_TOKEN_UNSUPPORTED);
+
+			TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED);
+		}
 	}
-	else if(!IsCtrl)
+	else if(!IsCtrl && g_Config.m_SvVanillaAntiSpoof)
 	{
 		CNetChunkHeader h;
 
@@ -327,7 +335,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			if (SecurityToken == GetVanillaToken(Addr))
 			{
 				if (g_Config.m_Debug)
-					dbg_msg("security", "token correct (vanilla handshake)");
+					dbg_msg("security", "new client (vanilla handshake)");
 				// try to accept client skipping auth state
 				TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED, true);
 			}
@@ -354,7 +362,8 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 	if (ControlMsg == NET_CTRLMSG_CONNECT)
 	{
 		bool SupportsToken = Packet.m_DataSize >=
-								(int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN));
+								(int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN)) &&
+								!mem_comp(&Packet.m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 
 		if (SupportsToken)
 		{
@@ -370,6 +379,8 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 		{
 			// correct token
 			// try to accept client
+			if (g_Config.m_Debug)
+				dbg_msg("security", "new client (ddnet token)");
 			TryAcceptClient(Addr, Token);
 		}
 		else
