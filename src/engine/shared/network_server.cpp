@@ -190,6 +190,11 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	// init connection slot
 	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken);
 
+	if (NoAuth)
+		// client sequence is unknown if the auth was done
+		// connection-less
+		m_aSlots[Slot].m_Connection.SetUnknownSeq();
+
 	if (g_Config.m_Debug)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];

@@ -58,10 +58,13 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 		// handle sequence stuff
 		if(m_pConnection && (Header.m_Flags&NET_CHUNKFLAG_VITAL))
 		{
-			if(Header.m_Sequence == (m_pConnection->m_Ack+1)%NET_MAX_SEQUENCE)
+			// anti spoof: ignore unknown sequence
+			if(Header.m_Sequence == (m_pConnection->m_Ack+1)%NET_MAX_SEQUENCE || m_pConnection->m_UnknownSeq)
 			{
+				m_pConnection->m_UnknownSeq = false;
+
 				// in sequence
-				m_pConnection->m_Ack = (m_pConnection->m_Ack+1)%NET_MAX_SEQUENCE;
+				m_pConnection->m_Ack = Header.m_Sequence;
 			}
 			else
 			{

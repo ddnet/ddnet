@@ -31,6 +31,7 @@ void CNetConnection::Reset()
 	m_Token = -1;
 	m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
 	//mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_UnknownSeq = false;
 
 	m_Buffer.Init();
 
