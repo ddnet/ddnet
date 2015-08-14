@@ -221,7 +221,6 @@ public:
 	// anti spoof
 	void DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken);
 	void SetUnknownSeq() { m_UnknownSeq = true; }
-	SECURITY_TOKEN SecurityToken() const { return m_SecurityToken; }
 };
 
 class CConsoleNetConnection
