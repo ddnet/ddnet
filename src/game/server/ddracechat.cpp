@@ -768,6 +768,13 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 				if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
 					pSelf->SendChatTarget(i, aBuf);
 		}
+		else if(!g_Config.m_SvTeamLock)
+		{
+			pSelf->Console()->Print(
+					IConsole::OUTPUT_LEVEL_STANDARD,
+					"print",
+					"Team locking is disabled on this server");
+		}
 		else
 		{
 			((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
