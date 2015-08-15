@@ -156,7 +156,7 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 }
 
 
-int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool NoAuth)
+int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth)
 {
 	// check for sv_max_clients_per_ip
 	if (NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIP)
@@ -188,10 +188,14 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	// init connection slot
 	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken);
 
-	if (NoAuth)
+	if (VanillaAuth)
+	{
 		// client sequence is unknown if the auth was done
 		// connection-less
 		m_aSlots[Slot].m_Connection.SetUnknownSeq();
+		// correct sequence
+		m_aSlots[Slot].m_Connection.SetSequence(6);
+	}
 
 	if (g_Config.m_Debug)
 	{
@@ -201,7 +205,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	}
 
 
-	if (NoAuth)
+	if (VanillaAuth)
 		m_pfnNewClientNoAuth(Slot, m_UserPtr);
 	else
 		m_pfnNewClient(Slot, m_UserPtr);
@@ -219,9 +223,9 @@ void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num)
 	{
 		const CMsgPacker *pMsg = Msgs[i];
 		CNetChunkHeader Header;
-		Header.m_Flags = 0;
+		Header.m_Flags = NET_CHUNKFLAG_VITAL;
 		Header.m_Size = pMsg->Size();
-		Header.m_Sequence = 0;
+		Header.m_Sequence = i+1;
 		pChunkData = Header.Pack(pChunkData);
 		mem_copy(pChunkData, pMsg->Data(), pMsg->Size());
 		*((unsigned char*)pChunkData) <<= 1;
