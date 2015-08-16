@@ -31,6 +31,7 @@ void CNetConnection::Reset()
 	m_Token = -1;
 	m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
 	//mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_UnknownSeq = false;
 
 	m_Buffer.Init();
 
@@ -201,6 +202,23 @@ void CNetConnection::Disconnect(const char *pReason)
 	}
 
 	Reset();
+}
+
+void CNetConnection::DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken)
+{
+	Reset();
+
+	m_State = NET_CONNSTATE_ONLINE;
+
+	m_PeerAddr = Addr;
+	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+
+	int64 Now = time_get();
+	m_LastSendTime = Now;
+	m_LastRecvTime = Now;
+	m_LastUpdateTime = Now;
+
+	m_SecurityToken = SecurityToken;
 }
 
 int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken)
