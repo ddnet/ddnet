@@ -442,8 +442,6 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			continue;
 		}
 
-		bool Found = false;
-
 		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{
 			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
