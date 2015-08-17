@@ -323,7 +323,7 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 
 	if (pHL)
 	{
-		int Length = str_length(m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName);
+		int Length = str_length(pName);
 
 		if((pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
 			return true;
