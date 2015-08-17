@@ -1586,8 +1586,8 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 
 	pEditor->Graphics()->QuadsBegin();
 	vec4 ColorTop, ColorBottom;
-	float Offset = HuePicker.h/7.0f;
-	for(int j = 0; j < 7; j++)
+	float Offset = HuePicker.h/6.0f;
+	for(int j = 0; j < 6; j++)
 	{
 		ColorTop = vec4(s_aColorIndices[j][0], s_aColorIndices[j][1], s_aColorIndices[j][2], 1.0f);
 		ColorBottom = vec4(s_aColorIndices[j+1][0], s_aColorIndices[j+1][1], s_aColorIndices[j+1][2], 1.0f);
