@@ -886,6 +886,8 @@ public:
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags=0, const char *pToolTip=0);
 
+	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, vec4 *pColor, const char *pToolTip=0);
+
 	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL);
 
 	void RenderBackground(CUIRect View, int Texture, float Size, float Brightness);
@@ -912,6 +914,7 @@ public:
 	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View);
 	static int PopupSound(CEditor *pEditor, CUIRect View);
 	static int PopupSource(CEditor *pEditor, CUIRect View);
+	static int PopupColorPicker(CEditor *pEditor, CUIRect View);
 
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -980,6 +983,10 @@ public:
 
 	int GetLineDistance();
 	void ZoomMouseTarget(float ZoomFactor);
+
+	static vec3 ms_PickerColor;
+	static int ms_SVPicker;
+	static int ms_HuePicker;
 
 	// DDRace
 
