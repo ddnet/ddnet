@@ -394,12 +394,15 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		// check for highlighted name
 		if (Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
-			// main character
-			if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName))
-				Highlighted = true;
-			// dummy
-			if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName)) 
-				Highlighted = true;
+			if(ClientID != m_pClient->Client()->m_LocalIDs[0])
+			{
+				// main character
+				if (LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_aName))
+					Highlighted = true;
+				// dummy
+				if(m_pClient->Client()->DummyConnected() && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_aName)) 
+					Highlighted = true;
+			}
 		}
 		else
 		{
