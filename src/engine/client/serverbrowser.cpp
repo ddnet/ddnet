@@ -774,10 +774,11 @@ void CServerBrowser::Update(bool ForceResort)
 
 		if(pEntry->m_RequestTime == 0)
 		{
-			if (pEntry->m_Is64)
-				RequestImpl64(pEntry->m_Addr, pEntry);
-			else
+			if (!pEntry->m_Is64)
 				RequestImpl(pEntry->m_Addr, pEntry);
+
+			// always request 64 info
+			RequestImpl64(pEntry->m_Addr, pEntry);
 		}
 
 		Count++;
