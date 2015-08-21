@@ -433,3 +433,13 @@ public:
 };
 
 IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments) { return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments); }
+
+IStorage *CreateLocalStorage()
+{
+	CStorage *pStorage = new CStorage();
+	if(pStorage)
+	{
+		pStorage->AddPath("$CURRENTDIR");
+	}
+	return pStorage;
+}

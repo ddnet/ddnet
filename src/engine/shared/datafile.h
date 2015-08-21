@@ -80,6 +80,8 @@ class CDataFileWriter
 public:
 	CDataFileWriter();
 	~CDataFileWriter();
+	void Init();
+	bool OpenFile(class IStorage *pStorage, const char *pFilename);
 	bool Open(class IStorage *pStorage, const char *Filename);
 	int AddData(int Size, void *pData);
 	int AddDataSwapped(int Size, void *pData);

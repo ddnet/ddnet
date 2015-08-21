@@ -2534,7 +2534,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	char aConfig[128];
 	char aTemp[128];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
-	str_format(aTemp, sizeof(aTemp), "%s.temp.%d", pNewMapName, pid(), pNewMapName);
+	str_format(aTemp, sizeof(aTemp), "%s.temp.%d", pNewMapName, pid());
 
 	IOHANDLE File = pStorage->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(!File)
@@ -2587,15 +2587,25 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
 			if(Size >= (int)sizeof(CMapItemInfoSettings))
 			{
-				SettingsIndex = pInfo->m_Settings;
-				char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
-				int DataSize = Reader.GetUncompressedDataSize(SettingsIndex);
-				if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, Size) == 0)
+				if(pInfo->m_Settings > -1)
 				{
-					// Configs coincide, no need to update map.
-					return;
+					SettingsIndex = pInfo->m_Settings;
+					char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
+					int DataSize = Reader.GetUncompressedDataSize(SettingsIndex);
+					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, Size) == 0)
+					{
+						// Configs coincide, no need to update map.
+						return;
+					}
+					Reader.UnloadData(pInfo->m_Settings);
 				}
-				Reader.UnloadData(pInfo->m_Settings);
+				else
+				{
+					MapInfo = *pInfo;
+					MapInfo.m_Settings = SettingsIndex;
+					pData = (int *)&MapInfo;
+					Size = sizeof(MapInfo);
+				}
 			}
 			else
 			{
@@ -2668,6 +2678,7 @@ void CGameContext::LoadMapSettings()
 			pNext += StrSize;
 		}
 		pMap->UnloadData(pItem->m_Settings);
+		break;
 	}
 
 	char aBuf[128];
