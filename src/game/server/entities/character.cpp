@@ -1838,6 +1838,14 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
+		if(g_Config.m_SvTeleportLoseWeapons)
+		{
+			for(int i=1;i<NUM_WEAPONS-1;i++)
+			{
+				m_aWeapons[i].m_Got = false;
+				if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
+			}
+		}
 		return;
 	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
@@ -1858,6 +1866,14 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 				m_Core.m_HookPos = m_Core.m_Pos;
+			}
+			if(g_Config.m_SvTeleportLoseWeapons)
+			{
+				for(int i=2;i<NUM_WEAPONS-1;i++)
+				{
+					m_aWeapons[i].m_Got = false;
+					if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
+				}
 			}
 		}
 		return;
