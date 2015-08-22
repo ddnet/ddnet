@@ -10,6 +10,9 @@
 #include "system.h"
 #include "confusables.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #if defined(WEBSOCKETS)
 	#include "engine/shared/websockets.h"
 #endif
@@ -19,8 +22,6 @@
 	#include <unistd.h>
 
 	/* unix net includes */
-	#include <sys/stat.h>
-	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <sys/ioctl.h>
 	#include <errno.h>
@@ -1694,15 +1695,11 @@ int fs_is_dir(const char *path)
 
 time_t fs_getmtime(const char *path)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-  /* TODO */
-#else
-	struct stat sb;
+  struct stat sb;
 	if (stat(path, &sb) == -1)
 		return 0;
 
 	return sb.st_mtime;
-#endif
 }
 
 int fs_chdir(const char *path)
