@@ -2708,7 +2708,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		{
 			static const char *s_paTexts[4] = {"R", "G", "B", "A"};
 			static int s_aShift[] = {24, 16, 8, 0};
-			int NewColor = 0, NewPickerColor = 0;
+			int NewColor = 0;
 
 			// extra space
 			CUIRect ColorBox, ColorSlots;
