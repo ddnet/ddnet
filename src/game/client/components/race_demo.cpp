@@ -18,6 +18,27 @@ CRaceDemo::CRaceDemo()
 	m_DemoStartTick = 0;
 }
 
+void CRaceDemo::Stop()
+{
+	if(Client()->RaceRecordIsRecording())
+		Client()->RaceRecordStop();
+
+	char aFilename[512];
+	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
+	Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
+
+	m_Time = 0;
+	m_RaceState = RACE_NONE;
+	m_RecordStopTime = 0;
+	m_DemoStartTick = 0;
+}
+
+void CRaceDemo::OnStateChange(int NewState, int OldState)
+{
+	if(OldState == IClient::STATE_ONLINE)
+		Stop();
+}
+
 void CRaceDemo::OnRender()
 {
 	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() != IClient::STATE_ONLINE)
@@ -40,8 +61,6 @@ void CRaceDemo::OnRender()
 			if(m_pClient->Collision()->GetFTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN) start = true;
 		}
 
-
-
 		if(start)
 		{
 			OnReset();
@@ -59,35 +78,17 @@ void CRaceDemo::OnRender()
 		CheckDemo();
 		OnReset();
 	}
-
 }
 
 void CRaceDemo::OnReset()
 {
-	if(Client()->State() != IClient::STATE_ONLINE)
-		return;
-
-	if(Client()->RaceRecordIsRecording())
-		Client()->RaceRecordStop();
-
-	char aFilename[512];
-	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
-	Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
-
-	m_Time = 0;
-	m_RaceState = RACE_NONE;
-	m_RecordStopTime = 0;
-	m_DemoStartTick = 0;
+	if(Client()->State() == IClient::STATE_ONLINE)
+		Stop();
 }
 
 void CRaceDemo::OnShutdown()
 {
-	if(Client()->RaceRecordIsRecording())
-		Client()->RaceRecordStop();
-
-	char aFilename[512];
-	str_format(aFilename, sizeof(aFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
-	Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
+	Stop();
 }
 
 void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
