@@ -1840,11 +1840,8 @@ void CCharacter::HandleTiles(int Index)
 		}
 		if(g_Config.m_SvTeleportLoseWeapons)
 		{
-			for(int i=WEAPON_GUN;i<NUM_WEAPONS-1;i++)
-			{
+			for(int i=WEAPON_SHOTGUN;i<NUM_WEAPONS-1;i++)
 				m_aWeapons[i].m_Got = false;
-				if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
-			}
 		}
 		return;
 	}
@@ -1870,10 +1867,7 @@ void CCharacter::HandleTiles(int Index)
 			if(g_Config.m_SvTeleportLoseWeapons)
 			{
 				for(int i=WEAPON_SHOTGUN;i<NUM_WEAPONS-1;i++)
-				{
 					m_aWeapons[i].m_Got = false;
-					if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
-				}
 			}
 		}
 		return;
