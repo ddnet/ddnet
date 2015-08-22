@@ -1435,20 +1435,8 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				}
 				else
 				{
-					if(!m_pEditor->m_SwitchNum)
-					{
-						m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
-						m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
-						m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
-						m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
-						m_pTiles[fy*m_Width+fx].m_Index = 0;
-						continue;
-					}
-					else
-					{
-						m_pSwitchTile[fy*m_Width+fx].m_Number = m_pEditor->m_SwitchNum;
-						m_pSwitchTile[fy*m_Width+fx].m_Delay = m_pEditor->m_SwitchDelay;
-					}
+					m_pSwitchTile[fy*m_Width+fx].m_Number = m_pEditor->m_SwitchNum;
+					m_pSwitchTile[fy*m_Width+fx].m_Delay = m_pEditor->m_SwitchDelay;
 				}
 
 				m_pSwitchTile[fy*m_Width+fx].m_Type = l->m_pTiles[y*l->m_Width+x].m_Index;
