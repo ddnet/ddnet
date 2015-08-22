@@ -642,8 +642,14 @@ void CGameTeams::KillSavedTeam(int Team)
 	ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+		{
+			// Set so that no finish is accidentally given to some of the players
+			GameServer()->m_apPlayers[i]->GetCharacter()->m_DDRaceState = DDRACE_NONE;
 			m_TeeFinished[i] = false;
+		}
+	}
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
