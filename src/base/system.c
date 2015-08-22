@@ -1694,11 +1694,15 @@ int fs_is_dir(const char *path)
 
 time_t fs_getmtime(const char *path)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+  /* TODO */
+#else
 	struct stat sb;
 	if (stat(path, &sb) == -1)
 		return 0;
 
 	return sb.st_mtime;
+#endif
 }
 
 int fs_chdir(const char *path)
