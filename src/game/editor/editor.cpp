@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/tl/array.h>
 #include <base/system.h>
+#include <base/color.h>
 #include <time.h>
 
 #if defined(CONF_FAMILY_UNIX)
@@ -47,6 +48,11 @@ int CEditor::ms_TeleTexture;
 int CEditor::ms_SpeedupTexture;
 int CEditor::ms_SwitchTexture;
 int CEditor::ms_TuneTexture;
+
+vec3 CEditor::ms_PickerColor;
+int CEditor::ms_SVPicker;
+int CEditor::ms_HuePicker;
+
 
 enum
 {
@@ -633,6 +639,12 @@ int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked,
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
+int CEditor::DoButton_ColorPicker(const void *pID, const CUIRect *pRect, vec4 *pColor, const char *pToolTip)
+{
+	RenderTools()->DrawUIRect(pRect, *pColor, 0, 0.0f);
+	return DoButton_Editor_Common(pID, 0x0, 0, pRect, 0, pToolTip);
+}
+
 void CEditor::RenderGrid(CLayerGroup *pGroup)
 {
 	if(!m_GridActive)
@@ -688,7 +700,7 @@ void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brig
 	Graphics()->QuadsEnd();
 }
 
-int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree)
+int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree, bool isHex)
 {
 	// logic
 	static float s_Value;
@@ -701,7 +713,10 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		s_LastTextpID = pID;
 		s_TextMode = true;
-		str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
+		if(isHex)
+			str_format(s_NumStr, sizeof(s_NumStr), "%06X", Current);
+		else
+			str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
 	}
 
 	if(UI()->ActiveItem() == pID)
@@ -726,7 +741,10 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		if(Input()->KeyPressed(KEY_RETURN) || Input()->KeyPressed(KEY_KP_ENTER) ||
 				((UI()->MouseButton(1) || UI()->MouseButton(0)) && !Inside))
 		{
-			Current = clamp(str_toint(s_NumStr), Min, Max);
+			if(isHex)
+				Current = clamp(str_toint_base(s_NumStr, 16), Min, Max);
+			else
+				Current = clamp(str_toint(s_NumStr), Min, Max);
 			m_LockMouse = false;
 			UI()->SetActiveItem(0);
 			s_TextMode = false;
@@ -782,6 +800,8 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			str_format(aBuf, sizeof(aBuf),"%s %d", pLabel, Current);
 		else if(isDegree)
 			str_format(aBuf, sizeof(aBuf),"%d°", Current);
+		else if(isHex)
+			str_format(aBuf, sizeof(aBuf),"0x%06X", Current);
 		else
 			str_format(aBuf, sizeof(aBuf),"%d", Current);
 		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
@@ -2688,7 +2708,15 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		{
 			static const char *s_paTexts[4] = {"R", "G", "B", "A"};
 			static int s_aShift[] = {24, 16, 8, 0};
-			int NewColor = 0;
+			int NewColor = 0, NewPickerColor = 0;
+
+			// extra space
+			CUIRect ColorBox, ColorSlots;
+
+			pToolBox->HSplitTop(3.0f*13.0f, &Slot, pToolBox);
+			Slot.VSplitMid(&ColorBox, &ColorSlots);
+			ColorBox.HMargin(1.0f, &ColorBox);
+			ColorBox.VMargin(6.0f, &ColorBox);
 
 			for(int c = 0; c < 4; c++)
 			{
@@ -2697,15 +2725,48 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 
 				if(c != 3)
 				{
-					pToolBox->HSplitTop(13.0f, &Slot, pToolBox);
-					Slot.VSplitMid(0, &Shifter);
+					ColorSlots.HSplitTop(13.0f, &Shifter, &ColorSlots);
 					Shifter.HMargin(1.0f, &Shifter);
 				}
 			}
 
+			// hex
+			pToolBox->HSplitTop(13.0f, &Slot, pToolBox);
+			Slot.VSplitMid(0x0, &Shifter);
+			Shifter.HMargin(1.0f, &Shifter);
+
+			int NewColorHex = pProps[i].m_Value&0xff;
+			NewColorHex |= UiDoValueSelector(((char *)&pIDs[i]+4), &Shifter, "", (pProps[i].m_Value >> 8)&0xFFFFFF, 0, 0xFFFFFF, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.", false, true) << 8;
+
+			// color picker
+			vec4 Color = vec4(
+				((pProps[i].m_Value >> s_aShift[0])&0xff)/255.0f,
+				((pProps[i].m_Value >> s_aShift[1])&0xff)/255.0f,
+				((pProps[i].m_Value >> s_aShift[2])&0xff)/255.0f,
+				1.0f);
+			
+			static int s_ColorPicker, s_ColorPickerID;
+			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &Color))
+			{
+				ms_PickerColor = RgbToHsv(vec3(Color.r, Color.g, Color.b));
+				UiInvokePopupMenu(&s_ColorPickerID, 0, UI()->MouseX(), UI()->MouseY(), 180, 150, PopupColorPicker);
+			}
+
+			if(UI()->HotItem() == &ms_SVPicker || UI()->HotItem() == &ms_HuePicker)
+			{
+				vec3 c = HsvToRgb(ms_PickerColor);
+				NewColor = ((int)(c.r * 255.0f)&0xff) << 24 | ((int)(c.g * 255.0f)&0xff) << 16 | ((int)(c.b * 255.0f)&0xff) << 8 | (pProps[i].m_Value&0xff);
+			}
+
+			//
 			if(NewColor != pProps[i].m_Value)
 			{
 				*pNewVal = NewColor;
+				Change = i;
+			}
+			else if(NewColorHex != pProps[i].m_Value)
+			{
+				*pNewVal = NewColorHex;
 				Change = i;
 			}
 		}
@@ -5240,6 +5301,8 @@ void CEditor::Init()
 	m_Map.m_Modified = false;
 	m_Map.m_UndoModified = 0;
 	m_LastUndoUpdateTime = time_get();
+
+	ms_PickerColor = vec3(1.0f, 0.0f, 0.0f);
 }
 
 void CEditor::DoMapBorder()
