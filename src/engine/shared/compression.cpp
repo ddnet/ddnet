@@ -86,4 +86,3 @@ long CVariableInt::Compress(const void *pSrc_, int Size, void *pDst_)
 	}
 	return (long)(pDst-(unsigned char *)pDst_);
 }
-

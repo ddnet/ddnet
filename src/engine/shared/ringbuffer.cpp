@@ -191,4 +191,3 @@ void *CRingBufferBase::Last()
 {
 	return Prev(m_pProduce+1);
 }
-

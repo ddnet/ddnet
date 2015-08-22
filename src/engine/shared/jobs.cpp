@@ -72,4 +72,3 @@ int CJobPool::Add(CJob *pJob, JOBFUNC pfnFunc, void *pData)
 	lock_unlock(m_Lock);
 	return 0;
 }
-

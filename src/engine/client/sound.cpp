@@ -927,4 +927,3 @@ void CSound::StopVoice(CVoiceHandle Voice)
 IOHANDLE CSound::ms_File = 0;
 
 IEngineSound *CreateEngineSound() { return new CSound; }
-

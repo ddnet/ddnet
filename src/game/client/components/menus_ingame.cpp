@@ -1134,4 +1134,3 @@ void CMenus::RenderGhost(CUIRect MainView)
 		pGhost->m_Active ^= 1;
 	}
 }
-

@@ -335,5 +335,3 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		}
 	}
 }
-
-

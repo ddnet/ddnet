@@ -55,4 +55,3 @@ The interval for how often a client recives a snapshot changes during the course
 - *Full*. Snapshot for every tick or every even tick depending on server configuration. This is used during normal gameplay and everything is running smooth.
 
 - *Recovery*. 1 snapshot each second. A client enters recovery rate when it havn't acknowlaged a snapshot over 1 second. This is to let the client to beable to recover if it has a slow connection.
-

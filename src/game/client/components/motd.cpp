@@ -98,4 +98,3 @@ bool CMotd::OnInput(IInput::CEvent Event)
 	}
 	return false;
 }
-

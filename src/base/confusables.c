@@ -93,4 +93,3 @@ int str_utf8_is_confusable(int smaller, int bigger)
 	default: return 0;
 	}
 }
-

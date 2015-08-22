@@ -39,6 +39,3 @@ public:
 extern IEngineMasterServer *CreateEngineMasterServer();
 
 #endif
-
-
-
