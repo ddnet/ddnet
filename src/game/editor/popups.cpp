@@ -78,10 +78,18 @@ void CEditor::UiDoPopupMenu()
 		r.Margin(4.0f, &r);
 
 		if(s_UiPopups[i].m_pfnFunc(this, r))
+		{
+			m_LockMouse = false;
+			UI()->SetActiveItem(0);
 			g_UiNumPopups--;
+		}
 
 		if(Input()->KeyDown(KEY_ESCAPE))
+		{
+			m_LockMouse = false;
+			UI()->SetActiveItem(0);
 			g_UiNumPopups--;
+		}
 	}
 }
 
