@@ -301,7 +301,8 @@ class CNetServer
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
 	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
-	bool ClientExists(const NETADDR &Addr);
+	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr) != -1; };
+	int GetClientSlot(const NETADDR &Addr);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
 
 	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth=false);

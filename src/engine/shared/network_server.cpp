@@ -143,7 +143,8 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 
 	for(int i = 0; i < MaxClients(); ++i)
 	{
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE ||
+			m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
 			continue;
 
 		OtherAddr = *m_aSlots[i].m_Connection.PeerAddress();
@@ -404,20 +405,22 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 	}
 }
 
-bool CNetServer::ClientExists(const NETADDR &Addr)
+int CNetServer::GetClientSlot(const NETADDR &Addr)
 {
+	int Slot = -1;
+
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		if(m_aSlots[i].m_Connection.State() != NET_CONNSTATE_OFFLINE &&
+			m_aSlots[i].m_Connection.State() != NET_CONNSTATE_ERROR &&
 			net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
+
 		{
-			// found
-			return true;
+			Slot = i;
 		}
 	}
 
-	// doesn't exist
-	return false;
+	return Slot;
 }
 
 /*
@@ -463,26 +466,21 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			else
 			{
 				// normal packet, find matching slot
-				bool Found = false;
-				for(int i = 0; i < MaxClients(); i++)
-				{
-					if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
-					{
-						if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE ||
-							m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
-							continue;
+				int Slot = GetClientSlot(Addr);
 
-						Found = true;
-						if(m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
-						{
-							if(m_RecvUnpacker.m_Data.m_DataSize)
-								m_RecvUnpacker.Start(&Addr, &m_aSlots[i].m_Connection, i);
-						}
+				if (Slot != -1)
+				{
+					// found
+					if(m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+					{
+						if(m_RecvUnpacker.m_Data.m_DataSize)
+							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);
 					}
 				}
-
-				if (!Found)
+				else
 				{
+					// not found, client that wants to connect
+
 					if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL &&
 						m_RecvUnpacker.m_Data.m_DataSize > 1)
 						// got control msg with extra size (should support token)
