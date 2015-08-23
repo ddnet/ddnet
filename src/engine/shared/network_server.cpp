@@ -390,10 +390,8 @@ void CNetServer::OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, cons
 			if (g_Config.m_Debug)
 				dbg_msg("security", "client %d reconnect");
 
-			//TODO: correctly reset network
-			m_aSlots[ClientID].m_Connection.SetUnknownSeq();
-			m_aSlots[ClientID].m_Connection.SetSequence(0);
-
+			// reset netconn and process rejoin
+			m_aSlots[ClientID].m_Connection.Reset(true);
 			m_pfnClientRejoin(ClientID, m_UserPtr);
 		}
 	}

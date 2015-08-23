@@ -16,7 +16,7 @@ void CNetConnection::ResetStats()
 	m_LastUpdateTime = 0;
 }
 
-void CNetConnection::Reset()
+void CNetConnection::Reset(bool Rejoin)
 {
 	m_Sequence = 0;
 	m_Ack = 0;
@@ -24,12 +24,17 @@ void CNetConnection::Reset()
 	m_TimeoutProtected = false;
 	m_TimeoutSituation = false;
 
-	m_State = NET_CONNSTATE_OFFLINE;
+	if (!Rejoin)
+	{
+		m_State = NET_CONNSTATE_OFFLINE;
+		m_Token = -1;
+		m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
+	}
+
 	m_LastSendTime = 0;
 	m_LastRecvTime = 0;
 	//m_LastUpdateTime = 0;
-	m_Token = -1;
-	m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
+
 	//mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
 	m_UnknownSeq = false;
 

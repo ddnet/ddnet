@@ -191,7 +191,7 @@ public:
 	bool m_TimeoutProtected;
 	bool m_TimeoutSituation;
 
-	void Reset();
+	void Reset(bool Rejoin=false);
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
 	void Disconnect(const char *pReason);
