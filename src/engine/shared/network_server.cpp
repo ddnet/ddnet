@@ -207,7 +207,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 
 
 	if (VanillaAuth)
-		m_pfnNewClientNoAuth(Slot, m_UserPtr);
+		m_pfnNewClientNoAuth(Slot, true, m_UserPtr);
 	else
 		m_pfnNewClient(Slot, m_UserPtr);
 
@@ -359,6 +359,43 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 	}
 }
 
+void CNetServer::OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, const CNetPacketConstruct &Packet)
+{
+	if (ControlMsg == NET_CTRLMSG_CONNECT)
+	{
+		// got connection attempt inside of valid session
+		// the client probably wants to reconnect
+		bool SupportsToken = Packet.m_DataSize >=
+								(int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN)) &&
+								!mem_comp(&Packet.m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
+
+		if (SupportsToken)
+		{
+			// response connection request with token
+			SECURITY_TOKEN Token = GetToken(Addr);
+			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC), Token);
+		}
+
+		if (g_Config.m_Debug)
+			dbg_msg("security", "client %d wants to reconnect", ClientID);
+	}
+	else if (ControlMsg == NET_CTRLMSG_ACCEPT && Packet.m_DataSize == 1 + sizeof(SECURITY_TOKEN))
+	{
+		SECURITY_TOKEN Token = ToSecurityToken(&Packet.m_aChunkData[1]);
+		if (Token == GetToken(Addr))
+		{
+			// correct token
+			// try to accept client
+			if (g_Config.m_Debug)
+				dbg_msg("security", "client %d reconnect");
+
+			m_aSlots[ClientID].m_Connection.SetUnknownSeq();
+			m_aSlots[ClientID].m_Connection.SetSequence(0);
+			m_pfnNewClientNoAuth(ClientID, false, m_UserPtr);
+		}
+	}
+}
+
 void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet)
 {
 	if (ClientExists(Addr))
@@ -471,6 +508,11 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				if (Slot != -1)
 				{
 					// found
+
+					// control
+					if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
+						OnConnCtrlMsg(Addr, Slot, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data);
+
 					if(m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
 					{
 						if(m_RecvUnpacker.m_Data.m_DataSize)

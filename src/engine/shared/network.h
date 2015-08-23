@@ -96,7 +96,7 @@ enum
 
 typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char* pReason, void *pUser);
 typedef int (*NETFUNC_NEWCLIENT)(int ClientID, void *pUser);
-typedef int (*NETFUNC_NEWCLIENT_NOAUTH)(int ClientID, void *pUser);
+typedef int (*NETFUNC_NEWCLIENT_NOAUTH)(int ClientID, bool Reset, void *pUser);
 
 struct CNetChunk
 {
@@ -301,6 +301,7 @@ class CNetServer
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
 	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
+	void OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, const CNetPacketConstruct &Packet);
 	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr) != -1; };
 	int GetClientSlot(const NETADDR &Addr);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
