@@ -760,17 +760,34 @@ void CServer::DoSnapshot()
 	GameServer()->OnPostSnap();
 }
 
-int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
+int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
-	pThis->m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
-	pThis->m_aClients[ClientID].m_aName[0] = 0;
-	pThis->m_aClients[ClientID].m_aClan[0] = 0;
-	pThis->m_aClients[ClientID].m_Country = -1;
+
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+
 	pThis->m_aClients[ClientID].Reset();
+
+	pThis->SendMap(ClientID);
+
+	return 0;
+}
+
+int CServer::NewClientNoAuthCallback(int ClientID, bool Reset, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	if (Reset)
+	{
+		pThis->m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
+		pThis->m_aClients[ClientID].m_aName[0] = 0;
+		pThis->m_aClients[ClientID].m_aClan[0] = 0;
+		pThis->m_aClients[ClientID].m_Country = -1;
+		pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
+		pThis->m_aClients[ClientID].m_AuthTries = 0;
+		pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+		pThis->m_aClients[ClientID].Reset();
+	}
 
 	pThis->SendMap(ClientID);
 
@@ -1028,8 +1045,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_READY;
 				GameServer()->OnClientConnected(ClientID);
-				SendConnectionReady(ClientID);
 			}
+
+			SendConnectionReady(ClientID);
 		}
 		else if(Msg == NETMSG_ENTERGAME)
 		{
@@ -1555,7 +1573,7 @@ int CServer::Run()
 		return -1;
 	}
 
-	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, DelClientCallback, this);
+	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
 	m_Econ.Init(Console(), &m_ServerBan);
 
