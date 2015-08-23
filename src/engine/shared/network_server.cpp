@@ -60,10 +60,11 @@ int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT p
 	return 0;
 }
 
-int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
+int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
 {
 	m_pfnNewClient = pfnNewClient;
 	m_pfnNewClientNoAuth = pfnNewClientNoAuth;
+	m_pfnClientRejoin = pfnClientRejoin;
 	m_pfnDelClient = pfnDelClient;
 	m_UserPtr = pUser;
 	return 0;
@@ -389,9 +390,11 @@ void CNetServer::OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, cons
 			if (g_Config.m_Debug)
 				dbg_msg("security", "client %d reconnect");
 
+			//TODO: correctly reset network
 			m_aSlots[ClientID].m_Connection.SetUnknownSeq();
 			m_aSlots[ClientID].m_Connection.SetSequence(0);
-			m_pfnNewClientNoAuth(ClientID, false, m_UserPtr);
+
+			m_pfnClientRejoin(ClientID, m_UserPtr);
 		}
 	}
 }
