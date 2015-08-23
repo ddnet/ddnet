@@ -98,6 +98,9 @@ int CNetConnection::Flush()
 
 int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int Sequence)
 {
+	if (m_State == NET_CONNSTATE_OFFLINE || m_State == NET_CONNSTATE_ERROR)
+		return -1;
+
 	unsigned char *pChunkData;
 
 	// check if we have space for it, if not, flush the connection
