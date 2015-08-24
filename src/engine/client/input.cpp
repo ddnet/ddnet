@@ -48,8 +48,7 @@ CInput::CInput()
 void CInput::Init()
 {
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
-	// FIXME: unicode handling: use SDL_StartTextInput/SDL_StopTextInput on inputs
-	// FIXME: key repeat: not a global setting anymore; need to do manually
+	SDL_StartTextInput();
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 }
