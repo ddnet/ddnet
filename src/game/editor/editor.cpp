@@ -946,7 +946,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Bottom.HSplitTop(2.5f, 0, &TB_Bottom);
 
 	// ctrl+o to open
-	if(Input()->KeyDown('o') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyDown(KEY_O) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
 	{
 		if(HasUnsavedData())
 		{
@@ -961,7 +961,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	}
 
 	// ctrl+s to save
-	if(Input()->KeyDown('s') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyDown(KEY_S) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
 	{
 		if(m_aFileName[0] && m_ValidSaveFilename)
 		{
@@ -976,18 +976,18 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	}
 
 	// ctrl+shift+s to save as
-	if(Input()->KeyDown('s') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && (Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT)) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyDown(KEY_S) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && (Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT)) && m_Dialog == DIALOG_NONE)
 		InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 
 	// ctrl+shift+alt+s to save as
-	if(Input()->KeyDown('s') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && (Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT)) && (Input()->KeyPressed(KEY_LALT) || Input()->KeyPressed(KEY_RALT)) && m_Dialog == DIALOG_NONE)
+	if(Input()->KeyDown(KEY_S) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)) && (Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT)) && (Input()->KeyPressed(KEY_LALT) || Input()->KeyPressed(KEY_RALT)) && m_Dialog == DIALOG_NONE)
 		InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 
 	// detail button
 	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 	static int s_HqButton = 0;
 	if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
-		(Input()->KeyDown('h') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(Input()->KeyDown(KEY_H) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
 	{
 		m_ShowDetail = !m_ShowDetail;
 	}
@@ -998,7 +998,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_AnimateButton = 0;
 	if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
-		(Input()->KeyDown('m') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(Input()->KeyDown(KEY_M) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
 	{
 		m_AnimateStart = time_get();
 		m_Animate = !m_Animate;
@@ -1010,7 +1010,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_ProofButton = 0;
 	if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
-		(Input()->KeyDown('p') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(Input()->KeyDown(KEY_P) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
 	{
 		m_ProofBorders = !m_ProofBorders;
 	}
@@ -1021,7 +1021,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_TileInfoButton = 0;
 	if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile informations") ||
-		(Input()->KeyDown('i') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(Input()->KeyDown(KEY_I) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
 	{
 		m_ShowTileInfo = !m_ShowTileInfo;
 		m_ShowEnvelopePreview = 0;
@@ -1080,7 +1080,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// flip buttons
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_FlipXButton = 0;
-		if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", CUI::CORNER_L) || (Input()->KeyDown('n') && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", CUI::CORNER_L) || (Input()->KeyDown(KEY_N) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushFlipX();
@@ -1088,7 +1088,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_FlipyButton = 0;
-		if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", CUI::CORNER_R) || (Input()->KeyDown('m') && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", CUI::CORNER_R) || (Input()->KeyDown(KEY_M) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushFlipY();
@@ -1113,7 +1113,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_CcwButton = 0;
-		if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", CUI::CORNER_L) || (Input()->KeyDown('r') && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", CUI::CORNER_L) || (Input()->KeyDown(KEY_R) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushRotate(-s_RotationAmount/360.0f*pi*2);
@@ -1121,7 +1121,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_CwButton = 0;
-		if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", CUI::CORNER_R) || (Input()->KeyDown('t') && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", CUI::CORNER_R) || (Input()->KeyDown(KEY_T) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushRotate(s_RotationAmount/360.0f*pi*2);

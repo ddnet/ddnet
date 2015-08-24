@@ -9,7 +9,7 @@ SDL = {
 			option.use_osxframework = false
 			option.lib_path = nil
 			
-			if family ~= "windows" and ExecuteSilent("pkg-config sdl") == 0 then
+			if family ~= "windows" and ExecuteSilent("pkg-config sdl2") == 0 then
 				option.value = true
 				option.use_pkgconfig = true
 			end
@@ -31,13 +31,13 @@ SDL = {
 		
 		local apply = function(option, settings)
 			if option.use_pkgconfig == true then
-				settings.cc.flags:Add("`pkg-config sdl --cflags`")
-				settings.link.flags:Add("`pkg-config sdl --libs`")
+				settings.cc.flags:Add("`pkg-config sdl2 --cflags`")
+				settings.link.flags:Add("`pkg-config sdl2 --libs`")
 			end
 
 			if option.use_osxframework == true then
-				client_settings.link.frameworks:Add("SDL")
-				client_settings.cc.includes:Add("/Library/Frameworks/SDL.framework/Headers")
+				client_settings.link.frameworks:Add("SDL2")
+				client_settings.cc.includes:Add("/Library/Frameworks/SDL2.framework/Headers")
 			end
 
 			if option.use_winlib > 0 then
@@ -47,8 +47,8 @@ SDL = {
 				else
 					settings.link.libpath:Add(SDL.basepath .. "/lib64")
 				end
-				settings.link.libs:Add("SDL")
-				settings.link.libs:Add("SDLmain")
+				settings.link.libs:Add("SDL2")
+				settings.link.libs:Add("SDLmain2")
 			end
 		end
 		

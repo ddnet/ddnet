@@ -793,7 +793,7 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_DbgResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
-	return m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags);
+	return m_pBackend->Init("DDNet Client", g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
 }
 
 int CGraphics_Threaded::InitWindow()
@@ -962,7 +962,7 @@ void CGraphics_Threaded::WaitForIdle()
 	m_pBackend->WaitForIdle();
 }
 
-int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes)
+int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
 {
 	if(g_Config.m_GfxDisplayAllModes)
 	{
@@ -978,7 +978,7 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes)
 	mem_zero(&Image, sizeof(Image));
 
 	int NumModes = 0;
-	CCommandBuffer::SCommand_VideoModes Cmd;
+	CCommandBuffer::SCommand_VideoModes Cmd(Screen);
 	Cmd.m_pModes = pModes;
 	Cmd.m_MaxModes = MaxModes;
 	Cmd.m_pNumModes = &NumModes;

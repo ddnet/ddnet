@@ -797,7 +797,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	static const int MAX_RESOLUTIONS = 256;
 	static CVideoMode s_aModes[MAX_RESOLUTIONS];
-	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS);
+	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 	static int s_GfxScreenWidth = g_Config.m_GfxScreenWidth;
 	static int s_GfxScreenHeight = g_Config.m_GfxScreenHeight;
 	static int s_GfxColorDepth = g_Config.m_GfxColorDepth;
@@ -816,7 +816,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxDisplayAllModes, Localize("Show only supported"), g_Config.m_GfxDisplayAllModes^1, &Button))
 	{
 		g_Config.m_GfxDisplayAllModes ^= 1;
-		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS);
+		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 	}
 
 	// display mode list

@@ -2569,10 +2569,7 @@ void CClient::Run()
 
 	// init graphics
 	{
-		if(g_Config.m_GfxThreadedOld)
-			m_pGraphics = CreateEngineGraphicsThreaded();
-		else
-			m_pGraphics = CreateEngineGraphics();
+		m_pGraphics = CreateEngineGraphicsThreaded();
 
 		bool RegisterFail = false;
 		RegisterFail = RegisterFail || !Kernel()->RegisterInterface(static_cast<IEngineGraphics*>(m_pGraphics)); // register graphics as both
@@ -2736,19 +2733,19 @@ void CClient::Run()
 		}
 
 		// panic quit button
-		if(CtrlShiftKey('q', LastQ))
+		if(CtrlShiftKey(KEY_Q, LastQ))
 		{
 			Quit();
 			break;
 		}
 
-		if(CtrlShiftKey('d', LastD))
+		if(CtrlShiftKey(KEY_D, LastD))
 			g_Config.m_Debug ^= 1;
 
-		if(CtrlShiftKey('g', LastG))
+		if(CtrlShiftKey(KEY_G, LastG))
 			g_Config.m_DbgGraphs ^= 1;
 
-		if(CtrlShiftKey('e', LastE))
+		if(CtrlShiftKey(KEY_E, LastE))
 		{
 			g_Config.m_ClEditor = g_Config.m_ClEditor^1;
 			Input()->MouseModeRelative();
