@@ -620,6 +620,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int Screen, int *pWidth
 
 	SDL_GetWindowSize(m_pWindow, pWidth, pHeight);
 
+	SDL_SetWindowGrab(m_pWindow, SDL_TRUE);
+
 	m_GLContext = SDL_GL_CreateContext(m_pWindow);
 
 	if(m_GLContext == NULL)
