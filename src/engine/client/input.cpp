@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <iostream>
 #include "SDL.h"
 
 #include <base/system.h>
@@ -48,9 +49,8 @@ CInput::CInput()
 void CInput::Init()
 {
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
-	SDL_StartTextInput();
 
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	MouseModeRelative();
 }
 
 void CInput::MouseRelative(float *x, float *y)
@@ -153,11 +153,17 @@ int CInput::Update()
 			{
 				case SDL_TEXTINPUT:
 				{
-					int TextLength, i;
-					TextLength = strlen(Event.text.text);
-					for(i = 0; i < TextLength; i++)
+					const char *text = Event.text.text;
+					std::cout << text << std::endl;
+					std::cout << text[0] << " " << text[1] << " " << text[2] << std::endl;
+					while(*text)
 					{
-						AddEvent(Event.text.text[i], 0, 0);
+						int Code = str_utf8_decode(&text);
+
+						if(Code == -1)
+							break;
+
+						AddEvent(Code, 0, 0);
 					}
 				}
 
