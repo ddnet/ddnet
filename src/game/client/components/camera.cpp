@@ -136,7 +136,7 @@ void CCamera::ToggleDynamic()
 		g_Config.m_ClMouseFollowfactor = 0;
 		g_Config.m_ClMouseMaxDistance = g_Config.m_ClDefaultMouseMaxDistance;
 		g_Config.m_ClMouseDeadzone = 0;
-		if(g_Config.m_ClDynCamMousesens && s_OldMousesens)
+		if(g_Config.m_ClDyncamMousesens && s_OldMousesens)
 		{
 			g_Config.m_InpMousesens = s_OldMousesens;
 		}
@@ -144,12 +144,12 @@ void CCamera::ToggleDynamic()
 	else
 	{
 		s_OldMousesens = g_Config.m_InpMousesens;
-		g_Config.m_ClMouseFollowfactor = g_Config.m_ClDynCamFollowFactor;
-		g_Config.m_ClMouseMaxDistance = g_Config.m_ClDynCamMaxDistance;
-		g_Config.m_ClMouseDeadzone = g_Config.m_ClDynCamDeadZone;
-		if(g_Config.m_ClDynCamMousesens)
+		g_Config.m_ClMouseFollowfactor = g_Config.m_ClDyncamFollowFactor;
+		g_Config.m_ClMouseMaxDistance = g_Config.m_ClDyncamMaxDistance;
+		g_Config.m_ClMouseDeadzone = g_Config.m_ClDyncamDeadzone;
+		if(g_Config.m_ClDyncamMousesens)
 		{
-			g_Config.m_InpMousesens = g_Config.m_ClDynCamMousesens;
+			g_Config.m_InpMousesens = g_Config.m_ClDyncamMousesens;
 		}
 	}
 }
