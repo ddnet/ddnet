@@ -190,5 +190,6 @@ public:
 	virtual void Maximize();
 	virtual int WindowActive();
 	virtual int WindowOpen();
+	virtual void SetWindowGrab(bool Grab);
 	virtual void NotifyWindow();
 };

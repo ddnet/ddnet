@@ -905,6 +905,11 @@ int CGraphics_Threaded::WindowOpen()
 	return m_pBackend->WindowOpen();
 }
 
+void CGraphics_Threaded::SetWindowGrab(bool Grab)
+{
+	return m_pBackend->SetWindowGrab(Grab);
+}
+
 void CGraphics_Threaded::NotifyWindow()
 {
 	return m_pBackend->NotifyWindow();

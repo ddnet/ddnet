@@ -145,6 +145,7 @@ public:
 	virtual bool IsIdle() = 0;
 	virtual void WaitForIdle() = 0;
 
+	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 };
 

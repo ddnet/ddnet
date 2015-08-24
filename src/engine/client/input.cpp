@@ -76,12 +76,14 @@ void CInput::MouseModeAbsolute()
 {
 	m_InputGrabbed = 0;
 	SDL_SetRelativeMouseMode(SDL_FALSE);
+	Graphics()->SetWindowGrab(SDL_FALSE);
 }
 
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = 1;
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+	Graphics()->SetWindowGrab(true);
 }
 
 int CInput::MouseDoubleClick()

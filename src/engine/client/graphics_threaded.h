@@ -313,6 +313,7 @@ public:
 	virtual void Maximize() = 0;
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
+	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
 
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
@@ -430,6 +431,7 @@ public:
 	virtual int WindowActive();
 	virtual int WindowOpen();
 
+	virtual void SetWindowGrab(bool Grab);
 	virtual void NotifyWindow();
 
 	virtual int Init();
