@@ -447,6 +447,11 @@ void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pComma
 
 void CCommandProcessorFragment_SDL::Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand)
 {
+	// TODO: Currently breaks some text fields
+	//int Width, Height;
+	//SDL_GetWindowSize(m_pWindow, &Width, &Height);
+	//glViewport(((float)Width-(float)g_Config.m_GfxScreenWidth)/2, ((float)Height-(float)g_Config.m_GfxScreenHeight)/2, (float)g_Config.m_GfxScreenWidth, (float)g_Config.m_GfxScreenHeight);
+
 	SDL_GL_SwapWindow(m_pWindow);
 
 	if(pCommand->m_Finish)
