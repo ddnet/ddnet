@@ -110,9 +110,6 @@ int CInput::KeyState(int Key)
 
 int CInput::Update()
 {
-	if(m_InputGrabbed && !Graphics()->WindowActive())
-		MouseModeAbsolute();
-
 	if(m_InputDispatched)
 	{
 		// clear and begin count on the other one
