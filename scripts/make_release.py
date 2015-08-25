@@ -68,7 +68,7 @@ if include_data and not use_bundle:
 	copydir("data", package_dir)
 	if platform[:3] == "win":
 		shutil.copy("other/config_directory.bat", package_dir)
-		shutil.copy("SDL.dll", package_dir)
+		shutil.copy("SDL2.dll", package_dir)
 		shutil.copy("freetype.dll", package_dir)
 		if platform == "win32":
 		    shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
