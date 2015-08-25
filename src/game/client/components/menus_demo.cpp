@@ -807,7 +807,195 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, -1);
 	}
 
-	static int s_DemoListId = 0;
+	// demo list
+
+	CUIRect Headers;
+
+	ListBox.HSplitTop(ms_ListheaderHeight, &Headers, &ListBox);
+
+	struct CColumn
+	{
+		int m_ID;
+		int m_Sort;
+		CLocConstString m_Caption;
+		int m_Direction;
+		float m_Width;
+		int m_Flags;
+		CUIRect m_Rect;
+		CUIRect m_Spacer;
+	};
+
+	enum
+	{
+		COL_DEMONAME=0,
+		COL_DATE,
+
+		SORT_DEMONAME,
+		SORT_DATE,
+	};
+
+	static CColumn s_aCols[] = {
+		{COL_DEMONAME,		SORT_DEMONAME,		"Demo",		0, 0.0f, 0, {0}, {0}},
+		{COL_DATE,	SORT_DATE,	"Date",		1, 300.0f, 0, {0}, {0}}
+	};
+
+
+	RenderTools()->DrawUIRect(&Headers, vec4(0.0f,0,0,0.15f), 0, 0);
+
+	int NumCols = sizeof(s_aCols)/sizeof(CColumn);
+
+	// do layout
+	for(int i = 0; i < NumCols; i++)
+	{
+		if(s_aCols[i].m_Direction == -1)
+		{
+			Headers.VSplitLeft(s_aCols[i].m_Width, &s_aCols[i].m_Rect, &Headers);
+
+			if(i+1 < NumCols)
+			{
+				//Cols[i].flags |= SPACER;
+				Headers.VSplitLeft(2, &s_aCols[i].m_Spacer, &Headers);
+			}
+		}
+	}
+
+	for(int i = NumCols-1; i >= 0; i--)
+	{
+		if(s_aCols[i].m_Direction == 1)
+		{
+			Headers.VSplitRight(s_aCols[i].m_Width, &Headers, &s_aCols[i].m_Rect);
+			Headers.VSplitRight(2, &Headers, &s_aCols[i].m_Spacer);
+		}
+	}
+
+	for(int i = 0; i < NumCols; i++)
+	{
+		if(s_aCols[i].m_Direction == 0)
+			s_aCols[i].m_Rect = Headers;
+	}
+
+	// do headers
+	for(int i = 0; i < NumCols; i++)
+	{
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
+		{
+			if(s_aCols[i].m_Sort != -1)
+			{
+				if(g_Config.m_BrSort == s_aCols[i].m_Sort)
+					g_Config.m_BrSortOrder ^= 1;
+				else
+					g_Config.m_BrSortOrder = 0;
+				g_Config.m_BrSort = s_aCols[i].m_Sort;
+			}
+		}
+	}
+	
+	CUIRect OriginalView = ListBox;
+	int NewSelected = -1;
+	int ItemIndex = -1;
+
+	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
+	/*{
+		CListboxItem Item = UiDoListboxNextItem((void*)(&r.front()));
+		if(Item.m_Visible)
+		{
+			Item.m_Rect.VSplitLeft(Item.m_Rect.h, &FileIcon, &Item.m_Rect);
+			Item.m_Rect.VSplitLeft(5.0f, 0, &Item.m_Rect);
+			DoButton_Icon(IMAGE_FILEICONS, r.front().m_IsDir?SPRITE_FILE_FOLDER:SPRITE_FILE_DEMO1, &FileIcon);
+			UI()->DoLabel(&Item.m_Rect, r.front().m_aName, Item.m_Rect.h*ms_FontmodHeight, -1);
+		}
+	}*/
+	{
+		ItemIndex++;
+
+		CUIRect Row;
+		CUIRect SelectHitBox;
+
+		ListBox.HSplitTop(ms_ListheaderHeight, &Row, &ListBox);
+		SelectHitBox = Row;
+
+		int Selected = str_comp(g_Config.m_UiDemoSelected, r.front().m_aName) == 0;
+
+		// make sure that only those in view can be selected
+		if(Row.y+Row.h > OriginalView.y && Row.y < OriginalView.y+OriginalView.h)
+		{
+			if(Selected)
+			{
+				CUIRect r = Row;
+				r.Margin(1.5f, &r);
+				RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+			}
+
+			// clip the selection
+			if(SelectHitBox.y < OriginalView.y) // top
+			{
+				SelectHitBox.h -= OriginalView.y-SelectHitBox.y;
+				SelectHitBox.y = OriginalView.y;
+			}
+			else if(SelectHitBox.y+SelectHitBox.h > OriginalView.y+OriginalView.h) // bottom
+				SelectHitBox.h = OriginalView.y+OriginalView.h-SelectHitBox.y;
+
+			if(UI()->DoButtonLogic(r.front().m_aName /* TODO: */, "", Selected, &SelectHitBox))
+			{
+				NewSelected = ItemIndex;
+				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
+#if defined(__ANDROID__)
+				if(NewSelected == m_DoubleClickIndex)
+					DoubleClicked = 1;
+#endif
+				m_DoubleClickIndex = NewSelected;
+			}
+		}
+		else
+		{
+			// reset active item, if not visible
+			//if(UI()->ActiveItem() == pItem)
+			//	UI()->SetActiveItem(0);
+
+			// don't render invisible items
+			continue;
+		}
+
+		for(int c = 0; c < NumCols; c++)
+		{
+			CUIRect Button;
+			char aTemp[64];
+			Button.x = s_aCols[c].m_Rect.x;
+			Button.y = Row.y;
+			Button.h = Row.h;
+			Button.w = s_aCols[c].m_Rect.w;
+
+			int ID = s_aCols[c].m_ID;
+
+			if(ID == COL_DEMONAME)
+			{
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+				Cursor.m_LineWidth = Button.w;
+
+				TextRender()->TextEx(&Cursor, r.front().m_aName, -1);
+
+			}
+			else if (ID == COL_DATE)
+			{
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+				Cursor.m_LineWidth = Button.w;
+
+				TextRender()->TextEx(&Cursor, "somedate", -1);
+			}
+
+		}
+	}
+
+/*	CUIRect Scroll;
+#if defined(__ANDROID__)
+	View.VSplitRight(50, &View, &Scroll);
+#else
+	View.VSplitRight(15, &View, &Scroll);
+#endif*/
+
+	/*static int s_DemoListId = 0;
 	static float s_ScrollValue = 0;
 #if defined(__ANDROID__)
 	UiDoListboxStart(&s_DemoListId, &ListBox, 50.0f, Localize("Demos"), aFooterLabel, m_lDemos.size(), 1, m_DemolistSelectedIndex, s_ScrollValue);
@@ -824,10 +1012,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			DoButton_Icon(IMAGE_FILEICONS, r.front().m_IsDir?SPRITE_FILE_FOLDER:SPRITE_FILE_DEMO1, &FileIcon);
 			UI()->DoLabel(&Item.m_Rect, r.front().m_aName, Item.m_Rect.h*ms_FontmodHeight, -1);
 		}
-	}
+	}*/
 	bool Activated = false;
-	m_DemolistSelectedIndex = UiDoListboxEnd(&s_ScrollValue, &Activated);
-	DemolistOnUpdate(false);
+	/*m_DemolistSelectedIndex = UiDoListboxEnd(&s_ScrollValue, &Activated);
+	DemolistOnUpdate(false);*/
 
 	static int s_RefreshButton = 0;
 	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect))
