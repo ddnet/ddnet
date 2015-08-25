@@ -574,7 +574,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int Screen, int *pWidth
 		"only one of borderless and fullscreen may be activated at the same time");
 
 	// set flags
-	int SdlFlags = SDL_WINDOW_OPENGL;
+	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
 
@@ -621,6 +621,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int Screen, int *pWidth
 	SDL_GetWindowSize(m_pWindow, pWidth, pHeight);
 
 	m_GLContext = SDL_GL_CreateContext(m_pWindow);
+
+	SDL_ShowWindow(m_pWindow);
 
 	if(m_GLContext == NULL)
 	{
