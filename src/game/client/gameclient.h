@@ -344,6 +344,7 @@ public:
 	class CItems *m_pItems;
 	class CMapLayers *m_pMapLayersBackGround;
 	class CMapLayers *m_pMapLayersForeGround;
+	class CBackground *m_pBackGround;
 
 	class CMapSounds *m_pMapSounds;
 

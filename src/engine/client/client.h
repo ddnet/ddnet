@@ -195,9 +195,6 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	char m_aDDNetSrvListToken[4];
 	bool m_DDNetSrvListTokenSet;
 
-    CImageInfo* m_pBgImg;
-    int m_TexIDBg;
-
 public:
 	IEngine *Engine() { return m_pEngine; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
