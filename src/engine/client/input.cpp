@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <iostream>
 #include "SDL.h"
 
 #include <base/system.h>
@@ -67,6 +66,8 @@ void CInput::MouseRelative(float *x, float *y)
 	if(m_InputGrabbed)
 		SDL_GetRelativeMouseState(&nx,&ny);
 
+	// This might force us to double x and y on X11 when SDL >= 2.0.4:
+	// https://bugzilla.libsdl.org/show_bug.cgi?id=2963
 	*x = nx*Sens;
 	*y = ny*Sens;
 #endif
@@ -151,8 +152,8 @@ int CInput::Update()
 				case SDL_TEXTINPUT:
 				{
 					const char *text = Event.text.text;
-					std::cout << text << std::endl;
-					std::cout << text[0] << " " << text[1] << " " << text[2] << std::endl;
+					//std::cout << text << std::endl;
+					//std::cout << text[0] << " " << text[1] << " " << text[2] << std::endl;
 					while(*text)
 					{
 						int Code = str_utf8_decode(&text);
