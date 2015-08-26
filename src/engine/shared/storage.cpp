@@ -439,6 +439,11 @@ IStorage *CreateLocalStorage()
 	CStorage *pStorage = new CStorage();
 	if(pStorage)
 	{
+		if(!fs_getcwd(pStorage->m_aCurrentdir, sizeof(pStorage->m_aCurrentdir)))
+		{
+			delete pStorage;
+			return NULL;
+		}
 		pStorage->AddPath("$CURRENTDIR");
 	}
 	return pStorage;
