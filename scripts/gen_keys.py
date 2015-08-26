@@ -47,7 +47,7 @@ print >>f, "\tKEY_MOUSE_8 = %d,"%(highestid+8); keynames[highestid+8] = "mouse8"
 print >>f, "\tKEY_MOUSE_WHEEL_UP = %d,"%(highestid+9); keynames[highestid+9] = "mousewheelup"
 print >>f, "\tKEY_MOUSE_WHEEL_DOWN = %d,"%(highestid+10); keynames[highestid+10] = "mousewheeldown"
 print >>f, "\tKEY_MOUSE_9 = %d,"%(highestid+11); keynames[highestid+11] = "mouse9"
-print >>f, "\tKEY_LAST,"
+print >>f, "\tKEY_LAST = 512,"
 
 print >>f, "};"
 print >>f, ""
