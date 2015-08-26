@@ -725,7 +725,7 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 	#if defined(CONF_FAMILY_WINDOWS)
 		FLASHWINFO desc;
 		desc.cbSize = sizeof(desc);
-		desc.hwnd = info.window;
+		desc.hwnd = info.info.win.window;
 		desc.dwFlags = FLASHW_TRAY;
 		desc.uCount = 3; // flash 3 times
 		desc.dwTimeout = 0;
