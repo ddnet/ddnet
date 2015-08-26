@@ -199,6 +199,12 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 
+#if defined(CONF_FAMILY_WINDOWS)
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClShowConsole, Localize("Show console window"), g_Config.m_ClShowConsole, &Button))
+			g_Config.m_ClShowConsole ^= 1;
+#endif
+
 		// auto statboard screenshot
 		{
 			Right.HSplitTop(20.0f, 0, &Right); //
