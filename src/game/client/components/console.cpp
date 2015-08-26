@@ -95,31 +95,34 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	if(m_pGameConsole->Input()->KeyPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyDown(KEY_V))
 	{
 		const char *Text = m_pGameConsole->Input()->GetClipboardText();
-		char Line[256];
-		int i, Begin = 0;
-		for(i = 0; i < str_length(Text); i++)
+		if(Text)
 		{
-			if(Text[i] == '\n')
+			char Line[256];
+			int i, Begin = 0;
+			for(i = 0; i < str_length(Text); i++)
 			{
-				if(i == Begin)
+				if(Text[i] == '\n')
 				{
-					Begin++;
-					continue;
+					if(i == Begin)
+					{
+						Begin++;
+						continue;
+					}
+					int max = i - Begin + 1;
+					if(max > (int)sizeof(Line))
+						max = sizeof(Line);
+					str_copy(Line, Text + Begin, max);
+					Begin = i+1;
+					ExecuteLine(Line);
 				}
-				int max = i - Begin + 1;
-				if(max > (int)sizeof(Line))
-					max = sizeof(Line);
-				str_copy(Line, Text + Begin, max);
-				Begin = i+1;
-				ExecuteLine(Line);
 			}
+			int max = i - Begin + 1;
+			if(max > (int)sizeof(Line))
+				max = sizeof(Line);
+			str_copy(Line, Text + Begin, max);
+			Begin = i+1;
+			m_Input.Add(Line);
 		}
-		int max = i - Begin + 1;
-		if(max > (int)sizeof(Line))
-			max = sizeof(Line);
-		str_copy(Line, Text + Begin, max);
-		Begin = i+1;
-		m_Input.Add(Line);
 	}
 
 	if(m_pGameConsole->Input()->KeyPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyDown(KEY_C))

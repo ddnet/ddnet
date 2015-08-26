@@ -241,16 +241,19 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_V))
 		{
 			const char *Text = Input()->GetClipboardText();
-			int CharsLeft = StrSize - str_length(pStr);
-			int Offset = str_length(pStr);
-			for(int i = 0; i < str_length(Text) && i <= CharsLeft; i++)
+			if(Text)
 			{
-				if(Text[i] == '\n')
-					pStr[i + Offset] = ' ';
-				else
-					pStr[i + Offset] = Text[i];
+				int CharsLeft = StrSize - str_length(pStr);
+				int Offset = str_length(pStr);
+				for(int i = 0; i < str_length(Text) && i <= CharsLeft; i++)
+				{
+					if(Text[i] == '\n')
+						pStr[i + Offset] = ' ';
+					else
+						pStr[i + Offset] = Text[i];
+				}
+				s_AtIndex = str_length(pStr);
 			}
-			s_AtIndex = str_length(pStr);
 		}
 
 		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_C))

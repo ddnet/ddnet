@@ -116,30 +116,33 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 	if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_V))
 	{
-		const char *text = Input()->GetClipboardText();
-		// if the text has more than one line, we send all lines except the last one
-		// the last one is set as in the text field
-		char Line[256];
-		int i, Begin = 0;
-		for(i = 0; i < str_length(text); i++)
+		const char *Text = Input()->GetClipboardText();
+		if(Text)
 		{
-			if(text[i] == '\n')
+			// if the text has more than one line, we send all lines except the last one
+			// the last one is set as in the text field
+			char Line[256];
+			int i, Begin = 0;
+			for(i = 0; i < str_length(Text); i++)
 			{
-				int max = i - Begin + 1;
-				if(max > (int)sizeof(Line))
-					max = sizeof(Line);
-				str_copy(Line, text + Begin, max);
-				Begin = i+1;
-				SayChat(Line);
-				while(text[i] == '\n') i++;
+				if(Text[i] == '\n')
+				{
+					int max = i - Begin + 1;
+					if(max > (int)sizeof(Line))
+						max = sizeof(Line);
+					str_copy(Line, Text + Begin, max);
+					Begin = i+1;
+					SayChat(Line);
+					while(Text[i] == '\n') i++;
+				}
 			}
+			int max = i - Begin + 1;
+			if(max > (int)sizeof(Line))
+				max = sizeof(Line);
+			str_copy(Line, Text + Begin, max);
+			Begin = i+1;
+			m_Input.Add(Line);
 		}
-		int max = i - Begin + 1;
-		if(max > (int)sizeof(Line))
-			max = sizeof(Line);
-		str_copy(Line, text + Begin, max);
-		Begin = i+1;
-		m_Input.Add(Line);
 	}
 
 	if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_C))
