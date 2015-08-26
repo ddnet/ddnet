@@ -82,8 +82,10 @@ void CBackground::OnRender()
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
 	vec2 Center = m_pClient->m_pCamera->m_Center;
+	
+	bool PassedGameLayer = false;
 
-	for(int g = 0; g < m_pLayers->m_pLayers->NumGroups(); g++)
+	for(int g = 0; g < m_pLayers->m_pLayers->NumGroups() && !PassedGameLayer; g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->m_pLayers->GetGroup(g);
 		
@@ -93,15 +95,6 @@ void CBackground::OnRender()
 			dbg_msg("MapLayers", "This is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
 			dbg_msg("MapLayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
 			continue;
-		}
-		
-		// load group name
-		if(pGroup->m_Version >= 3)
-		{
-			char Buf[32];
-			IntsToStr(pGroup->m_aName, sizeof(Buf)/sizeof(int), Buf);
-			if(str_comp(Buf, "Game") == 0)
-				return;
 		}
 
 		if(!g_Config.m_GfxNoclip && pGroup->m_Version >= 2 && pGroup->m_UseClipping)
@@ -124,24 +117,49 @@ void CBackground::OnRender()
 		else
 			m_pLayers->MapScreenToGroup(Center.x, Center.y, pGroup, m_pClient->m_pCamera->m_Zoom);
 		
-		if(g_Config.m_ClOverlayEntities == 100 && g_Config.m_ClBackgroundEntities)
+		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			for(int l = 0; l < pGroup->m_NumLayers; l++)
+			CMapItemLayer *pLayer = m_pLayers->m_pLayers->GetLayer(pGroup->m_StartLayer+l);
+			// skip rendering if detail layers if not wanted
+			if(pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail)
+				continue;
+			
+			if(pLayer == (CMapItemLayer*)m_pLayers->m_pLayers->GameLayer())
 			{
-				CMapItemLayer *pLayer = m_pLayers->m_pLayers->GetLayer(pGroup->m_StartLayer+l);
-				// skip rendering if detail layers if not wanted
-				if(pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail)
-					continue;
-					
-				if(pLayer->m_Type == LAYERTYPE_TILES)
-					continue;
+				PassedGameLayer = true;
+				break;
+			}
 				
+			if(pLayer->m_Type == LAYERTYPE_TILES && g_Config.m_ClBackgroundShowTilesLayers)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				if(pTMap->m_Image == -1)
+					Graphics()->TextureSet(-1);
+				else
+					Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
+
+				CTile *pTiles = (CTile *)m_pMap->GetData(pTMap->m_Data);
+				unsigned int Size = m_pMap->GetUncompressedDataSize(pTMap->m_Data);
+
+				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
+				{
+					Graphics()->BlendNone();
+					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
+					RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE,
+													m_pLayers->EnvelopeEval, m_pLayers, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+					Graphics()->BlendNormal();
+					RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
+													m_pLayers->EnvelopeEval, m_pLayers, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS && g_Config.m_ClShowQuads)
+			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 				if(pQLayer->m_Image == -1)
 					Graphics()->TextureSet(-1);
 				else
 					Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));
-
+	
 				CQuad *pQuads = (CQuad *)m_pMap->GetDataSwapped(pQLayer->m_Data);
 				
 				Graphics()->BlendNone();
