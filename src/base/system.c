@@ -2308,7 +2308,7 @@ int str_utf8_decode(const char **ptr)
 		unsigned char byte = str_byte_next(ptr);
 		if(utf8_bytes_needed == 0)
 		{
-			if(0x00 <= byte && byte <= 0x7F)
+			if(byte <= 0x7F)
 			{
 				return byte;
 			}
