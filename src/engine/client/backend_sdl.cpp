@@ -7,6 +7,7 @@
 #endif
 
 #include <base/detect.h>
+#include <stdlib.h>
 #include "SDL.h"
 #include "SDL_syswm.h"
 #if defined(__ANDROID__)
