@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "SDL.h"
-#include <stdlib.h>
 
 #include <base/system.h>
 #include <engine/shared/config.h>
@@ -103,7 +102,7 @@ const char* CInput::GetClipboardText()
 {
 	if(m_pClipboardText)
 	{
-		free(m_pClipboardText);
+		SDL_free(m_pClipboardText);
 	}
 	m_pClipboardText = SDL_GetClipboardText();
 	return m_pClipboardText;
