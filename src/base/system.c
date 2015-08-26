@@ -1695,7 +1695,7 @@ int fs_is_dir(const char *path)
 
 time_t fs_getmtime(const char *path)
 {
-  struct stat sb;
+	struct stat sb;
 	if (stat(path, &sb) == -1)
 		return 0;
 
