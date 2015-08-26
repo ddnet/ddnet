@@ -43,6 +43,7 @@ CInput::CInput()
 	m_NumEvents = 0;
 
 	m_VideoRestartNeeded = 0;
+	m_pClipboardText = NULL;
 }
 
 void CInput::Init()
