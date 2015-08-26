@@ -17,10 +17,11 @@
 void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
+
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
-	}
+	else
+		pSelf->m_Active = false;
 }
 
 void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
