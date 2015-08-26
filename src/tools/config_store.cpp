@@ -108,7 +108,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	}
 
 	Reader.Close();
-	if(!Writer.Open(pStorage, pMapName))
+	if(!Writer.OpenFile(pStorage, pMapName))
 	{
 		dbg_msg("config_store", "couldn't open map file '%s' for writing", pMapName);
 		return;
