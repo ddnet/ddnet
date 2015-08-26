@@ -168,8 +168,6 @@ int CInput::Update()
 				case SDL_TEXTINPUT:
 				{
 					const char *text = Event.text.text;
-					//std::cout << text << std::endl;
-					//std::cout << text[0] << " " << text[1] << " " << text[2] << std::endl;
 					while(*text)
 					{
 						int Code = str_utf8_decode(&text);
@@ -183,11 +181,15 @@ int CInput::Update()
 
 				// handle keys
 				case SDL_KEYDOWN:
-					Key = SDL_GetScancodeFromName(SDL_GetKeyName(Event.key.keysym.sym));
+					if(Event.key.keysym.sym == KEY_UNKNOWN)
+						continue;
+					Key = Event.key.keysym.scancode;
 					break;
 				case SDL_KEYUP:
+					if(Event.key.keysym.sym == KEY_UNKNOWN)
+						continue;
 					Action = IInput::FLAG_RELEASE;
-					Key = SDL_GetScancodeFromName(SDL_GetKeyName(Event.key.keysym.sym));
+					Key = Event.key.keysym.scancode;
 					break;
 
 				// handle mouse buttons
