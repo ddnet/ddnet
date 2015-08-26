@@ -3350,7 +3350,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!g_Config.m_ClShowConsole)
-		ShowWindow(GetConsoleWindow(), SW_HIDE);
+		FreeConsole();
 #endif
 
 	// run the client
