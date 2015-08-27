@@ -644,7 +644,7 @@ int CMenus::UiDoListboxEnd(float *pScrollValue, bool *pItemActivated)
 	return gs_ListBoxNewSelected;
 }
 
-int CMenus::DemolistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
 	int Length = str_length(pName);
@@ -664,6 +664,7 @@ int CMenus::DemolistFetchCallback(const char *pName, int IsDir, int StorageType,
 	{
 		str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-4));
 		Item.m_InfosLoaded = false;
+		Item.m_Date = Date;
 	}
 	Item.m_IsDir = IsDir != 0;
 	Item.m_StorageType = StorageType;
@@ -677,12 +678,34 @@ void CMenus::DemolistPopulate()
 	m_lDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorage::TYPE_ALL;
-	Storage()->ListDirectory(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
+	Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 	m_lDemos.sort_range();
 }
 
 void CMenus::DemolistOnUpdate(bool Reset)
 {
+	if (Reset)
+		g_Config.m_UiDemoSelected[0] = '\0';
+	else
+	{
+		bool Found = false;
+		int SelectedIndex = -1;
+		// search for selected index
+		for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
+		{
+			SelectedIndex++;
+
+			if (str_comp(g_Config.m_UiDemoSelected, r.front().m_aName) == 0)
+			{
+				Found = true;
+				break;
+			}
+		}
+
+		if (Found)
+			m_DemolistSelectedIndex = SelectedIndex;
+	}
+
 	m_DemolistSelectedIndex = Reset ? m_lDemos.size() > 0 ? 0 : -1 :
 										m_DemolistSelectedIndex >= m_lDemos.size() ? m_lDemos.size()-1 : m_DemolistSelectedIndex;
 	m_DemolistSelectedIsDir = m_DemolistSelectedIndex < 0 ? false : m_lDemos[m_DemolistSelectedIndex].m_IsDir;
@@ -807,6 +830,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, -1);
 	}
 
+
 	// demo list
 
 	CUIRect Headers;
@@ -827,18 +851,19 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	enum
 	{
-		COL_DEMONAME=0,
+		COL_ICON=0,
+		COL_DEMONAME,
 		COL_DATE,
 
-		SORT_DEMONAME,
+		SORT_DEMONAME=0,
 		SORT_DATE,
 	};
 
 	static CColumn s_aCols[] = {
+		{COL_ICON,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
 		{COL_DEMONAME,		SORT_DEMONAME,		"Demo",		0, 0.0f, 0, {0}, {0}},
-		{COL_DATE,	SORT_DATE,	"Date",		1, 300.0f, 0, {0}, {0}}
+		{COL_DATE,	SORT_DATE,	"Date",		1, 150.0f, 0, {0}, {0}},
 	};
-
 
 	RenderTools()->DrawUIRect(&Headers, vec4(0.0f,0,0,0.15f), 0, 0);
 
@@ -877,34 +902,66 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	// do headers
 	for(int i = 0; i < NumCols; i++)
 	{
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, g_Config.m_BrDemoSort == s_aCols[i].m_Sort, &s_aCols[i].m_Rect))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{
-				if(g_Config.m_BrSort == s_aCols[i].m_Sort)
-					g_Config.m_BrSortOrder ^= 1;
+				if(g_Config.m_BrDemoSort == s_aCols[i].m_Sort)
+					g_Config.m_BrDemoSortOrder ^= 1;
 				else
-					g_Config.m_BrSortOrder = 0;
-				g_Config.m_BrSort = s_aCols[i].m_Sort;
+					g_Config.m_BrDemoSortOrder = 0;
+				g_Config.m_BrDemoSort = s_aCols[i].m_Sort;
 			}
+
+			DemolistPopulate();
+			DemolistOnUpdate(false);
 		}
 	}
-	
+
+	// scrollbar
+	CUIRect Scroll;
+#if defined(__ANDROID__)
+	ListBox.VSplitRight(50, &ListBox, &Scroll);
+#else
+	ListBox.VSplitRight(15, &ListBox, &Scroll);
+#endif
+
+	int Num = (int)(ListBox.h/s_aCols[0].m_Rect.h) + 1;
+	static int s_ScrollBar = 0;
+	static float s_ScrollValue = 0;
+
+	Scroll.HMargin(5.0f, &Scroll);
+	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+
+	int ScrollNum = m_lDemos.size()-Num+1;
+	if(ScrollNum > 0)
+	{
+		if(m_ScrollOffset)
+		{
+			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
+			m_ScrollOffset = 0;
+		}
+		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&ListBox))
+			s_ScrollValue -= 3.0f/ScrollNum;
+		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&ListBox))
+			s_ScrollValue += 3.0f/ScrollNum;
+	}
+	else
+		ScrollNum = 0;
+
+	if(s_ScrollValue < 0) s_ScrollValue = 0;
+	if(s_ScrollValue > 1) s_ScrollValue = 1;
+
+	// set clipping
+	UI()->ClipEnable(&ListBox);
+
 	CUIRect OriginalView = ListBox;
+	ListBox.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
+
 	int NewSelected = -1;
 	int ItemIndex = -1;
 
 	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
-	/*{
-		CListboxItem Item = UiDoListboxNextItem((void*)(&r.front()));
-		if(Item.m_Visible)
-		{
-			Item.m_Rect.VSplitLeft(Item.m_Rect.h, &FileIcon, &Item.m_Rect);
-			Item.m_Rect.VSplitLeft(5.0f, 0, &Item.m_Rect);
-			DoButton_Icon(IMAGE_FILEICONS, r.front().m_IsDir?SPRITE_FILE_FOLDER:SPRITE_FILE_DEMO1, &FileIcon);
-			UI()->DoLabel(&Item.m_Rect, r.front().m_aName, Item.m_Rect.h*ms_FontmodHeight, -1);
-		}
-	}*/
 	{
 		ItemIndex++;
 
@@ -914,7 +971,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		ListBox.HSplitTop(ms_ListheaderHeight, &Row, &ListBox);
 		SelectHitBox = Row;
 
-		int Selected = str_comp(g_Config.m_UiDemoSelected, r.front().m_aName) == 0;
+		int Selected = ItemIndex == m_DemolistSelectedIndex;
 
 		// make sure that only those in view can be selected
 		if(Row.y+Row.h > OriginalView.y && Row.y < OriginalView.y+OriginalView.h)
@@ -939,19 +996,17 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				NewSelected = ItemIndex;
 				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
+				DemolistOnUpdate(false);
 #if defined(__ANDROID__)
 				if(NewSelected == m_DoubleClickIndex)
 					DoubleClicked = 1;
 #endif
+
 				m_DoubleClickIndex = NewSelected;
 			}
 		}
 		else
 		{
-			// reset active item, if not visible
-			//if(UI()->ActiveItem() == pItem)
-			//	UI()->SetActiveItem(0);
-
 			// don't render invisible items
 			continue;
 		}
@@ -967,7 +1022,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 			int ID = s_aCols[c].m_ID;
 
-			if(ID == COL_DEMONAME)
+			if (ID == COL_ICON)
+			{
+				DoButton_Icon(IMAGE_FILEICONS, r.front().m_IsDir?SPRITE_FILE_FOLDER:SPRITE_FILE_DEMO1, &Button);
+			}
+			else if(ID == COL_DEMONAME)
 			{
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
@@ -976,46 +1035,29 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				TextRender()->TextEx(&Cursor, r.front().m_aName, -1);
 
 			}
-			else if (ID == COL_DATE)
+			else if (ID == COL_DATE && !r.front().m_IsDir)
 			{
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
-				TextRender()->TextEx(&Cursor, "somedate", -1);
+				char aBuf[256];
+				str_timestamp_ex(r.front().m_Date, aBuf, sizeof(aBuf), "%Y-%m-%d %H:%M:%S");
+				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
-
 		}
 	}
 
-/*	CUIRect Scroll;
-#if defined(__ANDROID__)
-	View.VSplitRight(50, &View, &Scroll);
-#else
-	View.VSplitRight(15, &View, &Scroll);
-#endif*/
+	UI()->ClipDisable();
 
-	/*static int s_DemoListId = 0;
-	static float s_ScrollValue = 0;
-#if defined(__ANDROID__)
-	UiDoListboxStart(&s_DemoListId, &ListBox, 50.0f, Localize("Demos"), aFooterLabel, m_lDemos.size(), 1, m_DemolistSelectedIndex, s_ScrollValue);
-#else
-	UiDoListboxStart(&s_DemoListId, &ListBox, 17.0f, Localize("Demos"), aFooterLabel, m_lDemos.size(), 1, m_DemolistSelectedIndex, s_ScrollValue);
-#endif
-	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
-	{
-		CListboxItem Item = UiDoListboxNextItem((void*)(&r.front()));
-		if(Item.m_Visible)
-		{
-			Item.m_Rect.VSplitLeft(Item.m_Rect.h, &FileIcon, &Item.m_Rect);
-			Item.m_Rect.VSplitLeft(5.0f, 0, &Item.m_Rect);
-			DoButton_Icon(IMAGE_FILEICONS, r.front().m_IsDir?SPRITE_FILE_FOLDER:SPRITE_FILE_DEMO1, &FileIcon);
-			UI()->DoLabel(&Item.m_Rect, r.front().m_aName, Item.m_Rect.h*ms_FontmodHeight, -1);
-		}
-	}*/
+
 	bool Activated = false;
-	/*m_DemolistSelectedIndex = UiDoListboxEnd(&s_ScrollValue, &Activated);
-	DemolistOnUpdate(false);*/
+
+	if (m_EnterPressed || (Input()->MouseDoubleClick() && UI()->ActiveItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+	{
+		UI()->SetActiveItem(0);
+		Activated = true;
+	}
 
 	static int s_RefreshButton = 0;
 	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect))

@@ -230,6 +230,23 @@ public:
 		dbg_msg("storage", "warning no data directory found");
 	}
 
+
+	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_INFO_CALLBACK pfnCallback, void *pUser)
+	{
+		char aBuffer[MAX_PATH_LENGTH];
+		if(Type == TYPE_ALL)
+		{
+			// list all available directories
+			for(int i = 0; i < m_NumPaths; ++i)
+				fs_listdir_info(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
+		}
+		else if(Type >= 0 && Type < m_NumPaths)
+		{
+			// list wanted directory
+			fs_listdir_info(GetPath(Type, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, Type, pUser);
+		}
+	}
+
 	virtual void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser)
 	{
 		char aBuffer[MAX_PATH_LENGTH];
