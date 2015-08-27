@@ -1658,7 +1658,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 void CMenus::RenderSettingsDDRace(CUIRect MainView)
 {
-	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label;
+	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
 
 	MainView.HSplitTop(100.0f, &Demo , &MainView);
 
@@ -1835,7 +1835,25 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
 	}
-
+	
+	{
+		static float s_OffsetCode = 0.0f;
+		MainView.HSplitTop(30.0f, &Background, &MainView);
+		Background.HSplitTop(20.0f, &Background, 0);
+		Background.VMargin(5.0f, &Background);
+		Background.VSplitLeft(90.0f, &Label, &Left);
+		UI()->DoLabelScaled(&Label, Localize("Background"), 14.0f, -1);
+		Left.VSplitLeft(200.0f, &Button, &Left);
+		DoEditBox(g_Config.m_ClBackgroundEntities, &Button, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_OffsetCode);
+		
+		Left.VMargin(50.0f, &Left);
+		Left.VSplitLeft(15.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from background map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
+		{
+			g_Config.m_ClBackgroundShowTilesLayers ^= 1;
+		}
+	}
+	
 	MainView.HSplitTop(30.0f, &Label, &Miscellaneous);
 	UI()->DoLabelScaled(&Label, Localize("Miscellaneous"), 20.0f, -1);
 	Miscellaneous.VMargin(5.0f, &Miscellaneous);

@@ -6,6 +6,8 @@
 
 class CMapLayers : public CComponent
 {
+	friend class CBackground;
+	
 	CLayers *m_pLayers;	// todo refactor: maybe remove it and access it through client*
 	int m_Type;
 	int m_CurrentLocalTick;

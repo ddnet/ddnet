@@ -26,6 +26,7 @@
 
 #include "gameclient.h"
 
+#include "components/background.h"
 #include "components/binds.h"
 #include "components/broadcast.h"
 #include "components/camera.h"
@@ -95,6 +96,7 @@ static CMapImages gs_MapImages;
 
 static CMapLayers gs_MapLayersBackGround(CMapLayers::TYPE_BACKGROUND);
 static CMapLayers gs_MapLayersForeGround(CMapLayers::TYPE_FOREGROUND);
+static CBackground gs_BackGround;
 
 static CMapSounds gs_MapSounds;
 
@@ -153,6 +155,7 @@ void CGameClient::OnConsoleInit()
 	m_pItems = &::gs_Items;
 	m_pMapLayersBackGround = &::gs_MapLayersBackGround;
 	m_pMapLayersForeGround = &::gs_MapLayersForeGround;
+	m_pBackGround = &::gs_BackGround;
 
 	m_pMapSounds = &::gs_MapSounds;
 
@@ -174,6 +177,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pRaceDemo);
 	m_All.Add(m_pMapSounds);
 
+	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&gs_MapLayersBackGround); // first to render
 	m_All.Add(&m_pParticles->m_RenderTrail);
 	m_All.Add(m_pItems);
