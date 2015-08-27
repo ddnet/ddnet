@@ -10,6 +10,11 @@ class CBackground : public CComponent
 	bool m_Loaded;
 	char m_aMapName[128];
 	
+	//to avoid memory leak when switching to %current%
+	IEngineMap *m_pBackgroundMap; 
+	CLayers *m_pBackgroundLayers;
+	CMapImages *m_pBackgroundImages;
+	
 public:
 	CBackground();
 	~CBackground();
@@ -18,6 +23,7 @@ public:
 	virtual void OnMapLoad();
 	virtual void OnRender();
 	
+	void LoadBackground();
 };
 
 #endif

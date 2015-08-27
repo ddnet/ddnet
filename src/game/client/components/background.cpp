@@ -12,8 +12,11 @@ CBackground::CBackground()
 {
 	m_pLayers = new CMapLayers(CMapLayers::TYPE_BACKGROUND);
 	m_pLayers->m_pLayers = new CLayers;
+	m_pBackgroundLayers = m_pLayers->m_pLayers;
 	m_pImages = new CMapImages;
+	m_pBackgroundImages = m_pImages;
 	m_pMap = CreateEngineMap();
+	m_pBackgroundMap = m_pMap;
 	m_Loaded = false;
 	m_aMapName[0] = '\0';
 }
@@ -27,39 +30,47 @@ CBackground::~CBackground()
 
 void CBackground::OnInit()
 {
-	m_Loaded = false;
 	m_pImages->m_pClient = GameClient();
 	m_pLayers->m_pClient = GameClient();
+	Kernel()->ReregisterInterface(static_cast<IEngineMap*>(m_pMap));
 	str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
-	if(Kernel()->ReregisterInterface(static_cast<IEngineMap*>(m_pMap)))
+	if(str_comp(g_Config.m_ClBackgroundEntities, "%current%"))
+		LoadBackground();
+}
+
+void CBackground::LoadBackground()
+{
+	if(m_Loaded && m_pMap == m_pBackgroundMap)
+		m_pMap->Unload();
+		
+	m_Loaded = false;
+	m_pMap = m_pBackgroundMap;
+	m_pLayers->m_pLayers = m_pBackgroundLayers;
+	m_pImages = m_pBackgroundImages;
+	
+	str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
+	if(m_pMap->Load(aBuf))
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
-		if(m_pMap->Load(aBuf))
-		{
-			m_pLayers->m_pLayers->InitBackground(m_pMap);
-			m_pImages->LoadBackground(m_pMap);
-			str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
-			m_Loaded = true;
-		}
-		else if(!str_comp(g_Config.m_ClBackgroundEntities, "%current%"))
-		{
-			str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", Client()->GetCurrentMap(), Client()->GetCurrentMapCrc());
-			if(m_pMap->Load(aBuf))
-			{
-				m_pLayers->m_pLayers->InitBackground(m_pMap);
-				m_pImages->LoadBackground(m_pMap);
-				str_format(m_aMapName, sizeof(m_aMapName), "%s", "%current%");
-				m_Loaded = true;
-			}
-		}
+		m_pLayers->m_pLayers->InitBackground(m_pMap);
+		m_pImages->LoadBackground(m_pMap);
+        RenderTools()->RenderTilemapGenerateSkip(m_pLayers->m_pLayers);
+		m_Loaded = true;
+	}
+	else if(str_comp(g_Config.m_ClBackgroundEntities, "%current%") == 0)
+	{
+        m_pMap = Kernel()->RequestInterface<IEngineMap>();
+		m_pLayers->m_pLayers = GameClient()->Layers();
+		m_pImages = GameClient()->m_pMapimages;
+		m_Loaded = true;
 	}
 }
 
 void CBackground::OnMapLoad()
 {
 	if(str_comp(g_Config.m_ClBackgroundEntities, "%current%") == 0)
-		OnInit();
+		LoadBackground();
 }
 
 //code is from CMapLayers::OnRender()
@@ -67,7 +78,7 @@ void CBackground::OnRender()
 {
 	//probably not the best place for this
 	if(str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
-		OnInit();
+		LoadBackground();
 		
 	if(!m_Loaded)
 		return;
@@ -168,10 +179,9 @@ void CBackground::OnRender()
 				RenderTools()->ForceRenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, m_pLayers->EnvelopeEval, m_pLayers);
 			}
 		}
+		if(!g_Config.m_GfxNoclip)
+			Graphics()->ClipDisable();
 	}
-	
-	if(!g_Config.m_GfxNoclip)
-		Graphics()->ClipDisable();
 
 	// reset the screen like it was before
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
