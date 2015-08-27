@@ -221,6 +221,11 @@ struct CMapItemInfo
 	int m_License;
 } ;
 
+struct CMapItemInfoSettings : CMapItemInfo
+{
+	int m_Settings;
+} ;
+
 struct CMapItemImage
 {
 	int m_Version;

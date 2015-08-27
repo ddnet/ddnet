@@ -174,6 +174,7 @@ protected:
 public:
 	virtual void OnInit() = 0;
 	virtual void OnConsoleInit() = 0;
+	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
 	virtual void OnShutdown() = 0;
 
 	virtual void OnTick() = 0;

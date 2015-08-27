@@ -195,7 +195,7 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
-
+	void ResetServerGameSettings();
 	// DDRace
 
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);

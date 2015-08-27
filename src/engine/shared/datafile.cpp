@@ -452,13 +452,16 @@ CDataFileWriter::~CDataFileWriter()
 	m_pDatas = 0;
 }
 
-bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename)
+bool CDataFileWriter::OpenFile(class IStorage *pStorage, const char *pFilename)
 {
 	dbg_assert(!m_File, "a file already exists");
 	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(!m_File)
-		return false;
+	return m_File != 0;
+}
 
+void CDataFileWriter::Init()
+{
+	dbg_assert(!m_File, "a file already exists");
 	m_NumItems = 0;
 	m_NumDatas = 0;
 	m_NumItemTypes = 0;
@@ -469,14 +472,16 @@ bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename)
 		m_pItemTypes[i].m_First = -1;
 		m_pItemTypes[i].m_Last = -1;
 	}
+}
 
-	return true;
+bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename)
+{
+	Init();
+	return OpenFile(pStorage, pFilename);
 }
 
 int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)
 {
-	if(!m_File) return 0;
-
 	dbg_assert(Type >= 0 && Type < 0xFFFF, "incorrect type");
 	dbg_assert(m_NumItems < 1024, "too many items");
 	dbg_assert(Size%sizeof(int) == 0, "incorrect boundary");
@@ -511,8 +516,6 @@ int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)
 
 int CDataFileWriter::AddData(int Size, void *pData)
 {
-	if(!m_File) return 0;
-
 	dbg_assert(m_NumDatas < 1024, "too much data");
 
 	CDataInfo *pInfo = &m_pDatas[m_NumDatas];

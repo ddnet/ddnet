@@ -33,6 +33,7 @@ public:
 };
 
 extern IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);
+extern IStorage *CreateLocalStorage();
 
 
 #endif
