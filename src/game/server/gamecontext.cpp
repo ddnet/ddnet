@@ -2571,7 +2571,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	Reader.Open(pStorage, pNewMapName, IStorage::TYPE_ALL);
 
 	CDataFileWriter Writer;
-	Writer.Open(pStorage, aTemp);
+	Writer.Init();
 
 	int SettingsIndex = Reader.NumData();
 	for(int i = 0; i < Reader.NumItems(); i++)
@@ -2633,6 +2633,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 
 	dbg_msg("mapchange", "imported settings");
 	Reader.Close();
+	Writer.OpenFile(pStorage, aTemp);
 	Writer.Finish();
 
 	str_copy(pNewMapName, aTemp, MapNameSize);
