@@ -25,9 +25,12 @@ CBackground::CBackground()
 
 CBackground::~CBackground()
 {
-	delete m_pLayers->m_pLayers;
-	delete m_pLayers;
-	delete m_pImages;
+	if(m_pLayers->m_pLayers != GameClient()->Layers())
+	{
+		delete m_pLayers->m_pLayers;
+		delete m_pLayers;
+		delete m_pImages;
+	}
 }
 
 void CBackground::OnInit()
