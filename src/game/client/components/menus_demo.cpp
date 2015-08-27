@@ -749,7 +749,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
-	CUIRect ButtonBar, RefreshRect, PlayRect, DeleteRect, RenameRect, FileIcon, ListBox;
+	CUIRect ButtonBar, RefreshRect, PlayRect, DeleteRect, RenameRect, ListBox;
 	MainView.HSplitBottom(ms_ButtonHeight+5.0f, &MainView, &ButtonBar);
 	ButtonBar.HSplitTop(5.0f, 0, &ButtonBar);
 	ButtonBar.VSplitRight(130.0f, &ButtonBar, &PlayRect);
@@ -1018,7 +1018,6 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		for(int c = 0; c < NumCols; c++)
 		{
 			CUIRect Button;
-			char aTemp[64];
 			Button.x = s_aCols[c].m_Rect.x;
 			Button.y = Row.y;
 			Button.h = Row.h;
