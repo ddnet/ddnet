@@ -90,6 +90,8 @@ if include_exe and not use_bundle:
 	shutil.copy(name+exe_ext, package_dir)
 	shutil.copy(name+"-Server"+exe_ext, package_dir)
 	shutil.copy("dilate"+exe_ext, package_dir)
+	shutil.copy("config_store"+exe_ext, package_dir)
+	shutil.copy("config_retrieve"+exe_ext, package_dir)
 	#shutil.copy(name+"-Server_sql"+exe_ext, package_dir)
 	
 if include_src:
@@ -100,7 +102,7 @@ if include_src:
 	shutil.copy("configure.lua", package_dir)
 
 if use_bundle:
-	bins = [name, name+'-Server', 'dilate', 'serverlaunch']
+	bins = [name, name+'-Server', 'dilate', 'config_store', 'config_retrieve', 'serverlaunch']
 	platforms = ('x86', 'x86_64', 'ppc')
 	for bin in bins:
 		to_lipo = []
