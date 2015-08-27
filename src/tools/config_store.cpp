@@ -70,7 +70,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 					SettingsIndex = pInfo->m_Settings;
 					char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
 					int DataSize = Reader.GetUncompressedDataSize(SettingsIndex);
-					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, Size) == 0)
+					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						dbg_msg("config_store", "configs coincide, not updating map");
 						return;

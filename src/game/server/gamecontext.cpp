@@ -2594,7 +2594,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 					SettingsIndex = pInfo->m_Settings;
 					char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
 					int DataSize = Reader.GetUncompressedDataSize(SettingsIndex);
-					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, Size) == 0)
+					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						// Configs coincide, no need to update map.
 						return;
