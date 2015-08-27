@@ -10,6 +10,9 @@ class CBackground : public CComponent
 	bool m_Loaded;
 	char m_aMapName[128];
 	
+	//to avoid spam when in menu
+	int64 m_LastLoad;
+	
 	//to avoid memory leak when switching to %current%
 	IEngineMap *m_pBackgroundMap; 
 	CLayers *m_pBackgroundLayers;

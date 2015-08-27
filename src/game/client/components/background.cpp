@@ -1,3 +1,5 @@
+#include <base/system.h>
+
 #include <engine/shared/config.h>
 #include <engine/map.h>
 #include <engine/graphics.h>
@@ -40,6 +42,9 @@ void CBackground::OnInit()
 
 void CBackground::LoadBackground()
 {
+	if(time_get()-m_LastLoad < 10*time_freq())
+		return;
+	
 	if(m_Loaded && m_pMap == m_pBackgroundMap)
 		m_pMap->Unload();
 		
@@ -65,17 +70,19 @@ void CBackground::LoadBackground()
 		m_pImages = GameClient()->m_pMapimages;
 		m_Loaded = true;
 	}
+	
+	m_LastLoad = time_get();
 }
 
 void CBackground::OnMapLoad()
 {
-	if(str_comp(g_Config.m_ClBackgroundEntities, "%current%") == 0)
+	if(str_comp(g_Config.m_ClBackgroundEntities, "%current%") == 0 || str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();
 }
 
 //code is from CMapLayers::OnRender()
 void CBackground::OnRender()
-{
+{	
 	//probably not the best place for this
 	if(str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();
