@@ -1027,6 +1027,7 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 		- Guarantees that buffer string will contain zero-termination.
 */
 void str_timestamp(char *buffer, int buffer_size);
+void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
 
 /* Group: Filesystem */
 
@@ -1044,7 +1045,9 @@ void str_timestamp(char *buffer, int buffer_size);
 		Always returns 0.
 */
 typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
+typedef int (*FS_LISTDIR_INFO_CALLBACK)(const char *name, time_t date, int is_dir, int dir_type, void *user);
 int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
+int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user);
 
 /*
 	Function: fs_makedir
