@@ -2574,6 +2574,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	Writer.Init();
 
 	int SettingsIndex = Reader.NumData();
+	bool FoundInfo = false;
 	for(int i = 0; i < Reader.NumItems(); i++)
 	{
 		int TypeID;
@@ -2584,6 +2585,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		CMapItemInfoSettings MapInfo;
 		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
 		{
+			FoundInfo = true;
 			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
 			if(Size >= (int)sizeof(CMapItemInfoSettings))
 			{
@@ -2616,6 +2618,18 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 			}
 		}
 		Writer.AddItem(TypeID, ItemID, Size, pData);
+	}
+
+	if(!FoundInfo)
+	{
+		CMapItemInfoSettings Info;
+		Info.m_Version = 1;
+		Info.m_Author = -1;
+		Info.m_MapVersion = -1;
+		Info.m_Credits = -1;
+		Info.m_License = -1;
+		Info.m_Settings = SettingsIndex;
+		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Info), &Info);
 	}
 
 	for(int i = 0; i < Reader.NumData() || i == SettingsIndex; i++)
