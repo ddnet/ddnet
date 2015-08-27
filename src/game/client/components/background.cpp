@@ -39,7 +39,7 @@ void CBackground::OnInit()
 	m_pLayers->m_pClient = GameClient();
 	Kernel()->ReregisterInterface(static_cast<IEngineMap*>(m_pMap));
 	str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
-	if(str_comp(g_Config.m_ClBackgroundEntities, "%current%"))
+	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT))
 		LoadBackground();
 }
 
@@ -63,12 +63,12 @@ void CBackground::LoadBackground()
 	{
 		m_pLayers->m_pLayers->InitBackground(m_pMap);
 		m_pImages->LoadBackground(m_pMap);
-        RenderTools()->RenderTilemapGenerateSkip(m_pLayers->m_pLayers);
+		RenderTools()->RenderTilemapGenerateSkip(m_pLayers->m_pLayers);
 		m_Loaded = true;
 	}
-	else if(str_comp(g_Config.m_ClBackgroundEntities, "%current%") == 0)
+	else if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0)
 	{
-        m_pMap = Kernel()->RequestInterface<IEngineMap>();
+		m_pMap = Kernel()->RequestInterface<IEngineMap>();
 		m_pLayers->m_pLayers = GameClient()->Layers();
 		m_pImages = GameClient()->m_pMapimages;
 		m_Loaded = true;
@@ -79,7 +79,7 @@ void CBackground::LoadBackground()
 
 void CBackground::OnMapLoad()
 {
-	if(str_comp(g_Config.m_ClBackgroundEntities, "%current%") == 0 || str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
+	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0 || str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();
 }
 

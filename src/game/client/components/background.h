@@ -2,6 +2,8 @@
 #define GAME_CLIENT_COMPONENTS_BACKGROUND_H
 #include <game/client/component.h>
 
+#define CURRENT "%current%"
+
 class CBackground : public CComponent
 {
 	class CMapLayers *m_pLayers;
