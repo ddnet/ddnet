@@ -1000,6 +1000,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	ListBox.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
+#if defined(__ANDROID__)
+	int DoubleClicked = 0;
+#endif
 	int ItemIndex = -1;
 
 	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
@@ -1093,7 +1096,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	bool Activated = false;
 
+#if defined(__ANDROID__)
+	if (m_EnterPressed || (DoubleClicked && UI()->ActiveItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+#else
 	if (m_EnterPressed || (Input()->MouseDoubleClick() && UI()->ActiveItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+#endif
 	{
 		UI()->SetActiveItem(0);
 		Activated = true;
