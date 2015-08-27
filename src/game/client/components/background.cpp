@@ -44,15 +44,15 @@ void CBackground::LoadBackground()
 {
 	if(time_get()-m_LastLoad < 10*time_freq())
 		return;
-	
+
 	if(m_Loaded && m_pMap == m_pBackgroundMap)
 		m_pMap->Unload();
-		
+
 	m_Loaded = false;
 	m_pMap = m_pBackgroundMap;
 	m_pLayers->m_pLayers = m_pBackgroundLayers;
 	m_pImages = m_pBackgroundImages;
-	
+
 	str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
@@ -70,7 +70,7 @@ void CBackground::LoadBackground()
 		m_pImages = GameClient()->m_pMapimages;
 		m_Loaded = true;
 	}
-	
+
 	m_LastLoad = time_get();
 }
 
@@ -82,14 +82,14 @@ void CBackground::OnMapLoad()
 
 //code is from CMapLayers::OnRender()
 void CBackground::OnRender()
-{	
+{
 	//probably not the best place for this
 	if(str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();
-		
+
 	if(!m_Loaded)
 		return;
-		
+
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
@@ -100,13 +100,13 @@ void CBackground::OnRender()
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
 	vec2 Center = m_pClient->m_pCamera->m_Center;
-	
+
 	bool PassedGameLayer = false;
 
 	for(int g = 0; g < m_pLayers->m_pLayers->NumGroups() && !PassedGameLayer; g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->m_pLayers->GetGroup(g);
-		
+
 		if(!pGroup)
 		{
 			dbg_msg("MapLayers", "Error:Group was null, Group Number = %d, Total Groups = %d", g, m_pLayers->m_pLayers->NumGroups());
@@ -134,20 +134,20 @@ void CBackground::OnRender()
 			m_pLayers->MapScreenToGroup(Center.x, Center.y, pGroup, 1.0);
 		else
 			m_pLayers->MapScreenToGroup(Center.x, Center.y, pGroup, m_pClient->m_pCamera->m_Zoom);
-		
+
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = m_pLayers->m_pLayers->GetLayer(pGroup->m_StartLayer+l);
 			// skip rendering if detail layers if not wanted
 			if(pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail)
 				continue;
-			
+
 			if(pLayer == (CMapItemLayer*)m_pLayers->m_pLayers->GameLayer())
 			{
 				PassedGameLayer = true;
 				break;
 			}
-				
+
 			if(pLayer->m_Type == LAYERTYPE_TILES && g_Config.m_ClBackgroundShowTilesLayers)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
@@ -177,9 +177,9 @@ void CBackground::OnRender()
 					Graphics()->TextureSet(-1);
 				else
 					Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));
-	
+
 				CQuad *pQuads = (CQuad *)m_pMap->GetDataSwapped(pQLayer->m_Data);
-				
+
 				Graphics()->BlendNone();
 				RenderTools()->ForceRenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_OPAQUE, m_pLayers->EnvelopeEval, m_pLayers);
 				Graphics()->BlendNormal();
