@@ -953,6 +953,43 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	else
 		ScrollNum = 0;
 
+	if(m_DemolistSelectedIndex > -1)
+	{
+		for(int i = 0; i < m_NumInputEvents; i++)
+		{
+			int NewIndex = -1;
+			if(m_aInputEvents[i].m_Flags&IInput::FLAG_PRESS)
+			{
+				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_DemolistSelectedIndex + 1;
+				if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_DemolistSelectedIndex - 1;
+			}
+			if(NewIndex > -1 && NewIndex < m_lDemos.size())
+			{
+				//scroll
+				float IndexY = ListBox.y - s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h + NewIndex*s_aCols[0].m_Rect.h;
+				int Scroll = ListBox.y > IndexY ? -1 : ListBox.y+ListBox.h < IndexY+s_aCols[0].m_Rect.h ? 1 : 0;
+				if(Scroll)
+				{
+					if(Scroll < 0)
+					{
+						int NumScrolls = (ListBox.y-IndexY+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
+						s_ScrollValue -= (1.0f/ScrollNum)*NumScrolls;
+					}
+					else
+					{
+						int NumScrolls = (IndexY+s_aCols[0].m_Rect.h-(ListBox.y+ListBox.h)+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
+						s_ScrollValue += (1.0f/ScrollNum)*NumScrolls;
+					}
+				}
+
+				m_DemolistSelectedIndex = NewIndex;
+
+				str_copy(g_Config.m_UiDemoSelected, m_lDemos[NewIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
+				DemolistOnUpdate(false);
+			}
+		}
+	}
+
 	if(s_ScrollValue < 0) s_ScrollValue = 0;
 	if(s_ScrollValue > 1) s_ScrollValue = 1;
 
