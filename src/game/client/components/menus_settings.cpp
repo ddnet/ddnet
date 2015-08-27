@@ -669,7 +669,18 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 			g_Config.m_InpMousesens = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/500.0f)*500.0f)+5;
 			//*key.key = ui_do_key_reader(key.key, &Button, *key.key);
-			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
+			MovementSettings.HSplitTop(5.0f, 0, &MovementSettings);
+		}
+
+		{
+			CUIRect Button, Label;
+			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
+			Button.VSplitLeft(135.0f, &Label, &Button);
+			UI()->DoLabel(&Label, Localize("Dyncam sens."), 14.0f*UI()->Scale(), -1);
+			Button.HMargin(2.0f, &Button);
+			g_Config.m_ClDyncamMousesens =
+				(int)(DoScrollbarH(&g_Config.m_ClDyncamMousesens, &Button, (g_Config.m_ClDyncamMousesens-5)/500.0f)*500.0f)+5;
+			MovementSettings.HSplitTop(10.0f, 0, &MovementSettings);
 		}
 
 		UiDoGetButtons(0, 7, MovementSettings);
