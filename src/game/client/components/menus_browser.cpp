@@ -181,7 +181,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		else
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
 	}
-	/*if(m_SelectedIndex > -1)
+	if(m_SelectedIndex > -1)
 	{
 		for(int i = 0; i < m_NumInputEvents; i++)
 		{
@@ -216,7 +216,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 			}
 		}
-	}*/
+	}
 
 	if(s_ScrollValue < 0) s_ScrollValue = 0;
 	if(s_ScrollValue > 1) s_ScrollValue = 1;
