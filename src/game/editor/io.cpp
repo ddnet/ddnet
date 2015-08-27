@@ -273,6 +273,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			{
 				int Length = str_length(m_lSettings[i].m_aCommand) + 1;
 				mem_copy(pNext, m_lSettings[i].m_aCommand, Length);
+				pNext += Length;
 			}
 			Item.m_Settings = df.AddData(Size, pSettings);
 			mem_free(pSettings);
