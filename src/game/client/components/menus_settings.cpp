@@ -72,8 +72,22 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		// dynamic camera
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClDyncam, Localize("Dynamic Camera"), g_Config.m_ClDyncam, &Button))
-			g_Config.m_ClDyncam ^= 1;
+		static int s_DynamicCameraButton = 0;
+		if(DoButton_CheckBox(&s_DynamicCameraButton, Localize("Dynamic Camera"), g_Config.m_ClMouseDeadzone != 0, &Button))
+		{
+			if(g_Config.m_ClMouseDeadzone)
+			{
+				g_Config.m_ClMouseFollowfactor = 0;
+				g_Config.m_ClMouseMaxDistance = 400;
+				g_Config.m_ClMouseDeadzone = 0;
+			}
+			else
+			{
+				g_Config.m_ClMouseFollowfactor = 60;
+				g_Config.m_ClMouseMaxDistance = 1000;
+				g_Config.m_ClMouseDeadzone = 300;
+			}
+		}
 
 		// weapon pickup
 		Left.HSplitTop(5.0f, 0, &Left);
@@ -563,7 +577,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Fire", "+fire", 0 },
 	{ "Hook", "+hook", 0 },
 	{ "Hook Collisions", "+showhookcoll", 0 },
-	{ "Dynamic Camera", "toggle cl_dyncam 0 1", 0 },
+	{ "Toggle Dynamic Camera", "toggle cl_dyncam 0 1", 0 },
 	{ "Hammer", "+weapon1", 0 },
 	{ "Pistol", "+weapon2", 0 },
 	{ "Shotgun", "+weapon3", 0 },
