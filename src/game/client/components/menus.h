@@ -324,6 +324,7 @@ public:
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	sorted_array<CDemoItem> m_lDemos;
 	void DemolistPopulate();
+	bool m_Dummy;
 
 	// Ghost
 	struct CGhostItem

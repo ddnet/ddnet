@@ -252,13 +252,11 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	CUIRect Button, Label, Dummy;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	static bool s_Dummy = false;
-
 	char *Name = g_Config.m_PlayerName;
 	char *Clan = g_Config.m_PlayerClan;
 	int *Country = &g_Config.m_PlayerCountry;
 
-	if(s_Dummy)
+	if(m_Dummy)
 	{
 		Name = g_Config.m_ClDummyName;
 		Clan = g_Config.m_ClDummyClan;
@@ -276,15 +274,15 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static float s_OffsetName = 0.0f;
 	if(DoEditBox(Name, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
 	{
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
 	}
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &Dummy))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &Dummy))
 	{
-		s_Dummy ^= 1;
+		m_Dummy ^= 1;
 	}
 
 	// player clan
@@ -297,7 +295,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static float s_OffsetClan = 0.0f;
 	if(DoEditBox(Clan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 	{
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -335,7 +333,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -348,13 +346,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	static bool s_Dummy = false;
 	char *Skin = g_Config.m_ClPlayerSkin;
 	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
 	int *ColorBody = &g_Config.m_ClPlayerColorBody;
 	int *ColorFeet = &g_Config.m_ClPlayerColorFeet;
 
-	if(s_Dummy)
+	if(m_Dummy)
 	{
 		Skin = g_Config.m_ClDummySkin;
 		UseCustomColor = &g_Config.m_ClDummyUseCustomColor;
@@ -388,16 +385,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &DummyLabel))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &DummyLabel))
 	{
-		s_Dummy ^= 1;
+		m_Dummy ^= 1;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowNewSkins, Localize("Show new skins ingame"), g_Config.m_ClShowNewSkins, &DummyLabel))
+	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), !g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
-		g_Config.m_ClShowNewSkins ^= 1;
+		g_Config.m_ClVanillaSkinsOnly ^= 1;
 		m_NeedRestartSkins = true;
 	}
 
@@ -418,7 +415,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor?0:1;
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -470,7 +467,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			if(PrevColor != Color)
 			{
-				if(s_Dummy)
+				if(m_Dummy)
 					m_NeedSendDummyinfo = true;
 				else
 					m_NeedSendinfo = true;
@@ -553,7 +550,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_ClPlayerSkin));
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -578,7 +575,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Fire", "+fire", 0 },
 	{ "Hook", "+hook", 0 },
 	{ "Hook Collisions", "+showhookcoll", 0 },
-	{ "Toggle Dynamic Camera", "toggle cl_dyncam 0 1", 0 },
+	{ "Toggle DynCam", "toggle cl_dyncam 0 1", 0 },
 	{ "Hammer", "+weapon1", 0 },
 	{ "Pistol", "+weapon2", 0 },
 	{ "Shotgun", "+weapon3", 0 },
