@@ -21,11 +21,12 @@ void CNetConnection::Reset(bool Rejoin)
 	m_Sequence = 0;
 	m_Ack = 0;
 	m_RemoteClosed = 0;
-	m_TimeoutProtected = false;
-	m_TimeoutSituation = false;
 
 	if (!Rejoin)
 	{
+		m_TimeoutProtected = false;
+		m_TimeoutSituation = false;
+
 		m_State = NET_CONNSTATE_OFFLINE;
 		m_Token = -1;
 		m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
