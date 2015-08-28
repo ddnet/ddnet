@@ -1854,11 +1854,10 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		Background.HSplitTop(20.0f, &Background, 0);
 		Background.VSplitLeft(100.0f, &Label, &Left);
 		UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
-		Left.VSplitLeft(200.0f, &Button, &Left);
-		DoEditBox(g_Config.m_ClBackgroundEntities, &Button, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
+		DoEditBox(g_Config.m_ClBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
 
 		aRects[1].HSplitTop(20.0f, &Button, 0);
-		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from background map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
 		{
 			g_Config.m_ClBackgroundShowTilesLayers ^= 1;
 		}
