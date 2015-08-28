@@ -801,7 +801,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		else if(isDegree)
 			str_format(aBuf, sizeof(aBuf),"%d°", Current);
 		else if(isHex)
-			str_format(aBuf, sizeof(aBuf),"0x%06X", Current);
+			str_format(aBuf, sizeof(aBuf),"#%06X", Current);
 		else
 			str_format(aBuf, sizeof(aBuf),"%d", Current);
 		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
