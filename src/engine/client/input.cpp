@@ -177,8 +177,8 @@ int CInput::Update()
 
 						AddEvent(Code, 0, 0);
 					}
+					break;
 				}
-
 				// handle keys
 				case SDL_KEYDOWN:
 					if(Event.key.keysym.sym == KEY_UNKNOWN)
@@ -234,7 +234,7 @@ int CInput::Update()
 			}
 
 			//
-			if(Key != -1)
+			if(Key >= 0 && Key < 1024)
 			{
 				m_aInputCount[m_InputCurrent][Key].m_Presses++;
 				if(Action == IInput::FLAG_PRESS)
