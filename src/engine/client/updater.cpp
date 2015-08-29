@@ -206,12 +206,6 @@ void CUpdater::PerformUpdate()
 	m_State = PARSING_UPDATE;
 	dbg_msg("updater", "Parsing update.json");
 	ParseUpdate();
-	dbg_msg("updater", "Parsing done");
-	dbg_msg("updater", "%d", m_ClientUpdate);
-	for(map<string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
-	{
-		dbg_msg("updater", "%s:%s", it->first.c_str(), it->second ? "download" : "remove");
-	}
 	m_State = DOWNLOADING;
 
 	const char *aLastFile;
