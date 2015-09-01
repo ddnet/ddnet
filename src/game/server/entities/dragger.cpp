@@ -1,13 +1,14 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include <engine/config.h>
 #include <engine/server.h>
+#include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include <game/server/gamemodes/DDRace.h>
 #include "dragger.h"
 
-const int LENGTH = 700;
+//const int LENGTH = 700;
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 		int CatchedTeam, int Layer, int Number) :
@@ -39,7 +40,7 @@ void CDragger::Move()
 	mem_zero(m_SoloEnts, sizeof(m_SoloEnts));
 	CCharacter *TempEnts[MAX_CLIENTS];
 
-	int Num = GameServer()->m_World.FindEntities(m_Pos, LENGTH,
+	int Num = GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvDraggerRange,
 			(CEntity**) m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	mem_copy(TempEnts, m_SoloEnts, sizeof(TempEnts));
 
@@ -118,7 +119,7 @@ void CDragger::Drag()
 			else
 				Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
 						Target->m_Pos, 0, 0);
-			if (Res || length(m_Pos - Target->m_Pos) > 700)
+			if (Res || length(m_Pos - Target->m_Pos) > g_Config.m_SvDraggerRange)
 			{
 				Target = 0;
 				if (i == -1)
