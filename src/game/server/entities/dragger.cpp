@@ -8,8 +8,6 @@
 #include <game/server/gamemodes/DDRace.h>
 #include "dragger.h"
 
-//const int LENGTH = 700;
-
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 		int CatchedTeam, int Layer, int Number) :
 		CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
