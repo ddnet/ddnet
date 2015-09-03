@@ -1,5 +1,18 @@
 CheckVersion("0.4")
 
+target_family = os.getenv("TARGET_FAMILY")
+if target_family then
+	family = target_family
+end
+target_platform = os.getenv("TARGET_PLATFORM")
+if target_platform then
+	platform = target_platform
+end
+target_arch = os.getenv("TARGET_ARCH")
+if target_arch then
+	arch = target_arch
+end
+
 Import("configure.lua")
 Import("other/sdl/sdl.lua")
 Import("other/freetype/freetype.lua")
@@ -28,7 +41,7 @@ config:Finalize("config.lua")
 
 -- data compiler
 function Script(name)
-	if family == "windows" then
+	if family == "windows" and target_family ~= "windows" then
 		return str_replace(name, "/", "\\")
 	end
 	return "python " .. name
@@ -67,14 +80,20 @@ DuplicateDirectoryStructure("src", "src", "objs")
 ]]
 
 function ResCompile(scriptfile)
+	windres = os.getenv("WINDRES")
+	if not windres then
+		windres = "windres"
+	end
+
 	scriptfile = Path(scriptfile)
 	if config.compiler.driver == "cl" then
 		output = PathBase(scriptfile) .. ".res"
 		AddJob(output, "rc " .. scriptfile, "rc /fo " .. output .. " " .. scriptfile)
 	elseif config.compiler.driver == "gcc" then
 		output = PathBase(scriptfile) .. ".coff"
-		AddJob(output, "windres " .. scriptfile, "windres -i " .. scriptfile .. " -o " .. output)
+		AddJob(output, windres .. " " .. scriptfile, windres .. " -i " .. scriptfile .. " -o " .. output)
 	end
+
 	AddDependency(output, scriptfile)
 	return output
 end
@@ -128,36 +147,36 @@ server_sql_depends = {}
 
 if family == "windows" then
 	if platform == "win32" then
-		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib32\\freetype.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib32\\SDL.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib32/freetype.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib32/SDL.dll"))
 
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\libcurl.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\libeay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\libidn-11.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\ssleay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib32\\zlib1.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libcurl.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libeay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libidn-11.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/ssleay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/zlib1.dll"))
 
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libgcc_s_sjlj-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libogg-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopus-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib32\\libopusfile-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libgcc_s_sjlj-1.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libogg-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopusfile-0.dll"))
 	else
-		table.insert(client_depends, CopyToDirectory(".", "other\\freetype\\lib64\\freetype.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\sdl\\lib64\\SDL.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib64/freetype.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL.dll"))
 
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\libcurl.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\libeay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\ssleay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\curl\\windows\\lib64\\zlib1.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/libcurl.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/libeay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/ssleay32.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/zlib1.dll"))
 
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libwinpthread-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libgcc_s_seh-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libogg-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libopus-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other\\opus\\windows\\lib64\\libopusfile-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libwinpthread-1.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libgcc_s_seh-1.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libogg-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopus-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopusfile-0.dll"))
 	end
-	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\mysqlcppconn.dll"))
-	table.insert(server_sql_depends, CopyToDirectory(".", "other\\mysql\\vc2005libs\\libmysql.dll"))
+	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/mysqlcppconn.dll"))
+	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/libmysql.dll"))
 
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
@@ -179,6 +198,16 @@ function build(settings)
 	--settings.objdir = Path("objs")
 	settings.cc.Output = Intermediate_Output
 
+	cc = os.getenv("CC")
+	if cc then
+		settings.cc.exe_c = cc
+	end
+	cxx = os.getenv("CXX")
+	if cxx then
+		settings.cc.exe_cxx = cxx
+		settings.link.exe = cxx
+		settings.dll.exe = cxx
+	end
 	cflags = os.getenv("CFLAGS")
 	if cflags then
 		settings.cc.flags:Add(cflags)

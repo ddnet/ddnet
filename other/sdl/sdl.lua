@@ -9,7 +9,7 @@ SDL = {
 			option.use_osxframework = false
 			option.lib_path = nil
 			
-			if ExecuteSilent("pkg-config sdl") == 0 then
+			if family ~= "windows" and ExecuteSilent("pkg-config sdl") == 0 then
 				option.value = true
 				option.use_pkgconfig = true
 			end

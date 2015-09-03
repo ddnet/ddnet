@@ -12,7 +12,7 @@ Curl = {
 				option.use_pkgconfig = true
 			end
 
-			if ExecuteSilent("pkg-config libcurl") == 0 then
+			if family ~= "windows" and ExecuteSilent("pkg-config libcurl") == 0 then
 				option.value = true
 				if option.use_pkgconfig == nil then
 					option.use_pkgconfig = true

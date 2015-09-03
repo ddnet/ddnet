@@ -8,7 +8,7 @@ FreeType = {
 			option.use_winlib = 0
 			option.lib_path = nil
 			
-			if ExecuteSilent("pkg-config freetype2") == 0 then
+			if family ~= "windows" and ExecuteSilent("pkg-config freetype2") == 0 then
 				option.value = true
 				option.use_pkgconfig = true
 			end
