@@ -156,6 +156,7 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/ssleay32.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/zlib1.dll"))
 
+		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libwinpthread-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libgcc_s_sjlj-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libogg-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
