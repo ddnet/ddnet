@@ -20,6 +20,7 @@ void CNetConnection::Reset(bool Rejoin)
 {
 	m_Sequence = 0;
 	m_Ack = 0;
+	m_PeerAck = 0;
 	m_RemoteClosed = 0;
 
 	if (!Rejoin)
@@ -245,6 +246,19 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 			return 0;
 		}
 	}
+
+	// check if actual ack value is valid(own sequence..latest peer ack)
+	if(m_Sequence >= m_PeerAck)
+	{
+		if(pPacket->m_Ack < m_PeerAck || pPacket->m_Ack > m_Sequence)
+			return 0;
+	}
+	else
+	{
+		if(pPacket->m_Ack < m_PeerAck && pPacket->m_Ack > m_Sequence)
+			return 0;
+	}
+	m_PeerAck = pPacket->m_Ack;
 
 	int64 Now = time_get();
 
