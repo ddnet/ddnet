@@ -179,9 +179,6 @@ function build(settings)
 	--settings.objdir = Path("objs")
 	settings.cc.Output = Intermediate_Output
 
-	--settings.cc.flags:Add("-m32")
-	--settings.link.flags:Add("-m32")
-
 	cflags = os.getenv("CFLAGS")
 	if cflags then
 		settings.cc.flags:Add(cflags)
