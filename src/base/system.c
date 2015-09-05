@@ -191,7 +191,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	va_list args;
 	char *msg;
 	int len;
-	int e;
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	time_t rawtime;
@@ -206,6 +205,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
 	{
+		int e;
 		semaphore_wait(&log_queue.notfull);
 		semaphore_wait(&log_queue.mutex);
 		e = queue_empty(&log_queue);
