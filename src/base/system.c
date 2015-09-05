@@ -49,6 +49,7 @@
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
+	#undef _WIN32_WINNT
 	#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
 	#include <windows.h>
 	#include <winsock2.h>
@@ -181,9 +182,7 @@ void dbg_enable_threaded()
 	dbg_msg_threaded = 1;
 
 	Thread = thread_init(dbg_msg_thread, 0);
-	#if defined(CONF_FAMILY_UNIX)
-		pthread_detach((pthread_t)Thread);
-	#endif
+	thread_detach(Thread);
 }
 #endif
 

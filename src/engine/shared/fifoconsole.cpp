@@ -28,7 +28,7 @@ FifoConsole::FifoConsole(IConsole *pConsole, char *pFifoFile, int flag)
 	m_pConsole = pConsole;
 	m_flag = flag;
 
-	pthread_detach((pthread_t)m_pFifoThread);
+	thread_detach(m_pFifoThread);
 }
 
 FifoConsole::~FifoConsole()
