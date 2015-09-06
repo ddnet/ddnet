@@ -930,7 +930,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	int Sys = Msg&1;
 	Msg >>= 1;
 
-	unsigned char *Ex = (Msg == NETMSG_NULL) ? Unpacker.GetRaw(4) : 0;
+	const unsigned char *Ex = (Msg == NETMSG_NULL) ? Unpacker.GetRaw(4) : 0;
 	
 	if(Unpacker.Error())
 		return;
