@@ -930,6 +930,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	int Sys = Msg&1;
 	Msg >>= 1;
 
+	int Ex = (Msg == NETMSG_NULL) ? Unpacker.GetInt() : -1;
+	
 	if(Unpacker.Error())
 		return;
 
