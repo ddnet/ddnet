@@ -2369,7 +2369,7 @@ int str_utf8_decode(const char **ptr)
 			{
 				return byte;
 			}
-			else if(0x80 <= byte && byte <= 0xDF)
+			else if(0xC2 <= byte && byte <= 0xDF)
 			{
 				utf8_bytes_needed = 1;
 				utf8_code_point = byte - 0xC0;
