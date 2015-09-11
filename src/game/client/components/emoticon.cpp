@@ -204,25 +204,27 @@ void CEmoticon::Emoticon(int Emoticon)
 
 void CEmoticon::Emote(int Emote)
 {
+	char aBuf[32];
 	switch(Emote)
 	{
 	case EMOTE_NORMAL:
-		GameClient()->m_pChat->Say(0, "/emote normal");
-		return;
+		str_format(aBuf, sizeof(aBuf), "/emote normal %d", g_Config.m_ClEyeDuration);
+		break;
 	case EMOTE_PAIN:
-		GameClient()->m_pChat->Say(0, "/emote pain");
-		return;
+		str_format(aBuf, sizeof(aBuf), "/emote pain %d", g_Config.m_ClEyeDuration);
+		break;
 	case EMOTE_HAPPY:
-		GameClient()->m_pChat->Say(0, "/emote happy");
-		return;
+		str_format(aBuf, sizeof(aBuf), "/emote happy %d", g_Config.m_ClEyeDuration);
+		break;
 	case EMOTE_SURPRISE:
-		GameClient()->m_pChat->Say(0, "/emote surprise");
-		return;
+		str_format(aBuf, sizeof(aBuf), "/emote surprise %d", g_Config.m_ClEyeDuration);
+		break;
 	case EMOTE_ANGRY:
-		GameClient()->m_pChat->Say(0, "/emote angry");
-		return;
+		str_format(aBuf, sizeof(aBuf), "/emote angry %d", g_Config.m_ClEyeDuration);
+		break;
 	case EMOTE_BLINK:
-		GameClient()->m_pChat->Say(0, "/emote blink");
-		return;
+		str_format(aBuf, sizeof(aBuf), "/emote blink %d", g_Config.m_ClEyeDuration);
+		break;
 	}
+	GameClient()->m_pChat->Say(0, aBuf);
 }
