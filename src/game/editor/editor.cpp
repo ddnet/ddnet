@@ -4417,7 +4417,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					int Time = (int)(((UI()->MouseX()-View.x)*TimeScale)*1000.0f);
 					//float env_y = (UI()->MouseY()-view.y)/TimeScale;
 					float aChannels[4];
-					pEnvelope->Eval(Time, aChannels);
+					pEnvelope->Eval(Time / 1000.0f, aChannels);
 					pEnvelope->AddPoint(Time,
 						f2fx(aChannels[0]), f2fx(aChannels[1]),
 						f2fx(aChannels[2]), f2fx(aChannels[3]));
