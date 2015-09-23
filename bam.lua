@@ -255,11 +255,9 @@ function build(settings)
 		if platform == "macosx" then
 			settings.link.frameworks:Add("Carbon")
 			settings.link.frameworks:Add("AppKit")
-			settings.link.libs:Add("dl")
 			settings.link.libs:Add("crypto")
 		else
 			settings.link.libs:Add("pthread")
-			settings.link.libs:Add("dl")
 			settings.link.libs:Add("rt")
 		end
 		
@@ -315,7 +313,6 @@ function build(settings)
 			client_settings.link.libs:Add("X11")
 			client_settings.link.libs:Add("GL")
 			client_settings.link.libs:Add("GLU")
-			client_settings.link.libs:Add("dl")
 		end
 
 	elseif family == "windows" then
@@ -341,6 +338,13 @@ function build(settings)
 	config.opusfile:Apply(client_settings)
 	config.opus:Apply(client_settings)
 	config.ogg:Apply(client_settings)
+
+	if family == "unix" then
+		engine_settings.link.libs:Add("dl")
+		server_settings.link.libs:Add("dl")
+		client_settings.link.libs:Add("dl")
+		launcher_settings.link.libs:Add("dl")
+	end
 
 	engine = Compile(engine_settings, Collect("src/engine/shared/*.cpp", "src/base/*.c"))
 	client = Compile(client_settings, Collect("src/engine/client/*.cpp"))
