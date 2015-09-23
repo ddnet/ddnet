@@ -1184,7 +1184,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 
 void CSqlScore::FuzzyString(char *pString)
 {
-	char newString[127]; // 32 * 4 - 1
+	char newString[32*4-1];
 	int pos = 0;
 
 	for(int i=0;i<64;i++)
@@ -1204,7 +1204,7 @@ void CSqlScore::FuzzyString(char *pString)
 // anti SQL injection
 void CSqlScore::ClearString(char *pString, int size)
 {
-	char newString[size*2-1];
+	char *newString = (char *)malloc(size * 2 - 1);
 	int pos = 0;
 
 	for(int i=0;i<size;i++)
@@ -1233,6 +1233,7 @@ void CSqlScore::ClearString(char *pString, int size)
 	newString[pos] = '\0';
 
 	strcpy(pString,newString);
+	free(newString);
 }
 
 void CSqlScore::agoTimeToString(int agoTime, char agoString[])
