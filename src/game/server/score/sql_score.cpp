@@ -831,7 +831,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 				char aNames[2300];
 				int Rank = 0;
 				float Time = 0;
-				int aCuts[Rows];
+				int aCuts[320]; // 64 * 5
 				int CutPos = 0;
 
 				aNames[0] = '\0';
@@ -1184,7 +1184,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 
 void CSqlScore::FuzzyString(char *pString)
 {
-	char newString[32*4-1];
+	char newString[127]; // 32 * 4 - 1
 	int pos = 0;
 
 	for(int i=0;i<64;i++)
