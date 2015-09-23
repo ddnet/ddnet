@@ -339,7 +339,7 @@ function build(settings)
 	config.opus:Apply(client_settings)
 	config.ogg:Apply(client_settings)
 
-	if family == "unix" then
+	if family == "unix" and (platform == "macosx" or platform == "linux") then
 		engine_settings.link.libs:Add("dl")
 		server_settings.link.libs:Add("dl")
 		client_settings.link.libs:Add("dl")
