@@ -2367,7 +2367,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
 
-	if(g_Config.m_SvSoloServer)
+	if(g_Config.m_SvSoloServer || g_Config.m_SvRaceServer)
 	{
 		g_Config.m_SvTeam = 3;
 		g_Config.m_SvShowOthersDefault = 1;
@@ -2380,6 +2380,13 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			TuningList()[i].Set("player_collision", 0);
 			TuningList()[i].Set("player_hooking", 0);
 		}
+	}
+	if(g_Config.m_SvRaceServer)
+	{
+		g_Config.m_SvRespawnDelay = 0;
+		g_Config.m_SvAutoRespawnDelay = 0;
+		g_Config.m_SvKillDelay = 1;
+		g_Config.m_SvKillProjectiles = 0;
 	}
 
 	// delete old score object
