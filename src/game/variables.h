@@ -161,6 +161,8 @@ MACRO_CONFIG_INT(SvSendVotesPerTick, sv_send_votes_per_tick, 5, 1, 15, CFGFLAG_S
 
 MACRO_CONFIG_INT(SvRescue, sv_rescue, 0, 0, 1, CFGFLAG_SERVER, "Allow /rescue command so players can teleport themselves out of freeze")
 MACRO_CONFIG_INT(SvRescueDelay, sv_rescue_delay, 5, 0, 1000, CFGFLAG_SERVER, "Number of seconds inbetween two rescues")
+MACRO_CONFIG_INT(SvRespawnDelay, sv_respawn_delay, 500, 0, 5000, CFGFLAG_SERVER, "Number of milliseconds until respawn is possible")
+MACRO_CONFIG_INT(SvAutoRespawnDelay, sv_auto_respawn_delay, 3000, 0, 10000, CFGFLAG_SERVER, "Number of milliseconds until auto respawn")
 
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly
