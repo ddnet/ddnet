@@ -125,8 +125,6 @@ void CMapLayers::OnRender()
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
 	vec2 Center = m_pClient->m_pCamera->m_Center;
-	//float center_x = gameclient.camera->center.x;
-	//float center_y = gameclient.camera->center.y;
 
 	bool PassedGameLayer = false;
 
@@ -176,7 +174,7 @@ void CMapLayers::OnRender()
 			if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
 			{
 				IsGameLayer = true;
-				PassedGameLayer = 1;
+				PassedGameLayer = true;
 			}
 
 			if(pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
@@ -200,13 +198,13 @@ void CMapLayers::OnRender()
 
 			if(m_Type == -1)
 				Render = true;
-			else if(m_Type == 0)
+			else if(m_Type == TYPE_BACKGROUND)
 			{
 				if(PassedGameLayer)
 					return;
 				Render = true;
 			}
-			else
+			else // TYPE_FOREGROUND
 			{
 				if(PassedGameLayer && !IsGameLayer)
 					Render = true;
@@ -235,8 +233,6 @@ void CMapLayers::OnRender()
 
 			if((Render && g_Config.m_ClOverlayEntities < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (g_Config.m_ClOverlayEntities && IsGameLayer))
 			{
-				//layershot_begin();
-
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
@@ -283,10 +279,8 @@ void CMapLayers::OnRender()
 					Graphics()->BlendNormal();
 					RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, this);
 				}
-
-				//layershot_end();
 			}
-			else if(g_Config.m_ClOverlayEntities && IsFrontLayer)
+			else if(Render && g_Config.m_ClOverlayEntities && IsFrontLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
@@ -307,7 +301,7 @@ void CMapLayers::OnRender()
 							EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 				}
 			}
-			else if(g_Config.m_ClOverlayEntities && IsSwitchLayer)
+			else if(Render && g_Config.m_ClOverlayEntities && IsSwitchLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
@@ -327,7 +321,7 @@ void CMapLayers::OnRender()
 					RenderTools()->RenderSwitchOverlay(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
 				}
 			}
-			else if(g_Config.m_ClOverlayEntities && IsTeleLayer)
+			else if(Render && g_Config.m_ClOverlayEntities && IsTeleLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
@@ -347,7 +341,7 @@ void CMapLayers::OnRender()
 					RenderTools()->RenderTeleOverlay(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
 				}
 			}
-			else if(g_Config.m_ClOverlayEntities && IsSpeedupLayer)
+			else if(Render && g_Config.m_ClOverlayEntities && IsSpeedupLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
@@ -367,7 +361,7 @@ void CMapLayers::OnRender()
 					RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
 				}
 			}
-			else if(g_Config.m_ClOverlayEntities && IsTuneLayer)
+			else if(Render && g_Config.m_ClOverlayEntities && IsTuneLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
