@@ -3340,9 +3340,12 @@ int main(int argc, const char **argv) // ignore_convention
 
 	if(g_Config.m_ClConfigVersion < 1)
 	{
-		g_Config.m_ClAntiPingPlayers = 1;
-		g_Config.m_ClAntiPingGrenade = 1;
-		g_Config.m_ClAntiPingWeapons = 1;
+		if(g_Config.m_ClAntiPing == 0)
+		{
+			g_Config.m_ClAntiPingPlayers = 1;
+			g_Config.m_ClAntiPingGrenade = 1;
+			g_Config.m_ClAntiPingWeapons = 1;
+		}
 	}
 	g_Config.m_ClConfigVersion = 1;
 
