@@ -2383,10 +2383,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	}
 	if(g_Config.m_SvRaceServer)
 	{
-		g_Config.m_SvRespawnDelay = 0;
-		g_Config.m_SvAutoRespawnDelay = 0;
 		g_Config.m_SvKillDelay = 1;
-		g_Config.m_SvKillProjectiles = 0;
 	}
 
 	// delete old score object

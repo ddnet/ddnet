@@ -141,7 +141,7 @@ void CProjectile::Tick()
 	int Team = -1;
 	if(pOwnerChar && pOwnerChar->IsAlive())
 		Team = pOwnerChar->Team();
-	else if(m_Owner >= 0 && (!GameServer()->m_apPlayers[m_Owner] || GameServer()->m_apPlayers[m_Owner]->GetTeam() == TEAM_SPECTATORS || g_Config.m_SvKillProjectiles))
+	else if(m_Owner >= 0 && (!GameServer()->m_apPlayers[m_Owner] || GameServer()->m_apPlayers[m_Owner]->GetTeam() == TEAM_SPECTATORS || g_Config.m_SvRaceServer))
 		GameServer()->m_World.DestroyEntity(this);
 	int64_t TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(Team, -1, -1);
 

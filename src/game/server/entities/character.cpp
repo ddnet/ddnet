@@ -885,8 +885,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 		Server()->StopRecord(m_pPlayer->GetCID());
 
-	// we got to wait sv_respawn_delay millisecs before respawning
-	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*(g_Config.m_SvRespawnDelay/1000.0f);
+	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*(g_Config.m_SvRaceServer ? 0 : 0.5f);
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];
