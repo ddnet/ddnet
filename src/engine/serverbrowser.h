@@ -45,6 +45,7 @@ public:
 	int m_Latency; // in ms
 	char m_aGameType[16];
 	char m_aName[64];
+	int m_HasRank;
 	char m_aMap[32];
 	char m_aVersion[32];
 	char m_aAddress[NETADDR_MAXSTRSIZE];

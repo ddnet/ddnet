@@ -680,6 +680,9 @@ void CSqlScore::SaveScoreThread(void *pUser)
 
 void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS])
 {
+	// send has rank to client
+	Server()->SendRankOnScore(ClientID);
+
 	CConsole* pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
@@ -1851,6 +1854,62 @@ void CSqlScore::LoadTeamThread(void *pUser)
 
 	delete pData;
 	delete SavedTeam;
+
+	lock_unlock(gs_SqlLock);
+}
+
+
+void CSqlScore::SendRankOnRequest(const NETADDR *pAddr, const char *pName)
+{
+	CSqlScoreData *Tmp = new CSqlScoreData();
+	Tmp->m_pAddr = *pAddr;
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	Tmp->m_pSqlData = this;
+
+	void *SendThread = thread_init(SendRankOnRequestThread, Tmp);
+	thread_detach(SendThread);
+}
+
+void CSqlScore::SendRankOnRequestThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			// check strings
+			pData->m_pSqlData->ClearString(pData->m_aName);
+
+			char aBuf[512];
+
+			str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_race WHERE Map='%s' AND Name='%s' LIMIT 1;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+			bool HasRank = false;
+			if(pData->m_pSqlData->m_pResults->next())
+				HasRank = true;
+
+			pData->m_pSqlData->Server()->SendRank(&pData->m_pAddr, HasRank);
+
+			// delete statement and results
+			delete pData->m_pSqlData->m_pResults;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf);
+			dbg_msg("SQL", "ERROR: Could not update account");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();
+	}
+
+	delete pData;
 
 	lock_unlock(gs_SqlLock);
 }

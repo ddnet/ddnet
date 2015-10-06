@@ -188,6 +188,8 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = 1;
+		else if(g_Config.m_BrFilterUnfinishedMap && m_ppServerlist[i]->m_Info.m_HasRank != 0)
+			Filtered = 1;
 		else
 		{
 			if(g_Config.m_BrFilterCountry)
@@ -291,8 +293,9 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterPure<<11;
 	i |= g_Config.m_BrFilterPureMap<<12;
 	i |= g_Config.m_BrFilterGametypeStrict<<13;
-	i |= g_Config.m_BrFilterCountry<<14;
-	i |= g_Config.m_BrFilterPing<<15;
+	i |= g_Config.m_BrFilterUnfinishedMap<<14;
+	i |= g_Config.m_BrFilterCountry<<15;
+	i |= g_Config.m_BrFilterPing<<16;
 	return i;
 }
 
@@ -409,6 +412,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	pEntry->m_Info.m_NetAddr = Addr;
 
 	pEntry->m_Info.m_Latency = 999;
+	pEntry->m_Info.m_HasRank = -1;
 	net_addr_str(&Addr, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), true);
 	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
 
@@ -638,11 +642,40 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 		pEntry->m_RequestTime = time_get();
 }
 
+void CServerBrowser::RequestHasRank(const NETADDR &Addr) const
+{
+	unsigned char Buffer[sizeof(SERVERBROWSE_HASRANK)+MAX_NAME_LENGTH];
+	CNetChunk Packet;
+
+	if(g_Config.m_Debug)
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf),"requesting has rank from %s", aAddrStr);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
+	}
+
+	mem_copy(Buffer, SERVERBROWSE_HASRANK, sizeof(SERVERBROWSE_HASRANK));
+	mem_copy(Buffer+sizeof(SERVERBROWSE_HASRANK), g_Config.m_PlayerName, MAX_NAME_LENGTH);
+
+	Packet.m_ClientID = -1;
+	Packet.m_Address = Addr;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_DataSize = sizeof(Buffer);
+	Packet.m_pData = Buffer;
+
+	m_pNetClient->Send(&Packet);
+}
+
 void CServerBrowser::Request(const NETADDR &Addr) const
 {
 	// Call both because we can't know what kind the server is
 	RequestImpl64(Addr, 0);
 	RequestImpl(Addr, 0);
+
+	// Call this because we don't know if server supports this
+	RequestHasRank(Addr);
 }
 
 
@@ -774,9 +807,10 @@ void CServerBrowser::Update(bool ForceResort)
 
 		if(pEntry->m_RequestTime == 0)
 		{
-			if (pEntry->m_Is64)
+			if (pEntry->m_Is64) {
 				RequestImpl64(pEntry->m_Addr, pEntry);
-			else
+				RequestHasRank(pEntry->m_Addr);
+			} else
 				RequestImpl(pEntry->m_Addr, pEntry);
 		}
 
@@ -814,9 +848,28 @@ void CServerBrowser::Update(bool ForceResort)
 		}
 	}
 
+	// check if the name changed and we need to resend has rank
+	if(str_comp(g_Config.m_PlayerName, m_aHasRankPlayerName))
+		UpdateHasRank();
+
 	// check if we need to resort
 	if(m_Sorthash != SortHash() || ForceResort)
 		Sort();
+}
+
+void CServerBrowser::UpdateHasRank()
+{
+	if(time_get()-m_LastHasRank < 3*time_freq())
+		return;
+
+	str_copy(m_aHasRankPlayerName, g_Config.m_PlayerName, sizeof(m_aHasRankPlayerName));
+
+	for (int i = 0; i < m_NumServers; i++) {
+		m_ppServerlist[i]->m_Info.m_HasRank = -1;
+		RequestHasRank(m_ppServerlist[i]->m_Addr);
+	}
+
+	m_LastHasRank = time_get();
 }
 
 
