@@ -184,7 +184,7 @@ void CPlayer::Tick()
 		if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
 			m_ViewPos -= vec2(clamp(m_ViewPos.x-m_LatestActivity.m_TargetX, -500.0f, 500.0f), clamp(m_ViewPos.y-m_LatestActivity.m_TargetY, -400.0f, 400.0f));
 
-		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
+		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*(g_Config.m_SvRaceServer ? 0 : 3) <= Server()->Tick())
 			m_Spawning = true;
 
 		if(m_pCharacter)
@@ -496,8 +496,8 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	m_LastSetTeam = Server()->Tick();
 	m_LastActionTick = Server()->Tick();
 	m_SpectatorID = SPEC_FREEVIEW;
-	// we got to wait 0.5 secs before respawning
-	m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
+
+	m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*(g_Config.m_SvRaceServer ? 0 : 0.5f);
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 

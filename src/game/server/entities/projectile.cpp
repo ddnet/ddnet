@@ -115,8 +115,8 @@ void CProjectile::Tick()
 	vec2 ColPos;
 	vec2 NewPos;
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos, false);
-	CCharacter *pOwnerChar = 0;
 
+	CCharacter *pOwnerChar = 0;
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
@@ -125,7 +125,6 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64_t TeamMask = -1LL;
 	bool isWeaponCollide = false;
 	if
 	(
@@ -137,16 +136,14 @@ void CProjectile::Tick()
 			)
 	{
 			isWeaponCollide = true;
-			//TeamMask = OwnerChar->Teams()->TeamMask( OwnerChar->Team());
 	}
-	if (pOwnerChar && pOwnerChar->IsAlive())
-	{
-		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
-	}
-	else if (m_Owner >= 0)
-	{
+
+	int Team = -1;
+	if(pOwnerChar && pOwnerChar->IsAlive())
+		Team = pOwnerChar->Team();
+	else if(m_Owner >= 0 && (!GameServer()->m_apPlayers[m_Owner] || GameServer()->m_apPlayers[m_Owner]->GetTeam() == TEAM_SPECTATORS || g_Config.m_SvRaceServer))
 		GameServer()->m_World.DestroyEntity(this);
-	}
+	int64_t TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(Team, -1, -1);
 
 	if( ((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
 	{
@@ -186,14 +183,14 @@ void CProjectile::Tick()
 	{
 		if(m_Explosive)
 		{
-			if(m_Owner >= 0)
+			/*if(m_Owner >= 0)
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
 			int64_t TeamMask = -1LL;
 			if (pOwnerChar && pOwnerChar->IsAlive())
 			{
 					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
-			}
+			}*/
 
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
 			(m_Owner != -1)? TeamMask : -1LL);
@@ -245,13 +242,12 @@ void CProjectile::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = 0;
-	int64_t TeamMask = -1LL;
-
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-
-	if (pOwnerChar && pOwnerChar->IsAlive())
-			TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+	int Team = -1;
+	if(pOwnerChar && pOwnerChar->IsAlive())
+		Team = pOwnerChar->Team();
+	int64_t TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(Team, -1, -1);
 
 	if(m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
 		return;
