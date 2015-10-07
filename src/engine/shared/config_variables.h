@@ -54,6 +54,7 @@ MACRO_CONFIG_STR(BrFilterServerAddress, br_filter_serveraddress, 128, "", CFGFLA
 MACRO_CONFIG_INT(BrFilterPure, br_filter_pure, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-standard servers in browser")
 MACRO_CONFIG_INT(BrFilterPureMap, br_filter_pure_map, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-standard maps in browser")
 MACRO_CONFIG_INT(BrFilterCompatversion, br_filter_compatversion, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-compatible servers in browser")
+MACRO_CONFIG_INT(BrFilterUnfinishedMap, br_filter_unfinished_map, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show only servers with unfinished maps")
 
 MACRO_CONFIG_STR(BrFilterExcludeCountries, br_filter_exclude_countries, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out ddnet servers by country")
 MACRO_CONFIG_STR(BrFilterExcludeTypes, br_filter_exclude_types, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out ddnet servers by type (mod)")

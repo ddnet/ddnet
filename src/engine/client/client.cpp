@@ -1361,6 +1361,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		int Token = str_toint(Up.GetString());
 		str_copy(Info.m_aVersion, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aVersion));
 		str_copy(Info.m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aName));
+		Info.m_HasRank = -1;
 		str_copy(Info.m_aMap, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aMap));
 		str_copy(Info.m_aGameType, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aGameType));
 		Info.m_Flags = str_toint(Up.GetString());
@@ -1411,7 +1412,9 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				{
 					pEntry->m_Is64 = true;
 					m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry); // Force a quick update
-					//m_ServerBrowser.QueueRequest(pEntry);
+
+					// Probably thought this isn't a 64 player server and didn't send this before
+					m_ServerBrowser.RequestHasRank(pEntry->m_Addr);
 				}
 			}
 		}
@@ -1433,6 +1436,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		int Token = str_toint(Up.GetString());
 		str_copy(Info.m_aVersion, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aVersion));
 		str_copy(Info.m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aName));
+		Info.m_HasRank = -1;
 		str_copy(Info.m_aMap, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aMap));
 		str_copy(Info.m_aGameType, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aGameType));
 		Info.m_Flags = str_toint(Up.GetString());
@@ -1473,6 +1477,17 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
 			}
+		}
+	}
+
+	// rank
+	if(pPacket->m_DataSize == sizeof(SERVERBROWSE_RANK)+1 && mem_comp(pPacket->m_pData, SERVERBROWSE_RANK, sizeof(SERVERBROWSE_RANK)) == 0)
+	{
+		CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(pPacket->m_Address);
+		if (pEntry) {
+			CServerInfo &Info = pEntry->m_Info;
+			Info.m_HasRank = ((unsigned char *)pPacket->m_pData)[sizeof(SERVERBROWSE_RANK)];
+			m_ServerBrowser.Filter(); // update filter
 		}
 	}
 }

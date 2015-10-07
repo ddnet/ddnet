@@ -64,6 +64,8 @@ public:
 
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server) = 0;
 	virtual void LoadTeam(const char* Code, int ClientID) = 0;
+
+	virtual void SendRankOnRequest(const NETADDR *pAddr, const char *pName) = 0;
 };
 
 #endif

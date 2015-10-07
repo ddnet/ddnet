@@ -1381,6 +1381,43 @@ void CServer::UpdateServerInfo()
 	}
 }
 
+void CServer::SendRank(const NETADDR *pAddr, bool HasRank)
+{
+	// don't send rank if cheats are enabled
+	if(g_Config.m_SvTestingCommands)
+		return;
+
+	if(g_Config.m_Debug)
+	{
+
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), true);
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf),"to ip %s sent has rank %s", aAddrStr, HasRank ? "true" : "false");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
+	}
+
+	unsigned char Buffer[sizeof(SERVERBROWSE_RANK)+1];
+	mem_copy(Buffer, SERVERBROWSE_RANK, sizeof(SERVERBROWSE_RANK));
+	Buffer[sizeof(SERVERBROWSE_RANK)] = HasRank;
+
+	CNetChunk Packet;
+	Packet.m_ClientID = -1;
+	Packet.m_Address = *pAddr;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_DataSize = sizeof(Buffer);
+	Packet.m_pData = Buffer;
+
+	m_NetServer.Send(&Packet);
+}
+void CServer::SendRankOnScore(int ClientID)
+{
+	NETADDR pAddr;
+	GetClientAddr(ClientID, &pAddr);
+
+	SendRank(&pAddr, true);
+}
+
 
 void CServer::PumpNetwork()
 {
@@ -1405,6 +1442,13 @@ void CServer::PumpNetwork()
 					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO64, sizeof(SERVERBROWSE_GETINFO64)) == 0)
 				{
 					SendServerInfo(&Packet.m_Address, ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO64)], true);
+				}
+				else if(Packet.m_DataSize == sizeof(SERVERBROWSE_HASRANK)+MAX_NAME_LENGTH &&
+					mem_comp(Packet.m_pData, SERVERBROWSE_HASRANK, sizeof(SERVERBROWSE_HASRANK)) == 0)
+				{
+					char Name[MAX_NAME_LENGTH];
+					mem_copy(Name, (unsigned char *)Packet.m_pData+sizeof(SERVERBROWSE_HASRANK), sizeof(Name));
+					((CGameContext *)GameServer())->Score()->SendRankOnRequest(&Packet.m_Address, Name);
 				}
 			}
 		}

@@ -132,6 +132,9 @@ public:
 		return true;
 	}
 
+	virtual void SendRank(const NETADDR *pAddr, bool HasRank) = 0;
+	virtual void SendRankOnScore(int ClientID) = 0;
+
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
 	virtual void SetClientCountry(int ClientID, int Country) = 0;

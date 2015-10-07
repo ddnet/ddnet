@@ -88,15 +88,19 @@ public:
 
 	//
 	void Update(bool ForceResort);
+	void UpdateHasRank();
 	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
 	void Request(const NETADDR &Addr) const;
 
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
 
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
+	void RequestHasRank(const NETADDR &Addr) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
 	int GetCurrentType() { return m_ServerlistType; };
+
+	void Filter();
 
 private:
 	CNetClient *m_pNetClient;
@@ -156,7 +160,6 @@ private:
 	bool SortCompareNumClients(int Index1, int Index2) const;
 
 	//
-	void Filter();
 	void Sort();
 	int SortHash() const;
 
@@ -169,6 +172,10 @@ private:
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 
 	static void ConfigSaveCallback(IConfig *pConfig, void *pUserData);
+
+	// has rank
+	char m_aHasRankPlayerName[MAX_NAME_LENGTH];
+	int64 m_LastHasRank;
 };
 
 #endif

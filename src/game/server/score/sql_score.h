@@ -57,6 +57,8 @@ class CSqlScore: public IScore
 	static void SaveTeamThread(void *pUser);
 	static void LoadTeamThread(void *pUser);
 
+	static void SendRankOnRequestThread(void *pUser);
+
 	void Init();
 
 	bool Connect();
@@ -95,6 +97,8 @@ public:
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
 	static void agoTimeToString(int agoTime, char agoString[]);
+
+	virtual void SendRankOnRequest(const NETADDR *pAddr, const char *pName);
 };
 
 struct CSqlMapData
@@ -119,6 +123,9 @@ struct CSqlScoreData
 	int m_Num;
 	bool m_Search;
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+
+	// for send rank
+	NETADDR m_pAddr;
 };
 
 struct CSqlTeamScoreData

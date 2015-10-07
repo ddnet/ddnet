@@ -225,6 +225,9 @@ void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
 void CFileScore::SaveScore(int ClientID, float Time,
 		float CpTime[NUM_CHECKPOINTS])
 {
+	// send has rank to client
+	Server()->SendRankOnScore(ClientID);
+
 	CConsole* pCon = (CConsole*) GameServer()->Console();
 	if (!pCon->m_Cheated || g_Config.m_SvRankCheats)
 		UpdatePlayer(ClientID, Time, CpTime);
@@ -345,4 +348,19 @@ void CFileScore::LoadTeam(const char* Code, int ClientID)
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Save-function not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
+}
+
+
+void CFileScore::SendRankOnRequest(const NETADDR *pAddr, const char *pName)
+{
+	bool HasRank = false;
+
+	for (sorted_array<CPlayerScore>::range r = m_Top.all(); !r.empty();
+			r.pop_front())
+	{
+		if (!strcmp(r.front().m_aName, pName))
+			HasRank = true;
+	}
+
+	Server()->SendRank(pAddr, HasRank);
 }

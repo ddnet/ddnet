@@ -239,6 +239,9 @@ public:
 	void SendServerInfo(const NETADDR *pAddr, int Token, bool Extended=false, int Offset=0);
 	void UpdateServerInfo();
 
+	void SendRank(const NETADDR *pAddr, bool HasRank);
+	void SendRankOnScore(int ClientID);
+
 	void PumpNetwork();
 
 	char *GetMapName();
