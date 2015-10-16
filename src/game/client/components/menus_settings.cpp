@@ -936,7 +936,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		g_Config.m_SndEnable ^= 1;
 		if(g_Config.m_SndEnable)
 		{
-			if(g_Config.m_SndMusic)
+			if(g_Config.m_SndMusic && Client()->State() == IClient::STATE_OFFLINE)
 				m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		}
 		else
