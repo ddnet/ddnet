@@ -3315,10 +3315,10 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->InitInterfaces();
 
 	// execute config file
-	IOHANDLE file = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(file)
+	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
 	{
-		io_close(file);
+		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
 	else // fallback
@@ -3327,16 +3327,27 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	// execute autoexec file
-	file = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(file)
+	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
 	{
-		io_close(file);
+		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_CLIENT_FILE);
 	}
 	else // fallback
 	{
 		pConsole->ExecuteFile(AUTOEXEC_FILE);
 	}
+
+	if(g_Config.m_ClConfigVersion < 1)
+	{
+		if(g_Config.m_ClAntiPing == 0)
+		{
+			g_Config.m_ClAntiPingPlayers = 1;
+			g_Config.m_ClAntiPingGrenade = 1;
+			g_Config.m_ClAntiPingWeapons = 1;
+		}
+	}
+	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention

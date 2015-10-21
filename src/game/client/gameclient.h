@@ -363,11 +363,13 @@ public:
 
 	void FindWeaker(bool IsWeaker[2][MAX_CLIENTS]);
 
-private:
+	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers; }
+	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade; }
+	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
 
+private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];
-	bool m_CurrentAntiPing;
 };
 
 
