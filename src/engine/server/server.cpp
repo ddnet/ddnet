@@ -1702,10 +1702,13 @@ int CServer::Run()
 			// wait for incoming data
 			if (NonActive)
 			{
-				if(g_Config.m_SvReloadWhenEmpty == 1) {
+				if(g_Config.m_SvReloadWhenEmpty == 1)
+				{
 					m_MapReload = true;
 					g_Config.m_SvReloadWhenEmpty = 0;
-				} else if(g_Config.m_SvReloadWhenEmpty == 2 && !m_ReloadedWhenEmpty) {
+				}
+				else if(g_Config.m_SvReloadWhenEmpty == 2 && !m_ReloadedWhenEmpty)
+				{
 					m_MapReload = true;
 					m_ReloadedWhenEmpty = true;
 				}
