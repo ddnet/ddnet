@@ -309,6 +309,7 @@ CServer::CServer()
 	m_CurrentMapSize = 0;
 
 	m_MapReload = 0;
+	m_ReloadedWhenEmpty = false;
 
 	m_RconClientID = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
@@ -1701,6 +1702,17 @@ int CServer::Run()
 			// wait for incoming data
 			if (NonActive)
 			{
+				if(g_Config.m_SvReloadWhenEmpty == 1)
+				{
+					m_MapReload = true;
+					g_Config.m_SvReloadWhenEmpty = 0;
+				}
+				else if(g_Config.m_SvReloadWhenEmpty == 2 && !m_ReloadedWhenEmpty)
+				{
+					m_MapReload = true;
+					m_ReloadedWhenEmpty = true;
+				}
+
 				if(g_Config.m_SvShutdownWhenEmpty)
 					m_RunServer = false;
 				else
@@ -1708,6 +1720,8 @@ int CServer::Run()
 			}
 			else
 			{
+				m_ReloadedWhenEmpty = false;
+
 				set_new_tick();
 				int64 t = time_get();
 				int x = (TickStartTime(m_CurrentGameTick+1) - t) * 1000000 / time_freq() + 1;
