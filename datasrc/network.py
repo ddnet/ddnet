@@ -216,6 +216,10 @@ Objects = [
 	NetEvent("DamageInd:Common", [
 		NetIntAny("m_Angle"),
 	]),
+
+	NetObject("Character_DDNet:Character", [
+		NetIntRange("m_Test", 0, "max_int"),
+	]),
 ]
 
 Messages = [

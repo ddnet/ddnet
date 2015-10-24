@@ -208,10 +208,11 @@ public:
 		struct CCharacterInfo
 		{
 			bool m_Active;
+			bool m_isDDNet;
 
 			// snapshots
-			CNetObj_Character m_Prev;
-			CNetObj_Character m_Cur;
+			CNetObj_Character_DDNet m_Prev;
+			CNetObj_Character_DDNet m_Cur;
 
 			// interpolated position
 			vec2 m_Position;

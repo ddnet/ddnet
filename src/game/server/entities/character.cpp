@@ -1055,7 +1055,13 @@ void CCharacter::Snap(int SnappingClient)
 	if (m_Paused)
 		return;
 
-	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, id, sizeof(CNetObj_Character)));
+	CNetObj_Character *pCharacter = 0;
+
+	if (m_pPlayer->m_ClientVersion >= VERSION_DDNET_CHARACTER_NETOBJ)
+		pCharacter = static_cast<CNetObj_Character_DDNet *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER_DDNET, id, sizeof(CNetObj_Character_DDNet)));
+	else
+		pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, id, sizeof(CNetObj_Character)));
+
 	if(!pCharacter)
 		return;
 
@@ -1106,6 +1112,13 @@ void CCharacter::Snap(int SnappingClient)
 		if (pCharacter->m_Emote == EMOTE_NORMAL)
 			pCharacter->m_Emote = EMOTE_BLINK;
 		pCharacter->m_Weapon = WEAPON_NINJA;
+	}
+
+	// DDNet only
+	if (m_pPlayer->m_ClientVersion >= VERSION_DDNET_CHARACTER_NETOBJ)
+	{
+		CNetObj_Character_DDNet * pDDNetChar = (CNetObj_Character_DDNet *)pCharacter;
+		pDDNetChar->m_Test = 1337;
 	}
 
 	// jetpack and ninjajetpack prediction

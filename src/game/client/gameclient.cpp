@@ -1041,16 +1041,37 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_CHARACTER)
 			{
 				const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_ID);
-				m_Snap.m_aCharacters[Item.m_ID].m_Cur = *((const CNetObj_Character *)pData);
+				m_Snap.m_aCharacters[Item.m_ID].m_Cur.CNetObj_Character::operator=(*((const CNetObj_Character *)pData));
 				if(pOld)
 				{
 					m_Snap.m_aCharacters[Item.m_ID].m_Active = true;
-					m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
+					m_Snap.m_aCharacters[Item.m_ID].m_isDDNet = false;
+					m_Snap.m_aCharacters[Item.m_ID].m_Prev.CNetObj_Character::operator=(*((const CNetObj_Character *)pOld));
 
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
+				}
+			}
+			else if(Item.m_Type == NETOBJTYPE_CHARACTER_DDNET)
+			{
+				const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER_DDNET, Item.m_ID);
+				m_Snap.m_aCharacters[Item.m_ID].m_Cur = *((const CNetObj_Character_DDNet *)pData);
+				if(pOld)
+				{
+					m_Snap.m_aCharacters[Item.m_ID].m_Active = true;
+					m_Snap.m_aCharacters[Item.m_ID].m_isDDNet = true;
+					m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character_DDNet *)pOld);
+
+					if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
+						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
+					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
+						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
+
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "m_Test: %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Test);
+					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
