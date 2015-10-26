@@ -1151,77 +1151,59 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
 			{
+				int AuthLevel = -1;
+
 				if(g_Config.m_SvRconPassword[0] == 0 && g_Config.m_SvRconModPassword[0] == 0 && g_Config.m_SvRconHelperPassword[0] == 0)
 				{
 					SendRconLine(ClientID, "No rcon password set on server. Set sv_rcon_password and/or sv_rcon_mod_password to enable the remote console.");
 				}
 				else if(g_Config.m_SvRconPassword[0] && str_comp(pPw, g_Config.m_SvRconPassword) == 0)
+					AuthLevel = AUTHED_ADMIN;
+				else if(g_Config.m_SvRconModPassword[0] && str_comp(pPw, g_Config.m_SvRconModPassword) == 0)
+					AuthLevel = AUTHED_MOD;
+				else if(g_Config.m_SvRconHelperPassword[0] && str_comp(pPw, g_Config.m_SvRconHelperPassword) == 0)
+					AuthLevel = AUTHED_HELPER;
+
+				if(AuthLevel != -1)
 				{
-					m_aClients[ClientID].m_LastAuthed = AUTHED_ADMIN;
-					if(m_aClients[ClientID].m_Authed != AUTHED_ADMIN)
+					m_aClients[ClientID].m_LastAuthed = AuthLevel;
+					if(m_aClients[ClientID].m_Authed != AuthLevel)
 					{
 						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
 						Msg.AddInt(1);	//authed
 						Msg.AddInt(1);	//cmdlist
 						SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 
-						m_aClients[ClientID].m_Authed = AUTHED_ADMIN;
+						m_aClients[ClientID].m_Authed = AuthLevel;
 						int SendRconCmds = Unpacker.GetInt();
 						if(Unpacker.Error() == 0 && SendRconCmds)
-							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_ADMIN, CFGFLAG_SERVER);
-						SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
+							// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
+							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
+
+						switch (AuthLevel)
+						{
+							case AUTHED_ADMIN:
+							{
+								SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
+								break;
+							}
+							case AUTHED_MOD:
+							{
+								SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
+								break;
+							}
+							case AUTHED_HELPER:
+							{
+								SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
+								break;
+							}
+						}
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (admin)", ClientID);
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 						// DDRace
 						GameServer()->OnSetAuthed(ClientID, AUTHED_ADMIN);
-					}
-				}
-				else if(g_Config.m_SvRconModPassword[0] && str_comp(pPw, g_Config.m_SvRconModPassword) == 0)
-				{
-					m_aClients[ClientID].m_LastAuthed = AUTHED_MOD;
-					if(m_aClients[ClientID].m_Authed != AUTHED_MOD)
-					{
-						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-						Msg.AddInt(1);	//authed
-						Msg.AddInt(1);	//cmdlist
-						SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
-
-						m_aClients[ClientID].m_Authed = AUTHED_MOD;
-						int SendRconCmds = Unpacker.GetInt();
-						if(Unpacker.Error() == 0 && SendRconCmds)
-							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_MOD, CFGFLAG_SERVER);
-						SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (moderator)", ClientID);
-						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-
-						// DDRace
-						GameServer()->OnSetAuthed(ClientID, AUTHED_MOD);
-					}
-				}
-				else if(g_Config.m_SvRconHelperPassword[0] && str_comp(pPw, g_Config.m_SvRconHelperPassword) == 0)
-				{
-					m_aClients[ClientID].m_LastAuthed = AUTHED_HELPER;
-					if(m_aClients[ClientID].m_Authed != AUTHED_HELPER)
-					{
-						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-						Msg.AddInt(1);	//authed
-						Msg.AddInt(1);	//cmdlist
-						SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
-
-						m_aClients[ClientID].m_Authed = AUTHED_HELPER;
-						int SendRconCmds = Unpacker.GetInt();
-						if(Unpacker.Error() == 0 && SendRconCmds)
-							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_HELPER, CFGFLAG_SERVER);
-						SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (helper)", ClientID);
-						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-
-						// DDRace
-						GameServer()->OnSetAuthed(ClientID, AUTHED_HELPER);
 					}
 				}
 				else if(g_Config.m_SvRconMaxTries)
@@ -1986,34 +1968,39 @@ void CServer::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void 
 	}
 }
 
+void CServer::LogoutByAuthLevel(int AuthLevel) // AUTHED_<x>
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+			continue;
+		if(m_aClients[i].m_Authed == AuthLevel)
+		{
+			CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
+			Msg.AddInt(0);	//authed
+			Msg.AddInt(0);	//cmdlist
+			SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
+
+			m_aClients[i].m_Authed = AUTHED_NO;
+			m_aClients[i].m_LastAuthed = AUTHED_NO;
+			m_aClients[i].m_AuthTries = 0;
+			m_aClients[i].m_pRconCmdToSend = 0;
+
+			SendRconLine(i, "Logged out by password change.");
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		}
+	}
+}
+
 void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() == 1)
 	{
 		CServer *pServer = (CServer *)pUserData;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(pServer->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
-				continue;
-			if(pServer->m_aClients[i].m_Authed == AUTHED_ADMIN)
-			{
-				CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-				Msg.AddInt(0);	//authed
-				Msg.AddInt(0);	//cmdlist
-				pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
-
-				pServer->m_aClients[i].m_Authed = AUTHED_NO;
-				pServer->m_aClients[i].m_LastAuthed = AUTHED_NO;
-				pServer->m_aClients[i].m_AuthTries = 0;
-				pServer->m_aClients[i].m_pRconCmdToSend = 0;
-
-				pServer->SendRconLine(i, "Logged out by password change.");
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
-				pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-			}
-		}
+		pServer->LogoutByAuthLevel(AUTHED_ADMIN);
 	}
 }
 
@@ -2023,28 +2010,7 @@ void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pU
 	if(pResult->NumArguments() == 1)
 	{
 		CServer *pServer = (CServer *)pUserData;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(pServer->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
-				continue;
-			if(pServer->m_aClients[i].m_Authed == AUTHED_MOD)
-			{
-				CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-				Msg.AddInt(0);	//authed
-				Msg.AddInt(0);	//cmdlist
-				pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
-
-				pServer->m_aClients[i].m_Authed = AUTHED_NO;
-				pServer->m_aClients[i].m_LastAuthed = AUTHED_NO;
-				pServer->m_aClients[i].m_AuthTries = 0;
-				pServer->m_aClients[i].m_pRconCmdToSend = 0;
-
-				pServer->SendRconLine(i, "Logged out by password change.");
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
-				pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-			}
-		}
+		pServer->LogoutByAuthLevel(AUTHED_MOD);
 	}
 }
 
@@ -2054,28 +2020,7 @@ void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void 
 	if(pResult->NumArguments() == 1)
 	{
 		CServer *pServer = (CServer *)pUserData;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(pServer->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
-				continue;
-			if(pServer->m_aClients[i].m_Authed == AUTHED_HELPER)
-			{
-				CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
-				Msg.AddInt(0);	//authed
-				Msg.AddInt(0);	//cmdlist
-				pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
-
-				pServer->m_aClients[i].m_Authed = AUTHED_NO;
-				pServer->m_aClients[i].m_LastAuthed = AUTHED_NO;
-				pServer->m_aClients[i].m_AuthTries = 0;
-				pServer->m_aClients[i].m_pRconCmdToSend = 0;
-
-				pServer->SendRconLine(i, "Logged out by password change.");
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out by password change", i);
-				pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-			}
-		}
+		pServer->LogoutByAuthLevel(AUTHED_HELPER);
 	}
 }
 
