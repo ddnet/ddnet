@@ -1180,30 +1180,32 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 							// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
 							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
 
+						char aBuf[256];
 						switch (AuthLevel)
 						{
 							case AUTHED_ADMIN:
 							{
 								SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (admin)", ClientID);
 								break;
 							}
 							case AUTHED_MOD:
 							{
 								SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (moderator)", ClientID);
 								break;
 							}
 							case AUTHED_HELPER:
 							{
 								SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (helper)", ClientID);
 								break;
 							}
 						}
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (admin)", ClientID);
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 						// DDRace
-						GameServer()->OnSetAuthed(ClientID, AUTHED_ADMIN);
+						GameServer()->OnSetAuthed(ClientID, AuthLevel);
 					}
 				}
 				else if(g_Config.m_SvRconMaxTries)
