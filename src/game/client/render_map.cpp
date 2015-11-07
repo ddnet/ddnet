@@ -324,7 +324,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 
 void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha)
 {
-	if(g_Config.m_ClTextEntities == 0)
+	if(!g_Config.m_ClTextEntities)
 	  return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -438,7 +438,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha)
 {
-	if(g_Config.m_ClTextEntities == 0)
+	if(!g_Config.m_ClTextEntities)
 	  return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -496,7 +496,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 
 void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha)
 {
-	if(g_Config.m_ClTextEntities == 0)
+	if(!g_Config.m_ClTextEntities)
 	  return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
