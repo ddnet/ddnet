@@ -195,7 +195,7 @@ end
 function build(settings)
 	-- apply compiler settings
 	config.compiler:Apply(settings)
-	
+
 	--settings.objdir = Path("objs")
 	settings.cc.Output = Intermediate_Output
 
@@ -260,7 +260,7 @@ function build(settings)
 			settings.link.libs:Add("pthread")
 			settings.link.libs:Add("rt")
 		end
-		
+
 		if platform == "solaris" then
 			settings.link.flags:Add("-lsocket")
 			settings.link.flags:Add("-lnsl")
@@ -367,7 +367,6 @@ function build(settings)
 	if platform == "macosx" then
 		notification_settings = client_settings:Copy()
 		notification_settings.cc.flags:Add("-x objective-c++")
-		notification_settings.cc.flags:Add("-I/System/Library/Frameworks/Foundation.framework/Versions/C/Headers")
 		client_notification = Compile(notification_settings, "src/osx/notification.m")
 		client_osxlaunch = Compile(client_settings, "src/osxlaunch/client.m")
 		server_osxlaunch = Compile(launcher_settings, "src/osxlaunch/server.m")
@@ -465,14 +464,14 @@ if platform == "macosx" then
 	debug_sql_settings_ppc.cc.flags:Add("-arch ppc")
 	debug_sql_settings_ppc.link.flags:Add("-arch ppc")
 	debug_sql_settings_ppc.cc.defines:Add("CONF_DEBUG", "CONF_SQL")
-	
+
 	release_settings_ppc = release_settings:Copy()
 	release_settings_ppc.config_name = "release_ppc"
 	release_settings_ppc.config_ext = "_ppc"
 	release_settings_ppc.cc.flags:Add("-arch ppc")
 	release_settings_ppc.link.flags:Add("-arch ppc")
 	release_settings_ppc.cc.defines:Add("CONF_RELEASE")
-	
+
 	release_sql_settings_ppc = release_sql_settings:Copy()
 	release_sql_settings_ppc.config_name = "sql_release_ppc"
 	release_sql_settings_ppc.config_ext = "_sql_ppc"
@@ -506,7 +505,7 @@ if platform == "macosx" then
 		release_settings_x86.cc.flags:Add("-arch i386")
 		release_settings_x86.link.flags:Add("-arch i386")
 		release_settings_x86.cc.defines:Add("CONF_RELEASE")
-	
+
 		release_sql_settings_x86 = release_sql_settings:Copy()
 		release_sql_settings_x86.config_name = "sql_release_x86"
 		release_sql_settings_x86.config_ext = "_sql_x86"
@@ -541,7 +540,7 @@ if platform == "macosx" then
 		release_settings_x86_64.cc.flags:Add("-arch x86_64")
 		release_settings_x86_64.link.flags:Add("-arch x86_64")
 		release_settings_x86_64.cc.defines:Add("CONF_RELEASE")
-	
+
 		release_sql_settings_x86_64 = release_sql_settings:Copy()
 		release_sql_settings_x86_64.config_name = "sql_release_x86_64"
 		release_sql_settings_x86_64.config_ext = "_sql_x86_64"
@@ -556,7 +555,7 @@ if platform == "macosx" then
 	end
 
 	DefaultTarget("game_debug_x86")
-	
+
 	if config.macosxppc.value == 1 then
 		if arch == "ia32" then
 			PseudoTarget("release", ppc_r, x86_r)

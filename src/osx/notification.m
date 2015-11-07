@@ -1,7 +1,7 @@
-#include <NSString.h>
-#include <NSUserNotification.h>
-#include <Cocoa/Cocoa.h>
-#include "notification.h"
+#import <Foundation/Foundation.h>
+#import <Foundation/NSUserNotification.h>
+#import <Cocoa/Cocoa.h>
+#import "notification.h"
 
 void CNotification::notify(const char *pTitle, const char *pMsg)
 {
