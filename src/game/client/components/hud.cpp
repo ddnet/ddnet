@@ -494,6 +494,10 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character_DDNet *pCharacter)
 		for (int i = 0; i < NUM_WEAPONS; i++)
 			if (pCharacter->m_WeaponFlags & 1 << i)
 			{
+				if (i == pCharacter->m_Weapon%NUM_WEAPONS)
+					Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+				else
+					Graphics()->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
 				RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody);
 				RenderTools()->DrawSprite(i*20+13, y+4, 20);
 			}
@@ -512,6 +516,8 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character_DDNet *pCharacter)
 			Array[i++] = IGraphics::CQuadItem(x+h*12,y,10,10);
 		Graphics()->QuadsDrawTL(Array, i);
 	}
+
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// render armor meter
 	h = 0;
