@@ -1118,7 +1118,16 @@ void CCharacter::Snap(int SnappingClient)
 	if (m_pPlayer->m_ClientVersion >= VERSION_DDNET_CHARACTER_NETOBJ)
 	{
 		CNetObj_Character_DDNet * pDDNetChar = (CNetObj_Character_DDNet *)pCharacter;
-		pDDNetChar->m_Test = 1337;
+
+		for (int i = 0; i < NUM_WEAPONS; i++)
+			pDDNetChar->m_WeaponFlags |= m_aWeapons[i].m_Got * (1 << i);
+
+		pDDNetChar->m_FreezeTime = m_FreezeTime;
+		// Figure strong/weak
+		pDDNetChar->m_StrongWeakID = GetStrongWeakID();
+		pDDNetChar->m_DDRaceState = m_DDRaceState;
+		pDDNetChar->m_Hit = m_Hit;
+		pDDNetChar->m_Flags = GetNetFlags();
 	}
 
 	// jetpack and ninjajetpack prediction
@@ -1203,6 +1212,19 @@ int CCharacter::NetworkClipped(int SnappingClient, vec2 CheckPos)
 }
 
 // DDRace
+
+int CCharacter::GetStrongWeakID()
+{
+	// TODO: figure true id
+	return 0;
+}
+
+int CCharacter::GetNetFlags()
+{
+	return 1 << 0 * Teams()->m_Core.GetSolo(m_pPlayer->GetCID()) |
+		   1 << 1 * m_SuperJump |
+		   1 << 2 * m_EndlessHook;
+}
 
 bool CCharacter::CanCollide(int ClientID)
 {

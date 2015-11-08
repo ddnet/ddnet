@@ -218,7 +218,12 @@ Objects = [
 	]),
 
 	NetObject("Character_DDNet:Character", [
-		NetIntRange("m_Test", 0, "max_int"),
+		NetIntAny("m_WeaponFlags"),
+		NetIntAny("m_FreezeTime"),
+		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
+		NetIntAny("m_DDRaceState"),
+		NetIntAny("m_Hit"),
+		NetIntAny("m_Flags"),
 	]),
 ]
 

@@ -1068,11 +1068,11 @@ void CGameClient::OnNewSnapshot()
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick());
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
-
-					char aBuf[64];
-					str_format(aBuf, sizeof(aBuf), "m_Test: %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Test);
-					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 				}
+
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "WeaponFlags: %d", m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_WeaponFlags);
+				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
