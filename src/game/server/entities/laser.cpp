@@ -99,7 +99,7 @@ void CLaser::DoBounce()
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, false);
+	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
 
 	if(Res)
 	{

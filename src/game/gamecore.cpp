@@ -273,7 +273,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
+		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
 
 		//m_NewHook = false;
 

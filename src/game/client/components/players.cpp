@@ -580,7 +580,7 @@ void CPlayers::RenderPlayer(
 				}
 
 				int teleNr = 0;
-				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr, true);
+				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr);
 
 				if(!doBreak && Hit) {
 					if (Hit != TILE_NOHOOK)

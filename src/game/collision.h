@@ -23,9 +23,9 @@ public:
 	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
 	int GetWidth() { return m_Width; };
 	int GetHeight() { return m_Height; };
-	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough);
-	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough);
-	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough);
+	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
+	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
+	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces);
 	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
 	bool TestBox(vec2 Pos, vec2 Size);
@@ -44,14 +44,14 @@ public:
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int GetIndex(int x, int y);
-	int GetIndex(vec2 Pos);
 	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
 
 	int GetTile(int x, int y);
 	int GetFTile(int x, int y);
 	int Entity(int x, int y, int Layer);
-	int GetPureMapIndex(vec2 Pos);
+	int GetPureMapIndex(float x, float y);
+	int GetPureMapIndex(vec2 Pos) { return GetPureMapIndex(Pos.x, Pos.y); }
 	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0);
 	int GetMapIndex(vec2 Pos);
 	bool TileExists(int Index);
