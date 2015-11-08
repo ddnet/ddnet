@@ -583,7 +583,7 @@ void CPlayers::RenderPlayer(
 				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr, true);
 
 				if(!doBreak && Hit) {
-					if (!(Hit&CCollision::COLFLAG_NOHOOK))
+					if (Hit != TILE_NOHOOK)
 						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, Alpha);
 				}
 

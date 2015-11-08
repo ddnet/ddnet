@@ -15,21 +15,7 @@ class CCollision
 	int m_Height;
 	class CLayers *m_pLayers;
 
-	//bool IsTileSolid(int x, int y);
-	//int GetTile(int x, int y);
-
 public:
-	enum
-	{
-		COLFLAG_SOLID=1,
-		COLFLAG_DEATH=2,
-		COLFLAG_NOHOOK=4,
-		// DDRace
-		//COLFLAG_NOLASER=8, // Unused, now used for TimedSwitchActivation
-		//COLFLAG_THROUGH=16, // Unused, now used for WallJump
-		COLFLAG_TELE=32
-	};
-
 	CCollision();
 	void Init(class CLayers *pLayers);
 	bool CheckPoint(float x, float y) { return IsSolid(round_to_int(x), round_to_int(y)); }
@@ -47,7 +33,7 @@ public:
 	// DDRace
 
 	void Dest();
-	void SetCollisionAt(float x, float y, int Flag);
+	void SetCollisionAt(float x, float y, int id);
 	void SetDTile(float x, float y, bool State);
 	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
 	int GetDTileIndex(int Index);
@@ -82,7 +68,6 @@ public:
 	int IsTeleportWeapon(int Index);
 	int IsTeleportHook(int Index);
 	int IsTCheckpoint(int Index);
-	//int IsCheckpoint(int Index);
 	int IsSpeedup(int Index);
 	int IsTune(int Index);
 	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed);
