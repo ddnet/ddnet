@@ -15,7 +15,7 @@ class CHud : public CComponent
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
 	void RenderVoting();
-	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);
+	void RenderHealthAndAmmo(const CNetObj_Character_DDNet *pCharacter);
 	void RenderGameTimer();
 	void RenderPauseNotification();
 	void RenderSuddenDeath();

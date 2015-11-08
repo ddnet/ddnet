@@ -351,7 +351,7 @@ Messages = [
 		NetStringStrict("m_Reason"),
 	]),
 
-	NetMessage("Cl_IsDDNet", []),
+	NetMessage("IsDDNet", []),
 
 	NetMessage("Sv_DDRaceTime", [
 		NetIntAny("m_Time"),

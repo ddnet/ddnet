@@ -1432,7 +1432,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
-		else if (MsgID == NETMSGTYPE_CL_ISDDNET)
+		else if (MsgID == NETMSGTYPE_ISDDNET)
 		{
 			int Version = pUnpacker->GetInt();
 
@@ -1447,6 +1447,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
 			dbg_msg("DDNet", aBuf);
+
+			// send servers NET_VERSIONNR back to client
+			CMsgPacker Msg(NETMSGTYPE_ISDDNET);
+			Msg.AddInt(NET_VERSIONNR);
+			Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 
 			//first update his teams state
 			((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
