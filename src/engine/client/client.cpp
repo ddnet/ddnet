@@ -326,7 +326,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_Fire = 0;
 
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
-	mem_zero(&DummyInput, sizeof(DummyInput));
+	mem_zero(&m_DummyInput, sizeof(m_DummyInput));
 	mem_zero(&HammerInput, sizeof(HammerInput));
 	HammerInput.m_Fire = 0;
 
@@ -510,16 +510,16 @@ void CClient::SendInput()
 
 	if(m_LastDummy != (bool)g_Config.m_ClDummy)
 	{
-		mem_copy(&DummyInput, &m_aInputs[!g_Config.m_ClDummy][(m_CurrentInput[!g_Config.m_ClDummy]+200-1)%200], sizeof(DummyInput));
+		mem_copy(&m_DummyInput, &m_aInputs[!g_Config.m_ClDummy][(m_CurrentInput[!g_Config.m_ClDummy]+200-1)%200], sizeof(m_DummyInput));
 		m_LastDummy = g_Config.m_ClDummy;
 
 		if (g_Config.m_ClDummyResetOnSwitch)
 		{
-			DummyInput.m_Jump = 0;
-			DummyInput.m_Hook = 0;
-			if(DummyInput.m_Fire & 1)
-				DummyInput.m_Fire++;
-			DummyInput.m_Direction = 0;
+			m_DummyInput.m_Jump = 0;
+			m_DummyInput.m_Hook = 0;
+			if(m_DummyInput.m_Fire & 1)
+				m_DummyInput.m_Fire++;
+			m_DummyInput.m_Direction = 0;
 			GameClient()->ResetDummyInput();
 		}
 	}
@@ -535,22 +535,22 @@ void CClient::SendInput()
 		{
 			if(m_Fire != 0)
 			{
-				DummyInput.m_Fire = HammerInput.m_Fire;
+				m_DummyInput.m_Fire = HammerInput.m_Fire;
 				m_Fire = 0;
 			}
 
-			if(!Size && (!DummyInput.m_Direction && !DummyInput.m_Jump && !DummyInput.m_Hook))
+			if(!Size && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
 				return;
 
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
 			Msg.AddInt(m_AckGameTick[!g_Config.m_ClDummy]);
 			Msg.AddInt(m_PredTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(sizeof(DummyInput));
+			Msg.AddInt(sizeof(m_DummyInput));
 
 			// pack it
-			for(unsigned int i = 0; i < sizeof(DummyInput)/4; i++)
-				Msg.AddInt(((int*) &DummyInput)[i]);
+			for(unsigned int i = 0; i < sizeof(m_DummyInput)/4; i++)
+				Msg.AddInt(((int*) &m_DummyInput)[i]);
 
 			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
 		}

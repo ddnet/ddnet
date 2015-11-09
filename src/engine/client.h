@@ -42,7 +42,7 @@ public:
 	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
 
-	CNetObj_PlayerInput DummyInput;
+	CNetObj_PlayerInput m_DummyInput;
 
 	bool m_DummySendConnInfo;
 
