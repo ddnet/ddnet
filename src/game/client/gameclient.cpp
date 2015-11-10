@@ -110,6 +110,11 @@ const char *CGameClient::Version() { return GAME_VERSION; }
 const char *CGameClient::NetVersion() { return GAME_NETVERSION; }
 const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjName(Type); }
 
+const CNetObj_PlayerInput &CGameClient::getPlayerInput(int dummy)
+{
+	return m_pControls->m_InputData[dummy];
+}
+
 void CGameClient::ResetDummyInput()
 {
 	m_pControls->ResetInput(!g_Config.m_ClDummy);
