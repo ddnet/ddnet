@@ -510,7 +510,7 @@ void CClient::SendInput()
 
 	if(m_LastDummy != (bool)g_Config.m_ClDummy)
 	{
-		mem_copy(&m_DummyInput, &m_aInputs[!g_Config.m_ClDummy][(m_CurrentInput[!g_Config.m_ClDummy]+200-1)%200], sizeof(m_DummyInput));
+		m_DummyInput = GameClient()->getPlayerInput(!g_Config.m_ClDummy);
 		m_LastDummy = g_Config.m_ClDummy;
 
 		if (g_Config.m_ClDummyResetOnSwitch)
