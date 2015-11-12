@@ -1063,12 +1063,24 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFO)
 			{
 				static bool s_GameOver = 0;
+				static bool s_GamePaused = 0;
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
-				if(!s_GameOver && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
+				bool CurrentTickGameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
+				if(!s_GameOver && CurrentTickGameOver)
 					OnGameOver();
-				else if(s_GameOver && !(m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+				else if(s_GameOver && !CurrentTickGameOver)
 					OnStartGame();
-				s_GameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
+				// Reset statboard when new round is started (RoundStartTick changed)
+				// New round is usually started after `restart` on server
+				if ((m_Snap.m_pGameInfoObj->m_RoundStartTick - m_LastRoundStartTick > 2)
+						// In GamePaused or GameOver state RoundStartTick is updated on each tick
+						// hence no need to reset stats until player leaves GameOver
+						// and it would be a mistake to reset stats after or during the pause
+						&& !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED || s_GamePaused))
+					m_pStatboard->OnReset();
+				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
+				s_GameOver = CurrentTickGameOver;
+				s_GamePaused = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED;
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
