@@ -110,12 +110,12 @@ void CCollision::Init(class CLayers *pLayers)
 		{
 			// remove unused tiles from front layer
 			Index = m_pFront[i].m_Index;
-			if(Index <= TILE_NPH_START && !(Index == TILE_DEATH || Index == TILE_NOLASER || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
+			if(Index <= TILE_NPH_START && !(Index == TILE_DEATH || Index == TILE_NOLASER || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
 				m_pFront[i].m_Index = 0;
 		}
 		// remove unused tiles from game layer
 		Index = m_pTiles[i].m_Index;
-		if(Index <= TILE_NPH_START && !((Index >= TILE_SOLID && Index <= TILE_NOLASER) || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
+		if(Index <= TILE_NPH_START && !((Index >= TILE_SOLID && Index <= TILE_NOLASER) || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
 				m_pTiles[i].m_Index = 0;
 	}
 
@@ -211,13 +211,14 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 			return TILE_TELEINHOOK;
 		}
 
-		if(CheckPoint(ix, iy) && !IsThrough(ix+dx, iy+dy))
+		bool hit = CheckPoint(ix, iy) && !IsThrough(ix, iy, dx, dy, Pos0, Pos1);
+		if(hit || !IsAirThrough(ix, iy, Pos0, Pos1))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			return GetCollisionAt(ix, iy);
+			return hit ? GetCollisionAt(ix, iy) : TILE_NOHOOK;
 		}
 
 		Last = Pos;
@@ -412,18 +413,35 @@ int CCollision::IsSolid(int x, int y)
 	return index == TILE_SOLID || index == TILE_NOHOOK;
 }
 
-int CCollision::IsThrough(int x, int y)
+bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1)
 {
 	int pos = GetPureMapIndex(x, y);
-	int Index = m_pTiles[pos].m_Index;
-	int Findex = 0;
-	if (m_pFront)
-		Findex = m_pFront[pos].m_Index;
-	if (Index == TILE_THROUGH)
-		return Index;
-	if (Findex == TILE_THROUGH)
-		return Findex;
-	return 0;
+	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_ALL)
+		return true;
+	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && (
+		(m_pFront[pos].m_Flags == ROTATION_0   && pos0.y > pos1.y) ||
+		(m_pFront[pos].m_Flags == ROTATION_90  && pos0.x < pos1.x) ||
+		(m_pFront[pos].m_Flags == ROTATION_180 && pos0.y < pos1.y) ||
+		(m_pFront[pos].m_Flags == ROTATION_270 && pos0.x > pos1.x) ))
+		return true;
+	int offpos = GetPureMapIndex(x+xoff, y+yoff);
+	if(m_pTiles[offpos].m_Index == TILE_THROUGH || (m_pFront && m_pFront[offpos].m_Index == TILE_THROUGH))
+		return true;
+	return false;
+}
+
+bool CCollision::IsAirThrough(int x, int y, vec2 pos0, vec2 pos1)
+{
+	int pos = GetPureMapIndex(x, y);
+	if(m_pTiles[pos].m_Index == TILE_THROUGH_ALL)
+		return false;
+	if(m_pTiles[pos].m_Index == TILE_THROUGH_DIR && (
+		(m_pTiles[pos].m_Flags == ROTATION_0   && pos0.y < pos1.y) ||
+		(m_pTiles[pos].m_Flags == ROTATION_90  && pos0.x > pos1.x) ||
+		(m_pTiles[pos].m_Flags == ROTATION_180 && pos0.y > pos1.y) ||
+		(m_pTiles[pos].m_Flags == ROTATION_270 && pos0.x < pos1.x) ))
+		return false;
+	return true;
 }
 
 int CCollision::IsWallJump(int Index)
