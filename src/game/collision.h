@@ -77,7 +77,7 @@ public:
 
 	int IsSolid(int x, int y);
 	bool IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1);
-	bool IsAirThrough(int x, int y, vec2 pos0, vec2 pos1);
+	bool IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1);
 	int IsWallJump(int Index);
 	int IsNoLaser(int x, int y);
 	int IsFNoLaser(int x, int y);
