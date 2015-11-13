@@ -1072,7 +1072,7 @@ void CGameClient::OnNewSnapshot()
 					OnStartGame();
 				// Reset statboard when new round is started (RoundStartTick changed)
 				// New round is usually started after `restart` on server
-				if ((m_Snap.m_pGameInfoObj->m_RoundStartTick - m_LastRoundStartTick > 2)
+				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick
 						// In GamePaused or GameOver state RoundStartTick is updated on each tick
 						// hence no need to reset stats until player leaves GameOver
 						// and it would be a mistake to reset stats after or during the pause
