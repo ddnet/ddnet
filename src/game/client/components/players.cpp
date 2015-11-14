@@ -417,7 +417,8 @@ void CPlayers::RenderPlayer(
 	}
 	else
 	{
-		// fix wrong calculation of weapon Angle in demo player				
+		// If player move his weapon through top then change the end angle on 2*Pi.
+		// So mix function will calculate offset angle by a short path, and not by long one.
 		if (Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
 		{
 			Player.m_Angle -= 256.0f * 2 * pi;
