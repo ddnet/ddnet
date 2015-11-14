@@ -9,6 +9,8 @@ Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY",
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 
+DDNetCharacterFlags = ["SOLO", "DEEPFREEZE", "SUPERJUMP", "ENDLESSHOOK"]
+
 RawHeader = '''
 
 #include <engine/message.h>
@@ -47,7 +49,8 @@ Enums = [
 Flags = [
 	Flags("PLAYERFLAG", PlayerFlags),
 	Flags("GAMEFLAG", GameFlags),
-	Flags("GAMESTATEFLAG", GameStateFlags)
+	Flags("GAMESTATEFLAG", GameStateFlags),
+	Flags("DDNETCHARACTERFLAGS", DDNetCharacterFlags)
 ]
 
 Objects = [
@@ -223,7 +226,8 @@ Objects = [
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
 		NetIntAny("m_DDRaceState"),
 		NetIntAny("m_Hit"),
-		NetIntAny("m_Flags"),
+		NetIntAny("m_DDNetFlags1"),
+		NetIntAny("m_DDNetFlags2"),
 	]),
 ]
 

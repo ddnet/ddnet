@@ -1127,7 +1127,7 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetChar->m_StrongWeakID = GetStrongWeakID();
 		pDDNetChar->m_DDRaceState = m_DDRaceState;
 		pDDNetChar->m_Hit = m_Hit;
-		pDDNetChar->m_Flags = GetNetFlags();
+		pDDNetChar->m_DDNetFlags1 = GetNetFlags();
 	}
 
 	// jetpack and ninjajetpack prediction
@@ -1221,9 +1221,10 @@ int CCharacter::GetStrongWeakID()
 
 int CCharacter::GetNetFlags()
 {
-	return 1 << 0 * Teams()->m_Core.GetSolo(m_pPlayer->GetCID()) |
-		   1 << 1 * m_SuperJump |
-		   1 << 2 * m_EndlessHook;
+	return Teams()->m_Core.GetSolo(m_pPlayer->GetCID()) ? DDNETCHARACTERFLAGS_SOLO : 0 |
+		   m_DeepFreeze ? DDNETCHARACTERFLAGS_DEEPFREEZE : 0 |
+		   m_EndlessHook ? DDNETCHARACTERFLAGS_ENDLESSHOOK : 0|
+		   m_SuperJump ? DDNETCHARACTERFLAGS_SUPERJUMP : 0;
 }
 
 bool CCharacter::CanCollide(int ClientID)
