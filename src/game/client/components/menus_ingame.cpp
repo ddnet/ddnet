@@ -796,9 +796,7 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 	CUIRect Box = MainView;
 	CUIRect Button;
 
-	static int PrevPage = g_Config.m_UiPage;
-	static int LastServersPage = g_Config.m_UiPage;
-	int ActivePage = g_Config.m_UiPage;
+	int Page = g_Config.m_UiPage;
 	int NewPage = -1;
 
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
@@ -809,40 +807,37 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 
 	Box.VSplitLeft(100.0f, &Button, &Box);
 	static int s_InternetButton=0;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
+	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_TL))
 	{
-		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_INTERNET) ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-		LastServersPage = PAGE_INTERNET;
+		if (Page != PAGE_INTERNET)
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 		NewPage = PAGE_INTERNET;
 	}
 
-	//Box.VSplitLeft(4.0f, 0, &Box);
 	Box.VSplitLeft(80.0f, &Button, &Box);
 	static int s_LanButton=0;
-	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), ActivePage==PAGE_LAN, &Button, 0))
+	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), Page==PAGE_LAN, &Button, 0))
 	{
-		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_LAN) ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-		LastServersPage = PAGE_LAN;
+		if (Page != PAGE_LAN)
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		NewPage = PAGE_LAN;
 	}
 
-	//box.VSplitLeft(4.0f, 0, &box);
 	Box.VSplitLeft(110.0f, &Button, &Box);
 	static int s_FavoritesButton=0;
-	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), ActivePage==PAGE_FAVORITES, &Button, 0))
+	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), Page==PAGE_FAVORITES, &Button, 0))
 	{
-		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_FAVORITES) ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-		LastServersPage = PAGE_FAVORITES;
+		if (Page != PAGE_FAVORITES)
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		NewPage  = PAGE_FAVORITES;
 	}
 
-	//box.VSplitLeft(4.0f, 0, &box);
 	Box.VSplitLeft(110.0f, &Button, &Box);
 	static int s_DDNetButton=0;
-	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
+	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_TR))
 	{
-		if (PrevPage != PAGE_SETTINGS || LastServersPage != PAGE_DDNET) ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-		LastServersPage = PAGE_DDNET;
+		if (Page != PAGE_DDNET)
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 		NewPage  = PAGE_DDNET;
 	}
 
@@ -851,8 +846,6 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 		if(Client()->State() != IClient::STATE_OFFLINE)
 			g_Config.m_UiPage = NewPage;
 	}
-
-	PrevPage = g_Config.m_UiPage;
 
 	RenderServerbrowser(MainView);
 	return;

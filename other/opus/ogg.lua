@@ -12,7 +12,7 @@ Ogg = {
 				option.use_pkgconfig = true
 			end
 
-			if ExecuteSilent("pkg-config ogg") == 0 then
+			if family ~= "windows" and ExecuteSilent("pkg-config ogg") == 0 then
 				option.value = true
 				if option.use_pkgconfig == nil then
 					option.use_pkgconfig = true
@@ -58,10 +58,9 @@ Ogg = {
 					client_settings.link.libpath:Add("other/opus/mac/lib32")
 				elseif platform == "macosx" and string.find(settings.config_name, "64") then
 					client_settings.link.libpath:Add("other/opus/mac/lib64")
-				elseif platform == "linux" and arch == "ia32" then
-					client_settings.link.libpath:Add("other/opus/linux/lib32")
-				elseif platform == "linux" and arch == "amd64" then
+				elseif platform == "linux" then
 					client_settings.link.libpath:Add("other/opus/linux/lib64")
+					client_settings.link.libpath:Add("other/opus/linux/lib32")
 				end
 			end
 		end

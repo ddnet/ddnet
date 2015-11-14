@@ -206,7 +206,7 @@ void CEditorImage::AnalyseTileFlags()
 
 	int tw = m_Width/16; // tilesizes
 	int th = m_Height/16;
-	if ( tw == th )
+	if ( tw == th && m_Format == CImageInfo::FORMAT_RGBA )
 	{
 		unsigned char *pPixelData = (unsigned char *)m_pData;
 
@@ -4267,8 +4267,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			if(pNewEnv->m_Channels == 4)
 			{
-				pNewEnv->AddPoint(0, 1,1,1,1);
-				pNewEnv->AddPoint(1000, 1,1,1,1);
+				pNewEnv->AddPoint(0, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
+				pNewEnv->AddPoint(1000, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
 			}
 			else
 			{
@@ -4417,7 +4417,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					int Time = (int)(((UI()->MouseX()-View.x)*TimeScale)*1000.0f);
 					//float env_y = (UI()->MouseY()-view.y)/TimeScale;
 					float aChannels[4];
-					pEnvelope->Eval(Time, aChannels);
+					pEnvelope->Eval(Time / 1000.0f, aChannels);
 					pEnvelope->AddPoint(Time,
 						f2fx(aChannels[0]), f2fx(aChannels[1]),
 						f2fx(aChannels[2]), f2fx(aChannels[3]));
@@ -5466,9 +5466,7 @@ void CEditor::DoMapBorder()
 void CEditor::CreateUndoStep()
 {
 	void *CreateThread = thread_init(CreateUndoStepThread, this);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)CreateThread);
-#endif
+	thread_detach(CreateThread);
 }
 
 void CEditor::CreateUndoStepThread(void *pUser)

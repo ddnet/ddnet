@@ -42,7 +42,7 @@ public:
 	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
 
-	CNetObj_PlayerInput DummyInput;
+	CNetObj_PlayerInput m_DummyInput;
 
 	bool m_DummySendConnInfo;
 
@@ -210,6 +210,7 @@ public:
 	virtual int OnSnapInput(int *pData) = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
 	virtual void ResetDummyInput() = 0;
+	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy) = 0;
 
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;

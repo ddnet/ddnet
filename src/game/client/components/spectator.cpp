@@ -185,7 +185,7 @@ void CSpectator::OnRender()
 		return;
 	}
 
-	if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(!m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		m_Active = false;
 		m_WasActive = false;

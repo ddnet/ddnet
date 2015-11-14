@@ -95,8 +95,11 @@ bool CSqlScore::Connect()
 		m_pStatement = m_pConnection->createStatement();
 
 		// Create database if not exists
-		str_format(aBuf, sizeof(aBuf), "CREATE DATABASE IF NOT EXISTS %s", m_pDatabase);
-		m_pStatement->execute(aBuf);
+		if(g_Config.m_SvSqlCreateTables)
+		{
+			str_format(aBuf, sizeof(aBuf), "CREATE DATABASE IF NOT EXISTS %s", m_pDatabase);
+			m_pStatement->execute(aBuf);
+		}
 
 		// Connect to specific database
 		m_pConnection->setSchema(m_pDatabase);
@@ -163,25 +166,27 @@ void CSqlScore::Init()
 	{
 		try
 		{
-			// create tables
 			char aBuf[1024];
+			// create tables
+			if(g_Config.m_SvSqlCreateTables)
+			{
+				str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_race (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, Server CHAR(4), cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY (Map, Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
+				m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_race (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, Server CHAR(3), cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY (Map, Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
-			m_pStatement->execute(aBuf);
+				str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_teamrace (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
+				m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_teamrace (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
-			m_pStatement->execute(aBuf);
+				str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Mapper VARCHAR(128) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, Timestamp TIMESTAMP, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
+				m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Mapper VARCHAR(128) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, Timestamp TIMESTAMP, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
-			m_pStatement->execute(aBuf);
+				str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Server CHAR(4), UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
+				m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Server CHAR(3), UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
-			m_pStatement->execute(aBuf);
+				str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
+				m_pStatement->execute(aBuf);
 
-			str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
-			m_pStatement->execute(aBuf);
-
-			dbg_msg("SQL", "Tables were created successfully");
+				dbg_msg("SQL", "Tables were created successfully");
+			}
 
 			// get the best time
 			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_race WHERE Map='%s' ORDER BY `Time` ASC LIMIT 0, 1;", m_pPrefix, m_aMap);
@@ -279,9 +284,7 @@ void CSqlScore::LoadScore(int ClientID)
 	Tmp->m_pSqlData = this;
 
 	void *LoadThread = thread_init(LoadScoreThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)LoadThread);
-#endif
+	thread_detach(LoadThread);
 }
 
 void CSqlScore::SaveTeamScoreThread(void *pUser)
@@ -416,9 +419,7 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 	Tmp->m_pSqlData = this;
 
 	void *VoteThread = thread_init(MapVoteThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)VoteThread);
-#endif
+	thread_detach(VoteThread);
 }
 
 void CSqlScore::MapVoteThread(void *pUser)
@@ -518,9 +519,7 @@ void CSqlScore::MapInfo(int ClientID, const char* MapName)
 	Tmp->m_pSqlData = this;
 
 	void *InfoThread = thread_init(MapInfoThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)InfoThread);
-#endif
+	thread_detach(InfoThread);
 }
 
 void CSqlScore::MapInfoThread(void *pUser)
@@ -693,9 +692,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS
 	Tmp->m_pSqlData = this;
 
 	void *SaveThread = thread_init(SaveScoreThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)SaveThread);
-#endif
+	thread_detach(SaveThread);
 }
 
 void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
@@ -714,9 +711,7 @@ void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
 	Tmp->m_pSqlData = this;
 
 	void *SaveTeamThread = thread_init(SaveTeamScoreThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)SaveTeamThread);
-#endif
+	thread_detach(SaveTeamThread);
 }
 
 void CSqlScore::ShowTeamRankThread(void *pUser)
@@ -836,7 +831,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 				char aNames[2300];
 				int Rank = 0;
 				float Time = 0;
-				int aCuts[Rows];
+				int aCuts[320]; // 64 * 5
 				int CutPos = 0;
 
 				aNames[0] = '\0';
@@ -983,9 +978,7 @@ void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
 	Tmp->m_pSqlData = this;
 
 	void *TeamRankThread = thread_init(ShowTeamRankThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)TeamRankThread);
-#endif
+	thread_detach(TeamRankThread);
 }
 
 void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
@@ -998,9 +991,7 @@ void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
 	Tmp->m_pSqlData = this;
 
 	void *RankThread = thread_init(ShowRankThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)RankThread);
-#endif
+	thread_detach(RankThread);
 }
 
 void CSqlScore::ShowTop5Thread(void *pUser)
@@ -1152,9 +1143,7 @@ void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUs
 	Tmp->m_pSqlData = this;
 
 	void *TeamTop5Thread = thread_init(ShowTeamTop5Thread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)TeamTop5Thread);
-#endif
+	thread_detach(TeamTop5Thread);
 }
 
 void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
@@ -1165,9 +1154,7 @@ void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserDa
 	Tmp->m_pSqlData = this;
 
 	void *Top5Thread = thread_init(ShowTop5Thread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)Top5Thread);
-#endif
+	thread_detach(Top5Thread);
 }
 
 void CSqlScore::ShowTimes(int ClientID, int Debut)
@@ -1179,9 +1166,7 @@ void CSqlScore::ShowTimes(int ClientID, int Debut)
 	Tmp->m_Search = false;
 
 	void *TimesThread = thread_init(ShowTimesThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)TimesThread);
-#endif
+	thread_detach(TimesThread);
 }
 
 void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
@@ -1194,9 +1179,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 	Tmp->m_Search = true;
 
 	void *TimesThread = thread_init(ShowTimesThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)TimesThread);
-#endif
+	thread_detach(TimesThread);
 }
 
 void CSqlScore::FuzzyString(char *pString)
@@ -1221,7 +1204,7 @@ void CSqlScore::FuzzyString(char *pString)
 // anti SQL injection
 void CSqlScore::ClearString(char *pString, int size)
 {
-	char newString[size*2-1];
+	char *newString = (char *)malloc(size * 2 - 1);
 	int pos = 0;
 
 	for(int i=0;i<size;i++)
@@ -1250,6 +1233,7 @@ void CSqlScore::ClearString(char *pString, int size)
 	newString[pos] = '\0';
 
 	strcpy(pString,newString);
+	free(newString);
 }
 
 void CSqlScore::agoTimeToString(int agoTime, char agoString[])
@@ -1399,9 +1383,7 @@ void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
 	Tmp->m_pSqlData = this;
 
 	void *PointsThread = thread_init(ShowPointsThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)PointsThread);
-#endif
+	thread_detach(PointsThread);
 }
 
 void CSqlScore::ShowTopPointsThread(void *pUser)
@@ -1463,9 +1445,7 @@ void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pU
 	Tmp->m_pSqlData = this;
 
 	void *TopPointsThread = thread_init(ShowTopPointsThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)TopPointsThread);
-#endif
+	thread_detach(TopPointsThread);
 }
 
 void CSqlScore::RandomMapThread(void *pUser)
@@ -1589,9 +1569,7 @@ void CSqlScore::RandomMap(int ClientID, int stars)
 	Tmp->m_pSqlData = this;
 
 	void *RandomThread = thread_init(RandomMapThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)RandomThread);
-#endif
+	thread_detach(RandomThread);
 }
 
 void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
@@ -1603,9 +1581,7 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
 	Tmp->m_pSqlData = this;
 
 	void *RandomUnfinishedThread = thread_init(RandomUnfinishedMapThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)RandomUnfinishedThread);
-#endif
+	thread_detach(RandomUnfinishedThread);
 }
 
 void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
@@ -1630,9 +1606,7 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 	Tmp->m_pSqlData = this;
 
 	void *SaveThread = thread_init(SaveTeamThread, Tmp);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)SaveThread);
-#endif
+	thread_detach(SaveThread);
 }
 
 void CSqlScore::SaveTeamThread(void *pUser)
@@ -1745,9 +1719,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 	Tmp->m_pSqlData = this;
 
 	void *LoadThread = thread_init(LoadTeamThread, Tmp);
-	#if defined(CONF_FAMILY_UNIX)
-		pthread_detach((pthread_t)LoadThread);
-	#endif
+	thread_detach(LoadThread);
 }
 
 void CSqlScore::LoadTeamThread(void *pUser)
@@ -1776,7 +1748,7 @@ void CSqlScore::LoadTeamThread(void *pUser)
 			if (pData->m_pSqlData->m_pResults->rowsCount() > 0)
 			{
 				pData->m_pSqlData->m_pResults->first();
-				char ServerName[4];
+				char ServerName[5];
 				str_copy(ServerName, pData->m_pSqlData->m_pResults->getString("Server").c_str(), sizeof(ServerName));
 				if(str_comp(ServerName, g_Config.m_SvSqlServerName))
 				{

@@ -18,6 +18,7 @@ rm -rf AndroidData
 
 # Actual compilation, needs a key to sign
 cd /media/commandergenius
+ln -s teeworlds project/jni/application/src
 ./changeAppSettings.sh -a
 android update project -p project
 ./build.sh

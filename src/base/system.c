@@ -49,6 +49,7 @@
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
+	#undef _WIN32_WINNT
 	#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
 	#include <windows.h>
 	#include <winsock2.h>
@@ -181,9 +182,7 @@ void dbg_enable_threaded()
 	dbg_msg_threaded = 1;
 
 	Thread = thread_init(dbg_msg_thread, 0);
-	#if defined(CONF_FAMILY_UNIX)
-		pthread_detach((pthread_t)Thread);
-	#endif
+	thread_detach(Thread);
 }
 #endif
 
@@ -192,7 +191,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	va_list args;
 	char *msg;
 	int len;
-	int e;
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	time_t rawtime;
@@ -207,6 +205,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
 	{
+		int e;
 		semaphore_wait(&log_queue.notfull);
 		semaphore_wait(&log_queue.mutex);
 		e = queue_empty(&log_queue);
@@ -2370,7 +2369,7 @@ int str_utf8_decode(const char **ptr)
 			{
 				return byte;
 			}
-			else if(0x80 <= byte && byte <= 0xDF)
+			else if(0xC2 <= byte && byte <= 0xDF)
 			{
 				utf8_bytes_needed = 1;
 				utf8_code_point = byte - 0xC0;

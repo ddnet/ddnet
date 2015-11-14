@@ -324,6 +324,9 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 
 void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha)
 {
+	if(!g_Config.m_ClTextEntities)
+	  return;
+
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
@@ -412,27 +415,32 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 				Graphics()->QuadsEnd();
 
-				// draw force
-				char aBuf[16];
-				str_format(aBuf, sizeof(aBuf), "%d", Force);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale, my*Scale+16, Scale-20, aBuf, -1);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-				if(MaxSpeed)
+				if(g_Config.m_ClTextEntities)
 				{
-					str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+					// draw force
+					char aBuf[16];
+					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					UI()->TextRender()->Text(0, mx*Scale, my*Scale-2, Scale-20, aBuf, -1);
+					UI()->TextRender()->Text(0, mx*Scale, my*Scale+16, Scale-20, aBuf, -1);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					if(MaxSpeed)
+					{
+						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+						UI()->TextRender()->Text(0, mx*Scale, my*Scale-2, Scale-20, aBuf, -1);
+						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					}
 				}
 			}
 		}
-
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
 void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha)
 {
+	if(!g_Config.m_ClTextEntities)
+	  return;
+
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
@@ -488,6 +496,9 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 
 void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha)
 {
+	if(!g_Config.m_ClTextEntities)
+	  return;
+
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 

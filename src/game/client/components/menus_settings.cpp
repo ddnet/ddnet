@@ -392,7 +392,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), !g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
+	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
 		m_NeedRestartSkins = true;
@@ -936,7 +936,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		g_Config.m_SndEnable ^= 1;
 		if(g_Config.m_SndEnable)
 		{
-			if(g_Config.m_SndMusic)
+			if(g_Config.m_SndMusic && Client()->State() == IClient::STATE_OFFLINE)
 				m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		}
 		else

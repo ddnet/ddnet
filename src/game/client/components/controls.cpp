@@ -264,7 +264,7 @@ int CControls::SnapInput(int *pData)
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)
 		{
-			CNetObj_PlayerInput *DummyInput = &Client()->DummyInput;
+			CNetObj_PlayerInput *DummyInput = &Client()->m_DummyInput;
 			DummyInput->m_Direction = m_InputData[g_Config.m_ClDummy].m_Direction;
 			DummyInput->m_Hook = m_InputData[g_Config.m_ClDummy].m_Hook;
 			DummyInput->m_Jump = m_InputData[g_Config.m_ClDummy].m_Jump;
