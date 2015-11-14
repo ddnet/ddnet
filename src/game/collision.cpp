@@ -110,7 +110,7 @@ void CCollision::Init(class CLayers *pLayers)
 		{
 			// remove unused tiles from front layer
 			Index = m_pFront[i].m_Index;
-			if(Index <= TILE_NPH_START && !(Index == TILE_DEATH || Index == TILE_NOLASER || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
+			if(Index <= TILE_NPH_START && !(Index == TILE_DEATH || (Index >= TILE_NOLASER && Index <= TILE_THROUGH) || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
 				m_pFront[i].m_Index = 0;
 		}
 		// remove unused tiles from game layer
@@ -425,7 +425,7 @@ int CCollision::IsSolid(int x, int y)
 bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1)
 {
 	int pos = GetPureMapIndex(x, y);
-	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_ALL)
+	if(m_pFront && (m_pFront[pos].m_Index == TILE_THROUGH_ALL || m_pFront[pos].m_Index == TILE_THROUGH_CUT))
 		return true;
 	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && (
 		(m_pFront[pos].m_Flags == ROTATION_0   && pos0.y > pos1.y) ||
