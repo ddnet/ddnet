@@ -418,14 +418,14 @@ void CPlayers::RenderPlayer(
 	else
 	{
 		// fix wrong calculation of weapon Angle in demo player				
-		if (Player.m_Angle > 800 && Prev.m_Angle < 0)
+		if (Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
 		{
-			Player.m_Angle -= 1600;
+			Player.m_Angle -= 256.0f * 2 * pi;
 			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick) / 256.0f;
 		}
-		else if (Player.m_Angle < 0 && Prev.m_Angle > 800)
+		else if (Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
 		{
-			Player.m_Angle += 1600;
+			Player.m_Angle += 256.0f * 2 * pi;
 			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick) / 256.0f;
 		}
 		/*
