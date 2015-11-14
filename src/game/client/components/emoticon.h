@@ -14,7 +14,7 @@ class CEmoticon : public CComponent
 
 	vec2 m_SelectorMouse;
 	int m_SelectedEmote;
-	int m_SelectedEmoticon;
+	int m_SelectedEyeEmote;
 
 	static void ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData);
 	static void ConEmote(IConsole::IResult *pResult, void *pUserData);
@@ -28,8 +28,8 @@ public:
 	virtual void OnRelease();
 	virtual bool OnMouseMove(float x, float y);
 
-	void Emoticon(int Emoticon);
 	void Emote(int Emote);
+	void EyeEmote(int EyeEmote);
 };
 
 #endif
