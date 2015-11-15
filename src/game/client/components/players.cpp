@@ -406,19 +406,17 @@ void CPlayers::RenderPlayer(
 
 	float IntraTick = Client()->IntraGameTick();
 
-	float Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick)/256.0f;
-
-	//float angle = 0;
-
+	float Angle;
 	if(pInfo.m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		// just use the direct input if it's local player we are rendering
+		// just use the direct input if it's the local player we are rendering
 		Angle = GetAngle(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
-		// If player move his weapon through top then change the end angle on 2*Pi.
-		// So mix function will calculate offset angle by a short path, and not by long one.
+		// If the player moves their weapon through top, then change
+		// the end angle by 2*Pi, so that the mix function will use the
+		// short path and not the long one.
 		if (Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
 		{
 			Player.m_Angle -= 256.0f * 2 * pi;
@@ -429,25 +427,11 @@ void CPlayers::RenderPlayer(
 			Player.m_Angle += 256.0f * 2 * pi;
 			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick) / 256.0f;
 		}
-		/*
-		float mixspeed = Client()->FrameTime()*2.5f;
-		if(player.attacktick != prev.attacktick) // shooting boosts the mixing speed
-			mixspeed *= 15.0f;
-
-		// move the delta on a constant speed on a x^2 curve
-		float current = g_GameClient.m_aClients[info.cid].angle;
-		float target = player.angle/256.0f;
-		float delta = angular_distance(current, target);
-		float sign = delta < 0 ? -1 : 1;
-		float new_delta = delta - 2*mixspeed*sqrt(delta*sign)*sign + mixspeed*mixspeed;
-
-		// make sure that it doesn't vibrate when it's still
-		if(fabs(delta) < 2/256.0f)
-			angle = target;
 		else
-			angle = angular_approach(current, target, fabs(delta-new_delta));
-
-		g_GameClient.m_aClients[info.cid].angle = angle;*/
+		{
+			// No special cases? Just use mix():
+			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick)/256.0f;
+		}
 	}
 
 
