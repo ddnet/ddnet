@@ -50,5 +50,6 @@ bam.exe
 .settings
 *.opensdf
 *.pyc
+*.dll
 
 DDNet*

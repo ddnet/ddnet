@@ -417,6 +417,18 @@ void CPlayers::RenderPlayer(
 	}
 	else
 	{
+		// If player move his weapon through top then change the end angle on 2*Pi.
+		// So mix function will calculate offset angle by a short path, and not by long one.
+		if (Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
+		{
+			Player.m_Angle -= 256.0f * 2 * pi;
+			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick) / 256.0f;
+		}
+		else if (Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
+		{
+			Player.m_Angle += 256.0f * 2 * pi;
+			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick) / 256.0f;
+		}
 		/*
 		float mixspeed = Client()->FrameTime()*2.5f;
 		if(player.attacktick != prev.attacktick) // shooting boosts the mixing speed
