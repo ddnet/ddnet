@@ -3353,9 +3353,6 @@ int main(int argc, const char **argv) // ignore_convention
 	if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
-	// restore empty config strings to their defaults
-	pConfig->RestoreStrings();
-
 	pClient->Engine()->InitLogfile();
 
 #if defined(CONF_FAMILY_UNIX)

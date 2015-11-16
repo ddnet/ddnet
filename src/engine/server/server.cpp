@@ -2181,9 +2181,6 @@ int main(int argc, const char **argv) // ignore_convention
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze");
 
-	// restore empty config strings to their defaults
-	pConfig->RestoreStrings();
-
 	pEngine->InitLogfile();
 
 #if defined(CONF_FAMILY_UNIX)
