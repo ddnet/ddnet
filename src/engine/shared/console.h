@@ -4,6 +4,7 @@
 #define ENGINE_SHARED_CONSOLE_H
 
 #include <engine/console.h>
+#include <base/math.h>
 #include "memheap.h"
 
 class CConsole : public IConsole

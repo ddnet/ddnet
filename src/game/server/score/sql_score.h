@@ -4,41 +4,24 @@
 #ifndef GAME_SERVER_SQLSCORE_H
 #define GAME_SERVER_SQLSCORE_H
 
-#include <mysql_connection.h>
-
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/statement.h>
-
+#include "sqlserver.h"
 #include "../score.h"
+
 
 class CSqlScore: public IScore
 {
+	CGameContext *GameServer() { return m_pGameServer; }
+	IServer *Server() { return m_pServer; }
+	CSqlServer *SqlServer() { return &m_SqlServer; }
+
+	void Init();
+
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
 
-	sql::Driver *m_pDriver;
-	sql::Connection *m_pConnection;
-	sql::Statement *m_pStatement;
-	sql::ResultSet *m_pResults;
+	CSqlServer m_SqlServer;
 
-	// copy of config vars
-	const char* m_pDatabase;
-	const char* m_pPrefix;
-	const char* m_pUser;
-	const char* m_pPass;
-	const char* m_pIp;
 	char m_aMap[64];
-	int m_Port;
-
-	CGameContext *GameServer()
-	{
-		return m_pGameServer;
-	}
-	IServer *Server()
-	{
-		return m_pServer;
-	}
 
 	static void MapInfoThread(void *pUser);
 	static void MapVoteThread(void *pUser);
@@ -56,17 +39,6 @@ class CSqlScore: public IScore
 	static void RandomUnfinishedMapThread(void *pUser);
 	static void SaveTeamThread(void *pUser);
 	static void LoadTeamThread(void *pUser);
-
-	void Init();
-
-	bool Connect();
-	void Disconnect();
-
-	void FuzzyString(char *pString);
-	// anti SQL injection
-	void ClearString(char *pString, int size = 32);
-
-	void NormalizeMapname(char *pString);
 
 public:
 
@@ -94,19 +66,38 @@ public:
 	virtual void RandomUnfinishedMap(int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
-	static void agoTimeToString(int agoTime, char agoString[]);
 };
 
-struct CSqlMapData
+// generic implementation to provide sqlserver, gameserver and server
+struct CSqlData
 {
-	CSqlScore *m_pSqlData;
+	CSqlData(CSqlServer* pSqlServer) : m_pSqlServer(pSqlServer) {}
+
+	CGameContext* GameServer() { return ms_pGameServer; }
+	IServer* Server() { return ms_pServer; }
+	CPlayerData* PlayerData(int ID) { return &ms_pPlayerData[ID]; }
+	const char* MapName() { return ms_pMap; }
+	CSqlServer* SqlServer() { return m_pSqlServer; }
+
+	static CGameContext *ms_pGameServer;
+	static IServer *ms_pServer;
+	static CPlayerData *ms_pPlayerData;
+	static const char *ms_pMap;
+	CSqlServer *m_pSqlServer;
+};
+
+struct CSqlMapData : CSqlData
+{
+	CSqlMapData(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
+
 	int m_ClientID;
 	char m_aMap[128];
 };
 
-struct CSqlScoreData
+struct CSqlScoreData : CSqlData
 {
-	CSqlScore *m_pSqlData;
+	CSqlScoreData(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
+
 	int m_ClientID;
 #if defined(CONF_FAMILY_WINDOWS)
 	char m_aName[16]; // Don't edit this, or all your teeth will fall http://bugs.mysql.com/bug.php?id=50046
@@ -121,9 +112,10 @@ struct CSqlScoreData
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 };
 
-struct CSqlTeamScoreData
+struct CSqlTeamScoreData : CSqlData
 {
-	CSqlScore *m_pSqlData;
+	CSqlTeamScoreData(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
+
 	unsigned int m_Size;
 	int m_aClientIDs[MAX_CLIENTS];
 #if defined(CONF_FAMILY_WINDOWS)
@@ -139,20 +131,22 @@ struct CSqlTeamScoreData
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 };
 
-struct CSqlTeamSave
+struct CSqlTeamSave : CSqlData
 {
+	CSqlTeamSave(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
+
 	int m_Team;
 	int m_ClientID;
 	char m_Code[128];
 	char m_Server[5];
-	CSqlScore *m_pSqlData;
 };
 
-struct CSqlTeamLoad
+struct CSqlTeamLoad : CSqlData
 {
+	CSqlTeamLoad(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
+
 	char m_Code[128];
 	int m_ClientID;
-	CSqlScore *m_pSqlData;
 };
 
 #endif
