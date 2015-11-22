@@ -50,7 +50,9 @@ Mysql = {
 					settings.link.libs:Add("mysqlcppconn-static")
 					settings.link.libs:Add("mysqlclient")
 					settings.link.libs:Add("dl")
-					settings.link.libs:Add("rt")
+					if platform ~= "macosx" then
+						settings.link.libs:Add("rt")
+					end
 				end
 
 				if platform == "macosx" and string.find(settings.config_name, "32") then
