@@ -26,7 +26,7 @@ Import("other/mysql/mysql.lua")
 config = NewConfig()
 config:Add(OptCCompiler("compiler"))
 config:Add(OptTestCompileC("stackprotector", "int main(){return 0;}", "-fstack-protector -fstack-protector-all"))
-config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5.sdk"))
+config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-version-min=10.7 -isysroot /Developer/SDKs/MacOSX10.7.sdk"))
 config:Add(OptTestCompileC("macosxppc", "int main(){return 0;}", "-arch ppc"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
 config:Add(SDL.OptFind("sdl", true))
@@ -235,11 +235,13 @@ function build(settings)
 			-- disable visibility attribute support for gcc on windows
 			settings.cc.defines:Add("NO_VIZ")
 		elseif platform == "macosx" then
-			settings.cc.flags:Add("-mmacosx-version-min=10.5")
-			settings.link.flags:Add("-mmacosx-version-min=10.5")
+			settings.cc.flags:Add("-mmacosx-version-min=10.7")
+			settings.link.flags:Add("-mmacosx-version-min=10.7")
+			settings.cc.flags:Add("-stdlib=libc++")
+			settings.link.flags:Add("-stdlib=libc++")
 			if config.minmacosxsdk.value == 1 then
-				settings.cc.flags:Add("-isysroot /Developer/SDKs/MacOSX10.5.sdk")
-				settings.link.flags:Add("-isysroot /Developer/SDKs/MacOSX10.5.sdk")
+				settings.cc.flags:Add("-isysroot /Developer/SDKs/MacOSX10.7.sdk")
+				settings.link.flags:Add("-isysroot /Developer/SDKs/MacOSX10.7.sdk")
 			end
 		elseif config.stackprotector.value == 1 then
 			settings.cc.flags:Add("-fstack-protector", "-fstack-protector-all")
