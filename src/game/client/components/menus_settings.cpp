@@ -75,7 +75,18 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_DynamicCameraButton = 0;
 		if(DoButton_CheckBox(&s_DynamicCameraButton, Localize("Dynamic Camera"), g_Config.m_ClMouseDeadzone != 0, &Button))
 		{
-			CCamera::ToggleDynamic();
+			if(g_Config.m_ClMouseDeadzone)
+			{
+				g_Config.m_ClMouseFollowfactor = 0;
+				g_Config.m_ClMouseMaxDistance = 400;
+				g_Config.m_ClMouseDeadzone = 0;
+			}
+			else
+			{
+				g_Config.m_ClMouseFollowfactor = 60;
+				g_Config.m_ClMouseMaxDistance = 1000;
+				g_Config.m_ClMouseDeadzone = 300;
+			}
 		}
 
 		// weapon pickup
@@ -94,7 +105,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
-		        g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
+			g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
 
 		// chat messages
 		Right.HSplitTop(5.0f, 0, &Right);
@@ -199,6 +210,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Button.HMargin(2.0f, &Button);
 		g_Config.m_ClCpuThrottle= static_cast<int>(DoScrollbarH(&g_Config.m_ClCpuThrottle, &Button, g_Config.m_ClCpuThrottle/100.0f)*100.0f+0.1f);
 
+#if defined(CONF_FAMILY_WINDOWS)
+		Left.HSplitTop(20.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClShowConsole, Localize("Show console window"), g_Config.m_ClShowConsole, &Button))
+			g_Config.m_ClShowConsole ^= 1;
+#endif
+
 		// auto statboard screenshot
 		{
 			Right.HSplitTop(20.0f, 0, &Right); //
@@ -234,13 +252,11 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	CUIRect Button, Label, Dummy;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	static bool s_Dummy = false;
-
 	char *Name = g_Config.m_PlayerName;
 	char *Clan = g_Config.m_PlayerClan;
 	int *Country = &g_Config.m_PlayerCountry;
 
-	if(s_Dummy)
+	if(m_Dummy)
 	{
 		Name = g_Config.m_ClDummyName;
 		Clan = g_Config.m_ClDummyClan;
@@ -258,15 +274,15 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static float s_OffsetName = 0.0f;
 	if(DoEditBox(Name, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
 	{
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
 	}
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &Dummy))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &Dummy))
 	{
-		s_Dummy ^= 1;
+		m_Dummy ^= 1;
 	}
 
 	// player clan
@@ -279,7 +295,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static float s_OffsetClan = 0.0f;
 	if(DoEditBox(Clan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 	{
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -317,7 +333,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -330,13 +346,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	static bool s_Dummy = false;
 	char *Skin = g_Config.m_ClPlayerSkin;
 	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
 	int *ColorBody = &g_Config.m_ClPlayerColorBody;
 	int *ColorFeet = &g_Config.m_ClPlayerColorFeet;
 
-	if(s_Dummy)
+	if(m_Dummy)
 	{
 		Skin = g_Config.m_ClDummySkin;
 		UseCustomColor = &g_Config.m_ClDummyUseCustomColor;
@@ -370,16 +385,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), s_Dummy, &DummyLabel))
+	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &DummyLabel))
 	{
-		s_Dummy ^= 1;
+		m_Dummy ^= 1;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowNewSkins, Localize("Show new skins ingame"), g_Config.m_ClShowNewSkins, &DummyLabel))
+	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
-		g_Config.m_ClShowNewSkins ^= 1;
+		g_Config.m_ClVanillaSkinsOnly ^= 1;
 		m_NeedRestartSkins = true;
 	}
 
@@ -400,7 +415,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&ColorBody, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor?0:1;
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -452,7 +467,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			if(PrevColor != Color)
 			{
-				if(s_Dummy)
+				if(m_Dummy)
 					m_NeedSendDummyinfo = true;
 				else
 					m_NeedSendinfo = true;
@@ -535,7 +550,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(OldSelected != NewSelected)
 	{
 		mem_copy(Skin, s_paSkinList[NewSelected]->m_aName, sizeof(g_Config.m_ClPlayerSkin));
-		if(s_Dummy)
+		if(m_Dummy)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
@@ -560,7 +575,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Fire", "+fire", 0 },
 	{ "Hook", "+hook", 0 },
 	{ "Hook Collisions", "+showhookcoll", 0 },
-	{ "Dynamic Camera", "toggle_dynamic_camera", 0 },
+	{ "Toggle DynCam", "toggle cl_dyncam 0 1", 0 },
 	{ "Hammer", "+weapon1", 0 },
 	{ "Pistol", "+weapon2", 0 },
 	{ "Shotgun", "+weapon3", 0 },
@@ -921,7 +936,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		g_Config.m_SndEnable ^= 1;
 		if(g_Config.m_SndEnable)
 		{
-			if(g_Config.m_SndMusic)
+			if(g_Config.m_SndMusic && Client()->State() == IClient::STATE_OFFLINE)
 				m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
 		}
 		else
@@ -1652,7 +1667,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 void CMenus::RenderSettingsDDRace(CUIRect MainView)
 {
-	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label;
+	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
 
 	MainView.HSplitTop(100.0f, &Demo , &MainView);
 
@@ -1690,7 +1705,7 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 		}
 	}
 
-	MainView.HSplitTop(250.0f, &Gameplay , &MainView);
+	MainView.HSplitTop(290.0f, &Gameplay , &MainView);
 
 	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
 	UI()->DoLabelScaled(&Label, Localize("Gameplay"), 20.0f, -1);
@@ -1829,7 +1844,22 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
 	}
+	
+	{
+		static float s_Map = 0.0f;
+		aRects[1].HSplitTop(25.0f, &Background, &aRects[1]);
+		Background.HSplitTop(20.0f, &Background, 0);
+		Background.VSplitLeft(100.0f, &Label, &Left);
+		UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
+		DoEditBox(g_Config.m_ClBackgroundEntities, &Left, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
 
+		aRects[1].HSplitTop(20.0f, &Button, 0);
+		if(DoButton_CheckBox(&g_Config.m_ClBackgroundShowTilesLayers, Localize("Show tiles layers from BG map"), g_Config.m_ClBackgroundShowTilesLayers, &Button))
+		{
+			g_Config.m_ClBackgroundShowTilesLayers ^= 1;
+		}
+	}
+	
 	MainView.HSplitTop(30.0f, &Label, &Miscellaneous);
 	UI()->DoLabelScaled(&Label, Localize("Miscellaneous"), 20.0f, -1);
 	Miscellaneous.VMargin(5.0f, &Miscellaneous);

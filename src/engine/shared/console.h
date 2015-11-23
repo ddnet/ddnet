@@ -56,8 +56,8 @@ class CConsole : public IConsole
 	static void Con_Exec(IResult *pResult, void *pUserData);
 	static void ConToggle(IResult *pResult, void *pUser);
 	static void ConToggleStroke(IResult *pResult, void *pUser);
-	static void ConModCommandAccess(IResult *pResult, void *pUser);
-	static void ConModCommandStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConCommandAccess(IResult *pResult, void *pUser);
+	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
 	void ExecuteFileRecurse(const char *pFilename);
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1);
@@ -195,7 +195,7 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted = false);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
-
+	void ResetServerGameSettings();
 	// DDRace
 
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);

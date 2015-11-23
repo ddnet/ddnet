@@ -12,7 +12,7 @@ Curl = {
 				option.use_pkgconfig = true
 			end
 
-			if ExecuteSilent("pkg-config libcurl") == 0 then
+			if family ~= "windows" and ExecuteSilent("pkg-config libcurl") == 0 then
 				option.value = true
 				if option.use_pkgconfig == nil then
 					option.use_pkgconfig = true
@@ -59,10 +59,9 @@ Curl = {
 					settings.link.libpath:Add("other/curl/mac/lib32")
 				elseif platform == "macosx" and string.find(settings.config_name, "64") then
 					settings.link.libpath:Add("other/curl/mac/lib64")
-				elseif platform == "linux" and arch == "ia32" then
-					settings.link.libpath:Add("other/curl/linux/lib32")
-				elseif platform == "linux" and arch == "amd64" then
+				elseif platform == "linux" then
 					settings.link.libpath:Add("other/curl/linux/lib64")
+					settings.link.libpath:Add("other/curl/linux/lib32")
 				end
 			end
 		end

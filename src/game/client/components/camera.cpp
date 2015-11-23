@@ -64,8 +64,8 @@ void CCamera::OnRender()
 		float l = length(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
 		if(l > 0.0001f) // make sure that this isn't 0
 		{
-			float DeadZone = g_Config.m_ClMouseDeadzone;
-			float FollowFactor = g_Config.m_ClMouseFollowfactor/100.0f;
+			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 			float OffsetAmount = max(l-DeadZone, 0.0f) * FollowFactor;
 
 			CameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy])*OffsetAmount;
@@ -85,7 +85,6 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
 	Console()->Register("zoom", "", CFGFLAG_CLIENT, ConZoomReset, this, "Zoom reset");
-	Console()->Register("toggle_dynamic_camera", "", CFGFLAG_CLIENT, ConToggleDynamic, this, "Turn dynamic camera on/off");
 }
 
 const float ZoomStep = 0.866025f;
@@ -126,35 +125,4 @@ void CCamera::ConZoomReset(IConsole::IResult *pResult, void *pUserData)
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
 	((CCamera *)pUserData)->OnReset();
-}
-
-void CCamera::ToggleDynamic()
-{
-	static int s_OldMousesens = 0;
-	if(g_Config.m_ClMouseDeadzone)
-	{
-		g_Config.m_ClMouseFollowfactor = 0;
-		g_Config.m_ClMouseMaxDistance = g_Config.m_ClDefaultMouseMaxDistance;
-		g_Config.m_ClMouseDeadzone = 0;
-		if(g_Config.m_ClDyncamMousesens && s_OldMousesens)
-		{
-			g_Config.m_InpMousesens = s_OldMousesens;
-		}
-	}
-	else
-	{
-		s_OldMousesens = g_Config.m_InpMousesens;
-		g_Config.m_ClMouseFollowfactor = g_Config.m_ClDyncamFollowFactor;
-		g_Config.m_ClMouseMaxDistance = g_Config.m_ClDyncamMaxDistance;
-		g_Config.m_ClMouseDeadzone = g_Config.m_ClDyncamDeadzone;
-		if(g_Config.m_ClDyncamMousesens)
-		{
-			g_Config.m_InpMousesens = g_Config.m_ClDyncamMousesens;
-		}
-	}
-}
-
-void CCamera::ConToggleDynamic(IConsole::IResult *pResult, void *pUserData)
-{
-	ToggleDynamic();
 }

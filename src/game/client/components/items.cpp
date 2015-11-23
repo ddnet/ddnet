@@ -57,7 +57,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	int PrevTick = Client()->PrevGameTick();
 
-	if (g_Config.m_ClAntiPingGrenade && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if (m_pClient->AntiPingGrenade() && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		// calc predicted game tick
 		static int Offset = 0;

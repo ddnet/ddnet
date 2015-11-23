@@ -74,8 +74,8 @@ if include_data and not use_bundle:
 		    shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
 		    shutil.copy("libidn-11.dll", package_dir)
 		elif platform == "win64":
-		    shutil.copy("libwinpthread-1.dll", package_dir)
 		    shutil.copy("libgcc_s_seh-1.dll", package_dir)
+		shutil.copy("libwinpthread-1.dll", package_dir)
 		shutil.copy("libogg-0.dll", package_dir)
 		shutil.copy("libopus-0.dll", package_dir)
 		shutil.copy("libopusfile-0.dll", package_dir)
@@ -90,6 +90,8 @@ if include_exe and not use_bundle:
 	shutil.copy(name+exe_ext, package_dir)
 	shutil.copy(name+"-Server"+exe_ext, package_dir)
 	shutil.copy("dilate"+exe_ext, package_dir)
+	shutil.copy("config_store"+exe_ext, package_dir)
+	shutil.copy("config_retrieve"+exe_ext, package_dir)
 	#shutil.copy(name+"-Server_sql"+exe_ext, package_dir)
 	
 if include_src:
@@ -100,7 +102,7 @@ if include_src:
 	shutil.copy("configure.lua", package_dir)
 
 if use_bundle:
-	bins = [name, name+'-Server', 'dilate', 'serverlaunch']
+	bins = [name, name+'-Server', 'dilate', 'config_store', 'config_retrieve', 'serverlaunch']
 	platforms = ('x86', 'x86_64', 'ppc')
 	for bin in bins:
 		to_lipo = []

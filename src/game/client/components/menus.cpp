@@ -89,6 +89,7 @@ CMenus::CMenus()
 	m_DDRacePage = PAGE_BROWSER;
 
 	m_DemoPlayerState = DEMOPLAYER_NONE;
+	m_Dummy = false;
 }
 
 vec4 CMenus::ButtonColorMul(const void *pID)

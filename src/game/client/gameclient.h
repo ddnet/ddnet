@@ -314,6 +314,8 @@ public:
 	virtual const char *Version();
 	virtual const char *NetVersion();
 
+	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy);
+
 
 	// actions
 	// TODO: move these
@@ -344,6 +346,7 @@ public:
 	class CItems *m_pItems;
 	class CMapLayers *m_pMapLayersBackGround;
 	class CMapLayers *m_pMapLayersForeGround;
+	class CBackground *m_pBackGround;
 
 	class CMapSounds *m_pMapSounds;
 
@@ -362,11 +365,13 @@ public:
 
 	void FindWeaker(bool IsWeaker[2][MAX_CLIENTS]);
 
-private:
+	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers; }
+	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade; }
+	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
 
+private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];
-	bool m_CurrentAntiPing;
 };
 
 

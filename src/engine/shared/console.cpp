@@ -323,7 +323,29 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 
 		if(pCommand)
 		{
-			if(pCommand->GetAccessLevel() >= m_AccessLevel)
+			if(ClientID == IConsole::CLIENT_ID_GAME
+				&& !(pCommand->m_Flags & CFGFLAG_GAME))
+			{
+				if(Stroke)
+				{
+					char aBuf[96];
+					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", Result.m_pCommand);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				}
+			}
+			else if(ClientID == IConsole::CLIENT_ID_NO_GAME
+				&& pCommand->m_Flags & CFGFLAG_GAME)
+			{
+				if(Stroke)
+				{
+					char aBuf[96];
+					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				}
+			}
+			else if(pCommand->GetAccessLevel() >= m_AccessLevel)
 			{
 				int IsStrokeCommand = 0;
 				if(Result.m_pCommand[0] == '+')
@@ -458,7 +480,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID)
 	// exec the file
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 
-	char aBuf[8192];
+	char aBuf[128];
 	if(File)
 	{
 		char *pLine;
@@ -492,7 +514,7 @@ void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 	((CConsole*)pUserData)->ExecuteFile(pResult->GetString(0));
 }
 
-void CConsole::ConModCommandAccess(IResult *pResult, void *pUser)
+void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 {
 	CConsole* pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[128];
@@ -504,11 +526,15 @@ void CConsole::ConModCommandAccess(IResult *pResult, void *pUser)
 			pCommand->SetAccessLevel(pResult->GetInteger(1));
 			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
 		}
 		else
 		{
 			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
 		}
@@ -519,7 +545,7 @@ void CConsole::ConModCommandAccess(IResult *pResult, void *pUser)
 	pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
-void CConsole::ConModCommandStatus(IResult *pResult, void *pUser)
+void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 {
 	CConsole* pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[240];
@@ -528,7 +554,7 @@ void CConsole::ConModCommandStatus(IResult *pResult, void *pUser)
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= ACCESS_LEVEL_MOD)
+		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->GetInteger(0), (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
@@ -554,12 +580,25 @@ void CConsole::ConModCommandStatus(IResult *pResult, void *pUser)
 		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
+void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
+{
+	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	CResult Result;
+	Result.m_pCommand = "access_status";
+	char aBuf[4];
+	str_format(aBuf, sizeof(aBuf), "%d", IConsole::ACCESS_LEVEL_USER);
+	Result.AddArgument(aBuf);
+
+	pConsole->ConCommandStatus(&Result, pConsole);
+}
+
 struct CIntVariableData
 {
 	IConsole *m_pConsole;
 	int *m_pVariable;
 	int m_Min;
 	int m_Max;
+	int m_OldValue;
 };
 
 struct CStrVariableData
@@ -567,6 +606,7 @@ struct CStrVariableData
 	IConsole *m_pConsole;
 	char *m_pStr;
 	int m_MaxSize;
+	char *m_pOldValue;
 };
 
 static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
@@ -587,10 +627,12 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		}
 
 		*(pData->m_pVariable) = Val;
+		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Val;
 	}
 	else
 	{
-		char aBuf[1024];
+		char aBuf[32];
 		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
@@ -622,6 +664,9 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 			str_copy(pData->m_pStr, pString, pData->m_MaxSize);
+
+		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize);
 	}
 	else
 	{
@@ -724,21 +769,21 @@ CConsole::CConsole(int FlagMask)
 	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
 	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
 
-	Register("mod_command", "s?i", CFGFLAG_SERVER, ConModCommandAccess, this, "Specify command accessibility for moderators");
-	Register("mod_status", "", CFGFLAG_SERVER, ConModCommandStatus, this, "List all commands which are accessible for moderators");
-	Register("user_status", "", CFGFLAG_SERVER, ConUserCommandStatus, this, "List all commands which are accessible for users");
+	Register("access_level", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
+	Register("access_status", "i", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
 	Register("cmdlist", "", CFGFLAG_SERVER|CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
 
 	// TODO: this should disappear
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max }; \
+		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def }; \
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
 	}
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
-		static CStrVariableData Data = { this, g_Config.m_##Name, Len }; \
+		static char OldValue[Len] = Def; \
+		static CStrVariableData Data = { this, g_Config.m_##Name, Len, OldValue }; \
 		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc); \
 	}
 
@@ -973,39 +1018,48 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 
 extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
 
-void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
+void CConsole::ResetServerGameSettings()
 {
-	CConsole* pConsole = static_cast<CConsole *>(pUser);
-	char aBuf[240];
-	mem_zero(aBuf, sizeof(aBuf));
-	int Used = 0;
-
-	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
-	{
-		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() == ACCESS_LEVEL_USER)
-		{
-			int Length = str_length(pCommand->m_pName);
-			if(Used + Length + 2 < (int)(sizeof(aBuf)))
-			{
-				if(Used > 0)
-				{
-					Used += 2;
-					str_append(aBuf, ", ", sizeof(aBuf));
-				}
-				str_append(aBuf, pCommand->m_pName, sizeof(aBuf));
-				Used += Length;
-			}
-			else
-			{
-				pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-				mem_zero(aBuf, sizeof(aBuf));
-				str_copy(aBuf, pCommand->m_pName, sizeof(aBuf));
-				Used = Length;
-			}
-		}
+	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+	{ \
+		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
+		{ \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			void *pUserData = pCommand->m_pUserData; \
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
+			while(pfnCallback == Con_Chain) \
+			{ \
+				CChain *pChainInfo = (CChain *)pUserData; \
+				pUserData = pChainInfo->m_pCallbackUserData; \
+				pfnCallback = pChainInfo->m_pfnCallback; \
+			} \
+			CIntVariableData *pData = (CIntVariableData *)pUserData; \
+			*pData->m_pVariable = pData->m_OldValue; \
+		} \
 	}
-	if(Used > 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
+	{ \
+		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
+		{ \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			void *pUserData = pCommand->m_pUserData; \
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
+			while(pfnCallback == Con_Chain) \
+			{ \
+				CChain *pChainInfo = (CChain *)pUserData; \
+				pUserData = pChainInfo->m_pCallbackUserData; \
+				pfnCallback = pChainInfo->m_pfnCallback; \
+			} \
+			CStrVariableData *pData = (CStrVariableData *)pUserData; \
+			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize); \
+		} \
+	}
+
+	#include "config_variables.h"
+
+	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_STR
 }
 
 int CConsole::CResult::GetVictim()

@@ -1243,11 +1243,12 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	// status box
 	{
-		CUIRect Button, ButtonArea, Part;
+		CUIRect Button, ButtonArea;
 		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
 
 		// version note
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
+		CUIRect Part;
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
 		int State = Updater()->GetCurrentState();

@@ -49,6 +49,7 @@
 
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
+	#undef _WIN32_WINNT
 	#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
 	#include <windows.h>
 	#include <winsock2.h>
@@ -181,9 +182,7 @@ void dbg_enable_threaded()
 	dbg_msg_threaded = 1;
 
 	Thread = thread_init(dbg_msg_thread, 0);
-	#if defined(CONF_FAMILY_UNIX)
-		pthread_detach((pthread_t)Thread);
-	#endif
+	thread_detach(Thread);
 }
 #endif
 
@@ -192,7 +191,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	va_list args;
 	char *msg;
 	int len;
-	int e;
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	time_t rawtime;
@@ -207,6 +205,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
 	{
+		int e;
 		semaphore_wait(&log_queue.notfull);
 		semaphore_wait(&log_queue.mutex);
 		e = queue_empty(&log_queue);
@@ -1569,6 +1568,59 @@ int net_init()
 	return 0;
 }
 
+int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WIN32_FIND_DATA finddata;
+	HANDLE handle;
+	char buffer[1024*2];
+	int length;
+	str_format(buffer, sizeof(buffer), "%s/*", dir);
+
+	handle = FindFirstFileA(buffer, &finddata);
+
+	if (handle == INVALID_HANDLE_VALUE)
+		return 0;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+
+	/* add all the entries */
+	do
+	{
+		str_copy(buffer+length, finddata.cFileName, (int)sizeof(buffer)-length);
+		if(cb(finddata.cFileName, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
+			break;
+	}
+	while (FindNextFileA(handle, &finddata));
+
+	FindClose(handle);
+	return 0;
+#else
+	struct dirent *entry;
+	char buffer[1024*2];
+	int length;
+	DIR *d = opendir(dir);
+
+	if(!d)
+		return 0;
+
+	str_format(buffer, sizeof(buffer), "%s/", dir);
+	length = str_length(buffer);
+
+	while((entry = readdir(d)) != NULL)
+	{
+		str_copy(buffer+length, entry->d_name, (int)sizeof(buffer)-length);
+		if(cb(entry->d_name, fs_getmtime(buffer), fs_is_dir(buffer), type, user))
+			break;
+	}
+
+	/* close the directory and return */
+	closedir(d);
+	return 0;
+#endif
+}
+
 int fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -1695,7 +1747,7 @@ int fs_is_dir(const char *path)
 
 time_t fs_getmtime(const char *path)
 {
-  struct stat sb;
+	struct stat sb;
 	if (stat(path, &sb) == -1)
 		return 0;
 
@@ -2060,15 +2112,20 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 	}
 }
 
+void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
+{
+	struct tm *time_info;
+
+	time_info = localtime(&time_data);
+	strftime(buffer, buffer_size, format, time_info);
+	buffer[buffer_size-1] = 0;	/* assure null termination */
+}
+
 void str_timestamp(char *buffer, int buffer_size)
 {
 	time_t time_data;
-	struct tm *time_info;
-
 	time(&time_data);
-	time_info = localtime(&time_data);
-	strftime(buffer, buffer_size, "%Y-%m-%d_%H-%M-%S", time_info);
-	buffer[buffer_size-1] = 0;	/* assure null termination */
+	str_timestamp_ex(time_data, buffer, buffer_size, "%Y-%m-%d_%H-%M-%S");
 }
 
 int mem_comp(const void *a, const void *b, int size)
@@ -2308,11 +2365,11 @@ int str_utf8_decode(const char **ptr)
 		unsigned char byte = str_byte_next(ptr);
 		if(utf8_bytes_needed == 0)
 		{
-			if(0x00 <= byte && byte <= 0x7F)
+			if(byte <= 0x7F)
 			{
 				return byte;
 			}
-			else if(0x80 <= byte && byte <= 0xDF)
+			else if(0xC2 <= byte && byte <= 0xDF)
 			{
 				utf8_bytes_needed = 1;
 				utf8_code_point = byte - 0xC0;

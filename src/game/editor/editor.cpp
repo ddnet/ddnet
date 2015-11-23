@@ -206,7 +206,7 @@ void CEditorImage::AnalyseTileFlags()
 
 	int tw = m_Width/16; // tilesizes
 	int th = m_Height/16;
-	if ( tw == th )
+	if ( tw == th && m_Format == CImageInfo::FORMAT_RGBA )
 	{
 		unsigned char *pPixelData = (unsigned char *)m_pData;
 
@@ -801,7 +801,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		else if(isDegree)
 			str_format(aBuf, sizeof(aBuf),"%d°", Current);
 		else if(isHex)
-			str_format(aBuf, sizeof(aBuf),"0x%06X", Current);
+			str_format(aBuf, sizeof(aBuf),"#%06X", Current);
 		else
 			str_format(aBuf, sizeof(aBuf),"%d", Current);
 		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
@@ -2736,7 +2736,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.HMargin(1.0f, &Shifter);
 
 			int NewColorHex = pProps[i].m_Value&0xff;
-			NewColorHex |= UiDoValueSelector(((char *)&pIDs[i]+4), &Shifter, "", (pProps[i].m_Value >> 8)&0xFFFFFF, 0, 0xFFFFFF, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.", false, true) << 8;
+			NewColorHex |= UiDoValueSelector(((char *)&pIDs[i]-1), &Shifter, "", (pProps[i].m_Value >> 8)&0xFFFFFF, 0, 0xFFFFFF, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.", false, true) << 8;
 
 			// color picker
 			vec4 Color = vec4(
@@ -4098,6 +4098,20 @@ void CEditor::RenderStatusbar(CUIRect View)
 	else if(MouseButton == 1)
 		m_ShowEnvelopeEditor = (m_ShowEnvelopeEditor+1)%4;
 
+	if(MouseButton)
+	{
+		m_ShowServerSettingsEditor = false;
+	}
+
+	View.VSplitRight(100.0f, &View, &Button);
+	Button.VSplitRight(10.0f, &Button, 0);
+	static int s_SettingsButton = 0;
+	if(DoButton_Editor(&s_SettingsButton, "Server settings", m_ShowServerSettingsEditor, &Button, 0, "Toggles the server settings editor."))
+	{
+		m_ShowEnvelopeEditor = 0;
+		m_ShowServerSettingsEditor ^= 1;
+	}
+
 	if (g_Config.m_ClEditorUndo)
 	{
 		View.VSplitRight(5.0f, &View, &Button);
@@ -4253,8 +4267,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			if(pNewEnv->m_Channels == 4)
 			{
-				pNewEnv->AddPoint(0, 1,1,1,1);
-				pNewEnv->AddPoint(1000, 1,1,1,1);
+				pNewEnv->AddPoint(0, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
+				pNewEnv->AddPoint(1000, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
 			}
 			else
 			{
@@ -4403,7 +4417,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					int Time = (int)(((UI()->MouseX()-View.x)*TimeScale)*1000.0f);
 					//float env_y = (UI()->MouseY()-view.y)/TimeScale;
 					float aChannels[4];
-					pEnvelope->Eval(Time, aChannels);
+					pEnvelope->Eval(Time / 1000.0f, aChannels);
 					pEnvelope->AddPoint(Time,
 						f2fx(aChannels[0]), f2fx(aChannels[1]),
 						f2fx(aChannels[2]), f2fx(aChannels[3]));
@@ -4707,6 +4721,126 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	}
 }
 
+void CEditor::RenderServerSettingsEditor(CUIRect View)
+{
+	static int s_CommandSelectedIndex = -1;
+
+	CUIRect ToolBar;
+	View.HSplitTop(20.0f, &ToolBar, &View);
+	ToolBar.Margin(2.0f, &ToolBar);
+
+	// do the toolbar
+	{
+		CUIRect Button;
+
+		// command line
+		ToolBar.VSplitLeft(5.0f, 0, &Button);
+		UI()->DoLabel(&Button, "Command:", 12.0f, -1);
+
+		Button.VSplitLeft(70.0f, 0, &Button);
+		Button.VSplitLeft(180.0f, &Button, 0);
+		DoEditBox(&m_CommandBox, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox);
+
+		// buttons
+		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
+		static int s_AddButton = 0;
+		if(DoButton_Editor(&s_AddButton, "Add", 0, &Button, 0, "Add a command to command list.")
+			|| ((Input()->KeyDown(KEY_RETURN) || Input()->KeyDown(KEY_KP_ENTER)) && UI()->LastActiveItem() == &m_CommandBox))
+		{
+			if(m_aSettingsCommand[0] != 0 && str_find(m_aSettingsCommand, " "))
+			{
+				bool Found = false;
+				for(int i = 0; i < m_Map.m_lSettings.size(); i++)
+					if(!str_comp(m_Map.m_lSettings[i].m_aCommand, m_aSettingsCommand))
+					{
+						Found = true;
+						break;
+					}
+
+				if(!Found)
+				{
+					CEditorMap::CSetting Setting;
+					str_copy(Setting.m_aCommand, m_aSettingsCommand, sizeof(Setting.m_aCommand));
+					m_Map.m_lSettings.add(Setting);
+				}
+			}
+		}
+
+		if(m_Map.m_lSettings.size())
+		{
+			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
+			Button.VSplitRight(5.0f, &Button, 0);
+			static int s_AddButton = 0;
+			if(DoButton_Editor(&s_AddButton, "Del", 0, &Button, 0, "Delete a command from the command list.")
+				|| Input()->KeyDown(KEY_DELETE))
+				if(s_CommandSelectedIndex > -1 && s_CommandSelectedIndex < m_Map.m_lSettings.size())
+					m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
+		}
+	}
+
+	View.HSplitTop(2.0f, 0, &View);
+	RenderBackground(View, ms_CheckerTexture, 32.0f, 0.1f);
+
+	CUIRect ListBox;
+	View.Margin(1.0f, &ListBox);
+
+	float ListHeight = 17.0f * m_Map.m_lSettings.size();
+	static int s_ScrollBar = 0;
+	static float s_ScrollValue = 0;
+
+	float ScrollDifference = ListHeight - ListBox.h;
+
+	if(ListHeight > ListBox.h)	// Do we even need a scrollbar?
+	{
+		CUIRect Scroll;
+		ListBox.VSplitRight(15.0f, &ListBox, &Scroll);
+		ListBox.VSplitRight(3.0f, &ListBox, 0);	// extra spacing
+		Scroll.HMargin(5.0f, &Scroll);
+		s_ScrollValue = UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+
+		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ListBox))
+		{
+			int ScrollNum = (int)((ListHeight-ListBox.h)/17.0f)+1;
+			if(ScrollNum > 0)
+			{
+				if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+					s_ScrollValue = clamp(s_ScrollValue - 1.0f/ScrollNum, 0.0f, 1.0f);
+				if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+					s_ScrollValue = clamp(s_ScrollValue + 1.0f/ScrollNum, 0.0f, 1.0f);
+			}
+			else
+				ScrollNum = 0;
+		}
+	}
+
+	float ListStartAt = ScrollDifference * s_ScrollValue;
+	if(ListStartAt < 0.0f)
+		ListStartAt = 0.0f;
+
+	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
+	float ListCur = 0;
+
+	UI()->ClipEnable(&ListBox);
+	for(int i = 0; i < m_Map.m_lSettings.size(); i++)
+	{
+		if(ListCur > ListStopAt)
+			break;
+
+		if(ListCur >= ListStartAt)
+		{
+			CUIRect Button;
+			ListBox.HSplitTop(15.0f, &Button, &ListBox);
+			ListBox.HSplitTop(2.0f, 0, &ListBox);
+			Button.VSplitLeft(5.0f, 0, &Button);
+
+			if(DoButton_MenuItem(&m_Map.m_lSettings[i], m_Map.m_lSettings[i].m_aCommand, s_CommandSelectedIndex == i, &Button, 0, 0))
+				s_CommandSelectedIndex = i;
+		}
+		ListCur += 17.0f;
+	}
+	UI()->ClipDisable();
+}
+
 int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 {
 	static int s_NewMapButton = 0;
@@ -4874,8 +5008,8 @@ void CEditor::Render()
 	// render checker
 	RenderBackground(View, ms_CheckerTexture, 32.0f, 1.0f);
 
-	CUIRect MenuBar, CModeBar, ToolBar, StatusBar, EnvelopeEditor, UndoList, ToolBox;
-	m_ShowPicker = Input()->KeyPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0;
+	CUIRect MenuBar, CModeBar, ToolBar, StatusBar, ExtraEditor, UndoList, ToolBox;
+	m_ShowPicker = Input()->KeyPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && UI()->LastActiveItem() != &m_CommandBox;
 
 	if(m_GuiActive)
 	{
@@ -4892,12 +5026,15 @@ void CEditor::Render()
 				size *= 2.0f;
 			else if(m_ShowEnvelopeEditor == 3)
 				size *= 3.0f;
-			View.HSplitBottom(size, &View, &EnvelopeEditor);
+			View.HSplitBottom(size, &View, &ExtraEditor);
 		}
 		if (m_ShowUndo && !m_ShowPicker)
 		{
 			View.HSplitBottom(250.0f, &View, &UndoList);
 		}
+
+		if(m_ShowServerSettingsEditor && !m_ShowPicker)
+			View.HSplitBottom(250.0f, &View, &ExtraEditor);
 	}
 
 	//	a little hack for now
@@ -4963,10 +5100,10 @@ void CEditor::Render()
 
 	if(m_GuiActive)
 	{
-		if(m_ShowEnvelopeEditor)
+		if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor)
 		{
-			RenderBackground(EnvelopeEditor, ms_BackgroundTexture, 128.0f, Brightness);
-			EnvelopeEditor.Margin(2.0f, &EnvelopeEditor);
+			RenderBackground(ExtraEditor, ms_BackgroundTexture, 128.0f, Brightness);
+			ExtraEditor.Margin(2.0f, &ExtraEditor);
 		}
 		if(m_ShowUndo)
 		{
@@ -4991,9 +5128,11 @@ void CEditor::Render()
 
 		RenderModebar(CModeBar);
 		if(m_ShowEnvelopeEditor && !m_ShowPicker)
-			RenderEnvelopeEditor(EnvelopeEditor);
+			RenderEnvelopeEditor(ExtraEditor);
 		if(m_ShowUndo)
 			RenderUndoList(UndoList);
+		if(m_ShowServerSettingsEditor)
+			RenderServerSettingsEditor(ExtraEditor);
 	}
 
 	if(m_Dialog == DIALOG_FILE)
@@ -5215,6 +5354,8 @@ void CEditorMap::Clean()
 
 	m_MapInfo.Reset();
 
+	m_lSettings.clear();
+
 	m_pGameLayer = 0x0;
 	m_pGameGroup = 0x0;
 
@@ -5325,9 +5466,7 @@ void CEditor::DoMapBorder()
 void CEditor::CreateUndoStep()
 {
 	void *CreateThread = thread_init(CreateUndoStepThread, this);
-#if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)CreateThread);
-#endif
+	thread_detach(CreateThread);
 }
 
 void CEditor::CreateUndoStepThread(void *pUser)

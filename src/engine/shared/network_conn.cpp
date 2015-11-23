@@ -20,12 +20,14 @@ void CNetConnection::Reset(bool Rejoin)
 {
 	m_Sequence = 0;
 	m_Ack = 0;
+	m_PeerAck = 0;
 	m_RemoteClosed = 0;
-	m_TimeoutProtected = false;
-	m_TimeoutSituation = false;
 
 	if (!Rejoin)
 	{
+		m_TimeoutProtected = false;
+		m_TimeoutSituation = false;
+
 		m_State = NET_CONNSTATE_OFFLINE;
 		m_Token = -1;
 		m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
@@ -204,9 +206,12 @@ void CNetConnection::Disconnect(const char *pReason)
 		else
 			SendControl(NET_CTRLMSG_CLOSE, 0, 0);
 
-		m_ErrorString[0] = 0;
-		if(pReason && pReason != m_ErrorString)
-			str_copy(m_ErrorString, pReason, sizeof(m_ErrorString));
+		if(pReason != m_ErrorString)
+		{
+			m_ErrorString[0] = 0;
+			if(pReason)
+				str_copy(m_ErrorString, pReason, sizeof(m_ErrorString));
+		}
 	}
 
 	Reset();
@@ -244,6 +249,19 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 			return 0;
 		}
 	}
+
+	// check if actual ack value is valid(own sequence..latest peer ack)
+	if(m_Sequence >= m_PeerAck)
+	{
+		if(pPacket->m_Ack < m_PeerAck || pPacket->m_Ack > m_Sequence)
+			return 0;
+	}
+	else
+	{
+		if(pPacket->m_Ack < m_PeerAck && pPacket->m_Ack > m_Sequence)
+			return 0;
+	}
+	m_PeerAck = pPacket->m_Ack;
 
 	int64 Now = time_get();
 

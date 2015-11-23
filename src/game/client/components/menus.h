@@ -155,14 +155,45 @@ class CMenus : public CComponent
 		char m_aName[128];
 		bool m_IsDir;
 		int m_StorageType;
+		time_t m_Date;
 
 		bool m_InfosLoaded;
 		bool m_Valid;
 		CDemoHeader m_Info;
 
-		bool operator<(const CDemoItem &Other) { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
+		bool operator<(const CDemoItem &Other)
+		{
+			if (g_Config.m_BrDemoSort)
+			{
+				if (g_Config.m_BrDemoSortOrder)
+				{
+					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
 														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_filenames(m_aFilename, Other.m_aFilename) < 0; }
+														m_Date < Other.m_Date;
+				}
+				else
+				{
+					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
+														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
+														m_Date > Other.m_Date;
+				}
+			}
+			else
+			{
+				if (g_Config.m_BrDemoSortOrder)
+				{
+					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
+														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
+														str_comp_filenames(m_aFilename, Other.m_aFilename) < 0;
+				}
+				else
+				{
+					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
+														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
+														str_comp_filenames(m_aFilename, Other.m_aFilename) > 0;
+				}
+			}
+		}
 	};
 
 	//sorted_array<CDemoItem> m_lDemos;
@@ -174,7 +205,7 @@ class CMenus : public CComponent
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
-	static int DemolistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
+	static int DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser);
 
 	// friends
 	struct CFriendItem
@@ -293,6 +324,7 @@ public:
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	sorted_array<CDemoItem> m_lDemos;
 	void DemolistPopulate();
+	bool m_Dummy;
 
 	// Ghost
 	struct CGhostItem

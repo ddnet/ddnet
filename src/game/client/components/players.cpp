@@ -257,7 +257,7 @@ void CPlayers::RenderHook(
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
-	if (!g_Config.m_ClAntiPingPlayers)
+	if (!m_pClient->AntiPingPlayers())
 	{
 		// use preditect players if needed
 		if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -290,7 +290,7 @@ void CPlayers::RenderHook(
 	}
 
 	vec2 Position;
-	if (!g_Config.m_ClAntiPingPlayers)
+	if (!m_pClient->AntiPingPlayers())
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 	else
 		Position = parPosition;
@@ -305,7 +305,7 @@ void CPlayers::RenderHook(
 		vec2 Pos = Position;
 		vec2 HookPos;
 
-		if (!g_Config.m_ClAntiPingPlayers)
+		if (!m_pClient->AntiPingPlayers())
 		{
 			if(pPlayerChar->m_HookedPlayer != -1)
 			{
@@ -406,41 +406,37 @@ void CPlayers::RenderPlayer(
 
 	float IntraTick = Client()->IntraGameTick();
 
-	float Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick)/256.0f;
-
-	//float angle = 0;
-
+	float Angle;
 	if(pInfo.m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		// just use the direct input if it's local player we are rendering
+		// just use the direct input if it's the local player we are rendering
 		Angle = GetAngle(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
-		/*
-		float mixspeed = Client()->FrameTime()*2.5f;
-		if(player.attacktick != prev.attacktick) // shooting boosts the mixing speed
-			mixspeed *= 15.0f;
-
-		// move the delta on a constant speed on a x^2 curve
-		float current = g_GameClient.m_aClients[info.cid].angle;
-		float target = player.angle/256.0f;
-		float delta = angular_distance(current, target);
-		float sign = delta < 0 ? -1 : 1;
-		float new_delta = delta - 2*mixspeed*sqrt(delta*sign)*sign + mixspeed*mixspeed;
-
-		// make sure that it doesn't vibrate when it's still
-		if(fabs(delta) < 2/256.0f)
-			angle = target;
+		// If the player moves their weapon through top, then change
+		// the end angle by 2*Pi, so that the mix function will use the
+		// short path and not the long one.
+		if (Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
+		{
+			Player.m_Angle -= 256.0f * 2 * pi;
+			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick) / 256.0f;
+		}
+		else if (Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
+		{
+			Player.m_Angle += 256.0f * 2 * pi;
+			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick) / 256.0f;
+		}
 		else
-			angle = angular_approach(current, target, fabs(delta-new_delta));
-
-		g_GameClient.m_aClients[info.cid].angle = angle;*/
+		{
+			// No special cases? Just use mix():
+			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick)/256.0f;
+		}
 	}
 
 
 	// use preditect players if needed
-	if (!g_Config.m_ClAntiPingPlayers)
+	if (!m_pClient->AntiPingPlayers())
 	{
 		if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
@@ -475,7 +471,7 @@ void CPlayers::RenderPlayer(
 
 	vec2 Direction = GetDirection((int)(Angle*256.0f));
 	vec2 Position;
-	if (!g_Config.m_ClAntiPingPlayers)
+	if (!m_pClient->AntiPingPlayers())
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 	else
 		Position = parPosition;
@@ -878,7 +874,7 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsEnd();
 	}
 
-	if(g_Config.m_ClNameplates && g_Config.m_ClAntiPingPlayers)
+	if(g_Config.m_ClNameplates && m_pClient->AntiPingPlayers())
 	{
 		float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 		float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
@@ -972,7 +968,7 @@ void CPlayers::OnRender()
 
 	static int predcnt = 0;
 
-	if (g_Config.m_ClAntiPingPlayers)
+	if (m_pClient->AntiPingPlayers())
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -999,7 +995,7 @@ void CPlayers::OnRender()
 			}
 		}
 
-		if(g_Config.m_ClAntiPingPlayers && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		if(m_pClient->AntiPingPlayers() && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 			{
 	//			double ping = m_pClient->m_Snap.m_pLocalInfo->m_Latency;

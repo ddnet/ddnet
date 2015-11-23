@@ -7,6 +7,9 @@
 #include <engine/shared/config.h>
 #include <engine/map.h>
 #include <engine/console.h>
+#include <engine/shared/datafile.h>
+#include <engine/shared/linereader.h>
+#include <engine/storage.h>
 #include "gamecontext.h"
 #include <game/version.h>
 #include <game/collision.h>
@@ -56,6 +59,7 @@ void CGameContext::Construct(int Resetting)
 		m_NumMutes = 0;
 	}
 	m_ChatResponseTargetID = -1;
+	m_aDeleteTempfile[0] = 0;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -1092,7 +1096,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Console()->SetFlagMask(CFGFLAG_CHAT);
 
 					if (pPlayer->m_Authed)
-						Console()->SetAccessLevel(pPlayer->m_Authed == CServer::AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
+						Console()->SetAccessLevel(pPlayer->m_Authed == CServer::AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : pPlayer->m_Authed == CServer::AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
 					else
 						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 					Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
@@ -2242,15 +2246,15 @@ void CGameContext::OnConsoleInit()
 
 	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(0, SendChatResponse, this);
 
-	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
+	Console()->Register("tune", "si", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
 	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "Dump tuning");
-	Console()->Register("tune_zone", "isi", CFGFLAG_SERVER, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("tune_zone", "isi", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
 	Console()->Register("tune_zone_dump", "i", CFGFLAG_SERVER, ConTuneDumpZone, this, "Dump zone tuning in zone x");
 	Console()->Register("tune_zone_reset", "?i", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
-	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
-	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
-	Console()->Register("switch_open", "i", CFGFLAG_SERVER, ConSwitchOpen, this, "Whether a switch is open by default (otherwise closed)");
+	Console()->Register("tune_zone_enter", "is", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
+	Console()->Register("tune_zone_leave", "is", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
+	Console()->Register("switch_open", "i", CFGFLAG_SERVER|CFGFLAG_GAME, ConSwitchOpen, this, "Whether a switch is open by default (otherwise closed)");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
 	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
 	Console()->Register("random_map", "?i", CFGFLAG_SERVER, ConRandomMap, this, "Random map");
@@ -2284,6 +2288,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
+
+	DeleteTempfile();
 
 	//if(!data) // only load once
 		//data = load_data_from_memory(internal_data);
@@ -2347,11 +2353,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile);
 
-	char buf[512];
-	str_format(buf, sizeof(buf), "maps/%s.cfg", g_Config.m_SvMap);
-	Console()->ExecuteFile(buf);
-	str_format(buf, sizeof(buf), "maps/%s.map.cfg", g_Config.m_SvMap);
-	Console()->ExecuteFile(buf);
+	LoadMapSettings();
+
 /*	// select gametype
 	if(str_comp(g_Config.m_SvGametype, "mod") == 0)
 		m_pController = new CGameControllerMOD(this);
@@ -2514,13 +2517,188 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 #endif
 }
 
+void CGameContext::DeleteTempfile()
+{
+	if(m_aDeleteTempfile[0] != 0)
+	{
+		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+		pStorage->RemoveFile(m_aDeleteTempfile, IStorage::TYPE_SAVE);
+		m_aDeleteTempfile[0] = 0;
+	}
+}
+
+void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
+{
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+
+	char aConfig[128];
+	char aTemp[128];
+	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
+	str_format(aTemp, sizeof(aTemp), "%s.temp.%d", pNewMapName, pid());
+
+	IOHANDLE File = pStorage->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		// No map-specific config, just return.
+		return;
+	}
+	CLineReader LineReader;
+	LineReader.Init(File);
+
+	array<char *> aLines;
+	char *pLine;
+	int TotalLength = 0;
+	while((pLine = LineReader.Get()))
+	{
+		int Length = str_length(pLine) + 1;
+		char *pCopy = (char *)mem_alloc(Length, 1);
+		mem_copy(pCopy, pLine, Length);
+		aLines.add(pCopy);
+		TotalLength += Length;
+	}
+
+	char *pSettings = (char *)mem_alloc(TotalLength, 1);
+	int Offset = 0;
+	for(int i = 0; i < aLines.size(); i++)
+	{
+		int Length = str_length(aLines[i]) + 1;
+		mem_copy(pSettings + Offset, aLines[i], Length);
+		Offset += Length;
+		mem_free(aLines[i]);
+	}
+
+	CDataFileReader Reader;
+	Reader.Open(pStorage, pNewMapName, IStorage::TYPE_ALL);
+
+	CDataFileWriter Writer;
+	Writer.Init();
+
+	int SettingsIndex = Reader.NumData();
+	bool FoundInfo = false;
+	for(int i = 0; i < Reader.NumItems(); i++)
+	{
+		int TypeID;
+		int ItemID;
+		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
+		// GetItemSize returns item size including header, remove that.
+		int Size = Reader.GetItemSize(i) - sizeof(int) * 2;
+		CMapItemInfoSettings MapInfo;
+		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
+		{
+			FoundInfo = true;
+			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
+			if(Size >= (int)sizeof(CMapItemInfoSettings))
+			{
+				if(pInfo->m_Settings > -1)
+				{
+					SettingsIndex = pInfo->m_Settings;
+					char *pMapSettings = (char *)Reader.GetData(SettingsIndex);
+					int DataSize = Reader.GetUncompressedDataSize(SettingsIndex);
+					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
+					{
+						// Configs coincide, no need to update map.
+						return;
+					}
+					Reader.UnloadData(pInfo->m_Settings);
+				}
+				else
+				{
+					MapInfo = *pInfo;
+					MapInfo.m_Settings = SettingsIndex;
+					pData = (int *)&MapInfo;
+					Size = sizeof(MapInfo);
+				}
+			}
+			else
+			{
+				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pInfo;
+				MapInfo.m_Settings = SettingsIndex;
+				pData = (int *)&MapInfo;
+				Size = sizeof(MapInfo);
+			}
+		}
+		Writer.AddItem(TypeID, ItemID, Size, pData);
+	}
+
+	if(!FoundInfo)
+	{
+		CMapItemInfoSettings Info;
+		Info.m_Version = 1;
+		Info.m_Author = -1;
+		Info.m_MapVersion = -1;
+		Info.m_Credits = -1;
+		Info.m_License = -1;
+		Info.m_Settings = SettingsIndex;
+		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Info), &Info);
+	}
+
+	for(int i = 0; i < Reader.NumData() || i == SettingsIndex; i++)
+	{
+		if(i == SettingsIndex)
+		{
+			Writer.AddData(TotalLength, pSettings);
+			continue;
+		}
+		unsigned char *pData = (unsigned char *)Reader.GetData(i);
+		int Size = Reader.GetUncompressedDataSize(i);
+		Writer.AddData(Size, pData);
+		Reader.UnloadData(i);
+	}
+
+	dbg_msg("mapchange", "imported settings");
+	Reader.Close();
+	Writer.OpenFile(pStorage, aTemp);
+	Writer.Finish();
+
+	str_copy(pNewMapName, aTemp, MapNameSize);
+	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
+}
+
 void CGameContext::OnShutdown()
 {
+	DeleteTempfile();
+	Console()->ResetServerGameSettings();
 	Layers()->Dest();
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;
 	Clear();
+}
+
+void CGameContext::LoadMapSettings()
+{
+	IMap *pMap = Kernel()->RequestInterface<IMap>();
+	int Start, Num;
+	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
+	for(int i = Start; i < Start + Num; i++)
+	{
+		int ItemID;
+		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, 0, &ItemID);
+		int ItemSize = pMap->GetItemSize(i) - 8;
+		if(!pItem || ItemID != 0)
+			continue;
+
+		if(ItemSize < (int)sizeof(CMapItemInfoSettings))
+			break;
+		if(!(pItem->m_Settings > -1))
+			break;
+
+		int Size = pMap->GetUncompressedDataSize(pItem->m_Settings);
+		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
+		char *pNext = pSettings;
+		while(pNext < pSettings + Size)
+		{
+			int StrSize = str_length(pNext) + 1;
+			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
+			pNext += StrSize;
+		}
+		pMap->UnloadData(pItem->m_Settings);
+		break;
+	}
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "maps/%s.map.cfg", g_Config.m_SvMap);
+	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
 }
 
 void CGameContext::OnSnap(int ClientID)

@@ -144,7 +144,7 @@ struct CSqlTeamSave
 	int m_Team;
 	int m_ClientID;
 	char m_Code[128];
-	char m_Server[4];
+	char m_Server[5];
 	CSqlScore *m_pSqlData;
 };
 

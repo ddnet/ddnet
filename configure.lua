@@ -382,8 +382,8 @@ function OptCCompiler(name, default_driver, default_c, default_cxx, desc)
 			error(option.driver.." is not a known c/c++ compile driver")
 		end
 
-		if option.c_compiler then settings.cc.c_compiler = option.c_compiler end
-		if option.cxx_compiler then settings.cc.cxx_compiler = option.cxx_compiler end
+		if option.c_compiler then settings.cc.exe_c = option.c_compiler end
+		if option.cxx_compiler then settings.cc.exe_cxx = option.cxx_compiler end
 	end
 
 	local save = function(option, output)

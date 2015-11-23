@@ -50,17 +50,18 @@ Mysql = {
 					settings.link.libs:Add("mysqlcppconn-static")
 					settings.link.libs:Add("mysqlclient")
 					settings.link.libs:Add("dl")
-					settings.link.libs:Add("rt")
+					if platform ~= "macosx" then
+						settings.link.libs:Add("rt")
+					end
 				end
 
 				if platform == "macosx" and string.find(settings.config_name, "32") then
 					settings.link.libpath:Add("other/mysql/mac/lib32")
 				elseif platform == "macosx" and string.find(settings.config_name, "64") then
 					settings.link.libpath:Add("other/mysql/mac/lib64")
-				elseif platform == "linux" and arch == "ia32" then
-					settings.link.libpath:Add("other/mysql/linux/lib32")
-				elseif platform == "linux" and arch == "amd64" then
+				elseif platform == "linux" then
 					settings.link.libpath:Add("other/mysql/linux/lib64")
+					settings.link.libpath:Add("other/mysql/linux/lib32")
 				end
 			end
 		end

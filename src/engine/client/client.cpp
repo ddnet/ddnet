@@ -326,7 +326,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_Fire = 0;
 
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
-	mem_zero(&DummyInput, sizeof(DummyInput));
+	mem_zero(&m_DummyInput, sizeof(m_DummyInput));
 	mem_zero(&HammerInput, sizeof(HammerInput));
 	HammerInput.m_Fire = 0;
 
@@ -510,16 +510,16 @@ void CClient::SendInput()
 
 	if(m_LastDummy != (bool)g_Config.m_ClDummy)
 	{
-		mem_copy(&DummyInput, &m_aInputs[!g_Config.m_ClDummy][(m_CurrentInput[!g_Config.m_ClDummy]+200-1)%200], sizeof(DummyInput));
+		m_DummyInput = GameClient()->getPlayerInput(!g_Config.m_ClDummy);
 		m_LastDummy = g_Config.m_ClDummy;
 
 		if (g_Config.m_ClDummyResetOnSwitch)
 		{
-			DummyInput.m_Jump = 0;
-			DummyInput.m_Hook = 0;
-			if(DummyInput.m_Fire & 1)
-				DummyInput.m_Fire++;
-			DummyInput.m_Direction = 0;
+			m_DummyInput.m_Jump = 0;
+			m_DummyInput.m_Hook = 0;
+			if(m_DummyInput.m_Fire & 1)
+				m_DummyInput.m_Fire++;
+			m_DummyInput.m_Direction = 0;
 			GameClient()->ResetDummyInput();
 		}
 	}
@@ -535,22 +535,22 @@ void CClient::SendInput()
 		{
 			if(m_Fire != 0)
 			{
-				DummyInput.m_Fire = HammerInput.m_Fire;
+				m_DummyInput.m_Fire = HammerInput.m_Fire;
 				m_Fire = 0;
 			}
 
-			if(!Size && (!DummyInput.m_Direction && !DummyInput.m_Jump && !DummyInput.m_Hook))
+			if(!Size && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
 				return;
 
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
 			Msg.AddInt(m_AckGameTick[!g_Config.m_ClDummy]);
 			Msg.AddInt(m_PredTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(sizeof(DummyInput));
+			Msg.AddInt(sizeof(m_DummyInput));
 
 			// pack it
-			for(unsigned int i = 0; i < sizeof(DummyInput)/4; i++)
-				Msg.AddInt(((int*) &DummyInput)[i]);
+			for(unsigned int i = 0; i < sizeof(m_DummyInput)/4; i++)
+				Msg.AddInt(((int*) &m_DummyInput)[i]);
 
 			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
 		}
@@ -1493,7 +1493,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	if(Sys)
 	{
 		// system message
-		if(Msg == NETMSG_MAP_CHANGE)
+		if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
 		{
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			int MapCrc = Unpacker.GetInt();
@@ -1602,7 +1602,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				}
 			}
 		}
-		else if(Msg == NETMSG_CON_READY)
+		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CON_READY)
 		{
 			GameClient()->OnConnected();
 		}
@@ -1611,7 +1611,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			CMsgPacker Msg(NETMSG_PING_REPLY);
 			SendMsgEx(&Msg, 0);
 		}
-		else if(Msg == NETMSG_RCON_CMD_ADD)
+		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
 			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			const char *pHelp = Unpacker.GetString(CUnpacker::SANITIZE_CC);
@@ -1619,13 +1619,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Unpacker.Error() == 0)
 				m_pConsole->RegisterTemp(pName, pParams, CFGFLAG_SERVER, pHelp);
 		}
-		else if(Msg == NETMSG_RCON_CMD_REM)
+		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_REM)
 		{
 			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			if(Unpacker.Error() == 0)
 				m_pConsole->DeregisterTemp(pName);
 		}
-		else if(Msg == NETMSG_RCON_AUTH_STATUS)
+		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
 		{
 			int Result = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
@@ -1637,7 +1637,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Old != 0 && m_UseTempRconCommands == 0)
 				m_pConsole->DeregisterTempAll();
 		}
-		else if(Msg == NETMSG_RCON_LINE)
+		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_LINE)
 		{
 			const char *pLine = Unpacker.GetString();
 			if(Unpacker.Error() == 0)
@@ -1891,12 +1891,15 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	}
 	else
 	{
-		// game message
-		for(int i = 0; i < RECORDER_MAX; i++)
-			if(m_DemoRecorder[i].IsRecording())
-				m_DemoRecorder[i].RecordMessage(pPacket->m_pData, pPacket->m_DataSize);
+		if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 || Msg == NETMSGTYPE_SV_EXTRAPROJECTILE)
+		{
+			// game message
+			for(int i = 0; i < RECORDER_MAX; i++)
+				if(m_DemoRecorder[i].IsRecording())
+					m_DemoRecorder[i].RecordMessage(pPacket->m_pData, pPacket->m_DataSize);
 
-		GameClient()->OnMessage(Msg, &Unpacker);
+			GameClient()->OnMessage(Msg, &Unpacker);
+		}
 	}
 }
 
@@ -3312,10 +3315,10 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->InitInterfaces();
 
 	// execute config file
-	IOHANDLE file = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(file)
+	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
 	{
-		io_close(file);
+		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
 	else // fallback
@@ -3324,10 +3327,10 @@ int main(int argc, const char **argv) // ignore_convention
 	}
 
 	// execute autoexec file
-	file = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(file)
+	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
 	{
-		io_close(file);
+		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_CLIENT_FILE);
 	}
 	else // fallback
@@ -3335,17 +3338,30 @@ int main(int argc, const char **argv) // ignore_convention
 		pConsole->ExecuteFile(AUTOEXEC_FILE);
 	}
 
+	if(g_Config.m_ClConfigVersion < 1)
+	{
+		if(g_Config.m_ClAntiPing == 0)
+		{
+			g_Config.m_ClAntiPingPlayers = 1;
+			g_Config.m_ClAntiPingGrenade = 1;
+			g_Config.m_ClAntiPingWeapons = 1;
+		}
+	}
+	g_Config.m_ClConfigVersion = 1;
+
 	// parse the command line arguments
 	if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
-
-	// restore empty config strings to their defaults
-	pConfig->RestoreStrings();
 
 	pClient->Engine()->InitLogfile();
 
 #if defined(CONF_FAMILY_UNIX)
 	FifoConsole *fifoConsole = new FifoConsole(pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
+#endif
+
+#if defined(CONF_FAMILY_WINDOWS)
+	if(!g_Config.m_ClShowConsole)
+		FreeConsole();
 #endif
 
 	// run the client
