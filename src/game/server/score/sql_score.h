@@ -4,7 +4,9 @@
 #ifndef GAME_SERVER_SQLSCORE_H
 #define GAME_SERVER_SQLSCORE_H
 
-#include "sqlserver.h"
+#include <engine/console.h>
+
+#include "sql_server.h"
 #include "../score.h"
 
 enum
@@ -45,6 +47,10 @@ class CSqlScore: public IScore
 	static void SaveTeamThread(void *pUser);
 	static void LoadTeamThread(void *pUser);
 
+	// console commands for sqlmasters
+	static void ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData);
+
 public:
 
 	CSqlScore(CGameContext *pGameServer);
@@ -82,7 +88,26 @@ struct CSqlData
 	IServer* Server() { return ms_pServer; }
 	CPlayerData* PlayerData(int ID) { return &ms_pPlayerData[ID]; }
 	const char* MapName() { return ms_pMap; }
+	CSqlServer* SqlMasterServer(int i) { return ms_pMasterSqlServers[i]; }
 	CSqlServer* SqlServer() { return m_pSqlServer; }
+
+	void ConnectSqlServer(bool useMasters = false)
+	{
+		if (useMasters)
+		{
+			m_pSqlServer = 0;
+			for (int i = 0; i < MAX_SQLMASTERS; i++)
+			{
+				if (SqlMasterServer(i) && SqlMasterServer(i)->Connect())
+				{
+					m_pSqlServer = SqlMasterServer(i);
+					break;
+				}
+			}
+		}
+		else if (!SqlServer()->Connect())
+			m_pSqlServer = 0;
+	}
 
 	static CGameContext *ms_pGameServer;
 	static IServer *ms_pServer;

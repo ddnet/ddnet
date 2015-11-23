@@ -8,13 +8,14 @@
 
 
 CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port) :
-		m_pDatabase(pDatabase),
-		m_pPrefix(pPrefix),
-		m_pUser(pUser),
-		m_pPass(pPass),
-		m_pIp(pIp),
 		m_Port(Port)
 {
+	str_copy(m_aDatabase, pDatabase, sizeof(m_aDatabase));
+	str_copy(m_aPrefix, pPrefix, sizeof(m_aPrefix));
+	str_copy(m_aUser, pUser, sizeof(m_aUser));
+	str_copy(m_aPass, pPass, sizeof(m_aPass));
+	str_copy(m_aIp, pIp, sizeof(m_aIp));
+
 	m_pDriver = 0;
 	m_pConnection = 0;
 	m_pResults = 0;
@@ -44,7 +45,7 @@ bool CSqlServer::Connect()
 		try
 		{
 			// Connect to specific database
-			m_pConnection->setSchema(m_pDatabase);
+			m_pConnection->setSchema(m_aDatabase);
 		}
 		catch (sql::SQLException &e)
 		{
@@ -65,10 +66,10 @@ bool CSqlServer::Connect()
 		m_pStatement = 0;
 
 		sql::ConnectOptionsMap connection_properties;
-		connection_properties["hostName"]      = sql::SQLString(m_pIp);
+		connection_properties["hostName"]      = sql::SQLString(m_aIp);
 		connection_properties["port"]          = m_Port;
-		connection_properties["userName"]      = sql::SQLString(m_pUser);
-		connection_properties["password"]      = sql::SQLString(m_pPass);
+		connection_properties["userName"]      = sql::SQLString(m_aUser);
+		connection_properties["password"]      = sql::SQLString(m_aPass);
 		connection_properties["OPT_RECONNECT"] = true;
 
 		// Create connection
@@ -78,8 +79,16 @@ bool CSqlServer::Connect()
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
 
+		if (g_Config.m_SvSqlCreateTables)
+		{
+			char aBuf[256];
+			// create database
+			str_format(aBuf, sizeof(aBuf), "CREATE DATABASE IF NOT EXISTS %s", m_aDatabase);
+			m_pStatement->execute(aBuf);
+		}
+
 		// Connect to specific database
-		m_pConnection->setSchema(m_pDatabase);
+		m_pConnection->setSchema(m_aDatabase);
 		dbg_msg("SQL", "SQL connection established");
 		return true;
 	}
@@ -142,24 +151,20 @@ void CSqlServer::CreateTables()
 	{
 		char aBuf[1024];
 
-		// create database
-		str_format(aBuf, sizeof(aBuf), "CREATE DATABASE IF NOT EXISTS %s", m_pDatabase);
-		m_pStatement->execute(aBuf);
-
 		// create tables
-		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_race (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, Server CHAR(4), cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY (Map, Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
+		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_race (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , Time FLOAT DEFAULT 0, Server CHAR(4), cp1 FLOAT DEFAULT 0, cp2 FLOAT DEFAULT 0, cp3 FLOAT DEFAULT 0, cp4 FLOAT DEFAULT 0, cp5 FLOAT DEFAULT 0, cp6 FLOAT DEFAULT 0, cp7 FLOAT DEFAULT 0, cp8 FLOAT DEFAULT 0, cp9 FLOAT DEFAULT 0, cp10 FLOAT DEFAULT 0, cp11 FLOAT DEFAULT 0, cp12 FLOAT DEFAULT 0, cp13 FLOAT DEFAULT 0, cp14 FLOAT DEFAULT 0, cp15 FLOAT DEFAULT 0, cp16 FLOAT DEFAULT 0, cp17 FLOAT DEFAULT 0, cp18 FLOAT DEFAULT 0, cp19 FLOAT DEFAULT 0, cp20 FLOAT DEFAULT 0, cp21 FLOAT DEFAULT 0, cp22 FLOAT DEFAULT 0, cp23 FLOAT DEFAULT 0, cp24 FLOAT DEFAULT 0, cp25 FLOAT DEFAULT 0, KEY (Map, Name)) CHARACTER SET utf8 ;", m_aPrefix, MAX_NAME_LENGTH);
 		executeSql(aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_teamrace (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
+		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_teamrace (Map VARCHAR(128) BINARY NOT NULL, Name VARCHAR(%d) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Time FLOAT DEFAULT 0, ID VARBINARY(16) NOT NULL, KEY Map (Map)) CHARACTER SET utf8 ;", m_aPrefix, MAX_NAME_LENGTH);
 		executeSql(aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Mapper VARCHAR(128) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, Timestamp TIMESTAMP, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_pPrefix);
+		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_maps (Map VARCHAR(128) BINARY NOT NULL, Server VARCHAR(32) BINARY NOT NULL, Mapper VARCHAR(128) BINARY NOT NULL, Points INT DEFAULT 0, Stars INT DEFAULT 0, Timestamp TIMESTAMP, UNIQUE KEY Map (Map)) CHARACTER SET utf8 ;", m_aPrefix);
 		executeSql(aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Server CHAR(4), UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_pPrefix);
+		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_saves (Savegame TEXT CHARACTER SET utf8 BINARY NOT NULL, Map VARCHAR(128) BINARY NOT NULL, Code VARCHAR(128) BINARY NOT NULL, Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, Server CHAR(4), UNIQUE KEY (Map, Code)) CHARACTER SET utf8 ;", m_aPrefix);
 		executeSql(aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
+		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_aPrefix, MAX_NAME_LENGTH);
 		executeSql(aBuf);
 
 		dbg_msg("SQL", "Tables were created successfully");
@@ -183,16 +188,6 @@ void CSqlServer::executeSqlQuery(const char *pQuery)
 	if (m_pResults)
 	delete m_pResults;
 	m_pResults = m_pStatement->executeQuery(pQuery);
-}
-
-sql::ResultSet* CSqlServer::GetResults()
-{
-	return m_pResults;
-}
-
-const char* CSqlServer::GetPrefix()
-{
-	return m_pPrefix;
 }
 
 #endif

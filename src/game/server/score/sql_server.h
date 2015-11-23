@@ -19,21 +19,29 @@ public:
 
 	void executeSql(const char* pCommand);
 	void executeSqlQuery(const char* pQuery);
-	sql::ResultSet* GetResults();
 
-	const char* GetPrefix();
+	sql::ResultSet* GetResults() { return m_pResults; }
+
+	const char* GetDatabase() { return m_aDatabase; }
+	const char* GetPrefix() { return m_aPrefix; }
+	const char* GetUser() { return m_aUser; }
+	const char* GetPass() { return m_aPass; }
+	const char* GetIP() { return m_aIp; }
+	int GetPort() { return m_Port; }
+
 
 private:
 	sql::Driver *m_pDriver;
 	sql::Connection *m_pConnection;
 	sql::Statement *m_pStatement;
 	sql::ResultSet *m_pResults;
+	
 	// copy of config vars
-	const char* m_pDatabase;
-	const char* m_pPrefix;
-	const char* m_pUser;
-	const char* m_pPass;
-	const char* m_pIp;
+	char m_aDatabase[64];
+	char m_aPrefix[64];
+	char m_aUser[64];
+	char m_aPass[64];
+	char m_aIp[64];
 	int m_Port;
 };
 
