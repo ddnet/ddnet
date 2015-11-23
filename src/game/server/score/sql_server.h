@@ -1,5 +1,5 @@
-#ifndef GAME_SERVER_SQLSERVER_H
-#define GAME_SERVER_SQLSERVER_H
+#ifndef GAME_SERVER_SQL_SERVER_H
+#define GAME_SERVER_SQL_SERVER_H
 
 #include <mysql_connection.h>
 

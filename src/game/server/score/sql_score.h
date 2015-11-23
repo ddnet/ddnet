@@ -7,6 +7,10 @@
 #include "sqlserver.h"
 #include "../score.h"
 
+enum
+{
+	MAX_SQLMASTERS=10
+};
 
 class CSqlScore: public IScore
 {
@@ -20,6 +24,7 @@ class CSqlScore: public IScore
 	IServer *m_pServer;
 
 	CSqlServer m_SqlServer;
+	CSqlServer* m_apMasterSqlServers[MAX_SQLMASTERS];
 
 	char m_aMap[64];
 
@@ -71,7 +76,7 @@ public:
 // generic implementation to provide sqlserver, gameserver and server
 struct CSqlData
 {
-	CSqlData(CSqlServer* pSqlServer) : m_pSqlServer(pSqlServer) {}
+	CSqlData() : m_pSqlServer(ms_pSqlServer) {}
 
 	CGameContext* GameServer() { return ms_pGameServer; }
 	IServer* Server() { return ms_pServer; }
@@ -83,21 +88,20 @@ struct CSqlData
 	static IServer *ms_pServer;
 	static CPlayerData *ms_pPlayerData;
 	static const char *ms_pMap;
+	static CSqlServer *ms_pSqlServer;
+	static CSqlServer **ms_pMasterSqlServers;
+
 	CSqlServer *m_pSqlServer;
 };
 
 struct CSqlMapData : CSqlData
 {
-	CSqlMapData(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
-
 	int m_ClientID;
 	char m_aMap[128];
 };
 
 struct CSqlScoreData : CSqlData
 {
-	CSqlScoreData(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
-
 	int m_ClientID;
 #if defined(CONF_FAMILY_WINDOWS)
 	char m_aName[16]; // Don't edit this, or all your teeth will fall http://bugs.mysql.com/bug.php?id=50046
@@ -114,8 +118,6 @@ struct CSqlScoreData : CSqlData
 
 struct CSqlTeamScoreData : CSqlData
 {
-	CSqlTeamScoreData(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
-
 	unsigned int m_Size;
 	int m_aClientIDs[MAX_CLIENTS];
 #if defined(CONF_FAMILY_WINDOWS)
@@ -133,8 +135,6 @@ struct CSqlTeamScoreData : CSqlData
 
 struct CSqlTeamSave : CSqlData
 {
-	CSqlTeamSave(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
-
 	int m_Team;
 	int m_ClientID;
 	char m_Code[128];
@@ -143,8 +143,6 @@ struct CSqlTeamSave : CSqlData
 
 struct CSqlTeamLoad : CSqlData
 {
-	CSqlTeamLoad(CSqlServer* pSqlServer) : CSqlData(pSqlServer) {}
-
 	char m_Code[128];
 	int m_ClientID;
 };

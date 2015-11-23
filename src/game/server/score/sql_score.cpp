@@ -20,6 +20,8 @@ CGameContext *CSqlData::ms_pGameServer = 0;
 IServer *CSqlData::ms_pServer = 0;
 CPlayerData *CSqlData::ms_pPlayerData = 0;
 const char *CSqlData::ms_pMap = 0;
+CSqlServer *CSqlData::ms_pSqlServer = 0;
+CSqlServer **CSqlData::ms_pMasterSqlServers = 0;
 
 CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 		m_pServer(pGameServer->Server()),
@@ -32,6 +34,8 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 	CSqlData::ms_pServer = m_pServer;
 	CSqlData::ms_pPlayerData = PlayerData(0);
 	CSqlData::ms_pMap = m_aMap;
+	CSqlData::ms_pSqlServer = &m_SqlServer;
+	CSqlData::ms_pMasterSqlServers = m_apMasterSqlServers;
 
 	if(gs_SqlLock == 0)
 		gs_SqlLock = lock_create();
@@ -142,7 +146,7 @@ void CSqlScore::LoadScoreThread(void *pUser)
 
 void CSqlScore::LoadScore(int ClientID)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 
@@ -273,7 +277,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 
 void CSqlScore::MapVote(int ClientID, const char* MapName)
 {
-	CSqlMapData *Tmp = new CSqlMapData(&m_SqlServer);
+	CSqlMapData *Tmp = new CSqlMapData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aMap, MapName, 128);
 
@@ -370,7 +374,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 
 void CSqlScore::MapInfo(int ClientID, const char* MapName)
 {
-	CSqlMapData *Tmp = new CSqlMapData(&m_SqlServer);
+	CSqlMapData *Tmp = new CSqlMapData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aMap, MapName, 128);
 
@@ -534,7 +538,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS
 	CConsole* pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	Tmp->m_Time = Time;
@@ -550,7 +554,7 @@ void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
 	CConsole* pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
-	CSqlTeamScoreData *Tmp = new CSqlTeamScoreData(&m_SqlServer);
+	CSqlTeamScoreData *Tmp = new CSqlTeamScoreData();
 	for(unsigned int i = 0; i < Size; i++)
 	{
 		Tmp->m_aClientIDs[i] = aClientIDs[i];
@@ -810,7 +814,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 
 void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
 	Tmp->m_Search = Search;
@@ -822,7 +826,7 @@ void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
 
 void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
 	Tmp->m_Search = Search;
@@ -969,7 +973,7 @@ void CSqlScore::ShowTimesThread(void *pUser)
 
 void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 
@@ -979,7 +983,7 @@ void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUs
 
 void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 
@@ -989,7 +993,7 @@ void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserDa
 
 void CSqlScore::ShowTimes(int ClientID, int Debut)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Search = false;
@@ -1000,7 +1004,7 @@ void CSqlScore::ShowTimes(int ClientID, int Debut)
 
 void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
@@ -1069,7 +1073,7 @@ void CSqlScore::ShowPointsThread(void *pUser)
 
 void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, pName, MAX_NAME_LENGTH);
 	Tmp->m_Search = Search;
@@ -1129,7 +1133,7 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 
 void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 
@@ -1245,7 +1249,7 @@ void CSqlScore::RandomUnfinishedMapThread(void *pUser)
 
 void CSqlScore::RandomMap(int ClientID, int stars)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = stars;
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, GameServer()->Server()->ClientName(ClientID), MAX_NAME_LENGTH);
@@ -1256,7 +1260,7 @@ void CSqlScore::RandomMap(int ClientID, int stars)
 
 void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData(&m_SqlServer);
+	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = stars;
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, GameServer()->Server()->ClientName(ClientID), MAX_NAME_LENGTH);
@@ -1279,7 +1283,7 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 		return;
 	}
 
-	CSqlTeamSave *Tmp = new CSqlTeamSave(&m_SqlServer);
+	CSqlTeamSave *Tmp = new CSqlTeamSave();
 	Tmp->m_Team = Team;
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_Code, Code, 32);
@@ -1390,7 +1394,7 @@ void CSqlScore::SaveTeamThread(void *pUser)
 
 void CSqlScore::LoadTeam(const char* Code, int ClientID)
 {
-	CSqlTeamLoad *Tmp = new CSqlTeamLoad(&m_SqlServer);
+	CSqlTeamLoad *Tmp = new CSqlTeamLoad();
 	str_copy(Tmp->m_Code, Code, 32);
 	Tmp->m_ClientID = ClientID;
 

@@ -1,8 +1,10 @@
+#if defined(CONF_SQL)
+
 #include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/config.h>
 
-#include "sqlserver.h"
+#include "sql_server.h"
 
 
 CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port) :
@@ -192,3 +194,5 @@ const char* CSqlServer::GetPrefix()
 {
 	return m_pPrefix;
 }
+
+#endif
