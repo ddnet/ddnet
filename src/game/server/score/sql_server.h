@@ -7,13 +7,18 @@
 #include <cppconn/exception.h>
 #include <cppconn/statement.h>
 
+enum
+{
+	MAX_SQLMASTERS=10
+};
+
 class CSqlServer
 {
 public:
 	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port);
 	~CSqlServer();
 
-	bool Connect();
+	bool Connect(bool CreateDatabase = false);
 	void Disconnect();
 	void CreateTables();
 
@@ -35,7 +40,7 @@ private:
 	sql::Connection *m_pConnection;
 	sql::Statement *m_pStatement;
 	sql::ResultSet *m_pResults;
-	
+
 	// copy of config vars
 	char m_aDatabase[64];
 	char m_aPrefix[64];

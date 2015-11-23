@@ -9,24 +9,17 @@
 #include "sql_server.h"
 #include "../score.h"
 
-enum
-{
-	MAX_SQLMASTERS=10
-};
-
 class CSqlScore: public IScore
 {
 	CGameContext *GameServer() { return m_pGameServer; }
 	IServer *Server() { return m_pServer; }
-	CSqlServer *SqlServer() { return &m_SqlServer; }
+	inline CSqlServer *SqlServer() { return m_pServer->SqlServer(); }
+	inline CSqlServer **SqlMasterServers() { return m_pServer->SqlMasterServers(); }
 
 	void Init();
 
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
-
-	CSqlServer m_SqlServer;
-	CSqlServer* m_apMasterSqlServers[MAX_SQLMASTERS];
 
 	char m_aMap[64];
 
@@ -46,10 +39,6 @@ class CSqlScore: public IScore
 	static void RandomUnfinishedMapThread(void *pUser);
 	static void SaveTeamThread(void *pUser);
 	static void LoadTeamThread(void *pUser);
-
-	// console commands for sqlmasters
-	static void ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData);
-	static void ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData);
 
 public:
 
@@ -101,9 +90,12 @@ struct CSqlData
 				if (SqlMasterServer(i) && SqlMasterServer(i)->Connect())
 				{
 					m_pSqlServer = SqlMasterServer(i);
-					break;
+					return;
 				}
+				if (SqlMasterServer(i))
+					dbg_msg("SQL", "Warning: Unable to connect to sqlmaster %d ('%s'), trying next...", i, SqlMasterServer(i)->GetIP());
 			}
+			dbg_msg("SQL", "ERROR: No sqlmasterservers available");
 		}
 		else if (!SqlServer()->Connect())
 			m_pSqlServer = 0;

@@ -38,7 +38,7 @@ CSqlServer::~CSqlServer()
 	}
 }
 
-bool CSqlServer::Connect()
+bool CSqlServer::Connect(bool CreateDatabase)
 {
 	if (m_pDriver != NULL && m_pConnection != NULL)
 	{
@@ -79,9 +79,9 @@ bool CSqlServer::Connect()
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
 
-		if (g_Config.m_SvSqlCreateTables)
+		if (CreateDatabase)
 		{
-			char aBuf[256];
+			char aBuf[128];
 			// create database
 			str_format(aBuf, sizeof(aBuf), "CREATE DATABASE IF NOT EXISTS %s", m_aDatabase);
 			m_pStatement->execute(aBuf);
@@ -147,6 +147,9 @@ void CSqlServer::Disconnect()
 
 void CSqlServer::CreateTables()
 {
+	if (!Connect(true))
+		return;
+
 	try
 	{
 		char aBuf[1024];
@@ -176,6 +179,8 @@ void CSqlServer::CreateTables()
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Tables were NOT created");
 	}
+
+	Disconnect();
 }
 
 void CSqlServer::executeSql(const char *pCommand)

@@ -229,6 +229,7 @@ MACRO_CONFIG_INT(SvSaveGames, sv_savegames, 1, 0, 1, CFGFLAG_SERVER, "Enables sa
 MACRO_CONFIG_INT(SvSaveGamesDelay, sv_savegames_delay, 60, 0, 10000, CFGFLAG_SERVER, "Delay in seconds for loading a savegame")
 
 MACRO_CONFIG_INT(SvUseSQLMasters, sv_use_sqlmasters, 0, 0, 1, CFGFLAG_SERVER, "Redirects all writes to the specified masterservers")
+MACRO_CONFIG_INT(SvSqlMastersCreateTables, sv_sqlmasters_create_tables, 0, 0, 1, CFGFLAG_SERVER, "Try to create the SQL tables when starting")
 #endif
 
 MACRO_CONFIG_INT(SvDDRaceRules, sv_ddrace_rules, 1, 0, 1, CFGFLAG_SERVER, "Whether the default mod rules are displayed or not")

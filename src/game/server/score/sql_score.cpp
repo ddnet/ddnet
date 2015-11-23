@@ -24,24 +24,17 @@ CSqlServer *CSqlData::ms_pSqlServer = 0;
 CSqlServer **CSqlData::ms_pMasterSqlServers = 0;
 
 CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
-		m_pServer(pGameServer->Server()),
-		m_SqlServer(g_Config.m_SvSqlDatabase, g_Config.m_SvSqlPrefix, g_Config.m_SvSqlUser, g_Config.m_SvSqlPw, g_Config.m_SvSqlIp, g_Config.m_SvSqlPort)
+		m_pServer(pGameServer->Server())
 {
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
 	ClearString(m_aMap);
-
-	for (int i = 0; i < MAX_SQLMASTERS; i++)
-		m_apMasterSqlServers[i] = 0;
 
 	CSqlData::ms_pGameServer = m_pGameServer;
 	CSqlData::ms_pServer = m_pServer;
 	CSqlData::ms_pPlayerData = PlayerData(0);
 	CSqlData::ms_pMap = m_aMap;
-	CSqlData::ms_pSqlServer = &m_SqlServer;
-	CSqlData::ms_pMasterSqlServers = m_apMasterSqlServers;
-
-	GameServer()->Console()->Register("add_sqlmaster", "sssssi", CFGFLAG_SERVER, ConAddSqlMaster, this, "add a sqlmasterserver <Database> <Prefix> <User> <Password> <IP> <Port>");
-	GameServer()->Console()->Register("dump_sqlmaster", "", CFGFLAG_SERVER, ConDumpSqlMaster, this, "dumps all sqlmasterservers");
+	CSqlData::ms_pSqlServer = SqlServer();
+	CSqlData::ms_pMasterSqlServers = SqlMasterServers();
 
 	if(gs_SqlLock == 0)
 		gs_SqlLock = lock_create();
@@ -53,50 +46,6 @@ CSqlScore::~CSqlScore()
 {
 	lock_wait(gs_SqlLock);
 	lock_unlock(gs_SqlLock);
-	for (int i = 0; i < MAX_SQLMASTERS; i++)
-		if (m_apMasterSqlServers[i])
-			delete m_apMasterSqlServers[i];
-}
-
-void CSqlScore::ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData)
-{
-	CSqlScore *pSelf = (CSqlScore *)pUserData;
-
-	if (pResult->NumArguments() != 6)
-	{
-		pSelf->GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "6 arguments are required");
-		return;
-	}
-
-	for (int i = 0; i < MAX_SQLMASTERS; i++)
-	{
-		if (!pSelf->m_apMasterSqlServers[i])
-			pSelf->m_apMasterSqlServers[i] = new CSqlServer(pResult->GetString(0), pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetInteger(5));
-
-			if(g_Config.m_SvSqlCreateTables)
-			{
-				pSelf->m_apMasterSqlServers[i]->Connect();
-				pSelf->m_apMasterSqlServers[i]->CreateTables();
-				pSelf->m_apMasterSqlServers[i]->Disconnect();
-			}
-
-			pSelf->GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Added new sqlmasterserver");
-			return;
-	}
-	pSelf->GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlmaster: limit of sqlmasters reached");
-}
-
-void CSqlScore::ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData)
-{
-	CSqlScore *pSelf = (CSqlScore *)pUserData;
-
-	for (int i = 0; i < MAX_SQLMASTERS; i++)
-		if (pSelf->m_apMasterSqlServers[i])
-		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "SQL-Master %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", i, pSelf->m_apMasterSqlServers[i]->GetDatabase(), pSelf->m_apMasterSqlServers[i]->GetPrefix(), pSelf->m_apMasterSqlServers[i]->GetUser(), pSelf->m_apMasterSqlServers[i]->GetPass(), pSelf->m_apMasterSqlServers[i]->GetIP(), pSelf->m_apMasterSqlServers[i]->GetPort());
-			pSelf->GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-		}
 }
 
 // create tables... should be done only once
@@ -108,10 +57,6 @@ void CSqlScore::Init()
 		try
 		{
 			char aBuf[1024];
-			// create tables
-			if(g_Config.m_SvSqlCreateTables)
-				SqlServer()->CreateTables();
-
 			// get the best time
 			str_format(aBuf, sizeof(aBuf), "SELECT Time FROM %s_race WHERE Map='%s' ORDER BY `Time` ASC LIMIT 0, 1;", SqlServer()->GetPrefix(), m_aMap);
 			SqlServer()->executeSqlQuery(aBuf);
@@ -322,9 +267,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 		pData->SqlServer()->Disconnect();
 	}
 	else
-	{
 		dbg_msg("SQL", "ERROR: Could not connect to SQL-Server");
-	}
 
 	delete pData;
 
@@ -586,10 +529,7 @@ void CSqlScore::SaveScoreThread(void *pUser)
 		pData->SqlServer()->Disconnect();
 	}
 	else
-	{
 		dbg_msg("SQL", "ERROR: Could not connect to SQL-Server");
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "ERROR: Could NOT connect to SQL-server, this rank is lost.");
-	}
 
 	delete pData;
 

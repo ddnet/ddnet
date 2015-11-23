@@ -302,6 +302,10 @@ CServer::CServer()
 
 	m_pGameServer = 0;
 
+#if defined (CONF_SQL)
+	m_pSqlServer = 0;
+#endif
+
 	m_CurrentGameTick = 0;
 	m_RunServer = 1;
 
@@ -320,6 +324,11 @@ CServer::CServer()
 	m_ServerInfoFirstRequest = 0;
 	m_ServerInfoNumRequests = 0;
 	m_ServerInfoHighLoad = false;
+
+#if defined (CONF_SQL)
+	for (int i = 0; i < MAX_SQLMASTERS; i++)
+		m_apMasterSqlServers[i] = 0;
+#endif
 
 	Init();
 }
@@ -1650,6 +1659,14 @@ int CServer::Run()
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
+#if defined (CONF_SQL)
+	m_pSqlServer = new CSqlServer(g_Config.m_SvSqlDatabase, g_Config.m_SvSqlPrefix, g_Config.m_SvSqlUser, g_Config.m_SvSqlPw, g_Config.m_SvSqlIp, g_Config.m_SvSqlPort);
+
+	// create tables
+	if(g_Config.m_SvSqlCreateTables)
+		m_pSqlServer->CreateTables();
+#endif
+
 	GameServer()->OnInit();
 	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -1815,6 +1832,16 @@ int CServer::Run()
 
 	if(m_pCurrentMapData)
 		mem_free(m_pCurrentMapData);
+
+#if defined (CONF_SQL)
+		if (m_pSqlServer)
+			delete m_pSqlServer;
+
+		for (int i = 0; i < MAX_SQLMASTERS; i++)
+			if (m_apMasterSqlServers[i])
+				delete m_apMasterSqlServers[i];
+#endif
+
 	return 0;
 }
 
@@ -1990,6 +2017,51 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+#if defined (CONF_SQL)
+
+void CServer::ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	if (pResult->NumArguments() != 6)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "6 arguments are required");
+		return;
+	}
+
+	for (int i = 0; i < MAX_SQLMASTERS; i++)
+	{
+		if (!pSelf->m_apMasterSqlServers[i])
+		{
+			pSelf->m_apMasterSqlServers[i] = new CSqlServer(pResult->GetString(0), pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetInteger(5));
+
+			if(g_Config.m_SvSqlMastersCreateTables)
+				pSelf->m_apMasterSqlServers[i]->CreateTables();
+
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "Added new sqlmasterserver: %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", i, pSelf->m_apMasterSqlServers[i]->GetDatabase(), pSelf->m_apMasterSqlServers[i]->GetPrefix(), pSelf->m_apMasterSqlServers[i]->GetUser(), pSelf->m_apMasterSqlServers[i]->GetPass(), pSelf->m_apMasterSqlServers[i]->GetIP(), pSelf->m_apMasterSqlServers[i]->GetPort());
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			return;
+		}
+	}
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlmaster: limit of sqlmasters reached");
+}
+
+void CServer::ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	for (int i = 0; i < MAX_SQLMASTERS; i++)
+		if (pSelf->m_apMasterSqlServers[i])
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "SQL-Master %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", i, pSelf->m_apMasterSqlServers[i]->GetDatabase(), pSelf->m_apMasterSqlServers[i]->GetPrefix(), pSelf->m_apMasterSqlServers[i]->GetUser(), pSelf->m_apMasterSqlServers[i]->GetPass(), pSelf->m_apMasterSqlServers[i]->GetIP(), pSelf->m_apMasterSqlServers[i]->GetPort());
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		}
+}
+
+#endif
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -2118,6 +2190,13 @@ void CServer::RegisterCommands()
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
+
+#if defined (CONF_SQL)
+
+	Console()->Register("add_sqlmaster", "sssssi", CFGFLAG_SERVER, ConAddSqlMaster, this, "add a sqlmasterserver <Database> <Prefix> <User> <Password> <IP> <Port>");
+	Console()->Register("dump_sqlmaster", "", CFGFLAG_SERVER, ConDumpSqlMaster, this, "dumps all sqlmasterservers");
+
+#endif
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);

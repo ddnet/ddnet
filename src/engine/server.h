@@ -165,6 +165,11 @@ public:
 	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) = 0;
 
 	virtual int* GetIdMap(int ClientID) = 0;
+
+#if defined (CONF_SQL)
+	virtual class CSqlServer *SqlServer() = 0;
+	virtual class CSqlServer **SqlMasterServers() = 0;
+#endif
 };
 
 class IGameServer : public IInterface

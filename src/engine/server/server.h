@@ -17,6 +17,10 @@
 #include <engine/shared/econ.h>
 #include <engine/shared/netban.h>
 
+#if defined (CONF_SQL)
+	#include <game/server/score/sql_score.h>
+#endif
+
 class CSnapIDPool
 {
 	enum
@@ -75,6 +79,12 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+
+#if defined (CONF_SQL)
+	CSqlServer* m_pSqlServer;
+	CSqlServer* m_apMasterSqlServers[MAX_SQLMASTERS];
+#endif
+
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -268,6 +278,13 @@ public:
 	static void ConStopRecord(IConsole::IResult *pResult, void *pUser);
 	static void ConMapReload(IConsole::IResult *pResult, void *pUser);
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
+
+#if defined (CONF_SQL)
+	// console commands for sqlmasters
+	static void ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData);
+#endif
+
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -296,6 +313,11 @@ public:
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
 	virtual int* GetIdMap(int ClientID);
+
+#if defined (CONF_SQL)
+	CSqlServer *SqlServer() { return m_pSqlServer; }
+	CSqlServer **SqlMasterServers() { return m_apMasterSqlServers; }
+#endif
 };
 
 #endif
