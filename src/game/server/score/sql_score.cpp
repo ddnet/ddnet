@@ -14,8 +14,6 @@
 #include "../gamemodes/DDRace.h"
 #include "../save.h"
 
-static LOCK gs_SqlLock = 0;
-
 CGameContext *CSqlData::ms_pGameServer = 0;
 IServer *CSqlData::ms_pServer = 0;
 CPlayerData *CSqlData::ms_pPlayerData = 0;
@@ -36,16 +34,7 @@ CSqlScore::CSqlScore(CGameContext *pGameServer) : m_pGameServer(pGameServer),
 	CSqlData::ms_pSqlServer = SqlServer();
 	CSqlData::ms_pMasterSqlServers = SqlMasterServers();
 
-	if(gs_SqlLock == 0)
-		gs_SqlLock = lock_create();
-
 	Init();
-}
-
-CSqlScore::~CSqlScore()
-{
-	lock_wait(gs_SqlLock);
-	lock_unlock(gs_SqlLock);
 }
 
 // create tables... should be done only once
@@ -84,8 +73,6 @@ void CSqlScore::Init()
 // update stuff
 void CSqlScore::LoadScoreThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -133,10 +120,7 @@ void CSqlScore::LoadScoreThread(void *pUser)
 		// disconnect from database
 		pData->SqlServer()->Disconnect();
 	}
-
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::LoadScore(int ClientID)
@@ -151,8 +135,6 @@ void CSqlScore::LoadScore(int ClientID)
 
 void CSqlScore::SaveTeamScoreThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlTeamScoreData *pData = (CSqlTeamScoreData *)pUser;
 
 	// Connect to database
@@ -270,8 +252,6 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 		dbg_msg("SQL", "ERROR: Could not connect to SQL-Server");
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::MapVote(int ClientID, const char* MapName)
@@ -286,8 +266,6 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 
 void CSqlScore::MapVoteThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlMapData *pData = (CSqlMapData *)pUser;
 
 	// Connect to database
@@ -366,9 +344,7 @@ void CSqlScore::MapVoteThread(void *pUser)
 
 		pData->SqlServer()->Disconnect();
 	}
-
 	delete pData;
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::MapInfo(int ClientID, const char* MapName)
@@ -383,8 +359,6 @@ void CSqlScore::MapInfo(int ClientID, const char* MapName)
 
 void CSqlScore::MapInfoThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlMapData *pData = (CSqlMapData *)pUser;
 
 	// Connect to database
@@ -465,15 +439,11 @@ void CSqlScore::MapInfoThread(void *pUser)
 
 		pData->SqlServer()->Disconnect();
 	}
-
 	delete pData;
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::SaveScoreThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -532,8 +502,6 @@ void CSqlScore::SaveScoreThread(void *pUser)
 		dbg_msg("SQL", "ERROR: Could not connect to SQL-Server");
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS])
@@ -572,8 +540,6 @@ void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
 
 void CSqlScore::ShowTeamRankThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -648,14 +614,10 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 	}
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTeamTop5Thread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -747,14 +709,10 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 	}
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowRankThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -811,8 +769,6 @@ void CSqlScore::ShowRankThread(void *pUser)
 	}
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
@@ -841,8 +797,6 @@ void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
 
 void CSqlScore::ShowTop5Thread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -886,15 +840,11 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 		// disconnect from database
 		pData->SqlServer()->Disconnect();
 	}
-
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTimesThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -970,8 +920,6 @@ void CSqlScore::ShowTimesThread(void *pUser)
 		pData->SqlServer()->Disconnect();
 	}
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
@@ -1019,8 +967,6 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 
 void CSqlScore::ShowPointsThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -1070,8 +1016,6 @@ void CSqlScore::ShowPointsThread(void *pUser)
 	}
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
@@ -1088,8 +1032,6 @@ void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
 
 void CSqlScore::ShowTopPointsThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -1130,8 +1072,6 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 	}
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut)
@@ -1146,8 +1086,6 @@ void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pU
 
 void CSqlScore::RandomMapThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -1191,14 +1129,10 @@ void CSqlScore::RandomMapThread(void *pUser)
 	}
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::RandomUnfinishedMapThread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
-
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
 	// Connect to database
@@ -1246,8 +1180,6 @@ void CSqlScore::RandomUnfinishedMapThread(void *pUser)
 	}
 
 	delete pData;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::RandomMap(int ClientID, int stars)
@@ -1340,7 +1272,6 @@ void CSqlScore::SaveTeamThread(void *pUser)
 	else
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
 
-	lock_wait(gs_SqlLock);
 	// Connect to database
 	if(!Num && pData->SqlServer()->Connect())
 	{
@@ -1391,8 +1322,6 @@ void CSqlScore::SaveTeamThread(void *pUser)
 	delete pData;
 	if(SavedTeam)
 		delete SavedTeam;
-
-	lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::LoadTeam(const char* Code, int ClientID)
@@ -1418,7 +1347,6 @@ void CSqlScore::LoadTeamThread(void *pUser)
 	ClearString(Map, sizeof(Map));
 	int Num;
 
-	lock_wait(gs_SqlLock);
 	// Connect to database
 	if(pData->SqlServer()->Connect())
 	{
@@ -1532,8 +1460,6 @@ void CSqlScore::LoadTeamThread(void *pUser)
 
 	delete pData;
 	delete SavedTeam;
-
-	lock_unlock(gs_SqlLock);
 }
 
 #endif

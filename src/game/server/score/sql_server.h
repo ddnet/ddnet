@@ -34,6 +34,9 @@ public:
 	const char* GetIP() { return m_aIp; }
 	int GetPort() { return m_Port; }
 
+	void Lock() { lock_wait(m_SqlLock); }
+	void UnLock() { lock_unlock(m_SqlLock); }
+
 
 private:
 	sql::Driver *m_pDriver;
@@ -48,6 +51,8 @@ private:
 	char m_aPass[64];
 	char m_aIp[64];
 	int m_Port;
+
+	LOCK m_SqlLock;
 };
 
 #endif

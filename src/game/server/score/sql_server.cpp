@@ -20,10 +20,13 @@ CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* p
 	m_pConnection = 0;
 	m_pResults = 0;
 	m_pStatement = 0;
+
+	m_SqlLock = lock_create();
 }
 
 CSqlServer::~CSqlServer()
 {
+	Lock();
 	try
 	{
 		if (m_pResults)
@@ -36,10 +39,13 @@ CSqlServer::~CSqlServer()
 	{
 		dbg_msg("SQL", "ERROR: No SQL connection");
 	}
+	UnLock();
 }
 
 bool CSqlServer::Connect(bool CreateDatabase)
 {
+	Lock();
+
 	if (m_pDriver != NULL && m_pConnection != NULL)
 	{
 		try
@@ -54,6 +60,7 @@ bool CSqlServer::Connect(bool CreateDatabase)
 			dbg_msg("SQL", aBuf);
 
 			dbg_msg("SQL", "ERROR: SQL connection failed");
+			UnLock();
 			return false;
 		}
 		return true;
@@ -99,6 +106,7 @@ bool CSqlServer::Connect(bool CreateDatabase)
 		dbg_msg("SQL", aBuf);
 
 		dbg_msg("SQL", "ERROR: SQL connection failed");
+		UnLock();
 		return false;
 	}
 	catch (const std::exception& ex)
@@ -135,14 +143,16 @@ bool CSqlServer::Connect(bool CreateDatabase)
 		dbg_msg("SQL", "Unknown Error cause by the MySQL/C++ Connector, my advice compile server_debug and use it");
 
 		dbg_msg("SQL", "ERROR: SQL connection failed");
+		UnLock();
 		return false;
 	}
+	UnLock();
 	return false;
 }
 
 void CSqlServer::Disconnect()
 {
-
+	UnLock();
 }
 
 void CSqlServer::CreateTables()

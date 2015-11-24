@@ -14,6 +14,7 @@ class CSqlScore: public IScore
 	CGameContext *GameServer() { return m_pGameServer; }
 	IServer *Server() { return m_pServer; }
 	inline CSqlServer *SqlServer() { return m_pServer->SqlServer(); }
+	inline CSqlServer *SqlMasterServer(int i) { return m_pServer->SqlMasterServers()[i]; }
 	inline CSqlServer **SqlMasterServers() { return m_pServer->SqlMasterServers(); }
 
 	void Init();
@@ -43,7 +44,6 @@ class CSqlScore: public IScore
 public:
 
 	CSqlScore(CGameContext *pGameServer);
-	~CSqlScore();
 
 	virtual void LoadScore(int ClientID);
 	virtual void MapInfo(int ClientID, const char* MapName);
