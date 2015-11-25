@@ -2036,7 +2036,10 @@ void CServer::ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData)
 			pSelf->m_apMasterSqlServers[i] = new CSqlServer(pResult->GetString(0), pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetInteger(5));
 
 			if(g_Config.m_SvSqlMastersCreateTables)
-				pSelf->m_apMasterSqlServers[i]->CreateTables();
+			{
+				void *TablesThread = thread_init(CreateTablesThread, pSelf->m_apMasterSqlServers[i]);
+				thread_detach(TablesThread);
+			}
 
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "Added new sqlmasterserver: %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", i, pSelf->m_apMasterSqlServers[i]->GetDatabase(), pSelf->m_apMasterSqlServers[i]->GetPrefix(), pSelf->m_apMasterSqlServers[i]->GetUser(), pSelf->m_apMasterSqlServers[i]->GetPass(), pSelf->m_apMasterSqlServers[i]->GetIP(), pSelf->m_apMasterSqlServers[i]->GetPort());
@@ -2058,6 +2061,11 @@ void CServer::ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData)
 			str_format(aBuf, sizeof(aBuf), "SQL-Master %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", i, pSelf->m_apMasterSqlServers[i]->GetDatabase(), pSelf->m_apMasterSqlServers[i]->GetPrefix(), pSelf->m_apMasterSqlServers[i]->GetUser(), pSelf->m_apMasterSqlServers[i]->GetPass(), pSelf->m_apMasterSqlServers[i]->GetIP(), pSelf->m_apMasterSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
+}
+
+void CServer::CreateTablesThread(void *pData)
+{
+	((CSqlServer *)pData)->CreateTables();
 }
 
 #endif

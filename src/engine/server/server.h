@@ -283,6 +283,8 @@ public:
 	// console commands for sqlmasters
 	static void ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData);
+
+	static void CreateTablesThread(void *pData);
 #endif
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
