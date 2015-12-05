@@ -71,7 +71,7 @@ public:
 // generic implementation to provide sqlserver, gameserver and server
 struct CSqlData
 {
-	CSqlData() : m_pSqlServer(ms_pSqlServer) {}
+	CSqlData() : m_pSqlServer(ms_pSqlServer), m_ActiveMaster(-1) {}
 
 	CGameContext* GameServer() { return ms_pGameServer; }
 	IServer* Server() { return ms_pServer; }
@@ -79,23 +79,26 @@ struct CSqlData
 	const char* MapName() { return ms_pMap; }
 	CSqlServer* SqlMasterServer(int i) { return ms_pMasterSqlServers[i]; }
 	CSqlServer* SqlServer() { return m_pSqlServer; }
+	int ActiveMasterID() { return m_ActiveMaster; }
 
-	void ConnectSqlServer(bool useMasters = false)
+	void ConnectSqlServer(bool useMasters = false, int skipCount = 0)
 	{
 		if (useMasters)
 		{
 			m_pSqlServer = 0;
-			for (int i = 0; i < MAX_SQLMASTERS; i++)
+			for (int i = skipCount; i < MAX_SQLMASTERS; i++)
 			{
 				if (SqlMasterServer(i) && SqlMasterServer(i)->Connect())
 				{
 					m_pSqlServer = SqlMasterServer(i);
+					m_ActiveMaster = 0;
 					return;
 				}
 				if (SqlMasterServer(i))
 					dbg_msg("SQL", "Warning: Unable to connect to sqlmaster %d ('%s'), trying next...", i, SqlMasterServer(i)->GetIP());
 			}
 			dbg_msg("SQL", "ERROR: No sqlmasterservers available");
+			m_ActiveMaster = -1;
 		}
 		else if (!SqlServer()->Connect())
 			m_pSqlServer = 0;
@@ -109,6 +112,7 @@ struct CSqlData
 	static CSqlServer **ms_pMasterSqlServers;
 
 	CSqlServer *m_pSqlServer;
+	int m_ActiveMaster;
 };
 
 struct CSqlMapData : CSqlData

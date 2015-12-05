@@ -137,8 +137,17 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 {
 	CSqlTeamScoreData *pData = (CSqlTeamScoreData *)pUser;
 
+	for (int skipCount = 0; skipCount < MAX_SQLMASTERS; skipCount++)
+	{
+
 	// Connect to database
-	pData->ConnectSqlServer(g_Config.m_SvUseSQLMasters);
+	pData->ConnectSqlServer(g_Config.m_SvUseSQLMasters, skipCount);
+
+	if (pData->ActiveMasterID() == -1)
+	{
+		dbg_msg("SQL", "ERROR: Could not connect to ANY SQLMASTER-Server");
+		return;
+	}
 
 	if(pData->SqlServer())
 	{
@@ -247,9 +256,13 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 
 		// disconnect from database
 		pData->SqlServer()->Disconnect();
+
+		// no errors and everything updated --> break fallback loop
+		break;
 	}
 	else
 		dbg_msg("SQL", "ERROR: Could not connect to SQL-Server");
+	}
 
 	delete pData;
 }
@@ -446,8 +459,17 @@ void CSqlScore::SaveScoreThread(void *pUser)
 {
 	CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
+	for (int skipCount = 0; skipCount < MAX_SQLMASTERS; skipCount++)
+	{
+
 	// Connect to database
-	pData->ConnectSqlServer(g_Config.m_SvUseSQLMasters);
+	pData->ConnectSqlServer(g_Config.m_SvUseSQLMasters, skipCount);
+
+	if (pData->ActiveMasterID() == -1)
+	{
+		dbg_msg("SQL", "ERROR: Could not connect to ANY SQLMASTER-Server");
+		return;
+	}
 
 	if(pData->SqlServer())
 	{
@@ -497,9 +519,13 @@ void CSqlScore::SaveScoreThread(void *pUser)
 
 		// disconnect from database
 		pData->SqlServer()->Disconnect();
+
+		// no errors and everything updated --> break fallback loop
+		break;
 	}
 	else
 		dbg_msg("SQL", "ERROR: Could not connect to SQL-Server");
+	}
 
 	delete pData;
 }
