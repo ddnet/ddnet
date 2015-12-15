@@ -73,7 +73,7 @@ int main(int argc, const char **argv)
 			continue;
 		}
 
-		if(Len < sizeof(".txt") || str_comp(argv[i] + Len - sizeof(".map"), ".map") != 0)
+		if(Len < sizeof(".map") || str_comp(argv[i] + Len - sizeof(".map"), ".map") != 0)
 		{
 			dbg_msg("map_details", "can't process non-map file '%s'", argv[i]);
 			continue;
@@ -81,7 +81,7 @@ int main(int argc, const char **argv)
 
 		str_copy(aMapDetails, argv[i], sizeof(aMapDetails));
 		aMapDetails[Len - sizeof(".map")] = 0;
-		str_append(aMapDetails, ".txt", sizeof(aMapDetails));
+		str_append(aMapDetails, ".details.txt", sizeof(aMapDetails));
 		dbg_msg("map_details", "processing '%s'", argv[i]);
 		Process(pStorage, argv[i], aMapDetails);
 	}
