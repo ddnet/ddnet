@@ -18,7 +18,8 @@
 #include <engine/shared/netban.h>
 
 #if defined (CONF_SQL)
-	#include <game/server/score/sql_score.h>
+	#include "sql_connector.h"
+	#include "sql_server.h"
 #endif
 
 class CSnapIDPool
@@ -81,8 +82,8 @@ class CServer : public IServer
 	class IStorage *m_pStorage;
 
 #if defined (CONF_SQL)
-	CSqlServer* m_pSqlServer;
-	CSqlServer* m_apMasterSqlServers[MAX_SQLMASTERS];
+	CSqlServer* m_apSqlReadServers[MAX_SQLSERVERS];
+	CSqlServer* m_apSqlWriteServers[MAX_SQLSERVERS];;
 #endif
 
 public:
@@ -281,8 +282,8 @@ public:
 
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
-	static void ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData);
-	static void ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
 
 	static void CreateTablesThread(void *pData);
 #endif
@@ -316,10 +317,6 @@ public:
 
 	virtual int* GetIdMap(int ClientID);
 
-#if defined (CONF_SQL)
-	CSqlServer *SqlServer() { return m_pSqlServer; }
-	CSqlServer **SqlMasterServers() { return m_apMasterSqlServers; }
-#endif
 };
 
 #endif

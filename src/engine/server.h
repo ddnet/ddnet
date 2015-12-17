@@ -166,10 +166,6 @@ public:
 
 	virtual int* GetIdMap(int ClientID) = 0;
 
-#if defined (CONF_SQL)
-	virtual class CSqlServer *SqlServer() = 0;
-	virtual class CSqlServer **SqlMasterServers() = 0;
-#endif
 };
 
 class IGameServer : public IInterface

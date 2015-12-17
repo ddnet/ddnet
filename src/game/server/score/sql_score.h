@@ -5,22 +5,19 @@
 #define GAME_SERVER_SQLSCORE_H
 
 #include <engine/console.h>
+#include <engine/server/sql_connector.h>
 
-#include "sql_server.h"
 #include "../score.h"
 
 class CSqlScore: public IScore
 {
 	CGameContext *GameServer() { return m_pGameServer; }
 	IServer *Server() { return m_pServer; }
-	inline CSqlServer *SqlServer() { return m_pServer->SqlServer(); }
-	inline CSqlServer *SqlMasterServer(int i) { return m_pServer->SqlMasterServers()[i]; }
-	inline CSqlServer **SqlMasterServers() { return m_pServer->SqlMasterServers(); }
-
-	void Init();
 
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
+
+	void Init();
 
 	char m_aMap[64];
 
@@ -68,51 +65,18 @@ public:
 	virtual void LoadTeam(const char* Code, int ClientID);
 };
 
-// generic implementation to provide sqlserver, gameserver and server
+// generic implementation to provide gameserver and server
 struct CSqlData
 {
-	CSqlData() : m_pSqlServer(ms_pSqlServer), m_ActiveMaster(-1) {}
-
 	CGameContext* GameServer() { return ms_pGameServer; }
 	IServer* Server() { return ms_pServer; }
 	CPlayerData* PlayerData(int ID) { return &ms_pPlayerData[ID]; }
 	const char* MapName() { return ms_pMap; }
-	CSqlServer* SqlMasterServer(int i) { return ms_pMasterSqlServers[i]; }
-	CSqlServer* SqlServer() { return m_pSqlServer; }
-	int ActiveMasterID() { return m_ActiveMaster; }
-
-	void ConnectSqlServer(bool useMasters = false, int skipCount = 0)
-	{
-		if (useMasters)
-		{
-			m_pSqlServer = 0;
-			for (int i = skipCount; i < MAX_SQLMASTERS; i++)
-			{
-				if (SqlMasterServer(i) && SqlMasterServer(i)->Connect())
-				{
-					m_pSqlServer = SqlMasterServer(i);
-					m_ActiveMaster = 0;
-					return;
-				}
-				if (SqlMasterServer(i))
-					dbg_msg("SQL", "Warning: Unable to connect to sqlmaster %d ('%s'), trying next...", i, SqlMasterServer(i)->GetIP());
-			}
-			dbg_msg("SQL", "ERROR: No sqlmasterservers available");
-			m_ActiveMaster = -1;
-		}
-		else if (!SqlServer()->Connect())
-			m_pSqlServer = 0;
-	}
 
 	static CGameContext *ms_pGameServer;
 	static IServer *ms_pServer;
 	static CPlayerData *ms_pPlayerData;
 	static const char *ms_pMap;
-	static CSqlServer *ms_pSqlServer;
-	static CSqlServer **ms_pMasterSqlServers;
-
-	CSqlServer *m_pSqlServer;
-	int m_ActiveMaster;
 };
 
 struct CSqlMapData : CSqlData

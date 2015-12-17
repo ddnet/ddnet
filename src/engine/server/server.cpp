@@ -42,6 +42,11 @@
 	#include <windows.h>
 #endif
 
+#ifdef CONF_SQL
+CSqlServer** CSqlConnector::ms_ppSqlReadServers = 0;
+CSqlServer** CSqlConnector::ms_ppSqlWriteServers = 0;
+#endif
+
 static const char *StrLtrim(const char *pStr)
 {
 	while(*pStr)
@@ -302,10 +307,6 @@ CServer::CServer()
 
 	m_pGameServer = 0;
 
-#if defined (CONF_SQL)
-	m_pSqlServer = 0;
-#endif
-
 	m_CurrentGameTick = 0;
 	m_RunServer = 1;
 
@@ -326,8 +327,14 @@ CServer::CServer()
 	m_ServerInfoHighLoad = false;
 
 #if defined (CONF_SQL)
-	for (int i = 0; i < MAX_SQLMASTERS; i++)
-		m_apMasterSqlServers[i] = 0;
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		m_apSqlReadServers[i] = 0;
+		m_apSqlWriteServers[i] = 0;
+	}
+
+	CSqlConnector::SetReadServers(m_apSqlReadServers);
+	CSqlConnector::SetWriteServers(m_apSqlWriteServers);
 #endif
 
 	Init();
@@ -1659,14 +1666,6 @@ int CServer::Run()
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
-#if defined (CONF_SQL)
-	m_pSqlServer = new CSqlServer(g_Config.m_SvSqlDatabase, g_Config.m_SvSqlPrefix, g_Config.m_SvSqlUser, g_Config.m_SvSqlPw, g_Config.m_SvSqlIp, g_Config.m_SvSqlPort);
-
-	// create tables
-	if(g_Config.m_SvSqlCreateTables)
-		m_pSqlServer->CreateTables();
-#endif
-
 	GameServer()->OnInit();
 	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -1834,12 +1833,14 @@ int CServer::Run()
 		mem_free(m_pCurrentMapData);
 
 #if defined (CONF_SQL)
-		if (m_pSqlServer)
-			delete m_pSqlServer;
+		for (int i = 0; i < MAX_SQLSERVERS; i++)
+		{
+			if (m_apSqlReadServers[i])
+				delete m_apSqlReadServers[i];
 
-		for (int i = 0; i < MAX_SQLMASTERS; i++)
-			if (m_apMasterSqlServers[i])
-				delete m_apMasterSqlServers[i];
+			if (m_apSqlWriteServers[i])
+				delete m_apSqlWriteServers[i];
+		}
 #endif
 
 	return 0;
@@ -2019,30 +2020,34 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 
 #if defined (CONF_SQL)
 
-void CServer::ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData)
+void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
 
-	if (pResult->NumArguments() != 6)
+	if (pResult->NumArguments() != 7)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "6 arguments are required");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "7 arguments are required");
 		return;
 	}
 
-	for (int i = 0; i < MAX_SQLMASTERS; i++)
-	{
-		if (!pSelf->m_apMasterSqlServers[i])
-		{
-			pSelf->m_apMasterSqlServers[i] = new CSqlServer(pResult->GetString(0), pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetInteger(5));
+	bool ReadOnly = !pResult->GetInteger(0);
 
-			if(g_Config.m_SvSqlMastersCreateTables)
+	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (!apSqlServers[i])
+		{
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6));
+
+			if(g_Config.m_SvSqlCreateTables == 3 || (g_Config.m_SvSqlCreateTables == 1 && ReadOnly) || (g_Config.m_SvSqlCreateTables == 2 && !ReadOnly))
 			{
-				void *TablesThread = thread_init(CreateTablesThread, pSelf->m_apMasterSqlServers[i]);
+				void *TablesThread = thread_init(CreateTablesThread, apSqlServers[i]);
 				thread_detach(TablesThread);
 			}
 
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Added new sqlmasterserver: %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", i, pSelf->m_apMasterSqlServers[i]->GetDatabase(), pSelf->m_apMasterSqlServers[i]->GetPrefix(), pSelf->m_apMasterSqlServers[i]->GetUser(), pSelf->m_apMasterSqlServers[i]->GetPass(), pSelf->m_apMasterSqlServers[i]->GetIP(), pSelf->m_apMasterSqlServers[i]->GetPort());
+			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 			return;
 		}
@@ -2050,15 +2055,19 @@ void CServer::ConAddSqlMaster(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlmaster: limit of sqlmasters reached");
 }
 
-void CServer::ConDumpSqlMaster(IConsole::IResult *pResult, void *pUserData)
+void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
 
-	for (int i = 0; i < MAX_SQLMASTERS; i++)
-		if (pSelf->m_apMasterSqlServers[i])
+	bool ReadOnly = !pResult->GetInteger(0);
+
+	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+		if (apSqlServers[i])
 		{
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "SQL-Master %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", i, pSelf->m_apMasterSqlServers[i]->GetDatabase(), pSelf->m_apMasterSqlServers[i]->GetPrefix(), pSelf->m_apMasterSqlServers[i]->GetUser(), pSelf->m_apMasterSqlServers[i]->GetPass(), pSelf->m_apMasterSqlServers[i]->GetIP(), pSelf->m_apMasterSqlServers[i]->GetPort());
+			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
 }
@@ -2201,8 +2210,8 @@ void CServer::RegisterCommands()
 
 #if defined (CONF_SQL)
 
-	Console()->Register("add_sqlmaster", "sssssi", CFGFLAG_SERVER, ConAddSqlMaster, this, "add a sqlmasterserver <Database> <Prefix> <User> <Password> <IP> <Port>");
-	Console()->Register("dump_sqlmaster", "", CFGFLAG_SERVER, ConDumpSqlMaster, this, "dumps all sqlmasterservers");
+	Console()->Register("add_sqlserver", "isssssi", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver <read = 0, write = 1> <Database> <Prefix> <User> <Password> <IP> <Port>");
+	Console()->Register("dump_sqlservers", "i", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = 0, writeservers = 1");
 
 #endif
 

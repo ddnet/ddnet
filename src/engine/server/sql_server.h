@@ -1,16 +1,11 @@
-#ifndef GAME_SERVER_SQL_SERVER_H
-#define GAME_SERVER_SQL_SERVER_H
+#ifndef ENGINE_SERVER_SQL_SERVER_H
+#define ENGINE_SERVER_SQL_SERVER_H
 
 #include <mysql_connection.h>
 
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
 #include <cppconn/statement.h>
-
-enum
-{
-	MAX_SQLMASTERS=10
-};
 
 class CSqlServer
 {
