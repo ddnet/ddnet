@@ -2030,7 +2030,16 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	bool ReadOnly = !pResult->GetInteger(0);
+	bool ReadOnly;
+	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
+		ReadOnly = false;
+	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
+		ReadOnly = true;
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
 
 	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
 
@@ -2059,7 +2068,16 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
 
-	bool ReadOnly = !pResult->GetInteger(0);
+	bool ReadOnly;
+	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
+		ReadOnly = false;
+	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
+		ReadOnly = true;
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
 
 	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
 
@@ -2210,8 +2228,8 @@ void CServer::RegisterCommands()
 
 #if defined (CONF_SQL)
 
-	Console()->Register("add_sqlserver", "isssssi", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver <read = 0, write = 1> <Database> <Prefix> <User> <Password> <IP> <Port>");
-	Console()->Register("dump_sqlservers", "i", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = 0, writeservers = 1");
+	Console()->Register("add_sqlserver", "ssssssi", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver <read = r, write = w> <Database> <Prefix> <User> <Password> <IP> <Port>");
+	Console()->Register("dump_sqlservers", "i", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 
 #endif
 
