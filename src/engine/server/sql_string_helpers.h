@@ -1,6 +1,8 @@
 #ifndef ENGINE_SERVER_SQL_STRING_HELPERS_H
 #define ENGINE_SERVER_SQL_STRING_HELPERS_H
 
+#include <cmath>
+#include <cstring>
 #include <base/system.h>
 
 void FuzzyString(char *pString)

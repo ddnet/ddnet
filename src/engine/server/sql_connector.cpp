@@ -31,8 +31,8 @@ bool CSqlConnector::ConnectSqlServer(bool ReadOnly)
 			m_pSqlServer = SqlServer(i, ReadOnly);
 			return true;
 		}
-		if (SqlServer())
-			dbg_msg("SQL", "Warning: Unable to connect to Sql%sServer %d ('%s'), trying next...", ReadOnly ? "read" : "write", i, SqlServer()->GetIP());
+		if (SqlServer(i, ReadOnly))
+			dbg_msg("SQL", "Warning: Unable to connect to Sql%sServer %d ('%s'), trying next...", ReadOnly ? "read" : "write", i, SqlServer(i, ReadOnly)->GetIP());
 	}
 	dbg_msg("SQL", "ERROR: No Sql%sServers available", ReadOnly ? "Read" : "Write");
 	m_pSqlServer = 0;
