@@ -2024,9 +2024,9 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
 
-	if (pResult->NumArguments() != 7)
+	if (pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "7 arguments are required");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "7 or 8 arguments are required");
 		return;
 	}
 
@@ -2041,15 +2041,17 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : false;
+
 	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
 
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
 		if (!apSqlServers[i])
 		{
-			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6));
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), SetUpDb);
 
-			if(g_Config.m_SvSqlCreateTables == 3 || (g_Config.m_SvSqlCreateTables == 1 && ReadOnly) || (g_Config.m_SvSqlCreateTables == 2 && !ReadOnly))
+			if(SetUpDb)
 			{
 				void *TablesThread = thread_init(CreateTablesThread, apSqlServers[i]);
 				thread_detach(TablesThread);
@@ -2228,7 +2230,7 @@ void CServer::RegisterCommands()
 
 #if defined (CONF_SQL)
 
-	Console()->Register("add_sqlserver", "ssssssi", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver <read = r, write = w> <Database> <Prefix> <User> <Password> <IP> <Port>");
+	Console()->Register("add_sqlserver", "ssssssi?i", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver <read = r, write = w> <Database> <Prefix> <User> <Password> <IP> <Port> [SetUpDatabase = 0]");
 	Console()->Register("dump_sqlservers", "i", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 
 #endif

@@ -10,10 +10,10 @@
 class CSqlServer
 {
 public:
-	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port);
+	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool SetUpDb = false);
 	~CSqlServer();
 
-	bool Connect(bool CreateDatabase = false);
+	bool Connect();
 	void Disconnect();
 	void CreateTables();
 
@@ -46,6 +46,8 @@ private:
 	char m_aPass[64];
 	char m_aIp[64];
 	int m_Port;
+
+	bool m_SetUpDB;
 
 	LOCK m_SqlLock;
 };

@@ -7,8 +7,9 @@
 #include "sql_server.h"
 
 
-CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port) :
-		m_Port(Port)
+CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool SetUpDb) :
+		m_Port(Port),
+		m_SetUpDB(SetUpDb)
 {
 	str_copy(m_aDatabase, pDatabase, sizeof(m_aDatabase));
 	str_copy(m_aPrefix, pPrefix, sizeof(m_aPrefix));
@@ -20,7 +21,7 @@ CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* p
 	m_pConnection = 0;
 	m_pResults = 0;
 	m_pStatement = 0;
-
+	
 	m_SqlLock = lock_create();
 }
 
@@ -42,7 +43,7 @@ CSqlServer::~CSqlServer()
 	UnLock();
 }
 
-bool CSqlServer::Connect(bool CreateDatabase)
+bool CSqlServer::Connect()
 {
 	Lock();
 
@@ -86,7 +87,7 @@ bool CSqlServer::Connect(bool CreateDatabase)
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
 
-		if (CreateDatabase)
+		if (m_SetUpDB)
 		{
 			char aBuf[128];
 			// create database
@@ -157,7 +158,7 @@ void CSqlServer::Disconnect()
 
 void CSqlServer::CreateTables()
 {
-	if (!Connect(true))
+	if (!Connect())
 		return;
 
 	try
