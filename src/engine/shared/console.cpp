@@ -360,7 +360,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 					if(ParseArgs(&Result, pCommand->m_pParams))
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
+						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pUsage);
 						Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 					}
 					else if(m_StoreCommands && pCommand->m_Flags&CFGFLAG_STORE)
@@ -763,14 +763,14 @@ CConsole::CConsole(int FlagMask)
 	m_pStorage = 0;
 
 	// register some basic commands
-	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text");
-	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
+	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", "<text>");
+	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", "<file>");
 
-	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
-	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
+	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value", "<config-option> <value 1> <value 2>");
+	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress", "<config-option> <value 1> <value 2>");
 
-	Register("access_level", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
-	Register("access_status", "i", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
+	Register("access_level", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)", "<command> <accesslevel>");
+	Register("access_status", "i", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3", "<accesslevel>");
 	Register("cmdlist", "", CFGFLAG_SERVER|CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
 
 	// TODO: this should disappear
@@ -846,7 +846,7 @@ void CConsole::AddCommandSorted(CCommand *pCommand)
 }
 
 void CConsole::Register(const char *pName, const char *pParams,
-	int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp)
+	int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp, const char *pUsage)
 {
 	CCommand *pCommand = FindCommand(pName, Flags);
 	bool DoAdd = false;
@@ -861,6 +861,7 @@ void CConsole::Register(const char *pName, const char *pParams,
 	pCommand->m_pName = pName;
 	pCommand->m_pHelp = pHelp;
 	pCommand->m_pParams = pParams;
+	pCommand->m_pUsage = pUsage;
 
 	pCommand->m_Flags = Flags;
 	pCommand->m_Temp = false;
@@ -872,7 +873,7 @@ void CConsole::Register(const char *pName, const char *pParams,
 		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
 }
 
-void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, const char *pHelp)
+void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, const char *pHelp, const char* pUsage)
 {
 	CCommand *pCommand;
 	if(m_pRecycleList)
@@ -881,6 +882,9 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, c
 		str_copy(const_cast<char *>(pCommand->m_pName), pName, TEMPCMD_NAME_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pHelp), pHelp, TEMPCMD_HELP_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pParams), pParams, TEMPCMD_PARAMS_LENGTH);
+
+		if (pUsage)
+			str_copy(const_cast<char *>(pCommand->m_pUsage), pParams, TEMPCMD_USAGE_LENGTH);
 
 		m_pRecycleList = m_pRecycleList->m_pNext;
 	}
@@ -896,6 +900,13 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, c
 		pMem = static_cast<char *>(m_TempCommands.Allocate(TEMPCMD_PARAMS_LENGTH));
 		str_copy(pMem, pParams, TEMPCMD_PARAMS_LENGTH);
 		pCommand->m_pParams = pMem;
+
+		if (pUsage)
+		{
+			pMem = static_cast<char *>(m_TempCommands.Allocate(TEMPCMD_USAGE_LENGTH));
+			str_copy(pMem, pParams, TEMPCMD_USAGE_LENGTH);
+			pCommand->m_pParams = pMem;
+		}
 	}
 
 	pCommand->m_pfnCallback = 0;

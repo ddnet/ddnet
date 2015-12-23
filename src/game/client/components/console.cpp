@@ -48,6 +48,7 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_ReverseTAB = false;
 
 	m_IsCommand = false;
+	m_HasUsage = false;
 }
 
 void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
@@ -208,10 +209,24 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				m_IsCommand = true;
 				str_copy(m_aCommandName, pCommand->m_pName, IConsole::TEMPCMD_NAME_LENGTH);
 				str_copy(m_aCommandHelp, pCommand->m_pHelp, IConsole::TEMPCMD_HELP_LENGTH);
-				str_copy(m_aCommandParams, pCommand->m_pParams, IConsole::TEMPCMD_PARAMS_LENGTH);
+
+				if (pCommand->m_pUsage)
+				{
+					str_copy(m_aCommandParams, pCommand->m_pParams, IConsole::TEMPCMD_PARAMS_LENGTH);
+					str_copy(m_aCommandUsage, pCommand->m_pUsage, IConsole::TEMPCMD_USAGE_LENGTH);
+					m_HasUsage = true;
+				}
+				else
+				{
+					str_copy(m_aCommandParams, pCommand->m_pParams, IConsole::TEMPCMD_PARAMS_LENGTH + IConsole::TEMPCMD_USAGE_LENGTH);
+					m_HasUsage = false;
+				}
 			}
 			else
+			{
 				m_IsCommand = false;
+				m_HasUsage = false;
+			}
 		}
 	}
 }
@@ -489,7 +504,11 @@ void CGameConsole::OnRender()
 						str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_aCommandHelp);
 						TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 						TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1);
-						str_format(aBuf, sizeof(aBuf), "Syntax: %s %s", pConsole->m_aCommandName, pConsole->m_aCommandParams);
+						if (pConsole->m_HasUsage)
+							str_format(aBuf, sizeof(aBuf), "Usage: %s %s (%s)", pConsole->m_aCommandName, pConsole->m_aCommandUsage, pConsole->m_aCommandParams);
+						else
+							str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pConsole->m_aCommandName, pConsole->m_aCommandParams);
+
 						TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 					}
 				}

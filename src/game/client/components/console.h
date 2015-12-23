@@ -44,9 +44,11 @@ class CGameConsole : public CComponent
 		bool m_ReverseTAB;
 
 		bool m_IsCommand;
+		bool m_HasUsage;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
 		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
 		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH];
+		char m_aCommandUsage[IConsole::TEMPCMD_USAGE_LENGTH];
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
