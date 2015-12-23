@@ -260,7 +260,6 @@ function build(settings)
 			settings.link.libs:Add("crypto")
 		else
 			settings.link.libs:Add("pthread")
-			settings.link.libs:Add("rt")
 		end
 
 		if platform == "solaris" then
