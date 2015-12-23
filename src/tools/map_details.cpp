@@ -17,14 +17,14 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pMapDetailsNa
 	for(int i = Start; i < Start + Num; i++)
 	{
 		int ItemID;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Map.GetItem(i, 0, &ItemID);
+		CMapItemInfo *pItem = (CMapItemInfo *)Map.GetItem(i, 0, &ItemID);
 		if(!pItem || ItemID != 0)
 			continue;
 
 		IOHANDLE MapDetails = pStorage->OpenFile(pMapDetailsName, IOFLAG_WRITE, IStorage::TYPE_ALL);
 		if(!MapDetails)
 		{
-			dbg_msg("map_details", "error opening config for writing '%s'", pMapDetailsName);
+			dbg_msg("map_details", "error opening file for writing '%s'", pMapDetailsName);
 			return;
 		}
 
