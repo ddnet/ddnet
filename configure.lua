@@ -364,6 +364,8 @@ function OptCCompiler(name, default_driver, default_c, default_cxx, desc)
 				option.driver = "cl"
 			elseif ExecuteSilent("g++ -v") == 0 then
 				option.driver = "gcc"
+			elseif ExecuteSilent("clang++ -v") == 0 then
+				option.driver = "clang"
 			else
 				error("no c/c++ compiler found")
 			end
