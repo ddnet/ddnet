@@ -106,7 +106,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_AckGameTick[2];
 	int m_CurrentRecvTick[2];
 	int m_RconAuthed[2];
-	char m_RconPassword[32];
+	char m_RconPassword[64];
 	int m_UseTempRconCommands;
 
 	// version-checking

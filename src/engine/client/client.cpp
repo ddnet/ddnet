@@ -434,7 +434,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH);
 	Msg.AddString(pName, 32);
-	Msg.AddString(pPassword, 32);
+	Msg.AddString(pPassword, 64);
 	Msg.AddInt(1);
 	SendMsgEx(&Msg, MSGFLAG_VITAL);
 }
@@ -447,7 +447,7 @@ void CClient::Rcon(const char *pCmd)
 	{ // Against IP spoofing on DDNet servers
 		CMsgPacker Msg(NETMSG_RCON_AUTH);
 		Msg.AddString("", 32);
-		Msg.AddString(m_RconPassword, 32);
+		Msg.AddString(m_RconPassword, 64);
 		Msg.AddInt(1);
 		SendMsgEx(&Msg, MSGFLAG_VITAL);
 	}
