@@ -207,7 +207,11 @@ char CConsole::NextParam(const char *&pFormat)
 		if (*pFormat == '[')
 		{
 			// skip bracket contents
-			for (; *pFormat && *pFormat != ']'; pFormat++);
+			for (; *pFormat != ']'; pFormat++)
+			{
+				if (!*pFormat)
+					return *pFormat;
+			}
 
 			// skip ']'
 			pFormat++;
