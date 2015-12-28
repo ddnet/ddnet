@@ -72,9 +72,18 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 		const char *pArg = pResult->GetString(0);
 		const IConsole::CCommandInfo *pCmdInfo =
 				pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_SERVER, false);
-		if (pCmdInfo && pCmdInfo->m_pHelp)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help",
-					pCmdInfo->m_pHelp);
+		if (pCmdInfo)
+		{
+			if (pCmdInfo->m_pParams)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pCmdInfo->m_pName, pCmdInfo->m_pParams);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help", aBuf);
+			}
+
+			if (pCmdInfo->m_pHelp)
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help", pCmdInfo->m_pHelp);
+		}
 		else
 			pSelf->Console()->Print(
 					IConsole::OUTPUT_LEVEL_STANDARD,

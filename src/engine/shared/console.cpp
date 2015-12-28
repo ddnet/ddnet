@@ -88,7 +88,7 @@ int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
 
 int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 {
-	char Command;
+	char Command = *pFormat;
 	char *pStr;
 	int Optional = 0;
 	int Error = 0;
@@ -99,10 +99,6 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 
 	while(1)
 	{
-		// fetch command
-		Command = *pFormat;
-		pFormat++;
-
 		if(!Command)
 			break;
 
@@ -120,14 +116,14 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					break;
 				}
 
-				while(*(pFormat - 1))
+				while(Command)
 				{
-					if(*(pFormat - 1) == 'v')
+					if(Command == 'v')
 					{
 						pResult->SetVictim(CResult::VICTIM_ME);
 						break;
 					}
-					pFormat++;
+					Command = NextParam(pFormat);
 				}
 				break;
 			}
@@ -170,7 +166,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				char* pVictim = 0;
 
 				if (Command != 'v')
-				pResult->AddArgument(pStr);
+					pResult->AddArgument(pStr);
 				else
 					pVictim = pStr;
 
@@ -195,9 +191,33 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pResult->SetVictim(pVictim);
 			}
 		}
+		// fetch next command
+		Command = NextParam(pFormat);
 	}
 
 	return Error;
+}
+
+char CConsole::NextParam(const char *&pFormat)
+{
+	if (*pFormat)
+	{
+		pFormat++;
+
+		if (*pFormat == '[')
+		{
+			// skip bracket contents
+			for (; *pFormat && *pFormat != ']'; pFormat++);
+
+			// skip ']'
+			pFormat++;
+
+			// skip space if there is one
+			if (*pFormat == ' ')
+				pFormat++;
+		}
+	}
+	return *pFormat;
 }
 
 int CConsole::RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData)
@@ -360,7 +380,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 					if(ParseArgs(&Result, pCommand->m_pParams))
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pUsage);
+						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
 						Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 					}
 					else if(m_StoreCommands && pCommand->m_Flags&CFGFLAG_STORE)
@@ -763,14 +783,14 @@ CConsole::CConsole(int FlagMask)
 	m_pStorage = 0;
 
 	// register some basic commands
-	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", "<text>");
-	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", "<file>");
+	Register("echo", "r[text]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text");
+	Register("exec", "r[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
 
-	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value", "<config-option> <value 1> <value 2>");
-	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress", "<config-option> <value 1> <value 2>");
+	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
+	Register("+toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
 
-	Register("access_level", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)", "<command> <accesslevel>");
-	Register("access_status", "i", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3", "<accesslevel>");
+	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
+	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
 	Register("cmdlist", "", CFGFLAG_SERVER|CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
 
 	// TODO: this should disappear
@@ -846,7 +866,7 @@ void CConsole::AddCommandSorted(CCommand *pCommand)
 }
 
 void CConsole::Register(const char *pName, const char *pParams,
-	int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp, const char *pUsage)
+	int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp)
 {
 	CCommand *pCommand = FindCommand(pName, Flags);
 	bool DoAdd = false;
@@ -861,7 +881,6 @@ void CConsole::Register(const char *pName, const char *pParams,
 	pCommand->m_pName = pName;
 	pCommand->m_pHelp = pHelp;
 	pCommand->m_pParams = pParams;
-	pCommand->m_pUsage = pUsage;
 
 	pCommand->m_Flags = Flags;
 	pCommand->m_Temp = false;
@@ -873,7 +892,7 @@ void CConsole::Register(const char *pName, const char *pParams,
 		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
 }
 
-void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, const char *pHelp, const char* pUsage)
+void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, const char *pHelp)
 {
 	CCommand *pCommand;
 	if(m_pRecycleList)
@@ -882,9 +901,6 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, c
 		str_copy(const_cast<char *>(pCommand->m_pName), pName, TEMPCMD_NAME_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pHelp), pHelp, TEMPCMD_HELP_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pParams), pParams, TEMPCMD_PARAMS_LENGTH);
-
-		if (pUsage)
-			str_copy(const_cast<char *>(pCommand->m_pUsage), pParams, TEMPCMD_USAGE_LENGTH);
 
 		m_pRecycleList = m_pRecycleList->m_pNext;
 	}
@@ -900,13 +916,6 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, c
 		pMem = static_cast<char *>(m_TempCommands.Allocate(TEMPCMD_PARAMS_LENGTH));
 		str_copy(pMem, pParams, TEMPCMD_PARAMS_LENGTH);
 		pCommand->m_pParams = pMem;
-
-		if (pUsage)
-		{
-			pMem = static_cast<char *>(m_TempCommands.Allocate(TEMPCMD_USAGE_LENGTH));
-			str_copy(pMem, pParams, TEMPCMD_USAGE_LENGTH);
-			pCommand->m_pParams = pMem;
-		}
 	}
 
 	pCommand->m_pfnCallback = 0;

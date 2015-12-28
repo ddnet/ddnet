@@ -179,8 +179,8 @@ void CVoting::OnReset()
 
 void CVoting::OnConsoleInit()
 {
-	Console()->Register("callvote", "ss?r", CFGFLAG_CLIENT, ConCallvote, this, "Call vote", "<name> <command> [reason]");
-	Console()->Register("vote", "r", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no", "<'yes'|'no'>");
+	Console()->Register("callvote", "s[name] s[command] ?r[reason]", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
+	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no");
 }
 
 void CVoting::OnMessage(int MsgType, void *pRawMsg)

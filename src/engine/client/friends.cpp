@@ -47,14 +47,14 @@ void CFriends::Init(bool Foes)
 	{
 		if(Foes)
 		{
-			pConsole->Register("add_foe", "s?s", CFGFLAG_CLIENT, ConAddFriend, this, "Add a foe", "<name> [clan]");
-			pConsole->Register("remove_foe", "s?s", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a foe", "<name> [clan]");
+			pConsole->Register("add_foe", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddFriend, this, "Add a foe");
+			pConsole->Register("remove_foe", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a foe");
 			pConsole->Register("foes", "", CFGFLAG_CLIENT, ConFriends, this, "List foes");
 		}
 		else
 		{
-			pConsole->Register("add_friend", "s?s", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend", "<name> [clan]");
-			pConsole->Register("remove_friend", "s?s", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend", "<name> [clan]");
+			pConsole->Register("add_friend", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
+			pConsole->Register("remove_friend", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
 			pConsole->Register("friends", "", CFGFLAG_CLIENT, ConFriends, this, "List friends");
 		}
 	}
