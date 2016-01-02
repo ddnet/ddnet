@@ -2547,6 +2547,13 @@ void secure_random_fill(void *bytes, size_t length)
 #endif
 }
 
+int secure_rand()
+{
+	unsigned int i;
+	secure_random_fill(&i, sizeof(i));
+	return (int)(i%RAND_MAX);
+}
+
 #if defined(__cplusplus)
 }
 #endif

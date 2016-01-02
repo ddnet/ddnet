@@ -2582,10 +2582,10 @@ void CClient::Run()
 		}
 		for(int i = 0; i < 3; i++)
 		{
-			BindAddr.port = (rand() % 64511) + 1024;
+			BindAddr.port = (secure_rand() % 64511) + 1024;
 			while(!m_NetClient[i].Open(BindAddr, 0))
 			{
-				BindAddr.port = (rand() % 64511) + 1024;
+				BindAddr.port = (secure_rand() % 64511) + 1024;
 			}
 		}
 	}
@@ -3254,6 +3254,12 @@ int main(int argc, const char **argv) // ignore_convention
 #if !defined(CONF_PLATFORM_MACOSX)
 	dbg_enable_threaded();
 #endif
+
+	if(secure_random_init() != 0)
+	{
+		dbg_msg("secure", "could not initialize secure RNG");
+		return -1;
+	}
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
