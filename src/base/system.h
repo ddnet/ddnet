@@ -1383,6 +1383,12 @@ int secure_random_init();
 */
 void secure_random_fill(void *bytes, size_t length);
 
+/*
+	Function: secure_rand
+		Returns random int (replacement for rand()).
+*/
+int secure_rand();
+
 #ifdef __cplusplus
 }
 #endif

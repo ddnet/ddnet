@@ -2547,6 +2547,13 @@ void secure_random_fill(void *bytes, size_t length)
 #endif
 }
 
+int secure_rand()
+{
+	int i;
+	secure_random_fill(&i, sizeof(i));
+	return i;
+}
+
 #if defined(__cplusplus)
 }
 #endif
