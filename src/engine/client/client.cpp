@@ -2582,11 +2582,11 @@ void CClient::Run()
 		}
 		for(int i = 0; i < 3; i++)
 		{
-			BindAddr.port = (secure_rand() % 64511) + 1024;
-			while(!m_NetClient[i].Open(BindAddr, 0))
+			do
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
 			}
+			while(!m_NetClient[i].Open(BindAddr, 0));
 		}
 	}
 
