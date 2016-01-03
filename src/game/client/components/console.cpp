@@ -489,7 +489,7 @@ void CGameConsole::OnRender()
 						str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_aCommandHelp);
 						TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 						TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1);
-						str_format(aBuf, sizeof(aBuf), "Syntax: %s %s", pConsole->m_aCommandName, pConsole->m_aCommandParams);
+						str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pConsole->m_aCommandName, pConsole->m_aCommandParams);
 						TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 					}
 				}
