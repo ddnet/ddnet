@@ -145,7 +145,9 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 	for(int i = 0; i < MaxClients(); ++i)
 	{
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE ||
-			m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
+			(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
+				(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
+				 !m_aSlots[i].m_Connection.m_TimeoutSituation)))
 			continue;
 
 		OtherAddr = *m_aSlots[i].m_Connection.PeerAddress();
