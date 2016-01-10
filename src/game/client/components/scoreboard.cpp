@@ -449,7 +449,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			str_format(aId, sizeof(aId),"%d: ", pInfo->m_ClientID);
+			if (pInfo->m_ClientID >= 10)
+				str_format(aId, sizeof(aId),"%d: ", pInfo->m_ClientID);
+			else
+				str_format(aId, sizeof(aId)," %d: ", pInfo->m_ClientID);
 			str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
 			Cursor.m_LineWidth = NameLength+3;
 			TextRender()->TextEx(&Cursor, aId, -1);
