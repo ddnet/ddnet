@@ -2230,8 +2230,8 @@ void CServer::RegisterCommands()
 
 #if defined (CONF_SQL)
 
-	Console()->Register("add_sqlserver", "ssssssi?i", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver <read = r, write = w> <Database> <Prefix> <User> <Password> <IP> <Port> [SetUpDatabase = 0]");
-	Console()->Register("dump_sqlservers", "i", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
+	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver");
+	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 
 #endif
 
