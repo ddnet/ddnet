@@ -102,7 +102,8 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 
 	// TODO: change this header
 	CDatafileHeader Header;
-	if (sizeof Header != io_read(File, &Header, sizeof(Header))) {
+	if (sizeof(Header) != io_read(File, &Header, sizeof(Header)))
+	{
 		dbg_msg("datafile", "couldn't load header");
 		return 0;
 	}
