@@ -125,6 +125,17 @@ void CPlayer::Reset()
 #if defined(CONF_SQL)
 	m_LastSQLQuery = 0;
 #endif
+
+	int64 Now = Server()->Tick();
+	int64 TickSpeed = Server()->TickSpeed();
+	if(Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
+	{
+		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
+	}
+	else
+	{
+		m_FirstVoteTick = Now;
+	}
 }
 
 void CPlayer::Tick()
