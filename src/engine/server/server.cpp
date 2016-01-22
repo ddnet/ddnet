@@ -317,6 +317,10 @@ CServer::CServer()
 	m_RconRestrict = -1;
 	m_GeneratedRconPassword = 0;
 
+	m_ServerInfoFirstRequest = 0;
+	m_ServerInfoNumRequests = 0;
+	m_ServerInfoHighLoad = false;
+
 	Init();
 }
 
@@ -1266,11 +1270,34 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	}
 }
 
-void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int Offset)
+void CServer::SendServerInfoConnless(const NETADDR *pAddr, int Token, bool Extended)
+{
+	const int MaxRequests = g_Config.m_SvServerInfoPerSecond;
+	int64 Now = Tick();
+	if(Now <= m_ServerInfoFirstRequest + TickSpeed())
+	{
+		m_ServerInfoNumRequests++;
+	}
+	else
+	{
+		m_ServerInfoHighLoad = m_ServerInfoNumRequests > MaxRequests;
+		m_ServerInfoNumRequests = 1;
+		m_ServerInfoFirstRequest = Now;
+	}
+
+	bool Short = m_ServerInfoNumRequests > MaxRequests || m_ServerInfoHighLoad;
+	SendServerInfo(pAddr, Token, Extended, 0, Short);
+}
+
+void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int Offset, bool Short)
 {
 	CNetChunk Packet;
 	CPacker p;
 	char aBuf[128];
+
+	Packet.m_ClientID = -1;
+	Packet.m_Address = *pAddr;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 
 	// count the players
 	int PlayerCount = 0, ClientCount = 0;
@@ -1346,6 +1373,14 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int
 	if (Extended)
 		p.AddInt(Offset);
 
+	if(Short)
+	{
+		Packet.m_DataSize = p.Size();
+		Packet.m_pData = p.Data();
+		m_NetServer.Send(&Packet);
+		return;
+	}
+
 	int ClientsPerPacket = Extended ? 24 : VANILLA_MAX_CLIENTS;
 	int Skip = Offset;
 	int Take = ClientsPerPacket;
@@ -1368,9 +1403,6 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, bool Extended, int
 		}
 	}
 
-	Packet.m_ClientID = -1;
-	Packet.m_Address = *pAddr;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = p.Size();
 	Packet.m_pData = p.Data();
 	m_NetServer.Send(&Packet);
@@ -1406,15 +1438,25 @@ void CServer::PumpNetwork()
 			// stateless
 			if(!m_Register.RegisterProcessPacket(&Packet))
 			{
+				bool ServerInfo = false;
+				bool Extended = false;
+
 				if(Packet.m_DataSize == sizeof(SERVERBROWSE_GETINFO)+1 &&
 					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
 				{
-					SendServerInfo(&Packet.m_Address, ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)]);
+					ServerInfo = true;
+					Extended = false;
 				}
 				else if(Packet.m_DataSize == sizeof(SERVERBROWSE_GETINFO64)+1 &&
 					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO64, sizeof(SERVERBROWSE_GETINFO64)) == 0)
 				{
-					SendServerInfo(&Packet.m_Address, ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO64)], true);
+					ServerInfo = true;
+					Extended = true;
+				}
+				if(ServerInfo)
+				{
+					int Token = ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)];
+					SendServerInfoConnless(&Packet.m_Address, Token, Extended);
 				}
 			}
 		}
