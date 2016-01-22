@@ -1152,7 +1152,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if(Now < pPlayer->m_FirstVoteTick)
+			if(g_Config.m_SvJoinVoteDelay && Now < pPlayer->m_FirstVoteTick)
 			{
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote", ((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);

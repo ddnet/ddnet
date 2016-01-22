@@ -131,9 +131,11 @@ void CPlayer::Reset()
 	// If the player joins within ten seconds of the server becoming
 	// non-empty, allow them to vote immediately. This allows players to
 	// vote after map changes or when they join an empty server.
+	//
+	// Otherwise, block voting for 60 seconds after joining.
 	if(Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
 	{
-		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
+		m_FirstVoteTick = Now + 60 * TickSpeed;
 	}
 	else
 	{
