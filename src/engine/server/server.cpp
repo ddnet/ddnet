@@ -1694,6 +1694,7 @@ int CServer::Run()
 
 					m_GameStartTime = time_get();
 					m_CurrentGameTick = 0;
+					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					GameServer()->OnInit();
 					UpdateServerInfo();
