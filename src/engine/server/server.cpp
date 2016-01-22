@@ -1272,7 +1272,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 void CServer::SendServerInfoConnless(const NETADDR *pAddr, int Token, bool Extended)
 {
-	static const int MAX_REQUESTS_PER_SECOND = 10;
+	const int MaxRequests = g_Config.m_SvServerInfoPerSecond;
 	int64 Now = Tick();
 	if(Now <= m_ServerInfoFirstRequest + TickSpeed())
 	{
@@ -1280,12 +1280,12 @@ void CServer::SendServerInfoConnless(const NETADDR *pAddr, int Token, bool Exten
 	}
 	else
 	{
-		m_ServerInfoHighLoad = m_ServerInfoNumRequests > MAX_REQUESTS_PER_SECOND;
+		m_ServerInfoHighLoad = m_ServerInfoNumRequests > MaxRequests;
 		m_ServerInfoNumRequests = 1;
 		m_ServerInfoFirstRequest = Now;
 	}
 
-	bool Short = m_ServerInfoNumRequests > MAX_REQUESTS_PER_SECOND || m_ServerInfoHighLoad;
+	bool Short = m_ServerInfoNumRequests > MaxRequests || m_ServerInfoHighLoad;
 	SendServerInfo(pAddr, Token, Extended, 0, Short);
 }
 
