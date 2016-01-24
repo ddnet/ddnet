@@ -1055,7 +1055,13 @@ void CCharacter::Snap(int SnappingClient)
 	if (m_Paused)
 		return;
 
-	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, id, sizeof(CNetObj_Character)));
+	CNetObj_Character *pCharacter = 0;
+
+	if (m_pPlayer->m_ClientVersion >= VERSION_DDNET_CHARACTER_NETOBJ)
+		pCharacter = static_cast<CNetObj_Character_DDNet *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER_DDNET, id, sizeof(CNetObj_Character_DDNet)));
+	else
+		pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, id, sizeof(CNetObj_Character)));
+
 	if(!pCharacter)
 		return;
 
@@ -1106,6 +1112,22 @@ void CCharacter::Snap(int SnappingClient)
 		if (pCharacter->m_Emote == EMOTE_NORMAL)
 			pCharacter->m_Emote = EMOTE_BLINK;
 		pCharacter->m_Weapon = WEAPON_NINJA;
+	}
+
+	// DDNet only
+	if (m_pPlayer->m_ClientVersion >= VERSION_DDNET_CHARACTER_NETOBJ)
+	{
+		CNetObj_Character_DDNet * pDDNetChar = (CNetObj_Character_DDNet *)pCharacter;
+
+		for (int i = 0; i < NUM_WEAPONS; i++)
+			pDDNetChar->m_WeaponFlags |= m_aWeapons[i].m_Got * (1 << i);
+
+		pDDNetChar->m_FreezeTime = m_FreezeTime;
+		// Figure strong/weak
+		pDDNetChar->m_StrongWeakID = GetStrongWeakID();
+		pDDNetChar->m_DDRaceState = m_DDRaceState;
+		pDDNetChar->m_Hit = m_Hit;
+		pDDNetChar->m_DDNetFlags1 = GetNetFlags();
 	}
 
 	// jetpack and ninjajetpack prediction
@@ -1190,6 +1212,20 @@ int CCharacter::NetworkClipped(int SnappingClient, vec2 CheckPos)
 }
 
 // DDRace
+
+int CCharacter::GetStrongWeakID()
+{
+	// TODO: figure true id
+	return 0;
+}
+
+int CCharacter::GetNetFlags()
+{
+	return Teams()->m_Core.GetSolo(m_pPlayer->GetCID()) ? DDNETCHARACTERFLAGS_SOLO : 0 |
+		   m_DeepFreeze ? DDNETCHARACTERFLAGS_DEEPFREEZE : 0 |
+		   m_EndlessHook ? DDNETCHARACTERFLAGS_ENDLESSHOOK : 0|
+		   m_SuperJump ? DDNETCHARACTERFLAGS_SUPERJUMP : 0;
+}
 
 bool CCharacter::CanCollide(int ClientID)
 {

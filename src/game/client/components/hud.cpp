@@ -460,7 +460,7 @@ void CHud::RenderCursor()
 	Graphics()->QuadsEnd();
 }
 
-void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
+void CHud::RenderHealthAndAmmo(const CNetObj_Character_DDNet *pCharacter)
 {
 	if(!pCharacter)
 		return;
@@ -486,34 +486,77 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	Graphics()->QuadsDrawTL(Array, i);
 	Graphics()->QuadsEnd();
 
-	Graphics()->QuadsBegin();
 	int h = 0;
 
-	// render health
-	RenderTools()->SelectSprite(SPRITE_HEALTH_FULL);
-	for(; h < min(pCharacter->m_Health, 10); h++)
-		Array[h] = IGraphics::CQuadItem(x+h*12,y,10,10);
-	Graphics()->QuadsDrawTL(Array, h);
+	if (GameClient()->m_ServerVersion >= VERSION_DDNET_CHARACTER_NETOBJ)
+	{
+		Graphics()->QuadsBegin();
+		// render all weapons the player got
+		for (int i = 0; i < NUM_WEAPONS; i++)
+			if (pCharacter->m_WeaponFlags & 1 << i)
+			{
+				// highlight active weapon
+				if (i == pCharacter->m_Weapon%NUM_WEAPONS)
+					Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+				else
+					Graphics()->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
+				RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody);
+				RenderTools()->DrawSprite(i*20+13, y+4, 20);
+			}
 
-	i = 0;
-	RenderTools()->SelectSprite(SPRITE_HEALTH_EMPTY);
-	for(; h < 10; h++)
-		Array[i++] = IGraphics::CQuadItem(x+h*12,y,10,10);
-	Graphics()->QuadsDrawTL(Array, i);
+		static int s_LastMaxFreezeTime = 3 * SERVER_TICK_SPEED;
 
-	// render armor meter
-	h = 0;
-	RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
-	for(; h < min(pCharacter->m_Armor, 10); h++)
-		Array[h] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
-	Graphics()->QuadsDrawTL(Array, h);
+		bool DeepFreeze = pCharacter->m_DDNetFlags1 & DDNETCHARACTERFLAGS_DEEPFREEZE;
 
-	i = 0;
-	RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
-	for(; h < 10; h++)
-		Array[i++] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
-	Graphics()->QuadsDrawTL(Array, i);
-	Graphics()->QuadsEnd();
+		if (DeepFreeze)
+			Graphics()->SetColor(0, 0, 0, 0.8f);
+		else if (pCharacter->m_FreezeTime)
+		{
+			if (pCharacter->m_FreezeTime > s_LastMaxFreezeTime)
+				s_LastMaxFreezeTime = pCharacter->m_FreezeTime;
+
+			Graphics()->SetColor(0, 0, 0, 0.5f);		}
+		else
+			s_LastMaxFreezeTime = 3 * SERVER_TICK_SPEED;
+
+		h = 0;
+		RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
+		int iterations = DeepFreeze ? 10 : (pCharacter->m_FreezeTime + 5) * 10 / s_LastMaxFreezeTime;
+		for(; h < iterations; h++)
+			Array[h] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
+		Graphics()->QuadsDrawTL(Array, h);
+
+		Graphics()->QuadsEnd();
+	}
+	else
+	{
+		Graphics()->QuadsBegin();
+		// render health
+		RenderTools()->SelectSprite(SPRITE_HEALTH_FULL);
+		for(; h < min(pCharacter->m_Health, 10); h++)
+			Array[h] = IGraphics::CQuadItem(x+h*12,y,10,10);
+		Graphics()->QuadsDrawTL(Array, h);
+
+		i = 0;
+		RenderTools()->SelectSprite(SPRITE_HEALTH_EMPTY);
+		for(; h < 10; h++)
+			Array[i++] = IGraphics::CQuadItem(x+h*12,y,10,10);
+		Graphics()->QuadsDrawTL(Array, i);
+
+		// render armor meter
+		h = 0;
+		RenderTools()->SelectSprite(SPRITE_ARMOR_FULL);
+		for(; h < min(pCharacter->m_Armor, 10); h++)
+			Array[h] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
+		Graphics()->QuadsDrawTL(Array, h);
+
+		i = 0;
+		RenderTools()->SelectSprite(SPRITE_ARMOR_EMPTY);
+		for(; h < 10; h++)
+			Array[i++] = IGraphics::CQuadItem(x+h*12,y+12,10,10);
+		Graphics()->QuadsDrawTL(Array, i);
+		Graphics()->QuadsEnd();
+	}
 }
 
 void CHud::RenderSpectatorHud()

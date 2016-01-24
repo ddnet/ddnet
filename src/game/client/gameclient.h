@@ -163,6 +163,7 @@ public:
 		SERVERMODE_PUREMOD,
 	};
 	int m_ServerMode;
+	int m_ServerVersion;
 
 	int m_DemoSpecID;
 
@@ -175,8 +176,8 @@ public:
 	// snap pointers
 	struct CSnapState
 	{
-		const CNetObj_Character *m_pLocalCharacter;
-		const CNetObj_Character *m_pLocalPrevCharacter;
+		const CNetObj_Character_DDNet *m_pLocalCharacter;
+		const CNetObj_Character_DDNet *m_pLocalPrevCharacter;
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
@@ -208,10 +209,11 @@ public:
 		struct CCharacterInfo
 		{
 			bool m_Active;
+			bool m_isDDNet;
 
 			// snapshots
-			CNetObj_Character m_Prev;
-			CNetObj_Character m_Cur;
+			CNetObj_Character_DDNet m_Prev;
+			CNetObj_Character_DDNet m_Cur;
 
 			// interpolated position
 			vec2 m_Position;
