@@ -191,7 +191,6 @@ public:
 	CServer();
 
 	int TrySetClientName(int ClientID, const char *pName);
-	virtual bool ValidateString(int ClientID, const char *pString);
 
 	virtual void SetClientName(int ClientID, const char *pName);
 	virtual void SetClientClan(int ClientID, char const *pClan);

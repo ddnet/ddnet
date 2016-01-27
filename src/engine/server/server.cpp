@@ -357,19 +357,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	return 0;
 }
 
-bool CServer::ValidateString(int ClientID, const char *pString)
-{
-	int Codepoint;
-	while((Codepoint = str_utf8_decode(&pString)))
-	{
-		if(Codepoint == -1)
-		{
-			Kick(ClientID, "Non-UTF-8 string");
-			return false;
-		}
-	}
-	return true;
-}
+
 
 void CServer::SetClientName(int ClientID, const char *pName)
 {
@@ -979,7 +967,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_AUTH)
 			{
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(!ValidateString(ClientID, pVersion))
+				if(!str_utf8_check(pVersion))
 				{
 					return;
 				}
@@ -993,7 +981,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				const char *pPassword = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(!ValidateString(ClientID, pPassword))
+				if(!str_utf8_check(pPassword))
 				{
 					return;
 				}
@@ -1145,7 +1133,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_RCON_CMD)
 		{
 			const char *pCmd = Unpacker.GetString();
-			if(!ValidateString(ClientID, pCmd))
+			if(!str_utf8_check(pCmd))
 			{
 				return;
 			}
@@ -1179,7 +1167,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			const char *pPw;
 			Unpacker.GetString(); // login name, not used
 			pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-			if(!ValidateString(ClientID, pPw))
+			if(!str_utf8_check(pPw))
 			{
 				return;
 			}
