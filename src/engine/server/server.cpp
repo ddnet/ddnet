@@ -967,6 +967,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_AUTH)
 			{
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+				if(!str_utf8_check(pVersion))
+				{
+					return;
+				}
 				if(str_comp(pVersion, GameServer()->NetVersion()) != 0)
 				{
 					// wrong version
@@ -977,6 +981,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				const char *pPassword = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+				if(!str_utf8_check(pPassword))
+				{
+					return;
+				}
 				if(g_Config.m_Password[0] != 0 && str_comp(g_Config.m_Password, pPassword) != 0)
 				{
 					// wrong password
@@ -1125,6 +1133,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_RCON_CMD)
 		{
 			const char *pCmd = Unpacker.GetString();
+			if(!str_utf8_check(pCmd))
+			{
+				return;
+			}
 			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
 			{
 				CGameContext *GameServer = (CGameContext *) m_pGameServer;
@@ -1155,6 +1167,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			const char *pPw;
 			Unpacker.GetString(); // login name, not used
 			pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+			if(!str_utf8_check(pPw))
+			{
+				return;
+			}
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
 			{

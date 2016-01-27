@@ -1009,6 +1009,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		if(MsgID == NETMSGTYPE_CL_SAY)
 		{
 			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
+			if(!str_utf8_check(pMsg->m_pMessage))
+			{
+				return;
+			}
 			int Team = pMsg->m_Team;
 
 			// trim right and set maximum length to 256 utf8-characters
@@ -1147,6 +1151,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			char aCmd[VOTE_CMD_LENGTH] = {0};
 			char aReason[VOTE_REASON_LENGTH] = "No reason given";
 			CNetMsg_Cl_CallVote *pMsg = (CNetMsg_Cl_CallVote *)pRawMsg;
+			if(!str_utf8_check(pMsg->m_Type)
+				|| !str_utf8_check(pMsg->m_Reason)
+				|| !str_utf8_check(pMsg->m_Value))
+			{
+				return;
+			}
 			if(pMsg->m_Reason[0])
 			{
 				str_copy(aReason, pMsg->m_Reason, sizeof(aReason));
@@ -1522,6 +1532,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			CNetMsg_Cl_ChangeInfo *pMsg = (CNetMsg_Cl_ChangeInfo *)pRawMsg;
+			if(!str_utf8_check(pMsg->m_pName)
+				|| !str_utf8_check(pMsg->m_pClan)
+				|| !str_utf8_check(pMsg->m_pSkin))
+			{
+				return;
+			}
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 
 			// set infos
@@ -1631,6 +1647,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			return;
 
 		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
+		if(!str_utf8_check(pMsg->m_pName)
+			|| !str_utf8_check(pMsg->m_pClan)
+			|| !str_utf8_check(pMsg->m_pSkin))
+		{
+			return;
+		}
 		pPlayer->m_LastChangeInfo = Server()->Tick();
 
 		// set start infos
