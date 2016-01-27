@@ -89,7 +89,7 @@ public:
 	int m_RespawnTick;
 	int m_DieTick;
 	int m_Score;
-	int m_ScoreStartTick;
+	int m_JoinTick;
 	bool m_ForceBalanced;
 	int m_LastActionTick;
 	bool m_StolenSkin;

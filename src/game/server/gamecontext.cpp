@@ -665,13 +665,11 @@ void CGameContext::OnTick()
 					else if(ActVote < 0)
 						No++;
 
-					// veto right for players with much progress and who're not afk
-					if(!m_VoteKick && !m_VoteSpec && !m_apPlayers[i]->m_Afk &&
-						m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
-						m_apPlayers[i]->GetCharacter() &&
-						m_apPlayers[i]->GetCharacter()->m_DDRaceState == DDRACE_STARTED &&
+					// veto right for players who have been active on server for long and who're not afk
+					if(!m_VoteKick && !m_VoteSpec && m_apPlayers[i] &&
+						!m_apPlayers[i]->m_Afk && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
 						g_Config.m_SvVoteVetoTime &&
-						(Server()->Tick() - m_apPlayers[i]->GetCharacter()->m_StartTime) / (Server()->TickSpeed() * 60) > g_Config.m_SvVoteVetoTime)
+						(Server()->Tick() - m_apPlayers[i]->m_JoinTick) / (Server()->TickSpeed() * 60) > g_Config.m_SvVoteVetoTime)
 					{
 						if(ActVote == 0)
 							Veto = true;

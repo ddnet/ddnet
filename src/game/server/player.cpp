@@ -40,7 +40,7 @@ void CPlayer::Reset()
 {
 	m_RespawnTick = Server()->Tick();
 	m_DieTick = Server()->Tick();
-	m_ScoreStartTick = Server()->Tick();
+	m_JoinTick = Server()->Tick();
 	if (m_pCharacter)
 		delete m_pCharacter;
 	m_pCharacter = 0;
@@ -222,7 +222,7 @@ void CPlayer::Tick()
 	{
 		++m_RespawnTick;
 		++m_DieTick;
-		++m_ScoreStartTick;
+		++m_JoinTick;
 		++m_LastActionTick;
 		++m_TeamChangeTick;
 	}
