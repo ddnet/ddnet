@@ -32,7 +32,8 @@ m_pServer(pGameServer->Server())
 	CSqlData::ms_pPlayerData = PlayerData(0);
 	CSqlData::ms_pMap = m_aMap;
 
-	ExecSqlFunc(new CSqlExecData(Init, new CSqlData()));
+	void* InitThread = thread_init(ExecSqlFunc, new CSqlExecData(Init, new CSqlData()));
+	thread_detach(InitThread);
 }
 
 void CSqlScore::ExecSqlFunc(void *pUser)

@@ -21,7 +21,7 @@ CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* p
 	m_pConnection = 0;
 	m_pResults = 0;
 	m_pStatement = 0;
-	
+
 	m_SqlLock = lock_create();
 }
 
