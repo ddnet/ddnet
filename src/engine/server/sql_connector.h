@@ -22,10 +22,12 @@ public:
 	static void SetReadServers(CSqlServer** ppReadServers) { ms_ppSqlReadServers = ppReadServers; }
 	static void SetWriteServers(CSqlServer** ppWriteServers) { ms_ppSqlWriteServers = ppWriteServers; }
 
+	static void ResetReachable() { ms_ReachableReadServer = 0; ms_ReachableWriteServer = 0; }
+
 	bool ConnectSqlServer(bool ReadOnly = true);
 
 	bool MaxTriesReached(bool ReadOnly = true) { return ReadOnly ? m_NumReadRetries >= CSqlServer::ms_NumReadServer : m_NumWriteRetries >= CSqlServer::ms_NumWriteServer; }
-	
+
 private:
 
 	CSqlServer *m_pSqlServer;
