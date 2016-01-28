@@ -861,6 +861,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
 
 		dbg_msg("SQL", "Showing top5 done");
+		return true;
 	}
 	catch (sql::SQLException &e)
 	{

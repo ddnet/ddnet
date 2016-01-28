@@ -24,13 +24,19 @@ public:
 
 	bool ConnectSqlServer(bool ReadOnly = true);
 
-	bool MaxTriesReached(bool ReadOnly = true) { return ReadOnly ? m_NumReadRetries : m_NumWriteRetries >= MAX_SQLSERVERS; }
-
+	bool MaxTriesReached(bool ReadOnly = true) { return ReadOnly ? m_NumReadRetries >= CSqlServer::ms_NumReadServer : m_NumWriteRetries >= CSqlServer::ms_NumWriteServer; }
+	
 private:
 
 	CSqlServer *m_pSqlServer;
 	static CSqlServer **ms_ppSqlReadServers;
 	static CSqlServer **ms_ppSqlWriteServers;
+
+	static int ms_NumReadServer;
+	static int ms_NumWriteServer;
+
+	static int ms_ReachableReadServer;
+	static int ms_ReachableWriteServer;
 
 	int m_NumReadRetries;
 	int m_NumWriteRetries;

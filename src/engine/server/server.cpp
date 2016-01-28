@@ -42,11 +42,6 @@
 	#include <windows.h>
 #endif
 
-#ifdef CONF_SQL
-CSqlServer** CSqlConnector::ms_ppSqlReadServers = 0;
-CSqlServer** CSqlConnector::ms_ppSqlWriteServers = 0;
-#endif
-
 static const char *StrLtrim(const char *pStr)
 {
 	while(*pStr)
@@ -2049,7 +2044,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	{
 		if (!apSqlServers[i])
 		{
-			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), SetUpDb);
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
 
 			if(SetUpDb)
 			{
@@ -2063,7 +2058,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 	}
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlmaster: limit of sqlmasters reached");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlserver: limit of sqlservers reached");
 }
 
 void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)

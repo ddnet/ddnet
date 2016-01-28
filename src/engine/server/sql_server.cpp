@@ -7,7 +7,10 @@
 #include "sql_server.h"
 
 
-CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool SetUpDb) :
+int CSqlServer::ms_NumReadServer = 0;
+int CSqlServer::ms_NumWriteServer = 0;
+
+CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly, bool SetUpDb) :
 		m_Port(Port),
 		m_SetUpDB(SetUpDb)
 {
@@ -21,6 +24,8 @@ CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* p
 	m_pConnection = 0;
 	m_pResults = 0;
 	m_pStatement = 0;
+
+	ReadOnly ? ms_NumReadServer++ : ms_NumWriteServer++;
 
 	m_SqlLock = lock_create();
 }
@@ -78,6 +83,7 @@ bool CSqlServer::Connect()
 		connection_properties["port"]          = m_Port;
 		connection_properties["userName"]      = sql::SQLString(m_aUser);
 		connection_properties["password"]      = sql::SQLString(m_aPass);
+		connection_properties["OPT_CONNECT_TIMEOUT"] = 10;
 		connection_properties["OPT_RECONNECT"] = true;
 
 		// Create connection

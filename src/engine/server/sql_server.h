@@ -10,7 +10,7 @@
 class CSqlServer
 {
 public:
-	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool SetUpDb = false);
+	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
 	~CSqlServer();
 
 	bool Connect();
@@ -32,6 +32,8 @@ public:
 	void Lock() { lock_wait(m_SqlLock); }
 	void UnLock() { lock_unlock(m_SqlLock); }
 
+	static int ms_NumReadServer;
+	static int ms_NumWriteServer;
 
 private:
 	sql::Driver *m_pDriver;
