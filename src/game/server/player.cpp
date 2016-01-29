@@ -125,6 +125,22 @@ void CPlayer::Reset()
 #if defined(CONF_SQL)
 	m_LastSQLQuery = 0;
 #endif
+
+	int64 Now = Server()->Tick();
+	int64 TickSpeed = Server()->TickSpeed();
+	// If the player joins within ten seconds of the server becoming
+	// non-empty, allow them to vote immediately. This allows players to
+	// vote after map changes or when they join an empty server.
+	//
+	// Otherwise, block voting for 60 seconds after joining.
+	if(Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
+	{
+		m_FirstVoteTick = Now + 60 * TickSpeed;
+	}
+	else
+	{
+		m_FirstVoteTick = Now;
+	}
 }
 
 void CPlayer::Tick()

@@ -934,6 +934,22 @@ void CGameContext::OnClientEnter(int ClientID)
 
 void CGameContext::OnClientConnected(int ClientID)
 {
+	{
+		bool Empty = true;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i])
+			{
+				Empty = false;
+				break;
+			}
+		}
+		if(Empty)
+		{
+			m_NonEmptySince = Server()->Tick();
+		}
+	}
+
 	// Check which team the player should be on
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
@@ -1119,12 +1135,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
-			if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry+Server()->TickSpeed()*3 > Server()->Tick())
+			int64 Now = Server()->Tick();
+			int64 TickSpeed = Server()->TickSpeed();
+
+			if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + TickSpeed * 3 > Now)
 				return;
 
-			int64 Now = Server()->Tick();
 			pPlayer->m_LastVoteTry = Now;
-			//if(pPlayer->GetTeam() == TEAM_SPECTATORS)
 			if(g_Config.m_SvSpectatorVotes == 0 && pPlayer->GetTeam() == TEAM_SPECTATORS)
 			{
 				SendChatTarget(ClientID, "Spectators aren't allowed to start a vote.");
@@ -1137,11 +1154,19 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			int Timeleft = pPlayer->m_LastVoteCall + Server()->TickSpeed()*g_Config.m_SvVoteDelay - Now;
-			if(pPlayer->m_LastVoteCall && Timeleft > 0)
+			if(g_Config.m_SvJoinVoteDelay && Now < pPlayer->m_FirstVoteTick)
 			{
-				char aChatmsg[512] = {0};
-				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote", (Timeleft/Server()->TickSpeed())+1);
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote", ((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
+				SendChatTarget(ClientID, aBuf);
+				return;
+			}
+
+			int TimeLeft = pPlayer->m_LastVoteCall + TickSpeed * g_Config.m_SvVoteDelay - Now;
+			if(pPlayer->m_LastVoteCall && TimeLeft > 0)
+			{
+				char aChatmsg[64];
+				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote", (TimeLeft/TickSpeed)+1);
 				SendChatTarget(ClientID, aChatmsg);
 				return;
 			}
