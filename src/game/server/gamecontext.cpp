@@ -1664,6 +1664,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pPlayer->m_LastKill = Server()->Tick();
 			pPlayer->KillCharacter(WEAPON_SELF);
+			pPlayer->Respawn();
 		}
 	}
 	if (MsgID == NETMSGTYPE_CL_STARTINFO)
