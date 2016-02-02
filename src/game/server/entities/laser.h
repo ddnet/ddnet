@@ -17,7 +17,7 @@ public:
 
 protected:
 	bool HitCharacter(vec2 From, vec2 To);
-	void DoBounce();
+	void DoBounce(int64_t TeamMask);
 
 private:
 	vec2 m_From;
@@ -28,7 +28,6 @@ private:
 	int m_Bounces;
 	int m_EvalTick;
 	int m_Owner;
-	int m_TeamMask;
 
 	// DDRace
 

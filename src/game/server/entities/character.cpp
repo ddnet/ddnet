@@ -885,8 +885,8 @@ void CCharacter::Die(int Killer, int Weapon)
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 		Server()->StopRecord(m_pPlayer->GetCID());
 
-	// we got to wait 0.5 secs before respawning
-	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
+	// player got to wait 0.5 seconds before respawning, 0 seconds in race mode
+	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*(g_Config.m_SvSoloServer == 2 ? 0 : 0.5f);
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];
@@ -906,7 +906,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	// a nice sound
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
-	// this is for auto respawn after 3 secs
+	// this is for auto respawn after sv_auto_respawn_delay millisecs
 	m_pPlayer->m_DieTick = Server()->Tick();
 
 	m_Alive = false;

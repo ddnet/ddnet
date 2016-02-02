@@ -2394,6 +2394,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvTeleportHoldHook = 0;
 		g_Config.m_SvTeam = 1;
 		g_Config.m_SvShowOthersDefault = 0;
+		g_Config.m_SvKillDelay = 3;
 
 		if(Collision()->m_NumSwitchers > 0)
 			for (int i = 0; i < Collision()->m_NumSwitchers+1; ++i)
@@ -2429,6 +2430,10 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			TuningList()[i].Set("player_collision", 0);
 			TuningList()[i].Set("player_hooking", 0);
 		}
+	}
+	if(g_Config.m_SvSoloServer == 2)
+	{
+		g_Config.m_SvKillDelay = 1;
 	}
 
 	// delete old score object
