@@ -1338,11 +1338,11 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		char name[16];
 		str_copy(name, g_Config.m_PlayerName, sizeof(name));
-		str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
+		str_format(aBuf, sizeof(aBuf), Localize("*** '%s' entered and joined the spectators"), name);
 		while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Label.w)
 		{
 			name[str_length(name) - 1] = 0;
-			str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
+			str_format(aBuf, sizeof(aBuf), Localize("*** '%s' entered and joined the spectators"), name);
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 12.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
