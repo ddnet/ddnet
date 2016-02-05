@@ -294,7 +294,11 @@ void CGameClient::OnInit()
 	// load default font
 	static CFont *pDefaultFont = 0;
 	char aFilename[512];
-	IOHANDLE File = Storage()->OpenFile("fonts/DejaVuSans.ttf", IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+	char *fontFile = "fonts/DejaVuSansCJKName.ttf";
+	if (strstr(g_Config.m_ClLanguagefile, "chinese") != NULL || strstr(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+		strstr(g_Config.m_ClLanguagefile, "korean") != NULL)
+		fontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
+	IOHANDLE File = Storage()->OpenFile(fontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
 		io_close(File);
@@ -302,7 +306,7 @@ void CGameClient::OnInit()
 		TextRender()->SetDefaultFont(pDefaultFont);
 	}
 	if(!pDefaultFont)
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='fonts/DejaVuSans.ttf'");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", fontFile);
 
 	// init all components
 	for(int i = m_All.m_Num-1; i >= 0; --i)

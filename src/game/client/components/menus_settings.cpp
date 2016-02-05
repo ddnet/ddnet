@@ -1151,6 +1151,23 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 	{
 		str_copy(g_Config.m_ClLanguagefile, s_Languages[s_SelectedLanguage].m_FileName, sizeof(g_Config.m_ClLanguagefile));
 		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName, Storage(), Console());
+		
+		// Load Font
+		static CFont *pDefaultFont = 0;
+		char aFilename[512];
+		char *fontFile = "fonts/DejaVuSansCJKName.ttf";
+		if (strstr(g_Config.m_ClLanguagefile, "chinese") != NULL || strstr(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+			strstr(g_Config.m_ClLanguagefile, "korean") != NULL)
+			fontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
+		IOHANDLE File = Storage()->OpenFile(fontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+		if(File)
+		{
+			io_close(File);
+			pDefaultFont = TextRender()->LoadFont(aFilename);
+			TextRender()->SetDefaultFont(pDefaultFont);
+		}
+		if(!pDefaultFont)
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", fontFile);
 	}
 }
 
