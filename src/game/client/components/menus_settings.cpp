@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/tl/string.h>
+#include <string.h>
 
 #include <base/math.h>
 
