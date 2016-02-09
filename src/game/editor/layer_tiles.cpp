@@ -1296,7 +1296,7 @@ CTile CLayerFront::GetTile(int x, int y, bool force)
 
 void CLayerFront::SetTile(int x, int y, CTile tile, bool force)
 {
-	if(force || GetTile(x, y, true).m_Index != TILE_THROUGH_CUT)
+	if(force || (GetTile(x, y, true).m_Index != TILE_THROUGH_CUT && tile.m_Index != TILE_THROUGH_CUT))
 		m_pTiles[y*m_Width+x] = tile;
 }
 
