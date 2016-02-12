@@ -2,7 +2,7 @@
 #originally created by:
 #	MK124
 #modified by:
-#
+# 2016.2.5 CarolVlCznYu
 ##### /authors #####
 
 ##### translated strings #####
@@ -253,6 +253,9 @@ Kick player
 Language
 == 语言
 
+DDNet Client needs to be restarted to complete update!
+== DDNet客户端需要重新启动才能完成更新!
+
 Loading
 == 载入中
 
@@ -282,6 +285,27 @@ Movement
 
 Mute when not active
 == 不活动的时候静音
+
+Enable game sounds
+== 开启游戏声音
+
+Enable gun sound
+== 开启枪的声音
+
+Enable server message sound
+== 开启服务器消息声音
+
+Enable regular chat sound
+== 开启普通聊天的声音
+
+Enable team chat sound
+== 开启团队聊天声音
+
+Enable highlighted chat sound
+== 开启高亮(被@)聊天声音
+
+Threaded sound loading
+== 开启线程声音
 
 Name
 == 名字
@@ -333,6 +357,9 @@ Play background music
 
 Player
 == 玩家
+
+HUD
+== 详细
 
 Player country:
 == 玩家的国家/地区:
@@ -440,7 +467,7 @@ Show friends only
 == 只显示好友
 
 Show ingame HUD
-== 显示游戏内 HUD
+== 显示游戏内信息
 
 Show name plates
 == 显示名字板
@@ -488,10 +515,22 @@ Strict gametype filter
 == 严格过滤游戏类型
 
 Sudden Death
-== 出乎意料的死亡
+== 一枪击杀
 
 Switch weapon on pickup
 == 拾取武器时自动装备
+
+Switch weapon when out of ammo
+== 切换武器时发射弹药
+
+Show clan above name plates
+== 显示战队名称
+
+Clan plates size
+== 战队名称大小
+
+Reset wanted weapon on death
+== 在死亡时复位被给予的武器
 
 Team
 == 团队
@@ -580,313 +619,314 @@ You must restart the game for all settings to take effect.
 == 
 
 %d player left
-== 
+== %d 个玩家离开
 
 %d player not ready
-== 
+== %d 个玩家没有准备
 
 %d players left
-== 
+== %d 个玩家离开
 
 %d players not ready
-== 
+== %d 个玩家没有准备
 
 %d servers, %d players
-== 
+== %d 个服务器, %d 个玩家
 
 '%s' called for vote to kick '%s' (%s)
-== 
+== '%s' 发起投票将 '%s' 踢出游戏 (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
-== 
+== '%s' 发起投票将 '%s' 移动到旁观者 (%s)
 
 '%s' called vote to change server option '%s' (%s)
-== 
+== '%s' 发起了一个修改服务器选项 '%s' 的投票 (%s)
 
 '%s' entered and joined the %s
-== 
+== '%s' 加入了游戏
 
 '%s' has left the game
-== 
+== '%s' 离开了游戏
 
 '%s' has left the game (%s)
-== 
+== '%s' 离开了游戏
 
 '%s' joined the %s
-== 
+== '%s' 加入 %s
 
 Admin forced server option '%s' (%s)
-== 
+== 管理员强制服务器投票 '%s' (%s)
 
 Admin forced vote no
-== 
+== 管理员强制投票为否
 
 Admin forced vote yes
-== 
+== 管理员强制投票为是
 
 Admin moved '%s' to spectator (%s)
-== 
+== 管理员将 '%s' 移动到旁观者 (%s)
 
 Alp:
-== 
+== 透明度
 
 Anti Aliasing
-== 
+== 抗锯齿
 
 Are you sure you want to rename the demo?
-== 
+== 你确定你要重命名录像？
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== 你确定你要保存你的皮肤?如果使用该名称的皮肤已经存在,它会被替换.
 
 Back
-== 
+== 返回
 
 Basic
-== 
+== 基本
 
 Bodies
-== 
+== 身体
 
 Borderless window
-== 
+== 无边界窗口
 
 Color
-== 
+== 颜色
 
 Crc
-== 
+== Crc
 
 Created
-== 
+== 创建
 
 Custom
-== 
+== 自定义
 
 Customize
-== 
+== 自定义
 
 Decoration
-== 
+== 装饰
 
 Demo
-== 
+== 录像
 
 Detail
-== 
+== 详情
 
 Editor
-== 
+== 编辑
 
 Eyes
-== 
+== 眼
 
 Format
-== 
+== 格式
 
 Game starts in
-== 
+== 游戏开始于
 
 Global
-== 
+== 全局
 
 Hands
-== 
+== 手
 
 Host address:
-== 
+== 主机地址
 
 Hue:
-== 
+== 色调:
 
 Join
-== 
+== 加入
 
 Joined
-== 
+== 加入
 
 Joined blue
-== 
+== 加入蓝队
 
 Joined red
-== 
+== 加入红队
 
 Kick voting requires %d players on the server
-== 
+== 投票踢玩家需要 %d 个玩家
 
 Laser
-== 
+== 激光
 
 Length
-== 
+== 范围
 
 Letterbox
-== 
+== 信箱
 
 Lgt:
 == 
 
 Local
-== 
+== 本地
 
 Local server
-== 
+== 本地服务器
 
 Match
-== 
+== 匹配
 
 Max
-== 
+== 最大
 
 Misc
-== 
+== 杂项
 
 Netversion
-== 
+== 网络版本
 
 Nickname is empty.
-== 
+== 名称为空.
 
 Normal:
-== 
+== 正常:
 
 Only %d active players are allowed
-== 
+== 最多允许 %d 个在线玩家
 
 Personal
-== 
+== 个人
 
 Ready
-== 
+== 准备
 
 Record
-== 
+== 记录
 
 Recorded
-== 
+== 录制
 
 Reset
-== 
+== 重置
 
 Resolutions
-== 
+== 决议
 
 Round over
-== 
+== 回合结束
 
 Round over!
-== 
+== 回合结束!
 
 Sat:
-== 
+== 星期六
 
 Save
-== 
+== 保存
 
 Save skin
-== 
+== 保存皮肤
 
 Screen
-== 
+== 屏幕
 
 Search:
-== 
+== 搜索
 
 Server does not allow voting to kick players
-== 
+== 服务器不允许投票踢玩家
 
 Server does not allow voting to move players to spectators
-== 
+== 服务器不允许投票移动玩家到旁观者
 
 Servers
-== 
+== 服务器
 
 Size
-== 
+==大小
 
 Skin
-== 
+== 皮肤
 
 Spectating
-== 
+== 旁观者
 
 Spectators aren't allowed to start a vote.
-== 
+== 旁观者不允许参与投票
 
 Standard Gametype
-== 
+== 标准游戏类型
 
 Tattoo
-== 
+== 纹身
 
 Tattoos
-== 
+== 纹身
 
 Team:
-== 
+== 队伍
 
 Teams are locked
-== 
+== 团队锁定
 
 Teams are locked. Time to wait before changing team: %02d:%02d
-== 
+== 团队已锁定，在修改团队前需要等待: %02d:%02d
+
 
 Teams were locked
-== 
+== 团队锁定
 
 Teams were unlocked
-== 
+== 队伍解锁
 
 Tee
-== 
+== Tee
 
 Texture
-== 
+== 质地
 
 Volume
-== 
+== 音量
 
 Vote aborted
-== 
+== 投票终止
 
 Vote failed
-== 
+== 投票失败
 
 Vote passed
-== 
+== 投票通过
 
 Wait for current vote to end before calling a new one.
-== 
+== 等待当前投票结束,才能发起新投票
 
 Wait for next round
-== 
+== 等待下一轮
 
 Wide
-== 
+== 宽
 
 You must wait %d seconds before making another vote
-== 
+== 进行另一次投票前,必须等待 %d 秒
 
 blue
-== 
+== 蓝
 
 blue team
-== 
+== 蓝队
 
 game
-== 
+== 游戏
 
 red
-== 
+== 红
 
 red team
-== 
+== 红队
 
 spectators
-== 
+== 旁观者
 
 wait for more players
-== 
+== 等待更多玩家
 
 ##### old translations #####
 
@@ -920,23 +960,32 @@ FSAA samples
 Sound volume
 == 音量
 
+Map sound volume
+== 地图音量
+
 Created:
 == 已创建:
 
 Max Screenshots
 == 最大截图数
 
+Dummy settings
+== 假人设置
+
+Vanilla Skins only
+== 只显示默认皮肤
+
 Length:
 == 长度:
 
 Skin name
-== 
+== 皮肤名字
 
 Rifle
 == 激光枪
 
 Patterns
-== 
+== 模式
 
 Netversion:
 == 网络版本
@@ -948,7 +997,7 @@ Map:
 == %d 字节
 
 Coloration
-== 
+== 着色
 
 Info
 == 信息
@@ -986,6 +1035,18 @@ Lht.
 no limit
 == 无限制
 
+CPU Throttle
+== CPU节流
+
+Show console window
+== 显示控制台窗口
+
+Automatically take statboard screenshot
+== 自动对状态版截图
+
+none
+== 没有
+
 Quick search:
 == 快速搜索:
 
@@ -1002,7 +1063,7 @@ Alpha
 == 透明度
 
 Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 
+== 你确定你要保存你的皮肤？如果使用该名称的皮肤已经存在，它会被替换。
 
 Current version: %s
 == 当前版本: %s
@@ -1016,3 +1077,281 @@ Name plates size
 Type:
 == 类型:
 
+Switch
+== 切换
+
+Tele
+== 远距
+
+Unknown
+== 未知
+
+Something is VERY wrong with the %s layer please report this at http://ddnet.tw, you will need to post the map as well and any steps that u think may have led to this
+== 
+
+localization
+== 定位
+
+unexpected end of file
+== 文件出错
+
+loaded '%s'
+== 加载 '%s'
+
+malform replacement line for '%s'
+== 格式不正确的替换路程 '%s'
+
+Switch team
+== 切换团队
+
+Kill yourself
+== 自杀
+
+Tune variable to value
+== 音乐变量值
+
+Reset tuning
+== 复位
+
+Dump tuning
+== 转储调整
+
+Change map
+== 更换地图
+
+Restart in x seconds
+== 重新启动在x秒
+
+Broadcast message
+== 广播消息
+
+Say in chat
+== 聊天
+
+Set team of player to team
+== 设置玩家组队
+
+Set team of all players to team
+== 设置全部玩家组队
+
+Add a voting option
+== 添加投票选项
+
+remove a voting option
+== 删除投票选项
+
+Force a voting option
+== 强制投票的选项
+
+Clears the voting options
+== 清除投票选项
+
+Force a vote to yes/no
+== 强制投票是/否
+
+Swap the current teams
+== 交换当前的团队
+
+Shuffle the current teams
+== 重组目前球队
+
+initialisation finished after %.2fms
+== %.2fms 后初始化完成
+
+dropped weird message '%s' (%d), failed on '%s'
+==
+
+You must restart the game for all settings to take effect.
+== 你必须重新启动游戏才能让所有新的设置生效。
+
+Use DDRace Scoreboard
+== 使用DDRace计分板
+
+Show client IDs in Scoreboard
+== 在计分板上显示客户端ID
+
+Show score
+== 显示比分
+
+Show health + ammo
+== 显示生命与弹药
+
+Show names in chat in team colors
+== 在聊天中名称显示玩家颜色
+
+Show kill messages
+== 显示Kill消息
+
+Show votes window after voting
+== 在投票时显示投票窗口
+
+Messages
+== 信息
+
+System message
+== 系统信息
+
+Highlighted message
+== 高亮显示信息
+
+Look out!
+== 小心!
+
+Team message
+== 团队信息
+
+We will win
+== 我们一定会赢
+
+Normal message
+== 普通信息
+
+Hello and welcome
+== 你好,欢迎
+
+Inner color
+== 内部颜色
+
+Outline color
+== 外部颜色
+
+Save the best demo of each race
+== 保存每场竞赛的录像
+
+Ghost
+== 幽灵
+
+Show ghost
+== 显示幽灵
+
+Save ghost
+== 保存幽灵
+
+Gameplay
+== 游戏
+
+Overlay entities
+== 显示实体层
+
+Show others
+== 显示其他
+
+Show quads
+== 显示背景
+
+Default zoom
+== 默认缩放
+
+AntiPing limit
+== AntiPing限制
+
+AntiPing
+== 
+
+AntiPing: predict other players
+== AntiPing:预测其他玩家
+
+AntiPing: predict weapons
+== AntiPing:预测武器
+
+AntiPing: predict grenade paths
+== AntiPing:预测榴弹路径
+
+Show other players' hook collision lines
+== 显示其他玩家的钩子线
+
+Show other players' key presses
+== 显示其他玩家的按键
+
+Background (regular)
+== 背景(常规)
+
+Background (entities)
+== 背景(实体)
+
+Show tiles layers from BG map
+== 在BG地图显示砖层
+
+Try fast HTTP map download first
+== 首先尝试下载最快的http地图
+
+DDNet %s is available:
+== DDnet %s 可用:
+
+Update now
+== 更新
+
+Updating...
+== 更新中...
+
+DDNet Client updated!
+== DDNet客户端更新!
+
+No updates available
+== 没有可用的更新
+
+Check now
+== 检查更新
+
+Timeout code
+== 超时代码
+
+Dummy Timeout code
+== 假人超时代码
+
+default
+== 默认
+
+Weapon
+== 武器
+
+DM
+== 死亡竞技
+
+TDM
+== 团队竞技
+
+CTF
+== 夺旗模式
+
+prediction error
+== 预测误差
+
+Loading DDNet Client
+== 加载DDNet客户端中...
+
+add_favorite
+== 添加喜爱
+
+remove_favorite
+== 删除喜爱
+
+add_friend
+== 添加好友
+
+remove_friend
+== 删除好友
+
+*** '%s' entered and joined the spectators
+== *** '%s' 进入游戏并加入旁观者
+
+Network
+== 网络
+
+Browser
+== 浏览
+
+Connect dummy
+== 开启假人
+
+Connecting dummy
+== 正在开启假人
+
+Disconnect dummy
+== 关闭假人
+
+Spectator
+== 旁观者
+
+Search
+== 搜索
