@@ -487,7 +487,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 	// render quick search
 	{
-		const char *pLabel = Localize("⚲");
+		const char *pLabel = "⚲";
 		UI()->DoLabelScaled(&QuickSearch, pLabel, 12.0f, -1);
 		float w = TextRender()->TextWidth(0, 12.0f, pLabel, -1);
 		QuickSearch.VSplitLeft(w, 0, &QuickSearch);
