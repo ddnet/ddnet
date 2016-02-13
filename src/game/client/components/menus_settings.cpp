@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/tl/string.h>
-#include <string.h>
 
 #include <base/math.h>
 
@@ -1157,8 +1156,8 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 		static CFont *pDefaultFont = 0;
 		char aFilename[512];
 		char *fontFile = "fonts/DejaVuSansCJKName.ttf";
-		if (strstr(g_Config.m_ClLanguagefile, "chinese") != NULL || strstr(g_Config.m_ClLanguagefile, "japanese") != NULL ||
-			strstr(g_Config.m_ClLanguagefile, "korean") != NULL)
+		if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+			str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
 			fontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
 		IOHANDLE File = Storage()->OpenFile(fontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
