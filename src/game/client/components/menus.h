@@ -131,7 +131,6 @@ class CMenus : public CComponent
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
 	int m_SettingPlayerPage;
-	char m_aSkinFilterString[25];
 
 	//
 	bool m_EscapePressed;

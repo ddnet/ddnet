@@ -21,6 +21,7 @@ MACRO_CONFIG_INT(ClCpuThrottleInactive, cl_cpu_throttle_inactive, 1, 0, 1, CFGFL
 MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(ClEditorUndo, cl_editorundo, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Undo function in editor")
 MACRO_CONFIG_INT(ClLoadCountryFlags, cl_load_country_flags, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Load and show country flags")
+MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Skin filtering string")
 
 MACRO_CONFIG_INT(ClAutoDemoRecord, cl_auto_demo_record, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Automatically record demos")
 MACRO_CONFIG_INT(ClAutoDemoMax, cl_auto_demo_max, 10, 0, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Maximum number of automatically recorded demos (0 = no limit)")

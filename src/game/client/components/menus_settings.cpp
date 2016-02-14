@@ -490,7 +490,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
 
 			// filter quick search
-			if(m_aSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, m_aSkinFilterString))
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
 				continue;
 
 			// no special skins
@@ -575,7 +575,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
 		static float Offset = 0.0f;
-		if(DoEditBox(&m_aSkinFilterString, &QuickSearch, m_aSkinFilterString, sizeof(m_aSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
+		if(DoEditBox(&g_Config.m_ClSkinFilterString, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
 			s_InitSkinlist = true;
 
 		// clear button
@@ -585,8 +585,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			UI()->DoLabel(&QuickSearchClearButton, "×", QuickSearchClearButton.h*ms_FontmodHeight, 0);
 			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &QuickSearchClearButton))
 			{
-				m_aSkinFilterString[0] = 0;
-				UI()->SetActiveItem(&m_aSkinFilterString);
+				g_Config.m_ClSkinFilterString[0] = 0;
+				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
 				s_InitSkinlist = true;
 			}
 		}
