@@ -609,7 +609,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		{
 			Bottom.VSplitLeft(240.0f, &QuickSearch, &Bottom);
 			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-			const char *pSearchLabel = Localize("⚲");
+			const char *pSearchLabel = "⚲";
 			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
 			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);

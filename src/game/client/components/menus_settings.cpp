@@ -342,7 +342,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy, DummyLabel;
+	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
@@ -479,6 +479,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
+	MainView.HSplitTop(230.0f, &SkinList, &MainView);
 	static sorted_array<const CSkins::CSkin *> s_paSkinList;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist)
@@ -487,16 +488,22 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		for(int i = 0; i < m_pClient->m_pSkins->Num(); ++i)
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(i);
+
+			// filter quick search
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
+				continue;
+
 			// no special skins
 			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_'))
 				continue;
+
 			s_paSkinList.add(s);
 		}
 		s_InitSkinlist = false;
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &MainView, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
+	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
 	for(int i = 0; i < s_paSkinList.size(); ++i)
 	{
 		const CSkins::CSkin *s = s_paSkinList[i];
@@ -554,6 +561,35 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			m_NeedSendDummyinfo = true;
 		else
 			m_NeedSendinfo = true;
+	}
+
+	// render quick search
+	{
+		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
+		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
+		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
+		const char *pSearchLabel = "⚲";
+		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
+		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
+		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
+		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
+		static float Offset = 0.0f;
+		if(DoEditBox(&g_Config.m_ClSkinFilterString, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
+			s_InitSkinlist = true;
+
+		// clear button
+		{
+			static int s_ClearButton = 0;
+			RenderTools()->DrawUIRect(&QuickSearchClearButton, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
+			UI()->DoLabel(&QuickSearchClearButton, "×", QuickSearchClearButton.h*ms_FontmodHeight, 0);
+			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &QuickSearchClearButton))
+			{
+				g_Config.m_ClSkinFilterString[0] = 0;
+				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
+				s_InitSkinlist = true;
+			}
+		}
 	}
 }
 
