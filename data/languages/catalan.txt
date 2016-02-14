@@ -63,7 +63,7 @@ Are you sure that you want to quit?
 Are you sure that you want to remove the player from your friends list?
 == Estàs segur que vols eliminar a aquest jugador de la lista d'amics?
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Com és el primer cop que obres el joc, si us plau, posa el teu nom. Es recomenable que verifiquis la configuració del joc abans d'unirte a un servidor.
+== Com és el primer cop que obres el joc, si us plau, posa el teu nom. Es recomanable que verifiquis la configuració del joc abans d'unirte a un servidor.
 
 Automatically record demos
 == Grabar repeticions automàticament
@@ -117,7 +117,7 @@ Controls
 == Controls
 
 Count players only
-== Nomes contar jugadors
+== Només contar jugadors
 
 Country
 == País
@@ -138,7 +138,7 @@ Demo details
 == Detalls de la repetició
 
 Demofile: %s
-== Archiu: %s
+== Fitxer de la repetició: %s
 
 Demos
 == Repeticions
@@ -278,7 +278,7 @@ Move player to spectators
 == Moure jugador a espectadors
 
 Move right
-== Moures a la dreta
+== Moure's a la dreta
 
 Movement
 == Moviment
@@ -446,10 +446,10 @@ Show ingame HUD
 == Veure HUD en el joc
 
 Show name plates
-== Mostrar noms
+== Veure els noms
 
 Show only chat messages from friends
-== Rebre nomes missatges d'amics
+== Rebre només missatges d'amics
 
 Show only supported
 == Veure únicament modes compatibles
@@ -479,7 +479,7 @@ Spectators
 == Espectadors
 
 Standard gametype
-== Tipo de joc estàndar
+== Tipus de joc estàndar
 
 Standard map
 == Mapa estàndar
@@ -512,10 +512,10 @@ The audio device couldn't be initialised.
 == El dispositiu de audio no pot ser inicialitzat.
 
 The server is running a non-standard tuning on a pure game type.
-== El servidor está ejecutant una configuració no estándar en un tipo de juoc pur.
+== El servidor está ejecutant una configuració no estándar en un tipo de joc pur.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Tens un mapa sense guardar en el editor, alomillor vols guardarlo abans de sortir.
+== Tens un mapa sense guardar en el editor, segurament vols guardarlo abans de sortir.
 
 Time limit
 == Temps límit
@@ -524,7 +524,7 @@ Time limit: %d min
 == Temps límit: %d minuts
 
 Try again
-== Intenta de nou
+== Intentau de nou
 
 Type
 == Tipus
@@ -548,7 +548,7 @@ Version
 == Versió
 
 Vote command:
-== Command de votació:
+== Codi de votació:
 
 Vote description:
 == Descripció de la votació:
@@ -572,10 +572,10 @@ Welcome to Teeworlds
 == ¡Benvingut/da a Teeworlds!
 
 Yes
-== Si
+== Sí
 
 You must restart the game for all settings to take effect.
-== Tens que reiniciar el joc perque els canvis fagin efecte
+== Tens que reiniciar el joc perquè els canvis tinguin efecte.
 
 ##### needs translation #####
 
@@ -592,7 +592,7 @@ You must restart the game for all settings to take effect.
 == %d s'han anat
 
 %d players not ready
-== 
+== jugadors no estan llestos
 
 %d servers, %d players
 == %d servidors, %d jugadors
@@ -604,7 +604,7 @@ You must restart the game for all settings to take effect.
 == '%s' ha votat moure '%s' als espectadors (%s)
 
 '%s' called vote to change server option '%s' (%s)
-== '%s' ha votat cambiar una opcia del servidor '%s' (%s)
+== '%s' ha votat cambiar una opció del servidor '%s' (%s)
 
 '%s' joined the %s
 == '%s' s'ha unit al %s
@@ -616,7 +616,7 @@ Admin forced vote no
 == Un admin a forçat votar no
 
 Admin forced vote yes
-== Un admin a forçat votar si
+== Un admin a forçat votar sí
 
 Admin moved '%s' to spectator (%s)
 == Un admin ha mogut '%s' als espectadors
@@ -628,19 +628,19 @@ Anti Aliasing
 == 
 
 Are you sure you want to rename the demo?
-== Estas segur que vols cambiar el nom de la repetició?
+== Estàs segur que vols cambiar el nom de la repetició?
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
 == 
 
 Back
-== Enderrere
+== Enrere
 
 Basic
 == Bàsic
 
 Bodies
-== Cos
+== Cosos
 
 Borderless window
 == Pantalla sense finestra
@@ -688,10 +688,10 @@ Hands
 == Mans
 
 Host address:
-== Direccio del host
+== Direcció del host
 
 Hue:
-== 
+== Matís
 
 Join
 == Entrar
@@ -715,7 +715,7 @@ Length
 == Longitud
 
 Letterbox
-== 
+== Bústia
 
 Lgt:
 == 
@@ -745,7 +745,7 @@ Normal:
 == 
 
 Only %d active players are allowed
-== 
+== Només %d jugadors actius estan permesos
 
 Personal
 == Personal
@@ -766,7 +766,7 @@ Resolutions
 == Resolucions
 
 Round over
-== Roda acabada
+== Ronda acabada
 
 Round over!
 == Ronda acabada!
@@ -784,7 +784,7 @@ Screen
 == Pantalla
 
 Search:
-== Buscar
+== Buscar:
 
 Server does not allow voting to kick players
 == El servidor no permet expulsar jugadors
@@ -805,7 +805,7 @@ Spectating
 == Espectant
 
 Spectators aren't allowed to start a vote.
-== Els espectadors no tenen permes votar
+== Els espectadors no tenen permés votar
 
 Standard Gametype
 == Mode de joc estàndar
@@ -823,13 +823,13 @@ Teams are locked
 == Els equips estan bloquejats
 
 Teams are locked. Time to wait before changing team: %02d:%02d
-== 
+== Els equips estan bloquejats. Temps a esperar per cambiar de equip: %02d:%02d
 
 Teams were locked
-== Els equips han sigut bloquejats
+== Els equips han estat bloquejats
 
 Teams were unlocked
-== Els equips han sigut desbloquejats
+== Els equips han estat desbloquejats
 
 Tee
 == 
@@ -841,16 +841,16 @@ Volume
 == Volum
 
 Vote aborted
-== Votacio cancelada
+== Votació cancelada
 
 Vote failed
-== Votacio fallida
+== Votació fallida
 
 Vote passed
-== Votacio acceptada
+== Votació acceptada
 
 Wait for current vote to end before calling a new one.
-== Espera a que acabi la votacio actual
+== Espera a que acabi la votació actual
 
 Wait for next round
 == Espera a la següent ronda
@@ -880,7 +880,7 @@ spectators
 == espectadors
 
 wait for more players
-== esperant mes jugadors
+== esperant més jugadors
 
 ##### old translations #####
 
@@ -897,7 +897,7 @@ Internet
 == Internet
 
 Max demos
-== Númeru maxim de repeticions
+== Númeru màxim de repeticions
 
 News
 == Notícies
@@ -924,13 +924,13 @@ Length:
 == Longitud:
 
 Skin name
-== 
+== Nom de la skin
 
 Rifle
 == Láser
 
 Patterns
-== 
+== Patrons
 
 Netversion:
 == Versió Net
@@ -939,7 +939,7 @@ Map:
 == Mapa:
 
 %d Bytes
-== %d bytes
+== %d Bytes
 
 Coloration
 == Coloració
@@ -948,7 +948,7 @@ Info
 == Informació
 
 Hue
-== Matis
+== Matís
 
 Record demo
 == Grabar repetició
@@ -960,10 +960,10 @@ Size:
 == Tamany:
 
 Reset to defaults
-== Restaure per defecte
+== Restaurà per defecte
 
 Quit anyway?
-== Sortir de totes maneras?
+== Sortir igualment?
 
 Display Modes
 == Modes de video
@@ -975,7 +975,7 @@ Round
 == Ronda
 
 Lht.
-== Luminositat
+== Lluminositat
 
 no limit
 == sense límit
@@ -990,7 +990,7 @@ Host address
 == Direcció del host
 
 Crc:
-== CRC:
+== Crc:
 
 Alpha
 == Alpha
