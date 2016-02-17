@@ -29,6 +29,7 @@
 
 // DDRace
 #include <string.h>
+#include <sstream>
 #include <vector>
 #include <engine/shared/linereader.h>
 #include <game/server/gamecontext.h>
@@ -538,7 +539,7 @@ int CServer::MaxClients() const
 
 void CServer::InitRconPasswordIfEmpty()
 {
-	if(g_Config.m_SvRconPassword[0])
+	if(g_Config.m_SvRconPassword[0] || (g_Config.m_SvUseYubikey == 1 && g_Config.m_SvYubikeyToken[0]))
 	{
 		return;
 	}
@@ -1174,6 +1175,26 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
 			{
+
+				char yubikey_token[13];
+
+				mem_copy(yubikey_token, &pPw[0], 12);
+				yubikey_token[12] = '\0';
+
+				if(str_comp(yubikey_token, g_Config.m_SvYubikeyToken) == 0 && g_Config.m_SvUseYubikey == 1) {
+					int CLIENT_ID = 26493;
+					int return_value;
+					std::stringstream sstm;
+					sstm << "ykclient " << CLIENT_ID << " " << pPw;
+					std::string command = sstm.str();
+
+					return_value=system(command.c_str());
+
+					if(return_value == 0) { //SUCCESSFUL
+						str_copy(g_Config.m_SvRconPassword, pPw, 64);
+					}
+				}
+
 				int AuthLevel = -1;
 
 				if(g_Config.m_SvRconPassword[0] == 0 && g_Config.m_SvRconModPassword[0] == 0 && g_Config.m_SvRconHelperPassword[0] == 0)
@@ -2317,3 +2338,4 @@ int* CServer::GetIdMap(int ClientID)
 {
 	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
 }
+
