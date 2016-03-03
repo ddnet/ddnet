@@ -52,6 +52,14 @@ italian
 == Italiano
 == 380
 
+japanese
+== 日本語
+== 392
+
+korean
+== 한국어
+== 410
+
 kyrgyz
 == Кыргызча
 == 417
@@ -79,6 +87,10 @@ russian
 serbian
 == Srpski
 == 688
+
+simplified_chinese
+== 简体中文
+== 156
 
 slovak
 == Slovensky
