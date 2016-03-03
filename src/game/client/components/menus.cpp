@@ -669,7 +669,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_GhostButton=0;
-		if(DoButton_MenuTab(&s_GhostButton, "Network", m_ActivePage==PAGE_DDRace, &Button, 0))
+		if(DoButton_MenuTab(&s_GhostButton, Localize("Network"), m_ActivePage==PAGE_DDRace, &Button, 0))
 			NewPage = PAGE_DDRace;
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
