@@ -604,6 +604,12 @@ void CGameContext::OnTick()
 		}
 	}
 
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_apPlayers[i])
+			m_apPlayers[i]->PostPostTick();
+	}
+
 	// update voting
 	if(m_VoteCloseTime)
 	{
