@@ -1599,6 +1599,12 @@ void CCharacter::HandleTiles(int Index)
 		m_Jetpack = false;
 	}
 
+	// unlock team
+	else if((m_TileIndex == TILE_UNLOCK_TEAM) || (m_TileFIndex == TILE_UNLOCK_TEAM))
+	{
+		Teams()->SetTeamLock(Team(), false);
+	}
+
 	// solo part
 	if(((m_TileIndex == TILE_SOLO_START) || (m_TileFIndex == TILE_SOLO_START)) && !Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{

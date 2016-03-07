@@ -645,7 +645,8 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 
 void CGameTeams::SetTeamLock(int Team, bool Lock)
 {
-	m_TeamLocked[Team] = Lock;
+	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
+		m_TeamLocked[Team] = Lock;
 }
 
 void CGameTeams::KillSavedTeam(int Team)
