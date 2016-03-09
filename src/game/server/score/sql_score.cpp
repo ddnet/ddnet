@@ -772,7 +772,7 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 				if(g_Config.m_SvHideScore)
 					str_format(aBuf, sizeof(aBuf), "Your team time: %02d:%05.02f", (int)(Time/60), Time-((int)Time/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%d. [%02d:%05.02f] %s, requested by %s", Rank, (int)(Time/60), Time-((int)Time/60*60), aNames, pData->m_aRequestingPlayer);
+					str_format(aBuf, sizeof(aBuf), "%d. %02d:%05.02f %s, requested by %s", Rank, (int)(Time/60), Time-((int)Time/60*60), aNames, pData->m_aRequestingPlayer);
 
 				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 			}
@@ -867,7 +867,7 @@ void CSqlScore::ShowTeamTop5Thread(void *pUser)
 
 					if (Row == aCuts[CutPos])
 					{
-						str_format(aBuf, sizeof(aBuf), "%d. [%02d:%05.2f] %s", Rank, (int)(Time/60), Time-((int)Time/60*60), aNames);
+						str_format(aBuf, sizeof(aBuf), "%d. %02d:%05.2f %s", Rank, (int)(Time/60), Time-((int)Time/60*60), aNames);
 						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 						CutPos++;
 						aNames[0] = '\0';
@@ -941,7 +941,7 @@ void CSqlScore::ShowRankThread(void *pUser)
 				if(g_Config.m_SvHideScore)
 					str_format(aBuf, sizeof(aBuf), "Your time: %02d:%05.2f", (int)(Time/60), Time-((int)Time/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%d. [%02d:%05.2f] %s, requested by %s", Rank, (int)(Time/60), Time-((int)Time/60*60), pData->m_pSqlData->m_pResults->getString("Name").c_str(), pData->m_aRequestingPlayer);
+					str_format(aBuf, sizeof(aBuf), "%d. %02d:%05.2f %s, requested by %s", Rank, (int)(Time/60), Time-((int)Time/60*60), pData->m_pSqlData->m_pResults->getString("Name").c_str(), pData->m_aRequestingPlayer);
 
 				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 			}
@@ -1022,7 +1022,7 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 			{
 				Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 				Rank = (float)pData->m_pSqlData->m_pResults->getInt("rank");
-				str_format(aBuf, sizeof(aBuf), "%d. [%02d:%05.2f] %s", Rank, (int)(Time/60), Time-((int)Time/60*60), pData->m_pSqlData->m_pResults->getString("Name").c_str());
+				str_format(aBuf, sizeof(aBuf), "%d. %02d:%05.2f %s", Rank, (int)(Time/60), Time-((int)Time/60*60), pData->m_pSqlData->m_pResults->getString("Name").c_str());
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 				//Rank++;
 			}
@@ -1347,7 +1347,7 @@ void CSqlScore::ShowPointsThread(void *pUser)
 				pData->m_pSqlData->m_pResults->next();
 				int count = (int)pData->m_pSqlData->m_pResults->getInt("Points");
 				int rank = (int)pData->m_pSqlData->m_pResults->getInt("rank");
-				str_format(aBuf, sizeof(aBuf), "%d. [%d pts] %s, requested by %s", rank, count, pData->m_pSqlData->m_pResults->getString("Name").c_str(), pData->m_aRequestingPlayer);
+				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
 				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 			}
 
@@ -1406,11 +1406,11 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			// show top points
-			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "------- Points Top 5 -------");
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------- Top Points --------");
 
 			while(pData->m_pSqlData->m_pResults->next())
 			{
-				str_format(aBuf, sizeof(aBuf), "%d. [%d pts] %s", pData->m_pSqlData->m_pResults->getInt("rank"), pData->m_pSqlData->m_pResults->getInt("Points"), pData->m_pSqlData->m_pResults->getString("Name").c_str());
+				str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d", pData->m_pSqlData->m_pResults->getInt("rank"), pData->m_pSqlData->m_pResults->getString("Name").c_str(), pData->m_pSqlData->m_pResults->getInt("Points"));
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 			}
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
