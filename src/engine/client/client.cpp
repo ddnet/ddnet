@@ -443,14 +443,6 @@ void CClient::Rcon(const char *pCmd)
 {
 	CServerInfo Info;
 	GetServerInfo(&Info);
-	if(RconAuthed() && IsDDNet(&Info))
-	{ // Against IP spoofing on DDNet servers
-		CMsgPacker Msg(NETMSG_RCON_AUTH);
-		Msg.AddString("", 32);
-		Msg.AddString(m_RconPassword, 32);
-		Msg.AddInt(1);
-		SendMsgEx(&Msg, MSGFLAG_VITAL);
-	}
 
 	CMsgPacker Msg(NETMSG_RCON_CMD);
 	Msg.AddString(pCmd, 256);

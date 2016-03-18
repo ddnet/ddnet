@@ -131,7 +131,7 @@ void CCollision::Init(class CLayers *pLayers)
 				}
 
 				// DDRace tiles
-				if(Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START))
+				if(Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START))
 					m_pFront[i].m_Index = Index;
 			}
 		}
@@ -157,7 +157,7 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 
 			// DDRace tiles
-			if(Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_NPH) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START))
+			if(Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START))
 				m_pTiles[i].m_Index = Index;
 		}
 	}
@@ -992,7 +992,7 @@ int CCollision::Entity(int x, int y, int Layer)
 			default:
 				str_format(aBuf,sizeof(aBuf), "Unknown");
 		}
-		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at http://ddnet.tw, you will need to post the map as well and any steps that u think may have led to this", aBuf);
+		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", aBuf);
 		return 0;
 	}
 	switch (Layer)

@@ -809,7 +809,6 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
@@ -838,7 +837,6 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
@@ -1146,7 +1144,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
 				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				if (GameServer->m_apPlayers[ClientID] && (GameServer->m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_RCONPROTECT || m_aClients[ClientID].m_LastAuthed))
+				if (GameServer->m_apPlayers[ClientID])
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
@@ -1158,7 +1156,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 					m_RconClientID = IServer::RCON_CID_SERV;
 					m_RconAuthLevel = AUTHED_ADMIN;
-					m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 				}
 			}
 		}
@@ -1189,7 +1186,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				if(AuthLevel != -1)
 				{
-					m_aClients[ClientID].m_LastAuthed = AuthLevel;
 					if(m_aClients[ClientID].m_Authed != AuthLevel)
 					{
 						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
@@ -1980,7 +1976,6 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 		pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, pServer->m_RconClientID, true);
 
 		pServer->m_aClients[pServer->m_RconClientID].m_Authed = AUTHED_NO;
-		pServer->m_aClients[pServer->m_RconClientID].m_LastAuthed = AUTHED_NO;
 		pServer->m_aClients[pServer->m_RconClientID].m_AuthTries = 0;
 		pServer->m_aClients[pServer->m_RconClientID].m_pRconCmdToSend = 0;
 		pServer->SendRconLine(pServer->m_RconClientID, "Logout successful.");
@@ -2059,7 +2054,6 @@ void CServer::LogoutByAuthLevel(int AuthLevel) // AUTHED_<x>
 			SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
 
 			m_aClients[i].m_Authed = AUTHED_NO;
-			m_aClients[i].m_LastAuthed = AUTHED_NO;
 			m_aClients[i].m_AuthTries = 0;
 			m_aClients[i].m_pRconCmdToSend = 0;
 
