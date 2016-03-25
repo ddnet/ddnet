@@ -905,6 +905,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
 	Score()->LoadScore(ClientID);
+	Score()->CheckBirthday(ClientID);
 
 	if(((CServer *) Server())->m_aPrevStates[ClientID] < CServer::CClient::STATE_INGAME)
 	{
