@@ -770,11 +770,15 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 				pData->m_pSqlData->m_pResults->first();
 
 				if(g_Config.m_SvHideScore)
+				{
 					str_format(aBuf, sizeof(aBuf), "Your team time: %02d:%05.02f", (int)(Time/60), Time-((int)Time/60*60));
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+				}
 				else
+				{
 					str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %02d:%05.02f, requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer);
-
-				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+				}
 			}
 
 			dbg_msg("SQL", "Showing teamrank done");
@@ -939,11 +943,15 @@ void CSqlScore::ShowRankThread(void *pUser)
 				float Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 				int Rank = (int)pData->m_pSqlData->m_pResults->getInt("Rank");
 				if(g_Config.m_SvHideScore)
+				{
 					str_format(aBuf, sizeof(aBuf), "Your time: %02d:%05.2f", (int)(Time/60), Time-((int)Time/60*60));
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+				}
 				else
+				{
 					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d:%05.2f, requested by %s", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer);
-
-				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+				}
 			}
 
 			dbg_msg("SQL", "Showing rank done");
