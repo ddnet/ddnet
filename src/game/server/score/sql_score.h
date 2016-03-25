@@ -42,6 +42,7 @@ class CSqlScore: public IScore
 
 	static void MapInfoThread(void *pUser);
 	static void MapVoteThread(void *pUser);
+	static void CheckBirthdayThread(void *pUser);
 	static void LoadScoreThread(void *pUser);
 	static void SaveScoreThread(void *pUser);
 	static void SaveTeamScoreThread(void *pUser);
@@ -73,6 +74,7 @@ public:
 	CSqlScore(CGameContext *pGameServer);
 	~CSqlScore();
 
+	virtual void CheckBirthday(int ClientID);
 	virtual void LoadScore(int ClientID);
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void MapVote(int ClientID, const char* MapName);
