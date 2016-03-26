@@ -303,6 +303,8 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_KP4, "say /emote surprise 999999");
 		Bind(KEY_KP5, "say /emote blink 999999");
 		Bind(KEY_MOUSE_3, "+spectate");
+		Bind(KEY_MINUS, "spectate_previous");
+		Bind(KEY_EQUALS, "spectate_next");
 	}
 	else
 	{
@@ -343,9 +345,9 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		if(!Get('x')[0])
 			Bind('x', "toggle cl_dummy 0 1");
 		if(!Get(KEY_PAGEDOWN)[0])
-			Bind(KEY_PAGEDOWN, "cl_show_entities 0");
+			Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1");
 		if(!Get(KEY_PAGEUP)[0])
-			Bind(KEY_PAGEUP, "cl_show_entities 1");
+			Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100");
 		if(!Get(KEY_KP0)[0])
 			Bind(KEY_KP0, "say /emote normal 999999");
 		if(!Get(KEY_KP1)[0])
