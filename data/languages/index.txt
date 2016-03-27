@@ -68,6 +68,10 @@ norwegian
 == Norsk
 == 578
 
+persian
+== Persian
+== 364
+
 polish
 == Polski
 == 616
