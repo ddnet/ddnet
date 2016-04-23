@@ -314,19 +314,22 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			// to load a map, otherwise it might crash. The map
 			// should be as small as is possible and directly available
 			// to the client. Therefor a dummy map is sent in the same
-			// packet.
+			// packet. To reduce the traffic we'll fallback to a default
+			// map if there are too many connection attempts at once.
 
 			// send mapchange + map data + con_ready + 3 x empty snap (with token)
 			CMsgPacker MapChangeMsg(NETMSG_MAP_CHANGE);
 
 			if (Flooding)
 			{
+				// Fallback to dm1
 				MapChangeMsg.AddString("dm1", 0);
 				MapChangeMsg.AddInt(0xf2159e6e);
 				MapChangeMsg.AddInt(5805);
 			}
 			else
 			{
+				// dummy map
 				MapChangeMsg.AddString("dummy", 0);
 				MapChangeMsg.AddInt(DummyMapCrc);
 				MapChangeMsg.AddInt(sizeof(g_aDummyMapData));
@@ -345,6 +348,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			}
 			else
 			{
+				// send dummy map data
 				MapDataMsg.AddInt(1); // last chunk
 				MapDataMsg.AddInt(DummyMapCrc); // crc
 				MapDataMsg.AddInt(0); // chunk index
