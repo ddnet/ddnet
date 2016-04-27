@@ -163,9 +163,48 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 	return FoundAddr;
 }
 
+bool CNetServer::Connlimit(NETADDR Addr)
+{
+	int64 Now = time_get();
+	int Oldest = 0;
+
+	for(int i = 0; i < NET_CONNLIMIT_IPS; ++i)
+	{
+		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr))
+		{
+			if(m_aSpamConns[i].m_Time > Now - time_freq() * g_Config.m_SvConnlimitTime)
+			{
+				if(m_aSpamConns[i].m_Conns >= g_Config.m_SvConnlimit)
+					return true;
+			}
+			else
+			{
+				m_aSpamConns[i].m_Time = Now;
+				m_aSpamConns[i].m_Conns = 0;
+			}
+			m_aSpamConns[i].m_Conns++;
+			return false;
+		}
+
+		if(m_aSpamConns[i].m_Time < m_aSpamConns[Oldest].m_Time)
+			Oldest = i;
+	}
+
+	m_aSpamConns[Oldest].m_Addr = Addr;
+	m_aSpamConns[Oldest].m_Time = Now;
+	m_aSpamConns[Oldest].m_Conns = 1;
+	return false;
+}
 
 int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth)
 {
+	if (Connlimit(Addr))
+	{
+		const char Msg[] = "Too many connections in a short time";
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, Msg, sizeof(Msg), SecurityToken);
+		return -1; // failed to add client
+	}
+
 	// check for sv_max_clients_per_ip
 	if (NumClientsWithAddr(Addr) + 1 > m_MaxClientsPerIP)
 	{
