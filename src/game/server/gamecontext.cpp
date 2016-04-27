@@ -553,6 +553,11 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 				{
 					Msg.AddInt(0);
 				}
+				else if((i==36) // hammer hit
+				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
+				{
+					Msg.AddInt(0);
+				}
 				else
 				{
 					Msg.AddInt(pParams[i]);
@@ -905,6 +910,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
 	Score()->LoadScore(ClientID);
+	Score()->CheckBirthday(ClientID);
 
 	if(((CServer *) Server())->m_aPrevStates[ClientID] < CServer::CClient::STATE_INGAME)
 	{

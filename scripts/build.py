@@ -282,7 +282,7 @@ if flag_make_release:
 		bail("failed to make a relase of %s" % name)
 	final_output = "FAIL"
 	for f in os.listdir("."):
-		if version_teeworlds in f and platform in f and name in f and (".zip" in f or ".tar.gz" in f):
+		if version_teeworlds in f and platform in f and name in f and (".zip" in f or ".tar.xz" in f):
 			final_output = f
 	os.chdir(work_dir)
 	shutil.copy("%s/%s" % (src_dir_teeworlds, final_output), "../"+final_output)

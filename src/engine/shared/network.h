@@ -300,6 +300,11 @@ class CNetServer
 	int64 m_TimeNumConAttempts;
 	unsigned char m_SecurityTokenSeed[16];
 
+	// vanilla connect flood detection
+	bool m_VConnHighLoad;
+	int64 m_VConnFirst;
+	int m_VConnNum;
+
 	CNetRecvUnpacker m_RecvUnpacker;
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);

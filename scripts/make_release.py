@@ -12,7 +12,7 @@ version = sys.argv[1]
 platform = sys.argv[2]
 exe_ext = ""
 use_zip = 0
-use_gz = 1
+use_xz = 1
 use_dmg = 0
 use_bundle = 0
 include_data = True
@@ -24,7 +24,7 @@ if platform == "src":
 	include_exe = False
 	include_src = True
 	use_zip = 1
-	use_gz = 1
+	use_xz = 1
 
 #if not platform in valid_platforms:
 #	print("not a valid platform")
@@ -34,10 +34,10 @@ if platform == "src":
 if platform == 'win32' or platform == 'win64':
 	exe_ext = ".exe"
 	use_zip = 1
-	use_gz = 0
+	use_xz = 0
 if  platform == 'osx':
 	use_dmg = 1
-	use_gz = 0
+	use_xz = 0
 	use_bundle = 1
 
 def copydir(src, dst, excl=[]):
@@ -211,9 +211,9 @@ if use_zip:
 	#zf.printdir()
 	zf.close()
 	
-if use_gz:
-	print("making tar.gz archive")
-	os.system("tar czf %s.tar.gz %s" % (package, package_dir))
+if use_xz:
+	print("making tar.xz archive")
+	os.system("XZ_OPT=-9 tar cJf %s.tar.xz %s" % (package, package_dir))
 
 if use_dmg:
 	print("making disk image")

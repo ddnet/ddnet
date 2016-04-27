@@ -37,5 +37,5 @@ if 1:
 	os.system("python scripts/make_release.py %s src" % version)
 	os.chdir(root_dir)
 	for f in os.listdir("teeworlds"):
-		if "teeworlds" in f and "src" in f and (".zip" in f or ".tar.gz" in f):
+		if "teeworlds" in f and "src" in f and (".zip" in f or ".tar.xz" in f):
 			shutil.copy("teeworlds/"+f, "../" + f)
