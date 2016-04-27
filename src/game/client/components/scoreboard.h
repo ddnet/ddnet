@@ -10,7 +10,6 @@ class CScoreboard : public CComponent
 	void RenderSpectators(float x, float y, float w);
 	void RenderScoreboard(float x, float y, float w, int Team, const char *pTitle);
 	void RenderRecordingNotification(float x);
-	void RenderLocalTime(float x);
 
 	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData);
 
