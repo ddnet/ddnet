@@ -273,15 +273,15 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
+		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
 
 		//m_NewHook = false;
 
 		if(Hit)
 		{
-			if(Hit&CCollision::COLFLAG_NOHOOK)
+			if(Hit == TILE_NOHOOK)
 				GoingToRetract = true;
-			else if (Hit&CCollision::COLFLAG_TELE)
+			else if (Hit == TILE_TELEINHOOK)
 				GoingThroughTele = true;
 			else
 				GoingToHitGround = true;
