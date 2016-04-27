@@ -251,8 +251,8 @@ class CMenus : public CComponent
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerControl(CUIRect MainView);
-	void RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
-	void RenderServerControlServer(CUIRect MainView);
+	bool RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
+	bool RenderServerControlServer(CUIRect MainView);
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
