@@ -9,7 +9,7 @@
 #include <stdlib.h> // system
 
 using std::string;
-using std::vector;
+using std::map;
 
 CUpdater::CUpdater()
 {
@@ -42,30 +42,22 @@ void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
 void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 {
 	CUpdater *pUpdate = (CUpdater *)pUser;
-	if(!str_comp(pTask->Dest(), "update.json"))
+	const char *b = 0;
+	for(const char *a = pTask->Dest(); *a; a++)
+		if(*a == '/')
+			b = a + 1;
+	b = b ? b : pTask->Dest();
+	if(!str_comp(b, "update.json"))
 	{
 		if(pTask->State() == CFetchTask::STATE_DONE)
 			pUpdate->m_State = GOT_MANIFEST;
 		else if(pTask->State() == CFetchTask::STATE_ERROR)
 			pUpdate->m_State = FAIL;
 	}
-	else if(!str_comp(pTask->Dest(), pUpdate->m_aLastFile))
+	else if(!str_comp(b, pUpdate->m_aLastFile))
 	{
 		if(pTask->State() == CFetchTask::STATE_DONE)
-		{
-			if(pUpdate->m_ClientUpdate)
-				pUpdate->ReplaceClient();
-			if(pUpdate->m_ServerUpdate)
-				pUpdate->ReplaceServer();
-			if(pUpdate->m_pClient->State() == IClient::STATE_ONLINE || pUpdate->m_pClient->EditorHasUnsavedData())
-				pUpdate->m_State = NEED_RESTART;
-			else{
-				if(!pUpdate->m_IsWinXP)
-					pUpdate->m_pClient->Restart();
-				else
-					pUpdate->WinXpRestart();
-			}
-		}
+			pUpdate->m_State = MOVE_FILES;
 		else if(pTask->State() == CFetchTask::STATE_ERROR)
 			pUpdate->m_State = FAIL;
 	}
@@ -74,12 +66,31 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	char aBuf[256];
+	char aBuf[256], aPath[256];
 	str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdateServer, pFile);
 	if(!pDestPath)
 		pDestPath = pFile;
+	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);
 	CFetchTask *Task = new CFetchTask(false);
-	m_pFetcher->QueueAdd(Task, aBuf, pDestPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->QueueAdd(Task, aBuf, aPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+}
+ 
+void CUpdater::MoveFile(const char *pFile)
+{
+	char aBuf[256];
+	size_t len = str_length(pFile);
+	if(!str_comp(pFile + len - 4, ".dll"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
+		m_pStorage->RenameBinaryFile(pFile, aBuf);
+		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
+		m_pStorage->RenameBinaryFile(aBuf, pFile);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
+		m_pStorage->RenameBinaryFile(aBuf, pFile);
+	}
 }
 
 void CUpdater::Update()
@@ -88,33 +99,18 @@ void CUpdater::Update()
 	{
 		case GOT_MANIFEST:
 			PerformUpdate();
+			break;
+		case MOVE_FILES:
+			CommitUpdate();
+			break;
 		default:
 			return;
 	}
 }
 
-void CUpdater::AddNewFile(const char *pFile)
+void CUpdater::AddFileJob(const char *pFile, bool job)
 {
-	//Check if already on the download list
-	for(vector<string>::iterator it = m_AddedFiles.begin(); it < m_AddedFiles.end(); ++it)
-	{
-		if(!str_comp(it->c_str(), pFile))
-			return;
-	}
-	m_AddedFiles.push_back(string(pFile));
-}
-
-void CUpdater::AddRemovedFile(const char *pFile)
-{
-	//First remove from to be downloaded list
-	for(vector<string>::iterator it = m_AddedFiles.begin(); it < m_AddedFiles.end(); ++it)
-	{
-		if(!str_comp(it->c_str(), pFile)){
-			m_AddedFiles.erase(it);
-			break;
-		}
-	}
-	m_RemovedFiles.push_back(string(pFile));
+	m_FileJobs[string(pFile)] = job;
 }
 
 void CUpdater::ReplaceClient()
@@ -126,7 +122,7 @@ void CUpdater::ReplaceClient()
 	{
 		m_pStorage->RemoveBinaryFile("DDNet.old");
 		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
-		m_pStorage->RenameBinaryFile("DDNet.tmp", PLAT_CLIENT_EXEC);
+		m_pStorage->RenameBinaryFile("update/DDNet.tmp", PLAT_CLIENT_EXEC);
 	}
 	#if !defined(CONF_FAMILY_WINDOWS)
 		char aPath[512];
@@ -145,7 +141,7 @@ void CUpdater::ReplaceServer()
 	//Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile("DDNet-Server.old");
 	m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, "DDNet-Server.old");
-	m_pStorage->RenameBinaryFile("DDNet-Server.tmp", PLAT_SERVER_EXEC);
+	m_pStorage->RenameBinaryFile("update/DDNet-Server.tmp", PLAT_SERVER_EXEC);
 	#if !defined(CONF_FAMILY_WINDOWS)
 		char aPath[512];
 		m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
@@ -159,7 +155,7 @@ void CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[512];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
 	{
 		char aBuf[4096*4];
@@ -184,12 +180,12 @@ void CUpdater::ParseUpdate()
 					if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
 					{
 						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddNewFile(json_string_get(json_array_get(pTemp, j)));
+							AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
 					}
 					if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
 					{
 						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddRemovedFile(json_string_get(json_array_get(pTemp, j)));
+							AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
 					}
 				}
 				else
@@ -213,29 +209,58 @@ void CUpdater::PerformUpdate()
 	m_State = DOWNLOADING;
 
 	const char *aLastFile;
+	aLastFile = "";
+	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it){
+		if(it->second){
+			aLastFile = it->first.c_str();
+			break;
+		}
+	}
+
+	for(map<string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
+	{
+		if(it->second)
+		{
+			FetchFile(it->first.c_str());
+			aLastFile = it->first.c_str();
+		}
+		else
+			m_pStorage->RemoveBinaryFile(it->first.c_str());
+	}
+
+	if(m_ServerUpdate)
+	{
+		FetchFile(PLAT_SERVER_DOWN, "DDNet-Server.tmp");
+		aLastFile = "DDNet-Server.tmp";
+	}
 	if(m_ClientUpdate)
+	{
+		FetchFile(PLAT_CLIENT_DOWN, "DDNet.tmp");
 		aLastFile = "DDNet.tmp";
-	else if(!m_AddedFiles.empty())
-		aLastFile= m_AddedFiles.front().c_str();
-	else
-		aLastFile = "";
+	}
 
 	str_copy(m_aLastFile, aLastFile, sizeof(m_aLastFile));
+}
 
-	while(!m_AddedFiles.empty())
-	{
-		FetchFile(m_AddedFiles.back().c_str());
-		m_AddedFiles.pop_back();
-	}
-	while(!m_RemovedFiles.empty())
-	{
-		m_pStorage->RemoveBinaryFile(m_RemovedFiles.back().c_str());
-		m_RemovedFiles.pop_back();
-	}
-	if(m_ServerUpdate)
-		FetchFile(PLAT_SERVER_DOWN, "DDNet-Server.tmp");
+void CUpdater::CommitUpdate()
+{
+	for(map<std::string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
+		if(it->second)
+			MoveFile(it->first.c_str());
+
 	if(m_ClientUpdate)
-		FetchFile(PLAT_CLIENT_DOWN, "DDNet.tmp");
+		ReplaceClient();
+	if(m_ServerUpdate)
+		ReplaceServer();
+	if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
+		m_State = NEED_RESTART;
+	else
+	{
+		if(!m_IsWinXP)
+			m_pClient->Restart();
+		else
+			WinXpRestart();
+	}
 }
 
 void CUpdater::WinXpRestart()

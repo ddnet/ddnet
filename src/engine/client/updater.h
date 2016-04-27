@@ -3,7 +3,7 @@
 
 #include <engine/updater.h>
 #include <engine/fetcher.h>
-#include <vector>
+#include <map>
 #include <string>
 
 #define CLIENT_EXEC "DDNet"
@@ -48,15 +48,15 @@ class CUpdater : public IUpdater
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
 
-	std::vector<std::string> m_AddedFiles;
-	std::vector<std::string> m_RemovedFiles;
+	std::map<std::string, bool> m_FileJobs;
 
-	void AddNewFile(const char *pFile);
-	void AddRemovedFile(const char *pFile);
+	void AddFileJob(const char *pFile, bool job);
 	void FetchFile(const char *pFile, const char *pDestPath = 0);
+	void MoveFile(const char *pFile);
 
 	void ParseUpdate();
 	void PerformUpdate();
+	void CommitUpdate();
 
 	void ReplaceClient();
 	void ReplaceServer();
