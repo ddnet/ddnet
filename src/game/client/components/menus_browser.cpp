@@ -1068,7 +1068,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	m_lFriends.sort_range();
 	for(int i = 0; i < m_lFriends.size(); ++i)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&m_lFriends[i]);
+		CListboxItem Item = UiDoListboxNextItem(&m_lFriends[i], false, false);
 
 		if(Item.m_Visible)
 		{

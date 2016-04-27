@@ -567,7 +567,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow()
 	return Item;
 }
 
-CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
+CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected, bool KeyEvents)
 {
 	int ThisItemIndex = gs_ListBoxItemIndex;
 	if(Selected)
@@ -595,7 +595,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
 			}
-			else
+			else if(KeyEvents)
 			{
 				for(int i = 0; i < m_NumInputEvents; i++)
 				{
