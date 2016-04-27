@@ -86,8 +86,6 @@ CMenus::CMenus()
 	m_FriendlistSelectedIndex = -1;
 	m_DoubleClickIndex = -1;
 
-	m_DDRacePage = PAGE_BROWSER;
-
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 }
@@ -667,10 +665,15 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage==PAGE_SERVER_INFO, &Button, 0))
 			NewPage = PAGE_SERVER_INFO;
 
-		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(90.0f, &Button, &Box);
+		static int s_NetworkButton=0;
+		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage==PAGE_NETWORK, &Button, 0))
+			NewPage = PAGE_NETWORK;
+
+		Box.VSplitLeft(70.0f, &Button, &Box);
 		static int s_GhostButton=0;
-		if(DoButton_MenuTab(&s_GhostButton, "Network", m_ActivePage==PAGE_DDRace, &Button, 0))
-			NewPage = PAGE_DDRace;
+		if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, 0))
+			NewPage = PAGE_GHOST;
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
@@ -955,16 +958,16 @@ int CMenus::Render()
 				RenderPlayers(MainView);
 			else if(m_GamePage == PAGE_SERVER_INFO)
 				RenderServerInfo(MainView);
-			else if(m_GamePage == PAGE_DDRace)
-				RenderInGameDDRace(MainView);
+			else if(m_GamePage == PAGE_NETWORK)
+				RenderInGameNetwork(MainView);
+			else if(m_GamePage == PAGE_GHOST)
+				RenderGhost(MainView);
 			else if(m_GamePage == PAGE_CALLVOTE)
 				RenderServerControl(MainView);
 			else if(m_GamePage == PAGE_SETTINGS)
 				RenderSettings(MainView);
 			else if(m_GamePage == PAGE_GHOST)
 				RenderGhost(MainView);
-			else if(m_GamePage == PAGE_BROWSER)
-				RenderInGameBrowser(MainView);
 		}
 		else if(g_Config.m_UiPage == PAGE_NEWS)
 			RenderNews(MainView);

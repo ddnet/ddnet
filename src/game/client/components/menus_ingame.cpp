@@ -762,44 +762,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	}
 }
 
-void CMenus::RenderInGameDDRace(CUIRect MainView)
-{
-	CUIRect Box = MainView;
-	CUIRect Button;
-
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
-
-	Box.HSplitTop(5.0f, &MainView, &MainView);
-	Box.HSplitTop(24.0f, &Box, &MainView);
-	Box.VMargin(20.0f, &Box);
-
-	Box.VSplitLeft(100.0f, &Button, &Box);
-	static int s_BrwoserButton=0;
-	if(DoButton_MenuTab(&s_BrwoserButton, Localize("Browser"), m_DDRacePage==PAGE_BROWSER, &Button, CUI::CORNER_TL))
-	{
-		m_DDRacePage = PAGE_BROWSER;
-	}
-
-	//Box.VSplitLeft(4.0f, 0, &Box);
-	Box.VSplitLeft(80.0f, &Button, &Box);
-	static int s_GhostButton=0;
-	if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_DDRacePage==PAGE_GHOST, &Button, 0))
-	{
-		m_DDRacePage = PAGE_GHOST;
-	}
-
-	if(m_DDRacePage != -1)
-	{
-		if(m_DDRacePage == PAGE_GHOST)
-			RenderGhost(MainView);
-		else
-			RenderInGameBrowser(MainView);
-	}
-
-	return;
-}
-
-void CMenus::RenderInGameBrowser(CUIRect MainView)
+void CMenus::RenderInGameNetwork(CUIRect MainView)
 {
 	CUIRect Box = MainView;
 	CUIRect Button;

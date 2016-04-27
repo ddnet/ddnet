@@ -314,8 +314,7 @@ public:
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
-		PAGE_DDRace,
-		PAGE_BROWSER,
+		PAGE_NETWORK,
 		PAGE_GHOST
 	};
 
@@ -343,7 +342,6 @@ public:
 
 	sorted_array<CGhostItem> m_lGhosts;
 	CGhostItem *m_OwnGhost;
-	int m_DDRacePage;
 	void GhostlistPopulate();
 	void setPopup(int Popup) { m_Popup = Popup; }
 
@@ -378,9 +376,8 @@ private:
 	static int GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 
 	// found in menus_ingame.cpp
-	void RenderInGameDDRace(CUIRect MainView);
+	void RenderInGameNetwork(CUIRect MainView);
 	void RenderGhost(CUIRect MainView);
-	void RenderInGameBrowser(CUIRect MainView);
 
 	// found in menus_settings.cpp
 	void RenderSettingsDDRace(CUIRect MainView);
