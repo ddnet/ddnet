@@ -689,9 +689,25 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_pEditor->m_Map.m_Modified = true;
 
 	if(Prop == PROP_WIDTH && NewVal > 1)
+	{
+		if(NewVal > 1000 && !m_pEditor->m_LargeLayerWasWarned)
+		{
+			m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_LARGELAYER;
+			m_pEditor->m_PopupEventActivated = true;
+			m_pEditor->m_LargeLayerWasWarned = true;
+		}
 		Resize(NewVal, m_Height);
+	}
 	else if(Prop == PROP_HEIGHT && NewVal > 1)
+	{
+		if(NewVal > 1000 && !m_pEditor->m_LargeLayerWasWarned)
+		{
+			m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_LARGELAYER;
+			m_pEditor->m_PopupEventActivated = true;
+			m_pEditor->m_LargeLayerWasWarned = true;
+		}
 		Resize(m_Width, NewVal);
+	}
 	else if(Prop == PROP_SHIFT)
 		Shift(NewVal);
 	else if(Prop == PROP_SHIFT_BY)

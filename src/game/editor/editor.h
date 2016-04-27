@@ -714,6 +714,7 @@ public:
 		m_SpeedupForce = 50;
 		m_SpeedupMaxSpeed = 0;
 		m_SpeedupAngle = 0;
+		m_LargeLayerWasWarned = false;
 	}
 
 	virtual void Init();
@@ -773,11 +774,13 @@ public:
 		POPEVENT_LOAD,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
+		POPEVENT_LARGELAYER,
 	};
 
 	int m_PopupEventType;
 	int m_PopupEventActivated;
 	int m_PopupEventWasActivated;
+	bool m_LargeLayerWasWarned;
 
 	enum
 	{
