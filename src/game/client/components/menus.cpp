@@ -1898,7 +1898,7 @@ void CMenus::RenderBackground()
 	// render border fade
 	Graphics()->TextureSet(gs_TextureBlob);
 	Graphics()->QuadsBegin();
-		Graphics()->SetColor(0,0,0,0.5f);
+		Graphics()->SetColor(1,1,1,1);
 		QuadItem = IGraphics::CQuadItem(-100, -100, sw+200, sh+200);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
