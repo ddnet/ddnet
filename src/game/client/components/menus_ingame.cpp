@@ -805,6 +805,12 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 	Box.HSplitTop(24.0f, &Box, &MainView);
 	Box.VMargin(20.0f, &Box);
 
+	if(Page < PAGE_INTERNET || Page > PAGE_DDNET)
+	{
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+		NewPage = PAGE_DDNET;
+	}
+
 	Box.VSplitLeft(100.0f, &Button, &Box);
 	static int s_InternetButton=0;
 	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_TL))
