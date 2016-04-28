@@ -81,7 +81,7 @@ class IDemoEditor : public IInterface
 	MACRO_INTERFACE("demoeditor", 0)
 public:
 
-	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick) = 0;
+	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, bool RemoveChat) = 0;
 };
 
 #endif

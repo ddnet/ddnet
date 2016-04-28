@@ -15,8 +15,8 @@ class CFetchTask
 
 	CFetchTask *m_pNext;
 
-	char m_pUrl[256];
-	char m_pDest[128];
+	char m_aUrl[256];
+	char m_aDest[128];
 	PROGFUNC m_pfnProgressCallback;
 	COMPFUNC m_pfnCompCallback;
 	void *m_pUser;
@@ -44,7 +44,7 @@ public:
 	const double Size() const { return m_Size; };
 	const int Progress() const { return m_Progress; };
 	const int State() const { return m_State; };
-	const char *Dest() const { return m_pDest; };
+	const char *Dest() const { return m_aDest; };
 
 	void Abort() { m_Abort = true; };
 };

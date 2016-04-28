@@ -532,6 +532,30 @@ void CHud::RenderSpectatorHud()
 	TextRender()->Text(0, m_Width-174.0f, m_Height-13.0f, 8.0f, aBuf, -1);
 }
 
+void CHud::RenderLocalTime(float x)
+{
+	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_pScoreboard->Active())
+		return;
+
+	//draw the box
+	Graphics()->BlendNormal();
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+	RenderTools()->DrawRoundRectExt(x-30.0f, 0.0f, 25.0f, 12.5f, 3.75f, CUI::CORNER_B);
+	Graphics()->QuadsEnd();
+
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	//draw the text
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+	TextRender()->Text(0, x-25.0f, 2.5f, 5.0f, aBuf, -1);
+}
+
 void CHud::OnRender()
 {
 	if(!m_pClient->m_Snap.m_pGameInfoObj)
@@ -563,6 +587,7 @@ void CHud::OnRender()
 			RenderScoreHud();
 		RenderWarmupTimer();
 		RenderFps();
+		RenderLocalTime((m_Width/7)*3);
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderConnectionWarning();
 		RenderTeambalanceWarning();

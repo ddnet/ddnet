@@ -59,7 +59,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if (m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
 	{
 		CUIRect Screen = *UI()->Screen();
-		CUIRect Box, Part;
+		CUIRect Box, Part, Part2;
 		Box = Screen;
 		Box.VMargin(150.0f/UI()->Scale(), &Box);
 #if defined(__ANDROID__)
@@ -95,6 +95,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Ok.VMargin(20.0f, &Ok);
 		Abort.VMargin(20.0f, &Abort);
 
+		static int s_RemoveChat = 0;
+
 		static int s_ButtonAbort = 0;
 		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
 			m_DemoPlayerState = DEMOPLAYER_NONE;
@@ -114,16 +116,25 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
-				Client()->DemoSlice(aPath);
+				Client()->DemoSlice(aPath, s_RemoveChat);
 			}
 		}
 
 		Box.HSplitBottom(60.f, &Box, &Part);
+		Box.HSplitBottom(60.f, &Box, &Part2);
 #if defined(__ANDROID__)
+		Box.HSplitBottom(60.f, &Box, &Part2);
 		Box.HSplitBottom(60.f, &Box, &Part);
 #else
+		Box.HSplitBottom(24.f, &Box, &Part2);
 		Box.HSplitBottom(24.f, &Box, &Part);
 #endif
+
+		Part2.VSplitLeft(60.0f, 0, &Label);
+		if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &Label))
+		{
+			s_RemoveChat ^= 1;
+		}
 
 		Part.VSplitLeft(60.0f, 0, &Label);
 		Label.VSplitLeft(120.0f, 0, &TextBox);
@@ -132,7 +143,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, -1);
 		static float Offset = 0.0f;
 		DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
-
 	}
 
 	// handle mousewheel independent of active menu
@@ -557,7 +567,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow()
 	return Item;
 }
 
-CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
+CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected, bool KeyEvents)
 {
 	int ThisItemIndex = gs_ListBoxItemIndex;
 	if(Selected)
@@ -579,12 +589,13 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
 		{
 			gs_ListBoxDoneEvents = 1;
 
+
 			if(m_EnterPressed || (UI()->ActiveItem() == pId && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
 			}
-			else
+			else if(KeyEvents)
 			{
 				for(int i = 0; i < m_NumInputEvents; i++)
 				{

@@ -108,59 +108,17 @@ void CCollision::Init(class CLayers *pLayers)
 		}
 		if(m_pFront)
 		{
+			// remove unused tiles from front layer
 			Index = m_pFront[i].m_Index;
-
-			if(Index <= TILE_NPH_START)
-			{
-				switch(Index)
-				{
-				case TILE_DEATH:
-					m_pFront[i].m_Index = COLFLAG_DEATH;
-					break;
-				case TILE_SOLID:
-					m_pFront[i].m_Index = 0;
-					break;
-				case TILE_NOHOOK:
-					m_pFront[i].m_Index = 0;
-					break;
-				case TILE_NOLASER:
-					m_pFront[i].m_Index = TILE_NOLASER;
-					break;
-				default:
-					m_pFront[i].m_Index = 0;
-				}
-
-				// DDRace tiles
-				if(Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START))
-					m_pFront[i].m_Index = Index;
-			}
+			if(Index <= TILE_NPH_START && !(Index == TILE_DEATH || (Index >= TILE_NOLASER && Index <= TILE_THROUGH) || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
+				m_pFront[i].m_Index = 0;
 		}
+		// remove unused tiles from game layer
 		Index = m_pTiles[i].m_Index;
-		if(Index <= TILE_NPH_START)
-		{
-			switch(Index)
-			{
-			case TILE_DEATH:
-				m_pTiles[i].m_Index = COLFLAG_DEATH;
-				break;
-			case TILE_SOLID:
-				m_pTiles[i].m_Index = COLFLAG_SOLID;
-				break;
-			case TILE_NOHOOK:
-				m_pTiles[i].m_Index = COLFLAG_SOLID|COLFLAG_NOHOOK;
-				break;
-			case TILE_NOLASER:
-				m_pTiles[i].m_Index = TILE_NOLASER;
-				break;
-			default:
+		if(Index <= TILE_NPH_START && !((Index >= TILE_SOLID && Index <= TILE_NOLASER) || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
 				m_pTiles[i].m_Index = 0;
-			}
-
-			// DDRace tiles
-			if(Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || Index == TILE_CP || Index == TILE_CP_F || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START))
-				m_pTiles[i].m_Index = Index;
-		}
 	}
+
 	if(m_NumSwitchers)
 	{
 		m_pSwitchers = new SSwitchers[m_NumSwitchers+1];
@@ -187,31 +145,18 @@ int CCollision::GetTile(int x, int y)
 	int Ny = clamp(y/32, 0, m_Height-1);
 	int pos = Ny * m_Width + Nx;
 
-	if(m_pTiles[pos].m_Index == COLFLAG_SOLID
-		|| m_pTiles[pos].m_Index == (COLFLAG_SOLID|COLFLAG_NOHOOK)
-		|| m_pTiles[pos].m_Index == COLFLAG_DEATH
-		|| m_pTiles[pos].m_Index == TILE_NOLASER)
+	if(m_pTiles[pos].m_Index >= TILE_SOLID && m_pTiles[pos].m_Index <= TILE_NOLASER)
 		return m_pTiles[pos].m_Index;
 	return 0;
 }
-/*
-bool CCollision::IsTileSolid(int x, int y)
-{
-	return GetTile(x, y)&COLFLAG_SOLID;
-}
-*/
+
 // TODO: rewrite this smarter!
-int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough)
+int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision)
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance+1);
 	vec2 Last = Pos0;
 	int ix = 0, iy = 0; // Temporary position for checking collision
-	int dx = 0, dy = 0; // Offset for checking the "through" tile
-	if (AllowThrough)
-		{
-			ThroughOffset(Pos0, Pos1, &dx, &dy);
-		}
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i/(float)End;
@@ -219,7 +164,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		ix = round_to_int(Pos.x);
 		iy = round_to_int(Pos.y);
 
-		if((CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy))))
+		if(CheckPoint(ix, iy))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -237,17 +182,14 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	return 0;
 }
 
-int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough)
+int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr)
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance+1);
 	vec2 Last = Pos0;
 	int ix = 0, iy = 0; // Temporary position for checking collision
 	int dx = 0, dy = 0; // Offset for checking the "through" tile
-	if (AllowThrough)
-		{
-			ThroughOffset(Pos0, Pos1, &dx, &dy);
-		}
+	ThroughOffset(Pos0, Pos1, &dx, &dy);
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i/(float)End;
@@ -255,28 +197,37 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		ix = round_to_int(Pos.x);
 		iy = round_to_int(Pos.y);
 
-		int Nx = clamp(ix/32, 0, m_Width-1);
-		int Ny = clamp(iy/32, 0, m_Height-1);
+		int Index = GetPureMapIndex(Pos);
 		if (g_Config.m_SvOldTeleportHook)
-			*pTeleNr = IsTeleport(Ny*m_Width+Nx);
+			*pTeleNr = IsTeleport(Index);
 		else
-			*pTeleNr = IsTeleportHook(Ny*m_Width+Nx);
+			*pTeleNr = IsTeleportHook(Index);
 		if(*pTeleNr)
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			return COLFLAG_TELE;
+			return TILE_TELEINHOOK;
 		}
 
-		if((CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy))))
+		int hit = 0;
+		if(CheckPoint(ix, iy))
+		{
+			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
+				hit = GetCollisionAt(ix, iy);
+		}
+		else if(IsHookBlocker(ix, iy, Pos0, Pos1))
+		{
+			hit = TILE_NOHOOK;
+		}
+		if(hit)
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			return GetCollisionAt(ix, iy);
+			return hit;
 		}
 
 		Last = Pos;
@@ -288,17 +239,12 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	return 0;
 }
 
-int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough)
+int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr)
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance+1);
 	vec2 Last = Pos0;
 	int ix = 0, iy = 0; // Temporary position for checking collision
-	int dx = 0, dy = 0; // Offset for checking the "through" tile
-	if (AllowThrough)
-		{
-			ThroughOffset(Pos0, Pos1, &dx, &dy);
-		}
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i/(float)End;
@@ -306,22 +252,21 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 		ix = round_to_int(Pos.x);
 		iy = round_to_int(Pos.y);
 
-		int Nx = clamp(ix/32, 0, m_Width-1);
-		int Ny = clamp(iy/32, 0, m_Height-1);
+		int Index = GetPureMapIndex(Pos);
 		if (g_Config.m_SvOldTeleportWeapons)
-			*pTeleNr = IsTeleport(Ny*m_Width+Nx);
+			*pTeleNr = IsTeleport(Index);
 		else
-			*pTeleNr = IsTeleportWeapon(Ny*m_Width+Nx);
+			*pTeleNr = IsTeleportWeapon(Index);
 		if(*pTeleNr)
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			return COLFLAG_TELE;
+			return TILE_TELEINWEAPON;
 		}
 
-		if((CheckPoint(ix, iy) && !(AllowThrough && IsThrough(ix + dx, iy + dy))))
+		if(CheckPoint(ix, iy))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -473,22 +418,45 @@ void CCollision::Dest()
 
 int CCollision::IsSolid(int x, int y)
 {
-	return (GetTile(x,y)&COLFLAG_SOLID);
+	int index = GetTile(x,y);
+	return index == TILE_SOLID || index == TILE_NOHOOK;
 }
 
-int CCollision::IsThrough(int x, int y)
+bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1)
 {
-	int Nx = clamp(x/32, 0, m_Width-1);
-	int Ny = clamp(y/32, 0, m_Height-1);
-	int Index = m_pTiles[Ny*m_Width+Nx].m_Index;
-	int Findex = 0;
-	if (m_pFront)
-		Findex = m_pFront[Ny*m_Width+Nx].m_Index;
-	if (Index == TILE_THROUGH)
-		return Index;
-	if (Findex == TILE_THROUGH)
-		return Findex;
-	return 0;
+	int pos = GetPureMapIndex(x, y);
+	if(m_pFront && (m_pFront[pos].m_Index == TILE_THROUGH_ALL || m_pFront[pos].m_Index == TILE_THROUGH_CUT))
+		return true;
+	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && (
+		(m_pFront[pos].m_Flags == ROTATION_0   && pos0.y > pos1.y) ||
+		(m_pFront[pos].m_Flags == ROTATION_90  && pos0.x < pos1.x) ||
+		(m_pFront[pos].m_Flags == ROTATION_180 && pos0.y < pos1.y) ||
+		(m_pFront[pos].m_Flags == ROTATION_270 && pos0.x > pos1.x) ))
+		return true;
+	int offpos = GetPureMapIndex(x+xoff, y+yoff);
+	if(m_pTiles[offpos].m_Index == TILE_THROUGH || (m_pFront && m_pFront[offpos].m_Index == TILE_THROUGH))
+		return true;
+	return false;
+}
+
+bool CCollision::IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1)
+{
+	int pos = GetPureMapIndex(x, y);
+	if(m_pTiles[pos].m_Index == TILE_THROUGH_ALL || (m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_ALL))
+		return true;
+	if(m_pTiles[pos].m_Index == TILE_THROUGH_DIR && (
+		(m_pTiles[pos].m_Flags == ROTATION_0   && pos0.y < pos1.y) ||
+		(m_pTiles[pos].m_Flags == ROTATION_90  && pos0.x > pos1.x) ||
+		(m_pTiles[pos].m_Flags == ROTATION_180 && pos0.y > pos1.y) ||
+		(m_pTiles[pos].m_Flags == ROTATION_270 && pos0.x < pos1.x) ))
+		return true;
+	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && (
+		(m_pFront[pos].m_Flags == ROTATION_0   && pos0.y < pos1.y) ||
+		(m_pFront[pos].m_Flags == ROTATION_90  && pos0.x > pos1.x) ||
+		(m_pFront[pos].m_Flags == ROTATION_180 && pos0.y > pos1.y) ||
+		(m_pFront[pos].m_Flags == ROTATION_270 && pos0.x < pos1.x) ))
+		return true;
+	return false;
 }
 
 int CCollision::IsWallJump(int Index)
@@ -712,10 +680,10 @@ vec2 CCollision::CpSpeed(int Index, int Flags)
 	return target;
 }
 
-int CCollision::GetPureMapIndex(vec2 Pos)
+int CCollision::GetPureMapIndex(float x, float y)
 {
-	int Nx = clamp((int)Pos.x/32, 0, m_Width-1);
-	int Ny = clamp((int)Pos.y/32, 0, m_Height-1);
+	int Nx = clamp((int)x/32, 0, m_Width-1);
+	int Ny = clamp((int)y/32, 0, m_Height-1);
 	return Ny*m_Width+Nx;
 }
 
@@ -899,14 +867,6 @@ int CCollision::GetIndex(int Nx, int Ny)
 	return m_pTiles[Ny*m_Width+Nx].m_Index;
 }
 
-int CCollision::GetIndex(vec2 Pos)
-{
-	int nx = clamp((int)Pos.x/32, 0, m_Width-1);
-	int ny = clamp((int)Pos.y/32, 0, m_Height-1);
-
-	return ny*m_Width+nx;
-}
-
 int CCollision::GetIndex(vec2 PrevPos, vec2 Pos)
 {
 	float Distance = distance(PrevPos, Pos);
@@ -957,7 +917,7 @@ int CCollision::GetFTile(int x, int y)
 	int Nx = clamp(x/32, 0, m_Width-1);
 	int Ny = clamp(y/32, 0, m_Height-1);
 	/*dbg_msg("GetFTile","m_Index %d",m_pFront[Ny*m_Width+Nx].m_Index);//Remove */
-	if(m_pFront[Ny*m_Width+Nx].m_Index == COLFLAG_DEATH
+	if(m_pFront[Ny*m_Width+Nx].m_Index == TILE_DEATH
 		|| m_pFront[Ny*m_Width+Nx].m_Index == TILE_NOLASER)
 		return m_pFront[Ny*m_Width+Nx].m_Index;
 	else
@@ -1015,12 +975,12 @@ int CCollision::Entity(int x, int y, int Layer)
 	}
 }
 
-void CCollision::SetCollisionAt(float x, float y, int flag)
+void CCollision::SetCollisionAt(float x, float y, int id)
 {
 	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
 	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 
-	m_pTiles[Ny * m_Width + Nx].m_Index = flag;
+	m_pTiles[Ny * m_Width + Nx].m_Index = id;
 }
 
 void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Number)
@@ -1100,8 +1060,8 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x)/32, 0, m_Width-1);
 		int Ny = clamp(round_to_int(Pos.y)/32, 0, m_Height-1);
-		if(GetIndex(Nx, Ny) == COLFLAG_SOLID
-			|| GetIndex(Nx, Ny) == (COLFLAG_SOLID|COLFLAG_NOHOOK)
+		if(GetIndex(Nx, Ny) == TILE_SOLID
+			|| GetIndex(Nx, Ny) == TILE_NOHOOK
 			|| GetIndex(Nx, Ny) == TILE_NOLASER
 			|| GetFIndex(Nx, Ny) == TILE_NOLASER)
 		{

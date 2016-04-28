@@ -1068,7 +1068,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	m_lFriends.sort_range();
 	for(int i = 0; i < m_lFriends.size(); ++i)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&m_lFriends[i]);
+		CListboxItem Item = UiDoListboxNextItem(&m_lFriends[i], false, false);
 
 		if(Item.m_Visible)
 		{
@@ -1335,7 +1335,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button))
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button) || Input()->KeyPressed(KEY_F5))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

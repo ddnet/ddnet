@@ -3020,12 +3020,12 @@ void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
 	pSelf->DemoSliceEnd();
 }
 
-void CClient::DemoSlice(const char *pDstPath)
+void CClient::DemoSlice(const char *pDstPath, bool RemoveChat)
 {
 	if (m_DemoPlayer.IsPlaying())
 	{
 		const char *pDemoFileName = m_DemoPlayer.GetDemoFileName();
-		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd);
+		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, RemoveChat);
 	}
 }
 
@@ -3037,7 +3037,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_NetClient[0].ResetErrorString();
 
 	// try to start playback
-	m_DemoPlayer.SetListner(this);
+	m_DemoPlayer.SetListener(this);
 
 	if(m_DemoPlayer.Load(Storage(), m_pConsole, pFilename, StorageType))
 		return "error loading demo";
@@ -3098,6 +3098,12 @@ void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)
 			pSelf->m_DemoPlayer.Pause();
 		}
 	}
+}
+
+void CClient::Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->m_DemoPlayer.SetSpeed(pResult->GetFloat(0));
 }
 
 void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder)
@@ -3221,6 +3227,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_slice_start", "", CFGFLAG_CLIENT, Con_DemoSliceBegin, this, "");
 	m_pConsole->Register("demo_slice_end", "", CFGFLAG_CLIENT, Con_DemoSliceEnd, this, "");
 	m_pConsole->Register("demo_play", "", CFGFLAG_CLIENT, Con_DemoPlay, this, "Play demo");
+	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
 
 	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);

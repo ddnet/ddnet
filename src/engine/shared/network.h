@@ -79,6 +79,8 @@ enum
 
 	NET_CONN_BUFFERSIZE=1024*32,
 
+	NET_CONNLIMIT_IPS=16,
+
 	NET_ENUM_TERMINATOR
 };
 
@@ -283,6 +285,13 @@ class CNetServer
 		CNetConnection m_Connection;
 	};
 
+	struct CSpamConn
+	{
+		NETADDR m_Addr;
+		int64 m_Time;
+		int m_Conns;
+	};
+
 	NETSOCKET m_Socket;
 	class CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
@@ -305,6 +314,8 @@ class CNetServer
 	int64 m_VConnFirst;
 	int m_VConnNum;
 
+	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];
+
 	CNetRecvUnpacker m_RecvUnpacker;
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
@@ -316,6 +327,7 @@ class CNetServer
 
 	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth=false);
 	int NumClientsWithAddr(NETADDR Addr);
+	bool Connlimit(NETADDR Addr);
 	void SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num);
 
 public:

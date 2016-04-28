@@ -492,27 +492,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	}
 }
 
-void CScoreboard::RenderLocalTime(float x)
-{
-	//draw the box
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(x-120.0f, 0.0f, 100.0f, 50.0f, 15.0f, CUI::CORNER_B);
-	Graphics()->QuadsEnd();
-
-	time_t rawtime;
-	struct tm *timeinfo;
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
-
-	//draw the text
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
-	TextRender()->Text(0, x-100.0f, 10.0f, 20.0f, aBuf, -1);
-}
-
 void CScoreboard::RenderRecordingNotification(float x)
 {
 	if(!m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording() &&
@@ -564,6 +543,7 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 	TextRender()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
 }
+
 
 void CScoreboard::OnRender()
 {
@@ -640,7 +620,6 @@ void CScoreboard::OnRender()
 	RenderGoals(Width/2-w/2, 150+760+10, w);
 	RenderSpectators(Width/2-w/2, 150+760+10+50+10, w);
 	RenderRecordingNotification((Width/7)*4);
-	RenderLocalTime((Width/7)*3);
 }
 
 bool CScoreboard::Active()
