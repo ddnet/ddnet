@@ -670,10 +670,17 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage==PAGE_NETWORK, &Button, 0))
 			NewPage = PAGE_NETWORK;
 
-		Box.VSplitLeft(70.0f, &Button, &Box);
-		static int s_GhostButton=0;
-		if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, 0))
-			NewPage = PAGE_GHOST;
+		{
+			CServerInfo Info;
+			Client()->GetServerInfo(&Info);
+			static int s_GhostButton=0;
+			if(IsRace(&Info) || IsDDNet(&Info))
+			{
+				Box.VSplitLeft(70.0f, &Button, &Box);
+				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, 0))
+					NewPage = PAGE_GHOST;
+			}
+		}
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
