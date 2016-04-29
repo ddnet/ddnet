@@ -232,7 +232,7 @@ int CInput::Update()
 					return 1;
 
 #if defined(__ANDROID__)
-				case SDL_VIDEORESIZE:
+				case SDL_WINDOWEVENT_RESIZED:
 					m_VideoRestartNeeded = 1;
 					break;
 #endif
