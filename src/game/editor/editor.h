@@ -640,6 +640,7 @@ public:
 		m_aFileName[0] = 0;
 		m_aFileSaveName[0] = 0;
 		m_ValidSaveFilename = false;
+		m_LicenseSet = false;
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
@@ -748,6 +749,8 @@ public:
 		const char *pBasepath, const char *pDefaultName,
 		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 
+	void InvokeMapDetailsMenu();
+
 	void Reset(bool CreateDefault=true);
 	int Save(const char *pFilename);
 	int Load(const char *pFilename, int StorageType);
@@ -773,6 +776,7 @@ public:
 	char m_aFileName[512];
 	char m_aFileSaveName[512];
 	bool m_ValidSaveFilename;
+	bool m_LicenseSet;
 
 	enum
 	{

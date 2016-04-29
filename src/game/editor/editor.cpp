@@ -870,6 +870,7 @@ void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUse
 		pEditor->m_Map.m_Modified = false;
 		pEditor->m_Map.m_UndoModified = 0;
 		pEditor->m_LastUndoUpdateTime = time_get();
+		pEditor->m_LicenseSet = true;
 	}
 	else
 	{
@@ -1155,6 +1156,15 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				}
 			}
 		}
+	}
+
+	{
+		TB_Top.VSplitRight(10.0f, &TB_Top, &Button);
+		TB_Top.VSplitRight(60.0f, &TB_Top, &Button);
+		static int s_MapInfoButton = 0;
+
+		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, 0))
+			InvokeMapDetailsMenu();
 	}
 
 	// tile manipulation
@@ -2744,7 +2754,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				((pProps[i].m_Value >> s_aShift[1])&0xff)/255.0f,
 				((pProps[i].m_Value >> s_aShift[2])&0xff)/255.0f,
 				1.0f);
-			
+
 			static int s_ColorPicker, s_ColorPickerID;
 			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &Color))
 			{
@@ -3979,17 +3989,21 @@ void CEditor::RenderFileDialog()
 	{
 		ButtonBar.VSplitLeft(40.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
-		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, 0))
-		{
-			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor, sizeof(m_Map.m_MapInfo.m_aAuthorTmp));
-			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion, sizeof(m_Map.m_MapInfo.m_aVersionTmp));
-			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits, sizeof(m_Map.m_MapInfo.m_aCreditsTmp));
-			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense, sizeof(m_Map.m_MapInfo.m_aLicenseTmp));
-			static int s_MapInfoPopupID = 0;
-			UiInvokePopupMenu(&s_MapInfoPopupID, 0, Width/2.0f-200.0f, Height/2.0f-100.0f, 400.0f, 200.0f, PopupMapInfo);
-			UI()->SetActiveItem(0);
-		}
+		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, 0) || !m_LicenseSet)
+			InvokeMapDetailsMenu();
 	}
+}
+
+void CEditor::InvokeMapDetailsMenu()
+{
+	m_LicenseSet = true;
+	str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor, sizeof(m_Map.m_MapInfo.m_aAuthorTmp));
+	str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion, sizeof(m_Map.m_MapInfo.m_aVersionTmp));
+	str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits, sizeof(m_Map.m_MapInfo.m_aCreditsTmp));
+	str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense, sizeof(m_Map.m_MapInfo.m_aLicenseTmp));
+	static int s_MapInfoPopupID = 0;
+	UiInvokePopupMenu(&s_MapInfoPopupID, 0, UI()->Screen()->w/2.0f-200.0f, UI()->Screen()->h/2.0f-150.0f, 400.0f, 300.0f, PopupMapInfo);
+	UI()->SetActiveItem(0);
 }
 
 void CEditor::FilelistPopulate(int StorageType)
@@ -4945,7 +4959,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	MenuBar.VSplitLeft(60.0f, &s_File, &MenuBar);
 	if(DoButton_Menu(&s_File, "File", 0, &s_File, 0, 0))
-		UiInvokePopupMenu(&s_File, 1, s_File.x, s_File.y+s_File.h-1.0f, 120, 150, PopupMenuFile, this);
+		UiInvokePopupMenu(&s_File, 1, s_File.x, s_File.y+s_File.h-1.0f, 120, 140, PopupMenuFile, this);
 
 	/*
 	menubar.VSplitLeft(5.0f, 0, &menubar);
@@ -5218,10 +5232,6 @@ void CEditor::Reset(bool CreateDefault)
 	if(CreateDefault)
 		m_Map.CreateDefault(ms_EntitiesTexture);
 
-	/*
-	{
-	}*/
-
 	m_SelectedLayer = 0;
 	m_SelectedGroup = 0;
 	m_SelectedQuad = -1;
@@ -5248,6 +5258,8 @@ void CEditor::Reset(bool CreateDefault)
 	m_Map.m_UndoModified = 0;
 	m_LastUndoUpdateTime = time_get();
 	m_UndoRunning = false;
+
+	m_LicenseSet = false;
 
 	m_ShowEnvelopePreview = 0;
 	m_ShiftBy = 1;
@@ -5395,6 +5407,10 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(new CLayerGame(50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
+
+	str_copy(m_MapInfo.m_aAuthor, g_Config.m_PlayerName, sizeof(m_MapInfo.m_aAuthor));
+	str_copy(m_MapInfo.m_aVersion, "1.0", sizeof(m_MapInfo.m_aVersion));
+	str_copy(m_MapInfo.m_aLicense, "CC BY-SA 4.0", sizeof(m_MapInfo.m_aLicense));
 
 	m_pFrontLayer = 0x0;
 	m_pTeleLayer = 0x0;
