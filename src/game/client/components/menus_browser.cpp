@@ -432,24 +432,20 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					vec3 hsl = vec3(1.0f, 1.0f, 1.0f);
 
-					if (!str_comp(pItem->m_aGameType, "DM")
-							|| !str_comp(pItem->m_aGameType, "TDM")
-							|| !str_comp(pItem->m_aGameType, "CTF"))
-						hsl = vec3(0.33f, 1.0f, 0.75f); // Vanilla
-					else if (str_find_nocase(pItem->m_aGameType, "catch"))
-						hsl = vec3(0.17f, 1.0f, 0.75f); // Catch
-					else if (str_find_nocase(pItem->m_aGameType, "idm")
-							|| str_find_nocase(pItem->m_aGameType, "itdm")
-							|| str_find_nocase(pItem->m_aGameType, "ictf"))
-						hsl = vec3(0.00f, 1.0f, 0.75f); // Instagib
-					else if (str_find_nocase(pItem->m_aGameType, "fng"))
-						hsl = vec3(0.83f, 1.0f, 0.75f); // FNG
+					if (IsVanilla(pItem))
+						hsl = vec3(0.33f, 1.0f, 0.75f);
+					else if (IsCatch(pItem))
+						hsl = vec3(0.17f, 1.0f, 0.75f);
+					else if (IsInsta(pItem))
+						hsl = vec3(0.00f, 1.0f, 0.75f);
+					else if (IsFNG(pItem))
+						hsl = vec3(0.83f, 1.0f, 0.75f);
 					else if (IsDDNet(pItem))
-						hsl = vec3(0.58f, 1.0f, 0.75f); // DDNet
+						hsl = vec3(0.58f, 1.0f, 0.75f);
 					else if (IsDDRace(pItem))
-						hsl = vec3(0.75f, 1.0f, 0.75f); // DDRace
+						hsl = vec3(0.75f, 1.0f, 0.75f);
 					else if (IsRace(pItem))
-						hsl = vec3(0.46f, 1.0f, 0.75f); // Race
+						hsl = vec3(0.46f, 1.0f, 0.75f);
 
 					vec3 rgb = HslToRgb(hsl);
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
