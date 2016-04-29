@@ -1335,7 +1335,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button) || Input()->KeyDown(KEY_F5) || (Input()->KeyDown(KEY_r) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button) || Input()->KeyDown(KEY_F5) || (Input()->KeyDown(KEY_R) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
