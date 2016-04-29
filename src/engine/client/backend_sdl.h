@@ -188,6 +188,7 @@ public:
 
 	virtual void Minimize();
 	virtual void Maximize();
+	virtual bool Fullscreen(bool State);
 	virtual int WindowActive();
 	virtual int WindowOpen();
 	virtual void SetWindowGrab(bool Grab);
