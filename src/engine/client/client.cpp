@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <climits>
+#include <locale.h> //setlocale
 
 #include <base/math.h>
 #include <base/vmath.h>
@@ -3394,6 +3395,9 @@ int main(int argc, const char **argv) // ignore_convention
 	if(!g_Config.m_ClShowConsole)
 		FreeConsole();
 #endif
+
+	// For XOpenIM in SDL2: https://bugzilla.libsdl.org/show_bug.cgi?id=3102
+	setlocale(LC_ALL, "");
 
 	// run the client
 	dbg_msg("client", "starting...");
