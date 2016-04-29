@@ -40,8 +40,6 @@ protected:
 	int m_InputCurrent;
 	bool m_InputDispatched;
 
-	int KeyWasPressed(int Key) { return m_aInputState[m_InputCurrent^1][Key]; }
-
 public:
 	enum
 	{
@@ -68,10 +66,10 @@ public:
 	}
 
 	// keys
-	int KeyPressed(int Key) { return m_aInputState[m_InputCurrent][Key]; }
-	int KeyReleases(int Key) { return m_aInputCount[m_InputCurrent][Key].m_Releases; }
-	int KeyPresses(int Key) { return m_aInputCount[m_InputCurrent][Key].m_Presses; }
-	int KeyDown(int Key) { return KeyPressed(Key)&&!KeyWasPressed(Key); }
+	virtual int KeyPressed(int Key) const = 0;
+	virtual int KeyReleases(int Key) const = 0;
+	virtual int KeyPresses(int Key) const = 0;
+	virtual int KeyDown(int Key) const = 0;
 	const char *KeyName(int Key) { return (Key >= 0 && Key < 512) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
 
 	//

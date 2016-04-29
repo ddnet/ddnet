@@ -120,9 +120,14 @@ void CInput::ClearKeyStates()
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 }
 
-int CInput::KeyState(int Key)
+int CInput::KeyState(int Key) const
 {
-	return m_aInputState[m_InputCurrent][Key];
+	return m_aInputState[m_InputCurrent][Key>=KEY_MOUSE_1 ? Key : SDL_GetScancodeFromKey(KeyToKeycode(Key))];
+}
+
+int CInput::KeyStateOld(int Key) const
+{
+	return m_aInputState[m_InputCurrent^1][Key>=KEY_MOUSE_1 ? Key : SDL_GetScancodeFromKey(KeyToKeycode(Key))];
 }
 
 int CInput::Update()
@@ -162,6 +167,7 @@ int CInput::Update()
 		while(SDL_PollEvent(&Event))
 		{
 			int Key = -1;
+			int Scancode = 0;
 			int Action = IInput::FLAG_PRESS;
 			switch (Event.type)
 			{
@@ -181,15 +187,13 @@ int CInput::Update()
 				}
 				// handle keys
 				case SDL_KEYDOWN:
-					if(Event.key.keysym.sym == KEY_UNKNOWN)
-						continue;
-					Key = Event.key.keysym.scancode;
+					Key = KeycodeToKey(Event.key.keysym.sym);
+					Scancode = Event.key.keysym.scancode;
 					break;
 				case SDL_KEYUP:
-					if(Event.key.keysym.sym == KEY_UNKNOWN)
-						continue;
 					Action = IInput::FLAG_RELEASE;
-					Key = Event.key.keysym.scancode;
+					Key = KeycodeToKey(Event.key.keysym.sym);
+					Scancode = Event.key.keysym.scancode;
 					break;
 
 				// handle mouse buttons
@@ -213,6 +217,7 @@ int CInput::Update()
 					if(Event.button.button == 7) Key = KEY_MOUSE_7; // ignore_convention
 					if(Event.button.button == 8) Key = KEY_MOUSE_8; // ignore_convention
 					if(Event.button.button == 9) Key = KEY_MOUSE_9; // ignore_convention
+					Scancode = Key;
 					break;
 
 				case SDL_MOUSEWHEEL:
@@ -233,12 +238,11 @@ int CInput::Update()
 #endif
 			}
 
-			//
 			if(Key >= 0 && Key < 1024)
 			{
 				m_aInputCount[m_InputCurrent][Key].m_Presses++;
 				if(Action == IInput::FLAG_PRESS)
-					m_aInputState[m_InputCurrent][Key] = 1;
+					m_aInputState[m_InputCurrent][Scancode] = 1;
 				AddEvent(0, Key, Action);
 			}
 

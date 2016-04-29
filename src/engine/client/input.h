@@ -24,6 +24,15 @@ public:
 
 	virtual void Init();
 
+	int KeyState(int Key) const;
+	int KeyStateOld(int Key) const;
+	int KeyWasPressed(int Key) const { return KeyStateOld(Key); }
+
+	int KeyPressed(int Key) const { return KeyState(Key); }
+	int KeyReleases(int Key) const { return m_aInputCount[m_InputCurrent][Key].m_Releases; }
+	int KeyPresses(int Key) const { return m_aInputCount[m_InputCurrent][Key].m_Presses; }
+	int KeyDown(int Key) const { return KeyPressed(Key)&&!KeyWasPressed(Key); }
+
 	virtual void MouseRelative(float *x, float *y);
 	virtual void MouseModeAbsolute();
 	virtual void MouseModeRelative();
@@ -32,7 +41,6 @@ public:
 	virtual void SetClipboardText(const char *Text);
 
 	void ClearKeyStates();
-	int KeyState(int Key);
 
 	int ButtonPressed(int Button) { return m_aInputState[m_InputCurrent][Button]; }
 
