@@ -227,6 +227,16 @@ int CInput::Update()
 					Action = IInput::FLAG_RELEASE;
 					break;
 
+#if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL
+				case SDL_WINDOWEVENT:
+					if(Event.window.event == SDL_WINDOWEVENT_MAXIMIZED)
+					{
+						MouseModeAbsolute();
+						MouseModeRelative();
+					}
+					break;
+#endif
+
 				// other messages
 				case SDL_QUIT:
 					return 1;

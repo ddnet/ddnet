@@ -67,6 +67,10 @@ public:
 	float ScreenAspect() const { return (float)ScreenWidth()/(float)ScreenHeight(); }
 
 	virtual bool Fullscreen(bool State) = 0;
+	virtual void SetWindowBordered(bool State) = 0;
+	virtual bool SetWindowScreen(int Index) = 0;
+	virtual bool SetVSync(bool State) = 0;
+	virtual int GetWindowScreen() = 0;
 
 	virtual void Clear(float r, float g, float b) = 0;
 
@@ -141,6 +145,7 @@ public:
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) = 0;
 
 	virtual void Swap() = 0;
+	virtual int GetNumScreens() const = 0;
 
 	// syncronization
 	virtual void InsertSignal(class semaphore *pSemaphore) = 0;

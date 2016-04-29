@@ -82,6 +82,7 @@ public:
 		CMD_SWAP,
 
 		// misc
+		CMD_VSYNC,
 		CMD_SCREENSHOT,
 		CMD_VIDEOMODES,
 
@@ -191,7 +192,7 @@ public:
 
 	struct SCommand_VideoModes : public SCommand
 	{
-		SCommand_VideoModes(int screen) : SCommand(CMD_VIDEOMODES), m_Screen(screen) {}
+		SCommand_VideoModes() : SCommand(CMD_VIDEOMODES) {}
 
 		CVideoMode *m_pModes; // processor will fill this in
 		int m_MaxModes; // maximum of modes the processor can write to the m_pModes
@@ -204,6 +205,14 @@ public:
 		SCommand_Swap() : SCommand(CMD_SWAP) {}
 
 		int m_Finish;
+	};
+
+	struct SCommand_VSync : public SCommand
+	{
+		SCommand_VSync() : SCommand(CMD_VSYNC) {}
+
+		int m_VSync;
+		bool *m_pRetOk;
 	};
 
 	struct SCommand_Texture_Create : public SCommand
@@ -304,14 +313,19 @@ public:
 
 	virtual ~IGraphicsBackend() {}
 
-	virtual int Init(const char *pName, int Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight) = 0;
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight) = 0;
 	virtual int Shutdown() = 0;
 
 	virtual int MemoryUsage() const = 0;
 
+	virtual int GetNumScreens() const = 0;
+
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
 	virtual bool Fullscreen(bool State) = 0;
+	virtual void SetWindowBordered(bool State) = 0;
+	virtual bool SetWindowScreen(int Index) = 0;
+	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
 	virtual void SetWindowGrab(bool Grab) = 0;
@@ -426,9 +440,13 @@ public:
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
 
+	virtual int GetNumScreens() const;
 	virtual void Minimize();
 	virtual void Maximize();
 	virtual bool Fullscreen(bool State);
+	virtual void SetWindowBordered(bool State);
+	virtual bool SetWindowScreen(int Index);
+	virtual int GetWindowScreen();
 
 	virtual int WindowActive();
 	virtual int WindowOpen();
@@ -442,6 +460,7 @@ public:
 	virtual void TakeScreenshot(const char *pFilename);
 	virtual void TakeCustomScreenshot(const char *pFilename);
 	virtual void Swap();
+	virtual bool SetVSync(bool State);
 
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen);
 

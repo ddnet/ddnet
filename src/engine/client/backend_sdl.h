@@ -156,6 +156,7 @@ private:
 	void Cmd_Init(const SCommand_Init *pCommand);
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
 	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
+	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
 	void Cmd_VideoModes(const CCommandBuffer::SCommand_VideoModes *pCommand);
 public:
 	CCommandProcessorFragment_SDL();
@@ -180,15 +181,21 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	SDL_GLContext m_GLContext;
 	ICommandProcessor *m_pProcessor;
 	volatile int m_TextureMemoryUsage;
+	int m_NumScreens;
 public:
-	virtual int Init(const char *pName, int Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight);
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight);
 	virtual int Shutdown();
 
 	virtual int MemoryUsage() const;
 
+	virtual int GetNumScreens() const { return m_NumScreens; }
+
 	virtual void Minimize();
 	virtual void Maximize();
 	virtual bool Fullscreen(bool State);
+	virtual void SetWindowBordered(bool State);	// on=true/off=false
+	virtual bool SetWindowScreen(int Index);
+	virtual int GetWindowScreen();
 	virtual int WindowActive();
 	virtual int WindowOpen();
 	virtual void SetWindowGrab(bool Grab);
