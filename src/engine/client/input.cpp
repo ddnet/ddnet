@@ -62,13 +62,11 @@ void CInput::MouseRelative(float *x, float *y)
 	*y = ny;
 #else
 	int nx = 0, ny = 0;
-	float Sens = ((g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens) ? g_Config.m_ClDyncamMousesens : g_Config.m_InpMousesens) / 100.0f;
+	float Sens = ((g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens) ? g_Config.m_ClDyncamMousesens : g_Config.m_InpMousesens) / 50.0f;
 
 	if(m_InputGrabbed)
 		SDL_GetRelativeMouseState(&nx,&ny);
 
-	// This might force us to double x and y on X11 when SDL >= 2.0.4:
-	// https://bugzilla.libsdl.org/show_bug.cgi?id=2963
 	*x = nx*Sens;
 	*y = ny*Sens;
 #endif
