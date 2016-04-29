@@ -152,7 +152,9 @@ enum
 	TILE_NPC_START = 104,
 	TILE_SUPER_START,
 	TILE_JETPACK_START,
-	TILE_NPH_START,//Remember to change this in collision.cpp if you add anymore tiles
+	TILE_NPH_START,
+	TILE_ENTITIES_OFF_1 = 190,
+	TILE_ENTITIES_OFF_2,
 	//End of higher tiles
 	//Layers
 	LAYER_GAME=0,
@@ -452,5 +454,10 @@ public:
 	unsigned char m_Number;
 	unsigned char m_Type;
 };
+
+
+bool IsValidGameTile(int Index);
+bool IsValidFrontTile(int Index);
+bool IsValidEntity(int Index);
 
 #endif

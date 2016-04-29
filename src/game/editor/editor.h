@@ -721,6 +721,7 @@ public:
 		m_SpeedupMaxSpeed = 0;
 		m_SpeedupAngle = 0;
 		m_LargeLayerWasWarned = false;
+		m_AllowPlaceUnusedTiles = false;
 	}
 
 	virtual void Init();
@@ -787,6 +788,7 @@ public:
 	int m_PopupEventActivated;
 	int m_PopupEventWasActivated;
 	bool m_LargeLayerWasWarned;
+	bool m_AllowPlaceUnusedTiles;
 
 	enum
 	{
