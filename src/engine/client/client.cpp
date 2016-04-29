@@ -2463,6 +2463,10 @@ void CClient::Update()
 	// update the server browser
 	m_ServerBrowser.Update(m_ResortServerBrowser);
 	m_ResortServerBrowser = false;
+
+	// update gameclient
+	if(!m_EditorActive)
+		GameClient()->OnUpdate();
 }
 
 void CClient::VersionUpdate()
@@ -2751,11 +2755,6 @@ void CClient::Run()
 			g_Config.m_ClEditor = g_Config.m_ClEditor^1;
 			Input()->MouseModeRelative();
 		}
-
-		/*
-		if(!gfx_window_open())
-			break;
-		*/
 
 		// render
 		{
