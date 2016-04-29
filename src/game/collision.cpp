@@ -110,13 +110,13 @@ void CCollision::Init(class CLayers *pLayers)
 		{
 			// remove unused tiles from front layer
 			Index = m_pFront[i].m_Index;
-			if(Index <= TILE_NPH_START && !(Index == TILE_DEATH || (Index >= TILE_NOLASER && Index <= TILE_THROUGH) || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
+			if(!IsValidFrontTile(Index))
 				m_pFront[i].m_Index = 0;
 		}
 		// remove unused tiles from game layer
 		Index = m_pTiles[i].m_Index;
-		if(Index <= TILE_NPH_START && !((Index >= TILE_SOLID && Index <= TILE_NOLASER) || Index == TILE_THROUGH || Index == TILE_FREEZE || (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) || (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END) || (Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) || (Index >= TILE_CP && Index <= TILE_THROUGH_DIR) || (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) || (Index >= TILE_NPC_END && Index <= TILE_NPH_END) || (Index >= TILE_NPC_START && Index <= TILE_NPH_START)))
-				m_pTiles[i].m_Index = 0;
+		if(!IsValidGameTile(Index))
+			m_pTiles[i].m_Index = 0;
 	}
 
 	if(m_NumSwitchers)

@@ -42,7 +42,13 @@ void CLayerGame::SetTile(int x, int y, CTile tile, bool force)
 			CTile air = {TILE_AIR, 0, 0, 0};
 			m_pEditor->m_Map.m_pFrontLayer->SetTile(x, y, air, true);
 		}
-		m_pTiles[y*m_Width+x] = tile;
+		// set normal game tile
+		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(tile.m_Index)) {
+			m_pTiles[y*m_Width+x] = tile;
+		} else {
+			CTile air = {TILE_AIR, 0, 0, 0};
+			SetTile(x, y, air);
+		}
 	}
 }
 

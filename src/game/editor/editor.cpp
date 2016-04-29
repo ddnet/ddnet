@@ -1027,6 +1027,17 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		m_ShowEnvelopePreview = 0;
 	}
 
+	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+	// allow place unused tiles button
+	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+	static int s_AllowPlaceUnusedTilesButton = 0;
+	if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
+		(Input()->KeyDown('u') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+	{
+		m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
+	}
+
 	TB_Top.VSplitLeft(15.0f, 0, &TB_Top);
 
 	// zoom group
