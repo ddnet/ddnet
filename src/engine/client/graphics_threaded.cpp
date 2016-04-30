@@ -846,7 +846,7 @@ int CGraphics_Threaded::Init()
 	if(InitWindow() != 0)
 		return -1;
 
-	// fetch final resolusion
+	// fetch final resolution
 	m_ScreenWidth = g_Config.m_GfxScreenWidth;
 	m_ScreenHeight = g_Config.m_GfxScreenHeight;
 
