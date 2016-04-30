@@ -1300,11 +1300,6 @@ CLayerFront::CLayerFront(int w, int h)
 	m_Front = 1;
 }
 
-CTile CLayerFront::GetTile(int x, int y)
-{
-	return CLayerTiles::GetTile(x, y);
-}
-
 void CLayerFront::SetTile(int x, int y, CTile tile)
 {
 	if(tile.m_Index == TILE_THROUGH_CUT) {

@@ -1088,7 +1088,6 @@ public:
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
-	virtual CTile GetTile(int x, int y);
 	virtual void SetTile(int x, int y, CTile tile);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 };
