@@ -158,7 +158,7 @@ bool CSpectator::OnMouseMove(float x, float y)
 	{
 		m_OldMouseX = x;
 		m_OldMouseY = y;
-		m_SelectorMouse = vec2((x - g_Config.m_GfxScreenWidth/2), (y - g_Config.m_GfxScreenHeight/2));
+		m_SelectorMouse = vec2((x - Graphics()->ScreenWidth()/2), (y - Graphics()->ScreenHeight()/2));
 	}
 #else
 	UI()->ConvertMouseMove(&x, &y);

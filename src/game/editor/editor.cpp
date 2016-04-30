@@ -5524,8 +5524,8 @@ void CEditor::UpdateAndRender()
 		tx = s_MouseX;
 		ty = s_MouseY;
 
-		s_MouseX = (rx / (float)g_Config.m_GfxScreenWidth) * UI()->Screen()->w;
-		s_MouseY = (ry / (float)g_Config.m_GfxScreenHeight) * UI()->Screen()->h;
+		s_MouseX = (rx / (float)Graphics()->ScreenWidth()) * UI()->Screen()->w;
+		s_MouseY = (ry / (float)Graphics()->ScreenHeight()) * UI()->Screen()->h;
 
 		s_MouseX = clamp(s_MouseX, 0.0f, UI()->Screen()->w);
 		s_MouseY = clamp(s_MouseY, 0.0f, UI()->Screen()->h);

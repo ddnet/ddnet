@@ -65,7 +65,7 @@ void CInput::MouseRelative(float *x, float *y)
 	*y = ny;
 #else
 	int nx = 0, ny = 0;
-	float Sens = ((g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens) ? g_Config.m_ClDyncamMousesens : g_Config.m_InpMousesens) / 50.0f;
+	float Sens = ((g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens) ? g_Config.m_ClDyncamMousesens : g_Config.m_InpMousesens) / 100.0f;
 
 	SDL_GetRelativeMouseState(&nx,&ny);
 
@@ -173,10 +173,9 @@ int CInput::Update()
 			switch (Event.type)
 			{
 				case SDL_TEXTINPUT:
-				{
-					AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
+					if(!IgnoreKeys)
+						AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
 					break;
-				}
 				// handle keys
 				case SDL_KEYDOWN:
 					Key = KeycodeToKey(Event.key.keysym.sym);
@@ -222,15 +221,24 @@ int CInput::Update()
 				case SDL_WINDOWEVENT:
 					// Ignore keys following a focus gain as they may be part of global
 					// shortcuts
-					if(Event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-						IgnoreKeys = true;
-#if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL
-					if(Event.window.event == SDL_WINDOWEVENT_MAXIMIZED)
+					switch (Event.window.event)
 					{
-						MouseModeAbsolute();
-						MouseModeRelative();
-					}
+						case SDL_WINDOWEVENT_RESIZED:
+						case SDL_WINDOWEVENT_SIZE_CHANGED:
+							Graphics()->Resize(Event.window.data1, Event.window.data2);
+							break;
+						case SDL_WINDOWEVENT_FOCUS_GAINED:
+						case SDL_WINDOWEVENT_FOCUS_LOST:
+							// TODO: Check if from FOCUS_LOST til FOCUS_GAINED is good enough, maybe also ENTER and LEAVE
+							IgnoreKeys = true;
+							break;
+#if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL
+						case SDL_WINDOWEVENT_MAXIMIZED:
+							MouseModeAbsolute();
+							MouseModeRelative();
+							break;
 #endif
+					}
 					break;
 
 				// other messages

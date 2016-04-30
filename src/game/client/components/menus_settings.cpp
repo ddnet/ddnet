@@ -850,7 +850,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxColorDepth = Depth;
 		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_Width;
 		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_Height;
-		CheckSettings = true;
+		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
 	}
 
 	// switches
@@ -934,8 +934,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		else
 			m_NeedRestartGraphics = true;
 	}
-
-	//
 
 	CUIRect Text;
 	MainView.HSplitTop(20.0f, 0, &MainView);

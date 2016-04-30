@@ -61,7 +61,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		COL_VERSION,
 	};
 
-	static CColumn s_aCols[] = {
+	CColumn s_aCols[] = {
 		{-1,			-1,						" ",		-1, 2.0f, 0, {0}, {0}},
 		{COL_FLAG_LOCK,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
 		{COL_FLAG_FAV,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},

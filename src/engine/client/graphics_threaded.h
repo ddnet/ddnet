@@ -85,6 +85,7 @@ public:
 		CMD_VSYNC,
 		CMD_SCREENSHOT,
 		CMD_VIDEOMODES,
+		CMD_RESIZE,
 
 	};
 
@@ -213,6 +214,14 @@ public:
 
 		int m_VSync;
 		bool *m_pRetOk;
+	};
+
+	struct SCommand_Resize : public SCommand
+	{
+		SCommand_Resize() : SCommand(CMD_RESIZE) {}
+
+		int m_Width;
+		int m_Height;
 	};
 
 	struct SCommand_Texture_Create : public SCommand
@@ -446,6 +455,7 @@ public:
 	virtual bool Fullscreen(bool State);
 	virtual void SetWindowBordered(bool State);
 	virtual bool SetWindowScreen(int Index);
+	virtual void Resize(int w, int h);
 	virtual int GetWindowScreen();
 
 	virtual int WindowActive();

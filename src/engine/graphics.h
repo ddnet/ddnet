@@ -71,6 +71,7 @@ public:
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual int GetWindowScreen() = 0;
+	virtual void Resize(int w, int h) = 0;
 
 	virtual void Clear(float r, float g, float b) = 0;
 

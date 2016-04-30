@@ -786,7 +786,7 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxBorderless) Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
 	if(g_Config.m_GfxFullscreen) Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
-	if(g_Config.m_DbgResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
+	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
 	return m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
 }
@@ -908,6 +908,29 @@ void CGraphics_Threaded::SetWindowBordered(bool State)
 bool CGraphics_Threaded::SetWindowScreen(int Index)
 {
 	return m_pBackend->SetWindowScreen(Index);
+}
+
+void CGraphics_Threaded::Resize(int w, int h)
+{
+	if(m_ScreenWidth == w && m_ScreenHeight == h)
+		return;
+
+	if(h > 4*w/5)
+		h = 4*w/5;
+	if(w > 21*h/9)
+		w = 21*h/9;
+
+	m_ScreenWidth = w;
+	m_ScreenHeight = h;
+
+	CCommandBuffer::SCommand_Resize Cmd;
+	Cmd.m_Width = w;
+	Cmd.m_Height = h;
+	m_pCommandBuffer->AddCommand(Cmd);
+
+	// kick the command buffer
+	KickCommandBuffer();
+	WaitForIdle();
 }
 
 int CGraphics_Threaded::GetWindowScreen()
