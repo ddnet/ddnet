@@ -622,6 +622,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 	}
 
+	// Might fix problems with Windows HighDPI scaling
+	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+
 	m_pWindow = SDL_CreateWindow(
 		pName,
 		SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen),
