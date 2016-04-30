@@ -106,17 +106,6 @@ void CCollision::Init(class CLayers *pLayers)
 					m_pSwitch[i].m_Type = 0;
 			}
 		}
-		if(m_pFront)
-		{
-			// remove unused tiles from front layer
-			Index = m_pFront[i].m_Index;
-			if(!IsValidFrontTile(Index))
-				m_pFront[i].m_Index = 0;
-		}
-		// remove unused tiles from game layer
-		Index = m_pTiles[i].m_Index;
-		if(!IsValidGameTile(Index))
-			m_pTiles[i].m_Index = 0;
 	}
 
 	if(m_NumSwitchers)
