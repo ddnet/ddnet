@@ -16,6 +16,15 @@ class CInput : public IEngineInput
 	int m_VideoRestartNeeded;
 
 	void AddEvent(char *pText, int Key, int Flags);
+	void Clear();
+	bool IsEventValid(CEvent *pEvent) const { return pEvent->m_InputCount == m_InputCounter; };
+
+	//quick access to input
+	unsigned short m_aInputCount[g_MaxKeys];	// tw-KEY
+	unsigned char m_aInputState[g_MaxKeys];	// SDL_SCANCODE
+	int m_InputCounter;
+
+	bool KeyState(int Key) const;
 
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 
@@ -24,14 +33,8 @@ public:
 
 	virtual void Init();
 
-	int KeyState(int Key) const;
-	int KeyStateOld(int Key) const;
-	int KeyWasPressed(int Key) const { return KeyStateOld(Key); }
-
-	int KeyPressed(int Key) const { return KeyState(Key); }
-	int KeyReleases(int Key) const { return m_aInputCount[m_InputCurrent][Key].m_Releases; }
-	int KeyPresses(int Key) const { return m_aInputCount[m_InputCurrent][Key].m_Presses; }
-	int KeyDown(int Key) const { return KeyPressed(Key)&&!KeyWasPressed(Key); }
+	bool KeyIsPressed(int Key) const { return KeyState(Key); }
+	bool KeyPress(int Key, bool CheckCounter) const { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
 	virtual void MouseRelative(float *x, float *y);
 	virtual void MouseModeAbsolute();
@@ -39,10 +42,6 @@ public:
 	virtual int MouseDoubleClick();
 	virtual const char* GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
-
-	void ClearKeyStates();
-
-	int ButtonPressed(int Button) { return m_aInputState[m_InputCurrent][Button]; }
 
 	virtual int Update();
 

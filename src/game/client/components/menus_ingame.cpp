@@ -947,9 +947,9 @@ void CMenus::RenderGhost(CUIRect MainView)
 	int ScrollNum = NumGhosts-Num+1;
 	if(ScrollNum > 0)
 	{
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 			s_ScrollValue -= 1.0f/ScrollNum;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 			s_ScrollValue += 1.0f/ScrollNum;
 	}
 	else

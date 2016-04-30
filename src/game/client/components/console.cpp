@@ -92,7 +92,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
 
-	if(m_pGameConsole->Input()->KeyPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyDown(KEY_V))
+	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_V))
 	{
 		const char *Text = m_pGameConsole->Input()->GetClipboardText();
 		if(Text)
@@ -125,7 +125,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		}
 	}
 
-	if(m_pGameConsole->Input()->KeyPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyDown(KEY_C))
+	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
 	{
 		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
 	}

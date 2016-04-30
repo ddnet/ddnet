@@ -419,7 +419,7 @@ void CHud::RenderVoting()
 	Base.y += Base.h+6;
 	UI()->DoLabel(&Base, Localize("Vote yes"), 16.0f, -1);
 	UI()->DoLabel(&Base, Localize("Vote no"), 16.0f, 1);
-	if( Input()->KeyDown(KEY_MOUSE_1) )
+	if( Input()->KeyPress(KEY_MOUSE_1) )
 	{
 		float mx, my;
 		Input()->MouseRelative(&mx, &my);

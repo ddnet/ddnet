@@ -238,7 +238,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		if(Len == 0)
 			s_AtIndex = 0;
 
-		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_V))
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
 		{
 			const char *Text = Input()->GetClipboardText();
 			if(Text)
@@ -256,7 +256,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			}
 		}
 
-		if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_C))
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
 		{
 			Input()->SetClipboardText(pStr);
 		}
@@ -1838,9 +1838,9 @@ void CMenus::OnRender()
 	int Buttons = 0;
 	if(m_UseMouseButtons)
 	{
-		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+		if(Input()->KeyIsPressed(KEY_MOUSE_1)) Buttons |= 1;
+		if(Input()->KeyIsPressed(KEY_MOUSE_2)) Buttons |= 2;
+		if(Input()->KeyIsPressed(KEY_MOUSE_3)) Buttons |= 4;
 	}
 
 #if defined(__ANDROID__)

@@ -88,7 +88,7 @@ void CEditor::UiDoPopupMenu()
 			m_PopupEventWasActivated = false;
 		}
 
-		if(Input()->KeyDown(KEY_ESCAPE))
+		if(Input()->KeyPress(KEY_ESCAPE))
 		{
 			m_LockMouse = false;
 			UI()->SetActiveItem(0);
@@ -1124,9 +1124,9 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 			int ScrollNum = (int)((ImagesHeight-ButtonBar.h)/14.0f)+1;
 			if(ScrollNum > 0)
 			{
-				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 					s_ScrollValue = clamp(s_ScrollValue - 1.0f/ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f/ScrollNum, 0.0f, 1.0f);
 			}
 		}
@@ -1235,9 +1235,9 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View)
 			int ScrollNum = (int)((SoundsHeight-ButtonBar.h)/14.0f)+1;
 			if(ScrollNum > 0)
 			{
-				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 					s_ScrollValue = clamp(s_ScrollValue - 1.0f/ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 					s_ScrollValue = clamp(s_ScrollValue + 1.0f/ScrollNum, 0.0f, 1.0f);
 			}
 		}

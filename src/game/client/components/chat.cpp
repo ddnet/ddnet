@@ -114,7 +114,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_V))
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
 	{
 		const char *Text = Input()->GetClipboardText();
 		if(Text)
@@ -145,7 +145,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		}
 	}
 
-	if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyDown(KEY_C))
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
 	{
 		Input()->SetClipboardText(m_Input.GetString());
 	}
@@ -339,7 +339,7 @@ void CChat::EnableMode(int Team)
 		else
 			m_Mode = MODE_ALL;
 
-		Input()->ClearEvents();
+		Input()->Clear();
 		m_CompletionChosen = -1;
 		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
 	}

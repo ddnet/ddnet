@@ -166,17 +166,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = -1;
 		}
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
 			s_ScrollValue -= 3.0f/ScrollNum;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
 			s_ScrollValue += 3.0f/ScrollNum;
 	}
 	else
 		ScrollNum = 0;
 
-	if(Input()->KeyDown(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
+	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_pGameConsole->IsClosed())
 	{
-		if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 - 1) % 3;
 		else
 			g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + 1) % 3;
@@ -1335,7 +1335,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		else
 			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
 
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button) || Input()->KeyDown(KEY_F5) || (Input()->KeyDown(KEY_R) && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
 		{
 			if(g_Config.m_UiPage == PAGE_INTERNET)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);

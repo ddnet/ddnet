@@ -386,6 +386,8 @@ void CGameClient::OnUpdate()
 	for(int i = 0; i < Input()->NumEvents(); i++)
 	{
 		IInput::CEvent e = Input()->GetEvent(i);
+		if(!Input()->IsEventValid(&e))
+			continue;
 
 		for(int h = 0; h < m_Input.m_Num; h++)
 		{
@@ -393,9 +395,6 @@ void CGameClient::OnUpdate()
 				break;
 		}
 	}
-
-	// clear all events for this frame
-	Input()->ClearEvents();
 }
 
 
@@ -562,6 +561,9 @@ void CGameClient::OnRender()
 	// render all systems
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnRender();
+
+	// clear all events/input for this frame
+	Input()->Clear();
 
 	// clear new tick flags
 	m_NewTick = false;

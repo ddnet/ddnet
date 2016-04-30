@@ -2713,7 +2713,7 @@ void CClient::Run()
 				Input()->MouseModeAbsolute();
 			m_WindowMustRefocus = 1;
 		}
-		else if (g_Config.m_DbgFocus && Input()->KeyPressed(KEY_ESCAPE))
+		else if (g_Config.m_DbgFocus && Input()->KeyIsPressed(KEY_ESCAPE))
 		{
 			Input()->MouseModeAbsolute();
 			m_WindowMustRefocus = 1;
@@ -2728,7 +2728,7 @@ void CClient::Run()
 				m_WindowMustRefocus++;
 			}
 
-			if(m_WindowMustRefocus >= 3 || Input()->KeyPressed(KEY_MOUSE_1))
+			if(m_WindowMustRefocus >= 3 || Input()->KeyIsPressed(KEY_MOUSE_1))
 			{
 				Input()->MouseModeRelative();
 				m_WindowMustRefocus = 0;
@@ -2855,12 +2855,12 @@ void CClient::Run()
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
 {
-	if(Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && !Last && Input()->KeyPressed(Key))
+	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && !Last && Input()->KeyIsPressed(Key))
 	{
 		Last = true;
 		return true;
 	}
-	else if (Last && !Input()->KeyPressed(Key))
+	else if (Last && !Input()->KeyIsPressed(Key))
 		Last = false;
 
 	return false;
