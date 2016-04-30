@@ -160,6 +160,7 @@ int CInput::Update()
 
 	{
 		SDL_Event Event;
+		int IgnoreKeys = false;
 
 		while(SDL_PollEvent(&Event))
 		{
@@ -224,15 +225,19 @@ int CInput::Update()
 					Action = IInput::FLAG_RELEASE;
 					break;
 
-#if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL
 				case SDL_WINDOWEVENT:
+					// Ignore keys following a focus gain as they may be part of global
+					// shortcuts
+					if(Event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+						IgnoreKeys = true;
+#if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL
 					if(Event.window.event == SDL_WINDOWEVENT_MAXIMIZED)
 					{
 						MouseModeAbsolute();
 						MouseModeRelative();
 					}
-					break;
 #endif
+					break;
 
 				// other messages
 				case SDL_QUIT:
@@ -245,7 +250,7 @@ int CInput::Update()
 #endif
 			}
 
-			if(Key >= 0 && Key < 1024)
+			if(Key >= 0 && Key < 1024 && !IgnoreKeys)
 			{
 				m_aInputCount[m_InputCurrent][Key].m_Presses++;
 				if(Action == IInput::FLAG_PRESS)
