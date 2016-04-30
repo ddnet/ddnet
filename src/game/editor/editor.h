@@ -507,8 +507,8 @@ public:
 	CLayerTiles(int w, int h);
 	~CLayerTiles();
 
-	virtual CTile GetTile(int x, int y, bool force=false);
-	virtual void SetTile(int x, int y, CTile tile, bool force=false);
+	virtual CTile GetTile(int x, int y);
+	virtual void SetTile(int x, int y, CTile tile);
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
@@ -593,8 +593,8 @@ public:
 	CLayerGame(int w, int h);
 	~CLayerGame();
 
-	virtual CTile GetTile(int x, int y, bool force=false);
-	virtual void SetTile(int x, int y, CTile tile, bool force=false);
+	virtual CTile GetTile(int x, int y);
+	virtual void SetTile(int x, int y, CTile tile);
 
 	virtual int RenderProperties(CUIRect *pToolbox);
 };
@@ -1088,8 +1088,8 @@ public:
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
-	virtual CTile GetTile(int x, int y, bool force=false);
-	virtual void SetTile(int x, int y, CTile tile, bool force=false);
+	virtual CTile GetTile(int x, int y);
+	virtual void SetTile(int x, int y, CTile tile);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 };
 
