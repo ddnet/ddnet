@@ -1108,9 +1108,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	bool Activated = false;
 
 #if defined(__ANDROID__)
-	if (m_EnterPressed || (DoubleClicked && UI()->ActiveItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+	if (m_EnterPressed || (DoubleClicked && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
 #else
-	if (m_EnterPressed || (Input()->MouseDoubleClick() && UI()->ActiveItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+	if (m_EnterPressed || (Input()->MouseDoubleClick() && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
 #endif
 	{
 		UI()->SetActiveItem(0);
