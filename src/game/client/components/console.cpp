@@ -215,8 +215,8 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	}
 	if(Event.m_Flags&IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
 	{
-	m_ReverseTAB = false;
-	Handled = true;
+		m_ReverseTAB = false;
+		Handled = true;
 	}
 
 	if(!Handled)
@@ -613,7 +613,7 @@ void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
 
 bool CGameConsole::OnInput(IInput::CEvent Event)
 {
-	if(m_ConsoleState == CONSOLE_CLOSED)
+	if(m_ConsoleState != CONSOLE_OPEN)
 		return false;
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;
