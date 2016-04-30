@@ -223,10 +223,12 @@ int CInput::Update()
 					// shortcuts
 					switch (Event.window.event)
 					{
+#if defined(SDL_VIDEO_DRIVER_X11)
 						case SDL_WINDOWEVENT_RESIZED:
 						case SDL_WINDOWEVENT_SIZE_CHANGED:
 							Graphics()->Resize(Event.window.data1, Event.window.data2);
 							break;
+#endif
 						case SDL_WINDOWEVENT_FOCUS_GAINED:
 						case SDL_WINDOWEVENT_FOCUS_LOST:
 							// TODO: Check if from FOCUS_LOST til FOCUS_GAINED is good enough, maybe also ENTER and LEAVE
