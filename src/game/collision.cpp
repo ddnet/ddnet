@@ -682,8 +682,8 @@ vec2 CCollision::CpSpeed(int Index, int Flags)
 
 int CCollision::GetPureMapIndex(float x, float y)
 {
-	int Nx = clamp((int)x/32, 0, m_Width-1);
-	int Ny = clamp((int)y/32, 0, m_Height-1);
+	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
+	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 	return Ny*m_Width+Nx;
 }
 
