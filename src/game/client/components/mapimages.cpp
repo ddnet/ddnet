@@ -3,6 +3,7 @@
 #include <engine/graphics.h>
 #include <engine/map.h>
 #include <engine/storage.h>
+#include <engine/serverbrowser.h>
 #include <game/client/component.h>
 #include <game/mapitems.h>
 
@@ -88,11 +89,26 @@ void CMapImages::LoadBackground(class IMap *pMap)
 
 int CMapImages::GetEntities()
 {
-	if(m_EntitiesTextures == -1)
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+
+	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
 	{
-		m_EntitiesTextures = Graphics()->LoadTexture("editor/entities_clear.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-		if(m_EntitiesTextures == -1)
-			m_EntitiesTextures = Graphics()->LoadTexture("editor/entities.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		char file[64] = "vanilla";
+		if(IsDDNet(&Info))
+			str_copy(file, "ddnet", sizeof(file));
+		else if(IsDDRace(&Info))
+			str_copy(file, "ddrace", sizeof(file));
+		else if(IsRace(&Info))
+			str_copy(file, "race", sizeof(file));
+		else if(IsFNG(&Info))
+			str_copy(file, "fng", sizeof(file));
+
+		char path[64];
+		str_format(path, sizeof(path), "editor/entities_clear/%s.png", file);
+		m_EntitiesTextures = Graphics()->LoadTexture(path, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+
+		str_copy(m_aEntitiesGameType, Info.m_aGameType, sizeof(m_aEntitiesGameType));
 	}
 	return m_EntitiesTextures;
 }
