@@ -15,7 +15,7 @@ class CInput : public IEngineInput
 
 	int m_VideoRestartNeeded;
 
-	void AddEvent(int Unicode, int Key, int Flags);
+	void AddEvent(char *pText, int Key, int Flags);
 
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 

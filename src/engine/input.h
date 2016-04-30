@@ -15,8 +15,8 @@ public:
 	{
 	public:
 		int m_Flags;
-		int m_Unicode;
 		int m_Key;
+		char m_aText[32];
 	};
 
 protected:
@@ -45,7 +45,8 @@ public:
 	{
 		FLAG_PRESS=1,
 		FLAG_RELEASE=2,
-		FLAG_REPEAT=4
+		FLAG_REPEAT=4,
+		FLAG_TEXT=8,
 	};
 
 	// events
