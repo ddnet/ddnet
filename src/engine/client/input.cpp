@@ -153,8 +153,7 @@ int CInput::Update()
 
 	{
 		SDL_Event Event;
-		int IgnoreKeys = false;
-
+		bool IgnoreKeys = false;
 		while(SDL_PollEvent(&Event))
 		{
 			int Key = -1;
@@ -163,13 +162,15 @@ int CInput::Update()
 			switch (Event.type)
 			{
 				case SDL_TEXTINPUT:
-					if(!IgnoreKeys)
-						AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
+					AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
 					break;
 				// handle keys
 				case SDL_KEYDOWN:
-					Key = KeycodeToKey(Event.key.keysym.sym);
-					Scancode = Event.key.keysym.scancode;
+					if(!(Event.key.keysym.mod & KMOD_LALT))
+					{
+						Key = KeycodeToKey(Event.key.keysym.sym);
+						Scancode = Event.key.keysym.scancode;
+					}
 					break;
 				case SDL_KEYUP:
 					Action = IInput::FLAG_RELEASE;
@@ -219,9 +220,10 @@ int CInput::Update()
 							m_VideoRestartNeeded = 1;
 #endif
 							break;
+						case SDL_WINDOWEVENT_ENTER:
+						case SDL_WINDOWEVENT_LEAVE:
 						case SDL_WINDOWEVENT_FOCUS_GAINED:
 						case SDL_WINDOWEVENT_FOCUS_LOST:
-							// TODO: Check if from FOCUS_LOST til FOCUS_GAINED is good enough, maybe also ENTER and LEAVE
 							IgnoreKeys = true;
 							break;
 #if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL
@@ -238,7 +240,7 @@ int CInput::Update()
 					return 1;
 			}
 
-			if(Key >= 0 && Key < g_MaxKeys)
+			if(Key >= 0 && Key < g_MaxKeys && !IgnoreKeys)
 			{
 				if(Action&IInput::FLAG_PRESS)
 				{
