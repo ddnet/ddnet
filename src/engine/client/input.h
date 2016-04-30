@@ -44,6 +44,7 @@ public:
 	virtual void SetClipboardText(const char *Text);
 
 	virtual int Update();
+	virtual void NextFrame();
 
 	virtual int VideoRestartNeeded();
 };

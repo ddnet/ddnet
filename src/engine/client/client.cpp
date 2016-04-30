@@ -2809,6 +2809,7 @@ void CClient::Run()
 					}
 					m_pGraphics->Swap();
 				}
+				Input()->NextFrame();
 			}
 			if(Input()->VideoRestartNeeded())
 			{
