@@ -79,6 +79,10 @@ void CUpdater::MoveFile(const char *pFile)
 {
 	char aBuf[256];
 	size_t len = str_length(pFile);
+
+	if(fs_makedir_rec_for(pFile) < 0)
+		dbg_msg("updater", "I/O Error couldnt create folder for: %s", pFile);
+
 	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);

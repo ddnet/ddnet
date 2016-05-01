@@ -103,16 +103,8 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	else
 		m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_aDest, aPath, sizeof(aPath));
 
-	for(char *p = aPath; *p != '\0'; p++)
-	{
-		if(*p == '/' && *(p + 1) != '\0')
-		{
-			*p = '\0';
-			if(fs_makedir(aPath) < 0)
-				dbg_msg("fetcher", "I/O Error couldnt create folder: %s", aPath);
-			*p = '/';
-		}
-	}
+	if(fs_makedir_rec_for(aPath) < 0)
+		dbg_msg("fetcher", "I/O Error couldnt create folder for: %s", aPath);
 
 	IOHANDLE File = io_open(aPath, IOFLAG_WRITE);
 
