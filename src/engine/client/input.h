@@ -13,6 +13,7 @@ class CInput : public IEngineInput
 	int64 m_LastRelease;
 	int64 m_ReleaseDelta;
 
+	bool m_MouseFocus;
 	int m_VideoRestartNeeded;
 
 	void AddEvent(char *pText, int Key, int Flags);

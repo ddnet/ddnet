@@ -44,6 +44,7 @@ CInput::CInput()
 	m_ReleaseDelta = -1;
 
 	m_NumEvents = 0;
+	m_MouseFocus = true;
 
 	m_VideoRestartNeeded = 0;
 	m_pClipboardText = NULL;
@@ -58,6 +59,9 @@ void CInput::Init()
 
 void CInput::MouseRelative(float *x, float *y)
 {
+	if(!m_MouseFocus)
+		return;
+
 #if defined(__ANDROID__) // No relative mouse on Android
 	int nx = 0, ny = 0;
 	SDL_GetMouseState(&nx, &ny);
@@ -222,7 +226,11 @@ int CInput::Update()
 #endif
 							break;
 						case SDL_WINDOWEVENT_ENTER:
+							m_MouseFocus = true;
+							break;
 						case SDL_WINDOWEVENT_LEAVE:
+							m_MouseFocus = false;
+							break;
 						case SDL_WINDOWEVENT_FOCUS_GAINED:
 						case SDL_WINDOWEVENT_FOCUS_LOST:
 							IgnoreKeys = true;
