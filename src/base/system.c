@@ -1705,8 +1705,8 @@ int fs_storage_path(const char *appname, char *path, int max)
 int fs_makedir_rec_for(const char *path)
 {
 	char buffer[1024*2];
-	str_copy(buffer, path, sizeof(buffer));
 	char *p;
+	str_copy(buffer, path, sizeof(buffer));
 	for(p = buffer; *p != '\0'; p++)
 	{
 		if(*p == '/' && *(p + 1) != '\0')
