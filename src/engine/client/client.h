@@ -95,7 +95,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_RenderFrames;
 
 	NETADDR m_ServerAddress;
-	int m_WindowMustRefocus;
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
 	bool m_AutoStatScreenshotRecycle;

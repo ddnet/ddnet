@@ -226,13 +226,17 @@ int CInput::Update()
 #endif
 							break;
 						case SDL_WINDOWEVENT_ENTER:
-							m_MouseFocus = true;
-							break;
 						case SDL_WINDOWEVENT_LEAVE:
-							m_MouseFocus = false;
+							IgnoreKeys = true;
 							break;
 						case SDL_WINDOWEVENT_FOCUS_GAINED:
+							if(m_InputGrabbed)
+								MouseModeRelative();
+							m_MouseFocus = true;
+							IgnoreKeys = true;
+							break;
 						case SDL_WINDOWEVENT_FOCUS_LOST:
+							m_MouseFocus = false;
 							IgnoreKeys = true;
 							break;
 #if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL

@@ -278,7 +278,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	m_GameTickSpeed = SERVER_TICK_SPEED;
 
-	m_WindowMustRefocus = 0;
 	m_SnapCrcErrors = 0;
 	m_AutoScreenshotRecycle = false;
 	m_AutoStatScreenshotRecycle = false;
@@ -2705,35 +2704,6 @@ void CClient::Run()
 
 		// update sound
 		Sound()->Update();
-
-		// release focus
-		if(!m_pGraphics->WindowActive())
-		{
-			if(m_WindowMustRefocus == 0)
-				Input()->MouseModeAbsolute();
-			m_WindowMustRefocus = 1;
-		}
-		else if (g_Config.m_DbgFocus && Input()->KeyIsPressed(KEY_ESCAPE))
-		{
-			Input()->MouseModeAbsolute();
-			m_WindowMustRefocus = 1;
-		}
-
-		// refocus
-		if(m_WindowMustRefocus && m_pGraphics->WindowActive())
-		{
-			if(m_WindowMustRefocus < 3)
-			{
-				Input()->MouseModeAbsolute();
-				m_WindowMustRefocus++;
-			}
-
-			if(m_WindowMustRefocus >= 3 || Input()->KeyIsPressed(KEY_MOUSE_1))
-			{
-				Input()->MouseModeRelative();
-				m_WindowMustRefocus = 0;
-			}
-		}
 
 		// panic quit button
 		if(CtrlShiftKey(KEY_Q, LastQ))
