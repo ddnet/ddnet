@@ -721,6 +721,7 @@ public:
 		m_SpeedupMaxSpeed = 0;
 		m_SpeedupAngle = 0;
 		m_LargeLayerWasWarned = false;
+		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = false;
 	}
 
@@ -782,12 +783,14 @@ public:
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
 		POPEVENT_LARGELAYER,
+		POPEVENT_PREVENTUNUSEDTILES
 	};
 
 	int m_PopupEventType;
 	int m_PopupEventActivated;
 	int m_PopupEventWasActivated;
 	bool m_LargeLayerWasWarned;
+	bool m_PreventUnusedTilesWasWarned;
 	bool m_AllowPlaceUnusedTiles;
 
 	enum
