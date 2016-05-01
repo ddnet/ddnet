@@ -1040,6 +1040,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 		pEditor->UI()->DoLabel(&Label, "Save map", 20.0f, 0);
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
 		pEditor->UI()->DoLabel(&Label, "Large layer", 20.0f, 0);
+	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
+		pEditor->UI()->DoLabel(&Label, "Unused tiles disabled", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -1058,6 +1060,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 		pEditor->UI()->DoLabel(&Label, "The file already exists.\nDo you want to overwrite the map?", 10.0f, -1);
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
 		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, -1, Label.w-10.0f);
+	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
+		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map. If you are mapping for a different gametype you can activate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w-10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
@@ -1081,7 +1085,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 	}
 	ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
-	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER)
+	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES)
 	{
 		static int s_AbortButton = 0;
 		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0))
@@ -1303,7 +1307,7 @@ static int s_GametileOpSelected = -1;
 
 int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View)
 {
-	static const char *s_pButtonNames[] = { "Clear", "Collision", "Death", "Unhookable", "Freeze", "Unfreeze", "Deep Freeze", "Deep Unfreeze", "Check-Tele From", "Evil Check-Tele From" };
+	static const char *s_pButtonNames[] = { "Clear", "Collision", "Death", "Unhookable", "Freeze", "Unfreeze", "Deep Freeze", "Deep Unfreeze", "Check-Tele From", "Evil Check-Tele From", "Hookthrough" };
 	static unsigned s_NumButtons = sizeof(s_pButtonNames) / sizeof(char*);
 	CUIRect Button;
 
@@ -1322,7 +1326,7 @@ void CEditor::PopupSelectGametileOpInvoke(float x, float y)
 {
 	static int s_SelectGametileOpPopupId = 0;
 	s_GametileOpSelected = -1;
-	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 150.0f, PopupSelectGametileOp);
+	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 165.0f, PopupSelectGametileOp);
 }
 
 int CEditor::PopupSelectGameTileOpResult()
