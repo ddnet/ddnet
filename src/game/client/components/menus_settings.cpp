@@ -1711,20 +1711,20 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	Left.HSplitTop(20.0f, &Label, &Left);
 	Button.VSplitRight(20.0f, &Button, 0);
 	char aBuf[64];
-	if (g_Config.m_ClReconnectBanTimeout == 1)
+	if (g_Config.m_ClReconnectTimeout == 1)
 	{
-		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("second"));
+		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectTimeout, Localize("second"));
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectBanTimeout, Localize("seconds"));
+		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectTimeout, Localize("seconds"));
 	}
 	UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
 	Left.HSplitTop(20.0f, &Button, 0);
 	Button.HMargin(2.0f, &Button);
-	g_Config.m_ClReconnectBanTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectBanTimeout, &Button, g_Config.m_ClReconnectBanTimeout / 120.0f) * 120.0f);
-	if (g_Config.m_ClReconnectBanTimeout < 5)
-		g_Config.m_ClReconnectBanTimeout = 5;*/
+	g_Config.m_ClReconnectTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout / 120.0f) * 120.0f);
+	if (g_Config.m_ClReconnectTimeout < 5)
+		g_Config.m_ClReconnectTimeout = 5;*/
 }
 
 void CMenus::RenderSettingsDDRace(CUIRect MainView)

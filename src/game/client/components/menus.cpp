@@ -1050,11 +1050,11 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			if ((str_find_nocase(Client()->ErrorString(), "full")) || (str_find_nocase(Client()->ErrorString(), "reserved")))
 			{
-				if (g_Config.m_ClReconnectFull)
+				if (g_Config.m_ClReconnectFull > 0)
 				{
 					if (_my_rtime == 0)
 						_my_rtime = time_get();
-					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ClReconnectFullTimeout));
+					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ClReconnectFull));
 					pTitle = Client()->ErrorString();
 					pExtraText = aBuf;
 					pButtonText = Localize("Abort");
@@ -1062,11 +1062,11 @@ int CMenus::Render()
 			}
 			else if (str_find_nocase(Client()->ErrorString(), "ban"))
 			{
-				if (g_Config.m_ClReconnectBan)
+				if (g_Config.m_ClReconnectTimeout > 0)
 				{
 					if (_my_rtime == 0)
 						_my_rtime = time_get();
-					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ClReconnectBanTimeout));
+					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ClReconnectTimeout));
 					pTitle = Client()->ErrorString();
 					pExtraText = aBuf;
 					pButtonText = Localize("Abort");
@@ -1616,12 +1616,12 @@ int CMenus::Render()
 	{
 		if (str_find_nocase(Client()->ErrorString(), "full") || str_find_nocase(Client()->ErrorString(), "reserved"))
 		{
-			if (g_Config.m_ClReconnectFull && time_get() > _my_rtime + time_freq() * g_Config.m_ClReconnectFullTimeout)
+			if (g_Config.m_ClReconnectFull > 0 && time_get() > _my_rtime + time_freq() * g_Config.m_ClReconnectFull)
 				Client()->Connect(g_Config.m_UiServerAddress);
 		}
-		else if (str_find_nocase(Client()->ErrorString(), "ban") || str_find_nocase(Client()->ErrorString(), "kick"))
+		else if (str_find_nocase(Client()->ErrorString(), "Timeout"))
 		{
-			if (g_Config.m_ClReconnectBan && time_get() > _my_rtime + time_freq() * g_Config.m_ClReconnectBanTimeout)
+			if (g_Config.m_ClReconnectTimeout > 0 && time_get() > _my_rtime + time_freq() * g_Config.m_ClReconnectTimeout)
 				Client()->Connect(g_Config.m_UiServerAddress);
 		}
 	}
