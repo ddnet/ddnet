@@ -46,12 +46,12 @@ CLayerTiles::~CLayerTiles()
 	delete [] m_pTiles;
 }
 
-CTile CLayerTiles::GetTile(int x, int y, bool force)
+CTile CLayerTiles::GetTile(int x, int y)
 {
 	return m_pTiles[y*m_Width+x];
 }
 
-void CLayerTiles::SetTile(int x, int y, CTile tile, bool force)
+void CLayerTiles::SetTile(int x, int y, CTile tile)
 {
 	m_pTiles[y*m_Width+x] = tile;
 }
@@ -1300,26 +1300,20 @@ CLayerFront::CLayerFront(int w, int h)
 	m_Front = 1;
 }
 
-CTile CLayerFront::GetTile(int x, int y, bool force)
+void CLayerFront::SetTile(int x, int y, CTile tile)
 {
-	if(!force && GetTile(x, y, true).m_Index == TILE_THROUGH_CUT) {
-		CTile air = {TILE_AIR, 0, 0, 0};
-		return air;
-	} else {
-		return m_pTiles[y*m_Width+x];
+	if(tile.m_Index == TILE_THROUGH_CUT) {
+		CTile nohook = {TILE_NOHOOK};
+		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, nohook);
+	} else if(tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT) {
+		CTile air = {TILE_AIR};
+		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, air);
 	}
-}
-
-void CLayerFront::SetTile(int x, int y, CTile tile, bool force)
-{
-	if(force || (GetTile(x, y, true).m_Index != TILE_THROUGH_CUT && tile.m_Index != TILE_THROUGH_CUT)) {
-		// set normal front tile
-		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(tile.m_Index)) {
-			m_pTiles[y*m_Width+x] = tile;
-		} else {
-			CTile air = {TILE_AIR, 0, 0, 0};
-			SetTile(x, y, air);
-		}
+	if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(tile.m_Index)) {
+		CLayerTiles::SetTile(x, y, tile);
+	} else {
+		CTile air = {TILE_AIR};
+		CLayerTiles::SetTile(x, y, air);
 	}
 }
 
