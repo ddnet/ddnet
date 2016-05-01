@@ -79,7 +79,7 @@ void CUpdater::MoveFile(const char *pFile)
 {
 	char aBuf[256];
 	size_t len = str_length(pFile);
-	if(!str_comp(pFile + len - 4, ".dll"))
+	if(!str_comp(pFile + len - 4, ".dll") || !str_comp(pFile + len - 4, ".ttf"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
 		m_pStorage->RenameBinaryFile(pFile, aBuf);
