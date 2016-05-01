@@ -59,7 +59,7 @@ void CInput::Init()
 
 void CInput::MouseRelative(float *x, float *y)
 {
-	if(!m_MouseFocus)
+	if(!m_MouseFocus || !m_InputGrabbed)
 		return;
 
 #if defined(__ANDROID__) // No relative mouse on Android
