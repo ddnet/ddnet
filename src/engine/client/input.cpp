@@ -78,7 +78,7 @@ void CInput::MouseModeAbsolute()
 {
 	m_InputGrabbed = 0;
 	SDL_SetRelativeMouseMode(SDL_FALSE);
-	Graphics()->SetWindowGrab(SDL_FALSE);
+	Graphics()->SetWindowGrab(false);
 }
 
 void CInput::MouseModeRelative()
