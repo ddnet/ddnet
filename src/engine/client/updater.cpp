@@ -221,8 +221,24 @@ void CUpdater::PerformUpdate()
 	{
 		if(it->second)
 		{
-			FetchFile(it->first.c_str());
-			aLastFile = it->first.c_str();
+			const char *pFile = it->first.c_str();
+			size_t len = str_length(pFile);
+			if(!str_comp_nocase(pFile + len - 4, ".dll"))
+			{
+#if defined(CONF_FAMILY_WINDOWS)
+				char aBuf[512];
+				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
+				str_copy(aBuf + len - 4, "-" PLAT_NAME, sizeof(aBuf) - len + 4); // -win32
+				str_append(aBuf, pFile + len - 4, sizeof(aBuf)); // .dll
+				FetchFile(aBuf, pFile);
+#endif
+				// Ignore DLL downloads on other platforms, on Linux we statically link anyway
+			}
+			else
+			{
+				FetchFile(pFile);
+			}
+			aLastFile = pFile;
 		}
 		else
 			m_pStorage->RemoveBinaryFile(it->first.c_str());
