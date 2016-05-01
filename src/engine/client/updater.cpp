@@ -287,7 +287,7 @@ void CUpdater::WinXpRestart()
 		if(!bhFile)
 			return;
 		char bBuf[512];
-		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\n:_T\r\nrename \"DDNet.tmp\" \"DDNet.exe\"\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
+		str_format(bBuf, sizeof(bBuf), ":_R\r\ndel \"DDNet.exe\"\r\nif exist \"DDNet.exe\" goto _R\r\n:_T\r\nrename \"update/DDNet.tmp\" \"DDNet.exe\"\r\nif not exist \"DDNet.exe\" goto _T\r\nstart DDNet.exe\r\ndel \"du.bat\"\r\n");
 		io_write(bhFile, bBuf, str_length(bBuf));
 		io_close(bhFile);
 		shell_execute(aBuf);
