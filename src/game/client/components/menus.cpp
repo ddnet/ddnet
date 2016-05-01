@@ -1060,7 +1060,7 @@ int CMenus::Render()
 					pButtonText = Localize("Abort");
 				}
 			}
-			else if (str_find_nocase(Client()->ErrorString(), "ban"))
+			else if (str_find_nocase(Client()->ErrorString(), "Timeout"))
 			{
 				if (g_Config.m_ClReconnectTimeout > 0)
 				{
