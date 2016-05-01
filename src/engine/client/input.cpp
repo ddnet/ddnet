@@ -238,6 +238,7 @@ int CInput::Update()
 						case SDL_WINDOWEVENT_FOCUS_LOST:
 							m_MouseFocus = false;
 							IgnoreKeys = true;
+							SDL_SetRelativeMouseMode(SDL_FALSE);
 							break;
 #if defined(CONF_PLATFORM_MACOSX)	// Todo: remove this when fixed in SDL
 						case SDL_WINDOWEVENT_MAXIMIZED:
