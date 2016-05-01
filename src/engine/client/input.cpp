@@ -211,6 +211,7 @@ int CInput::Update()
 					if(Event.wheel.y > 0) Key = KEY_MOUSE_WHEEL_UP; // ignore_convention
 					if(Event.wheel.y < 0) Key = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
 					Action |= IInput::FLAG_RELEASE;
+					Scancode = Key;
 					break;
 
 				case SDL_WINDOWEVENT:
