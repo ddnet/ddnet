@@ -61,10 +61,8 @@ void CFifo::Update()
 	while(true)
 	{
 		char *pResult = fgets(aBuf, sizeof(aBuf), m_File);
-		if(pResult != NULL)
-			m_pConsole->ExecuteLineFlag(pResult, m_Flag, -1);
-		else
-			break;
+		if(pResult == NULL) break;
+		m_pConsole->ExecuteLineFlag(pResult, m_Flag, -1);
 	}
 }
 #endif
