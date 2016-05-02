@@ -224,7 +224,7 @@ void CFileScore::LoadScore(int ClientID)
 
 void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
 {
-	dbg_msg("FileScore", "SaveTeamScore not implemented for FileScore");
+	dbg_msg("filescore", "saveteamscore not implemented for filescore");
 }
 
 void CFileScore::SaveScore(int ClientID, float Time,

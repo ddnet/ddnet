@@ -48,7 +48,7 @@ void FifoConsole::ListenFifoThread(void *pUser)
 
 	if(!gs_FifoLock)
 	{
-		dbg_msg("fifo", "FIFO not properly initialized");
+		dbg_msg("fifo", "fifo not properly initialized");
 		exit(2);
 	}
 
@@ -63,14 +63,14 @@ void FifoConsole::ListenFifoThread(void *pUser)
 
 	if(!S_ISFIFO(attribute.st_mode))
 	{
-		dbg_msg("fifo", "'%s' is not a FIFO, removing", pData->m_pFifoFile);
+		dbg_msg("fifo", "'%s' is not a fifo, removing", pData->m_pFifoFile);
 		fs_remove(pData->m_pFifoFile);
 		mkfifo(pData->m_pFifoFile, 0600);
 		stat(pData->m_pFifoFile, &attribute);
 
 		if(!S_ISFIFO(attribute.st_mode))
 		{
-			dbg_msg("fifo", "Can't remove file, quitting");
+			dbg_msg("fifo", "can't remove file, quitting");
 			exit(2);
 		}
 	}

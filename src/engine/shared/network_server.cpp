@@ -248,7 +248,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
-		dbg_msg("security", "Client accepted %s", aAddrStr);
+		dbg_msg("security", "client accepted %s", aAddrStr);
 	}
 
 

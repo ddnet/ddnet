@@ -116,7 +116,7 @@ void CUpdater::AddFileJob(const char *pFile, bool job)
 
 void CUpdater::ReplaceClient()
 {
-	dbg_msg("updater", "Replacing " PLAT_CLIENT_EXEC);
+	dbg_msg("updater", "replacing " PLAT_CLIENT_EXEC);
 
 	//Replace running executable by renaming twice...
 	if(!m_IsWinXP)
@@ -131,13 +131,13 @@ void CUpdater::ReplaceClient()
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 		if (system(aBuf))
-			dbg_msg("updater", "Error setting client executable bit");
+			dbg_msg("updater", "ERROR: failed to set client executable bit");
 	#endif
 }
 
 void CUpdater::ReplaceServer()
 {
-	dbg_msg("updater", "Replacing " PLAT_SERVER_EXEC);
+	dbg_msg("updater", "replacing " PLAT_SERVER_EXEC);
 
 	//Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile("DDNet-Server.old");
@@ -149,7 +149,7 @@ void CUpdater::ReplaceServer()
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 		if (system(aBuf))
-			dbg_msg("updater", "Error setting server executable bit");
+			dbg_msg("updater", "ERROR: failed to set server executable bit");
 	#endif
 }
 
@@ -205,7 +205,7 @@ void CUpdater::InitiateUpdate()
 void CUpdater::PerformUpdate()
 {
 	m_State = PARSING_UPDATE;
-	dbg_msg("updater", "Parsing update.json");
+	dbg_msg("updater", "parsing update.json");
 	ParseUpdate();
 	m_State = DOWNLOADING;
 

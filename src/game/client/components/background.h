@@ -2,6 +2,7 @@
 #define GAME_CLIENT_COMPONENTS_BACKGROUND_H
 #include <game/client/component.h>
 
+// Special value to use background of current map
 #define CURRENT "%current%"
 
 class CBackground : public CComponent

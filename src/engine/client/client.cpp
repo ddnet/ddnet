@@ -749,7 +749,8 @@ void CClient::Disconnect()
 {
 	if(m_DummyConnected)
 		DummyDisconnect(0);
-	DisconnectWithReason(0);
+	if(m_State != IClient::STATE_OFFLINE)
+		DisconnectWithReason(0);
 }
 
 bool CClient::DummyConnected()
@@ -1283,7 +1284,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		{
 			m_pMasterServer->SetCount(ServerID, ServerCount);
 			if(g_Config.m_Debug)
-				dbg_msg("MasterCount", "Server %d got %d servers", ServerID, ServerCount);
+				dbg_msg("mastercount", "server %d got %d servers", ServerID, ServerCount);
 		}
 	}
 	// server list from master server
@@ -2444,7 +2445,7 @@ void CClient::Update()
 			FinishMapDownload();
 		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
 		{
-			dbg_msg("webdl", "HTTP failed falling back to gameserver.");
+			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
 			SendMapRequest();
 		}

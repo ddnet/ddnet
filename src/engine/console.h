@@ -90,7 +90,7 @@ public:
 	virtual void ExecuteLine(const char *Sptr, int ClientID = -1) = 0;
 	virtual void ExecuteLineFlag(const char *Sptr, int FlasgMask, int ClientID = -1) = 0;
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1) = 0;
-	virtual void ExecuteFile(const char *pFilename, int ClientID = -1) = 0;
+	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false) = 0;
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;

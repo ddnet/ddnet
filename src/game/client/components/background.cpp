@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <iostream>
 
 #include <engine/shared/config.h>
 #include <engine/map.h>
@@ -38,8 +39,7 @@ void CBackground::OnInit()
 	m_pImages->m_pClient = GameClient();
 	m_pLayers->m_pClient = GameClient();
 	Kernel()->ReregisterInterface(static_cast<IEngineMap*>(m_pMap));
-	str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
-	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT))
+	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, CURRENT))
 		LoadBackground();
 }
 
@@ -48,6 +48,7 @@ void CBackground::LoadBackground()
 	if(time_get()-m_LastLoad < 10*time_freq())
 		return;
 
+	std::cout << "here" << std::endl;
 	if(m_Loaded && m_pMap == m_pBackgroundMap)
 		m_pMap->Unload();
 
@@ -56,7 +57,7 @@ void CBackground::LoadBackground()
 	m_pLayers->m_pLayers = m_pBackgroundLayers;
 	m_pImages = m_pBackgroundImages;
 
-	str_format(m_aMapName, sizeof(m_aMapName), "%s", g_Config.m_ClBackgroundEntities);
+	str_copy(m_aMapName, g_Config.m_ClBackgroundEntities, sizeof(m_aMapName));
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
 	if(m_pMap->Load(aBuf))
@@ -87,7 +88,7 @@ void CBackground::OnMapLoad()
 void CBackground::OnRender()
 {
 	//probably not the best place for this
-	if(str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
+	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();
 
 	if(!m_Loaded)
@@ -112,9 +113,9 @@ void CBackground::OnRender()
 
 		if(!pGroup)
 		{
-			dbg_msg("MapLayers", "Error:Group was null, Group Number = %d, Total Groups = %d", g, m_pLayers->m_pLayers->NumGroups());
-			dbg_msg("MapLayers", "This is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
-			dbg_msg("MapLayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
+			dbg_msg("background", "error group was null, group number = %d, total groups = %d", g, m_pLayers->m_pLayers->NumGroups());
+			dbg_msg("background", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
+			dbg_msg("background", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
 			continue;
 		}
 

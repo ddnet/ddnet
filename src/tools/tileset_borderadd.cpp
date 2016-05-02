@@ -76,7 +76,7 @@ int main(int argc, const char **argv)
 	dbg_logger_stdout();
 	if(argc == 1)
 	{
-		dbg_msg("Usage", "%s FILE1 [ FILE2... ]", argv[0]);
+		dbg_msg("usage", "%s FILE1 [ FILE2... ]", argv[0]);
 		return -1;
 	}
 

@@ -588,7 +588,6 @@ void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed)
 
 int CCollision::IsSwitch(int Index)
 {
-	//dbg_msg("IsSwitch","Index %d, pSwitch %d, m_Type %d, m_Number %d", Index, m_pSwitch, (m_pSwitch)?m_pSwitch[Index].m_Type:0, (m_pSwitch)?m_pSwitch[Index].m_Number:0);
 	if(Index < 0 || !m_pSwitch)
 		return 0;
 
@@ -600,7 +599,6 @@ int CCollision::IsSwitch(int Index)
 
 int CCollision::GetSwitchNumber(int Index)
 {
-	//dbg_msg("GetSwitchNumber","Index %d, pSwitch %d, m_Type %d, m_Number %d", Index, m_pSwitch, (m_pSwitch)?m_pSwitch[Index].m_Type:0, (m_pSwitch)?m_pSwitch[Index].m_Number:0);
 	if(Index < 0 || !m_pSwitch)
 		return 0;
 
@@ -612,7 +610,6 @@ int CCollision::GetSwitchNumber(int Index)
 
 int CCollision::GetSwitchDelay(int Index)
 {
-	//dbg_msg("GetSwitchNumber","Index %d, pSwitch %d, m_Type %d, m_Number %d", Index, m_pSwitch, (m_pSwitch)?m_pSwitch[Index].m_Type:0, (m_pSwitch)?m_pSwitch[Index].m_Number:0);
 	if(Index < 0 || !m_pSwitch)
 		return 0;
 
@@ -745,9 +742,6 @@ int CCollision::GetMapIndex(vec2 Pos)
 	int Nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
 	int Ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
 	int Index = Ny*m_Width+Nx;
-	/*if (m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN)) dbg_msg("m_pTele && TELEIN","Index %d",Index);
-	else if (m_pTele && m_pTele[Index].m_Type==TILE_TELEOUT) dbg_msg("TELEOUT","Index %d",Index);
-	else dbg_msg("GetMapIndex(","Index %d",Index);//REMOVE */
 
 	if(TileExists(Index))
 		return Index;
@@ -765,9 +759,6 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 		int Nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
 		int Ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
 		int Index = Ny * m_Width + Nx;
-		/*if (m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN)) dbg_msg("m_pTele && TELEIN","Index %d",Index);
-		else if (m_pTele && m_pTele[Index].m_Type==TILE_TELEOUT) dbg_msg("TELEOUT","Index %d",Index);
-		else dbg_msg("GetMapIndex(","Index %d",Index);//REMOVE */
 
 		if(TileExists(Index))
 		{
@@ -791,15 +782,12 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 			Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
 			Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
 			Index = Ny * m_Width + Nx;
-			//dbg_msg("lastindex","%d",LastIndex);
-			//dbg_msg("index","%d",Index);
 			if(TileExists(Index) && LastIndex != Index)
 			{
 				if(MaxIndices && Indices.size() > MaxIndices)
 					return Indices;
 				Indices.push_back(Index);
 				LastIndex = Index;
-				//dbg_msg("pushed","%d",Index);
 			}
 		}
 
@@ -819,7 +807,6 @@ vec2 CCollision::GetPos(int Index)
 
 int CCollision::GetTileIndex(int Index)
 {
-	/*dbg_msg("GetTileIndex","m_pTiles[%d].m_Index = %d",Index,m_pTiles[Index].m_Index);//Remove*/
 	if(Index < 0)
 		return 0;
 	return m_pTiles[Index].m_Index;
@@ -827,8 +814,6 @@ int CCollision::GetTileIndex(int Index)
 
 int CCollision::GetFTileIndex(int Index)
 {
-	/*dbg_msg("GetFTileIndex","m_pFront[%d].m_Index = %d",Index,m_pFront[Index].m_Index);//Remove*/
-
 	if(Index < 0 || !m_pFront)
 		return 0;
 	return m_pFront[Index].m_Index;
@@ -836,7 +821,6 @@ int CCollision::GetFTileIndex(int Index)
 
 int CCollision::GetTileFlags(int Index)
 {
-	/*dbg_msg("GetTileIndex","m_pTiles[%d].m_Index = %d",Index,m_pTiles[Index].m_Index);//Remove*/
 	if(Index < 0)
 		return 0;
 	return m_pTiles[Index].m_Flags;
@@ -844,8 +828,6 @@ int CCollision::GetTileFlags(int Index)
 
 int CCollision::GetFTileFlags(int Index)
 {
-	/*dbg_msg("GetFTileIndex","m_pFront[%d].m_Index = %d",Index,m_pFront[Index].m_Index);//Remove*/
-
 	if(Index < 0 || !m_pFront)
 		return 0;
 	return m_pFront[Index].m_Flags;
@@ -905,7 +887,6 @@ int CCollision::GetFTile(int x, int y)
 	return 0;
 	int Nx = clamp(x/32, 0, m_Width-1);
 	int Ny = clamp(y/32, 0, m_Height-1);
-	/*dbg_msg("GetFTile","m_Index %d",m_pFront[Ny*m_Width+Nx].m_Index);//Remove */
 	if(m_pFront[Ny*m_Width+Nx].m_Index == TILE_DEATH
 		|| m_pFront[Ny*m_Width+Nx].m_Index == TILE_NOLASER)
 		return m_pFront[Ny*m_Width+Nx].m_Index;
@@ -941,7 +922,7 @@ int CCollision::Entity(int x, int y, int Layer)
 			default:
 				str_format(aBuf,sizeof(aBuf), "Unknown");
 		}
-		dbg_msg("CCollision::Entity","Something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", aBuf);
+		dbg_msg("collision","something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", aBuf);
 		return 0;
 	}
 	switch (Layer)

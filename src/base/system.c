@@ -413,7 +413,7 @@ int mem_check_imp()
 		MEMTAIL *tail = (MEMTAIL *)(((char*)(header+1))+header->size);
 		if(tail->guard != MEM_GUARD_VAL)
 		{
-			dbg_msg("mem", "Memory check failed at %s(%d): %d", header->filename, header->line, header->size);
+			dbg_msg("mem", "memory check failed at %s(%d): %d", header->filename, header->line, header->size);
 			return 0;
 		}
 		header = header->next;
@@ -1707,7 +1707,7 @@ int fs_makedir_rec_for(const char *path)
 	char buffer[1024*2];
 	char *p;
 	str_copy(buffer, path, sizeof(buffer));
-	for(p = buffer; *p != '\0'; p++)
+	for(p = buffer+1; *p != '\0'; p++)
 	{
 		if(*p == '/' && *(p + 1) != '\0')
 		{

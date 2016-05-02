@@ -378,10 +378,6 @@ void CControls::OnRender()
 			m_InputDirectionRight[g_Config.m_ClDummy] = 0;
 		}
 
-		//dbg_msg("dbg", "RunPressed %d m_JoystickSwipeJumpClear %lld m_JoystickSwipeJumpY %d RunY %d cond %d",
-		//		RunPressed, m_JoystickSwipeJumpClear, (int)m_JoystickSwipeJumpY, RunY,
-		//		(int)((!m_JoystickSwipeJumpY && RunY > SWIPE_JUMP_THRESHOLD) || (m_JoystickSwipeJumpY && RunY < -SWIPE_JUMP_THRESHOLD)));
-
 		if( HookPressed )
 		{
 			m_MousePos[g_Config.m_ClDummy] = vec2(HookX / 30, HookY / 30);
