@@ -138,10 +138,6 @@ void CCharacter::HandleJetpack()
 	if (m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
 
-	// don't fire non auto weapons when player is deep and sv_deepfly is disabled
-	if(!g_Config.m_SvDeepfly && !FullAuto && m_DeepFreeze)
-		return;
-
 	// check if we gonna fire
 	bool WillFire = false;
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
@@ -348,6 +344,10 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 	if (m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
+
+	// don't fire non auto weapons when player is deep and sv_deepfly is disabled
+	if(!g_Config.m_SvDeepfly && !FullAuto && m_DeepFreeze)
+		return;
 
 	// check if we gonna fire
 	bool WillFire = false;
