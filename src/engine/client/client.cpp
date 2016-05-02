@@ -42,7 +42,7 @@
 #include <engine/shared/protocol.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
-#include <engine/shared/fifoconsole.h>
+#include <engine/shared/fifo.h>
 
 #include <game/version.h>
 
@@ -2652,6 +2652,10 @@ void CClient::Run()
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
+#endif
+
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
@@ -2796,6 +2800,10 @@ void CClient::Run()
 		if(State() == IClient::STATE_QUITING)
 			break;
 
+#if defined(CONF_FAMILY_UNIX)
+		m_Fifo.Update();
+#endif
+
 		// beNice
 		if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);
@@ -2812,6 +2820,10 @@ void CClient::Run()
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
 	}
+
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Shutdown();
+#endif
 
 	GameClient()->OnShutdown();
 	Disconnect();
@@ -3444,10 +3456,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pClient->Engine()->InitLogfile();
 
-#if defined(CONF_FAMILY_UNIX)
-	FifoConsole *fifoConsole = new FifoConsole(pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
-#endif
-
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!g_Config.m_ClShowConsole)
 		FreeConsole();
@@ -3459,10 +3467,6 @@ int main(int argc, const char **argv) // ignore_convention
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
-
-#if defined(CONF_FAMILY_UNIX)
-	delete fifoConsole;
-#endif
 
 	// write down the config and quit
 	pConfig->Save();
