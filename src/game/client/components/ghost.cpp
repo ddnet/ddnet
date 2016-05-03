@@ -49,7 +49,7 @@ void CGhost::AddInfos(CGhostCharacter Player)
 	// Just to be sure it doesnt eat too much memory, the first test should be enough anyway
 	if(m_CurGhost.m_Path.size() > Client()->GameTickSpeed()*60*20)
 	{
-		dbg_msg("ghost", "20 minutes elapsed. Stopping ghost record");
+		dbg_msg("ghost", "20 minutes elapsed. stopping ghost record");
 		StopRecord();
 		m_CurGhost.m_Path.clear();
 		return;
@@ -396,7 +396,7 @@ void CGhost::Save()
 	m_pClient->m_pMenus->m_lGhosts.add(Item);
 	m_pClient->m_pMenus->m_OwnGhost = &find_linear(m_pClient->m_pMenus->m_lGhosts.all(), Item).front();
 
-	dbg_msg("ghost", "Saved better ghost");
+	dbg_msg("ghost", "saved better ghost");
 	m_Saving = false;
 }
 

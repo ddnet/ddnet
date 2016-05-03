@@ -6,6 +6,9 @@
 	#define WINVER 0x0501
 #endif
 
+#include <base/detect.h>
+#include <base/math.h>
+#include <stdlib.h>
 #include "SDL.h"
 #include "SDL_syswm.h"
 #if defined(__ANDROID__)
@@ -14,9 +17,14 @@
 	#include <GLES/glext.h>
 	#include <GL/glu.h>
 	#define glOrtho glOrthof
-	#include <SDL_android.h>
 #else
 	#include "SDL_opengl.h"
+
+	#if defined(CONF_PLATFORM_MACOSX)
+	#include "OpenGL/glu.h"
+	#else
+	#include "GL/glu.h"
+	#endif
 #endif
 
 #if defined(SDL_VIDEO_DRIVER_X11)
@@ -34,9 +42,6 @@
 
 void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 {
-	#ifdef CONF_PLATFORM_MACOSX
-		CAutoreleasePool AutoreleasePool;
-	#endif
 	CGraphicsBackend_Threaded *pThis = (CGraphicsBackend_Threaded *)pUser;
 
 	while(!pThis->m_Shutdown)
@@ -44,6 +49,9 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 		pThis->m_Activity.wait();
 		if(pThis->m_pBuffer)
 		{
+			#ifdef CONF_PLATFORM_MACOSX
+				CAutoreleasePool AutoreleasePool;
+			#endif
 			pThis->m_pProcessor->RunBuffer(pThis->m_pBuffer);
 			sync_barrier();
 			pThis->m_pBuffer = 0x0;
@@ -417,8 +425,9 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 
 void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 {
-	m_GLContext = pCommand->m_Context;
-	GL_MakeCurrent(m_GLContext);
+	m_GLContext = pCommand->m_GLContext;
+	m_pWindow = pCommand->m_pWindow;
+	SDL_GL_MakeCurrent(m_pWindow, m_GLContext);
 
 	// set some default settings
 	glEnable(GL_BLEND);
@@ -434,48 +443,62 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 
 void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
-	GL_ReleaseContext(m_GLContext);
+	SDL_GL_MakeCurrent(NULL, NULL);
 }
 
 void CCommandProcessorFragment_SDL::Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand)
 {
-	GL_SwapBuffers(m_GLContext);
+	SDL_GL_SwapWindow(m_pWindow);
 
 	if(pCommand->m_Finish)
 		glFinish();
 }
 
+void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand)
+{
+	*pCommand->m_pRetOk = SDL_GL_SetSwapInterval(pCommand->m_VSync) == 0;
+}
+
+void CCommandProcessorFragment_SDL::Cmd_Resize(const CCommandBuffer::SCommand_Resize *pCommand)
+{
+	SDL_SetWindowSize(m_pWindow, pCommand->m_Width, pCommand->m_Height);
+	glViewport(0, 0, pCommand->m_Width, pCommand->m_Height);
+}
+
 void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SCommand_VideoModes *pCommand)
 {
-	// TODO: fix this code on osx or windows
-	SDL_Rect **ppModes = SDL_ListModes(NULL, SDL_OPENGL|SDL_GL_DOUBLEBUFFER|SDL_FULLSCREEN);
-	if(ppModes == NULL)
+	SDL_DisplayMode mode;
+	int maxModes = SDL_GetNumDisplayModes(pCommand->m_Screen),
+		numModes = 0;
+
+	for(int i = 0; i < maxModes; i++)
 	{
-		// no modes
-		*pCommand->m_pNumModes = 0;
-	}
-	else if(ppModes == (SDL_Rect**)-1)
-	{
-		// no modes
-		*pCommand->m_pNumModes = 0;
-	}
-	else
-	{
-		int NumModes = 0;
-		for(int i = 0; ppModes[i]; ++i)
+		if(SDL_GetDisplayMode(pCommand->m_Screen, i, &mode) < 0)
 		{
-			if(NumModes == pCommand->m_MaxModes)
-				break;
-			pCommand->m_pModes[NumModes].m_Width = ppModes[i]->w;
-			pCommand->m_pModes[NumModes].m_Height = ppModes[i]->h;
-			pCommand->m_pModes[NumModes].m_Red = 8;
-			pCommand->m_pModes[NumModes].m_Green = 8;
-			pCommand->m_pModes[NumModes].m_Blue = 8;
-			NumModes++;
+			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+			continue;
 		}
 
-		*pCommand->m_pNumModes = NumModes;
+		bool alreadyFound = false;
+		for(int j = 0; j < numModes; j++)
+		{
+			if(pCommand->m_pModes[j].m_Width == mode.w && pCommand->m_pModes[j].m_Height == mode.h)
+			{
+				alreadyFound = true;
+				break;
+			}
+		}
+		if(alreadyFound)
+			continue;
+
+		pCommand->m_pModes[numModes].m_Width = mode.w;
+		pCommand->m_pModes[numModes].m_Height = mode.h;
+		pCommand->m_pModes[numModes].m_Red = 8;
+		pCommand->m_pModes[numModes].m_Green = 8;
+		pCommand->m_pModes[numModes].m_Blue = 8;
+		numModes++;
 	}
+	*pCommand->m_pNumModes = numModes;
 }
 
 CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
@@ -487,6 +510,8 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 	switch(pBaseCommand->m_Cmd)
 	{
 	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_VSYNC: Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_RESIZE: Cmd_Resize(static_cast<const CCommandBuffer::SCommand_Resize *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_VIDEOMODES: Cmd_VideoModes(static_cast<const CCommandBuffer::SCommand_VideoModes *>(pBaseCommand)); break;
 	case CMD_INIT: Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)); break;
 	case CMD_SHUTDOWN: Cmd_Shutdown(static_cast<const SCommand_Shutdown *>(pBaseCommand)); break;
@@ -522,7 +547,7 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 
 // ------------ CGraphicsBackend_SDL_OpenGL
 
-int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Width, int *Height, int FsaaSamples, int Flags)
+int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight)
 {
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 	{
@@ -538,44 +563,65 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Width, int *Height
 		#endif
 	}
 
-	const SDL_VideoInfo *pInfo = SDL_GetVideoInfo();
-	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE); // prevent stuck mouse cursor sdl-bug when loosing fullscreen focus in windows
-
-	// use current resolution as default
-#ifndef __ANDROID__
-	if(*Width == 0 || *Height == 0)
-#endif
+	// set screen
+	SDL_Rect ScreenPos;
+	m_NumScreens = SDL_GetNumVideoDisplays();
+	if(m_NumScreens > 0)
 	{
-		*Width = pInfo->current_w;
-		*Height = pInfo->current_h;
+		clamp(*Screen, 0, m_NumScreens-1);
+		if(SDL_GetDisplayBounds(*Screen, &ScreenPos) != 0)
+		{
+			dbg_msg("gfx", "unable to retrieve screen information: %s", SDL_GetError());
+			return -1;
+		}
+
+	}
+	else
+	{
+		dbg_msg("gfx", "unable to retrieve number of screens: %s", SDL_GetError());
+		return -1;
 	}
 
+	// store desktop resolution for settings reset button
+	SDL_DisplayMode DisplayMode;
+	if(SDL_GetDesktopDisplayMode(*Screen, &DisplayMode))
+	{
+		dbg_msg("gfx", "unable to get desktop resolution: %s", SDL_GetError());
+		return -1;
+	}
+	*pDesktopWidth = DisplayMode.w;
+	*pDesktopHeight = DisplayMode.h;
 
+	// use desktop resolution as default resolution
+#ifndef __ANDROID__
+	if(*pWidth == 0 || *pHeight == 0)
+#endif
+	{
+		*pWidth = *pDesktopWidth;
+		*pHeight = *pDesktopHeight;
+	}
 
 	// set flags
-	int SdlFlags = SDL_OPENGL;
+	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+#if defined(SDL_VIDEO_DRIVER_X11)
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
-		SdlFlags |= SDL_RESIZABLE;
-
-	if(pInfo->hw_available) // ignore_convention
-		SdlFlags |= SDL_HWSURFACE;
-	else
-		SdlFlags |= SDL_SWSURFACE;
-
-	if(pInfo->blit_hw) // ignore_convention
-		SdlFlags |= SDL_HWACCEL;
-
-	dbg_assert(!(Flags&IGraphicsBackend::INITFLAG_BORDERLESS)
-		|| !(Flags&IGraphicsBackend::INITFLAG_FULLSCREEN),
-		"only one of borderless and fullscreen may be activated at the same time");
-
+		SdlFlags |= SDL_WINDOW_RESIZABLE;
+#endif
 	if(Flags&IGraphicsBackend::INITFLAG_BORDERLESS)
-		SdlFlags |= SDL_NOFRAME;
-
+		SdlFlags |= SDL_WINDOW_BORDERLESS;
 	if(Flags&IGraphicsBackend::INITFLAG_FULLSCREEN)
-		SdlFlags |= SDL_FULLSCREEN;
+	{
+#if defined(CONF_PLATFORM_MACOSX)	// Todo SDL: remove this when fixed (game freezes when losing focus in fullscreen)
+		SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;	// always use "fake" fullscreen
+		*pWidth = *pDesktopWidth;
+		*pHeight = *pDesktopHeight;
+#else
+		SdlFlags |= SDL_WINDOW_FULLSCREEN;
+#endif
+	}
 
 	// set gl attributes
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	if(FsaaSamples)
 	{
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -587,26 +633,41 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Width, int *Height
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
+	// Might fix problems with Windows HighDPI scaling
+	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+
+	m_pWindow = SDL_CreateWindow(
+		pName,
+		SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen),
+		SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen),
+		*pWidth,
+		*pHeight,
+		SdlFlags);
 
 	// set caption
-	SDL_WM_SetCaption(pName, pName);
-
-	// create window
-	m_pScreenSurface = SDL_SetVideoMode(*Width, *Height, 0, SdlFlags);
-	if(!m_pScreenSurface)
+	if(m_pWindow == NULL)
 	{
-		dbg_msg("gfx", "unable to set video mode: %s", SDL_GetError());
-		//*pCommand->m_pResult = -1;
+		dbg_msg("gfx", "unable to create window: %s", SDL_GetError());
 		return -1;
 	}
 
-	SDL_ShowCursor(0);
+	SDL_GetWindowSize(m_pWindow, pWidth, pHeight);
 
-	// fetch gl contexts and release the context from this thread
-	m_GLContext = GL_GetCurrentContext();
-	GL_ReleaseContext(m_GLContext);
+	m_GLContext = SDL_GL_CreateContext(m_pWindow);
+
+	if(m_GLContext == NULL)
+	{
+		dbg_msg("gfx", "unable to create OpenGL context: %s", SDL_GetError());
+		return -1;
+	}
+
+	SDL_ShowWindow(m_pWindow);
+
+	SetWindowScreen(g_Config.m_GfxScreen);
+
+	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
+
+	SDL_GL_MakeCurrent(NULL, NULL);
 
 	// start the command processor
 	m_pProcessor = new CCommandProcessor_SDL_OpenGL;
@@ -618,7 +679,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Width, int *Height
 	CmdOpenGL.m_pTextureMemoryUsage = &m_TextureMemoryUsage;
 	CmdBuffer.AddCommand(CmdOpenGL);
 	CCommandProcessorFragment_SDL::SCommand_Init CmdSDL;
-	CmdSDL.m_Context = m_GLContext;
+	CmdSDL.m_pWindow = m_pWindow;
+	CmdSDL.m_GLContext = m_GLContext;
 	CmdBuffer.AddCommand(CmdSDL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
@@ -641,6 +703,9 @@ int CGraphicsBackend_SDL_OpenGL::Shutdown()
 	delete m_pProcessor;
 	m_pProcessor = 0;
 
+	SDL_GL_DeleteContext(m_GLContext);
+	SDL_DestroyWindow(m_pWindow);
+
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	return 0;
 }
@@ -652,7 +717,7 @@ int CGraphicsBackend_SDL_OpenGL::MemoryUsage() const
 
 void CGraphicsBackend_SDL_OpenGL::Minimize()
 {
-	SDL_WM_IconifyWindow();
+	SDL_MinimizeWindow(m_pWindow);
 }
 
 void CGraphicsBackend_SDL_OpenGL::Maximize()
@@ -660,14 +725,55 @@ void CGraphicsBackend_SDL_OpenGL::Maximize()
 	// TODO: SDL
 }
 
+bool CGraphicsBackend_SDL_OpenGL::Fullscreen(bool State)
+{
+#if defined(CONF_PLATFORM_MACOSX)	// Todo SDL: remove this when fixed (game freezes when losing focus in fullscreen)
+	return SDL_SetWindowFullscreen(m_pWindow, State ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) == 0;
+#else
+	return SDL_SetWindowFullscreen(m_pWindow, State ? SDL_WINDOW_FULLSCREEN : 0) == 0;
+#endif
+}
+
+void CGraphicsBackend_SDL_OpenGL::SetWindowBordered(bool State)
+{
+	SDL_SetWindowBordered(m_pWindow, SDL_bool(State));
+}
+
+bool CGraphicsBackend_SDL_OpenGL::SetWindowScreen(int Index)
+{
+	if(Index >= 0 && Index < m_NumScreens)
+	{
+		SDL_Rect ScreenPos;
+		if(SDL_GetDisplayBounds(Index, &ScreenPos) == 0)
+		{
+			SDL_SetWindowPosition(m_pWindow,
+				SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
+				SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int CGraphicsBackend_SDL_OpenGL::GetWindowScreen()
+{
+	return SDL_GetWindowDisplayIndex(m_pWindow);
+}
+
 int CGraphicsBackend_SDL_OpenGL::WindowActive()
 {
-	return SDL_GetAppState()&SDL_APPINPUTFOCUS;
+	return SDL_GetWindowFlags(m_pWindow)&SDL_WINDOW_INPUT_FOCUS;
 }
 
 int CGraphicsBackend_SDL_OpenGL::WindowOpen()
 {
-	return SDL_GetAppState()&SDL_APPACTIVE;
+	return SDL_GetWindowFlags(m_pWindow)&SDL_WINDOW_SHOWN;
+}
+
+void CGraphicsBackend_SDL_OpenGL::SetWindowGrab(bool Grab)
+{
+	SDL_SetWindowGrab(m_pWindow, Grab ? SDL_TRUE : SDL_FALSE);
 }
 
 void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
@@ -675,7 +781,7 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 	// get window handle
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
-	if(!SDL_GetWMInfo(&info))
+	if(!SDL_GetWindowWMInfo(m_pWindow, &info))
 	{
 		dbg_msg("gfx", "unable to obtain window handle");
 		return;
@@ -684,7 +790,7 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 	#if defined(CONF_FAMILY_WINDOWS)
 		FLASHWINFO desc;
 		desc.cbSize = sizeof(desc);
-		desc.hwnd = info.window;
+		desc.hwnd = info.info.win.window;
 		desc.dwFlags = FLASHW_TRAY;
 		desc.uCount = 3; // flash 3 times
 		desc.dwTimeout = 0;
@@ -692,11 +798,7 @@ void CGraphicsBackend_SDL_OpenGL::NotifyWindow()
 		FlashWindowEx(&desc);
 	#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(CONF_PLATFORM_MACOSX)
 		Display *dpy = info.info.x11.display;
-		Window win;
-		if(m_pScreenSurface->flags & SDL_FULLSCREEN)
-			win = info.info.x11.fswindow;
-		else
-			win = info.info.x11.wmwindow;
+		Window win = info.info.x11.window;
 
 		// Old hints
 		XWMHints *wmhints;

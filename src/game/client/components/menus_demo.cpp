@@ -59,7 +59,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if (m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
 	{
 		CUIRect Screen = *UI()->Screen();
-		CUIRect Box, Part;
+		CUIRect Box, Part, Part2;
 		Box = Screen;
 		Box.VMargin(150.0f/UI()->Scale(), &Box);
 #if defined(__ANDROID__)
@@ -95,6 +95,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Ok.VMargin(20.0f, &Ok);
 		Abort.VMargin(20.0f, &Abort);
 
+		static int s_RemoveChat = 0;
+
 		static int s_ButtonAbort = 0;
 		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
 			m_DemoPlayerState = DEMOPLAYER_NONE;
@@ -114,16 +116,25 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
-				Client()->DemoSlice(aPath);
+				Client()->DemoSlice(aPath, s_RemoveChat);
 			}
 		}
 
 		Box.HSplitBottom(60.f, &Box, &Part);
+		Box.HSplitBottom(60.f, &Box, &Part2);
 #if defined(__ANDROID__)
+		Box.HSplitBottom(60.f, &Box, &Part2);
 		Box.HSplitBottom(60.f, &Box, &Part);
 #else
+		Box.HSplitBottom(24.f, &Box, &Part2);
 		Box.HSplitBottom(24.f, &Box, &Part);
 #endif
+
+		Part2.VSplitLeft(60.0f, 0, &Label);
+		if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &Label))
+		{
+			s_RemoveChat ^= 1;
+		}
 
 		Part.VSplitLeft(60.0f, 0, &Label);
 		Label.VSplitLeft(120.0f, 0, &TextBox);
@@ -132,11 +143,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, -1);
 		static float Offset = 0.0f;
 		DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset);
-
 	}
 
 	// handle mousewheel independent of active menu
-	if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+	if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 	{
 		if(pInfo->m_Speed < 0.1f) DemoPlayer()->SetSpeed(0.1f);
 		else if(pInfo->m_Speed < 0.25f) DemoPlayer()->SetSpeed(0.25f);
@@ -148,7 +158,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		else DemoPlayer()->SetSpeed(8.0f);
 		LastSpeedChange = time_get();
 	}
-	else if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+	else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 	{
 		if(pInfo->m_Speed > 4.0f) DemoPlayer()->SetSpeed(4.0f);
 		else if(pInfo->m_Speed > 2.0f) DemoPlayer()->SetSpeed(2.0f);
@@ -264,7 +274,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				static float PrevAmount = 0.0f;
 				float Amount = (UI()->MouseX()-SeekBar.x)/(float)SeekBar.w;
 
-				if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{
 					Amount = PrevAmount + (Amount-PrevAmount) * 0.05f;
 
@@ -346,7 +356,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static int s_SlowDownButton = 0;
-	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 		DecreaseDemoSpeed = true;
 
 	// fastforward
@@ -497,9 +507,9 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 		Num = 0;
 	if(Num > 0)
 	{
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
 			gs_ListBoxScrollValue -= 3.0f/Num;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
 			gs_ListBoxScrollValue += 3.0f/Num;
 
 		if(gs_ListBoxScrollValue < 0.0f) gs_ListBoxScrollValue = 0.0f;
@@ -557,7 +567,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow()
 	return Item;
 }
 
-CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
+CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected, bool KeyEvents)
 {
 	int ThisItemIndex = gs_ListBoxItemIndex;
 	if(Selected)
@@ -579,12 +589,13 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
 		{
 			gs_ListBoxDoneEvents = 1;
 
+
 			if(m_EnterPressed || (UI()->ActiveItem() == pId && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
 			}
-			else
+			else if(KeyEvents)
 			{
 				for(int i = 0; i < m_NumInputEvents; i++)
 				{
@@ -945,9 +956,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
 			m_ScrollOffset = 0;
 		}
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&ListBox))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&ListBox))
 			s_ScrollValue -= 3.0f/ScrollNum;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&ListBox))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&ListBox))
 			s_ScrollValue += 3.0f/ScrollNum;
 	}
 	else
@@ -1097,9 +1108,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	bool Activated = false;
 
 #if defined(__ANDROID__)
-	if (m_EnterPressed || (DoubleClicked && UI()->ActiveItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+	if (m_EnterPressed || (DoubleClicked && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
 #else
-	if (m_EnterPressed || (Input()->MouseDoubleClick() && UI()->ActiveItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+	if (m_EnterPressed || (Input()->MouseDoubleClick() && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
 #endif
 	{
 		UI()->SetActiveItem(0);
@@ -1107,7 +1118,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static int s_RefreshButton = 0;
-	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect))
+	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
 	{
 		DemolistPopulate();
 		DemolistOnUpdate(false);

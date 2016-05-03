@@ -15,6 +15,7 @@
 #include <base/math.h>
 #include <engine/shared/mapchecker.h>
 #include <engine/shared/econ.h>
+#include <engine/shared/fifo.h>
 #include <engine/shared/netban.h>
 
 #if defined (CONF_SQL)
@@ -146,7 +147,6 @@ public:
 		int m_Country;
 		int m_Score;
 		int m_Authed;
-		int m_LastAuthed;
 		int m_AuthTries;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
@@ -166,6 +166,9 @@ public:
 	CSnapIDPool m_IDPool;
 	CNetServer m_NetServer;
 	CEcon m_Econ;
+#if defined(CONF_FAMILY_UNIX)
+	CFifo m_Fifo;
+#endif
 	CServerBan m_ServerBan;
 
 	IEngineMap *m_pMap;

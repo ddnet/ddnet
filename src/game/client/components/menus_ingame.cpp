@@ -452,7 +452,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	TextRender()->Text(0, Motd.x+x, Motd.y+y, 16, m_pClient->m_pMotd->m_aServerMotd, (int)Motd.w);
 }
 
-void CMenus::RenderServerControlServer(CUIRect MainView)
+bool CMenus::RenderServerControlServer(CUIRect MainView)
 {
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
@@ -493,12 +493,14 @@ void CMenus::RenderServerControlServer(CUIRect MainView)
 		NumVoteOptions++;
 	}
 
-	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, 0);
+	bool Call;
+	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, &Call);
 	if(s_CurVoteOption < Total)
 		m_CallvoteSelectedOption = aIndices[s_CurVoteOption];
+	return Call;
 }
 
-void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
+bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 {
 	int NumOptions = 0;
 	int Selected = -1;
@@ -544,8 +546,10 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		}
 	}
 
-	Selected = UiDoListboxEnd(&s_ScrollValue, 0);
+	bool Call;
+	Selected = UiDoListboxEnd(&s_ScrollValue, &Call);
 	m_CallvoteSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
+	return Call;
 }
 
 void CMenus::RenderServerControl(CUIRect MainView)
@@ -594,12 +598,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	MainView.HSplitBottom(ms_ButtonHeight + 5*2, &MainView, &Bottom);
 	Bottom.HMargin(5.0f, &Bottom);
 
+	bool Call = false;
 	if(s_ControlPage == 0)
-		RenderServerControlServer(MainView);
+		Call = RenderServerControlServer(MainView);
 	else if(s_ControlPage == 1)
-		RenderServerControlKick(MainView, false);
+		Call = RenderServerControlKick(MainView, false);
 	else if(s_ControlPage == 2)
-		RenderServerControlKick(MainView, true);
+		Call = RenderServerControlKick(MainView, true);
 
 	// vote menu
 	{
@@ -638,10 +643,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
 		static int s_CallVoteButton = 0;
-		if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button))
+		if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || Call)
 		{
 			if(s_ControlPage == 0)
+			{
 				m_pClient->m_pVoting->CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
+				SetActive(false);
+			}
 			else if(s_ControlPage == 1)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
@@ -754,44 +762,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	}
 }
 
-void CMenus::RenderInGameDDRace(CUIRect MainView)
-{
-	CUIRect Box = MainView;
-	CUIRect Button;
-
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
-
-	Box.HSplitTop(5.0f, &MainView, &MainView);
-	Box.HSplitTop(24.0f, &Box, &MainView);
-	Box.VMargin(20.0f, &Box);
-
-	Box.VSplitLeft(100.0f, &Button, &Box);
-	static int s_BrwoserButton=0;
-	if(DoButton_MenuTab(&s_BrwoserButton, Localize("Browser"), m_DDRacePage==PAGE_BROWSER, &Button, CUI::CORNER_TL))
-	{
-		m_DDRacePage = PAGE_BROWSER;
-	}
-
-	//Box.VSplitLeft(4.0f, 0, &Box);
-	Box.VSplitLeft(80.0f, &Button, &Box);
-	static int s_GhostButton=0;
-	if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_DDRacePage==PAGE_GHOST, &Button, 0))
-	{
-		m_DDRacePage = PAGE_GHOST;
-	}
-
-	if(m_DDRacePage != -1)
-	{
-		if(m_DDRacePage == PAGE_GHOST)
-			RenderGhost(MainView);
-		else
-			RenderInGameBrowser(MainView);
-	}
-
-	return;
-}
-
-void CMenus::RenderInGameBrowser(CUIRect MainView)
+void CMenus::RenderInGameNetwork(CUIRect MainView)
 {
 	CUIRect Box = MainView;
 	CUIRect Button;
@@ -805,9 +776,15 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 	Box.HSplitTop(24.0f, &Box, &MainView);
 	Box.VMargin(20.0f, &Box);
 
+	if(Page < PAGE_INTERNET || Page > PAGE_DDNET)
+	{
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+		NewPage = PAGE_DDNET;
+	}
+
 	Box.VSplitLeft(100.0f, &Button, &Box);
 	static int s_InternetButton=0;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_TL))
+	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_BL))
 	{
 		if (Page != PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -834,7 +811,7 @@ void CMenus::RenderInGameBrowser(CUIRect MainView)
 
 	Box.VSplitLeft(110.0f, &Button, &Box);
 	static int s_DDNetButton=0;
-	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_TR))
+	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_BR))
 	{
 		if (Page != PAGE_DDNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
@@ -970,9 +947,9 @@ void CMenus::RenderGhost(CUIRect MainView)
 	int ScrollNum = NumGhosts-Num+1;
 	if(ScrollNum > 0)
 	{
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 			s_ScrollValue -= 1.0f/ScrollNum;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 			s_ScrollValue += 1.0f/ScrollNum;
 	}
 	else

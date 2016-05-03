@@ -482,7 +482,7 @@ void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID)
 }
 
 
-void CConsole::ExecuteFile(const char *pFilename, int ClientID)
+void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure)
 {
 	// make sure that this isn't being executed already
 	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
@@ -519,7 +519,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID)
 
 		io_close(File);
 	}
-	else
+	else if(LogFailure)
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
@@ -535,7 +535,7 @@ void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 {
-	((CConsole*)pUserData)->ExecuteFile(pResult->GetString(0));
+	((CConsole*)pUserData)->ExecuteFile(pResult->GetString(0), -1, true);
 }
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
@@ -829,7 +829,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
 		{
 			if(NumArgs - i > 1)
-				ExecuteFile(ppArguments[i+1]);
+				ExecuteFile(ppArguments[i+1], -1, true);
 			i++;
 		}
 		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))

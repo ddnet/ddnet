@@ -7,7 +7,7 @@
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
 	// don't handle invalid events and keys that arn't set to anything
-	if(Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F15 && m_pBinds->m_aaKeyBindings[Event.m_Key][0] != 0)
+	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) && m_pBinds->m_aaKeyBindings[Event.m_Key][0] != 0)
 	{
 		int Stroke = 0;
 		if(Event.m_Flags&IInput::FLAG_PRESS)
@@ -47,10 +47,10 @@ bool CBinds::OnInput(IInput::CEvent e)
 	if(e.m_Key <= 0 || e.m_Key >= KEY_LAST || m_aaKeyBindings[e.m_Key][0] == 0)
 		return false;
 
-	int Stroke = 0;
 	if(e.m_Flags&IInput::FLAG_PRESS)
-		Stroke = 1;
-	Console()->ExecuteLineStroked(Stroke, m_aaKeyBindings[e.m_Key]);
+		Console()->ExecuteLineStroked(1, m_aaKeyBindings[e.m_Key]);
+	if(e.m_Flags&IInput::FLAG_RELEASE)
+		Console()->ExecuteLineStroked(0, m_aaKeyBindings[e.m_Key]);
 	return true;
 }
 
@@ -296,13 +296,15 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1");
 		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100");
 #endif
-		Bind(KEY_KP0, "say /emote normal 999999");
-		Bind(KEY_KP1, "say /emote happy 999999");
-		Bind(KEY_KP2, "say /emote angry 999999");
-		Bind(KEY_KP3, "say /emote pain 999999");
-		Bind(KEY_KP4, "say /emote surprise 999999");
-		Bind(KEY_KP5, "say /emote blink 999999");
+		Bind(KEY_KP_0, "say /emote normal 999999");
+		Bind(KEY_KP_1, "say /emote happy 999999");
+		Bind(KEY_KP_2, "say /emote angry 999999");
+		Bind(KEY_KP_3, "say /emote pain 999999");
+		Bind(KEY_KP_4, "say /emote surprise 999999");
+		Bind(KEY_KP_5, "say /emote blink 999999");
 		Bind(KEY_MOUSE_3, "+spectate");
+		Bind(KEY_MINUS, "spectate_previous");
+		Bind(KEY_EQUALS, "spectate_next");
 	}
 	else
 	{
@@ -343,21 +345,21 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		if(!Get('x')[0])
 			Bind('x', "toggle cl_dummy 0 1");
 		if(!Get(KEY_PAGEDOWN)[0])
-			Bind(KEY_PAGEDOWN, "cl_show_entities 0");
+			Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1");
 		if(!Get(KEY_PAGEUP)[0])
-			Bind(KEY_PAGEUP, "cl_show_entities 1");
-		if(!Get(KEY_KP0)[0])
-			Bind(KEY_KP0, "say /emote normal 999999");
-		if(!Get(KEY_KP1)[0])
-			Bind(KEY_KP1, "say /emote happy 999999");
-		if(!Get(KEY_KP2)[0])
-			Bind(KEY_KP2, "say /emote angry 999999");
-		if(!Get(KEY_KP3)[0])
-			Bind(KEY_KP3, "say /emote pain 999999");
-		if(!Get(KEY_KP4)[0])
-			Bind(KEY_KP4, "say /emote surprise 999999");
-		if(!Get(KEY_KP5)[0])
-			Bind(KEY_KP5, "say /emote blink 999999");
+			Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100");
+		if(!Get(KEY_KP_0)[0])
+			Bind(KEY_KP_0, "say /emote normal 999999");
+		if(!Get(KEY_KP_1)[0])
+			Bind(KEY_KP_1, "say /emote happy 999999");
+		if(!Get(KEY_KP_2)[0])
+			Bind(KEY_KP_2, "say /emote angry 999999");
+		if(!Get(KEY_KP_3)[0])
+			Bind(KEY_KP_3, "say /emote pain 999999");
+		if(!Get(KEY_KP_4)[0])
+			Bind(KEY_KP_4, "say /emote surprise 999999");
+		if(!Get(KEY_KP_5)[0])
+			Bind(KEY_KP_5, "say /emote blink 999999");
 		if(!Get(KEY_MOUSE_3)[0])
 			Bind(KEY_MOUSE_3, "+spectate");
 		if(!Get(KEY_MINUS)[0])

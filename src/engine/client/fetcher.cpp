@@ -35,8 +35,8 @@ CFetcher::~CFetcher()
 
 void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
 {
-	str_copy(pTask->m_pUrl, pUrl, sizeof(pTask->m_pUrl));
-	str_copy(pTask->m_pDest, pDest, sizeof(pTask->m_pDest));
+	str_copy(pTask->m_aUrl, pUrl, sizeof(pTask->m_aUrl));
+	str_copy(pTask->m_aDest, pDest, sizeof(pTask->m_aDest));
 	pTask->m_StorageType = StorageType;
 	pTask->m_pfnProgressCallback = pfnProgCb;
 	pTask->m_pfnCompCallback = pfnCompCb;
@@ -75,7 +75,7 @@ void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
 void CFetcher::FetcherThread(void *pUser)
 {
 	CFetcher *pFetcher = (CFetcher *)pUser;
-	dbg_msg("fetcher", "Thread started...");
+	dbg_msg("fetcher", "thread started...");
 	while(1)
 	{
 		lock_wait(pFetcher->m_Lock);
@@ -85,7 +85,7 @@ void CFetcher::FetcherThread(void *pUser)
 		lock_unlock(pFetcher->m_Lock);
 		if(pTask)
 		{
-			dbg_msg("fetcher", "Task got %s:%s", pTask->m_pUrl, pTask->m_pDest);
+			dbg_msg("fetcher", "task got %s:%s", pTask->m_aUrl, pTask->m_aDest);
 			pFetcher->FetchFile(pTask);
 			if(pTask->m_pfnCompCallback)
 				pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
@@ -99,13 +99,17 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 {
 	char aPath[512];
 	if(pTask->m_StorageType == -2)
-		m_pStorage->GetBinaryPath(pTask->m_pDest, aPath, sizeof(aPath));
+		m_pStorage->GetBinaryPath(pTask->m_aDest, aPath, sizeof(aPath));
 	else
-		m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_pDest, aPath, sizeof(aPath));
+		m_pStorage->GetCompletePath(pTask->m_StorageType, pTask->m_aDest, aPath, sizeof(aPath));
+
+	if(fs_makedir_rec_for(aPath) < 0)
+		dbg_msg("fetcher", "i/o error, cannot create folder for: %s", aPath);
+
 	IOHANDLE File = io_open(aPath, IOFLAG_WRITE);
 
 	if(!File){
-		dbg_msg("fetcher", "I/O Error cannot open file: %s", pTask->m_pDest);
+		dbg_msg("fetcher", "i/o error, cannot open file: %s", pTask->m_aDest);
 		pTask->m_State = CFetchTask::STATE_ERROR;
 		return;
 	}
@@ -133,25 +137,25 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, aCAFile);
-	curl_easy_setopt(m_pHandle, CURLOPT_URL, pTask->m_pUrl);
+	curl_easy_setopt(m_pHandle, CURLOPT_URL, pTask->m_aUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);
 	curl_easy_setopt(m_pHandle, CURLOPT_NOPROGRESS, 0);
 	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSDATA, pTask);
 	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSFUNCTION, &CFetcher::ProgressCallback);
 
-	dbg_msg("fetcher", "Downloading %s", pTask->m_pDest);
+	dbg_msg("fetcher", "downloading %s", pTask->m_aDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;
 	int ret = curl_easy_perform(m_pHandle);
 	io_close(File);
 	if(ret != CURLE_OK)
 	{
-		dbg_msg("fetcher", "Task failed. libcurl error: %s", aErr);
+		dbg_msg("fetcher", "task failed. libcurl error: %s", aErr);
 		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? CFetchTask::STATE_ABORTED : CFetchTask::STATE_ERROR;
 	}
 	else
 	{
-		dbg_msg("fetcher", "Task done %s", pTask->m_pDest);
+		dbg_msg("fetcher", "task done %s", pTask->m_aDest);
 		pTask->m_State = CFetchTask::STATE_DONE;
 	}
 }
@@ -164,7 +168,6 @@ void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
 int CFetcher::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
 {
 	CFetchTask *pTask = (CFetchTask *)pUser;
-	//dbg_msg("fetcher", "DlCurr:%f, DlTotal:%f", DlCurr, DlTotal);
 	pTask->m_Current = DlCurr;
 	pTask->m_Size = DlTotal;
 	pTask->m_Progress = (100 * DlCurr) / (DlTotal ? DlTotal : 1);

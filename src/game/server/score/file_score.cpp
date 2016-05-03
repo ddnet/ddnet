@@ -202,6 +202,11 @@ void CFileScore::UpdatePlayer(int ID, float Score,
 	Save();
 }
 
+void CFileScore::CheckBirthday(int ClientID)
+{
+	// TODO: implement
+}
+
 void CFileScore::LoadScore(int ClientID)
 {
 	CPlayerScore *pPlayer = SearchScore(ClientID, 0);
@@ -219,7 +224,7 @@ void CFileScore::LoadScore(int ClientID)
 
 void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
 {
-	dbg_msg("FileScore", "SaveTeamScore not implemented for FileScore");
+	dbg_msg("filescore", "saveteamscore not implemented for filescore");
 }
 
 void CFileScore::SaveScore(int ClientID, float Time,

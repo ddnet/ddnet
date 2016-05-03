@@ -636,7 +636,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 				{
 					GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
 					if (Weapon == WEAPON_SELF)
-						GameServer()->m_apPlayers[i]->Respawn();
+						GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
 					GameServer()->SendChatTarget(i, aBuf);
 				}
 		}
@@ -645,7 +645,8 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 
 void CGameTeams::SetTeamLock(int Team, bool Lock)
 {
-	m_TeamLocked[Team] = Lock;
+	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
+		m_TeamLocked[Team] = Lock;
 }
 
 void CGameTeams::KillSavedTeam(int Team)

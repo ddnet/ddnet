@@ -39,11 +39,11 @@ CSqlServer::~CSqlServer()
 			delete m_pResults;
 		if (m_pConnection)
 			delete m_pConnection;
-		dbg_msg("SQL", "SQL connection disconnected");
+		dbg_msg("sql", "SQL connection disconnected");
 	}
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("SQL", "ERROR: No SQL connection");
+		dbg_msg("sql", "ERROR: No SQL connection");
 	}
 	UnLock();
 }
@@ -63,9 +63,9 @@ bool CSqlServer::Connect()
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
+			dbg_msg("sql", aBuf);
 
-			dbg_msg("SQL", "ERROR: SQL connection failed");
+			dbg_msg("sql", "ERROR: SQL connection failed");
 			UnLock();
 			return false;
 		}
@@ -103,53 +103,53 @@ bool CSqlServer::Connect()
 
 		// Connect to specific database
 		m_pConnection->setSchema(m_aDatabase);
-		dbg_msg("SQL", "SQL connection established");
+		dbg_msg("sql", "sql connection established");
 		return true;
 	}
 	catch (sql::SQLException &e)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("SQL", aBuf);
+		dbg_msg("sql", aBuf);
 
-		dbg_msg("SQL", "ERROR: SQL connection failed");
+		dbg_msg("sql", "ERROR: sql connection failed");
 		UnLock();
 		return false;
 	}
 	catch (const std::exception& ex)
 	{
 		// ...
-		dbg_msg("SQL", "1 %s",ex.what());
+		dbg_msg("sql", "1 %s",ex.what());
 
 	}
 	catch (const std::string& ex)
 	{
 		// ...
-		dbg_msg("SQL", "2 %s",ex.c_str());
+		dbg_msg("sql", "2 %s",ex.c_str());
 	}
 	catch( int )
 	{
-		dbg_msg("SQL", "3 %s");
+		dbg_msg("sql", "3 %s");
 	}
 	catch( float )
 	{
-		dbg_msg("SQL", "4 %s");
+		dbg_msg("sql", "4 %s");
 	}
 
 	catch( char[] )
 	{
-		dbg_msg("SQL", "5 %s");
+		dbg_msg("sql", "5 %s");
 	}
 
 	catch( char )
 	{
-		dbg_msg("SQL", "6 %s");
+		dbg_msg("sql", "6 %s");
 	}
 	catch (...)
 	{
-		dbg_msg("SQL", "Unknown Error cause by the MySQL/C++ Connector, my advice compile server_debug and use it");
+		dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector, my advice compile server_debug and use it");
 
-		dbg_msg("SQL", "ERROR: SQL connection failed");
+		dbg_msg("sql", "ERROR: sql connection failed");
 		UnLock();
 		return false;
 	}
@@ -187,14 +187,14 @@ void CSqlServer::CreateTables()
 		str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_aPrefix, MAX_NAME_LENGTH);
 		executeSql(aBuf);
 
-		dbg_msg("SQL", "Tables were created successfully");
+		dbg_msg("sql", "Tables were created successfully");
 	}
 	catch (sql::SQLException &e)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("SQL", aBuf);
-		dbg_msg("SQL", "ERROR: Tables were NOT created");
+		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "ERROR: Tables were NOT created");
 	}
 
 	Disconnect();

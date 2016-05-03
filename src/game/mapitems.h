@@ -97,7 +97,8 @@ enum
 	TILE_DEATH,
 	TILE_NOHOOK,
 	TILE_NOLASER,
-	TILE_THROUGH = 6,
+	TILE_THROUGH_CUT,
+	TILE_THROUGH,
 	TILE_JUMP,
 	TILE_FREEZE = 9,
 	TILE_TELEINEVIL,
@@ -130,15 +131,18 @@ enum
 	TILE_STOP = 60,
 	TILE_STOPS,
 	TILE_STOPA,
-	TILE_TELECHECKINEVIL = 63,
-	TILE_CP = 64,
+	TILE_TELECHECKINEVIL,
+	TILE_CP,
 	TILE_CP_F,
-	TILE_TUNE1 = 68,
+	TILE_THROUGH_ALL,
+	TILE_THROUGH_DIR,
+	TILE_TUNE1,
 	TILE_OLDLASER = 71,
 	TILE_NPC,
 	TILE_EHOOK,
 	TILE_NOHIT,
 	TILE_NPH,
+	TILE_UNLOCK_TEAM,
 	TILE_PENALTY = 79,
 	TILE_NPC_END = 88,
 	TILE_SUPER_END,
@@ -148,7 +152,9 @@ enum
 	TILE_NPC_START = 104,
 	TILE_SUPER_START,
 	TILE_JETPACK_START,
-	TILE_NPH_START,//Remember to change this in collision.cpp if you add anymore tiles
+	TILE_NPH_START,
+	TILE_ENTITIES_OFF_1 = 190,
+	TILE_ENTITIES_OFF_2,
 	//End of higher tiles
 	//Layers
 	LAYER_GAME=0,
@@ -448,5 +454,10 @@ public:
 	unsigned char m_Number;
 	unsigned char m_Type;
 };
+
+
+bool IsValidGameTile(int Index);
+bool IsValidFrontTile(int Index);
+bool IsValidEntity(int Index);
 
 #endif

@@ -23,7 +23,7 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/snapshot.h>
-#include <engine/shared/fifoconsole.h>
+#include <engine/shared/fifo.h>
 
 #include <mastersrv/mastersrv.h>
 
@@ -820,7 +820,6 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
@@ -849,7 +848,6 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
@@ -1050,7 +1048,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			Msg.AddInt(Chunk);
 			Msg.AddInt(ChunkSize);
 			Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
-			SendMsgEx(&Msg, MSGFLAG_FLUSH, ClientID, true);
+			SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
 
 			if(g_Config.m_Debug)
 			{
@@ -1157,7 +1155,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
 				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				if (GameServer->m_apPlayers[ClientID] && (GameServer->m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_RCONPROTECT || m_aClients[ClientID].m_LastAuthed))
+				if (GameServer->m_apPlayers[ClientID])
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
@@ -1169,7 +1167,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 					m_RconClientID = IServer::RCON_CID_SERV;
 					m_RconAuthLevel = AUTHED_ADMIN;
-					m_aClients[ClientID].m_LastAuthed = AUTHED_NO;
 				}
 			}
 		}
@@ -1200,7 +1197,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				if(AuthLevel != -1)
 				{
-					m_aClients[ClientID].m_LastAuthed = AuthLevel;
 					if(m_aClients[ClientID].m_Authed != AuthLevel)
 					{
 						CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
@@ -1537,6 +1533,9 @@ void CServer::PumpNetwork()
 
 	m_ServerBan.Update();
 	m_Econ.Update();
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Update();
+#endif
 }
 
 char *CServer::GetMapName()
@@ -1656,6 +1655,10 @@ int CServer::Run()
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
 	m_Econ.Init(Console(), &m_ServerBan);
+
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Init(Console(), g_Config.m_SvInputFifo, CFGFLAG_SERVER);
+#endif
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
@@ -1817,9 +1820,13 @@ int CServer::Run()
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			m_NetServer.Drop(i, "Server shutdown");
-
-		m_Econ.Shutdown();
 	}
+
+	m_Econ.Shutdown();
+
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Shutdown();
+#endif
 
 	GameServer()->OnShutdown();
 	m_pMap->Unload();
@@ -2003,7 +2010,6 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 		pServer->SendMsgEx(&Msg, MSGFLAG_VITAL, pServer->m_RconClientID, true);
 
 		pServer->m_aClients[pServer->m_RconClientID].m_Authed = AUTHED_NO;
-		pServer->m_aClients[pServer->m_RconClientID].m_LastAuthed = AUTHED_NO;
 		pServer->m_aClients[pServer->m_RconClientID].m_AuthTries = 0;
 		pServer->m_aClients[pServer->m_RconClientID].m_pRconCmdToSend = 0;
 		pServer->SendRconLine(pServer->m_RconClientID, "Logout successful.");
@@ -2163,7 +2169,6 @@ void CServer::LogoutByAuthLevel(int AuthLevel) // AUTHED_<x>
 			SendMsgEx(&Msg, MSGFLAG_VITAL, i, true);
 
 			m_aClients[i].m_Authed = AUTHED_NO;
-			m_aClients[i].m_LastAuthed = AUTHED_NO;
 			m_aClients[i].m_AuthTries = 0;
 			m_aClients[i].m_pRconCmdToSend = 0;
 
@@ -2354,10 +2359,6 @@ int main(int argc, const char **argv) // ignore_convention
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze");
 
 	pEngine->InitLogfile();
-
-#if defined(CONF_FAMILY_UNIX)
-	FifoConsole *fifoConsole = new FifoConsole(pConsole, g_Config.m_SvInputFifo, CFGFLAG_SERVER);
-#endif
 	pServer->InitRconPasswordIfEmpty();
 
 	// run the server
@@ -2365,9 +2366,6 @@ int main(int argc, const char **argv) // ignore_convention
 	pServer->Run();
 
 	// free
-#if defined(CONF_FAMILY_UNIX)
-	delete fifoConsole;
-#endif
 	delete pServer;
 	delete pKernel;
 	delete pEngineMap;

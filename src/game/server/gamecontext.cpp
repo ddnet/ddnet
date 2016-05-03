@@ -553,6 +553,11 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 				{
 					Msg.AddInt(0);
 				}
+				else if((i==36) // hammer hit
+				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
+				{
+					Msg.AddInt(0);
+				}
 				else
 				{
 					Msg.AddInt(pParams[i]);
@@ -602,6 +607,12 @@ void CGameContext::OnTick()
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
 		}
+	}
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_apPlayers[i])
+			m_apPlayers[i]->PostPostTick();
 	}
 
 	// update voting
@@ -899,6 +910,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
 	Score()->LoadScore(ClientID);
+	Score()->CheckBirthday(ClientID);
 
 	if(((CServer *) Server())->m_aPrevStates[ClientID] < CServer::CClient::STATE_INGAME)
 	{
@@ -907,7 +919,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "please visit http://ddnet.tw or say /info for more info");
+		SendChatTarget(ClientID, "please visit https://ddnet.tw or say /info for more info");
 
 		if(g_Config.m_SvWelcome[0]!=0)
 			SendChatTarget(ClientID,g_Config.m_SvWelcome);
@@ -1481,9 +1493,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else if(pPlayer->m_ClientVersion < Version)
 				pPlayer->m_ClientVersion = Version;
 
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
-			dbg_msg("DDNet", aBuf);
+			dbg_msg("ddnet", "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
 
 			//first update his teams state
 			((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
@@ -2401,7 +2411,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 				Collision()->m_pSwitchers[i].m_Initial = true;
 	}
 
-	Console()->ExecuteFile(g_Config.m_SvResetFile);
+	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);
 
 	LoadMapSettings();
 
@@ -2467,27 +2477,27 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 			if(Index == TILE_OLDLASER)
 			{
 				g_Config.m_SvOldLaser = 1;
-				dbg_msg("Game Layer", "Found Old Laser Tile");
+				dbg_msg("game layer", "found old laser tile");
 			}
 			else if(Index == TILE_NPC)
 			{
 				m_Tuning.Set("player_collision", 0);
-				dbg_msg("Game Layer", "Found No Collision Tile");
+				dbg_msg("game layer", "found no collision tile");
 			}
 			else if(Index == TILE_EHOOK)
 			{
 				g_Config.m_SvEndlessDrag = 1;
-				dbg_msg("Game Layer", "Found No Unlimited hook time Tile");
+				dbg_msg("game layer", "found no unlimited hook time tile");
 			}
 			else if(Index == TILE_NOHIT)
 			{
 				g_Config.m_SvHit = 0;
-				dbg_msg("Game Layer", "Found No Weapons Hitting others Tile");
+				dbg_msg("game layer", "found no weapons hitting others tile");
 			}
 			else if(Index == TILE_NPH)
 			{
 				m_Tuning.Set("player_hooking", 0);
-				dbg_msg("Game Layer", "Found No Player Hooking Tile");
+				dbg_msg("game layer", "found no player hooking tile");
 			}
 
 			if(Index >= ENTITY_OFFSET)
@@ -2503,27 +2513,27 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 				if(Index == TILE_OLDLASER)
 				{
 					g_Config.m_SvOldLaser = 1;
-					dbg_msg("Front Layer", "Found Old Laser Tile");
+					dbg_msg("front layer", "found old laser tile");
 				}
 				else if(Index == TILE_NPC)
 				{
 					m_Tuning.Set("player_collision", 0);
-					dbg_msg("Front Layer", "Found No Collision Tile");
+					dbg_msg("front layer", "found no collision tile");
 				}
 				else if(Index == TILE_EHOOK)
 				{
 					g_Config.m_SvEndlessDrag = 1;
-					dbg_msg("Front Layer", "Found No Unlimited hook time Tile");
+					dbg_msg("front layer", "found no unlimited hook time tile");
 				}
 				else if(Index == TILE_NOHIT)
 				{
 					g_Config.m_SvHit = 0;
-					dbg_msg("Front Layer", "Found No Weapons Hitting others Tile");
+					dbg_msg("front layer", "found no weapons hitting others tile");
 				}
 				else if(Index == TILE_NPH)
 				{
 					m_Tuning.Set("player_hooking", 0);
-					dbg_msg("Front Layer", "Found No Player Hooking Tile");
+					dbg_msg("front layer", "found no player hooking tile");
 				}
 				if(Index >= ENTITY_OFFSET)
 				{

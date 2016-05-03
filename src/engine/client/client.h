@@ -49,7 +49,7 @@ public:
 };
 
 
-class CClient : public IClient, public CDemoPlayer::IListner
+class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
 	IEngine *m_pEngine;
@@ -95,7 +95,6 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	int m_RenderFrames;
 
 	NETADDR m_ServerAddress;
-	int m_WindowMustRefocus;
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
 	bool m_AutoStatScreenshotRecycle;
@@ -194,6 +193,10 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 	char m_aDDNetSrvListToken[4];
 	bool m_DDNetSrvListTokenSet;
+
+#if defined(CONF_FAMILY_UNIX)
+	CFifo m_Fifo;
+#endif
 
 public:
 	IEngine *Engine() { return m_pEngine; }
@@ -320,6 +323,7 @@ public:
 
 	static void Con_Quit(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoPlay(IConsole::IResult *pResult, void *pUserData);
+	static void Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
@@ -332,6 +336,10 @@ public:
 	static void Con_StopRecord(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
@@ -353,6 +361,12 @@ public:
 
 	void ServerBrowserUpdate();
 
+	// gfx
+	void SwitchWindowScreen(int Index);
+	void ToggleFullscreen();
+	void ToggleWindowBordered();
+	void ToggleWindowVSync();
+
 	// DDRace
 
 	virtual const char* GetCurrentMap();
@@ -363,7 +377,7 @@ public:
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
-	virtual void DemoSlice(const char *pDstPath);
+	virtual void DemoSlice(const char *pDstPath, bool RemoveChat);
 
 	void RequestDDNetSrvList();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }

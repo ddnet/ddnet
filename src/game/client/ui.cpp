@@ -79,7 +79,6 @@ void CUI::AndroidShowScreenKeys(bool shown)
 	static SDL_Rect ButtonHidden = { 0, 0, 0, 0 };
 	if( !ScreenKeyboardInitialized )
 	{
-		//dbg_msg("dbg", "CUI::AndroidShowScreenKeys: ScreenKeyboardInitialized");
 		ScreenKeyboardInitialized = true;
 
 		for( int i = 0; i < SDL_ANDROID_SCREENKEYBOARD_BUTTON_NUM; i++ )
@@ -158,7 +157,6 @@ void CUI::AndroidShowScreenKeys(bool shown)
 	if( ScreenKeyboardShown == shown )
 		return;
 	ScreenKeyboardShown = shown;
-	//dbg_msg("dbg", "CUI::AndroidShowScreenKeys: shown %d", shown);
 	for( int i = 0; i < SDL_ANDROID_SCREENKEYBOARD_BUTTON_NUM; i++ )
 		SDL_ANDROID_SetScreenKeyboardButtonPos( i, shown ? &Buttons[i] : &ButtonHidden );
 #endif

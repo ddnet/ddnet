@@ -11,7 +11,7 @@ class CHud : public CComponent
 
 	void RenderCursor();
 
-	void RenderFps();
+	void RenderTextInfo();
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
 	void RenderVoting();
@@ -22,6 +22,7 @@ class CHud : public CComponent
 	void RenderScoreHud();
 	void RenderSpectatorHud();
 	void RenderWarmupTimer();
+	void RenderLocalTime(float x);
 
 	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
 public:

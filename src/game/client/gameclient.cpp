@@ -294,7 +294,11 @@ void CGameClient::OnInit()
 	// load default font
 	static CFont *pDefaultFont = 0;
 	char aFilename[512];
-	IOHANDLE File = Storage()->OpenFile("fonts/DejaVuSans.ttf", IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
+	if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+		str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
+		pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
+	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
 		io_close(File);
@@ -302,7 +306,7 @@ void CGameClient::OnInit()
 		TextRender()->SetDefaultFont(pDefaultFont);
 	}
 	if(!pDefaultFont)
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='fonts/DejaVuSans.ttf'");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
 
 	// init all components
 	for(int i = m_All.m_Num-1; i >= 0; --i)
@@ -362,7 +366,7 @@ void CGameClient::OnInit()
 	}
 }
 
-void CGameClient::DispatchInput()
+void CGameClient::OnUpdate()
 {
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
@@ -382,19 +386,15 @@ void CGameClient::DispatchInput()
 	for(int i = 0; i < Input()->NumEvents(); i++)
 	{
 		IInput::CEvent e = Input()->GetEvent(i);
+		if(!Input()->IsEventValid(&e))
+			continue;
 
 		for(int h = 0; h < m_Input.m_Num; h++)
 		{
 			if(m_Input.m_paComponents[h]->OnInput(e))
-			{
-				//dbg_msg("", "%d char=%d key=%d flags=%d", h, e.ch, e.key, e.flags);
 				break;
-			}
 		}
 	}
-
-	// clear all events for this frame
-	Input()->ClearEvents();
 }
 
 
@@ -555,30 +555,15 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 
 void CGameClient::OnRender()
 {
-	/*Graphics()->Clear(1,0,0);
-
-	menus->render_background();
-	return;*/
-	/*
-	Graphics()->Clear(1,0,0);
-	Graphics()->MapScreen(0,0,100,100);
-
-	Graphics()->QuadsBegin();
-		Graphics()->SetColor(1,1,1,1);
-		Graphics()->QuadsDraw(50, 50, 30, 30);
-	Graphics()->QuadsEnd();
-
-	return;*/
-
 	// update the local character and spectate position
 	UpdatePositions();
-
-	// dispatch all input to systems
-	DispatchInput();
 
 	// render all systems
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnRender();
+
+	// clear all events/input for this frame
+	Input()->Clear();
 
 	// clear new tick flags
 	m_NewTick = false;
@@ -1408,7 +1393,7 @@ void CGameClient::OnPredict()
 			if(!World.m_apCharacters[c])
 				continue;
 
-			if(g_Config.m_ClAntiPingPlayers && Tick == Client()->PredGameTick())
+			if(AntiPingPlayers() && Tick == Client()->PredGameTick())
 				g_GameClient.m_aClients[c].m_PrevPredicted = *World.m_apCharacters[c];
 		}
 
@@ -2114,7 +2099,7 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 	vec2 NewPos;
 	int Collide = 0;
 	if(m_pCollision)
-		Collide = m_pCollision->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos, false);
+		Collide = m_pCollision->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
 	int Target = m_pGameClient->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, &ColPos, m_Owner, m_pWorld);
 
 	bool isWeaponCollide = false;

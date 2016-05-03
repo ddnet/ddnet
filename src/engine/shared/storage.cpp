@@ -408,7 +408,14 @@ public:
 	{
 		char aOldBuffer[MAX_PATH_LENGTH];
 		char aNewBuffer[MAX_PATH_LENGTH];
-		return !fs_rename(GetBinaryPath(pOldFilename, aOldBuffer, sizeof(aOldBuffer)), GetBinaryPath(pNewFilename, aNewBuffer, sizeof (aNewBuffer)));
+
+		GetBinaryPath(pOldFilename, aOldBuffer, sizeof(aOldBuffer));
+		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
+
+		if(fs_makedir_rec_for(aNewBuffer) < 0)
+			dbg_msg("storage", "cannot create folder for: %s", aNewBuffer);
+
+		return !fs_rename(aOldBuffer, aNewBuffer);
 	}
 
 	virtual bool CreateFolder(const char *pFoldername, int Type)

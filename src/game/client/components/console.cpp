@@ -92,6 +92,44 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
 
+	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_V))
+	{
+		const char *Text = m_pGameConsole->Input()->GetClipboardText();
+		if(Text)
+		{
+			char Line[256];
+			int i, Begin = 0;
+			for(i = 0; i < str_length(Text); i++)
+			{
+				if(Text[i] == '\n')
+				{
+					if(i == Begin)
+					{
+						Begin++;
+						continue;
+					}
+					int max = i - Begin + 1;
+					if(max > (int)sizeof(Line))
+						max = sizeof(Line);
+					str_copy(Line, Text + Begin, max);
+					Begin = i+1;
+					ExecuteLine(Line);
+				}
+			}
+			int max = i - Begin + 1;
+			if(max > (int)sizeof(Line))
+				max = sizeof(Line);
+			str_copy(Line, Text + Begin, max);
+			Begin = i+1;
+			m_Input.Add(Line);
+		}
+	}
+
+	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
+	{
+		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
+	}
+
 	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{
 		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
@@ -177,14 +215,14 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	}
 	if(Event.m_Flags&IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
 	{
-	m_ReverseTAB = false;
-	Handled = true;
+		m_ReverseTAB = false;
+		Handled = true;
 	}
 
 	if(!Handled)
 		m_Input.ProcessInput(Event);
 
-	if(Event.m_Flags&IInput::FLAG_PRESS)
+	if(Event.m_Flags & (IInput::FLAG_PRESS|IInput::FLAG_TEXT))
 	{
 		if((Event.m_Key != KEY_TAB) && (Event.m_Key != KEY_LSHIFT))
 		{
@@ -575,9 +613,9 @@ void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
 
 bool CGameConsole::OnInput(IInput::CEvent Event)
 {
-	if(m_ConsoleState == CONSOLE_CLOSED)
+	if(m_ConsoleState != CONSOLE_OPEN)
 		return false;
-	if(Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F15)
+	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;
 
 	if(Event.m_Key == KEY_ESCAPE && (Event.m_Flags&IInput::FLAG_PRESS))

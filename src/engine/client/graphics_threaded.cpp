@@ -782,18 +782,13 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 int CGraphics_Threaded::IssueInit()
 {
 	int Flags = 0;
-	if(g_Config.m_GfxBorderless && g_Config.m_GfxFullscreen)
-	{
-		dbg_msg("gfx", "both borderless and fullscreen activated, disabling borderless");
-		g_Config.m_GfxBorderless = 0;
-	}
 
 	if(g_Config.m_GfxBorderless) Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
-	else if(g_Config.m_GfxFullscreen) Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
+	if(g_Config.m_GfxFullscreen) Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
-	if(g_Config.m_DbgResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
+	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
-	return m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags);
+	return m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
 }
 
 int CGraphics_Threaded::InitWindow()
@@ -851,7 +846,7 @@ int CGraphics_Threaded::Init()
 	if(InitWindow() != 0)
 		return -1;
 
-	// fetch final resolusion
+	// fetch final resolution
 	m_ScreenWidth = g_Config.m_GfxScreenWidth;
 	m_ScreenHeight = g_Config.m_GfxScreenHeight;
 
@@ -884,6 +879,11 @@ void CGraphics_Threaded::Shutdown()
 		delete m_apCommandBuffers[i];
 }
 
+int CGraphics_Threaded::GetNumScreens() const
+{
+	return m_pBackend->GetNumScreens();
+}
+
 void CGraphics_Threaded::Minimize()
 {
 	m_pBackend->Minimize();
@@ -895,6 +895,49 @@ void CGraphics_Threaded::Maximize()
 	m_pBackend->Maximize();
 }
 
+bool CGraphics_Threaded::Fullscreen(bool State)
+{
+	return m_pBackend->Fullscreen(State);
+}
+
+void CGraphics_Threaded::SetWindowBordered(bool State)
+{
+	m_pBackend->SetWindowBordered(State);
+}
+
+bool CGraphics_Threaded::SetWindowScreen(int Index)
+{
+	return m_pBackend->SetWindowScreen(Index);
+}
+
+void CGraphics_Threaded::Resize(int w, int h)
+{
+	if(m_ScreenWidth == w && m_ScreenHeight == h)
+		return;
+
+	if(h > 4*w/5)
+		h = 4*w/5;
+	if(w > 21*h/9)
+		w = 21*h/9;
+
+	m_ScreenWidth = w;
+	m_ScreenHeight = h;
+
+	CCommandBuffer::SCommand_Resize Cmd;
+	Cmd.m_Width = w;
+	Cmd.m_Height = h;
+	m_pCommandBuffer->AddCommand(Cmd);
+
+	// kick the command buffer
+	KickCommandBuffer();
+	WaitForIdle();
+}
+
+int CGraphics_Threaded::GetWindowScreen()
+{
+	return m_pBackend->GetWindowScreen();
+}
+
 int CGraphics_Threaded::WindowActive()
 {
 	return m_pBackend->WindowActive();
@@ -903,6 +946,11 @@ int CGraphics_Threaded::WindowActive()
 int CGraphics_Threaded::WindowOpen()
 {
 	return m_pBackend->WindowOpen();
+}
+
+void CGraphics_Threaded::SetWindowGrab(bool Grab)
+{
+	return m_pBackend->SetWindowGrab(Grab);
 }
 
 void CGraphics_Threaded::NotifyWindow()
@@ -944,6 +992,21 @@ void CGraphics_Threaded::Swap()
 	KickCommandBuffer();
 }
 
+bool CGraphics_Threaded::SetVSync(bool State)
+{
+	// add vsnc command
+	bool RetOk = 0;
+	CCommandBuffer::SCommand_VSync Cmd;
+	Cmd.m_VSync = State ? 1 : 0;
+	Cmd.m_pRetOk = &RetOk;
+	m_pCommandBuffer->AddCommand(Cmd);
+
+	// kick the command buffer
+	KickCommandBuffer();
+	WaitForIdle();
+	return RetOk;
+}
+
 // syncronization
 void CGraphics_Threaded::InsertSignal(semaphore *pSemaphore)
 {
@@ -962,7 +1025,7 @@ void CGraphics_Threaded::WaitForIdle()
 	m_pBackend->WaitForIdle();
 }
 
-int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes)
+int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
 {
 	if(g_Config.m_GfxDisplayAllModes)
 	{
@@ -982,6 +1045,7 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes)
 	Cmd.m_pModes = pModes;
 	Cmd.m_MaxModes = MaxModes;
 	Cmd.m_pNumModes = &NumModes;
+	Cmd.m_Screen = Screen;
 	m_pCommandBuffer->AddCommand(Cmd);
 
 	// kick the buffer and wait for the result and return it

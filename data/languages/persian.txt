@@ -1,0 +1,1317 @@
+﻿##### authors #####
+Created By : OneShadow
+##### translated strings #####
+
+%d%% loaded
+== %d%% ﯼﺭﺍﺰﮔﺭﺎﺑ
+
+
+%ds left
+== %ds ﭗﭼ
+
+
+%i minute left
+== %i ﻩﺪﺷ ﻒﻠﺗ ﻪﻘﯿﻗﺩ
+
+
+%i minutes left
+== %i ﻩﺪﺷ ﻒﻠﺗ ﻪﻘﯿﻗﺩ
+
+
+%i second left
+== %i ﻩﺪﺷ ﻒﻠﺗ ﻪﯿﻧﺎﺛ
+
+
+%i seconds left
+== %i ﻩﺪﺷ ﻒﻠﺗ ﻪﯿﻧﺎﺛ
+
+
+%s wins!
+== %s ! ﺎﻫ ﻩﺪﻧﺮﺑ
+
+
+'%s' entered and joined the %s
+== '%s'ﻞﺧﺍﺩ ﻭ ﺩﺭﺍﻭ
+%s
+
+'%s' has left the game
+== '%s' از بازی بیرون رفت
+
+'%s' has left the game (%s)
+== '%s'ﺖﻓﺭ ﻥﻭﺮﯿﺑ ﯼﺯﺎﺑ ﺯﺍ
+(%s)
+
+-Page %d-
+== -ﻪﺤﻔﺻ
+%d-
+
+Abort
+== ﻥﺩﺮﮐ ﺩﺭ
+
+
+Add
+== ﻥﺩﺮﮐ ﻪﻓﺎﺿﺍ
+
+
+Add Friend
+== ﺖﺳﻭﺩ ﻥﺩﺮﮐ ﻪﻓﺎﺿﺍ
+
+
+Address
+== ﺱﺭﺩﺁ
+
+
+All
+== ﻪﻤﻫ
+
+
+Always show name plates
+== ﺎﻫ ﻢﺳﺍ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+
+
+Are you sure that you want to delete the demo?
+== ؟ﺪﯿﻨﮐ ﮎﺎﭘ ﺍﺭ ﻮﻣﺩ ﻞﯾﺎﻓ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﻤﺷ ﺎﯾﺁ
+
+
+Are you sure that you want to quit?
+== ؟ﺪﯾﻮﺷ ﺝﺭﺎﺧ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﻤﺷ ﺎﯾﺁ
+
+
+Are you sure that you want to remove the player from your friends list?
+== ؟ﺪﯿﻨﮐ ﻑﺬﺣ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﺍﺭ ﻦﮑﯾﺯﺎﺑ ﻦﯾﺍ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﻤﺷ ﺎﯾﺁ
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== .ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ ﺕﺎﻤﯿﻈﻨﺗ ﺭﺩ ﺍﺭ ﻥﺁ ﺪﯿﻧﺍﻮﺘﯿﻣ ﺎﻤﺷ .ﺪﯿﻨﮐ ﺏﺎﺨﺘﻧﺍ ﻢﺳﺍ ﮏﯾ ﺩﻮﺧ ﯼﺍﺮﺑ ﺎﻔﻄﻟ , ﺪﯾﻮﺸﯿﻣ ﯼﺯﺎﺑ ﺩﺭﺍﻭ ﻪﮐ ﺖﺳﺍ ﯼﺭﺎﺑ ﻦﯿﻟﻭﺍ ﺮﮔﺍ
+Automatically record demos
+== ﻮﻣﺩ ﺭﺎﮐﺩﻮﺧ ﻂﺒﺿ
+
+
+Automatically take game over screenshot
+== ﻪﺤﻔﺻ ﺯﺍ ﺭﺎﮐﺩﻮﺧ ﺲﮑﻋ ﻦﺘﻓﺮﮔ
+
+
+Blue team
+== ﯽﺑﺁ ﻢﯿﺗ
+
+Blue team wins!
+== ! ﺪﺷ ﻩﺪﻧﺮﺑ ﯽﺑﺁ ﻢﯿﺗ
+
+
+Body
+== ﻥﺪﺑ
+
+
+Call vote
+== ﯽﺠﻨﺳ ﺮﻈﻧ
+
+
+Change settings
+== ﺕﺎﻤﯿﻈﻨﺗ ﺮﯿﯿﻐﺗ
+
+
+Chat
+== ﻮﮔ ﻭ ﺖﻔﮔ
+
+
+Clan
+== ﻦﻠﮐ
+
+
+Client
+== ﺖﻨﯾﻼﮐ
+
+
+Close
+== ﻦﺘﺴﺑ
+
+Compatible version
+== ﺭﺎﮔﺯﺎﺳ ﻪﺨﺴﻧ
+
+
+Connect
+== ﻥﺪﺷ ﻞﺻﻭ
+
+
+Connecting to
+== ﻪﺑ ﻥﺪﺷ ﻞﺻﻭ
+
+
+Connection Problems...
+== ...ﺪﺷ ﻪﺟﺍﻮﻣ ﻞﮑﺸﻣ ﺎﺑ ﻁﺎﺒﺗﺭﺍ
+
+
+Console
+== ﻝﻮﺴﻨﮐ
+
+
+Controls
+== ﺎﻫ ﻝﺮﺘﻨﮐ
+
+
+Count players only
+== ﺎﻫ ﻦﮑﯾﺯﺎﺑ ﺩﺍﺪﻌﺗ
+
+
+Country
+== ﺭﻮﺸﮐ
+
+
+Current
+== ﯼﺭﺎﺟ
+
+
+Custom colors
+== ﻩﺍﻮﺨﻟﺩ ﮓﻧﺭ
+
+
+Delete
+== ﻥﺩﺮﮐ ﮎﺎﭘ
+
+
+Delete demo
+== ﻮﻣﺩ ﻥﺩﺮﮐ ﮎﺎﭘ
+
+
+Demo details
+== ﻮﻣﺩ ﺕﺎﻋﻼﻃﺍ
+
+
+Demofile: %s
+== ﻮﻣﺩ ﻞﯾﺎﻓ
+: %s
+
+Demos
+== ﺎﻫ ﻮﻣﺩ
+
+
+Disconnect
+== ﻥﺩﺮﮐ ﻊﻄﻗ
+
+
+Disconnected
+== ﺪﺷ ﻊﻄﻗ
+
+
+Downloading map
+== ﭗﻣ ﺖﻓﺎﯾﺭﺩ ﻝﺎﺣ ﺭﺩ
+
+
+Draw!
+== !ﯼﻭﺎﺴﻣ
+
+
+Dynamic Camera
+== ﻩﺪﻨﻨﮐ ﺖﮐﺮﺣ ﻦﯿﺑﺭﻭﺩ
+
+
+Emoticon
+== ﺎﻫ ﮏﻠﮑﺷ
+
+
+Enter
+== ﻥﺪﺷ ﺩﺭﺍﻭ
+
+
+Error
+== ﺎﻄﺧ
+
+
+Error loading demo
+== ﻮﻣﺩ ﯼﺭﺍﺰﮔﺭﺎﺑ ﺭﺩ ﺎﻄﺧ
+
+
+Favorite
+== ﺪﻨﻣ ﻪﻗﻼﻋ
+
+
+Favorites
+== ﺎﻫ ﻩﺪﺷ ﺪﻨﻣ ﻪﻗﻼﻋ
+
+Feet
+== ﺎﭘ
+
+
+Filter
+== ﺮﺘﻠﯿﻓ
+
+
+Fire
+== ﮏﯿﻠﺷ
+
+
+Folder
+== ﻪﺷﻮﭘ
+
+
+Force vote
+== ﺭﺎﺒﺟﺍ ﯼﺍﺭ
+
+Free-View
+== ﺩﺍﺯﺁ ﻥﺪﯾﺩ
+
+Friends
+== ﻥﺎﺘﺳﻭﺩ
+
+
+Fullscreen
+== ﻞﻣﺎﮐ ﯼ ﻪﺤﻔﺻ
+
+
+Game
+== ﯼﺯﺎﺑ
+
+
+Game info
+== ﯼﺯﺎﺑ ﺕﺎﻋﻼﻃﺍ
+
+
+Game over
+== ﺖﻓﺎﯾ ﻥﺎﯾﺎﭘ ﯼﺯﺎﺑ
+
+
+Game paused
+== ﺪﺷ ﻒﻗﻮﺘﻣ ﯼﺯﺎﺑ
+
+
+Game type
+== ﯼﺯﺎﺑ ﺖﻟﺎﺣ
+
+
+Game types:
+== : ﯼﺯﺎﺑ ﯼﺎﻫ ﺖﻟﺎﺣ
+
+
+General
+== ﯽﻠﺻﺍ
+
+
+Graphics
+== ﮏﯿﻓﺍﺮﮔ
+
+
+Grenade
+== ﺯﺍﺪﻧﺍ ﺐﻤﺑ
+
+
+Hammer
+== ﺶﮑﭼ
+
+
+Has people playing
+== ﺪﻨﺘﺴﻫ ﯼﺯﺎﺑ ﺭﺩ ﻪﮐ ﯽﻣﺩﺮﻣ
+
+
+High Detail
+== ﻻﺎﺑ ﺖﯿﻔﯿﮐ
+
+
+Hook
+== ﺏﺎﻨﻃ
+
+
+Invalid Demo
+== ﺖﺴﯿﻧ ﺩﻮﺟﻮﻣ ﻮﻣﺩ
+
+
+Join blue
+== ﯽﺑﺁ ﻢﯿﺗ ﻪﺑ ﻥﺪﺷ ﺩﺭﺍﻭ
+
+Join red
+== ﺰﻣﺮﻗ ﻢﯿﺗ ﻪﺑ ﻥﺪﺷ ﺩﺭﺍﻭ
+
+
+Jump
+== ﺵﺮﭘ
+
+
+Kick player
+== ﻦﮑﯾﺯﺎﺑ ﻥﻭﺮﯿﺑ ﻦﺘﺧﺍﺪﻧﺍ
+
+
+Language
+== ﻥﺎﺑﺯ
+
+
+Loading
+== ﯼﺭﺍﺰﮔﺭﺎﺑ ﻝﺎﺣﺭﺩ
+
+
+MOTD
+== ﺕﺎﺤﯿﺿﻮﺗ
+
+
+Map
+== ﭗﻣ
+
+
+Maximum ping:
+== ﮓﻨﯿﭘ ﺖﯾﺎﻬﻧ
+:
+
+Mouse sens.
+== ﺱﻮﻣ ﺵﺰﻐﻟ
+
+
+Move left
+== ﭗﭼ ﻪﺑ ﺖﮐﺮﺣ
+
+
+Move player to spectators
+== ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ ﺭﺩ ﻦﮑﯾﺯﺎﺑ
+
+
+Move right
+== ﺖﺳﺍﺭ ﻪﺑ ﺖﮐﺮﺣ
+
+
+Movement
+== ﺖﮐﺮﺣ
+
+
+Mute when not active
+== ﺖﺳﺍ ﻝﺎﻌﻓ ﺮﯿﻏ ﻪﮐ ﯽﻧﺎﻣﺯ ﺭﺩ ﺍﺪﺼﯿﺑ
+
+
+Name
+== ﻢﺳﺍ
+
+
+Next weapon
+== ﯼﺪﻌﺑ ﻪﺤﻠﺳﺍ
+
+
+Nickname
+== ﺭﺎﻌﺘﺴﻣ ﻢﺳﺍ
+
+
+No
+== ﻪﻧ
+
+
+No password
+== ﺰﻣﺭ ﻥﻭﺪﺑ
+
+
+No servers found
+== ﺪﺸﻧ ﺍﺪﯿﭘ ﯼﺭﻭﺮﺳ
+
+
+No servers match your filter criteria
+== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﺎﻫ ﯽﮔﮋﯾﻭ ﻦﯾﺍ ﺎﺑ ﯼﺭﻭﺮﺳ
+
+
+Ok
+== ﻝﻮﺒﻗ
+
+
+Open
+== ﻥﺩﺮﮐﺯﺎﺑ
+
+
+Parent Folder
+== ﯽﻠﺻﺍ ﻪﺷﻮﭘ
+
+Password
+== ﺰﻣﺭ
+
+
+Password incorrect
+== ﺖﺳﺍ ﻩﺎﺒﺘﺷﺍ ﺰﻣﺭ
+
+
+Ping
+== ﮓﻨﯿﭘ
+
+
+Pistol
+== ﺮﯿﺗ ﺖﻔﻫ
+
+
+Play
+== ﯼﺯﺎﺑ
+
+Play background music
+== ﯼﺯﺎﺑ ﻪﻨﯿﻣﺯ ﺲﭘ ﯽﻘﯿﺳﻮﻣ
+
+
+Player
+== ﻦﮑﯾﺯﺎﺑ
+
+
+Player country:
+== : ﻦﮑﯾﺯﺎﺑ ﺭﻮﺸﮐ
+
+
+Player options
+== : ﻦﮑﯾﺯﺎﺑ ﺕﺎﻤﯿﻈﻨﺗ
+
+
+Players
+== ﻥﺎﻨﮑﯾﺯﺎﺑ
+
+
+Please balance teams!
+== !ﺪﯿﻨﮐ ﻝﺩﺎﻌﺘﻣ ﺍﺭ ﺎﻫ ﻢﯿﺗ ﺎﻔﻄﻟ
+
+
+Prev. weapon
+== ﯽﻠﺒﻗ ﯼ ﻪﺤﻠﺳﺍ
+
+
+Quality Textures
+== ﻦﺘﻣ ﺖﯿﻔﯿﮐ
+
+
+Quit
+== ﻥﺪﺷ ﺝﺭﺎﺧ
+
+
+REC %3d:%02d
+== ﻂﺒﺿ
+ %3d:%02d
+
+Reason:
+== ﻞﯿﻟﺩ
+:
+
+Red team
+== ﺰﻣﺮﻗ ﻢﯿﺗ
+
+
+Red team wins!
+== ! ﺪﺷ ﻩﺪﻧﺮﺑ ﺰﻣﺮﻗ ﻢﯿﺗ
+
+
+Refresh
+== ﻩﺭﺎﺑﻭﺩ ﯼﺭﺍﺰﮔﺭﺎﺑ
+
+
+Refreshing master servers
+== ﯽﻠﺻﺍ ﺭﻭﺮﺳ ﻩﺭﺎﺑﻭﺩ ﯼﺭﺍﺰﮔﺭﺎﺑ ﻝﺎﺣﺭﺩ
+
+
+Remote console
+== ﻝﻮﺴﻨﮐ ﻝﺮﺘﻨﮐ
+
+
+Remove
+== ﻥﺩﺮﮐ ﻑﺬﺣ
+
+
+
+Remove friend
+== ﺖﺳﻭﺩ ﻥﺩﺮﮐ ﻑﺪﺣ
+
+
+Rename
+== ﻡﺎﻧ ﺮﯿﻐﺗ
+
+
+
+Rename demo
+== ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
+
+
+Reset filter
+== ﺮﺘﻠﯿﻓ ﻩﺭﺎﺑﻭﺩ ﻢﯿﻈﻨﺗ
+
+
+Respawn
+== ﻥﺪﺷ ﺮﻫﺎﻇ
+
+
+Sample rate
+== ﻥﺪﯿﺠﻨﺳ ﻪﻧﻮﻤﻧ
+
+
+Score
+== ﺯﺎﯿﺘﻣﺍ
+
+
+Score board
+== ﯼﺪﻨﺑ ﻪﺒﺗﺭ
+
+
+
+Score limit
+== ﺯﺎﯿﺘﻣﺍ ﺪﺣ
+
+
+Scoreboard
+== ﯼﺪﻨﺑ ﻪﺒﺗﺭ
+
+
+Screenshot
+== ﻪﺤﻔﺻ ﺯﺍ ﯼﺭﺍﺩﺮﺑ ﺲﮑﻋ
+
+
+Server address:
+== : ﺭﻭﺮﺳ ﺱﺭﺩﺍ
+
+
+Server details
+== ﺭﻭﺮﺳ ﺕﺎﺼﺨﺸﻣ
+
+
+Server filter
+== ﺭﻭﺮﺳ ﯽﮔﮋﯾﻭ
+
+
+Server info
+== ﺭﻭﺮﺳ ﺕﺎﻋﻼﻃﺍ
+
+
+Server not full
+== ﻩﺪﺸﻧ ﺮﭘ ﺭﻭﺮﺳ
+
+
+Settings
+== ﺕﺎﻤﯿﻈﻨﺗ
+
+
+Shotgun
+== ﺮﺘﺴﭽﻨﯾﻭ
+
+
+Show chat
+== ﻮﮔ ﻭ ﺖﻔﮔ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+
+
+Show friends only
+== ﻥﺎﺘﺳﻭﺩ ﻥﺩﺍﺩ ﻥﺎﺸﻧ ﻂﻘﻓ
+
+
+Show ingame HUD
+== ﯼﺯﺎﺑ ﺭﺩ HUD ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+
+
+Show name plates
+== ﻢﺳﺍ ﻥﺩﺍﺩ ﻥﺎﺴﻧ
+
+
+Show only chat messages from friends
+== ﻥﺎﺘﺳﻭﺩ ﺯﺍ ﺖﭼ ﯼﺎﻫ ﻡﺎﯿﭘ ﻥﺩﺍﺩ ﻥﺎﺸﻧ ﻂﻘﻓ
+
+
+Show only supported
+== ﺪﻧﻮﺸﯿﻣ ﯽﻧﺎﺒﯿﺘﺸﭘ ﻪﮐ ﯽﯾﺎﻫ ﺰﯿﭼ ﻂﻘﻓ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+
+
+Skins
+== ﻦﯿﮑﺳﺍ
+
+
+Sound
+== ﺍﺪﺻ
+
+Sound error
+== ﺍﺪﺻ ﯼﺎﻄﺧ
+
+
+Spectate
+== ﺎﺷﺎﻤﺗ
+
+
+Spectate next
+== ﯼﺪﻌﺑ ﯼ ﺎﺷﺎﻤﺗ
+
+
+Spectate previous
+== ﯽﻠﺒﻗ ﯼ ﺎﺷﺎﻤﺗ
+
+
+Spectator mode
+== ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ
+
+
+Spectators
+== ﺎﻫ ﺮﮔﺎﺷﺎﻤﺗ
+
+
+Standard gametype
+== ﯼﺯﺎﺑ ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﯼﺎﻫ ﻝﺪﻣ
+
+
+Standard map
+== ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﯼﺎﻫ ﭗﻣ
+
+
+Stop record
+== ﻥﺩﺮﮐ ﻂﺒﺿ ﻒﻗﻮﺗ
+
+
+Strict gametype filter
+== ﯼﺯﺎﺑ ﺩﻮﻣ ﺮﺘﻠﯿﻓ
+
+
+Sudden Death
+== ﯽﻧﺎﻬﮔﺎﻧ ﮒﺮﻣ
+
+
+Switch weapon on pickup
+== ﻥﺪﺷ ﻪﺘﺷﺍﺩﺭﻭ ﺕﺭﻮﺻ ﺭﺩ ﻪﺤﻠﺳﺍ ﺮﯿﯿﻐﺗ
+
+
+Team
+== ﻢﯿﺗ
+
+Team chat
+== ﻢﯿﺗ ﺖﭼ
+
+
+Teeworlds %s is out! Download it at www.teeworlds.com!
+== om!www.teeworlds.c ﺯﺍ ﺪﯿﻨﮐ ﺖﻓﺎﯾﺭﺩ ﺍﺭ ﻥﺁ ﺎﻔﻄﻟ !ﺖﻓﺎﯾ ﺭﺎﺸﺘﻧﺍ s% ﺯﺪﻟﺭﻮﯿﺗ ﯼ ﻪﺨﺴﻧ
+
+
+Texture Compression
+== Texture Compression
+The audio device couldn't be initialised.
+== .ﺪﺸﻧ ﻥﺪﺷ ﺐﺼﻧ ﻪﺑ ﻖﻓﻮﻣ ﺍﺪﺻ ﻩﺎﮕﺘﺳﺩ
+
+
+The server is running a non-standard tuning on a pure game type.
+== .ﺖﺳﺍ ﺮﮕﯾﺩ ﯼﺯﺎﺑ ﻝﺪﻣ ﮏﯾ ﯼﻭﺭ ﻭ ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﺮﯿﻏ ﺕﺎﻤﯿﻈﻨﺗ ﯼﺍﺭﺍﺩ ﺍﺮﺟﺍ ﻝﺎﺣ ﺭﺩ ﺭﻭﺮﺳ
+
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== .ﯼﺯﺎﺑ ﺯﺍ ﺝﻭﺮﺧ ﺯﺍ ﻼﺒﻗ ﺪﯿﻨﮐ ﻩﺮﯿﺧﺫ ﺍﺭ ﻥﺁ ﺪﯿﻫﺍﻮﺨﺑ ﺎﻤﺷ ﺖﺳﺍ ﻦﮑﻤﻣ , ﺮﮕﻨﯾﻭﺪﺗ ﺭﺩ ﻩﺪﺸﻧ ﻩﺮﯿﺧﺫ ﭗﻣ ﻦﯾﺍ
+
+Time limit
+== ﻥﺎﻣﺯ ﺖﯾﺎﻬﻧ
+
+
+Time limit: %d min
+== ﻪﻘﯿﻗﺩ d% :ﻥﺎﻣﺯ ﺖﯾﺎﻬﻧ
+
+
+Try again
+== ﻩﺭﺎﺑﻭﺩ ﺵﻼﺗ
+
+
+Type
+== ﻝﺪﻣ
+
+
+Unable to delete the demo
+== ﺩﺮﮐ ﮎﺎﭘ ﺍﺭ ﻮﻣﺩ ﻦﯾﺍ ﻥﺍﻮﺘﯿﻤﻧ
+
+
+Unable to rename the demo
+== ﺩﺮﮐ ﺽﻮﻋ ﺍﺭ ﻮﻣﺩ ﻦﯾﺍ ﻢﺳﺍ ﻥﺍﻮﺘﯿﻤﻧ
+
+
+Use sounds
+== ﺍﺪﺻ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
+
+
+Use team colors for name plates
+== ﺎﻫ ﻢﺳﺍ ﯼﺍﺮﺑ ﻢﯿﺗ ﮓﻧﺭ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
+
+
+V-Sync
+== V-Sync
+
+Version
+== ﻪﺨﺴﻧ
+
+
+Vote command:
+== ﯽﺠﻨﺳ ﺮﻈﻧ ﺕﺍﺭﻮﺘﺳﺩ
+:
+
+Vote description:
+== :ﯽﺠﻨﺳ ﺮﻈﻧ ﺕﺎﺤﯿﺿﻮﺗ
+
+
+Vote no
+== ﻪﻧ ﯼﺍﺭ
+
+
+Vote yes
+== ﻪﻠﺑ ﯼﺍﺭ
+
+
+Voting
+== ﯼﺮﯿﮔ ﯼﺍﺭ
+
+
+Warmup
+== ﺪﯿﻨﮐ ﻪﻠﺠﻋ
+
+
+Weapon
+== ﻪﺤﻠﺳﺍ
+
+
+Welcome to Teeworlds
+== !Teeworlds ﻪﺑ ﺪﯾﺪﻣﻭﺍ ﺵﻮﺧ
+
+
+Yes
+== ﻪﻠﺑ
+
+
+You must restart the game for all settings to take effect.
+== ﺪﻧﻮﺷ ﻡﺎﺠﻧﺍ ﺕﺎﻤﯿﻈﻨﺗ ﻪﮑﻨﯾﺍ ﯼﺍﺮﺑ ﺪﯿﻨﮐ ﯼﺭﺍﺰﮔﺭﺎﺑ ﻩﺭﺎﺑﻭﺩ ﺍﺭ ﯼﺯﺎﺑ ﺪﯾﺎﺑ ﺎﻤﺷ
+
+
+##### ﻪﻤﺟﺮﺗ ﻪﺑ ﺝﺎﯿﺘﺣﺍ
+ #####
+
+%.3f KiB
+== 
+
+%d player left
+== ﺪﺷ ﺝﺭﺎﺧ ﻦﮑﯾﺯﺎﺑ d%
+
+
+
+%d player not ready
+== ﺪﻨﺘﺴﯿﻧ ﻩﺩﺎﻣﺁ ﺎﻫ ﻦﮑﯾﺯﺎﺑ d%
+
+
+
+%d players left
+== ﺪﻧﺪﺷ ﺝﺭﺎﺧ ﺎﻫ ﻦﮑﯾﺯﺎﺑ d%
+
+
+%d players not ready
+== ﺪﻨﺘﺴﯿﻧ ﻩﺩﺎﻣﺁ ﯼﺎﻫ ﻦﮑﯾﺯﺎﺑ d%
+
+
+%d servers, %d players
+== ﺎﻫ ﻦﮑﯾﺯﺎﺑ d% , ﺎﻫﺭﻭﺮﺳ d%
+
+
+'%s' called for vote to kick '%s' (%s)
+== ﻥﺩﺮﮐ ﮏﯿﮐ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ %s''
+'%s' (%s)
+
+'%s' called for vote to move '%s' to spectators (%s)
+== (%s) ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ ﻪﺑ %s'' ﻦﺘﻓﺭ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ %s''
+
+
+'%s' called vote to change server option '%s' (%s)
+== %s'' (%s) ﻪﺑ ﺭﻭﺮﺳ ﺕﺎﻤﯿﻈﻨﺗ ﻥﺩﺮﮐ ﺮﯿﯿﻐﺗ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ %s''
+
+
+'%s' joined the %s
+== %s"' ﻪﺑ ﺪﺷ ﺩﺭﺍﻭ %s''
+
+
+Admin forced server option '%s' (%s)
+== ﻪﺑ ﺩﺮﮐ ﻞﯿﻤﺤﺗ ﺍﺭ ﺕﺎﻤﯿﻈﻨﺗ ﻦﯿﻣﺩﺍ
+'%s' (%s)
+
+Admin forced vote no
+== ﺩﺮﮐ ﺩﺭ ﺍﺭ ﯽﺠﻨﺳ ﺮﻈﻧ ﻦﯿﻣﺩﺍ
+
+
+Admin forced vote yes
+== ﺩﺮﮐ ﻝﻮﺒﻗ ﺍﺭ ﯽﺠﻨﺳ ﺮﻈﻧ ﻦﯿﻣﺩﺍ
+
+
+Admin moved '%s' to spectator (%s)
+== ﺩﺎﺘﺳﺮﻓ ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ ﻪﺑ ﺍﺭ %s"' ﻦﮑﯾﺯﺎﺑ ﻦﯿﻣﺩﺍ
+
+
+Alp:
+== Alp:
+
+Anti Aliasing
+== Anti Aliasing
+
+Are you sure you want to rename the demo?
+== ؟ ﺪﯿﻨﮐ ﺽﻮﻋ ﺍﺭ ﻮﻣﺩ ﻦﯾﺍ ﻢﺳﺍ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﻤﺷ ﺎﯾﺁ
+
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== .ﺪﺷ ﺪﻫﺍﻮﺧ ﻦﯾﺰﮕﯾﺎﺟ ﻭ ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺮﺿﺎﺣ ﻝﺎﺣ ﺭﺩ ﻦﯿﮑﺳﺍ ﻦﯾﺍ ؟ ﺪﯿﻨﮐ ﻩﺮﯿﺧﺫ ﺍﺭ ﺩﻮﺧ ﻦﯿﮑﺳﺍ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﻤﺷ ﺎﯾﺁ
+
+
+Back
+== ﺖﺸﮔﺯﺎﺑ
+
+
+Basic
+== ﯽﻠﺻﺍ
+
+
+Bodies
+== ﺎﻫ ﻥﺪﺑ
+
+
+Borderless window
+== ﺯﺮﻣ ﻩﺮﺠﻨﭘ
+
+Color
+== ﮓﻧﺭ
+
+
+Crc
+== Crc
+
+Created
+== ﺪﺷ ﻪﺘﺧﺎﺳ
+
+
+Custom
+== ﻩﺍﻮﺨﻟﺩ
+
+
+Customize
+== ﻩﺍﻮﺨﻟﺩ ﻪﺑ
+
+
+Decoration
+== ﻦﯿﯾﺰﺗ
+
+
+Demo
+== ﻮﻣﺩ
+
+
+Detail
+== ﺕﺎﯿﺋﺰﺟ
+
+
+Editor
+== ﺭﻮﺘﯾﺩﺍ
+
+
+Eyes
+== ﺎﻫ ﻢﺸﭼ
+
+
+Format
+== ﺖﻣﺮﻓ
+
+
+Game starts in
+== ﺭﺩ ﺩﻮﺸﯿﻣ ﻉﻭﺮﺷ ﯼﺯﺎﺑ
+
+
+Global
+== ﯽﻧﺎﻬﺟ
+
+
+Hands
+== ﺎﻫ ﺖﺳﺩ
+
+
+Host address:
+== :ﺖﺳﺎﻫ ﺱﺭﺩﺁ
+
+
+Hue:
+== Hue
+
+Join
+== ﻥﺪﺷ ﺩﺭﺍﻭ
+
+
+Joined
+== ﺪﺷ ﺩﺭﺍﻭ
+
+
+Joined blue
+== ﺪﺷ ﯽﺑﺁ ﺩﺭﺍﻭ
+
+
+Joined red
+== ﺪﺷ ﺰﻣﺮﻗ ﺩﺭﺍﻭ
+
+
+Kick voting requires %d players on the server
+== ﺭﻭﺮﺳ ﺭﺩ ﻦﮑﯾﺯﺎﺑ d% ﻥﺩﺮﮐ ﮏﯿﮐ ﯽﺠﻨﺳ ﺮﻈﻧ
+
+
+Laser
+== ﺭﺰﯿﻟ
+
+
+Length
+== ﻝﻮﻃ
+
+
+Letterbox
+== ﯼﺎﻫ ﻪﻣﺎﻧ
+
+
+Lgt:
+== Lgt:
+
+Local
+== ﯽﻠﺤﻣ
+
+
+Local server
+== ﯽﻠﺤﻣ ﺭﻭﺮﺳ
+
+
+Match
+== ﻪﻘﺑﺎﺴﻣ
+
+
+Max
+== ﺖﯾﺎﻬﻧ
+
+
+Misc
+== ﻪﻗﺮﻔﺘﻣ
+
+
+Netversion
+== ﻪﺨﺴﻧ
+
+
+Nickname is empty.
+== .ﺖﺳﺍ ﯽﻟﺎﺧ ﻡﺎﻧ
+
+Normal:
+== :ﯽﻟﻮﻤﻌﻣ
+
+
+Only %d active players are allowed
+== ﺖﺳﺍ ﺯﺎﺠﻣ ﻝﺎﻌﻓ ﻦﮑﯾﺯﺎﺑ d% ﻂﻘﻓ
+
+
+Personal
+== ﯽﺼﺨﺷ
+
+
+Ready
+== ﻩﺩﺎﻣﺁ
+
+
+Record
+== ﻂﺒﺿ
+
+
+Recorded
+== ﻥﺪﺷ ﻂﺒﺿ
+
+
+Reset
+== ﺩﺪﺠﻣ ﻢﯿﻈﻨﺗ
+
+
+Resolutions
+== ﻦﺸﯿﻟﻭﺯﺭ
+
+
+Round over
+== ﺪﺷ ﻡﺎﻤﺗ ﺭﻭﺩ
+
+
+Round over!
+== !ﺪﺷ ﻡﺎﻤﺗ ﺭﻭﺩ
+
+
+Sat:
+== Sat:
+
+Save
+== ﻩﺮﯿﺧﺫ
+
+
+Save skin
+== ﻦﯿﮑﺳﺍ ﻩﺮﯿﺧﺫ
+
+
+Screen
+== ﻪﺤﻔﺻ
+
+
+Search:
+== ﻮﺟ ﻭ ﺖﺴﺟ
+
+
+Server does not allow voting to kick players
+== ﺖﺴﯿﻧ ﺯﺎﺠﻣ ﺭﻭﺮﺳ ﺭﺩ ﻥﺎﻨﮐﺯﺎﺑ ﻥﺩﺮﮐ ﮏﯿﮐ ﯼﺍﺮﺑ ﯽﺠﻨﺳ ﺮﻈﻧ
+
+
+Server does not allow voting to move players to spectators
+== ﺖﺴﯿﻧ ﺯﺎﺠﻣ ﺭﻭﺮﺳ ﺭﺩ ﻥﺎﻨﮐﺯﺎﺑ ﻥﺩﺮﮐ ﺮﮔﺎﺷﺎﻤﺗ ﯼﺍﺮﺑ ﯽﺠﻨﺳ ﺮﻈﻧ
+
+
+Servers
+== ﺎﻫ ﺭﻭﺮﺳ
+
+
+Size
+== ﻩﺯﺍﺪﻧﺍ
+
+
+Skin
+== ﻦﯿﮑﺳﺍ
+
+
+Spectating
+== ﯼﺮﮔﺎﺷﺎﻤﺗ
+
+
+Spectators aren't allowed to start a vote.
+== .ﺪﻨﻨﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ ﺪﻨﻧﺍﻮﺗ ﯽﻤﻧ ﻥﺍﺮﮔﺎﺷﺎﻤﺗ
+
+
+Standard Gametype
+== ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﯼﺯﺎﺑ ﻝﺪﻣ
+
+
+Tattoo
+==  ﯽﺑﻮﮐ ﻝﺎﺧ
+
+
+Tattoos
+== ﺎﻫ ﯽﺑﻮﮐ ﻝﺎﺧ
+
+
+Team:
+== :ﻢﯿﺗ
+
+
+Teams are locked
+== ﺖﺳﺍ ﻞﻔﻗ ﻢﯿﺗ
+
+
+Teams are locked. Time to wait before changing team: %02d:%02d
+== :%02d:%02d ﻢﯿﺗ ﻥﺩﺮﮐ ﺽﻮﻋ ﺯﺍ ﻞﺒﻗ ﺪﯿﻨﮐ ﺮﺒﺻ ﺎﻔﻄﻟ .ﺖﺳﺍ ﻞﻔﻗ ﻢﯿﺗ
+
+
+Teams were locked
+== ﺪﺷ ﻞﻔﻗ ﻢﯿﺗ
+
+
+Teams were unlocked
+== ﺪﺷ ﺯﺎﺑ ﻢﯿﺗ ﻞﻔﻗ
+
+
+Tee
+== Tee
+
+Texture
+== Texture
+
+Volume
+== ﺍﺪﺻ ﻩﺯﺍﺪﻧﺍ
+
+
+Vote aborted
+== ﺪﺷ ﻒﻗﻮﺘﻣ ﯽﺠﻨﺳ ﺮﻈﻧ
+
+
+Vote failed
+== ﺪﺷ ﺩﺭ ﯽﺠﻨﺳ ﺮﻈﻧ
+
+
+
+Vote passed
+== ﺪﺷ ﻝﻮﺒﻗ ﯽﺠﻨﺳ ﺮﻈﻧ
+
+
+Wait for current vote to end before calling a new one.
+== ﺪﯿﻨﮐ ﺩﺎﺠﯾﺍ ﯼﺪﯾﺪﺟ ﯽﺠﻨﺳ ﺮﻈﻧ ﺲﭙﺳ ﺩﻮﺷ ﻡﺎﻤﺗ ﺮﺿﺎﺣ ﯽﺠﻨﺳ ﺮﻄﻧ ﺪﯿﻨﮐ ﺮﺒﺻ ﺎﻔﻄﻟ
+
+
+Wait for next round
+== ﺪﯿﻨﮐ ﺮﺒﺻ ﺪﻌﺑ ﺭﻭﺩ ﯼﺍﺮﺑ
+
+
+Wide
+== ﻊﯿﺳﻭ
+
+
+You must wait %d seconds before making another vote
+== ﺪﯾﺯﺎﺴﺑ ﯼﺮﮕﯾﺩ ﯽﺠﻨﺳ ﺮﻈﻧ ﻪﮑﻨﯾﺍ ﺯﺍ ﻞﺒﻗ ﺪﯿﻨﮐ ﺮﺒﺻ ﻪﯿﻧﺎﺛ d% ﺪﯾﺎﺑ ﺎﻤﺷ
+
+
+blue
+== ﯽﺑﺁ
+
+blue team
+== ﯽﺑﺁ ﻢﯿﺗ
+
+
+game
+== ﯼﺯﺎﺑ
+
+
+red
+== ﺰﻣﺮﻗ
+
+
+red team
+== ﺰﻣﺮﻗ ﻢﯿﺗ
+
+
+spectators
+== ﻥﺍﺮﮔﺎﺷﺎﻤﺗ
+
+
+wait for more players
+== ﻥﺎﻨﮑﯾﺯﺎﺑ ﻪﯿﻘﺑ ﯼﺍﺮﺑ ﺪﯿﻨﮐ ﺮﺒﺻ
+
+
+##### old translations #####
+
+New name:
+== ﺪﯾﺪﺟ ﻢﺳﺍ
+
+
+Sat.
+== Sat
+Miscellaneous
+== ﻪﻗﺮﻔﺘﻣ
+
+
+Internet
+== ﺖﻧﺮﺘﻨﯾﺍ
+
+
+Max demos
+== ﻮﻣﺩ ﺖﯾﺎﻬﻧ
+
+
+News
+== ﺭﺎﺒﺧﺍ
+
+
+Join game
+== ﯼﺯﺎﺑ ﺩﺭﺍﻭ
+
+
+FSAA samples
+== FSAA ﯼ ﻪﻧﻮﻤﻧ
+
+
+%d of %d servers, %d players
+== ﻦﮑﯾﺯﺎﺑ d% , ﺭﻭﺮﺳ d% ﺯﺍ d%
+
+
+Sound volume
+== ﺍﺪﺻ ﺭﺍﺪﻘﻣ
+
+
+Created:
+== : ﻩﺪﺷ ﻪﺘﺧﺎﺳ
+
+
+Max Screenshots
+== ﻪﺤﻔﺻ ﺯﺍ ﯼﺭﺍﺩﺮﺑ ﺲﮑﻋ ﺖﯾﺎﻬﻧ
+
+
+Length:
+== : ﻝﻮﻃ
+
+
+Skin name
+== ﻦﯿﮑﺳﺍ ﻢﺳﺍ
+
+
+Rifle
+== ﺭﺰﯿﻟ
+
+
+Patterns
+== ﺎﻫﻮﮕﻟﺍ
+
+
+Netversion:
+== ﯽﻠﺻﺍ ﯼ ﻪﺨﺴﻧ
+
+Map:
+== :ﭗﻣ
+
+
+%d Bytes
+== ﺖﯾﺎﺑ d%
+
+
+Coloration
+== ﯼﺰﯿﻣﺁ ﮓﻧﺭ
+
+
+Info
+== ﺕﺎﻋﻼﻃﺍ
+
+
+Hue
+== ﮓﻧﺭ
+
+
+Record demo
+== ﻮﻣﺩ ﻂﺒﺿ
+
+
+Your skin
+== ﺎﻤﺷ ﻦﯿﮑﺳﺍ
+
+
+Size:
+== :ﻩﺯﺍﺪﻧﺍ
+
+Reset to defaults
+== ﺽﺮﻓ ﺶﯿﭘ ﺖﻟﺎﺣ ﻪﺑ ﺩﺪﺠﻣ ﻢﯿﻈﻨﺗ
+
+
+Quit anyway?
+== ؟ ﺪﯾﻮﺷ ﺝﺭﺎﺧ ﺪﯿﻫﺍﻮﺨﯿﻣ ﻝﺎﺣ ﺮﻫ ﻪﺑ
+
+
+Display Modes
+== ﺶﯾﺎﻤﻧ ﺖﻟﺎﺣ
+
+
+Version:
+== :ﻪﺨﺴﻧ
+
+
+Round
+== ﺭﻭﺩ
+
+
+Lht.
+== ﯽﯾﺎﻨﺷﻭﺭ
+
+
+no limit
+== ﺖﯾﺎﻬﻧ ﻥﻭﺪﺑ
+
+
+Quick search:
+== :ﻊﯾﺮﺳ ﯼﻮﺟ ﻭ ﺖﺴﺟ
+
+
+UI Color
+== ﮓﻧﺭ ﻮﻨﻣ
+
+
+Host address
+== ﺖﺳﺎﻫ ﺱﺭﺩﺍ
+
+
+Crc:
+== Crc:
+
+Alpha
+== Alpha
+
+Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
+== .ﺩﻮﺸﯿﻣ ﻦﯾﺰﮕﯾﺎﺟ ﻭ , ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺩﻮﺟﻭ ﺮﺿﺎﺣ ﻝﺎﺣ ﺭﺩ ﻦﯿﮑﺳﺍ ﻦﯾﺍ ؟ﺪﯿﻨﮐ ﻩﺮﯿﺧﺫ ﺍﺭ ﺩﻮﺧ ﻦﯿﮑﺳﺍ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﯾﺁ
+
+
+Current version: %s
+== Versió actual: %s
+
+LAN
+== ﻦﻟ
+
+
+Name plates size
+== ﻢﺳﺍ ﯼ ﻩﺯﺍﺪﻧﺍ
+
+
+Type:
+== :ﻉﻮﻧ
+

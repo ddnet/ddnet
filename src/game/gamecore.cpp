@@ -111,7 +111,6 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 	int MapIndexR = Collision()->GetPureMapIndex(vec2(m_Pos.x - (28/2)-4,m_Pos.y));
 	int MapIndexT = Collision()->GetPureMapIndex(vec2(m_Pos.x,m_Pos.y + (28/2)+4));
 	int MapIndexB = Collision()->GetPureMapIndex(vec2(m_Pos.x,m_Pos.y - (28/2)-4));
-	//dbg_msg("","N%d L%d R%d B%d T%d",MapIndex,MapIndexL,MapIndexR,MapIndexB,MapIndexT);
 	m_TileIndex = Collision()->GetTileIndex(MapIndex);
 	m_TileFlags = Collision()->GetTileFlags(MapIndex);
 	m_TileIndexL = Collision()->GetTileIndex(MapIndexL);
@@ -273,15 +272,15 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr, true);
+		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
 
 		//m_NewHook = false;
 
 		if(Hit)
 		{
-			if(Hit&CCollision::COLFLAG_NOHOOK)
+			if(Hit == TILE_NOHOOK)
 				GoingToRetract = true;
-			else if (Hit&CCollision::COLFLAG_TELE)
+			else if (Hit == TILE_TELEINHOOK)
 				GoingThroughTele = true;
 			else
 				GoingToHitGround = true;
@@ -486,7 +485,6 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			else
 			{
 				if(MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
-				//dbg_msg("speedup tile start","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
 				if(MaxSpeed > 0)
 				{
 					if(Direction.x > 0.0000001f)
@@ -517,7 +515,6 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 
 					DiffAngle = SpeederAngle - TeeAngle;
 					SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-					//dbg_msg("speedup tile debug","MaxSpeed %i, TeeSpeed %f, SpeedLeft %f, SpeederAngle %f, TeeAngle %f", MaxSpeed, TeeSpeed, SpeedLeft, SpeederAngle, TeeAngle);
 					if(abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
 					else if(abs((int)SpeedLeft) > Force)
@@ -540,8 +537,6 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 
 
 				m_Vel = TempVel;
-				//dbg_msg("speedup tile end","(Direction*Force) %f %f   m_Vel%f %f",(Direction*Force).x,(Direction*Force).y,m_Vel.x,m_Vel.y);
-				//dbg_msg("speedup tile end","Direction %f %f, Force %d, Max Speed %d", (Direction).x,(Direction).y, Force, MaxSpeed);
 			}
 		}
 

@@ -135,6 +135,7 @@ class CSqlScore: public IScore
 
 	char m_aMap[64];
 
+	static bool CheckBirthdayThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure = false);
 	static bool MapInfoThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure = false);
 	static bool MapVoteThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure = false);
 	static bool LoadScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure = false);
@@ -157,6 +158,7 @@ public:
 	CSqlScore(CGameContext *pGameServer);
 	~CSqlScore();
 
+	virtual void CheckBirthday(int ClientID);
 	virtual void LoadScore(int ClientID);
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void MapVote(int ClientID, const char* MapName);

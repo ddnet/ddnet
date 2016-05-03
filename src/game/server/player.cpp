@@ -47,6 +47,7 @@ void CPlayer::Reset()
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
 	m_TeamChangeTick = Server()->Tick();
+	m_WeakHookSpawn = false;
 
 	int* idMap = Server()->GetIdMap(m_ClientID);
 	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
@@ -230,7 +231,7 @@ void CPlayer::Tick()
 				m_pCharacter = 0;
 			}
 		}
-		else if(m_Spawning)
+		else if(m_Spawning && !m_WeakHookSpawn)
 			TryRespawn();
 	}
 	else
@@ -262,10 +263,24 @@ void CPlayer::PostTick()
 				m_aActLatency[i] = GameServer()->m_apPlayers[i]->m_Latency.m_Min;
 		}
 	}
+	else
+		m_aActLatency[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_Latency.m_Min;
 
 	// update view pos for spectators
 	if((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorID] && GameServer()->m_apPlayers[m_SpectatorID]->GetCharacter())
 		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->GetCharacter()->m_Pos;
+}
+
+void CPlayer::PostPostTick()
+{
+	#ifdef CONF_DEBUG
+		if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
+	#endif
+		if(!Server()->ClientIngame(m_ClientID))
+			return;
+
+	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
+		TryRespawn();
 }
 
 void CPlayer::Snap(int SnappingClient)
@@ -466,10 +481,13 @@ void CPlayer::KillCharacter(int Weapon)
 	}
 }
 
-void CPlayer::Respawn()
+void CPlayer::Respawn(bool WeakHook)
 {
 	if(m_Team != TEAM_SPECTATORS)
+	{
+		m_WeakHookSpawn = WeakHook;
 		m_Spawning = true;
+	}
 }
 
 CCharacter* CPlayer::ForceSpawn(vec2 Pos)
@@ -532,6 +550,7 @@ void CPlayer::TryRespawn()
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 
+	m_WeakHookSpawn = false;
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);

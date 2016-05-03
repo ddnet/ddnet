@@ -60,7 +60,6 @@ class CConsole : public IConsole
 	static void ConCommandAccess(IResult *pResult, void *pUser);
 	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
-	void ExecuteFileRecurse(const char *pFilename);
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1);
 
 	struct
@@ -197,7 +196,7 @@ public:
 	virtual bool LineIsValid(const char *pStr);
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1);
 	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1);
-	virtual void ExecuteFile(const char *pFilename, int ClientID = -1);
+	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false);
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);

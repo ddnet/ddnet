@@ -110,6 +110,12 @@ public:
 	virtual void AutoStatScreenshot_Start() = 0;
 	virtual void ServerBrowserUpdate() = 0;
 
+	// gfx
+	virtual void SwitchWindowScreen(int Index) = 0;
+	virtual void ToggleFullscreen() = 0;
+	virtual void ToggleWindowBordered() = 0;
+	virtual void ToggleWindowVSync() = 0;
+
 	// networking
 	virtual void EnterGame() = 0;
 
@@ -180,7 +186,7 @@ public:
 
 	virtual void DemoSliceBegin() = 0;
 	virtual void DemoSliceEnd() = 0;
-	virtual void DemoSlice(const char *pDstPath) = 0;
+	virtual void DemoSlice(const char *pDstPath, bool RemoveChat) = 0;
 
 	virtual void RequestDDNetSrvList() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
@@ -201,6 +207,7 @@ public:
 	virtual void OnEnterGame() = 0;
 	virtual void OnShutdown() = 0;
 	virtual void OnRender() = 0;
+	virtual void OnUpdate() = 0;
 	virtual void OnStateChange(int NewState, int OldState) = 0;
 	virtual void OnConnected() = 0;
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, bool IsDummy = 0) = 0;
