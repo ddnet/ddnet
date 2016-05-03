@@ -11,7 +11,7 @@ class CHud : public CComponent
 
 	void RenderCursor();
 
-	void RenderFps();
+	void RenderTextInfo();
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
 	void RenderVoting();

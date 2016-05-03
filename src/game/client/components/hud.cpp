@@ -308,7 +308,7 @@ void CHud::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
 	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
 }
 
-void CHud::RenderFps()
+void CHud::RenderTextInfo()
 {
 	if(g_Config.m_ClShowfps)
 	{
@@ -318,6 +318,13 @@ void CHud::RenderFps()
 		char Buf[512];
 		str_format(Buf, sizeof(Buf), "%d", (int)m_AverageFPS);
 		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1), 5, 12, Buf, -1);
+	}
+
+	if(g_Config.m_ClShowping)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%d", clamp(m_pClient->m_Snap.m_pLocalInfo->m_Latency, 0, 1000));
+		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,aBuf,-1), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1);
 	}
 }
 
@@ -586,7 +593,7 @@ void CHud::OnRender()
 		if (g_Config.m_ClShowhudScore)
 			RenderScoreHud();
 		RenderWarmupTimer();
-		RenderFps();
+		RenderTextInfo();
 		RenderLocalTime((m_Width/7)*3);
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderConnectionWarning();
