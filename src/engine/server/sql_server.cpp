@@ -208,7 +208,7 @@ void CSqlServer::executeSql(const char *pCommand)
 void CSqlServer::executeSqlQuery(const char *pQuery)
 {
 	if (m_pResults)
-	delete m_pResults;
+		delete m_pResults;
 	m_pResults = m_pStatement->executeQuery(pQuery);
 }
 
