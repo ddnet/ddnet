@@ -559,7 +559,7 @@ void CPlayers::RenderPlayer(
 
 			float PhysSize = 28.0f;
 
-			vec2 OldPos = initPos + ExDirection * PhysSize * 1.5f;;
+			vec2 OldPos = initPos + ExDirection * PhysSize * 1.5f;
 			vec2 NewPos = OldPos;
 
 			bool doBreak = false;

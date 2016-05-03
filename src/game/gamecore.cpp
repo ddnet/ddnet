@@ -106,7 +106,7 @@ void CCharacterCore::Reset()
 void CCharacterCore::Tick(bool UseInput, bool IsClient)
 {
 	float PhysSize = 28.0f;
-	int MapIndex = Collision()->GetPureMapIndex(m_Pos);;
+	int MapIndex = Collision()->GetPureMapIndex(m_Pos);
 	int MapIndexL = Collision()->GetPureMapIndex(vec2(m_Pos.x + (28/2)+4,m_Pos.y));
 	int MapIndexR = Collision()->GetPureMapIndex(vec2(m_Pos.x - (28/2)-4,m_Pos.y));
 	int MapIndexT = Collision()->GetPureMapIndex(vec2(m_Pos.x,m_Pos.y + (28/2)+4));
