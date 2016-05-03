@@ -119,7 +119,7 @@ bool CSqlScore::Init(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFai
 
 void CSqlScore::CheckBirthday(int ClientID)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData();
+	CSqlPlayerData *Tmp = new CSqlPlayerData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	void *CheckThread = thread_init(ExecSqlFunc, new CSqlExecData(CheckBirthdayThread, Tmp));
@@ -128,7 +128,7 @@ void CSqlScore::CheckBirthday(int ClientID)
 
 bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure)
 {
-	CSqlScoreData *pData = (CSqlScoreData *)pGameData;
+	CSqlPlayerData *pData = (CSqlPlayerData *)pGameData;
 
 	try
 	{
@@ -168,7 +168,7 @@ bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 
 void CSqlScore::LoadScore(int ClientID)
 {
-	CSqlScoreData *Tmp = new CSqlScoreData();
+	CSqlPlayerData *Tmp = new CSqlPlayerData();
 	Tmp->m_ClientID = ClientID;
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 
@@ -179,7 +179,7 @@ void CSqlScore::LoadScore(int ClientID)
 // update stuff
 bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure)
 {
-	CSqlScoreData *pData = (CSqlScoreData *)pGameData;
+	CSqlPlayerData *pData = (CSqlPlayerData *)pGameData;
 
 	if (HandleFailure)
 		return true;
