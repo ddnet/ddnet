@@ -1,5 +1,6 @@
 #include "fifo.h"
 
+#include <base/system.h>
 #if defined(CONF_FAMILY_UNIX)
 
 #include <engine/shared/config.h>
@@ -48,7 +49,8 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 
 void CFifo::Shutdown()
 {
-	fclose(m_File);
+	if(m_File)
+		fclose(m_File);
 }
 
 void CFifo::Update()
