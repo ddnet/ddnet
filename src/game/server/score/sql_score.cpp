@@ -20,6 +20,9 @@ IServer* CSqlData::ms_pServer = 0;
 CPlayerData* CSqlData::ms_pPlayerData = 0;
 const char* CSqlData::ms_pMap = 0;
 
+bool CSqlData::ms_GameContextAvailable = false;
+int CSqlData::ms_Instance = 0;
+
 CSqlScore::CSqlScore(CGameContext *pGameServer) :
 m_pGameServer(pGameServer),
 m_pServer(pGameServer->Server())
@@ -32,10 +35,19 @@ m_pServer(pGameServer->Server())
 	CSqlData::ms_pPlayerData = PlayerData(0);
 	CSqlData::ms_pMap = m_aMap;
 
+	CSqlData::ms_GameContextAvailable = true;
+	CSqlData::ms_Instance++;
+
 	CSqlConnector::ResetReachable();
 
 	void* InitThread = thread_init(ExecSqlFunc, new CSqlExecData(Init, new CSqlData()));
 	thread_detach(InitThread);
+}
+
+
+CSqlScore::~CSqlScore()
+{
+	CSqlData::ms_GameContextAvailable = false;
 }
 
 void CSqlScore::ExecSqlFunc(void *pUser)
@@ -97,6 +109,10 @@ bool CSqlScore::Init(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFai
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Tables were NOT created");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Setting best time failed (game reloaded).");
+	}
 
 	return false;
 }
@@ -147,6 +163,11 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not update account");
+	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted loading score due to reload/change of map.");
+		return true;
 	}
 	return false;
 }
@@ -382,6 +403,11 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool 
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not start Mapvote");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted mapvote due to reload/change of map.");
+		return true;
+	}
 	return false;
 }
 
@@ -475,6 +501,11 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool 
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not get Mapinfo");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted mapinfo-thread due to reload/change of map.");
+		return true;
+	}
 	return false;
 }
 
@@ -526,7 +557,12 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 					str_format(aBuf, sizeof(aBuf), "You earned %d point for finishing this map!", points);
 				else
 					str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", points);
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+
+				try
+				{
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+				}
+				catch (CGameContextError &e) {} // just do nothing, it is not much of a problem if the player is not informed about points during mapchange
 
 				str_format(aBuf, sizeof(aBuf), "INSERT INTO %s_points(Name, Points) VALUES ('%s', '%d') ON duplicate key UPDATE Name=VALUES(Name), Points=Points+VALUES(Points);", pSqlServer->GetPrefix(), pData->m_aName, points);
 				pSqlServer->executeSql(aBuf);
@@ -656,6 +692,11 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, CSqlData *pGameData, 
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not show team rank");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted showing teamrank due to reload/change of map.");
+		return true;
+	}
 	return false;
 }
 
@@ -747,6 +788,11 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, CSqlData *pGameData, 
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not show teamtop5");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted showing teamtop5 due to reload/change of map.");
+		return true;
+	}
 	return false;
 }
 
@@ -802,6 +848,11 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not show rank");
+	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted showing rank due to reload/change of map.");
+		return true;
 	}
 	return false;
 }
@@ -871,6 +922,11 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not show top5");
+	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted showing top5 due to reload/change of map.");
+		return true;
 	}
 	return false;
 }
@@ -948,6 +1004,12 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not show times");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted showing times due to reload/change of map.");
+		return true;
+	}
+
 	end:
 	return false;
 }
@@ -1041,6 +1103,11 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, CSqlData *pGameData, bo
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not show points");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted showing points due to reload/change of map.");
+		return true;
+	}
 	return false;
 }
 
@@ -1093,6 +1160,12 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not show toppoints");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted toppoints-thread due to reload/change of map.");
+		return true;
+	}
+
 	return false;
 }
 
@@ -1146,6 +1219,11 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not vote random map");
 	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted random-map-thread due to reload/change of map.");
+		return true;
+	}
 	return false;
 }
 
@@ -1191,6 +1269,11 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, CSqlData *pGam
 		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
 		dbg_msg("SQL", aBuf);
 		dbg_msg("SQL", "ERROR: Could not vote random unfinished map");
+	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted unfinished-map-thread due to reload/change of map.");
+		return true;
 	}
 	return false;
 }
@@ -1246,94 +1329,108 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 	CSaveTeam* SavedTeam = 0;
 	CSqlTeamSave *pData = (CSqlTeamSave *)pGameData;
 
-	int Team = pData->m_Team;
-
-	if (HandleFailure)
-	{
-		((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
-		return true;
-	}
-
-	char TeamString[65536];
-	char OriginalCode[32];
-	str_copy(OriginalCode, pData->m_Code, sizeof(OriginalCode));
-	ClearString(pData->m_Code, sizeof(pData->m_Code));
-	char Map[128];
-	str_copy(Map, g_Config.m_SvMap, 128);
-	ClearString(Map, sizeof(Map));
-
-	int Num = -1;
-
-	if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.Count(Team) > 0)
-	{
-		SavedTeam = new CSaveTeam(pData->GameServer()->m_pController);
-		Num = SavedTeam->save(Team);
-		switch (Num)
-		{
-			case 1:
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
-				break;
-			case 2:
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, "Could not find your Team");
-				break;
-			case 3:
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to find all Characters");
-				break;
-			case 4:
-				pData->GameServer()->SendChatTarget(pData->m_ClientID, "Your team is not started yet");
-				break;
-		}
-		if(!Num)
-		{
-			str_copy(TeamString, SavedTeam->GetString(), sizeof(TeamString));
-			ClearString(TeamString, sizeof(TeamString));
-		}
-	}
-	else
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
-
-	if (Num)
-	{
-		((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
-		return true;
-	}
-
 	try
 	{
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "select Savegame from %s_saves where Code = '%s' and Map = '%s';",  pSqlServer->GetPrefix(), pData->m_Code, Map);
-		pSqlServer->executeSqlQuery(aBuf);
+		int Team = pData->m_Team;
 
-		if (pSqlServer->GetResults()->rowsCount() == 0)
+		if (HandleFailure)
 		{
-			char aBuf[65536];
-			str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pSqlServer->GetPrefix(), TeamString, Map, pData->m_Code, pData->m_Server);
-			dbg_msg("SQL", aBuf);
-			pSqlServer->executeSql(aBuf);
+			((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
+			return true;
+		}
 
-			char aBuf2[256];
-			str_format(aBuf2, sizeof(aBuf2), "Team successfully saved. Use '/load %s' to continue", OriginalCode);
-			pData->GameServer()->SendChatTeam(Team, aBuf2);
-			((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.KillSavedTeam(Team);
+		char TeamString[65536];
+		char OriginalCode[32];
+		str_copy(OriginalCode, pData->m_Code, sizeof(OriginalCode));
+		ClearString(pData->m_Code, sizeof(pData->m_Code));
+		char Map[128];
+		str_copy(Map, g_Config.m_SvMap, 128);
+		ClearString(Map, sizeof(Map));
+
+		int Num = -1;
+
+		if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.Count(Team) > 0)
+		{
+			SavedTeam = new CSaveTeam(pData->GameServer()->m_pController);
+			Num = SavedTeam->save(Team);
+			switch (Num)
+			{
+				case 1:
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+					break;
+				case 2:
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Could not find your Team");
+					break;
+				case 3:
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to find all Characters");
+					break;
+				case 4:
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Your team is not started yet");
+					break;
+			}
+			if(!Num)
+			{
+				str_copy(TeamString, SavedTeam->GetString(), sizeof(TeamString));
+				ClearString(TeamString, sizeof(TeamString));
+			}
 		}
 		else
+			pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+
+		if (Num)
 		{
-			dbg_msg("SQL", "ERROR: This save-code already exists");
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, "This save-code already exists");
+			((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
+			return true;
 		}
 
-		if(SavedTeam)
-			delete SavedTeam;
+		try
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "select Savegame from %s_saves where Code = '%s' and Map = '%s';",  pSqlServer->GetPrefix(), pData->m_Code, Map);
+			pSqlServer->executeSqlQuery(aBuf);
 
-		return true;
+			if (pSqlServer->GetResults()->rowsCount() == 0)
+			{
+				char aBuf[65536];
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pSqlServer->GetPrefix(), TeamString, Map, pData->m_Code, pData->m_Server);
+				dbg_msg("SQL", aBuf);
+				pSqlServer->executeSql(aBuf);
+
+				// be sure to keep all calls to pData->GameServer() after inserting the save, otherwise it might be lost due to CGameContextError.
+
+				char aBuf2[256];
+				str_format(aBuf2, sizeof(aBuf2), "Team successfully saved. Use '/load %s' to continue", OriginalCode);
+				pData->GameServer()->SendChatTeam(Team, aBuf2);
+				((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.KillSavedTeam(Team);
+			}
+			else
+			{
+				dbg_msg("SQL", "ERROR: This save-code already exists");
+				pData->GameServer()->SendChatTarget(pData->m_ClientID, "This save-code already exists");
+			}
+
+			return true;
+		}
+		catch (sql::SQLException &e)
+		{
+			char aBuf2[256];
+			str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
+			dbg_msg("SQL", aBuf2);
+			dbg_msg("SQL", "ERROR: Could not save the team");
+			pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not save the team");
+		}
+		catch (CGameContextError &e)
+		{
+			if(SavedTeam)
+				delete SavedTeam;
+			dbg_msg("SQL", "WARNING: Could not send chatmessage during saving team due to reload/change of map.");
+			return true;
+		}
 	}
-	catch (sql::SQLException &e)
+	catch (CGameContextError &e)
 	{
-		char aBuf2[256];
-		str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
-		dbg_msg("SQL", aBuf2);
-		dbg_msg("SQL", "ERROR: Could not save the team");
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not save the team");
+		dbg_msg("SQL", "WARNING: Aborted saving team due to reload/change of map.");
+		return true;
 	}
 
 	if(SavedTeam)
@@ -1360,7 +1457,15 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 	if (HandleFailure)
 		return true;
 
-	SavedTeam = new CSaveTeam(pData->GameServer()->m_pController);
+	try
+	{
+		SavedTeam = new CSaveTeam(pData->GameServer()->m_pController);
+	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted loading team due to reload/change of map.");
+		return true;
+	}
 
 	ClearString(pData->m_Code, sizeof(pData->m_Code));
 	char Map[128];
@@ -1469,6 +1574,11 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 		dbg_msg("SQL", "ERROR: Could not load the team");
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not load the team");
 		delete SavedTeam;
+	}
+	catch (CGameContextError &e)
+	{
+		dbg_msg("SQL", "WARNING: Aborted loading team due to reload/change of map.");
+		return true;
 	}
 	return false;
 }

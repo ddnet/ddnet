@@ -4,25 +4,55 @@
 #ifndef GAME_SERVER_SQLSCORE_H
 #define GAME_SERVER_SQLSCORE_H
 
+#include <exception>
+
 #include <engine/console.h>
 #include <engine/server/sql_connector.h>
 
 #include "../score.h"
 
+
+class CGameContextError : public std::runtime_error
+{
+public:
+	CGameContextError(const char* pMsg) : std::runtime_error(pMsg) {}
+};
+
+
 // generic implementation to provide gameserver and server
 struct CSqlData
 {
+	CSqlData()
+	{
+		m_Instance = ms_Instance;
+		str_copy(m_aMap, ms_pMap, sizeof(m_aMap));
+	}
+
 	virtual ~CSqlData() {}
 
-	CGameContext* GameServer() { return ms_pGameServer; }
-	IServer* Server() { return ms_pServer; }
-	CPlayerData* PlayerData(int ID) { return &ms_pPlayerData[ID]; }
-	const char* MapName() { return ms_pMap; }
+	bool isGameContextVaild()
+	{
+		return m_Instance == ms_Instance && ms_GameContextAvailable;
+	}
+
+	CGameContext* GameServer() { return isGameContextVaild() ? ms_pGameServer : throw CGameContextError("[CSqlData]: GameServer() unavailable."); }
+	IServer* Server() { return isGameContextVaild() ? ms_pServer : throw CGameContextError("[CSqlData]: Server() unavailable."); }
+	CPlayerData* PlayerData(int ID) { return isGameContextVaild() ? &ms_pPlayerData[ID] : throw CGameContextError("[CSqlData]: PlayerData() unavailable."); }
+	const char* MapName() { return m_aMap; }
+
+	char m_aMap[128];
+
+	// counter to keep track to which instance of GameServer this object belongs to.
+	int m_Instance;
 
 	static CGameContext *ms_pGameServer;
 	static IServer *ms_pServer;
 	static CPlayerData *ms_pPlayerData;
 	static const char *ms_pMap;
+
+	static bool ms_GameContextAvailable;
+	// contains the instancecount of the current GameServer
+	static int ms_Instance;
 };
 
 struct CSqlExecData
@@ -37,6 +67,7 @@ struct CSqlExecData
 	bool m_ReadOnly;
 };
 
+// used for mapvote and mapinfo
 struct CSqlMapData : CSqlData
 {
 	int m_ClientID;
@@ -124,6 +155,7 @@ class CSqlScore: public IScore
 public:
 
 	CSqlScore(CGameContext *pGameServer);
+	~CSqlScore();
 
 	virtual void LoadScore(int ClientID);
 	virtual void MapInfo(int ClientID, const char* MapName);
