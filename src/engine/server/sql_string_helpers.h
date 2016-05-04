@@ -6,6 +6,9 @@
 #include <ctime>
 #include <base/system.h>
 
+namespace sqlstr
+{
+
 void FuzzyString(char *pString)
 {
 	char newString[32*4-1];
@@ -143,6 +146,7 @@ void getTimeStamp(char* dest, size_t size)
 	std::time(&rawtime);
 
 	str_timestamp_ex(rawtime, dest, size, "%Y-%m-%d %H:%M:%S");
+}
 }
 
 #endif

@@ -30,7 +30,7 @@ m_pGameServer(pGameServer),
 m_pServer(pGameServer->Server())
 {
 	str_copy(m_aMap, g_Config.m_SvMap, sizeof(m_aMap));
-	ClearString(m_aMap);
+	sqlstr::ClearString(m_aMap);
 
 	CSqlData::ms_pGameServer = m_pGameServer;
 	CSqlData::ms_pServer = m_pServer;
@@ -158,7 +158,7 @@ bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 		// check strings
 		char originalName[MAX_NAME_LENGTH];
 		strcpy(originalName, pData->m_aName);
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		char aBuf[512];
 
@@ -214,7 +214,7 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 	try
 	{
 		// check strings
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		char aBuf[512];
 
@@ -277,10 +277,10 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool 
 
 	char originalMap[128];
 	strcpy(originalMap,pData->m_aMap);
-	ClearString(pData->m_aMap);
+	sqlstr::ClearString(pData->m_aMap);
 	char clearMap[128];
 	strcpy(clearMap,pData->m_aMap);
-	FuzzyString(pData->m_aMap);
+	sqlstr::FuzzyString(pData->m_aMap);
 
 	try
 	{
@@ -373,10 +373,10 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool 
 
 	char originalMap[128];
 	strcpy(originalMap,pData->m_aMap);
-	ClearString(pData->m_aMap);
+	sqlstr::ClearString(pData->m_aMap);
 	char clearMap[128];
 	strcpy(clearMap,pData->m_aMap);
-	FuzzyString(pData->m_aMap);
+	sqlstr::FuzzyString(pData->m_aMap);
 
 	try
 	{
@@ -409,7 +409,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool 
 			char pReleasedString[60] = "\0";
 			if(stamp != 0)
 			{
-				agoTimeToString(ago, pAgoString);
+				sqlstr::agoTimeToString(ago, pAgoString);
 				str_format(pReleasedString, sizeof(pReleasedString), ", released %s ago", pAgoString);
 			}
 
@@ -483,7 +483,7 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 			dbg_msg("sql", "ERROR: Could not save Score, writing insert to a file now...");
 
 			char aTimestamp [20];
-			getTimeStamp(aTimestamp, sizeof(aTimestamp));
+			sqlstr::getTimeStamp(aTimestamp, sizeof(aTimestamp));
 
 			char aBuf[768];
 				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %%s_race(Map, Name, Timestamp, Time, Server, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25) VALUES ('%s', '%s', '%s', '%.2f', '%s', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f');", pData->MapName(), pData->m_aName, aTimestamp, pData->m_Time, g_Config.m_SvSqlServerName, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24]);
@@ -502,7 +502,7 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 		char aBuf[768];
 
 		// check strings
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		str_format(aBuf, sizeof(aBuf), "SELECT * FROM %s_race WHERE Map='%s' AND Name='%s' ORDER BY time ASC LIMIT 1;", pSqlServer->GetPrefix(), pData->MapName(), pData->m_aName);
 		pSqlServer->executeSqlQuery(aBuf);
@@ -586,7 +586,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 			io_write_newline(File);
 
 			char aTimestamp [20];
-			getTimeStamp(aTimestamp, sizeof(aTimestamp));
+			sqlstr::getTimeStamp(aTimestamp, sizeof(aTimestamp));
 
 			char aBuf[2300];
 			for(unsigned int i = 0; i < pData->m_Size; i++)
@@ -609,7 +609,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 
 		for(unsigned int i = 0; i < pData->m_Size; i++)
 		{
-			ClearString(pData->m_aNames[i]);
+			sqlstr::ClearString(pData->m_aNames[i]);
 		}
 
 		str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_teamrace WHERE Map = '%s' AND Name = '%s') as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pSqlServer->GetPrefix(), pData->MapName(), pData->m_aNames[0], pSqlServer->GetPrefix());
@@ -631,7 +631,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 			{
 				strcpy(aID2, pSqlServer->GetResults()->getString("ID").c_str());
 				strcpy(aName, pSqlServer->GetResults()->getString("Name").c_str());
-				ClearString(aName);
+				sqlstr::ClearString(aName);
 				if (str_comp(aID, aID2) != 0)
 				{
 					if (ValidNames && Count == pData->m_Size)
@@ -731,7 +731,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 		// check strings
 		char originalName[MAX_NAME_LENGTH];
 		strcpy(originalName,pData->m_aName);
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		// check sort methode
 		char aBuf[600];
@@ -808,7 +808,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, CSqlData *pGameData, 
 		// check strings
 		char originalName[MAX_NAME_LENGTH];
 		strcpy(originalName,pData->m_aName);
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		// check sort methode
 		char aBuf[600];
@@ -1080,7 +1080,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 	{
 		char originalName[MAX_NAME_LENGTH];
 		strcpy(originalName,pData->m_aName);
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		char aBuf[512];
 
@@ -1112,7 +1112,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 			pStamp = (int)pSqlServer->GetResults()->getInt("Stamp");
 			pTime = (float)pSqlServer->GetResults()->getDouble("Time");
 
-			agoTimeToString(pSince,pAgoString);
+			sqlstr::agoTimeToString(pSince,pAgoString);
 
 			if(pData->m_Search) // last 5 times of a player
 			{
@@ -1176,7 +1176,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, CSqlData *pGameData, bo
 		// check strings
 		char originalName[MAX_NAME_LENGTH];
 		strcpy(originalName,pData->m_aName);
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
@@ -1355,7 +1355,7 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, CSqlData *pGam
 	{
 		char originalName[MAX_NAME_LENGTH];
 		strcpy(originalName,pData->m_aName);
-		ClearString(pData->m_aName);
+		sqlstr::ClearString(pData->m_aName);
 
 		char aBuf[512];
 		if(pData->m_Num)
@@ -1437,10 +1437,10 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 		char TeamString[65536];
 		char OriginalCode[32];
 		str_copy(OriginalCode, pData->m_Code, sizeof(OriginalCode));
-		ClearString(pData->m_Code, sizeof(pData->m_Code));
+		sqlstr::ClearString(pData->m_Code, sizeof(pData->m_Code));
 		char Map[128];
 		str_copy(Map, g_Config.m_SvMap, 128);
-		ClearString(Map, sizeof(Map));
+		sqlstr::ClearString(Map, sizeof(Map));
 
 		int Num = -1;
 
@@ -1466,7 +1466,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 			if(!Num)
 			{
 				str_copy(TeamString, SavedTeam->GetString(), sizeof(TeamString));
-				ClearString(TeamString, sizeof(TeamString));
+				sqlstr::ClearString(TeamString, sizeof(TeamString));
 			}
 		}
 		else
@@ -1562,10 +1562,10 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool
 		return true;
 	}
 
-	ClearString(pData->m_Code, sizeof(pData->m_Code));
+	sqlstr::ClearString(pData->m_Code, sizeof(pData->m_Code));
 	char Map[128];
 	str_copy(Map, g_Config.m_SvMap, 128);
-	ClearString(Map, sizeof(Map));
+	sqlstr::ClearString(Map, sizeof(Map));
 	int Num;
 
 	try
