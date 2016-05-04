@@ -600,27 +600,27 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 		int Result = m_pEditor->PopupSelectGameTileOpResult();
 		switch(Result)
-		{
+		{	
 			case 4:
-				Result = TILE_FREEZE;
+				Result = TILE_THROUGH_CUT;
 				break;
 			case 5:
-				Result = TILE_UNFREEZE;
+				Result = TILE_FREEZE;
 				break;
 			case 6:
-				Result = TILE_DFREEZE;
+				Result = TILE_UNFREEZE;
 				break;
 			case 7:
-				Result = TILE_DUNFREEZE;
+				Result = TILE_DFREEZE;
 				break;
 			case 8:
-				Result = TILE_TELECHECKIN;
+				Result = TILE_DUNFREEZE;
 				break;
 			case 9:
-				Result = TILE_TELECHECKINEVIL;
+				Result = TILE_TELECHECKIN;
 				break;
 			case 10:
-				Result = TILE_THROUGH_CUT;
+				Result = TILE_TELECHECKINEVIL;
 			default:
 				break;
 		}
