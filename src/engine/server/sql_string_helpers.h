@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <ctime>
 #include <base/system.h>
 
 void FuzzyString(char *pString)
@@ -134,6 +135,14 @@ void agoTimeToString(int agoTime, char agoString[])
 			strcat(agoString,aBuf);
 		}
 	}
+}
+
+void getTimeStamp(char* dest, size_t size)
+{
+	std::time_t rawtime;
+	std::time(&rawtime);
+
+	str_timestamp_ex(rawtime, dest, size, "%Y-%m-%d %H:%M:%S");
 }
 
 #endif
