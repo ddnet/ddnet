@@ -600,7 +600,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 		int Result = m_pEditor->PopupSelectGameTileOpResult();
 		switch(Result)
-		{	
+		{
 			case 4:
 				Result = TILE_THROUGH_CUT;
 				break;
