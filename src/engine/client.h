@@ -41,6 +41,7 @@ protected:
 public:
 	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
+	int64 m_ReconnectTime;
 
 	CNetObj_PlayerInput m_DummyInput;
 
