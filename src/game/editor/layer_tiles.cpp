@@ -451,7 +451,7 @@ void CLayerTiles::RemoveRotationFlags()
 	for (int y = 0; y < m_Height; y++)
 		for (int x = 0; x < m_Width; x++)
 		{
-			auto i = m_pTiles[y*m_Width + x].m_Index;
+			int  i = m_pTiles[y*m_Width + x].m_Index;
 			if (i != TILE_STOP && i != TILE_STOPS && i != TILE_CP && i != TILE_CP_F&& i != TILE_THROUGH_DIR)
 				m_pTiles[y*m_Width + x].m_Flags &= ~(TILEFLAG_ROTATE | TILEFLAG_VFLIP | TILEFLAG_HFLIP);
 		}
