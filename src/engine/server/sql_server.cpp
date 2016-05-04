@@ -46,6 +46,7 @@ CSqlServer::~CSqlServer()
 		dbg_msg("sql", "ERROR: No SQL connection");
 	}
 	UnLock();
+	lock_destroy(m_SqlLock);
 }
 
 bool CSqlServer::Connect()
