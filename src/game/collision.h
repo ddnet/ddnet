@@ -15,21 +15,7 @@ class CCollision
 	int m_Height;
 	class CLayers *m_pLayers;
 
-	//bool IsTileSolid(int x, int y);
-	//int GetTile(int x, int y);
-
 public:
-	enum
-	{
-		COLFLAG_SOLID=1,
-		COLFLAG_DEATH=2,
-		COLFLAG_NOHOOK=4,
-		// DDRace
-		//COLFLAG_NOLASER=8, // Unused, now used for TimedSwitchActivation
-		//COLFLAG_THROUGH=16, // Unused, now used for WallJump
-		COLFLAG_TELE=32
-	};
-
 	CCollision();
 	void Init(class CLayers *pLayers);
 	bool CheckPoint(float x, float y) { return IsSolid(round_to_int(x), round_to_int(y)); }
@@ -37,9 +23,9 @@ public:
 	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
 	int GetWidth() { return m_Width; };
 	int GetHeight() { return m_Height; };
-	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, bool AllowThrough);
-	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough);
-	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, bool AllowThrough);
+	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
+	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
+	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces);
 	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
 	bool TestBox(vec2 Pos, vec2 Size);
@@ -47,7 +33,7 @@ public:
 	// DDRace
 
 	void Dest();
-	void SetCollisionAt(float x, float y, int Flag);
+	void SetCollisionAt(float x, float y, int id);
 	void SetDTile(float x, float y, bool State);
 	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
 	int GetDTileIndex(int Index);
@@ -58,14 +44,14 @@ public:
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
 	int GetIndex(int x, int y);
-	int GetIndex(vec2 Pos);
 	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
 
 	int GetTile(int x, int y);
 	int GetFTile(int x, int y);
 	int Entity(int x, int y, int Layer);
-	int GetPureMapIndex(vec2 Pos);
+	int GetPureMapIndex(float x, float y);
+	int GetPureMapIndex(vec2 Pos) { return GetPureMapIndex(Pos.x, Pos.y); }
 	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0);
 	int GetMapIndex(vec2 Pos);
 	bool TileExists(int Index);
@@ -82,7 +68,6 @@ public:
 	int IsTeleportWeapon(int Index);
 	int IsTeleportHook(int Index);
 	int IsTCheckpoint(int Index);
-	//int IsCheckpoint(int Index);
 	int IsSpeedup(int Index);
 	int IsTune(int Index);
 	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed);
@@ -91,7 +76,8 @@ public:
 	int GetSwitchDelay(int Index);
 
 	int IsSolid(int x, int y);
-	int IsThrough(int x, int y);
+	bool IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1);
+	bool IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1);
 	int IsWallJump(int Index);
 	int IsNoLaser(int x, int y);
 	int IsFNoLaser(int x, int y);

@@ -102,7 +102,6 @@ class CGameClient : public IGameClient
 	class CCollision m_Collision;
 	CUI m_UI;
 
-	void DispatchInput();
 	void ProcessEvents();
 	void UpdatePositions();
 
@@ -292,6 +291,7 @@ public:
 	// hooks
 	virtual void OnConnected();
 	virtual void OnRender();
+	virtual void OnUpdate();
 	virtual void OnDummyDisconnect();
 	virtual void OnRelease();
 	virtual void OnInit();
@@ -365,9 +365,9 @@ public:
 
 	void FindWeaker(bool IsWeaker[2][MAX_CLIENTS]);
 
-	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers; }
-	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade; }
-	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons; }
+	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && !(m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking || m_Tuning[g_Config.m_ClDummy].m_HammerStrength > 0); }
+	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
+	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 
 private:
 	bool m_DDRaceMsgSent[2];

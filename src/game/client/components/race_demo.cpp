@@ -210,5 +210,5 @@ void CRaceDemo::SaveDemo(const char* pDemo)
 
 	Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
 
-	dbg_msg("racedemo", "Saved better demo");
+	dbg_msg("racedemo", "saved better demo");
 }

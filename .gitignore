@@ -6,6 +6,7 @@ datasrc/*.pyc
 objs
 src/game/generated
 SDL.dll
+SDL2.dll
 freetype.dll
 
 crapnet*

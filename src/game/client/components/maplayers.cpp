@@ -134,9 +134,9 @@ void CMapLayers::OnRender()
 
 		if(!pGroup)
 		{
-			dbg_msg("MapLayers", "Error:Group was null, Group Number = %d, Total Groups = %d", g, m_pLayers->NumGroups());
-			dbg_msg("MapLayers", "This is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
-			dbg_msg("MapLayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
+			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
+			dbg_msg("maplayers", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
+			dbg_msg("maplayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
 			continue;
 		}
 
@@ -210,7 +210,7 @@ void CMapLayers::OnRender()
 					Render = true;
 			}
 
-			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && Input()->KeyDown(KEY_KP0))
+			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && Input()->KeyPress(KEY_KP_0))
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);

@@ -43,11 +43,11 @@ CSqlScore::~CSqlScore()
 	{
 		delete m_pStatement;
 		delete m_pConnection;
-		dbg_msg("SQL", "SQL connection disconnected");
+		dbg_msg("sql", "sql connection disconnected");
 	}
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("SQL", "ERROR: No SQL connection");
+		dbg_msg("sql", "ERROR: no sql connection");
 	}
 }
 
@@ -62,11 +62,8 @@ bool CSqlScore::Connect()
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-
-			dbg_msg("SQL", "ERROR: SQL connection failed");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: sql connection failed");
 			return false;
 		}
 		return true;
@@ -103,52 +100,49 @@ bool CSqlScore::Connect()
 
 		// Connect to specific database
 		m_pConnection->setSchema(m_pDatabase);
-		dbg_msg("SQL", "SQL connection established");
+		dbg_msg("sql", "sql connection established");
 		return true;
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("SQL", aBuf);
-
-		dbg_msg("SQL", "ERROR: SQL connection failed");
+		dbg_msg("sql", "MySQL ERROR: %s", e.what());
+		dbg_msg("sql", "ERROR: sql connection failed");
 		return false;
 	}
 	catch (const std::exception& ex)
 	{
 		// ...
-		dbg_msg("SQL", "1 %s",ex.what());
+		dbg_msg("sql", "1 %s",ex.what());
 
 	}
 	catch (const std::string& ex)
 	{
 		// ...
-		dbg_msg("SQL", "2 %s",ex.c_str());
+		dbg_msg("sql", "2 %s",ex.c_str());
 	}
 	catch( int )
 	{
-		dbg_msg("SQL", "3 %s");
+		dbg_msg("sql", "3 %s");
 	}
 	catch( float )
 	{
-		dbg_msg("SQL", "4 %s");
+		dbg_msg("sql", "4 %s");
 	}
 
 	catch( char[] )
 	{
-		dbg_msg("SQL", "5 %s");
+		dbg_msg("sql", "5 %s");
 	}
 
 	catch( char )
 	{
-		dbg_msg("SQL", "6 %s");
+		dbg_msg("sql", "6 %s");
 	}
 	catch (...)
 	{
-		dbg_msg("SQL", "Unknown Error cause by the MySQL/C++ Connector, my advice compile server_debug and use it");
+		dbg_msg("sql", "unknown error caused by the mysql/c++ connector, compile server_debug and use it");
 
-		dbg_msg("SQL", "ERROR: SQL connection failed");
+		dbg_msg("sql", "ERROR: sql connection failed");
 		return false;
 	}
 	return false;
@@ -185,7 +179,7 @@ void CSqlScore::Init()
 				str_format(aBuf, sizeof(aBuf), "CREATE TABLE IF NOT EXISTS %s_points (Name VARCHAR(%d) BINARY NOT NULL, Points INT DEFAULT 0, UNIQUE KEY Name (Name)) CHARACTER SET utf8 ;", m_pPrefix, MAX_NAME_LENGTH);
 				m_pStatement->execute(aBuf);
 
-				dbg_msg("SQL", "Tables were created successfully");
+				dbg_msg("sql", "tables were created successfully");
 			}
 
 			// get the best time
@@ -196,7 +190,7 @@ void CSqlScore::Init()
 			{
 				((CGameControllerDDRace*)GameServer()->m_pController)->m_CurrentRecord = (float)m_pResults->getDouble("Time");
 
-				dbg_msg("SQL", "Getting best time on server done");
+				dbg_msg("sql", "getting best time on server done");
 			}
 
 			// delete statement
@@ -204,16 +198,73 @@ void CSqlScore::Init()
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Tables were NOT created");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: tables were NOT created");
 		}
 
 		// disconnect from database
 		Disconnect();
 	}
 }
+
+void CSqlScore::CheckBirthdayThread(void *pUser)
+{
+	lock_wait(gs_SqlLock);
+
+	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+
+	// Connect to database
+	if(pData->m_pSqlData->Connect())
+	{
+		try
+		{
+			// check strings
+			char originalName[MAX_NAME_LENGTH];
+			strcpy(originalName,pData->m_aName);
+			pData->m_pSqlData->ClearString(pData->m_aName);
+
+			char aBuf[512];
+
+			str_format(aBuf, sizeof(aBuf), "select year(Current) - year(Stamp) as YearsAgo from (select CURRENT_TIMESTAMP as Current, min(Timestamp) as Stamp from %s_race WHERE Name='%s') as l where dayofmonth(Current) = dayofmonth(Stamp) and month(Current) = month(Stamp) and year(Current) > year(Stamp);", pData->m_pSqlData->m_pPrefix, pData->m_aName);
+			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+			if(pData->m_pSqlData->m_pResults->next())
+			{
+				int yearsAgo = (int)pData->m_pSqlData->m_pResults->getInt("YearsAgo");
+				str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday to %s for finishing their first map %d year%s ago!", originalName, yearsAgo, yearsAgo > 1 ? "s" : "");
+				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+			}
+
+			dbg_msg("sql", "checking birthday done");
+
+			// delete statement and results
+			delete pData->m_pSqlData->m_pResults;
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not check birthday");
+		}
+
+		// disconnect from database
+		pData->m_pSqlData->Disconnect();
+	}
+
+	delete pData;
+
+	lock_unlock(gs_SqlLock);
+}
+
+void CSqlScore::CheckBirthday(int ClientID)
+{
+	CSqlScoreData *Tmp = new CSqlScoreData();
+	Tmp->m_ClientID = ClientID;
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
+	Tmp->m_pSqlData = this;
+
+	void *CheckThread = thread_init(CheckBirthdayThread, Tmp);
+	thread_detach(CheckThread);
+}
+
 
 // update stuff
 void CSqlScore::LoadScoreThread(void *pUser)
@@ -254,17 +305,15 @@ void CSqlScore::LoadScoreThread(void *pUser)
 				}
 			}
 
-			dbg_msg("SQL", "Getting best time done");
+			dbg_msg("sql", "getting best time done");
 
 			// delete statement and results
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not update account");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not update account");
 		}
 
 		// disconnect from database
@@ -372,7 +421,7 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 			if (aUpdateID[0])
 			{
 				str_format(aBuf, sizeof(aBuf), "UPDATE %s_teamrace SET Time='%.2f' WHERE ID = '%s';", pData->m_pSqlData->m_pPrefix, pData->m_Time, aUpdateID);
-				dbg_msg("SQL", aBuf);
+				dbg_msg("sql", aBuf);
 				pData->m_pSqlData->m_pStatement->execute(aBuf);
 			}
 			else
@@ -383,23 +432,21 @@ void CSqlScore::SaveTeamScoreThread(void *pUser)
 				{
 				// if no entry found... create a new one
 					str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID) VALUES ('%s', '%s', CURRENT_TIMESTAMP(), '%.2f', @id);", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aNames[i], pData->m_Time);
-					dbg_msg("SQL", aBuf);
+					dbg_msg("sql", aBuf);
 					pData->m_pSqlData->m_pStatement->execute(aBuf);
 				}
 			}
 
 			end:
-			dbg_msg("SQL", "Updating team time done");
+			dbg_msg("sql", "updating team time done");
 
 			// delete results statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not update time");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not update time");
 		}
 
 		// disconnect from database
@@ -498,10 +545,8 @@ void CSqlScore::MapVoteThread(void *pUser)
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not update time");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not update time");
 		}
 
 		pData->m_pSqlData->Disconnect();
@@ -541,7 +586,7 @@ void CSqlScore::MapInfoThread(void *pUser)
 		try
 		{
 			char aBuf[1024];
-			str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Mapper, Points, Stars, (select count(Name) from %s_race where Map = l.Map) as Finishes, (select count(distinct Name) from %s_race where Map = l.Map) as Finishers, (select round(avg(Time)) from record_race where Map = l.Map) as Average, UNIX_TIMESTAMP(l.Timestamp) as Stamp, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(l.Timestamp) as Ago FROM (SELECT * FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY CASE WHEN Map = '%s' THEN 0 ELSE 1 END, CASE WHEN Map LIKE '%s%%' THEN 0 ELSE 1 END, LENGTH(Map), Map LIMIT 1) as l;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_aMap, clearMap, clearMap);
+			str_format(aBuf, sizeof(aBuf), "SELECT l.Map, l.Server, Mapper, Points, Stars, (select count(Name) from %s_race where Map = l.Map) as Finishes, (select count(distinct Name) from %s_race where Map = l.Map) as Finishers, (select round(avg(Time)) from %s_race where Map = l.Map) as Average, UNIX_TIMESTAMP(l.Timestamp) as Stamp, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(l.Timestamp) as Ago FROM (SELECT * FROM %s_maps WHERE Map LIKE '%s' COLLATE utf8_general_ci ORDER BY CASE WHEN Map = '%s' THEN 0 ELSE 1 END, CASE WHEN Map LIKE '%s%%' THEN 0 ELSE 1 END, LENGTH(Map), Map LIMIT 1) as l;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_pPrefix, pData->m_aMap, clearMap, clearMap);
 			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
 			if(pData->m_pSqlData->m_pResults->rowsCount() != 1)
@@ -599,10 +644,8 @@ void CSqlScore::MapInfoThread(void *pUser)
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not update time");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not update time");
 		}
 
 		pData->m_pSqlData->Disconnect();
@@ -656,17 +699,15 @@ void CSqlScore::SaveScoreThread(void *pUser)
 
 			// if no entry found... create a new one
 			str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_race(Map, Name, Timestamp, Time, Server, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25) VALUES ('%s', '%s', CURRENT_TIMESTAMP(), '%.2f', '%s', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f');", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_aName, pData->m_Time, g_Config.m_SvSqlServerName, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24]);
-			dbg_msg("SQL", aBuf);
+			dbg_msg("sql", aBuf);
 			pData->m_pSqlData->m_pStatement->execute(aBuf);
 
-			dbg_msg("SQL", "Updating time done");
+			dbg_msg("sql", "updating time done");
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not update time");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not update time");
 		}
 
 		// disconnect from database
@@ -770,126 +811,126 @@ void CSqlScore::ShowTeamRankThread(void *pUser)
 				pData->m_pSqlData->m_pResults->first();
 
 				if(g_Config.m_SvHideScore)
+				{
 					str_format(aBuf, sizeof(aBuf), "Your team time: %02d:%05.02f", (int)(Time/60), Time-((int)Time/60*60));
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+				}
 				else
+				{
 					str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %02d:%05.02f, requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer);
-
-				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+				}
 			}
 
-			dbg_msg("SQL", "Showing teamrank done");
+			dbg_msg("sql", "showing teamrank done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show team rank");
-		}
-
-		// disconnect from database
-		pData->m_pSqlData->Disconnect();
+		dbg_msg("sql", "MySQL ERROR: %s", e.what());
+		dbg_msg("sql", "ERROR: could not show team rank");
 	}
 
-	delete pData;
+	// disconnect from database
+	pData->m_pSqlData->Disconnect();
+}
 
-	lock_unlock(gs_SqlLock);
+delete pData;
+
+lock_unlock(gs_SqlLock);
 }
 
 void CSqlScore::ShowTeamTop5Thread(void *pUser)
 {
-	lock_wait(gs_SqlLock);
+lock_wait(gs_SqlLock);
 
-	CSqlScoreData *pData = (CSqlScoreData *)pUser;
+CSqlScoreData *pData = (CSqlScoreData *)pUser;
 
-	// Connect to database
-	if(pData->m_pSqlData->Connect())
+// Connect to database
+if(pData->m_pSqlData->Connect())
+{
+	try
 	{
-		try
-		{
-			// check sort methode
-			char aBuf[512];
+		// check sort methode
+		char aBuf[512];
 
-			pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
-			pData->m_pSqlData->m_pStatement->execute("SET @previd := NULL;");
-			pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
-			pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
-			str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, rank, l.Time FROM ((SELECT ID, rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a LIMIT %d, 5) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
-			pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
+		pData->m_pSqlData->m_pStatement->execute("SET @prev := NULL;");
+		pData->m_pSqlData->m_pStatement->execute("SET @previd := NULL;");
+		pData->m_pSqlData->m_pStatement->execute("SET @rank := 1;");
+		pData->m_pSqlData->m_pStatement->execute("SET @pos := 0;");
+		str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, rank, l.Time FROM ((SELECT ID, rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a LIMIT %d, 5) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap, pData->m_Num-1, pData->m_pSqlData->m_pPrefix, pData->m_pSqlData->m_aMap);
+		pData->m_pSqlData->m_pResults = pData->m_pSqlData->m_pStatement->executeQuery(aBuf);
 
-			// show teamtop5
-			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "------- Team Top 5 -------");
+		// show teamtop5
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "------- Team Top 5 -------");
 
-			int Rows = pData->m_pSqlData->m_pResults->rowsCount();
+		int Rows = pData->m_pSqlData->m_pResults->rowsCount();
 
-			if (Rows >= 1) {
-				char aID[17];
-				char aID2[17];
-				char aNames[2300];
-				int Rank = 0;
-				float Time = 0;
-				int aCuts[320]; // 64 * 5
-				int CutPos = 0;
+		if (Rows >= 1) {
+			char aID[17];
+			char aID2[17];
+			char aNames[2300];
+			int Rank = 0;
+			float Time = 0;
+			int aCuts[320]; // 64 * 5
+			int CutPos = 0;
 
-				aNames[0] = '\0';
-				aCuts[0] = -1;
+			aNames[0] = '\0';
+			aCuts[0] = -1;
 
-				pData->m_pSqlData->m_pResults->first();
-				strcpy(aID, pData->m_pSqlData->m_pResults->getString("ID").c_str());
-				for(int Row = 0; Row < Rows; Row++)
+			pData->m_pSqlData->m_pResults->first();
+			strcpy(aID, pData->m_pSqlData->m_pResults->getString("ID").c_str());
+			for(int Row = 0; Row < Rows; Row++)
+			{
+				strcpy(aID2, pData->m_pSqlData->m_pResults->getString("ID").c_str());
+				if (str_comp(aID, aID2) != 0)
 				{
-					strcpy(aID2, pData->m_pSqlData->m_pResults->getString("ID").c_str());
-					if (str_comp(aID, aID2) != 0)
-					{
-						strcpy(aID, aID2);
-						aCuts[CutPos++] = Row - 1;
-					}
-					pData->m_pSqlData->m_pResults->next();
+					strcpy(aID, aID2);
+					aCuts[CutPos++] = Row - 1;
 				}
-				aCuts[CutPos] = Rows - 1;
-
-				CutPos = 0;
-				pData->m_pSqlData->m_pResults->first();
-				for(int Row = 0; Row < Rows; Row++)
-				{
-					strcat(aNames, pData->m_pSqlData->m_pResults->getString("Name").c_str());
-
-					if (Row < aCuts[CutPos] - 1)
-						strcat(aNames, ", ");
-					else if (Row < aCuts[CutPos])
-						strcat(aNames, " & ");
-
-					Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
-					Rank = (float)pData->m_pSqlData->m_pResults->getInt("rank");
-
-					if (Row == aCuts[CutPos])
-					{
-						str_format(aBuf, sizeof(aBuf), "%d. %s Team Time: %02d:%05.2f", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
-						pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-						CutPos++;
-						aNames[0] = '\0';
-					}
-
-					pData->m_pSqlData->m_pResults->next();
-				}
+				pData->m_pSqlData->m_pResults->next();
 			}
+			aCuts[CutPos] = Rows - 1;
 
-			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
+			CutPos = 0;
+			pData->m_pSqlData->m_pResults->first();
+			for(int Row = 0; Row < Rows; Row++)
+			{
+				strcat(aNames, pData->m_pSqlData->m_pResults->getString("Name").c_str());
 
-			dbg_msg("SQL", "Showing teamtop5 done");
+				if (Row < aCuts[CutPos] - 1)
+					strcat(aNames, ", ");
+				else if (Row < aCuts[CutPos])
+					strcat(aNames, " & ");
 
-			// delete results and statement
-			delete pData->m_pSqlData->m_pResults;
+				Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
+				Rank = (float)pData->m_pSqlData->m_pResults->getInt("rank");
+
+				if (Row == aCuts[CutPos])
+				{
+					str_format(aBuf, sizeof(aBuf), "%d. %s Team Time: %02d:%05.2f", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+					CutPos++;
+					aNames[0] = '\0';
+				}
+
+				pData->m_pSqlData->m_pResults->next();
+			}
 		}
-		catch (sql::SQLException &e)
-		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show teamtop5");
+
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
+
+		dbg_msg("sql", "showing teamtop5 done");
+
+		// delete results and statement
+		delete pData->m_pSqlData->m_pResults;
+	}
+	catch (sql::SQLException &e)
+	{
+		dbg_msg("sql", "MySQL ERROR: %s", e.what());
+		dbg_msg("sql", "ERROR: could not show teamtop5");
 		}
 
 		// disconnect from database
@@ -939,24 +980,26 @@ void CSqlScore::ShowRankThread(void *pUser)
 				float Time = (float)pData->m_pSqlData->m_pResults->getDouble("Time");
 				int Rank = (int)pData->m_pSqlData->m_pResults->getInt("Rank");
 				if(g_Config.m_SvHideScore)
+				{
 					str_format(aBuf, sizeof(aBuf), "Your time: %02d:%05.2f", (int)(Time/60), Time-((int)Time/60*60));
+					pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+				}
 				else
+				{
 					str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d:%05.2f, requested by %s", Rank, pData->m_pSqlData->m_pResults->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer);
-
-				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+					pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
+				}
 			}
 
-			dbg_msg("SQL", "Showing rank done");
+			dbg_msg("sql", "showing rank done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show rank");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not show rank");
 		}
 
 		// disconnect from database
@@ -1028,17 +1071,15 @@ void CSqlScore::ShowTop5Thread(void *pUser)
 			}
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
 
-			dbg_msg("SQL", "Showing top5 done");
+			dbg_msg("sql", "showing top5 done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show top5");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not show top5");
 		}
 
 		// disconnect from database
@@ -1114,17 +1155,15 @@ void CSqlScore::ShowTimesThread(void *pUser)
 			}
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "----------------------------------------------------");
 
-			dbg_msg("SQL", "Showing times done");
+			dbg_msg("sql", "showing times done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show times");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not show times");
 		}
 		end:
 		// disconnect from database
@@ -1351,17 +1390,15 @@ void CSqlScore::ShowPointsThread(void *pUser)
 				pData->m_pSqlData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 			}
 
-			dbg_msg("SQL", "Showing points done");
+			dbg_msg("sql", "showing points done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show points");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not show points");
 		}
 
 		// disconnect from database
@@ -1415,17 +1452,15 @@ void CSqlScore::ShowTopPointsThread(void *pUser)
 			}
 			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "-------------------------------");
 
-			dbg_msg("SQL", "Showing toppoints done");
+			dbg_msg("sql", "showing toppoints done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not show toppoints");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not show toppoints");
 		}
 
 		// disconnect from database
@@ -1480,17 +1515,15 @@ void CSqlScore::RandomMapThread(void *pUser)
 				pData->m_pSqlData->GameServer()->Console()->ExecuteLine(aBuf);
 			}
 
-			dbg_msg("SQL", "Voting random map done");
+			dbg_msg("sql", "voting random map done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not vote random map");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not vote random map");
 		}
 
 		// disconnect from database
@@ -1538,17 +1571,15 @@ void CSqlScore::RandomUnfinishedMapThread(void *pUser)
 				pData->m_pSqlData->GameServer()->Console()->ExecuteLine(aBuf);
 			}
 
-			dbg_msg("SQL", "Voting random unfinished map done");
+			dbg_msg("sql", "voting random unfinished map done");
 
 			// delete results and statement
 			delete pData->m_pSqlData->m_pResults;
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf);
-			dbg_msg("SQL", "ERROR: Could not vote random unfinished map");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not vote random unfinished map");
 		}
 
 		// disconnect from database
@@ -1670,7 +1701,7 @@ void CSqlScore::SaveTeamThread(void *pUser)
 
 				char aBuf[65536];
 				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pData->m_pSqlData->m_pPrefix, TeamString, Map, pData->m_Code, pData->m_Server);
-				dbg_msg("SQL", aBuf);
+				dbg_msg("sql", aBuf);
 				pData->m_pSqlData->m_pStatement->execute(aBuf);
 
 				char aBuf2[256];
@@ -1680,17 +1711,15 @@ void CSqlScore::SaveTeamThread(void *pUser)
 			}
 			else
 			{
-				dbg_msg("SQL", "ERROR: This save-code already exists");
+				dbg_msg("sql", "ERROR: this save-code already exists");
 				pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "This save-code already exists");
 			}
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf2[256];
-			str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf2);
-			dbg_msg("SQL", "ERROR: Could not save the team");
-			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not save the team");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not save the team");
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL error: Could not save the team");
 		}
 
 		// disconnect from database
@@ -1698,8 +1727,8 @@ void CSqlScore::SaveTeamThread(void *pUser)
 	}
 	else if(!Num)
 	{
-		dbg_msg("SQL", "connection failed");
-		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "ERROR: Unable to connect to SQL-Server");
+		dbg_msg("sql", "connection failed");
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Error: Unable to connect to SQL-Server");
 	}
 
 	((CGameControllerDDRace*)(pData->m_pSqlData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
@@ -1833,11 +1862,9 @@ void CSqlScore::LoadTeamThread(void *pUser)
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf2[256];
-			str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
-			dbg_msg("SQL", aBuf2);
-			dbg_msg("SQL", "ERROR: Could not load the team");
-			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not load the team");
+			dbg_msg("sql", "MySQL ERROR: %s", e.what());
+			dbg_msg("sql", "ERROR: could not load the team");
+			pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL error: Could not load the team");
 		}
 
 		// disconnect from database
@@ -1845,8 +1872,8 @@ void CSqlScore::LoadTeamThread(void *pUser)
 	}
 	else
 	{
-		dbg_msg("SQL", "connection failed");
-		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "ERROR: Unable to connect to SQL-Server");
+		dbg_msg("sql", "connection failed");
+		pData->m_pSqlData->GameServer()->SendChatTarget(pData->m_ClientID, "Error: Unable to connect to sql server");
 	}
 
 	delete pData;

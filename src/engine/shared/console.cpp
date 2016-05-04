@@ -88,7 +88,7 @@ int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
 
 int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 {
-	char Command;
+	char Command = *pFormat;
 	char *pStr;
 	int Optional = 0;
 	int Error = 0;
@@ -99,10 +99,6 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 
 	while(1)
 	{
-		// fetch command
-		Command = *pFormat;
-		pFormat++;
-
 		if(!Command)
 			break;
 
@@ -120,14 +116,14 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					break;
 				}
 
-				while(*(pFormat - 1))
+				while(Command)
 				{
-					if(*(pFormat - 1) == 'v')
+					if(Command == 'v')
 					{
 						pResult->SetVictim(CResult::VICTIM_ME);
 						break;
 					}
-					pFormat++;
+					Command = NextParam(pFormat);
 				}
 				break;
 			}
@@ -170,7 +166,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				char* pVictim = 0;
 
 				if (Command != 'v')
-				pResult->AddArgument(pStr);
+					pResult->AddArgument(pStr);
 				else
 					pVictim = pStr;
 
@@ -195,9 +191,37 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pResult->SetVictim(pVictim);
 			}
 		}
+		// fetch next command
+		Command = NextParam(pFormat);
 	}
 
 	return Error;
+}
+
+char CConsole::NextParam(const char *&pFormat)
+{
+	if (*pFormat)
+	{
+		pFormat++;
+
+		if (*pFormat == '[')
+		{
+			// skip bracket contents
+			for (; *pFormat != ']'; pFormat++)
+			{
+				if (!*pFormat)
+					return *pFormat;
+			}
+
+			// skip ']'
+			pFormat++;
+
+			// skip space if there is one
+			if (*pFormat == ' ')
+				pFormat++;
+		}
+	}
+	return *pFormat;
 }
 
 int CConsole::RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData)
@@ -458,7 +482,7 @@ void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID)
 }
 
 
-void CConsole::ExecuteFile(const char *pFilename, int ClientID)
+void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure)
 {
 	// make sure that this isn't being executed already
 	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
@@ -495,7 +519,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID)
 
 		io_close(File);
 	}
-	else
+	else if(LogFailure)
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
@@ -511,7 +535,7 @@ void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 {
-	((CConsole*)pUserData)->ExecuteFile(pResult->GetString(0));
+	((CConsole*)pUserData)->ExecuteFile(pResult->GetString(0), -1, true);
 }
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
@@ -763,14 +787,14 @@ CConsole::CConsole(int FlagMask)
 	m_pStorage = 0;
 
 	// register some basic commands
-	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text");
-	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
+	Register("echo", "r[text]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text");
+	Register("exec", "r[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
 
-	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
-	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
+	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
+	Register("+toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
 
-	Register("access_level", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
-	Register("access_status", "i", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
+	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
+	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
 	Register("cmdlist", "", CFGFLAG_SERVER|CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
 
 	// TODO: this should disappear
@@ -805,7 +829,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
 		{
 			if(NumArgs - i > 1)
-				ExecuteFile(ppArguments[i+1]);
+				ExecuteFile(ppArguments[i+1], -1, true);
 			i++;
 		}
 		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))

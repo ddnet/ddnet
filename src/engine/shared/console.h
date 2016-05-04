@@ -59,7 +59,6 @@ class CConsole : public IConsole
 	static void ConCommandAccess(IResult *pResult, void *pUser);
 	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
-	void ExecuteFileRecurse(const char *pFilename);
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1);
 
 	struct
@@ -136,6 +135,14 @@ class CConsole : public IConsole
 	int ParseStart(CResult *pResult, const char *pString, int Length);
 	int ParseArgs(CResult *pResult, const char *pFormat);
 
+	/*
+	this function will set pFormat to the next parameter (i,s,r,v,?) it contains and
+	return the parameter; descriptions in brackets like [file] will be skipped;
+	returns '\0' if there is no next parameter; expects pFormat to point at a
+	parameter
+	*/
+	char NextParam(const char *&pFormat);
+
 	class CExecutionQueue
 	{
 		CHeap m_Queue;
@@ -188,7 +195,7 @@ public:
 	virtual bool LineIsValid(const char *pStr);
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1);
 	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1);
-	virtual void ExecuteFile(const char *pFilename, int ClientID = -1);
+	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false);
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
