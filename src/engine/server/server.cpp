@@ -1828,7 +1828,7 @@ int CServer::Run()
 	m_Fifo.Shutdown();
 #endif
 
-	GameServer()->OnShutdown();
+	GameServer()->OnShutdown(true);
 	m_pMap->Unload();
 
 	if(m_pCurrentMapData)

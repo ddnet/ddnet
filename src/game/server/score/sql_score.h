@@ -61,10 +61,20 @@ struct CSqlExecData
 		m_pFuncPtr(pFuncPtr),
 		m_pSqlData(pSqlData),
 		m_ReadOnly(ReadOnly)
-	{}
+	{
+		++ms_InstanceCount;
+	}
+	~CSqlExecData()
+	{
+		--ms_InstanceCount;
+	}
+
 	bool (*m_pFuncPtr) (CSqlServer*, CSqlData *, bool);
 	CSqlData *m_pSqlData;
 	bool m_ReadOnly;
+
+	// keeps track of score-threads
+	static int ms_InstanceCount;
 };
 
 struct CSqlPlayerData : CSqlData
@@ -190,6 +200,8 @@ public:
 	virtual void RandomUnfinishedMap(int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
+
+	virtual void OnShutdown();
 };
 
 #endif

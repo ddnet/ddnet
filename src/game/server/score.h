@@ -65,6 +65,9 @@ public:
 
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server) = 0;
 	virtual void LoadTeam(const char* Code, int ClientID) = 0;
+
+	// called when the server is shut down but not on mapchange/reload
+	virtual void OnShutdown() = 0;
 };
 
 #endif

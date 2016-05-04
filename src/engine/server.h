@@ -176,7 +176,9 @@ public:
 	virtual void OnInit() = 0;
 	virtual void OnConsoleInit() = 0;
 	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
-	virtual void OnShutdown() = 0;
+
+	// FullShutdown is true if the program is about to exit (not if the map is changed)
+	virtual void OnShutdown(bool FullShutdown = false) = 0;
 
 	virtual void OnTick() = 0;
 	virtual void OnPreSnap() = 0;

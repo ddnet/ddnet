@@ -2705,8 +2705,11 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
 }
 
-void CGameContext::OnShutdown()
+void CGameContext::OnShutdown(bool FullShutdown)
 {
+	if (FullShutdown)
+		Score()->OnShutdown();
+
 	DeleteTempfile();
 	Console()->ResetServerGameSettings();
 	Layers()->Dest();

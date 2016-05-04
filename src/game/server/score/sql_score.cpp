@@ -23,6 +23,8 @@ const char* CSqlData::ms_pMap = 0;
 bool CSqlData::ms_GameContextAvailable = false;
 int CSqlData::ms_Instance = 0;
 
+int CSqlExecData::ms_InstanceCount = 0;
+
 CSqlScore::CSqlScore(CGameContext *pGameServer) :
 m_pGameServer(pGameServer),
 m_pServer(pGameServer->Server())
@@ -36,7 +38,7 @@ m_pServer(pGameServer->Server())
 	CSqlData::ms_pMap = m_aMap;
 
 	CSqlData::ms_GameContextAvailable = true;
-	CSqlData::ms_Instance++;
+	++CSqlData::ms_Instance;
 
 	CSqlConnector::ResetReachable();
 
@@ -48,6 +50,24 @@ m_pServer(pGameServer->Server())
 CSqlScore::~CSqlScore()
 {
 	CSqlData::ms_GameContextAvailable = false;
+}
+
+void CSqlScore::OnShutdown()
+{
+	CSqlData::ms_GameContextAvailable = false;
+	int i = 0;
+	while (CSqlExecData::ms_InstanceCount != 0)
+	{
+		// print a log about every two seconds
+		if (i % 20 == 0)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Waiting for score-threads to complete (%d left)", CSqlExecData::ms_InstanceCount);
+			dbg_msg("sql", aBuf);
+		}
+		++i;
+		thread_sleep(100);
+	}
 }
 
 void CSqlScore::ExecSqlFunc(void *pUser)
