@@ -25,6 +25,8 @@ int CSqlData::ms_Instance = 0;
 
 int CSqlExecData::ms_InstanceCount = 0;
 
+LOCK CSqlScore::ms_FailureFileLock = lock_create();
+
 CSqlScore::CSqlScore(CGameContext *pGameServer) :
 m_pGameServer(pGameServer),
 m_pServer(pGameServer->Server())
@@ -68,6 +70,8 @@ void CSqlScore::OnShutdown()
 		++i;
 		thread_sleep(100);
 	}
+
+	lock_destroy(ms_FailureFileLock);
 }
 
 void CSqlScore::ExecSqlFunc(void *pUser)
@@ -477,6 +481,7 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 		if (!g_Config.m_SvSqlFailureFile[0])
 			return true;
 
+		lock_wait(ms_FailureFileLock);
 		IOHANDLE File = io_open(g_Config.m_SvSqlFailureFile, IOFLAG_APPEND);
 		if(File)
 		{
@@ -490,9 +495,11 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData, boo
 				io_write(File, aBuf, str_length(aBuf));
 				io_write_newline(File);
 				io_close(File);
+				lock_unlock(ms_FailureFileLock);
 
 			return true;
 		}
+		lock_unlock(ms_FailureFileLock);
 		dbg_msg("sql", "ERROR: Could not save Score, NOT even to a file");
 		return false;
 	}
@@ -578,6 +585,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 
 		dbg_msg("sql", "ERROR: Could not save TeamScore, writing insert to a file now...");
 
+		lock_wait(ms_FailureFileLock);
 		IOHANDLE File = io_open(g_Config.m_SvSqlFailureFile, IOFLAG_APPEND);
 		if(File)
 		{
@@ -596,8 +604,10 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 				io_write_newline(File);
 			}
 			io_close(File);
+			lock_unlock(ms_FailureFileLock);
 			return true;
 		}
+		lock_unlock(ms_FailureFileLock);
 		return false;
 	}
 

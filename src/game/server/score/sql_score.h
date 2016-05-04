@@ -6,6 +6,7 @@
 
 #include <exception>
 
+#include <base/system.h>
 #include <engine/console.h>
 #include <engine/server/sql_connector.h>
 
@@ -154,6 +155,8 @@ class CSqlScore: public IScore
 	static bool Init(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure);
 
 	char m_aMap[64];
+
+	static LOCK ms_FailureFileLock;
 
 	static bool CheckBirthdayThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure = false);
 	static bool MapInfoThread(CSqlServer* pSqlServer, CSqlData *pGameData, bool HandleFailure = false);
