@@ -94,7 +94,8 @@ int CMapImages::GetEntities()
 
 	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
 	{
-		char file[64] = "vanilla";
+		// DDNet default to prevent delay in seeing entities
+		char file[64] = "ddnet";
 		if(IsDDNet(&Info))
 			str_copy(file, "ddnet", sizeof(file));
 		else if(IsDDRace(&Info))
