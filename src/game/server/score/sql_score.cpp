@@ -590,7 +590,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, CSqlData *pGameData,
 		if(File)
 		{
 			const char pUUID[] = "SET @id = UUID();";
-			io_write(File, pUUID, sizeof(pUUID));
+			io_write(File, pUUID, sizeof(pUUID) - 1);
 			io_write_newline(File);
 
 			char aTimestamp [20];
