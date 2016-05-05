@@ -58,6 +58,8 @@ void CFifo::Update()
 	if(m_File == NULL)
 		return;
 
+	rewind(m_File);
+
 	char aBuf[8192];
 
 	while(true)
