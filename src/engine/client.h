@@ -140,6 +140,8 @@ public:
 
 	virtual void CheckVersionUpdate() = 0;
 
+	virtual int GetPredictionTime() = 0;
+
 	// snapshot interface
 
 	enum

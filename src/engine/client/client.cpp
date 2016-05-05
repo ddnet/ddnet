@@ -933,7 +933,6 @@ void CClient::DebugRender()
 	static NETSTATS Prev, Current;
 	static int64 LastSnap = 0;
 	static float FrameTimeAvg = 0;
-	int64 Now = time_get();
 	char aBuffer[512];
 
 	if(!g_Config.m_Debug)
@@ -999,8 +998,7 @@ void CClient::DebugRender()
 		}
 	}
 
-	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms",
-		(int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq()));
+	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms", GetPredictionTime());
 	Graphics()->QuadsText(2, 70, 16, aBuffer);
 	Graphics()->QuadsEnd();
 
@@ -3547,4 +3545,10 @@ void CClient::RequestDDNetSrvList()
 	Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST)+4;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
+}
+
+int CClient::GetPredictionTime()
+{
+	int64 Now = time_get();
+	return (int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq());
 }
