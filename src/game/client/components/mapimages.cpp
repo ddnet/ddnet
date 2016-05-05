@@ -104,6 +104,8 @@ int CMapImages::GetEntities()
 			str_copy(file, "race", sizeof(file));
 		else if(IsFNG(&Info))
 			str_copy(file, "fng", sizeof(file));
+		else if(IsVanilla(&Info))
+			str_copy(file, "vanilla", sizeof(file));
 
 		char path[64];
 		str_format(path, sizeof(path), "editor/entities_clear/%s.png", file);
