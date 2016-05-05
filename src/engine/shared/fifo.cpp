@@ -58,6 +58,10 @@ void CFifo::Update()
 	if(m_File == NULL)
 		return;
 
+#ifdef CONF_PLATFORM_MACOSX
+	rewind(m_File);
+#endif
+
 	char aBuf[8192];
 
 	while(true)
