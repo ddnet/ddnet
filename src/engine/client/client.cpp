@@ -599,12 +599,12 @@ int *CClient::GetInput(int Tick)
 	return 0;
 }
 
-bool CClient::InputExists(int Tick)
+int *CClient::GetPredictedInput(int Tick)
 {
 	for(int i = 0; i < 200; i++)
 		if(m_aInputs[g_Config.m_ClDummy][i].m_Tick == Tick)
-			return true;
-	return false;
+			return (int *)m_aInputs[g_Config.m_ClDummy][i].m_aData;
+	return 0;
 }
 
 // ------ state handling -----
