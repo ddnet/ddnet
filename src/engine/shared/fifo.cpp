@@ -5,15 +5,15 @@
 
 #include <engine/shared/config.h>
 
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 {
-	m_File = NULL;
+	m_File = -1;
 
 	m_pConsole = pConsole;
 	if(pFifoFile[0] == '\0')
@@ -40,39 +40,37 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 		}
 	}
 
-	int fileFD = open(pFifoFile, O_RDONLY|O_NONBLOCK);
-	if(fileFD >= 0)
-		m_File = fdopen(fileFD, "r");
-	if(m_File == NULL)
+	m_File = open(pFifoFile, O_RDONLY|O_NONBLOCK);
+	if(m_File < 0)
 		dbg_msg("fifo", "can't open file '%s'", pFifoFile);
 }
 
 void CFifo::Shutdown()
 {
-	if(m_File)
-		fclose(m_File);
+	if(m_File >= 0)
+		close(m_File);
 }
 
 void CFifo::Update()
 {
-	if(m_File == NULL)
+	if(m_File < 0)
 		return;
 
-#ifdef CONF_PLATFORM_MACOSX
-	rewind(m_File);
-#endif
-
 	char aBuf[8192];
+	int Length = read(m_File, aBuf, sizeof(aBuf));
+	if(Length <= 0)
+		return;
 
-	while(true)
+	char *pCur = aBuf;
+	for(int i = 0; i < Length; ++i)
 	{
-		char *pResult = fgets(aBuf, sizeof(aBuf), m_File);
-		if(pResult == NULL)
-			break;
-		int Last = str_length(pResult) - 1;
-		if(Last >= 0 && pResult[Last] == '\n')
-			pResult[Last] = '\0';
-		m_pConsole->ExecuteLineFlag(pResult, m_Flag, -1);
+		if(aBuf[i] != '\n')
+			continue;
+		aBuf[i] = '\0';
+		m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+		pCur = aBuf+i+1;
 	}
+	if(pCur < aBuf+Length) // missed the last line
+		m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
 }
 #endif
