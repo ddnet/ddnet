@@ -63,7 +63,11 @@ void CFifo::Update()
 	while(true)
 	{
 		char *pResult = fgets(aBuf, sizeof(aBuf), m_File);
-		if(pResult == NULL) break;
+		if(pResult == NULL)
+			break;
+		int Last = str_length(pResult) - 1;
+		if(Last >= 0 && pResult[Last] == '\n')
+			pResult[Last] = '\0';
 		m_pConsole->ExecuteLineFlag(pResult, m_Flag, -1);
 	}
 }
