@@ -150,6 +150,35 @@ bool CChat::OnInput(IInput::CEvent Event)
 		Input()->SetClipboardText(m_Input.GetString());
 	}
 
+	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump in front of spaces, special characters and upper case letters
+	{
+		int SearchDirection = 0;
+		if(Input()->KeyPress(KEY_LEFT))
+			SearchDirection = -1;
+		else if(Input()->KeyPress(KEY_RIGHT))
+			SearchDirection = 1;
+
+		if(SearchDirection != 0)
+		{
+			int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
+			for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+			{
+				int next = i+SearchDirection;
+				if(	(m_Input.GetString()[next] == ' ') ||
+					(m_Input.GetString()[next] >= 32 && m_Input.GetString()[next] <= 47) || // special character
+					(m_Input.GetString()[next] >= 58 && m_Input.GetString()[next] <= 64) || // special character
+					(m_Input.GetString()[next] >= 91 && m_Input.GetString()[next] <= 96) || // special character
+					((m_Input.GetString()[next] >= 65 && m_Input.GetString()[next] <= 90)   // upper case
+							&& !(m_Input.GetString()[i] >= 65 && m_Input.GetString()[i] <= 90)))
+				{
+					FoundAt = i;
+					break;
+				}
+			}
+			m_Input.SetCursorOffset(FoundAt);
+		}
+	}
+
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
 		m_Mode = MODE_NONE;
