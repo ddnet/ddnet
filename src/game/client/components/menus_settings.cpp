@@ -301,6 +301,112 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		else
 			m_NeedSendinfo = true;
 	}
+	
+	// Save & Load
+	static int s_SavePlayerInfoButton = 0;
+	Dummy.VSplitLeft(180.0f, 0, &Dummy);
+	Dummy.VSplitLeft(60.0f, &Dummy, 0);
+	if(DoButton_Menu(&s_SavePlayerInfoButton, Localize("Save"), 0, &Dummy))
+	{
+		IStorage *m_pStorage = Kernel()->RequestInterface<IStorage>();
+		if(!m_pStorage)
+			return;
+
+		// try to open file
+		IOHANDLE File = m_pStorage->OpenFile("Player_Info.cfg", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		if(!File)
+			return;
+
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "%s\r\n%s\r\n%s\r\n%d\r\n%d\r\n%d\r\n%d\r\n%s\r\n%s\r\n%s\r\n%d\r\n%d\r\n%d\r\n%d\r\nsend_info\r\n",
+    		g_Config.m_PlayerName, g_Config.m_PlayerClan, g_Config.m_ClPlayerSkin, g_Config.m_PlayerCountry, g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet,
+			g_Config.m_ClDummyName, g_Config.m_ClDummyClan, g_Config.m_ClDummySkin, g_Config.m_ClDummyCountry, g_Config.m_ClDummyUseCustomColor, g_Config.m_ClDummyColorBody, g_Config.m_ClDummyColorFeet);
+		io_write(File, aBuf, str_length(aBuf));
+
+		io_close(File);
+	}
+	
+	static int s_LoadPlayerInfoButton = 0;
+	Button.VSplitLeft(200.0f, &Button, &Dummy);
+	Dummy.VSplitLeft(180.0f, 0, &Dummy);
+	Dummy.VSplitLeft(60.0f, &Dummy, 0);
+	if(DoButton_Menu( &s_LoadPlayerInfoButton ,"Load",0, &Dummy))
+	{
+		IStorage *m_pStorage = Kernel()->RequestInterface<IStorage>();
+
+		if(!m_pStorage)
+			return;
+
+		// try to open file
+		IOHANDLE File = m_pStorage->OpenFile("Player_Info.cfg", IOFLAG_READ, IStorage::TYPE_SAVE);
+		if(!File)
+			return;
+
+		CLineReader LineReader;
+		LineReader.Init(File);
+
+		int CheckLine = 0;
+		while(1)
+		{
+			CheckLine++;
+			const char *pLine = LineReader.Get();
+			if(!pLine)
+				break;
+			switch(CheckLine)
+			{
+				case 1:
+				str_copy(g_Config.m_PlayerName,pLine,sizeof(g_Config.m_PlayerName));
+				break;
+				case 2:
+				str_copy(g_Config.m_PlayerClan,pLine,sizeof(g_Config.m_PlayerClan));
+				break;
+				case 3:
+				str_copy(g_Config.m_ClPlayerSkin,pLine,sizeof(g_Config.m_ClPlayerSkin));
+				break;
+				case 4:
+				g_Config.m_PlayerCountry = atoi(pLine);
+				break;
+				case 5:
+				g_Config.m_ClPlayerUseCustomColor = atoi(pLine);
+				break;
+				case 6:
+				g_Config.m_ClPlayerColorBody = atoi(pLine);
+				break;
+				case 7:
+				g_Config.m_ClPlayerColorFeet = atoi(pLine);
+				break;
+				case 8:
+				str_copy(g_Config.m_ClDummyName,pLine,sizeof(g_Config.m_ClDummyName));
+				break;
+				case 9:
+				str_copy(g_Config.m_ClDummyClan,pLine,sizeof(g_Config.m_ClDummyClan));
+				break;
+				case 10:
+				str_copy(g_Config.m_ClDummySkin,pLine,sizeof(g_Config.m_ClDummySkin));
+				break;
+				case 11:
+				g_Config.m_ClDummyCountry = atoi(pLine);
+				break;
+				case 12:
+				g_Config.m_ClDummyUseCustomColor = atoi(pLine);
+				break;
+				case 13:
+				g_Config.m_ClDummyColorBody = atoi(pLine);
+				break;
+				case 14:
+				g_Config.m_ClDummyColorFeet = atoi(pLine);
+				break;
+				case 15:
+				Console()->ExecuteLine(pLine);
+				CheckLine = 0;
+				break;
+				default:
+				Console()->Print(0, "File", "Loading Failed");
+			}
+		}
+
+		io_close(File);
+	}
 
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
