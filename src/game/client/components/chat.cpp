@@ -170,6 +170,8 @@ bool CChat::OnInput(IInput::CEvent Event)
 					(m_Input.GetString()[next] >= 91 && m_Input.GetString()[next] <= 96) )
 				{
 					FoundAt = i;
+					if(SearchDirection < 0)
+						FoundAt++;
 					break;
 				}
 			}
