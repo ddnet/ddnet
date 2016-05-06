@@ -70,11 +70,11 @@ void CCollision::Init(class CLayers *pLayers)
 	}
 
 	if(m_pLayers->TuneLayer())
-		{
+	{
 		unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(m_pLayers->TuneLayer()->m_Tune);
 		if (Size >= m_Width*m_Height*sizeof(CTuneTile))
 			m_pTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
-		}
+	}
 
 	if(m_pLayers->FrontLayer())
 	{
