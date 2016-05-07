@@ -568,7 +568,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	m_NumScreens = SDL_GetNumVideoDisplays();
 	if(m_NumScreens > 0)
 	{
-		clamp(*Screen, 0, m_NumScreens-1);
+		if(*Screen < 0 || *Screen >= m_NumScreens)
+			*Screen = 0;
 		if(SDL_GetDisplayBounds(*Screen, &ScreenPos) != 0)
 		{
 			dbg_msg("gfx", "unable to retrieve screen information: %s", SDL_GetError());
@@ -643,8 +644,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 	m_pWindow = SDL_CreateWindow(
 		pName,
-		SDL_WINDOWPOS_UNDEFINED_DISPLAY(g_Config.m_GfxScreen),
-		SDL_WINDOWPOS_UNDEFINED_DISPLAY(g_Config.m_GfxScreen),
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
 		*pWidth,
 		*pHeight,
 		SdlFlags);
@@ -656,8 +657,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	SetWindowScreen(g_Config.m_GfxScreen);
-
 	m_GLContext = SDL_GL_CreateContext(m_pWindow);
 
 	if(m_GLContext == NULL)
@@ -667,9 +666,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
-
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
-
 	SDL_GL_MakeCurrent(NULL, NULL);
 
 	// start the command processor
@@ -689,6 +686,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	WaitForIdle();
 
 	SDL_ShowWindow(m_pWindow);
+	SetWindowScreen(g_Config.m_GfxScreen);
 
 	// return
 	return 0;
