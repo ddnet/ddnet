@@ -1597,7 +1597,11 @@ int CMenus::Render()
 
 			static int s_Button = 0;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
+			{
+				if(m_Popup == POPUP_DISCONNECTED && Client()->m_ReconnectTime > 0)
+					Client()->m_ReconnectTime = 0;
 				m_Popup = POPUP_NONE;
+			}
 		}
 
 		if(m_Popup == POPUP_NONE)
