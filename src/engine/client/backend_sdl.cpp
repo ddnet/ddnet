@@ -602,7 +602,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	// set flags
-	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
 #if defined(SDL_VIDEO_DRIVER_X11)
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
@@ -633,9 +633,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 	}
 
-	// Might fix problems with Windows HighDPI scaling
-	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
-
 	if(g_Config.m_InpMouseOld)
 		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
 
@@ -654,7 +651,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	SDL_GetWindowSize(m_pWindow, pWidth, pHeight);
+	SetWindowScreen(g_Config.m_GfxScreen);
 
 	m_GLContext = SDL_GL_CreateContext(m_pWindow);
 
@@ -664,9 +661,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	SDL_ShowWindow(m_pWindow);
-
-	SetWindowScreen(g_Config.m_GfxScreen);
+	SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
 
@@ -750,8 +745,8 @@ bool CGraphicsBackend_SDL_OpenGL::SetWindowScreen(int Index)
 		if(SDL_GetDisplayBounds(Index, &ScreenPos) == 0)
 		{
 			SDL_SetWindowPosition(m_pWindow,
-				SDL_WINDOWPOS_UNDEFINED_DISPLAY(Index),
-				SDL_WINDOWPOS_UNDEFINED_DISPLAY(Index));
+				SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
+				SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
 			return true;
 		}
 	}
