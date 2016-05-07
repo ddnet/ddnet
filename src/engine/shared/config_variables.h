@@ -127,6 +127,7 @@ MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 0, CFGFLAG_SAVE|
 #else
 MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
 #endif
+MACRO_CONFIG_INT(GfxHighdpi, gfx_highdpi, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Try to use high-dpi screen features")
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 100, 5, 100000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Mouse sensitivity")
 MACRO_CONFIG_INT(InpMouseOld, inp_mouseold, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use old mouse mode (warp mouse instead of raw input)")
