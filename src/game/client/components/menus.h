@@ -129,6 +129,7 @@ class CMenus : public CComponent
 	bool m_NeedRestartGraphics;
 	bool m_NeedRestartSound;
 	bool m_NeedRestartUpdate;
+	bool m_NeedRestartDDNet;
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
 	int m_SettingPlayerPage;
@@ -380,7 +381,7 @@ private:
 	void RenderGhost(CUIRect MainView);
 
 	// found in menus_settings.cpp
-	void RenderSettingsDDRace(CUIRect MainView);
+	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsHUD(CUIRect MainView);
 };
 #endif

@@ -1274,7 +1274,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(s_SettingsPage == 7)
 		RenderSettingsSound(MainView);
 	else if(s_SettingsPage == 8)
-		RenderSettingsDDRace(MainView);
+		RenderSettingsDDNet(MainView);
 
 	if(m_NeedRestartUpdate)
 	{
@@ -1282,7 +1282,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound)
+	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
 void CMenus::RenderSettingsHUD(CUIRect MainView)
@@ -1727,9 +1727,12 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		g_Config.m_ClReconnectTimeout = 5;*/
 }
 
-void CMenus::RenderSettingsDDRace(CUIRect MainView)
+void CMenus::RenderSettingsDDNet(CUIRect MainView)
 {
 	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
+
+	bool CheckSettings = false;
+	static int s_InpMouseOld = g_Config.m_InpMouseOld;
 
 	MainView.HSplitTop(100.0f, &Demo , &MainView);
 
@@ -1868,6 +1871,19 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
+	{
+		g_Config.m_InpMouseOld ^= 1;
+		CheckSettings = true;
+	}
+
+	if(CheckSettings)
+	{
+		if(s_InpMouseOld == g_Config.m_InpMouseOld)
+			m_NeedRestartDDNet = false;
+		else
+			m_NeedRestartDDNet = true;
+	}
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
