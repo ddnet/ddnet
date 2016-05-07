@@ -344,6 +344,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
+
+	bool CheckSettings = false;
+	static int s_ClVanillaSkinsOnly = g_Config.m_ClVanillaSkinsOnly;
+
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
@@ -396,7 +400,15 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		m_NeedRestartSkins = true;
+		CheckSettings = true;
+	}
+
+	if(CheckSettings)
+	{
+		if(s_ClVanillaSkinsOnly == g_Config.m_ClVanillaSkinsOnly)
+			m_NeedRestartSkins = false;
+		else
+			m_NeedRestartSkins = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
