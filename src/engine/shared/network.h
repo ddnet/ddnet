@@ -220,7 +220,9 @@ public:
 	int AckSequence() const { return m_Ack; }
 	int SeqSequence() const { return m_Sequence; }
 	int SecurityToken() const { return m_SecurityToken; }
-	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken);
+	TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *ResendBuffer() { return &m_Buffer; };
+
+	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer);
 
 	// anti spoof
 	void DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken);
