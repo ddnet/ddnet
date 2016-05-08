@@ -939,7 +939,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxHighDetail ^= 1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("High-DPI screen support"), g_Config.m_GfxHighdpi, &Button))
+	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("High-DPI screen support (experimental)"), g_Config.m_GfxHighdpi, &Button))
 	{
 		g_Config.m_GfxHighdpi ^= 1;
 		CheckSettings = true;
