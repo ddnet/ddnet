@@ -210,6 +210,9 @@ void CSqlServer::executeSqlQuery(const char *pQuery)
 {
 	if (m_pResults)
 		delete m_pResults;
+
+	// set it to 0, so exceptions raised from executeQuery can not make m_pResults point to invalid memory
+	m_pResults = 0;
 	m_pResults = m_pStatement->executeQuery(pQuery);
 }
 
