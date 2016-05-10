@@ -2759,13 +2759,15 @@ void CClient::Run()
 				m_EditorActive = false;
 
 			Update();
+			int64 Now = time_get();
 
-			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen()) && (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle()))
+			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen())
+				&& (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle())
+				&& (!g_Config.m_GfxRefreshRate || Now >= m_LastRenderTime + time_freq() / g_Config.m_GfxRefreshRate))
 			{
 				m_RenderFrames++;
 
 				// update frametime
-				int64 Now = time_get();
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
 				if(m_RenderFrameTime < m_RenderFrameTimeLow)
 					m_RenderFrameTimeLow = m_RenderFrameTime;
