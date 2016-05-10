@@ -1233,6 +1233,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				// do decompression of serverlist
 				if (uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
 				{
+					aBuf[DstLen] = '\0';
 					bool ListChanged = true;
 
 					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_SAVE);
