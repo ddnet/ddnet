@@ -127,18 +127,14 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				if(Text[i] == '\n')
 				{
-					int max = i - Begin + 1;
-					if(max > (int)sizeof(Line))
-						max = sizeof(Line);
+					int max = min(i - Begin + 1, (int)sizeof(Line));
 					str_copy(Line, Text + Begin, max);
 					Begin = i+1;
 					SayChat(Line);
 					while(Text[i] == '\n') i++;
 				}
 			}
-			int max = i - Begin + 1;
-			if(max > (int)sizeof(Line))
-				max = sizeof(Line);
+			int max = min(i - Begin + 1, (int)sizeof(Line));
 			str_copy(Line, Text + Begin, max);
 			Begin = i+1;
 			m_Input.Add(Line);
