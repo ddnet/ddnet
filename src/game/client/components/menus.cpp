@@ -244,9 +244,9 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			const char *Text = Input()->GetClipboardText();
 			if(Text)
 			{
-				int CharsLeft = StrSize - str_length(pStr);
 				int Offset = str_length(pStr);
-				for(int i = 0; i < str_length(Text) && i <= CharsLeft; i++)
+				int CharsLeft = StrSize - Offset - 1;
+				for(int i = 0; i < str_length(Text) && i < CharsLeft; i++)
 				{
 					if(Text[i] == '\n')
 						pStr[i + Offset] = ' ';
