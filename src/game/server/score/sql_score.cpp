@@ -3,6 +3,7 @@
 /* CSqlScore class by Sushi */
 #if defined(CONF_SQL)
 #include <fstream>
+#include <cstring>
 
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
