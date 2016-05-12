@@ -1109,6 +1109,8 @@ public:
 	virtual void Shift(int Direction);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	virtual void BrushRotate(float Amount);
+
 };
 
 class CLayerTune : public CLayerTiles

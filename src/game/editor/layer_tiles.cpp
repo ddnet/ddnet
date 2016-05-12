@@ -1380,6 +1380,61 @@ CLayerSwitch::~CLayerSwitch()
 	delete[] m_pSwitchTile;
 }
 
+void CLayerSwitch::BrushRotate(float Amount)
+{
+	CLayerTiles::BrushRotate(Amount);
+	//back width and height to it previous state
+	int Temp = m_Width;
+	m_Width = m_Height;
+	m_Height = Temp;
+
+	int Rotation = (round_to_int(360.0f*Amount / (pi * 2)) / 90) % 4;	// 0=0°, 1=90°, 2=180°, 3=270°
+	if (Rotation < 0)
+		Rotation += 4;
+
+	if (Rotation == 1 || Rotation == 3)
+	{
+		// 90° rotation
+		CSwitchTile *pTempData = new CSwitchTile[m_Width*m_Height];
+		mem_copy(pTempData, m_pSwitchTile, m_Width*m_Height * sizeof(CSwitchTile));
+
+		CSwitchTile *pDst = m_pSwitchTile;
+		for (int x = 0; x < m_Width; ++x)
+			for (int y = m_Height - 1; y >= 0; --y, ++pDst)
+			{
+				*pDst = pTempData[y*m_Width + x];
+			}
+
+		int Temp = m_Width;
+		m_Width = m_Height;
+		m_Height = Temp;
+		delete[] pTempData;
+	}
+
+
+
+	if (Rotation == 2 || Rotation == 3)
+	{
+		for (int y = 0; y < m_Height; y++)
+			for (int x = 0; x < m_Width / 2; x++)
+			{
+				CSwitchTile Tmp = m_pSwitchTile[y*m_Width + x];
+				m_pSwitchTile[y*m_Width + x] = m_pSwitchTile[y*m_Width + m_Width - 1 - x];
+				m_pSwitchTile[y*m_Width + m_Width - 1 - x] = Tmp;
+			}
+
+		for (int y = 0; y < m_Height / 2; y++)
+			for (int x = 0; x < m_Width; x++)
+			{
+				CSwitchTile Tmp = m_pSwitchTile[y*m_Width + x];
+				m_pSwitchTile[y*m_Width + x] = m_pSwitchTile[(m_Height - 1 - y)*m_Width + x];
+				m_pSwitchTile[(m_Height - 1 - y)*m_Width + x] = Tmp;
+			}
+	}
+
+
+
+}
 
 void CLayerSwitch::Resize(int NewW, int NewH)
 {
