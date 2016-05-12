@@ -1380,6 +1380,7 @@ CLayerSwitch::~CLayerSwitch()
 	delete[] m_pSwitchTile;
 }
 
+
 void CLayerSwitch::Resize(int NewW, int NewH)
 {
 	// resize switch data
@@ -1473,7 +1474,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if((l->m_pTiles[y*l->m_Width+x].m_Index >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && l->m_pTiles[y*l->m_Width+x].m_Index <= (ENTITY_DOOR + ENTITY_OFFSET)) || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_HIT_START || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_HIT_END || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHOPEN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHCLOSE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDOPEN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDCLOSE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_FREEZE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DFREEZE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DUNFREEZE || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_JUMP || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_PENALTY || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_BONUS)
+			if(IsValidSwitchTile(l->m_pTiles[y*l->m_Width+x].m_Index))
 			{
 				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
 				{
