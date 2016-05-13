@@ -1403,6 +1403,9 @@ void CLayerSwitch::BrushRotate(float Amount)
 			for (int y = m_Height - 1; y >= 0; --y, ++pDst)
 			{
 				*pDst = pTempData[y*m_Width + x];
+				if (pDst->m_Flags&TILEFLAG_ROTATE)
+					pDst->m_Flags ^= (TILEFLAG_HFLIP | TILEFLAG_VFLIP);
+				pDst->m_Flags ^= TILEFLAG_ROTATE;
 			}
 
 		int Temp = m_Width;
@@ -1421,6 +1424,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 				CSwitchTile Tmp = m_pSwitchTile[y*m_Width + x];
 				m_pSwitchTile[y*m_Width + x] = m_pSwitchTile[y*m_Width + m_Width - 1 - x];
 				m_pSwitchTile[y*m_Width + m_Width - 1 - x] = Tmp;
+				m_pSwitchTile[y*m_Width + x].m_Flags ^= m_pSwitchTile[y*m_Width + x].m_Flags&TILEFLAG_ROTATE ? TILEFLAG_HFLIP : TILEFLAG_VFLIP;
 			}
 
 		for (int y = 0; y < m_Height / 2; y++)
@@ -1429,6 +1433,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 				CSwitchTile Tmp = m_pSwitchTile[y*m_Width + x];
 				m_pSwitchTile[y*m_Width + x] = m_pSwitchTile[(m_Height - 1 - y)*m_Width + x];
 				m_pSwitchTile[(m_Height - 1 - y)*m_Width + x] = Tmp;
+				m_pSwitchTile[y*m_Width + x].m_Flags ^= m_pSwitchTile[y*m_Width + x].m_Flags&TILEFLAG_ROTATE ? TILEFLAG_VFLIP : TILEFLAG_HFLIP;
 			}
 	}
 
@@ -1549,7 +1554,6 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 				m_pSwitchTile[fy*m_Width+fx].m_Type = l->m_pTiles[y*l->m_Width+x].m_Index;
 				m_pSwitchTile[fy*m_Width+fx].m_Flags = l->m_pTiles[y*l->m_Width+x].m_Flags;
-				m_pTiles[fy*m_Width+fx].m_Index = l->m_pTiles[y*l->m_Width+x].m_Index;
 			}
 			else
 			{
@@ -1557,8 +1561,9 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
-				m_pTiles[fy*m_Width+fx].m_Index = 0;
 			}
+			m_pTiles[fy*m_Width + fx].m_Index = l->m_pTiles[y*l->m_Width + x].m_Index;
+			m_pTiles[fy*m_Width + fx].m_Flags = l->m_pTiles[y*l->m_Width + x].m_Flags;
 
 			if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_FREEZE)
 			{
