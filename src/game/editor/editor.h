@@ -61,7 +61,7 @@ public:
 		m_aName[0] = 0;
 		m_Bottom = 0;
 		m_Top = 0;
-		m_Synchronized = true;
+		m_Synchronized = false;
 	}
 
 	void Resort()
