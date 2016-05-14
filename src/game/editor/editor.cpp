@@ -1196,7 +1196,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(DoButton_Ex(&s_SpeedupButton, "Speedup", (pS && pS->m_Speedup)?0:-1, &Button, 0, "Speedup", CUI::CORNER_ALL))
 		{
 			static int s_SpeedupPopupID = 0;
-			UiInvokePopupMenu(&s_SpeedupPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 53, PopupSpeedup);
+			UiInvokePopupMenu(&s_SpeedupPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 48, PopupSpeedup);
 		}
 		// do switch button
 		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
@@ -1214,7 +1214,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(DoButton_Ex(&s_TuneButton, "Tune", (pS && pS->m_Tune)?0:-1, &Button, 0, "Tune", CUI::CORNER_ALL))
 		{
 			static int s_TunePopupID = 0;
-			UiInvokePopupMenu(&s_TunePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 90, PopupTune);
+			UiInvokePopupMenu(&s_TunePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 23, PopupTune);
 		}
 	}
 

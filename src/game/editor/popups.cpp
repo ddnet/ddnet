@@ -1470,14 +1470,14 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 
 	enum
 	{
-		PROP_SwitchNumber=0,
-		PROP_SwitchDelay,
+		PROP_SwitchDelay=0,
+		PROP_SwitchNumber,
 		NUM_PROPS,
 	};
 
 	CProperty aProps[] = {
-		{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 0, 255},
 		{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT_STEP, 0, 255},
+		{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 0, 255},
 		{0},
 	};
 
