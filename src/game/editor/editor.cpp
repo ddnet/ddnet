@@ -5560,7 +5560,7 @@ void CEditor::UpdateAndRender()
 
 		// fix correct world x and y
 		CLayerGroup *g = GetSelectedGroup();
-		if(g)
+		if(!m_ShowPicker && g)
 		{
 			float aPoints[4];
 			g->Mapping(aPoints);
