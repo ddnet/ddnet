@@ -1534,7 +1534,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(IsValidSwitchTile(l->m_pTiles[y*l->m_Width+x].m_Index))
+			if(m_pEditor->m_AllowPlaceUnusedTiles ||IsValidSwitchTile(l->m_pTiles[y*l->m_Width+x].m_Index))
 			{
 				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
 				{
