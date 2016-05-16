@@ -85,6 +85,8 @@ bool CSqlServer::Connect()
 		connection_properties["userName"]      = sql::SQLString(m_aUser);
 		connection_properties["password"]      = sql::SQLString(m_aPass);
 		connection_properties["OPT_CONNECT_TIMEOUT"] = 10;
+		connection_properties["OPT_READ_TIMEOUT"] = 10;
+		connection_properties["OPT_WRITE_TIMEOUT"] = 20;
 		connection_properties["OPT_RECONNECT"] = true;
 
 		// Create connection
