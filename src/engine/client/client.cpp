@@ -2480,7 +2480,7 @@ void CClient::Update()
 
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{
-		Connect(g_Config.m_UiServerAddress);
+		Connect(m_aServerAddressStr);
 		m_ReconnectTime = 0;
 	}
 }
