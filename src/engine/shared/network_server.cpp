@@ -596,7 +596,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				// drop invalid ctrl packets
 				if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL &&
 						m_RecvUnpacker.m_Data.m_DataSize == 0)
-					return 0;
+					continue;
 
 				// normal packet, find matching slot
 				int Slot = GetClientSlot(Addr);
