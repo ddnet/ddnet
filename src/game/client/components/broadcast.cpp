@@ -3,6 +3,7 @@
 #include <engine/shared/config.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
+#include <engine/serverbrowser.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
 
@@ -27,8 +28,12 @@ void CBroadcast::OnRender()
 
 	if(time_get() < m_BroadcastTime)
 	{
+		CServerInfo Info;
+		Client()->GetServerInfo(&Info);
+		int Linebreaks = IsTutorial(&Info) ? 0 : TEXTFLAG_STOP_AT_END;
+
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER|Linebreaks);
 		Cursor.m_LineWidth = 300*Graphics()->ScreenAspect()-m_BroadcastRenderOffset;
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 	}

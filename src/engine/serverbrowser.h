@@ -58,6 +58,7 @@ bool IsFNG(const CServerInfo *pInfo);
 bool IsRace(const CServerInfo *pInfo);
 bool IsDDRace(const CServerInfo *pInfo);
 bool IsDDNet(const CServerInfo *pInfo);
+bool IsTutorial(const CServerInfo *pInfo);
 
 bool Is64Player(const CServerInfo *pInfo);
 bool IsPlus(const CServerInfo *pInfo);
@@ -110,7 +111,10 @@ public:
 	virtual bool IsFavorite(const NETADDR &Addr) const = 0;
 	virtual void AddFavorite(const NETADDR &Addr) = 0;
 	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
+	virtual void DDNetCountryFilterClean(bool WriteAll=false) = 0;
+	virtual void DDNetTypeFilterClean(bool WriteAll=false) = 0;
 
+	virtual void LoadDDNet() = 0;
 	virtual int NumDDNetCountries() = 0;
 	virtual int GetDDNetCountryFlag(int Index) = 0;
 	virtual const char *GetDDNetCountryName(int Index) = 0;

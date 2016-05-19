@@ -41,8 +41,9 @@ class CMenus : public CComponent
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
-	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool Active=true);
 	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners);
+	int DoButton_RefreshServerbrowser(CUIRect *pRect);
 
 	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect);
 	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
@@ -243,6 +244,7 @@ class CMenus : public CComponent
 	//void render_loading(float percent);
 	int RenderMenubar(CUIRect r);
 	void RenderNews(CUIRect MainView);
+	void RenderTutorialServerList(CUIRect MainView);
 
 	// found in menus_demo.cpp
 	static bool DemoFilterChat(const void *pData, int Size, void *pUser);
@@ -268,6 +270,8 @@ class CMenus : public CComponent
 	void RenderServerbrowser(CUIRect MainView);
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	void RefreshServerbrowser();
+	void ResetServerbrowserFilters();
 
 	// found in menus_settings.cpp
 	void RenderLanguageSelection(CUIRect MainView);
@@ -353,12 +357,10 @@ public:
 	enum
 	{
 		POPUP_NONE=0,
-		POPUP_FIRST_LAUNCH,
 		POPUP_CONNECTING,
 		POPUP_MESSAGE,
 		POPUP_DISCONNECTED,
 		POPUP_PURE,
-		POPUP_LANGUAGE,
 		POPUP_COUNTRY,
 		POPUP_DELETE_DEMO,
 		POPUP_RENAME_DEMO,
@@ -367,6 +369,10 @@ public:
 		POPUP_PASSWORD,
 		POPUP_QUIT,
 		POPUP_DISCONNECT,
+		POPUP_WELCOME_LANGUAGE,
+		POPUP_WELCOME_TEXT,
+		POPUP_WELCOME_SETTINGS,
+		POPUP_WELCOME_TUTORIAL,
 
 		// demo player states
 		DEMOPLAYER_NONE=0,
@@ -384,5 +390,10 @@ private:
 	// found in menus_settings.cpp
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsHUD(CUIRect MainView);
+
+	// found in menus.cpp
+	bool m_Finished;
+	void SetTutorialSettings();
+	void SetNoviceSettings();
 };
 #endif

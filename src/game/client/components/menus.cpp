@@ -89,6 +89,8 @@ CMenus::CMenus()
 
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
+
+	m_Finished = false;
 }
 
 vec4 CMenus::ButtonColorMul(const void *pID)
@@ -133,9 +135,9 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	return Active ? UI()->DoButtonLogic(pID, "", Checked, pRect) : 0;
 }
 
-int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool Active)
 {
-	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*(Active ? ButtonColorMul(pID) : vec4(1,1,1,0.5f)), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(pRect->h>=20.0f?2.0f:1.0f, &Temp);
 #if defined(__ANDROID__)
@@ -145,6 +147,8 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 #else
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
 #endif
+	if(!Active)
+		return false;
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -173,6 +177,19 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 #endif
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+}
+
+int CMenus::DoButton_RefreshServerbrowser(CUIRect *pRect)
+{
+		static int s_RefreshButton = 0;
+
+		char aBuf[64];
+		if(ServerBrowser()->IsRefreshing())
+			str_format(aBuf, sizeof(aBuf), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
+		else
+			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
+
+		return DoButton_Menu(&s_RefreshButton, aBuf, 0, pRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)));
 }
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -923,10 +940,7 @@ void CMenus::OnInit()
 	// */
 
 	if(g_Config.m_ClShowWelcome)
-	{
-		m_Popup = POPUP_LANGUAGE;
-		str_copy(g_Config.m_BrFilterString, "Novice [DDraceNetwork]", sizeof(g_Config.m_BrFilterString));
-	}
+		m_Popup = POPUP_WELCOME_LANGUAGE;
 	g_Config.m_ClShowWelcome = 0;
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
@@ -971,14 +985,7 @@ int CMenus::Render()
 		s_Frame++;
 		m_DoubleClickIndex = -1;
 
-		if(g_Config.m_UiPage == PAGE_INTERNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-		else if(g_Config.m_UiPage == PAGE_LAN)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-		else if(g_Config.m_UiPage == PAGE_FAVORITES)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-		else if(g_Config.m_UiPage == PAGE_DDNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+		RefreshServerbrowser();
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE)
@@ -1154,11 +1161,10 @@ int CMenus::Render()
 			pExtraText = Localize("Are you sure that you want to disconnect?");
 			ExtraAlign = -1;
 		}
-		else if(m_Popup == POPUP_FIRST_LAUNCH)
+		else if(m_Popup == POPUP_WELCOME_TEXT)
 		{
-			pTitle = Localize("Welcome to Teeworlds");
-			pExtraText = Localize("As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.");
-			pButtonText = Localize("Ok");
+			pTitle = Localize("Welcome to DDraceNetwork");
+			pExtraText = Localize("DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay. Help each other play through custom maps. All ranks made on official servers are available worldwide and you can collect points!");
 			ExtraAlign = -1;
 		}
 
@@ -1366,31 +1372,6 @@ int CMenus::Render()
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 			}
 		}
-		else if(m_Popup == POPUP_LANGUAGE)
-		{
-			Box = Screen;
-			Box.VMargin(150.0f, &Box);
-#if defined(__ANDROID__)
-			Box.HMargin(20.0f, &Box);
-#else
-			Box.HMargin(150.0f, &Box);
-#endif
-			Box.HSplitTop(20.f, &Part, &Box);
-			Box.HSplitBottom(20.f, &Box, &Part);
-#if defined(__ANDROID__)
-			Box.HSplitBottom(60.f, &Box, &Part);
-#else
-			Box.HSplitBottom(24.f, &Box, &Part);
-#endif
-			Box.HSplitBottom(20.f, &Box, 0);
-			Box.VMargin(20.0f, &Box);
-			RenderLanguageSelection(Box);
-			Part.VMargin(120.0f, &Part);
-
-			static int s_Button = 0;
-			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EscapePressed || m_EnterPressed)
-				m_Popup = POPUP_FIRST_LAUNCH;
-		}
 		else if(m_Popup == POPUP_COUNTRY)
 		{
 			Box = Screen;
@@ -1592,36 +1573,168 @@ int CMenus::Render()
 				}
 			}
 		}
-		else if(m_Popup == POPUP_FIRST_LAUNCH)
+		else if(m_Popup == POPUP_WELCOME_LANGUAGE)
 		{
-			CUIRect Label, TextBox;
+			Box = Screen;
+			Box.VMargin(150.f, &Box);
+#if defined(__ANDROID__)
+			Box.HMargin(20.f, &Box);
+#else
+			Box.HMargin(150.f, &Box);
+#endif
+			Box.Margin(20.f, &Box);
 
+			// ok button
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+			Part.VMargin(60.f, &Part);
+
+			static int s_Button = 0;
+			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EnterPressed)
+				m_Popup = POPUP_WELCOME_TEXT;
+
+			// language selection
+			Box.HSplitBottom(20.f, &Box, 0);
+			RenderLanguageSelection(Box);
+		}
+		else if(m_Popup == POPUP_WELCOME_TEXT)
+		{
+			// ok button
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
 			Box.HSplitBottom(60.f, &Box, &Part);
 #else
 			Box.HSplitBottom(24.f, &Box, &Part);
 #endif
-			Part.VMargin(80.0f, &Part);
+			Part.VMargin(80.f, &Part);
 
-			static int s_EnterButton = 0;
-			if(DoButton_Menu(&s_EnterButton, Localize("Enter"), 0, &Part) || m_EnterPressed)
-				m_Popup = POPUP_NONE;
+			static int s_Button = 0;
+			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EnterPressed)
+				m_Popup = POPUP_WELCOME_SETTINGS;
+		}
+		else if(m_Popup == POPUP_WELCOME_SETTINGS)
+		{
+			CUIRect Graphics, Nickname;
 
-			Box.HSplitBottom(40.f, &Box, &Part);
+			Box = Screen;
+			Box.VMargin(150.f, &Box);
+#if defined(__ANDROID__)
+			Box.HMargin(20.f, &Box);
+#else
+			Box.HMargin(150.f, &Box);
+#endif
+			Box.Margin(20.f, &Box);
+
+			// enter button
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+			Part.VMargin(60.f, &Part);
+
+			static int s_Button = 0;
+			bool ButtonActive = g_Config.m_PlayerName[0] != '\0';
+			if(DoButton_Menu(&s_Button, Localize("Enter"), 0, &Part, ButtonActive) || (m_EnterPressed && ButtonActive))
+			{
+				// set dummy name
+				str_copy(g_Config.m_ClDummyName, g_Config.m_PlayerName, sizeof(g_Config.m_ClDummyName));
+				str_append(g_Config.m_ClDummyName, "|D", sizeof(g_Config.m_ClDummyName));
+
+				// prepare welcome tutorial
+				SetTutorialSettings();
+				m_Popup = POPUP_WELCOME_TUTORIAL;
+			}
+
+			// settings
+			Box.VMargin(40.f, &Graphics);
+			Graphics.HSplitTop(Graphics.h/2.f, &Graphics, &Nickname);
+			Graphics.HSplitBottom(20.f, &Graphics, 0);
+			Nickname.HSplitBottom(20.f, &Nickname, 0);
+
+			// graphic settings
+			UI()->DoLabel(&Graphics, Localize("Adjust those settings for the best experience on your system."), 18.f, -1, Graphics.w);
+			Graphics.HSplitBottom(20.f, &Graphics, &Part);
+			if(DoButton_CheckBox(&g_Config.m_GfxFullscreen, Localize("Fullscreen"), g_Config.m_GfxFullscreen, &Part))
+				Client()->ToggleFullscreen();
+			Graphics.HSplitBottom(5.f, &Graphics, 0);
+			Graphics.HSplitBottom(20.f, &Graphics, &Part);
+			if(DoButton_CheckBox(&g_Config.m_GfxBorderless, Localize("Borderless window"), g_Config.m_GfxBorderless, &Part))
+				Client()->ToggleWindowBordered();
+
+			// nickname
+			UI()->DoLabel(&Nickname, Localize("Your nickname is displayed ingame, you can change it at any time."), 18.f, -1, Nickname.w);
+#if defined(__ANDROID__)
+			Nickname.HSplitBottom(60.f, &Nickname, &Part);
+#else
+			Nickname.HSplitBottom(24.f, &Nickname, &Part);
+#endif
+			UI()->DoLabel(&Part, Localize("Nickname:"), 18.f, -1);
+			Part.VSplitLeft(150.f, 0, &Part);
+			Part.VSplitLeft(150.f, &Part, 0);
+			static float Offset = 0.f;
+			DoEditBox(&g_Config.m_PlayerName, &Part, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName)-2, 14.f, &Offset);
+
+
+		}
+		else if(m_Popup == POPUP_WELCOME_TUTORIAL)
+		{
+			CUIRect Button;
+
+			Box = Screen;
+			Box.VMargin(150.f, &Box);
+#if defined(__ANDROID__)
+			Box.HMargin(20.f, &Box);
+#else
+			Box.HMargin(150.f, &Box);
+#endif
+			Box.Margin(20.f, &Box);
+
+			// help message
+			Box.HSplitTop(18.f, &Part, &Box);
+			UI()->DoLabel(&Part, Localize("Select a server with a low ping (latency)"), 18.f, -1);
+			Box.HSplitTop(20.f, 0, &Box);
+
+			// buttons
 #if defined(__ANDROID__)
 			Box.HSplitBottom(60.f, &Box, &Part);
 #else
 			Box.HSplitBottom(24.f, &Box, &Part);
 #endif
 
-			Part.VSplitLeft(60.0f, 0, &Label);
-			Label.VSplitLeft(100.0f, 0, &TextBox);
-			TextBox.VSplitLeft(20.0f, 0, &TextBox);
-			TextBox.VSplitRight(60.0f, &TextBox, 0);
-			UI()->DoLabel(&Label, Localize("Nickname"), 18.0f, -1);
-			static float Offset = 0.0f;
-			DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &Offset);
+			Part.VMargin(60.f, &Part);
+			float ButtonWidth = Part.w / 2.f - 20.f;
+
+			Part.VSplitLeft(ButtonWidth, &Button, 0);
+			static int s_ButtonStart = 0;
+			bool ButtonStartActive = g_Config.m_UiServerAddress[0] != '\0';
+			if(DoButton_Menu(&s_ButtonStart, Localize("Start tutorial"), 0, &Button, ButtonStartActive) || (m_EnterPressed && ButtonStartActive))
+				Client()->Connect(g_Config.m_UiServerAddress);
+
+			Part.VSplitRight(ButtonWidth, 0, &Button);
+			static int s_ButtonSkip = 0;
+			if(DoButton_Menu(&s_ButtonSkip, Localize("Skip tutorial"), 0, &Button))
+			{
+				SetNoviceSettings();
+				m_Popup = POPUP_NONE;
+			}
+
+			Box.HSplitBottom(20.f, &Box, 0);
+
+			// refresh button
+			Box.HSplitBottom(20.f, &Box, &Button);
+
+			Button.VSplitRight(130.f, 0, &Button);
+			if(DoButton_RefreshServerbrowser(&Button))
+				RefreshServerbrowser();
+
+			Box.HSplitBottom(5.f, &Box, 0);
+
+			// server list
+			RenderTutorialServerList(Box);
 		}
 		else
 		{
@@ -1631,7 +1744,7 @@ int CMenus::Render()
 #else
 			Box.HSplitBottom(24.f, &Box, &Part);
 #endif
-			Part.VMargin(120.0f, &Part);
+			Part.VMargin(120.f, &Part);
 
 			static int s_Button = 0;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
@@ -1808,6 +1921,25 @@ void CMenus::OnRender()
 	Graphics()->QuadsDrawTL(60, 60, 5000, 5000);
 	Graphics()->QuadsEnd();
 	return;*/
+
+	// check if we finished tutorial
+	if(Client()->State() == IClient::STATE_ONLINE && !m_Finished)
+	{
+		CServerInfo Info;
+		Client()->GetServerInfo(&Info);
+		if(IsTutorial(&Info))
+		{
+			std::list < int > Indices = m_pClient->Collision()->GetMapIndices(m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos);
+			if(!Indices.empty())
+				for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+					if(m_pClient->Collision()->GetTileIndex(*i) == TILE_END || m_pClient->Collision()->GetFTileIndex(*i) == TILE_END)
+						m_Finished = true;
+			else if(m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_END || m_pClient->Collision()->GetFTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_END)
+					m_Finished = true;
+			if(m_Finished)
+				SetNoviceSettings();
+		}
+	}
 
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
@@ -2033,4 +2165,316 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	}
 
 	Graphics()->Swap();
+}
+
+void CMenus::RenderTutorialServerList(CUIRect View)
+{
+	CUIRect Headers;
+	CUIRect Bottom;
+
+	View.HSplitTop(ms_ListheaderHeight, &Headers, &View);
+	View.HSplitBottom(ms_ListheaderHeight, &View, &Bottom);
+
+	// split of the scrollbar
+	RenderTools()->DrawUIRect(&Headers, vec4(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
+	Headers.VSplitRight(20.0f, &Headers, 0);
+
+	struct CColumn
+	{
+		int m_ID;
+		CLocConstString m_Caption;
+		int m_Direction;
+		float m_Width;
+		int m_Flags;
+		CUIRect m_Rect;
+		CUIRect m_Spacer;
+	};
+
+	enum
+	{
+		FIXED=1,
+
+		COL_NAME=0,
+		COL_PING
+	};
+
+	CColumn s_aCols[] = {
+		{-1,		" ",	-1, 2.0f, 0, {0}, {0}},
+		{COL_NAME,	"Name",	0, 50.0f, 0, {0}, {0}},	// Localize - these strings are localized within CLocConstString
+		{COL_PING,	"Ping",	1, 40.0f, FIXED, {0}, {0}},
+#if defined(__ANDROID__)
+		{-1,		" ",	1, 50.0f, 0, {0}, {0}}, // Scrollbar
+#endif
+	};
+	// This is just for scripts/update_localization.py to work correctly (all other strings are already Localize()'d somewhere else). Don't remove!
+	// Localize("Type");
+
+	int NumCols = sizeof(s_aCols)/sizeof(CColumn);
+
+	// do layout
+	for(int i = 0; i < NumCols; i++)
+	{
+		if(s_aCols[i].m_Direction == -1)
+		{
+			Headers.VSplitLeft(s_aCols[i].m_Width, &s_aCols[i].m_Rect, &Headers);
+
+			if(i+1 < NumCols)
+			{
+				//Cols[i].flags |= SPACER;
+				Headers.VSplitLeft(2, &s_aCols[i].m_Spacer, &Headers);
+			}
+		}
+	}
+
+	for(int i = NumCols-1; i >= 0; i--)
+	{
+		if(s_aCols[i].m_Direction == 1)
+		{
+			Headers.VSplitRight(s_aCols[i].m_Width, &Headers, &s_aCols[i].m_Rect);
+			Headers.VSplitRight(2, &Headers, &s_aCols[i].m_Spacer);
+		}
+	}
+
+	for(int i = 0; i < NumCols; i++)
+	{
+		if(s_aCols[i].m_Direction == 0)
+			s_aCols[i].m_Rect = Headers;
+	}
+
+	// do headers
+	for(int i = 0; i < NumCols; i++)
+	{
+		CUIRect t;
+		s_aCols[i].m_Rect.VSplitLeft(5.0f, 0, &t);
+	#if defined(__ANDROID__)
+		float TextH = min(20.0f, s_aCols[i].m_Rect.h);
+		UI()->DoLabel(&t, s_aCols[i].m_Caption, TextH*ms_FontmodHeight, -1);
+	#else
+		UI()->DoLabel(&t, s_aCols[i].m_Caption, s_aCols[i].m_Rect.h*ms_FontmodHeight, -1);
+	#endif
+	}
+
+	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.15f), 0, 0);
+
+	CUIRect Scroll;
+#if defined(__ANDROID__)
+	View.VSplitRight(50, &View, &Scroll);
+#else
+	View.VSplitRight(15, &View, &Scroll);
+#endif
+
+	int NumServers = ServerBrowser()->NumSortedServers();
+
+	// display important messages in the middle of the screen so no
+	// users misses it
+	{
+		CUIRect MsgBox = View;
+		MsgBox.y += View.h/3;
+
+		if(m_ActivePage == PAGE_INTERNET && ServerBrowser()->IsRefreshingMasters())
+			UI()->DoLabelScaled(&MsgBox, Localize("Refreshing master servers"), 16.0f, 0);
+		else if(!ServerBrowser()->NumServers())
+			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, 0);
+		else if(ServerBrowser()->NumServers() && !NumServers)
+			UI()->DoLabelScaled(&MsgBox, Localize("No servers match your filter criteria"), 16.0f, 0);
+	}
+
+	int Num = (int)(View.h/s_aCols[0].m_Rect.h) + 1;
+	static int s_ScrollBar = 0;
+	static float s_ScrollValue = 0;
+
+	Scroll.HMargin(5.0f, &Scroll);
+	s_ScrollValue = DoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+
+	int ScrollNum = NumServers-Num+1;
+	if(ScrollNum > 0)
+	{
+		if(m_ScrollOffset >= 0)
+		{
+			s_ScrollValue = (float)(m_ScrollOffset)/ScrollNum;
+			m_ScrollOffset = -1;
+		}
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+			s_ScrollValue -= 3.0f/ScrollNum;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+			s_ScrollValue += 3.0f/ScrollNum;
+	}
+	else
+		ScrollNum = 0;
+
+	if(m_SelectedIndex > -1)
+	{
+		for(int i = 0; i < m_NumInputEvents; i++)
+		{
+			int NewIndex = -1;
+			if(m_aInputEvents[i].m_Flags&IInput::FLAG_PRESS)
+			{
+				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_SelectedIndex + 1;
+				if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_SelectedIndex - 1;
+			}
+			if(NewIndex > -1 && NewIndex < NumServers)
+			{
+				//scroll
+				float IndexY = View.y - s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h + NewIndex*s_aCols[0].m_Rect.h;
+				int Scroll = View.y > IndexY ? -1 : View.y+View.h < IndexY+s_aCols[0].m_Rect.h ? 1 : 0;
+				if(Scroll)
+				{
+					if(Scroll < 0)
+					{
+						int NumScrolls = (View.y-IndexY+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
+						s_ScrollValue -= (1.0f/ScrollNum)*NumScrolls;
+					}
+					else
+					{
+						int NumScrolls = (IndexY+s_aCols[0].m_Rect.h-(View.y+View.h)+s_aCols[0].m_Rect.h-1.0f)/s_aCols[0].m_Rect.h;
+						s_ScrollValue += (1.0f/ScrollNum)*NumScrolls;
+					}
+				}
+
+				m_SelectedIndex = NewIndex;
+
+				const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
+				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+			}
+		}
+	}
+
+	if(s_ScrollValue < 0) s_ScrollValue = 0;
+	if(s_ScrollValue > 1) s_ScrollValue = 1;
+
+	// set clipping
+	UI()->ClipEnable(&View);
+
+	CUIRect OriginalView = View;
+	View.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
+
+	int NewSelected = -1;
+	int NumPlayers = 0;
+
+	m_SelectedIndex = -1;
+
+	for (int i = 0; i < NumServers; i++)
+	{
+		int ItemIndex = i;
+		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
+		NumPlayers += g_Config.m_BrFilterSpectators ? pItem->m_NumPlayers : pItem->m_NumClients;
+		CUIRect Row;
+		CUIRect SelectHitBox;
+
+		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
+
+		View.HSplitTop(ms_ListheaderHeight, &Row, &View);
+		SelectHitBox = Row;
+
+		if(Selected)
+			m_SelectedIndex = i;
+
+		// make sure that only those in view can be selected
+		if(Row.y+Row.h > OriginalView.y && Row.y < OriginalView.y+OriginalView.h)
+		{
+			if(Selected)
+			{
+				CUIRect r = Row;
+				r.Margin(1.5f, &r);
+				RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+			}
+
+			// clip the selection
+			if(SelectHitBox.y < OriginalView.y) // top
+			{
+				SelectHitBox.h -= OriginalView.y-SelectHitBox.y;
+				SelectHitBox.y = OriginalView.y;
+			}
+			else if(SelectHitBox.y+SelectHitBox.h > OriginalView.y+OriginalView.h) // bottom
+				SelectHitBox.h = OriginalView.y+OriginalView.h-SelectHitBox.y;
+
+			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox))
+				NewSelected = ItemIndex;
+		}
+		else
+		{
+			// reset active item, if not visible
+			if(UI()->ActiveItem() == pItem)
+				UI()->SetActiveItem(0);
+
+			// don't render invisible items
+			continue;
+		}
+
+		for(int c = 0; c < NumCols; c++)
+		{
+			CUIRect Button;
+			char aTemp[64];
+			Button.x = s_aCols[c].m_Rect.x;
+			Button.y = Row.y;
+			Button.h = Row.h;
+			Button.w = s_aCols[c].m_Rect.w;
+
+			int ID = s_aCols[c].m_ID;
+
+			if(ID == COL_NAME)
+			{
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+				Cursor.m_LineWidth = Button.w;
+				TextRender()->TextEx(&Cursor, pItem->m_aName, -1);
+			}
+			else if(ID == COL_PING)
+			{
+				str_format(aTemp, sizeof(aTemp), "%i", pItem->m_Latency);
+				if (g_Config.m_UiColorizePing)
+				{
+					vec3 rgb = HslToRgb(vec3((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+				}
+
+				UI()->DoLabelScaled(&Button, aTemp, 12.0f, 1);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			}
+		}
+	}
+
+	UI()->ClipDisable();
+
+	if(NewSelected != -1)
+	{
+		// select the new server
+		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
+		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+	}
+
+	RenderTools()->DrawUIRect(&Bottom, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
+}
+
+void CMenus::SetTutorialSettings()
+{
+	g_Config.m_UiPage = PAGE_DDNET;
+
+	// because PAGE_DDNET is set this will actually refresh the ddnet browser and parse the ddnet-servers.json
+	// which allows us to exclude ALL types except 'Tutorial'
+	ResetServerbrowserFilters();
+	g_Config.m_UiServerAddress[0] = '\0';
+
+	ServerBrowser()->DDNetTypeFilterClean(true);
+	ServerBrowser()->DDNetFilterRem(g_Config.m_BrFilterExcludeTypes, "Tutorial");
+
+	g_Config.m_BrSort = IServerBrowser::SORT_PING;
+	g_Config.m_BrSortOrder = 0;
+
+	ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+}
+
+void CMenus::SetNoviceSettings()
+{
+	g_Config.m_UiPage = PAGE_DDNET;
+
+	ResetServerbrowserFilters();
+	g_Config.m_UiServerAddress[0] = '\0';
+
+	str_copy(g_Config.m_BrFilterString, "Novice [DDraceNetwork]", sizeof(g_Config.m_BrFilterString));
+
+	g_Config.m_BrSort = IServerBrowser::SORT_NUMPLAYERS;
+	g_Config.m_BrSortOrder = 1;
+
+	ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 }

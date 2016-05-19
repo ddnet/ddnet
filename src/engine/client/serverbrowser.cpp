@@ -1063,7 +1063,7 @@ bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)
 	return false; // contry not excluded
 }
 
-void CServerBrowser::DDNetCountryFilterClean()
+void CServerBrowser::DDNetCountryFilterClean(bool WriteAll)
 {
 	char aNewList[128];
 	aNewList[0] = '\0';
@@ -1071,7 +1071,7 @@ void CServerBrowser::DDNetCountryFilterClean()
 	for(int i = 0; i < m_NumDDNetCountries; i++)
 	{
 		const char *pName = m_aDDNetCountries[i].m_aName;
-		if(DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pName))
+		if(WriteAll || DDNetFiltered(g_Config.m_BrFilterExcludeCountries, pName))
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), ",%s", pName);
@@ -1082,7 +1082,7 @@ void CServerBrowser::DDNetCountryFilterClean()
 	str_copy(g_Config.m_BrFilterExcludeCountries, aNewList, sizeof(g_Config.m_BrFilterExcludeCountries));
 }
 
-void CServerBrowser::DDNetTypeFilterClean()
+void CServerBrowser::DDNetTypeFilterClean(bool WriteAll)
 {
 	char aNewList[128];
 	aNewList[0] = '\0';
@@ -1090,7 +1090,7 @@ void CServerBrowser::DDNetTypeFilterClean()
 	for(int i = 0; i < m_NumDDNetTypes; i++)
 	{
 		const char *pName = m_aDDNetTypes[i];
-		if(DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pName))
+		if(WriteAll || DDNetFiltered(g_Config.m_BrFilterExcludeTypes, pName))
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), ",%s", pName);

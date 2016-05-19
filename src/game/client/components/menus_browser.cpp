@@ -804,27 +804,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	static int s_ClearButton = 0;
 	if(DoButton_Menu(&s_ClearButton, Localize("Reset filter"), 0, &ResetButton))
-	{
-		g_Config.m_BrFilterString[0] = 0;
-		g_Config.m_BrExcludeString[0] = 0;
-		g_Config.m_BrFilterFull = 0;
-		g_Config.m_BrFilterEmpty = 0;
-		g_Config.m_BrFilterSpectators = 0;
-		g_Config.m_BrFilterFriends = 0;
-		g_Config.m_BrFilterCountry = 0;
-		g_Config.m_BrFilterCountryIndex = -1;
-		g_Config.m_BrFilterPw = 0;
-		g_Config.m_BrFilterPing = 999;
-		g_Config.m_BrFilterGametype[0] = 0;
-		g_Config.m_BrFilterGametypeStrict = 0;
-		g_Config.m_BrFilterServerAddress[0] = 0;
-		g_Config.m_BrFilterPure = 0;
-		g_Config.m_BrFilterPureMap = 0;
-		g_Config.m_BrFilterCompatversion = 0;
-		g_Config.m_BrFilterExcludeCountries[0] = 0;
-		g_Config.m_BrFilterExcludeTypes[0] = 0;
-		Client()->ServerBrowserUpdate();
-	}
+		ResetServerbrowserFilters();
 }
 
 void CMenus::RenderServerbrowserServerDetail(CUIRect View)
@@ -1325,26 +1305,9 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ButtonArea.HSplitTop(20.0f, &Button, &ButtonArea);
 		Button.VMargin(20.0f, &Button);
 
-		static int s_RefreshButton = 0;
-		if(ServerBrowser()->IsRefreshing())
-			str_format(aBuf, sizeof(aBuf), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
-		else
-			str_copy(aBuf, Localize("Refresh"), sizeof(aBuf));
-
-		if(DoButton_Menu(&s_RefreshButton, aBuf, 0, &Button) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		if(DoButton_RefreshServerbrowser(&Button))
 		{
-			if(g_Config.m_UiPage == PAGE_INTERNET)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			else if(g_Config.m_UiPage == PAGE_LAN)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-			else if(g_Config.m_UiPage == PAGE_FAVORITES)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-			else if(g_Config.m_UiPage == PAGE_DDNET)
-			{
-				// start a new serverlist request
-				Client()->RequestDDNetSrvList();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-			}
+			RefreshServerbrowser();
 			m_DoubleClickIndex = -1;
 		}
 
@@ -1353,7 +1316,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		Button.VMargin(20.0f, &Button);
 
 		static int s_JoinButton = 0;
-		if(DoButton_Menu(&s_JoinButton, Localize("Connect"), 0, &Button) || m_EnterPressed)
+		bool JoinButtonActive = g_Config.m_UiServerAddress[0] != '\0';
+		if(DoButton_Menu(&s_JoinButton, Localize("Connect"), 0, &Button, JoinButtonActive) || (m_EnterPressed && JoinButtonActive))
 		{
 			Client()->Connect(g_Config.m_UiServerAddress);
 			m_EnterPressed = false;
@@ -1384,4 +1348,43 @@ void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUser
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() && (g_Config.m_UiPage == PAGE_FAVORITES || g_Config.m_UiPage == PAGE_DDNET) && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+}
+
+void CMenus::RefreshServerbrowser()
+{
+	if(g_Config.m_UiPage == PAGE_INTERNET)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+	else if(g_Config.m_UiPage == PAGE_LAN)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+	else if(g_Config.m_UiPage == PAGE_FAVORITES)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+	else if(g_Config.m_UiPage == PAGE_DDNET)
+	{
+		// start a new serverlist request
+		Client()->RequestDDNetSrvList();
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+	}
+}
+
+void CMenus::ResetServerbrowserFilters()
+{
+	g_Config.m_BrFilterString[0] = '\0';
+	g_Config.m_BrExcludeString[0] = '\0';
+	g_Config.m_BrFilterFull = 0;
+	g_Config.m_BrFilterEmpty = 0;
+	g_Config.m_BrFilterSpectators = 0;
+	g_Config.m_BrFilterFriends = 0;
+	g_Config.m_BrFilterCountry = 0;
+	g_Config.m_BrFilterCountryIndex = -1;
+	g_Config.m_BrFilterPw = 0;
+	g_Config.m_BrFilterPing = 999;
+	g_Config.m_BrFilterGametype[0] = '\0';
+	g_Config.m_BrFilterGametypeStrict = '\0';
+	g_Config.m_BrFilterServerAddress[0] = '\0';
+	g_Config.m_BrFilterPure = 0;
+	g_Config.m_BrFilterPureMap = 0;
+	g_Config.m_BrFilterCompatversion = 1;
+	g_Config.m_BrFilterExcludeCountries[0] = '\0';
+	g_Config.m_BrFilterExcludeTypes[0] = '\0';
+	RefreshServerbrowser();
 }

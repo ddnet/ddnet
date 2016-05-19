@@ -43,6 +43,10 @@ public:
 	char m_aNews[NEWS_SIZE];
 	int64 m_ReconnectTime;
 
+	bool m_DummySendConnInfo;
+
+	bool m_TutorialLangSent;
+
 	class CSnapItem
 	{
 	public:

@@ -45,6 +45,11 @@ bool IsDDNet(const CServerInfo *pInfo)
 	    || str_find_nocase(pInfo->m_aGameType, "ddnet");
 }
 
+bool IsTutorial(const CServerInfo *pInfo)
+{
+	return str_find_nocase(pInfo->m_aGameType, "tutddracenet");
+}
+
 // other
 
 bool Is64Player(const CServerInfo *pInfo)

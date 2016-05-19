@@ -616,6 +616,7 @@ void CClient::EnterGame()
 	ServerInfoRequest(); // fresh one for timeout protection
 	m_aTimeoutCodeSent[0] = false;
 	m_aTimeoutCodeSent[1] = false;
+	m_TutorialLangSent = false;
 }
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
@@ -1840,19 +1841,39 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						m_GameTime[g_Config.m_ClDummy].Update(&m_GametimeMarginGraph, (GameTick-1)*time_freq()/50, TimeLeft, 0);
 					}
 
-					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50 && !m_aTimeoutCodeSent[g_Config.m_ClDummy])
+					// send auto commands
+					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50)
 					{
-						if(IsDDNet(&m_CurrentServerInfo))
+						char Command[1024] = "/\0";
+						if(IsDDNet(&m_CurrentServerInfo) && !m_aTimeoutCodeSent[g_Config.m_ClDummy])
 						{
 							m_aTimeoutCodeSent[g_Config.m_ClDummy] = true;
+							char Cmd[256];
+							str_format(Cmd, sizeof(Cmd), "timeout %s;", m_aTimeoutCodes[g_Config.m_ClDummy]);
+							str_append(Command, Cmd, sizeof(Command));
+						}
+						if(IsTutorial(&m_CurrentServerInfo) && !m_TutorialLangSent)
+						{
+							m_TutorialLangSent = true;
+							char Lang[256];
+							int LanguageFileLength = str_length(g_Config.m_ClLanguagefile);
+							if(LanguageFileLength < 15)
+								str_copy(Lang, "english", sizeof(Lang));
+							else
+								str_copy(Lang, g_Config.m_ClLanguagefile+10, LanguageFileLength-14+1);
+							char LangCmd[256];
+							str_format(LangCmd, sizeof(LangCmd), "lang %s;", Lang);
+							str_append(Command, LangCmd, sizeof(Command));
+						}
+						if(Command[1] != '\0')
+						{
 							CNetMsg_Cl_Say Msg;
 							Msg.m_Team = 0;
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
-							Msg.m_pMessage = aBuf;
+							Msg.m_pMessage = Command;
 							CMsgPacker Packer(Msg.MsgID());
 							Msg.Pack(&Packer);
 							SendMsgExY(&Packer, MSGFLAG_VITAL, false, g_Config.m_ClDummy);
+							m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "autocmd", Command);
 						}
 					}
 

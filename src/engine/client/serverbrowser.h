@@ -83,8 +83,8 @@ public:
 	void DDNetFilterAdd(char *pFilter, const char *pName);
 	void DDNetFilterRem(char *pFilter, const char *pName);
 	bool DDNetFiltered(char *pFilter, const char *pName);
-	void DDNetCountryFilterClean();
-	void DDNetTypeFilterClean();
+	void DDNetCountryFilterClean(bool WriteAll=false);
+	void DDNetTypeFilterClean(bool WriteAll=false);
 
 	//
 	void Update(bool ForceResort);

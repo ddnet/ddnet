@@ -19,6 +19,7 @@
 #	Yared Hufkens	2012-02-03 19:57:59
 #	andi103			2012-07-14 11:31:11
 #	timakro			2014-06-30 18:26:59
+#	timakro			2016-05-21
 ##### /authors #####
 
 ##### translated strings #####
@@ -67,9 +68,6 @@ Are you sure that you want to quit?
 
 Are you sure that you want to remove the player from your friends list?
 == Bist du sicher, dass du diesen Spieler aus deiner Freundesliste entfernen möchtest?
-
-As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Da dies der erste Start des Spiels ist, gib bitte unten deinen Namen ein. Es wird empfohlen die Einstellungen zu überprüfen, um sie deinen Vorstellungen anzupassen, bevor du einem Server beitrittst.
 
 Automatically record demos
 == Automatisch Aufnahmen erstellen
@@ -293,9 +291,6 @@ Name
 Next weapon
 == Nächste Waffe
 
-Nickname
-== Spitzname
-
 No
 == Nein
 
@@ -358,9 +353,6 @@ Quality Textures
 
 Quit
 == Beenden
-
-REC %3d:%02d
-== REC %3d:%02d
 
 Reason:
 == Grund:
@@ -563,16 +555,11 @@ Warmup
 Weapon
 == Waffen
 
-Welcome to Teeworlds
-== Willkommen bei Teeworlds
-
 Yes
 == Ja
 
 You must restart the game for all settings to take effect.
 == Du musst das Spiel neustarten um die Änderungen zu übernehmen.
-
-##### needs translation #####
 
 New name:
 == Neuer Name:
@@ -637,9 +624,6 @@ Your skin
 Size:
 == Größe:
 
-﻿
-##### translated strings #####
-
 Reset to defaults
 == Standardeinstellung
 
@@ -684,9 +668,6 @@ Name plates size
 
 Type:
 == Typ:
-
-Automatically take game over statboard screenshot
-== Automatisch Screenshots vom Statboard am Spielende erstellen
 
 Ratio
 == Ratio
@@ -787,12 +768,6 @@ Restart
 Browser
 == Browser
 
-Automatically take game over scoreboard screenshot
-== Automatisch Screenshots vom Scoreboard am Spielende erstellen
-
-⚲
-== ⚲
-
 Enable gun sound
 == Aktiviere Pistolen-Ton
 
@@ -856,9 +831,6 @@ Timeout code
 Use DDRace Scoreboard
 == Benutze das DDRace Scoreboard
 
-DDNet %s is out! Download it at ddnet.tw!
-== DDNet %s ist jetzt auf ddnet.tw verfügbar!
-
 Loading DDNet Client
 == Lade DDNet Client
 
@@ -873,9 +845,6 @@ Show client IDs in Scoreboard
 
 seconds
 == Sekunden
-
-Show new skins ingame
-== Zeige neue Skins im Spiel
 
 %.2f KiB
 == %.2f KiB
@@ -927,3 +896,33 @@ Switch weapon when out of ammo
 
 AntiPing limit
 == AntiPing-Limit
+
+Your nickname is displayed ingame, you can change it at any time.
+== Dein Spitzname wird im Spiel angezeigt, du kannst ihn jeder Zeit ändern.
+
+Adjust those settings for the best experience on your system.
+== Passe diese Einstellungen an dein System an.
+
+DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay. Help each other play through custom maps. All ranks made on official servers are available worldwide and you can collect points!
+== DDraceNetwork (DDNet) ist eine stetig weiterentwickelte Version von DDRace, einer einzigartigen, kooperativen Teeworlds Modifikation. Bewältige vielfältige Maps im Team und sammle Punkte. Alle Ränge, die auf offiziellen Servern erzielt wurden sind weltweit verfügbar.
+
+DDNet %s is out! Download it at DDNet.tw!
+== DDNet %s ist da! Downloade es auf DDNet.tw!
+
+Welcome to DDraceNetwork
+== Willkommen im DDraceNetwork
+
+Skip tutorial
+== Tutorial überspringen
+
+Nickname:
+== Spitzname:
+
+Select a server with a low ping (latency)
+== Wähle einen Server mit einem niedrigen Ping (Latency)
+
+Borderless window
+== Rahmenloses Fenster
+
+Start tutorial
+== Tutorial starten
