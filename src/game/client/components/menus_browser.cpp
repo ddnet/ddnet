@@ -683,11 +683,11 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 			int NumTypes = ServerBrowser()->NumDDNetTypes();
 			int PerLine = 3;
 
-			if(MaxTypes <= 12)
-				ServerFilter.HSplitTop(8.0f, 0, &ServerFilter);
+			ServerFilter.HSplitTop(4.0f, 0, &ServerFilter);
+			ServerFilter.HSplitBottom(4.0f, &ServerFilter, 0);
 
 			const float TypesWidth = 40.0f;
-			const float TypesHeight = MaxTypes > 12 ? 15.0f : 20.0f;
+			const float TypesHeight = ServerFilter.h / ceil(MaxTypes / (float)PerLine);
 
 			CUIRect TypesRect, Left, Right;
 
@@ -1310,7 +1310,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		char aBuf[64];
 		if(str_comp(Client()->LatestVersion(), "0") != 0)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out! Download it at ddnet.tw!"), Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out! Download it at DDNet.tw!"), Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else

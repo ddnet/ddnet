@@ -156,6 +156,8 @@ if use_bundle:
         <string>%s</string>
         <key>CFBundleIdentifier</key>
         <string>org.DDNetClient.app</string>
+        <key>NSHighResolutionCapable</key>
+        <true/>
 </dict>
 </plist>
 	""" % (version))

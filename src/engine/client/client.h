@@ -270,6 +270,7 @@ public:
 
 	// ---
 
+	int GetPredictionTime();
 	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem);
 	void SnapInvalidateItem(int SnapID, int Index);
 	void *SnapFindItem(int SnapID, int Type, int ID);

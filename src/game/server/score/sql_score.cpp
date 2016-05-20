@@ -293,6 +293,12 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 			str_format(aBuf, sizeof(aBuf), "No map like \"%s\" found. Try adding a '%%' at the start if you don't know the first character. Example: /map %%castle for \"Out of Castle\"", pData->m_RequestedMap.Str());
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 		}
+		else if(Now < pPlayer->m_FirstVoteTick)
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote", ((pPlayer->m_FirstVoteTick - Now) / pData->Server()->TickSpeed()) + 1);
+			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+		}
 		else if(pPlayer->m_LastVoteCall && Timeleft > 0)
 		{
 			char aChatmsg[512] = {0};
@@ -1086,16 +1092,16 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 			if(pData->m_Search) // last 5 times of a player
 			{
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(aBuf, sizeof(aBuf), "%d min %.2f sec, don't know how long ago", (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(aBuf, sizeof(aBuf), "%02d:%05.02f, don't know how long ago", (int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%s ago, %d min %.2f sec", pAgoString,(int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(aBuf, sizeof(aBuf), "%s ago, %02d:%05.02f", pAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
 			else // last 5 times of the server
 			{
 				if(pStamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
-					str_format(aBuf, sizeof(aBuf), "%s, %02d:%05.02f s, don't know when", pSqlServer->GetResults()->getString("Name").c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(aBuf, sizeof(aBuf), "%s, %02d:%05.02f, don't know when", pSqlServer->GetResults()->getString("Name").c_str(), (int)(pTime/60), pTime-((int)pTime/60*60));
 				else
-					str_format(aBuf, sizeof(aBuf), "%s, %s ago, %02d:%05.02f s", pSqlServer->GetResults()->getString("Name").c_str(), pAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
+					str_format(aBuf, sizeof(aBuf), "%s, %s ago, %02d:%05.02f", pSqlServer->GetResults()->getString("Name").c_str(), pAgoString, (int)(pTime/60), pTime-((int)pTime/60*60));
 			}
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 		}

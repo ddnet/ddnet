@@ -244,9 +244,9 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			const char *Text = Input()->GetClipboardText();
 			if(Text)
 			{
-				int CharsLeft = StrSize - str_length(pStr);
 				int Offset = str_length(pStr);
-				for(int i = 0; i < str_length(Text) && i <= CharsLeft; i++)
+				int CharsLeft = StrSize - Offset - 1;
+				for(int i = 0; i < str_length(Text) && i < CharsLeft; i++)
 				{
 					if(Text[i] == '\n')
 						pStr[i + Offset] = ' ';
@@ -1057,29 +1057,12 @@ int CMenus::Render()
 			pTitle = Localize("Disconnected");
 			pExtraText = Client()->ErrorString();
 			pButtonText = Localize("Ok");
-			if ((str_find_nocase(Client()->ErrorString(), "full")) || (str_find_nocase(Client()->ErrorString(), "reserved")))
+			if(Client()->m_ReconnectTime > 0)
 			{
-				if (g_Config.m_ClReconnectFull > 0)
-				{
-					if (_my_rtime == 0)
-						_my_rtime = time_get();
-					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ClReconnectFull));
-					pTitle = Client()->ErrorString();
-					pExtraText = aBuf;
-					pButtonText = Localize("Abort");
-				}
-			}
-			else if (str_find_nocase(Client()->ErrorString(), "Timeout"))
-			{
-				if (g_Config.m_ClReconnectTimeout > 0)
-				{
-					if (_my_rtime == 0)
-						_my_rtime = time_get();
-					str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((_my_rtime - time_get()) / time_freq() + g_Config.m_ClReconnectTimeout));
-					pTitle = Client()->ErrorString();
-					pExtraText = aBuf;
-					pButtonText = Localize("Abort");
-				}
+				str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((Client()->m_ReconnectTime - time_get()) / time_freq() + g_Config.m_ClReconnectFull));
+				pTitle = Client()->ErrorString();
+				pExtraText = aBuf;
+				pButtonText = Localize("Abort");
 			}
 			ExtraAlign = 0;
 		}
@@ -1614,28 +1597,15 @@ int CMenus::Render()
 
 			static int s_Button = 0;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
+			{
+				if(m_Popup == POPUP_DISCONNECTED && Client()->m_ReconnectTime > 0)
+					Client()->m_ReconnectTime = 0;
 				m_Popup = POPUP_NONE;
+			}
 		}
 
 		if(m_Popup == POPUP_NONE)
 			UI()->SetActiveItem(0);
-	}
-
-	if (m_Popup == POPUP_DISCONNECTED)
-	{
-		if (str_find_nocase(Client()->ErrorString(), "full") || str_find_nocase(Client()->ErrorString(), "reserved"))
-		{
-			if (g_Config.m_ClReconnectFull > 0 && time_get() > _my_rtime + time_freq() * g_Config.m_ClReconnectFull)
-				Client()->Connect(g_Config.m_UiServerAddress);
-		}
-		else if (str_find_nocase(Client()->ErrorString(), "Timeout"))
-		{
-			if (g_Config.m_ClReconnectTimeout > 0 && time_get() > _my_rtime + time_freq() * g_Config.m_ClReconnectTimeout)
-				Client()->Connect(g_Config.m_UiServerAddress);
-		}
-	}
-	else if (_my_rtime != 0) {
-		_my_rtime = 0;
 	}
 	return 0;
 }

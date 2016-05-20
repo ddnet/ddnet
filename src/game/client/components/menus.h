@@ -129,6 +129,7 @@ class CMenus : public CComponent
 	bool m_NeedRestartGraphics;
 	bool m_NeedRestartSound;
 	bool m_NeedRestartUpdate;
+	bool m_NeedRestartDDNet;
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
 	int m_SettingPlayerPage;
@@ -185,13 +186,13 @@ class CMenus : public CComponent
 				{
 					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
 														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_filenames(m_aFilename, Other.m_aFilename) < 0;
+														str_comp_nocase(m_aFilename, Other.m_aFilename) < 0;
 				}
 				else
 				{
 					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
 														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_filenames(m_aFilename, Other.m_aFilename) > 0;
+														str_comp_nocase(m_aFilename, Other.m_aFilename) > 0;
 				}
 			}
 		}
@@ -320,7 +321,6 @@ public:
 	};
 
 	// DDRace
-	int64 _my_rtime; // reconnect time
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	sorted_array<CDemoItem> m_lDemos;
 	void DemolistPopulate();
@@ -381,7 +381,7 @@ private:
 	void RenderGhost(CUIRect MainView);
 
 	// found in menus_settings.cpp
-	void RenderSettingsDDRace(CUIRect MainView);
+	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsHUD(CUIRect MainView);
 };
 #endif

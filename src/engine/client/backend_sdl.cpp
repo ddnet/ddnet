@@ -568,7 +568,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	m_NumScreens = SDL_GetNumVideoDisplays();
 	if(m_NumScreens > 0)
 	{
-		clamp(*Screen, 0, m_NumScreens-1);
+		if(*Screen < 0 || *Screen >= m_NumScreens)
+			*Screen = 0;
 		if(SDL_GetDisplayBounds(*Screen, &ScreenPos) != 0)
 		{
 			dbg_msg("gfx", "unable to retrieve screen information: %s", SDL_GetError());
@@ -620,6 +621,11 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 #endif
 	}
 
+	if(Flags&IGraphicsBackend::INITFLAG_HIGHDPI)
+		SdlFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
+	else
+		SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+
 	// set gl attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	if(FsaaSamples)
@@ -633,13 +639,13 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 	}
 
-	// Might fix problems with Windows HighDPI scaling
-	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+	if(g_Config.m_InpMouseOld)
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
 
 	m_pWindow = SDL_CreateWindow(
 		pName,
-		SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen),
-		SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen),
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
 		*pWidth,
 		*pHeight,
 		SdlFlags);
@@ -651,8 +657,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	SDL_GetWindowSize(m_pWindow, pWidth, pHeight);
-
 	m_GLContext = SDL_GL_CreateContext(m_pWindow);
 
 	if(m_GLContext == NULL)
@@ -661,12 +665,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	SDL_ShowWindow(m_pWindow);
-
-	SetWindowScreen(g_Config.m_GfxScreen);
-
+	SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
-
 	SDL_GL_MakeCurrent(NULL, NULL);
 
 	// start the command processor
@@ -684,6 +684,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	CmdBuffer.AddCommand(CmdSDL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
+
+	SDL_ShowWindow(m_pWindow);
+	SetWindowScreen(g_Config.m_GfxScreen);
 
 	// return
 	return 0;

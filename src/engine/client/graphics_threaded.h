@@ -318,6 +318,7 @@ public:
 		INITFLAG_VSYNC = 2,
 		INITFLAG_RESIZABLE = 4,
 		INITFLAG_BORDERLESS = 8,
+		INITFLAG_HIGHDPI = 16,
 	};
 
 	virtual ~IGraphicsBackend() {}
