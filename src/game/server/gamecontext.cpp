@@ -919,7 +919,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
-		SendChatTarget(ClientID, "please visit https://ddnet.tw or say /info for more info");
+		SendChatTarget(ClientID, "please visit DDNet.tw or say /info for more info");
 
 		if(g_Config.m_SvWelcome[0]!=0)
 			SendChatTarget(ClientID,g_Config.m_SvWelcome);
@@ -930,7 +930,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		if (g_Config.m_SvShowOthersDefault)
 		{
 			if (g_Config.m_SvShowOthers)
-				SendChatTarget(ClientID, "You can see other players. To disable this use the DDNet client and type /showothers .");
+				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers .");
 
 			m_apPlayers[ClientID]->m_ShowOthers = true;
 		}
@@ -1166,7 +1166,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if(g_Config.m_SvJoinVoteDelay && Now < pPlayer->m_FirstVoteTick)
+			if(Now < pPlayer->m_FirstVoteTick)
 			{
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote", ((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);

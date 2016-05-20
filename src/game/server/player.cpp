@@ -134,13 +134,9 @@ void CPlayer::Reset()
 	//
 	// Otherwise, block voting for 60 seconds after joining.
 	if(Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
-	{
-		m_FirstVoteTick = Now + 60 * TickSpeed;
-	}
+		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
 	else
-	{
 		m_FirstVoteTick = Now;
-	}
 }
 
 void CPlayer::Tick()
