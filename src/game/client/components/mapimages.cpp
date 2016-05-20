@@ -94,7 +94,8 @@ int CMapImages::GetEntities()
 
 	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
 	{
-		char file[64] = "vanilla";
+		// DDNet default to prevent delay in seeing entities
+		char file[64] = "ddnet";
 		if(IsDDNet(&Info))
 			str_copy(file, "ddnet", sizeof(file));
 		else if(IsDDRace(&Info))
@@ -103,6 +104,8 @@ int CMapImages::GetEntities()
 			str_copy(file, "race", sizeof(file));
 		else if(IsFNG(&Info))
 			str_copy(file, "fng", sizeof(file));
+		else if(IsVanilla(&Info))
+			str_copy(file, "vanilla", sizeof(file));
 
 		char path[64];
 		str_format(path, sizeof(path), "editor/entities_clear/%s.png", file);

@@ -127,18 +127,14 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				if(Text[i] == '\n')
 				{
-					int max = i - Begin + 1;
-					if(max > (int)sizeof(Line))
-						max = sizeof(Line);
+					int max = min(i - Begin + 1, (int)sizeof(Line));
 					str_copy(Line, Text + Begin, max);
 					Begin = i+1;
 					SayChat(Line);
 					while(Text[i] == '\n') i++;
 				}
 			}
-			int max = i - Begin + 1;
-			if(max > (int)sizeof(Line))
-				max = sizeof(Line);
+			int max = min(i - Begin + 1, (int)sizeof(Line));
 			str_copy(Line, Text + Begin, max);
 			Begin = i+1;
 			m_Input.Add(Line);
@@ -148,6 +144,35 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
 	{
 		Input()->SetClipboardText(m_Input.GetString());
+	}
+
+	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
+	{
+		int SearchDirection = 0;
+		if(Input()->KeyPress(KEY_LEFT))
+			SearchDirection = -1;
+		else if(Input()->KeyPress(KEY_RIGHT))
+			SearchDirection = 1;
+
+		if(SearchDirection != 0)
+		{
+			int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
+			for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+			{
+				int next = i+SearchDirection;
+				if(	(m_Input.GetString()[next] == ' ') ||
+					(m_Input.GetString()[next] >= 32 && m_Input.GetString()[next] <= 47) ||
+					(m_Input.GetString()[next] >= 58 && m_Input.GetString()[next] <= 64) ||
+					(m_Input.GetString()[next] >= 91 && m_Input.GetString()[next] <= 96) )
+				{
+					FoundAt = i;
+					if(SearchDirection < 0)
+						FoundAt++;
+					break;
+				}
+			}
+			m_Input.SetCursorOffset(FoundAt);
+		}
 	}
 
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
@@ -641,12 +666,26 @@ void CChat::OnRender()
 		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_Show)
 			break;
 
+		char aName[64] = "";
+		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID != -1 && m_aLines[r].m_aName[0] != '\0')
+		{
+			if (m_aLines[r].m_ClientID >= 10)
+				str_format(aName, sizeof(aName),"%d: ", m_aLines[r].m_ClientID);
+			else
+				str_format(aName, sizeof(aName)," %d: ", m_aLines[r].m_ClientID);
+			str_append(aName, m_aLines[r].m_aName,sizeof(aName));
+		}
+		else
+		{
+			str_copy(aName, m_aLines[r].m_aName, sizeof(aName));
+		}
+
 		// get the y offset (calculate it if we haven't done that yet)
 		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
 		{
 			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
+			TextRender()->TextEx(&Cursor, aName, -1);
 			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
 			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
 		}
@@ -685,7 +724,7 @@ void CChat::OnRender()
 		else
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, Blend);
 
-		TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
+		TextRender()->TextEx(&Cursor, aName, -1);
 
 		// render line
 		if (m_aLines[r].m_ClientID == -1)

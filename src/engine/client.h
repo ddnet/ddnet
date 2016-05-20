@@ -41,6 +41,7 @@ protected:
 public:
 	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
+	int64 m_ReconnectTime;
 
 	CNetObj_PlayerInput m_DummyInput;
 
@@ -138,6 +139,8 @@ public:
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) = 0;
 
 	virtual void CheckVersionUpdate() = 0;
+
+	virtual int GetPredictionTime() = 0;
 
 	// snapshot interface
 

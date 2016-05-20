@@ -344,6 +344,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
+
+	bool CheckSettings = false;
+	static int s_ClVanillaSkinsOnly = g_Config.m_ClVanillaSkinsOnly;
+
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
@@ -396,7 +400,15 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla Skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		m_NeedRestartSkins = true;
+		CheckSettings = true;
+	}
+
+	if(CheckSettings)
+	{
+		if(s_ClVanillaSkinsOnly == g_Config.m_ClVanillaSkinsOnly)
+			m_NeedRestartSkins = false;
+		else
+			m_NeedRestartSkins = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -792,7 +804,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
 {
-	CUIRect Button;
+	CUIRect Button, Label;
 	char aBuf[128];
 	bool CheckSettings = false;
 
@@ -806,6 +818,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static int s_GfxTextureQuality = g_Config.m_GfxTextureQuality;
 	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
+	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
 
 	CUIRect ModeList;
 	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
@@ -925,6 +938,13 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("High-DPI screen support (experimental)"), g_Config.m_GfxHighdpi, &Button))
+	{
+		g_Config.m_GfxHighdpi ^= 1;
+		CheckSettings = true;
+	}
+
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
@@ -934,11 +954,19 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxVsync == g_Config.m_GfxVsync &&
 			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 			s_GfxTextureQuality == g_Config.m_GfxTextureQuality &&
-			s_GfxTextureCompression == g_Config.m_GfxTextureCompression)
+			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
+			s_GfxHighdpi == g_Config.m_GfxHighdpi)
 			m_NeedRestartGraphics = false;
 		else
 			m_NeedRestartGraphics = true;
 	}
+
+	MainView.HSplitTop(20.0f, &Label, &MainView);
+	Label.VSplitLeft(130.0f, &Label, &Button);
+	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Refresh Rate"), g_Config.m_GfxRefreshRate);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	Button.HMargin(2.0f, &Button);
+	g_Config.m_GfxRefreshRate = static_cast<int>(DoScrollbarH(&g_Config.m_GfxRefreshRate, &Button, g_Config.m_GfxRefreshRate/1000.0f)*1000.0f+0.1f);
 
 	CUIRect Text;
 	MainView.HSplitTop(20.0f, 0, &MainView);
@@ -1274,7 +1302,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(s_SettingsPage == 7)
 		RenderSettingsSound(MainView);
 	else if(s_SettingsPage == 8)
-		RenderSettingsDDRace(MainView);
+		RenderSettingsDDNet(MainView);
 
 	if(m_NeedRestartUpdate)
 	{
@@ -1282,7 +1310,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound)
+	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
 void CMenus::RenderSettingsHUD(CUIRect MainView)
@@ -1727,9 +1755,12 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		g_Config.m_ClReconnectTimeout = 5;*/
 }
 
-void CMenus::RenderSettingsDDRace(CUIRect MainView)
+void CMenus::RenderSettingsDDNet(CUIRect MainView)
 {
 	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
+
+	bool CheckSettings = false;
+	static int s_InpMouseOld = g_Config.m_InpMouseOld;
 
 	MainView.HSplitTop(100.0f, &Demo , &MainView);
 
@@ -1868,6 +1899,19 @@ void CMenus::RenderSettingsDDRace(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
+	{
+		g_Config.m_InpMouseOld ^= 1;
+		CheckSettings = true;
+	}
+
+	if(CheckSettings)
+	{
+		if(s_InpMouseOld == g_Config.m_InpMouseOld)
+			m_NeedRestartDDNet = false;
+		else
+			m_NeedRestartDDNet = true;
+	}
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);

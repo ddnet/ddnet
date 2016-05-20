@@ -683,11 +683,11 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 			int NumTypes = ServerBrowser()->NumDDNetTypes();
 			int PerLine = 3;
 
-			if(MaxTypes <= 12)
-				ServerFilter.HSplitTop(8.0f, 0, &ServerFilter);
+			ServerFilter.HSplitTop(4.0f, 0, &ServerFilter);
+			ServerFilter.HSplitBottom(4.0f, &ServerFilter, 0);
 
 			const float TypesWidth = 40.0f;
-			const float TypesHeight = MaxTypes > 12 ? 15.0f : 20.0f;
+			const float TypesHeight = ServerFilter.h / ceil(MaxTypes / (float)PerLine);
 
 			CUIRect TypesRect, Left, Right;
 
