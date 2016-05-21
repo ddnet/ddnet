@@ -1178,53 +1178,51 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Bottom.VSplitLeft(10.0f, &Button, &TB_Bottom);
 
-		// do tele/tune/switcher button
+		// do tele/tune/switch/speedup button
 		{
-
-			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 			{
-				typedef int(*popup)(CEditor *peditor, CUIRect View);
-				popup p;
-				static int layerButton = 0;
-				char *buttonName="Modifier";
-				float height;
-				int checked = -1;
+				int (*pPopupFunc)(CEditor *peditor, CUIRect View) = NULL;
+				const char *aButtonName = "Modifier";
+				float Height = 0.0f;
+				int Checked = -1;
 				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-				if (pS)
+				if(pS)
 				{
-					if (pS == m_Map.m_pSwitchLayer)
+					if(pS == m_Map.m_pSwitchLayer)
 					{
-						buttonName = "Switcher";
-						p = PopupSwitch;
-						height = 36;
-						checked = 0;
+						aButtonName = "Switch";
+						pPopupFunc = PopupSwitch;
+						Height = 36;
+						Checked = 0;
 					}
-					else if (pS == m_Map.m_pSpeedupLayer)
+					else if(pS == m_Map.m_pSpeedupLayer)
 					{
-						buttonName = "Speeduper";
-						p = PopupSpeedup;
-						height = 53;
-						checked = 0;
+						aButtonName = "Speedup";
+						pPopupFunc = PopupSpeedup;
+						Height = 53;
+						Checked = 0;
 					}
-					else if (pS == m_Map.m_pTuneLayer)
+					else if(pS == m_Map.m_pTuneLayer)
 					{
-						buttonName = "Tuner";
-						p = PopupTune;
-						height = 23;
-						checked = 0;
+						aButtonName = "Tune";
+						pPopupFunc = PopupTune;
+						Height = 23;
+						Checked = 0;
 					}
-					else if (pS == m_Map.m_pTeleLayer)
+					else if(pS == m_Map.m_pTeleLayer)
 					{
-						buttonName = "Teleporter";
-						p = PopupTele;
-						height = 23;
-						checked = 0;
+						aButtonName = "Tele";
+						pPopupFunc = PopupTele;
+						Height = 23;
+						Checked = 0;
 					}
 				}
-				if (DoButton_Ex(&layerButton, buttonName, checked, &Button, 0, buttonName, CUI::CORNER_ALL))
+				static int s_ModifierButton = 0;
+				if(DoButton_Ex(&s_ModifierButton, aButtonName, Checked, &Button, 0, aButtonName, CUI::CORNER_ALL))
 				{
-					UiInvokePopupMenu(&layerButton, 0, UI()->MouseX(), UI()->MouseY(), 120, height, p);
+					static int s_ModifierPopupID = 0;
+					UiInvokePopupMenu(&s_ModifierPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, pPopupFunc);
 				}
 			}
 		}
