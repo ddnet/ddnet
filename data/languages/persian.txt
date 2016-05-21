@@ -1,5 +1,5 @@
 ﻿##### authors #####
-Created By : OneShadow
+# Created By : OneShadow
 ##### translated strings #####
 
 %d%% loaded
@@ -31,19 +31,16 @@ Created By : OneShadow
 
 
 '%s' entered and joined the %s
-== '%s'ﻞﺧﺍﺩ ﻭ ﺩﺭﺍﻭ
-%s
+== '%s' ﻞﺧﺍﺩ ﻭ ﺩﺭﺍﻭ%s
 
 '%s' has left the game
 == '%s' از بازی بیرون رفت
 
 '%s' has left the game (%s)
-== '%s'ﺖﻓﺭ ﻥﻭﺮﯿﺑ ﯼﺯﺎﺑ ﺯﺍ
-(%s)
+== '%s' ﺖﻓﺭ ﻥﻭﺮﯿﺑ ﯼﺯﺎﺑ ﺯﺍ (%s)
 
 -Page %d-
-== -ﻪﺤﻔﺻ
-%d-
+== -ﻪﺤﻔﺻ%d-
 
 Abort
 == ﻥﺩﺮﮐ ﺩﺭ
@@ -177,8 +174,7 @@ Demo details
 
 
 Demofile: %s
-== ﻮﻣﺩ ﻞﯾﺎﻓ
-: %s
+== ﻮﻣﺩ ﻞﯾﺎﻓ: %s
 
 Demos
 == ﺎﻫ ﻮﻣﺩ
@@ -345,8 +341,7 @@ Map
 
 
 Maximum ping:
-== ﮓﻨﯿﭘ ﺖﯾﺎﻬﻧ
-:
+== ﮓﻨﯿﭘ ﺖﯾﺎﻬﻧ:
 
 Mouse sens.
 == ﺱﻮﻣ ﺵﺰﻐﻟ
@@ -467,12 +462,10 @@ Quit
 
 
 REC %3d:%02d
-== ﻂﺒﺿ
- %3d:%02d
+== ﻂﺒﺿ %3d:%02d
 
 Reason:
-== ﻞﯿﻟﺩ
-:
+== ﻞﯿﻟﺩ:
 
 Red team
 == ﺰﻣﺮﻗ ﻢﯿﺗ
@@ -716,8 +709,7 @@ Version
 
 
 Vote command:
-== ﯽﺠﻨﺳ ﺮﻈﻧ ﺕﺍﺭﻮﺘﺳﺩ
-:
+== ﯽﺠﻨﺳ ﺮﻈﻧ ﺕﺍﺭﻮﺘﺳﺩ:
 
 Vote description:
 == :ﯽﺠﻨﺳ ﺮﻈﻧ ﺕﺎﺤﯿﺿﻮﺗ
@@ -755,8 +747,7 @@ You must restart the game for all settings to take effect.
 == ﺪﻧﻮﺷ ﻡﺎﺠﻧﺍ ﺕﺎﻤﯿﻈﻨﺗ ﻪﮑﻨﯾﺍ ﯼﺍﺮﺑ ﺪﯿﻨﮐ ﯼﺭﺍﺰﮔﺭﺎﺑ ﻩﺭﺎﺑﻭﺩ ﺍﺭ ﯼﺯﺎﺑ ﺪﯾﺎﺑ ﺎﻤﺷ
 
 
-##### ﻪﻤﺟﺮﺗ ﻪﺑ ﺝﺎﯿﺘﺣﺍ
- #####
+##### ﻪﻤﺟﺮﺗ ﻪﺑ ﺝﺎﯿﺘﺣﺍ #####
 
 %.3f KiB
 == 
@@ -784,8 +775,7 @@ You must restart the game for all settings to take effect.
 
 
 '%s' called for vote to kick '%s' (%s)
-== ﻥﺩﺮﮐ ﮏﯿﮐ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ %s''
-'%s' (%s)
+== ﻥﺩﺮﮐ ﮏﯿﮐ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ '%s' (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
 == (%s) ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ ﻪﺑ %s'' ﻦﺘﻓﺭ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ %s''
@@ -800,8 +790,7 @@ You must restart the game for all settings to take effect.
 
 
 Admin forced server option '%s' (%s)
-== ﻪﺑ ﺩﺮﮐ ﻞﯿﻤﺤﺗ ﺍﺭ ﺕﺎﻤﯿﻈﻨﺗ ﻦﯿﻣﺩﺍ
-'%s' (%s)
+== ﻪﺑ ﺩﺮﮐ ﻞﯿﻤﺤﺗ ﺍﺭ ﺕﺎﻤﯿﻈﻨﺗ ﻦﯿﻣﺩﺍ '%s' (%s)
 
 Admin forced vote no
 == ﺩﺮﮐ ﺩﺭ ﺍﺭ ﯽﺠﻨﺳ ﺮﻈﻧ ﻦﯿﻣﺩﺍ

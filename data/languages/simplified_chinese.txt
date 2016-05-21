@@ -841,7 +841,7 @@ Servers
 == 服务器
 
 Size
-==大小
+== 大小
 
 Skin
 == 皮肤
@@ -1158,12 +1158,6 @@ Shuffle the current teams
 initialisation finished after %.2fms
 == %.2fms 后初始化完成
 
-dropped weird message '%s' (%d), failed on '%s'
-==
-
-You must restart the game for all settings to take effect.
-== 你必须重新启动游戏才能让所有新的设置生效。
-
 Use DDRace Scoreboard
 == 使用DDRace计分板
 
@@ -1301,9 +1295,6 @@ Dummy Timeout code
 
 default
 == 默认
-
-Weapon
-== 武器
 
 DM
 == 死亡竞技
