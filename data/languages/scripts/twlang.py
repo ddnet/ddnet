@@ -14,6 +14,8 @@ def decode(fileobj, elements_per_key):
     for index, line in enumerate(fileobj):
         line = line.decode("utf-8-sig").encode("utf-8")
         line = line[:-1]
+        if line and line[-1] == "\r":
+            line = line[:-1]
         if not line or line[:1] == "#":
             continue
         if line[:3] == "== ":
