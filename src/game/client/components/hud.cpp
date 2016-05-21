@@ -606,7 +606,6 @@ void CHud::OnRender()
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)
 {
-
 	if(MsgType == NETMSGTYPE_SV_DDRACETIME)
 	{
 		m_DDRaceTimeReceived = true;
@@ -624,6 +623,29 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 		{
 			m_CheckpointDiff = (float)pMsg->m_Check/100;
 			m_CheckpointTick = Client()->GameTick();
+		}
+	}
+	// NETMSGTYPE_SV_RACETIME on old race servers
+	else if(MsgType == NETMSGTYPE_SV_RECORD)
+	{
+		CServerInfo Info;
+		Client()->GetServerInfo(&Info);
+		if(!IsDDRace(&Info) && IsRace(&Info))
+		{
+			m_DDRaceTimeReceived = true;
+
+			CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
+
+			m_DDRaceTime = pMsg->m_ServerTimeBest; // First value: m_Time
+			m_DDRaceTick = 0;
+
+			m_LastReceivedTimeTick = Client()->GameTick();
+
+			if(pMsg->m_PlayerTimeBest) // Second value: m_Check
+			{
+				m_CheckpointDiff = (float)pMsg->m_PlayerTimeBest/100;
+				m_CheckpointTick = Client()->GameTick();
+			}
 		}
 	}
 	else if(MsgType == NETMSGTYPE_SV_KILLMSG)
