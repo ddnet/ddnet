@@ -57,6 +57,20 @@ bool IsValidSwitchTile(int Index)
 		);
 }
 
+bool IsValidTeleTile(int Index)
+{
+	return (
+		Index == TILE_TELEIN
+		|| Index == TILE_TELEINEVIL
+		|| Index == TILE_TELECHECKINEVIL
+		|| Index == TILE_TELEOUT
+		|| Index == TILE_TELECHECK
+		|| Index == TILE_TELECHECKOUT
+		|| Index == TILE_TELECHECKIN
+		|| Index == TILE_TELEINWEAPON
+		|| Index == TILE_TELEINHOOK
+		);
+}
 
 bool IsValidEntity(int Index)
 {

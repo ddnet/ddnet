@@ -169,7 +169,6 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 			pEditor->m_Map.MakeTeleLayer(l);
 			pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
 			pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
-			pEditor->m_Brush.Clear();
 			return 1;
 		}
 	}
@@ -1407,6 +1406,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 	{
 		NewVal = (NewVal + 256) % 256;
 
+		s_color = vec4(0.5f, 1, 0.5f, 0.5f);
 		CLayerTele *gl = pEditor->m_Map.m_pTeleLayer;
 		for(int y = 0; y < gl->m_Height; ++y)
 		{
@@ -1415,15 +1415,25 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 				if(gl->m_pTeleTile[y*gl->m_Width+x].m_Number == NewVal)
 				{
 					s_color = vec4(1,0.5f,0.5f,0.5f);
-					goto done;
+					break;
 				}
 			}
 		}
-
-		s_color = vec4(0.5f,1,0.5f,0.5f);
-
-		done:
 		pEditor->m_TeleNumber = NewVal;
+		if (!pEditor->m_Brush.IsEmpty())
+		{
+			CLayer *tl = pEditor->m_Brush.m_lLayers[0];
+			//checking for brush type==tele
+			for (int i = 0; i < pEditor->m_Brush.m_lLayers.size(); i++, tl++)
+			{
+				if (tl->m_Type == LAYERTYPE_TILES)
+					if (((CLayerTiles*)tl)->m_Tele == 1)
+				{
+					((CLayerTele*)tl)->ChangeValuesNumbersTo(NewVal);
+					break;
+				}
+			}
+		}
 	}
 
 	return 0;

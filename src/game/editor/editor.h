@@ -1053,7 +1053,6 @@ public:
 	~CLayerTele();
 
 	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNum;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
@@ -1062,6 +1061,7 @@ public:
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	virtual void ChangeValuesNumbersTo(int number);
 };
 
 class CLayerSpeedup : public CLayerTiles
