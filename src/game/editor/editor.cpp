@@ -1178,43 +1178,55 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Bottom.VSplitLeft(10.0f, &Button, &TB_Bottom);
 
-		// do tele button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_TeleButton = 0;
-		CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
+		// do tele/tune/switcher button
+		{
 
-		if(DoButton_Ex(&s_TeleButton, "Teleporter", (pS && pS->m_Tele)?0:-1, &Button, 0, "Teleporter", CUI::CORNER_ALL))
-		{
-			static int s_TelePopupID = 0;
-			UiInvokePopupMenu(&s_TelePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 23, PopupTele);
-		}
-		// do speedup button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_SpeedupButton = 0;
-		if(DoButton_Ex(&s_SpeedupButton, "Speedup", (pS && pS->m_Speedup)?0:-1, &Button, 0, "Speedup", CUI::CORNER_ALL))
-		{
-			static int s_SpeedupPopupID = 0;
-			UiInvokePopupMenu(&s_SpeedupPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 48, PopupSpeedup);
-		}
-		// do switch button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_SwitchButton = 0;
-		if(DoButton_Ex(&s_SwitchButton, "Switcher", (pS && pS->m_Switch)?0:-1, &Button, 0, "Switcher", CUI::CORNER_ALL))
-		{
-			static int s_SwitchPopupID = 0;
-			UiInvokePopupMenu(&s_SwitchPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 36, PopupSwitch);
-		}
-		// do tuning button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_TuneButton = 0;
-		if(DoButton_Ex(&s_TuneButton, "Tune", (pS && pS->m_Tune)?0:-1, &Button, 0, "Tune", CUI::CORNER_ALL))
-		{
-			static int s_TunePopupID = 0;
-			UiInvokePopupMenu(&s_TunePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 23, PopupTune);
+			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+			{
+				typedef int(*popup)(CEditor *peditor, CUIRect View);
+				popup p;
+				static int layerButton = 0;
+				char *buttonName="Modifier";
+				float height;
+				int checked = -1;
+				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
+				if (pS)
+				{
+					if (pS == m_Map.m_pSwitchLayer)
+					{
+						buttonName = "Switcher";
+						p = PopupSwitch;
+						height = 36;
+						checked = 0;
+					}
+					else if (pS == m_Map.m_pSpeedupLayer)
+					{
+						buttonName = "Speeduper";
+						p = PopupSpeedup;
+						height = 53;
+						checked = 0;
+					}
+					else if (pS == m_Map.m_pTuneLayer)
+					{
+						buttonName = "Tuner";
+						p = PopupTune;
+						height = 23;
+						checked = 0;
+					}
+					else if (pS == m_Map.m_pTeleLayer)
+					{
+						buttonName = "Teleporter";
+						p = PopupTele;
+						height = 23;
+						checked = 0;
+					}
+				}
+				if (DoButton_Ex(&layerButton, buttonName, checked, &Button, 0, buttonName, CUI::CORNER_ALL))
+				{
+					UiInvokePopupMenu(&layerButton, 0, UI()->MouseX(), UI()->MouseY(), 120, height, p);
+				}
+			}
 		}
 	}
 
