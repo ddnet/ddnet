@@ -224,6 +224,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			m_CompletionChosen = -1;
 			str_copy(m_aCompletionBuffer, m_Input.GetString(), sizeof(m_aCompletionBuffer));
+			m_CompletionRenderOffset = 0.0f;
 		}
 
 		// find the current command
