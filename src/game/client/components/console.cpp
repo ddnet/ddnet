@@ -609,7 +609,7 @@ void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
 
 bool CGameConsole::OnInput(IInput::CEvent Event)
 {
-	if(m_ConsoleState != CONSOLE_OPEN)
+	if(m_ConsoleState != CONSOLE_OPEN && m_ConsoleState != CONSOLE_OPENING)
 		return false;
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;
