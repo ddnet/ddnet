@@ -1110,7 +1110,8 @@ public:
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
 	virtual void BrushRotate(float Amount);
-
+	virtual void BrushFlipX();
+	virtual void BrushFlipY();
 };
 
 class CLayerTune : public CLayerTiles

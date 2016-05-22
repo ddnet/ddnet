@@ -52,7 +52,7 @@ bool IsValidSwitchTile(int Index)
 		|| Index == TILE_SWITCHCLOSE
 		|| Index == TILE_PENALTY
 		|| Index == TILE_BONUS
-		//Switch layer do not contain spawns and flags (which acceptedeable in IsValidEntity() )
+		//Switch layer do not contain spawn-entities and flag-enties (which acceptedeable in IsValidEntity() )
 		|| (Index >= ENTITY_ARMOR_1 + ENTITY_OFFSET && IsValidEntity(Index))
 		);
 }
