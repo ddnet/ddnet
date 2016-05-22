@@ -2421,7 +2421,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					}
 
 					CLayerGroup *g = GetSelectedGroup();
-					if(g)
+					if(!m_ShowPicker && g)
 					{
 						m_Brush.m_OffsetX += g->m_OffsetX;
 						m_Brush.m_OffsetY += g->m_OffsetY;
