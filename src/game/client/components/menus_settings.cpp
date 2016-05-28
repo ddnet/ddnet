@@ -417,7 +417,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(230.0f, &Label, 0);
 	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
-	Label.HSplitTop(15.0f, 0, &Label);;
+	Label.HSplitTop(15.0f, 0, &Label);
 	Label.VSplitLeft(70.0f, 0, &Label);
 	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
 
@@ -1224,7 +1224,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 	{
 		str_copy(g_Config.m_ClLanguagefile, s_Languages[s_SelectedLanguage].m_FileName, sizeof(g_Config.m_ClLanguagefile));
 		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName, Storage(), Console());
-		
+
 		// Load Font
 		static CFont *pDefaultFont = 0;
 		char aFilename[512];
@@ -1950,7 +1950,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
 	}
-	
+
 	{
 		static float s_Map = 0.0f;
 		aRects[1].HSplitTop(25.0f, &Background, &aRects[1]);
@@ -1965,7 +1965,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			g_Config.m_ClBackgroundShowTilesLayers ^= 1;
 		}
 	}
-	
+
 	MainView.HSplitTop(30.0f, &Label, &Miscellaneous);
 	UI()->DoLabelScaled(&Label, Localize("Miscellaneous"), 20.0f, -1);
 	Miscellaneous.VMargin(5.0f, &Miscellaneous);

@@ -125,7 +125,7 @@ const char *CUnpacker::GetString(int SanitizeType)
 		m_pCurrent++;
 		if(m_pCurrent == m_pEnd)
 		{
-			m_Error = 1;;
+			m_Error = 1;
 			return "";
 		}
 	}
