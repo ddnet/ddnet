@@ -116,6 +116,8 @@ struct CSqlTeamScoreData : CSqlData
 
 struct CSqlTeamSave : CSqlData
 {
+	virtual ~CSqlTeamSave();
+
 	int m_Team;
 	int m_ClientID;
 	sqlstr::CSqlString<128> m_Code;

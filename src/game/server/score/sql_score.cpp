@@ -27,6 +27,17 @@ int CSqlExecData::ms_InstanceCount = 0;
 
 LOCK CSqlScore::ms_FailureFileLock = lock_create();
 
+CSqlTeamSave::~CSqlTeamSave()
+{
+	try
+	{
+		((class CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.SetSaving(m_Team, false);
+	}
+	catch (CGameContextError& e) {}
+}
+
+
+
 CSqlScore::CSqlScore(CGameContext *pGameServer) :
 m_pGameServer(pGameServer),
 m_pServer(pGameServer->Server())
@@ -1386,7 +1397,6 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 
 bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
-	CSaveTeam* SavedTeam = 0;
 	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
 
 	try
@@ -1394,10 +1404,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		int Team = pData->m_Team;
 
 		if (HandleFailure)
-		{
-			((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
 			return true;
-		}
 
 		char TeamString[65536];
 
@@ -1405,8 +1412,8 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 
 		if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.Count(Team) > 0)
 		{
-			SavedTeam = new CSaveTeam(pData->GameServer()->m_pController);
-			Num = SavedTeam->save(Team);
+			CSaveTeam SavedTeam(pData->GameServer()->m_pController);
+			Num = SavedTeam.save(Team);
 			switch (Num)
 			{
 				case 1:
@@ -1424,7 +1431,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			}
 			if(!Num)
 			{
-				str_copy(TeamString, SavedTeam->GetString(), sizeof(TeamString));
+				str_copy(TeamString, SavedTeam.GetString(), sizeof(TeamString));
 				sqlstr::ClearString(TeamString, sizeof(TeamString));
 			}
 		}
@@ -1432,10 +1439,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
 
 		if (Num)
-		{
-			((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.SetSaving(Team, false);
 			return true;
-		}
 
 		try
 		{
@@ -1463,7 +1467,6 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				pData->GameServer()->SendChatTarget(pData->m_ClientID, "This save-code already exists");
 			}
 
-			return true;
 		}
 		catch (sql::SQLException &e)
 		{
@@ -1475,22 +1478,15 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		}
 		catch (CGameContextError &e)
 		{
-			if(SavedTeam)
-				delete SavedTeam;
 			dbg_msg("sql", "WARNING: Could not send chatmessage during saving team due to reload/change of map.");
-			return true;
 		}
 	}
 	catch (CGameContextError &e)
 	{
 		dbg_msg("sql", "WARNING: Aborted saving team due to reload/change of map.");
-		return true;
 	}
 
-	if(SavedTeam)
-		delete SavedTeam;
-
-	return false;
+	return true;
 }
 
 void CSqlScore::LoadTeam(const char* Code, int ClientID)
@@ -1505,23 +1501,10 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 
 bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
-	CSaveTeam* SavedTeam;
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 
 	if (HandleFailure)
 		return true;
-
-	try
-	{
-		SavedTeam = new CSaveTeam(pData->GameServer()->m_pController);
-	}
-	catch (CGameContextError &e)
-	{
-		dbg_msg("sql", "WARNING: Aborted loading team due to reload/change of map.");
-		return true;
-	}
-
-	int Num;
 
 	try
 	{
@@ -1551,7 +1534,9 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				goto end;
 			}
 
-			Num = SavedTeam->LoadString(pSqlServer->GetResults()->getString("Savegame").c_str());
+			CSaveTeam SavedTeam(pData->GameServer()->m_pController);
+
+			int Num = SavedTeam.LoadString(pSqlServer->GetResults()->getString("Savegame").c_str());
 
 			if(Num)
 				pData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to load savegame: data corrupted");
@@ -1559,9 +1544,9 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			{
 
 				bool found = false;
-				for (int i = 0; i < SavedTeam->GetMembersCount(); i++)
+				for (int i = 0; i < SavedTeam.GetMembersCount(); i++)
 				{
-					if(str_comp(SavedTeam->SavedTees[i].GetName(), pData->Server()->ClientName(pData->m_ClientID)) == 0)
+					if(str_comp(SavedTeam.SavedTees[i].GetName(), pData->Server()->ClientName(pData->m_ClientID)) == 0)
 					{ found = true; break; }
 				}
 				if (!found)
@@ -1581,7 +1566,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 						n = ((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.m_Core.Team(pData->m_ClientID); // if all Teams are full your the only one in your team
 					}
 
-					Num = SavedTeam->load(n);
+					Num = SavedTeam.load(n);
 
 					if(Num == 1)
 					{
@@ -1590,13 +1575,13 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 					else if(Num >= 10 && Num < 100)
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam->SavedTees[Num-10].GetName());
+						str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam.SavedTees[Num-10].GetName());
 						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 					}
 					else if(Num >= 100)
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam->SavedTees[Num-100].GetName());
+						str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam.SavedTees[Num-100].GetName());
 						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 					}
 					else
@@ -1613,7 +1598,6 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "No such savegame for this map");
 
 		end:
-		delete SavedTeam;
 		return true;
 	}
 	catch (sql::SQLException &e)
@@ -1623,7 +1607,6 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		dbg_msg("sql", aBuf2);
 		dbg_msg("sql", "ERROR: Could not load the team");
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not load the team");
-		delete SavedTeam;
 	}
 	catch (CGameContextError &e)
 	{
