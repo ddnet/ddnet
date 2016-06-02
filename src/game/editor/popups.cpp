@@ -1429,7 +1429,13 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 				if (tl->m_Type == LAYERTYPE_TILES)
 					if (((CLayerTiles*)tl)->m_Tele == 1)
 				{
-					((CLayerTele*)tl)->ChangeValuesNumbersTo(NewVal);
+					CLayerTele *tel = (CLayerTele*)tl;
+					for (int y = 0; y < tel->m_Height; y++)
+						for (int x = 0; x < tel->m_Width; x++)
+						{
+							if (tel->m_pTiles[tel->m_Width*y + x].m_Index != 0)
+								tel->m_pTeleTile[tel->m_Width*y + x].m_Number = pEditor->m_TeleNumber;
+						}
 					break;
 				}
 			}
@@ -1501,6 +1507,8 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 		NewVal = (NewVal + 256) % 256;
 
 		CLayerSwitch *gl = pEditor->m_Map.m_pSwitchLayer;
+
+		s_color = vec4(0.5f, 1, 0.5f, 0.5f);
 		for(int y = 0; y < gl->m_Height; ++y)
 		{
 			for(int x = 0; x < gl->m_Width; ++x)
@@ -1508,19 +1516,62 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 				if(gl->m_pSwitchTile[y*gl->m_Width+x].m_Number == NewVal)
 				{
 					s_color = vec4(1,0.5f,0.5f,0.5f);
-					goto done;
+					break;
 				}
 			}
 		}
 
-		s_color = vec4(0.5f,1,0.5f,0.5f);
-
-		done:
 		pEditor->m_SwitchNum = NewVal;
+		if (!pEditor->m_Brush.IsEmpty())
+		{
+			CLayer *tl = pEditor->m_Brush.m_lLayers[0];
+			for (int i = 0; i < pEditor->m_Brush.m_lLayers.size(); i++, tl++)
+			{
+				if (tl->m_Type == LAYERTYPE_TILES)
+					if (((CLayerTiles*)tl)->m_Switch == 1)
+					{
+
+						CLayerSwitch *sl = (CLayerSwitch*)tl;
+						for (int y = 0; y < sl->m_Height; y++)
+							for (int x = 0; x < sl->m_Width; x++)
+							{
+								if (sl->m_pTiles[sl->m_Width*y + x].m_Index != 0)
+								{
+									sl->m_pSwitchTile[sl->m_Width*y + x].m_Number = pEditor->m_SwitchNum;
+								}
+							}
+						break;
+					}
+			}
+		}
 	}
-	if(Prop == PROP_SwitchDelay)
+	if (Prop == PROP_SwitchDelay) 
+	{
 		pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 
+		if (!pEditor->m_Brush.IsEmpty())
+		{
+			CLayer *tl = pEditor->m_Brush.m_lLayers[0];
+			for (int i = 0; i < pEditor->m_Brush.m_lLayers.size(); i++, tl++)
+			{
+				if (tl->m_Type == LAYERTYPE_TILES)
+					if (((CLayerTiles*)tl)->m_Switch == 1)
+					{
+
+						CLayerSwitch *sl = (CLayerSwitch*)tl;
+						for (int y = 0; y < sl->m_Height; y++)
+							for (int x = 0; x < sl->m_Width; x++)
+							{
+								if (sl->m_pTiles[sl->m_Width*y + x].m_Index != 0)
+								{
+									sl->m_pSwitchTile[sl->m_Width*y + x].m_Delay = pEditor->m_SwitchDelay;
+								}
+							}
+						break;
+					}
+			}
+		}
+	}
 	return 0;
 }
 

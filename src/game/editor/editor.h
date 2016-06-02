@@ -540,6 +540,7 @@ public:
 
 	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
 
+
 	int m_TexID;
 	int m_Game;
 	int m_Image;
@@ -1061,7 +1062,6 @@ public:
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
-	virtual void ChangeValuesNumbersTo(int number);
 };
 
 class CLayerSpeedup : public CLayerTiles
@@ -1102,8 +1102,6 @@ public:
 	~CLayerSwitch();
 
 	CSwitchTile *m_pSwitchTile;
-	unsigned char m_SwitchNumber;
-	unsigned char m_SwitchDelay;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);

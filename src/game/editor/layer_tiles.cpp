@@ -241,28 +241,26 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 		pBrush->AddLayer(pGrabbed);
 
-		// copy the tiles
-		for(int y = 0; y < r.h; y++)
-			for(int x = 0; x < r.w; x++)
-				pGrabbed->m_pTiles[y*pGrabbed->m_Width+x] = GetTile(r.x+x, r.y+y);
-
 		// copy the switch data
-		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x] = ((CLayerSwitch*)this)->m_pSwitchTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_DOOR + ENTITY_OFFSET || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_HIT_START || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_HIT_END || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHOPEN || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHCLOSE || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHTIMEDOPEN || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_SWITCHTIMEDCLOSE || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_JUMP || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_PENALTY || pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_BONUS)
+					if (m_pEditor->m_AllowPlaceUnusedTiles || IsValidSwitchTile(GetTile(r.x + x, r.y + y).m_Index))
 					{
-						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Number;
-						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Delay;
+						pGrabbed->m_pTiles[y*pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+						if (!m_pEditor->m_ShowPicker)
+						{
+							pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width + x] = ((CLayerSwitch*)this)->m_pSwitchTile[(r.y + y)*m_Width + (r.x + x)];
+						}
+						else
+						{
+							pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width + x].m_Number = m_pEditor->m_SwitchNum;
+							pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width + x].m_Delay = m_pEditor->m_SwitchDelay;
+						}
 					}
 				}
-		pGrabbed->m_SwitchNumber = m_pEditor->m_SwitchNum;
-		pGrabbed->m_SwitchDelay = m_pEditor->m_SwitchDelay;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
-	}
-
+	str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+}
 	else if(m_pEditor->GetSelectedLayer(0) == m_pEditor->m_Map.m_pTuneLayer)
 	{
 		CLayerTune *pGrabbed = new CLayerTune(r.w, r.h);
@@ -321,7 +319,6 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				pGrabbed->m_pTiles[y*pGrabbed->m_Width+x] = GetTile(r.x+x, r.y+y);
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
-
 	return 1;
 }
 
@@ -1020,16 +1017,6 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	}
 }
 
-void CLayerTele::ChangeValuesNumbersTo(int number)
-{
-	for (int y = 0; y < m_Height; y++)
-		for (int x = 0; x < m_Width; x++)
-		{
-			if (m_pTiles[m_Width*y + x].m_Index != 0)
-				m_pTeleTile[m_Width*y + x].m_Number = number;
-		}
-}
-
 //------------------------------------------------------
 
 CLayerSpeedup::CLayerSpeedup(int w, int h)
@@ -1538,14 +1525,12 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 	if(m_Readonly)
 		return;
 
+	if (pBrush->m_Type != LAYERTYPE_TILES || ((CLayerTiles*)pBrush)->m_Switch != 1)
+		return;
+
 	CLayerSwitch *l = (CLayerSwitch *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
-	if(str_comp(l->m_aFileName, m_pEditor->m_aFileName))
-	{
-		m_pEditor->m_SwitchNum = l->m_SwitchNumber;
-		m_pEditor->m_SwitchDelay = l->m_SwitchDelay;
-	}
 
 	for(int y = 0; y < l->m_Height; y++)
 		for(int x = 0; x < l->m_Width; x++)
@@ -1557,12 +1542,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			if(m_pEditor->m_AllowPlaceUnusedTiles ||IsValidSwitchTile(l->m_pTiles[y*l->m_Width+x].m_Index))
 			{
-				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
-				{
-					m_pSwitchTile[fy*m_Width+fx].m_Number = m_pEditor->m_SwitchNum;
-					m_pSwitchTile[fy*m_Width+fx].m_Delay = m_pEditor->m_SwitchDelay;
-				}
-				else if(l->m_pSwitchTile[y*l->m_Width+x].m_Number)
+				 if(l->m_pSwitchTile[y*l->m_Width+x].m_Number)
 				{
 					m_pSwitchTile[fy*m_Width+fx].m_Number = l->m_pSwitchTile[y*l->m_Width+x].m_Number;
 					m_pSwitchTile[fy*m_Width+fx].m_Delay  = l->m_pSwitchTile[y*l->m_Width+x].m_Delay;
@@ -1575,14 +1555,14 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 				m_pSwitchTile[fy*m_Width+fx].m_Type = l->m_pTiles[y*l->m_Width+x].m_Index;
 				m_pSwitchTile[fy*m_Width+fx].m_Flags = l->m_pTiles[y*l->m_Width+x].m_Flags;
-			}
-			else
-			{
-				m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
-				m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
-				m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
-				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
-			}
+		     	}
+		    	else
+		    	{
+					m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
+					m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
+					m_pSwitchTile[fy*m_Width+fx].m_Flags = 0;
+					m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
+		    	}
 			m_pTiles[fy*m_Width + fx].m_Index = l->m_pTiles[y*l->m_Width + x].m_Index;
 			m_pTiles[fy*m_Width + fx].m_Flags = l->m_pTiles[y*l->m_Width + x].m_Flags;
 
@@ -1638,11 +1618,11 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				m_pSwitchTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
 				if(m_pEditor->m_SwitchNum && m_pTiles[fy*m_Width+fx].m_Index > 0)
 				{
-					if((!pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number) || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
+					if((!pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number))
 						m_pSwitchTile[fy*m_Width+fx].m_Number = m_pEditor->m_SwitchNum;
 					else
 						m_pSwitchTile[fy*m_Width+fx].m_Number = pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number;
-					if((!pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Delay) || m_pEditor->m_SwitchDelay != pLt->m_SwitchDelay)
+					if((!pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Delay))
 						m_pSwitchTile[fy*m_Width+fx].m_Delay = m_pEditor->m_SwitchDelay;
 					else
 						m_pSwitchTile[fy*m_Width+fx].m_Delay = pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Delay;
