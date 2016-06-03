@@ -1475,6 +1475,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			dbg_msg("sql", aBuf2);
 			dbg_msg("sql", "ERROR: Could not save the team");
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not save the team");
+			return false;
 		}
 		catch (CGameContextError &e)
 		{
