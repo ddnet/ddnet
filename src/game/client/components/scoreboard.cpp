@@ -454,7 +454,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			else
 				str_format(aId, sizeof(aId)," %d: ", pInfo->m_ClientID);
 			str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
-			Cursor.m_LineWidth = NameLength+3;
+			Cursor.m_LineWidth = NameLength+8;
 			TextRender()->TextEx(&Cursor, aId, -1);
 		}
 		else
