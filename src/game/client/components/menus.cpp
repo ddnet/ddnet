@@ -926,11 +926,15 @@ int CMenus::Render()
 
 	m_MouseSlow = false;
 
-	static bool s_First = true;
-	if(s_First)
+	static int s_Frame = 0;
+	if(s_Frame == 0)
+	{
+		s_Frame++;
+	}
+	else if(s_Frame == 1)
 	{
 		m_pClient->m_pSounds->Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
-		s_First = false;
+		s_Frame++;
 		m_DoubleClickIndex = -1;
 
 		if(g_Config.m_UiPage == PAGE_INTERNET)
