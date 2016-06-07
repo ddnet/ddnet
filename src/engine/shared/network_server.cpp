@@ -283,7 +283,7 @@ void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num)
 
 	//
 	m_Construct.m_DataSize = (int)(pChunkData-m_Construct.m_aChunkData);
-	CNetBase::SendPacket(m_Socket, &Addr, &m_Construct, GetToken(Addr));
+	CNetBase::SendPacket(m_Socket, &Addr, &m_Construct, NET_SECURITY_TOKEN_UNSUPPORTED);
 }
 
 // connection-less msg packet without token-support
