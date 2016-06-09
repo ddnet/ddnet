@@ -89,8 +89,14 @@ bool CSqlScore::Connect()
 
 		// Create connection
 		m_pDriver = get_driver_instance();
-		m_pConnection = m_pDriver->connect(connection_properties);
-
+		//m_pConnection = m_pDriver->connect(connection_properties); For Linux
+	
+		m_pConnection = m_pDriver->connect(m_pIp, m_pUser, m_pPass); //For Windows
+		/*
+		char aIp[256];
+		str_format(aIp, sizeof(aIp), "%s:%s", m_pIp, m_Port);
+		m_pConnection = m_pDriver->connect(aIp, m_pUser, m_pPass); //For Windows
+		*/
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
 
