@@ -270,6 +270,7 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_RequestedMap = MapName;
 	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
+	sqlstr::FuzzyString(Tmp->m_aFuzzyMap);
 
 	void *VoteThread = thread_init(ExecSqlFunc, new CSqlExecData(MapVoteThread, Tmp));
 	thread_detach(VoteThread);
