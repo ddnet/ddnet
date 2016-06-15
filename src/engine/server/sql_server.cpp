@@ -62,9 +62,7 @@ bool CSqlServer::Connect()
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-			dbg_msg("sql", aBuf);
+			dbg_msg("sql", "MySQL Error: %s", e.what());
 
 			dbg_msg("sql", "ERROR: SQL connection failed");
 			UnLock();
@@ -111,10 +109,7 @@ bool CSqlServer::Connect()
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
-
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: sql connection failed");
 		UnLock();
 		return false;
@@ -194,10 +189,7 @@ void CSqlServer::CreateTables()
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
-		dbg_msg("sql", "ERROR: Tables were NOT created");
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 	}
 
 	Disconnect();

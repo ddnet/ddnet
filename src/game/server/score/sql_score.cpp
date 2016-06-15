@@ -72,11 +72,7 @@ void CSqlScore::OnShutdown()
 	{
 		// print a log about every two seconds
 		if (i % 20 == 0)
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Waiting for score-threads to complete (%d left)", CSqlExecData::ms_InstanceCount);
-			dbg_msg("sql", aBuf);
-		}
+			dbg_msg("sql", "Waiting for score-threads to complete (%d left)", CSqlExecData::ms_InstanceCount);
 		++i;
 		thread_sleep(100);
 	}
@@ -138,9 +134,7 @@ bool CSqlScore::Init(CSqlServer* pSqlServer, const CSqlData *pGameData, bool Han
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Tables were NOT created");
 	}
 	catch (CGameContextError &e)
@@ -251,9 +245,7 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not update account");
 	}
 	catch (CGameContextError &e)
@@ -348,9 +340,7 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not start Mapvote");
 	}
 	catch (CGameContextError &e)
@@ -441,9 +431,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not get Mapinfo");
 	}
 	catch (CGameContextError &e)
@@ -535,7 +523,7 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 
 		// if no entry found... create a new one
 		str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_race(Map, Name, Timestamp, Time, Server, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25) VALUES ('%s', '%s', CURRENT_TIMESTAMP(), '%.2f', '%s', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f', '%.2f');", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr(), pData->m_Time, g_Config.m_SvSqlServerName, pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2], pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5], pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8], pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11], pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14], pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17], pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20], pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23], pData->m_aCpCurrent[24]);
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "%s", aBuf);
 		pSqlServer->executeSql(aBuf);
 
 		dbg_msg("sql", "Updating time done");
@@ -543,9 +531,7 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not update time");
 	}
 	return false;
@@ -677,7 +663,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 		if (aUpdateID[0])
 		{
 			str_format(aBuf, sizeof(aBuf), "UPDATE %s_teamrace SET Time='%.2f' WHERE ID = '%s';", pSqlServer->GetPrefix(), pData->m_Time, aUpdateID);
-			dbg_msg("sql", aBuf);
+			dbg_msg("sql", "%s", aBuf);
 			pSqlServer->executeSql(aBuf);
 		}
 		else
@@ -688,7 +674,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 			{
 			// if no entry found... create a new one
 				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_teamrace(Map, Name, Timestamp, Time, ID) VALUES ('%s', '%s', CURRENT_TIMESTAMP(), '%.2f', @id);", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_aNames[i].ClrStr(), pData->m_Time);
-				dbg_msg("sql", aBuf);
+				dbg_msg("sql", "%s", aBuf);
 				pSqlServer->executeSql(aBuf);
 			}
 		}
@@ -699,9 +685,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not update time");
 	}
 	return false;
@@ -766,9 +750,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show rank");
 	}
 	catch (CGameContextError &e)
@@ -856,9 +838,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show team rank");
 	}
 	catch (CGameContextError &e)
@@ -916,9 +896,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show top5");
 	}
 	catch (CGameContextError &e)
@@ -1023,9 +1001,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show teamtop5");
 	}
 	catch (CGameContextError &e)
@@ -1123,9 +1099,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show times");
 	}
 	catch (CGameContextError &e)
@@ -1186,9 +1160,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show points");
 	}
 	catch (CGameContextError &e)
@@ -1241,9 +1213,7 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGam
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show toppoints");
 	}
 	catch (CGameContextError &e)
@@ -1301,9 +1271,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not vote random map");
 	}
 	catch (CGameContextError &e)
@@ -1359,9 +1327,7 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not vote random unfinished map");
 	}
 	catch (CGameContextError &e)
@@ -1452,7 +1418,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			{
 				char aBuf[65536];
 				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pSqlServer->GetPrefix(), TeamString, pData->m_Map.ClrStr(), pData->m_Code.ClrStr(), pData->m_Server);
-				dbg_msg("sql", aBuf);
+				dbg_msg("sql", "%s", aBuf);
 				pSqlServer->executeSql(aBuf);
 
 				// be sure to keep all calls to pData->GameServer() after inserting the save, otherwise it might be lost due to CGameContextError.
@@ -1471,9 +1437,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		}
 		catch (sql::SQLException &e)
 		{
-			char aBuf2[256];
-			str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
-			dbg_msg("sql", aBuf2);
+			dbg_msg("sql", "MySQL Error: %s", e.what());
 			dbg_msg("sql", "ERROR: Could not save the team");
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not save the team");
 			return false;
@@ -1604,9 +1568,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	}
 	catch (sql::SQLException &e)
 	{
-		char aBuf2[256];
-		str_format(aBuf2, sizeof(aBuf2), "MySQL Error: %s", e.what());
-		dbg_msg("sql", aBuf2);
+		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not load the team");
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, "MySQL Error: Could not load the team");
 	}
