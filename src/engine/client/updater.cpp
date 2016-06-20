@@ -3,13 +3,15 @@
 #include <engine/fetcher.h>
 #include <engine/storage.h>
 #include <engine/client.h>
-#include <engine/external/json-parser/json.h>
+#include <engine/external/json/json.h>
 #include <game/version.h>
 
 #include <stdlib.h> // system
 
 using std::string;
 using std::map;
+
+using json = nlohmann::json;
 
 CUpdater::CUpdater()
 {
@@ -74,7 +76,7 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 	CFetchTask *Task = new CFetchTask(false);
 	m_pFetcher->QueueAdd(Task, aBuf, aPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
- 
+
 void CUpdater::MoveFile(const char *pFile)
 {
 	char aBuf[256];
@@ -164,34 +166,42 @@ void CUpdater::ParseUpdate()
 		io_read(File, aBuf, sizeof(aBuf));
 		io_close(File);
 
-		json_value *pVersions = json_parse(aBuf);
-
-		if(pVersions && pVersions->type == json_array)
+		try
 		{
-			for(int i = 0; i < json_array_length(pVersions); i++)
+			json j = json::parse(aBuf);
+
+			for (json& json_version : j)
 			{
-				const json_value *pTemp;
-				const json_value *pCurrent = json_array_get(pVersions, i);
-				if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
+				try
 				{
-					if(json_boolean_get(json_object_get(pCurrent, "client")))
-						m_ClientUpdate = true;
-					if(json_boolean_get(json_object_get(pCurrent, "server")))
-						m_ServerUpdate = true;
-					if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
+					if(str_comp(json_version["version"].get<string>().c_str(), GAME_RELEASE_VERSION))
 					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
+						if (json_version["client"].get<bool>())
+							m_ClientUpdate = true;
+
+						if (json_version["server"].get<bool>())
+							m_ServerUpdate = true;
+
+						for (json& json_download : json_version["download"])
+							AddFileJob(json_download.get<string>().c_str(), true);
+
+						for (json& json_remove : json_version["remove"])
+							AddFileJob(json_remove.get<string>().c_str(), false);
 					}
-					if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
-					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
-					}
+					else
+						break;
 				}
-				else
-					break;
+				catch (const std::domain_error& e)
+				{
+					dbg_msg("updater", "error: failed to parse update.json");
+					dbg_msg("updater", e.what());
+				}
 			}
+		}
+		catch (std::invalid_argument& e)
+		{
+			dbg_msg("updater", "error: failed to parse update.json");
+			dbg_msg("updater", e.what());
 		}
 	}
 }

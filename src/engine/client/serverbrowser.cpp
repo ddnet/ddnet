@@ -18,9 +18,13 @@
 
 #include <mastersrv/mastersrv.h>
 
-#include <engine/external/json-parser/json.h>
+#include <engine/external/json/json.h>
+
 
 #include "serverbrowser.h"
+
+using json = nlohmann::json;
+
 class SortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -912,72 +916,68 @@ void CServerBrowser::LoadDDNet()
 		io_read(File, aBuf, sizeof(aBuf));
 		io_close(File);
 
-
 		// parse JSON
-		json_value *pCountries = json_parse(aBuf);
-
-		if (pCountries && pCountries->type == json_array)
+		try
 		{
-			for (int i = 0; i < json_array_length(pCountries) && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
+			json j = json::parse(aBuf);
+
+			for (json& country : j)
 			{
-				// pSrv - { name, flagId, servers }
-				const json_value *pSrv = json_array_get(pCountries, i);
-				const json_value *pTypes = json_object_get(pSrv, "servers");
-				const json_value *pName = json_object_get(pSrv, "name");
-				const json_value *pFlagID = json_object_get(pSrv, "flagId");
-
-				if (pSrv->type != json_object || pTypes->type != json_object || pName->type != json_string || pFlagID->type != json_integer)
+				try
 				{
-					dbg_msg("client_srvbrowse", "invalid attributes");
-					continue;
-				}
+					int flagID = country["flagId"].get<int>();
+					std::string server_name = country["name"].get<std::string>();
+					json json_servers = country["servers"];
 
-				// build structure
-				CDDNetCountry *pCntr = &m_aDDNetCountries[m_NumDDNetCountries];
+					// build structure
+					CDDNetCountry *pCntr = &m_aDDNetCountries[m_NumDDNetCountries];
 
-				pCntr->Reset();
+					pCntr->Reset();
 
-				str_copy(pCntr->m_aName, json_string_get(pName), sizeof(pCntr->m_aName));
-				pCntr->m_FlagID = json_int_get(pFlagID);
+					str_copy(pCntr->m_aName, server_name.c_str(), server_name.length());
+					pCntr->m_FlagID = flagID;
 
-				// add country
-				for (unsigned int t = 0; t < pTypes->u.object.length; t++)
-				{
-					const char *pType = pTypes->u.object.values[t].name;
-					const json_value *pAddrs = pTypes->u.object.values[t].value;
-
-					// add type
-					if(json_array_length(pAddrs) > 0 && m_NumDDNetTypes < MAX_DDNET_TYPES)
+					for (json::iterator json_srv_by_mod = json_servers.begin(); json_srv_by_mod != json_servers.end(); ++json_srv_by_mod)
 					{
+						if (m_NumDDNetTypes == MAX_DDNET_TYPES)
+							break;
+
 						int pos;
 						for(pos = 0; pos < m_NumDDNetTypes; pos++)
 						{
-							if(!str_comp(m_aDDNetTypes[pos], pType))
+							if(!str_comp(m_aDDNetTypes[pos], json_srv_by_mod.key().c_str()))
 								break;
 						}
 						if(pos == m_NumDDNetTypes)
 						{
-							str_copy(m_aDDNetTypes[m_NumDDNetTypes], pType, sizeof(m_aDDNetTypes[m_NumDDNetTypes]));
-							m_NumDDNetTypes++;
+							str_copy(m_aDDNetTypes[m_NumDDNetTypes], json_srv_by_mod.key().c_str(), sizeof(m_aDDNetTypes[m_NumDDNetTypes]));
+							++m_NumDDNetTypes;
+						}
+
+						// add addresses
+						for (json& addr : json_srv_by_mod.value())
+						{
+							std::string addr_str = addr.get<std::string>();
+							net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], addr_str.c_str());
+							str_copy(pCntr->m_aTypes[pCntr->m_NumServers], json_srv_by_mod.key().c_str(), json_srv_by_mod.key().length());
+							++pCntr->m_NumServers;
 						}
 					}
-
-					// add addresses
-					for (int g = 0; g < json_array_length(pAddrs); g++, pCntr->m_NumServers++)
-					{
-						const json_value *pAddr = json_array_get(pAddrs, g);
-						const char* pStr = json_string_get(pAddr);
-						net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
-						str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
-					}
+					if (++m_NumDDNetCountries == MAX_DDNET_COUNTRIES)
+						break;
 				}
-
-				m_NumDDNetCountries++;
+				catch (const std::domain_error& e)
+				{
+					dbg_msg("client_srvbrowse", "invalid attributes");
+					dbg_msg("client_srvbrowse", e.what());
+				}
 			}
 		}
-
-		if (pCountries)
-			json_value_free(pCountries);
+		catch (std::invalid_argument& e)
+		{
+			dbg_msg("client_srvbrowse", "error: failed to parse ddnet-servers.json");
+			dbg_msg("client_srvbrowse", e.what());
+		}
 	}
 }
 
