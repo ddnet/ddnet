@@ -1324,6 +1324,7 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 		}
 
 		dbg_msg("sql", "voting random unfinished map done");
+		return true;
 	}
 	catch (sql::SQLException &e)
 	{
