@@ -224,6 +224,8 @@ int CInput::Update()
 				case SDL_MOUSEWHEEL:
 					if(Event.wheel.y > 0) Key = KEY_MOUSE_WHEEL_UP; // ignore_convention
 					if(Event.wheel.y < 0) Key = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
+					if(Event.wheel.x > 0) Key = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
+					if(Event.wheel.x < 0) Key = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
 					Action |= IInput::FLAG_RELEASE;
 					Scancode = Key;
 					break;
