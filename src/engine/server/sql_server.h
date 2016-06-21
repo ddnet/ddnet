@@ -7,10 +7,18 @@
 #include <cppconn/exception.h>
 #include <cppconn/statement.h>
 
+#include <base/system.h>
+
+enum
+{
+	MAX_SQLSERVERS=15
+};
+
 class CSqlServer
 {
 public:
-	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
+	static CSqlServer* createServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
+	static void deleteServers();
 	~CSqlServer();
 
 	bool Connect();
@@ -35,7 +43,12 @@ public:
 	static int ms_NumReadServer;
 	static int ms_NumWriteServer;
 
+	static CSqlServer* ms_apSqlReadServers[MAX_SQLSERVERS];
+	static CSqlServer* ms_apSqlWriteServers[MAX_SQLSERVERS];
+
 private:
+	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
+
 	sql::Driver *m_pDriver;
 	sql::Connection *m_pConnection;
 	sql::Statement *m_pStatement;

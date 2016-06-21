@@ -1,6 +1,5 @@
 #if defined(CONF_SQL)
 
-#include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/config.h>
 
@@ -9,6 +8,47 @@
 
 int CSqlServer::ms_NumReadServer = 0;
 int CSqlServer::ms_NumWriteServer = 0;
+CSqlServer* CSqlServer::ms_apSqlReadServers [] = {};
+CSqlServer* CSqlServer::ms_apSqlWriteServers [] = {};
+
+CSqlServer* CSqlServer::createServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly, bool SetUpDb)
+{
+	CSqlServer** apSqlServers = ReadOnly ? ms_apSqlReadServers : ms_apSqlWriteServers;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (!apSqlServers[i])
+		{
+			apSqlServers[i] = new CSqlServer(pDatabase, pPrefix, pUser, pPass, pIp, Port, ReadOnly, SetUpDb);
+
+			if(SetUpDb)
+			{
+				void *TablesThread = thread_init([](void* pData) { ((CSqlServer *)pData)->CreateTables(); }, apSqlServers[i]);
+				thread_detach(TablesThread);
+			}
+			return apSqlServers[i];
+		}
+	}
+	return nullptr;
+}
+
+void CSqlServer::deleteServers()
+{
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (ms_apSqlReadServers[i])
+		{
+			delete ms_apSqlReadServers[i];
+			ms_apSqlReadServers[i] = 0;
+		}
+
+		if (ms_apSqlWriteServers[i])
+		{
+			delete ms_apSqlWriteServers[i];
+			ms_apSqlWriteServers[i] = 0;
+		}
+	}
+}
 
 CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly, bool SetUpDb) :
 		m_Port(Port),

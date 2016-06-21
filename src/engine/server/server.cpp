@@ -36,6 +36,10 @@
 #include "register.h"
 #include "server.h"
 
+#if defined (CONF_SQL)
+	#include "sql_server.h"
+#endif
+
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
 	#define WIN32_LEAN_AND_MEAN
@@ -320,17 +324,6 @@ CServer::CServer()
 	m_ServerInfoFirstRequest = 0;
 	m_ServerInfoNumRequests = 0;
 	m_ServerInfoHighLoad = false;
-
-#if defined (CONF_SQL)
-	for (int i = 0; i < MAX_SQLSERVERS; i++)
-	{
-		m_apSqlReadServers[i] = 0;
-		m_apSqlWriteServers[i] = 0;
-	}
-
-	CSqlConnector::SetReadServers(m_apSqlReadServers);
-	CSqlConnector::SetWriteServers(m_apSqlWriteServers);
-#endif
 
 	Init();
 }
@@ -1840,14 +1833,7 @@ int CServer::Run()
 		mem_free(m_pCurrentMapData);
 
 #if defined (CONF_SQL)
-		for (int i = 0; i < MAX_SQLSERVERS; i++)
-		{
-			if (m_apSqlReadServers[i])
-				delete m_apSqlReadServers[i];
-
-			if (m_apSqlWriteServers[i])
-				delete m_apSqlWriteServers[i];
-		}
+	CSqlServer::deleteServers();
 #endif
 
 	return 0;
@@ -2049,25 +2035,14 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : false;
 
-	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
+	CSqlServer* pSqlServer = CSqlServer::createServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
 
-	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	if (pSqlServer)
 	{
-		if (!apSqlServers[i])
-		{
-			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
-
-			if(SetUpDb)
-			{
-				void *TablesThread = thread_init(CreateTablesThread, apSqlServers[i]);
-				thread_detach(TablesThread);
-			}
-
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-			return;
-		}
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", pSqlServer->GetDatabase(), pSqlServer->GetPrefix(), pSqlServer->GetUser(), pSqlServer->GetIP(), pSqlServer->GetPort());
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		return;
 	}
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlserver: limit of sqlservers reached");
 }
@@ -2087,7 +2062,7 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
+	CSqlServer** apSqlServers = ReadOnly ? CSqlServer::ms_apSqlReadServers : CSqlServer::ms_apSqlWriteServers;
 
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 		if (apSqlServers[i])
@@ -2096,11 +2071,6 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
-}
-
-void CServer::CreateTablesThread(void *pData)
-{
-	((CSqlServer *)pData)->CreateTables();
 }
 
 #endif
