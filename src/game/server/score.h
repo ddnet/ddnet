@@ -4,7 +4,10 @@
 #include "entities/character.h"
 #include "gamecontext.h"
 
-#define NUM_CHECKPOINTS 25
+enum
+{
+	 NUM_CHECKPOINTS = 25
+};
 
 class CPlayerData
 {

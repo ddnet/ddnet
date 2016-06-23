@@ -5,19 +5,17 @@
 #define GAME_SERVER_SQLSCORE_H
 
 #include <exception>
-#include <string>
+#include <atomic>
 
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/console.h>
-#include <engine/external/json/json.h>
+#include <engine/server/sql_server.h>
 #include <engine/server/sql_connector.h>
-#include <engine/server/sql_string_helpers.h>
 
 #include "../score.h"
 
-using json = nlohmann::json;
-
+#include "sql_data.h"
 
 class CGameContextError : public std::runtime_error
 {
@@ -25,225 +23,76 @@ public:
 	CGameContextError(const char* pMsg) : std::runtime_error(pMsg) {}
 };
 
-
-// generic implementation to provide gameserver and server
-struct CSqlData
+struct CGameDataBase
 {
-	CSqlData() : m_Map(ms_pMap)
+	CGameDataBase()
 	{
-		m_Instance = ms_Instance;
+		++ms_InstanceCount;
+		m_GameInstance = ms_GameInstance;
 	}
-
-	virtual ~CSqlData() {}
+	virtual ~CGameDataBase() { --ms_InstanceCount; }
 
 	bool isGameContextVaild() const
 	{
-		return m_Instance == ms_Instance && ms_GameContextAvailable;
+		return m_GameInstance == ms_GameInstance && ms_GameContextAvailable;
 	}
 
 	CGameContext* GameServer() const { return isGameContextVaild() ? ms_pGameServer : throw CGameContextError("[CSqlData]: GameServer() unavailable."); }
 	IServer* Server() const { return isGameContextVaild() ? ms_pServer : throw CGameContextError("[CSqlData]: Server() unavailable."); }
 	CPlayerData* PlayerData(int ID) const { return isGameContextVaild() ? &ms_pPlayerData[ID] : throw CGameContextError("[CSqlData]: PlayerData() unavailable."); }
 
-	sqlstr::CSqlString<128> m_Map;
-
 	// counter to keep track to which instance of GameServer this object belongs to.
-	int m_Instance;
+	int m_GameInstance;
 
 	static CGameContext *ms_pGameServer;
 	static IServer *ms_pServer;
 	static CPlayerData *ms_pPlayerData;
-	static const char *ms_pMap;
 
-	static bool ms_GameContextAvailable;
+	static std::atomic_bool ms_GameContextAvailable;
 	// contains the instancecount of the current GameServer
-	static int ms_Instance;
-};
-
-struct CSqlExecData
-{
-	CSqlExecData(bool (*pFuncPtr) (CSqlServer*, const CSqlData *, bool), CSqlData *pSqlData, bool ReadOnly = true) :
-		m_pFuncPtr(pFuncPtr),
-		m_pSqlData(pSqlData),
-		m_ReadOnly(ReadOnly)
-	{
-		++ms_InstanceCount;
-	}
-	~CSqlExecData()
-	{
-		--ms_InstanceCount;
-	}
-
-	bool (*m_pFuncPtr) (CSqlServer*, const CSqlData *, bool);
-	CSqlData *m_pSqlData;
-	bool m_ReadOnly;
+	static std::atomic_int ms_GameInstance;
 
 	// keeps track of score-threads
-	static int ms_InstanceCount;
+	static std::atomic_int ms_InstanceCount;
 };
 
-struct CSqlPlayerData : CSqlData
+template <typename T>
+struct CGameData : public CGameDataBase
 {
-	int m_ClientID;
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
+	CGameData(T* SqlData) : m_pSqlData(SqlData) {}
+	virtual ~CGameData() { delete m_pSqlData; }
+
+	const T& Sql() { return *m_pSqlData; }
+private:
+	T* m_pSqlData;
 };
 
-// used for mapvote and mapinfo
-struct CSqlMapData : CSqlData
+struct CTeamSaveGameData: public CGameData<CSqlTeamSave>
 {
-	int m_ClientID;
-
-	sqlstr::CSqlString<128> m_RequestedMap;
-	char m_aFuzzyMap[128];
+	CTeamSaveGameData(CSqlTeamSave* SqlData) : CGameData(SqlData) {}
+	virtual ~CTeamSaveGameData();
 };
 
-struct CSqlScoreData : CSqlData
+
+template <typename T>
+struct CSqlExecData
 {
-	int m_ClientID;
+	CSqlExecData(bool (*pFuncPtr) (CSqlServer*, T&, bool), T* pData, bool ReadOnly = true) :
+		m_pFuncPtr(pFuncPtr),
+		m_pData(pData),
+		m_ReadOnly(ReadOnly)
+		{}
 
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
-
-	float m_Time;
-	float m_aCpCurrent[NUM_CHECKPOINTS];
-	int m_Num;
-	bool m_Search;
-	char m_aRequestingPlayer [MAX_NAME_LENGTH];
-	char m_aTimestamp [20];
-	sqlstr::CSqlString<sizeof(g_Config.m_SvSqlServerName)> m_ServerName;
-
-	CSqlScoreData()
-	{
-		sqlstr::getTimeStamp(m_aTimestamp, sizeof(m_aTimestamp));
-		m_ServerName = g_Config.m_SvSqlServerName;
-	}
-
-	json toJSON() const
-	{
-		json j = {
-			{"type", "rank"},
-			{"Map", m_Map.Str()},
-			{"Name", m_Name.Str()},
-			{"Timestamp", m_aTimestamp},
-			{"Time", m_Time},
-			{"Server", m_ServerName.Str()}
-		};
-		for (int i = 0; i < 25; i++)
-		{
-			char aBuf[5];
-			str_format(aBuf, sizeof(aBuf), "cp%d", i);
-			j[aBuf] = m_aCpCurrent[i];
-		}
-		return j;
-	}
-
-	void fromJSON(const char* pJStr)
-	{
-		try
-		{
-			json j = json::parse(pJStr);
-			m_Map = j["Map"].get<std::string>().c_str();
-			m_Name = j["Name"].get<std::string>().c_str();
-			std::string timestamp = j["Timestamp"];
-			str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
-			m_Time = j["Time"];
-			m_ServerName = j["Server"].get<std::string>().c_str();
-		}
-		catch (const std::domain_error& e)
-		{
-			dbg_msg("sql", "ERROR: Failed to parse rank json.");
-			dbg_msg("sql", e.what());
-		}
-		catch (std::invalid_argument& e)
-		{
-			dbg_msg("sql", "ERROR: Failed to parse rank json.");
-			dbg_msg("sql", e.what());
-		}
-	}
-
+	bool (*m_pFuncPtr) (CSqlServer*, T&, bool);
+	T* m_pData;
+	bool m_ReadOnly;
 };
 
-struct CSqlTeamScoreData : CSqlData
+template <typename T, typename U = CGameData<T>>
+CSqlExecData<U>* newSqlExecData(bool (*pFuncPtr) (CSqlServer*, U&, bool), T* pData, bool ReadOnly = true)
 {
-	unsigned int m_Size;
-	int m_aClientIDs[MAX_CLIENTS];
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_aNames [MAX_CLIENTS];
-	float m_Time;
-	char m_aTimestamp [20];
-	sqlstr::CSqlString<sizeof(g_Config.m_SvSqlServerName)> m_ServerName;
-
-	CSqlTeamScoreData()
-	{
-		sqlstr::getTimeStamp(m_aTimestamp, sizeof(m_aTimestamp));
-		m_ServerName = g_Config.m_SvSqlServerName;
-	}
-
-	json toJSON() const
-	{
-		json j = {
-			{"type", "teamrank"},
-			{"Map", m_Map.Str()},
-			{"Server", m_ServerName.Str()},
-			{"Timestamp", m_aTimestamp},
-			{"Time", m_Time}
-		};
-
-		json json_names = json::array();
-
-		for (int i = 0; i < m_Size; i++)
-		{
-			json_names += m_aNames[i].Str();
-		}
-		j["Names"] = json_names;
-		return j;
-	}
-
-	void fromJSON(const char* pJStr)
-	{
-		try
-		{
-			json j = json::parse(pJStr);
-			m_Map = j["Map"].get<std::string>().c_str();
-			std::string timestamp = j["Timestamp"];
-			str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
-			m_Time = j["Time"];
-			m_ServerName = j["Server"].get<std::string>().c_str();
-
-			int i = 0;
-			for (json& name : j["Names"])
-			{
-				if (i == MAX_CLIENTS)
-					break;
-				m_aNames[i++] = name.get<std::string>().c_str();
-			}
-		}
-		catch (const std::domain_error& e)
-		{
-			dbg_msg("sql", "ERROR: Failed to parse teamrank json.");
-			dbg_msg("sql", e.what());
-		}
-		catch (std::invalid_argument& e)
-		{
-			dbg_msg("sql", "ERROR: Failed to parse teamrank json.");
-			dbg_msg("sql", e.what());
-		}
-	}
-};
-
-struct CSqlTeamSave : CSqlData
-{
-	virtual ~CSqlTeamSave();
-
-	int m_Team;
-	int m_ClientID;
-	sqlstr::CSqlString<128> m_Code;
-	char m_Server[5];
-};
-
-struct CSqlTeamLoad : CSqlData
-{
-	sqlstr::CSqlString<128> m_Code;
-	int m_ClientID;
-};
+	return new CSqlExecData<U>(pFuncPtr, new U(pData), ReadOnly);
+}
 
 class CSqlScore: public IScore
 {
@@ -253,31 +102,55 @@ class CSqlScore: public IScore
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
 
-	static void ExecSqlFunc(void *pUser);
+	template <typename T>
+	static void ExecSqlFunc(void *pUser)
+	{
+		CSqlExecData<T>* pData = (CSqlExecData<T> *)pUser;
 
-	static bool Init(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure);
+		CSqlConnector connector;
 
-	char m_aMap[64];
+		bool Success = false;
+
+		// try to connect to a working databaseserver
+		while (!Success && !connector.MaxTriesReached(pData->m_ReadOnly) && connector.ConnectSqlServer(pData->m_ReadOnly))
+		{
+			if (pData->m_pFuncPtr(connector.SqlServer(), *pData->m_pData, false))
+				Success = true;
+
+			// disconnect from databaseserver
+			connector.SqlServer()->Disconnect();
+		}
+
+		// handle failures
+		// eg write inserts to a file and print a nice error message
+		if (!Success)
+			pData->m_pFuncPtr(0, *pData->m_pData, true);
+
+		delete pData->m_pData;
+		delete pData;
+	}
+
+	static bool Init(CSqlServer* pSqlServer, CGameData<CSqlData>& pGameData, bool HandleFailure);
 
 	static LOCK ms_FailureFileLock;
 
-	static bool CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool CheckBirthdayThread(CSqlServer* pSqlServer, CGameData<CSqlPlayerData>& pGameData, bool HandleFailure = false);
+	static bool MapInfoThread(CSqlServer* pSqlServer, CGameData<CSqlMapData>& pGameData, bool HandleFailure = false);
+	static bool MapVoteThread(CSqlServer* pSqlServer, CGameData<CSqlMapData>& pGameData, bool HandleFailure = false);
+	static bool LoadScoreThread(CSqlServer* pSqlServer, CGameData<CSqlPlayerData>& pGameData, bool HandleFailure = false);
+	static bool SaveScoreThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool SaveTeamScoreThread(CSqlServer* pSqlServer, CGameData<CSqlTeamScoreData>& pGameData, bool HandleFailure = false);
+	static bool ShowRankThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool ShowTop5Thread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool ShowTeamRankThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool ShowTeamTop5Thread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool ShowTimesThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool ShowPointsThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool ShowTopPointsThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool RandomMapThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>& pGameData, bool HandleFailure = false);
+	static bool SaveTeamThread(CSqlServer* pSqlServer, CTeamSaveGameData& pGameData, bool HandleFailure = false);
+	static bool LoadTeamThread(CSqlServer* pSqlServer, CGameData<CSqlTeamLoad>& pGameData, bool HandleFailure = false);
 
 public:
 
