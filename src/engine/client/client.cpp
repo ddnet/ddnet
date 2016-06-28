@@ -2285,6 +2285,7 @@ void DemoPlayer()->SetPause(int paused)
 
 void CClient::Update()
 {
+	set_new_tick();
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_DemoPlayer.Update();
