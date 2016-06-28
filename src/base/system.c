@@ -670,15 +670,15 @@ void set_new_tick()
 int64 time_get()
 {
 	static int64 last = 0;
-	if(!new_tick)
+	if(new_tick == 0)
 		return last;
 	if(new_tick != -1)
 		new_tick = 0;
 
 #if defined(CONF_FAMILY_UNIX)
-	struct timeval val;
-	gettimeofday(&val, NULL);
-	last = (int64)val.tv_sec*(int64)1000000+(int64)val.tv_usec;
+	struct timespec spec;
+	clock_gettime(CLOCK_MONOTONIC, &spec);
+	last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
 	return last;
 #elif defined(CONF_FAMILY_WINDOWS)
 	{
