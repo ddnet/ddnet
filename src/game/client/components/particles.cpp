@@ -137,6 +137,7 @@ void CParticles::OnRender()
 	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
+	set_new_tick();
 	static int64 LastTime = 0;
 	int64 t = time_get();
 
