@@ -266,6 +266,10 @@ function build(settings)
 			settings.link.flags:Add("-lsocket")
 			settings.link.flags:Add("-lnsl")
 		end
+
+		if platform == "linux" then
+			settings.link.libs:Add("rt") -- clock_gettime for glibc < 2.17
+		end
 	elseif family == "windows" then
 		settings.link.libs:Add("gdi32")
 		settings.link.libs:Add("user32")
