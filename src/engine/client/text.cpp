@@ -323,7 +323,7 @@ class CTextRender : public IEngineTextRender
 
 	void UnloadTexture(IGraphics::CTextureHandle Index)
 	{
-		Graphics()->UnloadTexture(Index);
+		Graphics()->UnloadTexture(&Index);
 	}
 
 	void IncreaseFontTexture(CFont *pFont, int TextureIndex)
