@@ -41,6 +41,7 @@
 		#define _task_user_
 
 		#include <Carbon/Carbon.h>
+		#include <mach/mach_time.h>
 	#endif
 
 	#if defined(__ANDROID__)
@@ -675,7 +676,18 @@ int64 time_get()
 	if(new_tick != -1)
 		new_tick = 0;
 
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_PLATFORM_MACOSX)
+	static int got_timebase = 0;
+	mach_timebase_info_data_t timebase;
+	if(!got_timebase)
+	{
+		mach_timebase_info(&timebase);
+	}
+	uint64_t time = mach_absolute_time();
+	uint64_t q = time / timebase.denom;
+	uint64_t r = time % timebase.denom;
+	return q * timebase.numer + r * timebase.numer / timebase.denom;
+#elif defined(CONF_FAMILY_UNIX)
 	struct timespec spec;
 	clock_gettime(CLOCK_MONOTONIC, &spec);
 	last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
@@ -696,7 +708,9 @@ int64 time_get()
 
 int64 time_freq()
 {
-#if defined(CONF_FAMILY_UNIX)
+#if defined(CONF_PLATFORM_MACOSX)
+	return 10000000000;
+#elif defined(CONF_FAMILY_UNIX)
 	return 1000000;
 #elif defined(CONF_FAMILY_WINDOWS)
 	int64 t;
