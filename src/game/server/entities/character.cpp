@@ -1596,18 +1596,18 @@ void CCharacter::HandleTiles(int Index)
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 			if(Teams()->m_Core.Team(i) == Team())
-				GameServer()->SendChatTarget(i, "Your team was unlocked by a unlock team tile.");
+				GameServer()->SendChatTarget(i, "Your team was unlocked by an unlock team tile");
 	}
 
 	// solo part
 	if(((m_TileIndex == TILE_SOLO_START) || (m_TileFIndex == TILE_SOLO_START)) && !Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now in a solo part.");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now in a solo part");
 		SetSolo(true);
 	}
 	else if(((m_TileIndex == TILE_SOLO_END) || (m_TileFIndex == TILE_SOLO_END)) && Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now out of the solo part.");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You are now out of the solo part");
 		SetSolo(false);
 	}
 
