@@ -1443,8 +1443,8 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View)
 	};
 
 	CProperty aProps[] = {
-		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT_SCROLL, 0, 255},
-		{"Max Speed", pEditor->m_SpeedupMaxSpeed, PROPTYPE_INT_SCROLL, 0, 255},
+		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT_STEP, 0, 255},
+		{"Max Speed", pEditor->m_SpeedupMaxSpeed, PROPTYPE_INT_STEP, 0, 255},
 		{"Angle", pEditor->m_SpeedupAngle, PROPTYPE_ANGLE_SCROLL, 0, 359},
 		{0},
 	};

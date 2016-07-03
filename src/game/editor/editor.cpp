@@ -700,7 +700,7 @@ void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brig
 	Graphics()->QuadsEnd();
 }
 
-int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree, bool isHex)
+int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree, bool isHex, int corners)
 {
 	// logic
 	static float s_Value;
@@ -804,7 +804,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			str_format(aBuf, sizeof(aBuf),"#%06X", Current);
 		else
 			str_format(aBuf, sizeof(aBuf),"%d", Current);
-		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), CUI::CORNER_ALL, 5.0f);
+		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), corners, 5.0f);
 		pRect->y += pRect->h/2.0f-7.0f;
 		UI()->DoLabel(pRect, aBuf, 10, 0, -1);
 	}
@@ -2677,15 +2677,18 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			str_format(aBuf, sizeof(aBuf),"%d", pProps[i].m_Value);
-			RenderTools()->DrawUIRect(&Shifter, color, 0, 0.0f);
-			UI()->DoLabel(&Shifter, aBuf, 10.0f, 0, -1);
-
-			if(DoButton_ButtonDec(&pIDs[i], 0, 0, &Dec, 0, "Decrease"))
+			int NewValue = UiDoValueSelector((char *) &pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
+			if (NewValue != pProps[i].m_Value)
+			{
+				*pNewVal = NewValue;
+				Change = i;
+			}
+			if(DoButton_ButtonDec((char *) &pIDs[i] +1, 0, 0, &Dec, 0, "Decrease"))
 			{
 				*pNewVal = pProps[i].m_Value-1;
 				Change = i;
 			}
-			if(DoButton_ButtonInc(((char *)&pIDs[i])+1, 0, 0, &Inc, 0, "Increase"))
+			if(DoButton_ButtonInc(((char *)&pIDs[i])+2, 0, 0, &Inc, 0, "Increase"))
 			{
 				*pNewVal = pProps[i].m_Value+1;
 				Change = i;
@@ -2717,14 +2720,34 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_ANGLE_SCROLL)
 		{
+			CUIRect Inc, Dec;
+			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
+			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			bool Shift = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 			int Value = pProps[i].m_Value;
-			if (!Shift && UI()->MouseButton(0) && UI()->ActiveItem() == &pIDs[i])
+			const void *activeItem = UI()->ActiveItem();
+			if (!Shift && UI()->MouseButton(0) && (activeItem == &pIDs[i] || activeItem == &pIDs[i]+1 || activeItem == &pIDs[i]+2))
 				Value = (Value / 45) * 45;
-			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", Value, pProps[i].m_Min, Shift ? pProps[i].m_Max : 315, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.");
+			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", Value, pProps[i].m_Min, Shift ? pProps[i].m_Max : 315, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.",false,false,0);
 			if(NewValue != pProps[i].m_Value)
 			{
 				*pNewVal = NewValue;
+				Change = i;
+			}
+			if (DoButton_ButtonDec(&pIDs[i]+1, 0, 0, &Dec, 0, "Decrease"))
+			{
+				if (!Shift)
+					*pNewVal = pProps[i].m_Value - 45;
+				else
+					*pNewVal = pProps[i].m_Value - 1;
+				Change = i;
+			}
+			if (DoButton_ButtonInc(&pIDs[i]+ 2, 0, 0, &Inc, 0, "Increase"))
+			{
+				if (!Shift)
+					*pNewVal = pProps[i].m_Value + 45;
+				else
+					*pNewVal = pProps[i].m_Value + 1;
 				Change = i;
 			}
 		}
