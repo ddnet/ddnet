@@ -1590,9 +1590,13 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// unlock team
-	else if((m_TileIndex == TILE_UNLOCK_TEAM) || (m_TileFIndex == TILE_UNLOCK_TEAM))
+	else if(((m_TileIndex == TILE_UNLOCK_TEAM) || (m_TileFIndex == TILE_UNLOCK_TEAM)) && Teams()->TeamLocked(Team()))
 	{
 		Teams()->SetTeamLock(Team(), false);
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(Teams()->m_Core.Team(i) == Team())
+				GameServer()->SendChatTarget(i, "Your team was unlocked by a unlock team tile.");
 	}
 
 	// solo part
