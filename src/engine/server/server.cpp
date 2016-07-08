@@ -348,6 +348,11 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	if(!aTrimmedName[0])
 		return -1;
 
+	// check for names starting with /, as they can be abused to make people
+	// write chat commands
+	if(aTrimmedName[0] == '/')
+		return -1;
+
 	// make sure that two clients don't have the same name
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
