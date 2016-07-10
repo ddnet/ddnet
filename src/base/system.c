@@ -686,7 +686,8 @@ int64 time_get()
 	uint64_t time = mach_absolute_time();
 	uint64_t q = time / timebase.denom;
 	uint64_t r = time % timebase.denom;
-	return q * timebase.numer + r * timebase.numer / timebase.denom;
+	last = q * timebase.numer + r * timebase.numer / timebase.denom;
+	return last;
 #elif defined(CONF_FAMILY_UNIX)
 	struct timespec spec;
 	clock_gettime(CLOCK_MONOTONIC, &spec);
@@ -709,7 +710,7 @@ int64 time_get()
 int64 time_freq()
 {
 #if defined(CONF_PLATFORM_MACOSX)
-	return 10000000000;
+	return 1000000000;
 #elif defined(CONF_FAMILY_UNIX)
 	return 1000000;
 #elif defined(CONF_FAMILY_WINDOWS)
