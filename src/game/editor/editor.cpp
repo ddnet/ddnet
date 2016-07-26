@@ -700,7 +700,7 @@ void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brig
 	Graphics()->QuadsEnd();
 }
 
-int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree, bool isHex, int corners)
+int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree, bool isHex, int corners, vec4* color)
 {
 	// logic
 	static float s_Value;
@@ -804,7 +804,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			str_format(aBuf, sizeof(aBuf),"#%06X", Current);
 		else
 			str_format(aBuf, sizeof(aBuf),"%d", Current);
-		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, 0), corners, 5.0f);
+		RenderTools()->DrawUIRect(pRect, color ? *color : GetButtonColor(pID, 0), corners, 5.0f);
 		pRect->y += pRect->h/2.0f-7.0f;
 		UI()->DoLabel(pRect, aBuf, 10, 0, -1);
 	}
@@ -2677,7 +2677,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			str_format(aBuf, sizeof(aBuf),"%d", pProps[i].m_Value);
-			int NewValue = UiDoValueSelector((char *) &pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
+			int NewValue = UiDoValueSelector((char *) &pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, &color);
 			if (NewValue != pProps[i].m_Value)
 			{
 				*pNewVal = NewValue;
@@ -2728,7 +2728,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			const void *activeItem = UI()->ActiveItem();
 			if (!Shift && UI()->MouseButton(0) && (activeItem == &pIDs[i] || activeItem == &pIDs[i]+1 || activeItem == &pIDs[i]+2))
 				Value = (Value / 45) * 45;
-			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", Value, pProps[i].m_Min, Shift ? pProps[i].m_Max : 315, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.",false,false,0);
+			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", Value, pProps[i].m_Min, Shift ? pProps[i].m_Max : 315, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
 			if(NewValue != pProps[i].m_Value)
 			{
 				*pNewVal = NewValue;
