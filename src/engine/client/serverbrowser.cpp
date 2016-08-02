@@ -206,58 +206,69 @@ void CServerBrowser::Filter()
 
 			if(!Filtered && g_Config.m_BrFilterString[0] != 0)
 			{
-				int MatchFound = 0;
-
+				int Cursor = 0;
+				char aBuf[sizeof(g_Config.m_BrFilterString)];
 				m_ppServerlist[i]->m_Info.m_QuickSearchHit = 0;
 
-				// match against server name
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrFilterString))
+				while(const char *pWord = str_next_word(g_Config.m_BrFilterString, ',', aBuf, &Cursor))
 				{
-					MatchFound = 1;
-					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
-				}
+					int MatchFound = 0;
 
-				// match against players
-				for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
-				{
-					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, g_Config.m_BrFilterString) ||
-						str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, g_Config.m_BrFilterString))
+					// match against server name
+					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, pWord))
 					{
 						MatchFound = 1;
-						m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_PLAYER;
-						break;
+						m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
 					}
-				}
 
-				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrFilterString))
-				{
-					MatchFound = 1;
-					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
-				}
+					// match against players
+					for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
+					{
+						if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, pWord) ||
+							str_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, pWord))
+						{
+							MatchFound = 1;
+							m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_PLAYER;
+							break;
+						}
+					}
 
-				if(!MatchFound)
-					Filtered = 1;
+					// match against map
+					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, pWord))
+					{
+						MatchFound = 1;
+						m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
+					}
+
+					if(!MatchFound)
+						Filtered = 1;
+				}
 			}
 
 			if(!Filtered && g_Config.m_BrExcludeString[0] != 0)
 			{
-				int MatchFound = 0;
+				int Cursor = 0;
+				char aBuf[sizeof(g_Config.m_BrExcludeString)];
 
-				// match against server name
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, g_Config.m_BrExcludeString))
+				while(const char *pWord = str_next_word(g_Config.m_BrExcludeString, ',', aBuf, &Cursor))
 				{
-					MatchFound = 1;
-				}
+					int MatchFound = 0;
 
-				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrExcludeString))
-				{
-					MatchFound = 1;
-				}
+					// match against server name
+					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, pWord))
+					{
+						MatchFound = 1;
+					}
 
-				if(MatchFound)
-					Filtered = 1;
+					// match against map
+					if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, pWord))
+					{
+						MatchFound = 1;
+					}
+
+					if(MatchFound)
+						Filtered = 1;
+				}
 			}
 		}
 

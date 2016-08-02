@@ -2168,6 +2168,23 @@ int mem_comp(const void *a, const void *b, int size)
 	return memcmp(a,b,size);
 }
 
+const char *str_next_word(char *str, char delim, char *buf, int *cursor)
+{
+	if(str[*cursor] == '\0')
+		return NULL;
+
+	int i;
+	for(i = *cursor; ; ++i)
+	{
+		if(str[i] == delim || str[i] == '\0')
+		{
+			str_copy(buf, str + *cursor, i - *cursor);
+			*cursor = i + 1;
+			return buf;
+		}
+	}
+}
+
 const MEMSTATS *mem_stats()
 {
 	return &memory_stats;
