@@ -2564,6 +2564,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 		Graphics()->TextureSet(-1);
 		Graphics()->LinesBegin();
 
+		// possible screen sizes (white border)
 		float aLastPoints[4];
 		float Start = 1.0f; //9.0f/16.0f;
 		float End = 16.0f/9.0f;
@@ -2606,7 +2607,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			mem_copy(aLastPoints, aPoints, sizeof(aPoints));
 		}
 
-		if(1)
+		// two screen sizes (green and red border)
 		{
 			Graphics()->SetColor(1,0,0,1);
 			for(int i = 0; i < 2; i++)
@@ -2634,8 +2635,16 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 				Graphics()->SetColor(0,1,0,1);
 			}
 		}
-
 		Graphics()->LinesEnd();
+
+		// tee position (blue circle)
+		{
+			Graphics()->TextureSet(-1);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0,0,1,0.3f);
+			RenderTools()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY, 20.0f, 32);
+			Graphics()->QuadsEnd();
+		}
 	}
 
 	if (!m_ShowPicker && m_ShowTileInfo && m_ShowEnvelopePreview != 0 && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
