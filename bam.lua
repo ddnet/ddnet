@@ -1,4 +1,3 @@
-CheckVersion("0.4")
 
 target_family = os.getenv("TARGET_FAMILY")
 if target_family then
