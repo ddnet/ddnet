@@ -2170,10 +2170,11 @@ int mem_comp(const void *a, const void *b, int size)
 
 const char *str_next_word(char *str, char delim, char *buf, int *cursor)
 {
+	int i;
+
 	if(str[*cursor] == '\0')
 		return NULL;
 
-	int i;
 	for(i = *cursor; ; ++i)
 	{
 		if(str[i] == delim || str[i] == '\0')
