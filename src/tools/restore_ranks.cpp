@@ -1,8 +1,12 @@
 #if defined(CONF_SQL)
 
+#include <engine/external/json/json.h>
 #include <engine/shared/linereader.h>
 
 #include "restore_ranks.h"
+
+using json = nlohmann::json;
+
 
 CRestoreRanks::CRestoreRanks(IConsole* pConsole, IConfig* pConfig) :
 m_pConsole(pConsole),
@@ -36,33 +40,39 @@ void CRestoreRanks::parseJSON()
 		while((pLine = lr.Get()))
 		{
 			dbg_msg("restore_ranks", "parsing: %s", pLine);
-			bool error = false;
+
 			try
 			{
-				CSqlScoreData ScoreData;
-				ScoreData.fromJSON(pLine);
-				ExecSqlFunc<const CSqlScoreData&>(CRestoreRanks::SaveScore, false, ScoreData);
-			}
-			catch (const std::domain_error& e) { error = true; }
-			catch (const std::invalid_argument& e) { error = true; }
-			if (error)
-			{
-				try
+				json j = json::parse(pLine);
+
+				char aType[32];
+				str_copy(aType, j["type"].get<std::string>().c_str(), sizeof(aType));
+
+				if (str_comp("rank", aType) == 0)
+				{
+					CSqlScoreData ScoreData;
+					ScoreData.fromJSON(j);
+					ExecSqlFunc<const CSqlScoreData&>(CRestoreRanks::SaveScore, false, ScoreData);
+				}
+				else if (str_comp("teamrank", aType) == 0)
 				{
 					CSqlTeamScoreData TeamScoreData;
-					TeamScoreData.fromJSON(pLine);
+					TeamScoreData.fromJSON(j);
 					ExecSqlFunc<const CSqlTeamScoreData&>(CRestoreRanks::SaveTeamScore, false, TeamScoreData);
 				}
-				catch (const std::domain_error& e)
-				{
-					dbg_msg("sql", "ERROR: Failed to parse json.");
-					dbg_msg("sql", e.what());
-				}
-				catch (std::invalid_argument& e)
-				{
-					dbg_msg("sql", "ERROR: Failed to parse json.");
-					dbg_msg("sql", e.what());
-				}
+				else
+					dbg_msg("restore_ranks", "ERROR: json neither of type rank nor teamrank");
+
+			}
+			catch (const std::domain_error& e)
+			{
+				dbg_msg("restore_ranks", "ERROR: Failed to parse json.");
+				dbg_msg("restore_ranks", e.what());
+			}
+			catch (std::invalid_argument& e)
+			{
+				dbg_msg("restore_ranks", "ERROR: Failed to parse json.");
+				dbg_msg("restore_ranks", e.what());
 			}
 		}
 		io_close(File);

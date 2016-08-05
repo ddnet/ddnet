@@ -77,18 +77,16 @@ struct CSqlScoreData : CSqlData
 		return j;
 	}
 
-	void fromJSON(const char* pJStr)
+	void fromJSON(const json& j)
 	// throws std::domain_error and std::invalid_argument
 	{
-		json j = json::parse(pJStr);
-
 		if (str_comp("rank", j["type"].get<std::string>().c_str()))
 			throw std::domain_error("JSON-Object not of type rank.");
 
 		m_Map = j["Map"].get<std::string>().c_str();
 		m_Name = j["Name"].get<std::string>().c_str();
 		std::string timestamp = j["Timestamp"];
-		str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
+		str_copy(m_aTimestamp, timestamp.c_str(), sizeof(m_aTimestamp));
 		m_Time = j["Time"];
 		m_ServerName = j["Server"].get<std::string>().c_str();
 
@@ -100,6 +98,12 @@ struct CSqlScoreData : CSqlData
 		}
 	}
 
+	void fromJSON(const char* pJStr)
+	// throws std::domain_error and std::invalid_argument
+	{
+		fromJSON(json::parse(pJStr));
+	}
+
 };
 
 struct CSqlTeamScoreData : CSqlData
@@ -109,12 +113,10 @@ struct CSqlTeamScoreData : CSqlData
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_aNames [MAX_CLIENTS];
 	float m_Time;
 	char m_aTimestamp [20];
-	sqlstr::CSqlString<sizeof(g_Config.m_SvSqlServerName)> m_ServerName;
 
 	CSqlTeamScoreData()
 	{
 		sqlstr::getTimeStamp(m_aTimestamp, sizeof(m_aTimestamp));
-		m_ServerName = g_Config.m_SvSqlServerName;
 	}
 
 	json toJSON() const
@@ -122,7 +124,6 @@ struct CSqlTeamScoreData : CSqlData
 		json j = {
 			{"type", "teamrank"},
 			{"Map", m_Map.Str()},
-			{"Server", m_ServerName.Str()},
 			{"Timestamp", m_aTimestamp},
 			{"Time", m_Time}
 		};
@@ -137,27 +138,30 @@ struct CSqlTeamScoreData : CSqlData
 		return j;
 	}
 
-	void fromJSON(const char* pJStr)
+	void fromJSON(const json& j)
 	// throws std::domain_error and std::invalid_argument
 	{
-		json j = json::parse(pJStr);
-
 		if (str_comp("teamrank", j["type"].get<std::string>().c_str()))
 			throw std::domain_error("JSON-Object not of type teamrank.");
 
 		m_Map = j["Map"].get<std::string>().c_str();
 		std::string timestamp = j["Timestamp"];
-		str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
+		str_copy(m_aTimestamp, timestamp.c_str(), sizeof(m_aTimestamp));
 		m_Time = j["Time"];
-		m_ServerName = j["Server"].get<std::string>().c_str();
 
-		int i = 0;
-		for (json& name : j["Names"])
+		m_Size = 0;
+		for (const json& name : j["Names"])
 		{
-			if (i == MAX_CLIENTS)
+			if (m_Size == MAX_CLIENTS)
 				break;
-			m_aNames[i++] = name.get<std::string>().c_str();
+			m_aNames[m_Size++] = name.get<std::string>().c_str();
 		}
+	}
+
+	void fromJSON(const char* pJStr)
+	// throws std::domain_error and std::invalid_argument
+	{
+		fromJSON(json::parse(pJStr));
 	}
 };
 
