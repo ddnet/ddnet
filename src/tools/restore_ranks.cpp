@@ -1,5 +1,7 @@
 #if defined(CONF_SQL)
 
+#include <cstring>
+
 #include <engine/external/json/json.h>
 #include <engine/shared/linereader.h>
 

@@ -130,7 +130,7 @@ struct CSqlTeamScoreData : CSqlData
 
 		json json_names = json::array();
 
-		for (int i = 0; i < m_Size; i++)
+		for (unsigned int i = 0; i < m_Size; i++)
 		{
 			json_names += m_aNames[i].Str();
 		}
