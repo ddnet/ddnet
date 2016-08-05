@@ -10,19 +10,36 @@
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/console.h>
-#include <engine/server/sql_server.h>
-#include <engine/server/sql_connector.h>
+#include <engine/shared/sql_server.h>
+#include <engine/shared/sql_connector.h>
 
 #include "../score.h"
 
 #include "sql_data.h"
 
+/*
+CGameContextError:
+
+	Error to be thrown if an attempt is made to access gamespecific data while those are
+	unavailable.
+*/
 class CGameContextError : public std::runtime_error
 {
 public:
 	CGameContextError(const char* pMsg) : std::runtime_error(pMsg) {}
 };
 
+
+/*
+CGameDataBase:
+
+	This struct provides access to gamespecific things and takes care that they actually can be
+	accessed.
+	Additionally it keeps track of the running threads that perform sql queries and can is used
+	to sync them with the main thread on shutdown. This is done with static variables. In order
+	to keep those variables globally unique all more specific classes for CGameDataBase inherit
+	from this class.
+*/
 struct CGameDataBase
 {
 	CGameDataBase()
@@ -56,17 +73,33 @@ struct CGameDataBase
 	static std::atomic_int ms_InstanceCount;
 };
 
+
+/*
+CGameData:
+
+	This struct provides access to the actual data that are required by an sql-task. It inherits
+	from CGameDataBase and does not define the logic from it itself as this struct is a template and
+	thus could create multiple instances of members declared as static here.
+
+	As templateargument the type of the data specific to the sql-taks is required, see sql_data.h.
+*/
 template <typename T>
 struct CGameData : public CGameDataBase
 {
 	CGameData(T* SqlData) : m_pSqlData(SqlData) {}
 	virtual ~CGameData() { delete m_pSqlData; }
 
-	const T& Sql() { return *m_pSqlData; }
+	// Access to task-specific data.
+	const T& Data() { return *m_pSqlData; }
 private:
 	T* m_pSqlData;
 };
 
+/*
+CTeamSaveGameData:
+
+	Provide a custom destructor for cleanup.
+*/
 struct CTeamSaveGameData: public CGameData<CSqlTeamSave>
 {
 	CTeamSaveGameData(CSqlTeamSave* SqlData) : CGameData(SqlData) {}
@@ -74,6 +107,14 @@ struct CTeamSaveGameData: public CGameData<CSqlTeamSave>
 };
 
 
+/*
+CSqlExecData:
+
+	This struct defines the data that will be supplied for ExecSqlFunc mostly by a threadinvokation.
+
+	It contains the function that will perform the sql-queries as well as the data to supply to it
+	and whether to use a readonly sql-server.
+*/
 template <typename T>
 struct CSqlExecData
 {
@@ -88,10 +129,74 @@ struct CSqlExecData
 	bool m_ReadOnly;
 };
 
+/*
+	This function creates a new instance CSqlExecData on the heap. It will supply it with an
+	instance of CGameData if not specified differently, also created on the heap. Therefor it will
+	fill the new instance of CGameData with pData.
+
+	This simplifies creating new CSqlExecData as it will mostly have some specialization of
+	CGameData as Data. Like this it is enough to invoke this function like this to aquire a brandnew
+	instance of CSqlExecData:
+
+	CSqlExecData* pExecData = newSqlExecData(pSomeSqlFunction, pSomeTaskSpecificData);
+
+	Templatededcution will get the appropriate types from pSomeTaskSpecificData and there is no need
+	to worry about those: <>
+
+	ExecSqlFunc will delete those objects when it is done.
+*/
 template <typename T, typename U = CGameData<T>>
 CSqlExecData<U>* newSqlExecData(bool (*pFuncPtr) (CSqlServer*, U&, bool), T* pData, bool ReadOnly = true)
 {
 	return new CSqlExecData<U>(pFuncPtr, new U(pData), ReadOnly);
+}
+
+/*
+ The idea:
+
+ 	This function takes everything that is required for a database action as CSqlExecData and tries
+	to perfrom the given task until it is reported as done. To achieve this it will try all
+	specified sql-fallbacks one by one on an error until the task is done or no fallbacks are left.
+
+	As the sql-stuff is threaded this function only accepts a void* which will be casted to
+	CSqlExecData*. For greater typesafety it is a template and expects the type of data to supply
+	to the function that performs the sql stuff.
+
+Performing a task looks like this:
+
+	The function that is stored in CSqlExecData will be invoked with the arguments:
+	(sql-server to use, supplied data from CSqlExecData, whether to handle failure)
+
+	It is expected to return if the task is done or if it should be invoked again with a fallback-
+	server. If there are no more fallbacks left HandleFailure will be set to true and action can be
+	taken.
+*/
+template <typename T>
+static void ExecSqlFunc(void *pUser)
+{
+	CSqlExecData<T>* pData = (CSqlExecData<T> *)pUser;
+
+	CSqlConnector connector;
+
+	bool Done = false;
+
+	// try to connect to a working databaseserver
+	while (!Done && !connector.MaxTriesReached(pData->m_ReadOnly) && connector.ConnectSqlServer(pData->m_ReadOnly))
+	{
+		if (pData->m_pFuncPtr(connector.SqlServer(), *pData->m_pData, false))
+			Done = true;
+
+		// disconnect from databaseserver
+		connector.SqlServer()->Disconnect();
+	}
+
+	// handle failures
+	// eg write inserts to a file and print a nice error message
+	if (!Done)
+		pData->m_pFuncPtr(0, *pData->m_pData, true);
+
+	delete pData->m_pData;
+	delete pData;
 }
 
 class CSqlScore: public IScore
@@ -101,34 +206,6 @@ class CSqlScore: public IScore
 
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
-
-	template <typename T>
-	static void ExecSqlFunc(void *pUser)
-	{
-		CSqlExecData<T>* pData = (CSqlExecData<T> *)pUser;
-
-		CSqlConnector connector;
-
-		bool Success = false;
-
-		// try to connect to a working databaseserver
-		while (!Success && !connector.MaxTriesReached(pData->m_ReadOnly) && connector.ConnectSqlServer(pData->m_ReadOnly))
-		{
-			if (pData->m_pFuncPtr(connector.SqlServer(), *pData->m_pData, false))
-				Success = true;
-
-			// disconnect from databaseserver
-			connector.SqlServer()->Disconnect();
-		}
-
-		// handle failures
-		// eg write inserts to a file and print a nice error message
-		if (!Success)
-			pData->m_pFuncPtr(0, *pData->m_pData, true);
-
-		delete pData->m_pData;
-		delete pData;
-	}
 
 	static bool Init(CSqlServer* pSqlServer, CGameData<CSqlData>& pGameData, bool HandleFailure);
 

@@ -6,14 +6,13 @@
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <engine/external/json/json.h>
-#include <engine/server/sql_string_helpers.h>
+#include <engine/shared/sql_string_helpers.h>
 
 #include "../score.h"
 
 using json = nlohmann::json;
 
 
-// generic implementation to provide gameserver and server
 struct CSqlData
 {
 	CSqlData() : m_Map(g_Config.m_SvMap) {}
@@ -49,7 +48,7 @@ struct CSqlScoreData : CSqlData
 	float m_aCpCurrent[NUM_CHECKPOINTS];
 	int m_Num;
 	bool m_Search;
-	char m_aRequestingPlayer [MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 	char m_aTimestamp [20];
 	sqlstr::CSqlString<sizeof(g_Config.m_SvSqlServerName)> m_ServerName;
 
@@ -79,26 +78,25 @@ struct CSqlScoreData : CSqlData
 	}
 
 	void fromJSON(const char* pJStr)
+	// throws std::domain_error and std::invalid_argument
 	{
-		try
+		json j = json::parse(pJStr);
+
+		if (str_comp("rank", j["type"].get<std::string>().c_str()))
+			throw std::domain_error("JSON-Object not of type rank.");
+
+		m_Map = j["Map"].get<std::string>().c_str();
+		m_Name = j["Name"].get<std::string>().c_str();
+		std::string timestamp = j["Timestamp"];
+		str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
+		m_Time = j["Time"];
+		m_ServerName = j["Server"].get<std::string>().c_str();
+
+		for (int i = 0; i < 25; i++)
 		{
-			json j = json::parse(pJStr);
-			m_Map = j["Map"].get<std::string>().c_str();
-			m_Name = j["Name"].get<std::string>().c_str();
-			std::string timestamp = j["Timestamp"];
-			str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
-			m_Time = j["Time"];
-			m_ServerName = j["Server"].get<std::string>().c_str();
-		}
-		catch (const std::domain_error& e)
-		{
-			dbg_msg("sql", "ERROR: Failed to parse rank json.");
-			dbg_msg("sql", e.what());
-		}
-		catch (std::invalid_argument& e)
-		{
-			dbg_msg("sql", "ERROR: Failed to parse rank json.");
-			dbg_msg("sql", e.what());
+			char aBuf[5];
+			str_format(aBuf, sizeof(aBuf), "cp%d", i);
+			m_aCpCurrent[i] = j[aBuf].get<float>();
 		}
 	}
 
@@ -140,33 +138,25 @@ struct CSqlTeamScoreData : CSqlData
 	}
 
 	void fromJSON(const char* pJStr)
+	// throws std::domain_error and std::invalid_argument
 	{
-		try
-		{
-			json j = json::parse(pJStr);
-			m_Map = j["Map"].get<std::string>().c_str();
-			std::string timestamp = j["Timestamp"];
-			str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
-			m_Time = j["Time"];
-			m_ServerName = j["Server"].get<std::string>().c_str();
+		json j = json::parse(pJStr);
 
-			int i = 0;
-			for (json& name : j["Names"])
-			{
-				if (i == MAX_CLIENTS)
-					break;
-				m_aNames[i++] = name.get<std::string>().c_str();
-			}
-		}
-		catch (const std::domain_error& e)
+		if (str_comp("teamrank", j["type"].get<std::string>().c_str()))
+			throw std::domain_error("JSON-Object not of type teamrank.");
+
+		m_Map = j["Map"].get<std::string>().c_str();
+		std::string timestamp = j["Timestamp"];
+		str_copy(m_aTimestamp, timestamp.c_str(), timestamp.length());
+		m_Time = j["Time"];
+		m_ServerName = j["Server"].get<std::string>().c_str();
+
+		int i = 0;
+		for (json& name : j["Names"])
 		{
-			dbg_msg("sql", "ERROR: Failed to parse teamrank json.");
-			dbg_msg("sql", e.what());
-		}
-		catch (std::invalid_argument& e)
-		{
-			dbg_msg("sql", "ERROR: Failed to parse teamrank json.");
-			dbg_msg("sql", e.what());
+			if (i == MAX_CLIENTS)
+				break;
+			m_aNames[i++] = name.get<std::string>().c_str();
 		}
 	}
 };

@@ -1,5 +1,5 @@
-#ifndef ENGINE_SERVER_SQL_SERVER_H
-#define ENGINE_SERVER_SQL_SERVER_H
+#ifndef ENGINE_SHARED_SQL_SERVER_H
+#define ENGINE_SHARED_SQL_SERVER_H
 
 #include <mysql_connection.h>
 
@@ -8,6 +8,8 @@
 #include <cppconn/statement.h>
 
 #include <base/system.h>
+#include <engine/shared/console.h>
+
 
 enum
 {
@@ -45,6 +47,11 @@ public:
 
 	static CSqlServer* ms_apSqlReadServers[MAX_SQLSERVERS];
 	static CSqlServer* ms_apSqlWriteServers[MAX_SQLSERVERS];
+
+	// console commands
+	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
+	static void RegisterCommands(IConsole *pConsole);
 
 private:
 	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
