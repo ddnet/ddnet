@@ -12,22 +12,36 @@ using json = nlohmann::json;
 
 CRestoreRanks::CRestoreRanks(IConsole* pConsole, IConfig* pConfig) :
 m_pConsole(pConsole),
-m_pConfig(pConfig)
+m_pConfig(pConfig),
+m_ParseFailure(false)
 {
 	str_format(m_FailureFileTmp, sizeof(m_FailureFileTmp), "%s.tmp", g_Config.m_SvSqlFailureFile);
 	dbg_msg("restore_ranks", "moving '%s' to '%s'", g_Config.m_SvSqlFailureFile, m_FailureFileTmp);
 	if (fs_rename(g_Config.m_SvSqlFailureFile, m_FailureFileTmp))
+	{
 		dbg_msg("restore_ranks", "failed to move file");
+		m_ParseFailure = true;
+	}
 }
 
 CRestoreRanks::~CRestoreRanks()
 {
-	if(fs_remove(m_FailureFileTmp))
-		dbg_msg("restore_ranks", "failed to remove: %s", m_FailureFileTmp);
+	if (m_ParseFailure)
+	{
+		dbg_msg("restore_ranks", "Some errors occured, not deleting: %s", m_FailureFileTmp);
+	}
+	else
+	{
+		if(fs_remove(m_FailureFileTmp))
+			dbg_msg("restore_ranks", "failed to remove: %s", m_FailureFileTmp);
+	}
 }
 
 void CRestoreRanks::parseJSON()
 {
+	if (m_ParseFailure)
+		return;
+
 	// exec the file
 	IOHANDLE File = io_open(m_FailureFileTmp, IOFLAG_READ);
 
@@ -48,7 +62,13 @@ void CRestoreRanks::parseJSON()
 				json j = json::parse(pLine);
 
 				char aType[32];
-				str_copy(aType, j["type"].get<std::string>().c_str(), sizeof(aType));
+				auto pjTypeInfo = j.find("type");
+
+				if (pjTypeInfo == j.end())
+					throw std::domain_error("Can not handle json without type defined");
+
+
+				str_copy(aType, pjTypeInfo->get<std::string>().c_str(), sizeof(aType));
 
 				if (str_comp("rank", aType) == 0)
 				{
@@ -63,18 +83,20 @@ void CRestoreRanks::parseJSON()
 					ExecSqlFunc<const CSqlTeamScoreData&>(CRestoreRanks::SaveTeamScore, false, TeamScoreData);
 				}
 				else
-					dbg_msg("restore_ranks", "ERROR: json neither of type rank nor teamrank");
+					throw std::domain_error("json neither of type rank nor teamrank");
 
 			}
 			catch (const std::domain_error& e)
 			{
 				dbg_msg("restore_ranks", "ERROR: Failed to parse json.");
 				dbg_msg("restore_ranks", e.what());
+				m_ParseFailure = true;
 			}
 			catch (std::invalid_argument& e)
 			{
 				dbg_msg("restore_ranks", "ERROR: Failed to parse json.");
 				dbg_msg("restore_ranks", e.what());
+				m_ParseFailure = true;
 			}
 		}
 		io_close(File);
@@ -82,6 +104,7 @@ void CRestoreRanks::parseJSON()
 	else
 	{
 		dbg_msg("restore_ranks", "failed to open '%s'", g_Config.m_SvSqlFailureFile);
+		m_ParseFailure = true;
 	}
 }
 
@@ -304,9 +327,10 @@ int main(int argc, const char** argv)
 		io_close(file);
 		pConsole->ExecuteFile("restore_ranks.cfg");
 	}
-	else // fallback
+	else
 	{
-		pConsole->ExecuteFile(AUTOEXEC_FILE);
+		dbg_msg("restore_ranks", "ERROR: failed to open restore_ranks.cfg");
+		return 1;
 	}
 
 	// parse the command line arguments
@@ -318,13 +342,14 @@ int main(int argc, const char** argv)
 
 	CRestoreRanks RR(pConsole, pConfig);
 	RR.parseJSON();
+	int Failure = RR.paresFailure();
 
 	CSqlServer::deleteServers();
 
 	delete pConsole;
 	delete pConfig;
 
-	return 0;
+	return Failure;
 }
 
 #else

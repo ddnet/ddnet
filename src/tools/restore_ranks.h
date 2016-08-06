@@ -49,6 +49,7 @@ public:
 	~CRestoreRanks();
 
     void parseJSON();
+	bool paresFailure() { return m_ParseFailure; }
 	static bool SaveScore(bool HandleFailure, CSqlServer* pSqlServer, const CSqlScoreData& pData);
 	static bool SaveTeamScore(bool HandleFailure, CSqlServer* pSqlServer, const CSqlTeamScoreData& Data);
 
@@ -61,6 +62,8 @@ private:
 
 	// g_Config.m_SvSqlFailureFile + ".tmp" --> 4 chars longer
 	char m_FailureFileTmp[sizeof(g_Config.m_SvSqlFailureFile) + 4];
+
+	bool m_ParseFailure;
 };
 
 #endif
