@@ -1030,8 +1030,6 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 void str_timestamp(char *buffer, int buffer_size);
 void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
 
-const char *str_next_word(char *str, char delim, char *buf, int *cursor);
-
 /* Group: Filesystem */
 
 /*
