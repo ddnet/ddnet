@@ -327,4 +327,13 @@ int main(int argc, const char** argv)
 	return 0;
 }
 
+#else
+
+#include <iostream>
+
+int main(int argc, const char** argv)
+{
+	std::cout << "You need to compile this tool with sql-support to make use of it." << std::endl;
+}
+
 #endif
