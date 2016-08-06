@@ -18,6 +18,7 @@ map_resave*
 map_version*
 mastersrv*
 packetgen*
+restore_ranks*
 teeworlds*
 teeworlds_srv*
 serverlaunch_*
