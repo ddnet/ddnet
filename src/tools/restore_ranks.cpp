@@ -298,11 +298,11 @@ int main(int argc, const char** argv)
 	CSqlServer::RegisterCommands(pConsole);
 
 	// execute autoexec file
-	IOHANDLE file = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE file = pStorage->OpenFile("restore_ranks.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
 	if(file)
 	{
 		io_close(file);
-		pConsole->ExecuteFile(AUTOEXEC_SERVER_FILE);
+		pConsole->ExecuteFile("restore_ranks.cfg");
 	}
 	else // fallback
 	{
