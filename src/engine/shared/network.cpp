@@ -211,7 +211,14 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	else
 	{
 		if(pPacket->m_Flags&NET_PACKETFLAG_COMPRESSION)
+		{
+			// Don't allow compressed control packets.
+			if(pPacket->m_Flags&NET_PACKETFLAG_CONTROL)
+			{
+				return -1;
+			}
 			pPacket->m_DataSize = ms_Huffman.Decompress(&pBuffer[3], pPacket->m_DataSize, pPacket->m_aChunkData, sizeof(pPacket->m_aChunkData));
+		}
 		else
 			mem_copy(pPacket->m_aChunkData, &pBuffer[3], pPacket->m_DataSize);
 	}
