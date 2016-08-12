@@ -399,10 +399,10 @@ function build(settings)
 		engine, zlib, libwebsockets, md5)
 
 	masterserver_exe = Link(server_settings, "mastersrv", masterserver,
-		engine, zlib, md5)
+		engine, zlib, libwebsockets, md5)
 
 	twping_exe = Link(server_settings, "twping", twping,
-		engine, zlib, md5)
+		engine, zlib, libwebsockets, md5)
 
 	-- make targets
 	c = PseudoTarget("client".."_"..settings.config_name, client_exe, client_depends)
