@@ -185,7 +185,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_pClient->OnRelease();
 		if(g_Config.m_ClChatReset)
 			m_Input.Clear();
-		
+
 		// abort text editing when pressing escape
 		Input()->SetIMEState(false);
 	}
@@ -217,6 +217,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_Mode = MODE_NONE;
 		m_pClient->OnRelease();
 		m_Input.Clear();
+
+		// stop text editing after send chat.
+		Input()->SetIMEState(false);
 	}
 	if(Event.m_Flags&IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
