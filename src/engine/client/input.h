@@ -25,6 +25,11 @@ class CInput : public IEngineInput
 	unsigned char m_aInputState[g_MaxKeys];	// SDL_SCANCODE
 	int m_InputCounter;
 
+	//ime support
+	bool m_IsEditingText;
+	char m_pEditingText[32];
+	int m_EditingCursor;
+
 	bool KeyState(int Key) const;
 
 	IEngineGraphics *Graphics() { return m_pGraphics; }
@@ -48,6 +53,10 @@ public:
 	virtual void NextFrame();
 
 	virtual int VideoRestartNeeded();
+
+	virtual void SetIMEState(bool activate);
+	virtual const char* GetIMECandidate();
+	virtual int GetEditingCursor();
 };
 
 #endif

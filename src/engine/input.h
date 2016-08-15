@@ -67,6 +67,10 @@ public:
 	virtual void SetClipboardText(const char *Text) = 0;
 
 	virtual void MouseRelative(float *x, float *y) = 0;
+
+	virtual void SetIMEState(bool activate) = 0;
+	virtual const char* GetIMECandidate() = 0;
+	virtual int GetEditingCursor() = 0;
 };
 
 
