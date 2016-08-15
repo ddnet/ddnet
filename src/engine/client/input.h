@@ -54,6 +54,7 @@ public:
 
 	virtual int VideoRestartNeeded();
 
+	virtual bool GetIMEState();
 	virtual void SetIMEState(bool activate);
 	virtual const char* GetIMECandidate();
 	virtual int GetEditingCursor();

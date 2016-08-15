@@ -66,6 +66,7 @@ void CChat::OnStateChange(int NewState, int OldState)
 	if(OldState <= IClient::STATE_CONNECTING)
 	{
 		m_Mode = MODE_NONE;
+		Input()->SetIMEState(false);
 		for(int i = 0; i < MAX_LINES; i++)
 			m_aLines[i].m_Time = 0;
 		m_CurrentLine = 0;
@@ -113,6 +114,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 {
 	if(m_Mode == MODE_NONE)
 		return false;
+
+	// prevent freezing when input while reconnecting
+	if (!Input()->GetIMEState()) Input()->SetIMEState(true);
 
 	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
 	{
@@ -181,6 +185,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_pClient->OnRelease();
 		if(g_Config.m_ClChatReset)
 			m_Input.Clear();
+		
+		// abort text editing when pressing escape
+		Input()->SetIMEState(false);
 	}
 	else if(Event.m_Flags&IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
@@ -610,38 +617,50 @@ void CChat::OnRender()
 
 		TextRender()->TextEx(&Cursor, ": ", -1);
 
+		// IME candidate editing
+		bool Editing = false;
+		int EditingCursor = Input()->GetEditingCursor();
+		if (Input()->GetIMEState())
+		{
+			if(str_length(Input()->GetIMECandidate()))
+			{
+				m_Input.Editing(Input()->GetIMECandidate(), EditingCursor);
+				Editing = true;
+			}
+		}
+
 		// check if the visible text has to be moved
 		if(m_InputUpdate)
 		{
-			if(m_ChatStringOffset > 0 && m_Input.GetLength() < m_OldChatStringLength)
-				m_ChatStringOffset = max(0, m_ChatStringOffset-(m_OldChatStringLength-m_Input.GetLength()));
+			if(m_ChatStringOffset > 0 && m_Input.GetLength(Editing) < m_OldChatStringLength)
+				m_ChatStringOffset = max(0, m_ChatStringOffset-(m_OldChatStringLength-m_Input.GetLength(Editing)));
 
-			if(m_ChatStringOffset > m_Input.GetCursorOffset())
-				m_ChatStringOffset -= m_ChatStringOffset-m_Input.GetCursorOffset();
+			if(m_ChatStringOffset > m_Input.GetCursorOffset(Editing))
+				m_ChatStringOffset -= m_ChatStringOffset-m_Input.GetCursorOffset(Editing);
 			else
 			{
 				CTextCursor Temp = Cursor;
 				Temp.m_Flags = 0;
-				TextRender()->TextEx(&Temp, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
+				TextRender()->TextEx(&Temp, m_Input.GetString(Editing)+m_ChatStringOffset, m_Input.GetCursorOffset(Editing)-m_ChatStringOffset);
 				TextRender()->TextEx(&Temp, "|", -1);
 				while(Temp.m_LineCount > 2)
 				{
 					++m_ChatStringOffset;
 					Temp = Cursor;
 					Temp.m_Flags = 0;
-					TextRender()->TextEx(&Temp, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
+					TextRender()->TextEx(&Temp, m_Input.GetString(Editing)+m_ChatStringOffset, m_Input.GetCursorOffset(Editing)-m_ChatStringOffset);
 					TextRender()->TextEx(&Temp, "|", -1);
 				}
 			}
 			m_InputUpdate = false;
 		}
 
-		TextRender()->TextEx(&Cursor, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
+		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing)+m_ChatStringOffset, m_Input.GetCursorOffset(Editing)-m_ChatStringOffset);
 		static float MarkerOffset = TextRender()->TextWidth(0, 8.0f, "|", -1)/3;
 		CTextCursor Marker = Cursor;
 		Marker.m_X -= MarkerOffset;
 		TextRender()->TextEx(&Marker, "|", -1);
-		TextRender()->TextEx(&Cursor, m_Input.GetString()+m_Input.GetCursorOffset(), -1);
+		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing)+m_Input.GetCursorOffset(Editing), -1);
 	}
 
 	y -= 8.0f;

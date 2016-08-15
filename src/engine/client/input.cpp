@@ -141,6 +141,11 @@ void CInput::NextFrame()
 	mem_copy(m_aInputState, pState, i);
 }
 
+bool CInput::GetIMEState()
+{
+	return m_IsEditingText;
+}
+
 void CInput::SetIMEState(bool activate)
 {
 	if (activate)
