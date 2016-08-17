@@ -537,6 +537,42 @@ void CPlayers::RenderPlayer(
 		);
 	}
 
+	// draw aim line
+	if (pPlayerInfo->m_Local)
+	{
+		vec2 Pos = Position + m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy];
+		vec2 From = Position;
+		vec2 Dir = Direction;
+		vec2 Out, Border;
+
+		Graphics()->BlendNormal();
+		Graphics()->TextureSet(-1);
+		Graphics()->QuadsBegin();
+
+		// do outline
+		if (Player.m_Weapon == WEAPON_SHOTGUN)
+			Graphics()->SetColor(1.0f, 1.0f, 0.2f, 0.5f);
+		else if (Player.m_Weapon == WEAPON_RIFLE)
+			Graphics()->SetColor(0.2f, 0.2f, 1.0f, 0.5f);
+		else if (Player.m_Weapon == WEAPON_GRENADE)
+			Graphics()->SetColor(1.0f, 0.2f, 0.2f, 0.5f);
+		else
+			Graphics()->SetColor(0.2f, 1.0f, 0.2f, 0.5f);
+
+		Out = vec2(Dir.y, -Dir.x) * 2.0f;
+
+		IGraphics::CFreeformItem Freeform2(
+				From.x-Out.x, From.y-Out.y,
+				From.x+Out.x, From.y+Out.y,
+				Pos.x-Out.x, Pos.y-Out.y,
+				Pos.x+Out.x, Pos.y+Out.y);
+		Graphics()->QuadsDrawFreeform(&Freeform2, 1);
+
+		Graphics()->QuadsEnd();
+
+		Graphics()->BlendNormal();
+	}
+
 	// draw gun
 	{
 		if (Player.m_PlayerFlags&PLAYERFLAG_AIM && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))
