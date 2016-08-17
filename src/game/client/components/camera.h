@@ -17,9 +17,11 @@ class CCamera : public CComponent
 	int m_CamType;
 	vec2 m_LastPos[2];
 	vec2 m_PrevCenter;
+	int64 m_LastUpdate;
 
 public:
 	vec2 m_Center;
+	vec2 m_Center2;
 	bool m_ZoomSet;
 	float m_Zoom;
 
