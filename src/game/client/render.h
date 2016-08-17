@@ -7,7 +7,6 @@
 #include <game/mapitems.h>
 #include "ui.h"
 
-
 class CTeeRenderInfo
 {
 public:
@@ -23,6 +22,7 @@ public:
 	int m_Texture;
 	vec4 m_ColorBody;
 	vec4 m_ColorFeet;
+	bool m_FlipFeet;
 	float m_Size;
 	int m_GotAirJump;
 };

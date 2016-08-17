@@ -260,6 +260,12 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					float h = Emote == EMOTE_BLINK ? BaseSize*0.15f : EyeScale;
 					float EyeSeparation = (0.075f - 0.010f*absolute(Direction.x))*BaseSize;
 					vec2 Offset = vec2(Direction.x*0.125f, -0.05f+Direction.y*0.10f)*BaseSize;
+
+					if (pInfo->m_FlipFeet && Offset.x < 0)
+						Offset.x = Offset.x * 0.5f;
+					if (!pInfo->m_FlipFeet && Offset.x > 0)
+						Offset.x = Offset.x * 0.5f;
+
 					IGraphics::CQuadItem Array[2] = {
 						IGraphics::CQuadItem(BodyPos.x-EyeSeparation+Offset.x, BodyPos.y+Offset.y, EyeScale, h),
 						IGraphics::CQuadItem(BodyPos.x+EyeSeparation+Offset.x, BodyPos.y+Offset.y, -EyeScale, h)};
@@ -273,7 +279,10 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			float w = BaseSize;
 			float h = BaseSize/2;
 
-			Graphics()->QuadsSetRotation(pFoot->m_Angle*pi*2);
+			if (pInfo->m_FlipFeet)
+				Graphics()->QuadsSetRotation(-pFoot->m_Angle*pi*2);
+			else
+				Graphics()->QuadsSetRotation(pFoot->m_Angle*pi*2);
 
 			bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
 			float cs = 1.0f; // color scale
@@ -287,13 +296,21 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					cs = 0.5f;
 			}
 
-
 			if(Alpha)
 				Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, pInfo->m_ColorFeet.a*cs);
 			else
 				Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, 1.0f);
-			IGraphics::CQuadItem QuadItem(Position.x+pFoot->m_X*AnimScale, Position.y+pFoot->m_Y*AnimScale, w, h);
-			Graphics()->QuadsDraw(&QuadItem, 1);
+
+			if(pInfo->m_FlipFeet)
+			{
+				IGraphics::CQuadItem QuadItem(Position.x-pFoot->m_X*AnimScale, Position.y+pFoot->m_Y*AnimScale, w, h);
+				Graphics()->QuadsDraw(&QuadItem, 1);
+			}
+			else
+			{
+				IGraphics::CQuadItem QuadItem(Position.x+pFoot->m_X*AnimScale, Position.y+pFoot->m_Y*AnimScale, w, h);
+				Graphics()->QuadsDraw(&QuadItem, 1);
+			}
 		}
 	}
 

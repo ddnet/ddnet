@@ -18,6 +18,8 @@ public:
 	void Set(CAnimation *pAnim, float Time);
 	void Add(CAnimation *pAdded, float Time, float Amount);
 
+	bool m_Reverse;
+
 	static CAnimState *GetIdle();
 };
 

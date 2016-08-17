@@ -7,7 +7,7 @@
 
 #include "animstate.h"
 
-static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
+static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame, bool Reverse)
 {
 	if(pSeq->m_NumFrames == 0)
 	{
@@ -42,18 +42,34 @@ static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 		if (pFrame1 && pFrame2)
 		{
 			pFrame->m_Time = Time;
-			pFrame->m_X = mix(pFrame1->m_X, pFrame2->m_X, Blend);
 			pFrame->m_Y = mix(pFrame1->m_Y, pFrame2->m_Y, Blend);
-			pFrame->m_Angle = mix(pFrame1->m_Angle, pFrame2->m_Angle, Blend);
+			if (Reverse)
+			{
+				pFrame->m_X = -mix(pFrame1->m_X, pFrame2->m_X, Blend);
+				pFrame->m_Angle = -mix(pFrame1->m_Angle, pFrame2->m_Angle, Blend);
+			}
+			else
+			{
+				pFrame->m_X = mix(pFrame1->m_X, pFrame2->m_X, Blend);
+				pFrame->m_Angle = mix(pFrame1->m_Angle, pFrame2->m_Angle, Blend);
+			}
 		}
 	}
 }
 
-static void AnimAddKeyframe(CAnimKeyframe *pSeq, CAnimKeyframe *pAdded, float Amount)
+static void AnimAddKeyframe(CAnimKeyframe *pSeq, CAnimKeyframe *pAdded, float Amount, bool Reverse = false)
 {
-	pSeq->m_X += pAdded->m_X*Amount;
 	pSeq->m_Y += pAdded->m_Y*Amount;
-	pSeq->m_Angle += pAdded->m_Angle*Amount;
+	if (Reverse)
+	{
+		pSeq->m_X -= pAdded->m_X*Amount;
+		pSeq->m_Angle -= pAdded->m_Angle*Amount;
+	}
+	else
+	{
+		pSeq->m_X += pAdded->m_X*Amount;
+		pSeq->m_Angle += pAdded->m_Angle*Amount;
+	}
 }
 
 static void AnimAdd(CAnimState *pState, CAnimState *pAdded, float Amount)
@@ -67,16 +83,19 @@ static void AnimAdd(CAnimState *pState, CAnimState *pAdded, float Amount)
 
 void CAnimState::Set(CAnimation *pAnim, float Time)
 {
-	AnimSeqEval(&pAnim->m_Body, Time, &m_Body);
-	AnimSeqEval(&pAnim->m_BackFoot, Time, &m_BackFoot);
-	AnimSeqEval(&pAnim->m_FrontFoot, Time, &m_FrontFoot);
-	AnimSeqEval(&pAnim->m_Attach, Time, &m_Attach);
+	AnimSeqEval(&pAnim->m_Body, Time, &m_Body, false);
+	AnimSeqEval(&pAnim->m_BackFoot, Time, &m_BackFoot, m_Reverse);
+	AnimSeqEval(&pAnim->m_FrontFoot, Time, &m_FrontFoot, m_Reverse);
+	AnimSeqEval(&pAnim->m_Attach, Time, &m_Attach, false);
 }
 
 void CAnimState::Add(CAnimation *pAnim, float Time, float Amount)
 {
 	CAnimState Add;
-	Add.Set(pAnim, Time);
+	if (m_Reverse)
+		Add.Set(pAnim, 1.0f-Time);
+	else
+		Add.Set(pAnim, Time);
 	AnimAdd(this, &Add, Amount);
 }
 
