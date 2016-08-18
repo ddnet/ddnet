@@ -622,6 +622,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Move right", "+right", 0 },
 	{ "Jump", "+jump", 0 },
 	{ "Fire", "+fire", 0 },
+	{ "Rapid fire", "+rapidfire", 0 },
 	{ "Hook", "+hook", 0 },
 	{ "Hook Collisions", "+showhookcoll", 0 },
 	{ "Toggle DynCam", "toggle cl_dyncam 0 1", 0 },
