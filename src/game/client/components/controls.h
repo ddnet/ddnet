@@ -29,6 +29,7 @@ public:
 	int m_InputDirectionLeft[2];
 	int m_InputDirectionRight[2];
 	int m_ShowHookColl[2];
+	int m_RapidFire[2];
 	int m_LastDummy;
 	int m_OtherFire;
 
