@@ -183,6 +183,7 @@ void CControls::OnConsoleInit()
 	{ static CInputState s_State = {this, &m_InputData[0].m_Hook, &m_InputData[1].m_Hook}; Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Hook"); }
 	{ static CInputState s_State = {this, &m_InputData[0].m_Fire, &m_InputData[1].m_Fire}; Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, (void *)&s_State, "Fire"); }
 	{ static CInputState s_State = {this, &m_ShowHookColl[0], &m_ShowHookColl[1]}; Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Show Hook Collision"); }
+	{ static CInputState s_State = {this, &m_RapidFire[0], &m_RapidFire[1]}; Console()->Register("+rapidfire", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Rapid fire"); }
 
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 1}; Console()->Register("+weapon1", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to hammer"); }
 	{ static CInputSet s_Set = {this, &m_InputData[0].m_WantedWeapon, &m_InputData[1].m_WantedWeapon, 2}; Console()->Register("+weapon2", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to gun"); }
@@ -232,6 +233,18 @@ int CControls::SnapInput(int *pData)
 		Send = true;
 
 	m_LastData[g_Config.m_ClDummy].m_PlayerFlags = m_InputData[g_Config.m_ClDummy].m_PlayerFlags;
+
+	// rapid fire
+	if(m_pClient->m_pControls->m_RapidFire[g_Config.m_ClDummy])
+	{
+		if(time_get() > LastSendTime + time_freq()/100)
+			m_InputData[g_Config.m_ClDummy].m_Fire = (m_InputData[g_Config.m_ClDummy].m_Fire + 1) & INPUT_STATE_MASK;
+	}
+	else
+	{
+		if(m_InputData[g_Config.m_ClDummy].m_Fire & 1)
+			m_InputData[g_Config.m_ClDummy].m_Fire = (m_InputData[g_Config.m_ClDummy].m_Fire + 1) & INPUT_STATE_MASK;
+	}
 
 	// we freeze the input if chat or menu is activated
 	if(!(m_InputData[g_Config.m_ClDummy].m_PlayerFlags&PLAYERFLAG_PLAYING))
