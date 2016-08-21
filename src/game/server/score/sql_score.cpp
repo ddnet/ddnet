@@ -810,13 +810,13 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 
 			for(int Row = 0; Row < Rows; Row++)
 			{
-				strcat(aNames, pSqlServer->GetResults()->getString("Name").c_str());
+				str_append(aNames, pSqlServer->GetResults()->getString("Name").c_str(), sizeof(aNames));
 				pSqlServer->GetResults()->next();
 
 				if (Row < Rows - 2)
-					strcat(aNames, ", ");
+					str_append(aNames, ", ", sizeof(aNames));
 				else if (Row < Rows - 1)
-					strcat(aNames, " & ");
+					str_append(aNames, " & ", sizeof(aNames));
 			}
 
 			pSqlServer->GetResults()->first();
@@ -972,12 +972,12 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 			pSqlServer->GetResults()->first();
 			for(int Row = 0; Row < Rows; Row++)
 			{
-				strcat(aNames, pSqlServer->GetResults()->getString("Name").c_str());
+				str_append(aNames, pSqlServer->GetResults()->getString("Name").c_str(), sizeof(aNames));
 
 				if (Row < aCuts[CutPos] - 1)
-					strcat(aNames, ", ");
+					str_append(aNames, ", ", sizeof(aNames));
 				else if (Row < aCuts[CutPos])
-					strcat(aNames, " & ");
+					str_append(aNames, " & ", sizeof(aNames));
 
 				Time = (float)pSqlServer->GetResults()->getDouble("Time");
 				Rank = (float)pSqlServer->GetResults()->getInt("rank");
