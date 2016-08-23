@@ -619,6 +619,7 @@ void CGameClient::OnDummyDisconnect()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[1] = -1;
 	m_LastNewPredictedTick[1] = -1;
+	g_Config.m_ClDummyCopyMoves = 0;
 }
 
 void CGameClient::OnRelease()
