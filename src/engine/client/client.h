@@ -116,6 +116,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	//
 	char m_aCurrentMap[256];
+	char m_aCurrentMapPath[512];
 	unsigned m_CurrentMapCrc;
 
 	bool m_TimeoutCodeSent[2];
@@ -372,6 +373,7 @@ public:
 
 	virtual const char* GetCurrentMap();
 	virtual int GetCurrentMapCrc();
+	virtual const char* GetCurrentMapPath();
 	virtual const char* RaceRecordStart(const char *pFilename);
 	virtual void RaceRecordStop();
 	virtual bool RaceRecordIsRecording();

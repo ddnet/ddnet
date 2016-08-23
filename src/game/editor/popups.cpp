@@ -1052,7 +1052,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 	View.HSplitTop(20.0f, &Label, &View);
 	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you exit the editor.\nContinue anyway?", 10.0f, -1, Label.w-10.0f);
-	else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
+	else if((pEditor->m_PopupEventType == POPEVENT_LOAD)
+	||(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT))
 		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you load a new map.\nContinue anyway?", 10.0f, -1, Label.w-10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you create a new map.\nContinue anyway?", 10.0f, -1, Label.w-10.0f);
@@ -1073,6 +1074,8 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 			g_Config.m_ClEditor = 0;
 		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
 			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
+		else if(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
+			pEditor->LoadCurrentMap();
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		{
 			pEditor->Reset();

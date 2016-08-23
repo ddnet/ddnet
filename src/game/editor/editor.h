@@ -753,7 +753,8 @@ public:
 	void Reset(bool CreateDefault=true);
 	int Save(const char *pFilename);
 	int Load(const char *pFilename, int StorageType);
-	int Append(const char *pFilename, int StorageType);
+	int Append(const char *pFilename, int StorageType); 
+	void LoadCurrentMap();
 	void Render();
 
 	CQuad *GetSelectedQuad();
@@ -780,6 +781,7 @@ public:
 	{
 		POPEVENT_EXIT=0,
 		POPEVENT_LOAD,
+		POPEVENT_LOADCURRENT,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
 		POPEVENT_LARGELAYER,
