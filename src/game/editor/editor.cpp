@@ -4963,17 +4963,6 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
 		return 1;
 	}
-	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load Current Map", 0, &Slot, 0, "Opens the current map for editing"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_LOAD;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
-		return 1;
-	}
 
 	View.HSplitTop(10.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
