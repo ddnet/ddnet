@@ -2745,6 +2745,7 @@ void CClient::Run()
 		{
 			g_Config.m_ClEditor = g_Config.m_ClEditor^1;
 			Input()->MouseModeRelative();
+			Input()->SetIMEState(true);
 		}
 
 		// render
