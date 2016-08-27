@@ -30,6 +30,7 @@
 #include <engine/shared/config.h>
 #include <base/tl/threading.h>
 
+#include "video.h"
 #include "graphics_threaded.h"
 #include "backend_sdl.h"
 
@@ -2122,6 +2123,9 @@ CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
 
 bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
+	if (CVideo::Current())
+		CVideo::Current()->nextFrame();
+
 	switch(pBaseCommand->m_Cmd)
 	{
 	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); break;
