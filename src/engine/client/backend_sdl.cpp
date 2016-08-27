@@ -30,7 +30,10 @@
 #include <engine/shared/config.h>
 #include <base/tl/threading.h>
 
-#include "video.h"
+#if defined(CONF_VIDEORECORDER)
+	#include "video.h"
+#endif
+
 #include "graphics_threaded.h"
 #include "backend_sdl.h"
 
@@ -2123,8 +2126,10 @@ CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
 
 bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
-	if (CVideo::Current())
-		CVideo::Current()->nextFrame();
+	#if defined(CONF_VIDEORECORDER)
+		if (CVideo::Current())
+			CVideo::Current()->nextFrame();
+	#endif
 
 	switch(pBaseCommand->m_Cmd)
 	{

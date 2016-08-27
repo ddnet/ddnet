@@ -93,7 +93,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CFriends m_Friends;
 	class CFriends m_Foes;
 
+#if defined(CONF_VIDEORECORDER)
 	class CVideo* m_pVideo;
+#endif
 
 	char m_aServerAddressStr[256];
 
@@ -240,7 +242,9 @@ public:
 	IStorage *Storage() { return m_pStorage; }
 	IUpdater *Updater() { return m_pUpdater; }
 
+#if defined(CONF_VIDEORECORDER)
 	class CVideo* Video() { return m_pVideo; }
+#endif
 
 	CClient();
 
@@ -363,8 +367,12 @@ public:
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
+
+#if defined(CONF_VIDEORECORDER)
 	static void Con_StartVideo(IConsole::IResult *pResult, void *pUserData);
 	static void Con_StopVideo(IConsole::IResult *pResult, void *pUserData);
+#endif
+
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconLogin(IConsole::IResult *pResult, void *pUserData);

@@ -69,7 +69,9 @@
 #include "updater.h"
 #include "client.h"
 
-#include "video.h"
+#if defined(CONF_VIDEORECORDER)
+	#include "video.h"
+#endif
 
 #include <zlib.h>
 
@@ -269,7 +271,9 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	for (int i = 0; i < RECORDER_MAX; i++)
 		m_DemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta);
 
+#if defined(CONF_VIDEORECORDER)
 	m_pVideo = 0;
+#endif
 
 	m_pEditor = 0;
 	m_pInput = 0;
@@ -2826,6 +2830,11 @@ void CClient::Run()
 	// init sound, allowed to fail
 	m_SoundInitFailed = Sound()->Init() != 0;
 
+#if defined(CONF_VIDEORECORDER)
+	// init video recorder aka ffmpeg
+	CVideo::Init();
+#endif
+
 	// open socket
 	{
 		NETADDR BindAddr;
@@ -3132,12 +3141,14 @@ void CClient::Run()
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
 	}
 
+#if defined(CONF_VIDEORECORDER)
 	if (m_pVideo)
 	{
 		m_pVideo->stop();
 		delete m_pVideo;
 		m_pVideo = 0;
 	}
+#endif
 
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
@@ -3285,6 +3296,8 @@ void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Graphics()->TakeScreenshot(0);
 }
 
+#if defined(CONF_VIDEORECORDER)
+
 void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3307,6 +3320,8 @@ void CClient::Con_StopVideo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pVideo = 0;
 	}
 }
+
+#endif
 
 void CClient::Con_Rcon(IConsole::IResult *pResult, void *pUserData)
 {
@@ -3784,8 +3799,12 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");
+
+#if defined(CONF_VIDEORECORDER)
 	m_pConsole->Register("start_video", "", CFGFLAG_CLIENT, Con_StartVideo, this, "Start recording a video");
 	m_pConsole->Register("stop_video", "", CFGFLAG_CLIENT, Con_StopVideo, this, "Stop recording a video");
+#endif
+
 	m_pConsole->Register("rcon", "r[rcon-command]", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon");
 	m_pConsole->Register("rcon_auth", "s[password]", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon");
 	m_pConsole->Register("rcon_login", "s[username] r[password]", CFGFLAG_CLIENT, Con_RconLogin, this, "Authenticate to rcon with a username");
