@@ -20,6 +20,7 @@ Import("other/opus/opusfile.lua")
 Import("other/opus/opus.lua")
 Import("other/opus/ogg.lua")
 Import("other/mysql/mysql.lua")
+Import("other/ffmpeg/ffmpeg.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -35,6 +36,7 @@ config:Add(Opusfile.OptFind("opusfile", true))
 config:Add(Opus.OptFind("opus", true))
 config:Add(Ogg.OptFind("ogg", true))
 config:Add(Mysql.OptFind("mysql", false))
+config:Add(FFMPEG.OptFind("ffmpeg", false))
 config:Add(OptString("websockets", false))
 config:Finalize("config.lua")
 
@@ -342,6 +344,7 @@ function build(settings)
 	config.opusfile:Apply(client_settings)
 	config.opus:Apply(client_settings)
 	config.ogg:Apply(client_settings)
+	config.ffmpeg:Apply(client_settings)
 
 	if family == "unix" and (platform == "macosx" or platform == "linux") then
 		engine_settings.link.libs:Add("dl")

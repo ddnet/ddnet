@@ -82,6 +82,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CFriends m_Foes;
 	class CMapChecker m_MapChecker;
 
+	class CVideo* m_pVideo;
+
 	char m_aServerAddressStr[256];
 
 	unsigned m_SnapshotParts;
@@ -210,6 +212,8 @@ public:
 	IFetcher *Fetcher() { return m_pFetcher; }
 	IUpdater *Updater() { return m_pUpdater; }
 
+	class CVideo* Video() { return m_pVideo; }
+
 	CClient();
 
 	// ----- send functions -----
@@ -329,6 +333,8 @@ public:
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
+	static void Con_StartVideo(IConsole::IResult *pResult, void *pUserData);
+	static void Con_StopVideo(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddFavorite(IConsole::IResult *pResult, void *pUserData);
