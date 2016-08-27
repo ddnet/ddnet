@@ -20,14 +20,33 @@
 extern "C"
 {
 	#include <libavcodec/avcodec.h>
+	#include <libavformat/avformat.h>
 	#include <libavutil/imgutils.h>
 	#include <libavutil/opt.h>
 	#include <libswscale/swscale.h>
+	#include <libswresample/swresample.h>
 };
 
 #include <base/system.h>
 
-enum Constants { SCREENSHOT_MAX_FILENAME = 256 };
+
+// a wrapper around a single output AVStream
+typedef struct OutputStream {
+    AVStream *st;
+    AVCodecContext *enc;
+
+    /* pts of the next frame that will be generated */
+    int64_t next_pts;
+    int samples_count;
+
+    AVFrame *frame;
+    AVFrame *tmp_frame;
+
+    float t, tincr, tincr2;
+
+    struct SwsContext *sws_ctx;
+    struct SwrContext *swr_ctx;
+} OutputStream;
 
 class CVideo
 {
@@ -42,12 +61,23 @@ public:
 
 	static CVideo* Current() { return ms_pCurrentVideo; }
 
+	static void Init() { avcodec_register_all(); av_register_all(); }
+
 private:
-	void ffmpeg_encoder_set_frame_yuv_from_rgb(uint8_t* pRGB);
-	void ffmpeg_encoder_start(int codec_id, int fps, int width, int height);
-	void ffmpeg_encoder_finish();
-	void ffmpeg_encoder_encode_frame();
-	void ffmpeg_encoder_glread_rgb();
+	void fill_frame();
+	void finish_video_frames();
+	void write_video_frame();
+	void read_rgb_from_gl();
+
+	void open_video();
+	void open_audio();
+	AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height);
+	AVFrame* alloc_audio_frame(enum AVSampleFormat sample_fmt, uint64_t channel_layout, int sample_rate, int nb_samples);
+
+	bool write_frame(const AVRational *time_base, AVStream *st, AVPacket *pkt);
+	void close_stream(OutputStream *ost);
+
+	void add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec, enum AVCodecID codec_id);
 
 	class IStorage *m_pStorage;
 	class IConsole *m_pConsole;
@@ -58,14 +88,21 @@ private:
 	bool m_Recording;
 	bool m_ProcessingFrame;
 
-	GLubyte* m_pPixels;
-	unsigned int m_nframes;
+	bool m_HasAudio;
 
-	AVCodecContext* m_pContext;
-	AVFrame* m_pFrame;
-	AVPacket m_Packet;
-	IOHANDLE m_File;
-	struct SwsContext* m_pSws_context;
+	GLubyte* m_pPixels;
+
+	OutputStream m_VideoStream;
+	OutputStream m_AudioStream;
+
+	AVCodec* m_VideoCodec;
+	AVCodec* m_AudioCodec;
+
+	AVDictionary* m_pOptDict;
+
+	AVFormatContext* m_pFormatContext;
+	AVOutputFormat* m_pFormat;
+
 	uint8_t* m_pRGB;
 
 	static CVideo* ms_pCurrentVideo;
