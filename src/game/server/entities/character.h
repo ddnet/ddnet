@@ -130,6 +130,7 @@ private:
 	// input
 	CNetObj_PlayerInput m_PrevInput;
 	CNetObj_PlayerInput m_Input;
+	CNetObj_PlayerInput m_SavedInput;
 	int m_NumInputs;
 	int m_Jumped;
 
