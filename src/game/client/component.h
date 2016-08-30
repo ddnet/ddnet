@@ -3,6 +3,10 @@
 #ifndef GAME_CLIENT_COMPONENT_H
 #define GAME_CLIENT_COMPONENT_H
 
+#if defined(CONF_VIDEORECORDER)
+	#include <engine/shared/video.h>
+#endif
+
 #include <engine/input.h>
 #include "gameclient.h"
 
@@ -29,6 +33,16 @@ protected:
 	class CLayers *Layers() const { return m_pClient->Layers(); }
 	class CCollision *Collision() const { return m_pClient->Collision(); }
 	class IUpdater *Updater() const { return m_pClient->Updater(); }
+
+#if defined(CONF_VIDEORECORDER)
+	const int64 time() const { return IVideo::Current() ? IVideo::time() : time_get(); }
+	const float LocalTime() const { return IVideo::Current() ? IVideo::LocalTime() : Client()->LocalTime(); }
+#else
+	const int64 time() const { return time_get(); }
+	const float LocalTime() const { return Client()->LocalTime(); }
+#endif
+
+
 public:
 	virtual ~CComponent() {}
 	class CGameClient *GameClient() const { return m_pClient; }

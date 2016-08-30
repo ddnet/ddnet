@@ -14,6 +14,9 @@
 
 extern "C"
 {
+#if defined(CONF_VIDEORECORDER)
+	#include <engine/shared/video.h>
+#endif
 	#include <opusfile.h>
 	#include <wavpack.h>
 }
@@ -266,12 +269,20 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 			pFinalOut[j] = Int2Short(vl);
 			pFinalOut[j+1] = Int2Short(vr);
+
+			// dbg_msg("sound", "the real shit: %d %d", pFinalOut[j], pFinalOut[j+1]);
 		}
 	}
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
 #endif
+
+#if defined(CONF_VIDEORECORDER)
+	if (IVideo::Current())
+		IVideo::Current()->nextAudioFrame(pFinalOut);
+#endif
+
 }
 
 static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)

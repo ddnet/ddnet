@@ -28,6 +28,7 @@
 #endif
 
 #include <engine/shared/config.h>
+
 #include <base/tl/threading.h>
 
 #if defined(CONF_VIDEORECORDER)
@@ -62,10 +63,15 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 				CAutoreleasePool AutoreleasePool;
 			#endif
 			pThis->m_pProcessor->RunBuffer(pThis->m_pBuffer);
+
 			sync_barrier();
 			pThis->m_pBuffer = 0x0;
 			pThis->m_BufferDone.signal();
 		}
+		#if defined(CONF_VIDEORECORDER)
+			if (IVideo::Current())
+				IVideo::Current()->nextVideoFrame_thread();
+		#endif
 	}
 }
 
@@ -2126,11 +2132,6 @@ CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
 
 bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
-	#if defined(CONF_VIDEORECORDER)
-		if (CVideo::Current())
-			CVideo::Current()->nextFrame();
-	#endif
-
 	switch(pBaseCommand->m_Cmd)
 	{
 	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); break;

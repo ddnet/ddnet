@@ -39,7 +39,7 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 	if(i)
 	{
 		i->m_Pos = Pos;
-		i->m_StartTime = Client()->LocalTime();
+		i->m_StartTime = LocalTime();
 		i->m_Dir = Dir*-1;
 		i->m_StartAngle = (( (float)rand()/(float)RAND_MAX) - 1.0f) * 2.0f * pi;
 	}
@@ -48,24 +48,24 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 void CDamageInd::OnRender()
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	static float s_LastLocalTime = Client()->LocalTime();
+	static float s_LastLocalTime = LocalTime();
 	for(int i = 0; i < m_NumItems;)
 	{
 		if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		{
 			const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 			if(pInfo->m_Paused)
-				m_aItems[i].m_StartTime += Client()->LocalTime()-s_LastLocalTime;
+				m_aItems[i].m_StartTime += LocalTime()-s_LastLocalTime;
 			else
-				m_aItems[i].m_StartTime += (Client()->LocalTime()-s_LastLocalTime)*(1.0f-pInfo->m_Speed);
+				m_aItems[i].m_StartTime += (LocalTime()-s_LastLocalTime)*(1.0f-pInfo->m_Speed);
 		}
 		else
 		{
 			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED)
-				m_aItems[i].m_StartTime += Client()->LocalTime()-s_LastLocalTime;
+				m_aItems[i].m_StartTime += LocalTime()-s_LastLocalTime;
 		}
 
-		float Life = 0.75f - (Client()->LocalTime() - m_aItems[i].m_StartTime);
+		float Life = 0.75f - (LocalTime() - m_aItems[i].m_StartTime);
 		if(Life < 0.0f)
 			DestroyI(&m_aItems[i]);
 		else
@@ -77,10 +77,7 @@ void CDamageInd::OnRender()
 			i++;
 		}
 	}
-	s_LastLocalTime = Client()->LocalTime();
-
-	Graphics()->QuadsSetRotation(0);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	s_LastLocalTime = LocalTime();
 }
 
 void CDamageInd::OnInit()

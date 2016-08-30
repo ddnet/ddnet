@@ -271,10 +271,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	for (int i = 0; i < RECORDER_MAX; i++)
 		m_DemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta);
 
-#if defined(CONF_VIDEORECORDER)
-	m_pVideo = 0;
-#endif
-
 	m_pEditor = 0;
 	m_pInput = 0;
 	m_pGraphics = 0;
@@ -1970,6 +1966,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_SnapshotStorage[g_Config.m_ClDummy].m_pFirst;
 						m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = m_SnapshotStorage[g_Config.m_ClDummy].m_pLast;
 						m_LocalStartTime = time_get();
+#if defined(CONF_VIDEORECORDER)
+						IVideo::SetLocalStartTime(m_LocalStartTime);
+#endif
 						SetState(IClient::STATE_ONLINE);
 						DemoRecorder_HandleAutoStart();
 					}
@@ -2220,6 +2219,9 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 						m_aSnapshots[!g_Config.m_ClDummy][SNAP_PREV] = m_SnapshotStorage[!g_Config.m_ClDummy].m_pFirst;
 						m_aSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT] = m_SnapshotStorage[!g_Config.m_ClDummy].m_pLast;
 						m_LocalStartTime = time_get();
+#if defined(CONF_VIDEORECORDER)
+						IVideo::SetLocalStartTime(m_LocalStartTime);
+#endif
 						SetState(IClient::STATE_ONLINE);
 					}
 
@@ -2504,7 +2506,20 @@ void CClient::Update()
 {
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 	{
+
+#if defined(CONF_VIDEORECORDER)
+	if (m_DemoPlayer.IsPlaying() && IVideo::Current())
+	{
+		if (IVideo::Current()->frameRendered())
+		{
+			IVideo::Current()->nextVideoFrame();
+		}
+	}
+#endif
+
+
 		m_DemoPlayer.Update();
+
 		if(m_DemoPlayer.IsPlaying())
 		{
 			// update timers
@@ -2786,6 +2801,10 @@ void CClient::InitInterfaces()
 void CClient::Run()
 {
 	m_LocalStartTime = time_get();
+#if defined(CONF_VIDEORECORDER)
+	IVideo::SetLocalStartTime(m_LocalStartTime);
+#endif
+	m_SnapshotParts = 0;
 
 	if(m_GenerateTimeoutSeed)
 	{
@@ -3141,15 +3160,6 @@ void CClient::Run()
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
 	}
 
-#if defined(CONF_VIDEORECORDER)
-	if (m_pVideo)
-	{
-		m_pVideo->stop();
-		delete m_pVideo;
-		m_pVideo = 0;
-	}
-#endif
-
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
 #endif
@@ -3302,22 +3312,24 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 
-	if (!pSelf->m_pVideo)
+	if (pSelf->State() != IClient::STATE_DEMOPLAYBACK)
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Can not start videorecorder outside of demoplayer.");
+
+	if (!IVideo::Current())
 	{
-		pSelf->m_pVideo = new CVideo(pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight());
-		pSelf->m_pVideo->start();
+		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight());
+		IVideo::Current()->start();
 	}
+	else
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
 }
 
 void CClient::Con_StopVideo(IConsole::IResult *pResult, void *pUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
-
-	if (pSelf->m_pVideo)
+	if (IVideo::Current())
 	{
-		pSelf->m_pVideo->stop();
-		delete pSelf->m_pVideo;
-		pSelf->m_pVideo = 0;
+		IVideo::Current()->stop();
+		delete IVideo::Current();
 	}
 }
 

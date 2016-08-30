@@ -8,6 +8,12 @@
 
 #include <engine/shared/config.h>
 
+#if defined(CONF_VIDEORECORDER)
+	#include <engine/shared/video.h>
+#endif
+
+#include <game/generated/protocol.h>
+
 #include "compression.h"
 #include "demo.h"
 #include "memheap.h"
@@ -384,6 +390,9 @@ CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta)
 	m_File = 0;
 	m_pKeyFrames = 0;
 	m_SpeedIndex = 4;
+
+	m_TickTime = 0;
+	m_Time = 0;
 
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_LastSnapshotDataSize = -1;
@@ -792,6 +801,15 @@ int CDemoPlayer::NextFrame()
 	return IsPlaying();
 }
 
+const int64 CDemoPlayer::time()
+{
+#if defined(CONF_VIDEORECORDER)
+	return IVideo::Current() ? IVideo::time() : time_get();
+#else
+	return time_get();
+#endif
+}
+
 int CDemoPlayer::Play()
 {
 	// fill in previous and next tick
@@ -802,7 +820,7 @@ int CDemoPlayer::Play()
 	/*m_Info.start_tick = m_Info.previous_tick;
 	m_Info.start_time = time_get();*/
 	m_Info.m_CurrentTime = m_Info.m_PreviousTick*time_freq()/SERVER_TICK_SPEED;
-	m_Info.m_LastUpdate = time_get();
+	m_Info.m_LastUpdate = time();
 	return 0;
 }
 
@@ -866,7 +884,7 @@ void CDemoPlayer::SetSpeedIndex(int Offset)
 
 int CDemoPlayer::Update(bool RealTime)
 {
-	int64 Now = time_get();
+	int64 Now = time();
 	int64 Deltatime = Now-m_Info.m_LastUpdate;
 	m_Info.m_LastUpdate = Now;
 
@@ -916,6 +934,8 @@ int CDemoPlayer::Update(bool RealTime)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 			}
 		}
+
+		m_Time += m_TickTime;
 	}
 
 	return 0;
@@ -923,6 +943,14 @@ int CDemoPlayer::Update(bool RealTime)
 
 int CDemoPlayer::Stop()
 {
+#if defined(CONF_VIDEORECORDER)
+		if (IVideo::Current())
+		{
+			IVideo::Current()->stop();
+			delete IVideo::Current();
+		}
+#endif
+
 	if(!m_File)
 		return -1;
 
