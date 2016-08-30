@@ -78,7 +78,7 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start+Env, 0, 0);
 
 	static float s_Time = 0.0f;
-	static float s_LastLocalTime = pThis->Client()->LocalTime();
+	static float s_LastLocalTime = pThis->LocalTime();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -109,10 +109,10 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 							pThis->Client()->IntraGameTick());
 			}
 			else
-				s_Time += pThis->Client()->LocalTime()-s_LastLocalTime;
+				s_Time += pThis->LocalTime()-s_LastLocalTime;
 		}
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time+TimeOffset, pChannels);
-		s_LastLocalTime = pThis->Client()->LocalTime();
+		s_LastLocalTime = pThis->LocalTime();
 	}
 }
 

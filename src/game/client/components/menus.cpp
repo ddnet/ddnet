@@ -385,7 +385,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			else
 				aInputing[s_AtIndex + i] = Text[i];
 		}
-		//s_AtIndex = s_AtIndex+FillCharLen;	
+		//s_AtIndex = s_AtIndex+FillCharLen;
 		pDisplayStr = aInputing;
 		}
 	}
@@ -1944,7 +1944,7 @@ void CMenus::RenderBackground()
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 		float Size = 15.0f;
-		float OffsetTime = fmod(Client()->LocalTime()*0.15f, 2.0f);
+		float OffsetTime = fmod(LocalTime()*0.15f, 2.0f);
 		for(int y = -2; y < (int)(sw/Size); y++)
 			for(int x = -2; x < (int)(sh/Size); x++)
 			{

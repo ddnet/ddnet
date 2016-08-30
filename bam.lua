@@ -344,7 +344,9 @@ function build(settings)
 	config.opusfile:Apply(client_settings)
 	config.opus:Apply(client_settings)
 	config.ogg:Apply(client_settings)
+
 	config.ffmpeg:Apply(client_settings)
+	config.ffmpeg:Apply(engine_settings)
 
 	if family == "unix" and (platform == "macosx" or platform == "linux") then
 		engine_settings.link.libs:Add("dl")

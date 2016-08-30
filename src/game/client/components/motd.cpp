@@ -18,7 +18,7 @@ void CMotd::Clear()
 
 bool CMotd::IsActive()
 {
-	return time_get() < m_ServerMotdTime;
+	return time() < m_ServerMotdTime;
 }
 
 void CMotd::OnStateChange(int NewState, int OldState)
@@ -83,7 +83,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
-			m_ServerMotdTime = time_get()+time_freq()*g_Config.m_ClMotdTime;
+			m_ServerMotdTime = time()+time_freq()*g_Config.m_ClMotdTime;
 		else
 			m_ServerMotdTime = 0;
 	}

@@ -94,22 +94,22 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	{
 		m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1);
 		static float s_Time = 0.0f;
-		static float s_LastLocalTime = Client()->LocalTime();
+		static float s_LastLocalTime = LocalTime();
 
 		if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		{
 			const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 			if(!pInfo->m_Paused)
-				s_Time += (Client()->LocalTime()-s_LastLocalTime)*pInfo->m_Speed;
+				s_Time += (LocalTime()-s_LastLocalTime)*pInfo->m_Speed;
 		}
 		else
 		{
 			if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
-				s_Time += Client()->LocalTime()-s_LastLocalTime;
+				s_Time += LocalTime()-s_LastLocalTime;
 		}
 
 		Graphics()->QuadsSetRotation(s_Time*pi*2*2 + ItemID);
-		s_LastLocalTime = Client()->LocalTime();
+		s_LastLocalTime = LocalTime();
 	}
 	else
 	{
@@ -163,22 +163,22 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	Graphics()->QuadsSetRotation(Angle);
 
 	static float s_Time = 0.0f;
-	static float s_LastLocalTime = Client()->LocalTime();
+	static float s_LastLocalTime = LocalTime();
 	float Offset = Pos.y/32.0f + Pos.x/32.0f;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 		if(!pInfo->m_Paused)
-			s_Time += (Client()->LocalTime()-s_LastLocalTime)*pInfo->m_Speed;
+			s_Time += (LocalTime()-s_LastLocalTime)*pInfo->m_Speed;
 	}
 	else
 	{
 		if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
-			s_Time += Client()->LocalTime()-s_LastLocalTime;
+			s_Time += LocalTime()-s_LastLocalTime;
 	}
 	Pos.x += cosf(s_Time*2.0f+Offset)*2.5f;
 	Pos.y += sinf(s_Time*2.0f+Offset)*2.5f;
-	s_LastLocalTime = Client()->LocalTime();
+	s_LastLocalTime = LocalTime();
 	RenderTools()->DrawSprite(Pos.x, Pos.y, Size);
 	Graphics()->QuadsEnd();
 }

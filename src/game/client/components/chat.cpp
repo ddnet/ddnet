@@ -192,7 +192,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		{
 			bool AddEntry = false;
 
-			if(m_LastChatSend+time_freq() < time_get())
+			if(m_LastChatSend+time_freq() < time())
 			{
 				Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
 				AddEntry = true;
@@ -454,7 +454,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		}
 
 		m_CurrentLine = (m_CurrentLine+1)%MAX_LINES;
-		m_aLines[m_CurrentLine].m_Time = time_get();
+		m_aLines[m_CurrentLine].m_Time = time();
 		m_aLines[m_CurrentLine].m_YOffset[0] = -1.0f;
 		m_aLines[m_CurrentLine].m_YOffset[1] = -1.0f;
 		m_aLines[m_CurrentLine].m_ClientID = ClientID;
@@ -533,7 +533,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 
 	// play sound
-	int64 Now = time_get();
+	int64 Now = time();
 	if(ClientID == -1)
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_SERVER] >= time_freq()*3/10)
@@ -583,7 +583,7 @@ void CChat::OnRender()
 		return;
 
 	// send pending chat messages
-	if(m_PendingChatCounter > 0 && m_LastChatSend+time_freq() < time_get())
+	if(m_PendingChatCounter > 0 && m_LastChatSend+time_freq() < time())
 	{
 		CHistoryEntry *pEntry = m_History.Last();
 		for(int i = m_PendingChatCounter-1; pEntry; --i, pEntry = m_History.Prev(pEntry))
@@ -669,7 +669,7 @@ void CChat::OnRender()
 	x += 120.0f;
 #endif
 
-	int64 Now = time_get();
+	int64 Now = time();
 	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
 	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
 	float Begin = x;
@@ -812,7 +812,7 @@ void CChat::OnRender()
 
 void CChat::Say(int Team, const char *pLine)
 {
-	m_LastChatSend = time_get();
+	m_LastChatSend = time();
 
 	// send chat message
 	CNetMsg_Cl_Say Msg;
@@ -828,7 +828,7 @@ void CChat::SayChat(const char *pLine)
 
 	bool AddEntry = false;
 
-	if(m_LastChatSend+time_freq() < time_get())
+	if(m_LastChatSend+time_freq() < time())
 	{
 		Say(m_Mode == MODE_ALL ? 0 : 1, pLine);
 		AddEntry = true;

@@ -139,7 +139,7 @@ void CParticles::OnRender()
 
 	set_new_tick();
 	static int64 LastTime = 0;
-	int64 t = time_get();
+	int64 t = time();
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
