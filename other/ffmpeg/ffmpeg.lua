@@ -4,45 +4,54 @@ FFMPEG = {
 	OptFind = function (name, required)
 		local check = function(option, settings)
 			option.value = true
-			-- option.use_pkgconfig = false
-			-- option.use_winlib = 0
-			--
-			-- if family ~= "windows" and ExecuteSilent("pkg-config sdl2") == 0 then
-			-- 	option.value = true
-			-- 	option.use_pkgconfig = true
-			-- end
+			option.use_pkgconfig = false
+			option.use_winlib = 0
 
-			-- if platform == "win32" then
-			-- 	option.value = true
-			-- 	option.use_winlib = 32
-			-- elseif platform == "win64" then
-			-- 	option.value = true
-			-- 	option.use_winlib = 64
-			-- end
-			--
-			-- if platform == "macosx" then
-			-- 	option.value = true
-			-- 	option.use_osxframework = true
-			-- 	option.use_pkgconfig = false
-			-- end
+			if family ~= "windows" and ExecuteSilent("pkg-config libavcodec libavformat libavutil libswscale libswresample") == 0 then
+				option.value = true
+				option.use_pkgconfig = true
+			end
+
+			if platform == "win32" then
+				option.value = true
+				option.use_winlib = 32
+			elseif platform == "win64" then
+				option.value = true
+				option.use_winlib = 64
+			end
 		end
 
 		local apply = function(option, settings)
 			if option.value == true then
-				settings.cc.flags:Add("`pkg-config libavcodec --cflags`")
-				settings.link.flags:Add("`pkg-config libavcodec --libs`")
+				if option.use_pkgconfig then
+					settings.cc.flags:Add("`pkg-config libavcodec --cflags`")
+					settings.link.flags:Add("`pkg-config libavcodec --libs`")
 
-				settings.cc.flags:Add("`pkg-config libavformat --cflags`")
-				settings.link.flags:Add("`pkg-config libavformat --libs`")
+					settings.cc.flags:Add("`pkg-config libavformat --cflags`")
+					settings.link.flags:Add("`pkg-config libavformat --libs`")
 
-				settings.cc.flags:Add("`pkg-config libavutil --cflags`")
-				settings.link.flags:Add("`pkg-config libavutil --libs`")
+					settings.cc.flags:Add("`pkg-config libavutil --cflags`")
+					settings.link.flags:Add("`pkg-config libavutil --libs`")
 
-				settings.cc.flags:Add("`pkg-config libswscale --cflags`")
-				settings.link.flags:Add("`pkg-config libswscale --libs`")
+					settings.cc.flags:Add("`pkg-config libswscale --cflags`")
+					settings.link.flags:Add("`pkg-config libswscale --libs`")
 
-				settings.cc.flags:Add("`pkg-config libswresample --cflags`")
-				settings.link.flags:Add("`pkg-config libswresample --libs`")
+					settings.cc.flags:Add("`pkg-config libswresample --cflags`")
+					settings.link.flags:Add("`pkg-config libswresample --libs`")
+				end
+
+				if platform == "win32" then
+					client_settings.link.libpath:Add("other/ffmpeg/windows/lib32")
+				elseif platform == "win64" then
+					client_settings.link.libpath:Add("other/ffmpeg/windows/lib64")
+				-- elseif platform == "macosx" and string.find(settings.config_name, "32") then
+				-- 	client_settings.link.libpath:Add("other/ffmpeg/mac/lib32")
+				-- elseif platform == "macosx" and string.find(settings.config_name, "64") then
+				-- 	client_settings.link.libpath:Add("other/ffmpeg/mac/lib64")
+				-- elseif platform == "linux" then
+				-- 	client_settings.link.libpath:Add("other/ffmpeg/linux/lib64")
+				-- 	client_settings.link.libpath:Add("other/ffmpeg/linux/lib32")
+				end
 
 				settings.cc.defines:Add("CONF_VIDEORECORDER")
 			end
@@ -70,26 +79,23 @@ FFMPEG = {
 
 		local save = function(option, output)
 			output:option(option, "value")
-			-- output:option(option, "use_pkgconfig")
-			-- output:option(option, "use_winlib")
-			-- output:option(option, "use_osxframework")
+			output:option(option, "use_pkgconfig")
+			output:option(option, "use_winlib")
 		end
 
 		local display = function(option)
-			return "trying ffmpeg"
-			-- if option.value == true then
-			-- 	if option.use_pkgconfig == true then return "using pkg-config" end
-			-- 	if option.use_winlib == 32 then return "using supplied win32 libraries" end
-			-- 	if option.use_winlib == 64 then return "using supplied win64 libraries" end
-			-- 	if option.use_osxframework == true then return "using osx framework" end
-			-- 	return "using unknown method"
-			-- else
-			-- 	if option.required then
-			-- 		return "not found (required)"
-			-- 	else
-			-- 		return "not found (optional)"
-			-- 	end
-			-- end
+			if option.value == true then
+				if option.use_pkgconfig == true then return "using pkg-config" end
+				if option.use_winlib == 32 then return "using supplied win32 libraries" end
+				if option.use_winlib == 64 then return "using supplied win64 libraries" end
+				return "using unknown method"
+			else
+				if option.required then
+					return "not found (required)"
+				else
+					return "not found (optional)"
+				end
+			end
 		end
 
 		local o = MakeOption(name, 0, check, save, display)
