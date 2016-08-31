@@ -74,6 +74,13 @@ void CParticles::Add(int Group, CParticle *pPart)
 
 void CParticles::Update(float TimePassed)
 {
+
+#if defined(CONF_VIDEORECORDER)
+	 // dont update if there is nothing to update, during videorecording this might actually happen
+	if (TimePassed == 0.f)
+		return;
+#endif
+
 	static float FrictionFraction = 0;
 	FrictionFraction += TimePassed;
 
