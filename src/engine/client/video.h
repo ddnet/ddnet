@@ -92,6 +92,8 @@ private:
 	int m_Width;
 	int m_Height;
 
+	int m_FPS;
+
 	bool m_Started;
 	bool m_Recording;
 

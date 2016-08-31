@@ -31,6 +31,8 @@ CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pCon
 	m_Width = width;
 	m_Height = height;
 
+	m_FPS = g_Config.m_ClVideoRecorderFPS;
+
 	m_Recording = false;
 	m_Started = false;
 	m_ProcessingVideoFrame = false;
@@ -45,6 +47,7 @@ CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pCon
 
 	dbg_assert(ms_pCurrentVideo == 0, "ms_pCurrentVideo is NOT set to NULL while creating a new Video.");
 
+	ms_TickTime = time_freq() / m_FPS;
 	ms_pCurrentVideo = this;
 }
 
@@ -55,8 +58,13 @@ CVideo::~CVideo()
 
 void CVideo::start()
 {
+	char aDate[20];
+	str_timestamp(aDate, sizeof(aDate));
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "videos/%s.mp4", aDate);
+
 	char aWholePath[1024];
-	IOHANDLE File = m_pStorage->OpenFile("tmp.mp4", IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
+	IOHANDLE File = m_pStorage->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
 
 	if(File)
 	{
@@ -562,7 +570,7 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 			 * of which frame timestamps are represented. For fixed-fps content,
 			 * timebase should be 1/framerate and timestamp increments should be
 			 * identical to 1. */
-			ost->st->time_base = (AVRational){ 1, STREAM_FRAME_RATE };
+			ost->st->time_base = (AVRational){ 1, m_FPS };
 			c->time_base = ost->st->time_base;
 
 			c->gop_size = 12; /* emit one intra frame every twelve frames at most */
