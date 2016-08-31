@@ -44,6 +44,13 @@ ffmpeg = {
 						-- 	client_settings.link.libpath:Add("other/ffmpeg/linux/lib32")
 						end
 					end
+
+					settings.link.libs:Add("libavcodec")
+					settings.link.libs:Add("libavformat")
+					settings.link.libs:Add("libavutil")
+					settings.link.libs:Add("libswscale")
+					settings.link.libs:Add("libswresample")
+
 				end
 				settings.cc.defines:Add("CONF_VIDEORECORDER")
 			end
