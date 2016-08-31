@@ -8,15 +8,7 @@
 
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
-#define STREAM_FRAME_RATE 60 /* 60 images/s */
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
-
-IVideo* IVideo::ms_pCurrentVideo = 0;
-
-int64 IVideo::ms_Time = 0;
-float IVideo::ms_LocalTime = 0;
-int64 IVideo::ms_LocalStartTime = 0;
-int64 IVideo::ms_TickTime = time_freq() / STREAM_FRAME_RATE;
 
 CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pConsole, int width, int height) :
 	IVideo::IVideo(),
@@ -47,7 +39,7 @@ CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pCon
 	m_NextFrame = false;
 
 	// TODO:
-	m_HasAudio = false;
+	m_HasAudio = true;
 
 	m_SndBufferSize =  g_Config.m_SndBufferSize;
 
@@ -123,8 +115,9 @@ void CVideo::start()
 		int ret = avio_open(&m_pFormatContext->pb, aWholePath, AVIO_FLAG_WRITE);
 		if (ret < 0)
 		{
-			dbg_msg("video_recorder", "Could not open '%s': %s", aWholePath,
-					av_err2str(ret));
+			char aBuf[AV_ERROR_MAX_STRING_SIZE];
+			av_strerror(ret, aBuf, sizeof(aBuf));
+			dbg_msg("video_recorder", "Could not open '%s': %s", aWholePath, aBuf);
 			return;
 		}
 	}
@@ -134,7 +127,9 @@ void CVideo::start()
 	int ret = avformat_write_header(m_pFormatContext, &m_pOptDict);
 	if (ret < 0)
 	{
-		dbg_msg("video_recorder", "Error occurred when opening output file: %s", av_err2str(ret));
+		char aBuf[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(ret, aBuf, sizeof(aBuf));
+		dbg_msg("video_recorder", "Error occurred when opening output file: %s", aBuf);
 		return;
 	}
 	m_Recording = true;
@@ -226,7 +221,7 @@ void CVideo::nextAudioFrame(short* pData)
 		m_AudioStream.frame->pts = m_AudioStream.enc->frame_number;
 		// dbg_msg("video_recorder", "aframe: %d", m_AudioStream.enc->frame_number);
 
-		memcpy(m_AudioStream.tmp_frame->data[0], pData, sizeof(int16_t) * m_SndBufferSize * 2);
+		// memcpy(m_AudioStream.tmp_frame->data[0], pData, sizeof(int16_t) * m_SndBufferSize * 2);
 		//
 		// for (int i = 0; i < m_SndBufferSize; i++)
 		// {
@@ -246,6 +241,16 @@ void CVideo::nextAudioFrame(short* pData)
 		// );
 
 		// dbg_msg("video_recorder", "dst_nb_samples: %d", dst_nb_samples);
+
+		av_samples_fill_arrays(
+			(uint8_t**)m_AudioStream.tmp_frame->data,
+			0, // pointer to linesize (int*)
+			(const uint8_t*)pData,
+			2, // channels
+			m_AudioStream.tmp_frame->nb_samples,
+			AV_SAMPLE_FMT_S16P,
+			0 // align
+		);
 
 
 		int ret = av_frame_make_writable(m_AudioStream.frame);
@@ -386,7 +391,9 @@ void CVideo::open_video()
 	av_dict_free(&opt);
 	if (ret < 0)
 	{
-		dbg_msg("video_recorder", "Could not open video codec: %s", av_err2str(ret));
+		char aBuf[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(ret, aBuf, sizeof(aBuf));
+		dbg_msg("video_recorder", "Could not open video codec: %s", aBuf);
 		exit(1);
 	}
 
@@ -435,8 +442,11 @@ void CVideo::open_audio()
 	av_dict_copy(&opt, m_pOptDict, 0);
 	ret = avcodec_open2(c, m_AudioCodec, &opt);
 	av_dict_free(&opt);
-	if (ret < 0) {
-		dbg_msg("video_recorder", "Could not open audio codec: %s", av_err2str(ret));
+	if (ret < 0)
+	{
+		char aBuf[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(ret, aBuf, sizeof(aBuf));
+		dbg_msg("video_recorder", "Could not open audio codec: %s", aBuf);
 		exit(1);
 	}
 
@@ -610,7 +620,9 @@ void CVideo::write_frame(OutputStream* pStream)
 
 			if (int ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
 			{
-				dbg_msg("video_recorder", "Error while writing video frame: %s", av_err2str(ret));
+				char aBuf[AV_ERROR_MAX_STRING_SIZE];
+				av_strerror(ret, aBuf, sizeof(aBuf));
+				dbg_msg("video_recorder", "Error while writing video frame: %s", aBuf);
 			}
 		}
 		else
@@ -646,7 +658,9 @@ void CVideo::finish_frames(OutputStream* pStream)
 
 			if (int ret = av_interleaved_write_frame(m_pFormatContext, &Packet))
 			{
-				dbg_msg("video_recorder", "Error while writing video frame: %s", av_err2str(ret));
+				char aBuf[AV_ERROR_MAX_STRING_SIZE];
+				av_strerror(ret, aBuf, sizeof(aBuf));
+				dbg_msg("video_recorder", "Error while writing video frame: %s", aBuf);
 			}
 		}
 		else
