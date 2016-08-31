@@ -11,7 +11,6 @@
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pConsole, int width, int height) :
-	IVideo::IVideo(),
 	m_pGraphics(pGraphics),
 	m_pStorage(pStorage),
 	m_pConsole(pConsole),
@@ -39,6 +38,7 @@ CVideo::CVideo(CGraphics_Threaded* pGraphics, IStorage* pStorage, IConsole *pCon
 	m_ProcessingAudioFrame = false;
 
 	m_NextFrame = false;
+
 
 	// TODO:
 	m_HasAudio = false;
@@ -556,7 +556,8 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 			c->channels = 2;
 			c->channel_layout = AV_CH_LAYOUT_STEREO;
 
-			ost->st->time_base = (AVRational){ 1, c->sample_rate };
+			ost->st->time_base.num = 1;
+			ost->st->time_base.den = c->sample_rate;
 			break;
 
 		case AVMEDIA_TYPE_VIDEO:
@@ -570,7 +571,8 @@ void CVideo::add_stream(OutputStream *ost, AVFormatContext *oc, AVCodec **codec,
 			 * of which frame timestamps are represented. For fixed-fps content,
 			 * timebase should be 1/framerate and timestamp increments should be
 			 * identical to 1. */
-			ost->st->time_base = (AVRational){ 1, m_FPS };
+			ost->st->time_base.num = 1;
+			ost->st->time_base.den =  m_FPS;
 			c->time_base = ost->st->time_base;
 
 			c->gop_size = 12; /* emit one intra frame every twelve frames at most */
