@@ -1,4 +1,4 @@
-FFMPEG = {
+ffmpeg = {
 	basepath = PathDir(ModuleFilename()),
 
 	OptFind = function (name, required)
@@ -26,22 +26,25 @@ FFMPEG = {
 				if option.use_pkgconfig then
 					settings.cc.flags:Add("`pkg-config libavcodec libavformat libavutil libswscale libswresample --cflags`")
 					settings.link.flags:Add("`pkg-config libavcodec libavformat libavutil libswscale libswresample --libs`")
-				end
+				else
+					settings.cc.includes:Add(ffmpeg.basepath .. "/include")
 
-				if platform == "win32" then
-					settings.link.libpath:Add("other/ffmpeg/windows/lib32")
-				elseif platform == "win64" then
-					settings.link.libpath:Add("other/ffmpeg/windows/lib64")
-				-- elseif platform == "macosx" and not option.use_pkgconfig then
-				-- 	settings.link.libpath:Add("other/ffmpeg/mac/lib64")
-				-- 	settings.link.flags:Add("-lavcodec -lavformat -lavutil -lswscale -lswresample")
-				-- elseif platform == "macosx" and string.find(settings.config_name, "64") then
-				-- 	client_settings.link.libpath:Add("other/ffmpeg/mac/lib64")
-				-- elseif platform == "linux" then
-				-- 	client_settings.link.libpath:Add("other/ffmpeg/linux/lib64")
-				-- 	client_settings.link.libpath:Add("other/ffmpeg/linux/lib32")
+					if family == "windows" then
+						if platform == "win32" then
+							settings.link.libpath:Add("other/ffmpeg/windows/lib32")
+						elseif platform == "win64" then
+							settings.link.libpath:Add("other/ffmpeg/windows/lib64")
+						-- elseif platform == "macosx" and not option.use_pkgconfig then
+						-- 	settings.link.libpath:Add("other/ffmpeg/mac/lib64")
+						-- 	settings.link.flags:Add("-lavcodec -lavformat -lavutil -lswscale -lswresample")
+						-- elseif platform == "macosx" and string.find(settings.config_name, "64") then
+						-- 	client_settings.link.libpath:Add("other/ffmpeg/mac/lib64")
+						-- elseif platform == "linux" then
+						-- 	client_settings.link.libpath:Add("other/ffmpeg/linux/lib64")
+						-- 	client_settings.link.libpath:Add("other/ffmpeg/linux/lib32")
+						end
+					end
 				end
-
 				settings.cc.defines:Add("CONF_VIDEORECORDER")
 			end
 			-- if option.use_pkgconfig == true then

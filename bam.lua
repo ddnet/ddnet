@@ -36,7 +36,7 @@ config:Add(Opusfile.OptFind("opusfile", true))
 config:Add(Opus.OptFind("opus", true))
 config:Add(Ogg.OptFind("ogg", true))
 config:Add(Mysql.OptFind("mysql", false))
-config:Add(FFMPEG.OptFind("ffmpeg", false))
+config:Add(ffmpeg.OptFind("ffmpeg", false))
 config:Add(OptString("websockets", false))
 config:Finalize("config.lua")
 
