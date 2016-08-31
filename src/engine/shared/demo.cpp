@@ -770,7 +770,26 @@ int CDemoPlayer::NextFrame()
 const int64 CDemoPlayer::time()
 {
 #if defined(CONF_VIDEORECORDER)
-	return IVideo::Current() ? IVideo::time() : time_get();
+	static bool s_Recording = false;
+	if (IVideo::Current())
+	{
+		if (!s_Recording)
+		{
+			s_Recording = true;
+			m_Info.m_LastUpdate = IVideo::time();
+		}
+		return IVideo::time();
+	}
+	else
+	{
+		int64 Now = time_get();
+		if (s_Recording)
+		{
+			s_Recording = false;
+			m_Info.m_LastUpdate = Now;
+		}
+		return Now;
+	}
 #else
 	return time_get();
 #endif
