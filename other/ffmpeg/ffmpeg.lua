@@ -45,11 +45,11 @@ ffmpeg = {
 						end
 					end
 
-					settings.link.libs:Add("libavcodec")
-					settings.link.libs:Add("libavformat")
-					settings.link.libs:Add("libavutil")
-					settings.link.libs:Add("libswscale")
-					settings.link.libs:Add("libswresample")
+					settings.link.libs:Add("avcodec")
+					settings.link.libs:Add("avformat")
+					settings.link.libs:Add("avutil")
+					settings.link.libs:Add("swscale")
+					settings.link.libs:Add("swresample")
 
 				end
 				settings.cc.defines:Add("CONF_VIDEORECORDER")
