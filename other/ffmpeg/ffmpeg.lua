@@ -24,28 +24,17 @@ FFMPEG = {
 		local apply = function(option, settings)
 			if option.value == true then
 				if option.use_pkgconfig then
-					settings.cc.flags:Add("`pkg-config libavcodec --cflags`")
-					settings.link.flags:Add("`pkg-config libavcodec --libs`")
-
-					settings.cc.flags:Add("`pkg-config libavformat --cflags`")
-					settings.link.flags:Add("`pkg-config libavformat --libs`")
-
-					settings.cc.flags:Add("`pkg-config libavutil --cflags`")
-					settings.link.flags:Add("`pkg-config libavutil --libs`")
-
-					settings.cc.flags:Add("`pkg-config libswscale --cflags`")
-					settings.link.flags:Add("`pkg-config libswscale --libs`")
-
-					settings.cc.flags:Add("`pkg-config libswresample --cflags`")
-					settings.link.flags:Add("`pkg-config libswresample --libs`")
+					settings.cc.flags:Add("`pkg-config libavcodec libavformat libavutil libswscale libswresample --cflags`")
+					settings.link.flags:Add("`pkg-config libavcodec libavformat libavutil libswscale libswresample --libs`")
 				end
 
 				if platform == "win32" then
-					client_settings.link.libpath:Add("other/ffmpeg/windows/lib32")
+					settings.link.libpath:Add("other/ffmpeg/windows/lib32")
 				elseif platform == "win64" then
-					client_settings.link.libpath:Add("other/ffmpeg/windows/lib64")
-				-- elseif platform == "macosx" and string.find(settings.config_name, "32") then
-				-- 	client_settings.link.libpath:Add("other/ffmpeg/mac/lib32")
+					settings.link.libpath:Add("other/ffmpeg/windows/lib64")
+				-- elseif platform == "macosx" and not option.use_pkgconfig then
+				-- 	settings.link.libpath:Add("other/ffmpeg/mac/lib64")
+				-- 	settings.link.flags:Add("-lavcodec -lavformat -lavutil -lswscale -lswresample")
 				-- elseif platform == "macosx" and string.find(settings.config_name, "64") then
 				-- 	client_settings.link.libpath:Add("other/ffmpeg/mac/lib64")
 				-- elseif platform == "linux" then
@@ -88,6 +77,7 @@ FFMPEG = {
 				if option.use_pkgconfig == true then return "using pkg-config" end
 				if option.use_winlib == 32 then return "using supplied win32 libraries" end
 				if option.use_winlib == 64 then return "using supplied win64 libraries" end
+				-- if platform == "macosx" then return "using supplied universal libraries" end
 				return "using unknown method"
 			else
 				if option.required then

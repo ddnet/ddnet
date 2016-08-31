@@ -163,14 +163,16 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libopusfile-0.dll"))
 
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avcodec-57.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avdevice-57.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avfilter-6.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avformat-57.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avutil-55.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/postproc-54.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/swresample-2.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/swscale-4.dll"))
+		if config.ffmpeg.value then
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avcodec-57.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avdevice-57.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avfilter-6.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avformat-57.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/avutil-55.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/postproc-54.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/swresample-2.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib32/swscale-4.dll"))
+		end
 	else
 		table.insert(client_depends, CopyToDirectory(".", "other/freetype/lib64/freetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL2.dll"))
@@ -186,17 +188,22 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopus-0.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libopusfile-0.dll"))
 
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avcodec-57.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avdevice-57.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avfilter-6.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avformat-57.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avutil-55.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/postproc-54.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/swresample-2.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/swscale-4.dll"))
+		if config.ffmpeg.value then
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avcodec-57.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avdevice-57.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avfilter-6.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avformat-57.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/avutil-55.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/postproc-54.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/swresample-2.dll"))
+			table.insert(client_depends, CopyToDirectory(".", "other/ffmpeg/windows/lib64/swscale-4.dll"))
+		end
 	end
-	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/mysqlcppconn.dll"))
-	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/libmysql.dll"))
+
+	if config.mysql.value then
+		table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/mysqlcppconn.dll"))
+		table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/libmysql.dll"))
+	end
 
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
