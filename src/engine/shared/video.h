@@ -3,6 +3,8 @@
 
 #include <base/system.h>
 
+#define STREAM_FRAME_RATE 60 /* 60 images/s */
+
 class IVideo
 {
 public:
