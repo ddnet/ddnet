@@ -116,7 +116,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		return false;
 
 	// prevent freezing when input while reconnecting
-	if (!Input()->GetIMEState()) Input()->SetIMEState(true);
+	// if (!Input()->GetIMEState()) Input()->SetIMEState(true);
 
 	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
 	{
@@ -374,6 +374,7 @@ void CChat::EnableMode(int Team)
 		else
 			m_Mode = MODE_ALL;
 
+		Input()->SetIMEState(true);
 		Input()->Clear();
 		m_CompletionChosen = -1;
 		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
