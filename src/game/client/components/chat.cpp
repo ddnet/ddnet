@@ -115,9 +115,6 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	// prevent freezing when input while reconnecting
-	// if (!Input()->GetIMEState()) Input()->SetIMEState(true);
-
 	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
 	{
 		const char *Text = Input()->GetClipboardText();
