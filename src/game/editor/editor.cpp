@@ -863,18 +863,8 @@ void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUse
 	CEditor *pEditor = (CEditor*)pUser;
 	if(pEditor->Load(pFileName, StorageType))
 	{
-		str_copy(pEditor->m_aFileName, pFileName, 512);
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
-		pEditor->SortImages();
 		pEditor->m_Dialog = DIALOG_NONE;
-		pEditor->m_Map.m_Modified = false;
-		pEditor->m_Map.m_UndoModified = 0;
-		pEditor->m_LastUndoUpdateTime = time_get();
-	}
-	else
-	{
-		pEditor->Reset();
-		pEditor->m_aFileName[0] = 0;
 	}
 }
 
@@ -4929,6 +4919,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 	static int s_SaveAsButton = 0;
 	static int s_SaveCopyButton = 0;
 	static int s_OpenButton = 0;
+	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
 	static int s_ExitButton = 0;
 
@@ -4961,6 +4952,22 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 		}
 		else
 			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(2.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_OpenCurrentMapButton, "Load Current Map", 0, &Slot, 0, "Opens the current in game map for editing"))
+	{
+		if(pEditor->HasUnsavedData())
+		{
+			pEditor->m_PopupEventType = POPEVENT_LOADCURRENT;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			pEditor->LoadCurrentMap();
+		}
 		return 1;
 	}
 
@@ -5026,7 +5033,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	MenuBar.VSplitLeft(60.0f, &s_File, &MenuBar);
 	if(DoButton_Menu(&s_File, "File", 0, &s_File, 0, 0))
-		UiInvokePopupMenu(&s_File, 1, s_File.x, s_File.y+s_File.h-1.0f, 120, 150, PopupMenuFile, this);
+		UiInvokePopupMenu(&s_File, 1, s_File.x, s_File.y+s_File.h-1.0f, 120, 160, PopupMenuFile, this);
 
 	/*
 	menubar.VSplitLeft(5.0f, 0, &menubar);
@@ -5299,10 +5306,6 @@ void CEditor::Reset(bool CreateDefault)
 	if(CreateDefault)
 		m_Map.CreateDefault(ms_EntitiesTexture);
 
-	/*
-	{
-	}*/
-
 	m_SelectedLayer = 0;
 	m_SelectedGroup = 0;
 	m_SelectedQuad = -1;
@@ -5331,7 +5334,11 @@ void CEditor::Reset(bool CreateDefault)
 	m_UndoRunning = false;
 
 	m_ShowEnvelopePreview = 0;
-	m_ShiftBy = 1;
+	m_ShiftBy = 1; 
+	
+	m_Map.m_Modified = false;
+	m_Map.m_UndoModified = 0;
+	m_LastUndoUpdateTime = time_get();
 }
 
 int CEditor::GetLineDistance()

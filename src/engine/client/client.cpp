@@ -15,6 +15,7 @@
 
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
+#include <game/editor/editor.h>
 
 #include <engine/client.h>
 #include <engine/config.h>
@@ -1095,6 +1096,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 	m_ReceivedSnapshots[g_Config.m_ClDummy] = 0;
 
 	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
+	str_copy(m_aCurrentMapPath, pFilename, sizeof(m_aCurrentMapPath));
 	m_CurrentMapCrc = m_pMap->Crc();
 
 	return 0x0;
@@ -3506,6 +3508,11 @@ const char* CClient::GetCurrentMap()
 int CClient::GetCurrentMapCrc()
 {
 	return m_CurrentMapCrc;
+}
+
+const char* CClient::GetCurrentMapPath()
+{
+	return m_aCurrentMapPath;
 }
 
 const char* CClient::RaceRecordStart(const char *pFilename)
