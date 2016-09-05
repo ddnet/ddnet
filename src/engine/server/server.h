@@ -3,6 +3,7 @@
 #ifndef ENGINE_SERVER_SERVER_H
 #define ENGINE_SERVER_SERVER_H
 
+#include <engine/engine.h>
 #include <engine/server.h>
 
 #include <engine/map.h>
@@ -116,7 +117,12 @@ public:
 
 			SNAPRATE_INIT=0,
 			SNAPRATE_FULL,
-			SNAPRATE_RECOVER
+			SNAPRATE_RECOVER,
+
+			DNSBL_STATE_NONE=0,
+			DNSBL_STATE_PENDING,
+			DNSBL_STATE_BLACKLISTED,
+			DNSBL_STATE_WHITELISTED,
 		};
 
 		class CInput
@@ -156,6 +162,10 @@ public:
 		// DDRace
 
 		NETADDR m_Addr;
+
+		// DNSBL
+		int m_DnsblState;
+		CHostLookup m_DnsblLookup;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -320,6 +330,12 @@ public:
 
 	virtual int* GetIdMap(int ClientID);
 
+	void InitDnsbl(int ClientID);
+	bool DnsblWhite(int ClientID)
+	{
+		return m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE ||
+		m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
+	}
 };
 
 #endif
