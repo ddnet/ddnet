@@ -292,6 +292,7 @@ public:
 	static void ConStopRecord(IConsole::IResult *pResult, void *pUser);
 	static void ConMapReload(IConsole::IResult *pResult, void *pUser);
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
+	static void ConDnsblStatus(IConsole::IResult *pResult, void *pUser);
 
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
