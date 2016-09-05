@@ -116,7 +116,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	//
 	char m_aCurrentMap[256];
-	char m_aCurrentMapPath[512];
+	char m_aCurrentMapPath[CEditor::MAX_PATH_LENGTH];
 	unsigned m_CurrentMapCrc;
 
 	bool m_TimeoutCodeSent[2];

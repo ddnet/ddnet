@@ -15,6 +15,7 @@
 
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
+#include <game/editor/editor.h>
 
 #include <engine/client.h>
 #include <engine/config.h>
