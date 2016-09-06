@@ -3,20 +3,20 @@ ffmpeg = {
 
 	OptFind = function (name, required)
 		local check = function(option, settings)
-			option.value = true
+			option.value = false
 			option.use_pkgconfig = false
 			option.use_winlib = 0
 
 			if family ~= "windows" and ExecuteSilent("pkg-config libavcodec libavformat libavutil libswscale libswresample") == 0 then
-				option.value = true
+				-- option.value = true
 				option.use_pkgconfig = true
 			end
 
 			if platform == "win32" then
-				option.value = true
+				-- option.value = true
 				option.use_winlib = 32
 			elseif platform == "win64" then
-				option.value = true
+				-- option.value = true
 				option.use_winlib = 64
 			end
 		end
@@ -93,7 +93,7 @@ ffmpeg = {
 				if option.required then
 					return "not found (required)"
 				else
-					return "not found (optional)"
+					return "disabled (optional)"
 				end
 			end
 		end
