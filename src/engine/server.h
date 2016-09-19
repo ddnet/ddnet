@@ -166,6 +166,7 @@ public:
 
 	virtual int* GetIdMap(int ClientID) = 0;
 
+	virtual bool DnsblWhite(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface

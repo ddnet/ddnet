@@ -800,6 +800,9 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 int CServer::NewClientNoAuthCallback(int ClientID, bool Reset, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
+
+	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
+
 	if (Reset)
 	{
 		pThis->m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
@@ -821,6 +824,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_AUTH;
+	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].m_aName[0] = 0;
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
@@ -832,6 +836,27 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	memset(&pThis->m_aClients[ClientID].m_Addr, 0, sizeof(NETADDR));
 	pThis->m_aClients[ClientID].Reset();
 	return 0;
+}
+
+void CServer::InitDnsbl(int ClientID)
+{
+	NETADDR Addr = *m_NetServer.ClientAddr(ClientID);
+
+	//TODO: support ipv6
+	if (Addr.type != NETTYPE_IPV4)
+		return;
+
+	// build dnsbl host lookup
+	char aBuf[256];
+	if (g_Config.m_SvDnsblKey[0] == '\0')
+		// without key
+		str_format(aBuf, sizeof(aBuf), "%d.%d.%d.%d.%s", Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], g_Config.m_SvDnsblHost);
+	else
+		// with key
+		str_format(aBuf, sizeof(aBuf), "%s.%d.%d.%d.%d.%s", g_Config.m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], g_Config.m_SvDnsblHost);
+
+	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	pEngine->HostLookup(&m_aClients[ClientID].m_DnsblLookup, aBuf, NETTYPE_IPV4);
 }
 
 int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
@@ -1742,6 +1767,50 @@ int CServer::Run()
 				}
 			}
 
+			// handle dnsbl
+			if (g_Config.m_SvDnsbl)
+			{
+				for (int c = 0; c < MAX_CLIENTS; c++)
+				{
+					if (m_aClients[c].m_State == CClient::STATE_EMPTY)
+						continue;
+
+					if (m_aClients[c].m_DnsblState == CClient::DNSBL_STATE_NONE)
+					{
+						// initiate dnsbl lookup
+						m_aClients[c].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+						InitDnsbl(c);
+					}
+					else if (m_aClients[c].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
+								m_aClients[c].m_DnsblLookup.m_Job.Status() == CJob::STATE_DONE)
+					{
+
+						if (m_aClients[c].m_DnsblLookup.m_Addr.type == NETTYPE_INVALID)
+						{
+							// entry not found -> whitelisted
+							m_aClients[c].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+						}
+						else
+						{
+							// entry found -> blacklisted
+							m_aClients[c].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
+
+							// console output
+							char aAddrStr[NETADDR_MAXSTRSIZE];
+							net_addr_str(m_NetServer.ClientAddr(c), aAddrStr, sizeof(aAddrStr), true);
+
+							char aBuf[256];
+							str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=%s secure=%s blacklisted", c, aAddrStr, m_NetServer.HasSecurityToken(c)?"yes":"no");
+							Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
+						}
+					}
+
+					if (m_aClients[c].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED &&
+							g_Config.m_SvDnsblBan)
+						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(c), 60*10, "Blacklisted by DNSBL");
+				}
+			}
+
 			while(t > TickStartTime(m_CurrentGameTick+1))
 			{
 				m_CurrentGameTick++;
@@ -1888,6 +1957,34 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY)
+		{
+			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
+			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
+			{
+				const char *pAuthStr = pThis->m_aClients[i].m_Authed == CServer::AUTHED_ADMIN ? "(Admin)" :
+										pThis->m_aClients[i].m_Authed == CServer::AUTHED_MOD ? "(Mod)" :
+										pThis->m_aClients[i].m_Authed == CServer::AUTHED_HELPER ? "(Helper)" : "";
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
+					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", pAuthStr);
+			}
+			else
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
+		}
+	}
+}
+
+void CServer::ConDnsblStatus(IConsole::IResult *pResult, void *pUser)
+{
+	// dump blacklisted clients
+	char aBuf[1024];
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	CServer* pThis = static_cast<CServer *>(pUser);
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY &&
+				pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
 		{
 			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
@@ -2239,6 +2336,8 @@ void CServer::RegisterCommands()
 	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 
 #endif
+
+	Console()->Register("dnsbl_status", "", CFGFLAG_SERVER, ConDnsblStatus, this, "List blacklisted players");
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
