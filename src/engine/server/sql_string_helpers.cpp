@@ -5,12 +5,12 @@
 
 #include "sql_string_helpers.h"
 
-void sqlstr::FuzzyString(char *pString)
+void sqlstr::FuzzyString(char *pString, int size)
 {
-	char newString[32*4-1];
+	char * newString = new char [size * 4 - 1];
 	int pos = 0;
 
-	for(int i=0;i<64;i++)
+	for(int i = 0; i < size; i++)
 	{
 		if(!pString[i])
 			break;
@@ -21,7 +21,8 @@ void sqlstr::FuzzyString(char *pString)
 	}
 
 	newString[pos] = '\0';
-	strcpy(pString, newString);
+	str_copy(pString, newString, size);
+	delete [] newString;
 }
 
 // anti SQL injection
@@ -30,7 +31,7 @@ void sqlstr::ClearString(char *pString, int size)
 	char *newString = new char [size * 2 - 1];
 	int pos = 0;
 
-	for(int i=0;i<size;i++)
+	for(int i = 0; i < size; i++)
 	{
 		if(pString[i] == '\\')
 		{
@@ -55,7 +56,7 @@ void sqlstr::ClearString(char *pString, int size)
 
 	newString[pos] = '\0';
 
-	strcpy(pString, newString);
+	str_copy(pString, newString, size);
 	delete [] newString;
 }
 
