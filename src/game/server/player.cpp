@@ -193,9 +193,6 @@ void CPlayer::Tick()
 
 	if(!GameServer()->m_World.m_Paused)
 	{
-		if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpectatorID == SPEC_FREEVIEW)
-			m_ViewPos -= vec2(clamp(m_ViewPos.x-m_LatestActivity.m_TargetX, -500.0f, 500.0f), clamp(m_ViewPos.y-m_LatestActivity.m_TargetY, -400.0f, 400.0f));
-
 		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
 			m_Spawning = true;
 
@@ -318,9 +315,9 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_Local = 0;
 	pPlayerInfo->m_ClientID = id;
 	pPlayerInfo->m_Score = abs(m_Score) * -1;
-	pPlayerInfo->m_Team = (m_Paused != PAUSED_SPEC || m_ClientID != SnappingClient) && m_Paused < PAUSED_PAUSED ? m_Team : TEAM_SPECTATORS;
+	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSED_SPEC || m_ClientID != SnappingClient) && m_Paused < PAUSED_PAUSED ? m_Team : TEAM_SPECTATORS;
 
-	if(m_ClientID == SnappingClient)
+	if(m_ClientID == SnappingClient && (m_Paused != PAUSED_SPEC || m_ClientVersion >= VERSION_DDNET_OLD))
 		pPlayerInfo->m_Local = 1;
 
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
@@ -341,26 +338,45 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Score = abs(m_Score) * -1;
 }
 
-void CPlayer::FakeSnap(int SnappingClient)
+void CPlayer::FakeSnap()
 {
 	// This is problematic when it's sent before we know whether it's a non-64-player-client
 	// Then we can't spectate players at the start
-	IServer::CClientInfo info;
-	Server()->GetClientInfo(SnappingClient, &info);
-	CGameContext *GameContext = (CGameContext *) GameServer();
-	if (SnappingClient > -1 && GameContext->m_apPlayers[SnappingClient] && GameContext->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_OLD)
+
+	if(m_ClientVersion >= VERSION_DDNET_OLD)
 		return;
 
-	int id = VANILLA_MAX_CLIENTS - 1;
+	int FakeID = VANILLA_MAX_CLIENTS - 1;
 
-	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
+	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, FakeID, sizeof(CNetObj_ClientInfo)));
 
 	if(!pClientInfo)
 		return;
 
 	StrToInts(&pClientInfo->m_Name0, 4, " ");
-	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+	StrToInts(&pClientInfo->m_Clan0, 3, "");
+	StrToInts(&pClientInfo->m_Skin0, 6, "default");
+
+	if(m_Paused != PAUSED_SPEC)
+		return;
+
+	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
+	if(!pPlayerInfo)
+		return;
+
+	pPlayerInfo->m_Latency = m_Latency.m_Min;
+	pPlayerInfo->m_Local = 1;
+	pPlayerInfo->m_ClientID = FakeID;
+	pPlayerInfo->m_Score = -9999;
+	pPlayerInfo->m_Team = TEAM_SPECTATORS;
+
+	CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, FakeID, sizeof(CNetObj_SpectatorInfo)));
+	if(!pSpectatorInfo)
+		return;
+
+	pSpectatorInfo->m_SpectatorID = m_SpectatorID;
+	pSpectatorInfo->m_X = m_ViewPos.x;
+	pSpectatorInfo->m_Y = m_ViewPos.y;
 }
 
 void CPlayer::OnDisconnect(const char *pReason)
