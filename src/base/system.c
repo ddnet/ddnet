@@ -2559,12 +2559,13 @@ void generate_password(char *buffer, unsigned length, unsigned short *random, un
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
 	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
+	unsigned i;
 	dbg_assert(length >= random_length * 2 + 1, "too small buffer");
 	dbg_assert(NUM_VALUES * NUM_VALUES >= 2048, "need at least 2048 possibilities for 2-character sequences");
 
 	buffer[random_length * 2] = 0;
 
-	for(size_t i = 0; i < random_length; i++)
+	for(i = 0; i < random_length; i++)
 	{
 		unsigned short random_number = random[i] % 2048;
 		buffer[2 * i + 0] = VALUES[random_number / NUM_VALUES];
@@ -2575,13 +2576,13 @@ void generate_password(char *buffer, unsigned length, unsigned short *random, un
 void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 {
 	static const size_t MAX_PASSWORD_LENGTH = 128;
+	unsigned short random[MAX_PASSWORD_LENGTH / 2];
 	// With 6 characters, we get a password entropy of log(2048) * 6/2 = 33bit.
 	dbg_assert(length >= pw_length + 1, "too small buffer");
 	dbg_assert(pw_length >= 6, "too small password length");
 	dbg_assert(pw_length % 2 == 0, "need an even password length");
 	dbg_assert(pw_length <= MAX_PASSWORD_LENGTH, "too large password length");
 
-	unsigned short random[MAX_PASSWORD_LENGTH / 2];
 	secure_random_fill(random, pw_length);
 
 	generate_password(buffer, length, random, pw_length / 2);

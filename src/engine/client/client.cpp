@@ -728,7 +728,7 @@ void CClient::GenerateTimeoutCodes()
 	else
 	{
 		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode, sizeof(m_aTimeoutCodes[0]));
-		str_copy(m_aTimeoutCodes[0], g_Config.m_ClDummyTimeoutCode, sizeof(m_aTimeoutCodes[0]));
+		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode, sizeof(m_aTimeoutCodes[1]));
 	}
 }
 
