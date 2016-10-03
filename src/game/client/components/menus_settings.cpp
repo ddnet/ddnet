@@ -2020,24 +2020,11 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 #endif
 
 	{
+		static int s_ButtonTimeout = 0;
 		Right.HSplitTop(20.0f, &Button, &Right);
-		Button.VSplitLeft(190.0f, &Label, &Button);
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Timeout code"));
-		UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
-		static float s_OffsetCode = 0.0f;
-		DoEditBox(g_Config.m_ClTimeoutCode, &Button, g_Config.m_ClTimeoutCode, sizeof(g_Config.m_ClTimeoutCode), 14.0f, &s_OffsetCode);
-	}
-
-	Right.HSplitTop(5.0f, &Button, &Right);
-
-	{
-		Right.HSplitTop(20.0f, &Button, &Right);
-		Button.VSplitLeft(190.0f, &Label, &Button);
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Dummy Timeout code"));
-		UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
-		static float s_OffsetCode = 0.0f;
-		DoEditBox(g_Config.m_ClDummyTimeoutCode, &Button, g_Config.m_ClDummyTimeoutCode, sizeof(g_Config.m_ClDummyTimeoutCode), 14.0f, &s_OffsetCode);
+		if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button))
+		{
+			Client()->GenerateTimeoutSeed();
+		}
 	}
 }

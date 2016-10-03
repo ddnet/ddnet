@@ -706,10 +706,7 @@ void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADD
 
 void CClient::GenerateTimeoutSeed()
 {
-	if(m_GenerateTimeoutSeed)
-	{
-		secure_random_password(g_Config.m_ClTimeoutSeed, sizeof(g_Config.m_ClTimeoutSeed), 16);
-	}
+	secure_random_password(g_Config.m_ClTimeoutSeed, sizeof(g_Config.m_ClTimeoutSeed), 16);
 }
 
 void CClient::GenerateTimeoutCodes()
@@ -2629,7 +2626,10 @@ void CClient::Run()
 	m_LocalStartTime = time_get();
 	m_SnapshotParts = 0;
 
-	GenerateTimeoutSeed();
+	if(m_GenerateTimeoutSeed)
+	{
+		GenerateTimeoutSeed();
+	}
 
 	unsigned int Seed;
 	secure_random_fill(&Seed, sizeof(Seed));

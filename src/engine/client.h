@@ -195,6 +195,8 @@ public:
 	virtual void RequestDDNetSrvList() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
 
+	virtual void GenerateTimeoutSeed() = 0;
+
 	virtual IFriends* Foes() = 0;
 };
 
