@@ -2573,9 +2573,10 @@ void generate_password(char *buffer, unsigned length, unsigned short *random, un
 	}
 }
 
+#define MAX_PASSWORD_LENGTH 128
+
 void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 {
-	static const size_t MAX_PASSWORD_LENGTH = 128;
 	unsigned short random[MAX_PASSWORD_LENGTH / 2];
 	// With 6 characters, we get a password entropy of log(2048) * 6/2 = 33bit.
 	dbg_assert(length >= pw_length + 1, "too small buffer");
@@ -2587,6 +2588,8 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 
 	generate_password(buffer, length, random, pw_length / 2);
 }
+
+#undef MAX_PASSWORD_LENGTH
 
 void secure_random_fill(void *bytes, unsigned length)
 {
