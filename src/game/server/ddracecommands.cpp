@@ -166,6 +166,14 @@ void CGameContext::ConRifle(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_RIFLE, false);
 }
 
+void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (pChr)
+		pChr->m_Jetpack = true;
+}
+
 void CGameContext::ConWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -190,6 +198,14 @@ void CGameContext::ConUnRifle(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_RIFLE, true);
 }
 
+void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (pChr)
+		pChr->m_Jetpack = false;
+}
+
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -211,10 +227,11 @@ void CGameContext::ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 		int Weapon, bool Remove)
 {
-	CGameContext *pSelf = (CGameContext *) pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter* pChr = GetPlayerChar(pResult->m_ClientID);
+	if (!pChr)
 		return;
-	int ClientID = pResult->m_ClientID;
+
 	if (clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
@@ -222,47 +239,15 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 		return;
 	}
 
-	CCharacter* pChr = GetPlayerChar(ClientID);
-	if (!pChr)
-		return;
-
 	if (Weapon == -1)
 	{
-		if (Remove
-				&& (pChr->GetActiveWeapon() == WEAPON_SHOTGUN
-						|| pChr->GetActiveWeapon() == WEAPON_GRENADE
-						|| pChr->GetActiveWeapon() == WEAPON_RIFLE))
-			pChr->SetActiveWeapon(WEAPON_GUN);
-
-		if (Remove)
-		{
-			pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
-			pChr->SetWeaponGot(WEAPON_GRENADE, false);
-			pChr->SetWeaponGot(WEAPON_RIFLE, false);
-		}
-		else
-			pChr->GiveAllWeapons();
-	}
-	else if (Weapon != WEAPON_NINJA)
-	{
-		if (Remove && pChr->GetActiveWeapon() == Weapon)
-			pChr->SetActiveWeapon(WEAPON_GUN);
-
-		if (Remove)
-			pChr->SetWeaponGot(Weapon, false);
-		else
-			pChr->GiveWeapon(Weapon, -1);
+		pChr->GiveWeapon(WEAPON_SHOTGUN);
+		pChr->GiveWeapon(WEAPON_GRENADE);
+		pChr->GiveWeapon(WEAPON_RIFLE);
 	}
 	else
 	{
-		if (Remove)
-		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-					"you can't remove ninja");
-			return;
-		}
-
-		pChr->GiveNinja();
+		pChr->GiveWeapon(Weapon, Remove);
 	}
 
 	pChr->m_DDRaceState = DDRACE_CHEAT;

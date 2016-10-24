@@ -75,8 +75,9 @@ public:
 	bool IncreaseHealth(int Amount);
 	bool IncreaseArmor(int Amount);
 
-	bool GiveWeapon(int Weapon, int Ammo);
+	void GiveWeapon(int Weapon, bool Remove = false);
 	void GiveNinja();
+	void RemoveNinja();
 
 	void SetEmote(int Emote, int Tick);
 
