@@ -11,13 +11,11 @@
 # Ryomou Hentai Girl  2011-07-11 11:33:42
 # Isadora             2011-07-20 21:47:11
 # HeroiAmarelo        2012-08-01 15:50:18
-# Rafael Ferreira     2014-11-21 13:31:06
+# Rafael Fontenelle   2014-11-21 13:31:06
+# Rafael Fontenelle   2016-12-12 13:31:06
 ##### /authors #####
 
 ##### translated strings #####
-
-%d%% loaded
-== %d%% carregado
 
 %ds left
 == Faltam %ds
@@ -54,9 +52,6 @@ Address
 
 All
 == Todos
-
-Always show name plates
-== Sempre mostrar apelidos
 
 Are you sure that you want to delete the demo?
 == Tem certeza que deseja deletar o demo?
@@ -242,7 +237,7 @@ High Detail
 == Mostrar detalhes
 
 Hook
-== Gancho
+== Gancho (hook)
 
 Invalid Demo
 == Demo inválida
@@ -261,9 +256,6 @@ Kick player
 
 Language
 == Idioma
-
-Loading
-== Carregando
 
 MOTD
 == MOTD
@@ -364,9 +356,6 @@ Quality Textures
 Quit
 == Sair
 
-REC %3d:%02d
-== REC %3d:%02d
-
 Reason:
 == Motivo:
 
@@ -436,9 +425,6 @@ Server info
 Server not full
 == Servidor não lotado
 
-Settings
-== Configurações
-
 Shotgun
 == Espingarda
 
@@ -507,9 +493,6 @@ Team
 
 Team chat
 == Chat do time
-
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworlds %s foi lançado! Baixe-o em www.teeworlds.com!
 
 Texture Compression
 == Compressão de textura
@@ -583,314 +566,434 @@ Yes
 You must restart the game for all settings to take effect.
 == Você deve reiniciar o jogo para que todas as alterações tenham efeito.
 
-%.3f KiB
-== %.3f KB
-
-%d player left
-== Falta %d jogador
-
-%d player not ready
-== %d jogador não está pronto
-
-%d players left
-== Faltam %d jogadores
-
-%d players not ready
-== %d jogadores não estão prontos
-
-%d servers, %d players
-== %d servidores, %d jogadores
-
-'%s' called for vote to kick '%s' (%s)
-== '%s' convocou votação para expulsar '%s' (%s)
-
-'%s' called for vote to move '%s' to spectators (%s)
-== '%s' convocou votação para mover '%s' para observador (%s)
-
-'%s' called vote to change server option '%s' (%s)
-== '%s' convocou votação para mudar opção '%s' do observador (%s)
-
-'%s' entered and joined the %s
-== '%s' entrou no %s
-
-'%s' has left the game
-== '%s' saiu do jogo
-
-'%s' has left the game (%s)
-== '%s' saiu do jogo (%s)
-
-'%s' joined the %s
-== '%s' entrou no %s
-
-Admin forced server option '%s' (%s)
-== Administrador forçou a opção '%s' do servidor (%s)
-
-Admin forced vote no
-== Administrador forçou votação não
-
-Admin forced vote yes
-== Administrador forçou votação sim
-
-Admin moved '%s' to spectator (%s)
-== Administrador moveu '%s' para observador (%s)
-
-Alp:
-== Alp:
-
-Anti Aliasing
-== Suavização
-
-Are you sure you want to rename the demo?
-== Tem certeza que deseja renomear o demo?
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== Tem certeza que deseja salvar sua skin? Se uma skin com este nome já existir, ela será substituída.
-
-Back
-== Voltar
-
-Basic
-== Básico
-
-Bodies
-== Corpos
-
 Borderless window
 == Janela sem borda
-
-Color
-== Cor
-
-Crc
-== Crc
-
-Created
-== Criado
-
-Custom
-== Personalizado
-
-Customize
-== Personalizar
-
-Decoration
-== Decoração
 
 Demo
 == Demo
 
-Detail
-== Detalhes
-
-Editor
-== Editor
-
-Eyes
-== Olhos
-
-Format
-== Formato
-
-Game starts in
-== Jogo começa em
-
-Global
-== global
-
-Hands
-== Mãos
-
-Host address:
-== Servidor:
-
-Hue:
-== Matiz:
-
-Join
-== Entrar
-
-Joined
-== Entrou
-
-Joined blue
-== Azul
-
-Joined red
-== Vermelho
-
-Kick voting requires %d players on the server
-== Votação para expulsar requer %d jogadores no servidor
-
 Laser
 == Laser
 
-Length
-== Duração
-
-Letterbox
-== Letterbox
-
-Lgt:
-== Lgt:
-
-Local
-== Local
-
-Local server
-== Servidor local
-
-Match
-== Partida
-
-Max
-== Máx.
-
-Misc
-== Diversos
-
-Netversion
-== Netversion
-
-Nickname is empty.
-== Apelido está vazido.
-
-Normal:
-== Normal:
-
-Only %d active players are allowed
-== Apenas %d jogadores ativos são permitidos
-
-Personal
-== Pessoal
-
-Ready
-== Pronto
-
-Record
-== Gravar
-
-Recorded
-== Gravado
-
 Reset
-== Reiniciar
-
-Resolutions
-== Resoluções
-
-Round over
-== Acabar rodada
-
-Round over!
-== Rodada acabou!
-
-Sat:
-== Sat:
-
-Save
-== Salvar
-
-Save skin
-== Salvar skin
+== Redefinir
 
 Screen
 == Tela
 
-Search:
-== Pesquisar:
+New name:
+== Novo jogo:
 
-Server does not allow voting to kick players
-== Servidor não permite votação para expulsar jogadores
+Ratio
+== Proporção
 
-Server does not allow voting to move players to spectators
-== Servidor não permite votação para mover jogadores para observadores
+Max demos
+== Máximo de demos
 
-Servers
-== Servidores
+Dummy settings
+== Configurações do dummy
 
-Size
-== Tamanho
+AntiPing
+== AntiPing
 
-Skin
-== Skin
+Show quads
+== Mostrar quadrados
 
-Spectating
-== Observando
+✎
+== ✎
 
-Spectators aren't allowed to start a vote.
-== Observadores não podem iniciar uma votação.
+Map sound volume
+== Volume do som de mapas
 
-Standard Gametype
-== Tipo de jogo padrão
+Rifle
+== Rifle
 
-Tattoo
-== Tatuagem
+✗
+== ✗
 
-Tattoos
-== Tatuagens
+Join game
+== Entrar no jogo
 
-Team:
-== Time:
+Countries
+== Países
 
-Teams are locked
-== Times estão travados
+Crc:
+== CRC:
 
-Teams are locked. Time to wait before changing team: %02d:%02d
-== Times estão travados. Tempo de espera até a troca de time : %02d:%02d
+FSAA samples
+== Amostras FSAA
 
-Teams were locked
-== Times foram travados
+Inner color
+== Cor interna
 
-Teams were unlocked
-== Times foram destravados
+CPU Throttle
+== 
 
-Tee
-== Tee
+\n\nReconnect in %d sec
+== \n\nReconnetar em %d segundos
 
-Texture
-== Textura
+Save ghost
+== Salvar fantasma
 
-Volume
-== Volume
+Background (entities)
+== Papel de parede (entidades)
 
-Vote aborted
-== Votação cancelada
+Show kill messages
+== Mostrar mensagens de kill
 
-Vote failed
-== Votação falhou
+Show ghost
+== Mostrar fantasma
 
-Vote passed
-== Votação passou
+Clan plates size
+== Tamanho da placa do clã
 
-Wait for current vote to end before calling a new one.
-== Espere a votação atual acabar antes de convocar outra.
+Info
+== Info
 
-Wait for next round
-== Espere pela próxima rodada
+No updates available
+== Nenhuma atualização disponível
 
-Wide
-== Wide
+Update now
+== Atualizar agora
 
-You must wait %d seconds before making another vote
-== Você tem que esperar %d segundos antes de fazer outra votação
+Enable server message sound
+== Habilitar som de mensagem do servidor
 
-blue
-== azul
+second
+== segundo
 
-blue team
-== time azul
+Show votes window after voting
+== Mostrar janela de votos após votar
 
-game
-== jogo
+HUD
+== HUD
 
-red
-== vermelho
+AntiPing limit
+== Limite de AntiPing
 
-red team
-== time vermelho
+Look out!
+== Cuidado!
 
-spectators
-== observadores
+Show names in chat in team colors
+== Mostrar nomes no bate-papo com cores do time
 
-wait for more players
-== espere por jogadores
+Select a name
+== Selecione um nome
+
+Netversion:
+== Netversion:
+
+Enable team chat sound
+== Habilitar som de bate-papo do time
+
+Show other players' hook collision lines
+== Mostra linhas de colisão dos outros jogadores
+
+We will win
+== Nós vamos vencer
+
+Your skin
+== Sua skin
+
+Deaths
+== Mortes
+
+Enable game sounds
+== Habilitar sons do jogo
+
+DDNet Client needs to be restarted to complete update!
+== O Cliente DDNet precisa ser reiniciado para completar a atualização!
+
+Spectator
+== Observador
+
+Max Screenshots
+== Máximo de capturas de tela
+
+Size:
+== Tamanho:
+
+Sound volume
+== Volume do som
+
+Hue
+== Matiz
+
+Please use a different name
+== Por favor, use um nome diferente
+
+Wait before try for
+== Aguarde antes de tentar para
+
+Show others
+== Mostrar outros
+
+Gameplay
+== Jogabilidade
+
+Restart
+== Reiniciar
+
+Old mouse mode
+== Modo antigo de mouse
+
+Display Modes
+== Modos de exibição
+
+Round
+== Turno
+
+Browser
+== Navegar
+
+none
+== nenhum
+
+Follow
+== Seguir
+
+%.2f KiB
+== %.2f KB
+
+Enable gun sound
+== Habilitar som da arma
+
+Team message
+== Mensagem do time
+
+Manual %3d:%02d  
+== Manual %3d:%02d  
+
+Save the best demo of each race
+== Salvar a melhor demo de cada corrida
+
+Show tiles layers from BG map
+== Mostrar camadas de tiles de mapas
+
+Are you sure that you want to disconnect?
+== Tem certeza que deseja se desconectar?
+
+Types
+== Tipos
+
+Ghost
+== Fantasma
+
+Remove chat
+== Remover bate-papo
+
+Current version: %s
+== Versão atual: %s
+
+Threaded sound loading
+== Carregamento de som em fluxos
+
+Check now
+== Verificar agora
+
+Exclude
+== Excluir
+
+DDNet Client updated!
+== DDNet Client atualizado!
+
+Race %3d:%02d  
+== Corrida %3d:%02d  
+
+Type:
+== Tipo:
+
+Background (regular)
+== Fundo de tela (regular)
+
+DDNet %s is out! Download it at DDNet.tw!
+== DDNet %s foi lançado! Baixe-o em DDNet.tw!
+
+Internet
+== Internet
+
+Frags
+== Frags
+
+AntiPing: predict other players
+== AntiPing: prever outros jogadores
+
+Show other players' key presses
+== Mostrar teclas pressionadas de outros jogadores
+
+Automatically take statboard screenshot
+== Automaticamente capturar imagem do statboard
+
+System message
+== Mensagem do sistema
+
+Quit anyway?
+== Sair mesmo assim
+
+DDNet %s is available:
+== DDNet %s está disponível:
+
+News
+== Novidades
+
+Updating...
+== Atualizando...
+
+Show health + ammo
+== Mostrar vida + munição
+
+Overlay entities
+== Sobrepor entidades
+
+Messages
+== Mensagens
+
+Vanilla Skins only
+== Skins padrões apenas
+
+Sat.
+== Sat.
+
+%.2f MiB
+== %.2f MB
+
+Refresh Rate
+== Taxa de atualiz.
+
+New random timeout code
+== Novo código aleatório de timeout
+
+Created:
+== Criado:
+
+Suicides
+== Suicídios
+
+Use DDRace Scoreboard
+== Usar o placar do DDRace
+
+Record demo
+== Gravar demo
+
+Net
+== Net
+
+Miscellaneous
+== Diversos
+
+Loading DDNet Client
+== Carregando DDNet Client
+
+FPM
+== FPM
+
+Default zoom
+== Zoom padrão
+
+Show score
+== Mostrar pontuação
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== Mostrar IDs de clientes no placar
+
+seconds
+== segundos
+
+UI Color
+== Cor da UI
+
+Show console window
+== Mostra janela de console
+
+Try fast HTTP map download first
+== Tentar baixar mapa por HTTP (rápido) primeiro
+
+Best
+== Melhor
+
+Enable regular chat sound
+== Habilitar som comum de bate-papo
+
+DDNet
+== DDNet
+
+Normal message
+== Mensagem normal
+
+AntiPing: predict grenade paths
+== AntiPing: predizer caminho de granada
+
+Search
+== Pesquisar
+
+LAN
+== LAN
+
+Connecting dummy
+== Conectando dummy
+
+Version:
+== Versão:
+
+Map:
+== Mapa:
+
+Lht.
+== Lumin.
+
+Auto %3d:%02d  
+== Auto %3d:%02d  
+
+Show clan above name plates
+== Mostrar clã sobre placas de nomes
+
+%d of %d servers, %d players
+== %d/%d servidores, %d jogadores
+
+Enable highlighted chat sound
+== Habilitar som realçado de bate-papo
+
+Reset to defaults
+== Redefinir valores
+
+Hello and welcome
+== Olá e bem-vindo
+
+AntiPing: predict weapons
+== AntiPing: predizer armas
+
+Host address
+== Endereço do servidor
+
+High-DPI screen support (experimental)
+== Suporte a tela HDPI (experimental)
+
+Outline color
+== Cor do contorno
+
+Highlighted message
+== Mensagem realçada
+
+Alpha
+== Alfa
+
+Reset wanted weapon on death
+== Redefinir arma desejada ao morrer
+
+Length:
+== Duração:
+
+no limit
+== sem limite
+
+Switch weapon when out of ammo
+== Trocar de arma quando acabar munição
+
+Name plates size
+== Tamanho de placas de nomes
+
+Grabs
+== Pega
