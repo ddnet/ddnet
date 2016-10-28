@@ -148,26 +148,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// handle mousewheel independent of active menu
 	if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 	{
-		if(pInfo->m_Speed < 0.1f) DemoPlayer()->SetSpeed(0.1f);
-		else if(pInfo->m_Speed < 0.25f) DemoPlayer()->SetSpeed(0.25f);
-		else if(pInfo->m_Speed < 0.5f) DemoPlayer()->SetSpeed(0.5f);
-		else if(pInfo->m_Speed < 0.75f) DemoPlayer()->SetSpeed(0.75f);
-		else if(pInfo->m_Speed < 1.0f) DemoPlayer()->SetSpeed(1.0f);
-		else if(pInfo->m_Speed < 2.0f) DemoPlayer()->SetSpeed(2.0f);
-		else if(pInfo->m_Speed < 4.0f) DemoPlayer()->SetSpeed(4.0f);
-		else DemoPlayer()->SetSpeed(8.0f);
+		DemoPlayer()->SetSpeedIndex(+1);
 		LastSpeedChange = time_get();
 	}
 	else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 	{
-		if(pInfo->m_Speed > 4.0f) DemoPlayer()->SetSpeed(4.0f);
-		else if(pInfo->m_Speed > 2.0f) DemoPlayer()->SetSpeed(2.0f);
-		else if(pInfo->m_Speed > 1.0f) DemoPlayer()->SetSpeed(1.0f);
-		else if(pInfo->m_Speed > 0.75f) DemoPlayer()->SetSpeed(0.75f);
-		else if(pInfo->m_Speed > 0.5f) DemoPlayer()->SetSpeed(0.5f);
-		else if(pInfo->m_Speed > 0.25f) DemoPlayer()->SetSpeed(0.25f);
-		else if(pInfo->m_Speed > 0.1f) DemoPlayer()->SetSpeed(0.1f);
-		else DemoPlayer()->SetSpeed(0.05f);
+		DemoPlayer()->SetSpeedIndex(-1);
 		LastSpeedChange = time_get();
 	}
 
@@ -422,26 +408,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	if(IncreaseDemoSpeed)
 	{
-		if(pInfo->m_Speed < 0.1f) DemoPlayer()->SetSpeed(0.1f);
-		else if(pInfo->m_Speed < 0.25f) DemoPlayer()->SetSpeed(0.25f);
-		else if(pInfo->m_Speed < 0.5f) DemoPlayer()->SetSpeed(0.5f);
-		else if(pInfo->m_Speed < 0.75f) DemoPlayer()->SetSpeed(0.75f);
-		else if(pInfo->m_Speed < 1.0f) DemoPlayer()->SetSpeed(1.0f);
-		else if(pInfo->m_Speed < 2.0f) DemoPlayer()->SetSpeed(2.0f);
-		else if(pInfo->m_Speed < 4.0f) DemoPlayer()->SetSpeed(4.0f);
-		else DemoPlayer()->SetSpeed(8.0f);
+		DemoPlayer()->SetSpeedIndex(+1);
 		LastSpeedChange = time_get();
 	}
 	else if(DecreaseDemoSpeed)
 	{
-		if(pInfo->m_Speed > 4.0f) DemoPlayer()->SetSpeed(4.0f);
-		else if(pInfo->m_Speed > 2.0f) DemoPlayer()->SetSpeed(2.0f);
-		else if(pInfo->m_Speed > 1.0f) DemoPlayer()->SetSpeed(1.0f);
-		else if(pInfo->m_Speed > 0.75f) DemoPlayer()->SetSpeed(0.75f);
-		else if(pInfo->m_Speed > 0.5f) DemoPlayer()->SetSpeed(0.5f);
-		else if(pInfo->m_Speed > 0.25f) DemoPlayer()->SetSpeed(0.25f);
-		else if(pInfo->m_Speed > 0.1f) DemoPlayer()->SetSpeed(0.1f);
-		else DemoPlayer()->SetSpeed(0.05f);
+		DemoPlayer()->SetSpeedIndex(-1);
 		LastSpeedChange = time_get();
 	}
 }

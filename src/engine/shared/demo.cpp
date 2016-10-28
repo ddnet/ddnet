@@ -369,6 +369,7 @@ CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta)
 {
 	m_File = 0;
 	m_pKeyFrames = 0;
+	m_SpeedIndex = 4;
 
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_LastSnapshotDataSize = -1;
@@ -657,6 +658,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_Info.m_Info.m_CurrentTick = -1;
 	m_Info.m_PreviousTick = -1;
 	m_Info.m_Info.m_Speed = 1;
+	m_SpeedIndex = 4;
 
 	m_LastSnapshotDataSize = -1;
 
@@ -816,6 +818,12 @@ int CDemoPlayer::SetPos(float Percent)
 void CDemoPlayer::SetSpeed(float Speed)
 {
 	m_Info.m_Info.m_Speed = Speed;
+}
+
+void CDemoPlayer::SetSpeedIndex(int Offset)
+{
+	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(sizeof(g_aSpeeds)/sizeof(g_aSpeeds[0])-1));
+	SetSpeed(g_aSpeeds[m_SpeedIndex]);
 }
 
 int CDemoPlayer::Update(bool RealTime)

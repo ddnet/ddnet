@@ -101,6 +101,7 @@ private:
 	char m_aFilename[256];
 	CKeyFrame *m_pKeyFrames;
 	CMapInfo m_MapInfo;
+	int m_SpeedIndex;
 
 	CPlaybackInfo m_Info;
 	int m_DemoType;
@@ -125,6 +126,7 @@ public:
 	void Unpause();
 	int Stop();
 	void SetSpeed(float Speed);
+	void SetSpeedIndex(int Offset);
 	int SetPos(float Percent);
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const;
