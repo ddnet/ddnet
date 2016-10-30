@@ -358,7 +358,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	{
 		if(i != ClientID && m_aClients[i].m_State >= CClient::STATE_READY)
 		{
-			if(str_utf8_comp_names(aTrimmedName, m_aClients[i].m_aName) == 0)
+			if(str_utf8_comp_confusable(aTrimmedName, m_aClients[i].m_aName) == 0)
 				return -1;
 		}
 	}

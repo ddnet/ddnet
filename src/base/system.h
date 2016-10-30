@@ -1265,7 +1265,19 @@ unsigned str_quickhash(const char *str);
 */
 void gui_messagebox(const char *title, const char *message);
 
-int str_utf8_comp_names(const char *a, const char *b);
+/*
+	Function: str_utf8_comp_confusable
+		Compares two strings for visual appearance.
+
+	Parameters:
+		a - String to compare.
+		b - String to compare.
+
+	Returns:
+		0 if the strings are confusable.
+		!=0 otherwise.
+*/
+int str_utf8_comp_confusable(const char *a, const char *b);
 
 int str_utf8_isspace(int code);
 

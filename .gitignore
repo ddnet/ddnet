@@ -9,6 +9,7 @@ SDL.dll
 SDL2.dll
 freetype.dll
 
+/confusables*
 /crapnet*
 /config_store*
 /config_retrieve*
