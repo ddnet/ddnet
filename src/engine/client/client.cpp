@@ -1768,8 +1768,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					m_CurrentRecvTick[g_Config.m_ClDummy] = GameTick;
 				}
 
-				// TODO: clean this up abit
-				mem_copy((char*)m_aSnapshotIncomingData + Part*MAX_SNAPSHOT_PACKSIZE, pData, PartSize);
+				mem_copy((char*)m_aSnapshotIncomingData + Part*MAX_SNAPSHOT_PACKSIZE, pData, clamp(PartSize, 0, (int)sizeof(m_aSnapshotIncomingData) - Part*MAX_SNAPSHOT_PACKSIZE));
 				m_SnapshotParts |= 1<<Part;
 
 				if(m_SnapshotParts == (unsigned)((1<<NumParts)-1))
@@ -2024,8 +2023,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					m_CurrentRecvTick[!g_Config.m_ClDummy] = GameTick;
 				}
 
-				// TODO: clean this up abit
-				mem_copy((char*)m_aSnapshotIncomingData + Part*MAX_SNAPSHOT_PACKSIZE, pData, PartSize);
+				mem_copy((char*)m_aSnapshotIncomingData + Part*MAX_SNAPSHOT_PACKSIZE, pData, clamp(PartSize, 0, (int)sizeof(m_aSnapshotIncomingData) - Part*MAX_SNAPSHOT_PACKSIZE));
 				m_SnapshotParts |= 1<<Part;
 
 				if(m_SnapshotParts == (unsigned)((1<<NumParts)-1))
