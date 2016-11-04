@@ -1757,7 +1757,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 			pData = (const char *)Unpacker.GetRaw(PartSize);
 
-			if(Unpacker.Error())
+			if(Unpacker.Error() || NumParts < 1 || Part < 0 || PartSize < 0)
 				return;
 
 			if(GameTick >= m_CurrentRecvTick[g_Config.m_ClDummy])
@@ -2012,7 +2012,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 
 			pData = (const char *)Unpacker.GetRaw(PartSize);
 
-			if(Unpacker.Error())
+			if(Unpacker.Error() || NumParts < 1 || Part < 0 || PartSize < 0)
 				return;
 
 			if(GameTick >= m_CurrentRecvTick[!g_Config.m_ClDummy])
