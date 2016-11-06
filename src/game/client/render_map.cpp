@@ -177,7 +177,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 }
 
 void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags,
-									ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
+									ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset, bool tileCheck(int Index))
 {
 	//Graphics()->TextureSet(img_get(tmap->image));
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -245,6 +245,10 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 			int c = mx + my*w;
 
 			unsigned char Index = pTiles[c].m_Index;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && tileCheck != NULL && !(tileCheck(Index)))
+				continue;
+			
 			if(Index)
 			{
 				unsigned char Flags = pTiles[c].m_Flags;
@@ -357,6 +361,10 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			int c = mx + my*w;
 
 			unsigned char Index = pTele[c].m_Number;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidTeleTile(Index))
+				continue;
+
 			if(Index && pTele[c].m_Type != TILE_TELECHECKIN && pTele[c].m_Type != TILE_TELECHECKINEVIL)
 			{
 				char aBuf[16];
@@ -399,6 +407,11 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 				continue; // my = h-1;
 
 			int c = mx + my*w;
+
+			unsigned char Index = pSpeedup[c].m_Type;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidSpeedupTile(Index))
+				continue;
 
 			int Force = (int)pSpeedup[c].m_Force;
 			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
@@ -471,6 +484,10 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			int c = mx + my*w;
 
 			unsigned char Index = pSwitch[c].m_Number;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidSwitchTile(Index))
+				continue;
+
 			if(Index)
 			{
 				char aBuf[16];
@@ -529,6 +546,10 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			int c = mx + my*w;
 
 			unsigned char Index = pTune[c].m_Number;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidTuneTile(Index))
+				continue;
+
 			if(Index)
 			{
 				char aBuf[16];
@@ -597,6 +618,10 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ve
 			int c = mx + my*w;
 
 			unsigned char Index = pTele[c].m_Type;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidTeleTile(Index))
+				continue;
+
 			if(Index)
 			{
 				bool Render = false;
@@ -690,6 +715,10 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, fl
 			int c = mx + my*w;
 
 			unsigned char Index = pSpeedupTile[c].m_Type;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidSpeedupTile(Index))
+				continue;
+
 			if(Index)
 			{
 				bool Render = false;
@@ -783,6 +812,10 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 			int c = mx + my*w;
 
 			unsigned char Index = pSwitchTile[c].m_Type;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidSwitchTile(Index))
+				continue;
+
 			if(Index)
 			{
 				if(Index == TILE_SWITCHTIMEDOPEN)
@@ -917,6 +950,10 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ve
 			int c = mx + my*w;
 
 			unsigned char Index = pTune[c].m_Type;
+
+			if (!g_Config.m_ClOverlayEntitiesShowUnused && !IsValidTuneTile(Index))
+				continue;
+
 			if(Index)
 			{
 				bool Render = false;

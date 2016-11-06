@@ -258,10 +258,10 @@ void CMapLayers::OnRender()
 						if(!IsGameLayer && g_Config.m_ClOverlayEntities)
 							Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*(100-g_Config.m_ClOverlayEntities)/100.0f);
 						RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE,
-														EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+														EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset, IsValidGameTile);
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
-														EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+														EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset, IsValidGameTile);
 					}
 				}
 				else if(pLayer->m_Type == LAYERTYPE_QUADS)
@@ -293,10 +293,10 @@ void CMapLayers::OnRender()
 					Graphics()->BlendNone();
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE,
-							EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+							EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset, IsValidFrontTile);
 					Graphics()->BlendNormal();
 					RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
-							EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+							EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset, IsValidFrontTile);
 				}
 			}
 			else if(Render && g_Config.m_ClOverlayEntities && IsSwitchLayer)

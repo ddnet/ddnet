@@ -458,6 +458,10 @@ public:
 
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
+bool IsValidTeleTile(int Index);
+bool IsValidSwitchTile(int Index);
+bool IsValidSpeedupTile(int Index);
+bool IsValidTuneTile(int Index);
 bool IsValidEntity(int Index);
 
 #endif
