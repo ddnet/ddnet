@@ -1196,9 +1196,9 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 	int OldSelected = s_SelectedLanguage;
 
 #if defined(__ANDROID__)
-	UiDoListboxStart(&s_LanguageList , &MainView, 50.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
+	UiDoListboxStart(&s_LanguageList , &MainView, 50.0f, "Language", "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
 #else
-	UiDoListboxStart(&s_LanguageList , &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
+	UiDoListboxStart(&s_LanguageList , &MainView, 24.0f, "Language", "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
 #endif
 
 	for(sorted_array<CLanguage>::range r = s_Languages.all(); !r.empty(); r.pop_front())
