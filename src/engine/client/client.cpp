@@ -841,6 +841,9 @@ void CClient::DummyConnect()
 
 	m_DummySendConnInfo = true;
 
+	g_Config.m_ClDummyCopyMoves = 0;
+	g_Config.m_ClDummyHammer = 0;
+
 	//connecting to the server
 	m_NetClient[1].Connect(&m_ServerAddress);
 }
