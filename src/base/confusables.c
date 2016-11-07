@@ -18,6 +18,10 @@ static int str_utf8_skeleton(int ch, const int **skeleton, int *skeleton_len)
 			*skeleton_len = length;
 			return 1;
 		}
+		else if(ch < decomp_chars[i])
+		{
+			break;
+		}
 	}
 	*skeleton = NULL;
 	*skeleton_len = 1;
