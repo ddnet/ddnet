@@ -10,6 +10,8 @@ enum
 	MAX_TIMELINE_MARKERS=64
 };
 
+const double g_aSpeeds[] = {0.1f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f, 8.0f};
+
 struct CDemoHeader
 {
 	unsigned char m_aMarker[7];
@@ -56,6 +58,7 @@ public:
 
 	~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
+	virtual void SetSpeedIndex(int Offset) = 0;
 	virtual int SetPos(float Percent) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;
