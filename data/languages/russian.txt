@@ -337,7 +337,7 @@ Player
 == Игрок
 
 Player country:
-== Страна:
+== Страна игрока:
 
 Player options
 == Опции игрока
@@ -489,6 +489,24 @@ Sudden Death
 Switch weapon on pickup
 == Переключать оружие при подборе
 
+Switch weapon when out of ammo
+== Переключать оружие без патронов
+
+Reset wanted weapon on death
+== Сбрасывать выбор оружия при смерти
+
+Show only chat messages from friends
+== Показывать сообщения только от друзей
+
+Show clan above name plates
+== Показывать клан
+
+Automatically take statboard screenshot
+== Автоматически делать скрин результатов
+
+Show console window
+== Показывать консоль
+
 Team
 == Команда
 
@@ -570,6 +588,84 @@ Yes
 You must restart the game for all settings to take effect.
 == Перезапустите игру для применения изменений.
 
+Map sound volume
+== Громк. музыки с карты
+
+Enable game sounds
+== Звуки игры
+
+Enable gun sound
+== Звуки оружия
+
+Enable server message sound
+== Звуки сообщений сервера
+
+Enable regular chat sound
+== Звуки обычных сообщений
+
+Enable team chat sound
+== Звуки сообщений в команде
+
+Enable highlighted chat sound
+== Звуки подсвечиваемых сообщений
+
+Threaded sound loading
+== Фоновая загрузка музыки
+
+Borderless window
+== Без рамки
+
+Converse
+== Ответить
+
+Respawn
+== Рестарт
+
+Use DDRace Scoreboard
+== Использовать DDRace табло
+
+Show client IDs in Scoreboard
+== Показывать ID клиентов в табло
+
+Show kill messages
+== Показывать сообщения о смерти
+
+Show score
+== Показывать лидеров
+
+Show health + ammo
+== Покывать здоровье
+
+Show names in chat in team colors
+== Выделять цветом сообщения игроков в 
+
+Show votes window after voting
+== Скрывать меню голосования после вашего выбора
+
+Reset
+== Сброс
+
+Dummy settings
+== Настройки dummy
+
+Vanilla Skins only
+== Только Vanilla скины
+
+Search
+== Поиск
+
+Ghost
+== Тень
+
+Deactivate
+== Выключить
+
+Countries
+== Страны
+
+Types
+== Тип
+
 ##### needs translation #####
 
 %.3f KiB
@@ -642,9 +738,6 @@ Basic
 == 
 
 Bodies
-== 
-
-Borderless window
 == 
 
 Color
@@ -764,13 +857,7 @@ Record
 Recorded
 == 
 
-Reset
-== 
-
 Resolutions
-== 
-
-Respawn
 == 
 
 Round over
@@ -789,9 +876,6 @@ Save skin
 == 
 
 Screen
-== 
-
-Search:
 == 
 
 Server does not allow voting to kick players
