@@ -10,7 +10,7 @@ enum
 	MAX_TIMELINE_MARKERS=64
 };
 
-const double g_aSpeeds[] = {0.1f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f, 8.0f};
+const double g_aSpeeds[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0, 8.0};
 
 struct CDemoHeader
 {
