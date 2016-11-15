@@ -710,7 +710,10 @@ Map sound volume
 == ✗
 
 Countries
-== Ländern
+== Länder
+
+Types
+== Typen
 
 Inner color
 == Innere Farbe
