@@ -8,7 +8,6 @@
 #include <time.h>
 
 #include "system.h"
-#include "confusables.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -2233,36 +2232,6 @@ int str_toint(const char *str) { return atoi(str); }
 int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
 float str_tofloat(const char *str) { return atof(str); }
 
-
-int str_utf8_comp_names(const char *a, const char *b)
-{
-	int codeA;
-	int codeB;
-	int diff;
-
-	while(*a && *b)
-	{
-		do
-		{
-			codeA = str_utf8_decode(&a);
-		}
-		while(*a && !str_utf8_isspace(codeA));
-
-		do
-		{
-			codeB = str_utf8_decode(&b);
-		}
-		while(*b && !str_utf8_isspace(codeB));
-
-		diff = codeA - codeB;
-
-		if((diff < 0 && !str_utf8_is_confusable(codeA, codeB))
-		|| (diff > 0 && !str_utf8_is_confusable(codeB, codeA)))
-			return diff;
-	}
-
-	return *a - *b;
-}
 
 int str_utf8_isspace(int code)
 {
