@@ -154,6 +154,7 @@ public:
 		int m_Score;
 		int m_Authed;
 		int m_AuthTries;
+		int m_NextMapChunk;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
@@ -256,6 +257,7 @@ public:
 	static int ClientRejoinCallback(int ClientID, void *pUser);
 
 	void SendMap(int ClientID);
+	void SendMapData(int ClientID, int Chunk);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted = false);
