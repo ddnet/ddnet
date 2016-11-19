@@ -44,7 +44,7 @@ void str_utf8_skeleton_begin(struct SKELETON *skel, const char *str)
 
 int str_utf8_skeleton_next(struct SKELETON *skel)
 {
-	int ch;
+	int ch = 0;
 	while(skel->skeleton_len == 0)
 	{
 		ch = str_utf8_decode(&skel->str);
