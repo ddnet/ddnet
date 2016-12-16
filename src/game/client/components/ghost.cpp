@@ -554,25 +554,18 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(pMsg->m_ClientID == -1 && m_RaceState == RACE_STARTED)
 		{
-			const char* pMessage = pMsg->m_pMessage;
-
-			int Num = 0;
-			while(str_comp_num(pMessage, " finished in: ", 14))
-			{
-				pMessage++;
-				Num++;
-				if(!pMessage[0])
-					return;
-			}
-
-			// store the name
-			char aName[64];
-			str_copy(aName, pMsg->m_pMessage, Num+1);
+			char aName[MAX_NAME_LENGTH];
+			const char *pFinished = str_find(pMsg->m_pMessage, " finished in: ");
+			int FinishedPos = pFinished - pMsg->m_pMessage;
+			if (!pFinished || FinishedPos == 0 || FinishedPos >= (int)sizeof(aName))
+				return;
+			
+			str_copy(aName, pMsg->m_pMessage, FinishedPos + 1);
 
 			// prepare values and state for saving
 			int Minutes;
 			float Seconds;
-			if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) && sscanf(pMessage, " finished in: %d minute(s) %f", &Minutes, &Seconds) == 2)
+			if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) && sscanf(pFinished, " finished in: %d minute(s) %f", &Minutes, &Seconds) == 2)
 			{
 				m_RaceState = RACE_FINISHED;
 				float CurTime = Minutes*60 + Seconds;
