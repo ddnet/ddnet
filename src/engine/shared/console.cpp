@@ -304,8 +304,16 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
-void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
+void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bool InterpretSemicolons)
 {
+	static const char s_aMulticommandPrefix[] = "mc;";
+	static const int s_PrefixLength = str_length(s_aMulticommandPrefix);
+	if(str_length(pStr) >= s_PrefixLength
+		&& str_comp_num(pStr, s_aMulticommandPrefix, s_PrefixLength) == 0)
+	{
+		InterpretSemicolons = true;
+		pStr += s_PrefixLength;
+	}
 	while(pStr && *pStr)
 	{
 		CResult Result;
@@ -323,7 +331,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID)
 				if(pEnd[1] == '"')
 					pEnd++;
 			}
-			else if(!InString)
+			else if(!InString && InterpretSemicolons)
 			{
 				if(*pEnd == ';') // command separator
 				{
@@ -467,17 +475,17 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	return 0x0;
 }
 
-void CConsole::ExecuteLine(const char *pStr, int ClientID)
+void CConsole::ExecuteLine(const char *pStr, int ClientID, bool InterpretSemicolons)
 {
-	CConsole::ExecuteLineStroked(1, pStr, ClientID); // press it
-	CConsole::ExecuteLineStroked(0, pStr, ClientID); // then release it
+	CConsole::ExecuteLineStroked(1, pStr, ClientID, InterpretSemicolons); // press it
+	CConsole::ExecuteLineStroked(0, pStr, ClientID, InterpretSemicolons); // then release it
 }
 
-void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID)
+void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID, bool InterpretSemicolons)
 {
 	int Temp = m_FlagMask;
 	m_FlagMask = FlagMask;
-	ExecuteLine(pStr, ClientID);
+	ExecuteLine(pStr, ClientID, InterpretSemicolons);
 	m_FlagMask = Temp;
 }
 
