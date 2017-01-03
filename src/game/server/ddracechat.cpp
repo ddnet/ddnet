@@ -244,69 +244,25 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 				"Be nice.");
 		Printed = true;
 	}
-	if (g_Config.m_SvRulesLine1[0])
+	#define _RL(n) g_Config.m_SvRulesLine ## n
+	char *pRuleLines[] = {
+		_RL(1), _RL(2), _RL(3), _RL(4), _RL(5),
+		_RL(6), _RL(7), _RL(8), _RL(9), _RL(10),
+	};
+	for(unsigned i = 0; i < sizeof(pRuleLines) / sizeof(pRuleLines[0]); i++)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine1);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine2[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine2);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine3[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine3);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine4[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine4);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine5[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine5);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine6[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine6);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine7[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine7);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine8[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine8);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine9[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine9);
-		Printed = true;
-	}
-	if (g_Config.m_SvRulesLine10[0])
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
-				g_Config.m_SvRulesLine10);
-		Printed = true;
+		if(pRuleLines[i][0])
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
+				"rules", pRuleLines[i]);
+			Printed = true;
+		}
 	}
 	if (!Printed)
+	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
 				"No Rules Defined, Kill em all!!");
+	}
 }
 
 void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
