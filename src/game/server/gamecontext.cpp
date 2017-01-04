@@ -1136,9 +1136,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 					Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
 
-					bool InterpretSemicolons = !(m_apPlayers[ClientID]->m_PlayerFlags & PLAYERFLAG_CHATTING);
+					bool InterpretSemicolons = !(pPlayer->m_PlayerFlags & PLAYERFLAG_CHATTING);
 					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, InterpretSemicolons);
-					if(InterpretSemicolons && !m_apPlayers[ClientID]->m_SentSemicolonTip)
+					// m_apPlayers[ClientID] can be NULL, if the player used a
+					// timeout code and replaced another client.
+					if(InterpretSemicolons && m_apPlayers[ClientID] && !m_apPlayers[ClientID]->m_SentSemicolonTip)
 					{
 						bool FoundSemicolons = false;
 
