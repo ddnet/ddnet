@@ -1561,7 +1561,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if(pPlayer->m_ClientVersion < Version)
 				pPlayer->m_ClientVersion = Version;
-
+			
+			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+				pPlayer->m_TimerType = g_Config.m_SvDefaultTimerType;
+			
 			dbg_msg("ddnet", "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
 
 			//first update his teams state

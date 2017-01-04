@@ -64,7 +64,7 @@ void CPlayer::Reset()
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
 	m_EyeEmote = true;
-	m_TimerType = g_Config.m_SvDefaultTimerType;
+	m_TimerType = (g_Config.m_SvDefaultTimerType == 0 || g_Config.m_SvDefaultTimerType == 2) ? 1 : g_Config.m_SvDefaultTimerType;
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = false;
 	m_LastWhisperTo = -1;
