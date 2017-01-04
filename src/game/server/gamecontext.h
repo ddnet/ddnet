@@ -95,6 +95,11 @@ class CGameContext : public IGameServer
 	void Construct(int Resetting);
 
 	bool m_Resetting;
+
+public:
+	int m_ZoneHandle_TeeWorlds;
+	int m_ZoneHandle_DDFreeze;
+	
 public:
 	IServer *Server() const { return m_pServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -218,7 +223,7 @@ public:
 	virtual const char *GameType();
 	virtual const char *Version();
 	virtual const char *NetVersion();
-
+	
 	// DDRace
 
 	int ProcessSpamProtection(int ClientID);

@@ -161,6 +161,7 @@ private:
 
 
 	void HandleTiles(int Index);
+	void HandleZones();
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();

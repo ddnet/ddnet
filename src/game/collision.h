@@ -4,6 +4,7 @@
 #define GAME_COLLISION_H
 
 #include <base/vmath.h>
+#include <base/tl/array.h>
 #include <engine/shared/protocol.h>
 
 #include <list>
@@ -14,6 +15,10 @@ class CCollision
 	int m_Width;
 	int m_Height;
 	class CLayers *m_pLayers;
+	
+	double m_Time;
+	
+	array< array<int> > m_Zones;
 
 public:
 	CCollision();
@@ -94,6 +99,11 @@ public:
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
+
+	void SetTime(double Time) { m_Time = Time; }
+	//This function return an Handle to access all zone layers with the name "pName"
+	int GetZoneHandle(const char* pName);
+	int GetZoneValueAt(int ZoneHandle, float x, float y);
 
 private:
 

@@ -14,6 +14,8 @@ class CLayers
 	int m_LayersStart;
 	CMapItemGroup *m_pGameGroup;
 	CMapItemLayerTilemap *m_pGameLayer;
+	CMapItemGroup *m_pZoneGroup;
+	CMapItemGroup *m_pEntityGroup;
 	class IMap *m_pMap;
 
 public:
@@ -26,6 +28,8 @@ public:
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; };
 	CMapItemGroup *GetGroup(int Index) const;
 	CMapItemLayer *GetLayer(int Index) const;
+	CMapItemGroup *ZoneGroup() const { return m_pZoneGroup; };
+	CMapItemGroup *EntityGroup() const { return m_pEntityGroup; };
 
 	// DDRace
 
