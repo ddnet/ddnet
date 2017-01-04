@@ -1182,30 +1182,58 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	const char msg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
 	char aBuf[128];
 	if(pPlayer->m_TimerType <= 2 && pPlayer->m_TimerType >= 0)
-		str_format(aBuf, sizeof(aBuf), "Timer is displayed in", msg[pPlayer->m_TimerType]);
+		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", msg[pPlayer->m_TimerType]);
 	else if(pPlayer->m_TimerType == 3)
 		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
+
+	int OldType = pPlayer->m_TimerType;
 
 	if(pResult->NumArguments() == 0) {
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 		return;
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0) {
-		pSelf->SendBroadcast("", pResult->m_ClientID);
-		pPlayer->m_TimerType = 0;
+	else if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0)
+	{
+		if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+			pPlayer->m_TimerType = 0;
+		else
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer","gametimer is not supported by your client.");
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "broadcast") == 0)
-			pPlayer->m_TimerType = 1;
+		pPlayer->m_TimerType = 1;
 	else if(str_comp_nocase(pResult->GetString(0), "both") == 0)
+	{
+		if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
 			pPlayer->m_TimerType = 2;
-	else if(str_comp_nocase(pResult->GetString(0), "none") == 0)
-			pPlayer->m_TimerType = 3;
-	else if(str_comp_nocase(pResult->GetString(0), "cycle") == 0) {
-		if(pPlayer->m_TimerType < 3)
-			pPlayer->m_TimerType++;
-		else if(pPlayer->m_TimerType == 3)
-			pPlayer->m_TimerType = 0;
+		else
+		{
+			pPlayer->m_TimerType = 1;
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer","gametimer is not supported by your client.");
+		}
 	}
+	else if(str_comp_nocase(pResult->GetString(0), "none") == 0)
+		pPlayer->m_TimerType = 3;
+	else if(str_comp_nocase(pResult->GetString(0), "cycle") == 0)
+	{
+		if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+		{
+			if(pPlayer->m_TimerType < 3)
+				pPlayer->m_TimerType++;
+			else if(pPlayer->m_TimerType == 3)
+				pPlayer->m_TimerType = 0;
+		}
+		else
+		{
+			if(pPlayer->m_TimerType < 3)
+				pPlayer->m_TimerType = 3;
+			else if(pPlayer->m_TimerType == 3)
+				pPlayer->m_TimerType = 1;
+		}
+	}
+	
+	if((OldType == 1 || OldType == 2) && (pPlayer->m_TimerType == 0 || pPlayer->m_TimerType == 3))
+		pSelf->SendBroadcast("", pResult->m_ClientID);
+	
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"timer",aBuf);
 }
 
