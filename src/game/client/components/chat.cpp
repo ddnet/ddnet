@@ -102,12 +102,18 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 	((CChat *)pUserData)->m_Show = pResult->GetInteger(0) != 0;
 }
 
+void CChat::ConEcho(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChat *)pUserData)->AddLine(-2, -2, pResult->GetString(0));
+}
+
 void CChat::OnConsoleInit()
 {
 	Console()->Register("say", "r[message]", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
 	Console()->Register("say_team", "r[message]", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
+	Console()->Register("echo", "r[message]", CFGFLAG_CLIENT, ConEcho, this, "Echo the text in chat window");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
@@ -405,7 +411,7 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
-	if(*pLine == 0 || (ClientID != -1 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
+	if(*pLine == 0 || (ClientID >= 0 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
 		m_pClient->m_aClients[ClientID].m_ChatIgnore ||
 		(m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
 		(m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))))
@@ -485,7 +491,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		m_aLines[m_CurrentLine].m_Highlighted = Highlighted;
 
-		if(ClientID == -1) // server message
+		if(ClientID < 0) // server or client message
 		{
 			str_copy(m_aLines[m_CurrentLine].m_aName, "*** ", sizeof(m_aLines[m_CurrentLine].m_aName));
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), "%s", pLine);
@@ -534,7 +540,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 	// play sound
 	int64 Now = time_get();
-	if(ClientID == -1)
+	if(ClientID == -1) // Server message
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_SERVER] >= time_freq()*3/10)
 		{
@@ -544,6 +550,10 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
 		}
+	}
+	else if(ClientID == -2) // Client message
+	{
+		// No sound yet
 	}
 	else if(Highlighted)
 	{
@@ -722,14 +732,21 @@ void CChat::OnRender()
 		Cursor.m_LineWidth = LineWidth;
 
 		// render name
-		if (m_aLines[r].m_ClientID == -1)
+		if (m_aLines[r].m_ClientID == -1) // system
 		{
-			//TextRender()->TextColor(1.0f, 1.0f, 0.5f, Blend); // system
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
+		else if (m_aLines[r].m_ClientID == -2) // client
+		{
+			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageClientHue / 255.0f, g_Config.m_ClMessageClientSat / 255.0f, g_Config.m_ClMessageClientLht / 255.0f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
+		}
 		else if (m_aLines[r].m_Team)
-			TextRender()->TextColor(0.45f, 0.9f, 0.45f, Blend); // team message
+		{
+			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend); // team message
+		}
 		else if(m_aLines[r].m_NameColor == TEAM_RED)
 			TextRender()->TextColor(1.0f, 0.5f, 0.5f, Blend); // red
 		else if(m_aLines[r].m_NameColor == TEAM_BLUE)
@@ -747,27 +764,28 @@ void CChat::OnRender()
 		TextRender()->TextEx(&Cursor, aName, -1);
 
 		// render line
-		if (m_aLines[r].m_ClientID == -1)
+		if (m_aLines[r].m_ClientID == -1) // system
 		{
-			//TextRender()->TextColor(1.0f, 1.0f, 0.5f, Blend); // system
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
-		else if (m_aLines[r].m_Highlighted)
+		else if (m_aLines[r].m_ClientID == -2) // client
 		{
-			//TextRender()->TextColor(1.0f, 0.5f, 0.5f, Blend); // highlighted
+			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageClientHue / 255.0f, g_Config.m_ClMessageClientSat / 255.0f, g_Config.m_ClMessageClientLht / 255.0f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
+		}
+		else if (m_aLines[r].m_Highlighted) // highlighted
+		{
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
-		else if (m_aLines[r].m_Team)
+		else if (m_aLines[r].m_Team) // team message
 		{
-			//TextRender()->TextColor(0.65f, 1.0f, 0.65f, Blend); // team message
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
-		else
+		else // regular message
 		{
-			//TextRender()->TextColor(1.0f, 1.0f, 1.0f, Blend);
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}

@@ -264,6 +264,10 @@ MACRO_CONFIG_INT(ClMessageSystemHue, cl_message_system_hue, 42, 0, 255, CFGFLAG_
 MACRO_CONFIG_INT(ClMessageSystemSat, cl_message_system_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color saturation")
 MACRO_CONFIG_INT(ClMessageSystemLht, cl_message_system_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color lightness")
 
+MACRO_CONFIG_INT(ClMessageClientHue, cl_message_client_hue, 147, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color hue")
+MACRO_CONFIG_INT(ClMessageClientSat, cl_message_client_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color saturation")
+MACRO_CONFIG_INT(ClMessageClientLht, cl_message_client_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color lightness")
+
 MACRO_CONFIG_INT(ClMessageHighlightHue, cl_message_highlight_hue, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color hue")
 MACRO_CONFIG_INT(ClMessageHighlightSat, cl_message_highlight_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color saturation")
 MACRO_CONFIG_INT(ClMessageHighlightLht, cl_message_highlight_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color lightness")
