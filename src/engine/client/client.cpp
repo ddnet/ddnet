@@ -1844,12 +1844,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					// send auto commands
 					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50)
 					{
-						char Command[1024] = "/\0";
+						char Command[1024] = "/mc\0";
 						if(IsDDNet(&m_CurrentServerInfo) && !m_aTimeoutCodeSent[g_Config.m_ClDummy])
 						{
 							m_aTimeoutCodeSent[g_Config.m_ClDummy] = true;
 							char Cmd[256];
-							str_format(Cmd, sizeof(Cmd), "timeout %s;", m_aTimeoutCodes[g_Config.m_ClDummy]);
+							str_format(Cmd, sizeof(Cmd), ";timeout %s", m_aTimeoutCodes[g_Config.m_ClDummy]);
 							str_append(Command, Cmd, sizeof(Command));
 						}
 						if(IsTutorial(&m_CurrentServerInfo) && !m_TutorialLangSent)
@@ -1862,10 +1862,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 							else
 								str_copy(Lang, g_Config.m_ClLanguagefile+10, LanguageFileLength-14+1);
 							char LangCmd[256];
-							str_format(LangCmd, sizeof(LangCmd), "lang %s;", Lang);
+							str_format(LangCmd, sizeof(LangCmd), ";lang %s", Lang);
 							str_append(Command, LangCmd, sizeof(Command));
 						}
-						if(Command[1] != '\0')
+						if(Command[3] != '\0')
 						{
 							CNetMsg_Cl_Say Msg;
 							Msg.m_Team = 0;

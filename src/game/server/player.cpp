@@ -128,7 +128,7 @@ void CPlayer::Reset()
 
 	m_MainPlayer = -1;
 	m_Texts = NULL;
-	m_LangBroadcastTime = time_get() + time_freq()*1.5;
+	m_LangBroadcastTime = time_get() + time_freq()*4;
 	m_ImCausingOverfill = false;
 	if(g_Config.m_SvTutorialServer)
 	{
