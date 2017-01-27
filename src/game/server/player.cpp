@@ -126,6 +126,50 @@ void CPlayer::Reset()
 	m_LastSQLQuery = 0;
 #endif
 
+	m_MainPlayer = -1;
+	m_Texts = NULL;
+	m_LangBroadcastTime = time_get() + time_freq()*1.5;
+	m_ImCausingOverfill = false;
+	if(g_Config.m_SvTutorialServer)
+	{
+		NETADDR my_addr;
+		Server()->GetClientAddr(GetCID(), &my_addr);
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_MainPlayer == -1)
+			{
+				NETADDR his_addr;
+				Server()->GetClientAddr(GameServer()->m_apPlayers[i]->GetCID(), &his_addr);
+				if(my_addr.type == his_addr.type && mem_comp(my_addr.ip, his_addr.ip, sizeof(NETADDR::ip)) == 0)
+				{
+					bool HasNoDummy = true;
+					for(int j = 0; j < MAX_CLIENTS; ++j)
+					{
+						if(GameServer()->m_apPlayers[j] && GameServer()->m_apPlayers[j]->m_MainPlayer == i)
+						{
+							HasNoDummy = false;
+							break;
+						}
+					}
+					if(HasNoDummy)
+					{
+						m_MainPlayer = i;
+						break;
+					}
+				}
+			}
+		}
+		if(m_MainPlayer == -1)
+		{
+			int NumMainPlayers = 0;
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_MainPlayer == -1)
+					NumMainPlayers++;
+			if((NumMainPlayers+1)*2 > g_Config.m_SvMaxClients)
+				m_ImCausingOverfill = true;
+		}
+	}
+
 	int64 Now = Server()->Tick();
 	int64 TickSpeed = Server()->TickSpeed();
 	// If the player joins within ten seconds of the server becoming
@@ -189,6 +233,22 @@ void CPlayer::Tick()
 		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 		((CServer *)(Server()))->m_NetServer.ResetErrorString(m_ClientID);
+	}
+
+	if(g_Config.m_SvTutorialServer)
+	{
+		if(!IsPlaying() && time_get() > m_LangBroadcastTime)
+		{
+			GameServer()->SendBroadcast("To choose a tutorial language press [t] to open the chat, type '/lang' and press [enter].", m_ClientID);
+			m_LangBroadcastTime = time_get() + time_freq()*9.5;
+		}	
+		if(!IsPlaying() && m_MainPlayer != -1 && GameServer()->m_apPlayers[m_MainPlayer]->IsPlaying())
+		{
+			GameServer()->m_VoteUpdate = true;
+			SetTeam(0);
+			m_TeamChangeTick = Server()->Tick();
+			Respawn();
+		}
 	}
 
 	if(!GameServer()->m_World.m_Paused)
@@ -382,6 +442,14 @@ void CPlayer::FakeSnap()
 void CPlayer::OnDisconnect(const char *pReason)
 {
 	KillCharacter();
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_MainPlayer == GetCID())
+		{
+			Server()->Kick(i, "You are a dummy and your main player left");
+			break;
+		}
+	}
 
 	if(Server()->ClientIngame(m_ClientID))
 	{
@@ -553,9 +621,12 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 
 void CPlayer::TryRespawn()
 {
+	if(m_MainPlayer != -1 && !GameServer()->m_apPlayers[m_MainPlayer]->IsPlaying())
+		return;
+
 	vec2 SpawnPos;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+	if(!GameServer()->m_pController->CanSpawn(m_Team, m_MainPlayer, &SpawnPos))
 		return;
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
@@ -566,7 +637,13 @@ void CPlayer::TryRespawn()
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 
-	if(g_Config.m_SvTeam == 3)
+	if(m_MainPlayer != -1 && GetCharacter() && GameServer()->m_apPlayers[m_MainPlayer] && GameServer()->m_apPlayers[m_MainPlayer]->GetCharacter())
+	{
+		GetCharacter()->m_DDRaceState = GameServer()->m_apPlayers[m_MainPlayer]->GetCharacter()->m_DDRaceState;
+		GetCharacter()->m_StartTime = GameServer()->m_apPlayers[m_MainPlayer]->GetCharacter()->m_StartTime;
+	}
+
+	if((g_Config.m_SvTeam == 3 && !g_Config.m_SvTutorialServer) || m_MainPlayer == -1)
 	{
 		int NewTeam = 0;
 		for(; NewTeam < TEAM_SUPER; NewTeam++)
@@ -577,6 +654,10 @@ void CPlayer::TryRespawn()
 			NewTeam = 0;
 
 		Controller->m_Teams.SetForceCharacterTeam(GetCID(), NewTeam);
+	}
+	else if(g_Config.m_SvTutorialServer)
+	{
+		Controller->m_Teams.SetForceCharacterTeam(GetCID(), Controller->m_Teams.m_Core.Team(m_MainPlayer));
 	}
 }
 

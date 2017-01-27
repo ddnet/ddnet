@@ -284,7 +284,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x] = ((CLayerTune*)this)->m_pTuneTile[(r.y+y)*m_Width+(r.x+x)];
-					if(pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Type == TILE_TUNE1)
+					if(pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Type == TILE_TUNE1 || pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Type == TILE_TUT_TEXT)
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y*pGrabbed->m_Width+x].m_Number;
 					}
@@ -1681,7 +1681,7 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 				if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 					continue;
 
-				if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TUNE1)
+				if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TUNE1 || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TUT_TEXT)
 				{
 					if(m_pEditor->m_TuningNum != l->m_TuningNumber)
 					{
@@ -1803,7 +1803,7 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 					continue;
 
-				if(Empty || (pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index != TILE_TUNE1) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here
+				if(Empty || ((pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index != TILE_TUNE1 && (pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index != TILE_TUT_TEXT)) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here
 				{
 					m_pTiles[fy*m_Width+fx].m_Index = 0;
 					m_pTuneTile[fy*m_Width+fx].m_Type = 0;

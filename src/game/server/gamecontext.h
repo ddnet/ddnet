@@ -12,6 +12,7 @@
 
 #include "eventhandler.h"
 #include "gamecontroller.h"
+#include "tutorialtext.h"
 #include "gameworld.h"
 #include "player.h"
 
@@ -111,6 +112,7 @@ public:
 	CPlayer *m_apPlayers[MAX_CLIENTS];
 
 	IGameController *m_pController;
+	TutorialText *m_pTutorialText;
 	CGameWorld m_World;
 
 	// helper functions
@@ -314,6 +316,7 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConLang(IConsole::IResult *pResult, void *pUserData);
 
 
 

@@ -42,6 +42,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastRefillJumps = false;
 	m_LastPenalty = false;
 	m_LastBonus = false;
+	m_BroadcastTime = 0;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -1889,7 +1890,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
 		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos))
+		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), m_pPlayer->m_MainPlayer, &SpawnPos))
 		{
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
@@ -1921,7 +1922,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
 		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos))
+		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), m_pPlayer->m_MainPlayer, &SpawnPos))
 		{
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
@@ -1949,6 +1950,33 @@ void CCharacter::HandleTuneLayer()
 	{
 		// send zone msgs
 		SendZoneMsgs();
+	}
+
+	if(g_Config.m_SvTutorialServer)
+	{
+		int TextId = GameServer()->Collision()->IsTutText(CurrentIndex);
+		if(TextId)
+		{
+			if(m_BroadcastTime >= 0 && time_get() > m_BroadcastTime)
+			{
+				const char *Text = GameServer()->m_pTutorialText->GetText(TextId-1, m_pPlayer->m_MainPlayer == -1 ? m_pPlayer->m_Texts : GameServer()->m_apPlayers[m_pPlayer->m_MainPlayer]->m_Texts);
+				if(Text)
+				{
+					GameServer()->SendBroadcast(Text, m_pPlayer->GetCID());
+					m_BroadcastTime = time_get() + time_freq()*9.5;
+				}
+				else
+				{
+					m_BroadcastTime = -1;
+				}
+			}
+		}
+		else
+		{
+			if(m_BroadcastTime > 0)
+				GameServer()->SendBroadcast("", m_pPlayer->GetCID());
+			m_BroadcastTime = 0;
+		}
 	}
 }
 

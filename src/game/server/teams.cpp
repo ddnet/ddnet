@@ -29,6 +29,8 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	CCharacter* pStartingChar = Character(ClientID);
 	if (!pStartingChar)
 		return;
+	if (pStartingChar->GetPlayer()->m_MainPlayer != -1)
+		return;
 	if (m_Core.Team(ClientID) != TEAM_FLOCK && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
 		return;
 	if (m_Core.Team(ClientID) == TEAM_FLOCK
@@ -101,6 +103,17 @@ void CGameTeams::OnCharacterStart(int ClientID)
 
 void CGameTeams::OnCharacterFinish(int ClientID)
 {
+	if(g_Config.m_SvTutorialServer)
+	{
+		CPlayer* pPlayer = GetPlayer(ClientID);
+		if (pPlayer && pPlayer->IsPlaying() && pPlayer->m_MainPlayer == -1)
+		{
+			OnFinish(pPlayer);
+			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_FINISHED);
+		}
+		return;
+	}
+
 	if (m_Core.Team(ClientID) == TEAM_FLOCK
 			|| m_Core.Team(ClientID) == TEAM_SUPER)
 	{
@@ -425,6 +438,9 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size)
 	CallSaveScore = g_Config.m_SvUseSQL;
 #endif
 
+	if(!g_Config.m_SvSaveScores)
+		CallSaveScore = false;
+
 	int PlayerCIDs[MAX_CLIENTS];
 
 	for(unsigned int i = 0; i < Size; i++)
@@ -522,6 +538,9 @@ void CGameTeams::OnFinish(CPlayer* Player)
 		CallSaveScore = true;
 	}
 
+	if(!g_Config.m_SvSaveScores)
+		CallSaveScore = false;
+
 	if (CallSaveScore)
 		if (g_Config.m_SvNamelessScore || str_comp_num(Server()->ClientName(Player->GetCID()), "nameless tee",
 				12) != 0)
@@ -544,6 +563,16 @@ void CGameTeams::OnFinish(CPlayer* Player)
 	}
 
 	SetDDRaceState(Player, DDRACE_FINISHED);
+	if(g_Config.m_SvTutorialServer)
+	{
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			CPlayer* pPlayer = GetPlayer(i);
+			if (pPlayer && pPlayer->m_MainPlayer == Player->GetCID())
+				SetDDRaceState(pPlayer, DDRACE_FINISHED);
+		}
+	}
+
 	// set player score
 	if (!pData->m_CurrentTime || pData->m_CurrentTime > time)
 	{

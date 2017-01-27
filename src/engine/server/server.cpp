@@ -507,7 +507,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 
 void CServer::GetClientAddr(int ClientID, char *pAddrStr, int Size)
 {
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State >= CClient::STATE_READY)
 		net_addr_str(m_NetServer.ClientAddr(ClientID), pAddrStr, Size, false);
 }
 
@@ -1880,6 +1880,13 @@ void CServer::ConRescue(CConsole::IResult *pResult, void *pUser)
 	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
+void CServer::ConTutorialServer(CConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Value: %d", g_Config.m_SvTutorialServer);
+	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
 	if(pResult->NumArguments() > 1)
@@ -2629,6 +2636,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze");
+	pConsole->Register("sv_tutorial_server", "", CFGFLAG_SERVER, CServer::ConTutorialServer, pConsole, "Set server to tutorial mode");
 
 	pEngine->InitLogfile();
 
@@ -2652,10 +2660,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 {
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
-	{
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State >= CClient::STATE_READY)
 		*pAddr = *m_NetServer.ClientAddr(ClientID);
-	}
 }
 
 char *CServer::GetAnnouncementLine(char const *pFileName)

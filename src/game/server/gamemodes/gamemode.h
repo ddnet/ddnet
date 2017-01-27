@@ -5,4 +5,5 @@
 
 #define GAME_NAME "DDraceNetwork"
 #define TEST_NAME "TestDDraceNetwork"
+#define TUTORIAL_NAME "TutDDraceNetwork"
 #endif

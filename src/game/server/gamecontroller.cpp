@@ -104,36 +104,59 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 	}
 }
 
-bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
+bool IGameController::CanSpawn(int Team, int MainPlayer, vec2 *pOutPos)
 {
-	CSpawnEval Eval;
-
 	// spectators can't spawn
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
-	/*if(IsTeamplay())
+	if(MainPlayer == -1)
 	{
-		Eval.m_FriendlyTeam = Team;
-
-		// first try own team spawn, then normal spawn and then enemy
-		EvaluateSpawnType(&Eval, 1+(Team&1));
-		if(!Eval.m_Got)
-		{
-			EvaluateSpawnType(&Eval, 0);
-			if(!Eval.m_Got)
-				EvaluateSpawnType(&Eval, 1+((Team+1)&1));
-		}
-	}
-	else
-	{*/
+		CSpawnEval Eval;
 		EvaluateSpawnType(&Eval, 0);
 		EvaluateSpawnType(&Eval, 1);
 		EvaluateSpawnType(&Eval, 2);
-	//}
-
-	*pOutPos = Eval.m_Pos;
-	return Eval.m_Got;
+		*pOutPos = Eval.m_Pos;
+		return Eval.m_Got;
+	}
+	else
+	{
+		if(GameServer()->m_apPlayers[MainPlayer] && GameServer()->m_apPlayers[MainPlayer]->IsPlaying())
+		{
+			CCharacter* main = GameServer()->m_apPlayers[MainPlayer]->GetCharacter();
+			int radius = main->m_ProximityRadius/2;
+			int pos[2] = {round_to_int(main->GetCore().m_Pos.x), round_to_int(main->GetCore().m_Pos.y)};
+			int pos_tile[2] = {pos[0] / 32, pos[1] / 32};
+			int diff[2] = {0, 0};
+			for(int i = 0; i < 2; i++)
+			{
+				for(int s = 1; s != -3; s -= 2)
+				{
+					diff[i] += (pos[i] + s*radius)/32 - pos_tile[i];
+				}
+			}
+			int positions[2][4][2] = {{{-1, 0}, {1, 0}}, {{0, -1}, {0, 1}}};
+			for(int i = 0; i < 2; i++)
+			{
+				positions[i][diff[i]<0?0:1][i] += diff[i];
+				for(int j = 0; j < 2; j++)
+					for(int k = 0; k < 2; k++)
+						positions[1-i][j+2][k] = positions[1-i][j][k] + (k==i ? diff[i] : 0);
+			}
+			for(int i = 0; i < 2; i++)
+			{
+				for(int j = 0; j < 4; j++)
+				{
+					vec2 pos = vec2((pos_tile[0] + positions[i][j][0])*32 + 16, (pos_tile[1] + positions[i][j][1])*32 + 16);
+					if(!GameServer()->Collision()->CheckPoint(pos)) {
+						*pOutPos = pos;
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 }
 
 

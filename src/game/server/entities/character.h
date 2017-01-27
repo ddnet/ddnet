@@ -251,6 +251,7 @@ public:
 	bool m_LastRefillJumps;
 	bool m_LastPenalty;
 	bool m_LastBonus;
+	int64 m_BroadcastTime;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };

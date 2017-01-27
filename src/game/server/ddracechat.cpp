@@ -1281,6 +1281,52 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 			//pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
+
+void CGameContext::ConLang(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(pResult->NumArguments() <= 0)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lang", "Example: /lang german");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lang", "Available languages:");
+		array<char *> *AvailableLangsList = pSelf->m_pTutorialText->GetAvailableLangsList();
+		for(int i = 0; i < AvailableLangsList->size(); i++)
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lang", (*AvailableLangsList)[i]);
+		return;
+	}
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	const char *LangName = pResult->GetString(0);
+	array<char *> *Texts = pSelf->m_pTutorialText->GetLanguage(LangName);
+	char Feedback[256];
+	if(Texts)
+	{
+		CPlayer *MainPlayer = pPlayer->m_MainPlayer == -1 ? pPlayer : pSelf->m_apPlayers[pPlayer->m_MainPlayer];
+		if(!MainPlayer->IsPlaying())
+		{
+			pSelf->m_VoteUpdate = true;
+			MainPlayer->SetTeam(0);
+			MainPlayer->m_TeamChangeTick = pSelf->Server()->Tick();
+			MainPlayer->Respawn();
+		}
+		if(pPlayer->GetCharacter())
+			pPlayer->GetCharacter()->m_BroadcastTime = 0;
+		MainPlayer->m_Texts = Texts;
+		str_format(Feedback, sizeof(Feedback), "Set tutorial language to %s", LangName);
+	}
+	else
+	{
+		str_format(Feedback, sizeof(Feedback), "The tutorial is not available in %s", LangName);
+	}
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lang", Feedback);
+}
+
 #if defined(CONF_SQL)
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {

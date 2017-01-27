@@ -189,6 +189,10 @@ public:
 #if defined(CONF_SQL)
 	int64 m_LastSQLQuery;
 #endif
+	int m_MainPlayer;
+	array<char *> *m_Texts;
+	int64 m_LangBroadcastTime;
+	bool m_ImCausingOverfill;
 };
 
 #endif

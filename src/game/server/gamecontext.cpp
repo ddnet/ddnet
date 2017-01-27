@@ -45,6 +45,7 @@ void CGameContext::Construct(int Resetting)
 		m_apPlayers[i] = 0;
 
 	m_pController = 0;
+	m_pTutorialText = 0;
 	m_VoteCloseTime = 0;
 	m_pVoteOptionFirst = 0;
 	m_pVoteOptionLast = 0;
@@ -980,6 +981,8 @@ void CGameContext::OnClientConnected(int ClientID)
 	//	//((CServer*)Server())->m_aClients[ClientID].Reset();
 	//	((CServer*)Server())->m_aClients[ClientID].m_State = 4;
 	}
+	if(m_apPlayers[ClientID]->m_ImCausingOverfill)
+		Server()->Kick(ClientID, "bananen sind toll");
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 
@@ -1502,6 +1505,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}*/
 
+			if(g_Config.m_SvTutorialServer)
+			{
+				SendChatTarget(ClientID, "You can't change teams on tutorial servers");
+				return;
+			}
+
 			//Kill Protection
 			CCharacter* pChr = pPlayer->GetCharacter();
 			if(pChr)
@@ -1735,6 +1744,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CCharacter* pChr = pPlayer->GetCharacter();
 			if(!pChr)
 				return;
+
+			if(g_Config.m_SvTutorialServer)
+			{
+				SendChatTarget(ClientID, "You can't kill on tutorial servers");
+				return;
+			}
 
 			//Kill Protection
 			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
@@ -2489,6 +2504,22 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
+
+	if(g_Config.m_SvTutorialServer)
+	{
+		g_Config.m_SvSaveScores = 0;
+		#if defined(CONF_SQL)
+		g_Config.m_SvSaveGames = 0;
+		#endif
+		g_Config.m_SvMapVote = 0;
+		g_Config.m_SvTournamentMode = 1;
+		g_Config.m_SvPauseable = 0;
+		g_Config.m_SvTeam = 3;
+		g_Config.m_SvTeamLock = 0;
+
+		m_pTutorialText = new TutorialText(Kernel()->RequestInterface<IStorage>());
+		m_pConsole->Register("lang", "?r[language]", CFGFLAG_CHAT|CFGFLAG_SERVER, ConLang, this, "Change tutorial language");
+	}
 
 	if(g_Config.m_SvSoloServer)
 	{

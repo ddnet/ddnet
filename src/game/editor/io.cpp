@@ -1048,8 +1048,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
-									if(((CLayerTune*)pTiles)->m_pTuneTile[i].m_Type == TILE_TUNE1)
-										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = TILE_TUNE1;
+									if(((CLayerTune*)pTiles)->m_pTuneTile[i].m_Type == TILE_TUNE1 || ((CLayerTune*)pTiles)->m_pTuneTile[i].m_Type == TILE_TUT_TEXT)
+										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = ((CLayerTune*)pTiles)->m_pTuneTile[i].m_Type;
 									else
 										((CLayerTiles*)pTiles)->m_pTiles[i].m_Index = 0;
 								}
