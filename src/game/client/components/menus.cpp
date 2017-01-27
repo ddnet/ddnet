@@ -1672,7 +1672,9 @@ int CMenus::Render()
 #else
 			Nickname.HSplitBottom(24.f, &Nickname, &Part);
 #endif
-			UI()->DoLabel(&Part, Localize("Nickname:"), 18.f, -1);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Nickname"));
+			UI()->DoLabel(&Part, aBuf, 18.f, -1);
 			Part.VSplitLeft(150.f, 0, &Part);
 			Part.VSplitLeft(150.f, &Part, 0);
 			static float Offset = 0.f;

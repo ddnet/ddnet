@@ -1009,3 +1009,24 @@ Name plates size
 
 Type:
 == Tipus:
+
+Welcome to DDraceNetwork
+== Benvingut a DDraceNetwork
+
+DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay. Help each other play through custom maps. All ranks made on official servers are available worldwide and you can collect points!
+== DDraceNetwork (DDNet) és una versió de DDRace amb un manteniment actiu, es una modificació de Teeworlds amb una jugabilitat cooperativa. Ajudeu-vos mútuament i jugueu mapes personalitzats. Tots els ranks fets en els servidors oficials estan disponibles a tot al món i pots obtenir punts!
+
+Adjust those settings for the best experience on your system.
+== Ajusta aquestes opcions per tenir una millor experiència de joc.
+
+Your nickname is displayed ingame, you can change it at any time.
+== El teu nom es mostra al joc, el pots canviar quan ho desitgis.
+
+Select a server with a low ping (latency)
+== Selecciona un servidor amb poc ping (latència)
+
+Start tutorial
+== Començar el tutorial
+
+Skip tutorial
+== Saltar el tutorial

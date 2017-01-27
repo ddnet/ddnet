@@ -915,8 +915,8 @@ Welcome to DDraceNetwork
 Skip tutorial
 == Tutorial überspringen
 
-Nickname:
-== Spitzname:
+Nickname
+== Spitzname
 
 Select a server with a low ping (latency)
 == Wähle einen Server mit einem niedrigen Ping (Latency)
