@@ -194,7 +194,15 @@ void CBinds::ConBindPrint(IConsole::IResult *pResult, void *pUserData)
 	}
 	else {
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "bind %s (%d) = %s", pKeyName, id, pBinds->m_aaKeyBindings[id]);
+
+		if (pBinds->m_aaKeyBindings[id][0] == '\0')
+		{
+			str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, id);
+		}
+		else {
+			str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, id, pBinds->m_aaKeyBindings[id]);
+		}
+		
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 	}
 }
