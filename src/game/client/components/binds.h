@@ -12,6 +12,7 @@ class CBinds : public CComponent
 	int GetKeyID(const char *pKeyName);
 
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
+	static void ConBindPrint(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbind(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbindAll(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpBinds(IConsole::IResult *pResult, void *pUserData);
