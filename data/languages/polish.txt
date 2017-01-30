@@ -6,6 +6,7 @@
 #	Tsin			2011-04-06 23:15:58
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
+#	Savander		2017-01-29
 ##### /authors #####
 
 ##### translated strings #####
@@ -1210,3 +1211,24 @@ none
 
 DDNet Client needs to be restarted to complete update!
 == DDNet Client wymaga ponownego uruchomienia, aby zakończyć aktualizację!
+
+Welcome to DDraceNetwork
+== Witaj na DDraceNetwork
+
+DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay. Help each other play through custom maps. All ranks made on official servers are available worldwide and you can collect points!
+== DDraceNetwork(DDNet) jest aktywnie rozwijającą się wersją DDRace, modyfikacji, która posiada unikalną rozgrywkę kooperacyjną. Pomagaj innym, oraz graj niestandardowe mapy. Wszystkie rekordy, które zostały uzyskane na oficjalnych serwerach, są dostępne na całym świecie. Grając na nich, możesz zdobyć punkty!
+
+Adjust those settings for the best experience on your system.
+== Dostosuj te ustawienia, w celu uzyskania najlepszego doświadczenia.
+
+Your nickname is displayed ingame, you can change it at any time.
+== Twoja nazwa jest wyświetlana w grze, możesz ją zmienić w dowolnym momencie.
+
+Select a server with a low ping (latency)
+== Wybierz serwer z najmniejszym pigiem (opóźnieniem)
+
+Start tutorial
+== Rozpocznij samouczek
+
+Skip tutorial
+== Pomiń samouczek
