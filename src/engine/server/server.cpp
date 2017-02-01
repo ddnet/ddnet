@@ -838,6 +838,7 @@ void CServer::InitDnsbl(int ClientID)
 		str_format(aBuf, sizeof(aBuf), "%s.%d.%d.%d.%d.%s", g_Config.m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], g_Config.m_SvDnsblHost);
 
 	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	m_aClients[ClientID].m_DnsblLookup.m_Addr.type = NETTYPE_INVALID;
 	pEngine->HostLookup(&m_aClients[ClientID].m_DnsblLookup, aBuf, NETTYPE_IPV4);
 }
 
