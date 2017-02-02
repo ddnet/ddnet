@@ -1727,7 +1727,7 @@ int CServer::Run()
 								m_aClients[c].m_DnsblLookup.m_Job.Status() == CJob::STATE_DONE)
 					{
 
-						if (m_aClients[c].m_DnsblLookup.m_Addr.type == NETTYPE_INVALID)
+						if (m_aClients[c].m_DnsblLookup.m_Job.Result() != 0)
 						{
 							// entry not found -> whitelisted
 							m_aClients[c].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
