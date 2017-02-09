@@ -1990,9 +1990,10 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
 			{
-				const char *pAuthStr = pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_ADMIN ? "(Admin)" :
+				const char *pAuthStr =  pThis->m_aClients[i].m_pAuthKey ?
+										pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_ADMIN ? "(Admin)" :
 										pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_MOD ? "(Mod)" :
-										pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_HELPER ? "(Helper)" : "";
+										"(Helper)" : "" ;
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
 					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", pAuthStr);
 			}
@@ -2018,9 +2019,10 @@ void CServer::ConDnsblStatus(IConsole::IResult *pResult, void *pUser)
 			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
 			{
-				const char *pAuthStr = pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_ADMIN ? "(Admin)" :
+				const char *pAuthStr =  pThis->m_aClients[i].m_pAuthKey ?
+										pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_ADMIN ? "(Admin)" :
 										pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_MOD ? "(Mod)" :
-										pThis->m_aClients[i].m_pAuthKey->m_Level == CServer::AUTHED_HELPER ? "(Helper)" : "";
+										"(Helper)" : "" ;
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
 					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", pAuthStr);
 			}
