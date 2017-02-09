@@ -416,15 +416,15 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 							{
 								for (int i = 0; i < MAX_CLIENTS; i++)
 								{
-										Result.SetVictim(i);
-						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+									Result.SetVictim(i);
+									pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 								}
 							}
 							else
-						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 						}
 						else
-						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 
 						if (pCommand->m_Flags&CMDFLAG_TEST)
 							m_Cheated = true;
