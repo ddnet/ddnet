@@ -184,10 +184,10 @@ bool CChat::OnInput(IInput::CEvent Event)
 				{
 					char Text[512];
 					str_copy(Text, m_Input.GetString(), FoundAt + 1);
+
 					if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
-					{
 						str_append(Text, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
-					}
+
 					m_Input.Set(Text);
 				}
 			}
