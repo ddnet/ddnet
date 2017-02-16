@@ -7,6 +7,7 @@
 #	GaBOr			2011-07-15 01:23:39
 #	HeroiAmarelo	2012-08-01 15:52:45
 #	Mortcheck		2012-11-03 22:58:43
+#	Beiroc			2017-02-14
 ##### /authors #####
 
 ##### translated strings #####
@@ -653,7 +654,7 @@ Bodies
 == 
 
 Borderless window
-== 
+== Ventana sin bordes
 
 Color
 == 
@@ -1020,3 +1021,23 @@ Name plates size
 Type:
 == Tipo:
 
+Welcome to DDraceNetwork
+== Bienvenido a DDraceNetwork
+
+DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay. Help each other play through custom maps. All ranks made on official servers are available worldwide and you can collect points!
+== DDraceNetwork (DDNet) es una versión activamente mantenida de DDRace, una modificación de Teeworlds con jugabilidad cooperativa y única. Ayuda a los demas a jugar mapas personalizados. Todas las calificaciones obtenidas al completar mapas en los servidores oficiales estan disponibles en todo el mundo y podras recolectar puntos.
+
+Adjust those settings for the best experience on your system.
+== Ajusta estas configuraciones para una mejor experiencia en tu sistema.
+
+Your nickname is displayed ingame, you can change it at any time.
+== Tu nombre es mostrado dentro del juego, podras cambiarlo en cualquier momento.
+
+Select a server with a low ping (latency)
+== Selecciona un servidor con ping bajo (latencia)
+
+Start tutorial
+== Empezar tutorial
+
+Skip tutorial
+== Omitir tutorial
