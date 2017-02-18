@@ -156,26 +156,39 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
 	{
 		int SearchDirection = 0;
-		if(Input()->KeyPress(KEY_LEFT))
+		if(Input()->KeyPress(KEY_LEFT) || Input()->KeyPress(KEY_BACKSPACE))
 			SearchDirection = -1;
 		else if(Input()->KeyPress(KEY_RIGHT))
 			SearchDirection = 1;
 
 		if(SearchDirection != 0)
 		{
-			int FoundAt = SearchDirection > 0 ? m_Input.GetLength()-1 : 0;
-			for(int i = m_Input.GetCursorOffset()+SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength()-1 : i > 0; i+=SearchDirection)
+			int FoundAt = SearchDirection > 0 ? m_Input.GetLength() - 1 : 0;
+			for(int i = m_Input.GetCursorOffset() + SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength() - 1 : i > 0; i += SearchDirection)
 			{
-				int next = i+SearchDirection;
-				if(	(m_Input.GetString()[next] == ' ') ||
-					(m_Input.GetString()[next] >= 32 && m_Input.GetString()[next] <= 47) ||
-					(m_Input.GetString()[next] >= 58 && m_Input.GetString()[next] <= 64) ||
-					(m_Input.GetString()[next] >= 91 && m_Input.GetString()[next] <= 96) )
+				int Next = i + SearchDirection;
+				if(	(m_Input.GetString()[Next] == ' ') ||
+					(m_Input.GetString()[Next] >= 32 && m_Input.GetString()[Next] <= 47) ||
+					(m_Input.GetString()[Next] >= 58 && m_Input.GetString()[Next] <= 64) ||
+					(m_Input.GetString()[Next] >= 91 && m_Input.GetString()[Next] <= 96))
 				{
 					FoundAt = i;
-					if(SearchDirection < 0)
+					if (SearchDirection < 0)
 						FoundAt++;
 					break;
+				}
+			}
+			if(Input()->KeyPress(KEY_BACKSPACE))
+			{
+				if(m_Input.GetCursorOffset() != 0)
+				{
+					char aText[512];
+					str_copy(aText, m_Input.GetString(), FoundAt + 1);
+
+					if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
+						str_append(aText, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
+
+					m_Input.Set(aText);
 				}
 			}
 			m_Input.SetCursorOffset(FoundAt);
