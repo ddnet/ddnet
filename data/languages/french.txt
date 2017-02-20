@@ -14,6 +14,7 @@
 #	Choupom			2011-04-03 23:00:57
 #	Ubu				2011-04-04 21:09:05
 #	Choupom			2011-07-02 19:23:49
+#	dcgù			2017-02-20
 ##### /authors #####
 
 ##### translated strings #####
@@ -651,7 +652,7 @@ Bodies
 == 
 
 Borderless window
-== 
+== Mode fenêtre
 
 Color
 == 
@@ -1027,3 +1028,23 @@ Name plates size
 Type:
 == Type :
 
+Welcome to DDraceNetwork
+== Bienvenue sur DDraceNetwork
+
+DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay. Help each other play through custom maps. All ranks made on official servers are available worldwide and you can collect points!
+== DDraceNetwork (DDnet) est une version activement maintenue de DDrace, une modification de Teeworlds avec un mode de jeu coopératif unique. Aidez les autres joueurs à travers des maps personnalisées. Toutes les courses réalisées sur les serveurs officiels sont disponibles mondialement et vous pouvez amasser des points!
+
+Adjust those settings for the best experience on your system.
+== Ajustez ces paramètres en fonction de votre système pour une expérience optimale.
+
+Your nickname is displayed ingame, you can change it at any time.
+== Votre pseudonyme est affiché pendant la partie, vous pouvez le modifier ultérieurement.
+
+Select a server with a low ping (latency)
+== Choisissez un serveur avec un ping faible (latence)
+
+Start tutorial
+== Commencer le tutoriel
+
+Skip tutorial
+== Passer le tutoriel
