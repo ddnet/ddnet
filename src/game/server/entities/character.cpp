@@ -665,7 +665,7 @@ void CCharacter::RemoveNinja()
 	m_Ninja.m_CurrentMoveTime = 0;
 	m_aWeapons[WEAPON_NINJA].m_Got = false;
 	m_Core.m_ActiveWeapon = m_LastWeapon;
-	
+
 		SetWeapon(m_Core.m_ActiveWeapon);
 }
 
@@ -2124,7 +2124,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 			GiveNinja();
 		return;
 	}
-	
+
 	if (Remove)
 	{
 		if (GetActiveWeapon()== Weapon)

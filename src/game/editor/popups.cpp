@@ -1597,7 +1597,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 	if(pEditor->UI()->DoPickerLogic(&pEditor->ms_SVPicker, &SVPicker, &X, &Y))
 	{
 		hsv.y = X/SVPicker.w;
-		hsv.z = 1.0f - Y/SVPicker.h;	
+		hsv.z = 1.0f - Y/SVPicker.h;
 	}
 
 	// hue slider
@@ -1637,7 +1637,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 
 	if(pEditor->UI()->DoPickerLogic(&pEditor->ms_HuePicker, &HuePicker, &X, &Y))
 	{
-		hsv.x = 1.0f - Y/HuePicker.h;	
+		hsv.x = 1.0f - Y/HuePicker.h;
 	}
 
 	pEditor->ms_PickerColor = hsv;

@@ -753,7 +753,7 @@ public:
 	void Reset(bool CreateDefault=true);
 	int Save(const char *pFilename);
 	int Load(const char *pFilename, int StorageType);
-	int Append(const char *pFilename, int StorageType); 
+	int Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
 

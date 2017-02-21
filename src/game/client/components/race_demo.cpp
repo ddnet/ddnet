@@ -117,7 +117,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 			int FinishedPos = pFinished - pMsg->m_pMessage;
 			if (!pFinished || FinishedPos == 0 || FinishedPos >= (int)sizeof(aName))
 				return;
-			
+
 			// store the name
 			str_copy(aName, pMsg->m_pMessage, FinishedPos + 1);
 

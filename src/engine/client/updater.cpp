@@ -74,7 +74,7 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 	CFetchTask *Task = new CFetchTask(false);
 	m_pFetcher->QueueAdd(Task, aBuf, aPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
- 
+
 void CUpdater::MoveFile(const char *pFile)
 {
 	char aBuf[256];

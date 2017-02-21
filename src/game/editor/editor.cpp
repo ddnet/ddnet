@@ -2790,7 +2790,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				((pProps[i].m_Value >> s_aShift[1])&0xff)/255.0f,
 				((pProps[i].m_Value >> s_aShift[2])&0xff)/255.0f,
 				1.0f);
-			
+
 			static int s_ColorPicker, s_ColorPickerID;
 			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &Color))
 			{
@@ -3808,7 +3808,7 @@ void CEditor::RenderFileDialog()
 		aPath[0] = 0;
 	str_format(aBuf, sizeof(aBuf), "Current path: %s", aPath);
 	UI()->DoLabel(&PathBox, aBuf, 10.0f, -1, -1);
-	
+
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
 		// filebox
@@ -3829,11 +3829,11 @@ void CEditor::RenderFileDialog()
 		FileBox.VSplitRight(250, &FileBox, 0);
 		CUIRect ClearBox;
 		FileBox.VSplitRight(15, &FileBox, &ClearBox);
-		
+
 		static float s_SearchBoxID = 0;
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, -1, -1);
 		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID,false,CUI::CORNER_L);
-		
+
 		// clearSearchbox button
 		{
 			static int s_ClearButton = 0;
@@ -5334,8 +5334,8 @@ void CEditor::Reset(bool CreateDefault)
 	m_UndoRunning = false;
 
 	m_ShowEnvelopePreview = 0;
-	m_ShiftBy = 1; 
-	
+	m_ShiftBy = 1;
+
 	m_Map.m_Modified = false;
 	m_Map.m_UndoModified = 0;
 	m_LastUndoUpdateTime = time_get();
