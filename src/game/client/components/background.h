@@ -17,7 +17,7 @@ class CBackground : public CComponent
 	int64 m_LastLoad;
 
 	//to avoid memory leak when switching to %current%
-	IEngineMap *m_pBackgroundMap; 
+	IEngineMap *m_pBackgroundMap;
 	CLayers *m_pBackgroundLayers;
 	CMapImages *m_pBackgroundImages;
 

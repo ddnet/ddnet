@@ -385,7 +385,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			else
 				aInputing[s_AtIndex + i] = Text[i];
 		}
-		//s_AtIndex = s_AtIndex+FillCharLen;	
+		//s_AtIndex = s_AtIndex+FillCharLen;
 		pDisplayStr = aInputing;
 		}
 	}
