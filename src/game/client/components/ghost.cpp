@@ -559,7 +559,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 			int FinishedPos = pFinished - pMsg->m_pMessage;
 			if (!pFinished || FinishedPos == 0 || FinishedPos >= (int)sizeof(aName))
 				return;
-			
+
 			str_copy(aName, pMsg->m_pMessage, FinishedPos + 1);
 
 			// prepare values and state for saving

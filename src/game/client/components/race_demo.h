@@ -19,22 +19,22 @@ class CRaceDemo : public CComponent
 public:
 
 	int m_RaceState;
-	
+
 	enum
 	{
 		RACE_NONE = 0,
 		RACE_STARTED,
 		RACE_FINISHED,
 	};
-	
+
 	CRaceDemo();
-	
+
 	virtual void OnReset();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnRender();
 	virtual void OnShutdown();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
-	
+
 	void CheckDemo();
 	void SaveDemo(const char* pDemo);
 };

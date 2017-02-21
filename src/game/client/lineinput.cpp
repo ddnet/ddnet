@@ -48,7 +48,7 @@ void CLineInput::Editing(const char *pString, int Cursor)
 			m_DisplayStr[m_CursorPos + i] = Texting[i];
 	}
 	m_FakeLen = str_length(m_DisplayStr);
-	m_FakeCursorPos = m_CursorPos + Cursor + 1;	
+	m_FakeCursorPos = m_CursorPos + Cursor + 1;
 }
 
 void CLineInput::Add(const char *pString)
