@@ -49,15 +49,28 @@ struct CEntity
 class CEnvelope
 {
 public:
+	int m_Type;
 	int m_Channels;
 	array<CEnvPoint> m_lPoints;
 	char m_aName[32];
 	float m_Bottom, m_Top;
 	bool m_Synchronized;
 
-	CEnvelope(int Chan)
+	CEnvelope(int Type)
 	{
-		m_Channels = Chan;
+		m_Type = Type;
+		switch(m_Type)
+		{
+			case ENVTYPE_POSITION:
+			case ENVTYPE_COLOR:
+				m_Channels = 4;
+				break;
+			case ENVTYPE_SOUND:
+				m_Channels = 1;
+				break;
+			default:
+				m_Channels = 0;
+		}
 		m_aName[0] = 0;
 		m_Bottom = 0;
 		m_Top = 0;
@@ -385,11 +398,11 @@ public:
 	class CLayerGame *m_pGameLayer;
 	CLayerGroup *m_pGameGroup;
 
-	CEnvelope *NewEnvelope(int Channels)
+	CEnvelope *NewEnvelope(int Type)
 	{
 		m_Modified = true;
 		m_UndoModified++;
-		CEnvelope *e = new CEnvelope(Channels);
+		CEnvelope *e = new CEnvelope(Type);
 		m_lEnvelopes.add(e);
 		return e;
 	}

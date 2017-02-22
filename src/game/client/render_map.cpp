@@ -74,11 +74,10 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 	return;
 }
 
-
-static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
+static void RotateAndScale(CPoint *pCenter, CPoint *pPoint, float Rotation, float Scale)
 {
-	int x = pPoint->x - pCenter->x;
-	int y = pPoint->y - pCenter->y;
+	float x = (pPoint->x - pCenter->x)*Scale;
+	float y = (pPoint->y - pCenter->y)*Scale;
 	pPoint->x = (int)(x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
 	pPoint->y = (int)(x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
 }
@@ -131,6 +130,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 		float OffsetX = 0;
 		float OffsetY = 0;
 		float Rot = 0;
+		float Scale = 1;
 
 		// TODO: fix this
 		if(q->m_PosEnv >= 0)
@@ -140,6 +140,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 			Rot = aChannels[2]/360.0f*pi*2;
+			Scale = aChannels[3];
 		}
 
 		IGraphics::CColorVertex Array[4] = {
@@ -151,7 +152,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 
 		CPoint *pPoints = q->m_aPoints;
 
-		if(Rot != 0)
+		if(Rot != 0 || Scale != 1)
 		{
 			static CPoint aRotated[4];
 			aRotated[0] = q->m_aPoints[0];
@@ -160,17 +161,17 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			aRotated[3] = q->m_aPoints[3];
 			pPoints = aRotated;
 
-			Rotate(&q->m_aPoints[4], &aRotated[0], Rot);
-			Rotate(&q->m_aPoints[4], &aRotated[1], Rot);
-			Rotate(&q->m_aPoints[4], &aRotated[2], Rot);
-			Rotate(&q->m_aPoints[4], &aRotated[3], Rot);
+			RotateAndScale(&q->m_aPoints[4], &aRotated[0], Rot, Scale);
+			RotateAndScale(&q->m_aPoints[4], &aRotated[1], Rot, Scale);
+			RotateAndScale(&q->m_aPoints[4], &aRotated[2], Rot, Scale);
+			RotateAndScale(&q->m_aPoints[4], &aRotated[3], Rot, Scale);
 		}
 
 		IGraphics::CFreeformItem Freeform(
-			fx2f(pPoints[0].x)+OffsetX, fx2f(pPoints[0].y)+OffsetY,
-			fx2f(pPoints[1].x)+OffsetX, fx2f(pPoints[1].y)+OffsetY,
-			fx2f(pPoints[2].x)+OffsetX, fx2f(pPoints[2].y)+OffsetY,
-			fx2f(pPoints[3].x)+OffsetX, fx2f(pPoints[3].y)+OffsetY);
+			fx2f(pPoints[0].x) + OffsetX, fx2f(pPoints[0].y) + OffsetY,
+			fx2f(pPoints[1].x) + OffsetX, fx2f(pPoints[1].y) + OffsetY,
+			fx2f(pPoints[2].x) + OffsetX, fx2f(pPoints[2].y) + OffsetY,
+			fx2f(pPoints[3].x) + OffsetX, fx2f(pPoints[3].y) + OffsetY);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 	}
 	Graphics()->QuadsEnd();
