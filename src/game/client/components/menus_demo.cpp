@@ -44,6 +44,24 @@ int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Chec
 	return UI()->DoButtonLogic(pID, "", Checked, pRect);
 }
 
+bool CMenus::DemoFilterChat(const void *pData, int Size, void *pUser)
+{
+	bool DoFilterChat = *(bool *)pUser;
+	if(!DoFilterChat)
+	{
+		return false;
+	}
+
+	CUnpacker Unpacker;
+	Unpacker.Reset(pData, Size);
+
+	int Msg = Unpacker.GetInt();
+	int Sys = Msg&1;
+	Msg >>= 1;
+
+	return !Unpacker.Error() && !Sys && Msg == NETMSGTYPE_SV_CHAT;
+}
+
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
 	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
@@ -116,7 +134,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
-				Client()->DemoSlice(aPath, s_RemoveChat);
+				Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
 			}
 		}
 
