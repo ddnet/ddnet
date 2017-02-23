@@ -3,7 +3,7 @@ project(DDNet)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-option(WEBSOCKETS "Enable websockets support")
+option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" ON)
 option(CLIENT "Compile client" ON)
 option(SERVER "Compile server" ON)
@@ -60,16 +60,16 @@ if(MYSQL AND NOT(MYSQL_FOUND))
 endif()
 
 if(CLIENT AND NOT(CURL_FOUND))
-  message(FATAL_ERROR "You must install Curl to compile DDNet client")
+  message(SEND_ERROR "You must install Curl to compile DDNet client")
 endif()
 if(CLIENT AND NOT(FREETYPE_FOUND))
-  message(FATAL_ERROR "You must install Freetype to compile DDNet client")
+  message(SEND_ERROR "You must install Freetype to compile DDNet client")
 endif()
 if(CLIENT AND NOT(OPUSFILE_FOUND))
-  message(FATAL_ERROR "You must install Openfile to compile DDNet client")
+  message(SEND_ERROR "You must install Openfile to compile DDNet client")
 endif()
 if(CLIENT AND NOT(SDL2_FOUND))
-  message(FATAL_ERROR "You must install SDL2 to compile DDNet client")
+  message(SEND_ERROR "You must install SDL2 to compile DDNet client")
 endif()
 
 
@@ -105,6 +105,8 @@ chash("src/game/generated/nethash.cpp"
   "src/game/tuning.h"
   "src/game/gamecore.cpp"
 )
+generate_source("src/game/generated/client_data.cpp" "client_content_source")
+generate_source("src/game/generated/client_data.h" "client_content_header")
 generate_source("src/game/generated/protocol.cpp" "network_source")
 generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
