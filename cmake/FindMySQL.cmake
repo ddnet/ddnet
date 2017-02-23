@@ -7,7 +7,7 @@ find_path(MYSQL_INCLUDE_DIR
 )
 
 find_library(MYSQL_LIBRARY
-  NAMES "mysqlclient" "mysqlclient_r"
+  NAMES "mysqlclient" "mysqlclient_r" "mariadbclient"
   PATHS
     "/usr/lib/mysql"
     "/usr/lib64/mysql"
