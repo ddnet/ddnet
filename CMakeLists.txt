@@ -14,6 +14,11 @@ find_package(SDL2)
 find_package(Threads)
 find_package(ZLIB)
 
+# Set the default build type to Release
+if(NOT(CMAKE_BUILD_TYPE))
+	set(CMAKE_BUILD_TYPE Release)
+endif()
+
 # TODO: Complain if packages are not found.
 
 function(chash output_file)
@@ -69,7 +74,7 @@ set(CLIENT ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIEN
 set(SERVER ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS})
 set(DEPS_CLIENT ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
-set(LIBS Threads::Threads ${ZLIB_LIBRARIES})
+set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
 set(LIBS_SERVER ${MYSQL_LIBRARIES})
 set(LIBS_CLIENT
   ${CURL_LIBRARIES}
