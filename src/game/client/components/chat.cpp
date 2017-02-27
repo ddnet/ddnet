@@ -540,7 +540,14 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			}
 			else
 			{
-				str_copy(m_aLines[m_CurrentLine].m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
+				if(m_pClient->m_aClients[ClientID].m_Friend)
+				{
+					str_format(m_aLines[m_CurrentLine].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName), "♥ %s", m_pClient->m_aClients[ClientID].m_aName);
+					m_aLines[m_CurrentLine].m_NameColor = 2;
+					m_aLines[m_CurrentLine].m_Team = 0;
+				}
+				else
+					str_copy(m_aLines[m_CurrentLine].m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
 			}
 
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), ": %s", pLine);
@@ -766,6 +773,8 @@ void CChat::OnRender()
 			TextRender()->TextColor(0.7f, 0.7f, 1.0f, Blend); // blue
 		else if(m_aLines[r].m_NameColor == TEAM_SPECTATORS)
 			TextRender()->TextColor(0.75f, 0.5f, 0.75f, Blend); // spectator
+		else if(m_aLines[r].m_NameColor == 2)
+			TextRender()->TextColor(1.0f, 0.1f, 0.1f, Blend); // red
 		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
 		{
 			vec3 rgb = HslToRgb(vec3(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
