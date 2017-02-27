@@ -1315,9 +1315,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 }
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
-	int pIDP1 = 0, pIDP2 = 0;
+	static int pIDP1 = 0, pIDP2 = 0;
 	static int Page = 1;
-	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser, Page1Tab, Page2Tab;
+	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser, Page1Tab, Page2Tab, Enable;
 
 	MainView.HSplitTop(150.0f, &HUD, &MainView);
 
@@ -1560,16 +1560,24 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char aBuf[64];
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Label.VSplitRight(50.0f, &Label, &Button);
+			float twh = TextRender()->TextWidth(0, 16.0f, "Friend message", -1) ;
+			Label.VSplitLeft(twh + 5.0f, &Label, &Enable);
+			Enable.VSplitLeft(20.0f, &Enable, 0);
 			UI()->DoLabelScaled(&Label, "Friend message", 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-						vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
-						g_Config.m_ClMessageHighlightHue = HSL.h;
-						g_Config.m_ClMessageHighlightSat = HSL.s;
-						g_Config.m_ClMessageHighlightLht = HSL.l;
-					}
+						g_Config.m_ClMessageFriendHue = 0;
+						g_Config.m_ClMessageFriendSat = 255;
+						g_Config.m_ClMessageFriendLht = 145;
+				}
 			}
+
+			if(DoButton_CheckBox(&g_Config.m_ClMessageFriend, "", g_Config.m_ClMessageFriend, &Enable))
+			{
+				g_Config.m_ClMessageFriend ^= 1;
+			}
+
 			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.VSplitLeft(15.0f, 0, &Button);
 			Button.VSplitLeft(100.0f, &Label, &Button);
