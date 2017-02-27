@@ -1,0 +1,5 @@
+find_package(PkgConfig)
+pkg_check_modules(CURL libcurl)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Curl DEFAULT_MSG CURL_LIBRARIES)
