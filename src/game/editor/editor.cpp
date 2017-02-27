@@ -3968,7 +3968,6 @@ void CEditor::RenderFileDialog()
 	static int s_OkButton = 0;
 	static int s_CancelButton = 0;
 	static int s_NewFolderButton = 0;
-	static int s_MapInfoButton = 0;
 
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
@@ -4041,22 +4040,6 @@ void CEditor::RenderFileDialog()
 			m_FileDialogErrString[0] = 0;
 			static int s_NewFolderPopupID = 0;
 			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width/2.0f-200.0f, Height/2.0f-100.0f, 400.0f, 200.0f, PopupNewFolder);
-			UI()->SetActiveItem(0);
-		}
-	}
-
-	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
-	{
-		ButtonBar.VSplitLeft(40.0f, 0, &ButtonBar);
-		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
-		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, 0))
-		{
-			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor, sizeof(m_Map.m_MapInfo.m_aAuthorTmp));
-			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion, sizeof(m_Map.m_MapInfo.m_aVersionTmp));
-			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits, sizeof(m_Map.m_MapInfo.m_aCreditsTmp));
-			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense, sizeof(m_Map.m_MapInfo.m_aLicenseTmp));
-			static int s_MapInfoPopupID = 0;
-			UiInvokePopupMenu(&s_MapInfoPopupID, 0, Width/2.0f-200.0f, Height/2.0f-100.0f, 400.0f, 200.0f, PopupMapInfo);
 			UI()->SetActiveItem(0);
 		}
 	}
@@ -4918,6 +4901,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 	static int s_SaveButton = 0;
 	static int s_SaveAsButton = 0;
 	static int s_SaveCopyButton = 0;
+	static int s_MapDetailsButton = 0;
 	static int s_OpenButton = 0;
 	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
@@ -5012,6 +4996,20 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
 
 	View.HSplitTop(10.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_MapDetailsButton, "Edit metadata", 0, &Slot, 0, "Set the author, the version, the license and the credits of the map"))
+	{
+		str_copy(pEditor->m_Map.m_MapInfo.m_aAuthorTmp, pEditor->m_Map.m_MapInfo.m_aAuthor, sizeof(pEditor->m_Map.m_MapInfo.m_aAuthorTmp));
+		str_copy(pEditor->m_Map.m_MapInfo.m_aVersionTmp, pEditor->m_Map.m_MapInfo.m_aVersion, sizeof(pEditor->m_Map.m_MapInfo.m_aVersionTmp));
+		str_copy(pEditor->m_Map.m_MapInfo.m_aCreditsTmp, pEditor->m_Map.m_MapInfo.m_aCredits, sizeof(pEditor->m_Map.m_MapInfo.m_aCreditsTmp));
+		str_copy(pEditor->m_Map.m_MapInfo.m_aLicenseTmp, pEditor->m_Map.m_MapInfo.m_aLicense, sizeof(pEditor->m_Map.m_MapInfo.m_aLicenseTmp));
+		
+		static int s_MapDetailsPopupID = 0;
+		pEditor->UiInvokePopupMenu(&s_MapDetailsPopupID, 0, pEditor->UI()->Screen()->w/2.0f-200.0f, pEditor->UI()->Screen()->h/2.0f-100.0f, 400.0f, 200.0f, PopupMapInfo);
+		return 1;
+	}
+
+	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ExitButton, "Exit", 0, &Slot, 0, "Exits from the editor"))
 	{
 		if(pEditor->HasUnsavedData())
@@ -5033,7 +5031,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	MenuBar.VSplitLeft(60.0f, &s_File, &MenuBar);
 	if(DoButton_Menu(&s_File, "File", 0, &s_File, 0, 0))
-		UiInvokePopupMenu(&s_File, 1, s_File.x, s_File.y+s_File.h-1.0f, 120, 160, PopupMenuFile, this);
+		UiInvokePopupMenu(&s_File, 1, s_File.x, s_File.y+s_File.h-1.0f, 120, 182, PopupMenuFile, this);
 
 	/*
 	menubar.VSplitLeft(5.0f, 0, &menubar);
@@ -5458,6 +5456,8 @@ void CEditorMap::Clean()
 
 void CEditorMap::CreateDefault(int EntitiesTexture)
 {
+	str_copy(m_MapInfo.m_aCredits, "CC-BY-SA 4.0", sizeof(m_MapInfo.m_aCredits));
+	
 	// add background
 	CLayerGroup *pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
