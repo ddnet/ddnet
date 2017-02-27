@@ -1558,6 +1558,65 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		}
 		{
 			char aBuf[64];
+			Right.HSplitTop(20.0f, &Label, &Right);
+			Label.VSplitRight(50.0f, &Label, &Button);
+			UI()->DoLabelScaled(&Label, "Friend message", 16.0f, -1);
+			{
+				static int s_DefaultButton = 0;
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+						vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
+						g_Config.m_ClMessageHighlightHue = HSL.h;
+						g_Config.m_ClMessageHighlightSat = HSL.s;
+						g_Config.m_ClMessageHighlightLht = HSL.l;
+					}
+			}
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(15.0f, 0, &Button);
+			Button.VSplitLeft(100.0f, &Label, &Button);
+			Button.HMargin(2.0f, &Button);
+			UI()->DoLabelScaled(&Label, Localize("Hue"), 14.0f, -1);
+			g_Config.m_ClMessageFriendHue = (int)(DoScrollbarH(&g_Config.m_ClMessageFriendHue, &Button, g_Config.m_ClMessageFriendHue / 255.0f)*255.0f);
+
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(15.0f, 0, &Button);
+			Button.VSplitLeft(100.0f, &Label, &Button);
+			Button.HMargin(2.0f, &Button);
+			UI()->DoLabelScaled(&Label, Localize("Sat."), 14.0f, -1);
+			g_Config.m_ClMessageFriendSat = (int)(DoScrollbarH(&g_Config.m_ClMessageFriendSat, &Button, g_Config.m_ClMessageFriendSat / 255.0f)*255.0f);
+
+			Right.HSplitTop(20.0f, &Button, &Right);
+			Button.VSplitLeft(15.0f, 0, &Button);
+			Button.VSplitLeft(100.0f, &Label, &Button);
+			Button.HMargin(2.0f, &Button);
+			UI()->DoLabelScaled(&Label, Localize("Lht."), 14.0f, -1);
+			g_Config.m_ClMessageFriendLht = (int)(DoScrollbarH(&g_Config.m_ClMessageFriendLht, &Button, g_Config.m_ClMessageFriendLht / 255.0f)*255.0f);
+
+			Right.HSplitTop(10.0f, &Label, &Right);
+
+			vec3 rgbf = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
+			TextRender()->TextColor(rgbf.r, rgbf.g, rgbf.b, 1.0f);
+			str_format(aBuf, sizeof aBuf, "♥ %s", Localize("Friend"));
+			float tw = TextRender()->TextWidth(0, 12.0f, aBuf, -1);
+			Label.VSplitLeft(tw, &Label, &Button);
+			UI()->DoLabelScaled(&Label, aBuf, 12.0f, -1);
+
+			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			char name[16];
+			str_copy(name, g_Config.m_PlayerName, sizeof(name));
+			str_format(aBuf, sizeof(aBuf), ": %s", Localize ("Look out!"));
+			while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Button.w)
+			{
+				name[str_length(name) - 1] = 0;
+				str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize("Look out!"));
+			}
+			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
+
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			Right.HSplitTop(20.0f, 0, &Right);
+		}
+		{
+			char aBuf[64];
 			Left.HSplitTop(20.0f, &Label, &Left);
 			Label.VSplitRight(50.0f, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Normal message"), 16.0f, -1);
