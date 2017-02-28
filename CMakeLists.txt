@@ -17,11 +17,37 @@ endif()
 # DEPENDENCIES
 ########################################################################
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(TARGET_BITS 32)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(TARGET_BITS 64)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(TARGET_OS "windows")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(TARGET_OS "linux")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(TARGET_OS "mac")
+endif()
+
+function(set_extra_dirs VARIABLE NAME)
+  if(TARGET_BITS AND TARGET_OS)
+    set("EXTRA_${VARIABLE}_LIBDIR" "other/${NAME}/${TARGET_OS}/lib${TARGET_BITS}/" PARENT_SCOPE)
+  endif()
+  set("EXTRA_${VARIABLE}_INCLUDEDIR" "other/${NAME}/include/" PARENT_SCOPE)
+endfunction()
+
+# Check for PkgConfig once so all the other `find_package` calls can do it
+# quietly.
+find_package(PkgConfig)
 find_package(Curl)
 find_package(Freetype)
 if(MYSQL)
   find_package(MySQL)
 endif()
+find_package(Ogg)
+find_package(Opus)
 find_package(Opusfile)
 find_package(PythonInterp)
 find_package(SDL2)
@@ -32,24 +58,31 @@ message(STATUS "******** DDNet ********")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 
-message(STATUS ${name} "Dependencies:")
-function(show_dependency_status name varFound)
-  if(${varFound})
-    message(STATUS " * " ${name} " found")
+message(STATUS "Dependencies:")
+function(show_dependency_status NAME FOUND PATH)
+  if(FOUND)
+    string(FIND "${PATH}" "${CMAKE_SOURCE_DIR}" LOCAL_PATH_POS)
+    if(LOCAL_PATH_POS EQUAL 0)
+      message(STATUS " * ${NAME} found (bundled)")
+    else()
+      message(STATUS " * ${NAME} found")
+    endif()
   else()
-    message(STATUS " * " ${name} " not found")
+    message(STATUS " * ${NAME} not found")
   endif()
 endfunction()
 
-show_dependency_status("Curl" "${CURL_FOUND}")
-show_dependency_status("Freetype" "${FREETYPE_FOUND}")
+show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
+show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
 if(MYSQL)
-  show_dependency_status("MySQL" "${MYSQL_FOUND}")
+  show_dependency_status("MySQL" ${MYSQL_FOUND} "")
 endif()
-show_dependency_status("Opusfile" "${OPUSFILE_FOUND}")
-show_dependency_status("PythonInterp" "${PYTHONINTERP_FOUND}")
-show_dependency_status("SDL2" "${SDL2_FOUND}")
-show_dependency_status("Zlib" "${ZLIB_FOUND}")
+show_dependency_status("Ogg" ${OGG_FOUND} "${OGG_LIBRARY}")
+show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_LIBRARY}")
+show_dependency_status("Opusfile" ${OPUSFILE_FOUND} "${OPUSFILE_LIBRARY}")
+show_dependency_status("PythonInterp" ${PYTHONINTERP_FOUND} "")
+show_dependency_status("SDL2" ${SDL2_FOUND} "${SDL2_LIBRARY}")
+show_dependency_status("Zlib" ${ZLIB_FOUND} "")
 
 if(MYSQL AND NOT(MYSQL_FOUND))
   message(STATUS " ! Warning: MySQL support wanted, but not found.")
@@ -60,16 +93,22 @@ if(MYSQL AND NOT(MYSQL_FOUND))
 endif()
 
 if(CLIENT AND NOT(CURL_FOUND))
-  message(SEND_ERROR "You must install Curl to compile DDNet client")
+  message(SEND_ERROR "You must install Curl to compile the DDNet client")
 endif()
 if(CLIENT AND NOT(FREETYPE_FOUND))
-  message(SEND_ERROR "You must install Freetype to compile DDNet client")
+  message(SEND_ERROR "You must install Freetype to compile the DDNet client")
+endif()
+if(CLIENT AND NOT(OGG_FOUND))
+  message(SEND_ERROR "You must install Ogg to compile the DDNet client")
+endif()
+if(CLIENT AND NOT(OPUS_FOUND))
+  message(SEND_ERROR "You must install Opus to compile the DDNet client")
 endif()
 if(CLIENT AND NOT(OPUSFILE_FOUND))
-  message(SEND_ERROR "You must install Openfile to compile DDNet client")
+  message(SEND_ERROR "You must install Opusfile to compile the DDNet client")
 endif()
 if(CLIENT AND NOT(SDL2_FOUND))
-  message(SEND_ERROR "You must install SDL2 to compile DDNet client")
+  message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
 endif()
 
 
@@ -168,7 +207,9 @@ if(CLIENT)
   set(LIBS_CLIENT
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
+    ${OGG_LIBRARIES}
     ${OPUSFILE_LIBRARIES}
+    ${OPUS_LIBRARIES}
     ${SDL2_LIBRARIES}
     GL
     GLU
@@ -180,9 +221,14 @@ if(CLIENT)
   add_executable(${TARGET_CLIENT} ${CLIENT_SRC} ${DEPS_CLIENT})
   target_link_libraries(${TARGET_CLIENT} ${TARGET_GAME_SHARED} ${LIBS_CLIENT})
 
-  target_include_directories(${TARGET_CLIENT} PRIVATE ${FREETYPE_INCLUDE_DIRS})
-  target_include_directories(${TARGET_CLIENT} PRIVATE ${OPUSFILE_INCLUDE_DIRS})
-  target_include_directories(${TARGET_CLIENT} PRIVATE ${SDL2_INCLUDE_DIRS})
+  target_include_directories(${TARGET_CLIENT} PRIVATE
+    ${CURL_INCLUDE_DIRS}
+    ${FREETYPE_INCLUDE_DIRS}
+    ${OGG_INCLUDE_DIRS}
+    ${OPUSFILE_INCLUDE_DIRS}
+    ${OPUS_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIRS}
+  )
 endif()
 
 ########################################################################
