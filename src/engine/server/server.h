@@ -280,8 +280,9 @@ public:
 	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted = false);
 
-	void LogoutClient(int ClientID, const char *Reason);
-	void LogoutKey(CAuthListEntry *Key, const char *Reason);
+	void LogoutClient(int ClientID, const char *pReason);
+	void LogoutKey(CAuthListEntry *Key, const char *pReason);
+	void LogoutAuthLevel(int AuthLevel, const char *pReason);
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);

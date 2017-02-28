@@ -558,16 +558,13 @@ int CServer::MaxClients() const
 
 void CServer::InitRconPasswordIfEmpty()
 {
-	if(m_pAuthListHeap){
-		for(CAuthListEntry *e = m_pAuthListRoot; e; e = e->m_pNext)
-			if(e->m_Level == AUTHED_ADMIN)
-				return;
+	if(g_Config.m_SvRconPassword[0])
+	{
+		return;
 	}
 
-	char aBuf[32];
-	secure_random_password(aBuf, sizeof aBuf, 6);
-	AuthListAdd("generated", aBuf, AUTHED_ADMIN);
-
+	secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);
+	AuthListAdd("default_admin", g_Config.m_SvRconPassword, AUTHED_ADMIN);
 	m_GeneratedRconPassword = 1;
 }
 
@@ -994,7 +991,7 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighte
 	ReentryGuard--;
 }
 
-void CServer::LogoutClient(int ClientID, const char *Reason)
+void CServer::LogoutClient(int ClientID, const char *pReason)
 {
 	CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS);
 	Msg.AddInt(0);	//authed
@@ -1005,10 +1002,10 @@ void CServer::LogoutClient(int ClientID, const char *Reason)
 	m_aClients[ClientID].m_pRconCmdToSend = 0;
 
 	char aBuf[64];
-	if(*Reason){
-		str_format(aBuf, sizeof aBuf, "Logged out by %s.", Reason);
+	if(*pReason){
+		str_format(aBuf, sizeof aBuf, "Logged out by %s.", pReason);
 		SendRconLine(ClientID, aBuf);
-		str_format(aBuf, sizeof aBuf, "ClientID=%d with key=%s logged out by %s", ClientID, m_aClients[ClientID].m_pAuthKey->m_aIdent, Reason);
+		str_format(aBuf, sizeof aBuf, "ClientID=%d with key=%s logged out by %s", ClientID, m_aClients[ClientID].m_pAuthKey->m_aIdent, pReason);
 	}
 	else{
 		SendRconLine(ClientID, "Logout successful.");
@@ -1020,11 +1017,18 @@ void CServer::LogoutClient(int ClientID, const char *Reason)
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
-void CServer::LogoutKey(CAuthListEntry *Key, const char *Reason)
+void CServer::LogoutKey(CAuthListEntry *Key, const char *pReason)
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_aClients[i].m_pAuthKey == Key)
-			LogoutClient(i, Reason);
+			LogoutClient(i, pReason);
+}
+
+void CServer::LogoutAuthLevel(int AuthLevel, const char *pReason)
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(m_aClients[i].m_pAuthKey->m_Level == AuthLevel)
+			LogoutClient(i, pReason);
 }
 
 void CServer::SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID)
@@ -1730,8 +1734,9 @@ int CServer::Run()
 
 	if(m_GeneratedRconPassword)
 	{
+		CAuthListEntry *e = AuthListFind("default_admin");
 		dbg_msg("server", "+-------------------------+");
-		dbg_msg("server", "| rcon password: '%s' |", m_pAuthListRoot->m_aPw);
+		dbg_msg("server", "| rcon password: '%s' |", e->m_aPw);
 		dbg_msg("server", "+-------------------------+");
 	}
 
@@ -2368,7 +2373,7 @@ void CServer::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void 
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() == 1)
 	{
-		CServer *pThis = static_cast<CServer *>(pUserData);
+		CServer *pThis = (CServer*)pUserData;
 		pThis->Console()->SetPrintOutputLevel(pThis->m_PrintCBIndex, pResult->GetInteger(0));
 	}
 }
@@ -2376,19 +2381,53 @@ void CServer::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void 
 void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	((CServer *)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "sv_rcon_password is deprecated.");
+	if(pResult->NumArguments() == 1)
+	{
+		CServer *pServer = (CServer *)pUserData;
+		CAuthListEntry *e = pServer->AuthListFind("default_admin");
+		if(!e){
+			pServer->AuthListAdd("default_admin", pResult->GetString(0), AUTHED_ADMIN);
+			dbg_msg("auth", "default_admin doesn't exist, this should be impossible");
+			return;
+		}
+		else
+			str_copy(e->m_aPw, pResult->GetString(0), sizeof e->m_aPw);
+		pServer->LogoutKey(e, "password change");
+	}
 }
 
 void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	((CServer *)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "sv_rcon_mod_password is deprecated.");
+	if(pResult->NumArguments() == 1)
+	{
+		CServer *pServer = (CServer *)pUserData;
+		CAuthListEntry *e = pServer->AuthListFind("default_mod");
+		if(!e){
+			pServer->AuthListAdd("default_mod", pResult->GetString(0), AUTHED_MOD);
+			return;
+		}
+		else
+			str_copy(e->m_aPw, pResult->GetString(0), sizeof e->m_aPw);
+		pServer->LogoutKey(e, "password change");
+	}
 }
 
 void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	((CServer *)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "sv_rcon_helper_password is deprecated.");
+	if(pResult->NumArguments() == 1)
+	{
+		CServer *pServer = (CServer *)pUserData;
+		CAuthListEntry *e = pServer->AuthListFind("default_helper");
+		if(!e){
+			pServer->AuthListAdd("default_helper", pResult->GetString(0), AUTHED_HELPER);
+			return;
+		}
+		else
+			str_copy(e->m_aPw, pResult->GetString(0), sizeof e->m_aPw);
+		pServer->LogoutKey(e, "password change");
+	}
 }
 
 void CServer::RegisterCommands()
