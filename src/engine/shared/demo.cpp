@@ -25,6 +25,8 @@ static const int gs_NumMarkersOffset = 176;
 CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData)
 {
 	m_File = 0;
+	m_pfnFilter = 0;
+	m_pUser = 0;
 	m_LastTickMarker = -1;
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_DelayedMapData = DelayedMapData;
