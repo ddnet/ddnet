@@ -324,14 +324,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_CurrentInput[1] = 0;
 	m_LastDummy = 0;
 	m_LastDummy2 = 0;
-	m_LocalIDs[0] = 0;
-	m_LocalIDs[1] = 0;
-	m_Fire = 0;
 
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
-	mem_zero(&m_DummyInput, sizeof(m_DummyInput));
-	mem_zero(&HammerInput, sizeof(HammerInput));
-	HammerInput.m_Fire = 0;
 
 	m_State = IClient::STATE_OFFLINE;
 	m_aServerAddressStr[0] = 0;
@@ -481,106 +475,44 @@ void CClient::SendInput()
 	if(m_PredTick[g_Config.m_ClDummy] <= 0)
 		return;
 
-	// fetch input
-	int Size = GameClient()->OnSnapInput(m_aInputs[g_Config.m_ClDummy][m_CurrentInput[g_Config.m_ClDummy]].m_aData);
-
-	if(Size)
+	if(m_LastDummy != g_Config.m_ClDummy)
 	{
-		// pack input
-		CMsgPacker Msg(NETMSG_INPUT);
-		Msg.AddInt(m_AckGameTick[g_Config.m_ClDummy]);
-		Msg.AddInt(m_PredTick[g_Config.m_ClDummy]);
-		Msg.AddInt(Size);
-
-		m_aInputs[g_Config.m_ClDummy][m_CurrentInput[g_Config.m_ClDummy]].m_Tick = m_PredTick[g_Config.m_ClDummy];
-		m_aInputs[g_Config.m_ClDummy][m_CurrentInput[g_Config.m_ClDummy]].m_PredictedTime = m_PredictedTime.Get(Now);
-		m_aInputs[g_Config.m_ClDummy][m_CurrentInput[g_Config.m_ClDummy]].m_Time = Now;
-
-		// pack it
-		for(int i = 0; i < Size/4; i++)
-			Msg.AddInt(m_aInputs[g_Config.m_ClDummy][m_CurrentInput[g_Config.m_ClDummy]].m_aData[i]);
-
-		m_CurrentInput[g_Config.m_ClDummy]++;
-		m_CurrentInput[g_Config.m_ClDummy]%=200;
-
-		SendMsgEx(&Msg, MSGFLAG_FLUSH);
-	}
-
-	if(m_LastDummy != (bool)g_Config.m_ClDummy)
-	{
-		m_DummyInput = GameClient()->getPlayerInput(!g_Config.m_ClDummy);
 		m_LastDummy = g_Config.m_ClDummy;
-
-		if (g_Config.m_ClDummyResetOnSwitch)
-		{
-			m_DummyInput.m_Jump = 0;
-			m_DummyInput.m_Hook = 0;
-			if(m_DummyInput.m_Fire & 1)
-				m_DummyInput.m_Fire++;
-			m_DummyInput.m_Direction = 0;
-			GameClient()->ResetDummyInput();
-		}
+		GameClient()->OnDummySwap();
 	}
 
-	if(!g_Config.m_ClDummy)
-		m_LocalIDs[0] = ((CGameClient *)GameClient())->m_Snap.m_LocalClientID;
-	else
-		m_LocalIDs[1] = ((CGameClient *)GameClient())->m_Snap.m_LocalClientID;
-
-	if(m_DummyConnected)
+	bool Force = false;
+	// fetch input
+	for(int Dummy = 0; Dummy < 2; Dummy++)
 	{
-		if(!g_Config.m_ClDummyHammer)
+		if(!m_DummyConnected && Dummy != 0)
 		{
-			if(m_Fire != 0)
-			{
-				m_DummyInput.m_Fire = HammerInput.m_Fire;
-				m_Fire = 0;
-			}
-
-			if(!Size && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
-				return;
-
-			// pack input
-			CMsgPacker Msg(NETMSG_INPUT);
-			Msg.AddInt(m_AckGameTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(m_PredTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(sizeof(m_DummyInput));
-
-			// pack it
-			for(unsigned int i = 0; i < sizeof(m_DummyInput)/4; i++)
-				Msg.AddInt(((int*) &m_DummyInput)[i]);
-
-			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
+			break;
 		}
-		else
+		int i = g_Config.m_ClDummy ^ Dummy;
+		int Size = GameClient()->OnSnapInput(m_aInputs[i][m_CurrentInput[i]].m_aData, Dummy, Force);
+
+		if(Size)
 		{
-			if ((((float) m_Fire / 12.5) - (int ((float) m_Fire / 12.5))) > 0.01)
-			{
-				m_Fire++;
-				return;
-			}
-			m_Fire++;
-
-			HammerInput.m_Fire+=2;
-			HammerInput.m_WantedWeapon = 1;
-
-			vec2 Main = ((CGameClient *)GameClient())->m_LocalCharacterPos;
-			vec2 Dummy = ((CGameClient *)GameClient())->m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
-			vec2 Dir = Main - Dummy;
-			HammerInput.m_TargetX = Dir.x;
-			HammerInput.m_TargetY = Dir.y;
-
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
-			Msg.AddInt(m_AckGameTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(m_PredTick[!g_Config.m_ClDummy]);
-			Msg.AddInt(sizeof(HammerInput));
+			Msg.AddInt(m_AckGameTick[i]);
+			Msg.AddInt(m_PredTick[i]);
+			Msg.AddInt(Size);
+
+			m_aInputs[i][m_CurrentInput[i]].m_Tick = m_PredTick[i];
+			m_aInputs[i][m_CurrentInput[i]].m_PredictedTime = m_PredictedTime.Get(Now);
+			m_aInputs[i][m_CurrentInput[i]].m_Time = Now;
 
 			// pack it
-			for(unsigned int i = 0; i < sizeof(HammerInput)/4; i++)
-				Msg.AddInt(((int*) &HammerInput)[i]);
+			for(int k = 0; k < Size/4; k++)
+				Msg.AddInt(m_aInputs[i][m_CurrentInput[i]].m_aData[k]);
 
-			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, !g_Config.m_ClDummy);
+			m_CurrentInput[i]++;
+			m_CurrentInput[i] %= 200;
+
+			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, i);
+			Force = true;
 		}
 	}
 }
@@ -885,21 +817,6 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 
 	m_NetClient[NetClient].Send(&Packet);
 	return 0;
-}
-
-void CClient::DummyInfo()
-{
-	CNetMsg_Cl_ChangeInfo Msg;
-	Msg.m_pName = g_Config.m_ClDummyName;
-	Msg.m_pClan = g_Config.m_ClDummyClan;
-	Msg.m_Country = g_Config.m_ClDummyCountry;
-	Msg.m_pSkin = g_Config.m_ClDummySkin;
-	Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
-	Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
-	Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
-	CMsgPacker Packer(Msg.MsgID());
-	Msg.Pack(&Packer);
-	SendMsgExY(&Packer, MSGFLAG_VITAL);
 }
 
 void CClient::GetServerInfo(CServerInfo *pServerInfo)
@@ -1259,11 +1176,11 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
 
-			IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
-			if (newsFile)
+			IOHANDLE NewsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			if (NewsFile)
 			{
-				io_write(newsFile, m_aNews, sizeof(m_aNews));
-				io_close(newsFile);
+				io_write(NewsFile, m_aNews, sizeof(m_aNews));
+				io_close(NewsFile);
 			}
 		}
 
@@ -3080,12 +2997,12 @@ void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
 	pSelf->DemoSliceEnd();
 }
 
-void CClient::DemoSlice(const char *pDstPath, bool RemoveChat)
+void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
 {
 	if (m_DemoPlayer.IsPlaying())
 	{
 		const char *pDemoFileName = m_DemoPlayer.GetDemoFileName();
-		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, RemoveChat);
+		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, pfnFilter, pUser);
 	}
 }
 
