@@ -22,9 +22,7 @@ class CDemoRecorder : public IDemoRecorder
 	bool m_DelayedMapData;
 	unsigned int m_MapSize;
 	unsigned char *m_pMapData;
-
-	DEMOFUNC_FILTER m_pfnFilter;
-	void *m_pUser;
+	bool m_RemoveChat;
 
 	void WriteTickMarker(int Tick, int Keyframe);
 	void Write(int Type, const void *pData, int Size);
@@ -32,7 +30,7 @@ public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize = 0, unsigned char *pMapData = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize = 0, unsigned char *pMapData = 0, bool RemoveChat = false);
 	int Stop(bool Finalize = false);
 	void AddDemoMarker();
 
@@ -158,7 +156,7 @@ class CDemoEditor : public IDemoEditor, public CDemoPlayer::IListener
 
 public:
 	virtual void Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
-	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser);
+	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, bool RemoveChat);
 
 	virtual void OnDemoPlayerSnapshot(void *pData, int Size);
 	virtual void OnDemoPlayerMessage(void *pData, int Size);

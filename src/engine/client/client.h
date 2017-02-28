@@ -152,7 +152,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_CurrentInput[2];
 	bool m_LastDummy;
 	bool m_LastDummy2;
-	bool m_DummySendConnInfo;
+	CNetObj_PlayerInput HammerInput;
 
 	// graphs
 	CGraph m_InputtimeMarginGraph;
@@ -261,8 +261,10 @@ public:
 	virtual void DummyConnect();
 	virtual bool DummyConnected();
 	virtual bool DummyConnecting();
+	void DummyInfo();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
+	int m_Fire;
 
 	virtual void GetServerInfo(CServerInfo *pServerInfo);
 	void ServerInfoRequest();
@@ -384,7 +386,7 @@ public:
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
-	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
+	virtual void DemoSlice(const char *pDstPath, bool RemoveChat);
 
 	void RequestDDNetSrvList();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }

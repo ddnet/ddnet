@@ -12,8 +12,6 @@ enum
 
 const double g_aSpeeds[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0, 8.0};
 
-typedef bool (*DEMOFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
-
 struct CDemoHeader
 {
 	unsigned char m_aMarker[7];
@@ -86,7 +84,7 @@ class IDemoEditor : public IInterface
 	MACRO_INTERFACE("demoeditor", 0)
 public:
 
-	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
+	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, bool RemoveChat) = 0;
 };
 
 #endif
