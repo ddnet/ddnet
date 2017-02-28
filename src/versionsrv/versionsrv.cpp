@@ -67,13 +67,13 @@ void BuildPackets()
 
 void ReadNews()
 {
-	IOHANDLE NewsFile = io_open("news", IOFLAG_READ);
-	if (!NewsFile)
+	IOHANDLE newsFile = io_open("news", IOFLAG_READ);
+	if (!newsFile)
 		return;
 
-	io_read(NewsFile, m_aNews, NEWS_SIZE);
+	io_read(newsFile, m_aNews, NEWS_SIZE);
 
-	io_close(NewsFile);
+	io_close(newsFile);
 }
 
 void ReadServerList()
