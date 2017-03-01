@@ -4,14 +4,16 @@ project(DDNet)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 option(WEBSOCKETS "Enable websockets support" OFF)
-option(MYSQL "Enable mysql support" ON)
+option(MYSQL "Enable mysql support" OFF)
 option(CLIENT "Compile client" ON)
-option(SERVER "Compile server" ON)
 
 # Set the default build type to Release
 if(NOT(CMAKE_BUILD_TYPE))
   set(CMAKE_BUILD_TYPE Release)
 endif()
+
+set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
+set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
 ########################################################################
 # DEPENDENCIES
@@ -63,7 +65,7 @@ function(show_dependency_status NAME FOUND PATH)
   if(FOUND)
     string(FIND "${PATH}" "${CMAKE_SOURCE_DIR}" LOCAL_PATH_POS)
     if(LOCAL_PATH_POS EQUAL 0)
-      message(STATUS " * ${NAME} found (bundled)")
+      message(STATUS " * ${NAME} not found (using bundled version)")
     else()
       message(STATUS " * ${NAME} found")
     endif()
@@ -82,14 +84,14 @@ show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_LIBRARY}")
 show_dependency_status("Opusfile" ${OPUSFILE_FOUND} "${OPUSFILE_LIBRARY}")
 show_dependency_status("PythonInterp" ${PYTHONINTERP_FOUND} "")
 show_dependency_status("SDL2" ${SDL2_FOUND} "${SDL2_LIBRARY}")
-show_dependency_status("Zlib" ${ZLIB_FOUND} "")
+if(ZLIB_FOUND)
+  message(STATUS " * Zlib found")
+else()
+  message(STATUS " * Zlib not found (using bundled version)")
+endif()
 
 if(MYSQL AND NOT(MYSQL_FOUND))
-  message(STATUS " ! Warning: MySQL support wanted, but not found.")
-  message(STATUS "            MySQL support will be disabled.")
-  message(STATUS "            If you don't want MySQL support,")
-  message(STATUS "            please execute cmake with the option -DMYSQL=OFF.")
-  set(MYSQL OFF)
+  message(SEND_ERROR "You must install MySQL to compile the DDNet server with MySQL support")
 endif()
 
 if(CLIENT AND NOT(CURL_FOUND))
@@ -111,6 +113,13 @@ if(CLIENT AND NOT(SDL2_FOUND))
   message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
 endif()
 
+
+if(NOT(ZLIB_FOUND))
+  unset(ZLIB_LIBRARIES)
+  file(GLOB ZLIB_SRC "src/engine/external/zlib/*.c" "src/engine/external/zlib/*.h")
+  add_library(zlib OBJECT ${ZLIB_SRC})
+  set(ZLIB $<TARGET_OBJECTS:zlib>)
+endif()
 
 ########################################################################
 # CODE GENERATION
@@ -156,7 +165,7 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 # SHARED
 ########################################################################
 
-#Sources
+# Sources
 file(GLOB_RECURSE BASE "src/base/*.c" "src/base/*.cpp" "src/base/*.h")
 file(GLOB_RECURSE ENGINE_SHARED "src/engine/shared/*.cpp" "src/engine/shared/*.h") 
 file(GLOB GAME_SHARED "src/game/*.cpp" "src/game/*.h")
@@ -176,13 +185,8 @@ set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS})
 set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
 
 # Targets
-set(TARGET_ENGINE_SHARED DDNet-Engine-Shared)
-add_library(${TARGET_ENGINE_SHARED} ${ENGINE_SHARED} ${BASE} ${DEPS})
-target_link_libraries(${TARGET_ENGINE_SHARED} ${LIBS})
-
-set(TARGET_GAME_SHARED DDNet-Game-Shared)
-add_library(${TARGET_GAME_SHARED} ${GAME_SHARED} ${GAME_GENERATED_SHARED})
-target_link_libraries(${TARGET_GAME_SHARED} ${TARGET_ENGINE_SHARED})
+add_library(engine-shared OBJECT ${ENGINE_SHARED} ${BASE} ${DEPS})
+add_library(game-shared OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 
 
 ########################################################################
@@ -205,6 +209,7 @@ if(CLIENT)
 
   # Libraries
   set(LIBS_CLIENT
+    ${LIBS}
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${OGG_LIBRARIES}
@@ -217,9 +222,15 @@ if(CLIENT)
   )
 
   # Target
-  set(TARGET_CLIENT DDNet)
-  add_executable(${TARGET_CLIENT} ${CLIENT_SRC} ${DEPS_CLIENT})
-  target_link_libraries(${TARGET_CLIENT} ${TARGET_GAME_SHARED} ${LIBS_CLIENT})
+  set(TARGET_CLIENT ${CLIENT_EXECUTABLE})
+  add_executable(${TARGET_CLIENT}
+    ${CLIENT_SRC}
+    ${DEPS_CLIENT}
+    $<TARGET_OBJECTS:engine-shared>
+    $<TARGET_OBJECTS:game-shared>
+    ${ZLIB}
+  )
+  target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
   target_include_directories(${TARGET_CLIENT} PRIVATE
     ${CURL_INCLUDE_DIRS}
@@ -235,23 +246,54 @@ endif()
 # SERVER
 ########################################################################
 
-if(SERVER)
-  # Sources
-  file(GLOB_RECURSE ENGINE_SERVER "src/engine/server/*.cpp" "src/engine/server/*.h")
-  file(GLOB_RECURSE GAME_SERVER "src/game/server/*.cpp" "src/game/server/*.h")
-  set(GAME_GENERATED_SERVER "src/game/generated/server_data.cpp" "src/game/generated/server_data.h")
-  set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
+# Sources
+file(GLOB_RECURSE ENGINE_SERVER "src/engine/server/*.cpp" "src/engine/server/*.h")
+file(GLOB_RECURSE GAME_SERVER "src/game/server/*.cpp" "src/game/server/*.h")
+set(GAME_GENERATED_SERVER "src/game/generated/server_data.cpp" "src/game/generated/server_data.h")
+set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 
-  # Libraries
-  set(LIBS_SERVER ${MYSQL_LIBRARIES})
+# Libraries
+set(LIBS_SERVER ${LIBS} ${MYSQL_LIBRARIES})
 
-  # Target
-  set(TARGET_SERVER DDNet-Server)
-  add_executable(${TARGET_SERVER} ${SERVER_SRC})
-  target_link_libraries(${TARGET_SERVER} ${TARGET_GAME_SHARED} ${LIBS_SERVER})
+# Target
+set(TARGET_SERVER ${SERVER_EXECUTABLE})
+add_executable(${TARGET_SERVER}
+  ${SERVER_SRC}
+  $<TARGET_OBJECTS:engine-shared>
+  $<TARGET_OBJECTS:game-shared>
+  ${ZLIB}
+)
+target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 
-  if(MYSQL_FOUND)
-    target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_WEBSOCKETS)
-    target_include_directories(${TARGET_SERVER} PRIVATE ${MYSQL_INCLUDE_DIRS})
-  endif()
+if(MYSQL_FOUND)
+  target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_WEBSOCKETS)
+  target_include_directories(${TARGET_SERVER} PRIVATE ${MYSQL_INCLUDE_DIRS})
 endif()
+
+########################################################################
+# VARIOUS TARGETS
+########################################################################
+
+file(GLOB_RECURSE MASTERSRV_SRC "src/mastersrv/*.cpp" "src/mastersrv/*.h")
+file(GLOB_RECURSE VERSIONSRV_SRC  "src/versionsrv/*.cpp" "src/versionsrv/*.h")
+file(GLOB_RECURSE TWPING_SRC "src/twping/*.cpp" "src/twping/*.h")
+
+set(TARGET_MASTERSRV mastersrv)
+set(TARGET_VERSIONSRV versionsrv)
+set(TARGET_TWPING twping)
+
+add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${ZLIB})
+add_executable(${TARGET_VERSIONSRV} EXCLUDE_FROM_ALL ${VERSIONSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${ZLIB})
+add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${ZLIB})
+
+target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
+target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
+target_link_libraries(${TARGET_TWPING} ${LIBS})
+
+add_custom_target(everything DEPENDS
+  ${TARGET_CLIENT}
+  ${TARGET_SERVER}
+  ${TARGET_MASTERSRV}
+  ${TARGET_VERSIONSRV}
+  ${TARGET_TWPING}
+)
