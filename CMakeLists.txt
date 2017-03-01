@@ -193,6 +193,10 @@ add_library(game-shared OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 # CLIENT
 ########################################################################
 
+file(GLOB DEP_PNG_SRC "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
+add_library(png OBJECT ${DEP_PNG_SRC})
+set(DEP_PNG $<TARGET_OBJECTS:png>)
+
 if(CLIENT)
   # Sources
   file(GLOB_RECURSE ENGINE_CLIENT "src/engine/client/*.cpp" "src/engine/client/*.h")
@@ -202,10 +206,13 @@ if(CLIENT)
   set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
   # Static dependencies
-  # TODO: Make add_library(.. OBJECT ..) out of these.
-  file(GLOB DEP_JSON "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
-  file(GLOB DEP_PNG "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
-  file(GLOB DEP_WAV "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
+  file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
+  file(GLOB DEP_WAV_SRC "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
+  add_library(json OBJECT ${DEP_JSON_SRC})
+  add_library(wav OBJECT ${DEP_WAV_SRC})
+  set(DEP_JSON $<TARGET_OBJECTS:json>)
+  set(DEP_WAV $<TARGET_OBJECTS:wav>)
+
   set(DEPS_CLIENT ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
 
   # Libraries
@@ -309,6 +316,7 @@ foreach(T ${TOOLS})
   )
   if(TOOL MATCHES "^(tileset_|dilate$)")
     target_sources(${TOOL} PRIVATE ${DEP_PNG})
+    message(STATUS ${TOOL})
   endif()
   if(TOOL MATCHES "^config_")
     target_sources(${TOOL} PRIVATE "src/tools/config_common.h")
