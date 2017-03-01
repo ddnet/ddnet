@@ -307,7 +307,8 @@ public:
 	virtual void OnNewSnapshot();
 	virtual void OnPredict();
 	virtual void OnActivateEditor();
-	virtual int OnSnapInput(int *pData);
+	virtual void OnDummySwap();
+	virtual int OnSnapInput(int *pData, bool Dummy, bool Force);
 	virtual void OnShutdown();
 	virtual void OnEnterGame();
 	virtual void OnRconLine(const char *pLine);
@@ -315,13 +316,9 @@ public:
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
 
-	virtual void ResetDummyInput();
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
 	virtual const char *NetVersion();
-
-	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy);
-
 
 	// actions
 	// TODO: move these
@@ -357,6 +354,11 @@ public:
 	class CMapSounds *m_pMapSounds;
 
 	// DDRace
+
+	int m_LocalIDs[2];
+	CNetObj_PlayerInput m_DummyInput;
+	CNetObj_PlayerInput m_HammerInput;
+	int m_DummyFire;
 
 	class CRaceDemo *m_pRaceDemo;
 	class CGhost *m_pGhost;

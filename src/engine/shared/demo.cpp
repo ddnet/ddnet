@@ -7,7 +7,6 @@
 #include <engine/storage.h>
 
 #include <engine/shared/config.h>
-#include <game/generated/protocol.h>
 
 #include "compression.h"
 #include "demo.h"
@@ -26,17 +25,21 @@ static const int gs_NumMarkersOffset = 176;
 CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData)
 {
 	m_File = 0;
+	m_pfnFilter = 0;
+	m_pUser = 0;
 	m_LastTickMarker = -1;
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_DelayedMapData = DelayedMapData;
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, bool RemoveChat)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
+	m_pfnFilter = pfnFilter;
+	m_pUser = pUser;
+
 	m_MapSize = MapSize;
 	m_pMapData = pMapData;
-	m_RemoveChat = RemoveChat;
 
 	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
@@ -278,23 +281,13 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 
 void CDemoRecorder::RecordMessage(const void *pData, int Size)
 {
-	if (m_RemoveChat)
+	if(m_pfnFilter)
 	{
-		CUnpacker Unpacker;
-		Unpacker.Reset(pData, Size);
-
-		// unpack msgid and system flag
-		int Msg = Unpacker.GetInt();
-		int Sys = Msg&1;
-		Msg >>= 1;
-
-		if(Unpacker.Error())
+		if(m_pfnFilter(pData, Size, m_pUser))
+		{
 			return;
-
-		if(!Sys && Msg == NETMSGTYPE_SV_CHAT)
-			return;
+		}
 	}
-
 	Write(CHUNKTYPE_MESSAGE, pData, Size);
 }
 
@@ -948,7 +941,7 @@ void CDemoEditor::Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotD
 	m_pStorage = pStorage;
 }
 
-void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, bool RemoveChat)
+void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	class CDemoPlayer DemoPlayer(m_pSnapshotDelta);
 	class CDemoRecorder DemoRecorder(m_pSnapshotDelta);
@@ -966,7 +959,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 		return;
 
 	const CDemoPlayer::CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
-	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client", 0, 0, RemoveChat) == -1)
+	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client", 0, 0, pfnFilter, pUser) == -1)
 		return;
 
 
