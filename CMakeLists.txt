@@ -202,6 +202,7 @@ if(CLIENT)
   set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
   # Static dependencies
+  # TODO: Make add_library(.. OBJECT ..) out of these.
   file(GLOB DEP_JSON "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
   file(GLOB DEP_PNG "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
   file(GLOB DEP_WAV "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
@@ -290,10 +291,30 @@ target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
 target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
 target_link_libraries(${TARGET_TWPING} ${LIBS})
 
-add_custom_target(everything DEPENDS
+set(TARGETS
   ${TARGET_CLIENT}
   ${TARGET_SERVER}
   ${TARGET_MASTERSRV}
   ${TARGET_VERSIONSRV}
   ${TARGET_TWPING}
 )
+
+file(GLOB TOOLS RELATIVE "${CMAKE_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
+foreach(T ${TOOLS})
+  string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
+  add_executable(${TOOL} EXCLUDE_FROM_ALL
+    src/tools/${TOOL}.cpp
+    $<TARGET_OBJECTS:engine-shared>
+    ${ZLIB}
+  )
+  if(TOOL MATCHES "^(tileset_|dilate$)")
+    target_sources(${TOOL} PRIVATE ${DEP_PNG})
+  endif()
+  if(TOOL MATCHES "^config_")
+    target_sources(${TOOL} PRIVATE "src/tools/config_common.h")
+  endif()
+  target_link_libraries(${TOOL} ${LIBS})
+  list(APPEND TARGETS ${TOOL})
+endforeach()
+
+add_custom_target(everything DEPENDS ${TARGETS})
