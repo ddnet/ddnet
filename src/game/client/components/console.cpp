@@ -9,6 +9,7 @@
 
 #include <base/system.h>
 
+#include <engine/serverbrowser.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/config.h>
 #include <engine/graphics.h>
@@ -47,6 +48,8 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CompletionRenderOffset = 0.0f;
 	m_ReverseTAB = false;
 
+	m_aUser[0] = '\0';
+
 	m_IsCommand = false;
 }
 
@@ -76,7 +79,18 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		if(m_pGameConsole->Client()->RconAuthed())
 			m_pGameConsole->Client()->Rcon(pLine);
 		else
-			m_pGameConsole->Client()->RconAuth("", pLine);
+		{
+			CServerInfo pServerInfo;
+			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
+
+			if(!m_aUser[0] && IsDDNet(&pServerInfo))
+				str_copy(m_aUser, pLine, sizeof m_aUser);
+			else
+			{
+				m_pGameConsole->Client()->RconAuth(m_aUser, pLine);
+				m_aUser[0] = '\0';
+			}
+		}
 	}
 }
 
@@ -459,6 +473,9 @@ void CGameConsole::OnRender()
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
 		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER);
 
+		CServerInfo pServerInfo;
+		Client()->GetServerInfo(&pServerInfo);
+
 		// render prompt
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
@@ -470,7 +487,17 @@ void CGameConsole::OnRender()
 				if(Client()->RconAuthed())
 					pPrompt = "rcon> ";
 				else
-					pPrompt = "ENTER PASSWORD> ";
+				{
+					if(IsDDNet(&pServerInfo))
+					{
+						if(!pConsole->m_aUser[0])
+							pPrompt = "Enter Username> ";
+						else
+							pPrompt = "Enter Password> ";
+					}
+					else
+						pPrompt = "ENTER PASSWORD> ";
+				}
 			}
 			else
 				pPrompt = "NOT CONNECTED> ";
@@ -495,7 +522,7 @@ void CGameConsole::OnRender()
 		//hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed())
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_aUser[0] || !IsDDNet(&pServerInfo)))
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
