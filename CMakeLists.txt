@@ -81,8 +81,8 @@ show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
 if(MYSQL)
   show_dependency_status("MySQL" ${MYSQL_FOUND} "")
 endif()
-show_dependency_status("Ogg" ${OGG_FOUND} "${OGG_LIBRARY}")
-show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_LIBRARY}")
+show_dependency_status("Ogg" ${OGG_FOUND} "${OGG_INCLUDEDIR}")
+show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_INCLUDEDIR}")
 show_dependency_status("Opusfile" ${OPUSFILE_FOUND} "${OPUSFILE_LIBRARY}")
 show_dependency_status("PythonInterp" ${PYTHONINTERP_FOUND} "")
 show_dependency_status("SDL2" ${SDL2_FOUND} "${SDL2_LIBRARY}")
@@ -117,12 +117,21 @@ endif()
 
 
 if(NOT(ZLIB_FOUND))
-  unset(ZLIB_LIBRARIES)
+  set(ZLIB_LIBRARIES)
   file(GLOB ZLIB_SRC "src/engine/external/zlib/*.c" "src/engine/external/zlib/*.h")
+  include_directories(src/engine/external/zlib/)
   add_library(zlib OBJECT ${ZLIB_SRC})
   set(ZLIB $<TARGET_OBJECTS:zlib>)
 else()
   set(ZLIB)
+endif()
+
+if(TARGET_OS STREQUAL "windows")
+  set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
+  set(PLATFORM_LIBS ws2_32) # Windows sockets
+else()
+  set(PLATFORM_CLIENT_LIBS GL GLU X11)
+  set(PLATFORM_LIBS)
 endif()
 
 ########################################################################
@@ -188,7 +197,7 @@ endif()
 set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS})
 
 # Libraries
-set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
+set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
 add_library(engine-shared OBJECT ${ENGINE_SHARED} ${BASE} ${DEPS})
@@ -226,13 +235,9 @@ if(CLIENT)
     ${LIBS}
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${OGG_LIBRARIES}
     ${OPUSFILE_LIBRARIES}
-    ${OPUS_LIBRARIES}
     ${SDL2_LIBRARIES}
-    GL
-    GLU
-    X11
+    ${PLATFORM_CLIENT_LIBS}
   )
 
   # Target

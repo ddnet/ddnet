@@ -1,7 +1,7 @@
 find_package(PkgConfig QUIET)
 pkg_check_modules(PC_SDL2 sdl2)
 
-set_extra_dirs(SDL2 opus)
+set_extra_dirs(SDL2 sdl)
 
 find_path(SDL2_INCLUDEDIR SDL.h
   PATH_SUFFIXES SDL2
