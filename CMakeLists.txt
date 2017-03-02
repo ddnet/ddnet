@@ -273,8 +273,8 @@ add_executable(${TARGET_SERVER}
 )
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 
-if(MYSQL_FOUND)
-  target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_WEBSOCKETS)
+if(MYSQL)
+  target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_SQL)
   target_include_directories(${TARGET_SERVER} PRIVATE ${MYSQL_INCLUDE_DIRS})
 endif()
 
