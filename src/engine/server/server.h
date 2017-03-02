@@ -19,6 +19,8 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/netban.h>
 
+#include "authmanager.h"
+
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
 	#include "sql_server.h"
@@ -153,6 +155,7 @@ public:
 		int m_Country;
 		int m_Score;
 		int m_Authed;
+		int m_AuthKey;
 		int m_AuthTries;
 		int m_NextMapChunk;
 
@@ -206,6 +209,7 @@ public:
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
 	CMapChecker m_MapChecker;
+	CAuthManager m_AuthManager;
 
 	int m_RconRestrict;
 
@@ -296,6 +300,13 @@ public:
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
 	static void ConDnsblStatus(IConsole::IResult *pResult, void *pUser);
 
+	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthUpdate(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthRemove(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthList(IConsole::IResult *pResult, void *pUser);
+
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
@@ -309,7 +320,8 @@ public:
 	static void ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-	void LogoutByAuthLevel(int AuthLevel);
+	void LogoutClient(int ClientID, const char *pReason);
+	void LogoutKey(int Key, const char *pReason);
 
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

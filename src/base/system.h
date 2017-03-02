@@ -1017,6 +1017,17 @@ const char *str_find(const char *haystack, const char *needle);
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 
 /*
+	Function: str_hex_decode
+		Takes a hex string and returns a byte array.
+
+		Parameters:
+			dst - Buffer for the byte array
+			dst_size - size of the buffer
+			data - String to decode
+			data_size - Size of the data
+*/
+void str_hex_decode(unsigned char *dst, int dst_size, const char *src);
+/*
 	Function: str_timestamp
 		Copies a time stamp in the format year-month-day_hour-minute-second to the string.
 
