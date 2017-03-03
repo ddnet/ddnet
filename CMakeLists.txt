@@ -149,6 +149,7 @@ endif()
 
 file(GLOB DEP_PNG_SRC "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
 add_library(png OBJECT ${DEP_PNG_SRC})
+target_include_directories(png PRIVATE ${ZLIB_INCLUDEDIR})
 
 set(DEP_PNG $<TARGET_OBJECTS:png>)
 list(APPEND TARGETS_DEP png)
@@ -377,6 +378,7 @@ set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 foreach(target ${TARGETS})
   if(MSVC)
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
+    target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
     target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=1>) # Detect some buffer overflows.
@@ -387,7 +389,6 @@ foreach(target ${TARGETS_OWN})
   if(MSVC)
     target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
-    target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(${target} PRIVATE -Wall)
     #target_compile_options(${target} PRIVATE -Wextra)
