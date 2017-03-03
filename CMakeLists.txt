@@ -335,6 +335,7 @@ target_link_libraries(${TARGET_TWPING} ${LIBS})
 
 list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV})
 
+set(TARGETS_TOOLS)
 file(GLOB TOOLS RELATIVE "${PROJECT_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
 foreach(T ${TOOLS})
   string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
@@ -350,13 +351,16 @@ foreach(T ${TOOLS})
     target_sources(${TOOL} PRIVATE "src/tools/config_common.h")
   endif()
   target_link_libraries(${TOOL} ${LIBS})
-  list(APPEND TARGETS_OWN ${TOOL})
+  list(APPEND TARGETS_TOOLS ${TOOL})
 endforeach()
 
+list(APPEND TARGETS_OWN ${TARGETS_TOOLS})
+
+add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
 
 ########################################################################
-# COMPILER-SPECIFICS PART 2
+# COMPILER-SPECIFICS
 ########################################################################
 
 # In the future (CMake 3.8.0+), use source_group(TREE ...)
