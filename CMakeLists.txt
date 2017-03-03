@@ -115,17 +115,6 @@ if(CLIENT AND NOT(SDL2_FOUND))
   message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
 endif()
 
-
-if(NOT(ZLIB_FOUND))
-  set(ZLIB_LIBRARIES)
-  file(GLOB ZLIB_SRC "src/engine/external/zlib/*.c" "src/engine/external/zlib/*.h")
-  include_directories(src/engine/external/zlib/)
-  add_library(zlib OBJECT ${ZLIB_SRC})
-  set(ZLIB $<TARGET_OBJECTS:zlib>)
-else()
-  set(ZLIB)
-endif()
-
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
@@ -135,10 +124,50 @@ else()
 endif()
 
 ########################################################################
-# CODE GENERATION
+# INITALIZE TARGET LISTS
 ########################################################################
 
-include_directories(src/)
+set(TARGETS_OWN)
+set(TARGETS_DEP)
+
+########################################################################
+# DEPENDENCY COMPILATION
+########################################################################
+
+if(NOT(ZLIB_FOUND))
+  set(ZLIB_LIBRARIES)
+  file(GLOB ZLIB_SRC "src/engine/external/zlib/*.c" "src/engine/external/zlib/*.h")
+  add_library(zlib OBJECT ${ZLIB_SRC})
+
+  list(APPEND TARGETS_DEP zlib)
+  set(ZLIB_INCLUDEDIR src/engine/external/zlib/)
+  set(DEP_ZLIB $<TARGET_OBJECTS:zlib>)
+else()
+  set(ZLIB_INCLUDEDIR)
+  set(DEP_ZLIB)
+endif()
+
+file(GLOB DEP_PNG_SRC "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
+add_library(png OBJECT ${DEP_PNG_SRC})
+
+set(DEP_PNG $<TARGET_OBJECTS:png>)
+list(APPEND TARGETS_DEP png)
+
+if(CLIENT)
+  # Static dependencies
+  file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
+  file(GLOB DEP_WAV_SRC "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
+  add_library(json OBJECT ${DEP_JSON_SRC})
+  add_library(wav OBJECT ${DEP_WAV_SRC})
+
+  list(APPEND TARGETS_DEP json wav)
+  set(DEP_JSON $<TARGET_OBJECTS:json>)
+  set(DEP_WAV $<TARGET_OBJECTS:wav>)
+endif()
+
+########################################################################
+# CODE GENERATION
+########################################################################
 
 function(chash output_file)
   add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
@@ -185,32 +214,32 @@ file(GLOB GAME_SHARED "src/game/*.cpp" "src/game/*.h")
 set(GAME_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/protocol.h" "src/game/generated/nethash.cpp")
 
 # Static dependencies
-file(GLOB DEP_MD5 "src/engine/external/md5/*.c" "src/engine/external/md5/*.h")
+file(GLOB DEP_MD5_SRC "src/engine/external/md5/*.c" "src/engine/external/md5/*.h")
+add_library(md5 OBJECT ${DEP_MD5_SRC})
+set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 
 if(WEBSOCKETS)
-  file(GLOB DEP_WEBSOCKETS "src/engine/external/libwebsockets/*.c" "src/engine/external/libwebsockets/*.h")
-  add_definitions(-DWEBSOCKETS)
+  file(GLOB DEP_WEBSOCKETS_SRC "src/engine/external/libwebsockets/*.c" "src/engine/external/libwebsockets/*.h")
+  add_library(websockets OBJECT ${DEP_WEBSOCKETS_SRC})
+  set(DEP_WEBSOCKETS $<TARGET_OBJECTS:websockets>)
 else()
   set(DEP_WEBSOCKETS)
 endif()
 
-set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS})
+set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS} ${DEP_ZLIB})
 
 # Libraries
 set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
-add_library(engine-shared OBJECT ${ENGINE_SHARED} ${BASE} ${DEPS})
+add_library(engine-shared OBJECT ${ENGINE_SHARED} ${BASE})
 add_library(game-shared OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
+list(APPEND TARGETS_OWN engine-shared game-shared)
 
 
 ########################################################################
 # CLIENT
 ########################################################################
-
-file(GLOB DEP_PNG_SRC "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
-add_library(png OBJECT ${DEP_PNG_SRC})
-set(DEP_PNG $<TARGET_OBJECTS:png>)
 
 if(CLIENT)
   # Sources
@@ -220,15 +249,7 @@ if(CLIENT)
   set(GAME_GENERATED_CLIENT "src/game/generated/client_data.cpp" "src/game/generated/client_data.h")
   set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
-  # Static dependencies
-  file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
-  file(GLOB DEP_WAV_SRC "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
-  add_library(json OBJECT ${DEP_JSON_SRC})
-  add_library(wav OBJECT ${DEP_WAV_SRC})
-  set(DEP_JSON $<TARGET_OBJECTS:json>)
-  set(DEP_WAV $<TARGET_OBJECTS:wav>)
-
-  set(DEPS_CLIENT ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
+  set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
 
   # Libraries
   set(LIBS_CLIENT
@@ -247,7 +268,7 @@ if(CLIENT)
     ${DEPS_CLIENT}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
-    ${ZLIB}
+    ${DEP_ZLIB}
   )
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
@@ -259,6 +280,7 @@ if(CLIENT)
     ${OPUS_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
   )
+  list(APPEND TARGETS_OWN ${TARGET_CLIENT})
 endif()
 
 ########################################################################
@@ -277,12 +299,13 @@ set(LIBS_SERVER ${LIBS} ${MYSQL_LIBRARIES})
 # Target
 set(TARGET_SERVER ${SERVER_EXECUTABLE})
 add_executable(${TARGET_SERVER}
+  ${DEPS}
   ${SERVER_SRC}
   $<TARGET_OBJECTS:engine-shared>
   $<TARGET_OBJECTS:game-shared>
-  ${ZLIB}
 )
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
+list(APPEND TARGETS_OWN ${TARGET_SERVER})
 
 if(MYSQL)
   target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_SQL)
@@ -301,29 +324,23 @@ set(TARGET_MASTERSRV mastersrv)
 set(TARGET_VERSIONSRV versionsrv)
 set(TARGET_TWPING twping)
 
-add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${ZLIB})
-add_executable(${TARGET_VERSIONSRV} EXCLUDE_FROM_ALL ${VERSIONSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${ZLIB})
-add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${ZLIB})
+add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+add_executable(${TARGET_VERSIONSRV} EXCLUDE_FROM_ALL ${VERSIONSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 
 target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
 target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
 target_link_libraries(${TARGET_TWPING} ${LIBS})
 
-set(TARGETS
-  ${TARGET_CLIENT}
-  ${TARGET_SERVER}
-  ${TARGET_MASTERSRV}
-  ${TARGET_VERSIONSRV}
-  ${TARGET_TWPING}
-)
+list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV})
 
 file(GLOB TOOLS RELATIVE "${PROJECT_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
 foreach(T ${TOOLS})
   string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
   add_executable(${TOOL} EXCLUDE_FROM_ALL
+    ${DEPS}
     src/tools/${TOOL}.cpp
     $<TARGET_OBJECTS:engine-shared>
-    ${ZLIB}
   )
   if(TOOL MATCHES "^(tileset_|dilate$)")
     target_sources(${TOOL} PRIVATE ${DEP_PNG})
@@ -332,13 +349,13 @@ foreach(T ${TOOLS})
     target_sources(${TOOL} PRIVATE "src/tools/config_common.h")
   endif()
   target_link_libraries(${TOOL} ${LIBS})
-  list(APPEND TARGETS ${TOOL})
+  list(APPEND TARGETS_OWN ${TOOL})
 endforeach()
 
-add_custom_target(everything DEPENDS ${TARGETS})
+add_custom_target(everything DEPENDS ${TARGETS_OWN})
 
 ########################################################################
-# COMPILER-SPECIFICS
+# COMPILER-SPECIFICS PART 2
 ########################################################################
 
 # In the future (CMake 3.8.0+), use source_group(TREE ...)
@@ -355,8 +372,37 @@ macro(source_group_tree dir)
 endmacro()
 source_group_tree(src)
 
-if(MSVC)
-  add_compile_options(/wd4244) # Possible loss of data (float -> int, int -> float, etc.).
-  add_compile_options(/wd4800) # Implicit conversion of int to bool.
-  add_compile_options(/wd4996) # Use of non-_s functions.
-endif()
+set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
+
+foreach(target ${TARGETS})
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
+    target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
+    target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=1>) # Detect some buffer overflows.
+  endif()
+endforeach()
+
+foreach(target ${TARGETS_OWN})
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
+    target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
+    target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
+    target_compile_options(${target} PRIVATE -Wall)
+    #target_compile_options(${target} PRIVATE -Wextra)
+    #target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
+  endif()
+  target_include_directories(${target} PRIVATE src)
+  target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
+  target_include_directories(${target} PRIVATE ${ZLIB_INCLUDEDIR})
+  if(WEBSOCKETS)
+    target_compile_definitions(${target} PRIVATE WEBSOCKETS)
+  endif()
+endforeach()
+
+foreach(target ${TARGET_DEP})
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /W0)
+  endif()
+endforeach()
