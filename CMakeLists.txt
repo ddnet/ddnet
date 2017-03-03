@@ -65,7 +65,7 @@ message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Dependencies:")
 function(show_dependency_status NAME FOUND PATH)
   if(FOUND)
-    string(FIND "${PATH}" "${CMAKE_SOURCE_DIR}" LOCAL_PATH_POS)
+    string(FIND "${PATH}" "${PROJECT_SOURCE_DIR}" LOCAL_PATH_POS)
     if(LOCAL_PATH_POS EQUAL 0)
       message(STATUS " * ${NAME} not found (using bundled version)")
     else()
@@ -141,22 +141,22 @@ endif()
 include_directories(src/)
 
 function(chash output_file)
-  add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/${output_file}
+  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
     COMMAND ${PYTHON_EXECUTABLE} scripts/cmd5.py ${ARGN} > ${output_file}
     DEPENDS scripts/cmd5.py ${ARGN}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction(chash)
 
 function(generate_source output_file script_parameter)
-  add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/${output_file}
+  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
     COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter} > ${output_file}
     DEPENDS
       datasrc/compile.py
       datasrc/content.py
       datasrc/datatypes.py
       datasrc/network.py
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction(generate_source)
 
@@ -317,7 +317,7 @@ set(TARGETS
   ${TARGET_TWPING}
 )
 
-file(GLOB TOOLS RELATIVE "${CMAKE_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
+file(GLOB TOOLS RELATIVE "${PROJECT_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
 foreach(T ${TOOLS})
   string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
   add_executable(${TOOL} EXCLUDE_FROM_ALL
@@ -336,3 +336,17 @@ foreach(T ${TOOLS})
 endforeach()
 
 add_custom_target(everything DEPENDS ${TARGETS})
+
+# In the future (CMake 3.8.0+), use source_group(TREE ...)
+macro(source_group_tree dir)
+  file(GLOB ents RELATIVE ${PROJECT_SOURCE_DIR}/${dir} ${PROJECT_SOURCE_DIR}/${dir}/*)
+  foreach(ent ${ents})
+    if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${dir}/${ent})
+      source_group_tree(${dir}/${ent})
+    else()
+      string(REPLACE "/" "\\" group ${dir})
+      source_group(${group} FILES ${PROJECT_SOURCE_DIR}/${dir}/${ent})
+    endif()
+  endforeach()
+endmacro()
+source_group_tree(src)
