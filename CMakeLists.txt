@@ -137,7 +137,7 @@ set(TARGETS_DEP)
 if(NOT(ZLIB_FOUND))
   set(ZLIB_LIBRARIES)
   file(GLOB ZLIB_SRC "src/engine/external/zlib/*.c" "src/engine/external/zlib/*.h")
-  add_library(zlib OBJECT ${ZLIB_SRC})
+  add_library(zlib EXCLUDE_FROM_ALL OBJECT ${ZLIB_SRC})
 
   list(APPEND TARGETS_DEP zlib)
   set(ZLIB_INCLUDEDIR src/engine/external/zlib/)
@@ -148,7 +148,7 @@ else()
 endif()
 
 file(GLOB DEP_PNG_SRC "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
-add_library(png OBJECT ${DEP_PNG_SRC})
+add_library(png OBJECT EXCLUDE_FROM_ALL ${DEP_PNG_SRC})
 target_include_directories(png PRIVATE ${ZLIB_INCLUDEDIR})
 
 set(DEP_PNG $<TARGET_OBJECTS:png>)
@@ -158,8 +158,8 @@ if(CLIENT)
   # Static dependencies
   file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
   file(GLOB DEP_WAV_SRC "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
-  add_library(json OBJECT ${DEP_JSON_SRC})
-  add_library(wav OBJECT ${DEP_WAV_SRC})
+  add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
+  add_library(wav EXCLUDE_FROM_ALL OBJECT ${DEP_WAV_SRC})
 
   list(APPEND TARGETS_DEP json wav)
   set(DEP_JSON $<TARGET_OBJECTS:json>)
@@ -216,12 +216,12 @@ set(GAME_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/
 
 # Static dependencies
 file(GLOB DEP_MD5_SRC "src/engine/external/md5/*.c" "src/engine/external/md5/*.h")
-add_library(md5 OBJECT ${DEP_MD5_SRC})
+add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 
 if(WEBSOCKETS)
   file(GLOB DEP_WEBSOCKETS_SRC "src/engine/external/libwebsockets/*.c" "src/engine/external/libwebsockets/*.h")
-  add_library(websockets OBJECT ${DEP_WEBSOCKETS_SRC})
+  add_library(websockets EXCLUDE_FROM_ALL OBJECT ${DEP_WEBSOCKETS_SRC})
   set(DEP_WEBSOCKETS $<TARGET_OBJECTS:websockets>)
 else()
   set(DEP_WEBSOCKETS)
@@ -233,8 +233,8 @@ set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS} ${DEP_ZLIB})
 set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
-add_library(engine-shared OBJECT ${ENGINE_SHARED} ${BASE})
-add_library(game-shared OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_SHARED} ${BASE})
+add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 
 
