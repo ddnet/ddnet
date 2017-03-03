@@ -337,6 +337,10 @@ endforeach()
 
 add_custom_target(everything DEPENDS ${TARGETS})
 
+########################################################################
+# COMPILER-SPECIFICS
+########################################################################
+
 # In the future (CMake 3.8.0+), use source_group(TREE ...)
 macro(source_group_tree dir)
   file(GLOB ents RELATIVE ${PROJECT_SOURCE_DIR}/${dir} ${PROJECT_SOURCE_DIR}/${dir}/*)
@@ -350,3 +354,9 @@ macro(source_group_tree dir)
   endforeach()
 endmacro()
 source_group_tree(src)
+
+if(MSVC)
+  add_compile_options(/wd4244) # Possible loss of data (float -> int, int -> float, etc.).
+  add_compile_options(/wd4800) # Implicit conversion of int to bool.
+  add_compile_options(/wd4996) # Use of non-_s functions.
+endif()
