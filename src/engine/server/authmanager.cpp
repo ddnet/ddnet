@@ -12,10 +12,18 @@ CAuthManager::CAuthManager()
 	m_aDefault[0] = -1;
 	m_aDefault[1] = -1;
 	m_aDefault[2] = -1;
+	m_Generated = false;
 }
 
 void CAuthManager::Init()
 {
+	if(m_aKeys.size() == 0 && !g_Config.m_SvRconPassword[0])
+	{
+		secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);
+		m_Generated = true;
+	}
+
+
 	if(g_Config.m_SvRconPassword[0])
 		AddAdminKey(g_Config.m_SvRconPassword);
 	if(g_Config.m_SvRconModPassword[0])
@@ -69,8 +77,7 @@ int CAuthManager::FindKey(const char *pIdent)
 
 bool CAuthManager::CheckKey(int Slot, const char *pPw)
 {
-	if(Slot < 0 || Slot > m_aKeys.size())
-		return false;
+	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
 
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
@@ -86,32 +93,25 @@ bool CAuthManager::CheckKey(int Slot, const char *pPw)
 
 int CAuthManager::DefaultKey(int AuthLevel)
 {
-	if(AuthLevel < 0 || AuthLevel > AUTHED_ADMIN)
-		return -1;
-
+	dbg_assert(AuthLevel < 0 || AuthLevel > AUTHED_ADMIN, "auth level invalid");
 	return m_aDefault[AUTHED_ADMIN - AuthLevel];
 }
 
 int CAuthManager::KeyLevel(int Slot)
 {
-	if(Slot < 0 || Slot > m_aKeys.size())
-		return AUTHED_NO;
-
+	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
 	return m_aKeys[Slot].m_Level;
 }
 
 const char *CAuthManager::KeyIdent(int Slot)
 {
-	if(Slot < 0 || Slot > m_aKeys.size())
-		return 0;
-
+	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
 	return m_aKeys[Slot].m_aIdent;
 }
 
 void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
 {
-	if(Slot < 0 || Slot > m_aKeys.size())
-		return;
+	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
 
 	CKey *pKey = &m_aKeys[Slot];
 	mem_copy(pKey->m_aPw, pHash, MD5_BYTES);
@@ -121,8 +121,7 @@ void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const uns
 
 void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 {
-	if(Slot < 0 || Slot > m_aKeys.size())
-		return;
+	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
 
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
@@ -159,4 +158,9 @@ void CAuthManager::AddModKey(const char *pPw)
 void CAuthManager::AddHelperKey(const char *pPw)
 {
 	m_aDefault[2] = AddKey(HELPER_IDENT, pPw, AUTHED_HELPER);
+}
+
+bool CAuthManager::IsGenerated()
+{
+	return m_Generated;
 }
