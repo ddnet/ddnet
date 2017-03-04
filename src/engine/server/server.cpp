@@ -554,17 +554,6 @@ int CServer::MaxClients() const
 	return m_NetServer.MaxClients();
 }
 
-void CServer::InitRconPasswordIfEmpty()
-{
-	if(g_Config.m_SvRconPassword[0])
-	{
-		return;
-	}
-
-	secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);
-	m_GeneratedRconPassword = 1;
-}
-
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
 	return SendMsgEx(pMsg, Flags, ClientID, false);
@@ -1195,7 +1184,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC); // login name, now used
 			const char *pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-			if(!str_utf8_check(pPw))
+			if(!str_utf8_check(pPw) || !str_utf8_check(pName))
 			{
 				return;
 			}
@@ -2423,11 +2412,14 @@ void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUser
 		int KeySlot = pManager->DefaultKey(AUTHED_ADMIN);
 		if(KeySlot == -1)
 		{
-			pManager->AddAdminKey(pResult->GetString(0));//Shouldn't happen
+			pManager->AddAdminKey(pResult->GetString(0));//Shouldn't happen except for the first launch
 		}
 		else
 		{
-			pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_ADMIN);
+			if(!pResult->GetString(0)[0])
+				pManager->RemoveKey(KeySlot);
+			else
+				pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_ADMIN);
 			pServer->LogoutKey(KeySlot, "key update");
 		}
 	}
@@ -2446,7 +2438,10 @@ void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pU
 			pManager->AddModKey(pResult->GetString(0));
 		else
 		{
-			pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_MOD);
+			if(!pResult->GetString(0)[0])
+				pManager->RemoveKey(KeySlot);
+			else
+				pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_MOD);
 			pServer->LogoutKey(KeySlot, "key update");
 		}
 	}
@@ -2465,7 +2460,10 @@ void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void 
 			pManager->AddHelperKey(pResult->GetString(0));
 		else
 		{
-			pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_HELPER);
+			if(!pResult->GetString(0)[0])
+				pManager->RemoveKey(KeySlot);
+			else
+				pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_HELPER);
 			pServer->LogoutKey(KeySlot, "key update");
 		}
 	}
@@ -2629,7 +2627,6 @@ int main(int argc, const char **argv) // ignore_convention
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze");
 
 	pEngine->InitLogfile();
-	pServer->InitRconPasswordIfEmpty();
 
 	// run the server
 	dbg_msg("server", "starting...");

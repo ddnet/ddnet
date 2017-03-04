@@ -25,6 +25,7 @@ private:
 	array<CKey> m_aKeys;
 
 	int m_aDefault[3];
+	bool m_Generated;
 public:
 	typedef void (*FListCallback)(const char *pIdent, int Level, void *pUser);
 
@@ -45,6 +46,7 @@ public:
 	void AddAdminKey(const char *pPw);
 	void AddModKey(const char *pPw);
 	void AddHelperKey(const char *pPw);
+	bool IsGenerated();
 };
 
 #endif //ENGINE_SERVER_AUTH_MANAGER_H
