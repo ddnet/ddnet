@@ -34,6 +34,9 @@ void CAuthManager::Init()
 
 int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
 {
+	if(FindKey(pIdent) < 0)
+		return -1;
+
 	CKey Key;
 	str_copy(Key.m_aIdent, pIdent, sizeof Key.m_aIdent);
 	mem_copy(Key.m_aPw, pHash, MD5_BYTES);

@@ -316,7 +316,6 @@ CServer::CServer()
 	m_RconAuthLevel = AUTHED_ADMIN;
 
 	m_RconRestrict = -1;
-	m_GeneratedRconPassword = 0;
 
 	m_ServerInfoFirstRequest = 0;
 	m_ServerInfoNumRequests = 0;
@@ -1646,7 +1645,7 @@ int CServer::Run()
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 
-	if(m_GeneratedRconPassword)
+	if(m_AuthManager.IsGenerated())
 	{
 		dbg_msg("server", "+-------------------------+");
 		dbg_msg("server", "| rcon password: '%s' |", g_Config.m_SvRconPassword);
@@ -1973,13 +1972,6 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 
-	int KeySlot = pManager->FindKey(pIdent);
-	if(KeySlot != -1)
-	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
-		return;
-	}
-
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
 	{
@@ -1987,9 +1979,10 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	pManager->AddKey(pIdent, pPw, Level);
-
-	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
+	if(pManager->AddKey(pIdent, pPw, Level) < 0)
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
+	else
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
 }
 
 void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
@@ -2001,12 +1994,6 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 	const char *pSalt = pResult->GetString(3);
-
-	int KeySlot = pManager->FindKey(pIdent);
-	if(KeySlot != -1){
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
-		return;
-	}
 
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
@@ -2021,9 +2008,10 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	str_hex_decode(aHash, sizeof aHash, pPw);
 	str_hex_decode(aSalt, sizeof aSalt, pSalt);
 
-	pManager->AddKeyHash(pIdent, aHash, aSalt, Level);
-
-	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
+	if(pManager->AddKeyHash(pIdent, aHash, aSalt, Level) < 0)
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
+	else
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
 }
 
 void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
