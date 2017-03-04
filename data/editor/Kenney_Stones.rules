@@ -1,0 +1,1218 @@
+[Solid]
+Index 31
+NewRun
+Index 1 ROTATE
+Pos 0 0 INDEX 31
+Pos -1 0 INDEX 31
+Pos 0 1 INDEX 31
+Pos -1 1 INDEX 31
+Pos 0 2 INDEX 31
+Pos -1 2 INDEX 31
+Random 6
+NewRun
+Index 31
+Pos 0 0 INDEX 1 ROTATE
+Pos 0 -1 INDEX 1 ROTATE
+Index 31
+Pos 0 0 INDEX 1 ROTATE
+Pos 1 -1 INDEX 1 ROTATE
+Index 31
+Pos 0 0 INDEX 1 ROTATE
+Pos 0 -2 INDEX 1 ROTATE
+Index 31
+Pos 0 0 INDEX 1 ROTATE
+Pos 1 -2 INDEX 1 ROTATE
+Index 31
+Pos 0 0 INDEX 1 ROTATE
+Pos -1 0 INDEX 1 ROTATE
+Index 31
+Pos 0 0 INDEX 1 ROTATE
+Pos -1 -1 INDEX 1 ROTATE
+Index 31
+Pos 0 0 INDEX 1 ROTATE
+Pos -1 -2 INDEX 1 ROTATE
+NewRun
+Index 17 ROTATE
+Pos 1 0 INDEX 1 ROTATE
+Index 2 ROTATE
+Pos 0 -1 INDEX 1 ROTATE
+Index 18 ROTATE
+Pos 1 -1 INDEX 1 ROTATE
+Index 3 ROTATE
+Pos 0 -2 INDEX 1 ROTATE
+Index 19 ROTATE
+Pos 1 -2 INDEX 1 ROTATE
+NewRun
+Index 33
+Pos 0 0 INDEX 31
+Pos 0 1 INDEX 31
+Pos 1 0 INDEX 31
+Pos 1 1 INDEX 31
+Pos 2 0 INDEX 31
+Pos 2 1 INDEX 31
+Random 6
+NewRun
+Index 31
+Pos 0 0 INDEX 33
+Pos 0 -1 INDEX 33
+Index 31
+Pos 0 0 INDEX 33
+Pos -1 0 INDEX 33
+Index 31
+Pos 0 0 INDEX 33
+Pos -1 -1 INDEX 33
+Index 31
+Pos 0 0 INDEX 33
+Pos -2 0 INDEX 33
+Index 31
+Pos 0 0 INDEX 33
+Pos -2 -1 INDEX 33
+Index 31
+Pos 0 0 INDEX 33
+Pos 1 -1 INDEX 33
+Index 31
+Pos 0 0 INDEX 33
+Pos 2 -1 INDEX 33
+NewRun
+Index 49
+Pos 0 -1 INDEX 33
+Index 34
+Pos -1 0 INDEX 33
+Index 50
+Pos -1 -1 INDEX 33
+Index 35
+Pos -2 0 INDEX 33
+Index 51
+Pos -2 -1 INDEX 33
+NewRun
+Index 33 ROTATE
+Pos 0 0 INDEX 31
+Pos -1 0 INDEX 31
+Pos 0 1 INDEX 31
+Pos -1 1 INDEX 31
+Pos 0 2 INDEX 31
+Pos -1 2 INDEX 31
+Random 6
+NewRun
+Index 31
+Pos 0 0 INDEX 33 ROTATE
+Pos 0 -1 INDEX 33 ROTATE
+Index 31
+Pos 0 0 INDEX 33 ROTATE
+Pos 1 -1 INDEX 33 ROTATE
+Index 31
+Pos 0 0 INDEX 33 ROTATE
+Pos 0 -2 INDEX 33 ROTATE
+Index 31
+Pos 0 0 INDEX 33 ROTATE
+Pos 1 -2 INDEX 33 ROTATE
+Index 31
+Pos 0 0 INDEX 33 ROTATE
+Pos -1 0 INDEX 33 ROTATE
+Index 31
+Pos 0 0 INDEX 33 ROTATE
+Pos -1 -1 INDEX 33 ROTATE
+Index 31
+Pos 0 0 INDEX 33 ROTATE
+Pos -1 -2 INDEX 33 ROTATE
+NewRun
+Index 49 ROTATE
+Pos 1 0 INDEX 33 ROTATE
+Index 34 ROTATE
+Pos 0 -1 INDEX 33 ROTATE
+Index 50 ROTATE
+Pos 1 -1 INDEX 33 ROTATE
+Index 35 ROTATE
+Pos 0 -2 INDEX 33 ROTATE
+Index 51 ROTATE
+Pos 1 -2 INDEX 33 ROTATE
+NewRun
+Index 4
+Pos 0 0 INDEX 31
+Pos 0 1 INDEX 31
+Pos 1 0 INDEX 31
+Pos 1 1 INDEX 31
+Random 4
+NewRun
+Index 31
+Pos 0 0 INDEX 4
+Pos 0 -1 INDEX 4
+Index 31
+Pos 0 0 INDEX 4
+Pos -1 0 INDEX 4
+Index 31
+Pos 0 0 INDEX 4
+Pos -1 -1 INDEX 4
+Index 31
+Pos 0 0 INDEX 4
+Pos 1 -1 INDEX 4
+NewRun
+Index 20
+Pos 0 -1 INDEX 4
+Index 5
+Pos -1 0 INDEX 4
+Index 21
+Pos -1 -1 INDEX 4
+NewRun
+Index 36
+Pos 0 0 INDEX 31
+Pos 0 1 INDEX 31
+Pos 1 0 INDEX 31
+Pos 1 1 INDEX 31
+Random 4
+NewRun
+Index 31
+Pos 0 0 INDEX 36
+Pos 0 -1 INDEX 36
+Index 31
+Pos 0 0 INDEX 36
+Pos -1 0 INDEX 36
+Index 31
+Pos 0 0 INDEX 36
+Pos -1 -1 INDEX 36
+Index 31
+Pos 0 0 INDEX 36
+Pos 1 -1 INDEX 36
+NewRun
+Index 52
+Pos 0 -1 INDEX 36
+Index 37
+Pos -1 0 INDEX 36
+Index 53
+Pos -1 -1 INDEX 36
+NewRun
+Index 6
+Pos 0 0 INDEX 31
+Pos 1 0 INDEX 31
+Pos 2 0 INDEX 31
+Random 3
+NewRun
+Index 31
+Pos 0 0 INDEX 6
+Pos -1 0 INDEX 6
+Index 31
+Pos 0 0 INDEX 6
+Pos -2 0 INDEX 6
+NewRun
+Index 7
+Pos -1 0 INDEX 6
+Index 8
+Pos -2 0 INDEX 6
+NewRun
+Index 6 ROTATE
+Pos 0 0 INDEX 31
+Pos 0 1 INDEX 31
+Pos 0 2 INDEX 31
+Random 3
+NewRun
+Index 31
+Pos 0 0 INDEX 6 ROTATE
+Pos 0 -1 INDEX 6 ROTATE
+Index 31
+Pos 0 0 INDEX 6 ROTATE
+Pos 0 -2 INDEX 6 ROTATE
+NewRun
+Index 7 ROTATE
+Pos 0 -1 INDEX 6 ROTATE
+Index 8 ROTATE
+Pos 0 -2 INDEX 6 ROTATE
+NewRun
+Index 22
+Pos 0 0 INDEX 31
+Pos 1 0 INDEX 31
+Pos 2 0 INDEX 31
+Random 3
+NewRun
+Index 31
+Pos 0 0 INDEX 22
+Pos -1 0 INDEX 22
+Index 31
+Pos 0 0 INDEX 22
+Pos -2 0 INDEX 22
+NewRun
+Index 23
+Pos -1 0 INDEX 22
+Index 24
+Pos -2 0 INDEX 22
+NewRun
+Index 22 ROTATE
+Pos 0 0 INDEX 31
+Pos 0 1 INDEX 31
+Pos 0 2 INDEX 31
+Random 3
+NewRun
+Index 31
+Pos 0 0 INDEX 22 ROTATE
+Pos 0 -1 INDEX 22 ROTATE
+Index 31
+Pos 0 0 INDEX 22 ROTATE
+Pos 0 -2 INDEX 22 ROTATE
+NewRun
+Index 23 ROTATE
+Pos 0 -1 INDEX 22 ROTATE
+Index 24 ROTATE
+Pos 0 -2 INDEX 22 ROTATE
+NewRun
+Index 9
+Pos 0 0 INDEX 31
+Pos 1 0 INDEX 31
+Random 2
+NewRun
+Index 31
+Pos 0 0 INDEX 9
+Pos -1 0 INDEX 9
+NewRun
+Index 10
+Pos -1 0 INDEX 9
+NewRun
+Index 9 ROTATE
+Pos 0 0 INDEX 31
+Pos 0 1 INDEX 31
+Random 2
+NewRun
+Index 31
+Pos 0 0 INDEX 9 ROTATE
+Pos 0 -1 INDEX 9 ROTATE
+NewRun
+Index 10 ROTATE
+Pos 0 -1 INDEX 9 ROTATE
+NewRun
+Index 25
+Pos 0 0 INDEX 31
+Pos 1 0 INDEX 31
+Random 2
+NewRun
+Index 31
+Pos 0 0 INDEX 25
+Pos -1 0 INDEX 25
+NewRun
+Index 26
+Pos -1 0 INDEX 25
+NewRun
+Index 25 ROTATE
+Pos 0 0 INDEX 31
+Pos 0 1 INDEX 31
+Random 2
+NewRun
+Index 31
+Pos 0 0 INDEX 25 ROTATE
+Pos 0 -1 INDEX 25 ROTATE
+NewRun
+Index 26 ROTATE
+Pos 0 -1 INDEX 25 ROTATE
+NewRun
+Index 15
+Pos 0 0 INDEX 31
+Random 1
+NewRun
+Index 31
+Pos 0 0 INDEX 31
+Random 1
+[Broken]
+Index 47
+NewRun
+Index 65 ROTATE
+Pos 0 0 INDEX 47
+Pos -1 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos -1 1 INDEX 47
+Pos 0 2 INDEX 47
+Pos -1 2 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 0 -1 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 1 -1 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 0 -2 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 1 -2 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos -1 0 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos -1 -1 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos -1 -2 INDEX 65 ROTATE
+NewRun
+Index 81 ROTATE
+Pos 1 0 INDEX 65 ROTATE
+Index 66 ROTATE
+Pos 0 -1 INDEX 65 ROTATE
+Index 82 ROTATE
+Pos 1 -1 INDEX 65 ROTATE
+Index 67 ROTATE
+Pos 0 -2 INDEX 65 ROTATE
+Index 83 ROTATE
+Pos 1 -2 INDEX 65 ROTATE
+NewRun
+Index 97
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Pos 2 0 INDEX 47
+Pos 2 1 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 97
+Pos 0 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -1 0 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -1 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -2 0 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -2 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos 1 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos 2 -1 INDEX 97
+NewRun
+Index 113
+Pos 0 -1 INDEX 97
+Index 98
+Pos -1 0 INDEX 97
+Index 114
+Pos -1 -1 INDEX 97
+Index 99
+Pos -2 0 INDEX 97
+Index 115
+Pos -2 -1 INDEX 97
+NewRun
+Index 97 ROTATE
+Pos 0 0 INDEX 47
+Pos -1 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos -1 1 INDEX 47
+Pos 0 2 INDEX 47
+Pos -1 2 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 0 -1 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 1 -1 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 0 -2 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 1 -2 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos -1 0 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos -1 -1 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos -1 -2 INDEX 97 ROTATE
+NewRun
+Index 113 ROTATE
+Pos 1 0 INDEX 97 ROTATE
+Index 98 ROTATE
+Pos 0 -1 INDEX 97 ROTATE
+Index 114 ROTATE
+Pos 1 -1 INDEX 97 ROTATE
+Index 99 ROTATE
+Pos 0 -2 INDEX 97 ROTATE
+Index 115 ROTATE
+Pos 1 -2 INDEX 97 ROTATE
+NewRun
+Index 68
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Random 4
+NewRun
+Index 47
+Pos 0 0 INDEX 68
+Pos 0 -1 INDEX 68
+Index 47
+Pos 0 0 INDEX 68
+Pos -1 0 INDEX 68
+Index 47
+Pos 0 0 INDEX 68
+Pos -1 -1 INDEX 68
+Index 47
+Pos 0 0 INDEX 68
+Pos 1 -1 INDEX 68
+NewRun
+Index 84
+Pos 0 -1 INDEX 68
+Index 69
+Pos -1 0 INDEX 68
+Index 85
+Pos -1 -1 INDEX 68
+NewRun
+Index 38
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Pos 2 0 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 38
+Pos -1 0 INDEX 38
+Index 47
+Pos 0 0 INDEX 38
+Pos -2 0 INDEX 38
+NewRun
+Index 39
+Pos -1 0 INDEX 38
+Index 40
+Pos -2 0 INDEX 38
+NewRun
+Index 38 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 0 2 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 38 ROTATE
+Pos 0 -1 INDEX 38 ROTATE
+Index 47
+Pos 0 0 INDEX 38 ROTATE
+Pos 0 -2 INDEX 38 ROTATE
+NewRun
+Index 39 ROTATE
+Pos 0 -1 INDEX 38 ROTATE
+Index 40 ROTATE
+Pos 0 -2 INDEX 38 ROTATE
+NewRun
+Index 54
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Pos 2 0 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 54
+Pos -1 0 INDEX 54
+Index 47
+Pos 0 0 INDEX 54
+Pos -2 0 INDEX 54
+NewRun
+Index 55
+Pos -1 0 INDEX 54
+Index 56
+Pos -2 0 INDEX 54
+NewRun
+Index 54 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 0 2 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 54 ROTATE
+Pos 0 -1 INDEX 54 ROTATE
+Index 47
+Pos 0 0 INDEX 54 ROTATE
+Pos 0 -2 INDEX 54 ROTATE
+NewRun
+Index 55 ROTATE
+Pos 0 -1 INDEX 54 ROTATE
+Index 56 ROTATE
+Pos 0 -2 INDEX 54 ROTATE
+NewRun
+Index 41
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 41
+Pos -1 0 INDEX 41
+NewRun
+Index 42
+Pos -1 0 INDEX 41
+NewRun
+Index 41 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 41 ROTATE
+Pos 0 -1 INDEX 41 ROTATE
+NewRun
+Index 42 ROTATE
+Pos 0 -1 INDEX 41 ROTATE
+NewRun
+Index 57
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 57
+Pos -1 0 INDEX 57
+NewRun
+Index 58
+Pos -1 0 INDEX 57
+NewRun
+Index 57 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 57 ROTATE
+Pos 0 -1 INDEX 57 ROTATE
+NewRun
+Index 58 ROTATE
+Pos 0 -1 INDEX 57 ROTATE
+NewRun
+Index 47
+Pos 0 0 INDEX 47
+Random 1
+[Solid & Broken]
+Index 47
+NewRun
+Index 1 ROTATE
+Pos 0 0 INDEX 47
+Pos -1 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos -1 1 INDEX 47
+Pos 0 2 INDEX 47
+Pos -1 2 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 1 ROTATE
+Pos 0 -1 INDEX 1 ROTATE
+Index 47
+Pos 0 0 INDEX 1 ROTATE
+Pos 1 -1 INDEX 1 ROTATE
+Index 47
+Pos 0 0 INDEX 1 ROTATE
+Pos 0 -2 INDEX 1 ROTATE
+Index 47
+Pos 0 0 INDEX 1 ROTATE
+Pos 1 -2 INDEX 1 ROTATE
+Index 47
+Pos 0 0 INDEX 1 ROTATE
+Pos -1 0 INDEX 1 ROTATE
+Index 47
+Pos 0 0 INDEX 1 ROTATE
+Pos -1 -1 INDEX 1 ROTATE
+Index 47
+Pos 0 0 INDEX 1 ROTATE
+Pos -1 -2 INDEX 1 ROTATE
+NewRun
+Index 17 ROTATE
+Pos 1 0 INDEX 1 ROTATE
+Index 2 ROTATE
+Pos 0 -1 INDEX 1 ROTATE
+Index 18 ROTATE
+Pos 1 -1 INDEX 1 ROTATE
+Index 3 ROTATE
+Pos 0 -2 INDEX 1 ROTATE
+Index 19 ROTATE
+Pos 1 -2 INDEX 1 ROTATE
+NewRun
+Index 33
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Pos 2 0 INDEX 47
+Pos 2 1 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 33
+Pos 0 -1 INDEX 33
+Index 47
+Pos 0 0 INDEX 33
+Pos -1 0 INDEX 33
+Index 47
+Pos 0 0 INDEX 33
+Pos -1 -1 INDEX 33
+Index 47
+Pos 0 0 INDEX 33
+Pos -2 0 INDEX 33
+Index 47
+Pos 0 0 INDEX 33
+Pos -2 -1 INDEX 33
+Index 47
+Pos 0 0 INDEX 33
+Pos 1 -1 INDEX 33
+Index 47
+Pos 0 0 INDEX 33
+Pos 2 -1 INDEX 33
+NewRun
+Index 49
+Pos 0 -1 INDEX 33
+Index 34
+Pos -1 0 INDEX 33
+Index 50
+Pos -1 -1 INDEX 33
+Index 35
+Pos -2 0 INDEX 33
+Index 51
+Pos -2 -1 INDEX 33
+NewRun
+Index 33 ROTATE
+Pos 0 0 INDEX 47
+Pos -1 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos -1 1 INDEX 47
+Pos 0 2 INDEX 47
+Pos -1 2 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 33 ROTATE
+Pos 0 -1 INDEX 33 ROTATE
+Index 47
+Pos 0 0 INDEX 33 ROTATE
+Pos 1 -1 INDEX 33 ROTATE
+Index 47
+Pos 0 0 INDEX 33 ROTATE
+Pos 0 -2 INDEX 33 ROTATE
+Index 47
+Pos 0 0 INDEX 33 ROTATE
+Pos 1 -2 INDEX 33 ROTATE
+Index 47
+Pos 0 0 INDEX 33 ROTATE
+Pos -1 0 INDEX 33 ROTATE
+Index 47
+Pos 0 0 INDEX 33 ROTATE
+Pos -1 -1 INDEX 33 ROTATE
+Index 47
+Pos 0 0 INDEX 33 ROTATE
+Pos -1 -2 INDEX 33 ROTATE
+NewRun
+Index 49 ROTATE
+Pos 1 0 INDEX 33 ROTATE
+Index 34 ROTATE
+Pos 0 -1 INDEX 33 ROTATE
+Index 50 ROTATE
+Pos 1 -1 INDEX 33 ROTATE
+Index 35 ROTATE
+Pos 0 -2 INDEX 33 ROTATE
+Index 51 ROTATE
+Pos 1 -2 INDEX 33 ROTATE
+NewRun
+Index 65
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Pos 2 0 INDEX 47
+Pos 2 1 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 65
+Pos 0 -1 INDEX 65
+Index 47
+Pos 0 0 INDEX 65
+Pos -1 0 INDEX 65
+Index 47
+Pos 0 0 INDEX 65
+Pos -1 -1 INDEX 65
+Index 47
+Pos 0 0 INDEX 65
+Pos -2 0 INDEX 65
+Index 47
+Pos 0 0 INDEX 65
+Pos -2 -1 INDEX 65
+Index 47
+Pos 0 0 INDEX 65
+Pos 1 -1 INDEX 65
+Index 47
+Pos 0 0 INDEX 65
+Pos 2 -1 INDEX 65
+NewRun
+Index 81
+Pos 0 -1 INDEX 65
+Index 66
+Pos -1 0 INDEX 65
+Index 82
+Pos -1 -1 INDEX 65
+Index 67
+Pos -2 0 INDEX 65
+Index 83
+Pos -2 -1 INDEX 65
+NewRun
+Index 65 ROTATE
+Pos 0 0 INDEX 47
+Pos -1 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos -1 1 INDEX 47
+Pos 0 2 INDEX 47
+Pos -1 2 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 0 -1 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 1 -1 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 0 -2 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos 1 -2 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos -1 0 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos -1 -1 INDEX 65 ROTATE
+Index 47
+Pos 0 0 INDEX 65 ROTATE
+Pos -1 -2 INDEX 65 ROTATE
+NewRun
+Index 81 ROTATE
+Pos 1 0 INDEX 65 ROTATE
+Index 66 ROTATE
+Pos 0 -1 INDEX 65 ROTATE
+Index 82 ROTATE
+Pos 1 -1 INDEX 65 ROTATE
+Index 67 ROTATE
+Pos 0 -2 INDEX 65 ROTATE
+Index 83 ROTATE
+Pos 1 -2 INDEX 65 ROTATE
+NewRun
+Index 97
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Pos 2 0 INDEX 47
+Pos 2 1 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 97
+Pos 0 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -1 0 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -1 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -2 0 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos -2 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos 1 -1 INDEX 97
+Index 47
+Pos 0 0 INDEX 97
+Pos 2 -1 INDEX 97
+NewRun
+Index 113
+Pos 0 -1 INDEX 97
+Index 98
+Pos -1 0 INDEX 97
+Index 114
+Pos -1 -1 INDEX 97
+Index 99
+Pos -2 0 INDEX 97
+Index 115
+Pos -2 -1 INDEX 97
+NewRun
+Index 97 ROTATE
+Pos 0 0 INDEX 47
+Pos -1 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos -1 1 INDEX 47
+Pos 0 2 INDEX 47
+Pos -1 2 INDEX 47
+Random 6
+NewRun
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 0 -1 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 1 -1 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 0 -2 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos 1 -2 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos -1 0 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos -1 -1 INDEX 97 ROTATE
+Index 47
+Pos 0 0 INDEX 97 ROTATE
+Pos -1 -2 INDEX 97 ROTATE
+NewRun
+Index 113 ROTATE
+Pos 1 0 INDEX 97 ROTATE
+Index 98 ROTATE
+Pos 0 -1 INDEX 97 ROTATE
+Index 114 ROTATE
+Pos 1 -1 INDEX 97 ROTATE
+Index 99 ROTATE
+Pos 0 -2 INDEX 97 ROTATE
+Index 115 ROTATE
+Pos 1 -2 INDEX 97 ROTATE
+NewRun
+Index 4
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Random 4
+NewRun
+Index 47
+Pos 0 0 INDEX 4
+Pos 0 -1 INDEX 4
+Index 47
+Pos 0 0 INDEX 4
+Pos -1 0 INDEX 4
+Index 47
+Pos 0 0 INDEX 4
+Pos -1 -1 INDEX 4
+Index 47
+Pos 0 0 INDEX 4
+Pos 1 -1 INDEX 4
+NewRun
+Index 20
+Pos 0 -1 INDEX 4
+Index 5
+Pos -1 0 INDEX 4
+Index 21
+Pos -1 -1 INDEX 4
+NewRun
+Index 36
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Random 4
+NewRun
+Index 47
+Pos 0 0 INDEX 36
+Pos 0 -1 INDEX 36
+Index 47
+Pos 0 0 INDEX 36
+Pos -1 0 INDEX 36
+Index 47
+Pos 0 0 INDEX 36
+Pos -1 -1 INDEX 36
+Index 47
+Pos 0 0 INDEX 36
+Pos 1 -1 INDEX 36
+NewRun
+Index 52
+Pos 0 -1 INDEX 36
+Index 37
+Pos -1 0 INDEX 36
+Index 53
+Pos -1 -1 INDEX 36
+NewRun
+Index 68
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 1 0 INDEX 47
+Pos 1 1 INDEX 47
+Random 4
+NewRun
+Index 47
+Pos 0 0 INDEX 68
+Pos 0 -1 INDEX 68
+Index 47
+Pos 0 0 INDEX 68
+Pos -1 0 INDEX 68
+Index 47
+Pos 0 0 INDEX 68
+Pos -1 -1 INDEX 68
+Index 47
+Pos 0 0 INDEX 68
+Pos 1 -1 INDEX 68
+NewRun
+Index 84
+Pos 0 -1 INDEX 68
+Index 69
+Pos -1 0 INDEX 68
+Index 85
+Pos -1 -1 INDEX 68
+NewRun
+Index 6
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Pos 2 0 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 6
+Pos -1 0 INDEX 6
+Index 47
+Pos 0 0 INDEX 6
+Pos -2 0 INDEX 6
+NewRun
+Index 7
+Pos -1 0 INDEX 6
+Index 8
+Pos -2 0 INDEX 6
+NewRun
+Index 6 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 0 2 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 6 ROTATE
+Pos 0 -1 INDEX 6 ROTATE
+Index 47
+Pos 0 0 INDEX 6 ROTATE
+Pos 0 -2 INDEX 6 ROTATE
+NewRun
+Index 7 ROTATE
+Pos 0 -1 INDEX 6 ROTATE
+Index 8 ROTATE
+Pos 0 -2 INDEX 6 ROTATE
+NewRun
+Index 22
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Pos 2 0 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 22
+Pos -1 0 INDEX 22
+Index 47
+Pos 0 0 INDEX 22
+Pos -2 0 INDEX 22
+NewRun
+Index 23
+Pos -1 0 INDEX 22
+Index 24
+Pos -2 0 INDEX 22
+NewRun
+Index 22 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 0 2 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 22 ROTATE
+Pos 0 -1 INDEX 22 ROTATE
+Index 47
+Pos 0 0 INDEX 22 ROTATE
+Pos 0 -2 INDEX 22 ROTATE
+NewRun
+Index 23 ROTATE
+Pos 0 -1 INDEX 22 ROTATE
+Index 24 ROTATE
+Pos 0 -2 INDEX 22 ROTATE
+NewRun
+Index 38
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Pos 2 0 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 38
+Pos -1 0 INDEX 38
+Index 47
+Pos 0 0 INDEX 38
+Pos -2 0 INDEX 38
+NewRun
+Index 39
+Pos -1 0 INDEX 38
+Index 40
+Pos -2 0 INDEX 38
+NewRun
+Index 38 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 0 2 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 38 ROTATE
+Pos 0 -1 INDEX 38 ROTATE
+Index 47
+Pos 0 0 INDEX 38 ROTATE
+Pos 0 -2 INDEX 38 ROTATE
+NewRun
+Index 39 ROTATE
+Pos 0 -1 INDEX 38 ROTATE
+Index 40 ROTATE
+Pos 0 -2 INDEX 38 ROTATE
+NewRun
+Index 54
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Pos 2 0 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 54
+Pos -1 0 INDEX 54
+Index 47
+Pos 0 0 INDEX 54
+Pos -2 0 INDEX 54
+NewRun
+Index 55
+Pos -1 0 INDEX 54
+Index 56
+Pos -2 0 INDEX 54
+NewRun
+Index 54 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Pos 0 2 INDEX 47
+Random 3
+NewRun
+Index 47
+Pos 0 0 INDEX 54 ROTATE
+Pos 0 -1 INDEX 54 ROTATE
+Index 47
+Pos 0 0 INDEX 54 ROTATE
+Pos 0 -2 INDEX 54 ROTATE
+NewRun
+Index 55 ROTATE
+Pos 0 -1 INDEX 54 ROTATE
+Index 56 ROTATE
+Pos 0 -2 INDEX 54 ROTATE
+NewRun
+Index 9
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 9
+Pos -1 0 INDEX 9
+NewRun
+Index 10
+Pos -1 0 INDEX 9
+NewRun
+Index 9 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 9 ROTATE
+Pos 0 -1 INDEX 9 ROTATE
+NewRun
+Index 10 ROTATE
+Pos 0 -1 INDEX 9 ROTATE
+NewRun
+Index 25
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 25
+Pos -1 0 INDEX 25
+NewRun
+Index 26
+Pos -1 0 INDEX 25
+NewRun
+Index 25 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 25 ROTATE
+Pos 0 -1 INDEX 25 ROTATE
+NewRun
+Index 26 ROTATE
+Pos 0 -1 INDEX 25 ROTATE
+NewRun
+Index 41
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 41
+Pos -1 0 INDEX 41
+NewRun
+Index 42
+Pos -1 0 INDEX 41
+NewRun
+Index 41 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 41 ROTATE
+Pos 0 -1 INDEX 41 ROTATE
+NewRun
+Index 42 ROTATE
+Pos 0 -1 INDEX 41 ROTATE
+NewRun
+Index 57
+Pos 0 0 INDEX 47
+Pos 1 0 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 57
+Pos -1 0 INDEX 57
+NewRun
+Index 58
+Pos -1 0 INDEX 57
+NewRun
+Index 57 ROTATE
+Pos 0 0 INDEX 47
+Pos 0 1 INDEX 47
+Random 2
+NewRun
+Index 47
+Pos 0 0 INDEX 57 ROTATE
+Pos 0 -1 INDEX 57 ROTATE
+NewRun
+Index 58 ROTATE
+Pos 0 -1 INDEX 57 ROTATE
+NewRun
+Index 15
+Pos 0 0 INDEX 47
+Random 1
+NewRun
+Index 31
+Pos 0 0 INDEX 47
+Random 1
+NewRun
+Index 47
+Pos 0 0 INDEX 47
+Random 1
