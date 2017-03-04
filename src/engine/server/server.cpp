@@ -2422,10 +2422,14 @@ void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUser
 
 		int KeySlot = pManager->DefaultKey(AUTHED_ADMIN);
 		if(KeySlot == -1)
+		{
 			pManager->AddAdminKey(pResult->GetString(0));//Shouldn't happen
-
-		pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_ADMIN);
-		pServer->LogoutKey(KeySlot, "key update");
+		}
+		else
+		{
+			pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_ADMIN);
+			pServer->LogoutKey(KeySlot, "key update");
+		}
 	}
 }
 
