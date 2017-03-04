@@ -2181,12 +2181,20 @@ static unsigned char byteval(const char *byte)
 	return hexval(byte[0]) * 16 + hexval(byte[1]);
 }
 
-void str_hex_decode(unsigned char *dst, int dst_size, const char *src)
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
 {
 	int len = str_length(src)/2;
+	if(len != dst_size)
+		return -1;
 	int i = 0;
 	for(; i < len && dst_size; i++, dst_size--)
-		*dst++ = byteval(src + i * 2);
+	{
+		int val = byteval(src + i * 2);
+		if(val == -1)
+			return -2;
+		*dst++ = val;
+	}
+	return 0;
 }
 
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
