@@ -1407,7 +1407,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
 					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
 					g_Config.m_ClMessageSystemHue = HSL.h;
 					g_Config.m_ClMessageSystemSat = HSL.s;
@@ -1458,12 +1459,13 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Highlighted message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-						vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
-						g_Config.m_ClMessageHighlightHue = HSL.h;
-						g_Config.m_ClMessageHighlightSat = HSL.s;
-						g_Config.m_ClMessageHighlightLht = HSL.l;
-					}
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
+					g_Config.m_ClMessageHighlightHue = HSL.h;
+					g_Config.m_ClMessageHighlightSat = HSL.s;
+					g_Config.m_ClMessageHighlightLht = HSL.l;
+				}
 			}
 			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.VSplitLeft(15.0f, 0, &Button);
@@ -1515,7 +1517,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Team message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
 					vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
 					g_Config.m_ClMessageTeamHue = HSL.h;
 					g_Config.m_ClMessageTeamSat = HSL.s;
@@ -1566,10 +1569,11 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, "Friend message", 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
-						g_Config.m_ClMessageFriendHue = 0;
-						g_Config.m_ClMessageFriendSat = 255;
-						g_Config.m_ClMessageFriendLht = 145;
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
+					g_Config.m_ClMessageFriendHue = 0;
+					g_Config.m_ClMessageFriendSat = 255;
+					g_Config.m_ClMessageFriendLht = 145;
 				}
 			}
 
@@ -1630,7 +1634,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Normal message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				{
 					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
 					g_Config.m_ClMessageHue = HSL.h;
 					g_Config.m_ClMessageSat = HSL.s;
@@ -1686,7 +1691,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Inner color"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+			{
 				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
 				g_Config.m_ClLaserInnerHue = HSL.h;
 				g_Config.m_ClLaserInnerSat = HSL.s;
@@ -1721,7 +1727,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Outline color"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button)){
+			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+			{
 				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
 				g_Config.m_ClLaserOutlineHue = HSL.h;
 				g_Config.m_ClLaserOutlineSat = HSL.s;
@@ -2081,7 +2088,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		}
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 			str_format(aBuf, sizeof(aBuf), Localize("Updating..."));
-		else if(State == IUpdater::NEED_RESTART){
+		else if(State == IUpdater::NEED_RESTART)
+		{
 			str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
 			m_NeedRestartUpdate = true;
 		}
