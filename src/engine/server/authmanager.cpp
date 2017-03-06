@@ -23,7 +23,6 @@ void CAuthManager::Init()
 		m_Generated = true;
 	}
 
-
 	if(g_Config.m_SvRconPassword[0])
 		AddAdminKey(g_Config.m_SvRconPassword);
 	if(g_Config.m_SvRconModPassword[0])
@@ -34,7 +33,7 @@ void CAuthManager::Init()
 
 int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
 {
-	if(FindKey(pIdent) < 0)
+	if(FindKey(pIdent) > 0)
 		return -1;
 
 	CKey Key;
