@@ -759,7 +759,7 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 	CServer *pThis = (CServer *)pUser;
 
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_AuthKey = 0;
+	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 
 	pThis->m_aClients[ClientID].Reset();
@@ -782,7 +782,7 @@ int CServer::NewClientNoAuthCallback(int ClientID, bool Reset, void *pUser)
 		pThis->m_aClients[ClientID].m_aClan[0] = 0;
 		pThis->m_aClients[ClientID].m_Country = -1;
 		pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-		pThis->m_aClients[ClientID].m_AuthKey = 0;
+		pThis->m_aClients[ClientID].m_AuthKey = -1;
 		pThis->m_aClients[ClientID].m_AuthTries = 0;
 		pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 		pThis->m_aClients[ClientID].Reset();
@@ -802,7 +802,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_AuthKey = 0;
+	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
@@ -852,7 +852,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_AuthKey = 0;
+	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
