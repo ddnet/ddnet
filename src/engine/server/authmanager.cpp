@@ -24,11 +24,11 @@ void CAuthManager::Init()
 	}
 
 	if(g_Config.m_SvRconPassword[0])
-		AddAdminKey(g_Config.m_SvRconPassword);
+		AddDefaultKey(AUTHED_ADMIN, g_Config.m_SvRconPassword);
 	if(g_Config.m_SvRconModPassword[0])
-		AddModKey(g_Config.m_SvRconModPassword);
+		AddDefaultKey(AUTHED_MOD, g_Config.m_SvRconModPassword);
 	if (g_Config.m_SvRconHelperPassword[0])
-		AddHelperKey(g_Config.m_SvRconHelperPassword);
+		AddDefaultKey(AUTHED_HELPER, g_Config.m_SvRconHelperPassword);
 }
 
 int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
@@ -63,9 +63,10 @@ int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
 	return AddKeyHash(pIdent, aHash, aSalt, AuthLevel);
 }
 
-void CAuthManager::RemoveKey(int Slot)
+int CAuthManager::RemoveKey(int Slot)
 {
 	m_aKeys.remove_index_fast(Slot);
+	return m_aKeys.size();
 }
 
 int CAuthManager::FindKey(const char *pIdent)
@@ -147,19 +148,12 @@ void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)
 		pfnListCallback(m_aKeys[i].m_aIdent, m_aKeys[i].m_Level, pUser);
 }
 
-void CAuthManager::AddAdminKey(const char *pPw)
+void CAuthManager::AddDefaultKey(int Level, const char *pPw)
 {
-	m_aDefault[0] = AddKey(ADMIN_IDENT, pPw, AUTHED_ADMIN);
-}
-
-void CAuthManager::AddModKey(const char *pPw)
-{
-	m_aDefault[1] = AddKey(MOD_IDENT, pPw, AUTHED_MOD);
-}
-
-void CAuthManager::AddHelperKey(const char *pPw)
-{
-	m_aDefault[2] = AddKey(HELPER_IDENT, pPw, AUTHED_HELPER);
+	dbg_assert(AUTHED_HELPER <= Level && Level <= AUTHED_ADMIN, "level out of range");
+	static const char IDENTS[3][sizeof(HELPER_IDENT)] = {ADMIN_IDENT, MOD_IDENT, HELPER_IDENT};
+	int Index = AUTHED_ADMIN - Level;
+	m_aDefault[Index] = AddKey(IDENTS[Index], pPw, Level);
 }
 
 bool CAuthManager::IsGenerated()
