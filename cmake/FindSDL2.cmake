@@ -1,0 +1,23 @@
+find_package(PkgConfig QUIET)
+pkg_check_modules(PC_SDL2 sdl2)
+
+set_extra_dirs(SDL2 sdl)
+
+find_path(SDL2_INCLUDEDIR SDL.h
+  PATH_SUFFIXES SDL2
+  HINTS ${PC_SDL2_INCLUDEDIR} ${PC_SDL2_INCLUDE_DIRS}
+  PATHS ${EXTRA_SDL2_INCLUDEDIR}
+)
+find_library(SDL2_LIBRARY
+  NAMES SDL2
+  HINTS ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
+  PATHS ${EXTRA_SDL2_LIBDIR}
+)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(SDL2 DEFAULT_MSG SDL2_LIBRARY SDL2_INCLUDEDIR)
+
+mark_as_advanced(SDL2_LIBRARY SDL2_INCLUDEDIR)
+
+set(SDL2_LIBRARIES ${SDL2_LIBRARY})
+set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDEDIR})
