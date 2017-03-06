@@ -80,7 +80,7 @@ int CAuthManager::FindKey(const char *pIdent)
 
 bool CAuthManager::CheckKey(int Slot, const char *pPw)
 {
-	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
+	dbg_assert(Slot > 0 || Slot < m_aKeys.size(), "indice out of bounds");
 
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
@@ -96,25 +96,25 @@ bool CAuthManager::CheckKey(int Slot, const char *pPw)
 
 int CAuthManager::DefaultKey(int AuthLevel)
 {
-	dbg_assert(AuthLevel < 0 || AuthLevel > AUTHED_ADMIN, "auth level invalid");
+	dbg_assert(AuthLevel >= 0 || AuthLevel <= AUTHED_ADMIN, "auth level invalid");
 	return m_aDefault[AUTHED_ADMIN - AuthLevel];
 }
 
 int CAuthManager::KeyLevel(int Slot)
 {
-	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
+	dbg_assert(Slot > 0 || Slot < m_aKeys.size(), "indice out of bounds");
 	return m_aKeys[Slot].m_Level;
 }
 
 const char *CAuthManager::KeyIdent(int Slot)
 {
-	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
+	dbg_assert(Slot > 0 || Slot < m_aKeys.size(), "indice out of bounds");
 	return m_aKeys[Slot].m_aIdent;
 }
 
 void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
 {
-	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
+	dbg_assert(Slot > 0 || Slot < m_aKeys.size(), "indice out of bounds");
 
 	CKey *pKey = &m_aKeys[Slot];
 	mem_copy(pKey->m_aPw, pHash, MD5_BYTES);
@@ -124,7 +124,7 @@ void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const uns
 
 void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 {
-	dbg_assert(Slot < 0 || Slot > m_aKeys.size(), "indice out of bounds");
+	dbg_assert(Slot > 0 || Slot < m_aKeys.size(), "indice out of bounds");
 
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
