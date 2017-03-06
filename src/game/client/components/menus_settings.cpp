@@ -1314,6 +1314,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
+
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
 	static int pIDP1 = 0, pIDP2 = 0;
@@ -1544,7 +1545,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			Left.HSplitTop(10.0f, &Label, &Left);
 
-			TextRender()->TextColor(0.45f, 0.9f, 0.45f, 1.0f);
+			vec3 rgbn = CalculateNameColor(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+			TextRender()->TextColor(rgbn.r, rgbn.g, rgbn.b, 1.0f);
 			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1);
 			Label.VSplitLeft(tw, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
