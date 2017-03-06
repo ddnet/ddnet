@@ -43,6 +43,9 @@ class CGameConsole : public CComponent
 		float m_CompletionRenderOffset;
 		bool m_ReverseTAB;
 
+		char m_aUser[32];
+		bool m_UserGot;
+
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
 		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];

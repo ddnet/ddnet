@@ -2146,6 +2146,64 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 	}
 }
 
+static int hexval(char x)
+{
+    switch(x)
+    {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    case 'a':
+    case 'A': return 10;
+    case 'b':
+    case 'B': return 11;
+    case 'c':
+    case 'C': return 12;
+    case 'd':
+    case 'D': return 13;
+    case 'e':
+    case 'E': return 14;
+    case 'f':
+    case 'F': return 15;
+    default: return -1;
+    }
+}
+
+static int byteval(const char *byte, unsigned char *dst)
+{
+	int v1 = -1, v2 = -1;
+	v1 = hexval(byte[0]);
+	v2 = hexval(byte[1]);
+
+	if(v1 < 0 || v2 < 0)
+		return 1;
+
+	*dst = v1 * 16 + v2;
+	return 0;
+}
+
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
+{
+	int len = str_length(src)/2;
+	int i;
+	if(len != dst_size)
+		return 2;
+
+	for(i = 0; i < len && dst_size; i++, dst_size--)
+	{
+		if(byteval(src + i * 2, dst++))
+			return 1;
+	}
+	return 0;
+}
+
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
 	struct tm *time_info;
