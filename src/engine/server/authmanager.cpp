@@ -37,7 +37,7 @@ int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, con
 		return -1;
 
 	CKey Key;
-	str_copy(Key.m_aIdent, pIdent, sizeof Key.m_aIdent);
+	str_copy(Key.m_aIdent, pIdent, sizeof(Key.m_aIdent));
 	mem_copy(Key.m_aPw, pHash, MD5_BYTES);
 	mem_copy(Key.m_aSalt, pSalt, SALT_BYTES);
 	Key.m_Level = AuthLevel;
@@ -51,10 +51,10 @@ int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
 	unsigned char aHash[MD5_BYTES];
 	unsigned char aSalt[SALT_BYTES];
 
-	//Generate random salt
+	// Generate random salt
 	secure_random_fill(aSalt, SALT_BYTES);
 
-	//Hash the password and the salt
+	// Hash the password and the salt
 	md5_init(&ctx);
 	md5_append(&ctx, (unsigned char *)pPw, str_length(pPw));
 	md5_append(&ctx, aSalt, SALT_BYTES);
@@ -85,7 +85,7 @@ bool CAuthManager::CheckKey(int Slot, const char *pPw)
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
 
-	//Hash the password and the salt
+	// Hash the password and the salt
 	md5_init(&ctx);
 	md5_append(&ctx, (unsigned char*)pPw, str_length(pPw));
 	md5_append(&ctx, m_aKeys[Slot].m_aSalt, SALT_BYTES);
@@ -130,10 +130,10 @@ void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 	unsigned char aHash[MD5_BYTES];
 	unsigned char aSalt[SALT_BYTES];
 
-	//Generate random salt
+	// Generate random salt
 	secure_random_fill(aSalt, SALT_BYTES);
 
-	//Hash the password and the salt
+	// Hash the password and the salt
 	md5_init(&ctx);
 	md5_append(&ctx, (unsigned char *)pPw, str_length(pPw));
 	md5_append(&ctx, aSalt, SALT_BYTES);

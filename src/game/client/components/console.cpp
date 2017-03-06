@@ -502,7 +502,7 @@ void CGameConsole::OnRender()
 							pPrompt = "Enter Password> ";
 					}
 					else
-						pPrompt = "ENTER PASSWORD> ";
+						pPrompt = "Enter Password> ";
 				}
 			}
 			else

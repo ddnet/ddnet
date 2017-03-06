@@ -2148,7 +2148,7 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 
 static int hexval(char x)
 {
-    switch (x)
+    switch(x)
     {
     case '0': return 0;
     case '1': return 1;
@@ -2192,11 +2192,11 @@ static int byteval(const char *byte, unsigned char *dst)
 int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
 {
 	int len = str_length(src)/2;
+	int i;
 	if(len != dst_size)
 		return 2;
 
-	int i = 0;
-	for(; i < len && dst_size; i++, dst_size--)
+	for(i = 0; i < len && dst_size; i++, dst_size--)
 	{
 		if(byteval(src + i * 2, dst++))
 			return 1;
