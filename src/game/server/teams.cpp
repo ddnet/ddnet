@@ -20,6 +20,7 @@ void CGameTeams::Reset()
 		m_LastChat[i] = 0;
 		m_TeamLocked[i] = false;
 		m_IsSaving[i] = false;
+		m_Invited[i] = 0;
 	}
 }
 
@@ -646,7 +647,30 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 void CGameTeams::SetTeamLock(int Team, bool Lock)
 {
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
+	{
+		if(!m_TeamLocked[Team] && Lock)
+			ResetInvited(Team);
 		m_TeamLocked[Team] = Lock;
+	}
+}
+
+void CGameTeams::ResetInvited(int Team)
+{
+	m_Invited[Team] = 0;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+			m_Invited[Team] |= 1LL << i;
+}
+
+void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
+{
+	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
+	{
+		if(Invited)
+			m_Invited[Team] |= 1LL << ClientID;
+		else
+			m_Invited[Team] &= ~(1LL << ClientID);
+	}
 }
 
 void CGameTeams::KillSavedTeam(int Team)
