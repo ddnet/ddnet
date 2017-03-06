@@ -1026,6 +1026,7 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 			data - String to decode
 
 		Returns:
+			2 - String doesn't exactly fit the buffer
 			1 - Invalid character in string
 			0 - Success
 

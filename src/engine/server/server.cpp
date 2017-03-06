@@ -2013,12 +2013,12 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 
 	if(str_hex_decode(aHash, sizeof aHash, pPw))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in password hash");
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
 		return;
 	}
 	if(str_hex_decode(aSalt, sizeof aSalt, pSalt))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in salt hash");
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed salt hash");
 		return;
 	}
 
@@ -2083,12 +2083,12 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 
 	if(str_hex_decode(aHash, sizeof aHash, pPw))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in password hash");
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
 		return;
 	}
 	if(str_hex_decode(aSalt, sizeof aSalt, pSalt))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Invalid character in salt hash");
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed salt hash");
 		return;
 	}
 

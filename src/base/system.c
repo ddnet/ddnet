@@ -2192,7 +2192,8 @@ static int byteval(const char *byte, unsigned char *dst)
 int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
 {
 	int len = str_length(src)/2;
-	dbg_assert(len == dst_size, "hex string doesn't exactly fit the buffer");
+	if(len != dst_size)
+		return 2;
 
 	int i = 0;
 	for(; i < len && dst_size; i++, dst_size--)
