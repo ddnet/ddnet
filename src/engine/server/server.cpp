@@ -1969,6 +1969,21 @@ static int GetAuthLevel(const char *pLevel)
 	return Level;
 }
 
+void CServer::AuthRemoveKey(int KeySlot)
+{
+	int NewKeySlot = KeySlot;
+	int OldKeySlot = m_AuthManager.RemoveKey(KeySlot);
+	LogoutKey(KeySlot, "key removal");
+
+	// Update indices.
+	if(OldKeySlot != NewKeySlot)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(m_aClients[i].m_AuthKey == OldKeySlot)
+				m_aClients[i].m_AuthKey = NewKeySlot;
+	}
+}
+
 void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
@@ -2111,8 +2126,7 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	pManager->RemoveKey(KeySlot);
-	pThis->LogoutKey(KeySlot, "key removal");
+	pThis->AuthRemoveKey(KeySlot);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key removed, all users logged out");
 }
 
@@ -2411,72 +2425,47 @@ void CServer::LogoutKey(int Key, const char *pReason)
 			LogoutClient(i, pReason);
 }
 
-void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CServer::ConchainRconPasswordChangeGeneric(int Level, IConsole::IResult *pResult)
 {
-	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() == 1)
 	{
-		CServer *pServer = (CServer *)pUserData;
-		CAuthManager *pManager = &pServer->m_AuthManager;
-
-		int KeySlot = pManager->DefaultKey(AUTHED_ADMIN);
+		int KeySlot = m_AuthManager.DefaultKey(Level);
 		if(KeySlot == -1 && pResult->GetString(0)[0])
 		{
-			pManager->AddAdminKey(pResult->GetString(0));
+			m_AuthManager.AddDefaultKey(Level, pResult->GetString(0));
 		}
 		else if(KeySlot > 0)
 		{
 			if(!pResult->GetString(0)[0])
-				pManager->RemoveKey(KeySlot);
+			{
+				AuthRemoveKey(KeySlot);
+				// Already logs users out.
+			}
 			else
-				pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_ADMIN);
-			pServer->LogoutKey(KeySlot, "key update");
+			{
+				m_AuthManager.UpdateKey(KeySlot, pResult->GetString(0), Level);
+				LogoutKey(KeySlot, "key update");
+			}
 		}
 	}
+}
+
+void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_ADMIN, pResult);
 }
 
 void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() == 1)
-	{
-		CServer *pServer = (CServer *)pUserData;
-		CAuthManager *pManager = &pServer->m_AuthManager;
-
-		int KeySlot = pManager->DefaultKey(AUTHED_MOD);
-		if(KeySlot == -1 && pResult->GetString(0)[0])
-			pManager->AddModKey(pResult->GetString(0));
-		else if(KeySlot > 0)
-		{
-			if(!pResult->GetString(0)[0])
-				pManager->RemoveKey(KeySlot);
-			else
-				pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_MOD);
-			pServer->LogoutKey(KeySlot, "key update");
-		}
-	}
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_MOD, pResult);
 }
 
 void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() == 1)
-	{
-		CServer *pServer = (CServer *)pUserData;
-		CAuthManager *pManager = &pServer->m_AuthManager;
-
-		int KeySlot = pManager->DefaultKey(AUTHED_HELPER);
-		if(KeySlot == -1 && pResult->GetString(0)[0])
-			pManager->AddHelperKey(pResult->GetString(0));
-		else if(KeySlot > 0)
-		{
-			if(!pResult->GetString(0)[0])
-				pManager->RemoveKey(KeySlot);
-			else
-				pManager->UpdateKey(KeySlot, pResult->GetString(0), AUTHED_HELPER);
-			pServer->LogoutKey(KeySlot, "key update");
-		}
-	}
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_HELPER, pResult);
 }
 
 void CServer::RegisterCommands()
