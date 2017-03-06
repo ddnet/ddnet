@@ -18,6 +18,7 @@
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/netban.h>
+#include <engine/shared/memheap.h>
 
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
@@ -103,6 +104,8 @@ public:
 		MAX_RCONCMD_SEND=16,
 	};
 
+	struct CAuthListEntry;
+
 	class CClient
 	{
 	public:
@@ -152,7 +155,7 @@ public:
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
 		int m_Score;
-		int m_Authed;
+		CAuthListEntry *m_pAuthKey;
 		int m_AuthTries;
 		int m_NextMapChunk;
 
@@ -201,6 +204,16 @@ public:
 	unsigned char *m_pCurrentMapData;
 	unsigned int m_CurrentMapSize;
 
+	struct CAuthListEntry {
+		char m_aIdent[64];
+		char m_aPw[33];
+		int m_Level;
+
+		struct CAuthListEntry *m_pNext;
+	};
+	CAuthListEntry *m_pAuthListRoot;
+	CHeap *m_pAuthListHeap;
+
 	int m_GeneratedRconPassword;
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
@@ -235,6 +248,11 @@ public:
 
 	void InitRconPasswordIfEmpty();
 
+	void AuthListAdd(const char *Ident, const char *Pw, int Level);
+	int AuthListRemove(CAuthListEntry *Key);
+	CAuthListEntry *AuthListFind(const char *Ident);
+	CAuthListEntry *AuthListCheck(const char *Pw);
+
 	void SetRconCID(int ClientID);
 	bool IsAuthed(int ClientID);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
@@ -261,6 +279,10 @@ public:
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted = false);
+
+	void LogoutClient(int ClientID, const char *pReason);
+	void LogoutKey(CAuthListEntry *Key, const char *pReason);
+	void LogoutAuthLevel(int AuthLevel, const char *pReason);
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
@@ -295,6 +317,10 @@ public:
 	static void ConMapReload(IConsole::IResult *pResult, void *pUser);
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
 	static void ConDnsblStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConRconPwAdd(IConsole::IResult *pResult, void *pUser);
+	static void ConRconPwChange(IConsole::IResult *pResult, void *pUser);
+	static void ConRconPwRemovei(IConsole::IResult *pResult, void *pUser);
+	static void ConRconPwRemovep(IConsole::IResult *pResult, void *pUser);
 
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
@@ -309,7 +335,6 @@ public:
 	static void ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-	void LogoutByAuthLevel(int AuthLevel);
 
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
