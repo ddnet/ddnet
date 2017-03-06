@@ -2420,11 +2420,11 @@ void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUser
 		CAuthManager *pManager = &pServer->m_AuthManager;
 
 		int KeySlot = pManager->DefaultKey(AUTHED_ADMIN);
-		if(KeySlot == -1)
+		if(KeySlot == -1 && pResult->GetString(0)[0])
 		{
 			pManager->AddAdminKey(pResult->GetString(0));
 		}
-		else
+		else if(KeySlot > 0)
 		{
 			if(!pResult->GetString(0)[0])
 				pManager->RemoveKey(KeySlot);
@@ -2444,9 +2444,9 @@ void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pU
 		CAuthManager *pManager = &pServer->m_AuthManager;
 
 		int KeySlot = pManager->DefaultKey(AUTHED_MOD);
-		if(KeySlot == -1)
+		if(KeySlot == -1 && pResult->GetString(0)[0])
 			pManager->AddModKey(pResult->GetString(0));
-		else
+		else if(KeySlot > 0)
 		{
 			if(!pResult->GetString(0)[0])
 				pManager->RemoveKey(KeySlot);
@@ -2466,9 +2466,9 @@ void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void 
 		CAuthManager *pManager = &pServer->m_AuthManager;
 
 		int KeySlot = pManager->DefaultKey(AUTHED_HELPER);
-		if(KeySlot == -1)
+		if(KeySlot == -1 && pResult->GetString(0)[0])
 			pManager->AddHelperKey(pResult->GetString(0));
-		else
+		else if(KeySlot > 0)
 		{
 			if(!pResult->GetString(0)[0])
 				pManager->RemoveKey(KeySlot);
