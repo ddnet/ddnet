@@ -439,6 +439,7 @@ inline vec3 RgbToHsl(vec3 RGB)
 
 }
 
+vec3 CalculateNameColor(vec3 TextColorHSL);
 
 extern const char *Localize(const char *Str);
 
