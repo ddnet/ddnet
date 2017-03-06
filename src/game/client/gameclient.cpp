@@ -2272,3 +2272,8 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 		IsWeaker[g_Config.m_ClDummy][HookedPlayer] = (DirAccumulated[g_Config.m_ClDummy][HookedPlayer] > 0);
 	}
 }
+
+vec3 CalculateNameColor(vec3 TextColorHSL)
+{
+	return HslToRgb(vec3(TextColorHSL.h, TextColorHSL.s * 0.68f, TextColorHSL.l * 0.81f));
+}
