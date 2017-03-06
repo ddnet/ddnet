@@ -2176,9 +2176,17 @@ static int hexval(char x)
     }
 }
 
-static unsigned char byteval(const char *byte)
+static int byteval(const char *byte, unsigned char *dst)
 {
-	return hexval(byte[0]) * 16 + hexval(byte[1]);
+	int v1 = -1, v2 = -1;
+	v1 = hexval(byte[0]);
+	v2 = hexval(byte[1]);
+
+	if(v1 < 0 || v2 < 0)
+		return 1;
+
+	*dst = v1 * 16 + v2;
+	return 0;
 }
 
 int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
@@ -2189,10 +2197,8 @@ int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
 	int i = 0;
 	for(; i < len && dst_size; i++, dst_size--)
 	{
-		int val = byteval(src + i * 2);
-		if(val == -1)
+		if(byteval(src + i * 2, dst++))
 			return -2;
-		*dst++ = val;
 	}
 	return 0;
 }
