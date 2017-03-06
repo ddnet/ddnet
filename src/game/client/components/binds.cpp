@@ -154,7 +154,7 @@ void CBinds::OnConsoleInit()
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
 
 	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
-	Console()->Register("bind_print", "?s[key]", CFGFLAG_CLIENT, ConBindPrint, this, "Print command executed by this keybinding");
+	Console()->Register("dump_binds", "?s[key]", CFGFLAG_CLIENT, ConDumpBinds, this, "Print command executed by this keybindind or all binds");
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
 
@@ -179,7 +179,7 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	pBinds->Bind(id, pResult->GetString(1));
 }
 
-void CBinds::ConBindPrint(IConsole::IResult *pResult, void *pUserData)
+void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 {
 	CBinds *pBinds = (CBinds *)pUserData;
 	if(pResult->NumArguments() == 1)
@@ -190,7 +190,7 @@ void CBinds::ConBindPrint(IConsole::IResult *pResult, void *pUserData)
 		int id = pBinds->GetKeyID(pKeyName);
 		if (!id)
 		{
-			str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
+			str_format(aBuf, sizeof(aBuf), "key '%s' not found", pKeyName);
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 		}
 		else
