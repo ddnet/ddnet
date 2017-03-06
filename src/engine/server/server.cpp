@@ -1218,7 +1218,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						Msg.AddInt(1);	//cmdlist
 						SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 
-						m_aClients[ClientID].m_Authed = AuthLevel; //Keeping m_Authed around is unwise...
+						m_aClients[ClientID].m_Authed = AuthLevel; // Keeping m_Authed around is unwise...
 						m_aClients[ClientID].m_AuthKey = KeySlot;
 						int SendRconCmds = Unpacker.GetInt();
 						if(Unpacker.Error() == 0 && SendRconCmds)
@@ -1910,8 +1910,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 										pThis->m_aClients[i].m_Authed == CServer::AUTHED_HELPER ? "(Helper)" : "";
 				char aAuthStr[128];
 				aAuthStr[0] = '\0';
-				if(pThis->m_aClients[i].m_AuthKey > 0)
-					str_format(aAuthStr, sizeof aAuthStr, "key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
+				if(pThis->m_aClients[i].m_AuthKey >= 0)
+					str_format(aAuthStr, sizeof(aAuthStr), "key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
 					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", aAuthStr);
@@ -1943,8 +1943,8 @@ void CServer::ConDnsblStatus(IConsole::IResult *pResult, void *pUser)
 										pThis->m_aClients[i].m_Authed == CServer::AUTHED_HELPER ? "(Helper)" : "";
 				char aAuthStr[128];
 				aAuthStr[0] = '\0';
-				if(pThis->m_aClients[i].m_AuthKey > 0)
-					str_format(aAuthStr, sizeof aAuthStr, "key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
+				if(pThis->m_aClients[i].m_AuthKey >= 0)
+					str_format(aAuthStr, sizeof(aAuthStr), "key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
 					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", aAuthStr);
@@ -2026,12 +2026,12 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	unsigned char aHash[MD5_BYTES];
 	unsigned char aSalt[SALT_BYTES];
 
-	if(str_hex_decode(aHash, sizeof aHash, pPw))
+	if(str_hex_decode(aHash, sizeof(aHash), pPw))
 	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
 		return;
 	}
-	if(str_hex_decode(aSalt, sizeof aSalt, pSalt))
+	if(str_hex_decode(aSalt, sizeof(aSalt), pSalt))
 	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed salt hash");
 		return;
@@ -2053,7 +2053,8 @@ void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
 	const char *pPw = pResult->GetString(2);
 
 	int KeySlot = pManager->FindKey(pIdent);
-	if(KeySlot == -1){
+	if(KeySlot == -1)
+	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident couldn't be found");
 		return;
 	}
@@ -2081,7 +2082,8 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 	const char *pSalt = pResult->GetString(3);
 
 	int KeySlot = pManager->FindKey(pIdent);
-	if(KeySlot == -1){
+	if(KeySlot == -1)
+	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident couldn't be found");
 		return;
 	}
@@ -2096,12 +2098,12 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 	unsigned char aHash[MD5_BYTES];
 	unsigned char aSalt[SALT_BYTES];
 
-	if(str_hex_decode(aHash, sizeof aHash, pPw))
+	if(str_hex_decode(aHash, sizeof(aHash), pPw))
 	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
 		return;
 	}
-	if(str_hex_decode(aSalt, sizeof aSalt, pSalt))
+	if(str_hex_decode(aSalt, sizeof(aSalt), pSalt))
 	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed salt hash");
 		return;
@@ -2121,7 +2123,8 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 	const char *pIdent = pResult->GetString(0);
 
 	int KeySlot = pManager->FindKey(pIdent);
-	if(KeySlot == -1){
+	if(KeySlot == -1)
+	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident couldn't be found");
 		return;
 	}
@@ -2132,10 +2135,10 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 
 static void ListKeysCallback(const char *pIdent, int Level, void *pUser)
 {
-	static const char lstring[][10] = {"helper", "moderator", "admin"};
+	static const char LSTRING[][10] = {"helper", "moderator", "admin"};
 
 	char aBuf[256];
-	str_format(aBuf, sizeof aBuf, "%s %s", pIdent, lstring[Level - 1]);
+	str_format(aBuf, sizeof(aBuf), "%s %s", pIdent, LSTRING[Level - 1]);
 	((CServer *)pUser)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf);
 }
 
@@ -2402,14 +2405,16 @@ void CServer::LogoutClient(int ClientID, const char *pReason)
 	m_aClients[ClientID].m_pRconCmdToSend = 0;
 
 	char aBuf[64];
-	if(*pReason){
-		str_format(aBuf, sizeof aBuf, "Logged out by %s.", pReason);
+	if(*pReason)
+	{
+		str_format(aBuf, sizeof(aBuf), "Logged out by %s.", pReason);
 		SendRconLine(ClientID, aBuf);
-		str_format(aBuf, sizeof aBuf, "ClientID=%d with key=%s logged out by %s", ClientID, m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey), pReason);
+		str_format(aBuf, sizeof(aBuf), "ClientID=%d with key=%s logged out by %s", ClientID, m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey), pReason);
 	}
-	else{
+	else
+	{
 		SendRconLine(ClientID, "Logout successful.");
-		str_format(aBuf, sizeof aBuf, "ClientID=%d with key=%s logged out", ClientID, m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey));
+		str_format(aBuf, sizeof(aBuf), "ClientID=%d with key=%s logged out", ClientID, m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey));
 	}
 
 	m_aClients[ClientID].m_Authed = AUTHED_NO;
@@ -2434,7 +2439,7 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, IConsole::IResult *pR
 		{
 			m_AuthManager.AddDefaultKey(Level, pResult->GetString(0));
 		}
-		else if(KeySlot > 0)
+		else if(KeySlot >= 0)
 		{
 			if(!pResult->GetString(0)[0])
 			{
@@ -2495,12 +2500,12 @@ void CServer::RegisterCommands()
 
 	Console()->Register("dnsbl_status", "", CFGFLAG_SERVER, ConDnsblStatus, this, "List blacklisted players");
 
-	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER, ConAuthAdd, this, "add a rcon key.");
-	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER, ConAuthAddHashed, this, "add a prehashed rcon key.");
-	Console()->Register("auth_change", "s[ident] s[level] s[pw]", CFGFLAG_SERVER, ConAuthUpdate, this, "update a rcon key.");
-	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER, ConAuthUpdateHashed, this, "update a rcon key with prehashed data.");
-	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER, ConAuthRemove, this, "remove a rcon key.");
-	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "list all rcon keys.");
+	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER, ConAuthAdd, this, "Add a rcon key");
+	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER, ConAuthAddHashed, this, "Add a prehashed rcon key");
+	Console()->Register("auth_change", "s[ident] s[level] s[pw]", CFGFLAG_SERVER, ConAuthUpdate, this, "Update a rcon key");
+	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data");
+	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER, ConAuthRemove, this, "Remove a rcon key");
+	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
@@ -2647,7 +2652,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 {
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME) {
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	{
 		*pAddr = *m_NetServer.ClientAddr(ClientID);
 	}
 }
