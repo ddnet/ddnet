@@ -2957,6 +2957,12 @@ void CClient::Con_RconAuth(IConsole::IResult *pResult, void *pUserData)
 	pSelf->RconAuth("", pResult->GetString(0));
 }
 
+void CClient::Con_RconLogin(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->RconAuth(pResult->GetString(0), pResult->GetString(1));
+}
+
 void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3286,6 +3292,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");
 	m_pConsole->Register("rcon", "r[rcon-command]", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon");
 	m_pConsole->Register("rcon_auth", "s[password]", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon");
+	m_pConsole->Register("rcon_login", "s[username] s[password]", CFGFLAG_CLIENT, Con_RconLogin, this, "Authenticate to rcon with a username");
 	m_pConsole->Register("play", "r[file]", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Play, this, "Play the file specified");
 	m_pConsole->Register("record", "?s[file]", CFGFLAG_CLIENT, Con_Record, this, "Record to the file");
 	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording");
