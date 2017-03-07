@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	#include "engine/shared/websockets.h"
 #endif
 
@@ -1024,7 +1024,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 		sock.type &= ~NETTYPE_IPV4;
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	/* close down websocket_ipv4 */
 	if(sock.web_ipv4sock >= 0)
 	{
@@ -1140,7 +1140,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		int socket = -1;
@@ -1229,7 +1229,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			dbg_msg("net", "can't send ipv4 traffic to this socket");
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(addr->type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(sock.web_ipv4sock >= 0)
@@ -1304,7 +1304,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
 		bytes = recvfrom(sock.ipv6sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bytes <= 0 && sock.web_ipv4sock >= 0)
 	{
 		fromlen = sizeof(struct sockaddr);
@@ -1899,7 +1899,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 		if(sock.ipv6sock > sockid)
 			sockid = sock.ipv6sock;
 	}
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(sock.web_ipv4sock >= 0)
 	{
 		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
