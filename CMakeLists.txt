@@ -123,6 +123,12 @@ else()
   set(PLATFORM_LIBS)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
+  include(CheckSymbolExists)
+  check_symbol_exists(_FORTIFY_SOURCE "" FORTIFY_SOURCE_DEFINED)
+endif()
+
+
 ########################################################################
 # INITALIZE TARGET LISTS
 ########################################################################
@@ -408,7 +414,9 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
-    target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=1>) # Detect some buffer overflows.
+    if(NOT FORTIFY_SOURCE_DEFINED)
+      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=1>) # Detect some buffer overflows.
+    endif()
   endif()
 endforeach()
 
