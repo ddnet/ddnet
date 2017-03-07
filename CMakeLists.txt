@@ -294,7 +294,12 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
   )
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
+
+  if(TARGET_OS STREQUAL "windows")
+    target_sources(${TARGET_CLIENT} PRIVATE "other/icons/DDNet.rc")
+  endif()
 endif()
+
 
 ########################################################################
 # SERVER
@@ -324,6 +329,11 @@ if(MYSQL)
   target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_SQL)
   target_include_directories(${TARGET_SERVER} PRIVATE ${MYSQL_INCLUDE_DIRS})
 endif()
+
+if(TARGET_OS STREQUAL "windows")
+  target_sources(${TARGET_SERVER} PRIVATE "other/icons/DDNet-Server.rc")
+endif()
+
 
 ########################################################################
 # VARIOUS TARGETS
