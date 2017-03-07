@@ -1,4 +1,4 @@
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 
 #include <string.h>
 #include <stdlib.h>

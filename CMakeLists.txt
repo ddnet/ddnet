@@ -403,7 +403,7 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDEDIR})
   if(WEBSOCKETS)
-    target_compile_definitions(${target} PRIVATE WEBSOCKETS)
+    target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
   endif()
 endforeach()
 
