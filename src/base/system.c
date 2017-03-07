@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	#include "engine/shared/websockets.h"
 #endif
 
@@ -675,35 +675,38 @@ int64 time_get()
 	if(new_tick != -1)
 		new_tick = 0;
 
+	{
 #if defined(CONF_PLATFORM_MACOSX)
-	static int got_timebase = 0;
-	mach_timebase_info_data_t timebase;
-	if(!got_timebase)
-	{
-		mach_timebase_info(&timebase);
-	}
-	uint64_t time = mach_absolute_time();
-	uint64_t q = time / timebase.denom;
-	uint64_t r = time % timebase.denom;
-	last = q * timebase.numer + r * timebase.numer / timebase.denom;
-	return last;
+		static int got_timebase = 0;
+		mach_timebase_info_data_t timebase;
+		uint64_t time;
+		uint64_t q;
+		uint64_t r;
+		if(!got_timebase)
+		{
+			mach_timebase_info(&timebase);
+		}
+		time = mach_absolute_time();
+		q = time / timebase.denom;
+		r = time % timebase.denom;
+		last = q * timebase.numer + r * timebase.numer / timebase.denom;
+		return last;
 #elif defined(CONF_FAMILY_UNIX)
-	struct timespec spec;
-	clock_gettime(CLOCK_MONOTONIC, &spec);
-	last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
-	return last;
+		struct timespec spec;
+		clock_gettime(CLOCK_MONOTONIC, &spec);
+		last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
+		return last;
 #elif defined(CONF_FAMILY_WINDOWS)
-	{
 		int64 t;
 		QueryPerformanceCounter((PLARGE_INTEGER)&t);
 		if(t<last) /* for some reason, QPC can return values in the past */
 			return last;
 		last = t;
 		return t;
-	}
 #else
-	#error not implemented
+		#error not implemented
 #endif
+	}
 }
 
 int64 time_freq()
@@ -1021,7 +1024,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 		sock.type &= ~NETTYPE_IPV4;
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	/* close down websocket_ipv4 */
 	if(sock.web_ipv4sock >= 0)
 	{
@@ -1137,7 +1140,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		int socket = -1;
@@ -1226,7 +1229,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			dbg_msg("net", "can't send ipv4 traffic to this socket");
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(addr->type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(sock.web_ipv4sock >= 0)
@@ -1301,7 +1304,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
 		bytes = recvfrom(sock.ipv6sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bytes <= 0 && sock.web_ipv4sock >= 0)
 	{
 		fromlen = sizeof(struct sockaddr);
@@ -1896,7 +1899,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 		if(sock.ipv6sock > sockid)
 			sockid = sock.ipv6sock;
 	}
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(sock.web_ipv4sock >= 0)
 	{
 		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
@@ -2513,10 +2516,11 @@ void shell_execute(const char *file)
 #if defined(CONF_FAMILY_WINDOWS)
 	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
 #elif defined(CONF_FAMILY_UNIX)
-	char* argv[2];
+	char *argv[2];
+	pid_t pid;
 	argv[0] = (char*) file;
 	argv[1] = NULL;
-	pid_t pid = fork();
+	pid = fork();
 	if(!pid)
 		execv(file, argv);
 #endif

@@ -8,10 +8,20 @@ find_path(OGG_INCLUDEDIR ogg.h
   HINTS ${PC_OGG_INCLUDEDIR} ${PC_OGG_INCLUDE_DIRS}
   PATHS ${EXTRA_OGG_INCLUDEDIR}
 )
+find_library(OGG_LIBRARY
+  NAMES ogg
+  HINTS ${PC_OGG_LIBDIR} ${PC_OGG_LIBRARY_DIRS}
+  PATHS ${EXTRA_OGG_LIBDIR}
+)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Ogg DEFAULT_MSG OGG_INCLUDEDIR)
 
-mark_as_advanced(OGG_INCLUDEDIR)
+mark_as_advanced(OGG_INCLUDEDIR OGG_LIBRARY)
 
 set(OGG_INCLUDE_DIRS ${OGG_INCLUDEDIR})
+if(OGG_LIBRARY)
+  set(OGG_LIBRARIES ${OGG_LIBRARY})
+else()
+  set(OGG_LIBRARIES)
+endif()

@@ -35,9 +35,9 @@ endif()
 
 function(set_extra_dirs VARIABLE NAME)
   if(TARGET_BITS AND TARGET_OS)
-    set("EXTRA_${VARIABLE}_LIBDIR" "other/${NAME}/${TARGET_OS}/lib${TARGET_BITS}/" PARENT_SCOPE)
+    set("EXTRA_${VARIABLE}_LIBDIR" "other/${NAME}/${TARGET_OS}/lib${TARGET_BITS}" PARENT_SCOPE)
   endif()
-  set("EXTRA_${VARIABLE}_INCLUDEDIR" "other/${NAME}/include/" PARENT_SCOPE)
+  set("EXTRA_${VARIABLE}_INCLUDEDIR" "other/${NAME}/include" PARENT_SCOPE)
 endfunction()
 
 # Check for PkgConfig once so all the other `find_package` calls can do it
@@ -167,6 +167,16 @@ if(CLIENT)
 endif()
 
 ########################################################################
+# COPY DATA AND DLLS
+########################################################################
+
+file(COPY data DESTINATION .)
+file(COPY ${CURL_COPY_FILES} DESTINATION .)
+file(COPY ${FREETYPE_COPY_FILES} DESTINATION .)
+file(COPY ${OPUSFILE_COPY_FILES} DESTINATION .)
+file(COPY ${SDL2_COPY_FILES} DESTINATION .)
+
+########################################################################
 # CODE GENERATION
 ########################################################################
 
@@ -257,7 +267,9 @@ if(CLIENT)
     ${LIBS}
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
+    ${OGG_LIBRARIES}
     ${OPUSFILE_LIBRARIES}
+    ${OPUS_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${PLATFORM_CLIENT_LIBS}
   )
@@ -282,7 +294,12 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
   )
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
+
+  if(TARGET_OS STREQUAL "windows")
+    target_sources(${TARGET_CLIENT} PRIVATE "other/icons/DDNet.rc")
+  endif()
 endif()
+
 
 ########################################################################
 # SERVER
@@ -312,6 +329,11 @@ if(MYSQL)
   target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_SQL)
   target_include_directories(${TARGET_SERVER} PRIVATE ${MYSQL_INCLUDE_DIRS})
 endif()
+
+if(TARGET_OS STREQUAL "windows")
+  target_sources(${TARGET_SERVER} PRIVATE "other/icons/DDNet-Server.rc")
+endif()
+
 
 ########################################################################
 # VARIOUS TARGETS
@@ -381,6 +403,7 @@ set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
 foreach(target ${TARGETS})
   if(MSVC)
+    target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
@@ -395,6 +418,7 @@ foreach(target ${TARGETS_OWN})
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(${target} PRIVATE -Wall)
+    target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>)
     #target_compile_options(${target} PRIVATE -Wextra)
     #target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
   endif()
@@ -402,7 +426,7 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDEDIR})
   if(WEBSOCKETS)
-    target_compile_definitions(${target} PRIVATE WEBSOCKETS)
+    target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
   endif()
 endforeach()
 
