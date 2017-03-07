@@ -35,9 +35,9 @@ endif()
 
 function(set_extra_dirs VARIABLE NAME)
   if(TARGET_BITS AND TARGET_OS)
-    set("EXTRA_${VARIABLE}_LIBDIR" "other/${NAME}/${TARGET_OS}/lib${TARGET_BITS}/" PARENT_SCOPE)
+    set("EXTRA_${VARIABLE}_LIBDIR" "other/${NAME}/${TARGET_OS}/lib${TARGET_BITS}" PARENT_SCOPE)
   endif()
-  set("EXTRA_${VARIABLE}_INCLUDEDIR" "other/${NAME}/include/" PARENT_SCOPE)
+  set("EXTRA_${VARIABLE}_INCLUDEDIR" "other/${NAME}/include" PARENT_SCOPE)
 endfunction()
 
 # Check for PkgConfig once so all the other `find_package` calls can do it
@@ -165,6 +165,16 @@ if(CLIENT)
   set(DEP_JSON $<TARGET_OBJECTS:json>)
   set(DEP_WAV $<TARGET_OBJECTS:wav>)
 endif()
+
+########################################################################
+# COPY DATA AND DLLS
+########################################################################
+
+file(COPY data DESTINATION .)
+file(COPY ${CURL_COPY_FILES} DESTINATION .)
+file(COPY ${FREETYPE_COPY_FILES} DESTINATION .)
+file(COPY ${OPUSFILE_COPY_FILES} DESTINATION .)
+file(COPY ${SDL2_COPY_FILES} DESTINATION .)
 
 ########################################################################
 # CODE GENERATION
@@ -383,6 +393,7 @@ set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
 foreach(target ${TARGETS})
   if(MSVC)
+    target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
