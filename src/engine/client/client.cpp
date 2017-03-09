@@ -2090,7 +2090,8 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 
 void CClient::ResetMapDownload()
 {
-	if(m_pMapdownloadTask){
+	if(m_pMapdownloadTask)
+	{
 		delete m_pMapdownloadTask;
 		m_pMapdownloadTask = NULL;
 	}
@@ -2120,7 +2121,8 @@ void CClient::FinishMapDownload()
 		m_MapdownloadTotalsize = prev;
 		SendMapRequest();
 	}
-	else{
+	else
+	{
 		if(m_MapdownloadFile)
 			io_close(m_MapdownloadFile);
 		ResetMapDownload();
@@ -3073,11 +3075,14 @@ void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	if(pSelf->m_DemoPlayer.IsPlaying()){
-		if(pSelf->m_DemoPlayer.BaseInfo()->m_Paused){
+	if(pSelf->m_DemoPlayer.IsPlaying())
+	{
+		if(pSelf->m_DemoPlayer.BaseInfo()->m_Paused)
+		{
 			pSelf->m_DemoPlayer.Unpause();
 		}
-		else{
+		else
+		{
 			pSelf->m_DemoPlayer.Pause();
 		}
 	}
