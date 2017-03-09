@@ -16,7 +16,7 @@ def hash_password(password):
 
 def auth_add_p_line(username, level, pwhash, salt):
 	if level not in ('admin', 'mod', 'moderator', 'helper'):
-		print("Warning: level ({}) not one of admin, mod and helper.".format(level), file=sys.stderr)
+		print("Warning: level ({}) not one of admin, mod or helper.".format(level), file=sys.stderr)
 	if repr(level) != "'{}'".format(level):
 		print("Warning: level ({}) contains weird symbols, config line is possibly malformed.".format(level), file=sys.stderr)
 	if repr(username) != "'{}'".format(username):
