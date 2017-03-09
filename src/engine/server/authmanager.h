@@ -9,7 +9,8 @@
 class CAuthManager
 {
 private:
-	enum { //:(
+	enum
+	{
 		AUTHED_NO = 0,
 		AUTHED_HELPER,
 		AUTHED_MOD,
