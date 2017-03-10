@@ -1319,7 +1319,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
 	static int pIDP1 = 0, pIDP2 = 0;
 	static int Page = 1;
-	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser, Page1Tab, Page2Tab, Enable;
+	CUIRect Left, Right, HUD, Messages, Button, Label, Weapon, Laser, Page1Tab, Page2Tab, Enable, Heart;
 
 	MainView.HSplitTop(150.0f, &HUD, &MainView);
 
@@ -1610,21 +1610,18 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			vec3 rgbf = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
 			TextRender()->TextColor(rgbf.r, rgbf.g, rgbf.b, 1.0f);
-			str_format(aBuf, sizeof aBuf, "♥ %s", Localize("Friend"));
-			float tw = TextRender()->TextWidth(0, 12.0f, aBuf, -1);
+			float hw = TextRender()->TextWidth(0, 12.0f, "♥ ", -1);
+			Label.VSplitLeft(hw, &Heart, &Label);
+			UI()->DoLabelScaled(&Heart, "♥ ", 12.0f, -1);
+
+			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
+			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Friend"), -1);
 			Label.VSplitLeft(tw, &Label, &Button);
-			UI()->DoLabelScaled(&Label, aBuf, 12.0f, -1);
+			UI()->DoLabelScaled(&Label, Localize("Friend"), 12.0f, -1);
 
 			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
-			char name[16];
-			str_copy(name, g_Config.m_PlayerName, sizeof(name));
-			str_format(aBuf, sizeof(aBuf), ": %s", Localize ("Look out!"));
-			while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Button.w)
-			{
-				name[str_length(name) - 1] = 0;
-				str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize("Look out!"));
-			}
+			str_format(aBuf, sizeof(aBuf), ": %s", Localize("Hi o/"));
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
