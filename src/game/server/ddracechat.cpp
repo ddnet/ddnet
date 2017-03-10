@@ -774,9 +774,7 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
-
 	const char *pName = pResult->GetString(0);
-
 
 	int Team = pController->m_Teams.m_Core.Team(pResult->m_ClientID);
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
@@ -841,19 +839,19 @@ void CGameContext::ConUnInviteTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(Target > 0)
 		{
-				if(!pController->m_Teams.IsInvited(Team, Target))
-				{
-					pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player already not invited");
-					return;
-				}
+			if(!pController->m_Teams.IsInvited(Team, Target))
+			{
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player already not invited");
+				return;
+			}
 
-				pController->m_Teams.SetClientInvited(Team, Target, false);
+			pController->m_Teams.SetClientInvited(Team, Target, false);
 
-				char aBuf[512];
-				str_format(aBuf, sizeof aBuf, "Your invite to team %d is no longer valid.", Team);
-				pSelf->SendChatTarget(Target, aBuf);
+			char aBuf[512];
+			str_format(aBuf, sizeof aBuf, "Your invite to team %d is no longer valid.", Team);
+			pSelf->SendChatTarget(Target, aBuf);
 
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player has been notified");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player has been notified");
 		}
 		else
 		{

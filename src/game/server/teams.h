@@ -12,7 +12,7 @@ class CGameTeams
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
 	bool m_IsSaving[MAX_CLIENTS];
-	int64_t m_Invited[MAX_CLIENTS];
+	uint64_t m_Invited[MAX_CLIENTS];
 
 	class CGameContext * m_pGameContext;
 
