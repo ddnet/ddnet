@@ -659,7 +659,7 @@ void CGameTeams::ResetInvited(int Team)
 	m_Invited[Team] = 0;
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-			m_Invited[Team] |= 1LL << i;
+			m_Invited[Team] |= 1ULL << i;
 }
 
 void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
@@ -667,9 +667,9 @@ void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
 	{
 		if(Invited)
-			m_Invited[Team] |= 1LL << ClientID;
+			m_Invited[Team] |= 1ULL << ClientID;
 		else
-			m_Invited[Team] &= ~(1LL << ClientID);
+			m_Invited[Team] &= ~(1ULL << ClientID);
 	}
 }
 
