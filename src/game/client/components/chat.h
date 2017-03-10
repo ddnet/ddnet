@@ -24,6 +24,7 @@ class CChat : public CComponent
 		int m_NameColor;
 		char m_aName[64];
 		char m_aText[512];
+		bool m_Friend;
 		bool m_Highlighted;
 	};
 
