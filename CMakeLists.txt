@@ -206,6 +206,7 @@ function(generate_source output_file script_parameter)
   )
 endfunction(generate_source)
 
+file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/src/game/generated/")
 chash("src/game/generated/nethash.cpp"
   "src/engine/shared/protocol.h"
   "src/game/generated/protocol.h"
