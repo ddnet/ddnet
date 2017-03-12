@@ -545,6 +545,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			m_aLines[m_CurrentLine].m_Friend = m_pClient->m_aClients[ClientID].m_Friend;
 		}
 
+		m_aLines[m_CurrentLine].m_Friend = ClientID >= 0 ? m_pClient->m_aClients[ClientID].m_Friend : false;
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
@@ -744,11 +745,19 @@ void CChat::OnRender()
 		TextRender()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 
-		if(g_Config.m_ClMessageFriend && m_aLines[r].m_Friend)
+		if(g_Config.m_ClMessageFriend)
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-			TextRender()->TextEx(&Cursor, "♥ ", -1);
+			if(m_aLines[r].m_Friend)
+			{
+				vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
+				TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
+				TextRender()->TextEx(&Cursor, "♥ ", -1);
+			}
+			else // Ugly hack to align messages
+			{
+				float tw = TextRender()->TextWidth(0, FontSize, "♥ ", -1);
+				Cursor.m_X += tw;
+			}
 		}
 
 		// render name
