@@ -16,6 +16,7 @@ public:
 		int Span,
 		bool Freeeze,
 		bool Explosive,
+		bool Teleport,
 		float Force,
 		int SoundImpact,
 		int Weapon,
@@ -25,6 +26,8 @@ public:
 
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
+	bool GetNearestAirPos(vec2 Pos, vec2* OutPos);
+	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2* OutPos);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -47,6 +50,7 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
+	bool m_Teleport;
 	int m_TuneZone;
 
 public:
