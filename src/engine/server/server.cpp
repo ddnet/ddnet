@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#define _WIN32_WINNT 0x0501
+
 #include <base/math.h>
 #include <base/system.h>
 
@@ -37,7 +40,6 @@
 #include "server.h"
 
 #if defined(CONF_FAMILY_WINDOWS)
-	#define _WIN32_WINNT 0x0501
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
