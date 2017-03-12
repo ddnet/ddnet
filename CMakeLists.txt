@@ -235,10 +235,12 @@ set(GAME_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/
 file(GLOB DEP_MD5_SRC "src/engine/external/md5/*.c" "src/engine/external/md5/*.h")
 add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+list(APPEND TARGETS_DEP md5)
 
 if(WEBSOCKETS)
   file(GLOB DEP_WEBSOCKETS_SRC "src/engine/external/libwebsockets/*.c" "src/engine/external/libwebsockets/*.h")
   add_library(websockets EXCLUDE_FROM_ALL OBJECT ${DEP_WEBSOCKETS_SRC})
+  list(APPEND TARGETS_DEP websockets)
   set(DEP_WEBSOCKETS $<TARGET_OBJECTS:websockets>)
 else()
   set(DEP_WEBSOCKETS)
@@ -288,7 +290,6 @@ if(CLIENT)
     ${DEPS_CLIENT}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
-    ${DEP_ZLIB}
   )
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
@@ -410,6 +411,9 @@ set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
 foreach(target ${TARGETS})
   if(MSVC)
+    set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
+    target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd>) # Use static CRT
+    target_compile_options(${target} PRIVATE /MP) # Use multiple cores
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
@@ -424,6 +428,7 @@ endforeach()
 foreach(target ${TARGETS_OWN})
   if(MSVC)
     target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
+    target_compile_options(${target} PRIVATE /wd4267) # Possible loss of data (size_t - int on win64).
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(${target} PRIVATE -Wall)
@@ -439,7 +444,7 @@ foreach(target ${TARGETS_OWN})
   endif()
 endforeach()
 
-foreach(target ${TARGET_DEP})
+foreach(target ${TARGETS_DEP})
   if(MSVC)
     target_compile_options(${target} PRIVATE /W0)
   endif()
