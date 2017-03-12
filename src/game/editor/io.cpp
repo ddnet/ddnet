@@ -269,10 +269,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 			char *pSettings = (char *)mem_alloc(Size, 1);
 			char *pNext = pSettings;
-			int Length = 0;
 			for(int i = 0; i < m_lSettings.size(); i++)
 			{
-				Length = str_length(m_lSettings[i].m_aCommand) + 1;
+				int Length = str_length(m_lSettings[i].m_aCommand) + 1;
 				mem_copy(pNext, m_lSettings[i].m_aCommand, Length);
 				pNext += Length;
 			}
@@ -306,8 +305,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
 			{
 				// Convert to RGBA
-				unsigned char *pDataRGBA = (unsigned char*) mem_alloc(Item.m_Width*Item.m_Height*4, 1);
-				unsigned char *pDataRGB = (unsigned char*)pImg->m_pData;
+				unsigned char *pDataRGBA = (unsigned char *)mem_alloc(Item.m_Width*Item.m_Height*4, 1);
+				unsigned char *pDataRGB = (unsigned char *)pImg->m_pData;
 				for(int i = 0; i < Item.m_Width*Item.m_Height; i++)
 				{
 
@@ -353,10 +352,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 	// save layers
 	int LayerCount = 0, GroupCount = 0;
-	CLayerGroup *pGroup = 0x0;
 	for(int g = 0; g < m_lGroups.size(); g++)
 	{
-		pGroup = m_lGroups[g];
+		CLayerGroup *pGroup = m_lGroups[g];
 		if(!pGroup->m_SaveToMap)
 			continue;
 
@@ -883,16 +881,26 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Tele);
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile))
 							{
-								const int TilesRep[9] = { TILE_TELEIN, TILE_TELEINEVIL, TILE_TELEOUT, TILE_TELECHECK, TILE_TELECHECKIN, TILE_TELECHECKINEVIL, TILE_TELECHECKOUT, TILE_TELEINWEAPON, TILE_TELEINHOOK };
-								mem_copy(((CLayerTele*)pTiles)->m_pTeleTile, pTeleData, pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile));
+								static const int s_aTilesRep[] = {
+									TILE_TELEIN,
+									TILE_TELEINEVIL,
+									TILE_TELEOUT,
+									TILE_TELECHECK,
+									TILE_TELECHECKIN,
+									TILE_TELECHECKINEVIL,
+									TILE_TELECHECKOUT,
+									TILE_TELEINWEAPON,
+									TILE_TELEINHOOK
+								};
+								mem_copy(((CLayerTele *)pTiles)->m_pTeleTile, pTeleData, pTiles->m_Width*pTiles->m_Height*sizeof(CTeleTile));
 
 								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
 									pTiles->m_pTiles[i].m_Index = 0;
-									for (int e=0; e<9; e++)
+									for (unsigned e = 0; e < sizeof(s_aTilesRep) / sizeof(s_aTilesRep[0]); e++)
 									{
-										if (((CLayerTele*)pTiles)->m_pTeleTile[i].m_Type == TilesRep[e])
-											pTiles->m_pTiles[i].m_Index = TilesRep[e];
+										if (((CLayerTele *)pTiles)->m_pTeleTile[i].m_Type == s_aTilesRep[e])
+											pTiles->m_pTiles[i].m_Index = s_aTilesRep[e];
 									}
 								}
 							}
@@ -933,9 +941,21 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Switch);
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile))
 							{
-								const int TilesComp[11] = { TILE_SWITCHTIMEDOPEN, TILE_SWITCHTIMEDCLOSE, TILE_SWITCHOPEN, TILE_FREEZE, TILE_DFREEZE, TILE_DUNFREEZE, TILE_HIT_START, TILE_HIT_END, TILE_JUMP, TILE_PENALTY, TILE_BONUS };
-								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch*)pTiles)->m_pSwitchTile;
-								mem_copy(((CLayerSwitch*)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile));
+								const int s_aTilesComp[] = {
+									TILE_SWITCHTIMEDOPEN,
+									TILE_SWITCHTIMEDCLOSE,
+									TILE_SWITCHOPEN,
+									TILE_FREEZE,
+									TILE_DFREEZE,
+									TILE_DUNFREEZE,
+									TILE_HIT_START,
+									TILE_HIT_END,
+									TILE_JUMP,
+									TILE_PENALTY,
+									TILE_BONUS
+								};
+								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;
+								mem_copy(((CLayerSwitch *)pTiles)->m_pSwitchTile, pSwitchData, pTiles->m_Width*pTiles->m_Height*sizeof(CSwitchTile));
 
 								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
@@ -948,11 +968,11 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 										continue;
 									}
 
-									for (int e=0; e<11; e++)
+									for (unsigned e = 0; e < sizeof(s_aTilesComp) / sizeof(s_aTilesComp[0]); e++)
 									{
-										if(pLayerSwitchTiles[i].m_Type == TilesComp[e])
+										if(pLayerSwitchTiles[i].m_Type == s_aTilesComp[e])
 										{
-											pTiles->m_pTiles[i].m_Index = TilesComp[e];
+											pTiles->m_pTiles[i].m_Index = s_aTilesComp[e];
 											pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 										}
 									}
@@ -966,8 +986,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							unsigned int Size = DataFile.GetUncompressedDataSize(pTilemapItem->m_Tune);
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTuneTile))
 							{
-								CTuneTile *pLayerTuneTiles = ((CLayerTune*)pTiles)->m_pTuneTile;
-								mem_copy(((CLayerTune*)pTiles)->m_pTuneTile, pTuneData, pTiles->m_Width*pTiles->m_Height*sizeof(CTuneTile));
+								CTuneTile *pLayerTuneTiles = ((CLayerTune *)pTiles)->m_pTuneTile;
+								mem_copy(((CLayerTune *)pTiles)->m_pTuneTile, pTuneData, pTiles->m_Width*pTiles->m_Height*sizeof(CTuneTile));
 
 								for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 								{
