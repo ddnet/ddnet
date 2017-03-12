@@ -299,7 +299,7 @@ class CTextRender : public IEngineTextRender
 		int SlotSize = SlotW*SlotH;
 		int x = 1;
 		int y = 1;
-		unsigned int px, py;
+		int px, py;
 
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, pSizeData->m_FontSize);
 
