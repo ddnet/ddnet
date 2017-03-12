@@ -235,10 +235,12 @@ set(GAME_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/
 file(GLOB DEP_MD5_SRC "src/engine/external/md5/*.c" "src/engine/external/md5/*.h")
 add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+list(APPEND TARGETS_DEP md5)
 
 if(WEBSOCKETS)
   file(GLOB DEP_WEBSOCKETS_SRC "src/engine/external/libwebsockets/*.c" "src/engine/external/libwebsockets/*.h")
   add_library(websockets EXCLUDE_FROM_ALL OBJECT ${DEP_WEBSOCKETS_SRC})
+  list(APPEND TARGETS_DEP websockets)
   set(DEP_WEBSOCKETS $<TARGET_OBJECTS:websockets>)
 else()
   set(DEP_WEBSOCKETS)
@@ -288,7 +290,6 @@ if(CLIENT)
     ${DEPS_CLIENT}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
-    ${DEP_ZLIB}
   )
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
