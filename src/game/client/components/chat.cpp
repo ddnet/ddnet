@@ -539,18 +539,12 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				Highlighted = true;
 			}
 			else
-			{
-				if(g_Config.m_ClMessageFriend && m_pClient->m_aClients[ClientID].m_Friend)
-				{
-					str_format(m_aLines[m_CurrentLine].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName), "♥ %s", m_pClient->m_aClients[ClientID].m_aName);
-					m_aLines[m_CurrentLine].m_NameColor = 2;
-				}
-				else
-					str_copy(m_aLines[m_CurrentLine].m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
-			}
+				str_copy(m_aLines[m_CurrentLine].m_aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(m_aLines[m_CurrentLine].m_aName));
 
 			str_format(m_aLines[m_CurrentLine].m_aText, sizeof(m_aLines[m_CurrentLine].m_aText), ": %s", pLine);
 		}
+
+		m_aLines[m_CurrentLine].m_Friend = m_pClient->m_aClients[ClientID].m_Friend;
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
@@ -750,6 +744,13 @@ void CChat::OnRender()
 		TextRender()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 
+		if(g_Config.m_ClMessageFriend && m_aLines[r].m_Friend)
+		{
+			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
+			TextRender()->TextEx(&Cursor, "♥ ", -1);
+		}
+
 		// render name
 		if (m_aLines[r].m_ClientID == -1) // system
 		{
@@ -772,11 +773,6 @@ void CChat::OnRender()
 			TextRender()->TextColor(0.7f, 0.7f, 1.0f, Blend); // blue
 		else if(m_aLines[r].m_NameColor == TEAM_SPECTATORS)
 			TextRender()->TextColor(0.75f, 0.5f, 0.75f, Blend); // spectator
-		else if(m_aLines[r].m_NameColor == 2)
-		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-		}
 		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
 		{
 			vec3 rgb = HslToRgb(vec3(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
