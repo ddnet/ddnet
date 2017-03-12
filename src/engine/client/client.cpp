@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
 
+#define _WIN32_WINNT 0x0501
+
 #include <time.h>
 #include <stdlib.h> // qsort
 #include <stdarg.h>
@@ -55,9 +57,6 @@
 #include <engine/client/serverbrowser.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
-	#ifndef _WIN32_WINNT
-		#define _WIN32_WINNT 0x0501
-	#endif
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
