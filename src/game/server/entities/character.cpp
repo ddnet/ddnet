@@ -464,7 +464,6 @@ void CCharacter::FireWeapon()
 						Lifetime,//Span
 						0,//Freeze
 						0,//Explosive
-						1,//TeleportGun
 						0,//Force
 						-1,//SoundImpact
 						WEAPON_GUN//Weapon
@@ -544,7 +543,6 @@ void CCharacter::FireWeapon()
 					Lifetime,//Span
 					0,//Freeze
 					true,//Explosive
-					1,//TeleportGun
 					0,//Force
 					SOUND_GRENADE_EXPLODE,//SoundImpact
 					WEAPON_GRENADE//Weapon
