@@ -439,7 +439,7 @@ foreach(target ${TARGETS_OWN})
   endif()
 endforeach()
 
-foreach(target ${TARGET_DEP})
+foreach(target ${TARGETS_DEP})
   if(MSVC)
     target_compile_options(${target} PRIVATE /W0)
   endif()
