@@ -39,6 +39,8 @@ public:
 	//character's size
 	static const int ms_PhysSize = 28;
 
+	bool m_Telegun;
+
 	CCharacter(CGameWorld *pWorld);
 
 	virtual void Reset();

@@ -16,7 +16,6 @@ public:
 		int Span,
 		bool Freeeze,
 		bool Explosive,
-		bool Teleport,
 		float Force,
 		int SoundImpact,
 		int Weapon,
@@ -50,7 +49,6 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
-	bool m_Teleport;
 	int m_TuneZone;
 
 public:

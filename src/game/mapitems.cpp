@@ -13,6 +13,9 @@ bool IsValidGameTile(int Index)
 		|| (Index >= TILE_CP && Index <= TILE_THROUGH_DIR)
 		|| (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM)
 		|| (Index >= TILE_NPC_END && Index <= TILE_NPH_END)
+		||  Index == TILE_TELEGUN_ENABLE
+		||  Index == TILE_TELEGUN_DISABLE
+		||  Index == TILE_NOTELEGUN
 		|| (Index >= TILE_NPC_START && Index <= TILE_NPH_START)
 		|| (Index >= TILE_ENTITIES_OFF_1 && Index <= TILE_ENTITIES_OFF_2)
 		||  IsValidEntity(Index)
@@ -32,6 +35,9 @@ bool IsValidFrontTile(int Index)
 		|| (Index >= TILE_CP && Index <= TILE_THROUGH_DIR)
 		|| (Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM)
 		|| (Index >= TILE_NPC_END && Index <= TILE_NPH_END)
+		||  Index == TILE_TELEGUN_ENABLE
+		||  Index == TILE_TELEGUN_DISABLE
+		||  Index == TILE_NOTELEGUN
 		|| (Index >= TILE_NPC_START && Index <= TILE_NPH_START)
 		||  IsValidEntity(Index)
 	);

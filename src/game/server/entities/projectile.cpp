@@ -18,7 +18,6 @@ CProjectile::CProjectile
 		int Span,
 		bool Freeze,
 		bool Explosive,
-		bool Teleport,
 		float Force,
 		int SoundImpact,
 		int Weapon,
@@ -42,7 +41,6 @@ CProjectile::CProjectile
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
-	m_Teleport = Teleport;
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
@@ -206,24 +204,49 @@ void CProjectile::Tick()
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
-
-		if (m_Teleport && pOwnerChar && ColPos)
+		
+		if (pOwnerChar && ColPos && pOwnerChar->m_Telegun && !GameLayerClipped(ColPos))
 		{
 			vec2 PossiblePos;
-			bool found = false;
-			if (pTargetChr)
-				found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
-			else 
-				found = GetNearestAirPos(ColPos, &PossiblePos);
-			
-			if (found && PossiblePos)
+			int MapIndex;
+			int TileIndex;
+			int TileFIndex;
+			bool found;
+
+			MapIndex = GameServer()->Collision()->GetPureMapIndex(round_to_int(pTargetChr ? pTargetChr->m_Pos.x : ColPos.x),
+				round_to_int(pTargetChr ? pTargetChr->m_Pos.y : ColPos.y));
+			TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+			TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+			if (TileIndex != TILE_NOTELEGUN && TileFIndex != TILE_NOTELEGUN)
 			{
-				GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(), 
-					(m_Owner != -1) ? TeamMask : -1LL);
-				pOwnerChar->Core()->m_Pos = PossiblePos;
-				pOwnerChar->Core()->m_Vel = vec2(0, 0);
-				GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
-				GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
+				if (pTargetChr)
+				{
+					found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
+					if (found && PossiblePos)
+					{
+						GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
+							(m_Owner != -1) ? TeamMask : -1LL);
+						pOwnerChar->Core()->m_Pos = PossiblePos;
+						pOwnerChar->Core()->m_Vel = vec2(0, 0);
+						GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
+						GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
+					}
+				}
+				else
+				{
+					found = GetNearestAirPos(ColPos, &PossiblePos);
+
+					if (found && PossiblePos)
+					{
+						GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
+							(m_Owner != -1) ? TeamMask : -1LL);
+						pOwnerChar->Core()->m_Pos = PossiblePos;
+						pOwnerChar->Core()->m_Vel = vec2(0, 0);
+						GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
+						GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
+					}
+				}
 			}
 		}
 

@@ -43,6 +43,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastPenalty = false;
 	m_LastBonus = false;
 
+	m_Telegun = false;
+
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
@@ -1617,6 +1619,24 @@ void CCharacter::HandleTiles(int Index)
 	if((m_TileIndex != TILE_REFILL_JUMPS) && (m_TileFIndex != TILE_REFILL_JUMPS))
 	{
 		m_LastRefillJumps = false;
+	}
+
+	// Telegun
+	if (((m_TileIndex == TILE_TELEGUN_ENABLE) || (m_TileFIndex == TILE_TELEGUN_ENABLE)))
+	{
+		if (!m_Telegun)
+		{
+			m_Telegun = true;
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun activated");
+		}
+	}
+	else if (((m_TileIndex == TILE_TELEGUN_DISABLE) || (m_TileFIndex == TILE_TELEGUN_DISABLE)))
+	{
+		if (m_Telegun)
+		{
+			m_Telegun = false;
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun deactivated");
+		}
 	}
 
 	// stopper
