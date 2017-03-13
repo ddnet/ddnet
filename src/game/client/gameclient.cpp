@@ -4,6 +4,7 @@
 #include <engine/engine.h>
 #include <engine/friends.h>
 #include <engine/graphics.h>
+#include <engine/zonedb.h>
 #include <engine/textrender.h>
 #include <engine/demo.h>
 #include <engine/map.h>
@@ -123,6 +124,7 @@ void CGameClient::OnConsoleInit()
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
+	m_pZoneDB = Kernel()->RequestInterface<IZoneDB>();
 	m_pFoes = Client()->Foes();
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();

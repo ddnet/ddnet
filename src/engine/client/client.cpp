@@ -34,6 +34,7 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+#include <engine/zonedb.h>
 
 #include <engine/external/md5/md5.h>
 
@@ -2615,6 +2616,9 @@ void CClient::Run()
 	// init the input
 	Input()->Init();
 
+	// init zone database
+	Kernel()->RequestInterface<IEngineZoneDB>()->Init();
+	
 	// start refreshing addresses while we load
 	MasterServer()->RefreshAddresses(m_NetClient[0].NetType());
 
@@ -3391,6 +3395,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
+	IEngineZoneDB *pEngineZoneDB = CreateEngineZoneDB();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 
@@ -3415,6 +3420,9 @@ int main(int argc, const char **argv) // ignore_convention
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer));
+
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineZoneDB*>(pEngineZoneDB)); // register as both
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IZoneDB*>(pEngineZoneDB));
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor());
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient());

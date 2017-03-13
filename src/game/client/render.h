@@ -37,6 +37,8 @@ enum
 	LAYERRENDERFLAG_TRANSPARENT=2,
 
 	TILERENDERFLAG_EXTEND=4,
+	
+	QUADRENDERFLAG_ZONEQUADS=1,
 };
 
 typedef void (*ENVELOPE_EVAL)(float TimeOffset, int Env, float *pChannels, void *pUser);

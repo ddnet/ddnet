@@ -85,10 +85,13 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 
 void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
 {
-	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
-		return;
-
-	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100-g_Config.m_ClOverlayEntities)/100.0f);
+	//Render quads if:
+	// * Zone Quads
+	// * Decorative Quads are enabled and not hidden by overlay
+	if(RenderFlags&QUADRENDERFLAG_ZONEQUADS)
+		ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, g_Config.m_ClOverlayEntities/100.0f);
+	else if(g_Config.m_ClShowQuads && g_Config.m_ClOverlayEntities < 100)
+		ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100-g_Config.m_ClOverlayEntities)/100.0f);
 }
 
 void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha)
@@ -101,32 +104,28 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 
 		float r=1, g=1, b=1, a=1;
 
-		if(q->m_ColorEnv >= 0)
+		if(!(RenderFlags&QUADRENDERFLAG_ZONEQUADS))
 		{
-			float aChannels[4];
-			pfnEval(q->m_ColorEnvOffset/1000.0f, q->m_ColorEnv, aChannels, pUser);
-			r = aChannels[0];
-			g = aChannels[1];
-			b = aChannels[2];
-			a = aChannels[3];
+			if(q->m_ColorEnv >= 0)
+			{
+				float aChannels[4];
+				pfnEval(q->m_ColorEnvOffset/1000.0f, q->m_ColorEnv, aChannels, pUser);
+				r = aChannels[0];
+				g = aChannels[1];
+				b = aChannels[2];
+				a = aChannels[3];
+			}
 		}
-
-		bool Opaque = false;
+		
 		/* TODO: Analyze quadtexture
 		if(a < 0.01f || (q->m_aColors[0].a < 0.01f && q->m_aColors[1].a < 0.01f && q->m_aColors[2].a < 0.01f && q->m_aColors[3].a < 0.01f))
 			Opaque = true;
 		*/
+		bool Opaque = false;
 		if(Opaque && !(RenderFlags&LAYERRENDERFLAG_OPAQUE))
 			continue;
 		if(!Opaque && !(RenderFlags&LAYERRENDERFLAG_TRANSPARENT))
 			continue;
-
-		Graphics()->QuadsSetSubsetFree(
-			fx2f(q->m_aTexcoords[0].x), fx2f(q->m_aTexcoords[0].y),
-			fx2f(q->m_aTexcoords[1].x), fx2f(q->m_aTexcoords[1].y),
-			fx2f(q->m_aTexcoords[2].x), fx2f(q->m_aTexcoords[2].y),
-			fx2f(q->m_aTexcoords[3].x), fx2f(q->m_aTexcoords[3].y)
-		);
 
 		float OffsetX = 0;
 		float OffsetY = 0;
@@ -142,13 +141,18 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			Rot = aChannels[2]/360.0f*pi*2;
 		}
 
-		IGraphics::CColorVertex Array[4] = {
-			IGraphics::CColorVertex(0, q->m_aColors[0].r*Conv*r, q->m_aColors[0].g*Conv*g, q->m_aColors[0].b*Conv*b, q->m_aColors[0].a*Conv*a*Alpha),
-			IGraphics::CColorVertex(1, q->m_aColors[1].r*Conv*r, q->m_aColors[1].g*Conv*g, q->m_aColors[1].b*Conv*b, q->m_aColors[1].a*Conv*a*Alpha),
-			IGraphics::CColorVertex(2, q->m_aColors[2].r*Conv*r, q->m_aColors[2].g*Conv*g, q->m_aColors[2].b*Conv*b, q->m_aColors[2].a*Conv*a*Alpha),
-			IGraphics::CColorVertex(3, q->m_aColors[3].r*Conv*r, q->m_aColors[3].g*Conv*g, q->m_aColors[3].b*Conv*b, q->m_aColors[3].a*Conv*a*Alpha)};
-		Graphics()->SetColorVertex(Array, 4);
-
+		if(RenderFlags&QUADRENDERFLAG_ZONEQUADS)
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		else
+		{
+			IGraphics::CColorVertex Array[4] = {
+				IGraphics::CColorVertex(0, q->m_aColors[0].r*Conv*r, q->m_aColors[0].g*Conv*g, q->m_aColors[0].b*Conv*b, q->m_aColors[0].a*Conv*a*Alpha),
+				IGraphics::CColorVertex(1, q->m_aColors[1].r*Conv*r, q->m_aColors[1].g*Conv*g, q->m_aColors[1].b*Conv*b, q->m_aColors[1].a*Conv*a*Alpha),
+				IGraphics::CColorVertex(2, q->m_aColors[2].r*Conv*r, q->m_aColors[2].g*Conv*g, q->m_aColors[2].b*Conv*b, q->m_aColors[2].a*Conv*a*Alpha),
+				IGraphics::CColorVertex(3, q->m_aColors[3].r*Conv*r, q->m_aColors[3].g*Conv*g, q->m_aColors[3].b*Conv*b, q->m_aColors[3].a*Conv*a*Alpha)};
+			Graphics()->SetColorVertex(Array, 4);
+		}
+		
 		CPoint *pPoints = q->m_aPoints;
 
 		if(Rot != 0)
@@ -164,6 +168,25 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			Rotate(&q->m_aPoints[4], &aRotated[1], Rot);
 			Rotate(&q->m_aPoints[4], &aRotated[2], Rot);
 			Rotate(&q->m_aPoints[4], &aRotated[3], Rot);
+		}
+
+		if(RenderFlags&QUADRENDERFLAG_ZONEQUADS)
+		{
+			Graphics()->QuadsSetSubsetFree(
+				(fx2f(pPoints[0].x)+OffsetX)/32.0f, (fx2f(pPoints[0].y)+OffsetY)/32.0f,
+				(fx2f(pPoints[1].x)+OffsetX)/32.0f, (fx2f(pPoints[1].y)+OffsetY)/32.0f,
+				(fx2f(pPoints[2].x)+OffsetX)/32.0f, (fx2f(pPoints[2].y)+OffsetY)/32.0f,
+				(fx2f(pPoints[3].x)+OffsetX)/32.0f, (fx2f(pPoints[3].y)+OffsetY)/32.0f
+			);
+		}
+		else
+		{
+			Graphics()->QuadsSetSubsetFree(
+				fx2f(q->m_aTexcoords[0].x), fx2f(q->m_aTexcoords[0].y),
+				fx2f(q->m_aTexcoords[1].x), fx2f(q->m_aTexcoords[1].y),
+				fx2f(q->m_aTexcoords[2].x), fx2f(q->m_aTexcoords[2].y),
+				fx2f(q->m_aTexcoords[3].x), fx2f(q->m_aTexcoords[3].y)
+			);
 		}
 
 		IGraphics::CFreeformItem Freeform(

@@ -9,6 +9,7 @@ class CMapLayers : public CComponent
 	friend class CBackground;
 
 	CLayers *m_pLayers;	// todo refactor: maybe remove it and access it through client*
+	class IZoneDB *m_pZoneDB;
 	int m_Type;
 	int m_CurrentLocalTick;
 	int m_LastLocalTick;
