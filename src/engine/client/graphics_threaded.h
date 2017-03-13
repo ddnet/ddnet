@@ -99,6 +99,7 @@ public:
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_COMPRESSED = 2,
 		TEXFLAG_QUALITY = 4,
+		TEXFLAG_TEXTURE3D = 8,
 	};
 
 	enum
@@ -124,7 +125,7 @@ public:
 	};
 
 	struct SPoint { float x, y, z; };
-	struct STexCoord { float u, v; };
+	struct STexCoord { float u, v, r; };
 	struct SColor { float r, g, b, a; };
 
 	struct SVertex
@@ -147,6 +148,7 @@ public:
 		int m_BlendMode;
 		int m_WrapMode;
 		int m_Texture;
+		int m_Texture3D; //If set to -1, the texture is 2D, otherwise, the texture is 3D and the third coordinate is m_Texture3D
 		SPoint m_ScreenTL;
 		SPoint m_ScreenBR;
 
@@ -430,6 +432,8 @@ public:
 	void ScreenshotDirect();
 
 	virtual void TextureSet(int TextureID);
+	virtual void TextureSet3D(int TextureID, int Index);
+	virtual void TextureSet3DIndex(int Index);
 
 	virtual void Clear(float r, float g, float b);
 

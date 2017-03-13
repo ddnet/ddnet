@@ -38,6 +38,8 @@
 #include "graphics_threaded.h"
 #include "backend_sdl.h"
 
+PFNGLTEXIMAGE3DPROC glTexImage3D_Dyn;
+
 // ------------ CGraphicsBackend_Threaded
 
 void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
@@ -196,27 +198,58 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 		glDisable(GL_SCISSOR_TEST);
 
 	// texture
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_3D);
 	if(State.m_Texture >= 0 && State.m_Texture < CCommandBuffer::MAX_TEXTURES)
 	{
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
+		if(State.m_Texture3D >= 0)
+		{
+			if(glTexImage3D_Dyn)
+			{
+				glEnable(GL_TEXTURE_3D);
+				glBindTexture(GL_TEXTURE_3D, m_aTextures[State.m_Texture].m_Tex);
+			}
+		}
+		else
+		{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
+		}
+	}
+
+	if(State.m_Texture3D >= 0)
+	{
+		switch(State.m_WrapMode)
+		{
+		case CCommandBuffer::WRAP_REPEAT:
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			break;
+		case CCommandBuffer::WRAP_CLAMP:
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			break;
+		default:
+			dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+		};
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
 	}
 	else
-		glDisable(GL_TEXTURE_2D);
-
-	switch(State.m_WrapMode)
 	{
-	case CCommandBuffer::WRAP_REPEAT:
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		break;
-	case CCommandBuffer::WRAP_CLAMP:
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		break;
-	default:
-		dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
-	};
+		switch(State.m_WrapMode)
+		{
+		case CCommandBuffer::WRAP_REPEAT:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			break;
+		case CCommandBuffer::WRAP_CLAMP:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			break;
+		default:
+			dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+		};
+	}
 
 	// screen mapping
 	glMatrixMode(GL_PROJECTION);
@@ -253,7 +286,16 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	if(pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGBA || pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGB)
 	{
 		int MaxTexSize;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexSize);
+		
+		if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_TEXTURE3D)
+		{
+			int Max3DTexSize;
+			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &Max3DTexSize);
+			MaxTexSize = Max3DTexSize*16;
+		}
+		else
+			glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexSize);
+		
 		if(Width > MaxTexSize || Height > MaxTexSize)
 		{
 			do
@@ -295,17 +337,57 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 		}
 	}
 #endif
-	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
-	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 
-	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)
+	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_TEXTURE3D)
 	{
+		if(glTexImage3D_Dyn)
+		{
+			// copy and reorder texture data
+			int SubWidth = Width/16;
+			int SubHeight = Height/16;
+			int Depth = 256;
+			
+			int MemSize = Width*Height*Depth*pCommand->m_PixelSize;
+			char *pTmpData = (char *)mem_alloc(MemSize, sizeof(void*));
+
+			const int TileSize = (SubHeight * SubWidth) * pCommand->m_PixelSize;
+			const int TileRowSize = SubWidth * pCommand->m_PixelSize;
+			const int ImagePitch = Width * pCommand->m_PixelSize;
+			mem_zero(pTmpData, MemSize);
+			for(int i = 0; i < Depth; i++)
+			{
+				const int px = (i%16) * SubWidth;
+				const int py = (i/16) * SubHeight;
+				const char *pTileData = (const char *)pTexData + (py * Width + px) * pCommand->m_PixelSize;
+				for(int y = 0; y < SubHeight; y++)
+					mem_copy(pTmpData + i*TileSize + y*TileRowSize, pTileData + y * ImagePitch, TileRowSize);
+			}
+
+			mem_free(pTexData);
+			pTexData = pTmpData;
+			
+			glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
+			glBindTexture(GL_TEXTURE_3D, m_aTextures[pCommand->m_Slot].m_Tex);
+
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexImage3D_Dyn(GL_TEXTURE_3D, 0, StoreOglformat, SubWidth, SubHeight, Depth, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		}
+	}
+	else if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)
+	{
+		glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
+		glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
+		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 	}
 	else
 	{
+		glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
+		glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
+		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		gluBuild2DMipmaps(GL_TEXTURE_2D, StoreOglformat, Width, Height, Oglformat, GL_UNSIGNED_BYTE, pTexData);
@@ -335,8 +417,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	SetState(pCommand->m_State);
 
 	glVertexPointer(3, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices + sizeof(float)*3);
-	glColorPointer(4, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices + sizeof(float)*5);
+	glTexCoordPointer(3, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices + sizeof(float)*3);
+	glColorPointer(4, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices + sizeof(float)*6);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -664,6 +746,10 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		dbg_msg("gfx", "unable to create OpenGL context: %s", SDL_GetError());
 		return -1;
 	}
+	
+	glTexImage3D_Dyn = (PFNGLTEXIMAGE3DPROC) SDL_GL_GetProcAddress("glTexImage3D");
+	if(!glTexImage3D_Dyn)
+		dbg_msg("gfx", "glTexImage3D not supported: %s", SDL_GetError());
 
 	SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);

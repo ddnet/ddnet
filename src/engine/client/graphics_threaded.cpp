@@ -150,6 +150,7 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_State.m_ClipW = 0;
 	m_State.m_ClipH = 0;
 	m_State.m_Texture = -1;
+	m_State.m_Texture3D = -1;
 	m_State.m_BlendMode = CCommandBuffer::BLEND_NONE;
 	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
 
@@ -359,6 +360,8 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 	Cmd.m_Flags = 0;
 	if(Flags&IGraphics::TEXLOAD_NOMIPMAPS)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
+	if(Flags&IGraphics::TEXLOAD_TEXTURE3D)
+		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TEXTURE3D;
 	if(g_Config.m_GfxTextureCompression)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_COMPRESSED;
 	if(g_Config.m_GfxTextureQuality || Flags&TEXLOAD_NORESAMPLE)
@@ -498,6 +501,19 @@ void CGraphics_Threaded::TextureSet(int TextureID)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
 	m_State.m_Texture = TextureID;
+	m_State.m_Texture3D = -1;
+}
+
+void CGraphics_Threaded::TextureSet3D(int TextureID, int Index)
+{
+	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
+	m_State.m_Texture = TextureID;
+	m_State.m_Texture3D = Index;
+}
+
+void CGraphics_Threaded::TextureSet3DIndex(int Index)
+{
+	m_State.m_Texture3D = Index;
 }
 
 void CGraphics_Threaded::Clear(float r, float g, float b)
@@ -566,6 +582,11 @@ void CGraphics_Threaded::QuadsSetSubset(float TlU, float TlV, float BrU, float B
 
 	m_aTexture[3].u = TlU;	m_aTexture[2].u = BrU;
 	m_aTexture[3].v = BrV;	m_aTexture[2].v = BrV;
+	
+	m_aTexture[0].r = (m_State.m_Texture3D >= 0 ? (0.5f + m_State.m_Texture3D) / 256.0f : 0.0f);
+	m_aTexture[1].r = m_aTexture[0].r;
+	m_aTexture[2].r = m_aTexture[0].r;
+	m_aTexture[3].r = m_aTexture[0].r;
 }
 
 void CGraphics_Threaded::QuadsSetSubsetFree(
@@ -576,6 +597,11 @@ void CGraphics_Threaded::QuadsSetSubsetFree(
 	m_aTexture[1].u = x1; m_aTexture[1].v = y1;
 	m_aTexture[2].u = x2; m_aTexture[2].v = y2;
 	m_aTexture[3].u = x3; m_aTexture[3].v = y3;
+	
+	m_aTexture[0].r = (m_State.m_Texture3D >= 0 ? (0.5f + m_State.m_Texture3D) / 256.0f : 0.0f);
+	m_aTexture[1].r = m_aTexture[0].r;
+	m_aTexture[2].r = m_aTexture[0].r;
+	m_aTexture[3].r = m_aTexture[0].r;
 }
 
 void CGraphics_Threaded::QuadsDraw(CQuadItem *pArray, int Num)

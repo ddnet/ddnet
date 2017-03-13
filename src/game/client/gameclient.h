@@ -96,6 +96,7 @@ class CGameClient : public IGameClient
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
+	class IZoneDB *m_pZoneDB;
 	class IUpdater *m_pUpdater;
 
 	CLayers m_Layers;
@@ -142,6 +143,7 @@ public:
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
+	class IZoneDB *ZoneDB() { return m_pZoneDB; }
 	class IUpdater *Updater() { return m_pUpdater; }
 
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
