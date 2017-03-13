@@ -172,6 +172,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 
 		if(RenderFlags&QUADRENDERFLAG_ZONEQUADS)
 		{
+			Graphics()->TextureSet3DIndex(q->m_ColorEnvOffset);
 			Graphics()->QuadsSetSubsetFree(
 				(fx2f(pPoints[0].x)+OffsetX)/32.0f, (fx2f(pPoints[0].y)+OffsetY)/32.0f,
 				(fx2f(pPoints[1].x)+OffsetX)/32.0f, (fx2f(pPoints[1].y)+OffsetY)/32.0f,

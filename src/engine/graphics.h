@@ -97,6 +97,7 @@ public:
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual void TextureSet(int TextureID) = 0;
 	virtual void TextureSet3D(int TextureID, int Index) = 0;
+	virtual void TextureSet3DIndex(int Index) = 0;
 
 	struct CLineItem
 	{

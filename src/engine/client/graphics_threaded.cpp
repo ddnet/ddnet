@@ -511,6 +511,11 @@ void CGraphics_Threaded::TextureSet3D(int TextureID, int Index)
 	m_State.m_Texture3D = Index;
 }
 
+void CGraphics_Threaded::TextureSet3DIndex(int Index)
+{
+	m_State.m_Texture3D = Index;
+}
+
 void CGraphics_Threaded::Clear(float r, float g, float b)
 {
 	CCommandBuffer::SCommand_Clear Cmd;

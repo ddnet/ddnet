@@ -433,6 +433,7 @@ public:
 
 	virtual void TextureSet(int TextureID);
 	virtual void TextureSet3D(int TextureID, int Index);
+	virtual void TextureSet3DIndex(int Index);
 
 	virtual void Clear(float r, float g, float b);
 
