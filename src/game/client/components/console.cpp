@@ -29,6 +29,7 @@
 #include <game/client/render.h>
 #include <game/client/components/controls.h>
 #include <game/client/components/menus.h>
+#include <game/client/components/chat.h>
 
 #include "console.h"
 
@@ -707,7 +708,8 @@ void CGameConsole::Toggle(int Type)
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 
-			Input()->SetIMEState(false);
+			if(!m_pClient->m_pMenus->IsActive() && !m_pClient->m_pChat->IsActive())
+				Input()->SetIMEState(false);
 		}
 	}
 
