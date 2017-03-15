@@ -1272,6 +1272,8 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendBroadcast(aBuftime, pResult->m_ClientID);
 }
 
+static const char s_aaMsg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
+
 void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -1283,6 +1285,8 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
+	char aBuf[128];
+	
 	if(pResult->NumArguments() > 0)
 	{
 		int OldType = pPlayer->m_TimerType;
@@ -1325,15 +1329,19 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 					pPlayer->m_TimerType = CPlayer::TIMERTYPE_BROADCAST;
 			}
 		}
-	
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "Unknown \"%s\" parameter. Accepted values: gametimer, broadcast, both, none, cycle", pResult->GetString(0));
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", aBuf);
+			return;
+		}
+		
 		if((OldType == CPlayer::TIMERTYPE_BROADCAST || OldType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE))
 			pSelf->SendBroadcast("", pResult->m_ClientID);
 	}
 	
-	char aBuf[128];
-	const char msg[3][128] = {"game/round timer.", "broadcast.", "both game/round timer and broadcast."};
 	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
-		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", msg[pPlayer->m_TimerType]);
+		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", s_aaMsg[pPlayer->m_TimerType]);
 	else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
 		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
 	
