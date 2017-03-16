@@ -176,13 +176,13 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 	Graphics()->QuadsEnd();
 }
 
-void CRenderTools::RenderTileRetangle(int X, int Y, int w, int h, unsigned char indexIn, unsigned char indexOut, float Scale, vec4 Color, int RenderFlags,
-									ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
+void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
+                                       unsigned char IndexIn, unsigned char IndexOut,
+                                       float Scale, vec4 Color, int RenderFlags,
+                                       ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
 {
-	//Graphics()->TextureSet(img_get(tmap->image));
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	//Graphics()->MapScreen(screen_x0-50, screen_y0-50, screen_x1+50, screen_y1+50);
 
 	// calculate the final pixelsize for the tiles
 	float TilePixelSize = 1024/32.0f;
@@ -214,9 +214,10 @@ void CRenderTools::RenderTileRetangle(int X, int Y, int w, int h, unsigned char 
 	float Nudge = (0.5f/TexSize) * (1/FinalTilesetScale);
 
 	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
-			unsigned char Index = (x<X || x>=X+w || y<Y || y>Y+h) ? indexOut : indexIn;
+			unsigned char Index = (x>=RectX && x<RectX+RectW && y>=RectY && y<RectY+RectH) ? IndexIn : IndexOut;
 			if(Index)
 			{
 				bool Render = false;
@@ -225,7 +226,6 @@ void CRenderTools::RenderTileRetangle(int X, int Y, int w, int h, unsigned char 
 
 				if(Render)
 				{
-
 					int tx = Index%16;
 					int ty = Index/16;
 					int Px0 = tx*(1024/16);
@@ -248,18 +248,17 @@ void CRenderTools::RenderTileRetangle(int X, int Y, int w, int h, unsigned char 
 				}
 			}
 		}
+	}
 
 	Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
 void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags,
-									ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
+                                 ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
 {
-	//Graphics()->TextureSet(img_get(tmap->image));
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	//Graphics()->MapScreen(screen_x0-50, screen_y0-50, screen_x1+50, screen_y1+50);
 
 	// calculate the final pixelsize for the tiles
 	float TilePixelSize = 1024/32.0f;
@@ -291,6 +290,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 	float Nudge = (0.5f/TexSize) * (1/FinalTilesetScale);
 
 	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
 			int mx = x;
@@ -340,7 +340,6 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 
 				if(Render)
 				{
-
 					int tx = Index%16;
 					int ty = Index/16;
 					int Px0 = tx*(1024/16);
@@ -394,6 +393,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 			}
 			x += pTiles[c].m_Skip;
 		}
+	}
 
 	Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
