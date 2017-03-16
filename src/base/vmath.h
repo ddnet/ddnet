@@ -26,7 +26,7 @@ public:
 	vector2_base operator +(const vector2_base &v) const { return vector2_base(x+v.x, y+v.y); }
 	vector2_base operator *(const T v) const { return vector2_base(x*v, y*v); }
 	vector2_base operator *(const vector2_base &v) const { return vector2_base(x*v.x, y*v.y); }
-	vector2_base operator /(const T v) const { return vector3_base(x/v, y/v); }
+	vector2_base operator /(const T v) const { return vector2_base(x/v, y/v); }
 	vector2_base operator /(const vector2_base &v) const { return vector2_base(x/v.x, y/v.y); }
 
 	const vector2_base &operator =(const vector2_base &v) { x = v.x; y = v.y; return *this; }
@@ -66,8 +66,7 @@ inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
 template<typename T>
 inline vector2_base<T> normalize(const vector2_base<T> &v)
 {
-	T l = (T)(1.0f/sqrtf(v.x*v.x + v.y*v.y));
-	return vector2_base<T>(v.x*l, v.y*l);
+	return v / length(v);
 }
 
 typedef vector2_base<float> vec2;
@@ -149,8 +148,7 @@ inline T dot(const vector3_base<T> &a, const vector3_base<T> &b)
 template<typename T>
 inline vector3_base<T> normalize(const vector3_base<T> &v)
 {
-	T l = (T)(1.0f/sqrtf(v.x*v.x + v.y*v.y + v.z*v.z));
-	return vector3_base<T>(v.x*l, v.y*l, v.z*l);
+	return v / length(v);
 }
 
 template<typename T>
