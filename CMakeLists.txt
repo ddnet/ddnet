@@ -272,6 +272,15 @@ if(CLIENT)
   set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
 
   # Libraries
+  set(INCLUDE_DIRS_CLIENT
+    ${CURL_INCLUDE_DIRS}
+    ${FREETYPE_INCLUDE_DIRS}
+    ${OGG_INCLUDE_DIRS}
+    ${OPUSFILE_INCLUDE_DIRS}
+    ${OPUS_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIRS}
+  )
+  
   set(LIBS_CLIENT
     ${LIBS}
     ${CURL_LIBRARIES}
@@ -293,19 +302,27 @@ if(CLIENT)
   )
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
-  target_include_directories(${TARGET_CLIENT} PRIVATE
-    ${CURL_INCLUDE_DIRS}
-    ${FREETYPE_INCLUDE_DIRS}
-    ${OGG_INCLUDE_DIRS}
-    ${OPUSFILE_INCLUDE_DIRS}
-    ${OPUS_INCLUDE_DIRS}
-    ${SDL2_INCLUDE_DIRS}
-  )
+  target_include_directories(${TARGET_CLIENT} PRIVATE ${INCLUDE_DIRS_CLIENT})
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
 
   if(TARGET_OS STREQUAL "windows")
     target_sources(${TARGET_CLIENT} PRIVATE "other/icons/DDNet.rc")
   endif()
+  
+  # Benchmark for text rendering
+  set(TARGET_BM_TEXTRENDERING benchmarks_textrendering)
+  add_executable(${TARGET_BM_TEXTRENDERING}
+    "src/benchmarks/textrendering.cpp"
+    "src/engine/client/graphics_threaded.cpp"
+    "src/engine/client/backend_sdl.cpp"
+    "src/engine/client/text.cpp"
+    ${DEPS_CLIENT}
+    $<TARGET_OBJECTS:engine-shared>
+    $<TARGET_OBJECTS:game-shared>
+  )
+  target_link_libraries(${TARGET_BM_TEXTRENDERING} ${LIBS_CLIENT})
+  target_include_directories(${TARGET_BM_TEXTRENDERING} PRIVATE ${INCLUDE_DIRS_CLIENT})
+  list(APPEND TARGETS_OWN ${TARGET_BM_TEXTRENDERING})
 endif()
 
 
