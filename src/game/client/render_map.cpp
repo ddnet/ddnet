@@ -176,13 +176,13 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 	Graphics()->QuadsEnd();
 }
 
-void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags,
-									ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
+void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
+                                       unsigned char IndexIn, unsigned char IndexOut,
+                                       float Scale, vec4 Color, int RenderFlags,
+                                       ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
 {
-	//Graphics()->TextureSet(img_get(tmap->image));
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	//Graphics()->MapScreen(screen_x0-50, screen_y0-50, screen_x1+50, screen_y1+50);
 
 	// calculate the final pixelsize for the tiles
 	float TilePixelSize = 1024/32.0f;
@@ -214,6 +214,83 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 	float Nudge = (0.5f/TexSize) * (1/FinalTilesetScale);
 
 	for(int y = StartY; y < EndY; y++)
+	{
+		for(int x = StartX; x < EndX; x++)
+		{
+			unsigned char Index = (x>=RectX && x<RectX+RectW && y>=RectY && y<RectY+RectH) ? IndexIn : IndexOut;
+			if(Index)
+			{
+				bool Render = false;
+				if(RenderFlags&LAYERRENDERFLAG_TRANSPARENT)
+					Render = true;
+
+				if(Render)
+				{
+					int tx = Index%16;
+					int ty = Index/16;
+					int Px0 = tx*(1024/16);
+					int Py0 = ty*(1024/16);
+					int Px1 = Px0+(1024/16)-1;
+					int Py1 = Py0+(1024/16)-1;
+
+					float x0 = Nudge + Px0/TexSize+Frac;
+					float y0 = Nudge + Py0/TexSize+Frac;
+					float x1 = Nudge + Px1/TexSize-Frac;
+					float y1 = Nudge + Py0/TexSize+Frac;
+					float x2 = Nudge + Px1/TexSize-Frac;
+					float y2 = Nudge + Py1/TexSize-Frac;
+					float x3 = Nudge + Px0/TexSize+Frac;
+					float y3 = Nudge + Py1/TexSize-Frac;
+
+					Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
+					IGraphics::CQuadItem QuadItem(x*Scale, y*Scale, Scale, Scale);
+					Graphics()->QuadsDrawTL(&QuadItem, 1);
+				}
+			}
+		}
+	}
+
+	Graphics()->QuadsEnd();
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags,
+                                 ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
+{
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	// calculate the final pixelsize for the tiles
+	float TilePixelSize = 1024/32.0f;
+	float FinalTileSize = Scale/(ScreenX1-ScreenX0) * Graphics()->ScreenWidth();
+	float FinalTilesetScale = FinalTileSize/TilePixelSize;
+
+	float r=1, g=1, b=1, a=1;
+	if(ColorEnv >= 0)
+	{
+		float aChannels[4];
+		pfnEval(ColorEnvOffset/1000.0f, ColorEnv, aChannels, pUser);
+		r = aChannels[0];
+		g = aChannels[1];
+		b = aChannels[2];
+		a = aChannels[3];
+	}
+
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(Color.r*r, Color.g*g, Color.b*b, Color.a*a);
+
+	int StartY = (int)(ScreenY0/Scale)-1;
+	int StartX = (int)(ScreenX0/Scale)-1;
+	int EndY = (int)(ScreenY1/Scale)+1;
+	int EndX = (int)(ScreenX1/Scale)+1;
+
+	// adjust the texture shift according to mipmap level
+	float TexSize = 1024.0f;
+	float Frac = (1.25f/TexSize) * (1/FinalTilesetScale);
+	float Nudge = (0.5f/TexSize) * (1/FinalTilesetScale);
+
+	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
 			int mx = x;
@@ -263,7 +340,6 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 
 				if(Render)
 				{
-
 					int tx = Index%16;
 					int ty = Index/16;
 					int Px0 = tx*(1024/16);
@@ -317,6 +393,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 			}
 			x += pTiles[c].m_Skip;
 		}
+	}
 
 	Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);

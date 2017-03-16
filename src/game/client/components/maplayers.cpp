@@ -263,6 +263,21 @@ void CMapLayers::OnRender()
 						RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE,
 														EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 						Graphics()->BlendNormal();
+						
+						// draw kill tiles outside the entity clipping rectangle
+						if(IsGameLayer)
+						{
+							
+							// slow blinking to hint that it's not a part of the map
+							double Seconds = time_get()/(double)time_freq();
+							vec4 ColorHint = vec4(1.0f, 1.0f, 1.0f, 0.3f + 0.7f*(1.0+sin(2.0f*pi*Seconds/3.f))/2.0f);
+							
+							RenderTools()->RenderTileRectangle(-201, -201, pTMap->m_Width+402, pTMap->m_Height+402,
+							                                   0, TILE_DEATH, // display air inside, death outside
+							                                   32.0f, Color*ColorHint, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
+							                                   EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+						}
+						
 						RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
 														EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 					}
