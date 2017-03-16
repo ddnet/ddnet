@@ -28,7 +28,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"trml, Soreu, hi_leute_gll, Lady Saavik, Chairn, heinrich5991,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
-		"swick, oy & others.");
+		"swick, oy, necropotame, Ryozuki, Redix, d3fault, marcelherd,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
+		"BannZay, ACTom, SiuFuWong, PathosEthosLogos, TsFreddie & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credit",
