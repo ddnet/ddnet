@@ -66,7 +66,8 @@ inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
 template<typename T>
 inline vector2_base<T> normalize(const vector2_base<T> &v)
 {
-	return v / length(v);
+	T l = (T)(1.0f/sqrtf(v.x*v.x + v.y*v.y));
+	return vector2_base<T>(v.x*l, v.y*l);
 }
 
 typedef vector2_base<float> vec2;
@@ -148,7 +149,8 @@ inline T dot(const vector3_base<T> &a, const vector3_base<T> &b)
 template<typename T>
 inline vector3_base<T> normalize(const vector3_base<T> &v)
 {
-	return v / length(v);
+	T l = (T)(1.0f/sqrtf(v.x*v.x + v.y*v.y + v.z*v.z));
+	return vector3_base<T>(v.x*l, v.y*l, v.z*l);
 }
 
 template<typename T>
