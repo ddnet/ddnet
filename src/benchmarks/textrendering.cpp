@@ -55,74 +55,83 @@ int main(int argc, const char **argv) // ignore_convention
 	dbg_msg("benchmark", "ready!");
 	
 	// text from https://fr.wikibooks.org/wiki/Translinguisme/Par_expression/Bonjour
-	static const char aaText[][1024] = 
+	static const char aaText[][1024] =
 	{
-		"Hello DDNet",
-		"Bonjour",
-		"صَباح الخير",
-		"早晨",
-		"안녕하세요",
-		"नमस्कार",
-		"Günaydın",
-		"Καλιμέρα",
-		"おはようございます",
-		"สวัสดี ครับ",
-		"Здравствуй",
-		"בוקר טוב",
-		"Paakuinôgwzian",
+		"azertyuiop",
+		"ըթժիլխծկհձ",
+		"ءحآخغأدؤذإ",
+		"ႠႡႢႣႤႥႦႧႨႩ",
+		"ΑΒΓΔΕΖΗΘΙΚ",
+		"٠١٢٣٤٥٦٧٨٩",
+		"ЀЎМЪЁЏНЫЂА",
+		"QSDFGHJKLM",
+		"رئزاسبشفةص",
+		"ﬡﬢﬣﬤﬥﬦﬧﬨ﬩שׁ",
+		"αβγδεζηθικ",
+		"ႭႮႯႰႱႲႳႴႵႶ",
+		"ՋՍՌՎՏՐՑՒՓՔ",
+		"ОЬЃБПЭЄВРЮ",
+		"0123456789",
+		"wxcvbnqsdf",
+		"قتضكثطلجظم",
+		"ΛΜΝΞΟΠΡΣΤΥ",
+		"ნოპჟრსტუფქ",
+		"еужфзхицйч",
+		"ԱԲԳԴԵԶԷԸԹԺ",
+		"כלםמןנסעףפ",
+		"AZERTYUIOP",
 	};
-	static const int NbText = 13;
+	static const int NbText = sizeof(aaText)/sizeof(aaText[0]);
+	static const int Duration = 20; // in seconds
 	
-	int64 StartTime = time_get();
-	int FrameCounter = 0;
-	while(1)
-	{		
-		int64 CurrentTime = time_get();
-		double RenderTime = (CurrentTime - StartTime)/(double)time_freq();
-		
-		pGraphics->Clear(0.5f, 0.5f, 0.5f);
-		
-		float Height = 300.0f;
-		float Width = Height*pGraphics->ScreenAspect();
-		pGraphics->MapScreen(0.0f, 0.0f, Width, Height);
-		
-		//~ for(int i=0; i<NbText; i++)
-		//~ {
-			//~ float Angle = RenderTime*pi/2.0f + i*2.0f*pi/NbText;
-			//~ CTextCursor Cursor;
-			//~ pTextRender->SetCursor(&Cursor, Width/4, Height/2 + (i - NbText/2)*15.0f , 40.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-			//~ Cursor.m_LineWidth = Width/2;
-			//~ pTextRender->TextEx(&Cursor, aaText[i], -1);
-		//~ }
-		//~ for(int i=0; i<NbText; i++)
-		//~ {
-			//~ float Angle = RenderTime*pi/2.0f + i*2.0f*pi/NbText;
-			//~ CTextCursor Cursor;
-			//~ pTextRender->SetCursor(&Cursor, Width/2, Height/2 + (i - NbText/2)*15.0f , 8.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-			//~ Cursor.m_LineWidth = Width/2;
-			//~ pTextRender->TextEx(&Cursor, aaText[i], -1);
-		//~ }
-		for(int i=0; i<2*NbText; i++)
+	float Fps = 0.0f;
+	unsigned int FrameCounter = 0;
+	
+	{
+		int64 StartTime = time_get();
+		while(1)
 		{
-			float Angle = RenderTime*pi/2.0f + i*pi/NbText;
-			CTextCursor Cursor;
-			pTextRender->SetCursor(&Cursor, Width/4 + sin(Angle)*100.f, Height/2 + cos(Angle)*100.f, 8.0f + (sin(Angle)+1)*20.0, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-			Cursor.m_LineWidth = Width;
-			pTextRender->TextEx(&Cursor, aaText[i%NbText], -1);
-		}
-		
-		pGraphics->Swap();
-		
-		FrameCounter++;
-		CurrentTime = time_get();
-		if(CurrentTime - StartTime > time_freq()*10)
-		{
-			double Time = (CurrentTime - StartTime)/(double)time_freq();
-			dbg_msg("benchmark", "result: %lf fps", (double)FrameCounter / Time);
-			break;
+			int64 CurrentTime = time_get();
+			double RenderTime = 0.1*(CurrentTime - StartTime)/(double)time_freq();
+
+			pGraphics->Clear(0.5f, 0.5f, 0.5f);
+			
+			float Height = 300.0f;
+			float Width = Height*pGraphics->ScreenAspect();
+			pGraphics->MapScreen(0.0f, 0.0f, Width, Height);
+			
+			for(int j=0; j<3; j++)
+			{
+				for(int i=0; i<NbText; i++)
+				{
+					float TimeWrap = fmod(RenderTime + i/(double)(NbText), 1.0f);
+					
+					float PositionX = j*Width/3.0f;
+					float PositionY = TimeWrap*Height*0.8f;
+					float Size = 8+TimeWrap*40.0;
+					
+					CTextCursor Cursor;
+					pTextRender->SetCursor(&Cursor, PositionX, PositionY, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+					Cursor.m_LineWidth = Width;
+					pTextRender->TextEx(&Cursor, aaText[i%NbText], -1);
+				}
+			}
+			
+			pGraphics->Swap();
+			
+			FrameCounter++;
+			int64 TimeDiff = CurrentTime - StartTime;
+			if(TimeDiff > time_freq()*Duration)
+			{
+				double Time = TimeDiff/(double)time_freq();
+				Fps = (double)FrameCounter / Time;
+				break;
+			}
 		}
 	}
-	
+
+	dbg_msg("Benchmark", "Result: %f", Fps);
+
 	delete pTextRender;
 	delete pGraphics;
 	delete pKernel;
