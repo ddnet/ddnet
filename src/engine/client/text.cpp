@@ -326,14 +326,14 @@ class CTextRender : public IEngineTextRender
 
 		if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
 		{
-			for(py = 0; py < pBitmap->rows; py++) // ignore_convention
-				for(px = 0; px < pBitmap->width; px++) // ignore_convention
+			for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
+				for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
 					ms_aGlyphData[(py+y)*SlotW+px+x] = pBitmap->buffer[py*pBitmap->pitch+px]; // ignore_convention
 		}
 		else if(pBitmap->pixel_mode == FT_PIXEL_MODE_MONO) // ignore_convention
 		{
-			for(py = 0; py < pBitmap->rows; py++) // ignore_convention
-				for(px = 0; px < pBitmap->width; px++) // ignore_convention
+			for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
+				for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
 				{
 					if(pBitmap->buffer[py*pBitmap->pitch+px/8]&(1<<(7-(px%8)))) // ignore_convention
 						ms_aGlyphData[(py+y)*SlotW+px+x] = 255;
