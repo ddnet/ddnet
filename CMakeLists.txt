@@ -125,7 +125,8 @@ endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
   include(CheckCCompilerFlag)
-  check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE)
+  check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
+  check_c_compiler_flag("-fstack-protector-all" ENABLE_STACK_PROTECTOR) # -fstack-protector-all doesn't work on MinGW.
 endif()
 
 
@@ -418,7 +419,9 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
+    if(ENABLE_STACK_PROTECTOR)
+      target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
+    endif()
     if(DEFINE_FORTIFY_SOURCE)
       target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
     endif()
