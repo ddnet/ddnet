@@ -439,7 +439,7 @@ foreach(target ${TARGETS_OWN})
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(${target} PRIVATE -Wall)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.3)
+    if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
       target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>)
     endif()
     #target_compile_options(${target} PRIVATE -Wextra)
