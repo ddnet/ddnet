@@ -228,7 +228,7 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 
 # Sources
 file(GLOB_RECURSE BASE "src/base/*.c" "src/base/*.cpp" "src/base/*.h")
-file(GLOB_RECURSE ENGINE_SHARED "src/engine/shared/*.cpp" "src/engine/shared/*.h") 
+file(GLOB_RECURSE ENGINE_SHARED "src/engine/shared/*.cpp" "src/engine/shared/*.h")
 file(GLOB GAME_SHARED "src/game/*.cpp" "src/game/*.h")
 set(GAME_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/protocol.h" "src/game/generated/nethash.cpp")
 
@@ -442,7 +442,9 @@ foreach(target ${TARGETS_OWN})
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(${target} PRIVATE -Wall)
-    target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.3)
+      target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>)
+    endif()
     #target_compile_options(${target} PRIVATE -Wextra)
     #target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
   endif()
