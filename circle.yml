@@ -22,5 +22,5 @@ test:
 
         mkdir build
         cd build
-        cmake ..
+        env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake ..
         make everything
