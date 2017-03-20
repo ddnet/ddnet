@@ -120,7 +120,11 @@ if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_LIBS ws2_32) # Windows sockets
 else()
   set(PLATFORM_CLIENT_LIBS GL GLU X11)
-  set(PLATFORM_LIBS)
+  if(TARGET_OS STREQUAL "linux")
+    set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
+  else()
+    set(PLATFORM_LIBS)
+  endif()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
@@ -277,10 +281,13 @@ if(CLIENT)
     ${LIBS}
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${OGG_LIBRARIES}
+    ${SDL2_LIBRARIES}
+
+    # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
     ${OPUS_LIBRARIES}
-    ${SDL2_LIBRARIES}
+    ${OGG_LIBRARIES}
+
     ${PLATFORM_CLIENT_LIBS}
   )
 
