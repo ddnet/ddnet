@@ -310,7 +310,7 @@ if(CLIENT)
   endif()
   
   # Benchmark for text rendering
-  set(TARGET_BM_TEXTRENDERING benchmarks_textrendering)
+  set(TARGET_BM_TEXTRENDERING benchmark_textrendering)
   add_executable(${TARGET_BM_TEXTRENDERING}
     "src/benchmarks/textrendering.cpp"
     "src/engine/client/graphics_threaded.cpp"
