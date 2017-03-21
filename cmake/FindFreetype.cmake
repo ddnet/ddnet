@@ -2,7 +2,8 @@ find_package(PkgConfig QUIET)
 pkg_check_modules(PC_FREETYPE freetype2)
 set_extra_dirs(FREETYPE freetype)
 
-find_path(FREETYPE_INCLUDEDIR freetype/config/ftheader.h
+find_path(FREETYPE_INCLUDEDIR
+  NAMES config/ftheader.h freetype/config/ftheader.h
   PATH_SUFFIXES freetype2
   HINTS ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
   PATHS ${EXTRA_FREETYPE_INCLUDEDIR}
