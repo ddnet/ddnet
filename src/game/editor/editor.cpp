@@ -555,11 +555,11 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 
 int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, vec3 BaseColor)
 {
-	float bright = Checked ? 1.0f : 0.5f;
-	float alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
-	vec4 color = vec4(BaseColor.r*bright, BaseColor.g*bright, BaseColor.b*bright, alpha);
+	float Bright = Checked ? 1.0f : 0.5f;
+	float Alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
+	vec4 Color = vec4(BaseColor.r*Bright, BaseColor.g*Bright, BaseColor.b*Bright, Alpha);
 
-	RenderTools()->DrawUIRect(pRect, color, CUI::CORNER_ALL, 3.0f);
+	RenderTools()->DrawUIRect(pRect, Color, CUI::CORNER_ALL, 3.0f);
 	CUIRect NewRect = *pRect;
 	NewRect.y += NewRect.h/2.0f-7.0f;
 	float tw = min(TextRender()->TextWidth(0, 10.0f, pText, -1), NewRect.w);
@@ -700,7 +700,7 @@ void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brig
 	Graphics()->QuadsEnd();
 }
 
-int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree, bool isHex, int corners, vec4* color)
+int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, vec4* Color)
 {
 	// logic
 	static float s_Value;
@@ -713,7 +713,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		s_LastTextpID = pID;
 		s_TextMode = true;
-		if(isHex)
+		if(IsHex)
 			str_format(s_NumStr, sizeof(s_NumStr), "%06X", Current);
 		else
 			str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
@@ -741,7 +741,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		if(Input()->KeyIsPressed(KEY_RETURN) || Input()->KeyIsPressed(KEY_KP_ENTER) ||
 				((UI()->MouseButton(1) || UI()->MouseButton(0)) && !Inside))
 		{
-			if(isHex)
+			if(IsHex)
 				Current = clamp(str_toint_base(s_NumStr, 16), Min, Max);
 			else
 				Current = clamp(str_toint(s_NumStr), Min, Max);
@@ -798,13 +798,13 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		char aBuf[128];
 		if(pLabel[0] != '\0')
 			str_format(aBuf, sizeof(aBuf),"%s %d", pLabel, Current);
-		else if(isDegree)
+		else if(IsDegree)
 			str_format(aBuf, sizeof(aBuf),"%d°", Current);
-		else if(isHex)
+		else if(IsHex)
 			str_format(aBuf, sizeof(aBuf),"#%06X", Current);
 		else
 			str_format(aBuf, sizeof(aBuf),"%d", Current);
-		RenderTools()->DrawUIRect(pRect, color ? *color : GetButtonColor(pID, 0), corners, 5.0f);
+		RenderTools()->DrawUIRect(pRect, Color ? *Color : GetButtonColor(pID, 0), Corners, 5.0f);
 		pRect->y += pRect->h/2.0f-7.0f;
 		UI()->DoLabel(pRect, aBuf, 10, 0, -1);
 	}
@@ -2202,16 +2202,16 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			if(t)
 			{
 				m_QuadsetPicker.m_Image = t->m_Image;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = (int) View.x << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = (int) View.y << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = (int) (View.x+View.w) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].y = (int) View.y << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].x = (int) View.x << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = (int) (View.y+View.h) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = (int) (View.x+View.w) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = (int) (View.y+View.h) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = (int) (View.x+View.w/2) << 10;
-				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = (int) (View.y+View.h/2) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = (int)View.x << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = (int)View.y << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = (int)(View.x+View.w) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].y = (int)View.y << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].x = (int)View.x << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[2].y = (int)(View.y+View.h) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].x = (int)(View.x+View.w) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[3].y = (int)(View.y+View.h) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].x = (int)(View.x+View.w/2) << 10;
+				m_QuadsetPicker.m_lQuads[0].m_aPoints[4].y = (int)(View.y+View.h/2) << 10;
 				m_QuadsetPicker.Render();
 			}
 		}
@@ -2655,7 +2655,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 }
 
 
-int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 color)
+int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 Color)
 {
 	int Change = -1;
 
@@ -2676,7 +2676,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			str_format(aBuf, sizeof(aBuf),"%d", pProps[i].m_Value);
-			int NewValue = UiDoValueSelector((char *) &pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, &color);
+			int NewValue = UiDoValueSelector((char *) &pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, &Color);
 			if (NewValue != pProps[i].m_Value)
 			{
 				*pNewVal = NewValue;
@@ -3499,16 +3499,16 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 			done:
 			if(Selected < 2 && e == 1)
 			{
-				bool found = false;
+				bool Found = false;
 				for(unsigned int k = 0; k < sizeof(vanillaImages) / sizeof(vanillaImages[0]); k++)
 				{
 					if(str_comp(m_Map.m_lImages[i]->m_aName, vanillaImages[k]) == 0)
 					{
-						found = true;
+						Found = true;
 						break;
 					}
 				}
-				if(!found)
+				if(!Found)
 					Selected += 4; // Image should be embedded
 			}
 
@@ -5109,12 +5109,12 @@ void CEditor::Render()
 
 		if(m_ShowEnvelopeEditor && !m_ShowPicker)
 		{
-			float size = 125.0f;
+			float Size = 125.0f;
 			if(m_ShowEnvelopeEditor == 2)
-				size *= 2.0f;
+				Size *= 2.0f;
 			else if(m_ShowEnvelopeEditor == 3)
-				size *= 3.0f;
-			View.HSplitBottom(size, &View, &ExtraEditor);
+				Size *= 3.0f;
+			View.HSplitBottom(Size, &View, &ExtraEditor);
 		}
 		if (m_ShowUndo && !m_ShowPicker)
 		{

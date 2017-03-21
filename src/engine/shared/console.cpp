@@ -163,7 +163,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			}
 			else
 			{
-				char* pVictim = 0;
+				char *pVictim = 0;
 
 				if (Command != 'v')
 					pResult->AddArgument(pStr);
@@ -548,7 +548,7 @@ void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 {
-	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[128];
 	CCommand *pCommand = pConsole->FindCommand(pResult->GetString(0), CFGFLAG_SERVER);
 	if(pCommand)
@@ -579,7 +579,7 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 
 void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 {
-	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[240];
 	mem_zero(aBuf, sizeof(aBuf));
 	int Used = 0;
@@ -614,7 +614,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 
 void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 {
-	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	CResult Result;
 	Result.m_pCommand = "access_status";
 	char aBuf[4];
@@ -710,7 +710,7 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 {
-	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[128] = {0};
 	CCommand *pCommand = pConsole->FindCommand(pResult->GetString(0), pConsole->m_FlagMask);
 	if(pCommand)
@@ -746,7 +746,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 
 void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
 {
-	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[128] = {0};
 	CCommand *pCommand = pConsole->FindCommand(pResult->GetString(1), pConsole->m_FlagMask);
 	if(pCommand)

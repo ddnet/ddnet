@@ -47,21 +47,21 @@ void CRaceDemo::OnRender()
 	// start the demo
 	if(m_DemoStartTick < Client()->GameTick())
 	{
-		bool start = false;
+		bool Start = false;
 		std::list < int > Indices = m_pClient->Collision()->GetMapIndices(m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos);
 		if(!Indices.empty())
 			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
 			{
-				if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) start = true;
-				if(m_pClient->Collision()->GetFTileIndex(*i) == TILE_BEGIN) start = true;
+				if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) Start = true;
+				if(m_pClient->Collision()->GetFTileIndex(*i) == TILE_BEGIN) Start = true;
 			}
 		else
 		{
-			if(m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN) start = true;
-			if(m_pClient->Collision()->GetFTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN) start = true;
+			if(m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN) Start = true;
+			if(m_pClient->Collision()->GetFTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN) Start = true;
 		}
 
-		if(start)
+		if(Start)
 		{
 			OnReset();
 			char aBuf[512];

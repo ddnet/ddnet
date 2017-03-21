@@ -1217,8 +1217,8 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	char aBuftime[64];
-	int IntTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime)
-			/ ((float) pSelf->Server()->TickSpeed()));
+	int IntTime = (int)((float)(pSelf->Server()->Tick() - pChr->m_StartTime)
+			/ ((float)pSelf->Server()->TickSpeed()));
 	str_format(aBuftime, sizeof(aBuftime), "%s time is %s%d:%s%d",
 			aBufname,
 			((IntTime / 60) > 9) ? "" : "0", IntTime / 60,
@@ -1242,8 +1242,8 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	char aBuftime[64];
-	int IntTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime)
-			/ ((float) pSelf->Server()->TickSpeed()));
+	int IntTime = (int)((float)(pSelf->Server()->Tick() - pChr->m_StartTime)
+			/ ((float)pSelf->Server()->TickSpeed()));
 	str_format(aBuftime, sizeof(aBuftime),
 			"%s\'s current race time is %s%d:%s%d",
 			pSelf->Server()->ClientName(pResult->m_ClientID),
@@ -1266,8 +1266,8 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	char aBuftime[64];
-	int IntTime = (int) ((float) (pSelf->Server()->Tick() - pChr->m_StartTime)
-			/ ((float) pSelf->Server()->TickSpeed()));
+	int IntTime = (int)((float)(pSelf->Server()->Tick() - pChr->m_StartTime)
+			/ ((float)pSelf->Server()->TickSpeed()));
 	str_format(aBuftime, sizeof(aBuftime), "Your time is %s%d:%s%d",
 				((IntTime / 60) > 9) ? "" : "0", IntTime / 60,
 				((IntTime % 60) > 9) ? "" : "0", IntTime % 60);

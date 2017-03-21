@@ -763,7 +763,7 @@ public:
 	CLayerGroup *GetSelectedGroup();
 	CSoundSource *GetSelectedSource();
 
-	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 color = vec4(1,1,1,0.5f));
+	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 Color = vec4(1,1,1,0.5f));
 
 	int m_Mode;
 	int m_Dialog;
@@ -928,7 +928,7 @@ public:
 	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra=0);
 	void UiDoPopupMenu();
 
-	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool isDegree=false, bool isHex=false, int corners=CUI::CORNER_ALL, vec4* color=0);
+	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, vec4* Color=0);
 
 	static int PopupGroup(CEditor *pEditor, CUIRect View);
 	static int PopupLayer(CEditor *pEditor, CUIRect View);

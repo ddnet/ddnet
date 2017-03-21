@@ -228,7 +228,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	{
 		if (m_ServerRecord > 0)
 		{
-			str_format(aBuf, sizeof(aBuf), "%02d:%02d", ((int) m_ServerRecord)/60, ((int) m_ServerRecord)%60);
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d", ((int)m_ServerRecord)/60, ((int)m_ServerRecord)%60);
 		}
 		else
 			aBuf[0] = 0;

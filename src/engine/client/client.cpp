@@ -1038,23 +1038,23 @@ vec3 CClient::GetColorV3(int v)
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)
 {
-	static char aErrorMsg[128];
+	static char s_aErrorMsg[128];
 
 	SetState(IClient::STATE_LOADING);
 
 	if(!m_pMap->Load(pFilename))
 	{
-		str_format(aErrorMsg, sizeof(aErrorMsg), "map '%s' not found", pFilename);
-		return aErrorMsg;
+		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' not found", pFilename);
+		return s_aErrorMsg;
 	}
 
 	// get the crc of the map
 	if(m_pMap->Crc() != WantedCrc)
 	{
-		str_format(aErrorMsg, sizeof(aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aErrorMsg);
+		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
 		m_pMap->Unload();
-		return aErrorMsg;
+		return s_aErrorMsg;
 	}
 
 	// stop demo recording if we loaded a new map
@@ -1246,7 +1246,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 	}
 
 	//server count from master server
-	if(pPacket->m_DataSize == (int) sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
+	if(pPacket->m_DataSize == (int)sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{
 		unsigned char *pP = (unsigned char*) pPacket->m_pData;
 		pP += sizeof(SERVERBROWSE_COUNT);
@@ -1298,10 +1298,10 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		{
 			NETADDR Addr;
 
-			static unsigned char IPV4Mapping[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF };
+			static unsigned char s_IPV4Mapping[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF };
 
 			// copy address
-			if(!mem_comp(IPV4Mapping, pAddrs[i].m_aIp, sizeof(IPV4Mapping)))
+			if(!mem_comp(s_IPV4Mapping, pAddrs[i].m_aIp, sizeof(s_IPV4Mapping)))
 			{
 				mem_zero(&Addr, sizeof(Addr));
 				Addr.type = NETTYPE_IPV4;

@@ -479,16 +479,16 @@ void CCommandProcessorFragment_SDL::Cmd_VideoModes(const CCommandBuffer::SComman
 			continue;
 		}
 
-		bool alreadyFound = false;
+		bool AlreadyFound = false;
 		for(int j = 0; j < numModes; j++)
 		{
 			if(pCommand->m_pModes[j].m_Width == mode.w && pCommand->m_pModes[j].m_Height == mode.h)
 			{
-				alreadyFound = true;
+				AlreadyFound = true;
 				break;
 			}
 		}
-		if(alreadyFound)
+		if(AlreadyFound)
 			continue;
 
 		pCommand->m_pModes[numModes].m_Width = mode.w;

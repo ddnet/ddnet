@@ -107,13 +107,13 @@ void CMapSounds::OnRender()
 								(Client()->GameTick()-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
 								Client()->IntraGameTick());
 		}
-		float offset = s_Time-pSource->m_pSource->m_TimeDelay;
-		if(offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !pSource->m_HighDetail))
+		float Offset = s_Time-pSource->m_pSource->m_TimeDelay;
+		if(Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !pSource->m_HighDetail))
 		{
 			if(pSource->m_Voice.IsValid())
 			{
 				// currently playing, set offset
-				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);
+				Sound()->SetVoiceTimeOffset(pSource->m_Voice, Offset);
 			}
 			else
 			{
@@ -123,7 +123,7 @@ void CMapSounds::OnRender()
 				if(!pSource->m_pSource->m_Pan) Flags |= ISound::FLAG_NO_PANNING;
 
 				pSource->m_Voice = m_pClient->m_pSounds->PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
-				Sound()->SetVoiceTimeOffset(pSource->m_Voice, offset);
+				Sound()->SetVoiceTimeOffset(pSource->m_Voice, Offset);
 				Sound()->SetVoiceFalloff(pSource->m_Voice, pSource->m_pSource->m_Falloff/255.0f);
 				switch(pSource->m_pSource->m_Shape.m_Type)
 				{

@@ -223,11 +223,11 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		if(pSqlServer->GetResults()->next())
 		{
 			// get the best time
-			float time = (float)pSqlServer->GetResults()->getDouble("Time");
-			pData->PlayerData(pData->m_ClientID)->m_BestTime = time;
-			pData->PlayerData(pData->m_ClientID)->m_CurrentTime = time;
+			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
+			pData->PlayerData(pData->m_ClientID)->m_BestTime = Time;
+			pData->PlayerData(pData->m_ClientID)->m_CurrentTime = Time;
 			if(pData->GameServer()->m_apPlayers[pData->m_ClientID])
-				pData->GameServer()->m_apPlayers[pData->m_ClientID]->m_Score = -time;
+				pData->GameServer()->m_apPlayers[pData->m_ClientID]->m_Score = -Time;
 
 			char aColumn[8];
 			if(g_Config.m_SvCheckpointSave)
@@ -1512,13 +1512,13 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			else
 			{
 
-				bool found = false;
+				bool Found = false;
 				for (int i = 0; i < SavedTeam.GetMembersCount(); i++)
 				{
 					if(str_comp(SavedTeam.SavedTees[i].GetName(), pData->Server()->ClientName(pData->m_ClientID)) == 0)
-					{ found = true; break; }
+					{ Found = true; break; }
 				}
-				if (!found)
+				if (!Found)
 					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You don't belong to this team");
 				else
 				{
