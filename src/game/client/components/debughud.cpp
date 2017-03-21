@@ -108,7 +108,7 @@ void CDebugHud::RenderTuning()
 		TextRender()->Text(0x0, x-w, y+Count*6, 5, aBuf, -1);
 
 		x += 5.0f;
-		TextRender()->Text(0x0, x, y+Count*6, 5, m_pClient->m_Tuning[g_Config.m_ClDummy].m_apNames[i], -1);
+		TextRender()->Text(0x0, x, y+Count*6, 5, m_pClient->m_Tuning[g_Config.m_ClDummy].ms_apNames[i], -1);
 
 		Count++;
 	}

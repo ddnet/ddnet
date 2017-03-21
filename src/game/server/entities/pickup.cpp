@@ -54,7 +54,7 @@ void CPickup::Tick()
 		if(pChr && pChr->IsAlive())
 		{
 			if(m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
-			bool sound = false;
+			bool Sound = false;
 			// player picked us up, is someone was hooking us, let them go
 			switch (m_Type)
 			{
@@ -72,14 +72,14 @@ void CPickup::Tick()
 							{
 								pChr->SetWeaponGot(i, false);
 								pChr->SetWeaponAmmo(i, 0);
-								sound = true;
+								Sound = true;
 							}
 						}
 					}
 					pChr->SetNinjaActivationDir(vec2(0,0));
 					pChr->SetNinjaActivationTick(-500);
 					pChr->SetNinjaCurrentMoveTime(0);
-					if (sound)
+					if (Sound)
 					{
 						pChr->SetLastWeapon(WEAPON_GUN);
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));

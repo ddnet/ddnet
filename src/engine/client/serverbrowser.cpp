@@ -938,13 +938,13 @@ void CServerBrowser::LoadDDNet()
 					// add type
 					if(json_array_length(pAddrs) > 0 && m_NumDDNetTypes < MAX_DDNET_TYPES)
 					{
-						int pos;
-						for(pos = 0; pos < m_NumDDNetTypes; pos++)
+						int Pos;
+						for(Pos = 0; Pos < m_NumDDNetTypes; Pos++)
 						{
-							if(!str_comp(m_aDDNetTypes[pos], pType))
+							if(!str_comp(m_aDDNetTypes[Pos], pType))
 								break;
 						}
-						if(pos == m_NumDDNetTypes)
+						if(Pos == m_NumDDNetTypes)
 						{
 							str_copy(m_aDDNetTypes[m_NumDDNetTypes], pType, sizeof(m_aDDNetTypes[m_NumDDNetTypes]));
 							m_NumDDNetTypes++;
@@ -955,7 +955,7 @@ void CServerBrowser::LoadDDNet()
 					for (int g = 0; g < json_array_length(pAddrs); g++, pCntr->m_NumServers++)
 					{
 						const json_value *pAddr = json_array_get(pAddrs, g);
-						const char* pStr = json_string_get(pAddr);
+						const char *pStr = json_string_get(pAddr);
 						net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
 						str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
 					}

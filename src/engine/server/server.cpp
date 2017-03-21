@@ -171,7 +171,7 @@ void CSnapIDPool::FreeID(int ID)
 }
 
 
-void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* pServer)
+void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
 {
 	CNetBan::Init(pConsole, pStorage);
 
@@ -988,7 +988,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		int64 Now = time_get();
 		int64 Diff = Now - m_aClients[ClientID].m_TrafficSince;
 		float Alpha = g_Config.m_SvNetlimitAlpha / 100.0;
-		float Limit = (float) g_Config.m_SvNetlimit * 1024 / time_freq();
+		float Limit = (float)g_Config.m_SvNetlimit * 1024 / time_freq();
 
 		if (m_aClients[ClientID].m_Traffic > Limit)
 		{
@@ -997,7 +997,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		if (Diff > 100)
 		{
-			m_aClients[ClientID].m_Traffic = (Alpha * ((float) pPacket->m_DataSize / Diff)) + (1.0 - Alpha) * m_aClients[ClientID].m_Traffic;
+			m_aClients[ClientID].m_Traffic = (Alpha * ((float)pPacket->m_DataSize / Diff)) + (1.0 - Alpha) * m_aClients[ClientID].m_Traffic;
 			m_aClients[ClientID].m_TrafficSince = Now;
 		}
 	}
@@ -1898,7 +1898,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[1024];
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	CServer* pThis = static_cast<CServer *>(pUser);
+	CServer *pThis = static_cast<CServer *>(pUser);
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -1930,7 +1930,7 @@ void CServer::ConDnsblStatus(IConsole::IResult *pResult, void *pUser)
 	// dump blacklisted clients
 	char aBuf[1024];
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	CServer* pThis = static_cast<CServer *>(pUser);
+	CServer *pThis = static_cast<CServer *>(pUser);
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -2225,7 +2225,7 @@ bool CServer::IsRecording(int ClientID)
 
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
-	CServer* pServer = (CServer *)pUser;
+	CServer *pServer = (CServer *)pUser;
 	char aFilename[128];
 
 	if(pResult->NumArguments())

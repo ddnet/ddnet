@@ -17,157 +17,156 @@ CSaveTee::~CSaveTee()
 	;
 }
 
-void CSaveTee::save(CCharacter* pchr)
+void CSaveTee::save(CCharacter *pChr)
 {
-	str_copy(m_name, pchr->m_pPlayer->Server()->ClientName(pchr->m_pPlayer->GetCID()), sizeof(m_name));
+	str_copy(m_name, pChr->m_pPlayer->Server()->ClientName(pChr->m_pPlayer->GetCID()), sizeof(m_name));
 
-	m_Alive = pchr->m_Alive;
-	m_Paused = pchr->m_pPlayer->m_Paused;
-	m_NeededFaketuning = pchr->m_NeededFaketuning;
+	m_Alive = pChr->m_Alive;
+	m_Paused = pChr->m_pPlayer->m_Paused;
+	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
-	m_TeeFinished = pchr->Teams()->TeeFinished(pchr->m_pPlayer->GetCID());
-	m_IsSolo = pchr->Teams()->m_Core.GetSolo(pchr->m_pPlayer->GetCID());
+	m_TeeFinished = pChr->Teams()->TeeFinished(pChr->m_pPlayer->GetCID());
+	m_IsSolo = pChr->Teams()->m_Core.GetSolo(pChr->m_pPlayer->GetCID());
 
 	for(int i = 0; i< NUM_WEAPONS; i++)
 	{
-		m_aWeapons[i].m_AmmoRegenStart = pchr->m_aWeapons[i].m_AmmoRegenStart;
-		m_aWeapons[i].m_Ammo = pchr->m_aWeapons[i].m_Ammo;
-		m_aWeapons[i].m_Ammocost = pchr->m_aWeapons[i].m_Ammocost;
-		m_aWeapons[i].m_Got = pchr->m_aWeapons[i].m_Got;
+		m_aWeapons[i].m_AmmoRegenStart = pChr->m_aWeapons[i].m_AmmoRegenStart;
+		m_aWeapons[i].m_Ammo = pChr->m_aWeapons[i].m_Ammo;
+		m_aWeapons[i].m_Ammocost = pChr->m_aWeapons[i].m_Ammocost;
+		m_aWeapons[i].m_Got = pChr->m_aWeapons[i].m_Got;
 	}
 
-	m_LastWeapon = pchr->m_LastWeapon;
-	m_QueuedWeapon = pchr->m_QueuedWeapon;
+	m_LastWeapon = pChr->m_LastWeapon;
+	m_QueuedWeapon = pChr->m_QueuedWeapon;
 
-	m_SuperJump = pchr->m_SuperJump;
-	m_Jetpack = pchr->m_Jetpack;
-	m_NinjaJetpack = pchr->m_NinjaJetpack;
-	m_FreezeTime = pchr->m_FreezeTime;
-	m_FreezeTick = pchr->Server()->Tick() - pchr->m_FreezeTick;
+	m_SuperJump = pChr->m_SuperJump;
+	m_Jetpack = pChr->m_Jetpack;
+	m_NinjaJetpack = pChr->m_NinjaJetpack;
+	m_FreezeTime = pChr->m_FreezeTime;
+	m_FreezeTick = pChr->Server()->Tick() - pChr->m_FreezeTick;
 
-	m_DeepFreeze = pchr->m_DeepFreeze;
-	m_EndlessHook = pchr->m_EndlessHook;
-	m_DDRaceState = pchr->m_DDRaceState;
+	m_DeepFreeze = pChr->m_DeepFreeze;
+	m_EndlessHook = pChr->m_EndlessHook;
+	m_DDRaceState = pChr->m_DDRaceState;
 
-	m_Hit = pchr->m_Hit;
-	m_TuneZone = pchr->m_TuneZone;
-	m_TuneZoneOld = pchr->m_TuneZoneOld;
+	m_Hit = pChr->m_Hit;
+	m_TuneZone = pChr->m_TuneZone;
+	m_TuneZoneOld = pChr->m_TuneZoneOld;
 
-	if(pchr->m_StartTime)
-		m_Time = pchr->Server()->Tick() - pchr->m_StartTime + 60 * pchr->Server()->TickSpeed();
+	if(pChr->m_StartTime)
+		m_Time = pChr->Server()->Tick() - pChr->m_StartTime + 60 * pChr->Server()->TickSpeed();
 
-	m_Pos = pchr->m_Pos;
-	m_PrevPos = pchr->m_PrevPos;
-	m_TeleCheckpoint = pchr->m_TeleCheckpoint;
-	m_LastPenalty = pchr->m_LastPenalty;
+	m_Pos = pChr->m_Pos;
+	m_PrevPos = pChr->m_PrevPos;
+	m_TeleCheckpoint = pChr->m_TeleCheckpoint;
+	m_LastPenalty = pChr->m_LastPenalty;
 
-	if(pchr->m_CpTick)
-		m_CpTime = pchr->Server()->Tick() - pchr->m_CpTick;
+	if(pChr->m_CpTick)
+		m_CpTime = pChr->Server()->Tick() - pChr->m_CpTick;
 
-	m_CpActive = pchr->m_CpActive;
-	m_CpLastBroadcast = pchr->m_CpLastBroadcast;
+	m_CpActive = pChr->m_CpActive;
+	m_CpLastBroadcast = pChr->m_CpLastBroadcast;
 
 	for(int i = 0; i < 25; i++)
-		m_CpCurrent[i] = pchr->m_CpCurrent[i];
+		m_CpCurrent[i] = pChr->m_CpCurrent[i];
 
 	// Core
-	m_CorePos = pchr->m_Core.m_Pos;
-	m_Vel = pchr->m_Core.m_Vel;
-	m_Hook = pchr->m_Core.m_Hook;
-	m_Collision = pchr->m_Core.m_Collision;
-	m_ActiveWeapon = pchr->m_Core.m_ActiveWeapon;
-	m_Jumped = pchr->m_Core.m_Jumped;
-	m_JumpedTotal = pchr->m_Core.m_JumpedTotal;
-	m_Jumps = pchr->m_Core.m_Jumps;
-	m_HookPos = pchr->m_Core.m_HookPos;
-	m_HookDir = pchr->m_Core.m_HookDir;
-	m_HookTeleBase = pchr->m_Core.m_HookTeleBase;
+	m_CorePos = pChr->m_Core.m_Pos;
+	m_Vel = pChr->m_Core.m_Vel;
+	m_Hook = pChr->m_Core.m_Hook;
+	m_Collision = pChr->m_Core.m_Collision;
+	m_ActiveWeapon = pChr->m_Core.m_ActiveWeapon;
+	m_Jumped = pChr->m_Core.m_Jumped;
+	m_JumpedTotal = pChr->m_Core.m_JumpedTotal;
+	m_Jumps = pChr->m_Core.m_Jumps;
+	m_HookPos = pChr->m_Core.m_HookPos;
+	m_HookDir = pChr->m_Core.m_HookDir;
+	m_HookTeleBase = pChr->m_Core.m_HookTeleBase;
 
-	m_HookTick = pchr->m_Core.m_HookTick;
+	m_HookTick = pChr->m_Core.m_HookTick;
 
-	m_HookState = pchr->m_Core.m_HookState;
+	m_HookState = pChr->m_Core.m_HookState;
 }
 
-void CSaveTee::load(CCharacter* pchr, int Team)
+void CSaveTee::load(CCharacter *pChr, int Team)
 {
-	pchr->m_pPlayer->m_Paused = m_Paused;
-	pchr->m_pPlayer->ProcessPause();
+	pChr->m_pPlayer->m_Paused = m_Paused;
+	pChr->m_pPlayer->ProcessPause();
 
-	pchr->m_Alive = m_Alive;
-	pchr->m_NeededFaketuning = m_NeededFaketuning;
+	pChr->m_Alive = m_Alive;
+	pChr->m_NeededFaketuning = m_NeededFaketuning;
 
-	pchr->Teams()->SetForceCharacterTeam(pchr->m_pPlayer->GetCID(), Team);
-	pchr->Teams()->m_Core.SetSolo(pchr->m_pPlayer->GetCID(), m_IsSolo);
-	pchr->Teams()->SetFinished(pchr->m_pPlayer->GetCID(), m_TeeFinished);
+	pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCID(), Team);
+	pChr->Teams()->m_Core.SetSolo(pChr->m_pPlayer->GetCID(), m_IsSolo);
+	pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCID(), m_TeeFinished);
 
 	for(int i = 0; i< NUM_WEAPONS; i++)
 	{
-		pchr->m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
-		pchr->m_aWeapons[i].m_Ammo = m_aWeapons[i].m_Ammo;
-		pchr->m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
-		pchr->m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
+		pChr->m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
+		pChr->m_aWeapons[i].m_Ammo = m_aWeapons[i].m_Ammo;
+		pChr->m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
+		pChr->m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
 	}
 
-	pchr->m_LastWeapon = m_LastWeapon;
-	pchr->m_QueuedWeapon = m_QueuedWeapon;
+	pChr->m_LastWeapon = m_LastWeapon;
+	pChr->m_QueuedWeapon = m_QueuedWeapon;
 
-	pchr->m_SuperJump = m_SuperJump;
-	pchr->m_Jetpack = m_Jetpack;
-	pchr->m_NinjaJetpack = m_NinjaJetpack;
-	pchr->m_FreezeTime = m_FreezeTime;
-	pchr->m_FreezeTick = pchr->Server()->Tick() - m_FreezeTick;
+	pChr->m_SuperJump = m_SuperJump;
+	pChr->m_Jetpack = m_Jetpack;
+	pChr->m_NinjaJetpack = m_NinjaJetpack;
+	pChr->m_FreezeTime = m_FreezeTime;
+	pChr->m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
 
-	pchr->m_DeepFreeze = m_DeepFreeze;
-	pchr->m_EndlessHook = m_EndlessHook;
-	pchr->m_DDRaceState = m_DDRaceState;
+	pChr->m_DeepFreeze = m_DeepFreeze;
+	pChr->m_EndlessHook = m_EndlessHook;
+	pChr->m_DDRaceState = m_DDRaceState;
 
-	pchr->m_Hit = m_Hit;
-	pchr->m_TuneZone = m_TuneZone;
-	pchr->m_TuneZoneOld = m_TuneZoneOld;
+	pChr->m_Hit = m_Hit;
+	pChr->m_TuneZone = m_TuneZone;
+	pChr->m_TuneZoneOld = m_TuneZoneOld;
 
 	if(m_Time)
-		pchr->m_StartTime = pchr->Server()->Tick() - m_Time;
+		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
 
-	pchr->m_Pos = m_Pos;
-	pchr->m_PrevPos = m_PrevPos;
-	pchr->m_TeleCheckpoint = m_TeleCheckpoint;
-	pchr->m_LastPenalty = m_LastPenalty;
+	pChr->m_Pos = m_Pos;
+	pChr->m_PrevPos = m_PrevPos;
+	pChr->m_TeleCheckpoint = m_TeleCheckpoint;
+	pChr->m_LastPenalty = m_LastPenalty;
 
 	if(m_CpTime)
-		pchr->m_CpTick = pchr->Server()->Tick() - m_CpTime;
+		pChr->m_CpTick = pChr->Server()->Tick() - m_CpTime;
 
-	pchr->m_CpActive  = m_CpActive;
-	pchr->m_CpLastBroadcast = m_CpLastBroadcast;
+	pChr->m_CpActive  = m_CpActive;
+	pChr->m_CpLastBroadcast = m_CpLastBroadcast;
 
 	for(int i = 0; i < 25; i++)
-		pchr->m_CpCurrent[i] = m_CpCurrent[i];
+		pChr->m_CpCurrent[i] = m_CpCurrent[i];
 
 	// Core
-	pchr->m_Core.m_Pos = m_CorePos;
-	pchr->m_Core.m_Vel = m_Vel;
-	pchr->m_Core.m_Hook = m_Hook;
-	pchr->m_Core.m_Collision = m_Collision;
-	pchr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
-	pchr->m_Core.m_Jumped = m_Jumped;
-	pchr->m_Core.m_JumpedTotal = m_JumpedTotal;
-	pchr->m_Core.m_Jumps = m_Jumps;
-	pchr->m_Core.m_HookPos = m_HookPos;
-	pchr->m_Core.m_HookDir = m_HookDir;
-	pchr->m_Core.m_HookTeleBase = m_HookTeleBase;
+	pChr->m_Core.m_Pos = m_CorePos;
+	pChr->m_Core.m_Vel = m_Vel;
+	pChr->m_Core.m_Hook = m_Hook;
+	pChr->m_Core.m_Collision = m_Collision;
+	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
+	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;
+	pChr->m_Core.m_Jumps = m_Jumps;
+	pChr->m_Core.m_HookPos = m_HookPos;
+	pChr->m_Core.m_HookDir = m_HookDir;
+	pChr->m_Core.m_HookTeleBase = m_HookTeleBase;
 
-	pchr->m_Core.m_HookTick = m_HookTick;
+	pChr->m_Core.m_HookTick = m_HookTick;
 
 	if(m_HookState == HOOK_GRABBED)
 	{
-		pchr->m_Core.m_HookState = HOOK_FLYING;
-		pchr->m_Core.m_HookedPlayer = -1;
+		pChr->m_Core.m_HookState = HOOK_FLYING;
+		pChr->m_Core.m_HookedPlayer = -1;
 	}
 	else
 	{
-		pchr->m_Core.m_HookState = m_HookState;
+		pChr->m_Core.m_HookState = m_HookState;
 	}
 
-	pchr->GameServer()->SendTuningParams(pchr->m_pPlayer->GetCID(), m_TuneZone);
+	pChr->GameServer()->SendTuningParams(pChr->m_pPlayer->GetCID(), m_TuneZone);
 }
 
 char* CSaveTee::GetString()
@@ -271,7 +270,7 @@ int CSaveTeam::load(int Team)
 	Teams->ChangeTeamState(Team, m_TeamState);
 	Teams->SetTeamLock(Team, m_TeamLocked);
 
-	CCharacter* pchr;
+	CCharacter *pChr;
 
 	for (int i = 0; i<m_MembersCount; i++)
 	{
@@ -288,10 +287,10 @@ int CSaveTeam::load(int Team)
 
 	for (int i = 0; i<m_MembersCount; i++)
 	{
-		pchr = MatchCharacter(SavedTees[i].GetName(), i);
-		if(pchr)
+		pChr = MatchCharacter(SavedTees[i].GetName(), i);
+		if(pChr)
 		{
-			SavedTees[i].load(pchr, Team);
+			SavedTees[i].load(pChr, Team);
 		}
 	}
 

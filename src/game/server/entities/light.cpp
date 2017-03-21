@@ -129,29 +129,29 @@ void CLight::Snap(int SnappingClient)
 	if (!pObj)
 		return;
 
-	pObj->m_X = (int) m_Pos.x;
-	pObj->m_Y = (int) m_Pos.y;
+	pObj->m_X = (int)m_Pos.x;
+	pObj->m_Y = (int)m_Pos.y;
 
 	if (Char && Char->Team() == TEAM_SUPER)
 	{
-		pObj->m_FromX = (int) m_Pos.x;
-		pObj->m_FromY = (int) m_Pos.y;
+		pObj->m_FromX = (int)m_Pos.x;
+		pObj->m_FromY = (int)m_Pos.y;
 	}
 	else if (Char && m_Layer == LAYER_SWITCH
 			&& GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 	{
-		pObj->m_FromX = (int) m_To.x;
-		pObj->m_FromY = (int) m_To.y;
+		pObj->m_FromX = (int)m_To.x;
+		pObj->m_FromY = (int)m_To.y;
 	}
 	else if (m_Layer != LAYER_SWITCH)
 	{
-		pObj->m_FromX = (int) m_To.x;
-		pObj->m_FromY = (int) m_To.y;
+		pObj->m_FromX = (int)m_To.x;
+		pObj->m_FromY = (int)m_To.y;
 	}
 	else
 	{
-		pObj->m_FromX = (int) m_Pos.x;
-		pObj->m_FromY = (int) m_Pos.y;
+		pObj->m_FromX = (int)m_Pos.x;
+		pObj->m_FromY = (int)m_Pos.y;
 	}
 
 	int StartTick = m_EvalTick;

@@ -179,12 +179,12 @@ void CStatboard::RenderGlobalStats()
 	if(m_pClient->m_pMotd->IsActive())
 		m_pClient->m_pMotd->Clear();
 
-	bool gameWithFlags = m_pClient->m_Snap.m_pGameInfoObj &&
+	bool GameWithFlags = m_pClient->m_Snap.m_pGameInfoObj &&
 		m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS;
 
 	StatboardContentWidth += 7 * 85 + 95; // Suicides 95; other labels 85
 
-	if(gameWithFlags)
+	if(GameWithFlags)
 		StatboardContentWidth += 150; // Grabs & Flags
 
 	bool aDisplayWeapon[NUM_WEAPONS] = {false};
@@ -223,7 +223,7 @@ void CStatboard::RenderGlobalStats()
 	{
 		if(i == 2)
 			px += 10.0f; // Suicides
-		if(i == 8 && !gameWithFlags) // Don't draw "Grabs" in game with no flag
+		if(i == 8 && !GameWithFlags) // Don't draw "Grabs" in game with no flag
 			continue;
 		tw = TextRender()->TextWidth(0, 22.0f, apHeaders[i], -1);
 		TextRender()->Text(0, x+px-tw, y-5, 22.0f, apHeaders[i], -1);
@@ -246,7 +246,7 @@ void CStatboard::RenderGlobalStats()
 	}
 	Graphics()->QuadsEnd();
 
-	if(gameWithFlags)
+	if(GameWithFlags)
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 		Graphics()->QuadsBegin();
@@ -366,7 +366,7 @@ void CStatboard::RenderGlobalStats()
 			px += 85;
 		}
 		// GRABS
-		if(gameWithFlags)
+		if(GameWithFlags)
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagGrabs);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
@@ -386,7 +386,7 @@ void CStatboard::RenderGlobalStats()
 			px += 80;
 		}
 		// FLAGS
-		if(gameWithFlags)
+		if(GameWithFlags)
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagCaptures);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);

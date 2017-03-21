@@ -619,12 +619,12 @@ int CCollision::GetSwitchDelay(int Index)
 	return 0;
 }
 
-int CCollision::IsMover(int x, int y, int* Flags)
+int CCollision::IsMover(int x, int y, int *pFlags)
 {
 	int Nx = clamp(x/32, 0, m_Width-1);
 	int Ny = clamp(y/32, 0, m_Height-1);
 	int Index = m_pTiles[Ny*m_Width+Nx].m_Index;
-	*Flags = m_pTiles[Ny*m_Width+Nx].m_Flags;
+	*pFlags = m_pTiles[Ny*m_Width+Nx].m_Flags;
 	if(Index < 0)
 		return 0;
 	if (Index == TILE_CP || Index == TILE_CP_F)

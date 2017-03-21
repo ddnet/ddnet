@@ -126,7 +126,7 @@ void CProjectile::Tick()
 		m_LifeSpan--;
 
 	int64_t TeamMask = -1LL;
-	bool isWeaponCollide = false;
+	bool IsWeaponCollide = false;
 	if
 	(
 			pOwnerChar &&
@@ -136,7 +136,7 @@ void CProjectile::Tick()
 			!pTargetChr->CanCollide(m_Owner)
 			)
 	{
-			isWeaponCollide = true;
+			IsWeaponCollide = true;
 			//TeamMask = OwnerChar->Teams()->TeamMask( OwnerChar->Team());
 	}
 	if (pOwnerChar && pOwnerChar->IsAlive())
@@ -148,7 +148,7 @@ void CProjectile::Tick()
 		GameServer()->m_World.DestroyEntity(this);
 	}
 
-	if( ((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
+	if( ((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
 	{
 		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
 		{

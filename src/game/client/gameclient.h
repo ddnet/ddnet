@@ -409,25 +409,25 @@ inline vec3 HslToRgb(vec3 HSL)
 inline vec3 RgbToHsl(vec3 RGB)
 {
 	vec3 HSL;
-	float maxColor = MAX3(RGB.r, RGB.g, RGB.b);
-	float minColor = MIN3(RGB.r, RGB.g, RGB.b);
-	if (minColor == maxColor)
+	float MaxColor = MAX3(RGB.r, RGB.g, RGB.b);
+	float MinColor = MIN3(RGB.r, RGB.g, RGB.b);
+	if (MinColor == MaxColor)
 		return vec3(0.0f, 0.0f, RGB.g * 255.0f);
 	else
 	{
-		HSL.l = (minColor + maxColor) / 2;
+		HSL.l = (MinColor + MaxColor) / 2;
 
 		if (HSL.l < 0.5)
-			HSL.s = (maxColor - minColor) / (maxColor + minColor);
+			HSL.s = (MaxColor - MinColor) / (MaxColor + MinColor);
 		else
-			HSL.s = (maxColor - minColor) / (2.0 - maxColor - minColor);
+			HSL.s = (MaxColor - MinColor) / (2.0 - MaxColor - MinColor);
 
-		if (RGB.r == maxColor)
-			HSL.h = (RGB.g - RGB.b) / (maxColor - minColor);
-		else if (RGB.g == maxColor)
-			HSL.h = 2.0 + (RGB.b - RGB.r) / (maxColor - minColor);
+		if (RGB.r == MaxColor)
+			HSL.h = (RGB.g - RGB.b) / (MaxColor - MinColor);
+		else if (RGB.g == MaxColor)
+			HSL.h = 2.0 + (RGB.b - RGB.r) / (MaxColor - MinColor);
 		else
-			HSL.h = 4.0 + (RGB.r - RGB.g) / (maxColor - minColor);
+			HSL.h = 4.0 + (RGB.r - RGB.g) / (MaxColor - MinColor);
 
 		HSL.h /= 6; //to bring it to a number between 0 and 1
 		if (HSL.h < 0) HSL.h++;
