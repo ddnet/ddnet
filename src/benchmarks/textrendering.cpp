@@ -55,7 +55,7 @@ int main(int argc, const char **argv) // ignore_convention
 	dbg_msg("benchmark", "ready!");
 	
 	// text from https://fr.wikibooks.org/wiki/Translinguisme/Par_expression/Bonjour
-	static const char aaText[][32] =
+	static const char s_aaText[][32] =
 	{
 		"azertyuiop",
 		"ըթժիլխծկհձ",
@@ -81,8 +81,8 @@ int main(int argc, const char **argv) // ignore_convention
 		"כלםמןנסעףפ",
 		"AZERTYUIOP",
 	};
-	static const int NbText = sizeof(aaText) / sizeof(aaText[0]);
-	static const int Duration = 20; // in seconds
+	static const int s_NbText = sizeof(s_aaText) / sizeof(s_aaText[0]);
+	static const int s_Duration = 20; // in seconds
 	
 	float Fps = 0.0f;
 	unsigned int FrameCounter = 0;
@@ -92,7 +92,7 @@ int main(int argc, const char **argv) // ignore_convention
 		while(1)
 		{
 			int64 CurrentTime = time_get();
-			double RenderTime = 0.1 * (CurrentTime - StartTime) / (double) time_freq();
+			double RenderTime = 0.1 * (CurrentTime - StartTime) / (double)time_freq();
 
 			pGraphics->Clear(0.5f, 0.5f, 0.5f);
 			
@@ -102,9 +102,9 @@ int main(int argc, const char **argv) // ignore_convention
 			
 			for(int j = 0; j < 3; j++)
 			{
-				for(int i=0; i < NbText; i++)
+				for(int i = 0; i < s_NbText; i++)
 				{
-					float TimeWrap = fmod(RenderTime + i / (double) (NbText), 1.0f);
+					float TimeWrap = fmod(RenderTime + i / (double)(s_NbText), 1.0f);
 					
 					float PositionX = j * Width / 3.0f;
 					float PositionY = TimeWrap * Height * 0.8f;
@@ -113,7 +113,7 @@ int main(int argc, const char **argv) // ignore_convention
 					CTextCursor Cursor;
 					pTextRender->SetCursor(&Cursor, PositionX, PositionY, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = Width;
-					pTextRender->TextEx(&Cursor, aaText[i % NbText], -1);
+					pTextRender->TextEx(&Cursor, s_aaText[i % s_NbText], -1);
 				}
 			}
 			
@@ -121,9 +121,9 @@ int main(int argc, const char **argv) // ignore_convention
 			
 			FrameCounter++;
 			int64 TimeDiff = CurrentTime - StartTime;
-			if(TimeDiff > time_freq() * Duration)
+			if(TimeDiff > time_freq() * s_Duration)
 			{
-				double Time = TimeDiff / (double) time_freq();
+				double Time = TimeDiff / (double)time_freq();
 				Fps = (double)FrameCounter / Time;
 				break;
 			}
