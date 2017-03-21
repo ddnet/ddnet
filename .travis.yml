@@ -1,0 +1,17 @@
+language: c++
+sudo: false
+dist: trusty
+addons:
+  apt:
+    packages:
+    - libfreetype6-dev
+    - libsdl2-dev
+script:
+- mkdir build
+- cd build
+- cmake ..
+- make everything
+env:
+  global:
+  - CFLAGS="-Wdeclaration-after-statement -Werror"
+  - CXXFLAGS="-Werror"
