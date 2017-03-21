@@ -10,31 +10,107 @@
 #include <engine/kernel.h>
 #include <engine/textrender.h>
 
-class CTimer
+#include "tools.h"
+
+typedef char TestString[64];
+
+int ExecTest(const TestString* pStrings, int NumStrings)
 {
-public:
-	CTimer(int64 StartTime) : m_StartTime(StartTime) { }
-	CTimer() : m_StartTime(time_get()) { }
-	int64 GetElapsed(int64 CurrentTime)
+	CTimer TimerStartup;
+
+	IKernel *pKernel = IKernel::Create();
+	IEngineGraphics *pGraphics = 0;
+	IEngineTextRender *pTextRender = 0;
+
+	// init SDL
 	{
-		return CurrentTime - m_StartTime;
+		CTimer Timer;
+		if(SDL_Init(0) < 0)
+		{
+			dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
+			return 1;
+		}
+
+		atexit(SDL_Quit); // ignore_convention
+		Timer.PrintElapsed("sdl");
 	}
-	int64 GetElapsed()
+
+	// init graphics
 	{
-		return GetElapsed(time_get());
+		CTimer Timer;
+		pGraphics = CreateEngineGraphicsThreaded();
+		pKernel->RegisterInterface(static_cast<IEngineGraphics*>(pGraphics));
+		pKernel->RegisterInterface(static_cast<IGraphics*>(pGraphics));
+		if(pGraphics->Init() != 0)
+		{
+			dbg_msg("client", "couldn't init graphics");
+			return 1;
+		}
+		Timer.PrintElapsed("graphics");
 	}
-	void PrintElapsed(const char *pName, int64 CurrentTime)
+
+	// init textrender
 	{
-		double Elapsed = GetElapsed(CurrentTime) / (double)time_freq();
-		dbg_msg("benchmark", "%s: %.2fms", pName, Elapsed * 1000);
+		pTextRender = CreateEngineTextRender();
+		pKernel->RegisterInterface(static_cast<IEngineTextRender*>(pTextRender));
+		pKernel->RegisterInterface(static_cast<ITextRender*>(pTextRender));
+		pTextRender->Init();
+
+		{
+			CTimer Timer;
+			CFont *pDefaultFont = pTextRender->LoadFont("data/fonts/DejaVuSansCJKName.ttf");
+			pTextRender->SetDefaultFont(pDefaultFont);
+			Timer.PrintElapsed("font");
+		}
 	}
-	void PrintElapsed(const char *pName)
+
+	pGraphics->BlendNormal();
+
+	TimerStartup.PrintElapsed("startup");
+
+	static const int s_Columns = 3;
+
+	CFrameLoopAnalyser Analyser(20, 512);
+
+	while(Analyser.Continue())
 	{
-		PrintElapsed(pName, time_get());
+		int64 Time = Analyser.GetFrameTime();
+		double RenderTime = 0.1 * Time / (double)time_freq();
+
+		pGraphics->Clear(0.5f, 0.5f, 0.5f);
+
+		float Height = 300.0f;
+		float Width = Height * pGraphics->ScreenAspect();
+		pGraphics->MapScreen(0.0f, 0.0f, Width, Height);
+
+		for(int j = 0; j < s_Columns; j++)
+		{
+			for(int i = 0; i < NumStrings; i++)
+			{
+				float TimeWrap = fmod(RenderTime + i / (double)(NumStrings), 1.0f);
+
+				float PositionX = j * Width / s_Columns;
+				float PositionY = TimeWrap * Height * 0.8f;
+				float Size = 8 + TimeWrap * 40.0;
+
+				CTextCursor Cursor;
+				pTextRender->SetCursor(&Cursor, PositionX, PositionY, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+				Cursor.m_LineWidth = Width;
+				pTextRender->TextEx(&Cursor, pStrings[i % NumStrings], -1);
+			}
+		}
+
+		pGraphics->Swap();
 	}
-private:
-	int64 m_StartTime;
-};
+
+	Analyser.PrintReport();
+
+	delete pTextRender;
+	delete pGraphics;
+	delete pKernel;
+	
+	return 0;
+}
 
 #if defined(CONF_PLATFORM_MACOSX) || defined(__ANDROID__)
 extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
@@ -44,55 +120,66 @@ extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
 int main(int argc, const char **argv) // ignore_convention
 {
 #endif
-	CTimer TimerStartup;
 	dbg_logger_stdout();
-
-	IKernel *pKernel = IKernel::Create();
-
-	CTimer TimerSDL;
-	// init SDL
+	
+	// this set contains different glyphs, including CJK
+	static const TestString s_aaCjk[] =
 	{
-		if(SDL_Init(0) < 0)
-		{
-			dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
-			return 1;
-		}
+		"azertyuiop",
+		"ըթժիլխծկհձ",
+		"ءحآخغأدؤذإ",
+		"ႠႡႢႣႤႥႦႧႨႩ",
+		"ΑΒΓΔΕΖΗΘΙΚ",
+		"㮖㯙㿄㾩䋤䋬䙐䘂䤠䣤",
+		"ЀЎМЪЁЏНЫЂА",
+		"QSDFGHJKLM",
+		"アコイザェナボゼハク", 
+		"رئزاسبشفةص",
+		"ﬡﬢﬣﬤﬥﬦﬧﬨ﬩שׁ",
+		"αβγδεζηθικ",
+		"ႭႮႯႰႱႲႳႴႵႶ",
+		"ՋՍՌՎՏՐՑՒՓՔ",
+		"ОЬЃБПЭЄВРЮ",
+		"あつさうじほぬぜむん",
+		"😀😖😱😻😴😳🙀🙃🙊🙏",
+		"قتضكثطلجظم",
+		"갥겎뙱뫋민봴빹쀔앂챠",
+		"ნოპჟრსტუფქ",
+		"еужфзхицйч",
+		"ԱԲԳԴԵԶԷԸԹԺ",
+		"כלםמןנסעףפ",
+	};
 
-		atexit(SDL_Quit); // ignore_convention
-	}
-	TimerSDL.PrintElapsed("sdl");
-
-	CTimer TimerGraphics;
-	// init graphics
-	IEngineGraphics *pGraphics = CreateEngineGraphicsThreaded();
-	pKernel->RegisterInterface(static_cast<IEngineGraphics*>(pGraphics));
-	pKernel->RegisterInterface(static_cast<IGraphics*>(pGraphics));
-	if(pGraphics->Init() != 0)
+	// this set contains only ascii characters
+	static const TestString s_aaAscii[] =
 	{
-		dbg_msg("client", "couldn't init graphics");
-		return 1;
-	}
-	TimerGraphics.PrintElapsed("graphics");
+		"Jumping",
+		"the gun",
+		"A retro",
+		"multiplayer",
+		"shooter",
+		"Teeworlds is",
+		"a free online",
+		"multiplayer game,",
+		"available for",
+		"all major",
+		"operating",
+		"systems.",
+		"Battle with",
+		"up to 16 players",
+		"in a variety",
+		"of game modes,",
+		"including",
+		"Team Deathmatch",
+		"and Capture",
+		"The Flag",
+		"You can even",
+		"design your",
+		"own maps!",
+	};
 
-	// init textrender
-	IEngineTextRender *pTextRender = CreateEngineTextRender();
-	pKernel->RegisterInterface(static_cast<IEngineTextRender*>(pTextRender));
-	pKernel->RegisterInterface(static_cast<ITextRender*>(pTextRender));
-	pTextRender->Init();
-
-	{
-		CTimer TimerFont;
-		CFont *pDefaultFont = pTextRender->LoadFont("data/fonts/DejaVuSansCJKName.ttf");
-		pTextRender->SetDefaultFont(pDefaultFont);
-		TimerFont.PrintElapsed("font");
-	}
-
-	pGraphics->BlendNormal();
-
-	TimerStartup.PrintElapsed("startup");
-
-	// text from https://fr.wikibooks.org/wiki/Translinguisme/Par_expression/Bonjour
-	static const char s_aaText[][32] =
+	// this set contains glyphs available in the default font
+	static const TestString s_aaMonofont[] =
 	{
 		"azertyuiop",
 		"ըթժիլխծկհձ",
@@ -118,108 +205,69 @@ int main(int argc, const char **argv) // ignore_convention
 		"כלםמןנסעףפ",
 		"AZERTYUIOP",
 	};
-	static const int s_NbText = sizeof(s_aaText) / sizeof(s_aaText[0]);
-	static const int s_Duration = 20; // in seconds
-	static const int s_Columns = 3;
 
-	float Fps = 0.0f;
-	unsigned int FrameCounter = 0;
-
-	array<int64> aFrameTimes;
-	aFrameTimes.hint_size(s_Duration * 200); // 200 fps should be enough for anybody.
+	enum
 	{
-		int64 CurrentTime = time_get();
-		CTimer Timer(CurrentTime);
-		CTimer FrameTimer(CurrentTime);
-		while(1)
+		TEST_DEFAULT = 0,
+		TEST_ASCII,
+		TEST_MONOFONT,
+		TEST_CJK,
+	};
+
+	int Test = TEST_DEFAULT;
+
+	for(int i = 1; i < argc; i++)
+	{
+		if(str_comp(argv[i], "--help") == 0 || str_comp(argv[i], "-h") == 0)
 		{
-			double RenderTime = 0.1 * Timer.GetElapsed(CurrentTime) / (double)time_freq();
-
-			pGraphics->Clear(0.5f, 0.5f, 0.5f);
-
-			float Height = 300.0f;
-			float Width = Height * pGraphics->ScreenAspect();
-			pGraphics->MapScreen(0.0f, 0.0f, Width, Height);
-
-			for(int j = 0; j < s_Columns; j++)
+			dbg_msg("benchmark", "Usage: %s --test <testname>", argv[0]);
+			dbg_msg("benchmark", "Available tests: \"ascii\", \"monofont\" or \"cjk\"", argv[0]);
+			return 0;
+		}
+		else if(str_comp(argv[i], "--test") == 0 || str_comp(argv[i], "-t") == 0)
+		{
+			if(Test != TEST_DEFAULT)
+				continue;
+			else if(i+1 < argc)
 			{
-				for(int i = 0; i < s_NbText; i++)
+				if(str_comp(argv[i+1], "ascii") == 0)
 				{
-					float TimeWrap = fmod(RenderTime + i / (double)(s_NbText), 1.0f);
-
-					float PositionX = j * Width / s_Columns;
-					float PositionY = TimeWrap * Height * 0.8f;
-					float Size = 8 + TimeWrap * 40.0;
-
-					CTextCursor Cursor;
-					pTextRender->SetCursor(&Cursor, PositionX, PositionY, Size, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-					Cursor.m_LineWidth = Width;
-					pTextRender->TextEx(&Cursor, s_aaText[i % s_NbText], -1);
+					Test = TEST_ASCII;
 				}
-			}
-
-			pGraphics->Swap();
-
-			CurrentTime = time_get();
-			if(FrameCounter == 0)
-			{
-				FrameTimer.PrintElapsed("first frame", CurrentTime);
-				Timer = CTimer(CurrentTime);
+				else if(str_comp(argv[i+1], "monofont") == 0)
+				{
+					Test = TEST_MONOFONT;
+				}
+				else if(str_comp(argv[i+1], "cjk") == 0)
+				{
+					Test = TEST_CJK;
+				}
+				else
+				{
+					dbg_msg("benchmark", "Error: unknown value for parameter \"test\". Possible values: \"ascii\", \"monofont\" or \"cjk\"");
+					return 1;
+				}
+				
+				i++;
 			}
 			else
 			{
-				int64 FrameTime = FrameTimer.GetElapsed(CurrentTime);
-				aFrameTimes.add(FrameTime);
-				if(argc > 1)
-				{
-					FrameTimer.PrintElapsed("frame", CurrentTime);
-				}
-			}
-			FrameTimer = CTimer(CurrentTime);
-			FrameCounter++;
-
-			int64 TimeDiff = Timer.GetElapsed(CurrentTime);
-			if(TimeDiff > time_freq() * s_Duration)
-			{
-				double Time = TimeDiff / (double)time_freq();
-				Fps = (double)(FrameCounter - 1) / Time;
-				break;
+				dbg_msg("benchmark", "Error: missing value for parameter \"test\". possible values: \"ascii\", \"monofont\" or \"cjk\"");
+				return 1;
 			}
 		}
 	}
 
-	sort(aFrameTimes.all());
-
-	dbg_msg("benchmark", "result: %.2fms per frame (%.2f fps)", 1 / Fps * 1000, Fps);
-
-	for(int i = 0; i < 10; i++)
+	switch(Test)
 	{
-		if(i >= aFrameTimes.size())
-		{
-			break;
-		}
-		double Time = aFrameTimes[aFrameTimes.size() - 1 - i] / (double)time_freq() * 1000;
-		char aPrefix[6] = "";
-		if(i != 0)
-		{
-			const char *pSuffix = "th";
-			if(i == 1)
-			{
-				pSuffix = "nd";
-			}
-			else if(i == 2)
-			{
-				pSuffix = "rd";
-			}
-			str_format(aPrefix, sizeof(aPrefix), "%d%s ", i + 1, pSuffix);
-		}
-		dbg_msg("benchmark", "%slongest frame: %.2fms", aPrefix, Time);
+		case TEST_DEFAULT:
+		case TEST_MONOFONT:
+			return ExecTest(s_aaMonofont, sizeof(s_aaMonofont) / sizeof(TestString));
+		case TEST_CJK:
+			return ExecTest(s_aaCjk, sizeof(s_aaCjk) / sizeof(TestString));
+		case TEST_ASCII:
+			return ExecTest(s_aaAscii, sizeof(s_aaAscii) / sizeof(TestString));
 	}
-	dbg_msg("benchmark", "median frame: %.2fms", aFrameTimes[aFrameTimes.size() / 2] / (double)time_freq() * 1000);
-
-	delete pTextRender;
-	delete pGraphics;
-	delete pKernel;
-
+	
 	return 0;
 }

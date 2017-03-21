@@ -309,6 +309,20 @@ if(CLIENT)
     target_sources(${TARGET_CLIENT} PRIVATE "other/icons/DDNet.rc")
   endif()
   
+  # Benchmark for clear color
+  set(TARGET_BM_CLEARCOLOR benchmark_clearcolor)
+  add_executable(${TARGET_BM_CLEARCOLOR}
+    "src/benchmarks/clearcolor.cpp"
+    "src/engine/client/graphics_threaded.cpp"
+    "src/engine/client/backend_sdl.cpp"
+    ${DEPS_CLIENT}
+    $<TARGET_OBJECTS:engine-shared>
+    $<TARGET_OBJECTS:game-shared>
+  )
+  target_link_libraries(${TARGET_BM_CLEARCOLOR} ${LIBS_CLIENT})
+  target_include_directories(${TARGET_BM_CLEARCOLOR} PRIVATE ${INCLUDE_DIRS_CLIENT})
+  list(APPEND TARGETS_OWN ${TARGET_BM_CLEARCOLOR})
+  
   # Benchmark for text rendering
   set(TARGET_BM_TEXTRENDERING benchmark_textrendering)
   add_executable(${TARGET_BM_TEXTRENDERING}
