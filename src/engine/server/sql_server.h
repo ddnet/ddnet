@@ -10,15 +10,15 @@
 class CSqlServer
 {
 public:
-	CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
+	CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
 	~CSqlServer();
 
 	bool Connect();
 	void Disconnect();
 	void CreateTables();
 
-	void executeSql(const char* pCommand);
-	void executeSqlQuery(const char* pQuery);
+	void executeSql(const char *pCommand);
+	void executeSqlQuery(const char *pQuery);
 
 	sql::ResultSet* GetResults() { return m_pResults; }
 

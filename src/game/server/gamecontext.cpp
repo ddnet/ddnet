@@ -1503,7 +1503,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}*/
 
 			//Kill Protection
-			CCharacter* pChr = pPlayer->GetCharacter();
+			CCharacter *pChr = pPlayer->GetCharacter();
 			if(pChr)
 			{
 				int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
@@ -1682,7 +1682,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_LastEmote = Server()->Tick();
 
 			SendEmoticon(ClientID, pMsg->m_Emoticon);
-			CCharacter* pChr = pPlayer->GetCharacter();
+			CCharacter *pChr = pPlayer->GetCharacter();
 			if(pChr && g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmote)
 			{
 				switch(pMsg->m_Emoticon)
@@ -1732,7 +1732,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pPlayer->m_Paused)
 				return;
 
-			CCharacter* pChr = pPlayer->GetCharacter();
+			CCharacter *pChr = pPlayer->GetCharacter();
 			if(!pChr)
 				return;
 
@@ -1829,7 +1829,7 @@ void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
 	{
 		float v;
 		pSelf->Tuning()->Get(i, &v);
-		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->m_apNames[i], v);
+		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->ms_apNames[i], v);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
@@ -1866,7 +1866,7 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 		{
 			float v;
 			pSelf->TuningList()[List].Get(i, &v);
-			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].m_apNames[i], v);
+			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].ms_apNames[i], v);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		}
 	}
@@ -2946,7 +2946,7 @@ float CGameContext::PlayerJetpack()
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
 {
-	CServer* pServ = (CServer*)Server();
+	CServer *pServ = (CServer*)Server();
 	if(m_apPlayers[ClientID])
 	{
 		m_apPlayers[ClientID]->m_Authed = Level;
@@ -3008,7 +3008,7 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 
 int CGameContext::GetDDRaceTeam(int ClientID)
 {
-	CGameControllerDDRace* pController = (CGameControllerDDRace*)m_pController;
+	CGameControllerDDRace *pController = (CGameControllerDDRace*)m_pController;
 	return pController->m_Teams.m_Core.Team(ClientID);
 }
 
@@ -3198,43 +3198,43 @@ void CGameContext::Converse(int ClientID, char *pStr)
 	}
 }
 
-void CGameContext::List(int ClientID, const char* filter)
+void CGameContext::List(int ClientID, const char *pFilter)
 {
-	int total = 0;
-	char buf[256];
-	int bufcnt = 0;
-	if (filter[0])
-		str_format(buf, sizeof(buf), "Listing players with \"%s\" in name:", filter);
+	int Total = 0;
+	char aBuf[256];
+	int Bufcnt = 0;
+	if (pFilter[0])
+		str_format(aBuf, sizeof(aBuf), "Listing players with \"%s\" in name:", pFilter);
 	else
-		str_format(buf, sizeof(buf), "Listing all players:", filter);
-	SendChatTarget(ClientID, buf);
+		str_format(aBuf, sizeof(aBuf), "Listing all players:", pFilter);
+	SendChatTarget(ClientID, aBuf);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_apPlayers[i])
 		{
-			total++;
-			const char* name = Server()->ClientName(i);
-			if (str_find_nocase(name, filter) == NULL)
+			Total++;
+			const char *pName = Server()->ClientName(i);
+			if (str_find_nocase(pName, pFilter) == NULL)
 				continue;
-			if (bufcnt + str_length(name) + 4 > 256)
+			if (Bufcnt + str_length(pName) + 4 > 256)
 			{
-				SendChatTarget(ClientID, buf);
-				bufcnt = 0;
+				SendChatTarget(ClientID, aBuf);
+				Bufcnt = 0;
 			}
-			if (bufcnt != 0)
+			if (Bufcnt != 0)
 			{
-				str_format(&buf[bufcnt], sizeof(buf) - bufcnt, ", %s", name);
-				bufcnt += 2 + str_length(name);
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, ", %s", pName);
+				Bufcnt += 2 + str_length(pName);
 			}
 			else
 			{
-				str_format(&buf[bufcnt], sizeof(buf) - bufcnt, "%s", name);
-				bufcnt += str_length(name);
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, "%s", pName);
+				Bufcnt += str_length(pName);
 			}
 		}
 	}
-	if (bufcnt != 0)
-		SendChatTarget(ClientID, buf);
-	str_format(buf, sizeof(buf), "%d players online", total);
-	SendChatTarget(ClientID, buf);
+	if (Bufcnt != 0)
+		SendChatTarget(ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
+	SendChatTarget(ClientID, aBuf);
 }

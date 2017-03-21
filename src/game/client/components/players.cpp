@@ -159,10 +159,10 @@ vec2 NonPredPos = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), In
 	Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 
 
-	static double ping = 0;
+	static double s_Ping = 0;
 
 	if(pInfo.m_Local) {
-		ping = mix(ping, (double)pInfo.m_Latency, 0.1);
+		s_Ping = mix(s_Ping, (double)pInfo.m_Latency, 0.1);
 	}
 
 	if(!pInfo.m_Local)
@@ -184,9 +184,9 @@ vec2 NonPredPos = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), In
 
 
 		if(m_pClient->m_Snap.m_pLocalInfo)
-			ping = mix(ping, (double)m_pClient->m_Snap.m_pLocalInfo->m_Latency, 0.1);
+			s_Ping = mix(s_Ping, (double)m_pClient->m_Snap.m_pLocalInfo->m_Latency, 0.1);
 
-		double d = length(PrevPredPos - Position)/ping;
+		double d = length(PrevPredPos - Position)/s_Ping;
 
 		if((d > 0.4) && (d < 5.))
 		{
@@ -602,39 +602,39 @@ void CPlayers::RenderPlayer(
 				ExDirection = normalize(vec2(m_pClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetX, m_pClient->m_pControls->m_InputData[g_Config.m_ClDummy].m_TargetY));
 
 			Graphics()->TextureSet(-1);
-			vec2 initPos = Position;
-			vec2 finishPos = initPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength-42.0f);
+			vec2 InitPos = Position;
+			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength-42.0f);
 
 			Graphics()->LinesBegin();
 			Graphics()->SetColor(1.00f, 0.0f, 0.0f, Alpha);
 
 			float PhysSize = 28.0f;
 
-			vec2 OldPos = initPos + ExDirection * PhysSize * 1.5f;
+			vec2 OldPos = InitPos + ExDirection * PhysSize * 1.5f;
 			vec2 NewPos = OldPos;
 
-			bool doBreak = false;
+			bool DoBreak = false;
 			int Hit = 0;
 
 			do {
 				OldPos = NewPos;
 				NewPos = OldPos + ExDirection * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookFireSpeed;
 
-				if (distance(initPos, NewPos) > m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength)
+				if (distance(InitPos, NewPos) > m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength)
 				{
-					NewPos = initPos + normalize(NewPos-initPos) * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength;
-					doBreak = true;
+					NewPos = InitPos + normalize(NewPos-InitPos) * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength;
+					DoBreak = true;
 				}
 
-				int teleNr = 0;
-				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &finishPos, 0x0, &teleNr);
+				int TeleNr = 0;
+				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
 
-				if(!doBreak && Hit) {
+				if(!DoBreak && Hit) {
 					if (Hit != TILE_NOHOOK)
 						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, Alpha);
 				}
 
-				if(m_pClient->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking && m_pClient->IntersectCharacter(OldPos, finishPos, finishPos, pPlayerInfo->m_ClientID) != -1)
+				if(m_pClient->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking && m_pClient->IntersectCharacter(OldPos, FinishPos, FinishPos, pPlayerInfo->m_ClientID) != -1)
 				{
 					Graphics()->SetColor(1.0f, 1.0f, 0.0f, Alpha);
 					break;
@@ -651,9 +651,9 @@ void CPlayers::RenderPlayer(
 
 				ExDirection.x = round_to_int(ExDirection.x*256.0f) / 256.0f;
 				ExDirection.y = round_to_int(ExDirection.y*256.0f) / 256.0f;
-			} while (!doBreak);
+			} while (!DoBreak);
 
-			IGraphics::CLineItem LineItem(initPos.x, initPos.y, finishPos.x, finishPos.y);
+			IGraphics::CLineItem LineItem(InitPos.x, InitPos.y, FinishPos.x, FinishPos.y);
 			Graphics()->LinesDraw(&LineItem, 1);
 			Graphics()->LinesEnd();
 		}
@@ -917,7 +917,7 @@ void CPlayers::RenderPlayer(
 
 		Graphics()->SetColor(1.0f,1.0f,1.0f,a);
 		if (OtherTeam)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * (float) g_Config.m_ClShowOthersAlpha / 100.0f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * (float)g_Config.m_ClShowOthersAlpha / 100.0f);
 		// client_datas::emoticon is an offset from the first emoticon
 		RenderTools()->SelectSprite(SPRITE_OOP + m_pClient->m_aClients[pInfo.m_ClientID].m_Emoticon);
 		IGraphics::CQuadItem QuadItem(Position.x, Position.y - 23 - 32*h, 64, 64*h);

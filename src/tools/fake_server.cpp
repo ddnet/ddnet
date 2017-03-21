@@ -29,19 +29,19 @@ int aInfoMsgSize;
 
 static void SendHeartBeats()
 {
-	static unsigned char aData[sizeof(SERVERBROWSE_HEARTBEAT) + 2];
+	static unsigned char s_aData[sizeof(SERVERBROWSE_HEARTBEAT) + 2];
 	CNetChunk Packet;
 
-	mem_copy(aData, SERVERBROWSE_HEARTBEAT, sizeof(SERVERBROWSE_HEARTBEAT));
+	mem_copy(s_aData, SERVERBROWSE_HEARTBEAT, sizeof(SERVERBROWSE_HEARTBEAT));
 
 	Packet.m_ClientID = -1;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(SERVERBROWSE_HEARTBEAT) + 2;
-	Packet.m_pData = &aData;
+	Packet.m_pData = &s_aData;
 
 	/* supply the set port that the master can use if it has problems */
-	aData[sizeof(SERVERBROWSE_HEARTBEAT)] = 0;
-	aData[sizeof(SERVERBROWSE_HEARTBEAT)+1] = 0;
+	s_aData[sizeof(SERVERBROWSE_HEARTBEAT)] = 0;
+	s_aData[sizeof(SERVERBROWSE_HEARTBEAT)+1] = 0;
 
 	for(int i = 0; i < NumMasters; i++)
 	{

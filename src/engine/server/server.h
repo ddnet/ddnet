@@ -70,7 +70,7 @@ class CServerBan : public CNetBan
 public:
 	class CServer *Server() const { return m_pServer; }
 
-	void InitServerBan(class IConsole *pConsole, class IStorage *pStorage, class CServer* pServer);
+	void InitServerBan(class IConsole *pConsole, class IStorage *pStorage, class CServer *pServer);
 
 	virtual int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason);
 	virtual int BanRange(const CNetRange *pRange, int Seconds, const char *pReason);
@@ -86,8 +86,8 @@ class CServer : public IServer
 	class IStorage *m_pStorage;
 
 #if defined (CONF_SQL)
-	CSqlServer* m_apSqlReadServers[MAX_SQLSERVERS];
-	CSqlServer* m_apSqlWriteServers[MAX_SQLSERVERS];
+	CSqlServer *m_apSqlReadServers[MAX_SQLSERVERS];
+	CSqlServer *m_apSqlWriteServers[MAX_SQLSERVERS];
 #endif
 
 public:

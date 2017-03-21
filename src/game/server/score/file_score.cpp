@@ -248,8 +248,8 @@ void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID,
 		CPlayerScore *r = &m_Top[i + Debut - 1];
 		str_format(aBuf, sizeof(aBuf),
 				"%d. %s Time: %d minute(s) %5.2f second(s)", i + Debut,
-				r->m_aName, (int) r->m_Score / 60,
-				r->m_Score - ((int) r->m_Score / 60 * 60));
+				r->m_aName, (int)r->m_Score / 60,
+				r->m_Score - ((int)r->m_Score / 60 * 60));
 		pSelf->SendChatTarget(ClientID, aBuf);
 	}
 	pSelf->SendChatTarget(ClientID, "------------------------------");
@@ -274,13 +274,13 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 				Server()->ClientName(ClientID));
 		if (g_Config.m_SvHideScore)
 			str_format(aBuf, sizeof(aBuf),
-					"Your time: %d minute(s) %5.2f second(s)", (int) Time / 60,
-					Time - ((int) Time / 60 * 60));
+					"Your time: %d minute(s) %5.2f second(s)", (int)Time / 60,
+					Time - ((int)Time / 60 * 60));
 		else
 			str_format(aBuf, sizeof(aBuf),
 					"%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Pos,
-					pScore->m_aName, (int) Time / 60,
-					Time - ((int) Time / 60 * 60), aClientName);
+					pScore->m_aName, (int)Time / 60,
+					Time - ((int)Time / 60 * 60), aClientName);
 		if (!Search)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
 		else

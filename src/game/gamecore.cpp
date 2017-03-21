@@ -4,7 +4,7 @@
 
 #include <engine/shared/config.h>
 #include <engine/server/server.h>
-const char *CTuningParams::m_apNames[] =
+const char *CTuningParams::ms_apNames[] =
 {
 	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) #ScriptName,
 	#include "tuning.h"
@@ -31,7 +31,7 @@ bool CTuningParams::Get(int Index, float *pValue)
 bool CTuningParams::Set(const char *pName, float Value)
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, m_apNames[i]) == 0)
+		if(str_comp_nocase(pName, ms_apNames[i]) == 0)
 			return Set(i, Value);
 	return false;
 }
@@ -39,7 +39,7 @@ bool CTuningParams::Set(const char *pName, float Value)
 bool CTuningParams::Get(const char *pName, float *pValue)
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, m_apNames[i]) == 0)
+		if(str_comp_nocase(pName, ms_apNames[i]) == 0)
 			return Get(i, pValue);
 
 	return false;
@@ -57,7 +57,7 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 	return 1.0f/powf(Curvature, (Value-Start)/Range);
 }
 
-void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams)
+void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams)
 {
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
@@ -71,7 +71,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Jumps = 2;
 }
 
-void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > *pTeleOuts)
+void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2> > *pTeleOuts)
 {
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
@@ -773,7 +773,7 @@ void SnapshotRemoveExtraInfo(unsigned char *pData)
 		CSnapshotItem *pItem = pSnap->GetItem(Index);
 		if(pItem->Type() == NETOBJTYPE_PROJECTILE)
 		{
-			CNetObj_Projectile* pProj = (CNetObj_Projectile*) ((void*)pItem->Data());
+			CNetObj_Projectile *pProj = (CNetObj_Projectile*) ((void*)pItem->Data());
 			if(UseExtraInfo(pProj))
 			{
 				vec2 Pos;

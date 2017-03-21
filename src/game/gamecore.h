@@ -40,7 +40,7 @@ public:
 		#undef MACRO_TUNING_PARAM
 	}
 
-	static const char *m_apNames[];
+	static const char *ms_apNames[];
 
 	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) CTuneParam m_##Name;
 	#include "tuning.h"
@@ -211,8 +211,8 @@ public:
 
 	int m_TriggeredEvents;
 
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams);
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> > *pTeleOuts);
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2> > *pTeleOuts);
 	void Reset();
 	void Tick(bool UseInput, bool IsClient);
 	void Move();
@@ -236,7 +236,7 @@ public:
 
 private:
 
-	CTeamsCore* m_pTeams;
+	CTeamsCore *m_pTeams;
 	int m_TileIndex;
 	int m_TileFlags;
 	int m_TileFIndex;
