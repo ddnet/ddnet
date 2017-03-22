@@ -309,6 +309,7 @@ CGameConsole::CInstance *CGameConsole::CurrentConsole()
 
 void CGameConsole::OnReset()
 {
+	m_RemoteConsole.m_UserGot = false;
 }
 
 // only defined for 0<=t<=1
