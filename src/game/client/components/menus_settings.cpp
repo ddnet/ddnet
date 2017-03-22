@@ -1324,7 +1324,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	MainView.HSplitTop(150.0f, &HUD, &MainView);
 
 	HUD.HSplitTop(30.0f, &Label, &HUD);
-	Label.VSplitLeft(60.0f, &Label, &Page1Tab);
+	float tw = TextRender()->TextWidth(0, 20.0f, Localize("HUD"), -1);
+	Label.VSplitLeft(tw + 10.0f, &Label, &Page1Tab);
 	Page1Tab.VSplitLeft(60.0f, &Page1Tab, 0);
 	Page1Tab.VSplitLeft(30.0f, &Page1Tab, &Page2Tab);
 
