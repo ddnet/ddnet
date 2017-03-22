@@ -4,6 +4,7 @@
 #include <base/tl/string.h>
 
 #include <base/math.h>
+#include <math.h>
 
 #include <engine/demo.h>
 #include <engine/keys.h>
@@ -360,7 +361,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static int s_SlowDownButton = 0;
-	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 		DecreaseDemoSpeed = true;
 
 	// fastforward
@@ -373,8 +374,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// speed meter
 	ButtonBar.VSplitLeft(Margins*3, 0, &ButtonBar);
 	char aBuffer[64];
-	if(pInfo->m_Speed >= 1.0f)
+	if(fabs(pInfo->m_Speed - 1.0f) <= 0.01f)
 		str_format(aBuffer, sizeof(aBuffer), "×%.0f", pInfo->m_Speed);
+	else if(pInfo->m_Speed >= 1.01f)
+		str_format(aBuffer, sizeof(aBuffer), "×%.1f", pInfo->m_Speed);
 	else
 		str_format(aBuffer, sizeof(aBuffer), "×%.2f", pInfo->m_Speed);
 	UI()->DoLabel(&ButtonBar, aBuffer, Button.h*0.7f, -1);
