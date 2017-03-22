@@ -228,9 +228,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	View.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
-#if defined(__ANDROID__)
 	int DoubleClicked = 0;
-#endif
 	int NumPlayers = 0;
 
 	m_SelectedIndex = -1;
@@ -299,10 +297,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox))
 			{
 				NewSelected = ItemIndex;
-#if defined(__ANDROID__)
 				if(NewSelected == m_DoubleClickIndex)
 					DoubleClicked = 1;
-#endif
 				m_DoubleClickIndex = NewSelected;
 			}
 		}
@@ -468,7 +464,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 #if defined(__ANDROID__)
 		if(DoubleClicked)
 #else
-		if(Input()->MouseDoubleClick())
+		if(Input()->MouseDoubleClick() && DoubleClicked)
 #endif
 			Client()->Connect(g_Config.m_UiServerAddress);
 	}
