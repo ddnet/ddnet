@@ -99,36 +99,36 @@ public:
 		return SendMsg(&Packer, Flags, ClientID);
 	}
 
-	bool Translate(int& target, int client)
+	bool Translate(int& Target, int Client)
 	{
-		CClientInfo info;
-		GetClientInfo(client, &info);
-		if (info.m_ClientVersion >= VERSION_DDNET_OLD)
+		CClientInfo Info;
+		GetClientInfo(Client, &Info);
+		if (Info.m_ClientVersion >= VERSION_DDNET_OLD)
 			return true;
-		int* map = GetIdMap(client);
-		bool found = false;
+		int *pMap = GetIdMap(Client);
+		bool Found = false;
 		for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		{
-			if (target == map[i])
+			if (Target == pMap[i])
 			{
-				target = i;
-				found = true;
+				Target = i;
+				Found = true;
 				break;
 			}
 		}
-		return found;
+		return Found;
 	}
 
-	bool ReverseTranslate(int& target, int client)
+	bool ReverseTranslate(int& Target, int Client)
 	{
-		CClientInfo info;
-		GetClientInfo(client, &info);
-		if (info.m_ClientVersion >= VERSION_DDNET_OLD)
+		CClientInfo Info;
+		GetClientInfo(Client, &Info);
+		if (Info.m_ClientVersion >= VERSION_DDNET_OLD)
 			return true;
-		int* map = GetIdMap(client);
-		if (map[target] == -1)
+		int *pMap = GetIdMap(Client);
+		if (pMap[Target] == -1)
 			return false;
-		target = map[target];
+		Target = pMap[Target];
 		return true;
 	}
 
@@ -166,6 +166,7 @@ public:
 
 	virtual int* GetIdMap(int ClientID) = 0;
 
+	virtual bool DnsblWhite(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface

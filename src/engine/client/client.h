@@ -116,9 +116,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	//
 	char m_aCurrentMap[256];
+	char m_aCurrentMapPath[CEditor::MAX_PATH_LENGTH];
 	unsigned m_CurrentMapCrc;
 
-	bool m_TimeoutCodeSent[2];
+	char m_aTimeoutCodes[2][32];
+	bool m_aTimeoutCodeSent[2];
+	bool m_GenerateTimeoutSeed;
 
 	//
 	char m_aCmdConnect[256];
@@ -149,7 +152,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_CurrentInput[2];
 	bool m_LastDummy;
 	bool m_LastDummy2;
-	CNetObj_PlayerInput HammerInput;
+	bool m_DummySendConnInfo;
 
 	// graphs
 	CGraph m_InputtimeMarginGraph;
@@ -258,10 +261,8 @@ public:
 	virtual void DummyConnect();
 	virtual bool DummyConnected();
 	virtual bool DummyConnecting();
-	void DummyInfo();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
-	int m_Fire;
 
 	virtual void GetServerInfo(CServerInfo *pServerInfo);
 	void ServerInfoRequest();
@@ -330,6 +331,7 @@ public:
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RconLogin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddFavorite(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Play(IConsole::IResult *pResult, void *pUserData);
@@ -341,6 +343,7 @@ public:
 	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
@@ -370,15 +373,19 @@ public:
 
 	// DDRace
 
+	void GenerateTimeoutSeed();
+	void GenerateTimeoutCodes();
+
 	virtual const char* GetCurrentMap();
 	virtual int GetCurrentMapCrc();
+	virtual const char* GetCurrentMapPath();
 	virtual const char* RaceRecordStart(const char *pFilename);
 	virtual void RaceRecordStop();
 	virtual bool RaceRecordIsRecording();
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
-	virtual void DemoSlice(const char *pDstPath, bool RemoveChat);
+	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 
 	void RequestDDNetSrvList();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }

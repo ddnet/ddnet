@@ -7,12 +7,12 @@
 
 #include "sql_string_helpers.h"
 
-void sqlstr::FuzzyString(char *pString)
+void sqlstr::FuzzyString(char *pString, int size)
 {
-	char newString[32*4-1];
+	char * newString = new char [size * 4 - 1];
 	int pos = 0;
 
-	for(int i=0;i<64;i++)
+	for(int i = 0; i < size; i++)
 	{
 		if(!pString[i])
 			break;
@@ -23,7 +23,8 @@ void sqlstr::FuzzyString(char *pString)
 	}
 
 	newString[pos] = '\0';
-	strcpy(pString, newString);
+	str_copy(pString, newString, size);
+	delete [] newString;
 }
 
 // anti SQL injection
@@ -32,7 +33,7 @@ void sqlstr::ClearString(char *pString, int size)
 	char *newString = new char [size * 2 - 1];
 	int pos = 0;
 
-	for(int i=0;i<size;i++)
+	for(int i = 0; i < size; i++)
 	{
 		if(pString[i] == '\\')
 		{
@@ -57,14 +58,14 @@ void sqlstr::ClearString(char *pString, int size)
 
 	newString[pos] = '\0';
 
-	strcpy(pString, newString);
+	str_copy(pString, newString, size);
 	delete [] newString;
 }
 
-void sqlstr::agoTimeToString(int agoTime, char agoString[])
+void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString)
 {
 	char aBuf[20];
-	int times[7] =
+	int aTimes[7] =
 	{
 			60 * 60 * 24 * 365 ,
 			60 * 60 * 24 * 30 ,
@@ -74,7 +75,7 @@ void sqlstr::agoTimeToString(int agoTime, char agoString[])
 			60 ,
 			1
 	};
-	char names[7][6] =
+	char aaNames[7][6] =
 	{
 			"year",
 			"month",
@@ -85,65 +86,65 @@ void sqlstr::agoTimeToString(int agoTime, char agoString[])
 			"sec"
 	};
 
-	int seconds = 0;
-	char name[6];
-	int count = 0;
+	int Seconds = 0;
+	char aName[6];
+	int Count = 0;
 	int i = 0;
 
 	// finding biggest match
-	for(i = 0; i<7; i++)
+	for(i = 0; i < 7; i++)
 	{
-		seconds = times[i];
-		strcpy(name, names[i]);
+		Seconds = aTimes[i];
+		strcpy(aName, aaNames[i]);
 
-		count = floor((float)agoTime/(float)seconds);
-		if(count != 0)
+		Count = floor((float)AgoTime/(float)Seconds);
+		if(Count != 0)
 		{
 			break;
 		}
 	}
 
-	if(count == 1)
+	if(Count == 1)
 	{
-		str_format(aBuf, sizeof(aBuf), "%d %s", 1 , name);
+		str_format(aBuf, sizeof(aBuf), "%d %s", 1 , aName);
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "%d %ss", count , name);
+		str_format(aBuf, sizeof(aBuf), "%d %ss", Count , aName);
 	}
-	strcat(agoString, aBuf);
+	strcat(pAgoString, aBuf);
 
 	if (i + 1 < 7)
 	{
 		// getting second piece now
-		int seconds2 = times[i+1];
-		char name2[6];
-		strcpy(name2, names[i+1]);
+		int Seconds2 = aTimes[i+1];
+		char aName2[6];
+		strcpy(aName2, aaNames[i+1]);
 
 		// add second piece if it's greater than 0
-		int count2 = floor((float)(agoTime - (seconds * count)) / (float)seconds2);
+		int Count2 = floor((float)(AgoTime - (Seconds * Count)) / (float)Seconds2);
 
-		if (count2 != 0)
+		if (Count2 != 0)
 		{
-			if(count2 == 1)
+			if(Count2 == 1)
 			{
-				str_format(aBuf, sizeof(aBuf), " and %d %s", 1 , name2);
+				str_format(aBuf, sizeof(aBuf), " and %d %s", 1 , aName2);
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), " and %d %ss", count2 , name2);
+				str_format(aBuf, sizeof(aBuf), " and %d %ss", Count2 , aName2);
 			}
-			strcat(agoString, aBuf);
+			strcat(pAgoString, aBuf);
 		}
 	}
 }
 
-void sqlstr::getTimeStamp(char* dest, unsigned int size)
+void sqlstr::GetTimeStamp(char *pDest, unsigned int Size)
 {
-	std::time_t rawtime;
-	std::time(&rawtime);
+	std::time_t Rawtime;
+	std::time(&Rawtime);
 
-	str_timestamp_ex(rawtime, dest, size, "%Y-%m-%d %H:%M:%S");
+	str_timestamp_ex(Rawtime, pDest, Size, "%Y-%m-%d %H:%M:%S");
 }
 
 #endif

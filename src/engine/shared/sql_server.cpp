@@ -50,7 +50,7 @@ void CSqlServer::deleteServers()
 	}
 }
 
-CSqlServer::CSqlServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly, bool SetUpDb) :
+CSqlServer::CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, bool ReadOnly, bool SetUpDb) :
 		m_Port(Port),
 		m_SetUpDB(SetUpDb)
 {

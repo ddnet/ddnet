@@ -4,7 +4,7 @@ dependencies:
         sudo add-apt-repository -y ppa:zoogie/sdl2-snapshots
         sudo apt-get update
         sudo apt-get build-dep teeworlds
-        sudo apt-get install libsdl2-dev
+        sudo apt-get install libsdl2-dev cmake
 
         if [ ! -x ~/bam/bam ]; then
           git clone https://github.com/matricks/bam ~/bam/
@@ -19,3 +19,8 @@ test:
   override:
     - |
         ../bam/bam release
+
+        mkdir build
+        cd build
+        env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake ..
+        make everything

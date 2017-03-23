@@ -653,6 +653,10 @@ void CGameContext::OnTick()
 					if(m_apPlayers[i]->m_Afk && i != m_VoteCreator)
 						continue;
 
+					// don't count votes by blacklisted clients
+					if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i))
+						continue;
+
 					int ActVote = m_apPlayers[i]->m_Vote;
 					int ActVotePos = m_apPlayers[i]->m_VotePos;
 
@@ -1132,7 +1136,64 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 					Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
 
-					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID);
+					bool InterpretSemicolons = !(pPlayer->m_PlayerFlags & PLAYERFLAG_CHATTING);
+					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, InterpretSemicolons);
+					// m_apPlayers[ClientID] can be NULL, if the player used a
+					// timeout code and replaced another client.
+					if(InterpretSemicolons && m_apPlayers[ClientID] && !m_apPlayers[ClientID]->m_SentSemicolonTip)
+					{
+						bool FoundSemicolons = false;
+
+						const char *pStr = pMsg->m_pMessage + 1;
+						int Length = str_length(pStr);
+						bool InString = false;
+						bool Escape = false;
+						for(int i = 0; i < Length; i++)
+						{
+							char c = pStr[i];
+							if(InString)
+							{
+								if(Escape)
+								{
+									Escape = false;
+									if(c == '\\' || c == '"')
+									{
+										continue;
+									}
+								}
+								else if(c == '\\')
+								{
+									Escape = true;
+								}
+								else if(c == '"')
+								{
+									InString = false;
+								}
+							}
+							else
+							{
+								if(c == '"')
+								{
+									InString = true;
+								}
+								else if(c == ';')
+								{
+									FoundSemicolons = true;
+									break;
+								}
+							}
+						}
+						static const char s_aPrefix[] = "mc;";
+						static const int s_PrefixLength = str_length(s_aPrefix);
+						if(FoundSemicolons && !(Length >= s_PrefixLength && str_comp_num(pStr, s_aPrefix, s_PrefixLength) == 0))
+						{
+							SendChatTarget(ClientID, "Usage of semicolons without /mc is deprecated");
+							char aBuf[256];
+							str_format(aBuf, sizeof(aBuf), "Try changing your bind to '/mc;%s'", pStr);
+							SendChatTarget(ClientID, aBuf);
+							m_apPlayers[ClientID]->m_SentSemicolonTip = true;
+						}
+					}
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
 					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
@@ -1150,6 +1211,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			int64 Now = Server()->Tick();
 			int64 TickSpeed = Server()->TickSpeed();
+
+			if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(ClientID))
+			{
+				// blacklisted by dnsbl
+				SendChatTarget(ClientID, "You are not allowed to vote due to DNSBL");
+				return;
+			}
 
 			if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + TickSpeed * 3 > Now)
 				return;
@@ -1435,7 +1503,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}*/
 
 			//Kill Protection
-			CCharacter* pChr = pPlayer->GetCharacter();
+			CCharacter *pChr = pPlayer->GetCharacter();
 			if(pChr)
 			{
 				int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
@@ -1493,7 +1561,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if(pPlayer->m_ClientVersion < Version)
 				pPlayer->m_ClientVersion = Version;
-
+			
+			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
+				pPlayer->m_TimerType = g_Config.m_SvDefaultTimerType;
+			
 			dbg_msg("ddnet", "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
 
 			//first update his teams state
@@ -1611,7 +1682,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_LastEmote = Server()->Tick();
 
 			SendEmoticon(ClientID, pMsg->m_Emoticon);
-			CCharacter* pChr = pPlayer->GetCharacter();
+			CCharacter *pChr = pPlayer->GetCharacter();
 			if(pChr && g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmote)
 			{
 				switch(pMsg->m_Emoticon)
@@ -1661,7 +1732,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pPlayer->m_Paused)
 				return;
 
-			CCharacter* pChr = pPlayer->GetCharacter();
+			CCharacter *pChr = pPlayer->GetCharacter();
 			if(!pChr)
 				return;
 
@@ -1758,7 +1829,7 @@ void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
 	{
 		float v;
 		pSelf->Tuning()->Get(i, &v);
-		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->m_apNames[i], v);
+		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->ms_apNames[i], v);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
@@ -1795,7 +1866,7 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 		{
 			float v;
 			pSelf->TuningList()[List].Get(i, &v);
-			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].m_apNames[i], v);
+			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].ms_apNames[i], v);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		}
 	}
@@ -2780,7 +2851,7 @@ void CGameContext::OnSnap(int ClientID)
 	}
 
 	if(ClientID > -1)
-		m_apPlayers[ClientID]->FakeSnap(ClientID);
+		m_apPlayers[ClientID]->FakeSnap();
 
 }
 void CGameContext::OnPreSnap() {}
@@ -2875,7 +2946,7 @@ float CGameContext::PlayerJetpack()
 
 void CGameContext::OnSetAuthed(int ClientID, int Level)
 {
-	CServer* pServ = (CServer*)Server();
+	CServer *pServ = (CServer*)Server();
 	if(m_apPlayers[ClientID])
 	{
 		m_apPlayers[ClientID]->m_Authed = Level;
@@ -2937,7 +3008,7 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 
 int CGameContext::GetDDRaceTeam(int ClientID)
 {
-	CGameControllerDDRace* pController = (CGameControllerDDRace*)m_pController;
+	CGameControllerDDRace *pController = (CGameControllerDDRace*)m_pController;
 	return pController->m_Teams.m_Core.Team(ClientID);
 }
 
@@ -3127,43 +3198,43 @@ void CGameContext::Converse(int ClientID, char *pStr)
 	}
 }
 
-void CGameContext::List(int ClientID, const char* filter)
+void CGameContext::List(int ClientID, const char *pFilter)
 {
-	int total = 0;
-	char buf[256];
-	int bufcnt = 0;
-	if (filter[0])
-		str_format(buf, sizeof(buf), "Listing players with \"%s\" in name:", filter);
+	int Total = 0;
+	char aBuf[256];
+	int Bufcnt = 0;
+	if (pFilter[0])
+		str_format(aBuf, sizeof(aBuf), "Listing players with \"%s\" in name:", pFilter);
 	else
-		str_format(buf, sizeof(buf), "Listing all players:", filter);
-	SendChatTarget(ClientID, buf);
+		str_format(aBuf, sizeof(aBuf), "Listing all players:", pFilter);
+	SendChatTarget(ClientID, aBuf);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_apPlayers[i])
 		{
-			total++;
-			const char* name = Server()->ClientName(i);
-			if (str_find_nocase(name, filter) == NULL)
+			Total++;
+			const char *pName = Server()->ClientName(i);
+			if (str_find_nocase(pName, pFilter) == NULL)
 				continue;
-			if (bufcnt + str_length(name) + 4 > 256)
+			if (Bufcnt + str_length(pName) + 4 > 256)
 			{
-				SendChatTarget(ClientID, buf);
-				bufcnt = 0;
+				SendChatTarget(ClientID, aBuf);
+				Bufcnt = 0;
 			}
-			if (bufcnt != 0)
+			if (Bufcnt != 0)
 			{
-				str_format(&buf[bufcnt], sizeof(buf) - bufcnt, ", %s", name);
-				bufcnt += 2 + str_length(name);
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, ", %s", pName);
+				Bufcnt += 2 + str_length(pName);
 			}
 			else
 			{
-				str_format(&buf[bufcnt], sizeof(buf) - bufcnt, "%s", name);
-				bufcnt += str_length(name);
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, "%s", pName);
+				Bufcnt += str_length(pName);
 			}
 		}
 	}
-	if (bufcnt != 0)
-		SendChatTarget(ClientID, buf);
-	str_format(buf, sizeof(buf), "%d players online", total);
-	SendChatTarget(ClientID, buf);
+	if (Bufcnt != 0)
+		SendChatTarget(ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
+	SendChatTarget(ClientID, aBuf);
 }

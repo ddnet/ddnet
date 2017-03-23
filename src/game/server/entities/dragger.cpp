@@ -365,17 +365,17 @@ void CDragger::Snap(int SnappingClient)
 
 		if (!obj)
 			continue;
-		obj->m_X = (int) m_Pos.x;
-		obj->m_Y = (int) m_Pos.y;
+		obj->m_X = (int)m_Pos.x;
+		obj->m_Y = (int)m_Pos.y;
 		if (Target)
 		{
-			obj->m_FromX = (int) Target->m_Pos.x;
-			obj->m_FromY = (int) Target->m_Pos.y;
+			obj->m_FromX = (int)Target->m_Pos.x;
+			obj->m_FromY = (int)Target->m_Pos.y;
 		}
 		else
 		{
-			obj->m_FromX = (int) m_Pos.x;
-			obj->m_FromY = (int) m_Pos.y;
+			obj->m_FromX = (int)m_Pos.x;
+			obj->m_FromY = (int)m_Pos.y;
 		}
 
 		int StartTick = m_EvalTick;

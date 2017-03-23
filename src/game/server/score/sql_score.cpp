@@ -186,11 +186,11 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, CGameData<CSqlPlayerData
 		if(pSqlServer->GetResults()->next())
 		{
 			// get the best time
-			float time = (float)pSqlServer->GetResults()->getDouble("Time");
-			pGameData.PlayerData(pGameData.Data().m_ClientID)->m_BestTime = time;
-			pGameData.PlayerData(pGameData.Data().m_ClientID)->m_CurrentTime = time;
+			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
+			pGameData.PlayerData(pGameData.Data().m_ClientID)->m_BestTime = Time;
+			pGameData.PlayerData(pGameData.Data().m_ClientID)->m_CurrentTime = Time;
 			if(pGameData.GameServer()->m_apPlayers[pGameData.Data().m_ClientID])
-				pGameData.GameServer()->m_apPlayers[pGameData.Data().m_ClientID]->m_Score = -time;
+				pGameData.GameServer()->m_apPlayers[pGameData.Data().m_ClientID]->m_Score = -Time;
 
 			char aColumn[8];
 			if(g_Config.m_SvCheckpointSave)
@@ -225,7 +225,8 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_RequestedMap = MapName;
 	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
-	sqlstr::FuzzyString(Tmp->m_aFuzzyMap);
+	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
+	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 
 	void *VoteThread = thread_init(ExecSqlFunc<CGameData<CSqlMapData>>, newSqlExecData(MapVoteThread, Tmp));
 	thread_detach(VoteThread);
@@ -318,7 +319,8 @@ void CSqlScore::MapInfo(int ClientID, const char* MapName)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_RequestedMap = MapName;
 	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
-	sqlstr::FuzzyString(Tmp->m_aFuzzyMap);
+	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
+	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 
 	void *InfoThread = thread_init(ExecSqlFunc<CGameData<CSqlMapData>>, newSqlExecData(MapInfoThread, Tmp));
 	thread_detach(InfoThread);
@@ -360,7 +362,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, CGameData<CSqlMapData>& pG
 			char pReleasedString[60] = "\0";
 			if(stamp != 0)
 			{
-				sqlstr::agoTimeToString(ago, pAgoString);
+				sqlstr::AgoTimeToString(ago, pAgoString);
 				str_format(pReleasedString, sizeof(pReleasedString), ", released %s ago", pAgoString);
 			}
 
@@ -731,7 +733,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, CGameData<CSqlScoreDa
 	try
 	{
 		// check sort methode
-		char aBuf[600];
+		char aBuf[2400];
 		char aNames[2300];
 		aNames[0] = '\0';
 
@@ -758,13 +760,13 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, CGameData<CSqlScoreDa
 
 			for(int Row = 0; Row < Rows; Row++)
 			{
-				strcat(aNames, pSqlServer->GetResults()->getString("Name").c_str());
+				str_append(aNames, pSqlServer->GetResults()->getString("Name").c_str(), sizeof(aNames));
 				pSqlServer->GetResults()->next();
 
 				if (Row < Rows - 2)
-					strcat(aNames, ", ");
+					str_append(aNames, ", ", sizeof(aNames));
 				else if (Row < Rows - 1)
-					strcat(aNames, " & ");
+					str_append(aNames, " & ", sizeof(aNames));
 			}
 
 			pSqlServer->GetResults()->first();
@@ -871,7 +873,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, CGameData<CSqlScoreDa
 	try
 	{
 		// check sort methode
-		char aBuf[512];
+		char aBuf[2400];
 
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @previd := NULL;");
@@ -916,12 +918,12 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, CGameData<CSqlScoreDa
 			pSqlServer->GetResults()->first();
 			for(int Row = 0; Row < Rows; Row++)
 			{
-				strcat(aNames, pSqlServer->GetResults()->getString("Name").c_str());
+				str_append(aNames, pSqlServer->GetResults()->getString("Name").c_str(), sizeof(aNames));
 
 				if (Row < aCuts[CutPos] - 1)
-					strcat(aNames, ", ");
+					str_append(aNames, ", ", sizeof(aNames));
 				else if (Row < aCuts[CutPos])
-					strcat(aNames, " & ");
+					str_append(aNames, " & ", sizeof(aNames));
 
 				Time = (float)pSqlServer->GetResults()->getDouble("Time");
 				Rank = (float)pSqlServer->GetResults()->getInt("rank");
@@ -1016,7 +1018,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, CGameData<CSqlScoreData>
 			pStamp = (int)pSqlServer->GetResults()->getInt("Stamp");
 			pTime = (float)pSqlServer->GetResults()->getDouble("Time");
 
-			sqlstr::agoTimeToString(pSince,pAgoString);
+			sqlstr::AgoTimeToString(pSince,pAgoString);
 
 			if(pGameData.Data().m_Search) // last 5 times of a player
 			{
@@ -1440,13 +1442,13 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, CGameData<CSqlTeamLoad>& 
 			else
 			{
 
-				bool found = false;
+				bool Found = false;
 				for (int i = 0; i < SavedTeam.GetMembersCount(); i++)
 				{
 					if(str_comp(SavedTeam.SavedTees[i].GetName(), pGameData.Server()->ClientName(pGameData.Data().m_ClientID)) == 0)
-					{ found = true; break; }
+					{ Found = true; break; }
 				}
-				if (!found)
+				if (!Found)
 					pGameData.GameServer()->SendChatTarget(pGameData.Data().m_ClientID, "You don't belong to this team");
 				else
 				{

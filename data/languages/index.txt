@@ -108,6 +108,10 @@ swedish
 == Svenska
 == 752
 
+traditional_chinese
+== 繁體中文
+== 156
+
 turkish
 == Türkçe
 == 792

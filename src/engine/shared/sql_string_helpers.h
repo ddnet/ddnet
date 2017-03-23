@@ -4,14 +4,14 @@
 namespace sqlstr
 {
 
-void FuzzyString(char *pString);
+void FuzzyString(char *pString, int size);
 
 // anti SQL injection
 void ClearString(char *pString, int size = 32);
 
-void agoTimeToString(int agoTime, char agoString[]);
+void AgoTimeToString(int agoTime, char *pAgoString);
 
-void getTimeStamp(char* dest, unsigned int size);
+void GetTimeStamp(char *pDest, unsigned int Size);
 
 
 template<unsigned int size>
@@ -20,7 +20,7 @@ class CSqlString
 public:
 	CSqlString() {}
 
-	CSqlString(const char* pStr)
+	CSqlString(const char *pStr)
 	{
 		str_copy(m_aString, pStr, size);
 		str_copy(m_aClearString, pStr, size);
@@ -30,7 +30,7 @@ public:
 	const char* Str() const { return m_aString; }
 	const char* ClrStr() const { return m_aClearString; }
 
-	CSqlString& operator = (const char* pStr)
+	CSqlString& operator = (const char *pStr)
 	{
 		str_copy(m_aString, pStr, size);
 		str_copy(m_aClearString, pStr, size);

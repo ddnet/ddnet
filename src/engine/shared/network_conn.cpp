@@ -4,7 +4,7 @@
 #include "config.h"
 #include "network.h"
 
-SECURITY_TOKEN ToSecurityToken(unsigned char* pData)
+SECURITY_TOKEN ToSecurityToken(unsigned char *pData)
 {
 	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
 }

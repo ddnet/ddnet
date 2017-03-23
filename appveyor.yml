@@ -1,0 +1,7 @@
+before_build:
+- cmd: >-
+    md build
+
+    cd build
+
+    cmake ..

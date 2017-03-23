@@ -150,15 +150,15 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 
 void Swap(CPoint& a, CPoint& b)
 {
-	CPoint tmp;
-	tmp.x = a.x;
-	tmp.y = a.y;
+	CPoint Tmp;
+	Tmp.x = a.x;
+	Tmp.y = a.y;
 
 	a.x = b.x;
 	a.y = b.y;
 
-	b.x = tmp.x;
-	b.y = tmp.y;
+	b.x = Tmp.x;
+	b.y = Tmp.y;
 }
 
 void CLayerQuads::BrushFlipX()

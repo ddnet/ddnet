@@ -48,6 +48,8 @@ CInput::CInput()
 
 	m_VideoRestartNeeded = 0;
 	m_pClipboardText = NULL;
+
+	m_IsEditingText = false;
 }
 
 void CInput::Init()
@@ -139,6 +141,36 @@ void CInput::NextFrame()
 	mem_copy(m_aInputState, pState, i);
 }
 
+bool CInput::GetIMEState()
+{
+	return m_IsEditingText;
+}
+
+void CInput::SetIMEState(bool activate)
+{
+	if (activate)
+		SDL_StartTextInput();
+	else
+	{
+		// force stop editing
+		SDL_StopTextInput();
+		m_IsEditingText = false;
+	}
+}
+
+const char* CInput::GetIMECandidate()
+{
+	if (str_length(m_pEditingText))
+		return m_pEditingText;
+	else
+		return "";
+}
+
+int CInput::GetEditingCursor()
+{
+	return m_EditingCursor;
+}
+
 int CInput::Update()
 {
 	// keep the counter between 1..0xFFFF, 0 means not pressed
@@ -166,6 +198,20 @@ int CInput::Update()
 			int Action = IInput::FLAG_PRESS;
 			switch (Event.type)
 			{
+				case SDL_TEXTEDITING:
+				{
+					if (str_length(Event.edit.text))
+					{
+						str_format(m_pEditingText, sizeof(m_pEditingText), Event.edit.text);
+						m_EditingCursor = 0;
+						for (int i = 0; i < Event.edit.start; i++)
+							m_EditingCursor = str_utf8_forward(m_pEditingText, m_EditingCursor);
+						m_IsEditingText = true;
+					}
+					else
+						m_IsEditingText = false;
+					break;
+				}
 				case SDL_TEXTINPUT:
 					AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
 					break;
@@ -272,7 +318,7 @@ int CInput::Update()
 					return 1;
 			}
 
-			if(Key >= 0 && Key < g_MaxKeys && !IgnoreKeys)
+			if(Key >= 0 && Key < g_MaxKeys && !IgnoreKeys && !m_IsEditingText)
 			{
 				if(Action&IInput::FLAG_PRESS)
 				{

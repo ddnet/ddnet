@@ -218,7 +218,7 @@ function build(settings)
 	end
 
 	if config.websockets.value then
-		settings.cc.defines:Add("WEBSOCKETS")
+		settings.cc.defines:Add("CONF_WEBSOCKETS")
 	end
 
 	if config.compiler.driver == "cl" then
@@ -399,10 +399,10 @@ function build(settings)
 		engine, zlib, libwebsockets, md5)
 
 	masterserver_exe = Link(server_settings, "mastersrv", masterserver,
-		engine, zlib, md5)
+		engine, zlib, libwebsockets, md5)
 
 	twping_exe = Link(server_settings, "twping", twping,
-		engine, zlib, md5)
+		engine, zlib, libwebsockets, md5)
 
 	-- make targets
 	c = PseudoTarget("client".."_"..settings.config_name, client_exe, client_depends)

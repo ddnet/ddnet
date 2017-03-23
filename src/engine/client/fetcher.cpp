@@ -108,7 +108,8 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 
 	IOHANDLE File = io_open(aPath, IOFLAG_WRITE);
 
-	if(!File){
+	if(!File)
+	{
 		dbg_msg("fetcher", "i/o error, cannot open file: %s", pTask->m_aDest);
 		pTask->m_State = CFetchTask::STATE_ERROR;
 		return;
@@ -143,6 +144,7 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_NOPROGRESS, 0);
 	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSDATA, pTask);
 	curl_easy_setopt(m_pHandle, CURLOPT_PROGRESSFUNCTION, &CFetcher::ProgressCallback);
+	curl_easy_setopt(m_pHandle, CURLOPT_NOSIGNAL, 1L);
 
 	dbg_msg("fetcher", "downloading %s", pTask->m_aDest);
 	pTask->m_State = CFetchTask::STATE_RUNNING;

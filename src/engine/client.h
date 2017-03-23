@@ -8,7 +8,6 @@
 #include <engine/friends.h>
 #include <engine/shared/config.h>
 #include <versionsrv/versionsrv.h>
-#include <game/generated/protocol.h>
 
 enum
 {
@@ -17,6 +16,8 @@ enum
 	RECORDER_RACE=2,
 	RECORDER_MAX=3,
 };
+
+typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
 class IClient : public IInterface
 {
@@ -39,13 +40,8 @@ protected:
 
 	int m_GameTickSpeed;
 public:
-	int m_LocalIDs[2];
 	char m_aNews[NEWS_SIZE];
 	int64 m_ReconnectTime;
-
-	CNetObj_PlayerInput m_DummyInput;
-
-	bool m_DummySendConnInfo;
 
 	class CSnapItem
 	{
@@ -183,16 +179,19 @@ public:
 
 	virtual const char* GetCurrentMap() = 0;
 	virtual int GetCurrentMapCrc() = 0;
+	virtual const char* GetCurrentMapPath() = 0;
 	virtual const char* RaceRecordStart(const char *pFilename) = 0;
 	virtual void RaceRecordStop() = 0;
 	virtual bool RaceRecordIsRecording() = 0;
 
 	virtual void DemoSliceBegin() = 0;
 	virtual void DemoSliceEnd() = 0;
-	virtual void DemoSlice(const char *pDstPath, bool RemoveChat) = 0;
+	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
 	virtual void RequestDDNetSrvList() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
+
+	virtual void GenerateTimeoutSeed() = 0;
 
 	virtual IFriends* Foes() = 0;
 };
@@ -217,10 +216,9 @@ public:
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
 
-	virtual int OnSnapInput(int *pData) = 0;
+	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
+	virtual void OnDummySwap() = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
-	virtual void ResetDummyInput() = 0;
-	virtual const CNetObj_PlayerInput &getPlayerInput(int dummy) = 0;
 
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;

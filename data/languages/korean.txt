@@ -1,14 +1,13 @@
 ##### authors #####
 #originally created by:
 #	ksgcln72
-#modified by:
-#
-##### /authors #####
+#contributors:
+#   Pathos
 
 ##### translated strings #####
 
 %d%% loaded
-== %d%% 로딩...
+== %d%% 로딩 됨
 
 %ds left
 == %d 초 후 취소
@@ -26,13 +25,13 @@
 == %i 초 남음
 
 %s wins!
-== %s (이)가 이김!
+== %s 승리!
 
 -Page %d-
 == -Page %d-
 
 Abort
-== 중단
+== 취소
 
 Add
 == 추가
@@ -113,7 +112,7 @@ Controls
 == 조작
 
 Count players only
-== Count players only
+== 플레이어만 세기
 
 Country
 == 국가
@@ -476,7 +475,7 @@ Team chat
 == 팀 채팅
 
 Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworlds %s is out! Download it at www.teeworlds.com!
+== Teeworlds %s 출시! www.teeworlds.com에서 다운로드 하세요!
 
 Texture Compression
 == 텍스처 압축
@@ -571,25 +570,25 @@ You must restart the game for all settings to take effect.
 == 
 
 '%s' called for vote to kick '%s' (%s)
-== 
+== '%s'님이 '%s'님을 강퇴 투표를 실시 하셨습니다 (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
-== 
+== '%s'님이 '%s'님을 관전자로 이동 하려고 투표를 실시 했습니다 (%s)
 
 '%s' called vote to change server option '%s' (%s)
-== 
+== '%s'님이 서버 옵션 '%s'실시 했습니다 (%s)
 
 '%s' entered and joined the %s
-== 
+== '%s'님이 난입 하여 %s으로 참가 하셨습니다
 
 '%s' has left the game
-== 
+== '%s'님이 퇴장하셨습니다
 
 '%s' has left the game (%s)
-== 
+== '%s'님이 퇴장셨습니다 (%s)
 
 '%s' joined the %s
-== 
+== '%s'님이 %s으로 참가 하셨습니다
 
 Admin forced server option '%s' (%s)
 == 
@@ -658,13 +657,13 @@ Editor
 == 
 
 Eyes
-== 
+== 눈
 
 Format
 == 
 
 Game paused
-== 
+== 게임 일시 중지
 
 Game starts in
 == 
@@ -694,7 +693,7 @@ Joined red
 == 
 
 Kick voting requires %d players on the server
-== 
+== 강퇴 투표는 %d명 플레이어가 필요 합니다
 
 Laser
 == 
@@ -733,16 +732,16 @@ Normal:
 == 
 
 Only %d active players are allowed
-== 
+== %d명만 게임 참가 할 수 있습니다
 
 Personal
 == 
 
 Play background music
-== 
+== 배경 음악
 
 Player country:
-== 
+== 플레이어 국가:
 
 Ready
 == 
@@ -757,16 +756,16 @@ Reset
 == 
 
 Resolutions
-== 
+== 회상도
 
 Respawn
-== 
+== 부활
 
 Round over
-== 
+== 라운드 끝
 
 Round over!
-== 
+== 라운드 끝!
 
 Sat:
 == 
@@ -781,82 +780,82 @@ Screen
 == 
 
 Search:
-== 
+== 찾기
 
 Server does not allow voting to kick players
-== 
+== 이 서버에서 강퇴 투표를 실시 할 수 없습니다
 
 Server does not allow voting to move players to spectators
-== 
+== 이 서버에서 관전자 이동 투표를 실시 할 수 없습니다
 
 Servers
-== 
+== 서버
 
 Show only chat messages from friends
-== 
+== 친구 메세지만 보기
 
 Size
-== 
+== 크기
 
 Skin
-== 
+== 스킨
 
 Spectate next
-== 
+== 다음 플레이어 관전
 
 Spectate previous
-== 
+== 이전 플레이어 관전
 
 Spectating
-== 
+== 관전중
 
 Spectators aren't allowed to start a vote.
-== 
+== 관전자는 투표를 시작 할 수가 없습니다.
 
 Standard Gametype
 == 
 
 Tattoo
-== 
+== 문신
 
 Tattoos
-== 
+== 문신
 
 Team:
-== 
+== 팀:
 
 Teams are locked
-== 
+== 팀 잠김
 
 Teams are locked. Time to wait before changing team: %02d:%02d
-== 
+== 팀이 잠겨 있습니다. 팀 열릴 시간: %02d:%02d
 
 Teams were locked
-== 
+== 팀 잠김
 
 Teams were unlocked
-== 
+== 팀 열림
 
 Tee
-== 
+== Tee
 
 Texture
 == 
 
 Volume
-== 
+== 음량
 
 Vote aborted
-== 
+== 투표 취소
 
 Vote failed
-== 
+== 투표 부결
 
 Vote passed
-== 
+== 투표 가결
 
 Wait for current vote to end before calling a new one.
-== 
+== 진행 되고 있는 투표를 기다려야 투표 실시 할 수 있습니다
 
 Wait for next round
 == 
@@ -865,7 +864,7 @@ Wide
 == 
 
 You must wait %d seconds before making another vote
-== 
+== 투표는 %d초 후에 다시 실시 됩니다
 
 blue
 == 
@@ -894,7 +893,7 @@ New name:
 == 새 이름:
 
 Max demos
-== 최대 데모
+== 최대 리플레이
 
 Internet
 == 인터넷
@@ -999,8 +998,7 @@ Current version: %s
 == 현재 버전: %s
 
 Name plates size
-== 크기
+== 이름 글꼴 크기
 
 Type:
 == 종류:
-

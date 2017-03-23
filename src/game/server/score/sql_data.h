@@ -54,7 +54,7 @@ struct CSqlScoreData : CSqlData
 
 	CSqlScoreData()
 	{
-		sqlstr::getTimeStamp(m_aTimestamp, sizeof(m_aTimestamp));
+		sqlstr::GetTimeStamp(m_aTimestamp, sizeof(m_aTimestamp));
 		m_ServerName = g_Config.m_SvSqlServerName;
 	}
 
@@ -116,7 +116,7 @@ struct CSqlTeamScoreData : CSqlData
 
 	CSqlTeamScoreData()
 	{
-		sqlstr::getTimeStamp(m_aTimestamp, sizeof(m_aTimestamp));
+		sqlstr::GetTimeStamp(m_aTimestamp, sizeof(m_aTimestamp));
 	}
 
 	json toJSON() const

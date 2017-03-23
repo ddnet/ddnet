@@ -33,7 +33,7 @@ public:
 	// will be called after all Tick and PostTick calls from other players
 	void PostPostTick();
 	void Snap(int SnappingClient);
-	void FakeSnap(int SnappingClient);
+	void FakeSnap();
 
 	void OnDirectInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
@@ -96,6 +96,7 @@ public:
 	int m_LastActionTick;
 	bool m_StolenSkin;
 	int m_TeamChangeTick;
+	bool m_SentSemicolonTip;
 	struct
 	{
 		int m_TargetX;
@@ -137,6 +138,14 @@ public:
 		PAUSED_SPEC,
 		PAUSED_PAUSED,
 		PAUSED_FORCE
+	};
+	
+	enum
+	{
+		TIMERTYPE_GAMETIMER=0,
+		TIMERTYPE_BROADCAST,
+		TIMERTYPE_GAMETIMER_AND_BROADCAST,
+		TIMERTYPE_NONE,
 	};
 
 	int m_Paused;

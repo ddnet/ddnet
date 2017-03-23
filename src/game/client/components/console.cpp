@@ -9,6 +9,7 @@
 
 #include <base/system.h>
 
+#include <engine/serverbrowser.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/config.h>
 #include <engine/graphics.h>
@@ -47,6 +48,9 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CompletionRenderOffset = 0.0f;
 	m_ReverseTAB = false;
 
+	m_aUser[0] = '\0';
+	m_UserGot = false;
+
 	m_IsCommand = false;
 }
 
@@ -76,7 +80,21 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 		if(m_pGameConsole->Client()->RconAuthed())
 			m_pGameConsole->Client()->Rcon(pLine);
 		else
-			m_pGameConsole->Client()->RconAuth("", pLine);
+		{
+			CServerInfo pServerInfo;
+			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
+
+			if(!m_UserGot && IsDDNet(&pServerInfo))
+			{
+				m_UserGot = true;
+				str_copy(m_aUser, pLine, sizeof m_aUser);
+			}
+			else
+			{
+				m_pGameConsole->Client()->RconAuth(m_aUser, pLine);
+				m_UserGot = false;
+			}
+		}
 	}
 }
 
@@ -130,7 +148,9 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	{
 		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
-			if(m_Input.GetString()[0])
+			CServerInfo pServerInfo;
+			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
+			if(m_Input.GetString()[0] || (IsDDNet(&pServerInfo) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 			{
 				if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
@@ -459,6 +479,9 @@ void CGameConsole::OnRender()
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
 		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER);
 
+		CServerInfo pServerInfo;
+		Client()->GetServerInfo(&pServerInfo);
+
 		// render prompt
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
@@ -470,7 +493,17 @@ void CGameConsole::OnRender()
 				if(Client()->RconAuthed())
 					pPrompt = "rcon> ";
 				else
-					pPrompt = "ENTER PASSWORD> ";
+				{
+					if(IsDDNet(&pServerInfo))
+					{
+						if(!pConsole->m_UserGot)
+							pPrompt = "Enter Username> ";
+						else
+							pPrompt = "Enter Password> ";
+					}
+					else
+						pPrompt = "Enter Password> ";
+				}
 			}
 			else
 				pPrompt = "NOT CONNECTED> ";
@@ -479,33 +512,46 @@ void CGameConsole::OnRender()
 
 		x = Cursor.m_X;
 
+
+		//console text editing
+		bool Editing = false;
+		int EditingCursor = Input()->GetEditingCursor();
+		if (Input()->GetIMEState())
+		{
+			if(str_length(Input()->GetIMECandidate()))
+			{
+				pConsole->m_Input.Editing(Input()->GetIMECandidate(), EditingCursor);
+				Editing = true;
+			}
+		}
+
 		//hide rcon password
 		char aInputString[512];
-		str_copy(aInputString, pConsole->m_Input.GetString(), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed())
+		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !IsDDNet(&pServerInfo)))
 		{
-			for(int i = 0; i < pConsole->m_Input.GetLength(); ++i)
+			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
 		}
 
 		// render console input (wrap line)
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, 0);
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
-		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset());
-		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(), -1);
+		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
+		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(Editing), -1);
 		int Lines = Cursor.m_LineCount;
 
 		y -= (Lines - 1) * FontSize;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 
-		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset());
+		TextRender()->TextEx(&Cursor, aInputString, pConsole->m_Input.GetCursorOffset(Editing));
 		static float MarkerOffset = TextRender()->TextWidth(0, FontSize, "|", -1)/3;
 		CTextCursor Marker = Cursor;
 		Marker.m_X -= MarkerOffset;
 		Marker.m_LineWidth = -1;
 		TextRender()->TextEx(&Marker, "|", -1);
-		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(), -1);
+		TextRender()->TextEx(&Cursor, aInputString+pConsole->m_Input.GetCursorOffset(Editing), -1);
 
 		// render possible commands
 		if(m_ConsoleType == CONSOLETYPE_LOCAL || Client()->RconAuthed())
@@ -651,6 +697,8 @@ void CGameConsole::Toggle(int Type)
 			m_ConsoleState = CONSOLE_OPENING;
 			/*// reset controls
 			m_pClient->m_pControls->OnReset();*/
+
+			Input()->SetIMEState(true);
 		}
 		else
 		{
@@ -658,6 +706,8 @@ void CGameConsole::Toggle(int Type)
 			m_pClient->m_pMenus->UseMouseButtons(true);
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
+
+			Input()->SetIMEState(false);
 		}
 	}
 

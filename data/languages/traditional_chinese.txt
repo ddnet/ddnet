@@ -1,0 +1,1346 @@
+##### authors #####
+#originally created by:
+#	SiuFu
+##### /authors #####
+
+##### translated strings #####
+
+%d%% loaded
+== 已加載 %d%%
+
+%ds left
+== %ds 離開
+
+%i minute left
+== 還剩下 %i 分鐘
+
+%i minutes left
+== 還剩下 %i 分鐘
+
+%i second left
+== 還剩下 %i 秒鐘
+
+%i seconds left
+== 還剩下 %i 秒鐘
+
+%s wins!
+== %s 勝利!
+
+-Page %d-
+== -第 %x 頁-
+
+Abort
+== 退出
+
+Add
+== 添加
+
+Add Friend
+== 添加好友
+
+Address
+== 地址
+
+All
+== 全部
+
+Always show name plates
+== 總是顯示名字
+
+Are you sure that you want to delete the demo?
+== 你確定要刪除這個錄像嗎?
+
+Are you sure that you want to quit?
+== 你確定要退出嗎?
+
+Are you sure that you want to remove the player from your friends list?
+== 你確定要把這個玩家從好友列表中刪除嗎?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 這是你第一次執行遊戲, 所以請在下面輸入你的暱稱. 建議你在進入一個服務器之前, 先確認一下設置是否符合你的習慣.
+
+Automatically record demos
+== 自動記錄錄像
+
+Automatically take game over screenshot
+== 自動截取遊戲結束畫面
+
+Blue team
+== 藍隊
+
+Blue team wins!
+== 藍隊勝利!
+
+Body
+== 身體
+
+Call vote
+== 發起投票
+
+Change settings
+== 改變設置
+
+Chat
+== 聊天
+
+Clan
+== 戰隊
+
+Client
+== 客戶端
+
+Close
+== 關閉
+
+Compatible version
+== 兼容的版本
+
+Connect
+== 連接
+
+Connecting to
+== 正在連接到
+
+Connection Problems...
+== 連接出現問題...
+
+Console
+== 控制台
+
+Controls
+== 控制
+
+Count players only
+== 只統計玩家數
+
+Country
+== 國家/地區
+
+Current
+== 當前
+
+Custom colors
+== 自定義顏色
+
+Delete
+== 删除
+
+Delete demo
+== 刪除錄像
+
+Demo details
+== 錄像詳細信息
+
+Demofile: %s
+== 錄像檔: %s
+
+Demos
+== 錄像
+
+Disconnect
+== 斷開連接
+
+Disconnected
+== 連接已斷開
+
+Downloading map
+== 正在下載地圖
+
+Draw!
+== 平局！
+
+Dynamic Camera
+== 動態視角
+
+Emoticon
+== 表情
+
+Enter
+== 進入
+
+Error
+== 錯誤
+
+Error loading demo
+== 讀取錄像錯誤
+
+Favorite
+== 收藏
+
+Favorites
+== 收藏夾
+
+Feet
+== 腳
+
+Filter
+== 過濾
+
+Fire
+== 開火
+
+Folder
+== 文件夾
+
+Force vote
+== 強制投票
+
+Free-View
+== 自由視角
+
+Friends
+== 好友
+
+Fullscreen
+== 全屏幕
+
+Game
+== 遊戲
+
+Game info
+== 遊戲信息
+
+Game over
+== 遊戲結束
+
+Game paused
+== 遊戲已暫停
+
+Game type
+== 遊戲類型
+
+Game types:
+== 遊戲類型:
+
+General
+== 一般
+
+Graphics
+== 圖像
+
+Grenade
+== 手榴彈
+
+Hammer
+== 錘子
+
+Has people playing
+== 有人在玩
+
+High Detail
+== 高細節
+
+Hook
+== 鉤子
+
+Invalid Demo
+== 無效的錄像
+
+Join blue
+== 加入藍隊
+
+Join red
+== 加入紅隊
+
+Jump
+== 跳躍
+
+Kick player
+== 踢除玩家
+
+Language
+== 語言
+
+DDNet Client needs to be restarted to complete update!
+== DDNet客戶端需要重新啟動才能完成更新！
+
+Loading
+== 載入中
+
+MOTD
+== 每日通告
+
+Map
+== 地圖
+
+Maximum ping:
+== 最大延遲:
+
+Mouse sens.
+== 滑標靈敏度
+
+Move left
+== 向左移動
+
+Move player to spectators
+== 將玩家移到觀眾席
+
+Move right
+== 向右移動
+
+Movement
+== 移動
+
+Mute when not active
+== 不活動時靜音
+
+Enable game sounds
+== 開啟遊戲聲音
+
+Enable gun sound
+== 開啟槍械聲音
+
+Enable server message sound
+== 開啟服務器消息聲音
+
+Enable regular chat sound
+== 開啟普通聊天的聲音
+
+Enable team chat sound
+== 開啟團隊聊天聲音
+
+Enable highlighted chat sound
+== 開啟高亮聊天聲音
+
+Threaded sound loading
+== 線程聲音加載
+
+Name
+== 名字
+
+Next weapon
+== 下一個武器
+
+Nickname
+== 暱稱
+
+No
+== 否
+
+No password
+== 無密碼
+
+No servers found
+== 找不到任何服務器
+
+No servers match your filter criteria
+== 沒有任何服務器匹配你的過濾
+
+Ok
+== 確定
+
+Open
+== 打開
+
+Parent Folder
+== 上級目錄
+
+Password
+== 密碼
+
+Password incorrect
+== 密碼錯誤
+
+Ping
+== 延遲
+
+Pistol
+== 手槍
+
+Play
+== 播放
+
+Play background music
+== 播放背景音樂
+
+Player
+== 玩家
+
+HUD
+== HUD
+
+Player country:
+== 玩家的國家/地區：
+
+Player options
+== 玩家選項
+
+Players
+== 玩家數
+
+Please balance teams!
+== 請平衡隊伍人數！
+
+Prev. weapon
+== 上一個武器
+
+Quality Textures
+== 高品質紋理
+
+Quit
+== 退出
+
+REC %3d:%02d
+== REC %3d:%02d
+
+Reason:
+== 理由:
+
+Red team
+== 紅隊
+
+Red team wins!
+== 紅隊勝利！
+
+Refresh
+== 刷新
+
+Refreshing master servers
+== 刷新主服務器中
+
+Remote console
+== 遠程控制台
+
+Remove
+== 移除
+
+Remove friend
+== 刪除好友
+
+Rename
+== 重新命名
+
+Rename demo
+== 重新命名錄像
+
+Reset filter
+== 重置過濾
+
+Respawn
+== 重生
+
+Sample rate
+== 採樣率
+
+Score
+== 得分
+
+Score board
+== 得分榜
+
+Score limit
+== 得分限制
+
+Scoreboard
+== 得分榜
+
+Screenshot
+== 截圖
+
+Server address:
+== 服務器地址:
+
+Server details
+== 服務器詳細信息
+
+Server filter
+== 服務器過濾
+
+Server info
+== 服務器信息
+
+Server not full
+== 服務器未滿
+
+Settings
+== 設置
+
+Shotgun
+== 霰彈槍
+
+Show chat
+== 顯示聊天
+
+Show friends only
+== 只顯示好友
+
+Show ingame HUD
+== 顯示遊戲HUD
+
+Show name plates
+== 顯示名字
+
+Show only chat messages from friends
+== 只顯示好友消息
+
+Show only supported
+== 只顯示支持的
+
+Skins
+== 皮膚
+
+Sound
+== 聲音
+
+Sound error
+== 聲音出現錯誤
+
+Spectate
+== 旁觀
+
+Spectate next
+== 觀看下一個
+
+Spectate previous
+== 觀看前一個
+
+Spectator mode
+== 旁觀者模式
+
+Spectators
+== 旁觀者
+
+Standard gametype
+== 標準遊戲類型
+
+Standard map
+== 標準地圖
+
+Stop record
+== 停止錄製
+
+Strict gametype filter
+== 嚴格過濾遊戲類型
+
+Sudden Death
+== 一槍擊殺
+
+Switch weapon on pickup
+== 拾取武器時自動裝備
+
+Switch weapon when out of ammo
+== 彈藥用盡時切換武器
+
+Show clan above name plates
+== 名稱上顯示戰隊
+
+Clan plates size
+== 戰隊名稱大小
+
+Reset wanted weapon on death
+== 在死亡時重置想要的武器
+
+Team
+== 隊伍
+
+Team chat
+== 團隊聊天
+
+Teeworlds %s is out! Download it at www.teeworlds.com!
+== Teeworlds %s 已經發布！ 請到 www.teeworlds.com 下载!
+
+Texture Compression
+== 紋理壓縮
+
+The audio device couldn't be initialised.
+== 無法初始化音頻設備。
+
+The server is running a non-standard tuning on a pure game type.
+== 此服務器運行著經過調整的非標準遊戲類型。
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== 編輯器中的地圖尚未保存，或許你應該在退出遊戲之前保存一下。
+
+Time limit
+== 時間限制
+
+Time limit: %d min
+== 時間限制: %d 分鐘
+
+Try again
+== 重試
+
+Type
+== 類型
+
+Unable to delete the demo
+== 無法刪除這個錄像
+
+Unable to rename the demo
+== 無法重新命名這個錄像
+
+Use sounds
+== 開啟音效
+
+Use team colors for name plates
+== 為名字使用團隊顏色
+
+V-Sync
+== 垂直同步
+
+Version
+== 版本
+
+Vote command:
+== 投票命令:
+
+Vote description:
+== 投票描述:
+
+Vote no
+== 反對
+
+Vote yes
+== 贊成
+
+Voting
+== 投票
+
+Warmup
+== 熱身
+
+Weapon
+== 武器
+
+Welcome to Teeworlds
+== 歡迎來到 Teeworlds!
+
+Yes
+== 是
+
+You must restart the game for all settings to take effect.
+== 你必須重啟遊戲才能讓所有設置起效。
+
+##### needs translation #####
+
+%.3f KiB
+== 
+
+%d player left
+== %d 玩家離開
+
+%d player not ready
+== %d 玩家沒有準備
+
+%d players left
+== %d 個玩家離開
+
+%d players not ready
+== %d 個玩家沒有準備
+
+%d servers, %d players
+== %d 個服務器, %d 個玩家
+
+'%s' called for vote to kick '%s' (%s)
+== '%s' 發起投票將 '%s' 踢出遊戲 (%s)
+
+'%s' called for vote to move '%s' to spectators (%s)
+== '%s' 發起投票將 '%s' 移動到觀眾席 (%s)
+
+'%s' called vote to change server option '%s' (%s)
+== '%s' 發起了一個修改服務器選項 '%s' 的投票 (%s)
+
+'%s' entered and joined the %s
+== '%s' 加入了遊戲
+
+'%s' has left the game
+== '%s' 離開了遊戲
+
+'%s' has left the game (%s)
+== '%s' 離開了遊戲
+
+'%s' joined the %s
+== '%s' 加入 %s
+
+Admin forced server option '%s' (%s)
+== 管理員強制服務器投票 '%s' (%s)
+
+Admin forced vote no
+== 管理員強制投票為否
+
+Admin forced vote yes
+== 管理員強制投票為是
+
+Admin moved '%s' to spectator (%s)
+== 管理員將 '%s' 移動到旁觀者 (%s)
+
+Alp:
+== 透明度
+
+Anti Aliasing
+== 抗鋸齒
+
+Are you sure you want to rename the demo?
+== 你確定你要重新命名錄像？
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 你確定你要保存你的皮膚？如果使用該名稱的皮膚已經存在，它被被替換。
+
+Back
+== 返回
+
+Basic
+== 基本
+
+Bodies
+== 身體
+
+Borderless window
+== 無邊界窗口
+
+Color
+== 顏色
+
+Crc
+== Crc
+
+Created
+== 創建
+
+Custom
+== 自定
+
+Customize
+== 自定義
+
+Decoration
+== 裝飾
+
+Demo
+== 錄像
+
+Detail
+== 詳情
+
+Editor
+== 編輯器
+
+Eyes
+== 眼
+
+Format
+== 格式
+
+Game starts in
+== 遊戲開始於
+
+Global
+== 全局
+
+Hands
+== 手
+
+Host address:
+== 主機地址:
+
+Hue:
+== 色調:
+
+Join
+== 加入
+
+Joined
+== 已加入
+
+Joined blue
+== 已加入蓝队
+
+Joined red
+== 已加入红队
+
+Kick voting requires %d players on the server
+== 踢除投票需要 %d 個玩家
+
+Laser
+== 激光
+
+Length
+== 範圍
+
+Letterbox
+== 信箱
+
+Lgt:
+== Lgt:
+
+Local
+== 本地
+
+Local server
+== 本地服務器
+
+Match
+== 匹配
+
+Max
+== 最大
+
+Misc
+== 雜項
+
+Netversion
+== 網絡版本
+
+Nickname is empty.
+== 名稱為空。
+
+Normal:
+== 正常:
+
+Only %d active players are allowed
+== 最多允許 %d 個在線玩家
+
+Personal
+== 個人
+
+Ready
+== 準備
+
+Record
+== 記錄
+
+Recorded
+== 記錄
+
+Reset
+== 重置
+
+Resolutions
+== 解析度
+
+Round over
+== 回合結束
+
+Round over!
+== 回合結束!
+
+Sat:
+== 星期六
+
+Save
+== 保存
+
+Save skin
+== 保存皮膚
+
+Screen
+== 屏幕
+
+Search:
+== 搜索
+
+Server does not allow voting to kick players
+== 服務器不允許投票踢除玩家
+
+Server does not allow voting to move players to spectators
+== 服務器不允許投票移動玩家到觀眾席
+
+Servers
+== 服務器
+
+Size
+== 大小
+
+Skin
+== 皮膚
+
+Spectating
+== 旁觀者
+
+Spectators aren't allowed to start a vote.
+== 旁觀者不允許參與投票
+
+Standard Gametype
+== 標準遊戲類型
+
+Tattoo
+== 紋身
+
+Tattoos
+== 紋身
+
+Team:
+== 隊伍
+
+Teams are locked
+== 隊伍鎖定
+
+Teams are locked. Time to wait before changing team: %02d:%02d
+== 隊伍已鎖定，在修改團隊前需要等待: %02d:%02d
+
+
+Teams were locked
+== 隊伍已鎖定
+
+Teams were unlocked
+== 隊伍解除鎖定
+
+Tee
+== Tee
+
+Texture
+== 質地
+
+Volume
+== 音量
+
+Vote aborted
+== 投票終止
+
+Vote failed
+== 投票失敗
+
+Vote passed
+== 投票通過
+
+Wait for current vote to end before calling a new one.
+== 等待當前投票結束，才能發起新投票
+
+Wait for next round
+== 等待下一輪
+
+Wide
+== 寬
+
+You must wait %d seconds before making another vote
+== 進行另一次投票前，必須等待 %d 秒
+
+blue
+== 藍
+
+blue team
+== 藍隊
+
+game
+== 遊戲
+
+red
+== 紅
+
+red team
+== 紅隊
+
+spectators
+== 旁觀者
+
+wait for more players
+== 等待更多玩家
+
+##### old translations #####
+
+New name:
+== 新名字:
+
+Sat.
+== 飽和度
+
+Miscellaneous
+== 雜項
+
+Internet
+== 互聯網
+
+Max demos
+== 最大錄像數
+
+News
+== 新聞
+
+Join game
+== 加入遊戲
+
+FSAA samples
+== 全屏抗鋸齒（FXAA）採樣倍數
+
+%d of %d servers, %d players
+== %d / %d 個服務器, %d 個玩家
+
+Sound volume
+== 音量
+
+Map sound volume
+== 地圖音量
+
+Created:
+== 已創建:
+
+Max Screenshots
+== 最大截圖數
+
+Dummy settings
+== 傀儡設置
+
+Vanilla Skins only
+== 只顯示默認皮膚
+
+Length:
+== 長度:
+
+Skin name
+== 皮膚名字
+
+Rifle
+== 激光槍
+
+Patterns
+== 模式
+
+Netversion:
+== 網絡版本
+
+Map:
+== 地圖:
+
+%d Bytes
+== %d 字節
+
+Coloration
+== 著色
+
+Info
+== 信息
+
+Hue
+== 色調
+
+Record demo
+== 錄製錄像
+
+Your skin
+== 你的皮膚
+
+Size:
+== 尺寸:
+
+Reset to defaults
+== 恢復默認設置
+
+Quit anyway?
+== 無論如何都要退出嗎？
+
+Display Modes
+== 顯示模式
+
+Version:
+== 版本:
+
+Round
+== 回合
+
+Lht.
+== 亮度
+
+no limit
+== 無限制
+
+CPU Throttle
+== CPU節流
+
+Show console window
+== 顯示控制台窗口
+
+Automatically take statboard screenshot
+== 自動對狀態版截圖
+
+none
+== 没有
+
+Quick search:
+== 快速搜索:
+
+UI Color
+== 界面顏色
+
+Host address
+== 主機地址
+
+Crc:
+== Crc:
+
+Alpha
+== 透明度
+
+Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
+== 你確定你要保存你的皮膚？如果使用該名稱的皮膚已經存在，它被被替換。
+
+Current version: %s
+== 當前版本: %s
+
+LAN
+== 局域網
+
+Name plates size
+== 名字尺寸
+
+Type:
+== 類型:
+
+Switch
+== 切換
+
+Tele
+== 远距
+
+Unknown
+== 未知
+
+Something is VERY wrong with the %s layer please report this at http://ddnet.tw, you will need to post the map as well and any steps that u think may have led to this
+== 
+
+localization
+== 定位
+
+unexpected end of file
+== 文件出錯
+
+loaded '%s'
+== 加載 '%s'
+
+malform replacement line for '%s'
+== 格式不正確的替換路程 '%s'
+
+Switch team
+== 切換隊伍
+
+Kill yourself
+== 自殺
+
+Tune variable to value
+== 音樂變量值
+
+Reset tuning
+== 復位
+
+Dump tuning
+== 轉儲調整
+
+Change map
+== 更換地圖
+
+Restart in x seconds
+== 重新啟動在x秒
+
+Broadcast message
+== 廣播消息
+
+Say in chat
+== 聊天
+
+Set team of player to team
+== 設置玩家組隊
+
+Set team of all players to team
+== 設置全部玩家組隊
+
+Add a voting option
+== 添加投票選項
+
+remove a voting option
+== 刪除投票選項
+
+Force a voting option
+== 強制投票的選項
+
+Clears the voting options
+== 清除投票選項
+
+Force a vote to yes/no
+== 強制投票是/否
+
+Swap the current teams
+== 交換當前的團隊
+
+Shuffle the current teams
+== 重組目前球隊
+
+initialisation finished after %.2fms
+== %.2fms 後初始化完成
+
+Use DDRace Scoreboard
+== 使用DDRace計分板
+
+Show client IDs in Scoreboard
+== 在計分板上顯示客戶端ID
+
+Show score
+== 顯示比分
+
+Show health + ammo
+== 顯示生命與彈藥
+
+Show names in chat in team colors
+== 在聊天中名顯示玩家顏色
+
+Show kill messages
+== 顯示Kill信息
+
+Show votes window after voting
+== 在投票時顯示投票窗口
+
+Messages
+== 信息
+
+System message
+== 系統信息
+
+Highlighted message
+== 高亮顯示信息
+
+Look out!
+== 小心!
+
+Team message
+== 團隊信息
+
+We will win
+== 我們一定會贏
+
+Normal message
+== 普通信息
+
+Hello and welcome
+== 你好,歡迎
+
+Inner color
+== 內部顏色
+
+Outline color
+== 外部顏色
+
+Save the best demo of each race
+== 保存每場競賽的錄像
+
+Ghost
+== 幽靈
+
+Show ghost
+== 顯示幽靈
+
+Save ghost
+== 保存幽靈
+
+Gameplay
+== 遊戲
+
+Overlay entities
+== 顯示實體層
+
+Show others
+== 顯示其他
+
+Show quads
+== 顯示背景
+
+Default zoom
+== 默認縮放
+
+AntiPing limit
+== Anti Ping限制
+
+AntiPing
+== 
+
+AntiPing: predict other players
+== AntiPing:預測其他玩家
+
+AntiPing: predict weapons
+== AntiPing:預測武器
+
+AntiPing: predict grenade paths
+== AntiPing:預測榴彈路徑
+
+Show other players' hook collision lines
+== 顯示其他玩家的鉤子線
+
+Show other players' key presses
+== 顯示其他玩家的按鍵
+
+Background (regular)
+== 背景(常規)
+
+Background (entities)
+== 背景(實體)
+
+Show tiles layers from BG map
+== 在BG地圖顯示磚層
+
+Try fast HTTP map download first
+== 首先嘗試下載最快的http地圖
+
+DDNet %s is available:
+== DDnet %s 可用:
+
+Update now
+== 更新
+
+Updating...
+== 更新中...
+
+DDNet Client updated!
+== DDNet客戶端更新!
+
+No updates available
+== 沒有可用的更新
+
+Check now
+== 檢查更新
+
+Timeout code
+== 超時代碼
+
+Dummy Timeout code
+== 傀儡超時代碼
+
+default
+== 默認
+
+DM
+== 死亡競技
+
+TDM
+== 團隊競技
+
+CTF
+== 奪旗模式
+
+prediction error
+== 預測誤差
+
+Loading DDNet Client
+== 加載DDNet客戶端中...
+
+add_favorite
+== 添加喜愛
+
+remove_favorite
+== 刪除喜愛
+
+add_friend
+== 添加好友
+
+remove_friend
+== 刪除好友
+
+*** '%s' entered and joined the spectators
+== *** '%s' 進入遊戲並加入旁觀者
+
+Network
+== 網絡
+
+Browser
+== 瀏覽
+
+Connect dummy
+== 開啟傀儡
+
+Connecting dummy
+== 正在開啟傀儡
+
+Disconnect dummy
+== 關閉傀儡
+
+Spectator
+== 旁觀者
+
+Search
+== 搜索

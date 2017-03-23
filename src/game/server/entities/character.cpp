@@ -180,11 +180,7 @@ void CCharacter::HandleNinja()
 	if ((Server()->Tick() - m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000))
 	{
 		// time's up, return
-		m_Ninja.m_CurrentMoveTime = 0;
-		m_aWeapons[WEAPON_NINJA].m_Got = false;
-		m_Core.m_ActiveWeapon = m_LastWeapon;
-
-		SetWeapon(m_Core.m_ActiveWeapon);
+		RemoveNinja();
 		return;
 	}
 
@@ -650,18 +646,6 @@ void CCharacter::HandleWeapons()
 	return;
 }
 
-bool CCharacter::GiveWeapon(int Weapon, int Ammo)
-{
-	if(m_aWeapons[Weapon].m_Ammo < g_pData->m_Weapons.m_aId[Weapon].m_Maxammo || !m_aWeapons[Weapon].m_Got)
-	{
-		m_aWeapons[Weapon].m_Got = true;
-		if(!m_FreezeTime)
-			m_aWeapons[Weapon].m_Ammo = min(g_pData->m_Weapons.m_aId[Weapon].m_Maxammo, Ammo);
-		return true;
-	}
-	return false;
-}
-
 void CCharacter::GiveNinja()
 {
 	m_Ninja.m_ActivationTick = Server()->Tick();
@@ -676,6 +660,15 @@ void CCharacter::GiveNinja()
 		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 }
 
+void CCharacter::RemoveNinja()
+{
+	m_Ninja.m_CurrentMoveTime = 0;
+	m_aWeapons[WEAPON_NINJA].m_Got = false;
+	m_Core.m_ActiveWeapon = m_LastWeapon;
+
+		SetWeapon(m_Core.m_ActiveWeapon);
+}
+
 void CCharacter::SetEmote(int Emote, int Tick)
 {
 	m_EmoteType = Emote;
@@ -685,10 +678,11 @@ void CCharacter::SetEmote(int Emote, int Tick)
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	// check for changes
-	if(mem_comp(&m_Input, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
+	if(mem_comp(&m_SavedInput, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
 		m_LastAction = Server()->Tick();
 
 	// copy new input
+	mem_copy(&m_SavedInput, pNewInput, sizeof(m_SavedInput));
 	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
 	m_NumInputs++;
 
@@ -1217,7 +1211,7 @@ void CCharacter::HandleBroadcast()
 		m_CpLastBroadcast = m_CpActive;
 		m_LastBroadcast = Server()->Tick();
 	}
-	else if ((m_pPlayer->m_TimerType == 1 || m_pPlayer->m_TimerType == 2) && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
+	else if ((m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_BROADCAST || m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
 	{
 		char aBuftime[64];
 		int IntTime = (int)((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
@@ -1994,6 +1988,7 @@ void CCharacter::SendZoneMsgs()
 
 void CCharacter::DDRaceTick()
 {
+	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
 	m_Armor=(m_FreezeTime >= 0)?10-(m_FreezeTime/15):0;
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
@@ -2119,14 +2114,37 @@ bool CCharacter::UnFreeze()
 	return false;
 }
 
+void CCharacter::GiveWeapon(int Weapon, bool Remove)
+{
+	if (Weapon == WEAPON_NINJA)
+	{
+		if (Remove)
+			RemoveNinja();
+		else
+			GiveNinja();
+		return;
+	}
+
+	if (Remove)
+	{
+		if (GetActiveWeapon()== Weapon)
+			SetActiveWeapon(WEAPON_GUN);
+	}
+	else
+	{
+		if (!m_FreezeTime)
+			m_aWeapons[Weapon].m_Ammo = -1;
+	}
+
+	m_aWeapons[Weapon].m_Got = !Remove;
+}
+
 void CCharacter::GiveAllWeapons()
 {
 	for(int i=WEAPON_GUN;i<NUM_WEAPONS-1;i++)
 	{
-		m_aWeapons[i].m_Got = true;
-		if(!m_FreezeTime) m_aWeapons[i].m_Ammo = -1;
+		GiveWeapon(i);
 	}
-	return;
 }
 
 void CCharacter::Pause(bool Pause)

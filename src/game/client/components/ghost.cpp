@@ -64,20 +64,20 @@ void CGhost::OnRender()
 		return;
 
 	// Check if the race line is crossed then start the render of the ghost if one
-	bool start = false;
+	bool Start = false;
 
 	std::list < int > Indices = m_pClient->Collision()->GetMapIndices(m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos);
 	if(!Indices.empty())
 	{
 		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-			if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) start = true;
+			if(m_pClient->Collision()->GetTileIndex(*i) == TILE_BEGIN) Start = true;
 	}
 	else
 	{
-		start = m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN;
+		Start = m_pClient->Collision()->GetTileIndex(m_pClient->Collision()->GetPureMapIndex(m_pClient->m_LocalCharacterPos)) == TILE_BEGIN;
 	}
 
-	if(start)
+	if(Start)
 	{
 		OnReset();
 		m_RaceState = RACE_STARTED;
@@ -554,25 +554,18 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(pMsg->m_ClientID == -1 && m_RaceState == RACE_STARTED)
 		{
-			const char* pMessage = pMsg->m_pMessage;
+			char aName[MAX_NAME_LENGTH];
+			const char *pFinished = str_find(pMsg->m_pMessage, " finished in: ");
+			int FinishedPos = pFinished - pMsg->m_pMessage;
+			if (!pFinished || FinishedPos == 0 || FinishedPos >= (int)sizeof(aName))
+				return;
 
-			int Num = 0;
-			while(str_comp_num(pMessage, " finished in: ", 14))
-			{
-				pMessage++;
-				Num++;
-				if(!pMessage[0])
-					return;
-			}
-
-			// store the name
-			char aName[64];
-			str_copy(aName, pMsg->m_pMessage, Num+1);
+			str_copy(aName, pMsg->m_pMessage, FinishedPos + 1);
 
 			// prepare values and state for saving
 			int Minutes;
 			float Seconds;
-			if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) && sscanf(pMessage, " finished in: %d minute(s) %f", &Minutes, &Seconds) == 2)
+			if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) && sscanf(pFinished, " finished in: %d minute(s) %f", &Minutes, &Seconds) == 2)
 			{
 				m_RaceState = RACE_FINISHED;
 				float CurTime = Minutes*60 + Seconds;

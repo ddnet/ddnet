@@ -151,9 +151,9 @@ void CEmoticon::OnRender()
 
 		CTeeRenderInfo *pTeeInfo;
 		if(g_Config.m_ClDummy)
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[1]].m_RenderInfo;
+			pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_RenderInfo;
 		else
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->Client()->m_LocalIDs[0]].m_RenderInfo;
+			pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_RenderInfo;
 
 		Graphics()->TextureSet(pTeeInfo->m_Texture);
 
@@ -165,11 +165,12 @@ void CEmoticon::OnRender()
 
 			bool Selected = m_SelectedEyeEmote == i;
 
-			pTeeInfo->m_Size = Selected ? 64.0f : 48.0f;
-
 			float NudgeX = 70.0f * cosf(Angle);
 			float NudgeY = 70.0f * sinf(Angle);
+
+			pTeeInfo->m_Size = Selected ? 64.0f : 48.0f;
 			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1,0), vec2(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY));
+			pTeeInfo->m_Size = 64.0f;
 		}
 
 		Graphics()->TextureSet(-1);

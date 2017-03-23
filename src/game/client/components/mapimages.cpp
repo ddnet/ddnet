@@ -91,7 +91,7 @@ int CMapImages::GetEntities()
 {
 	CServerInfo Info;
 	Client()->GetServerInfo(&Info);
-
+	
 	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
 	{
 		// DDNet default to prevent delay in seeing entities
@@ -109,6 +109,9 @@ int CMapImages::GetEntities()
 
 		char path[64];
 		str_format(path, sizeof(path), "editor/entities_clear/%s.png", file);
+		
+		if(m_EntitiesTextures >= 0)
+			Graphics()->UnloadTexture(m_EntitiesTextures);
 		m_EntitiesTextures = Graphics()->LoadTexture(path, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 		str_copy(m_aEntitiesGameType, Info.m_aGameType, sizeof(m_aEntitiesGameType));

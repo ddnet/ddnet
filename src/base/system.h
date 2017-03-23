@@ -1017,6 +1017,24 @@ const char *str_find(const char *haystack, const char *needle);
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 
 /*
+	Function: str_hex_decode
+		Takes a hex string and returns a byte array.
+
+		Parameters:
+			dst - Buffer for the byte array
+			dst_size - size of the buffer
+			data - String to decode
+
+		Returns:
+			2 - String doesn't exactly fit the buffer
+			1 - Invalid character in string
+			0 - Success
+
+		Remarks:
+			- The contents of the buffer is only valid on success
+*/
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
+/*
 	Function: str_timestamp
 		Copies a time stamp in the format year-month-day_hour-minute-second to the string.
 
@@ -1029,8 +1047,6 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 */
 void str_timestamp(char *buffer, int buffer_size);
 void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
-
-const char *str_next_word(char *str, char delim, char *buf, int *cursor);
 
 /* Group: Filesystem */
 
@@ -1267,7 +1283,19 @@ unsigned str_quickhash(const char *str);
 */
 void gui_messagebox(const char *title, const char *message);
 
-int str_utf8_comp_names(const char *a, const char *b);
+/*
+	Function: str_utf8_comp_confusable
+		Compares two strings for visual appearance.
+
+	Parameters:
+		a - String to compare.
+		b - String to compare.
+
+	Returns:
+		0 if the strings are confusable.
+		!=0 otherwise.
+*/
+int str_utf8_comp_confusable(const char *a, const char *b);
 
 int str_utf8_isspace(int code);
 
@@ -1378,6 +1406,20 @@ void shell_execute(const char *file);
 int os_compare_version(int major, int minor);
 
 /*
+	Function: generate_password
+		Generates a null-terminated password of length `2 *
+		random_length`.
+
+
+	Parameters:
+		buffer - Pointer to the start of the output buffer.
+		length - Length of the buffer.
+		random - Pointer to a randomly-initialized array of shorts.
+		random_length - Length of the short array.
+*/
+void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length);
+
+/*
 	Function: secure_random_init
 		Initializes the secure random module.
 		You *MUST* check the return value of this function.
@@ -1389,6 +1431,21 @@ int os_compare_version(int major, int minor);
 int secure_random_init();
 
 /*
+	Function: secure_random_password
+		Fills the buffer with the specified amount of random password
+		characters.
+
+		The desired password length must be greater or equal to 6, even
+		and smaller or equal to 128.
+
+	Parameters:
+		buffer - Pointer to the start of the buffer.
+		length - Length of the buffer.
+		pw_length - Length of the desired password.
+*/
+void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
+
+/*
 	Function: secure_random_fill
 		Fills the buffer with the specified amount of random bytes.
 
@@ -1396,7 +1453,7 @@ int secure_random_init();
 		buffer - Pointer to the start of the buffer.
 		length - Length of the buffer.
 */
-void secure_random_fill(void *bytes, size_t length);
+void secure_random_fill(void *bytes, unsigned length);
 
 /*
 	Function: secure_rand

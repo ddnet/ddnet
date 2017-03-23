@@ -8,12 +8,11 @@
 #include <time.h>
 
 #include "system.h"
-#include "confusables.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	#include "engine/shared/websockets.h"
 #endif
 
@@ -676,35 +675,38 @@ int64 time_get()
 	if(new_tick != -1)
 		new_tick = 0;
 
+	{
 #if defined(CONF_PLATFORM_MACOSX)
-	static int got_timebase = 0;
-	mach_timebase_info_data_t timebase;
-	if(!got_timebase)
-	{
-		mach_timebase_info(&timebase);
-	}
-	uint64_t time = mach_absolute_time();
-	uint64_t q = time / timebase.denom;
-	uint64_t r = time % timebase.denom;
-	last = q * timebase.numer + r * timebase.numer / timebase.denom;
-	return last;
+		static int got_timebase = 0;
+		mach_timebase_info_data_t timebase;
+		uint64_t time;
+		uint64_t q;
+		uint64_t r;
+		if(!got_timebase)
+		{
+			mach_timebase_info(&timebase);
+		}
+		time = mach_absolute_time();
+		q = time / timebase.denom;
+		r = time % timebase.denom;
+		last = q * timebase.numer + r * timebase.numer / timebase.denom;
+		return last;
 #elif defined(CONF_FAMILY_UNIX)
-	struct timespec spec;
-	clock_gettime(CLOCK_MONOTONIC, &spec);
-	last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
-	return last;
+		struct timespec spec;
+		clock_gettime(CLOCK_MONOTONIC, &spec);
+		last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
+		return last;
 #elif defined(CONF_FAMILY_WINDOWS)
-	{
 		int64 t;
 		QueryPerformanceCounter((PLARGE_INTEGER)&t);
 		if(t<last) /* for some reason, QPC can return values in the past */
 			return last;
 		last = t;
 		return t;
-	}
 #else
-	#error not implemented
+		#error not implemented
 #endif
+	}
 }
 
 int64 time_freq()
@@ -1022,7 +1024,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 		sock.type &= ~NETTYPE_IPV4;
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	/* close down websocket_ipv4 */
 	if(sock.web_ipv4sock >= 0)
 	{
@@ -1138,7 +1140,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		int socket = -1;
@@ -1227,7 +1229,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			dbg_msg("net", "can't send ipv4 traffic to this socket");
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(addr->type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(sock.web_ipv4sock >= 0)
@@ -1302,7 +1304,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
 		bytes = recvfrom(sock.ipv6sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
 	}
 
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(bytes <= 0 && sock.web_ipv4sock >= 0)
 	{
 		fromlen = sizeof(struct sockaddr);
@@ -1897,7 +1899,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 		if(sock.ipv6sock > sockid)
 			sockid = sock.ipv6sock;
 	}
-#if defined(WEBSOCKETS)
+#if defined(CONF_WEBSOCKETS)
 	if(sock.web_ipv4sock >= 0)
 	{
 		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
@@ -2147,6 +2149,64 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 	}
 }
 
+static int hexval(char x)
+{
+    switch(x)
+    {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    case 'a':
+    case 'A': return 10;
+    case 'b':
+    case 'B': return 11;
+    case 'c':
+    case 'C': return 12;
+    case 'd':
+    case 'D': return 13;
+    case 'e':
+    case 'E': return 14;
+    case 'f':
+    case 'F': return 15;
+    default: return -1;
+    }
+}
+
+static int byteval(const char *byte, unsigned char *dst)
+{
+	int v1 = -1, v2 = -1;
+	v1 = hexval(byte[0]);
+	v2 = hexval(byte[1]);
+
+	if(v1 < 0 || v2 < 0)
+		return 1;
+
+	*dst = v1 * 16 + v2;
+	return 0;
+}
+
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
+{
+	int len = str_length(src)/2;
+	int i;
+	if(len != dst_size)
+		return 2;
+
+	for(i = 0; i < len && dst_size; i++, dst_size--)
+	{
+		if(byteval(src + i * 2, dst++))
+			return 1;
+	}
+	return 0;
+}
+
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
 	struct tm *time_info;
@@ -2166,24 +2226,6 @@ void str_timestamp(char *buffer, int buffer_size)
 int mem_comp(const void *a, const void *b, int size)
 {
 	return memcmp(a,b,size);
-}
-
-const char *str_next_word(char *str, char delim, char *buf, int *cursor)
-{
-	int i;
-
-	if(str[*cursor] == '\0')
-		return NULL;
-
-	for(i = *cursor; ; ++i)
-	{
-		if(str[i] == delim || str[i] == '\0')
-		{
-			str_copy(buf, str + *cursor, i - *cursor);
-			*cursor = i + 1;
-			return buf;
-		}
-	}
 }
 
 const MEMSTATS *mem_stats()
@@ -2251,36 +2293,6 @@ int str_toint(const char *str) { return atoi(str); }
 int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
 float str_tofloat(const char *str) { return atof(str); }
 
-
-int str_utf8_comp_names(const char *a, const char *b)
-{
-	int codeA;
-	int codeB;
-	int diff;
-
-	while(*a && *b)
-	{
-		do
-		{
-			codeA = str_utf8_decode(&a);
-		}
-		while(*a && !str_utf8_isspace(codeA));
-
-		do
-		{
-			codeB = str_utf8_decode(&b);
-		}
-		while(*b && !str_utf8_isspace(codeB));
-
-		diff = codeA - codeB;
-
-		if((diff < 0 && !str_utf8_is_confusable(codeA, codeB))
-		|| (diff > 0 && !str_utf8_is_confusable(codeB, codeA)))
-			return diff;
-	}
-
-	return *a - *b;
-}
 
 int str_utf8_isspace(int code)
 {
@@ -2504,10 +2516,11 @@ void shell_execute(const char *file)
 #if defined(CONF_FAMILY_WINDOWS)
 	ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOWDEFAULT);
 #elif defined(CONF_FAMILY_UNIX)
-	char* argv[2];
+	char *argv[2];
+	pid_t pid;
 	argv[0] = (char*) file;
 	argv[1] = NULL;
-	pid_t pid = fork();
+	pid = fork();
 	if(!pid)
 		execv(file, argv);
 #endif
@@ -2573,7 +2586,43 @@ int secure_random_init()
 #endif
 }
 
-void secure_random_fill(void *bytes, size_t length)
+void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length)
+{
+	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
+	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
+	unsigned i;
+	dbg_assert(length >= random_length * 2 + 1, "too small buffer");
+	dbg_assert(NUM_VALUES * NUM_VALUES >= 2048, "need at least 2048 possibilities for 2-character sequences");
+
+	buffer[random_length * 2] = 0;
+
+	for(i = 0; i < random_length; i++)
+	{
+		unsigned short random_number = random[i] % 2048;
+		buffer[2 * i + 0] = VALUES[random_number / NUM_VALUES];
+		buffer[2 * i + 1] = VALUES[random_number % NUM_VALUES];
+	}
+}
+
+#define MAX_PASSWORD_LENGTH 128
+
+void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
+{
+	unsigned short random[MAX_PASSWORD_LENGTH / 2];
+	// With 6 characters, we get a password entropy of log(2048) * 6/2 = 33bit.
+	dbg_assert(length >= pw_length + 1, "too small buffer");
+	dbg_assert(pw_length >= 6, "too small password length");
+	dbg_assert(pw_length % 2 == 0, "need an even password length");
+	dbg_assert(pw_length <= MAX_PASSWORD_LENGTH, "too large password length");
+
+	secure_random_fill(random, pw_length);
+
+	generate_password(buffer, length, random, pw_length / 2);
+}
+
+#undef MAX_PASSWORD_LENGTH
+
+void secure_random_fill(void *bytes, unsigned length)
 {
 	if(!secure_random_data.initialized)
 	{

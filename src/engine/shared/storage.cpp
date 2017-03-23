@@ -395,7 +395,7 @@ public:
 		return !fs_remove(GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer)));
 	}
 
-	virtual bool RenameFile(const char* pOldFilename, const char* pNewFilename, int Type)
+	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type)
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 			return false;
@@ -404,7 +404,7 @@ public:
 		return !fs_rename(GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer)), GetPath(Type, pNewFilename, aNewBuffer, sizeof (aNewBuffer)));
 	}
 
-	virtual bool RenameBinaryFile(const char* pOldFilename, const char* pNewFilename)
+	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename)
 	{
 		char aOldBuffer[MAX_PATH_LENGTH];
 		char aNewBuffer[MAX_PATH_LENGTH];

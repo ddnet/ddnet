@@ -331,7 +331,7 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 
 		Type = *pData++;
 		ID = *pData++;
-		if ((unsigned int) Type < sizeof(m_aItemSizes) && m_aItemSizes[Type])
+		if ((unsigned int)Type < sizeof(m_aItemSizes) && m_aItemSizes[Type])
 			ItemSize = m_aItemSizes[Type];
 		else
 		{

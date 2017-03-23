@@ -27,8 +27,8 @@ public:
 	void Disconnect();
 	void CreateTables();
 
-	void executeSql(const char* pCommand);
-	void executeSqlQuery(const char* pQuery);
+	void executeSql(const char *pCommand);
+	void executeSqlQuery(const char *pQuery);
 
 	sql::ResultSet* GetResults() { return m_pResults; }
 
