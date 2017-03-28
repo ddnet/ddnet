@@ -372,6 +372,9 @@ add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OB
 add_executable(${TARGET_VERSIONSRV} EXCLUDE_FROM_ALL ${VERSIONSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 
+add_custom_target(generate_nethash DEPENDS src/game/generated/nethash.cpp)
+add_dependencies(${TARGET_VERSIONSRV} generate_nethash)
+
 target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
 target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
 target_link_libraries(${TARGET_TWPING} ${LIBS})
