@@ -1379,17 +1379,6 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 					m_CurrentServerInfoRequestTime = -1;
 				}
 			}
-
-			if (Is64Player(&Info))
-			{
-				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
-				if (pEntry)
-				{
-					pEntry->m_Is64 = true;
-					m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry); // Force a quick update
-					//m_ServerBrowser.QueueRequest(pEntry);
-				}
-			}
 		}
 	}
 
@@ -1448,6 +1437,11 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
+			}
+
+			if (pEntry)
+			{
+				pEntry->m_Is64 = true;
 			}
 		}
 	}
