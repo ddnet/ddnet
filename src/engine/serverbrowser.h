@@ -31,6 +31,10 @@ public:
 	int m_SortedIndex;
 	int m_ServerIndex;
 
+	int m_Type;
+	uint64 m_ReceivedPackets;
+	int m_NumReceivedClients;
+
 	NETADDR m_NetAddr;
 
 	int m_QuickSearchHit;
@@ -46,6 +50,8 @@ public:
 	char m_aGameType[16];
 	char m_aName[64];
 	char m_aMap[32];
+	int m_MapCrc;
+	int m_MapSize;
 	char m_aVersion[32];
 	char m_aAddress[NETADDR_MAXSTRSIZE];
 	CClient m_aClients[MAX_CLIENTS];

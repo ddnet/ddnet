@@ -90,18 +90,24 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 	}
 }
 
+static const unsigned char NET_HEADER_EXTENDED[] = {'x', 'e'};
 // packs the data tight and sends it
-void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize)
+void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4])
 {
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
-	aBuffer[0] = 0xff;
-	aBuffer[1] = 0xff;
-	aBuffer[2] = 0xff;
-	aBuffer[3] = 0xff;
-	aBuffer[4] = 0xff;
-	aBuffer[5] = 0xff;
-	mem_copy(&aBuffer[6], pData, DataSize);
-	net_udp_send(Socket, pAddr, aBuffer, 6+DataSize);
+	const int DATA_OFFSET = 6;
+	if(!Extended)
+	{
+		for(int i = 0; i < DATA_OFFSET; i++)
+			aBuffer[i] = 0xff;
+	}
+	else
+	{
+		mem_copy(aBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED));
+		mem_copy(aBuffer + sizeof(NET_HEADER_EXTENDED), aExtra, 4);
+	}
+	mem_copy(aBuffer + DATA_OFFSET, pData, DataSize);
+	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
 }
 
 void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken)
@@ -196,7 +202,8 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 	if(pPacket->m_Flags&NET_PACKETFLAG_CONNLESS)
 	{
-		if(Size < 6)
+		const int DATA_OFFSET = 6;
+		if(Size < DATA_OFFSET)
 		{
 			//dbg_msg("", "connection less packet too small, %d", Size);
 			return -1;
@@ -205,8 +212,14 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		pPacket->m_Flags = NET_PACKETFLAG_CONNLESS;
 		pPacket->m_Ack = 0;
 		pPacket->m_NumChunks = 0;
-		pPacket->m_DataSize = Size - 6;
-		mem_copy(pPacket->m_aChunkData, &pBuffer[6], pPacket->m_DataSize);
+		pPacket->m_DataSize = Size - DATA_OFFSET;
+		mem_copy(pPacket->m_aChunkData, pBuffer + DATA_OFFSET, pPacket->m_DataSize);
+
+		if(mem_comp(pBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED)) == 0)
+		{
+			pPacket->m_Flags |= NET_PACKETFLAG_EXTENDED;
+			mem_copy(pPacket->m_aExtraData, pBuffer + sizeof(NET_HEADER_EXTENDED), sizeof(pPacket->m_aExtraData));
+		}
 	}
 	else
 	{

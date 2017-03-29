@@ -435,8 +435,10 @@ void lock_unlock(LOCK lock);
 	not being a C90 thing.
 */
 __extension__ typedef long long int64;
+__extension__ typedef unsigned long long uint64;
 #else
 typedef long long int64;
+typedef unsigned long long uint64;
 #endif
 
 void set_new_tick();
