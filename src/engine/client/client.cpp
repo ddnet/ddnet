@@ -443,9 +443,6 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 
 void CClient::Rcon(const char *pCmd)
 {
-	CServerInfo Info;
-	GetServerInfo(&Info);
-
 	CMsgPacker Msg(NETMSG_RCON_CMD);
 	Msg.AddString(pCmd, 256);
 	SendMsgEx(&Msg, MSGFLAG_VITAL);
@@ -1322,128 +1319,207 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 	}
 
 	// server info
-	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_INFO) && mem_comp(pPacket->m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
+	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_INFO))
 	{
-		// we got ze info
-		CUnpacker Up;
-		CServerInfo Info = {0};
+		int Type = -1;
+		if(mem_comp(pPacket->m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
+			Type = SERVERINFO_VANILLA;
+		else if(mem_comp(pPacket->m_pData, SERVERBROWSE_INFO_64_LEGACY, sizeof(SERVERBROWSE_INFO_64_LEGACY)) == 0)
+			Type = SERVERINFO_64_LEGACY;
+		else if(mem_comp(pPacket->m_pData, SERVERBROWSE_INFO_EXTENDED, sizeof(SERVERBROWSE_INFO_EXTENDED)) == 0)
+			Type = SERVERINFO_EXTENDED;
+		else if(mem_comp(pPacket->m_pData, SERVERBROWSE_INFO_EXTENDED_MORE, sizeof(SERVERBROWSE_INFO_EXTENDED_MORE)) == 0)
+			Type = SERVERINFO_EXTENDED_MORE;
 
-		CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(pPacket->m_Address);
-		// Don't add info if we already got info64
-		if(pEntry && pEntry->m_Info.m_MaxClients > VANILLA_MAX_CLIENTS)
-			return;
-
-		Up.Reset((unsigned char*)pPacket->m_pData+sizeof(SERVERBROWSE_INFO), pPacket->m_DataSize-sizeof(SERVERBROWSE_INFO));
-		int Token = str_toint(Up.GetString());
-		str_copy(Info.m_aVersion, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aVersion));
-		str_copy(Info.m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aName));
-		str_copy(Info.m_aMap, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aMap));
-		str_copy(Info.m_aGameType, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aGameType));
-		Info.m_Flags = str_toint(Up.GetString());
-		Info.m_NumPlayers = str_toint(Up.GetString());
-		Info.m_MaxPlayers = str_toint(Up.GetString());
-		Info.m_NumClients = str_toint(Up.GetString());
-		Info.m_MaxClients = str_toint(Up.GetString());
-
-		// don't add invalid info to the server browser list
-		if(Info.m_NumClients < 0 || Info.m_NumClients > MAX_CLIENTS || Info.m_MaxClients < 0 || Info.m_MaxClients > MAX_CLIENTS ||
-			Info.m_NumPlayers < 0 || Info.m_NumPlayers > Info.m_NumClients || Info.m_MaxPlayers < 0 || Info.m_MaxPlayers > Info.m_MaxClients)
-			return;
-
-		net_addr_str(&pPacket->m_Address, Info.m_aAddress, sizeof(Info.m_aAddress), true);
-
-		for(int i = 0; i < Info.m_NumClients; i++)
+		if(Type != -1)
 		{
-			str_copy(Info.m_aClients[i].m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aName));
-			str_copy(Info.m_aClients[i].m_aClan, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aClan));
-			Info.m_aClients[i].m_Country = str_toint(Up.GetString());
-			Info.m_aClients[i].m_Score = str_toint(Up.GetString());
-			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0 ? true : false;
+			void *pData = (unsigned char *)pPacket->m_pData + sizeof(SERVERBROWSE_INFO);
+			int DataSize = pPacket->m_DataSize - sizeof(SERVERBROWSE_INFO);
+			ProcessServerInfo(Type, &pPacket->m_Address, pData, DataSize);
+		}
+	}
+}
+
+static int SavedServerInfoType(int Type)
+{
+	if(Type == SERVERINFO_EXTENDED_MORE)
+		return SERVERINFO_EXTENDED;
+
+	return Type;
+}
+
+void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, int DataSize)
+{
+	CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(*pFrom);
+
+	CServerInfo Info = {0};
+	int SavedType = SavedServerInfoType(RawType);
+	if((SavedType == SERVERINFO_64_LEGACY || SavedType == SERVERINFO_EXTENDED)
+		&& pEntry && pEntry->m_GotInfo && SavedType == pEntry->m_Info.m_Type)
+	{
+		Info = pEntry->m_Info;
+	}
+
+	Info.m_Type = SavedType;
+
+	net_addr_str(pFrom, Info.m_aAddress, sizeof(Info.m_aAddress), true);
+
+	CUnpacker Up;
+	Up.Reset(pData, DataSize);
+
+	#define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(array))
+	#define GET_INT(integer) (integer) = str_toint(Up.GetString())
+
+	int Offset = 0; // Only used for SavedType == SERVERINFO_64_LEGACY
+	int Token;
+	int PacketNo = 0; // Only used if SavedType == SERVERINFO_EXTENDED
+
+	GET_INT(Token);
+	if(RawType != SERVERINFO_EXTENDED_MORE)
+	{
+		GET_STRING(Info.m_aVersion);
+		GET_STRING(Info.m_aName);
+		GET_STRING(Info.m_aMap);
+
+		if(SavedType == SERVERINFO_EXTENDED)
+		{
+			GET_INT(Info.m_MapCrc);
+			GET_INT(Info.m_MapSize);
 		}
 
+		GET_STRING(Info.m_aGameType);
+		GET_INT(Info.m_Flags);
+		GET_INT(Info.m_NumPlayers);
+		GET_INT(Info.m_MaxPlayers);
+		GET_INT(Info.m_NumClients);
+		GET_INT(Info.m_MaxClients);
+
+		// don't add invalid info to the server browser list
+		if(Info.m_NumClients < 0 || Info.m_MaxClients < 0 ||
+			Info.m_NumPlayers < 0 || Info.m_MaxPlayers < 0 ||
+			Info.m_NumPlayers > Info.m_NumClients || Info.m_MaxPlayers > Info.m_MaxClients)
+		{
+			return;
+		}
+
+		switch(SavedType)
+		{
+		case SERVERINFO_VANILLA:
+			if(Info.m_MaxPlayers > VANILLA_MAX_CLIENTS ||
+				Info.m_MaxClients > VANILLA_MAX_CLIENTS)
+			{
+				return;
+			}
+			break;
+		case SERVERINFO_64_LEGACY:
+			if(Info.m_MaxPlayers > MAX_CLIENTS ||
+				Info.m_MaxClients > MAX_CLIENTS)
+			{
+				return;
+			}
+			break;
+		case SERVERINFO_EXTENDED:
+			if(Info.m_NumPlayers > Info.m_NumClients)
+				return;
+			break;
+		default:
+			dbg_assert(false, "unknown serverinfo type");
+		}
+
+		if(SavedType == SERVERINFO_64_LEGACY)
+			Offset = Up.GetInt();
+
+		// Check for valid offset.
+		if(Offset < 0)
+			return;
+
+		if(SavedType == SERVERINFO_EXTENDED)
+			PacketNo = 0;
+	}
+	else
+	{
+		GET_INT(PacketNo);
+		// 0 needs to be excluded because that's reserved for the main packet.
+		if(PacketNo <= 0 || PacketNo >= 64)
+			return;
+	}
+
+	bool DuplicatedPacket = false;
+	if(SavedType == SERVERINFO_EXTENDED)
+	{
+		Up.GetString(); // extra info, reserved
+
+		uint64 Flag = (uint64)1 << PacketNo;
+		DuplicatedPacket = Info.m_ReceivedPackets&Flag;
+		Info.m_ReceivedPackets |= Flag;
+	}
+
+	bool IgnoreError = false;
+	for(int i = Offset; i < MAX_CLIENTS && Info.m_NumReceivedClients < MAX_CLIENTS && !Up.Error(); i++)
+	{
+		CServerInfo::CClient *pClient = &Info.m_aClients[Info.m_NumReceivedClients];
+		GET_STRING(pClient->m_aName);
+		if(Up.Error())
+		{
+			// Packet end, no problem unless it happens during one
+			// player info, so ignore the error.
+			IgnoreError = true;
+			break;
+		}
+		GET_STRING(pClient->m_aClan);
+		GET_INT(pClient->m_Country);
+		GET_INT(pClient->m_Score);
+		GET_INT(pClient->m_Player);
+		if(SavedType == SERVERINFO_EXTENDED)
+		{
+			Up.GetString(); // extra info, reserved
+		}
 		if(!Up.Error())
 		{
-			// sort players
-			qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
-
-			pEntry = m_ServerBrowser.Find(pPacket->m_Address);
-			if (!pEntry || !pEntry->m_GotInfo)
-				m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
-
-			if(net_addr_comp(&m_ServerAddress, &pPacket->m_Address) == 0)
+			if(SavedType == SERVERINFO_64_LEGACY)
 			{
-				if(m_CurrentServerInfo.m_MaxClients <= VANILLA_MAX_CLIENTS)
+				uint64 Flag = (uint64)1 << i;
+				if(!(Info.m_ReceivedPackets&Flag))
 				{
-					mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
-					m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
-					m_CurrentServerInfoRequestTime = -1;
+					Info.m_ReceivedPackets |= Flag;
+					Info.m_NumReceivedClients++;
 				}
 			}
-
-			if (Is64Player(&Info))
+			else
 			{
-				pEntry = m_ServerBrowser.Find(pPacket->m_Address);
-				if (pEntry)
-				{
-					pEntry->m_Is64 = true;
-					m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry); // Force a quick update
-					//m_ServerBrowser.QueueRequest(pEntry);
-				}
+				Info.m_NumReceivedClients++;
 			}
 		}
 	}
 
-	// server info 64
-	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_INFO64) && mem_comp(pPacket->m_pData, SERVERBROWSE_INFO64, sizeof(SERVERBROWSE_INFO64)) == 0)
+	if(!Up.Error() || IgnoreError)
 	{
-		// we got ze info
-		CUnpacker Up;
-		CServerInfo NewInfo = {0};
-		CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(pPacket->m_Address);
-		CServerInfo &Info = NewInfo;
+		qsort(Info.m_aClients, Info.m_NumReceivedClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
 
-		if (pEntry)
-			Info = pEntry->m_Info;
-
-		Up.Reset((unsigned char*)pPacket->m_pData+sizeof(SERVERBROWSE_INFO64), pPacket->m_DataSize-sizeof(SERVERBROWSE_INFO64));
-		int Token = str_toint(Up.GetString());
-		str_copy(Info.m_aVersion, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aVersion));
-		str_copy(Info.m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aName));
-		str_copy(Info.m_aMap, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aMap));
-		str_copy(Info.m_aGameType, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aGameType));
-		Info.m_Flags = str_toint(Up.GetString());
-		Info.m_NumPlayers = str_toint(Up.GetString());
-		Info.m_MaxPlayers = str_toint(Up.GetString());
-		Info.m_NumClients = str_toint(Up.GetString());
-		Info.m_MaxClients = str_toint(Up.GetString());
-
-		// don't add invalid info to the server browser list
-		if(Info.m_NumClients < 0 || Info.m_NumClients > MAX_CLIENTS || Info.m_MaxClients < 0 || Info.m_MaxClients > MAX_CLIENTS ||
-			Info.m_NumPlayers < 0 || Info.m_NumPlayers > Info.m_NumClients || Info.m_MaxPlayers < 0 || Info.m_MaxPlayers > Info.m_MaxClients)
-			return;
-
-		net_addr_str(&pPacket->m_Address, Info.m_aAddress, sizeof(Info.m_aAddress), true);
-
-		int Offset = Up.GetInt();
-
-		for(int i = max(Offset, 0); i < max(Offset, 0) + 24 && i < MAX_CLIENTS; i++)
+		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
-			str_copy(Info.m_aClients[i].m_aName, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aName));
-			str_copy(Info.m_aClients[i].m_aClan, Up.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Info.m_aClients[i].m_aClan));
-			Info.m_aClients[i].m_Country = str_toint(Up.GetString());
-			Info.m_aClients[i].m_Score = str_toint(Up.GetString());
-			Info.m_aClients[i].m_Player = str_toint(Up.GetString()) != 0 ? true : false;
+			m_ServerBrowser.Set(*pFrom, IServerBrowser::SET_TOKEN, Token, &Info);
+			pEntry = m_ServerBrowser.Find(*pFrom);
+
+			if(SavedType == SERVERINFO_VANILLA && Is64Player(&Info) && pEntry)
+			{
+				pEntry->m_Request64Legacy = true;
+				// Force a quick update.
+				m_ServerBrowser.RequestImpl64(pEntry->m_Addr, pEntry);
+			}
 		}
 
-		if(!Up.Error())
+		// Player info is irrelevant for the client (while connected),
+		// it gets its info from elsewhere.
+		//
+		// SERVERINFO_EXTENDED_MORE doesn't carry any server
+		// information, so just skip it.
+		if(net_addr_comp(&m_ServerAddress, pFrom) == 0 && RawType != SERVERINFO_EXTENDED_MORE)
 		{
-			// sort players
-			if (Offset + 24 >= Info.m_NumClients)
-				qsort(Info.m_aClients, Info.m_NumClients, sizeof(*Info.m_aClients), PlayerScoreNameComp);
-
-			m_ServerBrowser.Set(pPacket->m_Address, IServerBrowser::SET_TOKEN, Token, &Info);
-
-			if(net_addr_comp(&m_ServerAddress, &pPacket->m_Address) == 0)
+			// Only accept server info that has a type that is
+			// newer or equal to something the server already sent
+			// us.
+			if(SavedType >= m_CurrentServerInfo.m_Type)
 			{
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
@@ -1451,6 +1527,8 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			}
 		}
 	}
+	#undef GET_STRING
+	#undef GET_INT
 }
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket)
@@ -2390,7 +2468,7 @@ void CClient::Update()
 			m_CurrentServerInfoRequestTime >= 0 &&
 			time_get() > m_CurrentServerInfoRequestTime)
 		{
-			m_ServerBrowser.Request(m_ServerAddress);
+			m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
 			m_CurrentServerInfoRequestTime = time_get()+time_freq()*2;
 		}
 	}

@@ -255,7 +255,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		// update friend counter
 		if(pItem->m_FriendState != IFriends::FRIEND_NO)
 		{
-			for(int j = 0; j < pItem->m_NumClients; ++j)
+			for(int j = 0; j < pItem->m_NumReceivedClients; ++j)
 			{
 				if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO)
 				{
@@ -906,9 +906,9 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	{
 		static int s_VoteList = 0;
 		static float s_ScrollValue = 0;
-		UiDoListboxStart(&s_VoteList, &ServerScoreBoard, 26.0f, Localize("Scoreboard"), "", pSelectedServer->m_NumClients, 1, -1, s_ScrollValue);
+		UiDoListboxStart(&s_VoteList, &ServerScoreBoard, 26.0f, Localize("Scoreboard"), "", pSelectedServer->m_NumReceivedClients, 1, -1, s_ScrollValue);
 
-		for (int i = 0; i < pSelectedServer->m_NumClients; i++)
+		for (int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 		{
 			CListboxItem Item = UiDoListboxNextItem(&i);
 
@@ -1097,7 +1097,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 			const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
 			if(pItem->m_FriendState != IFriends::FRIEND_NO)
 			{
-				for(int j = 0; j < pItem->m_NumClients && !Found; ++j)
+				for(int j = 0; j < pItem->m_NumReceivedClients && !Found; ++j)
 				{
 					if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO &&
 						((g_Config.m_ClFriendsIgnoreClan && m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
