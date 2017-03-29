@@ -27,6 +27,7 @@ void CAuthManager::Init()
 	if(m_aKeys.size() == NumDefaultKeys && !g_Config.m_SvRconPassword[0])
 	{
 		secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);
+		AddDefaultKey(AUTHED_ADMIN, g_Config.m_SvRconPassword);
 		m_Generated = true;
 	}
 }
