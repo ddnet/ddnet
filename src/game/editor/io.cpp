@@ -416,22 +416,22 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 				Item.m_Image = pLayer->m_Image;
 
-				if (pLayer->m_Flags && !(pLayer->m_Flags&TILESLAYERFLAG_GAME))
+				if (Item.m_Flags && !(pLayer->m_Game))
 				{
 					CTile *pEmptyTiles = (CTile*)mem_alloc(sizeof(CTile)*pLayer->m_Width*pLayer->m_Height, 1);
 					mem_zero(pEmptyTiles, pLayer->m_Width*pLayer->m_Height*sizeof(CTile));
 					Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), pEmptyTiles);
 					mem_free(pEmptyTiles);
 
-					if(pLayer->m_Flags&TILESLAYERFLAG_TELE)
+					if(pLayer->m_Tele)
 						Item.m_Tele = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTeleTile), ((CLayerTele *)pLayer)->m_pTeleTile);
-					else if(pLayer->m_Flags&TILESLAYERFLAG_SPEEDUP)
+					else if(pLayer->m_Speedup)
 						Item.m_Speedup = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CSpeedupTile), ((CLayerSpeedup *)pLayer)->m_pSpeedupTile);
-					else if(pLayer->m_Flags&TILESLAYERFLAG_FRONT)
+					else if(pLayer->m_Front)
 						Item.m_Front = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), pLayer->m_pTiles);
-					else if(pLayer->m_Flags&TILESLAYERFLAG_SWITCH)
+					else if(pLayer->m_Switch)
 						Item.m_Switch = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CSwitchTile), ((CLayerSwitch *)pLayer)->m_pSwitchTile);
-					else if(pLayer->m_Flags&TILESLAYERFLAG_TUNE)
+					else if(pLayer->m_Tune)
 						Item.m_Tune = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTuneTile), ((CLayerTune *)pLayer)->m_pTuneTile);
 				}
 				else
