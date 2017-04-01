@@ -1360,8 +1360,33 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		StatusBox.HSplitTop(20.0f, &Button, &StatusBox);
 		UI()->DoLabelScaled(&Button, Localize("Host address"), 14.0f, -1);
 		StatusBox.HSplitTop(20.0f, &Button, 0);
+		Button.VSplitLeft(245.0f, &Button, 0);
 		static float Offset = 0.0f;
-		DoEditBox(&g_Config.m_UiServerAddress, &Button, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 14.0f, &Offset);
+		DoEditBox(&g_Config.m_UiServerAddress, &Button, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 14.0f, &Offset, false, CUI::CORNER_L);
+ 			
+		// Copy & Paste
+		{
+			const char *Text = Input()->GetClipboardText();
+			
+			Button.VSplitLeft(245, 0, &Button);
+			Button.VSplitLeft(15.0f, &Button, 0);
+			static int s_CopyButton = 0;
+			RenderTools()->DrawUIRect(&Button, vec4(0,1,1,0.33f)*ButtonColorMul(&s_CopyButton), 0, 3.0f);
+			if(DoButton_Menu(&s_CopyButton, "C", 0, &Button, 0, 3.0f) && g_Config.m_UiServerAddress[0] != 0)
+				Input()->SetClipboardText(g_Config.m_UiServerAddress);
+			
+			Button.VSplitLeft(15, 0, &Button);
+			Button.VSplitLeft(15.0f, &Button, 0);
+			static int s_PasteButton = 0;
+			RenderTools()->DrawUIRect(&Button, vec4(0,1,1,0.33f)*ButtonColorMul(&s_PasteButton), CUI::CORNER_R, 3.0f);
+			if(DoButton_Menu(&s_PasteButton, "P", 0, &Button, CUI::CORNER_R, 3.0f) && Text)
+			{
+				/*char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "ui_server_address \"%s\"", Text);
+				Console()->ExecuteLine(aBuf);*/
+				str_copy(g_Config.m_UiServerAddress, Text, sizeof(g_Config.m_UiServerAddress));
+			}
+		}
 	}
 }
 
