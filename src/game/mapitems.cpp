@@ -37,6 +37,41 @@ bool IsValidFrontTile(int Index)
 	);
 }
 
+bool IsValidSwitchTile(int Index)
+{
+	return (
+		Index == TILE_JUMP
+		|| Index == TILE_FREEZE
+		|| Index == TILE_DFREEZE
+		|| Index == TILE_DUNFREEZE
+		|| Index == TILE_HIT_START
+		|| Index == TILE_HIT_END
+		|| Index == TILE_SWITCHTIMEDOPEN
+		|| Index == TILE_SWITCHTIMEDCLOSE
+		|| Index == TILE_SWITCHOPEN
+		|| Index == TILE_SWITCHCLOSE
+		|| Index == TILE_PENALTY
+		|| Index == TILE_BONUS
+		//Switch layer do not contain spawn-entities and flag-enties (which acceptedeable in IsValidEntity() )
+		|| (Index >= ENTITY_ARMOR_1 + ENTITY_OFFSET && IsValidEntity(Index))
+		);
+}
+
+bool IsValidTeleTile(int Index)
+{
+	return (
+		Index == TILE_TELEIN
+		|| Index == TILE_TELEINEVIL
+		|| Index == TILE_TELECHECKINEVIL
+		|| Index == TILE_TELEOUT
+		|| Index == TILE_TELECHECK
+		|| Index == TILE_TELECHECKOUT
+		|| Index == TILE_TELECHECKIN
+		|| Index == TILE_TELEINWEAPON
+		|| Index == TILE_TELEINHOOK
+		);
+}
+
 bool IsValidEntity(int Index)
 {
 	Index -= ENTITY_OFFSET;

@@ -540,6 +540,7 @@ public:
 
 	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
 
+
 	int m_TexID;
 	int m_Game;
 	int m_Image;
@@ -1056,7 +1057,6 @@ public:
 	~CLayerTele();
 
 	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNum;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
@@ -1105,13 +1105,14 @@ public:
 	~CLayerSwitch();
 
 	CSwitchTile *m_pSwitchTile;
-	unsigned char m_SwitchNumber;
-	unsigned char m_SwitchDelay;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	virtual void BrushRotate(float Amount);
+	virtual void BrushFlipX();
+	virtual void BrushFlipY();
 };
 
 class CLayerTune : public CLayerTiles

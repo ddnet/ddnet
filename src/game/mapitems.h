@@ -455,9 +455,10 @@ public:
 	unsigned char m_Type;
 };
 
-
+bool IsValidSwitchTile(int Index);
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
+bool IsValidTeleTile(int Index);
 bool IsValidEntity(int Index);
 
 #endif
