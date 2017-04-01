@@ -151,6 +151,7 @@ public:
 	virtual void BrushFlipX() {}
 	virtual void BrushFlipY() {}
 	virtual void BrushRotate(float Amount) {}
+	virtual void RemoveRotationFlags() {}
 
 	virtual void Render() {}
 	virtual int RenderProperties(CUIRect *pToolbox) { return 0; }
@@ -529,6 +530,7 @@ public:
 	virtual void BrushFlipX();
 	virtual void BrushFlipY();
 	virtual void BrushRotate(float Amount);
+	virtual void RemoveRotationFlags();
 
 	virtual void ShowInfo();
 	virtual int RenderProperties(CUIRect *pToolbox);

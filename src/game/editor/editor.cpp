@@ -1137,6 +1137,21 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushRotate(s_RotationAmount/360.0f*pi*2);
 		}
+
+		TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
+		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+		static int s_NButton = 0;
+		CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
+		if (pT && (!(pT->m_Game || pT-> m_Front)))
+			pT = 0;
+		if (DoButton_Editor(&s_NButton, "H", pT ? 0 : -1, &Button, 0, "[H] Remove rotation from each non-rotateable tile") || (Input()->KeyPress(KEY_H) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+		{
+			if (!pT)
+				return;
+			for (int i = 0; i < m_Brush.m_lLayers.size(); i++)
+				m_Brush.m_lLayers[i]->RemoveRotationFlags();
+		}
+
 	}
 
 	// refocus button
