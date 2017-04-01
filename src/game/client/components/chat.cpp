@@ -37,6 +37,7 @@ void CChat::OnReset()
 		m_aLines[i].m_Time = 0;
 		m_aLines[i].m_aText[0] = 0;
 		m_aLines[i].m_aName[0] = 0;
+		m_aLines[i].m_Friend = false;
 	}
 
 	m_ReverseTAB = false;
