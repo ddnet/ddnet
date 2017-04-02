@@ -61,26 +61,38 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Motd *pMsg = (CNetMsg_Sv_Motd *)pRawMsg;
 
-		char* pLast = m_aServerMotd;
-		// process escaping
-		str_copy(m_aServerMotd, pMsg->m_pMessage, sizeof(m_aServerMotd));
-		for(int i = 0; m_aServerMotd[i]; i++)
+		// copy it manually to process all \n
+		mem_zero(m_aServerMotd, sizeof(m_aServerMotd));
+		const char *pMsgStr = pMsg->m_pMessage;
+		for(int c = 0, i = 0; i < str_length(pMsg->m_pMessage); i++)
 		{
-			if(m_aServerMotd[i] == '\\')
+			if(pMsgStr[i] == '\\' && pMsgStr[i+1] == 'n')
 			{
-				if(m_aServerMotd[i+1] == 'n')
+				m_aServerMotd[c] = '\n';
+				i++; // skip the 'n'
+			}
+			else
+				m_aServerMotd[c] = pMsgStr[i];
+			c++;
+		}
+
+		// print it to the console
+		if(g_Config.m_ClPrintMotd)
+		{
+			const char *pLast = m_aServerMotd;
+			for(int i = 0; m_aServerMotd[i]; i++)
+			{
+				if(m_aServerMotd[i] == '\n')
 				{
 					m_aServerMotd[i] = '\0';
 					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
-					m_aServerMotd[i] = ' ';
-					m_aServerMotd[i+1] = '\n';
-					i++;
-					pLast = m_aServerMotd+i+1;
+					m_aServerMotd[i] = '\n';
+					pLast = m_aServerMotd + i+1;
 				}
 			}
+			if(*pLast != '\0')
+				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 		}
-		if(*pLast)
-			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
 			m_ServerMotdTime = time_get()+time_freq()*g_Config.m_ClMotdTime;
