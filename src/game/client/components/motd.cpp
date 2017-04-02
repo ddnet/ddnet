@@ -62,9 +62,8 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Motd *pMsg = (CNetMsg_Sv_Motd *)pRawMsg;
 
 		// copy it manually to process all \n
-		mem_zero(m_aServerMotd, sizeof(m_aServerMotd));
 		const char *pMsgStr = pMsg->m_pMessage;
-		int MotdLen = str_length(pMsgStr);
+		int MotdLen = str_length(pMsgStr) + 1;
 		const char *pLast = m_aServerMotd; // for console printing
 		for(int i = 0, k = 0; i < MotdLen && k < (int)sizeof(m_aServerMotd); i++, k++)
 		{
@@ -86,6 +85,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 				pLast = m_aServerMotd + k+1;
 			}
 		}
+		m_aServerMotd[sizeof(m_aServerMotd) - 1] = '\0';
 		if(g_Config.m_ClPrintMotd && *pLast != '\0')
 			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 
