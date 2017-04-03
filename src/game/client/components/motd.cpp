@@ -61,25 +61,32 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Motd *pMsg = (CNetMsg_Sv_Motd *)pRawMsg;
 
-		char* pLast = m_aServerMotd;
-		// process escaping
-		str_copy(m_aServerMotd, pMsg->m_pMessage, sizeof(m_aServerMotd));
-		for(int i = 0; m_aServerMotd[i]; i++)
+		// copy it manually to process all \n
+		const char *pMsgStr = pMsg->m_pMessage;
+		int MotdLen = str_length(pMsgStr) + 1;
+		const char *pLast = m_aServerMotd; // for console printing
+		for(int i = 0, k = 0; i < MotdLen && k < (int)sizeof(m_aServerMotd); i++, k++)
 		{
-			if(m_aServerMotd[i] == '\\')
+			// handle incoming "\\n"
+			if(pMsgStr[i] == '\\' && pMsgStr[i+1] == 'n')
 			{
-				if(m_aServerMotd[i+1] == 'n')
-				{
-					m_aServerMotd[i] = '\0';
-					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
-					m_aServerMotd[i] = ' ';
-					m_aServerMotd[i+1] = '\n';
-					i++;
-					pLast = m_aServerMotd+i+1;
-				}
+				m_aServerMotd[k] = '\n';
+				i++; // skip the 'n'
+			}
+			else
+				m_aServerMotd[k] = pMsgStr[i];
+
+			// print the line to the console when receiving the newline character
+			if(g_Config.m_ClPrintMotd && m_aServerMotd[k] == '\n')
+			{
+				m_aServerMotd[k] = '\0';
+				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
+				m_aServerMotd[k] = '\n';
+				pLast = m_aServerMotd + k+1;
 			}
 		}
-		if(*pLast)
+		m_aServerMotd[sizeof(m_aServerMotd) - 1] = '\0';
+		if(g_Config.m_ClPrintMotd && *pLast != '\0')
 			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, true);
 
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
