@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <game/server/save.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -242,6 +243,20 @@ void CPlayer::Tick()
 	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
+	}
+
+	// team load state
+	if (m_TeamLoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_DONE) {
+		// sql thread gave us information of the savegame 
+		CSaveTeam *pSaveTeam = m_TeamLoadState.m_pSaveTeam;
+		dbg_msg("asd", "success number of players: %d", pSaveTeam->GetMembersCount());
+		// next state
+		m_TeamLoadState.m_State = CTeamLoadState::HOST_WAIT_FOR_CLIENTS;
+	} else if (m_TeamLoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_FAILED) {
+		// sql thread had problem retrieving savegame information 
+		dbg_msg("asd", "problems");
+		// reset
+		m_TeamLoadState.m_State = CTeamLoadState::NONE;
 	}
 }
 

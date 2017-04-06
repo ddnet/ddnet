@@ -618,6 +618,31 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 #endif
 }
 
+void CGameContext::ConLoadNew(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->m_TeamLoadState.m_State != CTeamLoadState::NONE)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You cannot use /load now.");
+		return;
+	}
+
+	// initiate load
+	pPlayer->m_TeamLoadState.m_State = CTeamLoadState::HOST_THREAD_INIT_LOAD;
+	str_copy(pPlayer->m_TeamLoadState.m_aCode, pResult->GetString(0), sizeof(pPlayer->m_TeamLoadState));
+	pPlayer->m_TeamLoadState.m_TimeInitiated = pSelf->Server()->Tick();
+
+	// sql
+	pSelf->Score()->LoadTeamInfo(pResult->GetString(0), pResult->m_ClientID);
+}
+
 void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -640,8 +665,9 @@ void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 			return;
 #endif
 
-	if (pResult->NumArguments() > 0)
+	if (pResult->NumArguments() > 0) {
 		pSelf->Score()->LoadTeam(pResult->GetString(0), pResult->m_ClientID);
+	}
 	else
 		return;
 

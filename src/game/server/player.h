@@ -7,6 +7,31 @@
 #include "entities/character.h"
 #include "gamecontext.h"
 
+struct CTeamLoadState
+{
+	enum
+	{
+		NONE=0,
+		// host states
+		HOST_THREAD_INIT_LOAD,
+		HOST_THREAD_INIT_DONE,
+		HOST_THREAD_INIT_FAILED,
+		HOST_WAIT_FOR_CLIENTS,
+		// client states
+		CLIENT_ACCEPTED,
+	};
+
+	int m_State;
+	// host
+	char m_aCode[128+1];
+	int m_TimeInitiated;
+	int m_NumPlayersLeft;
+	struct CSaveTeam *m_pSaveTeam;
+
+	// client
+	int m_JoinID;
+};
+
 // player object
 class CPlayer
 {
@@ -189,6 +214,8 @@ public:
 #if defined(CONF_SQL)
 	int64 m_LastSQLQuery;
 #endif
+
+	CTeamLoadState m_TeamLoadState;
 };
 
 #endif
