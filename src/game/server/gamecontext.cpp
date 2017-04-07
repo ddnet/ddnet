@@ -836,9 +836,6 @@ void CGameContext::OnTick()
 			if (LoadState.m_OwnSavedTeeID == -1)
 			{
 				// this player is not part of the savegame
-				SendChatTarget(i, "You don't belong to this team");
-
-				// reset
 				ResetTeamLoadState(i, "You don't belong to this team");
 			}
 			else if (pSaveTeam->GetMembersCount() > 1)
