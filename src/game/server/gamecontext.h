@@ -366,7 +366,7 @@ public:
 	virtual bool PlayerHooking();
 	virtual float PlayerJetpack();
 
-  void ResetTeamLoadState(int ClientID, const char *pInfo);
+	void ResetTeamLoadState(int ClientID, const char *pInfo);
 
 	void ResetTuning();
 
