@@ -292,7 +292,7 @@ private:
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
-	static void ConLoadNew(IConsole::IResult *pResult, void *pUserData);
+	static void ConAcceptLoad(IConsole::IResult *pResult, void *pUserData);
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeamRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConRank(IConsole::IResult *pResult, void *pUserData);
@@ -365,6 +365,8 @@ public:
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 	virtual float PlayerJetpack();
+
+  void ResetTeamLoadState(int ClientID, const char *pInfo);
 
 	void ResetTuning();
 

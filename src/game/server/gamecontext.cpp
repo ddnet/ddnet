@@ -29,6 +29,7 @@
 #if defined(CONF_SQL)
 #include "score/sql_score.h"
 #endif
+#include "save.h"
 
 enum
 {
@@ -803,6 +804,174 @@ void CGameContext::OnTick()
 		}
 	}
 #endif
+
+	// update team/savegame loading
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!m_apPlayers[i])
+			continue;
+
+		CTeamLoadState &LoadState = m_apPlayers[i]->m_TeamLoadState;
+
+		if (LoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_DONE) {
+			// sql thread gave us information of the savegame
+			CSaveTeam *pSaveTeam = LoadState.m_pSaveTeam;
+			LoadState.m_NumPlayersLeft = pSaveTeam->GetMembersCount()-1;
+			// next state
+			LoadState.m_State = CTeamLoadState::HOST_WAIT_FOR_CLIENTS;
+
+			// find saved tee id
+			LoadState.m_OwnSavedTeeID = -1;
+			for (int g = 0; g < pSaveTeam->GetMembersCount(); g++)
+			{
+				if (str_comp(pSaveTeam->SavedTees[g].GetName(), Server()->ClientName(i)) == 0)
+				{
+					// this is us
+					LoadState.m_OwnSavedTeeID = g;
+					break;
+				}
+			}
+
+			if (LoadState.m_OwnSavedTeeID == -1)
+			{
+				// this player is not part of the savepoint
+				SendChatTarget(i, "You don't belong to this team");
+
+				// reset
+				ResetTeamLoadState(i, "You don't belong to this team");
+			}
+			else if (pSaveTeam->GetMembersCount() > 1)
+			{
+				// ensure that all savegame members are on the server
+				bool AllFound = true;
+				int NotFound = -1;
+				for (int g = 0; g < pSaveTeam->GetMembersCount(); g++)
+				{
+					bool Found = false;
+					for (int c = 0; c < MAX_CLIENTS; c++)
+					{
+						if (str_comp(pSaveTeam->SavedTees[g].GetName(), Server()->ClientName(c)) == 0)
+						{
+							Found = true;
+							break;
+						}
+					}
+
+					if (!Found)
+					{
+						NotFound = g;
+						AllFound = false;
+						break;
+					}
+				}
+
+				if (!AllFound)
+				{
+					char aInfo[256];
+					str_format(aInfo, sizeof(aInfo), "Unable to find Player: %s", pSaveTeam->SavedTees[NotFound].GetName());
+					ResetTeamLoadState(i, aInfo);
+				}
+				else
+				{
+					// inform host
+					char aHostInfo[256];
+					str_format(aHostInfo, sizeof(aHostInfo), "The following players are being invited: ");
+					int Count = pSaveTeam->GetMembersCount()-1;
+					for (int g = 0; g < pSaveTeam->GetMembersCount(); g++)
+					{
+						if (g == LoadState.m_OwnSavedTeeID)
+							// this is us
+							continue;
+
+						str_append(aHostInfo, pSaveTeam->SavedTees[g].GetName(), sizeof(aHostInfo));
+						if (Count > 1)
+							str_append(aHostInfo, ", ", sizeof(aHostInfo));
+						Count--;
+					}
+
+					SendChatTarget(i, aHostInfo);
+
+					// invite all players that are part of the team
+					char aInfoMsg[256];
+					str_format(aInfoMsg, sizeof(aInfoMsg), "You've been invited to a savegame, say '/acceptload %s' to accept", Server()->ClientName(i));
+
+					for (int g = 0; g < pSaveTeam->GetMembersCount(); g++)
+					{
+						if (g == LoadState.m_OwnSavedTeeID)
+							continue;
+
+						for (int c = 0; c < MAX_CLIENTS; c++)
+						{
+							if (str_comp(pSaveTeam->SavedTees[g].GetName(), Server()->ClientName(c)) == 0)
+								SendChatTarget(c, aInfoMsg);
+						}
+					}
+				}
+			}
+		}
+		else if (LoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_FAILED)
+		{
+			// sql thread had problems retrieving savegame information
+			// reset
+			ResetTeamLoadState(i, 0);
+		}
+		else if (LoadState.m_State == CTeamLoadState::HOST_WAIT_FOR_CLIENTS)
+		{
+			if (LoadState.m_NumPlayersLeft == 0)
+			{
+				// All players accepted, do actual team/savepoint load
+
+				// load team
+				Score()->LoadTeam(LoadState.m_aCode, i);
+				// reset states
+				ResetTeamLoadState(i, 0);
+			}
+			else if (Server()->Tick() >= LoadState.m_TimeInitiated+Server()->TickSpeed()*g_Config.m_SvLoadInviteTimeout)
+			{
+				// invite timed out, reset states
+				ResetTeamLoadState(i, "Load invitation timed out.");
+			}
+		}
+	}
+}
+
+void CGameContext::ResetTeamLoadState(int ClientID, const char *pInfo)
+{
+	CPlayer &Player = *m_apPlayers[ClientID];
+	CTeamLoadState &LoadState = Player.m_TeamLoadState;
+
+
+	if (LoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_DONE)
+	{
+		delete LoadState.m_pSaveTeam;
+	}
+	else if (LoadState.m_State == CTeamLoadState::HOST_WAIT_FOR_CLIENTS)
+	{
+		delete LoadState.m_pSaveTeam;
+
+		// also reset participants
+		for (int g = 0; g < MAX_CLIENTS; g++)
+		{
+			if (!m_apPlayers[g])
+				continue;
+
+			if (m_apPlayers[g]->m_TeamLoadState.m_State == CTeamLoadState::CLIENT_ACCEPTED && m_apPlayers[g]->m_TeamLoadState.m_JoinID == ClientID)
+			{
+				ResetTeamLoadState(g, pInfo);
+			}
+		}
+	}
+	else if (LoadState.m_State == CTeamLoadState::CLIENT_ACCEPTED)
+	{
+		CPlayer &HostPlayer = *m_apPlayers[LoadState.m_JoinID];
+		CTeamLoadState &HostLoadState = HostPlayer.m_TeamLoadState;
+
+		HostLoadState.m_NumPlayersLeft++;
+	}
+
+	if (pInfo)
+		SendChatTarget(ClientID, pInfo);
+	LoadState.m_State = CTeamLoadState::NONE;
 }
 
 // Server hooks
@@ -1001,6 +1170,7 @@ void CGameContext::OnClientConnected(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
+	ResetTeamLoadState(ClientID, "Savegame load cancelled.");
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
 	delete m_apPlayers[ClientID];

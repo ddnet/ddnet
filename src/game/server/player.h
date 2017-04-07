@@ -30,6 +30,9 @@ struct CTeamLoadState
 
 	// client
 	int m_JoinID;
+
+  // both
+  int m_OwnSavedTeeID; // CSaveTeam.SavedTees index
 };
 
 // player object
