@@ -814,7 +814,7 @@ void CGameContext::OnTick()
 		CTeamLoadState &LoadState = m_apPlayers[i]->m_TeamLoadState;
 
 		if (LoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_DONE)
-    {
+		{
 			// sql thread gave us information about the savegame
 			CSaveTeam *pSaveTeam = LoadState.m_pSaveTeam;
 			LoadState.m_NumPlayersLeft = pSaveTeam->GetMembersCount()-1;
