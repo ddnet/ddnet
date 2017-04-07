@@ -813,8 +813,9 @@ void CGameContext::OnTick()
 
 		CTeamLoadState &LoadState = m_apPlayers[i]->m_TeamLoadState;
 
-		if (LoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_DONE) {
-			// sql thread gave us information of the savegame
+		if (LoadState.m_State == CTeamLoadState::HOST_THREAD_INIT_DONE)
+    {
+			// sql thread gave us information about the savegame
 			CSaveTeam *pSaveTeam = LoadState.m_pSaveTeam;
 			LoadState.m_NumPlayersLeft = pSaveTeam->GetMembersCount()-1;
 			// next state
@@ -844,14 +845,30 @@ void CGameContext::OnTick()
 			{
 				// ensure that all savegame members are on the server
 				bool AllFound = true;
+				bool SameIPAndReady = true;
+				char aHostIP[NETADDR_MAXSTRSIZE];
+				char aTmpIP[NETADDR_MAXSTRSIZE];
 				int NotFound = -1;
+
+				Server()->GetClientAddr(i, aHostIP, NETADDR_MAXSTRSIZE);
+
 				for (int g = 0; g < pSaveTeam->GetMembersCount(); g++)
 				{
+					if (g == LoadState.m_OwnSavedTeeID)
+						continue;
+
 					bool Found = false;
 					for (int c = 0; c < MAX_CLIENTS; c++)
 					{
+						if (!m_apPlayers[c])
+							continue;
+
 						if (str_comp(pSaveTeam->SavedTees[g].GetName(), Server()->ClientName(c)) == 0)
 						{
+							Server()->GetClientAddr(c, aTmpIP, NETADDR_MAXSTRSIZE);
+							if (m_apPlayers[c]->m_TeamLoadState.m_State != CTeamLoadState::NONE || str_comp(aTmpIP, aHostIP) != 0)
+								SameIPAndReady = false;
+
 							Found = true;
 							break;
 						}
@@ -871,8 +888,32 @@ void CGameContext::OnTick()
 					str_format(aInfo, sizeof(aInfo), "Unable to find Player: %s", pSaveTeam->SavedTees[NotFound].GetName());
 					ResetTeamLoadState(i, aInfo);
 				}
+				else if (SameIPAndReady)
+				{
+					// All participants have the same ip, enforce team load
+					for (int g = 0; g < pSaveTeam->GetMembersCount(); g++)
+					{
+						if (g == LoadState.m_OwnSavedTeeID)
+							continue;
+
+						for (int c = 0; c < MAX_CLIENTS; c++)
+						{
+							if (str_comp(pSaveTeam->SavedTees[g].GetName(), Server()->ClientName(c)) == 0)
+							{
+								m_apPlayers[c]->m_TeamLoadState.m_State = CTeamLoadState::CLIENT_ACCEPTED;
+								LoadState.m_NumPlayersLeft--;
+								break;
+							}
+						}
+
+						// LoadState.m_NumPlayersLeft now is zero and will trigger
+						// the load in the next state
+					}
+				}
 				else
 				{
+					// Invite potential participants
+
 					// inform host
 					char aHostInfo[256];
 					str_format(aHostInfo, sizeof(aHostInfo), "The following players are being invited: ");
@@ -915,7 +956,8 @@ void CGameContext::OnTick()
 			// reset
 			ResetTeamLoadState(i, 0);
 		}
-		else if (LoadState.m_State == CTeamLoadState::HOST_WAIT_FOR_CLIENTS)
+
+		if (LoadState.m_State == CTeamLoadState::HOST_WAIT_FOR_CLIENTS)
 		{
 			if (LoadState.m_NumPlayersLeft == 0)
 			{
