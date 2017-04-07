@@ -835,7 +835,7 @@ void CGameContext::OnTick()
 
 			if (LoadState.m_OwnSavedTeeID == -1)
 			{
-				// this player is not part of the savepoint
+				// this player is not part of the savegame
 				SendChatTarget(i, "You don't belong to this team");
 
 				// reset
@@ -961,7 +961,7 @@ void CGameContext::OnTick()
 		{
 			if (LoadState.m_NumPlayersLeft == 0)
 			{
-				// All players accepted, do actual team/savepoint load
+				// All players accepted, do actual team/savegame load
 
 				// load team
 				Score()->LoadTeam(LoadState.m_aCode, i);
