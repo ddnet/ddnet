@@ -90,7 +90,7 @@ void CSaveTee::save(CCharacter *pChr)
 
 void CSaveTee::load(CCharacter *pChr, int Team)
 {
-	pChr->m_pPlayer->Pause(m_Paused);
+	pChr->m_pPlayer->Pause(m_Paused, true);
 
 	pChr->m_Alive = m_Alive;
 	pChr->m_NeededFaketuning = m_NeededFaketuning;

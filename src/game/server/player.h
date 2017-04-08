@@ -129,7 +129,8 @@ private:
 	int m_Team;
 
 	int m_Paused;
-	int m_ForcePauseTime;
+	int64 m_ForcePauseTime;
+	int64 m_LastPause;
 
 	// DDRace
 
@@ -151,11 +152,10 @@ public:
 
 	bool m_DND;
 	int64 m_FirstVoteTick;
-	int64 m_NextPauseTick;
 	char m_TimeoutCode[64];
 
 	void ProcessPause();
-	int Pause(int State);
+	int Pause(int State, bool Force);
 	int ForcePause(int Time);
 	int IsPaused();
 
