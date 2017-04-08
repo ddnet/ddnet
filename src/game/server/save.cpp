@@ -22,7 +22,7 @@ void CSaveTee::save(CCharacter *pChr)
 	str_copy(m_name, pChr->m_pPlayer->Server()->ClientName(pChr->m_pPlayer->GetCID()), sizeof(m_name));
 
 	m_Alive = pChr->m_Alive;
-	m_Paused = pChr->m_pPlayer->m_Paused;
+	m_Paused = pChr->m_pPlayer->IsPaused();
 	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
 	m_TeeFinished = pChr->Teams()->TeeFinished(pChr->m_pPlayer->GetCID());
@@ -90,8 +90,7 @@ void CSaveTee::save(CCharacter *pChr)
 
 void CSaveTee::load(CCharacter *pChr, int Team)
 {
-	pChr->m_pPlayer->m_Paused = m_Paused;
-	pChr->m_pPlayer->ProcessPause();
+	pChr->m_pPlayer->Pause(m_Paused);
 
 	pChr->m_Alive = m_Alive;
 	pChr->m_NeededFaketuning = m_NeededFaketuning;

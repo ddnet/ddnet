@@ -335,7 +335,6 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CServer* pServ = (CServer*)pSelf->Server();
 	int Victim = pResult->GetVictim();
 	int Seconds = 0;
 	if (pResult->NumArguments() > 0)
@@ -345,8 +344,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
-	pPlayer->m_ForcePauseTime = Seconds*pServ->TickSpeed();
-	pPlayer->m_Paused = CPlayer::PAUSED_FORCE;
+	pPlayer->ForcePause(Seconds);
 }
 
 void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,

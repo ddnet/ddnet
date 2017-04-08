@@ -83,7 +83,7 @@ void CDoor::Snap(int SnappingClient)
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
-				|| GameServer()->m_apPlayers[SnappingClient]->m_Paused)
+				|| GameServer()->m_apPlayers[SnappingClient]->IsPaused())
 			&& GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 

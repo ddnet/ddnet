@@ -1529,7 +1529,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				//if(m_pController->CanChangeTeam(pPlayer, pMsg->m_Team))
 
-				if(pPlayer->m_Paused)
+				if(pPlayer->IsPaused())
 					SendChatTarget(ClientID,"Use /pause first then you can kill");
 				else
 				{
@@ -1729,7 +1729,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			if(pPlayer->m_LastKill && pPlayer->m_LastKill+Server()->TickSpeed()*g_Config.m_SvKillDelay > Server()->Tick())
 				return;
-			if(pPlayer->m_Paused)
+			if(pPlayer->IsPaused())
 				return;
 
 			CCharacter *pChr = pPlayer->GetCharacter();
@@ -2033,7 +2033,7 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_apPlayers[ClientID]->m_TeamChangeTick = pSelf->Server()->Tick()+pSelf->Server()->TickSpeed()*Delay*60;
 	pSelf->m_apPlayers[ClientID]->SetTeam(Team);
 	if(Team == TEAM_SPECTATORS)
-		pSelf->m_apPlayers[ClientID]->m_Paused = CPlayer::PAUSED_NONE;
+		pSelf->m_apPlayers[ClientID]->Pause(CPlayer::PAUSE_NONE);
 	// (void)pSelf->m_pController->CheckTeamBalance();
 }
 
