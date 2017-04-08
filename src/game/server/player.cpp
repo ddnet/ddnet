@@ -119,7 +119,7 @@ void CPlayer::Reset()
 	m_Paused = PAUSE_NONE;
 	m_DND = false;
 
-	m_NextPauseTick = 0;
+	m_LastPause = 0;
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -652,7 +652,7 @@ void CPlayer::ProcessPause()
 	if(m_ForcePauseTime && m_ForcePauseTime < Server()->Tick())
 	{
 		m_ForcePauseTime = 0;
-		Pause(PAUSE_NONE);
+		Pause(PAUSE_NONE, true);
 	}
 
 	if(m_Paused == PAUSE_SPEC && !m_pCharacter->IsPaused() && m_pCharacter->IsGrounded() && m_pCharacter->m_Pos == m_pCharacter->m_PrevPos)
@@ -663,7 +663,7 @@ void CPlayer::ProcessPause()
 	}
 }
 
-int CPlayer::Pause(int State)
+int CPlayer::Pause(int State, bool Force)
 {
 	dbg_assert(State >= PAUSE_NONE && State <= PAUSE_SPEC, "invalid pause state passed");
 	if(!m_pCharacter)
@@ -674,29 +674,30 @@ int CPlayer::Pause(int State)
 	{
 		// Get to wanted state
 		switch(State){
+		case PAUSE_PAUSED:
+		case PAUSE_NONE:
+			if(m_pCharacter->IsPaused()) // First condition might be unnecessary
+			{
+				if(!Force && m_LastPause && m_LastPause + g_Config.m_SvPauseFrequency * Server()->TickSpeed() > Server()->Tick())
+				{
+					GameServer()->SendChatTarget(m_ClientID, "Can't pause that quickly.");
+					return m_Paused; // Do not update state. Do not collect $200
+				}
+				m_pCharacter->Pause(false);
+				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+			}
 		case PAUSE_SPEC:
 			if(g_Config.m_SvPauseMessages)
 			{
-				str_format(aBuf, sizeof(aBuf), (m_Paused == PAUSE_PAUSED) ? "'%s' paused" : "'%s' was force-paused for %ds", Server()->ClientName(m_ClientID), m_ForcePauseTime/Server()->TickSpeed());
+				str_format(aBuf, sizeof(aBuf), (m_Paused > PAUSE_NONE) ? "'%s' paused" : "'%s' resumed", Server()->ClientName(m_ClientID));
 				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			}
 			break;
-		case PAUSE_PAUSED:
-		case PAUSE_NONE:
-			if(m_Paused == PAUSE_SPEC && m_pCharacter->IsPaused())
-			{
-				m_pCharacter->Pause(false);
-				if(g_Config.m_SvPauseMessages && State == PAUSE_NONE)
-				{
-					str_format(aBuf, sizeof(aBuf), "'%s' resumed", Server()->ClientName(m_ClientID));
-					GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-				}
-				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
-			}
-			break;
 		}
+
 		// Update state
 		m_Paused = State;
+		m_LastPause = Server()->Tick();
 	}
 
 	return m_Paused;
@@ -706,7 +707,14 @@ int CPlayer::ForcePause(int Time)
 {
 	m_ForcePauseTime = Server()->Tick() + Server()->TickSpeed() * Time;
 
-	return Pause(PAUSE_SPEC);
+	if(g_Config.m_SvPauseMessages)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' was force-paused for %ds", Server()->ClientName(m_ClientID), Time);
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	}
+
+	return Pause(PAUSE_SPEC, true);
 }
 
 int CPlayer::IsPaused()
