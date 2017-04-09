@@ -749,14 +749,9 @@ void CChat::OnRender()
 
 		if(g_Config.m_ClMessageFriend)
 		{
-			if(m_aLines[r].m_Friend)
-			{
-				vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
-				TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
-				TextRender()->TextEx(&Cursor, "♥ ", -1);
-			}
-			else // Ugly hack to align messages
-				Cursor.m_X += HeartAlign;
+			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, m_aLines[r].m_Friend ? Blend : 0); //Less ugly hack to align messages
+			TextRender()->TextEx(&Cursor, "♥ ", -1);
 		}
 
 		// render name
