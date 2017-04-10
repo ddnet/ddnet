@@ -700,8 +700,7 @@ void CChat::OnRender()
 	float FontSize = 6.0f;
 #endif
 	int64 Now = time_get();
-	float HeartAlign = TextRender()->TextWidth(0, FontSize, "♥ ", -1);
-	float LineWidth = (g_Config.m_ClMessageFriend ? HeartAlign : 0.0f) + (m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f);
+	float LineWidth = m_pClient->m_pScoreboard->Active() ? 90.0f : 200.0f;
 	float HeightLimit = m_pClient->m_pScoreboard->Active() ? 230.0f : m_Show ? 50.0f : 200.0f;
 	float Begin = x;
 	CTextCursor Cursor;
