@@ -1541,6 +1541,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	int Sys = Msg&1;
 	Msg >>= 1;
 
+	const unsigned char *Ex = (Msg == NETMSG_NULL) ? Unpacker.GetRaw(4) : 0;
+
 	if(Unpacker.Error())
 		return;
 
