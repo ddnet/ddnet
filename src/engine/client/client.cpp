@@ -2172,8 +2172,9 @@ void CClient::ResetMapDownload()
 {
 	if(m_pMapdownloadTask)
 	{
+		m_pMapdownloadTask->Abort();
 		delete m_pMapdownloadTask;
-		m_pMapdownloadTask = NULL;
+		m_pMapdownloadTask = 0;
 	}
 	m_MapdownloadFile = 0;
 	m_MapdownloadAmount = 0;
@@ -2195,7 +2196,7 @@ void CClient::FinishMapDownload()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 		SendReady();
 	}
-	else if(m_pMapdownloadTask)
+	else if(m_pMapdownloadTask) // fallback
 	{
 		ResetMapDownload();
 		m_MapdownloadTotalsize = prev;
