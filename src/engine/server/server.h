@@ -244,6 +244,7 @@ public:
 	int ClientCountry(int ClientID);
 	bool ClientIngame(int ClientID);
 	int MaxClients() const;
+	int GetClientID(const char *pName);
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID);
 	int SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System);

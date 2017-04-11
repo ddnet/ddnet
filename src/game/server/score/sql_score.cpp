@@ -1471,6 +1471,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
+	CGameControllerDDRace *pController = (CGameControllerDDRace *)pData->m_pController;
 
 	if (HandleFailure)
 		return true;
@@ -1511,55 +1512,52 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				pData->GameServer()->SendChatTarget(pData->m_ClientID, "Unable to load savegame: data corrupted");
 			else
 			{
-
-				bool Found = false;
-				for (int i = 0; i < SavedTeam.GetMembersCount(); i++)
+				int Team = pController->m_Teams.m_Core.Team(pData->m_ClientID);
+				if(Team == TEAM_FLOCK || Team == TEAM_SUPER)
 				{
-					if(str_comp(SavedTeam.SavedTees[i].GetName(), pData->Server()->ClientName(pData->m_ClientID)) == 0)
-					{ Found = true; break; }
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You must be in a team to load");
+					goto end;
 				}
-				if (!Found)
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You don't belong to this team");
+				if(pController->m_Teams.GetTeamState(Team) == CGameTeams::TEAMSTATE_STARTED)
+				{
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Can't load while racing");
+					goto end;
+				}
+
+				int TeamCount = pController->m_Teams.Count(Team);
+				if(TeamCount != SavedTeam.GetMembersCount())
+				{
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "All saved tees must be present to load."); // Also list the missing tees I guess
+					goto end;
+				}
+
+				int64_t TeamMask = pController->m_Teams.TeamMask(Team);
+
+				int Found = 0;
+				for(int i = 0; i < SavedTeam.GetMembersCount(); i++)
+				{
+					int CID = pData->Server()->GetClientID(SavedTeam.SavedTees[i]);
+					if(CID >= 0 && pController->m_Teams.m_Core.Team(CID) == Team)
+						Found++;
+					else
+						break;
+				}
+				if(Found != SavedTeam.GetMembersCount())
+				{
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "All saved tees must be present to load."); // Also list the missing tees I guess
+					goto end;
+				}
+
+				if(!SavedTeam.load(Team))
+				{
+					pData->GameServer()->SendChatTeam(Team, "Loading successfully done");
+					char aBuf[512];
+					str_format(aBuf, sizeof(aBuf), "DELETE from %s_saves where Code='%s' and Map='%s';", pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
+					pSqlServer->executeSql(aBuf);
+				}
 				else
 				{
-
-					int n;
-					for(n = 1; n<64; n++)
-					{
-						if(((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.Count(n) == 0)
-							break;
-					}
-
-					if(((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.Count(n) > 0)
-					{
-						n = ((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.m_Core.Team(pData->m_ClientID); // if all Teams are full your the only one in your team
-					}
-
-					Num = SavedTeam.load(n);
-
-					if(Num == 1)
-					{
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
-					}
-					else if(Num >= 10 && Num < 100)
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam.SavedTees[Num-10].GetName());
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-					}
-					else if(Num >= 100)
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam.SavedTees[Num-100].GetName());
-						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
-					}
-					else
-					{
-						pData->GameServer()->SendChatTeam(n, "Loading successfully done");
-						char aBuf[512];
-						str_format(aBuf, sizeof(aBuf), "DELETE from %s_saves where Code='%s' and Map='%s';", pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
-						pSqlServer->executeSql(aBuf);
-					}
+					pData->GameServer()->SendChatTeam(Team, "Loading failed, report this incident");
 				}
 			}
 		}
