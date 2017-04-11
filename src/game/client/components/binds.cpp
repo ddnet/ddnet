@@ -50,8 +50,15 @@ void CBinds::Bind(int KeyID, const char *pStr)
 	{
 		int size = str_length(pStr) + 1;
 		m_apKeyBindings[KeyID] = (char *)mem_alloc(size, 1);
-		str_copy(m_apKeyBindings[KeyID], pStr, size);
-		str_format(aBuf, sizeof(aBuf), "bound %s (%d) = %s", Input()->KeyName(KeyID), KeyID, m_apKeyBindings[KeyID]);
+		if(!m_apKeyBindings[KeyID])
+		{
+			str_format(aBuf, sizeof(aBuf), "couldn't bind %s (%d) (bind might be too long)", Input()->KeyName(KeyID), KeyID);
+		}
+		else
+		{
+			str_copy(m_apKeyBindings[KeyID], pStr, size);
+			str_format(aBuf, sizeof(aBuf), "bound %s (%d) = %s", Input()->KeyName(KeyID), KeyID, m_apKeyBindings[KeyID]);
+		}
 	}
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 }
