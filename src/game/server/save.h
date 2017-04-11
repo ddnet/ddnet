@@ -9,8 +9,8 @@ class CSaveTee
 public:
 	CSaveTee();
 	~CSaveTee();
-	void save(CCharacter* pchr);
-	void load(CCharacter* pchr, int Team);
+	void Save(CCharacter* pchr);
+	void Load(CCharacter* pchr, int Team);
 	char* GetString();
 	int LoadString(char* String);
 	vec2 GetPos() { return m_Pos; }
@@ -88,12 +88,11 @@ public:
 	char* GetString();
 	int GetMembersCount() {return m_MembersCount;}
 	int LoadString(const char* String);
-	int save(int Team);
-	int load(int Team);
+	int Save(int Team);
+	int Load(int Team);
 	CSaveTee* SavedTees;
 
 private:
-	int MatchPlayer(char name[16]);
 	CCharacter* MatchCharacter(char name[16], int SaveID);
 
 	IGameController* m_pController;
