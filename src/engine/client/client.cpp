@@ -313,7 +313,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	// map download
 	m_aMapdownloadFilename[0] = 0;
 	m_aMapdownloadName[0] = 0;
-	m_pMapdownloadTask = 0;
+	m_pMapdownloadTask = NULL;
 	m_MapdownloadFile = 0;
 	m_MapdownloadChunk = 0;
 	m_MapdownloadCrc = 0;
@@ -2172,6 +2172,7 @@ void CClient::ResetMapDownload()
 {
 	if(m_pMapdownloadTask)
 	{
+		m_pMapdownloadTask->Abort();
 		delete m_pMapdownloadTask;
 		m_pMapdownloadTask = NULL;
 	}
@@ -2195,7 +2196,7 @@ void CClient::FinishMapDownload()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 		SendReady();
 	}
-	else if(m_pMapdownloadTask)
+	else if(m_pMapdownloadTask) // fallback
 	{
 		ResetMapDownload();
 		m_MapdownloadTotalsize = prev;
@@ -2513,7 +2514,7 @@ void CClient::Update()
 		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
 		{
 			delete m_pMapdownloadTask;
-			m_pMapdownloadTask = 0;
+			m_pMapdownloadTask = NULL;
 		}
 	}
 
