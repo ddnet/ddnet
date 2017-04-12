@@ -88,7 +88,7 @@ void CBinds::UnbindAll()
 
 const char *CBinds::Get(int KeyID)
 {
-	if(KeyID > 0 && KeyID < KEY_LAST)
+	if(KeyID > 0 && KeyID < KEY_LAST && m_apKeyBindings[KeyID])
 		return m_apKeyBindings[KeyID];
 	return "";
 }
