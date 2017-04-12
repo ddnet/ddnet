@@ -72,7 +72,7 @@ const char *CBinds::GetKey(const char *pBindStr)
 	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
 	{
 		const char *pBind = Get(KeyId);
-		if(!pBind[0])
+		if(!pBind)
 			continue;
 
 		if(str_comp(pBind, pBindStr) == 0)
