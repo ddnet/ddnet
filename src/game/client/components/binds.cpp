@@ -39,7 +39,10 @@ void CBinds::Bind(int KeyID, const char *pStr)
 		return;
 
 	if(m_apKeyBindings[KeyID])
+	{
 		mem_free(m_apKeyBindings[KeyID]);
+		m_apKeyBindings[KeyID] = 0;
+	}
 
 	char aBuf[256];
 	if(!pStr[0])
