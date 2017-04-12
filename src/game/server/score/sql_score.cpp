@@ -1525,29 +1525,40 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				}
 
 				int TeamCount = pController->m_Teams.Count(Team);
-				if(TeamCount != SavedTeam.GetMembersCount())
+				if(TeamCount < SavedTeam.GetMembersCount()) // Not enough
 				{
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "All saved tees must be present to load."); // Also list the missing tees I guess
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "All saved tees must be present to load"); // Also list the missing tees I guess
 					goto end;
 				}
 
-				int64_t TeamMask = pController->m_Teams.TeamMask(Team);
-
-				int Found = 0;
-				for(int i = 0; i < SavedTeam.GetMembersCount(); i++)
 				{
-					int CID = pData->Server()->GetClientID(SavedTeam.SavedTees[i]);
-					if(CID >= 0 && pController->m_Teams.m_Core.Team(CID) == Team)
-						Found++;
-					else
-						break;
-				}
-				if(Found != SavedTeam.GetMembersCount())
-				{
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "All saved tees must be present to load."); // Also list the missing tees I guess
-					goto end;
-				}
+					int Found = 0;
+					bool Removed = false;
+					for (int i = 0; i < MAX_CLIENTS; ++i)
+					{
+						if(pController->m_Teams.m_Core.Team(i) == Team)
+						{
+							bool Allowed = false;
+							for(int j = 0; !Allowed && j < SavedTeam.GetMembersCount(); i++)
+								if(!str_comp(pData->Server()->ClientName(i), SavedTeam.SavedTees[j]))
+									Allowed = true;
 
+							if(!Allowed)
+								pController->m_Teams.SetForceCharacterTeam(i, TEAM_FLOCK);
+
+							Found += Allowed;
+							Removed |= !Allowed;
+						}
+					}
+					if(Found != SavedTeam.GetMembersCount())
+					{
+						pData->GameServer()->SendChatTarget(pData->m_ClientID, "All saved tees must be present to load"); // Also list the missing tees I guess
+						goto end;
+					}
+					if(Removed)
+						pData->GameServer()->SendChatTarget(pData->m_ClientID, "Tees that don't belong to the save have been removed");
+				}
+				
 				if(!SavedTeam.load(Team))
 				{
 					pData->GameServer()->SendChatTeam(Team, "Loading successfully done");
