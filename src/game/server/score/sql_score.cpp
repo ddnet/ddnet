@@ -1534,14 +1534,21 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				{
 					int Found = 0;
 					bool Removed = false;
+					bool Belongs = false;
 					for (int i = 0; i < MAX_CLIENTS; ++i)
 					{
 						if(pController->m_Teams.m_Core.Team(i) == Team)
 						{
 							bool Allowed = false;
 							for(int j = 0; !Allowed && j < SavedTeam.GetMembersCount(); i++)
+							{
 								if(!str_comp(pData->Server()->ClientName(i), SavedTeam.SavedTees[j]))
+								{
+									if(i == pData->m_ClientID)
+										Belongs = true;
 									Allowed = true;
+								}
+							}
 
 							if(!Allowed)
 								pController->m_Teams.SetForceCharacterTeam(i, TEAM_FLOCK);
@@ -1557,6 +1564,11 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 					}
 					if(Removed)
 						pData->GameServer()->SendChatTarget(pData->m_ClientID, "Tees that don't belong to the save have been removed");
+					if(!Belongs)
+					{
+						pData->GameServer()->SendChatTarget(pData->m_ClientID, "You don't belong to this save"); // Also list the missing tees I guess
+						goto end;
+					}
 				}
 				
 				if(!SavedTeam.load(Team))
