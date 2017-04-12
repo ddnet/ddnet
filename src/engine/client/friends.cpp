@@ -72,11 +72,11 @@ int CFriends::GetFriendState(const char *pName, const char *pClan) const
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || m_aFriends[i].m_ClanHash == ClanHash)
+		if((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan)))
 		{
 			if(m_aFriends[i].m_aName[0] == 0)
 				Result = FRIEND_CLAN;
-			else if(m_aFriends[i].m_NameHash == NameHash)
+			else if(m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName))
 			{
 				Result = FRIEND_PLAYER;
 				break;
@@ -92,8 +92,8 @@ bool CFriends::IsFriend(const char *pName, const char *pClan, bool PlayersOnly) 
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if(((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || m_aFriends[i].m_ClanHash == ClanHash) &&
-			((!PlayersOnly && m_aFriends[i].m_aName[0] == 0) || m_aFriends[i].m_NameHash == NameHash))
+		if(((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))) &&
+			((!PlayersOnly && m_aFriends[i].m_aName[0] == 0) || (m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName))))
 			return true;
 	}
 	return false;
@@ -109,7 +109,7 @@ void CFriends::AddFriend(const char *pName, const char *pClan)
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if(m_aFriends[i].m_NameHash == NameHash && ((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || m_aFriends[i].m_ClanHash == ClanHash))
+		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) && ((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))))
 			return;
 	}
 
@@ -126,7 +126,8 @@ void CFriends::RemoveFriend(const char *pName, const char *pClan)
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if(m_aFriends[i].m_NameHash == NameHash && ((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || m_aFriends[i].m_ClanHash == ClanHash))
+		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) && 
+			((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))))
 		{
 			RemoveFriend(i);
 			return;
