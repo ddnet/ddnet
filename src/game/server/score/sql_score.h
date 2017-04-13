@@ -74,7 +74,7 @@ struct CSqlExecData
 	bool m_ReadOnly;
 
 	// keeps track of score-threads
-	static int ms_InstanceCount;
+	volatile static int ms_InstanceCount;
 };
 
 struct CSqlPlayerData : CSqlData
