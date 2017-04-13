@@ -25,8 +25,6 @@ public:
 
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
-	bool GetNearestAirPos(vec2 Pos, vec2* OutPos);
-	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2* OutPos);
 
 	virtual void Reset();
 	virtual void Tick();
