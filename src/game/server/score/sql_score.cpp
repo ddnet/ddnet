@@ -70,6 +70,11 @@ void CSqlScore::OnShutdown()
 	int i = 0;
 	while (CSqlExecData::ms_InstanceCount != 0)
 	{
+		if (i > 600)  {
+			dbg_msg("sql", "Waited 60 seconds for score-threads to complete, quitting anyway");
+			break;
+		}
+
 		// print a log about every two seconds
 		if (i % 20 == 0)
 			dbg_msg("sql", "Waiting for score-threads to complete (%d left)", CSqlExecData::ms_InstanceCount);
