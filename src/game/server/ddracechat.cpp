@@ -401,11 +401,9 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID)) return;
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-#if defined(CONF_SQL)
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
 		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
 			return;
-#endif
 
 	if(g_Config.m_SvUseSQL)
 	{
@@ -417,9 +415,7 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 		if(pResult->NumArguments() == 0)
 		{
 			pScore->ShowTimes(pPlayer->GetCID(),1);
-			return;
 		}
-
 		else if(pResult->NumArguments() < 3)
 		{
 			if (pResult->NumArguments() == 1)
@@ -428,23 +424,21 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 					pScore->ShowTimes(pPlayer->GetCID(),pResult->GetInteger(0));
 				else
 					pScore->ShowTimes(pPlayer->GetCID(), (str_comp(pResult->GetString(0), "me") == 0) ? pSelf->Server()->ClientName(pResult->m_ClientID) : pResult->GetString(0),1);
-				return;
 			}
 			else if (pResult->GetInteger(1) != 0)
 			{
 				pScore->ShowTimes(pPlayer->GetCID(), (str_comp(pResult->GetString(0), "me") == 0) ? pSelf->Server()->ClientName(pResult->m_ClientID) : pResult->GetString(0),pResult->GetInteger(1));
-				return;
 			}
 		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
+		}
 
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
-
-#if defined(CONF_SQL)
 		if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
 			pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
 	}
 }
 #endif
