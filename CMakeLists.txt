@@ -128,6 +128,13 @@ else()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag("-std=c++11" CXX11_SUPPORTED)
+  if(NOT(CXX11_SUPPORTED))
+    message(SEND_ERROR "please make sure to use a compiler with C++11 support")
+  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
   include(CheckCCompilerFlag)
   check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
   check_c_compiler_flag("-fstack-protector-all" ENABLE_STACK_PROTECTOR) # -fstack-protector-all doesn't work on MinGW.
@@ -167,13 +174,10 @@ list(APPEND TARGETS_DEP png)
 
 if(CLIENT)
   # Static dependencies
-  file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
   file(GLOB DEP_WAV_SRC "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
-  add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
   add_library(wav EXCLUDE_FROM_ALL OBJECT ${DEP_WAV_SRC})
 
-  list(APPEND TARGETS_DEP json wav)
-  set(DEP_JSON $<TARGET_OBJECTS:json>)
+  list(APPEND TARGETS_DEP wav)
   set(DEP_WAV $<TARGET_OBJECTS:wav>)
 endif()
 
@@ -274,7 +278,7 @@ if(CLIENT)
   set(GAME_GENERATED_CLIENT "src/game/generated/client_data.cpp" "src/game/generated/client_data.h")
   set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
-  set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
+  set(DEPS_CLIENT ${DEPS} ${DEP_PNG} ${DEP_WAV})
 
   # Libraries
   set(LIBS_CLIENT

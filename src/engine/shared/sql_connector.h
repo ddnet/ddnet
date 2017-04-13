@@ -1,12 +1,7 @@
-#ifndef ENGINE_SERVER_SQL_CONNECTOR_H
-#define ENGINE_SERVER_SQL_CONNECTOR_H
+#ifndef ENGINE_SHARED_SQL_CONNECTOR_H
+#define ENGINE_SHARED_SQL_CONNECTOR_H
 
 #include "sql_server.h"
-
-enum
-{
-	MAX_SQLSERVERS=15
-};
 
 // implementation to provide sqlservers
 class CSqlConnector
@@ -14,13 +9,10 @@ class CSqlConnector
 public:
 	CSqlConnector();
 
-	CSqlServer* SqlServer(int i, bool ReadOnly = true) { return ReadOnly ? ms_ppSqlReadServers[i] : ms_ppSqlWriteServers[i]; }
+	CSqlServer* SqlServer(int i, bool ReadOnly = true) { return ReadOnly ? CSqlServer::ms_apSqlReadServers[i] : CSqlServer::ms_apSqlWriteServers[i]; }
 
 	// always returns the last connected sql-server
 	CSqlServer* SqlServer() { return m_pSqlServer; }
-
-	static void SetReadServers(CSqlServer** ppReadServers) { ms_ppSqlReadServers = ppReadServers; }
-	static void SetWriteServers(CSqlServer** ppWriteServers) { ms_ppSqlWriteServers = ppWriteServers; }
 
 	static void ResetReachable() { ms_ReachableReadServer = 0; ms_ReachableWriteServer = 0; }
 
@@ -31,11 +23,6 @@ public:
 private:
 
 	CSqlServer *m_pSqlServer;
-	static CSqlServer **ms_ppSqlReadServers;
-	static CSqlServer **ms_ppSqlWriteServers;
-
-	static int ms_NumReadServer;
-	static int ms_NumWriteServer;
 
 	static int ms_ReachableReadServer;
 	static int ms_ReachableWriteServer;

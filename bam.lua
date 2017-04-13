@@ -226,6 +226,7 @@ function build(settings)
 		settings.cc.flags:Add("/EHsc")
 	else
 		settings.cc.flags:Add("-Wall")
+		settings.cc.flags_cxx:Add("-std=c++11")
 		if family == "windows" then
 			if config.compiler.driver == "gcc" then
 				settings.link.flags:Add("-static-libgcc")
@@ -293,7 +294,6 @@ function build(settings)
 	-- build the small libraries
 	wavpack = Compile(settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(settings, Collect("src/engine/external/pnglite/*.c"))
-	jsonparser = Compile(settings, Collect("src/engine/external/json-parser/*.c"))
 	md5 = Compile(settings, "src/engine/external/md5/md5.c")
 	if config.websockets.value then
 		libwebsockets = Compile(settings, Collect("src/engine/external/libwebsockets/*.c"))
@@ -385,7 +385,7 @@ function build(settings)
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
 		engine, client, game_editor, zlib, pnglite, wavpack,
-		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification)
+		client_link_other, client_osxlaunch, libwebsockets, md5, client_notification)
 
 	server_exe = Link(server_settings, "DDNet-Server", engine, server,
 		game_shared, game_server, zlib, server_link_other, libwebsockets, md5)

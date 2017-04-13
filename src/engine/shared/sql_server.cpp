@@ -1,6 +1,5 @@
 #if defined(CONF_SQL)
 
-#include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/config.h>
 
@@ -9,6 +8,47 @@
 
 int CSqlServer::ms_NumReadServer = 0;
 int CSqlServer::ms_NumWriteServer = 0;
+CSqlServer* CSqlServer::ms_apSqlReadServers [] = {};
+CSqlServer* CSqlServer::ms_apSqlWriteServers [] = {};
+
+CSqlServer* CSqlServer::createServer(const char* pDatabase, const char* pPrefix, const char* pUser, const char* pPass, const char* pIp, int Port, bool ReadOnly, bool SetUpDb)
+{
+	CSqlServer** apSqlServers = ReadOnly ? ms_apSqlReadServers : ms_apSqlWriteServers;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (!apSqlServers[i])
+		{
+			apSqlServers[i] = new CSqlServer(pDatabase, pPrefix, pUser, pPass, pIp, Port, ReadOnly, SetUpDb);
+
+			if(SetUpDb)
+			{
+				void *TablesThread = thread_init([](void* pData) { ((CSqlServer *)pData)->CreateTables(); }, apSqlServers[i]);
+				thread_detach(TablesThread);
+			}
+			return apSqlServers[i];
+		}
+	}
+	return nullptr;
+}
+
+void CSqlServer::deleteServers()
+{
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (ms_apSqlReadServers[i])
+		{
+			delete ms_apSqlReadServers[i];
+			ms_apSqlReadServers[i] = 0;
+		}
+
+		if (ms_apSqlWriteServers[i])
+		{
+			delete ms_apSqlWriteServers[i];
+			ms_apSqlWriteServers[i] = 0;
+		}
+	}
+}
 
 CSqlServer::CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, bool ReadOnly, bool SetUpDb) :
 		m_Port(Port),
@@ -208,6 +248,73 @@ void CSqlServer::executeSqlQuery(const char *pQuery)
 	// set it to 0, so exceptions raised from executeQuery can not make m_pResults point to invalid memory
 	m_pResults = 0;
 	m_pResults = m_pStatement->executeQuery(pQuery);
+}
+
+void CSqlServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
+{
+	IConsole *pConsole = (IConsole *)pUserData;
+
+	if (pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
+	{
+		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "7 or 8 arguments are required");
+		return;
+	}
+
+	bool ReadOnly;
+	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
+		ReadOnly = false;
+	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
+		ReadOnly = true;
+	else
+	{
+		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
+
+	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : false;
+
+	CSqlServer* pSqlServer = CSqlServer::createServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
+
+	if (pSqlServer)
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", pSqlServer->GetDatabase(), pSqlServer->GetPrefix(), pSqlServer->GetUser(), pSqlServer->GetIP(), pSqlServer->GetPort());
+		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		return;
+	}
+	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed to add new sqlserver: limit of sqlservers reached");
+}
+
+void CSqlServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
+{
+	IConsole *pConsole = (IConsole *)pUserData;
+
+	bool ReadOnly;
+	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
+		ReadOnly = false;
+	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
+		ReadOnly = true;
+	else
+	{
+		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
+
+	CSqlServer** apSqlServers = ReadOnly ? CSqlServer::ms_apSqlReadServers : CSqlServer::ms_apSqlWriteServers;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+		if (apSqlServers[i])
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		}
+}
+
+void CSqlServer::RegisterCommands(IConsole *pConsole)
+{
+	pConsole->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER, ConAddSqlServer, pConsole, "add a sqlserver");
+	pConsole->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, pConsole, "dumps all sqlservers readservers = r, writeservers = w");
 }
 
 #endif

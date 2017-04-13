@@ -110,7 +110,7 @@ swedish
 
 traditional_chinese
 == 繁體中文
-== 158
+== 156
 
 turkish
 == Türkçe

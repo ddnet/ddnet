@@ -4,9 +4,6 @@
 
 #include "sql_connector.h"
 
-CSqlServer** CSqlConnector::ms_ppSqlReadServers = 0;
-CSqlServer** CSqlConnector::ms_ppSqlWriteServers = 0;
-
 int CSqlConnector::ms_ReachableReadServer = 0;
 int CSqlConnector::ms_ReachableWriteServer = 0;
 
