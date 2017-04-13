@@ -809,66 +809,6 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Can't invite players to this team");
 }
 
-void CGameContext::ConUnInviteTeam(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
-
-	const char *pName = pResult->GetString(0);
-
-	int Target = -1;
-	if(pResult->NumArguments() == 1)
-	{
-		for(Target = 0; Target < MAX_CLIENTS; Target++)
-			if(!str_comp(pName, pSelf->Server()->ClientName(Target)))
-				break;
-
-		if(Target < 0)
-		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player not found");
-			return;
-		}
-	}
-
-	int Team = pController->m_Teams.m_Core.Team(pResult->m_ClientID);
-	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
-	{
-		if(Target > 0)
-		{
-			if(!pController->m_Teams.IsInvited(Team, Target))
-			{
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player already not invited");
-				return;
-			}
-
-			pController->m_Teams.SetClientInvited(Team, Target, false);
-
-			char aBuf[512];
-			str_format(aBuf, sizeof aBuf, "Your invite to team %d is no longer valid.", Team);
-			pSelf->SendChatTarget(Target, aBuf);
-
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player has been notified");
-		}
-		else
-		{
-			pController->m_Teams.ResetInvited(Team);
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(pController->m_Teams.IsInvited(Team, i) && pController->m_Teams.m_Core.Team(i) != Team)
-				{
-					char aBuf[512];
-					str_format(aBuf, sizeof aBuf, "Your invite to team %d is no longer valid.", Team);
-					pSelf->SendChatTarget(i, aBuf);
-				}
-			}
-
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "All invites have been invalidated");
-		}
-	}
-	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Can't uninvite players from this team");
-}
-
 void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
