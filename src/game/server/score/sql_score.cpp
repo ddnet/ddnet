@@ -23,7 +23,7 @@ const char* CSqlData::ms_pMap = 0;
 bool CSqlData::ms_GameContextAvailable = false;
 int CSqlData::ms_Instance = 0;
 
-int CSqlExecData::ms_InstanceCount = 0;
+volatile int CSqlExecData::ms_InstanceCount = 0;
 
 LOCK CSqlScore::ms_FailureFileLock = lock_create();
 
@@ -93,20 +93,24 @@ void CSqlScore::ExecSqlFunc(void *pUser)
 
 	bool Success = false;
 
-	// try to connect to a working databaseserver
-	while (!Success && !connector.MaxTriesReached(pData->m_ReadOnly) && connector.ConnectSqlServer(pData->m_ReadOnly))
-	{
-		if (pData->m_pFuncPtr(connector.SqlServer(), pData->m_pSqlData, false))
-			Success = true;
+	try {
+		// try to connect to a working databaseserver
+		while (!Success && !connector.MaxTriesReached(pData->m_ReadOnly) && connector.ConnectSqlServer(pData->m_ReadOnly))
+		{
+			if (pData->m_pFuncPtr(connector.SqlServer(), pData->m_pSqlData, false))
+				Success = true;
 
-		// disconnect from databaseserver
-		connector.SqlServer()->Disconnect();
+			// disconnect from databaseserver
+			connector.SqlServer()->Disconnect();
+		}
+
+		// handle failures
+		// eg write inserts to a file and print a nice error message
+		if (!Success)
+			pData->m_pFuncPtr(0, pData->m_pSqlData, true);
+	} catch (...) {
+		dbg_msg("sql", "Unexpected exception caught");
 	}
-
-	// handle failures
-	// eg write inserts to a file and print a nice error message
-	if (!Success)
-		pData->m_pFuncPtr(0, pData->m_pSqlData, true);
 
 	delete pData->m_pSqlData;
 	delete pData;
@@ -1054,9 +1058,9 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		char aBuf[512];
 
 		if(pData->m_Search) // last 5 times of a player
-			str_format(aBuf, sizeof(aBuf), "SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' AND Name = '%s' ORDER BY Ago ASC LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr(), pData->m_Num-1);
+			str_format(aBuf, sizeof(aBuf), "SELECT Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' AND Name = '%s' ORDER BY Timestamp DESC LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Name.ClrStr(), pData->m_Num-1);
 		else// last 5 times of server
-			str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' ORDER BY Ago ASC LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Num-1);
+			str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago, UNIX_TIMESTAMP(Timestamp) as Stamp FROM %s_race WHERE Map = '%s' ORDER BY Timestamp DESC LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_Num-1);
 
 		pSqlServer->executeSqlQuery(aBuf);
 
