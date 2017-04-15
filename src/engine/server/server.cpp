@@ -844,11 +844,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 
 	bool CanSeeAddress = pThis->m_aClients[ClientID].m_Authed > CServer::AUTHED_MOD;
 
-	char aBuf[256];
-	if(CanSeeAddress)
-		str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=%s reason='%s'", ClientID, aAddrStr, pReason);
-	else
-		str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d reason='%s'", ClientID, pReason);
+	char aBuf[256];str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=%s reason='%s'", ClientID, aAddrStr, pReason);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 
 	// notify the mod about the drop
@@ -1084,12 +1080,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				bool CanSeeAddress = m_aClients[ClientID].m_Authed > CServer::AUTHED_MOD;
 
 				char aBuf[256];
-
-				if(CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=%s secure=%s", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID)?"yes":"no");
-				else
-					str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d secure=%s", ClientID, m_NetServer.HasSecurityToken(ClientID) ? "yes" : "no");
-
+				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=%s secure=%s", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID)?"yes":"no");
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_READY;
 				GameServer()->OnClientConnected(ClientID);
@@ -1104,13 +1095,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				char aAddrStr[NETADDR_MAXSTRSIZE];
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
-				bool CanSeeAddress = m_aClients[ClientID].m_Authed > CServer::AUTHED_MOD;
-
 				char aBuf[256];
-				if(CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=%s", ClientID, aAddrStr);
-				else
-					str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d", ClientID);
+				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=%s", ClientID, aAddrStr);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				GameServer()->OnClientEnter(ClientID);
