@@ -151,6 +151,7 @@ protected:
 
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+	class IServer *m_pServer;
 	CBanAddrPool m_BanAddrPool;
 	CBanRangePool m_BanRangePool;
 	NETADDR m_LocalhostIPV4, m_LocalhostIPV6;
@@ -166,9 +167,10 @@ public:
 
 	class IConsole *Console() const { return m_pConsole; }
 	class IStorage *Storage() const { return m_pStorage; }
+	class IServer *Server() const { return m_pServer; }
 
 	virtual ~CNetBan() {}
-	void Init(class IConsole *pConsole, class IStorage *pStorage);
+	void Init(class IConsole *pConsole, class IStorage *pStorage, class IServer *pServer);
 	void Update();
 
 	virtual int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason);

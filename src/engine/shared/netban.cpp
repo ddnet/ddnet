@@ -2,6 +2,7 @@
 
 #include <engine/console.h>
 #include <engine/storage.h>
+#include <engine/server.h>
 #include <engine/shared/config.h>
 
 #include "netban.h"
@@ -308,10 +309,11 @@ int CNetBan::Unban(T *pBanPool, const typename T::CDataType *pData)
 	return -1;
 }
 
-void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
+void CNetBan::Init(IConsole *pConsole, IStorage *pStorage, IServer *pServer)
 {
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
+	m_pServer = pServer;
 	m_BanAddrPool.Reset();
 	m_BanRangePool.Reset();
 
@@ -450,9 +452,12 @@ void CNetBan::ConBan(IConsole::IResult *pResult, void *pUser)
 	int Minutes = pResult->NumArguments()>1 ? clamp(pResult->GetInteger(1), 0, 44640) : 30;
 	const char *pReason = pResult->NumArguments()>2 ? pResult->GetString(2) : "No reason given";
 
+	char aReason[256];
+	str_format(aReason, sizeof(aReason), "%s [%s]", pReason, pThis->Server()->ClientName(pResult->m_ClientID));
+
 	NETADDR Addr;
 	if(net_addr_from_str(&Addr, pStr) == 0)
-		pThis->BanAddr(&Addr, Minutes*60, pReason);
+		pThis->BanAddr(&Addr, Minutes*60, aReason);
 	else
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid network address)");
 }
@@ -466,9 +471,12 @@ void CNetBan::ConBanRange(IConsole::IResult *pResult, void *pUser)
 	int Minutes = pResult->NumArguments()>2 ? clamp(pResult->GetInteger(2), 0, 44640) : 30;
 	const char *pReason = pResult->NumArguments()>3 ? pResult->GetString(3) : "No reason given";
 
+	char aReason[256];
+	str_format(aReason, sizeof(aReason), "%s [%s]", pReason, pThis->Server()->ClientName(pResult->m_ClientID));
+
 	CNetRange Range;
 	if(net_addr_from_str(&Range.m_LB, pStr1) == 0 && net_addr_from_str(&Range.m_UB, pStr2) == 0)
-		pThis->BanRange(&Range, Minutes*60, pReason);
+		pThis->BanRange(&Range, Minutes*60, aReason);
 	else
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid range)");
 }
