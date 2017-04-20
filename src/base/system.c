@@ -112,7 +112,7 @@ void dbg_break()
 }
 
 #if !defined(CONF_PLATFORM_MACOSX)
-#define QUEUE_SIZE 16
+#define QUEUE_SIZE 64
 
 typedef struct
 {
@@ -121,7 +121,6 @@ typedef struct
 	int end;
 	SEMAPHORE mutex;
 	SEMAPHORE notempty;
-	SEMAPHORE notfull;
 } Queue;
 
 static int dbg_msg_threaded = 0;
@@ -141,19 +140,14 @@ void dbg_msg_thread(void *v)
 {
 	char str[1024*4];
 	int i;
-	int f;
 	while(1)
 	{
 		semaphore_wait(&log_queue.notempty);
 		semaphore_wait(&log_queue.mutex);
-		f = queue_full(&log_queue);
 
 		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
 
 		log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
-
-		if(f)
-			semaphore_signal(&log_queue.notfull);
 
 		if(!queue_empty(&log_queue))
 			semaphore_signal(&log_queue.notempty);
@@ -175,9 +169,7 @@ void dbg_enable_threaded()
 	q->end = 0;
 	semaphore_init(&q->mutex);
 	semaphore_init(&q->notempty);
-	semaphore_init(&q->notfull);
 	semaphore_signal(&q->mutex);
-	semaphore_signal(&q->notfull);
 
 	dbg_msg_threaded = 1;
 
@@ -205,31 +197,30 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
 	{
-		int e;
-		semaphore_wait(&log_queue.notfull);
 		semaphore_wait(&log_queue.mutex);
-		e = queue_empty(&log_queue);
-
-		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
-
-		len = strlen(log_queue.q[log_queue.end]);
-		msg = (char *)log_queue.q[log_queue.end] + len;
-
-		va_start(args, fmt);
-#if defined(CONF_FAMILY_WINDOWS)
-		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
-#else
-		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
-#endif
-		va_end(args);
-
-		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
-
-		if(e)
-			semaphore_signal(&log_queue.notempty);
 
 		if(!queue_full(&log_queue))
-			semaphore_signal(&log_queue.notfull);
+		{
+			int e = queue_empty(&log_queue);
+
+			str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
+
+			len = strlen(log_queue.q[log_queue.end]);
+			msg = (char *)log_queue.q[log_queue.end] + len;
+
+			va_start(args, fmt);
+#if defined(CONF_FAMILY_WINDOWS)
+			_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+#else
+			vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+#endif
+			va_end(args);
+
+			log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
+
+			if(e)
+				semaphore_signal(&log_queue.notempty);
+		}
 
 		semaphore_signal(&log_queue.mutex);
 	}
