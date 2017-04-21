@@ -119,6 +119,7 @@ typedef struct
 	char q[QUEUE_SIZE][1024*4];
 	int begin;
 	int end;
+	int skipped;
 	SEMAPHORE mutex;
 	SEMAPHORE notempty;
 } Queue;
@@ -145,11 +146,19 @@ void dbg_msg_thread(void *v)
 		semaphore_wait(&log_queue.notempty);
 		semaphore_wait(&log_queue.mutex);
 
-		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
+		if(queue_empty(&log_queue))
+		{
+			str_format(str, sizeof(str), "Skipped %d log messages because of full queue.", log_queue.skipped);
+			log_queue.skipped = 0;
+		}
+		else
+		{
+			str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
 
-		log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
+			log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
+		}
 
-		if(!queue_empty(&log_queue))
+		if(!queue_empty(&log_queue) || log_queue.skipped > 0)
 			semaphore_signal(&log_queue.notempty);
 
 		semaphore_signal(&log_queue.mutex);
@@ -167,6 +176,7 @@ void dbg_enable_threaded()
 	q = &log_queue;
 	q->begin = 0;
 	q->end = 0;
+	q->skipped = 0;
 	semaphore_init(&q->mutex);
 	semaphore_init(&q->notempty);
 	semaphore_signal(&q->mutex);
@@ -199,7 +209,11 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	{
 		semaphore_wait(&log_queue.mutex);
 
-		if(!queue_full(&log_queue))
+		if(queue_full(&log_queue))
+		{
+			log_queue.skipped++;
+		}
+		else
 		{
 			int e = queue_empty(&log_queue);
 
