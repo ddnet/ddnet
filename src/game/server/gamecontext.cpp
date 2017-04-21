@@ -927,10 +927,15 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChatTarget(ClientID, "please visit DDNet.tw or say /info for more info");
 
 		if(g_Config.m_SvWelcome[0]!=0)
-			SendChatTarget(ClientID,g_Config.m_SvWelcome);
+			SendChatTarget(ClientID, g_Config.m_SvWelcome);
 		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+
+		const char* pCountryMessage = m_CountryMessages.getCountryMessage(Server()->ClientCountry(ClientID));
+		if(pCountryMessage)
+			SendChatTarget(ClientID, pCountryMessage);
 
 		if (g_Config.m_SvShowOthersDefault)
 		{
@@ -2412,6 +2417,8 @@ void CGameContext::OnConsoleInit()
 #include "game/ddracecommands.h"
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 #include "ddracechat.h"
+
+	m_CountryMessages.OnConsoleInit(this);
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)

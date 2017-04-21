@@ -14,6 +14,7 @@
 #include "gamecontroller.h"
 #include "gameworld.h"
 #include "player.h"
+#include "countrymessage.h"
 
 #include "score.h"
 #ifdef _MSC_VER
@@ -60,6 +61,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_TuningList[NUM_TUNINGZONES];
+	CCountryMessages m_CountryMessages;
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
