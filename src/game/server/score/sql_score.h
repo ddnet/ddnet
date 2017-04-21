@@ -172,7 +172,7 @@ public:
 
 	virtual void CheckBirthday(int ClientID);
 	virtual void LoadScore(int ClientID);
-	virtual void MapInfo(int ClientID, const char* MapName);
+	virtual void MapInfo(int ClientID, const char* MapName, const char *pNick);
 	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);

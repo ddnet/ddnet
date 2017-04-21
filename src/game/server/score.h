@@ -43,7 +43,7 @@ public:
 
 	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
 
-	virtual void MapInfo(int ClientID, const char* MapName) = 0;
+	virtual void MapInfo(int ClientID, const char* MapName, const char *pNick = "") = 0;
 	virtual void MapVote(int ClientID, const char* MapName) = 0;
 	virtual void CheckBirthday(int ClientID) = 0;
 	virtual void LoadScore(int ClientID) = 0;
