@@ -90,6 +90,7 @@ struct CSqlMapData : CSqlData
 
 	sqlstr::CSqlString<128> m_RequestedMap;
 	char m_aFuzzyMap[128];
+	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 };
 
 struct CSqlScoreData : CSqlData
