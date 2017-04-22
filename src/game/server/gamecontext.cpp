@@ -492,22 +492,22 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 {
 	if (ClientID == -1)
 	{
-			for(int i = 0; i < MAX_CLIENTS; ++i)
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (m_apPlayers[i])
 			{
-				if (m_apPlayers[i])
+				if(m_apPlayers[i]->GetCharacter())
 				{
-					if(m_apPlayers[i]->GetCharacter())
-					{
-						if (m_apPlayers[i]->GetCharacter()->m_TuneZone == Zone)
-							SendTuningParams(i, Zone);
-					}
-					else if (m_apPlayers[i]->m_TuneZone == Zone)
-					{
+					if (m_apPlayers[i]->GetCharacter()->m_TuneZone == Zone)
 						SendTuningParams(i, Zone);
-					}
+				}
+				else if (m_apPlayers[i]->m_TuneZone == Zone)
+				{
+					SendTuningParams(i, Zone);
 				}
 			}
-			return;
+		}
+		return;
 	}
 
 	CheckPureTuning();
@@ -528,45 +528,45 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		last = 38;
 
 	for(unsigned i = 0; i < last; i++)
+	{
+		if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
 		{
-			if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
+			if((i==31) // collision
+			&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
+			 || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
 			{
-				if((i==31) // collision
-				&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
-				 || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
-				{
-					Msg.AddInt(0);
-				}
-				else if((i==32) // hooking
-				&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
-				 || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHOOK))
-				{
-					Msg.AddInt(0);
-				}
-				else if((i==3) // ground jump impulse
-				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOJUMP)
-				{
-					Msg.AddInt(0);
-				}
-				else if((i==33) // jetpack
-				&& !(m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK))
-				{
-					Msg.AddInt(0);
-				}
-				else if((i==36) // hammer hit
-				&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
-				{
-					Msg.AddInt(0);
-				}
-				else
-				{
-					Msg.AddInt(pParams[i]);
-				}
+				Msg.AddInt(0);
+			}
+			else if((i==32) // hooking
+			&& (m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO
+			 || m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHOOK))
+			{
+				Msg.AddInt(0);
+			}
+			else if((i==3) // ground jump impulse
+			&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOJUMP)
+			{
+				Msg.AddInt(0);
+			}
+			else if((i==33) // jetpack
+			&& !(m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK))
+			{
+				Msg.AddInt(0);
+			}
+			else if((i==36) // hammer hit
+			&& m_apPlayers[ClientID]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
+			{
+				Msg.AddInt(0);
 			}
 			else
-				Msg.AddInt(pParams[i]); // if everything is normal just send true tunings
+			{
+				Msg.AddInt(pParams[i]);
+			}
 		}
-		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		else
+			Msg.AddInt(pParams[i]); // if everything is normal just send true tunings
+	}
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 /*
 void CGameContext::SwapTeams()
@@ -1561,10 +1561,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if(pPlayer->m_ClientVersion < Version)
 				pPlayer->m_ClientVersion = Version;
-			
+
 			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
 				pPlayer->m_TimerType = g_Config.m_SvDefaultTimerType;
-			
+
 			dbg_msg("ddnet", "%d using Custom Client %d", ClientID, pPlayer->m_ClientVersion);
 
 			//first update his teams state
