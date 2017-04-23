@@ -12,7 +12,6 @@ class CGameTeams
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
 	bool m_IsSaving[MAX_CLIENTS];
-	uint64_t m_Invited[MAX_CLIENTS];
 
 	class CGameContext * m_pGameContext;
 
@@ -70,8 +69,6 @@ public:
 
 	void SendTeamsState(int Cid);
 	void SetTeamLock(int Team, bool Lock);
-	void ResetInvited(int Team);
-	void SetClientInvited(int Team, int ClientID, bool Invited);
 
 	int m_LastChat[MAX_CLIENTS];
 
@@ -102,11 +99,6 @@ public:
 			return false;
 
 		return m_TeamLocked[Team];
-	}
-
-	bool IsInvited(int Team, int ClientID)
-	{
-		return m_Invited[Team] & 1LL << ClientID;
 	}
 
 	void SetFinished(int ClientID, bool finished)
