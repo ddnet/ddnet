@@ -54,12 +54,12 @@ std::string SaveFile()
 	return oss.str();
 }
 
-void CFileScore::MapInfo(int ClientID, const char* MapName)
+void CFileScore::MapInfo(int ClientID, const char *pMapName)
 {
 	// TODO: implement
 }
 
-void CFileScore::MapVote(int ClientID, const char* MapName)
+void CFileScore::MapVote(int ClientID, const char *pMapName)
 {
 	// TODO: implement
 }
@@ -222,7 +222,7 @@ void CFileScore::LoadScore(int ClientID)
 		PlayerData(ClientID)->Set(pPlayer->m_Score, pPlayer->m_aCpTime);
 }
 
-void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
+void CFileScore::SaveTeamScore(int *ClientIDs, unsigned int Size, float Time)
 {
 	dbg_msg("filescore", "saveteamscore not implemented for filescore");
 }
@@ -317,7 +317,7 @@ void CFileScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *p
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::ShowPoints(int ClientID, const char* pName, bool Search)
+void CFileScore::ShowPoints(int ClientID, const char *pName, bool Search)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Points not supported in file based servers");
@@ -338,14 +338,14 @@ void CFileScore::RandomUnfinishedMap(int ClientID, int stars)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
+void CFileScore::SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Save-function not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-void CFileScore::LoadTeam(const char* Code, int ClientID)
+void CFileScore::LoadTeam(const char *pCode, int ClientID)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Save-function not supported in file based servers");

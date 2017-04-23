@@ -87,7 +87,7 @@ void CSqlScore::OnShutdown()
 
 void CSqlScore::ExecSqlFunc(void *pUser)
 {
-	CSqlExecData* pData = (CSqlExecData *)pUser;
+	CSqlExecData *pData = (CSqlExecData *)pUser;
 
 	CSqlConnector connector;
 
@@ -116,9 +116,9 @@ void CSqlScore::ExecSqlFunc(void *pUser)
 	delete pData;
 }
 
-bool CSqlScore::Init(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::Init(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
-	const CSqlData* pData = pGameData;
+	const CSqlData *pData = pGameData;
 
 	if (HandleFailure)
 	{
@@ -163,7 +163,7 @@ void CSqlScore::CheckBirthday(int ClientID)
 	thread_detach(CheckThread);
 }
 
-bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::CheckBirthdayThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerData *pData = dynamic_cast<const CSqlPlayerData *>(pGameData);
 
@@ -216,7 +216,7 @@ void CSqlScore::LoadScore(int ClientID)
 }
 
 // update stuff
-bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::LoadScoreThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlPlayerData *pData = dynamic_cast<const CSqlPlayerData *>(pGameData);
 
@@ -265,12 +265,12 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	return false;
 }
 
-void CSqlScore::MapVote(int ClientID, const char* MapName)
+void CSqlScore::MapVote(int ClientID, const char *pMapName)
 {
 	CSqlMapData *Tmp = new CSqlMapData();
 	Tmp->m_ClientID = ClientID;
-	Tmp->m_RequestedMap = MapName;
-	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
+	Tmp->m_RequestedMap = pMapName;
+	str_copy(Tmp->m_aFuzzyMap, pMapName, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 
@@ -278,7 +278,7 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 	thread_detach(VoteThread);
 }
 
-bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::MapVoteThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlMapData *pData = dynamic_cast<const CSqlMapData *>(pGameData);
 
@@ -361,13 +361,13 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 	return false;
 }
 
-void CSqlScore::MapInfo(int ClientID, const char* MapName)
+void CSqlScore::MapInfo(int ClientID, const char *pMapName)
 {
 	CSqlMapData *Tmp = new CSqlMapData();
 	Tmp->m_ClientID = ClientID;
-	Tmp->m_RequestedMap = MapName;
+	Tmp->m_RequestedMap = pMapName;
 	Tmp->m_Name = Server()->ClientName(ClientID);
-	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
+	str_copy(Tmp->m_aFuzzyMap, pMapName, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 
@@ -375,7 +375,7 @@ void CSqlScore::MapInfo(int ClientID, const char* MapName)
 	thread_detach(InfoThread);
 }
 
-bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::MapInfoThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlMapData *pData = dynamic_cast<const CSqlMapData *>(pGameData);
 
@@ -463,7 +463,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 
 void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS])
 {
-	CConsole* pCon = (CConsole*)GameServer()->Console();
+	CConsole *pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
 	CSqlScoreData *Tmp = new CSqlScoreData();
@@ -477,7 +477,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS
 	thread_detach(SaveThread);
 }
 
-bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::SaveScoreThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -556,9 +556,9 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	return false;
 }
 
-void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
+void CSqlScore::SaveTeamScore(int *aClientIDs, unsigned int Size, float Time)
 {
-	CConsole* pCon = (CConsole*)GameServer()->Console();
+	CConsole *pCon = (CConsole*)GameServer()->Console();
 	if(pCon->m_Cheated)
 		return;
 	CSqlTeamScoreData *Tmp = new CSqlTeamScoreData();
@@ -574,7 +574,7 @@ void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
 	thread_detach(SaveTeamThread);
 }
 
-bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::SaveTeamScoreThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlTeamScoreData *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
@@ -723,7 +723,7 @@ void CSqlScore::ShowRank(int ClientID, const char *pName, const char *pMap, bool
 	thread_detach(RankThread);
 }
 
-bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::ShowRankThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -794,7 +794,7 @@ void CSqlScore::ShowTeamRank(int ClientID, const char *pName, const char *pMap, 
 	thread_detach(TeamRankThread);
 }
 
-bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::ShowTeamRankThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -881,7 +881,7 @@ void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, const char *p
 	thread_detach(Top5Thread);
 }
 
-bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::ShowTop5Thread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -941,7 +941,7 @@ void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, const cha
 	thread_detach(TeamTop5Thread);
 }
 
-bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::ShowTeamTop5Thread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -1047,7 +1047,7 @@ void CSqlScore::ShowTimes(int ClientID, int Debut)
 	thread_detach(TimesThread);
 }
 
-void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
+void CSqlScore::ShowTimes(int ClientID, const char *pName, int Debut)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_Num = Debut;
@@ -1059,7 +1059,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 	thread_detach(TimesThread);
 }
 
-bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::ShowTimesThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -1136,7 +1136,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	return false;
 }
 
-void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
+void CSqlScore::ShowPoints(int ClientID, const char *pName, bool Search)
 {
 	CSqlScoreData *Tmp = new CSqlScoreData();
 	Tmp->m_ClientID = ClientID;
@@ -1148,7 +1148,7 @@ void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
 	thread_detach(PointsThread);
 }
 
-bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::ShowPointsThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -1205,7 +1205,7 @@ void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pU
 	thread_detach(TopPointsThread);
 }
 
-bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::ShowTopPointsThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -1260,7 +1260,7 @@ void CSqlScore::RandomMap(int ClientID, int stars)
 	thread_detach(RandomThread);
 }
 
-bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::RandomMapThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -1317,7 +1317,7 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
 	thread_detach(RandomUnfinishedThread);
 }
 
-bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::RandomUnfinishedMapThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
@@ -1363,7 +1363,7 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 	return false;
 }
 
-void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)
+void CSqlScore::SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer)
 {
 	if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(GameServer()->m_pController))->m_Teams.Count(Team) > 0)
 	{
@@ -1380,14 +1380,14 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 	CSqlTeamSave *Tmp = new CSqlTeamSave();
 	Tmp->m_Team = Team;
 	Tmp->m_ClientID = ClientID;
-	Tmp->m_Code = Code;
-	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
+	Tmp->m_Code = pCode;
+	str_copy(Tmp->m_Server, pServer, sizeof(Tmp->m_Server));
 
 	void *SaveThread = thread_init(ExecSqlFunc, new CSqlExecData(SaveTeamThread, Tmp, false));
 	thread_detach(SaveThread);
 }
 
-bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::SaveTeamThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
 
@@ -1480,17 +1480,17 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	return true;
 }
 
-void CSqlScore::LoadTeam(const char* Code, int ClientID)
+void CSqlScore::LoadTeam(const char *pCode, int ClientID)
 {
 	CSqlTeamLoad *Tmp = new CSqlTeamLoad();
-	Tmp->m_Code = Code;
+	Tmp->m_Code = pCode;
 	Tmp->m_ClientID = ClientID;
 
 	void *LoadThread = thread_init(ExecSqlFunc, new CSqlExecData(LoadTeamThread, Tmp));
 	thread_detach(LoadThread);
 }
 
-bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
+bool CSqlScore::LoadTeamThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 

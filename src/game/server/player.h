@@ -141,7 +141,7 @@ public:
 		PAUSED_PAUSED,
 		PAUSED_FORCE
 	};
-	
+
 	enum
 	{
 		TIMERTYPE_GAMETIMER=0,
