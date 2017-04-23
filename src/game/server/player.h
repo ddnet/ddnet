@@ -78,6 +78,8 @@ public:
 	int m_LastCommandPos;
 	int m_LastWhisperTo;
 
+	char m_aForMap[128];
+
 	int m_SendVoteIndex;
 
 	// TODO: clean this up

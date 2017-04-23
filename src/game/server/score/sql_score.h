@@ -97,6 +97,7 @@ struct CSqlScoreData : CSqlData
 {
 	int m_ClientID;
 
+	sqlstr::CSqlString<128> m_RequestedMap;
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 
 	float m_Time;
@@ -176,14 +177,14 @@ public:
 	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);
-	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time);
-	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
-	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
-	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
+	virtual void SaveTeamScore(int *aClientIDs, unsigned int Size, float Time);
+	virtual void ShowRank(int ClientID, const char *pName, const char *pMap, bool Search = false);
+	virtual void ShowTeamRank(int ClientID, const char *pName, bool Search = false);
+	virtual void ShowTimes(int ClientID, const char *pName, int Debut = 1);
 	virtual void ShowTimes(int ClientID, int Debut = 1);
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
+	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, const char *pMap,
 			void *pUserData, int Debut = 1);
-	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID,
+	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID, const char *pMap,
 			void *pUserData, int Debut = 1);
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
