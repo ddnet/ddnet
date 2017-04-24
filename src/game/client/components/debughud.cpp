@@ -54,11 +54,11 @@ void CDebugHud::RenderNetCorrections()
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += 2*LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_X/32);
+	str_format(aBuf, sizeof(aBuf), "%.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f);
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_Y/32);
+	str_format(aBuf, sizeof(aBuf), "%.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f);
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
 	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += 2*LineHeight;
