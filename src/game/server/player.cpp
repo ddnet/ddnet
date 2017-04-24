@@ -47,6 +47,7 @@ void CPlayer::Reset()
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
 	m_TeamChangeTick = Server()->Tick();
+	m_LastInvited = 0;
 	m_WeakHookSpawn = false;
 
 	int* idMap = Server()->GetIdMap(m_ClientID);
