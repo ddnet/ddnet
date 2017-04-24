@@ -1831,7 +1831,6 @@ void CGameClient::CClientData::Reset()
 	m_Emoticon = 0;
 	m_EmoticonStart = -1;
 	m_Active = false;
-	m_ChatIgnore = false;
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
 	m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
 	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
