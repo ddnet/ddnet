@@ -647,11 +647,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 void CGameTeams::SetTeamLock(int Team, bool Lock)
 {
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
-	{
-		if(!m_TeamLocked[Team] && Lock)
-			ResetInvited(Team);
 		m_TeamLocked[Team] = Lock;
-	}
 }
 
 void CGameTeams::ResetInvited(int Team)
