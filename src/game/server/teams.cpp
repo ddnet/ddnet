@@ -234,6 +234,7 @@ void CGameTeams::ForceLeaveTeam(int ClientID)
 
 			// unlock team when last player leaves
 			SetTeamLock(m_Core.Team(ClientID), false);
+			ResetInvited(m_Core.Team(ClientID));
 		}
 	}
 
@@ -653,9 +654,6 @@ void CGameTeams::SetTeamLock(int Team, bool Lock)
 void CGameTeams::ResetInvited(int Team)
 {
 	m_Invited[Team] = 0;
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-			m_Invited[Team] |= 1ULL << i;
 }
 
 void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
@@ -692,4 +690,5 @@ void CGameTeams::KillSavedTeam(int Team)
 
 	// unlock team when last player leaves
 	SetTeamLock(Team, false);
+	ResetInvited(Team);
 }
