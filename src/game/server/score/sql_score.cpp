@@ -735,10 +735,12 @@ bool CSqlScore::ShowRankThread(CSqlServer *pSqlServer, const CSqlData *pGameData
 		// check sort methode
 		char aBuf[600];
 
+		sqlstr::CSqlString *pMap = pData->m_RequestedMap.Str()[0] ? pData->m_RequestedMap : pData->m_Map;
+
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_race WHERE Map = '%s' GROUP BY Name ORDER BY `Time` ASC) as a) as b WHERE Name = '%s';", pSqlServer->GetPrefix(), pData->m_RequestedMap.ClrStr(), pData->m_Name.ClrStr());
+		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_race WHERE Map = '%s' GROUP BY Name ORDER BY `Time` ASC) as a) as b WHERE Name = '%s';", pSqlServer->GetPrefix(), pMap->ClrStr(), pData->m_Name.ClrStr());
 
 		pSqlServer->executeSqlQuery(aBuf);
 
@@ -755,12 +757,12 @@ bool CSqlScore::ShowRankThread(CSqlServer *pSqlServer, const CSqlData *pGameData
 			int Rank = (int)pSqlServer->GetResults()->getInt("Rank");
 			if(g_Config.m_SvHideScore)
 			{
-				str_format(aBuf, sizeof(aBuf), "Your time: %02d:%05.2f", (int)(Time/60), Time-((int)Time/60*60));
+				str_format(aBuf, sizeof(aBuf), "Your time on %s: %02d:%05.2f", pMap->Str(), (int)(Time/60), Time-((int)Time/60*60));
 				pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d:%05.2f on %s, requested by %s", Rank, pSqlServer->GetResults()->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_RequestedMap.Str(), pData->m_aRequestingPlayer);
+				str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d:%05.2f on %s, requested by %s", Rank, pSqlServer->GetResults()->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pMap->Str(), pData->m_aRequestingPlayer);
 				pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 			}
 		}
@@ -808,10 +810,12 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer *pSqlServer, const CSqlData *pGame
 		char aNames[2300];
 		aNames[0] = '\0';
 
+		sqlstr::CSqlString *pMap = pData->m_RequestedMap.Str()[0] ? pData->m_RequestedMap : pData->m_Map;
+
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time FROM (SELECT Rank, l2.ID FROM ((SELECT ID, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY Time) as ll) as l2) LEFT JOIN %s_teamrace as r2 ON l2.ID = r2.ID WHERE Map = '%s' AND Name = '%s' ORDER BY Rank LIMIT 1) as l LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Name;", pSqlServer->GetPrefix(), pData->m_RequestedMap.ClrStr(), pSqlServer->GetPrefix(), pData->m_RequestedMap.ClrStr(), pData->m_Name.ClrStr(), pSqlServer->GetPrefix());
+		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Name, Time FROM (SELECT Rank, l2.ID FROM ((SELECT ID, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY Time) as ll) as l2) LEFT JOIN %s_teamrace as r2 ON l2.ID = r2.ID WHERE Map = '%s' AND Name = '%s' ORDER BY Rank LIMIT 1) as l LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Name;", pSqlServer->GetPrefix(), pMap->ClrStr(), pSqlServer->GetPrefix(), pMap->ClrStr(), pData->m_Name.ClrStr(), pSqlServer->GetPrefix());
 
 		pSqlServer->executeSqlQuery(aBuf);
 
@@ -844,12 +848,12 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer *pSqlServer, const CSqlData *pGame
 
 			if(g_Config.m_SvHideScore)
 			{
-				str_format(aBuf, sizeof(aBuf), "Your team time: %02d:%05.02f on %s", (int)(Time/60), Time-((int)Time/60*60), pData->m_RequestedMap.Str());
+				str_format(aBuf, sizeof(aBuf), "Your team time: %02d:%05.02f on %s", (int)(Time/60), Time-((int)Time/60*60), pMap->Str());
 				pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %02d:%05.02f on %s, requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_RequestedMap.Str(), pData->m_aRequestingPlayer);
+				str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %02d:%05.02f on %s, requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pMap->Str(), pData->m_aRequestingPlayer);
 				pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 			}
 		}
@@ -892,14 +896,17 @@ bool CSqlScore::ShowTop5Thread(CSqlServer *pSqlServer, const CSqlData *pGameData
 	{
 		// check sort methode
 		char aBuf[512];
+
+		sqlstr::CSqlString *pMap = pData->m_RequestedMap.Str()[0] ? pData->m_RequestedMap : pData->m_Map;
+
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, rank FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_race WHERE Map = '%s' GROUP BY Name ORDER BY `Time` ASC) as a) as b LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_RequestedMap.ClrStr(), pData->m_Num-1);
+		str_format(aBuf, sizeof(aBuf), "SELECT Name, Time, rank FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Time,@rank, @pos)) rank, (@prev := Time) Time FROM (SELECT Name, min(Time) as Time FROM %s_race WHERE Map = '%s' GROUP BY Name ORDER BY `Time` ASC) as a) as b LIMIT %d, 5;", pSqlServer->GetPrefix(), pMap->ClrStr(), pData->m_Num-1);
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show top5
-		str_format(aBuf, sizeof(aBuf), "----------- %s Top 5 -----------", pData->m_RequestedMap.Str());
+		str_format(aBuf, sizeof(aBuf), "----------- %s Top 5 -----------", pMap->Str());
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 
 		int Rank = 0;
@@ -953,15 +960,18 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer *pSqlServer, const CSqlData *pGame
 		// check sort methode
 		char aBuf[2400];
 
+		sqlstr::CSqlString *pMap = pData->m_RequestedMap.Str()[0] ? pData->m_RequestedMap : pData->m_Map;
+
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @previd := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, rank, l.Time FROM ((SELECT ID, rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a LIMIT %d, 5) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pSqlServer->GetPrefix(), pData->m_RequestedMap.ClrStr(), pData->m_Num-1, pSqlServer->GetPrefix(), pData->m_RequestedMap.ClrStr());
+		str_format(aBuf, sizeof(aBuf), "SELECT ID, Name, Time, rank FROM (SELECT r.ID, Name, rank, l.Time FROM ((SELECT ID, rank, Time FROM (SELECT ID, (@pos := IF(@previd = ID,@pos,@pos+1)) pos, (@previd := ID), (@rank := IF(@prev = Time,@rank,@pos)) rank, (@prev := Time) Time FROM (SELECT ID, MIN(Time) as Time FROM %s_teamrace WHERE Map = '%s' GROUP BY ID ORDER BY `Time` ASC) as all_top_times) as a LIMIT %d, 5) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY Time ASC, r.ID, Name ASC) as a;", pSqlServer->GetPrefix(), pMap->ClrStr(), pData->m_Num-1, pSqlServer->GetPrefix(), pMap->ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
 
 		// show teamtop5
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, "------- Team Top 5 -------");
+		str_format(aBuf, sizeof(aBuf), "----------- %s Team Top 5 -----------", pMap->Str());
+		pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 
 		int Rows = pSqlServer->GetResults()->rowsCount();
 
