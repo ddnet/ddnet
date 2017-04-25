@@ -477,6 +477,18 @@ void CGameContext::ConList(IConsole::IResult *pResult, void *pUserData)
 		pSelf->List(ClientID, &zerochar);
 }
 
+
+void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
+
+	int Target = pResult->GetInteger(0);
+	if(!CheckClientID(Target)) return;
+
+	pController->m_Teams.SetForceCharacterTeam(pResult->GetVictim(), Target);
+}
+
 void CGameContext::ConFreezeHammer(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
