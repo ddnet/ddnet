@@ -1,4 +1,4 @@
-#include <cstring>
+#include <string>
 #include <game/client/component.h>
 
 class CStatboard: public CComponent
