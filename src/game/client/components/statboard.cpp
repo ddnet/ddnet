@@ -1,4 +1,4 @@
-#include <cstring>
+#include <string>
 
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
