@@ -480,6 +480,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		m_aLines[m_CurrentLine].m_ClientID = ClientID;
 		m_aLines[m_CurrentLine].m_Team = Team;
 		m_aLines[m_CurrentLine].m_NameColor = -2;
+		m_aLines[m_CurrentLine].m_Emojis.clear();
 
 		// check for highlighted name
 		if (Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -547,6 +548,21 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		}
 
 		m_aLines[m_CurrentLine].m_Friend = ClientID >= 0 ? m_pClient->m_aClients[ClientID].m_Friend : false;
+
+		for(int i = 0; i < m_pClient->m_pEmojis->m_aEmojis.size(); i++) {
+			int offset = 0;
+			const char *result = strstr(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+			while (result != NULL) {
+				CEmojis::CEmojiInfo Info;
+				Info.index = result - m_aLines[m_CurrentLine].m_aText;
+				Info.length = strlen(m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+				Info.m_ID = m_pClient->m_pEmojis->m_aEmojis[i].m_ID;
+				m_aLines[m_CurrentLine].m_Emojis.add(Info);
+				offset = Info.index + Info.length;
+				result = strstr(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+			}
+		}
+		m_aLines[m_CurrentLine].m_Emojis.sort_range();
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
@@ -813,8 +829,46 @@ void CChat::OnRender()
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
 
+		for(int i = 0; i < strlen(m_aLines[r].m_aText); ) {
+			CEmojis::CEmojiInfo info;
+			bool found = false;
+			for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++) {
+				if(m_aLines[r].m_Emojis[j].index >= i) {
+					found = true;
+					info = m_aLines[r].m_Emojis[j];
+					break;
+				}
 
-		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+			}
+			if(!found) {
+				char *start = &m_aLines[r].m_aText[i];
+				char *end = &m_aLines[r].m_aText[strlen(m_aLines[r].m_aText)];
+				char *substr = (char *)calloc(1, end - start + 1);
+
+				memcpy(substr, start, end - start);
+				TextRender()->TextEx(&Cursor, substr, -1);
+				free(substr);
+
+				i = strlen(m_aLines[r].m_aText);
+			} else {
+				char *start = &m_aLines[r].m_aText[i];
+				char *end = &m_aLines[r].m_aText[info.index];
+				char *substr = (char *)calloc(1, end - start + 1);
+
+				memcpy(substr, start, end - start);
+				TextRender()->TextEx(&Cursor, substr, -1);
+				free(substr);
+
+				m_pClient->m_pEmojis->Render(info.m_ID, Cursor.m_X + Cursor.m_FontSize * 2 / 3, Cursor.m_Y + Cursor.m_FontSize * 2 / 3, Cursor.m_FontSize, Cursor.m_FontSize);
+				Cursor.m_X += Cursor.m_FontSize;
+				if(Cursor.m_LineWidth < Cursor.m_X + Cursor.m_FontSize) {
+					Cursor.m_X = 0; 
+					Cursor.m_Y += Cursor.m_FontSize;
+				}
+
+				i = info.index + info.length;
+			}
+		}
 	}
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
