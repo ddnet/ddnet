@@ -98,6 +98,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
 	bool m_AutoStatScreenshotRecycle;
+	bool m_AutoCSVRecycle;
 	bool m_EditorActive;
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
@@ -363,6 +364,9 @@ public:
 	void AutoStatScreenshot_Start();
 	void AutoScreenshot_Cleanup();
 	void AutoStatScreenshot_Cleanup();
+
+	void AutoCSV_Start();
+	void AutoCSV_Cleanup();
 
 	void ServerBrowserUpdate();
 
