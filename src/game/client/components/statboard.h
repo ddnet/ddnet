@@ -1,3 +1,4 @@
+#include <cstring>
 #include <game/client/component.h>
 
 class CStatboard: public CComponent
@@ -9,6 +10,9 @@ class CStatboard: public CComponent
 		static void ConKeyStats(IConsole::IResult *pResult, void *pUserData);
 		void RenderGlobalStats();
 		void AutoStatScreenshot();
+		void AutoStatCSV();
+		std::string FormatStats();
+		std::string ReplaceCommata(std::string str);
 
 	public:
 		CStatboard();

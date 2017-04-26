@@ -245,6 +245,34 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 							&Button,
 							g_Config.m_ClAutoStatboardScreenshotMax/1000.0f)*1000.0f+0.1f);
 		}
+
+		// auto statboard csv
+		{
+			Right.HSplitTop(20.0f, 0, &Right); //
+			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if (DoButton_CheckBox(&g_Config.m_ClAutoCSV,
+				Localize("Automatically create statboard csv"),
+				g_Config.m_ClAutoCSV, &Button))
+			{
+				g_Config.m_ClAutoCSV ^= 1;
+			}
+
+			Right.HSplitTop(10.0f, 0, &Right);
+			Right.HSplitTop(20.0f, &Label, &Right);
+			Button.VSplitRight(20.0f, &Button, 0);
+			if (g_Config.m_ClAutoCSVMax)
+				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max CSVs"), g_Config.m_ClAutoCSVMax);
+			else
+				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max CSVs"), Localize("no limit"));
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			Right.HSplitTop(20.0f, &Button, 0);
+			Button.HMargin(2.0f, &Button);
+			g_Config.m_ClAutoCSVMax =
+				static_cast<int>(DoScrollbarH(&g_Config.m_ClAutoCSVMax,
+					&Button,
+					g_Config.m_ClAutoCSVMax / 1000.0f)*1000.0f + 0.1f);
+		}
 	}
 }
 
