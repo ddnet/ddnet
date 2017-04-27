@@ -2,13 +2,13 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 #include <base/system.h>
+#include <string.h>
 
 #include <game/generated/client_data.h>
 
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/storage.h>
-#include <engine/textrender.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
@@ -100,7 +100,6 @@ void CEmojis::OnInit()
 
 void CEmojis::Render(int i, float x, float y, float w, float h)
 {
-	CUIRect Screen;
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOJIS].m_Id);
 	Graphics()->QuadsBegin();
 	RenderTools()->SelectSprite(SPRITE_0023_20E3 + i);
