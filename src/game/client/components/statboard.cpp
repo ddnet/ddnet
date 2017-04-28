@@ -482,21 +482,21 @@ std::string CStatboard::FormatStats()
 
 	char aPlayerStats[1024 * VANILLA_MAX_CLIENTS];
 	str_format(aPlayerStats, sizeof(aPlayerStats), "Local-player,Team,Name,Clan,Score,Frags,Deaths,Suicides,F/D-ratio,Net,FPM,Spree,Best,Hammer-F/D,Gun-F/D,Shotgun-F/D,Grenade-F/D,Rifle-F/D,Ninja-F/D,GameWithFlags,Flag-grabs,Flag-captures\n");
-	for (int j = 0; j < NumPlayers; j++)
+	for (int i = 0; i < NumPlayers; i++)
 	{
-		const CNetObj_PlayerInfo *pInfo = apPlayers[j];
+		const CNetObj_PlayerInfo *pInfo = apPlayers[i];
 		const CGameClient::CClientStats *pStats = &m_pClient->m_aStats[pInfo->m_ClientID];
 		
 		// Pre-formatting		
 
 		// Weapons frags/deaths
 		char aWeaponFD[64 * NUM_WEAPONS];
-		for (int i = 0; i < NUM_WEAPONS; i++)
+		for (int j = 0; j < NUM_WEAPONS; j++)
 		{
-			if (i == 0)
-				str_format(aWeaponFD, sizeof(aWeaponFD), "%d/%d", pStats->m_aFragsWith[i], pStats->m_aDeathsFrom[i]);
+			if (j == 0)
+				str_format(aWeaponFD, sizeof(aWeaponFD), "%d/%d", pStats->m_aFragsWith[j], pStats->m_aDeathsFrom[j]);
 			else
-				str_format(aWeaponFD, sizeof(aWeaponFD), "%s,%d/%d", aWeaponFD, pStats->m_aFragsWith[i], pStats->m_aDeathsFrom[i]);
+				str_format(aWeaponFD, sizeof(aWeaponFD), "%s,%d/%d", aWeaponFD, pStats->m_aFragsWith[j], pStats->m_aDeathsFrom[j]);
 		}
 
 		// Frag/Death ratio
