@@ -1,4 +1,3 @@
-#include <string>
 #include <game/client/component.h>
 
 class CStatboard: public CComponent
@@ -11,8 +10,10 @@ class CStatboard: public CComponent
 		void RenderGlobalStats();
 		void AutoStatScreenshot();
 		void AutoStatCSV();
-		std::string FormatStats();
-		std::string ReplaceCommata(std::string str);
+
+		char* m_CSVstr;
+		char* ReplaceCommata(char* pStr);
+		void FormatStats();
 
 	public:
 		CStatboard();
