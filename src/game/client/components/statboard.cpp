@@ -424,7 +424,7 @@ void CStatboard::AutoStatCSV()
 
 		unsigned int len = str_length(m_CSVstr);
 		char* buf = new char[len];
-		memcpy(buf, m_CSVstr, len);
+		mem_copy(buf, m_CSVstr, len);
 
 		if(File)
 		{
@@ -461,7 +461,7 @@ char* CStatboard::ReplaceCommata(char* pStr)
 
 	unsigned int len = str_length(aOutbuf);
 	char* buf = new char[len];
-	memcpy(buf, aOutbuf, len);
+	mem_copy(buf, aOutbuf, len);
 	return buf;
 }
 
@@ -557,9 +557,10 @@ void CStatboard::FormatStats()
 	}
 
 	char aStats[1024*(VANILLA_MAX_CLIENTS+1)];
-	str_format(aStats, sizeof(aStats), "%s\n\n%s\0", aServerStats, aPlayerStats);
+	str_format(aStats, sizeof(aStats), "%s\n\n%s", aServerStats, aPlayerStats);
 
-	m_CSVstr = new char[sizeof(aStats)+1];
-	mem_zero(m_CSVstr, sizeof(aStats)+1);
-	strcpy(m_CSVstr, aStats);
+	unsigned int len = str_length(aStats);
+	m_CSVstr = new char[len];
+	mem_zero(m_CSVstr, len);
+	str_copy(m_CSVstr, aStats, len);
 }
