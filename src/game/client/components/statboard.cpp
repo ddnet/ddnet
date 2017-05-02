@@ -138,11 +138,8 @@ void CStatboard::OnRender()
 		}
 	}
 
-	if (IsActive())
-	{
+	if(IsActive())
 		RenderGlobalStats();
-		AutoStatCSV();
-	}
 }
 
 void CStatboard::RenderGlobalStats()
@@ -413,7 +410,7 @@ void CStatboard::AutoStatScreenshot()
 
 void CStatboard::AutoStatCSV()
 {
-	if (Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		char aDate[20], aFilename[128];
 		str_timestamp(aDate, sizeof(aDate));
@@ -438,7 +435,7 @@ void CStatboard::AutoStatCSV()
 
 char* CStatboard::ReplaceCommata(char* pStr)
 {
-	if (!str_find(pStr, ","))
+	if(!str_find(pStr, ","))
 		return pStr;
 
 	char aBuf[64];
@@ -447,9 +444,9 @@ char* CStatboard::ReplaceCommata(char* pStr)
 	char aOutbuf[256];
 	mem_zero(aOutbuf, sizeof(aOutbuf));
 
-	for (int i = 0, skip = 0; i < 64; i++)
+	for(int i = 0, skip = 0; i < 64; i++)
 	{
-		if (aBuf[i] == ',')
+		if(aBuf[i] == ',')
 		{
 			aOutbuf[i + skip++] = '%';
 			aOutbuf[i + skip++] = '2';
@@ -484,19 +481,19 @@ void CStatboard::FormatStats()
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
-		if (!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_RED)
+		if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_RED)
 			continue;
 		apPlayers[NumPlayers] = pInfo;
 		NumPlayers++;
 	}
 
 	// sort blue players by score after
-	if (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
+	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByScore[i];
-			if (!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_BLUE)
+			if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_BLUE)
 				continue;
 			apPlayers[NumPlayers] = pInfo;
 			NumPlayers++;
@@ -516,7 +513,7 @@ void CStatboard::FormatStats()
 		char aWeaponFD[64 * NUM_WEAPONS];
 		for (int j = 0; j < NUM_WEAPONS; j++)
 		{
-			if (j == 0)
+			if(j == 0)
 				str_format(aWeaponFD, sizeof(aWeaponFD), "%d/%d", pStats->m_aFragsWith[j], pStats->m_aDeathsFrom[j]);
 			else
 				str_format(aWeaponFD, sizeof(aWeaponFD), "%s,%d/%d", aWeaponFD, pStats->m_aFragsWith[j], pStats->m_aDeathsFrom[j]);
@@ -524,7 +521,7 @@ void CStatboard::FormatStats()
 
 		// Frag/Death ratio
 		float fdratio=0.0f;
-		if (pStats->m_Deaths != 0)
+		if(pStats->m_Deaths != 0)
 			fdratio = (float) (pStats->m_Frags) / pStats->m_Deaths;
 
 		// Local player
@@ -537,8 +534,8 @@ void CStatboard::FormatStats()
 		str_format(aBuf, sizeof(aBuf), "%d,%d,%s,%s,%d,%d,%d,%d,%.2f,%i,%.1f,%d,%d,%s,%d,%d,%d", 
 			localPlayer?1:0,															// Local player
 			m_pClient->m_aClients[pInfo->m_ClientID].m_Team,							// Team
-			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aName),	// Name
-			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan),	// Clan
+			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aName),			// Name
+			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan),			// Clan
 			clamp(pInfo->m_Score, -999, 999),											// Score
 			pStats->m_Frags,															// Frags
 			pStats->m_Deaths,															// Deaths
