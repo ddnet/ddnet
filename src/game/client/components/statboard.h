@@ -11,7 +11,7 @@ class CStatboard: public CComponent
 		void AutoStatScreenshot();
 		void AutoStatCSV();
 
-		char* m_CSVstr;
+		char* m_pCSVstr;
 		char* ReplaceCommata(char* pStr);
 		void FormatStats();
 

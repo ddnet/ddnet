@@ -14,7 +14,7 @@ CStatboard::CStatboard()
 	m_Active = false;
 	m_ScreenshotTaken = false;
 	m_ScreenshotTime = -1;
-	m_CSVstr = 0;
+	m_pCSVstr = 0;
 }
 
 void CStatboard::OnReset()
@@ -419,15 +419,19 @@ void CStatboard::AutoStatCSV()
 
 		FormatStats();
 
-		unsigned int len = str_length(m_CSVstr);
-		char* buf = new char[len];
-		mem_copy(buf, m_CSVstr, len);
+		unsigned int len = str_length(m_pCSVstr);
+		char* buf = (char*)mem_alloc(len, 0);
+		mem_copy(buf, m_pCSVstr, len);
+
+		mem_free(m_pCSVstr);
 
 		if(File)
 		{
 			io_write(File, buf, sizeof(char)*len);
 			io_close(File);
 		}
+
+		mem_free(buf);
 
 		Client()->AutoCSV_Start();
 	}		
@@ -557,7 +561,7 @@ void CStatboard::FormatStats()
 	str_format(aStats, sizeof(aStats), "%s\n\n%s", aServerStats, aPlayerStats);
 
 	unsigned int len = str_length(aStats);
-	m_CSVstr = new char[len];
-	mem_zero(m_CSVstr, len);
-	str_copy(m_CSVstr, aStats, len);
+	m_pCSVstr = (char*)mem_alloc(len, 0);
+	mem_zero(m_pCSVstr, len);
+	str_copy(m_pCSVstr, aStats, len);
 }
