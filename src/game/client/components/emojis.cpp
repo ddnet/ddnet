@@ -1,7 +1,6 @@
 ﻿/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
-#include <base/system.h>
 #include <string.h>
 
 #include <game/generated/client_data.h>
@@ -56,7 +55,7 @@ void CEmojis::LoadEmojisIndexfile()
 		}
 
 		int Count = str_toint(pLine); //TODO: add verification if valid number
-		
+
 		while (Count-- > 0) {
 			char *pAlias = LineReader.Get();
 			if (!pAlias)
@@ -126,12 +125,12 @@ char *replace(char *orig, char *rep, char *with) {
 	if (len_rep == 0)
 		return NULL; // empty rep causes infinite loop during count
 	if (!with)
-		with = "";
+		with = (char*)"";
 	len_with = strlen(with);
 
 	// count the number of replacements needed
 	ins = orig;
-	for (count = 0; tmp = strstr(ins, rep); ++count) {
+	for (count = 0; (tmp = strstr(ins, rep)); ++count) {
 		ins = tmp + len_rep;
 	}
 

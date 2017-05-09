@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/tl/string.h>
+#include <string.h>
 
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -551,15 +552,15 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		for(int i = 0; i < m_pClient->m_pEmojis->m_aEmojis.size(); i++) {
 			int offset = 0;
-			const char *result = strstr(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+			const char *result = str_find(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
 			while (result != NULL) {
 				CEmojis::CEmojiInfo Info;
 				Info.index = result - m_aLines[m_CurrentLine].m_aText;
-				Info.length = strlen(m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+				Info.length = str_length(m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
 				Info.m_ID = m_pClient->m_pEmojis->m_aEmojis[i].m_ID;
 				m_aLines[m_CurrentLine].m_Emojis.add(Info);
 				offset = Info.index + Info.length;
-				result = strstr(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+				result = str_find(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
 			}
 		}
 		m_aLines[m_CurrentLine].m_Emojis.sort_range();
@@ -829,7 +830,7 @@ void CChat::OnRender()
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
 
-		for(int i = 0; i < strlen(m_aLines[r].m_aText); ) {
+		for(int i = 0; (unsigned)i < strlen(m_aLines[r].m_aText); ) {
 			CEmojis::CEmojiInfo info;
 			bool found = false;
 			for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++) {
