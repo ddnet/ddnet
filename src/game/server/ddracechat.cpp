@@ -768,10 +768,17 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
 	const char *pName = pResult->GetString(0);
 
+	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+				"Admin has disabled teams");
+		return;
+	}
+
 	if(!g_Config.m_SvInvite)
 	{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Admin has diabled invites");
-			return;
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Admin has diabled invites");
+		return;
 	}
 
 	int Team = pController->m_Teams.m_Core.Team(pResult->m_ClientID);
