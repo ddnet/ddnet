@@ -719,9 +719,6 @@ void CGameContext::OnTick()
 				Server()->SetRconCID(IServer::RCON_CID_SERV);
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
-
-				if(m_apPlayers[m_VoteCreator])
-					m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
@@ -1405,13 +1402,20 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to kick '%s' (%s)", Server()->ClientName(ClientID), Server()->ClientName(KickID), aReason);
 				str_format(aDesc, sizeof(aDesc), "Kick '%s'", Server()->ClientName(KickID));
-				if (!g_Config.m_SvVoteKickBantime)
-					str_format(aCmd, sizeof(aCmd), "kick %d Kicked by vote", KickID);
+				if(!GetDDRaceTeam(ClientID))
+				{
+					if (!g_Config.m_SvVoteKickBantime)
+						str_format(aCmd, sizeof(aCmd), "kick %d Kicked by vote", KickID);
+					else
+					{
+						char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
+						Server()->GetClientAddr(KickID, aAddrStr, sizeof(aAddrStr));
+						str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", aAddrStr, g_Config.m_SvVoteKickBantime);
+					}
+				}
 				else
 				{
-					char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
-					Server()->GetClientAddr(KickID, aAddrStr, sizeof(aAddrStr));
-					str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", aAddrStr, g_Config.m_SvVoteKickBantime);
+					str_format(aCmd, sizeof(aCmd), "set_team_ddr %d 0", KickID);
 				}
 				m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 				m_VoteKick = true;
