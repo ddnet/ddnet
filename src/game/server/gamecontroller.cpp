@@ -772,7 +772,7 @@ void IGameController::Snap(int SnappingClient)
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
 	{
-		if((pPlayer->GetTeam() == -1 || pPlayer->m_Paused)
+		if((pPlayer->GetTeam() == -1 || pPlayer->IsPaused())
 			&& pPlayer->m_SpectatorID != SPEC_FREEVIEW
 			&& (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
 		{

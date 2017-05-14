@@ -116,10 +116,10 @@ void CPlayer::Reset()
 	m_SpecTeam = 0;
 	m_NinjaJetpack = false;
 
-	m_Paused = PAUSED_NONE;
+	m_Paused = PAUSE_NONE;
 	m_DND = false;
 
-	m_NextPauseTick = 0;
+	m_LastPause = 0;
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -157,9 +157,6 @@ void CPlayer::Tick()
 
 	if (m_ChatScore > 0)
 		m_ChatScore--;
-
-	if (m_ForcePauseTime > 0)
-		m_ForcePauseTime--;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 
@@ -201,21 +198,7 @@ void CPlayer::Tick()
 		{
 			if(m_pCharacter->IsAlive())
 			{
-				if(m_Paused >= PAUSED_FORCE)
-				{
-					if(m_ForcePauseTime == 0)
-					m_Paused = PAUSED_NONE;
-					ProcessPause();
-				}
-				else if(m_Paused == PAUSED_PAUSED && m_NextPauseTick < Server()->Tick())
-				{
-					if((!m_pCharacter->GetWeaponGot(WEAPON_NINJA) || m_pCharacter->m_FreezeTime) && m_pCharacter->IsGrounded() && m_pCharacter->m_Pos == m_pCharacter->m_PrevPos)
-						ProcessPause();
-				}
-				else if(m_NextPauseTick < Server()->Tick())
-				{
-					ProcessPause();
-				}
+				ProcessPause();
 				if(!m_Paused)
 					m_ViewPos = m_pCharacter->m_Pos;
 			}
@@ -316,9 +299,9 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_Local = 0;
 	pPlayerInfo->m_ClientID = id;
 	pPlayerInfo->m_Score = abs(m_Score) * -1;
-	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSED_SPEC || m_ClientID != SnappingClient) && m_Paused < PAUSED_PAUSED ? m_Team : TEAM_SPECTATORS;
+	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_SPEC || m_ClientID != SnappingClient) && m_Paused < PAUSE_PAUSED ? m_Team : TEAM_SPECTATORS;
 
-	if(m_ClientID == SnappingClient && (m_Paused != PAUSED_SPEC || m_ClientVersion >= VERSION_DDNET_OLD))
+	if(m_ClientID == SnappingClient && (m_Paused != PAUSE_SPEC || m_ClientVersion >= VERSION_DDNET_OLD))
 		pPlayerInfo->m_Local = 1;
 
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
@@ -358,7 +341,7 @@ void CPlayer::FakeSnap()
 	StrToInts(&pClientInfo->m_Clan0, 3, "");
 	StrToInts(&pClientInfo->m_Skin0, 6, "default");
 
-	if(m_Paused != PAUSED_SPEC)
+	if(m_Paused != PAUSE_SPEC)
 		return;
 
 	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
@@ -563,6 +546,7 @@ void CPlayer::TryRespawn()
 
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
+	m_Paused = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
@@ -665,39 +649,77 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
 
 void CPlayer::ProcessPause()
 {
+	if(m_ForcePauseTime && m_ForcePauseTime < Server()->Tick())
+	{
+		m_ForcePauseTime = 0;
+		Pause(PAUSE_NONE, true);
+	}
+
+	if(m_Paused == PAUSE_SPEC && !m_pCharacter->IsPaused() && m_pCharacter->IsGrounded() && m_pCharacter->m_Pos == m_pCharacter->m_PrevPos)
+	{
+		m_pCharacter->Pause(true);
+		GameServer()->CreateDeath(m_pCharacter->m_Pos, m_ClientID, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+		GameServer()->CreateSound(m_pCharacter->m_Pos, SOUND_PLAYER_DIE, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+	}
+}
+
+int CPlayer::Pause(int State, bool Force)
+{
+	dbg_assert(State >= PAUSE_NONE && State <= PAUSE_SPEC, "invalid pause state passed");
 	if(!m_pCharacter)
-		return;
+		return 0;
 
 	char aBuf[128];
-	if(m_Paused >= PAUSED_PAUSED)
+	if(State != m_Paused)
 	{
-		if(!m_pCharacter->IsPaused())
-		{
-			m_pCharacter->Pause(true);
+		// Get to wanted state
+		switch(State){
+		case PAUSE_PAUSED:
+		case PAUSE_NONE:
+			if(m_pCharacter->IsPaused()) // First condition might be unnecessary
+			{
+				if(!Force && m_LastPause && m_LastPause + g_Config.m_SvPauseFrequency * Server()->TickSpeed() > Server()->Tick())
+				{
+					GameServer()->SendChatTarget(m_ClientID, "Can't pause that quickly.");
+					return m_Paused; // Do not update state. Do not collect $200
+				}
+				m_pCharacter->Pause(false);
+				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+			}
+		case PAUSE_SPEC:
 			if(g_Config.m_SvPauseMessages)
 			{
-				str_format(aBuf, sizeof(aBuf), (m_Paused == PAUSED_PAUSED) ? "'%s' paused" : "'%s' was force-paused for %ds", Server()->ClientName(m_ClientID), m_ForcePauseTime/Server()->TickSpeed());
+				str_format(aBuf, sizeof(aBuf), (m_Paused > PAUSE_NONE) ? "'%s' paused" : "'%s' resumed", Server()->ClientName(m_ClientID));
 				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			}
-			GameServer()->CreateDeath(m_pCharacter->m_Pos, m_ClientID, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
-			GameServer()->CreateSound(m_pCharacter->m_Pos, SOUND_PLAYER_DIE, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
-			m_NextPauseTick = Server()->Tick() + g_Config.m_SvPauseFrequency * Server()->TickSpeed();
+			break;
 		}
+
+		// Update state
+		m_Paused = State;
+		m_LastPause = Server()->Tick();
 	}
-	else
+
+	return m_Paused;
+}
+
+int CPlayer::ForcePause(int Time)
+{
+	m_ForcePauseTime = Server()->Tick() + Server()->TickSpeed() * Time;
+
+	if(g_Config.m_SvPauseMessages)
 	{
-		if(m_pCharacter->IsPaused())
-		{
-			m_pCharacter->Pause(false);
-			if(g_Config.m_SvPauseMessages)
-			{
-				str_format(aBuf, sizeof(aBuf), "'%s' resumed", Server()->ClientName(m_ClientID));
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-			}
-			GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
-			m_NextPauseTick = Server()->Tick() + g_Config.m_SvPauseFrequency * Server()->TickSpeed();
-		}
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' was force-paused for %ds", Server()->ClientName(m_ClientID), Time);
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
+
+	return Pause(PAUSE_SPEC, true);
+}
+
+int CPlayer::IsPaused()
+{
+	return m_ForcePauseTime ? m_ForcePauseTime : -1 * m_Paused;
 }
 
 bool CPlayer::IsPlaying()
