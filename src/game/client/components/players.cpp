@@ -590,7 +590,7 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if (Player.m_PlayerFlags&PLAYERFLAG_AIM && (g_Config.m_ClShowOtherHookColl || pPlayerInfo->m_Local))
+		if (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!pPlayerInfo->m_Local && g_Config.m_ClShowHookCollOther) || (pPlayerInfo->m_Local && g_Config.m_ClShowHookCollOwn)))
 		{
 			float Alpha = 1.0f;
 			if (OtherTeam)
