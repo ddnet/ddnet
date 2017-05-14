@@ -555,14 +555,6 @@ int CServer::MaxClients() const
 	return m_NetServer.MaxClients();
 }
 
-int CServer::GetClientID(const char *pName)
-{
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(!str_comp(pName, m_aClients[i].m_aName))
-			return i;
-	return -1;
-}
-
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
 	return SendMsgEx(pMsg, Flags, ClientID, false);
