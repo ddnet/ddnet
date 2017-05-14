@@ -772,6 +772,12 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
 	const char *pName = pResult->GetString(0);
 
+	if(!g_Config.m_SvInvite)
+	{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Admin has diabled invites");
+			return;
+	}
+
 	int Team = pController->m_Teams.m_Core.Team(pResult->m_ClientID);
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
 	{
@@ -797,7 +803,14 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 
+		if(pSelf->m_apPlayers[pResult->m_ClientID] && pSelf->m_apPlayers[pResult->m_ClientID]->m_LastInvited + g_Config.m_SvInviteFrequency * pSelf->Server()->TickSpeed() > pSelf->Server()->Tick())
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Can't invite this quickly");
+			return;
+		}
+
 		pController->m_Teams.SetClientInvited(Team, Target, true);
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastInvited = pSelf->Server()->Tick();
 
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "'%s' invited you to team %d.", pSelf->Server()->ClientName(pResult->m_ClientID), Team);
@@ -863,6 +876,8 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < MAX_CLIENTS && pController->m_Teams.TeamLocked(pResult->GetInteger(0)) && !pController->m_Teams.IsInvited(pResult->GetInteger(0), pResult->m_ClientID))
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+						g_Config.m_SvInvite ?
+						"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 						"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 			}
 			else if(pResult->GetInteger(0) > 0 && pResult->GetInteger(0) < MAX_CLIENTS && pController->m_Teams.Count(pResult->GetInteger(0)) >= g_Config.m_SvTeamMaxSize)
@@ -1222,11 +1237,11 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	char aBuf[128];
-	
+
 	if(pResult->NumArguments() > 0)
 	{
 		int OldType = pPlayer->m_TimerType;
-		
+
 		if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0)
 		{
 			if(pPlayer->m_ClientVersion >= VERSION_DDNET_GAMETICK)
@@ -1271,16 +1286,16 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", aBuf);
 			return;
 		}
-		
+
 		if((OldType == CPlayer::TIMERTYPE_BROADCAST || OldType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE))
 			pSelf->SendBroadcast("", pResult->m_ClientID);
 	}
-	
+
 	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
 		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", s_aaMsg[pPlayer->m_TimerType]);
 	else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
 		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
-	
+
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", aBuf);
 }
 
