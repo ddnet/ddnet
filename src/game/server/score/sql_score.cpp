@@ -1494,7 +1494,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 
 	try
 	{
-		pSqlServer->executeSqlQuery("start transaction;");
+		pSqlServer->executeSql("start transaction;");
 		char aBuf[768];
 		str_format(aBuf, sizeof(aBuf), "select Savegame, Server, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago from %s_saves where Code = '%s' and Map = '%s';",  pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
@@ -1584,7 +1584,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "No such savegame for this map");
 
 		end:
-		pSqlServer->executeSqlQuery("commit;");
+		pSqlServer->executeSql("commit;");
 		return true;
 	}
 	catch (sql::SQLException &e)
