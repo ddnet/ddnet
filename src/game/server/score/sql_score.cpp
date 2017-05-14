@@ -1400,7 +1400,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		if((g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS)) && ((CGameControllerDDRace*)(pData->GameServer()->m_pController))->m_Teams.Count(Team) > 0)
 		{
 			CSaveTeam SavedTeam(pData->GameServer()->m_pController);
-			Num = SavedTeam.save(Team);
+			Num = SavedTeam.Save(Team);
 			switch (Num)
 			{
 				case 1:
@@ -1488,7 +1488,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
 {
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
-	CGameControllerDDRace *pController = (CGameControllerDDRace *)pData->m_pController;
+	CGameControllerDDRace *pController = (CGameControllerDDRace *)pData->GameServer()->m_pController;
 
 	if (HandleFailure)
 		return true;
@@ -1559,7 +1559,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 							bool Allowed = false;
 							for(int j = 0; !Allowed && j < SavedTeam.GetMembersCount(); i++)
 							{
-								if(!str_comp(pData->Server()->ClientName(i), SavedTeam.SavedTees[j]))
+								if(!str_comp(pData->Server()->ClientName(i), SavedTeam.SavedTees[j].GetName()))
 								{
 									if(i == pData->m_ClientID)
 										Belongs = true;
@@ -1588,7 +1588,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 					}
 				}
 				
-				if(!SavedTeam.load(Team))
+				if(!SavedTeam.Load(Team))
 				{
 					pData->GameServer()->SendChatTeam(Team, "Loading successfully done");
 					char aBuf[512];
