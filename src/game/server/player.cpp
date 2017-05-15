@@ -299,7 +299,7 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_Local = 0;
 	pPlayerInfo->m_ClientID = id;
 	pPlayerInfo->m_Score = abs(m_Score) * -1;
-	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_SPEC || m_ClientID != SnappingClient) && m_Paused < PAUSE_PAUSED ? m_Team : TEAM_SPECTATORS;
+	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
 
 	if(m_ClientID == SnappingClient && (m_Paused != PAUSE_SPEC || m_ClientVersion >= VERSION_DDNET_OLD))
 		pPlayerInfo->m_Local = 1;
