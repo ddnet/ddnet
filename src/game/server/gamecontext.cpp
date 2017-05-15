@@ -1323,7 +1323,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					}
 				}
 
-				m_LastMapVote = time_get();
 				m_VoteKick = false;
 				m_VoteSpec = false;
 			}
