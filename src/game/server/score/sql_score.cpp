@@ -1274,6 +1274,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "No maps found on this server!");
+			pData->GameServer()->m_LastMapVote = 0;
 		}
 		else
 		{
@@ -1331,6 +1332,7 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have no unfinished maps on this server!");
+			pData->GameServer()->m_LastMapVote = 0;
 		}
 		else
 		{
