@@ -665,7 +665,7 @@ void CPlayer::ProcessPause()
 
 int CPlayer::Pause(int State, bool Force)
 {
-	if(State >= PAUSE_NONE && State <= PAUSE_SPEC) // Invalid pause state passed
+	if(State < PAUSE_NONE || State > PAUSE_SPEC) // Invalid pause state passed
 		return 0;
 
 	if(!m_pCharacter)
