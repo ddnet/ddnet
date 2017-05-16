@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/tl/string.h>
-#include <string.h>
 
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -550,17 +549,19 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		m_aLines[m_CurrentLine].m_Friend = ClientID >= 0 ? m_pClient->m_aClients[ClientID].m_Friend : false;
 
-		for(int i = 0; i < m_pClient->m_pEmojis->m_aEmojis.size(); i++) {
-			int offset = 0;
-			const char *result = str_find(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
-			while (result != NULL) {
+		for(int i = 0; i < m_pClient->m_pEmojis->m_aEmojis.size(); i++)
+		{
+			int Offset = 0;
+			const char *pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+			while (pResult != NULL)
+			{
 				CEmojis::CEmojiInfo Info;
-				Info.index = result - m_aLines[m_CurrentLine].m_aText;
+				Info.index = pResult - m_aLines[m_CurrentLine].m_aText;
 				Info.length = str_length(m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
 				Info.m_ID = m_pClient->m_pEmojis->m_aEmojis[i].m_ID;
 				m_aLines[m_CurrentLine].m_Emojis.add(Info);
-				offset = Info.index + Info.length;
-				result = str_find(m_aLines[m_CurrentLine].m_aText + offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+				Offset = Info.index + Info.length;
+				pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
 			}
 		}
 		m_aLines[m_CurrentLine].m_Emojis.sort_range();
@@ -830,39 +831,48 @@ void CChat::OnRender()
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
 
-		for(int i = 0; (unsigned)i < strlen(m_aLines[r].m_aText); ) {
+		int Length = str_length(m_aLines[r].m_aText);
+
+		for (int i = 0; i < Length; )
+		{
 			CEmojis::CEmojiInfo info;
-			bool found = false;
-			for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++) {
+			bool Found = false;
+			for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++)
+			{
 				if(m_aLines[r].m_Emojis[j].index >= i) {
-					found = true;
+					Found = true;
 					info = m_aLines[r].m_Emojis[j];
 					break;
 				}
-
 			}
-			if(!found) {
-				char *start = &m_aLines[r].m_aText[i];
-				char *end = &m_aLines[r].m_aText[strlen(m_aLines[r].m_aText)];
-				char *substr = (char *)calloc(1, end - start + 1);
+			if(!Found)
+			{
+				char *pStart = &m_aLines[r].m_aText[i];
+				char *pEnd = &m_aLines[r].m_aText[str_length(m_aLines[r].m_aText)];
+				char *pSubstr = (char *)mem_alloc(pEnd - pStart + 1, 1);
+				mem_zero(pSubstr, pEnd - pStart + 1);
 
-				memcpy(substr, start, end - start);
-				TextRender()->TextEx(&Cursor, substr, -1);
-				free(substr);
+				mem_copy(pSubstr, pStart, pEnd - pStart);
+				TextRender()->TextEx(&Cursor, pSubstr, -1);
+				mem_free(pSubstr);
 
-				i = strlen(m_aLines[r].m_aText);
-			} else {
-				char *start = &m_aLines[r].m_aText[i];
-				char *end = &m_aLines[r].m_aText[info.index];
-				char *substr = (char *)calloc(1, end - start + 1);
+				i = str_length(m_aLines[r].m_aText);
+			}
+			else
+			{
+				char *pStart = &m_aLines[r].m_aText[i];
+				char *pEnd = &m_aLines[r].m_aText[info.index];
+				char *pSubstr = (char *)mem_alloc(pEnd - pStart + 1, 1);
+				mem_zero(pSubstr, pEnd - pStart + 1);
 
-				memcpy(substr, start, end - start);
-				TextRender()->TextEx(&Cursor, substr, -1);
-				free(substr);
+				mem_copy(pSubstr, pStart, pEnd - pStart);
+				TextRender()->TextEx(&Cursor, pSubstr, -1);
+				mem_free(pSubstr);
 
 				m_pClient->m_pEmojis->Render(info.m_ID, Cursor.m_X + Cursor.m_FontSize * 2 / 3, Cursor.m_Y + Cursor.m_FontSize * 2 / 3, Cursor.m_FontSize, Cursor.m_FontSize);
 				Cursor.m_X += Cursor.m_FontSize;
-				if(Cursor.m_LineWidth < Cursor.m_X + Cursor.m_FontSize) {
+				if(Cursor.m_LineWidth < Cursor.m_X + Cursor.m_FontSize)
+				{
 					Cursor.m_X = 0; 
 					Cursor.m_Y += Cursor.m_FontSize;
 				}

@@ -1,7 +1,6 @@
 ﻿/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
-#include <string.h>
 
 #include <game/generated/client_data.h>
 
@@ -109,7 +108,8 @@ void CEmojis::Render(int i, float x, float y, float w, float h)
 
 // Taken from http://stackoverflow.com/a/779960
 // You must free the result if result is non-NULL.
-char *replace(char *orig, char *rep, char *with) {
+char *replace(char *orig, char *rep, char *with)
+{
 	char *result; // the return string
 	char *ins;    // the next insert point
 	char *tmp;    // varies
@@ -118,23 +118,24 @@ char *replace(char *orig, char *rep, char *with) {
 	int len_front; // distance between rep and end of last rep
 	int count;    // number of replacements
 
-				  // sanity checks and initialization
+	// sanity checks and initialization
 	if (!orig || !rep)
 		return NULL;
-	len_rep = strlen(rep);
+	len_rep = str_length(rep);
 	if (len_rep == 0)
 		return NULL; // empty rep causes infinite loop during count
 	if (!with)
 		with = (char*)"";
-	len_with = strlen(with);
+	len_with = str_length(with);
 
 	// count the number of replacements needed
 	ins = orig;
-	for (count = 0; (tmp = strstr(ins, rep)); ++count) {
+	for(count = 0; (tmp = (char*)str_find(ins, rep)); ++count)
+	{
 		ins = tmp + len_rep;
 	}
 
-	tmp = result = (char *)malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+	tmp = result = (char *)mem_alloc(str_length(orig) + (len_with - len_rep) * count + 1, 1);
 
 	if (!result)
 		return NULL;
@@ -144,8 +145,9 @@ char *replace(char *orig, char *rep, char *with) {
 	//    tmp points to the end of the result string
 	//    ins points to the next occurrence of rep in orig
 	//    orig points to the remainder of orig after "end of rep"
-	while (count--) {
-		ins = strstr(orig, rep);
+	while (count--)
+	{
+		ins = (char *)str_find(orig, rep);
 		len_front = ins - orig;
 		tmp = strncpy(tmp, orig, len_front) + len_front;
 		tmp = strcpy(tmp, with) + len_with;
@@ -168,7 +170,7 @@ void CEmojis::OnMessage(int MsgType, void *pRawMsg)
 			char* tmp = replace((char*)pMsg->m_pMessage, m_aEmojis[i].m_Alias, m_aEmojis[i].m_UTF);
 			// if (i != 0)
 			// free previous
-			free((void *)pMsg->m_pMessage);
+			mem_free((void *)pMsg->m_pMessage);
 			pMsg->m_pMessage = tmp;
 		}
 	}
