@@ -665,7 +665,9 @@ void CPlayer::ProcessPause()
 
 int CPlayer::Pause(int State, bool Force)
 {
-	dbg_assert(State >= PAUSE_NONE && State <= PAUSE_SPEC, "invalid pause state passed");
+	if(State >= PAUSE_NONE && State <= PAUSE_SPEC) // Invalid pause state passed
+		return 0;
+
 	if(!m_pCharacter)
 		return 0;
 

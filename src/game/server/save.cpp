@@ -22,7 +22,7 @@ void CSaveTee::save(CCharacter *pChr)
 	str_copy(m_name, pChr->m_pPlayer->Server()->ClientName(pChr->m_pPlayer->GetCID()), sizeof(m_name));
 
 	m_Alive = pChr->m_Alive;
-	m_Paused = pChr->m_pPlayer->IsPaused();
+	m_Paused = abs(pChr->m_pPlayer->IsPaused());
 	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
 	m_TeeFinished = pChr->Teams()->TeeFinished(pChr->m_pPlayer->GetCID());
