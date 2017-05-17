@@ -86,6 +86,25 @@ void CEmojis::LoadEmojisIndexfile()
 	io_close(File);
 }
 
+int CEmojis::Num() const
+{
+	return m_aEmojis.size();
+}
+
+const CEmojis::CEmoji *CEmojis::GetByAlias(const char *alias) const
+{
+	for (int i = 0; i < m_aEmojis.size(); i++)
+	{
+		if (str_comp(alias, m_aEmojis[i].m_Alias) == 0) return GetByIndex(i);
+	}
+	return NULL;
+}
+
+const CEmojis::CEmoji *CEmojis::GetByIndex(int index) const
+{
+	return &m_aEmojis[max(0, index%m_aEmojis.size())];
+}
+
 void CEmojis::OnInit()
 {
 	m_aEmojis.clear();
@@ -104,74 +123,4 @@ void CEmojis::Render(int i, float x, float y, float w, float h)
 	IGraphics::CQuadItem QuadItem(x, y, w, h);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 	Graphics()->QuadsEnd();
-}
-
-// Taken from http://stackoverflow.com/a/779960
-// You must free the result if result is non-NULL.
-char *replace(char *orig, char *rep, char *with)
-{
-	char *result; // the return string
-	char *ins;    // the next insert point
-	char *tmp;    // varies
-	int len_rep;  // length of rep (the string to remove)
-	int len_with; // length of with (the string to replace rep with)
-	int len_front; // distance between rep and end of last rep
-	int count;    // number of replacements
-
-	// sanity checks and initialization
-	if (!orig || !rep)
-		return NULL;
-	len_rep = str_length(rep);
-	if (len_rep == 0)
-		return NULL; // empty rep causes infinite loop during count
-	if (!with)
-		with = (char*)"";
-	len_with = str_length(with);
-
-	// count the number of replacements needed
-	ins = orig;
-	for(count = 0; (tmp = (char*)str_find(ins, rep)); ++count)
-	{
-		ins = tmp + len_rep;
-	}
-
-	tmp = result = (char *)mem_alloc(str_length(orig) + (len_with - len_rep) * count + 1, 1);
-
-	if (!result)
-		return NULL;
-
-	// first time through the loop, all the variable are set correctly
-	// from here on,
-	//    tmp points to the end of the result string
-	//    ins points to the next occurrence of rep in orig
-	//    orig points to the remainder of orig after "end of rep"
-	while (count--)
-	{
-		ins = (char *)str_find(orig, rep);
-		len_front = ins - orig;
-		tmp = strncpy(tmp, orig, len_front) + len_front;
-		tmp = strcpy(tmp, with) + len_with;
-		orig += len_front + len_rep; // move to next "end of rep"
-	}
-	strcpy(tmp, orig);
-	return result;
-}
-
-void CEmojis::OnMessage(int MsgType, void *pRawMsg)
-{
-	if (MsgType == NETMSGTYPE_SV_CHAT)
-	{
-		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
-		if (m_aEmojis.size() == 0) return;
-
-		pMsg->m_pMessage = replace((char *)pMsg->m_pMessage, m_aEmojis[0].m_Alias, m_aEmojis[0].m_UTF);
-
-		for (int i = 1; i < m_aEmojis.size(); i++) {
-			char* tmp = replace((char*)pMsg->m_pMessage, m_aEmojis[i].m_Alias, m_aEmojis[i].m_UTF);
-			// if (i != 0)
-			// free previous
-			mem_free((void *)pMsg->m_pMessage);
-			pMsg->m_pMessage = tmp;
-		}
-	}
 }

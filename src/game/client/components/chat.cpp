@@ -549,19 +549,56 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		m_aLines[m_CurrentLine].m_Friend = ClientID >= 0 ? m_pClient->m_aClients[ClientID].m_Friend : false;
 
-		for(int i = 0; i < m_pClient->m_pEmojis->m_aEmojis.size(); i++)
+		char aBuffer[64];
+		int Length = str_length(m_aLines[m_CurrentLine].m_aText);
+
+		//lookup for aliases of emojis
+		for(int i = 0; i < Length; )
+		{
+			const char *pIndex1 = str_find(m_aLines[m_CurrentLine].m_aText + i, ":");
+			if (pIndex1 == NULL) break;
+			//prevents crashing when ":" is last character
+			if (m_aLines[m_CurrentLine].m_aText - pIndex1 + 1 == Length) break;
+
+			const char *pIndex2 = str_find(pIndex1 + 1, ":");
+			if (pIndex2 == NULL) break;
+
+			i = pIndex2 - m_aLines[m_CurrentLine].m_aText;
+
+			//prevents buffer overflow
+			if (pIndex2 - pIndex1 + 2 > 64) continue;
+			str_copy(aBuffer, pIndex1, pIndex2 - pIndex1 + 2); // extra place for ":\0"
+
+			//skip "::" and those aliases containing space
+			if (str_length(aBuffer) <= 2 || str_find(aBuffer, " ")) continue;
+
+			CEmojis::CEmoji const *pEmoji = m_pClient->m_pEmojis->GetByAlias(aBuffer);
+			if (pEmoji == NULL) continue;
+			//to prevent usage of the same ":"
+			i++;
+
+			CEmojis::CEmojiInfo Info;
+			Info.index = pIndex1 - m_aLines[m_CurrentLine].m_aText;
+			Info.length = str_length(aBuffer);
+			Info.m_ID = pEmoji->m_ID;
+			m_aLines[m_CurrentLine].m_Emojis.add(Info);
+		}
+
+		//lookup for utf emojis
+		for(int i = 0; i < m_pClient->m_pEmojis->Num(); i++)
 		{
 			int Offset = 0;
-			const char *pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+			CEmojis::CEmoji const *pEmoji = m_pClient->m_pEmojis->GetByIndex(i);
+			const char *pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, pEmoji->m_UTF);
 			while (pResult != NULL)
 			{
 				CEmojis::CEmojiInfo Info;
 				Info.index = pResult - m_aLines[m_CurrentLine].m_aText;
-				Info.length = str_length(m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
-				Info.m_ID = m_pClient->m_pEmojis->m_aEmojis[i].m_ID;
+				Info.length = str_length(pEmoji->m_UTF);
+				Info.m_ID = pEmoji->m_ID;
 				m_aLines[m_CurrentLine].m_Emojis.add(Info);
 				Offset = Info.index + Info.length;
-				pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, m_pClient->m_pEmojis->m_aEmojis[i].m_UTF);
+				pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, pEmoji->m_UTF);
 			}
 		}
 		m_aLines[m_CurrentLine].m_Emojis.sort_range();
