@@ -27,11 +27,13 @@ public:
 		char m_UNICODE[64];
 		char m_Alias[64];
 	};
+	int Num() const;
+	const CEmoji *GetByAlias(const char *alias) const;
+	const CEmoji *GetByIndex(int index) const;
 	void Render(int i, float x, float y, float w, float h);
-	array<CEmoji> m_aEmojis;
 private:
+	array<CEmoji> m_aEmojis;
 	void LoadEmojisIndexfile();
 	void OnInit();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
 };
 #endif
