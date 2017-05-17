@@ -776,7 +776,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(30.0f, &Box, &Button);
 	static int s_EditorButton=0;
-	if(DoButton_MenuTab(&s_EditorButton, Localize("✎"), 0, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_EditorButton, "✎", 0, &Button, CUI::CORNER_T))
 	{
 		g_Config.m_ClEditor = 1;
 	}
