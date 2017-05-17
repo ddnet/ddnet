@@ -1282,7 +1282,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							char chatmsg[512] = {0};
 							str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay,((m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
 							SendChatTarget(ClientID, chatmsg);
-							m_LastMapVote = time_get();
 
 							return;
 						}
@@ -1301,6 +1300,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
 						}
 
+						m_LastMapVote = time_get();
 						break;
 					}
 
