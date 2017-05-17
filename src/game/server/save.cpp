@@ -264,27 +264,34 @@ int CSaveTeam::load(int Team)
 	if(Team <= 0 || Team >= MAX_CLIENTS)
 		return 1;
 
-	CGameTeams* Teams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
+	CGameTeams* pTeams = &(((CGameControllerDDRace*)m_pController)->m_Teams);
 
-	Teams->ChangeTeamState(Team, m_TeamState);
-	Teams->SetTeamLock(Team, m_TeamLocked);
+	if(pTeams->Count(Team) > m_MembersCount)
+		return 2;
+
+	pTeams->ChangeTeamState(Team, m_TeamState);
+	pTeams->SetTeamLock(Team, m_TeamLocked);
 
 	CCharacter *pChr;
 
-	for (int i = 0; i<m_MembersCount; i++)
+	for (int i = 0; i < m_MembersCount; i++)
 	{
 		int ID = MatchPlayer(SavedTees[i].GetName());
 		if(ID == -1) // first check if team can be loaded / do not load half teams
 		{
-			return i+10; // +10 to let space for other return-values
+			return i+10; // +10 to leave space for other return-values
 		}
-		else if (m_pController->GameServer()->m_apPlayers[ID] && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter() && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter()->m_DDRaceState)
+		if(m_pController->GameServer()->m_apPlayers[ID] && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter() && m_pController->GameServer()->m_apPlayers[ID]->GetCharacter()->m_DDRaceState)
 		{
-			return i+100; // +100 to let space for other return-values
+			return i+100; // +100 to leave space for other return-values
+		}
+		if(Team != pTeams->m_Core.Team(ID))
+		{
+			return i+200; // +100 to leave space for other return-values
 		}
 	}
 
-	for (int i = 0; i<m_MembersCount; i++)
+	for (int i = 0; i < m_MembersCount; i++)
 	{
 		pChr = MatchCharacter(SavedTees[i].GetName(), i);
 		if(pChr)
