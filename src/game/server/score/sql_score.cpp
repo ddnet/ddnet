@@ -1370,7 +1370,7 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 	}
 	else
 	{
-		GameServer()->SendChatTarget(ClientID, "You have to be in a Team (from 1-63)");
+		GameServer()->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
 		return;
 	}
 
@@ -1406,7 +1406,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			switch (Num)
 			{
 				case 1:
-					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+					pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
 					break;
 				case 2:
 					pData->GameServer()->SendChatTarget(pData->m_ClientID, "Could not find your Team");
@@ -1425,7 +1425,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			}
 		}
 		else
-			pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a Team (from 1-63)");
+			pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
 
 		if (Num)
 			return true;
@@ -1553,7 +1553,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 					{
 						pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
 					}
-					if(Num == 2)
+					else if(Num == 2)
 					{
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "Too many players in this team, should be %d", SavedTeam.GetMembersCount());
