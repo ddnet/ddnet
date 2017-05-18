@@ -301,7 +301,7 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_Score = abs(m_Score) * -1;
 	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
 
-	if(m_ClientID == SnappingClient && (m_Paused != PAUSE_SPEC || m_ClientVersion >= VERSION_DDNET_OLD))
+	if(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || m_ClientVersion >= VERSION_DDNET_OLD))
 		pPlayerInfo->m_Local = 1;
 
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
@@ -341,7 +341,7 @@ void CPlayer::FakeSnap()
 	StrToInts(&pClientInfo->m_Clan0, 3, "");
 	StrToInts(&pClientInfo->m_Skin0, 6, "default");
 
-	if(m_Paused != PAUSE_SPEC)
+	if(m_Paused != PAUSE_PAUSED)
 		return;
 
 	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
