@@ -269,9 +269,6 @@ int CSaveTeam::load(int Team)
 	if(pTeams->Count(Team) > m_MembersCount)
 		return 2;
 
-	pTeams->ChangeTeamState(Team, m_TeamState);
-	pTeams->SetTeamLock(Team, m_TeamLocked);
-
 	CCharacter *pChr;
 
 	for (int i = 0; i < m_MembersCount; i++)
@@ -290,6 +287,9 @@ int CSaveTeam::load(int Team)
 			return i+200; // +100 to leave space for other return-values
 		}
 	}
+
+	pTeams->ChangeTeamState(Team, m_TeamState);
+	pTeams->SetTeamLock(Team, m_TeamLocked);
 
 	for (int i = 0; i < m_MembersCount; i++)
 	{
