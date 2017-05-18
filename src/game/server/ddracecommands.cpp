@@ -209,7 +209,7 @@ void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, 0, true);
+	pSelf->ModifyWeapons(pResult, pUserData, -1, true);
 }
 
 void CGameContext::ConAddWeapon(IConsole::IResult *pResult, void *pUserData)
@@ -241,9 +241,9 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 
 	if (Weapon == -1)
 	{
-		pChr->GiveWeapon(WEAPON_SHOTGUN);
-		pChr->GiveWeapon(WEAPON_GRENADE);
-		pChr->GiveWeapon(WEAPON_RIFLE);
+		pChr->GiveWeapon(WEAPON_SHOTGUN, Remove);
+		pChr->GiveWeapon(WEAPON_GRENADE, Remove);
+		pChr->GiveWeapon(WEAPON_RIFLE, Remove);
 	}
 	else
 	{
