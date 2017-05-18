@@ -10,6 +10,7 @@
 #if defined(CONF_SQL)
 #include <game/server/score/sql_score.h>
 #endif
+#include "save.h"
 
 bool CheckClientID(int ClientID);
 
@@ -608,6 +609,87 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 #endif
 }
 
+void CGameContext::ConAcceptLoad(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->m_TeamLoadState.m_State != CTeamLoadState::NONE)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are already involved in a savegame load.");
+		return;
+	}
+
+	// search for host
+	int HostID = -1;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (str_comp(pResult->GetString(0), pSelf->Server()->ClientName(i)) == 0)
+		{
+			HostID = i;
+			break;
+		}
+	}
+
+	if (HostID == -1 || !pSelf->m_apPlayers[HostID])
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Unable to find player.");
+		return;
+	}
+
+	CTeamLoadState &MyLoadState = pSelf->m_apPlayers[pResult->m_ClientID]->m_TeamLoadState;
+	CTeamLoadState &HostLoadState = pSelf->m_apPlayers[HostID]->m_TeamLoadState;
+
+	if (HostLoadState.m_State == CTeamLoadState::HOST_WAIT_FOR_CLIENTS)
+	{
+		// try to accept
+		if (HostLoadState.m_NumPlayersLeft > 0)
+		{
+			// find our saved tee id
+			MyLoadState.m_OwnSavedTeeID = -1;
+			for (int i = 0; i < HostLoadState.m_pSaveTeam->GetMembersCount(); i++)
+			{
+				if (str_comp(pSelf->Server()->ClientName(pResult->m_ClientID), HostLoadState.m_pSaveTeam->SavedTees[i].GetName()) == 0)
+				{
+					MyLoadState.m_OwnSavedTeeID = i;
+					break;
+				}
+			}
+
+			if (MyLoadState.m_OwnSavedTeeID == -1)
+			{
+				// Either we weren't invited to the party
+				// or we changed our name before accepting.
+				pSelf->SendChatTarget(pResult->m_ClientID, "You don't belong to this team.");
+			}
+			else
+			{
+				// accept
+				HostLoadState.m_NumPlayersLeft--;
+				MyLoadState.m_JoinID = HostID;
+				MyLoadState.m_State = CTeamLoadState::CLIENT_ACCEPTED;
+				pSelf->SendChatTarget(pResult->m_ClientID, "You accepted the invitation.");
+			}
+		}
+		else
+		{
+			// Some player accepted multiple times.
+			// Currently this is possible via name
+			// changes and/or server rejoin.
+			// Do nothing for now.
+		}
+	}
+	else
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Unable to find load invitation.");
+	}
+}
+
 void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -630,10 +712,32 @@ void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 			return;
 #endif
 
-	if (pResult->NumArguments() > 0)
-		pSelf->Score()->LoadTeam(pResult->GetString(0), pResult->m_ClientID);
+	if (g_Config.m_SvLoadInvite)
+	{
+		// load via invitation
+		if (pPlayer->m_TeamLoadState.m_State != CTeamLoadState::NONE)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are already involved in a savegame load.");
+			return;
+		}
+
+		// initiate load
+		pPlayer->m_TeamLoadState.m_State = CTeamLoadState::HOST_THREAD_INIT_LOAD;
+		str_copy(pPlayer->m_TeamLoadState.m_aCode, pResult->GetString(0), sizeof(pPlayer->m_TeamLoadState));
+		pPlayer->m_TeamLoadState.m_TimeInitiated = pSelf->Server()->Tick();
+
+		// sql
+		pSelf->Score()->LoadTeamInfo(pResult->GetString(0), pResult->m_ClientID);
+	}
 	else
-		return;
+	{
+		// old enforced load
+		if (pResult->NumArguments() > 0) {
+			pSelf->Score()->LoadTeam(pResult->GetString(0), pResult->m_ClientID);
+		}
+		else
+			return;
+	}
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)

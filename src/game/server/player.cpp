@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <game/server/save.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -27,6 +28,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_pCharacter = 0;
 	m_NumInputs = 0;
 	m_KillMe = 0;
+	m_TeamLoadState.m_State = CTeamLoadState::NONE;
 	Reset();
 }
 
