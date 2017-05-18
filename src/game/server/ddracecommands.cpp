@@ -209,7 +209,7 @@ void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, -1, true);
+	pSelf->ModifyWeapons(pResult, pUserData, 0, true);
 }
 
 void CGameContext::ConAddWeapon(IConsole::IResult *pResult, void *pUserData)
