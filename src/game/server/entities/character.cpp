@@ -1135,7 +1135,12 @@ void CCharacter::Snap(int SnappingClient)
 	}
 
 	if(GetPlayer()->m_Afk || GetPlayer()->IsPaused())
-		pCharacter->m_Emote = EMOTE_BLINK;
+	{
+		if(m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
+			pCharacter->m_Emote = EMOTE_NORMAL;
+		else
+			pCharacter->m_Emote = EMOTE_BLINK;
+	}
 
 	if(pCharacter->m_Emote == EMOTE_NORMAL)
 	{
