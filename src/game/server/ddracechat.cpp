@@ -819,7 +819,10 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof aBuf, "'%s' invited you to team %d.", pSelf->Server()->ClientName(pResult->m_ClientID), Team);
 		pSelf->SendChatTarget(Target, aBuf);
 
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player has been notified");
+		str_format(aBuf, sizeof aBuf, "'%s' invited '%s' to your team.", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Target));;
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			if (((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(i) == Team)
+				pSelf->SendChatTarget(i, aBuf);
 	}
 	else
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Can't invite players to this team");

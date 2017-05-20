@@ -629,16 +629,17 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because you %s.", Weapon == WEAPON_SELF ? "killed" : "died");
-			GameServer()->SendChatTarget(ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
 
 			for (int i = 0; i < MAX_CLIENTS; i++)
-				if(m_Core.Team(i) == Team && i != ClientID && GameServer()->m_apPlayers[i])
+				if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 				{
-					GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
-					if (Weapon == WEAPON_SELF)
-						GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
+					if(i != ClientID)
+					{
+						GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+						if (Weapon == WEAPON_SELF)
+							GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
+					}
 					GameServer()->SendChatTarget(i, aBuf);
 				}
 		}
