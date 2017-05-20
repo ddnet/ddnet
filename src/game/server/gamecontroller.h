@@ -116,7 +116,8 @@ public:
 	*/
 	//virtual bool OnEntity(int Index, vec2 Pos);
 	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
-
+	virtual bool OnEntity(const char* pName, vec2 Pivot, vec2 P0, vec2 P1, vec2 P2, vec2 P3, int PosEnv);
+	
 	/*
 		Function: on_CCharacter_spawn
 			Called when a CCharacter spawns into the game world.
@@ -155,6 +156,8 @@ public:
 	int ClampTeam(int Team);
 
 	virtual void PostReset();
+	
+	double GetTime();
 
 	// DDRace
 
