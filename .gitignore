@@ -24,6 +24,7 @@ freetype.dll
 /serverlaunch_*
 /tileset_border*
 /twping*
+/uuid*
 /versionsrv*
 
 Debug
