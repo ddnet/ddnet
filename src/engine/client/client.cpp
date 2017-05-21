@@ -46,9 +46,11 @@
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/protocol_ex.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/fifo.h>
+#include <engine/shared/uuid_manager.h>
 
 #include <game/version.h>
 
@@ -847,7 +849,7 @@ void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem)
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
 	i = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
 	pItem->m_DataSize = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
-	pItem->m_Type = i->Type();
+	pItem->m_Type = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(Index);
 	pItem->m_ID = i->ID();
 	return (void *)i->Data();
 }
@@ -878,7 +880,7 @@ void *CClient::SnapFindItem(int SnapID, int Type, int ID)
 	for(i = 0; i < m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap->NumItems(); i++)
 	{
 		CSnapshotItem *pItem = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(i);
-		if(pItem->Type() == Type && pItem->ID() == ID)
+		if(m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(i) == Type && pItem->ID() == ID)
 			return (void *)pItem->Data();
 	}
 	return 0x0;
@@ -1536,14 +1538,22 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 {
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
+	CMsgPacker Packer(NETMSG_EX);
 
 	// unpack msgid and system flag
-	int Msg = Unpacker.GetInt();
-	int Sys = Msg&1;
-	Msg >>= 1;
+	int Msg;
+	bool Sys;
+	CUuid Uuid;
 
-	if(Unpacker.Error())
+	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	if(Result == UNPACKMESSAGE_ERROR)
+	{
 		return;
+	}
+	else if(Result == UNPACKMESSAGE_ANSWER)
+	{
+		SendMsgEx(&Packer, MSGFLAG_VITAL, true);
+	}
 
 	if(Sys)
 	{
@@ -1834,7 +1844,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
-						m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "delta unpack failed!");
+						dbg_msg("client", "delta unpack failed!=%d", SnapSize);
 						return;
 					}
 
@@ -2636,6 +2646,11 @@ void CClient::Run()
 	unsigned int Seed;
 	secure_random_fill(&Seed, sizeof(Seed));
 	srand(Seed);
+
+	if(g_Config.m_Debug)
+	{
+		g_UuidManager.DebugDump();
+	}
 
 	// init SDL
 	{

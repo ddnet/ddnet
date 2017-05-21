@@ -233,8 +233,9 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 # Sources
 file(GLOB_RECURSE BASE "src/base/*.c" "src/base/*.cpp" "src/base/*.h")
 file(GLOB_RECURSE ENGINE_SHARED "src/engine/shared/*.cpp" "src/engine/shared/*.h")
+set(ENGINE_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/protocol.h")
 file(GLOB GAME_SHARED "src/game/*.cpp" "src/game/*.h")
-set(GAME_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/protocol.h" "src/game/generated/nethash.cpp")
+set(GAME_GENERATED_SHARED "src/game/generated/nethash.cpp")
 
 # Static dependencies
 file(GLOB DEP_MD5_SRC "src/engine/external/md5/*.c" "src/engine/external/md5/*.h")
@@ -257,7 +258,7 @@ set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS} ${DEP_ZLIB})
 set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 

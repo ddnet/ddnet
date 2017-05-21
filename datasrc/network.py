@@ -12,6 +12,7 @@ Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 RawHeader = '''
 
 #include <engine/message.h>
+#include <engine/shared/protocol_ex.h>
 
 enum
 {
@@ -189,6 +190,10 @@ Objects = [
 		NetIntAny("m_Y"),
 	]),
 
+	NetObjectEx("MyOwnObject", "my-own-object@heinrich5991.de", [
+		NetIntAny("m_Test"),
+	]),
+
 	## Events
 
 	NetEvent("Common", [
@@ -215,6 +220,10 @@ Objects = [
 
 	NetEvent("DamageInd:Common", [
 		NetIntAny("m_Angle"),
+	]),
+
+	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
+		NetIntAny("m_Test"),
 	]),
 ]
 
@@ -364,6 +373,10 @@ Messages = [
 
 	NetMessage("Cl_ShowOthers", [
 		NetBool("m_Show"),
-	])
+	]),
 # Can't add any NetMessages here!
+
+	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
+		NetIntAny("m_Test"),
+	]),
 ]
