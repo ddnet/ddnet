@@ -219,7 +219,10 @@ void CFileScore::LoadScore(int ClientID)
 
 	// set score
 	if (pPlayer)
+	{
 		PlayerData(ClientID)->Set(pPlayer->m_Score, pPlayer->m_aCpTime);
+		GameServer()->m_apPlayers[ClientID]->m_HasFinishScore = true;
+	}
 }
 
 void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
