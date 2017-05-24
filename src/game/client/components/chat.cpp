@@ -783,6 +783,9 @@ void CChat::OnRender()
 	float Begin = x;
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
+
+	int Length = str_length(m_aLines[r].m_aText);
+
 	for(int i = 0; i < MAX_LINES; i++)
 	{
 		int r = ((m_CurrentLine-i)+MAX_LINES)%MAX_LINES;
@@ -808,18 +811,45 @@ void CChat::OnRender()
 		{
 			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
-			Cursor.m_X += Cursor.m_FontSize * m_aLines[r].m_Emojis.size();
-			Cursor.m_Y += ((int)Cursor.m_X/(int)LineWidth) * Cursor.m_FontSize;
-			Cursor.m_X = (int)Cursor.m_X % (int)LineWidth;
 			TextRender()->TextEx(&Cursor, "♥ ", -1);
 			TextRender()->TextEx(&Cursor, aName, -1);
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aTextNoEmojis, -1);
-			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize; // 0 + 6
-			//this stores float ↓             +=      (( 198.333   +            6      *        0                   )/      200     )* 6;
-			//m_aLines[r].m_YOffset[OffsetType] += (int)((Cursor.m_X + Cursor.m_FontSize * m_aLines[r].m_Emojis.size())/LineWidth) * Cursor.m_FontSize;
-			printf("offset:\n%f %f %d %f\n", Cursor.m_X, Cursor.m_Y, m_aLines[r].m_Emojis.size(), LineWidth);
-			printf("%f\n", m_aLines[r].m_YOffset[OffsetType]);/*+ 
-			((int)(Cursor.m_X + Cursor.m_FontSize * m_aLines[r].m_Emojis.size())/(int)LineWidth)*Cursor.m_FontSize*/;
+			for (int i = 0; i < Length; )
+			{
+				//Maybe replace with pointer?
+				CEmojis::CEmojiInfo info;
+				bool Found = false;
+				for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++)
+				{
+					if(m_aLines[r].m_Emojis[j].index >= i) {
+						Found = true;
+						info = m_aLines[r].m_Emojis[j];
+						break;
+					}
+				}
+
+				char *pStart = &m_aLines[r].m_aText[i];
+
+				if(!Found)
+				{
+					TextRender()->TextEx(&Cursor, pStart, -1);
+					break;
+				}
+				else
+				{
+					TextRender()->TextEx(&Cursor, pStart, info.index - i);
+					Cursor.m_X += Cursor.m_FontSize + (Cursor.m_EmojiX - Cursor.m_X);
+
+					if(Begin + Cursor.m_LineWidth < Cursor.m_X)
+					{
+						Cursor.m_X = Cursor.m_StartX;
+						Cursor.m_Y += Cursor.m_FontSize;
+						Cursor.m_LineCount++;
+					}
+
+					i = info.index + info.length;
+				}
+			}
+			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
 		}
 		y -= m_aLines[r].m_YOffset[OffsetType];
 
@@ -871,7 +901,6 @@ void CChat::OnRender()
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, Blend);
 
 		TextRender()->TextEx(&Cursor, aName, -1);
-
 		// render line
 		if (m_aLines[r].m_ClientID == -1) // system
 		{
@@ -900,10 +929,10 @@ void CChat::OnRender()
 		}
 
 		int Length = str_length(m_aLines[r].m_aText);
-		char aBuf[1024];
 
 		for (int i = 0; i < Length; )
 		{
+			//maybe replace with pointer and remove "Found"?
 			CEmojis::CEmojiInfo info;
 			bool Found = false;
 			for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++)
@@ -919,27 +948,20 @@ void CChat::OnRender()
 
 			if(!Found)
 			{
-				str_copy(aBuf, pStart, Length - i + 1);
-
-				TextRender()->TextEx(&Cursor, aBuf, -1);
-
-				//i = str_length(m_aLines[r].m_aText);
+				TextRender()->TextEx(&Cursor, pStart, -1);
 				break;
 			}
 			else
 			{
-				str_copy(aBuf, pStart, info.index - i + 1);
-
-				TextRender()->TextEx(&Cursor, aBuf, -1);
-
-				m_pClient->m_pEmojis->Render(info.m_ID, (Cursor.m_EmojiX) + 3, Cursor.m_Y + Cursor.m_FontSize-1, Cursor.m_FontSize, Cursor.m_FontSize);
-
+				TextRender()->TextEx(&Cursor, pStart, info.index - i);
+				m_pClient->m_pEmojis->Render(info.m_ID, (Cursor.m_EmojiX) + Cursor.m_FontSize/2, Cursor.m_Y + Cursor.m_FontSize-1, Cursor.m_FontSize, Cursor.m_FontSize);
 				Cursor.m_X += Cursor.m_FontSize + (Cursor.m_EmojiX - Cursor.m_X);
 
-				if(Cursor.m_LineWidth < Cursor.m_X + Cursor.m_FontSize)
+				if(Begin + Cursor.m_LineWidth < Cursor.m_X)
 				{
-					Cursor.m_X = 0; 
+					Cursor.m_X = Cursor.m_StartX;
 					Cursor.m_Y += Cursor.m_FontSize;
+					Cursor.m_LineCount++;
 				}
 
 				i = info.index + info.length;
