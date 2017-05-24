@@ -929,8 +929,6 @@ void CChat::OnRender()
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
 
-		int Length = str_length(m_aLines[r].m_aText);
-
 		for (int i = 0; i < Length; )
 		{
 			//maybe replace with pointer and remove "Found"?
