@@ -784,10 +784,9 @@ void CChat::OnRender()
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
 
-	int Length = str_length(m_aLines[r].m_aText);
-
 	for(int i = 0; i < MAX_LINES; i++)
 	{
+
 		int r = ((m_CurrentLine-i)+MAX_LINES)%MAX_LINES;
 		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_Show)
 			break;
@@ -805,6 +804,8 @@ void CChat::OnRender()
 		{
 			str_copy(aName, m_aLines[r].m_aName, sizeof(aName));
 		}
+
+		int Length = str_length(m_aLines[r].m_aText);
 
 		// get the y offset (calculate it if we haven't done that yet)
 		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
