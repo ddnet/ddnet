@@ -147,6 +147,7 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	pChr->m_Core.m_Hook = m_Hook;
 	pChr->m_Core.m_Collision = m_Collision;
 	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
+	pChr->m_Core.m_Jumped = m_Jumped;
 	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;
 	pChr->m_Core.m_Jumps = m_Jumps;
 	pChr->m_Core.m_HookPos = m_HookPos;
