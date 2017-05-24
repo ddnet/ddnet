@@ -546,7 +546,6 @@ void CPlayer::TryRespawn()
 
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
-	m_Paused = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
