@@ -603,6 +603,29 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		}
 		m_aLines[m_CurrentLine].m_Emojis.sort_range();
 
+		int Offset = 0;
+
+		for(int i = 0; i < Length; )
+		{
+			CEmojis::CEmojiInfo info;
+			bool Found = false;
+			for(int j = 0; j < m_aLines[m_CurrentLine].m_Emojis.size(); j++)
+			{
+				if(m_aLines[m_CurrentLine].m_Emojis[j].index >= i) {
+					Found = true;
+					info = m_aLines[m_CurrentLine].m_Emojis[j];
+					break;
+				}
+			}
+			int End = Found ? info.index : str_length(m_aLines[m_CurrentLine].m_aText);
+
+			str_copy(m_aLines[m_CurrentLine].m_aTextNoEmojis + Offset, m_aLines[m_CurrentLine].m_aText + i, End - i + 1);
+
+			Offset += End - i;
+			i = End;
+			if (Found) i += info.length;
+		}
+
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team >= 2?"whisper":(m_aLines[m_CurrentLine].m_Team?"teamchat":"chat"), aBuf, Highlighted);
@@ -785,10 +808,18 @@ void CChat::OnRender()
 		{
 			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
+			Cursor.m_X += Cursor.m_FontSize * m_aLines[r].m_Emojis.size();
+			Cursor.m_Y += ((int)Cursor.m_X/(int)LineWidth) * Cursor.m_FontSize;
+			Cursor.m_X = (int)Cursor.m_X % (int)LineWidth;
 			TextRender()->TextEx(&Cursor, "♥ ", -1);
 			TextRender()->TextEx(&Cursor, aName, -1);
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
-			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
+			TextRender()->TextEx(&Cursor, m_aLines[r].m_aTextNoEmojis, -1);
+			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize; // 0 + 6
+			//this stores float ↓             +=      (( 198.333   +            6      *        0                   )/      200     )* 6;
+			//m_aLines[r].m_YOffset[OffsetType] += (int)((Cursor.m_X + Cursor.m_FontSize * m_aLines[r].m_Emojis.size())/LineWidth) * Cursor.m_FontSize;
+			printf("offset:\n%f %f %d %f\n", Cursor.m_X, Cursor.m_Y, m_aLines[r].m_Emojis.size(), LineWidth);
+			printf("%f\n", m_aLines[r].m_YOffset[OffsetType]);/*+ 
+			((int)(Cursor.m_X + Cursor.m_FontSize * m_aLines[r].m_Emojis.size())/(int)LineWidth)*Cursor.m_FontSize*/;
 		}
 		y -= m_aLines[r].m_YOffset[OffsetType];
 
@@ -869,6 +900,7 @@ void CChat::OnRender()
 		}
 
 		int Length = str_length(m_aLines[r].m_aText);
+		char aBuf[1024];
 
 		for (int i = 0; i < Length; )
 		{
@@ -882,32 +914,28 @@ void CChat::OnRender()
 					break;
 				}
 			}
+
+			char *pStart = &m_aLines[r].m_aText[i];
+
 			if(!Found)
 			{
-				char *pStart = &m_aLines[r].m_aText[i];
-				char *pEnd = &m_aLines[r].m_aText[str_length(m_aLines[r].m_aText)];
-				char *pSubstr = (char *)mem_alloc(pEnd - pStart + 1, 1);
-				mem_zero(pSubstr, pEnd - pStart + 1);
+				str_copy(aBuf, pStart, Length - i + 1);
 
-				mem_copy(pSubstr, pStart, pEnd - pStart);
-				TextRender()->TextEx(&Cursor, pSubstr, -1);
-				mem_free(pSubstr);
+				TextRender()->TextEx(&Cursor, aBuf, -1);
 
-				i = str_length(m_aLines[r].m_aText);
+				//i = str_length(m_aLines[r].m_aText);
+				break;
 			}
 			else
 			{
-				char *pStart = &m_aLines[r].m_aText[i];
-				char *pEnd = &m_aLines[r].m_aText[info.index];
-				char *pSubstr = (char *)mem_alloc(pEnd - pStart + 1, 1);
-				mem_zero(pSubstr, pEnd - pStart + 1);
+				str_copy(aBuf, pStart, info.index - i + 1);
 
-				mem_copy(pSubstr, pStart, pEnd - pStart);
-				TextRender()->TextEx(&Cursor, pSubstr, -1);
-				mem_free(pSubstr);
+				TextRender()->TextEx(&Cursor, aBuf, -1);
 
-				m_pClient->m_pEmojis->Render(info.m_ID, Cursor.m_X + Cursor.m_FontSize * 2 / 3, Cursor.m_Y + Cursor.m_FontSize * 2 / 3, Cursor.m_FontSize, Cursor.m_FontSize);
-				Cursor.m_X += Cursor.m_FontSize;
+				m_pClient->m_pEmojis->Render(info.m_ID, (Cursor.m_EmojiX) + 3, Cursor.m_Y + Cursor.m_FontSize-1, Cursor.m_FontSize, Cursor.m_FontSize);
+
+				Cursor.m_X += Cursor.m_FontSize + (Cursor.m_EmojiX - Cursor.m_X);
+
 				if(Cursor.m_LineWidth < Cursor.m_X + Cursor.m_FontSize)
 				{
 					Cursor.m_X = 0; 
