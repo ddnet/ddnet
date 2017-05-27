@@ -2917,6 +2917,7 @@ void CClient::Run()
 
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
+		thread_sleep(1); // beNice my friend...
 	}
 
 #if defined(CONF_FAMILY_UNIX)
