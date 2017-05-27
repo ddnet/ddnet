@@ -194,19 +194,20 @@ if gen_network_source:
 
 	lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
 	lines += ['\t"invalid",']
-	lines += ['\t"%s",' % o.name for o in network.Objects]
+	lines += ['\t"%s",' % o.name for o in network.Objects if o.ex is None]
 	lines += ['\t""', "};", ""]
 
 	lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
 	lines += ['\t0,']
-	lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects]
+	lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is None]
 	lines += ['\t0', "};", ""]
 
 
 	lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
 	lines += ['\t"invalid",']
 	for msg in network.Messages:
-		lines += ['\t"%s",' % msg.name]
+		if msg.ex is None:
+			lines += ['\t"%s",' % msg.name]
 	lines += ['\t""']
 	lines += ['};']
 	lines += ['']
