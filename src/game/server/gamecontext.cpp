@@ -3032,8 +3032,6 @@ void CGameContext::ResetTuning()
 
 bool CheckClientID2(int ClientID)
 {
-	dbg_assert(ClientID >= 0 || ClientID < MAX_CLIENTS,
-			"The Client ID is wrong");
 	if (ClientID < 0 || ClientID >= MAX_CLIENTS)
 		return false;
 	return true;
