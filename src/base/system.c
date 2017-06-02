@@ -136,6 +136,7 @@ void dbg_msg_thread(void *v)
 {
 	char str[1024*4];
 	int i;
+	int num;
 	while(1)
 	{
 		semaphore_wait(&log_queue.notempty);
@@ -156,7 +157,7 @@ void dbg_msg_thread(void *v)
 		if(!queue_empty(&log_queue) || log_queue.skipped > 0)
 			semaphore_signal(&log_queue.notempty);
 
-		int num = num_loggers;
+		num = num_loggers;
 		semaphore_signal(&log_queue.mutex);
 
 		for(i = 0; i < num; i++)
