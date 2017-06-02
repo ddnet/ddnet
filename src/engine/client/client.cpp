@@ -2915,9 +2915,9 @@ void CClient::Run()
 #ifdef CONF_DEBUG
 			g_Config.m_DbgStress ||
 #endif
-			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
+			(g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive()))
 		{
-			thread_sleep(max(1000000 * (LastTime + time_freq() / g_Config.m_ClRefreshRateInactive - Now) / time_freq(), (int64)0));
+			thread_sleep(g_Config.m_ClCpuThrottleInactive);
 		}
 		else if(g_Config.m_ClRefreshRate)
 		{
