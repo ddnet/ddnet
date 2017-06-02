@@ -287,10 +287,16 @@ static void logger_file(const char *line)
 
 void dbg_logger(DBG_LOGGER logger)
 {
-	semaphore_wait(&log_queue.mutex);
+#if !defined(CONF_PLATFORM_MACOSX)
+	if(dbg_msg_threaded)
+		semaphore_wait(&log_queue.mutex);
+#endif
 	loggers[num_loggers] = logger;
 	num_loggers++;
-	semaphore_signal(&log_queue.mutex);
+#if !defined(CONF_PLATFORM_MACOSX)
+	if(dbg_msg_threaded)
+		semaphore_signal(&log_queue.mutex);
+#endif
 }
 
 void dbg_logger_stdout() { dbg_logger(logger_stdout); }
