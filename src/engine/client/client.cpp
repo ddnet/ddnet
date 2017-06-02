@@ -2755,6 +2755,8 @@ void CClient::Run()
 	bool LastE = false;
 	bool LastG = false;
 
+	int64 LastTime = time_get();
+
 	while (1)
 	{
 		set_new_tick();
@@ -2908,15 +2910,20 @@ void CClient::Run()
 #endif
 
 		// beNice
+		int64 Now = time_get();
+		if(
 #ifdef CONF_DEBUG
-		if(g_Config.m_DbgStress)
-			thread_sleep(g_Config.m_ClCpuThrottleInactive);
+			g_Config.m_DbgStress ||
 #endif
-		if(g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive())
-			thread_sleep(g_Config.m_ClCpuThrottleInactive);
-		else if(g_Config.m_ClCpuThrottle)
-			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);
-			//thread_sleep(g_Config.m_ClCpuThrottle);
+			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
+		{
+			thread_sleep(max(1000000 * (LastTime + time_freq() / g_Config.m_ClRefreshRateInactive - Now) / time_freq(), (int64)0));
+		}
+		else if(g_Config.m_ClRefreshRate)
+		{
+			net_socket_read_wait(m_NetClient[0].m_Socket, max(1000000 * (LastTime + time_freq() / g_Config.m_ClRefreshRate - Now) / time_freq(), (int64)0));
+		}
+		LastTime = Now;
 
 		if(g_Config.m_DbgHitch)
 		{
