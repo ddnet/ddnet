@@ -435,7 +435,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	if(RconAuthed())
 		return;
 
-	str_copy(m_RconPassword, pPassword, sizeof(m_RconPassword));
+	if(pPassword != m_RconPassword)
+		str_copy(m_RconPassword, pPassword, sizeof(m_RconPassword));
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH);
 	Msg.AddString(pName, 32);
