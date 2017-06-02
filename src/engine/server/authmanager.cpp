@@ -92,7 +92,8 @@ int CAuthManager::FindKey(const char *pIdent)
 
 bool CAuthManager::CheckKey(int Slot, const char *pPw)
 {
-	dbg_assert(Slot >= 0 || Slot < m_aKeys.size(), "index out of bounds");
+	if(Slot < 0 || Slot >= m_aKeys.size())
+		return false;
 
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
@@ -108,25 +109,29 @@ bool CAuthManager::CheckKey(int Slot, const char *pPw)
 
 int CAuthManager::DefaultKey(int AuthLevel)
 {
-	dbg_assert(AuthLevel >= 0 || AuthLevel <= AUTHED_ADMIN, "auth level invalid");
+	if(AuthLevel < 0 || AuthLevel > AUTHED_ADMIN)
+		return 0;
 	return m_aDefault[AUTHED_ADMIN - AuthLevel];
 }
 
 int CAuthManager::KeyLevel(int Slot)
 {
-	dbg_assert(Slot >= 0 || Slot < m_aKeys.size(), "index out of bounds");
+	if(Slot < 0 || Slot >= m_aKeys.size())
+		return false;
 	return m_aKeys[Slot].m_Level;
 }
 
 const char *CAuthManager::KeyIdent(int Slot)
 {
-	dbg_assert(Slot >= 0 || Slot < m_aKeys.size(), "index out of bounds");
+	if(Slot < 0 || Slot >= m_aKeys.size())
+		return NULL;
 	return m_aKeys[Slot].m_aIdent;
 }
 
 void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
 {
-	dbg_assert(Slot >= 0 || Slot < m_aKeys.size(), "index out of bounds");
+	if(Slot < 0 || Slot >= m_aKeys.size())
+		return;
 
 	CKey *pKey = &m_aKeys[Slot];
 	mem_copy(pKey->m_aPw, pHash, MD5_BYTES);
@@ -136,7 +141,8 @@ void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const uns
 
 void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 {
-	dbg_assert(Slot >= 0 || Slot < m_aKeys.size(), "index out of bounds");
+	if(Slot < 0 || Slot >= m_aKeys.size())
+		return;
 
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
@@ -162,10 +168,13 @@ void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)
 
 void CAuthManager::AddDefaultKey(int Level, const char *pPw)
 {
-	dbg_assert(AUTHED_HELPER <= Level && Level <= AUTHED_ADMIN, "level out of range");
+	if(Level < AUTHED_HELPER || Level > AUTHED_ADMIN)
+		return;
+
 	static const char IDENTS[3][sizeof(HELPER_IDENT)] = {ADMIN_IDENT, MOD_IDENT, HELPER_IDENT};
 	int Index = AUTHED_ADMIN - Level;
-	dbg_assert(m_aDefault[Index] == -1, "trying to add an already existing default key");
+	if(m_aDefault[Index] >= 0)
+		return; // already exists
 	m_aDefault[Index] = AddKey(IDENTS[Index], pPw, Level);
 }
 
