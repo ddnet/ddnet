@@ -258,7 +258,7 @@ void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID,
 void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 {
 	CPlayerScore *pScore;
-	int Pos;
+	int Pos = -1;
 	char aBuf[512];
 
 	if (!Search)
