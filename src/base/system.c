@@ -92,11 +92,6 @@ static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
-void dbg_logger(DBG_LOGGER logger)
-{
-	loggers[num_loggers++] = logger;
-}
-
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
@@ -161,9 +156,10 @@ void dbg_msg_thread(void *v)
 		if(!queue_empty(&log_queue) || log_queue.skipped > 0)
 			semaphore_signal(&log_queue.notempty);
 
+		int num = num_loggers;
 		semaphore_signal(&log_queue.mutex);
 
-		for(i = 0; i < num_loggers; i++)
+		for(i = 0; i < num; i++)
 			loggers[i](str);
 	}
 }
@@ -286,6 +282,14 @@ static void logger_file(const char *line)
 	io_write(logfile, line, strlen(line));
 	io_write_newline(logfile);
 	io_flush(logfile);
+}
+
+void dbg_logger(DBG_LOGGER logger)
+{
+	semaphore_wait(&log_queue.mutex);
+	loggers[num_loggers] = logger;
+	num_loggers++;
+	semaphore_signal(&log_queue.mutex);
 }
 
 void dbg_logger_stdout() { dbg_logger(logger_stdout); }
