@@ -339,8 +339,10 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags)
 {
 	// don't waste memory on texture if we are stress testing
+#ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 		return m_InvalidTexture;
+#endif
 
 	// grab texture
 	int Tex = m_FirstFreeTexture;

@@ -532,8 +532,10 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 int CSound::LoadOpus(const char *pFilename)
 {
 	// don't waste memory on sound when we are stress testing
+#ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 		return -1;
+#endif
 
 	// no need to load sound when we are running with no sound
 	if(!m_SoundEnabled)
@@ -583,8 +585,10 @@ int CSound::LoadOpus(const char *pFilename)
 int CSound::LoadWV(const char *pFilename)
 {
 	// don't waste memory on sound when we are stress testing
+#ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 		return -1;
+#endif
 
 	// no need to load sound when we are running with no sound
 	if(!m_SoundEnabled)
@@ -633,8 +637,10 @@ int CSound::LoadWV(const char *pFilename)
 int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false)
 {
 	// don't waste memory on sound when we are stress testing
+#ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 		return -1;
+#endif
 
 	// no need to load sound when we are running with no sound
 	if(!m_SoundEnabled && !FromEditor)
@@ -656,8 +662,10 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEdito
 int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false)
 {
 	// don't waste memory on sound when we are stress testing
+#ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 		return -1;
+#endif
 
 	// no need to load sound when we are running with no sound
 	if(!m_SoundEnabled && !FromEditor)

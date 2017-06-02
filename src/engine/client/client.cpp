@@ -2487,6 +2487,7 @@ void CClient::Update()
 	}
 
 	// STRESS TEST: join the server again
+#ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 	{
 		static int64 ActionTaken = 0;
@@ -2510,6 +2511,7 @@ void CClient::Update()
 			}
 		}
 	}
+#endif
 
 	// pump the network
 	PumpNetwork();
@@ -2857,6 +2859,7 @@ void CClient::Run()
 
 				m_LastRenderTime = Now;
 
+#ifdef CONF_DEBUG
 				if(g_Config.m_DbgStress)
 				{
 					if((m_RenderFrames%10) == 0)
@@ -2872,6 +2875,7 @@ void CClient::Run()
 					}
 				}
 				else
+#endif
 				{
 					if(!m_EditorActive)
 						Render();
@@ -2904,7 +2908,11 @@ void CClient::Run()
 #endif
 
 		// beNice
-		if(g_Config.m_DbgStress || (g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive()))
+#ifdef CONF_DEBUG
+		if(g_Config.m_DbgStress)
+			thread_sleep(g_Config.m_ClCpuThrottleInactive);
+#endif
+		if(g_Config.m_ClCpuThrottleInactive && !m_pGraphics->WindowActive())
 			thread_sleep(g_Config.m_ClCpuThrottleInactive);
 		else if(g_Config.m_ClCpuThrottle)
 			net_socket_read_wait(m_NetClient[0].m_Socket, g_Config.m_ClCpuThrottle * 1000);
