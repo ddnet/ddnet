@@ -36,20 +36,18 @@ void CGameControllerDDRace::InitTeleporter()
 
 	for (int i = 0; i < Width * Height; i++)
 	{
-		if (GameServer()->Collision()->TeleLayer()[i].m_Number > 0)
+		int Number = GameServer()->Collision()->TeleLayer()[i].m_Number;
+		int Type = GameServer()->Collision()->TeleLayer()[i].m_Type;
+		if (Number > 0)
 		{
-			if (GameServer()->Collision()->TeleLayer()[i].m_Type
-					== TILE_TELEOUT)
+			if (Type == TILE_TELEOUT)
 			{
-				m_TeleOuts[GameServer()->Collision()->TeleLayer()[i].m_Number
-						- 1].push_back(
+				m_TeleOuts[Number - 1].push_back(
 						vec2(i % Width * 32 + 16, i / Width * 32 + 16));
 			}
-			else if (GameServer()->Collision()->TeleLayer()[i].m_Type
-					== TILE_TELECHECKOUT)
+			else if (Type == TILE_TELECHECKOUT)
 			{
-				m_TeleCheckOuts[GameServer()->Collision()->TeleLayer()[i].m_Number
-						- 1].push_back(
+				m_TeleCheckOuts[Number - 1].push_back(
 						vec2(i % Width * 32 + 16, i / Width * 32 + 16));
 			}
 		}
