@@ -237,7 +237,7 @@ int CControls::SnapInput(int *pData)
 	// rapid fire
 	if(m_pClient->m_pControls->m_RapidFire[g_Config.m_ClDummy])
 	{
-		if(time_get() > LastSendTime + time_freq() / (10 + rand() % 40))
+		if(time_get() > LastSendTime + time_freq() / (25 + rand() % 25))
 			m_InputData[g_Config.m_ClDummy].m_Fire = (m_InputData[g_Config.m_ClDummy].m_Fire + 1) & INPUT_STATE_MASK;
 	}
 	else
