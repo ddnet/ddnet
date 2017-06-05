@@ -105,7 +105,6 @@ vec2 CProjectile::GetPos(float Time)
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
-
 void CProjectile::Tick()
 {
 	float Pt = (Server()->Tick()-m_StartTick-1)/(float)Server()->TickSpeed();
@@ -159,6 +158,39 @@ void CProjectile::Tick()
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
+
+		if (pOwnerChar && ColPos && pOwnerChar->m_Telegun && !GameLayerClipped(ColPos))
+		{
+			int MapIndex = GameServer()->Collision()->GetPureMapIndex(round_to_int(pTargetChr ? pTargetChr->m_Pos.x : ColPos.x),
+				round_to_int(pTargetChr ? pTargetChr->m_Pos.y : ColPos.y));
+			int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+			if (TileIndex != TILE_NOTELEGUN && TileFIndex != TILE_NOTELEGUN)
+			{
+				bool found;
+				vec2 PossiblePos;
+				if (pTargetChr)
+				{
+					found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
+				}
+				else
+				{
+					found = GetNearestAirPos(ColPos, &PossiblePos);
+				}
+
+				if (found && PossiblePos)
+				{
+					GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
+						(m_Owner != -1) ? TeamMask : -1LL);
+					pOwnerChar->Core()->m_Pos = PossiblePos;
+					pOwnerChar->Core()->m_Vel = vec2(0, 0);
+					GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
+					GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
+				}
+			}
+		}
+
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = Server()->Tick();
