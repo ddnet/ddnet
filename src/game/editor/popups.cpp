@@ -14,28 +14,37 @@
 
 
 // popup menu handling
+
+enum
+{
+	POPUPFLAGS_MENU=0x1,		//Display rounded corners
+	POPUPFLAGS_INVALID=0x2,		//Closed popup. This is needed when a popup is closed in the middle of the list
+	MAX_NUM_POPUPS=8
+};
+
 static struct
 {
 	CUIRect m_Rect;
 	void *m_pId;
 	int (*m_pfnFunc)(CEditor *pEditor, CUIRect Rect);
-	int m_IsMenu;
+	int m_Flags;
 	void *m_pExtra;
-} s_UiPopups[8];
+} s_UiPopups[MAX_NUM_POPUPS];
 
 static int g_UiNumPopups = 0;
 
 void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Width, float Height, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra)
 {
-	if(g_UiNumPopups > 7)
+	if(g_UiNumPopups > MAX_NUM_POPUPS-1)
 		return;
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "invoked");
+	
 	if(x + Width > UI()->Screen()->w)
 		x -= Width;
 	if(y + Height > UI()->Screen()->h)
 		y -= Height;
 	s_UiPopups[g_UiNumPopups].m_pId = pID;
-	s_UiPopups[g_UiNumPopups].m_IsMenu = Flags;
+	s_UiPopups[g_UiNumPopups].m_Flags = Flags;
 	s_UiPopups[g_UiNumPopups].m_Rect.x = x;
 	s_UiPopups[g_UiNumPopups].m_Rect.y = y;
 	s_UiPopups[g_UiNumPopups].m_Rect.w = Width;
@@ -49,6 +58,9 @@ void CEditor::UiDoPopupMenu()
 {
 	for(int i = 0; i < g_UiNumPopups; i++)
 	{
+		if(s_UiPopups[i].m_Flags&POPUPFLAGS_INVALID)
+			continue;
+		
 		bool Inside = UI()->MouseInside(&s_UiPopups[i].m_Rect);
 		UI()->SetHotItem(&s_UiPopups[i].m_pId);
 
@@ -58,7 +70,7 @@ void CEditor::UiDoPopupMenu()
 			{
 				if(!Inside)
 				{
-					g_UiNumPopups--;
+					s_UiPopups[i].m_Flags = POPUPFLAGS_INVALID;
 					m_PopupEventWasActivated = false;
 				}
 				UI()->SetActiveItem(0);
@@ -71,7 +83,7 @@ void CEditor::UiDoPopupMenu()
 		}
 
 		int Corners = CUI::CORNER_ALL;
-		if(s_UiPopups[i].m_IsMenu)
+		if(s_UiPopups[i].m_Flags&POPUPFLAGS_MENU)
 			Corners = CUI::CORNER_R|CUI::CORNER_B;
 
 		CUIRect r = s_UiPopups[i].m_Rect;
@@ -84,7 +96,7 @@ void CEditor::UiDoPopupMenu()
 		{
 			m_LockMouse = false;
 			UI()->SetActiveItem(0);
-			g_UiNumPopups--;
+			s_UiPopups[i].m_Flags = POPUPFLAGS_INVALID;
 			m_PopupEventWasActivated = false;
 		}
 
@@ -92,9 +104,18 @@ void CEditor::UiDoPopupMenu()
 		{
 			m_LockMouse = false;
 			UI()->SetActiveItem(0);
-			g_UiNumPopups--;
+			s_UiPopups[i].m_Flags = POPUPFLAGS_INVALID;
 			m_PopupEventWasActivated = false;
 		}
+	}
+	
+	//Remove invalid popups at the end of the list
+	for(int i=g_UiNumPopups-1; i>=0; i--)
+	{
+		if(s_UiPopups[i].m_Flags&POPUPFLAGS_INVALID)
+			g_UiNumPopups--;
+		else
+			break;
 	}
 }
 
@@ -962,7 +983,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View)
 	// title
 	View.HSplitTop(10.0f, 0, &View);
 	View.HSplitTop(30.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Map details", 20.0f, 0);
+	pEditor->UI()->DoLabel(&Label, "Map metadata", 20.0f, 0);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
