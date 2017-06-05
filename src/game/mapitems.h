@@ -184,6 +184,11 @@ enum
 	TILESLAYERFLAG_TUNE=32,
 
 	ENTITY_OFFSET=255-16*4,
+	
+	ENVTYPE_UNKNOWN=-1,
+	ENVTYPE_POSITION=0,
+	ENVTYPE_COLOR,
+	ENVTYPE_SOUND,
 };
 
 struct CPoint
@@ -337,10 +342,20 @@ struct CMapItemEnvelope_v1
 	int m_aName[8];
 } ;
 
-struct CMapItemEnvelope : public CMapItemEnvelope_v1
+struct CMapItemEnvelope_v2 : public CMapItemEnvelope_v1
 {
-	enum { CURRENT_VERSION=2 };
+	enum { VERSION_WITH_SYNC=2 };
 	int m_Synchronized;
+};
+
+struct CMapItemEnvelope : public CMapItemEnvelope_v2
+{
+	enum
+	{
+		CURRENT_VERSION=3,
+		VERSION_WITH_SCALING=3,
+	};
+	int m_Type;
 };
 
 struct CSoundShape

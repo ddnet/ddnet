@@ -1307,6 +1307,14 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
 }
 
+static void RotateAndScale(const CPoint *pCenter, CPoint *pPoint, float Rotation, float Scale)
+{
+	float x = (pPoint->x - pCenter->x)*Scale;
+	float y = (pPoint->y - pCenter->y)*Scale;
+	pPoint->x = (int)(x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
+	pPoint->y = (int)(x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
+}
+
 void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 {
 	enum
@@ -1916,6 +1924,7 @@ void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, int TexID)
 			float OffsetX =  fx2f(apEnvelope[j]->m_lPoints[i].m_aValues[0]);
 			float OffsetY = fx2f(apEnvelope[j]->m_lPoints[i].m_aValues[1]);
 			float Rot = fx2f(apEnvelope[j]->m_lPoints[i].m_aValues[2])/360.0f*pi*2;
+			float Scale = fx2f(apEnvelope[j]->m_lPoints[i].m_aValues[3]);
 
 			//Set Colours
 			float Alpha = (m_SelectedQuadEnvelope == lQuads[j].m_PosEnv && m_SelectedEnvelopePoint == i) ? 0.65f : 0.35f;
@@ -1925,7 +1934,7 @@ void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, int TexID)
 				IGraphics::CColorVertex(2, lQuads[j].m_aColors[2].r, lQuads[j].m_aColors[2].g, lQuads[j].m_aColors[2].b, Alpha),
 				IGraphics::CColorVertex(3, lQuads[j].m_aColors[3].r, lQuads[j].m_aColors[3].g, lQuads[j].m_aColors[3].b, Alpha)};
 			Graphics()->SetColorVertex(aArray, 4);
-
+			
 			//Rotation
 			if(Rot != 0)
 			{
@@ -1936,10 +1945,10 @@ void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, int TexID)
 				aRotated[3] = lQuads[j].m_aPoints[3];
 				pPoints = aRotated;
 
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[0], Rot);
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[1], Rot);
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[2], Rot);
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[3], Rot);
+				RotateAndScale(&lQuads[j].m_aPoints[4], &aRotated[0], Rot, Scale);
+				RotateAndScale(&lQuads[j].m_aPoints[4], &aRotated[1], Rot, Scale);
+				RotateAndScale(&lQuads[j].m_aPoints[4], &aRotated[2], Rot, Scale);
+				RotateAndScale(&lQuads[j].m_aPoints[4], &aRotated[3], Rot, Scale);
 			}
 
 			//Set Texture Coords
@@ -1952,10 +1961,10 @@ void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, int TexID)
 
 			//Set Quad Coords & Draw
 			IGraphics::CFreeformItem Freeform(
-				fx2f(pPoints[0].x)+OffsetX, fx2f(pPoints[0].y)+OffsetY,
-				fx2f(pPoints[1].x)+OffsetX, fx2f(pPoints[1].y)+OffsetY,
-				fx2f(pPoints[2].x)+OffsetX, fx2f(pPoints[2].y)+OffsetY,
-				fx2f(pPoints[3].x)+OffsetX, fx2f(pPoints[3].y)+OffsetY);
+				fx2f(pPoints[0].x) + OffsetX, fx2f(pPoints[0].y) + OffsetY,
+				fx2f(pPoints[1].x) + OffsetX, fx2f(pPoints[1].y) + OffsetY,
+				fx2f(pPoints[2].x) + OffsetX, fx2f(pPoints[2].y) + OffsetY,
+				fx2f(pPoints[3].x) + OffsetX, fx2f(pPoints[3].y) + OffsetY);
 			Graphics()->QuadsDrawFreeform(&Freeform, 1);
 		}
 	}
@@ -4294,7 +4303,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_Map.m_Modified = true;
 			m_Map.m_UndoModified++;
-			pNewEnv = m_Map.NewEnvelope(1);
+			pNewEnv = m_Map.NewEnvelope(ENVTYPE_SOUND);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
@@ -4304,7 +4313,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_Map.m_Modified = true;
 			m_Map.m_UndoModified++;
-			pNewEnv = m_Map.NewEnvelope(4);
+			pNewEnv = m_Map.NewEnvelope(ENVTYPE_COLOR);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
@@ -4314,7 +4323,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_Map.m_Modified = true;
 			m_Map.m_UndoModified++;
-			pNewEnv = m_Map.NewEnvelope(3);
+			pNewEnv = m_Map.NewEnvelope(ENVTYPE_POSITION);
 		}
 
 		// Delete button
@@ -4336,15 +4345,19 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(pNewEnv) // add the default points
 		{
-			if(pNewEnv->m_Channels == 4)
+			switch(pNewEnv->m_Type)
 			{
-				pNewEnv->AddPoint(0, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
-				pNewEnv->AddPoint(1000, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
-			}
-			else
-			{
-				pNewEnv->AddPoint(0, 0);
-				pNewEnv->AddPoint(1000, 0);
+				case ENVTYPE_COLOR:
+					pNewEnv->AddPoint(0, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
+					pNewEnv->AddPoint(1000, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
+					break;
+				case ENVTYPE_POSITION:
+					pNewEnv->AddPoint(0, 0, 0, 0, f2fx(1.0f));
+					pNewEnv->AddPoint(1000, 0, 0, 0, f2fx(1.0f));
+					break;
+				default:
+					pNewEnv->AddPoint(0, 0);
+					pNewEnv->AddPoint(1000, 0);
 			}
 		}
 
@@ -4393,7 +4406,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	}
 
 	bool ShowColorBar = false;
-	if(pEnvelope && pEnvelope->m_Channels == 4)
+	if(pEnvelope && pEnvelope->m_Type == ENVTYPE_COLOR)
 	{
 		ShowColorBar = true;
 		View.HSplitTop(20.0f, &ColorBar, &View);
@@ -4417,18 +4430,16 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 
-			static const char *s_paNames[4][4] = {
-				{"V", "", "", ""},
-				{"", "", "", ""},
-				{"X", "Y", "R", ""},
+			static const char *s_paNames[3][4] = {
+				{"X", "Y", "R", "S"},
 				{"R", "G", "B", "A"},
+				{"V", "", "", ""},
 			};
 
-			const char *paDescriptions[4][4] = {
-				{"Volume of the envelope", "", "", ""},
-				{"", "", "", ""},
-				{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", ""},
+			const char *paDescriptions[3][4] = {
+				{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", "Scale of the envelope"},
 				{"Red value of the envelope", "Green value of the envelope", "Blue value of the envelope", "Alpha value of the envelope"},
+				{"Volume of the envelope", "", "", ""},
 			};
 
 			static int s_aChannelButtons[4] = {0};
@@ -4442,7 +4453,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				/*if(i == 0) draw_func = draw_editor_button_l;
 				else if(i == envelope->channels-1) draw_func = draw_editor_button_r;
 				else draw_func = draw_editor_button_m;*/
-				if(DoButton_Env(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Channels-1][i], s_ActiveChannels&Bit, &Button, paDescriptions[pEnvelope->m_Channels-1][i], aColors[i]))
+				if(DoButton_Env(&s_aChannelButtons[i], s_paNames[pEnvelope->m_Type][i], s_ActiveChannels&Bit, &Button, paDescriptions[pEnvelope->m_Type][i], aColors[i]))
 					s_ActiveChannels ^= Bit;
 			}
 

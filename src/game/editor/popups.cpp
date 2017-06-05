@@ -592,7 +592,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		if(Step != 0)
 		{
 			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 3)
+				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Type == ENVTYPE_POSITION)
 				{
 					pQuad->m_PosEnv = Index;
 					break;
@@ -607,7 +607,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		if(Step != 0)
 		{
 			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 4)
+				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Type == ENVTYPE_COLOR)
 				{
 					pQuad->m_ColorEnv = Index;
 					break;
@@ -741,7 +741,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 		if(Step != 0)
 		{
 			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 1)
+				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Type == ENVTYPE_SOUND)
 				{
 					pSource->m_SoundEnv = Index;
 					break;

@@ -508,11 +508,31 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	{
 		CMapItemEnvelope Item;
 		Item.m_Version = CMapItemEnvelope::CURRENT_VERSION;
-		Item.m_Channels = m_lEnvelopes[e]->m_Channels;
 		Item.m_StartPoint = PointCount;
 		Item.m_NumPoints = m_lEnvelopes[e]->m_lPoints.size();
 		Item.m_Synchronized = m_lEnvelopes[e]->m_Synchronized;
 		StrToInts(Item.m_aName, sizeof(Item.m_aName)/sizeof(int), m_lEnvelopes[e]->m_aName);
+		
+		// v1 and v2 use the number of channels to find the type of envelope
+		// v3 use a new field "type" because both color and position envelopes use 4 channels
+		// to maintain the compatibility with previous versions, we
+		// - set a "type" field that only DDNet or client supporting v3 can read
+		// - fake the number of channels for vanilla or older clients
+		switch(m_lEnvelopes[e]->m_Type)
+		{
+			case ENVTYPE_POSITION:
+				Item.m_Channels = 3;
+				break;
+			case ENVTYPE_COLOR:
+				Item.m_Channels = 4;
+				break;
+			case ENVTYPE_SOUND:
+				Item.m_Channels = 1;
+				break;
+			default:
+				Item.m_Channels = 0;
+		}
+		Item.m_Type = m_lEnvelopes[e]->m_Type;
 
 		df.AddItem(MAPITEMTYPE_ENVELOPE, e, sizeof(Item), &Item);
 		PointCount += Item.m_NumPoints;
@@ -1187,13 +1207,43 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			for(int e = 0; e < Num; e++)
 			{
 				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start+e, 0, 0);
-				CEnvelope *pEnv = new CEnvelope(pItem->m_Channels);
+				
+				int Type;
+				if(pItem->m_Version < CMapItemEnvelope::VERSION_WITH_SCALING)
+				{
+					switch(pItem->m_Channels)
+					{
+						case 1:
+							Type = ENVTYPE_SOUND;
+							break;
+						case 3:
+							Type = ENVTYPE_POSITION;
+							break;
+						case 4:
+							Type = ENVTYPE_COLOR;
+							break;
+						default:
+							Type = ENVTYPE_UNKNOWN;
+					}
+				}
+				else
+					Type = pItem->m_Type;
+				
+				CEnvelope *pEnv = new CEnvelope(Type);
 				pEnv->m_lPoints.set_size(pItem->m_NumPoints);
 				mem_copy(pEnv->m_lPoints.base_ptr(), &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint)*pItem->m_NumPoints);
+				
+				// sanitize unset scaling values coming from the old format
+				if(pItem->m_Version < CMapItemEnvelope::VERSION_WITH_SCALING && Type == ENVTYPE_POSITION)
+				{
+					for(int p=0; p<pItem->m_NumPoints; p++)
+						pEnv->m_lPoints[p].m_aValues[3] = f2fx(1.0f);
+				}
+				
 				if(pItem->m_aName[0] != -1)	// compatibility with old maps
 					IntsToStr(pItem->m_aName, sizeof(pItem->m_aName)/sizeof(int), pEnv->m_aName);
 				m_lEnvelopes.add(pEnv);
-				if(pItem->m_Version >= 2)
+				if(pItem->m_Version >= CMapItemEnvelope::VERSION_WITH_SYNC)
 					pEnv->m_Synchronized = pItem->m_Synchronized;
 			}
 		}
