@@ -2791,7 +2791,7 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 	}
 }
 
-char *CServer::GetAnnouncementLine(char const *pFileName)
+const char *CServer::GetAnnouncementLine(char const *pFileName)
 {
 	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
@@ -2830,4 +2830,17 @@ char *CServer::GetAnnouncementLine(char const *pFileName)
 int* CServer::GetIdMap(int ClientID)
 {
 	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
+}
+
+bool CServer::SetTimedOut(int ClientID, int OrigID) {
+	if (!m_NetServer.SetTimedOut(ClientID, OrigID))
+	{
+		return false;
+	}
+	CGameContext *GameServer = (CGameContext *) m_pGameServer;
+	DelClientCallback(OrigID, "Timeout Protection used", this);
+	m_aClients[ClientID].m_Authed = IServer::AUTHED_NO;
+	if (GameServer->m_apPlayers[ClientID]->GetCharacter())
+		GameServer->SendTuningParams(ClientID, GameServer->m_apPlayers[ClientID]->GetCharacter()->m_TuneZone);
+	return true;
 }
