@@ -98,11 +98,6 @@ public:
 
 	enum
 	{
-		AUTHED_NO=0,
-		AUTHED_HELPER,
-		AUTHED_MOD,
-		AUTHED_ADMIN,
-
 		MAX_RCONCMD_SEND=16,
 	};
 
@@ -337,7 +332,7 @@ public:
 
 	void GetClientAddr(int ClientID, NETADDR *pAddr);
 	int m_aPrevStates[MAX_CLIENTS];
-	char *GetAnnouncementLine(char const *FileName);
+	const char *GetAnnouncementLine(char const *FileName);
 	unsigned m_AnnouncementLastLine;
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
@@ -351,6 +346,11 @@ public:
 	}
 
 	void AuthRemoveKey(int KeySlot);
+	bool ClientPrevIngame(int ClientID) { return m_aPrevStates[ClientID] == CClient::STATE_INGAME; };
+	const char *GetNetErrorString(int ClientID) { return m_NetServer.ErrorString(ClientID); };
+	void ResetNetErrorString(int ClientID) { m_NetServer.ResetErrorString(ClientID); };
+	bool SetTimedOut(int ClientID, int OrigID);
+	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
 };
 
 #endif

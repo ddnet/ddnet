@@ -6,7 +6,7 @@
 #include <game/generated/client_data.h>
 #include <engine/shared/config.h>
 
-#include <game/gamecore.h> // get_angle
+#include <game/extrainfo.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
 #include <game/client/render.h>

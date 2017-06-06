@@ -3,7 +3,6 @@
 
 #include "save.h"
 #include "teams.h"
-#include <engine/server/server.h>
 #include "./gamemodes/DDRace.h"
 #include <engine/shared/config.h>
 
