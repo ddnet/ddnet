@@ -539,6 +539,8 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		if (!pSelf->m_apPlayers[i]) continue;
 		if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pResult->GetString(0))) continue;
 		if (pSelf->Server()->SetTimedOut(i, pResult->m_ClientID)) {
+			if (pSelf->m_apPlayers[i]->GetCharacter())
+				pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
 			return;
 		}
 	}

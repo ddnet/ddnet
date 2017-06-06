@@ -3240,3 +3240,16 @@ void CGameContext::List(int ClientID, const char *pFilter)
 	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
 	SendChatTarget(ClientID, aBuf);
 }
+
+int CGameContext::GetClientVersion(int ClientID) {
+	return m_apPlayers[ClientID]
+		? m_apPlayers[ClientID]->m_ClientVersion
+		: 0;
+}
+
+void CGameContext::SetClientVersion(int ClientID, int Version) {
+	if (!m_apPlayers[ClientID]) {
+		return;
+	}
+	m_apPlayers[ClientID]->m_ClientVersion = Version;
+}

@@ -52,6 +52,7 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <game/extrainfo.h>
 #include <game/version.h>
 
 #include <mastersrv/mastersrv.h>

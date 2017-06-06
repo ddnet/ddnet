@@ -35,7 +35,7 @@
 #include <string.h>
 #include <vector>
 #include <engine/shared/linereader.h>
-#include <game/server/gamecontext.h>
+#include <game/extrainfo.h>
 
 #include "register.h"
 #include "server.h"
@@ -500,9 +500,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
-		CGameContext *GameServer = (CGameContext *) m_pGameServer;
-		if (GameServer->m_apPlayers[ClientID])
-			pInfo->m_ClientVersion = GameServer->m_apPlayers[ClientID]->m_ClientVersion;
+		pInfo->m_ClientVersion = GameServer()->GetClientVersion(ClientID);
 		return 1;
 	}
 	return 0;
@@ -1170,14 +1168,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
 			{
-				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				if (GameServer->m_apPlayers[ClientID] && GameServer->m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_OLD)
-					GameServer->m_apPlayers[ClientID]->m_ClientVersion = VERSION_DDNET_OLD;
+				int version = GameServer()->GetClientVersion(ClientID);
+				if (GameServer()->PlayerExists(ClientID) && version < VERSION_DDNET_OLD)
+					GameServer()->SetClientVersion(ClientID, VERSION_DDNET_OLD);
 			} else
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
-				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				if (GameServer->m_apPlayers[ClientID])
+				if (GameServer()->PlayerExists(ClientID))
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
@@ -2023,10 +2020,10 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 				if(CanSeeAddress)
 					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", aAuthStr);
+						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
 				else
 					str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d client=%d secure=%s %s", i,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
+						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
 			}
 			else
 			{
@@ -2068,10 +2065,10 @@ void CServer::ConDnsblStatus(IConsole::IResult *pResult, void *pUser)
 
 				if (CanSeeAddress)
 					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", aAuthStr);
+						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
 				else
 					str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d client=%d secure=%s %s", i,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
+						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
 			}
 			else
 			{
@@ -2837,10 +2834,7 @@ bool CServer::SetTimedOut(int ClientID, int OrigID) {
 	{
 		return false;
 	}
-	CGameContext *GameServer = (CGameContext *) m_pGameServer;
 	DelClientCallback(OrigID, "Timeout Protection used", this);
 	m_aClients[ClientID].m_Authed = IServer::AUTHED_NO;
-	if (GameServer->m_apPlayers[ClientID]->GetCharacter())
-		GameServer->SendTuningParams(ClientID, GameServer->m_apPlayers[ClientID]->GetCharacter()->m_TuneZone);
 	return true;
 }

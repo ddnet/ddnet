@@ -215,6 +215,9 @@ public:
 	// DDRace
 
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
+	virtual int GetClientVersion(int ClientID) = 0;
+	virtual void SetClientVersion(int ClientID, int Version) = 0;
+	virtual bool PlayerExists(int ClientID) = 0;
 };
 
 extern IGameServer *CreateGameServer();

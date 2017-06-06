@@ -20,6 +20,7 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <game/extrainfo.h>
 #include <game/localization.h>
 #include <game/version.h>
 #include "render.h"

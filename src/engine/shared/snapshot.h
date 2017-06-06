@@ -45,6 +45,7 @@ public:
 
 	int Crc();
 	void DebugDump();
+	static void RemoveExtraInfo(unsigned char *pData);
 };
 
 
