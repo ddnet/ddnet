@@ -174,7 +174,7 @@ void CSnapIDPool::FreeID(int ID)
 
 void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
 {
-	CNetBan::Init(pConsole, pStorage);
+	CNetBan::Init(pConsole, pStorage, pServer);
 
 	m_pServer = pServer;
 
