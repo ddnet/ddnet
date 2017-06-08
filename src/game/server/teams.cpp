@@ -594,7 +594,7 @@ void CGameTeams::OnFinish(CPlayer* Player)
 	}
 
 	int TTime = 0 - (int)Time;
-	if (Player->m_Score < TTime)
+	if (Player->m_Score < TTime || Player->m_Score == -9999)
 		Player->m_Score = TTime;
 
 }
