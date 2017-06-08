@@ -361,12 +361,12 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 	return false;
 }
 
-void CSqlScore::MapInfo(int ClientID, const char* MapName)
+void CSqlScore::MapInfo(int ClientID, const char* MapName, const char *pNick = "")
 {
 	CSqlMapData *Tmp = new CSqlMapData();
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_RequestedMap = MapName;
-	Tmp->m_Name = Server()->ClientName(ClientID);
+	Tmp->m_Name = pNick ? pNick : Server()->ClientName(ClientID);
 	str_copy(Tmp->m_aFuzzyMap, MapName, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));

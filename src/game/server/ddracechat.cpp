@@ -513,7 +513,12 @@ void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 #endif
 
 	if (pResult->NumArguments() > 0)
-		pSelf->Score()->MapInfo(pResult->m_ClientID, pResult->GetString(0));
+	{
+		if(pResult->NumArguments() > 1)
+			pSelf->Score()->MapInfo(pResult->m_ClientID, pResult->GetString(0), pResult->GetString(1));
+		else
+			pSelf->Score()->MapInfo(pResult->m_ClientID, pResult->GetString(0));
+	}
 	else
 		pSelf->Score()->MapInfo(pResult->m_ClientID, g_Config.m_SvMap);
 
