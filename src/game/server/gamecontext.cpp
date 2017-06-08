@@ -945,7 +945,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	if(m_VoteCloseTime)
 		SendVoteSet(ClientID);
 
-	m_apPlayers[ClientID]->m_Authed = Server()->IsAuthed(ClientID);
+	m_apPlayers[ClientID]->m_Authed = Server()->GetAuthedState(ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID)
