@@ -118,6 +118,9 @@ endif()
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
+elseif(TARGET_OS STREQUAL "mac")
+  set(PLATFORM_CLIENT_LIBS "-framework OpenGL" "-framework Cocoa" "-framework AGL" "-framework Carbon" "-framework NotificationCenter")
+  set(PLATFORM_SERVER_LIBS "-framework Carbon")
 else()
   set(PLATFORM_CLIENT_LIBS GL GLU X11)
   if(TARGET_OS STREQUAL "linux")
@@ -252,6 +255,15 @@ else()
   set(DEP_WEBSOCKETS)
 endif()
 
+if(TARGET_OS STREQUAL "mac")
+  file(GLOB DEP_OSX_SRC "src/osx/*.mm")
+  add_library(osx EXCLUDE_FROM_ALL OBJECT ${DEP_OSX_SRC})
+  set(DEP_OSX $<TARGET_OBJECTS:osx>)
+  list(APPEND TARGETS_DEP osx)
+else()
+  set(DEP_OSX)
+endif()
+
 set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS} ${DEP_ZLIB})
 
 # Libraries
@@ -275,7 +287,7 @@ if(CLIENT)
   set(GAME_GENERATED_CLIENT "src/game/generated/client_data.cpp" "src/game/generated/client_data.h")
   set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
-  set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
+  set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV} ${DEP_OSX})
 
   # Libraries
   set(LIBS_CLIENT
@@ -337,7 +349,7 @@ else()
 endif()
 
 # Libraries
-set(LIBS_SERVER ${LIBS} ${MYSQL_LIBRARIES})
+set(LIBS_SERVER ${LIBS} ${MYSQL_LIBRARIES} ${PLATFORM_SERVER_LIBS})
 
 # Target
 set(TARGET_SERVER ${SERVER_EXECUTABLE})
