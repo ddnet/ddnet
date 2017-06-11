@@ -37,6 +37,42 @@ bool IsValidFrontTile(int Index)
 	);
 }
 
+bool IsValidTeleTile(int Index)
+{
+	return (
+		    Index == TILE_TELEINEVIL
+		||  Index == TILE_TELEINWEAPON
+		||  Index == TILE_TELEINHOOK
+		||  Index == TILE_TELEIN
+		||  Index == TILE_TELEOUT
+		||  Index == TILE_TELECHECK
+		||  Index == TILE_TELECHECKOUT
+		||  Index == TILE_TELECHECKIN
+		||  Index == TILE_TELECHECKINEVIL
+	);
+}
+
+bool IsValidSpeedupTile(int Index)
+{
+	return Index == TILE_BOOST;
+}
+
+bool IsValidSwitchTile(int Index)
+{
+	return (
+		    Index == TILE_JUMP
+		||  Index == TILE_FREEZE
+		||  Index == TILE_DFREEZE
+		||  Index == TILE_DUNFREEZE
+		||  Index == TILE_HIT_START
+		||  Index == TILE_HIT_END
+		|| (Index >= TILE_SWITCHTIMEDOPEN && Index <= TILE_SWITCHCLOSE)
+		||  Index == TILE_PENALTY
+		||  Index == TILE_BONUS
+		||  IsValidEntity(Index)
+	);
+}
+
 bool IsValidEntity(int Index)
 {
 	Index -= ENTITY_OFFSET;

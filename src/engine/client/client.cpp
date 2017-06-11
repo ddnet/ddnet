@@ -2720,6 +2720,12 @@ void CClient::Run()
 	// init the editor
 	m_pEditor->Init();
 
+	// load and save a map to fix it
+	/*
+	m_pEditor->Load(arg, IStorage::TYPE_ALL);
+	m_pEditor->Save(arg);
+	return;
+	*/
 
 	// load data
 	if(!LoadData())

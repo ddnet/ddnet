@@ -1019,28 +1019,78 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						DataFile.UnloadData(pTilemapItem->m_Data);
 
 						// Remove unused tiles on game and front layers
-						/*if(pTiles->m_Game)
+						/*
+						if(pTiles->m_Game)
 						{
 							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 							{
 								if(!IsValidGameTile(pTiles->m_pTiles[i].m_Index))
 								{
+									char aBuf[256];
+									str_format(aBuf, sizeof(aBuf), "game layer, tile %d", pTiles->m_pTiles[i].m_Index);
+									if (pTiles->m_pTiles[i].m_Index) m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 									pTiles->m_pTiles[i].m_Index = 0;
 									pTiles->m_pTiles[i].m_Flags = 0;
 								}
 							}
 						}
-						if(pTiles->m_Front)
+						else if(pTiles->m_Front)
 						{
 							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
 							{
 								if(!IsValidFrontTile(pTiles->m_pTiles[i].m_Index))
 								{
+									char aBuf[256];
+									str_format(aBuf, sizeof(aBuf), "front layer, tile %d", pTiles->m_pTiles[i].m_Index);
+									if (pTiles->m_pTiles[i].m_Index) m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 									pTiles->m_pTiles[i].m_Index = 0;
 									pTiles->m_pTiles[i].m_Flags = 0;
 								}
 							}
-						}*/
+						}
+						else if(pTiles->m_Tele)
+						{
+							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+							{
+								if(!IsValidTeleTile(pTiles->m_pTiles[i].m_Index))
+								{
+									char aBuf[256];
+									str_format(aBuf, sizeof(aBuf), "tele layer, tile %d", pTiles->m_pTiles[i].m_Index);
+									if (pTiles->m_pTiles[i].m_Index) m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+									pTiles->m_pTiles[i].m_Index = 0;
+									pTiles->m_pTiles[i].m_Flags = 0;
+								}
+							}
+						}
+						else if(pTiles->m_Speedup)
+						{
+							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+							{
+								if(!IsValidSpeedupTile(pTiles->m_pTiles[i].m_Index))
+								{
+									char aBuf[256];
+									str_format(aBuf, sizeof(aBuf), "speedup layer, tile %d", pTiles->m_pTiles[i].m_Index);
+									if (pTiles->m_pTiles[i].m_Index) m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+									pTiles->m_pTiles[i].m_Index = 0;
+									pTiles->m_pTiles[i].m_Flags = 0;
+								}
+							}
+						}
+						else if(pTiles->m_Switch)
+						{
+							for(int i = 0; i < pTiles->m_Width*pTiles->m_Height; i++)
+							{
+								if(!IsValidSwitchTile(pTiles->m_pTiles[i].m_Index))
+								{
+									char aBuf[256];
+									str_format(aBuf, sizeof(aBuf), "switch layer, tile %d", pTiles->m_pTiles[i].m_Index);
+									if (pTiles->m_pTiles[i].m_Index) m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+									pTiles->m_pTiles[i].m_Index = 0;
+									pTiles->m_pTiles[i].m_Flags = 0;
+								}
+							}
+						}
+						*/
 
 						// Convert race stoppers to ddrace stoppers
 						/*if(pTiles->m_Game)
