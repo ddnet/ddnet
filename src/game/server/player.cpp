@@ -5,7 +5,6 @@
 #include "player.h"
 
 #include <engine/server.h>
-#include <engine/server/server.h>
 #include "gamecontext.h"
 #include <game/gamecore.h>
 #include <game/version.h>
@@ -181,12 +180,12 @@ void CPlayer::Tick()
 		}
 	}
 
-	if(((CServer *)Server())->m_NetServer.ErrorString(m_ClientID)[0])
+	if(Server()->GetNetErrorString(m_ClientID)[0])
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-		((CServer *)(Server()))->m_NetServer.ResetErrorString(m_ClientID);
+		Server()->ResetNetErrorString(m_ClientID);
 	}
 
 	if(!GameServer()->m_World.m_Paused)
@@ -618,8 +617,7 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 			}
 			else if(m_LastPlaytime < time_get()-time_freq()*g_Config.m_SvMaxAfkTime)
 			{
-				CServer* serv =	(CServer*)m_pGameServer->Server();
-				serv->Kick(m_ClientID,"Away from keyboard");
+				m_pGameServer->Server()->Kick(m_ClientID, "Away from keyboard");
 				return true;
 			}
 		}

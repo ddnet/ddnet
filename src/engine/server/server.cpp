@@ -35,7 +35,7 @@
 #include <string.h>
 #include <vector>
 #include <engine/shared/linereader.h>
-#include <game/server/gamecontext.h>
+#include <game/extrainfo.h>
 
 #include "register.h"
 #include "server.h"
@@ -486,7 +486,7 @@ void CServer::SetRconCID(int ClientID)
 	m_RconClientID = ClientID;
 }
 
-bool CServer::IsAuthed(int ClientID)
+int CServer::GetAuthedState(int ClientID)
 {
 	return m_aClients[ClientID].m_Authed;
 }
@@ -500,9 +500,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
-		CGameContext *GameServer = (CGameContext *) m_pGameServer;
-		if (GameServer->m_apPlayers[ClientID])
-			pInfo->m_ClientVersion = GameServer->m_apPlayers[ClientID]->m_ClientVersion;
+		pInfo->m_ClientVersion = GameServer()->GetClientVersion(ClientID);
 		return 1;
 	}
 	return 0;
@@ -1170,14 +1168,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
 			{
-				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				if (GameServer->m_apPlayers[ClientID] && GameServer->m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_OLD)
-					GameServer->m_apPlayers[ClientID]->m_ClientVersion = VERSION_DDNET_OLD;
+				int version = GameServer()->GetClientVersion(ClientID);
+				if (GameServer()->PlayerExists(ClientID) && version < VERSION_DDNET_OLD)
+					GameServer()->SetClientVersion(ClientID, VERSION_DDNET_OLD);
 			} else
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
-				CGameContext *GameServer = (CGameContext *) m_pGameServer;
-				if (GameServer->m_apPlayers[ClientID])
+				if (GameServer()->PlayerExists(ClientID))
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
@@ -1998,7 +1995,7 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 		((CServer *)pUser)->Kick(pResult->GetInteger(0), "Kicked by console");
 }
 
-void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
+void CServer::StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlacklistedOnly)
 {
 	char aBuf[1024];
 	char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -2008,7 +2005,10 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(
+			pThis->m_aClients[i].m_State != CClient::STATE_EMPTY
+			&& (!DnsblBlacklistedOnly || pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
+		)
 		{
 			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
@@ -2023,10 +2023,10 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 				if(CanSeeAddress)
 					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", aAuthStr);
+						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
 				else
 					str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d client=%d secure=%s %s", i,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
+						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
 			}
 			else
 			{
@@ -2035,55 +2035,19 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				else
 					str_format(aBuf, sizeof(aBuf), "id=%d connecting", i);
 			}
-				
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 		}
 	}
 }
 
+void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
+{
+	StatusImpl(pResult, pUser, false);
+}
+
 void CServer::ConDnsblStatus(IConsole::IResult *pResult, void *pUser)
 {
-	// dump blacklisted clients
-	char aBuf[1024];
-	char aAddrStr[NETADDR_MAXSTRSIZE];
-	CServer *pThis = static_cast<CServer *>(pUser);
-
-	bool CanSeeAddress = pThis->m_aClients[pResult->m_ClientID].m_Authed > CServer::AUTHED_MOD;
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY &&
-				pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
-		{
-			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
-			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
-			{
-				const char *pAuthStr = pThis->m_aClients[i].m_Authed == CServer::AUTHED_ADMIN ? "(Admin)" :
-										pThis->m_aClients[i].m_Authed == CServer::AUTHED_MOD ? "(Mod)" :
-										pThis->m_aClients[i].m_Authed == CServer::AUTHED_HELPER ? "(Helper)" : "";
-				char aAuthStr[128];
-				aAuthStr[0] = '\0';
-				if(pThis->m_aClients[i].m_AuthKey >= 0)
-					str_format(aAuthStr, sizeof(aAuthStr), "key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
-
-				if (CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes":"no", aAuthStr);
-				else
-					str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d client=%d secure=%s %s", i,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, ((CGameContext *)(pThis->GameServer()))->m_apPlayers[i]->m_ClientVersion, pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
-			}
-			else
-			{
-				if (CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
-				else
-					str_format(aBuf, sizeof(aBuf), "id=%d connecting", i);
-			}
-				
-			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
-		}
-	}
+	StatusImpl(pResult, pUser, true);
 }
 
 static int GetAuthLevel(const char *pLevel)
@@ -2791,7 +2755,7 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 	}
 }
 
-char *CServer::GetAnnouncementLine(char const *pFileName)
+const char *CServer::GetAnnouncementLine(char const *pFileName)
 {
 	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
@@ -2830,4 +2794,14 @@ char *CServer::GetAnnouncementLine(char const *pFileName)
 int* CServer::GetIdMap(int ClientID)
 {
 	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
+}
+
+bool CServer::SetTimedOut(int ClientID, int OrigID) {
+	if (!m_NetServer.SetTimedOut(ClientID, OrigID))
+	{
+		return false;
+	}
+	DelClientCallback(OrigID, "Timeout Protection used", this);
+	m_aClients[ClientID].m_Authed = IServer::AUTHED_NO;
+	return true;
 }

@@ -145,11 +145,16 @@ public:
 
 	enum
 	{
+		AUTHED_NO=0,
+		AUTHED_HELPER,
+		AUTHED_MOD,
+		AUTHED_ADMIN,
+
 		RCON_CID_SERV=-1,
 		RCON_CID_VOTE=-2,
 	};
 	virtual void SetRconCID(int ClientID) = 0;
-	virtual bool IsAuthed(int ClientID) = 0;
+	virtual int GetAuthedState(int ClientID) = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
 
 	virtual void DemoRecorder_HandleAutoStart() = 0;
@@ -167,6 +172,12 @@ public:
 	virtual int* GetIdMap(int ClientID) = 0;
 
 	virtual bool DnsblWhite(int ClientID) = 0;
+	virtual const char *GetAnnouncementLine(char const *FileName) = 0;
+	virtual bool ClientPrevIngame(int ClientID) = 0;
+	virtual const char *GetNetErrorString(int ClientID) = 0;
+	virtual void ResetNetErrorString(int ClientID) = 0;
+	virtual bool SetTimedOut(int ClientID, int OrigID) = 0;
+	virtual void SetTimeoutProtected(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface
@@ -204,6 +215,9 @@ public:
 	// DDRace
 
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
+	virtual int GetClientVersion(int ClientID) = 0;
+	virtual void SetClientVersion(int ClientID, int Version) = 0;
+	virtual bool PlayerExists(int ClientID) = 0;
 };
 
 extern IGameServer *CreateGameServer();
