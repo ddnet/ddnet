@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		dbg_msg("usage", "%s <map> <destination folder>", argv[0]);
+		dbg_msg("usage", "%s map [directory]", argv[0]);
 		return -1;
 	}
 
