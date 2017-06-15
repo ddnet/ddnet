@@ -1884,7 +1884,7 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
 				m_Core.m_Vel = vec2(0,0);
 
-				if(!g_Config.m_SvCheckTeleportHoldHook)
+				if(!g_Config.m_SvTeleportHoldHook)
 				{
 					m_Core.m_HookedPlayer = -1;
 					m_Core.m_HookState = HOOK_RETRACTED;
@@ -1903,7 +1903,7 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_Pos = SpawnPos;
 			m_Core.m_Vel = vec2(0,0);
 
-			if(!g_Config.m_SvCheckTeleportHoldHook)
+			if(!g_Config.m_SvTeleportHoldHook)
 			{
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
@@ -1926,7 +1926,7 @@ void CCharacter::HandleTiles(int Index)
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
 
-				if(!g_Config.m_SvCheckTeleportHoldHook)
+				if(!g_Config.m_SvTeleportHoldHook)
 				{
 					m_Core.m_HookedPlayer = -1;
 					m_Core.m_HookState = HOOK_RETRACTED;
@@ -1943,7 +1943,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			m_Core.m_Pos = SpawnPos;
 
-			if(!g_Config.m_SvCheckTeleportHoldHook)
+			if(!g_Config.m_SvTeleportHoldHook)
 			{
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
