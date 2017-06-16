@@ -280,7 +280,7 @@ public:
 			BufferSize = sizeof(aBuffer);
 		}
 
-		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_comp(pFilename, ".."))
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || !str_comp(pFilename, ".."))
 		{
 			// don't escape base directory
 		}
