@@ -12,6 +12,13 @@ Mysql = {
 				option.use_mysqlconfig = true
 			end
 
+			if platform == "linux" then
+				-- Bundled libs are totally broken on lots of systems, new builds are not better, so let's just force the system ones
+				if option.use_mysqlconfig == nil then
+					option.use_mysqlconfig = true
+				end
+			end
+
 			if ExecuteSilent("mysql_config --version") == 0 then
 				option.value = true
 				if option.use_mysqlconfig == nil then
