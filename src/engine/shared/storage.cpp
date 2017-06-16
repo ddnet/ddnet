@@ -280,7 +280,11 @@ public:
 			BufferSize = sizeof(aBuffer);
 		}
 
-		if(Flags&IOFLAG_WRITE)
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_comp(pFilename, ".."))
+		{
+			// don't escape base directory
+		}
+		else if(Flags&IOFLAG_WRITE)
 		{
 			return io_open(GetPath(TYPE_SAVE, pFilename, pBuffer, BufferSize), Flags);
 		}
