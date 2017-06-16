@@ -31,7 +31,7 @@ $ unzip ddnet-sql.zip
 $ yaourt -S mariadb mysql-connector-c++
 $ mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 $ systemctl start mariadb
-$ /usr/bin/mysqladmin -u root password 'PW'
+$ mysqladmin -u root password 'PW'
 $ mysql -u root -p'PW'
 MariaDB [(none)]> create database teeworlds; create user 'teeworlds'@'localhost' identified by 'PW2'; grant all privileges on teeworlds.* to 'teeworlds'@'localhost'; flush privileges;
 # this takes a while, you can remove the KEYs in record_race.sql to trade performance in queries
