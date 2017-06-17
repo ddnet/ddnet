@@ -3,6 +3,7 @@
 #include <base/system.h>
 #include <engine/storage.h>
 #include "linereader.h"
+#include <string.h>
 
 // compiled-in data-dir path
 #define DATA_DIR "data"
@@ -280,7 +281,7 @@ public:
 			BufferSize = sizeof(aBuffer);
 		}
 
-		if(pFilename[0] == '/' || pFilename[0] == '\\' || (pFilename[0] == '.' && pFilename[1] == '.' && (pFilename[2] == '/' || pFilename[2] == '\\')))
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || strstr(pFilename, "../") != NULL || strstr(pFilename, "..\\") != NULL)
 		{
 			// don't escape base directory
 		}
