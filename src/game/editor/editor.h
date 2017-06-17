@@ -751,8 +751,8 @@ public:
 		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 
 	void Reset(bool CreateDefault=true);
-	int Save(const char *pFilename);
-	int Load(const char *pFilename, int StorageType);
+	virtual int Save(const char *pFilename);
+	virtual int Load(const char *pFilename, int StorageType);
 	int Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
