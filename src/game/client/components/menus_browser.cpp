@@ -189,7 +189,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(m_aInputEvents[i].m_Flags&IInput::FLAG_PRESS)
 			{
 				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_SelectedIndex + 1;
-				if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_SelectedIndex - 1;
+				else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_SelectedIndex - 1;
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = max(m_SelectedIndex - 25, 0);
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = min(m_SelectedIndex + 25, NumServers - 1);
+				else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
+				else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = NumServers - 1;
 			}
 			if(NewIndex > -1 && NewIndex < NumServers)
 			{
