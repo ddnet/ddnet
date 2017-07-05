@@ -171,6 +171,7 @@ public:
 	bool m_NinjaJetpack;
 	bool m_Afk;
 	int m_KillMe;
+	bool m_HasFinishScore;
 
 	int m_ChatScore;
 

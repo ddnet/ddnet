@@ -236,7 +236,10 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 			pData->PlayerData(pData->m_ClientID)->m_BestTime = Time;
 			pData->PlayerData(pData->m_ClientID)->m_CurrentTime = Time;
 			if(pData->GameServer()->m_apPlayers[pData->m_ClientID])
+			{
 				pData->GameServer()->m_apPlayers[pData->m_ClientID]->m_Score = -Time;
+				pData->GameServer()->m_apPlayers[pData->m_ClientID]->m_HasFinishScore = true;
+			}
 
 			char aColumn[8];
 			if(g_Config.m_SvCheckpointSave)
