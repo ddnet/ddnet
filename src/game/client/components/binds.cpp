@@ -293,20 +293,18 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 	CBinds *pSelf = (CBinds *)pUserData;
 
 	char aBuffer[256];
-	char *pEnd = aBuffer+sizeof(aBuffer)-8;
+	char *pEnd = aBuffer+sizeof(aBuffer);
 	pConfig->WriteLine("unbindall");
 	for(int i = 0; i < KEY_LAST; i++)
 	{
 		if(!pSelf->m_apKeyBindings[i])
 			continue;
-		str_format(aBuffer, sizeof(aBuffer), "bind %s ", pSelf->Input()->KeyName(i));
+		str_format(aBuffer, sizeof(aBuffer), "bind %s \"", pSelf->Input()->KeyName(i));
 
 		// process the string. we need to escape some characters
 		char *pDst = aBuffer + str_length(aBuffer);
-		*pDst++ = '"';
 		str_escape(&pDst, pSelf->m_apKeyBindings[i], pEnd);
-		*pDst++ = '"';
-		*pDst++ = 0;
+		str_append(aBuffer, "\"", sizeof(aBuffer));
 
 		pConfig->WriteLine(aBuffer);
 	}
