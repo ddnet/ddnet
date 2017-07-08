@@ -2239,6 +2239,16 @@ void str_timestamp(char *buffer, int buffer_size)
 	str_timestamp_ex(time_data, buffer, buffer_size, "%Y-%m-%d_%H-%M-%S");
 }
 
+void str_escape(char **dst, const char *src, const char *end)
+{
+	while(*src && *dst < end)
+	{
+		if(*src == '"' || *src == '\\') // escape \ and "
+			*(*dst)++ = '\\';
+		*(*dst)++ = *src++;
+	}
+}
+
 int mem_comp(const void *a, const void *b, int size)
 {
 	return memcmp(a,b,size);

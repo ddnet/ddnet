@@ -28,12 +28,7 @@ class CConfig : public IConfig
 
 	void EscapeParam(char *pDst, const char *pSrc, int size)
 	{
-		for(int i = 0; *pSrc && i < size - 1; ++i)
-		{
-			if(*pSrc == '"' || *pSrc == '\\') // escape \ and "
-				*pDst++ = '\\';
-			*pDst++ = *pSrc++;
-		}
+		str_escape(&pDst, pSrc, pDst + size);
 		*pDst = 0;
 	}
 
