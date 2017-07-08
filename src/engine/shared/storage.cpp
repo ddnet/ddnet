@@ -280,7 +280,11 @@ public:
 			BufferSize = sizeof(aBuffer);
 		}
 
-		if(pFilename[0] == '/' || pFilename[0] == '\\' || (pFilename[0] == '.' && pFilename[1] == '.' && (pFilename[2] == '/' || pFilename[2] == '\\')))
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
+		#ifdef CONF_FAMILY_WINDOWS
+			|| (pFilename[0] && pFilename[1] == ':')
+		#endif
+		)
 		{
 			// don't escape base directory
 		}

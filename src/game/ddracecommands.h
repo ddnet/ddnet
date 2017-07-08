@@ -40,7 +40,7 @@ CONSOLE_COMMAND("showothers", "?i['0'|'1']", CFGFLAG_CHAT, ConShowOthers, this, 
 CONSOLE_COMMAND("showall", "?i['0'|'1']", CFGFLAG_CHAT, ConShowAll, this, "Whether to show players at any distance (off by default), optional i = 0 for off else for on")
 
 CONSOLE_COMMAND("list", "?s[filter]", CFGFLAG_CHAT, ConList, this, "List connected players with optional case-insensitive substring matching filter")
-CONSOLE_COMMAND("set_team_ddr", "v[id]", CFGFLAG_SERVER, ConSetDDRTeam, this, "Set ddrace team of a player")
+CONSOLE_COMMAND("set_team_ddr", "v[id] ?i[team]", CFGFLAG_SERVER, ConSetDDRTeam, this, "Set ddrace team of a player")
 
 CONSOLE_COMMAND("mute", "", CFGFLAG_SERVER, ConMute, this, "");
 CONSOLE_COMMAND("muteid", "v[id] i[seconds]", CFGFLAG_SERVER, ConMuteID, this, "");

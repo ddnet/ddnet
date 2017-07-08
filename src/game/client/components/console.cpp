@@ -4,6 +4,7 @@
 #include <base/tl/sorted_array.h>
 
 #include <math.h>
+#include <limits.h>
 
 #include <game/generated/client_data.h>
 
@@ -222,6 +223,14 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			--m_BacklogActPage;
 			if(m_BacklogActPage < 0)
 				m_BacklogActPage = 0;
+		}
+		else if(Event.m_Key == KEY_HOME)
+		{
+			m_BacklogActPage = INT_MAX;
+		}
+		else if(Event.m_Key == KEY_END)
+		{
+			m_BacklogActPage = 0;
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
 		{

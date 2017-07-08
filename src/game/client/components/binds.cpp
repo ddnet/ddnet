@@ -302,15 +302,9 @@ void CBinds::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 		str_format(aBuffer, sizeof(aBuffer), "bind %s ", pSelf->Input()->KeyName(i));
 
 		// process the string. we need to escape some characters
-		const char *pSrc = pSelf->m_apKeyBindings[i];
 		char *pDst = aBuffer + str_length(aBuffer);
 		*pDst++ = '"';
-		while(*pSrc && pDst < pEnd)
-		{
-			if(*pSrc == '"' || *pSrc == '\\') // escape \ and "
-				*pDst++ = '\\';
-			*pDst++ = *pSrc++;
-		}
+		str_escape(&pDst, pSelf->m_apKeyBindings[i], pEnd);
 		*pDst++ = '"';
 		*pDst++ = 0;
 
