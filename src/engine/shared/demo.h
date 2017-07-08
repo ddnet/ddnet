@@ -19,7 +19,7 @@ class CDemoRecorder : public IDemoRecorder
 	class CSnapshotDelta *m_pSnapshotDelta;
 	int m_NumTimelineMarkers;
 	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
-	bool m_DelayedMapData;
+	bool m_NoMapData;
 	unsigned int m_MapSize;
 	unsigned char *m_pMapData;
 
@@ -29,11 +29,11 @@ class CDemoRecorder : public IDemoRecorder
 	void WriteTickMarker(int Tick, int Keyframe);
 	void Write(int Type, const void *pData, int Size);
 public:
-	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData = false);
+	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize = 0, unsigned char *pMapData = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
-	int Stop(bool Finalize = false);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
+	int Stop();
 	void AddDemoMarker();
 
 	void RecordSnapshot(int Tick, const void *pData, int Size);

@@ -3224,7 +3224,6 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	io_read(SoundFile, pData, (unsigned) DataSize);
 	io_close(SoundFile);
 
-	//
 	CEditorSound *pSound = pEditor->m_Map.m_lSounds[pEditor->m_SelectedSound];
 	int External = pSound->m_External;
 

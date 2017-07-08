@@ -29,6 +29,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		aLines.add(pCopy);
 		TotalLength += Length;
 	}
+	io_close(File);
 
 	pSettings = (char *)mem_alloc(TotalLength, 1);
 	int Offset = 0;

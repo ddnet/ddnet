@@ -921,81 +921,80 @@ void CServerBrowser::LoadDDNet()
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 	IOHANDLE File = pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_ALL);
 
-	if(File)
+	if(!File)
+		return;
+
+	char aBuf[4096*4];
+	mem_zero(aBuf, sizeof(aBuf));
+
+	io_read(File, aBuf, sizeof(aBuf));
+	io_close(File);
+
+	// parse JSON
+	json_value *pCountries = json_parse(aBuf);
+
+	if (pCountries && pCountries->type == json_array)
 	{
-		char aBuf[4096*4];
-		mem_zero(aBuf, sizeof(aBuf));
-
-		io_read(File, aBuf, sizeof(aBuf));
-		io_close(File);
-
-
-		// parse JSON
-		json_value *pCountries = json_parse(aBuf);
-
-		if (pCountries && pCountries->type == json_array)
+		for (int i = 0; i < json_array_length(pCountries) && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
 		{
-			for (int i = 0; i < json_array_length(pCountries) && m_NumDDNetCountries < MAX_DDNET_COUNTRIES; i++)
+			// pSrv - { name, flagId, servers }
+			const json_value *pSrv = json_array_get(pCountries, i);
+			const json_value *pTypes = json_object_get(pSrv, "servers");
+			const json_value *pName = json_object_get(pSrv, "name");
+			const json_value *pFlagID = json_object_get(pSrv, "flagId");
+
+			if (pSrv->type != json_object || pTypes->type != json_object || pName->type != json_string || pFlagID->type != json_integer)
 			{
-				// pSrv - { name, flagId, servers }
-				const json_value *pSrv = json_array_get(pCountries, i);
-				const json_value *pTypes = json_object_get(pSrv, "servers");
-				const json_value *pName = json_object_get(pSrv, "name");
-				const json_value *pFlagID = json_object_get(pSrv, "flagId");
-
-				if (pSrv->type != json_object || pTypes->type != json_object || pName->type != json_string || pFlagID->type != json_integer)
-				{
-					dbg_msg("client_srvbrowse", "invalid attributes");
-					continue;
-				}
-
-				// build structure
-				CDDNetCountry *pCntr = &m_aDDNetCountries[m_NumDDNetCountries];
-
-				pCntr->Reset();
-
-				str_copy(pCntr->m_aName, json_string_get(pName), sizeof(pCntr->m_aName));
-				pCntr->m_FlagID = json_int_get(pFlagID);
-
-				// add country
-				for (unsigned int t = 0; t < pTypes->u.object.length; t++)
-				{
-					const char *pType = pTypes->u.object.values[t].name;
-					const json_value *pAddrs = pTypes->u.object.values[t].value;
-
-					// add type
-					if(json_array_length(pAddrs) > 0 && m_NumDDNetTypes < MAX_DDNET_TYPES)
-					{
-						int Pos;
-						for(Pos = 0; Pos < m_NumDDNetTypes; Pos++)
-						{
-							if(!str_comp(m_aDDNetTypes[Pos], pType))
-								break;
-						}
-						if(Pos == m_NumDDNetTypes)
-						{
-							str_copy(m_aDDNetTypes[m_NumDDNetTypes], pType, sizeof(m_aDDNetTypes[m_NumDDNetTypes]));
-							m_NumDDNetTypes++;
-						}
-					}
-
-					// add addresses
-					for (int g = 0; g < json_array_length(pAddrs); g++, pCntr->m_NumServers++)
-					{
-						const json_value *pAddr = json_array_get(pAddrs, g);
-						const char *pStr = json_string_get(pAddr);
-						net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
-						str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
-					}
-				}
-
-				m_NumDDNetCountries++;
+				dbg_msg("client_srvbrowse", "invalid attributes");
+				continue;
 			}
-		}
 
-		if (pCountries)
-			json_value_free(pCountries);
+			// build structure
+			CDDNetCountry *pCntr = &m_aDDNetCountries[m_NumDDNetCountries];
+
+			pCntr->Reset();
+
+			str_copy(pCntr->m_aName, json_string_get(pName), sizeof(pCntr->m_aName));
+			pCntr->m_FlagID = json_int_get(pFlagID);
+
+			// add country
+			for (unsigned int t = 0; t < pTypes->u.object.length; t++)
+			{
+				const char *pType = pTypes->u.object.values[t].name;
+				const json_value *pAddrs = pTypes->u.object.values[t].value;
+
+				// add type
+				if(json_array_length(pAddrs) > 0 && m_NumDDNetTypes < MAX_DDNET_TYPES)
+				{
+					int Pos;
+					for(Pos = 0; Pos < m_NumDDNetTypes; Pos++)
+					{
+						if(!str_comp(m_aDDNetTypes[Pos], pType))
+							break;
+					}
+					if(Pos == m_NumDDNetTypes)
+					{
+						str_copy(m_aDDNetTypes[m_NumDDNetTypes], pType, sizeof(m_aDDNetTypes[m_NumDDNetTypes]));
+						m_NumDDNetTypes++;
+					}
+				}
+
+				// add addresses
+				for (int g = 0; g < json_array_length(pAddrs); g++, pCntr->m_NumServers++)
+				{
+					const json_value *pAddr = json_array_get(pAddrs, g);
+					const char *pStr = json_string_get(pAddr);
+					net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
+					str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
+				}
+			}
+
+			m_NumDDNetCountries++;
+		}
 	}
+
+	if (pCountries)
+		json_value_free(pCountries);
 }
 
 bool CServerBrowser::IsRefreshing() const

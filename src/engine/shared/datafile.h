@@ -33,6 +33,7 @@ public:
 	void Unload();
 
 	unsigned Crc();
+	int MapSize();
 };
 
 // write access

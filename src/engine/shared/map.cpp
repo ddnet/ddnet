@@ -43,6 +43,11 @@ public:
 	{
 		return m_DataFile.Crc();
 	}
+
+	virtual int MapSize()
+	{
+		return m_DataFile.MapSize();
+	}
 };
 
 extern IEngineMap *CreateEngineMap() { return new CMap; }

@@ -157,41 +157,41 @@ void CUpdater::ParseUpdate()
 {
 	char aPath[512];
 	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(!File)
+		return;
+
+	char aBuf[4096*4];
+	mem_zero(aBuf, sizeof (aBuf));
+	io_read(File, aBuf, sizeof(aBuf));
+	io_close(File);
+
+	json_value *pVersions = json_parse(aBuf);
+
+	if(pVersions && pVersions->type == json_array)
 	{
-		char aBuf[4096*4];
-		mem_zero(aBuf, sizeof (aBuf));
-		io_read(File, aBuf, sizeof(aBuf));
-		io_close(File);
-
-		json_value *pVersions = json_parse(aBuf);
-
-		if(pVersions && pVersions->type == json_array)
+		for(int i = 0; i < json_array_length(pVersions); i++)
 		{
-			for(int i = 0; i < json_array_length(pVersions); i++)
+			const json_value *pTemp;
+			const json_value *pCurrent = json_array_get(pVersions, i);
+			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
 			{
-				const json_value *pTemp;
-				const json_value *pCurrent = json_array_get(pVersions, i);
-				if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
+				if(json_boolean_get(json_object_get(pCurrent, "client")))
+					m_ClientUpdate = true;
+				if(json_boolean_get(json_object_get(pCurrent, "server")))
+					m_ServerUpdate = true;
+				if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
 				{
-					if(json_boolean_get(json_object_get(pCurrent, "client")))
-						m_ClientUpdate = true;
-					if(json_boolean_get(json_object_get(pCurrent, "server")))
-						m_ServerUpdate = true;
-					if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
-					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
-					}
-					if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
-					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
-					}
+					for(int j = 0; j < json_array_length(pTemp); j++)
+						AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
 				}
-				else
-					break;
+				if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
+				{
+					for(int j = 0; j < json_array_length(pTemp); j++)
+						AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
+				}
 			}
+			else
+				break;
 		}
 	}
 }
