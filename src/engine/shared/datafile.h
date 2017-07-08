@@ -34,6 +34,7 @@ public:
 
 	unsigned Crc();
 	int MapSize();
+	IOHANDLE File();
 };
 
 // write access

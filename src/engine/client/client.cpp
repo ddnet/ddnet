@@ -3250,7 +3250,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		}
 		else
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
-		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), NULL);
+		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 	}
 }
 
@@ -3660,7 +3660,7 @@ const char* CClient::RaceRecordStart(const char *pFilename)
 	if(State() != STATE_ONLINE)
 		dbg_msg("demorec/record", "client is not online");
 	else
-		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), NULL);
+		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 
 	return m_aCurrentMap;
 }

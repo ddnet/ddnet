@@ -30,6 +30,7 @@ public:
 	virtual void Unload() = 0;
 	virtual unsigned Crc() = 0;
 	virtual int MapSize() = 0;
+	virtual IOHANDLE File() = 0;
 };
 
 extern IEngineMap *CreateEngineMap();

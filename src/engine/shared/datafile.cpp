@@ -443,6 +443,12 @@ int CDataFileReader::MapSize()
 	return m_pDataFile->m_Header.m_Size + 16;
 }
 
+IOHANDLE CDataFileReader::File()
+{
+	if(!m_pDataFile) return 0;
+	return m_pDataFile->m_File;
+}
+
 
 CDataFileWriter::CDataFileWriter()
 {

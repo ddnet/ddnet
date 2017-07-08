@@ -33,7 +33,7 @@ CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapDat
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	m_pfnFilter = pfnFilter;
 	m_pUser = pUser;
@@ -59,9 +59,12 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	m_pConsole = pConsole;
 
-	IOHANDLE MapFile = NULL;
+	bool CloseMapFile = false;
 
-	if(!pMapData)
+	if(MapFile)
+		io_seek(MapFile, 0, IOSEEK_START);
+
+	if(!pMapData && !MapFile)
 	{
 		// open mapfile
 		char aMapFilename[128];
@@ -89,6 +92,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
 			return -1;
 		}
+
+		CloseMapFile = true;
 	}
 
 	// write header
@@ -129,7 +134,10 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 				break;
 			io_write(DemoFile, &aChunk, Bytes);
 		}
-		io_close(MapFile);
+		if(CloseMapFile)
+			io_close(MapFile);
+		else
+			io_seek(MapFile, 0, IOSEEK_START);
 	}
 
 	m_LastKeyFrame = -1;
@@ -950,7 +958,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 		return;
 
 	const CDemoPlayer::CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
-	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client", 0, 0, pfnFilter, pUser) == -1)
+	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client", 0, 0, 0, pfnFilter, pUser) == -1)
 		return;
 
 

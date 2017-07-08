@@ -48,6 +48,11 @@ public:
 	{
 		return m_DataFile.MapSize();
 	}
+
+	virtual IOHANDLE File()
+	{
+		return m_DataFile.File();
+	}
 };
 
 extern IEngineMap *CreateEngineMap() { return new CMap; }
