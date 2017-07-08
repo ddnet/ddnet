@@ -43,10 +43,23 @@ CSqlServer::~CSqlServer()
 	}
 	catch (sql::SQLException &e)
 	{
-		dbg_msg("sql", "ERROR: No SQL connection");
+		dbg_msg("sql", "ERROR: No SQL connection: %s", e.what());
+	}
+	catch (const std::exception& ex)
+	{
+		dbg_msg("sql", "ERROR: No SQL connection: %s", ex.what());
+	}
+	catch (const std::string& ex)
+	{
+		dbg_msg("sql", "ERROR: No SQL connection: %s", ex.c_str());
+	}
+	catch (...)
+	{
+		dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 	}
 	UnLock();
 	lock_destroy(m_SqlLock);
+	m_SqlLock = 0;
 }
 
 bool CSqlServer::Connect()
@@ -59,16 +72,28 @@ bool CSqlServer::Connect()
 		{
 			// Connect to specific database
 			m_pConnection->setSchema(m_aDatabase);
+			return true;
 		}
 		catch (sql::SQLException &e)
 		{
 			dbg_msg("sql", "MySQL Error: %s", e.what());
-
-			dbg_msg("sql", "ERROR: SQL connection failed");
-			UnLock();
-			return false;
 		}
-		return true;
+		catch (const std::exception& ex)
+		{
+			dbg_msg("sql", "MySQL Error: %s", ex.what());
+		}
+		catch (const std::string& ex)
+		{
+			dbg_msg("sql", "MySQL Error: %s", ex.c_str());
+		}
+		catch (...)
+		{
+			dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
+		}
+
+		dbg_msg("sql", "ERROR: SQL connection failed");
+		UnLock();
+		return false;
 	}
 
 	try
@@ -110,47 +135,21 @@ bool CSqlServer::Connect()
 	catch (sql::SQLException &e)
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
-		dbg_msg("sql", "ERROR: sql connection failed");
-		UnLock();
-		return false;
 	}
 	catch (const std::exception& ex)
 	{
-		// ...
-		dbg_msg("sql", "1 %s",ex.what());
-
+		dbg_msg("sql", "MySQL Error: %s", ex.what());
 	}
 	catch (const std::string& ex)
 	{
-		// ...
-		dbg_msg("sql", "2 %s",ex.c_str());
-	}
-	catch( int )
-	{
-		dbg_msg("sql", "3 %s");
-	}
-	catch( float )
-	{
-		dbg_msg("sql", "4 %s");
-	}
-
-	catch( char[] )
-	{
-		dbg_msg("sql", "5 %s");
-	}
-
-	catch( char )
-	{
-		dbg_msg("sql", "6 %s");
+		dbg_msg("sql", "MySQL Error: %s", ex.c_str());
 	}
 	catch (...)
 	{
-		dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector, my advice compile server_debug and use it");
-
-		dbg_msg("sql", "ERROR: sql connection failed");
-		UnLock();
-		return false;
+		dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 	}
+
+	dbg_msg("sql", "ERROR: sql connection failed");
 	UnLock();
 	return false;
 }
