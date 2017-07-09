@@ -1137,6 +1137,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					bool InterpretSemicolons = !(pPlayer->m_PlayerFlags & PLAYERFLAG_CHATTING);
 					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, InterpretSemicolons);
+
+					// Do not preserve formap over lines
+					if(m_apPlayers[ClientID])
+						m_apPlayers[ClientID]->m_aForMap[0] = '\0';
+
 					// m_apPlayers[ClientID] can be NULL, if the player used a
 					// timeout code and replaced another client.
 					if(InterpretSemicolons && m_apPlayers[ClientID] && !m_apPlayers[ClientID]->m_SentSemicolonTip)

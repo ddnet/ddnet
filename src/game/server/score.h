@@ -51,11 +51,11 @@ public:
 
 	virtual void SaveTeamScore(int* ClientIDs, unsigned int Size, float Time) = 0;
 
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowRank(int ClientID, const char *pName, bool Search=false) = 0;
+	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, const char *pMap, void *pUserData, int Debut=1) = 0;
+	virtual void ShowRank(int ClientID, const char *pName, const char *pMap, bool Search=false) = 0;
 
-	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
-	virtual void ShowTeamRank(int ClientID, const char *pName, bool Search=false) = 0;
+	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID, const char *pMap, void *pUserData, int Debut=1) = 0;
+	virtual void ShowTeamRank(int ClientID, const char *pName, const char *pMap, bool Search=false) = 0;
 
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowPoints(int ClientID, const char *pName, bool Search=false) = 0;

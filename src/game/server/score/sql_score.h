@@ -17,7 +17,7 @@
 class CGameContextError : public std::runtime_error
 {
 public:
-	CGameContextError(const char* pMsg) : std::runtime_error(pMsg) {}
+	CGameContextError(const char *pMsg) : std::runtime_error(pMsg) {}
 };
 
 
@@ -36,9 +36,9 @@ struct CSqlData
 		return m_Instance == ms_Instance && ms_GameContextAvailable;
 	}
 
-	CGameContext* GameServer() const { return isGameContextVaild() ? ms_pGameServer : throw CGameContextError("[CSqlData]: GameServer() unavailable."); }
-	IServer* Server() const { return isGameContextVaild() ? ms_pServer : throw CGameContextError("[CSqlData]: Server() unavailable."); }
-	CPlayerData* PlayerData(int ID) const { return isGameContextVaild() ? &ms_pPlayerData[ID] : throw CGameContextError("[CSqlData]: PlayerData() unavailable."); }
+	CGameContext *GameServer() const { return isGameContextVaild() ? ms_pGameServer : throw CGameContextError("[CSqlData]: GameServer() unavailable."); }
+	IServer *Server() const { return isGameContextVaild() ? ms_pServer : throw CGameContextError("[CSqlData]: Server() unavailable."); }
+	CPlayerData *PlayerData(int ID) const { return isGameContextVaild() ? &ms_pPlayerData[ID] : throw CGameContextError("[CSqlData]: PlayerData() unavailable."); }
 
 	sqlstr::CSqlString<128> m_Map;
 
@@ -97,6 +97,7 @@ struct CSqlScoreData : CSqlData
 {
 	int m_ClientID;
 
+	sqlstr::CSqlString<128> m_RequestedMap;
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 
 	float m_Time;
@@ -141,29 +142,29 @@ class CSqlScore: public IScore
 
 	static void ExecSqlFunc(void *pUser);
 
-	static bool Init(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure);
+	static bool Init(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure);
 
 	char m_aMap[64];
 
 	static LOCK ms_FailureFileLock;
 
-	static bool CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
-	static bool LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool CheckBirthdayThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool MapInfoThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool MapVoteThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool LoadScoreThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool SaveScoreThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool SaveTeamScoreThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool ShowRankThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool ShowTop5Thread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool ShowTeamRankThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool ShowTeamTop5Thread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool ShowTimesThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool ShowPointsThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool ShowTopPointsThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool RandomMapThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool RandomUnfinishedMapThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool SaveTeamThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
+	static bool LoadTeamThread(CSqlServer *pSqlServer, const CSqlData *pGameData, bool HandleFailure = false);
 
 public:
 
@@ -172,26 +173,26 @@ public:
 
 	virtual void CheckBirthday(int ClientID);
 	virtual void LoadScore(int ClientID);
-	virtual void MapInfo(int ClientID, const char* MapName);
-	virtual void MapVote(int ClientID, const char* MapName);
+	virtual void MapInfo(int ClientID, const char *pMapName);
+	virtual void MapVote(int ClientID, const char *pMapName);
 	virtual void SaveScore(int ClientID, float Time,
 			float CpTime[NUM_CHECKPOINTS]);
-	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time);
-	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
-	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
-	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
+	virtual void SaveTeamScore(int *aClientIDs, unsigned int Size, float Time);
+	virtual void ShowRank(int ClientID, const char *pName, const char *pMap, bool Search = false);
+	virtual void ShowTeamRank(int ClientID, const char *pName, bool Search = false);
+	virtual void ShowTimes(int ClientID, const char *pName, int Debut = 1);
 	virtual void ShowTimes(int ClientID, int Debut = 1);
-	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
+	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, const char *pMap,
 			void *pUserData, int Debut = 1);
-	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID,
+	virtual void ShowTeamTop5(IConsole::IResult *pResult, int ClientID, const char *pMap,
 			void *pUserData, int Debut = 1);
-	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
+	virtual void ShowPoints(int ClientID, const char *pName, bool Search = false);
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
 	virtual void RandomMap(int ClientID, int stars);
 	virtual void RandomUnfinishedMap(int ClientID, int stars);
-	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
-	virtual void LoadTeam(const char* Code, int ClientID);
+	virtual void SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer);
+	virtual void LoadTeam(const char *pCode, int ClientID);
 
 	virtual void OnShutdown();
 };

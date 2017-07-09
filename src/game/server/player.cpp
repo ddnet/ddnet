@@ -68,6 +68,7 @@ void CPlayer::Reset()
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = false;
 	m_LastWhisperTo = -1;
+	m_aForMap[0] = '\0';
 	m_LastSetSpectatorMode = 0;
 	m_TimeoutCode[0] = '\0';
 

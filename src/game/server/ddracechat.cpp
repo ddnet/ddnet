@@ -348,10 +348,11 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0 && pResult->GetInteger(0) > 0)
-		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
+		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pSelf->m_apPlayers[pResult->m_ClientID]->m_aForMap,
+			pUserData, pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pSelf->m_apPlayers[pResult->m_ClientID]->m_aForMap,
+			pUserData);
 
 #if defined(CONF_SQL)
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
@@ -379,10 +380,10 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pResult->NumArguments() > 0 && pResult->GetInteger(0) > 0)
-		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData,
+		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pSelf->m_apPlayers[pResult->m_ClientID]->m_aForMap, pUserData,
 				pResult->GetInteger(0));
 	else
-		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData);
+		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pSelf->m_apPlayers[pResult->m_ClientID]->m_aForMap, pUserData);
 
 #if defined(CONF_SQL)
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
@@ -655,7 +656,7 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0),
+			pSelf->Score()->ShowTeamRank(pResult->m_ClientID, pResult->GetString(0), pPlayer->m_aForMap,
 					true);
 		else
 			pSelf->Console()->Print(
@@ -664,7 +665,7 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 					"Showing the team rank of other players is not allowed on this server.");
 	else
 		pSelf->Score()->ShowTeamRank(pResult->m_ClientID,
-				pSelf->Server()->ClientName(pResult->m_ClientID));
+				pSelf->Server()->ClientName(pResult->m_ClientID), pPlayer->m_aForMap);
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
@@ -690,7 +691,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments() > 0)
 		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0),
+			pSelf->Score()->ShowRank(pResult->m_ClientID, pResult->GetString(0), pPlayer->m_aForMap,
 					true);
 		else
 			pSelf->Console()->Print(
@@ -699,7 +700,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 					"Showing the rank of other players is not allowed on this server.");
 	else
 		pSelf->Score()->ShowRank(pResult->m_ClientID,
-				pSelf->Server()->ClientName(pResult->m_ClientID));
+				pSelf->Server()->ClientName(pResult->m_ClientID), pPlayer->m_aForMap);
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
@@ -1343,6 +1344,22 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 			//pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
+
+void CGameContext::ConForMap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(!pSelf->m_apPlayers[pResult->m_ClientID])
+		return;
+
+	if(pResult->NumArguments() > 0)
+		str_copy(pSelf->m_apPlayers[pResult->m_ClientID]->m_aForMap, pResult->GetString(1), sizeof(pSelf->m_apPlayers[pResult->m_ClientID]->m_aForMap));
+	else
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_aForMap[0] = '\0';
+}
+
 #if defined(CONF_SQL)
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {

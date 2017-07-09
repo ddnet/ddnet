@@ -79,6 +79,8 @@ public:
 	int m_LastWhisperTo;
 	int m_LastInvited;
 
+	char m_aForMap[128];
+
 	int m_SendVoteIndex;
 
 	// TODO: clean this up
@@ -142,7 +144,7 @@ public:
 		PAUSE_PAUSED,
 		PAUSE_SPEC
 	};
-	
+
 	enum
 	{
 		TIMERTYPE_GAMETIMER=0,
