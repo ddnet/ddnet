@@ -1241,6 +1241,19 @@ void CCharacter::HandleSkippableTiles(int Index)
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
 		return;
 	}
+	
+	// handle death-tiles and leaving gamelayer (PTUM version)
+	if((
+		GameServer()->Collision()->GetZoneValueAt(GameServer()->m_ZoneHandle_TeeWorlds, m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f) == TILE_DEATH ||
+		GameServer()->Collision()->GetZoneValueAt(GameServer()->m_ZoneHandle_TeeWorlds, m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f) == TILE_DEATH ||
+		GameServer()->Collision()->GetZoneValueAt(GameServer()->m_ZoneHandle_TeeWorlds, m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f) == TILE_DEATH ||
+		GameServer()->Collision()->GetZoneValueAt(GameServer()->m_ZoneHandle_TeeWorlds, m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f) == TILE_DEATH
+		) && !m_Super && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID()))
+	)
+	{
+		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		return;
+	}
 
 	if (GameLayerClipped(m_Pos))
 	{
@@ -1475,7 +1488,7 @@ void CCharacter::HandleTiles(int Index)
 		Freeze();
 	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 		UnFreeze();
-
+	
 	// deep freeze
 	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
 		m_DeepFreeze = true;
@@ -1955,6 +1968,23 @@ void CCharacter::HandleTiles(int Index)
 	}
 }
 
+void CCharacter::HandleZones()
+{
+	int FreezeIndex = GameServer()->Collision()->GetZoneValueAt(GameServer()->m_ZoneHandle_DDFreeze, m_Pos.x, m_Pos.y);
+	
+	// freeze
+	if(FreezeIndex == ZONE_DDFREEZE_FREEZE && !m_Super && !m_DeepFreeze)
+		Freeze();
+	else if(FreezeIndex == ZONE_DDFREEZE_UNFREEZE && !m_DeepFreeze)
+		UnFreeze();
+	
+	// deep freeze
+	if(FreezeIndex == ZONE_DDFREEZE_DEEP && !m_Super && !m_DeepFreeze)
+		m_DeepFreeze = true;
+	else if(FreezeIndex == ZONE_DDFREEZE_UNDEEP && !m_DeepFreeze)
+		m_DeepFreeze = false;
+}
+
 void CCharacter::HandleTuneLayer()
 {
 
@@ -2088,6 +2118,8 @@ void CCharacter::DDRacePostCoreTick()
 	{
 		HandleTiles(CurrentIndex);
 	}
+	
+	HandleZones();
 
 	HandleBroadcast();
 }

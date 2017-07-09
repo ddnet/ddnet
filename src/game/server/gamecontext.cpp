@@ -588,6 +588,8 @@ void CGameContext::OnTick()
 {
 	// check tuning
 	CheckPureTuning();
+	
+	m_Collision.SetTime(m_pController->GetTime());
 
 	// copy tuning
 	m_World.m_Core.m_Tuning[0] = m_Tuning;
@@ -2437,6 +2439,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 
+	m_ZoneHandle_TeeWorlds = m_Collision.GetZoneHandle("teeworlds");
+	m_ZoneHandle_DDFreeze = m_Collision.GetZoneHandle("ddFreeze");
+
 	// reset everything here
 	//world = new GAMEWORLD;
 	//players = new CPlayer[MAX_CLIENTS];
@@ -2582,6 +2587,36 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 				vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
 				//m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
 				m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
+			}
+			
+			// create all entities from PTUM entity layers
+			if(m_Layers.EntityGroup())
+			{
+				char aLayerName[12];
+				
+				const CMapItemGroup* pGroup = m_Layers.EntityGroup();
+				for(int l = 0; l < pGroup->m_NumLayers; l++)
+				{
+					CMapItemLayer *pLayer = m_Layers.GetLayer(pGroup->m_StartLayer+l);
+					if(pLayer->m_Type == LAYERTYPE_QUADS)
+					{
+						CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
+						
+						IntsToStr(pQLayer->m_aName, sizeof(aLayerName)/sizeof(int), aLayerName);
+						
+						const CQuad *pQuads = (const CQuad *) Kernel()->RequestInterface<IMap>()->GetDataSwapped(pQLayer->m_Data);
+
+						for(int q = 0; q < pQLayer->m_NumQuads; q++)
+						{
+							vec2 P0(fx2f(pQuads[q].m_aPoints[0].x), fx2f(pQuads[q].m_aPoints[0].y));
+							vec2 P1(fx2f(pQuads[q].m_aPoints[1].x), fx2f(pQuads[q].m_aPoints[1].y));
+							vec2 P2(fx2f(pQuads[q].m_aPoints[2].x), fx2f(pQuads[q].m_aPoints[2].y));
+							vec2 P3(fx2f(pQuads[q].m_aPoints[3].x), fx2f(pQuads[q].m_aPoints[3].y));
+							vec2 Pivot(fx2f(pQuads[q].m_aPoints[4].x), fx2f(pQuads[q].m_aPoints[4].y));
+							m_pController->OnEntity(aLayerName, Pivot, P0, P1, P2, P3, pQuads[q].m_PosEnv);
+						}
+					}
+				}
 			}
 
 			if(pFront)

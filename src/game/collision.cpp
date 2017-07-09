@@ -12,6 +12,9 @@
 #include <game/layers.h>
 #include <game/collision.h>
 
+#include <game/gamecore.h>
+#include <game/animation.h>
+
 #include <engine/shared/config.h>
 
 CCollision::CCollision()
@@ -28,6 +31,8 @@ CCollision::CCollision()
 	m_pDoor = 0;
 	m_pSwitchers = 0;
 	m_pTune = 0;
+	
+	m_Time = 0.0;
 }
 
 void CCollision::Init(class CLayers *pLayers)
@@ -1129,4 +1134,165 @@ int CCollision::IsFCheckpoint(int Index)
 	if(z >= 35 && z <= 59)
 		return z-35;
 	return -1;
+}
+
+int CCollision::GetZoneHandle(const char* pName)
+{
+	if(!m_pLayers->ZoneGroup())
+		return -1;
+	
+	int Handle = m_Zones.size();
+	m_Zones.add(array<int>());
+	
+	array<int>& LayerList = m_Zones[Handle];
+	
+	char aLayerName[12];
+	for(int l = 0; l < m_pLayers->ZoneGroup()->m_NumLayers; l++)
+	{
+		CMapItemLayer *pLayer = m_pLayers->GetLayer(m_pLayers->ZoneGroup()->m_StartLayer+l);
+		
+		if(pLayer->m_Type == LAYERTYPE_TILES)
+		{
+			CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
+			IntsToStr(pTLayer->m_aName, sizeof(aLayerName)/sizeof(int), aLayerName);
+			if(str_comp(pName, aLayerName) == 0)
+				LayerList.add(l);
+		}
+		else if(pLayer->m_Type == LAYERTYPE_QUADS)
+		{
+			CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
+			IntsToStr(pQLayer->m_aName, sizeof(aLayerName)/sizeof(int), aLayerName);
+			if(str_comp(pName, aLayerName) == 0)
+				LayerList.add(l);
+		}
+	}
+	
+	return Handle;
+}
+
+/* TEEUNIVERSE  BEGIN *************************************************/
+
+inline bool SameSide(const vec2& l0, const vec2& l1, const vec2& p0, const vec2& p1)
+{
+	vec2 l0l1 = l1-l0;
+	vec2 l0p0 = p0-l0;
+	vec2 l0p1 = p1-l0;
+	
+	return sign(l0l1.x*l0p0.y - l0l1.y*l0p0.x) == sign(l0l1.x*l0p1.y - l0l1.y*l0p1.x);
+}
+
+//t0, t1 and t2 are position of triangle vertices
+inline vec3 BarycentricCoordinates(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p)
+{
+    vec2 e0 = t1 - t0;
+    vec2 e1 = t2 - t0;
+    vec2 e2 = p - t0;
+    
+    float d00 = dot(e0, e0);
+    float d01 = dot(e0, e1);
+    float d11 = dot(e1, e1);
+    float d20 = dot(e2, e0);
+    float d21 = dot(e2, e1);
+    float denom = d00 * d11 - d01 * d01;
+    
+    vec3 bary;
+    bary.x = (d11 * d20 - d01 * d21) / denom;
+    bary.y = (d00 * d21 - d01 * d20) / denom;
+    bary.z = 1.0f - bary.x - bary.y;
+    
+    return bary;
+}
+
+//t0, t1 and t2 are position of triangle vertices
+inline bool InsideTriangle(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p)
+{
+    vec3 bary = BarycentricCoordinates(t0, t1, t2, p);
+    return (bary.x >= 0.0f && bary.y >= 0.0f && bary.x + bary.y < 1.0f);
+}
+
+//t0, t1 and t2 are position of quad vertices
+inline bool InsideQuad(const vec2& q0, const vec2& q1, const vec2& q2, const vec2& q3, const vec2& p)
+{
+	if(SameSide(q1, q2, p, q0))
+		return InsideTriangle(q0, q1, q2, p);
+	else
+		return InsideTriangle(q1, q2, q3, p);
+}
+
+/* TEEUNIVERSE END ****************************************************/
+
+static void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
+{
+	float x = pPoint->x - pCenter->x;
+	float y = pPoint->y - pCenter->y;
+	pPoint->x = (x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
+	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
+}
+
+int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y)
+{
+	if(!m_pLayers->ZoneGroup())
+		return 0;
+	
+	if(ZoneHandle < 0 || ZoneHandle >= m_Zones.size())
+		return 0;
+	
+	int Index = 0;
+	
+	for(int i = 0; i < m_Zones[ZoneHandle].size(); i++)
+	{
+		int l = m_Zones[ZoneHandle][i];
+		
+		CMapItemLayer *pLayer = m_pLayers->GetLayer(m_pLayers->ZoneGroup()->m_StartLayer+l);
+		if(pLayer->m_Type == LAYERTYPE_TILES)
+		{
+			CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
+			
+			CTile *pTiles = (CTile *) m_pLayers->Map()->GetData(pTLayer->m_Data);
+			
+			int Nx = clamp(round_to_int(x)/32, 0, pTLayer->m_Width-1);
+			int Ny = clamp(round_to_int(y)/32, 0, pTLayer->m_Height-1);
+			
+			int TileIndex = (pTiles[Ny*pTLayer->m_Width+Nx].m_Index > 128 ? 0 : pTiles[Ny*pTLayer->m_Width+Nx].m_Index);
+			if(TileIndex > 0)
+				Index = TileIndex;
+		}
+		else if(pLayer->m_Type == LAYERTYPE_QUADS)
+		{
+			CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
+			
+			const CQuad *pQuads = (const CQuad *) m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
+
+			for(int q = 0; q < pQLayer->m_NumQuads; q++)
+			{
+				vec2 Position(0.0f, 0.0f);
+				float Angle = 0.0f;
+				if(pQuads[q].m_PosEnv >= 0)
+				{
+					GetAnimationTransform(m_Time, pQuads[q].m_PosEnv, m_pLayers, Position, Angle);
+				}
+				
+				vec2 p0 = Position + vec2(fx2f(pQuads[q].m_aPoints[0].x), fx2f(pQuads[q].m_aPoints[0].y));
+				vec2 p1 = Position + vec2(fx2f(pQuads[q].m_aPoints[1].x), fx2f(pQuads[q].m_aPoints[1].y));
+				vec2 p2 = Position + vec2(fx2f(pQuads[q].m_aPoints[2].x), fx2f(pQuads[q].m_aPoints[2].y));
+				vec2 p3 = Position + vec2(fx2f(pQuads[q].m_aPoints[3].x), fx2f(pQuads[q].m_aPoints[3].y));
+				
+				if(Angle != 0)
+				{
+					vec2 center(fx2f(pQuads[q].m_aPoints[4].x), fx2f(pQuads[q].m_aPoints[4].y));
+					Rotate(&center, &p0, Angle);
+					Rotate(&center, &p1, Angle);
+					Rotate(&center, &p2, Angle);
+					Rotate(&center, &p3, Angle);
+				}
+				
+				if(InsideQuad(p0, p1, p2, p3, vec2(x, y)))
+				{
+					Index = pQuads[q].m_ColorEnvOffset;
+				}
+			}
+		}
+	}
+	
+	return Index;
 }

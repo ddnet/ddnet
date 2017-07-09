@@ -6,8 +6,8 @@
 
 #include <game/server/teams.h>
 
-CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
+CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number, vec2 Pivot, vec2 RelPos, int PosEnv)
+: CAnimatedEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, Pivot, RelPos, PosEnv)
 {
 	m_Type = Type;
 	m_Subtype = SubType;
@@ -31,6 +31,8 @@ void CPickup::Reset()
 
 void CPickup::Tick()
 {
+	CAnimatedEntity::Tick();
+	
 	Move();
 	/*// wait for respawn
 	if(m_SpawnTick > 0)
