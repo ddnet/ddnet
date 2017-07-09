@@ -4,7 +4,6 @@
 	// For FlashWindowEx, FLASHWINFO, FLASHW_TRAY
 	#define _WIN32_WINNT 0x0501
 	#define WINVER 0x0501
-	#include <ShellScalingAPI.h>
 #endif
 
 #include <base/detect.h>
@@ -604,7 +603,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	// set flags
-	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
 #if defined(SDL_VIDEO_DRIVER_X11)
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
@@ -619,21 +618,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		*pHeight = *pDesktopHeight;
 #else
 		SdlFlags |= SDL_WINDOW_FULLSCREEN;
-#endif
-	}
-
-	if(Flags&IGraphicsBackend::INITFLAG_HIGHDPI)
-	{
-		SdlFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
-#ifdef CONF_FAMILY_WINDOWS
-		SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
-#endif
-	}
-	else
-	{
-		SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
-#ifdef CONF_FAMILY_WINDOWS
-		SetProcessDpiAwareness(PROCESS_DPI_UNAWARE);
 #endif
 	}
 

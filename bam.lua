@@ -178,12 +178,13 @@ if family == "windows" then
 	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "other/mysql/vc2005libs/libmysql.dll"))
 
+	client_link_other = {ResCompile("other/manifest/DDNet.rc")}
 	if config.compiler.driver == "cl" then
-		client_link_other = {ResCompile("other/icons/teeworlds_cl.rc")}
-		server_link_other = {ResCompile("other/icons/teeworlds_srv_cl.rc")}
+		client_link_other = {ResCompile("other/icons/DDNet_cl.rc")}
+		server_link_other = {ResCompile("other/icons/DDNet_srv_cl.rc")}
 	elseif config.compiler.driver == "gcc" then
-		client_link_other = {ResCompile("other/icons/teeworlds_gcc.rc")}
-		server_link_other = {ResCompile("other/icons/teeworlds_srv_gcc.rc")}
+		client_link_other = {ResCompile("other/icons/DDNet_gcc.rc")}
+		server_link_other = {ResCompile("other/icons/DDNet_srv_gcc.rc")}
 	end
 end
 
