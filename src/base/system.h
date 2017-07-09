@@ -1425,7 +1425,7 @@ void shell_execute(const char *file);
 		0 - OS version same.
 		-1 - OS version lower.
 */
-int os_compare_version(int major, int minor);
+int os_compare_version(unsigned int major, unsigned int minor);
 
 /*
 	Function: generate_password

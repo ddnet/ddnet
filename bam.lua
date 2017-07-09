@@ -297,6 +297,12 @@ function build(settings)
 		settings.cc.includes:Add("src/engine/external/zlib")
 	end
 
+	external_settings = settings:Copy()
+	if config.compiler.driver == "cl" then
+		external_settings.cc.flags:Add("/w")
+	else
+		external_settings.cc.flags:Add("-w")
+	end
 	-- build the small libraries
 	wavpack = Compile(external_settings, Collect("src/engine/external/wavpack/*.c"))
 	pnglite = Compile(external_settings, Collect("src/engine/external/pnglite/*.c"))
