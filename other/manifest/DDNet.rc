@@ -1,2 +1,2 @@
 #include "winuser.h"
-2 RT_MANIFEST DDNet.manifest
+2 RT_MANIFEST "DDNet.exe.manifest"
