@@ -2,10 +2,6 @@
 # Created By : OneShadow
 ##### translated strings #####
 
-%d%% loaded
-== %d%% ﯼﺭﺍﺰﮔﺭﺎﺑ
-
-
 %ds left
 == %ds ﭗﭼ
 
@@ -30,15 +26,6 @@
 == %s ! ﺎﻫ ﻩﺪﻧﺮﺑ
 
 
-'%s' entered and joined the %s
-== '%s' ﻞﺧﺍﺩ ﻭ ﺩﺭﺍﻭ%s
-
-'%s' has left the game
-== '%s' از بازی بیرون رفت
-
-'%s' has left the game (%s)
-== '%s' ﺖﻓﺭ ﻥﻭﺮﯿﺑ ﯼﺯﺎﺑ ﺯﺍ (%s)
-
 -Page %d-
 == -ﻪﺤﻔﺻ%d-
 
@@ -60,10 +47,6 @@ Address
 
 All
 == ﻪﻤﻫ
-
-
-Always show name plates
-== ﺎﻫ ﻢﺳﺍ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 
 Are you sure that you want to delete the demo?
@@ -328,10 +311,6 @@ Language
 == ﻥﺎﺑﺯ
 
 
-Loading
-== ﯼﺭﺍﺰﮔﺭﺎﺑ ﻝﺎﺣﺭﺩ
-
-
 MOTD
 == ﺕﺎﺤﯿﺿﻮﺗ
 
@@ -461,9 +440,6 @@ Quit
 == ﻥﺪﺷ ﺝﺭﺎﺧ
 
 
-REC %3d:%02d
-== ﻂﺒﺿ %3d:%02d
-
 Reason:
 == ﻞﯿﻟﺩ:
 
@@ -558,10 +534,6 @@ Server not full
 == ﻩﺪﺸﻧ ﺮﭘ ﺭﻭﺮﺳ
 
 
-Settings
-== ﺕﺎﻤﯿﻈﻨﺗ
-
-
 Shotgun
 == ﺮﺘﺴﭽﻨﯾﻭ
 
@@ -650,10 +622,6 @@ Team
 
 Team chat
 == ﻢﯿﺗ ﺖﭼ
-
-
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== om!www.teeworlds.c ﺯﺍ ﺪﯿﻨﮐ ﺖﻓﺎﯾﺭﺩ ﺍﺭ ﻥﺁ ﺎﻔﻄﻟ !ﺖﻓﺎﯾ ﺭﺎﺸﺘﻧﺍ s% ﺯﺪﻟﺭﻮﯿﺗ ﯼ ﻪﺨﺴﻧ
 
 
 Texture Compression
@@ -749,400 +717,24 @@ You must restart the game for all settings to take effect.
 
 ##### ﻪﻤﺟﺮﺗ ﻪﺑ ﺝﺎﯿﺘﺣﺍ #####
 
-%.3f KiB
-== 
-
-%d player left
-== ﺪﺷ ﺝﺭﺎﺧ ﻦﮑﯾﺯﺎﺑ d%
-
-
-
-%d player not ready
-== ﺪﻨﺘﺴﯿﻧ ﻩﺩﺎﻣﺁ ﺎﻫ ﻦﮑﯾﺯﺎﺑ d%
-
-
-
-%d players left
-== ﺪﻧﺪﺷ ﺝﺭﺎﺧ ﺎﻫ ﻦﮑﯾﺯﺎﺑ d%
-
-
-%d players not ready
-== ﺪﻨﺘﺴﯿﻧ ﻩﺩﺎﻣﺁ ﯼﺎﻫ ﻦﮑﯾﺯﺎﺑ d%
-
-
-%d servers, %d players
-== ﺎﻫ ﻦﮑﯾﺯﺎﺑ d% , ﺎﻫﺭﻭﺮﺳ d%
-
-
-'%s' called for vote to kick '%s' (%s)
-== ﻥﺩﺮﮐ ﮏﯿﮐ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ '%s' (%s)
-
-'%s' called for vote to move '%s' to spectators (%s)
-== (%s) ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ ﻪﺑ %s'' ﻦﺘﻓﺭ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ %s''
-
-
-'%s' called vote to change server option '%s' (%s)
-== %s'' (%s) ﻪﺑ ﺭﻭﺮﺳ ﺕﺎﻤﯿﻈﻨﺗ ﻥﺩﺮﮐ ﺮﯿﯿﻐﺗ ﯼﺍﺮﺑ ﺖﺳﺍ ﻩﺩﺮﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ %s''
-
-
-'%s' joined the %s
-== %s"' ﻪﺑ ﺪﺷ ﺩﺭﺍﻭ %s''
-
-
-Admin forced server option '%s' (%s)
-== ﻪﺑ ﺩﺮﮐ ﻞﯿﻤﺤﺗ ﺍﺭ ﺕﺎﻤﯿﻈﻨﺗ ﻦﯿﻣﺩﺍ '%s' (%s)
-
-Admin forced vote no
-== ﺩﺮﮐ ﺩﺭ ﺍﺭ ﯽﺠﻨﺳ ﺮﻈﻧ ﻦﯿﻣﺩﺍ
-
-
-Admin forced vote yes
-== ﺩﺮﮐ ﻝﻮﺒﻗ ﺍﺭ ﯽﺠﻨﺳ ﺮﻈﻧ ﻦﯿﻣﺩﺍ
-
-
-Admin moved '%s' to spectator (%s)
-== ﺩﺎﺘﺳﺮﻓ ﺮﮔﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ ﻪﺑ ﺍﺭ %s"' ﻦﮑﯾﺯﺎﺑ ﻦﯿﻣﺩﺍ
-
-
-Alp:
-== Alp:
-
-Anti Aliasing
-== Anti Aliasing
-
-Are you sure you want to rename the demo?
-== ؟ ﺪﯿﻨﮐ ﺽﻮﻋ ﺍﺭ ﻮﻣﺩ ﻦﯾﺍ ﻢﺳﺍ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﻤﺷ ﺎﯾﺁ
-
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== .ﺪﺷ ﺪﻫﺍﻮﺧ ﻦﯾﺰﮕﯾﺎﺟ ﻭ ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺮﺿﺎﺣ ﻝﺎﺣ ﺭﺩ ﻦﯿﮑﺳﺍ ﻦﯾﺍ ؟ ﺪﯿﻨﮐ ﻩﺮﯿﺧﺫ ﺍﺭ ﺩﻮﺧ ﻦﯿﮑﺳﺍ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﻤﺷ ﺎﯾﺁ
-
-
-Back
-== ﺖﺸﮔﺯﺎﺑ
-
-
-Basic
-== ﯽﻠﺻﺍ
-
-
-Bodies
-== ﺎﻫ ﻥﺪﺑ
-
-
 Borderless window
 == ﺯﺮﻣ ﻩﺮﺠﻨﭘ
 
-Color
-== ﮓﻧﺭ
-
-
-Crc
-== Crc
-
-Created
-== ﺪﺷ ﻪﺘﺧﺎﺳ
-
-
-Custom
-== ﻩﺍﻮﺨﻟﺩ
-
-
-Customize
-== ﻩﺍﻮﺨﻟﺩ ﻪﺑ
-
-
-Decoration
-== ﻦﯿﯾﺰﺗ
-
-
 Demo
 == ﻮﻣﺩ
-
-
-Detail
-== ﺕﺎﯿﺋﺰﺟ
-
-
-Editor
-== ﺭﻮﺘﯾﺩﺍ
-
-
-Eyes
-== ﺎﻫ ﻢﺸﭼ
-
-
-Format
-== ﺖﻣﺮﻓ
-
-
-Game starts in
-== ﺭﺩ ﺩﻮﺸﯿﻣ ﻉﻭﺮﺷ ﯼﺯﺎﺑ
-
-
-Global
-== ﯽﻧﺎﻬﺟ
-
-
-Hands
-== ﺎﻫ ﺖﺳﺩ
-
-
-Host address:
-== :ﺖﺳﺎﻫ ﺱﺭﺩﺁ
-
-
-Hue:
-== Hue
-
-Join
-== ﻥﺪﺷ ﺩﺭﺍﻭ
-
-
-Joined
-== ﺪﺷ ﺩﺭﺍﻭ
-
-
-Joined blue
-== ﺪﺷ ﯽﺑﺁ ﺩﺭﺍﻭ
-
-
-Joined red
-== ﺪﺷ ﺰﻣﺮﻗ ﺩﺭﺍﻭ
-
-
-Kick voting requires %d players on the server
-== ﺭﻭﺮﺳ ﺭﺩ ﻦﮑﯾﺯﺎﺑ d% ﻥﺩﺮﮐ ﮏﯿﮐ ﯽﺠﻨﺳ ﺮﻈﻧ
 
 
 Laser
 == ﺭﺰﯿﻟ
 
 
-Length
-== ﻝﻮﻃ
-
-
-Letterbox
-== ﯼﺎﻫ ﻪﻣﺎﻧ
-
-
-Lgt:
-== Lgt:
-
-Local
-== ﯽﻠﺤﻣ
-
-
-Local server
-== ﯽﻠﺤﻣ ﺭﻭﺮﺳ
-
-
-Match
-== ﻪﻘﺑﺎﺴﻣ
-
-
-Max
-== ﺖﯾﺎﻬﻧ
-
-
-Misc
-== ﻪﻗﺮﻔﺘﻣ
-
-
-Netversion
-== ﻪﺨﺴﻧ
-
-
-Nickname is empty.
-== .ﺖﺳﺍ ﯽﻟﺎﺧ ﻡﺎﻧ
-
-Normal:
-== :ﯽﻟﻮﻤﻌﻣ
-
-
-Only %d active players are allowed
-== ﺖﺳﺍ ﺯﺎﺠﻣ ﻝﺎﻌﻓ ﻦﮑﯾﺯﺎﺑ d% ﻂﻘﻓ
-
-
-Personal
-== ﯽﺼﺨﺷ
-
-
-Ready
-== ﻩﺩﺎﻣﺁ
-
-
-Record
-== ﻂﺒﺿ
-
-
-Recorded
-== ﻥﺪﺷ ﻂﺒﺿ
-
-
 Reset
 == ﺩﺪﺠﻣ ﻢﯿﻈﻨﺗ
-
-
-Resolutions
-== ﻦﺸﯿﻟﻭﺯﺭ
-
-
-Round over
-== ﺪﺷ ﻡﺎﻤﺗ ﺭﻭﺩ
-
-
-Round over!
-== !ﺪﺷ ﻡﺎﻤﺗ ﺭﻭﺩ
-
-
-Sat:
-== Sat:
-
-Save
-== ﻩﺮﯿﺧﺫ
-
-
-Save skin
-== ﻦﯿﮑﺳﺍ ﻩﺮﯿﺧﺫ
 
 
 Screen
 == ﻪﺤﻔﺻ
 
-
-Search:
-== ﻮﺟ ﻭ ﺖﺴﺟ
-
-
-Server does not allow voting to kick players
-== ﺖﺴﯿﻧ ﺯﺎﺠﻣ ﺭﻭﺮﺳ ﺭﺩ ﻥﺎﻨﮐﺯﺎﺑ ﻥﺩﺮﮐ ﮏﯿﮐ ﯼﺍﺮﺑ ﯽﺠﻨﺳ ﺮﻈﻧ
-
-
-Server does not allow voting to move players to spectators
-== ﺖﺴﯿﻧ ﺯﺎﺠﻣ ﺭﻭﺮﺳ ﺭﺩ ﻥﺎﻨﮐﺯﺎﺑ ﻥﺩﺮﮐ ﺮﮔﺎﺷﺎﻤﺗ ﯼﺍﺮﺑ ﯽﺠﻨﺳ ﺮﻈﻧ
-
-
-Servers
-== ﺎﻫ ﺭﻭﺮﺳ
-
-
-Size
-== ﻩﺯﺍﺪﻧﺍ
-
-
-Skin
-== ﻦﯿﮑﺳﺍ
-
-
-Spectating
-== ﯼﺮﮔﺎﺷﺎﻤﺗ
-
-
-Spectators aren't allowed to start a vote.
-== .ﺪﻨﻨﮐ ﺩﺎﺠﯾﺍ ﯽﺠﻨﺳ ﺮﻈﻧ ﺪﻨﻧﺍﻮﺗ ﯽﻤﻧ ﻥﺍﺮﮔﺎﺷﺎﻤﺗ
-
-
-Standard Gametype
-== ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﯼﺯﺎﺑ ﻝﺪﻣ
-
-
-Tattoo
-==  ﯽﺑﻮﮐ ﻝﺎﺧ
-
-
-Tattoos
-== ﺎﻫ ﯽﺑﻮﮐ ﻝﺎﺧ
-
-
-Team:
-== :ﻢﯿﺗ
-
-
-Teams are locked
-== ﺖﺳﺍ ﻞﻔﻗ ﻢﯿﺗ
-
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== :%02d:%02d ﻢﯿﺗ ﻥﺩﺮﮐ ﺽﻮﻋ ﺯﺍ ﻞﺒﻗ ﺪﯿﻨﮐ ﺮﺒﺻ ﺎﻔﻄﻟ .ﺖﺳﺍ ﻞﻔﻗ ﻢﯿﺗ
-
-
-Teams were locked
-== ﺪﺷ ﻞﻔﻗ ﻢﯿﺗ
-
-
-Teams were unlocked
-== ﺪﺷ ﺯﺎﺑ ﻢﯿﺗ ﻞﻔﻗ
-
-
-Tee
-== Tee
-
-Texture
-== Texture
-
-Volume
-== ﺍﺪﺻ ﻩﺯﺍﺪﻧﺍ
-
-
-Vote aborted
-== ﺪﺷ ﻒﻗﻮﺘﻣ ﯽﺠﻨﺳ ﺮﻈﻧ
-
-
-Vote failed
-== ﺪﺷ ﺩﺭ ﯽﺠﻨﺳ ﺮﻈﻧ
-
-
-
-Vote passed
-== ﺪﺷ ﻝﻮﺒﻗ ﯽﺠﻨﺳ ﺮﻈﻧ
-
-
-Wait for current vote to end before calling a new one.
-== ﺪﯿﻨﮐ ﺩﺎﺠﯾﺍ ﯼﺪﯾﺪﺟ ﯽﺠﻨﺳ ﺮﻈﻧ ﺲﭙﺳ ﺩﻮﺷ ﻡﺎﻤﺗ ﺮﺿﺎﺣ ﯽﺠﻨﺳ ﺮﻄﻧ ﺪﯿﻨﮐ ﺮﺒﺻ ﺎﻔﻄﻟ
-
-
-Wait for next round
-== ﺪﯿﻨﮐ ﺮﺒﺻ ﺪﻌﺑ ﺭﻭﺩ ﯼﺍﺮﺑ
-
-
-Wide
-== ﻊﯿﺳﻭ
-
-
-You must wait %d seconds before making another vote
-== ﺪﯾﺯﺎﺴﺑ ﯼﺮﮕﯾﺩ ﯽﺠﻨﺳ ﺮﻈﻧ ﻪﮑﻨﯾﺍ ﺯﺍ ﻞﺒﻗ ﺪﯿﻨﮐ ﺮﺒﺻ ﻪﯿﻧﺎﺛ d% ﺪﯾﺎﺑ ﺎﻤﺷ
-
-
-blue
-== ﯽﺑﺁ
-
-blue team
-== ﯽﺑﺁ ﻢﯿﺗ
-
-
-game
-== ﯼﺯﺎﺑ
-
-
-red
-== ﺰﻣﺮﻗ
-
-
-red team
-== ﺰﻣﺮﻗ ﻢﯿﺗ
-
-
-spectators
-== ﻥﺍﺮﮔﺎﺷﺎﻤﺗ
-
-
-wait for more players
-== ﻥﺎﻨﮑﯾﺯﺎﺑ ﻪﯿﻘﺑ ﯼﺍﺮﺑ ﺪﯿﻨﮐ ﺮﺒﺻ
-
-
-##### old translations #####
 
 New name:
 == ﺪﯾﺪﺟ ﻢﺳﺍ
@@ -1194,16 +786,8 @@ Length:
 == : ﻝﻮﻃ
 
 
-Skin name
-== ﻦﯿﮑﺳﺍ ﻢﺳﺍ
-
-
 Rifle
 == ﺭﺰﯿﻟ
-
-
-Patterns
-== ﺎﻫﻮﮕﻟﺍ
 
 
 Netversion:
@@ -1211,14 +795,6 @@ Netversion:
 
 Map:
 == :ﭗﻣ
-
-
-%d Bytes
-== ﺖﯾﺎﺑ d%
-
-
-Coloration
-== ﯼﺰﯿﻣﺁ ﮓﻧﺭ
 
 
 Info
@@ -1268,10 +844,6 @@ no limit
 == ﺖﯾﺎﻬﻧ ﻥﻭﺪﺑ
 
 
-Quick search:
-== :ﻊﯾﺮﺳ ﯼﻮﺟ ﻭ ﺖﺴﺟ
-
-
 UI Color
 == ﮓﻧﺭ ﻮﻨﻣ
 
@@ -1285,10 +857,6 @@ Crc:
 
 Alpha
 == Alpha
-
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== .ﺩﻮﺸﯿﻣ ﻦﯾﺰﮕﯾﺎﺟ ﻭ , ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺩﻮﺟﻭ ﺮﺿﺎﺣ ﻝﺎﺣ ﺭﺩ ﻦﯿﮑﺳﺍ ﻦﯾﺍ ؟ﺪﯿﻨﮐ ﻩﺮﯿﺧﺫ ﺍﺭ ﺩﻮﺧ ﻦﯿﮑﺳﺍ ﺪﯿﻫﺍﻮﺨﯿﻣ ﺎﯾﺁ
-
 
 Current version: %s
 == Versió actual: %s
@@ -1304,3 +872,320 @@ Name plates size
 Type:
 == :ﻉﻮﻧ
 
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

@@ -7,9 +7,6 @@
 
 ##### translated strings #####
 
-%d%% loaded
-== %d%% завантажено
-
 %ds left
 == залишилось %d сек.
 
@@ -21,9 +18,6 @@ Address
 
 All
 == Всі
-
-Always show name plates
-== Завжди показувати ніки гравців
 
 Are you sure that you want to delete the demo?
 == Ви впевнені, що хочете видалити демо?
@@ -184,9 +178,6 @@ Jump
 Language
 == Мова
 
-Loading
-== Завантаження
-
 MOTD
 == MOTD
 
@@ -319,9 +310,6 @@ Server info
 Server not full
 == Сервер не заповнений
 
-Settings
-== Налаштування
-
 Shotgun
 == Дробовик
 
@@ -366,9 +354,6 @@ Team
 
 Team chat
 == Командний чат
-
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== Вийшла Teeworlds %s! Завантажуйте на www.teeworlds.com!
 
 Texture Compression
 == Стиснення текстур
@@ -423,490 +408,14 @@ You must restart the game for all settings to take effect.
 
 ##### needs translation #####
 
-%.3f KiB
-== 
-
-%d player left
-== 
-
-%d player not ready
-== 
-
-%d players left
-== 
-
-%d players not ready
-== 
-
-%d servers, %d players
-== 
-
-%i minute left
-== 
-
-%i minutes left
-== 
-
-%i second left
-== 
-
-%i seconds left
-== 
-
-%s wins!
-== 
-
-'%s' called for vote to kick '%s' (%s)
-== 
-
-'%s' called for vote to move '%s' to spectators (%s)
-== 
-
-'%s' called vote to change server option '%s' (%s)
-== 
-
-'%s' entered and joined the %s
-== 
-
-'%s' has left the game
-== 
-
-'%s' has left the game (%s)
-== 
-
-'%s' joined the %s
-== 
-
--Page %d-
-== 
-
-Add
-== 
-
-Add Friend
-== 
-
-Admin forced server option '%s' (%s)
-== 
-
-Admin forced vote no
-== 
-
-Admin forced vote yes
-== 
-
-Admin moved '%s' to spectator (%s)
-== 
-
-Alp:
-== 
-
-Anti Aliasing
-== 
-
-Are you sure that you want to remove the player from your friends list?
-== 
-
-Are you sure you want to rename the demo?
-== 
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
-
-Automatically record demos
-== 
-
-Automatically take game over screenshot
-== 
-
-Back
-== 
-
-Basic
-== 
-
-Bodies
-== 
-
-Borderless window
-== 
-
-Change settings
-== 
-
-Clan
-== 
-
-Client
-== 
-
-Color
-== 
-
-Count players only
-== 
-
-Country
-== 
-
-Crc
-== 
-
-Created
-== 
-
-Custom
-== 
-
-Customize
-== 
-
-Decoration
-== 
-
-Delete demo
-== 
-
-Demo
-== 
-
-Demo details
-== 
-
-Demofile: %s
-== 
-
-Detail
-== 
-
-Editor
-== 
-
-Eyes
-== 
-
-Format
-== 
-
-Free-View
-== 
-
-Friends
-== 
-
-Game paused
-== 
-
-Game starts in
-== 
-
-Global
-== 
-
-Hands
-== 
-
-Host address:
-== 
-
-Hue:
-== 
-
-Join
-== 
-
-Joined
-== 
-
-Joined blue
-== 
-
-Joined red
-== 
-
-Kick player
-== 
-
-Kick voting requires %d players on the server
-== 
-
-Laser
-== 
-
-Length
-== 
-
-Letterbox
-== 
-
-Lgt:
-== 
-
-Local
-== 
-
-Local server
-== 
-
-Match
-== 
-
-Max
-== 
-
-Misc
-== 
-
-Move player to spectators
-== 
-
-Netversion
-== 
-
-Nickname is empty.
-== 
-
-Normal:
-== 
-
-Only %d active players are allowed
-== 
-
-Parent Folder
-== 
-
-Personal
-== 
-
-Play background music
-== 
-
-Player country:
-== 
-
-Player options
-== 
-
-REC %3d:%02d
-== 
-
-Ready
-== 
-
-Record
-== 
-
-Recorded
-== 
-
-Remove
-== 
-
-Remove friend
-== 
-
-Rename
-== 
-
-Rename demo
-== 
-
-Reset
-== 
-
-Resolutions
-== 
-
-Respawn
-== 
-
-Round over
-== 
-
-Round over!
-== 
-
-Sat:
-== 
-
-Save
-== 
-
-Save skin
-== 
-
-Screen
-== 
-
-Search:
-== 
-
-Server address:
-== 
-
-Server does not allow voting to kick players
-== 
-
-Server does not allow voting to move players to spectators
-== 
-
-Server filter
-== 
-
-Servers
-== 
-
-Show friends only
-== 
-
-Show ingame HUD
-== 
-
-Show only chat messages from friends
-== 
-
-Size
-== 
-
-Skin
-== 
-
-Sound error
-== 
-
-Spectate next
-== 
-
-Spectate previous
-== 
-
-Spectating
-== 
-
-Spectator mode
-== 
-
-Spectators aren't allowed to start a vote.
-== 
-
-Standard Gametype
-== 
-
-Strict gametype filter
-== 
-
-Tattoo
-== 
-
-Tattoos
-== 
-
-Team:
-== 
-
-Teams are locked
-== 
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== 
-
-Teams were locked
-== 
-
-Teams were unlocked
-== 
-
-Tee
-== 
-
-Texture
-== 
-
-The audio device couldn't be initialised.
-== 
-
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 
-
-Unable to delete the demo
-== 
-
-Unable to rename the demo
-== 
-
-Use team colors for name plates
-== 
-
-Volume
-== 
-
-Vote aborted
-== 
-
-Vote command:
-== 
-
-Vote description:
-== 
-
-Vote failed
-== 
-
-Vote passed
-== 
-
-Wait for current vote to end before calling a new one.
-== 
-
-Wait for next round
-== 
-
-Wide
-== 
-
-You must wait %d seconds before making another vote
-== 
-
-blue
-== 
-
-blue team
-== 
-
-game
-== 
-
-red
-== 
-
-red team
-== 
-
-spectators
-== 
-
-wait for more players
-== 
-
-##### old translations #####
-
-New name:
-== 
-
 Sat.
 == Контраст.
-
-Max demos
-== 
 
 Internet
 == Інтернет
 
 News
 == Новини
-
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 
 
 Rifle
 == Лазер
@@ -920,44 +429,14 @@ Join game
 Sound volume
 == Гучність звуку
 
-Created:
-== 
-
-Max Screenshots
-== 
-
-Length:
-== 
-
-Skin name
-== 
-
-Coloration
-== 
-
-Patterns
-== 
-
-Netversion:
-== 
-
-Map:
-== 
-
 FSAA samples
 == Семплів FSAA
 
 Your skin
 == Ваш скін
 
-%d Bytes
-== 
-
 Info
 == Інфо
-
-Version:
-== 
 
 Hue
 == Відтінок
@@ -968,9 +447,6 @@ Miscellaneous
 Reset to defaults
 == Скинути налаштування
 
-Quit anyway?
-== 
-
 Display Modes
 == Режими дисплея
 
@@ -980,23 +456,11 @@ Round
 Lht.
 == Яскравість
 
-no limit
-== 
-
-Quick search:
-== Швидкий пошук:
-
-Size:
-== 
-
 UI Color
 == колір інтерфейсу
 
 Host address
 == Адреса сервера
-
-Crc:
-== 
 
 Alpha
 == Прозор..
@@ -1010,9 +474,527 @@ LAN
 Record demo
 == Запис демо
 
-Name plates size
+
+##### generated by copy_fix.py, please translate this #####
+
+New name:
+== 
+
+Ratio
+== 
+
+Max demos
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+Show only chat messages from friends
+== 
+
+✗
+== 
+
+Countries
+== 
+
+Crc:
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Spectate previous
+== 
+
+Look out!
+== 
+
+Spectate next
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Netversion:
+== 
+
+Free-View
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+Clan
+== 
+
+Server filter
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Automatically take game over screenshot
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+-Page %d-
+== 
+
+Spectator
+== 
+
+Version:
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Kick player
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Game paused
+== 
+
+Laser
+== 
+
+Old mouse mode
+== 
+
+%i minutes left
+== 
+
+Rename demo
+== 
+
+Browser
+== 
+
+Play background music
+== 
+
+Player options
+== 
+
+Follow
+== 
+
+Reset
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+%i minute left
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Count players only
+== 
+
+Show tiles layers from BG map
+== 
+
+Use team colors for name plates
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Sound error
+== 
+
+Friends
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Respawn
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Server address:
+== 
+
+Race %3d:%02d  
+== 
+
+Automatically record demos
 == 
 
 Type:
 == 
 
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+Vote description:
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Show ingame HUD
+== 
+
+Quit anyway?
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Size:
+== 
+
+Remove friend
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+%i seconds left
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== 
+
+Created:
+== 
+
+The audio device couldn't be initialised.
+== 
+
+Spectator mode
+== 
+
+Suicides
+== 
+
+Player country:
+== 
+
+Delete demo
+== 
+
+%i second left
+== 
+
+Net
+== 
+
+Unable to rename the demo
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Demofile: %s
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+Borderless window
+== 
+
+Rename
+== 
+
+%.2f KiB
+== 
+
+Strict gametype filter
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Add
+== 
+
+Change settings
+== 
+
+Normal message
+== 
+
+Demo details
+== 
+
+Screen
+== 
+
+Move player to spectators
+== 
+
+Search
+== 
+
+Add Friend
+== 
+
+Connecting dummy
+== 
+
+Client
+== 
+
+Clan plates size
+== 
+
+Map:
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Show friends only
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Unable to delete the demo
+== 
+
+Max Screenshots
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+Are you sure that you want to remove the player from your friends list?
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+%s wins!
+== 
+
+Length:
+== 
+
+Country
+== 
+
+no limit
+== 
+
+Remove
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Demo
+== 
+
+AntiPing limit
+== 
+
+Vote command:
+== 
+
+Name plates size
+== 
+
+Parent Folder
+== 
+
+Inner color
+== 

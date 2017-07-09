@@ -3,9 +3,6 @@
 #	Ryozuki
 ##### translated strings #####
 
-%d%% loaded
-== %d%% carregat
-
 %ds left
 == %ds restants
 
@@ -24,15 +21,6 @@
 %s wins!
 == ¡%s guanya!
 
-'%s' entered and joined the %s
-== '%s' ha entrat i s'ha unit al %s
-
-'%s' has left the game
-== '%s' ha sortit del joc
-
-'%s' has left the game (%s)
-== '%s' ha sortit del joc (%s)
-
 -Page %d-
 == -Pàgina %d-
 
@@ -50,9 +38,6 @@ Address
 
 All
 == Tots
-
-Always show name plates
-== Veure sempre els noms
 
 Are you sure that you want to delete the demo?
 == Estàs segur que vols eliminar la repetició?
@@ -256,9 +241,6 @@ Kick player
 Language
 == Idioma
 
-Loading
-== Carregant
-
 MOTD
 == MOTD
 
@@ -358,9 +340,6 @@ Quality Textures
 Quit
 == Sortir
 
-REC %3d:%02d
-== REC %3d:%02d
-
 Reason:
 == Motiu:
 
@@ -430,9 +409,6 @@ Server info
 Server not full
 == Servidor sense omplir
 
-Settings
-== Configuració
-
 Shotgun
 == Escopeta
 
@@ -501,9 +477,6 @@ Team
 
 Team chat
 == En equip
-
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworlds %s ha sortit! ¡Descàrgal a www.teeworlds.com!
 
 Texture Compression
 == Compresió de textures
@@ -579,310 +552,20 @@ You must restart the game for all settings to take effect.
 
 ##### needs translation #####
 
-%.3f KiB
-== 
-
-%d player left
-== d s'ha anat
-
-%d player not ready
-== 
-
-%d players left
-== %d s'han anat
-
-%d players not ready
-== jugadors no estan llestos
-
-%d servers, %d players
-== %d servidors, %d jugadors
-
-'%s' called for vote to kick '%s' (%s)
-== '%s' ha votat expulsar '%s' (%s)
-
-'%s' called for vote to move '%s' to spectators (%s)
-== '%s' ha votat moure '%s' als espectadors (%s)
-
-'%s' called vote to change server option '%s' (%s)
-== '%s' ha votat cambiar una opció del servidor '%s' (%s)
-
-'%s' joined the %s
-== '%s' s'ha unit al %s
-
-Admin forced server option '%s' (%s)
-== Un admin a forçat la opció '%s' (%s)
-
-Admin forced vote no
-== Un admin a forçat votar no
-
-Admin forced vote yes
-== Un admin a forçat votar sí
-
-Admin moved '%s' to spectator (%s)
-== Un admin ha mogut '%s' als espectadors
-
-Alp:
-== 
-
-Anti Aliasing
-== 
-
-Are you sure you want to rename the demo?
-== Estàs segur que vols cambiar el nom de la repetició?
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
-
-Back
-== Enrere
-
-Basic
-== Bàsic
-
-Bodies
-== Cosos
-
 Borderless window
 == Pantalla sense finestra
-
-Color
-== Color
-
-Crc
-== 
-
-Created
-== Creat
-
-Custom
-== Personalitzat
-
-Customize
-== Personalitza
-
-Decoration
-== Decoració
 
 Demo
 == Repetició
 
-Detail
-== Detall
-
-Editor
-== 
-
-Eyes
-== Ulls
-
-Format
-== 
-
-Game starts in
-== El joc comença en
-
-Global
-== 
-
-Hands
-== Mans
-
-Host address:
-== Direcció del host
-
-Hue:
-== Matís
-
-Join
-== Entrar
-
-Joined
-== Ha entrat
-
-Joined blue
-== S'ha unit al blau
-
-Joined red
-== S'ha unit el vermell
-
-Kick voting requires %d players on the server
-== Votar per expulsar requereix &d jugadors al servidor
-
 Laser
 == Làser
-
-Length
-== Longitud
-
-Letterbox
-== Bústia
-
-Lgt:
-== 
-
-Local
-== 
-
-Local server
-== Servidor local
-
-Match
-== Partida
-
-Max
-== Màxim
-
-Misc
-== 
-
-Netversion
-== 
-
-Nickname is empty.
-== El nom esta buit
-
-Normal:
-== 
-
-Only %d active players are allowed
-== Només %d jugadors actius estan permesos
-
-Personal
-== Personal
-
-Ready
-== A punt
-
-Record
-== Grabar
-
-Recorded
-== Grabat
 
 Reset
 == Reiniciat
 
-Resolutions
-== Resolucions
-
-Round over
-== Ronda acabada
-
-Round over!
-== Ronda acabada!
-
-Sat:
-== 
-
-Save
-== Guardar
-
-Save skin
-== Guardar skin
-
 Screen
 == Pantalla
-
-Search:
-== Buscar:
-
-Server does not allow voting to kick players
-== El servidor no permet expulsar jugadors
-
-Server does not allow voting to move players to spectators
-== El servidor no permet moure jugadors als espectadors
-
-Servers
-== Servidors
-
-Size
-== Mida
-
-Skin
-== 
-
-Spectating
-== Espectant
-
-Spectators aren't allowed to start a vote.
-== Els espectadors no tenen permés votar
-
-Standard Gametype
-== Mode de joc estàndar
-
-Tattoo
-== 
-
-Tattoos
-== 
-
-Team:
-== Equip:
-
-Teams are locked
-== Els equips estan bloquejats
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== Els equips estan bloquejats. Temps a esperar per cambiar de equip: %02d:%02d
-
-Teams were locked
-== Els equips han estat bloquejats
-
-Teams were unlocked
-== Els equips han estat desbloquejats
-
-Tee
-== 
-
-Texture
-== Textura
-
-Volume
-== Volum
-
-Vote aborted
-== Votació cancelada
-
-Vote failed
-== Votació fallida
-
-Vote passed
-== Votació acceptada
-
-Wait for current vote to end before calling a new one.
-== Espera a que acabi la votació actual
-
-Wait for next round
-== Espera a la següent ronda
-
-Wide
-== Amplitud
-
-You must wait %d seconds before making another vote
-== Tens que esperar %d segons per fer una altre votacio
-
-blue
-== blau
-
-blue team
-== equip blau
-
-game
-== joc
-
-red
-== vermell
-
-red team
-== equip vermell
-
-spectators
-== espectadors
-
-wait for more players
-== esperant més jugadors
-
-##### old translations #####
 
 New name:
 == Nom nou:
@@ -923,26 +606,14 @@ Max Screenshots
 Length:
 == Longitud:
 
-Skin name
-== Nom de la skin
-
 Rifle
 == Láser
-
-Patterns
-== Patrons
 
 Netversion:
 == Versió Net
 
 Map:
 == Mapa:
-
-%d Bytes
-== %d Bytes
-
-Coloration
-== Coloració
 
 Info
 == Informació
@@ -980,9 +651,6 @@ Lht.
 no limit
 == sense límit
 
-Quick search:
-== Cerca ràpida:
-
 UI Color
 == Color del menú
 
@@ -995,9 +663,6 @@ Crc:
 Alpha
 == Alpha
 
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 
-
 Current version: %s
 == Versió actual: %s
 
@@ -1009,3 +674,320 @@ Name plates size
 
 Type:
 == Tipus:
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

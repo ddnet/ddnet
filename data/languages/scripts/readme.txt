@@ -5,7 +5,7 @@ about how to use the scripts.
 
 
 You can start by analyzing the current languages using analyze.py
-$ python analyze.py
+$ ./analyze.py
 
 analyze.py outputs serveral columns. The column 'total' is the number of
 translations in the file. 'empty' is the number of untranslated phrases in the
@@ -16,7 +16,7 @@ not in the source.
 
 
 To update a language you should first copy it using the copy_fix.py script.
-$ python copy_fix.py ../spanish.txt newspanish.txt --delete-unused --append-missing
+$ ./copy_fix.py ../spanish.txt newspanish.txt --delete-unused --append-missing
 
 Then you can start to modify newspanish.txt. Search in the file for the following
 line and remove it:
@@ -34,4 +34,4 @@ $ mv newspanish.txt ../spanish.txt
 
 Often people know better phrases for translations where the english phrase was just
 copied. To find these you can use find_unchanged.py
-$ python find_unchanged.py ../spanish.txt
+$ ./find_unchanged.py ../spanish.txt
