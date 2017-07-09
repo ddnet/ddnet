@@ -4,6 +4,7 @@
 	// For FlashWindowEx, FLASHWINFO, FLASHW_TRAY
 	#define _WIN32_WINNT 0x0501
 	#define WINVER 0x0501
+	#include <ShellScalingAPI.h>
 #endif
 
 #include <base/detect.h>
@@ -622,9 +623,19 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	if(Flags&IGraphicsBackend::INITFLAG_HIGHDPI)
+	{
 		SdlFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
+#ifdef CONF_FAMILY_WINDOWS
+		SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+#endif
+	}
 	else
+	{
 		SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+#ifdef CONF_FAMILY_WINDOWS
+		SetProcessDpiAwareness(PROCESS_DPI_UNAWARE);
+#endif
+	}
 
 	// set gl attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
