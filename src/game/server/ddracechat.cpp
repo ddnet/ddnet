@@ -286,9 +286,9 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 	int PauseState = pPlayer->IsPaused();
 	if(PauseState <= 0)
 	{
-		if(-PauseState != CPlayer::PAUSE_SPEC)
+		if(PauseState == CPlayer::PAUSE_NONE)
 			pPlayer->Pause(CPlayer::PAUSE_SPEC, false);
-		else if(-PauseState == CPlayer::PAUSE_SPEC)
+		else if(-PauseState > CPlayer::PAUSE_NONE)
 			pPlayer->Pause(CPlayer::PAUSE_NONE, false);
 	}
 	else
@@ -314,9 +314,9 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 	int PauseState = pPlayer->IsPaused();
 	if(PauseState <= 0)
 	{
-		if(-PauseState != CPlayer::PAUSE_PAUSED)
+		if(-PauseState == CPlayer::PAUSE_NONE)
 			pPlayer->Pause(CPlayer::PAUSE_PAUSED, false);
-		else if(-PauseState == CPlayer::PAUSE_PAUSED)
+		else if(-PauseState > CPlayer::PAUSE_NONE)
 			pPlayer->Pause(CPlayer::PAUSE_NONE, false);
 	}
 	else

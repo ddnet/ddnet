@@ -675,23 +675,26 @@ int CPlayer::Pause(int State, bool Force)
 		switch(State){
 		case PAUSE_PAUSED:
 		case PAUSE_NONE:
-			if(m_pCharacter->IsPaused()) // First condition might be unnecessary
+			if(m_pCharacter->IsPaused()) // This is misleading, CCharacter::Pause provides PAUSE_SPEC functionality
 			{
-				if(!Force && m_LastPause && m_LastPause + g_Config.m_SvPauseFrequency * Server()->TickSpeed() > Server()->Tick())
-				{
-					GameServer()->SendChatTarget(m_ClientID, "Can't pause that quickly.");
-					return m_Paused; // Do not update state. Do not collect $200
-				}
 				m_pCharacter->Pause(false);
 				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 			}
+			break;
 		case PAUSE_SPEC:
-			if(g_Config.m_SvPauseMessages)
+			if(!Force && !m_pCharacter->IsPaused() && m_LastPause && m_LastPause + g_Config.m_SvPauseFrequency * Server()->TickSpeed() > Server()->Tick())
 			{
-				str_format(aBuf, sizeof(aBuf), (m_Paused > PAUSE_NONE) ? "'%s' paused" : "'%s' resumed", Server()->ClientName(m_ClientID));
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+				GameServer()->SendChatTarget(m_ClientID, "Can't pause that quickly.");
+				return m_Paused; // Do not update state. Do not collect $200
 			}
 			break;
+		}
+
+		// Log the change
+		if(g_Config.m_SvPauseMessages)
+		{
+			str_format(aBuf, sizeof(aBuf), (m_Paused > PAUSE_NONE) ? "'%s' paused" : "'%s' resumed", Server()->ClientName(m_ClientID));
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 		}
 
 		// Update state
