@@ -637,6 +637,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	if(g_Config.m_InpMouseOld)
 		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
 
+	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+
 	m_pWindow = SDL_CreateWindow(
 		pName,
 		SDL_WINDOWPOS_UNDEFINED,
