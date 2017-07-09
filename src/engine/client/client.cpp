@@ -371,7 +371,9 @@ int CClient::SendMsgEx(CMsgPacker *pMsg, int Flags, bool System)
 
 	// HACK: modify the message id in the packet and store the system flag
 	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
+	{
 		dbg_break();
+	}
 
 	*((unsigned char*)Packet.m_pData) <<= 1;
 	if(System)
@@ -805,7 +807,9 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 
 	// HACK: modify the message id in the packet and store the system flag
 	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
+	{
 		dbg_break();
+	}
 
 	*((unsigned char*)Packet.m_pData) <<= 1;
 	if(System)
