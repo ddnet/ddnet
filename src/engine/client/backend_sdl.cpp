@@ -607,8 +607,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	{
 		float dpi;
 		SDL_GetDisplayDPI(0, NULL, &dpi, NULL);
-		pWidth = pWidth / (int)dpi;
-		pHeight = pHeight / (int)dpi;
+		*pWidth = *pWidth / (int)dpi;
+		*pHeight = *pHeight / (int)dpi;
 	}
 #else
 	if(*pWidth == 0 || *pHeight == 0)
