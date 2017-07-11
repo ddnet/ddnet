@@ -594,13 +594,29 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	*pDesktopHeight = DisplayMode.h;
 
 	// use desktop resolution as default resolution
-#ifndef __ANDROID__
+#ifdef __ANDROID__
+	*pWidth = *pDesktopWidth;
+	*pHeight = *pDesktopHeight;
+#elif defined(CONF_FAMILY_WINDOWS)
 	if(*pWidth == 0 || *pHeight == 0)
-#endif
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
 	}
+	else
+	{
+		float dpi;
+		SDL_GetDisplayDPI(0, NULL, &dpi, NULL);
+		pWidth /= dpi;
+		pHeight /= dpi;
+	}
+#else
+	if(*pWidth == 0 || *pHeight == 0)
+	{
+		*pWidth = *pDesktopWidth;
+		*pHeight = *pDesktopHeight;
+	}
+#endif
 
 	// set flags
 	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
