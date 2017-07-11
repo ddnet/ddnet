@@ -607,8 +607,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	{
 		float dpi;
 		SDL_GetDisplayDPI(0, NULL, &dpi, NULL);
-		*pWidth = *pWidth / (int)dpi;
-		*pHeight = *pHeight / (int)dpi;
+		*pWidth = *pWidth * 96 / (int)dpi;
+		*pHeight = *pHeight * 96 / (int)dpi;
 	}
 #else
 	if(*pWidth == 0 || *pHeight == 0)
@@ -652,8 +652,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 
 	if(g_Config.m_InpMouseOld)
 		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
-
-	SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 
 	m_pWindow = SDL_CreateWindow(
 		pName,
