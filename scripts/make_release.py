@@ -93,6 +93,7 @@ if include_exe and not use_bundle:
 	shutil.copy("config_store"+exe_ext, package_dir)
 	shutil.copy("config_retrieve"+exe_ext, package_dir)
 	shutil.copy("map_extract"+exe_ext, package_dir)
+	shutil.copy("map_diff"+exe_ext, package_dir)
 	#shutil.copy(name+"-Server_sql"+exe_ext, package_dir)
 	
 if include_src:
