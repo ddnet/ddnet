@@ -5060,7 +5060,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 
-	str_format(aBuf, sizeof(aBuf), "Z: %i, A: %.1f, G: %i  %02d:%02d", m_ZoomLevel, m_AnimateSpeed, m_GridFactor, timeinfo->tm_hour, timeinfo->tm_min);
+	str_format(aBuf, sizeof(aBuf), "X: %i, Y: %i, Z: %i, A: %.1f, G: %i  %02d:%02d", (int)UI()->MouseWorldX()/32, (int)UI()->MouseWorldY()/32, m_ZoomLevel, m_AnimateSpeed, m_GridFactor, timeinfo->tm_hour, timeinfo->tm_min);
 	UI()->DoLabel(&Info, aBuf, 10.0f, 1, -1);
 
 	static int s_CloseButton = 0;
