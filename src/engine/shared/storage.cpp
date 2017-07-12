@@ -280,7 +280,11 @@ public:
 			BufferSize = sizeof(aBuffer);
 		}
 
-		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
+		if(Type == TYPE_ABSOLUTE)
+		{
+			return io_open(pFilename, Flags);
+		}
+		else if (pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
 		#ifdef CONF_FAMILY_WINDOWS
 			|| (pFilename[0] && pFilename[1] == ':')
 		#endif
@@ -296,7 +300,7 @@ public:
 		{
 			IOHANDLE Handle = 0;
 
-			if(Type == TYPE_ALL)
+			if(Type <= TYPE_ALL)
 			{
 				// check all available directories
 				for(int i = 0; i < m_NumPaths; ++i)
