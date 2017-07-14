@@ -1402,7 +1402,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	p.AddString(GameServer()->GameType(), 16);
 
 	// flags
-	ADD_INT(p, g_Config.m_Password[0] ? SERVER_FLAG_PASSWORD : 0);
+	ADD_INT(p, g_Config.m_Password[0] ? SERVER_FLAG_PASSWORD : 0 | m_AuthManager.NonDefaultKeys() ? SERVER_FLAG_RCONLOGIN : 0);
 
 	int MaxClients = m_NetServer.MaxClients();
 	if(Type == SERVERINFO_VANILLA || Type == SERVERINFO_INGAME)

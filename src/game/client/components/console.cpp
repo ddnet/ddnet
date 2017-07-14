@@ -85,7 +85,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			CServerInfo pServerInfo;
 			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
 
-			if(!m_UserGot && IsDDNet(&pServerInfo))
+			if(!m_UserGot && IsRconLogin(&pServerInfo))
 			{
 				m_UserGot = true;
 				str_copy(m_aUser, pLine, sizeof m_aUser);
@@ -503,7 +503,7 @@ void CGameConsole::OnRender()
 					pPrompt = "rcon> ";
 				else
 				{
-					if(IsDDNet(&pServerInfo))
+					if(IsRconLogin(&pServerInfo))
 					{
 						if(!pConsole->m_UserGot)
 							pPrompt = "Enter Username> ";
@@ -537,7 +537,7 @@ void CGameConsole::OnRender()
 		//hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !IsDDNet(&pServerInfo)))
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !IsRconLogin(&pServerInfo)))
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';

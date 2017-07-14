@@ -58,3 +58,8 @@ bool IsPlus(const CServerInfo *pInfo)
 {
 	return str_find(pInfo->m_aGameType, "+");
 }
+
+bool IsRconLogin(const CServerInfo *pInfo)
+{
+	return pInfo->m_Flags & SERVER_FLAG_RCONLOGIN;
+}
