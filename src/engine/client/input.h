@@ -26,7 +26,7 @@ class CInput : public IEngineInput
 	int m_InputCounter;
 
 	//ime support
-	bool m_IsEditingText;
+	int m_CountEditingText;
 	char m_pEditingText[32];
 	int m_EditingCursor;
 
@@ -55,7 +55,7 @@ public:
 	virtual int VideoRestartNeeded();
 
 	virtual bool GetIMEState();
-	virtual void SetIMEState(bool activate);
+	virtual void SetIMEState(bool Activate);
 	virtual const char* GetIMECandidate();
 	virtual int GetEditingCursor();
 };
