@@ -26,10 +26,9 @@ class CConfig : public IConfig
 	CCallback m_aCallbacks[MAX_CALLBACKS];
 	int m_NumCallbacks;
 
-	void EscapeParam(char *pDst, const char *pSrc, int size)
+	void EscapeParam(char *pDst, const char *pSrc, int Size)
 	{
-		str_escape(&pDst, pSrc, pDst + size);
-		*pDst = 0;
+		str_escape(&pDst, pSrc, pDst + Size);
 	}
 
 public:

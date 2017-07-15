@@ -2684,6 +2684,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		aLines.add(pCopy);
 		TotalLength += Length;
 	}
+	io_close(File);
 
 	char *pSettings = (char *)mem_alloc(TotalLength, 1);
 	int Offset = 0;

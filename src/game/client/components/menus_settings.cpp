@@ -847,7 +847,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static int s_GfxTextureQuality = g_Config.m_GfxTextureQuality;
 	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
-	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
 
 	CUIRect ModeList;
 	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
@@ -967,13 +966,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("High-DPI screen support (experimental)"), g_Config.m_GfxHighdpi, &Button))
-	{
-		g_Config.m_GfxHighdpi ^= 1;
-		CheckSettings = true;
-	}
-
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
@@ -983,8 +975,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxVsync == g_Config.m_GfxVsync &&
 			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 			s_GfxTextureQuality == g_Config.m_GfxTextureQuality &&
-			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
-			s_GfxHighdpi == g_Config.m_GfxHighdpi)
+			s_GfxTextureCompression == g_Config.m_GfxTextureCompression)
 			m_NeedRestartGraphics = false;
 		else
 			m_NeedRestartGraphics = true;

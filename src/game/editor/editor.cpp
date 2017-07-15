@@ -973,6 +973,12 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	if(Input()->KeyPress(KEY_S) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT)) && m_Dialog == DIALOG_NONE)
 		InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 
+	// ctrl+l to load
+	if(Input()->KeyPress(KEY_L) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
+	{
+		InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
+	}
+
 	// detail button
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_HqButton = 0;
@@ -3224,7 +3230,6 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	io_read(SoundFile, pData, (unsigned) DataSize);
 	io_close(SoundFile);
 
-	//
 	CEditorSound *pSound = pEditor->m_Map.m_lSounds[pEditor->m_SelectedSound];
 	int External = pSound->m_External;
 
@@ -5061,7 +5066,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 
-	str_format(aBuf, sizeof(aBuf), "Z: %i, A: %.1f, G: %i  %02d:%02d", m_ZoomLevel, m_AnimateSpeed, m_GridFactor, timeinfo->tm_hour, timeinfo->tm_min);
+	str_format(aBuf, sizeof(aBuf), "X: %i, Y: %i, Z: %i, A: %.1f, G: %i  %02d:%02d", (int)UI()->MouseWorldX()/32, (int)UI()->MouseWorldY()/32, m_ZoomLevel, m_AnimateSpeed, m_GridFactor, timeinfo->tm_hour, timeinfo->tm_min);
 	UI()->DoLabel(&Info, aBuf, 10.0f, 1, -1);
 
 	static int s_CloseButton = 0;

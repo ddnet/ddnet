@@ -52,10 +52,10 @@ public:
 	void Load(const char* pTileName);
 	void Proceed(class CLayerTiles *pLayer, int ConfigID);
 
-	int ConfigNamesNum() { return m_lConfigs.size(); }
+	int ConfigNamesNum() const { return m_lConfigs.size(); }
 	const char* GetConfigName(int Index);
 
-	const bool IsLoaded() { return m_FileLoaded; }
+	bool IsLoaded() const { return m_FileLoaded; }
 private:
 	array<CConfiguration> m_lConfigs;
 	class CEditor *m_pEditor;

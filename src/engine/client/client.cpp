@@ -299,6 +299,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_RconAuthed[0] = 0;
 	m_RconAuthed[1] = 0;
 	m_RconPassword[0] = '\0';
+	m_Password[0] = '\0';
 
 	// version-checking
 	m_aVersionStr[0] = '0';
@@ -307,11 +308,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	// pinging
 	m_PingStartTime = 0;
 
-	//
 	m_aCurrentMap[0] = 0;
-	m_CurrentMapCrc = 0;
 
-	//
 	m_aCmdConnect[0] = 0;
 
 	// map download
@@ -374,7 +372,9 @@ int CClient::SendMsgEx(CMsgPacker *pMsg, int Flags, bool System)
 
 	// HACK: modify the message id in the packet and store the system flag
 	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
+	{
 		dbg_break();
+	}
 
 	*((unsigned char*)Packet.m_pData) <<= 1;
 	if(System)
@@ -404,7 +404,7 @@ void CClient::SendInfo()
 {
 	CMsgPacker Msg(NETMSG_INFO);
 	Msg.AddString(GameClient()->NetVersion(), 128);
-	Msg.AddString(g_Config.m_Password, 128);
+	Msg.AddString(m_Password, 128);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
 
@@ -516,7 +516,11 @@ void CClient::SendInput()
 			m_CurrentInput[i] %= 200;
 
 			SendMsgExY(&Msg, MSGFLAG_FLUSH, true, i);
-			Force = true;
+			// ugly workaround for dummy. we need to send input with dummy to prevent
+			// prediction time resets. but if we do it too often, then it's
+			// impossible to use grenade with frozen dummy that gets hammered...
+			if(g_Config.m_ClDummyCopyMoves || m_CurrentInput[i] % 2)
+				Force = true;
 		}
 	}
 }
@@ -665,7 +669,7 @@ void CClient::GenerateTimeoutCodes()
 	}
 }
 
-void CClient::Connect(const char *pAddress)
+void CClient::Connect(const char *pAddress, const char *pPassword)
 {
 	char aBuf[512];
 	int Port = 8303;
@@ -685,6 +689,11 @@ void CClient::Connect(const char *pAddress)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
 		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
+
+	if(!pPassword)
+		m_Password[0] = 0;
+	else
+		str_copy(m_Password, pPassword, sizeof(m_Password));
 
 	m_RconAuthed[0] = 0;
 	if(m_ServerAddress.port == 0)
@@ -808,7 +817,9 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 
 	// HACK: modify the message id in the packet and store the system flag
 	if(*((unsigned char*)Packet.m_pData) == 1 && System && Packet.m_DataSize == 1)
+	{
 		dbg_break();
+	}
 
 	*((unsigned char*)Packet.m_pData) <<= 1;
 	if(System)
@@ -1070,7 +1081,6 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 
 	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
 	str_copy(m_aCurrentMapPath, pFilename, sizeof(m_aCurrentMapPath));
-	m_CurrentMapCrc = m_pMap->Crc();
 
 	return 0x0;
 }
@@ -1175,13 +1185,13 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
 			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
 		{
-			if (mem_comp(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
+			if(mem_comp(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
 				g_Config.m_UiPage = CMenus::PAGE_NEWS;
 
 			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
 
 			IOHANDLE NewsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
-			if (NewsFile)
+			if(NewsFile)
 			{
 				io_write(NewsFile, m_aNews, sizeof(m_aNews));
 				io_close(NewsFile);
@@ -1206,13 +1216,13 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 				const char *pComp = (char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST)+8;
 
 				// do decompression of serverlist
-				if (uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
+				if(uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
 				{
 					aBuf[DstLen] = '\0';
 					bool ListChanged = true;
 
 					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_SAVE);
-					if (File)
+					if(File)
 					{
 						char aBuf2[16384];
 						io_read(File, aBuf2, sizeof(aBuf2));
@@ -1222,10 +1232,10 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 					}
 
 					// decompression successful, write plain file
-					if (ListChanged)
+					if(ListChanged)
 					{
 						IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
-						if (File)
+						if(File)
 						{
 							io_write(File, aBuf, PlainLength);
 							io_close(File);
@@ -1649,7 +1659,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			if(Last)
 			{
 				if(m_MapdownloadFile)
+				{
 					io_close(m_MapdownloadFile);
+					m_MapdownloadFile = 0;
+				}
 				FinishMapDownload();
 			}
 			else
@@ -2218,7 +2231,10 @@ void CClient::FinishMapDownload()
 	else
 	{
 		if(m_MapdownloadFile)
+		{
 			io_close(m_MapdownloadFile);
+			m_MapdownloadFile = 0;
+		}
 		ResetMapDownload();
 		DisconnectWithReason(pError);
 	}
@@ -2785,7 +2801,7 @@ void CClient::Run()
 			// send client info
 			CMsgPacker MsgInfo(NETMSG_INFO);
 			MsgInfo.AddString(GameClient()->NetVersion(), 128);
-			MsgInfo.AddString(g_Config.m_Password, 128);
+			MsgInfo.AddString(m_Password, 128);
 			SendMsgExY(&MsgInfo, MSGFLAG_VITAL|MSGFLAG_FLUSH, true, 1);
 
 			// update netclient
@@ -3248,7 +3264,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		}
 		else
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
-		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client");
+		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 	}
 }
 
@@ -3642,7 +3658,7 @@ const char* CClient::GetCurrentMap()
 
 int CClient::GetCurrentMapCrc()
 {
-	return m_CurrentMapCrc;
+	return m_pMap->Crc();
 }
 
 const char* CClient::GetCurrentMapPath()
@@ -3658,7 +3674,7 @@ const char* CClient::RaceRecordStart(const char *pFilename)
 	if(State() != STATE_ONLINE)
 		dbg_msg("demorec/record", "client is not online");
 	else
-		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client");
+		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 
 	return m_aCurrentMap;
 }

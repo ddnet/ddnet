@@ -1277,7 +1277,7 @@ int CMenus::Render()
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || m_EnterPressed)
 			{
-				Client()->Connect(g_Config.m_UiServerAddress);
+				Client()->Connect(g_Config.m_UiServerAddress, g_Config.m_Password);
 			}
 
 			Box.HSplitBottom(60.f, &Box, &Part);
@@ -1651,7 +1651,8 @@ int CMenus::Render()
 
 void CMenus::SetActive(bool Active)
 {
-	Input()->SetIMEState(Active);
+	if(Active != m_MenuActive)
+		Input()->SetIMEState(Active);
 	m_MenuActive = Active;
 #if defined(__ANDROID__)
 	UI()->AndroidShowScreenKeys(!m_MenuActive && !m_pClient->m_pControls->m_UsingGamepad);

@@ -97,8 +97,12 @@ void CSqlScore::ExecSqlFunc(void *pUser)
 		// try to connect to a working databaseserver
 		while (!Success && !connector.MaxTriesReached(pData->m_ReadOnly) && connector.ConnectSqlServer(pData->m_ReadOnly))
 		{
-			if (pData->m_pFuncPtr(connector.SqlServer(), pData->m_pSqlData, false))
-				Success = true;
+			try {
+				if (pData->m_pFuncPtr(connector.SqlServer(), pData->m_pSqlData, false))
+					Success = true;
+			} catch (...) {
+				dbg_msg("sql", "Unexpected exception caught");
+			}
 
 			// disconnect from databaseserver
 			connector.SqlServer()->Disconnect();

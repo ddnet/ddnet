@@ -185,6 +185,7 @@ public:
 	{}
 
 	plain_range_sorted(const plain_range_sorted &r)
+	: parent()
 	{
 		*this = r;
 	}

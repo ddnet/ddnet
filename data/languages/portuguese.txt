@@ -9,24 +9,6 @@
 
 ##### translated strings #####
 
-%d player left
-== %d jogador saiu
-
-%d player not ready
-== %d jogador não preparado
-
-%d players left
-== %d jogadores sairam
-
-%d players not ready
-== %d jogadores não preparados
-
-%d servers, %d players
-== %d servidores, %d jogadores
-
-%d%% loaded
-== %d%% A Carregar
-
 %ds left
 == faltam %ds
 
@@ -45,27 +27,6 @@
 %s wins!
 == %s ganhou!
 
-'%s' called for vote to kick '%s' (%s)
-== '%s' Criou um kick-vote para kickar: '%s' (%s)
-
-'%s' called for vote to move '%s' to spectators (%s)
-== '%s' Criou um spec-vote para mover o jogador '%s' para spec (%s)
-
-'%s' called vote to change server option '%s' (%s)
-== '%s' Criou um voto para mudar a opção do servidor '%s' (%s)
-
-'%s' entered and joined the %s
-== '%s' Entou e juntou-se ao %s
-
-'%s' has left the game
-== '%s' saiu do jogo
-
-'%s' has left the game (%s)
-== '%s' saiu do jogo (%s)
-
-'%s' joined the %s
-== '%s' entrou no %s
-
 -Page %d-
 == -Página %d-
 
@@ -81,29 +42,8 @@ Add Friend
 Address
 == Endereço
 
-Admin forced server option '%s' (%s)
-== O Admin forçou a server-option '%s' (%s)
-
-Admin forced vote no
-== O Admin forçou o voto: Sim
-
-Admin forced vote yes
-== O Admin forçou o voto: Não
-
-Admin moved '%s' to spectator (%s)
-== O Admin moveu o jogador '%s' para os specs. (%s)
-
 All
 == Todos
-
-Alp:
-== Alp;
-
-Always show name plates
-== Mostrar nicks
-
-Anti Aliasing
-== Anti Aliasing
 
 Are you sure that you want to delete the demo?
 == Tens a certeza que queres apagar a demo?
@@ -123,20 +63,11 @@ Automatically record demos
 Automatically take game over screenshot
 == Tirar screenshots no final do turno autom.
 
-Back
-== Voltar
-
-Basic
-== Básico
-
 Blue team
 == Equipa azul
 
 Blue team wins!
 == A Equipa azul ganhou!
-
-Bodies
-== Corpos
 
 Body
 == Corpo
@@ -186,26 +117,11 @@ Count players only
 Country
 == País
 
-Crc
-== Crc
-
-Created
-== Criado
-
 Current
 == Atualmente
 
-Custom
-== Personalizado
-
 Custom colors
 == Cores personalizadas
-
-Customize
-== Personalizável
-
-Decoration
-== Decoração
 
 Delete
 == Eliminar
@@ -225,9 +141,6 @@ Demofile: %s
 Demos
 == Demos
 
-Detail
-== Detalhes
-
 Disconnect
 == Desconectar
 
@@ -243,9 +156,6 @@ Draw!
 Dynamic Camera
 == Câmera dinâmica
 
-Editor
-== Editor
-
 Emoticon
 == Emotes
 
@@ -257,9 +167,6 @@ Error
 
 Error loading demo
 == Erro a carregar a demo
-
-Eyes
-== Olhos
 
 Favorite
 == Favorito
@@ -282,9 +189,6 @@ Folder
 Force vote
 == Forçar
 
-Format
-== Formato
-
 Free-View
 == Vista Livre
 
@@ -306,9 +210,6 @@ Game over
 Game paused
 == Jogo em Pausa
 
-Game starts in
-== O jogo começa em
-
 Game type
 == Tipo de jogo
 
@@ -327,9 +228,6 @@ Grenade
 Hammer
 == Martelo
 
-Hands
-== Mãos
-
 Has people playing
 == Há gente a jogar
 
@@ -338,9 +236,6 @@ High Detail
 
 Hook
 == Gancho
-
-Hue:
-== Hue:
 
 Invalid Demo
 == Demo inválida
@@ -357,29 +252,11 @@ Jump
 Kick player
 == Expulsar jogador
 
-Kick voting requires %d players on the server
-== São necessários %d jogadores para fazer um kick vote neste server
-
 Language
 == Língua
 
 Laser
 == Laser
-
-Length
-== Comprimento
-
-Letterbox
-== Letterbox
-
-Lgt:
-== Lgt:
-
-Loading
-== A carregar dados
-
-Local server
-== Servidor local
 
 MOTD
 == MOTD
@@ -387,17 +264,8 @@ MOTD
 Map
 == Mapa
 
-Match
-== Combate
-
-Max
-== Maximo
-
 Maximum ping:
 == Ping máximo:
-
-Misc
-== Misc
 
 Mouse sens.
 == Sens. do rato
@@ -420,9 +288,6 @@ Mute when not active
 Name
 == Nome
 
-Netversion
-== Netversion
-
 Next weapon
 == Arma Seguinte
 
@@ -441,14 +306,8 @@ No servers found
 No servers match your filter criteria
 == Não há servidores que correspondam às definições de procura.
 
-Normal:
-== Normal:
-
 Ok
 == Aceitar
-
-Only %d active players are allowed
-== Apenas são permitidos %d jogadores ativos
 
 Open
 == Abrir
@@ -461,9 +320,6 @@ Password
 
 Password incorrect
 == Password errada!
-
-Personal
-== Pessoal
 
 Ping
 == Ping
@@ -501,17 +357,8 @@ Quality Textures
 Quit
 == Sair
 
-REC %3d:%02d
-== REC %3d:%02d
-
-Ready
-== Preparado
-
 Reason:
 == Motivo:
-
-Recorded
-== A gravar
 
 Red team
 == Equipa verm.
@@ -546,29 +393,11 @@ Reset
 Reset filter
 == Reiniciar Fitro
 
-Resolutions
-== Resoluções
-
 Respawn
 == Respawn
 
-Round over
-== Fim da ronda
-
-Round over!
-== Fim da ronda!
-
 Sample rate
 == Frequencia de rate
-
-Sat:
-== Sat:
-
-Save
-== Gravar
-
-Save skin
-== Gravar skin
 
 Score
 == Pontos
@@ -594,12 +423,6 @@ Server address:
 Server details
 == Detalhes do servidor
 
-Server does not allow voting to kick players
-== O servidor não permite kick-votes
-
-Server does not allow voting to move players to spectators
-== O servidor não permite spec-votes
-
 Server filter
 == Filtro de servidores
 
@@ -608,12 +431,6 @@ Server info
 
 Server not full
 == Servidores não cheios
-
-Servers
-== Servidores
-
-Settings
-== Config.
 
 Shotgun
 == Shotgun
@@ -635,12 +452,6 @@ Show only chat messages from friends
 
 Show only supported
 == Mostrar apenas suportado
-
-Size
-== Tamanho
-
-Skin
-== Skin
 
 Skins
 == Skins
@@ -666,12 +477,6 @@ Spectator mode
 Spectators
 == Spectators
 
-Spectators aren't allowed to start a vote.
-== Os specs. não podem começar votes.
-
-Standard Gametype
-== Tipo de jogo original
-
 Standard gametype
 == Tipo de jogo normal
 
@@ -690,38 +495,11 @@ Sudden Death
 Switch weapon on pickup
 == Mudar de arma ao agarrar
 
-Tattoos
-== Tatuagens
-
 Team
 == Equipa
 
 Team chat
 == Chat de equipa
-
-Team:
-== Equipa:
-
-Teams are locked
-== As equipas estão bloqueadas
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== As equipas estão bloqueadas. Tempo de espera para poder mudar de equipa: %02d:%02d
-
-Teams were locked
-== As equipas estavam bloqueadas
-
-Teams were unlocked
-== As equipas estavam desbloqueadas
-
-Tee
-== Tee
-
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworlds %s já saiu! Download em www.teeworlds.com!
-
-Texture
-== Textura
 
 Texture Compression
 == Compressão de Textura
@@ -765,38 +543,20 @@ V-Sync
 Version
 == Versão
 
-Volume
-== Volume
-
-Vote aborted
-== Vote cancelado
-
 Vote command:
 == Comando:
 
 Vote description:
 == Descrição de votação:
 
-Vote failed
-== Vote falhado
-
 Vote no
 == Votar não
-
-Vote passed
-== Vote aceite
 
 Vote yes
 == Votar sim
 
 Voting
 == A votar
-
-Wait for current vote to end before calling a new one.
-== Espera que este vote acabe para poderes começar um novo
-
-Wait for next round
-== Espera pela próxima ronda
 
 Warmup
 == Preparação
@@ -807,99 +567,17 @@ Weapon
 Welcome to Teeworlds
 == Bem-vindo ao Teeworlds!
 
-Wide
-== Largura
-
 Yes
 == Sim
 
 You must restart the game for all settings to take effect.
 == Para que as configurações sejam efectuadas deves Reiniciar o jogo.
 
-You must wait %d seconds before making another vote
-== Tens de esperar %d seg. antes de fazer um novo vote.
-
-blue
-== azul
-
-blue team
-== equipa azul
-
-game
-== jogo
-
-red
-== vermelho
-
-red team
-== equipa vermelha
-
-spectators
-== specs
-
-wait for more players
-== Espera por mais jogadores
-
-##### needs translation #####
-
-%.3f KiB
-== 
-
-Are you sure you want to rename the demo?
-== 
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
-
-Color
-== 
-
-Global
-== 
-
-Host address:
-== 
-
-Join
-== 
-
-Joined
-== 
-
-Joined blue
-== 
-
-Joined red
-== 
-
-Local
-== 
-
-Nickname is empty.
-== 
-
-Record
-== 
-
-Search:
-== 
-
-Spectating
-== 
-
-Tattoo
-== 
-
-##### old translations #####
-
 Internet
 == Internet
 
 Max demos
 == Demos maximas
-
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== Tens a serteza que queres guardar a skin? Se já existir uma como o meu nome, ela será substituida.
 
 News
 == Notícias
@@ -909,9 +587,6 @@ Sat.
 
 Join game
 == Entrar no jogo
-
-Patterns
-== Patterns
 
 New name:
 == Novo nome:
@@ -934,9 +609,6 @@ Record demo
 Length:
 == Longitude:
 
-Skin name
-== Nome da skin
-
 Rifle
 == Laser
 
@@ -948,12 +620,6 @@ Map:
 
 FSAA samples
 == Amostras FSAA
-
-%d Bytes
-== %d Bytes
-
-Coloration
-== Coloração
 
 Info
 == Info.
@@ -988,9 +654,6 @@ Round
 no limit
 == sem limite
 
-Quick search:
-== Busca rápida:
-
 UI Color
 == Cor do menu
 
@@ -1018,3 +681,320 @@ Name plates size
 Type:
 == Tipo:
 
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

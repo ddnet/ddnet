@@ -9,7 +9,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 {
 	CDataFileReader Map;
 
-	if(!Map.Open(pStorage, pMapName, IStorage::TYPE_ALL))
+	if(!Map.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_extract", "error opening map '%s'", pMapName);
 		return false;

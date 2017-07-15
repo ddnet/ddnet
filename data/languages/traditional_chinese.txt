@@ -5,9 +5,6 @@
 
 ##### translated strings #####
 
-%d%% loaded
-== 已加載 %d%%
-
 %ds left
 == %ds 離開
 
@@ -43,9 +40,6 @@ Address
 
 All
 == 全部
-
-Always show name plates
-== 總是顯示名字
 
 Are you sure that you want to delete the demo?
 == 你確定要刪除這個錄像嗎?
@@ -254,9 +248,6 @@ Language
 DDNet Client needs to be restarted to complete update!
 == DDNet客戶端需要重新啟動才能完成更新！
 
-Loading
-== 載入中
-
 MOTD
 == 每日通告
 
@@ -380,9 +371,6 @@ Quality Textures
 Quit
 == 退出
 
-REC %3d:%02d
-== REC %3d:%02d
-
 Reason:
 == 理由:
 
@@ -451,9 +439,6 @@ Server info
 
 Server not full
 == 服務器未滿
-
-Settings
-== 設置
 
 Shotgun
 == 霰彈槍
@@ -536,9 +521,6 @@ Team
 Team chat
 == 團隊聊天
 
-Teeworlds %s is out! Download it at www.teeworlds.com!
-== Teeworlds %s 已經發布！ 請到 www.teeworlds.com 下载!
-
 Texture Compression
 == 紋理壓縮
 
@@ -613,320 +595,20 @@ You must restart the game for all settings to take effect.
 
 ##### needs translation #####
 
-%.3f KiB
-== 
-
-%d player left
-== %d 玩家離開
-
-%d player not ready
-== %d 玩家沒有準備
-
-%d players left
-== %d 個玩家離開
-
-%d players not ready
-== %d 個玩家沒有準備
-
-%d servers, %d players
-== %d 個服務器, %d 個玩家
-
-'%s' called for vote to kick '%s' (%s)
-== '%s' 發起投票將 '%s' 踢出遊戲 (%s)
-
-'%s' called for vote to move '%s' to spectators (%s)
-== '%s' 發起投票將 '%s' 移動到觀眾席 (%s)
-
-'%s' called vote to change server option '%s' (%s)
-== '%s' 發起了一個修改服務器選項 '%s' 的投票 (%s)
-
-'%s' entered and joined the %s
-== '%s' 加入了遊戲
-
-'%s' has left the game
-== '%s' 離開了遊戲
-
-'%s' has left the game (%s)
-== '%s' 離開了遊戲
-
-'%s' joined the %s
-== '%s' 加入 %s
-
-Admin forced server option '%s' (%s)
-== 管理員強制服務器投票 '%s' (%s)
-
-Admin forced vote no
-== 管理員強制投票為否
-
-Admin forced vote yes
-== 管理員強制投票為是
-
-Admin moved '%s' to spectator (%s)
-== 管理員將 '%s' 移動到旁觀者 (%s)
-
-Alp:
-== 透明度
-
-Anti Aliasing
-== 抗鋸齒
-
-Are you sure you want to rename the demo?
-== 你確定你要重新命名錄像？
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 你確定你要保存你的皮膚？如果使用該名稱的皮膚已經存在，它被被替換。
-
-Back
-== 返回
-
-Basic
-== 基本
-
-Bodies
-== 身體
-
 Borderless window
 == 無邊界窗口
-
-Color
-== 顏色
-
-Crc
-== Crc
-
-Created
-== 創建
-
-Custom
-== 自定
-
-Customize
-== 自定義
-
-Decoration
-== 裝飾
 
 Demo
 == 錄像
 
-Detail
-== 詳情
-
-Editor
-== 編輯器
-
-Eyes
-== 眼
-
-Format
-== 格式
-
-Game starts in
-== 遊戲開始於
-
-Global
-== 全局
-
-Hands
-== 手
-
-Host address:
-== 主機地址:
-
-Hue:
-== 色調:
-
-Join
-== 加入
-
-Joined
-== 已加入
-
-Joined blue
-== 已加入蓝队
-
-Joined red
-== 已加入红队
-
-Kick voting requires %d players on the server
-== 踢除投票需要 %d 個玩家
-
 Laser
 == 激光
-
-Length
-== 範圍
-
-Letterbox
-== 信箱
-
-Lgt:
-== Lgt:
-
-Local
-== 本地
-
-Local server
-== 本地服務器
-
-Match
-== 匹配
-
-Max
-== 最大
-
-Misc
-== 雜項
-
-Netversion
-== 網絡版本
-
-Nickname is empty.
-== 名稱為空。
-
-Normal:
-== 正常:
-
-Only %d active players are allowed
-== 最多允許 %d 個在線玩家
-
-Personal
-== 個人
-
-Ready
-== 準備
-
-Record
-== 記錄
-
-Recorded
-== 記錄
 
 Reset
 == 重置
 
-Resolutions
-== 解析度
-
-Round over
-== 回合結束
-
-Round over!
-== 回合結束!
-
-Sat:
-== 星期六
-
-Save
-== 保存
-
-Save skin
-== 保存皮膚
-
 Screen
 == 屏幕
-
-Search:
-== 搜索
-
-Server does not allow voting to kick players
-== 服務器不允許投票踢除玩家
-
-Server does not allow voting to move players to spectators
-== 服務器不允許投票移動玩家到觀眾席
-
-Servers
-== 服務器
-
-Size
-== 大小
-
-Skin
-== 皮膚
-
-Spectating
-== 旁觀者
-
-Spectators aren't allowed to start a vote.
-== 旁觀者不允許參與投票
-
-Standard Gametype
-== 標準遊戲類型
-
-Tattoo
-== 紋身
-
-Tattoos
-== 紋身
-
-Team:
-== 隊伍
-
-Teams are locked
-== 隊伍鎖定
-
-Teams are locked. Time to wait before changing team: %02d:%02d
-== 隊伍已鎖定，在修改團隊前需要等待: %02d:%02d
-
-
-Teams were locked
-== 隊伍已鎖定
-
-Teams were unlocked
-== 隊伍解除鎖定
-
-Tee
-== Tee
-
-Texture
-== 質地
-
-Volume
-== 音量
-
-Vote aborted
-== 投票終止
-
-Vote failed
-== 投票失敗
-
-Vote passed
-== 投票通過
-
-Wait for current vote to end before calling a new one.
-== 等待當前投票結束，才能發起新投票
-
-Wait for next round
-== 等待下一輪
-
-Wide
-== 寬
-
-You must wait %d seconds before making another vote
-== 進行另一次投票前，必須等待 %d 秒
-
-blue
-== 藍
-
-blue team
-== 藍隊
-
-game
-== 遊戲
-
-red
-== 紅
-
-red team
-== 紅隊
-
-spectators
-== 旁觀者
-
-wait for more players
-== 等待更多玩家
-
-##### old translations #####
 
 New name:
 == 新名字:
@@ -976,26 +658,14 @@ Vanilla Skins only
 Length:
 == 長度:
 
-Skin name
-== 皮膚名字
-
 Rifle
 == 激光槍
-
-Patterns
-== 模式
 
 Netversion:
 == 網絡版本
 
 Map:
 == 地圖:
-
-%d Bytes
-== %d 字節
-
-Coloration
-== 著色
 
 Info
 == 信息
@@ -1033,20 +703,11 @@ Lht.
 no limit
 == 無限制
 
-CPU Throttle
-== CPU節流
-
 Show console window
 == 顯示控制台窗口
 
 Automatically take statboard screenshot
 == 自動對狀態版截圖
-
-none
-== 没有
-
-Quick search:
-== 快速搜索:
 
 UI Color
 == 界面顏色
@@ -1060,9 +721,6 @@ Crc:
 Alpha
 == 透明度
 
-Are you sure you want to save your skin ? If a skin with this name already exists, it will be replaced.
-== 你確定你要保存你的皮膚？如果使用該名稱的皮膚已經存在，它被被替換。
-
 Current version: %s
 == 當前版本: %s
 
@@ -1074,87 +732,6 @@ Name plates size
 
 Type:
 == 類型:
-
-Switch
-== 切換
-
-Tele
-== 远距
-
-Unknown
-== 未知
-
-Something is VERY wrong with the %s layer please report this at http://ddnet.tw, you will need to post the map as well and any steps that u think may have led to this
-== 
-
-localization
-== 定位
-
-unexpected end of file
-== 文件出錯
-
-loaded '%s'
-== 加載 '%s'
-
-malform replacement line for '%s'
-== 格式不正確的替換路程 '%s'
-
-Switch team
-== 切換隊伍
-
-Kill yourself
-== 自殺
-
-Tune variable to value
-== 音樂變量值
-
-Reset tuning
-== 復位
-
-Dump tuning
-== 轉儲調整
-
-Change map
-== 更換地圖
-
-Restart in x seconds
-== 重新啟動在x秒
-
-Broadcast message
-== 廣播消息
-
-Say in chat
-== 聊天
-
-Set team of player to team
-== 設置玩家組隊
-
-Set team of all players to team
-== 設置全部玩家組隊
-
-Add a voting option
-== 添加投票選項
-
-remove a voting option
-== 刪除投票選項
-
-Force a voting option
-== 強制投票的選項
-
-Clears the voting options
-== 清除投票選項
-
-Force a vote to yes/no
-== 強制投票是/否
-
-Swap the current teams
-== 交換當前的團隊
-
-Shuffle the current teams
-== 重組目前球隊
-
-initialisation finished after %.2fms
-== %.2fms 後初始化完成
 
 Use DDRace Scoreboard
 == 使用DDRace計分板
@@ -1237,9 +814,6 @@ Default zoom
 AntiPing limit
 == Anti Ping限制
 
-AntiPing
-== 
-
 AntiPing: predict other players
 == AntiPing:預測其他玩家
 
@@ -1285,62 +859,139 @@ No updates available
 Check now
 == 檢查更新
 
-Timeout code
-== 超時代碼
-
-Dummy Timeout code
-== 傀儡超時代碼
-
-default
-== 默認
-
-DM
-== 死亡競技
-
-TDM
-== 團隊競技
-
-CTF
-== 奪旗模式
-
-prediction error
-== 預測誤差
-
 Loading DDNet Client
 == 加載DDNet客戶端中...
-
-add_favorite
-== 添加喜愛
-
-remove_favorite
-== 刪除喜愛
-
-add_friend
-== 添加好友
-
-remove_friend
-== 刪除好友
-
-*** '%s' entered and joined the spectators
-== *** '%s' 進入遊戲並加入旁觀者
-
-Network
-== 網絡
 
 Browser
 == 瀏覽
 
-Connect dummy
-== 開啟傀儡
-
 Connecting dummy
 == 正在開啟傀儡
-
-Disconnect dummy
-== 關閉傀儡
 
 Spectator
 == 旁觀者
 
 Search
 == 搜索
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+AntiPing
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+DDNet
+== 
+
+second
+== 
+
+Select a name
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Restart
+== 
+
+Old mouse mode
+== 
+
+Follow
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Remove chat
+== 
+
+Race %3d:%02d  
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Frags
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+%.2f KiB
+== 
+
+Best
+== 
+
+Auto %3d:%02d  
+== 
+
+Exclude
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Friend
+== 

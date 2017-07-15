@@ -108,6 +108,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_RconAuthed[2];
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
+	char m_Password[32];
 
 	// version-checking
 	char m_aVersionStr[10];
@@ -115,10 +116,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	// pinging
 	int64 m_PingStartTime;
 
-	//
 	char m_aCurrentMap[256];
 	char m_aCurrentMapPath[CEditor::MAX_PATH_LENGTH];
-	unsigned m_CurrentMapCrc;
 
 	char m_aTimeoutCodes[2][32];
 	bool m_aTimeoutCodeSent[2];
@@ -254,7 +253,7 @@ public:
 	void OnEnterGame();
 	virtual void EnterGame();
 
-	virtual void Connect(const char *pAddress);
+	virtual void Connect(const char *pAddress, const char *pPassword = NULL);
 	void DisconnectWithReason(const char *pReason);
 	virtual void Disconnect();
 

@@ -33,6 +33,8 @@ public:
 	void Unload();
 
 	unsigned Crc();
+	int MapSize();
+	IOHANDLE File();
 };
 
 // write access

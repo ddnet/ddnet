@@ -2241,12 +2241,18 @@ void str_timestamp(char *buffer, int buffer_size)
 
 void str_escape(char **dst, const char *src, const char *end)
 {
-	while(*src && *dst < end)
+	while(*src && *dst + 1 < end)
 	{
 		if(*src == '"' || *src == '\\') // escape \ and "
-			*(*dst)++ = '\\';
+		{
+			if(*dst + 2 < end)
+				*(*dst)++ = '\\';
+			else
+				break;
+		}
 		*(*dst)++ = *src++;
 	}
+	**dst = 0;
 }
 
 int mem_comp(const void *a, const void *b, int size)
@@ -2552,7 +2558,7 @@ void shell_execute(const char *file)
 #endif
 }
 
-int os_compare_version(int major, int minor)
+int os_compare_version(unsigned int major, unsigned int minor)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	OSVERSIONINFO ver;

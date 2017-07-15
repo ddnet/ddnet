@@ -2258,7 +2258,7 @@ void CServer::DemoRecorder_HandleAutoStart()
 		char aDate[20];
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%s.demo", "auto/autorecord", aDate);
-		m_aDemoRecorder[MAX_CLIENTS].Start(Storage(), m_pConsole, aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "server");
+		m_aDemoRecorder[MAX_CLIENTS].Start(Storage(), m_pConsole, aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "server", m_CurrentMapSize, m_pCurrentMapData);
 		if(g_Config.m_SvAutoDemoMax)
 		{
 			// clean up auto recorded demos
@@ -2277,7 +2277,7 @@ void CServer::SaveDemo(int ClientID, float Time)
 {
 	if(IsRecording(ClientID))
 	{
-		m_aDemoRecorder[ClientID].Stop(true);
+		m_aDemoRecorder[ClientID].Stop();
 
 		// rename the demo
 		char aOldFilename[256];
@@ -2294,7 +2294,7 @@ void CServer::StartRecord(int ClientID)
 	{
 		char aFilename[128];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, g_Config.m_SvPort, ClientID);
-		m_aDemoRecorder[ClientID].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client", m_CurrentMapSize, m_pCurrentMapData);
+		m_aDemoRecorder[ClientID].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "server", m_CurrentMapSize, m_pCurrentMapData);
 	}
 }
 
@@ -2328,7 +2328,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/demo_%s.demo", aDate);
 	}
-	pServer->m_aDemoRecorder[MAX_CLIENTS].Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapCrc, "server");
+	pServer->m_aDemoRecorder[MAX_CLIENTS].Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapCrc, "server", pServer->m_CurrentMapSize, pServer->m_pCurrentMapData);
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)
@@ -2709,10 +2709,10 @@ int main(int argc, const char **argv) // ignore_convention
 	pServer->RegisterCommands();
 
 	// execute autoexec file
-	IOHANDLE file = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(file)
+	IOHANDLE File = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
 	{
-		io_close(file);
+		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_SERVER_FILE);
 	}
 	else // fallback
@@ -2758,37 +2758,39 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 const char *CServer::GetAnnouncementLine(char const *pFileName)
 {
 	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
-	{
-		std::vector<char*> v;
-		char *pLine;
-		CLineReader *lr = new CLineReader();
-		lr->Init(File);
-		while((pLine = lr->Get()))
-			if(str_length(pLine))
-				if(pLine[0]!='#')
-					v.push_back(pLine);
-		if(v.size() == 1)
-		{
-			m_AnnouncementLastLine = 0;
-		}
-		else if(!g_Config.m_SvAnnouncementRandom)
-		{
-			if(m_AnnouncementLastLine >= v.size())
-				m_AnnouncementLastLine %= v.size();
-		}
-		else
-		{
-			unsigned Rand;
-			do
-				Rand = rand() % v.size();
-			while(Rand == m_AnnouncementLastLine);
+	if(!File)
+		return 0;
 
-			m_AnnouncementLastLine = Rand;
-		}
-		return v[m_AnnouncementLastLine];
+	std::vector<char*> v;
+	char *pLine;
+	CLineReader *lr = new CLineReader();
+	lr->Init(File);
+	while((pLine = lr->Get()))
+		if(str_length(pLine))
+			if(pLine[0]!='#')
+				v.push_back(pLine);
+	if(v.size() == 1)
+	{
+		m_AnnouncementLastLine = 0;
 	}
-	return 0;
+	else if(!g_Config.m_SvAnnouncementRandom)
+	{
+		if(m_AnnouncementLastLine >= v.size())
+			m_AnnouncementLastLine %= v.size();
+	}
+	else
+	{
+		unsigned Rand;
+		do
+			Rand = rand() % v.size();
+		while(Rand == m_AnnouncementLastLine);
+
+		m_AnnouncementLastLine = Rand;
+	}
+
+	io_close(File);
+
+	return v[m_AnnouncementLastLine];
 }
 
 int* CServer::GetIdMap(int ClientID)

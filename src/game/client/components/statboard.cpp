@@ -434,7 +434,7 @@ void CStatboard::AutoStatCSV()
 		mem_free(buf);
 
 		Client()->AutoCSV_Start();
-	}		
+	}
 }
 
 char* CStatboard::ReplaceCommata(char* pStr)

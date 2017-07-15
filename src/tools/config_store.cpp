@@ -7,7 +7,7 @@
 
 void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
-	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorage::TYPE_ABSOLUTE);
 	array<char *> aLines;
 	char *pSettings = NULL;
 	if(!File)
@@ -29,6 +29,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		aLines.add(pCopy);
 		TotalLength += Length;
 	}
+	io_close(File);
 
 	pSettings = (char *)mem_alloc(TotalLength, 1);
 	int Offset = 0;
@@ -41,7 +42,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	}
 
 	CDataFileReader Reader;
-	Reader.Open(pStorage, pMapName, IStorage::TYPE_ALL);
+	Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE);
 
 	CDataFileWriter Writer;
 	Writer.Init();

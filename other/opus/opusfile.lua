@@ -12,7 +12,7 @@ Opusfile = {
 				option.use_pkgconfig = true
 			end
 
-			if family ~= "windows" and ExecuteSilent("pkg-config opusfile") == 0 then
+			if family ~= "windows" and ExecuteSilent("pkg-config opusfile") == 0 and ExecuteSilent("pkg-config opus") == 0 and ExecuteSilent("pkg-config ogg") == 0 then
 				option.value = true
 				if option.use_pkgconfig == nil then
 					option.use_pkgconfig = true
@@ -41,13 +41,20 @@ Opusfile = {
 		local apply = function(option, settings)
 			if option.use_pkgconfig == true then
 				settings.cc.flags:Add("`pkg-config --cflags opusfile`")
+				settings.cc.flags:Add("`pkg-config --cflags opus`")
+				settings.cc.flags:Add("`pkg-config --cflags ogg`")
 				settings.link.flags:Add("`pkg-config --libs opusfile`")
+				settings.link.flags:Add("`pkg-config --libs opus`")
+				settings.link.flags:Add("`pkg-config --libs ogg`")
 			else
 				settings.cc.includes:Add(Opusfile.basepath .. "/include")
+				settings.cc.includes:Add(Opusfile.basepath .. "/include/ogg")
 				settings.cc.includes:Add(Opusfile.basepath .. "/include/opus")
 
 				if family ~= "windows" then
 					settings.link.libs:Add("opusfile")
+					settings.link.libs:Add("opus")
+					settings.link.libs:Add("ogg")
 				end
 
 				if platform == "win32" then

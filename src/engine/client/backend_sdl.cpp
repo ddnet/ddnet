@@ -594,16 +594,37 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	*pDesktopHeight = DisplayMode.h;
 
 	// use desktop resolution as default resolution
-#ifndef __ANDROID__
+#ifdef __ANDROID__
+	*pWidth = *pDesktopWidth;
+	*pHeight = *pDesktopHeight;
+/*
+#elif defined(CONF_FAMILY_WINDOWS)
 	if(*pWidth == 0 || *pHeight == 0)
-#endif
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
 	}
+	else
+	{
+		float dpi = -1;
+		SDL_GetDisplayDPI(0, NULL, &dpi, NULL);
+		if(dpi > 0)
+		{
+			*pWidth = *pWidth * 96 / dpi;
+			*pHeight = *pHeight * 96 / dpi;
+		}
+	}
+*/
+#else
+	if(*pWidth == 0 || *pHeight == 0)
+	{
+		*pWidth = *pDesktopWidth;
+		*pHeight = *pDesktopHeight;
+	}
+#endif
 
 	// set flags
-	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
 #if defined(SDL_VIDEO_DRIVER_X11)
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
@@ -620,11 +641,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		SdlFlags |= SDL_WINDOW_FULLSCREEN;
 #endif
 	}
-
-	if(Flags&IGraphicsBackend::INITFLAG_HIGHDPI)
-		SdlFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
-	else
-		SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 
 	// set gl attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);

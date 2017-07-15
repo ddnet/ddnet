@@ -218,7 +218,16 @@ int CControls::SnapInput(int *pData)
 	else if(m_pClient->m_pMenus->IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
+	{
+		if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags == PLAYERFLAG_CHATTING)
+		{
+			CServerInfo Info;
+			GameClient()->Client()->GetServerInfo(&Info);
+			if(IsDDNet(&Info))
+				ResetInput(g_Config.m_ClDummy);
+		}
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
+	}
 
 	if(m_pClient->m_pScoreboard->Active())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
@@ -249,7 +258,10 @@ int CControls::SnapInput(int *pData)
 	// we freeze the input if chat or menu is activated
 	if(!(m_InputData[g_Config.m_ClDummy].m_PlayerFlags&PLAYERFLAG_PLAYING))
 	{
-		ResetInput(g_Config.m_ClDummy);
+		CServerInfo Info;
+		GameClient()->Client()->GetServerInfo(&Info);
+		if(!IsDDNet(&Info))
+			ResetInput(g_Config.m_ClDummy);
 
 		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
 

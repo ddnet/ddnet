@@ -167,16 +167,13 @@ void CFriends::ConfigSaveCallback(IConfig *pConfig, void *pUserData)
 	{
 		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ", sizeof(aBuf));
 
-		char *pDst = aBuf+str_length(aBuf);
-		*pDst++ = '"';
+		str_append(aBuf, "\"", sizeof(aBuf));
+		char *pDst = aBuf + str_length(aBuf);
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aName, pEnd);
-		*pDst++ = '"';
-		*pDst++ = ' ';
-
-		*pDst++ = '"';
+		str_append(aBuf, "\" \"", sizeof(aBuf));
+		pDst = aBuf + str_length(aBuf);
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aClan, pEnd);
-		*pDst++ = '"';
-		*pDst++ = 0;
+		str_append(aBuf, "\"", sizeof(aBuf));
 
 		pConfig->WriteLine(aBuf);
 	}

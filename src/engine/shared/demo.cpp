@@ -22,18 +22,18 @@ static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
 
 
-CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool DelayedMapData)
+CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {
 	m_File = 0;
 	m_pfnFilter = 0;
 	m_pUser = 0;
 	m_LastTickMarker = -1;
 	m_pSnapshotDelta = pSnapshotDelta;
-	m_DelayedMapData = DelayedMapData;
+	m_NoMapData = NoMapData;
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	m_pfnFilter = pfnFilter;
 	m_pUser = pUser;
@@ -52,14 +52,19 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	CDemoHeader Header;
 	CTimelineMarkers TimelineMarkers;
-	if(m_File)
+	if(m_File) {
+		io_close(DemoFile);
 		return -1;
+	}
 
 	m_pConsole = pConsole;
 
-	IOHANDLE MapFile = NULL;
+	bool CloseMapFile = false;
 
-	if(!m_DelayedMapData)
+	if(MapFile)
+		io_seek(MapFile, 0, IOSEEK_START);
+
+	if(!pMapData && !MapFile)
 	{
 		// open mapfile
 		char aMapFilename[128];
@@ -87,6 +92,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
 			return -1;
 		}
+
+		CloseMapFile = true;
 	}
 
 	// write header
@@ -95,8 +102,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	Header.m_Version = gs_ActVersion;
 	str_copy(Header.m_aNetversion, pNetVersion, sizeof(Header.m_aNetversion));
 	str_copy(Header.m_aMapName, pMap, sizeof(Header.m_aMapName));
-	if(!m_DelayedMapData)
-		MapSize = io_length(MapFile);
 	Header.m_aMapSize[0] = (MapSize>>24)&0xff;
 	Header.m_aMapSize[1] = (MapSize>>16)&0xff;
 	Header.m_aMapSize[2] = (MapSize>>8)&0xff;
@@ -111,9 +116,12 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	io_write(DemoFile, &Header, sizeof(Header));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
 
-	if(m_DelayedMapData)
+	if(m_NoMapData)
 	{
-		io_seek(DemoFile, MapSize, IOSEEK_CUR);
+	}
+	else if(pMapData)
+	{
+		io_write(DemoFile, pMapData, MapSize);
 	}
 	else
 	{
@@ -126,7 +134,10 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 				break;
 			io_write(DemoFile, &aChunk, Bytes);
 		}
-		io_close(MapFile);
+		if(CloseMapFile)
+			io_close(MapFile);
+		else
+			io_seek(MapFile, 0, IOSEEK_START);
 	}
 
 	m_LastKeyFrame = -1;
@@ -291,7 +302,7 @@ void CDemoRecorder::RecordMessage(const void *pData, int Size)
 	Write(CHUNKTYPE_MESSAGE, pData, Size);
 }
 
-int CDemoRecorder::Stop(bool Finalize)
+int CDemoRecorder::Stop()
 {
 	if(!m_File)
 		return -1;
@@ -323,12 +334,6 @@ int CDemoRecorder::Stop(bool Finalize)
 		aMarker[2] = (Marker>>8)&0xff;
 		aMarker[3] = (Marker)&0xff;
 		io_write(m_File, aMarker, sizeof(aMarker));
-	}
-
-	if(Finalize && m_DelayedMapData)
-	{
-		io_seek(m_File, gs_NumMarkersOffset + sizeof(CTimelineMarkers), IOSEEK_START);
-		io_write(m_File, m_pMapData, m_MapSize);
 	}
 
 	io_close(m_File);
@@ -916,14 +921,8 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 		return false;
 
 	io_read(File, pDemoHeader, sizeof(CDemoHeader));
-	if(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion)
-	{
-		io_close(File);
-		return false;
-	}
-
 	io_close(File);
-	return true;
+	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
 }
 
 int CDemoPlayer::GetDemoType() const
@@ -959,7 +958,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 		return;
 
 	const CDemoPlayer::CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
-	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client", 0, 0, pfnFilter, pUser) == -1)
+	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client", 0, 0, 0, pfnFilter, pUser) == -1)
 		return;
 
 

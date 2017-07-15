@@ -40,10 +40,10 @@ public:
 		STATE_ABORTED,
 	};
 
-	const double Current() const { return m_Current; };
-	const double Size() const { return m_Size; };
-	const int Progress() const { return m_Progress; };
-	const int State() const { return m_State; };
+	double Current() const { return m_Current; };
+	double Size() const { return m_Size; };
+	int Progress() const { return m_Progress; };
+	int State() const { return m_State; };
 	const char *Dest() const { return m_aDest; };
 
 	void Abort() { m_Abort = true; };

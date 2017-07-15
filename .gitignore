@@ -57,7 +57,12 @@ bam.exe
 *.pyc
 *.dll
 
-DDNet*
+DDNet
+DDNet-Server
+DDNet_d
+DDNet-Server_d
+DDNet-Server_sql
+DDNet-Server_sql_d
 
 CMakeCache.txt
 CMakeFiles

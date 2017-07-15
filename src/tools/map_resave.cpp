@@ -18,7 +18,7 @@ int main(int argc, const char **argv)
 
 	str_format(aFileName, sizeof(aFileName), "%s", argv[2]);
 
-	if(!DataFile.Open(pStorage, argv[1], IStorage::TYPE_ALL))
+	if(!DataFile.Open(pStorage, argv[1], IStorage::TYPE_ABSOLUTE))
 		return -1;
 	if(!df.Open(pStorage, aFileName))
 		return -1;

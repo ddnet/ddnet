@@ -945,6 +945,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_SWITCHTIMEDOPEN,
 									TILE_SWITCHTIMEDCLOSE,
 									TILE_SWITCHOPEN,
+									TILE_SWITCHCLOSE,
 									TILE_FREEZE,
 									TILE_DFREEZE,
 									TILE_DUNFREEZE,

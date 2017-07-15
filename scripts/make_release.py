@@ -93,6 +93,7 @@ if include_exe and not use_bundle:
 	shutil.copy("config_store"+exe_ext, package_dir)
 	shutil.copy("config_retrieve"+exe_ext, package_dir)
 	shutil.copy("map_extract"+exe_ext, package_dir)
+	shutil.copy("map_diff"+exe_ext, package_dir)
 	#shutil.copy(name+"-Server_sql"+exe_ext, package_dir)
 	
 if include_src:
@@ -103,7 +104,7 @@ if include_src:
 	shutil.copy("configure.lua", package_dir)
 
 if use_bundle:
-	bins = [name, name+'-Server', 'dilate', 'config_store', 'config_retrieve', 'map_extract', 'serverlaunch']
+	bins = [name, name+'-Server', 'dilate', 'config_store', 'config_retrieve', 'map_extract', 'map_diff', 'serverlaunch']
 	platforms = ('x86', 'x86_64', 'ppc')
 	for bin in bins:
 		to_lipo = []
@@ -130,7 +131,6 @@ if use_bundle:
 
 
 	shutil.copy("other/icons/DDNet.icns", clientbundle_resource_dir)
-	#shutil.copy("other/icons/Teeworlds.icns", clientbundle_resource_dir)
 	shutil.copy(name+exe_ext, clientbundle_bin_dir)
 	os.system("install_name_tool -change /opt/X11/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib " + binary_path)
 	os.system("install_name_tool -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 " + binary_path)
