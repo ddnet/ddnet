@@ -973,6 +973,12 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	if(Input()->KeyPress(KEY_S) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && (Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT)) && m_Dialog == DIALOG_NONE)
 		InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 
+	// ctrl+l to load
+	if(Input()->KeyPress(KEY_L) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && m_Dialog == DIALOG_NONE)
+	{
+		InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
+	}
+
 	// detail button
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_HqButton = 0;
