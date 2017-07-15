@@ -597,6 +597,22 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 #ifdef __ANDROID__
 	*pWidth = *pDesktopWidth;
 	*pHeight = *pDesktopHeight;
+#elif defined(CONF_FAMILY_WINDOWS)
+	if(*pWidth == 0 || *pHeight == 0)
+	{
+		*pWidth = *pDesktopWidth;
+		*pHeight = *pDesktopHeight;
+	}
+	else
+	{
+		float dpi = -1;
+		SDL_GetDisplayDPI(0, NULL, &dpi, NULL);
+		if(dpi > 0)
+		{
+			*pWidth = *pWidth * 96 / dpi;
+			*pHeight = *pHeight * 96 / dpi;
+		}
+	}
 #else
 	if(*pWidth == 0 || *pHeight == 0)
 	{
