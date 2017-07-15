@@ -53,6 +53,8 @@ Opusfile = {
 
 				if family ~= "windows" then
 					settings.link.libs:Add("opusfile")
+					settings.link.libs:Add("opus")
+					settings.link.libs:Add("ogg")
 				end
 
 				if platform == "win32" then
