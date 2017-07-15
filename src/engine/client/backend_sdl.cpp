@@ -597,6 +597,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 #ifdef __ANDROID__
 	*pWidth = *pDesktopWidth;
 	*pHeight = *pDesktopHeight;
+/*
 #elif defined(CONF_FAMILY_WINDOWS)
 	if(*pWidth == 0 || *pHeight == 0)
 	{
@@ -613,6 +614,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 			*pHeight = *pHeight * 96 / dpi;
 		}
 	}
+*/
 #else
 	if(*pWidth == 0 || *pHeight == 0)
 	{
