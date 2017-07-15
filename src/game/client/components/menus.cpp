@@ -1277,7 +1277,7 @@ int CMenus::Render()
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || m_EnterPressed)
 			{
-				Client()->Connect(g_Config.m_UiServerAddress);
+				Client()->Connect(g_Config.m_UiServerAddress, g_Config.m_Password);
 			}
 
 			Box.HSplitBottom(60.f, &Box, &Part);

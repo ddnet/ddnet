@@ -87,7 +87,7 @@ public:
 	inline float LocalTime() const { return m_LocalTime; }
 
 	// actions
-	virtual void Connect(const char *pAddress) = 0;
+	virtual void Connect(const char *pAddress, const char *pPassword = NULL) = 0;
 	virtual void Disconnect() = 0;
 
 	// dummy

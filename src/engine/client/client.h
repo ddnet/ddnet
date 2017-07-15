@@ -108,6 +108,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_RconAuthed[2];
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
+	char m_Password[32];
 
 	// version-checking
 	char m_aVersionStr[10];
@@ -252,7 +253,7 @@ public:
 	void OnEnterGame();
 	virtual void EnterGame();
 
-	virtual void Connect(const char *pAddress);
+	virtual void Connect(const char *pAddress, const char *pPassword = NULL);
 	void DisconnectWithReason(const char *pReason);
 	virtual void Disconnect();
 
