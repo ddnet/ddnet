@@ -1,2 +1,1 @@
-#include "winuser.h"
-2 RT_MANIFEST "DDNet.exe.manifest"
+1 24 "DDNet.exe.manifest"
