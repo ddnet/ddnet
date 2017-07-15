@@ -104,7 +104,7 @@ if include_src:
 	shutil.copy("configure.lua", package_dir)
 
 if use_bundle:
-	bins = [name, name+'-Server', 'dilate', 'config_store', 'config_retrieve', 'map_extract', 'serverlaunch']
+	bins = [name, name+'-Server', 'dilate', 'config_store', 'config_retrieve', 'map_extract', 'map_diff', 'serverlaunch']
 	platforms = ('x86', 'x86_64', 'ppc')
 	for bin in bins:
 		to_lipo = []
