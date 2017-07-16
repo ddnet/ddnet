@@ -337,7 +337,7 @@ function build(settings)
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
 		client_settings.link.libs:Add("libopusfile-0")
-		client_settings.link.libs:Add("curl")
+		client_settings.link.libs:Add("curl-4")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("other/mysql/vc2005libs")
 			server_settings.link.libs:Add("mysqlcppconn")
