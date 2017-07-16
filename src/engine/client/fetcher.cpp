@@ -3,10 +3,11 @@
 #include <engine/shared/config.h>
 #include "fetcher.h"
 
-CFetchTask::CFetchTask(bool canTimeout)
+CFetchTask::CFetchTask(bool canTimeout, bool useDDNetCA)
 {
 	m_pNext = NULL;
 	m_CanTimeout = canTimeout;
+	m_UseDDNetCA = useDDNetCA;
 }
 
 CFetcher::CFetcher()
@@ -115,9 +116,6 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 		return;
 	}
 
-	char aCAFile[512];
-	m_pStorage->GetBinaryPath("data/ca-ddnet.pem", aCAFile, sizeof aCAFile);
-
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(m_pHandle, CURLOPT_ERRORBUFFER, aErr);
 
@@ -137,7 +135,12 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	curl_easy_setopt(m_pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(m_pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(m_pHandle, CURLOPT_FAILONERROR, 1L);
-	curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, aCAFile);
+	if(pTask->m_UseDDNetCA)
+	{
+		char aCAFile[512];
+		m_pStorage->GetBinaryPath("data/ca-ddnet.pem", aCAFile, sizeof aCAFile);
+		curl_easy_setopt(m_pHandle, CURLOPT_CAINFO, aCAFile);
+	}
 	curl_easy_setopt(m_pHandle, CURLOPT_URL, pTask->m_aUrl);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEDATA, File);
 	curl_easy_setopt(m_pHandle, CURLOPT_WRITEFUNCTION, &CFetcher::WriteToFile);
