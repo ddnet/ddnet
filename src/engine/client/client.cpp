@@ -1632,14 +1632,14 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
 
 						Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
-						str_format(aUrl, sizeof(aUrl), "%s/", g_Config.m_ClDDNetMapServer);
+						str_format(aUrl, sizeof(aUrl), "%s/", g_Config.m_ClDDNetMapDownloadUrl);
 
 						// We only trust our own custom-selected CAs for our own servers.
 						// Other servers can use any CA trusted by the system.
 						bool UseDDNetCA =
-							str_comp_nocase_num("maps.ddnet.tw/", g_Config.m_ClDDNetMapServer, 14) == 0 ||
-							str_comp_nocase_num("http://maps.ddnet.tw/", g_Config.m_ClDDNetMapServer, 21) == 0 ||
-							str_comp_nocase_num("https://maps.ddnet.tw/", g_Config.m_ClDDNetMapServer, 22) == 0;
+							str_comp_nocase_num("maps.ddnet.tw/", g_Config.m_ClDDNetMapDownloadUrl, 14) == 0 ||
+							str_comp_nocase_num("http://maps.ddnet.tw/", g_Config.m_ClDDNetMapDownloadUrl, 21) == 0 ||
+							str_comp_nocase_num("https://maps.ddnet.tw/", g_Config.m_ClDDNetMapDownloadUrl, 22) == 0;
 
 						str_append(aUrl, aEscaped, sizeof(aUrl));
 
