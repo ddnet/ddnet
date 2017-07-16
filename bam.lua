@@ -146,10 +146,10 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib32/SDL2.dll"))
 
 		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libcurl.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libeay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libidn-11.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/ssleay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/zlib1.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libeay32.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/libidn-11.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/ssleay32.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib32/zlib1.dll"))
 
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libwinpthread-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib32/libgcc_s_sjlj-1.dll"))
@@ -161,9 +161,9 @@ if family == "windows" then
 		table.insert(client_depends, CopyToDirectory(".", "other/sdl/lib64/SDL2.dll"))
 
 		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/libcurl.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/libeay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/ssleay32.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/zlib1.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/libeay32.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/ssleay32.dll"))
+		--table.insert(client_depends, CopyToDirectory(".", "other/curl/windows/lib64/zlib1.dll"))
 
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libwinpthread-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "other/opus/windows/lib64/libgcc_s_seh-1.dll"))
