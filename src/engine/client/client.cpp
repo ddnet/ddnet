@@ -1637,9 +1637,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						// We only trust our own custom-selected CAs for our own servers.
 						// Other servers can use any CA trusted by the system.
 						bool UseDDNetCA =
-							str_comp_nocase_num("maps.ddnet.tw/", g_Config.m_ClDDNetMapDownloadUrl, 14) == 0 ||
-							str_comp_nocase_num("http://maps.ddnet.tw/", g_Config.m_ClDDNetMapDownloadUrl, 21) == 0 ||
-							str_comp_nocase_num("https://maps.ddnet.tw/", g_Config.m_ClDDNetMapDownloadUrl, 22) == 0;
+							str_comp_nocase_num("maps.ddnet.tw/", aUrl, 14) == 0 ||
+							str_comp_nocase_num("http://maps.ddnet.tw/", aUrl, 21) == 0 ||
+							str_comp_nocase_num("https://maps.ddnet.tw/", aUrl, 22) == 0;
 
 						str_append(aUrl, aEscaped, sizeof(aUrl));
 
