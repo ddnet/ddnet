@@ -45,7 +45,9 @@ Curl = {
 			else
 				settings.cc.includes:Add(Curl.basepath .. "/include")
 
-				if family ~= "windows" then
+				if platform == "macosx" then
+					settings.link.libs:Add("curl")
+				elseif family ~= "windows" then
 					settings.link.libs:Add("curl")
 					settings.link.libs:Add("ssl")
 					settings.link.libs:Add("crypto")
