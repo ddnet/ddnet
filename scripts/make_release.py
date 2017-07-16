@@ -72,7 +72,7 @@ if include_data and not use_bundle:
 		shutil.copy("freetype.dll", package_dir)
 		if platform == "win32":
 		    shutil.copy("libgcc_s_sjlj-1.dll", package_dir)
-		    shutil.copy("libidn-11.dll", package_dir)
+		    #shutil.copy("libidn-11.dll", package_dir)
 		elif platform == "win64":
 		    shutil.copy("libgcc_s_seh-1.dll", package_dir)
 		shutil.copy("libwinpthread-1.dll", package_dir)
