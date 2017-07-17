@@ -51,6 +51,7 @@ CGameConsole::CInstance::CInstance(int Type)
 
 	m_aUser[0] = '\0';
 	m_UserGot = false;
+	m_UsernameReq = false;
 
 	m_IsCommand = false;
 }
@@ -82,10 +83,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			m_pGameConsole->Client()->Rcon(pLine);
 		else
 		{
-			CServerInfo pServerInfo;
-			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
-
-			if(!m_UserGot && IsRconLogin(&pServerInfo))
+			if(!m_UserGot && m_UsernameReq)
 			{
 				m_UserGot = true;
 				str_copy(m_aUser, pLine, sizeof m_aUser);
@@ -149,9 +147,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	{
 		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
-			CServerInfo pServerInfo;
-			m_pGameConsole->Client()->GetServerInfo(&pServerInfo);
-			if(m_Input.GetString()[0] || (IsDDNet(&pServerInfo) && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
+			if(m_Input.GetString()[0] || (m_UsernameReq && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 			{
 				if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
@@ -488,9 +484,6 @@ void CGameConsole::OnRender()
 		Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
 		TextRender()->SetCursor(&Info.m_Cursor, x+Info.m_Offset, y+RowHeight+2.0f, FontSize, TEXTFLAG_RENDER);
 
-		CServerInfo pServerInfo;
-		Client()->GetServerInfo(&pServerInfo);
-
 		// render prompt
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
@@ -503,7 +496,7 @@ void CGameConsole::OnRender()
 					pPrompt = "rcon> ";
 				else
 				{
-					if(IsRconLogin(&pServerInfo))
+					if(pConsole->m_UsernameReq)
 					{
 						if(!pConsole->m_UserGot)
 							pPrompt = "Enter Username> ";
@@ -537,7 +530,7 @@ void CGameConsole::OnRender()
 		//hide rcon password
 		char aInputString[512];
 		str_copy(aInputString, pConsole->m_Input.GetString(Editing), sizeof(aInputString));
-		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !IsRconLogin(&pServerInfo)))
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq))
 		{
 			for(int i = 0; i < pConsole->m_Input.GetLength(Editing); ++i)
 				aInputString[i] = '*';
@@ -788,6 +781,11 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 	}
 }
 
+void CGameConsole::RequireUsername(bool UsernameReq)
+{
+	m_RemoteConsole.m_UsernameReq = UsernameReq;
+}
+
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_LOCAL)
@@ -823,5 +821,6 @@ void CGameConsole::OnStateChange(int NewState, int OldState)
 	{
 		m_RemoteConsole.m_UserGot = false;
 		m_RemoteConsole.m_Input.Clear();
+		m_RemoteConsole.m_UsernameReq = false;
 	}
 }

@@ -45,6 +45,7 @@ class CGameConsole : public CComponent
 
 		char m_aUser[32];
 		bool m_UserGot;
+		bool m_UsernameReq;
 
 		bool m_IsCommand;
 		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
@@ -103,6 +104,7 @@ public:
 	CGameConsole();
 
 	void PrintLine(int Type, const char *pLine);
+	void RequireUsername(bool UsernameReq);
 
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnConsoleInit();

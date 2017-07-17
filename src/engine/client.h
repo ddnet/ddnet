@@ -204,6 +204,7 @@ protected:
 public:
 	virtual void OnConsoleInit() = 0;
 
+	virtual void OnRconType(bool UsernameReq) = 0;
 	virtual void OnRconLine(const char *pLine) = 0;
 	virtual void OnInit() = 0;
 	virtual void OnNewSnapshot() = 0;
