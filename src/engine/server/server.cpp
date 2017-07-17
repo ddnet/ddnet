@@ -2180,6 +2180,7 @@ void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
 	}
 
 	pManager->UpdateKey(KeySlot, pPw, Level);
+	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
 }
