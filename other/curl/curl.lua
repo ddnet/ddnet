@@ -47,6 +47,8 @@ Curl = {
 
 				if platform == "macosx" then
 					settings.link.libs:Add("curl")
+					settings.link.frameworks:Add("Foundation")
+					settings.link.frameworks:Add("Security")
 				elseif family ~= "windows" then
 					settings.link.libs:Add("curl")
 					settings.link.libs:Add("ssl")
@@ -60,6 +62,7 @@ Curl = {
 				elseif platform == "macosx" and string.find(settings.config_name, "32") then
 					settings.link.libpath:Add("other/curl/mac/lib32")
 				elseif platform == "macosx" and string.find(settings.config_name, "64") then
+					settings.link.libpath:Add("other/curl/mac/lib64")
 					settings.link.libpath:Add("other/curl/mac/lib64")
 				elseif platform == "linux" then
 					settings.link.libpath:Add("other/curl/linux/lib64")
