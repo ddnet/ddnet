@@ -1959,7 +1959,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_RCONTYPE)
 		{
-			bool UsernameReq = Unpacker.GetInt();
+			bool UsernameReq = Unpacker.GetInt() & 1;
 			GameClient()->OnRconType(UsernameReq);
 		}
 	}

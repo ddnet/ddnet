@@ -46,7 +46,7 @@ public:
 	void ListKeys(FListCallback pfnListCallbac, void *pUser);
 	void AddDefaultKey(int Level, const char *pPw);
 	bool IsGenerated();
-	int NonDefaultKeys();
+	int NumNonDefaultKeys();
 };
 
 #endif //ENGINE_SERVER_AUTH_MANAGER_H

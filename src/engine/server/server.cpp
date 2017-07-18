@@ -868,7 +868,7 @@ void CServer::SendRconType(int ClientID, bool UsernameReq)
 {
 	CMsgPacker Msg(NETMSG_RCONTYPE);
 	Msg.AddInt(UsernameReq);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
+	SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 }
 
 void CServer::SendMap(int ClientID)
@@ -1059,7 +1059,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
-				SendRconType(ClientID, m_AuthManager.NonDefaultKeys() > 0);
+				SendRconType(ClientID, m_AuthManager.NumNonDefaultKeys() > 0);
 				SendMap(ClientID);
 			}
 		}
@@ -2102,7 +2102,7 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	bool NeedUpdate = !pManager->NonDefaultKeys();
+	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 	if(pManager->AddKey(pIdent, pPw, Level) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
@@ -2144,7 +2144,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	bool NeedUpdate = !pManager->NonDefaultKeys();
+	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 
 	if(pManager->AddKeyHash(pIdent, aHash, aSalt, Level) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
