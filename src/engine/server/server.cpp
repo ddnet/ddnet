@@ -2245,7 +2245,7 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 
 	pThis->AuthRemoveKey(KeySlot);
 
-	if(!pManager->NonDefaultKeys())
+	if(!pManager->NumNonDefaultKeys())
 		pThis->SendRconType(-1, false);
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key removed, all users logged out");
