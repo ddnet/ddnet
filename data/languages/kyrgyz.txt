@@ -1,0 +1,994 @@
+##### translated strings #####
+
+%d of %d servers, %d players
+== %d / %d сервер, %d оюнчу
+
+%ds left
+== %d сек. калды
+
+%i minute left
+== %i минута калды!
+
+%i minutes left
+== %i минута калды!
+
+%i second left
+== %i секунда калды!
+
+%i seconds left
+== %i секунда калды!
+
+%s wins!
+== %s утту!
+
+-Page %d-
+== -Барак %d-
+
+Abort
+== Жокко чыгаруу
+
+Add
+== Кошуу
+
+Add Friend
+== Досту кошуу
+
+Address
+== Дареги
+
+All
+== Баары
+
+Alpha
+== Тунук.
+
+Are you sure that you want to delete the demo?
+== Сиз чын эле демонун өчүрүлүшүн каалайсызбы?
+
+Are you sure that you want to quit?
+== Сиз чын эле оюндан чыгууну каалайсызбы?
+
+Are you sure that you want to remove the player from your friends list?
+== Сиз чын эле бул оюнчуну достор тизмеңизден өчүргүңүз келеби?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Бул оюндун биринчи жүргүзүлүшү болгону үчүн, төмөн жакка такма атыңызды киргизиңиз. Серверге туташуу алдында ырастоолорду текшериңиз.
+
+Automatically record demos
+== Демону автоматтуу түрдө жаздыруу
+
+Automatically take game over screenshot
+== Оюн натыйжаларын сүрөткө тартуу
+
+Blue team
+== Көктөр
+
+Blue team wins!
+== Көктөр утту!
+
+Body
+== Дене
+
+Call vote
+== Добуш берүү
+
+Change settings
+== Ырастоолорду өзгөртүү
+
+Chat
+== Маек
+
+Clan
+== Кланы
+
+Client
+== Клиент
+
+Close
+== Чыгуу
+
+Compatible version
+== Батышуучу версия
+
+Connect
+== Туташуу
+
+Connecting to
+== Туташтырылууда
+
+Connection Problems...
+== Байланыш көйгөйлөрү...
+
+Console
+== Консоль
+
+Controls
+== Башкаруу
+
+Count players only
+== Оюнчуларды гана саноо
+
+Country
+== Өлкө
+
+Crc:
+== Crc:
+
+Created:
+== Жаратылганы:
+
+Current
+== Кезектегиси
+
+Current version: %s
+== Кезектеги версиясы: %s
+
+Custom colors
+== Өз түстөрүңүз
+
+Delete
+== Өчүрүү
+
+Delete demo
+== Демону өчүрүү
+
+Demo details
+== Демо деталдары
+
+Demofile: %s
+== Демофайлы: %s
+
+Demos
+== Демолор
+
+Disconnect
+== Өчүрүү
+
+Disconnected
+== Өчүрүлдү
+
+Display Modes
+== Көрсөтүү режимдери
+
+Downloading map
+== Карта жүктөөлүүдө
+
+Draw!
+== Тең!
+
+Dynamic Camera
+== Динамикалык камера
+
+Emoticon
+== Эмоциялар
+
+Enter
+== Кирүү
+
+Error
+== Ката
+
+Error loading demo
+== Демону жүктөө учурундагы ката
+
+FSAA samples
+== FSAA сэмплдери
+
+Favorite
+== Тандалма
+
+Favorites
+== Тандалмалар
+
+Feet
+== Бут
+
+Filter
+== Фильтр
+
+Fire
+== Атуу
+
+Folder
+== Папка
+
+Force vote
+== Тездетүү
+
+Free-View
+== Эркин сереп
+
+Friends
+== Достор
+
+Fullscreen
+== Толук экран
+
+Game
+== Оюн
+
+Game info
+== Оюн жөнүндө
+
+Game over
+== Оюн бүттү
+
+Game type
+== Оюн түрү
+
+Game types:
+== Оюн түрү:
+
+General
+== Негизги
+
+Graphics
+== Графика
+
+Grenade
+== Гранатомёт
+
+Hammer
+== Барскан
+
+Has people playing
+== Бош эмес сервер
+
+High Detail
+== Жогорку деталдаштыруу
+
+Hook
+== Илмек
+
+Host address
+== Сервер дареги
+
+Hue
+== Түсү
+
+Info
+== Маалымат
+
+Internet
+== Интернет
+
+Invalid Demo
+== Жарабаган демо
+
+Join blue
+== Көктөргө
+
+Join game
+== Ойноо
+
+Join red
+== Кызылдарга
+
+Jump
+== Секирүү
+
+Kick player
+== Оюнчуну чыгаруу
+
+LAN
+== LAN
+
+Language
+== Тил
+
+Length:
+== Узундугу:
+
+Lht.
+== Ач. түс.
+
+MOTD
+== Күндүн билдирүүсү
+
+Map
+== Картасы
+
+Map:
+== Картасы:
+
+Max Screenshots
+== Сүрөттөрдүн жогорку чеги
+
+Max demos
+== Демолордун жогорку чеги
+
+Maximum ping:
+== Пингдин ж. чеги:
+
+Miscellaneous
+== Кошумча
+
+Mouse sens.
+== Чычкан сезгич.
+
+Move left
+== Солго басуу
+
+Move player to spectators
+== Оюнчуну байкоочуларга ташуу
+
+Move right
+== Оңго басуу
+
+Movement
+== Аракет
+
+Mute when not active
+== Активдүү эмес кезде үндү өчүрүү
+
+Name
+== Аты
+
+Name plates size
+== Ат көрнөкчөлөрдүн өлчөмү
+
+Netversion:
+== Версиясы:
+
+New name:
+== Жаңы аты:
+
+News
+== Жаңылыктар
+
+Next weapon
+== Кийин. курал
+
+Nickname
+== Такма атыңыз
+
+No
+== Жок
+
+No password
+== Сырсөзсүз
+
+No servers found
+== Серверлер табылган жок
+
+No servers match your filter criteria
+== Сиздин фильтриңизге жарай турган серверлер жок
+
+Ok
+== ОК
+
+Open
+== Ачуу
+
+Parent Folder
+== Ата-энелик каталог
+
+Password
+== Сырсөзү
+
+Password incorrect
+== Сырсөз
+
+Ping
+== Пинги
+
+Pistol
+== Тапанча
+
+Play
+== Көрүү
+
+Play background music
+== Фон музыкасын ойнотуу
+
+Player
+== Оюнчу
+
+Player country:
+== Өлкөсү:
+
+Player options
+== Оюнчу опциялары
+
+Players
+== Оюнчулар
+
+Please balance teams!
+== Команадаларды баланстаңыз!
+
+Prev. weapon
+== Мурун. курал
+
+Quality Textures
+== Сапаттуу текстуралар
+
+Quit
+== Чыгуу
+
+Quit anyway?
+== Чыгуу?
+
+Reason:
+== Себеби:
+
+Record demo
+== Демо жаздыруу
+
+Red team
+== Кызылдар
+
+Red team wins!
+== Кызылдар утту!
+
+Refresh
+== Жаңылоо
+
+Refreshing master servers
+== Мастер-серверлер тизмесин жаңылоо
+
+Remote console
+== Алыскы консоль
+
+Remove
+== Өчүрүү
+
+Remove friend
+== Досту өчүрүү
+
+Rename
+== Атын өзгөртүү
+
+Rename demo
+== Демо атын өзгөртүү
+
+Reset filter
+== Фильтрлерди түшүрүү
+
+Reset to defaults
+== Жарыяланбаска түшүрүү
+
+Rifle
+== Бластер
+
+Round
+== Раунду
+
+Sample rate
+== Жыштыгы
+
+Sat.
+== Канык.
+
+Score
+== Упайы
+
+Score board
+== Табло
+
+Score limit
+== Упай чеги
+
+Scoreboard
+== Табло
+
+Screenshot
+== Сүрөт
+
+Server address:
+== Сервер дареги:
+
+Server details
+== Сервер деталдары
+
+Server filter
+== Сервер фильтри
+
+Server info
+== Маалымат
+
+Server not full
+== Сервер толук эмес
+
+Shotgun
+== Мылтык
+
+Show chat
+== Маекти көрсөтүү
+
+Show friends only
+== Достор менен гана
+
+Show ingame HUD
+== Оюн ичиндеги HUD'ни көрсөтүү
+
+Show name plates
+== Оюнчулардын аттарын көрсөтүү
+
+Show only supported
+== Колдолгонду гана көрсөтүү
+
+Size:
+== Өлчөмү:
+
+Skins
+== Терилер
+
+Sound
+== Үн
+
+Sound error
+== Үн катасы
+
+Sound volume
+== Үн көлөмү
+
+Spectate
+== Байкоо
+
+Spectate next
+== Кийин. байкоо
+
+Spectate previous
+== Мурун. байкоо
+
+Spectator mode
+== Байкоочу
+
+Spectators
+== Байкоочулар
+
+Standard gametype
+== Стандарттуу оюн түрү
+
+Standard map
+== Стандарттуу карта
+
+Stop record
+== Токтотуу
+
+Strict gametype filter
+== Оюн түрүнүн так фильтри
+
+Sudden Death
+== Тез өлүм
+
+Switch weapon on pickup
+== Көтөрүлгөн куралга которуу
+
+Team
+== Команда
+
+Team chat
+== Команда маеги
+
+Texture Compression
+== Текстура кысылышы
+
+The audio device couldn't be initialised.
+== Аудио түзмөгүн инициализациялап алууга мүмкүн эмес.
+
+The server is running a non-standard tuning on a pure game type.
+== Бул сервер стандартту эмес ырастоолор менен таза оюн түрүндө иштеп жатат.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Редактордо сакталбаган карта бар, аны оюндан чыгаар алдында сактасаңыз болот.
+
+Time limit
+== Убакыт чеги
+
+Time limit: %d min
+== Убакыт чеги: %d мин.
+
+Try again
+== ОК
+
+Type
+== Түрү
+
+Type:
+== Түрү:
+
+UI Color
+== Интерфейс түсү
+
+Unable to delete the demo
+== Демону өчүрүү мүмкүн эмес
+
+Unable to rename the demo
+== Демо атын өзгөртүү мүмкүн эмес
+
+Use sounds
+== Үндөрдү колдонуу
+
+Use team colors for name plates
+== Аттар үчүн команданын түсүн колдонуу
+
+V-Sync
+== Тик синхрондоштуруусу
+
+Version
+== Версиясы
+
+Version:
+== Версиясы:
+
+Vote command:
+== Добуш коммандасы:
+
+Vote description:
+== Добуш баяндамасы:
+
+Vote no
+== Каршы
+
+Vote yes
+== Макул
+
+Voting
+== Добуш берүү
+
+Warmup
+== Даярдануу
+
+Weapon
+== Курал
+
+Welcome to Teeworlds
+== Teeworlds'ко кош келиңиз!
+
+Yes
+== Ооба
+
+You must restart the game for all settings to take effect.
+== Өзгөртүүлөрдү колдонуу үчүн оюнду кайта жүргүзүңүз.
+
+Your skin
+== Териңиз
+
+no limit
+== чексиз
+
+Game paused
+== Оюн бир азга токтотулду
+
+Respawn
+== Кайра жаралуу
+
+Show only chat messages from friends
+== Достордун гана маек билдирүүлөрүн көрсөтүү
+
+##### needs translation #####
+
+##### old translations #####
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Laser
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Reset
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+Borderless window
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Screen
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Demo
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

@@ -1,0 +1,2138 @@
+[Random Silver]
+
+Index 16
+
+Index 1
+Random 40
+
+Index 1 XFLIP
+Random 40
+
+Index 1 YFLIP
+Random 40
+
+Index 1 YFLIP XFLIP
+Random 40
+
+Index 2
+Random 40
+
+Index 2 XFLIP
+Random 40
+
+Index 2 YFLIP
+Random 40
+
+Index 2 YFLIP XFLIP
+Random 40
+
+Index 16 XFLIP
+Random 40
+
+Index 16 YFLIP
+Random 40
+
+Index 16 YFLIP XFLIP
+Random 40
+
+Index 17
+Random 40
+
+Index 17 XFLIP
+Random 40
+
+Index 17 YFLIP
+Random 40
+
+Index 17 YFLIP XFLIP
+Random 40
+
+Index 18
+Random 40
+
+Index 18 XFLIP
+Random 40
+
+Index 18 YFLIP
+Random 40
+
+Index 18 YFLIP XFLIP
+Random 40
+
+Index 32
+Random 40
+
+Index 32 XFLIP
+Random 40
+
+Index 32 YFLIP
+Random 40
+
+Index 32 YFLIP XFLIP
+Random 40
+
+Index 33
+Random 40
+
+Index 33 XFLIP
+Random 40
+
+Index 33 YFLIP
+Random 40
+
+Index 33 YFLIP XFLIP
+Random 40
+
+Index 34
+Random 40
+
+Index 34 XFLIP
+Random 40
+
+Index 34 YFLIP
+Random 40
+
+Index 34 YFLIP XFLIP
+Random 40
+
+Index 38
+Random 40
+
+Index 38 XFLIP
+Random 40
+
+Index 38 YFLIP
+Random 40
+
+Index 38 YFLIP XFLIP
+Random 40
+
+Index 54
+Random 40
+
+Index 54 XFLIP
+Random 40
+
+Index 54 YFLIP
+Random 40
+
+Index 54 YFLIP XFLIP
+Random 40
+
+#random 2x2
+Index 3
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
+Random 50
+
+Index 5
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
+Random 50
+
+#random 3x3
+Index 80
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos 0 2 FULL
+Pos 1 2 FULL
+Pos 2 2 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 3 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 75
+
+#random 3x2
+Index 67
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 100
+
+Index 99
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 100
+
+NewRun
+
+#Remove overlaps
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -2 -2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -1 -2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 0 -2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 1 -2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 2 -2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -2 -1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -1 -1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 0 -1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 1 -1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 2 -1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -2 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -1 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 1 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 2 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -2 1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -1 1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 0 1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 1 1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 2 1 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -2 2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos -1 2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 0 2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 1 2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+Index 16
+Pos 0 0 INDEX 3 OR 5 OR 80 OR 67 OR 99
+Pos 2 2 INDEX 3 OR 5 OR 80 OR 67 OR 99
+
+NewRun
+
+#Fill tiles
+Index 4
+Pos -1 0 INDEX 3
+Index 19
+Pos 0 -1 INDEX 3
+Index 20
+Pos -1 -1 INDEX 3
+
+Index 6
+Pos -1 0 INDEX 5
+Index 21
+Pos 0 -1 INDEX 5
+Index 22
+Pos -1 -1 INDEX 5
+
+Index 81
+Pos -1 0 INDEX 80
+Index 82
+Pos -2 0 INDEX 80
+Index 96
+Pos 0 -1 INDEX 80
+Index 97
+Pos -1 -1 INDEX 80
+Index 98
+Pos -2 -1 INDEX 80
+Index 112
+Pos 0 -2 INDEX 80
+Index 113
+Pos -1 -2 INDEX 80
+Index 114
+Pos -2 -2 INDEX 80
+
+Index 68
+Pos -1 0 INDEX 67
+Index 69
+Pos -2 0 INDEX 67
+Index 83
+Pos 0 -1 INDEX 67
+Index 84
+Pos -1 -1 INDEX 67
+Index 85
+Pos -2 -1 INDEX 67
+
+Index 100
+Pos -1 0 INDEX 99
+Index 101
+Pos -2 0 INDEX 99
+Index 115
+Pos 0 -1 INDEX 99
+Index 116
+Pos -1 -1 INDEX 99
+Index 117
+Pos -2 -1 INDEX 99
+
+
+
+[Random Gold]
+
+Index 23
+
+Index 8
+Random 40
+
+Index 8 XFLIP
+Random 40
+
+Index 8 YFLIP
+Random 40
+
+Index 8 YFLIP XFLIP
+Random 40
+
+Index 9
+Random 40
+
+Index 9 XFLIP
+Random 40
+
+Index 9 YFLIP
+Random 40
+
+Index 9 YFLIP XFLIP
+Random 40
+
+Index 23 XFLIP
+Random 40
+
+Index 23 YFLIP
+Random 40
+
+Index 23 YFLIP XFLIP
+Random 40
+
+Index 24
+Random 40
+
+Index 24 XFLIP
+Random 40
+
+Index 24 YFLIP
+Random 40
+
+Index 24 YFLIP XFLIP
+Random 40
+
+Index 25
+Random 40
+
+Index 25 XFLIP
+Random 40
+
+Index 25 YFLIP
+Random 40
+
+Index 25 YFLIP XFLIP
+Random 40
+
+Index 39
+Random 40
+
+Index 39 XFLIP
+Random 40
+
+Index 39 YFLIP
+Random 40
+
+Index 39 YFLIP XFLIP
+Random 40
+
+Index 40
+Random 40
+
+Index 40 XFLIP
+Random 40
+
+Index 40 YFLIP
+Random 40
+
+Index 40 YFLIP XFLIP
+Random 40
+
+Index 41
+Random 40
+
+Index 41 XFLIP
+Random 40
+
+Index 41 YFLIP
+Random 40
+
+Index 41 YFLIP XFLIP
+Random 40
+
+Index 45
+Random 40
+
+Index 45 XFLIP
+Random 40
+
+Index 45 YFLIP
+Random 40
+
+Index 45 YFLIP XFLIP
+Random 40
+
+Index 61
+Random 40
+
+Index 61 XFLIP
+Random 40
+
+Index 61 YFLIP
+Random 40
+
+Index 61 YFLIP XFLIP
+Random 40
+
+#random 2x2
+Index 10
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
+Random 50
+
+Index 12
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
+Random 50
+
+#random 3x3
+Index 87
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos 0 2 FULL
+Pos 1 2 FULL
+Pos 2 2 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 3 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 75
+
+#random 3x2
+Index 74
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 100
+
+Index 106
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 100
+
+NewRun
+
+#Remove overlaps
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -2 -2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -1 -2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 0 -2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 1 -2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 2 -2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -2 -1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -1 -1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 0 -1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 1 -1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 2 -1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -2 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -1 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 1 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 2 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -2 1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -1 1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 0 1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 1 1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 2 1 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -2 2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos -1 2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 0 2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 1 2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+Index 23
+Pos 0 0 INDEX 10 OR 12 OR 87 OR 74 OR 106
+Pos 2 2 INDEX 10 OR 12 OR 87 OR 74 OR 106
+
+NewRun
+
+#Fill tiles
+Index 11
+Pos -1 0 INDEX 10
+Index 26
+Pos 0 -1 INDEX 10
+Index 27
+Pos -1 -1 INDEX 10
+
+Index 13
+Pos -1 0 INDEX 12
+Index 28
+Pos 0 -1 INDEX 12
+Index 29
+Pos -1 -1 INDEX 12
+
+Index 88
+Pos -1 0 INDEX 87
+Index 89
+Pos -2 0 INDEX 87
+Index 103
+Pos 0 -1 INDEX 87
+Index 104
+Pos -1 -1 INDEX 87
+Index 105
+Pos -2 -1 INDEX 87
+Index 119
+Pos 0 -2 INDEX 87
+Index 120
+Pos -1 -2 INDEX 87
+Index 121
+Pos -2 -2 INDEX 87
+
+Index 75
+Pos -1 0 INDEX 74
+Index 76
+Pos -2 0 INDEX 74
+Index 90
+Pos 0 -1 INDEX 74
+Index 91
+Pos -1 -1 INDEX 74
+Index 92
+Pos -2 -1 INDEX 74
+
+Index 107
+Pos -1 0 INDEX 106
+Index 108
+Pos -2 0 INDEX 106
+Index 122
+Pos 0 -1 INDEX 106
+Index 123
+Pos -1 -1 INDEX 106
+Index 124
+Pos -2 -1 INDEX 106
+
+
+
+[Random Bronze]
+
+Index 144
+
+Index 129
+Random 40
+
+Index 129 XFLIP
+Random 40
+
+Index 129 YFLIP
+Random 40
+
+Index 129 YFLIP XFLIP
+Random 40
+
+Index 130
+Random 40
+
+Index 130 XFLIP
+Random 40
+
+Index 130 YFLIP
+Random 40
+
+Index 130 YFLIP XFLIP
+Random 40
+
+Index 144 XFLIP
+Random 40
+
+Index 144 YFLIP
+Random 40
+
+Index 144 YFLIP XFLIP
+Random 40
+
+Index 145
+Random 40
+
+Index 145 XFLIP
+Random 40
+
+Index 145 YFLIP
+Random 40
+
+Index 145 YFLIP XFLIP
+Random 40
+
+Index 146
+Random 40
+
+Index 146 XFLIP
+Random 40
+
+Index 146 YFLIP
+Random 40
+
+Index 146 YFLIP XFLIP
+Random 40
+
+Index 160
+Random 40
+
+Index 160 XFLIP
+Random 40
+
+Index 160 YFLIP
+Random 40
+
+Index 160 YFLIP XFLIP
+Random 40
+
+Index 161
+Random 40
+
+Index 161 XFLIP
+Random 40
+
+Index 161 YFLIP
+Random 40
+
+Index 161 YFLIP XFLIP
+Random 40
+
+Index 162
+Random 40
+
+Index 162 XFLIP
+Random 40
+
+Index 162 YFLIP
+Random 40
+
+Index 162 YFLIP XFLIP
+Random 40
+
+Index 166
+Random 40
+
+Index 166 XFLIP
+Random 40
+
+Index 166 YFLIP
+Random 40
+
+Index 166 YFLIP XFLIP
+Random 40
+
+Index 182
+Random 40
+
+Index 182 XFLIP
+Random 40
+
+Index 182 YFLIP
+Random 40
+
+Index 182 YFLIP XFLIP
+Random 40
+
+#random 2x2
+Index 131
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
+Random 50
+
+Index 133
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
+Random 50
+
+#random 3x3
+Index 208
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos 0 2 FULL
+Pos 1 2 FULL
+Pos 2 2 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 3 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 75
+
+#random 3x2
+Index 195
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 100
+
+Index 227
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 100
+
+NewRun
+
+#Remove overlaps
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -2 -2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -1 -2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 0 -2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 1 -2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 2 -2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -2 -1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -1 -1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 0 -1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 1 -1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 2 -1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -2 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -1 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 1 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 2 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -2 1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -1 1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 0 1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 1 1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 2 1 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -2 2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos -1 2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 0 2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 1 2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+Index 144
+Pos 0 0 INDEX 131 OR 133 OR 208 OR 195 OR 227
+Pos 2 2 INDEX 131 OR 133 OR 208 OR 195 OR 227
+
+NewRun
+
+#Fill tiles
+Index 132
+Pos -1 0 INDEX 131
+Index 147
+Pos 0 -1 INDEX 131
+Index 148
+Pos -1 -1 INDEX 131
+
+Index 134
+Pos -1 0 INDEX 133
+Index 149
+Pos 0 -1 INDEX 133
+Index 150
+Pos -1 -1 INDEX 133
+
+Index 209
+Pos -1 0 INDEX 208
+Index 210
+Pos -2 0 INDEX 208
+Index 224
+Pos 0 -1 INDEX 208
+Index 225
+Pos -1 -1 INDEX 208
+Index 226
+Pos -2 -1 INDEX 208
+Index 240
+Pos 0 -2 INDEX 208
+Index 241
+Pos -1 -2 INDEX 208
+Index 242
+Pos -2 -2 INDEX 208
+
+Index 196
+Pos -1 0 INDEX 195
+Index 197
+Pos -2 0 INDEX 195
+Index 211
+Pos 0 -1 INDEX 195
+Index 212
+Pos -1 -1 INDEX 195
+Index 213
+Pos -2 -1 INDEX 195
+
+Index 228
+Pos -1 0 INDEX 227
+Index 229
+Pos -2 0 INDEX 227
+Index 243
+Pos 0 -1 INDEX 227
+Index 244
+Pos -1 -1 INDEX 227
+Index 245
+Pos -2 -1 INDEX 227
+
+
+
+[Silver/Gold-Mix]
+
+#Silver
+Index 16
+
+Index 1
+Random 80
+
+Index 1 XFLIP
+Random 80
+
+Index 1 YFLIP
+Random 80
+
+Index 1 YFLIP XFLIP
+Random 80
+
+Index 2
+Random 80
+
+Index 2 XFLIP
+Random 80
+
+Index 2 YFLIP
+Random 80
+
+Index 2 YFLIP XFLIP
+Random 80
+
+Index 16 XFLIP
+Random 80
+
+Index 16 YFLIP
+Random 80
+
+Index 16 YFLIP XFLIP
+Random 80
+
+Index 17
+Random 80
+
+Index 17 XFLIP
+Random 80
+
+Index 17 YFLIP
+Random 80
+
+Index 17 YFLIP XFLIP
+Random 80
+
+Index 18
+Random 80
+
+Index 18 XFLIP
+Random 80
+
+Index 18 YFLIP
+Random 80
+
+Index 18 YFLIP XFLIP
+Random 80
+
+Index 32
+Random 80
+
+Index 32 XFLIP
+Random 80
+
+Index 32 YFLIP
+Random 80
+
+Index 32 YFLIP XFLIP
+Random 80
+
+Index 33
+Random 80
+
+Index 33 XFLIP
+Random 80
+
+Index 33 YFLIP
+Random 80
+
+Index 33 YFLIP XFLIP
+Random 80
+
+Index 34
+Random 80
+
+Index 34 XFLIP
+Random 80
+
+Index 34 YFLIP
+Random 80
+
+Index 34 YFLIP XFLIP
+Random 80
+
+Index 38
+Random 80
+
+Index 38 XFLIP
+Random 80
+
+Index 38 YFLIP
+Random 80
+
+Index 38 YFLIP XFLIP
+Random 80
+
+Index 54
+Random 80
+
+Index 54 XFLIP
+Random 80
+
+Index 54 YFLIP
+Random 80
+
+Index 54 YFLIP XFLIP
+Random 80
+
+#Gold
+
+Index 8
+Random 80
+
+Index 8 XFLIP
+Random 80
+
+Index 8 YFLIP
+Random 80
+
+Index 8 YFLIP XFLIP
+Random 80
+
+Index 9
+Random 80
+
+Index 9 XFLIP
+Random 80
+
+Index 9 YFLIP
+Random 80
+
+Index 9 YFLIP XFLIP
+Random 80
+
+Index 23
+Random 80
+
+Index 23 XFLIP
+Random 80
+
+Index 23 YFLIP
+Random 80
+
+Index 23 YFLIP XFLIP
+Random 80
+
+Index 24
+Random 80
+
+Index 24 XFLIP
+Random 80
+
+Index 24 YFLIP
+Random 80
+
+Index 24 YFLIP XFLIP
+Random 80
+
+Index 25
+Random 80
+
+Index 25 XFLIP
+Random 80
+
+Index 25 YFLIP
+Random 80
+
+Index 25 YFLIP XFLIP
+Random 80
+
+Index 39
+Random 80
+
+Index 39 XFLIP
+Random 80
+
+Index 39 YFLIP
+Random 80
+
+Index 39 YFLIP XFLIP
+Random 80
+
+Index 40
+Random 80
+
+Index 40 XFLIP
+Random 80
+
+Index 40 YFLIP
+Random 80
+
+Index 40 YFLIP XFLIP
+Random 80
+
+Index 41
+Random 80
+
+Index 41 XFLIP
+Random 80
+
+Index 41 YFLIP
+Random 80
+
+Index 41 YFLIP XFLIP
+Random 80
+
+Index 45
+Random 80
+
+Index 45 XFLIP
+Random 80
+
+Index 45 YFLIP
+Random 80
+
+Index 45 YFLIP XFLIP
+Random 80
+
+Index 61
+Random 80
+
+Index 61 XFLIP
+Random 80
+
+Index 61 YFLIP
+Random 80
+
+Index 61 YFLIP XFLIP
+Random 80
+
+
+
+[Copper/Silver-Mix]
+
+#Copper
+Index 144
+
+Index 129
+Random 80
+
+Index 129 XFLIP
+Random 80
+
+Index 129 YFLIP
+Random 80
+
+Index 129 YFLIP XFLIP
+Random 80
+
+Index 130
+Random 80
+
+Index 130 XFLIP
+Random 80
+
+Index 130 YFLIP
+Random 80
+
+Index 130 YFLIP XFLIP
+Random 80
+
+Index 144 XFLIP
+Random 80
+
+Index 144 YFLIP
+Random 80
+
+Index 144 YFLIP XFLIP
+Random 80
+
+Index 145
+Random 80
+
+Index 145 XFLIP
+Random 80
+
+Index 145 YFLIP
+Random 80
+
+Index 145 YFLIP XFLIP
+Random 80
+
+Index 146
+Random 80
+
+Index 146 XFLIP
+Random 80
+
+Index 146 YFLIP
+Random 80
+
+Index 146 YFLIP XFLIP
+Random 80
+
+Index 160
+Random 80
+
+Index 160 XFLIP
+Random 80
+
+Index 160 YFLIP
+Random 80
+
+Index 160 YFLIP XFLIP
+Random 80
+
+Index 161
+Random 80
+
+Index 161 XFLIP
+Random 80
+
+Index 161 YFLIP
+Random 80
+
+Index 161 YFLIP XFLIP
+Random 80
+
+Index 162
+Random 80
+
+Index 162 XFLIP
+Random 80
+
+Index 162 YFLIP
+Random 80
+
+Index 162 YFLIP XFLIP
+Random 80
+
+Index 166
+Random 80
+
+Index 166 XFLIP
+Random 80
+
+Index 166 YFLIP
+Random 80
+
+Index 166 YFLIP XFLIP
+Random 80
+
+Index 182
+Random 80
+
+Index 182 XFLIP
+Random 80
+
+Index 182 YFLIP
+Random 80
+
+Index 182 YFLIP XFLIP
+Random 80
+
+#Silver
+
+Index 1
+Random 80
+
+Index 1 XFLIP
+Random 80
+
+Index 1 YFLIP
+Random 80
+
+Index 1 YFLIP XFLIP
+Random 80
+
+Index 2
+Random 80
+
+Index 2 XFLIP
+Random 80
+
+Index 2 YFLIP
+Random 80
+
+Index 2 YFLIP XFLIP
+Random 80
+
+Index 16
+Random 80
+
+Index 16 XFLIP
+Random 80
+
+Index 16 YFLIP
+Random 80
+
+Index 16 YFLIP XFLIP
+Random 80
+
+Index 17
+Random 80
+
+Index 17 XFLIP
+Random 80
+
+Index 17 YFLIP
+Random 80
+
+Index 17 YFLIP XFLIP
+Random 80
+
+Index 18
+Random 80
+
+Index 18 XFLIP
+Random 80
+
+Index 18 YFLIP
+Random 80
+
+Index 18 YFLIP XFLIP
+Random 80
+
+Index 32
+Random 80
+
+Index 32 XFLIP
+Random 80
+
+Index 32 YFLIP
+Random 80
+
+Index 32 YFLIP XFLIP
+Random 80
+
+Index 33
+Random 80
+
+Index 33 XFLIP
+Random 80
+
+Index 33 YFLIP
+Random 80
+
+Index 33 YFLIP XFLIP
+Random 80
+
+Index 34
+Random 80
+
+Index 34 XFLIP
+Random 80
+
+Index 34 YFLIP
+Random 80
+
+Index 34 YFLIP XFLIP
+Random 80
+
+Index 38
+Random 80
+
+Index 38 XFLIP
+Random 80
+
+Index 38 YFLIP
+Random 80
+
+Index 38 YFLIP XFLIP
+Random 80
+
+Index 54
+Random 80
+
+Index 54 XFLIP
+Random 80
+
+Index 54 YFLIP
+Random 80
+
+Index 54 YFLIP XFLIP
+Random 80
+
+
+
+[Gold/Copper-Mix]
+
+#Gold
+Index 23
+
+Index 8
+Random 80
+
+Index 8 XFLIP
+Random 80
+
+Index 8 YFLIP
+Random 80
+
+Index 8 YFLIP XFLIP
+Random 80
+
+Index 9
+Random 80
+
+Index 9 XFLIP
+Random 80
+
+Index 9 YFLIP
+Random 80
+
+Index 9 YFLIP XFLIP
+Random 80
+
+Index 23 XFLIP
+Random 80
+
+Index 23 YFLIP
+Random 80
+
+Index 23 YFLIP XFLIP
+Random 80
+
+Index 24
+Random 80
+
+Index 24 XFLIP
+Random 80
+
+Index 24 YFLIP
+Random 80
+
+Index 24 YFLIP XFLIP
+Random 80
+
+Index 25
+Random 80
+
+Index 25 XFLIP
+Random 80
+
+Index 25 YFLIP
+Random 80
+
+Index 25 YFLIP XFLIP
+Random 80
+
+Index 39
+Random 80
+
+Index 39 XFLIP
+Random 80
+
+Index 39 YFLIP
+Random 80
+
+Index 39 YFLIP XFLIP
+Random 80
+
+Index 40
+Random 80
+
+Index 40 XFLIP
+Random 80
+
+Index 40 YFLIP
+Random 80
+
+Index 40 YFLIP XFLIP
+Random 80
+
+Index 41
+Random 80
+
+Index 41 XFLIP
+Random 80
+
+Index 41 YFLIP
+Random 80
+
+Index 41 YFLIP XFLIP
+Random 80
+
+Index 45
+Random 80
+
+Index 45 XFLIP
+Random 80
+
+Index 45 YFLIP
+Random 80
+
+Index 45 YFLIP XFLIP
+Random 80
+
+Index 61
+Random 80
+
+Index 61 XFLIP
+Random 80
+
+Index 61 YFLIP
+Random 80
+
+Index 61 YFLIP XFLIP
+Random 80
+
+#Copper
+
+Index 129
+Random 80
+
+Index 129 XFLIP
+Random 80
+
+Index 129 YFLIP
+Random 80
+
+Index 129 YFLIP XFLIP
+Random 80
+
+Index 130
+Random 80
+
+Index 130 XFLIP
+Random 80
+
+Index 130 YFLIP
+Random 80
+
+Index 130 YFLIP XFLIP
+Random 80
+
+Index 144
+Random 80
+
+Index 144 XFLIP
+Random 80
+
+Index 144 YFLIP
+Random 80
+
+Index 144 YFLIP XFLIP
+Random 80
+
+Index 145
+Random 80
+
+Index 145 XFLIP
+Random 80
+
+Index 145 YFLIP
+Random 80
+
+Index 145 YFLIP XFLIP
+Random 80
+
+Index 146
+Random 80
+
+Index 146 XFLIP
+Random 80
+
+Index 146 YFLIP
+Random 80
+
+Index 146 YFLIP XFLIP
+Random 80
+
+Index 160
+Random 80
+
+Index 160 XFLIP
+Random 80
+
+Index 160 YFLIP
+Random 80
+
+Index 160 YFLIP XFLIP
+Random 80
+
+Index 161
+Random 80
+
+Index 161 XFLIP
+Random 80
+
+Index 161 YFLIP
+Random 80
+
+Index 161 YFLIP XFLIP
+Random 80
+
+Index 162
+Random 80
+
+Index 162 XFLIP
+Random 80
+
+Index 162 YFLIP
+Random 80
+
+Index 162 YFLIP XFLIP
+Random 80
+
+Index 166
+Random 80
+
+Index 166 XFLIP
+Random 80
+
+Index 166 YFLIP
+Random 80
+
+Index 166 YFLIP XFLIP
+Random 80
+
+Index 182
+Random 80
+
+Index 182 XFLIP
+Random 80
+
+Index 182 YFLIP
+Random 80
+
+Index 182 YFLIP XFLIP
+Random 80
+
+
+
+[Mix All]
+
+#Silver
+Index 16
+
+Index 1
+Random 120
+
+Index 1 XFLIP
+Random 120
+
+Index 1 YFLIP
+Random 120
+
+Index 1 YFLIP XFLIP
+Random 120
+
+Index 2
+Random 120
+
+Index 2 XFLIP
+Random 120
+
+Index 2 YFLIP
+Random 120
+
+Index 2 YFLIP XFLIP
+Random 120
+
+Index 16 XFLIP
+Random 120
+
+Index 16 YFLIP
+Random 120
+
+Index 16 YFLIP XFLIP
+Random 120
+
+Index 17
+Random 120
+
+Index 17 XFLIP
+Random 120
+
+Index 17 YFLIP
+Random 120
+
+Index 17 YFLIP XFLIP
+Random 120
+
+Index 18
+Random 120
+
+Index 18 XFLIP
+Random 120
+
+Index 18 YFLIP
+Random 120
+
+Index 18 YFLIP XFLIP
+Random 120
+
+Index 32
+Random 120
+
+Index 32 XFLIP
+Random 120
+
+Index 32 YFLIP
+Random 120
+
+Index 32 YFLIP XFLIP
+Random 120
+
+Index 33
+Random 120
+
+Index 33 XFLIP
+Random 120
+
+Index 33 YFLIP
+Random 120
+
+Index 33 YFLIP XFLIP
+Random 120
+
+Index 34
+Random 120
+
+Index 34 XFLIP
+Random 120
+
+Index 34 YFLIP
+Random 120
+
+Index 34 YFLIP XFLIP
+Random 120
+
+Index 38
+Random 120
+
+Index 38 XFLIP
+Random 120
+
+Index 38 YFLIP
+Random 120
+
+Index 38 YFLIP XFLIP
+Random 120
+
+Index 54
+Random 120
+
+Index 54 XFLIP
+Random 120
+
+Index 54 YFLIP
+Random 120
+
+Index 54 YFLIP XFLIP
+Random 120
+
+#Gold
+
+Index 8
+Random 120
+
+Index 8 XFLIP
+Random 120
+
+Index 8 YFLIP
+Random 120
+
+Index 8 YFLIP XFLIP
+Random 120
+
+Index 9
+Random 120
+
+Index 9 XFLIP
+Random 120
+
+Index 9 YFLIP
+Random 120
+
+Index 9 YFLIP XFLIP
+Random 120
+
+Index 23
+Random 120
+
+Index 23 XFLIP
+Random 120
+
+Index 23 YFLIP
+Random 120
+
+Index 23 YFLIP XFLIP
+Random 120
+
+Index 24
+Random 120
+
+Index 24 XFLIP
+Random 120
+
+Index 24 YFLIP
+Random 120
+
+Index 24 YFLIP XFLIP
+Random 120
+
+Index 25
+Random 120
+
+Index 25 XFLIP
+Random 120
+
+Index 25 YFLIP
+Random 120
+
+Index 25 YFLIP XFLIP
+Random 120
+
+Index 39
+Random 120
+
+Index 39 XFLIP
+Random 120
+
+Index 39 YFLIP
+Random 120
+
+Index 39 YFLIP XFLIP
+Random 120
+
+Index 40
+Random 120
+
+Index 40 XFLIP
+Random 120
+
+Index 40 YFLIP
+Random 120
+
+Index 40 YFLIP XFLIP
+Random 120
+
+Index 41
+Random 120
+
+Index 41 XFLIP
+Random 120
+
+Index 41 YFLIP
+Random 120
+
+Index 41 YFLIP XFLIP
+Random 120
+
+Index 45
+Random 120
+
+Index 45 XFLIP
+Random 120
+
+Index 45 YFLIP
+Random 120
+
+Index 45 YFLIP XFLIP
+Random 120
+
+Index 61
+Random 120
+
+Index 61 XFLIP
+Random 120
+
+Index 61 YFLIP
+Random 120
+
+Index 61 YFLIP XFLIP
+Random 120
+
+#Copper
+
+Index 129
+Random 120
+
+Index 129 XFLIP
+Random 120
+
+Index 129 YFLIP
+Random 120
+
+Index 129 YFLIP XFLIP
+Random 120
+
+Index 130
+Random 120
+
+Index 130 XFLIP
+Random 120
+
+Index 130 YFLIP
+Random 120
+
+Index 130 YFLIP XFLIP
+Random 120
+
+Index 144
+Random 120
+
+Index 144 XFLIP
+Random 120
+
+Index 144 YFLIP
+Random 120
+
+Index 144 YFLIP XFLIP
+Random 120
+
+Index 145
+Random 120
+
+Index 145 XFLIP
+Random 120
+
+Index 145 YFLIP
+Random 120
+
+Index 145 YFLIP XFLIP
+Random 120
+
+Index 146
+Random 120
+
+Index 146 XFLIP
+Random 120
+
+Index 146 YFLIP
+Random 120
+
+Index 146 YFLIP XFLIP
+Random 120
+
+Index 160
+Random 120
+
+Index 160 XFLIP
+Random 120
+
+Index 160 YFLIP
+Random 120
+
+Index 160 YFLIP XFLIP
+Random 120
+
+Index 161
+Random 120
+
+Index 161 XFLIP
+Random 120
+
+Index 161 YFLIP
+Random 120
+
+Index 161 YFLIP XFLIP
+Random 120
+
+Index 162
+Random 120
+
+Index 162 XFLIP
+Random 120
+
+Index 162 YFLIP
+Random 120
+
+Index 162 YFLIP XFLIP
+Random 120
+
+Index 166
+Random 120
+
+Index 166 XFLIP
+Random 120
+
+Index 166 YFLIP
+Random 120
+
+Index 166 YFLIP XFLIP
+Random 120
+
+Index 182
+Random 120
+
+Index 182 XFLIP
+Random 120
+
+Index 182 YFLIP
+Random 120
+
+Index 182 YFLIP XFLIP
+Random 120

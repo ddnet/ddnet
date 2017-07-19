@@ -1,0 +1,993 @@
+##### authors #####
+#translated to catalan by:
+#	Ryozuki
+##### translated strings #####
+
+%ds left
+== %ds restants
+
+%i minute left
+== %i minuts restants
+
+%i minutes left
+== %i minuts restants
+
+%i second left
+== %i segons restants
+
+%i seconds left
+== %i segons restants
+
+%s wins!
+== ¡%s guanya!
+
+-Page %d-
+== -Pàgina %d-
+
+Abort
+== Cancelar
+
+Add
+== Afegir
+
+Add Friend
+== Afegir a amics
+
+Address
+== Direcció
+
+All
+== Tots
+
+Are you sure that you want to delete the demo?
+== Estàs segur que vols eliminar la repetició?
+
+Are you sure that you want to quit?
+== Estàs segur que vols sortir?
+
+Are you sure that you want to remove the player from your friends list?
+== Estàs segur que vols eliminar a aquest jugador de la lista d'amics?
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Com és el primer cop que obres el joc, si us plau, posa el teu nom. Es recomanable que verifiquis la configuració del joc abans d'unirte a un servidor.
+
+Automatically record demos
+== Grabar repeticions automàticament
+
+Automatically take game over screenshot
+== Fer una foto de la pantalla al final de la partida
+
+Blue team
+== Equip blau
+
+Blue team wins!
+== El equip blau guanya!
+
+Body
+== Cos
+
+Call vote
+== Votar
+
+Change settings
+== Cambiar la configuració
+
+Chat
+== Conversació
+
+Clan
+== Clan
+
+Client
+== Client
+
+Close
+== Tancar
+
+Compatible version
+== Versió compatible
+
+Connect
+== Connectar
+
+Connecting to
+== T'estas unint a
+
+Connection Problems...
+== Problemes de conexió...
+
+Console
+== Consola
+
+Controls
+== Controls
+
+Count players only
+== Només contar jugadors
+
+Country
+== País
+
+Current
+== Actual
+
+Custom colors
+== Colors personalizats
+
+Delete
+== Borrar
+
+Delete demo
+== Borrar repetició
+
+Demo details
+== Detalls de la repetició
+
+Demofile: %s
+== Fitxer de la repetició: %s
+
+Demos
+== Repeticions
+
+Disconnect
+== Desconectar
+
+Disconnected
+== Desconectat
+
+Downloading map
+== Descarregant mapa
+
+Draw!
+== Empat!
+
+Dynamic Camera
+== Càmara dinàmica
+
+Emoticon
+== Emoticó
+
+Enter
+== Entrar
+
+Error
+== Error
+
+Error loading demo
+== Error al carregar la repetició
+
+Favorite
+== Preferit
+
+Favorites
+== Preferits
+Feet
+== Peus
+
+Filter
+== Filtre
+
+Fire
+== Disparar
+
+Folder
+== Carpeta
+
+Force vote
+== Forçar
+
+Free-View
+== Vista lliure
+
+Friends
+== Amics
+
+Fullscreen
+== Pantalla completa
+
+Game
+== Joc
+
+Game info
+== Informació de la partida
+
+Game over
+== Fi de la partida
+
+Game paused
+== Joc en pausa
+
+Game type
+== Mode de joc
+
+Game types:
+== Modes de joc:
+
+General
+== General
+
+Graphics
+== Gràfics
+
+Grenade
+== Granada
+
+Hammer
+== Martell
+
+Has people playing
+== Hi ha gent jugant
+
+High Detail
+== Mes detalls (HD)
+
+Hook
+== Ganxo
+
+Invalid Demo
+== Repetició invàlida
+
+Join blue
+== Unir-se al blau
+
+Join red
+== Unir-se al vermell
+
+Jump
+== Saltar
+
+Kick player
+== Expulsar jugador
+
+Language
+== Idioma
+
+MOTD
+== MOTD
+
+Map
+== Mapa
+
+Maximum ping:
+== Ping màxim:
+
+Mouse sens.
+== Sensibilitat del ratolí
+
+Move left
+== Moures a l'esquerra
+
+Move player to spectators
+== Moure jugador a espectadors
+
+Move right
+== Moure's a la dreta
+
+Movement
+== Moviment
+
+Mute when not active
+== Silenciar si no està actiu
+
+Name
+== Nom
+
+Next weapon
+== Arma següent
+
+Nickname
+== Nom
+
+No
+== No
+
+No password
+== Sense contrasenya
+
+No servers found
+== Cap servidor trobat
+
+No servers match your filter criteria
+== Cap servidor correspon als criteris de filtrat
+
+Ok
+== Ok
+
+Open
+== Obrir
+
+Parent Folder
+== Carpeta principal
+
+Password
+== Contrasenya
+
+Password incorrect
+== Contrasenya incorrecte
+
+Ping
+== Ping
+
+Pistol
+== Pistola
+
+Play
+== Reproduir
+
+Play background music
+== Reproduir música de fons
+
+Player
+== Jugador
+
+Player country:
+== País del jugador
+
+Player options
+== Opcions del jugador
+
+Players
+== Jugadors
+
+Please balance teams!
+== Si us plau, equilibreu els equips!
+
+Prev. weapon
+== Arma anterior
+
+Quality Textures
+== Textures de qualitat
+
+Quit
+== Sortir
+
+Reason:
+== Motiu:
+
+Red team
+== Equip vermell
+
+Red team wins!
+== El equip vermell guanya!
+
+Refresh
+== Actualitzar
+
+Refreshing master servers
+== Actualitzant servidors principals
+
+Remote console
+== Consola remota
+
+Remove
+== Eliminar
+
+Remove friend
+== Eliminar amic
+
+Rename
+== Renombrar
+
+Rename demo
+== Renombrar repetició
+
+Reset filter
+== Reiniciar filtre
+
+Respawn
+== Reaparéixer
+
+Sample rate
+== Frecuencia de la imatge
+
+Score
+== Punts
+
+Score board
+== Puntuació
+
+Score limit
+== Límit de punts
+
+Scoreboard
+== Puntuació
+
+Screenshot
+== Foto de pantalla
+
+Server address:
+== IP del servidor:
+
+Server details
+== Detalls del servidor
+
+Server filter
+== Filtre del servidor
+
+Server info
+== Servidor
+
+Server not full
+== Servidor sense omplir
+
+Shotgun
+== Escopeta
+
+Show chat
+== Veure conversació
+
+Show friends only
+== Nomes veure amics
+
+Show ingame HUD
+== Veure HUD en el joc
+
+Show name plates
+== Veure els noms
+
+Show only chat messages from friends
+== Rebre només missatges d'amics
+
+Show only supported
+== Veure únicament modes compatibles
+
+Skins
+== Skins
+
+Sound
+== So
+
+Sound error
+== Error de so
+
+Spectate
+== Asistir
+
+Spectate next
+== Observar següent
+
+Spectate previous
+== Observar anterior
+
+Spectator mode
+== Mode espectador
+
+Spectators
+== Espectadors
+
+Standard gametype
+== Tipus de joc estàndar
+
+Standard map
+== Mapa estàndar
+
+Stop record
+== Parar grabació
+
+Strict gametype filter
+== Tipo de joc del filtre
+
+Sudden Death
+== Mort súbita
+
+Switch weapon on pickup
+== Cambiar al arma rellida
+
+Team
+== Equip
+
+Team chat
+== En equip
+
+Texture Compression
+== Compresió de textures
+
+The audio device couldn't be initialised.
+== El dispositiu de audio no pot ser inicialitzat.
+
+The server is running a non-standard tuning on a pure game type.
+== El servidor está ejecutant una configuració no estándar en un tipo de joc pur.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Tens un mapa sense guardar en el editor, segurament vols guardarlo abans de sortir.
+
+Time limit
+== Temps límit
+
+Time limit: %d min
+== Temps límit: %d minuts
+
+Try again
+== Intentau de nou
+
+Type
+== Tipus
+
+Unable to delete the demo
+== No es pot eliminar la repetició
+
+Unable to rename the demo
+== No es pot reanomenar la repetició
+
+Use sounds
+== Fer servir sons
+
+Use team colors for name plates
+== Fe servir els colors dels equips en els noms
+
+V-Sync
+== V-Sync
+
+Version
+== Versió
+
+Vote command:
+== Codi de votació:
+
+Vote description:
+== Descripció de la votació:
+
+Vote no
+== Votar no
+
+Vote yes
+== Votar si
+
+Voting
+== Votació
+
+Warmup
+== Calentament
+
+Weapon
+== Arma
+
+Welcome to Teeworlds
+== ¡Benvingut/da a Teeworlds!
+
+Yes
+== Sí
+
+You must restart the game for all settings to take effect.
+== Tens que reiniciar el joc perquè els canvis tinguin efecte.
+
+##### needs translation #####
+
+Borderless window
+== Pantalla sense finestra
+
+Demo
+== Repetició
+
+Laser
+== Làser
+
+Reset
+== Reiniciat
+
+Screen
+== Pantalla
+
+New name:
+== Nom nou:
+
+Sat.
+== Saturació
+
+Miscellaneous
+== Miscelánea
+
+Internet
+== Internet
+
+Max demos
+== Númeru màxim de repeticions
+
+News
+== Notícies
+
+Join game
+== Unir-se
+
+FSAA samples
+== Mostras FSAA
+
+%d of %d servers, %d players
+== %d de %d servidors, %d jugadors
+
+Sound volume
+== Volum de so
+
+Created:
+== Creat:
+
+Max Screenshots
+== Número máxim de capturas
+
+Length:
+== Longitud:
+
+Rifle
+== Láser
+
+Netversion:
+== Versió Net
+
+Map:
+== Mapa:
+
+Info
+== Informació
+
+Hue
+== Matís
+
+Record demo
+== Grabar repetició
+
+Your skin
+== La teva skin
+
+Size:
+== Tamany:
+
+Reset to defaults
+== Restaurà per defecte
+
+Quit anyway?
+== Sortir igualment?
+
+Display Modes
+== Modes de video
+
+Version:
+== Versió:
+
+Round
+== Ronda
+
+Lht.
+== Lluminositat
+
+no limit
+== sense límit
+
+UI Color
+== Color del menú
+
+Host address
+== Direcció del host
+
+Crc:
+== Crc:
+
+Alpha
+== Alpha
+
+Current version: %s
+== Versió actual: %s
+
+LAN
+== LAN
+
+Name plates size
+== Mida de la font dels noms
+
+Type:
+== Tipus:
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

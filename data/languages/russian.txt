@@ -1,0 +1,1005 @@
+##### authors #####
+#originally created by:
+#	kaddyd
+#modified by:
+#	carzil		2011-04-05 19:19:06
+#	RaZeR[RT]	2011-04-12 17:57:02
+#	BotanEgg	2011-05-02 19:07:35
+#	Bananbl4	2011-07-07 02:03:04
+#	Arion WT	2011-07-07 09:39:05
+#	Arion WT	2011-08-07 12:16:28
+##### /authors #####
+
+##### translated strings #####
+
+%ds left
+== осталось %d сек.
+
+%i minute left
+== Осталась %i минута!
+
+%i minutes left
+== Осталось %i минут!
+
+%i second left
+== Осталась %i секунда!
+
+%i seconds left
+== Осталось %i секунд!
+
+%s wins!
+== %s победил!
+
+-Page %d-
+== -Страница %d-
+
+Abort
+== Отмена
+
+Add
+== Добавить
+
+Add Friend
+== Добавить друга
+
+Address
+== Адрес
+
+All
+== Все
+
+Are you sure that you want to delete the demo?
+== Вы уверены, что хотите удалить демо?
+
+Are you sure that you want to quit?
+== Вы действительно желаете выйти?
+
+Are you sure that you want to remove the player from your friends list?
+== Вы уверены, что хотите удалить игрока из друзей?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Пожалуйста, введите своё имя. Также рекоммендуется проверить настройки игры и поменять некоторые из них перед тем, как начать играть.
+
+Automatically record demos
+== Автоматически записывать демо
+
+Automatically take game over screenshot
+== Делать снимок результатов игры
+
+Blue team
+== Синие
+
+Blue team wins!
+== Синие победили!
+
+Body
+== Тело
+
+Call vote
+== Голосовать
+
+Change settings
+== Изменить настройки
+
+Chat
+== Чат
+
+Clan
+== Клан
+
+Client
+== Клиент
+
+Close
+== Выход
+
+Compatible version
+== Совместимая версия
+
+Connect
+== Подключиться
+
+Connecting to
+== Подключение к
+
+Connection Problems...
+== Проблемы со связью...
+
+Console
+== Консоль
+
+Controls
+== Управление
+
+Count players only
+== Считать только игроков
+
+Country
+== Флаг вашей страны
+
+Current
+== Текущий
+
+Custom colors
+== Свои цвета
+
+Delete
+== Удалить
+
+Delete demo
+== Удалить демо
+
+Demo details
+== Детали демо
+
+Demofile: %s
+== Демо: %s
+
+Demos
+== Демо
+
+Disconnect
+== Отключить
+
+Disconnected
+== Отключено
+
+Downloading map
+== Скачивание карты
+
+Draw!
+== Ничья!
+
+Dynamic Camera
+== Динамическая камера
+
+Emoticon
+== Эмоции
+
+Enter
+== Вход
+
+Error
+== Ошибка
+
+Error loading demo
+== ошибка при загрузке демо
+
+Favorite
+== Избранный
+
+Favorites
+== Избранные
+
+Feet
+== Ноги
+
+Filter
+== Фильтр
+
+Fire
+== Выстрел
+
+Folder
+== Папка
+
+Force vote
+== Форсировать
+
+Free-View
+== Свободный обзор
+
+Friends
+== Друзья
+
+Fullscreen
+== Полноэкранный режим
+
+Game
+== Игра
+
+Game info
+== Инфо об игре
+
+Game over
+== Игра окончена
+
+Game type
+== Тип игры
+
+Game types:
+== Тип игры:
+
+General
+== Основные
+
+Graphics
+== Графика
+
+Grenade
+== Гранатомёт
+
+Hammer
+== Молот
+
+Has people playing
+== Не пустой сервер
+
+High Detail
+== Высокая детализация
+
+Hook
+== Крюк
+
+Invalid Demo
+== Недопустимое демо
+
+Join blue
+== За синих
+
+Join red
+== За красных
+
+Jump
+== Прыжок
+
+Kick player
+== Забанить игрока
+
+Language
+== Язык
+
+MOTD
+== MOTD
+
+Map
+== Карта
+
+Maximum ping:
+== Макс. пинг:
+
+Mouse sens.
+== Чувств. мыши
+
+Move left
+== Шаг влево
+
+Move player to spectators
+== Сделать наблюдателем
+
+Move right
+== Шаг вправо
+
+Movement
+== Перемещение
+
+Mute when not active
+== Глушить звуки, когда игра неактивна
+
+Name
+== Имя
+
+Next weapon
+== След. оружие
+
+Nickname
+== Имя
+
+No
+== Нет
+
+No password
+== Без пароля
+
+No servers found
+== Сервера не найдены
+
+No servers match your filter criteria
+== Нет серверов, подходящих под ваш фильтр
+
+Ok
+== ОК
+
+Open
+== Открыть
+
+Parent Folder
+== Родительский каталог
+
+Password
+== Пароль
+
+Password incorrect
+== Пароль
+
+Ping
+== Пинг
+
+Pistol
+== Пистолет
+
+Play
+== Просмотр
+
+Play background music
+== Играть фоновую музыку
+
+Player
+== Игрок
+
+Player country:
+== Страна игрока:
+
+Player options
+== Опции игрока
+
+Players
+== Игроки
+
+Please balance teams!
+== Сбалансируйте команды!
+
+Prev. weapon
+== Пред. оружие
+
+Quality Textures
+== Качественные текстуры
+
+Quit
+== Выход
+
+Reason:
+== Причина:
+
+Red team
+== Красные
+
+Red team wins!
+== Красные победили!
+
+Refresh
+== Обновить
+
+Refreshing master servers
+== Обновление списка мастер-серверов
+
+Remote console
+== Консоль сервера
+
+Remove
+== Удалить
+
+Remove friend
+== Удалить друга
+
+Rename
+== Переименов.
+
+Rename demo
+== Переименовать демо
+
+Reset filter
+== Сбросить фильтры
+
+Sample rate
+== Частота
+
+Score
+== Очки
+
+Score board
+== Табло
+
+Score limit
+== Лимит очков
+
+Scoreboard
+== Табло
+
+Screenshot
+== Снимок
+
+Server address:
+== Адрес сервера
+
+Server details
+== Детали сервера
+
+Server filter
+== Фильтр серверов
+
+Server info
+== Информация
+
+Server not full
+== Сервер не заполнен
+
+Shotgun
+== Дробовик
+
+Show chat
+== Показать чат
+
+Show friends only
+== Только с друзьями
+
+Show ingame HUD
+== Показывать внутриигровой HUD
+
+Show name plates
+== Показывать имена игроков
+
+Show only supported
+== Показывать только поддерживаемые разрешения экрана
+
+Skins
+== Скины
+
+Sound
+== Звук
+
+Sound error
+== Звуковая ошибка
+
+Spectate
+== Наблюдать
+
+Spectate next
+== Наблюдать след.
+
+Spectate previous
+== Наблюдать пред.
+
+Spectator mode
+== Наблюдатель
+
+Spectators
+== Наблюдатели
+
+Standard gametype
+== Стандартный тип игры
+
+Standard map
+== Стандартная карта
+
+Stop record
+== Стоп
+
+Strict gametype filter
+== Строгий фильтр р-мов
+
+Sudden Death
+== Быстрая смерть
+
+Switch weapon on pickup
+== Переключать оружие при подборе
+
+Switch weapon when out of ammo
+== Переключать оружие без патронов
+
+Reset wanted weapon on death
+== Сбрасывать выбор оружия при смерти
+
+Show only chat messages from friends
+== Показывать сообщения только от друзей
+
+Show clan above name plates
+== Показывать клан
+
+Automatically take statboard screenshot
+== Автоматически делать скрин результатов
+
+Show console window
+== Показывать консоль
+
+Team
+== Команда
+
+Team chat
+== Командный чат
+
+Texture Compression
+== Сжатие текстур
+
+The audio device couldn't be initialised.
+== Аудио устройство не может быть инициализировано
+
+The server is running a non-standard tuning on a pure game type.
+== Сервер запущен с нестандартными настройками на стандартном типе игры.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Есть несохранённая карта в редакторе, Вы можете сохранить её перед тем, как выйти.
+
+Time limit
+== Лимит времени
+
+Time limit: %d min
+== Лимит времени: %d
+
+Try again
+== ОК
+
+Type
+== Тип
+
+Unable to delete the demo
+== Невозможно удалить демо
+
+Unable to rename the demo
+== Невозможно переименовать демо
+
+Use sounds
+== Использовать звуки
+
+Use team colors for name plates
+== Командные цвета для имен игроков
+
+V-Sync
+== Вертикальная синхронизация
+
+Version
+== Версия
+
+Vote command:
+== Комманда голосования:
+
+Vote description:
+== Описание голосования:
+
+Vote no
+== Против
+
+Vote yes
+== За
+
+Voting
+== Голосование
+
+Warmup
+== Разминка
+
+Weapon
+== Оружие
+
+Welcome to Teeworlds
+== Добро пожаловать в Teeworlds!
+
+Yes
+== Да
+
+You must restart the game for all settings to take effect.
+== Перезапустите игру для применения изменений.
+
+Map sound volume
+== Громк. музыки с карты
+
+Enable game sounds
+== Звуки игры
+
+Enable gun sound
+== Звуки оружия
+
+Enable server message sound
+== Звуки сообщений сервера
+
+Enable regular chat sound
+== Звуки обычных сообщений
+
+Enable team chat sound
+== Звуки сообщений в команде
+
+Enable highlighted chat sound
+== Звуки подсвечиваемых сообщений
+
+Threaded sound loading
+== Фоновая загрузка музыки
+
+Borderless window
+== Без рамки
+
+Respawn
+== Рестарт
+
+Use DDRace Scoreboard
+== Использовать DDRace табло
+
+Show client IDs in Scoreboard
+== Показывать ID клиентов в табло
+
+Show kill messages
+== Показывать сообщения о смерти
+
+Show score
+== Показывать лидеров
+
+Show health + ammo
+== Покывать здоровье
+
+Show names in chat in team colors
+== Выделять цветом сообщения игроков в 
+
+Show votes window after voting
+== Скрывать меню голосования после вашего выбора
+
+Reset
+== Сброс
+
+Dummy settings
+== Настройки dummy
+
+Vanilla Skins only
+== Только Vanilla скины
+
+Search
+== Поиск
+
+Ghost
+== Тень
+
+Countries
+== Страны
+
+Types
+== Тип
+
+##### needs translation #####
+
+New name:
+== Новое имя
+
+Sat.
+== Контраст
+
+Miscellaneous
+== Дополнительно
+
+Internet
+== Интернет
+
+Max demos
+== Максимальное количество демо
+
+News
+== Новости
+
+Join game
+== Играть
+
+FSAA samples
+== Сэмплов FSAA
+
+%d of %d servers, %d players
+== %d из %d серверов, %d игроков
+
+Sound volume
+== Громкость звука
+
+Created:
+== Создан:
+
+Max Screenshots
+== Максимальное количество снимков
+
+Length:
+== Длина
+
+Rifle
+== Бластер
+
+Netversion:
+== Версия:
+
+Map:
+== Карта:
+
+Info
+== Инфо
+
+Hue
+== Оттенок
+
+Record demo
+== Записать демо
+
+Your skin
+== Ваш скин
+
+Size:
+== Размер:
+
+Reset to defaults
+== Сбросить настройки
+
+Quit anyway?
+== Выйти?
+
+Display Modes
+== Разрешение экрана
+
+Version:
+== Версия:
+
+Round
+== Раунд
+
+Lht.
+== Яркость
+
+no limit
+== Без лимита
+
+UI Color
+== Цвет интерфейса
+
+Host address
+== Адрес сервера
+
+Crc:
+== Crc:
+
+Alpha
+== Прозрачн.
+
+Current version: %s
+== Текущая версия: %s
+
+LAN
+== LAN
+
+Name plates size
+== Размер
+
+Type:
+== Тип:
+
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+✗
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+second
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Select a name
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Game paused
+== 
+
+Laser
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Remove chat
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Spree
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Best
+== 
+
+Normal message
+== 
+
+Screen
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Demo
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

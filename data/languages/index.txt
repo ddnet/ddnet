@@ -1,0 +1,121 @@
+##### language indices #####
+
+belarusian
+== Беларуская
+== 112
+
+bosnian
+== Bosanski
+== 70
+
+brazilian_portuguese
+== Português brasileiro
+== 76
+
+bulgarian
+== Български
+== 100
+
+catalan
+== Català
+== 906
+
+czech
+== Česky
+== 203
+
+danish
+== Dansk
+== 208
+
+dutch
+== Nederlands
+== 528
+
+finnish
+== Suomi
+== 246
+
+french
+== Français
+== 250
+
+german
+== Deutsch
+== 276
+
+hungarian
+== Magyar
+== 348
+
+italian
+== Italiano
+== 380
+
+japanese
+== 日本語
+== 392
+
+korean
+== 한국어
+== 410
+
+kyrgyz
+== Кыргызча
+== 417
+
+norwegian
+== Norsk
+== 578
+
+persian
+== Persian
+== 364
+
+polish
+== Polski
+== 616
+
+portuguese
+== Português
+== 620
+
+romanian
+== Română
+== 642
+
+russian
+== Русский
+== 643
+
+serbian
+== Srpski
+== 688
+
+simplified_chinese
+== 简体中文
+== 156
+
+slovak
+== Slovensky
+== 703
+
+spanish
+== Español
+== 724
+
+swedish
+== Svenska
+== 752
+
+traditional_chinese
+== 繁體中文
+== 158
+
+turkish
+== Türkçe
+== 792
+
+ukrainian
+== Українська
+== 804

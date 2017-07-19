@@ -1,0 +1,1018 @@
+##### authors #####
+#originally created by:
+#	Dominik Geyer
+#modified by:
+#	Fujnky			2010-06-03 11:30:05
+#	Fujnky			2010-06-03 17:41:45
+#	Fujnky			2010-06-05 23:36:52
+#	Fujnky			2010-06-07 16:17:40
+#	Fujnky			2010-06-11 09:50:47
+#	Sworddragon		2010-11-21 14:25:00
+#	Fujnky			2011-01-02 19:49:22
+#	heinrich5991	2011-01-23 17:53:42
+#	Sworddragon		2011-02-09 12:54:50
+#	heinrich5991	2011-04-03 23:46:51
+#	ghost91			2011-04-04 20:47:01
+#	andi103			2011-05-02 19:12:27
+#	andi103			2011-05-03 23:25:20
+#	heinrich5991	2011-07-02 09:10:21
+#	Yared Hufkens	2012-02-03 19:57:59
+#	andi103			2012-07-14 11:31:11
+#	timakro			2014-06-30 18:26:59
+##### /authors #####
+
+##### translated strings #####
+
+%ds left
+== Noch %ds
+
+%i minute left
+== Noch %i Minute
+
+%i minutes left
+== Noch %i Minuten
+
+%i second left
+== Noch %i Sekunde
+
+%i seconds left
+== Noch %i Sekunden
+
+%s wins!
+== %s gewinnt!
+
+-Page %d-
+== -Seite %d-
+
+Abort
+== Abbrechen
+
+Add
+== Hinzufügen
+
+Add Friend
+== Freund hinzufügen
+
+Address
+== Adresse
+
+All
+== Alle
+
+Are you sure that you want to delete the demo?
+== Möchtest du die Aufnahme wirklich löschen?
+
+Are you sure that you want to quit?
+== Bist du sicher, dass du beenden möchtest?
+
+Are you sure that you want to remove the player from your friends list?
+== Bist du sicher, dass du diesen Spieler aus deiner Freundesliste entfernen möchtest?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Da dies der erste Start des Spiels ist, gib bitte unten deinen Namen ein. Es wird empfohlen die Einstellungen zu überprüfen, um sie deinen Vorstellungen anzupassen, bevor du einem Server beitrittst.
+
+Automatically record demos
+== Automatisch Aufnahmen erstellen
+
+Blue team
+== Blaues Team
+
+Blue team wins!
+== Blaues Team gewinnt!
+
+Body
+== Körper
+
+Call vote
+== Abstimmen
+
+Change settings
+== Einstellungen ändern
+
+Chat
+== Chat
+
+Clan
+== Clan
+
+Client
+== Client
+
+Close
+== Schließ.
+
+Compatible version
+== Kompatible Version
+
+Connect
+== Verbinden
+
+Connecting to
+== Verbinden mit
+
+Connection Problems...
+== Verbindungsprobleme...
+
+Console
+== Konsole
+
+Controls
+== Steuerung
+
+Count players only
+== Nur Spieler zählen
+
+Country
+== Land
+
+Current
+== Aktuell
+
+Custom colors
+== Eigene Farben
+
+Delete
+== Löschen
+
+Delete demo
+== Aufnahme löschen
+
+Demo details
+== Aufnahmendetails:
+
+Demofile: %s
+== Demodatei: %s
+
+Demos
+== Aufnahm.
+
+Disconnect
+== Trennen
+
+Disconnected
+== Verbindung getrennt
+
+Downloading map
+== Karte herunterladen
+
+Draw!
+== Unentschieden!
+
+Dynamic Camera
+== Dynamische Kamera
+
+Emoticon
+== Emoticon
+
+Enter
+== Starten
+
+Error
+== Fehlgeschlagen
+
+Error loading demo
+== Fehler beim Laden der Aufnahme, die Datei ist ungültig.
+
+Favorite
+== Favorit
+
+Favorites
+== Favoriten
+
+Feet
+== Füße
+
+Filter
+== Filter
+
+Fire
+== Feuern
+
+Folder
+== Ordner
+
+Force vote
+== Erzwingen
+
+Free-View
+== Freie Ansicht
+
+Friends
+== Freunde
+
+Fullscreen
+== Vollbild
+
+Game
+== Spiel
+
+Game info
+== Spielinfo
+
+Game over
+== Spiel vorbei
+
+Game paused
+== Spiel pausiert
+
+Game type
+== Spieltyp
+
+Game types:
+== Spieltypen:
+
+General
+== Allgemein
+
+Graphics
+== Grafik
+
+Grenade
+== Granate
+
+Hammer
+== Hammer
+
+Has people playing
+== Server nicht leer
+
+High Detail
+== Hohe Details
+
+Hook
+== Haken
+
+Invalid Demo
+== Ungültige Aufnahme
+
+Join blue
+== zu Blau
+
+Join red
+== zu Rot
+
+Jump
+== Springen
+
+Kick player
+== Spieler kicken
+
+Language
+== Sprache
+
+MOTD
+== Nachricht des Tages
+
+Map
+== Karte
+
+Maximum ping:
+== Maximaler Ping:
+
+Mouse sens.
+== Maus-Empfindl.
+
+Move left
+== Nach links
+
+Move player to spectators
+== Spieler zu Zuschauer machen
+
+Move right
+== Nach rechts
+
+Movement
+== Bewegungen
+
+Mute when not active
+== Stumm, wenn inaktiv
+
+Name
+== Name
+
+Next weapon
+== Nächste Waffe
+
+Nickname
+== Spitzname
+
+No
+== Nein
+
+No password
+== Kein Passwort
+
+No servers found
+== Keine Server gefunden
+
+No servers match your filter criteria
+== Kein Server entspricht den Kriterien
+
+Ok
+== OK
+
+Open
+== Öffnen
+
+Parent Folder
+== Übergeordneter Ordner
+
+Password
+== Passwort
+
+Password incorrect
+== Passwort falsch
+
+Ping
+== Ping
+
+Pistol
+== Pistole
+
+Play
+== Abspielen
+
+Play background music
+== Hintergrundmusik abspielen
+
+Player
+== Spieler
+
+Player country:
+== Spielerland:
+
+Player options
+== Spieleroptionen
+
+Players
+== Spieler
+
+Please balance teams!
+== Bitte Teams ausgleichen!
+
+Prev. weapon
+== Vorherige Waffe
+
+Quality Textures
+== Hochauflösende Texturen
+
+Quit
+== Beenden
+
+Reason:
+== Grund:
+
+Red team
+== Rotes team
+
+Red team wins!
+== Rotes Team gewinnt!
+
+Refresh
+== Erneuern
+
+Refreshing master servers
+== Aktualisiere Masterserver
+
+Remote console
+== Remotekonsole
+
+Remove
+== Löschen
+
+Remove friend
+== Freund entfernen
+
+Rename
+== Umbenennen
+
+Rename demo
+== Aufnahme umbenennen
+
+Reset filter
+== Standardfilter
+
+Respawn
+== Wiederbelebung
+
+Sample rate
+== Abtastrate
+
+Score
+== Score
+
+Score board
+== Punktetafel
+
+Score limit
+== Punktelimit
+
+Scoreboard
+== Punktetafel
+
+Screenshot
+== Bildschirmfoto
+
+Server address:
+== Serveradresse:
+
+Server details
+== Serverdetails
+
+Server filter
+== Filter
+
+Server info
+== Serverinfo
+
+Server not full
+== Server nicht voll
+
+Shotgun
+== Schrotflinte
+
+Show chat
+== Chat anzeigen
+
+Show friends only
+== Nur Freunde zeigen
+
+Show ingame HUD
+== Spielanzeigen
+
+Show name plates
+== Zeige Namen
+
+Show only chat messages from friends
+== Nur Nachrichten von Freunden zeigen
+
+Show only supported
+== Zeige nur unterstützte
+
+Skins
+== Skins
+
+Sound
+== Ton
+
+Sound error
+== Audiofehler
+
+Spectate
+== Zuschauen
+
+Spectate next
+== Nächstem zusehen
+
+Spectate previous
+== Vorherigem zusehen
+
+Spectator mode
+== Zuschaueroptionen
+
+Spectators
+== Zuschauer
+
+Standard gametype
+== Standard-Spieltyp
+
+Standard map
+== Standardkarte
+
+Stop record
+== Aufnahme be.
+
+Strict gametype filter
+== Genauer Spieltyp
+
+Sudden Death
+== Sudden Death
+
+Switch weapon on pickup
+== Waffe beim Aufnehmen wechseln
+
+Team
+== Team
+
+Team chat
+== Teamchat
+
+Texture Compression
+== Texturkompression
+
+The audio device couldn't be initialised.
+== Das Audiosystem konnte nicht gestartet werden.
+
+The server is running a non-standard tuning on a pure game type.
+== Der Server läuft nicht mit Standardeinstellungen.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Im Editor ist noch eine ungespeicherte Karte. Vielleicht möchtest du sie speichern.
+
+Time limit
+== Zeitlimit
+
+Time limit: %d min
+== Zeitlimit: %d min
+
+Try again
+== Nochmal versuchen
+
+Type
+== Typ
+
+Unable to delete the demo
+== Aufnahme konnte nicht gelöscht werden
+
+Unable to rename the demo
+== Aufnahme konnte nicht umbenannt werden
+
+Use sounds
+== Aktiviere Ton
+
+Use team colors for name plates
+== Nutze Teamfarben für Spielernamen
+
+V-Sync
+== V-Sync
+
+Version
+== Version
+
+Vote command:
+== Kommando:
+
+Vote description:
+== Beschreibung:
+
+Vote no
+== Nein
+
+Vote yes
+== Ja
+
+Voting
+== Abstimmung
+
+Warmup
+== Aufwärmen
+
+Weapon
+== Waffen
+
+Welcome to Teeworlds
+== Willkommen bei Teeworlds
+
+Yes
+== Ja
+
+You must restart the game for all settings to take effect.
+== Du musst das Spiel neustarten um die Änderungen zu übernehmen.
+
+##### needs translation #####
+
+New name:
+== Neuer Name:
+
+Sat.
+== Sätt.
+
+Miscellaneous
+== Verschiedenes
+
+Internet
+== Internet
+
+Max demos
+== Maximale Anzahl an Aufnahmen
+
+News
+== News
+
+Join game
+== Beitreten
+
+FSAA samples
+== Vollbild Anti-Aliasing
+
+%d of %d servers, %d players
+== %d von %d Servern, %d Spieler
+
+Sound volume
+== Lautstärke
+
+Created:
+== Erstellt:
+
+Max Screenshots
+== Maximale Anzahl an Bildschirmfotos
+
+Length:
+== Länge
+
+Rifle
+== Laser
+
+Netversion:
+== Netversion:
+
+Map:
+== Karte:
+
+Info
+== Info
+
+Hue
+== Farb.
+
+Record demo
+== Aufnahme sta.
+
+Your skin
+== Dein Skin
+
+Size:
+== Größe:
+
+﻿
+##### translated strings #####
+
+Reset to defaults
+== Standardeinstellung
+
+Quit anyway?
+== Trotzdem beenden?
+
+Display Modes
+== Auflösungen
+
+Version:
+== Version:
+
+Round
+== Runde
+
+Lht.
+== Hell.
+
+no limit
+== Keine Begrenzung
+
+UI Color
+== Menüfarbe
+
+Host address
+== Serveradresse
+
+Crc:
+== Prüfsumme:
+
+Alpha
+== Alpha
+
+Current version: %s
+== Aktuelle Version: %s
+
+LAN
+== LAN
+
+Name plates size
+== Größe der Spielernamen
+
+Type:
+== Typ:
+
+Ratio
+== Ratio
+
+Dummy settings
+== Einstellungen für Dummy
+
+AntiPing
+== AntiPing
+
+Show quads
+== Quads anzeigen
+
+Map sound volume
+== Lautstärke von Mapsounds
+
+✗
+== ✗
+
+Countries
+== Länder
+
+Types
+== Typen
+
+Inner color
+== Innere Farbe
+
+\n\nReconnect in %d sec
+== Neu verbinden in %d Sekunden
+
+Background (entities)
+== Hintergrund (Entities)
+
+Show kill messages
+== Kill-Nachrichten anzeigen
+
+Show ghost
+== Geist anzeigen
+
+No updates available
+== Keine neuen Versionen verfügbar
+
+Update now
+== Jetzt aktualisieren
+
+Enable server message sound
+== Aktiviere Ton für Server-Nachrichten
+
+second
+== Sekunde
+
+Show votes window after voting
+== Zeige Vote-Fenster nach dem Voten
+
+HUD
+== Aussehen
+
+Look out!
+== Pass auf!
+
+Show names in chat in team colors
+== Nutze Teamfarben im Chat
+
+Enable team chat sound
+== Aktiviere Ton für Team-Nachrichten
+
+Show other players' hook collision lines
+== Hook-Collision von anderen Spielern anzeigen
+
+We will win
+== Wir werden gewinnen
+
+Deaths
+== Tode
+
+Enable game sounds
+== Aktiviere Ton im Spiel
+
+DDNet Client needs to be restarted to complete update!
+== Der DDNet Client muss neu gestarted werden um das Update abzuschließen!
+
+Spectator
+== Zuschauer
+
+Show others
+== Andere Teams zeigen
+
+Restart
+== Neustart
+
+Browser
+== Browser
+
+Enable gun sound
+== Aktiviere Pistolen-Ton
+
+Show health + ammo
+== Gesundheit und Munition anzeigen
+
+Team message
+== Team-Nachricht
+
+Save the best demo of each race
+== Speichere die beste Aufnahme von jedem Race
+
+Outline color
+== Äußere Farbe
+
+Are you sure that you want to disconnect?
+== Bist du sicher, dass du die Verbindung trennen möchtest?
+
+Ghost
+== Geist
+
+Check now
+== Aktualisieren
+
+DDNet Client updated!
+== Der DDNet Client wurde aktualisiert!
+
+Background (regular)
+== Hintergrund (Normal)
+
+AntiPing: predict other players
+== AntiPing: Berechne andere Spieler vor
+
+Show other players' key presses
+== Tastendrücke von anderen Spielern anzeigen
+
+System message
+== Server-Nachricht
+
+DDNet %s is available:
+== DDNet %s ist verfügbar:
+
+Updating...
+== Aktualisieren...
+
+Overlay entities
+== Entities Overlay
+
+Messages
+== Nachrichten
+
+%.2f MiB
+== %.2f MiB
+
+Use DDRace Scoreboard
+== Benutze das DDRace Scoreboard
+
+Loading DDNet Client
+== Lade DDNet Client
+
+Default zoom
+== Normal-Zoom
+
+Show score
+== Score anzeigen
+
+Show client IDs in Scoreboard
+== Client IDs im Scoreboard anzeigen
+
+seconds
+== Sekunden
+
+%.2f KiB
+== %.2f KiB
+
+Try fast HTTP map download first
+== Probiere schnelleres Downloaden über HTTP
+
+Enable regular chat sound
+== Aktiviere Ton für normale Nachrichten
+
+DDNet
+== DDNet
+
+Normal message
+== Normale Nachricht
+
+AntiPing: predict grenade paths
+== AntiPing: Berechne Granaten-Flugkurve vor
+
+Search
+== Suche
+
+Connecting dummy
+== Dummy verbindet sich
+
+Show clan above name plates
+== Clan über Spielernamen anzeigen
+
+Save ghost
+== Geist speichern
+
+Enable highlighted chat sound
+== Aktiviere Ton für Nachrichten an dich
+
+AntiPing: predict weapons
+== AntiPing: Berechne Waffen vor
+
+Hello and welcome
+== Hallo und willkommen
+
+Highlighted message
+== Nachricht an dich
+
+Reset wanted weapon on death
+== Waffe beim Tod zurücksetzen
+
+Switch weapon when out of ammo
+== Waffe wechseln wenn die Munition leer ist
+
+AntiPing limit
+== AntiPing-Limit
+
+##### generated by copy_fix.py, please translate this #####
+
+Grabs
+== 
+
+Select a name
+== 
+
+Hi o/
+== 
+
+Automatically take game over screenshot
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Gameplay
+== 
+
+Laser
+== 
+
+Old mouse mode
+== 
+
+Follow
+== 
+
+Reset
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Show tiles layers from BG map
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Race %3d:%02d  
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Frags
+== 
+
+Automatically take statboard screenshot
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Vanilla Skins only
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Max CSVs
+== 
+
+Borderless window
+== 
+
+Best
+== 
+
+Screen
+== 
+
+Clan plates size
+== 
+
+Auto %3d:%02d  
+== 
+
+Exclude
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Friend
+== 
+
+Demo
+== 

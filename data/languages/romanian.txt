@@ -1,0 +1,1006 @@
+##### authors #####
+#originally created by:
+#	kneekoo
+#modified by:
+#	kneekoo		2011-01-18 18:26:02
+#	kneekoo		2011-02-09 12:23:47
+#	kneekoo		2011-04-03 23:00:38
+#	kneekoo		2011-05-25 18:36:32
+#	kneekoo		2011-07-01 18:40:49
+#	kneekoo		2011-07-05 23:34:34
+#	kneekoo		2012-05-01 02:01:47
+##### /authors #####
+
+##### translated strings #####
+
+%ds left
+== %ds a ieșit
+
+%i minute left
+== %i minute rămas
+
+%i minutes left
+== %i minutes rămase
+
+%i second left
+== %i secundă rămasă
+
+%i seconds left
+== %i secunde rămase
+
+%s wins!
+== %s câștigă!
+
+-Page %d-
+== -Pagina %d-
+
+Abort
+== Anulează
+
+Add
+== Adaugă
+
+Add Friend
+== Adaugă prieten
+
+Address
+== Adresa
+
+All
+== Toți
+
+Are you sure that you want to delete the demo?
+== Sigur vrei să ștergi demo-ul?
+
+Are you sure that you want to quit?
+== Sigur vrei să ieși?
+
+Are you sure that you want to remove the player from your friends list?
+== Sigur vrei să ștergi jucătorul din lista ta de prieteni?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Aceasta fiind prima lansare a jocului, te rog introdu-ți pseudonimul mai jos. E recomandat să verifici setările și să le ajustezi cum vrei înainte să intri pe un server.
+
+Automatically record demos
+== Înregistrează automat demo-uri
+
+Automatically take game over screenshot
+== Fă automat o captură de ecran la final
+
+Blue team
+== Echipa albastră
+
+Blue team wins!
+== Echipa albastră a câștigat!
+
+Body
+== Corp
+
+Call vote
+== Votează
+
+Change settings
+== Modifică setările
+
+Chat
+== Chat
+
+Clan
+== Clanul
+
+Client
+== Clientul
+
+Close
+== Închide
+
+Compatible version
+== Versiune compatibilă
+
+Connect
+== Conectează
+
+Connecting to
+== Conectare la
+
+Connection Problems...
+== Probleme la conexiune...
+
+Console
+== Consolă
+
+Controls
+== Controale
+
+Count players only
+== Numără doar jucătorii
+
+Country
+== Țara
+
+Current
+== Curent
+
+Custom colors
+== Culori personalizate
+
+Delete
+== Șterge
+
+Delete demo
+== Șterge demonstrația
+
+Demo details
+== Detalii demo
+
+Demofile: %s
+== Fișier demo: %s
+
+Demos
+== Demo
+
+Disconnect
+== Deconectare
+
+Disconnected
+== Deconectat
+
+Downloading map
+== Se descarcă harta
+
+Draw!
+== Egalitate!
+
+Dynamic Camera
+== Cameră dinamică
+
+Emoticon
+== Figurine
+
+Enter
+== Intră
+
+Error
+== Eroare
+
+Error loading demo
+== Eroare la încărcarea demo-ului
+
+Favorite
+== Favorit
+
+Favorites
+== Favorite
+
+Feet
+== Picioare
+
+Filter
+== Filtre
+
+Fire
+== Foc
+
+Folder
+== Dosar
+
+Force vote
+== Forțează votul
+
+Free-View
+== Vizualizare liberă
+
+Friends
+== Prieteni
+
+Fullscreen
+== Ecrat complet
+
+Game
+== Joc
+
+Game info
+== Informații joc
+
+Game over
+== Final de joc
+
+Game paused
+== Joc în pauză
+
+Game type
+== Tip de joc
+
+Game types:
+== Tipuri de joc:
+
+General
+== General
+
+Graphics
+== Grafică
+
+Grenade
+== Grenade
+
+Hammer
+== Ciocan
+
+Has people playing
+== Are jucători activi
+
+High Detail
+== Detalii înalte
+
+Hook
+== Cârlig
+
+Invalid Demo
+== Demo nevalid
+
+Join blue
+== La albaștri
+
+Join red
+== La roșii
+
+Jump
+== Salt
+
+Kick player
+== Dă afară jucător
+
+Language
+== Limba
+
+MOTD
+== Mesajul zilei
+
+Map
+== Hartă
+
+Maximum ping:
+== Ping maxim:
+
+Mouse sens.
+== Sensib. maus
+
+Move left
+== Mută la stânga
+
+Move player to spectators
+== Mută jucătorul la spectatori
+
+Move right
+== Mută la dreapta
+
+Movement
+== Mișcare
+
+Mute when not active
+== Opreşte sunetul la inactivate
+
+Name
+== Nume
+
+Next weapon
+== Arma următoare
+
+Nickname
+== Pseudonim
+
+No
+== Nu
+
+No password
+== Fără parolă
+
+No servers found
+== Nici un server găsit
+
+No servers match your filter criteria
+== Nici un server nu corespunde criteriilor
+
+Ok
+== Bine
+
+Open
+== Deschide
+
+Parent Folder
+== Dosarul părinte
+
+Password
+== Parolă
+
+Password incorrect
+== Parolă incorectă
+
+Ping
+== Ping
+
+Pistol
+== Pistol
+
+Play
+== Redă
+
+Play background music
+== Redă muzică în fundal
+
+Player
+== Jucător
+
+Player country:
+== Țara jucătorului:
+
+Player options
+== Opțiuni jucător
+
+Players
+== Jucători
+
+Please balance teams!
+== Echilibrați echipele!
+
+Prev. weapon
+== Arma precedentă
+
+Quality Textures
+== Texturi de înaltă calitate
+
+Quit
+== Ieșire
+
+Reason:
+== Motiv:
+
+Red team
+== Echipa roșie
+
+Red team wins!
+== Echipa roșie a câștigat!
+
+Refresh
+== Reîncarcă
+
+Refreshing master servers
+== Reîncarcă serverele principale
+
+Remote console
+== Consolă server
+
+Remove
+== Șterge
+
+Remove friend
+== Șterge prietenul
+
+Rename
+== Redenumește
+
+Rename demo
+== Redenumește demo-ul
+
+Reset filter
+== Filtru implicit
+
+Respawn
+== Renaşte
+
+Sample rate
+== Frecvența
+
+Score
+== Scor
+
+Score board
+== Scoruri
+
+Score limit
+== Limita de scor
+
+Scoreboard
+== Scoruri
+
+Screenshot
+== Captură de ecran
+
+Server address:
+== Adresă server:
+
+Server details
+== Detalii server
+
+Server filter
+== Filtru servere:
+
+Server info
+== Info. server
+
+Server not full
+== Are locuri libere
+
+Shotgun
+== Pușcă
+
+Show chat
+== Afișare chat
+
+Show friends only
+== Arată prietenii
+
+Show ingame HUD
+== Arată scorul în joc
+
+Show name plates
+== Arată pseudonimele
+
+Show only chat messages from friends
+== Arată doar chatul prietenilor
+
+Show only supported
+== Arată doar modurile suportate
+
+Skins
+== Costume
+
+Sound
+== Sunet
+
+Sound error
+== Eroare de sunet
+
+Spectate
+== Spectator
+
+Spectate next
+== Vezi următorul
+
+Spectate previous
+== Vezi anteriorul
+
+Spectator mode
+== Mod spectator
+
+Spectators
+== Spectatori
+
+Standard gametype
+== Jocuri standard
+
+Standard map
+== Hărți standard
+
+Stop record
+== Stop înreg.
+
+Strict gametype filter
+== Filtru strict tip joc
+
+Sudden Death
+== Moarte subită
+
+Switch weapon on pickup
+== Schimbă arma la găsire
+
+Team
+== Echipa
+
+Team chat
+== Chat cu echipa
+
+Texture Compression
+== Compresie texturi
+
+The audio device couldn't be initialised.
+== Dispozitivul audio nu a putut fi inițializat.
+
+The server is running a non-standard tuning on a pure game type.
+== Serverul folosește parametri ne-standard într-un joc standard.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Există o hartă nesalvată în editor. Probabil vrei să o salvezi înainte să ieși din joc.
+
+Time limit
+== Timp limită
+
+Time limit: %d min
+== Timp limită : %d min
+
+Try again
+== Reîncearcă
+
+Type
+== Tip
+
+Unable to delete the demo
+== Nu pot șterge demo-ul
+
+Unable to rename the demo
+== Nu pot redenumi demo-ul
+
+Use sounds
+== Folosește sunetul
+
+Use team colors for name plates
+== Folosește culorile echipelor pe etichetele de nume
+
+V-Sync
+== Sincronizare verticală (V-Sync)
+
+Version
+== Versiune
+
+Vote command:
+== Comandă votare:
+
+Vote description:
+== Descriere votare:
+
+Vote no
+== Votează nu
+
+Vote yes
+== Votează da
+
+Voting
+== Votare
+
+Warmup
+== Încălzire
+
+Weapon
+== Arme
+
+Welcome to Teeworlds
+== Bun venit în Teeworlds
+
+Yes
+== Da
+
+You must restart the game for all settings to take effect.
+== Trebuie să repornești jocul pentru aplicarea setărilor.
+
+##### needs translation #####
+
+New name:
+== Nume nou:
+
+Sat.
+== Saturație
+
+Miscellaneous
+== Diverse
+
+Internet
+== Internet
+
+Max demos
+== Număr maxim de demo-uri
+
+News
+== Știri
+
+Join game
+== Intră în joc
+
+FSAA samples
+== Eșantioane FSAA
+
+%d of %d servers, %d players
+== %d/%d servere, %d jucători
+
+Sound volume
+== Volum sunet
+
+Created:
+== Creată la data:
+
+Max Screenshots
+== Număr maxim de capturi de ecran
+
+Length:
+== Durată:
+
+Rifle
+== Carabină
+
+Netversion:
+== Cod rețea:
+
+Map:
+== Harta:
+
+Info
+== Informații
+
+Hue
+== Tentă
+
+Record demo
+== Înreg. demo
+
+Your skin
+== Costumul tău
+
+Size:
+== Dimensiunea:
+
+Reset to defaults
+== Setări implicite
+
+Quit anyway?
+== Ieși oricum?
+
+Display Modes
+== Moduri de afișare
+
+Version:
+== Versiune:
+
+Round
+== Runda
+
+Lht.
+== Luminozitate
+
+no limit
+== fără limită
+
+UI Color
+== Culoare meniu
+
+Host address
+== Adresa gazdei
+
+Crc:
+== Suma de control:
+
+Alpha
+== Alfa
+
+Current version: %s
+== Versiunea actuală: %s
+
+LAN
+== Rețea
+
+Name plates size
+== Dimensiune nume placă
+
+Type:
+== Tip:
+
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Laser
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Reset
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+Borderless window
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Screen
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Demo
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

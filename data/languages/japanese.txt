@@ -1,0 +1,1000 @@
+##### authors #####
+#originally created by:
+#	orange
+#modified by:
+#
+##### /authors #####
+
+##### translated strings #####
+
+%ds left
+== 残り %ds
+
+%i minute left
+== 残り %i 分
+
+%i minutes left
+== 残り %i 分
+
+%i second left
+== 残り %i 秒
+
+%i seconds left
+== 残り %i 秒
+
+%s wins!
+== %s の勝ち!
+
+-Page %d-
+== -%d ページ-
+
+Abort
+== 中止
+
+Add
+== 追加
+
+Add Friend
+== 友達追加
+
+Address
+== アドレス
+
+All
+== 全部
+
+Are you sure that you want to delete the demo?
+== デモを削除してもよろしいですか？
+
+Are you sure that you want to quit?
+== 終了してもよろしいですか？
+
+Are you sure that you want to remove the player from your friends list?
+== このプレイヤーを友達リストから削除してもよろしいですか？
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== あなたのハンドルネームを入力してください。(半角英数のみ)
+
+Automatically record demos
+== 自動的にデモを保存する
+
+Automatically take game over screenshot
+== 自動的にスクリーンショットを保存する
+
+Blue team
+== 青チーム
+
+Blue team wins!
+== 青チームの勝ち！
+
+Body
+== 体
+
+Call vote
+== 投票を開始する
+
+Change settings
+== 設定を変える
+
+Chat
+== チャット
+
+Clan
+== クラン
+
+Client
+== クライアント
+
+Close
+== 閉じる
+
+Compatible version
+== 互換性のあるバージョン
+
+Connect
+== 接続
+
+Connecting to
+== 接続先
+
+Connection Problems...
+== 接続中に問題が発生
+
+Console
+== コンソール
+
+Controls
+== コントロール
+
+Count players only
+== 実際のプレイヤー数を表示
+
+Country
+== 国
+
+Current
+== 現行
+
+Custom colors
+== 色変更
+
+Delete
+== 削除
+
+Delete demo
+== デモを削除
+
+Demo details
+== デモの詳細
+
+Demofile: %s
+== デモファイル: %s
+
+Demos
+== デモ
+
+Disconnect
+== 切断
+
+Disconnected
+== 切断されました
+
+Downloading map
+== マップをダウンロード中
+
+Draw!
+== 引き分け！
+
+Dynamic Camera
+== ダイナミックカメラ
+
+Emoticon
+== エモティコン
+
+Enter
+== Enter
+
+Error
+== エラー
+
+Error loading demo
+== デモの読み込みに失敗しました
+
+Favorite
+== お気に入り
+
+Favorites
+== お気に入り
+
+Feet
+== 足
+
+Filter
+== フィルタ
+
+Fire
+== 射撃
+
+Folder
+== フォルダ
+
+Force vote
+== 強制投票
+
+Free-View
+== 自由視点
+
+Friends
+== 友達
+
+Fullscreen
+== フルスクリーン
+
+Game
+== ゲーム
+
+Game info
+== ゲーム情報
+
+Game over
+== ゲームオーバー
+
+Game type
+== ゲームタイプ
+
+Game types:
+== ゲームタイプ:
+
+General
+== 一般
+
+Graphics
+== グラフィック
+
+Grenade
+== グレネード
+
+Hammer
+== ハンマー
+
+Has people playing
+== プレイヤーがいるサーバー
+
+High Detail
+== High Detail表示
+
+Hook
+== フック
+
+Invalid Demo
+== 無効なデモ
+
+Join blue
+== 青チームに参加
+
+Join red
+== 赤チームに参加
+
+Jump
+== ジャンプ
+
+Kick player
+== プレイヤーをキック
+
+Language
+== 言語
+
+MOTD
+== 説明
+
+Map
+== マップ
+
+Maximum ping:
+== Pingの最大値:
+
+Mouse sens.
+== マウス感度
+
+Move left
+== 左移動
+
+Move player to spectators
+== プレイヤーを観戦席に移動
+
+Move right
+== 右移動
+
+Movement
+== 動き
+
+Mute when not active
+== 非アクティブ時にミュート
+
+Name
+== 名前
+
+Next weapon
+== 次の武器
+
+Nickname
+== ハンドルネーム
+
+No
+== いいえ
+
+No password
+== パスワードがないサーバー
+
+No servers found
+== サーバーが見つかりません
+
+No servers match your filter criteria
+== フィルタに適合するサーバーが見つかりません
+
+Ok
+== Ok
+
+Open
+== 開く
+
+Parent Folder
+== 親フォルダ
+
+Password
+== パスワード
+
+Password incorrect
+== パスワードが正しくありません
+
+Ping
+== Ping
+
+Pistol
+== ピストル
+
+Play
+== プレイ
+
+Play background music
+== BGMを再生する
+
+Player
+== プレイヤー
+
+Player country:
+== 国籍:
+
+Player options
+== プレイヤー設定
+
+Players
+== プレイヤー
+
+Please balance teams!
+== チーム人数が偏っています！
+
+Prev. weapon
+== 前の武器
+
+Quality Textures
+== テクスチャの品質
+
+Quit
+== 終了
+
+Reason:
+== 理由:
+
+Red team
+== 赤チーム
+
+Red team wins!
+== 赤チームの勝ち！
+
+Refresh
+== 更新
+
+Refreshing master servers
+== サーバーリスト更新
+
+Remote console
+== リモコン
+
+Remove
+== 削除
+
+Remove friend
+== 友達を削除
+
+Rename
+== 名前変更
+
+Rename demo
+== デモの名前変更
+
+Reset filter
+== フィルタをリセット
+
+Sample rate
+== サンプルレート
+
+Score
+== スコア
+
+Score board
+== スコアボード
+
+Score limit
+== スコア上限
+
+Scoreboard
+== スコアボード
+
+Screenshot
+== スクリーンショット
+
+Server address:
+== IPアドレス:
+
+Server details
+== サーバーの詳細
+
+Server filter
+== サーバーフィルタ
+
+Server info
+== サーバー情報
+
+Server not full
+== 空きがあるサーバー
+
+Shotgun
+== ショットガン
+
+Show chat
+== チャットを見る
+
+Show friends only
+== 友達がいるサーバー
+
+Show ingame HUD
+== ゲーム内でHUDを表示
+
+Show name plates
+== 名前を表示
+
+Show only supported
+== 対応している項目のみを表示
+
+Skins
+== スキン
+
+Sound
+== サウンド
+
+Sound error
+== サウンドエラー
+
+Spectate
+== 観戦
+
+Spectate next
+== 次の人を見る
+
+Spectate previous
+== 前の人を見る
+
+Spectator mode
+== 観戦モード
+
+Spectators
+== 観戦者
+
+Standard gametype
+== 標準のゲームタイプ
+
+Standard map
+== 標準のマップ
+
+Stop record
+== 録画停止
+
+Strict gametype filter
+== ゲームタイプ完全一致検索
+
+Sudden Death
+== サドンデス
+
+Switch weapon on pickup
+== 拾った武器に持ちかえる
+
+Team
+== チーム
+
+Team chat
+== チームチャット
+
+Texture Compression
+== テクスチャ圧縮
+
+The audio device couldn't be initialised.
+== オーディオデバイスの初期化に失敗しました。
+
+The server is running a non-standard tuning on a pure game type.
+== サーバーがMODを導入しているようです。
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== 保存されていないデータがありますが、よろしいですか。
+
+Time limit
+== 残り時間
+
+Time limit: %d min
+== 残り %d 分
+
+Try again
+== もう一度
+
+Type
+== タイプ
+
+Unable to delete the demo
+== デモを削除できません。
+
+Unable to rename the demo
+== デモの名前を変更できません。
+
+Use sounds
+== 音を鳴らす
+
+Use team colors for name plates
+== 名前表示にチームカラーを使う
+
+V-Sync
+== V-Sync
+
+Version
+== バージョン
+
+Vote command:
+== 投票コマンド:
+
+Vote description:
+== 投票の説明:
+
+Vote no
+== 反対
+
+Vote yes
+== 賛成
+
+Voting
+== 投票
+
+Warmup
+== 準備中
+
+Weapon
+== 武器
+
+Welcome to Teeworlds
+== Teeworldsの世界へようこそ！
+
+Yes
+== はい
+
+You must restart the game for all settings to take effect.
+== 設定を反映するためにはゲームの再起動が必要です。
+
+##### needs translation #####
+
+New name:
+== 新しい名前:
+
+Max demos
+== デモの最大数
+
+Internet
+== オンライン
+
+Round
+== ラウンド
+
+Quit anyway?
+== 終了しますか？
+
+News
+== ニュース
+
+Join game
+== ゲームに参加
+
+Crc:
+== Crc:
+
+FSAA samples
+== FSAAサンプル数
+
+Sat.
+== 彩度
+
+LAN
+== LAN
+
+Sound volume
+== 音量
+
+Created:
+== 作成:
+
+Record demo
+== デモを録画
+
+%d of %d servers, %d players
+== %d of %d サーバー, %d プレイヤー
+
+Miscellaneous
+== その他
+
+Netversion:
+== Netversion:
+
+Info
+== 情報
+
+UI Color
+== UIカラー
+
+Max Screenshots
+== スクリーンショットの最大数
+
+Size:
+== サイズ:
+
+Hue
+== 色相
+
+Your skin
+== あなたのスキン
+
+Reset to defaults
+== 初期設定に戻す
+
+Rifle
+== ライフル
+
+Display Modes
+== 画面モード
+
+Version:
+== バージョン:
+
+Map:
+== マップ:
+
+Lht.
+== 明るさ
+
+Host address
+== IPアドレス:ポート
+
+Alpha
+== 透明度
+
+Length:
+== 長さ:
+
+no limit
+== 無制限
+
+Current version: %s
+== クライアントのバージョン: %s
+
+Name plates size
+== 名前表示の大きさ
+
+Type:
+== タイプ:
+
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+Show only chat messages from friends
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Game paused
+== 
+
+Laser
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Reset
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Respawn
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+Borderless window
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Screen
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Demo
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

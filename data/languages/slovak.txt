@@ -1,0 +1,1000 @@
+##### authors #####
+#originally created by:
+#	Limit and Petr
+#modified by:
+#	LimiT		2011-07-02 20:24:44
+##### /authors #####
+
+##### translated strings #####
+
+%ds left
+== Zostáva %ds
+
+%i minute left
+== Zostávajúce minúty: %i
+
+%i minutes left
+== Zostávajúce minúty: %i
+
+%i second left
+== Zostávajúce sekundy: %i
+
+%i seconds left
+== Zostávajúce sekundy: %i
+
+%s wins!
+== %s vyhráva!
+
+-Page %d-
+== -Strana %d-
+
+Abort
+== Zrušiť
+
+Add
+== Pridať
+
+Add Friend
+== Pridať Priateľa
+
+Address
+== Adresa
+
+All
+== Všetkým
+
+Are you sure that you want to delete the demo?
+== Určite chcete vymazať tento záznam?
+
+Are you sure that you want to quit?
+== Ukončiť hru?
+
+Are you sure that you want to remove the player from your friends list?
+== Ste si istí, že chcete tohto hráča odstrániť zo zoznamu priateľov?
+
+As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Vitajte v hre TeeWorlds. Predtým, ako sa pripojíte na herný server, odporúčame nastaviť si hru podľa svojich požiadavkov. Napíšte do políčka nižšie meno pre Vášho tee a pokračujte kliknutím na tlačítko.
+
+Automatically record demos
+== Automaticky nahrávať záznamy
+
+Automatically take game over screenshot
+== Automaticky vyfotiť koniec kola
+
+Blue team
+== Modrý tým
+
+Blue team wins!
+== Modrý tým vyhráva!
+
+Body
+== Telo
+
+Call vote
+== Hlasovať
+
+Change settings
+== Zmeniť nastavenia
+
+Chat
+== Chat
+
+Clan
+== Klan
+
+Client
+== Klient
+
+Close
+== Zavrieť
+
+Compatible version
+== Kompatibilná verzia
+
+Connect
+== Pripojiť
+
+Connecting to
+== Pripojujem sa k
+
+Connection Problems...
+== Problémy s pripojením...
+
+Console
+== Konzola
+
+Controls
+== Ovládanie
+
+Count players only
+== Nepočítať divákov
+
+Country
+== Krajina
+
+Current
+== Aktuálne
+
+Custom colors
+== Vlastné farby
+
+Delete
+== Vymazať
+
+Delete demo
+== Vymazať záznam
+
+Demo details
+== Detaily nahrávky
+
+Demofile: %s
+== Nahrávka: %s
+
+Demos
+== Záznamy
+
+Disconnect
+== Odpojiť
+
+Disconnected
+== Prerušené spojenie
+
+Downloading map
+== Sťahujem mapu
+
+Draw!
+== Remíza!
+
+Dynamic Camera
+== Dynamická kamera
+
+Emoticon
+== Smajlíci
+
+Enter
+== Vstúpiť
+
+Error
+== Chyba
+
+Error loading demo
+== Problém s otvorením záznamu
+
+Favorite
+== Obľúbený
+
+Favorites
+== Obľúbené
+
+Feet
+== Nohy
+
+Filter
+== Filter
+
+Fire
+== Streľba
+
+Folder
+== Zložka
+
+Force vote
+== Zvoliť
+
+Free-View
+== Voľná Kamera
+
+Friends
+== Priatelia
+
+Fullscreen
+== Celá obrazovka
+
+Game
+== Hra
+
+Game info
+== Info o hre
+
+Game over
+== Koniec hry
+
+Game type
+== Herný typ
+
+Game types:
+== Herné typy:
+
+General
+== Hlavné
+
+Graphics
+== Grafika
+
+Grenade
+== Granátomet
+
+Hammer
+== Kladivo
+
+Has people playing
+== Nie je prázdny
+
+High Detail
+== Detaily
+
+Hook
+== Hook/Lano
+
+Invalid Demo
+== Neplatný Záznam
+
+Join blue
+== K modrým
+
+Join red
+== K červeným
+
+Jump
+== Skok
+
+Kick player
+== Vyhodiť hráča
+
+Language
+== Jazyk
+
+MOTD
+== MOTD
+
+Map
+== Mapa
+
+Maximum ping:
+== Maximálny ping:
+
+Mouse sens.
+== Citlivosť myši
+
+Move left
+== Pohyb vľavo
+
+Move player to spectators
+== Poslať hráča pozorovať
+
+Move right
+== Pohyb vpravo
+
+Movement
+== Pohyb
+
+Mute when not active
+== Stlmiť pri neaktivite
+
+Name
+== Meno
+
+Next weapon
+== Ďalšia zbraň
+
+Nickname
+== Prezývka
+
+No
+== Nie
+
+No password
+== Bez hesla
+
+No servers found
+== Nenájdené žiadne servery
+
+No servers match your filter criteria
+== Žiadny server nezodpovedá zadaným kritériám
+
+Ok
+== OK
+
+Open
+== Otvoriť
+
+Parent Folder
+== Nadradený Priečinok
+
+Password
+== Heslo
+
+Password incorrect
+== Nesprávne heslo
+
+Ping
+== Ping
+
+Pistol
+== Pištoľ
+
+Play
+== Prehrať
+
+Play background music
+== Prehrať hudbu na pozadí
+
+Player
+== Hráč
+
+Player country:
+== Filter krajín:
+
+Player options
+== Nastavenia hráča
+
+Players
+== Hráči
+
+Please balance teams!
+== Prosím vyrovnajte týmy!
+
+Prev. weapon
+== Predošlá zbraň
+
+Quality Textures
+== Kvalitné textúry
+
+Quit
+== Ukončiť
+
+Reason:
+== Dôvod:
+
+Red team
+== Červený tým
+
+Red team wins!
+== Červený tým vyhráva!
+
+Refresh
+== Obnoviť
+
+Refreshing master servers
+== Obnovujem master servery
+
+Remote console
+== Vzdialená konzola
+
+Remove
+== Odstrániť
+
+Remove friend
+== Vymazať priateľa
+
+Rename
+== Premenovať
+
+Rename demo
+== Premenovať nahrávku
+
+Reset filter
+== Obnoviť filter
+
+Sample rate
+== Sample rate
+
+Score
+== Skóre
+
+Score board
+== Tabuľka výsledkov
+
+Score limit
+== Limit skóre
+
+Scoreboard
+== Tabuľka výsledkov
+
+Screenshot
+== Screenshot
+
+Server address:
+== Adresa servera:
+
+Server details
+== Detaily servera
+
+Server filter
+== Filter serverov
+
+Server info
+== Informácie
+
+Server not full
+== Nie je plný
+
+Shotgun
+== Brokovnica
+
+Show chat
+== Ukázať chat
+
+Show friends only
+== Ukázať priateľov
+
+Show ingame HUD
+== Ukázať HUD
+
+Show name plates
+== Zobrazovať menovky
+
+Show only supported
+== Zobraziť len podporované
+
+Skins
+== Skiny
+
+Sound
+== Zvuk
+
+Sound error
+== Zvuková chyba
+
+Spectate
+== Pozorovať
+
+Spectate next
+== Pozorovať ďalšieho
+
+Spectate previous
+== Pozorovať predch.
+
+Spectator mode
+== Mód diváka
+
+Spectators
+== Diváci
+
+Standard gametype
+== Štandardný herný typ
+
+Standard map
+== Štandardná mapa
+
+Stop record
+== Nenahrávať
+
+Strict gametype filter
+== Striktný filter módov
+
+Sudden Death
+== Rýchla Smrť
+
+Switch weapon on pickup
+== Nastavovať zdvíhanú zbraň ako aktuálnu
+
+Team
+== Týmu
+
+Team chat
+== Týmový chat
+
+Texture Compression
+== Kompresia textúr
+
+The audio device couldn't be initialised.
+== Zvukové zariadenie nemohlo byť inicializované.
+
+The server is running a non-standard tuning on a pure game type.
+== Server používa neštandardné nastavenia na základnom hernom móde.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== V editore máte neuloženú mapu, možno si ju chcete pred skončením hry uložiť.
+
+Time limit
+== Časový limit
+
+Time limit: %d min
+== Časový limit: %d min
+
+Try again
+== Skúsiť znovu
+
+Type
+== Typ
+
+Unable to delete the demo
+== Nemôžem vymazať záznam
+
+Unable to rename the demo
+== Nahrávka sa nedá premenovať
+
+Use sounds
+== Povoliť zvuky
+
+Use team colors for name plates
+== Zafarbiť menovky podľa farieb týmov
+
+V-Sync
+== V-Sync
+
+Version
+== Verzia
+
+Vote command:
+== Príkaz hlasu:
+
+Vote description:
+== Popis hlasu:
+
+Vote no
+== Nie
+
+Vote yes
+== Áno
+
+Voting
+== Hlasovanie
+
+Warmup
+== Rozohrávka
+
+Weapon
+== Zbrane
+
+Welcome to Teeworlds
+== Vitajte v hre Teeworlds!
+
+Yes
+== Áno
+
+You must restart the game for all settings to take effect.
+== Zmeny sa prejavia po reštartovaní hry.
+
+##### needs translation #####
+
+New name:
+== Nové meno:
+
+Sat.
+== Sat.
+
+Miscellaneous
+== Ostatné
+
+Internet
+== Internet
+
+Max demos
+== Maximum nahrávok
+
+News
+== Novinky
+
+Join game
+== Hrať
+
+FSAA samples
+== Anti-aliasing
+
+%d of %d servers, %d players
+== %d z %d serverov, %d hráčov online
+
+Sound volume
+== Hlasitosť
+
+Created:
+== Vytvorené:
+
+Max Screenshots
+== Maximum obrázkov
+
+Length:
+== Dĺžka:
+
+Rifle
+== Laser
+
+Netversion:
+== Netversion:
+
+Map:
+== Mapa:
+
+Info
+== Info
+
+Hue
+== Hue
+
+Record demo
+== Nahrávať
+
+Your skin
+== Váš skin
+
+Size:
+== Veľkosť:
+
+Reset to defaults
+== Vrátiť na pôvodné
+
+Quit anyway?
+== Aj tak ukončiť?
+
+Display Modes
+== Možnosti zobrazenia
+
+Version:
+== Verzia:
+
+Round
+== Kolo
+
+Lht.
+== Lht.
+
+no limit
+== bez limitu
+
+UI Color
+== Farba prostredia
+
+Host address
+== Hostiteľ
+
+Crc:
+== Crc:
+
+Alpha
+== Alpha
+
+Current version: %s
+== Aktuálna verzia: %s
+
+LAN
+== LAN
+
+Name plates size
+== Veľkosť menoviek
+
+Type:
+== Typ:
+
+
+##### generated by copy_fix.py, please translate this #####
+
+Ratio
+== 
+
+Dummy settings
+== 
+
+AntiPing
+== 
+
+Show quads
+== 
+
+Map sound volume
+== 
+
+Show only chat messages from friends
+== 
+
+✗
+== 
+
+Countries
+== 
+
+\n\nReconnect in %d sec
+== 
+
+Grabs
+== 
+
+Background (entities)
+== 
+
+Show kill messages
+== 
+
+Show ghost
+== 
+
+DDNet
+== 
+
+No updates available
+== 
+
+Enable server message sound
+== 
+
+second
+== 
+
+Show votes window after voting
+== 
+
+HUD
+== 
+
+Look out!
+== 
+
+Show names in chat in team colors
+== 
+
+Select a name
+== 
+
+Enable team chat sound
+== 
+
+Show other players' hook collision lines
+== 
+
+We will win
+== 
+
+Hi o/
+== 
+
+Deaths
+== 
+
+Enable game sounds
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Spectator
+== 
+
+Please use a different name
+== 
+
+Wait before try for
+== 
+
+Show console window
+== 
+
+Show others
+== 
+
+Gameplay
+== 
+
+Restart
+== 
+
+Game paused
+== 
+
+Laser
+== 
+
+Old mouse mode
+== 
+
+Browser
+== 
+
+Follow
+== 
+
+Reset
+== 
+
+Enable gun sound
+== 
+
+Show health + ammo
+== 
+
+Team message
+== 
+
+Manual %3d:%02d  
+== 
+
+Automatically create statboard csv
+== 
+
+Save the best demo of each race
+== 
+
+Show tiles layers from BG map
+== 
+
+Are you sure that you want to disconnect?
+== 
+
+Types
+== 
+
+Ghost
+== 
+
+Respawn
+== 
+
+Remove chat
+== 
+
+Threaded sound loading
+== 
+
+Check now
+== 
+
+Race %3d:%02d  
+== 
+
+Background (regular)
+== 
+
+DDNet %s is out! Download it at DDNet.tw!
+== 
+
+Reset wanted weapon on death
+== 
+
+Frags
+== 
+
+AntiPing: predict other players
+== 
+
+Show other players' key presses
+== 
+
+Automatically take statboard screenshot
+== 
+
+System message
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+DDNet %s is available:
+== 
+
+Updating...
+== 
+
+Overlay entities
+== 
+
+Messages
+== 
+
+Vanilla Skins only
+== 
+
+%.2f MiB
+== 
+
+Refresh Rate
+== 
+
+New random timeout code
+== 
+
+Suicides
+== 
+
+Net
+== 
+
+Loading DDNet Client
+== 
+
+FPM
+== 
+
+Default zoom
+== 
+
+Show score
+== 
+
+Spree
+== 
+
+Show client IDs in Scoreboard
+== 
+
+Max CSVs
+== 
+
+seconds
+== 
+
+Borderless window
+== 
+
+%.2f KiB
+== 
+
+Try fast HTTP map download first
+== 
+
+Use DDRace Scoreboard
+== 
+
+Best
+== 
+
+Enable regular chat sound
+== 
+
+Normal message
+== 
+
+Screen
+== 
+
+Search
+== 
+
+Connecting dummy
+== 
+
+Clan plates size
+== 
+
+Update now
+== 
+
+Auto %3d:%02d  
+== 
+
+Show clan above name plates
+== 
+
+Save ghost
+== 
+
+Exclude
+== 
+
+Enable highlighted chat sound
+== 
+
+Hello and welcome
+== 
+
+AntiPing: predict weapons
+== 
+
+DDNet Client updated!
+== 
+
+High-DPI screen support (experimental)
+== 
+
+Outline color
+== 
+
+Highlighted message
+== 
+
+Friend
+== 
+
+Switch weapon when out of ammo
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Demo
+== 
+
+AntiPing limit
+== 
+
+Inner color
+== 

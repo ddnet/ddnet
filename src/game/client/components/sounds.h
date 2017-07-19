@@ -1,0 +1,56 @@
+/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+/* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#ifndef GAME_CLIENT_COMPONENTS_SOUNDS_H
+#define GAME_CLIENT_COMPONENTS_SOUNDS_H
+#include <engine/sound.h>
+#include <game/client/component.h>
+
+class CSounds : public CComponent
+{
+	enum
+	{
+		QUEUE_SIZE = 32,
+	};
+	struct QueueEntry
+	{
+		int m_Channel;
+		int m_SetId;
+	} m_aQueue[QUEUE_SIZE];
+	int m_QueuePos;
+	int64 m_QueueWaitTime;
+	class CJob m_SoundJob;
+	bool m_WaitForSoundJob;
+
+	int GetSampleId(int SetId);
+
+	float m_MapSoundVolume;
+
+public:
+	// sound channels
+	enum
+	{
+		CHN_GUI=0,
+		CHN_MUSIC,
+		CHN_WORLD,
+		CHN_GLOBAL,
+		CHN_MAPSOUND,
+	};
+
+	virtual void OnInit();
+	virtual void OnReset();
+	virtual void OnStateChange(int NewState, int OldState);
+	virtual void OnRender();
+
+	void ClearQueue();
+	void Enqueue(int Channel, int SetId);
+	void Play(int Channel, int SetId, float Vol);
+	void PlayAt(int Channel, int SetId, float Vol, vec2 Pos);
+	void PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos);
+	void Stop(int SetId);
+
+	ISound::CVoiceHandle PlaySample(int Channel, int SampleId, float Vol, int Flags = 0);
+	ISound::CVoiceHandle PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags = 0);
+};
+
+
+#endif
