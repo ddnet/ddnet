@@ -6,7 +6,14 @@ addons:
     packages:
     - libfreetype6-dev
     - libsdl2-dev
+before_script:
+- |
+    if [ ! -x ~/ddnet-libs ]; then
+      git clone https://github.com/ddnet/ddnet-libs ~/ddnet-libs/
+    fi
 script:
+- ln -s ~/ddnet-libs/ ddnet-libs
+- cd ddnet-libs; git pull; cd ..
 - mkdir build
 - cd build
 - cmake ..
