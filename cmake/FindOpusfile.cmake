@@ -24,12 +24,16 @@ set(OPUSFILE_INCLUDE_DIRS ${OPUSFILE_INCLUDEDIR})
 string(FIND "${OPUSFILE_LIBRARY}" "${PROJECT_SOURCE_DIR}" LOCAL_PATH_POS)
 if(LOCAL_PATH_POS EQUAL 0 AND TARGET_OS STREQUAL "windows")
   set(OPUSFILE_COPY_FILES
-    "${EXTRA_OPUSFILE_LIBDIR}/libgcc_s_sjlj-1.dll"
     "${EXTRA_OPUSFILE_LIBDIR}/libogg-0.dll"
     "${EXTRA_OPUSFILE_LIBDIR}/libopus-0.dll"
     "${EXTRA_OPUSFILE_LIBDIR}/libopusfile-0.dll"
     "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
   )
+  if (TARGET_BITS EQUAL 32)
+    list(APPEND OPUSFILE_COPY_FILES
+      "${EXTRA_OPUSFILE_LIBDIR}/libgcc_s_sjlj-1.dll"
+    )
+  endif()
 else()
   set(OPUSFILE_COPY_FILES)
 endif()

@@ -23,11 +23,7 @@ set(CURL_INCLUDE_DIRS ${CURL_INCLUDEDIR})
 string(FIND "${CURL_LIBRARY}" "${PROJECT_SOURCE_DIR}" LOCAL_PATH_POS)
 if(LOCAL_PATH_POS EQUAL 0 AND TARGET_OS STREQUAL "windows")
   set(CURL_COPY_FILES
-    "${EXTRA_CURL_LIBDIR}/libcurl.dll"
-    "${EXTRA_CURL_LIBDIR}/libeay32.dll"
-    "${EXTRA_CURL_LIBDIR}/libidn-11.dll"
-    "${EXTRA_CURL_LIBDIR}/ssleay32.dll"
-    "${EXTRA_CURL_LIBDIR}/zlib1.dll"
+    "${EXTRA_CURL_LIBDIR}/libcurl-4.dll"
   )
 else()
   set(CURL_COPY_FILES)
