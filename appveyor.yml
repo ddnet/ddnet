@@ -1,5 +1,7 @@
 before_build:
 - cmd: >-
+    git submodule update --init
+
     md build
 
     cd build

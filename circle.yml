@@ -18,6 +18,7 @@ dependencies:
 test:
   override:
     - |
+        git submodule update --init
         ../bam/bam release
 
         mkdir build

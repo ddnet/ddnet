@@ -7,6 +7,7 @@ addons:
     - libfreetype6-dev
     - libsdl2-dev
 script:
+- git submodule update --init
 - mkdir build
 - cd build
 - cmake ..
