@@ -35,9 +35,9 @@ endif()
 
 function(set_extra_dirs VARIABLE NAME)
   if(TARGET_BITS AND TARGET_OS)
-    set("EXTRA_${VARIABLE}_LIBDIR" "other/${NAME}/${TARGET_OS}/lib${TARGET_BITS}" PARENT_SCOPE)
+    set("EXTRA_${VARIABLE}_LIBDIR" "ddnet-libs/${NAME}/${TARGET_OS}/lib${TARGET_BITS}" PARENT_SCOPE)
   endif()
-  set("EXTRA_${VARIABLE}_INCLUDEDIR" "other/${NAME}/include" PARENT_SCOPE)
+  set("EXTRA_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
 endfunction()
 
 # Check for PkgConfig once so all the other `find_package` calls can do it
