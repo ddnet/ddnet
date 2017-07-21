@@ -438,6 +438,10 @@ source_group_tree(src)
 
 set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
+if(MSVC)
+  target_link_libraries(${TARGET_CLIENT} PRIVATE "-SAFESEH:NO") # No Windows 8 store
+endif()
+
 foreach(target ${TARGETS})
   if(MSVC)
     set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
@@ -446,7 +450,6 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
-    target_link_libraries(${target} INTERFACE "-SAFESEH:NO") # No Windows 8 store
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     if(ENABLE_STACK_PROTECTOR)
       target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
