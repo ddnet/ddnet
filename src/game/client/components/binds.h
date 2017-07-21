@@ -32,7 +32,7 @@ public:
 
 	CBindsSpecial m_SpecialBinds;
 
-	void Bind(int KeyID, const char *pStr);
+	void Bind(int KeyID, const char *pStr, bool FreeOnly = false);
 	void SetDefaults();
 	void UnbindAll();
 	const char *Get(int KeyID);
