@@ -343,6 +343,11 @@ public:
 		Clean();
 	}
 
+	~CEditorMap()
+	{
+		Clean();
+	}
+
 	array<CLayerGroup*> m_lGroups;
 	array<CEditorImage*> m_lImages;
 	array<CEnvelope*> m_lEnvelopes;
