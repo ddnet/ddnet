@@ -121,7 +121,7 @@ void CBinds::SetDefaults()
 	Bind(KEY_F1, "toggle_local_console");
 	Bind(KEY_F2, "toggle_remote_console");
 	Bind(KEY_TAB, "+scoreboard");
-	Bind(KEY_BACKQUOTE, "+statboard");
+	Bind(KEY_EQUALS, "+statboard");
 	Bind(KEY_F10, "screenshot");
 
 	Bind(KEY_A, "+left");
@@ -161,7 +161,6 @@ void CBinds::SetDefaults()
 
 	Bind(KEY_T, "+show_chat; chat all");
 	Bind(KEY_Y, "+show_chat; chat team");
-	Bind(KEY_Z, "+show_chat; chat team"); // For German keyboards
 	Bind(KEY_U, "+show_chat");
 	Bind(KEY_I, "+show_chat; chat all /c ");
 

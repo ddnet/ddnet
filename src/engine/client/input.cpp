@@ -129,7 +129,9 @@ void CInput::Clear()
 
 bool CInput::KeyState(int Key) const
 {
-	return m_aInputState[Key>=KEY_MOUSE_1 ? Key : SDL_GetScancodeFromKey(KeyToKeycode(Key))];
+	if(Key < 0 || Key >= KEY_LAST)
+		return false;
+	return m_aInputState[Key];
 }
 
 void CInput::NextFrame()
@@ -237,13 +239,13 @@ int CInput::Update()
 					// Sum if you want to ignore multiple modifiers.
 					if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
 					{
-						Key = KeycodeToKey(Event.key.keysym.sym);
+						Key = Event.key.keysym.sym;
 						Scancode = Event.key.keysym.scancode;
 					}
 					break;
 				case SDL_KEYUP:
 					Action = IInput::FLAG_RELEASE;
-					Key = KeycodeToKey(Event.key.keysym.sym);
+					Key = Event.key.keysym.sym;
 					Scancode = Event.key.keysym.scancode;
 					break;
 
@@ -322,14 +324,14 @@ int CInput::Update()
 					return 1;
 			}
 
-			if(Key >= 0 && Key < g_MaxKeys && !IgnoreKeys && m_CountEditingText == 0)
+			if(Scancode >= 0 && Scancode < g_MaxKeys && !IgnoreKeys && m_CountEditingText == 0)
 			{
 				if(Action&IInput::FLAG_PRESS)
 				{
 					m_aInputState[Scancode] = 1;
-					m_aInputCount[Key] = m_InputCounter;
+					m_aInputCount[Scancode] = m_InputCounter;
 				}
-				AddEvent(0, Key, Action);
+				AddEvent(0, Scancode, Action);
 			}
 
 		}
