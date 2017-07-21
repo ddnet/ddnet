@@ -21,7 +21,7 @@ set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(TARGET_BITS "64")
-else
+else()
   set(TARGET_BITS "32")
 endif()
 
