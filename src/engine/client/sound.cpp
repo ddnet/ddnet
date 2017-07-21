@@ -348,6 +348,12 @@ int CSound::Update()
 
 int CSound::Shutdown()
 {
+
+	for(unsigned SampleID = 0; SampleID < NUM_SAMPLES; SampleID++)
+	{
+		UnloadSample(SampleID);
+	}
+
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	lock_destroy(m_SoundLock);
@@ -684,7 +690,8 @@ void CSound::UnloadSample(int SampleID)
 		return;
 
 	Stop(SampleID);
-	mem_free(m_aSamples[SampleID].m_pData);
+	if (m_aSamples[SampleID].m_pData != 0x0) 
+		mem_free(m_aSamples[SampleID].m_pData);
 
 	m_aSamples[SampleID].m_pData = 0x0;
 }
