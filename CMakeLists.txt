@@ -446,7 +446,7 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
-    target_compile_options(${target} PRIVATE /SAFESEH:NO) # No Windows 8 store
+    target_link_libraries(${target} INTERFACE "-SAFESEH:NO") # No Windows 8 store
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     if(ENABLE_STACK_PROTECTOR)
       target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
