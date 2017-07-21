@@ -840,6 +840,19 @@ CConsole::CConsole(int FlagMask)
 	m_Cheated = false;
 }
 
+CConsole::~CConsole()
+{
+	CCommand *pCommand = m_pFirstCommand;
+	while(pCommand)
+	{
+		CCommand *pNext = pCommand->m_pNext;
+		if(pCommand->m_pfnCallback == Con_Chain)
+			mem_free(static_cast<CChain *>(pCommand->m_pUserData));
+		delete pCommand;
+		pCommand = pNext;
+	}
+}
+
 void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 {
 	for(int i = 0; i < NumArgs; i++)
@@ -895,7 +908,7 @@ void CConsole::Register(const char *pName, const char *pParams,
 	bool DoAdd = false;
 	if(pCommand == 0)
 	{
-		pCommand = new(mem_alloc(sizeof(CCommand), sizeof(void*))) CCommand;
+		pCommand = new CCommand();
 		DoAdd = true;
 	}
 	pCommand->m_pfnCallback = pfnFunc;
