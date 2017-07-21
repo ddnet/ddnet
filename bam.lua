@@ -142,25 +142,25 @@ server_sql_depends = {}
 
 if family == "windows" then
 	if platform == "win32" then
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/freetype/lib32/libfreetype-6.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/sdl/lib32/SDL2.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/curl/windows/lib32/libcurl-4.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/freetype/windows/lib32/libfreetype.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/sdl/windows/lib32/SDL2.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/curl/windows/lib32/libcurl.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libwinpthread-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libgcc_s_sjlj-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libogg-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libopus-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libopusfile-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libogg.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libopus.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libopusfile.dll"))
 	else
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/freetype/lib64/libfreetype-6.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/sdl/lib64/SDL2.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/curl/windows/lib64/libcurl-4.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/freetype/windows/lib64/libfreetype.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/sdl/windows/lib64/SDL2.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/curl/windows/lib64/libcurl.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libwinpthread-1.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libogg-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libopus-0.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libopusfile-0.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libogg.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libopus.dll"))
+		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libopusfile.dll"))
 	end
-	table.insert(server_sql_depends, CopyToDirectory(".", "ddnet-libs/mysql/vc2005libs/mysqlcppconn.dll"))
-	table.insert(server_sql_depends, CopyToDirectory(".", "ddnet-libs/mysql/vc2005libs/libmysql.dll"))
+	table.insert(server_sql_depends, CopyToDirectory(".", "ddnet-libs/mysql/windows/mysqlcppconn.dll"))
+	table.insert(server_sql_depends, CopyToDirectory(".", "ddnet-libs/mysql/windows/libmysql.dll"))
 
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/DDNet_cl.rc")}

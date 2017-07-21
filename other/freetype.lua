@@ -30,11 +30,11 @@ FreeType = {
 
 			elseif option.use_winlib > 0 then
 				if option.use_winlib == 32 then
-					settings.link.libpath:Add("ddnet-libs/freetype/lib32")
+					settings.link.libpath:Add("ddnet-libs/freetype/windows/lib32")
 				else
-					settings.link.libpath:Add("ddnet-libs/freetype/lib64")
+					settings.link.libpath:Add("ddnet-libs/freetype/windows/lib64")
 				end
-				settings.link.libs:Add("freetype-6")
+				settings.link.libs:Add("freetype")
 			end
 		end
 
