@@ -19,10 +19,10 @@ set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 # DEPENDENCIES
 ########################################################################
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  set(TARGET_BITS 32)
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(TARGET_BITS 64)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(TARGET_BITS "64")
+else
+  set(TARGET_BITS "32")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -32,6 +32,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
 endif()
+
+message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 
 function(set_extra_dirs VARIABLE NAME)
   if(TARGET_BITS AND TARGET_OS)
