@@ -448,6 +448,7 @@ public:
 		m_TextOutlineA = 0.3f;
 
 		m_pDefaultFont = 0;
+		m_FTLibrary = 0;
 
 		// GL_LUMINANCE can be good for debugging
 		//m_FontTextureFormat = GL_ALPHA;
@@ -457,6 +458,9 @@ public:
 	{
 		if (m_pDefaultFont != 0)
 			DestroyFont(m_pDefaultFont);
+
+		if (m_FTLibrary != 0)
+			FT_Done_FreeType(m_FTLibrary);
 	}
 
 	virtual void Init()
