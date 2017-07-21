@@ -284,7 +284,10 @@ public:
 		{
 			return io_open(pFilename, Flags);
 		}
-		else if (pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
+		if(str_comp_num(pFilename, "mapres/../skins/", 16) == 0) {
+			pFilename = pFilename + 10; // just start from skins/
+		}
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
 		#ifdef CONF_FAMILY_WINDOWS
 			|| (pFilename[0] && pFilename[1] == ':')
 		#endif
