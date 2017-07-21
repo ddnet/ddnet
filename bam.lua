@@ -164,10 +164,10 @@ if family == "windows" then
 
 	if config.compiler.driver == "cl" then
 		client_link_other = {ResCompile("other/icons/DDNet_cl.rc")}
-		server_link_other = {ResCompile("other/icons/DDNet_srv_cl.rc")}
+		server_link_other = {ResCompile("other/icons/DDNet-Server_cl.rc")}
 	elseif config.compiler.driver == "gcc" then
 		client_link_other = {ResCompile("other/icons/DDNet_gcc.rc")}
-		server_link_other = {ResCompile("other/icons/DDNet_srv_gcc.rc")}
+		server_link_other = {ResCompile("other/icons/DDNet-Server_gcc.rc")}
 	end
 end
 
