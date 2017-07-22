@@ -324,7 +324,7 @@ int CInput::Update()
 					return 1;
 			}
 
-			if(Scancode >= 0 && Scancode < g_MaxKeys && !IgnoreKeys && m_CountEditingText == 0)
+			if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && m_CountEditingText == 0)
 			{
 				if(Action&IInput::FLAG_PRESS)
 				{
