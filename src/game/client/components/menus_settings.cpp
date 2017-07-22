@@ -734,6 +734,8 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 
 void CMenus::RenderSettingsControls(CUIRect MainView)
 {
+	char aBuf[128];
+
 	// this is kinda slow, but whatever
 	for(int i = 0; i < g_KeyCount; i++)
 		gs_aKeys[i].m_KeyId = 0;
@@ -778,11 +780,26 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		{
 			CUIRect Button, Label;
 			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
-			Button.VSplitLeft(135.0f, &Label, &Button);
-			UI()->DoLabel(&Label, Localize("Mouse sens."), 14.0f*UI()->Scale(), -1);
+			Button.VSplitLeft(160.0f, &Label, &Button);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Mouse sens."), g_Config.m_InpMousesens);
+			UI()->DoLabel(&Label, aBuf, 14.0f*UI()->Scale(), -1);
 			Button.HMargin(2.0f, &Button);
-			g_Config.m_InpMousesens = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (g_Config.m_InpMousesens-5)/500.0f)*500.0f)+5;
-			//*key.key = ui_do_key_reader(key.key, &Button, *key.key);
+			int NewValue = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (min(g_Config.m_InpMousesens, 500)-5)/500.0f)*500.0f)+5;
+			if(g_Config.m_InpMousesens < 500 || NewValue < 500)
+				g_Config.m_InpMousesens = min(NewValue, 500);
+			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
+		}
+
+		{
+			CUIRect Button, Label;
+			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
+			Button.VSplitLeft(160.0f, &Label, &Button);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
+			UI()->DoLabel(&Label, aBuf, 14.0f*UI()->Scale(), -1);
+			Button.HMargin(2.0f, &Button);
+			int NewValue = (int)(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (min(g_Config.m_UiMousesens, 500)-5)/500.0f)*500.0f)+5;
+			if(g_Config.m_UiMousesens < 500 || NewValue < 500)
+				g_Config.m_UiMousesens = min(NewValue, 500);
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
