@@ -1160,11 +1160,11 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		int socket = -1;
+		char addr_str[NETADDR_MAXSTRSIZE];
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_WEBSOCKET_IPV4;
 
-		char addr_str[NETADDR_MAXSTRSIZE];
 		net_addr_str(&tmpbindaddr, addr_str, sizeof(addr_str), 0);
 		socket = websocket_create(addr_str, tmpbindaddr.port);
 
