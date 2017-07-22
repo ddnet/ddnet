@@ -24,7 +24,11 @@ To clone this repository with history since we moved the libraries to https://gi
 Building
 --------
 
-To compile DDNet yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything).
+To compile DDNet yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything). Alternatively we also support CMake, so something like this works:
+
+    make build
+    cmake ..
+    make
 
 DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). The bundled libraries are now in the ddnet-libs submodule.
 
