@@ -439,7 +439,7 @@ source_group_tree(src)
 set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
 if(MSVC)
-  target_link_libraries(${TARGET_CLIENT} PRIVATE "-SAFESEH:NO") # No Windows 8 store
+  target_link_libraries(${TARGET_CLIENT} -SAFESEH:NO) # No Windows 8 store
 endif()
 
 foreach(target ${TARGETS})
