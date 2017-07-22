@@ -373,7 +373,8 @@ function build(settings)
 	tools = {}
 	for i,v in ipairs(tools_src) do
 		toolname = PathFilename(PathBase(v))
-		tools[i] = Link(settings, toolname, Compile(settings, v), engine, zlib, pnglite, md5, game_shared)
+		tools[i] = Link(settings, toolname, Compile(settings, v), engine,
+			zlib, pnglite, md5, game_shared, libwebsockets)
 	end
 
 	-- build client, server, version server and master server
