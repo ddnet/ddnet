@@ -73,7 +73,7 @@ class CMenus : public CComponent
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key);
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
-	void UiDoGetButtons(int Start, int Stop, CUIRect View);
+	void UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
 
 	struct CListboxItem
 	{

@@ -1009,16 +1009,13 @@ int CMenus::Render()
 
 	if(m_Popup == POPUP_NONE)
 	{
-		// do tab bar
 #if defined(__ANDROID__)
 		Screen.HSplitTop(100.0f, &TabBar, &MainView);
 #else
 		Screen.HSplitTop(24.0f, &TabBar, &MainView);
 #endif
-		TabBar.VMargin(20.0f, &TabBar);
-		RenderMenubar(TabBar);
 
-		// news is not implemented yet
+		// render news
 		if(g_Config.m_UiPage < PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -1060,6 +1057,10 @@ int CMenus::Render()
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);
+
+		// do tab bar
+		TabBar.VMargin(20.0f, &TabBar);
+		RenderMenubar(TabBar);
 	}
 	else
 	{
