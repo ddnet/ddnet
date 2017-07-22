@@ -490,9 +490,21 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 
 	int NumViewable = (int)(gs_ListBoxOriginalView.h/Row.h) + 1;
 	int Num = (NumItems+gs_ListBoxItemsPerRow-1)/gs_ListBoxItemsPerRow-NumViewable+1;
-	if(Num < 0)
+	if(Num <= 0)
+	{
 		Num = 0;
-	if(Num > 0)
+	}
+	else if(Num == 1)
+	{
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
+			gs_ListBoxScrollValue -= 0.1f;
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
+			gs_ListBoxScrollValue += 0.1f;
+
+		if(gs_ListBoxScrollValue < 0.0f) gs_ListBoxScrollValue = 0.0f;
+		if(gs_ListBoxScrollValue > 1.0f) gs_ListBoxScrollValue = 1.0f;
+	}
+	else
 	{
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
 			gs_ListBoxScrollValue -= 3.0f/Num;

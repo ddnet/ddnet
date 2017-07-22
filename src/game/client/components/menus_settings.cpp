@@ -646,13 +646,24 @@ typedef struct
 
 static CKeyInfo gs_aKeys[] =
 {
-	{ "Move left", "+left", 0},		// Localize - these strings are localized within CLocConstString
+	{ "Move left", "+left", 0}, // Localize - these strings are localized within CLocConstString
 	{ "Move right", "+right", 0 },
 	{ "Jump", "+jump", 0 },
 	{ "Fire", "+fire", 0 },
 	{ "Hook", "+hook", 0 },
-	{ "Hook Collisions", "+showhookcoll", 0 },
-	{ "Toggle DynCam", "toggle cl_dyncam 0 1", 0 },
+	{ "Hook collisions", "+showhookcoll", 0 },
+	{ "Pause", "say /pause", 0 },
+	{ "Kill", "kill", 0 },
+	{ "Zoom in", "zoom+", 0 },
+	{ "Zoom out", "zoom-", 0 },
+	{ "Default zoom", "zoom", 0 },
+	{ "Show others", "say /showothers", 0 },
+	{ "Show all", "say /showall", 0 },
+	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0 },
+	{ "Toggle dummy", "toggle cl_dummy 0 1", 0 },
+	{ "Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0 },
+	{ "Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0 },
+
 	{ "Hammer", "+weapon1", 0 },
 	{ "Pistol", "+weapon2", 0 },
 	{ "Shotgun", "+weapon3", 0 },
@@ -660,12 +671,15 @@ static CKeyInfo gs_aKeys[] =
 	{ "Rifle", "+weapon5", 0 },
 	{ "Next weapon", "+nextweapon", 0 },
 	{ "Prev. weapon", "+prevweapon", 0 },
+
 	{ "Vote yes", "vote yes", 0 },
 	{ "Vote no", "vote no", 0 },
+
 	{ "Chat", "+show_chat; chat all", 0 },
 	{ "Team chat", "+show_chat; chat team", 0 },
 	{ "Converse", "+show_chat; chat all /c ", 0 },
 	{ "Show chat", "+show_chat", 0 },
+
 	{ "Emoticon", "+emote", 0 },
 	{ "Spectator mode", "+spectate", 0 },
 	{ "Spectate next", "spectate_next", 0 },
@@ -675,10 +689,9 @@ static CKeyInfo gs_aKeys[] =
 	{ "Screenshot", "screenshot", 0 },
 	{ "Scoreboard", "+scoreboard", 0 },
 	{ "Statboard", "+statboard", 0 },
-	{ "Respawn", "kill", 0 },
-	{ "Toggle Dummy", "toggle cl_dummy 0 1", 0 },
-	{ "Dummy Copy", "toggle cl_dummy_copy_moves 0 1", 0 },
-	{ "Hammerfly Dummy", "toggle cl_dummy_hammer 0 1", 0 },
+	{ "Lock team", "say /lock", 0 },
+	{ "Show entities", "toggle cl_overlay_entities 0 100", 0 },
+	{ "Show HUD", "toggle cl_showhud 0 1", 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
@@ -736,13 +749,22 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			}
 	}
 
+	// controls in a scrollable listbox
+	static int s_ControlsList = 0;
+	static int s_SelectedControl = -1;
+	static float s_ScrollValue = 0;
+	int OldSelected = s_SelectedControl;
+	UiDoListboxStart(&s_ControlsList , &MainView, 475.0f, Localize("Controls"), "", 1, 1, s_SelectedControl, s_ScrollValue);
+
 	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, MiscSettings, ResetButton;
-	MainView.VSplitMid(&MovementSettings, &VotingSettings);
+	CListboxItem Item = UiDoListboxNextItem(&OldSelected, false, false);
+	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
+	Item.m_Rect.VSplitMid(&MovementSettings, &VotingSettings);
 
 	// movement settings
 	{
 		MovementSettings.VMargin(5.0f, &MovementSettings);
-		MovementSettings.HSplitTop(MainView.h/3+75.0f, &MovementSettings, &WeaponSettings);
+		MovementSettings.HSplitTop(450.0f, &MovementSettings, &WeaponSettings);
 		RenderTools()->DrawUIRect(&MovementSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
@@ -761,26 +783,27 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
-		UiDoGetButtons(0, 7, MovementSettings);
+		UiDoGetButtons(0, 17, MovementSettings);
 
 	}
 
 	// weapon settings
 	{
 		WeaponSettings.HSplitTop(10.0f, 0, &WeaponSettings);
-		WeaponSettings.HSplitTop(MainView.h/3+35.0f, &WeaponSettings, &ResetButton);
+		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
 		RenderTools()->DrawUIRect(&WeaponSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		WeaponSettings.VMargin(10.0f, &WeaponSettings);
 
 		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y, 14.0f*UI()->Scale(), Localize("Weapon"), -1);
 
 		WeaponSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &WeaponSettings);
-		UiDoGetButtons(7, 14, WeaponSettings);
+		UiDoGetButtons(17, 24, WeaponSettings);
 	}
 
 	// defaults
 	{
 		ResetButton.HSplitTop(10.0f, 0, &ResetButton);
+		ResetButton.HSplitTop(40.0f, &ResetButton, 0);
 		RenderTools()->DrawUIRect(&ResetButton, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		ResetButton.HMargin(10.0f, &ResetButton);
 		ResetButton.VMargin(30.0f, &ResetButton);
@@ -793,41 +816,43 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// voting settings
 	{
 		VotingSettings.VMargin(5.0f, &VotingSettings);
-		VotingSettings.HSplitTop(MainView.h/3-106.0f, &VotingSettings, &ChatSettings);
+		VotingSettings.HSplitTop(80.0f, &VotingSettings, &ChatSettings);
 		RenderTools()->DrawUIRect(&VotingSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		VotingSettings.VMargin(10.0f, &VotingSettings);
 
 		TextRender()->Text(0, VotingSettings.x, VotingSettings.y, 14.0f*UI()->Scale(), Localize("Voting"), -1);
 
-		VotingSettings.HSplitTop(14.0f+5.0f, 0, &VotingSettings);
-		UiDoGetButtons(14, 16, VotingSettings);
+		VotingSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &VotingSettings);
+		UiDoGetButtons(24, 26, VotingSettings);
 	}
 
 	// chat settings
 	{
 		ChatSettings.HSplitTop(10.0f, 0, &ChatSettings);
-		ChatSettings.HSplitTop(MainView.h/3-56.0f, &ChatSettings, &MiscSettings);
+		ChatSettings.HSplitTop(125.0f, &ChatSettings, &MiscSettings);
 		RenderTools()->DrawUIRect(&ChatSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y, 14.0f*UI()->Scale(), Localize("Chat"), -1);
 
-		ChatSettings.HSplitTop(14.0f+5.0f, 0, &ChatSettings);
-		UiDoGetButtons(16, 20, ChatSettings);
+		ChatSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &ChatSettings);
+		UiDoGetButtons(26, 30, ChatSettings);
 	}
 
 	// misc settings
 	{
 		MiscSettings.HSplitTop(10.0f, 0, &MiscSettings);
+		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
 		RenderTools()->DrawUIRect(&MiscSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MiscSettings.VMargin(10.0f, &MiscSettings);
 
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
-		MiscSettings.HSplitTop(14.0f+5.0f, 0, &MiscSettings);
-		UiDoGetButtons(20, 33, MiscSettings);
+		MiscSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MiscSettings);
+		UiDoGetButtons(30, 42, MiscSettings);
 	}
 
+	UiDoListboxEnd(&s_ScrollValue, 0);
 }
 
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
