@@ -215,8 +215,8 @@ static void Mix(short *pFinalOut, unsigned Frames)
 					}
 
 					{
-						Lvol *= FalloffX;
-						Rvol *= FalloffX;
+						Lvol *= FalloffX * FalloffY;
+						Rvol *= FalloffX * FalloffY;
 					}
 				}
 				else
