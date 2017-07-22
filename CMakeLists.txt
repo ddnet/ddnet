@@ -361,12 +361,6 @@ add_executable(${TARGET_SERVER}
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 
-if(MYSQL)
-  target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_SQL)
-  target_include_directories(${TARGET_SERVER} PRIVATE ${MYSQL_INCLUDE_DIRS})
-endif()
-
-
 ########################################################################
 # VARIOUS TARGETS
 ########################################################################
@@ -475,6 +469,10 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDEDIR})
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
+  endif()
+  if(MYSQL)
+    target_compile_definitions(${target} PRIVATE CONF_SQL)
+    target_include_directories(${target} PRIVATE ${MYSQL_INCLUDE_DIRS})
   endif()
 endforeach()
 
