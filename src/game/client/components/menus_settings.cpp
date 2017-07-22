@@ -712,22 +712,23 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 		View.HSplitTop(20.0f, &Button, &View);
 		Button.VSplitLeft(135.0f, &Label, &Button);
 
-		if(Button.y < ScopeView.y || Button.y + Button.h > ScopeView.y + ScopeView.h)
-			continue;
-
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", (const char *)Key.m_Name);
-
-		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-		int OldId = Key.m_KeyId;
-		int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId);
-		if(NewId != OldId)
+		if(Button.y >= ScopeView.y && Button.y + Button.h <= ScopeView.y + ScopeView.h)
 		{
-			if(OldId != 0 || NewId == 0)
-				m_pClient->m_pBinds->Bind(OldId, "");
-			if(NewId != 0)
-				m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s:", (const char *)Key.m_Name);
+
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			int OldId = Key.m_KeyId;
+			int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId);
+			if(NewId != OldId)
+			{
+				if(OldId != 0 || NewId == 0)
+					m_pClient->m_pBinds->Bind(OldId, "");
+				if(NewId != 0)
+					m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand);
+			}
 		}
+
 		View.HSplitTop(2.0f, 0, &View);
 	}
 }
@@ -769,7 +770,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// movement settings
 	{
 		MovementSettings.VMargin(5.0f, &MovementSettings);
-		MovementSettings.HSplitTop(450.0f, &MovementSettings, &WeaponSettings);
+		MovementSettings.HSplitTop(490.0f, &MovementSettings, &WeaponSettings);
 		RenderTools()->DrawUIRect(&MovementSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
