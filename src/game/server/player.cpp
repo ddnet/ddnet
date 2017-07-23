@@ -120,7 +120,7 @@ void CPlayer::Reset()
 
 	m_LastPause = 0;
 	m_Score = -9999;
-	m_HasFinishScore = false
+	m_HasFinishScore = false;
 
 	// Variable initialized:
 	m_Last_Team = 0;
