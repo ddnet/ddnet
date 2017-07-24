@@ -433,6 +433,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
+	if(DoButton_CheckBox(&g_Config.m_ClKittySkins, Localize("Kitty skins"), g_Config.m_ClKittySkins, &DummyLabel))
+	{
+		g_Config.m_ClKittySkins ^= 1;
+	}
+
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
 	if(DoButton_CheckBox(&g_Config.m_ClFatSkins, Localize("Fat skins"), g_Config.m_ClFatSkins, &DummyLabel))
 	{
 		g_Config.m_ClFatSkins ^= 1;
