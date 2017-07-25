@@ -6,6 +6,8 @@ addons:
     packages:
     - libfreetype6-dev
     - libsdl2-dev
+git:
+  submodules: false
 script:
 - git submodule update --init
 - mkdir build
