@@ -86,7 +86,7 @@ void CFetcher::FetcherThread(void *pUser)
 		lock_unlock(pFetcher->m_Lock);
 		if(pTask)
 		{
-			dbg_msg("fetcher", "task got %s:%s", pTask->m_aUrl, pTask->m_aDest);
+			dbg_msg("fetcher", "task got %s -> %s", pTask->m_aUrl, pTask->m_aDest);
 			pFetcher->FetchFile(pTask);
 			if(pTask->m_pfnCompCallback)
 				pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
