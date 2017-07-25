@@ -650,7 +650,8 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			if(s_ControlPage == 0)
 			{
 				m_pClient->m_pVoting->CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
-				SetActive(false);
+				if(g_Config.m_UiCloseWindowAfterChangingSetting)
+					SetActive(false);
 			}
 			else if(s_ControlPage == 1)
 			{
