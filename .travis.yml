@@ -16,3 +16,6 @@ env:
   global:
   - CFLAGS="-Wdeclaration-after-statement -Werror"
   - CXXFLAGS="-Werror"
+os:
+  - osx
+  - linux
