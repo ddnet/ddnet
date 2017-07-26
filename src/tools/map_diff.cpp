@@ -47,7 +47,7 @@ bool Process(IStorage *pStorage, char **pMapNames)
 		{
 			pItem[i] = (CMapItemLayer *)Maps[i].GetItem(Start[i]+j, 0, 0);
 			pTilemap[i] = (CMapItemLayerTilemap *)pItem[i];
-			(CTile *)Maps[i].GetData(pTilemap[i]->m_Data);
+			(void)(CTile *)Maps[i].GetData(pTilemap[i]->m_Data);
 		}
 	}
 
