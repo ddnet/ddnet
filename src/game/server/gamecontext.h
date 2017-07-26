@@ -48,7 +48,7 @@ typedef unsigned __int64 uint64_t;
 
 enum
 {
-	NUM_TUNINGZONES = 256
+	NUM_TUNEZONES = 256
 };
 
 class CGameContext : public IGameServer
@@ -59,7 +59,7 @@ class CGameContext : public IGameServer
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
-	CTuningParams m_TuningList[NUM_TUNINGZONES];
+	CTuningParams m_aTuningList[NUM_TUNEZONES];
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
@@ -100,7 +100,7 @@ public:
 	class IConsole *Console() { return m_pConsole; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
-	CTuningParams *TuningList() { return &m_TuningList[0]; }
+	CTuningParams *TuningList() { return &m_aTuningList[0]; }
 
 	CGameContext();
 	~CGameContext();
@@ -134,8 +134,8 @@ public:
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_NumVoteOptions;
 	int m_VoteEnforce;
-	char m_ZoneEnterMsg[NUM_TUNINGZONES][256]; // 0 is used for switching from or to area without tunings
-	char m_ZoneLeaveMsg[NUM_TUNINGZONES][256];
+	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
+	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
 
 	char m_aDeleteTempfile[128];
 	void DeleteTempfile();

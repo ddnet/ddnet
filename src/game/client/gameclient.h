@@ -7,6 +7,7 @@
 #include <engine/client.h>
 #include <engine/console.h>
 #include <game/layers.h>
+#include <game/localization.h>
 #include <game/gamecore.h>
 #include "render.h"
 
@@ -441,8 +442,5 @@ inline vec3 RgbToHsl(vec3 RGB)
 }
 
 vec3 CalculateNameColor(vec3 TextColorHSL);
-
-extern const char *Localize(const char *Str);
-
 
 #endif

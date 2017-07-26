@@ -20,14 +20,14 @@ class CInput : public IEngineInput
 	void Clear();
 	bool IsEventValid(CEvent *pEvent) const { return pEvent->m_InputCount == m_InputCounter; };
 
-	//quick access to input
+	// quick access to input
 	unsigned short m_aInputCount[g_MaxKeys];	// tw-KEY
 	unsigned char m_aInputState[g_MaxKeys];	// SDL_SCANCODE
 	int m_InputCounter;
 
-	//ime support
+	// IME support
 	int m_CountEditingText;
-	char m_pEditingText[32];
+	char m_aEditingText[32];
 	int m_EditingCursor;
 
 	bool KeyState(int Key) const;
