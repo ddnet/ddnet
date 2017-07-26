@@ -319,7 +319,6 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 	Bind(KEY_KP_PLUS, "zoom+", FreeOnly);
 	Bind(KEY_KP_MINUS, "zoom-", FreeOnly);
 	Bind(KEY_KP_MULTIPLY, "zoom", FreeOnly);
-	Bind(KEY_HOME, "kill", FreeOnly);
 	Bind(KEY_PAUSE, "say /pause", FreeOnly);
 	Bind(KEY_UP, "+jump", FreeOnly);
 	Bind(KEY_LEFT, "+left", FreeOnly);
