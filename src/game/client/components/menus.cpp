@@ -368,7 +368,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	char aInputing[32] = {0};
 	if(UI()->HotItem() == pID && Input()->GetIMEState())
 	{
-		str_format(aInputing, sizeof(aInputing), pStr);
+		str_copy(aInputing, pStr, sizeof(aInputing));
 		const char *Text = Input()->GetIMECandidate();
 		if (str_length(Text))
 		{
@@ -1098,7 +1098,7 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			if(Client()->m_ReconnectTime > 0)
 			{
-				str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), ((Client()->m_ReconnectTime - time_get()) / time_freq() + g_Config.m_ClReconnectFull));
+				str_format(aBuf, sizeof(aBuf), Localize("\n\nReconnect in %d sec"), (int)((Client()->m_ReconnectTime - time_get()) / time_freq() + g_Config.m_ClReconnectFull));
 				pTitle = Client()->ErrorString();
 				pExtraText = aBuf;
 				pButtonText = Localize("Abort");
@@ -1344,18 +1344,18 @@ int CMenus::Render()
 				UI()->DoLabel(&Part, aBuf, 20.f, 0, -1);
 
 				// time left
-				const char *pTimeLeftString;
 				int TimeLeft = max(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize()-Client()->MapDownloadAmount())/m_DownloadSpeed) : 1);
 				if(TimeLeft >= 60)
 				{
 					TimeLeft /= 60;
-					pTimeLeftString = TimeLeft == 1 ? Localize("%i minute left") : Localize("%i minutes left");
+					str_format(aBuf, sizeof(aBuf), TimeLeft == 1 ? Localize("%i minute left") : Localize("%i minutes left"), TimeLeft);
 				}
 				else
-					pTimeLeftString = TimeLeft == 1 ? Localize("%i second left") : Localize("%i seconds left");
+				{
+					str_format(aBuf, sizeof(aBuf), TimeLeft == 1 ? Localize("%i second left") : Localize("%i seconds left"), TimeLeft);
+				}
 				Box.HSplitTop(20.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
-				str_format(aBuf, sizeof(aBuf), pTimeLeftString, TimeLeft);
 				UI()->DoLabel(&Part, aBuf, 20.f, 0, -1);
 
 				// progress bar

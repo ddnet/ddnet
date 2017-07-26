@@ -461,8 +461,10 @@ foreach(target ${TARGETS_OWN})
     if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
       target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>)
     endif()
-    #target_compile_options(${target} PRIVATE -Wextra)
-    #target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
+    target_compile_options(${target} PRIVATE -Wextra)
+    target_compile_options(${target} PRIVATE -Wno-unused-parameter)
+    target_compile_options(${target} PRIVATE -Wno-missing-field-initializers)
+    target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
   endif()
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)

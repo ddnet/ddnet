@@ -169,8 +169,8 @@ void CInput::SetIMEState(bool Activate)
 
 const char* CInput::GetIMECandidate()
 {
-	if (str_length(m_pEditingText))
-		return m_pEditingText;
+	if (str_length(m_aEditingText))
+		return m_aEditingText;
 	else
 		return "";
 }
@@ -211,10 +211,10 @@ int CInput::Update()
 				{
 					if(str_length(Event.edit.text))
 					{
-						str_format(m_pEditingText, sizeof(m_pEditingText), Event.edit.text);
+						str_copy(m_aEditingText, Event.edit.text, sizeof(m_aEditingText));
 						m_EditingCursor = 0;
 						for (int i = 0; i < Event.edit.start; i++)
-							m_EditingCursor = str_utf8_forward(m_pEditingText, m_EditingCursor);
+							m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);
 					}
 					break;
 				}

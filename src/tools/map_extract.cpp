@@ -25,10 +25,10 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	CMapItemInfo *pInfo = (CMapItemInfo *)Map.FindItem(MAPITEMTYPE_INFO, 0);
 
-	dbg_msg("map_extract", "author:  %s", Map.GetData(pInfo->m_Author));
-	dbg_msg("map_extract", "version: %s", Map.GetData(pInfo->m_MapVersion));
-	dbg_msg("map_extract", "credits: %s", Map.GetData(pInfo->m_Credits));
-	dbg_msg("map_extract", "license: %s", Map.GetData(pInfo->m_License));
+	dbg_msg("map_extract", "author:  %s", (char *)Map.GetData(pInfo->m_Author));
+	dbg_msg("map_extract", "version: %s", (char *)Map.GetData(pInfo->m_MapVersion));
+	dbg_msg("map_extract", "credits: %s", (char *)Map.GetData(pInfo->m_Credits));
+	dbg_msg("map_extract", "license: %s", (char *)Map.GetData(pInfo->m_License));
 
 	int Start, Num;
 
@@ -77,7 +77,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 	return Map.Close();
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	dbg_logger_stdout();
 
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 
 	if (!fs_is_dir(aDir))
 	{
-		dbg_msg("usage" "directory '%s' does not exist", aDir);
+		dbg_msg("usage", "directory '%s' does not exist", aDir);
 		return -1;
 	}
 

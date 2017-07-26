@@ -193,13 +193,10 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	time_t rawtime;
-	struct tm* timeinfo;
-	char timestr [80];
+	char timestr[80];
 
-	time ( &rawtime );
-	timeinfo = localtime ( &rawtime );
-
-	strftime (timestr,sizeof(timestr),"%y-%m-%d %H:%M:%S",timeinfo);
+	time(&rawtime);
+	str_timestamp_ex(rawtime, timestr, sizeof(timestr), "%Y-%m %H:%M:%S");
 
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
@@ -2228,7 +2225,14 @@ void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const cha
 	struct tm *time_info;
 
 	time_info = localtime(&time_data);
+	#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+	#endif
 	strftime(buffer, buffer_size, format, time_info);
+	#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+	#endif
 	buffer[buffer_size-1] = 0;	/* assure null termination */
 }
 
