@@ -159,12 +159,79 @@ set(TARGETS_DEP)
 set(TARGETS_LINK) # Targets with a linking stage.
 
 ########################################################################
+# COMMON FUNCTIONS
+########################################################################
+
+function(set_glob VAR GLOBBING DIRECTORY) # ...
+  file(${GLOBBING} GLOB_RESULT "${DIRECTORY}/*.c" "${DIRECTORY}/*.cpp" "${DIRECTORY}/*.h")
+  list(SORT GLOB_RESULT)
+  set(FILES)
+  foreach(file ${ARGN})
+    list(APPEND FILES "${PROJECT_SOURCE_DIR}/${DIRECTORY}/${file}")
+  endforeach()
+
+  if(NOT FILES STREQUAL GLOB_RESULT)
+    message(AUTHOR_WARNING "${VAR} does not contain every file from directory ${DIRECTORY}")
+    set(LIST_BUT_NOT_GLOB)
+    if(POLICY CMP0057)
+      cmake_policy(SET CMP0057 NEW)
+      foreach(file ${FILES})
+        if(NOT file IN_LIST GLOB_RESULT)
+          list(APPEND LIST_BUT_NOT_GLOB ${file})
+        endif()
+      endforeach()
+      if(LIST_BUT_NOT_GLOB)
+        message(AUTHOR_WARNING "Entries only present in ${VAR}: ${LIST_BUT_NOT_GLOB}")
+      endif()
+      set(GLOB_BUT_NOT_LIST)
+      foreach(file ${GLOB_RESULT})
+        if(NOT file IN_LIST FILES)
+          list(APPEND GLOB_BUT_NOT_LIST ${file})
+        endif()
+      endforeach()
+      if(GLOB_BUT_NOT_LIST)
+        message(AUTHOR_WARNING "Entries only present in ${DIRECTORY}: ${GLOB_BUT_NOT_LIST}")
+      endif()
+    endif()
+  endif()
+
+  set(${VAR} ${FILES} PARENT_SCOPE)
+endfunction()
+
+########################################################################
 # DEPENDENCY COMPILATION
 ########################################################################
 
 if(NOT(ZLIB_FOUND))
   set(ZLIB_LIBRARIES)
-  file(GLOB ZLIB_SRC "src/engine/external/zlib/*.c" "src/engine/external/zlib/*.h")
+  set_glob(ZLIB_SRC GLOB src/engine/external/zlib
+    adler32.c
+    compress.c
+    crc32.c
+    crc32.h
+    deflate.c
+    deflate.h
+    gzclose.c
+    gzguts.h
+    gzlib.c
+    gzread.c
+    gzwrite.c
+    infback.c
+    inffast.c
+    inffast.h
+    inffixed.h
+    inflate.c
+    inflate.h
+    inftrees.c
+    inftrees.h
+    trees.c
+    trees.h
+    uncompr.c
+    zconf.h
+    zlib.h
+    zutil.c
+    zutil.h
+  )
   add_library(zlib EXCLUDE_FROM_ALL OBJECT ${ZLIB_SRC})
 
   list(APPEND TARGETS_DEP zlib)
@@ -175,7 +242,7 @@ else()
   set(DEP_ZLIB)
 endif()
 
-file(GLOB DEP_PNG_SRC "src/engine/external/pnglite/*.c" "src/engine/external/pnglite/*.h")
+set_glob(DEP_PNG_SRC GLOB src/engine/external/pnglite pnglite.c pnglite.h)
 add_library(png OBJECT EXCLUDE_FROM_ALL ${DEP_PNG_SRC})
 target_include_directories(png PRIVATE ${ZLIB_INCLUDEDIR})
 
@@ -184,8 +251,16 @@ list(APPEND TARGETS_DEP png)
 
 if(CLIENT)
   # Static dependencies
-  file(GLOB DEP_JSON_SRC "src/engine/external/json-parser/*.c" "src/engine/external/json-parser/*.h")
-  file(GLOB DEP_WAV_SRC "src/engine/external/wavpack/*.c" "src/engine/external/wavpack/*.h")
+  set_glob(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
+  set_glob(DEP_WAV_SRC GLOB src/engine/external/wavpack
+    bits.c
+    float.c
+    metadata.c
+    unpack.c
+    wavpack.h
+    words.c
+    wputils.c
+  )
   add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
   add_library(wav EXCLUDE_FROM_ALL OBJECT ${DEP_WAV_SRC})
 
@@ -248,20 +323,143 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 ########################################################################
 
 # Sources
-file(GLOB_RECURSE BASE "src/base/*.c" "src/base/*.cpp" "src/base/*.h")
-file(GLOB_RECURSE ENGINE_SHARED "src/engine/shared/*.cpp" "src/engine/shared/*.h")
-set(ENGINE_GENERATED_SHARED "src/game/generated/protocol.cpp" "src/game/generated/protocol.h")
-file(GLOB GAME_SHARED "src/game/*.cpp" "src/game/*.h")
-set(GAME_GENERATED_SHARED "src/game/generated/nethash.cpp")
+set_glob(BASE GLOB_RECURSE src/base
+  color.h
+  confusables.c
+  confusables_data.h
+  detect.h
+  math.h
+  system.c
+  system.h
+  tl/algorithm.h
+  tl/allocator.h
+  tl/array.h
+  tl/base.h
+  tl/range.h
+  tl/sorted_array.h
+  tl/string.h
+  tl/threading.h
+  vmath.h
+)
+set_glob(ENGINE_SHARED GLOB src/engine/shared
+  compression.cpp
+  compression.h
+  config.cpp
+  config.h
+  config_variables.h
+  console.cpp
+  console.h
+  datafile.cpp
+  datafile.h
+  demo.cpp
+  demo.h
+  econ.cpp
+  econ.h
+  engine.cpp
+  fifo.cpp
+  fifo.h
+  filecollection.cpp
+  filecollection.h
+  global_uuid_manager.cpp
+  huffman.cpp
+  huffman.h
+  jobs.cpp
+  jobs.h
+  kernel.cpp
+  linereader.cpp
+  linereader.h
+  map.cpp
+  mapchecker.cpp
+  mapchecker.h
+  masterserver.cpp
+  memheap.cpp
+  memheap.h
+  message.h
+  netban.cpp
+  netban.h
+  network.cpp
+  network.h
+  network_client.cpp
+  network_conn.cpp
+  network_console.cpp
+  network_console_conn.cpp
+  network_server.cpp
+  packer.cpp
+  packer.h
+  protocol.h
+  protocol_ex.cpp
+  protocol_ex.h
+  protocol_ex_msgs.h
+  ringbuffer.cpp
+  ringbuffer.h
+  serverbrowser.cpp
+  snapshot.cpp
+  snapshot.h
+  storage.cpp
+  storage.h
+  uuid_manager.cpp
+  uuid_manager.h
+  websockets.cpp
+  websockets.h
+)
+set(ENGINE_GENERATED_SHARED src/game/generated/protocol.cpp src/game/generated/protocol.h)
+set_glob(GAME_SHARED GLOB src/game
+  collision.cpp
+  collision.h
+  ddracecommands.h
+  extrainfo.cpp
+  extrainfo.h
+  gamecore.cpp
+  gamecore.h
+  layers.cpp
+  layers.h
+  localization.cpp
+  localization.h
+  mapitems.cpp
+  mapitems.h
+  teamscore.cpp
+  teamscore.h
+  tuning.h
+  variables.h
+  version.h
+  voting.h
+)
+set(GAME_GENERATED_SHARED src/game/generated/nethash.cpp)
 
 # Static dependencies
-file(GLOB DEP_MD5_SRC "src/engine/external/md5/*.c" "src/engine/external/md5/*.h")
+set_glob(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
 add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 list(APPEND TARGETS_DEP md5)
 
 if(WEBSOCKETS)
-  file(GLOB DEP_WEBSOCKETS_SRC "src/engine/external/libwebsockets/*.c" "src/engine/external/libwebsockets/*.h")
+  set_glob(DEP_WEBSOCKETS_SRC GLOB src/engine/external/libwebsockets
+    alloc.c
+    base64-decode.c
+    config.h
+    context.c
+    extension-deflate-frame.c
+    extension-deflate-frame.h
+    extension-deflate-stream.c
+    extension-deflate-stream.h
+    extension.c
+    getifaddrs.h
+    handshake.c
+    huftable.h
+    lextable-strings.h
+    lextable.h
+    libwebsockets.c
+    libwebsockets.h
+    lws-plat-unix.c
+    output.c
+    parsers.c
+    pollfd.c
+    private-libwebsockets.h
+    server-handshake.c
+    server.c
+    service.c
+    sha-1.c
+  )
   add_library(websockets EXCLUDE_FROM_ALL OBJECT ${DEP_WEBSOCKETS_SRC})
   list(APPEND TARGETS_DEP websockets)
   set(DEP_WEBSOCKETS $<TARGET_OBJECTS:websockets>)
@@ -286,10 +484,126 @@ list(APPEND TARGETS_OWN engine-shared game-shared)
 
 if(CLIENT)
   # Sources
-  file(GLOB_RECURSE ENGINE_CLIENT "src/engine/client/*.cpp" "src/engine/client/*.h")
-  file(GLOB_RECURSE GAME_CLIENT "src/game/client/*.cpp" "src/game/client/*.h")
-  file(GLOB_RECURSE GAME_EDITOR "src/game/editor/*.cpp" "src/game/editor/*.h")
-  set(GAME_GENERATED_CLIENT "src/game/generated/client_data.cpp" "src/game/generated/client_data.h")
+  set_glob(ENGINE_CLIENT GLOB src/engine/client
+    backend_sdl.cpp
+    backend_sdl.h
+    client.cpp
+    client.h
+    fetcher.cpp
+    fetcher.h
+    friends.cpp
+    friends.h
+    graphics_threaded.cpp
+    graphics_threaded.h
+    input.cpp
+    input.h
+    keynames.h
+    serverbrowser.cpp
+    serverbrowser.h
+    sound.cpp
+    sound.h
+    text.cpp
+    updater.cpp
+    updater.h
+  )
+  set_glob(GAME_CLIENT GLOB_RECURSE src/game/client
+    animstate.cpp
+    animstate.h
+    component.h
+    components/background.cpp
+    components/background.h
+    components/binds.cpp
+    components/binds.h
+    components/broadcast.cpp
+    components/broadcast.h
+    components/camera.cpp
+    components/camera.h
+    components/chat.cpp
+    components/chat.h
+    components/console.cpp
+    components/console.h
+    components/controls.cpp
+    components/controls.h
+    components/countryflags.cpp
+    components/countryflags.h
+    components/damageind.cpp
+    components/damageind.h
+    components/debughud.cpp
+    components/debughud.h
+    components/effects.cpp
+    components/effects.h
+    components/emoticon.cpp
+    components/emoticon.h
+    components/flow.cpp
+    components/flow.h
+    components/ghost.cpp
+    components/ghost.h
+    components/hud.cpp
+    components/hud.h
+    components/items.cpp
+    components/items.h
+    components/killmessages.cpp
+    components/killmessages.h
+    components/mapimages.cpp
+    components/mapimages.h
+    components/maplayers.cpp
+    components/maplayers.h
+    components/mapsounds.cpp
+    components/mapsounds.h
+    components/menus.cpp
+    components/menus.h
+    components/menus_browser.cpp
+    components/menus_demo.cpp
+    components/menus_ingame.cpp
+    components/menus_settings.cpp
+    components/motd.cpp
+    components/motd.h
+    components/nameplates.cpp
+    components/nameplates.h
+    components/particles.cpp
+    components/particles.h
+    components/players.cpp
+    components/players.h
+    components/race_demo.cpp
+    components/race_demo.h
+    components/scoreboard.cpp
+    components/scoreboard.h
+    components/skins.cpp
+    components/skins.h
+    components/sounds.cpp
+    components/sounds.h
+    components/spectator.cpp
+    components/spectator.h
+    components/statboard.cpp
+    components/statboard.h
+    components/voting.cpp
+    components/voting.h
+    gameclient.cpp
+    gameclient.h
+    lineinput.cpp
+    lineinput.h
+    render.cpp
+    render.h
+    render_map.cpp
+    ui.cpp
+    ui.h
+  )
+  set_glob(GAME_EDITOR GLOB src/game/editor
+    auto_map.cpp
+    auto_map.h
+    editor.cpp
+    editor.h
+    io.cpp
+    layer_game.cpp
+    layer_quads.cpp
+    layer_sounds.cpp
+    layer_tiles.cpp
+    popups.cpp
+  )
+  set(GAME_GENERATED_CLIENT
+    src/game/generated/client_data.cpp
+    src/game/generated/client_data.h
+  )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
   set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
@@ -348,9 +662,73 @@ endif()
 ########################################################################
 
 # Sources
-file(GLOB_RECURSE ENGINE_SERVER "src/engine/server/*.cpp" "src/engine/server/*.h")
-file(GLOB_RECURSE GAME_SERVER "src/game/server/*.cpp" "src/game/server/*.h")
-set(GAME_GENERATED_SERVER "src/game/generated/server_data.cpp" "src/game/generated/server_data.h")
+set_glob(ENGINE_SERVER GLOB src/engine/server
+  authmanager.cpp
+  authmanager.h
+  register.cpp
+  register.h
+  server.cpp
+  server.h
+  sql_connector.cpp
+  sql_connector.h
+  sql_server.cpp
+  sql_server.h
+  sql_string_helpers.cpp
+  sql_string_helpers.h
+)
+set_glob(GAME_SERVER GLOB_RECURSE src/game/server
+  ddracechat.cpp
+  ddracechat.h
+  ddracecommands.cpp
+  entities/character.cpp
+  entities/character.h
+  entities/door.cpp
+  entities/door.h
+  entities/dragger.cpp
+  entities/dragger.h
+  entities/flag.cpp
+  entities/flag.h
+  entities/gun.cpp
+  entities/gun.h
+  entities/laser.cpp
+  entities/laser.h
+  entities/light.cpp
+  entities/light.h
+  entities/pickup.cpp
+  entities/pickup.h
+  entities/plasma.cpp
+  entities/plasma.h
+  entities/projectile.cpp
+  entities/projectile.h
+  entity.cpp
+  entity.h
+  eventhandler.cpp
+  eventhandler.h
+  gamecontext.cpp
+  gamecontext.h
+  gamecontroller.cpp
+  gamecontroller.h
+  gamemodes/DDRace.cpp
+  gamemodes/DDRace.h
+  gamemodes/gamemode.h
+  gameworld.cpp
+  gameworld.h
+  player.cpp
+  player.h
+  save.cpp
+  save.h
+  score.h
+  score/file_score.cpp
+  score/file_score.h
+  score/sql_score.cpp
+  score/sql_score.h
+  teams.cpp
+  teams.h
+)
+set(GAME_GENERATED_SERVER
+  "src/game/generated/server_data.cpp"
+  "src/game/generated/server_data.h"
+)
 set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")
   if(MSVC)
@@ -382,9 +760,9 @@ list(APPEND TARGETS_LINK ${TARGET_SERVER})
 # VARIOUS TARGETS
 ########################################################################
 
-file(GLOB_RECURSE MASTERSRV_SRC "src/mastersrv/*.cpp" "src/mastersrv/*.h")
-file(GLOB_RECURSE VERSIONSRV_SRC  "src/versionsrv/*.cpp" "src/versionsrv/*.h")
-file(GLOB_RECURSE TWPING_SRC "src/twping/*.cpp" "src/twping/*.h")
+set_glob(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
+set_glob(VERSIONSRV_SRC GLOB src/versionsrv mapversions.h versionsrv.cpp versionsrv.h)
+set_glob(TWPING_SRC GLOB src/twping twping.cpp)
 
 set(TARGET_MASTERSRV mastersrv)
 set(TARGET_VERSIONSRV versionsrv)
@@ -405,24 +783,46 @@ list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV
 list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV})
 
 set(TARGETS_TOOLS)
-file(GLOB TOOLS RELATIVE "${PROJECT_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
-foreach(T ${TOOLS})
-  string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
-  set(EXTRA_TOOL_SRC)
-  if(TOOL MATCHES "^(tileset_|dilate|map_extract$)")
-    list(APPEND EXTRA_TOOL_SRC ${DEP_PNG})
+set_glob(TOOLS GLOB src/tools
+  config_common.h
+  config_retrieve.cpp
+  config_store.cpp
+  confusables.cpp
+  crapnet.cpp
+  dilate.cpp
+  dummy_map.cpp
+  fake_server.cpp
+  map_diff.cpp
+  map_extract.cpp
+  map_resave.cpp
+  map_version.cpp
+  packetgen.cpp
+  tileset_borderadd.cpp
+  tileset_borderfix.cpp
+  tileset_borderrem.cpp
+  tileset_borderset.cpp
+  uuid.cpp
+)
+foreach(ABS_T ${TOOLS})
+  file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
+  if(T MATCHES "\\.cpp$")
+    string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
+    set(EXTRA_TOOL_SRC)
+    if(TOOL MATCHES "^(tileset_|dilate|map_extract$)")
+      list(APPEND EXTRA_TOOL_SRC ${DEP_PNG})
+    endif()
+    if(TOOL MATCHES "^config_")
+      list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
+    endif()
+    add_executable(${TOOL} EXCLUDE_FROM_ALL
+      ${DEPS}
+      src/tools/${TOOL}.cpp
+      ${EXTRA_TOOL_SRC}
+      $<TARGET_OBJECTS:engine-shared>
+    )
+    target_link_libraries(${TOOL} ${LIBS})
+    list(APPEND TARGETS_TOOLS ${TOOL})
   endif()
-  if(TOOL MATCHES "^config_")
-    list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
-  endif()
-  add_executable(${TOOL} EXCLUDE_FROM_ALL
-    ${DEPS}
-    src/tools/${TOOL}.cpp
-    ${EXTRA_TOOL_SRC}
-    $<TARGET_OBJECTS:engine-shared>
-  )
-  target_link_libraries(${TOOL} ${LIBS})
-  list(APPEND TARGETS_TOOLS ${TOOL})
 endforeach()
 
 list(APPEND TARGETS_OWN ${TARGETS_TOOLS})
