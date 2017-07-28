@@ -357,11 +357,8 @@ int CSound::Shutdown()
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	lock_destroy(m_SoundLock);
-	if(m_pMixBuffer)
-	{
-		mem_free(m_pMixBuffer);
-		m_pMixBuffer = 0;
-	}
+	mem_free(m_pMixBuffer);
+	m_pMixBuffer = 0;
 	return 0;
 }
 
@@ -690,8 +687,7 @@ void CSound::UnloadSample(int SampleID)
 		return;
 
 	Stop(SampleID);
-	if (m_aSamples[SampleID].m_pData != 0x0) 
-		mem_free(m_aSamples[SampleID].m_pData);
+	mem_free(m_aSamples[SampleID].m_pData);
 
 	m_aSamples[SampleID].m_pData = 0x0;
 }
