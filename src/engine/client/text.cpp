@@ -456,10 +456,10 @@ public:
 
 	virtual ~CTextRender()
 	{
-		if (m_pDefaultFont != 0)
+		if(m_pDefaultFont != 0)
 			DestroyFont(m_pDefaultFont);
 
-		if (m_FTLibrary != 0)
+		if(m_FTLibrary != 0)
 			FT_Done_FreeType(m_FTLibrary);
 	}
 
@@ -499,7 +499,7 @@ public:
 	virtual void SetDefaultFont(CFont *pFont)
 	{
 		dbg_msg("textrender", "default pFont set %p", pFont);
-		if (m_pDefaultFont != 0)
+		if(m_pDefaultFont != 0)
 			DestroyFont(m_pDefaultFont);
 		m_pDefaultFont = pFont;
 	}
