@@ -40,7 +40,7 @@ class CJobPool
 {
 	enum
 	{
-			MAX_THREADS=32
+		MAX_THREADS=32
 	};
 	int m_NumThreads;
 	void *m_apThreads[MAX_THREADS];
