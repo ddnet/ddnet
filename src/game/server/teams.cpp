@@ -118,9 +118,8 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			{
 				CPlayer* pPlayer = GetPlayer(i);
 				if (m_Core.Team(ClientID) == m_Core.Team(i) && pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
-					{
-						GameServer()->SendChatTarget(i, aBuf);
-					}
+				{
+					GameServer()->SendChatTarget(i, aBuf);
 				}
 			}
 		}
