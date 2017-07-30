@@ -3,7 +3,9 @@ pkg_check_modules(PC_SDL2 sdl2)
 
 set_extra_dirs(SDL2 sdl)
 
-find_path(SDL2_INCLUDEDIR SDL.h
+# Looking for 'SDL.h' directly might accidently find a SDL instead of SDL 2
+# installation. Look for a header file only present in SDL 2 instead.
+find_path(SDL2_INCLUDEDIR SDL_assert.h
   PATH_SUFFIXES SDL2
   HINTS ${PC_SDL2_INCLUDEDIR} ${PC_SDL2_INCLUDE_DIRS}
   PATHS ${EXTRA_SDL2_INCLUDEDIR}

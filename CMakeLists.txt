@@ -21,7 +21,7 @@ set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(TARGET_BITS "64")
-else()
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
   set(TARGET_BITS "32")
 endif()
 
@@ -32,8 +32,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
 endif()
-
-message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 
 function(set_extra_dirs VARIABLE NAME)
   if(TARGET_BITS AND TARGET_OS)
@@ -61,8 +59,9 @@ find_package(Threads)
 find_package(ZLIB)
 
 message(STATUS "******** DDNet ********")
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Dependencies:")
 function(show_dependency_status NAME FOUND PATH)
@@ -118,9 +117,23 @@ if(CLIENT AND NOT(SDL2_FOUND))
 endif()
 
 if(TARGET_OS STREQUAL "windows")
+  set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
+elseif(TARGET_OS STREQUAL "mac")
+  find_library(CARBON Carbon)
+  find_library(COCOA Cocoa)
+  find_library(OPENGL OpenGL)
+  set(PLATFORM_CLIENT
+    src/osx/notification.h
+    src/osx/notification.mm
+    src/osxlaunch/client.h
+    src/osxlaunch/client.m
+  )
+  set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
+  set(PLATFORM_LIBS ${CARBON})
 else()
+  set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS GL GLU X11)
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
@@ -142,6 +155,8 @@ endif()
 
 set(TARGETS_OWN)
 set(TARGETS_DEP)
+
+set(TARGETS_LINK) # Targets with a linking stage.
 
 ########################################################################
 # DEPENDENCY COMPILATION
@@ -275,7 +290,7 @@ if(CLIENT)
   file(GLOB_RECURSE GAME_CLIENT "src/game/client/*.cpp" "src/game/client/*.h")
   file(GLOB_RECURSE GAME_EDITOR "src/game/editor/*.cpp" "src/game/editor/*.h")
   set(GAME_GENERATED_CLIENT "src/game/generated/client_data.cpp" "src/game/generated/client_data.h")
-  set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
+  set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
   set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
 
@@ -324,6 +339,7 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
   )
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
+  list(APPEND TARGETS_LINK ${TARGET_CLIENT})
 endif()
 
 
@@ -360,6 +376,7 @@ add_executable(${TARGET_SERVER}
 )
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
+list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
 ########################################################################
 # VARIOUS TARGETS
@@ -385,6 +402,7 @@ target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
 target_link_libraries(${TARGET_TWPING} ${LIBS})
 
 list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV})
+list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV})
 
 set(TARGETS_TOOLS)
 file(GLOB TOOLS RELATIVE "${PROJECT_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
@@ -408,6 +426,7 @@ foreach(T ${TOOLS})
 endforeach()
 
 list(APPEND TARGETS_OWN ${TARGETS_TOOLS})
+list(APPEND TARGETS_LINK ${TARGETS_TOOLS})
 
 add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
@@ -440,7 +459,6 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
-    set_property(TARGET ${target} APPEND PROPERTY LINK_FLAGS /SAFESEH:NO) # disable seh because the shipped libraries don't support it
   elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
     if(ENABLE_STACK_PROTECTOR)
       target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
@@ -448,6 +466,21 @@ foreach(target ${TARGETS})
     if(DEFINE_FORTIFY_SOURCE)
       target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
     endif()
+  endif()
+  if(TARGET_OS STREQUAL "mac")
+    target_compile_options(${target} PRIVATE -stdlib=libc++)
+    target_compile_options(${target} PRIVATE -mmacosx-version-min=10.7)
+  endif()
+endforeach()
+
+if(TARGET_OS STREQUAL "windows")
+  set_property(TARGET ${TARGET_CLIENT} APPEND PROPERTY LINK_FLAGS /SAFESEH:NO) # Disable SafeSEH because the shipped libraries don't support it.
+endif()
+
+foreach(target ${TARGETS_LINK})
+  if(TARGET_OS STREQUAL "mac")
+    target_link_libraries(${target} -stdlib=libc++)
+    target_link_libraries(${target} -mmacosx-version-min=10.7)
   endif()
 endforeach()
 

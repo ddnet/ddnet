@@ -1,13 +1,16 @@
 language: c++
 sudo: false
 dist: trusty
+os:
+- linux
+- osx
 addons:
   apt:
     packages:
     - libfreetype6-dev
     - libsdl2-dev
 script:
-- git submodule update --init
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl2; fi
 - mkdir build
 - cd build
 - cmake ..
