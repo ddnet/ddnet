@@ -473,7 +473,7 @@ foreach(target ${TARGETS})
   endif()
 endforeach()
 
-if(TARGET_OS STREQUAL "windows")
+if(TARGET_OS STREQUAL "windows" AND MSVC)
   set_property(TARGET ${TARGET_CLIENT} APPEND PROPERTY LINK_FLAGS /SAFESEH:NO) # Disable SafeSEH because the shipped libraries don't support it.
 endif()
 
