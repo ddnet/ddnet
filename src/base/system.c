@@ -2626,7 +2626,7 @@ void secure_random_fill(void *bytes, unsigned length)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, bytes))
 	{
-		dbg_msg("secure", "CryptGenRandom failed, last_error=%d", GetLastError());
+		dbg_msg("secure", "CryptGenRandom failed, last_error=%ld", GetLastError());
 		dbg_break();
 	}
 #else
