@@ -2220,21 +2220,21 @@ int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
 	return 0;
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
 	struct tm *time_info;
 
 	time_info = localtime(&time_data);
-	#ifdef __GNUC__
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-	#endif
 	strftime(buffer, buffer_size, format, time_info);
-	#ifdef __GNUC__
-	#pragma GCC diagnostic pop
-	#endif
 	buffer[buffer_size-1] = 0;	/* assure null termination */
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 void str_timestamp(char *buffer, int buffer_size)
 {
