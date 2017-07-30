@@ -196,7 +196,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	char timestr[80];
 
 	time(&rawtime);
-	str_timestamp_ex(rawtime, timestr, sizeof(timestr), "%Y-%m %H:%M:%S");
+	str_timestamp_ex(rawtime, timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S");
 
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
