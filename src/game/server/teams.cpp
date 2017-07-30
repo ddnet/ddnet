@@ -114,12 +114,15 @@ void CGameTeams::OnCharacterStart(int ClientID)
 				}
 			}
 
-			for (int i = 0; i < MAX_CLIENTS; ++i)
+			if (g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
 			{
-				CPlayer* pPlayer = GetPlayer(i);
-				if (m_Core.Team(ClientID) == m_Core.Team(i) && pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
+				for (int i = 0; i < MAX_CLIENTS; ++i)
 				{
-					GameServer()->SendChatTarget(i, aBuf);
+					CPlayer* pPlayer = GetPlayer(i);
+					if (m_Core.Team(ClientID) == m_Core.Team(i) && pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
+					{
+						GameServer()->SendChatTarget(i, aBuf);
+					}
 				}
 			}
 		}
