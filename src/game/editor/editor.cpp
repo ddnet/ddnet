@@ -5220,12 +5220,15 @@ void CEditor::Render()
 		RenderMenubar(MenuBar);
 
 		RenderModebar(CModeBar);
-		if(m_ShowEnvelopeEditor && !m_ShowPicker)
-			RenderEnvelopeEditor(ExtraEditor);
-		if(m_ShowUndo)
-			RenderUndoList(UndoList);
-		if(m_ShowServerSettingsEditor)
-			RenderServerSettingsEditor(ExtraEditor);
+		if(!m_ShowPicker)
+		{
+			if(m_ShowEnvelopeEditor)
+				RenderEnvelopeEditor(ExtraEditor);
+			if(m_ShowUndo)
+				RenderUndoList(UndoList);
+			if(m_ShowServerSettingsEditor)
+				RenderServerSettingsEditor(ExtraEditor);
+		}
 	}
 
 	if(m_Dialog == DIALOG_FILE)

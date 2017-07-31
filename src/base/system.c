@@ -193,13 +193,10 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	time_t rawtime;
-	struct tm* timeinfo;
-	char timestr [80];
+	char timestr[80];
 
-	time ( &rawtime );
-	timeinfo = localtime ( &rawtime );
-
-	strftime (timestr,sizeof(timestr),"%y-%m-%d %H:%M:%S",timeinfo);
+	time(&rawtime);
+	str_timestamp_ex(rawtime, timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S");
 
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
@@ -1160,11 +1157,11 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type&NETTYPE_WEBSOCKET_IPV4)
 	{
 		int socket = -1;
+		char addr_str[NETADDR_MAXSTRSIZE];
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_WEBSOCKET_IPV4;
 
-		char addr_str[NETADDR_MAXSTRSIZE];
 		net_addr_str(&tmpbindaddr, addr_str, sizeof(addr_str), 0);
 		socket = websocket_create(addr_str, tmpbindaddr.port);
 
@@ -2223,6 +2220,10 @@ int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
 	return 0;
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
 	struct tm *time_info;
@@ -2231,6 +2232,9 @@ void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const cha
 	strftime(buffer, buffer_size, format, time_info);
 	buffer[buffer_size-1] = 0;	/* assure null termination */
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 void str_timestamp(char *buffer, int buffer_size)
 {
@@ -2268,48 +2272,6 @@ const MEMSTATS *mem_stats()
 void net_stats(NETSTATS *stats_inout)
 {
 	*stats_inout = network_stats;
-}
-
-void gui_messagebox(const char *title, const char *message)
-{
-#if defined(CONF_PLATFORM_MACOSX)
-	DialogRef theItem;
-	DialogItemIndex itemIndex;
-
-	/* FIXME: really needed? can we rely on glfw? */
-	/* HACK - get events without a bundle */
-	ProcessSerialNumber psn;
-	GetCurrentProcess(&psn);
-	TransformProcessType(&psn,kProcessTransformToForegroundApplication);
-	SetFrontProcess(&psn);
-	/* END HACK */
-
-	CreateStandardAlert(kAlertStopAlert,
-			CFStringCreateWithCString(NULL, title, kCFStringEncodingASCII),
-			CFStringCreateWithCString(NULL, message, kCFStringEncodingASCII),
-			NULL,
-			&theItem);
-
-	RunStandardAlert(theItem, NULL, &itemIndex);
-#elif defined(CONF_FAMILY_UNIX)
-	static char cmd[1024];
-	int err;
-	/* use xmessage which is available on nearly every X11 system */
-	snprintf(cmd, sizeof(cmd), "xmessage -center -title '%s' '%s'",
-		title,
-		message);
-
-	err = system(cmd);
-	dbg_msg("gui/msgbox", "result = %i", err);
-#elif defined(CONF_FAMILY_WINDOWS)
-	MessageBox(NULL,
-		message,
-		title,
-		MB_ICONEXCLAMATION | MB_OK);
-#else
-	/* this is not critical */
-	#warning not implemented
-#endif
 }
 
 int str_isspace(char c) { return c == ' ' || c == '\n' || c == '\t'; }
@@ -2664,7 +2626,7 @@ void secure_random_fill(void *bytes, unsigned length)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, bytes))
 	{
-		dbg_msg("secure", "CryptGenRandom failed, last_error=%d", GetLastError());
+		dbg_msg("secure", "CryptGenRandom failed, last_error=%ld", GetLastError());
 		dbg_break();
 	}
 #else

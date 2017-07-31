@@ -3,8 +3,8 @@
 
 class CNotification
 {
-	public:
-		static void notify(const char *pTitle, const char *pMsg);
+public:
+	static void Notify(const char *pTitle, const char *pMsg);
 };
 
 #endif // NOTIFICATION_H

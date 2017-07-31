@@ -516,7 +516,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	if (Zone == 0)
 		pParams = (int *)&m_Tuning;
 	else
-		pParams = (int *)&(m_TuningList[Zone]);
+		pParams = (int *)&(m_aTuningList[Zone]);
 
 	unsigned int last = sizeof(m_Tuning)/sizeof(int);
 	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion < VERSION_DDNET_EXTRATUNES)
@@ -1237,7 +1237,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(Now < pPlayer->m_FirstVoteTick)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote", ((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
+				str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote", (int)((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
 				SendChatTarget(ClientID, aBuf);
 				return;
 			}
@@ -1246,7 +1246,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pPlayer->m_LastVoteCall && TimeLeft > 0)
 			{
 				char aChatmsg[64];
-				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote", (TimeLeft/TickSpeed)+1);
+				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote", (int)(TimeLeft / TickSpeed) + 1);
 				SendChatTarget(ClientID, aChatmsg);
 				return;
 			}
@@ -1281,9 +1281,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						}
 						if(!m_apPlayers[ClientID]->m_Authed && (str_comp_num(pOption->m_aCommand, "sv_map ", 7) == 0 || str_comp_num(pOption->m_aCommand, "change_map ", 11) == 0 || str_comp_num(pOption->m_aCommand, "random_map", 10) == 0 || str_comp_num(pOption->m_aCommand, "random_unfinished_map", 21) == 0) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 						{
-							char chatmsg[512] = {0};
-							str_format(chatmsg, sizeof(chatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay,((m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq()));
-							SendChatTarget(ClientID, chatmsg);
+							str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay, (int)(((m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq())));
+							SendChatTarget(ClientID, aChatmsg);
 
 							return;
 						}
@@ -1334,12 +1333,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				else if(!m_apPlayers[ClientID]->m_Authed && time_get() < m_apPlayers[ClientID]->m_Last_KickVote + (time_freq() * g_Config.m_SvVoteKickDelay))
 				{
-					char chatmsg[512] = {0};
-					str_format(chatmsg, sizeof(chatmsg), "There's a %d second wait time between kick votes for each player please wait %d second(s)",
+					str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second wait time between kick votes for each player please wait %d second(s)",
 					g_Config.m_SvVoteKickDelay,
-					((m_apPlayers[ClientID]->m_Last_KickVote + (m_apPlayers[ClientID]->m_Last_KickVote*time_freq()))/time_freq())-(time_get()/time_freq())
+					(int)(((m_apPlayers[ClientID]->m_Last_KickVote + (m_apPlayers[ClientID]->m_Last_KickVote*time_freq()))/time_freq())-(time_get()/time_freq()))
 					);
-					SendChatTarget(ClientID, chatmsg);
+					SendChatTarget(ClientID, aChatmsg);
 					m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 					return;
 				}
@@ -1846,7 +1844,7 @@ void CGameContext::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 	const char *pParamName = pResult->GetString(1);
 	float NewValue = pResult->GetFloat(2);
 
-	if (List >= 0 && List < NUM_TUNINGZONES)
+	if (List >= 0 && List < NUM_TUNEZONES)
 	{
 		if(pSelf->TuningList()[List].Set(pParamName, NewValue))
 		{
@@ -1865,7 +1863,7 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int List = pResult->GetInteger(0);
 	char aBuf[256];
-	if (List >= 0 && List < NUM_TUNINGZONES)
+	if (List >= 0 && List < NUM_TUNEZONES)
 	{
 		for(int i = 0; i < pSelf->TuningList()[List].Num(); i++)
 		{
@@ -1884,7 +1882,7 @@ void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 	if (pResult->NumArguments())
 	{
 		int List = pResult->GetInteger(0);
-		if (List >= 0 && List < NUM_TUNINGZONES)
+		if (List >= 0 && List < NUM_TUNEZONES)
 		{
 			pSelf->TuningList()[List] = TuningParams;
 			char aBuf[256];
@@ -1895,7 +1893,7 @@ void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		for (int i = 0; i < NUM_TUNINGZONES; i++)
+		for (int i = 0; i < NUM_TUNEZONES; i++)
 		{
 			*(pSelf->TuningList()+i) = TuningParams;
 			pSelf->SendTuningParams(-1, i);
@@ -1910,9 +1908,9 @@ void CGameContext::ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUse
 	if (pResult->NumArguments())
 	{
 		int List = pResult->GetInteger(0);
-		if (List >= 0 && List < NUM_TUNINGZONES)
+		if (List >= 0 && List < NUM_TUNEZONES)
 		{
-			str_format(pSelf->m_ZoneEnterMsg[List], sizeof(pSelf->m_ZoneEnterMsg[List]), pResult->GetString(1));
+			str_copy(pSelf->m_aaZoneEnterMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaZoneEnterMsg[List]));
 		}
 	}
 }
@@ -1923,9 +1921,9 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 	if (pResult->NumArguments())
 	{
 		int List = pResult->GetInteger(0);
-		if (List >= 0 && List < NUM_TUNINGZONES)
+		if (List >= 0 && List < NUM_TUNEZONES)
 		{
-			str_format(pSelf->m_ZoneLeaveMsg[List], sizeof(pSelf->m_ZoneLeaveMsg[List]), pResult->GetString(1));
+			str_copy(pSelf->m_aaZoneLeaveMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaZoneLeaveMsg[List]));
 		}
 	}
 }
@@ -2443,7 +2441,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	// Reset Tunezones
 	CTuningParams TuningParams;
-	for (int i = 0; i < NUM_TUNINGZONES; i++)
+	for (int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
 		TuningList()[i].Set("gun_curvature", 0);
@@ -2453,10 +2451,11 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		TuningList()[i].Set("shotgun_speeddiff", 0);
 	}
 
-	for (int i = 0; i < NUM_TUNINGZONES; i++) // decided to send no text on changing Tunezones for now
+	for (int i = 0; i < NUM_TUNEZONES; i++)
 	{
-		str_format(m_ZoneEnterMsg[i], sizeof(m_ZoneEnterMsg[i]), "", i);
-		str_format(m_ZoneLeaveMsg[i], sizeof(m_ZoneLeaveMsg[i]), "", i);
+		// Send no text by default when changing tune zones.
+		m_aaZoneEnterMsg[i][0] = 0;
+		m_aaZoneLeaveMsg[i][0] = 0;
 	}
 	// Reset Tuning
 	if(g_Config.m_SvTuneReset)
@@ -2503,7 +2502,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		Tuning()->Set("player_collision", 0);
 		Tuning()->Set("player_hooking", 0);
 
-		for (int i = 0; i < NUM_TUNINGZONES; i++)
+		for (int i = 0; i < NUM_TUNEZONES; i++)
 		{
 			TuningList()[i].Set("player_collision", 0);
 			TuningList()[i].Set("player_hooking", 0);
@@ -3208,7 +3207,7 @@ void CGameContext::List(int ClientID, const char *pFilter)
 	if (pFilter[0])
 		str_format(aBuf, sizeof(aBuf), "Listing players with \"%s\" in name:", pFilter);
 	else
-		str_format(aBuf, sizeof(aBuf), "Listing all players:", pFilter);
+		str_format(aBuf, sizeof(aBuf), "Listing all players:");
 	SendChatTarget(ClientID, aBuf);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{

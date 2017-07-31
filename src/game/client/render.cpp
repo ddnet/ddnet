@@ -231,7 +231,8 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 
 				vec2 BodyPos = Position + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y)*AnimScale;
 				SelectSprite(OutLine?SPRITE_TEE_BODY_OUTLINE:SPRITE_TEE_BODY, 0, 0, 0);
-				IGraphics::CQuadItem QuadItem(BodyPos.x, BodyPos.y, BaseSize, BaseSize);
+				float BodySize = g_Config.m_ClFatSkins ? BaseSize * 1.3 : BaseSize;
+				IGraphics::CQuadItem QuadItem(BodyPos.x, BodyPos.y, BodySize, BodySize);
 				Graphics()->QuadsDraw(&QuadItem, 1);
 
 				// draw eyes

@@ -1,9 +1,8 @@
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![Build Status](https://circleci.com/gh/ddnet/ddnet/tree/master.png)](https://circleci.com/gh/ddnet/ddnet)
-================================
+[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![CircleCI Build Status](https://circleci.com/gh/ddnet/ddnet/tree/master.png)](https://circleci.com/gh/ddnet/ddnet) [![Travis CI Build Status](https://travis-ci.org/ddnet/ddnet.svg?branch=master)](https://travis-ci.org/ddnet/ddnet) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/foeer8wbynqaqqho?svg=true)](https://ci.appveyor.com/project/def-/ddnet)
 
 Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) for more information.
 
-Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)).
+Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)) or on [Discord in the developer channel](https://discord.gg/xsEd9xu).
 
 You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/).
 
@@ -22,10 +21,18 @@ To clone this repository with history since we moved the libraries to https://gi
 
     git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
 
+To clone the libraries if you have previously cloned ddnet without them:
+
+    git submodule update --init --recursive
+
 Building
 --------
 
-To compile DDNet yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything).
+To compile DDNet yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything). Alternatively we also support CMake, so something like this works:
+
+    make build
+    cmake ..
+    make
 
 DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). The bundled libraries are now in the ddnet-libs submodule.
 

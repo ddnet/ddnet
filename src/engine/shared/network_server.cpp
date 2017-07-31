@@ -503,7 +503,7 @@ void CNetServer::OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, cons
 			// correct token
 			// try to accept client
 			if (g_Config.m_Debug)
-				dbg_msg("security", "client %d reconnect");
+				dbg_msg("security", "client %d reconnect", ClientID);
 
 			// reset netconn and process rejoin
 			m_aSlots[ClientID].m_Connection.Reset(true);

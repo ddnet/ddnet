@@ -577,7 +577,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 #ifdef CONF_PLATFORM_MACOSX
 			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
-			CNotification::notify("DDNet-Chat", aBuf);
+			CNotification::Notify("DDNet-Chat", aBuf);
 #else
 			Graphics()->NotifyWindow();
 #endif

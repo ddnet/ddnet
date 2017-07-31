@@ -215,8 +215,8 @@ static void Mix(short *pFinalOut, unsigned Frames)
 					}
 
 					{
-						Lvol *= FalloffX;
-						Rvol *= FalloffX;
+						Lvol *= FalloffX * FalloffY;
+						Rvol *= FalloffX * FalloffY;
 					}
 				}
 				else
@@ -310,7 +310,9 @@ int CSound::Init()
 	Format.userdata = NULL; // ignore_convention
 
 	// Open the audio device and start playing sound!
-	if(SDL_OpenAudio(&Format, &FormatOut) < 0)
+	m_Device = SDL_OpenAudioDevice(NULL, 0, &Format, &FormatOut, SDL_AUDIO_ALLOW_FORMAT_CHANGE | SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+
+	if (m_Device == 0)
 	{
 		dbg_msg("client/sound", "unable to open audio: %s", SDL_GetError());
 		return -1;
@@ -321,7 +323,7 @@ int CSound::Init()
 	m_MaxFrames = FormatOut.samples*2;
 	m_pMixBuffer = (int *)mem_alloc(m_MaxFrames*2*sizeof(int), 1);
 
-	SDL_PauseAudio(0);
+	SDL_PauseAudioDevice(m_Device, 0);
 
 	m_SoundEnabled = 1;
 	Update(); // update the volume
@@ -348,13 +350,12 @@ int CSound::Update()
 
 int CSound::Shutdown()
 {
-
 	for(unsigned SampleID = 0; SampleID < NUM_SAMPLES; SampleID++)
 	{
 		UnloadSample(SampleID);
 	}
 
-	SDL_CloseAudio();
+	SDL_CloseAudioDevice(m_Device);
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	lock_destroy(m_SoundLock);
 	mem_free(m_pMixBuffer);

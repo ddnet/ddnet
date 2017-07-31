@@ -45,6 +45,12 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 #define dbg_assert(test,msg) assert(test)
 #endif
 
+#ifdef __GNUC__
+#define GNUC_ATTRIBUTE(x) __attribute__(x)
+#else
+#define GNUC_ATTRIBUTE(x)
+#endif
+
 /*
 	Function: dbg_break
 		Breaks into the debugger.
@@ -77,7 +83,8 @@ void dbg_break_imp();
 	See Also:
 		<dbg_assert>
 */
-void dbg_msg(const char *sys, const char *fmt, ...);
+void dbg_msg(const char *sys, const char *fmt, ...)
+GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
 /* Group: Memory */
 
@@ -793,7 +800,8 @@ int str_length(const char *str);
 		- The strings are treated as zero-termineted strings.
 		- Garantees that dst string will contain zero-termination.
 */
-int str_format(char *buffer, int buffer_size, const char *format, ...);
+int str_format(char *buffer, int buffer_size, const char *format, ...)
+GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
 /*
 	Function: str_trim_words
@@ -1054,7 +1062,8 @@ int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
 		- Guarantees that buffer string will contain zero-termination.
 */
 void str_timestamp(char *buffer, int buffer_size);
-void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
+void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format)
+GNUC_ATTRIBUTE((format(strftime, 4, 0)));
 
 /*
 	Function: str_escape
@@ -1292,16 +1301,6 @@ float str_tofloat(const char *str);
 int str_isspace(char c);
 char str_uppercase(char c);
 unsigned str_quickhash(const char *str);
-
-/*
-	Function: gui_messagebox
-		Display plain OS-dependent message box
-
-	Parameters:
-		title - title of the message box
-		message - text to display
-*/
-void gui_messagebox(const char *title, const char *message);
 
 /*
 	Function: str_utf8_comp_confusable

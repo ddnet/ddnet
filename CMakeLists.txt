@@ -19,10 +19,10 @@ set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 # DEPENDENCIES
 ########################################################################
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  set(TARGET_BITS 32)
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(TARGET_BITS 64)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(TARGET_BITS "64")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(TARGET_BITS "32")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -59,8 +59,9 @@ find_package(Threads)
 find_package(ZLIB)
 
 message(STATUS "******** DDNet ********")
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Dependencies:")
 function(show_dependency_status NAME FOUND PATH)
@@ -79,7 +80,7 @@ endfunction()
 show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
 show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
 if(MYSQL)
-  show_dependency_status("MySQL" ${MYSQL_FOUND} "")
+  show_dependency_status("MySQL" ${MYSQL_FOUND} "${MYSQL_LIBRARY}")
 endif()
 show_dependency_status("Ogg" ${OGG_FOUND} "${OGG_INCLUDEDIR}")
 show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_INCLUDEDIR}")
@@ -116,9 +117,23 @@ if(CLIENT AND NOT(SDL2_FOUND))
 endif()
 
 if(TARGET_OS STREQUAL "windows")
+  set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 glu32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
+elseif(TARGET_OS STREQUAL "mac")
+  find_library(CARBON Carbon)
+  find_library(COCOA Cocoa)
+  find_library(OPENGL OpenGL)
+  set(PLATFORM_CLIENT
+    src/osx/notification.h
+    src/osx/notification.mm
+    src/osxlaunch/client.h
+    src/osxlaunch/client.m
+  )
+  set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
+  set(PLATFORM_LIBS ${CARBON})
 else()
+  set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS GL GLU X11)
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
@@ -140,6 +155,8 @@ endif()
 
 set(TARGETS_OWN)
 set(TARGETS_DEP)
+
+set(TARGETS_LINK) # Targets with a linking stage.
 
 ########################################################################
 # DEPENDENCY COMPILATION
@@ -273,7 +290,7 @@ if(CLIENT)
   file(GLOB_RECURSE GAME_CLIENT "src/game/client/*.cpp" "src/game/client/*.h")
   file(GLOB_RECURSE GAME_EDITOR "src/game/editor/*.cpp" "src/game/editor/*.h")
   set(GAME_GENERATED_CLIENT "src/game/generated/client_data.cpp" "src/game/generated/client_data.h")
-  set(CLIENT_SRC ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
+  set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
   set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV})
 
@@ -293,7 +310,11 @@ if(CLIENT)
   )
 
   if(TARGET_OS STREQUAL "windows")
-    set(CLIENT_ICON "other/icons/DDNet.rc")
+    if(MSVC)
+      set(CLIENT_ICON "other/icons/DDNet_cl.rc")
+    else()
+      set(CLIENT_ICON "other/icons/DDNet_gcc.rc")
+    endif()
   else()
     set(CLIENT_ICON)
   endif()
@@ -318,6 +339,7 @@ if(CLIENT)
     ${SDL2_INCLUDE_DIRS}
   )
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
+  list(APPEND TARGETS_LINK ${TARGET_CLIENT})
 endif()
 
 
@@ -331,7 +353,11 @@ file(GLOB_RECURSE GAME_SERVER "src/game/server/*.cpp" "src/game/server/*.h")
 set(GAME_GENERATED_SERVER "src/game/generated/server_data.cpp" "src/game/generated/server_data.h")
 set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
 if(TARGET_OS STREQUAL "windows")
-  set(SERVER_ICON "other/icons/DDNet-Server.rc")
+  if(MSVC)
+    set(CLIENT_ICON "other/icons/DDNet-Server_cl.rc")
+  else()
+    set(CLIENT_ICON "other/icons/DDNet-Server_gcc.rc")
+  endif()
 else()
   set(SERVER_ICON)
 endif()
@@ -350,12 +376,7 @@ add_executable(${TARGET_SERVER}
 )
 target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
-
-if(MYSQL)
-  target_compile_definitions(${TARGET_SERVER} PRIVATE -DCONF_SQL)
-  target_include_directories(${TARGET_SERVER} PRIVATE ${MYSQL_INCLUDE_DIRS})
-endif()
-
+list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
 ########################################################################
 # VARIOUS TARGETS
@@ -381,6 +402,7 @@ target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
 target_link_libraries(${TARGET_TWPING} ${LIBS})
 
 list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV})
+list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING} ${TARGET_VERSIONSRV})
 
 set(TARGETS_TOOLS)
 file(GLOB TOOLS RELATIVE "${PROJECT_SOURCE_DIR}/src/tools/" "src/tools/*.cpp")
@@ -404,6 +426,7 @@ foreach(T ${TOOLS})
 endforeach()
 
 list(APPEND TARGETS_OWN ${TARGETS_TOOLS})
+list(APPEND TARGETS_LINK ${TARGETS_TOOLS})
 
 add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
@@ -444,6 +467,21 @@ foreach(target ${TARGETS})
       target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
     endif()
   endif()
+  if(TARGET_OS STREQUAL "mac")
+    target_compile_options(${target} PRIVATE -stdlib=libc++)
+    target_compile_options(${target} PRIVATE -mmacosx-version-min=10.7)
+  endif()
+endforeach()
+
+if(TARGET_OS STREQUAL "windows" AND MSVC)
+  set_property(TARGET ${TARGET_CLIENT} APPEND PROPERTY LINK_FLAGS /SAFESEH:NO) # Disable SafeSEH because the shipped libraries don't support it.
+endif()
+
+foreach(target ${TARGETS_LINK})
+  if(TARGET_OS STREQUAL "mac")
+    target_link_libraries(${target} -stdlib=libc++)
+    target_link_libraries(${target} -mmacosx-version-min=10.7)
+  endif()
 endforeach()
 
 foreach(target ${TARGETS_OWN})
@@ -456,14 +494,20 @@ foreach(target ${TARGETS_OWN})
     if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
       target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>)
     endif()
-    #target_compile_options(${target} PRIVATE -Wextra)
-    #target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
+    target_compile_options(${target} PRIVATE -Wextra)
+    target_compile_options(${target} PRIVATE -Wno-unused-parameter)
+    target_compile_options(${target} PRIVATE -Wno-missing-field-initializers)
+    target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
   endif()
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDEDIR})
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
+  endif()
+  if(MYSQL)
+    target_compile_definitions(${target} PRIVATE CONF_SQL)
+    target_include_directories(${target} PRIVATE ${MYSQL_INCLUDE_DIRS})
   endif()
 endforeach()
 

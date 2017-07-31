@@ -182,3 +182,9 @@ bool CAuthManager::IsGenerated()
 {
 	return m_Generated;
 }
+
+int CAuthManager::NumNonDefaultKeys()
+{
+	int DefaultCount = (m_aDefault[0] >= 0) + (m_aDefault[1] >= 0) + (m_aDefault[2] >= 0);
+	return m_aKeys.size() - DefaultCount;
+}

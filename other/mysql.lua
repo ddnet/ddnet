@@ -67,6 +67,8 @@ Mysql = {
 				elseif platform == "linux" then
 					settings.link.libpath:Add("ddnet-libs/mysql/linux/lib64")
 					settings.link.libpath:Add("ddnet-libs/mysql/linux/lib32")
+				elseif platform == "windows" then
+					settings.link.libpath:Add("ddnet-libs/mysql/windows")
 				end
 			end
 		end

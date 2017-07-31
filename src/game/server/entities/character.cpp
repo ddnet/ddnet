@@ -1977,34 +1977,35 @@ void CCharacter::HandleTuneLayer()
 void CCharacter::SendZoneMsgs()
 {
 	// send zone leave msg
-	if (m_TuneZoneOld >= 0 && GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld]) // m_TuneZoneOld >= 0: avoid zone leave msgs on spawn
+	// (m_TuneZoneOld >= 0: avoid zone leave msgs on spawn)
+	if (m_TuneZoneOld >= 0 && GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld])
 	{
-		const char* cur = GameServer()->m_ZoneLeaveMsg[m_TuneZoneOld];
-		const char* pos;
-		while ((pos = str_find(cur, "\\n")))
+		const char *pCur = GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld];
+		const char *pPos;
+		while ((pPos = str_find(pCur, "\\n")))
 		{
 			char aBuf[256];
-			str_copy(aBuf, cur, pos - cur + 1);
-			aBuf[pos - cur + 1] = '\0';
-			cur = pos + 2;
+			str_copy(aBuf, pCur, pPos - pCur + 1);
+			aBuf[pPos - pCur + 1] = '\0';
+			pCur = pPos + 2;
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
 	}
 	// send zone enter msg
-	if (GameServer()->m_ZoneEnterMsg[m_TuneZone])
+	if (GameServer()->m_aaZoneEnterMsg[m_TuneZone])
 	{
-		const char* cur = GameServer()->m_ZoneEnterMsg[m_TuneZone];
-		const char* pos;
-		while ((pos = str_find(cur, "\\n")))
+		const char* pCur = GameServer()->m_aaZoneEnterMsg[m_TuneZone];
+		const char* pPos;
+		while ((pPos = str_find(pCur, "\\n")))
 		{
 			char aBuf[256];
-			str_copy(aBuf, cur, pos - cur + 1);
-			aBuf[pos - cur + 1] = '\0';
-			cur = pos + 2;
+			str_copy(aBuf, pCur, pPos - pCur + 1);
+			aBuf[pPos - pCur + 1] = '\0';
+			pCur = pPos + 2;
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), cur);
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
 	}
 }
 
@@ -2240,7 +2241,7 @@ void CCharacter::Rescue()
 		if (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed());
+			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 			return;
 		}

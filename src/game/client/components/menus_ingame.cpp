@@ -622,6 +622,8 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button2);
 			static float Offset = 0.0f;
 			//static char aFilterString[25];
+			if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+				UI()->SetActiveItem(&m_aFilterString);
 			if(DoEditBox(&m_aFilterString, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search"))) {
 				// TODO: Implement here
 			}
@@ -648,7 +650,8 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			if(s_ControlPage == 0)
 			{
 				m_pClient->m_pVoting->CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
-				SetActive(false);
+				if(g_Config.m_UiCloseWindowAfterChangingSetting)
+					SetActive(false);
 			}
 			else if(s_ControlPage == 1)
 			{
@@ -681,6 +684,8 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1);
 		Reason.VSplitLeft(w+10.0f, 0, &Reason);
 		static float s_Offset = 0.0f;
+		if(Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+			UI()->SetActiveItem(&m_aCallvoteReason);
 		DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_ALL);
 
 		// extended features (only available when authed in rcon)

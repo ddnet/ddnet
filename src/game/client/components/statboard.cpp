@@ -510,8 +510,8 @@ void CStatboard::FormatStats()
 	{
 		const CNetObj_PlayerInfo *pInfo = apPlayers[i];
 		const CGameClient::CClientStats *pStats = &m_pClient->m_aStats[pInfo->m_ClientID];
-		
-		// Pre-formatting		
+
+		// Pre-formatting
 
 		// Weapons frags/deaths
 		char aWeaponFD[64 * NUM_WEAPONS];
@@ -534,8 +534,8 @@ void CStatboard::FormatStats()
 		// Game with flags
 		bool GameWithFlags = (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS);
 
-		char aBuf[1024];		
-		str_format(aBuf, sizeof(aBuf), "%d,%d,%s,%s,%d,%d,%d,%d,%.2f,%i,%.1f,%d,%d,%s,%d,%d,%d", 
+		char aBuf[1024];
+		str_format(aBuf, sizeof(aBuf), "%d,%d,%s,%s,%d,%d,%d,%d,%.2f,%i,%.1f,%d,%d,%s,%d,%d,%d\n",
 			localPlayer?1:0,															// Local player
 			m_pClient->m_aClients[pInfo->m_ClientID].m_Team,							// Team
 			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aName),			// Name
@@ -554,7 +554,7 @@ void CStatboard::FormatStats()
 			pStats->m_FlagGrabs,														// Flag grabs
 			pStats->m_FlagCaptures);													// Flag captures
 
-		str_format(aPlayerStats, sizeof(aPlayerStats), "%s%s\n", aPlayerStats, aBuf);
+		str_append(aPlayerStats, aBuf, sizeof(aPlayerStats));
 	}
 
 	char aStats[1024*(VANILLA_MAX_CLIENTS+1)];

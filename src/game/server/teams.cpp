@@ -82,6 +82,17 @@ void CGameTeams::OnCharacterStart(int ClientID)
 		if (m_TeamState[m_Core.Team(ClientID)] < TEAMSTATE_STARTED && !Waiting)
 		{
 			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_STARTED);
+
+			char aBuf[512];
+			str_format(
+					aBuf,
+					sizeof(aBuf),
+					"Team %d started with these %d players: ",
+					m_Core.Team(ClientID),
+					Count(m_Core.Team(ClientID)));
+
+			bool First = true;
+
 			for (int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				if (m_Core.Team(ClientID) == m_Core.Team(i))
@@ -92,6 +103,25 @@ void CGameTeams::OnCharacterStart(int ClientID)
 					{
 						SetDDRaceState(pPlayer, DDRACE_STARTED);
 						SetStartTime(pPlayer, Tick);
+
+						if (First)
+							First = false;
+						else
+							str_append(aBuf, ", ", sizeof(aBuf));
+
+						str_append(aBuf, GameServer()->Server()->ClientName(i), sizeof(aBuf));
+					}
+				}
+			}
+
+			if (g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
+			{
+				for (int i = 0; i < MAX_CLIENTS; ++i)
+				{
+					CPlayer* pPlayer = GetPlayer(i);
+					if (m_Core.Team(ClientID) == m_Core.Team(i) && pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
+					{
+						GameServer()->SendChatTarget(i, aBuf);
 					}
 				}
 			}
@@ -595,7 +625,10 @@ void CGameTeams::OnFinish(CPlayer* Player)
 
 	int TTime = 0 - (int)Time;
 	if (Player->m_Score < TTime || !Player->m_HasFinishScore)
+	{
 		Player->m_Score = TTime;
+		Player->m_HasFinishScore = true;
+	}
 }
 
 void CGameTeams::OnCharacterSpawn(int ClientID)

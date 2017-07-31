@@ -5,9 +5,12 @@
 
 #include <engine/sound.h>
 
+#include "SDL.h"
+
 class CSound : public IEngineSound
 {
 	int m_SoundEnabled;
+	SDL_AudioDeviceID m_Device;
 
 public:
 	IEngineGraphics *m_pGraphics;

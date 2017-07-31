@@ -165,7 +165,7 @@ void CUpdater::ParseUpdate()
 	io_read(File, aBuf, sizeof(aBuf));
 	io_close(File);
 
-	json_value *pVersions = json_parse(aBuf);
+	json_value *pVersions = json_parse(aBuf, sizeof(aBuf));
 
 	if(pVersions && pVersions->type == json_array)
 	{
