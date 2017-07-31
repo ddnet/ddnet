@@ -3,22 +3,6 @@ project(DDNet)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-option(WEBSOCKETS "Enable websockets support" OFF)
-option(MYSQL "Enable mysql support" OFF)
-option(CLIENT "Compile client" ON)
-
-# Set the default build type to Release
-if(NOT(CMAKE_BUILD_TYPE))
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
-set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
-set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
-
-########################################################################
-# DEPENDENCIES
-########################################################################
-
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(TARGET_BITS "64")
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -33,11 +17,44 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
 endif()
 
+set(PREFER_BUNDLED_LIBS_DEFAULT OFF)
+if(TARGET_OS STREQUAL "windows")
+  set(PREFER_BUNDLED_LIBS_DEFAULT ON)
+endif()
+
+option(WEBSOCKETS "Enable websockets support" OFF)
+option(MYSQL "Enable mysql support" OFF)
+option(CLIENT "Compile client" ON)
+option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${PREFER_BUNDLED_LIBS_DEFAULT})
+
+# Set the default build type to Release
+if(NOT(CMAKE_BUILD_TYPE))
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
+set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
+
+########################################################################
+# DEPENDENCIES
+########################################################################
+
 function(set_extra_dirs VARIABLE NAME)
-  if(TARGET_BITS AND TARGET_OS)
-    set("EXTRA_${VARIABLE}_LIBDIR" "ddnet-libs/${NAME}/${TARGET_OS}/lib${TARGET_BITS}" PARENT_SCOPE)
+  set("PATHS_${VARIABLE}_LIBDIR" PARENT_SCOPE)
+  set("HINTS_${VARIABLE}_LIBDIR" PARENT_SCOPE)
+  set("PATHS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
+  set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
+  if(PREFER_BUNDLED_LIBS)
+    set(TYPE HINTS)
+  else()
+    set(TYPE PATHS)
   endif()
-  set("EXTRA_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
+  if(TARGET_BITS AND TARGET_OS)
+    set(DIR "ddnet-libs/${NAME}/${TARGET_OS}/lib${TARGET_BITS}")
+    set("${TYPE}_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
+    set("EXTRA_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
+  endif()
+  set("${TYPE}_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
 endfunction()
 
 # Check for PkgConfig once so all the other `find_package` calls can do it
@@ -56,7 +73,11 @@ find_package(Opusfile)
 find_package(PythonInterp)
 find_package(SDL2)
 find_package(Threads)
-find_package(ZLIB)
+if(NOT PREFER_BUNDLED_LIBS)
+  find_package(ZLIB)
+else()
+  set(ZLIB_FOUND NO)
+endif()
 
 message(STATUS "******** DDNet ********")
 message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
