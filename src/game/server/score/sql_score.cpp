@@ -187,7 +187,7 @@ bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGam
 			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday to %s for finishing their first map %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
 			pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 
-			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday %s!\nYou have finished your first map %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
+			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday, %s!\nYou have finished your first map exactly %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
 
 			pData->GameServer()->SendBroadcast(aBuf, pData->m_ClientID);
 		}
