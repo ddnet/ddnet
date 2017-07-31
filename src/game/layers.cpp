@@ -169,13 +169,3 @@ CMapItemLayer *CLayers::GetLayer(int Index) const
 	return static_cast<CMapItemLayer *>(m_pMap->GetItem(m_LayersStart+Index, 0, 0));
 }
 
-// DDRace
-
-void CLayers::Dest()
-{
-	/*m_pTeleLayer = 0;
-	m_pSpeedupLayer = 0;
-	m_pFrontLayer = 0;
-	m_pSwitchLayer = 0;
-	m_pTuneLayer = 0;*/
-}

@@ -30,9 +30,13 @@ CCollision::CCollision()
 	m_pTune = 0;
 }
 
+CCollision::~CCollision()
+{
+	Dest();
+}
+
 void CCollision::Init(class CLayers *pLayers)
 {
-	if(m_pLayers) m_pLayers->Dest();
 	Dest();
 	m_NumSwitchers = 0;
 	m_pLayers = pLayers;

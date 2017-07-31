@@ -29,7 +29,6 @@ public:
 
 	// DDRace
 
-	void Dest();
 	CMapItemLayerTilemap *TeleLayer() const { return m_pTeleLayer; };
 	CMapItemLayerTilemap *SpeedupLayer() const { return m_pSpeedupLayer; };
 	CMapItemLayerTilemap *FrontLayer() const { return m_pFrontLayer; };

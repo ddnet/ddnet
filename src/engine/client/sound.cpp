@@ -350,14 +350,16 @@ int CSound::Update()
 
 int CSound::Shutdown()
 {
+	for(unsigned SampleID = 0; SampleID < NUM_SAMPLES; SampleID++)
+	{
+		UnloadSample(SampleID);
+	}
+
 	SDL_CloseAudioDevice(m_Device);
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	lock_destroy(m_SoundLock);
-	if(m_pMixBuffer)
-	{
-		mem_free(m_pMixBuffer);
-		m_pMixBuffer = 0;
-	}
+	mem_free(m_pMixBuffer);
+	m_pMixBuffer = 0;
 	return 0;
 }
 

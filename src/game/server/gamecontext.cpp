@@ -2789,7 +2789,6 @@ void CGameContext::OnShutdown(bool FullShutdown)
 
 	DeleteTempfile();
 	Console()->ResetServerGameSettings();
-	Layers()->Dest();
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;

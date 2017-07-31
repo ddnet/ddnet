@@ -115,9 +115,7 @@ void *mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 		Frees a block allocated through <mem_alloc>.
 
 	Remarks:
-		- In the debug version of the library the function will assert if
-		a non-valid block is passed, like a null pointer or a block that
-		isn't allocated.
+		- Is safe on null pointers.
 
 	See Also:
 		<mem_alloc>

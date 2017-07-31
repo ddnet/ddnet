@@ -51,7 +51,10 @@ int main(int argc, const char **argv) // ignore_convention
 	RegisterFail |= !pKernel->RegisterInterface(s_pEngineMap);
 
 	if(RegisterFail)
+	{
+		delete pKernel;
 		return -1;
+	}
 
 	s_File = s_pStorage->OpenFile("map_version.txt", IOFLAG_WRITE, 1);
 	if(s_File)
@@ -62,5 +65,6 @@ int main(int argc, const char **argv) // ignore_convention
 		io_close(s_File);
 	}
 
+	delete pKernel;
 	return 0;
 }
