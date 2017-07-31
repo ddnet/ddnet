@@ -894,7 +894,7 @@ foreach(target ${TARGETS})
   endif()
 endforeach()
 
-if(TARGET_OS STREQUAL "windows" AND MSVC)
+if(MSVC)
   set_property(TARGET ${TARGET_CLIENT} APPEND PROPERTY LINK_FLAGS /SAFESEH:NO) # Disable SafeSEH because the shipped libraries don't support it.
 endif()
 
@@ -902,6 +902,12 @@ foreach(target ${TARGETS_LINK})
   if(TARGET_OS STREQUAL "mac")
     target_link_libraries(${target} -stdlib=libc++)
     target_link_libraries(${target} -mmacosx-version-min=10.7)
+  endif()
+  if(MINGW)
+    # Statically link the standard libraries with on MinGW so we don't have to
+    # ship them as DLLs.
+    target_link_libraries(${target} -static-libgcc)
+    target_link_libraries(${target} -static-libstdc++)
   endif()
 endforeach()
 
