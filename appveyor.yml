@@ -6,4 +6,4 @@ before_build:
 
     cd build
 
-    cmake ..
+    cmake -Werror=dev ..
