@@ -162,13 +162,8 @@ if family == "windows" then
 	table.insert(server_sql_depends, CopyToDirectory(".", "ddnet-libs/mysql/windows/mysqlcppconn.dll"))
 	table.insert(server_sql_depends, CopyToDirectory(".", "ddnet-libs/mysql/windows/libmysql.dll"))
 
-	if config.compiler.driver == "cl" then
-		client_link_other = {ResCompile("other/icons/DDNet_cl.rc")}
-		server_link_other = {ResCompile("other/icons/DDNet-Server_cl.rc")}
-	elseif config.compiler.driver == "gcc" then
-		client_link_other = {ResCompile("other/icons/DDNet_gcc.rc")}
-		server_link_other = {ResCompile("other/icons/DDNet-Server_gcc.rc")}
-	end
+	client_link_other = {ResCompile("other/icons/DDNet.rc")}
+	server_link_other = {ResCompile("other/icons/DDNet-Server.rc")}
 end
 
 function Intermediate_Output(settings, input)
