@@ -114,6 +114,10 @@ else()
   message(STATUS " * Zlib not found (using bundled version)")
 endif()
 
+if(NOT(PYTHONINTERP_FOUND))
+  message(SEND_ERROR "You must install Python to compile DDNet")
+endif()
+
 if(MYSQL AND NOT(MYSQL_FOUND))
   message(SEND_ERROR "You must install MySQL to compile the DDNet server with MySQL support")
 endif()
