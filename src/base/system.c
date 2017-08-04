@@ -192,11 +192,8 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	int len;
 
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
-	time_t rawtime;
 	char timestr[80];
-
-	time(&rawtime);
-	str_timestamp_ex(rawtime, timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S");
+	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
 
 #if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
@@ -2227,21 +2224,25 @@ int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
 	struct tm *time_info;
-
 	time_info = localtime(&time_data);
 	strftime(buffer, buffer_size, format, time_info);
 	buffer[buffer_size-1] = 0;	/* assure null termination */
 }
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
-void str_timestamp(char *buffer, int buffer_size)
+void str_timestamp_format(char *buffer, int buffer_size, const char *format)
 {
 	time_t time_data;
 	time(&time_data);
-	str_timestamp_ex(time_data, buffer, buffer_size, "%Y-%m-%d_%H-%M-%S");
+	str_timestamp_ex(time_data, buffer, buffer_size, format);
 }
+
+void str_timestamp(char *buffer, int buffer_size)
+{
+	str_timestamp_format(buffer, buffer_size, FORMAT_NOSPACE);
+}
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 void str_escape(char **dst, const char *src, const char *end)
 {

@@ -803,7 +803,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		UI()->DoLabelScaled(&Left, Localize("Created:"), 14.0f, -1);
 
 		char aTimestamp[256];
-		str_timestamp_ex(m_lDemos[m_DemolistSelectedIndex].m_Date, aTimestamp, sizeof(aTimestamp), "%Y-%m-%d %H:%M:%S");
+		str_timestamp_ex(m_lDemos[m_DemolistSelectedIndex].m_Date, aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 
 		UI()->DoLabelScaled(&Right, aTimestamp, 14.0f, -1);
 		Labels.HSplitTop(5.0f, 0, &Labels);
@@ -1116,7 +1116,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[256];
-				str_timestamp_ex(r.front().m_Date, aBuf, sizeof(aBuf), "%Y-%m-%d %H:%M:%S");
+				str_timestamp_ex(r.front().m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 		}
