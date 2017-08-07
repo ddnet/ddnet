@@ -324,7 +324,7 @@ function build(settings)
 		client_settings.link.libs:Add("opengl32")
 		client_settings.link.libs:Add("glu32")
 		client_settings.link.libs:Add("winmm")
-		client_settings.link.libs:Add("libopusfile")
+		client_settings.link.libs:Add("opusfile")
 		client_settings.link.libs:Add("curl")
 		if string.find(settings.config_name, "sql") then
 			server_settings.link.libpath:Add("ddnet-libs/mysql/vc2005libs")
