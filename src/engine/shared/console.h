@@ -4,6 +4,7 @@
 #define ENGINE_SHARED_CONSOLE_H
 
 #include <engine/console.h>
+#include <engine/storage.h>
 #include <base/math.h>
 #include "memheap.h"
 
@@ -197,7 +198,7 @@ public:
 	virtual bool LineIsValid(const char *pStr);
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1, bool InterpretSemicolons = true);
 	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true);
-	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false);
+	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL);
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
