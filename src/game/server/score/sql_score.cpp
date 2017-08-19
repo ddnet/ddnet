@@ -1120,6 +1120,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		}
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, "----------------------------------------------------");
 
+		end:
 		dbg_msg("sql", "Showing times done");
 		return true;
 	}
@@ -1134,7 +1135,6 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		return true;
 	}
 
-	end:
 	return false;
 }
 
