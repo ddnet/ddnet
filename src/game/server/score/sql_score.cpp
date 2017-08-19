@@ -1083,7 +1083,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		if(pSqlServer->GetResults()->rowsCount() == 0)
 		{
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "There are no times in the specified range");
-			goto end;
+			return true;
 		}
 
 		str_format(aBuf, sizeof(aBuf), "------------ Last Times No %d - %d ------------", pData->m_Num, pData->m_Num + (int)pSqlServer->GetResults()->rowsCount() - 1);
@@ -1120,7 +1120,6 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		}
 		pData->GameServer()->SendChatTarget(pData->m_ClientID, "----------------------------------------------------");
 
-		end:
 		dbg_msg("sql", "Showing times done");
 		return true;
 	}
@@ -1128,14 +1127,13 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	{
 		dbg_msg("sql", "MySQL Error: %s", e.what());
 		dbg_msg("sql", "ERROR: Could not show times");
+		return false;
 	}
 	catch (CGameContextError &e)
 	{
 		dbg_msg("sql", "WARNING: Aborted showing times due to reload/change of map.");
 		return true;
 	}
-
-	return false;
 }
 
 void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
