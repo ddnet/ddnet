@@ -2917,10 +2917,15 @@ void CGameContext::SendChatResponse(const char *pLine, void *pUser, bool Highlig
 		return;
 	ReentryGuard++;
 
-	if(*pLine == '[')
-	do
-		pLine++;
-	while((pLine - 2 < pLineOrig || *(pLine - 2) != ':') && *pLine != 0); // remove the category (e.g. [Console]: No Such Command)
+	if(pLine[0] == '[')
+	{
+		// Remove time and category: [20:39:00][Console]
+		pLine = str_find(pLine, "]: ");
+		if(pLine)
+			pLine += 3;
+		else
+			pLine = pLineOrig;
+	}
 
 	pSelf->SendChatTarget(ClientID, pLine);
 
