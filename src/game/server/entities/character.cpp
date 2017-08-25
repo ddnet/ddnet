@@ -688,7 +688,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
 		m_Input.m_TargetY = -1;
 
-	mem_copy(&m_SavedInput, m_Input, sizeof(m_SavedInput));
+	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
 }
 
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
