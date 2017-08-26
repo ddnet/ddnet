@@ -111,6 +111,7 @@ bool CSqlServer::Connect()
 		connection_properties["OPT_READ_TIMEOUT"] = 10;
 		connection_properties["OPT_WRITE_TIMEOUT"] = 20;
 		connection_properties["OPT_RECONNECT"] = true;
+		connection_properties["OPT_CHARSET_NAME"] = sql::SQLString("utf8mb4");
 
 		// Create connection
 		m_pDriver = get_driver_instance();
@@ -123,7 +124,7 @@ bool CSqlServer::Connect()
 		{
 			char aBuf[128];
 			// create database
-			str_format(aBuf, sizeof(aBuf), "CREATE DATABASE IF NOT EXISTS %s", m_aDatabase);
+			str_format(aBuf, sizeof(aBuf), "CREATE DATABASE IF NOT EXISTS %s CHARACTER SET utf8mb4", m_aDatabase);
 			m_pStatement->execute(aBuf);
 		}
 
