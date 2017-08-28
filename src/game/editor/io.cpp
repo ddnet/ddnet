@@ -612,7 +612,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			DataFile.GetType(MAPITEMTYPE_INFO, &Start, &Num);
 			for(int i = Start; i < Start + Num; i++)
 			{
-				int ItemSize = DataFile.GetItemSize(Start) - 8;
+				int ItemSize = DataFile.GetItemSize(Start);
 				int ItemID;
 				CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)DataFile.GetItem(i, 0, &ItemID);
 				if(!pItem || ItemID != 0)

@@ -2708,8 +2708,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		int TypeID;
 		int ItemID;
 		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
-		// GetItemSize returns item size including header, remove that.
-		int Size = Reader.GetItemSize(i) - sizeof(int) * 2;
+		int Size = Reader.GetItemSize(i);
 		CMapItemInfoSettings MapInfo;
 		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
 		{
@@ -2804,7 +2803,7 @@ void CGameContext::LoadMapSettings()
 	{
 		int ItemID;
 		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, 0, &ItemID);
-		int ItemSize = pMap->GetItemSize(i) - 8;
+		int ItemSize = pMap->GetItemSize(i);
 		if(!pItem || ItemID != 0)
 			continue;
 

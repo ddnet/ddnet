@@ -18,7 +18,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	{
 		int ItemID;
 		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Map.GetItem(i, 0, &ItemID);
-		int ItemSize = Map.GetItemSize(i) - 8;
+		int ItemSize = Map.GetItemSize(i);
 		if(!pItem || ItemID != 0)
 			continue;
 
