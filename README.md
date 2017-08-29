@@ -25,24 +25,25 @@ To clone the libraries if you have previously cloned ddnet without them:
 
     git submodule update --init --recursive
 
-Building
---------
+Building on Linux and macOS
+---------------------------
 
 To compile DDNet yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything). Alternatively we also support CMake, so something like this works:
 
-    make build
+    mkdir build
+    cd build
     cmake ..
     make
 
-DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86_64). The bundled libraries are now in the ddnet-libs submodule.
+DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64). The bundled libraries are now in the ddnet-libs submodule.
 
 You can install the required libraries on your system, remove the `config.lua` and `bam` should use the system-wide libraries by default. You can install all required dependencies and bam on Debian and Ubuntu like this:
 
-    apt-get install libsdl2-dev libfreetype6-dev libcurl4-openssl-dev libogg-dev libopus-dev libopusfile-dev bam
+    apt-get install libsdl2-dev libfreetype6-dev libcurl4-openssl-dev libogg-dev libopus-dev libopusfile-dev bam cmake
 
 Or on Arch Linux like this:
 
-    pacman -S sdl2 freetype2 curl opusfile bam
+    pacman -S sdl2 freetype2 curl opusfile bam cmake
 
 If you have the libraries installed, but still want to use the bundled ones instead, you can specify so by running `bam config curl.use_pkgconfig=false opus.use_pkgconfig=false opusfile.use_pkgconfig=false ogg.use_pkgconfig=false`.
 
@@ -50,8 +51,15 @@ The MySQL server is not included in the binary releases and can be built with `b
 
 Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that `mysql.use_mysqlconfig` is set to `true` in your config.lua.
 
+Building on Windows with Visual Studio
+--------------------------------------
+
+Download and install some version of [Microsoft Visual Studio](https://www.visualstudio.com/) (as of writing, MSVS Community 2017) with **C++ support**, install [Python 3](https://www.python.org/downloads/) **for all users** and install [CMake](https://cmake.org/download/#latest).
+
+Start CMake and select the source code folder (where DDNet resides, the directory with `CMakeLists.txt`). Additionally select a build folder, e.g. create a build subdirectory in the source code directory. Click "Configure" and select the Visual Studio generator (it should be pre-selected, so pressing "Finish" will suffice). After configuration finishes and the "Generate" reactivates, click it. When that finishes, click "Open Project". Visual Studio should open. You can compile the DDNet client by right-clicking the DDNet project (not the solution) and select "Select as StartUp project". Now you should be able to compile DDNet by clicking the green, triangular "Run" button.
+
 Importing the official DDNet Database
---------
+-------------------------------------
 
 ```
 $ wget https://ddnet.tw/stats/ddnet-sql.zip
