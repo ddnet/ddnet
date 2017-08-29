@@ -1,5 +1,5 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */ /* If you are missing that file, acquire a 
-complete release at teeworlds.com.  */
+/* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
+/* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
 #include <base/system.h>
 #include <base/math.h>
@@ -15,35 +15,33 @@ complete release at teeworlds.com.  */
            new image filepath must be absolute or relative to the current position
 */
 
-// global datafile reader and writer
-CDataFileReader DataFile;
-CDataFileWriter df;
+CDataFileReader DataReader;
+CDataFileWriter DataWriter;
 
 // global new image data (set by ReplaceImageItem)
-int NewNameID   = -1;
-char aNewName[128];
-int NewDataID   = -1;
-int NewDataSize = 0;
-void* pNewData   = 0;
+int g_NewNameID = -1;
+char g_aNewName[128];
+int g_NewDataID  = -1;
+int g_NewDataSize = 0;
+void *g_pNewData = 0;
 
-int LoadPNG(CImageInfo* pImg, const char *pFilename)
+int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
         unsigned char *pBuffer;
         png_t Png;
 
-        png_init(0,0);
         int Error = png_open_file(&Png, pFilename);
         if(Error != PNG_NO_ERROR)
         {
-                dbg_msg("game/png", "failed to open file. filename='%s'", pFilename);
+                dbg_msg("map_replace_image", "failed to open image file. filename='%s'", pFilename);
                 if(Error != PNG_FILE_ERROR)
                         png_close_file(&Png);
                 return 0;
         }
 
-        if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2<<12) || Png.height > (2<<12)) 
+        if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2<<12) || Png.height > (2<<12))
         {
-                dbg_msg("game/png", "invalid format. filename='%s'", pFilename);
+                dbg_msg("map_replace_image", "invalid image format. filename='%s'", pFilename);
                 png_close_file(&Png);
                 return 0;
         }
@@ -64,102 +62,141 @@ int LoadPNG(CImageInfo* pImg, const char *pFilename)
 
 void ExtractName(const char *pFileName, char *pName, int BufferSize)
 {
-    const char *pExtractedName = pFileName;
-    const char *pEnd = 0;
-    for(; *pFileName; ++pFileName)
-    {
-        if(*pFileName == '/' || *pFileName == '\\')
-            pExtractedName = pFileName+1;
-        else if(*pFileName == '.')
-            pEnd = pFileName;
-    }
+	const char *pExtractedName = pFileName;
+	const char *pEnd = 0;
+	for(; *pFileName; ++pFileName)
+	{
+		if(*pFileName == '/' || *pFileName == '\\')
+			pExtractedName = pFileName+1;
+		else if(*pFileName == '.')
+			pEnd = pFileName;
+	}
 
-    int Length = pEnd > pExtractedName ? min(BufferSize, (int)(pEnd-pExtractedName+1)) : BufferSize;
-    str_copy(pName, pExtractedName, Length);
+	int Length = pEnd > pExtractedName ? min(BufferSize, (int)(pEnd-pExtractedName+1)) : BufferSize;
+	str_copy(pName, pExtractedName, Length);
 }
 
-void* ReplaceImageItem(void *pItem, int Type, char *aImgName, char *aImgFile)
+void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
-    if(Type != MAPITEMTYPE_IMAGE)
-        return pItem;
+	if(Type != MAPITEMTYPE_IMAGE)
+		return pItem;
 
-    CMapItemImage *pImgItem = (CMapItemImage*) pItem;
-    char *pName = (char *)DataFile.GetData(pImgItem->m_ImageName);
+	CMapItemImage *pImgItem = (CMapItemImage *)pItem;
+	char *pName = (char *)DataReader.GetData(pImgItem->m_ImageName);
 
-    if(str_comp(aImgName, pName))
-        return pItem;
+	if(str_comp(pImgName, pName) != 0)
+		return pItem;
 
-    CImageInfo* pImgInfo = new CImageInfo;
-    if(!LoadPNG(pImgInfo, aImgFile))
-        return pItem;
+	dbg_msg("map_replace_image", "found image '%s'", pImgName);
 
-    CMapItemImage *pNewImgItem = new CMapItemImage;
-    *pNewImgItem = *pImgItem;
+	CImageInfo ImgInfo;
+	if(!LoadPNG(&ImgInfo, pImgFile))
+		return 0;
 
-    pNewImgItem->m_Width  = pImgInfo->m_Width;
-    pNewImgItem->m_Height = pImgInfo->m_Height;
-    int PixelSize = pImgInfo->m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
-    
-    NewNameID = pImgItem->m_ImageName;
-    ExtractName(aImgFile, aNewName, sizeof(aNewName));
-    NewDataID = pImgItem->m_ImageData;
-    pNewData = pImgInfo->m_pData;
-    NewDataSize = pImgInfo->m_Width*pImgInfo->m_Height*PixelSize;
+	*pNewImgItem = *pImgItem;
 
-    return (void *)pNewImgItem;
+	pNewImgItem->m_Width  = ImgInfo.m_Width;
+	pNewImgItem->m_Height = ImgInfo.m_Height;
+	int PixelSize = ImgInfo.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
+
+	g_NewNameID = pImgItem->m_ImageName;
+	ExtractName(pImgFile, g_aNewName, sizeof(g_aNewName));
+	g_NewDataID = pImgItem->m_ImageData;
+	g_pNewData = ImgInfo.m_pData;
+	g_NewDataSize = ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
+
+	return (void *)pNewImgItem;
 }
 
 int main(int argc, const char **argv)
 {
-        IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
-        int Index, ID = 0, Type = 0, Size;
-        void *pPtr;
-        char aFileName[1024], aImageName[1024], aImageFile[1024];
+	dbg_logger_stdout();
 
-        if(!pStorage || argc != 5) {
-                return -1;
-        }
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 
-        str_format(aFileName, sizeof(aFileName), "%s", argv[2]);
-        str_format(aImageName, sizeof(aImageName), "%s", argv[3]);
-        str_format(aImageFile, sizeof(aImageFile), "%s", argv[4]);
+	if(argc != 5)
+	{
+                dbg_msg("map_replace_image", "Invalid arguments");
+                dbg_msg("map_replace_image", "Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>");
+                dbg_msg("map_replace_image", "Notes: map filepath must be relative to user default teeworlds folder");
+                dbg_msg("map_replace_image", "       new image filepath must be absolute or relative to the current position");
+		return -1;
+	}
 
-        if(!DataFile.Open(pStorage, argv[1], IStorage::TYPE_ALL)) {
-                return -1;
-        }
-        if(!df.Open(pStorage, aFileName)) {
-                return -1;
-        }
-    
-        // add all items
-        for(Index = 0; Index < DataFile.NumItems(); Index++)
-        {
-                pPtr = DataFile.GetItem(Index, &Type, &ID);
-                Size = DataFile.GetItemSize(Index);
-                pPtr = ReplaceImageItem(pPtr, Type, aImageName, aImageFile);
-                df.AddItem(Type, ID, Size, pPtr);
-        }
+	if (!pStorage)
+	{
+                dbg_msg("map_replace_image", "error loading storage");
+		return -1;
+	}
 
-        // add all data
-        for(Index = 0; Index < DataFile.NumItems(); Index++)
-        {
-                if(Index == NewDataID) {
-                    pPtr = pNewData;
-                    Size = NewDataSize;
+	const char *pSourceFileName = argv[1];
+	const char *pDestFileName = argv[2];
+	const char *pImageName = argv[3];
+	const char *pImageFile = argv[4];
+
+	int ID = 0;
+        int Type = 0;
+        int Size = 0;
+	void *pItem = 0;
+	void *pData = 0;
+
+	if(!DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ALL))
+	{
+		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFileName);
+		return -1;
+	}
+
+	if(!DataWriter.Open(pStorage, pDestFileName))
+	{
+		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFileName);
+		return -1;
+	}
+
+        png_init(0,0);
+
+	// add all items
+	for(int Index = 0; Index < DataReader.NumItems(); Index++)
+	{
+		CMapItemImage NewImageItem;
+		pItem = DataReader.GetItem(Index, &Type, &ID);
+		Size = DataReader.GetItemSize(Index);
+		pItem = ReplaceImageItem(pItem, Type, pImageName, pImageFile, &NewImageItem);
+		if(!pItem)
+			return -1;
+		DataWriter.AddItem(Type, ID, Size, pItem);
+	}
+
+	if(g_NewDataID == -1)
+	{
+		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", pImageName, pSourceFileName);
+		return -1;
+	}
+
+	// add all data
+	for(int Index = 0; Index < DataReader.NumItems(); Index++)
+	{
+		if(Index == g_NewDataID)
+		{
+			pData = g_pNewData;
+			Size = g_NewDataSize;
                 }
-                else if (Index == NewNameID) {
-                    pPtr = (void *)aNewName;
-                    Size = str_length(aNewName)+1;
-                }
-                else {
-                    pPtr = DataFile.GetData(Index);
-                    Size = DataFile.GetUncompressedDataSize(Index);
-                }
+		else if (Index == g_NewNameID)
+		{
+			pData = (void *)g_aNewName;
+			Size = str_length(g_aNewName) + 1;
+		}
+		else
+		{
+			pData = DataReader.GetData(Index);
+			Size = DataReader.GetUncompressedDataSize(Index);
+		}
 
-                df.AddData(Size, pPtr);
-        }
+		DataWriter.AddData(Size, pData);
+	}
 
-        DataFile.Close();
-        df.Finish();
-        return 0;
+	DataReader.Close();
+	DataWriter.Finish();
+
+	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);
+	return 0;
 }
