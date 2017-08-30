@@ -13,7 +13,9 @@ private:
 
 	void *m_pThHandle;
 
+	bool m_Running;
 	LOCK m_Lock;
+	SEMAPHORE m_Queued;
 	CFetchTask *m_pFirst;
 	CFetchTask *m_pLast;
 	class IStorage *m_pStorage;
