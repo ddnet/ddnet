@@ -54,8 +54,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		int TypeID;
 		int ItemID;
 		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
-		// GetItemSize returns item size including header, remove that.
-		int Size = Reader.GetItemSize(i) - sizeof(int) * 2;
+		int Size = Reader.GetItemSize(i);
 		CMapItemInfoSettings MapInfo;
 		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
 		{

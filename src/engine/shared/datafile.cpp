@@ -356,10 +356,11 @@ void CDataFileReader::UnloadData(int Index)
 
 int CDataFileReader::GetItemSize(int Index)
 {
-	if(!m_pDataFile) { return 0; }
+	if(!m_pDataFile)
+		return 0;
 	if(Index == m_pDataFile->m_Header.m_NumItems-1)
-		return m_pDataFile->m_Header.m_ItemSize-m_pDataFile->m_Info.m_pItemOffsets[Index];
-	return m_pDataFile->m_Info.m_pItemOffsets[Index+1]-m_pDataFile->m_Info.m_pItemOffsets[Index];
+		return m_pDataFile->m_Header.m_ItemSize-m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
+	return m_pDataFile->m_Info.m_pItemOffsets[Index+1]-m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
 }
 
 void *CDataFileReader::GetItem(int Index, int *pType, int *pID)

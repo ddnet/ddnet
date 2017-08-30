@@ -819,6 +819,7 @@ set_glob(TOOLS GLOB src/tools
   fake_server.cpp
   map_diff.cpp
   map_extract.cpp
+  map_replace_image.cpp
   map_resave.cpp
   map_version.cpp
   packetgen.cpp
@@ -833,7 +834,7 @@ foreach(ABS_T ${TOOLS})
   if(T MATCHES "\\.cpp$")
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(EXTRA_TOOL_SRC)
-    if(TOOL MATCHES "^(tileset_|dilate|map_extract$)")
+    if(TOOL MATCHES "^(tileset_|dilate|map_extract|map_replace_image$)")
       list(APPEND EXTRA_TOOL_SRC ${DEP_PNG})
     endif()
     if(TOOL MATCHES "^config_")
