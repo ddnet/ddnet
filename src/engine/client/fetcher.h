@@ -26,7 +26,7 @@ public:
 	virtual void Escape(char *pBud, size_t size, const char *pStr);
 	static void FetcherThread(void *pUser);
 	void FetchFile(CFetchTask *pTask);
-	static void WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);
+	static size_t WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);
 	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
 };
 

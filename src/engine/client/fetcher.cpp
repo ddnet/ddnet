@@ -165,9 +165,9 @@ void CFetcher::FetchFile(CFetchTask *pTask)
 	}
 }
 
-void CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
+size_t CFetcher::WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile)
 {
-	io_write((IOHANDLE)pFile, pData, size*nmemb);
+	return io_write((IOHANDLE)pFile, pData, size*nmemb);
 }
 
 int CFetcher::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
