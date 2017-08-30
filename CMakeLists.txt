@@ -62,6 +62,7 @@ endfunction()
 find_package(PkgConfig)
 find_package(Curl)
 find_package(Freetype)
+find_package(GTest)
 if(MYSQL)
   find_package(MySQL)
 else()
@@ -100,6 +101,7 @@ endfunction()
 
 show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
 show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
+show_dependency_status("GTest" ${GTEST_FOUND} "${GTEST_LIBRARY}")
 if(MYSQL)
   show_dependency_status("MySQL" ${MYSQL_FOUND} "${MYSQL_LIBRARY}")
 endif()
@@ -139,6 +141,9 @@ if(CLIENT AND NOT(OPUSFILE_FOUND))
 endif()
 if(CLIENT AND NOT(SDL2_FOUND))
   message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
+endif()
+if(NOT(GTEST_FOUND))
+  message("To run the tests, you have to install GTest")
 endif()
 
 if(TARGET_OS STREQUAL "windows")
@@ -856,6 +861,36 @@ list(APPEND TARGETS_LINK ${TARGETS_TOOLS})
 
 add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
+
+########################################################################
+# TESTS
+########################################################################
+
+if(GTEST_FOUND)
+  set_glob(TESTS GLOB src/test
+    strip_path_and_extension.cpp
+  )
+
+  set(TARGET_TESTRUNNER testrunner)
+  add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
+    ${TESTS}
+    $<TARGET_OBJECTS:engine-shared>
+    $<TARGET_OBJECTS:game-shared>
+    ${DEP_MD5}
+  )
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${GTEST_BOTH_LIBRARIES})
+  target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${GTEST_INCLUDE_DIRS})
+
+  list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
+  list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
+
+  add_custom_target(run_tests
+    COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}>
+    COMMENT Running tests
+    DEPENDS ${TARGET_TESTRUNNER}
+    USES_TERMINAL
+  )
+endif()
 
 ########################################################################
 # COMPILER-SPECIFICS
