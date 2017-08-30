@@ -62,6 +62,8 @@ CServerBrowser::CServerBrowser()
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
 	m_BroadcastExtraToken = -1;
+
+	m_pDDNetRanks = 0;
 }
 
 void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
@@ -189,6 +191,8 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = 1;
+		else if(g_Config.m_BrFilterUnfinishedMap && m_ppServerlist[i]->m_Info.m_HasRank != 0)
+			Filtered = 1;
 		else
 		{
 			if(g_Config.m_BrFilterCountry)
@@ -292,8 +296,9 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterPure<<11;
 	i |= g_Config.m_BrFilterPureMap<<12;
 	i |= g_Config.m_BrFilterGametypeStrict<<13;
-	i |= g_Config.m_BrFilterCountry<<14;
-	i |= g_Config.m_BrFilterPing<<15;
+	i |= g_Config.m_BrFilterUnfinishedMap<<14;
+	i |= g_Config.m_BrFilterCountry<<15;
+	i |= g_Config.m_BrFilterPing<<16;
 	return i;
 }
 
@@ -411,6 +416,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	pEntry->m_Info.m_NetAddr = Addr;
 
 	pEntry->m_Info.m_Latency = 999;
+	pEntry->m_Info.m_HasRank = -1;
 	net_addr_str(&Addr, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), true);
 	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
 
@@ -581,7 +587,8 @@ void CServerBrowser::Refresh(int Type)
 	}
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
-		LoadDDNet();
+		LoadDDNetServers();
+		LoadDDNetRanks();
 
 		// remove unknown elements of exclude list
 		DDNetCountryFilterClean();
@@ -911,7 +918,7 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 	}
 }
 
-void CServerBrowser::LoadDDNet()
+void CServerBrowser::LoadDDNetServers()
 {
 	// reset servers / countries
 	m_NumDDNetCountries = 0;
@@ -926,7 +933,6 @@ void CServerBrowser::LoadDDNet()
 
 	char aBuf[4096*4];
 	mem_zero(aBuf, sizeof(aBuf));
-
 	io_read(File, aBuf, sizeof(aBuf));
 	io_close(File);
 
@@ -995,6 +1001,52 @@ void CServerBrowser::LoadDDNet()
 
 	if (pCountries)
 		json_value_free(pCountries);
+}
+
+void CServerBrowser::LoadDDNetRanks()
+{
+	// load ddnet ranks list
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+	IOHANDLE File = pStorage->OpenFile("ddnet-ranks.json", IOFLAG_READ, IStorage::TYPE_ALL);
+
+	if(!File)
+		return;
+
+	const int Length = io_length(File);
+	char *pBuf = (char *)mem_alloc(Length, 1);
+	pBuf[0] = '\0';
+
+	io_read(File, pBuf, Length);
+	io_close(File);
+
+	m_pDDNetRanks = json_parse(pBuf, Length);
+
+	mem_free(pBuf);
+
+	for(int i = 0; i < m_NumServers; i++)
+	{
+		if(m_ppServerlist[i]->m_Info.m_aMap[0])
+			m_ppServerlist[i]->m_Info.m_HasRank = HasRank(m_ppServerlist[i]->m_Info.m_aMap);
+	}
+}
+
+int CServerBrowser::HasRank(const char *pMap)
+{
+	if(m_ServerlistType != IServerBrowser::TYPE_DDNET)
+		return -1;
+
+	if(!m_pDDNetRanks)
+		return -1;
+
+	for (int i = 0; i < json_array_length(m_pDDNetRanks); i++)
+	{
+		const json_value *pJson = json_array_get(m_pDDNetRanks, i);
+		const char *pStr = json_string_get(pJson);
+		if(str_comp(pMap, pStr) == 0)
+			return 1;
+	}
+
+	return 0;
 }
 
 bool CServerBrowser::IsRefreshing() const

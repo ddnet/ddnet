@@ -47,6 +47,7 @@ public:
 	int m_Flags;
 	int m_Favorite;
 	int m_Latency; // in ms
+	int m_HasRank;
 	char m_aGameType[16];
 	char m_aName[64];
 	char m_aMap[32];

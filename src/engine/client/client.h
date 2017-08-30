@@ -135,6 +135,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadCrc;
 	int m_MapdownloadAmount;
 	int m_MapdownloadTotalsize;
+	CFetchTask *m_pDDNetRanksTask;
 
 	// time
 	CSmoothTime m_GameTime[2];
@@ -298,6 +299,8 @@ public:
 
 	void ResetMapDownload();
 	void FinishMapDownload();
+	void ResetDDNetRanks();
+	void FinishDDNetRanks();
 
 	virtual CFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
 	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
@@ -392,6 +395,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 
 	void RequestDDNetSrvList();
+	void RequestDDNetRanks();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends* Foes() {return &m_Foes; }

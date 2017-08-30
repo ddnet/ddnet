@@ -321,6 +321,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_MapdownloadCrc = 0;
 	m_MapdownloadAmount = -1;
 	m_MapdownloadTotalsize = -1;
+	m_pDDNetRanksTask = NULL;
 
 	m_CurrentServerInfoRequestTime = -1;
 
@@ -1170,6 +1171,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 
 			RequestDDNetSrvList();
+			RequestDDNetRanks();
 
 			// request the map version list now
 			mem_zero(&Packet, sizeof(Packet));
@@ -1408,6 +1410,8 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		GET_INT(Info.m_MaxPlayers);
 		GET_INT(Info.m_NumClients);
 		GET_INT(Info.m_MaxClients);
+		if(Info.m_aMap[0])
+			Info.m_HasRank = m_ServerBrowser.HasRank(Info.m_aMap);
 
 		// don't add invalid info to the server browser list
 		if(Info.m_NumClients < 0 || Info.m_MaxClients < 0 ||
@@ -1542,6 +1546,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			}
 		}
 	}
+
 	#undef GET_STRING
 	#undef GET_INT
 }
@@ -2256,6 +2261,22 @@ void CClient::FinishMapDownload()
 	}
 }
 
+void CClient::ResetDDNetRanks()
+{
+	if(m_pDDNetRanksTask)
+	{
+		m_pDDNetRanksTask->Abort();
+		delete m_pDDNetRanksTask;
+		m_pDDNetRanksTask = NULL;
+	}
+}
+
+void CClient::FinishDDNetRanks()
+{
+	ResetDDNetRanks();
+	m_ServerBrowser.LoadDDNetRanks();
+}
+
 void CClient::PumpNetwork()
 {
 	for(int i=0; i<3; i++)
@@ -2548,6 +2569,7 @@ void CClient::Update()
 
 	// pump the network
 	PumpNetwork();
+
 	if(m_pMapdownloadTask)
 	{
 		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
@@ -2565,6 +2587,21 @@ void CClient::Update()
 		}
 	}
 
+	if(m_pDDNetRanksTask)
+	{
+		if(m_pDDNetRanksTask->State() == CFetchTask::STATE_DONE)
+			FinishDDNetRanks();
+		else if(m_pDDNetRanksTask->State() == CFetchTask::STATE_ERROR)
+		{
+			dbg_msg("ddnet-ranks", "download failed");
+			ResetDDNetRanks();
+		}
+		else if(m_pDDNetRanksTask->State() == CFetchTask::STATE_ABORTED)
+		{
+			delete m_pDDNetRanksTask;
+			m_pDDNetRanksTask = NULL;
+		}
+	}
 
 	// update the maser server registry
 	MasterServer()->Update();
@@ -3733,6 +3770,18 @@ void CClient::RequestDDNetSrvList()
 	Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST)+4;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
+}
+
+void CClient::RequestDDNetRanks()
+{
+	char aUrl[256];
+	char aEscaped[128];
+
+	Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
+	str_format(aUrl, sizeof(aUrl), "https://ddnet.tw/players/?json=%s", aEscaped);
+
+	m_pDDNetRanksTask = new CFetchTask(true, /*UseDDNetCA*/ false);
+	Fetcher()->QueueAdd(m_pDDNetRanksTask, aUrl, "ddnet-ranks.json", IStorage::TYPE_SAVE);
 }
 
 int CClient::GetPredictionTime()

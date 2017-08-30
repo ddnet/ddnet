@@ -190,6 +190,7 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
 	virtual void RequestDDNetSrvList() = 0;
+	virtual void RequestDDNetRanks() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
 
 	virtual void GenerateTimeoutSeed() = 0;

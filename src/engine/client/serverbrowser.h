@@ -4,6 +4,7 @@
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
 #include <engine/serverbrowser.h>
+#include <engine/external/json-parser/json.h>
 
 class CServerBrowser : public IServerBrowser
 {
@@ -73,7 +74,9 @@ public:
 	void AddFavorite(const NETADDR &Addr);
 	void RemoveFavorite(const NETADDR &Addr);
 
-	void LoadDDNet();
+	void LoadDDNetServers();
+	void LoadDDNetRanks();
+	int HasRank(const char *pMap);
 	int NumDDNetCountries() { return m_NumDDNetCountries; };
 	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; };
 	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; };
@@ -118,6 +121,7 @@ private:
 
 	char m_aDDNetTypes[MAX_DDNET_TYPES][32];
 	int m_NumDDNetTypes;
+	json_value *m_pDDNetRanks;
 
 	CServerEntry *m_aServerlistIp[256]; // ip hash list
 
