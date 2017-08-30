@@ -1,7 +1,5 @@
 /* (c) Redix and Sushi */
 
-#include <stdio.h>
-
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/serverbrowser.h>
@@ -115,7 +113,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 		{
 			char aName[MAX_NAME_LENGTH];
 			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
-			if(Time && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
+			if(Time > 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
 			{
 				m_RaceState = RACE_FINISHED;
 				m_RecordStopTime = Client()->GameTick() + Client()->GameTickSpeed();
@@ -148,7 +146,7 @@ void CRaceDemo::CheckDemo()
 			pDemo += MapLen + 1;
 			int Time = CRaceHelper::TimeFromSecondsStr(pDemo);
 			float DemoTime = Time / 1000.f;
-			if(Time && m_Time < DemoTime)
+			if(Time > 0 && m_Time < DemoTime)
 			{
 				// save new record
 				SaveDemo(m_pMap);
@@ -189,11 +187,11 @@ void CRaceDemo::SaveDemo(const char* pDemo)
 			if(aPlayerName[i] == '\\' || aPlayerName[i] == '/' || aPlayerName[i] == '|' || aPlayerName[i] == ':' || aPlayerName[i] == '*' || aPlayerName[i] == '?' || aPlayerName[i] == '<' || aPlayerName[i] == '>' || aPlayerName[i] == '"')
 				aPlayerName[i] = '%';
 
-			str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%5.2f_%s.demo", pDemo, m_Time, aPlayerName);
+			str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%.2f_%s.demo", pDemo, m_Time, aPlayerName);
 		}
 	}
 	else
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%5.2f.demo", pDemo, m_Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%.2f.demo", pDemo, m_Time);
 
 	str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
 
