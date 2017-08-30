@@ -117,7 +117,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 			{
 				m_RaceState = RACE_FINISHED;
 				m_RecordStopTime = Client()->GameTick() + Client()->GameTickSpeed();
-				m_Time = Time / 1000.f;
+				m_Time = Time;
 			}
 		}
 	}
@@ -145,8 +145,7 @@ void CRaceDemo::CheckDemo()
 			// set cursor
 			pDemo += MapLen + 1;
 			int Time = CRaceHelper::TimeFromSecondsStr(pDemo);
-			float DemoTime = Time / 1000.f;
-			if(Time > 0 && m_Time < DemoTime)
+			if(Time > 0 && m_Time < Time)
 			{
 				// save new record
 				SaveDemo(m_pMap);
@@ -187,11 +186,11 @@ void CRaceDemo::SaveDemo(const char* pDemo)
 			if(aPlayerName[i] == '\\' || aPlayerName[i] == '/' || aPlayerName[i] == '|' || aPlayerName[i] == ':' || aPlayerName[i] == '*' || aPlayerName[i] == '?' || aPlayerName[i] == '<' || aPlayerName[i] == '>' || aPlayerName[i] == '"')
 				aPlayerName[i] = '%';
 
-			str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%.2f_%s.demo", pDemo, m_Time, aPlayerName);
+			str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%d.%03d_%s.demo", pDemo, m_Time / 1000, m_Time % 1000, aPlayerName);
 		}
 	}
 	else
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%.2f.demo", pDemo, m_Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%d.%03d.demo", pDemo, m_Time / 1000, m_Time % 1000);
 
 	str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
 
