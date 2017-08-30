@@ -588,7 +588,6 @@ void CServerBrowser::Refresh(int Type)
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
 		LoadDDNetServers();
-		LoadDDNetRanks();
 
 		// remove unknown elements of exclude list
 		DDNetCountryFilterClean();
@@ -1013,6 +1012,12 @@ void CServerBrowser::LoadDDNetRanks()
 		return;
 
 	const int Length = io_length(File);
+	if(Length <= 0)
+	{
+		io_close(File);
+		return;
+	}
+
 	char *pBuf = (char *)mem_alloc(Length, 1);
 	pBuf[0] = '\0';
 
