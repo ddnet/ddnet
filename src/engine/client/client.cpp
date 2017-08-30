@@ -3002,7 +3002,6 @@ void CClient::Run()
 	Disconnect();
 
 	m_pGraphics->Shutdown();
-	m_pSound->Shutdown();
 
 	// shutdown SDL
 	{
