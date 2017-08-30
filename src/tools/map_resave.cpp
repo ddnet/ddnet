@@ -35,7 +35,7 @@ int main(int argc, const char **argv)
 	for(Index = 0; Index < DataFile.NumData(); Index++)
 	{
 		pPtr = DataFile.GetData(Index);
-		Size = DataFile.GetUncompressedDataSize(Index);
+		Size = DataFile.GetDataSize(Index);
 		df.AddData(Size, pPtr);
 	}
 

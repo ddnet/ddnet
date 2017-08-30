@@ -188,7 +188,7 @@ int main(int argc, const char **argv)
 		else
 		{
 			pData = g_DataReader.GetData(Index);
-			Size = g_DataReader.GetUncompressedDataSize(Index);
+			Size = g_DataReader.GetDataSize(Index);
 		}
 
 		g_DataWriter.AddData(Size, pData);
