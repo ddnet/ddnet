@@ -418,16 +418,13 @@ int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CU
 	}
 	else if(HotItem() == pID)
 	{
-		if(MouseButton(0))
+		for(int i = 0; i < 3; ++i)
 		{
-			SetActiveItem(pID);
-			ButtonUsed = 0;
-		}
-
-		if(MouseButton(1))
-		{
-			SetActiveItem(pID);
-			ButtonUsed = 1;
+			if(MouseButton(i))
+			{
+				SetActiveItem(pID);
+				ButtonUsed = i;
+			}
 		}
 	}
 

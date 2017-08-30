@@ -735,20 +735,38 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = TypesWidth;
 					Rect.h = TypesHeight;
 
-					if (UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect))
+					int Button = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect);
+					if(Button == 1)
 					{
-						// toggle flag filter
-						if (Active)
+						// left click to toggle flag filter
+						if(Active)
 							ServerBrowser()->DDNetFilterAdd(g_Config.m_BrFilterExcludeTypes, pName);
 						else
 							ServerBrowser()->DDNetFilterRem(g_Config.m_BrFilterExcludeTypes, pName);
 
 						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 					}
+					else if(Button == 2)
+					{
+						// right click to exclusively activate one
+						g_Config.m_BrFilterExcludeTypes[0] = '\0';
+						for (int j = 0; j < MaxTypes; ++j)
+						{
+							if(j != TypeIndex)
+								ServerBrowser()->DDNetFilterAdd(g_Config.m_BrFilterExcludeTypes, ServerBrowser()->GetDDNetType(j));
+						}
+						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+					}
+					else if(Button == 3)
+					{
+						// middle click to reset (reenable all)
+						g_Config.m_BrFilterExcludeTypes[0] = '\0';
+						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+					}
 
 					vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
 
-					if (!Active)
+					if(!Active)
 						Color.a = 0.2f;
 					TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
 					UI()->DoLabelScaled(&Rect, pName, FontSize, 0);
@@ -798,14 +816,32 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = FlagWidth;
 					Rect.h = FlagHeight;
 
-					if (UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect))
+					int Button = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect);
+					if(Button == 1)
 					{
-						// toggle flag filter
-						if (Active)
+						// left click to toggle flag filter
+						if(Active)
 							ServerBrowser()->DDNetFilterAdd(g_Config.m_BrFilterExcludeCountries, pName);
 						else
 							ServerBrowser()->DDNetFilterRem(g_Config.m_BrFilterExcludeCountries, pName);
 
+						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+					}
+					else if(Button == 2)
+					{
+						// right click to exclusively activate one
+						g_Config.m_BrFilterExcludeCountries[0] = '\0';
+						for (int j = 0; j < MaxFlags; ++j)
+						{
+							if(j != CountryIndex)
+								ServerBrowser()->DDNetFilterAdd(g_Config.m_BrFilterExcludeCountries, ServerBrowser()->GetDDNetCountryName(j));
+						}
+						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+					}
+					else if(Button == 3)
+					{
+						// middle click to reset (reenable all)
+						g_Config.m_BrFilterExcludeCountries[0] = '\0';
 						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 					}
 
