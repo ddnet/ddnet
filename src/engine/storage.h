@@ -32,6 +32,8 @@ public:
 	virtual bool RemoveBinaryFile(const char *pFilename) = 0;
 	virtual bool RenameBinaryFile(const char* pOldFilename, const char* pNewFilename) = 0;
 	virtual const char* GetBinaryPath(const char *pDir, char *pBuffer, unsigned BufferSize) = 0;
+
+	static void StripPathAndExtension(const char *pFilename, char *pBuffer, int BufferSize);
 };
 
 extern IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);

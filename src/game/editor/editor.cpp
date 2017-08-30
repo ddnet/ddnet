@@ -3092,7 +3092,7 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 	}
 	*pImg = ImgInfo;
 	pImg->m_External = External;
-	pEditor->ExtractName(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
+	IStorage::StripPathAndExtension(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pImg->m_TexID = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 	ImgInfo.m_pData = 0;
@@ -3114,7 +3114,7 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 
 	// check if we have that image already
 	char aBuf[128];
-	ExtractName(pFileName, aBuf, sizeof(aBuf));
+	IStorage::StripPathAndExtension(pFileName, aBuf, sizeof(aBuf));
 	for(int i = 0; i < pEditor->m_Map.m_lImages.size(); ++i)
 	{
 		if(!str_comp(pEditor->m_Map.m_lImages[i]->m_aName, aBuf))
@@ -3148,7 +3148,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 
 	// check if we have that sound already
 	char aBuf[128];
-	ExtractName(pFileName, aBuf, sizeof(aBuf));
+	IStorage::StripPathAndExtension(pFileName, aBuf, sizeof(aBuf));
 	for(int i = 0; i < pEditor->m_Map.m_lSounds.size(); ++i)
 	{
 		if(!str_comp(pEditor->m_Map.m_lSounds[i]->m_aName, aBuf))
@@ -3243,7 +3243,7 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 
 	// replace sound
 	pSound->m_External = External;
-	pEditor->ExtractName(pFileName, pSound->m_aName, sizeof(pSound->m_aName));
+	IStorage::StripPathAndExtension(pFileName, pSound->m_aName, sizeof(pSound->m_aName));
 	pSound->m_SoundID = pEditor->Sound()->LoadOpusFromMem(pData, (unsigned) DataSize, true);
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;

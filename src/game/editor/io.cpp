@@ -550,7 +550,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		|| !mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv6Localhost, sizeof(ipv6Localhost)))
 		{
 			char aMapName[128];
-			m_pEditor->ExtractName(pFileName, aMapName, sizeof(aMapName));
+			IStorage::StripPathAndExtension(pFileName, aMapName, sizeof(aMapName));
 			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
 				m_pEditor->Client()->Rcon("reload");
 		}
