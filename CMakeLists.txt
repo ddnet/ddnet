@@ -589,6 +589,7 @@ if(CLIENT)
     components/particles.h
     components/players.cpp
     components/players.h
+    components/race.h
     components/race_demo.cpp
     components/race_demo.h
     components/scoreboard.cpp

@@ -8,6 +8,7 @@
 #include <engine/storage.h>
 
 #include "menus.h"
+#include "race.h"
 #include "race_demo.h"
 
 CRaceDemo::CRaceDemo()
@@ -113,22 +114,12 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 		if(pMsg->m_ClientID == -1 && m_RaceState == RACE_STARTED)
 		{
 			char aName[MAX_NAME_LENGTH];
-			const char *pFinished = str_find(pMsg->m_pMessage, " finished in: ");
-			int FinishedPos = pFinished - pMsg->m_pMessage;
-			if (!pFinished || FinishedPos == 0 || FinishedPos >= (int)sizeof(aName))
-				return;
-
-			// store the name
-			str_copy(aName, pMsg->m_pMessage, FinishedPos + 1);
-
-			// prepare values and state for saving
-			int Minutes;
-			float Seconds;
-			if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) && sscanf(pFinished, " finished in: %d minute(s) %f", &Minutes, &Seconds) == 2)
+			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
+			if(Time && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
 			{
 				m_RaceState = RACE_FINISHED;
 				m_RecordStopTime = Client()->GameTick() + Client()->GameTickSpeed();
-				m_Time = Minutes*60 + Seconds;
+				m_Time = Time / 1000.f;
 			}
 		}
 	}
