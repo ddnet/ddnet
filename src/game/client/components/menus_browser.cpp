@@ -369,9 +369,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					Button.VMargin(4.0f, &Button);
 					Button.VSplitLeft(Button.h, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					if(pItem->m_HasRank == 0)
-						DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_NORANK, &Icon);
-					else if(pItem->m_HasRank == 1)
+					if(pItem->m_HasRank == 1)
 						DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_RANK, &Icon);
 				}
 
