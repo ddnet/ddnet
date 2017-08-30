@@ -260,6 +260,12 @@ void CServerBrowser::Filter()
 				{
 					MatchFound = 1;
 				}
+				
+				// match against gametype
+				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrExcludeString))
+				{
+					MatchFound = 1;
+				}
 
 				if(MatchFound)
 					Filtered = 1;
