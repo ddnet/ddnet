@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/storage.h>
 #include "linereader.h"
@@ -472,6 +473,28 @@ public:
 		return p;
 	}
 };
+
+void IStorage::StripPathAndExtension(const char *pFilename, char *pBuffer, int BufferSize)
+{
+	const char *pFilenameEnd = pFilename + str_length(pFilename);
+	const char *pExtractedName = pFilename;
+	const char *pEnd = pFilenameEnd;
+	for(const char *pIter = pFilename; *pIter; pIter++)
+	{
+		if(*pIter == '/' || *pIter == '\\')
+		{
+			pExtractedName = pIter + 1;
+			pEnd = pFilenameEnd;
+		}
+		else if(*pIter == '.')
+		{
+			pEnd = pIter;
+		}
+	}
+
+	int Length = min(BufferSize, (int)(pEnd - pExtractedName + 1));
+	str_copy(pBuffer, pExtractedName, Length);
+}
 
 IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments) { return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments); }
 

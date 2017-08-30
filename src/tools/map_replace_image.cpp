@@ -60,22 +60,6 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	return 1;
 }
 
-void ExtractName(const char *pFileName, char *pName, int BufferSize)
-{
-	const char *pExtractedName = pFileName;
-	const char *pEnd = 0;
-	for(; *pFileName; ++pFileName)
-	{
-		if(*pFileName == '/' || *pFileName == '\\')
-			pExtractedName = pFileName+1;
-		else if(*pFileName == '.')
-			pEnd = pFileName;
-	}
-
-	int Length = pEnd > pExtractedName ? min(BufferSize, (int)(pEnd-pExtractedName+1)) : BufferSize;
-	str_copy(pName, pExtractedName, Length);
-}
-
 void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
 	if(Type != MAPITEMTYPE_IMAGE)
@@ -100,7 +84,7 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 	int PixelSize = ImgInfo.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
 
 	g_NewNameID = pImgItem->m_ImageName;
-	ExtractName(pImgFile, g_aNewName, sizeof(g_aNewName));
+	IStorage::StripPathAndExtension(pImgFile, g_aNewName, sizeof(g_aNewName));
 	g_NewDataID = pImgItem->m_ImageData;
 	g_pNewData = ImgInfo.m_pData;
 	g_NewDataSize = ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
