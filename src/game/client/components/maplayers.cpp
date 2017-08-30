@@ -250,7 +250,7 @@ void CMapLayers::OnRender()
 						Graphics()->TextureSet(m_pClient->m_pMapimages->Get(pTMap->m_Image));
 
 					CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
-					unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(pTMap->m_Data);
+					unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
 
 					if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 					{
@@ -304,7 +304,7 @@ void CMapLayers::OnRender()
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
 				CTile *pFrontTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Front);
-				unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(pTMap->m_Front);
+				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Front);
 
 				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 				{
@@ -323,7 +323,7 @@ void CMapLayers::OnRender()
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
 				CSwitchTile *pSwitchTiles = (CSwitchTile *)m_pLayers->Map()->GetData(pTMap->m_Switch);
-				unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(pTMap->m_Switch);
+				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Switch);
 
 				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSwitchTile))
 				{
@@ -341,7 +341,7 @@ void CMapLayers::OnRender()
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
 				CTeleTile *pTeleTiles = (CTeleTile *)m_pLayers->Map()->GetData(pTMap->m_Tele);
-				unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(pTMap->m_Tele);
+				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tele);
 
 				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTeleTile))
 				{
@@ -359,7 +359,7 @@ void CMapLayers::OnRender()
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
 				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)m_pLayers->Map()->GetData(pTMap->m_Speedup);
-				unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(pTMap->m_Speedup);
+				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Speedup);
 
 				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSpeedupTile))
 				{
@@ -377,7 +377,7 @@ void CMapLayers::OnRender()
 				Graphics()->TextureSet(m_pClient->m_pMapimages->GetEntities());
 
 				CTuneTile *pTuneTiles = (CTuneTile *)m_pLayers->Map()->GetData(pTMap->m_Tune);
-				unsigned int Size = m_pLayers->Map()->GetUncompressedDataSize(pTMap->m_Tune);
+				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tune);
 
 				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTuneTile))
 				{

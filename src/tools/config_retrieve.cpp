@@ -35,7 +35,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 			return;
 		}
 
-		int Size = Map.GetUncompressedDataSize(pItem->m_Settings);
+		int Size = Map.GetDataSize(pItem->m_Settings);
 		char *pSettings = (char *)Map.GetData(pItem->m_Settings);
 		char *pNext = pSettings;
 		while(pNext < pSettings + Size)

@@ -161,7 +161,7 @@ void CBackground::OnRender()
 					Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
 
 				CTile *pTiles = (CTile *)m_pMap->GetData(pTMap->m_Data);
-				unsigned int Size = m_pMap->GetUncompressedDataSize(pTMap->m_Data);
+				unsigned int Size = m_pMap->GetDataSize(pTMap->m_Data);
 
 				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 				{
