@@ -137,14 +137,18 @@ void CRaceDemo::CheckDemo()
 	m_pClient->m_pMenus->DemolistPopulate();
 	for(int i = 0; i < m_pClient->m_pMenus->m_lDemos.size(); i++)
 	{
-		if(!str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, m_pMap, str_length(m_pMap)) && str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, aTmpDemoName, str_length(aTmpDemoName)) && str_length(m_pClient->m_pMenus->m_lDemos[i].m_aName) > str_length(m_pMap) && m_pClient->m_pMenus->m_lDemos[i].m_aName[str_length(m_pMap)] == '_')
-		{
-			const char *pDemo = m_pClient->m_pMenus->m_lDemos[i].m_aName;
+		const char *pDemo = m_pClient->m_pMenus->m_lDemos[i].m_aName;
+		if(str_comp(pDemo, aTmpDemoName) == 0)
+			continue;
 
+		int MapLen = str_length(m_pMap);
+		if(str_comp_num(pDemo, m_pMap, MapLen) == 0 && pDemo[MapLen] == '_')
+		{
 			// set cursor
-			pDemo += str_length(m_pMap)+1;
-			float DemoTime = str_tofloat(pDemo);
-			if(m_Time < DemoTime)
+			pDemo += MapLen + 1;
+			int Time = CRaceHelper::TimeFromSecondsStr(pDemo);
+			float DemoTime = Time / 1000.f;
+			if(Time && m_Time < DemoTime)
 			{
 				// save new record
 				SaveDemo(m_pMap);
