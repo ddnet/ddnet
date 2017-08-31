@@ -425,13 +425,15 @@ void lock_unlock(LOCK lock);
 
 
 /* Group: Semaphores */
-#if defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_MACOSX)
+#if defined(CONF_FAMILY_UNIX)
 	#include <semaphore.h>
+	#if defined(CONF_PLATFORM_MACOSX)
+	typedef sem_t* SEMAPHORE;
+	#else
 	typedef sem_t SEMAPHORE;
+	#endif
 #elif defined(CONF_FAMILY_WINDOWS)
 	typedef void* SEMAPHORE;
-#elif defined(CONF_PLATFORM_MACOSX)
-	typedef sem_t* SEMAPHORE;
 #else
 	#error not implemented on this platform
 #endif
