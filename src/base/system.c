@@ -39,8 +39,6 @@
 		#define _lock_set_user_
 		#define _task_user_
 
-		#define OSX_SEMCOUNT 10
-
 		#include <Carbon/Carbon.h>
 		#include <mach/mach_time.h>
 	#endif
@@ -660,22 +658,15 @@ void semaphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE
 void semaphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
 void semaphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
 #elif defined(CONF_PLATFORM_MACOSX)
-sem_t *g_aSemaphores[OSX_SEMCOUNT];
-
 void semaphore_init(SEMAPHORE *sem)
 {
-	*sem = 0;
-	for(; *sem < OSX_SEMCOUNT; *sem++)
-		if(!g_aSemaphores[*sem])
-			break;
-
-	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%d", pid(), *sem);
-	g_aSemaphores[*sem] = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%p", pid(), (void *)sem);
+	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
 }
-void semaphore_wait(SEMAPHORE *sem) { sem_wait(g_aSemaphores[*sem]); }
-void semaphore_signal(SEMAPHORE *sem) { sem_post(g_aSemaphores[*sem]); }
-void semaphore_destroy(SEMAPHORE *sem) { sem_close(g_aSemaphores[*sem]); g_aSemaphores[*sem] = 0; }
+void semaphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
+void semaphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
+void semaphore_destroy(SEMAPHORE *sem) { sem_close(*sem); }
 #else
 	#error not implemented on this platform
 #endif
