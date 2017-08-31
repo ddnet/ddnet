@@ -665,7 +665,10 @@ void lock_unlock(LOCK lock)
 	void semaphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
 	void semaphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
 	#else
-		#error not implemented on this platform
+	void semaphore_init(SEMAPHORE *sem) { *sem = sem_open("twsemaphore", O_CREAT, S_IRWXU | S_IRWXG, 0); sem_unlink("twsemaphore"); }
+	void semaphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
+	void semaphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
+	void semaphore_destroy(SEMAPHORE *sem) { sem_close(*sem); }
 	#endif
 #endif
 

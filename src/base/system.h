@@ -433,7 +433,7 @@ void lock_unlock(LOCK lock);
 	#elif defined(CONF_FAMILY_WINDOWS)
 		typedef void* SEMAPHORE;
 	#else
-		#error missing sempahore implementation
+		typedef sem_t* SEMAPHORE;
 	#endif
 
 	void semaphore_init(SEMAPHORE *sem);
