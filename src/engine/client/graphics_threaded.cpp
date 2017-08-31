@@ -996,8 +996,11 @@ void CGraphics_Threaded::Swap()
 
 bool CGraphics_Threaded::SetVSync(bool State)
 {
+	if(!m_pCommandBuffer)
+		return true;
+
 	// add vsnc command
-	bool RetOk = 0;
+	bool RetOk = false;
 	CCommandBuffer::SCommand_VSync Cmd;
 	Cmd.m_VSync = State ? 1 : 0;
 	Cmd.m_pRetOk = &RetOk;
