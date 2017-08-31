@@ -670,7 +670,7 @@ void semaphore_init(SEMAPHORE *sem)
 			break;
 
 	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%d-ddphore-%d", pid(), *sem);
+	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%d", pid(), *sem);
 	g_aSemaphores[*sem] = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
 }
 void semaphore_wait(SEMAPHORE *sem) { sem_wait(g_aSemaphores[*sem]); }
