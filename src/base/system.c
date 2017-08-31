@@ -106,7 +106,6 @@ void dbg_break_imp()
 	*((volatile unsigned*)0) = 0x0;
 }
 
-#if !defined(CONF_PLATFORM_MACOSX)
 #define QUEUE_SIZE 64
 
 typedef struct
@@ -139,8 +138,8 @@ void dbg_msg_thread(void *v)
 	int num;
 	while(1)
 	{
-		semaphore_wait(&log_queue.notempty);
-		semaphore_wait(&log_queue.mutex);
+		sphore_wait(&log_queue.notempty);
+		sphore_wait(&log_queue.mutex);
 
 		if(queue_empty(&log_queue))
 		{
@@ -155,10 +154,10 @@ void dbg_msg_thread(void *v)
 		}
 
 		if(!queue_empty(&log_queue) || log_queue.skipped > 0)
-			semaphore_signal(&log_queue.notempty);
+			sphore_signal(&log_queue.notempty);
 
 		num = num_loggers;
-		semaphore_signal(&log_queue.mutex);
+		sphore_signal(&log_queue.mutex);
 
 		for(i = 0; i < num; i++)
 			loggers[i](str);
@@ -174,16 +173,15 @@ void dbg_enable_threaded()
 	q->begin = 0;
 	q->end = 0;
 	q->skipped = 0;
-	semaphore_init(&q->mutex);
-	semaphore_init(&q->notempty);
-	semaphore_signal(&q->mutex);
+	sphore_init(&q->mutex);
+	sphore_init(&q->notempty);
+	sphore_signal(&q->mutex);
 
 	dbg_msg_threaded = 1;
 
 	Thread = thread_init(dbg_msg_thread, 0);
 	thread_detach(Thread);
 }
-#endif
 
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
@@ -195,10 +193,9 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	char timestr[80];
 	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
 
-#if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
 	{
-		semaphore_wait(&log_queue.mutex);
+		sphore_wait(&log_queue.mutex);
 
 		if(queue_full(&log_queue))
 		{
@@ -224,13 +221,12 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 			log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
 
 			if(e)
-				semaphore_signal(&log_queue.notempty);
+				sphore_signal(&log_queue.notempty);
 		}
 
-		semaphore_signal(&log_queue.mutex);
+		sphore_signal(&log_queue.mutex);
 	}
 	else
-#endif
 	{
 		char str[1024*4];
 		int i;
@@ -281,16 +277,14 @@ static void logger_file(const char *line)
 
 void dbg_logger(DBG_LOGGER logger)
 {
-#if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
-		semaphore_wait(&log_queue.mutex);
-#endif
+		sphore_wait(&log_queue.mutex);
+
 	loggers[num_loggers] = logger;
 	num_loggers++;
-#if !defined(CONF_PLATFORM_MACOSX)
+
 	if(dbg_msg_threaded)
-		semaphore_signal(&log_queue.mutex);
-#endif
+		sphore_signal(&log_queue.mutex);
 }
 
 void dbg_logger_stdout() { dbg_logger(logger_stdout); }
@@ -653,20 +647,28 @@ void lock_unlock(LOCK lock)
 #endif
 }
 
-#if !defined(CONF_PLATFORM_MACOSX)
-	#if defined(CONF_FAMILY_UNIX)
-	void semaphore_init(SEMAPHORE *sem) { sem_init(sem, 0, 0); }
-	void semaphore_wait(SEMAPHORE *sem) { sem_wait(sem); }
-	void semaphore_signal(SEMAPHORE *sem) { sem_post(sem); }
-	void semaphore_destroy(SEMAPHORE *sem) { sem_destroy(sem); }
-	#elif defined(CONF_FAMILY_WINDOWS)
-	void semaphore_init(SEMAPHORE *sem) { *sem = CreateSemaphore(0, 0, 10000, 0); }
-	void semaphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
-	void semaphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
-	void semaphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
-	#else
-		#error not implemented on this platform
-	#endif
+#if defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_MACOSX)
+void sphore_init(SEMAPHORE *sem) { sem_init(sem, 0, 0); }
+void sphore_wait(SEMAPHORE *sem) { sem_wait(sem); }
+void sphore_signal(SEMAPHORE *sem) { sem_post(sem); }
+void sphore_destroy(SEMAPHORE *sem) { sem_destroy(sem); }
+#elif defined(CONF_FAMILY_WINDOWS)
+void sphore_init(SEMAPHORE *sem) { *sem = CreateSemaphore(0, 0, 10000, 0); }
+void sphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
+void sphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
+void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
+#elif defined(CONF_PLATFORM_MACOSX)
+void sphore_init(SEMAPHORE *sem)
+{
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%p", pid(), (void *)sem);
+	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
+}
+void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
+void sphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
+void sphore_destroy(SEMAPHORE *sem) { sem_close(*sem); }
+#else
+	#error not implemented on this platform
 #endif
 
 static int new_tick = -1;

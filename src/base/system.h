@@ -425,22 +425,23 @@ void lock_unlock(LOCK lock);
 
 
 /* Group: Semaphores */
-
-#if !defined(CONF_PLATFORM_MACOSX)
-	#if defined(CONF_FAMILY_UNIX)
-		#include <semaphore.h>
-		typedef sem_t SEMAPHORE;
-	#elif defined(CONF_FAMILY_WINDOWS)
-		typedef void* SEMAPHORE;
+#if defined(CONF_FAMILY_UNIX)
+	#include <semaphore.h>
+	#if defined(CONF_PLATFORM_MACOSX)
+	typedef sem_t* SEMAPHORE;
 	#else
-		#error missing sempahore implementation
+	typedef sem_t SEMAPHORE;
 	#endif
-
-	void semaphore_init(SEMAPHORE *sem);
-	void semaphore_wait(SEMAPHORE *sem);
-	void semaphore_signal(SEMAPHORE *sem);
-	void semaphore_destroy(SEMAPHORE *sem);
+#elif defined(CONF_FAMILY_WINDOWS)
+	typedef void* SEMAPHORE;
+#else
+	#error not implemented on this platform
 #endif
+
+void sphore_init(SEMAPHORE *sem);
+void sphore_wait(SEMAPHORE *sem);
+void sphore_signal(SEMAPHORE *sem);
+void sphore_destroy(SEMAPHORE *sem);
 
 /* Group: Timer */
 #ifdef __GNUC__
@@ -1273,9 +1274,7 @@ void swap_endian(void *data, unsigned elem_size, unsigned num);
 typedef void (*DBG_LOGGER)(const char *line);
 void dbg_logger(DBG_LOGGER logger);
 
-#if !defined(CONF_PLATFORM_MACOSX)
 void dbg_enable_threaded();
-#endif
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
