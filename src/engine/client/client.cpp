@@ -2274,6 +2274,7 @@ void CClient::ResetDDNetRanks()
 void CClient::FinishDDNetRanks()
 {
 	ResetDDNetRanks();
+	m_pStorage->RenameFile("ddnet-ranks.json.tmp", "ddnet-ranks.json", IStorage::TYPE_SAVE);
 	m_ServerBrowser.LoadDDNetRanks();
 }
 
@@ -3780,7 +3781,7 @@ void CClient::RequestDDNetRanks()
 	str_format(aUrl, sizeof(aUrl), "https://ddnet.tw/players/?json=%s", aEscaped);
 
 	m_pDDNetRanksTask = new CFetchTask(true, /*UseDDNetCA*/ true);
-	Fetcher()->QueueAdd(m_pDDNetRanksTask, aUrl, "ddnet-ranks.json", IStorage::TYPE_SAVE);
+	Fetcher()->QueueAdd(m_pDDNetRanksTask, aUrl, "ddnet-ranks.json.tmp", IStorage::TYPE_SAVE);
 }
 
 int CClient::GetPredictionTime()

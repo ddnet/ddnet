@@ -594,6 +594,7 @@ void CServerBrowser::Refresh(int Type)
 	else if(Type == IServerBrowser::TYPE_DDNET)
 	{
 		LoadDDNetServers();
+		LoadDDNetRanks();
 
 		// remove unknown elements of exclude list
 		DDNetCountryFilterClean();
