@@ -333,7 +333,7 @@ public:
 		char m_aFilename[256];
 		char m_aPlayer[MAX_NAME_LENGTH];
 
-		float m_Time;
+		int m_Time;
 
 		bool m_Active;
 		int m_ID;

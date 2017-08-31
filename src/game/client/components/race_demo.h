@@ -11,7 +11,7 @@ class CRaceDemo : public CComponent
 {
 	int m_RecordStopTime;
 	int m_DemoStartTick;
-	float m_Time;
+	int m_Time;
 	const char *m_pMap;
 
 	void Stop();

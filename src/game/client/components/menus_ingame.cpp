@@ -851,7 +851,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	CGhostItem Item;
 	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
 	str_copy(Item.m_aPlayer, Header.m_aOwner, sizeof(Item.m_aPlayer));
-	Item.m_Time = Header.m_Time;
+	Item.m_Time = Header.m_Time * 1000;
 	Item.m_Active = false;
 	Item.m_ID = pSelf->m_lGhosts.add(Item);
 
@@ -1079,7 +1079,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%02d:%06.3f", (int)pItem->m_Time/60, pItem->m_Time-((int)pItem->m_Time/60*60));
+				str_format(aBuf, sizeof(aBuf), "%02d:%02d.%03d", pItem->m_Time / (60 * 1000), (pItem->m_Time / 1000) % 60, pItem->m_Time % 1000);
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 		}
