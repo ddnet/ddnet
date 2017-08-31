@@ -60,7 +60,6 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	if(!m_pThHandle)
 	{
 		m_pThHandle = thread_init(&FetcherThread, this);
-		thread_detach(m_pThHandle);
 	}
 
 	if(!m_pFirst)

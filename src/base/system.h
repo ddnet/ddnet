@@ -388,17 +388,8 @@ void *thread_init(void (*threadfunc)(void *), void *user);
 void thread_wait(void *thread);
 
 /*
-	Function: thread_destroy
-		Destroys a thread.
-
-	Parameters:
-		thread - Thread to destroy.
-*/
-void thread_destroy(void *thread);
-
-/*
 	Function: thread_yeild
-		Yeild the current threads execution slice.
+		Yield the current threads execution slice.
 */
 void thread_yield();
 
@@ -425,15 +416,14 @@ void lock_unlock(LOCK lock);
 
 
 /* Group: Semaphores */
-#if defined(CONF_FAMILY_UNIX)
-	#include <semaphore.h>
-	#if defined(CONF_PLATFORM_MACOSX)
-	typedef sem_t* SEMAPHORE;
-	#else
-	typedef sem_t SEMAPHORE;
-	#endif
-#elif defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS)
 	typedef void* SEMAPHORE;
+#elif defined(CONF_PLATFORM_MACOSX)
+	#include <semaphore.h>
+	typedef sem_t* SEMAPHORE;
+#elif defined(CONF_FAMILY_UNIX)
+	#include <semaphore.h>
+	typedef sem_t SEMAPHORE;
 #else
 	#error not implemented on this platform
 #endif
@@ -1274,9 +1264,7 @@ void swap_endian(void *data, unsigned elem_size, unsigned num);
 typedef void (*DBG_LOGGER)(const char *line);
 void dbg_logger(DBG_LOGGER logger);
 
-#if !defined(CONF_PLATFORM_MACOSX)
 void dbg_enable_threaded();
-#endif
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);

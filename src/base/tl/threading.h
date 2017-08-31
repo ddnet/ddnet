@@ -61,21 +61,15 @@
 	#error missing atomic implementation for this compiler
 #endif
 
-#if defined(CONF_PLATFORM_MACOSX)
-	/*
-		use semaphore provided by SDL on macosx
-	*/
-#else
-	class semaphore
-	{
-		SEMAPHORE sem;
-	public:
-		semaphore() { sphore_init(&sem); }
-		~semaphore() { sphore_destroy(&sem); }
-		void wait() { sphore_wait(&sem); }
-		void signal() { sphore_signal(&sem); }
-	};
-#endif
+class semaphore
+{
+	SEMAPHORE sem;
+public:
+	semaphore() { sphore_init(&sem); }
+	~semaphore() { sphore_destroy(&sem); }
+	void wait() { sphore_wait(&sem); }
+	void signal() { sphore_signal(&sem); }
+};
 
 class lock
 {

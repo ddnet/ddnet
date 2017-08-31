@@ -526,21 +526,13 @@ void *thread_init(void (*threadfunc)(void *), void *u)
 void thread_wait(void *thread)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_join((pthread_t)thread, NULL);
+	int result = pthread_join((pthread_t)thread, NULL);
+	if(result != 0)
+		dbg_msg("thread", "!! %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	WaitForSingleObject((HANDLE)thread, INFINITE);
 #else
 	#error not implemented
-#endif
-}
-
-void thread_destroy(void *thread)
-{
-#if defined(CONF_FAMILY_UNIX)
-	void *r = 0;
-	pthread_join((pthread_t)thread, &r);
-#else
-	/*#error not implemented*/
 #endif
 }
 
@@ -647,12 +639,7 @@ void lock_unlock(LOCK lock)
 #endif
 }
 
-#if defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_MACOSX)
-void sphore_init(SEMAPHORE *sem) { sem_init(sem, 0, 0); }
-void sphore_wait(SEMAPHORE *sem) { sem_wait(sem); }
-void sphore_signal(SEMAPHORE *sem) { sem_post(sem); }
-void sphore_destroy(SEMAPHORE *sem) { sem_destroy(sem); }
-#elif defined(CONF_FAMILY_WINDOWS)
+#if defined(CONF_FAMILY_WINDOWS)
 void sphore_init(SEMAPHORE *sem) { *sem = CreateSemaphore(0, 0, 10000, 0); }
 void sphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
 void sphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
@@ -666,9 +653,18 @@ void sphore_init(SEMAPHORE *sem)
 }
 void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
 void sphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
-void sphore_destroy(SEMAPHORE *sem) { sem_close(*sem); }
-#else
-	#error not implemented on this platform
+void sphore_destroy(SEMAPHORE *sem)
+{
+	char aBuf[64];
+	sem_close(*sem);
+	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%p", pid(), (void *)sem);
+	sem_unlink(aBuf);
+}
+#elif defined(CONF_FAMILY_UNIX)
+void sphore_init(SEMAPHORE *sem) { sem_init(sem, 0, 0); }
+void sphore_wait(SEMAPHORE *sem) { sem_wait(sem); }
+void sphore_signal(SEMAPHORE *sem) { sem_post(sem); }
+void sphore_destroy(SEMAPHORE *sem) { sem_destroy(sem); }
 #endif
 
 static int new_tick = -1;
