@@ -35,6 +35,9 @@ FreeType = {
 					settings.link.libpath:Add("ddnet-libs/freetype/windows/lib64")
 				end
 				settings.link.libs:Add("freetype")
+			elseif platform == "macosx" and string.find(settings.config_name, "64") then
+				settings.link.libpath:Add("ddnet-libs/freetype/mac/lib64")
+				settings.link.libs:Add("freetype")
 			end
 		end
 
