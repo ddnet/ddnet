@@ -113,9 +113,9 @@ typedef struct
 	char q[QUEUE_SIZE][1024*4];
 	int begin;
 	int end;
-	int skipped;
-	SEMAPHORE mutex;
+	LOCK mutex;
 	SEMAPHORE notempty;
+	SEMAPHORE notfull;
 } Queue;
 
 static int dbg_msg_threaded = 0;
@@ -139,25 +139,18 @@ void dbg_msg_thread(void *v)
 	while(1)
 	{
 		sphore_wait(&log_queue.notempty);
-		sphore_wait(&log_queue.mutex);
+		lock_wait(log_queue.mutex);
 
-		if(queue_empty(&log_queue))
-		{
-			str_format(str, sizeof(str), "Skipped %d log messages because of full queue.", log_queue.skipped);
-			log_queue.skipped = 0;
-		}
-		else
-		{
-			str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
+		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
+		log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
 
-			log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
-		}
-
-		if(!queue_empty(&log_queue) || log_queue.skipped > 0)
+		if(!queue_empty(&log_queue))
 			sphore_signal(&log_queue.notempty);
 
+		sphore_signal(&log_queue.notfull);
+
 		num = num_loggers;
-		sphore_signal(&log_queue.mutex);
+		lock_unlock(log_queue.mutex);
 
 		for(i = 0; i < num; i++)
 			loggers[i](str);
@@ -172,10 +165,11 @@ void dbg_enable_threaded()
 	q = &log_queue;
 	q->begin = 0;
 	q->end = 0;
-	q->skipped = 0;
-	sphore_init(&q->mutex);
+	q->mutex = lock_create();
 	sphore_init(&q->notempty);
-	sphore_signal(&q->mutex);
+	sphore_init(&q->notfull);
+
+	sphore_signal(&q->notfull);
 
 	dbg_msg_threaded = 1;
 
@@ -195,36 +189,35 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	if(dbg_msg_threaded)
 	{
-		sphore_wait(&log_queue.mutex);
+		int empty;
 
-		if(queue_full(&log_queue))
-		{
-			log_queue.skipped++;
-		}
-		else
-		{
-			int e = queue_empty(&log_queue);
+		sphore_wait(&log_queue.notfull);
+		lock_wait(log_queue.mutex);
 
-			str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
+		empty = queue_empty(&log_queue);
 
-			len = strlen(log_queue.q[log_queue.end]);
-			msg = (char *)log_queue.q[log_queue.end] + len;
+		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
 
-			va_start(args, fmt);
+		len = strlen(log_queue.q[log_queue.end]);
+		msg = (char *)log_queue.q[log_queue.end] + len;
+
+		va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
-			_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #else
-			vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
 #endif
-			va_end(args);
+		va_end(args);
 
-			log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
+		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
 
-			if(e)
-				sphore_signal(&log_queue.notempty);
-		}
+		if(empty)
+			sphore_signal(&log_queue.notempty);
 
-		sphore_signal(&log_queue.mutex);
+		if(!queue_full(&log_queue))
+			sphore_signal(&log_queue.notfull);
+
+		lock_unlock(log_queue.mutex);
 	}
 	else
 	{
@@ -278,13 +271,13 @@ static void logger_file(const char *line)
 void dbg_logger(DBG_LOGGER logger)
 {
 	if(dbg_msg_threaded)
-		sphore_wait(&log_queue.mutex);
+		lock_wait(log_queue.mutex);
 
 	loggers[num_loggers] = logger;
 	num_loggers++;
 
 	if(dbg_msg_threaded)
-		sphore_signal(&log_queue.mutex);
+		lock_unlock(log_queue.mutex);
 }
 
 void dbg_logger_stdout() { dbg_logger(logger_stdout); }
