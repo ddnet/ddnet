@@ -6,7 +6,7 @@
 class StripPathAndExtension : public ::testing::Test
 {
 protected:
-	void testEq(const char *pInput, const char *pOutput)
+	void Test(const char *pInput, const char *pOutput)
 	{
 		char aBuf[32];
 		IStorage::StripPathAndExtension(pInput, aBuf, sizeof(aBuf));
@@ -14,22 +14,27 @@ protected:
 	}
 };
 
-TEST_F(StripPathAndExtension, WorksOnBareFilename) {
-	testEq("abc", "abc");
+TEST_F(StripPathAndExtension, WorksOnBareFilename)
+{
+	Test("abc", "abc");
 }
 
-TEST_F(StripPathAndExtension, NormalPath) {
-	testEq("/usr/share/teeworlds/data/mapres/grass_main.png", "grass_main");
+TEST_F(StripPathAndExtension, NormalPath)
+{
+	Test("/usr/share/teeworlds/data/mapres/grass_main.png", "grass_main");
 }
 
-TEST_F(StripPathAndExtension, NormalFile) {
-	testEq("winter_main.png", "winter_main");
+TEST_F(StripPathAndExtension, NormalFile)
+{
+	Test("winter_main.png", "winter_main");
 }
 
-TEST_F(StripPathAndExtension, DotInFolder) {
-	testEq("C:\\a.b\\c", "c");
+TEST_F(StripPathAndExtension, DotInFolder)
+{
+	Test("C:\\a.b\\c", "c");
 }
 
-TEST_F(StripPathAndExtension, DoubleDot) {
-	testEq("file.name.png", "file.name");
+TEST_F(StripPathAndExtension, DoubleDot)
+{
+	Test("file.name.png", "file.name");
 }
