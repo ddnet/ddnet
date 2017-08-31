@@ -144,9 +144,6 @@ void dbg_msg_thread(void *v)
 		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
 		log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
 
-		if(!queue_empty(&log_queue))
-			sphore_signal(&log_queue.notempty);
-
 		sphore_signal(&log_queue.notfull);
 
 		num = num_loggers;
@@ -169,8 +166,6 @@ void dbg_enable_threaded()
 	sphore_init(&q->notempty);
 	sphore_init(&q->notfull);
 
-	sphore_signal(&q->notfull);
-
 	dbg_msg_threaded = 1;
 
 	Thread = thread_init(dbg_msg_thread, 0);
@@ -189,12 +184,9 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 	if(dbg_msg_threaded)
 	{
-		int empty;
-
-		sphore_wait(&log_queue.notfull);
+		while(queue_full(&log_queue))
+			sphore_wait(&log_queue.notfull);
 		lock_wait(log_queue.mutex);
-
-		empty = queue_empty(&log_queue);
 
 		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
 
@@ -211,11 +203,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
 
-		if(empty)
-			sphore_signal(&log_queue.notempty);
-
-		if(!queue_full(&log_queue))
-			sphore_signal(&log_queue.notfull);
+		sphore_signal(&log_queue.notempty);
 
 		lock_unlock(log_queue.mutex);
 	}
