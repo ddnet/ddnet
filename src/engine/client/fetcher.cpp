@@ -15,7 +15,7 @@ CFetcher::CFetcher()
 	m_pStorage = NULL;
 	m_pHandle = NULL;
 	m_Lock = lock_create();
-	semaphore_init(&m_Queued);
+	sphore_init(&m_Queued);
 	m_pFirst = NULL;
 	m_pLast = NULL;
 	m_Running = true;
@@ -34,11 +34,11 @@ CFetcher::~CFetcher()
 	if(m_pThHandle)
 	{
 		m_Running = false;
-		semaphore_signal(&m_Queued);
+		sphore_signal(&m_Queued);
 		thread_wait(m_pThHandle);
 	}
 	lock_destroy(m_Lock);
-	semaphore_destroy(&m_Queued);
+	sphore_destroy(&m_Queued);
 
 	if(m_pHandle)
 		curl_easy_cleanup(m_pHandle);
@@ -75,7 +75,7 @@ void CFetcher::QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, 
 	}
 	pTask->m_State = CFetchTask::STATE_QUEUED;
 	lock_unlock(m_Lock);
-	semaphore_signal(&m_Queued);
+	sphore_signal(&m_Queued);
 }
 
 void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
@@ -91,7 +91,7 @@ void CFetcher::FetcherThread(void *pUser)
 	dbg_msg("fetcher", "thread started...");
 	while(pFetcher->m_Running)
 	{
-		semaphore_wait(&pFetcher->m_Queued);
+		sphore_wait(&pFetcher->m_Queued);
 		lock_wait(pFetcher->m_Lock);
 		CFetchTask *pTask = pFetcher->m_pFirst;
 		if(pTask)
