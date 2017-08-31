@@ -3779,7 +3779,7 @@ void CClient::RequestDDNetRanks()
 	Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
 	str_format(aUrl, sizeof(aUrl), "https://ddnet.tw/players/?json=%s", aEscaped);
 
-	m_pDDNetRanksTask = new CFetchTask(true, /*UseDDNetCA*/ false);
+	m_pDDNetRanksTask = new CFetchTask(true, /*UseDDNetCA*/ true);
 	Fetcher()->QueueAdd(m_pDDNetRanksTask, aUrl, "ddnet-ranks.json", IStorage::TYPE_SAVE);
 }
 
