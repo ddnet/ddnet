@@ -108,7 +108,6 @@ void dbg_break_imp()
 	*((volatile unsigned*)0) = 0x0;
 }
 
-#if !defined(CONF_PLATFORM_MACOSX)
 #define QUEUE_SIZE 64
 
 typedef struct
@@ -185,7 +184,6 @@ void dbg_enable_threaded()
 	Thread = thread_init(dbg_msg_thread, 0);
 	thread_detach(Thread);
 }
-#endif
 
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
@@ -197,7 +195,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	char timestr[80];
 	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
 
-#if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
 	{
 		semaphore_wait(&log_queue.mutex);
@@ -232,7 +229,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 		semaphore_signal(&log_queue.mutex);
 	}
 	else
-#endif
 	{
 		char str[1024*4];
 		int i;
@@ -283,16 +279,14 @@ static void logger_file(const char *line)
 
 void dbg_logger(DBG_LOGGER logger)
 {
-#if !defined(CONF_PLATFORM_MACOSX)
 	if(dbg_msg_threaded)
 		semaphore_wait(&log_queue.mutex);
-#endif
+
 	loggers[num_loggers] = logger;
 	num_loggers++;
-#if !defined(CONF_PLATFORM_MACOSX)
+
 	if(dbg_msg_threaded)
 		semaphore_signal(&log_queue.mutex);
-#endif
 }
 
 void dbg_logger_stdout() { dbg_logger(logger_stdout); }
