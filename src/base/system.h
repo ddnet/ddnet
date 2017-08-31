@@ -431,7 +431,7 @@ void lock_unlock(LOCK lock);
 #elif defined(CONF_FAMILY_WINDOWS)
 	typedef void* SEMAPHORE;
 #elif defined(CONF_PLATFORM_MACOSX)
-	typedef int SEMAPHORE;
+	typedef sem_t* SEMAPHORE;
 #else
 	#error not implemented on this platform
 #endif
