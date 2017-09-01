@@ -204,13 +204,13 @@ public:
 		// 4) check for all default locations
 		{
 			const char *aDirs[] = {
-				"/usr/share/teeworlds/data",
-				"/usr/share/games/teeworlds/data",
-				"/usr/local/share/teeworlds/data",
-				"/usr/local/share/games/teeworlds/data",
-				"/usr/pkg/share/teeworlds/data",
-				"/usr/pkg/share/games/teeworlds/data",
-				"/opt/teeworlds/data"
+				"/usr/share/ddnet",
+				"/usr/share/games/ddnet",
+				"/usr/local/share/ddnet",
+				"/usr/local/share/games/ddnet",
+				"/usr/pkg/share/ddnet",
+				"/usr/pkg/share/games/ddnet",
+				"/opt/ddnet"
 			};
 			const int DirsCount = sizeof(aDirs) / sizeof(aDirs[0]);
 
@@ -218,11 +218,11 @@ public:
 			for (i = 0; i < DirsCount; i++)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s/mapres", aDirs[i]);
+				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", aDirs[i]);
 				if(fs_is_dir(aBuf))
 				{
-					str_copy(m_aBinarydir, aDirs[i], sizeof(aDirs[i])-5);
-					str_copy(m_aDatadir, aDirs[i], sizeof(m_aDatadir));
+					str_copy(m_aBinarydir, aDirs[i], sizeof(m_aDatadir));
+					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aDirs[i]);
 					return;
 				}
 			}
