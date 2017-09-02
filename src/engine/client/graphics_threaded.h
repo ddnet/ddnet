@@ -59,6 +59,7 @@ public:
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
 		CMDGROUP_PLATFORM_OPENGL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
+		CMDGROUP_PLATFORM_OPENGL3_3 = 30000,
 
 		//
 		CMD_NOP = CMDGROUP_CORE,

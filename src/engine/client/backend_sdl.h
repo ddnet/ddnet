@@ -117,6 +117,66 @@ public:
 	bool RunCommand(const CCommandBuffer::SCommand * pBaseCommand);
 };
 
+
+class CGLSLProgram;
+class CGLSLQuadProgram;
+// takes care of opengl 3.2 related rendering
+class CCommandProcessorFragment_OpenGL3_3
+{
+	struct CTexture
+	{
+		GLuint m_Tex;
+		GLuint m_Sampler;
+		int m_MemSize;
+	};
+	CTexture m_aTextures[CCommandBuffer::MAX_TEXTURES];
+	volatile int *m_pTextureMemoryUsage;
+
+	CGLSLQuadProgram* m_QuadProgram;
+	
+	GLuint QuadDrawVertexID;
+	GLuint QuadDrawBufferID;
+public:
+	enum
+	{
+		CMD_INIT = CCommandBuffer::CMDGROUP_PLATFORM_OPENGL3_3,
+		CMD_SHUTDOWN,
+	};
+
+	struct SCommand_Init : public CCommandBuffer::SCommand
+	{
+		SCommand_Init() : SCommand(CMD_INIT) {}
+		volatile int *m_pTextureMemoryUsage;
+	};
+
+	struct SCommand_Shutdown : public CCommandBuffer::SCommand
+	{
+		SCommand_Shutdown() : SCommand(CMD_SHUTDOWN) {}
+		volatile int *m_pTextureMemoryUsage;
+	};
+
+private:
+	static int TexFormatToOpenGLFormat(int TexFormat);
+	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
+	static void *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
+
+	void SetState(const CCommandBuffer::SState &State);
+
+	void Cmd_Init(const SCommand_Init *pCommand);
+	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
+	void Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand);
+	void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand);
+	void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand);
+	void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand);
+	void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand);
+	void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand);
+
+public:
+	CCommandProcessorFragment_OpenGL3_3();
+
+	bool RunCommand(const CCommandBuffer::SCommand * pBaseCommand);
+};
+
 // takes care of sdl related commands
 class CCommandProcessorFragment_SDL
 {
@@ -159,9 +219,13 @@ public:
 class CCommandProcessor_SDL_OpenGL : public CGraphicsBackend_Threaded::ICommandProcessor
 {
 	CCommandProcessorFragment_OpenGL m_OpenGL;
+	CCommandProcessorFragment_OpenGL3_3 m_OpenGL3_3;
 	CCommandProcessorFragment_SDL m_SDL;
 	CCommandProcessorFragment_General m_General;
+	
+	bool m_UseOpenGL3_3;
 public:
+	void UseOpenGL3_3(bool Use) { m_UseOpenGL3_3 = Use; }
 	virtual void RunBuffer(CCommandBuffer *pBuffer);
 };
 
@@ -173,6 +237,8 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	ICommandProcessor *m_pProcessor;
 	volatile int m_TextureMemoryUsage;
 	int m_NumScreens;
+	
+	bool m_UseOpenGL3_3;
 public:
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight);
 	virtual int Shutdown();
