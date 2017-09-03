@@ -557,9 +557,9 @@ void CHud::RenderLocalTime(float x)
 	Graphics()->QuadsEnd();
 
 	//draw the text
-	char aBuf[64];
-	str_timestamp_format(aBuf, sizeof(aBuf), "%H:%M");
-	TextRender()->Text(0, x-25.0f, 2.5f, 5.0f, aBuf, -1);
+	char aTimeStr[6];
+	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
+	TextRender()->Text(0, x-25.0f, 2.5f, 5.0f, aTimeStr, -1);
 }
 
 void CHud::OnRender()
