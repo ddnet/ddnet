@@ -3562,16 +3562,19 @@ extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
 int main(int argc, const char **argv) // ignore_convention
 {
 #endif
-#if defined(CONF_FAMILY_WINDOWS)
+	bool Silent = false;
+
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
 		{
+			Silent = true;
+#if defined(CONF_FAMILY_WINDOWS)
 			FreeConsole();
+#endif
 			break;
 		}
 	}
-#endif
 
 #if !defined(CONF_PLATFORM_MACOSX)
 	dbg_enable_threaded();
@@ -3589,7 +3592,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->RegisterInterfaces();
 
 	// create the components
-	IEngine *pEngine = CreateEngine("Teeworlds");
+	IEngine *pEngine = CreateEngine("DDNet", Silent);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();

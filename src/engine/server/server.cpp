@@ -2672,18 +2672,22 @@ static CServer *CreateServer() { return new CServer(); }
 
 int main(int argc, const char **argv) // ignore_convention
 {
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(FUZZING)
-	dbg_enable_threaded();
-#endif
-#if defined(CONF_FAMILY_WINDOWS)
+	bool Silent = false;
+
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
 		{
+			Silent = true;
+#if defined(CONF_FAMILY_WINDOWS)
 			ShowWindow(GetConsoleWindow(), SW_HIDE);
+#endif
 			break;
 		}
 	}
+
+#if !defined(CONF_PLATFORM_MACOSX) && !defined(FUZZING)
+	dbg_enable_threaded();
 #endif
 
 	if(secure_random_init() != 0)
@@ -2696,7 +2700,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IKernel *pKernel = IKernel::Create();
 
 	// create the components
-	IEngine *pEngine = CreateEngine("Teeworlds");
+	IEngine *pEngine = CreateEngine("DDNet", Silent);
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER|CFGFLAG_ECON);
