@@ -18,7 +18,6 @@
 
 #include "scoreboard.h"
 
-#include <time.h>
 #include <base/tl/string.h>
 #include <engine/serverbrowser.h>
 

@@ -10,7 +10,6 @@
 #include <game/version.h>
 #include <game/server/teams.h>
 #include "gamemodes/DDRace.h"
-#include <stdio.h>
 #include <time.h>
 
 
@@ -82,20 +81,13 @@ void CPlayer::Reset()
 	{
 		time_t rawtime;
 		struct tm* timeinfo;
-		char d[16], m[16], y[16];
-		int dd, mm;
-		time ( &rawtime );
-		timeinfo = localtime ( &rawtime );
-		strftime (d,sizeof(y),"%d",timeinfo);
-		strftime (m,sizeof(m),"%m",timeinfo);
-		strftime (y,sizeof(y),"%Y",timeinfo);
-		dd = atoi(d);
-		mm = atoi(m);
-		if ((mm == 12 && dd == 31) || (mm == 1 && dd == 1))
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		if ((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 1 && timeinfo->tm_mday == 1))
 		{ // New Year
 			m_DefEmote = EMOTE_HAPPY;
 		}
-		else if ((mm == 10 && dd == 31) || (mm == 11 && dd == 1))
+		else if ((timeinfo->tm_mon == 9 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 10 && timeinfo->tm_mday == 1))
 		{ // Halloween
 			m_DefEmote = EMOTE_ANGRY;
 			m_Halloween = true;

@@ -5,7 +5,6 @@
 
 #include <new>
 
-#include <time.h>
 #include <stdlib.h> // qsort
 #include <stdarg.h>
 #include <string.h>
