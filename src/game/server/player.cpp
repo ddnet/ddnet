@@ -592,8 +592,7 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 			// not playing, check how long
 			if(m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.5))
 			{
-				sprintf(
-					m_pAfkMsg,
+				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
 					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
 					(int)(g_Config.m_SvMaxAfkTime*0.5),
 					g_Config.m_SvMaxAfkTime
@@ -603,8 +602,7 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 			}
 			else if(m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get()-time_freq()*(int)(g_Config.m_SvMaxAfkTime*0.9))
 			{
-				sprintf(
-					m_pAfkMsg,
+				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
 					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
 					(int)(g_Config.m_SvMaxAfkTime*0.9),
 					g_Config.m_SvMaxAfkTime
