@@ -2158,7 +2158,7 @@ void CClient::LoadDDNetInfo()
 	if(pVersion && pVersion->type == json_string)
 	{
 		const char *pVersionString = json_string_get(pVersion);
-		if(str_comp(pVersionString, GAME_VERSION))
+		if(str_comp(pVersionString, GAME_RELEASE_VERSION))
 		{
 			str_copy(m_aVersionStr, pVersionString, sizeof(m_aVersionStr));
 		}

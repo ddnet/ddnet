@@ -173,7 +173,7 @@ void CUpdater::ParseUpdate()
 		{
 			const json_value *pTemp;
 			const json_value *pCurrent = json_array_get(pVersions, i);
-			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_VERSION))
+			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
 			{
 				if(json_boolean_get(json_object_get(pCurrent, "client")))
 					m_ClientUpdate = true;
