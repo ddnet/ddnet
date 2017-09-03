@@ -31,7 +31,6 @@
 #include <game/client/lineinput.h>
 #include <game/localization.h>
 #include <mastersrv/mastersrv.h>
-#include <versionsrv/versionsrv.h>
 
 #include "countryflags.h"
 #include "menus.h"
@@ -696,7 +695,10 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
+			{
+				Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+			}
 			NewPage = PAGE_DDNET;
 			m_DoubleClickIndex = -1;
 		}

@@ -2155,7 +2155,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
 
-	//Updater
+	// Updater
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	{
 		Left.HSplitTop(20.0f, &Label, &Left);
@@ -2163,7 +2163,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();
 
-		//Update Button
+		// Update Button
 		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is available:"), Client()->LatestVersion());
@@ -2188,7 +2188,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
-				Client()->CheckVersionUpdate();
+				Client()->RequestDDNetInfo();
 			}
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
