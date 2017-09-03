@@ -1169,9 +1169,6 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			Packet.m_Flags = NETSENDFLAG_CONNLESS;
 			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
 
-			RequestDDNetSrvList();
-			RequestDDNetRanks();
-
 			// request the map version list now
 			mem_zero(&Packet, sizeof(Packet));
 			Packet.m_ClientID = -1;
@@ -2823,6 +2820,9 @@ void CClient::Run()
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 #endif
+
+	RequestDDNetSrvList();
+	RequestDDNetRanks();
 
 	bool LastD = false;
 	bool LastQ = false;
