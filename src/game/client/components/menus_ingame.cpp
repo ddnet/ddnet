@@ -781,12 +781,6 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	Box.HSplitTop(24.0f, &Box, &MainView);
 	Box.VMargin(20.0f, &Box);
 
-	if(Page < PAGE_INTERNET || Page > PAGE_DDNET)
-	{
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-		NewPage = PAGE_DDNET;
-	}
-
 	Box.VSplitLeft(100.0f, &Button, &Box);
 	static int s_InternetButton=0;
 	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_BL))
@@ -816,10 +810,13 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 
 	Box.VSplitLeft(110.0f, &Button, &Box);
 	static int s_DDNetButton=0;
-	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_BR))
+	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_BR) || Page < PAGE_INTERNET || Page > PAGE_DDNET)
 	{
 		if (Page != PAGE_DDNET)
+		{
+			Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+		}
 		NewPage  = PAGE_DDNET;
 	}
 

@@ -80,7 +80,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CUpdater m_Updater;
 	class CFriends m_Friends;
 	class CFriends m_Foes;
-	class CMapChecker m_MapChecker;
 
 	char m_aServerAddressStr[256];
 
@@ -135,7 +134,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadCrc;
 	int m_MapdownloadAmount;
 	int m_MapdownloadTotalsize;
-	CFetchTask *m_pDDNetRanksTask;
+
+	CFetchTask *m_pDDNetInfoTask;
 
 	// time
 	CSmoothTime m_GameTime[2];
@@ -195,9 +195,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	void GraphicsThread();
 	vec3 GetColorV3(int v);
 
-	char m_aDDNetSrvListToken[4];
-	bool m_DDNetSrvListTokenSet;
-
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
 #endif
@@ -244,8 +241,6 @@ public:
 	virtual bool InputExists(int Tick);
 
 	const char *LatestVersion();
-	void VersionUpdate();
-	void CheckVersionUpdate();
 
 	// ------ state handling -----
 	void SetState(int s);
@@ -299,8 +294,11 @@ public:
 
 	void ResetMapDownload();
 	void FinishMapDownload();
-	void ResetDDNetRanks();
-	void FinishDDNetRanks();
+
+	void RequestDDNetInfo();
+	void ResetDDNetInfo();
+	void FinishDDNetInfo();
+	void LoadDDNetInfo();
 
 	virtual CFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
 	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
@@ -394,8 +392,6 @@ public:
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 
-	void RequestDDNetSrvList();
-	void RequestDDNetRanks();
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends* Foes() {return &m_Foes; }

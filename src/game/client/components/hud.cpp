@@ -556,15 +556,10 @@ void CHud::RenderLocalTime(float x)
 	RenderTools()->DrawRoundRectExt(x-30.0f, 0.0f, 25.0f, 12.5f, 3.75f, CUI::CORNER_B);
 	Graphics()->QuadsEnd();
 
-	time_t rawtime;
-	struct tm *timeinfo;
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
-
 	//draw the text
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
-	TextRender()->Text(0, x-25.0f, 2.5f, 5.0f, aBuf, -1);
+	char aTimeStr[6];
+	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
+	TextRender()->Text(0, x-25.0f, 2.5f, 5.0f, aTimeStr, -1);
 }
 
 void CHud::OnRender()

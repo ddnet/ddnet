@@ -5,7 +5,6 @@
 
 #include <new>
 
-#include <time.h>
 #include <stdlib.h> // qsort
 #include <stdarg.h>
 #include <string.h>
@@ -42,7 +41,6 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/filecollection.h>
-#include <engine/shared/mapchecker.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
@@ -56,7 +54,6 @@
 #include <game/version.h>
 
 #include <mastersrv/mastersrv.h>
-#include <versionsrv/versionsrv.h>
 
 #include <engine/client/serverbrowser.h>
 
@@ -303,7 +300,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	// version-checking
 	m_aVersionStr[0] = '0';
-	m_aVersionStr[1] = 0;
+	m_aVersionStr[1] = '\0';
 
 	// pinging
 	m_PingStartTime = 0;
@@ -321,7 +318,9 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_MapdownloadCrc = 0;
 	m_MapdownloadAmount = -1;
 	m_MapdownloadTotalsize = -1;
-	m_pDDNetRanksTask = NULL;
+
+	m_pDDNetInfoTask = NULL;
+	m_aNews[0] = '\0';
 
 	m_CurrentServerInfoRequestTime = -1;
 
@@ -346,7 +345,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	if (g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
 
-	m_DDNetSrvListTokenSet = false;
 	m_ReconnectTime = 0;
 
 	m_GenerateTimeoutSeed = true;
@@ -1134,131 +1132,6 @@ int CClient::PlayerScoreNameComp(const void *a, const void *b)
 
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 {
-	// version server
-	if(m_VersionInfo.m_State == CVersionInfo::STATE_READY && net_addr_comp(&pPacket->m_Address, &m_VersionInfo.m_VersionServeraddr.m_Addr) == 0)
-	{
-		// version info
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_VERSION, sizeof(VERSIONSRV_VERSION)) == 0)
-		{
-			char *pVersionData = (char*)pPacket->m_pData + sizeof(VERSIONSRV_VERSION);
-			int aCurVersion[] = {0,0,0}, aNewVersion[] = {0,0,0};
-			sscanf(pVersionData, "%d.%d.%d", aNewVersion, aNewVersion+1, aNewVersion+2);
-			sscanf(GAME_RELEASE_VERSION, "%d.%d.%d", aCurVersion, aCurVersion+1, aCurVersion+2);
-			bool VersionMatch = mem_comp(aCurVersion, aNewVersion, sizeof aCurVersion) >= 0;
-
-			char aVersion[sizeof(GAME_RELEASE_VERSION)];
-			str_copy(aVersion, pVersionData, sizeof(aVersion));
-
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "version does %s (%s)",
-				VersionMatch ? "match" : "NOT match",
-				aVersion);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/version", aBuf);
-
-			// assume version is out of date when version-data doesn't match
-			if(!VersionMatch)
-				str_copy(m_aVersionStr, aVersion, sizeof(m_aVersionStr));
-
-			// request the news
-			CNetChunk Packet;
-			mem_zero(&Packet, sizeof(Packet));
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETNEWS;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETNEWS);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
-
-			RequestDDNetSrvList();
-			RequestDDNetRanks();
-
-			// request the map version list now
-			mem_zero(&Packet, sizeof(Packet));
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETMAPLIST;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETMAPLIST);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-			m_NetClient[g_Config.m_ClDummy].Send(&Packet);
-		}
-
-		// news
-		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_NEWS) + NEWS_SIZE) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_NEWS, sizeof(VERSIONSRV_NEWS)) == 0)
-		{
-			if(mem_comp(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE))
-				g_Config.m_UiPage = CMenus::PAGE_NEWS;
-
-			mem_copy(m_aNews, (char*)pPacket->m_pData + sizeof(VERSIONSRV_NEWS), NEWS_SIZE);
-
-			IOHANDLE NewsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_WRITE, IStorage::TYPE_SAVE);
-			if(NewsFile)
-			{
-				io_write(NewsFile, m_aNews, sizeof(m_aNews));
-				io_close(NewsFile);
-			}
-		}
-
-		// ddnet server list
-		// Packet: VERSIONSRV_DDNETLIST + char[4] Token + int16 comp_length + int16 plain_length + char[comp_length]
-		if(pPacket->m_DataSize >= (int)(sizeof(VERSIONSRV_DDNETLIST) + 8) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_DDNETLIST, sizeof(VERSIONSRV_DDNETLIST)) == 0 &&
-			mem_comp((char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST), m_aDDNetSrvListToken, 4) == 0)
-		{
-			// reset random token
-			m_DDNetSrvListTokenSet = false;
-			int CompLength = *(short*)((char*)pPacket->m_pData+(sizeof(VERSIONSRV_DDNETLIST)+4));
-			int PlainLength = *(short*)((char*)pPacket->m_pData+(sizeof(VERSIONSRV_DDNETLIST)+6));
-
-			if (pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_DDNETLIST) + 8 + CompLength))
-			{
-				char aBuf[16384];
-				uLongf DstLen = sizeof(aBuf);
-				const char *pComp = (char*)pPacket->m_pData+sizeof(VERSIONSRV_DDNETLIST)+8;
-
-				// do decompression of serverlist
-				if(uncompress((Bytef*)aBuf, &DstLen, (Bytef*)pComp, CompLength) == Z_OK && (int)DstLen == PlainLength)
-				{
-					aBuf[DstLen] = '\0';
-					bool ListChanged = true;
-
-					IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_READ, IStorage::TYPE_SAVE);
-					if(File)
-					{
-						char aBuf2[16384];
-						io_read(File, aBuf2, sizeof(aBuf2));
-						io_close(File);
-						if (str_comp(aBuf, aBuf2) == 0)
-							ListChanged = false;
-					}
-
-					// decompression successful, write plain file
-					if(ListChanged)
-					{
-						IOHANDLE File = m_pStorage->OpenFile("ddnet-servers.json", IOFLAG_WRITE, IStorage::TYPE_SAVE);
-						if(File)
-						{
-							io_write(File, aBuf, PlainLength);
-							io_close(File);
-						}
-						if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
-							m_ServerBrowser.Refresh(IServerBrowser::TYPE_DDNET);
-					}
-				}
-			}
-		}
-
-		// map version list
-		if(pPacket->m_DataSize >= (int)sizeof(VERSIONSRV_MAPLIST) &&
-			mem_comp(pPacket->m_pData, VERSIONSRV_MAPLIST, sizeof(VERSIONSRV_MAPLIST)) == 0)
-		{
-			int Size = pPacket->m_DataSize-sizeof(VERSIONSRV_MAPLIST);
-			int Num = Size/sizeof(CMapVersion);
-			m_MapChecker.AddMaplist((CMapVersion *)((char*)pPacket->m_pData+sizeof(VERSIONSRV_MAPLIST)), Num);
-		}
-	}
-
 	//server count from master server
 	if(pPacket->m_DataSize == (int)sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{
@@ -1587,10 +1460,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 			if(m_DummyConnected)
 				DummyDisconnect(0);
-
-			// check for valid standard map
-			if(!m_MapChecker.IsMapValid(pMap, MapCrc, MapSize))
-				pError = "invalid standard map";
 
 			for(int i = 0; pMap[i]; i++) // protect the player from nasty map names
 			{
@@ -2261,21 +2130,55 @@ void CClient::FinishMapDownload()
 	}
 }
 
-void CClient::ResetDDNetRanks()
+void CClient::ResetDDNetInfo()
 {
-	if(m_pDDNetRanksTask)
+	if(m_pDDNetInfoTask)
 	{
-		m_pDDNetRanksTask->Abort();
-		delete m_pDDNetRanksTask;
-		m_pDDNetRanksTask = NULL;
+		m_pDDNetInfoTask->Abort();
+		delete m_pDDNetInfoTask;
+		m_pDDNetInfoTask = NULL;
 	}
 }
 
-void CClient::FinishDDNetRanks()
+void CClient::FinishDDNetInfo()
 {
-	ResetDDNetRanks();
-	m_pStorage->RenameFile("ddnet-ranks.json.tmp", "ddnet-ranks.json", IStorage::TYPE_SAVE);
-	m_ServerBrowser.LoadDDNetRanks();
+	ResetDDNetInfo();
+	m_pStorage->RenameFile("ddnet-info.json.tmp", "ddnet-info.json", IStorage::TYPE_SAVE);
+	LoadDDNetInfo();
+}
+
+void CClient::LoadDDNetInfo()
+{
+	const json_value *pDDNetInfo = m_ServerBrowser.LoadDDNetInfo();
+
+	if(!pDDNetInfo)
+		return;
+
+	const json_value *pVersion = json_object_get(pDDNetInfo, "version");
+	if(pVersion && pVersion->type == json_string)
+	{
+		const char *pVersionString = json_string_get(pVersion);
+		if(str_comp(pVersionString, GAME_RELEASE_VERSION))
+		{
+			str_copy(m_aVersionStr, pVersionString, sizeof(m_aVersionStr));
+		}
+		else
+		{
+			m_aVersionStr[0] = '0';
+			m_aVersionStr[1] = '\0';
+		}
+	}
+
+	const json_value *pNews = json_object_get(pDDNetInfo, "news");
+	if(pNews && pNews->type == json_string)
+	{
+		const char *pNewsString = json_string_get(pNews);
+
+		if(m_aNews[0] && str_comp(m_aNews, pNewsString))
+			g_Config.m_UiPage = CMenus::PAGE_NEWS;
+
+		str_copy(m_aNews, pNewsString, sizeof(m_aNews));
+	}
 }
 
 void CClient::PumpNetwork()
@@ -2588,19 +2491,19 @@ void CClient::Update()
 		}
 	}
 
-	if(m_pDDNetRanksTask)
+	if(m_pDDNetInfoTask)
 	{
-		if(m_pDDNetRanksTask->State() == CFetchTask::STATE_DONE)
-			FinishDDNetRanks();
-		else if(m_pDDNetRanksTask->State() == CFetchTask::STATE_ERROR)
+		if(m_pDDNetInfoTask->State() == CFetchTask::STATE_DONE)
+			FinishDDNetInfo();
+		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ERROR)
 		{
-			dbg_msg("ddnet-ranks", "download failed");
-			ResetDDNetRanks();
+			dbg_msg("ddnet-info", "download failed");
+			ResetDDNetInfo();
 		}
-		else if(m_pDDNetRanksTask->State() == CFetchTask::STATE_ABORTED)
+		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ABORTED)
 		{
-			delete m_pDDNetRanksTask;
-			m_pDDNetRanksTask = NULL;
+			delete m_pDDNetInfoTask;
+			m_pDDNetInfoTask = NULL;
 		}
 	}
 
@@ -2620,40 +2523,6 @@ void CClient::Update()
 		Connect(m_aServerAddressStr);
 		m_ReconnectTime = 0;
 	}
-}
-
-void CClient::VersionUpdate()
-{
-	if(m_VersionInfo.m_State == CVersionInfo::STATE_INIT)
-	{
-			Engine()->HostLookup(&m_VersionInfo.m_VersionServeraddr, "version.ddnet.tw", m_NetClient[0].NetType());
-			m_VersionInfo.m_State = CVersionInfo::STATE_START;
-	}
-	else if(m_VersionInfo.m_State == CVersionInfo::STATE_START)
-	{
-		if(m_VersionInfo.m_VersionServeraddr.m_Job.Status() == CJob::STATE_DONE)
-		{
-			CNetChunk Packet;
-
-			mem_zero(&Packet, sizeof(Packet));
-
-			m_VersionInfo.m_VersionServeraddr.m_Addr.port = VERSIONSRV_PORT;
-
-			Packet.m_ClientID = -1;
-			Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-			Packet.m_pData = VERSIONSRV_GETVERSION;
-			Packet.m_DataSize = sizeof(VERSIONSRV_GETVERSION);
-			Packet.m_Flags = NETSENDFLAG_CONNLESS;
-
-			m_NetClient[0].Send(&Packet);
-			m_VersionInfo.m_State = CVersionInfo::STATE_READY;
-		}
-	}
-}
-
-void CClient::CheckVersionUpdate()
-{
-	m_VersionInfo.m_State = CVersionInfo::STATE_START;
 }
 
 void CClient::RegisterInterfaces()
@@ -2698,13 +2567,6 @@ void CClient::InitInterfaces()
 
 	m_Friends.Init();
 	m_Foes.Init(true);
-
-	IOHANDLE newsFile = m_pStorage->OpenFile("ddnet-news.txt", IOFLAG_READ, IStorage::TYPE_SAVE);
-	if (newsFile)
-	{
-		io_read(newsFile, m_aNews, NEWS_SIZE);
-		io_close(newsFile);
-	}
 }
 
 void CClient::Run()
@@ -2825,6 +2687,11 @@ void CClient::Run()
 	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 #endif
 
+	// loads the existing ddnet-info.json file if it exists
+	LoadDDNetInfo();
+	// but still request the new one from server
+	RequestDDNetInfo();
+
 	bool LastD = false;
 	bool LastQ = false;
 	bool LastE = false;
@@ -2835,9 +2702,6 @@ void CClient::Run()
 	while (1)
 	{
 		set_new_tick();
-
-		//
-		VersionUpdate();
 
 		// handle pending connects
 		if(m_aCmdConnect[0])
@@ -3563,16 +3427,19 @@ extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
 int main(int argc, const char **argv) // ignore_convention
 {
 #endif
-#if defined(CONF_FAMILY_WINDOWS)
+	bool Silent = false;
+
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
 		{
+			Silent = true;
+#if defined(CONF_FAMILY_WINDOWS)
 			FreeConsole();
+#endif
 			break;
 		}
 	}
-#endif
 
 #if !defined(CONF_PLATFORM_MACOSX)
 	dbg_enable_threaded();
@@ -3590,7 +3457,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->RegisterInterfaces();
 
 	// create the components
-	IEngine *pEngine = CreateEngine("Teeworlds");
+	IEngine *pEngine = CreateEngine("DDNet", Silent);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
@@ -3752,38 +3619,16 @@ bool CClient::RaceRecordIsRecording()
 	return m_DemoRecorder[RECORDER_RACE].IsRecording();
 }
 
-void CClient::RequestDDNetSrvList()
-{
-	// request ddnet server list
-	// generate new token
-	for (int i = 0; i < 4; i++)
-		m_aDDNetSrvListToken[i] = rand()&0xff;
-	m_DDNetSrvListTokenSet = true;
-
-	char aData[sizeof(VERSIONSRV_GETDDNETLIST)+4];
-	mem_copy(aData, VERSIONSRV_GETDDNETLIST, sizeof(VERSIONSRV_GETDDNETLIST));
-	mem_copy(aData+sizeof(VERSIONSRV_GETDDNETLIST), m_aDDNetSrvListToken, 4); // add token
-
-	CNetChunk Packet;
-	mem_zero(&Packet, sizeof(Packet));
-	Packet.m_ClientID = -1;
-	Packet.m_Address = m_VersionInfo.m_VersionServeraddr.m_Addr;
-	Packet.m_pData = aData;
-	Packet.m_DataSize = sizeof(VERSIONSRV_GETDDNETLIST)+4;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS;
-	m_NetClient[g_Config.m_ClDummy].Send(&Packet);
-}
-
-void CClient::RequestDDNetRanks()
+void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
 	char aEscaped[128];
 
 	Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
-	str_format(aUrl, sizeof(aUrl), "https://ddnet.tw/players/?json=%s", aEscaped);
+	str_format(aUrl, sizeof(aUrl), "https://info.ddnet.tw/info?name=%s", aEscaped);
 
-	m_pDDNetRanksTask = new CFetchTask(true, /*UseDDNetCA*/ true);
-	Fetcher()->QueueAdd(m_pDDNetRanksTask, aUrl, "ddnet-ranks.json.tmp", IStorage::TYPE_SAVE);
+	m_pDDNetInfoTask = new CFetchTask(true, /*UseDDNetCA*/ true);
+	Fetcher()->QueueAdd(m_pDDNetInfoTask, aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE);
 }
 
 int CClient::GetPredictionTime()

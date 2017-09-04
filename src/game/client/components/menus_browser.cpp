@@ -1397,8 +1397,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			else if(g_Config.m_UiPage == PAGE_DDNET)
 			{
 				// start a new serverlist request
-				Client()->RequestDDNetSrvList();
-				Client()->RequestDDNetRanks();
+				Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 			}
 			m_DoubleClickIndex = -1;

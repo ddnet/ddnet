@@ -677,6 +677,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Show all", "say /showall", 0 },
 	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0 },
 	{ "Toggle dummy", "toggle cl_dummy 0 1", 0 },
+	{ "Toggle ghost", "toggle cl_race_show_ghost 0 1", 0 },
 	{ "Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0 },
 	{ "Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0 },
 
@@ -786,7 +787,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// movement settings
 	{
 		MovementSettings.VMargin(5.0f, &MovementSettings);
-		MovementSettings.HSplitTop(490.0f, &MovementSettings, &WeaponSettings);
+		MovementSettings.HSplitTop(515.0f, &MovementSettings, &WeaponSettings);
 		RenderTools()->DrawUIRect(&MovementSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
@@ -820,7 +821,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
-		UiDoGetButtons(0, 17, MovementSettings, MainView);
+		UiDoGetButtons(0, 18, MovementSettings, MainView);
 
 	}
 
@@ -834,7 +835,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y, 14.0f*UI()->Scale(), Localize("Weapon"), -1);
 
 		WeaponSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &WeaponSettings);
-		UiDoGetButtons(17, 24, WeaponSettings, MainView);
+		UiDoGetButtons(18, 25, WeaponSettings, MainView);
 	}
 
 	// defaults
@@ -860,7 +861,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, VotingSettings.x, VotingSettings.y, 14.0f*UI()->Scale(), Localize("Voting"), -1);
 
 		VotingSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &VotingSettings);
-		UiDoGetButtons(24, 26, VotingSettings, MainView);
+		UiDoGetButtons(25, 27, VotingSettings, MainView);
 	}
 
 	// chat settings
@@ -873,7 +874,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y, 14.0f*UI()->Scale(), Localize("Chat"), -1);
 
 		ChatSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &ChatSettings);
-		UiDoGetButtons(26, 30, ChatSettings, MainView);
+		UiDoGetButtons(27, 31, ChatSettings, MainView);
 	}
 
 	// misc settings
@@ -886,7 +887,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
 		MiscSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MiscSettings);
-		UiDoGetButtons(30, 42, MiscSettings, MainView);
+		UiDoGetButtons(31, 43, MiscSettings, MainView);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
@@ -2155,7 +2156,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		g_Config.m_ClHttpMapDownload ^= 1;
 	}
 
-	//Updater
+	// Updater
 #if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
 	{
 		Left.HSplitTop(20.0f, &Label, &Left);
@@ -2163,7 +2164,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();
 
-		//Update Button
+		// Update Button
 		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is available:"), Client()->LatestVersion());
@@ -2188,7 +2189,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			static int s_ButtonUpdate = 0;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))
 			{
-				Client()->CheckVersionUpdate();
+				Client()->RequestDDNetInfo();
 			}
 		}
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
