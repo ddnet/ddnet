@@ -860,7 +860,7 @@ foreach(ABS_T ${TOOLS})
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(EXTRA_TOOL_SRC)
     set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
-    if(TOOL MATCHES "^(tileset_|dilate|map_extract|map_replace_image$)")
+    if(TOOL MATCHES "^(tileset_.*|dilate|map_extract|map_replace_image)$")
       list(APPEND EXTRA_TOOL_SRC ${DEP_PNG})
     endif()
     if(TOOL MATCHES "^config_")
@@ -1035,23 +1035,97 @@ foreach(str ${CPACK_SOURCE_FILES_INVERTED})
   list(APPEND CPACK_SOURCE_IGNORE_FILES "${PROJECT_SOURCE_DIR_ESCAPED}/${str}")
 endforeach()
 
-# Unset these variables, they might do something in the future of CPack.
-unset(CPACK_SOURCE_FILES)
-unset(CPACK_SOURCE_FILES_INVERTED)
-
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 install(TARGETS ${TARGET_CLIENT} ${TARGET_SERVER} DESTINATION bin)
 install(DIRECTORY data DESTINATION share/DDNet)
 
-set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
-install(TARGETS ${TARGET_CLIENT} ${TARGET_SERVER} ${EXTRA_ARGS})
-install(TARGETS config_retrieve config_store dilate map_diff map_extract ${EXTRA_ARGS} OPTIONAL)
-install(DIRECTORY data ${EXTRA_ARGS})
-install(FILES license.txt storage.cfg autoexec_server.cfg ${EXTRA_ARGS})
-install(FILES ${COPY_FILES} ${EXTRA_ARGS})
+set(CPACK_TARGETS
+  ${TARGET_CLIENT}
+  ${TARGET_SERVER}
+  config_retrieve
+  config_store
+  dilate
+  map_diff
+  map_extract
+)
+set(CPACK_DIRS data)
+set(CPACK_FILES
+  license.txt
+  storage.cfg
+  autoexec_server.cfg
+  ${COPY_FILES}
+)
 if(TARGET_OS STREQUAL "windows")
-  install(FILES other/config_directory.bat ${EXTRA_ARGS})
+  list(APPEND CPACK_FILES other/config_directory.bat)
 endif()
+
+function(array_add_prefix VAR PREFIX) # ...
+  set(RESULT)
+  foreach(element ${ARGN})
+    list(APPEND RESULT "${PREFIX}${element}")
+  endforeach()
+  set(${VAR} ${RESULT} PARENT_SCOPE)
+endfunction()
+
+if(CMAKE_VERSION VERSION_GREATER 3.6 OR CMAKE_VERSION VERSION_EQUAL 3.6)
+  set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable)
+  install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
+  install(DIRECTORY ${CPACK_DIRS} ${EXTRA_ARGS})
+  install(FILES ${CPACK_FILES} ${EXTRA_ARGS})
+else()
+  message(WARNING "Cannot create CPack targets, CMake version too old. Use CMake 3.6 or newer.")
+endif()
+
+array_add_prefix(PACKAGE_FILES_SOURCE ${PROJECT_SOURCE_DIR}/ ${CPACK_FILES})
+set(COPY_DIRS_COMMAND)
+foreach(dir ${CPACK_DIRS})
+  list(APPEND COPY_DIRS_COMMAND COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${CPACK_PACKAGE_FILE_NAME}/${dir})
+endforeach()
+set(PACKAGE_TARGETS_EXPRESSIONS)
+foreach(target ${CPACK_TARGETS})
+  list(APPEND PACKAGE_TARGETS_EXPRESSIONS $<TARGET_FILE:${target}>)
+endforeach()
+
+foreach(ext zip tar.gz tar.xz)
+  set(TAR_MODE c)
+  set(TAR_FORMAT paxr)
+  string(REPLACE . _ EXT_SLUG ${ext})
+  if(ext STREQUAL zip)
+    set(TAR_FORMAT zip)
+  elseif(ext STREQUAL tar.gz)
+    set(TAR_MODE cz)
+  elseif(ext STREQUAL tar.xz)
+    set(TAR_MODE cJ)
+  endif()
+  add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.${ext}
+    COMMAND cmake -E make_directory ${CPACK_PACKAGE_FILE_NAME}
+    COMMAND cmake -E copy ${PACKAGE_FILES_SOURCE} ${CPACK_PACKAGE_FILE_NAME}/
+    ${COPY_DIRS_COMMAND}
+    COMMAND cmake -E copy ${PACKAGE_TARGETS_EXPRESSIONS} ${CPACK_PACKAGE_FILE_NAME}/
+    COMMAND cmake -E tar ${TAR_MODE} ${CPACK_PACKAGE_FILE_NAME}.${ext} --format=${TAR_FORMAT} -- ${CPACK_PACKAGE_FILE_NAME}/
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
+endforeach()
+
+set(PACKAGE_DEFAULT tar_xz)
+if(TARGET_OS STREQUAL "windows")
+  set(PACKAGE_DEFAULT zip)
+endif()
+add_custom_target(package_default DEPENDS package_${PACKAGE_DEFAULT})
+
+add_custom_target(package_all DEPENDS
+  package_tar_gz
+  package_tar_xz
+  package_zip
+)
+
+# Unset these variables, they might do something in the future of CPack.
+unset(CPACK_SOURCE_FILES)
+unset(CPACK_SOURCE_FILES_INVERTED)
+unset(CPACK_TARGETS)
+unset(CPACK_DIRS)
+unset(CPACK_FILES)
 
 include(CPack)
 
