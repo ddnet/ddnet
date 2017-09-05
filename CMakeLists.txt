@@ -1059,14 +1059,6 @@ if(TARGET_OS STREQUAL "windows")
   list(APPEND CPACK_FILES other/config_directory.bat)
 endif()
 
-function(array_add_prefix VAR PREFIX) # ...
-  set(RESULT)
-  foreach(element ${ARGN})
-    list(APPEND RESULT "${PREFIX}${element}")
-  endforeach()
-  set(${VAR} ${RESULT} PARENT_SCOPE)
-endfunction()
-
 if(CMAKE_VERSION VERSION_GREATER 3.6 OR CMAKE_VERSION VERSION_EQUAL 3.6)
   set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable)
   install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
@@ -1076,22 +1068,25 @@ else()
   message(WARNING "Cannot create CPack targets, CMake version too old. Use CMake 3.6 or newer.")
 endif()
 
-array_add_prefix(PACKAGE_FILES_SOURCE ${PROJECT_SOURCE_DIR}/ ${CPACK_FILES})
-set(COPY_DIRS_COMMAND)
-foreach(dir ${CPACK_DIRS})
-  list(APPEND COPY_DIRS_COMMAND COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${CPACK_PACKAGE_FILE_NAME}/${dir})
+set(COPY_FILE_COMMANDS)
+set(COPY_DIR_COMMANDS)
+set(COPY_TARGET_COMMANDS)
+foreach(file ${CPACK_FILES})
+  list(APPEND COPY_FILE_COMMANDS COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/${file} ${CPACK_PACKAGE_FILE_NAME}/)
 endforeach()
-set(PACKAGE_TARGETS_EXPRESSIONS)
+foreach(dir ${CPACK_DIRS})
+  list(APPEND COPY_DIR_COMMAND COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${CPACK_PACKAGE_FILE_NAME}/${dir})
+endforeach()
 foreach(target ${CPACK_TARGETS})
-  list(APPEND PACKAGE_TARGETS_EXPRESSIONS $<TARGET_FILE:${target}>)
+  list(APPEND COPY_TARGET_COMMANDS COMMAND cmake -E copy $<TARGET_FILE:${target}> ${CPACK_PACKAGE_FILE_NAME}/)
 endforeach()
 
 foreach(ext zip tar.gz tar.xz)
   set(TAR_MODE c)
-  set(TAR_FORMAT paxr)
+  set(TAR_EXTRA_ARGS)
   string(REPLACE . _ EXT_SLUG ${ext})
   if(ext STREQUAL zip)
-    set(TAR_FORMAT zip)
+    set(TAR_EXTRA_ARGS --format=zip)
   elseif(ext STREQUAL tar.gz)
     set(TAR_MODE cz)
   elseif(ext STREQUAL tar.xz)
@@ -1099,10 +1094,10 @@ foreach(ext zip tar.gz tar.xz)
   endif()
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.${ext}
     COMMAND cmake -E make_directory ${CPACK_PACKAGE_FILE_NAME}
-    COMMAND cmake -E copy ${PACKAGE_FILES_SOURCE} ${CPACK_PACKAGE_FILE_NAME}/
-    ${COPY_DIRS_COMMAND}
-    COMMAND cmake -E copy ${PACKAGE_TARGETS_EXPRESSIONS} ${CPACK_PACKAGE_FILE_NAME}/
-    COMMAND cmake -E tar ${TAR_MODE} ${CPACK_PACKAGE_FILE_NAME}.${ext} --format=${TAR_FORMAT} -- ${CPACK_PACKAGE_FILE_NAME}/
+    ${COPY_FILE_COMMANDS}
+    ${COPY_DIR_COMMANDS}
+    ${COPY_TARGET_COMMANDS}
+    COMMAND cmake -E tar ${TAR_MODE} ${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   )
   add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
