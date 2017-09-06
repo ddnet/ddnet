@@ -1,5 +1,27 @@
 cmake_minimum_required(VERSION 2.8)
-project(DDNet)
+
+file(STRINGS src/game/version.h VERSION_LINE
+  LIMIT_COUNT 1
+  REGEX GAME_RELEASE_VERSION
+)
+
+if(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\\.([0-9]+)\"")
+  set(VERSION_MAJOR ${CMAKE_MATCH_1})
+  set(VERSION_MINOR ${CMAKE_MATCH_2})
+  set(VERSION_PATCH ${CMAKE_MATCH_3})
+else()
+  message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
+endif()
+
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 NEW)
+  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+else()
+  project(DDNet)
+  set(PROJECT_VERSION_MAJOR ${VERSION_MAJOR})
+  set(PROJECT_VERSION_MINOR ${VERSION_MINOR})
+  set(PROJECT_VERSION_PATCH ${VERSION_PATCH})
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -304,10 +326,13 @@ endif()
 ########################################################################
 
 file(COPY data DESTINATION .)
-file(COPY ${CURL_COPY_FILES} DESTINATION .)
-file(COPY ${FREETYPE_COPY_FILES} DESTINATION .)
-file(COPY ${OPUSFILE_COPY_FILES} DESTINATION .)
-file(COPY ${SDL2_COPY_FILES} DESTINATION .)
+set(COPY_FILES
+  ${CURL_COPY_FILES}
+  ${FREETYPE_COPY_FILES}
+  ${OPUSFILE_COPY_FILES}
+  ${SDL2_COPY_FILES}
+)
+file(COPY ${COPY_FILES} DESTINATION .)
 
 ########################################################################
 # CODE GENERATION
@@ -834,13 +859,17 @@ foreach(ABS_T ${TOOLS})
   if(T MATCHES "\\.cpp$")
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
     set(EXTRA_TOOL_SRC)
-    if(TOOL MATCHES "^(tileset_|dilate|map_extract|map_replace_image$)")
+    set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
+    if(TOOL MATCHES "^(tileset_.*|dilate|map_extract|map_replace_image)$")
       list(APPEND EXTRA_TOOL_SRC ${DEP_PNG})
     endif()
     if(TOOL MATCHES "^config_")
       list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
     endif()
-    add_executable(${TOOL} EXCLUDE_FROM_ALL
+    if(TOOL MATCHES "^(config_retrieve|config_store|dilate|map_diff|map_extract)$")
+      set(EXCLUDE_FROM_ALL)
+    endif()
+    add_executable(${TOOL} ${EXCLUDE_FROM_ALL}
       ${DEPS}
       src/tools/${TOOL}.cpp
       ${EXTRA_TOOL_SRC}
@@ -886,6 +915,214 @@ if(GTEST_FOUND)
     USES_TERMINAL
   )
 endif()
+
+########################################################################
+# INSTALLATION
+########################################################################
+
+function(escape_regex VAR STRING)
+  string(REGEX REPLACE "([][^$.+*?|()\\\\])" "\\\\\\1" ESCAPED "${STRING}")
+  set(${VAR} ${ESCAPED} PARENT_SCOPE)
+endfunction()
+
+function(max_length VAR)
+  set(MAX_LENGTH 0)
+  foreach(str ${ARGN})
+    string(LENGTH ${str} LENGTH)
+    if(LENGTH GREATER MAX_LENGTH)
+      set(MAX_LENGTH ${LENGTH})
+    endif()
+  endforeach()
+  set(${VAR} ${MAX_LENGTH} PARENT_SCOPE)
+endfunction()
+
+# Tries to generate a list of regex that matches everything except the given
+# parameters.
+function(regex_inverted VAR)
+  max_length(MAX_LENGTH ${ARGN})
+  math(EXPR UPPER_BOUND "${MAX_LENGTH}-1")
+
+  set(REMAINING ${ARGN})
+  set(RESULT)
+
+  foreach(i RANGE ${UPPER_BOUND})
+    set(TEMP ${REMAINING})
+    set(REMAINING)
+    foreach(str ${TEMP})
+      string(LENGTH ${str} LENGTH)
+      if(i LESS LENGTH)
+        list(APPEND REMAINING ${str})
+      endif()
+    endforeach()
+
+    set(ADDITIONAL)
+    foreach(outer ${REMAINING})
+      string(SUBSTRING ${outer} 0 ${i} OUTER_PREFIX)
+      set(CHARS "")
+      foreach(inner ${REMAINING})
+        string(SUBSTRING ${inner} 0 ${i} INNER_PREFIX)
+        if(OUTER_PREFIX STREQUAL INNER_PREFIX)
+          string(SUBSTRING ${inner} ${i} 1 INNER_NEXT)
+          set(CHARS "${CHARS}${INNER_NEXT}")
+        endif()
+      endforeach()
+      escape_regex(OUTER_PREFIX_ESCAPED "${OUTER_PREFIX}")
+
+      list(APPEND ADDITIONAL "${OUTER_PREFIX_ESCAPED}([^${CHARS}]|$)")
+    endforeach()
+    list(REMOVE_DUPLICATES ADDITIONAL)
+    list(APPEND RESULT ${ADDITIONAL})
+  endforeach()
+  set(${VAR} ${RESULT} PARENT_SCOPE)
+endfunction()
+
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+set(CPACK_VERBATIM_VARIABLES ON)
+set(CPACK_GENERATOR TGZ TXZ)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_ALL portable)
+set(CPACK_SOURCE_GENERATOR ZIP TGZ TBZ2 TXZ)
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
+set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
+
+if(TARGET_OS AND TARGET_BITS)
+  if(TARGET_OS STREQUAL "windows")
+    set(CPACK_SYSTEM_NAME "win${TARGET_BITS}")
+    set(CPACK_GENERATOR ZIP)
+  elseif(TARGET_OS STREQUAL "linux")
+    # Assuming Intel here.
+    if(TARGET_BITS EQUAL 32)
+      set(CPACK_SYSTEM_NAME "linux_x86")
+    elseif(TARGET_BITS EQUAL 64)
+      set(CPACK_SYSTEM_NAME "linux_x86_64")
+    endif()
+  elseif(TARGET_OS STREQUAL "mac")
+    set(CPACK_SYSTEM_NAME "osx")
+  endif()
+endif()
+
+set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
+set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-src)
+set(CPACK_SOURCE_FILES
+  CMakeLists.txt
+  README.md
+  autoexec_server.cfg
+  bam.lua
+  cmake/
+  configure.lua
+  data/
+  datasrc/
+  ddnet-libs/
+  license.txt
+  other/
+  scripts/
+  src/
+  storage.cfg
+)
+set(CPACK_SOURCE_IGNORE_FILES
+  "\\.pyc$"
+  "/\\.git"
+  "/__pycache__/"
+)
+
+regex_inverted(CPACK_SOURCE_FILES_INVERTED ${CPACK_SOURCE_FILES})
+escape_regex(PROJECT_SOURCE_DIR_ESCAPED ${PROJECT_SOURCE_DIR})
+
+foreach(str ${CPACK_SOURCE_FILES_INVERTED})
+  list(APPEND CPACK_SOURCE_IGNORE_FILES "${PROJECT_SOURCE_DIR_ESCAPED}/${str}")
+endforeach()
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
+install(TARGETS ${TARGET_CLIENT} ${TARGET_SERVER} DESTINATION bin)
+install(DIRECTORY data DESTINATION share/DDNet)
+
+set(CPACK_TARGETS
+  ${TARGET_CLIENT}
+  ${TARGET_SERVER}
+  config_retrieve
+  config_store
+  dilate
+  map_diff
+  map_extract
+)
+set(CPACK_DIRS data)
+set(CPACK_FILES
+  license.txt
+  storage.cfg
+  autoexec_server.cfg
+  ${COPY_FILES}
+)
+if(TARGET_OS STREQUAL "windows")
+  list(APPEND CPACK_FILES other/config_directory.bat)
+endif()
+
+if(CMAKE_VERSION VERSION_GREATER 3.6 OR CMAKE_VERSION VERSION_EQUAL 3.6)
+  set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable)
+  install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
+  install(DIRECTORY ${CPACK_DIRS} ${EXTRA_ARGS})
+  install(FILES ${CPACK_FILES} ${EXTRA_ARGS})
+else()
+  message(WARNING "Cannot create CPack targets, CMake version too old. Use CMake 3.6 or newer.")
+endif()
+
+set(COPY_FILE_COMMANDS)
+set(COPY_DIR_COMMANDS)
+set(COPY_TARGET_COMMANDS)
+foreach(file ${CPACK_FILES})
+  list(APPEND COPY_FILE_COMMANDS COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/${file} ${CPACK_PACKAGE_FILE_NAME}/)
+endforeach()
+foreach(dir ${CPACK_DIRS})
+  list(APPEND COPY_DIR_COMMAND COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${CPACK_PACKAGE_FILE_NAME}/${dir})
+endforeach()
+foreach(target ${CPACK_TARGETS})
+  list(APPEND COPY_TARGET_COMMANDS COMMAND cmake -E copy $<TARGET_FILE:${target}> ${CPACK_PACKAGE_FILE_NAME}/)
+endforeach()
+
+foreach(ext zip tar.gz tar.xz)
+  set(TAR_MODE c)
+  set(TAR_EXTRA_ARGS)
+  string(REPLACE . _ EXT_SLUG ${ext})
+  if(ext STREQUAL zip)
+    set(TAR_EXTRA_ARGS --format=zip)
+  elseif(ext STREQUAL tar.gz)
+    set(TAR_MODE cz)
+  elseif(ext STREQUAL tar.xz)
+    set(TAR_MODE cJ)
+  endif()
+  add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.${ext}
+    COMMAND cmake -E make_directory ${CPACK_PACKAGE_FILE_NAME}
+    ${COPY_FILE_COMMANDS}
+    ${COPY_DIR_COMMANDS}
+    ${COPY_TARGET_COMMANDS}
+    COMMAND cmake -E tar ${TAR_MODE} ${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
+endforeach()
+
+set(PACKAGE_DEFAULT tar_xz)
+if(TARGET_OS STREQUAL "windows")
+  set(PACKAGE_DEFAULT zip)
+endif()
+add_custom_target(package_default DEPENDS package_${PACKAGE_DEFAULT})
+
+add_custom_target(package_all DEPENDS
+  package_tar_gz
+  package_tar_xz
+  package_zip
+)
+
+# Unset these variables, they might do something in the future of CPack.
+unset(CPACK_SOURCE_FILES)
+unset(CPACK_SOURCE_FILES_INVERTED)
+unset(CPACK_TARGETS)
+unset(CPACK_DIRS)
+unset(CPACK_FILES)
+
+include(CPack)
 
 ########################################################################
 # COMPILER-SPECIFICS
