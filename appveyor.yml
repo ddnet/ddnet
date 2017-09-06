@@ -7,3 +7,7 @@ before_build:
     cd build
 
     cmake -Werror=dev ..
+environment:
+  CFLAGS: /WX
+  CXXFLAGS: /WX
+  LDFLAGS: /WX
