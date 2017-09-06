@@ -2273,10 +2273,11 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 			}
 			PredictErr[dir] = distance(OtherChar.m_Vel, OtherCharCur.m_Vel);
 		}
-		const float Low = 0.0001, High = 0.07;
-		if(PredictErr[1] < Low && PredictErr[0] > High)
+		static const float LOW = 0.0001f;
+		static const float HIGH = 0.07f;
+		if(PredictErr[1] < LOW && PredictErr[0] > HIGH)
 			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], 1);
-		else if(PredictErr[0] < Low && PredictErr[1] > High)
+		else if(PredictErr[0] < LOW && PredictErr[1] > HIGH)
 			DirAccumulated[g_Config.m_ClDummy][HookedPlayer] = SaturatedAdd(-1, 2, DirAccumulated[g_Config.m_ClDummy][HookedPlayer], -1);
 		IsWeaker[g_Config.m_ClDummy][HookedPlayer] = (DirAccumulated[g_Config.m_ClDummy][HookedPlayer] > 0);
 	}

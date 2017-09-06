@@ -480,7 +480,7 @@ void CClient::SendInput()
 	if(m_PredTick[g_Config.m_ClDummy] <= 0)
 		return;
 
-	if(m_LastDummy != g_Config.m_ClDummy)
+	if(m_LastDummy != (bool)g_Config.m_ClDummy)
 	{
 		m_LastDummy = g_Config.m_ClDummy;
 		GameClient()->OnDummySwap();
