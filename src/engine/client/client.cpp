@@ -2690,7 +2690,8 @@ void CClient::Run()
 	// loads the existing ddnet-info.json file if it exists
 	LoadDDNetInfo();
 	// but still request the new one from server
-	RequestDDNetInfo();
+	if(g_Config.m_ClShowWelcome)
+		RequestDDNetInfo();
 
 	bool LastD = false;
 	bool LastQ = false;
@@ -3622,10 +3623,15 @@ bool CClient::RaceRecordIsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	char aEscaped[128];
+	str_copy(aUrl, "https://info.ddnet.tw/info", sizeof(aUrl));
 
-	Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
-	str_format(aUrl, sizeof(aUrl), "https://info.ddnet.tw/info?name=%s", aEscaped);
+	if(g_Config.m_BrIndicateFinished)
+	{
+		char aEscaped[128];
+		Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
+		str_append(aUrl, "?name=", sizeof(aUrl));
+		str_append(aUrl, aEscaped, sizeof(aUrl));
+	}
 
 	m_pDDNetInfoTask = new CFetchTask(true, /*UseDDNetCA*/ true);
 	Fetcher()->QueueAdd(m_pDDNetInfoTask, aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE);

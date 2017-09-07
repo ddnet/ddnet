@@ -925,10 +925,7 @@ void CMenus::OnInit()
 	// */
 
 	if(g_Config.m_ClShowWelcome)
-	{
 		m_Popup = POPUP_LANGUAGE;
-		str_copy(g_Config.m_BrFilterString, "Novice [DDraceNetwork]", sizeof(g_Config.m_BrFilterString));
-	}
 	g_Config.m_ClShowWelcome = 0;
 
 	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
@@ -1159,7 +1156,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
-			pTitle = Localize("Welcome to Teeworlds");
+			pTitle = Localize("Welcome to DDNet");
 			pExtraText = Localize("As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.");
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
@@ -1609,9 +1606,22 @@ int CMenus::Render()
 
 			static int s_EnterButton = 0;
 			if(DoButton_Menu(&s_EnterButton, Localize("Enter"), 0, &Part) || m_EnterPressed)
+			{
+				Client()->RequestDDNetInfo();
 				m_Popup = POPUP_NONE;
+			}
 
-			Box.HSplitBottom(40.f, &Box, &Part);
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+
+			Part.VSplitLeft(60.0f, 0, &Part);
+			if (DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)"), g_Config.m_BrIndicateFinished, &Part))
+				g_Config.m_BrIndicateFinished ^= 1;
+
 #if defined(__ANDROID__)
 			Box.HSplitBottom(60.f, &Box, &Part);
 #else
