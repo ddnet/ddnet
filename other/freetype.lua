@@ -35,6 +35,8 @@ FreeType = {
 					settings.link.libpath:Add("ddnet-libs/freetype/windows/lib64")
 				end
 				settings.link.libs:Add("freetype")
+			else
+				settings.link.libs:Add("freetype")
 			end
 		end
 
