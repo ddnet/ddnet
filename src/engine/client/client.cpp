@@ -2691,6 +2691,8 @@ void CClient::Run()
 	LoadDDNetInfo();
 	// but still request the new one from server
 	if(g_Config.m_ClShowWelcome)
+		g_Config.m_ClShowWelcome = 0;
+	else
 		RequestDDNetInfo();
 
 	bool LastD = false;
