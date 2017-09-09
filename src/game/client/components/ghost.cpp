@@ -70,7 +70,7 @@ void CGhost::OnRender()
 		{
 			vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
 			vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
-			if(!m_Rendering && CRaceHelper::IsStart(m_pClient->Collision(), PrevPos, Pos))
+			if(!m_Rendering && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
 				StartRender();
 		}
 
@@ -81,7 +81,7 @@ void CGhost::OnRender()
 			vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
 
 			// detecting death, needed because race allows immediate respawning
-			if(!m_Recording && CRaceHelper::IsStart(m_pClient->Collision(), PrevPos, Pos) && m_LastDeathTick < PrevTick)
+			if(!m_Recording && CRaceHelper::IsStart(m_pClient, PrevPos, Pos) && m_LastDeathTick < PrevTick)
 				StartRecord();
 
 			if(m_Recording)

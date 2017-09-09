@@ -33,6 +33,11 @@ bool IsRace(const CServerInfo *pInfo)
 	    || str_find_nocase(pInfo->m_aGameType, "fastcap");
 }
 
+bool IsFastCap(const CServerInfo *pInfo)
+{
+	return str_find_nocase(pInfo->m_aGameType, "fastcap");
+}
+
 bool IsDDRace(const CServerInfo *pInfo)
 {
 	return str_find_nocase(pInfo->m_aGameType, "ddrace")

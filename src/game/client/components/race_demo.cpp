@@ -44,7 +44,7 @@ void CRaceDemo::OnRender()
 		return;
 
 	// start the demo
-	if(m_DemoStartTick < Client()->GameTick() && CRaceHelper::IsStart(m_pClient->Collision(), m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos))
+	if(m_DemoStartTick < Client()->GameTick() && CRaceHelper::IsStart(m_pClient, m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos))
 	{
 		OnReset();
 		char aBuf[512];

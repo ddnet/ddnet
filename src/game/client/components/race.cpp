@@ -2,10 +2,13 @@
 #include <list>
 
 #include <base/math.h>
-#include <game/collision.h>
+#include <engine/serverbrowser.h>
+#include <game/client/gameclient.h>
 #include <game/mapitems.h>
 
 #include "race.h"
+
+int CRaceHelper::ms_aFlagIndex[2] = { -1, -1 };
 
 int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 {
@@ -65,23 +68,36 @@ int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int Nam
 	return TimeFromStr(pFinished + str_length(s_pFinishedStr));
 }
 
-bool CRaceHelper::IsStart(CCollision *pCollision, vec2 Prev, vec2 Pos)
+bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 {
-	std::list < int > Indices = pCollision->GetMapIndices(Prev, Pos);
-	if(!Indices.empty())
-		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-		{
-			if(pCollision->GetTileIndex(*i) == TILE_BEGIN)
-				return true;
-			if(pCollision->GetFTileIndex(*i) == TILE_BEGIN)
-				return true;
-		}
+	CServerInfo ServerInfo;
+	pClient->Client()->GetServerInfo(&ServerInfo);
+
+
+	CCollision *pCollision = pClient->Collision();
+	if(IsFastCap(&ServerInfo))
+	{
+		int EnemyTeam = pClient->m_aClients[pClient->m_Snap.m_LocalClientID].m_Team ^ 1;
+		return ms_aFlagIndex[EnemyTeam] != -1 && distance(Pos, pCollision->GetPos(ms_aFlagIndex[EnemyTeam])) < 32;
+	}
 	else
 	{
-		if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
-			return true;
-		if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
-			return true;
+		std::list < int > Indices = pCollision->GetMapIndices(Prev, Pos);
+		if(!Indices.empty())
+			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+			{
+				if(pCollision->GetTileIndex(*i) == TILE_BEGIN)
+					return true;
+				if(pCollision->GetFTileIndex(*i) == TILE_BEGIN)
+					return true;
+			}
+		else
+		{
+			if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+				return true;
+			if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+				return true;
+		}
 	}
 	return false;
 }

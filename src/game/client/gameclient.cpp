@@ -59,6 +59,7 @@
 #include "components/voting.h"
 
 #include <base/system.h>
+#include "components/race.h"
 #include "components/race_demo.h"
 #include "components/ghost.h"
 #include <base/tl/sorted_array.h>
@@ -452,6 +453,21 @@ void CGameClient::OnConnected()
 	m_Collision.Init(Layers());
 
 	RenderTools()->RenderTilemapGenerateSkip(Layers());
+
+	CRaceHelper::ms_aFlagIndex[0] = -1;
+	CRaceHelper::ms_aFlagIndex[1] = -1;
+
+	CTile *pGameTiles = static_cast<CTile *>(Layers()->Map()->GetData(Layers()->GameLayer()->m_Data));
+
+	// get flag positions
+	for(int i = 0; i < m_Collision.GetWidth()*m_Collision.GetHeight(); i++)
+	{
+		if(pGameTiles[i].m_Index - ENTITY_OFFSET == ENTITY_FLAGSTAND_RED)
+			CRaceHelper::ms_aFlagIndex[TEAM_RED] = i;
+		else if(pGameTiles[i].m_Index - ENTITY_OFFSET == ENTITY_FLAGSTAND_BLUE)
+			CRaceHelper::ms_aFlagIndex[TEAM_BLUE] = i;
+		i += pGameTiles[i].m_Skip;
+	}
 
 	for(int i = 0; i < m_All.m_Num; i++)
 	{
