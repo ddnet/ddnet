@@ -420,6 +420,8 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
+  ghost.cpp
+  ghost.h
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
