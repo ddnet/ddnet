@@ -53,13 +53,21 @@ private:
 		MAX_ACTIVE_GHOSTS = 8,
 	};
 
-	struct CGhostItem
+	class CGhostItem
 	{
+	public:
 		CTeeRenderInfo m_RenderInfo;
-		array<CGhostCharacter_NoTick> m_lPath;
+		array<CGhostCharacter> m_lPath;
+		int m_PlaybackPos;
+
+		CGhostItem() { Reset(); }
 
 		bool Empty() const { return m_lPath.size() == 0; }
-		void Reset() { m_lPath.clear(); }
+		void Reset()
+		{
+			m_lPath.clear();
+			m_PlaybackPos = 0;
+		}
 	};
 
 	class IGhostLoader *m_pGhostLoader;
@@ -69,7 +77,7 @@ private:
 	CGhostItem m_CurGhost;
 
 	int m_StartRenderTick;
-	int m_CurPos;
+	int m_LastDeathTick;
 	bool m_Recording;
 	bool m_Rendering;
 
@@ -83,8 +91,8 @@ private:
 	void StartRender();
 	void StopRender();
 
-	void RenderGhost(const CGhostCharacter_NoTick *pPlayer, const CGhostCharacter_NoTick *pPrev, CTeeRenderInfo *pInfo);
-	void RenderGhostHook(const CGhostCharacter_NoTick *pPlayer, const CGhostCharacter_NoTick *pPrev);
+	void RenderGhost(const CGhostCharacter_NoTick *pPrev, const CGhostCharacter_NoTick *pPlayer, CTeeRenderInfo *pInfo, float IntraTick);
+	void RenderGhostHook(const CGhostCharacter_NoTick *pPrev, const CGhostCharacter_NoTick *pPlayer, float IntraTick);
 
 	void InitRenderInfos(CTeeRenderInfo *pRenderInfo, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 

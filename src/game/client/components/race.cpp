@@ -1,8 +1,13 @@
 #include <ctype.h>
+#include <list>
+
+#include <base/math.h>
+#include <game/collision.h>
+#include <game/mapitems.h>
 
 #include "race.h"
 
-int CRaceHelper::TimeFromSecondsStr(const char *pStr) // x.xxx
+int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 {
 	while(*pStr == ' ') // skip leading spaces
 		pStr++;
@@ -21,7 +26,7 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr) // x.xxx
 	return Time;
 }
 
-int CRaceHelper::TimeFromStr(const char *pStr) // x minute(s) x.xxx second(s)
+int CRaceHelper::TimeFromStr(const char *pStr)
 {
 	static const char * const s_pMinutesStr = " minute(s) ";
 	static const char * const s_pSecondsStr = " second(s)";
@@ -44,7 +49,7 @@ int CRaceHelper::TimeFromStr(const char *pStr) // x minute(s) x.xxx second(s)
 		return TimeFromSecondsStr(pStr);
 }
 
-int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize) // xxx finished in: x minute(s) x.xxx second(s)
+int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize)
 {
 	static const char * const s_pFinishedStr = " finished in: ";
 	const char *pFinished = str_find(pStr, s_pFinishedStr);
@@ -58,4 +63,25 @@ int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int Nam
 	str_copy(pNameBuf, pStr, FinishedPos + 1);
 
 	return TimeFromStr(pFinished + str_length(s_pFinishedStr));
+}
+
+bool CRaceHelper::IsStart(CCollision *pCollision, vec2 Prev, vec2 Pos)
+{
+	std::list < int > Indices = pCollision->GetMapIndices(Prev, Pos);
+	if(!Indices.empty())
+		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+		{
+			if(pCollision->GetTileIndex(*i) == TILE_BEGIN)
+				return true;
+			if(pCollision->GetFTileIndex(*i) == TILE_BEGIN)
+				return true;
+		}
+	else
+	{
+		if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+			return true;
+		if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_BEGIN)
+			return true;
+	}
+	return false;
 }
