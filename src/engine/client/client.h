@@ -383,12 +383,13 @@ public:
 	void GenerateTimeoutSeed();
 	void GenerateTimeoutCodes();
 
-	virtual const char* GetCurrentMap();
-	virtual int GetCurrentMapCrc();
-	virtual const char* GetCurrentMapPath();
-	virtual const char* RaceRecordStart(const char *pFilename);
-	virtual void RaceRecordStop();
-	virtual bool RaceRecordIsRecording();
+	const char *GetCurrentMap();
+	const char *GetCurrentMapPath();
+
+	void RaceRecord_GetName(char *pBuf, int Size, int Time = -1);
+	void RaceRecord_Start();
+	void RaceRecord_Stop();
+	bool RaceRecord_IsRecording();
 
 	void Ghost_GetPath(char *pBuf, int Size, int Time = -1);
 	void GhostRecorder_Start();

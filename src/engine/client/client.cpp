@@ -3586,43 +3586,14 @@ int main(int argc, const char **argv) // ignore_convention
 
 // DDRace
 
-const char* CClient::GetCurrentMap()
+const char *CClient::GetCurrentMap()
 {
 	return m_aCurrentMap;
 }
 
-int CClient::GetCurrentMapCrc()
-{
-	return m_pMap->Crc();
-}
-
-const char* CClient::GetCurrentMapPath()
+const char *CClient::GetCurrentMapPath()
 {
 	return m_aCurrentMapPath;
-}
-
-const char* CClient::RaceRecordStart(const char *pFilename)
-{
-	char aFilename[128];
-	str_format(aFilename, sizeof(aFilename), "demos/%s_%s.demo", m_aCurrentMap, pFilename);
-
-	if(State() != STATE_ONLINE)
-		dbg_msg("demorec/record", "client is not online");
-	else
-		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
-
-	return m_aCurrentMap;
-}
-
-void CClient::RaceRecordStop()
-{
-	if(m_DemoRecorder[RECORDER_RACE].IsRecording())
-		m_DemoRecorder[RECORDER_RACE].Stop();
-}
-
-bool CClient::RaceRecordIsRecording()
-{
-	return m_DemoRecorder[RECORDER_RACE].IsRecording();
 }
 
 void ClearFilename(char *pStr)
@@ -3633,6 +3604,48 @@ void ClearFilename(char *pStr)
 			*pStr = '%';
 		pStr++;
 	}
+}
+
+void CClient::RaceRecord_GetName(char *pBuf, int Size, int Time)
+{
+	// check the player name
+	char aPlayerName[MAX_NAME_LENGTH];
+	str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
+	ClearFilename(aPlayerName);
+
+	if(Time < 0)
+		str_format(pBuf, Size, "%s_tmp_%d", m_aCurrentMap, pid());
+	else if(g_Config.m_ClDemoName)
+		str_format(pBuf, Size, "%s_%d.%03d_%s", m_aCurrentMap, Time / 1000, Time % 1000, aPlayerName);
+	else
+		str_format(pBuf, Size, "%s_%d.%03d", m_aCurrentMap, Time / 1000, Time % 1000);
+}
+
+void CClient::RaceRecord_Start()
+{
+	if(State() != IClient::STATE_ONLINE)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+	else
+	{
+		char aDemoName[128];
+		char aFilename[128];
+
+		RaceRecord_GetName(aDemoName, sizeof(aDemoName));
+		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", aDemoName);
+
+		m_DemoRecorder[RECORDER_RACE].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
+	}
+}
+
+void CClient::RaceRecord_Stop()
+{
+	if(m_DemoRecorder[RECORDER_RACE].IsRecording())
+		m_DemoRecorder[RECORDER_RACE].Stop();
+}
+
+bool CClient::RaceRecord_IsRecording()
+{
+	return m_DemoRecorder[RECORDER_RACE].IsRecording();
 }
 
 void CClient::Ghost_GetPath(char *pBuf, int Size, int Time)

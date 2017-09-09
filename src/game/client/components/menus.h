@@ -327,6 +327,8 @@ public:
 	void DemolistPopulate();
 	bool m_Dummy;
 
+	const char *GetCurrentDemoFolder() const { return m_aCurrentDemoFolder; }
+
 	// Ghost
 	struct CGhostItem
 	{
