@@ -45,70 +45,46 @@ struct CGhostCharacter : public CGhostCharacter_NoTick
 	int m_Tick;
 };
 
-class CGhostTools
-{
-public:
-	static void GetGhostCharacter(CGhostCharacter_NoTick *pGhostChar, const CNetObj_Character *pChar)
-	{
-		pGhostChar->m_X = pChar->m_X;
-		pGhostChar->m_Y = pChar->m_Y;
-		pGhostChar->m_VelX = pChar->m_VelX;
-		pGhostChar->m_VelY = 0;
-		pGhostChar->m_Angle = pChar->m_Angle;
-		pGhostChar->m_Direction = pChar->m_Direction;
-		pGhostChar->m_Weapon = pChar->m_Weapon;
-		pGhostChar->m_HookState = pChar->m_HookState;
-		pGhostChar->m_HookX = pChar->m_HookX;
-		pGhostChar->m_HookY = pChar->m_HookY;
-		pGhostChar->m_AttackTick = pChar->m_AttackTick;
-	}
-};
-
 class CGhost : public CComponent
 {
 private:
+	enum
+	{
+		MAX_ACTIVE_GHOSTS = 8,
+	};
+
 	struct CGhostItem
 	{
-		int m_ID;
 		CTeeRenderInfo m_RenderInfo;
 		array<CGhostCharacter_NoTick> m_lPath;
 
-		bool Empty() { return m_lPath.size() == 0; }
+		bool Empty() const { return m_lPath.size() == 0; }
 		void Reset() { m_lPath.clear(); }
-
-		bool operator==(const CGhostItem &Other) { return m_ID == Other.m_ID; }
 	};
 
 	class IGhostLoader *m_pGhostLoader;
 	class IGhostRecorder *m_pGhostRecorder;
 
-	array<CGhostItem> m_lGhosts;
+	CGhostItem m_aActiveGhosts[MAX_ACTIVE_GHOSTS];
 	CGhostItem m_CurGhost;
 
 	int m_StartRenderTick;
 	int m_CurPos;
 	bool m_Recording;
 	bool m_Rendering;
-	int m_BestTime;
 
-	enum
-	{
-		RACE_NONE = 0,
-		RACE_STARTED,
-		RACE_FINISHED,
-	};
+	static void GetGhostCharacter(CGhostCharacter_NoTick *pGhostChar, const CNetObj_Character *pChar);
 
 	void AddInfos(const CNetObj_Character *pChar);
+	int GetSlot() const;
 
 	void StartRecord();
-	void StopRecord();
+	void StopRecord(int Time = -1);
 	void StartRender();
 	void StopRender();
 
 	void RenderGhost(const CGhostCharacter_NoTick *pPlayer, const CGhostCharacter_NoTick *pPrev, CTeeRenderInfo *pInfo);
 	void RenderGhostHook(const CGhostCharacter_NoTick *pPlayer, const CGhostCharacter_NoTick *pPrev);
-
-	void Save(int Time);
 
 	void InitRenderInfos(CTeeRenderInfo *pRenderInfo, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 
@@ -123,8 +99,8 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnMapLoad();
 
-	void Load(const char* pFilename, int ID);
-	void Unload(int ID);
+	int Load(const char *pFilename);
+	void Unload(int Slot);
 
 	class IGhostLoader *GhostLoader() const { return m_pGhostLoader; }
 	class IGhostRecorder *GhostRecorder() const { return m_pGhostRecorder; }

@@ -856,6 +856,7 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 void CGameClient::OnShutdown()
 {
 	m_pRaceDemo->OnShutdown();
+	m_pGhost->OnReset();
 }
 
 void CGameClient::OnEnterGame()
