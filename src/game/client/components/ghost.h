@@ -5,44 +5,82 @@
 
 #include <game/client/component.h>
 
-class CGhost : public CComponent
+enum
+{
+	GHOSTDATA_TYPE_SKIN = 0,
+	GHOSTDATA_TYPE_CHARACTER_NO_TICK,
+	GHOSTDATA_TYPE_CHARACTER
+};
+
+struct CGhostSkin
+{
+	int m_Skin0;
+	int m_Skin1;
+	int m_Skin2;
+	int m_Skin3;
+	int m_Skin4;
+	int m_Skin5;
+	int m_UseCustomColor;
+	int m_ColorBody;
+	int m_ColorFeet;
+};
+
+struct CGhostCharacter_NoTick
+{
+	int m_X;
+	int m_Y;
+	int m_VelX;
+	int m_VelY;
+	int m_Angle;
+	int m_Direction;
+	int m_Weapon;
+	int m_HookState;
+	int m_HookX;
+	int m_HookY;
+	int m_AttackTick;
+};
+
+struct CGhostCharacter : public CGhostCharacter_NoTick
+{
+	int m_Tick;
+};
+
+class CGhostTools
 {
 public:
-	struct CGhostHeader
+	static void GetGhostCharacter(CGhostCharacter_NoTick *pGhostChar, const CNetObj_Character *pChar)
 	{
-		unsigned char m_aMarker[8];
-		unsigned char m_Version;
-		char m_aOwner[MAX_NAME_LENGTH];
-		char m_aMap[64];
-		unsigned char m_aCrc[4];
-		int m_NumShots;
-		float m_Time;
-	};
+		pGhostChar->m_X = pChar->m_X;
+		pGhostChar->m_Y = pChar->m_Y;
+		pGhostChar->m_VelX = pChar->m_VelX;
+		pGhostChar->m_VelY = 0;
+		pGhostChar->m_Angle = pChar->m_Angle;
+		pGhostChar->m_Direction = pChar->m_Direction;
+		pGhostChar->m_Weapon = pChar->m_Weapon;
+		pGhostChar->m_HookState = pChar->m_HookState;
+		pGhostChar->m_HookX = pChar->m_HookX;
+		pGhostChar->m_HookY = pChar->m_HookY;
+		pGhostChar->m_AttackTick = pChar->m_AttackTick;
+	}
+};
 
+class CGhost : public CComponent
+{
 private:
-	struct CGhostCharacter
-	{
-		int m_X;
-		int m_Y;
-		int m_VelX;
-		int m_VelY;
-		int m_Angle;
-		int m_Direction;
-		int m_Weapon;
-		int m_HookState;
-		int m_HookX;
-		int m_HookY;
-		int m_AttackTick;
-	};
-
 	struct CGhostItem
 	{
 		int m_ID;
-		CNetObj_ClientInfo m_Info;
-		array<CGhostCharacter> m_Path;
+		CTeeRenderInfo m_RenderInfo;
+		array<CGhostCharacter_NoTick> m_lPath;
+
+		bool Empty() { return m_lPath.size() == 0; }
+		void Reset() { m_lPath.clear(); }
 
 		bool operator==(const CGhostItem &Other) { return m_ID == Other.m_ID; }
 	};
+
+	class IGhostLoader *m_pGhostLoader;
+	class IGhostRecorder *m_pGhostRecorder;
 
 	array<CGhostItem> m_lGhosts;
 	CGhostItem m_CurGhost;
@@ -51,10 +89,7 @@ private:
 	int m_CurPos;
 	bool m_Recording;
 	bool m_Rendering;
-	int m_RaceState;
 	int m_BestTime;
-	bool m_NewRecord;
-	bool m_Saving;
 
 	enum
 	{
@@ -63,20 +98,19 @@ private:
 		RACE_FINISHED,
 	};
 
-	void AddInfos(CGhostCharacter Player);
-
-	CGhostCharacter GetGhostCharacter(CNetObj_Character Char);
+	void AddInfos(const CNetObj_Character *pChar);
 
 	void StartRecord();
 	void StopRecord();
 	void StartRender();
 	void StopRender();
-	void RenderGhost(CGhostCharacter Player, CGhostCharacter Prev, CNetObj_ClientInfo Info);
-	void RenderGhostHook(CGhostCharacter Player, CGhostCharacter Prev);
 
-	bool GetHeader(IOHANDLE *pFile, CGhostHeader *pHeader);
+	void RenderGhost(const CGhostCharacter_NoTick *pPlayer, const CGhostCharacter_NoTick *pPrev, CTeeRenderInfo *pInfo);
+	void RenderGhostHook(const CGhostCharacter_NoTick *pPlayer, const CGhostCharacter_NoTick *pPrev);
 
-	void Save();
+	void Save(int Time);
+
+	void InitRenderInfos(CTeeRenderInfo *pRenderInfo, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 
 	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
 
@@ -92,7 +126,8 @@ public:
 	void Load(const char* pFilename, int ID);
 	void Unload(int ID);
 
-	bool GetInfo(const char* pFilename, CGhostHeader *pHeader);
+	class IGhostLoader *GhostLoader() const { return m_pGhostLoader; }
+	class IGhostRecorder *GhostRecorder() const { return m_pGhostRecorder; }
 };
 
 #endif

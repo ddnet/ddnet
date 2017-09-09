@@ -75,6 +75,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
+	class CGhostRecorder m_GhostRecorder;
+	class CGhostLoader m_GhostLoader;
 	class CServerBrowser m_ServerBrowser;
 	class CFetcher m_Fetcher;
 	class CUpdater m_Updater;
@@ -387,6 +389,11 @@ public:
 	virtual const char* RaceRecordStart(const char *pFilename);
 	virtual void RaceRecordStop();
 	virtual bool RaceRecordIsRecording();
+
+	void Ghost_GetPath(char *pBuf, int Size, int Time = -1);
+	void GhostRecorder_Start();
+	bool GhostLoader_Load(const char *pFilename);
+	bool GhostLoader_GetGhostInfo(const char *pFilename, struct CGhostHeader *pGhostHeader);
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();

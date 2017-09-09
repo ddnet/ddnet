@@ -41,6 +41,7 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/filecollection.h>
+#include <engine/shared/ghost.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
@@ -2529,6 +2530,8 @@ void CClient::RegisterInterfaces()
 {
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[RECORDER_MANUAL]), false);
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer), false);
+	Kernel()->RegisterInterface(static_cast<IGhostRecorder*>(&m_GhostRecorder), false);
+	Kernel()->RegisterInterface(static_cast<IGhostLoader*>(&m_GhostLoader), false);
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser), false);
 	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher), false);
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
@@ -3621,6 +3624,47 @@ bool CClient::RaceRecordIsRecording()
 {
 	return m_DemoRecorder[RECORDER_RACE].IsRecording();
 }
+
+void ClearFilename(char *pStr)
+{
+	while(*pStr)
+	{
+		if(*pStr == '\\' || *pStr == '/' || *pStr == '|' || *pStr == ':' || *pStr == '*' || *pStr == '?' || *pStr == '<' || *pStr == '>' || *pStr == '"')
+			*pStr = '%';
+		pStr++;
+	}
+}
+
+void CClient::Ghost_GetPath(char *pBuf, int Size, int Time)
+{
+	// check the player name
+	char aPlayerName[MAX_NAME_LENGTH];
+	str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
+	ClearFilename(aPlayerName);
+
+	if(Time < 0)
+		str_format(pBuf, Size, "ghosts/%s_%s_%08x_tmp_%d.gho", m_aCurrentMap, aPlayerName, m_pMap->Crc(), pid());
+	else
+		str_format(pBuf, Size, "ghosts/%s_%s_%d.%03d_%08x.gho", m_aCurrentMap, aPlayerName, Time / 1000, Time % 1000, m_pMap->Crc());
+}
+
+void CClient::GhostRecorder_Start()
+{
+	char aFilename[128];
+	Ghost_GetPath(aFilename, sizeof(aFilename));
+	m_GhostRecorder.Start(Storage(), m_pConsole, aFilename, m_aCurrentMap, m_pMap->Crc(), g_Config.m_PlayerName);
+}
+
+bool CClient::GhostLoader_Load(const char *pFilename)
+{
+	return m_GhostLoader.Load(Storage(), m_pConsole, pFilename, m_aCurrentMap, m_pMap->Crc()) == 0;
+}
+
+bool CClient::GhostLoader_GetGhostInfo(const char *pFilename, struct CGhostHeader *pGhostHeader)
+{
+	return m_GhostLoader.GetGhostInfo(Storage(), m_pConsole, pFilename, pGhostHeader, m_aCurrentMap, m_pMap->Crc());
+}
+
 
 void CClient::RequestDDNetInfo()
 {

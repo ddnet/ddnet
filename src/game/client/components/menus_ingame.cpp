@@ -5,6 +5,7 @@
 #include <engine/config.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
+#include <engine/ghost.h>
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/textrender.h>
@@ -841,17 +842,20 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 		(!IsDir && (Length < 4 || str_comp(pName+Length-4, ".gho") || str_comp_num(pName, pMap, str_length(pMap)))))
 		return 0;
 
-	CGhost::CGhostHeader Header;
-	if(!pSelf->m_pClient->m_pGhost->GetInfo(pName, &Header))
+	char aFilename[256];
+	str_format(aFilename, sizeof(aFilename), "ghosts/%s", pName);
+
+	CGhostHeader Header;
+	if(!pSelf->Client()->GhostLoader_GetGhostInfo(aFilename, &Header))
 		return 0;
 
 	CGhostItem Item;
-	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
+	str_copy(Item.m_aFilename, aFilename, sizeof(Item.m_aFilename));
 	str_copy(Item.m_aPlayer, Header.m_aOwner, sizeof(Item.m_aPlayer));
-	Item.m_Time = Header.m_Time * 1000;
+	Item.m_Time = pSelf->m_pClient->m_pGhost->GhostLoader()->GetTime(&Header);
 	Item.m_Active = false;
-	Item.m_ID = pSelf->m_lGhosts.add(Item);
-
+	if(Item.m_Time > 0)
+		Item.m_ID = pSelf->m_lGhosts.add(Item);
 	return 0;
 }
 

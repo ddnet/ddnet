@@ -182,6 +182,11 @@ public:
 	virtual void RaceRecordStop() = 0;
 	virtual bool RaceRecordIsRecording() = 0;
 
+	virtual void Ghost_GetPath(char *pBuf, int Size, int Time = -1) = 0;
+	virtual void GhostRecorder_Start() = 0;
+	virtual bool GhostLoader_Load(const char *pFilename) = 0;
+	virtual bool GhostLoader_GetGhostInfo(const char *pFilename, struct CGhostHeader *pGhostHeader) = 0;
+
 	virtual void DemoSliceBegin() = 0;
 	virtual void DemoSliceEnd() = 0;
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
