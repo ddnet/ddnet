@@ -1045,6 +1045,12 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 		}
 
+		if(pItem->m_Own)
+		{
+			vec3 rgb = HslToRgb(vec3(0.33f, 1.0f, 0.75f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+		}
+
 		for(int c = 0; c < NumCols; c++)
 		{
 			CUIRect Button;
@@ -1074,10 +1080,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
-				// TODO: use icon or color for this
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s%s", pItem->m_aPlayer, pItem->m_Own ? " (own)" : "");
-				TextRender()->TextEx(&Cursor, aBuf, -1);
+				TextRender()->TextEx(&Cursor, pItem->m_aPlayer, -1);
 			}
 			else if(Id == COL_TIME)
 			{
@@ -1090,6 +1093,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 		}
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	UI()->ClipDisable();
