@@ -81,7 +81,8 @@ private:
 	bool m_Recording;
 	bool m_Rendering;
 
-	static void GetGhostCharacter(CGhostCharacter_NoTick *pGhostChar, const CNetObj_Character *pChar);
+	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar);
+	static void GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter *pGhostChar);
 
 	void AddInfos(const CNetObj_Character *pChar);
 	int GetSlot() const;
@@ -90,9 +91,6 @@ private:
 	void StopRecord(int Time = -1);
 	void StartRender();
 	void StopRender();
-
-	void RenderGhost(const CGhostCharacter_NoTick *pPrev, const CGhostCharacter_NoTick *pPlayer, CTeeRenderInfo *pInfo, float IntraTick);
-	void RenderGhostHook(const CGhostCharacter_NoTick *pPrev, const CGhostCharacter_NoTick *pPlayer, float IntraTick);
 
 	void InitRenderInfos(CTeeRenderInfo *pRenderInfo, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 
