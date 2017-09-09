@@ -34,10 +34,28 @@ void CGhost::GetGhostCharacter(CGhostCharacter_NoTick *pGhostChar, const CNetObj
 void CGhost::AddInfos(const CNetObj_Character *pChar)
 {
 	// Just to be sure it doesnt eat too much memory, the first test should be enough anyway
-	if(m_CurGhost.m_lPath.size() > Client()->GameTickSpeed()*60*20)
+	int NumTicks = m_CurGhost.m_lPath.size();
+	if(NumTicks > Client()->GameTickSpeed()*60*20)
 	{
 		StopRecord();
 		return;
+	}
+
+	// do not start writing to file as long as we still touch the start line
+	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
+	{
+		Client()->GhostRecorder_Start();
+
+		const CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
+		CGhostSkin Skin;
+		StrToInts(&Skin.m_Skin0, 6, pClientData->m_aSkinName);
+		Skin.m_UseCustomColor = pClientData->m_UseCustomColor;
+		Skin.m_ColorBody = pClientData->m_ColorBody;
+		Skin.m_ColorFeet = pClientData->m_ColorFeet;
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&Skin, sizeof(Skin));
+
+		for(int i = 0; i < NumTicks; i++)
+			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&m_CurGhost.m_lPath[i], sizeof(CGhostCharacter));
 	}
 
 	CGhostCharacter GhostChar;
@@ -45,7 +63,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	GhostChar.m_Tick = pChar->m_Tick;
 	m_CurGhost.m_lPath.add(GhostChar);
 	if(GhostRecorder()->IsRecording())
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&GhostChar, sizeof(GhostChar));
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&GhostChar, sizeof(CGhostCharacter));
 }
 
 int CGhost::GetSlot() const
@@ -70,7 +88,7 @@ void CGhost::OnRender()
 		{
 			vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
 			vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
-			if(!m_Rendering && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
+			if((!m_Rendering || !m_IsSolo) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
 				StartRender();
 		}
 
@@ -81,8 +99,12 @@ void CGhost::OnRender()
 			vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
 
 			// detecting death, needed because race allows immediate respawning
-			if(!m_Recording && CRaceHelper::IsStart(m_pClient, PrevPos, Pos) && m_LastDeathTick < PrevTick)
+			if((!m_Recording || !m_IsSolo) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos) && m_LastDeathTick < PrevTick)
+			{
+				if(m_Recording)
+					GhostRecorder()->Stop(0, -1);
 				StartRecord();
+			}
 
 			if(m_Recording)
 				AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
@@ -255,20 +277,8 @@ void CGhost::StartRecord()
 	m_Recording = true;
 	m_CurGhost.Reset();
 	
-	CGameClient::CClientData ClientData = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
-	InitRenderInfos(&m_CurGhost.m_RenderInfo, ClientData.m_aSkinName, ClientData.m_UseCustomColor, ClientData.m_ColorBody, ClientData.m_ColorFeet);
-
-	if(g_Config.m_ClRaceSaveGhost)
-	{
-		Client()->GhostRecorder_Start();
-
-		CGhostSkin Skin;
-		StrToInts(&Skin.m_Skin0, 6, ClientData.m_aSkinName);
-		Skin.m_UseCustomColor = ClientData.m_UseCustomColor;
-		Skin.m_ColorBody = ClientData.m_ColorBody;
-		Skin.m_ColorFeet = ClientData.m_ColorFeet;
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&Skin, sizeof(Skin));
-	}
+	const CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
+	InitRenderInfos(&m_CurGhost.m_RenderInfo, pClientData->m_aSkinName, pClientData->m_UseCustomColor, pClientData->m_ColorBody, pClientData->m_ColorFeet);
 }
 
 void CGhost::StopRecord(int Time)
@@ -486,4 +496,5 @@ void CGhost::OnMapLoad()
 	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
 		Unload(i);
 	m_pClient->m_pMenus->GhostlistPopulate();
+	m_IsSolo = true;
 }

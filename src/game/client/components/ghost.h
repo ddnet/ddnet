@@ -99,6 +99,8 @@ private:
 	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
 
 public:
+	bool m_IsSolo;
+
 	CGhost();
 
 	virtual void OnRender();

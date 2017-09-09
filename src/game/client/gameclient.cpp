@@ -850,6 +850,9 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 		if (i <= 16)
 			m_Teams.m_IsDDRace16 = true;
+
+		m_pGhost->m_IsSolo = false;
+		m_pRaceDemo->m_IsSolo = false;
 	}
 	else if(MsgId == NETMSGTYPE_SV_PLAYERTIME)
 	{

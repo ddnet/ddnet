@@ -17,7 +17,7 @@ class CRaceDemo : public CComponent
 	void Stop();
 
 public:
-
+	bool m_IsSolo;
 	int m_RaceState;
 
 	enum
@@ -34,6 +34,7 @@ public:
 	virtual void OnRender();
 	virtual void OnShutdown();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
+	virtual void OnMapLoad();
 
 	void CheckDemo();
 	void SaveDemo(const char* pDemo);
