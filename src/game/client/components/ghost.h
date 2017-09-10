@@ -85,6 +85,7 @@ private:
 	static void GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter *pGhostChar);
 
 	void AddInfos(const CNetObj_Character *pChar);
+	int GetSlot() const;
 
 	void StartRecord();
 	void StopRecord(int Time = -1);
@@ -106,7 +107,7 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnMapLoad();
 
-	int GetSlot() const;
+	int FreeSlot() const;
 	int Load(const char *pFilename);
 	void Unload(int Slot);
 

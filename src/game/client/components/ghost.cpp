@@ -90,6 +90,15 @@ int CGhost::GetSlot() const
 	return -1;
 }
 
+int CGhost::FreeSlot() const
+{
+	int Num = 0;
+	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
+		if(m_aActiveGhosts[i].Empty())
+			Num++;
+	return Num;
+}
+
 void CGhost::OnRender()
 {
 	// only for race
@@ -226,8 +235,11 @@ void CGhost::StopRecord(int Time)
 	CMenus::CGhostItem *pOwnGhost = m_pClient->m_pMenus->GetOwnGhost();
 	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time))
 	{
+		if(pOwnGhost && pOwnGhost->Active())
+			Unload(pOwnGhost->m_Slot);
+
 		// add to active ghosts
-		int Slot = pOwnGhost ? pOwnGhost->m_Slot : GetSlot();
+		int Slot = GetSlot();
 		if(Slot != -1)
 			m_aActiveGhosts[Slot] = m_CurGhost;
 

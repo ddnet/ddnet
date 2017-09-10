@@ -1140,7 +1140,9 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static int s_SaveButton = 0;
 	static int s_ReloadButton = 0;
 
-	if(pGhost->HasFile() && (pGhost->Active() || m_pClient->m_pGhost->GetSlot() != -1))
+	CGhostItem *pOwnGhost = GetOwnGhost();
+	int ReservedSlots = !pGhost->m_Own && !(pOwnGhost && pOwnGhost->Active());
+	if(pGhost->HasFile() && (pGhost->Active() || m_pClient->m_pGhost->FreeSlot() > ReservedSlots))
 	{
 		Status.VSplitRight(120.0f, &Status, &Button);
 
