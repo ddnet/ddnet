@@ -19,7 +19,7 @@ void CRaceDemo::OnStateChange(int NewState, int OldState)
 
 void CRaceDemo::OnRender()
 {
-	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pLocalCharacter)
+	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pLocalCharacter || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	// only for race
@@ -56,7 +56,7 @@ void CRaceDemo::OnReset()
 
 void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(!g_Config.m_ClAutoRaceRecord || m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if(!g_Config.m_ClAutoRaceRecord || m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	// only for race

@@ -95,7 +95,7 @@ void CGhost::OnRender()
 	// only for race
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost)
+	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalPrevCharacter)
@@ -404,7 +404,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
 
-	if(!IsRace(&ServerInfo) || m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if(!IsRace(&ServerInfo) || m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	// check for messages from server
