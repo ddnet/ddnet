@@ -1138,8 +1138,9 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static int s_GhostButton = 0;
 	static int s_DeleteButton = 0;
 	static int s_SaveButton = 0;
+	static int s_ReloadButton = 0;
 
-	if(pGhost->HasFile())
+	if(pGhost->HasFile() && (pGhost->Active() || m_pClient->m_pGhost->GetSlot() != -1))
 	{
 		Status.VSplitRight(120.0f, &Status, &Button);
 
@@ -1175,5 +1176,13 @@ void CMenus::RenderGhost(CUIRect MainView)
 		Status.VSplitRight(120.0f, &Status, &Button);
 		if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button))
 			m_pClient->m_pGhost->SaveGhost(pGhost);
+	}
+
+	Status.VSplitLeft(120.0f, &Button, &Status);
+
+	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button))
+	{
+		m_pClient->m_pGhost->UnloadAll();
+		GhostlistPopulate();
 	}
 }
