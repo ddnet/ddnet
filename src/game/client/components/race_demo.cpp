@@ -9,7 +9,7 @@
 #include "race.h"
 #include "race_demo.h"
 
-CRaceDemo::CRaceDemo() : m_RaceState(RACE_NONE), m_RecordStartTick(-1), m_RecordStopTick(-1), m_Time(0) {}
+CRaceDemo::CRaceDemo() : m_RaceState(RACE_NONE), m_RaceStartTick(-1), m_RecordStopTick(-1), m_Time(0) {}
 
 void CRaceDemo::OnStateChange(int NewState, int OldState)
 {
@@ -29,7 +29,8 @@ void CRaceDemo::OnRender()
 		return;
 
 	// start the demo
-	if((m_RaceState == RACE_NONE || !m_IsSolo) && m_RecordStartTick + Client()->GameTickSpeed() < Client()->GameTick())
+	bool AllowRestart = !m_IsSolo && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
+	if(m_RaceState == RACE_IDLE || m_RaceState == RACE_PREPARE || (m_RaceState == RACE_STARTED && AllowRestart))
 	{
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
 		vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
@@ -37,11 +38,27 @@ void CRaceDemo::OnRender()
 		if(CRaceHelper::IsStart(m_pClient, m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos))
 		{
 			if(m_RaceState == RACE_STARTED)
-				OnReset();
-			Client()->RaceRecord_Start();
-			m_RecordStartTick = Client()->GameTick();
+				Client()->RaceRecord_Stop();
+			if(m_RaceState != RACE_PREPARE) // start recording again
+				Client()->RaceRecord_Start();
+			m_RaceStartTick = Client()->GameTick();
 			m_RaceState = RACE_STARTED;
 		}
+	}
+
+	// start recording before the player passes the start line, so we can see some preparation steps
+	if(m_RaceState == RACE_NONE)
+	{
+		Client()->RaceRecord_Start();
+		m_RaceStartTick = Client()->GameTick();
+		m_RaceState = RACE_PREPARE;
+	}
+
+	// stop recording if the player did not pass the start line after 20 seconds
+	if(m_RaceState == RACE_PREPARE && Client()->GameTick() - m_RaceStartTick >= Client()->GameTickSpeed() * 20)
+	{
+		OnReset();
+		m_RaceState = RACE_IDLE;
 	}
 
 	// stop the demo
@@ -118,7 +135,7 @@ void CRaceDemo::StopRecord(int Time)
 
 	m_Time = 0;
 	m_RaceState = RACE_NONE;
-	m_RecordStartTick = -1;
+	m_RaceStartTick = -1;
 	m_RecordStopTick = -1;
 }
 

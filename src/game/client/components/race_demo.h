@@ -10,12 +10,14 @@ class CRaceDemo : public CComponent
 	enum
 	{
 		RACE_NONE = 0,
+		RACE_IDLE,
+		RACE_PREPARE,
 		RACE_STARTED,
 		RACE_FINISHED,
 	};
 
 	int m_RaceState;
-	int m_RecordStartTick;
+	int m_RaceStartTick;
 	int m_RecordStopTick;
 	int m_Time;
 
