@@ -3648,11 +3648,11 @@ bool CClient::RaceRecord_IsRecording()
 	return m_DemoRecorder[RECORDER_RACE].IsRecording();
 }
 
-void CClient::Ghost_GetPath(char *pBuf, int Size, int Time)
+void CClient::Ghost_GetPath(char *pBuf, int Size, const char *pPlayerName, int Time)
 {
 	// check the player name
 	char aPlayerName[MAX_NAME_LENGTH];
-	str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
+	str_copy(aPlayerName, pPlayerName, sizeof(aPlayerName));
 	ClearFilename(aPlayerName);
 
 	if(Time < 0)
@@ -3661,11 +3661,11 @@ void CClient::Ghost_GetPath(char *pBuf, int Size, int Time)
 		str_format(pBuf, Size, "ghosts/%s_%s_%d.%03d_%08x.gho", m_aCurrentMap, aPlayerName, Time / 1000, Time % 1000, m_pMap->Crc());
 }
 
-void CClient::GhostRecorder_Start(int Time)
+void CClient::GhostRecorder_Start(const char *pPlayerName, int Time)
 {
 	char aFilename[128];
-	Ghost_GetPath(aFilename, sizeof(aFilename), Time);
-	m_GhostRecorder.Start(Storage(), m_pConsole, aFilename, m_aCurrentMap, m_pMap->Crc(), g_Config.m_PlayerName);
+	Ghost_GetPath(aFilename, sizeof(aFilename), pPlayerName, Time);
+	m_GhostRecorder.Start(Storage(), m_pConsole, aFilename, m_aCurrentMap, m_pMap->Crc(), pPlayerName);
 }
 
 bool CClient::GhostLoader_Load(const char *pFilename)

@@ -59,6 +59,7 @@ private:
 		CTeeRenderInfo m_RenderInfo;
 		CGhostSkin m_Skin;
 		array<CGhostCharacter> m_lPath;
+		char m_aPlayer[MAX_NAME_LENGTH];
 		int m_PlaybackPos;
 
 		CGhostItem() { Reset(); }

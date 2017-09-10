@@ -69,7 +69,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	// do not start writing to file as long as we still touch the start line
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
-		Client()->GhostRecorder_Start();
+		Client()->GhostRecorder_Start(m_CurGhost.m_aPlayer);
 
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&m_CurGhost.m_Skin, sizeof(CGhostSkin));
 		for(int i = 0; i < NumTicks; i++)
@@ -224,6 +224,7 @@ void CGhost::StartRecord()
 	m_CurGhost.Reset();
 
 	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
+	str_copy(m_CurGhost.m_aPlayer, g_Config.m_PlayerName, sizeof(m_CurGhost.m_aPlayer));
 	GetGhostSkin(&m_CurGhost.m_Skin, pData->m_aSkinName, pData->m_UseCustomColor, pData->m_ColorBody, pData->m_ColorFeet);
 	InitRenderInfos(&m_CurGhost);
 }
@@ -237,7 +238,7 @@ void CGhost::StopRecord(int Time)
 		GhostRecorder()->Stop(m_CurGhost.m_lPath.size(), Time);
 
 	char aTmpFilename[128];
-	Client()->Ghost_GetPath(aTmpFilename, sizeof(aTmpFilename));
+	Client()->Ghost_GetPath(aTmpFilename, sizeof(aTmpFilename), m_CurGhost.m_aPlayer);
 
 	CMenus::CGhostItem *pOwnGhost = m_pClient->m_pMenus->GetOwnGhost();
 	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time))
@@ -252,12 +253,12 @@ void CGhost::StopRecord(int Time)
 
 		char aFilename[128] = { 0 };
 		if(RecordingToFile)
-			Client()->Ghost_GetPath(aFilename, sizeof(aFilename), Time);
+			Client()->Ghost_GetPath(aFilename, sizeof(aFilename), m_CurGhost.m_aPlayer, Time);
 
 		// create ghost item
 		CMenus::CGhostItem Item;
 		str_copy(Item.m_aFilename, aFilename, sizeof(Item.m_aFilename));
-		str_copy(Item.m_aPlayer, g_Config.m_PlayerName, sizeof(Item.m_aPlayer));
+		str_copy(Item.m_aPlayer, m_CurGhost.m_aPlayer, sizeof(Item.m_aPlayer));
 		Item.m_Time = Time;
 		Item.m_Slot = Slot;
 
@@ -309,6 +310,8 @@ int CGhost::Load(const char *pFilename)
 	// select ghost
 	CGhostItem *pGhost = &m_aActiveGhosts[Slot];
 	pGhost->m_lPath.set_size(NumTicks);
+
+	str_copy(pGhost->m_aPlayer, pHeader->m_aOwner, sizeof(pGhost->m_aPlayer));
 
 	int Index = 0;
 	bool FoundSkin = false;
@@ -382,18 +385,18 @@ void CGhost::UnloadAll()
 void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 {
 	int Slot = pItem->m_Slot;
-	if(Slot < 0 || pItem->HasFile() || m_aActiveGhosts[Slot].Empty() || GhostRecorder()->IsRecording())
+	if(!pItem->Active() || pItem->HasFile() || m_aActiveGhosts[Slot].Empty() || GhostRecorder()->IsRecording())
 		return;
 
 	int NumTicks = m_aActiveGhosts[Slot].m_lPath.size();
-	Client()->GhostRecorder_Start(pItem->m_Time);
+	Client()->GhostRecorder_Start(pItem->m_aPlayer, pItem->m_Time);
 
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&m_aActiveGhosts[Slot].m_Skin, sizeof(CGhostSkin));
 	for(int i = 0; i < NumTicks; i++)
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&m_aActiveGhosts[Slot].m_lPath[i], sizeof(CGhostCharacter));
 
 	GhostRecorder()->Stop(NumTicks, pItem->m_Time);
-	Client()->Ghost_GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_Time);
+	Client()->Ghost_GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_aPlayer, pItem->m_Time);
 }
 
 void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData)
