@@ -14,6 +14,14 @@
 
 CGhost::CGhost() : m_StartRenderTick(-1), m_LastDeathTick(-1), m_Rendering(false), m_Recording(false) {}
 
+void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
+{
+	StrToInts(&pSkin->m_Skin0, 6, pSkinName);
+	pSkin->m_UseCustomColor = UseCustomColor;
+	pSkin->m_ColorBody = ColorBody;
+	pSkin->m_ColorFeet = ColorFeet;
+}
+
 void CGhost::GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar)
 {
 	pGhostChar->m_X = pChar->m_X;
@@ -63,14 +71,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	{
 		Client()->GhostRecorder_Start();
 
-		const CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
-		CGhostSkin Skin;
-		StrToInts(&Skin.m_Skin0, 6, pClientData->m_aSkinName);
-		Skin.m_UseCustomColor = pClientData->m_UseCustomColor;
-		Skin.m_ColorBody = pClientData->m_ColorBody;
-		Skin.m_ColorFeet = pClientData->m_ColorFeet;
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&Skin, sizeof(Skin));
-
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&m_CurGhost.m_Skin, sizeof(CGhostSkin));
 		for(int i = 0; i < NumTicks; i++)
 			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&m_CurGhost.m_lPath[i], sizeof(CGhostCharacter));
 	}
@@ -185,9 +186,13 @@ void CGhost::OnRender()
 		StopRender();
 }
 
-void CGhost::InitRenderInfos(CTeeRenderInfo *pRenderInfo, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
+void CGhost::InitRenderInfos(CGhostItem *pGhost)
 {
-	int SkinId = m_pClient->m_pSkins->Find(pSkinName);
+	char aSkinName[64];
+	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName);
+	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
+
+	int SkinId = m_pClient->m_pSkins->Find(aSkinName);
 	if(SkinId < 0)
 	{
 		SkinId = m_pClient->m_pSkins->Find("default");
@@ -195,11 +200,12 @@ void CGhost::InitRenderInfos(CTeeRenderInfo *pRenderInfo, const char *pSkinName,
 			SkinId = 0;
 	}
 
-	pRenderInfo->m_ColorBody = m_pClient->m_pSkins->GetColorV4(ColorBody);
-	pRenderInfo->m_ColorFeet = m_pClient->m_pSkins->GetColorV4(ColorFeet);
-
-	if(UseCustomColor)
+	if(pGhost->m_Skin.m_UseCustomColor)
+	{
 		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_ColorTexture;
+		pRenderInfo->m_ColorBody = m_pClient->m_pSkins->GetColorV4(pGhost->m_Skin.m_ColorBody);
+		pRenderInfo->m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pGhost->m_Skin.m_ColorFeet);
+	}
 	else
 	{
 		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_OrgTexture;
@@ -216,9 +222,10 @@ void CGhost::StartRecord()
 {
 	m_Recording = true;
 	m_CurGhost.Reset();
-	
-	const CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
-	InitRenderInfos(&m_CurGhost.m_RenderInfo, pClientData->m_aSkinName, pClientData->m_UseCustomColor, pClientData->m_ColorBody, pClientData->m_ColorFeet);
+
+	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
+	GetGhostSkin(&m_CurGhost.m_Skin, pData->m_aSkinName, pData->m_UseCustomColor, pData->m_ColorBody, pData->m_ColorFeet);
+	InitRenderInfos(&m_CurGhost);
 }
 
 void CGhost::StopRecord(int Time)
@@ -306,41 +313,39 @@ int CGhost::Load(const char *pFilename)
 	int Index = 0;
 	bool FoundSkin = false;
 	bool NoTick = false;
+	bool Error = false;
 
 	int Type;
-	while(GhostLoader()->ReadNextType(&Type))
+	while(!Error && GhostLoader()->ReadNextType(&Type))
 	{
 		if(Index == NumTicks && (Type == GHOSTDATA_TYPE_CHARACTER || Type == GHOSTDATA_TYPE_CHARACTER_NO_TICK))
 		{
-			Index = -1;
+			Error = true;
 			break;
 		}
 
-		if(Type == GHOSTDATA_TYPE_SKIN)
+		if(Type == GHOSTDATA_TYPE_SKIN && !FoundSkin)
 		{
-			CGhostSkin Skin;
-			if(GhostLoader()->ReadData(Type, (char*)&Skin, sizeof(Skin)) && !FoundSkin)
-			{
-				FoundSkin = true;
-				char aSkinName[64];
-				IntsToStr(&Skin.m_Skin0, 6, aSkinName);
-				InitRenderInfos(&pGhost->m_RenderInfo, aSkinName, Skin.m_UseCustomColor, Skin.m_ColorBody, Skin.m_ColorFeet);
-			}
+			FoundSkin = true;
+			if(!GhostLoader()->ReadData(Type, (char*)&pGhost->m_Skin, sizeof(CGhostSkin)))
+				Error = true;
 		}
 		else if(Type == GHOSTDATA_TYPE_CHARACTER_NO_TICK)
 		{
 			NoTick = true;
-			GhostLoader()->ReadData(Type, (char*)&pGhost->m_lPath[Index++], sizeof(CGhostCharacter_NoTick));
+			if(!GhostLoader()->ReadData(Type, (char*)&pGhost->m_lPath[Index++], sizeof(CGhostCharacter_NoTick)))
+				Error = true;
 		}
 		else if(Type == GHOSTDATA_TYPE_CHARACTER)
 		{
-			GhostLoader()->ReadData(Type, (char*)&pGhost->m_lPath[Index++], sizeof(CGhostCharacter));
+			if(!GhostLoader()->ReadData(Type, (char*)&pGhost->m_lPath[Index++], sizeof(CGhostCharacter)))
+				Error = true;
 		}
 	}
 
 	GhostLoader()->Close();
 
-	if(Index != NumTicks)
+	if(Error || Index != NumTicks)
 	{
 		pGhost->Reset();
 		return -1;
@@ -357,7 +362,8 @@ int CGhost::Load(const char *pFilename)
 	}
 
 	if(!FoundSkin)
-		InitRenderInfos(&pGhost->m_RenderInfo, "default", 0, 0, 0);
+		GetGhostSkin(&pGhost->m_Skin, "default", 0, 0, 0);
+	InitRenderInfos(pGhost);
 
 	return Slot;
 }
@@ -382,14 +388,7 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 	int NumTicks = m_aActiveGhosts[Slot].m_lPath.size();
 	Client()->GhostRecorder_Start(pItem->m_Time);
 
-	const CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
-	CGhostSkin Skin;
-	StrToInts(&Skin.m_Skin0, 6, pClientData->m_aSkinName);
-	Skin.m_UseCustomColor = pClientData->m_UseCustomColor;
-	Skin.m_ColorBody = pClientData->m_ColorBody;
-	Skin.m_ColorFeet = pClientData->m_ColorFeet;
-	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&Skin, sizeof(Skin));
-
+	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&m_aActiveGhosts[Slot].m_Skin, sizeof(CGhostSkin));
 	for(int i = 0; i < NumTicks; i++)
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&m_aActiveGhosts[Slot].m_lPath[i], sizeof(CGhostCharacter));
 

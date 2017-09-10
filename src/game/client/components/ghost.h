@@ -57,6 +57,7 @@ private:
 	{
 	public:
 		CTeeRenderInfo m_RenderInfo;
+		CGhostSkin m_Skin;
 		array<CGhostCharacter> m_lPath;
 		int m_PlaybackPos;
 
@@ -81,6 +82,7 @@ private:
 	bool m_Recording;
 	bool m_Rendering;
 
+	static void GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar);
 	static void GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter *pGhostChar);
 
@@ -92,7 +94,7 @@ private:
 	void StartRender();
 	void StopRender();
 
-	void InitRenderInfos(CTeeRenderInfo *pRenderInfo, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
+	void InitRenderInfos(CGhostItem *pGhost);
 
 	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
 
