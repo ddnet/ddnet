@@ -351,6 +351,8 @@ public:
 
 	void GhostlistPopulate();
 	CGhostItem *GetOwnGhost();
+	void UpdateOwnGhost(CGhostItem Item);
+	void DeleteGhostItem(int Index);
 
 	void setPopup(int Popup) { m_Popup = Popup; }
 

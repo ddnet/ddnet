@@ -3661,10 +3661,10 @@ void CClient::Ghost_GetPath(char *pBuf, int Size, int Time)
 		str_format(pBuf, Size, "ghosts/%s_%s_%d.%03d_%08x.gho", m_aCurrentMap, aPlayerName, Time / 1000, Time % 1000, m_pMap->Crc());
 }
 
-void CClient::GhostRecorder_Start()
+void CClient::GhostRecorder_Start(int Time)
 {
 	char aFilename[128];
-	Ghost_GetPath(aFilename, sizeof(aFilename));
+	Ghost_GetPath(aFilename, sizeof(aFilename), Time);
 	m_GhostRecorder.Start(Storage(), m_pConsole, aFilename, m_aCurrentMap, m_pMap->Crc(), g_Config.m_PlayerName);
 }
 

@@ -110,6 +110,10 @@ public:
 	int Load(const char *pFilename);
 	void Unload(int Slot);
 
+	void UnloadAll();
+
+	void SaveGhost(CMenus::CGhostItem *pItem);
+
 	class IGhostLoader *GhostLoader() const { return m_pGhostLoader; }
 	class IGhostRecorder *GhostRecorder() const { return m_pGhostRecorder; }
 };

@@ -233,15 +233,7 @@ void CGhost::StopRecord(int Time)
 
 		char aFilename[128] = { 0 };
 		if(RecordingToFile)
-		{
-			// remove old ghost
-			if(pOwnGhost && pOwnGhost->HasFile())
-				Storage()->RemoveFile(pOwnGhost->m_aFilename, IStorage::TYPE_SAVE);
-
-			// save new ghost
 			Client()->Ghost_GetPath(aFilename, sizeof(aFilename), Time);
-			Storage()->RenameFile(aTmpFilename, aFilename, IStorage::TYPE_SAVE);
-		}
 
 		// create ghost item
 		CMenus::CGhostItem Item;
@@ -249,14 +241,13 @@ void CGhost::StopRecord(int Time)
 		str_copy(Item.m_aPlayer, g_Config.m_PlayerName, sizeof(Item.m_aPlayer));
 		Item.m_Time = Time;
 		Item.m_Slot = Slot;
-		Item.m_Own = true;
+
+		// save new ghost file
+		if(Item.HasFile())
+			Storage()->RenameFile(aTmpFilename, aFilename, IStorage::TYPE_SAVE);
 
 		// add item to menu list
-		if(pOwnGhost)
-			*pOwnGhost = Item;
-		else
-			m_pClient->m_pMenus->m_lGhosts.add(Item);
-		m_pClient->m_pMenus->m_lGhosts.sort_range();
+		m_pClient->m_pMenus->UpdateOwnGhost(Item);
 	}
 	else if(RecordingToFile) // no new record
 		Storage()->RemoveFile(aTmpFilename, IStorage::TYPE_SAVE);
@@ -364,6 +355,36 @@ void CGhost::Unload(int Slot)
 	m_aActiveGhosts[Slot].Reset();
 }
 
+void CGhost::UnloadAll()
+{
+	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
+		Unload(i);
+}
+
+void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
+{
+	int Slot = pItem->m_Slot;
+	if(Slot < 0 || pItem->HasFile() || m_aActiveGhosts[Slot].Empty() || GhostRecorder()->IsRecording())
+		return;
+
+	int NumTicks = m_aActiveGhosts[Slot].m_lPath.size();
+	Client()->GhostRecorder_Start(pItem->m_Time);
+
+	const CGameClient::CClientData *pClientData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
+	CGhostSkin Skin;
+	StrToInts(&Skin.m_Skin0, 6, pClientData->m_aSkinName);
+	Skin.m_UseCustomColor = pClientData->m_UseCustomColor;
+	Skin.m_ColorBody = pClientData->m_ColorBody;
+	Skin.m_ColorFeet = pClientData->m_ColorFeet;
+	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&Skin, sizeof(Skin));
+
+	for(int i = 0; i < NumTicks; i++)
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&m_aActiveGhosts[Slot].m_lPath[i], sizeof(CGhostCharacter));
+
+	GhostRecorder()->Stop(NumTicks, pItem->m_Time);
+	Client()->Ghost_GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_Time);
+}
+
 void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGhost *)pUserData)->StartRender();
@@ -424,8 +445,7 @@ void CGhost::OnReset()
 void CGhost::OnMapLoad()
 {
 	OnReset();
-	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
-		Unload(i);
+	UnloadAll();
 	m_pClient->m_pMenus->GhostlistPopulate();
 	m_IsSolo = true;
 }
