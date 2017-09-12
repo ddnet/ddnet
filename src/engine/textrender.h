@@ -43,6 +43,7 @@ public:
 
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length) = 0;
+	virtual void UploadText(int TextureID, const char *pText, int Length, float x, float y, float Size) = 0;
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
