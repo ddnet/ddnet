@@ -19,15 +19,23 @@ public:
 	int Num() const { return m_Count; }
 
 	virtual void OnMapLoad();
+	virtual void OnInit();
 	void LoadBackground(class IMap *pMap);
 
 	// DDRace
 
 	int GetEntities();
+	
+	int GetOverlayBottom();
+	int GetOverlayTop();
+	int GetOverlayCenter();
 
 private:
 
 	int m_EntitiesTextures;
+	int m_OverlayBottomTexture;
+	int m_OverlayTopTexture;
+	int m_OverlayCenterTexture;
 };
 
 #endif
