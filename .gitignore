@@ -65,6 +65,7 @@ DDNet-Server_d
 DDNet-Server_sql
 DDNet-Server_sql_d
 
+/build
 CMakeCache.txt
 CMakeSettings*
 CMakeFiles

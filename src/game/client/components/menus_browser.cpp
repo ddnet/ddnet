@@ -669,8 +669,19 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if(g_Config.m_UiPage == PAGE_DDNET)
 	{
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-		if (DoButton_CheckBox(&g_Config.m_BrFilterUnfinishedMap, Localize("Unfinished map"), g_Config.m_BrFilterUnfinishedMap, &Button))
-			g_Config.m_BrFilterUnfinishedMap ^= 1;
+		if (DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Indicate map finish"), g_Config.m_BrIndicateFinished, &Button))
+			g_Config.m_BrIndicateFinished ^= 1;
+
+		if(g_Config.m_BrIndicateFinished)
+		{
+			ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+			if (DoButton_CheckBox(&g_Config.m_BrFilterUnfinishedMap, Localize("Unfinished map"), g_Config.m_BrFilterUnfinishedMap, &Button))
+				g_Config.m_BrFilterUnfinishedMap ^= 1;
+		}
+		else
+		{
+			g_Config.m_BrFilterUnfinishedMap = 0;
+		}
 
 		// add more space
 		ServerFilter.HSplitTop(10.0f, 0, &ServerFilter);

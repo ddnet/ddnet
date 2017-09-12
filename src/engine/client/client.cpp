@@ -2690,7 +2690,10 @@ void CClient::Run()
 	// loads the existing ddnet-info.json file if it exists
 	LoadDDNetInfo();
 	// but still request the new one from server
-	RequestDDNetInfo();
+	if(g_Config.m_ClShowWelcome)
+		g_Config.m_ClShowWelcome = 0;
+	else
+		RequestDDNetInfo();
 
 	bool LastD = false;
 	bool LastQ = false;
@@ -3622,10 +3625,23 @@ bool CClient::RaceRecordIsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	char aEscaped[128];
+	#if defined(CONF_FAMILY_WINDOWS)
+	static bool s_IsWinXP = os_compare_version(5U, 1U) <= 0;
+	#else
+	static bool s_IsWinXP = false;
+	#endif
+	if(s_IsWinXP)
+		str_copy(aUrl, "http://info.ddnet.tw/info", sizeof(aUrl));
+	else
+		str_copy(aUrl, "https://info.ddnet.tw/info", sizeof(aUrl));
 
-	Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
-	str_format(aUrl, sizeof(aUrl), "https://info.ddnet.tw/info?name=%s", aEscaped);
+	if(g_Config.m_BrIndicateFinished)
+	{
+		char aEscaped[128];
+		Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
+		str_append(aUrl, "?name=", sizeof(aUrl));
+		str_append(aUrl, aEscaped, sizeof(aUrl));
+	}
 
 	m_pDDNetInfoTask = new CFetchTask(true, /*UseDDNetCA*/ true);
 	Fetcher()->QueueAdd(m_pDDNetInfoTask, aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE);
