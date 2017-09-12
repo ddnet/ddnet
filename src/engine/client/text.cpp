@@ -745,6 +745,79 @@ public:
 			pCursor->m_Y = DrawY;
 	}
 
+	virtual void UploadText(int TextureID, const char *pText, int Length, float x, float y, float Size)
+	{
+		CFont *pFont = m_pDefaultFont;
+		FT_Bitmap *pBitmap;
+
+		if(!pFont)
+			return;
+		
+		// set length
+		if(Length < 0)
+			Length = str_length(pText);
+
+		const char *pCurrent = (char *)pText;
+		const char *pEnd = pCurrent+Length;
+				
+		int ChrCount = 0;
+		
+		int WidthLastChars = 0;
+	
+		while(pCurrent < pEnd)
+		{
+			int NewLine = 0;
+			const char *pBatchEnd = pEnd;
+			
+			const char *pTmp = pCurrent;
+			int NextCharacter = str_utf8_decode(&pTmp);
+			
+			if(NextCharacter){
+				int SlotID = 0;
+				int SlotW = Size;
+				int SlotH = Size;
+				int SlotSize = SlotW*SlotH;
+				int xt = 1;
+				int yt = 1;
+				unsigned int px, py;
+				
+				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, Size);
+
+				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
+				{
+					dbg_msg("pFont", "error loading glyph %d", NextCharacter);
+					pCurrent = pTmp;
+					continue;
+				}
+				
+				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
+
+				// prepare glyph data
+				mem_zero(ms_aGlyphData, SlotSize);
+
+				if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
+				{
+					for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
+						for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
+							ms_aGlyphData[(py+yt)*SlotW+px+xt] = pBitmap->buffer[py*pBitmap->pitch+px]; // ignore_convention
+				}
+				else if(pBitmap->pixel_mode == FT_PIXEL_MODE_MONO) // ignore_convention
+				{
+					for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
+						for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
+						{
+							if(pBitmap->buffer[py*pBitmap->pitch+px/8]&(1<<(7-(px%8)))) // ignore_convention
+								ms_aGlyphData[(py+yt)*SlotW+px+xt] = 255;
+						}
+				}
+				
+				Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, Size, Size, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
+				WidthLastChars += (pBitmap->width + 1);
+			}
+			++ChrCount;
+			pCurrent = pTmp;
+		}
+	}
 };
 
 IEngineTextRender *CreateEngineTextRender() { return new CTextRender; }
