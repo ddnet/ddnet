@@ -468,64 +468,80 @@ void *CCommandProcessorFragment_OpenGL3_3::Rescale(int Width, int Height, int Ne
 	return pTmpData;
 }
 
-void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState &State)
+void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram* pProgram)
 {
-	// blend
-	switch(State.m_BlendMode)
-	{
-	case CCommandBuffer::BLEND_NONE:
-		glDisable(GL_BLEND);
-		break;
-	case CCommandBuffer::BLEND_ALPHA:
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		break;
-	case CCommandBuffer::BLEND_ADDITIVE:
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		break;
-	default:
-		dbg_msg("render", "unknown blendmode %d\n", State.m_BlendMode);
-	};
+	if(State.m_BlendMode != m_LastBlendMode/* && State.m_BlendMode != CCommandBuffer::BLEND_NONE*/){
+		// blend
+		switch(State.m_BlendMode)
+		{
+		case CCommandBuffer::BLEND_NONE:
+			//we don't really need this anymore
+			glDisable(GL_BLEND);
+			break;
+		case CCommandBuffer::BLEND_ALPHA:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			break;
+		case CCommandBuffer::BLEND_ADDITIVE:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			break;
+		default:
+			dbg_msg("render", "unknown blendmode %d\n", State.m_BlendMode);
+		};
+		
+		m_LastBlendMode = State.m_BlendMode;
+	}
 
 	// clip
 	if(State.m_ClipEnable)
 	{
 		glScissor(State.m_ClipX, State.m_ClipY, State.m_ClipW, State.m_ClipH);
 		glEnable(GL_SCISSOR_TEST);
+		m_LastClipEnable = true;
 	}
-	else
+	else if(m_LastClipEnable) {
+		//dont disable it always
 		glDisable(GL_SCISSOR_TEST);
+		m_LastClipEnable = false;
+	}
 
 	// texture
 	if(State.m_Texture >= 0 && State.m_Texture < CCommandBuffer::MAX_TEXTURES)
 	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
-		glBindSampler(0, m_aTextures[State.m_Texture].m_Sampler);
-		m_QuadProgram->SetUniform(m_QuadProgram->m_LocIsTextured, (int)1);
-		m_QuadProgram->SetUniform(m_QuadProgram->m_LocTextureSampler, (int)0);
+		int Slot = State.m_Texture % m_MaxTextureUnits;
+		
+		if(!IsAndUpdateTextureSlotBound(Slot, State.m_Texture)) {
+			glActiveTexture(GL_TEXTURE0 + Slot);
+			glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
+			glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
+		}
+		if(pProgram->m_LocIsTextured != -1) pProgram->SetUniform(pProgram->m_LocIsTextured, (int)1);
+		pProgram->SetUniform(pProgram->m_LocTextureSampler, (int)Slot);
 
-		switch (State.m_WrapMode)
-		{
-		case CCommandBuffer::WRAP_REPEAT:
-			glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			break;
-		case CCommandBuffer::WRAP_CLAMP:
-			glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			break;
-		default:
-			dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
-		};
+		if(m_TextureSlotBoundToUnit[Slot].m_LastWrapMode != State.m_WrapMode){
+			switch (State.m_WrapMode)
+			{
+			case CCommandBuffer::WRAP_REPEAT:
+				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				break;
+			case CCommandBuffer::WRAP_CLAMP:
+				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glSamplerParameteri(m_aTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				break;
+			default:
+				dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+			};
+			m_TextureSlotBoundToUnit[Slot].m_LastWrapMode = State.m_WrapMode;
+		}
 	}
 	else {
-		m_QuadProgram->SetUniform(m_QuadProgram->m_LocIsTextured, (int)0);
+		if(pProgram->m_LocIsTextured != -1) pProgram->SetUniform(pProgram->m_LocIsTextured, (int)0);
 	}
 
 	// screen mapping
-	//ortho matrix... we only need this projection... so no real need just made all structs here..
+	//ortho matrix... we only need this projection... just made all structs here..
 	struct vec4{
 		vec4() {}
 		vec4(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} 
@@ -544,61 +560,256 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 	vec4 r1( (2.f/(State.m_ScreenBR.x - State.m_ScreenTL.x)), 0, 0, -((State.m_ScreenBR.x + State.m_ScreenTL.x)/(State.m_ScreenBR.x - State.m_ScreenTL.x)));
 	vec4 r2( 0, (2.f/(State.m_ScreenTL.y - State.m_ScreenBR.y)), 0, -((State.m_ScreenTL.y + State.m_ScreenBR.y)/(State.m_ScreenTL.y - State.m_ScreenBR.y)));
 	vec4 r3( 0, 0, -(2.f/(9.f)), -((11.f)/(9.f)));
-	vec4 r4( 0, 0, 0, 1.f);
+	vec4 r4( 0, 0, 0, 1.0f);
 	
 	mat4 m(r1,r2,r3,r4);
 	
-	glUniformMatrix4fv(m_QuadProgram->m_LocPos, 1, true, (float*)&m);
+	//transpose bcs of column-major order of opengl
+	glUniformMatrix4fv(pProgram->m_LocPos, 1, true, (float*)&m);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
 {
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
-	m_QuadProgram = new CGLSLQuadProgram;
+	m_LastBlendMode = -1;
+	m_LastClipEnable = false;
+	m_PrimitiveProgram = new CGLSLPrimitiveProgram;
+	m_TileProgram = new CGLSLTileProgram;
+	m_TileProgramTextured = new CGLSLTileProgram;
+	m_BorderTileProgram = new CGLSLBorderTileProgram;
+	m_BorderTileProgramTextured = new CGLSLBorderTileProgram;
+	m_BorderTileLineProgram = new CGLSLBorderTileLineProgram;
+	m_BorderTileLineProgramTextured = new CGLSLBorderTileLineProgram;
 	
-	CGLSL QuadVertexShader;
-	CGLSL QuadFragmentShader;
-	QuadVertexShader.LoadShader("./shader/quad.vert", GL_VERTEX_SHADER);
-	QuadFragmentShader.LoadShader("./shader/quad.frag", GL_FRAGMENT_SHADER);
+	{
+		CGLSL PrimitiveVertexShader;
+		CGLSL PrimitiveFragmentShader;
+		PrimitiveVertexShader.LoadShader("./shader/prim.vert", GL_VERTEX_SHADER);
+		PrimitiveFragmentShader.LoadShader("./shader/prim.frag", GL_FRAGMENT_SHADER);
+		
+		m_PrimitiveProgram->CreateProgram();
+		m_PrimitiveProgram->AddShader(&PrimitiveVertexShader);
+		m_PrimitiveProgram->AddShader(&PrimitiveFragmentShader);
+		m_PrimitiveProgram->LinkProgram();
+		
+		//detach shader, they are not needed anymore after linking
+		m_PrimitiveProgram->DetachShader(&PrimitiveVertexShader);
+		m_PrimitiveProgram->DetachShader(&PrimitiveFragmentShader);
+		
+		m_PrimitiveProgram->UseProgram();
+		
+		m_PrimitiveProgram->m_LocPos = m_PrimitiveProgram->GetUniformLoc("Pos");
+		m_PrimitiveProgram->m_LocIsTextured = m_PrimitiveProgram->GetUniformLoc("isTextured");
+		m_PrimitiveProgram->m_LocTextureSampler = m_PrimitiveProgram->GetUniformLoc("textureSampler");
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		VertexShader.LoadShader("./shader/tile.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("./shader/tile.frag", GL_FRAGMENT_SHADER);
+		
+		m_TileProgram->CreateProgram();
+		m_TileProgram->AddShader(&VertexShader);
+		m_TileProgram->AddShader(&FragmentShader);
+		m_TileProgram->LinkProgram();
+		
+		//detach shader, they are not needed anymore after linking
+		m_TileProgram->DetachShader(&VertexShader);
+		m_TileProgram->DetachShader(&FragmentShader);
+		
+		m_TileProgram->UseProgram();
+		
+		m_TileProgram->m_LocPos = m_TileProgram->GetUniformLoc("Pos");
+		m_TileProgram->m_LocIsTextured = -1;
+		m_TileProgram->m_LocTextureSampler = -1;
+		m_TileProgram->m_LocColor = m_TileProgram->GetUniformLoc("vertColor");
+		m_TileProgram->m_LocZoomFactor = -1;
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		VertexShader.LoadShader("./shader/tiletex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("./shader/tiletex.frag", GL_FRAGMENT_SHADER);
+		
+		m_TileProgramTextured->CreateProgram();
+		m_TileProgramTextured->AddShader(&VertexShader);
+		m_TileProgramTextured->AddShader(&FragmentShader);
+		m_TileProgramTextured->LinkProgram();
+		
+		//detach shader, they are not needed anymore after linking
+		m_TileProgramTextured->DetachShader(&VertexShader);
+		m_TileProgramTextured->DetachShader(&FragmentShader);
+		
+		m_TileProgramTextured->UseProgram();
+		
+		m_TileProgramTextured->m_LocPos = m_TileProgramTextured->GetUniformLoc("Pos");
+		m_TileProgramTextured->m_LocIsTextured = -1;
+		m_TileProgramTextured->m_LocTextureSampler = m_TileProgramTextured->GetUniformLoc("textureSampler");
+		m_TileProgramTextured->m_LocColor = m_TileProgramTextured->GetUniformLoc("vertColor");
+		m_TileProgramTextured->m_LocZoomFactor = m_TileProgramTextured->GetUniformLoc("ZoomFactor");
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		VertexShader.LoadShader("./shader/bordertile.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("./shader/bordertile.frag", GL_FRAGMENT_SHADER);
+		
+		m_BorderTileProgram->CreateProgram();
+		m_BorderTileProgram->AddShader(&VertexShader);
+		m_BorderTileProgram->AddShader(&FragmentShader);
+		m_BorderTileProgram->LinkProgram();
+		
+		//detach shader, they are not needed anymore after linking
+		m_BorderTileProgram->DetachShader(&VertexShader);
+		m_BorderTileProgram->DetachShader(&FragmentShader);
+		
+		m_BorderTileProgram->UseProgram();
+		
+		m_BorderTileProgram->m_LocPos = m_BorderTileProgram->GetUniformLoc("Pos");
+		m_BorderTileProgram->m_LocIsTextured = -1;
+		m_BorderTileProgram->m_LocTextureSampler = -1;
+		m_BorderTileProgram->m_LocColor = m_BorderTileProgram->GetUniformLoc("vertColor");
+		m_BorderTileProgram->m_LocZoomFactor = -1;
+		m_BorderTileProgram->m_LocOffset = m_BorderTileProgram->GetUniformLoc("Offset");
+		m_BorderTileProgram->m_LocDir = m_BorderTileProgram->GetUniformLoc("Dir");
+		m_BorderTileProgram->m_LocJumpIndex = m_BorderTileProgram->GetUniformLoc("JumpIndex");
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		VertexShader.LoadShader("./shader/bordertiletex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("./shader/bordertiletex.frag", GL_FRAGMENT_SHADER);
+		
+		m_BorderTileProgramTextured->CreateProgram();
+		m_BorderTileProgramTextured->AddShader(&VertexShader);
+		m_BorderTileProgramTextured->AddShader(&FragmentShader);
+		m_BorderTileProgramTextured->LinkProgram();
+		
+		//detach shader, they are not needed anymore after linking
+		m_BorderTileProgramTextured->DetachShader(&VertexShader);
+		m_BorderTileProgramTextured->DetachShader(&FragmentShader);
+		
+		m_BorderTileProgramTextured->UseProgram();
+		
+		m_BorderTileProgramTextured->m_LocPos = m_BorderTileProgramTextured->GetUniformLoc("Pos");
+		m_BorderTileProgramTextured->m_LocIsTextured = -1;
+		m_BorderTileProgramTextured->m_LocTextureSampler = m_BorderTileProgramTextured->GetUniformLoc("textureSampler");
+		m_BorderTileProgramTextured->m_LocColor = m_BorderTileProgramTextured->GetUniformLoc("vertColor");
+		m_BorderTileProgramTextured->m_LocZoomFactor = m_BorderTileProgramTextured->GetUniformLoc("ZoomFactor");
+		m_BorderTileProgramTextured->m_LocOffset = m_BorderTileProgramTextured->GetUniformLoc("Offset");
+		m_BorderTileProgramTextured->m_LocDir = m_BorderTileProgramTextured->GetUniformLoc("Dir");
+		m_BorderTileProgramTextured->m_LocJumpIndex = m_BorderTileProgramTextured->GetUniformLoc("JumpIndex");
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		VertexShader.LoadShader("./shader/bordertileline.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("./shader/bordertileline.frag", GL_FRAGMENT_SHADER);
+		
+		m_BorderTileLineProgram->CreateProgram();
+		m_BorderTileLineProgram->AddShader(&VertexShader);
+		m_BorderTileLineProgram->AddShader(&FragmentShader);
+		m_BorderTileLineProgram->LinkProgram();
+		
+		//detach shader, they are not needed anymore after linking
+		m_BorderTileLineProgram->DetachShader(&VertexShader);
+		m_BorderTileLineProgram->DetachShader(&FragmentShader);
+		
+		m_BorderTileLineProgram->UseProgram();
+		
+		m_BorderTileLineProgram->m_LocPos = m_BorderTileLineProgram->GetUniformLoc("Pos");
+		m_BorderTileLineProgram->m_LocIsTextured = -1;
+		m_BorderTileLineProgram->m_LocTextureSampler = -1;
+		m_BorderTileLineProgram->m_LocColor = m_BorderTileLineProgram->GetUniformLoc("vertColor");
+		m_BorderTileLineProgram->m_LocZoomFactor = -1;
+		m_BorderTileLineProgram->m_LocDir = m_BorderTileLineProgram->GetUniformLoc("Dir");
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		VertexShader.LoadShader("./shader/bordertilelinetex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("./shader/bordertilelinetex.frag", GL_FRAGMENT_SHADER);
+		
+		m_BorderTileLineProgramTextured->CreateProgram();
+		m_BorderTileLineProgramTextured->AddShader(&VertexShader);
+		m_BorderTileLineProgramTextured->AddShader(&FragmentShader);
+		m_BorderTileLineProgramTextured->LinkProgram();
+		
+		//detach shader, they are not needed anymore after linking
+		m_BorderTileLineProgramTextured->DetachShader(&VertexShader);
+		m_BorderTileLineProgramTextured->DetachShader(&FragmentShader);
+		
+		m_BorderTileLineProgramTextured->UseProgram();
+		
+		m_BorderTileLineProgramTextured->m_LocPos = m_BorderTileLineProgramTextured->GetUniformLoc("Pos");
+		m_BorderTileLineProgramTextured->m_LocIsTextured = -1;
+		m_BorderTileLineProgramTextured->m_LocTextureSampler = m_BorderTileLineProgramTextured->GetUniformLoc("textureSampler");
+		m_BorderTileLineProgramTextured->m_LocColor = m_BorderTileLineProgramTextured->GetUniformLoc("vertColor");
+		m_BorderTileLineProgramTextured->m_LocZoomFactor = m_BorderTileLineProgramTextured->GetUniformLoc("ZoomFactor");
+		m_BorderTileLineProgramTextured->m_LocDir = m_BorderTileLineProgramTextured->GetUniformLoc("Dir");
+	}
 	
-	m_QuadProgram->CreateProgram();
-	m_QuadProgram->AddShader(&QuadVertexShader);
-	m_QuadProgram->AddShader(&QuadFragmentShader);
-	m_QuadProgram->LinkProgram();
-	
-	//detach shader, they are not needed anymore after linking
-	m_QuadProgram->DetachShader(&QuadVertexShader);
-	m_QuadProgram->DetachShader(&QuadFragmentShader);
-	
-	m_QuadProgram->UseProgram();
-	
-	m_QuadProgram->m_LocPos = m_QuadProgram->GetUniformLoc("Pos");
-	m_QuadProgram->m_LocIsTextured = m_QuadProgram->GetUniformLoc("isTextured");
-	m_QuadProgram->m_LocTextureSampler = m_QuadProgram->GetUniformLoc("textureSampler");
-
-	glActiveTexture(GL_TEXTURE0);
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	
-	glGenBuffers(1, &QuadDrawBufferID);
-	glGenVertexArrays(1, &QuadDrawVertexID);
-	glBindVertexArray(QuadDrawVertexID);
+	glGenBuffers(1, &PrimitiveDrawBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, PrimitiveDrawBufferID);
+	glGenVertexArrays(1, &PrimitiveDrawVertexID);
+	glBindVertexArray(PrimitiveDrawVertexID);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	
+	//query maximum of allowed textures
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_MaxTextureUnits);
+	m_TextureSlotBoundToUnit.resize(m_MaxTextureUnits);
+	for(int i = 0; i < m_MaxTextureUnits; ++i) {
+		m_TextureSlotBoundToUnit[i].m_TextureSlot = -1;
+		m_TextureSlotBoundToUnit[i].m_LastWrapMode = -1;
+	}
+	
+	mem_zero(m_aTextures, sizeof(m_aTextures));
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
-	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
-	delete m_QuadProgram;
+	//clean up everything
+	m_PrimitiveProgram->DeleteProgram();
+	//m_QuadProgram->DeleteProgram();
+	m_TileProgram->DeleteProgram();
+	m_TileProgramTextured->DeleteProgram();
+	m_BorderTileProgram->DeleteProgram();
+	m_BorderTileProgramTextured->DeleteProgram();
+	m_BorderTileLineProgram->DeleteProgram();
+	m_BorderTileLineProgramTextured->DeleteProgram();
+	
+	delete m_PrimitiveProgram;
+	//delete m_QuadProgram;
+	delete m_TileProgram;
+	delete m_TileProgramTextured;
+	delete m_BorderTileProgram;
+	delete m_BorderTileProgramTextured;
+	delete m_BorderTileLineProgram;
+	delete m_BorderTileLineProgramTextured;
 	
 	glBindVertexArray(0);
-	glDeleteBuffers(1, &QuadDrawBufferID);
-	glDeleteVertexArrays(1, &QuadDrawVertexID);
+	glDeleteBuffers(1, &PrimitiveDrawBufferID);
+	glDeleteVertexArrays(1, &PrimitiveDrawVertexID);
+	
+	for(int i = 0; i < CCommandBuffer::MAX_TEXTURES; ++i){
+		DestroyTexture(i);
+	}
+	
+	for(int i = 0; i < m_VisualObjects.size(); ++i){
+		DestroyVisualObjects(i);
+	}
+	m_VisualObjects.clear();
+	
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
 {
+	int Slot = pCommand->m_Slot % m_MaxTextureUnits;
+	//just tell, that we using this texture now
+	IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
+	glActiveTexture(GL_TEXTURE0 + Slot);
 	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height,
 		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pCommand->m_pData);
@@ -607,9 +818,14 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
 {
-	glDeleteTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
-	glDeleteSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler);
-	*m_pTextureMemoryUsage -= m_aTextures[pCommand->m_Slot].m_MemSize;
+	int Slot = pCommand->m_Slot % m_MaxTextureUnits;
+	IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
+	glActiveTexture(GL_TEXTURE0 + Slot);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindSampler(Slot, 0);
+	m_TextureSlotBoundToUnit[Slot].m_TextureSlot = -1;
+	m_TextureSlotBoundToUnit[Slot].m_LastWrapMode = -1;
+	DestroyTexture(pCommand->m_Slot);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
@@ -658,18 +874,22 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		switch(StoreOglformat)
 		{
 			case GL_RGB: StoreOglformat = GL_COMPRESSED_RGB; break;
-			case GL_RED: StoreOglformat = GL_COMPRESSED_ALPHA; break;
+			//this needs further checks. it seems on some gpus COMPRESSED_ALPHA isnt in the core profile
+			case GL_RED: StoreOglformat = GL_COMPRESSED_RGBA; break;
 			case GL_RGBA: StoreOglformat = GL_COMPRESSED_RGBA; break;
 			default: StoreOglformat = GL_COMPRESSED_RGBA;
 		}
 	}
 #endif
-	glActiveTexture(GL_TEXTURE0);
+	int Slot = pCommand->m_Slot % m_MaxTextureUnits;
+	//just tell, that we using this texture now
+	IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
+	glActiveTexture(GL_TEXTURE0 + Slot);
 	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
 	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 
 	glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler);
-	glBindSampler(0, m_aTextures[pCommand->m_Slot].m_Sampler);
+	glBindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler);
 
 	
 	if(Oglformat == GL_RED) {
@@ -712,47 +932,33 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Clear(const CCommandBuffer::SComma
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand)
 {
-	SetState(pCommand->m_State);
+	m_PrimitiveProgram->UseProgram();
+	SetState(pCommand->m_State, m_PrimitiveProgram);
 	
 	int Count = 0;
 	switch(pCommand->m_PrimType)
 	{
-	case CCommandBuffer::PRIMTYPE_QUADS:
-		Count = pCommand->m_PrimCount*4;
-		break;
 	case CCommandBuffer::PRIMTYPE_LINES:
 		Count = pCommand->m_PrimCount*2;
 		break;
 	case CCommandBuffer::PRIMTYPE_TRIANGLES:
 		Count = pCommand->m_PrimCount*3;
 		break;
+	default:
+		return;
 	};
 	
-	glBindBuffer(GL_ARRAY_BUFFER, QuadDrawBufferID);
-	glBindVertexArray(QuadDrawVertexID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * Count, (char*)pCommand->m_pVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, PrimitiveDrawBufferID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * Count, (char*)pCommand->m_pVertices, GL_STREAM_DRAW);
+	glBindVertexArray(PrimitiveDrawVertexID);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), 0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 3));
 	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 5));
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	/*glVertexPointer(3, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices + sizeof(float)*3);
-	glColorPointer(4, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char*)pCommand->m_pVertices + sizeof(float)*5);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);*/
 
 	switch(pCommand->m_PrimType)
 	{
-	case CCommandBuffer::PRIMTYPE_QUADS:
-#if defined(__ANDROID__)
-		for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
-			glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
-#else
-		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount*4);
-#endif
-		break;
+	//we dont support GL_QUADS due to core profile
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
 		break;
@@ -817,12 +1023,288 @@ bool CCommandProcessorFragment_OpenGL3_3::RunCommand(const CCommandBuffer::SComm
 	case CCommandBuffer::CMD_CLEAR: Cmd_Clear(static_cast<const CCommandBuffer::SCommand_Clear *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER: Cmd_Render(static_cast<const CCommandBuffer::SCommand_Render *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_SCREENSHOT: Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_Screenshot *>(pBaseCommand)); break;
+	
+	case CCommandBuffer::CMD_CREATE_VERTEX_BUFFER_OBJECT: Cmd_CreateVertBuffer(static_cast<const CCommandBuffer::SCommand_CreateVertexBufferObject *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_APPEND_VERTEX_BUFFER_OBJECT: Cmd_AppendVertBuffer(static_cast<const CCommandBuffer::SCommand_AppendVertexBufferObject *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_CREATE_VERTEX_ARRAY_OBJECT: Cmd_CreateVertArray(static_cast<const CCommandBuffer::SCommand_CreateVertexArrayObject *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_CREATE_INDEX_BUFFER_OBJECT: Cmd_CreateIndexBuffer(static_cast<const CCommandBuffer::SCommand_CreateIndexBufferObject *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_APPEND_INDEX_BUFFER_OBJECT: Cmd_AppendIndexBuffer(static_cast<const CCommandBuffer::SCommand_AppendIndexBufferObject *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_RENDER_IBO_VERTEX_ARRAY: Cmd_RenderVertexArray(static_cast<const CCommandBuffer::SCommand_RenderVertexArray *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_DESTROY_VISUAL: Cmd_DestroyVertexArray(static_cast<const CCommandBuffer::SCommand_DestroyVisual *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_RENDER_BORDER_TILE: Cmd_RenderBorderTile(static_cast<const CCommandBuffer::SCommand_RenderBorderTile *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_RENDER_BORDER_TILE_LINE: Cmd_RenderBorderTileLine(static_cast<const CCommandBuffer::SCommand_RenderBorderTileLine *>(pBaseCommand)); break;
 	default: return false;
 	}
 
 	return true;
 }
 
+bool CCommandProcessorFragment_OpenGL3_3::IsAndUpdateTextureSlotBound(int IDX, int Slot){
+	if(m_TextureSlotBoundToUnit[IDX].m_TextureSlot == Slot) return true;
+	else {
+		//the texture slot uses this index now
+		m_TextureSlotBoundToUnit[IDX].m_TextureSlot = Slot;
+		m_TextureSlotBoundToUnit[IDX].m_LastWrapMode = -1;
+		return false;
+	}
+}
+
+void CCommandProcessorFragment_OpenGL3_3::DestroyTexture(int Slot){
+	glDeleteTextures(1, &m_aTextures[Slot].m_Tex);
+	glDeleteSamplers(1, &m_aTextures[Slot].m_Sampler);
+	*m_pTextureMemoryUsage -= m_aTextures[Slot].m_MemSize;
+	
+	m_aTextures[Slot].m_Tex = 0;
+	m_aTextures[Slot].m_Sampler = 0;
+}
+
+void CCommandProcessorFragment_OpenGL3_3::DestroyVisualObjects(int Index){
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	if(VisualObject.m_VertArrayID != 0) glDeleteBuffers(1, &VisualObject.m_VertArrayID);
+	if(VisualObject.m_VertBufferID != 0) glDeleteBuffers(1, &VisualObject.m_VertBufferID);//this line should never be called
+	if(VisualObject.m_IndexBufferID != 0) glDeleteBuffers(1, &VisualObject.m_IndexBufferID);
+
+	VisualObject.m_NumElements = 0;
+	VisualObject.m_IsTextured = false;
+	VisualObject.m_NumIndices = 0;
+	VisualObject.m_IndexBufferID = VisualObject.m_VertBufferID = VisualObject.m_VertArrayID = 0;
+}
+	
+void CCommandProcessorFragment_OpenGL3_3::Cmd_DestroyVertexArray(const CCommandBuffer::SCommand_DestroyVisual *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	if(Index >= m_VisualObjects.size())
+		return;
+	
+	DestroyVisualObjects(Index);
+}
+
+void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	//if space not there return
+	if(Index >= m_VisualObjects.size())
+		return;
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	if(VisualObject.m_VertArrayID == 0 || VisualObject.m_IndexBufferID == 0) return;
+	
+	CGLSLBorderTileProgram* pProgram = NULL;
+	if(VisualObject.m_IsTextured) {
+		pProgram = m_BorderTileProgramTextured;
+	}
+	else pProgram = m_BorderTileProgram;
+	pProgram->UseProgram();
+	if(pProgram->m_LocZoomFactor != -1) pProgram->SetUniform(pProgram->m_LocZoomFactor, (float)(pCommand->m_ZoomScreenRatio < .5f ? .5f : pCommand->m_ZoomScreenRatio));
+	
+	SetState(pCommand->m_State, pProgram);
+	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);
+	
+	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (float*)&pCommand->m_Offset);
+	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (float*)&pCommand->m_Dir);
+	pProgram->SetUniform(pProgram->m_LocJumpIndex, (int)pCommand->m_JumpIndex);
+	
+	glBindVertexArray(VisualObject.m_VertArrayID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VisualObject.m_IndexBufferID);
+		
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum);
+}
+
+void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	//if space not there return
+	if(Index >= m_VisualObjects.size())
+		return;
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	if(VisualObject.m_VertArrayID == 0 || VisualObject.m_IndexBufferID == 0) return;
+	
+	CGLSLBorderTileLineProgram* pProgram = NULL;
+	if(VisualObject.m_IsTextured) {
+		pProgram = m_BorderTileLineProgramTextured;
+	}
+	else pProgram = m_BorderTileLineProgram;
+	pProgram->UseProgram();
+	if(pProgram->m_LocZoomFactor != -1) pProgram->SetUniform(pProgram->m_LocZoomFactor, (float)(pCommand->m_ZoomScreenRatio < .5f ? .5f : pCommand->m_ZoomScreenRatio));
+	
+	SetState(pCommand->m_State, pProgram);
+	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);	
+	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (float*)&pCommand->m_Dir);
+	
+	glBindVertexArray(VisualObject.m_VertArrayID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VisualObject.m_IndexBufferID);
+		
+	glDrawElementsInstanced(GL_TRIANGLES, pCommand->m_IndexDrawNum, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum);
+}
+	
+void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderVertexArray(const CCommandBuffer::SCommand_RenderVertexArray *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	//if space not there return
+	if(Index >= m_VisualObjects.size())
+		return;
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	if(VisualObject.m_VertArrayID == 0 || VisualObject.m_IndexBufferID == 0) return;
+
+	GLsizei* DrawCount = new GLsizei[pCommand->m_IndicesDrawNum];
+	GLvoid** Offsets = new GLvoid*[pCommand->m_IndicesDrawNum];
+	int c = 0;
+	for (int i = 0; i < pCommand->m_IndicesDrawNum; ++i) {
+		if (pCommand->m_pIndicesOffsets[i].m_DrawCount == 0) continue;
+		DrawCount[c] = pCommand->m_pIndicesOffsets[i].m_DrawCount;
+		Offsets[c++] = pCommand->m_pIndicesOffsets[i].m_Offset;
+	}
+	if (c == 0) {
+		delete[] DrawCount;
+		delete[] Offsets;
+		return; //nothing to draw
+	}
+	
+	CGLSLTileProgram* pProgram = NULL;
+	if(VisualObject.m_IsTextured) {
+		pProgram = m_TileProgramTextured;
+	}
+	else pProgram = m_TileProgram;
+	
+	pProgram->UseProgram();
+	if(pProgram->m_LocZoomFactor != -1) pProgram->SetUniform(pProgram->m_LocZoomFactor, (float)(pCommand->m_ZoomScreenRatio < .5f ? .5f : pCommand->m_ZoomScreenRatio));
+	
+	SetState(pCommand->m_State, pProgram);
+	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);
+		
+	glBindVertexArray(VisualObject.m_VertArrayID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VisualObject.m_IndexBufferID);
+	
+	//for some reasons this function seems not to be in the coreprofile for quite some gpus
+	//glMultiDrawElements(GL_TRIANGLES, DrawCount, GL_UNSIGNED_INT, Offsets, c);
+	for (int i = 0; i < c; ++i) {
+		glDrawElements(GL_TRIANGLES, DrawCount[i], GL_UNSIGNED_INT, Offsets[i]);
+	}
+
+	delete[] DrawCount;
+	delete[] Offsets;
+}
+	
+void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateVertBuffer(const CCommandBuffer::SCommand_CreateVertexBufferObject *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	//create necessary space
+	if(Index >= m_VisualObjects.size()){
+		for(int i = m_VisualObjects.size(); i < Index + 1; ++i){
+			m_VisualObjects.push_back(SVisualObject());
+		}
+	}
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	VisualObject.m_NumElements = pCommand->m_NumVertices;
+	VisualObject.m_IsTextured = pCommand->m_IsTextured;
+	
+	glGenBuffers(1, &VisualObject.m_VertBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, VisualObject.m_VertBufferID);
+	
+	GLsizeiptr size = (VisualObject.m_IsTextured ? (sizeof(float) + sizeof(unsigned char) * 2) : (sizeof(float)));	
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(VisualObject.m_NumElements * size), pCommand->m_Elements, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void CCommandProcessorFragment_OpenGL3_3::Cmd_AppendVertBuffer(const CCommandBuffer::SCommand_AppendVertexBufferObject *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	
+	//if space not there return
+	if(Index >= m_VisualObjects.size()){
+		return;
+	}
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	
+	glBindBuffer(GL_COPY_READ_BUFFER, VisualObject.m_VertBufferID);
+	GLuint NewVerBufferID;
+	glGenBuffers(1, &NewVerBufferID);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, NewVerBufferID);
+	GLsizeiptr size = (VisualObject.m_IsTextured ? (sizeof(float) + sizeof(unsigned char) * 2) : (sizeof(float)));
+	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)((VisualObject.m_NumElements + pCommand->m_NumVertices) * size), NULL, GL_STATIC_DRAW);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, (GLsizeiptr)(VisualObject.m_NumElements * size));
+	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(VisualObject.m_NumElements * size), (GLsizeiptr)(pCommand->m_NumVertices * size), pCommand->m_Elements);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+	glBindBuffer(GL_COPY_READ_BUFFER, 0);
+	
+	glDeleteBuffers(1, &VisualObject.m_VertBufferID);	
+	VisualObject.m_VertBufferID = NewVerBufferID;
+
+	VisualObject.m_NumElements += pCommand->m_NumVertices;	
+}
+
+void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateVertArray(const CCommandBuffer::SCommand_CreateVertexArrayObject *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	//if space not there return
+	if(Index >= m_VisualObjects.size())
+		return;
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	
+	glGenVertexArrays(1, &VisualObject.m_VertArrayID);
+	glBindVertexArray(VisualObject.m_VertArrayID);
+	
+	glEnableVertexAttribArray(0);
+	if(VisualObject.m_IsTextured) {
+		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
+	}
+	
+	glBindBuffer(GL_ARRAY_BUFFER, VisualObject.m_VertBufferID);	
+	GLsizei stride = sizeof(float) * 2 + sizeof(unsigned char) * 2 * 2;
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, (GLsizei)(VisualObject.m_IsTextured ? stride : 0) , 0);
+	if(VisualObject.m_IsTextured) {
+		glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, (GLsizei)(VisualObject.m_IsTextured ? stride : 0), (void*)(sizeof(float)*2));
+		glVertexAttribIPointer(2, 2, GL_UNSIGNED_BYTE, (GLsizei)(VisualObject.m_IsTextured ? stride : 0), (void*)(sizeof(float)*2 + sizeof(unsigned char)*2));
+	}
+	
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
+	//TODO: destroy the VBO here? it shouldn't be needed anymore	
+	glDeleteBuffers(1, &VisualObject.m_VertBufferID);
+	VisualObject.m_VertBufferID = 0;
+}
+
+void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateIndexBuffer(const CCommandBuffer::SCommand_CreateIndexBufferObject *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	
+	//if space not there return
+	if(Index >= m_VisualObjects.size()){
+		return;
+	}
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	VisualObject.m_NumIndices = pCommand->m_NumIndices;
+	
+	glGenBuffers(1, &VisualObject.m_IndexBufferID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VisualObject.m_IndexBufferID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(VisualObject.m_NumIndices * sizeof(unsigned int)), pCommand->m_Indices, GL_STATIC_DRAW);
+}
+
+void CCommandProcessorFragment_OpenGL3_3::Cmd_AppendIndexBuffer(const CCommandBuffer::SCommand_AppendIndexBufferObject *pCommand){
+	int Index = pCommand->m_VisualObjectIDX;
+	
+	//if space not there return
+	if(Index >= m_VisualObjects.size()){
+		return;
+	}
+	
+	SVisualObject& VisualObject = m_VisualObjects[Index];
+	
+	glBindBuffer(GL_COPY_READ_BUFFER, VisualObject.m_IndexBufferID);
+	GLuint NewIndexBufferID;
+	glGenBuffers(1, &NewIndexBufferID);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, NewIndexBufferID);
+	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)((VisualObject.m_NumIndices + pCommand->m_NumIndices) * sizeof(unsigned int)), NULL, GL_STATIC_DRAW);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, (GLsizeiptr)(VisualObject.m_NumIndices * sizeof(unsigned int)));
+	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(VisualObject.m_NumIndices * sizeof(unsigned int)), (GLsizeiptr)(pCommand->m_NumIndices * sizeof(unsigned int)), pCommand->m_Indices);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+	glBindBuffer(GL_COPY_READ_BUFFER, 0);
+	
+	glDeleteBuffers(1, &VisualObject.m_IndexBufferID);	
+	VisualObject.m_IndexBufferID = NewIndexBufferID;
+	
+	VisualObject.m_NumIndices += pCommand->m_NumIndices;	
+}
 
 // ------------ CCommandProcessorFragment_SDL
 
@@ -836,8 +1318,6 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 
 	glAlphaFunc(GL_GREATER, 0);
 	glEnable(GL_ALPHA_TEST);
@@ -972,7 +1452,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	m_UseOpenGL3_3 = false;
-	if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) == 0) {
+	if (!g_Config.m_ClForceOldOpenGL && SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) == 0) {
 		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3) == 0 && SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3) == 0) {
 			m_UseOpenGL3_3 = true;
 			int vMaj, vMin;
