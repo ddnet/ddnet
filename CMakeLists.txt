@@ -331,14 +331,12 @@ endif()
 ########################################################################
 
 file(COPY data DESTINATION .)
-<<<<<<< HEAD
 file(COPY shader DESTINATION .)
 file(COPY ${CURL_COPY_FILES} DESTINATION .)
 file(COPY ${FREETYPE_COPY_FILES} DESTINATION .)
 file(COPY ${OPUSFILE_COPY_FILES} DESTINATION .)
 file(COPY ${SDL2_COPY_FILES} DESTINATION .)
 file(COPY ${GLEW_COPY_FILES} DESTINATION .)
-=======
 set(COPY_FILES
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
@@ -346,7 +344,6 @@ set(COPY_FILES
   ${SDL2_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
->>>>>>> 73d9ad76151f8d3c0a77b3dc8c97999e5126a959
 
 ########################################################################
 # CODE GENERATION
