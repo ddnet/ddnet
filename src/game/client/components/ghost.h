@@ -9,7 +9,8 @@ enum
 {
 	GHOSTDATA_TYPE_SKIN = 0,
 	GHOSTDATA_TYPE_CHARACTER_NO_TICK,
-	GHOSTDATA_TYPE_CHARACTER
+	GHOSTDATA_TYPE_CHARACTER,
+	GHOSTDATA_TYPE_START_TICK
 };
 
 struct CGhostSkin
@@ -59,6 +60,7 @@ private:
 		CTeeRenderInfo m_RenderInfo;
 		CGhostSkin m_Skin;
 		array<CGhostCharacter> m_lPath;
+		int m_StartTick;
 		char m_aPlayer[MAX_NAME_LENGTH];
 		int m_PlaybackPos;
 
@@ -90,9 +92,9 @@ private:
 	void AddInfos(const CNetObj_Character *pChar);
 	int GetSlot() const;
 
-	void StartRecord();
+	void StartRecord(int Tick);
 	void StopRecord(int Time = -1);
-	void StartRender();
+	void StartRender(int Tick);
 	void StopRender();
 
 	void InitRenderInfos(CGhostItem *pGhost);
