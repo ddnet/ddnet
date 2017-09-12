@@ -798,53 +798,60 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 		DrawBorder = true;
 	}
 	
-	//create the indice buffers we want to draw -- reuse them
-	static std::vector<char*> IndexOffsets;
-	static std::vector<unsigned int> DrawCounts;
-	static unsigned long long maxRes = (IndexOffsets.max_size() > DrawCounts.max_size() ? DrawCounts.max_size() : IndexOffsets.max_size());
+	bool DrawLayer = true;
+	if(X1 < 0) DrawLayer = false;
+	if(Y1 < 0) DrawLayer = false;
+	if(X0 >= pTileLayer->m_Width) DrawLayer = false;
+	if(Y0 >= pTileLayer->m_Height) DrawLayer = false;
 	
-	IndexOffsets.clear();
-	DrawCounts.clear();
-	/*static char* IndexOffsets[100000];
-	static unsigned int DrawCounts[100000];*/
+	if(DrawLayer){
+		//create the indice buffers we want to draw -- reuse them
+		static std::vector<char*> IndexOffsets;
+		static std::vector<unsigned int> DrawCounts;
+		static unsigned long long maxRes = (IndexOffsets.max_size() > DrawCounts.max_size() ? DrawCounts.max_size() : IndexOffsets.max_size());
+		
+		IndexOffsets.clear();
+		DrawCounts.clear();
+		/*static char* IndexOffsets[100000];
+		static unsigned int DrawCounts[100000];*/
 
-	int GroupXStart = X0 / INDEX_BUFFER_GROUP_WIDTH;
-	int GroupYStart = Y0 / INDEX_BUFFER_GROUP_HEIGHT;
-	int GroupXEnd = X1 / INDEX_BUFFER_GROUP_WIDTH;
-	int GroupYEnd = Y1 / INDEX_BUFFER_GROUP_HEIGHT;
-	
-	unsigned long long Reserve = absolute(GroupYEnd - GroupYStart) + 1;
-	if(Reserve > maxRes) Reserve = maxRes;
-	IndexOffsets.reserve(Reserve);
-	DrawCounts.reserve(Reserve);
-	
-	int c = 0;
-	
-	for(int y = GroupYStart; y <= GroupYEnd; ++y){
-		unsigned int NumTiles = 0;
+		int GroupXStart = X0 / INDEX_BUFFER_GROUP_WIDTH;
+		int GroupYStart = Y0 / INDEX_BUFFER_GROUP_HEIGHT;
+		int GroupXEnd = X1 / INDEX_BUFFER_GROUP_WIDTH;
+		int GroupYEnd = Y1 / INDEX_BUFFER_GROUP_HEIGHT;
+		
+		unsigned long long Reserve = absolute(GroupYEnd - GroupYStart) + 1;
+		if(Reserve > maxRes) Reserve = maxRes;
+		IndexOffsets.reserve(Reserve);
+		DrawCounts.reserve(Reserve);
+		
+		int c = 0;
+		
+		for(int y = GroupYStart; y <= GroupYEnd; ++y){
+			unsigned int NumTiles = 0;
 
-		int x = GroupXStart;
-		if (x > GroupXEnd) continue;
-		int GroupIDX = x + y * (((pTileLayer->m_Width + INDEX_BUFFER_GROUP_WIDTH - 1) / INDEX_BUFFER_GROUP_WIDTH));
-		IndexOffsets.push_back(BufferGroup[GroupIDX].m_ByteOffset);
-		DrawCounts.push_back(0);
-		//DrawCounts[c] = 0;
-		//IndexOffsets[c] = BufferGroup[GroupIDX].m_ByteOffset;
-		for(;x <= GroupXEnd; ++x){
-			GroupIDX = x + y * (((pTileLayer->m_Width + INDEX_BUFFER_GROUP_WIDTH - 1) / INDEX_BUFFER_GROUP_WIDTH));
-			NumTiles += BufferGroup[GroupIDX].m_NumTilesToRender * 6lu;			
+			int x = GroupXStart;
+			if (x > GroupXEnd) continue;
+			int GroupIDX = x + y * (((pTileLayer->m_Width + INDEX_BUFFER_GROUP_WIDTH - 1) / INDEX_BUFFER_GROUP_WIDTH));
+			IndexOffsets.push_back(BufferGroup[GroupIDX].m_ByteOffset);
+			DrawCounts.push_back(0);
+			//DrawCounts[c] = 0;
+			//IndexOffsets[c] = BufferGroup[GroupIDX].m_ByteOffset;
+			for(;x <= GroupXEnd; ++x){
+				GroupIDX = x + y * (((pTileLayer->m_Width + INDEX_BUFFER_GROUP_WIDTH - 1) / INDEX_BUFFER_GROUP_WIDTH));
+				NumTiles += BufferGroup[GroupIDX].m_NumTilesToRender * 6lu;			
+			}
+			DrawCounts[c++] = NumTiles ;
 		}
-		DrawCounts[c++] = NumTiles ;
+		
+		pColor->x *= r;
+		pColor->y *= g;
+		pColor->z *= b;
+		pColor->w *= a;
+		
+		int DrawCount = IndexOffsets.size();
+		if(DrawCount != 0) Graphics()->DrawVisualObject(Visuals.m_VisualObjectIndex, (float*)pColor, &IndexOffsets[0], &DrawCounts[0], DrawCount);
 	}
-	
-	pColor->x *= r;
-	pColor->y *= g;
-	pColor->z *= b;
-	pColor->w *= a;
-	
-	int DrawCount = IndexOffsets.size();
-	if(DrawCount != 0) Graphics()->DrawVisualObject(Visuals.m_VisualObjectIndex, (float*)pColor, &IndexOffsets[0], &DrawCounts[0], DrawCount);
-
 	if(DrawBorder) DrawTileBorder(LayerIndex, pColor, pTileLayer, pGroup, BorderX0, BorderY0, BorderX1, BorderY1);
 }
 
