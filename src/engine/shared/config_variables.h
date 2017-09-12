@@ -397,4 +397,6 @@ MACRO_CONFIG_INT(ClDemoSliceBegin, cl_demo_slice_begin, -1, 0, 0, CFGFLAG_SAVE|C
 MACRO_CONFIG_INT(ClDemoSliceEnd, cl_demo_slice_end, -1, 0, 0, CFGFLAG_SAVE|CFGFLAG_CLIENT, "End marker for demo slice")
 MACRO_CONFIG_INT(ClDemoShowSpeed, cl_demo_show_speed, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show speed meter on change")
 
+//opengl
+MACRO_CONFIG_INT(ClForceOldOpenGL, cl_force_old_opengl, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Forces to use the old opengl version.")
 #endif
