@@ -70,6 +70,7 @@ public:
 			fs_makedir(GetPath(TYPE_SAVE, "demos/auto", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "editor", aPath, sizeof(aPath)));
 			fs_makedir(GetPath(TYPE_SAVE, "ghosts", aPath, sizeof(aPath)));
+			fs_makedir(GetPath(TYPE_SAVE, "teehistorian", aPath, sizeof(aPath)));
 		}
 
 		return m_NumPaths ? 0 : 1;

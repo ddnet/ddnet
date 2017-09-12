@@ -870,6 +870,13 @@ void CServer::SendRconType(int ClientID, bool UsernameReq)
 	SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 }
 
+void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, int *pMapCrc)
+{
+	str_copy(pMapName, GetMapName(), MapNameSize);
+	*pMapSize = m_CurrentMapSize;
+	*pMapCrc = m_CurrentMapCrc;
+}
+
 void CServer::SendMap(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_MAP_CHANGE);

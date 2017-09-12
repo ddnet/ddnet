@@ -776,6 +776,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   score/sql_score.h
   teams.cpp
   teams.h
+  teehistorian.cpp
+  teehistorian.h
 )
 set(GAME_GENERATED_SERVER
   "src/game/generated/server_data.cpp"

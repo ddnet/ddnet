@@ -11,6 +11,19 @@ static const CUuid TEEWORLDS_NAMESPACE = {{
 	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29
 }};
 
+CUuid RandomUuid()
+{
+	CUuid Result;
+	secure_random_fill(&Result, sizeof(Result));
+
+	Result.m_aData[6] &= 0x0f;
+	Result.m_aData[6] |= 0x40;
+	Result.m_aData[8] &= 0x3f;
+	Result.m_aData[8] |= 0x80;
+
+	return Result;
+}
+
 CUuid CalculateUuid(const char *pName)
 {
 	md5_state_t Md5;

@@ -231,6 +231,7 @@ public:
 
 	void SetRconCID(int ClientID);
 	int GetAuthedState(int ClientID);
+	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, int *pMapCrc);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
 	const char *ClientName(int ClientID);
