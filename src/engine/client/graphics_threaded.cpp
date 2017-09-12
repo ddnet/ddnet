@@ -59,7 +59,7 @@ void CGraphics_Threaded::FlushVertices()
 
 	if(m_Drawing == DRAWING_QUADS)
 	{
-		if(g_Config.m_GfxQuadAsTriangle)
+		if(g_Config.m_GfxQuadAsTriangle || m_UseOpenGL3_3)
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			Cmd.m_PrimCount = NumVerts/3;
@@ -598,7 +598,7 @@ void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle)
+	if(g_Config.m_GfxQuadAsTriangle || m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -686,7 +686,7 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle)
+	if(g_Config.m_GfxQuadAsTriangle || m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -781,6 +781,411 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
+void mem_copy_special(void* pDest, void* pSource, size_t Size, size_t Count, size_t Steps){
+	size_t CurStep = 0;
+	for(size_t i = 0; i < Count; ++i){
+		mem_copy(((char*)pDest) + CurStep + i * Size, ((char*)pSource) + i * Size, Size);
+		CurStep += Steps;
+	}
+}
+
+void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, char** pOffsets, unsigned int* IndicedVertexDrawNum, size_t NumIndicesOffet)
+{
+	if(NumIndicesOffet == 0) return;
+	
+	//add the VertexArrays and draw
+	CCommandBuffer::SCommand_RenderVertexArray Cmd;
+	Cmd.m_State = m_State;
+	Cmd.m_IndicesDrawNum = NumIndicesOffet;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	Cmd.m_ZoomScreenRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+
+	Cmd.m_pIndicesOffsets = (CCommandBuffer::SIndicesArray *)m_pCommandBuffer->AllocData(sizeof(CCommandBuffer::SIndicesArray)*NumIndicesOffet);
+	if(Cmd.m_pIndicesOffsets == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+	Cmd.m_pIndicesOffsets = (CCommandBuffer::SIndicesArray *)m_pCommandBuffer->AllocData(sizeof(CCommandBuffer::SIndicesArray)*NumIndicesOffet);
+		if(Cmd.m_pIndicesOffsets == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+	}
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		Cmd.m_pIndicesOffsets = (CCommandBuffer::SIndicesArray *)m_pCommandBuffer->AllocData(sizeof(CCommandBuffer::SIndicesArray)*NumIndicesOffet);
+		if(Cmd.m_pIndicesOffsets == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for render command");
+			return;
+		}
+	}
+
+	mem_copy_special(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char*), NumIndicesOffet, sizeof(unsigned int));
+	mem_copy_special(((char*)Cmd.m_pIndicesOffsets) + sizeof(char*), IndicedVertexDrawNum, sizeof(unsigned int), NumIndicesOffet, sizeof(char*));
+	
+	//todo max indices group check!!
+}
+
+void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum){
+	//draw a border tile alot of times
+	CCommandBuffer::SCommand_RenderBorderTile Cmd;
+	Cmd.m_State = m_State;
+	Cmd.m_DrawNum = DrawNum;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	Cmd.m_ZoomScreenRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+
+	Cmd.m_pIndicesOffset = pOffset;
+	Cmd.m_JumpIndex = JumpIndex;
+	
+	Cmd.m_Offset[0] = Offset[0];
+	Cmd.m_Offset[1] = Offset[1];
+	Cmd.m_Dir[0] = Dir[0];
+	Cmd.m_Dir[1] = Dir[1];
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for render command");
+			return;
+		}
+	}
+}
+
+void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum){
+	if(IndexDrawNum == 0 || RedrawNum == 0) return;
+	//draw a border tile alot of times
+	CCommandBuffer::SCommand_RenderBorderTileLine Cmd;
+	Cmd.m_State = m_State;
+	Cmd.m_IndexDrawNum = IndexDrawNum;
+	Cmd.m_DrawNum = RedrawNum;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	Cmd.m_ZoomScreenRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+
+	Cmd.m_pIndicesOffset = pOffset;
+	
+	Cmd.m_Dir[0] = Dir[0];
+	Cmd.m_Dir[1] = Dir[1];
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for render command");
+			return;
+		}
+	}
+}
+
+void CGraphics_Threaded::DestroyVisual(int VisualObjectIDX){
+	if (VisualObjectIDX == -1) return;
+	CCommandBuffer::SCommand_DestroyVisual Cmd;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for destroy all visuals command");
+			return;
+		}
+	}
+	
+	//also clear the vert array index
+	m_VertexArrayIndices[VisualObjectIDX] = m_FirstFreeVertexArrayIndex;
+	m_FirstFreeVertexArrayIndex = VisualObjectIDX;
+}
+
+int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int* pIndices, unsigned int NumIndices){
+	if(!pVertices || !pIndices) return -1;
+	
+	//first create an index
+	int index = -1;
+	if(m_FirstFreeVertexArrayIndex == -1){
+		index = m_VertexArrayIndices.size();
+		m_VertexArrayIndices.push_back(index);
+	} else  {
+		index = m_FirstFreeVertexArrayIndex;
+		m_FirstFreeVertexArrayIndex = m_VertexArrayIndices[index];
+		m_VertexArrayIndices[index] = index;
+	}
+	
+	//upload the vertex buffer first
+	//the size of the cmd data buffer is 2MB -- we create 4 vertices of each 2 floats plus 2 shorts(2*unsigned char each) if TexCoordinates are used
+	char AddTexture = (pTexCoords == NULL ? 0 : 1);
+	int AddTextureSize = (pTexCoords == NULL ? 0 : (sizeof(unsigned char) * 2 * 2 * 4));
+	
+	int MaxTileNumUpload = (1024*1024*2) / (sizeof(float) * 4 * 2 + AddTextureSize);
+	
+	int RealTileNum = NumTiles;
+	if(NumTiles > MaxTileNumUpload) RealTileNum = MaxTileNumUpload;
+
+	CCommandBuffer::SCommand_CreateVertexBufferObject Cmd;
+	Cmd.m_IsTextured = pTexCoords != NULL;
+	Cmd.m_VisualObjectIDX = index;
+	int NumVerts = (Cmd.m_NumVertices = RealTileNum * 4 * 2); //number of vertices to upload -- same value for texcoords(if used)
+	
+	Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+	if(Cmd.m_Elements == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return -1;
+		}
+	}
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return -1;
+		}
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create vertex buffer command");
+			return -1;
+		}
+	}
+	
+	mem_copy_special(Cmd.m_Elements, pVertices, sizeof(float) * 2, RealTileNum * 4, (AddTexture) * sizeof(unsigned char) * 2 * 2);
+	
+	if(pTexCoords) {
+		mem_copy_special(((char*)Cmd.m_Elements) + sizeof(float) * 2, pTexCoords, sizeof(unsigned char) * 2 * 2, RealTileNum * 4, (AddTexture) * sizeof(float) * 2);
+	}
+		
+	if(NumTiles > MaxTileNumUpload){
+		pVertices += NumVerts;
+		if(pTexCoords) pTexCoords += NumVerts*2;
+		AppendAllVertices(pVertices, pTexCoords, NumTiles - MaxTileNumUpload, index);
+	}
+	
+	//now upload the index buffer
+	unsigned int MaxIndices = (1024*1024*2) / (sizeof(unsigned int));
+	
+	unsigned int RealNumIndices = NumIndices;
+	if(NumIndices > MaxIndices) RealNumIndices = MaxIndices;
+	
+	CCommandBuffer::SCommand_CreateIndexBufferObject CmdIndex;
+	CmdIndex.m_VisualObjectIDX = index;
+	unsigned int NumIndicesUploaded = (CmdIndex.m_NumIndices = RealNumIndices); //number of indices to upload
+	
+	CmdIndex.m_Indices = (unsigned int*)m_pCommandBuffer->AllocData(RealNumIndices * (sizeof(unsigned int)));
+	if(CmdIndex.m_Indices == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		CmdIndex.m_Indices = (unsigned int*)m_pCommandBuffer->AllocData(RealNumIndices * (sizeof(unsigned int)));
+		if(CmdIndex.m_Indices == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for indices");
+			return -1;
+		}
+	}
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(CmdIndex))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		
+		CmdIndex.m_Indices = (unsigned int*)m_pCommandBuffer->AllocData(RealNumIndices * (sizeof(unsigned int)));
+		if(CmdIndex.m_Indices == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for indices");
+			return -1;
+		}
+
+		if(!m_pCommandBuffer->AddCommand(CmdIndex))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create index buffer command");
+			return -1;
+		}
+	}
+	
+	mem_copy(CmdIndex.m_Indices, pIndices, RealNumIndices * (sizeof(unsigned int)));
+	
+	if(NumIndices > RealNumIndices){
+		pIndices += NumIndicesUploaded;
+		AppendAllIndices(pIndices, NumIndices - RealNumIndices, index);
+	}
+	
+	CCommandBuffer::SCommand_CreateVertexArrayObject VertArrayCmd;
+	VertArrayCmd.m_VisualObjectIDX = index;
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(VertArrayCmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		
+		if(!m_pCommandBuffer->AddCommand(VertArrayCmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create vertex array command");
+			return -1;
+		}
+	}
+	
+	//make sure we uploaded everything
+	KickCommandBuffer();
+	
+	return index;
+}
+
+void CGraphics_Threaded::AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX){
+	//the size of the cmd data buffer is 2MB -- we create 4 vertices of each 2 floats plus 2 shorts(2*unsigned char each) if TexCoordinates are used
+	char AddTexture = (pTexCoords == NULL ? 0 : 1);
+	int AddTextureSize = (pTexCoords == NULL ? 0 : (sizeof(unsigned char) * 2 * 2 * 4));
+	
+	int MaxTileNumUpload = (1024*1024*2) / (sizeof(float) * 4 * 2 + AddTextureSize);
+	
+	int RealTileNum = NumTiles;
+	if(NumTiles > MaxTileNumUpload) RealTileNum = MaxTileNumUpload;
+
+	CCommandBuffer::SCommand_AppendVertexBufferObject Cmd;
+	int NumVerts = (Cmd.m_NumVertices = RealTileNum * 4 * 2); //number of vertices to upload -- same value for texcoords(if used)
+	Cmd.m_VisualObjectIDX = VisualObjectIDX;
+
+	Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+	if(Cmd.m_Elements == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+	}
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create vertex buffer command");
+			return;
+		}
+	}
+	
+	mem_copy_special(Cmd.m_Elements, pVertices, sizeof(float) * 2, RealTileNum * 4, (AddTexture) * sizeof(unsigned char) * 2 * 2);
+	
+	if(pTexCoords) {
+		mem_copy_special(((char*)Cmd.m_Elements) + sizeof(float) * 2, pTexCoords, sizeof(unsigned char) * 2 * 2, RealTileNum * 4, (AddTexture) * sizeof(float) * 2);
+	}
+	
+	if(NumTiles > RealTileNum){
+		pVertices += NumVerts;
+		if(pTexCoords) pTexCoords += NumVerts*2;
+		AppendAllVertices(pVertices, pTexCoords, NumTiles - RealTileNum, VisualObjectIDX);
+	}
+}
+
+void CGraphics_Threaded::AppendAllIndices(unsigned int* pIndices, unsigned int NumIndices, int VisualObjectIDX){
+	if(NumIndices == 0) return;
+	unsigned int MaxIndices = (1024*1024*2) / (sizeof(unsigned int));
+	
+	unsigned int RealNumIndices = NumIndices;
+	if(NumIndices > MaxIndices) RealNumIndices = MaxIndices;
+	
+	CCommandBuffer::SCommand_AppendIndexBufferObject CmdIndex;
+	CmdIndex.m_VisualObjectIDX = VisualObjectIDX;
+	unsigned int NumIndicesUploaded = (CmdIndex.m_NumIndices = RealNumIndices); //number of indices to upload
+	
+	CmdIndex.m_Indices = (unsigned int*)m_pCommandBuffer->AllocData(RealNumIndices * (sizeof(unsigned int)));
+	if (CmdIndex.m_Indices == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		CmdIndex.m_Indices = (unsigned int*)m_pCommandBuffer->AllocData(RealNumIndices * (sizeof(unsigned int)));
+		if (CmdIndex.m_Indices == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for indices");
+			return;
+		}
+	}
+
+	// check if we have enough free memory in the commandbuffer
+	if (!m_pCommandBuffer->AddCommand(CmdIndex))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		CmdIndex.m_Indices = (unsigned int*)m_pCommandBuffer->AllocData(RealNumIndices * (sizeof(unsigned int)));
+		if (CmdIndex.m_Indices == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for indices");
+			return;
+		}
+
+		if (!m_pCommandBuffer->AddCommand(CmdIndex))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create index buffer command");
+			return;
+		}
+	}
+
+	mem_copy(CmdIndex.m_Indices, pIndices, RealNumIndices * (sizeof(unsigned int)));
+	
+	if(NumIndices > RealNumIndices){
+		pIndices += NumIndicesUploaded;
+		AppendAllIndices(pIndices, NumIndices - RealNumIndices, VisualObjectIDX);
+	}
+}
+
 int CGraphics_Threaded::IssueInit()
 {
 	int Flags = 0;
@@ -790,7 +1195,9 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
-	return m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
+	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
+	m_UseOpenGL3_3 = m_pBackend->IsOpenGL3_3();
+	return r;
 }
 
 int CGraphics_Threaded::InitWindow()
@@ -843,6 +1250,8 @@ int CGraphics_Threaded::Init()
 	for(int i = 0; i < MAX_TEXTURES-1; i++)
 		m_aTextureIndices[i] = i+1;
 	m_aTextureIndices[MAX_TEXTURES-1] = -1;
+	
+	m_FirstFreeVertexArrayIndex = -1;
 
 	m_pBackend = CreateGraphicsBackend();
 	if(InitWindow() != 0)
