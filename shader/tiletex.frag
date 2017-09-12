@@ -6,8 +6,9 @@ uniform vec4 vertColor;
 
 noperspective in vec2 texCoord;
 
+out vec4 FragClr;
 void main()
 {
-	vec4 tex = texture2D(textureSampler, texCoord);
-	gl_FragColor = tex * vertColor;	
+	vec4 tex = texture(textureSampler, texCoord);
+	FragClr = tex * vertColor;	
 }
