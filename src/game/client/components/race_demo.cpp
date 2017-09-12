@@ -29,7 +29,7 @@ void CRaceDemo::OnRender()
 		return;
 
 	// start the demo
-	bool AllowRestart = !m_IsSolo && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
+	bool AllowRestart = m_AllowRestart && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
 	if(m_RaceState == RACE_IDLE || m_RaceState == RACE_PREPARE || (m_RaceState == RACE_STARTED && AllowRestart))
 	{
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
@@ -108,7 +108,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 
 void CRaceDemo::OnMapLoad()
 {
-	m_IsSolo = true;
+	m_AllowRestart = false;
 }
 
 void CRaceDemo::StopRecord(int Time)

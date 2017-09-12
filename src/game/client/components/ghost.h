@@ -102,7 +102,7 @@ private:
 	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
 
 public:
-	bool m_IsSolo;
+	bool m_AllowRestart;
 
 	CGhost();
 

@@ -25,7 +25,7 @@ class CRaceDemo : public CComponent
 	bool CheckDemo(int Time) const;
 
 public:
-	bool m_IsSolo;
+	bool m_AllowRestart;
 
 	CRaceDemo();
 

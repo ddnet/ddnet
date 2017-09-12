@@ -106,51 +106,88 @@ void CGhost::OnRender()
 	// only for race
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
+	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost || !m_pClient->m_Snap.m_pGameInfoObj || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalPrevCharacter)
 	{
-		if(m_pClient->m_NewPredictedTick)
+		bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
+		int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
+
+		static int s_NewRenderTick = -1;
+		int RenderTick = s_NewRenderTick;
+
+		if(!RaceFlag && m_pClient->m_NewPredictedTick)
 		{
 			vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
 			vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
-			if((!m_Rendering || !m_IsSolo) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
-				StartRender(Client()->PredGameTick());
+			bool Rendering = m_Rendering || RenderTick != -1;
+			if((!Rendering || m_AllowRestart) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
+				RenderTick = Client()->PredGameTick();
 		}
 
 		if(m_pClient->m_NewTick)
 		{
-			int PrevTick = m_pClient->m_Snap.m_pLocalPrevCharacter->m_Tick;
-			int CurTick = m_pClient->m_Snap.m_pLocalCharacter->m_Tick;
-			vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
-			vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
+			static int s_LastRaceTick = -1;
 
-			// detecting death, needed because race allows immediate respawning
-			if((!m_Recording || !m_IsSolo) && m_LastDeathTick < PrevTick)
+			if(RaceFlag && s_LastRaceTick != RaceTick)
 			{
-				// estimate the exact start tick
-				int RecordTick = -1;
-				int TickDiff = CurTick - PrevTick;
-				for(int i = 0; i < TickDiff; i++)
+				if(m_Recording && s_LastRaceTick != -1)
+					m_AllowRestart = true;
+				if(GhostRecorder()->IsRecording())
+					GhostRecorder()->Stop(0, -1);
+				int StartTick = RaceTick;
+				if(IsDDRace(&ServerInfo))
+					StartTick--;
+				StartRecord(StartTick);
+				RenderTick = StartTick;
+			}
+			else if(!RaceFlag)
+			{
+				int PrevTick = m_pClient->m_Snap.m_pLocalPrevCharacter->m_Tick;
+				int CurTick = m_pClient->m_Snap.m_pLocalCharacter->m_Tick;
+				vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
+				vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
+
+				// detecting death, needed because race allows immediate respawning
+				if((!m_Recording || m_AllowRestart) && m_LastDeathTick < PrevTick)
 				{
-					if(CRaceHelper::IsStart(m_pClient, mix(PrevPos, Pos, (float)i/TickDiff), mix(PrevPos, Pos, (float)(i+1)/TickDiff)))
+					// estimate the exact start tick
+					int RecordTick = -1;
+					int TickDiff = CurTick - PrevTick;
+					for(int i = 0; i < TickDiff; i++)
 					{
-						RecordTick = PrevTick + i + 1;
-						if(m_IsSolo)
-							break;
+						if(CRaceHelper::IsStart(m_pClient, mix(PrevPos, Pos, (float)i/TickDiff), mix(PrevPos, Pos, (float)(i+1)/TickDiff)))
+						{
+							RecordTick = PrevTick + i + 1;
+							if(!m_AllowRestart)
+								break;
+						}
 					}
-				}
-				if(RecordTick != -1)
-				{
-					if(m_Recording)
-						GhostRecorder()->Stop(0, -1);
-					StartRecord(RecordTick);
+					if(RecordTick != -1)
+					{
+						if(GhostRecorder()->IsRecording())
+							GhostRecorder()->Stop(0, -1);
+						StartRecord(RecordTick);
+					}
 				}
 			}
 
 			if(m_Recording)
 				AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
+
+			s_LastRaceTick = RaceFlag ? RaceTick : -1;
+		}
+
+		if((RaceFlag && m_pClient->m_NewTick) || (!RaceFlag && m_pClient->m_NewPredictedTick))
+		{
+			// only restart rendering if it did not change since last tick to prevent stuttering
+			if(s_NewRenderTick != -1 && s_NewRenderTick == RenderTick)
+			{
+				StartRender(RenderTick);
+				RenderTick = -1;
+			}
+			s_NewRenderTick = RenderTick;
 		}
 	}
 
@@ -492,5 +529,5 @@ void CGhost::OnMapLoad()
 	OnReset();
 	UnloadAll();
 	m_pClient->m_pMenus->GhostlistPopulate();
-	m_IsSolo = true;
+	m_AllowRestart = false;
 }
