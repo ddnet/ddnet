@@ -73,6 +73,7 @@ find_package(Opus)
 find_package(Opusfile)
 find_package(PythonInterp)
 find_package(SDL2)
+find_package(GLEW)
 find_package(Threads)
 if(NOT PREFER_BUNDLED_LIBS)
   find_package(ZLIB)
@@ -110,6 +111,7 @@ show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_INCLUDEDIR}")
 show_dependency_status("Opusfile" ${OPUSFILE_FOUND} "${OPUSFILE_LIBRARY}")
 show_dependency_status("PythonInterp" ${PYTHONINTERP_FOUND} "")
 show_dependency_status("SDL2" ${SDL2_FOUND} "${SDL2_LIBRARY}")
+show_dependency_status("GLEW" ${GLEW_FOUND} "${GLEW_LIBRARY}")
 if(ZLIB_FOUND)
   message(STATUS " * Zlib found")
 else()
@@ -141,6 +143,9 @@ if(CLIENT AND NOT(OPUSFILE_FOUND))
 endif()
 if(CLIENT AND NOT(SDL2_FOUND))
   message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
+endif()
+if(CLIENT AND NOT(GLEW_FOUND))
+  message(SEND_ERROR "You must install GLEW to compile the DDNet client")
 endif()
 if(NOT(GTEST_FOUND))
   message("To run the tests, you have to install GTest")
@@ -304,10 +309,12 @@ endif()
 ########################################################################
 
 file(COPY data DESTINATION .)
+file(COPY shader DESTINATION .)
 file(COPY ${CURL_COPY_FILES} DESTINATION .)
 file(COPY ${FREETYPE_COPY_FILES} DESTINATION .)
 file(COPY ${OPUSFILE_COPY_FILES} DESTINATION .)
 file(COPY ${SDL2_COPY_FILES} DESTINATION .)
+file(COPY ${GLEW_COPY_FILES} DESTINATION .)
 
 ########################################################################
 # CODE GENERATION
@@ -533,6 +540,10 @@ if(CLIENT)
     text.cpp
     updater.cpp
     updater.h
+	opengl_sl_program.cpp
+	opengl_sl_program.h
+	opengl_sl.cpp
+	opengl_sl.h
   )
   set_glob(GAME_CLIENT GLOB_RECURSE src/game/client
     animstate.cpp
@@ -644,6 +655,7 @@ if(CLIENT)
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${SDL2_LIBRARIES}
+    ${GLEW_LIBRARIES}
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
@@ -681,6 +693,7 @@ if(CLIENT)
     ${OPUSFILE_INCLUDE_DIRS}
     ${OPUS_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
+    ${GLEW_INCLUDE_DIRS}
   )
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
   list(APPEND TARGETS_LINK ${TARGET_CLIENT})
