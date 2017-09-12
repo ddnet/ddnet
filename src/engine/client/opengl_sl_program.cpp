@@ -45,6 +45,10 @@ void CGLSLProgram::SetUniformVec4(int Loc, int Count, const float* Value) {
 	glUniform4fv(Loc, Count, Value);
 }
 
+void CGLSLProgram::SetUniformVec2(int Loc, int Count, const float* Value) {
+	glUniform2fv(Loc, Count, Value);
+}
+
 void CGLSLProgram::SetUniform(int Loc, const int Value) {
 	glUniform1i(Loc, Value);
 }
