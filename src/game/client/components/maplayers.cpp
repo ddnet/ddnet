@@ -801,7 +801,7 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 	//create the indice buffers we want to draw -- reuse them
 	static std::vector<char*> IndexOffsets;
 	static std::vector<unsigned int> DrawCounts;
-	static int maxRes = (IndexOffsets.max_size() > DrawCounts.max_size() ? DrawCounts.max_size() : IndexOffsets.max_size());
+	static unsigned long long maxRes = (IndexOffsets.max_size() > DrawCounts.max_size() ? DrawCounts.max_size() : IndexOffsets.max_size());
 	
 	IndexOffsets.clear();
 	DrawCounts.clear();
@@ -813,7 +813,7 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 	int GroupXEnd = X1 / INDEX_BUFFER_GROUP_WIDTH;
 	int GroupYEnd = Y1 / INDEX_BUFFER_GROUP_HEIGHT;
 	
-	int Reserve = absolute(GroupYEnd - GroupYStart) + 1;
+	unsigned long long Reserve = absolute(GroupYEnd - GroupYStart) + 1;
 	if(Reserve > maxRes) Reserve = maxRes;
 	IndexOffsets.reserve(Reserve);
 	DrawCounts.reserve(Reserve);
