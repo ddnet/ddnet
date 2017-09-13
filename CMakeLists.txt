@@ -925,6 +925,11 @@ function(escape_regex VAR STRING)
   set(${VAR} ${ESCAPED} PARENT_SCOPE)
 endfunction()
 
+function(escape_backslashes VAR STRING)
+  string(REGEX REPLACE "\\\\" "\\\\\\\\" ESCAPED "${STRING}")
+  set(${VAR} ${ESCAPED} PARENT_SCOPE)
+endfunction()
+
 function(max_length VAR)
   set(MAX_LENGTH 0)
   foreach(str ${ARGN})
@@ -977,7 +982,6 @@ function(regex_inverted VAR)
 endfunction()
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_VERBATIM_VARIABLES ON)
 set(CPACK_GENERATOR TGZ TXZ)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_COMPONENTS_ALL portable)
@@ -1023,8 +1027,8 @@ set(CPACK_SOURCE_FILES
   storage.cfg
 )
 set(CPACK_SOURCE_IGNORE_FILES
-  "\\.pyc$"
-  "/\\.git"
+  "\\\\.pyc$"
+  "/\\\\.git"
   "/__pycache__/"
 )
 
@@ -1032,7 +1036,8 @@ regex_inverted(CPACK_SOURCE_FILES_INVERTED ${CPACK_SOURCE_FILES})
 escape_regex(PROJECT_SOURCE_DIR_ESCAPED ${PROJECT_SOURCE_DIR})
 
 foreach(str ${CPACK_SOURCE_FILES_INVERTED})
-  list(APPEND CPACK_SOURCE_IGNORE_FILES "${PROJECT_SOURCE_DIR_ESCAPED}/${str}")
+  escape_backslashes(STR_ESCAPED "${PROJECT_SOURCE_DIR_ESCAPED}/${str}")
+  list(APPEND CPACK_SOURCE_IGNORE_FILES "${STR_ESCAPED}")
 endforeach()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
