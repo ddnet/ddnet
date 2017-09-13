@@ -240,7 +240,7 @@ function build(settings)
 		if platform == "macosx" then
 			settings.link.frameworks:Add("Carbon")
 			settings.link.frameworks:Add("AppKit")
-			settings.link.libs:Add("crypto")
+			-- settings.link.libs:Add("crypto")
 		else
 			settings.link.libs:Add("pthread")
 		end
