@@ -14,14 +14,34 @@ dependencies:
   cache_directories:
     - "~/bam/"
 
-## Customize test commands
-test:
-  override:
-    - |
-        git submodule update --init
-        ../bam/bam release
+checkout:
+  post:
+    - git submodule update --init
 
+## Customize test commands
+compile:
+  override:
+    - ../bam/bam release
+    - |
         mkdir build
         cd build
         env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake ..
         make everything
+
+test:
+  override:
+    - |
+        cd build
+        make package
+        mv DDNet-*.tar ${CIRCLE_ARTIFACTS}
+
+##
+##deployment:
+##  master:
+##    branch: master
+##    owner: ddnet
+##    commands:
+##      - |
+##          cd build
+##          make package
+##          mv DDNet-*.tar.*
