@@ -25,7 +25,10 @@ class CMapLayers : public CComponent
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
 	
 	struct STileLayerVisuals{
-		~STileLayerVisuals() { m_IndexBufferGroups.clear(); }
+		~STileLayerVisuals()
+		{ 
+			m_IndexBufferGroups.clear();
+		}
 		int m_VisualObjectIndex;
 		bool m_IsTextured;
 		

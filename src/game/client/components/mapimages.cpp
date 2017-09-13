@@ -19,14 +19,17 @@ CMapImages::CMapImages()
 	m_OverlayCenterTexture = -1;
 }
 
-void CMapImages::OnInit(){
+void CMapImages::OnInit()
+{
 	//TODO: improve this a bit -- with better fron sizes etc.
-	if(m_OverlayBottomTexture == -1){
+	if(m_OverlayBottomTexture == -1)
+	{
 		void *pMem = mem_alloc(1024*1024, 1);
 		mem_zero(pMem, 1024*1024);
 		m_OverlayBottomTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 		
-		for(int i = 0; i < 256; ++i){
+		for(int i = 0; i < 256; ++i)
+		{
 			char buff[4];
 			str_format(buff, 4, "%d", i);
 			int len = str_length(buff);
@@ -38,12 +41,14 @@ void CMapImages::OnInit(){
 		}
 		mem_free(pMem);
 	}
-	if(m_OverlayTopTexture == -1){
+	if(m_OverlayTopTexture == -1)
+	{
 		void *pMem = mem_alloc(1024*1024, 1);
 		mem_zero(pMem, 1024*1024);
 		m_OverlayTopTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 		
-		for(int i = 0; i < 256; ++i){
+		for(int i = 0; i < 256; ++i)
+		{
 			char buff[4];
 			str_format(buff, 4, "%d", i);
 			int len = str_length(buff);
@@ -55,12 +60,14 @@ void CMapImages::OnInit(){
 		}
 		mem_free(pMem);
 	}
-	if(m_OverlayCenterTexture == -1){
+	if(m_OverlayCenterTexture == -1)
+	{
 		void *pMem = mem_alloc(1024*1024, 1);
 		mem_zero(pMem, 1024*1024);
 		m_OverlayCenterTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 		
-		for(int i = 0; i < 256; ++i){
+		for(int i = 0; i < 256; ++i)
+		{
 			char buff[4];
 			str_format(buff, 4, "%d", i);
 			int len = str_length(buff);
@@ -184,14 +191,17 @@ int CMapImages::GetEntities()
 	return m_EntitiesTextures;
 }
 
-int CMapImages::GetOverlayBottom(){
+int CMapImages::GetOverlayBottom()
+{
 	return m_OverlayBottomTexture;
 }
 
-int CMapImages::GetOverlayTop(){
+int CMapImages::GetOverlayTop()
+{
 	return m_OverlayTopTexture;
 }
 
-int CMapImages::GetOverlayCenter(){
+int CMapImages::GetOverlayCenter()
+{
 	return m_OverlayCenterTexture;
 }

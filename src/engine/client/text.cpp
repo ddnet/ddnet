@@ -772,7 +772,8 @@ public:
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 			
-			if(NextCharacter){
+			if(NextCharacter)
+			{
 				int SlotID = 0;
 				int SlotW = Size;
 				int SlotH = Size;

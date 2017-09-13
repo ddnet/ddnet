@@ -137,17 +137,17 @@ class CCommandProcessorFragment_OpenGL3_3
 	CTexture m_aTextures[CCommandBuffer::MAX_TEXTURES];
 	volatile int *m_pTextureMemoryUsage;
 
-	CGLSLPrimitiveProgram* m_PrimitiveProgram;
+	CGLSLPrimitiveProgram* m_pPrimitiveProgram;
 	//CGLSLQuadProgram* m_QuadProgram; 
-	CGLSLTileProgram* m_TileProgram;
-	CGLSLTileProgram* m_TileProgramTextured;
-	CGLSLBorderTileProgram* m_BorderTileProgram;
-	CGLSLBorderTileProgram* m_BorderTileProgramTextured;
-	CGLSLBorderTileLineProgram* m_BorderTileLineProgram;
-	CGLSLBorderTileLineProgram* m_BorderTileLineProgramTextured;
+	CGLSLTileProgram* m_pTileProgram;
+	CGLSLTileProgram* m_pTileProgramTextured;
+	CGLSLBorderTileProgram* m_pBorderTileProgram;
+	CGLSLBorderTileProgram* m_pBorderTileProgramTextured;
+	CGLSLBorderTileLineProgram* m_pBorderTileLineProgram;
+	CGLSLBorderTileLineProgram* m_pBorderTileLineProgramTextured;
 	
-	GLuint PrimitiveDrawVertexID;
-	GLuint PrimitiveDrawBufferID;
+	GLuint m_PrimitiveDrawVertexID;
+	GLuint m_PrimitiveDrawBufferID;
 	
 	GLint m_MaxTextureUnits;
 	

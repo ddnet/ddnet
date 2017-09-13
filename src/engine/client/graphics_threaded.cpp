@@ -781,9 +781,11 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
-void mem_copy_special(void* pDest, void* pSource, size_t Size, size_t Count, size_t Steps){
+void mem_copy_special(void* pDest, void* pSource, size_t Size, size_t Count, size_t Steps)
+{
 	size_t CurStep = 0;
-	for(size_t i = 0; i < Count; ++i){
+	for(size_t i = 0; i < Count; ++i)
+	{
 		mem_copy(((char*)pDest) + CurStep + i * Size, ((char*)pSource) + i * Size, Size);
 		CurStep += Steps;
 	}
@@ -841,7 +843,8 @@ void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, ch
 	//todo max indices group check!!
 }
 
-void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum){
+void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum)
+{
 	//draw a border tile alot of times
 	CCommandBuffer::SCommand_RenderBorderTile Cmd;
 	Cmd.m_State = m_State;
@@ -872,7 +875,8 @@ void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char
 	}
 }
 
-void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum){
+void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
+{
 	if(IndexDrawNum == 0 || RedrawNum == 0) return;
 	//draw a border tile alot of times
 	CCommandBuffer::SCommand_RenderBorderTileLine Cmd;
@@ -902,7 +906,8 @@ void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float* pColor, 
 	}
 }
 
-void CGraphics_Threaded::DestroyVisual(int VisualObjectIDX){
+void CGraphics_Threaded::DestroyVisual(int VisualObjectIDX)
+{
 	if (VisualObjectIDX == -1) return;
 	CCommandBuffer::SCommand_DestroyVisual Cmd;
 	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
@@ -925,12 +930,14 @@ void CGraphics_Threaded::DestroyVisual(int VisualObjectIDX){
 	m_FirstFreeVertexArrayIndex = VisualObjectIDX;
 }
 
-int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int* pIndices, unsigned int NumIndices){
+int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int* pIndices, unsigned int NumIndices)
+{
 	if(!pVertices || !pIndices) return -1;
 	
 	//first create an index
 	int index = -1;
-	if(m_FirstFreeVertexArrayIndex == -1){
+	if(m_FirstFreeVertexArrayIndex == -1)
+	{
 		index = m_VertexArrayIndices.size();
 		m_VertexArrayIndices.push_back(index);
 	} else  {
@@ -990,11 +997,13 @@ int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTe
 	
 	mem_copy_special(Cmd.m_Elements, pVertices, sizeof(float) * 2, RealTileNum * 4, (AddTexture) * sizeof(unsigned char) * 2 * 2);
 	
-	if(pTexCoords) {
+	if(pTexCoords)
+	{
 		mem_copy_special(((char*)Cmd.m_Elements) + sizeof(float) * 2, pTexCoords, sizeof(unsigned char) * 2 * 2, RealTileNum * 4, (AddTexture) * sizeof(float) * 2);
 	}
 		
-	if(NumTiles > MaxTileNumUpload){
+	if(NumTiles > MaxTileNumUpload)
+	{
 		pVertices += NumVerts;
 		if(pTexCoords) pTexCoords += NumVerts*2;
 		AppendAllVertices(pVertices, pTexCoords, NumTiles - MaxTileNumUpload, index);
@@ -1046,7 +1055,8 @@ int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTe
 	
 	mem_copy(CmdIndex.m_Indices, pIndices, RealNumIndices * (sizeof(unsigned int)));
 	
-	if(NumIndices > RealNumIndices){
+	if(NumIndices > RealNumIndices)
+	{
 		pIndices += NumIndicesUploaded;
 		AppendAllIndices(pIndices, NumIndices - RealNumIndices, index);
 	}
@@ -1072,7 +1082,8 @@ int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTe
 	return index;
 }
 
-void CGraphics_Threaded::AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX){
+void CGraphics_Threaded::AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX)
+{
 	//the size of the cmd data buffer is 2MB -- we create 4 vertices of each 2 floats plus 2 shorts(2*unsigned char each) if TexCoordinates are used
 	char AddTexture = (pTexCoords == NULL ? 0 : 1);
 	int AddTextureSize = (pTexCoords == NULL ? 0 : (sizeof(unsigned char) * 2 * 2 * 4));
@@ -1122,18 +1133,21 @@ void CGraphics_Threaded::AppendAllVertices(float* pVertices, unsigned char* pTex
 	
 	mem_copy_special(Cmd.m_Elements, pVertices, sizeof(float) * 2, RealTileNum * 4, (AddTexture) * sizeof(unsigned char) * 2 * 2);
 	
-	if(pTexCoords) {
+	if(pTexCoords)
+	{
 		mem_copy_special(((char*)Cmd.m_Elements) + sizeof(float) * 2, pTexCoords, sizeof(unsigned char) * 2 * 2, RealTileNum * 4, (AddTexture) * sizeof(float) * 2);
 	}
 	
-	if(NumTiles > RealTileNum){
+	if(NumTiles > RealTileNum)
+	{
 		pVertices += NumVerts;
 		if(pTexCoords) pTexCoords += NumVerts*2;
 		AppendAllVertices(pVertices, pTexCoords, NumTiles - RealTileNum, VisualObjectIDX);
 	}
 }
 
-void CGraphics_Threaded::AppendAllIndices(unsigned int* pIndices, unsigned int NumIndices, int VisualObjectIDX){
+void CGraphics_Threaded::AppendAllIndices(unsigned int* pIndices, unsigned int NumIndices, int VisualObjectIDX)
+{
 	if(NumIndices == 0) return;
 	unsigned int MaxIndices = (1024*1024*2) / (sizeof(unsigned int));
 	
@@ -1180,7 +1194,8 @@ void CGraphics_Threaded::AppendAllIndices(unsigned int* pIndices, unsigned int N
 
 	mem_copy(CmdIndex.m_Indices, pIndices, RealNumIndices * (sizeof(unsigned int)));
 	
-	if(NumIndices > RealNumIndices){
+	if(NumIndices > RealNumIndices)
+	{
 		pIndices += NumIndicesUploaded;
 		AppendAllIndices(pIndices, NumIndices - RealNumIndices, VisualObjectIDX);
 	}
