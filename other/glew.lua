@@ -45,6 +45,7 @@ Glew = {
 		local save = function(option, output)
 			output:option(option, "value")
 			output:option(option, "use_winlib")
+			output:option(option, "use_macosxframwork")
 		end
 
 		local display = function(option)
