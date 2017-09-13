@@ -896,6 +896,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		//Bind the texture 2D.
 		GLint swizzleMask[] = {GL_ONE, GL_ONE, GL_ONE, GL_RED};
 		glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+		StoreOglformat = GL_RGBA;
 	}
 	
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)
