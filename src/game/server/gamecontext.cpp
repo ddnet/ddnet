@@ -107,6 +107,15 @@ void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUse
 	io_write(pSelf->m_TeeHistorianFile, pData, DataSize);
 }
 
+void CGameContext::CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	if(pSelf->m_TeeHistorianActive)
+	{
+		pSelf->m_TeeHistorian.RecordConsoleCommand(ClientID, FlagMask, pCmd, pResult);
+	}
+}
+
 class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || !m_apPlayers[ClientID])
@@ -846,8 +855,6 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 
 	if(m_TeeHistorianActive)
 	{
-		// TODO: Only record when not in spectators. Be careful not to
-		// miss the first tick though.
 		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
 	}
 }
@@ -1068,10 +1075,31 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	}
 }
 
+void CGameContext::OnClientEngineJoin(int ClientID)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerJoin(ClientID);
+	}
+}
+
+void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerDrop(ClientID, pReason);
+	}
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
 	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
+	}
 
 	if(!pRawMsg)
 	{
@@ -2444,9 +2472,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
-	//Console()->Register("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams");
-	//Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams");
-	//Console()->Register("lock_teams", "", CFGFLAG_SERVER, ConLockTeams, this, "Lock/unlock teams");
 
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
 	Console()->Register("remove_vote", "s[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
@@ -2456,10 +2481,10 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include "game/ddracecommands.h"
-#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include "ddracechat.h"
+	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+	#include <game/ddracecommands.h>
+	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+	#include "ddracechat.h"
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
@@ -2470,6 +2495,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Events.SetGameServer(this);
 
 	m_GameUuid = RandomUuid();
+	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 
 	DeleteTempfile();
 
@@ -2572,6 +2598,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_pServerName = g_Config.m_SvName;
 		GameInfo.m_ServerPort = g_Config.m_SvPort;
 		GameInfo.m_pGameType = "DDraceNetwork";
+
+		GameInfo.m_pConfig = &g_Config;
+		GameInfo.m_pTuning = Tuning();
 
 		char aMapName[128];
 		Server()->GetMapInfo(aMapName, sizeof(aMapName), &GameInfo.m_MapSize, &GameInfo.m_MapCrc);

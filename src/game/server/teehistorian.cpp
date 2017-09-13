@@ -1,6 +1,8 @@
 #include "teehistorian.h"
 
+#include <engine/shared/config.h>
 #include <engine/shared/snapshot.h>
+#include <game/gamecore.h>
 
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
 static const char TEEHISTORIAN_VERSION[] = "1";
@@ -14,6 +16,10 @@ enum
 	TEEHISTORIAN_PLAYER_OLD,
 	TEEHISTORIAN_INPUT_DIFF,
 	TEEHISTORIAN_INPUT_NEW,
+	TEEHISTORIAN_MESSAGE,
+	TEEHISTORIAN_JOIN,
+	TEEHISTORIAN_DROP,
+	TEEHISTORIAN_CONSOLE_COMMAND,
 };
 
 static char EscapeJsonChar(char c)
@@ -115,11 +121,11 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	char aGameTypeBuffer[128];
 	char aMapNameBuffer[128];
 
-	char aJson[1024];
+	char aJson[2048];
 
 	#define E(buf, str) EscapeJson(buf, sizeof(buf), str)
 
-	str_format(aJson, sizeof(aJson), "{\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":%d,\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":%d,\"map_crc\":\"%08x\"}",
+	str_format(aJson, sizeof(aJson), "{\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":%d,\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":%d,\"map_crc\":\"%08x\",\"config\":{",
 		TEEHISTORIAN_VERSION,
 		aGameUuid,
 		E(aServerVersionBuffer, pGameInfo->m_pServerVersion),
@@ -130,10 +136,61 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		E(aMapNameBuffer, pGameInfo->m_pMapName),
 		pGameInfo->m_MapSize,
 		pGameInfo->m_MapCrc);
+	Write(aJson, str_length(aJson));
 
-	// Include null-termination.
-	Write(aJson, str_length(aJson) + 1);
+	char aBuffer1[1024];
+	char aBuffer2[1024];
+	bool First = true;
+
+	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC)) \
+	{ \
+		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
+			First ? "" : ",", \
+			E(aBuffer1, #ScriptName), \
+			pGameInfo->m_pConfig->m_##Name); \
+		Write(aJson, str_length(aJson)); \
+		First = false; \
+	}
+
+	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
+	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC)) \
+	{ \
+		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%s\"", \
+			First ? "" : ",", \
+			E(aBuffer1, #ScriptName), \
+			E(aBuffer2, pGameInfo->m_pConfig->m_##Name)); \
+		Write(aJson, str_length(aJson)); \
+		First = false; \
+	}
+
+	#include <engine/shared/config_variables.h>
+
+	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_STR
+
+	str_format(aJson, sizeof(aJson), "},\"tuning\":{");
+	Write(aJson, str_length(aJson));
+
+	First = true;
+
+	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) \
+	{ \
+		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
+			First ? "" : ",", \
+			E(aBuffer1, #ScriptName), \
+			pGameInfo->m_pTuning->m_##Name.Get()); \
+		Write(aJson, str_length(aJson)); \
+		First = false; \
+	}
+	#include <game/tuning.h>
+	#undef MACRO_TUNING_PARAM
+
+	str_format(aJson, sizeof(aJson), "}}");
+	Write(aJson, str_length(aJson));
+	Write("", 1); // Null termination.
 }
+
 
 void CTeeHistorian::BeginTick(int Tick)
 {
@@ -321,6 +378,66 @@ void CTeeHistorian::RecordPlayerInput(int ClientID, const CNetObj_PlayerInput *p
 	pPrev->m_Input = *pInput;
 }
 
+void CTeeHistorian::RecordPlayerMessage(int ClientID, const void *pMsg, int MsgSize)
+{
+	// TODO: Check if the size of `m_Buffer` suffices (probably not).
+	m_Buffer.AddInt(-TEEHISTORIAN_MESSAGE);
+	m_Buffer.AddInt(ClientID);
+	m_Buffer.AddInt(MsgSize);
+	m_Buffer.AddRaw(pMsg, MsgSize);
+
+	if(m_Debug)
+	{
+		CUnpacker Unpacker;
+		Unpacker.Reset(pMsg, MsgSize);
+		int MsgID = Unpacker.GetInt();
+		int Sys = MsgID & 1;
+		MsgID >>= 1;
+		dbg_msg("teehistorian", "msg cid=%d sys=%d msgid=%d", ClientID, Sys, MsgID);
+	}
+}
+
+void CTeeHistorian::RecordPlayerJoin(int ClientID)
+{
+	m_Buffer.AddInt(-TEEHISTORIAN_JOIN);
+	m_Buffer.AddInt(ClientID);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "join cid=%d", ClientID);
+	}
+}
+
+void CTeeHistorian::RecordPlayerDrop(int ClientID, const char *pReason)
+{
+	m_Buffer.AddInt(-TEEHISTORIAN_DROP);
+	m_Buffer.AddInt(ClientID);
+	m_Buffer.AddString(pReason, 0);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "drop cid=%d reason='%s'", ClientID, pReason);
+	}
+}
+
+void CTeeHistorian::RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult)
+{
+	m_Buffer.AddInt(-TEEHISTORIAN_CONSOLE_COMMAND);
+	m_Buffer.AddInt(ClientID);
+	m_Buffer.AddInt(FlagMask);
+	m_Buffer.AddString(pCmd, 0);
+	m_Buffer.AddInt(pResult->NumArguments());
+	for(int i = 0; i < pResult->NumArguments(); i++)
+	{
+		m_Buffer.AddString(pResult->GetString(i), 0);
+	}
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "ccmd cid=%d cmd='%s'", ClientID, pCmd);
+	}
+}
+
 void CTeeHistorian::EndInputs()
 {
 	dbg_assert(m_State == STATE_INPUTS, "invalid teehistorian state");
@@ -358,4 +475,9 @@ void CTeeHistorian::Finish()
 	m_Buffer.Reset();
 	m_Buffer.AddInt(-TEEHISTORIAN_FINISH);
 	Write(m_Buffer.Data(), m_Buffer.Size());
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "finish");
+	}
 }

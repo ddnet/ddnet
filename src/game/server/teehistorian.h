@@ -1,8 +1,12 @@
+#include <engine/console.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 
 #include <time.h>
+
+struct CConfiguration;
+class CTuningParams;
 
 class CTeeHistorian
 {
@@ -22,6 +26,9 @@ public:
 		const char *m_pMapName;
 		int m_MapSize;
 		int m_MapCrc;
+
+		CConfiguration *m_pConfig;
+		CTuningParams *m_pTuning;
 	};
 
 	CTeeHistorian();
@@ -40,6 +47,10 @@ public:
 
 	void BeginInputs();
 	void RecordPlayerInput(int ClientID, const CNetObj_PlayerInput *pInput);
+	void RecordPlayerMessage(int ClientID, const void *pMsg, int MsgSize);
+	void RecordPlayerJoin(int ClientID);
+	void RecordPlayerDrop(int ClientID, const char *pReason);
+	void RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
 	void EndInputs();
 
 	void EndTick();

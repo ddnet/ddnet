@@ -296,7 +296,7 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	int TeleTo = pResult->GetInteger(0);
+	int TeleTo = pResult->GetInteger(1);
 	int Tele = pResult->m_ClientID;
 	if (pResult->NumArguments() > 0)
 		Tele = pResult->GetVictim();
@@ -337,7 +337,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	int Victim = pResult->GetVictim();
 	int Seconds = 0;
 	if (pResult->NumArguments() > 0)
-		Seconds = clamp(pResult->GetInteger(0), 0, 360);
+		Seconds = clamp(pResult->GetInteger(1), 0, 360);
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
 	if (!pPlayer)
@@ -481,7 +481,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
 
 	int Target = pResult->GetVictim();
-	int Team = pResult->GetInteger(0);
+	int Team = pResult->GetInteger(1);
 
 	if(pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED)
 		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_SELF);

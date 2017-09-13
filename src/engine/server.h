@@ -220,6 +220,9 @@ public:
 	virtual int GetClientVersion(int ClientID) = 0;
 	virtual void SetClientVersion(int ClientID, int Version) = 0;
 	virtual bool PlayerExists(int ClientID) = 0;
+
+	virtual void OnClientEngineJoin(int ClientID) = 0;
+	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
 };
 
 extern IGameServer *CreateGameServer();

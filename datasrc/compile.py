@@ -150,6 +150,7 @@ public:
 
 	const char *GetMsgName(int Type);
 	void *SecureUnpackMsg(int Type, CUnpacker *pUnpacker);
+	bool TeeHistorianRecordMsg(int Type);
 	const char *FailedMsgOn();
 };
 
@@ -323,6 +324,22 @@ if gen_network_source:
 	lines += ['};']
 	lines += ['']
 
+	lines += ['bool CNetObjHandler::TeeHistorianRecordMsg(int Type)']
+	lines += ['{']
+	lines += ['\tswitch(Type)']
+	lines += ['\t{']
+	empty = True
+	for msg in network.Messages:
+		if not msg.teehistorian:
+			lines += ['\tcase %s:' % msg.enum_name]
+			empty = False
+	if not empty:
+		lines += ['\t\treturn false;']
+	lines += ['\tdefault:']
+	lines += ['\t\treturn true;']
+	lines += ['\t}']
+	lines += ['}']
+	lines += ['']
 
 	lines += ['void RegisterGameUuids(CUuidManager *pManager)']
 	lines += ['{']
