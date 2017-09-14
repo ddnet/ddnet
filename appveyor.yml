@@ -3,6 +3,7 @@ before_build:
     git submodule update --init
 
     md build
+
     cd build
 
     cmake -Werror=dev ..
