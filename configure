@@ -26,7 +26,8 @@ Configuration:
   --debug                    Build in debug mode.
   --fetch-only               Only fetch the files required to run ./configure
                              without network access later and exit.
-  --prefer-bundled-libs      
+  --prefer-bundled-libs      Prefer bundled libraries to those found in the
+                             system.
 
 Some influential environment variables:
   CC                         C compiler command
