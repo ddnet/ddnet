@@ -552,28 +552,14 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 	}
 
 	// screen mapping
-	//ortho matrix... we only need this projection... just made all structs here..
-	struct vec4{
-		vec4() {}
-		vec4(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} 
-		vec4(vec4& v) : x(v.x), y(v.y), z(v.z), w(v.w) {} 
-		float x;
-		float y;
-		float z;
-		float w;
+	//orthographic projection matrix
+	
+	float m[4*4] = {
+		2.f/(State.m_ScreenBR.x - State.m_ScreenTL.x), 0, 0, -((State.m_ScreenBR.x + State.m_ScreenTL.x)/(State.m_ScreenBR.x - State.m_ScreenTL.x)),
+		0, (2.f/(State.m_ScreenTL.y - State.m_ScreenBR.y)), 0, -((State.m_ScreenTL.y + State.m_ScreenBR.y)/(State.m_ScreenTL.y - State.m_ScreenBR.y)),
+		0, 0, -(2.f/(9.f)), -((11.f)/(9.f)),
+		0, 0, 0, 1.0f
 	};
-	
-	struct mat4{
-		mat4(vec4& r1, vec4& r2, vec4& r3, vec4& r4) { r[0] = r1; r[1] = r2; r[2] = r3; r[3] = r4; }
-		vec4 r[4];
-	};
-	
-	vec4 r1( (2.f/(State.m_ScreenBR.x - State.m_ScreenTL.x)), 0, 0, -((State.m_ScreenBR.x + State.m_ScreenTL.x)/(State.m_ScreenBR.x - State.m_ScreenTL.x)));
-	vec4 r2( 0, (2.f/(State.m_ScreenTL.y - State.m_ScreenBR.y)), 0, -((State.m_ScreenTL.y + State.m_ScreenBR.y)/(State.m_ScreenTL.y - State.m_ScreenBR.y)));
-	vec4 r3( 0, 0, -(2.f/(9.f)), -((11.f)/(9.f)));
-	vec4 r4( 0, 0, 0, 1.0f);
-	
-	mat4 m(r1,r2,r3,r4);
 	
 	//transpose bcs of column-major order of opengl
 	glUniformMatrix4fv(pProgram->m_LocPos, 1, true, (float*)&m);
