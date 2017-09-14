@@ -8,8 +8,11 @@ before_build:
 
     cmake -Werror=dev ..
 
+build_script:
+  - cmd: cmake --build . --target everything
+
 after_build:
-  - cmd: msbuild package
+  - cmd: cmake --build . --target package
 
 artifacts:
   - path: DDNet-*.zip
