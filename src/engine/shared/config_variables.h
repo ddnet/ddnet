@@ -399,5 +399,6 @@ MACRO_CONFIG_INT(ClDemoSliceEnd, cl_demo_slice_end, -1, 0, 0, CFGFLAG_SAVE|CFGFL
 MACRO_CONFIG_INT(ClDemoShowSpeed, cl_demo_show_speed, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show speed meter on change")
 
 //opengl
-MACRO_CONFIG_INT(ClForceOldOpenGL, cl_force_old_opengl, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Forces to use the old opengl version.")
+MACRO_CONFIG_INT(GfxForceOldOpenGL, gfx_force_old_opengl, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Forces to use the old opengl version.")
+MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #endif

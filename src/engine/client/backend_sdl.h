@@ -148,6 +148,7 @@ class CCommandProcessorFragment_OpenGL3_3
 	
 	GLuint m_PrimitiveDrawVertexID;
 	GLuint m_PrimitiveDrawBufferID;
+	GLuint m_PrimitiveDrawIndexBufferID;
 	
 	GLint m_MaxTextureUnits;
 	

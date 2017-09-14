@@ -470,14 +470,14 @@ void *CCommandProcessorFragment_OpenGL3_3::Rescale(int Width, int Height, int Ne
 
 void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram* pProgram)
 {
-	if(State.m_BlendMode != m_LastBlendMode/* && State.m_BlendMode != CCommandBuffer::BLEND_NONE*/)
+	if(State.m_BlendMode != m_LastBlendMode && State.m_BlendMode != CCommandBuffer::BLEND_NONE)
 	{
 		// blend
 		switch(State.m_BlendMode)
 		{
 		case CCommandBuffer::BLEND_NONE:
 			//we don't really need this anymore
-			glDisable(GL_BLEND);
+			//glDisable(GL_BLEND);
 			break;
 		case CCommandBuffer::BLEND_ALPHA:
 			glEnable(GL_BLEND);
@@ -513,9 +513,16 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 	{
 		int Slot = State.m_Texture % m_MaxTextureUnits;
 		
-		if(!IsAndUpdateTextureSlotBound(Slot, State.m_Texture))
+		if(g_Config.m_GfxEnableTextureUnitOptimization)
 		{
-			glActiveTexture(GL_TEXTURE0 + Slot);
+			if(!IsAndUpdateTextureSlotBound(Slot, State.m_Texture))
+			{
+				glActiveTexture(GL_TEXTURE0 + Slot);
+				glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
+				glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
+			}
+		} else {
+			Slot = 0;
 			glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
 			glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
 		}
@@ -574,6 +581,11 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
 {
+	if(!g_Config.m_GfxEnableTextureUnitOptimization)
+	{
+		glActiveTexture(GL_TEXTURE0);
+	}
+	
 	m_pTextureMemoryUsage = pCommand->m_pTextureMemoryUsage;
 	m_LastBlendMode = -1;
 	m_LastClipEnable = false;
@@ -770,6 +782,23 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_TextureSlotBoundToUnit[i].m_LastWrapMode = -1;
 	}
 	
+	glGenBuffers(1, &m_PrimitiveDrawIndexBufferID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_PrimitiveDrawIndexBufferID);
+	
+	unsigned int Indices[CCommandBuffer::MAX_VERTICES/4 * 6];
+	int Primq = 0;
+	for(int i = 0; i < CCommandBuffer::MAX_VERTICES/4 * 6; i+=6)
+	{
+		Indices[i] = Primq;
+		Indices[i+1] = Primq + 1;
+		Indices[i+2] = Primq + 3;
+		Indices[i+3] = Primq + 1;
+		Indices[i+4] = Primq + 2;
+		Indices[i+5] = Primq + 3;
+		Primq+=4;
+	}
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW);
+	
 	mem_zero(m_aTextures, sizeof(m_aTextures));
 }
 
@@ -813,10 +842,13 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
 {
-	int Slot = pCommand->m_Slot % m_MaxTextureUnits;
-	//just tell, that we using this texture now
-	IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
-	glActiveTexture(GL_TEXTURE0 + Slot);
+	if(g_Config.m_GfxEnableTextureUnitOptimization)
+	{
+		int Slot = pCommand->m_Slot % m_MaxTextureUnits;
+		//just tell, that we using this texture now
+		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
+		glActiveTexture(GL_TEXTURE0 + Slot);
+	}
 	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height,
 		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pCommand->m_pData);
@@ -825,9 +857,13 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
 {
-	int Slot = pCommand->m_Slot % m_MaxTextureUnits;
-	IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
-	glActiveTexture(GL_TEXTURE0 + Slot);
+	int Slot = 0;
+	if(g_Config.m_GfxEnableTextureUnitOptimization)
+	{
+		Slot = pCommand->m_Slot % m_MaxTextureUnits;
+		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
+		glActiveTexture(GL_TEXTURE0 + Slot);
+	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindSampler(Slot, 0);
 	m_TextureSlotBoundToUnit[Slot].m_TextureSlot = -1;
@@ -888,16 +924,19 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		}
 	}
 #endif
-	int Slot = pCommand->m_Slot % m_MaxTextureUnits;
-	//just tell, that we using this texture now
-	IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
-	glActiveTexture(GL_TEXTURE0 + Slot);
+	int Slot = 0;
+	if(g_Config.m_GfxEnableTextureUnitOptimization)
+	{
+		Slot = pCommand->m_Slot % m_MaxTextureUnits;
+		//just tell, that we using this texture now
+		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
+		glActiveTexture(GL_TEXTURE0 + Slot);
+	}
 	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
 	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 
 	glGenSamplers(1, &m_aTextures[pCommand->m_Slot].m_Sampler);
 	glBindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler);
-
 	
 	if(Oglformat == GL_RED)
 	{
@@ -950,20 +989,20 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 	case CCommandBuffer::PRIMTYPE_LINES:
 		Count = pCommand->m_PrimCount*2;
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
-		Count = pCommand->m_PrimCount*3;
+	case CCommandBuffer::PRIMTYPE_QUADS:
+		Count = pCommand->m_PrimCount*4;
 		break;
 	default:
 		return;
 	};
 	
-	glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * Count, (char*)pCommand->m_pVertices, GL_STREAM_DRAW);
 	glBindVertexArray(m_PrimitiveDrawVertexID);
+	glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, (char*)pCommand->m_pVertices, GL_STREAM_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), 0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 3));
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 5));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 2));
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 4));
 
 	switch(pCommand->m_PrimType)
 	{
@@ -971,8 +1010,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
-		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount*3);
+	case CCommandBuffer::PRIMTYPE_QUADS:
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_PrimitiveDrawIndexBufferID);
+		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount*6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
 		dbg_msg("render", "unknown primtype %d\n", pCommand->m_Cmd);
@@ -1488,7 +1528,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	m_UseOpenGL3_3 = false;
-	if (!g_Config.m_ClForceOldOpenGL && SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) == 0)
+	if (!g_Config.m_GfxForceOldOpenGL && SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) == 0)
 	{
 		if (SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3) == 0 && SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3) == 0)
 		{
