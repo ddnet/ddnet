@@ -791,11 +791,11 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	for(int i = 0; i < CCommandBuffer::MAX_VERTICES/4 * 6; i+=6)
 	{
 		Indices[i] = Primq;
-		Indices[i+1] = Primq + 1;
-		Indices[i+2] = Primq + 3;
-		Indices[i+3] = Primq + 1;
-		Indices[i+4] = Primq + 2;
-		Indices[i+5] = Primq + 3;
+		Indices[i+1] = Primq + 3;
+		Indices[i+2] = Primq + 1;
+		Indices[i+3] = Primq + 3;
+		Indices[i+4] = Primq + 1;
+		Indices[i+5] = Primq + 2;
 		Primq+=4;
 	}
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW);
@@ -997,10 +997,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 		return;
 	};
 	
-	glBindVertexArray(m_PrimitiveDrawVertexID);
 	glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, (char*)pCommand->m_pVertices, GL_STREAM_DRAW);
 
+	glBindVertexArray(m_PrimitiveDrawVertexID);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), 0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 2));
 	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void*)(sizeof(float) * 4));
@@ -1113,7 +1113,7 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyTexture(int Slot)
 void CCommandProcessorFragment_OpenGL3_3::DestroyVisualObjects(int Index)
 {
 	SVisualObject& VisualObject = m_VisualObjects[Index];
-	if(VisualObject.m_VertArrayID != 0) glDeleteBuffers(1, &VisualObject.m_VertArrayID);
+	if(VisualObject.m_VertArrayID != 0) glDeleteVertexArrays(1, &VisualObject.m_VertArrayID);
 	if(VisualObject.m_VertBufferID != 0) glDeleteBuffers(1, &VisualObject.m_VertBufferID);//this line should never be called
 	if(VisualObject.m_IndexBufferID != 0) glDeleteBuffers(1, &VisualObject.m_IndexBufferID);
 
