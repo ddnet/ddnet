@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+set -o nounset
+set -o pipefail
+
+OPTS="$(getopt -o "h" --long \
+help,debug,fetch-only,prefer-bundled-libs,\
+ -n './configure' -- "$@")"
+if [ $? != 0 ]; then exit 1; fi
+
+eval set -- "$OPTS"
+
+DEBUG=
+FETCH_ONLY=
+PREFER_BUNDLED_LIBS=
+
+help() {
+    cat << EOF
+Usage:
+  ./configure [OPTION]...
+
+Defaults for the options (based on current environment) are specified in
+brackets.
+
+Configuration:
+  -h, --help                 Print this help and exit.
+  --debug                    Build in debug mode.
+  --fetch-only               Only fetch the files required to run ./configure
+                             without network access later and exit.
+  --prefer-bundled-libs      
+
+Some influential environment variables:
+  CC                         C compiler command
+  CFLAGS                     C compiler flags
+  CXX                        C++ compiler command
+  CXXFLAGS                   C++ compiler flags
+  LDFLAGS                    Linker flags
+  PKG_CONFIG_PATH            directories to add to pkg-config's search path
+  PKG_CONFIG_LIBDIR          path overriding pkg-config's built-in search path
+
+Use these variables to override the choices made by \`configure' or to help
+it to find libraries and programs with nonstandard names/locations.
+
+EOF
+}
+
+while true; do
+    case "$1" in
+        --debug ) DEBUG=yes; shift ;;
+        --fetch-only ) FETCH_ONLY=yes; shift ;;
+        --prefer-bundled-libs ) PREFER_BUNDLED_LIBS=yes; shift ;;
+        -h | --help ) help; exit 0 ;;
+        -- ) shift; break ;;
+        * ) break ;;
+    esac
+done
+
+if [ -d ".git" ]; then
+    git submodule update --init 2>/dev/null
+fi
+
+if [ "$FETCH_ONLY" = "yes" ]; then exit 0; fi
+
+cmake_build_type=
+if [ "$DEBUG" = "yes" ]; then
+    cmake_build_type="$cmake_build_type -DCMAKE_BUILD_TYPE=Debug";
+fi
+if [ "$PREFER_BUNDLED_LIBS" = "yes" ]; then
+    cmake_build_type="$cmake_build_type -DPREFER_BUNDLED_LIBS=ON";
+fi
+
+if [ ! -x "$(which cmake 2>/dev/null)" ]; then
+    echo "-!- CMake required."
+    exit 1
+fi
+
+ninja_bin="$(which ninja-build 2>/dev/null)"
+if ! [ -x "$ninja_bin" ]; then
+    ninja_bin="$(which ninja 2>/dev/null)"
+fi
+if [ -x "$ninja_bin" ]; then
+    ninja_version="$("$ninja_bin" --version 2>/dev/null)"
+    if [ $? -eq 0 ]; then
+        echo "-- Found Ninja: $ninja_bin (found version \"$ninja_version\")"
+        cmake_type="Ninja"
+        exec_bin="$ninja_bin"
+        exec_command="$exec_bin"
+    elif [[ "/usr/sbin/ninja" = "$ninja_bin" ]]; then
+        echo "-- Ninja at $ninja_bin is not usable. Did you install 'ninja' instead of 'ninja-build'?"
+    fi
+fi
+
+if ! [ -x "$exec_bin" ]; then
+    make_bin="$(which make 2>/dev/null)"
+    if [ -x "$make_bin" ]; then
+        echo "-- Found Make: $make_bin"
+        cmake_type="Unix Makefiles"
+        exec_bin="$make_bin"
+        exec_command="$exec_bin"
+        echo "--   Running with make. Using Ninja (ninja-build) might improve build experience."
+    fi
+fi
+
+if ! [ -x "$exec_bin" ]; then
+    echo "-!- No compatible build system (Ninja, Make) found."
+    exit 4
+fi
+
+
+if [ -f build ]; then
+    echo "-!- ./build file exists. ./configure can't continue"
+    exit 2
+fi
+
+cmake_config="$cmake_type:$cmake_build_type"
+if [ -d build ]; then
+    last_config="$(cat build/.cmake_config)"
+    if [[ "$cmake_config" != "$last_config" ]]; then
+        echo "-- Using different build config, cleaning build system files"
+        rm -r build/CMakeCache.txt build/CMakeFiles
+    fi
+fi
+
+mkdir -p build
+pushd build > /dev/null
+
+echo "$cmake_config" > .cmake_config
+cmake -G "$cmake_type" $cmake_build_type .. || exit 9
+
+if [[ "$cmake_type" != "Ninja" ]]; then
+cat << EOF > Makefile
+default:
+	@cmake --build .
+%:
+	@cmake --build . --target "\$@"
+EOF
+fi
+
+popd > /dev/null
+
+cat << EOF > Makefile
+default:
+	@cmake --build build
+%:
+	@cmake --build build --target "\$@"
+EOF
+
+echo "-- Configured. Type 'make' to build, 'make install' to install."
