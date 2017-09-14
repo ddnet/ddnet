@@ -3,7 +3,13 @@ before_build:
     git submodule update --init
 
     md build
-
     cd build
 
     cmake -Werror=dev ..
+
+after_build:
+  - cmd: msbuild package
+
+artifacts:
+  - path: DDNet-*.zip
+    name: DDNet
