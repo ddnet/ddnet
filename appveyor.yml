@@ -4,13 +4,13 @@ before_build:
 - cmd: |
     git submodule update --init
 
-    md build32 & pushd build32
+    md build32 & cd build32
     cmake -Werror=dev -G "Visual Studio 14 2015" ..
-    popd
+    cd ..
 
-    md build64 & pushd build64
+    md build64 & cd build64
     cmake -Werror=dev -G "Visual Studio 14 2015 Win64" ..
-    popd
+    cd ..
 
 build_script:
   - cmd: cmake --build build32 --config Release --target everything
