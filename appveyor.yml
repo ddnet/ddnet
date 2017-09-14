@@ -21,6 +21,5 @@ after_build:
   - cmd: cmake --build build64 --config Release --target package
 
 artifacts:
-  - path: build^/DDNet-*.zip
+  - path: build*/DDNet-*.zip
     name: DDNet
-    
