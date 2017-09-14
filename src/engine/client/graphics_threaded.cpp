@@ -59,7 +59,7 @@ void CGraphics_Threaded::FlushVertices()
 
 	if(m_Drawing == DRAWING_QUADS)
 	{
-		if(g_Config.m_GfxQuadAsTriangle || m_UseOpenGL3_3)
+		if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			Cmd.m_PrimCount = NumVerts/3;
@@ -594,11 +594,10 @@ void CGraphics_Threaded::QuadsDraw(CQuadItem *pArray, int Num)
 void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 {
 	CCommandBuffer::SPoint Center;
-	Center.z = 0;
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle || m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -686,7 +685,7 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle || m_UseOpenGL3_3)
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -1255,10 +1254,6 @@ int CGraphics_Threaded::Init()
 	// fetch pointers
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
-
-	// Set all z to -5.0f
-	for(int i = 0; i < MAX_VERTICES; i++)
-		m_aVertices[i].m_Pos.z = -5.0f;
 
 	// init textures
 	m_FirstFreeTexture = 0;
