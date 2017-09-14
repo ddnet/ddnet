@@ -14,7 +14,7 @@ before_build:
 
 build_script:
   - cmd: cmake --build build32 --config Release --target everything
-  - cmd: cmake --build build64 --condig Release --target everything
+  - cmd: cmake --build build64 --config Release --target everything
 
 after_build:
   - cmd: cmake --build build32 --config Release --target package
@@ -23,3 +23,4 @@ after_build:
 artifacts:
   - path: build^/DDNet-*.zip
     name: DDNet
+    
