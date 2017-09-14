@@ -35,7 +35,7 @@ void CRaceDemo::OnRender()
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
 		vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
 
-		if(CRaceHelper::IsStart(m_pClient, m_pClient->m_PredictedPrevChar.m_Pos, m_pClient->m_LocalCharacterPos))
+		if(CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
 		{
 			if(m_RaceState == RACE_STARTED)
 				Client()->RaceRecord_Stop();
