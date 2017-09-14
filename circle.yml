@@ -16,7 +16,7 @@ dependencies:
         if [ ! -d ~/cmake ]; then
           mkdir ~/cmake
           cd ~/cmake
-          wget -O cmake.tar.gz https://cmake.org/files/v3.9/cmake-3.9.2.tar.gz
+          curl -o cmake.tar.gz https://cmake.org/files/v3.9/cmake-3.9.2.tar.gz
           tar --strip-components=1 -zxf cmake.tar.gz
           ./bootstrap && make
         fi
