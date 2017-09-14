@@ -513,7 +513,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 	{
 		int Slot = State.m_Texture % m_MaxTextureUnits;
 		
-		if(g_Config.m_GfxEnableTextureUnitOptimization)
+		if(m_UseMultipleTextureUnits)
 		{
 			if(!IsAndUpdateTextureSlotBound(Slot, State.m_Texture))
 			{
@@ -581,7 +581,8 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
 {
-	if(!g_Config.m_GfxEnableTextureUnitOptimization)
+	m_UseMultipleTextureUnits = g_Config.m_GfxEnableTextureUnitOptimization;
+	if(!m_UseMultipleTextureUnits)
 	{
 		glActiveTexture(GL_TEXTURE0);
 	}
@@ -842,7 +843,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
 {
-	if(g_Config.m_GfxEnableTextureUnitOptimization)
+	if(m_UseMultipleTextureUnits)
 	{
 		int Slot = pCommand->m_Slot % m_MaxTextureUnits;
 		//just tell, that we using this texture now
@@ -858,7 +859,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
 {
 	int Slot = 0;
-	if(g_Config.m_GfxEnableTextureUnitOptimization)
+	if(m_UseMultipleTextureUnits)
 	{
 		Slot = pCommand->m_Slot % m_MaxTextureUnits;
 		IsAndUpdateTextureSlotBound(Slot, pCommand->m_Slot);
@@ -925,7 +926,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	}
 #endif
 	int Slot = 0;
-	if(g_Config.m_GfxEnableTextureUnitOptimization)
+	if(m_UseMultipleTextureUnits)
 	{
 		Slot = pCommand->m_Slot % m_MaxTextureUnits;
 		//just tell, that we using this texture now

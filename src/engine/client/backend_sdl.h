@@ -128,6 +128,8 @@ class CGLSLBorderTileLineProgram;
 // takes care of opengl 3.2 related rendering
 class CCommandProcessorFragment_OpenGL3_3
 {
+	bool m_UseMultipleTextureUnits;
+	
 	struct CTexture
 	{
 		GLuint m_Tex;
