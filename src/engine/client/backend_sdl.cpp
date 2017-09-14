@@ -826,6 +826,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	
 	glBindVertexArray(0);
 	glDeleteBuffers(1, &m_PrimitiveDrawBufferID);
+	glDeleteBuffers(1, &m_PrimitiveDrawIndexBufferID);
 	glDeleteVertexArrays(1, &m_PrimitiveDrawVertexID);
 	
 	for(int i = 0; i < CCommandBuffer::MAX_TEXTURES; ++i)
