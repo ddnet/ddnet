@@ -609,10 +609,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pPrimitiveProgram->AddShader(&PrimitiveFragmentShader);
 		m_pPrimitiveProgram->LinkProgram();
 		
-		//detach shader, they are not needed anymore after linking
-		m_pPrimitiveProgram->DetachShader(&PrimitiveVertexShader);
-		m_pPrimitiveProgram->DetachShader(&PrimitiveFragmentShader);
-		
 		m_pPrimitiveProgram->UseProgram();
 		
 		m_pPrimitiveProgram->m_LocPos = m_pPrimitiveProgram->GetUniformLoc("Pos");
@@ -629,10 +625,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pTileProgram->AddShader(&VertexShader);
 		m_pTileProgram->AddShader(&FragmentShader);
 		m_pTileProgram->LinkProgram();
-		
-		//detach shader, they are not needed anymore after linking
-		m_pTileProgram->DetachShader(&VertexShader);
-		m_pTileProgram->DetachShader(&FragmentShader);
 		
 		m_pTileProgram->UseProgram();
 		
@@ -653,10 +645,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pTileProgramTextured->AddShader(&FragmentShader);
 		m_pTileProgramTextured->LinkProgram();
 		
-		//detach shader, they are not needed anymore after linking
-		m_pTileProgramTextured->DetachShader(&VertexShader);
-		m_pTileProgramTextured->DetachShader(&FragmentShader);
-		
 		m_pTileProgramTextured->UseProgram();
 		
 		m_pTileProgramTextured->m_LocPos = m_pTileProgramTextured->GetUniformLoc("Pos");
@@ -675,10 +663,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileProgram->AddShader(&VertexShader);
 		m_pBorderTileProgram->AddShader(&FragmentShader);
 		m_pBorderTileProgram->LinkProgram();
-		
-		//detach shader, they are not needed anymore after linking
-		m_pBorderTileProgram->DetachShader(&VertexShader);
-		m_pBorderTileProgram->DetachShader(&FragmentShader);
 		
 		m_pBorderTileProgram->UseProgram();
 		
@@ -702,10 +686,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileProgramTextured->AddShader(&FragmentShader);
 		m_pBorderTileProgramTextured->LinkProgram();
 		
-		//detach shader, they are not needed anymore after linking
-		m_pBorderTileProgramTextured->DetachShader(&VertexShader);
-		m_pBorderTileProgramTextured->DetachShader(&FragmentShader);
-		
 		m_pBorderTileProgramTextured->UseProgram();
 		
 		m_pBorderTileProgramTextured->m_LocPos = m_pBorderTileProgramTextured->GetUniformLoc("Pos");
@@ -728,10 +708,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileLineProgram->AddShader(&FragmentShader);
 		m_pBorderTileLineProgram->LinkProgram();
 		
-		//detach shader, they are not needed anymore after linking
-		m_pBorderTileLineProgram->DetachShader(&VertexShader);
-		m_pBorderTileLineProgram->DetachShader(&FragmentShader);
-		
 		m_pBorderTileLineProgram->UseProgram();
 		
 		m_pBorderTileLineProgram->m_LocPos = m_pBorderTileLineProgram->GetUniformLoc("Pos");
@@ -751,10 +727,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileLineProgramTextured->AddShader(&VertexShader);
 		m_pBorderTileLineProgramTextured->AddShader(&FragmentShader);
 		m_pBorderTileLineProgramTextured->LinkProgram();
-		
-		//detach shader, they are not needed anymore after linking
-		m_pBorderTileLineProgramTextured->DetachShader(&VertexShader);
-		m_pBorderTileLineProgramTextured->DetachShader(&FragmentShader);
 		
 		m_pBorderTileLineProgramTextured->UseProgram();
 		
@@ -805,16 +777,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
-	//clean up everything
-	m_pPrimitiveProgram->DeleteProgram();
-	//m_QuadProgram->DeleteProgram();
-	m_pTileProgram->DeleteProgram();
-	m_pTileProgramTextured->DeleteProgram();
-	m_pBorderTileProgram->DeleteProgram();
-	m_pBorderTileProgramTextured->DeleteProgram();
-	m_pBorderTileLineProgram->DeleteProgram();
-	m_pBorderTileLineProgramTextured->DeleteProgram();
-	
+	//clean up everything	
 	delete m_pPrimitiveProgram;
 	//delete m_QuadProgram;
 	delete m_pTileProgram;

@@ -16,6 +16,8 @@ public:
 	GLuint GetProgramID();
 	
 	void DetachShader(CGLSL* pShader);
+	void DetachShaderByID(GLuint ShaderID);
+	void DetachAllShaders();
 	
 	//Support various types	
 	void SetUniformVec2(int Loc, int Count, const float* Value);
@@ -29,7 +31,7 @@ public:
 	int GetUniformLoc(const char* Name);
 	
 	CGLSLProgram();
-	~CGLSLProgram();
+	virtual ~CGLSLProgram();
 	
 protected:
 	GLuint m_ProgramID;

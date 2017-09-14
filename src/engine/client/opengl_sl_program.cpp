@@ -28,8 +28,13 @@ void CGLSLProgram::DetachShader(CGLSL* pShader)
 {
 	if (pShader->IsLoaded())
 	{
-		glDetachShader(m_ProgramID, pShader->GetShaderID());
+		DetachShaderByID(pShader->GetShaderID());
 	}
+}
+
+void CGLSLProgram::DetachShaderByID(GLuint ShaderID)
+{
+	glDetachShader(m_ProgramID, ShaderID);
 }
 
 void CGLSLProgram::LinkProgram()
@@ -46,6 +51,28 @@ void CGLSLProgram::LinkProgram()
 		glGetProgramInfoLog(m_ProgramID, 1024, &iLogLength, sInfoLog);
 		str_format(sFinalMessage, 1536, "Error! Shader program wasn't linked! The linker returned:\n\n%s", sInfoLog);
 		dbg_msg("GLSL Program", sFinalMessage);
+	}
+	
+	//detach all shaders attached to this program
+	DetachAllShaders();
+}
+
+void CGLSLProgram::DetachAllShaders(){
+	GLuint aShaders[100];
+	GLsizei ReturnedCount = 0;
+	while(1)
+	{
+		glGetAttachedShaders(m_ProgramID, 100, &ReturnedCount, aShaders);
+		
+		if(ReturnedCount > 0)
+		{
+			for(GLsizei i = 0; i < ReturnedCount; ++i)
+			{
+				DetachShaderByID(aShaders[i]);
+			}
+		}
+		
+		if(ReturnedCount < 100) break;
 	}
 }
 
