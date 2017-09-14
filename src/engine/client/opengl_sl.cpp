@@ -1,5 +1,5 @@
 #include "opengl_sl.h"
-#include <base/system.h>
+#include <engine/shared/linereader.h>
 #include <vector>
 #include <stdio.h>
 #include <string>
@@ -7,14 +7,18 @@
 bool CGLSL::LoadShader(const char* pFile, int Type) {
 	if (m_IsLoaded) return true;
 	IOHANDLE f;
-	//support read text in system.h/cpp
-	f = (IOHANDLE)fopen(pFile, "rt");
+	f = io_open(pFile, IOFLAG_READ);
 	
 	std::vector<std::string> Lines;
 	char buff[500];
 	if (f) {
-		//support fgets in system.h/cpp
-		while (fgets(buff, 500, (FILE*)f)) Lines.push_back(buff);
+		CLineReader LineReader;
+		LineReader.Init(f);
+		char* ReadLine = NULL;
+		while ((ReadLine = LineReader.Get())) {
+			Lines.push_back(ReadLine);
+			Lines.back().append("\r\n");
+		}
 		io_close(f);
 
 		const char** ShaderCode = new const char*[Lines.size()];
@@ -72,4 +76,8 @@ GLuint CGLSL::GetShaderID() {
 
 CGLSL::CGLSL(){
 	m_IsLoaded = false;
+}
+
+CGLSL::~CGLSL(){
+	DeleteShader();
 }

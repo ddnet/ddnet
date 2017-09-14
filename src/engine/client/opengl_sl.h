@@ -11,6 +11,7 @@ public:
 	GLuint GetShaderID();
 	
 	CGLSL();
+	virtual ~CGLSL();
 private:
 	GLuint m_ShaderID;
 	int m_Type;
