@@ -330,10 +330,14 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 	void *pTmpData = mem_alloc(MemSize, sizeof(void*));
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
-
-	//
-	m_pCommandBuffer->AddCommand(Cmd);
-	KickCommandBuffer();
+	
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		m_pCommandBuffer->AddCommand(Cmd);
+	}		
 	return 0;
 }
 
@@ -373,8 +377,13 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
 
-	//
-	m_pCommandBuffer->AddCommand(Cmd);
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		m_pCommandBuffer->AddCommand(Cmd);
+	}
 
 	return Tex;
 }
