@@ -27,6 +27,7 @@ void CMapImages::OnInit()
 		void *pMem = mem_alloc(1024*1024, 1);
 		mem_zero(pMem, 1024*1024);
 		m_OverlayBottomTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
+		mem_free(pMem);
 		
 		for(int i = 0; i < 256; ++i)
 		{
@@ -36,16 +37,15 @@ void CMapImages::OnInit()
 			
 			float x = (i%16) * 64;
 			float y = (int)(i/16)* 64;
-			Graphics()->LoadTextureRawSub(m_OverlayBottomTexture, x, y, 64, 64, CImageInfo::FORMAT_ALPHA, pMem);
-			TextRender()->UploadText(m_OverlayBottomTexture, buff, -1, x, y + 12 + 32, 20);
+			TextRender()->UploadText(m_OverlayBottomTexture, buff, -1, x+1, y + 12 + 32, 20, 64-1);
 		}
-		mem_free(pMem);
 	}
 	if(m_OverlayTopTexture == -1)
 	{
 		void *pMem = mem_alloc(1024*1024, 1);
 		mem_zero(pMem, 1024*1024);
 		m_OverlayTopTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
+		mem_free(pMem);
 		
 		for(int i = 0; i < 256; ++i)
 		{
@@ -55,17 +55,16 @@ void CMapImages::OnInit()
 			
 			float x = (i%16) * 64;
 			float y = (int)(i/16)* 64;
-			Graphics()->LoadTextureRawSub(m_OverlayTopTexture, x, y, 64, 64, CImageInfo::FORMAT_ALPHA, pMem);
-			TextRender()->UploadText(m_OverlayTopTexture, buff, -1, x, y, 20);
+			TextRender()->UploadText(m_OverlayTopTexture, buff, -1, x+1, y+1, 20, 64-1);
 		}
-		mem_free(pMem);
 	}
 	if(m_OverlayCenterTexture == -1)
 	{
 		void *pMem = mem_alloc(1024*1024, 1);
 		mem_zero(pMem, 1024*1024);
 		m_OverlayCenterTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
-		
+		mem_free(pMem);
+
 		for(int i = 0; i < 256; ++i)
 		{
 			char buff[4];
@@ -76,14 +75,11 @@ void CMapImages::OnInit()
 			float y = (int)(i/16)* 64;
 			
 			int Size = (len == 3 ? 20 : 64);
-			int Width = (len == 3 ? 15 : 32);
 			int OffY = (len == 3 ? 10 : 5);
-			int OffX = (len == 3 ? 10 : 0);
+			int OffX = (len == 3 ? 10 : 1);
 			
-			Graphics()->LoadTextureRawSub(m_OverlayCenterTexture, x, y, 64, 64, CImageInfo::FORMAT_ALPHA, pMem);
-			TextRender()->UploadText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, Size);
+			TextRender()->UploadText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, Size, 64-OffX);
 		}
-		mem_free(pMem);
 	}
 }
 

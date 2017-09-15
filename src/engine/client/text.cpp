@@ -745,7 +745,7 @@ public:
 			pCursor->m_Y = DrawY;
 	}
 
-	virtual void UploadText(int TextureID, const char *pText, int Length, float x, float y, float Size)
+	virtual void UploadText(int TextureID, const char *pText, int Length, float x, float y, int Size, int MaxWidth)
 	{
 		CFont *pFont = m_pDefaultFont;
 		FT_Bitmap *pBitmap;
@@ -766,7 +766,6 @@ public:
 	
 		while(pCurrent < pEnd)
 		{
-			int NewLine = 0;
 			const char *pBatchEnd = pEnd;
 			
 			const char *pTmp = pCurrent;
@@ -774,12 +773,6 @@ public:
 			
 			if(NextCharacter)
 			{
-				int SlotID = 0;
-				int SlotW = Size;
-				int SlotH = Size;
-				int SlotSize = SlotW*SlotH;
-				int xt = 1;
-				int yt = 1;
 				unsigned int px, py;
 				
 				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, Size);
@@ -792,28 +785,38 @@ public:
 				}
 				
 				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
-
-				// prepare glyph data
-				mem_zero(ms_aGlyphData, SlotSize);
-
-				if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
-				{
-					for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
-						for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
-							ms_aGlyphData[(py+yt)*SlotW+px+xt] = pBitmap->buffer[py*pBitmap->pitch+px]; // ignore_convention
-				}
-				else if(pBitmap->pixel_mode == FT_PIXEL_MODE_MONO) // ignore_convention
-				{
-					for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
-						for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
-						{
-							if(pBitmap->buffer[py*pBitmap->pitch+px/8]&(1<<(7-(px%8)))) // ignore_convention
-								ms_aGlyphData[(py+yt)*SlotW+px+xt] = 255;
-						}
-				}
 				
-				Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, Size, Size, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
-				WidthLastChars += (pBitmap->width + 1);
+				int MaxSize = (MaxWidth - WidthLastChars);
+				if (MaxSize > 0)
+				{
+					int SlotW = (MaxSize < pBitmap->width ? MaxSize : pBitmap->width);
+					int SlotH = pBitmap->rows;
+					int SlotSize = SlotW*SlotH;
+					
+					// prepare glyph data
+					mem_zero(ms_aGlyphData, SlotSize);
+
+					if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
+					{
+						for (py = 0; py < (unsigned)SlotH; py++) // ignore_convention
+							for (px = 0; px < (unsigned)SlotW; px++)
+							{
+								ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
+							}
+					}
+					/*else if(pBitmap->pixel_mode == FT_PIXEL_MODE_MONO) // ignore_convention
+					{
+						for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
+							for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
+							{
+								if(pBitmap->buffer[py*pBitmap->pitch+px/8]&(1<<(7-(px%8)))) // ignore_convention
+									ms_aGlyphData[(py)*SlotW+px] = 255;
+							}
+					}*/
+					
+					Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
+					WidthLastChars += (SlotW + 1);
+				}
 			}
 			++ChrCount;
 			pCurrent = pTmp;

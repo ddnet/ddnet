@@ -333,6 +333,7 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 
 	//
 	m_pCommandBuffer->AddCommand(Cmd);
+	KickCommandBuffer();
 	return 0;
 }
 
