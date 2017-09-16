@@ -176,13 +176,14 @@ elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
   find_library(OPENGL OpenGL)
+  find_library(SECURITY Security)
   set(PLATFORM_CLIENT
     src/osx/notification.h
     src/osx/notification.mm
     src/osxlaunch/client.h
     src/osxlaunch/client.m
   )
-  set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
+  set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL} ${SECURITY})
   set(PLATFORM_LIBS ${CARBON})
 else()
   set(PLATFORM_CLIENT)
