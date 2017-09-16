@@ -341,6 +341,8 @@ void CMapLayers::OnMapLoad()
 		}
 		m_TileLayerVisuals.clear();
 	}
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
 	
 	bool PassedGameLayer = false;
 	//prepare all visuals for all tile layers	
@@ -493,7 +495,7 @@ void CMapLayers::OnMapLoad()
 										{ 
 											Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
 											Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-											if(!IsValidGameTile(Index)) continue;
+											if(IsDDNet(&Info) && !IsValidGameTile(Index)) continue;
 										}
 										if(IsFrontLayer)
 										{ 
