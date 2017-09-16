@@ -359,8 +359,13 @@ void CGhost::Save()
 		mem_copy(aBuffer2, Data, Size);
 		Data += Items;
 
-		Size = CVariableInt::Compress(aBuffer2, Size, aBuffer);
+		Size = CVariableInt::Compress(aBuffer2, Size, aBuffer, sizeof(aBuffer));
+		if(Size < 0)
+			return;
+
 		Size = CNetBase::Compress(aBuffer, Size, aBuffer2, sizeof(aBuffer2));
+		if(Size < 0)
+			return;
 
 		aSize[0] = (Size>>24)&0xff;
 		aSize[1] = (Size>>16)&0xff;
@@ -490,7 +495,7 @@ void CGhost::Load(const char* pFilename, int ID)
 			break;
 		}
 
-		Size = CVariableInt::Decompress(aDecompressed, Size, aData);
+		Size = CVariableInt::Decompress(aDecompressed, Size, aData, sizeof(aData));
 		if(Size < 0)
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost", "error during intpack decompression");
