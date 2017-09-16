@@ -19,7 +19,7 @@ void CRaceDemo::OnStateChange(int NewState, int OldState)
 
 void CRaceDemo::OnRender()
 {
-	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pLocalCharacter || Client()->State() != IClient::STATE_ONLINE)
+	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pGameInfoObj || !m_pClient->m_Snap.m_pLocalCharacter || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	// only for race
@@ -28,14 +28,20 @@ void CRaceDemo::OnRender()
 	if(!IsRace(&ServerInfo) || !m_pClient->m_NewTick)
 		return;
 
+	static int s_LastRaceTick = -1;
+
+	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
+	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
+
 	// start the demo
-	bool AllowRestart = m_AllowRestart && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
+	bool ForceStart = RaceFlag && s_LastRaceTick != RaceTick;
+	bool AllowRestart = (m_AllowRestart || ForceStart) && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
 	if(m_RaceState == RACE_IDLE || m_RaceState == RACE_PREPARE || (m_RaceState == RACE_STARTED && AllowRestart))
 	{
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
 		vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
 
-		if(CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
+		if(ForceStart || (!RaceFlag && CRaceHelper::IsStart(m_pClient, PrevPos, Pos)))
 		{
 			if(m_RaceState == RACE_STARTED)
 				Client()->RaceRecord_Stop();
@@ -64,6 +70,8 @@ void CRaceDemo::OnRender()
 	// stop the demo
 	if(m_RaceState == RACE_FINISHED && m_RecordStopTick <= Client()->GameTick())
 		StopRecord(m_Time);
+
+	s_LastRaceTick = RaceFlag ? RaceTick : -1;
 }
 
 void CRaceDemo::OnReset()
