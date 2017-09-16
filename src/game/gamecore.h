@@ -67,7 +67,7 @@ inline vec2 GetDir(float Angle)
 
 inline float GetAngle(vec2 Dir)
 {
-	if(Dir.x == 0 || Dir.y == 0)
+	if(Dir.x == 0 && Dir.y == 0)
 		return 0.0f;
 	float a = atanf(Dir.y/Dir.x);
 	if(Dir.x < 0)
