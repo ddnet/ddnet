@@ -20,6 +20,11 @@ after_build:
   - cmd: cmake --build build32 --config Release --target package
   - cmd: cmake --build build64 --config Release --target package
 
+environment:
+  CFLAGS: /WX
+  CXXFLAGS: /WX
+  LDFLAGS: /WX
+
 artifacts:
   - path: build*/DDNet-*.zip
     name: DDNet
