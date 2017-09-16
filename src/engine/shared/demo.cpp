@@ -228,8 +228,13 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	mem_copy(aBuffer2, pData, Size);
 	while(Size&3)
 		aBuffer2[Size++] = 0;
-	Size = CVariableInt::Compress(aBuffer2, Size, aBuffer); // buffer2 -> buffer
+	Size = CVariableInt::Compress(aBuffer2, Size, aBuffer, sizeof(aBuffer)); // buffer2 -> buffer
+	if(Size < 0)
+		return;
+
 	Size = CNetBase::Compress(aBuffer, Size, aBuffer2, sizeof(aBuffer2)); // buffer -> buffer2
+	if(Size < 0)
+		return;
 
 
 	aChunk[0] = ((Type&0x3)<<5);
@@ -550,7 +555,7 @@ void CDemoPlayer::DoTick()
 				break;
 			}
 
-			DataSize = CVariableInt::Decompress(aDecompressed, DataSize, aData);
+			DataSize = CVariableInt::Decompress(aDecompressed, DataSize, aData, sizeof(aData));
 
 			if(DataSize < 0)
 			{
