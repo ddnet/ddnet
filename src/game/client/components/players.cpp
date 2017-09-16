@@ -681,7 +681,7 @@ void CPlayers::RenderPlayer(
 					vec2 Dir = vec2(pPlayerChar->m_X,pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
 					Dir = normalize(Dir);
 					float HadOkenAngle = GetAngle(Dir);
-					Graphics()->QuadsSetRotation(HadOkenAngle );
+					Graphics()->QuadsSetRotation(HadOkenAngle);
 					//float offsety = -data->weapons[iw].muzzleoffsety;
 					RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX], 0);
 					vec2 DirY(-Dir.y,Dir.x);
@@ -798,7 +798,7 @@ void CPlayers::RenderPlayer(
 			if (OtherTeam)
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			IGraphics::CQuadItem QuadItem(Position.x-30, Position.y - 70, 22, 22);
-			Graphics()->QuadsSetRotation(GetAngle(vec2(1,0))+pi);
+			Graphics()->QuadsSetRotation(pi);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -819,7 +819,7 @@ void CPlayers::RenderPlayer(
 			if (OtherTeam)
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			IGraphics::CQuadItem QuadItem(Position.x, Position.y - 70, 22, 22);
-			Graphics()->QuadsSetRotation(GetAngle(vec2(0,1))+pi);
+			Graphics()->QuadsSetRotation(3 / 2 * pi);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
