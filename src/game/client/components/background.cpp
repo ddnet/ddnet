@@ -1,5 +1,4 @@
 #include <base/system.h>
-#include <iostream>
 
 #include <engine/shared/config.h>
 #include <engine/map.h>
@@ -48,7 +47,6 @@ void CBackground::LoadBackground()
 	if(time_get()-m_LastLoad < 10*time_freq())
 		return;
 
-	std::cout << "here" << std::endl;
 	if(m_Loaded && m_pMap == m_pBackgroundMap)
 		m_pMap->Unload();
 

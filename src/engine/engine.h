@@ -29,6 +29,6 @@ public:
 	virtual void AddJob(CJob *pJob, JOBFUNC pfnFunc, void *pData) = 0;
 };
 
-extern IEngine *CreateEngine(const char *pAppname);
+extern IEngine *CreateEngine(const char *pAppname, bool Silent);
 
 #endif

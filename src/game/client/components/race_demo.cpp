@@ -1,13 +1,12 @@
 /* (c) Redix and Sushi */
 
-#include <stdio.h>
-
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 
 #include "menus.h"
+#include "race.h"
 #include "race_demo.h"
 
 CRaceDemo::CRaceDemo()
@@ -113,22 +112,12 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 		if(pMsg->m_ClientID == -1 && m_RaceState == RACE_STARTED)
 		{
 			char aName[MAX_NAME_LENGTH];
-			const char *pFinished = str_find(pMsg->m_pMessage, " finished in: ");
-			int FinishedPos = pFinished - pMsg->m_pMessage;
-			if (!pFinished || FinishedPos == 0 || FinishedPos >= (int)sizeof(aName))
-				return;
-
-			// store the name
-			str_copy(aName, pMsg->m_pMessage, FinishedPos + 1);
-
-			// prepare values and state for saving
-			int Minutes;
-			float Seconds;
-			if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) && sscanf(pFinished, " finished in: %d minute(s) %f", &Minutes, &Seconds) == 2)
+			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
+			if(Time > 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
 			{
 				m_RaceState = RACE_FINISHED;
 				m_RecordStopTime = Client()->GameTick() + Client()->GameTickSpeed();
-				m_Time = Minutes*60 + Seconds;
+				m_Time = Time;
 			}
 		}
 	}
@@ -146,14 +135,17 @@ void CRaceDemo::CheckDemo()
 	m_pClient->m_pMenus->DemolistPopulate();
 	for(int i = 0; i < m_pClient->m_pMenus->m_lDemos.size(); i++)
 	{
-		if(!str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, m_pMap, str_length(m_pMap)) && str_comp_num(m_pClient->m_pMenus->m_lDemos[i].m_aName, aTmpDemoName, str_length(aTmpDemoName)) && str_length(m_pClient->m_pMenus->m_lDemos[i].m_aName) > str_length(m_pMap) && m_pClient->m_pMenus->m_lDemos[i].m_aName[str_length(m_pMap)] == '_')
-		{
-			const char *pDemo = m_pClient->m_pMenus->m_lDemos[i].m_aName;
+		const char *pDemo = m_pClient->m_pMenus->m_lDemos[i].m_aName;
+		if(str_comp(pDemo, aTmpDemoName) == 0)
+			continue;
 
+		int MapLen = str_length(m_pMap);
+		if(str_comp_num(pDemo, m_pMap, MapLen) == 0 && pDemo[MapLen] == '_')
+		{
 			// set cursor
-			pDemo += str_length(m_pMap)+1;
-			float DemoTime = str_tofloat(pDemo);
-			if(m_Time < DemoTime)
+			pDemo += MapLen + 1;
+			int Time = CRaceHelper::TimeFromSecondsStr(pDemo);
+			if(Time > 0 && m_Time < Time)
 			{
 				// save new record
 				SaveDemo(m_pMap);
@@ -194,11 +186,11 @@ void CRaceDemo::SaveDemo(const char* pDemo)
 			if(aPlayerName[i] == '\\' || aPlayerName[i] == '/' || aPlayerName[i] == '|' || aPlayerName[i] == ':' || aPlayerName[i] == '*' || aPlayerName[i] == '?' || aPlayerName[i] == '<' || aPlayerName[i] == '>' || aPlayerName[i] == '"')
 				aPlayerName[i] = '%';
 
-			str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%5.2f_%s.demo", pDemo, m_Time, aPlayerName);
+			str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%d.%03d_%s.demo", pDemo, m_Time / 1000, m_Time % 1000, aPlayerName);
 		}
 	}
 	else
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%5.2f.demo", pDemo, m_Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%d.%03d.demo", pDemo, m_Time / 1000, m_Time % 1000);
 
 	str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_tmp_%d.demo", m_pMap, pid());
 

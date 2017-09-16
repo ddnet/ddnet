@@ -52,7 +52,7 @@ private:
 	bool m_Recording;
 	bool m_Rendering;
 	int m_RaceState;
-	float m_BestTime;
+	int m_BestTime;
 	bool m_NewRecord;
 	bool m_Saving;
 

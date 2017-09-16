@@ -7,7 +7,6 @@
 #include "message.h"
 #include <engine/friends.h>
 #include <engine/shared/config.h>
-#include <versionsrv/versionsrv.h>
 
 enum
 {
@@ -40,7 +39,7 @@ protected:
 
 	int m_GameTickSpeed;
 public:
-	char m_aNews[NEWS_SIZE];
+	char m_aNews[3000];
 	int64 m_ReconnectTime;
 
 	class CSnapItem
@@ -135,8 +134,6 @@ public:
 	// server info
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) = 0;
 
-	virtual void CheckVersionUpdate() = 0;
-
 	virtual int GetPredictionTime() = 0;
 
 	// snapshot interface
@@ -189,8 +186,7 @@ public:
 	virtual void DemoSliceEnd() = 0;
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
-	virtual void RequestDDNetSrvList() = 0;
-	virtual void RequestDDNetRanks() = 0;
+	virtual void RequestDDNetInfo() = 0;
 	virtual bool EditorHasUnsavedData() = 0;
 
 	virtual void GenerateTimeoutSeed() = 0;

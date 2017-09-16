@@ -67,7 +67,7 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
 	char aBuf[256], aPath[256];
-	str_format(aBuf, sizeof(aBuf), "https://%s/%s", g_Config.m_ClDDNetUpdate4Server, pFile);
+	str_format(aBuf, sizeof(aBuf), "https://update4.ddnet.tw/%s", pFile);
 	if(!pDestPath)
 		pDestPath = pFile;
 	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);

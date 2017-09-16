@@ -8,13 +8,18 @@ addons:
   apt:
     packages:
     - libfreetype6-dev
+    - libgtest-dev
     - libsdl2-dev
 script:
 - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl2; fi
+- if [ "$TRAVIS_OS_NAME" != "osx" ]; then mkdir gtest_build; cmake -E chdir gtest_build cmake /usr/src/gtest; cmake --build gtest_build; fi
 - mkdir build
 - cd build
-- cmake -Werror=dev ..
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then cmake -Werror=dev ..; fi
+- if [ "$TRAVIS_OS_NAME" != "osx" ]; then cmake -Werror=dev -DGTEST_LIBRARY=../gtest_build/libgtest.a -DGTEST_MAIN_LIBRARY=../gtest_build/libgtest_main.a ..; fi
 - make everything
+- if [ "$TRAVIS_OS_NAME" != "osx" ]; then make run_tests; fi
+- make package_default
 env:
   global:
   - CFLAGS="-Wdeclaration-after-statement -Werror"

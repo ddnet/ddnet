@@ -14,7 +14,6 @@
 #include <engine/server/register.h>
 #include <engine/shared/console.h>
 #include <base/math.h>
-#include <engine/shared/mapchecker.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/netban.h>
@@ -202,7 +201,6 @@ public:
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
-	CMapChecker m_MapChecker;
 	CAuthManager m_AuthManager;
 
 	int m_RconRestrict;

@@ -1,7 +1,5 @@
 /* (c) Rajh, Redix and Sushi. */
 
-#include <cstdio>
-
 #include <engine/storage.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -11,6 +9,7 @@
 #include <game/generated/client_data.h>
 #include <game/client/animstate.h>
 
+#include "race.h"
 #include "skins.h"
 #include "menus.h"
 #include "ghost.h"
@@ -319,10 +318,8 @@ void CGhost::Save()
 	}
 
 	char aFilename[256];
-	char aBuf[256];
-	str_format(aFilename, sizeof(aFilename), "%s_%s_%.3f_%08x.gho", Client()->GetCurrentMap(), aName, m_BestTime, Client()->GetCurrentMapCrc());
-	str_format(aBuf, sizeof(aBuf), "ghosts/%s", aFilename);
-	IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	str_format(aFilename, sizeof(aFilename), "ghosts/%s_%s_%d.%03d_%08x.gho", Client()->GetCurrentMap(), aName, m_BestTime / 1000, m_BestTime % 1000, Client()->GetCurrentMapCrc());
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!File)
 		return;
 
@@ -337,7 +334,7 @@ void CGhost::Save()
 	Header.m_aCrc[1] = (Crc>>16)&0xff;
 	Header.m_aCrc[2] = (Crc>>8)&0xff;
 	Header.m_aCrc[3] = (Crc)&0xff;
-	Header.m_Time = m_BestTime;
+	Header.m_Time = m_BestTime / 1000.f;
 	Header.m_NumShots = m_CurGhost.m_Path.size();
 	io_write(File, &Header, sizeof(Header));
 
@@ -454,7 +451,7 @@ void CGhost::Load(const char* pFilename, int ID)
 	}
 
 	if(ID == -1)
-		m_BestTime = Header.m_Time;
+		m_BestTime = Header.m_Time * 1000;
 
 	int NumShots = Header.m_NumShots;
 
@@ -555,24 +552,14 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		if(pMsg->m_ClientID == -1 && m_RaceState == RACE_STARTED)
 		{
 			char aName[MAX_NAME_LENGTH];
-			const char *pFinished = str_find(pMsg->m_pMessage, " finished in: ");
-			int FinishedPos = pFinished - pMsg->m_pMessage;
-			if (!pFinished || FinishedPos == 0 || FinishedPos >= (int)sizeof(aName))
-				return;
-
-			str_copy(aName, pMsg->m_pMessage, FinishedPos + 1);
-
-			// prepare values and state for saving
-			int Minutes;
-			float Seconds;
-			if(!str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) && sscanf(pFinished, " finished in: %d minute(s) %f", &Minutes, &Seconds) == 2)
+			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
+			if(Time > 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
 			{
 				m_RaceState = RACE_FINISHED;
-				float CurTime = Minutes*60 + Seconds;
-				if(m_Recording && (CurTime < m_BestTime || m_BestTime == -1))
+				if(m_Recording && (Time < m_BestTime || m_BestTime == -1))
 				{
 					m_NewRecord = true;
-					m_BestTime = CurTime;
+					m_BestTime = Time;
 					m_Saving = true;
 				}
 			}

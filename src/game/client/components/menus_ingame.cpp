@@ -781,12 +781,6 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	Box.HSplitTop(24.0f, &Box, &MainView);
 	Box.VMargin(20.0f, &Box);
 
-	if(Page < PAGE_INTERNET || Page > PAGE_DDNET)
-	{
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-		NewPage = PAGE_DDNET;
-	}
-
 	Box.VSplitLeft(100.0f, &Button, &Box);
 	static int s_InternetButton=0;
 	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_BL))
@@ -816,10 +810,13 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 
 	Box.VSplitLeft(110.0f, &Button, &Box);
 	static int s_DDNetButton=0;
-	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_BR))
+	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_BR) || Page < PAGE_INTERNET || Page > PAGE_DDNET)
 	{
 		if (Page != PAGE_DDNET)
+		{
+			Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+		}
 		NewPage  = PAGE_DDNET;
 	}
 
@@ -851,7 +848,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	CGhostItem Item;
 	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
 	str_copy(Item.m_aPlayer, Header.m_aOwner, sizeof(Item.m_aPlayer));
-	Item.m_Time = Header.m_Time;
+	Item.m_Time = Header.m_Time * 1000;
 	Item.m_Active = false;
 	Item.m_ID = pSelf->m_lGhosts.add(Item);
 
@@ -1079,7 +1076,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%02d:%06.3f", (int)pItem->m_Time/60, pItem->m_Time-((int)pItem->m_Time/60*60));
+				str_format(aBuf, sizeof(aBuf), "%02d:%02d.%03d", pItem->m_Time / (60 * 1000), (pItem->m_Time / 1000) % 60, pItem->m_Time % 1000);
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 		}

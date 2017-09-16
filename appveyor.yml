@@ -1,13 +1,30 @@
+image: Visual Studio 2015
+
 before_build:
-- cmd: >-
+- cmd: |
     git submodule update --init
 
-    md build
+    md build32 & cd build32
+    cmake -Werror=dev -G "Visual Studio 14 2015" ..
+    cd ..
 
-    cd build
+    md build64 & cd build64
+    cmake -Werror=dev -G "Visual Studio 14 2015 Win64" ..
+    cd ..
 
-    cmake -Werror=dev ..
+build_script:
+  - cmd: cmake --build build32 --config Release --target everything
+  - cmd: cmake --build build64 --config Release --target everything
+
+after_build:
+  - cmd: cmake --build build32 --config Release --target package
+  - cmd: cmake --build build64 --config Release --target package
+
 environment:
   CFLAGS: /WX
   CXXFLAGS: /WX
   LDFLAGS: /WX
+
+artifacts:
+  - path: build*/DDNet-*.zip
+    name: DDNet

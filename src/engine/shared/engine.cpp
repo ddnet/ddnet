@@ -55,10 +55,13 @@ public:
 		}
 	}
 
-	CEngine(const char *pAppname)
+	CEngine(const char *pAppname, bool Silent)
 	{
-		dbg_logger_stdout();
+		if(!Silent)
+			dbg_logger_stdout();
+#if defined(CONF_FAMILY_WINDOWS)
 		dbg_logger_debugger();
+#endif
 
 		//
 		dbg_msg("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
@@ -113,4 +116,4 @@ public:
 	}
 };
 
-IEngine *CreateEngine(const char *pAppname) { return new CEngine(pAppname); }
+IEngine *CreateEngine(const char *pAppname, bool Silent) { return new CEngine(pAppname, Silent); }
