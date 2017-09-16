@@ -112,12 +112,13 @@ void CGhost::OnRender()
 	if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalPrevCharacter)
 	{
 		bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
+		bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
 		int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 
 		static int s_NewRenderTick = -1;
 		int RenderTick = s_NewRenderTick;
 
-		if(!RaceFlag && m_pClient->m_NewPredictedTick)
+		if(!ServerControl && m_pClient->m_NewPredictedTick)
 		{
 			vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
 			vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
@@ -130,7 +131,7 @@ void CGhost::OnRender()
 		{
 			static int s_LastRaceTick = -1;
 
-			if(RaceFlag && s_LastRaceTick != RaceTick)
+			if(ServerControl && s_LastRaceTick != RaceTick)
 			{
 				if(m_Recording && s_LastRaceTick != -1)
 					m_AllowRestart = true;
@@ -142,7 +143,7 @@ void CGhost::OnRender()
 				StartRecord(StartTick);
 				RenderTick = StartTick;
 			}
-			else if(!RaceFlag)
+			else if(!ServerControl)
 			{
 				int PrevTick = m_pClient->m_Snap.m_pLocalPrevCharacter->m_Tick;
 				int CurTick = m_pClient->m_Snap.m_pLocalCharacter->m_Tick;
@@ -179,7 +180,7 @@ void CGhost::OnRender()
 			s_LastRaceTick = RaceFlag ? RaceTick : -1;
 		}
 
-		if((RaceFlag && m_pClient->m_NewTick) || (!RaceFlag && m_pClient->m_NewPredictedTick))
+		if((ServerControl && m_pClient->m_NewTick) || (!ServerControl && m_pClient->m_NewPredictedTick))
 		{
 			// only restart rendering if it did not change since last tick to prevent stuttering
 			if(s_NewRenderTick != -1 && s_NewRenderTick == RenderTick)

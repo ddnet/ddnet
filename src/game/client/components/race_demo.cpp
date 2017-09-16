@@ -31,17 +31,18 @@ void CRaceDemo::OnRender()
 	static int s_LastRaceTick = -1;
 
 	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
+	bool ServerControl = RaceFlag && g_Config.m_ClRaceRecordServerControl;
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 
 	// start the demo
-	bool ForceStart = RaceFlag && s_LastRaceTick != RaceTick;
+	bool ForceStart = ServerControl && s_LastRaceTick != RaceTick;
 	bool AllowRestart = (m_AllowRestart || ForceStart) && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
 	if(m_RaceState == RACE_IDLE || m_RaceState == RACE_PREPARE || (m_RaceState == RACE_STARTED && AllowRestart))
 	{
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
 		vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
 
-		if(ForceStart || (!RaceFlag && CRaceHelper::IsStart(m_pClient, PrevPos, Pos)))
+		if(ForceStart || (!ServerControl && CRaceHelper::IsStart(m_pClient, PrevPos, Pos)))
 		{
 			if(m_RaceState == RACE_STARTED)
 				Client()->RaceRecord_Stop();
