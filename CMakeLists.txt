@@ -562,6 +562,10 @@ if(CLIENT)
     input.cpp
     input.h
     keynames.h
+    opengl_sl.cpp
+    opengl_sl.h
+    opengl_sl_program.cpp
+    opengl_sl_program.h
     serverbrowser.cpp
     serverbrowser.h
     sound.cpp
@@ -569,10 +573,6 @@ if(CLIENT)
     text.cpp
     updater.cpp
     updater.h
-    opengl_sl_program.cpp
-    opengl_sl_program.h
-    opengl_sl.cpp
-    opengl_sl.h
   )
   set_glob(GAME_CLIENT GLOB_RECURSE src/game/client
     animstate.cpp
