@@ -56,11 +56,59 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 	pChar->m_Tick = pGhostChar->m_Tick;
 }
 
+void CGhost::CGhostPath::Copy(const CGhostPath &Other)
+{
+	Reset(Other.m_ChunkSize);
+	SetSize(Other.Size());
+	for(int i = 0; i < m_lChunks.size(); i++)
+		mem_copy(m_lChunks[i], Other.m_lChunks[i], sizeof(CGhostCharacter) * m_ChunkSize);
+}
+
+void CGhost::CGhostPath::Reset(int ChunkSize)
+{
+	for(int i = 0; i < m_lChunks.size(); i++)
+		mem_free(m_lChunks[i]);
+	m_lChunks.clear();
+	m_ChunkSize = ChunkSize;
+	m_NumItems = 0;
+}
+
+void CGhost::CGhostPath::SetSize(int Items)
+{
+	int Chunks = m_lChunks.size();
+	int NeededChunks = (Items + m_ChunkSize - 1) / m_ChunkSize;
+
+	if(NeededChunks > Chunks)
+	{
+		m_lChunks.set_size(NeededChunks);
+		for(int i = Chunks; i < NeededChunks; i++)
+			m_lChunks[i] = (CGhostCharacter*)mem_alloc(sizeof(CGhostCharacter) * m_ChunkSize, 1);
+	}
+
+	m_NumItems = Items;
+}
+
+void CGhost::CGhostPath::Add(CGhostCharacter Char)
+{
+	SetSize(m_NumItems + 1);
+	*Get(m_NumItems - 1) = Char;
+}
+
+CGhostCharacter *CGhost::CGhostPath::Get(int Index)
+{
+	if(Index < 0 || Index >= m_NumItems)
+		return 0;
+
+	int Chunk = Index / m_ChunkSize;
+	int Pos = Index % m_ChunkSize;
+	return &m_lChunks[Chunk][Pos];
+}
+
 void CGhost::AddInfos(const CNetObj_Character *pChar)
 {
 	// Just to be sure it doesnt eat too much memory, the first test should be enough anyway
-	int NumTicks = m_CurGhost.m_lPath.size();
-	if(NumTicks > Client()->GameTickSpeed()*60*20)
+	int NumTicks = m_CurGhost.m_Path.Size();
+	if(NumTicks > Client()->GameTickSpeed()/2*60*30)
 	{
 		StopRecord();
 		return;
@@ -74,12 +122,12 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, (const char*)&m_CurGhost.m_StartTick, sizeof(int));
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&m_CurGhost.m_Skin, sizeof(CGhostSkin));
 		for(int i = 0; i < NumTicks; i++)
-			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&m_CurGhost.m_lPath[i], sizeof(CGhostCharacter));
+			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)m_CurGhost.m_Path.Get(i), sizeof(CGhostCharacter));
 	}
 
 	CGhostCharacter GhostChar;
 	GetGhostCharacter(&GhostChar, pChar);
-	m_CurGhost.m_lPath.add(GhostChar);
+	m_CurGhost.m_Path.Add(GhostChar);
 	if(GhostRecorder()->IsRecording())
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&GhostChar, sizeof(CGhostCharacter));
 }
@@ -207,9 +255,9 @@ void CGhost::OnRender()
 
 		bool End = false;
 		int GhostTick = pGhost->m_StartTick + PlaybackTick;
-		while(pGhost->m_lPath[pGhost->m_PlaybackPos].m_Tick < GhostTick && !End)
+		while(pGhost->m_Path.Get(pGhost->m_PlaybackPos)->m_Tick < GhostTick && !End)
 		{
-			if(pGhost->m_PlaybackPos < pGhost->m_lPath.size() - 1)
+			if(pGhost->m_PlaybackPos < pGhost->m_Path.Size() - 1)
 				pGhost->m_PlaybackPos++;
 			else
 				End = true;
@@ -222,12 +270,12 @@ void CGhost::OnRender()
 
 		int CurPos = pGhost->m_PlaybackPos;
 		int PrevPos = max(0, CurPos - 1);
-		if(pGhost->m_lPath[PrevPos].m_Tick > GhostTick)
+		if(pGhost->m_Path.Get(PrevPos)->m_Tick > GhostTick)
 			continue;
 
 		CNetObj_Character Player, Prev;
-		GetNetObjCharacter(&Player, &pGhost->m_lPath[CurPos]);
-		GetNetObjCharacter(&Prev, &pGhost->m_lPath[PrevPos]);
+		GetNetObjCharacter(&Player, pGhost->m_Path.Get(CurPos));
+		GetNetObjCharacter(&Prev, pGhost->m_Path.Get(PrevPos));
 
 		int TickDiff = Player.m_Tick - Prev.m_Tick;
 		float IntraTick = 0.f;
@@ -281,7 +329,6 @@ void CGhost::StartRecord(int Tick)
 	m_Recording = true;
 	m_CurGhost.Reset();
 	m_CurGhost.m_StartTick = Tick;
-	m_CurGhost.m_lPath.hint_size(25*60);
 
 	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
 	str_copy(m_CurGhost.m_aPlayer, g_Config.m_PlayerName, sizeof(m_CurGhost.m_aPlayer));
@@ -295,7 +342,7 @@ void CGhost::StopRecord(int Time)
 	bool RecordingToFile = GhostRecorder()->IsRecording();
 
 	if(RecordingToFile)
-		GhostRecorder()->Stop(m_CurGhost.m_lPath.size(), Time);
+		GhostRecorder()->Stop(m_CurGhost.m_Path.Size(), Time);
 
 	char aTmpFilename[128];
 	Client()->Ghost_GetPath(aTmpFilename, sizeof(aTmpFilename), m_CurGhost.m_aPlayer);
@@ -366,7 +413,7 @@ int CGhost::Load(const char *pFilename)
 
 	// select ghost
 	CGhostItem *pGhost = &m_aActiveGhosts[Slot];
-	pGhost->m_lPath.set_size(NumTicks);
+	pGhost->m_Path.SetSize(NumTicks);
 
 	str_copy(pGhost->m_aPlayer, pHeader->m_aOwner, sizeof(pGhost->m_aPlayer));
 
@@ -394,12 +441,12 @@ int CGhost::Load(const char *pFilename)
 		else if(Type == GHOSTDATA_TYPE_CHARACTER_NO_TICK)
 		{
 			NoTick = true;
-			if(!GhostLoader()->ReadData(Type, (char*)&pGhost->m_lPath[Index++], sizeof(CGhostCharacter_NoTick)))
+			if(!GhostLoader()->ReadData(Type, (char*)pGhost->m_Path.Get(Index++), sizeof(CGhostCharacter_NoTick)))
 				Error = true;
 		}
 		else if(Type == GHOSTDATA_TYPE_CHARACTER)
 		{
-			if(!GhostLoader()->ReadData(Type, (char*)&pGhost->m_lPath[Index++], sizeof(CGhostCharacter)))
+			if(!GhostLoader()->ReadData(Type, (char*)pGhost->m_Path.Get(Index++), sizeof(CGhostCharacter)))
 				Error = true;
 		}
 		else if(Type == GHOSTDATA_TYPE_START_TICK)
@@ -421,14 +468,14 @@ int CGhost::Load(const char *pFilename)
 	{
 		int StartTick = 0;
 		for(int i = 1; i < NumTicks; i++) // estimate start tick
-			if(pGhost->m_lPath[i].m_AttackTick != pGhost->m_lPath[i - 1].m_AttackTick)
-				StartTick = pGhost->m_lPath[i].m_AttackTick - i;
+			if(pGhost->m_Path.Get(i)->m_AttackTick != pGhost->m_Path.Get(i - 1)->m_AttackTick)
+				StartTick = pGhost->m_Path.Get(i)->m_AttackTick - i;
 		for(int i = 0; i < NumTicks; i++)
-			pGhost->m_lPath[i].m_Tick = StartTick + i;
+			pGhost->m_Path.Get(i)->m_Tick = StartTick + i;
 	}
 
 	if(pGhost->m_StartTick == -1)
-		pGhost->m_StartTick = pGhost->m_lPath[0].m_Tick;
+		pGhost->m_StartTick = pGhost->m_Path.Get(0)->m_Tick;
 
 	if(!FoundSkin)
 		GetGhostSkin(&pGhost->m_Skin, "default", 0, 0, 0);
@@ -454,15 +501,15 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 	if(!pItem->Active() || pItem->HasFile() || m_aActiveGhosts[Slot].Empty() || GhostRecorder()->IsRecording())
 		return;
 
-	const CGhostItem *pGhost = &m_aActiveGhosts[Slot];
+	CGhostItem *pGhost = &m_aActiveGhosts[Slot];
 
-	int NumTicks = pGhost->m_lPath.size();
+	int NumTicks = pGhost->m_Path.Size();
 	Client()->GhostRecorder_Start(pItem->m_aPlayer, pItem->m_Time);
 
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, (const char*)&pGhost->m_StartTick, sizeof(int));
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&pGhost->m_Skin, sizeof(CGhostSkin));
 	for(int i = 0; i < NumTicks; i++)
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&pGhost->m_lPath[i], sizeof(CGhostCharacter));
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)pGhost->m_Path.Get(i), sizeof(CGhostCharacter));
 
 	GhostRecorder()->Stop(NumTicks, pItem->m_Time);
 	Client()->Ghost_GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_aPlayer, pItem->m_Time);

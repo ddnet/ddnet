@@ -54,22 +54,45 @@ private:
 		MAX_ACTIVE_GHOSTS = 8,
 	};
 
+	class CGhostPath
+	{
+		int m_ChunkSize;
+		int m_NumItems;
+
+		array<CGhostCharacter*> m_lChunks;
+
+		void Copy(const CGhostPath &other);
+
+	public:
+		CGhostPath() { Reset(); }
+		~CGhostPath() { Reset(); }
+		CGhostPath(const CGhostPath &Other) { Copy(Other); };
+		CGhostPath &operator = (const CGhostPath &Other) { Copy(Other); return *this; };
+
+		void Reset(int ChunkSize = 25 * 60); // one minute with default snap rate
+		void SetSize(int Items);
+		int Size() const { return m_NumItems; }
+
+		void Add(CGhostCharacter Char);
+		CGhostCharacter *Get(int Index);
+	};
+
 	class CGhostItem
 	{
 	public:
 		CTeeRenderInfo m_RenderInfo;
 		CGhostSkin m_Skin;
-		array<CGhostCharacter> m_lPath;
+		CGhostPath m_Path;
 		int m_StartTick;
 		char m_aPlayer[MAX_NAME_LENGTH];
 		int m_PlaybackPos;
 
 		CGhostItem() { Reset(); }
 
-		bool Empty() const { return m_lPath.size() == 0; }
+		bool Empty() const { return m_Path.Size() == 0; }
 		void Reset()
 		{
-			m_lPath.clear();
+			m_Path.Reset();
 			m_PlaybackPos = 0;
 		}
 	};
