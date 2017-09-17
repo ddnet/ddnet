@@ -93,6 +93,7 @@ private:
 		void Reset()
 		{
 			m_Path.Reset();
+			m_StartTick = -1;
 			m_PlaybackPos = 0;
 		}
 	};

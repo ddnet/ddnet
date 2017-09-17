@@ -413,6 +413,7 @@ int CGhost::Load(const char *pFilename)
 
 	// select ghost
 	CGhostItem *pGhost = &m_aActiveGhosts[Slot];
+	pGhost->Reset();
 	pGhost->m_Path.SetSize(NumTicks);
 
 	str_copy(pGhost->m_aPlayer, pHeader->m_aOwner, sizeof(pGhost->m_aPlayer));
@@ -421,7 +422,6 @@ int CGhost::Load(const char *pFilename)
 	bool FoundSkin = false;
 	bool NoTick = false;
 	bool Error = false;
-	pGhost->m_StartTick = -1;
 
 	int Type;
 	while(!Error && GhostLoader()->ReadNextType(&Type))

@@ -1128,17 +1128,23 @@ void CMenus::RenderGhost(CUIRect MainView)
 	if(NewSelected != -1)
 		s_SelectedIndex = NewSelected;
 
-	CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
-
 	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
 	CUIRect Button;
+	Status.VSplitLeft(120.0f, &Button, &Status);
 
-	static int s_GhostButton = 0;
-	static int s_DeleteButton = 0;
-	static int s_SaveButton = 0;
 	static int s_ReloadButton = 0;
+	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button))
+	{
+		m_pClient->m_pGhost->UnloadAll();
+		GhostlistPopulate();
+	}
+
+	if(s_SelectedIndex >= m_lGhosts.size())
+		return;
+
+	CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
 
 	CGhostItem *pOwnGhost = GetOwnGhost();
 	int ReservedSlots = !pGhost->m_Own && !(pOwnGhost && pOwnGhost->Active());
@@ -1146,6 +1152,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	{
 		Status.VSplitRight(120.0f, &Status, &Button);
 
+		static int s_GhostButton = 0;
 		const char *pText = pGhost->Active() ? Localize("Deactivate") : Localize("Activate");
 		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClick()))
 		{
@@ -1163,6 +1170,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	Status.VSplitRight(120.0f, &Status, &Button);
 
+	static int s_DeleteButton = 0;
 	if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &Button))
 	{
 		if(pGhost->Active())
@@ -1175,16 +1183,9 @@ void CMenus::RenderGhost(CUIRect MainView)
 	bool Recording = m_pClient->m_pGhost->GhostRecorder()->IsRecording();
 	if(!pGhost->HasFile() && !Recording && pGhost->Active())
 	{
+		static int s_SaveButton = 0;
 		Status.VSplitRight(120.0f, &Status, &Button);
 		if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button))
 			m_pClient->m_pGhost->SaveGhost(pGhost);
-	}
-
-	Status.VSplitLeft(120.0f, &Button, &Status);
-
-	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button))
-	{
-		m_pClient->m_pGhost->UnloadAll();
-		GhostlistPopulate();
 	}
 }
