@@ -55,11 +55,12 @@ public:
 
 	void EndTick();
 
-	bool m_Debug;
+	int m_Debug; // Possible values: 0, 1, 2.
 
 private:
 	void WriteHeader(const CGameInfo *pGameInfo);
-	void UpdateMinMaxClientID(int ClientID);
+	void EnsureTickWrittenPlayerData(int ClientID);
+	void EnsureTickWritten();
 	void WriteTick();
 	void Write(const void *pData, int DataSize);
 
@@ -95,7 +96,5 @@ private:
 	int m_Tick;
 	int m_PrevMaxClientID;
 	int m_MaxClientID;
-	int m_MinClientID;
 	CPlayer m_aPrevPlayers[MAX_CLIENTS];
-	CPacker m_Buffer;
 };
