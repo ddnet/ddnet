@@ -44,6 +44,7 @@ public:
 	CCharacter *GetCharacter();
 
 	void FindDuplicateSkins();
+	void SpectatePlayerName(const char *pName);
 
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player

@@ -298,6 +298,9 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
 		return;
 	}
+
+	if(pResult->NumArguments() > 0)
+		pPlayer->SpectatePlayerName(pResult->GetString(0));
 }
 
 void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
@@ -326,6 +329,9 @@ void CGameContext::ConTogglePause(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
 		return;
 	}
+
+	if(pResult->NumArguments() > 0)
+		pPlayer->SpectatePlayerName(pResult->GetString(0));
 }
 
 void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)

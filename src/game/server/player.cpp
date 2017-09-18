@@ -728,13 +728,13 @@ void CPlayer::FindDuplicateSkins()
 {
 	if (m_TeeInfos.m_UseCustomColor == 0 && !m_StolenSkin) return;
 	m_StolenSkin = 0;
-	for (int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if (i == m_ClientID) continue;
+		if(i == m_ClientID) continue;
 		if(GameServer()->m_apPlayers[i])
 		{
-			if (GameServer()->m_apPlayers[i]->m_StolenSkin) continue;
-			if ((GameServer()->m_apPlayers[i]->m_TeeInfos.m_UseCustomColor == m_TeeInfos.m_UseCustomColor) &&
+			if(GameServer()->m_apPlayers[i]->m_StolenSkin) continue;
+			if((GameServer()->m_apPlayers[i]->m_TeeInfos.m_UseCustomColor == m_TeeInfos.m_UseCustomColor) &&
 			(GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorFeet == m_TeeInfos.m_ColorFeet) &&
 			(GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorBody == m_TeeInfos.m_ColorBody) &&
 			!str_comp(GameServer()->m_apPlayers[i]->m_TeeInfos.m_SkinName, m_TeeInfos.m_SkinName))
@@ -742,6 +742,21 @@ void CPlayer::FindDuplicateSkins()
 				m_StolenSkin = 1;
 				return;
 			}
+		}
+	}
+}
+
+void CPlayer::SpectatePlayerName(const char *pName)
+{
+	if(!pName)
+		return;
+
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(i != m_ClientID && Server()->ClientIngame(i) && !str_comp(pName, Server()->ClientName(i)))
+		{
+			m_SpectatorID = i;
+			return;
 		}
 	}
 }
