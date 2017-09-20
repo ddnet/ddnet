@@ -1072,7 +1072,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 
 	mem_free(pBuf);
 
-	if(m_pDDNetInfo->type != json_object)
+	if(m_pDDNetInfo && m_pDDNetInfo->type != json_object)
 	{
 		json_value_free(m_pDDNetInfo);
 		m_pDDNetInfo = 0;
