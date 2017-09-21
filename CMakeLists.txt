@@ -54,6 +54,11 @@ if(NOT(CMAKE_BUILD_TYPE))
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Use C++14
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
