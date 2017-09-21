@@ -688,22 +688,22 @@ Ratio
 == 
 
 Dummy settings
-== 
+==  Configurações do Dummy
 
 AntiPing
-== 
+== Antiping
 
 Show quads
 == 
 
 Map sound volume
-== 
+== Volume de som do mapa
 
 ✗
 == 
 
 Countries
-== 
+== Países
 
 \n\nReconnect in %d sec
 == 
@@ -715,25 +715,25 @@ Background (entities)
 == 
 
 Show kill messages
-== 
+== Mostrar mensagens de morte
 
 Show ghost
-== 
+== Mostrar fantasma
 
 DDNet
-== 
+== DDNet
 
 No updates available
-== 
+== Sem atualizações disponíveis
 
 Enable server message sound
-== 
+== Ativar o som de mensagem do servidor
 
 second
-== 
+== segundo
 
 Show votes window after voting
-== 
+== Mostrar janela de voto depois de votar
 
 HUD
 == 
@@ -742,55 +742,55 @@ Look out!
 == 
 
 Show names in chat in team colors
-== 
+== Mostrar nomes no chat com cores da equipa
 
 Select a name
-== 
+== Escolha um nome
 
 Enable team chat sound
-== 
+== Ativar o som do chat de equipa
 
 Show other players' hook collision lines
 == 
 
 We will win
-== 
+== Nós vamos ganhar
 
 Hi o/
-== 
+== Olá o/
 
 Deaths
-== 
+== Mortes
 
 Enable game sounds
-== 
+== Ativar os sons do jogo
 
 DDNet Client needs to be restarted to complete update!
-== 
+== O cliente DDNet precisa de ser reiniciado para completar a atualização
 
 Spectator
-== 
+== Espectador
 
 Please use a different name
-== 
+== Por favor usa um nome diferente
 
 Wait before try for
 == 
 
 Show console window
-== 
+== Mostrar a janela da consola
 
 Show others
-== 
+== Mostrar os outros
 
 Gameplay
 == 
 
 Restart
-== 
+== Reiniciar
 
 Old mouse mode
-== 
+== Modo de rato antigo
 
 Browser
 == 
@@ -802,10 +802,10 @@ Enable gun sound
 == 
 
 Show health + ammo
-== 
+== Mostrar saúde + munição
 
 Team message
-== 
+== Mensagem de equipa
 
 Manual %3d:%02d  
 == 
@@ -814,22 +814,22 @@ Automatically create statboard csv
 == 
 
 Save the best demo of each race
-== 
+== Guardar a melhor demo de cada corrida
 
 Show tiles layers from BG map
 == 
 
 Are you sure that you want to disconnect?
-== 
+== Tens a certeza que te queres desconectar?
 
 Types
-== 
+== Tipos
 
 Ghost
-== 
+== Fantasma
 
 Remove chat
-== 
+== Removar o chat
 
 Threaded sound loading
 == 
@@ -853,7 +853,7 @@ Frags
 == 
 
 AntiPing: predict other players
-== 
+== Antiping: prever os outros jogadores
 
 Show other players' key presses
 == 
@@ -862,7 +862,7 @@ Automatically take statboard screenshot
 == 
 
 System message
-== 
+== Mensagem do sistema
 
 Enable long pain sound (used when shooting in freeze)
 == 
@@ -871,13 +871,13 @@ DDNet %s is available:
 == 
 
 Updating...
-== 
+== A atualizar...
 
 Overlay entities
 == 
 
 Messages
-== 
+== Mensagens
 
 Vanilla Skins only
 == 
@@ -889,16 +889,16 @@ Refresh Rate
 == 
 
 New random timeout code
-== 
+== Novo código aleatório de timeout
 
 Suicides
-== 
+== Suicídios
 
 Net
 == 
 
 Loading DDNet Client
-== 
+== Carregando o cliente DDNet
 
 FPM
 == 
@@ -919,7 +919,7 @@ Max CSVs
 == 
 
 seconds
-== 
+== segundos
 
 %.2f KiB
 == 
@@ -931,25 +931,25 @@ Use DDRace Scoreboard
 == 
 
 Best
-== 
+== Melhor
 
 Enable regular chat sound
 == 
 
 Normal message
-== 
+== Mensagem normal
 
 Search
-== 
+== Procurar
 
 Connecting dummy
-== 
+== A conectar o dummy
 
 Clan plates size
 == 
 
 Update now
-== 
+== Atualizar agora
 
 Auto %3d:%02d  
 == 
@@ -958,22 +958,22 @@ Show clan above name plates
 == 
 
 Save ghost
-== 
+== Guardar fantasma
 
 Exclude
-== 
+== Excluir
 
 Enable highlighted chat sound
 == 
 
 Hello and welcome
-== 
+== Olá e bem-vindo
 
 AntiPing: predict weapons
-== 
+== AntiPing: prever as armas
 
 DDNet Client updated!
-== 
+== O cliente DDNet foi atualizado!
 
 High-DPI screen support (experimental)
 == 
@@ -985,10 +985,10 @@ Highlighted message
 == 
 
 Friend
-== 
+== Amigo
 
 Switch weapon when out of ammo
-== 
+== Mudar de arma quando ficar sem munição
 
 AntiPing: predict grenade paths
 == 
