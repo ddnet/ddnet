@@ -205,6 +205,9 @@ function build(settings)
 		settings.cc.flags:Add("/EHsc")
 	else
 		settings.cc.flags:Add("-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers")
+		if config.compiler.driver == "gcc" then
+			settings.cc.flags_cxx:Add("-std=c++11")
+		end
 		if family == "windows" then
 			if config.compiler.driver == "gcc" then
 				settings.link.flags:Add("-static-libgcc")
