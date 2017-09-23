@@ -47,7 +47,7 @@ class CJobPool
 	volatile bool m_Shutdown;
 
 	LOCK m_Lock;
-	SEMAPHORE m_Semaphore;
+	CONDITION m_Condition;
 	CJob *m_pFirstJob;
 	CJob *m_pLastJob;
 

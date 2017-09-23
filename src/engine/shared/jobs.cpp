@@ -9,20 +9,20 @@ CJobPool::CJobPool()
 	m_NumThreads = 0;
 	m_Shutdown = false;
 	m_Lock = lock_create();
-	sphore_init(&m_Semaphore);
 	m_pFirstJob = 0;
 	m_pLastJob = 0;
+	condition_init(&m_Condition);
 }
 
 CJobPool::~CJobPool()
 {
 	m_Shutdown = true;
 	for(int i = 0; i < m_NumThreads; i++)
-		sphore_signal(&m_Semaphore);
+		condition_signal(&m_Condition);
 	for(int i = 0; i < m_NumThreads; i++)
 		thread_wait(m_apThreads[i]);
 	lock_destroy(m_Lock);
-	sphore_destroy(&m_Semaphore);
+	condition_destroy(&m_Condition);
 }
 
 void CJobPool::WorkerThread(void *pUser)
@@ -34,17 +34,20 @@ void CJobPool::WorkerThread(void *pUser)
 		CJob *pJob = 0;
 
 		// fetch job from queue
-		sphore_wait(&pPool->m_Semaphore);
 		lock_wait(pPool->m_Lock);
+		while(!pPool->m_pFirstJob && !pPool->m_Shutdown)
+			condition_wait(&pPool->m_Condition, pPool->m_Lock);
+
+		if(pPool->m_Shutdown)
+			break;
+
+		pJob = pPool->m_pFirstJob;
+		pPool->m_pFirstJob = pPool->m_pFirstJob->m_pNext;
 		if(pPool->m_pFirstJob)
-		{
-			pJob = pPool->m_pFirstJob;
-			pPool->m_pFirstJob = pPool->m_pFirstJob->m_pNext;
-			if(pPool->m_pFirstJob)
-				pPool->m_pFirstJob->m_pPrev = 0;
-			else
-				pPool->m_pLastJob = 0;
-		}
+			pPool->m_pFirstJob->m_pPrev = 0;
+		else
+			pPool->m_pLastJob = 0;
+
 		lock_unlock(pPool->m_Lock);
 
 		// do the job if we have one
@@ -84,6 +87,6 @@ int CJobPool::Add(CJob *pJob, JOBFUNC pfnFunc, void *pData)
 		m_pFirstJob = pJob;
 
 	lock_unlock(m_Lock);
-	sphore_signal(&m_Semaphore);
+	condition_signal(&m_Condition);
 	return 0;
 }
