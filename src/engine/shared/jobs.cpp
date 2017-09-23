@@ -9,20 +9,20 @@ CJobPool::CJobPool()
 	m_NumThreads = 0;
 	m_Shutdown = false;
 	m_Lock = lock_create();
+	m_Condition = condition_init();
 	m_pFirstJob = 0;
 	m_pLastJob = 0;
-	condition_init(&m_Condition);
 }
 
 CJobPool::~CJobPool()
 {
 	m_Shutdown = true;
 	for(int i = 0; i < m_NumThreads; i++)
-		condition_signal(&m_Condition);
+		condition_signal(m_Condition);
 	for(int i = 0; i < m_NumThreads; i++)
 		thread_wait(m_apThreads[i]);
 	lock_destroy(m_Lock);
-	condition_destroy(&m_Condition);
+	condition_destroy(m_Condition);
 }
 
 void CJobPool::WorkerThread(void *pUser)
@@ -36,7 +36,7 @@ void CJobPool::WorkerThread(void *pUser)
 		// fetch job from queue
 		lock_wait(pPool->m_Lock);
 		while(!pPool->m_pFirstJob && !pPool->m_Shutdown)
-			condition_wait(&pPool->m_Condition, pPool->m_Lock);
+			condition_wait(pPool->m_Condition, pPool->m_Lock);
 
 		if(pPool->m_Shutdown)
 			break;
@@ -87,6 +87,6 @@ int CJobPool::Add(CJob *pJob, JOBFUNC pfnFunc, void *pData)
 		m_pFirstJob = pJob;
 
 	lock_unlock(m_Lock);
-	condition_signal(&m_Condition);
+	condition_signal(m_Condition);
 	return 0;
 }

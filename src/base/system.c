@@ -649,20 +649,45 @@ void sphore_destroy(SEMAPHORE *sem) { sem_destroy(sem); }
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
-	void condition_init(CONDITION *cond){ InitializeConditionVariable((PCONDITION_VARIABLE)cond); }
-	void condition_wait(CONDITION *cond, LOCK lock) { SleepConditionVariableCS((PCONDITION_VARIABLE)cond, (PCRITICAL_SECTION)lock, INFINITE); }
-	void condition_signal(CONDITION *cond) { WakeConditionVariable((PCONDITION_VARIABLE)cond); }
-	void condition_broadcast(CONDITION *cond) { WakeAllConditionVariable((PCONDITION_VARIABLE)cond); }
-	void condition_destroy(CONDITION *cond) {;}
+	typedef CONDITION_VARIABLE CONDITIONINT;
 #elif defined(CONF_FAMILY_UNIX)
-	void condition_init(CONDITION *cond) { pthread_cond_init((pthread_cond_t *)cond, NULL); }
-	void condition_wait(CONDITION *cond, LOCK lock) { pthread_cond_wait((pthread_cond_t *)cond, (LOCKINTERNAL *)lock); }
-	void condition_signal(CONDITION *cond) { pthread_cond_signal((pthread_cond_t *)cond); }
-	void condition_broadcast(CONDITION *cond) { pthread_cond_broadcast((pthread_cond_t *)cond); }
-	void condition_destroy(CONDITION *cond) { pthread_cond_destroy((pthread_cond_t *)cond); }
+	typedef pthread_cond_t CONDITIONINT;
 #else
 	#error not implemented on this platform
 #endif
+
+CONDITION condition_init()
+{
+	CONDITIONINT *cond = mem_alloc(sizeof(CONDITIONINT), 4);
+
+#if defined(CONF_FAMILY_WINDOWS)
+	InitializeConditionVariable((PCONDITION_VARIABLE)cond);
+#elif defined(CONF_FAMILY_UNIX)
+	pthread_cond_init((pthread_cond_t *)cond, NULL);
+#else
+	#error not implemented on this platform
+#endif
+	return (CONDITION)cond;
+}
+
+#if defined(CONF_FAMILY_WINDOWS)
+	void condition_wait(CONDITION cond, LOCK lock) { SleepConditionVariableCS((PCONDITION_VARIABLE)cond, (PCRITICAL_SECTION)lock, INFINITE); }
+	void condition_signal(CONDITION cond) { WakeConditionVariable((PCONDITION_VARIABLE)cond); }
+	void condition_broadcast(CONDITION cond) { WakeAllConditionVariable((PCONDITION_VARIABLE)cond); }
+#elif defined(CONF_FAMILY_UNIX)
+	void condition_wait(CONDITION cond, LOCK lock) { pthread_cond_wait((pthread_cond_t *)cond, (LOCKINTERNAL *)lock); }
+	void condition_signal(CONDITION cond) { pthread_cond_signal((pthread_cond_t *)cond); }
+	void condition_broadcast(CONDITION cond) { pthread_cond_broadcast((pthread_cond_t *)cond); }
+#else
+	#error not implemented on this platform
+#endif
+void condition_destroy(CONDITION cond)
+{
+#if defined(CONF_FAMILY_UNIX)
+	pthread_cond_destroy((pthread_cond_t *)cond);
+#endif
+	mem_free(cond);
+}
 
 static int new_tick = -1;
 

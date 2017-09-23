@@ -434,19 +434,14 @@ void sphore_signal(SEMAPHORE *sem);
 void sphore_destroy(SEMAPHORE *sem);
 
 /* Group: Condition Variables */
-#if defined(CONF_FAMILY_WINDOWS)
-	typedef CONDITION_VARIABLE CONDITION;
-#elif defined(CONF_FAMILY_UNIX)
-	typedef pthread_cond_t CONDITION;
-#else
-	#error not implemented on this platform
-#endif
 
-void condition_init(CONDITION *cond);
-void condition_wait(CONDITION *cond, LOCK lock);
-void condition_signal(CONDITION *cond);
-void condition_broadcast(CONDITION *cond);
-void condition_destroy(CONDITION *cond);
+typedef void *CONDITION;
+
+CONDITION condition_init();
+void condition_wait(CONDITION cond, LOCK lock);
+void condition_signal(CONDITION cond);
+void condition_broadcast(CONDITION cond);
+void condition_destroy(CONDITION cond);
 
 /* Group: Timer */
 #ifdef __GNUC__
