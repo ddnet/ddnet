@@ -51,6 +51,25 @@ MySQL (or MariaDB) support in the server is not included in the binary releases 
 
 Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
+Running tests
+-------------
+
+In order to run the tests, you need to install the following library `libgtest-dev`.
+
+This library isn't compiled, so you have to do it:
+```bash
+sudo apt install libgtest-dev
+cd /usr/src/gtest
+sudo cmake CMakeLists.txt
+sudo make
+ 
+# copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
+sudo cp *.a /usr/lib
+```
+
+To run the tests you must target `run_tests` with make:
+`make run_tests`
+
 Building on Windows with Visual Studio
 --------------------------------------
 
@@ -61,7 +80,7 @@ Start CMake and select the source code folder (where DDNet resides, the director
 Importing the official DDNet Database
 -------------------------------------
 
-```
+```bash
 $ wget https://ddnet.tw/stats/ddnet-sql.zip
 $ unzip ddnet-sql.zip
 $ yaourt -S mariadb mysql-connector-c++
