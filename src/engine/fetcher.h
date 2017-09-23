@@ -1,8 +1,12 @@
 #ifndef ENGINE_FETCHER_H
 #define ENGINE_FETCHER_H
 
+#include <engine/shared/jobs.h>
 #include "kernel.h"
 #include "stddef.h"
+
+#define WIN32_LEAN_AND_MEAN
+#include "curl/curl.h"
 
 class CFetchTask;
 
@@ -12,26 +16,28 @@ typedef void (*COMPFUNC)(CFetchTask *pDest, void *pUser);
 class CFetchTask
 {
 	friend class CFetcher;
+	class CFetcher *m_pFetcher;
 
-	CFetchTask *m_pNext;
+	CJob m_Job;
+	CURL *m_pHandle;
+	void *m_pUser;
 
 	char m_aUrl[256];
 	char m_aDest[128];
-	PROGFUNC m_pfnProgressCallback;
-	COMPFUNC m_pfnCompCallback;
-	void *m_pUser;
-
-	double m_Current;
-	double m_Size;
-	int m_Progress;
-	int m_State;
-	bool m_Abort;
-	bool m_CanTimeout;
 	int m_StorageType;
 	bool m_UseDDNetCA;
-public:
-	CFetchTask(bool canTimeout, bool useDDNetCA);
+	bool m_CanTimeout;
 
+	PROGFUNC m_pfnProgressCallback;
+	COMPFUNC m_pfnCompCallback;
+
+	double m_Size;
+	double m_Current;
+	int m_Progress;
+	int m_State;
+
+	bool m_Abort;
+public:
 	enum
 	{
 		STATE_ERROR = -1,
@@ -55,7 +61,7 @@ class IFetcher : public IInterface
 	MACRO_INTERFACE("fetcher", 0)
 public:
 	virtual bool Init() = 0;
-	virtual void QueueAdd(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = -2, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
+	virtual void FetchFile(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
 	virtual void Escape(char *pBud, size_t size, const char *pStr) = 0;
 };
 

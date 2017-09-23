@@ -71,8 +71,8 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 	if(!pDestPath)
 		pDestPath = pFile;
 	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);
-	CFetchTask *Task = new CFetchTask(false, true);
-	m_pFetcher->QueueAdd(Task, aBuf, aPath, -2, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	CFetchTask *Task = new CFetchTask;
+	m_pFetcher->FetchFile(Task, aBuf, aPath, -2, true, false, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::MoveFile(const char *pFile)
