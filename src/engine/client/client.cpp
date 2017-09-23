@@ -1517,8 +1517,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 						str_append(aUrl, aEscaped, sizeof(aUrl));
 
-						m_pMapdownloadTask = new CFetchTask(true, UseDDNetCA);
-						Fetcher()->QueueAdd(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+						m_pMapdownloadTask = new CFetchTask;
+						Fetcher()->FetchFile(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
 					}
 					else
 						SendMapRequest();
@@ -3644,8 +3644,8 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = new CFetchTask(true, /*UseDDNetCA*/ true);
-	Fetcher()->QueueAdd(m_pDDNetInfoTask, aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE);
+	m_pDDNetInfoTask = new CFetchTask;
+	Fetcher()->FetchFile(m_pDDNetInfoTask, aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
 }
 
 int CClient::GetPredictionTime()
