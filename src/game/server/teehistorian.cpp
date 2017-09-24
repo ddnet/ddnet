@@ -4,7 +4,8 @@
 #include <engine/shared/snapshot.h>
 #include <game/gamecore.h>
 
-static const CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
+static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
+static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "1";
 
 enum
@@ -115,6 +116,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	FormatUuid(pGameInfo->m_GameUuid, aGameUuid, sizeof(aGameUuid));
 	str_timestamp_ex(pGameInfo->m_StartTime, aStartTime, sizeof(aStartTime), "%Y-%m-%d %H:%M:%S %z");
 
+	char aCommentBuffer[128];
 	char aServerVersionBuffer[128];
 	char aStartTimeBuffer[128];
 	char aServerNameBuffer[128];
@@ -125,7 +127,8 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 
 	#define E(buf, str) EscapeJson(buf, sizeof(buf), str)
 
-	str_format(aJson, sizeof(aJson), "{\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":%d,\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":%d,\"map_crc\":\"%08x\",\"config\":{",
+	str_format(aJson, sizeof(aJson), "{\"comment\":\"%s\",\"version\":\"%s\",\"game_uuid\":\"%s\",\"server_version\":\"%s\",\"start_time\":\"%s\",\"server_name\":\"%s\",\"server_port\":%d,\"game_type\":\"%s\",\"map_name\":\"%s\",\"map_size\":%d,\"map_crc\":\"%08x\",\"config\":{",
+		E(aCommentBuffer, TEEHISTORIAN_NAME),
 		TEEHISTORIAN_VERSION,
 		aGameUuid,
 		E(aServerVersionBuffer, pGameInfo->m_pServerVersion),
@@ -143,7 +146,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	bool First = true;
 
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
-	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC)) \
+	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && pGameInfo->m_pConfig->m_##Name != (Def)) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
 			First ? "" : ",", \
@@ -154,7 +157,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	}
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
-	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC)) \
+	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && str_comp(pGameInfo->m_pConfig->m_##Name, (Def)) != 0) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%s\"", \
 			First ? "" : ",", \
@@ -174,7 +177,9 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 
 	First = true;
 
+	static const float TicksPerSecond = 50.0f;
 	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) \
+	if(pGameInfo->m_pTuning->m_##Name.Get() != (int)((Value)*100)) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
 			First ? "" : ",", \
