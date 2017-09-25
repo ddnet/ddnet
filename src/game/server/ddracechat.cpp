@@ -162,8 +162,8 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 					IConsole::OUTPUT_LEVEL_STANDARD,
 					"settings",
 					g_Config.m_SvHit ?
-							"Player's weapons affect each other" :
-							"Player's weapons has no affect on each other");
+							"Players' weapons affect each other" :
+							"Players' weapons has no affect on each other");
 		}
 		else if (str_comp(pArg, "oldlaser") == 0)
 		{
