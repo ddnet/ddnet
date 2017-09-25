@@ -51,7 +51,7 @@ MySQL (or MariaDB) support in the server is not included in the binary releases 
 
 Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
-Running tests
+Running tests (Debian/Ubuntu)
 -------------
 
 In order to run the tests, you need to install the following library `libgtest-dev`.
