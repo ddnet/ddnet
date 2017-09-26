@@ -433,6 +433,16 @@ void sphore_wait(SEMAPHORE *sem);
 void sphore_signal(SEMAPHORE *sem);
 void sphore_destroy(SEMAPHORE *sem);
 
+/* Group: Condition Variables */
+
+typedef void *CONDITION;
+
+CONDITION condition_init();
+void condition_wait(CONDITION cond, LOCK lock);
+void condition_signal(CONDITION cond);
+void condition_broadcast(CONDITION cond);
+void condition_destroy(CONDITION cond);
+
 /* Group: Timer */
 #ifdef __GNUC__
 /* if compiled with -pedantic-errors it will complain about long
