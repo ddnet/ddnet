@@ -2784,7 +2784,7 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	}
 	else if(!g_Config.m_SvAnnouncementRandom)
 	{
-		if(m_AnnouncementLastLine >= v.size())
+		if(++m_AnnouncementLastLine >= v.size())
 			m_AnnouncementLastLine %= v.size();
 	}
 	else
