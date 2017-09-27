@@ -1115,35 +1115,33 @@ int CMapLayers::TileLayersOfGroup(CMapItemGroup* pGroup)
 	for(int l = 0; l < pGroup->m_NumLayers; l++)
 	{
 		CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer+l);
-		bool Render = false;
 		bool IsGameLayer = false;
 		bool IsFrontLayer = false;
 		bool IsSwitchLayer = false;
 		bool IsTeleLayer = false;
 		bool IsSpeedupLayer = false;
 		bool IsTuneLayer = false;
-		bool IsEntityLayer = false;
 
 		if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
 		{
-			IsEntityLayer = IsGameLayer = true;
+			IsGameLayer = true;
 			PassedGameLayer = true;
 		}
 
 		if(pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
-			IsEntityLayer = IsFrontLayer = true;
+			IsFrontLayer = true;
 
 		if(pLayer == (CMapItemLayer*)m_pLayers->SwitchLayer())
-			IsEntityLayer = IsSwitchLayer = true;
+			IsSwitchLayer = true;
 
 		if(pLayer == (CMapItemLayer*)m_pLayers->TeleLayer())
-			IsEntityLayer = IsTeleLayer = true;
+			IsTeleLayer = true;
 
 		if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
-			IsEntityLayer = IsSpeedupLayer = true;
+			IsSpeedupLayer = true;
 
 		if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
-			IsEntityLayer = IsTuneLayer = true;
+			IsTuneLayer = true;
 		
 		else if(m_Type <= TYPE_BACKGROUND_FORCE)
 		{

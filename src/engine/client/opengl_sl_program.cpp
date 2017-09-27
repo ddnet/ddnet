@@ -50,7 +50,7 @@ void CGLSLProgram::LinkProgram()
 		int iLogLength;
 		glGetProgramInfoLog(m_ProgramID, 1024, &iLogLength, sInfoLog);
 		str_format(sFinalMessage, 1536, "Error! Shader program wasn't linked! The linker returned:\n\n%s", sInfoLog);
-		dbg_msg("GLSL Program", sFinalMessage);
+		dbg_msg("GLSL Program", "%s", sFinalMessage);
 	}
 	
 	//detach all shaders attached to this program

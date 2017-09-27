@@ -33,7 +33,6 @@ void CMapImages::OnInit()
 		{
 			char buff[4];
 			str_format(buff, 4, "%d", i);
-			int len = str_length(buff);
 			
 			float x = (i%16) * 64;
 			float y = (int)(i/16)* 64;
@@ -51,7 +50,6 @@ void CMapImages::OnInit()
 		{
 			char buff[4];
 			str_format(buff, 4, "%d", i);
-			int len = str_length(buff);
 			
 			float x = (i%16) * 64;
 			float y = (int)(i/16)* 64;

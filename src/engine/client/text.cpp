@@ -829,7 +829,7 @@ public:
 				int MaxSize = (MaxWidth - WidthLastChars);
 				if (MaxSize > 0)
 				{
-					int SlotW = ((unsigned int)MaxSize < pBitmap->width ? MaxSize : pBitmap->width);
+					int SlotW = ((((unsigned int)MaxSize) < (unsigned int)pBitmap->width) ? MaxSize : pBitmap->width);
 					int SlotH = pBitmap->rows;
 					int SlotSize = SlotW*SlotH;
 					

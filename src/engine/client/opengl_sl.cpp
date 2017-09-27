@@ -49,7 +49,7 @@ bool CGLSL::LoadShader(const char* pFile, int Type)
 
 			glGetShaderInfoLog(shader, maxLength, &maxLength, buff);
 
-			dbg_msg("GLSL", buff);
+			dbg_msg("GLSL", "%s", buff);
 			glDeleteShader(shader);
 			return false;
 		}
