@@ -553,16 +553,17 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 
 	// screen mapping
 	//orthographic projection matrix
+	//if we use the same z coordinate for every vertex, we can just ignore the z coordinate and set it in the shaders
 	
-	float m[4*4] = {
+	float m[2*4] = {
 		2.f/(State.m_ScreenBR.x - State.m_ScreenTL.x), 0, 0, -((State.m_ScreenBR.x + State.m_ScreenTL.x)/(State.m_ScreenBR.x - State.m_ScreenTL.x)),
 		0, (2.f/(State.m_ScreenTL.y - State.m_ScreenBR.y)), 0, -((State.m_ScreenTL.y + State.m_ScreenBR.y)/(State.m_ScreenTL.y - State.m_ScreenBR.y)),
-		0, 0, -(2.f/(9.f)), -((11.f)/(9.f)),
-		0, 0, 0, 1.0f
+		//0, 0, -(2.f/(9.f)), -((11.f)/(9.f)),
+		//0, 0, 0, 1.0f
 	};
 	
 	//transpose bcs of column-major order of opengl
-	glUniformMatrix4fv(pProgram->m_LocPos, 1, true, (float*)&m);
+	glUniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float*)&m);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
