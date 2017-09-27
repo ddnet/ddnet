@@ -23,35 +23,48 @@ class CMapLayers : public CComponent
 	bool m_EnvelopeUpdate;
 
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
-	
-	struct STileLayerVisuals{
-		~STileLayerVisuals()
-		{ 
-			m_IndexBufferGroups.clear();
-		}
-		int m_VisualObjectIndex;
-		bool m_IsTextured;
 		
-		struct SIndexBufferGroup{
-			SIndexBufferGroup() : m_ByteOffset(0), m_NumTilesToRender(0) {}
-			SIndexBufferGroup(char* Offset) : m_ByteOffset(Offset), m_NumTilesToRender(0) {}
-			char* m_ByteOffset;
-			unsigned int m_NumTilesToRender;
+	struct STileLayerVisuals
+	{
+		STileLayerVisuals() : m_TilesOfLayer(NULL), m_BorderTop(NULL), m_BorderLeft(NULL), m_BorderRight(NULL), m_BorderBottom(NULL) 
+		{
+			m_Width = 0;
+			m_Height = 0;
+			m_VisualObjectsIndex = -1;
+			m_IsTextured = false;
+		}		
+		
+		bool Init(unsigned int Width, unsigned int Height);
+		
+		~STileLayerVisuals();	
+		
+		struct STileVisual
+		{
+			STileVisual() : m_IndexBufferByteOffset(0), m_TilesHandledCount(0), m_Draw(false)  { }
+			char* m_IndexBufferByteOffset;
+			unsigned int m_TilesHandledCount; //number of tiles that were handled before this tile + this tile if added
+			bool m_Draw;
 		};
-		std::vector<SIndexBufferGroup> m_IndexBufferGroups; //we create 12*9 fields of tiles, and thats how the index buffer is build -- and store the byte offsets of each field
-		SIndexBufferGroup m_BorderTopLeft;
-		SIndexBufferGroup m_BorderBottomLeft;
-		SIndexBufferGroup m_BorderTopRight;
-		SIndexBufferGroup m_BorderBottomRight;
+		STileVisual** m_TilesOfLayer;
 		
-		SIndexBufferGroup m_BorderKillTile; //end of map kill tile -- game layer only
+		STileVisual m_BorderTopLeft;
+		STileVisual m_BorderTopRight;
+		STileVisual m_BorderBottomRight;
+		STileVisual m_BorderBottomLeft;
 		
-		std::vector<SIndexBufferGroup> m_TopBorderIndexBufferGroups; //for the border we create 20x1 fields
-		std::vector<SIndexBufferGroup> m_LeftBorderIndexBufferGroups; //for the border we create 20x1 fields
-		std::vector<SIndexBufferGroup> m_RightBorderIndexBufferGroups; //for the border we create 20x1 fields
-		std::vector<SIndexBufferGroup> m_BottomBorderIndexBufferGroups; //for the border we create 20x1 fields
+		STileVisual m_BorderKillTile; //end of map kill tile -- game layer only
+		
+		STileVisual* m_BorderTop;
+		STileVisual* m_BorderLeft;
+		STileVisual* m_BorderRight;
+		STileVisual* m_BorderBottom;
+		
+		unsigned int m_Width;
+		unsigned int m_Height;
+		int m_VisualObjectsIndex;
+		bool m_IsTextured;
 	};
-	std::vector<STileLayerVisuals> m_TileLayerVisuals;
+	std::vector<STileLayerVisuals*> m_TileLayerVisuals;
 	
 	int TileLayersOfGroup(CMapItemGroup* pGroup);
 public:
