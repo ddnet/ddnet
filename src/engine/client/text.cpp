@@ -772,7 +772,8 @@ public:
 				MinSize = 8;
 			FontSize = MinSize;
 			
-			while(!FoundMaxFontSize){
+			while(!FoundMaxFontSize)
+			{
 				int WidthOfText = 0;
 				
 				while(pCurrent < pEnd)
@@ -828,7 +829,7 @@ public:
 				int MaxSize = (MaxWidth - WidthLastChars);
 				if (MaxSize > 0)
 				{
-					int SlotW = (MaxSize < pBitmap->width ? MaxSize : pBitmap->width);
+					int SlotW = ((unsigned int)MaxSize < pBitmap->width ? MaxSize : pBitmap->width);
 					int SlotH = pBitmap->rows;
 					int SlotSize = SlotW*SlotH;
 					

@@ -335,11 +335,13 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 		m_TilesOfLayer[i] = new CMapLayers::STileLayerVisuals::STileVisual[Width];
 	}
 	
-	if(Width > 2) {
+	if(Width > 2)
+	{
 		m_BorderTop = new CMapLayers::STileLayerVisuals::STileVisual[Width-2];
 		m_BorderBottom = new CMapLayers::STileLayerVisuals::STileVisual[Width-2];
 	}
-	if(Height > 2) {
+	if(Height > 2)
+	{
 		m_BorderLeft = new CMapLayers::STileLayerVisuals::STileVisual[Height-2];
 		m_BorderRight = new CMapLayers::STileLayerVisuals::STileVisual[Height-2];
 	}
@@ -348,7 +350,8 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 
 CMapLayers::STileLayerVisuals::~STileLayerVisuals() 
 {
-	if(m_TilesOfLayer) {
+	if(m_TilesOfLayer)
+	{
 		for(unsigned int i = 0; i < m_Height; ++i)
 		{
 			delete[] m_TilesOfLayer[i];
@@ -485,7 +488,7 @@ void CMapLayers::OnMapLoad()
 				
 
 				int DataIndex = 0;
-				int TileSize = 0;
+				unsigned int TileSize = 0;
 				int OverlayCount = 0;
 				if (IsFrontLayer)
 				{
@@ -830,17 +833,17 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 	if(DrawLayer)
 	{
 		//create the indice buffers we want to draw -- reuse them
-		static std::vector<char*> IndexOffsets;
-		static std::vector<unsigned int> DrawCounts;
-		static unsigned long long maxRes = (IndexOffsets.max_size() > DrawCounts.max_size() ? DrawCounts.max_size() : IndexOffsets.max_size());
+		static std::vector<char*> s_IndexOffsets;
+		static std::vector<unsigned int> s_DrawCounts;
+		static unsigned long long s_MaxRes = (s_IndexOffsets.max_size() > s_DrawCounts.max_size() ? s_DrawCounts.max_size() : s_IndexOffsets.max_size());
 		
-		IndexOffsets.clear();
-		DrawCounts.clear();
+		s_IndexOffsets.clear();
+		s_DrawCounts.clear();
 		
 		unsigned long long Reserve = absolute(Y1 - Y0) + 1;
-		if(Reserve > maxRes) Reserve = maxRes;
-		IndexOffsets.reserve(Reserve);
-		DrawCounts.reserve(Reserve);
+		if(Reserve > s_MaxRes) Reserve = s_MaxRes;
+		s_IndexOffsets.reserve(Reserve);
+		s_DrawCounts.reserve(Reserve);
 		
 		for(int y = Y0; y <= Y1; ++y)
 		{
@@ -850,9 +853,10 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 			
 			unsigned int NumVertices = (Visuals.m_TilesOfLayer[y][X1].m_TilesHandledCount - Visuals.m_TilesOfLayer[y][X0].m_TilesHandledCount) * 6lu + (Visuals.m_TilesOfLayer[y][X1].m_Draw ? 6lu : 0lu);
 			
-			if(NumVertices) {
-				IndexOffsets.push_back(Visuals.m_TilesOfLayer[y][X0].m_IndexBufferByteOffset);
-				DrawCounts.push_back(NumVertices);
+			if(NumVertices)
+			{
+				s_IndexOffsets.push_back(Visuals.m_TilesOfLayer[y][X0].m_IndexBufferByteOffset);
+				s_DrawCounts.push_back(NumVertices);
 			}
 		}
 		
@@ -861,9 +865,10 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 		pColor->z *= b;
 		pColor->w *= a;
 		
-		int DrawCount = IndexOffsets.size();
-		if(DrawCount != 0) {
-			Graphics()->DrawVisualObject(Visuals.m_VisualObjectsIndex, (float*)pColor, &IndexOffsets[0], &DrawCounts[0], DrawCount);
+		int DrawCount = s_IndexOffsets.size();
+		if(DrawCount != 0)
+		{
+			Graphics()->DrawVisualObject(Visuals.m_VisualObjectsIndex, (float*)pColor, &s_IndexOffsets[0], &s_DrawCounts[0], DrawCount);
 		}
 	}
 	if(DrawBorder) DrawTileBorder(LayerIndex, pColor, pTileLayer, pGroup, BorderX0, BorderY0, BorderX1, BorderY1);
@@ -1150,7 +1155,7 @@ int CMapLayers::TileLayersOfGroup(CMapItemGroup* pGroup)
 		{
 			CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 			int DataIndex = 0;
-			int TileSize = 0;
+			unsigned int TileSize = 0;
 			int TileLayerAndOverlayCount = 0;
 			if (IsFrontLayer)
 			{
@@ -1330,7 +1335,7 @@ void CMapLayers::OnRender()
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				int DataIndex = 0;
-				int TileSize = 0;
+				unsigned int TileSize = 0;
 				int TileLayerAndOverlayCount = 0;
 				if (IsFrontLayer)
 				{
@@ -1491,7 +1496,9 @@ void CMapLayers::OnRender()
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTilemap(pFrontTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
 								EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset); 
-					} else {
+					} 
+					else
+					{
 						Graphics()->BlendNormal();					
 						RenderTileLayer(TileLayerCounter-1, &Color, pTMap, pGroup);
 					}
@@ -1515,7 +1522,9 @@ void CMapLayers::OnRender()
 						Graphics()->BlendNormal();
 						RenderTools()->RenderSwitchmap(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 						RenderTools()->RenderSwitchOverlay(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
-					} else {
+					} 
+					else
+					{
 						Graphics()->BlendNormal();					
 						RenderTileLayer(TileLayerCounter-3, &Color, pTMap, pGroup);
 						if(g_Config.m_ClTextEntities)
@@ -1546,7 +1555,9 @@ void CMapLayers::OnRender()
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTelemap(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 						RenderTools()->RenderTeleOverlay(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
-					} else {
+					}
+					else
+					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter-2, &Color, pTMap, pGroup);
 						if(g_Config.m_ClTextEntities)
@@ -1575,7 +1586,9 @@ void CMapLayers::OnRender()
 						Graphics()->BlendNormal();
 						RenderTools()->RenderSpeedupmap(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 						RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
-					} else {
+					} 
+					else
+					{
 						Graphics()->BlendNormal();
 						// draw arrow
 						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
@@ -1608,7 +1621,9 @@ void CMapLayers::OnRender()
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 						//RenderTools()->RenderTuneOverlay(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClOverlayEntities/100.0f);
-					} else {
+					} 
+					else
+					{
 						Graphics()->BlendNormal();					
 						RenderTileLayer(TileLayerCounter-1, &Color, pTMap, pGroup);
 					}

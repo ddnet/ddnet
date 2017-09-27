@@ -521,7 +521,8 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 				glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
 				glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
 			}
-		} else {
+		} else
+		{
 			Slot = 0;
 			glBindTexture(GL_TEXTURE_2D, m_aTextures[State.m_Texture].m_Tex);
 			glBindSampler(Slot, m_aTextures[State.m_Texture].m_Sampler);
@@ -547,7 +548,8 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 			m_TextureSlotBoundToUnit[Slot].m_LastWrapMode = State.m_WrapMode;
 		}
 	}
-	else {
+	else 
+	{
 		if(pProgram->m_LocIsTextured != -1) pProgram->SetUniform(pProgram->m_LocIsTextured, (int)0);
 	}
 
@@ -798,7 +800,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 		DestroyTexture(i);
 	}
 	
-	for(int i = 0; i < m_VisualObjects.size(); ++i)
+	for(size_t i = 0; i < m_VisualObjects.size(); ++i)
 	{
 		DestroyVisualObjects(i);
 	}
@@ -1073,7 +1075,8 @@ bool CCommandProcessorFragment_OpenGL3_3::RunCommand(const CCommandBuffer::SComm
 bool CCommandProcessorFragment_OpenGL3_3::IsAndUpdateTextureSlotBound(int IDX, int Slot)
 {
 	if(m_TextureSlotBoundToUnit[IDX].m_TextureSlot == Slot) return true;
-	else {
+	else
+	{
 		//the texture slot uses this index now
 		m_TextureSlotBoundToUnit[IDX].m_TextureSlot = Slot;
 		m_TextureSlotBoundToUnit[IDX].m_LastWrapMode = -1;
@@ -1108,7 +1111,7 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	unsigned int AddCount = NewIndicesCount - m_CurrentIndicesInBuffer;
 	unsigned int* Indices = new unsigned int[AddCount];
 	int Primq = (m_CurrentIndicesInBuffer/6) * 4;
-	for(int i = 0; i < AddCount; i+=6)
+	for(unsigned int i = 0; i < AddCount; i+=6)
 	{
 		Indices[i] = Primq;
 		Indices[i+1] = Primq + 1;
@@ -1142,7 +1145,7 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 void CCommandProcessorFragment_OpenGL3_3::Cmd_DestroyVertexArray(const CCommandBuffer::SCommand_DestroyVisual *pCommand)
 {
 	int Index = pCommand->m_VisualObjectIDX;
-	if(Index >= m_VisualObjects.size())
+	if((size_t)Index >= m_VisualObjects.size())
 		return;
 	
 	DestroyVisualObjects(Index);
@@ -1152,7 +1155,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuf
 {
 	int Index = pCommand->m_VisualObjectIDX;
 	//if space not there return
-	if(Index >= m_VisualObjects.size())
+	if((size_t)Index >= m_VisualObjects.size())
 		return;
 	
 	SVisualObject& VisualObject = m_VisualObjects[Index];
@@ -1183,7 +1186,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CComman
 {
 	int Index = pCommand->m_VisualObjectIDX;
 	//if space not there return
-	if(Index >= m_VisualObjects.size())
+	if((size_t)Index >= m_VisualObjects.size())
 		return;
 	
 	SVisualObject& VisualObject = m_VisualObjects[Index];
@@ -1211,7 +1214,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderVertexArray(const CCommandBu
 {
 	int Index = pCommand->m_VisualObjectIDX;
 	//if space not there return
-	if(Index >= m_VisualObjects.size())
+	if((size_t)Index >= m_VisualObjects.size())
 		return;
 	
 	SVisualObject& VisualObject = m_VisualObjects[Index];
@@ -1249,7 +1252,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateVertBuffer(const CCommandBuf
 {
 	int Index = pCommand->m_VisualObjectIDX;
 	//create necessary space
-	if(Index >= m_VisualObjects.size())
+	if((size_t)Index >= m_VisualObjects.size())
 	{
 		for(int i = m_VisualObjects.size(); i < Index + 1; ++i)
 		{
@@ -1274,7 +1277,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_AppendVertBuffer(const CCommandBuf
 	int Index = pCommand->m_VisualObjectIDX;
 	
 	//if space not there return
-	if(Index >= m_VisualObjects.size())
+	if((size_t)Index >= m_VisualObjects.size())
 	{
 		return;
 	}
@@ -1302,7 +1305,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateVertArray(const CCommandBuff
 {
 	int Index = pCommand->m_VisualObjectIDX;
 	//if space not there return
-	if(Index >= m_VisualObjects.size())
+	if((size_t)Index >= m_VisualObjects.size())
 		return;
 	
 	if(pCommand->m_RequiredIndicesCount > m_CurrentIndicesInBuffer) 
@@ -1691,7 +1694,9 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		CmdBuffer.AddCommand(CmdOpenGL);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
-	} else {
+	} 
+	else
+	{
 		CCommandProcessorFragment_OpenGL::SCommand_Init CmdOpenGL;
 		CmdOpenGL.m_pTextureMemoryUsage = &m_TextureMemoryUsage;
 		CmdBuffer.AddCommand(CmdOpenGL);

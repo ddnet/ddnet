@@ -565,7 +565,8 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 	m_Rotation = Angle;
 }
 
-inline void clampf(float& Value, float Min, float Max){
+inline void clampf(float& Value, float Min, float Max)
+{
 	if(Value > Max) Value = Max;
 	else if(Value < Min) Value = Min;
 }
@@ -1023,7 +1024,9 @@ int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTe
 	{
 		index = m_VertexArrayIndices.size();
 		m_VertexArrayIndices.push_back(index);
-	} else  {
+	}
+	else
+	{
 		index = m_FirstFreeVertexArrayIndex;
 		m_FirstFreeVertexArrayIndex = m_VertexArrayIndices[index];
 		m_VertexArrayIndices[index] = index;

@@ -57,7 +57,8 @@ void CGLSLProgram::LinkProgram()
 	DetachAllShaders();
 }
 
-void CGLSLProgram::DetachAllShaders(){
+void CGLSLProgram::DetachAllShaders()
+{
 	GLuint aShaders[100];
 	GLsizei ReturnedCount = 0;
 	while(1)

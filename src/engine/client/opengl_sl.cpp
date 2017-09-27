@@ -4,18 +4,20 @@
 #include <stdio.h>
 #include <string>
 
-bool CGLSL::LoadShader(const char* pFile, int Type) {
+bool CGLSL::LoadShader(const char* pFile, int Type)
+{
 	if (m_IsLoaded) return true;
 	IOHANDLE f;
 	f = io_open(pFile, IOFLAG_READ);
 	
 	std::vector<std::string> Lines;
-	char buff[500];
-	if (f) {
+	if (f)
+	{
 		CLineReader LineReader;
 		LineReader.Init(f);
 		char* ReadLine = NULL;
-		while ((ReadLine = LineReader.Get())) {
+		while ((ReadLine = LineReader.Get()))
+		{
 			Lines.push_back(ReadLine);
 			Lines.back().append("\r\n");
 		}
@@ -23,7 +25,8 @@ bool CGLSL::LoadShader(const char* pFile, int Type) {
 
 		const char** ShaderCode = new const char*[Lines.size()];
 
-		for (int i = 0; i < Lines.size(); ++i) {
+		for (size_t i = 0; i < Lines.size(); ++i)
+		{
 			ShaderCode[i] = Lines[i].c_str();
 		}
 
@@ -37,7 +40,8 @@ bool CGLSL::LoadShader(const char* pFile, int Type) {
 		int CompilationStatus;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &CompilationStatus);
 
-		if (CompilationStatus == GL_FALSE) {
+		if (CompilationStatus == GL_FALSE)
+		{
 			char buff[3000];
 
 			GLint maxLength = 0;
@@ -60,24 +64,29 @@ bool CGLSL::LoadShader(const char* pFile, int Type) {
 
 }
 
-void CGLSL::DeleteShader() {
+void CGLSL::DeleteShader()
+{
 	if (!IsLoaded()) return;
 	m_IsLoaded = false;
 	glDeleteShader(m_ShaderID);
 }
 
-bool CGLSL::IsLoaded() {
+bool CGLSL::IsLoaded()
+{
 	return m_IsLoaded;
 }
 
-GLuint CGLSL::GetShaderID() {
+GLuint CGLSL::GetShaderID()
+{
 	return m_ShaderID;
 }
 
-CGLSL::CGLSL(){
+CGLSL::CGLSL()
+{
 	m_IsLoaded = false;
 }
 
-CGLSL::~CGLSL(){
+CGLSL::~CGLSL()
+{
 	DeleteShader();
 }
