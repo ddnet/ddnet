@@ -745,7 +745,7 @@ public:
 			pCursor->m_Y = DrawY;
 	}
 
-	virtual void UploadText(int TextureID, const char *pText, int Length, float x, float y, int Size, int MaxWidth)
+	virtual void UploadText(int TextureID, const char *pText, int Length, float x, float y, int Size, int MaxWidth, int MaxSize = -1, int MinSize = -1)
 	{
 		CFont *pFont = m_pDefaultFont;
 		FT_Bitmap *pBitmap;
@@ -759,15 +759,54 @@ public:
 
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent+Length;
-				
-		int ChrCount = 0;
 		
 		int WidthLastChars = 0;
+		
+		int FontSize = Size;
+		
+		//adjust font size by the full space
+		if(Size == -1)
+		{
+			bool FoundMaxFontSize = false;
+			if(MinSize == -1) 
+				MinSize = 8;
+			FontSize = MinSize;
+			
+			while(!FoundMaxFontSize){
+				int WidthOfText = 0;
+				
+				while(pCurrent < pEnd)
+				{
+					const char *pTmp = pCurrent;
+					int NextCharacter = str_utf8_decode(&pTmp);
+					
+					if(NextCharacter)
+					{
+						FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
+						if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
+						{
+							dbg_msg("pFont", "error loading glyph %d", NextCharacter);
+							pCurrent = pTmp;
+							continue;
+						}
+						pBitmap = &pFont->m_FtFace->glyph->bitmap;
+						
+						WidthOfText += pBitmap->width + 1;				
+					}
+					pCurrent = pTmp;
+				}
+				if(WidthOfText > MaxWidth || (MaxSize != -1 && FontSize > MaxSize))
+					FoundMaxFontSize = true;
+				
+				pCurrent = (char *)pText;
+				pEnd = pCurrent+Length;
+				++FontSize;
+			}
+		}
+		
 	
 		while(pCurrent < pEnd)
-		{
-			const char *pBatchEnd = pEnd;
-			
+		{			
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 			
@@ -775,7 +814,7 @@ public:
 			{
 				unsigned int px, py;
 				
-				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, Size);
+				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize-1);
 
 				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
 				{
@@ -818,7 +857,6 @@ public:
 					WidthLastChars += (SlotW + 1);
 				}
 			}
-			++ChrCount;
 			pCurrent = pTmp;
 		}
 	}

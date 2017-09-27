@@ -74,11 +74,11 @@ void CMapImages::OnInit()
 			float x = (i%16) * 64;
 			float y = (int)(i/16)* 64;
 			
-			int Size = (len == 3 ? 20 : 64);
+			int MinSize = (len == 3 ? 20 : 50);
 			int OffY = (len == 3 ? 10 : 5);
-			int OffX = (len == 3 ? 10 : 1);
+			int OffX = (len == 3 ? 5 : 1);
 			
-			TextRender()->UploadText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, Size, 64-OffX);
+			TextRender()->UploadText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, -1, 64-(OffX*2), 64, MinSize);
 		}
 	}
 }
