@@ -101,9 +101,8 @@ public:
 	virtual void DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum) = 0;
 	virtual void DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
 	virtual void DestroyVisual(int VisualObjectIDX) = 0;
-	virtual int CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int* Indices, unsigned int NumIndices) = 0;
+	virtual int CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int NumIndicesRequired) = 0;
 	virtual void AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX) = 0;
-	virtual void AppendAllIndices(unsigned int* pIndices, unsigned int NumIndices, int VisualObjectIDX) = 0;
 	virtual bool IsBufferingEnabled() = 0;
 
 	struct CLineItem
