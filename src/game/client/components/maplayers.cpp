@@ -1115,7 +1115,6 @@ int CMapLayers::TileLayersOfGroup(CMapItemGroup* pGroup)
 	for(int l = 0; l < pGroup->m_NumLayers; l++)
 	{
 		CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer+l);
-		bool IsGameLayer = false;
 		bool IsFrontLayer = false;
 		bool IsSwitchLayer = false;
 		bool IsTeleLayer = false;
@@ -1124,7 +1123,6 @@ int CMapLayers::TileLayersOfGroup(CMapItemGroup* pGroup)
 
 		if(pLayer == (CMapItemLayer*)m_pLayers->GameLayer())
 		{
-			IsGameLayer = true;
 			PassedGameLayer = true;
 		}
 
