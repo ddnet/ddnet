@@ -227,7 +227,7 @@ void CTeeHistorian::EnsureTickWrittenPlayerData(int ClientID)
 	dbg_assert(ClientID > m_MaxClientID, "invalid player data order");
 	m_MaxClientID = ClientID;
 
-	if(!m_TickWritten && (ClientID < m_PrevMaxClientID || m_LastWrittenTick + 1 != m_Tick))
+	if(!m_TickWritten && (ClientID > m_PrevMaxClientID || m_LastWrittenTick + 1 != m_Tick))
 	{
 		WriteTick();
 	}
