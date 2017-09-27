@@ -86,8 +86,6 @@ public:
 		CMD_CREATE_VERTEX_ARRAY_OBJECT,//create vao
 		CMD_CREATE_VERTEX_BUFFER_OBJECT,//create vbo
 		CMD_APPEND_VERTEX_BUFFER_OBJECT,//append data to the vbo
-		CMD_CREATE_INDEX_BUFFER_OBJECT,//create ibo
-		CMD_APPEND_INDEX_BUFFER_OBJECT,//append data to ibo
 		CMD_RENDER_IBO_VERTEX_ARRAY,//render a specific amount of the index buffer from a vao
 		CMD_RENDER_BORDER_TILE,//render one tile multiple times
 		CMD_RENDER_BORDER_TILE_LINE,//render an amount of tiles multiple times
@@ -143,20 +141,25 @@ public:
 
 	struct SPoint { float x, y; };
 	struct STexCoord { float u, v; };
-	struct SColor { float r, g, b, a; };
+	struct SColorf { float r, g, b, a; };
+	
+	//use normalized color values
+	struct SColor { unsigned char r, g, b, a; };
 
-	struct SVertex
+	struct SVertexBase
 	{
 		SPoint m_Pos;
 		STexCoord m_Tex;
-		SColor m_Color;
-	};	
+	};
 	
-	//the char offset of all indices that should be rendered, and the amount of renders
-	struct SIndicesArray
+	struct SVertexOld : public SVertexBase
 	{
-		char* m_Offset;
-		unsigned int m_DrawCount;
+		SColorf m_Color;
+	};
+	
+	struct SVertex : public SVertexBase
+	{
+		SColor m_Color;
 	};
 
 	struct SCommand
@@ -186,7 +189,7 @@ public:
 	struct SCommand_Clear : public SCommand
 	{
 		SCommand_Clear() : SCommand(CMD_CLEAR) {}
-		SColor m_Color;
+		SColorf m_Color;
 	};
 
 	struct SCommand_Signal : public SCommand
@@ -207,7 +210,7 @@ public:
 		SState m_State;
 		unsigned m_PrimType;
 		unsigned m_PrimCount;
-		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
+		SVertexBase *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
 		
 	struct SCommand_CreateVertexBufferObject : public SCommand
@@ -233,22 +236,7 @@ public:
 	{
 		SCommand_CreateVertexArrayObject() : SCommand(CMD_CREATE_VERTEX_ARRAY_OBJECT) {}
 		int m_VisualObjectIDX;
-	};
-	
-	struct SCommand_CreateIndexBufferObject : public SCommand
-	{
-		SCommand_CreateIndexBufferObject() : SCommand(CMD_CREATE_INDEX_BUFFER_OBJECT) {}
-		unsigned int* m_Indices;
-		int m_NumIndices;
-		int m_VisualObjectIDX;
-	};
-	
-	struct SCommand_AppendIndexBufferObject : public SCommand
-	{
-		SCommand_AppendIndexBufferObject() : SCommand(CMD_APPEND_INDEX_BUFFER_OBJECT) {}
-		unsigned int* m_Indices;
-		int m_NumIndices;
-		int m_VisualObjectIDX;
+		unsigned int m_RequiredIndicesCount;
 	};
 	
 	struct SCommand_RenderVertexArray : public SCommand
@@ -256,8 +244,12 @@ public:
 		SCommand_RenderVertexArray() : SCommand(CMD_RENDER_IBO_VERTEX_ARRAY) {}
 		//even if clipping should be enabled, we will render all
 		SState m_State;
-		SColor m_Color; //the color of the whole tilelayer -- already envelopped
-		SIndicesArray *m_pIndicesOffsets; // you should use the command buffer data to allocate vertices for this command
+		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
+			
+		//the char offset of all indices that should be rendered, and the amount of renders
+		char** m_pIndicesOffsets;
+		unsigned int* m_pDrawCount;
+		
 		int m_IndicesDrawNum;
 		int m_VisualObjectIDX;
 		float m_ZoomScreenRatio;
@@ -267,7 +259,7 @@ public:
 	{
 		SCommand_RenderBorderTile() : SCommand(CMD_RENDER_BORDER_TILE) {}
 		SState m_State;
-		SColor m_Color; //the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_VisualObjectIDX;
@@ -282,7 +274,7 @@ public:
 	{
 		SCommand_RenderBorderTileLine() : SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
 		SState m_State;
-		SColor m_Color; //the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
@@ -488,8 +480,11 @@ class CGraphics_Threaded : public IEngineGraphics
 	class IConsole *m_pConsole;
 
 	CCommandBuffer::SVertex m_aVertices[MAX_VERTICES];
+	CCommandBuffer::SVertexOld m_aVerticesOld[MAX_VERTICES];
+	CCommandBuffer::SVertexBase* m_pVertices;
 	int m_NumVertices;
 
+	CCommandBuffer::SColorf m_aColorOld[4];
 	CCommandBuffer::SColor m_aColor[4];
 	CCommandBuffer::STexCoord m_aTexture[4];
 
@@ -511,7 +506,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	void FlushVertices();
 	void AddVertices(int Count);
-	void Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints, int NumPoints);
+	void Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertexBase *pPoints, int NumPoints);
 
 	void KickCommandBuffer();
 
@@ -559,6 +554,9 @@ public:
 
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
 	virtual void SetColor(float r, float g, float b, float a);
+	
+	void SetColor(CCommandBuffer::SVertexBase* pVertex, int ColorIndex);
+	CCommandBuffer::SVertexBase* GetVertex(int Index);
 
 	virtual void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV);
 	virtual void QuadsSetSubsetFree(
@@ -574,9 +572,8 @@ public:
 	virtual void DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum);
 	virtual void DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum);
 	virtual void DestroyVisual(int VisualObjectIDX);
-	virtual int CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int* Indices, unsigned int NumIndices);
+	virtual int CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int NumIndicesRequired);
 	virtual void AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX);
-	virtual void AppendAllIndices(unsigned int* pIndices, unsigned int NumIndices, int VisualObjectIDX);
 	
 	virtual int GetNumScreens() const;
 	virtual void Minimize();

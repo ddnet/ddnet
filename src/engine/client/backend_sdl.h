@@ -117,7 +117,6 @@ public:
 	bool RunCommand(const CCommandBuffer::SCommand * pBaseCommand);
 };
 
-
 class CGLSLProgram;
 class CGLSLTWProgram;
 class CGLSLPrimitiveProgram;
@@ -129,6 +128,7 @@ class CGLSLBorderTileLineProgram;
 class CCommandProcessorFragment_OpenGL3_3
 {
 	bool m_UseMultipleTextureUnits;
+	bool m_UsePreinitializedVertexBuffer;
 	
 	struct CTexture
 	{
@@ -150,7 +150,9 @@ class CCommandProcessorFragment_OpenGL3_3
 	
 	GLuint m_PrimitiveDrawVertexID;
 	GLuint m_PrimitiveDrawBufferID;
-	GLuint m_PrimitiveDrawIndexBufferID;
+	
+	GLuint m_QuadDrawIndexBufferID;
+	unsigned int m_CurrentIndicesInBuffer;
 	
 	GLint m_MaxTextureUnits;
 	
@@ -167,17 +169,18 @@ class CCommandProcessorFragment_OpenGL3_3
 	void DestroyTexture(int Slot);
 	void DestroyVisualObjects(int Index);
 	
+	void AppendIndices(unsigned int NewIndicesCount);
+	
 	struct SVisualObject{
-		SVisualObject() : m_VertArrayID(0), m_VertBufferID(0), m_NumElements(0), m_IsTextured(false), m_IndexBufferID(0), m_NumIndices(0) {}
+		SVisualObject() : m_VertArrayID(0), m_VertBufferID(0), m_NumElements(0), m_IsTextured(false) {}
 		GLuint m_VertArrayID;
 		GLuint m_VertBufferID;
 		int m_NumElements; //vertices and texture coordinates
 		bool m_IsTextured;
-		
-		GLuint m_IndexBufferID;
-		int m_NumIndices;
 	};
 	std::vector<SVisualObject> m_VisualObjects;
+	
+	CCommandBuffer::SColorf m_ClearColor;
 public:
 	enum
 	{
@@ -215,8 +218,6 @@ private:
 	void Cmd_CreateVertBuffer(const CCommandBuffer::SCommand_CreateVertexBufferObject *pCommand);
 	void Cmd_AppendVertBuffer(const CCommandBuffer::SCommand_AppendVertexBufferObject *pCommand);
 	void Cmd_CreateVertArray(const CCommandBuffer::SCommand_CreateVertexArrayObject *pCommand);
-	void Cmd_CreateIndexBuffer(const CCommandBuffer::SCommand_CreateIndexBufferObject *pCommand);
-	void Cmd_AppendIndexBuffer(const CCommandBuffer::SCommand_AppendIndexBufferObject *pCommand);
 	void Cmd_RenderVertexArray(const CCommandBuffer::SCommand_RenderVertexArray *pCommand);
 	void Cmd_DestroyVertexArray(const CCommandBuffer::SCommand_DestroyVisual *pCommand);
 	
