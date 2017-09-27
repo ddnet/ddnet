@@ -10,8 +10,9 @@ addons:
     - libfreetype6-dev
     - libgtest-dev
     - libsdl2-dev
+    - libglew-dev
 script:
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl2; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl2 glew; fi
 - if [ "$TRAVIS_OS_NAME" != "osx" ]; then mkdir gtest_build; cmake -E chdir gtest_build cmake /usr/src/gtest; cmake --build gtest_build; fi
 - mkdir build
 - cd build
