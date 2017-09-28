@@ -308,6 +308,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		PROP_CLIP_Y,
 		PROP_CLIP_W,
 		PROP_CLIP_H,
+		PROP_CLIP_TRIGGER,
 		NUM_PROPS,
 	};
 
@@ -323,6 +324,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		{"Clip Y", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Clip W", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipW, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Clip H", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipH, PROPTYPE_INT_SCROLL, 0, 1000000},
+		{"Clip Trigger", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipTrigger, PROPTYPE_INT_STEP, 0, 255},
 		{0},
 	};
 
@@ -352,6 +354,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		else if(Prop == PROP_CLIP_Y) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipY = NewVal;
 		else if(Prop == PROP_CLIP_W) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
 		else if(Prop == PROP_CLIP_H) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+		else if (Prop == PROP_CLIP_TRIGGER) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipTrigger = NewVal;
 	}
 
 	return 0;
