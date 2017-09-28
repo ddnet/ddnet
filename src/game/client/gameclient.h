@@ -115,6 +115,8 @@ class CGameClient : public IGameClient
 	int m_LastFlagCarrierBlue;
 
 	int m_CheckInfo[2];
+	
+	int m_lastTuneZone=0;
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
