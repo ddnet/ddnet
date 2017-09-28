@@ -1,5 +1,3 @@
-																							   
-																							   
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -32,7 +30,7 @@ int CGhostRecorder::Start(IStorage *pStorage, IConsole *pConsole, const char *pF
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf);
 		return -1;
 	}
-	
+
 	// write header
 	CGhostHeader Header;
 	mem_zero(&Header, sizeof(Header));
@@ -48,7 +46,7 @@ int CGhostRecorder::Start(IStorage *pStorage, IConsole *pConsole, const char *pF
 
 	m_LastItem.Reset();
 	ResetBuffer();
-	
+
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "Ghost recording to '%s'", pFilename);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", aBuf);
@@ -135,7 +133,7 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 {
 	if(!m_File)
 		return -1;
-		
+
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost_recorder", "Stopped ghost recording");
 
 	FlushChunk();
@@ -152,12 +150,12 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 	aTime[1] = (Time>>16)&0xff;
 	aTime[2] = (Time>>8)&0xff;
 	aTime[3] = (Time)&0xff;
-	
+
 	// write down num shots and time
 	io_seek(m_File, gs_NumTicksOffset, IOSEEK_START);
 	io_write(m_File, &aNumTicks, sizeof(aNumTicks));
 	io_write(m_File, &aTime, sizeof(aTime));
-	
+
 	io_close(m_File);
 	m_File = 0;
 	return 0;
