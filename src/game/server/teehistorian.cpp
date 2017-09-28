@@ -12,7 +12,7 @@ enum
 {
 	TEEHISTORIAN_NONE,
 	TEEHISTORIAN_FINISH,
-	TEEHISTORIAN_TICK,
+	TEEHISTORIAN_TICK_SKIP,
 	TEEHISTORIAN_PLAYER_NEW,
 	TEEHISTORIAN_PLAYER_OLD,
 	TEEHISTORIAN_INPUT_DIFF,
@@ -95,6 +95,9 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 
 	m_Tick = 0;
 	m_LastWrittenTick = 0;
+	// `m_TickWritten` is initialized in `BeginTick`
+	m_MaxClientID = MAX_CLIENTS;
+	// `m_PrevMaxClientID` is initialized in `BeginTick`
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_aPrevPlayers[i].m_Alive = false;
@@ -104,6 +107,8 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	m_pWriteCallbackUserdata = pUser;
 
 	WriteHeader(pGameInfo);
+
+	m_State = STATE_START;
 }
 
 void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
@@ -323,7 +328,7 @@ void CTeeHistorian::WriteTick()
 	TickPacker.Reset();
 
 	int dt = m_Tick - m_LastWrittenTick - 1;
-	TickPacker.AddInt(-TEEHISTORIAN_TICK);
+	TickPacker.AddInt(-TEEHISTORIAN_TICK_SKIP);
 	TickPacker.AddInt(dt);
 	if(m_Debug)
 	{
@@ -494,7 +499,7 @@ void CTeeHistorian::EndTick()
 
 void CTeeHistorian::Finish()
 {
-	dbg_assert(m_State == STATE_START || m_State == STATE_INPUTS || m_State == STATE_BEFORE_ENDTICK, "invalid teehistorian state");
+	dbg_assert(m_State == STATE_START || m_State == STATE_INPUTS || m_State == STATE_BEFORE_ENDTICK || m_State == STATE_BEFORE_TICK, "invalid teehistorian state");
 
 	if(m_State == STATE_INPUTS)
 	{
