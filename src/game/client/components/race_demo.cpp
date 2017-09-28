@@ -221,7 +221,7 @@ bool CRaceDemo::CheckDemo(int Time) const
 	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &Param);
 
 	// loop through demo files
-	for(int i = 0; i < lDemos.size(); i++)
+	for(unsigned i = 0; i < lDemos.size(); i++)
 	{
 		if(Time >= lDemos[i].m_Time) // found a better demo
 			return false;

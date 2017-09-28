@@ -77,7 +77,7 @@ CGhost::CGhostPath &CGhost::CGhostPath::operator = (CGhostPath &&Other)
 
 void CGhost::CGhostPath::Reset(int ChunkSize)
 {
-	for(int i = 0; i < m_lChunks.size(); i++)
+	for(unsigned i = 0; i < m_lChunks.size(); i++)
 		mem_free(m_lChunks[i]);
 	m_lChunks.clear();
 	m_ChunkSize = ChunkSize;
