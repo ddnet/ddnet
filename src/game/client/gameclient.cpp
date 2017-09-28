@@ -571,6 +571,26 @@ void CGameClient::UpdatePositions()
 			m_Snap.m_SpecInfo.m_UsePosition = true;
 		}
 	}
+	
+	//With updated positions, check if we're in a new tune zone, to alter clip areas
+	int zone = Collision()->GetTune(m_LocalCharacterPos);
+	if (m_lastTuneZone != zone) {
+		m_lastTuneZone = zone;
+
+		int Start, Num;
+		IMap *pMap = Kernel()->RequestInterface<IMap>();
+		pMap->GetType(MAPITEMTYPE_CLIPS, &Start, &Num);
+
+		for (int i = 0; i < Num; i++) {
+			CMapItemClips *pItem = (CMapItemClips *)pMap->GetItem(Start + i, 0, 0);
+
+			if (pItem->zone == zone) {
+				//m_pMapLayersBackGround->ChangeClipping(pItem->trigger, pItem->x, pItem->y, pItem->w, pItem->h);
+				m_pMapLayersForeGround->ChangeClipping(pItem->trigger, pItem->x, pItem->y, pItem->w, pItem->h, pItem->disable, pItem->rewind);
+			}
+		}
+	}
+
 }
 
 
