@@ -29,6 +29,8 @@ public:
 	void EnvelopeUpdate();
 
 	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
+	void ChangeClipping(int trigger, int x, int y , int w, int h, int disable, int rewind);
+
 };
 
 #endif
