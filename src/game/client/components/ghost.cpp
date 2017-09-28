@@ -56,12 +56,21 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 	pChar->m_Tick = pGhostChar->m_Tick;
 }
 
-void CGhost::CGhostPath::Copy(const CGhostPath &Other)
+CGhost::CGhostPath::CGhostPath(CGhostPath &&Other)
+	: m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_lChunks(std::move(Other.m_lChunks))
+{
+	Other.m_NumItems = 0;
+	Other.m_lChunks.clear();
+}
+
+CGhost::CGhostPath &CGhost::CGhostPath::operator = (CGhostPath &&Other)
 {
 	Reset(Other.m_ChunkSize);
-	SetSize(Other.Size());
-	for(int i = 0; i < m_lChunks.size(); i++)
-		mem_copy(m_lChunks[i], Other.m_lChunks[i], sizeof(CGhostCharacter) * m_ChunkSize);
+	m_NumItems = Other.m_NumItems;
+	m_lChunks = std::move(Other.m_lChunks);
+	Other.m_NumItems = 0;
+	Other.m_lChunks.clear();
+	return *this;
 }
 
 void CGhost::CGhostPath::Reset(int ChunkSize)
@@ -80,7 +89,7 @@ void CGhost::CGhostPath::SetSize(int Items)
 
 	if(NeededChunks > Chunks)
 	{
-		m_lChunks.set_size(NeededChunks);
+		m_lChunks.resize(NeededChunks);
 		for(int i = Chunks; i < NeededChunks; i++)
 			m_lChunks[i] = (CGhostCharacter*)mem_alloc(sizeof(CGhostCharacter) * m_ChunkSize, 1);
 	}
@@ -350,7 +359,7 @@ void CGhost::StopRecord(int Time)
 		// add to active ghosts
 		int Slot = GetSlot();
 		if(Slot != -1)
-			m_aActiveGhosts[Slot] = m_CurGhost;
+			m_aActiveGhosts[Slot] = std::move(m_CurGhost);
 
 		// create ghost item
 		CMenus::CGhostItem Item;

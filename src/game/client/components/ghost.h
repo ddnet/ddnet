@@ -59,15 +59,16 @@ private:
 		int m_ChunkSize;
 		int m_NumItems;
 
-		array<CGhostCharacter*> m_lChunks;
-
-		void Copy(const CGhostPath &other);
+		std::vector<CGhostCharacter*> m_lChunks;
 
 	public:
 		CGhostPath() { Reset(); }
 		~CGhostPath() { Reset(); }
-		CGhostPath(const CGhostPath &Other) { Copy(Other); };
-		CGhostPath &operator = (const CGhostPath &Other) { Copy(Other); return *this; };
+		CGhostPath(const CGhostPath &Other) = delete;
+		CGhostPath &operator = (const CGhostPath &Other) = delete;
+
+		CGhostPath(CGhostPath &&Other);
+		CGhostPath &operator = (CGhostPath &&Other);
 
 		void Reset(int ChunkSize = 25 * 60); // one minute with default snap rate
 		void SetSize(int Items);
