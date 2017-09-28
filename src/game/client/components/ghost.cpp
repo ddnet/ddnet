@@ -182,7 +182,7 @@ void CGhost::OnRender()
 		{
 			static int s_LastRaceTick = -1;
 
-			if(ServerControl && s_LastRaceTick != RaceTick)
+			if(ServerControl && s_LastRaceTick != RaceTick && Client()->GameTick() - RaceTick < Client()->GameTickSpeed())
 			{
 				if(m_Recording && s_LastRaceTick != -1)
 					m_AllowRestart = true;

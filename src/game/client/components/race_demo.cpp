@@ -35,7 +35,7 @@ void CRaceDemo::OnRender()
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 
 	// start the demo
-	bool ForceStart = ServerControl && s_LastRaceTick != RaceTick;
+	bool ForceStart = ServerControl && s_LastRaceTick != RaceTick && Client()->GameTick() - RaceTick < Client()->GameTickSpeed();
 	bool AllowRestart = (m_AllowRestart || ForceStart) && m_RaceStartTick + 10 * Client()->GameTickSpeed() < Client()->GameTick();
 	if(m_RaceState == RACE_IDLE || m_RaceState == RACE_PREPARE || (m_RaceState == RACE_STARTED && AllowRestart))
 	{
