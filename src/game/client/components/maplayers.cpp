@@ -400,3 +400,86 @@ void CMapLayers::OnRender()
 	// reset the screen like it was before
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 }
+
+//Modify group clipping on zone change
+void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int disable, int rewind) {
+	for (int g = 0; g < m_pLayers->NumGroups(); g++)
+	{
+		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
+
+		if (!pGroup)
+		{
+			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
+			dbg_msg("maplayers", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
+			dbg_msg("maplayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
+			continue;
+		}
+		//If map loaded from old format it probably has bad value here
+		if (pGroup->m_ClipTrigger > 255) continue;
+
+		if (!g_Config.m_GfxNoclip && pGroup->m_Version >= 2 && (pGroup->m_ClipTrigger == trigger || (pGroup->m_ClipTrigger > 0 && trigger == -1)))
+		{
+
+			if (disable) {
+				pGroup->m_UseClipping = false;
+			}
+			else {
+
+				pGroup->m_ClipX = x;
+				pGroup->m_ClipY = y;
+				pGroup->m_ClipW = w;
+				pGroup->m_ClipH = h;
+				pGroup->m_UseClipping = true;
+
+				if (!rewind) continue;
+				for (int l = 0; l < pGroup->m_NumLayers; l++)
+				{
+					CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
+
+					//// skip adjustment if detail layers if not wanted
+
+					//if (pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail)
+					//	continue;
+					if (pLayer->m_Type == LAYERTYPE_TILES)
+					{
+						CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+						pTMap->m_ColorEnvOffset = Client()->LocalTime() * -1000;
+					}
+					else if (pLayer->m_Type == LAYERTYPE_QUADS)
+					{
+						CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
+						CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
+
+						for (int q = 0; q < pQLayer->m_NumQuads; q++)
+						{
+							CQuad *quad = &pQuads[q];
+							quad->m_ColorEnvOffset = Client()->LocalTime()*-1000;
+							quad->m_PosEnvOffset = Client()->LocalTime() * -1000;
+						}
+					}
+					else if (pLayer->m_Type == LAYERTYPE_SOUNDS)
+					{
+						//I have never used sounds so i have no idea if this is right
+						CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
+						if (pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+							continue;
+						if (pSoundLayer->m_Sound == -1)
+							continue;
+
+						CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
+						if (!pSources)
+							continue;
+
+						for (int s = 0; s < pSoundLayer->m_NumSources; s++)
+						{
+							CSoundSource *snd = &pSources[s];
+							snd->m_PosEnvOffset = Client()->LocalTime() * -1000;
+							snd->m_SoundEnvOffset = Client()->LocalTime() * -1000;
+						}
+					}
+				}
+			}
+		}
+
+	}
+}
