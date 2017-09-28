@@ -836,10 +836,8 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 {
 	CMenus *pSelf = (CMenus *)pUser;
 	int Length = str_length(pName);
-	const char *pMap = pSelf->m_pClient->Client()->GetCurrentMap();
-	if((pName[0] == '.' && (pName[1] == 0 ||
-		(pName[1] == '.' && pName[2] == 0))) ||
-		(!IsDir && (Length < 4 || str_comp(pName+Length-4, ".gho") || str_comp_num(pName, pMap, str_length(pMap)))))
+	const char *pMap = pSelf->Client()->GetCurrentMap();
+	if(IsDir || Length < 4 || str_comp(pName+Length-4, ".gho") != 0 || str_comp_num(pName, pMap, str_length(pMap)) != 0)
 		return 0;
 
 	char aFilename[256];

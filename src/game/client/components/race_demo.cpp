@@ -1,15 +1,46 @@
 /* (c) Redix and Sushi */
 
+#include <ctype.h>
+
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 
-#include "menus.h"
 #include "race.h"
 #include "race_demo.h"
 
+const char *CRaceDemo::ms_pRaceDemoDir = "demos";
+
+struct CDemoItem
+{
+	char m_aName[128];
+	int m_Time;
+};
+
+struct CDemoListParam
+{
+	std::vector<CDemoItem> *m_plDemos;
+	const char *pMap;
+};
+
 CRaceDemo::CRaceDemo() : m_RaceState(RACE_NONE), m_RaceStartTick(-1), m_RecordStopTick(-1), m_Time(0) {}
+
+void CRaceDemo::GetPath(char *pBuf, int Size, int Time) const
+{
+	const char *pMap = Client()->GetCurrentMap();
+
+	char aPlayerName[MAX_NAME_LENGTH];
+	str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
+	str_sanitize_filename(aPlayerName);
+
+	if(Time < 0)
+		str_format(pBuf, Size, "%s/%s_tmp_%d.demo", ms_pRaceDemoDir, pMap, pid());
+	else if(g_Config.m_ClDemoName)
+		str_format(pBuf, Size, "%s/%s_%d.%03d_%s.demo", ms_pRaceDemoDir, pMap, Time / 1000, Time % 1000, aPlayerName);
+	else
+		str_format(pBuf, Size, "%s/%s_%d.%03d.demo", ms_pRaceDemoDir, pMap, Time / 1000, Time % 1000);
+}
 
 void CRaceDemo::OnStateChange(int NewState, int OldState)
 {
@@ -47,7 +78,10 @@ void CRaceDemo::OnRender()
 			if(m_RaceState == RACE_STARTED)
 				Client()->RaceRecord_Stop();
 			if(m_RaceState != RACE_PREPARE) // start recording again
-				Client()->RaceRecord_Start();
+			{
+				GetPath(m_aTmpFilename, sizeof(m_aTmpFilename));
+				Client()->RaceRecord_Start(m_aTmpFilename);
+			}
 			m_RaceStartTick = Client()->GameTick();
 			m_RaceState = RACE_STARTED;
 		}
@@ -56,7 +90,8 @@ void CRaceDemo::OnRender()
 	// start recording before the player passes the start line, so we can see some preparation steps
 	if(m_RaceState == RACE_NONE)
 	{
-		Client()->RaceRecord_Start();
+		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename));
+		Client()->RaceRecord_Start(m_aTmpFilename);
 		m_RaceStartTick = Client()->GameTick();
 		m_RaceState = RACE_PREPARE;
 	}
@@ -64,7 +99,7 @@ void CRaceDemo::OnRender()
 	// stop recording if the player did not pass the start line after 20 seconds
 	if(m_RaceState == RACE_PREPARE && Client()->GameTick() - m_RaceStartTick >= Client()->GameTickSpeed() * 20)
 	{
-		OnReset();
+		StopRecord();
 		m_RaceState = RACE_IDLE;
 	}
 
@@ -125,22 +160,18 @@ void CRaceDemo::StopRecord(int Time)
 	if(Client()->RaceRecord_IsRecording())
 		Client()->RaceRecord_Stop();
 
-	char aDemoName[128];
-	char aTmpFilename[512];
-	Client()->RaceRecord_GetName(aDemoName, sizeof(aDemoName));
-	str_format(aTmpFilename, sizeof(aTmpFilename), "demos/%s.demo", aDemoName);
-
 	if(Time > 0 && CheckDemo(Time))
 	{
 		// save file
 		char aNewFilename[512];
-		Client()->RaceRecord_GetName(aDemoName, sizeof(aDemoName), m_Time);
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s.demo", aDemoName);
+		GetPath(aNewFilename, sizeof(aNewFilename), m_Time);
 
-		Storage()->RenameFile(aTmpFilename, aNewFilename, IStorage::TYPE_SAVE);
+		Storage()->RenameFile(m_aTmpFilename, aNewFilename, IStorage::TYPE_SAVE);
 	}
 	else // no new record
-		Storage()->RemoveFile(aTmpFilename, IStorage::TYPE_SAVE);
+		Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
+
+	m_aTmpFilename[0] = 0;
 
 	m_Time = 0;
 	m_RaceState = RACE_NONE;
@@ -148,51 +179,57 @@ void CRaceDemo::StopRecord(int Time)
 	m_RecordStopTick = -1;
 }
 
+int CRaceDemo::RaceDemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)
+{
+	CDemoListParam *pParam = (CDemoListParam*) pUser;
+	int Length = str_length(pName);
+	int MapLen = str_length(pParam->pMap);
+	if(IsDir || Length < 5 || str_comp(pName + Length - 5, ".demo") != 0 || str_comp_num(pName, pParam->pMap, MapLen) != 0 || pName[MapLen] != '_')
+		return 0;
+
+	CDemoItem Item;
+	str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length - 4));
+
+	const char *pTime = Item.m_aName + MapLen + 1;
+	const char *pTEnd = pTime;
+	while(isdigit(*pTEnd) || *pTEnd == ' ' || *pTEnd == '.' || *pTEnd == ',')
+		pTEnd++;
+
+	if(g_Config.m_ClDemoName)
+	{
+		char aPlayerName[MAX_NAME_LENGTH];
+		str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
+		str_sanitize_filename(aPlayerName);
+
+		if(pTEnd[0] != '_' || str_comp(pTEnd + 1, aPlayerName) != 0)
+			return 0;
+	}
+	else if(pTEnd[0])
+		return 0;
+
+	Item.m_Time = CRaceHelper::TimeFromSecondsStr(pTime);
+	if(Item.m_Time > 0)
+		pParam->m_plDemos->push_back(Item);
+
+	return 0;
+}
+
 bool CRaceDemo::CheckDemo(int Time) const
 {
-	if(str_comp(m_pClient->m_pMenus->GetCurrentDemoFolder(), "demos") != 0)
-		return true;
-
-	char aTmpDemoName[128];
-	Client()->RaceRecord_GetName(aTmpDemoName, sizeof(aTmpDemoName));
+	std::vector<CDemoItem> lDemos;
+	CDemoListParam Param = { &lDemos, Client()->GetCurrentMap() };
+	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &Param);
 
 	// loop through demo files
-	m_pClient->m_pMenus->DemolistPopulate();
-	for(int i = 0; i < m_pClient->m_pMenus->m_lDemos.size(); i++)
+	for(int i = 0; i < lDemos.size(); i++)
 	{
-		// skip temp file
-		const char *pDemoName = m_pClient->m_pMenus->m_lDemos[i].m_aName;
-		if(str_comp(pDemoName, aTmpDemoName) == 0)
-			continue;
+		if(Time >= lDemos[i].m_Time) // found a better demo
+			return false;
 
-		int MapLen = str_length(Client()->GetCurrentMap());
-		if(str_comp_num(pDemoName, Client()->GetCurrentMap(), MapLen) != 0 || pDemoName[MapLen] != '_')
-			continue;
-
-		// set cursor
-		pDemoName += MapLen + 1;
-
-		if(g_Config.m_ClDemoName)
-		{
-			char aPlayerName[MAX_NAME_LENGTH];
-			str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
-			str_sanitize_filename(aPlayerName);
-
-			if(!str_find(pDemoName, aPlayerName))
-				continue;
-		}
-
-		int DemoTime = CRaceHelper::TimeFromSecondsStr(pDemoName);
-		if(DemoTime > 0)
-		{
-			if(Time >= DemoTime) // found a better demo
-				return false;
-
-			// delete old demo
-			char aFilename[512];
-			str_format(aFilename, sizeof(aFilename), "demos/%s", m_pClient->m_pMenus->m_lDemos[i].m_aFilename);
-			Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
-		}
+		// delete old demo
+		char aFilename[512];
+		str_format(aFilename, sizeof(aFilename), "%s/%s.demo", ms_pRaceDemoDir, lDemos[i].m_aName);
+		Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
 
 	return true;

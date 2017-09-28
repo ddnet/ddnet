@@ -177,14 +177,13 @@ public:
 
 	virtual const char *GetCurrentMap() = 0;
 	virtual const char *GetCurrentMapPath() = 0;
+	virtual unsigned GetMapCrc() = 0;
 
-	virtual void RaceRecord_GetName(char *pBuf, int Size, int Time = -1) = 0;
-	virtual void RaceRecord_Start() = 0;
+	virtual void RaceRecord_Start(const char *pFilename) = 0;
 	virtual void RaceRecord_Stop() = 0;
 	virtual bool RaceRecord_IsRecording() = 0;
 
-	virtual void Ghost_GetPath(char *pBuf, int Size, const char *pPlayerName, int Time = -1) = 0;
-	virtual void GhostRecorder_Start(const char *pPlayerName, int Time = -1) = 0;
+	virtual void GhostRecorder_Start(const char *pFilename, const char *pPlayerName) = 0;
 	virtual bool GhostLoader_Load(const char *pFilename) = 0;
 	virtual bool GhostLoader_GetGhostInfo(const char *pFilename, struct CGhostHeader *pGhostHeader) = 0;
 

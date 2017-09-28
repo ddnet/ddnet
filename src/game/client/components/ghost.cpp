@@ -12,6 +12,8 @@
 #include "menus.h"
 #include "ghost.h"
 
+const char *CGhost::ms_pGhostDir = "ghosts";
+
 CGhost::CGhost() : m_StartRenderTick(-1), m_LastDeathTick(-1), m_Recording(false), m_Rendering(false) {}
 
 void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
@@ -113,6 +115,21 @@ CGhostCharacter *CGhost::CGhostPath::Get(int Index)
 	return &m_lChunks[Chunk][Pos];
 }
 
+void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) const
+{
+	const char *pMap = Client()->GetCurrentMap();
+	unsigned Crc = Client()->GetMapCrc();
+
+	char aPlayerName[MAX_NAME_LENGTH];
+	str_copy(aPlayerName, pPlayerName, sizeof(aPlayerName));
+	str_sanitize_filename(aPlayerName);
+
+	if(Time < 0)
+		str_format(pBuf, Size, "%s/%s_%s_%08x_tmp_%d.gho", ms_pGhostDir, pMap, aPlayerName, Crc, pid());
+	else
+		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%08x.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, Crc);
+}
+
 void CGhost::AddInfos(const CNetObj_Character *pChar)
 {
 	int NumTicks = m_CurGhost.m_Path.Size();
@@ -120,7 +137,8 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	// do not start writing to file as long as we still touch the start line
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
-		Client()->GhostRecorder_Start(m_CurGhost.m_aPlayer);
+		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename), m_CurGhost.m_aPlayer);
+		Client()->GhostRecorder_Start(m_aTmpFilename, m_CurGhost.m_aPlayer);
 
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, (const char*)&m_CurGhost.m_StartTick, sizeof(int));
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&m_CurGhost.m_Skin, sizeof(CGhostSkin));
@@ -347,9 +365,6 @@ void CGhost::StopRecord(int Time)
 	if(RecordingToFile)
 		GhostRecorder()->Stop(m_CurGhost.m_Path.Size(), Time);
 
-	char aTmpFilename[128];
-	Client()->Ghost_GetPath(aTmpFilename, sizeof(aTmpFilename), m_CurGhost.m_aPlayer);
-
 	CMenus::CGhostItem *pOwnGhost = m_pClient->m_pMenus->GetOwnGhost();
 	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time))
 	{
@@ -364,20 +379,22 @@ void CGhost::StopRecord(int Time)
 		// create ghost item
 		CMenus::CGhostItem Item;
 		if(RecordingToFile)
-			Client()->Ghost_GetPath(Item.m_aFilename, sizeof(Item.m_aFilename), m_CurGhost.m_aPlayer, Time);
+			GetPath(Item.m_aFilename, sizeof(Item.m_aFilename), m_CurGhost.m_aPlayer, Time);
 		str_copy(Item.m_aPlayer, m_CurGhost.m_aPlayer, sizeof(Item.m_aPlayer));
 		Item.m_Time = Time;
 		Item.m_Slot = Slot;
 
 		// save new ghost file
 		if(Item.HasFile())
-			Storage()->RenameFile(aTmpFilename, Item.m_aFilename, IStorage::TYPE_SAVE);
+			Storage()->RenameFile(m_aTmpFilename, Item.m_aFilename, IStorage::TYPE_SAVE);
 
 		// add item to menu list
 		m_pClient->m_pMenus->UpdateOwnGhost(Item);
 	}
 	else if(RecordingToFile) // no new record
-		Storage()->RemoveFile(aTmpFilename, IStorage::TYPE_SAVE);
+		Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
+
+	m_aTmpFilename[0] = 0;
 
 	m_CurGhost.Reset();
 }
@@ -507,7 +524,8 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 	CGhostItem *pGhost = &m_aActiveGhosts[Slot];
 
 	int NumTicks = pGhost->m_Path.Size();
-	Client()->GhostRecorder_Start(pItem->m_aPlayer, pItem->m_Time);
+	GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_aPlayer, pItem->m_Time);
+	Client()->GhostRecorder_Start(pItem->m_aFilename, pItem->m_aPlayer);
 
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, (const char*)&pGhost->m_StartTick, sizeof(int));
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&pGhost->m_Skin, sizeof(CGhostSkin));
@@ -515,7 +533,6 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)pGhost->m_Path.Get(i), sizeof(CGhostCharacter));
 
 	GhostRecorder()->Stop(NumTicks, pItem->m_Time);
-	Client()->Ghost_GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_aPlayer, pItem->m_Time);
 }
 
 void CGhost::ConGPlay(IConsole::IResult *pResult, void *pUserData)

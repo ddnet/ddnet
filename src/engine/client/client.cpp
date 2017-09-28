@@ -3596,35 +3596,17 @@ const char *CClient::GetCurrentMapPath()
 	return m_aCurrentMapPath;
 }
 
-void CClient::RaceRecord_GetName(char *pBuf, int Size, int Time)
+unsigned CClient::GetMapCrc()
 {
-	// check the player name
-	char aPlayerName[MAX_NAME_LENGTH];
-	str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
-	str_sanitize_filename(aPlayerName);
-
-	if(Time < 0)
-		str_format(pBuf, Size, "%s_tmp_%d", m_aCurrentMap, pid());
-	else if(g_Config.m_ClDemoName)
-		str_format(pBuf, Size, "%s_%d.%03d_%s", m_aCurrentMap, Time / 1000, Time % 1000, aPlayerName);
-	else
-		str_format(pBuf, Size, "%s_%d.%03d", m_aCurrentMap, Time / 1000, Time % 1000);
+	return m_pMap->Crc();
 }
 
-void CClient::RaceRecord_Start()
+void CClient::RaceRecord_Start(const char *pFilename)
 {
 	if(State() != IClient::STATE_ONLINE)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
 	else
-	{
-		char aDemoName[128];
-		char aFilename[128];
-
-		RaceRecord_GetName(aDemoName, sizeof(aDemoName));
-		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", aDemoName);
-
-		m_DemoRecorder[RECORDER_RACE].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
-	}
+		m_DemoRecorder[RECORDER_RACE].Start(Storage(), m_pConsole, pFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 }
 
 void CClient::RaceRecord_Stop()
@@ -3638,24 +3620,9 @@ bool CClient::RaceRecord_IsRecording()
 	return m_DemoRecorder[RECORDER_RACE].IsRecording();
 }
 
-void CClient::Ghost_GetPath(char *pBuf, int Size, const char *pPlayerName, int Time)
+void CClient::GhostRecorder_Start(const char *pFilename, const char *pPlayerName)
 {
-	// check the player name
-	char aPlayerName[MAX_NAME_LENGTH];
-	str_copy(aPlayerName, pPlayerName, sizeof(aPlayerName));
-	str_sanitize_filename(aPlayerName);
-
-	if(Time < 0)
-		str_format(pBuf, Size, "ghosts/%s_%s_%08x_tmp_%d.gho", m_aCurrentMap, aPlayerName, m_pMap->Crc(), pid());
-	else
-		str_format(pBuf, Size, "ghosts/%s_%s_%d.%03d_%08x.gho", m_aCurrentMap, aPlayerName, Time / 1000, Time % 1000, m_pMap->Crc());
-}
-
-void CClient::GhostRecorder_Start(const char *pPlayerName, int Time)
-{
-	char aFilename[128];
-	Ghost_GetPath(aFilename, sizeof(aFilename), pPlayerName, Time);
-	m_GhostRecorder.Start(Storage(), m_pConsole, aFilename, m_aCurrentMap, m_pMap->Crc(), pPlayerName);
+	m_GhostRecorder.Start(Storage(), m_pConsole, pFilename, m_aCurrentMap, m_pMap->Crc(), pPlayerName);
 }
 
 bool CClient::GhostLoader_Load(const char *pFilename)

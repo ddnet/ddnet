@@ -99,11 +99,15 @@ private:
 		}
 	};
 
+	static const char *ms_pGhostDir;
+
 	class IGhostLoader *m_pGhostLoader;
 	class IGhostRecorder *m_pGhostRecorder;
 
 	CGhostItem m_aActiveGhosts[MAX_ACTIVE_GHOSTS];
 	CGhostItem m_CurGhost;
+
+	char m_aTmpFilename[128];
 
 	int m_StartRenderTick;
 	int m_LastDeathTick;
@@ -113,6 +117,8 @@ private:
 	static void GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar);
 	static void GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter *pGhostChar);
+
+	void GetPath(char *pBuf, int Size, const char *pPlayerName, int Time = -1) const;
 
 	void AddInfos(const CNetObj_Character *pChar);
 	int GetSlot() const;

@@ -385,14 +385,13 @@ public:
 
 	const char *GetCurrentMap();
 	const char *GetCurrentMapPath();
+	unsigned GetMapCrc();
 
-	void RaceRecord_GetName(char *pBuf, int Size, int Time = -1);
-	void RaceRecord_Start();
+	void RaceRecord_Start(const char *pFilename);
 	void RaceRecord_Stop();
 	bool RaceRecord_IsRecording();
 
-	void Ghost_GetPath(char *pBuf, int Size, const char *pPlayerName, int Time = -1);
-	void GhostRecorder_Start(const char *pPlayerName, int Time = -1);
+	void GhostRecorder_Start(const char *pFilename, const char *pPlayerName);
 	bool GhostLoader_Load(const char *pFilename);
 	bool GhostLoader_GetGhostInfo(const char *pFilename, struct CGhostHeader *pGhostHeader);
 
