@@ -370,6 +370,11 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		GItem.m_ClipY = pGroup->m_ClipY;
 		GItem.m_ClipW = pGroup->m_ClipW;
 		GItem.m_ClipH = pGroup->m_ClipH;
+		if (pGroup->m_GameGroup)
+			GItem.m_ClipTrigger = 0;
+		else
+			GItem.m_ClipTrigger = pGroup->m_ClipTrigger;
+
 		GItem.m_StartLayer = LayerCount;
 		GItem.m_NumLayers = 0;
 
@@ -533,6 +538,27 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
 	mem_free(pPoints);
 
+	//Save clips
+	if (m_lClipTriggers.size())
+	{
+		for (int i = 0; i < m_lClipTriggers.size(); i++)
+		{
+			CMapItemClips Item;
+			Item.zone = m_lClipTriggers[i].zone;
+			Item.trigger = m_lClipTriggers[i].trigger;
+			Item.x = m_lClipTriggers[i].x;
+			Item.y = m_lClipTriggers[i].y;
+			Item.w = m_lClipTriggers[i].w;
+			Item.h = m_lClipTriggers[i].h;
+			Item.disable = m_lClipTriggers[i].disable;
+			Item.rewind = m_lClipTriggers[i].rewind;
+			df.AddItem(MAPITEMTYPE_CLIPS, i, sizeof(Item), &Item);
+
+		}
+	}
+
+
+	
 	// finish the data file
 	df.Finish();
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving done");
@@ -790,6 +816,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					pGroup->m_ClipY = pGItem->m_ClipY;
 					pGroup->m_ClipW = pGItem->m_ClipW;
 					pGroup->m_ClipH = pGItem->m_ClipH;
+					pGroup->m_ClipTrigger = pGItem->m_ClipTrigger;
+					//Hack reading file save in previous format, where this value was read from a different item - set to zero
+					if (pGroup->m_ClipTrigger > 255)pGroup->m_ClipTrigger = 0;
 				}
 
 				// load group name
@@ -1261,6 +1290,19 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					pEnv->m_Synchronized = pItem->m_Synchronized;
 			}
 		}
+		
+		//Load clips
+		{
+			int Start, Num;
+			DataFile.GetType(MAPITEMTYPE_CLIPS, &Start, &Num);
+			for (int i = 0; i < Num; i++)
+			{
+				CMapItemClips *pItem = (CMapItemClips *)DataFile.GetItem(Start + i, 0, 0);
+				CClipTrigger newClip = { pItem->zone, pItem->trigger, pItem->x, pItem->y, pItem->w, pItem->h, pItem->disable, pItem->rewind };
+				m_lClipTriggers.add(newClip);
+			}
+		}
+		
 	}
 	else
 		return 0;
