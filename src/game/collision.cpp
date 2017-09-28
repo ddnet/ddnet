@@ -579,6 +579,20 @@ int CCollision::IsTune(int Index)
 	return 0;
 }
 
+int CCollision::GetTune(vec2 Pos)
+{
+	if (!m_pTune) return 0;
+
+	int Nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
+	int Ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
+	int Index = Ny*m_Width + Nx;
+
+	if (m_pTune[Index].m_Type)
+		return m_pTune[Index].m_Number;
+
+	return 0;
+}
+
 void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed)
 {
 	if(Index < 0 || !m_pSpeedup)
