@@ -10,7 +10,7 @@
 #include "race.h"
 #include "race_demo.h"
 
-const char *CRaceDemo::ms_pRaceDemoDir = "demos";
+const char *CRaceDemo::ms_pRaceDemoDir = "demos/auto/race";
 
 struct CDemoItem
 {
