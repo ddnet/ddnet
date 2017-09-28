@@ -3596,22 +3596,12 @@ const char *CClient::GetCurrentMapPath()
 	return m_aCurrentMapPath;
 }
 
-void ClearFilename(char *pStr)
-{
-	while(*pStr)
-	{
-		if(*pStr == '\\' || *pStr == '/' || *pStr == '|' || *pStr == ':' || *pStr == '*' || *pStr == '?' || *pStr == '<' || *pStr == '>' || *pStr == '"')
-			*pStr = '%';
-		pStr++;
-	}
-}
-
 void CClient::RaceRecord_GetName(char *pBuf, int Size, int Time)
 {
 	// check the player name
 	char aPlayerName[MAX_NAME_LENGTH];
 	str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
-	ClearFilename(aPlayerName);
+	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
 		str_format(pBuf, Size, "%s_tmp_%d", m_aCurrentMap, pid());
@@ -3653,7 +3643,7 @@ void CClient::Ghost_GetPath(char *pBuf, int Size, const char *pPlayerName, int T
 	// check the player name
 	char aPlayerName[MAX_NAME_LENGTH];
 	str_copy(aPlayerName, pPlayerName, sizeof(aPlayerName));
-	ClearFilename(aPlayerName);
+	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
 		str_format(pBuf, Size, "ghosts/%s_%s_%08x_tmp_%d.gho", m_aCurrentMap, aPlayerName, m_pMap->Crc(), pid());

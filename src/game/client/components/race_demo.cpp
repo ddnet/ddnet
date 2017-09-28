@@ -176,14 +176,7 @@ bool CRaceDemo::CheckDemo(int Time) const
 		{
 			char aPlayerName[MAX_NAME_LENGTH];
 			str_copy(aPlayerName, g_Config.m_PlayerName, sizeof(aPlayerName));
-			char *pStr = aPlayerName;
-
-			while(*pStr)
-			{
-				if(*pStr == '\\' || *pStr == '/' || *pStr == '|' || *pStr == ':' || *pStr == '*' || *pStr == '?' || *pStr == '<' || *pStr == '>' || *pStr == '"')
-					*pStr = '%';
-				pStr++;
-			}
+			str_sanitize_filename(aPlayerName);
 
 			if(!str_find(pDemoName, aPlayerName))
 				continue;

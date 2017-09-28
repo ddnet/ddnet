@@ -2011,6 +2011,17 @@ void str_sanitize(char *str_in)
 	}
 }
 
+void str_sanitize_filename(char *str_in)
+{
+	unsigned char *str = (unsigned char *)str_in;
+	while(*str)
+	{
+		if(*str < 32 || *str == '\\' || *str == '/' || *str == '|' || *str == ':' || *str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
+			*str = ' ';
+		str++;
+	}
+}
+
 char *str_skip_to_whitespace(char *str)
 {
 	while(*str && (*str != ' ' && *str != '\t' && *str != '\n'))
