@@ -106,13 +106,7 @@ CGhostCharacter *CGhost::CGhostPath::Get(int Index)
 
 void CGhost::AddInfos(const CNetObj_Character *pChar)
 {
-	// Just to be sure it doesnt eat too much memory, the first test should be enough anyway
 	int NumTicks = m_CurGhost.m_Path.Size();
-	if(NumTicks > Client()->GameTickSpeed()/2*60*30)
-	{
-		StopRecord();
-		return;
-	}
 
 	// do not start writing to file as long as we still touch the start line
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
