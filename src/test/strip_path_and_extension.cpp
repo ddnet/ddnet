@@ -10,7 +10,7 @@ protected:
 	{
 		char aBuf[32];
 		IStorage::StripPathAndExtension(pInput, aBuf, sizeof(aBuf));
-		ASSERT_STREQ(aBuf, pOutput);
+		EXPECT_STREQ(aBuf, pOutput);
 	}
 };
 

@@ -888,11 +888,17 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND)
   set_glob(TESTS GLOB src/test
     strip_path_and_extension.cpp
+    teehistorian.cpp
+  )
+  set(TESTS_EXTRA
+    src/game/server/teehistorian.cpp
+    src/game/server/teehistorian.h
   )
 
   set(TARGET_TESTRUNNER testrunner)
   add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
     ${TESTS}
+    ${TESTS_EXTRA}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
     ${DEP_MD5}
