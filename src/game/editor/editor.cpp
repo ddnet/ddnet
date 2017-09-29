@@ -1580,7 +1580,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				m_Map.m_UndoModified++;
 
 				static int s_QuadPopupID = 0;
-				UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
+				UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 198, PopupQuad);
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -5236,10 +5236,33 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 	if (UI()->MouseInside(&FullPanel) && Input()->KeyIsPressed(KEY_MOUSE_1)) {
 		s_ClipTriggerSelectedIndex = -1;
 		if (!m_aClipTrigger.disable) {
-			m_EditorOffsetX = m_aClipTrigger.x + m_aClipTrigger.w / 2;
-			m_EditorOffsetY = m_aClipTrigger.y + m_aClipTrigger.h / 2;
+			m_WorldOffsetX = m_aClipTrigger.x + m_aClipTrigger.w / 2;
+			m_WorldOffsetY = m_aClipTrigger.y + m_aClipTrigger.h / 2;
 		}
 	}
+	
+	//Copy selected groups clip into editor panel
+	if (UI()->MouseInside(&FullPanel) && Input()->KeyPress(KEY_C)) {
+		m_aClipTrigger.x = GetSelectedGroup()->m_ClipX;
+		m_aClipTrigger.y = GetSelectedGroup()->m_ClipY;
+		m_aClipTrigger.w = GetSelectedGroup()->m_ClipW;
+		m_aClipTrigger.h = GetSelectedGroup()->m_ClipH;
+		m_aClipTrigger.trigger = GetSelectedGroup()->m_ClipTrigger;
+		m_WorldOffsetX = m_aClipTrigger.x + m_aClipTrigger.w / 2;
+		m_WorldOffsetY = m_aClipTrigger.y + m_aClipTrigger.h / 2;
+		exists = false;
+		for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) {
+			if (m_aClipTrigger == m_Map.m_lClipTriggers[i]) {
+				exists = true;
+				s_ClipTriggerSelectedIndex = i;
+				s_ScrollValue = (float)i / m_Map.m_lClipTriggers.size();
+				break;
+			}
+		}
+	}
+
+	
+
 	if (changeView) {
 		if (!m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].disable) {
 			m_EditorOffsetX = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].x + m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].w / 2;
