@@ -841,7 +841,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 		return 0;
 
 	char aFilename[256];
-	str_format(aFilename, sizeof(aFilename), "ghosts/%s", pName);
+	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_pGhost->GetGhostDir(), pName);
 
 	CGhostHeader Header;
 	if(!pSelf->Client()->GhostLoader_GetGhostInfo(aFilename, &Header))
@@ -860,7 +860,7 @@ void CMenus::GhostlistPopulate()
 {
 	CGhostItem *pOwnGhost = 0;
 	m_lGhosts.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "ghosts", GhostlistFetchCallback, this);
+	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_pGhost->GetGhostDir(), GhostlistFetchCallback, this);
 
 	for(int i = 0; i < m_lGhosts.size(); i++)
 	{

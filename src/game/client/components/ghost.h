@@ -146,10 +146,11 @@ public:
 	int FreeSlot() const;
 	int Load(const char *pFilename);
 	void Unload(int Slot);
-
 	void UnloadAll();
 
 	void SaveGhost(CMenus::CGhostItem *pItem);
+
+	const char *GetGhostDir() const { return ms_pGhostDir; }
 
 	class IGhostLoader *GhostLoader() const { return m_pGhostLoader; }
 	class IGhostRecorder *GhostRecorder() const { return m_pGhostRecorder; }
