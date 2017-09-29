@@ -546,6 +546,63 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		pEditor->m_Map.m_Modified = true;
 		return 1;
 	}
+	
+	// Order Buttons
+	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_Button1 = 0;
+	static int s_Button2 = 0;
+	static int s_Button3 = 0;
+	static int s_Button4 = 0;
+	CUIRect miniButton;
+
+	Button.VSplitLeft(Button.w / 4, &miniButton, &Button);
+	if (pEditor->DoButton_ButtonDec(&s_Button1, "Back", 0, &miniButton, 0, "Push Quad to the back"))
+	{
+		plain_range<CQuad> pl = plain_range<CQuad>(&pLayer->m_lQuads[0], &pLayer->m_lQuads[pLayer->m_lQuads.size() - 1]);
+		pl.index(0);
+		CQuad *q = &(pLayer->m_lQuads[pEditor->m_SelectedQuad]);
+		CQuad n;
+		n = *q;
+		pLayer->m_lQuads.remove_index(pEditor->m_SelectedQuad);
+		pLayer->m_lQuads.insert(n, pl);
+		pEditor->m_SelectedQuad = 0;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
+	}
+
+	Button.VSplitLeft(Button.w / 3, &miniButton, &Button);
+	if (pEditor->DoButton_Ex(&s_Button2, "-", 0, &miniButton, 0, "Push Quad backwards by 1",0) && pEditor->m_SelectedQuad > 0)
+	{
+		CQuad temp = pLayer->m_lQuads[pEditor->m_SelectedQuad];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad] = pLayer->m_lQuads[pEditor->m_SelectedQuad - 1];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad - 1] = temp;
+		pEditor->m_SelectedQuad--;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
+	}
+
+	Button.VSplitLeft(Button.w / 2, &miniButton, &Button);
+	if (pEditor->DoButton_Ex(&s_Button3, "+", 0, &miniButton, 0, "Bring Quad forwards by 1",0) && pEditor->m_SelectedQuad < pLayer->m_lQuads.size() - 1)
+	{
+		CQuad temp = pLayer->m_lQuads[pEditor->m_SelectedQuad];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad] = pLayer->m_lQuads[pEditor->m_SelectedQuad + 1];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad + 1] = temp;
+		pEditor->m_SelectedQuad++;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
+	}
+
+
+	if (pEditor->DoButton_ButtonInc(&s_Button4, "Front", 0, &Button, 0, "Bring Quad to the front"))
+	{
+		CQuad temp = pLayer->m_lQuads[pEditor->m_SelectedQuad];
+		pLayer->m_lQuads.remove_index(pEditor->m_SelectedQuad);
+		pLayer->m_lQuads.add(temp);
+		pEditor->m_SelectedQuad = pLayer->m_lQuads.size() - 1;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
+	}
 
 
 	enum
