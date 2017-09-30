@@ -5071,6 +5071,8 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 					m_Map.m_lClipTriggers[i].h = m_aClipTrigger.h;
 					m_Map.m_lClipTriggers[i].disable = m_aClipTrigger.disable;
 					m_Map.m_lClipTriggers[i].rewind = m_aClipTrigger.rewind;
+					s_ScrollValue = (float)i / m_Map.m_lClipTriggers.size();
+					s_ClipTriggerSelectedIndex = i;
 					break;
 				}
 			}
@@ -5170,7 +5172,7 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 			else
 				str_format(aBuf, sizeof(aBuf), "Zone: %d   Trigger: %d   X: %d   Y: %d   W: %d   H: %d   Rewind? %s", m_Map.m_lClipTriggers[i].zone, m_Map.m_lClipTriggers[i].trigger, m_Map.m_lClipTriggers[i].x, m_Map.m_lClipTriggers[i].y, m_Map.m_lClipTriggers[i].w, m_Map.m_lClipTriggers[i].h, m_Map.m_lClipTriggers[i].rewind ? "Yes" : "No");
 
-			if (DoButton_MenuItem(&m_Map.m_lClipTriggers[i], aBuf, s_ClipTriggerSelectedIndex == i, &Button, 0, "Click to highlight clip area. Click twice to copy values into interface")) {
+			if (DoButton_MenuItem(&m_Map.m_lClipTriggers[i], aBuf, s_ClipTriggerSelectedIndex == i, &Button, 0, "Click to highlight clip area. Click twice to copy values into interface. While selected, press NumPad-/+ to reorder")) {
 				changeView = true;
 				if (s_ClipTriggerSelectedIndex == i) {
 					m_aClipTrigger.zone = m_Map.m_lClipTriggers[i].zone;
@@ -5200,6 +5202,7 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 
 	if (g_Config.m_ClEditorClipDraw >= 1) {
 		CEditorMap::CClipTrigger previewClip = m_aClipTrigger;
+		if (previewClip.disable)continue;
 		if (s_ClipTriggerSelectedIndex == -1)
 			DrawClipBox(previewClip, vec4(0, 1, 0, 1), vec4(0, 0.5f, 0, 0.2f));
 		else
@@ -5248,8 +5251,10 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 		m_aClipTrigger.w = GetSelectedGroup()->m_ClipW;
 		m_aClipTrigger.h = GetSelectedGroup()->m_ClipH;
 		m_aClipTrigger.trigger = GetSelectedGroup()->m_ClipTrigger;
-		m_WorldOffsetX = m_aClipTrigger.x + m_aClipTrigger.w / 2;
-		m_WorldOffsetY = m_aClipTrigger.y + m_aClipTrigger.h / 2;
+		if (m_aClipTrigger.w > 1 && m_aClipTrigger.h > 1) {
+			m_WorldOffsetX = m_aClipTrigger.x + m_aClipTrigger.w / 2;
+			m_WorldOffsetY = m_aClipTrigger.y + m_aClipTrigger.h / 2;
+		}
 		exists = false;
 		for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) {
 			if (m_aClipTrigger == m_Map.m_lClipTriggers[i]) {
@@ -5265,11 +5270,31 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 
 	if (changeView) {
 		if (!m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].disable) {
-			m_EditorOffsetX = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].x + m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].w / 2;
-			m_EditorOffsetY = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].y + m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].h / 2;
+			if (m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].w > 0 && m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].h > 0) {
+				m_EditorOffsetX = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].x + m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].w / 2;
+				m_EditorOffsetY = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].y + m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex].h / 2;
+			}
 		}
+	}
+	
+	
+	if (s_ClipTriggerSelectedIndex > 0 && Input()->KeyPress(KEY_KP_MINUS)) {
+		CEditorMap::CClipTrigger temp = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex] = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex - 1];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex - 1] = temp;
+		s_ClipTriggerSelectedIndex--;
+		s_ScrollValue = (float)s_ClipTriggerSelectedIndex / m_Map.m_lClipTriggers.size();
 
 	}
+	if (s_ClipTriggerSelectedIndex < m_Map.m_lClipTriggers.size() - 1 && Input()->KeyPress(KEY_KP_PLUS)) {
+		CEditorMap::CClipTrigger temp = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex] = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex + 1];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex + 1] = temp;
+		s_ClipTriggerSelectedIndex++;
+		s_ScrollValue = (float)s_ClipTriggerSelectedIndex / m_Map.m_lClipTriggers.size();
+	}
+
+
 
 
 
