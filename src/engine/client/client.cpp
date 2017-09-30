@@ -2884,6 +2884,7 @@ void CClient::Run()
 	GameClient()->OnShutdown();
 	Disconnect();
 
+	delete m_pEditor;
 	m_pGraphics->Shutdown();
 
 	// shutdown SDL
@@ -3492,7 +3493,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer), false);
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor());
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
 
