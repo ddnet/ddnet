@@ -428,56 +428,55 @@ void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int dis
 				pGroup->m_ClipW = w;
 				pGroup->m_ClipH = h;
 				pGroup->m_UseClipping = true;
+			}
 
-				if (!rewind) continue;
-				for (int l = 0; l < pGroup->m_NumLayers; l++)
+			if (!rewind) continue;
+			for (int l = 0; l < pGroup->m_NumLayers; l++)
+			{
+				CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
+
+				//// skip adjustment if detail layers if not wanted
+
+				//if (pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail)
+				//	continue;
+				if (pLayer->m_Type == LAYERTYPE_TILES)
 				{
-					CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
+					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+					pTMap->m_ColorEnvOffset = Client()->LocalTime() * -1000;
+				}
+				else if (pLayer->m_Type == LAYERTYPE_QUADS)
+				{
+					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
+					CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
 
-					//// skip adjustment if detail layers if not wanted
-
-					//if (pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail)
-					//	continue;
-					if (pLayer->m_Type == LAYERTYPE_TILES)
+					for (int q = 0; q < pQLayer->m_NumQuads; q++)
 					{
-						CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-						pTMap->m_ColorEnvOffset = Client()->LocalTime() * -1000;
+						CQuad *quad = &pQuads[q];
+						quad->m_ColorEnvOffset = Client()->LocalTime()*-1000;
+						quad->m_PosEnvOffset = Client()->LocalTime() * -1000;
 					}
-					else if (pLayer->m_Type == LAYERTYPE_QUADS)
+				}
+				else if (pLayer->m_Type == LAYERTYPE_SOUNDS)
+				{
+					//I have never used sounds so i have no idea if this is right
+					CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
+					if (pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+						continue;
+					if (pSoundLayer->m_Sound == -1)
+						continue;
+
+					CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
+					if (!pSources)
+						continue;
+
+					for (int s = 0; s < pSoundLayer->m_NumSources; s++)
 					{
-						CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-						CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
-
-						for (int q = 0; q < pQLayer->m_NumQuads; q++)
-						{
-							CQuad *quad = &pQuads[q];
-							quad->m_ColorEnvOffset = Client()->LocalTime()*-1000;
-							quad->m_PosEnvOffset = Client()->LocalTime() * -1000;
-						}
-					}
-					else if (pLayer->m_Type == LAYERTYPE_SOUNDS)
-					{
-						//I have never used sounds so i have no idea if this is right
-						CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
-						if (pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
-							continue;
-						if (pSoundLayer->m_Sound == -1)
-							continue;
-
-						CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
-						if (!pSources)
-							continue;
-
-						for (int s = 0; s < pSoundLayer->m_NumSources; s++)
-						{
-							CSoundSource *snd = &pSources[s];
-							snd->m_PosEnvOffset = Client()->LocalTime() * -1000;
-							snd->m_SoundEnvOffset = Client()->LocalTime() * -1000;
-						}
+						CSoundSource *snd = &pSources[s];
+						snd->m_PosEnvOffset = Client()->LocalTime() * -1000;
+						snd->m_SoundEnvOffset = Client()->LocalTime() * -1000;
 					}
 				}
 			}
 		}
-
 	}
 }
