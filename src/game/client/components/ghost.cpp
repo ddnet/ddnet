@@ -6,8 +6,9 @@
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 
+#include <game/client/race.h>
+
 #include "players.h"
-#include "race.h"
 #include "skins.h"
 #include "menus.h"
 #include "ghost.h"

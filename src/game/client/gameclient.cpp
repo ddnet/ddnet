@@ -23,6 +23,7 @@
 #include <game/extrainfo.h>
 #include <game/localization.h>
 #include <game/version.h>
+#include "race.h"
 #include "render.h"
 
 #include "gameclient.h"
@@ -59,7 +60,6 @@
 #include "components/voting.h"
 
 #include <base/system.h>
-#include "components/race.h"
 #include "components/race_demo.h"
 #include "components/ghost.h"
 #include <base/tl/sorted_array.h>

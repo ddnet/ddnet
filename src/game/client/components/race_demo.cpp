@@ -7,7 +7,8 @@
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 
-#include "race.h"
+#include <game/client/race.h>
+
 #include "race_demo.h"
 
 const char *CRaceDemo::ms_pRaceDemoDir = "demos/auto/race";
