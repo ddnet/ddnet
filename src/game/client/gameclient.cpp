@@ -1341,6 +1341,9 @@ void CGameClient::OnNewSnapshot()
 		// update state
 		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
+
+	m_pGhost->OnNewSnapshot();
+	m_pRaceDemo->OnNewSnapshot();
 }
 
 void CGameClient::OnPredict()
@@ -1796,6 +1799,9 @@ void CGameClient::OnPredict()
 	}
 
 	m_PredictedTick = Client()->PredGameTick();
+
+	if(m_NewPredictedTick)
+		m_pGhost->OnNewSnapshot(true);
 }
 
 void CGameClient::OnActivateEditor()

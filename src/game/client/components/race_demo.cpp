@@ -48,15 +48,14 @@ void CRaceDemo::OnStateChange(int NewState, int OldState)
 		StopRecord();
 }
 
-void CRaceDemo::OnRender()
+void CRaceDemo::OnNewSnapshot()
 {
-	if(!g_Config.m_ClAutoRaceRecord || !m_pClient->m_Snap.m_pGameInfoObj || !m_pClient->m_Snap.m_pLocalCharacter || Client()->State() != IClient::STATE_ONLINE)
-		return;
-
-	// only for race
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo) || !m_pClient->m_NewTick)
+	if(!IsRace(&ServerInfo) || !g_Config.m_ClAutoRaceRecord || Client()->State() != IClient::STATE_ONLINE)
+		return;
+
+	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
 
 	static int s_LastRaceTick = -1;
@@ -117,20 +116,11 @@ void CRaceDemo::OnReset()
 
 void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(!g_Config.m_ClAutoRaceRecord || m_pClient->m_Snap.m_SpecInfo.m_Active || Client()->State() != IClient::STATE_ONLINE)
-		return;
-
-	// only for race
-	CServerInfo ServerInfo;
-	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo))
-		return;
-
 	// check for messages from server
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
-		if(pMsg->m_Victim == m_pClient->m_Snap.m_LocalClientID)
+		if(pMsg->m_Victim == m_pClient->m_Snap.m_LocalClientID && Client()->RaceRecord_IsRecording())
 			StopRecord(m_Time);
 	}
 	else if(MsgType == NETMSGTYPE_SV_CHAT)

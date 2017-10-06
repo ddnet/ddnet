@@ -95,7 +95,7 @@ private:
 		{
 			m_Path.Reset();
 			m_StartTick = -1;
-			m_PlaybackPos = 0;
+			m_PlaybackPos = -1;
 		}
 	};
 
@@ -109,6 +109,7 @@ private:
 
 	char m_aTmpFilename[128];
 
+	int m_NewRenderTick;
 	int m_StartRenderTick;
 	int m_LastDeathTick;
 	bool m_Recording;
@@ -142,6 +143,8 @@ public:
 	virtual void OnReset();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnMapLoad();
+
+	void OnNewSnapshot(bool Predicted = false);
 
 	int FreeSlot() const;
 	int Load(const char *pFilename);
