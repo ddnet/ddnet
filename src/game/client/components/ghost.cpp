@@ -203,6 +203,8 @@ void CGhost::OnNewSnapshot(bool Predicted)
 		{
 			if(m_Recording && s_LastRaceTick != -1)
 				m_AllowRestart = true;
+			if(s_LastRaceTick == -1)
+				m_NewRenderTick = -1;
 			if(GhostRecorder()->IsRecording())
 				GhostRecorder()->Stop(0, -1);
 			int StartTick = RaceTick;
