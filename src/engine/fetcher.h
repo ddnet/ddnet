@@ -5,38 +5,8 @@
 #include "kernel.h"
 #include "stddef.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include "curl/curl.h"
-
-class CFetchTask;
-
-typedef void (*PROGFUNC)(CFetchTask *pTask, void *pUser);
-typedef void (*COMPFUNC)(CFetchTask *pDest, void *pUser);
-
-class CFetchTask
+class IFetchTask
 {
-	friend class CFetcher;
-	class CFetcher *m_pFetcher;
-
-	CJob m_Job;
-	CURL *m_pHandle;
-	void *m_pUser;
-
-	char m_aUrl[256];
-	char m_aDest[128];
-	int m_StorageType;
-	bool m_UseDDNetCA;
-	bool m_CanTimeout;
-
-	PROGFUNC m_pfnProgressCallback;
-	COMPFUNC m_pfnCompCallback;
-
-	double m_Size;
-	double m_Current;
-	int m_Progress;
-	int m_State;
-
-	bool m_Abort;
 public:
 	enum
 	{
@@ -47,21 +17,27 @@ public:
 		STATE_ABORTED,
 	};
 
-	double Current() const { return m_Current; };
-	double Size() const { return m_Size; };
-	int Progress() const { return m_Progress; };
-	int State() const { return m_State; };
-	const char *Dest() const { return m_aDest; };
+	virtual ~IFetchTask() {};
 
-	void Abort() { m_Abort = true; };
+	virtual double Current() = 0;
+	virtual double Size() = 0;
+	virtual int Progress() = 0;
+	virtual int State() = 0;
+	virtual const char *Dest() = 0;
+	virtual void Abort() = 0;
+
+	virtual void Destroy() = 0;
 };
+
+typedef void (*PROGFUNC)(IFetchTask *pTask, void *pUser);
+typedef void (*COMPFUNC)(IFetchTask *pDest, void *pUser);
 
 class IFetcher : public IInterface
 {
 	MACRO_INTERFACE("fetcher", 0)
 public:
 	virtual bool Init() = 0;
-	virtual void FetchFile(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
+	virtual IFetchTask *FetchFile(const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0) = 0;
 	virtual void Escape(char *pBud, size_t size, const char *pStr) = 0;
 };
 

@@ -126,7 +126,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdConnect[256];
 
 	// map download
-	CFetchTask *m_pMapdownloadTask;
+	IFetchTask *m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadName[256];
 	IOHANDLE m_MapdownloadFile;
@@ -135,7 +135,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadAmount;
 	int m_MapdownloadTotalsize;
 
-	CFetchTask *m_pDDNetInfoTask;
+	IFetchTask *m_pDDNetInfoTask;
 
 	// time
 	CSmoothTime m_GameTime[2];
@@ -300,7 +300,7 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
-	virtual CFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
+	virtual IFetchTask *MapDownloadTask() { return m_pMapdownloadTask; }
 	virtual const char *MapDownloadName() { return m_aMapdownloadName; }
 	virtual int MapDownloadAmount() { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
 	virtual int MapDownloadTotalsize() { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }

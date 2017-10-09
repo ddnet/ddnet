@@ -1517,8 +1517,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 						str_append(aUrl, aEscaped, sizeof(aUrl));
 
-						m_pMapdownloadTask = new CFetchTask;
-						Fetcher()->FetchFile(m_pMapdownloadTask, aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
+						m_pMapdownloadTask = Fetcher()->FetchFile(aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
 					}
 					else
 						SendMapRequest();
@@ -2089,7 +2088,7 @@ void CClient::ResetMapDownload()
 	if(m_pMapdownloadTask)
 	{
 		m_pMapdownloadTask->Abort();
-		delete m_pMapdownloadTask;
+		m_pMapdownloadTask->Destroy();
 		m_pMapdownloadTask = NULL;
 	}
 	m_MapdownloadFile = 0;
@@ -2135,7 +2134,7 @@ void CClient::ResetDDNetInfo()
 	if(m_pDDNetInfoTask)
 	{
 		m_pDDNetInfoTask->Abort();
-		delete m_pDDNetInfoTask;
+		m_pDDNetInfoTask->Destroy();
 		m_pDDNetInfoTask = NULL;
 	}
 }
@@ -2476,33 +2475,33 @@ void CClient::Update()
 
 	if(m_pMapdownloadTask)
 	{
-		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
+		if(m_pMapdownloadTask->State() == IFetchTask::STATE_DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
+		else if(m_pMapdownloadTask->State() == IFetchTask::STATE_ERROR)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
 			SendMapRequest();
 		}
-		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
+		else if(m_pMapdownloadTask->State() == IFetchTask::STATE_ABORTED)
 		{
-			delete m_pMapdownloadTask;
+			m_pMapdownloadTask->Destroy();
 			m_pMapdownloadTask = NULL;
 		}
 	}
 
 	if(m_pDDNetInfoTask)
 	{
-		if(m_pDDNetInfoTask->State() == CFetchTask::STATE_DONE)
+		if(m_pDDNetInfoTask->State() == IFetchTask::STATE_DONE)
 			FinishDDNetInfo();
-		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ERROR)
+		else if(m_pDDNetInfoTask->State() == IFetchTask::STATE_ERROR)
 		{
 			dbg_msg("ddnet-info", "download failed");
 			ResetDDNetInfo();
 		}
-		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ABORTED)
+		else if(m_pDDNetInfoTask->State() == IFetchTask::STATE_ABORTED)
 		{
-			delete m_pDDNetInfoTask;
+			m_pDDNetInfoTask->Destroy();
 			m_pDDNetInfoTask = NULL;
 		}
 	}
@@ -3644,8 +3643,7 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = new CFetchTask;
-	Fetcher()->FetchFile(m_pDDNetInfoTask, aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
+	m_pDDNetInfoTask = Fetcher()->FetchFile(aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
 }
 
 int CClient::GetPredictionTime()
