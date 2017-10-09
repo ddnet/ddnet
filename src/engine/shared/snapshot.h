@@ -74,6 +74,7 @@ private:
 	void UndiffItem(int *pPast, int *pDiff, int *pOut, int Size);
 
 public:
+	static int DiffItem(int *pPast, int *pCurrent, int *pOut, int Size);
 	CSnapshotDelta();
 	int GetDataRate(int Index) { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) { return m_aSnapshotDataUpdates[Index]; }

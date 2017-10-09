@@ -809,6 +809,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	memset(&pThis->m_aClients[ClientID].m_Addr, 0, sizeof(NETADDR));
 	pThis->m_aClients[ClientID].Reset();
+	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	return 0;
 }
 
@@ -860,6 +861,9 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aPrevStates[ClientID] = CClient::STATE_EMPTY;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
+
+	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
+
 	return 0;
 }
 
@@ -868,6 +872,13 @@ void CServer::SendRconType(int ClientID, bool UsernameReq)
 	CMsgPacker Msg(NETMSG_RCONTYPE);
 	Msg.AddInt(UsernameReq);
 	SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
+}
+
+void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, int *pMapCrc)
+{
+	str_copy(pMapName, GetMapName(), MapNameSize);
+	*pMapSize = m_CurrentMapSize;
+	*pMapCrc = m_CurrentMapCrc;
 }
 
 void CServer::SendMap(int ClientID)
@@ -1051,7 +1062,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				// reserved slot
-				if(ClientID >= (g_Config.m_SvMaxClients - g_Config.m_SvReservedSlots) && g_Config.m_SvReservedSlotsPass[0] != 0 && strcmp(g_Config.m_SvReservedSlotsPass, pPassword) != 0)
+				if(ClientID >= (g_Config.m_SvMaxClients - g_Config.m_SvReservedSlots) && g_Config.m_SvReservedSlotsPass[0] != 0 && str_comp(g_Config.m_SvReservedSlotsPass, pPassword) != 0)
 				{
 					m_NetServer.Drop(ClientID, "This server is full");
 					return;
@@ -1603,7 +1614,9 @@ void CServer::PumpNetwork()
 			}
 		}
 		else
+		{
 			ProcessClientPacket(&Packet);
+		}
 	}
 
 	m_ServerBan.Update();
@@ -2596,18 +2609,18 @@ void CServer::RegisterCommands()
 
 #if defined (CONF_SQL)
 
-	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver");
+	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
 	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 
 #endif
 
 	Console()->Register("dnsbl_status", "", CFGFLAG_SERVER, ConDnsblStatus, this, "List blacklisted players");
 
-	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER, ConAuthAdd, this, "Add a rcon key");
-	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER, ConAuthAddHashed, this, "Add a prehashed rcon key");
-	Console()->Register("auth_change", "s[ident] s[level] s[pw]", CFGFLAG_SERVER, ConAuthUpdate, this, "Update a rcon key");
-	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data");
-	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER, ConAuthRemove, this, "Remove a rcon key");
+	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
+	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAddHashed, this, "Add a prehashed rcon key");
+	Console()->Register("auth_change", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdate, this, "Update a rcon key");
+	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data");
+	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key");
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);

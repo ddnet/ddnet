@@ -165,10 +165,11 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 			{
 				char *pVictim = 0;
 
-				if (Command != 'v')
-					pResult->AddArgument(pStr);
-				else
+				pResult->AddArgument(pStr);
+				if(Command != 'v')
+				{
 					pVictim = pStr;
+				}
 
 				if(Command == 'r') // rest of the string
 					break;
@@ -187,8 +188,10 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pStr++;
 				}
 
-				if (pVictim)
+				if(pVictim)
+				{
 					pResult->SetVictim(pVictim);
+				}
 			}
 		}
 		// fetch next command
@@ -256,6 +259,12 @@ void CConsole::Print(int Level, const char *pFrom, const char *pStr, bool Highli
 			m_aPrintCB[i].m_pfnPrintCallback(aBuf, m_aPrintCB[i].m_pPrintCallbackUserdata, Highlighted);
 		}
 	}
+}
+
+void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnTeeHistorianCommandCallback = pfnCallback;
+	m_pTeeHistorianCommandUserdata = pUser;
 }
 
 bool CConsole::LineIsValid(const char *pStr)
@@ -407,27 +416,29 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					}
 					else
 					{
-						if(Result.GetVictim() == CResult::VICTIM_ME)
-							Result.SetVictim(ClientID);
-
 						if(pCommand->m_Flags&CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
 							return;
 
-						if (Result.HasVictim())
+						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags&CFGFLAG_NONTEEHISTORIC))
 						{
-							if(Result.GetVictim() == CResult::VICTIM_ALL)
+							m_pfnTeeHistorianCommandCallback(ClientID, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
+						}
+
+						if(Result.GetVictim() == CResult::VICTIM_ME)
+							Result.SetVictim(ClientID);
+
+						if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+						{
+							for (int i = 0; i < MAX_CLIENTS; i++)
 							{
-								for (int i = 0; i < MAX_CLIENTS; i++)
-								{
-									Result.SetVictim(i);
-									pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
-								}
-							}
-							else
+								Result.SetVictim(i);
 								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+							}
 						}
 						else
+						{
 							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+						}
 
 						if (pCommand->m_Flags&CMDFLAG_TEST)
 							m_Cheated = true;
@@ -805,6 +816,8 @@ CConsole::CConsole(int FlagMask)
 	m_pFirstExec = 0;
 	mem_zero(m_aPrintCB, sizeof(m_aPrintCB));
 	m_NumPrintCB = 0;
+	m_pfnTeeHistorianCommandCallback = 0;
+	m_pTeeHistorianCommandUserdata = 0;
 
 	m_pStorage = 0;
 

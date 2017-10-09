@@ -21,6 +21,7 @@ struct CUuid
 	bool operator!=(const CUuid &Other);
 };
 
+CUuid RandomUuid();
 CUuid CalculateUuid(const char *pName);
 void FormatUuid(CUuid Uuid, char *pBuffer, unsigned BufferLength);
 

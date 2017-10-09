@@ -56,6 +56,7 @@ void CGameContext::Construct(int Resetting)
 	}
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
+	m_TeeHistorianActive = false;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -99,6 +100,21 @@ void CGameContext::Clear()
 	m_Tuning = Tuning;
 }
 
+
+void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	io_write(pSelf->m_TeeHistorianFile, pData, DataSize);
+}
+
+void CGameContext::CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	if(pSelf->m_TeeHistorianActive)
+	{
+		pSelf->m_TeeHistorian.RecordConsoleCommand(ClientID, FlagMask, pCmd, pResult);
+	}
+}
 
 class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 {
@@ -586,12 +602,42 @@ void CGameContext::OnTick()
 	// check tuning
 	CheckPureTuning();
 
+	if(m_TeeHistorianActive)
+	{
+		if(!m_TeeHistorian.Starting())
+		{
+			m_TeeHistorian.EndInputs();
+			m_TeeHistorian.EndTick();
+		}
+		m_TeeHistorian.BeginTick(Server()->Tick());
+		m_TeeHistorian.BeginPlayers();
+	}
+
 	// copy tuning
 	m_World.m_Core.m_Tuning[0] = m_Tuning;
 	m_World.Tick();
 
 	//if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
+
+	if(m_TeeHistorianActive)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
+			{
+				CNetObj_CharacterCore Char;
+				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char);
+				m_TeeHistorian.RecordPlayer(i, &Char);
+			}
+			else
+			{
+				m_TeeHistorian.RecordDeadPlayer(i);
+			}
+		}
+		m_TeeHistorian.EndPlayers();
+		m_TeeHistorian.BeginInputs();
+	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -806,6 +852,11 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 {
 	if(!m_World.m_Paused)
 		m_apPlayers[ClientID]->OnDirectInput((CNetObj_PlayerInput *)pInput);
+
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
+	}
 }
 
 void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
@@ -997,6 +1048,10 @@ void CGameContext::OnClientConnected(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
+	if(m_TeeHistorianActive)
+	{
+		io_flush(m_TeeHistorianFile);
+	}
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
 	delete m_apPlayers[ClientID];
@@ -1020,10 +1075,31 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	}
 }
 
+void CGameContext::OnClientEngineJoin(int ClientID)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerJoin(ClientID);
+	}
+}
+
+void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerDrop(ClientID, pReason);
+	}
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
 	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
+	}
 
 	if(!pRawMsg)
 	{
@@ -2396,9 +2472,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
-	//Console()->Register("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams");
-	//Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams");
-	//Console()->Register("lock_teams", "", CFGFLAG_SERVER, ConLockTeams, this, "Lock/unlock teams");
 
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
 	Console()->Register("remove_vote", "s[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
@@ -2408,10 +2481,10 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include "game/ddracecommands.h"
-#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
-#include "ddracechat.h"
+	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+	#include <game/ddracecommands.h>
+	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+	#include "ddracechat.h"
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
@@ -2420,6 +2493,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
+
+	m_GameUuid = RandomUuid();
+	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 
 	DeleteTempfile();
 
@@ -2487,6 +2563,52 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);
 
 	LoadMapSettings();
+
+	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
+	if(m_TeeHistorianActive)
+	{
+		char aGameUuid[UUID_MAXSTRSIZE];
+		FormatUuid(m_GameUuid, aGameUuid, sizeof(aGameUuid));
+
+		char aFilename[64];
+		str_format(aFilename, sizeof(aFilename), "teehistorian/%s.teehistorian", aGameUuid);
+
+		m_TeeHistorianFile = Kernel()->RequestInterface<IStorage>()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		if(!m_TeeHistorianFile)
+		{
+			dbg_msg("teehistorian", "failed to open '%s'", aFilename);
+			exit(1);
+		}
+		else
+		{
+			dbg_msg("teehistorian", "recording to '%s'", aFilename);
+		}
+
+		char aVersion[128];
+#ifdef GIT_SHORTREV_HASH
+		str_format(aVersion, sizeof(aVersion), "%s (%s)", GAME_VERSION, GIT_SHORTREV_HASH);
+#else
+		str_format(aVersion, sizeof(aVersion), "%s", GAME_VERSION);
+#endif
+		CTeeHistorian::CGameInfo GameInfo;
+		GameInfo.m_GameUuid = m_GameUuid;
+		GameInfo.m_pServerVersion = aVersion;
+		GameInfo.m_StartTime = time(0);
+
+		GameInfo.m_pServerName = g_Config.m_SvName;
+		GameInfo.m_ServerPort = g_Config.m_SvPort;
+		GameInfo.m_pGameType = m_pController->m_pGameType;
+
+		GameInfo.m_pConfig = &g_Config;
+		GameInfo.m_pTuning = Tuning();
+
+		char aMapName[128];
+		Server()->GetMapInfo(aMapName, sizeof(aMapName), &GameInfo.m_MapSize, &GameInfo.m_MapCrc);
+		GameInfo.m_pMapName = aMapName;
+
+		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
+		io_flush(m_TeeHistorianFile);
+	}
 
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
@@ -2782,6 +2904,12 @@ void CGameContext::OnShutdown(bool FullShutdown)
 {
 	if (FullShutdown)
 		Score()->OnShutdown();
+
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.Finish();
+		io_close(m_TeeHistorianFile);
+	}
 
 	DeleteTempfile();
 	Console()->ResetServerGameSettings();

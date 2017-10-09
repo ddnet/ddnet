@@ -46,6 +46,9 @@ public:
 	const char *GetString(int SanitizeType = SANITIZE);
 	const unsigned char *GetRaw(int Size);
 	bool Error() const { return m_Error; }
+
+	int CompleteSize() const { return m_pEnd - m_pStart; }
+	const unsigned char *CompleteData() const { return m_pStart; }
 };
 
 #endif

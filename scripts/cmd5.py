@@ -33,4 +33,4 @@ hash = hashlib.md5(f).hexdigest().lower()[16:]
 if hash == "3dc531e4296de555":
 	hash = "626fce9a778df4d4"
 print('#define GAME_NETVERSION_HASH "%s"' % hash)
-print('#define GIT_SHORTREV_HASH "%s"' % os.popen('git rev-parse HEAD').readline(8))
+print('#define GIT_SHORTREV_HASH "%s"' % os.popen('git rev-parse --short HEAD').readline().strip())
