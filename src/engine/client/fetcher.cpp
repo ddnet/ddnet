@@ -37,11 +37,11 @@ class CFetchTask : public IFetchTask
 	bool m_Destroy;
 
 public:
-	virtual double Current() { return m_Current; };
-	virtual double Size() { return m_Size; };
-	virtual int Progress() { return m_Progress; };
-	virtual int State() { return m_State; };
-	virtual const char *Dest() { return m_aDest; };
+	virtual double Current() { return m_Current; }
+	virtual double Size() { return m_Size; }
+	virtual int Progress() { return m_Progress; }
+	virtual int State() { return m_State; }
+	virtual const char *Dest() { return m_aDest; }
 
 	virtual void Abort() { m_Abort = true; };
 	virtual void Destroy();
@@ -50,8 +50,11 @@ public:
 void CFetchTask::Destroy()
 {
 	if(m_State >= IFetchTask::STATE_DONE || m_State == IFetchTask::STATE_ERROR)
+	{
 		delete this;
-	else {
+	}
+	else
+	{
 		m_Abort = true;
 		m_Destroy = true;
 	}
