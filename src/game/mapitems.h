@@ -30,6 +30,7 @@ enum
 	MAPITEMTYPE_ENVPOINTS,
 	MAPITEMTYPE_SOUND,
 	MAPITEMTYPE_CLIPS,
+	MAPITEMTYPE_TRIGGERS,
 
 
 	CURVETYPE_STEP=0,
@@ -267,7 +268,6 @@ struct CMapItemGroup : public CMapItemGroup_v1
 	int m_ClipH;
 
 	int m_aName[3];
-	int m_ClipTrigger;
 } ;
 
 struct CMapItemLayer
@@ -416,14 +416,19 @@ struct CMapItemSound
 
 struct CMapItemClips
 {
-	int zone;
-	int trigger;
-	int x;
-	int y;
-	int w;
-	int h;
-	int disable;
-	int rewind;
+	int m_Zone;
+	int m_Trigger;
+	int m_X;
+	int m_Y;
+	int m_W;
+	int m_H;
+	int m_Disable;
+	int m_Rewind;
+};
+struct CMapItemTriggers
+{
+	int m_Group;
+	int m_Trigger;
 };
 
 

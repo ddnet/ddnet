@@ -584,9 +584,9 @@ void CGameClient::UpdatePositions()
 		for (int i = 0; i < Num; i++) {
 			CMapItemClips *pItem = (CMapItemClips *)pMap->GetItem(Start + i, 0, 0);
 
-			if (pItem->zone == zone) {
+			if (pItem->m_Zone == zone) {
 				//m_pMapLayersBackGround->ChangeClipping(pItem->trigger, pItem->x, pItem->y, pItem->w, pItem->h);
-				m_pMapLayersForeGround->ChangeClipping(pItem->trigger, pItem->x, pItem->y, pItem->w, pItem->h, pItem->disable, pItem->rewind);
+				m_pMapLayersForeGround->ChangeClipping(pItem->m_Trigger, pItem->m_X, pItem->m_Y, pItem->m_W, pItem->m_H, pItem->m_Disable, pItem->m_Rewind);
 			}
 		}
 	}

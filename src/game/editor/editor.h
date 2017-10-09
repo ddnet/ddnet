@@ -390,20 +390,27 @@ public:
 	array<CSetting> m_lSettings;
 
 	struct CClipTrigger {
-		int zone, trigger, x, y, w, h, disable, rewind;
+		int m_Zone; 
+		int m_Trigger; 
+		int m_X;
+		int m_Y; 
+		int m_W; 
+		int m_H;
+		int m_Disable;
+		int m_Rewind;
 		void Reset() {
-			zone = 1;
-			trigger = 1;
-			x = 0;
-			y = 0;
-			w = 128;
-			h = 128;
-			disable = 0;
-			rewind = 1;
+			m_Zone = 1;
+			m_Trigger = 1;
+			m_X = 0;
+			m_Y = 0;
+			m_W = 128;
+			m_H = 128;
+			m_Disable = 0;
+			m_Rewind = 1;
 
 		}
 		bool operator == (CClipTrigger other) {
-			return zone == other.zone && trigger == other.trigger;
+			return m_Zone == other.m_Zone && m_Trigger == other.m_Trigger;
 		}
 	};
 	array<CClipTrigger> m_lClipTriggers;

@@ -412,10 +412,17 @@ void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int dis
 			dbg_msg("maplayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
 			continue;
 		}
-		//If map loaded from old format it probably has bad value here
-		if (pGroup->m_ClipTrigger > 255) continue;
 
-		if (!g_Config.m_GfxNoclip && pGroup->m_Version >= 2 && (pGroup->m_ClipTrigger == trigger || (pGroup->m_ClipTrigger > 0 && trigger == -1)))
+		//get group trigger number
+		int tStart, tNum, groupTrigger = -2;
+
+		m_pLayers->Map()->GetType(MAPITEMTYPE_TRIGGERS, &tStart, &tNum);
+		if (tNum > 0) {
+			CMapItemTriggers *pTrigger = (CMapItemTriggers *)m_pLayers->Map()->GetItem(tStart + g, 0, 0);
+			groupTrigger = pTrigger->m_Trigger;
+		}
+
+		if (!g_Config.m_GfxNoclip && pGroup->m_Version >= 2 && (groupTrigger == trigger || (groupTrigger > 0 && trigger == -1)))
 		{
 
 			if (disable) {
