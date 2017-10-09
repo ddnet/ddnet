@@ -17,6 +17,8 @@ public:
 		STATE_ABORTED,
 	};
 
+	virtual ~IFetchTask() {};
+
 	virtual double Current() = 0;
 	virtual double Size() = 0;
 	virtual int Progress() = 0;

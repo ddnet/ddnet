@@ -37,11 +37,11 @@ class CFetchTask : public IFetchTask
 	bool m_Destroy;
 
 public:
-	virtual double Current() const { return m_Current; };
-	virtual double Size() const { return m_Size; };
-	virtual int Progress() const { return m_Progress; };
-	virtual int State() const { return m_State; };
-	virtual const char *Dest() const { return m_aDest; };
+	virtual double Current() { return m_Current; };
+	virtual double Size() { return m_Size; };
+	virtual int Progress() { return m_Progress; };
+	virtual int State() { return m_State; };
+	virtual const char *Dest() { return m_aDest; };
 
 	virtual void Abort() { m_Abort = true; };
 	virtual void Destroy();
@@ -50,7 +50,7 @@ public:
 void CFetchTask::Destroy()
 {
 	if(m_State >= IFetchTask::STATE_DONE || m_State == IFetchTask::STATE_ERROR)
-		mem_free(this);
+		delete this;
 	else {
 		m_Abort = true;
 		m_Destroy = true;
@@ -75,7 +75,7 @@ void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
 
 IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int StorageType, bool UseDDNetCA, bool CanTimeout, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
 {
-	CFetchTask *pTask = (CFetchTask *)mem_alloc(sizeof *pTask, 1);
+	CFetchTask *pTask = new CFetchTask;
 	pTask->m_pFetcher = this;
 
 	str_copy(pTask->m_aUrl, pUrl, sizeof(pTask->m_aUrl));
@@ -176,7 +176,7 @@ int CFetcher::FetcherThread(void *pUser)
 		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
 
 	if(pTask->m_Destroy)
-		mem_free(pTask);
+		delete pTask;
 
 	return(ret != CURLE_OK) ? 1 : 0;
 }
