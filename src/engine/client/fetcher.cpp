@@ -34,6 +34,7 @@ class CFetchTask : IFetchTask
 	int m_State;
 
 	bool m_Abort;
+	bool m_Destroy;
 public:
 
 	double Current() const { return m_Current; };
@@ -43,8 +44,18 @@ public:
 	const char *Dest() const { return m_aDest; };
 
 	void Abort() { m_Abort = true; };
-	void Destroy() { mem_free(this); };
+	void Destroy();
 };
+
+void CFetchTask::Destroy()
+{
+	if(m_State >= IFetchTask::STATE_DONE || m_State == IFetchTask::STATE_ERROR)
+		mem_free(this);
+	else {
+		m_Abort = true;
+		m_Destroy = true;
+	}
+}
 
 bool CFetcher::Init()
 {
@@ -75,6 +86,7 @@ IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int Storage
 	pTask->m_pfnProgressCallback = pfnProgCb;
 
 	pTask->m_Abort = false;
+	pTask->m_Destroy = false;
 	pTask->m_Size = pTask->m_Progress = 0;
 
 	pTask->m_State = IFetchTask::STATE_QUEUED;
@@ -162,6 +174,9 @@ int CFetcher::FetcherThread(void *pUser)
 
 	if(pTask->m_pfnCompCallback)
 		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
+
+	if(pTask->m_Destroy)
+		mem_free(pTask);
 
 	return(ret != CURLE_OK) ? 1 : 0;
 }
