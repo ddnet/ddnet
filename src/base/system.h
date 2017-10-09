@@ -388,7 +388,7 @@ void *thread_init(void (*threadfunc)(void *), void *user);
 void thread_wait(void *thread);
 
 /*
-	Function: thread_yeild
+	Function: thread_yield
 		Yield the current threads execution slice.
 */
 void thread_yield();

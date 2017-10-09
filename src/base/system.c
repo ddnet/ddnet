@@ -157,7 +157,7 @@ void dbg_msg_thread(void *v)
 void dbg_enable_threaded()
 {
 	Queue *q;
-	void *Thread;
+	void *thread;
 
 	q = &log_queue;
 	q->begin = 0;
@@ -168,8 +168,8 @@ void dbg_enable_threaded()
 
 	dbg_msg_threaded = 1;
 
-	Thread = thread_init(dbg_msg_thread, 0);
-	thread_detach(Thread);
+	thread = thread_init(dbg_msg_thread, 0);
+	thread_detach(thread);
 }
 
 void dbg_msg(const char *sys, const char *fmt, ...)
@@ -495,7 +495,10 @@ void *thread_init(void (*threadfunc)(void *), void *u)
 {
 #if defined(CONF_FAMILY_UNIX)
 	pthread_t id;
-	pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u);
+	if(pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u) != 0)
+	{
+		return 0;
+	}
 	return (void*)id;
 #elif defined(CONF_FAMILY_WINDOWS)
 	return CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)threadfunc, u, 0, NULL);
@@ -512,6 +515,7 @@ void thread_wait(void *thread)
 		dbg_msg("thread", "!! %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	WaitForSingleObject((HANDLE)thread, INFINITE);
+	CloseHandle(thread);
 #else
 	#error not implemented
 #endif
@@ -629,7 +633,7 @@ void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
 void sphore_init(SEMAPHORE *sem)
 {
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
 }
 void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
@@ -638,7 +642,7 @@ void sphore_destroy(SEMAPHORE *sem)
 {
 	char aBuf[64];
 	sem_close(*sem);
-	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
 	sem_unlink(aBuf);
 }
 #elif defined(CONF_FAMILY_UNIX)

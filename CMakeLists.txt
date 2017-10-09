@@ -893,6 +893,7 @@ if(GTEST_FOUND)
   set_glob(TESTS GLOB src/test
     strip_path_and_extension.cpp
     teehistorian.cpp
+    thread.cpp
   )
   set(TESTS_EXTRA
     src/game/server/teehistorian.cpp
