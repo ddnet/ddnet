@@ -18,7 +18,7 @@
 #include <engine/keys.h>
 #include <engine/console.h>
 
-#include <math.h> // cosf, sinf
+#include <math.h> // cosf, sinf, log2f
 
 #include "graphics_threaded.h"
 
@@ -879,7 +879,15 @@ void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, ch
 	Cmd.m_IndicesDrawNum = NumIndicesOffet;
 	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	Cmd.m_ZoomScreenRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+	float ScreenZoomRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * 1.f/ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	//5 because log2(1024/(2^5)) is 5 -- 1024/(2^6) = 32 which would mean 2 pixels per tile index
+	if(LOD > 5) LOD = 5;
+	if(LOD < 0) LOD = 0;
+	Cmd.m_LOD = LOD;
 
 	void* Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
 	if(Data == 0x0)
@@ -935,7 +943,14 @@ void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char
 	Cmd.m_DrawNum = DrawNum;
 	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	Cmd.m_ZoomScreenRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+	float ScreenZoomRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * 1.f/ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	if(LOD > 5) LOD = 5;
+	if(LOD < 0) LOD = 0;
+	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pOffset;
 	Cmd.m_JumpIndex = JumpIndex;
@@ -969,7 +984,14 @@ void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float* pColor, 
 	Cmd.m_DrawNum = RedrawNum;
 	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
-	Cmd.m_ZoomScreenRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+	float ScreenZoomRatio = (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x) / ScreenWidth();
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * 1.f/ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	if(LOD > 5) LOD = 5;
+	if(LOD < 0) LOD = 0;
+	Cmd.m_LOD = LOD;
 
 	Cmd.m_pIndicesOffset = pOffset;
 	

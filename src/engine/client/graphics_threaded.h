@@ -252,7 +252,7 @@ public:
 		
 		int m_IndicesDrawNum;
 		int m_VisualObjectIDX;
-		float m_ZoomScreenRatio;
+		int m_LOD;
 	};
 	
 	struct SCommand_RenderBorderTile : public SCommand
@@ -263,7 +263,7 @@ public:
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_VisualObjectIDX;
-		float m_ZoomScreenRatio;
+		int m_LOD;
 		
 		float m_Offset[2];
 		float m_Dir[2];
@@ -279,7 +279,7 @@ public:
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
 		int m_VisualObjectIDX;
-		float m_ZoomScreenRatio;
+		int m_LOD;
 		
 		float m_Dir[2];
 	};

@@ -621,7 +621,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pTileProgram->m_LocIsTextured = -1;
 		m_pTileProgram->m_LocTextureSampler = -1;
 		m_pTileProgram->m_LocColor = m_pTileProgram->GetUniformLoc("vertColor");
-		m_pTileProgram->m_LocZoomFactor = -1;
+		m_pTileProgram->m_LocLOD = -1;
 	}
 	{
 		CGLSL VertexShader;
@@ -640,7 +640,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pTileProgramTextured->m_LocIsTextured = -1;
 		m_pTileProgramTextured->m_LocTextureSampler = m_pTileProgramTextured->GetUniformLoc("textureSampler");
 		m_pTileProgramTextured->m_LocColor = m_pTileProgramTextured->GetUniformLoc("vertColor");
-		m_pTileProgramTextured->m_LocZoomFactor = m_pTileProgramTextured->GetUniformLoc("ZoomFactor");
+		m_pTileProgramTextured->m_LocLOD = m_pTileProgramTextured->GetUniformLoc("LOD");
 	}
 	{
 		CGLSL VertexShader;
@@ -659,7 +659,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileProgram->m_LocIsTextured = -1;
 		m_pBorderTileProgram->m_LocTextureSampler = -1;
 		m_pBorderTileProgram->m_LocColor = m_pBorderTileProgram->GetUniformLoc("vertColor");
-		m_pBorderTileProgram->m_LocZoomFactor = -1;
+		m_pBorderTileProgram->m_LocLOD = -1;
 		m_pBorderTileProgram->m_LocOffset = m_pBorderTileProgram->GetUniformLoc("Offset");
 		m_pBorderTileProgram->m_LocDir = m_pBorderTileProgram->GetUniformLoc("Dir");
 		m_pBorderTileProgram->m_LocJumpIndex = m_pBorderTileProgram->GetUniformLoc("JumpIndex");
@@ -681,7 +681,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileProgramTextured->m_LocIsTextured = -1;
 		m_pBorderTileProgramTextured->m_LocTextureSampler = m_pBorderTileProgramTextured->GetUniformLoc("textureSampler");
 		m_pBorderTileProgramTextured->m_LocColor = m_pBorderTileProgramTextured->GetUniformLoc("vertColor");
-		m_pBorderTileProgramTextured->m_LocZoomFactor = m_pBorderTileProgramTextured->GetUniformLoc("ZoomFactor");
+		m_pBorderTileProgramTextured->m_LocLOD = m_pBorderTileProgramTextured->GetUniformLoc("LOD");
 		m_pBorderTileProgramTextured->m_LocOffset = m_pBorderTileProgramTextured->GetUniformLoc("Offset");
 		m_pBorderTileProgramTextured->m_LocDir = m_pBorderTileProgramTextured->GetUniformLoc("Dir");
 		m_pBorderTileProgramTextured->m_LocJumpIndex = m_pBorderTileProgramTextured->GetUniformLoc("JumpIndex");
@@ -703,7 +703,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileLineProgram->m_LocIsTextured = -1;
 		m_pBorderTileLineProgram->m_LocTextureSampler = -1;
 		m_pBorderTileLineProgram->m_LocColor = m_pBorderTileLineProgram->GetUniformLoc("vertColor");
-		m_pBorderTileLineProgram->m_LocZoomFactor = -1;
+		m_pBorderTileLineProgram->m_LocLOD = -1;
 		m_pBorderTileLineProgram->m_LocDir = m_pBorderTileLineProgram->GetUniformLoc("Dir");
 	}
 	{
@@ -723,7 +723,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pBorderTileLineProgramTextured->m_LocIsTextured = -1;
 		m_pBorderTileLineProgramTextured->m_LocTextureSampler = m_pBorderTileLineProgramTextured->GetUniformLoc("textureSampler");
 		m_pBorderTileLineProgramTextured->m_LocColor = m_pBorderTileLineProgramTextured->GetUniformLoc("vertColor");
-		m_pBorderTileLineProgramTextured->m_LocZoomFactor = m_pBorderTileLineProgramTextured->GetUniformLoc("ZoomFactor");
+		m_pBorderTileLineProgramTextured->m_LocLOD = m_pBorderTileLineProgramTextured->GetUniformLoc("LOD");
 		m_pBorderTileLineProgramTextured->m_LocDir = m_pBorderTileLineProgramTextured->GetUniformLoc("Dir");
 	}
 	
@@ -926,7 +926,14 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	{
 		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		gluBuild2DMipmaps(GL_TEXTURE_2D, StoreOglformat, Width, Height, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		//prevent mipmap display bugs, when zooming out far
+		if(Width >= 1024 && Height >= 1024)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5);
+		}
+		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	
 	//this is the initial value for the wrap modes
@@ -1166,7 +1173,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuf
 	}
 	else pProgram = m_pBorderTileProgram;
 	pProgram->UseProgram();
-	if(pProgram->m_LocZoomFactor != -1) pProgram->SetUniform(pProgram->m_LocZoomFactor, (float)(pCommand->m_ZoomScreenRatio < .5f ? .5f : pCommand->m_ZoomScreenRatio));
+	if(pProgram->m_LocLOD != -1) pProgram->SetUniform(pProgram->m_LocLOD, (float)(pCommand->m_LOD));
 	
 	SetState(pCommand->m_State, pProgram);
 	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);
@@ -1197,7 +1204,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CComman
 	}
 	else pProgram = m_pBorderTileLineProgram;
 	pProgram->UseProgram();
-	if(pProgram->m_LocZoomFactor != -1) pProgram->SetUniform(pProgram->m_LocZoomFactor, (float)(pCommand->m_ZoomScreenRatio < .5f ? .5f : pCommand->m_ZoomScreenRatio));
+	if(pProgram->m_LocLOD != -1) pProgram->SetUniform(pProgram->m_LocLOD, (float)(pCommand->m_LOD));
 	
 	SetState(pCommand->m_State, pProgram);
 	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);	
@@ -1231,7 +1238,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderVertexArray(const CCommandBu
 	else pProgram = m_pTileProgram;
 	
 	pProgram->UseProgram();
-	if(pProgram->m_LocZoomFactor != -1) pProgram->SetUniform(pProgram->m_LocZoomFactor, (float)(pCommand->m_ZoomScreenRatio < .5f ? .5f : pCommand->m_ZoomScreenRatio));
+	if(pProgram->m_LocLOD != -1) pProgram->SetUniform(pProgram->m_LocLOD, (float)(pCommand->m_LOD));
 	
 	SetState(pCommand->m_State, pProgram);
 	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);

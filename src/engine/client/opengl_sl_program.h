@@ -58,7 +58,7 @@ public:
 class CGLSLTileProgram : public CGLSLTWProgram {
 public:
 	int m_LocColor;
-	int m_LocZoomFactor;
+	int m_LocLOD;
 };
 
 class CGLSLBorderTileProgram : public CGLSLTileProgram {
