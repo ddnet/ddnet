@@ -32,14 +32,14 @@ void CUpdater::Init()
 	#endif
 }
 
-void CUpdater::ProgressCallback(CFetchTask *pTask, void *pUser)
+void CUpdater::ProgressCallback(IFetchTask *pTask, void *pUser)
 {
 	CUpdater *pUpdate = (CUpdater *)pUser;
 	str_copy(pUpdate->m_Status, pTask->Dest(), sizeof(pUpdate->m_Status));
 	pUpdate->m_Percent = pTask->Progress();
 }
 
-void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
+void CUpdater::CompletionCallback(IFetchTask *pTask, void *pUser)
 {
 	CUpdater *pUpdate = (CUpdater *)pUser;
 	const char *b = 0;
@@ -49,19 +49,19 @@ void CUpdater::CompletionCallback(CFetchTask *pTask, void *pUser)
 	b = b ? b : pTask->Dest();
 	if(!str_comp(b, "update.json"))
 	{
-		if(pTask->State() == CFetchTask::STATE_DONE)
+		if(pTask->State() == IFetchTask::STATE_DONE)
 			pUpdate->m_State = GOT_MANIFEST;
-		else if(pTask->State() == CFetchTask::STATE_ERROR)
+		else if(pTask->State() == IFetchTask::STATE_ERROR)
 			pUpdate->m_State = FAIL;
 	}
 	else if(!str_comp(b, pUpdate->m_aLastFile))
 	{
-		if(pTask->State() == CFetchTask::STATE_DONE)
+		if(pTask->State() == IFetchTask::STATE_DONE)
 			pUpdate->m_State = MOVE_FILES;
-		else if(pTask->State() == CFetchTask::STATE_ERROR)
+		else if(pTask->State() == IFetchTask::STATE_ERROR)
 			pUpdate->m_State = FAIL;
 	}
-	delete pTask;
+	pTask->Destroy();
 }
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
@@ -71,8 +71,7 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 	if(!pDestPath)
 		pDestPath = pFile;
 	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);
-	CFetchTask *Task = new CFetchTask;
-	m_pFetcher->FetchFile(Task, aBuf, aPath, -2, true, false, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pFetcher->FetchFile(aBuf, aPath, -2, true, false, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
 }
 
 void CUpdater::MoveFile(const char *pFile)

@@ -10,6 +10,42 @@
 
 #include "fetcher.h"
 
+class CFetchTask : IFetchTask
+{
+	friend class CFetcher;
+	class CFetcher *m_pFetcher;
+
+	CJob m_Job;
+	CURL *m_pHandle;
+	void *m_pUser;
+
+	char m_aUrl[256];
+	char m_aDest[128];
+	int m_StorageType;
+	bool m_UseDDNetCA;
+	bool m_CanTimeout;
+
+	PROGFUNC m_pfnProgressCallback;
+	COMPFUNC m_pfnCompCallback;
+
+	double m_Size;
+	double m_Current;
+	int m_Progress;
+	int m_State;
+
+	bool m_Abort;
+public:
+
+	double Current() const { return m_Current; };
+	double Size() const { return m_Size; };
+	int Progress() const { return m_Progress; };
+	int State() const { return m_State; };
+	const char *Dest() const { return m_aDest; };
+
+	void Abort() { m_Abort = true; };
+	void Destroy() { mem_free(this); };
+};
+
 bool CFetcher::Init()
 {
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -26,8 +62,9 @@ void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
 	curl_free(pEsc);
 }
 
-void CFetcher::FetchFile(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType, bool UseDDNetCA, bool CanTimeout, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
+IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int StorageType, bool UseDDNetCA, bool CanTimeout, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
 {
+	CFetchTask *pTask = (CFetchTask *)mem_alloc(sizeof *pTask, 1);
 	pTask->m_pFetcher = this;
 
 	str_copy(pTask->m_aUrl, pUrl, sizeof(pTask->m_aUrl));
@@ -40,8 +77,10 @@ void CFetcher::FetchFile(CFetchTask *pTask, const char *pUrl, const char *pDest,
 	pTask->m_Abort = false;
 	pTask->m_Size = pTask->m_Progress = 0;
 
-	pTask->m_State = CFetchTask::STATE_QUEUED;
+	pTask->m_State = IFetchTask::STATE_QUEUED;
 	m_pEngine->AddJob(&pTask->m_Job, FetcherThread, pTask);
+
+	return pTask;
 }
 
 int CFetcher::FetcherThread(void *pUser)
@@ -66,7 +105,7 @@ int CFetcher::FetcherThread(void *pUser)
 	if(!File)
 	{
 		dbg_msg("fetcher", "i/o error, cannot open file: %s", pTask->m_aDest);
-		pTask->m_State = CFetchTask::STATE_ERROR;
+		pTask->m_State = IFetchTask::STATE_ERROR;
 		return 1;
 	}
 
@@ -105,18 +144,18 @@ int CFetcher::FetcherThread(void *pUser)
 	curl_easy_setopt(pTask->m_pHandle, CURLOPT_USERAGENT, "DDNet " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
 
 	dbg_msg("fetcher", "downloading %s", pTask->m_aDest);
-	pTask->m_State = CFetchTask::STATE_RUNNING;
+	pTask->m_State = IFetchTask::STATE_RUNNING;
 	int ret = curl_easy_perform(pTask->m_pHandle);
 	io_close(File);
 	if(ret != CURLE_OK)
 	{
 		dbg_msg("fetcher", "task failed. libcurl error: %s", aErr);
-		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? CFetchTask::STATE_ABORTED : CFetchTask::STATE_ERROR;
+		pTask->m_State = (ret == CURLE_ABORTED_BY_CALLBACK) ? IFetchTask::STATE_ABORTED : IFetchTask::STATE_ERROR;
 	}
 	else
 	{
 		dbg_msg("fetcher", "task done %s", pTask->m_aDest);
-		pTask->m_State = CFetchTask::STATE_DONE;
+		pTask->m_State = IFetchTask::STATE_DONE;
 	}
 
 	curl_easy_cleanup(pTask->m_pHandle);

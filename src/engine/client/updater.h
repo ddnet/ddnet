@@ -63,8 +63,8 @@ class CUpdater : public IUpdater
 
 public:
 	CUpdater();
-	static void ProgressCallback(CFetchTask *pTask, void *pUser);
-	static void CompletionCallback(CFetchTask *pTask, void *pUser);
+	static void ProgressCallback(IFetchTask *pTask, void *pUser);
+	static void CompletionCallback(IFetchTask *pTask, void *pUser);
 
 	int GetCurrentState() { return m_State; };
 	char *GetCurrentFile() { return m_Status; };

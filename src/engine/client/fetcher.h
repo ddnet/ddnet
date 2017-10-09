@@ -12,7 +12,7 @@ private:
 public:
 	virtual bool Init();
 
-	virtual void FetchFile(CFetchTask *pTask, const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
+	virtual IFetchTask *FetchFile(const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
 	virtual void Escape(char *pBud, size_t size, const char *pStr);
 
 	static int FetcherThread(void *pUser);
