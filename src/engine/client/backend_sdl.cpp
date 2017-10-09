@@ -530,7 +530,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		if(pProgram->m_LocIsTextured != -1) pProgram->SetUniform(pProgram->m_LocIsTextured, (int)1);
 		pProgram->SetUniform(pProgram->m_LocTextureSampler, (int)Slot);
 
-		if(m_TextureSlotBoundToUnit[Slot].m_LastWrapMode != State.m_WrapMode)
+		if(m_aTextures[State.m_Texture].m_LastWrapMode != State.m_WrapMode)
 		{
 			switch (State.m_WrapMode)
 			{
@@ -545,7 +545,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 			default:
 				dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
 			};
-			m_TextureSlotBoundToUnit[Slot].m_LastWrapMode = State.m_WrapMode;
+			m_aTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
 		}
 	}
 	else 
@@ -751,7 +751,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	for(int i = 0; i < m_MaxTextureUnits; ++i)
 	{
 		m_TextureSlotBoundToUnit[i].m_TextureSlot = -1;
-		m_TextureSlotBoundToUnit[i].m_LastWrapMode = -1;
 	}
 	
 	glGenBuffers(1, &m_QuadDrawIndexBufferID);
@@ -839,7 +838,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuff
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindSampler(Slot, 0);
 	m_TextureSlotBoundToUnit[Slot].m_TextureSlot = -1;
-	m_TextureSlotBoundToUnit[Slot].m_LastWrapMode = -1;
 	DestroyTexture(pCommand->m_Slot);
 }
 
@@ -920,8 +918,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)
 	{
-		glTexParameteri(m_aTextures[pCommand->m_Slot].m_Tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(m_aTextures[pCommand->m_Slot].m_Tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
@@ -932,6 +928,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		gluBuild2DMipmaps(GL_TEXTURE_2D, StoreOglformat, Width, Height, Oglformat, GL_UNSIGNED_BYTE, pTexData);
 	}
+	
+	//this is the initial value for the wrap modes
+	m_aTextures[pCommand->m_Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	// calculate memory usage
 	m_aTextures[pCommand->m_Slot].m_MemSize = Width*Height*pCommand->m_PixelSize;
@@ -1079,7 +1078,6 @@ bool CCommandProcessorFragment_OpenGL3_3::IsAndUpdateTextureSlotBound(int IDX, i
 	{
 		//the texture slot uses this index now
 		m_TextureSlotBoundToUnit[IDX].m_TextureSlot = Slot;
-		m_TextureSlotBoundToUnit[IDX].m_LastWrapMode = -1;
 		return false;
 	}
 }
