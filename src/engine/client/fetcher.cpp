@@ -10,7 +10,7 @@
 
 #include "fetcher.h"
 
-class CFetchTask : IFetchTask
+class CFetchTask : public IFetchTask
 {
 	friend class CFetcher;
 	class CFetcher *m_pFetcher;
@@ -35,16 +35,16 @@ class CFetchTask : IFetchTask
 
 	bool m_Abort;
 	bool m_Destroy;
+
 public:
+	virtual double Current() const { return m_Current; };
+	virtual double Size() const { return m_Size; };
+	virtual int Progress() const { return m_Progress; };
+	virtual int State() const { return m_State; };
+	virtual const char *Dest() const { return m_aDest; };
 
-	double Current() const { return m_Current; };
-	double Size() const { return m_Size; };
-	int Progress() const { return m_Progress; };
-	int State() const { return m_State; };
-	const char *Dest() const { return m_aDest; };
-
-	void Abort() { m_Abort = true; };
-	void Destroy();
+	virtual void Abort() { m_Abort = true; };
+	virtual void Destroy();
 };
 
 void CFetchTask::Destroy()
