@@ -1586,9 +1586,12 @@ void CMapLayers::OnRender()
 					else
 					{
 						Graphics()->BlendNormal();
-						// draw arrow
+						
+						// draw arrow -- clamp to the edge of the arrow image
+						Graphics()->WrapClamp();
 						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
-						RenderTileLayer(TileLayerCounter-3, &Color, pTMap, pGroup);						
+						RenderTileLayer(TileLayerCounter-3, &Color, pTMap, pGroup);	
+						Graphics()->WrapNormal();
 						if(g_Config.m_ClTextEntities)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
