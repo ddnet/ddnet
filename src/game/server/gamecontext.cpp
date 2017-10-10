@@ -2564,6 +2564,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	LoadMapSettings();
 
+	m_pController = new CGameControllerDDRace(this);
+	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
+
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
 	if(m_TeeHistorianActive)
 	{
@@ -2609,9 +2612,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
 		io_flush(m_TeeHistorianFile);
 	}
-
-	m_pController = new CGameControllerDDRace(this);
-	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
 
 	if(g_Config.m_SvSoloServer)
 	{
