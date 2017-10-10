@@ -891,6 +891,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 
 if(GTEST_FOUND)
   set_glob(TESTS GLOB src/test
+    async.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
     thread.cpp

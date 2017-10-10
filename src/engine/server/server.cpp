@@ -2684,10 +2684,6 @@ int main(int argc, const char **argv) // ignore_convention
 		}
 	}
 
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(FUZZING)
-	dbg_enable_threaded();
-#endif
-
 	if(secure_random_init() != 0)
 	{
 		dbg_msg("secure", "could not initialize secure RNG");
@@ -2764,6 +2760,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// free
 	delete pKernel;
+
 	return 0;
 }
 
