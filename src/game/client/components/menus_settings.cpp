@@ -909,6 +909,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static int s_GfxTextureQuality = g_Config.m_GfxTextureQuality;
 	static int s_GfxTextureCompression = g_Config.m_GfxTextureCompression;
+	static int s_GfxOpenGLVersion = g_Config.m_GfxForceOldOpenGL;
+	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
+	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
 
 	CUIRect ModeList;
 	MainView.VSplitLeft(300.0f, &MainView, &ModeList);
@@ -1030,6 +1033,30 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
 
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_GfxForceOldOpenGL, Localize("Use OpenGL 3.3 (experimental)"), g_Config.m_GfxForceOldOpenGL^1, &Button))
+	{
+		CheckSettings = true;
+		g_Config.m_GfxForceOldOpenGL ^= 1;
+	}
+
+	if(g_Config.m_GfxForceOldOpenGL == 0)
+	{
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_GfxUsePreinitBuffer, Localize("Preinit VBO (iGPUs only)"), g_Config.m_GfxUsePreinitBuffer, &Button))
+		{
+			CheckSettings = true;
+			g_Config.m_GfxUsePreinitBuffer ^= 1;
+		}
+
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_GfxEnableTextureUnitOptimization, Localize("Multiple texture units (disable for MacOS)"), g_Config.m_GfxEnableTextureUnitOptimization, &Button))
+		{
+			CheckSettings = true;
+			g_Config.m_GfxEnableTextureUnitOptimization ^= 1;
+		}
+	}
+	
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
@@ -1039,7 +1066,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_GfxVsync == g_Config.m_GfxVsync &&
 			s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 			s_GfxTextureQuality == g_Config.m_GfxTextureQuality &&
-			s_GfxTextureCompression == g_Config.m_GfxTextureCompression)
+			s_GfxTextureCompression == g_Config.m_GfxTextureCompression &&
+			s_GfxOpenGLVersion == g_Config.m_GfxForceOldOpenGL &&
+			s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
+			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization)
 			m_NeedRestartGraphics = false;
 		else
 			m_NeedRestartGraphics = true;
