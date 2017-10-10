@@ -22,6 +22,7 @@ script:
 - make package_default
 - cd ..
 - if [ "$TRAVIS_OS_NAME" != "osx" ]; then mkdir build_debug; cd build_debug; cmake -Werror=dev -DGTEST_LIBRARY=../gtest_build/libgtest.a -DGTEST_MAIN_LIBRARY=../gtest_build/libgtest_main.a -DCMAKE_BUILD_TYPE=Debug ..; make run_tests; cd ..; fi
+- build/DDNet-Server shutdown
 env:
   global:
   - CFLAGS="-Wdeclaration-after-statement -Werror"
