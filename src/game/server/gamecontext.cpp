@@ -104,7 +104,7 @@ void CGameContext::Clear()
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
-	io_write(pSelf->m_TeeHistorianFile, pData, DataSize);
+	async_write(pSelf->m_pTeeHistorianFile, pData, DataSize);
 }
 
 void CGameContext::CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser)
@@ -604,6 +604,13 @@ void CGameContext::OnTick()
 
 	if(m_TeeHistorianActive)
 	{
+		int Error = async_error(m_pTeeHistorianFile);
+		if(Error)
+		{
+			dbg_msg("teehistorian", "error writing to file, err=%d", Error);
+			exit(1);
+		}
+
 		if(!m_TeeHistorian.Starting())
 		{
 			m_TeeHistorian.EndInputs();
@@ -1048,10 +1055,6 @@ void CGameContext::OnClientConnected(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
-	if(m_TeeHistorianActive)
-	{
-		io_flush(m_TeeHistorianFile);
-	}
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
 	delete m_apPlayers[ClientID];
@@ -2573,8 +2576,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		char aFilename[64];
 		str_format(aFilename, sizeof(aFilename), "teehistorian/%s.teehistorian", aGameUuid);
 
-		m_TeeHistorianFile = Kernel()->RequestInterface<IStorage>()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-		if(!m_TeeHistorianFile)
+		IOHANDLE File = Kernel()->RequestInterface<IStorage>()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		if(!File)
 		{
 			dbg_msg("teehistorian", "failed to open '%s'", aFilename);
 			exit(1);
@@ -2583,6 +2586,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		{
 			dbg_msg("teehistorian", "recording to '%s'", aFilename);
 		}
+		m_pTeeHistorianFile = async_new(File);
 
 		char aVersion[128];
 #ifdef GIT_SHORTREV_HASH
@@ -2607,7 +2611,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_pMapName = aMapName;
 
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
-		io_flush(m_TeeHistorianFile);
 	}
 
 	m_pController = new CGameControllerDDRace(this);
@@ -2908,7 +2911,15 @@ void CGameContext::OnShutdown(bool FullShutdown)
 	if(m_TeeHistorianActive)
 	{
 		m_TeeHistorian.Finish();
-		io_close(m_TeeHistorianFile);
+		async_close(m_pTeeHistorianFile);
+		async_wait(m_pTeeHistorianFile);
+		int Error = async_error(m_pTeeHistorianFile);
+		if(Error)
+		{
+			dbg_msg("teehistorian", "error closing file, err=%d", Error);
+			exit(1);
+		}
+		async_free(m_pTeeHistorianFile);
 	}
 
 	DeleteTempfile();

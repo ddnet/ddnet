@@ -64,7 +64,7 @@ class CGameContext : public IGameServer
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
-	IOHANDLE m_TeeHistorianFile;
+	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
