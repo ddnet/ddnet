@@ -728,7 +728,10 @@ void async_wait(ASYNCIO *aio)
 	lock_wait(aio->lock);
 	thread = aio->thread;
 	aio->thread = 0;
-	aio->finish = ASYNCIO_EXIT;
+	if(aio->finish == ASYNCIO_RUNNING)
+	{
+		aio->finish = ASYNCIO_EXIT;
+	}
 	lock_unlock(aio->lock);
 	sphore_signal(&aio->sphore);
 	thread_wait(thread);
