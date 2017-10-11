@@ -5125,7 +5125,7 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 		{
 			for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) {
 				if (m_aClipTrigger == m_Map.m_lClipTriggers[i]) {
-					strcpy(m_Map.m_lClipTriggers[i].m_aName, m_aClipTrigger.m_aName);
+					mem_copy(m_Map.m_lClipTriggers[i].m_aName, m_aClipTrigger.m_aName, sizeof(m_aClipTrigger.m_aName));
 					m_Map.m_lClipTriggers[i].m_X = m_aClipTrigger.m_X;
 					m_Map.m_lClipTriggers[i].m_Y = m_aClipTrigger.m_Y;
 					m_Map.m_lClipTriggers[i].m_W = m_aClipTrigger.m_W;
