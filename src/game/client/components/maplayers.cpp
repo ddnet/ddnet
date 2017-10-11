@@ -835,13 +835,11 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 		//create the indice buffers we want to draw -- reuse them
 		static std::vector<char*> s_IndexOffsets;
 		static std::vector<unsigned int> s_DrawCounts;
-		static unsigned long long s_MaxRes = (s_IndexOffsets.max_size() > s_DrawCounts.max_size() ? s_DrawCounts.max_size() : s_IndexOffsets.max_size());
 		
 		s_IndexOffsets.clear();
 		s_DrawCounts.clear();
 		
 		unsigned long long Reserve = absolute(Y1 - Y0) + 1;
-		if(Reserve > s_MaxRes) Reserve = s_MaxRes;
 		s_IndexOffsets.reserve(Reserve);
 		s_DrawCounts.reserve(Reserve);
 		
