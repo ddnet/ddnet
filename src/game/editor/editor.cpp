@@ -27,6 +27,7 @@
 
 #include "auto_map.h"
 #include "editor.h"
+#include <string.h>
 
 const char* vanillaImages[] = {"bg_cloud1", "bg_cloud2", "bg_cloud3",
 	"desert_doodads", "desert_main", "desert_mountains", "desert_mountains2",
