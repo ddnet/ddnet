@@ -5239,6 +5239,7 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 				changeView = true;
 				if (s_ClipTriggerSelectedIndex == i)
 				{
+					mem_copy(m_aClipTrigger.m_aName, m_Map.m_lClipTriggers[i].m_aName, sizeof(m_Map.m_lClipTriggers[i].m_aName));
 					strcpy(m_aClipTrigger.m_aName, m_Map.m_lClipTriggers[i].m_aName);
 					m_aClipTrigger.m_Zone = m_Map.m_lClipTriggers[i].m_Zone;
 					m_aClipTrigger.m_Trigger = m_Map.m_lClipTriggers[i].m_Trigger;
