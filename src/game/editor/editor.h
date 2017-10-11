@@ -401,7 +401,7 @@ public:
 		int m_Rewind;
 		void Reset() 
 		{
-			memset(&m_aName[0], 0, sizeof(m_aName));
+			mem_zero(&m_aName[0], sizeof(m_aName));
 			m_Zone = 1;
 			m_Trigger = 1;
 			m_X = 0;

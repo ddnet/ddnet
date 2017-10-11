@@ -27,7 +27,6 @@
 
 #include "auto_map.h"
 #include "editor.h"
-#include <string.h>
 
 const char* vanillaImages[] = {"bg_cloud1", "bg_cloud2", "bg_cloud3",
 	"desert_doodads", "desert_main", "desert_mountains", "desert_mountains2",
@@ -5229,7 +5228,7 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 			Button.VSplitLeft(5.0f, 0, &Button);
 
 			char aBuf[128];
-			bool unnamed = strcmp(m_Map.m_lClipTriggers[i].m_aName, "") == 0;
+			bool unnamed = str_comp(m_Map.m_lClipTriggers[i].m_aName, "") == 0;
 
 			if (m_Map.m_lClipTriggers[i].m_Disable)
 				str_format(aBuf, sizeof(aBuf), "{ Zone: %d   Trigger: %d   Disables Clipping Area   Rewind? %s }   \"%s\"", m_Map.m_lClipTriggers[i].m_Zone, m_Map.m_lClipTriggers[i].m_Trigger, m_Map.m_lClipTriggers[i].m_Rewind ? "Yes" : "No", unnamed ? "Unnamed Clip" : m_Map.m_lClipTriggers[i].m_aName);
