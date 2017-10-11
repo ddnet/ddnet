@@ -416,6 +416,7 @@ struct CMapItemSound
 
 struct CMapItemClips
 {
+	int m_aName[8];
 	int m_Zone;
 	int m_Trigger;
 	int m_X;

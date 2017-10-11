@@ -399,8 +399,14 @@ void CMapLayers::OnRender()
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 }
 
-//Modify group clipping on zone change
-void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int disable, int rewind) {
+//Modify group clipping on tune zone change
+void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int disable, int rewind) 
+{
+	//Skip if theres no trigger data
+	int Start, Num;
+	m_pLayers->Map()->GetType(MAPITEMTYPE_TRIGGERS, &Start, &Num);
+	if (Num == 0) return;
+
 	for (int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
@@ -414,21 +420,19 @@ void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int dis
 		}
 
 		//get group trigger number
-		int tStart, tNum, groupTrigger = -2;
+		int groupTrigger = -3;
+		CMapItemTriggers *pTrigger = (CMapItemTriggers *)m_pLayers->Map()->GetItem(Start + g, 0, 0);
+		groupTrigger = pTrigger->m_Trigger;
 
-		m_pLayers->Map()->GetType(MAPITEMTYPE_TRIGGERS, &tStart, &tNum);
-		if (tNum > 0) {
-			CMapItemTriggers *pTrigger = (CMapItemTriggers *)m_pLayers->Map()->GetItem(tStart + g, 0, 0);
-			groupTrigger = pTrigger->m_Trigger;
-		}
-
-		if (!g_Config.m_GfxNoclip && pGroup->m_Version >= 2 && (groupTrigger == trigger || (groupTrigger > 0 && trigger == -1)))
+		if (!g_Config.m_GfxNoclip && pGroup->m_Version >= 2 && (groupTrigger == trigger || (groupTrigger >= 0 && trigger == -2)))
 		{
 
-			if (disable) {
+			if (disable)
+			{
 				pGroup->m_UseClipping = false;
 			}
-			else {
+			else 
+			{
 
 				pGroup->m_ClipX = x;
 				pGroup->m_ClipY = y;

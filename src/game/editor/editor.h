@@ -188,7 +188,6 @@ public:
 	int m_ClipY;
 	int m_ClipW;
 	int m_ClipH;
-
 	int m_ClipTrigger;
 
 	char m_aName[12];
@@ -389,8 +388,10 @@ public:
 	};
 	array<CSetting> m_lSettings;
 
-	struct CClipTrigger {
-		int m_Zone; 
+	struct CClipTrigger 
+	{
+		char m_aName[32];
+		int m_Zone;
 		int m_Trigger; 
 		int m_X;
 		int m_Y; 
@@ -398,7 +399,9 @@ public:
 		int m_H;
 		int m_Disable;
 		int m_Rewind;
-		void Reset() {
+		void Reset() 
+		{
+			memset(&m_aName[0], 0, sizeof(m_aName));
 			m_Zone = 1;
 			m_Trigger = 1;
 			m_X = 0;
@@ -409,7 +412,8 @@ public:
 			m_Rewind = 1;
 
 		}
-		bool operator == (CClipTrigger other) {
+		bool operator == (CClipTrigger other) 
+		{
 			return m_Zone == other.m_Zone && m_Trigger == other.m_Trigger;
 		}
 	};
@@ -1030,6 +1034,7 @@ public:
 	void DrawClipBox(CEditorMap::CClipTrigger clip, vec4 boxColor, vec4 fillColor);
 
 	CEditorMap::CClipTrigger m_aClipTrigger;
+	bool m_ClipExists = false;
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();

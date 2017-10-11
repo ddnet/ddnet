@@ -370,7 +370,6 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		GItem.m_ClipY = pGroup->m_ClipY;
 		GItem.m_ClipW = pGroup->m_ClipW;
 		GItem.m_ClipH = pGroup->m_ClipH;
-
 		GItem.m_StartLayer = LayerCount;
 		GItem.m_NumLayers = 0;
 
@@ -540,6 +539,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		for (int i = 0; i < m_lClipTriggers.size(); i++)
 		{
 			CMapItemClips Item;
+			StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), m_lClipTriggers[i].m_aName);
 			Item.m_Zone = m_lClipTriggers[i].m_Zone;
 			Item.m_Trigger = m_lClipTriggers[i].m_Trigger;
 			Item.m_X = m_lClipTriggers[i].m_X;
@@ -559,7 +559,14 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		CLayerGroup *pGroup = m_lGroups[g];
 		CMapItemTriggers Item;
 		Item.m_Group = g;
-		Item.m_Trigger = pGroup->m_ClipTrigger;
+		if (pGroup->m_GameGroup)
+		{
+			Item.m_Trigger = -1;
+		}
+		else
+		{
+			Item.m_Trigger = pGroup->m_ClipTrigger;
+		}
 		df.AddItem(MAPITEMTYPE_TRIGGERS, g, sizeof(Item), &Item);
 
 		
@@ -826,9 +833,14 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 					int tStart, tNum;
 					DataFile.GetType(MAPITEMTYPE_TRIGGERS, &tStart, &tNum);
-					if (tNum > 0) {
+					if (tNum > 0)
+					{
 						CMapItemTriggers *pTrigger = (CMapItemTriggers *)DataFile.GetItem(tStart + g, 0, 0);
 						pGroup->m_ClipTrigger = pTrigger->m_Trigger;
+					}
+					else
+					{
+						pGroup->m_ClipTrigger = 0;
 					}
 				}
 
@@ -1309,7 +1321,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			for (int i = 0; i < Num; i++)
 			{
 				CMapItemClips *pItem = (CMapItemClips *)DataFile.GetItem(Start + i, 0, 0);
-				CClipTrigger newClip = { pItem->m_Zone, pItem->m_Trigger, pItem->m_X, pItem->m_Y, pItem->m_W, pItem->m_H, pItem->m_Disable, pItem->m_Rewind };
+				CClipTrigger newClip = {"", pItem->m_Zone, pItem->m_Trigger, pItem->m_X, pItem->m_Y, pItem->m_W, pItem->m_H, pItem->m_Disable, pItem->m_Rewind };
+				IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), newClip.m_aName);
+
 				m_lClipTriggers.add(newClip);
 			}
 		}
