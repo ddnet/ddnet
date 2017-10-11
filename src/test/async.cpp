@@ -87,3 +87,19 @@ TEST_F(Async, Pieces)
 	}
 	Expect(aText);
 }
+
+TEST_F(Async, Mixed)
+{
+	char aText[64 * 1024 + 1];
+	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	{
+		aText[i] = 'a' + i % 26;
+	}
+	aText[sizeof(aText) - 1] = 0;
+	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	{
+		char w = 'a' + i % 26;
+		async_write(m_pAio, &w, 1);
+	}
+	Expect(aText);
+}
