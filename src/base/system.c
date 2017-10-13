@@ -82,7 +82,14 @@ IOHANDLE io_stdin() { return (IOHANDLE)stdin; }
 IOHANDLE io_stdout() { return (IOHANDLE)stdout; }
 IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
 
-static DBG_LOGGER loggers[16];
+typedef struct
+{
+	DBG_LOGGER logger;
+	DBG_LOGGER_FINISH finish;
+	void *user;
+} DBG_LOGGER_DATA;
+
+static DBG_LOGGER_DATA loggers[16];
 static int num_loggers = 0;
 
 static NETSTATS network_stats = {0};
@@ -103,73 +110,11 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 
 void dbg_break_imp()
 {
+#ifdef __GNUC__
+	__builtin_trap();
+#else
 	*((volatile unsigned*)0) = 0x0;
-}
-
-#define QUEUE_SIZE 64
-
-typedef struct
-{
-	char q[QUEUE_SIZE][1024*4];
-	int begin;
-	int end;
-	LOCK mutex;
-	SEMAPHORE notempty;
-	SEMAPHORE notfull;
-} Queue;
-
-static int dbg_msg_threaded = 0;
-static Queue log_queue;
-
-int queue_empty(Queue *q)
-{
-	return q->begin == q->end;
-}
-
-int queue_full(Queue *q)
-{
-	return ((q->end+1) % QUEUE_SIZE) == q->begin;
-}
-
-void dbg_msg_thread(void *v)
-{
-	char str[1024*4];
-	int i;
-	int num;
-	while(1)
-	{
-		sphore_wait(&log_queue.notempty);
-		lock_wait(log_queue.mutex);
-
-		str_copy(str, log_queue.q[log_queue.begin], sizeof(str));
-		log_queue.begin = (log_queue.begin + 1) % QUEUE_SIZE;
-
-		sphore_signal(&log_queue.notfull);
-
-		num = num_loggers;
-		lock_unlock(log_queue.mutex);
-
-		for(i = 0; i < num; i++)
-			loggers[i](str);
-	}
-}
-
-void dbg_enable_threaded()
-{
-	Queue *q;
-	void *Thread;
-
-	q = &log_queue;
-	q->begin = 0;
-	q->end = 0;
-	q->mutex = lock_create();
-	sphore_init(&q->notempty);
-	sphore_init(&q->notfull);
-
-	dbg_msg_threaded = 1;
-
-	Thread = thread_init(dbg_msg_thread, 0);
-	thread_detach(Thread);
+#endif
 }
 
 void dbg_msg(const char *sys, const char *fmt, ...)
@@ -178,104 +123,108 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	char *msg;
 	int len;
 
+	char str[1024*4];
+	int i;
+
 	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	char timestr[80];
 	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
 
-	if(dbg_msg_threaded)
-	{
-		while(queue_full(&log_queue))
-			sphore_wait(&log_queue.notfull);
-		lock_wait(log_queue.mutex);
+	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
 
-		str_format(log_queue.q[log_queue.end], sizeof(log_queue.q[log_queue.end]), "[%s][%s]: ", timestr, sys);
+	len = strlen(str);
+	msg = (char *)str + len;
 
-		len = strlen(log_queue.q[log_queue.end]);
-		msg = (char *)log_queue.q[log_queue.end] + len;
-
-		va_start(args, fmt);
+	va_start(args, fmt);
 #if defined(CONF_FAMILY_WINDOWS)
-		_vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+	_vsnprintf(msg, sizeof(str)-len, fmt, args);
 #else
-		vsnprintf(msg, sizeof(log_queue.q[log_queue.end])-len, fmt, args);
+	vsnprintf(msg, sizeof(str)-len, fmt, args);
 #endif
-		va_end(args);
+	va_end(args);
 
-		log_queue.end = (log_queue.end + 1) % QUEUE_SIZE;
-
-		sphore_signal(&log_queue.notempty);
-
-		lock_unlock(log_queue.mutex);
-	}
-	else
-	{
-		char str[1024*4];
-		int i;
-
-		str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
-
-		len = strlen(str);
-		msg = (char *)str + len;
-
-		va_start(args, fmt);
-#if defined(CONF_FAMILY_WINDOWS)
-		_vsnprintf(msg, sizeof(str)-len, fmt, args);
-#else
-		vsnprintf(msg, sizeof(str)-len, fmt, args);
-#endif
-		va_end(args);
-
-		for(i = 0; i < num_loggers; i++)
-			loggers[i](str);
-	}
+	for(i = 0; i < num_loggers; i++)
+		loggers[i].logger(str, loggers[i].user);
 }
 
-static void logger_stdout(const char *line)
+#if defined(CONF_FAMILY_WINDOWS) || defined(__ANDROID__)
+static void logger_debugger(const char *line, void *user)
 {
-	printf("%s\n", line);
-	fflush(stdout);
-#if defined(__ANDROID__)
-	__android_log_print(ANDROID_LOG_INFO, "DDNet", "%s", line);
-#endif
-}
-
-static void logger_debugger(const char *line)
-{
+	(void)user;
 #if defined(CONF_FAMILY_WINDOWS)
 	OutputDebugString(line);
 	OutputDebugString("\n");
+#elif defined(__ANDROID__)
+	__android_log_print(ANDROID_LOG_INFO, "DDNet", "%s", line);
+#endif
+}
+#endif
+
+
+static void logger_file(const char *line, void *user)
+{
+	ASYNCIO *logfile = (ASYNCIO *)user;
+	aio_write(logfile, line, strlen(line));
+	aio_write_newline(logfile);
+}
+
+static void logger_stdout_finish(void *user)
+{
+	ASYNCIO *logfile = (ASYNCIO *)user;
+	aio_wait(logfile);
+	aio_free(logfile);
+}
+
+static void logger_file_finish(void *user)
+{
+	ASYNCIO *logfile = (ASYNCIO *)user;
+	aio_close(logfile);
+	logger_stdout_finish(user);
+}
+
+static void dbg_logger_finish(void)
+{
+	int i;
+	for(i = 0; i < num_loggers; i++)
+	{
+		if(loggers[i].finish)
+		{
+			loggers[i].finish(loggers[i].user);
+		}
+	}
+}
+
+void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
+{
+	DBG_LOGGER_DATA data;
+	if(num_loggers == 0)
+	{
+		atexit(dbg_logger_finish);
+	}
+	data.logger = logger;
+	data.finish = finish;
+	data.user = user;
+	loggers[num_loggers] = data;
+	num_loggers++;
+}
+
+void dbg_logger_stdout()
+{
+	dbg_logger(logger_file, logger_stdout_finish, aio_new(io_stdout()));
+}
+
+void dbg_logger_debugger()
+{
+#if defined(CONF_FAMILY_WINDOWS) || defined(__ANDROID__)
+	dbg_logger(logger_debugger, 0, 0);
 #endif
 }
 
-
-static IOHANDLE logfile = 0;
-static void logger_file(const char *line)
-{
-	io_write(logfile, line, strlen(line));
-	io_write_newline(logfile);
-	io_flush(logfile);
-}
-
-void dbg_logger(DBG_LOGGER logger)
-{
-	if(dbg_msg_threaded)
-		lock_wait(log_queue.mutex);
-
-	loggers[num_loggers] = logger;
-	num_loggers++;
-
-	if(dbg_msg_threaded)
-		lock_unlock(log_queue.mutex);
-}
-
-void dbg_logger_stdout() { dbg_logger(logger_stdout); }
-
-void dbg_logger_debugger() { dbg_logger(logger_debugger); }
 void dbg_logger_file(const char *filename)
 {
-	logfile = io_open(filename, IOFLAG_WRITE);
+	IOHANDLE logfile = io_open(filename, IOFLAG_WRITE);
 	if(logfile)
-		dbg_logger(logger_file);
+		dbg_logger(logger_file, logger_file_finish, aio_new(logfile));
 	else
 		dbg_msg("dbg/logger", "failed to open '%s' for logging", filename);
 
@@ -465,6 +414,11 @@ long int io_length(IOHANDLE io)
 	return length;
 }
 
+int io_error(IOHANDLE io)
+{
+	return ferror((FILE*)io);
+}
+
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size)
 {
 	return fwrite(buffer, 1, size, (FILE*)io);
@@ -491,11 +445,306 @@ int io_flush(IOHANDLE io)
 	return 0;
 }
 
+
+#define ASYNC_BUFSIZE 8 * 1024
+
+typedef struct ASYNCIO
+{
+	LOCK lock;
+	IOHANDLE io;
+	SEMAPHORE sphore;
+	void *thread;
+
+	unsigned char *old_buffer;
+
+	unsigned char *buffer;
+	unsigned int buffer_size;
+	unsigned int read_pos;
+	unsigned int write_pos;
+
+	int error;
+	unsigned char finish;
+	unsigned char refcount;
+} ASYNCIO;
+
+enum
+{
+	ASYNCIO_RUNNING,
+	ASYNCIO_CLOSE,
+	ASYNCIO_EXIT,
+};
+
+struct BUFFERS
+{
+	unsigned char *buf1;
+	unsigned int len1;
+	unsigned char *buf2;
+	unsigned int len2;
+};
+
+static void buffer_ptrs(ASYNCIO *aio, struct BUFFERS *buffers)
+{
+	mem_zero(buffers, sizeof(*buffers));
+	if(aio->read_pos < aio->write_pos)
+	{
+		buffers->buf1 = aio->buffer + aio->read_pos;
+		buffers->len1 = aio->write_pos - aio->read_pos;
+	}
+	else if(aio->read_pos > aio->write_pos)
+	{
+		buffers->buf1 = aio->buffer + aio->read_pos;
+		buffers->len1 = aio->buffer_size - aio->read_pos;
+		buffers->buf2 = aio->buffer;
+		buffers->len2 = aio->write_pos;
+	}
+}
+
+static void aio_handle_free_and_unlock(ASYNCIO *aio)
+{
+	int do_free;
+	aio->refcount--;
+
+	do_free = aio->refcount == 0;
+	lock_unlock(aio->lock);
+	if(do_free)
+	{
+		mem_free(aio->buffer);
+		sphore_destroy(&aio->sphore);
+		lock_destroy(aio->lock);
+		mem_free(aio);
+	}
+}
+
+static void aio_thread(void *user)
+{
+	ASYNCIO *aio = user;
+
+	lock_wait(aio->lock);
+	while(1)
+	{
+		struct BUFFERS buffers;
+		int result_io_error;
+
+		if(aio->read_pos == aio->write_pos)
+		{
+			if(aio->finish != ASYNCIO_RUNNING)
+			{
+				if(aio->finish == ASYNCIO_CLOSE)
+				{
+					io_close(aio->io);
+				}
+				aio_handle_free_and_unlock(aio);
+				break;
+			}
+			lock_unlock(aio->lock);
+			sphore_wait(&aio->sphore);
+			lock_wait(aio->lock);
+			continue;
+		}
+
+		buffer_ptrs(aio, &buffers);
+		lock_unlock(aio->lock);
+
+		io_write(aio->io, buffers.buf1, buffers.len1);
+		if(buffers.buf2)
+		{
+			io_write(aio->io, buffers.buf2, buffers.len2);
+		}
+		io_flush(aio->io);
+		result_io_error = io_error(aio->io);
+
+		lock_wait(aio->lock);
+		aio->error = result_io_error;
+		aio->read_pos = (aio->read_pos + buffers.len1 + buffers.len2) % aio->buffer_size;
+		if(aio->old_buffer)
+		{
+			mem_free(aio->old_buffer);
+			aio->old_buffer = 0;
+		}
+	}
+}
+
+ASYNCIO *aio_new(IOHANDLE io)
+{
+	ASYNCIO *aio = mem_alloc(sizeof(*aio), sizeof(void *));
+	if(!aio)
+	{
+		return 0;
+	}
+	aio->io = io;
+	aio->lock = lock_create();
+	sphore_init(&aio->sphore);
+	aio->thread = 0;
+
+	aio->old_buffer = 0;
+	aio->buffer = mem_alloc(ASYNC_BUFSIZE, 1);
+	if(!aio->buffer)
+	{
+		sphore_destroy(&aio->sphore);
+		lock_destroy(aio->lock);
+		mem_free(aio);
+		return 0;
+	}
+	aio->buffer_size = ASYNC_BUFSIZE;
+	aio->read_pos = 0;
+	aio->write_pos = 0;
+	aio->error = 0;
+	aio->finish = ASYNCIO_RUNNING;
+	aio->refcount = 2;
+
+	aio->thread = thread_init(aio_thread, aio);
+	if(!aio->thread)
+	{
+		mem_free(aio->buffer);
+		sphore_destroy(&aio->sphore);
+		lock_destroy(aio->lock);
+		mem_free(aio);
+		return 0;
+	}
+	return aio;
+}
+
+static unsigned int buffer_len(ASYNCIO *aio)
+{
+	if(aio->write_pos >= aio->read_pos)
+	{
+		return aio->write_pos - aio->read_pos;
+	}
+	else
+	{
+		return aio->buffer_size + aio->write_pos - aio->read_pos;
+	}
+}
+
+static unsigned int next_buffer_size(unsigned int cur_size, unsigned int need_size)
+{
+	while(cur_size < need_size)
+	{
+		cur_size *= 2;
+	}
+	return cur_size;
+}
+
+void aio_write(ASYNCIO *aio, const void *buffer, unsigned size)
+{
+	unsigned int remaining;
+	lock_wait(aio->lock);
+	remaining = aio->buffer_size - buffer_len(aio);
+
+	// Don't allow full queue to distinguish between empty and full queue.
+	if(size < remaining)
+	{
+		unsigned int remaining_contiguous = aio->buffer_size - aio->write_pos;
+		if(size > remaining_contiguous)
+		{
+			mem_copy(aio->buffer + aio->write_pos, buffer, remaining_contiguous);
+			size -= remaining_contiguous;
+			buffer = ((unsigned char *)buffer) + remaining_contiguous;
+			aio->write_pos = 0;
+		}
+		mem_copy(aio->buffer + aio->write_pos, buffer, size);
+		aio->write_pos = (aio->write_pos + size) % aio->buffer_size;
+	}
+	else
+	{
+		// Add 1 so the new buffer isn't completely filled.
+		unsigned int new_written = buffer_len(aio) + size + 1;
+		unsigned int next_size = next_buffer_size(aio->buffer_size, new_written);
+		unsigned int next_len = 0;
+		unsigned char *next_buffer = mem_alloc(next_size, 1);
+
+		struct BUFFERS buffers;
+		buffer_ptrs(aio, &buffers);
+		if(buffers.buf1)
+		{
+			mem_copy(next_buffer + next_len, buffers.buf1, buffers.len1);
+			next_len += buffers.len1;
+			if(buffers.buf2)
+			{
+				mem_copy(next_buffer + next_len, buffers.buf2, buffers.len2);
+				next_len += buffers.len2;
+			}
+		}
+		mem_copy(next_buffer + next_len, buffer, size);
+		next_len += size;
+
+		if(!aio->old_buffer)
+		{
+			aio->old_buffer = aio->buffer;
+		}
+		else
+		{
+			mem_free(aio->buffer);
+		}
+		aio->buffer = next_buffer;
+		aio->buffer_size = next_size;
+		aio->read_pos = 0;
+		aio->write_pos = next_len;
+	}
+	lock_unlock(aio->lock);
+	sphore_signal(&aio->sphore);
+}
+
+void aio_write_newline(ASYNCIO *aio)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	aio_write(aio, "\r\n", 2);
+#else
+	aio_write(aio, "\n", 1);
+#endif
+}
+
+int aio_error(ASYNCIO *aio)
+{
+	int result;
+	lock_wait(aio->lock);
+	result = aio->error;
+	lock_unlock(aio->lock);
+	return result;
+}
+
+void aio_free(ASYNCIO *aio)
+{
+	lock_wait(aio->lock);
+	if(aio->thread)
+	{
+		thread_detach(aio->thread);
+		aio->thread = 0;
+	}
+	aio_handle_free_and_unlock(aio);
+}
+
+void aio_close(ASYNCIO *aio)
+{
+	lock_wait(aio->lock);
+	aio->finish = ASYNCIO_CLOSE;
+	lock_unlock(aio->lock);
+	sphore_signal(&aio->sphore);
+}
+
+void aio_wait(ASYNCIO *aio)
+{
+	void *thread;
+	lock_wait(aio->lock);
+	thread = aio->thread;
+	aio->thread = 0;
+	if(aio->finish == ASYNCIO_RUNNING)
+	{
+		aio->finish = ASYNCIO_EXIT;
+	}
+	lock_unlock(aio->lock);
+	sphore_signal(&aio->sphore);
+	thread_wait(thread);
+}
+
 void *thread_init(void (*threadfunc)(void *), void *u)
 {
 #if defined(CONF_FAMILY_UNIX)
 	pthread_t id;
-	pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u);
+	if(pthread_create(&id, NULL, (void *(*)(void*))threadfunc, u) != 0)
+	{
+		return 0;
+	}
 	return (void*)id;
 #elif defined(CONF_FAMILY_WINDOWS)
 	return CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)threadfunc, u, 0, NULL);
@@ -512,6 +761,7 @@ void thread_wait(void *thread)
 		dbg_msg("thread", "!! %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	WaitForSingleObject((HANDLE)thread, INFINITE);
+	CloseHandle(thread);
 #else
 	#error not implemented
 #endif
@@ -629,7 +879,7 @@ void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
 void sphore_init(SEMAPHORE *sem)
 {
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
 }
 void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
@@ -638,7 +888,7 @@ void sphore_destroy(SEMAPHORE *sem)
 {
 	char aBuf[64];
 	sem_close(*sem);
-	str_format(aBuf, sizeof(aBuf), "/%d-ddphore-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
 	sem_unlink(aBuf);
 }
 #elif defined(CONF_FAMILY_UNIX)

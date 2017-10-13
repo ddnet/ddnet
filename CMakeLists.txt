@@ -891,8 +891,10 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 
 if(GTEST_FOUND)
   set_glob(TESTS GLOB src/test
+    aio.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
+    thread.cpp
   )
   set(TESTS_EXTRA
     src/game/server/teehistorian.cpp

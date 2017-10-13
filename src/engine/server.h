@@ -180,6 +180,8 @@ public:
 	virtual void ResetNetErrorString(int ClientID) = 0;
 	virtual bool SetTimedOut(int ClientID, int OrigID) = 0;
 	virtual void SetTimeoutProtected(int ClientID) = 0;
+
+	virtual void SetErrorShutdown(const char *pReason) = 0;
 };
 
 class IGameServer : public IInterface

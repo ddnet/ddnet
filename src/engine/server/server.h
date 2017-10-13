@@ -209,6 +209,8 @@ public:
 	int64 m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
 
+	char m_aErrorShutdownReason[128];
+
 	CServer();
 
 	int TrySetClientName(int ClientID, const char *pName);
@@ -353,6 +355,9 @@ public:
 	void ResetNetErrorString(int ClientID) { m_NetServer.ResetErrorString(ClientID); };
 	bool SetTimedOut(int ClientID, int OrigID);
 	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
+
+	bool ErrorShutdown() const { return m_aErrorShutdownReason[0] != 0; }
+	void SetErrorShutdown(const char *pReason);
 };
 
 #endif

@@ -336,6 +336,18 @@ int io_close(IOHANDLE io);
 */
 int io_flush(IOHANDLE io);
 
+/*
+	Function: io_error
+		Checks whether an error occured during I/O with the file.
+
+	Parameters:
+		io - Handle to the file.
+
+	Returns:
+		Returns nonzero on error, 0 otherwise.
+*/
+int io_error(IOHANDLE io);
+
 
 /*
 	Function: io_stdin
@@ -355,6 +367,90 @@ IOHANDLE io_stdout();
 */
 IOHANDLE io_stderr();
 
+typedef struct ASYNCIO ASYNCIO;
+
+/*
+	Function: aio_new
+		Wraps a <IOHANDLE> for asynchronous writing.
+
+	Parameters:
+		io - Handle to the file.
+
+	Returns:
+		Returns the handle for asynchronous writing.
+
+*/
+ASYNCIO *aio_new(IOHANDLE io);
+
+/*
+	Function: aio_write
+		Queues a chunk of data for writing.
+
+	Parameters:
+		aio - Handle to the file.
+		buffer - Pointer to the data that should be written.
+		size - Number of bytes to write.
+
+*/
+void aio_write(ASYNCIO *aio, const void *buffer, unsigned size);
+
+/*
+	Function: aio_write_newline
+		Queues a newline for writing.
+
+	Parameters:
+		aio - Handle to the file.
+
+*/
+void aio_write_newline(ASYNCIO *aio);
+
+/*
+	Function: aio_error
+		Checks whether errors have occured during the asynchronous
+		writing.
+
+		Call this function regularly to see if there are errors. Call
+		this function after <aio_wait> to see if the process of writing
+		to the file succeeded.
+
+	Parameters:
+		aio - Handle to the file.
+
+	Returns:
+		Returns 0 if no error occured, and nonzero on error.
+
+*/
+int aio_error(ASYNCIO *aio);
+
+/*
+	Function: aio_close
+		Queues file closing.
+
+	Parameters:
+		aio - Handle to the file.
+
+*/
+void aio_close(ASYNCIO *aio);
+
+/*
+	Function: aio_wait
+		Wait for the asynchronous operations to complete.
+
+	Parameters:
+		aio - Handle to the file.
+
+*/
+void aio_wait(ASYNCIO *aio);
+
+/*
+	Function: aio_free
+		Frees the resources associated to the asynchronous file handle.
+
+	Parameters:
+		aio - Handle to the file.
+
+*/
+void aio_free(ASYNCIO *aio);
 
 /* Group: Threads */
 
@@ -388,7 +484,7 @@ void *thread_init(void (*threadfunc)(void *), void *user);
 void thread_wait(void *thread);
 
 /*
-	Function: thread_yeild
+	Function: thread_yield
 		Yield the current threads execution slice.
 */
 void thread_yield();
@@ -1261,10 +1357,10 @@ void mem_debug_dump(IOHANDLE file);
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 
-typedef void (*DBG_LOGGER)(const char *line);
-void dbg_logger(DBG_LOGGER logger);
+typedef void (*DBG_LOGGER)(const char *line, void *user);
+typedef void (*DBG_LOGGER_FINISH)(void *user);
+void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
 
-void dbg_enable_threaded();
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);

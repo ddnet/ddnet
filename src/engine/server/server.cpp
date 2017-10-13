@@ -334,6 +334,8 @@ CServer::CServer()
 	CSqlConnector::SetWriteServers(m_apSqlWriteServers);
 #endif
 
+	m_aErrorShutdownReason[0] = 0;
+
 	Init();
 }
 
@@ -1746,6 +1748,10 @@ int CServer::Run()
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	GameServer()->OnInit();
+	if(ErrorShutdown())
+	{
+		return 1;
+	}
 	str_format(aBuf, sizeof(aBuf), "version %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
@@ -1808,6 +1814,10 @@ int CServer::Run()
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					GameServer()->OnInit();
+					if(ErrorShutdown())
+					{
+						break;
+					}
 					UpdateServerInfo();
 				}
 				else
@@ -1885,6 +1895,10 @@ int CServer::Run()
 				}
 
 				GameServer()->OnTick();
+				if(ErrorShutdown())
+				{
+					break;
+				}
 			}
 
 			// snap game
@@ -1942,11 +1956,16 @@ int CServer::Run()
 			}
 		}
 	}
+	const char *pDisconnectReason = "Server shutdown";
+	if(ErrorShutdown())
+	{
+		pDisconnectReason = m_aErrorShutdownReason;
+	}
 	// disconnect all clients on shutdown
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-			m_NetServer.Drop(i, "Server shutdown");
+			m_NetServer.Drop(i, pDisconnectReason);
 	}
 
 	m_Econ.Shutdown();
@@ -1962,17 +1981,17 @@ int CServer::Run()
 		mem_free(m_pCurrentMapData);
 
 #if defined (CONF_SQL)
-		for (int i = 0; i < MAX_SQLSERVERS; i++)
-		{
-			if (m_apSqlReadServers[i])
-				delete m_apSqlReadServers[i];
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (m_apSqlReadServers[i])
+			delete m_apSqlReadServers[i];
 
-			if (m_apSqlWriteServers[i])
-				delete m_apSqlWriteServers[i];
-		}
+		if (m_apSqlWriteServers[i])
+			delete m_apSqlWriteServers[i];
+	}
 #endif
 
-	return 0;
+	return ErrorShutdown();
 }
 
 void CServer::ConTestingCommands(CConsole::IResult *pResult, void *pUser)
@@ -2684,10 +2703,6 @@ int main(int argc, const char **argv) // ignore_convention
 		}
 	}
 
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(FUZZING)
-	dbg_enable_threaded();
-#endif
-
 	if(secure_random_init() != 0)
 	{
 		dbg_msg("secure", "could not initialize secure RNG");
@@ -2764,6 +2779,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// free
 	delete pKernel;
+
 	return 0;
 }
 
@@ -2815,12 +2831,13 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	return v[m_AnnouncementLastLine];
 }
 
-int* CServer::GetIdMap(int ClientID)
+int *CServer::GetIdMap(int ClientID)
 {
-	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
+	return (int *)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
 }
 
-bool CServer::SetTimedOut(int ClientID, int OrigID) {
+bool CServer::SetTimedOut(int ClientID, int OrigID)
+{
 	if (!m_NetServer.SetTimedOut(ClientID, OrigID))
 	{
 		return false;
@@ -2828,4 +2845,9 @@ bool CServer::SetTimedOut(int ClientID, int OrigID) {
 	DelClientCallback(OrigID, "Timeout Protection used", this);
 	m_aClients[ClientID].m_Authed = IServer::AUTHED_NO;
 	return true;
+}
+
+void CServer::SetErrorShutdown(const char *pReason)
+{
+	str_copy(m_aErrorShutdownReason, pReason, sizeof(m_aErrorShutdownReason));
 }
