@@ -6111,15 +6111,6 @@ void CEditor::UpdateAndRender()
 #else
 		UI()->ConvertMouseMove(&rx, &ry);
 
-		//QWER
-		if (isnan(rx) || isnan(ry))
-		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "This never happens, but isnan seems to prevent a bug");
-			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
-
-		}
-
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;
 

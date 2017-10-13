@@ -1352,7 +1352,7 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	if(!Err)
 		return Err;
 
-	// modify indecies
+	// modify indicies
 	gs_ModifyAddAmount = m_Map.m_lImages.size();
 	NewMap.ModifyImageIndex(ModifyAdd);
 
@@ -1365,12 +1365,16 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	NewMap.m_lImages.clear();
 
 	// transfer envelopes
-	for(int i = 0; i < NewMap.m_lEnvelopes.size(); i++)
+	for (int i = 0; i < NewMap.m_lEnvelopes.size(); i++)
 		m_Map.m_lEnvelopes.add(NewMap.m_lEnvelopes[i]);
 	NewMap.m_lEnvelopes.clear();
 
-	// transfer groups
+	// transfer clip list
+	for (int i = 0; i < NewMap.m_lClipTriggers.size(); i++)
+		m_Map.m_lClipTriggers.add(NewMap.m_lClipTriggers[i]);
+	NewMap.m_lClipTriggers.clear();
 
+	// transfer groups
 	for(int i = 0; i < NewMap.m_lGroups.size(); i++)
 	{
 		if(NewMap.m_lGroups[i] == NewMap.m_pGameGroup)
