@@ -11,7 +11,7 @@ addons:
     - libgtest-dev
     - libsdl2-dev
 script:
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl2; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; brew install sdl2; fi
 - if [ "$TRAVIS_OS_NAME" != "osx" ]; then mkdir gtest_build; cmake -E chdir gtest_build cmake /usr/src/gtest; cmake --build gtest_build; fi
 - mkdir build
 - cd build
