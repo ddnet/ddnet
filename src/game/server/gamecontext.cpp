@@ -1101,7 +1101,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 	if(m_TeeHistorianActive)
 	{
-		m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
+		if(m_NetObjHandler.TeeHistorianRecordMsg(MsgID)
+		{
+			m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
+		}
 	}
 
 	if(!pRawMsg)
