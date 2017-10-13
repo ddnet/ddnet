@@ -85,7 +85,7 @@ IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
 typedef struct
 {
 	DBG_LOGGER logger;
-	void (*finish)(void *user);
+	DBG_LOGGER_FINISH finish;
 	void *user;
 } DBG_LOGGER_DATA;
 
@@ -194,7 +194,7 @@ static void dbg_logger_finish(void)
 	}
 }
 
-void dbg_logger(DBG_LOGGER logger, void (*finish)(void *user), void *user)
+void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
 {
 	DBG_LOGGER_DATA data;
 	if(num_loggers == 0)
@@ -736,7 +736,6 @@ void async_wait(ASYNCIO *aio)
 	sphore_signal(&aio->sphore);
 	thread_wait(thread);
 }
-
 
 void *thread_init(void (*threadfunc)(void *), void *u)
 {

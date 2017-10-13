@@ -1358,13 +1358,12 @@ void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 
 typedef void (*DBG_LOGGER)(const char *line, void *user);
-void dbg_logger(DBG_LOGGER logger, void (*finish)(void *user), void *user);
+typedef void (*DBG_LOGGER_FINISH)(void *user);
+void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
 
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
-
-void dbg_log_finish();
 
 typedef struct
 {
