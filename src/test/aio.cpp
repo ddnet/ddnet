@@ -2,6 +2,8 @@
 
 #include <base/system.h>
 
+static const int BUF_SIZE = 64 * 1024;
+
 class Async : public ::testing::Test
 {
 protected:
@@ -16,7 +18,7 @@ protected:
 		const char *pTestName = pTestInfo->name();
 
 		str_format(m_aFilename, sizeof(m_aFilename), "Async.%s-%d.tmp", pTestName, pid());
-		m_pAio = async_new(io_open(m_aFilename, IOFLAG_WRITE));
+		m_pAio = aio_new(io_open(m_aFilename, IOFLAG_WRITE));
 		Delete = false;
 	}
 
@@ -30,16 +32,16 @@ protected:
 
 	void Write(const char *pText)
 	{
-		async_write(m_pAio, pText, str_length(pText));
+		aio_write(m_pAio, pText, str_length(pText));
 	}
 
 	void Expect(const char *pOutput)
 	{
-		async_close(m_pAio);
-		async_wait(m_pAio);
-		async_free(m_pAio);
+		aio_close(m_pAio);
+		aio_wait(m_pAio);
+		aio_free(m_pAio);
 
-		char aBuf[64 * 1024];
+		char aBuf[BUF_SIZE];
 		IOHANDLE File = io_open(m_aFilename, IOFLAG_READ);
 		int Read = io_read(File, aBuf, sizeof(aBuf));
 
@@ -63,7 +65,7 @@ TEST_F(Async, Simple)
 
 TEST_F(Async, Long)
 {
-	char aText[32 * 1024 + 1];
+	char aText[BUF_SIZE + 1];
 	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a';
@@ -75,7 +77,7 @@ TEST_F(Async, Long)
 
 TEST_F(Async, Pieces)
 {
-	char aText[64 * 1024 + 1];
+	char aText[BUF_SIZE + 1];
 	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a';
@@ -90,7 +92,7 @@ TEST_F(Async, Pieces)
 
 TEST_F(Async, Mixed)
 {
-	char aText[64 * 1024 + 1];
+	char aText[BUF_SIZE + 1];
 	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a' + i % 26;
@@ -99,7 +101,24 @@ TEST_F(Async, Mixed)
 	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
 	{
 		char w = 'a' + i % 26;
-		async_write(m_pAio, &w, 1);
+		aio_write(m_pAio, &w, 1);
+	}
+	Expect(aText);
+}
+
+TEST_F(Async, NonDivisor)
+{
+	static const int NUM_LETTERS = 13;
+	static const int SIZE = BUF_SIZE / NUM_LETTERS * NUM_LETTERS;
+	char aText[SIZE + 1];
+	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	{
+		aText[i] = 'a' + i % NUM_LETTERS;
+	}
+	aText[sizeof(aText) - 1] = 0;
+	for(unsigned i = 0; i < (sizeof(aText) - 1) / NUM_LETTERS; i++)
+	{
+		Write("abcdefghijklm");
 	}
 	Expect(aText);
 }

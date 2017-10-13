@@ -164,21 +164,21 @@ static void logger_debugger(const char *line, void *user)
 static void logger_file(const char *line, void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
-	async_write(logfile, line, strlen(line));
-	async_write_newline(logfile);
+	aio_write(logfile, line, strlen(line));
+	aio_write_newline(logfile);
 }
 
 static void logger_stdout_finish(void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
-	async_wait(logfile);
-	async_free(logfile);
+	aio_wait(logfile);
+	aio_free(logfile);
 }
 
 static void logger_file_finish(void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
-	async_close(logfile);
+	aio_close(logfile);
 	logger_stdout_finish(user);
 }
 
@@ -210,7 +210,7 @@ void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
 
 void dbg_logger_stdout()
 {
-	dbg_logger(logger_file, logger_stdout_finish, async_new(io_stdout()));
+	dbg_logger(logger_file, logger_stdout_finish, aio_new(io_stdout()));
 }
 
 void dbg_logger_debugger()
@@ -224,7 +224,7 @@ void dbg_logger_file(const char *filename)
 {
 	IOHANDLE logfile = io_open(filename, IOFLAG_WRITE);
 	if(logfile)
-		dbg_logger(logger_file, logger_file_finish, async_new(logfile));
+		dbg_logger(logger_file, logger_file_finish, aio_new(logfile));
 	else
 		dbg_msg("dbg/logger", "failed to open '%s' for logging", filename);
 
@@ -499,7 +499,7 @@ static void buffer_ptrs(ASYNCIO *aio, struct BUFFERS *buffers)
 	}
 }
 
-static void async_handle_free_and_unlock(ASYNCIO *aio)
+static void aio_handle_free_and_unlock(ASYNCIO *aio)
 {
 	int do_free;
 	aio->refcount--;
@@ -515,7 +515,7 @@ static void async_handle_free_and_unlock(ASYNCIO *aio)
 	}
 }
 
-static void async_thread(void *user)
+static void aio_thread(void *user)
 {
 	ASYNCIO *aio = user;
 
@@ -533,7 +533,7 @@ static void async_thread(void *user)
 				{
 					io_close(aio->io);
 				}
-				async_handle_free_and_unlock(aio);
+				aio_handle_free_and_unlock(aio);
 				break;
 			}
 			lock_unlock(aio->lock);
@@ -564,7 +564,7 @@ static void async_thread(void *user)
 	}
 }
 
-ASYNCIO *async_new(IOHANDLE io)
+ASYNCIO *aio_new(IOHANDLE io)
 {
 	ASYNCIO *aio = mem_alloc(sizeof(*aio), sizeof(void *));
 	if(!aio)
@@ -592,7 +592,7 @@ ASYNCIO *async_new(IOHANDLE io)
 	aio->finish = ASYNCIO_RUNNING;
 	aio->refcount = 2;
 
-	aio->thread = thread_init(async_thread, aio);
+	aio->thread = thread_init(aio_thread, aio);
 	if(!aio->thread)
 	{
 		mem_free(aio->buffer);
@@ -625,7 +625,7 @@ static unsigned int next_buffer_size(unsigned int cur_size, unsigned int need_si
 	return cur_size;
 }
 
-void async_write(ASYNCIO *aio, const void *buffer, unsigned size)
+void aio_write(ASYNCIO *aio, const void *buffer, unsigned size)
 {
 	unsigned int remaining;
 	lock_wait(aio->lock);
@@ -685,16 +685,16 @@ void async_write(ASYNCIO *aio, const void *buffer, unsigned size)
 	sphore_signal(&aio->sphore);
 }
 
-void async_write_newline(ASYNCIO *aio)
+void aio_write_newline(ASYNCIO *aio)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	async_write(aio, "\r\n", 2);
+	aio_write(aio, "\r\n", 2);
 #else
-	async_write(aio, "\n", 1);
+	aio_write(aio, "\n", 1);
 #endif
 }
 
-int async_error(ASYNCIO *aio)
+int aio_error(ASYNCIO *aio)
 {
 	int result;
 	lock_wait(aio->lock);
@@ -703,7 +703,7 @@ int async_error(ASYNCIO *aio)
 	return result;
 }
 
-void async_free(ASYNCIO *aio)
+void aio_free(ASYNCIO *aio)
 {
 	lock_wait(aio->lock);
 	if(aio->thread)
@@ -711,10 +711,10 @@ void async_free(ASYNCIO *aio)
 		thread_detach(aio->thread);
 		aio->thread = 0;
 	}
-	async_handle_free_and_unlock(aio);
+	aio_handle_free_and_unlock(aio);
 }
 
-void async_close(ASYNCIO *aio)
+void aio_close(ASYNCIO *aio)
 {
 	lock_wait(aio->lock);
 	aio->finish = ASYNCIO_CLOSE;
@@ -722,7 +722,7 @@ void async_close(ASYNCIO *aio)
 	sphore_signal(&aio->sphore);
 }
 
-void async_wait(ASYNCIO *aio)
+void aio_wait(ASYNCIO *aio)
 {
 	void *thread;
 	lock_wait(aio->lock);

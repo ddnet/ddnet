@@ -370,7 +370,7 @@ IOHANDLE io_stderr();
 typedef struct ASYNCIO ASYNCIO;
 
 /*
-	Function: async_new
+	Function: aio_new
 		Wraps a <IOHANDLE> for asynchronous writing.
 
 	Parameters:
@@ -380,10 +380,10 @@ typedef struct ASYNCIO ASYNCIO;
 		Returns the handle for asynchronous writing.
 
 */
-ASYNCIO *async_new(IOHANDLE io);
+ASYNCIO *aio_new(IOHANDLE io);
 
 /*
-	Function: async_write
+	Function: aio_write
 		Queues a chunk of data for writing.
 
 	Parameters:
@@ -392,26 +392,26 @@ ASYNCIO *async_new(IOHANDLE io);
 		size - Number of bytes to write.
 
 */
-void async_write(ASYNCIO *aio, const void *buffer, unsigned size);
+void aio_write(ASYNCIO *aio, const void *buffer, unsigned size);
 
 /*
-	Function: async_write_newline
+	Function: aio_write_newline
 		Queues a newline for writing.
 
 	Parameters:
 		aio - Handle to the file.
 
 */
-void async_write_newline(ASYNCIO *aio);
+void aio_write_newline(ASYNCIO *aio);
 
 /*
-	Function: async_error
+	Function: aio_error
 		Checks whether errors have occured during the asynchronous
 		writing.
 
 		Call this function regularly to see if there are errors. Call
-		this function after <async_wait> to see if the process of
-		writing to the file succeeded.
+		this function after <aio_wait> to see if the process of writing
+		to the file succeeded.
 
 	Parameters:
 		aio - Handle to the file.
@@ -420,37 +420,37 @@ void async_write_newline(ASYNCIO *aio);
 		Returns 0 if no error occured, and nonzero on error.
 
 */
-int async_error(ASYNCIO *aio);
+int aio_error(ASYNCIO *aio);
 
 /*
-	Function: async_close
+	Function: aio_close
 		Queues file closing.
 
 	Parameters:
 		aio - Handle to the file.
 
 */
-void async_close(ASYNCIO *aio);
+void aio_close(ASYNCIO *aio);
 
 /*
-	Function: async_wait
+	Function: aio_wait
 		Wait for the asynchronous operations to complete.
 
 	Parameters:
 		aio - Handle to the file.
 
 */
-void async_wait(ASYNCIO *aio);
+void aio_wait(ASYNCIO *aio);
 
 /*
-	Function: async_free
+	Function: aio_free
 		Frees the resources associated to the asynchronous file handle.
 
 	Parameters:
 		aio - Handle to the file.
 
 */
-void async_free(ASYNCIO *aio);
+void aio_free(ASYNCIO *aio);
 
 /* Group: Threads */
 

@@ -104,7 +104,7 @@ void CGameContext::Clear()
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
-	async_write(pSelf->m_pTeeHistorianFile, pData, DataSize);
+	aio_write(pSelf->m_pTeeHistorianFile, pData, DataSize);
 }
 
 void CGameContext::CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser)
@@ -604,7 +604,7 @@ void CGameContext::OnTick()
 
 	if(m_TeeHistorianActive)
 	{
-		int Error = async_error(m_pTeeHistorianFile);
+		int Error = aio_error(m_pTeeHistorianFile);
 		if(Error)
 		{
 			dbg_msg("teehistorian", "error writing to file, err=%d", Error);
@@ -2589,7 +2589,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		{
 			dbg_msg("teehistorian", "recording to '%s'", aFilename);
 		}
-		m_pTeeHistorianFile = async_new(File);
+		m_pTeeHistorianFile = aio_new(File);
 
 		char aVersion[128];
 #ifdef GIT_SHORTREV_HASH
@@ -2911,15 +2911,15 @@ void CGameContext::OnShutdown(bool FullShutdown)
 	if(m_TeeHistorianActive)
 	{
 		m_TeeHistorian.Finish();
-		async_close(m_pTeeHistorianFile);
-		async_wait(m_pTeeHistorianFile);
-		int Error = async_error(m_pTeeHistorianFile);
+		aio_close(m_pTeeHistorianFile);
+		aio_wait(m_pTeeHistorianFile);
+		int Error = aio_error(m_pTeeHistorianFile);
 		if(Error)
 		{
 			dbg_msg("teehistorian", "error closing file, err=%d", Error);
 			Server()->SetErrorShutdown("teehistorian close error");
 		}
-		async_free(m_pTeeHistorianFile);
+		aio_free(m_pTeeHistorianFile);
 	}
 
 	DeleteTempfile();
