@@ -929,7 +929,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		//prevent mipmap display bugs, when zooming out far
 		if(Width >= 1024 && Height >= 1024)
 		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5.f);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5);
 		}
 		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
