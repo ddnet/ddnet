@@ -981,7 +981,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 			vec2 Dir;
 			Dir.x = 32.f;
 			Dir.y = 0.f;
-			Graphics()->DrawBorderTileLine(Visuals.m_VisualObjectsIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, absolute(BorderX1) - (pTileLayer->m_Width-1));
+			Graphics()->DrawBorderTileLine(Visuals.m_VisualObjectsIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, BorderX1 - pTileLayer->m_Width);
 		}
 	}
 	if(BorderY0 < 0)
@@ -1007,7 +1007,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 			vec2 Dir;
 			Dir.x = 0.f;
 			Dir.y = 32.f;
-			Graphics()->DrawBorderTileLine(Visuals.m_VisualObjectsIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, absolute(BorderY1) - (pTileLayer->m_Height-1));
+			Graphics()->DrawBorderTileLine(Visuals.m_VisualObjectsIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, BorderY1 - pTileLayer->m_Height);
 		}
 	}
 }
@@ -1038,13 +1038,13 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 	
 	if(BorderX0 < -300) BorderX0 = -300;
 	if(BorderY0 < -300) BorderY0 = -300;
-	if(BorderX1 >= pTileLayer->m_Width + 300) BorderX1 = pTileLayer->m_Width + 300;
-	if(BorderY1 >= pTileLayer->m_Height + 300) BorderY1 = pTileLayer->m_Height + 300;	
+	if(BorderX1 >= pTileLayer->m_Width + 300) BorderX1 = pTileLayer->m_Width + 299;
+	if(BorderY1 >= pTileLayer->m_Height + 300) BorderY1 = pTileLayer->m_Height + 299;	
 	
 	if(BorderX1 < -300) BorderX1 = -300;
 	if(BorderY1 < -300) BorderY1 = -300;
-	if(BorderX0 >= pTileLayer->m_Width + 300) BorderX0 = pTileLayer->m_Width + 300;
-	if(BorderY0 >= pTileLayer->m_Height + 300) BorderY0 = pTileLayer->m_Height + 300;	
+	if(BorderX0 >= pTileLayer->m_Width + 300) BorderX0 = pTileLayer->m_Width + 299;
+	if(BorderY0 >= pTileLayer->m_Height + 300) BorderY0 = pTileLayer->m_Height + 299;	
 	
 	//draw left kill tile border
 	if(BorderX0 < -201)
@@ -1087,7 +1087,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 
 		int Count = (BorderX1 - (pTileLayer->m_Width + 201)) * (BorderY1 - BorderY0);
 
-		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderKillTile.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, ((absolute(BorderX1)) - (pTileLayer->m_Width + 201)), Count);
+		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderKillTile.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (BorderX1 - (pTileLayer->m_Width + 201)), Count);
 	}
 	if(BorderY1 >= pTileLayer->m_Height + 201)
 	{
@@ -1100,7 +1100,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 		Dir.x = 32.f;
 		Dir.y = 32.f;
 
-		int Count = (OffX1 - OffX0) * ((absolute(BorderY1))-(pTileLayer->m_Height + 200));
+		int Count = (OffX1 - OffX0) * (BorderY1-(pTileLayer->m_Height + 201));
 
 		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderKillTile.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (OffX1 - OffX0), Count);
 	}

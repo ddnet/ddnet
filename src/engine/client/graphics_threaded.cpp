@@ -884,7 +884,7 @@ void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, ch
 	float LODFactor = (64.f / (32.f * 1.f/ScreenZoomRatio));
 	//log2 gives us the amount of halving the texture for mipmapping
 	int LOD = (int)log2f(LODFactor);
-	//5 because log2(1024/(2^5)) is 5 -- 1024/(2^6) = 32 which would mean 2 pixels per tile index
+	//5 because log2(1024/(2^5)) is 5 -- 2^5 = 32 which would mean 2 pixels per tile index
 	if(LOD > 5) LOD = 5;
 	if(LOD < 0) LOD = 0;
 	Cmd.m_LOD = LOD;
