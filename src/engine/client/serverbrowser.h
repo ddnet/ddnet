@@ -17,7 +17,6 @@ public:
 		int64 m_RequestTime;
 		int m_GotInfo;
 		bool m_Request64Legacy;
-		int m_ExtraToken;
 		CServerInfo m_Info;
 
 		CServerEntry *m_pNextIp; // ip hashed list
@@ -151,14 +150,16 @@ private:
 	char m_aFilterString[64];
 	char m_aFilterGametypeString[128];
 
-	// the token is to keep server refresh separated from each other
-	int m_CurrentToken;
-
 	int m_ServerlistType;
 	int64 m_BroadcastTime;
-	int m_BroadcastExtraToken;
+	int m_RequestNumber;
+	unsigned char m_aTokenSeed[16];
 
-	// sorting criterions
+	int GenerateToken(const NETADDR &Addr) const;
+	static int GetBasicToken(int Token);
+	static int GetExtraToken(int Token);
+
+	// sorting criteria
 	bool SortCompareName(int Index1, int Index2) const;
 	bool SortCompareMap(int Index1, int Index2) const;
 	bool SortComparePing(int Index1, int Index2) const;

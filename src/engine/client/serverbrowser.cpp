@@ -5,6 +5,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <engine/external/md5/md5.h>
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
@@ -56,12 +57,10 @@ CServerBrowser::CServerBrowser()
 	m_aFilterString[0] = 0;
 	m_aFilterGametypeString[0] = 0;
 
-	// the token is to keep server refresh separated from each other
-	m_CurrentToken = 1;
-
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
-	m_BroadcastExtraToken = -1;
+	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
+	m_RequestNumber = 0;
 
 	m_pDDNetInfo = 0;
 }
@@ -91,6 +90,28 @@ const CServerInfo *CServerBrowser::SortedGet(int Index) const
 	return &m_ppServerlist[m_pSortedServerlist[Index]]->m_Info;
 }
 
+int CServerBrowser::GenerateToken(const NETADDR &Addr) const
+{
+	md5_state_t Md5;
+	md5_byte_t aDigest[16];
+
+	md5_init(&Md5);
+	md5_append(&Md5, m_aTokenSeed, sizeof(m_aTokenSeed));
+	md5_append(&Md5, (unsigned char *)&Addr, sizeof(Addr));
+	md5_finish(&Md5, aDigest);
+
+	return (aDigest[0] << 16) | (aDigest[1] << 8) | aDigest[2];
+}
+
+int CServerBrowser::GetBasicToken(int Token)
+{
+	return Token & 0xff;
+}
+
+int CServerBrowser::GetExtraToken(int Token)
+{
+	return Token >> 8;
+}
 
 bool CServerBrowser::SortCompareName(int Index1, int Index2) const
 {
@@ -424,7 +445,6 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 
 	// set the info
 	pEntry->m_Addr = Addr;
-	pEntry->m_ExtraToken = secure_rand() & 0xffff;
 	pEntry->m_Info.m_NetAddr = Addr;
 
 	pEntry->m_Info.m_Latency = 999;
@@ -499,19 +519,26 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 	}
 	else if(Type == IServerBrowser::SET_TOKEN)
 	{
-		int CheckToken = Token;
+		int BasicToken = Token;
+		int ExtraToken = 0;
 		if(pInfo->m_Type == SERVERINFO_EXTENDED)
 		{
-			CheckToken = Token & 0xff;
+			BasicToken = Token & 0xff;
+			ExtraToken = Token >> 8;
 		}
 
-		if(CheckToken != m_CurrentToken)
-			return;
-
 		pEntry = Find(Addr);
-		if(pEntry && pInfo->m_Type == SERVERINFO_EXTENDED)
+		if(m_ServerlistType != IServerBrowser::TYPE_LAN)
 		{
-			if(((Token & 0xffff00) >> 8) != pEntry->m_ExtraToken)
+			if(!pEntry)
+			{
+				return;
+			}
+			int Token = GenerateToken(Addr);
+			bool Drop = false;
+			Drop = Drop || BasicToken != GetBasicToken(Token);
+			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+			if(Drop)
 			{
 				return;
 			}
@@ -520,9 +547,16 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			pEntry = Add(Addr);
 		if(pEntry)
 		{
-			if(m_ServerlistType == IServerBrowser::TYPE_LAN && pInfo->m_Type == SERVERINFO_EXTENDED)
+			if(m_ServerlistType == IServerBrowser::TYPE_LAN)
 			{
-				if(((Token & 0xffff00) >> 8) != m_BroadcastExtraToken)
+				NETADDR Broadcast;
+				mem_zero(&Broadcast, sizeof(Broadcast));
+				Broadcast.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
+				int Token = GenerateToken(Broadcast);
+				bool Drop = false;
+				Drop = Drop || BasicToken != GetBasicToken(Token);
+				Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+				if(Drop)
 				{
 					return;
 				}
@@ -553,8 +587,7 @@ void CServerBrowser::Refresh(int Type)
 	m_pLastReqServer = 0;
 	m_NumRequests = 0;
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
-	// next token
-	m_CurrentToken = (m_CurrentToken+1)&0xff;
+	m_RequestNumber++;
 
 	m_ServerlistType = Type;
 
@@ -564,9 +597,6 @@ void CServerBrowser::Refresh(int Type)
 		CNetChunk Packet;
 		int i;
 
-		mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-		Buffer[sizeof(SERVERBROWSE_GETINFO)] = m_CurrentToken;
-
 		/* do the broadcast version */
 		Packet.m_ClientID = -1;
 		mem_zero(&Packet, sizeof(Packet));
@@ -575,9 +605,14 @@ void CServerBrowser::Refresh(int Type)
 		Packet.m_DataSize = sizeof(Buffer);
 		Packet.m_pData = Buffer;
 		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
-		m_BroadcastExtraToken = rand() & 0xffff;
-		Packet.m_aExtraData[0] = m_BroadcastExtraToken >> 8;
-		Packet.m_aExtraData[1] = m_BroadcastExtraToken & 0xff;
+
+		int Token = GenerateToken(Packet.m_Address);
+		mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		Buffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
+
+		Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
+		Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
+
 		m_BroadcastTime = time_get();
 
 		for(i = 8303; i <= 8310; i++)
@@ -633,8 +668,10 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
 	}
 
+	int Token = GenerateToken(Addr);
+
 	mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-	Buffer[sizeof(SERVERBROWSE_GETINFO)] = m_CurrentToken;
+	Buffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
 
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
@@ -642,11 +679,8 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 	Packet.m_DataSize = sizeof(Buffer);
 	Packet.m_pData = Buffer;
 	mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
-	if(pEntry)
-	{
-		Packet.m_aExtraData[0] = pEntry->m_ExtraToken >> 8;
-		Packet.m_aExtraData[1] = pEntry->m_ExtraToken & 0xff;
-	}
+	Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
+	Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
 
 	m_pNetClient->Send(&Packet);
 
@@ -669,7 +703,7 @@ void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) co
 	}
 
 	mem_copy(Buffer, SERVERBROWSE_GETINFO_64_LEGACY, sizeof(SERVERBROWSE_GETINFO_64_LEGACY));
-	Buffer[sizeof(SERVERBROWSE_GETINFO_64_LEGACY)] = m_CurrentToken;
+	Buffer[sizeof(SERVERBROWSE_GETINFO_64_LEGACY)] = GetBasicToken(GenerateToken(Addr));
 
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
