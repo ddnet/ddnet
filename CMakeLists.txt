@@ -39,16 +39,16 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
 endif()
 
-set(PREFER_BUNDLED_LIBS_DEFAULT OFF)
+set(AUTO_DEPENDENCIES_DEFAULT OFF)
 if(TARGET_OS STREQUAL "windows")
-  set(PREFER_BUNDLED_LIBS_DEFAULT ON)
+  set(AUTO_DEPENDENCIES_DEFAULT ON)
 endif()
 
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(CLIENT "Compile client" ON)
-option(DOWNLOAD_GTEST "Download and compile GTest" OFF)
-option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${PREFER_BUNDLED_LIBS_DEFAULT})
+option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
+option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 
 # Set the default build type to Release
 if(NOT(CMAKE_BUILD_TYPE))
