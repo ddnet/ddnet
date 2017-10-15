@@ -1,0 +1,5 @@
+status = [
+  "ci/circleci",
+  "continuous-integration/appveyor/branch",
+  "continuous-integration/travis-ci/push",
+]
