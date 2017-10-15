@@ -47,6 +47,7 @@ endif()
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(CLIENT "Compile client" ON)
+option(DOWNLOAD_GTEST "Download and compile GTest" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${PREFER_BUNDLED_LIBS_DEFAULT})
 
 # Set the default build type to Release
@@ -54,9 +55,15 @@ if(NOT(CMAKE_BUILD_TYPE))
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  src/game/version.h
+)
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
@@ -169,7 +176,11 @@ if(CLIENT AND NOT(SDL2_FOUND))
   message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
 endif()
 if(NOT(GTEST_FOUND))
-  message("To run the tests, you have to install GTest")
+  if(DOWNLOAD_GTEST)
+    message(STATUS "Automatically downloading GTest to be able to run tests")
+  else()
+    message(STATUS "To run the tests, you have to install GTest")
+  endif()
 endif()
 
 if(TARGET_OS STREQUAL "windows")
@@ -205,6 +216,50 @@ if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
   check_c_compiler_flag("-fstack-protector-all" ENABLE_STACK_PROTECTOR) # -fstack-protector-all doesn't work on MinGW.
 endif()
 
+########################################################################
+# DOWNLOAD GTEST
+########################################################################
+
+if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
+  # Change to the 1.9.0 release tag once that works.
+  set(DDNET_GTEST_VERSION 7b6561c56e353100aca8458d7bc49c4e0119bae8)
+  configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  if(result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  if(result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+  endif()
+
+  # Prevent overriding the parent project's compiler/linker
+  # settings on Windows
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+  # Add googletest directly to our build. This defines
+  # the gtest and gtest_main targets.
+  add_subdirectory(
+    ${CMAKE_BINARY_DIR}/googletest-src
+    ${CMAKE_BINARY_DIR}/googletest-build
+  )
+
+  if(MSVC)
+    foreach(target gtest gtest_main)
+      target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd>)
+    endforeach()
+  endif()
+
+  set(GTEST_BOTH_LIBRARIES gtest_main)
+  set(GTEST_INCLUDE_DIRS)
+  if(CMAKE_VERSION VERSION_LESS 2.8.11)
+    set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
+  endif()
+endif()
 
 ########################################################################
 # INITALIZE TARGET LISTS
@@ -889,7 +944,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 # TESTS
 ########################################################################
 
-if(GTEST_FOUND)
+if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
     strip_path_and_extension.cpp
@@ -907,7 +962,7 @@ if(GTEST_FOUND)
     ${TESTS_EXTRA}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
-    ${DEP_MD5}
+    ${DEPS}
   )
   target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${GTEST_BOTH_LIBRARIES})
   target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${GTEST_INCLUDE_DIRS})
@@ -1158,7 +1213,6 @@ set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
 foreach(target ${TARGETS})
   if(MSVC)
-    set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
     target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd>) # Use static CRT
     target_compile_options(${target} PRIVATE /MP) # Use multiple cores
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
