@@ -36,13 +36,14 @@ compile:
     - |
         mkdir build
         cd build
-        env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" ~/cmake/bin/cmake ..
+        env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" ~/cmake/bin/cmake -DDOWNLOAD_GTEST=ON ..
         make everything
 
 test:
   override:
     - |
         cd build
+        make run_tests
         make package
         mv DDNet-*.tar.* ${CIRCLE_ARTIFACTS}
 
