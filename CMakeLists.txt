@@ -492,6 +492,7 @@ set_glob(BASE GLOB_RECURSE src/base
   tl/allocator.h
   tl/array.h
   tl/base.h
+  tl/queue.h
   tl/range.h
   tl/sorted_array.h
   tl/string.h
@@ -1005,6 +1006,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
     fs.cpp
+    queue.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
     test.cpp
