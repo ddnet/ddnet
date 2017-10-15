@@ -28,3 +28,6 @@ environment:
 artifacts:
   - path: build*/DDNet-*.zip
     name: DDNet
+branches:
+  except:
+  - staging.tmp

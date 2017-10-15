@@ -46,6 +46,10 @@ test:
         make package
         mv DDNet-*.tar.* ${CIRCLE_ARTIFACTS}
 
+branches:
+  ignore:
+    - staging.tmp
+
 ##
 ##deployment:
 ##  master:

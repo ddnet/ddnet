@@ -26,3 +26,6 @@ env:
   global:
   - CFLAGS="-Wdeclaration-after-statement -Werror"
   - CXXFLAGS="-Werror"
+branches:
+  except:
+  - staging.tmp
