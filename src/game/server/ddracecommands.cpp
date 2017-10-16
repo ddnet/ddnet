@@ -336,7 +336,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 	int Seconds = 0;
-	if (pResult->NumArguments() > 0)
+	if (pResult->NumArguments() > 1)
 		Seconds = clamp(pResult->GetInteger(1), 0, 360);
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
@@ -401,7 +401,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(0), 1, 86400),
+	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
 			pSelf->Server()->ClientName(Victim));
 }
 
