@@ -254,7 +254,7 @@ Move left
 == Balra lépés
 
 Move player to spectators
-== Játékost megfigyelőbe mozdítása
+== Játékos megfigyelőbe mozdítása
 
 Move right
 == Jobbra lépés
@@ -434,10 +434,10 @@ Spectators
 == Megfigyelők
 
 Standard gametype
-== Alapértelmezett játékfajták
+== Alap játékfajták
 
 Standard map
-== Alapértermeztt pályák
+== Alap pályák
 
 Stop record
 == Felvétel megállítása
