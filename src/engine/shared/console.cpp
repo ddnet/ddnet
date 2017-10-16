@@ -166,7 +166,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				char *pVictim = 0;
 
 				pResult->AddArgument(pStr);
-				if(Command != 'v')
+				if(Command == 'v')
 				{
 					pVictim = pStr;
 				}
