@@ -1354,7 +1354,7 @@ void CGameClient::OnPredict()
 		FindWeaker(IsWeaker);
 
 	// repredict character
-	CWorldCore World;
+	CWorldCore World(g_Config.m_ClPredictDDRace);
 	World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
 
 	// search for players
@@ -1574,11 +1574,7 @@ void CGameClient::OnPredict()
 								float Strength;
 								Strength = World.m_Tuning[g_Config.m_ClDummy].m_HammerStrength;
 
-								vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-
-								pTarget->LimitForce(&Temp);
-
-								Temp -= pTarget->m_Vel;
+								vec2 Temp = normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 								pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
 								Hits++;
 							}
@@ -2241,7 +2237,7 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 		float PredictErr[2];
 		for(int dir = 0; dir < 2; dir++)
 		{
-			CWorldCore World;
+			CWorldCore World(g_Config.m_ClPredictDDRace);
 			World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
 
 			CCharacterCore OtherChar;
