@@ -783,7 +783,11 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 
 void CGameConsole::RequireUsername(bool UsernameReq)
 {
-	m_RemoteConsole.m_UsernameReq = UsernameReq;
+	if((m_RemoteConsole.m_UsernameReq = UsernameReq))
+	{
+		m_RemoteConsole.m_aUser[0] = '\0';
+		m_RemoteConsole.m_UserGot = false;
+	}
 }
 
 void CGameConsole::PrintLine(int Type, const char *pLine)
