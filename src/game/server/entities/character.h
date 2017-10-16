@@ -164,7 +164,6 @@ private:
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
-	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleBroadcast();

@@ -420,7 +420,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		}
 
 		int Index = MapIndex;
-		if(m_pWorld->m_DDNet && IsClient && m_pCollision->IsSpeedup(Index))
+		if(m_pWorld->m_DDNet && m_pCollision->IsSpeedup(Index))
 		{
 			vec2 Direction, MaxVel, TempVel = m_Vel;
 			int Force, MaxSpeed = 0;
