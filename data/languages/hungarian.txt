@@ -1,4 +1,4 @@
-##### authors #####
+﻿##### authors #####
 #originally created by:
 #	Feca
 #modified by:
@@ -8,19 +8,17 @@
 ##### translated strings #####
 
 %ds left
-==  %ds vissza
+==  %ds van hátra
 
 %i minute left
-== %i perc vissza
-
-%i minutes left
-== %i perc vissza
+== %i perc van hátra%i minutes left
+== %i perc van hátra
 
 %i second left
-== %i másodperc vissza
+== %i másodperc van hátra
 
 %i seconds left
-== %i másodperc vissza
+== %i másodperc van hátra
 
 %s wins!
 == %s nyert!
@@ -35,7 +33,7 @@ Add
 == Hozzáad
 
 Add Friend
-== Hozzáad barátot
+== Hozzáadni barátot
 
 Address
 == Cím
@@ -44,19 +42,19 @@ All
 == Mindenki
 
 Are you sure that you want to delete the demo?
-== Biztos hogy le akarod törölni a demót?
+== Biztos, hogy le akarod törölni a demót?
 
 Are you sure that you want to quit?
-== Biztos hogy ki akarsz lépni?
+== Biztos, hogy ki akarsz lépni?
 
 Are you sure that you want to remove the player from your friends list?
-== Biztos vagy benne hogy ki akarod törölni a játékost a barátok listájáról?
+== Biztos vagy benne, hogy ki akarod törölni a játékost a barátok listájáról?
 
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Mivel ez az első alkalom hogy elindítottad ezt a játékot, kérlekk add meg a neved!
+== Mivel ez az első alkalom, hogy elindítottad a játékot, kérlek add meg a neved!
 
 Automatically record demos
-== Magától rögzítse a demókat
+== Magától rögzítsen demókat
 
 Automatically take game over screenshot
 == Magától készítsen a játék végén képet
@@ -96,7 +94,6 @@ Connect
 
 Connecting to
 == Csatlakozás a
-
 Connection Problems...
 == Csatlakozási problémák...
 
@@ -104,7 +101,7 @@ Console
 == Konzol
 
 Controls
-== Irányítás
+== Irányítások
 
 Count players only
 == Csak számontartott játékosok
@@ -155,7 +152,7 @@ Error
 == Hiba
 
 Error loading demo
-== Hiba a demó betöltésében
+== Hiba a demó betöltése közben
 
 Favorite
 == Kedvenc
@@ -185,7 +182,7 @@ Friends
 == Barátok
 
 Fullscreen
-== Teljesképernyő
+== Teljes képernyő
 
 Game
 == Játék
@@ -215,7 +212,7 @@ Hammer
 == Kalapács
 
 Has people playing
-== Játékos játszik
+== Játékosok játszanak
 
 High Detail
 == Jó részletek
@@ -257,7 +254,7 @@ Move left
 == Balra lépés
 
 Move player to spectators
-== Megfigyelő lett
+== Játékost megfigyelőbe mozdítása
 
 Move right
 == Jobbra lépés
@@ -266,7 +263,7 @@ Movement
 == Mozgás
 
 Mute when not active
-== Letiltás ha nem aktív
+== Lenémítás ha nem aktív
 
 Name
 == Név
@@ -347,7 +344,7 @@ Refresh
 == Újratöltés
 
 Refreshing master servers
-== A master szerverek frissítése
+== Mester szerverek frissítése
 
 Remote console
 == Távoli konzol
@@ -407,7 +404,7 @@ Show chat
 == Chat mutatása
 
 Show friends only
-== Barátok mutatása
+== Csak barátok mutatása
 
 Show ingame HUD
 == Játék közbeni HUD mutatása
@@ -425,7 +422,7 @@ Sound
 == Hang
 
 Sound error
-== Hang hiba
+== Audió hiba
 
 Spectate
 == Megfigyelés
@@ -437,10 +434,10 @@ Spectators
 == Megfigyelők
 
 Standard gametype
-== Általános játékfajta
+== Alapértelmezett játékfajták
 
 Standard map
-== Általános pálya
+== Alapértermeztt pályák
 
 Stop record
 == Felvétel megállítása
@@ -449,7 +446,7 @@ Sudden Death
 == Gyors halál
 
 Switch weapon on pickup
-== Fegyverváltás felvételnél
+== Fegyverváltás fegyver felvételénél
 
 Team
 == Csapat
@@ -467,13 +464,11 @@ The server is running a non-standard tuning on a pure game type.
 == A szerver egy nem szabványos hangolást futtat a tiszta játék típuson.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Van egy mentett térkép a szerkesztőben, talán akarod menteni, mielőtt kilépsz a játékból.
-
-Time limit
+== Mielött kilépnél a játékból, van egy pálya a szerkesztőben, amit nem mentettél el.Time limit
 == Időhatár
 
 Time limit: %d min
-== Időhatár: %d perc
+== Időhatár: %d percig
 
 Try again
 == Próbáld újra
@@ -482,10 +477,10 @@ Type
 == Típus
 
 Unable to delete the demo
-== Nem sikerült törölni a demó
+== Nem sikerült törölni a demót
 
 Unable to rename the demo
-== Nem sikerült átnevezni a demó
+== Nem sikerült átnevezni a demót
 
 Use sounds
 == Hangok használata
@@ -529,7 +524,7 @@ Yes
 You must restart the game for all settings to take effect.
 == Újra kell indítani a játékot, a beállítások érvénybe lépéséhez.
 
-##### needs translation #####
+##### needed translation #####
 
 New name:
 == Új Név:
@@ -541,7 +536,7 @@ Internet
 == Internet
 
 Max demos
-== Maximum Demó
+== Maximum Demók
 
 News
 == Hírek
@@ -550,7 +545,7 @@ Join game
 == Csatlakozás a játékhoz
 
 FSAA samples
-== FSAA mintáku
+== FSAA minták
 
 %d of %d servers, %d players
 == %d Szerver, %d Játékos
@@ -592,7 +587,7 @@ Size:
 == Méret:
 
 Reset to defaults
-== Visszaállítás az alapértelmezettre
+== Visszaállítás alapértelmezettre
 
 Quit anyway?
 == Mindenképpen kilép?
@@ -640,361 +635,356 @@ Type:
 == Típus:
 
 
-##### generated by copy_fix.py, please translate this #####
+##### generated by copy_fix.py, Right translate by Cellegen C: #####
 
 Ratio
-== 
+== Arány
 
 Dummy settings
-== 
+== Dummy beállítások
 
 AntiPing
-== 
+== Antiping
 
 Show quads
-== 
+== Négyzetek mutatása
 
 Map sound volume
-== 
+== Pálya hangerő
 
 Show only chat messages from friends
-== 
+== Csak barát üzenetinek olvasása
 
 ✗
 == 
 
-Countries
-== 
+
+
+✗Countries
+== Országok
 
 \n\nReconnect in %d sec
-== 
+== \n\nÚrjacsatlakozás %d másodperc múlva 
 
 Grabs
-== 
+== Ragadások
 
 Background (entities)
-== 
+== Háttér (szerkezetileg)
 
 Show kill messages
-== 
+== Mutassa a halálokat
 
 Show ghost
-== 
+== Mutasson szellemet
 
 DDNet
-== 
+== DDNet
 
 No updates available
-== 
+== Nincs újabb verzió jelenleg
 
 Enable server message sound
-== 
+== Engedélyezze a chat hangokat
 
 second
-== 
+== második
 
 Show votes window after voting
-== 
+== Mutassa a szavazásokat
 
 HUD
-== 
+== HUD
 
 Spectate previous
 == 
-
+Előző játékost nézni
 Look out!
-== 
+== Nézz oda!
 
 Spectate next
-== 
+== Következő játékost nézni
 
 Show names in chat in team colors
+== Mutassa a neveket csapatszín alapjánSelect a name
 == 
-
-Select a name
-== 
-
+Válassz nevet
 Enable team chat sound
-== 
+== Engedélyezni a csapatchat hangokat
 
 Show other players' hook collision lines
-== 
+== Mutassa más játékosok horogvonalát
 
 We will win
-== 
+== Nyerni fogunk
 
 Hi o/
-== 
+== Szia o/
 
 Deaths
-== 
+== Halálok
 
 Enable game sounds
-== 
+== Engedélyezze a játék hangjait
 
 DDNet Client needs to be restarted to complete update!
-== 
-
+== DDNet kliensnek újra kell indulnia ahoz, hogy az legújabb verzióval
+ játssz
 Spectator
-== 
+== Néző
 
 Please use a different name
-== 
+== Kérlek használj másik nevet
 
 Wait before try for
-== 
-
-Show console window
-== 
+== Kérlek várj erre:Show console window
+== Mutassa a konzol ablakját
 
 Show others
-== 
+== Mutasson másokat
 
 Gameplay
-== 
+== Játékmenet
 
 Restart
-== 
+== Újraindítás
 
 Game paused
-== 
+== Játék megállítva
 
 Laser
-== 
+== Lézer
 
 Old mouse mode
-== 
+== Régi egér mód
 
 Browser
 == 
 
-Play background music
-== 
+BöngészőPlay background music
+== Játszon le háttér zenét
 
 Follow
-== 
+== Követés
 
 Reset
-== 
-
+== Újra
+kezdés
 Enable gun sound
-== 
+== Engedélyezze a fegyverek hangjait
 
 Show health + ammo
-== 
+== Mutassa az életet + lőszert
 
 Team message
-== 
+== Csapat üzenet
 
 Manual %3d:%02d  
-== 
+== Manuális %3d:%02d
 
 Automatically create statboard csv
 == 
-
+Automatikusan készítsen csv értéktáblázatot
 Save the best demo of each race
-== 
+== Mentse el a legjobb demót, minden egyes versenynél
 
 Show tiles layers from BG map
-== 
+== Mutassa a blokkok rétegjeit a szerkezeti háttérben
 
 Are you sure that you want to disconnect?
-== 
+== Biztos le akarsz csatlakozni?
 
 Types
-== 
+== Típusok
 
 Ghost
-== 
+== Szellem
 
 Respawn
-== 
+== Újraéledés
 
 Remove chat
-== 
+== Eltünteti a chatet
 
 Threaded sound loading
-== 
+== csavarmentes hang betöltése
 
 Check now
-== 
+== Ellenőrzés most
 
 Race %3d:%02d  
-== 
+== Verseny %3d:%02d
 
 Background (regular)
-== 
+== Háttér (játék közbeni)
 
 DDNet %s is out! Download it at DDNet.tw!
-== 
+== A DDNet legújjab verziója kijött! Töltsd le a www.DDNet.tw oldalon!
 
 Reset wanted weapon on death
 == 
 
-Frags
-== 
+Halál után felvett fegyver kézbe tételeFrags
+== Zászlók
 
 AntiPing: predict other players
-== 
-
+== Antiping aktiválása játékosoknál
 Show other players' key presses
 == 
-
+Mutassa más játékosok mozgásait nyílakkal
 Automatically take statboard screenshot
-== 
+== Automatikusan tegyen el egy értéktáblázati képet
 
 System message
-== 
+== Rendszer üzenet
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Használja (lefagyasztáskor) a játékos fájdalmas hangját
 
 DDNet %s is available:
-== 
+== DDNet %s elérhető
 
 Updating...
 == 
-
+Fejlesztés...
 Overlay entities
-== 
-
+== Szerkezeti kép beállítása
 Messages
-== 
+== Üzenetek
 
 Vanilla Skins only
-== 
+== Csak sima skinek
 
 %.2f MiB
 == 
-
+%.2f MiB
 Refresh Rate
 == 
 
-New random timeout code
-== 
+Frissítési arányNew random timeout code
+== Új random időkihagyási kód
 
 Suicides
 == 
 
-Player country:
-== 
-
+ÖngyilkosságokPlayer country:
+== Játékos országa 
 Net
-== 
+== Net
 
 Loading DDNet Client
 == 
 
-FPM
+DDNet kliens betöltéseFPM
 == 
 
-Default zoom
-== 
+FPMDefault zoom
+== Alapértelmezett nagyítás
 
 Show score
-== 
+== Mutassa a pontokat
 
 Spree
-== 
+== Vérengzés
 
 Show client IDs in Scoreboard
-== 
+== Mutassa a a Pontszámtáblázatban lévő ID-ket
 
 Demofile: %s
 == 
 
 Max CSVs
-== 
+== Demófile: %s== Max CSV-k
 
 seconds
-== 
+== másokpercek
 
 Borderless window
-== 
+== Kitámasztott ablak
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Strict gametype filter
-== 
+== Pontos játékmód szűrő
 
 Try fast HTTP map download first
-== 
+== Próbálja meg letölteni HTTP pályát
 
 Use DDRace Scoreboard
-== 
+== Használja a DDRace Pontszámtábláját
 
 Best
-== 
+== Legjobb
 
 Enable regular chat sound
-== 
+== Engedélyezze az elsőtleges chat hangokat
 
 Normal message
-== 
+== Normál üzenet
 
 Screen
 == 
-
+Képernyő
 Search
-== 
+== Keresés
 
 Connecting dummy
-== 
+== Dummy csatlakoztatása
 
 Clan plates size
-== 
+== Klán lemez száma
 
 Update now
-== 
+== Fejlessze most
 
 Auto %3d:%02d  
 == 
-
+Automatikus %3d:02d
 Show clan above name plates
-== 
+== Mutassa név felett a klánt is
 
 Save ghost
 == 
-
+Mentse el a szellemet
 Exclude
-== 
+== Kizárás
 
 Enable highlighted chat sound
-== 
+== Engedélyezze a kiemelt chat hangokat
 
 Hello and welcome
-== 
+== Szia és üdvözletem
 
 AntiPing: predict weapons
 == 
 
-DDNet Client updated!
+Antiping aktiválása fegyvereknélDDNet Client updated!
 == 
 
-High-DPI screen support (experimental)
-== 
+A DDNet kliens fejlesztve van!High-DPI screen support (experimental)
+== Magas DPI képernyő támogatás (szakértőknek)
 
 Outline color
-== 
+== vázolt szín
 
 Highlighted message
-== 
+== Kiemelt üzenet
 
 Friend
-== 
+== Barát
 
 Switch weapon when out of ammo
-== 
+== Fegyverváltás, amikor kifogy a töltény
 
 AntiPing: predict grenade paths
 == 
 
-Demo
+Antiping aktiválása gránátnálDemo
 == 
-
+Demó
 AntiPing limit
-== 
+== Antiping limit
 
 Inner color
-== 
+== belső szín
