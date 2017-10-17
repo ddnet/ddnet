@@ -2,9 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_SHARED_JOBS_H
 #define ENGINE_SHARED_JOBS_H
-typedef int (*JOBFUNC)(void *pData);
-
+class CJob;
 class CJobPool;
+
+typedef int (*JOBFUNC)(void *pData);
+typedef void (*CBFUNC)(CJob *pJob, void *pData);
 
 class CJob
 {
@@ -17,6 +19,7 @@ class CJob
 	volatile int m_Result;
 
 	JOBFUNC m_pfnFunc;
+	CBFUNC m_pfnCallback;
 	void *m_pFuncData;
 public:
 	CJob()
@@ -58,6 +61,6 @@ public:
 	~CJobPool();
 
 	int Init(int NumThreads);
-	int Add(CJob *pJob, JOBFUNC pfnFunc, void *pData);
+	int Add(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnCallback = 0);
 };
 #endif

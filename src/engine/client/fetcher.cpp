@@ -15,7 +15,6 @@ class CFetchTask : public IFetchTask
 	friend class CFetcher;
 	class CFetcher *m_pFetcher;
 
-	CJob m_Job;
 	CURL *m_pHandle;
 	void *m_pUser;
 
@@ -35,6 +34,7 @@ class CFetchTask : public IFetchTask
 
 	bool m_Abort;
 	bool m_Destroy;
+	bool m_PastCB;
 
 public:
 	virtual double Current() { return m_Current; }
@@ -49,7 +49,7 @@ public:
 
 void CFetchTask::Destroy()
 {
-	if(m_Job.Status() == CJob::STATE_DONE)
+	if(m_PastCB)
 	{
 		delete this;
 	}
@@ -76,6 +76,18 @@ void CFetcher::Escape(char *pBuf, size_t size, const char *pStr)
 	curl_free(pEsc);
 }
 
+void CFetcher::DestroyCallback(CJob *pJob, void *pUser)
+{
+	CFetchTask *pTask = (CFetchTask *)pUser;
+
+	delete pJob;
+
+	if(pTask->m_Destroy)
+		delete pTask;
+
+	pTask->m_PastCB = true;
+}
+
 IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int StorageType, bool UseDDNetCA, bool CanTimeout, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
 {
 	CFetchTask *pTask = new CFetchTask;
@@ -92,10 +104,13 @@ IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int Storage
 
 	pTask->m_Abort = false;
 	pTask->m_Destroy = false;
+	pTask->m_PastCB = false;
 	pTask->m_Size = pTask->m_Progress = 0;
 
 	pTask->m_State = IFetchTask::STATE_QUEUED;
-	m_pEngine->AddJob(&pTask->m_Job, FetcherThread, pTask);
+
+	CJob *pJob = new CJob;
+	m_pEngine->AddJob(pJob, FetcherThread, pTask, DestroyCallback);
 
 	return pTask;
 }
@@ -179,9 +194,6 @@ int CFetcher::FetcherThread(void *pUser)
 
 	if(pTask->m_pfnCompCallback)
 		pTask->m_pfnCompCallback(pTask, pTask->m_pUser);
-
-	if(pTask->m_Destroy)
-		delete pTask;
 
 	return(ret != CURLE_OK) ? 1 : 0;
 }
