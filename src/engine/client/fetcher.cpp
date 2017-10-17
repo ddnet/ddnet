@@ -49,7 +49,7 @@ public:
 
 void CFetchTask::Destroy()
 {
-	if(m_State >= IFetchTask::STATE_DONE || m_State == IFetchTask::STATE_ERROR)
+	if(m_Job.Status() == CJob::STATE_DONE)
 	{
 		delete this;
 	}
@@ -87,6 +87,8 @@ IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int Storage
 	pTask->m_pUser = pUser;
 	pTask->m_pfnCompCallback = pfnCompCb;
 	pTask->m_pfnProgressCallback = pfnProgCb;
+	pTask->m_UseDDNetCA = UseDDNetCA;
+	pTask->m_CanTimeout = CanTimeout;
 
 	pTask->m_Abort = false;
 	pTask->m_Destroy = false;
