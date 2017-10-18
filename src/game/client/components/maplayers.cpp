@@ -433,7 +433,6 @@ void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int dis
 			}
 			else 
 			{
-
 				pGroup->m_ClipX = x;
 				pGroup->m_ClipY = y;
 				pGroup->m_ClipW = w;
@@ -447,7 +446,6 @@ void CMapLayers::ChangeClipping(int trigger, int x, int y, int w, int h, int dis
 				CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
 
 				//// skip adjustment if detail layers if not wanted
-
 				//if (pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail)
 				//	continue;
 				if (pLayer->m_Type == LAYERTYPE_TILES)

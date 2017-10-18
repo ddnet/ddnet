@@ -4994,10 +4994,7 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 		//m_Map.m_UndoModified++;
 	}
 
-
-
 	//Tune zone
-
 	More.HSplitMid(&Slider, &More);
 	Slider.HMargin(2, &Slider);
 	Slider.VSplitMid(&Label, &Slider);
@@ -5038,7 +5035,6 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 			}
 		}
 	}
-
 
 	//Rewind Animation
 	Remains.HSplitTop(15, &Slider, &Remains);
@@ -5112,8 +5108,6 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 			changeView = true;
 			s_ClipTriggerSelectedIndex = -1;
 		}
-
-
 	}
 
 
@@ -5255,13 +5249,10 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 					s_ClipTriggerSelectedIndex = i;
 				}
 			}
-
 		}
 		ListCur += itemHeight;
 	}
 	UI()->ClipDisable();
-
-
 
 	//Preview the clip areas
 	UI()->ClipEnable(&EditorRect);
@@ -5336,8 +5327,6 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 		}
 	}
 
-	
-
 	if (changeView) 
 	{
 		CEditorMap::CClipTrigger previewClip = m_aClipTrigger;
@@ -5353,7 +5342,6 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 		}
 	}
 	
-	
 	if (s_ClipTriggerSelectedIndex > 0 && Input()->KeyPress(KEY_KP_MINUS)) 
 	{
 		CEditorMap::CClipTrigger temp = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex];
@@ -5361,7 +5349,6 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex - 1] = temp;
 		s_ClipTriggerSelectedIndex--;
 		s_ScrollValue = (float)s_ClipTriggerSelectedIndex / m_Map.m_lClipTriggers.size();
-
 	}
 	if (s_ClipTriggerSelectedIndex < m_Map.m_lClipTriggers.size() - 1 && Input()->KeyPress(KEY_KP_PLUS))
 	{
@@ -5371,16 +5358,10 @@ void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
 		s_ClipTriggerSelectedIndex++;
 		s_ScrollValue = (float)s_ClipTriggerSelectedIndex / m_Map.m_lClipTriggers.size();
 	}
-
-
-
-
-
 }
 
 void CEditor::DrawClipBox(CEditorMap::CClipTrigger clip, vec4 boxColor, vec4 fillColor) 
 {
-
 	Graphics()->LinesBegin();
 
 	IGraphics::CLineItem Array[4] = {
@@ -5397,7 +5378,6 @@ void CEditor::DrawClipBox(CEditorMap::CClipTrigger clip, vec4 boxColor, vec4 fil
 	Graphics()->SetColor(fillColor.r, fillColor.g, fillColor.b, fillColor.a);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
-
 }
 
 int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
