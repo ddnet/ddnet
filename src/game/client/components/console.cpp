@@ -783,7 +783,11 @@ void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, 
 
 void CGameConsole::RequireUsername(bool UsernameReq)
 {
-	m_RemoteConsole.m_UsernameReq = UsernameReq;
+	if((m_RemoteConsole.m_UsernameReq = UsernameReq))
+	{
+		m_RemoteConsole.m_aUser[0] = '\0';
+		m_RemoteConsole.m_UserGot = false;
+	}
 }
 
 void CGameConsole::PrintLine(int Type, const char *pLine)
@@ -820,6 +824,7 @@ void CGameConsole::OnStateChange(int NewState, int OldState)
 	if(OldState == IClient::STATE_ONLINE && NewState < IClient::STATE_LOADING)
 	{
 		m_RemoteConsole.m_UserGot = false;
+		m_RemoteConsole.m_aUser[0] = '\0';
 		m_RemoteConsole.m_Input.Clear();
 		m_RemoteConsole.m_UsernameReq = false;
 	}
