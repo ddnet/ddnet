@@ -95,6 +95,15 @@ public:
 	virtual int LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual int LoadTextureRawSub(int TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual void TextureSet(int TextureID) = 0;
+	
+	//upload/draw of VBO and IBO
+	virtual void DrawVisualObject(int VisualObjectIDX, float* pColor, char** pOffsets, unsigned int* IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
+	virtual void DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum) = 0;
+	virtual void DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
+	virtual void DestroyVisual(int VisualObjectIDX) = 0;
+	virtual int CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int NumIndicesRequired) = 0;
+	virtual void AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX) = 0;
+	virtual bool IsBufferingEnabled() = 0;
 
 	struct CLineItem
 	{

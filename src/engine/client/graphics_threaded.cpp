@@ -18,7 +18,7 @@
 #include <engine/keys.h>
 #include <engine/console.h>
 
-#include <math.h> // cosf, sinf
+#include <math.h> // cosf, sinf, log2f
 
 #include "graphics_threaded.h"
 
@@ -50,6 +50,10 @@ void CGraphics_Threaded::FlushVertices()
 {
 	if(m_NumVertices == 0)
 		return;
+	
+	size_t VertSize = 0;
+	if(!m_UseOpenGL3_3) VertSize = sizeof(CCommandBuffer::SVertexOld);
+	else VertSize = sizeof(CCommandBuffer::SVertex);
 
 	int NumVerts = m_NumVertices;
 	m_NumVertices = 0;
@@ -59,7 +63,7 @@ void CGraphics_Threaded::FlushVertices()
 
 	if(m_Drawing == DRAWING_QUADS)
 	{
-		if(g_Config.m_GfxQuadAsTriangle)
+		if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 		{
 			Cmd.m_PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			Cmd.m_PrimCount = NumVerts/3;
@@ -78,13 +82,13 @@ void CGraphics_Threaded::FlushVertices()
 	else
 		return;
 
-	Cmd.m_pVertices = (CCommandBuffer::SVertex *)m_pCommandBuffer->AllocData(sizeof(CCommandBuffer::SVertex)*NumVerts);
+	Cmd.m_pVertices = (CCommandBuffer::SVertexBase *)m_pCommandBuffer->AllocData(VertSize*NumVerts);
 	if(Cmd.m_pVertices == 0x0)
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Cmd.m_pVertices = (CCommandBuffer::SVertex *)m_pCommandBuffer->AllocData(sizeof(CCommandBuffer::SVertex)*NumVerts);
+		Cmd.m_pVertices = (CCommandBuffer::SVertexBase *)m_pCommandBuffer->AllocData(VertSize*NumVerts);
 		if(Cmd.m_pVertices == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
@@ -98,7 +102,7 @@ void CGraphics_Threaded::FlushVertices()
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Cmd.m_pVertices = (CCommandBuffer::SVertex *)m_pCommandBuffer->AllocData(sizeof(CCommandBuffer::SVertex)*NumVerts);
+		Cmd.m_pVertices = (CCommandBuffer::SVertexBase *)m_pCommandBuffer->AllocData(VertSize*NumVerts);
 		if(Cmd.m_pVertices == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
@@ -112,7 +116,7 @@ void CGraphics_Threaded::FlushVertices()
 		}
 	}
 
-	mem_copy(Cmd.m_pVertices, m_aVertices, sizeof(CCommandBuffer::SVertex)*NumVerts);
+	mem_copy(Cmd.m_pVertices, m_pVertices, VertSize*NumVerts);
 }
 
 void CGraphics_Threaded::AddVertices(int Count)
@@ -122,19 +126,35 @@ void CGraphics_Threaded::AddVertices(int Count)
 		FlushVertices();
 }
 
-void CGraphics_Threaded::Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints, int NumPoints)
+void CGraphics_Threaded::Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertexBase *pPoints, int NumPoints)
 {
 	float c = cosf(m_Rotation);
 	float s = sinf(m_Rotation);
 	float x, y;
 	int i;
 
-	for(i = 0; i < NumPoints; i++)
+	
+	if(m_UseOpenGL3_3)
 	{
-		x = pPoints[i].m_Pos.x - rCenter.x;
-		y = pPoints[i].m_Pos.y - rCenter.y;
-		pPoints[i].m_Pos.x = x * c - y * s + rCenter.x;
-		pPoints[i].m_Pos.y = x * s + y * c + rCenter.y;
+		CCommandBuffer::SVertex* pVertices = (CCommandBuffer::SVertex*) pPoints;
+		for(i = 0; i < NumPoints; i++)
+		{
+			x = pVertices[i].m_Pos.x - rCenter.x;
+			y = pVertices[i].m_Pos.y - rCenter.y;
+			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
+			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
+		}
+	}
+	else
+	{
+		CCommandBuffer::SVertexOld* pVertices = (CCommandBuffer::SVertexOld*) pPoints;
+		for(i = 0; i < NumPoints; i++)
+		{
+			x = pVertices[i].m_Pos.x - rCenter.x;
+			y = pVertices[i].m_Pos.y - rCenter.y;
+			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
+			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
+		}
 	}
 }
 
@@ -263,15 +283,15 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 
 	for(int i = 0; i < Num; ++i)
 	{
-		m_aVertices[m_NumVertices + 2*i].m_Pos.x = pArray[i].m_X0;
-		m_aVertices[m_NumVertices + 2*i].m_Pos.y = pArray[i].m_Y0;
-		m_aVertices[m_NumVertices + 2*i].m_Tex = m_aTexture[0];
-		m_aVertices[m_NumVertices + 2*i].m_Color = m_aColor[0];
+		GetVertex(m_NumVertices + 2*i)->m_Pos.x = pArray[i].m_X0;
+		GetVertex(m_NumVertices + 2*i)->m_Pos.y = pArray[i].m_Y0;
+		GetVertex(m_NumVertices + 2*i)->m_Tex = m_aTexture[0];
+		SetColor(GetVertex(m_NumVertices + 2*i), 0);
 
-		m_aVertices[m_NumVertices + 2*i + 1].m_Pos.x = pArray[i].m_X1;
-		m_aVertices[m_NumVertices + 2*i + 1].m_Pos.y = pArray[i].m_Y1;
-		m_aVertices[m_NumVertices + 2*i + 1].m_Tex = m_aTexture[1];
-		m_aVertices[m_NumVertices + 2*i + 1].m_Color = m_aColor[1];
+		GetVertex(m_NumVertices + 2*i + 1)->m_Pos.x = pArray[i].m_X1;
+		GetVertex(m_NumVertices + 2*i + 1)->m_Pos.y = pArray[i].m_Y1;
+		GetVertex(m_NumVertices + 2*i + 1)->m_Tex = m_aTexture[1];
+		SetColor(GetVertex(m_NumVertices + 2*i + 1), 1);
 	}
 
 	AddVertices(2*Num);
@@ -330,9 +350,14 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 	void *pTmpData = mem_alloc(MemSize, sizeof(void*));
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
-
-	//
-	m_pCommandBuffer->AddCommand(Cmd);
+	
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		m_pCommandBuffer->AddCommand(Cmd);
+	}		
 	return 0;
 }
 
@@ -372,8 +397,13 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
 
-	//
-	m_pCommandBuffer->AddCommand(Cmd);
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		m_pCommandBuffer->AddCommand(Cmd);
+	}
 
 	return Tex;
 }
@@ -535,16 +565,37 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 	m_Rotation = Angle;
 }
 
+inline void clampf(float& Value, float Min, float Max)
+{
+	if(Value > Max) Value = Max;
+	else if(Value < Min) Value = Min;
+}
+
 void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, int Num)
 {
 	dbg_assert(m_Drawing != 0, "called Graphics()->SetColorVertex without begin");
 
 	for(int i = 0; i < Num; ++i)
 	{
-		m_aColor[pArray[i].m_Index].r = pArray[i].m_R;
-		m_aColor[pArray[i].m_Index].g = pArray[i].m_G;
-		m_aColor[pArray[i].m_Index].b = pArray[i].m_B;
-		m_aColor[pArray[i].m_Index].a = pArray[i].m_A;
+		if(m_UseOpenGL3_3)
+		{
+			float r = pArray[i].m_R, g = pArray[i].m_G, b = pArray[i].m_B, a = pArray[i].m_A;
+			clampf(r, 0.f, 1.f);
+			clampf(g, 0.f, 1.f);
+			clampf(b, 0.f, 1.f);
+			clampf(a, 0.f, 1.f);
+			m_aColor[pArray[i].m_Index].r = (unsigned char)(r*255.f);
+			m_aColor[pArray[i].m_Index].g = (unsigned char)(g*255.f);
+			m_aColor[pArray[i].m_Index].b = (unsigned char)(b*255.f);
+			m_aColor[pArray[i].m_Index].a = (unsigned char)(a*255.f);
+		} 
+		else
+		{				
+			m_aColorOld[pArray[i].m_Index].r = pArray[i].m_R;
+			m_aColorOld[pArray[i].m_Index].g = pArray[i].m_G;
+			m_aColorOld[pArray[i].m_Index].b = pArray[i].m_B;
+			m_aColorOld[pArray[i].m_Index].a = pArray[i].m_A;
+		}
 	}
 }
 
@@ -557,6 +608,34 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 		CColorVertex(2, r, g, b, a),
 		CColorVertex(3, r, g, b, a)};
 	SetColorVertex(Array, 4);
+}
+
+void CGraphics_Threaded::SetColor(CCommandBuffer::SVertexBase* pVertex, int ColorIndex)
+{
+	if(m_UseOpenGL3_3)
+	{
+		CCommandBuffer::SVertex* pVert = (CCommandBuffer::SVertex*)pVertex;
+		pVert->m_Color.r = m_aColor[ColorIndex].r;
+		pVert->m_Color.g = m_aColor[ColorIndex].g;
+		pVert->m_Color.b = m_aColor[ColorIndex].b;
+		pVert->m_Color.a = m_aColor[ColorIndex].a;
+	} 
+	else 
+	{
+		CCommandBuffer::SVertexOld* pVert = (CCommandBuffer::SVertexOld*)pVertex;
+		pVert->m_Color.r = m_aColorOld[ColorIndex].r;
+		pVert->m_Color.g = m_aColorOld[ColorIndex].g;
+		pVert->m_Color.b = m_aColorOld[ColorIndex].b;
+		pVert->m_Color.a = m_aColorOld[ColorIndex].a;
+	}
+}
+
+CCommandBuffer::SVertexBase* CGraphics_Threaded::GetVertex(int Index)
+{
+	if(!m_UseOpenGL3_3)
+		return &((CCommandBuffer::SVertexOld*)m_pVertices)[Index];
+	else
+		return &((CCommandBuffer::SVertex*)m_pVertices)[Index];
 }
 
 void CGraphics_Threaded::QuadsSetSubset(float TlU, float TlV, float BrU, float BrV)
@@ -594,52 +673,51 @@ void CGraphics_Threaded::QuadsDraw(CQuadItem *pArray, int Num)
 void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 {
 	CCommandBuffer::SPoint Center;
-	Center.z = 0;
 
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle)
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
 			// first triangle
-			m_aVertices[m_NumVertices + 6*i].m_Pos.x = pArray[i].m_X;
-			m_aVertices[m_NumVertices + 6*i].m_Pos.y = pArray[i].m_Y;
-			m_aVertices[m_NumVertices + 6*i].m_Tex = m_aTexture[0];
-			m_aVertices[m_NumVertices + 6*i].m_Color = m_aColor[0];
+			GetVertex(m_NumVertices + 6*i)->m_Pos.x = pArray[i].m_X;
+			GetVertex(m_NumVertices + 6*i)->m_Pos.y = pArray[i].m_Y;
+			GetVertex(m_NumVertices + 6*i)->m_Tex = m_aTexture[0];
+			SetColor(GetVertex(m_NumVertices + 6*i), 0);
 
-			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
-			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.y = pArray[i].m_Y;
-			m_aVertices[m_NumVertices + 6*i + 1].m_Tex = m_aTexture[1];
-			m_aVertices[m_NumVertices + 6*i + 1].m_Color = m_aColor[1];
+			GetVertex(m_NumVertices + 6*i + 1)->m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			GetVertex(m_NumVertices + 6*i + 1)->m_Pos.y = pArray[i].m_Y;
+			GetVertex(m_NumVertices + 6*i + 1)->m_Tex = m_aTexture[1];
+			SetColor(GetVertex(m_NumVertices + 6*i + 1), 1);
 
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[2];
-			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[2];
+			GetVertex(m_NumVertices + 6*i + 2)->m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			GetVertex(m_NumVertices + 6*i + 2)->m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			GetVertex(m_NumVertices + 6*i + 2)->m_Tex = m_aTexture[2];
+			SetColor(GetVertex(m_NumVertices + 6*i + 2), 2);
 
 			// second triangle
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[0];
-			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[0];
+			GetVertex(m_NumVertices + 6*i + 3)->m_Pos.x = pArray[i].m_X;
+			GetVertex(m_NumVertices + 6*i + 3)->m_Pos.y = pArray[i].m_Y;
+			GetVertex(m_NumVertices + 6*i + 3)->m_Tex = m_aTexture[0];
+			SetColor(GetVertex(m_NumVertices + 6*i + 3), 0);
 
-			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
-			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-			m_aVertices[m_NumVertices + 6*i + 4].m_Tex = m_aTexture[2];
-			m_aVertices[m_NumVertices + 6*i + 4].m_Color = m_aColor[2];
+			GetVertex(m_NumVertices + 6*i + 4)->m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			GetVertex(m_NumVertices + 6*i + 4)->m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			GetVertex(m_NumVertices + 6*i + 4)->m_Tex = m_aTexture[2];
+			SetColor(GetVertex(m_NumVertices + 6*i + 4), 2);
 
-			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.x = pArray[i].m_X;
-			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-			m_aVertices[m_NumVertices + 6*i + 5].m_Tex = m_aTexture[3];
-			m_aVertices[m_NumVertices + 6*i + 5].m_Color = m_aColor[3];
+			GetVertex(m_NumVertices + 6*i + 5)->m_Pos.x = pArray[i].m_X;
+			GetVertex(m_NumVertices + 6*i + 5)->m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			GetVertex(m_NumVertices + 6*i + 5)->m_Tex = m_aTexture[3];
+			SetColor(GetVertex(m_NumVertices + 6*i + 5), 3);
 
 			if(m_Rotation != 0)
 			{
 				Center.x = pArray[i].m_X + pArray[i].m_Width/2;
 				Center.y = pArray[i].m_Y + pArray[i].m_Height/2;
 
-				Rotate(Center, &m_aVertices[m_NumVertices + 6*i], 6);
+				Rotate(Center, GetVertex(m_NumVertices + 6*i), 6);
 			}
 		}
 
@@ -649,32 +727,32 @@ void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
-			m_aVertices[m_NumVertices + 4*i].m_Pos.x = pArray[i].m_X;
-			m_aVertices[m_NumVertices + 4*i].m_Pos.y = pArray[i].m_Y;
-			m_aVertices[m_NumVertices + 4*i].m_Tex = m_aTexture[0];
-			m_aVertices[m_NumVertices + 4*i].m_Color = m_aColor[0];
+			GetVertex(m_NumVertices + 4*i)->m_Pos.x = pArray[i].m_X;
+			GetVertex(m_NumVertices + 4*i)->m_Pos.y = pArray[i].m_Y;
+			GetVertex(m_NumVertices + 4*i)->m_Tex = m_aTexture[0];
+			SetColor(GetVertex(m_NumVertices + 4*i), 0);
 
-			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
-			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.y = pArray[i].m_Y;
-			m_aVertices[m_NumVertices + 4*i + 1].m_Tex = m_aTexture[1];
-			m_aVertices[m_NumVertices + 4*i + 1].m_Color = m_aColor[1];
+			GetVertex(m_NumVertices + 4*i + 1)->m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			GetVertex(m_NumVertices + 4*i + 1)->m_Pos.y = pArray[i].m_Y;
+			GetVertex(m_NumVertices + 4*i + 1)->m_Tex = m_aTexture[1];
+			SetColor(GetVertex(m_NumVertices + 4*i + 1), 1);
 
-			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
-			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-			m_aVertices[m_NumVertices + 4*i + 2].m_Tex = m_aTexture[2];
-			m_aVertices[m_NumVertices + 4*i + 2].m_Color = m_aColor[2];
+			GetVertex(m_NumVertices + 4*i + 2)->m_Pos.x = pArray[i].m_X + pArray[i].m_Width;
+			GetVertex(m_NumVertices + 4*i + 2)->m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			GetVertex(m_NumVertices + 4*i + 2)->m_Tex = m_aTexture[2];
+			SetColor(GetVertex(m_NumVertices + 4*i + 2), 2);
 
-			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.x = pArray[i].m_X;
-			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
-			m_aVertices[m_NumVertices + 4*i + 3].m_Tex = m_aTexture[3];
-			m_aVertices[m_NumVertices + 4*i + 3].m_Color = m_aColor[3];
+			GetVertex(m_NumVertices + 4*i + 3)->m_Pos.x = pArray[i].m_X;
+			GetVertex(m_NumVertices + 4*i + 3)->m_Pos.y = pArray[i].m_Y + pArray[i].m_Height;
+			GetVertex(m_NumVertices + 4*i + 3)->m_Tex = m_aTexture[3];
+			SetColor(GetVertex(m_NumVertices + 4*i + 3), 3);
 
 			if(m_Rotation != 0)
 			{
 				Center.x = pArray[i].m_X + pArray[i].m_Width/2;
 				Center.y = pArray[i].m_Y + pArray[i].m_Height/2;
 
-				Rotate(Center, &m_aVertices[m_NumVertices + 4*i], 4);
+				Rotate(Center, GetVertex(m_NumVertices + 4*i), 4);
 			}
 		}
 
@@ -686,39 +764,39 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if(g_Config.m_GfxQuadAsTriangle)
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
-			m_aVertices[m_NumVertices + 6*i].m_Pos.x = pArray[i].m_X0;
-			m_aVertices[m_NumVertices + 6*i].m_Pos.y = pArray[i].m_Y0;
-			m_aVertices[m_NumVertices + 6*i].m_Tex = m_aTexture[0];
-			m_aVertices[m_NumVertices + 6*i].m_Color = m_aColor[0];
+			GetVertex(m_NumVertices + 6*i)->m_Pos.x = pArray[i].m_X0;
+			GetVertex(m_NumVertices + 6*i)->m_Pos.y = pArray[i].m_Y0;
+			GetVertex(m_NumVertices + 6*i)->m_Tex = m_aTexture[0];
+			SetColor(GetVertex(m_NumVertices + 6*i), 0);
 
-			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.x = pArray[i].m_X1;
-			m_aVertices[m_NumVertices + 6*i + 1].m_Pos.y = pArray[i].m_Y1;
-			m_aVertices[m_NumVertices + 6*i + 1].m_Tex = m_aTexture[1];
-			m_aVertices[m_NumVertices + 6*i + 1].m_Color = m_aColor[1];
+			GetVertex(m_NumVertices + 6*i + 1)->m_Pos.x = pArray[i].m_X1;
+			GetVertex(m_NumVertices + 6*i + 1)->m_Pos.y = pArray[i].m_Y1;
+			GetVertex(m_NumVertices + 6*i + 1)->m_Tex = m_aTexture[1];
+			SetColor(GetVertex(m_NumVertices + 6*i + 1), 1);
 
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.x = pArray[i].m_X3;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Pos.y = pArray[i].m_Y3;
-			m_aVertices[m_NumVertices + 6*i + 2].m_Tex = m_aTexture[3];
-			m_aVertices[m_NumVertices + 6*i + 2].m_Color = m_aColor[3];
+			GetVertex(m_NumVertices + 6*i + 2)->m_Pos.x = pArray[i].m_X3;
+			GetVertex(m_NumVertices + 6*i + 2)->m_Pos.y = pArray[i].m_Y3;
+			GetVertex(m_NumVertices + 6*i + 2)->m_Tex = m_aTexture[3];
+			SetColor(GetVertex(m_NumVertices + 6*i + 2), 3);
 
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.x = pArray[i].m_X0;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Pos.y = pArray[i].m_Y0;
-			m_aVertices[m_NumVertices + 6*i + 3].m_Tex = m_aTexture[0];
-			m_aVertices[m_NumVertices + 6*i + 3].m_Color = m_aColor[0];
+			GetVertex(m_NumVertices + 6*i + 3)->m_Pos.x = pArray[i].m_X0;
+			GetVertex(m_NumVertices + 6*i + 3)->m_Pos.y = pArray[i].m_Y0;
+			GetVertex(m_NumVertices + 6*i + 3)->m_Tex = m_aTexture[0];
+			SetColor(GetVertex(m_NumVertices + 6*i + 3), 0);
 
-			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.x = pArray[i].m_X3;
-			m_aVertices[m_NumVertices + 6*i + 4].m_Pos.y = pArray[i].m_Y3;
-			m_aVertices[m_NumVertices + 6*i + 4].m_Tex = m_aTexture[3];
-			m_aVertices[m_NumVertices + 6*i + 4].m_Color = m_aColor[3];
+			GetVertex(m_NumVertices + 6*i + 4)->m_Pos.x = pArray[i].m_X3;
+			GetVertex(m_NumVertices + 6*i + 4)->m_Pos.y = pArray[i].m_Y3;
+			GetVertex(m_NumVertices + 6*i + 4)->m_Tex = m_aTexture[3];
+			SetColor(GetVertex(m_NumVertices + 6*i + 4), 3);
 
-			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.x = pArray[i].m_X2;
-			m_aVertices[m_NumVertices + 6*i + 5].m_Pos.y = pArray[i].m_Y2;
-			m_aVertices[m_NumVertices + 6*i + 5].m_Tex = m_aTexture[2];
-			m_aVertices[m_NumVertices + 6*i + 5].m_Color = m_aColor[2];
+			GetVertex(m_NumVertices + 6*i + 5)->m_Pos.x = pArray[i].m_X2;
+			GetVertex(m_NumVertices + 6*i + 5)->m_Pos.y = pArray[i].m_Y2;
+			GetVertex(m_NumVertices + 6*i + 5)->m_Tex = m_aTexture[2];
+			SetColor(GetVertex(m_NumVertices + 6*i + 5), 2);
 		}
 
 		AddVertices(3*2*Num);
@@ -727,25 +805,25 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
-			m_aVertices[m_NumVertices + 4*i].m_Pos.x = pArray[i].m_X0;
-			m_aVertices[m_NumVertices + 4*i].m_Pos.y = pArray[i].m_Y0;
-			m_aVertices[m_NumVertices + 4*i].m_Tex = m_aTexture[0];
-			m_aVertices[m_NumVertices + 4*i].m_Color = m_aColor[0];
+			GetVertex(m_NumVertices + 4*i)->m_Pos.x = pArray[i].m_X0;
+			GetVertex(m_NumVertices + 4*i)->m_Pos.y = pArray[i].m_Y0;
+			GetVertex(m_NumVertices + 4*i)->m_Tex = m_aTexture[0];
+			SetColor(GetVertex(m_NumVertices + 4*i), 0);
 
-			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.x = pArray[i].m_X1;
-			m_aVertices[m_NumVertices + 4*i + 1].m_Pos.y = pArray[i].m_Y1;
-			m_aVertices[m_NumVertices + 4*i + 1].m_Tex = m_aTexture[1];
-			m_aVertices[m_NumVertices + 4*i + 1].m_Color = m_aColor[1];
+			GetVertex(m_NumVertices + 4*i + 1)->m_Pos.x = pArray[i].m_X1;
+			GetVertex(m_NumVertices + 4*i + 1)->m_Pos.y = pArray[i].m_Y1;
+			GetVertex(m_NumVertices + 4*i + 1)->m_Tex = m_aTexture[1];
+			SetColor(GetVertex(m_NumVertices + 4*i + 1), 1);
 
-			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.x = pArray[i].m_X3;
-			m_aVertices[m_NumVertices + 4*i + 2].m_Pos.y = pArray[i].m_Y3;
-			m_aVertices[m_NumVertices + 4*i + 2].m_Tex = m_aTexture[3];
-			m_aVertices[m_NumVertices + 4*i + 2].m_Color = m_aColor[3];
+			GetVertex(m_NumVertices + 4*i + 2)->m_Pos.x = pArray[i].m_X3;
+			GetVertex(m_NumVertices + 4*i + 2)->m_Pos.y = pArray[i].m_Y3;
+			GetVertex(m_NumVertices + 4*i + 2)->m_Tex = m_aTexture[3];
+			SetColor(GetVertex(m_NumVertices + 4*i + 2), 3);
 
-			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.x = pArray[i].m_X2;
-			m_aVertices[m_NumVertices + 4*i + 3].m_Pos.y = pArray[i].m_Y2;
-			m_aVertices[m_NumVertices + 4*i + 3].m_Tex = m_aTexture[2];
-			m_aVertices[m_NumVertices + 4*i + 3].m_Color = m_aColor[2];
+			GetVertex(m_NumVertices + 4*i + 3)->m_Pos.x = pArray[i].m_X2;
+			GetVertex(m_NumVertices + 4*i + 3)->m_Pos.y = pArray[i].m_Y2;
+			GetVertex(m_NumVertices + 4*i + 3)->m_Tex = m_aTexture[2];
+			SetColor(GetVertex(m_NumVertices + 4*i + 3), 2);
 		}
 
 		AddVertices(4*Num);
@@ -781,6 +859,350 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
+void mem_copy_special(void* pDest, void* pSource, size_t Size, size_t Count, size_t Steps)
+{
+	size_t CurStep = 0;
+	for(size_t i = 0; i < Count; ++i)
+	{
+		mem_copy(((char*)pDest) + CurStep + i * Size, ((char*)pSource) + i * Size, Size);
+		CurStep += Steps;
+	}
+}
+
+void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, char** pOffsets, unsigned int* IndicedVertexDrawNum, size_t NumIndicesOffet)
+{
+	if(NumIndicesOffet == 0) return;
+	
+	//add the VertexArrays and draw
+	CCommandBuffer::SCommand_RenderVertexArray Cmd;
+	Cmd.m_State = m_State;
+	Cmd.m_IndicesDrawNum = NumIndicesOffet;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	//5 because log2(1024/(2^5)) is 5 -- 2^5 = 32 which would mean 2 pixels per tile index
+	if(LOD > 5) LOD = 5;
+	if(LOD < 0) LOD = 0;
+	Cmd.m_LOD = LOD;
+
+	void* Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+	if(Data == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+	
+		void* Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+		if(Data == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+	}
+	Cmd.m_pIndicesOffsets = (char**)Data;
+	Cmd.m_pDrawCount = (unsigned int*)(((char*)Data) + (sizeof(char*)*NumIndicesOffet));
+	
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+		if(Data == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+		Cmd.m_pIndicesOffsets = (char**)Data;
+		Cmd.m_pDrawCount = (unsigned int*)(((char*)Data) + (sizeof(char*)*NumIndicesOffet));
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for render command");
+			return;
+		}
+	}
+
+	
+	mem_copy(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char*)*NumIndicesOffet);
+	mem_copy(Cmd.m_pDrawCount, IndicedVertexDrawNum, sizeof(unsigned int)*NumIndicesOffet);
+	
+	//todo max indices group check!!
+}
+
+void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum)
+{
+	if(DrawNum == 0) return;
+	//draw a border tile alot of times
+	CCommandBuffer::SCommand_RenderBorderTile Cmd;
+	Cmd.m_State = m_State;
+	Cmd.m_DrawNum = DrawNum;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	if(LOD > 5) LOD = 5;
+	if(LOD < 0) LOD = 0;
+	Cmd.m_LOD = LOD;
+
+	Cmd.m_pIndicesOffset = pOffset;
+	Cmd.m_JumpIndex = JumpIndex;
+	
+	Cmd.m_Offset[0] = Offset[0];
+	Cmd.m_Offset[1] = Offset[1];
+	Cmd.m_Dir[0] = Dir[0];
+	Cmd.m_Dir[1] = Dir[1];
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for render command");
+			return;
+		}
+	}
+}
+
+void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
+{
+	if(IndexDrawNum == 0 || RedrawNum == 0) return;
+	//draw a border tile alot of times
+	CCommandBuffer::SCommand_RenderBorderTileLine Cmd;
+	Cmd.m_State = m_State;
+	Cmd.m_IndexDrawNum = IndexDrawNum;
+	Cmd.m_DrawNum = RedrawNum;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
+	float ScreenZoomRatio = ScreenWidth() / (m_State.m_ScreenBR.x - m_State.m_ScreenTL.x);
+	//the number of pixels we would skip in the fragment shader -- basically the LOD
+	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
+	//log2 gives us the amount of halving the texture for mipmapping
+	int LOD = (int)log2f(LODFactor);
+	if(LOD > 5) LOD = 5;
+	if(LOD < 0) LOD = 0;
+	Cmd.m_LOD = LOD;
+
+	Cmd.m_pIndicesOffset = pOffset;
+	
+	Cmd.m_Dir[0] = Dir[0];
+	Cmd.m_Dir[1] = Dir[1];
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for render command");
+			return;
+		}
+	}
+}
+
+void CGraphics_Threaded::DestroyVisual(int VisualObjectIDX)
+{
+	if (VisualObjectIDX == -1) return;
+	CCommandBuffer::SCommand_DestroyVisual Cmd;
+	Cmd.m_VisualObjectIDX = m_VertexArrayIndices[VisualObjectIDX];
+	
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for destroy all visuals command");
+			return;
+		}
+	}
+	
+	//also clear the vert array index
+	m_VertexArrayIndices[VisualObjectIDX] = m_FirstFreeVertexArrayIndex;
+	m_FirstFreeVertexArrayIndex = VisualObjectIDX;
+}
+
+int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int NumIndicesRequired)
+{
+	if(!pVertices) return -1;
+	
+	//first create an index
+	int index = -1;
+	if(m_FirstFreeVertexArrayIndex == -1)
+	{
+		index = m_VertexArrayIndices.size();
+		m_VertexArrayIndices.push_back(index);
+	}
+	else
+	{
+		index = m_FirstFreeVertexArrayIndex;
+		m_FirstFreeVertexArrayIndex = m_VertexArrayIndices[index];
+		m_VertexArrayIndices[index] = index;
+	}
+	
+	//upload the vertex buffer first
+	//the size of the cmd data buffer is 2MB -- we create 4 vertices of each 2 floats plus 2 shorts(2*unsigned char each) if TexCoordinates are used
+	char AddTexture = (pTexCoords == NULL ? 0 : 1);
+	int AddTextureSize = (pTexCoords == NULL ? 0 : (sizeof(unsigned char) * 2 * 2 * 4));
+	
+	int MaxTileNumUpload = (1024*1024*2) / (sizeof(float) * 4 * 2 + AddTextureSize);
+	
+	int RealTileNum = NumTiles;
+	if(NumTiles > MaxTileNumUpload) RealTileNum = MaxTileNumUpload;
+
+	CCommandBuffer::SCommand_CreateVertexBufferObject Cmd;
+	Cmd.m_IsTextured = pTexCoords != NULL;
+	Cmd.m_VisualObjectIDX = index;
+	int NumVerts = (Cmd.m_NumVertices = RealTileNum * 4 * 2); //number of vertices to upload -- same value for texcoords(if used)
+	
+	Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+	if(Cmd.m_Elements == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return -1;
+		}
+	}
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return -1;
+		}
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create vertex buffer command");
+			return -1;
+		}
+	}
+	
+	mem_copy_special(Cmd.m_Elements, pVertices, sizeof(float) * 2, RealTileNum * 4, (AddTexture) * sizeof(unsigned char) * 2 * 2);
+	
+	if(pTexCoords)
+	{
+		mem_copy_special(((char*)Cmd.m_Elements) + sizeof(float) * 2, pTexCoords, sizeof(unsigned char) * 2 * 2, RealTileNum * 4, (AddTexture) * sizeof(float) * 2);
+	}
+		
+	if(NumTiles > MaxTileNumUpload)
+	{
+		pVertices += NumVerts;
+		if(pTexCoords) pTexCoords += NumVerts*2;
+		AppendAllVertices(pVertices, pTexCoords, NumTiles - MaxTileNumUpload, index);
+	}
+		
+	CCommandBuffer::SCommand_CreateVertexArrayObject VertArrayCmd;
+	VertArrayCmd.m_VisualObjectIDX = index;
+	VertArrayCmd.m_RequiredIndicesCount = NumIndicesRequired;
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(VertArrayCmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		
+		if(!m_pCommandBuffer->AddCommand(VertArrayCmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create vertex array command");
+			return -1;
+		}
+	}
+	
+	//make sure we uploaded everything
+	KickCommandBuffer();
+	
+	return index;
+}
+
+void CGraphics_Threaded::AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX)
+{
+	//the size of the cmd data buffer is 2MB -- we create 4 vertices of each 2 floats plus 2 shorts(2*unsigned char each) if TexCoordinates are used
+	char AddTexture = (pTexCoords == NULL ? 0 : 1);
+	int AddTextureSize = (pTexCoords == NULL ? 0 : (sizeof(unsigned char) * 2 * 2 * 4));
+	
+	int MaxTileNumUpload = (1024*1024*2) / (sizeof(float) * 4 * 2 + AddTextureSize);
+	
+	int RealTileNum = NumTiles;
+	if(NumTiles > MaxTileNumUpload) RealTileNum = MaxTileNumUpload;
+
+	CCommandBuffer::SCommand_AppendVertexBufferObject Cmd;
+	int NumVerts = (Cmd.m_NumVertices = RealTileNum * 4 * 2); //number of vertices to upload -- same value for texcoords(if used)
+	Cmd.m_VisualObjectIDX = VisualObjectIDX;
+
+	Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+	if(Cmd.m_Elements == 0x0)
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+	}
+
+	// check if we have enough free memory in the commandbuffer
+	if(!m_pCommandBuffer->AddCommand(Cmd))
+	{
+		// kick command buffer and try again
+		KickCommandBuffer();
+		
+		Cmd.m_Elements = m_pCommandBuffer->AllocData(RealTileNum * (sizeof(float) * 4 * 2 + AddTextureSize));
+		if(Cmd.m_Elements == 0x0)
+		{
+			dbg_msg("graphics", "failed to allocate data for vertices");
+			return;
+		}
+
+		if(!m_pCommandBuffer->AddCommand(Cmd))
+		{
+			dbg_msg("graphics", "failed to allocate memory for create vertex buffer command");
+			return;
+		}
+	}
+	
+	mem_copy_special(Cmd.m_Elements, pVertices, sizeof(float) * 2, RealTileNum * 4, (AddTexture) * sizeof(unsigned char) * 2 * 2);
+	
+	if(pTexCoords)
+	{
+		mem_copy_special(((char*)Cmd.m_Elements) + sizeof(float) * 2, pTexCoords, sizeof(unsigned char) * 2 * 2, RealTileNum * 4, (AddTexture) * sizeof(float) * 2);
+	}
+	
+	if(NumTiles > RealTileNum)
+	{
+		pVertices += NumVerts;
+		if(pTexCoords) pTexCoords += NumVerts*2;
+		AppendAllVertices(pVertices, pTexCoords, NumTiles - RealTileNum, VisualObjectIDX);
+	}
+}
+
 int CGraphics_Threaded::IssueInit()
 {
 	int Flags = 0;
@@ -790,7 +1212,9 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxVsync) Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxResizable) Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 
-	return m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
+	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, g_Config.m_GfxFsaaSamples, Flags, &m_DesktopScreenWidth, &m_DesktopScreenHeight);
+	m_UseOpenGL3_3 = m_pBackend->IsOpenGL3_3();
+	return r;
 }
 
 int CGraphics_Threaded::InitWindow()
@@ -808,6 +1232,14 @@ int CGraphics_Threaded::InitWindow()
 		else
 			dbg_msg("gfx", "disabling FSAA and trying again");
 
+		if(IssueInit() == 0)
+			return 0;
+	}
+	
+	//try using old opengl context
+	if(!g_Config.m_GfxForceOldOpenGL)
+	{
+		g_Config.m_GfxForceOldOpenGL = 1;
 		if(IssueInit() == 0)
 			return 0;
 	}
@@ -834,19 +1266,22 @@ int CGraphics_Threaded::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	// Set all z to -5.0f
-	for(int i = 0; i < MAX_VERTICES; i++)
-		m_aVertices[i].m_Pos.z = -5.0f;
-
 	// init textures
 	m_FirstFreeTexture = 0;
 	for(int i = 0; i < MAX_TEXTURES-1; i++)
 		m_aTextureIndices[i] = i+1;
 	m_aTextureIndices[MAX_TEXTURES-1] = -1;
+	
+	m_FirstFreeVertexArrayIndex = -1;
 
 	m_pBackend = CreateGraphicsBackend();
 	if(InitWindow() != 0)
 		return -1;
+	
+	if(m_UseOpenGL3_3)
+		m_pVertices = m_aVertices;
+	else
+		m_pVertices = m_aVerticesOld;
 
 	// fetch final resolution
 	m_ScreenWidth = g_Config.m_GfxScreenWidth;

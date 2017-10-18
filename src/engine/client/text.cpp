@@ -745,6 +745,122 @@ public:
 			pCursor->m_Y = DrawY;
 	}
 
+	virtual void UploadText(int TextureID, const char *pText, int Length, float x, float y, int Size, int MaxWidth, int MaxSize = -1, int MinSize = -1)
+	{
+		CFont *pFont = m_pDefaultFont;
+		FT_Bitmap *pBitmap;
+
+		if(!pFont)
+			return;
+		
+		// set length
+		if(Length < 0)
+			Length = str_length(pText);
+
+		const char *pCurrent = (char *)pText;
+		const char *pEnd = pCurrent+Length;
+		
+		int WidthLastChars = 0;
+		
+		int FontSize = Size;
+		
+		//adjust font size by the full space
+		if(Size == -1)
+		{
+			bool FoundMaxFontSize = false;
+			if(MinSize == -1) 
+				MinSize = 8;
+			FontSize = MinSize;
+			
+			while(!FoundMaxFontSize)
+			{
+				int WidthOfText = 0;
+				
+				while(pCurrent < pEnd)
+				{
+					const char *pTmp = pCurrent;
+					int NextCharacter = str_utf8_decode(&pTmp);
+					
+					if(NextCharacter)
+					{
+						FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
+						if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
+						{
+							dbg_msg("pFont", "error loading glyph %d", NextCharacter);
+							pCurrent = pTmp;
+							continue;
+						}
+						pBitmap = &pFont->m_FtFace->glyph->bitmap;
+						
+						WidthOfText += pBitmap->width + 1;				
+					}
+					pCurrent = pTmp;
+				}
+				if(WidthOfText > MaxWidth || (MaxSize != -1 && FontSize > MaxSize))
+					FoundMaxFontSize = true;
+				
+				pCurrent = (char *)pText;
+				pEnd = pCurrent+Length;
+				++FontSize;
+			}
+		}
+		
+	
+		while(pCurrent < pEnd)
+		{			
+			const char *pTmp = pCurrent;
+			int NextCharacter = str_utf8_decode(&pTmp);
+			
+			if(NextCharacter)
+			{
+				unsigned int px, py;
+				
+				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize-1);
+
+				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
+				{
+					dbg_msg("pFont", "error loading glyph %d", NextCharacter);
+					pCurrent = pTmp;
+					continue;
+				}
+				
+				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
+				
+				int MaxSize = (MaxWidth - WidthLastChars);
+				if (MaxSize > 0)
+				{
+					int SlotW = ((((unsigned int)MaxSize) < (unsigned int)pBitmap->width) ? MaxSize : pBitmap->width);
+					int SlotH = pBitmap->rows;
+					int SlotSize = SlotW*SlotH;
+					
+					// prepare glyph data
+					mem_zero(ms_aGlyphData, SlotSize);
+
+					if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
+					{
+						for (py = 0; py < (unsigned)SlotH; py++) // ignore_convention
+							for (px = 0; px < (unsigned)SlotW; px++)
+							{
+								ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
+							}
+					}
+					/*else if(pBitmap->pixel_mode == FT_PIXEL_MODE_MONO) // ignore_convention
+					{
+						for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
+							for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
+							{
+								if(pBitmap->buffer[py*pBitmap->pitch+px/8]&(1<<(7-(px%8)))) // ignore_convention
+									ms_aGlyphData[(py)*SlotW+px] = 255;
+							}
+					}*/
+					
+					Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
+					WidthLastChars += (SlotW + 1);
+				}
+			}
+			pCurrent = pTmp;
+		}
+	}
 };
 
 IEngineTextRender *CreateEngineTextRender() { return new CTextRender; }

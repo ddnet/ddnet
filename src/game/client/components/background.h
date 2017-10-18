@@ -1,14 +1,13 @@
 #ifndef GAME_CLIENT_COMPONENTS_BACKGROUND_H
 #define GAME_CLIENT_COMPONENTS_BACKGROUND_H
 #include <game/client/component.h>
+#include <game/client/components/maplayers.h>
 
 // Special value to use background of current map
 #define CURRENT "%current%"
 
-class CBackground : public CComponent
+class CBackground : public CMapLayers
 {
-	class CMapLayers *m_pLayers;
-	class CMapImages *m_pImages;
 	IEngineMap *m_pMap;
 	bool m_Loaded;
 	char m_aMapName[128];

@@ -2,6 +2,8 @@
 
 #include <engine/graphics.h>
 
+#include <vector>
+
 class CCommandBuffer
 {
 	class CBuffer
@@ -51,6 +53,7 @@ public:
 	enum
 	{
 		MAX_TEXTURES=1024*4,
+		MAX_VERTICES=32*1024,
 	};
 
 	enum
@@ -59,6 +62,7 @@ public:
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
 		CMDGROUP_PLATFORM_OPENGL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
+		CMDGROUP_PLATFORM_OPENGL3_3 = 30000,
 
 		//
 		CMD_NOP = CMDGROUP_CORE,
@@ -77,6 +81,15 @@ public:
 		// rendering
 		CMD_CLEAR,
 		CMD_RENDER,
+		
+		//opengl 3.3 commands
+		CMD_CREATE_VERTEX_ARRAY_OBJECT,//create vao
+		CMD_CREATE_VERTEX_BUFFER_OBJECT,//create vbo
+		CMD_APPEND_VERTEX_BUFFER_OBJECT,//append data to the vbo
+		CMD_RENDER_IBO_VERTEX_ARRAY,//render a specific amount of the index buffer from a vao
+		CMD_RENDER_BORDER_TILE,//render one tile multiple times
+		CMD_RENDER_BORDER_TILE_LINE,//render an amount of tiles multiple times
+		CMD_DESTROY_VISUAL,//destroy all objects used to display anything
 
 		// swap
 		CMD_SWAP,
@@ -122,15 +135,30 @@ public:
 		WRAP_REPEAT = 0,
 		WRAP_CLAMP,
 	};
+	
+//fix all alignments in any struct -- e.g. don't align to 8 bytes at 64bit code
+#pragma pack(push, 1)
 
-	struct SPoint { float x, y, z; };
+	struct SPoint { float x, y; };
 	struct STexCoord { float u, v; };
-	struct SColor { float r, g, b, a; };
+	struct SColorf { float r, g, b, a; };
+	
+	//use normalized color values
+	struct SColor { unsigned char r, g, b, a; };
 
-	struct SVertex
+	struct SVertexBase
 	{
 		SPoint m_Pos;
 		STexCoord m_Tex;
+	};
+	
+	struct SVertexOld : public SVertexBase
+	{
+		SColorf m_Color;
+	};
+	
+	struct SVertex : public SVertexBase
+	{
 		SColor m_Color;
 	};
 
@@ -161,7 +189,7 @@ public:
 	struct SCommand_Clear : public SCommand
 	{
 		SCommand_Clear() : SCommand(CMD_CLEAR) {}
-		SColor m_Color;
+		SColorf m_Color;
 	};
 
 	struct SCommand_Signal : public SCommand
@@ -182,7 +210,84 @@ public:
 		SState m_State;
 		unsigned m_PrimType;
 		unsigned m_PrimCount;
-		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
+		SVertexBase *m_pVertices; // you should use the command buffer data to allocate vertices for this command
+	};
+		
+	struct SCommand_CreateVertexBufferObject : public SCommand
+	{
+		SCommand_CreateVertexBufferObject() : SCommand(CMD_CREATE_VERTEX_BUFFER_OBJECT) {}
+		void* m_Elements; //vertices and optinally textureCoords
+		
+		bool m_IsTextured;
+		
+		int m_NumVertices;
+		int m_VisualObjectIDX;
+	};
+	
+	struct SCommand_AppendVertexBufferObject : public SCommand
+	{
+		SCommand_AppendVertexBufferObject() : SCommand(CMD_APPEND_VERTEX_BUFFER_OBJECT) {}
+		void* m_Elements; //vertices and optinally textureCoords
+		int m_NumVertices;
+		int m_VisualObjectIDX;
+	};
+	
+	struct SCommand_CreateVertexArrayObject : public SCommand
+	{
+		SCommand_CreateVertexArrayObject() : SCommand(CMD_CREATE_VERTEX_ARRAY_OBJECT) {}
+		int m_VisualObjectIDX;
+		unsigned int m_RequiredIndicesCount;
+	};
+	
+	struct SCommand_RenderVertexArray : public SCommand
+	{
+		SCommand_RenderVertexArray() : SCommand(CMD_RENDER_IBO_VERTEX_ARRAY) {}
+		//even if clipping should be enabled, we will render all
+		SState m_State;
+		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
+			
+		//the char offset of all indices that should be rendered, and the amount of renders
+		char** m_pIndicesOffsets;
+		unsigned int* m_pDrawCount;
+		
+		int m_IndicesDrawNum;
+		int m_VisualObjectIDX;
+		int m_LOD;
+	};
+	
+	struct SCommand_RenderBorderTile : public SCommand
+	{
+		SCommand_RenderBorderTile() : SCommand(CMD_RENDER_BORDER_TILE) {}
+		SState m_State;
+		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
+		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
+		unsigned int m_DrawNum;
+		int m_VisualObjectIDX;
+		int m_LOD;
+		
+		float m_Offset[2];
+		float m_Dir[2];
+		int m_JumpIndex;
+	};
+	
+	struct SCommand_RenderBorderTileLine : public SCommand
+	{
+		SCommand_RenderBorderTileLine() : SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
+		SState m_State;
+		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
+		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
+		unsigned int m_IndexDrawNum;
+		unsigned int m_DrawNum;
+		int m_VisualObjectIDX;
+		int m_LOD;
+		
+		float m_Dir[2];
+	};
+	
+	struct SCommand_DestroyVisual : public SCommand
+	{
+		SCommand_DestroyVisual() : SCommand(CMD_DESTROY_VISUAL) {}
+		int m_VisualObjectIDX;
 	};
 
 	struct SCommand_Screenshot : public SCommand
@@ -264,6 +369,8 @@ public:
 		int m_Slot;
 	};
 
+#pragma pack(pop)
+
 	//
 	CCommandBuffer(unsigned CmdBufferSize, unsigned DataBufferSize)
 	: m_CmdBuffer(CmdBufferSize), m_DataBuffer(DataBufferSize)
@@ -343,6 +450,8 @@ public:
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
+	
+	virtual bool IsOpenGL3_3() { return false; }
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -360,6 +469,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
+	bool m_UseOpenGL3_3;
 
 	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
 	CCommandBuffer *m_pCommandBuffer;
@@ -370,8 +480,11 @@ class CGraphics_Threaded : public IEngineGraphics
 	class IConsole *m_pConsole;
 
 	CCommandBuffer::SVertex m_aVertices[MAX_VERTICES];
+	CCommandBuffer::SVertexOld m_aVerticesOld[MAX_VERTICES];
+	CCommandBuffer::SVertexBase* m_pVertices;
 	int m_NumVertices;
 
+	CCommandBuffer::SColorf m_aColorOld[4];
 	CCommandBuffer::SColor m_aColor[4];
 	CCommandBuffer::STexCoord m_aTexture[4];
 
@@ -387,10 +500,13 @@ class CGraphics_Threaded : public IEngineGraphics
 	int m_aTextureIndices[MAX_TEXTURES];
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
+	
+	std::vector<int> m_VertexArrayIndices;
+	int m_FirstFreeVertexArrayIndex;
 
 	void FlushVertices();
 	void AddVertices(int Count);
-	void Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertex *pPoints, int NumPoints);
+	void Rotate(const CCommandBuffer::SPoint &rCenter, CCommandBuffer::SVertexBase *pPoints, int NumPoints);
 
 	void KickCommandBuffer();
 
@@ -438,6 +554,9 @@ public:
 
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
 	virtual void SetColor(float r, float g, float b, float a);
+	
+	void SetColor(CCommandBuffer::SVertexBase* pVertex, int ColorIndex);
+	CCommandBuffer::SVertexBase* GetVertex(int Index);
 
 	virtual void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV);
 	virtual void QuadsSetSubsetFree(
@@ -449,6 +568,13 @@ public:
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
 
+	virtual void DrawVisualObject(int VisualObjectIDX, float* pColor, char** pOffsets, unsigned int* IndicedVertexDrawNum, size_t NumIndicesOffet);
+	virtual void DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum);
+	virtual void DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum);
+	virtual void DestroyVisual(int VisualObjectIDX);
+	virtual int CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int NumIndicesRequired);
+	virtual void AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX);
+	
 	virtual int GetNumScreens() const;
 	virtual void Minimize();
 	virtual void Maximize();
@@ -481,6 +607,8 @@ public:
 	virtual void InsertSignal(semaphore *pSemaphore);
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
+	
+	virtual bool IsBufferingEnabled() { return m_UseOpenGL3_3; }
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

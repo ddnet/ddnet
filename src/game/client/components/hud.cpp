@@ -315,13 +315,16 @@ void CHud::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
 
 void CHud::RenderTextInfo()
 {
-	if(g_Config.m_ClShowfps)
+	if(g_Config.m_ClShowfps > 0)
 	{
 		// calculate avg. fps
 		float FPS = 1.0f / Client()->RenderFrameTime();
 		m_AverageFPS = (m_AverageFPS*(1.0f-(1.0f/m_AverageFPS))) + (FPS*(1.0f/m_AverageFPS));
 		char Buf[512];
-		str_format(Buf, sizeof(Buf), "%d", (int)m_AverageFPS);
+		if(g_Config.m_ClShowfps == 1)
+			str_format(Buf, sizeof(Buf), "%d", (int)m_AverageFPS);
+		else
+			str_format(Buf, sizeof(Buf), "%d", (int)FPS);
 		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1), 5, 12, Buf, -1);
 	}
 	if(g_Config.m_ClShowpred)
