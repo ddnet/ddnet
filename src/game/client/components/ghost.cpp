@@ -187,13 +187,18 @@ void CGhost::OnNewSnapshot(bool Predicted)
 
 	int RenderTick = m_NewRenderTick;
 
+	static bool s_RenderingStartedByServer = false;
+
 	if(!ServerControl && Predicted)
 	{
 		vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
 		vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
-		bool Rendering = m_Rendering || RenderTick != -1;
-		if((!Rendering || m_AllowRestart) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
+		if(((!m_Rendering && RenderTick == -1) || m_AllowRestart) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
+		{
+			if(m_Rendering && !s_RenderingStartedByServer) // race restarted: stop rendering
+				StopRender();
 			RenderTick = Client()->PredGameTick();
+		}
 	}
 
 	if(!Predicted)
@@ -202,14 +207,16 @@ void CGhost::OnNewSnapshot(bool Predicted)
 
 		if(ServerControl && s_LastRaceTick != RaceTick && Client()->GameTick() - RaceTick < Client()->GameTickSpeed())
 		{
-			if(m_Recording && s_LastRaceTick != -1)
+			if(m_Rendering && s_RenderingStartedByServer) // race restarted: stop rendering
+				StopRender();
+			if(m_Recording && s_LastRaceTick != -1) // race restarted: activate restarting for local start detection so we have a smooth transition
 				m_AllowRestart = true;
-			if(s_LastRaceTick == -1)
+			if(s_LastRaceTick == -1) // no restart: reset rendering preparations
 				m_NewRenderTick = -1;
-			if(GhostRecorder()->IsRecording())
+			if(GhostRecorder()->IsRecording()) // race restarted: stop recording
 				GhostRecorder()->Stop(0, -1);
 			int StartTick = RaceTick;
-			if(IsDDRace(&ServerInfo))
+			if(IsDDRace(&ServerInfo)) // the client recognizes the start one tick earlier than ddrace servers
 				StartTick--;
 			StartRecord(StartTick);
 			RenderTick = StartTick;
@@ -238,7 +245,7 @@ void CGhost::OnNewSnapshot(bool Predicted)
 				}
 				if(RecordTick != -1)
 				{
-					if(GhostRecorder()->IsRecording())
+					if(GhostRecorder()->IsRecording()) // race restarted: stop recording
 						GhostRecorder()->Stop(0, -1);
 					StartRecord(RecordTick);
 				}
@@ -251,13 +258,14 @@ void CGhost::OnNewSnapshot(bool Predicted)
 		s_LastRaceTick = RaceFlag ? RaceTick : -1;
 	}
 
-	if((ServerControl && !Predicted) || (!ServerControl && Predicted))
+	if(ServerControl != Predicted)
 	{
 		// only restart rendering if it did not change since last tick to prevent stuttering
 		if(m_NewRenderTick != -1 && m_NewRenderTick == RenderTick)
 		{
 			StartRender(RenderTick);
 			RenderTick = -1;
+			s_RenderingStartedByServer = ServerControl;
 		}
 		m_NewRenderTick = RenderTick;
 	}
