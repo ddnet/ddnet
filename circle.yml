@@ -6,16 +6,6 @@ dependencies:
         sudo apt-get build-dep teeworlds
         sudo apt-get install cmake libsdl2-dev xz-utils
 
-    - |
-        if [ ! -x ~/bam/bam ]; then
-          git clone https://github.com/matricks/bam ~/bam/
-          cd ~/bam; ./make_unix.sh
-        fi
-
-  cache_directories:
-    - "~/bam/"
-    - "~/cmake/"
-
 checkout:
   post:
     - git submodule update --init
@@ -23,7 +13,6 @@ checkout:
 ## Customize test commands
 compile:
   override:
-    - ~/bam/bam release
     - |
         mkdir build
         cd build
