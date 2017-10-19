@@ -7,6 +7,12 @@ dependencies:
         sudo apt-get install libsdl2-dev xz-utils libglew-dev
 
     - |
+        if [ ! -x ~/bam/bam ]; then
+          git clone https://github.com/matricks/bam ~/bam/
+          cd ~/bam; ./make_unix.sh
+        fi
+
+    - |
         if [ ! -d ~/cmake ]; then
           mkdir ~/cmake
           cd ~/cmake
@@ -16,6 +22,7 @@ dependencies:
         fi
 
   cache_directories:
+    - "~/bam/"
     - "~/cmake/"
 
 checkout:
@@ -25,6 +32,7 @@ checkout:
 ## Customize test commands
 compile:
   override:
+    - ~/bam/bam release
     - |
         mkdir build
         cd build
