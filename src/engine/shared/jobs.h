@@ -19,7 +19,7 @@ class CJob
 	volatile int m_Result;
 
 	JOBFUNC m_pfnFunc;
-	CBFUNC m_pfnCallback;
+	CBFUNC m_pfnDestroy;
 	void *m_pFuncData;
 public:
 	CJob()
@@ -61,6 +61,6 @@ public:
 	~CJobPool();
 
 	int Init(int NumThreads);
-	int Add(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnCallback = 0);
+	int Add(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnDestroy = 0);
 };
 #endif

@@ -53,8 +53,8 @@ void CJobPool::WorkerThread(void *pUser)
 			pJob->m_Status = CJob::STATE_RUNNING;
 			pJob->m_Result = pJob->m_pfnFunc(pJob->m_pFuncData);
 			pJob->m_Status = CJob::STATE_DONE;
-			if(pJob->m_pfnCallback)
-				pJob->m_pfnCallback(pJob, pJob->m_pFuncData);
+			if(pJob->m_pfnDestroy)
+				pJob->m_pfnDestroy(pJob, pJob->m_pFuncData);
 		}
 	}
 
@@ -69,12 +69,12 @@ int CJobPool::Init(int NumThreads)
 	return 0;
 }
 
-int CJobPool::Add(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnCallback)
+int CJobPool::Add(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnDestroy)
 {
 	mem_zero(pJob, sizeof(CJob));
 	pJob->m_pfnFunc = pfnFunc;
 	pJob->m_pFuncData = pData;
-	pJob->m_pfnCallback = pfnCallback;
+	pJob->m_pfnDestroy = pfnDestroy;
 
 	lock_wait(m_Lock);
 

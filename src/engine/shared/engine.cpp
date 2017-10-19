@@ -106,11 +106,11 @@ public:
 		AddJob(&pLookup->m_Job, HostLookupThread, pLookup);
 	}
 
-	void AddJob(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnCB = 0)
+	void AddJob(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnDestroy = 0)
 	{
 		if(g_Config.m_Debug)
 			dbg_msg("engine", "job added");
-		m_JobPool.Add(pJob, pfnFunc, pData, pfnCB);
+		m_JobPool.Add(pJob, pfnFunc, pData, pfnDestroy);
 	}
 };
 
