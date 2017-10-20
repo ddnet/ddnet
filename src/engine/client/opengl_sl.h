@@ -5,7 +5,7 @@
 #if defined(CONF_PLATFORM_MACOSX)
 #include <OpenGL/gl3.h>
 #else
-#include "GL/glew.h"
+#include "engine/external/glew/glew.h"
 #endif
 
 class CGLSL {

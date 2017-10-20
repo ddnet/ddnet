@@ -10,7 +10,7 @@
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
 #else
-#include "GL/glew.h"
+#include "engine/external/glew/glew.h"
 #endif
 
 #include <base/detect.h>

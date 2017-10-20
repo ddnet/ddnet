@@ -18,7 +18,6 @@ Import("other/freetype.lua")
 Import("other/curl.lua")
 Import("other/opusfile.lua")
 Import("other/mysql.lua")
-Import("other/glew.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -32,7 +31,6 @@ config:Add(FreeType.OptFind("freetype", true))
 config:Add(Curl.OptFind("curl", true))
 config:Add(Opusfile.OptFind("opusfile", true))
 config:Add(Mysql.OptFind("mysql", false))
-config:Add(Glew.OptFind("glew", true))
 config:Add(OptString("websockets", false))
 config:Finalize("config.lua")
 
@@ -146,7 +144,6 @@ if family == "windows" then
 	if platform == "win32" then
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/freetype/windows/lib32/libfreetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/sdl/windows/lib32/SDL2.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/glew/windows/lib32/glew32.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/curl/windows/lib32/libcurl.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libwinpthread-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib32/libgcc_s_sjlj-1.dll"))
@@ -156,7 +153,6 @@ if family == "windows" then
 	else
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/freetype/windows/lib64/libfreetype.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/sdl/windows/lib64/SDL2.dll"))
-		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/glew/windows/lib64/glew32.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/curl/windows/lib64/libcurl.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libwinpthread-1.dll"))
 		table.insert(client_depends, CopyToDirectory(".", "ddnet-libs/opus/windows/lib64/libogg.dll"))
@@ -296,6 +292,10 @@ function build(settings)
 	if config.websockets.value then
 		libwebsockets = Compile(external_settings, Collect("src/engine/external/libwebsockets/*.c"))
 	end
+	if platform ~= "macosx" then
+		external_settings.cc.defines:Add("GLEW_STATIC")
+		glew = Compile(external_settings, Collect("src/engine/external/glew/*.c"))
+	end
 
 	-- build game components
 	engine_settings = settings:Copy()
@@ -335,7 +335,6 @@ function build(settings)
 	end
 
 	config.sdl:Apply(client_settings)
-	config.glew:Apply(client_settings)
 	config.freetype:Apply(client_settings)
 	config.curl:Apply(client_settings)
 	config.opusfile:Apply(client_settings)
@@ -381,7 +380,7 @@ function build(settings)
 
 	-- build client, server, version server and master server
 	client_exe = Link(client_settings, "DDNet", game_shared, game_client,
-		engine, client, game_editor, zlib, pnglite, wavpack,
+		engine, client, game_editor, zlib, pnglite, wavpack, glew,
 		client_link_other, client_osxlaunch, jsonparser, libwebsockets, md5, client_notification)
 
 	server_exe = Link(server_settings, "DDNet-Server", engine, server,
