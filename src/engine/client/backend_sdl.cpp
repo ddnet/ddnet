@@ -6,12 +6,7 @@
 	#define WINVER 0x0501
 #endif
 
-#if defined(CONF_PLATFORM_MACOSX)
-#include <OpenGL/gl3.h>
-#include <OpenGL/gl3ext.h>
-#else
 #include "engine/external/glew/GL/glew.h"
-#endif
 
 #include <base/detect.h>
 #include <base/math.h>
@@ -1682,12 +1677,10 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-#if !defined(CONF_PLATFORM_MACOSX)
 	//support graphic cards that are pretty old(and linux)
 	glewExperimental = GL_TRUE;
 	if (GLEW_OK != glewInit())
 		return -1;
-#endif
 
 	SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);

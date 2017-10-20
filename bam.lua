@@ -289,13 +289,13 @@ function build(settings)
 	pnglite = Compile(external_settings, Collect("src/engine/external/pnglite/*.c"))
 	jsonparser = Compile(external_settings, Collect("src/engine/external/json-parser/*.c"))
 	md5 = Compile(external_settings, "src/engine/external/md5/md5.c")
+
+	external_settings.cc.defines:Add("GLEW_STATIC")
+	external_settings.cc.flags:Add("-I src/engine/external/glew")
+	glew = Compile(external_settings, Collect("src/engine/external/glew/*.c"))
+
 	if config.websockets.value then
 		libwebsockets = Compile(external_settings, Collect("src/engine/external/libwebsockets/*.c"))
-	end
-	if platform ~= "macosx" then
-		external_settings.cc.defines:Add("GLEW_STATIC")
-		external_settings.cc.flags:Add("-I src/engine/external/glew")
-		glew = Compile(external_settings, Collect("src/engine/external/glew/*.c"))
 	end
 
 	-- build game components
