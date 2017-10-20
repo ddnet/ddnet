@@ -39,11 +39,11 @@ DDNet requires additional libraries, that are bundled for the most common platfo
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
-    sudo apt install cmake libcurl4-openssl-dev libfreetype6-dev libogg-dev libopus-dev libopusfile-dev libsdl2-dev libglew-dev
+    sudo apt install cmake libcurl4-openssl-dev libfreetype6-dev libogg-dev libopus-dev libopusfile-dev libsdl2-dev
 
 Or on Arch Linux like this:
 
-    pacman -S cmake curl freetype2 opusfile sdl2 glew
+    pacman -S cmake curl freetype2 opusfile sdl2
 
 If you have the libraries installed, but still want to use the bundled ones instead, you can do so by removing your build directory and re-running CMake with `-DPREFER_BUNDLED_LIBS=ON`, e.g. `cmake -DPREFER_BUNDLED_LIBS=ON ..`.
 
