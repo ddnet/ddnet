@@ -448,7 +448,7 @@ int io_flush(IOHANDLE io)
 
 #define ASYNC_BUFSIZE 8 * 1024
 
-typedef struct ASYNCIO
+struct ASYNCIO
 {
 	LOCK lock;
 	IOHANDLE io;
@@ -465,7 +465,7 @@ typedef struct ASYNCIO
 	int error;
 	unsigned char finish;
 	unsigned char refcount;
-} ASYNCIO;
+};
 
 enum
 {
