@@ -25,11 +25,11 @@
 	#include <GL/glu.h>
 	#define glOrtho glOrthof
 #else
-	#include "SDL_opengl.h"
 
 	#if defined(CONF_PLATFORM_MACOSX)
 	#include "OpenGL/glu.h"
 	#else
+	#include "SDL_opengl.h"
 	#include "GL/glu.h"
 	#endif
 #endif
