@@ -294,6 +294,7 @@ function build(settings)
 	end
 	if platform ~= "macosx" then
 		external_settings.cc.defines:Add("GLEW_STATIC")
+		external_settings.cc.flags:Add("-I src/engine/external/glew")
 		glew = Compile(external_settings, Collect("src/engine/external/glew/*.c"))
 	end
 

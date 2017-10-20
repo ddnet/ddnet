@@ -361,8 +361,11 @@ target_include_directories(png PRIVATE ${ZLIB_INCLUDEDIR})
 set(DEP_PNG $<TARGET_OBJECTS:png>)
 list(APPEND TARGETS_DEP png)
 
-set_glob(DEP_GLEW_SRC GLOB src/engine/external/glew glew.c glew.h)
+set_glob(DEP_GLEW_SRC GLOB src/engine/external/glew glew.c GL/glew.h
+    GL/eglew.h GL/glxew.h GL/wglew.h)
 add_library(glew OBJECT EXCLUDE_FROM_ALL ${DEP_GLEW_SRC})
+target_compile_definitions(glew PRIVATE GLEW_STATIC)
+target_include_directories(glew PRIVATE src/engine/external/glew)
 
 set(DEP_GLEW $<TARGET_OBJECTS:glew>)
 list(APPEND TARGETS_DEP glew)
