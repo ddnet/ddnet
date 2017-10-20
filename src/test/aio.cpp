@@ -11,14 +11,16 @@ protected:
 	char m_aFilename[64];
 	bool Delete;
 
-	Async()
+	void SetUp()
 	{
 		const ::testing::TestInfo *pTestInfo =
 			::testing::UnitTest::GetInstance()->current_test_info();
 		const char *pTestName = pTestInfo->name();
 
 		str_format(m_aFilename, sizeof(m_aFilename), "Async.%s-%d.tmp", pTestName, pid());
-		m_pAio = aio_new(io_open(m_aFilename, IOFLAG_WRITE));
+		IOHANDLE File = io_open(m_aFilename, IOFLAG_WRITE);
+		ASSERT_TRUE(File);
+		m_pAio = aio_new(File);
 		Delete = false;
 	}
 
@@ -43,7 +45,9 @@ protected:
 
 		char aBuf[BUF_SIZE];
 		IOHANDLE File = io_open(m_aFilename, IOFLAG_READ);
+		ASSERT_TRUE(File);
 		int Read = io_read(File, aBuf, sizeof(aBuf));
+		io_close(File);
 
 		ASSERT_EQ(str_length(pOutput), Read);
 		ASSERT_TRUE(mem_comp(aBuf, pOutput, Read) == 0);
