@@ -3,7 +3,6 @@ Glew = {
 		local check = function(option, settings)
 			option.value = false
 			option.use_winlib = 0
-			option.use_macosxframwork = 0
 
 			if platform == "win32" then
 				option.value = true
@@ -11,12 +10,6 @@ Glew = {
 			elseif platform == "win64" then
 				option.value = true
 				option.use_winlib = 64
-			elseif platform == "macosx" and string.find(settings.config_name, "32") then
-				option.value = true
-				option.use_macosxframwork = 32
-			elseif platform == "macosx" and string.find(settings.config_name, "64") then
-				option.value = true
-				option.use_macosxframwork = 64
 			elseif platform == "linux" and arch == "ia32" then
 				option.value = true
 			elseif platform == "linux" and arch == "amd64" then
@@ -35,7 +28,7 @@ Glew = {
 				end
 				
 				settings.link.libs:Add("glew32")
-			elseif option.use_macosxframwork > 0 then
+			elseif platform == "macosx" then
 				-- no glew
 			else
 				settings.link.libs:Add("GLEW")
@@ -45,7 +38,6 @@ Glew = {
 		local save = function(option, output)
 			output:option(option, "value")
 			output:option(option, "use_winlib")
-			output:option(option, "use_macosxframwork")
 		end
 
 		local display = function(option)

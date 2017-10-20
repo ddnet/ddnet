@@ -8,6 +8,7 @@
 
 #if defined(CONF_PLATFORM_MACOSX)
 #include <OpenGL/gl3.h>
+#include <OpenGL/gl3ext.h>
 #else
 #include "GL/glew.h"
 #endif
@@ -1681,7 +1682,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-#if defined(CONF_PLATFORM_MACOSX)
+#if !defined(CONF_PLATFORM_MACOSX)
 	//support graphic cards that are pretty old(and linux)
 	glewExperimental = GL_TRUE;
 	if (GLEW_OK != glewInit())
