@@ -363,7 +363,7 @@ list(APPEND TARGETS_DEP png)
 
 set_glob(DEP_GLEW_SRC GLOB src/engine/external/glew glew.c)
 set_glob(DEP_GLEW_INCLUDES GLOB src/engine/external/glew/GL eglew.h glew.h glxew.h wglew.h)
-add_library(glew OBJECT EXCLUDE_FROM_ALL ${DEP_GLEW_SRC})
+add_library(glew OBJECT EXCLUDE_FROM_ALL ${DEP_GLEW_SRC} ${DEP_GLEW_INCLUDES})
 target_include_directories(glew PRIVATE src/engine/external/glew)
 
 set(DEP_GLEW $<TARGET_OBJECTS:glew>)
@@ -395,10 +395,6 @@ endif()
 
 file(COPY data DESTINATION .)
 file(COPY shader DESTINATION .)
-file(COPY ${CURL_COPY_FILES} DESTINATION .)
-file(COPY ${FREETYPE_COPY_FILES} DESTINATION .)
-file(COPY ${OPUSFILE_COPY_FILES} DESTINATION .)
-file(COPY ${SDL2_COPY_FILES} DESTINATION .)
 set(COPY_FILES
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
