@@ -1377,7 +1377,7 @@ void CGameContext::ConViewers(IConsole::IResult * pResult, void * pUserData)
 			else
 			{
 				str_format(aBuf, sizeof(aBuf), ", '%s'", pSelf->Server()->ClientName(i));
-				str_append(aMsg, aBuf, sizeof(aMsg);
+				str_append(aMsg, aBuf, sizeof(aMsg));
 			}
 		}
 	}
