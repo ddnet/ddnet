@@ -1236,12 +1236,15 @@ int CGraphics_Threaded::InitWindow()
 			return 0;
 	}
 	
-	//try using old opengl context
-	if(!g_Config.m_GfxForceOldOpenGL)
+	// try using old opengl context
+	if(g_Config.m_GfxOpenGL3)
 	{
-		g_Config.m_GfxForceOldOpenGL = 1;
+		g_Config.m_GfxOpenGL3 = 0;
 		if(IssueInit() == 0)
+		{
+			g_Config.m_GfxOpenGL3 = 1;
 			return 0;
+		}
 	}
 
 	// try lowering the resolution
