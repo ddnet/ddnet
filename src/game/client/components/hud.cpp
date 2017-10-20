@@ -321,7 +321,7 @@ void CHud::RenderTextInfo()
 		float FPS = 1.0f / Client()->RenderFrameTime();
 		m_AverageFPS = (m_AverageFPS*(1.0f-(1.0f/m_AverageFPS))) + (FPS*(1.0f/m_AverageFPS));
 		char Buf[512];
-		if(g_Config.m_ClShowfps == 1)
+		if(g_Config.m_ClShowfps == 2)
 			str_format(Buf, sizeof(Buf), "%d", (int)m_AverageFPS);
 		else
 			str_format(Buf, sizeof(Buf), "%d", (int)FPS);
