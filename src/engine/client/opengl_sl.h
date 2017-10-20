@@ -1,6 +1,10 @@
 #pragma once
 
+#if defined(CONF_PLATFORM_MACOSX)
+#include <OpenGL/gl3.h>
+#else
 #include "GL/glew.h"
+#endif
 
 class CGLSL {
 public:

@@ -36,7 +36,7 @@ Glew = {
 				
 				settings.link.libs:Add("glew32")
 			elseif option.use_macosxframwork > 0 then
-				--todo
+				-- no glew
 			else
 				settings.link.libs:Add("GLEW")
 			end
