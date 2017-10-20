@@ -77,6 +77,7 @@ if include_data and not use_bundle:
 		shutil.copy("libopus.dll", package_dir)
 		shutil.copy("libopusfile.dll", package_dir)
 		shutil.copy("libcurl.dll", package_dir)
+		shutil.copy("glew32.dll", package_dir)
 
 if include_exe and not use_bundle:
 	shutil.copy(name+exe_ext, package_dir)
