@@ -753,8 +753,14 @@ if(CLIENT)
 
   if(TARGET_OS STREQUAL "windows")
     set(CLIENT_ICON "other/icons/DDNet.rc")
+    if(MINGW)
+      set(CLIENT_MANIFEST "other/manifest/dpimanifest.rc")
+	else()	
+      set(CLIENT_MANIFEST)
+	 endif()
   else()
     set(CLIENT_ICON)
+    set(CLIENT_MANIFEST)
   endif()
 
   # Target
@@ -762,6 +768,7 @@ if(CLIENT)
   add_executable(${TARGET_CLIENT}
     ${CLIENT_SRC}
     ${CLIENT_ICON}
+    ${CLIENT_MANIFEST}
     ${DEPS_CLIENT}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
@@ -1304,10 +1311,10 @@ if(MSVC)
 	TARGET ${CLIENT_EXECUTABLE}
 	POST_BUILD
 	COMMAND
-	  "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}/dpimanifest.manifest\" -outputresource:\"${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
+	  "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}/other/manifest/dpimanifest.manifest\" -outputresource:\"${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
 	COMMENT "Adding DPI awareness"
 	)
   else()
-    target_sources(${TARGET_CLIENT} PRIVATE dpimanifest.manifest)
+    target_sources(${TARGET_CLIENT} PRIVATE other/manifest/dpimanifest.manifest)
   endif()
 endif()
