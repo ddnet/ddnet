@@ -44,6 +44,10 @@ test:
     - |
         cd build
         make run_tests
+        ./DDNet-Server shutdown
+
+    - |
+        cd build
         make package
         mv DDNet-*.tar.* ${CIRCLE_ARTIFACTS}
 
