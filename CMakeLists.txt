@@ -1304,7 +1304,7 @@ if(MSVC)
 	TARGET ${CLIENT_EXECUTABLE}
 	POST_BUILD
 	COMMAND
-	  "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}/dpimanifest.manifest\" -inputresource:\"${CMAKE_CURRENT_BINARY_DIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1 -outputresource:\"${CMAKE_CURRENT_BINARY_DIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
+	  "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}/dpimanifest.manifest\" -outputresource:\"${CMAKE_CURRENT_BINARY_DIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
 	COMMENT "Adding DPI awareness"
 	)
   endif()
