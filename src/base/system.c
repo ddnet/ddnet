@@ -435,8 +435,7 @@ unsigned io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
-	fclose((FILE*)io);
-	return 1;
+	return fclose((FILE*)io) != 0;
 }
 
 int io_flush(IOHANDLE io)
