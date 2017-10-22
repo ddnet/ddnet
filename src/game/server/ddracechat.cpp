@@ -1349,6 +1349,56 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 			//pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
+
+void CGameContext::ConViewers(IConsole::IResult * pResult, void * pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	int ClientID = pResult->m_ClientID;
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
+	if (!pPlayer)
+		return;
+
+	char aBuf[32];
+	char aMsg[128];
+	int viewers = 0;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_SpectatorID == pResult->m_ClientID)
+		{
+			viewers++;
+			if (viewers == 1)
+			{
+				str_format(aMsg, sizeof(aMsg), "'%s'", pSelf->Server()->ClientName(i));
+			}
+			else
+			{
+				str_format(aBuf, sizeof(aBuf), ", '%s'", pSelf->Server()->ClientName(i));
+				str_append(aMsg, aBuf, sizeof(aMsg));
+			}
+		}
+	}
+
+	if (viewers == 1)
+	{
+		str_format(aBuf, sizeof(aBuf), "You have [%d] spectator:", viewers);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
+	}
+	else if (viewers > 1)
+	{
+		str_format(aBuf, sizeof(aBuf), "You have [%d] spectators:", viewers);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
+	}
+	else
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Nobody is spectating you right now.");
+	}
+}
 #if defined(CONF_SQL)
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {
