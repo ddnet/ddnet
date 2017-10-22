@@ -1297,15 +1297,17 @@ foreach(target ${TARGETS_DEP})
 endforeach()
 
 if(MSVC)
-  if(CMAKE_VERSION VERSION_LESS 3.4)
-    message(WARNING "CMake version 3.4 or newer is required to enable dpi awareness")
-  else()
+  if(CMAKE_VERSION VERSION_LESS 3)
+    message(WARNING "CMake version 3 or newer is required to enable dpi awareness")
+  elseif(CMAKE_VERSION VERSION_LESS 3.4)
     add_custom_command(
 	TARGET ${CLIENT_EXECUTABLE}
 	POST_BUILD
 	COMMAND
-	  "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}/dpimanifest.manifest\" -outputresource:\"${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
+	  "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}/dpimanifest.manifest\" -outputresource:\"${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
 	COMMENT "Adding DPI awareness"
 	)
+  else()
+    target_sources(${TARGET_CLIENT} PRIVATE dpimanifest.manifest)
   endif()
 endif()
