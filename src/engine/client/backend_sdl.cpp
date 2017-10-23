@@ -1657,8 +1657,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		//when we are at fullscreen, we really shouldn't allow window sizes, that aren't supported by the driver
 		bool SupportedResolution = false;
 		SDL_DisplayMode mode;
-		int maxModes = SDL_GetNumDisplayModes(g_Config.m_GfxScreen),
-			numModes = 0;
+		int maxModes = SDL_GetNumDisplayModes(g_Config.m_GfxScreen);
 
 		for (int i = 0; i < maxModes; i++)
 		{
