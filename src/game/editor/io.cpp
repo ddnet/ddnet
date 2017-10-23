@@ -549,7 +549,6 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			Item.m_Disable = m_lClipTriggers[i].m_Disable;
 			Item.m_Rewind = m_lClipTriggers[i].m_Rewind;
 			df.AddItem(MAPITEMTYPE_CLIPS, i, sizeof(Item), &Item);
-
 		}
 	}
 
