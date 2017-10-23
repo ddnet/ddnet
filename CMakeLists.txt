@@ -246,6 +246,7 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   add_subdirectory(
     ${CMAKE_BINARY_DIR}/googletest-src
     ${CMAKE_BINARY_DIR}/googletest-build
+    EXCLUDE_FROM_ALL
   )
 
   if(MSVC)
