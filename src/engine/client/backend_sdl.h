@@ -124,7 +124,7 @@ class CGLSLQuadProgram;
 class CGLSLTileProgram;
 class CGLSLBorderTileProgram;
 class CGLSLBorderTileLineProgram;
-// takes care of opengl 3.2 related rendering
+// takes care of opengl 3.3 related rendering
 class CCommandProcessorFragment_OpenGL3_3
 {
 	bool m_UseMultipleTextureUnits;
@@ -141,7 +141,6 @@ class CCommandProcessorFragment_OpenGL3_3
 	volatile int *m_pTextureMemoryUsage;
 
 	CGLSLPrimitiveProgram* m_pPrimitiveProgram;
-	//CGLSLQuadProgram* m_QuadProgram; 
 	CGLSLTileProgram* m_pTileProgram;
 	CGLSLTileProgram* m_pTileProgramTextured;
 	CGLSLBorderTileProgram* m_pBorderTileProgram;
@@ -151,6 +150,7 @@ class CCommandProcessorFragment_OpenGL3_3
 	
 	GLuint m_PrimitiveDrawVertexID;
 	GLuint m_PrimitiveDrawBufferID;
+	GLuint m_LastIndexBufferBound;
 	
 	GLuint m_QuadDrawIndexBufferID;
 	unsigned int m_CurrentIndicesInBuffer;
@@ -172,9 +172,10 @@ class CCommandProcessorFragment_OpenGL3_3
 	void AppendIndices(unsigned int NewIndicesCount);
 	
 	struct SVisualObject{
-		SVisualObject() : m_VertArrayID(0), m_VertBufferID(0), m_NumElements(0), m_IsTextured(false) {}
+		SVisualObject() : m_VertArrayID(0), m_VertBufferID(0), m_LastIndexBufferBound(0), m_NumElements(0), m_IsTextured(false) {}
 		GLuint m_VertArrayID;
 		GLuint m_VertBufferID;
+		GLuint m_LastIndexBufferBound;
 		int m_NumElements; //vertices and texture coordinates
 		bool m_IsTextured;
 	};
@@ -239,6 +240,7 @@ public:
 	enum
 	{
 		CMD_INIT = CCommandBuffer::CMDGROUP_PLATFORM_SDL,
+		CMD_UPDATE_VIEWPORT,
 		CMD_SHUTDOWN,
 	};
 
@@ -249,6 +251,15 @@ public:
 		SDL_GLContext m_GLContext;
 	};
 
+	struct SCommand_Update_Viewport : public CCommandBuffer::SCommand
+	{
+		SCommand_Update_Viewport() : SCommand(CMD_UPDATE_VIEWPORT) {}
+		int m_X;
+		int m_Y;
+		int m_Width;
+		int m_Height;
+	};
+
 	struct SCommand_Shutdown : public CCommandBuffer::SCommand
 	{
 		SCommand_Shutdown() : SCommand(CMD_SHUTDOWN) {}
@@ -256,6 +267,7 @@ public:
 
 private:
 	void Cmd_Init(const SCommand_Init *pCommand);
+	void Cmd_Update_Viewport(const SCommand_Update_Viewport* pCommand);
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
 	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
 	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
@@ -292,7 +304,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	
 	bool m_UseOpenGL3_3;
 public:
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight);
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int* pCurrentWidth, int* pCurrentHeight);
 	virtual int Shutdown();
 
 	virtual int MemoryUsage() const;
