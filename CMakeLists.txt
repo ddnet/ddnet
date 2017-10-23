@@ -753,10 +753,10 @@ if(CLIENT)
 
   if(TARGET_OS STREQUAL "windows")
     set(CLIENT_ICON "other/icons/DDNet.rc")
-    if(MINGW)
-      set(CLIENT_MANIFEST "other/manifest/dpimanifest.rc")
-    else()	
-      set(CLIENT_MANIFEST)
+    if(NOT MINGW)
+      set(CLIENT_MANIFEST "other/manifest/DDNet.manifest")
+    else()
+      set(CLIENT_MANIFEST "other/manifest/DDNet.rc")
     endif()
   else()
     set(CLIENT_ICON)
@@ -1302,19 +1302,3 @@ foreach(target ${TARGETS_DEP})
     target_compile_options(${target} PRIVATE /W0)
   endif()
 endforeach()
-
-if(MSVC)
-  if(CMAKE_VERSION VERSION_LESS 3)
-    message(WARNING "CMake version 3 or newer is required to enable dpi awareness")
-  elseif(CMAKE_VERSION VERSION_LESS 3.4)
-    add_custom_command(
-	TARGET ${CLIENT_EXECUTABLE}
-	POST_BUILD
-	COMMAND
-	  "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}/other/manifest/dpimanifest.manifest\" -outputresource:\"${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
-	COMMENT "Adding DPI awareness"
-	)
-  else()
-    target_sources(${TARGET_CLIENT} PRIVATE other/manifest/dpimanifest.manifest)
-  endif()
-endif()
