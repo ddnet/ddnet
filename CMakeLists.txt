@@ -72,11 +72,9 @@ set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 # DEPENDENCIES
 ########################################################################
 
-function(set_extra_dirs VARIABLE NAME)
+function(set_extra_dirs_lib VARIABLE NAME)
   set("PATHS_${VARIABLE}_LIBDIR" PARENT_SCOPE)
   set("HINTS_${VARIABLE}_LIBDIR" PARENT_SCOPE)
-  set("PATHS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
-  set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
   if(PREFER_BUNDLED_LIBS)
     set(TYPE HINTS)
   else()
@@ -88,6 +86,17 @@ function(set_extra_dirs VARIABLE NAME)
     set("EXTRA_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
   endif()
   set("${TYPE}_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
+endfunction()
+
+function(set_extra_dirs_include VARIABLE NAME LIBRARY)
+  set("PATHS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
+  set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
+  if(LIBRARY)
+    string(FIND "${LIBRARY}" "${PROJECT_SOURCE_DIR}" LOCAL_PATH_POS)
+    if(LOCAL_PATH_POS EQUAL 0 AND TARGET_BITS AND TARGET_OS)
+      set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
+    endif()
+  endif()
 endfunction()
 
 # Check for PkgConfig once so all the other `find_package` calls can do it

@@ -34,30 +34,30 @@ if(MYSQL_CONFIG)
   endforeach(LIB ${MYSQL_LIBS})
 endif(MYSQL_CONFIG)
 
-set_extra_dirs(MYSQL mysql)
-
+set_extra_dirs_lib(MYSQL mysql)
+find_library(MYSQL_LIBRARY
+  NAMES "mysqlclient" "mysqlclient_r" "mariadbclient"
+  HINTS ${HINTS_MYSQL_LIBDIR} ${MYSQL_CONFIG_LIBRARY_PATH}
+  PATHS ${PATHS_MYSQL_LIBDIR}
+)
+set_extra_dirs_include(MYSQL mysql "${MYSQL_LIBRARY}")
 find_path(MYSQL_INCLUDEDIR
   NAMES "mysql.h"
   HINTS ${HINTS_MYSQL_INCLUDEDIR} ${MYSQL_CONFIG_INCLUDE_DIR}
   PATHS ${PATHS_MYSQL_INCLUDEDIR}
 )
 
-find_library(MYSQL_LIBRARY
-  NAMES "mysqlclient" "mysqlclient_r" "mariadbclient"
-  HINTS ${HINTS_MYSQL_LIBDIR} ${MYSQL_CONFIG_LIBRARY_PATH}
-  PATHS ${PATHS_MYSQL_LIBDIR}
-)
-
-find_path(MYSQL_CPPCONN_INCLUDEDIR
-  NAMES "mysql_connection.h"
-  HINTS ${HINTS_MYSQL_INCLUDEDIR} ${MYSQL_CONFIG_INCLUDE_DIR}
-  PATHS ${PATHS_MYSQL_INCLUDEDIR}
-)
-
+set_extra_dirs_lib(MYSQL_CPPCONN mysql)
 find_library(MYSQL_CPPCONN_LIBRARY
   NAMES "mysqlcppconn" "mysqlcppconn-static"
-  HINTS ${HINTS_MYSQL_LIBDIR} ${MYSQL_CONFIG_LIBRARY_PATH}
-  PATHS ${PATHS_MYSQL_LIBDIR}
+  HINTS ${HINTS_MYSQL_CPPCONN_LIBDIR} ${MYSQL_CONFIG_LIBRARY_PATH}
+  PATHS ${PATHS_MYSQL_CPPCONN_LIBDIR}
+)
+set_extra_dirs_include(MYSQL_CPPCONN mysql "${MYSQL_CPPCONN_LIBRARY}")
+find_path(MYSQL_CPPCONN_INCLUDEDIR
+  NAMES "mysql_connection.h"
+  HINTS ${HINTS_MYSQL_CPPCONN_INCLUDEDIR} ${MYSQL_CONFIG_INCLUDE_DIR}
+  PATHS ${PATHS_MYSQL_CPPCONN_INCLUDEDIR}
 )
 
 include(FindPackageHandleStandardArgs)
