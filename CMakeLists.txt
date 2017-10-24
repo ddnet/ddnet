@@ -968,8 +968,11 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
+    fs.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
+    test.cpp
+    test.h
     thread.cpp
   )
   set(TESTS_EXTRA

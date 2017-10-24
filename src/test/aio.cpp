@@ -1,3 +1,4 @@
+#include "test.h"
 #include <gtest/gtest.h>
 
 #include <base/system.h>
@@ -8,17 +9,12 @@ class Async : public ::testing::Test
 {
 protected:
 	ASYNCIO *m_pAio;
-	char m_aFilename[64];
+	CTestInfo m_Info;
 	bool Delete;
 
 	void SetUp()
 	{
-		const ::testing::TestInfo *pTestInfo =
-			::testing::UnitTest::GetInstance()->current_test_info();
-		const char *pTestName = pTestInfo->name();
-
-		str_format(m_aFilename, sizeof(m_aFilename), "Async.%s-%d.tmp", pTestName, pid());
-		IOHANDLE File = io_open(m_aFilename, IOFLAG_WRITE);
+		IOHANDLE File = io_open(m_Info.m_aFilename, IOFLAG_WRITE);
 		ASSERT_TRUE(File);
 		m_pAio = aio_new(File);
 		Delete = false;
@@ -28,7 +24,7 @@ protected:
 	{
 		if(Delete)
 		{
-			fs_remove(m_aFilename);
+			fs_remove(m_Info.m_aFilename);
 		}
 	}
 
@@ -44,7 +40,7 @@ protected:
 		aio_free(m_pAio);
 
 		char aBuf[BUF_SIZE];
-		IOHANDLE File = io_open(m_aFilename, IOFLAG_READ);
+		IOHANDLE File = io_open(m_Info.m_aFilename, IOFLAG_READ);
 		ASSERT_TRUE(File);
 		int Read = io_read(File, aBuf, sizeof(aBuf));
 		io_close(File);
