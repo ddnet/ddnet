@@ -1363,7 +1363,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.type |= NETTYPE_IPV4;
 			sock.ipv4sock = socket;
 
-			/* set boardcast */
+			/* set broadcast */
 			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
 
 			/* set receive buffer size */
@@ -1411,7 +1411,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.type |= NETTYPE_IPV6;
 			sock.ipv6sock = socket;
 
-			/* set boardcast */
+			/* set broadcast */
 			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
 
 			/* set receive buffer size */
