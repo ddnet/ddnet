@@ -763,6 +763,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	
 	glGenBuffers(1, &m_QuadDrawIndexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+	m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	
 	unsigned int Indices[CCommandBuffer::MAX_VERTICES/4 * 6];
 	int Primq = 0;
@@ -1011,7 +1012,11 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
 		break;
 	case CCommandBuffer::PRIMTYPE_QUADS:
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		if (m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+			m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
+		}
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount*6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
@@ -1110,12 +1115,15 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyTexture(int Slot)
 void CCommandProcessorFragment_OpenGL3_3::DestroyVisualObjects(int Index)
 {
 	SVisualObject& VisualObject = m_VisualObjects[Index];
-	if(VisualObject.m_VertArrayID != 0) glDeleteVertexArrays(1, &VisualObject.m_VertArrayID);
-	if(VisualObject.m_VertBufferID != 0) glDeleteBuffers(1, &VisualObject.m_VertBufferID);//this line should never be called
+	if (VisualObject.m_VertArrayID != 0) glDeleteVertexArrays(1, &VisualObject.m_VertArrayID);
+
+	// this is required, due to a driver bug for AMD under windows
+	if(VisualObject.m_VertBufferID != 0) glDeleteBuffers(1, &VisualObject.m_VertBufferID);
 
 	VisualObject.m_NumElements = 0;
 	VisualObject.m_IsTextured = false;
 	VisualObject.m_VertBufferID = VisualObject.m_VertArrayID = 0;
+	VisualObject.m_LastIndexBufferBound = 0;
 }
 
 void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesCount)
@@ -1135,7 +1143,6 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 		Primq+=4;
 	}
 	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_COPY_READ_BUFFER, m_QuadDrawIndexBufferID);
 	GLuint NewIndexBufferID;
 	glGenBuffers(1, &NewIndexBufferID);
@@ -1149,7 +1156,6 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);	
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
 	
 	m_CurrentIndicesInBuffer = NewIndicesCount;
 	delete[] Indices;	
@@ -1191,7 +1197,11 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuf
 	pProgram->SetUniform(pProgram->m_LocJumpIndex, (int)pCommand->m_JumpIndex);
 	
 	glBindVertexArray(VisualObject.m_VertArrayID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+	if (VisualObject.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		VisualObject.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
+	}
 	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum);
 }
 
@@ -1219,7 +1229,11 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CComman
 	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (float*)&pCommand->m_Dir);
 	
 	glBindVertexArray(VisualObject.m_VertArrayID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+	if (VisualObject.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		VisualObject.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
+	}
 	glDrawElementsInstanced(GL_TRIANGLES, pCommand->m_IndexDrawNum, GL_UNSIGNED_INT, pCommand->m_pIndicesOffset, pCommand->m_DrawNum);
 }
 	
@@ -1252,9 +1266,11 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderVertexArray(const CCommandBu
 	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)&pCommand->m_Color);
 		
 	glBindVertexArray(VisualObject.m_VertArrayID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
-	//for some reasons this function seems not to be in the coreprofile for quite some gpus
-	//glMultiDrawElements(GL_TRIANGLES, pCommand->m_pDrawCount, GL_UNSIGNED_INT, pCommand->m_pIndicesOffsets, pCommand->m_IndicesDrawNum);
+	if (VisualObject.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+		VisualObject.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
+	}	
 	for (int i = 0; i < pCommand->m_IndicesDrawNum; ++i)
 	{
 		glDrawElements(GL_TRIANGLES, pCommand->m_pDrawCount[i], GL_UNSIGNED_INT, pCommand->m_pIndicesOffsets[i]);
@@ -1348,9 +1364,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateVertArray(const CCommandBuff
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
-	//TODO: destroy the VBO here? it shouldn't be needed anymore	
-	glDeleteBuffers(1, &VisualObject.m_VertBufferID);
-	VisualObject.m_VertBufferID = 0;
+	// due to a driver bug for AMD hardware (https://stackoverflow.com/questions/41520764/should-i-delete-vertex-buffer-object-after-binding-it-to-vertex-array-objects)
+	// we don't delete the VBO bound to the VAO
 }
 
 // ------------ CCommandProcessorFragment_SDL
@@ -1369,6 +1384,11 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	glAlphaFunc(GL_GREATER, 0);
 	glEnable(GL_ALPHA_TEST);
 	glDepthMask(0);
+}
+
+void CCommandProcessorFragment_SDL::Cmd_Update_Viewport(const SCommand_Update_Viewport* pCommand)
+{
+	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
 }
 
 void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
@@ -1445,6 +1465,7 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 	case CCommandBuffer::CMD_VIDEOMODES: Cmd_VideoModes(static_cast<const CCommandBuffer::SCommand_VideoModes *>(pBaseCommand)); break;
 	case CMD_INIT: Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)); break;
 	case CMD_SHUTDOWN: Cmd_Shutdown(static_cast<const SCommand_Shutdown *>(pBaseCommand)); break;
+	case CMD_UPDATE_VIEWPORT: Cmd_Update_Viewport(static_cast<const SCommand_Update_Viewport *>(pBaseCommand)); break;
 	default: return false;
 	}
 
@@ -1484,7 +1505,7 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 
 // ------------ CGraphicsBackend_SDL_OpenGL
 
-int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight)
+int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int* pCurrentWidth, int* pCurrentHeight)
 {	
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 	{
@@ -1634,7 +1655,29 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
 #else
-		SdlFlags |= SDL_WINDOW_FULLSCREEN;
+		//when we are at fullscreen, we really shouldn't allow window sizes, that aren't supported by the driver
+		bool SupportedResolution = false;
+		SDL_DisplayMode mode;
+		int maxModes = SDL_GetNumDisplayModes(g_Config.m_GfxScreen);
+
+		for (int i = 0; i < maxModes; i++)
+		{
+			if (SDL_GetDisplayMode(g_Config.m_GfxScreen, i, &mode) < 0)
+			{
+				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				continue;
+			}
+
+			if (*pWidth == mode.w && *pHeight == mode.h)
+			{
+				SupportedResolution = true;
+				break;
+			}
+		}
+		if(SupportedResolution)
+			SdlFlags |= SDL_WINDOW_FULLSCREEN;
+		else
+			SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 #endif
 	}
 
@@ -1721,8 +1764,39 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		WaitForIdle();
 	}
 
+	*pCurrentWidth = *pWidth;
+	*pCurrentHeight = *pHeight;
+
 	SDL_ShowWindow(m_pWindow);
-	SetWindowScreen(g_Config.m_GfxScreen);
+	if (SetWindowScreen(g_Config.m_GfxScreen))
+	{
+		// query the current displaymode, when running in fullscreen
+		// this is required if DPI scaling is active
+		if (SdlFlags&SDL_WINDOW_FULLSCREEN)
+		{
+			SDL_DisplayMode CurrentDisplayMode;
+			SDL_GetCurrentDisplayMode(g_Config.m_GfxScreen, &CurrentDisplayMode);
+
+			*pCurrentWidth = CurrentDisplayMode.w;
+			*pCurrentHeight = CurrentDisplayMode.h;
+
+			// since the window is centered, calculate how much the viewport has to be fixed
+			//int XOverflow = (*pWidth > *pCurrentWidth ? (*pWidth - *pCurrentWidth) : 0);
+			//int YOverflow = (*pHeight > *pCurrentHeight ? (*pHeight - *pCurrentHeight) : 0);
+			//TODO: current problem is, that the opengl driver knows about the scaled display,
+			//so the viewport cannot be adjusted for resolutions, that are higher than allowed by the display driver
+			
+			CCommandProcessorFragment_SDL::SCommand_Update_Viewport CmdSDL;
+			CmdSDL.m_X = 0;
+			CmdSDL.m_Y = 0;
+
+			CmdSDL.m_Width = CurrentDisplayMode.w;
+			CmdSDL.m_Height = CurrentDisplayMode.h;
+			CmdBuffer.AddCommand(CmdSDL);
+			RunBuffer(&CmdBuffer);
+			WaitForIdle();			
+		}
+	}
 
 	// return
 	return 0;

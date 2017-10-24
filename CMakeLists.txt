@@ -1126,6 +1126,7 @@ endforeach()
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 install(TARGETS ${TARGET_CLIENT} ${TARGET_SERVER} DESTINATION bin)
 install(DIRECTORY data DESTINATION share/DDNet)
+install(DIRECTORY shader DESTINATION share/DDNet)
 
 set(CPACK_TARGETS
   ${TARGET_CLIENT}
@@ -1137,6 +1138,7 @@ set(CPACK_TARGETS
   map_extract
 )
 set(CPACK_DIRS data)
+set(CPACK_DIRS shader)
 set(CPACK_FILES
   license.txt
   storage.cfg
