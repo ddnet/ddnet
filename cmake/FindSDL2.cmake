@@ -1,19 +1,19 @@
 find_package(PkgConfig QUIET)
 pkg_check_modules(PC_SDL2 sdl2)
 
-set_extra_dirs(SDL2 sdl)
-
+set_extra_dirs_lib(SDL2 sdl)
+find_library(SDL2_LIBRARY
+  NAMES SDL2
+  HINTS ${HINTS_SDL2_LIBDIR} ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
+  PATHS ${PATHS_SDL2_LIBDIR}
+)
+set_extra_dirs_include(SDL2 sdl "${SDL2_LIBRARY}")
 # Looking for 'SDL.h' directly might accidently find a SDL instead of SDL 2
 # installation. Look for a header file only present in SDL 2 instead.
 find_path(SDL2_INCLUDEDIR SDL_assert.h
   PATH_SUFFIXES SDL2
   HINTS ${HINTS_SDL2_INCLUDEDIR} ${PC_SDL2_INCLUDEDIR} ${PC_SDL2_INCLUDE_DIRS}
   PATHS ${PATHS_SDL2_INCLUDEDIR}
-)
-find_library(SDL2_LIBRARY
-  NAMES SDL2
-  HINTS ${HINTS_SDL2_LIBDIR} ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
-  PATHS ${PATHS_SDL2_LIBDIR}
 )
 
 include(FindPackageHandleStandardArgs)

@@ -1,17 +1,18 @@
 find_package(PkgConfig QUIET)
 pkg_check_modules(PC_FREETYPE freetype2)
-set_extra_dirs(FREETYPE freetype)
 
+set_extra_dirs_lib(FREETYPE freetype)
+find_library(FREETYPE_LIBRARY
+  NAMES freetype
+  HINTS ${HINTS_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBRARY_DIRS}
+  PATHS ${PATHS_FREETYPE_LIBDIR}
+)
+set_extra_dirs_include(FREETYPE freetype "${FREETYPE_LIBRARY}")
 find_path(FREETYPE_INCLUDEDIR
   NAMES config/ftheader.h freetype/config/ftheader.h
   PATH_SUFFIXES freetype2
   HINTS ${HINTS_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
   PATHS ${PATHS_FREETYPE_INCLUDEDIR}
-)
-find_library(FREETYPE_LIBRARY
-  NAMES freetype
-  HINTS ${HINTS_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBRARY_DIRS}
-  PATHS ${PATHS_FREETYPE_LIBDIR}
 )
 
 include(FindPackageHandleStandardArgs)

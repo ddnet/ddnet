@@ -1,15 +1,16 @@
 find_package(PkgConfig QUIET)
 pkg_check_modules(PC_CURL libcurl)
-set_extra_dirs(CURL curl)
 
-find_path(CURL_INCLUDEDIR curl/curl.h
-  HINTS ${HINTS_CURL_INCLUDEDIR} ${PC_CURL_INCLUDEDIR} ${PC_CURL_INCLUDE_DIRS}
-  PATHS ${PATHS_CURL_INCLUDEDIR}
-)
+set_extra_dirs_lib(CURL curl)
 find_library(CURL_LIBRARY
   NAMES curl
   HINTS ${HINTS_CURL_LIBDIR} ${PC_CURL_LIBDIR} ${PC_CURL_LIBRARY_DIRS}
   PATHS ${PATHS_CURL_LIBDIR}
+)
+set_extra_dirs_include(CURL curl "${CURL_LIBRARY}")
+find_path(CURL_INCLUDEDIR curl/curl.h
+  HINTS ${HINTS_CURL_INCLUDEDIR} ${PC_CURL_INCLUDEDIR} ${PC_CURL_INCLUDE_DIRS}
+  PATHS ${PATHS_CURL_INCLUDEDIR}
 )
 
 include(FindPackageHandleStandardArgs)
