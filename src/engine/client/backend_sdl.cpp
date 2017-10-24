@@ -1123,6 +1123,7 @@ void CCommandProcessorFragment_OpenGL3_3::DestroyVisualObjects(int Index)
 	VisualObject.m_NumElements = 0;
 	VisualObject.m_IsTextured = false;
 	VisualObject.m_VertBufferID = VisualObject.m_VertArrayID = 0;
+	VisualObject.m_LastIndexBufferBound = 0;
 }
 
 void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesCount)
