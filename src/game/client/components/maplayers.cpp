@@ -580,7 +580,7 @@ void CMapLayers::OnMapLoad()
 										Flags = 0;
 										Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										if(!IsValidSwitchTile(Index)) Index = 0;
-										if(CurOverlay == 0)
+										else if(CurOverlay == 0)
 										{
 											Flags = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
 											if(Index == TILE_SWITCHTIMEDOPEN) Index = 8;
@@ -591,9 +591,9 @@ void CMapLayers::OnMapLoad()
 									if(IsTeleLayer)
 									{
 										Index = ((CTeleTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!IsValidTeleTile(Index)) Index = 0;
 										Flags = 0;
-										if(CurOverlay == 1)
+										if(!IsValidTeleTile(Index)) Index = 0;
+										else if(CurOverlay == 1)
 										{
 											if(Index != TILE_TELECHECKIN && Index != TILE_TELECHECKINEVIL)
 												Index = ((CTeleTile*)pTiles)[y*pTMap->m_Width+x].m_Number;
@@ -603,10 +603,10 @@ void CMapLayers::OnMapLoad()
 									if(IsSpeedupLayer)
 									{
 										Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0) Index = 0;
 										Flags = 0;
-										AngleRotate = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Angle;
-										if(CurOverlay == 1) Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force;
+										AngleRotate = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width + x].m_Angle;
+										if(!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0) Index = 0;
+										else if(CurOverlay == 1) Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force;
 										else if(CurOverlay == 2) Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_MaxSpeed;
 									}
 									if(IsTuneLayer)
