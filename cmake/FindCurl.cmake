@@ -1,16 +1,20 @@
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_CURL libcurl)
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_CURL libcurl)
+endif()
 
 set_extra_dirs_lib(CURL curl)
 find_library(CURL_LIBRARY
   NAMES curl
   HINTS ${HINTS_CURL_LIBDIR} ${PC_CURL_LIBDIR} ${PC_CURL_LIBRARY_DIRS}
   PATHS ${PATHS_CURL_LIBDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 set_extra_dirs_include(CURL curl "${CURL_LIBRARY}")
 find_path(CURL_INCLUDEDIR curl/curl.h
   HINTS ${HINTS_CURL_INCLUDEDIR} ${PC_CURL_INCLUDEDIR} ${PC_CURL_INCLUDE_DIRS}
   PATHS ${PATHS_CURL_INCLUDEDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 include(FindPackageHandleStandardArgs)

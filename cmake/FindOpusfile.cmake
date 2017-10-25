@@ -1,17 +1,21 @@
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_OPUSFILE opusfile)
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_OPUSFILE opusfile)
+endif()
 
 set_extra_dirs_lib(OPUSFILE opus)
 find_library(OPUSFILE_LIBRARY
   NAMES opusfile
   HINTS ${HINTS_OPUSFILE_LIBDIR} ${PC_OPUSFILE_LIBDIR} ${PC_OPUSFILE_LIBRARY_DIRS}
   PATHS ${PATHS_OPUSFILE_LIBDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 set_extra_dirs_include(OPUSFILE opus "${OPUSFILE_LIBRARY}")
 find_path(OPUSFILE_INCLUDEDIR opusfile.h
   PATH_SUFFIXES opus
   HINTS ${HINTS_OPUSFILE_INCLUDEDIR} ${PC_OPUSFILE_INCLUDEDIR} ${PC_OPUSFILE_INCLUDE_DIRS}
   PATHS ${PATHS_OPUSFILE_INCLUDEDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 include(FindPackageHandleStandardArgs)

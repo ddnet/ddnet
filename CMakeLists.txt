@@ -85,7 +85,6 @@ function(set_extra_dirs_lib VARIABLE NAME)
     set("${TYPE}_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
     set("EXTRA_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
   endif()
-  set("${TYPE}_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
 endfunction()
 
 function(set_extra_dirs_include VARIABLE NAME LIBRARY)
@@ -93,9 +92,15 @@ function(set_extra_dirs_include VARIABLE NAME LIBRARY)
   set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
   is_bundled(IS_BUNDLED "${LIBRARY}")
   if(IS_BUNDLED)
-      set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
+    set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TARGET_OS}" PARENT_SCOPE)
   endif()
 endfunction()
+
+if(CMAKE_CROSSCOMPILING)
+  set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH)
+else()
+  set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH)
+endif()
 
 function(is_bundled VARIABLE PATH)
   if(PATH)
@@ -110,9 +115,11 @@ function(is_bundled VARIABLE PATH)
   endif()
 endfunction()
 
-# Check for PkgConfig once so all the other `find_package` calls can do it
-# quietly.
-find_package(PkgConfig)
+if(NOT CMAKE_CROSSCOMPILING)
+  # Check for PkgConfig once so all the other `find_package` calls can do it
+  # quietly.
+  find_package(PkgConfig)
+endif()
 find_package(Curl)
 find_package(Freetype)
 find_package(GTest)
@@ -434,7 +441,7 @@ function(chash output_file)
     DEPENDS scripts/cmd5.py ${ARGN}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
-endfunction(chash)
+endfunction()
 
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
@@ -446,7 +453,7 @@ function(generate_source output_file script_parameter)
       datasrc/network.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
-endfunction(generate_source)
+endfunction()
 
 file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/src/game/generated/")
 chash("src/game/generated/nethash.cpp"
@@ -1111,6 +1118,7 @@ if(TARGET_OS AND TARGET_BITS)
     endif()
   elseif(TARGET_OS STREQUAL "mac")
     set(CPACK_SYSTEM_NAME "osx")
+    set(CPACK_GENERATOR DMG)
   endif()
 endif()
 

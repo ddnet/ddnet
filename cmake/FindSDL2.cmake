@@ -1,12 +1,16 @@
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_SDL2 sdl2)
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_SDL2 sdl2)
+endif()
 
 set_extra_dirs_lib(SDL2 sdl)
 find_library(SDL2_LIBRARY
   NAMES SDL2
   HINTS ${HINTS_SDL2_LIBDIR} ${PC_SDL2_LIBDIR} ${PC_SDL2_LIBRARY_DIRS}
   PATHS ${PATHS_SDL2_LIBDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
+set(CMAKE_FIND_FRAMEWORK FIRST)
 set_extra_dirs_include(SDL2 sdl "${SDL2_LIBRARY}")
 # Looking for 'SDL.h' directly might accidently find a SDL instead of SDL 2
 # installation. Look for a header file only present in SDL 2 instead.
