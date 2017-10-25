@@ -567,32 +567,38 @@ void CMapLayers::OnMapLoad()
 									{ 
 										Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
 										Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-										if(IsDDNet(&Info) && !IsValidGameTile(Index)) Index = 0;
+										if(IsDDNet(&Info) && !IsValidGameTile(Index))
+											Index = 0;
 									}
 									if(IsFrontLayer)
 									{ 
 										Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
 										Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-										if(!IsValidFrontTile(Index)) Index = 0;
+										if(!IsValidFrontTile(Index))
+											Index = 0;
 									}
 									if(IsSwitchLayer)
 									{
 										Flags = 0;
 										Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!IsValidSwitchTile(Index)) Index = 0;
+										if(!IsValidSwitchTile(Index))
+											Index = 0;
 										else if(CurOverlay == 0)
 										{
 											Flags = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
 											if(Index == TILE_SWITCHTIMEDOPEN) Index = 8;
 										}
-										else if(CurOverlay == 1) Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Number;
-										else if(CurOverlay == 2) Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Delay;
+										else if(CurOverlay == 1)
+											Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Number;
+										else if(CurOverlay == 2)
+											Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Delay;
 									}
 									if(IsTeleLayer)
 									{
 										Index = ((CTeleTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
-										if(!IsValidTeleTile(Index)) Index = 0;
+										if(!IsValidTeleTile(Index))
+											Index = 0;
 										else if(CurOverlay == 1)
 										{
 											if(Index != TILE_TELECHECKIN && Index != TILE_TELECHECKINEVIL)
@@ -605,14 +611,18 @@ void CMapLayers::OnMapLoad()
 										Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
 										AngleRotate = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width + x].m_Angle;
-										if(!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0) Index = 0;
-										else if(CurOverlay == 1) Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force;
-										else if(CurOverlay == 2) Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_MaxSpeed;
+										if(!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0)
+											Index = 0;
+										else if(CurOverlay == 1)
+											Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force;
+										else if(CurOverlay == 2)
+											Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_MaxSpeed;
 									}
 									if(IsTuneLayer)
 									{							
 										Index = ((CTuneTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(Index != TILE_TUNE1) Index = 0;		
+										if(Index != TILE_TUNE1)
+											Index = 0;		
 										Flags = 0;
 									}
 								} else
