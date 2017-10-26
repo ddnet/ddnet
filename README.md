@@ -77,13 +77,21 @@ Download and install some version of [Microsoft Visual Studio](https://www.visua
 
 Start CMake and select the source code folder (where DDNet resides, the directory with `CMakeLists.txt`). Additionally select a build folder, e.g. create a build subdirectory in the source code directory. Click "Configure" and select the Visual Studio generator (it should be pre-selected, so pressing "Finish" will suffice). After configuration finishes and the "Generate" reactivates, click it. When that finishes, click "Open Project". Visual Studio should open. You can compile the DDNet client by right-clicking the DDNet project (not the solution) and select "Select as StartUp project". Now you should be able to compile DDNet by clicking the green, triangular "Run" button.
 
-Cross-compiling to Windows x86/x86\_64
---------------------------------------
+Cross-compiling on Linux to Windows x86/x86\_64
+-----------------------------------------------
 
 Install MinGW cross-compilers of the form `i686-w64-mingw32-gcc` (32 bit) or
 `x86_64-w64-mingw32-gcc` (64 bit). This is probably the hard part. ;)
 
 Then add `-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw64.toolchain` to the
+**initial** CMake command line.
+
+Cross-compiling on Linux to macOS
+---------------------------------
+
+Install [osxcross](https://github.com/tpoechtrager/osxcross), then add
+`-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/darwin.toolchain` and
+`-DCMAKE_OSX_SYSROOT=/path/to/osxcross/target/SDK/MacOSX10.11.sdk/` to the
 **initial** CMake command line.
 
 Importing the official DDNet Database

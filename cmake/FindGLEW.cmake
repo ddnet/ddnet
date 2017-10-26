@@ -1,16 +1,20 @@
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_GLEW libglew)
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_GLEW libglew)
+endif()
 
 set_extra_dirs_lib(GLEW glew)
 find_library(GLEW_LIBRARY
   NAMES GLEW glew32
   HINTS ${HINTS_GLEW_LIBDIR} ${PC_GLEW_LIBDIR} ${PC_GLEW_LIBRARY_DIRS}
   PATHS ${PATHS_GLEW_LIBDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 set_extra_dirs_include(GLEW glew "${GLEW_LIBRARY}")
 find_path(GLEW_INCLUDEDIR GL
   HINTS ${HINTS_GLEW_INCLUDEDIR} ${PC_GLEW_INCLUDEDIR} ${PC_GLEW_INCLUDE_DIRS}
   PATHS ${PATHS_GLEW_INCLUDEDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 include(FindPackageHandleStandardArgs)

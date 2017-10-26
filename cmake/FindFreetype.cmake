@@ -1,11 +1,14 @@
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_FREETYPE freetype2)
+if(NOT CMAKE_CROSSCOMPILING)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_FREETYPE freetype2)
+endif()
 
 set_extra_dirs_lib(FREETYPE freetype)
 find_library(FREETYPE_LIBRARY
-  NAMES freetype
+  NAMES freetype freetype.6
   HINTS ${HINTS_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBDIR} ${PC_FREETYPE_LIBRARY_DIRS}
   PATHS ${PATHS_FREETYPE_LIBDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 set_extra_dirs_include(FREETYPE freetype "${FREETYPE_LIBRARY}")
 find_path(FREETYPE_INCLUDEDIR
@@ -13,6 +16,7 @@ find_path(FREETYPE_INCLUDEDIR
   PATH_SUFFIXES freetype2
   HINTS ${HINTS_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDEDIR} ${PC_FREETYPE_INCLUDE_DIRS}
   PATHS ${PATHS_FREETYPE_INCLUDEDIR}
+  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 include(FindPackageHandleStandardArgs)
