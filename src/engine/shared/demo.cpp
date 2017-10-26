@@ -801,7 +801,7 @@ int CDemoPlayer::NextFrame()
 	return IsPlaying();
 }
 
-const int64 CDemoPlayer::time()
+int64 CDemoPlayer::time()
 {
 #if defined(CONF_VIDEORECORDER)
 	static bool s_Recording = false;

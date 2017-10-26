@@ -35,11 +35,11 @@ protected:
 	class IUpdater *Updater() const { return m_pClient->Updater(); }
 
 #if defined(CONF_VIDEORECORDER)
-	const int64 time() const { return IVideo::Current() ? IVideo::time() : time_get(); }
-	const float LocalTime() const { return IVideo::Current() ? IVideo::LocalTime() : Client()->LocalTime(); }
+	int64 time() const { return IVideo::Current() ? IVideo::time() : time_get(); }
+	float LocalTime() const { return IVideo::Current() ? IVideo::LocalTime() : Client()->LocalTime(); }
 #else
-	const int64 time() const { return time_get(); }
-	const float LocalTime() const { return Client()->LocalTime(); }
+	int64 time() const { return time_get(); }
+	float LocalTime() const { return Client()->LocalTime(); }
 #endif
 
 

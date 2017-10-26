@@ -20,8 +20,8 @@ public:
 
 	static IVideo* Current() { return ms_pCurrentVideo; }
 
-	static const int64 time() { return ms_Time; }
-	static const float LocalTime() { return ms_LocalTime; }
+	static int64 time() { return ms_Time; }
+	static float LocalTime() { return ms_LocalTime; }
 	static void SetLocalStartTime(int64 LocalStartTime) { ms_LocalStartTime = LocalStartTime; }
 	static void SetFPS(int fps) { ms_TickTime = time_freq() / fps; }
 
