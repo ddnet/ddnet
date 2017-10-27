@@ -636,14 +636,12 @@ void CMapLayers::OnMapLoad()
 								Visuals.m_TilesOfLayer[y][x].m_IndexBufferByteOffset = (char*)(TilesHandledCount*6*sizeof(unsigned int));
 								Visuals.m_TilesOfLayer[y][x].m_TilesHandledCount = tmpTiles.size();
 									
-								if(IsSpeedupLayer && CurOverlay == 0)
-								{
-									if(AddTile(tmpTiles, tmpTileTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, true, AngleRotate))
-										Visuals.m_TilesOfLayer[y][x].m_Draw = true;
-								}
-								else
-									if(AddTile(tmpTiles, tmpTileTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
-										Visuals.m_TilesOfLayer[y][x].m_Draw = true;
+								bool AddAsSpeedup = false;
+								if (IsSpeedupLayer && CurOverlay == 0)
+									AddAsSpeedup = true;
+
+								if(AddTile(tmpTiles, tmpTileTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
+									Visuals.m_TilesOfLayer[y][x].m_Draw = true;
 								
 								//do the border tiles
 								if(x == 0)
@@ -651,19 +649,19 @@ void CMapLayers::OnMapLoad()
 									if(y == 0)
 									{
 										Visuals.m_BorderTopLeft.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
-										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderTopLeft.m_Draw = true;
 									} else if(y == pTMap->m_Height - 1)
 									{
 										Visuals.m_BorderBottomLeft.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
-										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderBottomLeft.m_Draw = true;
 											
 									} else 
 									{
 										Visuals.m_BorderLeft[y-1].m_IndexBufferByteOffset = (char*)(tmpBorderLeftTiles.size()*6*sizeof(unsigned int));
 										Visuals.m_BorderLeft[y-1].m_TilesHandledCount = tmpBorderLeftTiles.size();
-										if(AddTile(tmpBorderLeftTiles, tmpBorderLeftTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderLeftTiles, tmpBorderLeftTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderLeft[y-1].m_Draw = true;
 									}
 								} else if(x == pTMap->m_Width - 1)
@@ -671,20 +669,20 @@ void CMapLayers::OnMapLoad()
 									if(y == 0)
 									{
 										Visuals.m_BorderTopRight.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
-										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderTopRight.m_Draw = true;
 											
 									} else if(y == pTMap->m_Height - 1)
 									{
 										Visuals.m_BorderBottomRight.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
-										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderBottomRight.m_Draw = true;
 											
 									} else
 									{
 										Visuals.m_BorderRight[y-1].m_IndexBufferByteOffset = (char*)(tmpBorderRightTiles.size()*6*sizeof(unsigned int));
 										Visuals.m_BorderRight[y-1].m_TilesHandledCount = tmpBorderRightTiles.size();
-										if(AddTile(tmpBorderRightTiles, tmpBorderRightTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderRightTiles, tmpBorderRightTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderRight[y-1].m_Draw = true;
 									}
 								} else if(y == 0)
@@ -693,7 +691,7 @@ void CMapLayers::OnMapLoad()
 									{
 										Visuals.m_BorderTop[x-1].m_IndexBufferByteOffset = (char*)(tmpBorderTopTiles.size()*6*sizeof(unsigned int));
 										Visuals.m_BorderTop[x-1].m_TilesHandledCount = tmpBorderTopTiles.size();
-										if(AddTile(tmpBorderTopTiles, tmpBorderTopTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderTopTiles, tmpBorderTopTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderTop[x-1].m_Draw = true;
 									}
 								} else if(y == pTMap->m_Height - 1)
@@ -702,7 +700,7 @@ void CMapLayers::OnMapLoad()
 									{
 										Visuals.m_BorderBottom[x-1].m_IndexBufferByteOffset = (char*)(tmpBorderBottomTiles.size()*6*sizeof(unsigned int));
 										Visuals.m_BorderBottom[x-1].m_TilesHandledCount = tmpBorderBottomTiles.size();
-										if(AddTile(tmpBorderBottomTiles, tmpBorderBottomTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords))
+										if(AddTile(tmpBorderBottomTiles, tmpBorderBottomTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderBottom[x-1].m_Draw = true;
 									}
 								}
