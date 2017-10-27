@@ -32,6 +32,7 @@ class CFetchTask : public IFetchTask
 	int m_Progress;
 	int m_State;
 
+	LOCK m_Lock;
 	bool m_Abort;
 	bool m_Destroy;
 	bool m_PastCB;
@@ -49,14 +50,17 @@ public:
 
 void CFetchTask::Destroy()
 {
+	lock_wait(m_Lock);
 	if(m_PastCB)
 	{
+		lock_destroy(m_Lock);
 		delete this;
 	}
 	else
 	{
 		m_Abort = true;
 		m_Destroy = true;
+		lock_unlock(m_Lock);
 	}
 }
 
@@ -82,10 +86,17 @@ void CFetcher::DestroyCallback(CJob *pJob, void *pUser)
 
 	delete pJob;
 
+	lock_wait(pTask->m_Lock);
 	if(pTask->m_Destroy)
+	{
+		lock_destroy(pTask->m_Lock);
 		delete pTask;
-
-	pTask->m_PastCB = true;
+	}
+	else
+	{
+		pTask->m_PastCB = true;
+	}
+	lock_unlock(pTask->m_Lock);
 }
 
 IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int StorageType, bool UseDDNetCA, bool CanTimeout, void *pUser, COMPFUNC pfnCompCb, PROGFUNC pfnProgCb)
@@ -102,6 +113,7 @@ IFetchTask *CFetcher::FetchFile(const char *pUrl, const char *pDest, int Storage
 	pTask->m_UseDDNetCA = UseDDNetCA;
 	pTask->m_CanTimeout = CanTimeout;
 
+	pTask->m_Lock = lock_create();
 	pTask->m_Abort = false;
 	pTask->m_Destroy = false;
 	pTask->m_PastCB = false;
