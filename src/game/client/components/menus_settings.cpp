@@ -1687,10 +1687,10 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char aBuf[64];
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Label.VSplitRight(50.0f, &Label, &Button);
-			float twh = TextRender()->TextWidth(0, 16.0f, "Friend message", -1) ;
+			float twh = TextRender()->TextWidth(0, 16.0f, Localize("Friend message"), -1) ;
 			Label.VSplitLeft(twh + 5.0f, &Label, &Enable);
 			Enable.VSplitLeft(20.0f, &Enable, 0);
-			UI()->DoLabelScaled(&Label, "Friend message", 16.0f, -1);
+			UI()->DoLabelScaled(&Label, Localize("Friend message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
 				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
