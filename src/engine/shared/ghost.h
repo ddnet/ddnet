@@ -12,7 +12,7 @@ enum
 class CGhostItem
 {
 public:
-	char m_aData[MAX_ITEM_SIZE];
+	unsigned char m_aData[MAX_ITEM_SIZE];
 	int m_Type;
 
 	CGhostItem() : m_Type(-1) {}
@@ -24,6 +24,7 @@ class CGhostRecorder : public IGhostRecorder
 {
 	IOHANDLE m_File;
 	class IConsole *m_pConsole;
+	class IStorage *m_pStorage;
 
 	CGhostItem m_LastItem;
 
@@ -37,10 +38,12 @@ class CGhostRecorder : public IGhostRecorder
 public:
 	CGhostRecorder();
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pMap, unsigned MapCrc, const char *pName);
+	void Init();
+
+	int Start(const char *pFilename, const char *pMap, unsigned MapCrc, const char *pName);
 	int Stop(int Ticks, int Time);
 
-	void WriteData(int Type, const char *pData, int Size);
+	void WriteData(int Type, const void *pData, int Size);
 	bool IsRecording() const { return m_File != 0; }
 };
 
@@ -48,6 +51,7 @@ class CGhostLoader : public IGhostLoader
 {
 	IOHANDLE m_File;
 	class IConsole *m_pConsole;
+	class IStorage *m_pStorage;
 
 	CGhostHeader m_Header;
 
@@ -65,16 +69,16 @@ class CGhostLoader : public IGhostLoader
 public:
 	CGhostLoader();
 
-	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pMap, unsigned Crc);
+	void Init();
+
+	int Load(const char *pFilename, const char *pMap, unsigned Crc);
 	void Close();
 	const CGhostHeader *GetHeader() const { return &m_Header; }
 
 	bool ReadNextType(int *pType);
-	bool ReadData(int Type, char *pData, int Size);
+	bool ReadData(int Type, void *pData, int Size);
 
-	bool GetGhostInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, CGhostHeader *pGhostHeader, const char *pMap, unsigned Crc) const;
-	int GetTime(const CGhostHeader *pHeader) const;
-	int GetTicks(const CGhostHeader *pHeader) const;
+	bool GetGhostInfo(const char *pFilename, CGhostHeader *pGhostHeader, const char *pMap, unsigned Crc);
 };
 
 class CGhostUpdater
@@ -133,10 +137,8 @@ class CGhostUpdater
 
 	static const int ms_GhostCharacterSize = 11 * sizeof(int);
 
-	static CGhostRecorder ms_Recorder;
-
 public:
-	static bool Update(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename);
+	static bool Update(class IGhostRecorder *pRecorder, class IStorage *pStorage, class IConsole *pConsole, const char *pFilename);
 };
 
 #endif

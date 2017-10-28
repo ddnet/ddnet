@@ -2570,6 +2570,9 @@ void CClient::InitInterfaces()
 
 	m_Friends.Init();
 	m_Foes.Init(true);
+
+	m_GhostRecorder.Init();
+	m_GhostLoader.Init();
 }
 
 void CClient::Run()
@@ -3618,21 +3621,6 @@ void CClient::RaceRecord_Stop()
 bool CClient::RaceRecord_IsRecording()
 {
 	return m_DemoRecorder[RECORDER_RACE].IsRecording();
-}
-
-void CClient::GhostRecorder_Start(const char *pFilename, const char *pPlayerName)
-{
-	m_GhostRecorder.Start(Storage(), m_pConsole, pFilename, m_aCurrentMap, m_pMap->Crc(), pPlayerName);
-}
-
-bool CClient::GhostLoader_Load(const char *pFilename)
-{
-	return m_GhostLoader.Load(Storage(), m_pConsole, pFilename, m_aCurrentMap, m_pMap->Crc()) == 0;
-}
-
-bool CClient::GhostLoader_GetGhostInfo(const char *pFilename, struct CGhostHeader *pGhostHeader)
-{
-	return m_GhostLoader.GetGhostInfo(Storage(), m_pConsole, pFilename, pGhostHeader, m_aCurrentMap, m_pMap->Crc());
 }
 
 

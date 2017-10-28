@@ -1801,7 +1801,7 @@ void CGameClient::OnPredict()
 	m_PredictedTick = Client()->PredGameTick();
 
 	if(m_NewPredictedTick)
-		m_pGhost->OnNewSnapshot(true);
+		m_pGhost->OnNewPredictedSnapshot();
 }
 
 void CGameClient::OnActivateEditor()

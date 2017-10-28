@@ -112,8 +112,11 @@ private:
 	int m_NewRenderTick;
 	int m_StartRenderTick;
 	int m_LastDeathTick;
+	int m_LastRaceTick;
 	bool m_Recording;
 	bool m_Rendering;
+
+	bool m_RenderingStartedByServer;
 
 	static void GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar);
@@ -123,6 +126,10 @@ private:
 
 	void AddInfos(const CNetObj_Character *pChar);
 	int GetSlot() const;
+
+	void CheckStart();
+	void CheckStartLocal(bool Predicted);
+	void TryRenderStart(int Tick, bool ServerControl);
 
 	void StartRecord(int Tick);
 	void StopRecord(int Time = -1);
@@ -144,9 +151,10 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual void OnMapLoad();
 
-	void OnNewSnapshot(bool Predicted = false);
+	void OnNewSnapshot();
+	void OnNewPredictedSnapshot();
 
-	int FreeSlot() const;
+	int FreeSlots() const;
 	int Load(const char *pFilename);
 	void Unload(int Slot);
 	void UnloadAll();

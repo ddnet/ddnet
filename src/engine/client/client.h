@@ -391,10 +391,6 @@ public:
 	void RaceRecord_Stop();
 	bool RaceRecord_IsRecording();
 
-	void GhostRecorder_Start(const char *pFilename, const char *pPlayerName);
-	bool GhostLoader_Load(const char *pFilename);
-	bool GhostLoader_GetGhostInfo(const char *pFilename, struct CGhostHeader *pGhostHeader);
-
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);

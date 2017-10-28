@@ -17,12 +17,16 @@ CGhostRecorder::CGhostRecorder()
 	ResetBuffer();
 }
 
-// Record
-int CGhostRecorder::Start(IStorage *pStorage, IConsole *pConsole, const char *pFilename, const char *pMap, unsigned Crc, const char* pName)
+void CGhostRecorder::Init()
 {
-	m_pConsole = pConsole;
+	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+}
 
-	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+// Record
+int CGhostRecorder::Start(const char *pFilename, const char *pMap, unsigned Crc, const char* pName)
+{
+	m_File = m_pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!m_File)
 	{
 		char aBuf[256];
@@ -71,7 +75,7 @@ static void DiffItem(int *pPast, int *pCurrent, int *pOut, int Size)
 	}
 }
 
-void CGhostRecorder::WriteData(int Type, const char *pData, int Size)
+void CGhostRecorder::WriteData(int Type, const void *pData, int Size)
 {
 	if(!m_File || (unsigned)Size > MAX_ITEM_SIZE || Size <= 0 || Type == -1)
 		return;
@@ -167,6 +171,12 @@ CGhostLoader::CGhostLoader()
 	ResetBuffer();
 }
 
+void CGhostLoader::Init()
+{
+	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+}
+
 void CGhostLoader::ResetBuffer()
 {
 	m_pBufferPos = m_aBuffer;
@@ -175,10 +185,9 @@ void CGhostLoader::ResetBuffer()
 	m_BufferPrevItem = -1;
 }
 
-int CGhostLoader::Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pMap, unsigned Crc)
+int CGhostLoader::Load(const char *pFilename, const char *pMap, unsigned Crc)
 {
-	m_pConsole = pConsole;
-	m_File = pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
+	m_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if(!m_File)
 	{
 		char aBuf[256];
@@ -299,7 +308,7 @@ static void UndiffItem(int *pPast, int *pDiff, int *pOut, int Size)
 	}
 }
 
-bool CGhostLoader::ReadData(int Type, char *pData, int Size)
+bool CGhostLoader::ReadData(int Type, void *pData, int Size)
 {
 	if(!m_File || Size > MAX_ITEM_SIZE || Size <= 0 || Type == -1)
 		return false;
@@ -327,14 +336,14 @@ void CGhostLoader::Close()
 	m_File = 0;
 }
 
-bool CGhostLoader::GetGhostInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, CGhostHeader *pGhostHeader, const char *pMap, unsigned Crc) const
+bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostHeader *pGhostHeader, const char *pMap, unsigned Crc)
 {
 	if(!pGhostHeader)
 		return false;
 
 	mem_zero(pGhostHeader, sizeof(CGhostHeader));
 
-	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if(!File)
 		return false;
 
@@ -344,41 +353,27 @@ bool CGhostLoader::GetGhostInfo(class IStorage *pStorage, class IConsole *pConso
 	{
 		io_close(File);
 		// old version... try to update
-		if(CGhostUpdater::Update(pStorage, pConsole, pFilename))
+		IGhostRecorder *pRecorder = Kernel()->RequestInterface<IGhostRecorder>();
+		if(CGhostUpdater::Update(pRecorder, m_pStorage, m_pConsole, pFilename))
 		{
 			// try again
-			File = pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
+			File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
 			io_read(File, pGhostHeader, sizeof(CGhostHeader));
 		}
 		else
 			return false;
 	}
 
+	io_close(File);
+
 	if(mem_comp(pGhostHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || (pGhostHeader->m_Version != gs_ActVersion && pGhostHeader->m_Version != 4))
-	{
-		io_close(File);
 		return false;
-	}
 
 	unsigned GhostMapCrc = (pGhostHeader->m_aCrc[0] << 24) | (pGhostHeader->m_aCrc[1] << 16) | (pGhostHeader->m_aCrc[2] << 8) | (pGhostHeader->m_aCrc[3]);
 	if(str_comp(pGhostHeader->m_aMap, pMap) != 0 || GhostMapCrc != Crc)
-	{
-		io_close(File);
 		return false;
-	}
 
-	io_close(File);
 	return true;
-}
-
-int CGhostLoader::GetTime(const CGhostHeader *pHeader) const
-{
-	return (pHeader->m_aTime[0] << 24) | (pHeader->m_aTime[1] << 16) | (pHeader->m_aTime[2] << 8) | (pHeader->m_aTime[3]);
-}
-
-int CGhostLoader::GetTicks(const CGhostHeader *pHeader) const
-{
-	return (pHeader->m_aNumTicks[0] << 24) | (pHeader->m_aNumTicks[1] << 16) | (pHeader->m_aNumTicks[2] << 8) | (pHeader->m_aNumTicks[3]);
 }
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
@@ -398,9 +393,7 @@ inline void StrToInts(int *pInts, int Num, const char *pStr)
 	pInts[-1] &= 0xffffff00;
 }
 
-CGhostRecorder CGhostUpdater::ms_Recorder;
-
-bool CGhostUpdater::Update(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename)
+bool CGhostUpdater::Update(class IGhostRecorder *pRecorder, class IStorage *pStorage, class IConsole *pConsole, const char *pFilename)
 {
 	pStorage->CreateFolder("ghosts/backup", IStorage::TYPE_SAVE);
 
@@ -443,11 +436,11 @@ bool CGhostUpdater::Update(class IStorage *pStorage, class IConsole *pConsole, c
 		Time = ExtHeader.m_Time * 1000;
 
 		unsigned Crc = (ExtHeader.m_aCrc[0] << 24) | (ExtHeader.m_aCrc[1] << 16) | (ExtHeader.m_aCrc[2] << 8) | (ExtHeader.m_aCrc[3]);
-		ms_Recorder.Start(pStorage, pConsole, pFilename, ExtHeader.m_aMap, Crc, ExtHeader.m_aOwner);
+		pRecorder->Start(pFilename, ExtHeader.m_aMap, Crc, ExtHeader.m_aOwner);
 
 		CGhostSkin Skin;
 		mem_copy(&Skin, aSkinData + ms_SkinOffsetV2, sizeof(Skin));
-		ms_Recorder.WriteData(0 /* GHOSTDATA_TYPE_SKIN */, (const char*)&Skin, sizeof(Skin));
+		pRecorder->WriteData(0 /* GHOSTDATA_TYPE_SKIN */, &Skin, sizeof(Skin));
 	}
 	else
 	{
@@ -459,14 +452,14 @@ bool CGhostUpdater::Update(class IStorage *pStorage, class IConsole *pConsole, c
 		Time = ExtHeader.m_Time * 1000;
 
 		unsigned Crc = (ExtHeader.m_aCrc[0] << 24) | (ExtHeader.m_aCrc[1] << 16) | (ExtHeader.m_aCrc[2] << 8) | (ExtHeader.m_aCrc[3]);
-		ms_Recorder.Start(pStorage, pConsole, pFilename, ExtHeader.m_aMap, Crc, ExtHeader.m_aOwner);
+		pRecorder->Start(pFilename, ExtHeader.m_aMap, Crc, ExtHeader.m_aOwner);
 
 		CGhostSkin Skin;
 		StrToInts(&Skin.m_Skin0, 6, ExtHeader.m_aSkinName);
 		Skin.m_UseCustomColor = ExtHeader.m_UseCustomColor;
 		Skin.m_ColorBody = ExtHeader.m_ColorBody;
 		Skin.m_ColorFeet = ExtHeader.m_ColorFeet;
-		ms_Recorder.WriteData(0 /* GHOSTDATA_TYPE_SKIN */, (const char*)&Skin, sizeof(Skin));
+		pRecorder->WriteData(0 /* GHOSTDATA_TYPE_SKIN */, &Skin, sizeof(Skin));
 	}
 
 	// read data
@@ -505,7 +498,7 @@ bool CGhostUpdater::Update(class IStorage *pStorage, class IConsole *pConsole, c
 		char *pTmp = s_aData;
 		for(int i = 0; i < DataSize / ms_GhostCharacterSize; i++)
 		{
-			ms_Recorder.WriteData(1 /* GHOSTDATA_TYPE_CHARACTER_NO_TICK */, pTmp, ms_GhostCharacterSize);
+			pRecorder->WriteData(1 /* GHOSTDATA_TYPE_CHARACTER_NO_TICK */, pTmp, ms_GhostCharacterSize);
 			pTmp += ms_GhostCharacterSize;
 			Index++;
 		}
@@ -514,6 +507,6 @@ bool CGhostUpdater::Update(class IStorage *pStorage, class IConsole *pConsole, c
 	io_close(File);
 
 	bool Error = Ticks != Index;
-	ms_Recorder.Stop(Index, Error ? 0 : Time);
+	pRecorder->Stop(Index, Error ? 0 : Time);
 	return !Error;
 }

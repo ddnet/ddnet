@@ -844,13 +844,13 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_pGhost->GetGhostDir(), pName);
 
 	CGhostHeader Header;
-	if(!pSelf->Client()->GhostLoader_GetGhostInfo(aFilename, &Header))
+	if(!pSelf->m_pClient->m_pGhost->GhostLoader()->GetGhostInfo(aFilename, &Header, pMap, pSelf->Client()->GetMapCrc()))
 		return 0;
 
 	CGhostItem Item;
 	str_copy(Item.m_aFilename, aFilename, sizeof(Item.m_aFilename));
 	str_copy(Item.m_aPlayer, Header.m_aOwner, sizeof(Item.m_aPlayer));
-	Item.m_Time = pSelf->m_pClient->m_pGhost->GhostLoader()->GetTime(&Header);
+	Item.m_Time = Header.GetTime();
 	if(Item.m_Time > 0)
 		pSelf->m_lGhosts.add(Item);
 	return 0;
@@ -1146,7 +1146,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	CGhostItem *pOwnGhost = GetOwnGhost();
 	int ReservedSlots = !pGhost->m_Own && !(pOwnGhost && pOwnGhost->Active());
-	if(pGhost->HasFile() && (pGhost->Active() || m_pClient->m_pGhost->FreeSlot() > ReservedSlots))
+	if(pGhost->HasFile() && (pGhost->Active() || m_pClient->m_pGhost->FreeSlots() > ReservedSlots))
 	{
 		Status.VSplitRight(120.0f, &Status, &Button);
 

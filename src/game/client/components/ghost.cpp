@@ -15,7 +15,7 @@
 
 const char *CGhost::ms_pGhostDir = "ghosts";
 
-CGhost::CGhost() : m_NewRenderTick(-1), m_StartRenderTick(-1), m_LastDeathTick(-1), m_Recording(false), m_Rendering(false) {}
+CGhost::CGhost() : m_NewRenderTick(-1), m_StartRenderTick(-1), m_LastDeathTick(-1), m_LastRaceTick(-1), m_Recording(false), m_Rendering(false) {}
 
 void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
@@ -139,19 +139,19 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
 		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename), m_CurGhost.m_aPlayer);
-		Client()->GhostRecorder_Start(m_aTmpFilename, m_CurGhost.m_aPlayer);
+		GhostRecorder()->Start(m_aTmpFilename, Client()->GetCurrentMap(), Client()->GetMapCrc(), m_CurGhost.m_aPlayer);
 
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, (const char*)&m_CurGhost.m_StartTick, sizeof(int));
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&m_CurGhost.m_Skin, sizeof(CGhostSkin));
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &m_CurGhost.m_StartTick, sizeof(int));
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &m_CurGhost.m_Skin, sizeof(CGhostSkin));
 		for(int i = 0; i < NumTicks; i++)
-			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)m_CurGhost.m_Path.Get(i), sizeof(CGhostCharacter));
+			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, m_CurGhost.m_Path.Get(i), sizeof(CGhostCharacter));
 	}
 
 	CGhostCharacter GhostChar;
 	GetGhostCharacter(&GhostChar, pChar);
 	m_CurGhost.m_Path.Add(GhostChar);
 	if(GhostRecorder()->IsRecording())
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)&GhostChar, sizeof(CGhostCharacter));
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, &GhostChar, sizeof(CGhostCharacter));
 }
 
 int CGhost::GetSlot() const
@@ -162,7 +162,7 @@ int CGhost::GetSlot() const
 	return -1;
 }
 
-int CGhost::FreeSlot() const
+int CGhost::FreeSlots() const
 {
 	int Num = 0;
 	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
@@ -171,104 +171,133 @@ int CGhost::FreeSlot() const
 	return Num;
 }
 
-void CGhost::OnNewSnapshot(bool Predicted)
+void CGhost::CheckStart()
+{
+	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
+	int RenderTick = m_NewRenderTick;
+
+	if(m_LastRaceTick != RaceTick && Client()->GameTick() - RaceTick < Client()->GameTickSpeed())
+	{
+		if(m_Rendering && m_RenderingStartedByServer) // race restarted: stop rendering
+			StopRender();
+		if(m_Recording && m_LastRaceTick != -1) // race restarted: activate restarting for local start detection so we have a smooth transition
+			m_AllowRestart = true;
+		if(m_LastRaceTick == -1) // no restart: reset rendering preparations
+			m_NewRenderTick = -1;
+		if(GhostRecorder()->IsRecording()) // race restarted: stop recording
+			GhostRecorder()->Stop(0, -1);
+		int StartTick = RaceTick;
+
+		CServerInfo ServerInfo;
+		Client()->GetServerInfo(&ServerInfo);
+		if(IsDDRace(&ServerInfo)) // the client recognizes the start one tick earlier than ddrace servers
+			StartTick--;
+		StartRecord(StartTick);
+		RenderTick = StartTick;
+	}
+
+	TryRenderStart(RenderTick, true);
+}
+
+void CGhost::CheckStartLocal(bool Predicted)
+{
+	if(Predicted) // rendering
+	{
+		int RenderTick = m_NewRenderTick;
+
+		vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
+		vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
+		if(((!m_Rendering && RenderTick == -1) || m_AllowRestart) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
+		{
+			if(m_Rendering && !m_RenderingStartedByServer) // race restarted: stop rendering
+				StopRender();
+			RenderTick = Client()->PredGameTick();
+		}
+
+		TryRenderStart(RenderTick, false);
+	}
+	else // recording
+	{
+		int PrevTick = m_pClient->m_Snap.m_pLocalPrevCharacter->m_Tick;
+		int CurTick = m_pClient->m_Snap.m_pLocalCharacter->m_Tick;
+		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
+		vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
+
+		// detecting death, needed because race allows immediate respawning
+		if((!m_Recording || m_AllowRestart) && m_LastDeathTick < PrevTick)
+		{
+			// estimate the exact start tick
+			int RecordTick = -1;
+			int TickDiff = CurTick - PrevTick;
+			for(int i = 0; i < TickDiff; i++)
+			{
+				if(CRaceHelper::IsStart(m_pClient, mix(PrevPos, Pos, (float)i / TickDiff), mix(PrevPos, Pos, (float)(i + 1) / TickDiff)))
+				{
+					RecordTick = PrevTick + i + 1;
+					if(!m_AllowRestart)
+						break;
+				}
+			}
+			if(RecordTick != -1)
+			{
+				if(GhostRecorder()->IsRecording()) // race restarted: stop recording
+					GhostRecorder()->Stop(0, -1);
+				StartRecord(RecordTick);
+			}
+		}
+	}
+}
+
+void CGhost::TryRenderStart(int Tick, bool ServerControl)
+{
+	// only restart rendering if it did not change since last tick to prevent stuttering
+	if(m_NewRenderTick != -1 && m_NewRenderTick == Tick)
+	{
+		StartRender(Tick);
+		Tick = -1;
+		m_RenderingStartedByServer = ServerControl;
+	}
+	m_NewRenderTick = Tick;
+}
+
+void CGhost::OnNewSnapshot()
 {
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
 	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
 		return;
-
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
 
 	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
 	bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
+
+	if(!ServerControl)
+		CheckStartLocal(false);
+	else
+		CheckStart();
+
+	if(m_Recording)
+		AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
+
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
+	m_LastRaceTick = RaceFlag ? RaceTick : -1;
+}
 
-	int RenderTick = m_NewRenderTick;
+void CGhost::OnNewPredictedSnapshot()
+{
+	CServerInfo ServerInfo;
+	Client()->GetServerInfo(&ServerInfo);
+	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
+		return;
+	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
+		return;
 
-	static bool s_RenderingStartedByServer = false;
+	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
+	bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
 
-	if(!ServerControl && Predicted)
-	{
-		vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
-		vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
-		if(((!m_Rendering && RenderTick == -1) || m_AllowRestart) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
-		{
-			if(m_Rendering && !s_RenderingStartedByServer) // race restarted: stop rendering
-				StopRender();
-			RenderTick = Client()->PredGameTick();
-		}
-	}
-
-	if(!Predicted)
-	{
-		static int s_LastRaceTick = -1;
-
-		if(ServerControl && s_LastRaceTick != RaceTick && Client()->GameTick() - RaceTick < Client()->GameTickSpeed())
-		{
-			if(m_Rendering && s_RenderingStartedByServer) // race restarted: stop rendering
-				StopRender();
-			if(m_Recording && s_LastRaceTick != -1) // race restarted: activate restarting for local start detection so we have a smooth transition
-				m_AllowRestart = true;
-			if(s_LastRaceTick == -1) // no restart: reset rendering preparations
-				m_NewRenderTick = -1;
-			if(GhostRecorder()->IsRecording()) // race restarted: stop recording
-				GhostRecorder()->Stop(0, -1);
-			int StartTick = RaceTick;
-			if(IsDDRace(&ServerInfo)) // the client recognizes the start one tick earlier than ddrace servers
-				StartTick--;
-			StartRecord(StartTick);
-			RenderTick = StartTick;
-		}
-		else if(!ServerControl)
-		{
-			int PrevTick = m_pClient->m_Snap.m_pLocalPrevCharacter->m_Tick;
-			int CurTick = m_pClient->m_Snap.m_pLocalCharacter->m_Tick;
-			vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
-			vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
-
-			// detecting death, needed because race allows immediate respawning
-			if((!m_Recording || m_AllowRestart) && m_LastDeathTick < PrevTick)
-			{
-				// estimate the exact start tick
-				int RecordTick = -1;
-				int TickDiff = CurTick - PrevTick;
-				for(int i = 0; i < TickDiff; i++)
-				{
-					if(CRaceHelper::IsStart(m_pClient, mix(PrevPos, Pos, (float)i / TickDiff), mix(PrevPos, Pos, (float)(i + 1) / TickDiff)))
-					{
-						RecordTick = PrevTick + i + 1;
-						if(!m_AllowRestart)
-							break;
-					}
-				}
-				if(RecordTick != -1)
-				{
-					if(GhostRecorder()->IsRecording()) // race restarted: stop recording
-						GhostRecorder()->Stop(0, -1);
-					StartRecord(RecordTick);
-				}
-			}
-		}
-
-		if(m_Recording)
-			AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
-
-		s_LastRaceTick = RaceFlag ? RaceTick : -1;
-	}
-
-	if(ServerControl != Predicted)
-	{
-		// only restart rendering if it did not change since last tick to prevent stuttering
-		if(m_NewRenderTick != -1 && m_NewRenderTick == RenderTick)
-		{
-			StartRender(RenderTick);
-			RenderTick = -1;
-			s_RenderingStartedByServer = ServerControl;
-		}
-		m_NewRenderTick = RenderTick;
-	}
+	if(!ServerControl)
+		CheckStartLocal(true);
 }
 
 void CGhost::OnRender()
@@ -282,7 +311,7 @@ void CGhost::OnRender()
 	for(int i = 0; i < MAX_ACTIVE_GHOSTS; i++)
 	{
 		CGhostItem *pGhost = &m_aActiveGhosts[i];
-		if(pGhost->Empty() || pGhost->m_PlaybackPos < 0)
+		if(pGhost->Empty())
 			continue;
 
 		int GhostTick = pGhost->m_StartTick + PlaybackTick;
@@ -424,13 +453,13 @@ int CGhost::Load(const char *pFilename)
 	if(Slot == -1)
 		return -1;
 
-	if(!Client()->GhostLoader_Load(pFilename))
+	if(GhostLoader()->Load(pFilename, Client()->GetCurrentMap(), Client()->GetMapCrc()) != 0)
 		return -1;
 
 	const CGhostHeader *pHeader = GhostLoader()->GetHeader();
 
-	int NumTicks = GhostLoader()->GetTicks(pHeader);
-	int Time = GhostLoader()->GetTime(pHeader);
+	int NumTicks = pHeader->GetTicks();
+	int Time = pHeader->GetTime();
 	if(NumTicks <= 0 || Time <= 0)
 	{
 		GhostLoader()->Close();
@@ -461,23 +490,23 @@ int CGhost::Load(const char *pFilename)
 		if(Type == GHOSTDATA_TYPE_SKIN && !FoundSkin)
 		{
 			FoundSkin = true;
-			if(!GhostLoader()->ReadData(Type, (char*)&pGhost->m_Skin, sizeof(CGhostSkin)))
+			if(!GhostLoader()->ReadData(Type, &pGhost->m_Skin, sizeof(CGhostSkin)))
 				Error = true;
 		}
 		else if(Type == GHOSTDATA_TYPE_CHARACTER_NO_TICK)
 		{
 			NoTick = true;
-			if(!GhostLoader()->ReadData(Type, (char*)pGhost->m_Path.Get(Index++), sizeof(CGhostCharacter_NoTick)))
+			if(!GhostLoader()->ReadData(Type, pGhost->m_Path.Get(Index++), sizeof(CGhostCharacter_NoTick)))
 				Error = true;
 		}
 		else if(Type == GHOSTDATA_TYPE_CHARACTER)
 		{
-			if(!GhostLoader()->ReadData(Type, (char*)pGhost->m_Path.Get(Index++), sizeof(CGhostCharacter)))
+			if(!GhostLoader()->ReadData(Type, pGhost->m_Path.Get(Index++), sizeof(CGhostCharacter)))
 				Error = true;
 		}
 		else if(Type == GHOSTDATA_TYPE_START_TICK)
 		{
-			if(!GhostLoader()->ReadData(Type, (char*)&pGhost->m_StartTick, sizeof(int)))
+			if(!GhostLoader()->ReadData(Type, &pGhost->m_StartTick, sizeof(int)))
 				Error = true;
 		}
 	}
@@ -531,12 +560,12 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 
 	int NumTicks = pGhost->m_Path.Size();
 	GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_aPlayer, pItem->m_Time);
-	Client()->GhostRecorder_Start(pItem->m_aFilename, pItem->m_aPlayer);
+	GhostRecorder()->Start(pItem->m_aFilename, Client()->GetCurrentMap(), Client()->GetMapCrc(), pItem->m_aPlayer);
 
-	GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, (const char*)&pGhost->m_StartTick, sizeof(int));
-	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, (const char*)&pGhost->m_Skin, sizeof(CGhostSkin));
+	GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &pGhost->m_StartTick, sizeof(int));
+	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &pGhost->m_Skin, sizeof(CGhostSkin));
 	for(int i = 0; i < NumTicks; i++)
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, (const char*)pGhost->m_Path.Get(i), sizeof(CGhostCharacter));
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, pGhost->m_Path.Get(i), sizeof(CGhostCharacter));
 
 	GhostRecorder()->Stop(NumTicks, pItem->m_Time);
 }
@@ -590,6 +619,7 @@ void CGhost::OnReset()
 	StopRecord();
 	StopRender();
 	m_LastDeathTick = -1;
+	m_LastRaceTick = -1;
 }
 
 void CGhost::OnMapLoad()
