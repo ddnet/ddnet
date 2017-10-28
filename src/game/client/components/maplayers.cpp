@@ -884,11 +884,6 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 {
 	STileLayerVisuals& Visuals = *m_TileLayerVisuals[LayerIndex];
 	
-	if(BorderX0 < -300 + pGroup->m_OffsetX/32) BorderX0 = -300 + pGroup->m_OffsetX/32;
-	if(BorderY0 < -300 + pGroup->m_OffsetY/32) BorderY0 = -300 + pGroup->m_OffsetY/32;
-	if(BorderX1 >= pTileLayer->m_Width + 300 + pGroup->m_OffsetX/32) BorderX1 = pTileLayer->m_Width + 299 + pGroup->m_OffsetX/32;
-	if(BorderY1 >= pTileLayer->m_Height + 300 + pGroup->m_OffsetY/32) BorderY1 = pTileLayer->m_Height + 299 + pGroup->m_OffsetY/32;	
-	
 	int Y0 = BorderY0;
 	int X0 = BorderX0;
 	int Y1 = BorderY1;
