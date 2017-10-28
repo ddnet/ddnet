@@ -26,7 +26,6 @@ class CChat : public CComponent
 		int m_NameColor;
 		char m_aName[64];
 		char m_aText[512];
-		char m_aTextNoEmojis[512];
 		bool m_Friend;
 		bool m_Highlighted;
 		sorted_array<CEmojis::CEmojiInfo> m_Emojis;

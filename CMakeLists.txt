@@ -686,6 +686,8 @@ if(CLIENT)
     components/debughud.h
     components/effects.cpp
     components/effects.h
+    components/emojis.cpp
+    components/emojis.h
     components/emoticon.cpp
     components/emoticon.h
     components/flow.cpp
