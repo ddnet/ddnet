@@ -480,6 +480,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		m_aLines[m_CurrentLine].m_ClientID = ClientID;
 		m_aLines[m_CurrentLine].m_Team = Team;
 		m_aLines[m_CurrentLine].m_NameColor = -2;
+		m_aLines[m_CurrentLine].m_Emojis.clear();
 
 		// check for highlighted name
 		if (Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -547,6 +548,83 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		}
 
 		m_aLines[m_CurrentLine].m_Friend = ClientID >= 0 ? m_pClient->m_aClients[ClientID].m_Friend : false;
+
+		char aBuffer[64];
+		int Length = str_length(m_aLines[m_CurrentLine].m_aText);
+
+		//lookup for aliases of emojis
+		for(int i = 0; i < Length; )
+		{
+			const char *pIndex1 = str_find(m_aLines[m_CurrentLine].m_aText + i, ":");
+			if (pIndex1 == NULL) break;
+			//prevents crashing when ":" is last character
+			if (m_aLines[m_CurrentLine].m_aText - pIndex1 + 1 == Length) break;
+
+			const char *pIndex2 = str_find(pIndex1 + 1, ":");
+			if (pIndex2 == NULL) break;
+
+			i = pIndex2 - m_aLines[m_CurrentLine].m_aText;
+
+			//prevents buffer overflow
+			if (pIndex2 - pIndex1 + 2 > 64) continue;
+			str_copy(aBuffer, pIndex1, pIndex2 - pIndex1 + 2); // extra place for ":\0"
+
+			//skip "::" and those aliases containing space
+			if (str_length(aBuffer) <= 2 || str_find(aBuffer, " ")) continue;
+
+			CEmojis::CEmoji const *pEmoji = m_pClient->m_pEmojis->GetByAlias(aBuffer);
+			if (pEmoji == NULL) continue;
+			//to prevent usage of the same ":"
+			i++;
+
+			CEmojis::CEmojiInfo Info;
+			Info.index = pIndex1 - m_aLines[m_CurrentLine].m_aText;
+			Info.length = str_length(aBuffer);
+			Info.m_ID = pEmoji->m_ID;
+			m_aLines[m_CurrentLine].m_Emojis.add(Info);
+		}
+
+		//lookup for utf emojis
+		for(int i = 0; i < m_pClient->m_pEmojis->Num(); i++)
+		{
+			int Offset = 0;
+			CEmojis::CEmoji const *pEmoji = m_pClient->m_pEmojis->GetByIndex(i);
+			const char *pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, pEmoji->m_UTF);
+			while (pResult != NULL)
+			{
+				CEmojis::CEmojiInfo Info;
+				Info.index = pResult - m_aLines[m_CurrentLine].m_aText;
+				Info.length = str_length(pEmoji->m_UTF);
+				Info.m_ID = pEmoji->m_ID;
+				m_aLines[m_CurrentLine].m_Emojis.add(Info);
+				Offset = Info.index + Info.length;
+				pResult = str_find(m_aLines[m_CurrentLine].m_aText + Offset, pEmoji->m_UTF);
+			}
+		}
+		m_aLines[m_CurrentLine].m_Emojis.sort_range();
+
+		int Offset = 0;
+
+		for(int i = 0; i < Length; )
+		{
+			CEmojis::CEmojiInfo info;
+			bool Found = false;
+			for(int j = 0; j < m_aLines[m_CurrentLine].m_Emojis.size(); j++)
+			{
+				if(m_aLines[m_CurrentLine].m_Emojis[j].index >= i) {
+					Found = true;
+					info = m_aLines[m_CurrentLine].m_Emojis[j];
+					break;
+				}
+			}
+			int End = Found ? info.index : str_length(m_aLines[m_CurrentLine].m_aText);
+
+			str_copy(m_aLines[m_CurrentLine].m_aTextNoEmojis + Offset, m_aLines[m_CurrentLine].m_aText + i, End - i + 1);
+
+			Offset += End - i;
+			i = End;
+			if (Found) i += info.length;
+		}
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
@@ -705,8 +783,10 @@ void CChat::OnRender()
 	float Begin = x;
 	CTextCursor Cursor;
 	int OffsetType = m_pClient->m_pScoreboard->Active() ? 1 : 0;
+
 	for(int i = 0; i < MAX_LINES; i++)
 	{
+
 		int r = ((m_CurrentLine-i)+MAX_LINES)%MAX_LINES;
 		if(Now > m_aLines[r].m_Time+16*time_freq() && !m_Show)
 			break;
@@ -725,6 +805,8 @@ void CChat::OnRender()
 			str_copy(aName, m_aLines[r].m_aName, sizeof(aName));
 		}
 
+		int Length = str_length(m_aLines[r].m_aText);
+
 		// get the y offset (calculate it if we haven't done that yet)
 		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
 		{
@@ -732,7 +814,42 @@ void CChat::OnRender()
 			Cursor.m_LineWidth = LineWidth;
 			TextRender()->TextEx(&Cursor, "♥ ", -1);
 			TextRender()->TextEx(&Cursor, aName, -1);
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+			for (int i = 0; i < Length; )
+			{
+				//Maybe replace with pointer?
+				CEmojis::CEmojiInfo info;
+				bool Found = false;
+				for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++)
+				{
+					if(m_aLines[r].m_Emojis[j].index >= i) {
+						Found = true;
+						info = m_aLines[r].m_Emojis[j];
+						break;
+					}
+				}
+
+				char *pStart = &m_aLines[r].m_aText[i];
+
+				if(!Found)
+				{
+					TextRender()->TextEx(&Cursor, pStart, -1);
+					break;
+				}
+				else
+				{
+					TextRender()->TextEx(&Cursor, pStart, info.index - i);
+					Cursor.m_X += Cursor.m_FontSize + (Cursor.m_EmojiX - Cursor.m_X);
+
+					if(Begin + Cursor.m_LineWidth < Cursor.m_X)
+					{
+						Cursor.m_X = Cursor.m_StartX;
+						Cursor.m_Y += Cursor.m_FontSize;
+						Cursor.m_LineCount++;
+					}
+
+					i = info.index + info.length;
+				}
+			}
 			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
 		}
 		y -= m_aLines[r].m_YOffset[OffsetType];
@@ -785,7 +902,6 @@ void CChat::OnRender()
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, Blend);
 
 		TextRender()->TextEx(&Cursor, aName, -1);
-
 		// render line
 		if (m_aLines[r].m_ClientID == -1) // system
 		{
@@ -813,8 +929,43 @@ void CChat::OnRender()
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, Blend);
 		}
 
+		for (int i = 0; i < Length; )
+		{
+			//maybe replace with pointer and remove "Found"?
+			CEmojis::CEmojiInfo info;
+			bool Found = false;
+			for(int j = 0; j < m_aLines[r].m_Emojis.size(); j++)
+			{
+				if(m_aLines[r].m_Emojis[j].index >= i) {
+					Found = true;
+					info = m_aLines[r].m_Emojis[j];
+					break;
+				}
+			}
 
-		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+			char *pStart = &m_aLines[r].m_aText[i];
+
+			if(!Found)
+			{
+				TextRender()->TextEx(&Cursor, pStart, -1);
+				break;
+			}
+			else
+			{
+				TextRender()->TextEx(&Cursor, pStart, info.index - i);
+				m_pClient->m_pEmojis->Render(info.m_ID, (Cursor.m_EmojiX) + Cursor.m_FontSize/2, Cursor.m_Y + Cursor.m_FontSize-1, Cursor.m_FontSize, Cursor.m_FontSize);
+				Cursor.m_X += Cursor.m_FontSize + (Cursor.m_EmojiX - Cursor.m_X);
+
+				if(Begin + Cursor.m_LineWidth < Cursor.m_X)
+				{
+					Cursor.m_X = Cursor.m_StartX;
+					Cursor.m_Y += Cursor.m_FontSize;
+					Cursor.m_LineCount++;
+				}
+
+				i = info.index + info.length;
+			}
+		}
 	}
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);

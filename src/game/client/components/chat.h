@@ -2,9 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CHAT_H
 #define GAME_CLIENT_COMPONENTS_CHAT_H
+#include <base/tl/sorted_array.h>
 #include <engine/shared/ringbuffer.h>
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
+#include <game/client/components/emojis.h>
 
 class CChat : public CComponent
 {
@@ -24,8 +26,10 @@ class CChat : public CComponent
 		int m_NameColor;
 		char m_aName[64];
 		char m_aText[512];
+		char m_aTextNoEmojis[512];
 		bool m_Friend;
 		bool m_Highlighted;
+		sorted_array<CEmojis::CEmojiInfo> m_Emojis;
 	};
 
 	CLine m_aLines[MAX_LINES];

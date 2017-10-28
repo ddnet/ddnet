@@ -38,6 +38,7 @@
 #include "components/damageind.h"
 #include "components/debughud.h"
 #include "components/effects.h"
+#include "components/emojis.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
 #include "components/hud.h"
@@ -69,6 +70,7 @@ CGameClient g_GameClient;
 static CKillMessages gs_KillMessages;
 static CCamera gs_Camera;
 static CChat gs_Chat;
+static CEmojis gs_Emojis;
 static CMotd gs_Motd;
 static CBroadcast gs_Broadcast;
 static CGameConsole gs_GameConsole;
@@ -137,6 +139,7 @@ void CGameClient::OnConsoleInit()
 	m_pSkins = &::gs_Skins;
 	m_pCountryFlags = &::gs_CountryFlags;
 	m_pChat = &::gs_Chat;
+	m_pEmojis = &::gs_Emojis;
 	m_pFlow = &::gs_Flow;
 	m_pCamera = &::gs_Camera;
 	m_pControls = &::gs_Controls;
@@ -188,6 +191,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_Emoticon);
 	m_All.Add(&gs_KillMessages);
+	m_All.Add(m_pEmojis);
 	m_All.Add(m_pChat);
 	m_All.Add(&gs_Broadcast);
 	m_All.Add(&gs_DebugHud);
