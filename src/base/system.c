@@ -2080,7 +2080,7 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) != 0)
+	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)
@@ -2255,6 +2255,17 @@ void str_sanitize(char *str_in)
 	while(*str)
 	{
 		if(*str < 32 && !(*str == '\r') && !(*str == '\n') && !(*str == '\t'))
+			*str = ' ';
+		str++;
+	}
+}
+
+void str_sanitize_filename(char *str_in)
+{
+	unsigned char *str = (unsigned char *)str_in;
+	while(*str)
+	{
+		if(*str < 32 || *str == '\\' || *str == '/' || *str == '|' || *str == ':' || *str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
 			*str = ' ';
 		str++;
 	}

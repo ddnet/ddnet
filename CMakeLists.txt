@@ -512,6 +512,8 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
+  ghost.cpp
+  ghost.h
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
@@ -720,8 +722,6 @@ if(CLIENT)
     components/particles.h
     components/players.cpp
     components/players.h
-    components/race.cpp
-    components/race.h
     components/race_demo.cpp
     components/race_demo.h
     components/scoreboard.cpp
@@ -740,6 +740,8 @@ if(CLIENT)
     gameclient.h
     lineinput.cpp
     lineinput.h
+    race.cpp
+    race.h
     render.cpp
     render.h
     render_map.cpp

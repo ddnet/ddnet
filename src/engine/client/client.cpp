@@ -41,6 +41,7 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/filecollection.h>
+#include <engine/shared/ghost.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
@@ -2528,6 +2529,8 @@ void CClient::RegisterInterfaces()
 {
 	Kernel()->RegisterInterface(static_cast<IDemoRecorder*>(&m_DemoRecorder[RECORDER_MANUAL]), false);
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer*>(&m_DemoPlayer), false);
+	Kernel()->RegisterInterface(static_cast<IGhostRecorder*>(&m_GhostRecorder), false);
+	Kernel()->RegisterInterface(static_cast<IGhostLoader*>(&m_GhostLoader), false);
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser), false);
 	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher), false);
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
@@ -2566,6 +2569,9 @@ void CClient::InitInterfaces()
 
 	m_Friends.Init();
 	m_Foes.Init(true);
+
+	m_GhostRecorder.Init();
+	m_GhostLoader.Init();
 }
 
 void CClient::Run()
@@ -3579,44 +3585,40 @@ int main(int argc, const char **argv) // ignore_convention
 
 // DDRace
 
-const char* CClient::GetCurrentMap()
+const char *CClient::GetCurrentMap()
 {
 	return m_aCurrentMap;
 }
 
-int CClient::GetCurrentMapCrc()
-{
-	return m_pMap->Crc();
-}
-
-const char* CClient::GetCurrentMapPath()
+const char *CClient::GetCurrentMapPath()
 {
 	return m_aCurrentMapPath;
 }
 
-const char* CClient::RaceRecordStart(const char *pFilename)
+unsigned CClient::GetMapCrc()
 {
-	char aFilename[128];
-	str_format(aFilename, sizeof(aFilename), "demos/%s_%s.demo", m_aCurrentMap, pFilename);
-
-	if(State() != STATE_ONLINE)
-		dbg_msg("demorec/record", "client is not online");
-	else
-		m_DemoRecorder[RECORDER_RACE].Start(Storage(),  m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
-
-	return m_aCurrentMap;
+	return m_pMap->Crc();
 }
 
-void CClient::RaceRecordStop()
+void CClient::RaceRecord_Start(const char *pFilename)
+{
+	if(State() != IClient::STATE_ONLINE)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+	else
+		m_DemoRecorder[RECORDER_RACE].Start(Storage(), m_pConsole, pFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
+}
+
+void CClient::RaceRecord_Stop()
 {
 	if(m_DemoRecorder[RECORDER_RACE].IsRecording())
 		m_DemoRecorder[RECORDER_RACE].Stop();
 }
 
-bool CClient::RaceRecordIsRecording()
+bool CClient::RaceRecord_IsRecording()
 {
 	return m_DemoRecorder[RECORDER_RACE].IsRecording();
 }
+
 
 void CClient::RequestDDNetInfo()
 {

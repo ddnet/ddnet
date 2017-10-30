@@ -355,6 +355,7 @@ public:
 	class CBackground *m_pBackGround;
 
 	class CMapSounds *m_pMapSounds;
+	class CPlayers *m_pPlayers;
 
 	// DDRace
 
