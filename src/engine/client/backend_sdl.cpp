@@ -760,7 +760,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		m_TextureSlotBoundToUnit[i].m_TextureSlot = -1;
 	}
-	
+
+	glBindVertexArray(0);
 	glGenBuffers(1, &m_QuadDrawIndexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
 	m_LastIndexBufferBound = 0;
@@ -1158,6 +1159,11 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);	
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
+
+	m_LastIndexBufferBound = 0;
+	for (size_t i = 0; i < m_VisualObjects.size(); ++i) {
+		m_VisualObjects[i].m_LastIndexBufferBound = 0;
+	}
 	
 	m_CurrentIndicesInBuffer = NewIndicesCount;
 	delete[] Indices;	
