@@ -763,7 +763,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 	glBindVertexArray(0);
 	glGenBuffers(1, &m_QuadDrawIndexBufferID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, m_QuadDrawIndexBufferID);
 	m_LastIndexBufferBound = 0;
 	
 	unsigned int Indices[CCommandBuffer::MAX_VERTICES/4 * 6];
@@ -778,7 +778,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		Indices[i+5] = Primq + 3;
 		Primq+=4;
 	}
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW);
+	glBufferData(GL_COPY_WRITE_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW);
 	
 	m_CurrentIndicesInBuffer = CCommandBuffer::MAX_VERTICES/4 * 6;
 	
