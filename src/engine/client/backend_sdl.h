@@ -156,6 +156,7 @@ class CCommandProcessorFragment_OpenGL3_3
 	unsigned int m_CurrentIndicesInBuffer;
 	
 	GLint m_MaxTextureUnits;
+	GLint m_MaxTexSize;
 	
 	int m_LastBlendMode; //avoid all possible opengl state changes
 	bool m_LastClipEnable;
