@@ -606,7 +606,7 @@ Length:
 == Länge:
 
 Rifle
-== Gewehr
+== Laser
 
 Netversion:
 == Netzwerkversion:
@@ -918,7 +918,7 @@ Laser
 == Laser
 
 Old mouse mode
-== Alter Mauscode
+== Alter Mausmodus
 
 Follow
 == Folgen
