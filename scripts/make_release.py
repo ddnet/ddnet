@@ -66,8 +66,6 @@ shutil.copy("autoexec_server.cfg", package_dir)
 if include_data and not use_bundle:
 	os.mkdir(os.path.join(package_dir, "data"))
 	copydir("data", package_dir)
-	os.mkdir(os.path.join(package_dir, "shader"))
-	copydir("shader", package_dir)
 	if platform[:3] == "win":
 		shutil.copy("other/config_directory.bat", package_dir)
 		shutil.copy("SDL2.dll", package_dir)
@@ -121,9 +119,7 @@ if use_bundle:
 	os.mkdir(clientbundle_resource_dir)
 	os.mkdir(clientbundle_framework_dir)
 	os.mkdir(os.path.join(clientbundle_resource_dir, "data"))
-	os.mkdir(os.path.join(clientbundle_resource_dir, "shader"))
 	copydir("data", clientbundle_resource_dir)
-	copydir("shader", clientbundle_resource_dir)
 
 
 	shutil.copy("other/icons/DDNet.icns", clientbundle_resource_dir)

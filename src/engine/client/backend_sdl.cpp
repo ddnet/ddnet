@@ -598,8 +598,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL PrimitiveVertexShader;
 		CGLSL PrimitiveFragmentShader;
-		PrimitiveVertexShader.LoadShader("./shader/prim.vert", GL_VERTEX_SHADER);
-		PrimitiveFragmentShader.LoadShader("./shader/prim.frag", GL_FRAGMENT_SHADER);
+		PrimitiveVertexShader.LoadShader("data/shader/prim.vert", GL_VERTEX_SHADER);
+		PrimitiveFragmentShader.LoadShader("data/shader/prim.frag", GL_FRAGMENT_SHADER);
 		
 		m_pPrimitiveProgram->CreateProgram();
 		m_pPrimitiveProgram->AddShader(&PrimitiveVertexShader);
@@ -615,8 +615,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("./shader/tile.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("./shader/tile.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader("data/shader/tile.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("data/shader/tile.frag", GL_FRAGMENT_SHADER);
 		
 		m_pTileProgram->CreateProgram();
 		m_pTileProgram->AddShader(&VertexShader);
@@ -634,8 +634,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("./shader/tiletex.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("./shader/tiletex.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader("data/shader/tiletex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("data/shader/tiletex.frag", GL_FRAGMENT_SHADER);
 		
 		m_pTileProgramTextured->CreateProgram();
 		m_pTileProgramTextured->AddShader(&VertexShader);
@@ -653,8 +653,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("./shader/bordertile.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("./shader/bordertile.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader("data/shader/bordertile.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("data/shader/bordertile.frag", GL_FRAGMENT_SHADER);
 		
 		m_pBorderTileProgram->CreateProgram();
 		m_pBorderTileProgram->AddShader(&VertexShader);
@@ -675,8 +675,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("./shader/bordertiletex.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("./shader/bordertiletex.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader("data/shader/bordertiletex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("data/shader/bordertiletex.frag", GL_FRAGMENT_SHADER);
 		
 		m_pBorderTileProgramTextured->CreateProgram();
 		m_pBorderTileProgramTextured->AddShader(&VertexShader);
@@ -697,8 +697,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("./shader/bordertileline.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("./shader/bordertileline.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader("data/shader/bordertileline.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("data/shader/bordertileline.frag", GL_FRAGMENT_SHADER);
 		
 		m_pBorderTileLineProgram->CreateProgram();
 		m_pBorderTileLineProgram->AddShader(&VertexShader);
@@ -717,8 +717,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("./shader/bordertilelinetex.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("./shader/bordertilelinetex.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader("data/shader/bordertilelinetex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader("data/shader/bordertilelinetex.frag", GL_FRAGMENT_SHADER);
 		
 		m_pBorderTileLineProgramTextured->CreateProgram();
 		m_pBorderTileLineProgramTextured->AddShader(&VertexShader);
