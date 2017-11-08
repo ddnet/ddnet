@@ -3641,6 +3641,9 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
+	if(m_pDDNetInfoTask)
+		m_pDDNetInfoTask->Destroy();
+
 	m_pDDNetInfoTask = Fetcher()->FetchFile(aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
 }
 
