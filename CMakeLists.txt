@@ -140,6 +140,17 @@ else()
   set(ZLIB_FOUND NO)
 endif()
 
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  find_program(DMG dmg)
+  find_program(HFSPLUS hfsplus)
+  find_program(NEWFS_HFS newfs_hfs)
+  if(DMG AND HFSPLUS AND NEWFS_HFS)
+    set(DMGTOOLS_FOUND ON)
+  else()
+    set(DMGTOOLS_FOUND OFF)
+  endif()
+endif()
+
 message(STATUS "******** DDNet ********")
 message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
@@ -160,6 +171,9 @@ function(show_dependency_status NAME FOUND PATH)
 endfunction()
 
 show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  show_dependency_status("Dmg tools" ${DMGTOOLS_FOUND} "")
+endif()
 show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
 show_dependency_status("GTest" ${GTEST_FOUND} "${GTEST_LIBRARY}")
 if(MYSQL)
@@ -1127,6 +1141,7 @@ if(TARGET_OS AND TARGET_BITS)
 endif()
 
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
+set(CPACK_ARCHIVE_PORTABLE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-src)
 set(CPACK_SOURCE_FILES
   CMakeLists.txt
@@ -1204,6 +1219,34 @@ foreach(target ${CPACK_TARGETS})
   list(APPEND COPY_TARGET_COMMANDS COMMAND cmake -E copy $<TARGET_FILE:${target}> ${CPACK_PACKAGE_FILE_NAME}/)
 endforeach()
 
+if(DMGTOOLS_FOUND)
+  set(DMG_TMPDIR ${CPACK_PACKAGE_FILE_NAME}_dmg)
+  set(DMG_MKDIRS
+    ${TARGET_CLIENT}.app
+    ${TARGET_CLIENT}.app/Contents
+    ${TARGET_CLIENT}.app/Contents/Frameworks
+    ${TARGET_CLIENT}.app/Contents/MacOS
+    ${TARGET_CLIENT}.app/Contents/Resources
+  )
+  set(DMG_MKDIR_COMMANDS)
+  foreach(dir ${DMG_MKDIRS})
+    list(APPEND DMG_MKDIR_COMMANDS COMMAND cmake -E make_directory ${DMG_TMPDIR}/${dir})
+  endforeach()
+  add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
+    ${DMG_MKDIR_COMMANDS}
+    COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
+    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/icons/DDNet.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
+    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/bundle/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
+    COMMAND cmake -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
+    COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
+    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create --dmg ${DMG} --hfsplus ${HFSPLUS} --newfs_hfs ${NEWFS_HFS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
+  )
+  add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
+endif()
+
 foreach(ext zip tar.gz tar.xz)
   set(TAR_MODE c)
   set(TAR_EXTRA_ARGS)
@@ -1229,6 +1272,8 @@ endforeach()
 set(PACKAGE_DEFAULT tar_xz)
 if(TARGET_OS STREQUAL "windows")
   set(PACKAGE_DEFAULT zip)
+elseif(TARGET_OS STREQUAL "mac")
+  set(PACKAGE_DEFAULT dmg)
 endif()
 add_custom_target(package_default DEPENDS package_${PACKAGE_DEFAULT})
 
