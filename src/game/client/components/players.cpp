@@ -841,7 +841,7 @@ void CPlayers::RenderPlayer(
 			if (OtherTeam)
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			IGraphics::CQuadItem QuadItem(Position.x, Position.y - 70, 22, 22);
-			Graphics()->QuadsSetRotation(3 / 2 * pi);
+			Graphics()->QuadsSetRotation(pi * 3 / 2);
 			Graphics()->QuadsDraw(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
