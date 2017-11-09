@@ -4,7 +4,8 @@ import shlex
 import subprocess
 import tempfile
 
-Config = namedtuple('Config', 'dmg hfsplus newfs_hfs verbose')
+ConfigDmgtools = namedtuple('Config', 'dmg hfsplus newfs_hfs verbose')
+ConfigHdiutil = namedtuple('Config', 'hdiutil verbose')
 
 def chunks(l, n):
 	"""
@@ -26,6 +27,7 @@ class Dmg:
 			kwargs["stdout"] = subprocess.DEVNULL
 		subprocess.check_call(process_args, *args, **kwargs)
 
+class Dmgtools(Dmg):
 	def _mkfs_hfs(self, *args):
 		self._check_call((self.config.newfs_hfs,) + args)
 	def _hfs(self, *args):
@@ -63,6 +65,15 @@ class Dmg:
 			print("REMOVING {}".format(hfs))
 		os.remove(hfs)
 
+class Hdiutil(Dmg):
+	def _hdiutil(self, *args):
+		self._check_call((self.config.hdiutil,) + args)
+
+	def create(self, dmg, volume_name, directory, symlinks):
+		if symlinks:
+			raise NotImplementedError("symlinks are not yet implemented")
+		self._hdiutil('create', '-volname', volume_name, '-srcdir', directory, dmg)
+
 def main():
 	import argparse
 	p = argparse.ArgumentParser(description="Manipulate dmg archives")
@@ -72,9 +83,9 @@ def main():
 
 	create = subcommands.add_parser("create", help="Create a dmg archive from files or directories")
 	create.add_argument('-v', '--verbose', action='count', help="Verbose output")
-	create.add_argument('--dmg', help="Path to the dmg executable (https://github.com/mozilla/libdmg-hfsplus)", required=True)
-	create.add_argument('--hfsplus', help="Path to the hfsplus executable (https://github.com/mozilla/libdmg-hfsplus)", required=True)
-	create.add_argument('--newfs_hfs', help="Path to the newfs_hfs executable (http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)", required=True)
+	createx = create.add_mutually_exclusive_group(required=True)
+	createx.add_argument('--dmgtools', nargs=3, help="Paths to the dmg and hfsplus executable (https://github.com/mozilla/libdmg-hfsplus) and the newfs_hfs executable (http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)")
+	createx.add_argument('--hdiutil', help="Path to the hdiutil (only exists for macOS at time of writing)")
 	create.add_argument('output', metavar="OUTPUT", help="Filename of the output dmg archive")
 	create.add_argument('volume_name', metavar="VOLUME_NAME", help="Name of the dmg archive")
 	create.add_argument('directory', metavar="DIR", help="Directory to create the archive from")
@@ -83,7 +94,13 @@ def main():
 
 	verbose = args.verbose or 0
 	symlinks = args.symlink or []
-	dmg = Dmg(Config(dmg=args.dmg, hfsplus=args.hfsplus, newfs_hfs=args.newfs_hfs, verbose=verbose))
+	if args.dmgtools:
+		dmg, hfsplus, newfs_hfs = args.dmgtools
+		dmg = Dmgtools(ConfigDmgtools(dmg=dmg, hfsplus=hfsplus, newfs_hfs=newfs_hfs, verbose=verbose))
+	elif args.hdiutil:
+		dmg = Hdiutil(ConfigHdiutil(hdiutil=args.hdiutil, verbose=verbose))
+	else:
+		raise RuntimeError("unreachable")
 	dmg.create(volume_name=args.volume_name, directory=args.directory, dmg=args.output, symlinks=symlinks)
 
 if __name__ == '__main__':

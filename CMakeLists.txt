@@ -149,6 +149,8 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   else()
     set(DMGTOOLS_FOUND OFF)
   endif()
+
+  find_program(HDIUTIL hdiutil)
 endif()
 
 message(STATUS "******** DDNet ********")
@@ -176,6 +178,9 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
 endif()
 show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
 show_dependency_status("GTest" ${GTEST_FOUND} "${GTEST_LIBRARY}")
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  show_dependency_status("Hdiutil" ${HDIUTIL} "")
+endif()
 if(MYSQL)
   show_dependency_status("MySQL" ${MYSQL_FOUND} "${MYSQL_LIBRARY}")
 endif()
@@ -1206,21 +1211,13 @@ else()
   message(WARNING "Cannot create CPack targets, CMake version too old. Use CMake 3.6 or newer.")
 endif()
 
-set(COPY_FILE_COMMANDS)
-set(COPY_DIR_COMMANDS)
-set(COPY_TARGET_COMMANDS)
-foreach(file ${CPACK_FILES})
-  list(APPEND COPY_FILE_COMMANDS COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/${file} ${CPACK_PACKAGE_FILE_NAME}/)
-endforeach()
-foreach(dir ${CPACK_DIRS})
-  list(APPEND COPY_DIR_COMMAND COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${CPACK_PACKAGE_FILE_NAME}/${dir})
-endforeach()
-foreach(target ${CPACK_TARGETS})
-  list(APPEND COPY_TARGET_COMMANDS COMMAND cmake -E copy $<TARGET_FILE:${target}> ${CPACK_PACKAGE_FILE_NAME}/)
-endforeach()
-
-if(DMGTOOLS_FOUND)
-  set(DMG_TMPDIR ${CPACK_PACKAGE_FILE_NAME}_dmg)
+if(DMGTOOLS_FOUND OR HDIUTIL)
+  if(HDIUTIL)
+    set(DMG_PARAMS --hdiutil ${HDIUTIL})
+  elseif(DMGTOOLS_FOUND)
+    set(DMG_PARAMS --dmgtools ${DMG} ${HFSPLUS} ${NEWFS_HFS})
+  endif()
+  set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
   set(DMG_MKDIRS
     ${TARGET_CLIENT}.app
     ${TARGET_CLIENT}.app/Contents
@@ -1233,6 +1230,7 @@ if(DMGTOOLS_FOUND)
     list(APPEND DMG_MKDIR_COMMANDS COMMAND cmake -E make_directory ${DMG_TMPDIR}/${dir})
   endforeach()
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
+    COMMAND cmake -E remove_directory ${DMG_TMPDIR}
     ${DMG_MKDIR_COMMANDS}
     COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
     COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/icons/DDNet.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
@@ -1242,7 +1240,7 @@ if(DMGTOOLS_FOUND)
     COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create --dmg ${DMG} --hfsplus ${HFSPLUS} --newfs_hfs ${NEWFS_HFS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
 endif()
@@ -1251,6 +1249,22 @@ foreach(ext zip tar.gz tar.xz)
   set(TAR_MODE c)
   set(TAR_EXTRA_ARGS)
   string(REPLACE . _ EXT_SLUG ${ext})
+
+  set(TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG}/${CPACK_PACKAGE_FILE_NAME})
+
+  set(COPY_FILE_COMMANDS)
+  set(COPY_DIR_COMMANDS)
+  set(COPY_TARGET_COMMANDS)
+  foreach(file ${CPACK_FILES})
+    list(APPEND COPY_FILE_COMMANDS COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/${file} ${TMPDIR}/)
+  endforeach()
+  foreach(dir ${CPACK_DIRS})
+    list(APPEND COPY_DIR_COMMANDS COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${TMPDIR}/${dir})
+  endforeach()
+  foreach(target ${CPACK_TARGETS})
+    list(APPEND COPY_TARGET_COMMANDS COMMAND cmake -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
+  endforeach()
+
   if(ext STREQUAL zip)
     set(TAR_EXTRA_ARGS --format=zip)
   elseif(ext STREQUAL tar.gz)
@@ -1259,11 +1273,11 @@ foreach(ext zip tar.gz tar.xz)
     set(TAR_MODE cJ)
   endif()
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.${ext}
-    COMMAND cmake -E make_directory ${CPACK_PACKAGE_FILE_NAME}
+    COMMAND cmake -E make_directory ${TMPDIR}
     ${COPY_FILE_COMMANDS}
     ${COPY_DIR_COMMANDS}
     ${COPY_TARGET_COMMANDS}
-    COMMAND cmake -E tar ${TAR_MODE} ${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
+    COMMAND cmake -E chdir pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG} cmake -E tar ${TAR_MODE} ../${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   )
   add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
