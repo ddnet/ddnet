@@ -24,7 +24,7 @@ class Dmg:
 		if self.config.verbose >= 1:
 			print("EXECUTING {}".format(" ".join(shlex.quote(x) for x in process_args)))
 		if not (self.config.verbose >= 2 and "stdout" not in kwargs):
-			kwargs["stdout"] = subprocess.DEVNULL
+			kwargs["stdout"] = open(os.devnull, 'wb')
 		subprocess.check_call(process_args, *args, **kwargs)
 
 class Dmgtools(Dmg):
