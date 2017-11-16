@@ -52,9 +52,8 @@ class Dmgtools(Dmg):
 		self._dmg('build', hfs, dmg)
 
 	def create(self, dmg, volume_name, directory, symlinks):
-		output_size_kb = int(subprocess.check_output(['du', '--apparent-size', '-sk', directory]).split()[0])
-		# TODO: Approximate a useful size (--apparent-size is GNU-specific)
-		output_size = max(int(round(output_size_kb * 1024 * 2)), 1024**2)
+		input_size = sum(os.stat(os.path.join(path, f)).st_size for path, dirs, files in os.walk(directory) for f in files)
+		output_size = max(input_size * 2, 1024**2)
 		hfs = tempfile.mktemp(prefix=dmg + '.', suffix='.hfs')
 		self._create_hfs(hfs, volume_name, output_size)
 		self._add(hfs, directory)
