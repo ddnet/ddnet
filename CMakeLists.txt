@@ -1224,6 +1224,12 @@ if(DMGTOOLS_FOUND OR HDIUTIL)
     ${TARGET_CLIENT}.app/Contents/Frameworks
     ${TARGET_CLIENT}.app/Contents/MacOS
     ${TARGET_CLIENT}.app/Contents/Resources
+    ${TARGET_SERVER}.app
+    ${TARGET_SERVER}.app/Contents
+    ${TARGET_SERVER}.app/Contents/MacOS
+    ${TARGET_SERVER}.app/Contents/Resources
+    ${TARGET_SERVER}.app/Contents/Resources/data
+    ${TARGET_SERVER}.app/Contents/Resources/data/mapres
   )
   set(DMG_MKDIR_COMMANDS)
   foreach(dir ${DMG_MKDIRS})
@@ -1232,14 +1238,24 @@ if(DMGTOOLS_FOUND OR HDIUTIL)
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
     COMMAND cmake -E remove_directory ${DMG_TMPDIR}
     ${DMG_MKDIR_COMMANDS}
+
+    # CLIENT
     COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
-    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/icons/DDNet.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
-    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/bundle/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
+    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_CLIENT}.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
+    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
     COMMAND cmake -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
     COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
     COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+
+    # SERVER
+    COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/data/maps
+    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_SERVER}.icns ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/
+    COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/
+    COMMAND cmake -E copy $<TARGET_FILE:${TARGET_SERVER}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
+
+    # DMG
     COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
@@ -1273,6 +1289,7 @@ foreach(ext zip tar.gz tar.xz)
     set(TAR_MODE cJ)
   endif()
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.${ext}
+    COMMAND cmake -E remove_directory ${TMPDIR}
     COMMAND cmake -E make_directory ${TMPDIR}
     ${COPY_FILE_COMMANDS}
     ${COPY_DIR_COMMANDS}
