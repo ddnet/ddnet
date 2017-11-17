@@ -21,6 +21,7 @@ else()
   set(PROJECT_VERSION_MAJOR ${VERSION_MAJOR})
   set(PROJECT_VERSION_MINOR ${VERSION_MINOR})
   set(PROJECT_VERSION_PATCH ${VERSION_PATCH})
+  set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
@@ -1221,6 +1222,11 @@ else()
 endif()
 
 if(DMGTOOLS_FOUND OR HDIUTIL)
+  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/client/")
+  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/server/")
+  configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
+  configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
+
   if(HDIUTIL)
     set(DMG_PARAMS --hdiutil ${HDIUTIL})
   elseif(DMGTOOLS_FOUND)
@@ -1251,7 +1257,7 @@ if(DMGTOOLS_FOUND OR HDIUTIL)
     # CLIENT
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_CLIENT}.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
+    COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
@@ -1261,13 +1267,24 @@ if(DMGTOOLS_FOUND OR HDIUTIL)
     # SERVER
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/data/maps
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_SERVER}.icns ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/
+    COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_SERVER}> $<TARGET_FILE:${TARGET_SERVER_LAUNCHER}> ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/
 
     # DMG
     COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
 
-    DEPENDS ${TARGET_CLIENT} ${TARGET_SERVER} ${TARGET_SERVER_LAUNCHER}
+    DEPENDS
+      ${TARGET_CLIENT}
+      ${TARGET_SERVER_LAUNCHER}
+      ${TARGET_SERVER}
+      ${CMAKE_BINARY_DIR}/bundle/client/Info.plist
+      ${CMAKE_BINARY_DIR}/bundle/server/Info.plist
+      data
+      other/bundle/client/PkgInfo
+      other/bundle/server/PkgInfo
+      other/icons/${TARGET_CLIENT}.icns
+      other/icons/${TARGET_SERVER}.icns
+      scripts/dmg.py
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
 endif()
