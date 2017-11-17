@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>English</string>
 		<key>CFBundleExecutable</key>
-		<string>DDNet_server</string>
+		<string>DDNet-Server-Launcher</string>
 		<key>CFBundleIconFile</key>
 		<string>DDNet-Server</string>
 		<key>CFBundleInfoDictionaryVersion</key>

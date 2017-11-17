@@ -936,6 +936,15 @@ target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  set(SERVER_LAUNCHER_SRC src/osxlaunch/server.mm)
+  set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
+  add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
+  target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
+  list(APPEND TARGETS_OWN ${TARGET_SERVER_LAUNCHER})
+  list(APPEND TARGETS_LINK ${TARGET_SERVER_LAUNCHER})
+endif()
+
 ########################################################################
 # VARIOUS TARGETS
 ########################################################################
@@ -1253,10 +1262,12 @@ if(DMGTOOLS_FOUND OR HDIUTIL)
     COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/data/maps
     COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_SERVER}.icns ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/
     COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/other/bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/
-    COMMAND cmake -E copy $<TARGET_FILE:${TARGET_SERVER}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
+    COMMAND cmake -E copy $<TARGET_FILE:${TARGET_SERVER}> $<TARGET_FILE:${TARGET_SERVER_LAUNCHER}> ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/
 
     # DMG
     COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
+
+    DEPENDS ${TARGET_CLIENT} ${TARGET_SERVER} ${TARGET_SERVER_LAUNCHER}
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
 endif()
@@ -1295,7 +1306,7 @@ foreach(ext zip tar.gz tar.xz)
     ${COPY_DIR_COMMANDS}
     ${COPY_TARGET_COMMANDS}
     COMMAND cmake -E chdir pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG} cmake -E tar ${TAR_MODE} ../${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    DEPENDS ${CPACK_TARGETS}
   )
   add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
 endforeach()
