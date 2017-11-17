@@ -118,15 +118,15 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 	}
 }
 
-//fix all alignments in any struct -- e.g. don't align to 8 bytes at 64bit code
-#pragma pack(push, 1)
-struct STmpTile{
+struct STmpTile
+{
 	vec2 m_TopLeft;
 	vec2 m_TopRight;
 	vec2 m_BottomRight;
 	vec2 m_BottomLeft;
 };
-struct STmpTileTexCoord{
+struct STmpTileTexCoord
+{
 	STmpTileTexCoord()
 	{
 		m_TexCoordTopLeftRightOrBottom[0] = m_TexCoordTopLeftRightOrBottom[1] = 0;
@@ -143,7 +143,6 @@ struct STmpTileTexCoord{
 	unsigned char m_TexCoordBottomLeft[2];
 	unsigned char m_TexCoordBottomLeftRightOrBottom[2];
 };
-#pragma pack(pop)
 
 void FillTmpTileSpeedup(STmpTile* pTmpTile, STmpTileTexCoord* pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, int Scale, CMapItemGroup* pGroup, short AngleRotate)
 {
