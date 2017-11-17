@@ -1221,6 +1221,8 @@ else()
   message(WARNING "Cannot create CPack targets, CMake version too old. Use CMake 3.6 or newer.")
 endif()
 
+set(PACKAGE_TARGETS)
+
 if(DMGTOOLS_FOUND OR HDIUTIL)
   file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/client/")
   file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/server/")
@@ -1287,6 +1289,7 @@ if(DMGTOOLS_FOUND OR HDIUTIL)
       scripts/dmg.py
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
+  list(APPEND PACKAGE_TARGETS package_dmg)
 endif()
 
 foreach(ext zip tar.gz tar.xz)
@@ -1326,6 +1329,7 @@ foreach(ext zip tar.gz tar.xz)
     DEPENDS ${CPACK_TARGETS}
   )
   add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
+  list(APPEND PACKAGE_TARGETS package_${EXT_SLUG})
 endforeach()
 
 set(PACKAGE_DEFAULT tar_xz)
@@ -1336,11 +1340,7 @@ elseif(TARGET_OS STREQUAL "mac")
 endif()
 add_custom_target(package_default DEPENDS package_${PACKAGE_DEFAULT})
 
-add_custom_target(package_all DEPENDS
-  package_tar_gz
-  package_tar_xz
-  package_zip
-)
+add_custom_target(package_all DEPENDS ${PACKAGE_TARGETS})
 
 # Unset these variables, they might do something in the future of CPack.
 unset(CPACK_SOURCE_FILES)
