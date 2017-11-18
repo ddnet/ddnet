@@ -1214,64 +1214,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 					Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
 
-					bool InterpretSemicolons = !(pPlayer->m_PlayerFlags & PLAYERFLAG_CHATTING);
-					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, InterpretSemicolons);
+					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
 					// m_apPlayers[ClientID] can be NULL, if the player used a
 					// timeout code and replaced another client.
-					if(InterpretSemicolons && m_apPlayers[ClientID] && !m_apPlayers[ClientID]->m_SentSemicolonTip)
-					{
-						bool FoundSemicolons = false;
-
-						const char *pStr = pMsg->m_pMessage + 1;
-						int Length = str_length(pStr);
-						bool InString = false;
-						bool Escape = false;
-						for(int i = 0; i < Length; i++)
-						{
-							char c = pStr[i];
-							if(InString)
-							{
-								if(Escape)
-								{
-									Escape = false;
-									if(c == '\\' || c == '"')
-									{
-										continue;
-									}
-								}
-								else if(c == '\\')
-								{
-									Escape = true;
-								}
-								else if(c == '"')
-								{
-									InString = false;
-								}
-							}
-							else
-							{
-								if(c == '"')
-								{
-									InString = true;
-								}
-								else if(c == ';')
-								{
-									FoundSemicolons = true;
-									break;
-								}
-							}
-						}
-						static const char s_aPrefix[] = "mc;";
-						static const int s_PrefixLength = str_length(s_aPrefix);
-						if(FoundSemicolons && !(Length >= s_PrefixLength && str_comp_num(pStr, s_aPrefix, s_PrefixLength) == 0))
-						{
-							SendChatTarget(ClientID, "Usage of semicolons without /mc is deprecated");
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "Try changing your bind to '/mc;%s'", pStr);
-							SendChatTarget(ClientID, aBuf);
-							m_apPlayers[ClientID]->m_SentSemicolonTip = true;
-						}
-					}
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
 					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
