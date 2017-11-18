@@ -42,6 +42,7 @@ public:
 	CUuid GetUuid(int ID) const;
 	const char *GetName(int ID) const;
 	int LookupUuid(CUuid Uuid) const;
+	int NumUuids() const;
 
 	int UnpackUuid(CUnpacker *pUnpacker) const;
 	int UnpackUuid(CUnpacker *pUnpacker, CUuid *pOut) const;

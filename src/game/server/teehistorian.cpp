@@ -6,7 +6,11 @@
 
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
-static const char TEEHISTORIAN_VERSION[] = "1";
+static const char TEEHISTORIAN_VERSION[] = "2";
+
+#define UUID(id, name) static const CUuid UUID_ ## id = CalculateUuid(name);
+#include <game/teehistorian_ex_chunks.h>
+#undef UUID
 
 enum
 {
@@ -21,6 +25,7 @@ enum
 	TEEHISTORIAN_JOIN,
 	TEEHISTORIAN_DROP,
 	TEEHISTORIAN_CONSOLE_COMMAND,
+	TEEHISTORIAN_EX,
 };
 
 static char EscapeJsonChar(char c)
@@ -196,9 +201,33 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	#include <game/tuning.h>
 	#undef MACRO_TUNING_PARAM
 
-	str_format(aJson, sizeof(aJson), "}}");
+	str_format(aJson, sizeof(aJson), "},\"uuids\":[");
+	Write(aJson, str_length(aJson));
+
+	for(int i = 0; i < pGameInfo->m_pUuids->NumUuids(); i++)
+	{
+		str_format(aJson, sizeof(aJson), "%s\"%s\"",
+			i == 0 ? "" : ",",
+			E(aBuffer1, pGameInfo->m_pUuids->GetName(OFFSET_UUID + i)));
+		Write(aJson, str_length(aJson));
+	}
+
+	str_format(aJson, sizeof(aJson), "]}");
 	Write(aJson, str_length(aJson));
 	Write("", 1); // Null termination.
+}
+
+void CTeeHistorian::WriteExtra(CUuid Uuid, const void *pData, int DataSize)
+{
+	EnsureTickWritten();
+
+	CPacker Ex;
+	Ex.Reset();
+	Ex.AddInt(-TEEHISTORIAN_EX);
+	Ex.AddRaw(&Uuid, sizeof(Uuid));
+	Ex.AddInt(DataSize);
+	Write(Ex.Data(), Ex.Size());
+	Write(pData, DataSize);
 }
 
 
@@ -482,6 +511,11 @@ void CTeeHistorian::RecordConsoleCommand(int ClientID, int FlagMask, const char 
 	}
 
 	Write(Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordTestExtra()
+{
+	WriteExtra(UUID_TEEHISTORIAN_TEST, "", 0);
 }
 
 void CTeeHistorian::EndInputs()

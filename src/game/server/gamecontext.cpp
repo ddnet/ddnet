@@ -2585,6 +2585,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 		GameInfo.m_pConfig = &g_Config;
 		GameInfo.m_pTuning = Tuning();
+		GameInfo.m_pUuids = &g_UuidManager;
 
 		char aMapName[128];
 		Server()->GetMapInfo(aMapName, sizeof(aMapName), &GameInfo.m_MapSize, &GameInfo.m_MapCrc);

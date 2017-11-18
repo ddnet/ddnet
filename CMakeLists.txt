@@ -636,6 +636,9 @@ set_glob(GAME_SHARED GLOB src/game
   mapitems.h
   teamscore.cpp
   teamscore.h
+  teehistorian_ex.cpp
+  teehistorian_ex.h
+  teehistorian_ex_chunks.h
   tuning.h
   variables.h
   version.h
