@@ -2,8 +2,19 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SOUNDS_H
 #define GAME_CLIENT_COMPONENTS_SOUNDS_H
+#include <engine/engine.h>
 #include <engine/sound.h>
 #include <game/client/component.h>
+
+class CSoundLoading : public IJob
+{
+	CGameClient *m_pGameClient;
+	bool m_Render;
+
+public:
+	CSoundLoading(CGameClient *pGameClient, bool Render);
+	void Run();
+};
 
 class CSounds : public CComponent
 {
@@ -18,7 +29,7 @@ class CSounds : public CComponent
 	} m_aQueue[QUEUE_SIZE];
 	int m_QueuePos;
 	int64 m_QueueWaitTime;
-	class CJob m_SoundJob;
+	std::shared_ptr<CSoundLoading> m_pSoundJob;
 	bool m_WaitForSoundJob;
 
 	int GetSampleId(int SetId);

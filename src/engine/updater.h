@@ -23,7 +23,7 @@ public:
 	virtual void InitiateUpdate() = 0;
 
 	virtual int GetCurrentState() = 0;
-	virtual char *GetCurrentFile() = 0;
+	virtual void GetCurrentFile(char *pBuf, int BufSize) = 0;
 	virtual int GetCurrentPercent() = 0;
 };
 

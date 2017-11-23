@@ -20,7 +20,7 @@ public:
 		NETADDR m_Addr;
 		bool m_Valid;
 		int m_Count;
-		CHostLookup m_Lookup;
+		std::shared_ptr<CHostLookup> m_pLookup;
 	};
 
 	enum
@@ -53,11 +53,10 @@ public:
 		// add lookup jobs
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
-			m_pEngine->HostLookup(&m_aMasterServers[i].m_Lookup, m_aMasterServers[i].m_aHostname, Nettype);
+			*m_aMasterServers[i].m_pLookup = CHostLookup(m_aMasterServers[i].m_aHostname, Nettype);
+			m_pEngine->AddJob(m_aMasterServers[i].m_pLookup);
 			m_aMasterServers[i].m_Valid = false;
 			m_aMasterServers[i].m_Count = 0;
-
-			//dbg_msg("MasterServer", "Lookup id: %d, name: %s, nettype: %d", i, m_aMasterServers[i].m_aHostname, Nettype);
 		}
 
 		m_State = STATE_UPDATE;
@@ -73,23 +72,19 @@ public:
 
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
-			if(m_aMasterServers[i].m_Lookup.m_Job.Status() != CJob::STATE_DONE)
+			if(m_aMasterServers[i].m_pLookup->Status() != IJob::STATE_DONE)
 				m_State = STATE_UPDATE;
 			else
 			{
-				if(m_aMasterServers[i].m_Lookup.m_Job.Result() == 0)
+				if(m_aMasterServers[i].m_pLookup->m_Result == 0)
 				{
-					m_aMasterServers[i].m_Addr = m_aMasterServers[i].m_Lookup.m_Addr;
+					m_aMasterServers[i].m_Addr = m_aMasterServers[i].m_pLookup->m_Addr;
 					m_aMasterServers[i].m_Addr.port = 8300;
 					m_aMasterServers[i].m_Valid = true;
-
-						//dbg_msg("MasterServer", "Set server %d, name: %s with addr-port: %d addr-ip %s addr-type %d", i, m_aMasterServers[i].m_aHostname, m_aMasterServers[i].m_Addr.port, m_aMasterServers[i].m_Addr.ip, m_aMasterServers[i].m_Addr.type);
 				}
 				else
 				{
 					m_aMasterServers[i].m_Valid = false;
-
-					//	dbg_msg("MasterServer", "Dropped %d, name: %s with addr-port: %d addr-ip %s addr-type %d", i, m_aMasterServers[i].m_aHostname);
 				}
 			}
 		}
