@@ -55,11 +55,17 @@ if(NOT(CMAKE_BUILD_TYPE))
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
+if(CMAKE_VERSION VERSION_LESS 3.1)
+  if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
+    if(CMAKE_CXX_FLAGS)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+    else()
+      set(CMAKE_CXX_FLAGS -std=gnu++11)
+    endif()
+  endif()
+endif()
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   src/game/version.h
@@ -1304,6 +1310,10 @@ foreach(target ${TARGETS_LINK})
 endforeach()
 
 foreach(target ${TARGETS_OWN})
+  if(CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+  endif()
+
   if(MSVC)
     target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
     target_compile_options(${target} PRIVATE /wd4267) # Possible loss of data (size_t - int on win64).

@@ -2760,21 +2760,19 @@ void shell_execute(const char *file)
 #endif
 }
 
-int os_compare_version(unsigned int major, unsigned int minor)
+int os_is_winxp_or_lower(unsigned int major, unsigned int minor)
 {
 #if defined(CONF_FAMILY_WINDOWS)
+	static const DWORD WINXP_MAJOR = 5;
+	static const DWORD WINXP_MINOR = 1;
 	OSVERSIONINFO ver;
 	mem_zero(&ver, sizeof(OSVERSIONINFO));
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&ver);
-	if(ver.dwMajorVersion > major || (ver.dwMajorVersion == major && ver.dwMinorVersion > minor))
-		return 1;
-	else if(ver.dwMajorVersion == major && ver.dwMinorVersion == minor)
-		return 0;
-	else
-		return -1;
+	return ver.dwMajorVersion < WINXP_MAJOR
+		|| (ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
 #else
-	return 0; // unimplemented
+	return 0;
 #endif
 }
 

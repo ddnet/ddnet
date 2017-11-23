@@ -3623,11 +3623,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	#if defined(CONF_FAMILY_WINDOWS)
-	static bool s_IsWinXP = os_compare_version(5U, 1U) <= 0;
-	#else
-	static bool s_IsWinXP = false;
-	#endif
+	static bool s_IsWinXP = os_is_winxp_or_lower();
 	if(s_IsWinXP)
 		str_copy(aUrl, "http://info.ddnet.tw/info", sizeof(aUrl));
 	else
