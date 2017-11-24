@@ -42,7 +42,7 @@ class CJobPool
 	};
 	int m_NumThreads;
 	void *m_apThreads[MAX_THREADS];
-	volatile bool m_Shutdown;
+	std::atomic<bool> m_Shutdown;
 
 	LOCK m_Lock;
 	SEMAPHORE m_Semaphore;
