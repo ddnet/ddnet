@@ -31,6 +31,7 @@ public:
 	};
 
 	CMasterInfo m_aMasterServers[MAX_MASTERSERVERS];
+	std::shared_ptr<CHostLookup> m_apLookup[MAX_MASTERSERVERS];
 	int m_State;
 	IEngine *m_pEngine;
 	IStorage *m_pStorage;
@@ -53,8 +54,8 @@ public:
 		// add lookup jobs
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
-			*m_aMasterServers[i].m_pLookup = CHostLookup(m_aMasterServers[i].m_aHostname, Nettype);
-			m_pEngine->AddJob(m_aMasterServers[i].m_pLookup);
+			*m_apLookup[i] = CHostLookup(m_aMasterServers[i].m_aHostname, Nettype);
+			m_pEngine->AddJob(m_apLookup[i]);
 			m_aMasterServers[i].m_Valid = false;
 			m_aMasterServers[i].m_Count = 0;
 		}
@@ -72,13 +73,13 @@ public:
 
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
-			if(m_aMasterServers[i].m_pLookup->Status() != IJob::STATE_DONE)
+			if(m_apLookup[i]->Status() != IJob::STATE_DONE)
 				m_State = STATE_UPDATE;
 			else
 			{
-				if(m_aMasterServers[i].m_pLookup->m_Result == 0)
+				if(m_apLookup[i]->m_Result == 0)
 				{
-					m_aMasterServers[i].m_Addr = m_aMasterServers[i].m_pLookup->m_Addr;
+					m_aMasterServers[i].m_Addr = m_apLookup[i]->m_Addr;
 					m_aMasterServers[i].m_Addr.port = 8300;
 					m_aMasterServers[i].m_Valid = true;
 				}
@@ -136,7 +137,10 @@ public:
 	{
 		mem_zero(m_aMasterServers, sizeof(m_aMasterServers));
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
+		{
 			str_format(m_aMasterServers[i].m_aHostname, sizeof(m_aMasterServers[i].m_aHostname), "master%d.teeworlds.com", i+1);
+			m_apLookup[i] = std::make_shared<CHostLookup>();
+		}
 	}
 
 	virtual int Load()
@@ -165,22 +169,26 @@ public:
 				Info.m_Addr.port = 8300;
 				bool Added = false;
 				for(int i = 0; i < MAX_MASTERSERVERS; ++i)
+				{
 					if(str_comp(m_aMasterServers[i].m_aHostname, Info.m_aHostname) == 0)
 					{
 						m_aMasterServers[i] = Info;
 						Added = true;
 						break;
 					}
+				}
 
 				if(!Added)
 				{
 					for(int i = 0; i < MAX_MASTERSERVERS; ++i)
+					{
 						if(m_aMasterServers[i].m_Addr.type == NETTYPE_INVALID)
 						{
 							m_aMasterServers[i] = Info;
 							Added = true;
 							break;
 						}
+					}
 				}
 
 				if(!Added)
