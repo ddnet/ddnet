@@ -1005,6 +1005,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
     fs.cpp
+    jobs.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
     test.cpp

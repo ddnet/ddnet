@@ -112,7 +112,7 @@ public:
 	{
 		if(g_Config.m_Debug)
 			dbg_msg("engine", "job added");
-		m_JobPool.Add(pJob);
+		m_JobPool.Add(std::move(pJob));
 	}
 };
 

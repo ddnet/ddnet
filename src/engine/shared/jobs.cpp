@@ -81,27 +81,25 @@ void CJobPool::WorkerThread(void *pUser)
 
 }
 
-int CJobPool::Init(int NumThreads)
+void CJobPool::Init(int NumThreads)
 {
 	// start threads
 	m_NumThreads = NumThreads > MAX_THREADS ? MAX_THREADS : NumThreads;
 	for(int i = 0; i < NumThreads; i++)
 		m_apThreads[i] = thread_init(WorkerThread, this);
-	return 0;
 }
 
-int CJobPool::Add(std::shared_ptr<IJob> pJob)
+void CJobPool::Add(std::shared_ptr<IJob> pJob)
 {
 	lock_wait(m_Lock);
 
 	// add job to queue
 	if(m_pLastJob)
 		m_pLastJob->m_pNext = pJob;
-	m_pLastJob = pJob;
+	m_pLastJob = std::move(pJob);
 	if(!m_pFirstJob)
-		m_pFirstJob = pJob;
+		m_pFirstJob = m_pLastJob;
 
 	lock_unlock(m_Lock);
 	sphore_signal(&m_Semaphore);
-	return 0;
 }

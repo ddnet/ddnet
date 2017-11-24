@@ -55,7 +55,7 @@ public:
 	CJobPool();
 	~CJobPool();
 
-	int Init(int NumThreads);
-	int Add(std::shared_ptr<IJob> pJob);
+	void Init(int NumThreads);
+	void Add(std::shared_ptr<IJob> pJob);
 };
 #endif
