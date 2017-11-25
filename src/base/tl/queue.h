@@ -85,37 +85,31 @@ public:
 
 	typename Container::reference Front()
 	{
-		auto Lck = GetLock();
 		return m_Queue.front();
 	}
 
 	typename Container::const_reference Front() const
 	{
-		auto Lck = GetLock();
 		return m_Queue.front();
 	}
 
 	typename Container::reference Back()
 	{
-		auto Lck = GetLock();
 		return m_Queue.back();
 	}
 
 	typename Container::const_reference Back() const
 	{
-		auto Lck = GetLock();
 		return m_Queue.back();
 	}
 
 	bool Empty() const
 	{
-		auto Lck = GetLock();
 		return m_Queue.empty();
 	}
 
 	size_t Size() const
 	{
-		auto Lck = GetLock();
 		return m_Queue.size();
 	}
 
