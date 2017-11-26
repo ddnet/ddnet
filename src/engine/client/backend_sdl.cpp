@@ -263,7 +263,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	// resample if needed
 	if(pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGBA || pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGB)
 	{
-		static int MaxTexSize = -1;
+		static int s_MaxTexSize = -1;
 		if(MaxTexSize == -1)
 			glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexSize);
 		if(Width > MaxTexSize || Height > MaxTexSize)
@@ -1164,7 +1164,8 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
 
 	m_LastIndexBufferBound = 0;
-	for (size_t i = 0; i < m_VisualObjects.size(); ++i) {
+	for (size_t i = 0; i < m_VisualObjects.size(); ++i)
+	{
 		m_VisualObjects[i].m_LastIndexBufferBound = 0;
 	}
 	
