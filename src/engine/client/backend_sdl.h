@@ -193,6 +193,7 @@ public:
 	struct SCommand_Init : public CCommandBuffer::SCommand
 	{
 		SCommand_Init() : SCommand(CMD_INIT) {}
+		class IStorage* m_pStorage;
 		volatile int *m_pTextureMemoryUsage;
 	};
 
@@ -305,7 +306,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	
 	bool m_UseOpenGL3_3;
 public:
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int* pCurrentWidth, int* pCurrentHeight);
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int* pCurrentWidth, int* pCurrentHeight, class IStorage* pStorage);
 	virtual int Shutdown();
 
 	virtual int MemoryUsage() const;
