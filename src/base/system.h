@@ -944,6 +944,18 @@ void str_sanitize_cc(char *str);
 void str_sanitize(char *str);
 
 /*
+	Function: str_sanitize_filename
+		Replaces all invalid filename characters with whitespace.
+
+	Parameters:
+		str - String to sanitize.
+
+	Remarks:
+		- The strings are treated as zero-termineted strings.
+*/
+void str_sanitize_filename(char *str);
+
+/*
 	Function: str_skip_to_whitespace
 		Skips leading non-whitespace characters(all but ' ', '\t', '\n', '\r').
 
@@ -1500,19 +1512,14 @@ int pid();
 void shell_execute(const char *file);
 
 /*
-	Function: os_compare_version
-		Compares the OS version to a given major and minor.
-
-	Parameters:
-		major - Major version to compare to.
-		minor - Minor version to compare to.
+	Function: os_is_winxp_or_lower
+		Checks whether the program runs on Windows XP or lower.
 
 	Returns:
-		1 - OS version higher.
-		0 - OS version same.
-		-1 - OS version lower.
+		1 - Windows XP or lower.
+		0 - Higher Windows version, Linux, macOS, etc.
 */
-int os_compare_version(unsigned int major, unsigned int minor);
+int os_is_winxp_or_lower();
 
 /*
 	Function: generate_password

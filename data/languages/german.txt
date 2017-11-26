@@ -138,13 +138,13 @@ Delete demo
 == Aufnahme löschen
 
 Demo details
-== Aufnahmendetails:
+== Aufnahmedetails:
 
 Demofile: %s
-== Demodatei: %s
+== Aufnahmedatei: %s
 
 Demos
-== Aufnahm.
+== Aufnahmen
 
 Disconnect
 == Trennen
@@ -246,10 +246,10 @@ Invalid Demo
 == Ungültige Aufnahme
 
 Join blue
-== zu Blau
+== Zu Blau
 
 Join red
-== zu Rot
+== Zu Rot
 
 Jump
 == Springen
@@ -363,19 +363,19 @@ Reason:
 == Grund:
 
 Red team
-== Rotes team
+== Rotes Team
 
 Red team wins!
 == Rotes Team gewinnt!
 
 Refresh
-== Erneuern
+== Aktualisieren
 
 Refreshing master servers
 == Aktualisiere Masterserver
 
 Remote console
-== Remotekonsole
+== Remote-Konsole
 
 Remove
 == Löschen
@@ -399,7 +399,7 @@ Sample rate
 == Abtastrate
 
 Score
-== Score
+== Punkte
 
 Score board
 == Punktetafel
@@ -447,7 +447,7 @@ Show only chat messages from friends
 == Nur Nachrichten von Freunden zeigen
 
 Show only supported
-== Zeige nur unterstützte
+== Nur Unterstützte anzeigen
 
 Skins
 == Skins
@@ -465,7 +465,7 @@ Spectate next
 == Nächstem zusehen
 
 Spectate previous
-== Vorherigem zusehen
+== Vorh. zusehen
 
 Spectator mode
 == Zuschaueroptionen
@@ -489,7 +489,7 @@ Sudden Death
 == Sudden Death
 
 Switch weapon on pickup
-== Waffe beim Aufnehmen wechseln
+== Waffe beim Aufsammeln wechseln
 
 Team
 == Team
@@ -528,10 +528,10 @@ Unable to rename the demo
 == Aufnahme konnte nicht umbenannt werden
 
 Use sounds
-== Aktiviere Ton
+== Ton aktivieren
 
 Use team colors for name plates
-== Nutze Teamfarben für Spielernamen
+== Teamfarben für Spielernamen benutzen
 
 V-Sync
 == V-Sync
@@ -540,7 +540,7 @@ Version
 == Version
 
 Vote command:
-== Kommando:
+== Befehl:
 
 Vote description:
 == Beschreibung:
@@ -560,16 +560,11 @@ Warmup
 Weapon
 == Waffen
 
-Welcome to Teeworlds
-== Willkommen bei Teeworlds
-
 Yes
 == Ja
 
 You must restart the game for all settings to take effect.
-== Du musst das Spiel neustarten um die Änderungen zu übernehmen.
-
-##### needs translation #####
+== Du musst das Spiel neustarten, um die Änderungen zu übernehmen.
 
 New name:
 == Neuer Name:
@@ -587,13 +582,13 @@ Max demos
 == Maximale Anzahl an Aufnahmen
 
 News
-== News
+== Neues
 
 Join game
 == Beitreten
 
 FSAA samples
-== Vollbild Anti-Aliasing
+== Vollbild-Anti-Aliasing
 
 %d of %d servers, %d players
 == %d von %d Servern, %d Spieler
@@ -608,13 +603,13 @@ Max Screenshots
 == Maximale Anzahl an Bildschirmfotos
 
 Length:
-== Länge
+== Länge:
 
 Rifle
 == Laser
 
 Netversion:
-== Netversion:
+== Netzwerkversion:
 
 Map:
 == Karte:
@@ -626,7 +621,7 @@ Hue
 == Farb.
 
 Record demo
-== Aufnahme sta.
+== Aufnehmen
 
 Your skin
 == Dein Skin
@@ -655,9 +650,6 @@ Round
 Lht.
 == Hell.
 
-no limit
-== Keine Begrenzung
-
 UI Color
 == Menüfarbe
 
@@ -683,10 +675,10 @@ Type:
 == Typ:
 
 Ratio
-== Ratio
+== Verhältnis
 
 Dummy settings
-== Einstellungen für Dummy
+== Dummy-Einstellungen
 
 AntiPing
 == AntiPing
@@ -695,7 +687,7 @@ Show quads
 == Quads anzeigen
 
 Map sound volume
-== Lautstärke von Mapsounds
+== Karten-Lautstärke
 
 ✗
 == ✗
@@ -710,7 +702,7 @@ Inner color
 == Innere Farbe
 
 \n\nReconnect in %d sec
-== Neu verbinden in %d Sekunden
+== \n\nNeu verbinden in %d Sekunden
 
 Background (entities)
 == Hintergrund (Entities)
@@ -728,13 +720,13 @@ Update now
 == Jetzt aktualisieren
 
 Enable server message sound
-== Aktiviere Ton für Server-Nachrichten
+== Ton für Server-Nachrichten aktivieren
 
 second
 == Sekunde
 
 Show votes window after voting
-== Zeige Vote-Fenster nach dem Voten
+== Abstimmungsfenster nach Abstimmung zeigen
 
 HUD
 == Aussehen
@@ -743,13 +735,13 @@ Look out!
 == Pass auf!
 
 Show names in chat in team colors
-== Nutze Teamfarben im Chat
+== Namen im Chat in Teamfarben anzeigen
 
 Enable team chat sound
-== Aktiviere Ton für Team-Nachrichten
+== Ton für Team-Nachrichten aktivieren
 
 Show other players' hook collision lines
-== Hook-Collision von anderen Spielern anzeigen
+== Hakenkollisionen von anderen Spielern anzeigen
 
 We will win
 == Wir werden gewinnen
@@ -758,10 +750,10 @@ Deaths
 == Tode
 
 Enable game sounds
-== Aktiviere Ton im Spiel
+== Ton im Spiel aktivieren
 
 DDNet Client needs to be restarted to complete update!
-== Der DDNet Client muss neu gestarted werden um das Update abzuschließen!
+== Der DDNet-Client muss neu gestartet werden, um das Update abzuschließen!
 
 Spectator
 == Zuschauer
@@ -776,7 +768,7 @@ Browser
 == Browser
 
 Enable gun sound
-== Aktiviere Pistolen-Ton
+== Pistolen-Ton aktivieren
 
 Show health + ammo
 == Gesundheit und Munition anzeigen
@@ -785,7 +777,7 @@ Team message
 == Team-Nachricht
 
 Save the best demo of each race
-== Speichere die beste Aufnahme von jedem Race
+== Beste Aufnahme von jedem Rennen speichern
 
 Outline color
 == Äußere Farbe
@@ -800,13 +792,13 @@ Check now
 == Aktualisieren
 
 DDNet Client updated!
-== Der DDNet Client wurde aktualisiert!
+== Der DDNet-Client wurde aktualisiert!
 
 Background (regular)
 == Hintergrund (Normal)
 
 AntiPing: predict other players
-== AntiPing: Berechne andere Spieler vor
+== AntiPing: Andere Spieler vorberechnen
 
 Show other players' key presses
 == Tastendrücke von anderen Spielern anzeigen
@@ -821,7 +813,7 @@ Updating...
 == Aktualisieren...
 
 Overlay entities
-== Entities Overlay
+== Overlay-Entities
 
 Messages
 == Nachrichten
@@ -830,19 +822,19 @@ Messages
 == %.2f MiB
 
 Use DDRace Scoreboard
-== Benutze das DDRace Scoreboard
+== DDRace-Punktetafel benutzen
 
 Loading DDNet Client
-== Lade DDNet Client
+== DDNet-Client laden
 
 Default zoom
-== Normal-Zoom
+== Normaler Zoom
 
 Show score
-== Score anzeigen
+== Punktestand anzeigen
 
 Show client IDs in Scoreboard
-== Client IDs im Scoreboard anzeigen
+== Client-IDs in der Punktetafel anzeigen
 
 seconds
 == Sekunden
@@ -851,10 +843,10 @@ seconds
 == %.2f KiB
 
 Try fast HTTP map download first
-== Probiere schnelleres Downloaden über HTTP
+== Schnellen HTTP-Kartendownload zuerst versuchen
 
 Enable regular chat sound
-== Aktiviere Ton für normale Nachrichten
+== Ton für normale Nachrichten aktivieren
 
 DDNet
 == DDNet
@@ -863,7 +855,7 @@ Normal message
 == Normale Nachricht
 
 AntiPing: predict grenade paths
-== AntiPing: Berechne Granaten-Flugkurve vor
+== AntiPing: Granatenflugkurve vorberechnen
 
 Search
 == Suche
@@ -878,141 +870,184 @@ Save ghost
 == Geist speichern
 
 Enable highlighted chat sound
-== Aktiviere Ton für Nachrichten an dich
+== Ton für Nachrichten an dich aktivieren
 
 AntiPing: predict weapons
-== AntiPing: Berechne Waffen vor
+== AntiPing: Waffen vorberechnen
 
 Hello and welcome
 == Hallo und willkommen
 
 Highlighted message
-== Nachricht an dich
+== Hervorgehobene Nachricht
 
 Reset wanted weapon on death
 == Waffe beim Tod zurücksetzen
 
 Switch weapon when out of ammo
-== Waffe wechseln wenn die Munition leer ist
+== Waffe wechseln, wenn die Munition leer ist
 
 AntiPing limit
 == AntiPing-Limit
 
-##### generated by copy_fix.py, please translate this #####
-
 Grabs
-== 
+== Griffe
 
 Select a name
-== 
+== Namen wählen
 
 Hi o/
-== 
+== Hallo o/
 
 Automatically take game over screenshot
-== 
+== Automatisch Bildschirmfoto am Spielende aufnehmen
 
 Please use a different name
-== 
+== Bitte anderen Namen wählen
 
 Wait before try for
-== 
+== Vor dem Versuch warten für
 
 Show console window
-== 
+== Konsolenfenster zeigen
 
 Gameplay
-== 
+== Gameplay
 
 Laser
-== 
+== Laser
 
 Old mouse mode
-== 
+== Alter Mausmodus
 
 Follow
-== 
+== Folgen
 
 Reset
-== 
+== Zurücks.
 
 Manual %3d:%02d  
-== 
+== Manuell %3d:%02d  
 
 Automatically create statboard csv
-== 
+== Automatisch Punktetafel-CSV erstellen
 
 Show tiles layers from BG map
-== 
+== Kachelebenen der Hintergrundkarte zeigen
 
 Remove chat
-== 
+== Chat entfernen
 
 Threaded sound loading
-== 
+== Sounds in Threads laden
 
 Race %3d:%02d  
-== 
+== Rennen %3d:%02d  
 
 DDNet %s is out! Download it at DDNet.tw!
-== 
+== DDNet %s ist da! Download bei DDNet.tw!
 
 Frags
-== 
+== Abschüsse
 
 Automatically take statboard screenshot
-== 
+== Automatisch Bildschirmfoto der Punktetafel aufnehmen
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Langen Schmerzens-Ton aktivieren (benutzt, wenn beim Einfrieren geschossen wird)
 
-Vanilla Skins only
-== 
+Vanilla skins only
+== Nur Skins des Standardspiels
 
 Refresh Rate
-== 
+== Aktual.-Rate
 
 New random timeout code
-== 
+== Neuer zufälliger Timeout-Code
 
 Suicides
-== 
+== Selbstmorde
 
 Net
-== 
+== Netzwerk
 
 FPM
-== 
+== FPM
 
 Spree
-== 
+== Serie
 
 Max CSVs
-== 
+== Maximale CSVs
 
 Borderless window
-== 
+== Randloses Fenster
 
 Best
-== 
+== Beste
 
 Screen
-== 
-
-Clan plates size
-== 
+== Bildschirm
 
 Auto %3d:%02d  
-== 
+== Auto %3d:%02d  
 
 Exclude
-== 
-
-High-DPI screen support (experimental)
-== 
+== Ausschließen
 
 Friend
-== 
+== Freund
 
 Demo
-== 
+== Aufnahme
+
+Kitty skins (DDCat)
+== Kätzchen-Skins (DDCat)
+
+Fat skins (DDFat)
+== Fette Skins (DDFat)
+
+Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
+== DDNet-Kartenabschlüsse im Serverbrowser anzeigen\n(überträgt deinen Spielernamen nach info.ddnet.tw)
+
+Unfinished map
+== Nicht gewonnene Karte
+
+Welcome to DDNet
+== Willkommen bei DDNet
+
+may cause delay
+== kann verlangsamen
+
+Preinit VBO (iGPUs only)
+== Preinit-VBO (nur für iGPUs)
+
+Multiple texture units (disable for MacOS)
+== Mehrere Textureinheiten (nicht für Mac OS)
+
+UI mouse s.
+== UI-Maus-Empf.
+
+Indicate map finish
+== Kartensieg anzeigen
+
+Use OpenGL 3.3 (experimental)
+== OpenGL 3.3 benutzen (experimentell)
+
+File already exists, do you want to overwrite it?
+== Datei existiert bereits, willst du sie überschreiben?
+
+Clan plates size
+== Größe des Clan-Namensschildes
+
+Friend message
+== Nachricht eines Freundes
+
+Date
+== Datum
+
+Connect dummy
+== Dummy verbinden
+
+Disconnect dummy
+== Dummy trennen

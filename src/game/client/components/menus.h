@@ -327,6 +327,8 @@ public:
 	void DemolistPopulate();
 	bool m_Dummy;
 
+	const char *GetCurrentDemoFolder() const { return m_aCurrentDemoFolder; }
+
 	// Ghost
 	struct CGhostItem
 	{
@@ -334,17 +336,24 @@ public:
 		char m_aPlayer[MAX_NAME_LENGTH];
 
 		int m_Time;
+		int m_Slot;
+		bool m_Own;
 
-		bool m_Active;
-		int m_ID;
+		CGhostItem() : m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
 
 		bool operator<(const CGhostItem &Other) { return m_Time < Other.m_Time; }
-		bool operator==(const CGhostItem &Other) { return m_ID == Other.m_ID; }
+		
+		bool Active() const { return m_Slot != -1; }
+		bool HasFile() const { return m_aFilename[0]; }
 	};
 
 	sorted_array<CGhostItem> m_lGhosts;
-	CGhostItem *m_OwnGhost;
+
 	void GhostlistPopulate();
+	CGhostItem *GetOwnGhost();
+	void UpdateOwnGhost(CGhostItem Item);
+	void DeleteGhostItem(int Index);
+
 	void setPopup(int Popup) { m_Popup = Popup; }
 
 	int m_DemoPlayerState;

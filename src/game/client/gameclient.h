@@ -338,6 +338,7 @@ public:
 	class CCountryFlags *m_pCountryFlags;
 	class CFlow *m_pFlow;
 	class CChat *m_pChat;
+	class CEmojis *m_pEmojis;
 	class CDamageInd *m_pDamageind;
 	class CCamera *m_pCamera;
 	class CControls *m_pControls;
@@ -354,6 +355,7 @@ public:
 	class CBackground *m_pBackGround;
 
 	class CMapSounds *m_pMapSounds;
+	class CPlayers *m_pPlayers;
 
 	// DDRace
 

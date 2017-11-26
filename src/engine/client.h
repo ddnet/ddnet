@@ -175,12 +175,13 @@ public:
 
 	//DDRace
 
-	virtual const char* GetCurrentMap() = 0;
-	virtual int GetCurrentMapCrc() = 0;
-	virtual const char* GetCurrentMapPath() = 0;
-	virtual const char* RaceRecordStart(const char *pFilename) = 0;
-	virtual void RaceRecordStop() = 0;
-	virtual bool RaceRecordIsRecording() = 0;
+	virtual const char *GetCurrentMap() = 0;
+	virtual const char *GetCurrentMapPath() = 0;
+	virtual unsigned GetMapCrc() = 0;
+
+	virtual void RaceRecord_Start(const char *pFilename) = 0;
+	virtual void RaceRecord_Stop() = 0;
+	virtual bool RaceRecord_IsRecording() = 0;
 
 	virtual void DemoSliceBegin() = 0;
 	virtual void DemoSliceEnd() = 0;

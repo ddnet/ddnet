@@ -52,7 +52,7 @@ MySQL (or MariaDB) support in the server is not included in the binary releases 
 Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
 Running tests (Debian/Ubuntu)
--------------
+-----------------------------
 
 In order to run the tests, you need to install the following library `libgtest-dev`.
 
@@ -76,6 +76,23 @@ Building on Windows with Visual Studio
 Download and install some version of [Microsoft Visual Studio](https://www.visualstudio.com/) (as of writing, MSVS Community 2017) with **C++ support**, install [Python 3](https://www.python.org/downloads/) **for all users** and install [CMake](https://cmake.org/download/#latest).
 
 Start CMake and select the source code folder (where DDNet resides, the directory with `CMakeLists.txt`). Additionally select a build folder, e.g. create a build subdirectory in the source code directory. Click "Configure" and select the Visual Studio generator (it should be pre-selected, so pressing "Finish" will suffice). After configuration finishes and the "Generate" reactivates, click it. When that finishes, click "Open Project". Visual Studio should open. You can compile the DDNet client by right-clicking the DDNet project (not the solution) and select "Select as StartUp project". Now you should be able to compile DDNet by clicking the green, triangular "Run" button.
+
+Cross-compiling on Linux to Windows x86/x86\_64
+-----------------------------------------------
+
+Install MinGW cross-compilers of the form `i686-w64-mingw32-gcc` (32 bit) or
+`x86_64-w64-mingw32-gcc` (64 bit). This is probably the hard part. ;)
+
+Then add `-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw64.toolchain` to the
+**initial** CMake command line.
+
+Cross-compiling on Linux to macOS
+---------------------------------
+
+Install [osxcross](https://github.com/tpoechtrager/osxcross), then add
+`-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/darwin.toolchain` and
+`-DCMAKE_OSX_SYSROOT=/path/to/osxcross/target/SDK/MacOSX10.11.sdk/` to the
+**initial** CMake command line.
 
 Importing the official DDNet Database
 -------------------------------------

@@ -55,11 +55,17 @@ if(NOT(CMAKE_BUILD_TYPE))
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
+if(CMAKE_VERSION VERSION_LESS 3.1)
+  if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
+    if(CMAKE_CXX_FLAGS)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+    else()
+      set(CMAKE_CXX_FLAGS -std=gnu++11)
+    endif()
+  endif()
+endif()
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   src/game/version.h
@@ -72,11 +78,9 @@ set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 # DEPENDENCIES
 ########################################################################
 
-function(set_extra_dirs VARIABLE NAME)
+function(set_extra_dirs_lib VARIABLE NAME)
   set("PATHS_${VARIABLE}_LIBDIR" PARENT_SCOPE)
   set("HINTS_${VARIABLE}_LIBDIR" PARENT_SCOPE)
-  set("PATHS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
-  set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
   if(PREFER_BUNDLED_LIBS)
     set(TYPE HINTS)
   else()
@@ -87,12 +91,41 @@ function(set_extra_dirs VARIABLE NAME)
     set("${TYPE}_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
     set("EXTRA_${VARIABLE}_LIBDIR" "${DIR}" PARENT_SCOPE)
   endif()
-  set("${TYPE}_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" PARENT_SCOPE)
 endfunction()
 
-# Check for PkgConfig once so all the other `find_package` calls can do it
-# quietly.
-find_package(PkgConfig)
+function(set_extra_dirs_include VARIABLE NAME LIBRARY)
+  set("PATHS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
+  set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
+  is_bundled(IS_BUNDLED "${LIBRARY}")
+  if(IS_BUNDLED)
+    set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TARGET_OS}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+if(CMAKE_CROSSCOMPILING)
+  set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH)
+else()
+  set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH)
+endif()
+
+function(is_bundled VARIABLE PATH)
+  if(PATH)
+    string(FIND "${PATH}" "${PROJECT_SOURCE_DIR}" LOCAL_PATH_POS)
+    if(LOCAL_PATH_POS EQUAL 0 AND TARGET_BITS AND TARGET_OS)
+      set("${VARIABLE}" ON PARENT_SCOPE)
+    else()
+      set("${VARIABLE}" OFF PARENT_SCOPE)
+    endif()
+  else()
+    set("${VARIABLE}" OFF PARENT_SCOPE)
+  endif()
+endfunction()
+
+if(NOT CMAKE_CROSSCOMPILING)
+  # Check for PkgConfig once so all the other `find_package` calls can do it
+  # quietly.
+  find_package(PkgConfig)
+endif()
 find_package(Curl)
 find_package(Freetype)
 find_package(GTest)
@@ -121,8 +154,8 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Dependencies:")
 function(show_dependency_status NAME FOUND PATH)
   if(FOUND)
-    string(FIND "${PATH}" "${PROJECT_SOURCE_DIR}" LOCAL_PATH_POS)
-    if(LOCAL_PATH_POS EQUAL 0)
+    is_bundled(IS_BUNDLED "${PATH}")
+    if(IS_BUNDLED)
       message(STATUS " * ${NAME} not found (using bundled version)")
     else()
       message(STATUS " * ${NAME} found")
@@ -246,6 +279,7 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   add_subdirectory(
     ${CMAKE_BINARY_DIR}/googletest-src
     ${CMAKE_BINARY_DIR}/googletest-build
+    EXCLUDE_FROM_ALL
   )
 
   if(MSVC)
@@ -394,7 +428,6 @@ endif()
 ########################################################################
 
 file(COPY data DESTINATION .)
-file(COPY shader DESTINATION .)
 set(COPY_FILES
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
@@ -413,7 +446,7 @@ function(chash output_file)
     DEPENDS scripts/cmd5.py ${ARGN}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
-endfunction(chash)
+endfunction()
 
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
@@ -425,7 +458,7 @@ function(generate_source output_file script_parameter)
       datasrc/network.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
-endfunction(generate_source)
+endfunction()
 
 file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/src/game/generated/")
 chash("src/game/generated/nethash.cpp"
@@ -484,6 +517,8 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
+  ghost.cpp
+  ghost.h
   global_uuid_manager.cpp
   huffman.cpp
   huffman.h
@@ -658,6 +693,8 @@ if(CLIENT)
     components/debughud.h
     components/effects.cpp
     components/effects.h
+    components/emojis.cpp
+    components/emojis.h
     components/emoticon.cpp
     components/emoticon.h
     components/flow.cpp
@@ -690,8 +727,6 @@ if(CLIENT)
     components/particles.h
     components/players.cpp
     components/players.h
-    components/race.cpp
-    components/race.h
     components/race_demo.cpp
     components/race_demo.h
     components/scoreboard.cpp
@@ -710,6 +745,8 @@ if(CLIENT)
     gameclient.h
     lineinput.cpp
     lineinput.h
+    race.cpp
+    race.h
     render.cpp
     render.h
     render_map.cpp
@@ -753,10 +790,10 @@ if(CLIENT)
 
   if(TARGET_OS STREQUAL "windows")
     set(CLIENT_ICON "other/icons/DDNet.rc")
-    if(MINGW)
-      set(CLIENT_MANIFEST "other/manifest/dpimanifest.rc")
-    else()	
-      set(CLIENT_MANIFEST)
+    if(NOT MINGW)
+      set(CLIENT_MANIFEST "other/manifest/DDNet.manifest")
+    else()
+      set(CLIENT_MANIFEST "other/manifest/DDNet.rc")
     endif()
   else()
     set(CLIENT_ICON)
@@ -967,8 +1004,11 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
+    fs.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
+    test.cpp
+    test.h
     thread.cpp
   )
   set(TESTS_EXTRA
@@ -1087,6 +1127,7 @@ if(TARGET_OS AND TARGET_BITS)
     endif()
   elseif(TARGET_OS STREQUAL "mac")
     set(CPACK_SYSTEM_NAME "osx")
+    set(CPACK_GENERATOR DMG)
   endif()
 endif()
 
@@ -1124,8 +1165,6 @@ endforeach()
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 install(TARGETS ${TARGET_CLIENT} ${TARGET_SERVER} DESTINATION bin)
-install(DIRECTORY data DESTINATION share/DDNet)
-install(DIRECTORY shader DESTINATION share/DDNet)
 
 set(CPACK_TARGETS
   ${TARGET_CLIENT}
@@ -1137,7 +1176,6 @@ set(CPACK_TARGETS
   map_extract
 )
 set(CPACK_DIRS data)
-set(CPACK_DIRS shader)
 set(CPACK_FILES
   license.txt
   storage.cfg
@@ -1272,6 +1310,10 @@ foreach(target ${TARGETS_LINK})
 endforeach()
 
 foreach(target ${TARGETS_OWN})
+  if(CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+  endif()
+
   if(MSVC)
     target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
     target_compile_options(${target} PRIVATE /wd4267) # Possible loss of data (size_t - int on win64).
@@ -1304,19 +1346,3 @@ foreach(target ${TARGETS_DEP})
     target_compile_options(${target} PRIVATE /W0)
   endif()
 endforeach()
-
-if(MSVC)
-  if(CMAKE_VERSION VERSION_LESS 3)
-    message(WARNING "CMake version 3 or newer is required to enable dpi awareness")
-  elseif(CMAKE_VERSION VERSION_LESS 3.4)
-    add_custom_command(
-	TARGET ${CLIENT_EXECUTABLE}
-	POST_BUILD
-	COMMAND
-	  "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}/other/manifest/dpimanifest.manifest\" -outputresource:\"${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CLIENT_EXECUTABLE}.exe\"\;\#1
-	COMMENT "Adding DPI awareness"
-	)
-  else()
-    target_sources(${TARGET_CLIENT} PRIVATE other/manifest/dpimanifest.manifest)
-  endif()
-endif()

@@ -11,7 +11,7 @@ addons:
     - libgtest-dev
     - libsdl2-dev
 script:
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then CMAKE_EXTRA_ARGS="-DDOWNLOAD_GTEST=ON"; brew update; brew install sdl2; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then CMAKE_EXTRA_ARGS="-DDOWNLOAD_GTEST=ON"; fi
 - if [ "$TRAVIS_OS_NAME" != "osx" ]; then CMAKE_EXTRA_ARGS="-DGTEST_LIBRARY=../gtest_build/libgtest.a -DGTEST_MAIN_LIBRARY=../gtest_build/libgtest_main.a"; mkdir gtest_build; cmake -E chdir gtest_build cmake /usr/src/gtest; cmake --build gtest_build; fi
 - mkdir build; cd build
 - cmake -Werror=dev $CMAKE_EXTRA_ARGS ..
@@ -22,6 +22,7 @@ script:
 - cmake -Werror=dev -DCMAKE_BUILD_TYPE=Debug $CMAKE_EXTRA_ARGS ..
 - make run_tests
 - cd ..
+- build/DDNet-Server shutdown
 env:
   global:
   - CFLAGS="-Wdeclaration-after-statement -Werror"

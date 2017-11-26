@@ -25,11 +25,7 @@ void CUpdater::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
-	#if defined(CONF_FAMILY_WINDOWS)
-	m_IsWinXP = os_compare_version(5U, 1U) <= 0;
-	#else
-	m_IsWinXP = false;
-	#endif
+	m_IsWinXP = os_is_winxp_or_lower();
 }
 
 void CUpdater::ProgressCallback(IFetchTask *pTask, void *pUser)
@@ -117,7 +113,7 @@ void CUpdater::ReplaceClient()
 {
 	dbg_msg("updater", "replacing " PLAT_CLIENT_EXEC);
 
-	//Replace running executable by renaming twice...
+	// Replace running executable by renaming twice...
 	if(!m_IsWinXP)
 	{
 		m_pStorage->RemoveBinaryFile("DDNet.old");

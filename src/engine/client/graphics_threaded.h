@@ -136,9 +136,6 @@ public:
 		WRAP_CLAMP,
 	};
 	
-//fix all alignments in any struct -- e.g. don't align to 8 bytes at 64bit code
-#pragma pack(push, 1)
-
 	struct SPoint { float x, y; };
 	struct STexCoord { float u, v; };
 	struct SColorf { float r, g, b, a; };
@@ -368,8 +365,6 @@ public:
 		// texture information
 		int m_Slot;
 	};
-
-#pragma pack(pop)
 
 	//
 	CCommandBuffer(unsigned CmdBufferSize, unsigned DataBufferSize)

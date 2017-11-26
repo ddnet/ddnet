@@ -892,8 +892,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	static CColumn s_aCols[] = {
 		{COL_ICON,     -1,            " ",    -1,  14.0f, 0, {0}, {0}},
-		{COL_DEMONAME, SORT_DEMONAME, "Demo",  0,   0.0f, 0, {0}, {0}},
-		{COL_DATE,     SORT_DATE,     "Date",  1, 300.0f, 0, {0}, {0}},
+		{COL_DEMONAME, SORT_DEMONAME, Localize("Demo"),  0,   0.0f, 0, {0}, {0}},
+		{COL_DATE,     SORT_DATE,     Localize("Date"),  1, 300.0f, 0, {0}, {0}},
 	};
 
 	RenderTools()->DrawUIRect(&Headers, vec4(0.0f,0,0,0.15f), 0, 0);

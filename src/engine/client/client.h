@@ -75,6 +75,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CDemoPlayer m_DemoPlayer;
 	class CDemoRecorder m_DemoRecorder[RECORDER_MAX];
 	class CDemoEditor m_DemoEditor;
+	class CGhostRecorder m_GhostRecorder;
+	class CGhostLoader m_GhostLoader;
 	class CServerBrowser m_ServerBrowser;
 	class CFetcher m_Fetcher;
 	class CUpdater m_Updater;
@@ -381,12 +383,13 @@ public:
 	void GenerateTimeoutSeed();
 	void GenerateTimeoutCodes();
 
-	virtual const char* GetCurrentMap();
-	virtual int GetCurrentMapCrc();
-	virtual const char* GetCurrentMapPath();
-	virtual const char* RaceRecordStart(const char *pFilename);
-	virtual void RaceRecordStop();
-	virtual bool RaceRecordIsRecording();
+	const char *GetCurrentMap();
+	const char *GetCurrentMapPath();
+	unsigned GetMapCrc();
+
+	void RaceRecord_Start(const char *pFilename);
+	void RaceRecord_Stop();
+	bool RaceRecord_IsRecording();
 
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();

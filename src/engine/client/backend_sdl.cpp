@@ -679,7 +679,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		CGLSL FragmentShader;
 		VertexShader.LoadShader(pCommand->m_pStorage, "shader/bordertiletex.vert", GL_VERTEX_SHADER);
 		FragmentShader.LoadShader(pCommand->m_pStorage, "shader/bordertiletex.frag", GL_FRAGMENT_SHADER);
-		
+
 		m_pBorderTileProgramTextured->CreateProgram();
 		m_pBorderTileProgramTextured->AddShader(&VertexShader);
 		m_pBorderTileProgramTextured->AddShader(&FragmentShader);

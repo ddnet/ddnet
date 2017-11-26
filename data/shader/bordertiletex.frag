@@ -11,5 +11,5 @@ out vec4 FragClr;
 void main()
 {
 	vec4 tex = textureLod(textureSampler, texCoord, fragLOD);
-	FragClr = tex * vertColor;	
+	FragClr = tex * vertColor;
 }

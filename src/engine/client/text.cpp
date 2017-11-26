@@ -640,6 +640,8 @@ public:
 					Graphics()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
 			}
 
+			pCursor->m_EmojiX = DrawX;
+
 			while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
 			{
 				int NewLine = 0;
@@ -717,6 +719,8 @@ public:
 							IGraphics::CQuadItem QuadItem(DrawX+pChr->m_OffsetX*Size, DrawY+pChr->m_OffsetY*Size, pChr->m_Width*Size, pChr->m_Height*Size);
 							Graphics()->QuadsDrawTL(&QuadItem, 1);
 						}
+
+						pCursor->m_EmojiX = DrawX + (pChr->m_OffsetX + pChr->m_Width) * Size;
 
 						DrawX += Advance*Size;
 						pCursor->m_CharCount++;

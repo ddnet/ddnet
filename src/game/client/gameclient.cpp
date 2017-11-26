@@ -23,6 +23,7 @@
 #include <game/extrainfo.h>
 #include <game/localization.h>
 #include <game/version.h>
+#include "race.h"
 #include "render.h"
 
 #include "gameclient.h"
@@ -38,6 +39,7 @@
 #include "components/damageind.h"
 #include "components/debughud.h"
 #include "components/effects.h"
+#include "components/emojis.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
 #include "components/hud.h"
@@ -69,6 +71,7 @@ CGameClient g_GameClient;
 static CKillMessages gs_KillMessages;
 static CCamera gs_Camera;
 static CChat gs_Chat;
+static CEmojis gs_Emojis;
 static CMotd gs_Motd;
 static CBroadcast gs_Broadcast;
 static CGameConsole gs_GameConsole;
@@ -137,6 +140,7 @@ void CGameClient::OnConsoleInit()
 	m_pSkins = &::gs_Skins;
 	m_pCountryFlags = &::gs_CountryFlags;
 	m_pChat = &::gs_Chat;
+	m_pEmojis = &::gs_Emojis;
 	m_pFlow = &::gs_Flow;
 	m_pCamera = &::gs_Camera;
 	m_pControls = &::gs_Controls;
@@ -154,6 +158,7 @@ void CGameClient::OnConsoleInit()
 	m_pBackGround = &::gs_BackGround;
 
 	m_pMapSounds = &::gs_MapSounds;
+	m_pPlayers = &::gs_Players;
 
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
@@ -177,7 +182,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_MapLayersBackGround); // first to render
 	m_All.Add(&m_pParticles->m_RenderTrail);
 	m_All.Add(m_pItems);
-	m_All.Add(&gs_Players);
+	m_All.Add(m_pPlayers);
 	m_All.Add(m_pGhost);
 	m_All.Add(&gs_MapLayersForeGround);
 	m_All.Add(&m_pParticles->m_RenderExplosions);
@@ -188,6 +193,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_Emoticon);
 	m_All.Add(&gs_KillMessages);
+	m_All.Add(m_pEmojis);
 	m_All.Add(m_pChat);
 	m_All.Add(&gs_Broadcast);
 	m_All.Add(&gs_DebugHud);
@@ -452,6 +458,21 @@ void CGameClient::OnConnected()
 	m_Collision.Init(Layers());
 
 	RenderTools()->RenderTilemapGenerateSkip(Layers());
+
+	CRaceHelper::ms_aFlagIndex[0] = -1;
+	CRaceHelper::ms_aFlagIndex[1] = -1;
+
+	CTile *pGameTiles = static_cast<CTile *>(Layers()->Map()->GetData(Layers()->GameLayer()->m_Data));
+
+	// get flag positions
+	for(int i = 0; i < m_Collision.GetWidth()*m_Collision.GetHeight(); i++)
+	{
+		if(pGameTiles[i].m_Index - ENTITY_OFFSET == ENTITY_FLAGSTAND_RED)
+			CRaceHelper::ms_aFlagIndex[TEAM_RED] = i;
+		else if(pGameTiles[i].m_Index - ENTITY_OFFSET == ENTITY_FLAGSTAND_BLUE)
+			CRaceHelper::ms_aFlagIndex[TEAM_BLUE] = i;
+		i += pGameTiles[i].m_Skip;
+	}
 
 	for(int i = 0; i < m_All.m_Num; i++)
 	{
@@ -834,6 +855,9 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 		if (i <= 16)
 			m_Teams.m_IsDDRace16 = true;
+
+		m_pGhost->m_AllowRestart = true;
+		m_pRaceDemo->m_AllowRestart = true;
 	}
 	else if(MsgId == NETMSGTYPE_SV_PLAYERTIME)
 	{
@@ -855,7 +879,8 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 void CGameClient::OnShutdown()
 {
-	m_pRaceDemo->OnShutdown();
+	m_pRaceDemo->OnReset();
+	m_pGhost->OnReset();
 }
 
 void CGameClient::OnEnterGame()
@@ -1320,6 +1345,9 @@ void CGameClient::OnNewSnapshot()
 		// update state
 		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
 	}
+
+	m_pGhost->OnNewSnapshot();
+	m_pRaceDemo->OnNewSnapshot();
 }
 
 void CGameClient::OnPredict()
@@ -1775,6 +1803,9 @@ void CGameClient::OnPredict()
 	}
 
 	m_PredictedTick = Client()->PredGameTick();
+
+	if(m_NewPredictedTick)
+		m_pGhost->OnNewPredictedSnapshot();
 }
 
 void CGameClient::OnActivateEditor()

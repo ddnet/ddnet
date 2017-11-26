@@ -435,8 +435,7 @@ unsigned io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
-	fclose((FILE*)io);
-	return 1;
+	return fclose((FILE*)io) != 0;
 }
 
 int io_flush(IOHANDLE io)
@@ -1364,7 +1363,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.type |= NETTYPE_IPV4;
 			sock.ipv4sock = socket;
 
-			/* set boardcast */
+			/* set broadcast */
 			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
 
 			/* set receive buffer size */
@@ -1412,7 +1411,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.type |= NETTYPE_IPV6;
 			sock.ipv6sock = socket;
 
-			/* set boardcast */
+			/* set broadcast */
 			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
 
 			/* set receive buffer size */
@@ -2081,7 +2080,7 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) != 0)
+	if(MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)
@@ -2256,6 +2255,17 @@ void str_sanitize(char *str_in)
 	while(*str)
 	{
 		if(*str < 32 && !(*str == '\r') && !(*str == '\n') && !(*str == '\t'))
+			*str = ' ';
+		str++;
+	}
+}
+
+void str_sanitize_filename(char *str_in)
+{
+	unsigned char *str = (unsigned char *)str_in;
+	while(*str)
+	{
+		if(*str < 32 || *str == '\\' || *str == '/' || *str == '|' || *str == ':' || *str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
 			*str = ' ';
 		str++;
 	}
@@ -2750,21 +2760,19 @@ void shell_execute(const char *file)
 #endif
 }
 
-int os_compare_version(unsigned int major, unsigned int minor)
+int os_is_winxp_or_lower(unsigned int major, unsigned int minor)
 {
 #if defined(CONF_FAMILY_WINDOWS)
+	static const DWORD WINXP_MAJOR = 5;
+	static const DWORD WINXP_MINOR = 1;
 	OSVERSIONINFO ver;
 	mem_zero(&ver, sizeof(OSVERSIONINFO));
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&ver);
-	if(ver.dwMajorVersion > major || (ver.dwMajorVersion == major && ver.dwMinorVersion > minor))
-		return 1;
-	else if(ver.dwMajorVersion == major && ver.dwMinorVersion == minor)
-		return 0;
-	else
-		return -1;
+	return ver.dwMajorVersion < WINXP_MAJOR
+		|| (ver.dwMajorVersion == WINXP_MAJOR && ver.dwMinorVersion <= WINXP_MINOR);
 #else
-	return 0; // unimplemented
+	return 0;
 #endif
 }
 
