@@ -273,7 +273,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 				Width>>=1;
 				Height>>=1;
 			}
-			while(Width > MaxTexSize || Height > MaxTexSize);
+			while(Width > s_MaxTexSize || Height > s_MaxTexSize);
 
 			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			mem_free(pTexData);
