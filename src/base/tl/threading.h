@@ -1,6 +1,12 @@
 
 #pragma once
 
+#include <mutex>
+#include <chrono>
+#include <utility>
+#include <type_traits>
+#include <condition_variable>
+
 #include "../system.h"
 
 /*
@@ -106,4 +112,60 @@ public:
 	{
 		var->release();
 	}
+};
+
+template <
+	typename M = std::mutex,
+	typename CV = std::conditional<
+		std::is_same<M, std::mutex>::value,
+		std::condition_variable,
+		std::condition_variable_any>>
+class condition_variable
+{
+public:
+	using CVStatus = std::cv_status;
+
+	condition_variable() = default;
+	condition_variable(const condition_variable &) = delete;
+	condition_variable &operator=(const condition_variable &) = delete;
+
+	template <typename LO>
+	std::unique_lock<M> GetLock(LO LockOpt)
+	{
+		return std::unique_lock<M>(m_Mutex, LockOpt);
+	}
+
+	std::unique_lock<M> GetLock() { return std::unique_lock<M>(m_Mutex); }
+
+	void NotifyOne() { m_CV.notify_one(); }
+
+	void NotifyAll() { m_CV.notify_all(); }
+
+	void Wait(std::unique_lock<M> &Lck) { m_CV.wait(Lck); }
+
+	template <typename Predicate>
+	void Wait(std::unique_lock<M> &Lck, Predicate &&Pred)
+	{
+		m_CV.wait(Lck, std::forward<Predicate>(Pred));
+	}
+
+	CVStatus WaitFor(std::unique_lock<M> &Lck, int MSecs)
+	{
+		return m_CV.wait_for(Lck, std::chrono::milliseconds(MSecs));
+	}
+
+	template <typename Predicate>
+	bool WaitFor(std::unique_lock<M> &Lck, int MSecs, Predicate &&Pred)
+	{
+		return m_CV.wait_for(
+			Lck,
+			std::chrono::milliseconds(MSecs),
+			std::forward<Predicate>(Pred));
+	}
+
+	M &Mutex() { return m_Mutex; }
+
+private:
+	M m_Mutex;
+	std::condition_variable_any m_CV;
 };
