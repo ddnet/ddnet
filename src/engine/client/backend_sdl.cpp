@@ -263,16 +263,17 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	// resample if needed
 	if(pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGBA || pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGB)
 	{
-		int MaxTexSize;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexSize);
-		if(Width > MaxTexSize || Height > MaxTexSize)
+		static int s_MaxTexSize = -1;
+		if(s_MaxTexSize == -1)
+			glGetIntegerv(GL_MAX_TEXTURE_SIZE, &s_MaxTexSize);
+		if(Width > s_MaxTexSize || Height > s_MaxTexSize)
 		{
 			do
 			{
 				Width>>=1;
 				Height>>=1;
 			}
-			while(Width > MaxTexSize || Height > MaxTexSize);
+			while(Width > s_MaxTexSize || Height > s_MaxTexSize);
 
 			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			mem_free(pTexData);
@@ -752,7 +753,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	
 	if(m_UsePreinitializedVertexBuffer)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * CCommandBuffer::MAX_VERTICES, NULL, GL_STREAM_DRAW);
-		
+	
+	//query the image max size only once
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &m_MaxTexSize);
+
 	//query maximum of allowed textures
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_MaxTextureUnits);
 	m_TextureSlotBoundToUnit.resize(m_MaxTextureUnits);
@@ -760,10 +764,11 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		m_TextureSlotBoundToUnit[i].m_TextureSlot = -1;
 	}
-	
+
+	glBindVertexArray(0);
 	glGenBuffers(1, &m_QuadDrawIndexBufferID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
-	m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
+	glBindBuffer(GL_COPY_WRITE_BUFFER, m_QuadDrawIndexBufferID);
+	m_LastIndexBufferBound = 0;
 	
 	unsigned int Indices[CCommandBuffer::MAX_VERTICES/4 * 6];
 	int Primq = 0;
@@ -777,13 +782,16 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		Indices[i+5] = Primq + 3;
 		Primq+=4;
 	}
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW);
+	glBufferData(GL_COPY_WRITE_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES/4 * 6, Indices, GL_STATIC_DRAW);
 	
 	m_CurrentIndicesInBuffer = CCommandBuffer::MAX_VERTICES/4 * 6;
 	
 	mem_zero(m_aTextures, sizeof(m_aTextures));
 	
 	m_ClearColor.r = m_ClearColor.g = m_ClearColor.b = -1.f;
+	
+	//fix the alignment to allow even 1byte changes, e.g. for alpha components
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
@@ -826,9 +834,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 		glActiveTexture(GL_TEXTURE0 + Slot);
 		glBindSampler(Slot, m_aTextures[pCommand->m_Slot].m_Sampler);
 	}
-	
-	//fix the alignment to allow even 1byte changes, e.g. for alpha components
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height,
 		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pCommand->m_pData);
@@ -859,16 +865,14 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	// resample if needed
 	if(pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGBA || pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGB)
 	{
-		int MaxTexSize;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexSize);
-		if(Width > MaxTexSize || Height > MaxTexSize)
+		if(Width > m_MaxTexSize || Height > m_MaxTexSize)
 		{
 			do
 			{
 				Width>>=1;
 				Height>>=1;
 			}
-			while(Width > MaxTexSize || Height > MaxTexSize);
+			while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 
 			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
 			mem_free(pTexData);
@@ -927,6 +931,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)
 	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(m_aTextures[pCommand->m_Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
@@ -1156,6 +1162,12 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);	
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
+
+	m_LastIndexBufferBound = 0;
+	for (size_t i = 0; i < m_VisualObjects.size(); ++i)
+	{
+		m_VisualObjects[i].m_LastIndexBufferBound = 0;
+	}
 	
 	m_CurrentIndicesInBuffer = NewIndicesCount;
 	delete[] Indices;	
