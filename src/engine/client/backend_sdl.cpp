@@ -264,9 +264,9 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	if(pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGBA || pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGB)
 	{
 		static int s_MaxTexSize = -1;
-		if(MaxTexSize == -1)
-			glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexSize);
-		if(Width > MaxTexSize || Height > MaxTexSize)
+		if(s_MaxTexSize == -1)
+			glGetIntegerv(GL_MAX_TEXTURE_SIZE, &s_MaxTexSize);
+		if(Width > s_MaxTexSize || Height > s_MaxTexSize)
 		{
 			do
 			{
