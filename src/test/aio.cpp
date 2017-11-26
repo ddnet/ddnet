@@ -122,3 +122,25 @@ TEST_F(Async, NonDivisor)
 	}
 	Expect(aText);
 }
+
+TEST_F(Async, Transaction)
+{
+	static const int NUM_LETTERS = 13;
+	static const int SIZE = BUF_SIZE / NUM_LETTERS * NUM_LETTERS;
+	char aText[SIZE + 1];
+	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	{
+		aText[i] = 'a' + i % NUM_LETTERS;
+	}
+	aText[sizeof(aText) - 1] = 0;
+	for(unsigned i = 0; i < (sizeof(aText) - 1) / NUM_LETTERS; i++)
+	{
+		aio_lock(m_pAio);
+		for(char c = 'a'; c < 'a' + NUM_LETTERS; c++)
+		{
+			aio_write_unlocked(m_pAio, &c, 1);
+		}
+		aio_unlock(m_pAio);
+	}
+	Expect(aText);
+}
