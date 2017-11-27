@@ -532,6 +532,30 @@ set_glob(BASE GLOB_RECURSE src/base
   tl/threading.h
   vmath.h
 )
+set_glob(ENGINE_INTERFACE GLOB src/engine
+  client.h
+  config.h
+  console.h
+  demo.h
+  editor.h
+  engine.h
+  friends.h
+  ghost.h
+  graphics.h
+  input.h
+  kernel.h
+  keys.h
+  map.h
+  masterserver.h
+  message.h
+  server.h
+  serverbrowser.h
+  sound.h
+  storage.h
+  textrender.h
+  updater.h
+  uuid.h
+)
 set_glob(ENGINE_SHARED GLOB src/engine/shared
   compression.cpp
   compression.h
@@ -663,7 +687,7 @@ set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS} ${DEP_ZLIB})
 set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 
