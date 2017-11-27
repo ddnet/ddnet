@@ -213,7 +213,7 @@ public:
 	struct SCommand_CreateVertexBufferObject : public SCommand
 	{
 		SCommand_CreateVertexBufferObject() : SCommand(CMD_CREATE_VERTEX_BUFFER_OBJECT) {}
-		void* m_Elements; //vertices and optinally textureCoords
+		void *m_Elements; //vertices and optinally textureCoords
 		
 		bool m_IsTextured;
 		
@@ -224,7 +224,7 @@ public:
 	struct SCommand_AppendVertexBufferObject : public SCommand
 	{
 		SCommand_AppendVertexBufferObject() : SCommand(CMD_APPEND_VERTEX_BUFFER_OBJECT) {}
-		void* m_Elements; //vertices and optinally textureCoords
+		void *m_Elements; //vertices and optinally textureCoords
 		int m_NumVertices;
 		int m_VisualObjectIDX;
 	};
@@ -245,7 +245,7 @@ public:
 			
 		//the char offset of all indices that should be rendered, and the amount of renders
 		char** m_pIndicesOffsets;
-		unsigned int* m_pDrawCount;
+		unsigned int *m_pDrawCount;
 		
 		int m_IndicesDrawNum;
 		int m_VisualObjectIDX;
@@ -424,7 +424,7 @@ public:
 
 	virtual ~IGraphicsBackend() {}
 
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int* pCurrentWidth, int* pCurrentHeight, class IStorage* pStorage) = 0;
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
 
 	virtual int MemoryUsage() const = 0;
@@ -476,7 +476,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer::SVertex m_aVertices[MAX_VERTICES];
 	CCommandBuffer::SVertexOld m_aVerticesOld[MAX_VERTICES];
-	CCommandBuffer::SVertexBase* m_pVertices;
+	CCommandBuffer::SVertexBase *m_pVertices;
 	int m_NumVertices;
 
 	CCommandBuffer::SColorf m_aColorOld[4];
@@ -550,8 +550,8 @@ public:
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
 	virtual void SetColor(float r, float g, float b, float a);
 	
-	void SetColor(CCommandBuffer::SVertexBase* pVertex, int ColorIndex);
-	CCommandBuffer::SVertexBase* GetVertex(int Index);
+	void SetColor(CCommandBuffer::SVertexBase *pVertex, int ColorIndex);
+	CCommandBuffer::SVertexBase *GetVertex(int Index);
 
 	virtual void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV);
 	virtual void QuadsSetSubsetFree(
@@ -563,12 +563,12 @@ public:
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num);
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
 
-	virtual void DrawVisualObject(int VisualObjectIDX, float* pColor, char** pOffsets, unsigned int* IndicedVertexDrawNum, size_t NumIndicesOffet);
-	virtual void DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum);
-	virtual void DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum);
+	virtual void DrawVisualObject(int VisualObjectIDX, float *pColor, char** pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet);
+	virtual void DrawBorderTile(int VisualObjectIDX, float *pColor, char *pOffset, float *Offset, float *Dir, int JumpIndex, unsigned int DrawNum);
+	virtual void DrawBorderTileLine(int VisualObjectIDX, float *pColor, char *pOffset, float *Dir, unsigned int IndexDrawNum, unsigned int RedrawNum);
 	virtual void DestroyVisual(int VisualObjectIDX);
-	virtual int CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int NumIndicesRequired);
-	virtual void AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX);
+	virtual int CreateVisualObjects(float *pVertices, unsigned char *pTexCoords, int NumTiles, unsigned int NumIndicesRequired);
+	virtual void AppendAllVertices(float *pVertices, unsigned char *pTexCoords, int NumTiles, int VisualObjectIDX);
 	
 	virtual int GetNumScreens() const;
 	virtual void Minimize();

@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include <string>
 
-bool CGLSL::LoadShader(IStorage* pStorage, const char* pFile, int Type)
+bool CGLSL::LoadShader(IStorage *pStorage, const char *pFile, int Type)
 {
 	if (m_IsLoaded)
 		return true;
 	IOHANDLE f = pStorage->OpenFile(pFile, IOFLAG_READ, IStorage::TYPE_ALL);
-	
+
 	std::vector<std::string> Lines;
 	if (f)
 	{

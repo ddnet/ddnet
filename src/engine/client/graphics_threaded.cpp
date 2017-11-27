@@ -136,7 +136,7 @@ void CGraphics_Threaded::Rotate(const CCommandBuffer::SPoint &rCenter, CCommandB
 	
 	if(m_UseOpenGL3_3)
 	{
-		CCommandBuffer::SVertex* pVertices = (CCommandBuffer::SVertex*) pPoints;
+		CCommandBuffer::SVertex *pVertices = (CCommandBuffer::SVertex*) pPoints;
 		for(i = 0; i < NumPoints; i++)
 		{
 			x = pVertices[i].m_Pos.x - rCenter.x;
@@ -147,7 +147,7 @@ void CGraphics_Threaded::Rotate(const CCommandBuffer::SPoint &rCenter, CCommandB
 	}
 	else
 	{
-		CCommandBuffer::SVertexOld* pVertices = (CCommandBuffer::SVertexOld*) pPoints;
+		CCommandBuffer::SVertexOld *pVertices = (CCommandBuffer::SVertexOld*) pPoints;
 		for(i = 0; i < NumPoints; i++)
 		{
 			x = pVertices[i].m_Pos.x - rCenter.x;
@@ -610,11 +610,11 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 	SetColorVertex(Array, 4);
 }
 
-void CGraphics_Threaded::SetColor(CCommandBuffer::SVertexBase* pVertex, int ColorIndex)
+void CGraphics_Threaded::SetColor(CCommandBuffer::SVertexBase *pVertex, int ColorIndex)
 {
 	if(m_UseOpenGL3_3)
 	{
-		CCommandBuffer::SVertex* pVert = (CCommandBuffer::SVertex*)pVertex;
+		CCommandBuffer::SVertex *pVert = (CCommandBuffer::SVertex*)pVertex;
 		pVert->m_Color.r = m_aColor[ColorIndex].r;
 		pVert->m_Color.g = m_aColor[ColorIndex].g;
 		pVert->m_Color.b = m_aColor[ColorIndex].b;
@@ -622,7 +622,7 @@ void CGraphics_Threaded::SetColor(CCommandBuffer::SVertexBase* pVertex, int Colo
 	} 
 	else 
 	{
-		CCommandBuffer::SVertexOld* pVert = (CCommandBuffer::SVertexOld*)pVertex;
+		CCommandBuffer::SVertexOld *pVert = (CCommandBuffer::SVertexOld*)pVertex;
 		pVert->m_Color.r = m_aColorOld[ColorIndex].r;
 		pVert->m_Color.g = m_aColorOld[ColorIndex].g;
 		pVert->m_Color.b = m_aColorOld[ColorIndex].b;
@@ -630,7 +630,7 @@ void CGraphics_Threaded::SetColor(CCommandBuffer::SVertexBase* pVertex, int Colo
 	}
 }
 
-CCommandBuffer::SVertexBase* CGraphics_Threaded::GetVertex(int Index)
+CCommandBuffer::SVertexBase *CGraphics_Threaded::GetVertex(int Index)
 {
 	if(!m_UseOpenGL3_3)
 		return &((CCommandBuffer::SVertexOld*)m_pVertices)[Index];
@@ -859,7 +859,7 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
-void mem_copy_special(void* pDest, void* pSource, size_t Size, size_t Count, size_t Steps)
+void mem_copy_special(void *pDest, void *pSource, size_t Size, size_t Count, size_t Steps)
 {
 	size_t CurStep = 0;
 	for(size_t i = 0; i < Count; ++i)
@@ -869,7 +869,7 @@ void mem_copy_special(void* pDest, void* pSource, size_t Size, size_t Count, siz
 	}
 }
 
-void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, char** pOffsets, unsigned int* IndicedVertexDrawNum, size_t NumIndicesOffet)
+void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float *pColor, char** pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet)
 {
 	if(NumIndicesOffet == 0) return;
 	
@@ -889,13 +889,13 @@ void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, ch
 	if(LOD < 0) LOD = 0;
 	Cmd.m_LOD = LOD;
 
-	void* Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+	void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
 	if(Data == 0x0)
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
 	
-		void* Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
+		void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
 		if(Data == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
@@ -934,7 +934,7 @@ void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float* pColor, ch
 	//todo max indices group check!!
 }
 
-void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum)
+void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float *pColor, char *pOffset, float *Offset, float *Dir, int JumpIndex, unsigned int DrawNum)
 {
 	if(DrawNum == 0) return;
 	//draw a border tile alot of times
@@ -974,7 +974,7 @@ void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float* pColor, char
 	}
 }
 
-void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
+void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float *pColor, char *pOffset, float *Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
 {
 	if(IndexDrawNum == 0 || RedrawNum == 0) return;
 	//draw a border tile alot of times
@@ -1036,7 +1036,7 @@ void CGraphics_Threaded::DestroyVisual(int VisualObjectIDX)
 	m_FirstFreeVertexArrayIndex = VisualObjectIDX;
 }
 
-int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTexCoords, int NumTiles, unsigned int NumIndicesRequired)
+int CGraphics_Threaded::CreateVisualObjects(float *pVertices, unsigned char *pTexCoords, int NumTiles, unsigned int NumIndicesRequired)
 {
 	if(!pVertices) return -1;
 	
@@ -1139,7 +1139,7 @@ int CGraphics_Threaded::CreateVisualObjects(float* pVertices, unsigned char* pTe
 	return index;
 }
 
-void CGraphics_Threaded::AppendAllVertices(float* pVertices, unsigned char* pTexCoords, int NumTiles, int VisualObjectIDX)
+void CGraphics_Threaded::AppendAllVertices(float *pVertices, unsigned char *pTexCoords, int NumTiles, int VisualObjectIDX)
 {
 	//the size of the cmd data buffer is 2MB -- we create 4 vertices of each 2 floats plus 2 shorts(2*unsigned char each) if TexCoordinates are used
 	char AddTexture = (pTexCoords == NULL ? 0 : 1);

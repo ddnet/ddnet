@@ -4,7 +4,7 @@
 
 class CGLSL {
 public:
-	bool LoadShader(class IStorage* pStorage, const char* pFile, int Type);
+	bool LoadShader(class IStorage *pStorage, const char *pFile, int Type);
 	void DeleteShader();
 	
 	bool IsLoaded();
