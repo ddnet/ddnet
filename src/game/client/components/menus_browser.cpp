@@ -1321,9 +1321,15 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::CLEAN)
+		{
 			str_format(aBuf, sizeof(aBuf), Localize("Current version: %s"), GAME_VERSION);
+		}
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-			str_format(aBuf, sizeof(aBuf), "Downloading %s:", Updater()->GetCurrentFile());
+		{
+			char aCurrentFile[64];
+			Updater()->GetCurrentFile(aCurrentFile, sizeof(aCurrentFile));
+			str_format(aBuf, sizeof(aBuf), "Downloading %s:", aCurrentFile);
+		}
 		else if(State == IUpdater::FAIL)
 		{
 			str_format(aBuf, sizeof(aBuf), "Failed to download a file! Restart client to retry...");

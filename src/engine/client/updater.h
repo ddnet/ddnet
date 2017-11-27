@@ -2,7 +2,7 @@
 #define ENGINE_CLIENT_UPDATER_H
 
 #include <engine/updater.h>
-#include <engine/fetcher.h>
+#include "fetcher.h"
 #include <map>
 #include <string>
 
@@ -34,14 +34,18 @@
 
 class CUpdater : public IUpdater
 {
+	friend class CUpdaterFetchTask;
+
 	class IClient *m_pClient;
 	class IStorage *m_pStorage;
-	class IFetcher *m_pFetcher;
+	class IEngine *m_pEngine;
 
 	bool m_IsWinXP;
 
+	LOCK m_Lock;
+
 	int m_State;
-	char m_Status[256];
+	char m_aStatus[256];
 	int m_Percent;
 	char m_aLastFile[256];
 
@@ -50,7 +54,7 @@ class CUpdater : public IUpdater
 
 	std::map<std::string, bool> m_FileJobs;
 
-	void AddFileJob(const char *pFile, bool job);
+	void AddFileJob(const char *pFile, bool Job);
 	void FetchFile(const char *pFile, const char *pDestPath = 0);
 	void MoveFile(const char *pFile);
 
@@ -61,14 +65,15 @@ class CUpdater : public IUpdater
 	void ReplaceClient();
 	void ReplaceServer();
 
+	void SetCurrentState(int NewState);
+
 public:
 	CUpdater();
-	static void ProgressCallback(IFetchTask *pTask, void *pUser);
-	static void CompletionCallback(IFetchTask *pTask, void *pUser);
+	~CUpdater();
 
-	int GetCurrentState() { return m_State; };
-	char *GetCurrentFile() { return m_Status; };
-	int GetCurrentPercent() { return m_Percent; };
+	int GetCurrentState();
+	void GetCurrentFile(char *pBuf, int BufSize);
+	int GetCurrentPercent();
 
 	virtual void InitiateUpdate();
 	void Init();

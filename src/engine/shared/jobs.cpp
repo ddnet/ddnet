@@ -3,6 +3,31 @@
 #include <base/system.h>
 #include "jobs.h"
 
+IJob::IJob() :
+	m_Status(STATE_PENDING)
+{
+}
+
+IJob::IJob(const IJob &Other) :
+	m_Status(STATE_PENDING)
+{
+}
+
+IJob &IJob::operator=(const IJob &Other)
+{
+	m_Status = STATE_PENDING;
+	return *this;
+}
+
+IJob::~IJob()
+{
+}
+
+int IJob::Status()
+{
+	return m_Status.load();
+}
+
 CJobPool::CJobPool()
 {
 	// empty the pool
@@ -31,7 +56,7 @@ void CJobPool::WorkerThread(void *pUser)
 
 	while(!pPool->m_Shutdown)
 	{
-		CJob *pJob = 0;
+		std::shared_ptr<IJob> pJob = 0;
 
 		// fetch job from queue
 		sphore_wait(&pPool->m_Semaphore);
@@ -40,9 +65,7 @@ void CJobPool::WorkerThread(void *pUser)
 		{
 			pJob = pPool->m_pFirstJob;
 			pPool->m_pFirstJob = pPool->m_pFirstJob->m_pNext;
-			if(pPool->m_pFirstJob)
-				pPool->m_pFirstJob->m_pPrev = 0;
-			else
+			if(!pPool->m_pFirstJob)
 				pPool->m_pLastJob = 0;
 		}
 		lock_unlock(pPool->m_Lock);
@@ -50,43 +73,33 @@ void CJobPool::WorkerThread(void *pUser)
 		// do the job if we have one
 		if(pJob)
 		{
-			pJob->m_Status = CJob::STATE_RUNNING;
-			pJob->m_Result = pJob->m_pfnFunc(pJob->m_pFuncData);
-			pJob->m_Status = CJob::STATE_DONE;
-			if(pJob->m_pfnDestroy)
-				pJob->m_pfnDestroy(pJob, pJob->m_pFuncData);
+			pJob->m_Status = IJob::STATE_RUNNING;
+			pJob->Run();
+			pJob->m_Status = IJob::STATE_DONE;
 		}
 	}
 
 }
 
-int CJobPool::Init(int NumThreads)
+void CJobPool::Init(int NumThreads)
 {
 	// start threads
 	m_NumThreads = NumThreads > MAX_THREADS ? MAX_THREADS : NumThreads;
 	for(int i = 0; i < NumThreads; i++)
 		m_apThreads[i] = thread_init(WorkerThread, this);
-	return 0;
 }
 
-int CJobPool::Add(CJob *pJob, JOBFUNC pfnFunc, void *pData, CBFUNC pfnDestroy)
+void CJobPool::Add(std::shared_ptr<IJob> pJob)
 {
-	mem_zero(pJob, sizeof(CJob));
-	pJob->m_pfnFunc = pfnFunc;
-	pJob->m_pFuncData = pData;
-	pJob->m_pfnDestroy = pfnDestroy;
-
 	lock_wait(m_Lock);
 
 	// add job to queue
-	pJob->m_pPrev = m_pLastJob;
 	if(m_pLastJob)
 		m_pLastJob->m_pNext = pJob;
-	m_pLastJob = pJob;
+	m_pLastJob = std::move(pJob);
 	if(!m_pFirstJob)
-		m_pFirstJob = pJob;
+		m_pFirstJob = m_pLastJob;
 
 	lock_unlock(m_Lock);
 	sphore_signal(&m_Semaphore);
-	return 0;
 }

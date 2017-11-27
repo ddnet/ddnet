@@ -13,29 +13,25 @@
 #include "sounds.h"
 
 
-struct CUserData
+CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :
+	m_pGameClient(pGameClient),
+	m_Render(Render)
 {
-	CGameClient *m_pGameClient;
-	bool m_Render;
-} g_UserData;
+}
 
-static int LoadSoundsThread(void *pUser)
+void CSoundLoading::Run()
 {
-	CUserData *pData = static_cast<CUserData *>(pUser);
-
 	for(int s = 0; s < g_pData->m_NumSounds; s++)
 	{
 		for(int i = 0; i < g_pData->m_aSounds[s].m_NumSounds; i++)
 		{
-			int Id = pData->m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
+			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
 		}
 
-		if(pData->m_Render)
-			pData->m_pGameClient->m_pMenus->RenderLoading();
+		if(m_Render)
+			m_pGameClient->m_pMenus->RenderLoading();
 	}
-
-	return 0;
 }
 
 int CSounds::GetSampleId(int SetId)
@@ -79,16 +75,13 @@ void CSounds::OnInit()
 	// load sounds
 	if(g_Config.m_ClThreadsoundloading)
 	{
-		g_UserData.m_pGameClient = m_pClient;
-		g_UserData.m_Render = false;
-		m_pClient->Engine()->AddJob(&m_SoundJob, LoadSoundsThread, &g_UserData);
+		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
+		m_pClient->Engine()->AddJob(m_pSoundJob);
 		m_WaitForSoundJob = true;
 	}
 	else
 	{
-		g_UserData.m_pGameClient = m_pClient;
-		g_UserData.m_Render = true;
-		LoadSoundsThread(&g_UserData);
+		CSoundLoading(m_pClient, true).Run();
 		m_WaitForSoundJob = false;
 	}
 }
@@ -113,7 +106,7 @@ void CSounds::OnRender()
 	// check for sound initialisation
 	if(m_WaitForSoundJob)
 	{
-		if(m_SoundJob.Status() == CJob::STATE_DONE)
+		if(m_pSoundJob->Status() == IJob::STATE_DONE)
 			m_WaitForSoundJob = false;
 		else
 			return;

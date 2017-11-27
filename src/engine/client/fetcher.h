@@ -1,24 +1,56 @@
 #ifndef ENGINE_CLIENT_FETCHER_H
 #define ENGINE_CLIENT_FETCHER_H
 
-#include <engine/fetcher.h>
+#include <engine/shared/jobs.h>
+#include <engine/storage.h>
+#include <engine/kernel.h>
 
-class CFetcher : public IFetcher
+class CFetchTask : public IJob
 {
 private:
-	class IEngine *m_pEngine;
-	class IStorage *m_pStorage;
+	IStorage *m_pStorage;
+
+	char m_aUrl[256];
+	char m_aDest[128];
+	int m_StorageType;
+	bool m_UseDDNetCA;
+	bool m_CanTimeout;
+
+	double m_Size;
+	double m_Current;
+	int m_Progress;
+	int m_State;
+
+	std::atomic<bool> m_Abort;
+
+	virtual void OnProgress() { }
+	virtual void OnCompletion() { }
+
+	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
+	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pFile);
+
+	void Run();
 
 public:
-	virtual bool Init();
+	enum
+	{
+		STATE_ERROR = -1,
+		STATE_QUEUED,
+		STATE_RUNNING,
+		STATE_DONE,
+		STATE_ABORTED,
+	};
 
-	virtual IFetchTask *FetchFile(const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true, void *pUser = 0, COMPFUNC pfnCompCb = 0, PROGFUNC pfnProgCb = 0);
-	virtual void Escape(char *pBud, size_t size, const char *pStr);
+	CFetchTask(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true);
 
-	static void DestroyCallback(CJob *pJob, void *pUser);
-	static int FetcherThread(void *pUser);
-	static size_t WriteToFile(char *pData, size_t size, size_t nmemb, void *pFile);
-	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
+	double Current() const;
+	double Size() const;
+	int Progress() const;
+	int State() const;
+	const char *Dest() const;
+	void Abort();
 };
 
+bool FetcherInit();
+void EscapeUrl(char *pBud, int Size, const char *pStr);
 #endif
