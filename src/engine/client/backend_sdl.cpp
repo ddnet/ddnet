@@ -7,7 +7,7 @@
 #endif
 
 #include "engine/external/glew/GL/glew.h"
-#include <engine/shared/storage.h>
+#include <engine/storage.h>
 
 #include <base/detect.h>
 #include <base/math.h>

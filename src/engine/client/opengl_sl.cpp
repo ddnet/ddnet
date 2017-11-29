@@ -1,6 +1,6 @@
 #include "opengl_sl.h"
 #include <engine/shared/linereader.h>
-#include <engine/shared/storage.h>
+#include <engine/storage.h>
 #include <vector>
 #include <stdio.h>
 #include <string>
