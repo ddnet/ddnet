@@ -1,6 +1,6 @@
 #include "updater.h"
 #include <base/system.h>
-#include <engine/fetcher.h>
+#include <engine/engine.h>
 #include <engine/storage.h>
 #include <engine/client.h>
 #include <engine/external/json-parser/json.h>
@@ -11,63 +11,128 @@
 using std::string;
 using std::map;
 
+class CUpdaterFetchTask : public CFetchTask
+{
+	char m_aBuf[256];
+	char m_aBuf2[256];
+	CUpdater *m_pUpdater;
+
+	void OnCompletion();
+	void OnProgress();
+
+public:
+	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
+};
+
+static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
+{
+	str_format(pBuf, BufSize, "https://update4.ddnet.tw/%s", pFile);
+	return pBuf;
+}
+
+static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile, const char *pDestPath)
+{
+	if(!pDestPath)
+	{
+		pDestPath = pFile;
+	}
+	str_format(pBuf, BufSize, "update/%s", pDestPath);
+	return pBuf;
+}
+
+CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
+	CFetchTask(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, true, false),
+	m_pUpdater(pUpdater)
+{
+}
+
+void CUpdaterFetchTask::OnProgress()
+{
+	lock_wait(m_pUpdater->m_Lock);
+	str_copy(m_pUpdater->m_aStatus, Dest(), sizeof(m_pUpdater->m_aStatus));
+	m_pUpdater->m_Percent = Progress();
+	lock_unlock(m_pUpdater->m_Lock);
+}
+
+void CUpdaterFetchTask::OnCompletion()
+{
+	const char *b = 0;
+	for(const char *a = Dest(); *a; a++)
+		if(*a == '/')
+			b = a + 1;
+	b = b ? b : Dest();
+	if(!str_comp(b, "update.json"))
+	{
+		if(State() == CFetchTask::STATE_DONE)
+			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
+		else if(State() == CFetchTask::STATE_ERROR)
+			m_pUpdater->SetCurrentState(IUpdater::FAIL);
+	}
+	else if(!str_comp(b, m_pUpdater->m_aLastFile))
+	{
+		if(State() == CFetchTask::STATE_DONE)
+			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
+		else if(State() == CFetchTask::STATE_ERROR)
+			m_pUpdater->SetCurrentState(IUpdater::FAIL);
+	}
+}
+
 CUpdater::CUpdater()
 {
 	m_pClient = NULL;
 	m_pStorage = NULL;
-	m_pFetcher = NULL;
+	m_pEngine = NULL;
 	m_State = CLEAN;
 	m_Percent = 0;
+	m_Lock = lock_create();
 }
 
 void CUpdater::Init()
 {
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
-	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_IsWinXP = os_is_winxp_or_lower();
 }
 
-void CUpdater::ProgressCallback(IFetchTask *pTask, void *pUser)
+CUpdater::~CUpdater()
 {
-	CUpdater *pUpdate = (CUpdater *)pUser;
-	str_copy(pUpdate->m_Status, pTask->Dest(), sizeof(pUpdate->m_Status));
-	pUpdate->m_Percent = pTask->Progress();
+	lock_destroy(m_Lock);
 }
 
-void CUpdater::CompletionCallback(IFetchTask *pTask, void *pUser)
+void CUpdater::SetCurrentState(int NewState)
 {
-	CUpdater *pUpdate = (CUpdater *)pUser;
-	const char *b = 0;
-	for(const char *a = pTask->Dest(); *a; a++)
-		if(*a == '/')
-			b = a + 1;
-	b = b ? b : pTask->Dest();
-	if(!str_comp(b, "update.json"))
-	{
-		if(pTask->State() == IFetchTask::STATE_DONE)
-			pUpdate->m_State = GOT_MANIFEST;
-		else if(pTask->State() == IFetchTask::STATE_ERROR)
-			pUpdate->m_State = FAIL;
-	}
-	else if(!str_comp(b, pUpdate->m_aLastFile))
-	{
-		if(pTask->State() == IFetchTask::STATE_DONE)
-			pUpdate->m_State = MOVE_FILES;
-		else if(pTask->State() == IFetchTask::STATE_ERROR)
-			pUpdate->m_State = FAIL;
-	}
-	pTask->Destroy();
+	lock_wait(m_Lock);
+	m_State = NewState;
+	lock_unlock(m_Lock);
+}
+
+int CUpdater::GetCurrentState()
+{
+	lock_wait(m_Lock);
+	int Result = m_State;
+	lock_unlock(m_Lock);
+	return Result;
+}
+
+void CUpdater::GetCurrentFile(char *pBuf, int BufSize)
+{
+	lock_wait(m_Lock);
+	str_copy(pBuf, m_aStatus, BufSize);
+	lock_unlock(m_Lock);
+}
+
+int CUpdater::GetCurrentPercent()
+{
+	lock_wait(m_Lock);
+	int Result = m_Percent;
+	lock_unlock(m_Lock);
+	return Result;
 }
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	char aBuf[256], aPath[256];
-	str_format(aBuf, sizeof(aBuf), "https://update4.ddnet.tw/%s", pFile);
-	if(!pDestPath)
-		pDestPath = pFile;
-	str_format(aPath, sizeof(aPath), "update/%s", pDestPath);
-	m_pFetcher->FetchFile(aBuf, aPath, -2, true, false, this, &CUpdater::CompletionCallback, &CUpdater::ProgressCallback);
+	m_pEngine->AddJob(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
 }
 
 void CUpdater::MoveFile(const char *pFile)
@@ -93,10 +158,10 @@ void CUpdater::Update()
 {
 	switch(m_State)
 	{
-		case GOT_MANIFEST:
+		case IUpdater::GOT_MANIFEST:
 			PerformUpdate();
 			break;
-		case MOVE_FILES:
+		case IUpdater::MOVE_FILES:
 			CommitUpdate();
 			break;
 		default:
@@ -104,9 +169,9 @@ void CUpdater::Update()
 	}
 }
 
-void CUpdater::AddFileJob(const char *pFile, bool job)
+void CUpdater::AddFileJob(const char *pFile, bool Job)
 {
-	m_FileJobs[string(pFile)] = job;
+	m_FileJobs[string(pFile)] = Job;
 }
 
 void CUpdater::ReplaceClient()

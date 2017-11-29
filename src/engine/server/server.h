@@ -164,7 +164,7 @@ public:
 
 		// DNSBL
 		int m_DnsblState;
-		CHostLookup m_DnsblLookup;
+		std::shared_ptr<CHostLookup> m_pDnsblLookup;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];

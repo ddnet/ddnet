@@ -820,20 +820,24 @@ void CServer::InitDnsbl(int ClientID)
 	NETADDR Addr = *m_NetServer.ClientAddr(ClientID);
 
 	//TODO: support ipv6
-	if (Addr.type != NETTYPE_IPV4)
+	if(Addr.type != NETTYPE_IPV4)
 		return;
 
 	// build dnsbl host lookup
 	char aBuf[256];
-	if (g_Config.m_SvDnsblKey[0] == '\0')
+	if(g_Config.m_SvDnsblKey[0] == '\0')
+	{
 		// without key
 		str_format(aBuf, sizeof(aBuf), "%d.%d.%d.%d.%s", Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], g_Config.m_SvDnsblHost);
+	}
 	else
+	{
 		// with key
 		str_format(aBuf, sizeof(aBuf), "%s.%d.%d.%d.%d.%s", g_Config.m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], g_Config.m_SvDnsblHost);
+	}
 
 	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	pEngine->HostLookup(&m_aClients[ClientID].m_DnsblLookup, aBuf, NETTYPE_IPV4);
+	pEngine->AddJob(m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4));
 }
 
 int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
@@ -1843,10 +1847,10 @@ int CServer::Run()
 						InitDnsbl(ClientID);
 					}
 					else if (m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
-								m_aClients[ClientID].m_DnsblLookup.m_Job.Status() == CJob::STATE_DONE)
+								m_aClients[ClientID].m_pDnsblLookup->Status() == IJob::STATE_DONE)
 					{
 
-						if (m_aClients[ClientID].m_DnsblLookup.m_Job.Result() != 0)
+						if (m_aClients[ClientID].m_pDnsblLookup->m_Result != 0)
 						{
 							// entry not found -> whitelisted
 							m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;

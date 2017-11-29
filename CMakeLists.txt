@@ -270,12 +270,10 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
     message(FATAL_ERROR "Build step for googletest failed: ${result}")
   endif()
 
-  # Prevent overriding the parent project's compiler/linker
-  # settings on Windows
+  # Prevent overriding the parent project's compiler/linker settings on Windows
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-  # Add googletest directly to our build. This defines
-  # the gtest and gtest_main targets.
+  # Add googletest directly to our build. This defines the gtest target.
   add_subdirectory(
     ${CMAKE_BINARY_DIR}/googletest-src
     ${CMAKE_BINARY_DIR}/googletest-build
@@ -283,12 +281,12 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   )
 
   if(MSVC)
-    foreach(target gtest gtest_main)
+    foreach(target gtest)
       target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd>)
     endforeach()
   endif()
 
-  set(GTEST_BOTH_LIBRARIES gtest_main)
+  set(GTEST_LIBRARIES gtest)
   set(GTEST_INCLUDE_DIRS)
   if(CMAKE_VERSION VERSION_LESS 2.8.11)
     set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
@@ -553,7 +551,6 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
-  storage.h
   uuid_manager.cpp
   uuid_manager.h
   websockets.cpp
@@ -1005,6 +1002,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
     fs.cpp
+    jobs.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
     test.cpp
@@ -1024,7 +1022,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     $<TARGET_OBJECTS:game-shared>
     ${DEPS}
   )
-  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${GTEST_BOTH_LIBRARIES})
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${GTEST_LIBRARIES})
   target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})

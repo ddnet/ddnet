@@ -20,7 +20,7 @@ public:
 		NETADDR m_Addr;
 		bool m_Valid;
 		int m_Count;
-		CHostLookup m_Lookup;
+		std::shared_ptr<CHostLookup> m_pLookup;
 	};
 
 	enum
@@ -31,6 +31,7 @@ public:
 	};
 
 	CMasterInfo m_aMasterServers[MAX_MASTERSERVERS];
+	std::shared_ptr<CHostLookup> m_apLookup[MAX_MASTERSERVERS];
 	int m_State;
 	IEngine *m_pEngine;
 	IStorage *m_pStorage;
@@ -53,11 +54,10 @@ public:
 		// add lookup jobs
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
-			m_pEngine->HostLookup(&m_aMasterServers[i].m_Lookup, m_aMasterServers[i].m_aHostname, Nettype);
+			*m_apLookup[i] = CHostLookup(m_aMasterServers[i].m_aHostname, Nettype);
+			m_pEngine->AddJob(m_apLookup[i]);
 			m_aMasterServers[i].m_Valid = false;
 			m_aMasterServers[i].m_Count = 0;
-
-			//dbg_msg("MasterServer", "Lookup id: %d, name: %s, nettype: %d", i, m_aMasterServers[i].m_aHostname, Nettype);
 		}
 
 		m_State = STATE_UPDATE;
@@ -73,23 +73,19 @@ public:
 
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
-			if(m_aMasterServers[i].m_Lookup.m_Job.Status() != CJob::STATE_DONE)
+			if(m_apLookup[i]->Status() != IJob::STATE_DONE)
 				m_State = STATE_UPDATE;
 			else
 			{
-				if(m_aMasterServers[i].m_Lookup.m_Job.Result() == 0)
+				if(m_apLookup[i]->m_Result == 0)
 				{
-					m_aMasterServers[i].m_Addr = m_aMasterServers[i].m_Lookup.m_Addr;
+					m_aMasterServers[i].m_Addr = m_apLookup[i]->m_Addr;
 					m_aMasterServers[i].m_Addr.port = 8300;
 					m_aMasterServers[i].m_Valid = true;
-
-						//dbg_msg("MasterServer", "Set server %d, name: %s with addr-port: %d addr-ip %s addr-type %d", i, m_aMasterServers[i].m_aHostname, m_aMasterServers[i].m_Addr.port, m_aMasterServers[i].m_Addr.ip, m_aMasterServers[i].m_Addr.type);
 				}
 				else
 				{
 					m_aMasterServers[i].m_Valid = false;
-
-					//	dbg_msg("MasterServer", "Dropped %d, name: %s with addr-port: %d addr-ip %s addr-type %d", i, m_aMasterServers[i].m_aHostname);
 				}
 			}
 		}
@@ -141,7 +137,10 @@ public:
 	{
 		mem_zero(m_aMasterServers, sizeof(m_aMasterServers));
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
+		{
 			str_format(m_aMasterServers[i].m_aHostname, sizeof(m_aMasterServers[i].m_aHostname), "master%d.teeworlds.com", i+1);
+			m_apLookup[i] = std::make_shared<CHostLookup>();
+		}
 	}
 
 	virtual int Load()
@@ -170,22 +169,26 @@ public:
 				Info.m_Addr.port = 8300;
 				bool Added = false;
 				for(int i = 0; i < MAX_MASTERSERVERS; ++i)
+				{
 					if(str_comp(m_aMasterServers[i].m_aHostname, Info.m_aHostname) == 0)
 					{
 						m_aMasterServers[i] = Info;
 						Added = true;
 						break;
 					}
+				}
 
 				if(!Added)
 				{
 					for(int i = 0; i < MAX_MASTERSERVERS; ++i)
+					{
 						if(m_aMasterServers[i].m_Addr.type == NETTYPE_INVALID)
 						{
 							m_aMasterServers[i] = Info;
 							Added = true;
 							break;
 						}
+					}
 				}
 
 				if(!Added)

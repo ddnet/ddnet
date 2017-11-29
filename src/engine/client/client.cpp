@@ -1506,7 +1506,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						char aEscaped[128];
 						str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
 
-						Fetcher()->Escape(aEscaped, sizeof(aEscaped), aFilename);
+						EscapeUrl(aEscaped, sizeof(aEscaped), aFilename);
 						str_format(aUrl, sizeof(aUrl), "%s/", g_Config.m_ClDDNetMapDownloadUrl);
 
 						// We only trust our own custom-selected CAs for our own servers.
@@ -1518,7 +1518,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 						str_append(aUrl, aEscaped, sizeof(aUrl));
 
-						m_pMapdownloadTask = Fetcher()->FetchFile(aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
+						m_pMapdownloadTask = std::make_shared<CFetchTask>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
+						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
 						SendMapRequest();
@@ -2089,7 +2090,6 @@ void CClient::ResetMapDownload()
 	if(m_pMapdownloadTask)
 	{
 		m_pMapdownloadTask->Abort();
-		m_pMapdownloadTask->Destroy();
 		m_pMapdownloadTask = NULL;
 	}
 	m_MapdownloadFile = 0;
@@ -2135,7 +2135,6 @@ void CClient::ResetDDNetInfo()
 	if(m_pDDNetInfoTask)
 	{
 		m_pDDNetInfoTask->Abort();
-		m_pDDNetInfoTask->Destroy();
 		m_pDDNetInfoTask = NULL;
 	}
 }
@@ -2476,33 +2475,31 @@ void CClient::Update()
 
 	if(m_pMapdownloadTask)
 	{
-		if(m_pMapdownloadTask->State() == IFetchTask::STATE_DONE)
+		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == IFetchTask::STATE_ERROR)
+		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
 			SendMapRequest();
 		}
-		else if(m_pMapdownloadTask->State() == IFetchTask::STATE_ABORTED)
+		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
 		{
-			m_pMapdownloadTask->Destroy();
 			m_pMapdownloadTask = NULL;
 		}
 	}
 
 	if(m_pDDNetInfoTask)
 	{
-		if(m_pDDNetInfoTask->State() == IFetchTask::STATE_DONE)
+		if(m_pDDNetInfoTask->State() == CFetchTask::STATE_DONE)
 			FinishDDNetInfo();
-		else if(m_pDDNetInfoTask->State() == IFetchTask::STATE_ERROR)
+		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ERROR)
 		{
 			dbg_msg("ddnet-info", "download failed");
 			ResetDDNetInfo();
 		}
-		else if(m_pDDNetInfoTask->State() == IFetchTask::STATE_ABORTED)
+		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ABORTED)
 		{
-			m_pDDNetInfoTask->Destroy();
 			m_pDDNetInfoTask = NULL;
 		}
 	}
@@ -2532,7 +2529,6 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IGhostRecorder*>(&m_GhostRecorder), false);
 	Kernel()->RegisterInterface(static_cast<IGhostLoader*>(&m_GhostLoader), false);
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser), false);
-	Kernel()->RegisterInterface(static_cast<IFetcher*>(&m_Fetcher), false);
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	Kernel()->RegisterInterface(static_cast<IUpdater*>(&m_Updater), false);
 #endif
@@ -2551,7 +2547,6 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
-	m_pFetcher = Kernel()->RequestInterface<IFetcher>();
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -2561,7 +2556,7 @@ void CClient::InitInterfaces()
 
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
-	m_Fetcher.Init();
+	FetcherInit();
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();
@@ -3632,15 +3627,13 @@ void CClient::RequestDDNetInfo()
 	if(g_Config.m_BrIndicateFinished)
 	{
 		char aEscaped[128];
-		Fetcher()->Escape(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
+		EscapeUrl(aEscaped, sizeof(aEscaped), g_Config.m_PlayerName);
 		str_append(aUrl, "?name=", sizeof(aUrl));
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	if(m_pDDNetInfoTask)
-		m_pDDNetInfoTask->Destroy();
-
-	m_pDDNetInfoTask = Fetcher()->FetchFile(aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
+	m_pDDNetInfoTask = std::make_shared<CFetchTask>(Storage(), aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
+	Engine()->AddJob(m_pDDNetInfoTask);
 }
 
 int CClient::GetPredictionTime()
