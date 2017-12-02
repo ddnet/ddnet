@@ -405,7 +405,6 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-//
 void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char *pReason)
 {
 	// reset votes
