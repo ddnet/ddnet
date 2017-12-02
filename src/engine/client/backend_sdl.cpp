@@ -7,6 +7,7 @@
 #endif
 
 #include "engine/external/glew/GL/glew.h"
+#include <engine/storage.h>
 
 #include <base/detect.h>
 #include <base/math.h>
@@ -120,7 +121,7 @@ void CCommandProcessorFragment_General::Cmd_Signal(const CCommandBuffer::SComman
 	pCommand->m_pSemaphore->signal();
 }
 
-bool CCommandProcessorFragment_General::RunCommand(const CCommandBuffer::SCommand * pBaseCommand)
+bool CCommandProcessorFragment_General::RunCommand(const CCommandBuffer::SCommand  *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
@@ -415,7 +416,7 @@ CCommandProcessorFragment_OpenGL::CCommandProcessorFragment_OpenGL()
 	m_pTextureMemoryUsage = 0;
 }
 
-bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand * pBaseCommand)
+bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand  *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
@@ -477,7 +478,7 @@ void *CCommandProcessorFragment_OpenGL3_3::Rescale(int Width, int Height, int Ne
 	return pTmpData;
 }
 
-void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram* pProgram)
+void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram)
 {
 	if(State.m_BlendMode != m_LastBlendMode && State.m_BlendMode != CCommandBuffer::BLEND_NONE)
 	{
@@ -599,8 +600,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL PrimitiveVertexShader;
 		CGLSL PrimitiveFragmentShader;
-		PrimitiveVertexShader.LoadShader("data/shader/prim.vert", GL_VERTEX_SHADER);
-		PrimitiveFragmentShader.LoadShader("data/shader/prim.frag", GL_FRAGMENT_SHADER);
+		PrimitiveVertexShader.LoadShader(pCommand->m_pStorage, "shader/prim.vert", GL_VERTEX_SHADER);
+		PrimitiveFragmentShader.LoadShader(pCommand->m_pStorage, "shader/prim.frag", GL_FRAGMENT_SHADER);
 		
 		m_pPrimitiveProgram->CreateProgram();
 		m_pPrimitiveProgram->AddShader(&PrimitiveVertexShader);
@@ -616,8 +617,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("data/shader/tile.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("data/shader/tile.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader(pCommand->m_pStorage, "shader/tile.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(pCommand->m_pStorage, "shader/tile.frag", GL_FRAGMENT_SHADER);
 		
 		m_pTileProgram->CreateProgram();
 		m_pTileProgram->AddShader(&VertexShader);
@@ -635,8 +636,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("data/shader/tiletex.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("data/shader/tiletex.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader(pCommand->m_pStorage, "shader/tiletex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(pCommand->m_pStorage, "shader/tiletex.frag", GL_FRAGMENT_SHADER);
 		
 		m_pTileProgramTextured->CreateProgram();
 		m_pTileProgramTextured->AddShader(&VertexShader);
@@ -654,8 +655,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("data/shader/bordertile.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("data/shader/bordertile.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader(pCommand->m_pStorage, "shader/bordertile.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(pCommand->m_pStorage, "shader/bordertile.frag", GL_FRAGMENT_SHADER);
 		
 		m_pBorderTileProgram->CreateProgram();
 		m_pBorderTileProgram->AddShader(&VertexShader);
@@ -676,9 +677,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("data/shader/bordertiletex.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("data/shader/bordertiletex.frag", GL_FRAGMENT_SHADER);
-		
+		VertexShader.LoadShader(pCommand->m_pStorage, "shader/bordertiletex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(pCommand->m_pStorage, "shader/bordertiletex.frag", GL_FRAGMENT_SHADER);
+
 		m_pBorderTileProgramTextured->CreateProgram();
 		m_pBorderTileProgramTextured->AddShader(&VertexShader);
 		m_pBorderTileProgramTextured->AddShader(&FragmentShader);
@@ -698,8 +699,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("data/shader/bordertileline.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("data/shader/bordertileline.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader(pCommand->m_pStorage, "shader/bordertileline.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(pCommand->m_pStorage, "shader/bordertileline.frag", GL_FRAGMENT_SHADER);
 		
 		m_pBorderTileLineProgram->CreateProgram();
 		m_pBorderTileLineProgram->AddShader(&VertexShader);
@@ -718,8 +719,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
-		VertexShader.LoadShader("data/shader/bordertilelinetex.vert", GL_VERTEX_SHADER);
-		FragmentShader.LoadShader("data/shader/bordertilelinetex.frag", GL_FRAGMENT_SHADER);
+		VertexShader.LoadShader(pCommand->m_pStorage, "shader/bordertilelinetex.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(pCommand->m_pStorage, "shader/bordertilelinetex.frag", GL_FRAGMENT_SHADER);
 		
 		m_pBorderTileLineProgramTextured->CreateProgram();
 		m_pBorderTileLineProgramTextured->AddShader(&VertexShader);
@@ -1002,7 +1003,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 	else 
 	{
 		//this is better for some iGPUs. Probably due to not initializing a new buffer in the system memory again and again...(driver dependend)
-		void* pData = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(CCommandBuffer::SVertex) * Count, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		void *pData = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(CCommandBuffer::SVertex) * Count, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
 		mem_copy(pData, pCommand->m_pVertices, sizeof(CCommandBuffer::SVertex) * Count);
 		
@@ -1071,7 +1072,7 @@ CCommandProcessorFragment_OpenGL3_3::CCommandProcessorFragment_OpenGL3_3()
 	m_pTextureMemoryUsage = 0;
 }
 
-bool CCommandProcessorFragment_OpenGL3_3::RunCommand(const CCommandBuffer::SCommand * pBaseCommand)
+bool CCommandProcessorFragment_OpenGL3_3::RunCommand(const CCommandBuffer::SCommand  *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
@@ -1136,7 +1137,7 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 {
 	if(NewIndicesCount <= m_CurrentIndicesInBuffer) return;
 	unsigned int AddCount = NewIndicesCount - m_CurrentIndicesInBuffer;
-	unsigned int* Indices = new unsigned int[AddCount];
+	unsigned int *Indices = new unsigned int[AddCount];
 	int Primq = (m_CurrentIndicesInBuffer/6) * 4;
 	for(unsigned int i = 0; i < AddCount; i+=6)
 	{
@@ -1192,7 +1193,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuf
 	SVisualObject& VisualObject = m_VisualObjects[Index];
 	if(VisualObject.m_VertArrayID == 0) return;
 	
-	CGLSLBorderTileProgram* pProgram = NULL;
+	CGLSLBorderTileProgram *pProgram = NULL;
 	if(VisualObject.m_IsTextured)
 	{
 		pProgram = m_pBorderTileProgramTextured;
@@ -1227,7 +1228,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CComman
 	SVisualObject& VisualObject = m_VisualObjects[Index];
 	if(VisualObject.m_VertArrayID == 0) return;
 	
-	CGLSLBorderTileLineProgram* pProgram = NULL;
+	CGLSLBorderTileLineProgram *pProgram = NULL;
 	if(VisualObject.m_IsTextured)
 	{
 		pProgram = m_pBorderTileLineProgramTextured;
@@ -1264,7 +1265,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderVertexArray(const CCommandBu
 		return; //nothing to draw
 	}
 	
-	CGLSLTileProgram* pProgram = NULL;
+	CGLSLTileProgram *pProgram = NULL;
 	if(VisualObject.m_IsTextured)
 	{
 		pProgram = m_pTileProgramTextured;
@@ -1398,7 +1399,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 	glDepthMask(0);
 }
 
-void CCommandProcessorFragment_SDL::Cmd_Update_Viewport(const SCommand_Update_Viewport* pCommand)
+void CCommandProcessorFragment_SDL::Cmd_Update_Viewport(const SCommand_Update_Viewport *pCommand)
 {
 	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
 }
@@ -1517,7 +1518,7 @@ void CCommandProcessor_SDL_OpenGL::RunBuffer(CCommandBuffer *pBuffer)
 
 // ------------ CGraphicsBackend_SDL_OpenGL
 
-int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int* pCurrentWidth, int* pCurrentHeight)
+int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {	
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 	{
@@ -1534,7 +1535,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	SDL_ClearError();
-	const char* pErr = NULL;
+	const char *pErr = NULL;
 	
 	//query default values, since they are platform dependend
 	static bool s_InitDefaultParams = false;
@@ -1759,6 +1760,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		WaitForIdle();
 		CCommandProcessorFragment_OpenGL3_3::SCommand_Init CmdOpenGL;
 		CmdOpenGL.m_pTextureMemoryUsage = &m_TextureMemoryUsage;
+		CmdOpenGL.m_pStorage = pStorage;
 		CmdBuffer.AddCommand(CmdOpenGL);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();

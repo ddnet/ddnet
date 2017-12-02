@@ -70,7 +70,7 @@ class CCommandProcessorFragment_General
 	void Cmd_Nop();
 	void Cmd_Signal(const CCommandBuffer::SCommand_Signal *pCommand);
 public:
-	bool RunCommand(const CCommandBuffer::SCommand * pBaseCommand);
+	bool RunCommand(const CCommandBuffer::SCommand  *pBaseCommand);
 };
 
 // takes care of opengl related rendering
@@ -114,7 +114,7 @@ private:
 public:
 	CCommandProcessorFragment_OpenGL();
 
-	bool RunCommand(const CCommandBuffer::SCommand * pBaseCommand);
+	bool RunCommand(const CCommandBuffer::SCommand  *pBaseCommand);
 };
 
 class CGLSLProgram;
@@ -140,13 +140,13 @@ class CCommandProcessorFragment_OpenGL3_3
 	CTexture m_aTextures[CCommandBuffer::MAX_TEXTURES];
 	volatile int *m_pTextureMemoryUsage;
 
-	CGLSLPrimitiveProgram* m_pPrimitiveProgram;
-	CGLSLTileProgram* m_pTileProgram;
-	CGLSLTileProgram* m_pTileProgramTextured;
-	CGLSLBorderTileProgram* m_pBorderTileProgram;
-	CGLSLBorderTileProgram* m_pBorderTileProgramTextured;
-	CGLSLBorderTileLineProgram* m_pBorderTileLineProgram;
-	CGLSLBorderTileLineProgram* m_pBorderTileLineProgramTextured;
+	CGLSLPrimitiveProgram *m_pPrimitiveProgram;
+	CGLSLTileProgram *m_pTileProgram;
+	CGLSLTileProgram *m_pTileProgramTextured;
+	CGLSLBorderTileProgram *m_pBorderTileProgram;
+	CGLSLBorderTileProgram *m_pBorderTileProgramTextured;
+	CGLSLBorderTileLineProgram *m_pBorderTileLineProgram;
+	CGLSLBorderTileLineProgram *m_pBorderTileLineProgramTextured;
 	
 	GLuint m_PrimitiveDrawVertexID;
 	GLuint m_PrimitiveDrawBufferID;
@@ -193,6 +193,7 @@ public:
 	struct SCommand_Init : public CCommandBuffer::SCommand
 	{
 		SCommand_Init() : SCommand(CMD_INIT) {}
+		class IStorage *m_pStorage;
 		volatile int *m_pTextureMemoryUsage;
 	};
 
@@ -206,7 +207,7 @@ private:
 	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
 	static void *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
 
-	void SetState(const CCommandBuffer::SState &State, CGLSLTWProgram* pProgram);
+	void SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram);
 
 	void Cmd_Init(const SCommand_Init *pCommand);
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
@@ -228,7 +229,7 @@ private:
 public:
 	CCommandProcessorFragment_OpenGL3_3();
 
-	bool RunCommand(const CCommandBuffer::SCommand * pBaseCommand);
+	bool RunCommand(const CCommandBuffer::SCommand  *pBaseCommand);
 };
 
 // takes care of sdl related commands
@@ -268,7 +269,7 @@ public:
 
 private:
 	void Cmd_Init(const SCommand_Init *pCommand);
-	void Cmd_Update_Viewport(const SCommand_Update_Viewport* pCommand);
+	void Cmd_Update_Viewport(const SCommand_Update_Viewport *pCommand);
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
 	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
 	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
@@ -305,7 +306,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	
 	bool m_UseOpenGL3_3;
 public:
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int* pCurrentWidth, int* pCurrentHeight);
+	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
 	virtual int Shutdown();
 
 	virtual int MemoryUsage() const;

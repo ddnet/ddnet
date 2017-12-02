@@ -1,15 +1,16 @@
 #include "opengl_sl.h"
 #include <engine/shared/linereader.h>
+#include <engine/storage.h>
 #include <vector>
 #include <stdio.h>
 #include <string>
 
-bool CGLSL::LoadShader(const char* pFile, int Type)
+bool CGLSL::LoadShader(IStorage *pStorage, const char *pFile, int Type)
 {
-	if (m_IsLoaded) return true;
-	IOHANDLE f;
-	f = io_open(pFile, IOFLAG_READ);
-	
+	if (m_IsLoaded)
+		return true;
+	IOHANDLE f = pStorage->OpenFile(pFile, IOFLAG_READ, IStorage::TYPE_ALL);
+
 	std::vector<std::string> Lines;
 	if (f)
 	{
