@@ -20,6 +20,7 @@ CBackground::CBackground() : CMapLayers(CMapLayers::TYPE_BACKGROUND_FORCE)
 	m_pBackgroundMap = m_pMap;
 	m_Loaded = false;
 	m_aMapName[0] = '\0';
+	m_LastLoad = 0;
 }
 
 CBackground::~CBackground()
@@ -62,9 +63,12 @@ void CBackground::LoadBackground()
 	else if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0)
 	{
 		m_pMap = Kernel()->RequestInterface<IEngineMap>();
-		m_pLayers = GameClient()->Layers();
-		m_pImages = GameClient()->m_pMapimages;
-		m_Loaded = true;
+		if(m_pMap->IsLoaded())
+		{
+			m_pLayers = GameClient()->Layers();
+			m_pImages = GameClient()->m_pMapimages;
+			m_Loaded = true;
+		}
 	}
 	
 	if(m_Loaded) 
@@ -76,7 +80,10 @@ void CBackground::LoadBackground()
 void CBackground::OnMapLoad()
 {
 	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0 || str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
+	{
+		m_LastLoad = 0;
 		LoadBackground();
+	}
 }
 
 void CBackground::OnRender()
