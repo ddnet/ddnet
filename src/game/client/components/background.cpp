@@ -63,7 +63,7 @@ void CBackground::LoadBackground()
 	else if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0)
 	{
 		m_pMap = Kernel()->RequestInterface<IEngineMap>();
-		if (m_pMap->IsLoaded())
+		if(m_pMap->IsLoaded())
 		{
 			m_pLayers = GameClient()->Layers();
 			m_pImages = GameClient()->m_pMapimages;
@@ -79,7 +79,7 @@ void CBackground::LoadBackground()
 
 void CBackground::OnMapLoad()
 {
-	if (str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0 || str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
+	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT) == 0 || str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 	{
 		m_LastLoad = 0;
 		LoadBackground();
