@@ -128,6 +128,9 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 find_package(Curl)
 find_package(Freetype)
+if(DOWNLOAD_GTEST)
+  find_package(Git)
+endif()
 find_package(GTest)
 if(MYSQL)
   find_package(MySQL)
@@ -167,6 +170,9 @@ endfunction()
 
 show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
 show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
+if(DOWNLOAD_GTEST)
+  show_dependency_status("Git" ${GIT_FOUND} "${GIT_EXECUTABLE}")
+endif()
 show_dependency_status("GTest" ${GTEST_FOUND} "${GTEST_LIBRARY}")
 if(MYSQL)
   show_dependency_status("MySQL" ${MYSQL_FOUND} "${MYSQL_LIBRARY}")
@@ -210,7 +216,12 @@ if(CLIENT AND NOT(SDL2_FOUND))
 endif()
 if(NOT(GTEST_FOUND))
   if(DOWNLOAD_GTEST)
-    message(STATUS "Automatically downloading GTest to be able to run tests")
+    if(GIT_FOUND)
+      message(STATUS "Automatically downloading GTest to be able to run tests")
+    else()
+      set(DOWNLOAD_GTEST OFF)
+      message(WARNING "To automatically download GTest, you have to install Git")
+    endif()
   else()
     message(STATUS "To run the tests, you have to install GTest")
   endif()
@@ -259,37 +270,42 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-  if(result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-  endif()
-  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-  if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-  endif()
-
-  # Prevent overriding the parent project's compiler/linker settings on Windows
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-  # Add googletest directly to our build. This defines the gtest target.
-  add_subdirectory(
-    ${CMAKE_BINARY_DIR}/googletest-src
-    ${CMAKE_BINARY_DIR}/googletest-build
-    EXCLUDE_FROM_ALL
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
   )
+  if(result)
+    message(WARNING "CMake step for googletest failed: ${result}")
+    set(DOWNLOAD_GTEST OFF)
+  else()
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+      RESULT_VARIABLE result
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
+    )
+    if(result)
+      message(WARNING "Build step for googletest failed: ${result}")
+      set(DOWNLOAD_GTEST OFF)
+    else()
+      # Prevent overriding the parent project's compiler/linker settings on Windows
+      set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-  if(MSVC)
-    foreach(target gtest)
-      target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd>)
-    endforeach()
-  endif()
+      # Add googletest directly to our build. This defines the gtest target.
+      add_subdirectory(
+        ${CMAKE_BINARY_DIR}/googletest-src
+        ${CMAKE_BINARY_DIR}/googletest-build
+        EXCLUDE_FROM_ALL
+      )
 
-  set(GTEST_LIBRARIES gtest)
-  set(GTEST_INCLUDE_DIRS)
-  if(CMAKE_VERSION VERSION_LESS 2.8.11)
-    set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
+      if(MSVC)
+        foreach(target gtest)
+          target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd>)
+        endforeach()
+      endif()
+
+      set(GTEST_LIBRARIES gtest)
+      set(GTEST_INCLUDE_DIRS)
+      if(CMAKE_VERSION VERSION_LESS 2.8.11)
+        set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
+      endif()
+    endif()
   endif()
 endif()
 
