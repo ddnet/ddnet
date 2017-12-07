@@ -3,3 +3,4 @@ status = [
   "continuous-integration/appveyor/branch",
   "continuous-integration/travis-ci/push",
 ]
+timeout_sec = 10800 # macOS on Travis CI has long waiting times
