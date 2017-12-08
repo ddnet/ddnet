@@ -21,6 +21,7 @@ else()
   set(PROJECT_VERSION_MAJOR ${VERSION_MAJOR})
   set(PROJECT_VERSION_MINOR ${VERSION_MINOR})
   set(PROJECT_VERSION_PATCH ${VERSION_PATCH})
+  set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
@@ -149,6 +150,19 @@ else()
   set(ZLIB_FOUND NO)
 endif()
 
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  find_program(DMG dmg)
+  find_program(HFSPLUS hfsplus)
+  find_program(NEWFS_HFS newfs_hfs)
+  if(DMG AND HFSPLUS AND NEWFS_HFS)
+    set(DMGTOOLS_FOUND ON)
+  else()
+    set(DMGTOOLS_FOUND OFF)
+  endif()
+
+  find_program(HDIUTIL hdiutil)
+endif()
+
 message(STATUS "******** DDNet ********")
 message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
@@ -169,11 +183,17 @@ function(show_dependency_status NAME FOUND PATH)
 endfunction()
 
 show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  show_dependency_status("Dmg tools" ${DMGTOOLS_FOUND} "")
+endif()
 show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
 if(DOWNLOAD_GTEST)
   show_dependency_status("Git" ${GIT_FOUND} "${GIT_EXECUTABLE}")
 endif()
 show_dependency_status("GTest" ${GTEST_FOUND} "${GTEST_LIBRARY}")
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  show_dependency_status("Hdiutil" ${HDIUTIL} "")
+endif()
 if(MYSQL)
   show_dependency_status("MySQL" ${MYSQL_FOUND} "${MYSQL_LIBRARY}")
 endif()
@@ -935,6 +955,15 @@ target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
+if(TARGET_OS AND TARGET_OS STREQUAL "mac")
+  set(SERVER_LAUNCHER_SRC src/osxlaunch/server.mm)
+  set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
+  add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
+  target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
+  list(APPEND TARGETS_OWN ${TARGET_SERVER_LAUNCHER})
+  list(APPEND TARGETS_LINK ${TARGET_SERVER_LAUNCHER})
+endif()
+
 ########################################################################
 # VARIOUS TARGETS
 ########################################################################
@@ -1146,6 +1175,7 @@ if(TARGET_OS AND TARGET_BITS)
 endif()
 
 set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
+set(CPACK_ARCHIVE_PORTABLE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-src)
 set(CPACK_SOURCE_FILES
   CMakeLists.txt
@@ -1201,7 +1231,7 @@ if(TARGET_OS STREQUAL "windows")
 endif()
 
 if(CMAKE_VERSION VERSION_GREATER 3.6 OR CMAKE_VERSION VERSION_EQUAL 3.6)
-  set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable)
+  set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
   install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
   install(DIRECTORY ${CPACK_DIRS} ${EXTRA_ARGS})
   install(FILES ${CPACK_FILES} ${EXTRA_ARGS})
@@ -1209,23 +1239,97 @@ else()
   message(WARNING "Cannot create CPack targets, CMake version too old. Use CMake 3.6 or newer.")
 endif()
 
-set(COPY_FILE_COMMANDS)
-set(COPY_DIR_COMMANDS)
-set(COPY_TARGET_COMMANDS)
-foreach(file ${CPACK_FILES})
-  list(APPEND COPY_FILE_COMMANDS COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/${file} ${CPACK_PACKAGE_FILE_NAME}/)
-endforeach()
-foreach(dir ${CPACK_DIRS})
-  list(APPEND COPY_DIR_COMMAND COMMAND cmake -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${CPACK_PACKAGE_FILE_NAME}/${dir})
-endforeach()
-foreach(target ${CPACK_TARGETS})
-  list(APPEND COPY_TARGET_COMMANDS COMMAND cmake -E copy $<TARGET_FILE:${target}> ${CPACK_PACKAGE_FILE_NAME}/)
-endforeach()
+set(PACKAGE_TARGETS)
+
+if(DMGTOOLS_FOUND OR HDIUTIL)
+  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/client/")
+  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/server/")
+  configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
+  configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
+
+  if(HDIUTIL)
+    set(DMG_PARAMS --hdiutil ${HDIUTIL})
+  elseif(DMGTOOLS_FOUND)
+    set(DMG_PARAMS --dmgtools ${DMG} ${HFSPLUS} ${NEWFS_HFS})
+  endif()
+  set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
+  set(DMG_MKDIRS
+    ${TARGET_CLIENT}.app
+    ${TARGET_CLIENT}.app/Contents
+    ${TARGET_CLIENT}.app/Contents/Frameworks
+    ${TARGET_CLIENT}.app/Contents/MacOS
+    ${TARGET_CLIENT}.app/Contents/Resources
+    ${TARGET_SERVER}.app
+    ${TARGET_SERVER}.app/Contents
+    ${TARGET_SERVER}.app/Contents/MacOS
+    ${TARGET_SERVER}.app/Contents/Resources
+    ${TARGET_SERVER}.app/Contents/Resources/data
+    ${TARGET_SERVER}.app/Contents/Resources/data/mapres
+  )
+  set(DMG_MKDIR_COMMANDS)
+  foreach(dir ${DMG_MKDIRS})
+    list(APPEND DMG_MKDIR_COMMANDS COMMAND ${CMAKE_COMMAND} -E make_directory ${DMG_TMPDIR}/${dir})
+  endforeach()
+  add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${DMG_TMPDIR}
+    ${DMG_MKDIR_COMMANDS}
+
+    # CLIENT
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_CLIENT}.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
+    COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/SDL2 ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @executable_path/../Frameworks/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+
+    # SERVER
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/data/maps
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_SERVER}.icns ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/
+    COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_SERVER}> $<TARGET_FILE:${TARGET_SERVER_LAUNCHER}> ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/
+
+    # DMG
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
+
+    DEPENDS
+      ${TARGET_CLIENT}
+      ${TARGET_SERVER_LAUNCHER}
+      ${TARGET_SERVER}
+      ${CMAKE_BINARY_DIR}/bundle/client/Info.plist
+      ${CMAKE_BINARY_DIR}/bundle/server/Info.plist
+      data
+      other/bundle/client/PkgInfo
+      other/bundle/server/PkgInfo
+      other/icons/${TARGET_CLIENT}.icns
+      other/icons/${TARGET_SERVER}.icns
+      scripts/dmg.py
+  )
+  add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
+  list(APPEND PACKAGE_TARGETS package_dmg)
+endif()
 
 foreach(ext zip tar.gz tar.xz)
   set(TAR_MODE c)
   set(TAR_EXTRA_ARGS)
   string(REPLACE . _ EXT_SLUG ${ext})
+
+  set(TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG}/${CPACK_PACKAGE_FILE_NAME})
+
+  set(COPY_FILE_COMMANDS)
+  set(COPY_DIR_COMMANDS)
+  set(COPY_TARGET_COMMANDS)
+  foreach(file ${CPACK_FILES})
+    list(APPEND COPY_FILE_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/${file} ${TMPDIR}/)
+  endforeach()
+  foreach(dir ${CPACK_DIRS})
+    list(APPEND COPY_DIR_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${TMPDIR}/${dir})
+  endforeach()
+  foreach(target ${CPACK_TARGETS})
+    list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
+  endforeach()
+
   if(ext STREQUAL zip)
     set(TAR_EXTRA_ARGS --format=zip)
   elseif(ext STREQUAL tar.gz)
@@ -1234,27 +1338,27 @@ foreach(ext zip tar.gz tar.xz)
     set(TAR_MODE cJ)
   endif()
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.${ext}
-    COMMAND cmake -E make_directory ${CPACK_PACKAGE_FILE_NAME}
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${TMPDIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${TMPDIR}
     ${COPY_FILE_COMMANDS}
     ${COPY_DIR_COMMANDS}
     ${COPY_TARGET_COMMANDS}
-    COMMAND cmake -E tar ${TAR_MODE} ${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E chdir pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG} ${CMAKE_COMMAND} -E tar ${TAR_MODE} ../${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
+    DEPENDS ${CPACK_TARGETS}
   )
   add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
+  list(APPEND PACKAGE_TARGETS package_${EXT_SLUG})
 endforeach()
 
 set(PACKAGE_DEFAULT tar_xz)
 if(TARGET_OS STREQUAL "windows")
   set(PACKAGE_DEFAULT zip)
+elseif(TARGET_OS STREQUAL "mac")
+  set(PACKAGE_DEFAULT dmg)
 endif()
 add_custom_target(package_default DEPENDS package_${PACKAGE_DEFAULT})
 
-add_custom_target(package_all DEPENDS
-  package_tar_gz
-  package_tar_xz
-  package_zip
-)
+add_custom_target(package_all DEPENDS ${PACKAGE_TARGETS})
 
 # Unset these variables, they might do something in the future of CPack.
 unset(CPACK_SOURCE_FILES)
