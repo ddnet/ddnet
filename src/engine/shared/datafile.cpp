@@ -346,6 +346,15 @@ void *CDataFileReader::GetDataSwapped(int Index)
 	return GetDataImpl(Index, 1);
 }
 
+void CDataFileReader::ReplaceData(int Index, char *pData)
+{
+	// make sure the data has been loaded
+	GetDataImpl(Index, 0);
+
+	UnloadData(Index);
+	m_pDataFile->m_ppDataPtrs[Index] = pData;
+}
+
 void CDataFileReader::UnloadData(int Index)
 {
 	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)

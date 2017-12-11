@@ -624,6 +624,7 @@ public:
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
 	void PrepareForSave();
+	void ExtractTiles(CTile *pSavedTiles);
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{

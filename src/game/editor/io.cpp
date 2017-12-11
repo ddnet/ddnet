@@ -793,17 +793,17 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						{
 							void *pData = DataFile.GetData(pTilemapItem->m_Data);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
-							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
-							{
+							if(pTilemapItem->m_Version > 3)
+								pTiles->ExtractTiles((CTile *)pData);
+							else if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
 								mem_copy(pTiles->m_pTiles, pData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
 
-								if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
+							if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
+							{
+								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
-									{
-										if(pTiles->m_pTiles[i].m_Index)
-											pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
-									}
+									if(pTiles->m_pTiles[i].m_Index)
+										pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
 								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Data);
