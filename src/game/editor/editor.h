@@ -553,6 +553,7 @@ public:
 	void PrepareForSave(int TileSize);
 
 	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
+	void ExtractTiles(CTile *pSavedTiles);
 
 	void FlagModified(int x, int y, int w, int h);
 

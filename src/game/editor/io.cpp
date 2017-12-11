@@ -944,7 +944,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTile))
+							{
 								mem_copy(((CLayerFront*)pTiles)->m_pTiles, pFrontData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
+							}
 
 							DataFile.UnloadData(pTilemapItem->m_Front);
 						}
@@ -1019,7 +1021,11 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						{
 							if (Size >= pTiles->m_Width*pTiles->m_Height*sizeof(CTile))
 							{
-								mem_copy(pTiles->m_pTiles, pData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
+								// get tile data
+								// if(pTilemapItem->m_Version > 3)
+									pTiles->ExtractTiles((CTile *)pData);
+								// else
+									// mem_copy(pTiles->m_pTiles, pData, pTiles->m_Width*pTiles->m_Height*sizeof(CTile));
 
 								if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
 								{
