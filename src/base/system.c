@@ -1825,6 +1825,25 @@ int net_init()
 	return 0;
 }
 
+#if defined(CONF_FAMILY_UNIX)
+UNIXSOCKET net_unnamed_unix_create()
+{
+	return socket(AF_UNIX, SOCK_DGRAM, 0);
+}
+
+int net_unix_send(UNIXSOCKET sock, UNIXSOCKETADDR *addr, void *data, int size)
+{
+	return sendto(sock, data, size, 0, (struct sockaddr *)addr, sizeof(struct sockaddr_un));
+}
+
+void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path)
+{
+	mem_zero(addr, sizeof(addr));
+	addr->sun_family = AF_UNIX;
+	str_copy(addr->sun_path, path, sizeof(addr->sun_path));
+}
+#endif
+
 int fs_listdir_info(const char *dir, FS_LISTDIR_INFO_CALLBACK cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)

@@ -12,6 +12,10 @@
 #include "stddef.h"
 #include <time.h>
 
+#ifdef CONF_FAMILY_UNIX
+#include <sys/un.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -601,6 +605,10 @@ typedef struct
 	unsigned short port;
 } NETADDR;
 
+#ifdef CONF_FAMILY_UNIX
+typedef int UNIXSOCKET;
+typedef struct sockaddr_un UNIXSOCKETADDR;
+#endif
 /*
 	Function: net_init
 		Initiates network functionallity.
@@ -824,6 +832,44 @@ int net_tcp_recv(NETSOCKET sock, void *data, int maxsize);
 		Returns 0 on success. Negative value on failure.
 */
 int net_tcp_close(NETSOCKET sock);
+
+#if defined(CONF_FAMILY_UNIX)
+/* Group: Network Unix Sockets */
+
+/*
+	Function: net_unnamed_unix_create
+		Creates an unnamed unix dgram socket.
+
+	Returns:
+		On success it returns a handle to the socket. On failure it returns -1.
+*/
+UNIXSOCKET net_unnamed_unix_create();
+
+/*
+	Function: net_unix_send
+		Sends data to a Unix socket.
+
+	Parameters:
+		sock - Socket to use.
+		addr - Where to send the packet.
+		data - Pointer to the packet data to send.
+		size - Size of the packet.
+
+	Returns:
+		Number of bytes sent. Negative value on failure.
+*/
+int net_unix_send(UNIXSOCKET sock, UNIXSOCKETADDR *addr, void *data, int size);
+
+/*
+	Function: net_unix_set_addr
+		Sets the unixsocketaddress for a path to a socket file.
+
+	Parameters:
+		addr - Pointer to the addressstruct to fill.
+		path - Path to the (named) unix socket.
+*/
+void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path);
+#endif
 
 /* Group: Strings */
 
