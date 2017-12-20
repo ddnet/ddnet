@@ -837,13 +837,13 @@ int net_tcp_close(NETSOCKET sock);
 /* Group: Network Unix Sockets */
 
 /*
-	Function: net_unnamed_unix_create
-		Creates an unnamed unix dgram socket.
+	Function: net_unix_create_unnamed
+		Creates an unnamed unix datagram socket.
 
 	Returns:
 		On success it returns a handle to the socket. On failure it returns -1.
 */
-UNIXSOCKET net_unnamed_unix_create();
+UNIXSOCKET net_unix_create_unnamed();
 
 /*
 	Function: net_unix_send
@@ -869,6 +869,16 @@ int net_unix_send(UNIXSOCKET sock, UNIXSOCKETADDR *addr, void *data, int size);
 		path - Path to the (named) unix socket.
 */
 void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path);
+
+/*
+	Function: net_unix_close
+		Closes a Unix socket.
+
+	Parameters:
+		sock - Socket to close.
+*/
+void net_unix_close(UNIXSOCKET sock);
+
 #endif
 
 /* Group: Strings */

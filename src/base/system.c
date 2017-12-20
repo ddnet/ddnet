@@ -1826,7 +1826,7 @@ int net_init()
 }
 
 #if defined(CONF_FAMILY_UNIX)
-UNIXSOCKET net_unnamed_unix_create()
+UNIXSOCKET net_unix_create_unnamed()
 {
 	return socket(AF_UNIX, SOCK_DGRAM, 0);
 }
@@ -1841,6 +1841,11 @@ void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path)
 	mem_zero(addr, sizeof(addr));
 	addr->sun_family = AF_UNIX;
 	str_copy(addr->sun_path, path, sizeof(addr->sun_path));
+}
+
+void net_unix_close(UNIXSOCKET sock)
+{
+	close(sock);
 }
 #endif
 

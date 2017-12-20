@@ -863,7 +863,7 @@ void CServer::SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR* pAddr)
 	mem_copy(&aData[5], pAddr->ip, 16);
 	mem_copy(&aData[21], &pAddr->port, 2);
 
-	net_unix_socket_send(m_ConnLoggingSocket, &m_ConnLoggingDestAddr, aData, sizeof(aData));
+	net_unix_send(m_ConnLoggingSocket, &m_ConnLoggingDestAddr, aData, sizeof(aData));
 }
 #endif
 
@@ -2652,7 +2652,7 @@ void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *
 		// open socket to send new connections
 		if(!pServer->m_ConnLoggingSocketCreated)
 		{
-			pServer->m_ConnLoggingSocket = net_unnamed_unix_socket_create();
+			pServer->m_ConnLoggingSocket = net_unix_create_unnamed();
 			if(pServer->m_ConnLoggingSocket == -1)
 			{
 				pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Failed to created socket for communication with the connection logging server.");
@@ -2664,7 +2664,7 @@ void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *
 		}
 
 		// set the destination address for the connection logging
-		net_unix_socket_set_addr(&pServer->m_ConnLoggingDestAddr, pResult->GetString(0));
+		net_unix_set_addr(&pServer->m_ConnLoggingDestAddr, pResult->GetString(0));
 	}
 }
 #endif
