@@ -1053,6 +1053,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     test.cpp
     test.h
     thread.cpp
+    unix.cpp
   )
   set(TESTS_EXTRA
     src/game/server/teehistorian.cpp

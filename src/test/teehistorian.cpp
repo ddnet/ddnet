@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <base/detect.h>
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
