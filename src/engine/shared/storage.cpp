@@ -312,7 +312,7 @@ public:
 				for(int i = 0; i < m_NumPaths; ++i)
 				{
 					Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
-					dbg_msg("storage", "SPATH: %s", pBuffer);
+					dbg_msg("storage", "SSPATH: %s", pBuffer);
 					if(Handle)
 						return Handle;
 				}
