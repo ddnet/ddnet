@@ -288,7 +288,7 @@ public:
 			return io_open(pFilename, Flags);
 		}
 		if(str_comp_num(pFilename, "mapres/../skins/", 16) == 0) {
-			pFilename = pFilename + 10; // just start from skins/
+			pFilename = pFilename + 10; // just start 1rom skins/
 		}
 		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
 		#ifdef CONF_FAMILY_WINDOWS
@@ -312,6 +312,7 @@ public:
 				for(int i = 0; i < m_NumPaths; ++i)
 				{
 					Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
+					dbg_msg("storage", "SSPATH: %s", pBuffer);
 					if(Handle)
 						return Handle;
 				}
