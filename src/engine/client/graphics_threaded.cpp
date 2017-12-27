@@ -446,14 +446,14 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		io_close(File);
 	else
 	{
-		dbg_msg("game/png", "failed to open file. filename='%s'", pFilename);
+		dbg_msg("game/png", "449, failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
 
 	int Error = png_open_file(&Png, aCompleteFilename); // ignore_convention
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("game/png", "failed to open file. filename='%s'", aCompleteFilename);
+		dbg_msg("game/png", "456, failed to open file. filename='%s' error='%d'", aCompleteFilename, Error);
 		if(Error != PNG_FILE_ERROR)
 			png_close_file(&Png); // ignore_convention
 		return 0;
