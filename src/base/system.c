@@ -164,8 +164,10 @@ static void logger_debugger(const char *line, void *user)
 static void logger_file(const char *line, void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_write(logfile, line, strlen(line));
-	aio_write_newline(logfile);
+	aio_lock(logfile);
+	aio_write_unlocked(logfile, line, strlen(line));
+	aio_write_newline_unlocked(logfile);
+	aio_unlock(logfile);
 }
 
 static void logger_stdout_finish(void *user)
@@ -624,10 +626,20 @@ static unsigned int next_buffer_size(unsigned int cur_size, unsigned int need_si
 	return cur_size;
 }
 
-void aio_write(ASYNCIO *aio, const void *buffer, unsigned size)
+void aio_lock(ASYNCIO *aio)
+{
+	lock_wait(aio->lock);
+}
+
+void aio_unlock(ASYNCIO *aio)
+{
+	lock_unlock(aio->lock);
+	sphore_signal(&aio->sphore);
+}
+
+void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 {
 	unsigned int remaining;
-	lock_wait(aio->lock);
 	remaining = aio->buffer_size - buffer_len(aio);
 
 	// Don't allow full queue to distinguish between empty and full queue.
@@ -680,17 +692,29 @@ void aio_write(ASYNCIO *aio, const void *buffer, unsigned size)
 		aio->read_pos = 0;
 		aio->write_pos = next_len;
 	}
-	lock_unlock(aio->lock);
-	sphore_signal(&aio->sphore);
+}
+
+void aio_write(ASYNCIO *aio, const void *buffer, unsigned size)
+{
+	aio_lock(aio);
+	aio_write_unlocked(aio, buffer, size);
+	aio_unlock(aio);
+}
+
+void aio_write_newline_unlocked(ASYNCIO *aio)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	aio_write_unlocked(aio, "\r\n", 2);
+#else
+	aio_write_unlocked(aio, "\n", 1);
+#endif
 }
 
 void aio_write_newline(ASYNCIO *aio)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	aio_write(aio, "\r\n", 2);
-#else
-	aio_write(aio, "\n", 1);
-#endif
+	aio_lock(aio);
+	aio_write_newline_unlocked(aio);
+	aio_unlock(aio);
 }
 
 int aio_error(ASYNCIO *aio)

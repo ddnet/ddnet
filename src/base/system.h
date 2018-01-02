@@ -387,6 +387,26 @@ typedef struct ASYNCIO ASYNCIO;
 ASYNCIO *aio_new(IOHANDLE io);
 
 /*
+	Function: aio_lock
+		Locks the ASYNCIO structure so it can't be written into by
+		other threads.
+
+	Parameters:
+		aio - Handle to the file.
+*/
+void aio_lock(ASYNCIO *aio);
+
+/*
+	Function: aio_unlock
+		Unlocks the ASYNCIO structure after finishing the contiguous
+		write.
+
+	Parameters:
+		aio - Handle to the file.
+*/
+void aio_unlock(ASYNCIO *aio);
+
+/*
 	Function: aio_write
 		Queues a chunk of data for writing.
 
@@ -407,6 +427,30 @@ void aio_write(ASYNCIO *aio, const void *buffer, unsigned size);
 
 */
 void aio_write_newline(ASYNCIO *aio);
+
+/*
+	Function: aio_write_unlocked
+		Queues a chunk of data for writing. The ASYNCIO struct must be
+		locked using `aio_lock` first.
+
+	Parameters:
+		aio - Handle to the file.
+		buffer - Pointer to the data that should be written.
+		size - Number of bytes to write.
+
+*/
+void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size);
+
+/*
+	Function: aio_write_newline_unlocked
+		Queues a newline for writing. The ASYNCIO struct must be locked
+		using `aio_lock` first.
+
+	Parameters:
+		aio - Handle to the file.
+
+*/
+void aio_write_newline_unlocked(ASYNCIO *aio);
 
 /*
 	Function: aio_error
