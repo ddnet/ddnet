@@ -39,7 +39,7 @@ SDL = {
 			end
 
 			if option.use_winlib > 0 then
-				settings.cc.includes:Add("ddnet-libs/sdl/include")
+				settings.cc.includes:Add("ddnet-libs/sdl/include/windows")
 				if option.use_winlib == 32 then
 					settings.link.libpath:Add("ddnet-libs/sdl/windows/lib32")
 				else
