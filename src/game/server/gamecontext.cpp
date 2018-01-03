@@ -1378,6 +1378,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				}
 
+				if(g_Config.m_SvVoteKickModerated)
+				{
+					for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if(m_apPlayers[i]->m_Authed > IServer::AUTHED_HELPER && !m_apPlayers[i]->m_Afk)
+						{
+							SendChatTarget(ClientID, "Can't vote kick while there is a moderator on the server");
+							return;
+						}
+					}
+				}
+
 				if(g_Config.m_SvVoteKickMin)
 				{
 					int PlayerNum = 0;
