@@ -316,7 +316,10 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
 
       if(MSVC)
         foreach(target gtest)
-          target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd>)
+          # `/w` disables all warnings. This is needed because `gtest` enables
+          # `/WX` (equivalent of `-Werror`) for some reason, breaking builds
+          # when MSVS adds new warnings.
+          target_compile_options(${target} PRIVATE $<$<NOT:${DBG}>:/MT> $<${DBG}:/MTd> /w)
         endforeach()
       endif()
 
