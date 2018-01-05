@@ -740,6 +740,26 @@ void CGameContext::OnTick()
 						else if(ActVote < 0)
 							VetoStop = true;
 					}
+
+					// Check if a active moderator has voted.
+					if (m_apPlayers[i] && m_apPlayers[i]->m_Vote != 0 && m_apPlayers[i]->m_Moderating)
+					{
+						if (m_apPlayers[i]->m_Vote == 1)
+						{
+							Server()->SetRconCID(IServer::RCON_CID_VOTE);
+							Console()->ExecuteLine(m_aVoteCommand);
+							Server()->SetRconCID(IServer::RCON_CID_SERV);
+							EndVote();
+							SendChat(-1, CGameContext::CHAT_ALL, "Vote passed enforced by server moderator");
+							return;
+						}
+						else if (m_apPlayers[i]->m_Vote == -1)
+						{
+							EndVote();
+							SendChat(-1, CGameContext::CHAT_ALL, "Vote failed enforced by server moderator");
+							return;
+						}
+					}
 				}
 
 				if(g_Config.m_SvVoteMaxTotal && Total > g_Config.m_SvVoteMaxTotal &&
@@ -762,14 +782,32 @@ void CGameContext::OnTick()
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				Server()->SetRconCID(IServer::RCON_CID_VOTE);
-				Console()->ExecuteLine(m_aVoteCommand);
-				Server()->SetRconCID(IServer::RCON_CID_SERV);
-				EndVote();
-				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
+				if (PlayerModerating() && (m_VoteKick || m_VoteSpec))
+				{
+					// Ensure minimum time for vote to end when moderating.
+					if (time_get() > m_VoteCloseTime)
+					{
+						Server()->SetRconCID(IServer::RCON_CID_VOTE);
+						Console()->ExecuteLine(m_aVoteCommand);
+						Server()->SetRconCID(IServer::RCON_CID_SERV);
+						EndVote();
+						SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 
-				if(m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
-					m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
+						if (m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
+							m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
+					}
+				}
+				else
+				{
+					Server()->SetRconCID(IServer::RCON_CID_VOTE);
+					Console()->ExecuteLine(m_aVoteCommand);
+					Server()->SetRconCID(IServer::RCON_CID_SERV);
+					EndVote();
+					SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
+
+					if (m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
+						m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
+				}
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
@@ -3344,4 +3382,14 @@ void CGameContext::SetClientVersion(int ClientID, int Version) {
 		return;
 	}
 	m_apPlayers[ClientID]->m_ClientVersion = Version;
+}
+
+bool CGameContext::PlayerModerating()
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (m_apPlayers[i] && m_apPlayers[i]->m_Moderating)
+			return true;
+	}
+	return false;
 }

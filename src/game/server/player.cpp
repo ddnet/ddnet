@@ -62,6 +62,7 @@ void CPlayer::Reset()
 	m_Sent1stAfkWarning = 0;
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
+	m_Moderating = false;
 	m_EyeEmote = true;
 	m_TimerType = (g_Config.m_SvDefaultTimerType == CPlayer::TIMERTYPE_GAMETIMER || g_Config.m_SvDefaultTimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) ? CPlayer::TIMERTYPE_BROADCAST : g_Config.m_SvDefaultTimerType;
 	m_DefEmote = EMOTE_NORMAL;
@@ -152,6 +153,15 @@ void CPlayer::Tick()
 		m_ChatScore--;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
+
+	if (m_Moderating && m_Afk)
+	{
+		m_Moderating = false;
+		GameServer()->SendChatTarget(m_ClientID, "Active moderator mode disabled because you are afk.");
+
+		if (!GameServer()->PlayerModerating())
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
+	}
 
 	// do latency stuff
 	{
@@ -374,6 +384,14 @@ void CPlayer::OnDisconnect(const char *pReason)
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", m_ClientID, Server()->ClientName(m_ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+		bool WasModerator = m_Moderating;
+
+		// Set this to false, otherwise PlayerModerating() will return true.
+		m_Moderating = false;
+
+		if (!GameServer()->PlayerModerating() && WasModerator)
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
 	}
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
