@@ -3432,7 +3432,7 @@ int main(int argc, const char **argv) // ignore_convention
 {
 #endif
 	bool Silent = false;
-	bool IsRandFail = false;
+	bool RandInitFailed = false;
 
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
@@ -3448,7 +3448,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	if(secure_random_init() != 0)
 	{
-		IsRandFail = true;
+		RandInitFailed = true;
 	}
 
 	CClient *pClient = CreateClient();
@@ -3467,7 +3467,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 
-	if (IsRandFail)
+	if(RandInitFailed)
 	{
 		dbg_msg("secure", "could not initialize secure RNG");
 		return -1;
