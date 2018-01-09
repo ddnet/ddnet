@@ -461,6 +461,34 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConModerate(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	bool HadModerator = pSelf->PlayerModerating();
+
+	CPlayer* player = pSelf->m_apPlayers[pResult->m_ClientID];
+	player->m_Moderating = !player->m_Moderating;
+	
+	char aBuf[256];
+
+	if(!HadModerator && player->m_Moderating)
+		str_format(aBuf, sizeof(aBuf), "Server kick/spec votes will now be actively moderated.");
+
+	if (!pSelf->PlayerModerating())
+		str_format(aBuf, sizeof(aBuf), "Server kick/spec votes are no longer actively moderated.");
+
+	pSelf->SendChat(-1, CHAT_ALL, aBuf, 0);
+	
+	if(player->m_Moderating)
+		pSelf->SendChatTarget(pResult->m_ClientID,
+			"Active moderator mode enabled for you.");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "Active moderator mode disabled for you.");
+}
+
 void CGameContext::ConList(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
