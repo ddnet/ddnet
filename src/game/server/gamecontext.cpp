@@ -766,9 +766,7 @@ void CGameContext::OnTick()
 						(m_VoteKick || m_VoteSpec))
 					Total = g_Config.m_SvVoteMaxTotal;
 
-				if((Yes > Total / (100.0 / g_Config.m_SvVoteYesPercentage)) && !Veto)
-					m_VoteEnforce = VOTE_ENFORCE_YES;
-				else if(No >= Total - Total / (100.0 / g_Config.m_SvVoteYesPercentage))
+				if(No >= Total - Total / (100.0 / g_Config.m_SvVoteYesPercentage))
 					m_VoteEnforce = VOTE_ENFORCE_NO;
 
 				if(VetoStop)
