@@ -780,32 +780,14 @@ void CGameContext::OnTick()
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				if (PlayerModerating() && (m_VoteKick || m_VoteSpec))
-				{
-					// Ensure minimum time for vote to end when moderating.
-					if (time_get() > m_VoteCloseTime)
-					{
-						Server()->SetRconCID(IServer::RCON_CID_VOTE);
-						Console()->ExecuteLine(m_aVoteCommand);
-						Server()->SetRconCID(IServer::RCON_CID_SERV);
-						EndVote();
-						SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
+				Server()->SetRconCID(IServer::RCON_CID_VOTE);
+				Console()->ExecuteLine(m_aVoteCommand);
+				Server()->SetRconCID(IServer::RCON_CID_SERV);
+				EndVote();
+				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 
-						if (m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
-							m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
-					}
-				}
-				else
-				{
-					Server()->SetRconCID(IServer::RCON_CID_VOTE);
-					Console()->ExecuteLine(m_aVoteCommand);
-					Server()->SetRconCID(IServer::RCON_CID_SERV);
-					EndVote();
-					SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
-
-					if (m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
-						m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
-				}
+				if (m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
+					m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
