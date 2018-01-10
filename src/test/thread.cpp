@@ -75,6 +75,7 @@ static void LockThread(void *pUser)
 TEST(Thread, Lock)
 {
 	LOCK Lock = lock_create();
+	lock_wait(Lock);
 	void *pThread = thread_init(LockThread, &Lock);
 	lock_unlock(Lock);
 	thread_wait(pThread);
