@@ -775,7 +775,7 @@ void CGameContext::OnTick()
 				m_VoteWillPass = Yes > (Yes + No) / (100.0 / g_Config.m_SvVoteYesPercentage);
 			}
 
-			if(Yes == Total)
+			if(Total > 0 && Yes == Total)
 				m_VoteEnforce = VOTE_ENFORCE_YES;
 
 			if(time_get() > m_VoteCloseTime)
