@@ -124,7 +124,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	char aStartTime[128];
 
 	FormatUuid(pGameInfo->m_GameUuid, aGameUuid, sizeof(aGameUuid));
-	str_timestamp_ex(pGameInfo->m_StartTime, aStartTime, sizeof(aStartTime), "%Y-%m-%d %H:%M:%S %z");
+	str_timestamp_ex(pGameInfo->m_StartTime, aStartTime, sizeof(aStartTime), "%Y-%m-%dT%H:%M:%S%z");
 
 	char aCommentBuffer[128];
 	char aServerVersionBuffer[128];

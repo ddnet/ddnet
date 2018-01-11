@@ -84,7 +84,7 @@ protected:
 		static const char PREFIX3[] = "]}";
 
 		char aTimeBuf[64];
-		str_timestamp_ex(m_GameInfo.m_StartTime, aTimeBuf, sizeof(aTimeBuf), "%Y-%m-%d %H:%M:%S %z");
+		str_timestamp_ex(m_GameInfo.m_StartTime, aTimeBuf, sizeof(aTimeBuf), "%Y-%m-%dT%H:%M:%S%z");
 
 		CPacker Buffer;
 		Buffer.Reset();
