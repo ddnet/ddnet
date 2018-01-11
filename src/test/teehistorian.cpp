@@ -39,6 +39,7 @@ protected:
 		#undef MACRO_CONFIG_INT
 
 		RegisterUuids(&m_UuidManager);
+		RegisterTeehistorianUuids(&m_UuidManager);
 		RegisterGameUuids(&m_UuidManager);
 
 		mem_zero(&m_GameInfo, sizeof(m_GameInfo));

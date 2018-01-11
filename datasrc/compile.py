@@ -107,7 +107,7 @@ if gen_network_header:
 	non_extended = [o for o in network.Objects if o.ex is None]
 	extended = [o for o in network.Objects if o.ex is not None]
 	for l in create_enum_table(["NETOBJTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETOBJTYPES"): print(l)
-	for l in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_TEEHISTORIAN_UUID-1"]+[o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"): print(l)
+	for l in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_GAME_UUID-1"]+[o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"): print(l)
 	print("")
 
 	non_extended = [o for o in network.Messages if o.ex is None]
@@ -343,7 +343,6 @@ if gen_network_source:
 
 	lines += ['void RegisterGameUuids(CUuidManager *pManager)']
 	lines += ['{']
-	lines += ['\tRegisterTeehistorianUuids(pManager);']
 
 	for item in network.Objects + network.Messages:
 		if item.ex is not None:

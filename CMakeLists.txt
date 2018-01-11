@@ -614,6 +614,9 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
+  teehistorian_ex.cpp
+  teehistorian_ex.h
+  teehistorian_ex_chunks.h
   uuid_manager.cpp
   uuid_manager.h
   websockets.cpp
@@ -636,9 +639,6 @@ set_glob(GAME_SHARED GLOB src/game
   mapitems.h
   teamscore.cpp
   teamscore.h
-  teehistorian_ex.cpp
-  teehistorian_ex.h
-  teehistorian_ex_chunks.h
   tuning.h
   variables.h
   version.h
