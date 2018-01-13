@@ -448,6 +448,7 @@ int io_flush(IOHANDLE io)
 
 
 #define ASYNC_BUFSIZE 8 * 1024
+#define ASYNC_LOCAL_BUFSIZE 64 * 1024
 
 struct ASYNCIO
 {
@@ -455,8 +456,6 @@ struct ASYNCIO
 	IOHANDLE io;
 	SEMAPHORE sphore;
 	void *thread;
-
-	unsigned char *old_buffer;
 
 	unsigned char *buffer;
 	unsigned int buffer_size;
@@ -525,6 +524,8 @@ static void aio_thread(void *user)
 	{
 		struct BUFFERS buffers;
 		int result_io_error;
+		unsigned char local_buffer[ASYNC_LOCAL_BUFSIZE];
+		unsigned int local_buffer_len = 0;
 
 		if(aio->read_pos == aio->write_pos)
 		{
@@ -544,24 +545,33 @@ static void aio_thread(void *user)
 		}
 
 		buffer_ptrs(aio, &buffers);
+		if(buffers.buf1)
+		{
+			if(buffers.len1 > sizeof(local_buffer) - local_buffer_len)
+			{
+				buffers.len1 = sizeof(local_buffer) - local_buffer_len;
+			}
+			mem_copy(local_buffer + local_buffer_len, buffers.buf1, buffers.len1);
+			local_buffer_len += buffers.len1;
+			if(buffers.buf2)
+			{
+				if(buffers.len2 > sizeof(local_buffer) - local_buffer_len)
+				{
+					buffers.len2 = sizeof(local_buffer) - local_buffer_len;
+				}
+				mem_copy(local_buffer + local_buffer_len, buffers.buf2, buffers.len2);
+				local_buffer_len += buffers.len2;
+			}
+		}
+		aio->read_pos = (aio->read_pos + buffers.len1 + buffers.len2) % aio->buffer_size;
 		lock_unlock(aio->lock);
 
-		io_write(aio->io, buffers.buf1, buffers.len1);
-		if(buffers.buf2)
-		{
-			io_write(aio->io, buffers.buf2, buffers.len2);
-		}
+		io_write(aio->io, local_buffer, local_buffer_len);
 		io_flush(aio->io);
 		result_io_error = io_error(aio->io);
 
 		lock_wait(aio->lock);
 		aio->error = result_io_error;
-		aio->read_pos = (aio->read_pos + buffers.len1 + buffers.len2) % aio->buffer_size;
-		if(aio->old_buffer)
-		{
-			mem_free(aio->old_buffer);
-			aio->old_buffer = 0;
-		}
 	}
 }
 
@@ -577,7 +587,6 @@ ASYNCIO *aio_new(IOHANDLE io)
 	sphore_init(&aio->sphore);
 	aio->thread = 0;
 
-	aio->old_buffer = 0;
 	aio->buffer = mem_alloc(ASYNC_BUFSIZE, 1);
 	if(!aio->buffer)
 	{
@@ -679,14 +688,7 @@ void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 		mem_copy(next_buffer + next_len, buffer, size);
 		next_len += size;
 
-		if(!aio->old_buffer)
-		{
-			aio->old_buffer = aio->buffer;
-		}
-		else
-		{
-			mem_free(aio->buffer);
-		}
+		mem_free(aio->buffer);
 		aio->buffer = next_buffer;
 		aio->buffer_size = next_size;
 		aio->read_pos = 0;
