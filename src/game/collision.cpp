@@ -502,7 +502,7 @@ int CCollision::IsCheckTeleport(int Index)
 		return 0;
 
 	if(m_pTele[Index].m_Type == TILE_TELECHECKIN)
-		return m_pTele[Index].m_Number;
+		return 1;
 
 	return 0;
 }
@@ -515,7 +515,7 @@ int CCollision::IsCheckEvilTeleport(int Index)
 		return 0;
 
 	if(m_pTele[Index].m_Type == TILE_TELECHECKINEVIL)
-		return m_pTele[Index].m_Number;
+		return 1;
 
 	return 0;
 }
