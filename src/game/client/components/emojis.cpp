@@ -88,14 +88,20 @@ void CEmojis::LoadEmojisIndexfile()
 
 int CEmojis::Num() const
 {
+	if (!g_Config.m_ClShowChatEmojis)
+		return 0;
 	return m_aEmojis.size();
 }
 
 const CEmojis::CEmoji *CEmojis::GetByAlias(const char *alias) const
 {
-	for (int i = 0; i < m_aEmojis.size(); i++)
+	if (g_Config.m_ClShowChatEmojis)
 	{
-		if (str_comp(alias, m_aEmojis[i].m_Alias) == 0) return GetByIndex(i);
+		for (int i = 0; i < m_aEmojis.size(); i++)
+		{
+			if (str_comp(alias, m_aEmojis[i].m_Alias) == 0)
+				return GetByIndex(i);
+		}
 	}
 	return NULL;
 }
