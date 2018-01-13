@@ -351,6 +351,9 @@ void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 {
 	char aBuf[128];
 	int Found = 0;
+
+	Addr->port = 0; // ignore port number for mutes
+
 	// find a matching mute for this ip, update expiration time if found
 	for (int i = 0; i < m_NumMutes; i++)
 	{
@@ -375,9 +378,12 @@ void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 	}
 	if (Found)
 	{
-		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds.",
-				pDisplayName, Secs);
-		SendChat(-1, CHAT_ALL, aBuf);
+		if (pDisplayName)
+		{
+			str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds.",
+					pDisplayName, Secs);
+			SendChat(-1, CHAT_ALL, aBuf);
+		}
 	}
 	else // no free slot found
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
@@ -415,8 +421,7 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 				"Invalid network address to mute");
 	}
-	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
-			pResult->GetString(0));
+	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL);
 }
 
 // unmute by mute list index

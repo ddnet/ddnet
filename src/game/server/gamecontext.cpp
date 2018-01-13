@@ -3097,6 +3097,7 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 		m_apPlayers[ClientID]->m_LastChat = Server()->Tick();
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
+	Addr.port = 0; // ignore port number for mutes
 	int Muted = 0;
 
 	for(int i = 0; i < m_NumMutes && !Muted; i++)
