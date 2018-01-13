@@ -778,7 +778,7 @@ void CGameContext::OnTick()
 			if(Total > 0 && Yes == Total)
 				m_VoteEnforce = VOTE_ENFORCE_YES;
 
-			if(time_get() > m_VoteCloseTime)
+			if(time_get() > m_VoteCloseTime && !g_Config.m_SvVoteMajority)
 				m_VoteEnforce = (m_VoteWillPass && !Veto) ? VOTE_ENFORCE_YES : VOTE_ENFORCE_NO;
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
