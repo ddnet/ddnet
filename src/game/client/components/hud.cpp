@@ -22,7 +22,7 @@
 CHud::CHud()
 {
 	// won't work if zero
-	m_AverageFPS = 1.0f;
+	m_FrameTimeAvg = 0.0f;
 	OnReset();
 }
 
@@ -315,16 +315,12 @@ void CHud::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
 
 void CHud::RenderTextInfo()
 {
-	if(g_Config.m_ClShowfps > 0)
+	if(g_Config.m_ClShowfps)
 	{
 		// calculate avg. fps
-		float FPS = 1.0f / Client()->RenderFrameTime();
-		m_AverageFPS = (m_AverageFPS*(1.0f-(1.0f/m_AverageFPS))) + (FPS*(1.0f/m_AverageFPS));
-		char Buf[512];
-		if(g_Config.m_ClShowfps == 2)
-			str_format(Buf, sizeof(Buf), "%d", (int)m_AverageFPS);
-		else
-			str_format(Buf, sizeof(Buf), "%d", (int)FPS);
+		m_FrameTimeAvg = m_FrameTimeAvg*0.9f + Client()->RenderFrameTime()*0.1f;
+		char Buf[64];
+		str_format(Buf, sizeof(Buf), "%d", (int)(1.0f/m_FrameTimeAvg + 0.5f));
 		TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1), 5, 12, Buf, -1);
 	}
 	if(g_Config.m_ClShowpred)
