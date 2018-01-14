@@ -811,7 +811,7 @@ void CPlayers::RenderPlayer(
 		RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
-	if (g_Config.m_ClShowDirection && ClientID >= 0 && (Local || DemoPlayer()->IsPlaying()))
+	if (g_Config.m_ClShowDirection && ClientID >= 0 && (!Local || DemoPlayer()->IsPlaying()))
 	{
 		if (Player.m_Direction == -1)
 		{
