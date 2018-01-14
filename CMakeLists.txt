@@ -1365,6 +1365,7 @@ foreach(ext zip tar.gz tar.xz)
   set(COPY_FILE_COMMANDS)
   set(COPY_DIR_COMMANDS)
   set(COPY_TARGET_COMMANDS)
+  set(STRIP_TARGET_COMMANDS)
   foreach(file ${CPACK_FILES})
     list(APPEND COPY_FILE_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/${file} ${TMPDIR}/)
   endforeach()
@@ -1373,6 +1374,7 @@ foreach(ext zip tar.gz tar.xz)
   endforeach()
   foreach(target ${CPACK_TARGETS})
     list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
+    list(APPEND STRIP_TARGET_COMMANDS COMMAND strip -s ${TMPDIR}/${target})
   endforeach()
 
   if(ext STREQUAL zip)
@@ -1388,6 +1390,7 @@ foreach(ext zip tar.gz tar.xz)
     ${COPY_FILE_COMMANDS}
     ${COPY_DIR_COMMANDS}
     ${COPY_TARGET_COMMANDS}
+    ${STRIP_TARGET_COMMANDS}
     COMMAND ${CMAKE_COMMAND} -E chdir pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG} ${CMAKE_COMMAND} -E tar ${TAR_MODE} ../${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
     DEPENDS ${CPACK_TARGETS}
   )
