@@ -1374,7 +1374,7 @@ foreach(ext zip tar.gz tar.xz)
   endforeach()
   foreach(target ${CPACK_TARGETS})
     list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
-    list(APPEND STRIP_TARGET_COMMANDS COMMAND strip -s ${TMPDIR}/${target})
+    list(APPEND STRIP_TARGET_COMMANDS COMMAND strip -s ${TMPDIR}/$<TARGET_FILE_NAME:${target}>)
   endforeach()
 
   if(ext STREQUAL zip)
