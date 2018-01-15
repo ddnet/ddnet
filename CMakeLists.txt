@@ -1451,6 +1451,10 @@ foreach(target ${TARGETS})
     if(DEFINE_FORTIFY_SOURCE)
       target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
     endif()
+    # Inaccurate floating point numbers cause problems on mingw-w64-gcc when
+    # compiling for x86, might cause problems elsewhere. So don't store floats
+    # in registers but keep them at higher accuracy.
+    target_compile_options(${target} PRIVATE -ffloat-store)
   endif()
   if(TARGET_OS STREQUAL "mac")
     target_compile_options(${target} PRIVATE -stdlib=libc++)
