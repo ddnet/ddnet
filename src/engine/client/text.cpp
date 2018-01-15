@@ -573,7 +573,7 @@ public:
 		int ActualX, ActualY;
 
 		int ActualSize;
-		int i;
+		int i = 0;
 		int GotNewLine = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
@@ -613,9 +613,8 @@ public:
 			Length = str_length(pText);
 
 		// if we don't want to render, we can just skip the first outline pass
-		i = 1;
-		if(pCursor->m_Flags&TEXTFLAG_RENDER)
-			i = 0;
+		if(!(pCursor->m_Flags&TEXTFLAG_RENDER))
+			i = 1;
 
 		for(;i < 2; i++)
 		{
