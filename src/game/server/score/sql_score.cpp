@@ -1162,7 +1162,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 		pSqlServer->executeSql("SET @pos := 0;");
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, Points, Name from (select (@prev := Points) Points, Name from %s_points order by Points desc) as ll) as l where Name = '%s';", pSqlServer->GetPrefix(), pData->m_Name.ClrStr());
+		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Points, Name FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Points, @rank, @pos)) Rank, (@prev := Points) Points FROM (SELECT Name, Points FROM %s_points GROUP BY Name ORDER BY Points DESC) as a) as b where Name = '%s';", pSqlServer->GetPrefix(), pData->m_Name.ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
@@ -1218,7 +1218,7 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGam
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
 		pSqlServer->executeSql("SET @pos := 0;");
-		str_format(aBuf, sizeof(aBuf), "select Rank, Name, Points from (select (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank,@pos)) Rank, Points, Name from (select (@prev := Points) Points, Name from %s_points order by Points desc) as ll) as l LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Num-1);
+		str_format(aBuf, sizeof(aBuf), "SELECT Rank, Points, Name FROM (SELECT Name, (@pos := @pos+1) pos, (@rank := IF(@prev = Points,@rank, @pos)) Rank, (@prev := Points) Points FROM (SELECT Name, Points FROM %s_points GROUP BY Name ORDER BY Points DESC) as a) as b LIMIT %d, 5;", pSqlServer->GetPrefix(), pData->m_Num-1);
 
 		pSqlServer->executeSqlQuery(aBuf);
 
