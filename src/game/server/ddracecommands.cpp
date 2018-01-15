@@ -403,6 +403,12 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	int Victim = pResult->GetVictim();
+	
+	if (Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "muteid", "Client id not found.");
+		return;
+	}
 
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
@@ -447,6 +453,16 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
+	
+	if (pSelf->m_NumMutes <= 0)
+	{
+		// Just to make sure.
+		pSelf->m_NumMutes = 0;
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
+			"There are no active mutes.");
+		return;
+	}
+	
 	char aIpBuf[64];
 	char aBuf[128];
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
