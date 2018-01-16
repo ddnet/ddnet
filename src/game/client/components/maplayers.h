@@ -12,7 +12,8 @@
 #define INDEX_BORDER_BUFFER_GROUP_SIZE 20
 
 typedef char* offset_ptr_size;
-typedef unsigned int offset_ptr;
+typedef uintptr_t offset_ptr;
+typedef unsigned int offset_ptr32;
 
 class CMapLayers : public CComponent
 {
@@ -45,7 +46,7 @@ class CMapLayers : public CComponent
 		{
 			STileVisual() : m_IndexBufferByteOffset(0) { }
 		private:
-			offset_ptr m_IndexBufferByteOffset;
+			offset_ptr32 m_IndexBufferByteOffset;
 		public:
 			bool DoDraw() 
 			{
@@ -62,14 +63,14 @@ class CMapLayers : public CComponent
 				return ((offset_ptr)(m_IndexBufferByteOffset & 0x7FFFFFFF));
 			}
 
-			void SetIndexBufferByteOffset(offset_ptr IndexBufferByteOff)
+			void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
 				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x80000000);
 			}
 
-			void AddIndexBufferByteOffset(offset_ptr IndexBufferByteOff)
+			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
-				m_IndexBufferByteOffset = (((offset_ptr)(m_IndexBufferByteOffset & 0x7FFFFFFF)) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x80000000);
+				m_IndexBufferByteOffset = (((offset_ptr32)(m_IndexBufferByteOffset & 0x7FFFFFFF)) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x80000000);
 			}
 		};
 		STileVisual* m_TilesOfLayer;

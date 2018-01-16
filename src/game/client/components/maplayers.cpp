@@ -629,7 +629,7 @@ void CMapLayers::OnMapLoad()
 								
 								//the amount of tiles handled before this tile
 								int TilesHandledCount = tmpTiles.size();
-								Visuals.m_TilesOfLayer[y*pTMap->m_Width + x].SetIndexBufferByteOffset((offset_ptr)(TilesHandledCount*6*sizeof(unsigned int)));
+								Visuals.m_TilesOfLayer[y*pTMap->m_Width + x].SetIndexBufferByteOffset((offset_ptr32)(TilesHandledCount*6*sizeof(unsigned int)));
 									
 								bool AddAsSpeedup = false;
 								if(IsSpeedupLayer && CurOverlay == 0)
@@ -643,18 +643,18 @@ void CMapLayers::OnMapLoad()
 								{
 									if(y == 0)
 									{
-										Visuals.m_BorderTopLeft.SetIndexBufferByteOffset((offset_ptr)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderTopLeft.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderTopLeft.Draw(true);
 									} else if(y == pTMap->m_Height - 1)
 									{
-										Visuals.m_BorderBottomLeft.SetIndexBufferByteOffset((offset_ptr)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderBottomLeft.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderBottomLeft.Draw(true);
 											
 									} else 
 									{
-										Visuals.m_BorderLeft[y-1].SetIndexBufferByteOffset((offset_ptr)(tmpBorderLeftTiles.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderLeft[y-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderLeftTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderLeftTiles, tmpBorderLeftTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderLeft[y-1].Draw(true);
 									}
@@ -662,19 +662,19 @@ void CMapLayers::OnMapLoad()
 								{
 									if(y == 0)
 									{
-										Visuals.m_BorderTopRight.SetIndexBufferByteOffset((offset_ptr)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderTopRight.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderTopRight.Draw(true);
 											
 									} else if(y == pTMap->m_Height - 1)
 									{
-										Visuals.m_BorderBottomRight.SetIndexBufferByteOffset((offset_ptr)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderBottomRight.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderBottomRight.Draw(true);
 											
 									} else
 									{
-										Visuals.m_BorderRight[y-1].SetIndexBufferByteOffset((offset_ptr)(tmpBorderRightTiles.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderRight[y-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderRightTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderRightTiles, tmpBorderRightTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderRight[y-1].Draw(true);
 									}
@@ -682,7 +682,7 @@ void CMapLayers::OnMapLoad()
 								{
 									if(x > 0 && x < pTMap->m_Width - 1)
 									{
-										Visuals.m_BorderTop[x-1].SetIndexBufferByteOffset((offset_ptr)(tmpBorderTopTiles.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderTop[x-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderTopTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderTopTiles, tmpBorderTopTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderTop[x-1].Draw(true);
 									}
@@ -690,7 +690,7 @@ void CMapLayers::OnMapLoad()
 								{
 									if(x > 0 && x < pTMap->m_Width - 1)
 									{
-										Visuals.m_BorderBottom[x-1].SetIndexBufferByteOffset((offset_ptr)(tmpBorderBottomTiles.size()*6*sizeof(unsigned int)));
+										Visuals.m_BorderBottom[x-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderBottomTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderBottomTiles, tmpBorderBottomTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
 											Visuals.m_BorderBottom[x-1].Draw(true);
 									}
@@ -701,7 +701,7 @@ void CMapLayers::OnMapLoad()
 						//append one kill tile to the gamelayer
 						if(IsGameLayer)
 						{
-							Visuals.m_BorderKillTile.SetIndexBufferByteOffset((offset_ptr)(tmpTiles.size() * 6 * sizeof(unsigned int)));
+							Visuals.m_BorderKillTile.SetIndexBufferByteOffset((offset_ptr32)(tmpTiles.size() * 6 * sizeof(unsigned int)));
 							if(AddTile(tmpTiles, tmpTileTexCoords, TILE_DEATH, 0, 0, 0, pGroup, DoTextureCoords))								
 								Visuals.m_BorderKillTile.Draw(true);
 						}
