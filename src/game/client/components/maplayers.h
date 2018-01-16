@@ -11,6 +11,9 @@
 #define INDEX_BUFFER_GROUP_HEIGHT 9
 #define INDEX_BORDER_BUFFER_GROUP_SIZE 20
 
+typedef char* offset_ptr_size;
+typedef unsigned int offset_ptr;
+
 class CMapLayers : public CComponent
 {
 	friend class CBackground;
@@ -40,12 +43,36 @@ class CMapLayers : public CComponent
 		
 		struct STileVisual
 		{
-			STileVisual() : m_IndexBufferByteOffset(0), m_TilesHandledCount(0), m_Draw(false)  { }
-			char* m_IndexBufferByteOffset;
-			unsigned int m_TilesHandledCount; //number of tiles that were handled before this tile + this tile if added
-			bool m_Draw;
+			STileVisual() : m_IndexBufferByteOffset(0) { }
+		private:
+			offset_ptr m_IndexBufferByteOffset;
+		public:
+			bool DoDraw() 
+			{
+				return (bool)(m_IndexBufferByteOffset&0x80000000 != 0);
+			}
+
+			void Draw(bool SetDraw) 
+			{
+				m_IndexBufferByteOffset = (SetDraw ? 0x80000000 : 0) | (m_IndexBufferByteOffset & 0x7FFFFFFF);
+			}
+
+			offset_ptr IndexBufferByteOffset()
+			{
+				return ((offset_ptr)(m_IndexBufferByteOffset & 0x7FFFFFFF));
+			}
+
+			void SetIndexBufferByteOffset(offset_ptr IndexBufferByteOff)
+			{
+				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x80000000);
+			}
+
+			void AddIndexBufferByteOffset(offset_ptr IndexBufferByteOff)
+			{
+				m_IndexBufferByteOffset = (((offset_ptr)(m_IndexBufferByteOffset & 0x7FFFFFFF)) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x80000000);
+			}
 		};
-		STileVisual** m_TilesOfLayer;
+		STileVisual* m_TilesOfLayer;
 		
 		STileVisual m_BorderTopLeft;
 		STileVisual m_BorderTopRight;
