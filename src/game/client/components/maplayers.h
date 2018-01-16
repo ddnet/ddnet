@@ -49,7 +49,7 @@ class CMapLayers : public CComponent
 		public:
 			bool DoDraw() 
 			{
-				return (bool)(m_IndexBufferByteOffset&0x80000000 != 0);
+				return (bool)((m_IndexBufferByteOffset&0x80000000) != 0);
 			}
 
 			void Draw(bool SetDraw) 
