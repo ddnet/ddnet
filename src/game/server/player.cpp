@@ -778,17 +778,3 @@ void CPlayer::SpectatePlayerName(const char *pName)
 		}
 	}
 }
-
-const char* CPlayer::GetAuthStateName(bool IsFirstWord)
-{
-	int State = Server()->GetAuthedState(m_ClientID);
-	
-	if(State == IServer::AUTHED_HELPER)
-		return IsFirstWord ? "Helper" : "helper";
-	if(State == IServer::AUTHED_MOD)
-		return IsFirstWord ? "Moderator" : "moderator";
-	if(State == IServer::AUTHED_NO)
-		return IsFirstWord ? "Admin" : "admin";
-	
-	return IsFirstWord ? "User" : "user";
-} 

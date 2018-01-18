@@ -160,8 +160,6 @@ public:
 	int Pause(int State, bool Force);
 	int ForcePause(int Time);
 	int IsPaused();
-	
-	const char* GetAuthStateName(bool IsFirstWord = false);
 
 	bool IsPlaying();
 	int64 m_Last_KickVote;
