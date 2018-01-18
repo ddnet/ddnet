@@ -3395,7 +3395,7 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 	m_VoteEnforcer = EnforcerID;
 	
 	char aBuf[256];
-	const char* pOption = Success ? "yes" : "no";
+	const char *pOption = Success ? "yes" : "no";
 	str_format(aBuf, sizeof(aBuf), "moderator forced vote %s", pOption);
 	SendChatTarget(-1, aBuf);
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pOption);
