@@ -573,3 +573,20 @@ void CGameContext::ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData
 
 	pChr->m_FreezeHammer = false;
 }
+void CGameContext::ConVoteNo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	
+	// check if there is a vote running
+	if(!pSelf->m_VoteCloseTime)
+		return;
+	
+	pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
+	pSelf->m_VoteEnforcer = pResult->m_ClientID;
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s forced vote %s", pResult->GetString(0), 
+			 pSelf->m_apPlayers[pResult->m_ClientID]->GetAuthStateName(true));
+	pSelf->SendChatTarget(-1, aBuf);
+	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pResult->GetString(0));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+}
