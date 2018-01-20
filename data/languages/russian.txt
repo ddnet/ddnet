@@ -774,55 +774,55 @@ Grabs
 == 
 
 Background (entities)
-== 
+== Задний фон
 
 Show ghost
-== 
+== Показать тень
 
 DDNet
 == 
 
 No updates available
-== 
+== Нет доступных обновлений
 
 second
-== 
+== Второй
 
 HUD
 == 
 
 Look out!
-== 
+== Берегись!
 
 Select a name
-== 
+== Выбрать имя
 
 Show other players' hook collision lines
-== 
+== Показывать hook collision линию других игроков
 
 We will win
-== 
+== Мы выиграем!
 
 Hi o/
-== 
+== Привет ^^/
 
 Deaths
 == 
 
 DDNet Client needs to be restarted to complete update!
-== 
+== Перезапустите DDNet Client для завершения обновления
 
 Spectator
-== 
+== Наблюдатель
 
 Please use a different name
-== 
+== Пожалуйста, используйте другое имя
 
 Wait before try for
 == 
 
 Show others
-== 
+== Показывать остальных
 
 Gameplay
 == 
@@ -831,13 +831,13 @@ Restart
 == 
 
 Game paused
-== 
+== Игра приостановлена
 
 Laser
-== 
+== Лазер
 
 Old mouse mode
-== 
+== Режим старой мышки
 
 Browser
 == 
@@ -846,13 +846,13 @@ Follow
 == 
 
 Team message
-== 
+== Сообщение команды
 
 Manual %3d:%02d  
 == 
 
 Automatically create statboard csv
-== 
+== Автоматически создавать statboard csv
 
 Save the best demo of each race
 == 
@@ -861,10 +861,10 @@ Show tiles layers from BG map
 == 
 
 Are you sure that you want to disconnect?
-== 
+== Вы уверены, что хотите отключиться?
 
 Remove chat
-== 
+== Удалить чат
 
 Check now
 == 
@@ -888,7 +888,7 @@ Show other players' key presses
 == 
 
 System message
-== 
+== Системное сообщение
 
 Enable long pain sound (used when shooting in freeze)
 == 
@@ -897,13 +897,13 @@ DDNet %s is available:
 == 
 
 Updating...
-== 
+== Обновление...
 
 Overlay entities
 == 
 
 Messages
-== 
+== Сообщения
 
 %.2f MiB
 == 
@@ -912,7 +912,7 @@ Refresh Rate
 == 
 
 New random timeout code
-== 
+== Новый случайный timeout код
 
 Suicides
 == 
@@ -921,7 +921,7 @@ Net
 == 
 
 Loading DDNet Client
-== 
+== Загрузка DDNet Client
 
 FPM
 == 
@@ -948,58 +948,58 @@ Best
 == 
 
 Normal message
-== 
+== Обычное сообщение
 
 Screen
 == 
 
 Connecting dummy
-== 
+== Присоединить dummy
 
 Clan plates size
 == 
 
 Update now
-== 
+== Обновить
 
 Auto %3d:%02d  
 == 
 
 Save ghost
-== 
+== Сохранять тень
 
 Exclude
 == 
 
 Hello and welcome
-== 
+== Привет и добро пожаловать
 
 AntiPing: predict weapons
 == 
 
 DDNet Client updated!
-== 
+== DDNet Client обновлён!
 
 High-DPI screen support (experimental)
 == 
 
 Outline color
-== 
+== Цвет контура
 
 Highlighted message
-== 
+== Выделенное сообщение
 
 Friend
-== 
+== Друг
 
 AntiPing: predict grenade paths
 == 
 
 Demo
-== 
+== Демо
 
 AntiPing limit
-== 
+== AntiPing лимит
 
 Inner color
-== 
+== Внутренний цвет
