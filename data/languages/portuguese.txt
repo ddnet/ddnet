@@ -52,13 +52,13 @@ Are you sure that you want to quit?
 == Queres mesmo sair?
 
 Are you sure that you want to remove the player from your friends list?
-== Queres mesmo apaga o jogador da tua lista de amigos?
+== Queres mesmo apagar o jogador da tua lista de amigos?
 
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Olá! Pelos vistos é a primeira vez que inicias o jogo, por isso escolhe um Nick Name para ti! Aproveita e vê as configurações antes de entrar num servidor!
 
 Automatically record demos
-== Gravar demos Automáticamente
+== Gravar demos automaticamente
 
 Automatically take game over screenshot
 == Tirar screenshots no final do turno autom.
@@ -88,7 +88,7 @@ Clan
 == Clã
 
 Client
-== Client
+== Cliente
 
 Close
 == Fechar
@@ -118,7 +118,7 @@ Country
 == País
 
 Current
-== Atualmente
+== Atual
 
 Custom colors
 == Cores personalizadas
@@ -157,7 +157,7 @@ Dynamic Camera
 == Câmera dinâmica
 
 Emoticon
-== Emotes
+== Emoticon
 
 Enter
 == Entrar
@@ -187,7 +187,7 @@ Folder
 == Pasta
 
 Force vote
-== Forçar
+== Forçar a votação
 
 Free-View
 == Vista Livre
@@ -196,13 +196,13 @@ Friends
 == Amigos
 
 Fullscreen
-== Fullscreen (Ecrã inteiro)
+== Ecrã inteiro
 
 Game
 == Jogo
 
 Game info
-== Info sobre o jogo
+== Informação sobre o jogo
 
 Game over
 == Fim de Jogo
@@ -229,7 +229,7 @@ Hammer
 == Martelo
 
 Has people playing
-== Há gente a jogar
+== Tem gente a jogar
 
 High Detail
 == Mais detalhes (HD)
@@ -241,10 +241,10 @@ Invalid Demo
 == Demo inválida
 
 Join blue
-== Juntar - Azuis
+== Juntar à azul
 
 Join red
-== J. Vermelhos
+== Juntar à vermelha
 
 Jump
 == Saltar
@@ -271,19 +271,19 @@ Mouse sens.
 == Sens. do rato
 
 Move left
-== Esquerda
+== Move-te para a esquerda
 
 Move player to spectators
 == Juntar jogador aos spectators
 
 Move right
-== Direita
+== Move-te para a direita
 
 Movement
 == Movimento
 
 Mute when not active
-== Fazer mute em estado AFK.
+== Fazer mute em estado AFK
 
 Name
 == Nome
@@ -301,10 +301,10 @@ No password
 == Sem password
 
 No servers found
-== Nenhum servidor encontrado.
+== Nenhum servidor encontrado
 
 No servers match your filter criteria
-== Não há servidores que correspondam às definições de procura.
+== Não há servidores que correspondam aos critérios de procura.
 
 Ok
 == Aceitar
@@ -316,10 +316,10 @@ Parent Folder
 == Pasta superior
 
 Password
-== Password
+== Palavra-Passe
 
 Password incorrect
-== Password errada!
+== Palavra-Passe errada!
 
 Ping
 == Ping
@@ -361,7 +361,7 @@ Reason:
 == Motivo:
 
 Red team
-== Equipa verm.
+== Equipa vermelha
 
 Red team wins!
 == Ganhou a equipa vermelha!
@@ -391,10 +391,10 @@ Reset
 == Reset
 
 Reset filter
-== Reiniciar Fitro
+== Reiniciar filtro
 
 Respawn
-== Respawn
+== Renascer
 
 Sample rate
 == Frequencia de rate
@@ -406,7 +406,7 @@ Score board
 == Tabela de Pontos
 
 Score limit
-== Pontuação Máx.
+== Pontuação máxima
 
 Scoreboard
 == Pontuação
@@ -427,10 +427,10 @@ Server filter
 == Filtro de servidores
 
 Server info
-== Info de servidor
+== Informação de servidor
 
 Server not full
-== Servidores não cheios
+== Servidor não cheio
 
 Shotgun
 == Shotgun
@@ -448,7 +448,7 @@ Show name plates
 == Mostrar nick's
 
 Show only chat messages from friends
-== Mostrar apenas mensagens chat dos amigos
+== Mostrar apenas mensagens dos amigos no chat
 
 Show only supported
 == Mostrar apenas suportado
@@ -463,7 +463,7 @@ Sound error
 == Erro no som!
 
 Spectate
-== Spectate
+== Observar
 
 Spectate next
 == Observar próximo
@@ -472,10 +472,10 @@ Spectate previous
 == Observar anterior
 
 Spectator mode
-== Modo spectator
+== Modo de espectador
 
 Spectators
-== Spectators
+== Espectadores
 
 Standard gametype
 == Tipo de jogo normal
@@ -493,7 +493,7 @@ Sudden Death
 == Morte súbita
 
 Switch weapon on pickup
-== Mudar de arma ao agarrar
+== Mudar de arma ao pegar nela
 
 Team
 == Equipa
@@ -514,7 +514,7 @@ There's an unsaved map in the editor, you might want to save it before you quit 
 == O mapa que editaste não foi gravado. Queres gravar antes de sair?
 
 Time limit
-== Tempo máx.
+== Tempo máximo
 
 Time limit: %d min
 == Limite de tempo: %d min
@@ -526,7 +526,7 @@ Type
 == Tipo
 
 Unable to delete the demo
-== Não podes eliminar a demo
+== Impossível eliminar a demo
 
 Unable to rename the demo
 == Impossivel renomear a demo
@@ -535,7 +535,7 @@ Use sounds
 == Ligar efeitos sonoros
 
 Use team colors for name plates
-== Usar cores dos nicks com a cor da equipa
+== Usar a cor da equipa para os nick's
 
 V-Sync
 == V-Sync
@@ -544,7 +544,7 @@ Version
 == Versão
 
 Vote command:
-== Comando:
+== Comando de voto:
 
 Vote description:
 == Descrição de votação:
@@ -559,7 +559,7 @@ Voting
 == A votar
 
 Warmup
-== Preparação
+== Aquecimento
 
 Weapon
 == Arma
@@ -571,13 +571,13 @@ Yes
 == Sim
 
 You must restart the game for all settings to take effect.
-== Para que as configurações sejam efectuadas deves Reiniciar o jogo.
+== Para que as configurações sejam efetuadas deves reiniciar o jogo.
 
 Internet
 == Internet
 
 Max demos
-== Demos maximas
+== Demos máximas
 
 News
 == Notícias
@@ -595,13 +595,13 @@ New name:
 == %d de %d servidores, %d jogadores
 
 Sound volume
-== Volume
+== Volume de som
 
 Created:
 == Criado:
 
 Max Screenshots
-== Máx. de Capturas de Tela
+== Máximo de Capturas de Ecrã
 
 Record demo
 == Gravar uma demo
@@ -613,7 +613,7 @@ Rifle
 == Laser
 
 Netversion:
-== Netversion
+== Netversion:
 
 Map:
 == Mapa:
@@ -622,7 +622,7 @@ FSAA samples
 == Amostras FSAA
 
 Info
-== Info.
+== Info
 
 Miscellaneous
 == Diversos
@@ -637,7 +637,7 @@ Size:
 == Tamanho:
 
 Reset to defaults
-== Pôr como defeito
+== Restaurar predefinições
 
 Quit anyway?
 == Sair na mesma?
@@ -670,13 +670,13 @@ Alpha
 == Alpha
 
 Current version: %s
-== Versão atual : %s
+== Versão atual: %s
 
 LAN
 == LAN
 
 Name plates size
-== Caracteres maximos nos nicks
+== Tamanho dos nick's
 
 Type:
 == Tipo:
@@ -712,7 +712,7 @@ Grabs
 == 
 
 Background (entities)
-== 
+== Plano de fundo (entidades)
 
 Show kill messages
 == Mostrar mensagens de morte
@@ -739,7 +739,7 @@ HUD
 == 
 
 Look out!
-== 
+==
 
 Show names in chat in team colors
 == Mostrar nomes no chat com cores da equipa
@@ -766,7 +766,7 @@ Enable game sounds
 == Ativar os sons do jogo
 
 DDNet Client needs to be restarted to complete update!
-== O cliente DDNet precisa de ser reiniciado para completar a atualização
+== O cliente DDNet precisa de ser reiniciado para completar a atualização!
 
 Spectator
 == Espectador
@@ -784,7 +784,7 @@ Show others
 == Mostrar os outros
 
 Gameplay
-== 
+== Jogabilidade
 
 Restart
 == Reiniciar
@@ -793,13 +793,13 @@ Old mouse mode
 == Modo de rato antigo
 
 Browser
-== 
+== Navegador
 
 Follow
 == 
 
 Enable gun sound
-== 
+== Ativar o som da arma
 
 Show health + ammo
 == Mostrar saúde + munição
@@ -835,16 +835,16 @@ Threaded sound loading
 == 
 
 Check now
-== 
+== Verifica agora
 
 Race %3d:%02d  
 == 
 
 Background (regular)
-== 
+== Plano de fundo (regular)	
 
 DDNet %s is out! Download it at DDNet.tw!
-== 
+== DDNet %s saiu! Saca-o em DDNet.tw!
 
 Reset wanted weapon on death
 == 
@@ -868,7 +868,7 @@ Enable long pain sound (used when shooting in freeze)
 == 
 
 DDNet %s is available:
-== 
+== DDNet %s está disponível:
 
 Updating...
 == A atualizar...
@@ -880,13 +880,13 @@ Messages
 == Mensagens
 
 Vanilla Skins only
-== 
+== Apenas skins vanilla
 
 %.2f MiB
 == 
 
 Refresh Rate
-== 
+== Taxa de atualização
 
 New random timeout code
 == Novo código aleatório de timeout
@@ -898,22 +898,22 @@ Net
 == 
 
 Loading DDNet Client
-== Carregando o cliente DDNet
+== A carregar o cliente DDNet
 
 FPM
 == 
 
 Default zoom
-== 
+== Zoom predefinido
 
 Show score
-== 
+== Mostrar pontuação
 
 Spree
 == 
 
 Show client IDs in Scoreboard
-== 
+== Mostrar os IDs do cliente na tabela de pontuação
 
 Max CSVs
 == 
@@ -928,13 +928,13 @@ Try fast HTTP map download first
 == 
 
 Use DDRace Scoreboard
-== 
+== Usa a tabela de pontuações de DDRace
 
 Best
 == Melhor
 
 Enable regular chat sound
-== 
+== Ativar o som do chat regular
 
 Normal message
 == Mensagem normal
@@ -946,7 +946,7 @@ Connecting dummy
 == A conectar o dummy
 
 Clan plates size
-== 
+== Tamanho do nome do clã
 
 Update now
 == Atualizar agora
@@ -955,7 +955,7 @@ Auto %3d:%02d
 == 
 
 Show clan above name plates
-== 
+== Mostrar o nome do clã por cima do nome
 
 Save ghost
 == Guardar fantasma
@@ -964,7 +964,7 @@ Exclude
 == Excluir
 
 Enable highlighted chat sound
-== 
+== Ativar o som do chat em destaque
 
 Hello and welcome
 == Olá e bem-vindo
@@ -982,7 +982,7 @@ Outline color
 == 
 
 Highlighted message
-== 
+== Mensagem em destaque
 
 Friend
 == Amigo
@@ -991,10 +991,10 @@ Switch weapon when out of ammo
 == Mudar de arma quando ficar sem munição
 
 AntiPing: predict grenade paths
-== 
+== Antiping: prever os caminhos da granada
 
 AntiPing limit
-== 
+== Limite do Antiping
 
 Inner color
-== 
+== Cor interior
