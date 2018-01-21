@@ -1322,16 +1322,16 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
+	if(!CheckClientID(pResult->m_ClientID))
 		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
+	if(!pPlayer)
 		return;
 	CCharacter* pChr = pPlayer->GetCharacter();
-	if (!pChr)
+	if(!pChr)
 		return;
 
-	if (!g_Config.m_SvRescue) {
+	if(!g_Config.m_SvRescue) {
 		pSelf->SendChatTarget(pPlayer->GetCID(), "Rescue is not enabled on this server");
 		return;
 	}
@@ -1342,26 +1342,26 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConMods(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
+	if(!CheckClientID(pResult->m_ClientID))
 		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
+	if(!pPlayer)
 		return;
 	
 	char aMsg[1024];
 	char aBuf[64];
 	int total_mods = 0;
 
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_Authed)
+		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_Authed)
 		{
 			total_mods++;
-			if (total_mods == 1)
+			if(total_mods == 1)
 			{
 				str_format(aMsg, sizeof(aMsg), "~~~~~~~ Moderators ~~~~~~~\n\n- '%s'\n", pSelf->Server()->ClientName(i));
 			}
-			else if (total_mods < 19)
+			else if(total_mods < 19)
 			{
 				str_format(aBuf, sizeof(aBuf), "- '%s'\n", pSelf->Server()->ClientName(i));
 				str_append(aMsg, aBuf, sizeof(aMsg));
@@ -1372,9 +1372,9 @@ void CGameContext::ConMods(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "\n~~~~~~~~~~~~~~~~~~~~~~\n total: %d", total_mods);
 	str_append(aMsg, aBuf, sizeof(aMsg));
 
-	if (!total_mods)
+	if(!total_mods)
 	{
-		str_format(aMsg, sizeof(aMsg), "~~~~~ Moderators ~~~~~\n\ncurrently no moderators online.");
+		str_format(aMsg, sizeof(aMsg), "~~~~~~~ Moderators ~~~~~~~\n\ncurrently no moderators online.");
 	}
 
 	// send motd
