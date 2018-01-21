@@ -1363,6 +1363,45 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 			//pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
+
+void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if(pPlayer->m_ModHelpTick > pSelf->Server()->Tick())
+	{
+		char aBuf[126];
+		str_format(aBuf, sizeof(aBuf), "You must wait %d seconds to execute this command again.",
+				   (pPlayer->m_ModHelpTick - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		return;
+	}
+
+	pPlayer->m_ModHelpTick = pSelf->Server()->Tick() + g_Config.m_SvModHelpDelay * pSelf->Server()->TickSpeed();
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Moderator help is requested by %s (ID: %d):",
+			pSelf->Server()->ClientName(pResult->m_ClientID),
+			pResult->m_ClientID);
+
+	// Send the request to all authed clients.
+	for ( int i = 0; i < MAX_CLIENTS; i++ )
+	{
+		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_Authed)
+		{
+			pSelf->SendChatTarget(pSelf->m_apPlayers[i]->GetCID(), aBuf);
+			pSelf->SendChatTarget(pSelf->m_apPlayers[i]->GetCID(), pResult->GetString(0));
+		}
+	}
+}
+
 #if defined(CONF_SQL)
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {
