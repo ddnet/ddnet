@@ -1075,7 +1075,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		return true;
 
 	int LimitStart = abs(pData->m_Num-1);
-	const char *pOrder = pData->m_Num >= 0 ? "ASC" : "DESC";
+	const char *pOrder = pData->m_Num >= 0 ? "DESC" : "ASC";
 
 	try
 	{
@@ -1095,8 +1095,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 			return true;
 		}
 
-		str_format(aBuf, sizeof(aBuf), "------------ Last Times No %d - %d ------------", pData->m_Num, pData->m_Num + (int)pSqlServer->GetResults()->rowsCount() - 1);
-		pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
+		pData->GameServer()->SendChatTarget(pData->m_ClientID, "------------- Last Times -------------");
 
 		float pTime = 0;
 		int pSince = 0;

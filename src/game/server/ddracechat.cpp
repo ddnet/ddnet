@@ -367,7 +367,7 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if (pResult->NumArguments() > 0 && pResult->GetInteger(0) > 0)
+	if (pResult->NumArguments() > 0)
 		pSelf->Score()->ShowTeamTop5(pResult, pResult->m_ClientID, pUserData,
 				pResult->GetInteger(0));
 	else
@@ -398,7 +398,7 @@ void CGameContext::ConTop5(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if (pResult->NumArguments() > 0 && pResult->GetInteger(0) > 0)
+	if (pResult->NumArguments() > 0)
 		pSelf->Score()->ShowTop5(pResult, pResult->m_ClientID, pUserData,
 				pResult->GetInteger(0));
 	else
@@ -1414,7 +1414,7 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if (pResult->NumArguments() > 0 && pResult->GetInteger(0) >= 0)
+	if (pResult->NumArguments() > 0)
 		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData,
 				pResult->GetInteger(0));
 	else
