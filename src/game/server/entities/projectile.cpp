@@ -146,6 +146,7 @@ void CProjectile::Tick()
 	else if (m_Owner >= 0)
 	{
 		GameServer()->m_World.DestroyEntity(this);
+		return;
 	}
 
 	if( ((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
@@ -177,10 +178,14 @@ void CProjectile::Tick()
 		{
 			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->m_World.DestroyEntity(this);
+			return;
 		}
 		else
 			if (!m_Freeze)
+			{
 				GameServer()->m_World.DestroyEntity(this);
+				return;
+			}
 	}
 	if(m_LifeSpan == -1)
 	{
@@ -201,6 +206,7 @@ void CProjectile::Tick()
 			(m_Owner != -1)? TeamMask : -1LL);
 		}
 		GameServer()->m_World.DestroyEntity(this);
+		return;
 	}
 
 	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
