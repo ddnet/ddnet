@@ -328,11 +328,7 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 	m_Width = Width;
 	m_Height = Height;
 	
-	m_TilesOfLayer = new CMapLayers::STileLayerVisuals::STileVisual*[Height];
-	for(unsigned int i = 0; i < Height; ++i)
-	{
-		m_TilesOfLayer[i] = new CMapLayers::STileLayerVisuals::STileVisual[Width];
-	}
+	m_TilesOfLayer = new CMapLayers::STileLayerVisuals::STileVisual[Height*Width];
 	
 	if(Width > 2)
 	{
@@ -351,10 +347,6 @@ CMapLayers::STileLayerVisuals::~STileLayerVisuals()
 {
 	if(m_TilesOfLayer)
 	{
-		for(unsigned int i = 0; i < m_Height; ++i)
-		{
-			delete[] m_TilesOfLayer[i];
-		}
 		delete[] m_TilesOfLayer;
 	}
 	
@@ -422,7 +414,7 @@ void CMapLayers::OnMapLoad()
 	std::vector<STmpTileTexCoord> tmpBorderBottomTilesTexCoords;
 	std::vector<STmpTile> tmpBorderCorners;
 	std::vector<STmpTileTexCoord> tmpBorderCornersTexCoords;
-	
+
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
@@ -452,25 +444,30 @@ void CMapLayers::OnMapLoad()
 				PassedGameLayer = true;
 			}
 			
-			if (pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
+			if(pLayer == (CMapItemLayer*)m_pLayers->FrontLayer())
 				IsEntityLayer = IsFrontLayer = true;
 
-			if (pLayer == (CMapItemLayer*)m_pLayers->SwitchLayer())
+			if(pLayer == (CMapItemLayer*)m_pLayers->SwitchLayer())
 				IsEntityLayer = IsSwitchLayer = true;
 
-			if (pLayer == (CMapItemLayer*)m_pLayers->TeleLayer())
+			if(pLayer == (CMapItemLayer*)m_pLayers->TeleLayer())
 				IsEntityLayer = IsTeleLayer = true;
 
-			if (pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
+			if(pLayer == (CMapItemLayer*)m_pLayers->SpeedupLayer())
 				IsEntityLayer = IsSpeedupLayer = true;
 
-			if (pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
+			if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
 			
 			if(m_Type <= TYPE_BACKGROUND_FORCE)
 			{
 				if(PassedGameLayer)
 					return;
+			}
+			else if(m_Type == TYPE_FOREGROUND)
+			{
+				if(!PassedGameLayer)
+					continue;
 			}
 			
 			if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -489,30 +486,30 @@ void CMapLayers::OnMapLoad()
 				int DataIndex = 0;
 				unsigned int TileSize = 0;
 				int OverlayCount = 0;
-				if (IsFrontLayer)
+				if(IsFrontLayer)
 				{
 					DataIndex = pTMap->m_Front;
 					TileSize = sizeof(CTile);
 				}
-				else if (IsSwitchLayer)
+				else if(IsSwitchLayer)
 				{
 					DataIndex = pTMap->m_Switch;
 					TileSize = sizeof(CSwitchTile);
 					OverlayCount = 2;
 				}
-				else if (IsTeleLayer)
+				else if(IsTeleLayer)
 				{
 					DataIndex = pTMap->m_Tele;
 					TileSize = sizeof(CTeleTile);
 					OverlayCount = 1;
 				}
-				else if (IsSpeedupLayer)
+				else if(IsSpeedupLayer)
 				{
 					DataIndex = pTMap->m_Speedup;
 					TileSize = sizeof(CSpeedupTile);
 					OverlayCount = 2;
 				}
-				else if (IsTuneLayer)
+				else if(IsTuneLayer)
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
@@ -525,7 +522,7 @@ void CMapLayers::OnMapLoad()
 				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
 				void* pTiles = (void*)m_pLayers->Map()->GetData(DataIndex);
 
-				if (Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
+				if(Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
 				{
 					int CurOverlay = 0;
 					while(CurOverlay < OverlayCount + 1)
@@ -632,75 +629,70 @@ void CMapLayers::OnMapLoad()
 								
 								//the amount of tiles handled before this tile
 								int TilesHandledCount = tmpTiles.size();
-								Visuals.m_TilesOfLayer[y][x].m_IndexBufferByteOffset = (char*)(TilesHandledCount*6*sizeof(unsigned int));
-								Visuals.m_TilesOfLayer[y][x].m_TilesHandledCount = tmpTiles.size();
+								Visuals.m_TilesOfLayer[y*pTMap->m_Width + x].SetIndexBufferByteOffset((offset_ptr32)(TilesHandledCount*6*sizeof(unsigned int)));
 									
 								bool AddAsSpeedup = false;
-								if (IsSpeedupLayer && CurOverlay == 0)
+								if(IsSpeedupLayer && CurOverlay == 0)
 									AddAsSpeedup = true;
 
 								if(AddTile(tmpTiles, tmpTileTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-									Visuals.m_TilesOfLayer[y][x].m_Draw = true;
+									Visuals.m_TilesOfLayer[y*pTMap->m_Width + x].Draw(true);
 								
 								//do the border tiles
 								if(x == 0)
 								{
 									if(y == 0)
 									{
-										Visuals.m_BorderTopLeft.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
+										Visuals.m_BorderTopLeft.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderTopLeft.m_Draw = true;
+											Visuals.m_BorderTopLeft.Draw(true);
 									} else if(y == pTMap->m_Height - 1)
 									{
-										Visuals.m_BorderBottomLeft.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
+										Visuals.m_BorderBottomLeft.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderBottomLeft.m_Draw = true;
+											Visuals.m_BorderBottomLeft.Draw(true);
 											
 									} else 
 									{
-										Visuals.m_BorderLeft[y-1].m_IndexBufferByteOffset = (char*)(tmpBorderLeftTiles.size()*6*sizeof(unsigned int));
-										Visuals.m_BorderLeft[y-1].m_TilesHandledCount = tmpBorderLeftTiles.size();
+										Visuals.m_BorderLeft[y-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderLeftTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderLeftTiles, tmpBorderLeftTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderLeft[y-1].m_Draw = true;
+											Visuals.m_BorderLeft[y-1].Draw(true);
 									}
 								} else if(x == pTMap->m_Width - 1)
 								{
 									if(y == 0)
 									{
-										Visuals.m_BorderTopRight.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
+										Visuals.m_BorderTopRight.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderTopRight.m_Draw = true;
+											Visuals.m_BorderTopRight.Draw(true);
 											
 									} else if(y == pTMap->m_Height - 1)
 									{
-										Visuals.m_BorderBottomRight.m_IndexBufferByteOffset = (char*)(tmpBorderCorners.size()*6*sizeof(unsigned int));
+										Visuals.m_BorderBottomRight.SetIndexBufferByteOffset((offset_ptr32)(tmpBorderCorners.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderCorners, tmpBorderCornersTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderBottomRight.m_Draw = true;
+											Visuals.m_BorderBottomRight.Draw(true);
 											
 									} else
 									{
-										Visuals.m_BorderRight[y-1].m_IndexBufferByteOffset = (char*)(tmpBorderRightTiles.size()*6*sizeof(unsigned int));
-										Visuals.m_BorderRight[y-1].m_TilesHandledCount = tmpBorderRightTiles.size();
+										Visuals.m_BorderRight[y-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderRightTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderRightTiles, tmpBorderRightTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderRight[y-1].m_Draw = true;
+											Visuals.m_BorderRight[y-1].Draw(true);
 									}
 								} else if(y == 0)
 								{
 									if(x > 0 && x < pTMap->m_Width - 1)
 									{
-										Visuals.m_BorderTop[x-1].m_IndexBufferByteOffset = (char*)(tmpBorderTopTiles.size()*6*sizeof(unsigned int));
-										Visuals.m_BorderTop[x-1].m_TilesHandledCount = tmpBorderTopTiles.size();
+										Visuals.m_BorderTop[x-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderTopTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderTopTiles, tmpBorderTopTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderTop[x-1].m_Draw = true;
+											Visuals.m_BorderTop[x-1].Draw(true);
 									}
 								} else if(y == pTMap->m_Height - 1)
 								{
 									if(x > 0 && x < pTMap->m_Width - 1)
 									{
-										Visuals.m_BorderBottom[x-1].m_IndexBufferByteOffset = (char*)(tmpBorderBottomTiles.size()*6*sizeof(unsigned int));
-										Visuals.m_BorderBottom[x-1].m_TilesHandledCount = tmpBorderBottomTiles.size();
+										Visuals.m_BorderBottom[x-1].SetIndexBufferByteOffset((offset_ptr32)(tmpBorderBottomTiles.size()*6*sizeof(unsigned int)));
 										if(AddTile(tmpBorderBottomTiles, tmpBorderBottomTilesTexCoords, Index, Flags, x, y, pGroup, DoTextureCoords, AddAsSpeedup, AngleRotate))
-											Visuals.m_BorderBottom[x-1].m_Draw = true;
+											Visuals.m_BorderBottom[x-1].Draw(true);
 									}
 								}
 							}
@@ -709,17 +701,17 @@ void CMapLayers::OnMapLoad()
 						//append one kill tile to the gamelayer
 						if(IsGameLayer)
 						{
-							Visuals.m_BorderKillTile.m_IndexBufferByteOffset = (char*)(tmpTiles.size() * 6 * sizeof(unsigned int));
+							Visuals.m_BorderKillTile.SetIndexBufferByteOffset((offset_ptr32)(tmpTiles.size() * 6 * sizeof(unsigned int)));
 							if(AddTile(tmpTiles, tmpTileTexCoords, TILE_DEATH, 0, 0, 0, pGroup, DoTextureCoords))								
-								Visuals.m_BorderKillTile.m_Draw = true;
+								Visuals.m_BorderKillTile.Draw(true);
 						}
 						
 						//add the border corners, then the borders and fix their byte offsets
 						int TilesHandledCount = tmpTiles.size();
-						Visuals.m_BorderTopLeft.m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
-						Visuals.m_BorderTopRight.m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
-						Visuals.m_BorderBottomLeft.m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
-						Visuals.m_BorderBottomRight.m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
+						Visuals.m_BorderTopLeft.AddIndexBufferByteOffset(TilesHandledCount*6*sizeof(unsigned int));
+						Visuals.m_BorderTopRight.AddIndexBufferByteOffset(TilesHandledCount*6*sizeof(unsigned int));
+						Visuals.m_BorderBottomLeft.AddIndexBufferByteOffset(TilesHandledCount*6*sizeof(unsigned int));
+						Visuals.m_BorderBottomRight.AddIndexBufferByteOffset(TilesHandledCount*6*sizeof(unsigned int));
 						//add the Corners to the tiles
 						tmpTiles.insert(tmpTiles.end(), tmpBorderCorners.begin(), tmpBorderCorners.end());
 						tmpTileTexCoords.insert(tmpTileTexCoords.end(), tmpBorderCornersTexCoords.begin(), tmpBorderCornersTexCoords.end());
@@ -730,7 +722,7 @@ void CMapLayers::OnMapLoad()
 						{
 							for(int i = 0; i < pTMap->m_Width-2; ++i)
 							{
-								Visuals.m_BorderTop[i].m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
+								Visuals.m_BorderTop[i].AddIndexBufferByteOffset(TilesHandledCount * 6 * sizeof(unsigned int));
 							}
 						}
 						tmpTiles.insert(tmpTiles.end(), tmpBorderTopTiles.begin(), tmpBorderTopTiles.end());
@@ -741,7 +733,7 @@ void CMapLayers::OnMapLoad()
 						{
 							for(int i = 0; i < pTMap->m_Width-2; ++i)
 							{
-								Visuals.m_BorderBottom[i].m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
+								Visuals.m_BorderBottom[i].AddIndexBufferByteOffset(TilesHandledCount * 6 * sizeof(unsigned int));
 							}
 						}
 						tmpTiles.insert(tmpTiles.end(), tmpBorderBottomTiles.begin(), tmpBorderBottomTiles.end());
@@ -752,7 +744,7 @@ void CMapLayers::OnMapLoad()
 						{
 							for(int i = 0; i < pTMap->m_Height-2; ++i)
 							{
-								Visuals.m_BorderLeft[i].m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
+								Visuals.m_BorderLeft[i].AddIndexBufferByteOffset(TilesHandledCount * 6 * sizeof(unsigned int));
 							}
 						}
 						tmpTiles.insert(tmpTiles.end(), tmpBorderLeftTiles.begin(), tmpBorderLeftTiles.end());
@@ -763,7 +755,7 @@ void CMapLayers::OnMapLoad()
 						{
 							for(int i = 0; i < pTMap->m_Height-2; ++i)
 							{
-								Visuals.m_BorderRight[i].m_IndexBufferByteOffset += TilesHandledCount*6*sizeof(unsigned int);
+								Visuals.m_BorderRight[i].AddIndexBufferByteOffset(TilesHandledCount * 6 * sizeof(unsigned int));
 							}
 						}
 						tmpTiles.insert(tmpTiles.end(), tmpBorderRightTiles.begin(), tmpBorderRightTiles.end());
@@ -786,7 +778,7 @@ void CMapLayers::OnMapLoad()
 void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup)
 {
 	STileLayerVisuals& Visuals = *m_TileLayerVisuals[LayerIndex];
-	if (Visuals.m_VisualObjectsIndex == -1) return; //no visuals were created
+	if(Visuals.m_VisualObjectsIndex == -1) return; //no visuals were created
 	
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -852,15 +844,16 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 		
 		for(int y = Y0; y <= Y1; ++y)
 		{
-			if (X0 > X1) continue;
+			if(X0 > X1) 
+				continue;
 			
-			dbg_assert(Visuals.m_TilesOfLayer[y][X1].m_TilesHandledCount >= Visuals.m_TilesOfLayer[y][X0].m_TilesHandledCount, "Tile count wrong.");
+			dbg_assert(Visuals.m_TilesOfLayer[y*pTileLayer->m_Width + X1].IndexBufferByteOffset() >= Visuals.m_TilesOfLayer[y*pTileLayer->m_Width + X0].IndexBufferByteOffset(), "Tile count wrong.");
 			
-			unsigned int NumVertices = (Visuals.m_TilesOfLayer[y][X1].m_TilesHandledCount - Visuals.m_TilesOfLayer[y][X0].m_TilesHandledCount) * 6lu + (Visuals.m_TilesOfLayer[y][X1].m_Draw ? 6lu : 0lu);
+			unsigned int NumVertices = ((Visuals.m_TilesOfLayer[y*pTileLayer->m_Width + X1].IndexBufferByteOffset() - Visuals.m_TilesOfLayer[y*pTileLayer->m_Width + X0].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_TilesOfLayer[y*pTileLayer->m_Width + X1].DoDraw() ? 6lu : 0lu);
 			
 			if(NumVertices)
 			{
-				s_IndexOffsets.push_back(Visuals.m_TilesOfLayer[y][X0].m_IndexBufferByteOffset);
+				s_IndexOffsets.push_back((offset_ptr_size)Visuals.m_TilesOfLayer[y*pTileLayer->m_Width + X0].IndexBufferByteOffset());
 				s_DrawCounts.push_back(NumVertices);
 			}
 		}
@@ -898,7 +891,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 		//draw corners on left side
 		if(BorderY0 < 0)
 		{
-			if (Visuals.m_BorderTopLeft.m_Draw)
+			if(Visuals.m_BorderTopLeft.DoDraw())
 			{
 				vec2 Offset;
 				Offset.x = BorderX0 * 32.f;
@@ -909,12 +902,12 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 
 				int Count = (absolute(BorderX0)+1) * (absolute(BorderY0)+1) - 1;//dont draw the corner again
 
-				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderTopLeft.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
+				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
 			}
 		}
 		if(BorderY1 >= pTileLayer->m_Height)
 		{
-			if (Visuals.m_BorderBottomLeft.m_Draw)
+			if(Visuals.m_BorderBottomLeft.DoDraw())
 			{
 				vec2 Offset;
 				Offset.x = BorderX0 * 32.f;
@@ -925,14 +918,14 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 
 				int Count = (absolute(BorderX0)+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1;//dont draw the corner again
 
-				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderBottomLeft.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
+				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
 			}
 		}
 		//draw left border
 		if(Y0 < pTileLayer->m_Height - 1 && Y1 > 0)
 		{
-			unsigned int DrawNum = (Visuals.m_BorderLeft[Y1-1].m_TilesHandledCount - Visuals.m_BorderLeft[Y0-1].m_TilesHandledCount) * 6lu + (Visuals.m_BorderLeft[Y1-1].m_Draw ? 6lu : 0lu);
-			char* pOffset = Visuals.m_BorderLeft[Y0-1].m_IndexBufferByteOffset;
+			unsigned int DrawNum = ((Visuals.m_BorderLeft[Y1-1].IndexBufferByteOffset() - Visuals.m_BorderLeft[Y0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderLeft[Y1-1].DoDraw() ? 6lu : 0lu);
+			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderLeft[Y0-1].IndexBufferByteOffset();
 			vec2 Dir;
 			Dir.x = -32.f;
 			Dir.y = 0.f;
@@ -945,7 +938,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 		//draw corners on right side
 		if(BorderY0 < 0)
 		{
-			if (Visuals.m_BorderTopRight.m_Draw)
+			if(Visuals.m_BorderTopRight.DoDraw())
 			{
 				vec2 Offset;
 				Offset.x = (BorderX1-pTileLayer->m_Width) * 32.f;
@@ -956,12 +949,12 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 
 				int Count = (BorderX1-pTileLayer->m_Width+1) * (absolute(BorderY0)+1) - 1;//dont draw the corner again
 
-				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderTopRight.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
+				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
 			}
 		}
 		if(BorderY1 >= pTileLayer->m_Height)
 		{
-			if (Visuals.m_BorderBottomRight.m_Draw)
+			if(Visuals.m_BorderBottomRight.DoDraw())
 			{
 				vec2 Offset;
 				Offset.x = (BorderX1-pTileLayer->m_Width) * 32.f;
@@ -972,14 +965,14 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 
 				int Count = (BorderX1-pTileLayer->m_Width+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1;//dont draw the corner again
 
-				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderBottomRight.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
+				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
 			}
 		}		
 		//draw right border
 		if(Y0 < pTileLayer->m_Height - 1 && Y1 > 0)
 		{
-			unsigned int DrawNum = (Visuals.m_BorderRight[Y1-1].m_TilesHandledCount - Visuals.m_BorderRight[Y0-1].m_TilesHandledCount) * 6lu + (Visuals.m_BorderRight[Y1-1].m_Draw ? 6lu : 0lu);;
-			char* pOffset = Visuals.m_BorderRight[Y0-1].m_IndexBufferByteOffset;
+			unsigned int DrawNum = ((Visuals.m_BorderRight[Y1-1].IndexBufferByteOffset() - Visuals.m_BorderRight[Y0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderRight[Y1-1].DoDraw() ? 6lu : 0lu);;
+			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderRight[Y0-1].IndexBufferByteOffset();
 			vec2 Dir;
 			Dir.x = 32.f;
 			Dir.y = 0.f;
@@ -991,8 +984,8 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 		//draw top border
 		if(X0 < pTileLayer->m_Width - 1 && X1 > 0)
 		{			
-			unsigned int DrawNum = (Visuals.m_BorderTop[X1-1].m_TilesHandledCount - Visuals.m_BorderTop[X0-1].m_TilesHandledCount) * 6lu + (Visuals.m_BorderTop[X1-1].m_Draw ? 6lu : 0lu);;
-			char* pOffset = Visuals.m_BorderTop[X0-1].m_IndexBufferByteOffset;			
+			unsigned int DrawNum = ((Visuals.m_BorderTop[X1-1].IndexBufferByteOffset() - Visuals.m_BorderTop[X0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderTop[X1-1].DoDraw() ? 6lu : 0lu);;
+			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderTop[X0-1].IndexBufferByteOffset();
 			vec2 Dir;
 			Dir.x = 0.f;
 			Dir.y = -32.f;
@@ -1004,8 +997,8 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 		//draw bottom border
 		if(X0 < pTileLayer->m_Width - 1 && X1 > 0)
 		{
-			unsigned int DrawNum = (Visuals.m_BorderBottom[X1-1].m_TilesHandledCount - Visuals.m_BorderBottom[X0-1].m_TilesHandledCount) * 6lu + (Visuals.m_BorderBottom[X1-1].m_Draw ? 6lu : 0lu);;
-			char* pOffset = Visuals.m_BorderBottom[X0-1].m_IndexBufferByteOffset;	
+			unsigned int DrawNum = ((Visuals.m_BorderBottom[X1-1].IndexBufferByteOffset() - Visuals.m_BorderBottom[X0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderBottom[X1-1].DoDraw() ? 6lu : 0lu);;
+			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderBottom[X0-1].IndexBufferByteOffset();
 			vec2 Dir;
 			Dir.x = 0.f;
 			Dir.y = 32.f;
@@ -1018,7 +1011,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup)
 {
 	STileLayerVisuals& Visuals = *m_TileLayerVisuals[LayerIndex];
-	if (Visuals.m_VisualObjectsIndex == -1) return; //no visuals were created
+	if(Visuals.m_VisualObjectsIndex == -1) return; //no visuals were created
 	
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1036,7 +1029,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 	if(BorderY1 >= pTileLayer->m_Height + 201) DrawBorder = true;
 	
 	if(!DrawBorder) return;
-	if (!Visuals.m_BorderKillTile.m_Draw) return;
+	if(!Visuals.m_BorderKillTile.DoDraw()) return;
 	
 	if(BorderX0 < -300) BorderX0 = -300;
 	if(BorderY0 < -300) BorderY0 = -300;
@@ -1060,7 +1053,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 
 		int Count = (absolute(BorderX0) - 201) * (BorderY1 - BorderY0);
 
-		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderKillTile.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (absolute(BorderX0) - 201), Count);
+		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (absolute(BorderX0) - 201), Count);
 	}
 	//draw top kill tile border
 	if(BorderY0 < -201)
@@ -1076,7 +1069,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 
 		int Count = (OffX1 - OffX0) * (absolute(BorderY0)-201);
 
-		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderKillTile.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (OffX1 - OffX0), Count);
+		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (OffX1 - OffX0), Count);
 	}
 	if(BorderX1 >= pTileLayer->m_Width + 201)
 	{
@@ -1089,7 +1082,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 
 		int Count = (BorderX1 - (pTileLayer->m_Width + 201)) * (BorderY1 - BorderY0);
 
-		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderKillTile.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (BorderX1 - (pTileLayer->m_Width + 201)), Count);
+		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (BorderX1 - (pTileLayer->m_Width + 201)), Count);
 	}
 	if(BorderY1 >= pTileLayer->m_Height + 201)
 	{
@@ -1104,7 +1097,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 
 		int Count = (OffX1 - OffX0) * (BorderY1-(pTileLayer->m_Height + 201));
 
-		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, Visuals.m_BorderKillTile.m_IndexBufferByteOffset, (float*)&Offset, (float*)&Dir, (OffX1 - OffX0), Count);
+		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (OffX1 - OffX0), Count);
 	}
 }
 
@@ -1141,10 +1134,16 @@ int CMapLayers::TileLayersOfGroup(CMapItemGroup* pGroup)
 		if(pLayer == (CMapItemLayer*)m_pLayers->TuneLayer())
 			IsTuneLayer = true;
 		
-		else if(m_Type <= TYPE_BACKGROUND_FORCE)
+
+		if(m_Type <= TYPE_BACKGROUND_FORCE)
 		{
 			if(PassedGameLayer)
 				return TileLayerCounter;
+		}
+		else if(m_Type == TYPE_FOREGROUND)
+		{
+			if(!PassedGameLayer)
+				continue;
 		}
 		
 		if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -1153,31 +1152,31 @@ int CMapLayers::TileLayersOfGroup(CMapItemGroup* pGroup)
 			int DataIndex = 0;
 			unsigned int TileSize = 0;
 			int TileLayerAndOverlayCount = 0;
-			if (IsFrontLayer)
+			if(IsFrontLayer)
 			{
 				DataIndex = pTMap->m_Front;
 				TileSize = sizeof(CTile);
 				TileLayerAndOverlayCount = 1;
 			}
-			else if (IsSwitchLayer) 
+			else if(IsSwitchLayer) 
 			{
 				DataIndex = pTMap->m_Switch;
 				TileSize = sizeof(CSwitchTile);
 				TileLayerAndOverlayCount = 3;
 			}
-			else if (IsTeleLayer) 
+			else if(IsTeleLayer) 
 			{
 				DataIndex = pTMap->m_Tele;
 				TileSize = sizeof(CTeleTile);
 				TileLayerAndOverlayCount = 2;
 			}
-			else if (IsSpeedupLayer) 
+			else if(IsSpeedupLayer) 
 			{
 				DataIndex = pTMap->m_Speedup;
 				TileSize = sizeof(CSpeedupTile);
 				TileLayerAndOverlayCount = 3;
 			}
-			else if (IsTuneLayer) 
+			else if(IsTuneLayer) 
 			{
 				DataIndex = pTMap->m_Tune;
 				TileSize = sizeof(CTuneTile);
@@ -1191,7 +1190,7 @@ int CMapLayers::TileLayersOfGroup(CMapItemGroup* pGroup)
 			}
 
 			unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-			if (Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
+			if(Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
 			{
 				TileLayerCounter += TileLayerAndOverlayCount;
 			}
@@ -1236,7 +1235,7 @@ void CMapLayers::OnRender()
 			float x1 = ((pGroup->m_ClipX+pGroup->m_ClipW) - Points[0]) / (Points[2]-Points[0]);
 			float y1 = ((pGroup->m_ClipY+pGroup->m_ClipH) - Points[1]) / (Points[3]-Points[1]);
 
-			if (x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
+			if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
 			{
 				//check tile layer count of this group
 				TileLayerCounter += TileLayersOfGroup(pGroup);
@@ -1327,37 +1326,37 @@ void CMapLayers::OnRender()
 				}
 			}
 
-			if(pLayer->m_Type == LAYERTYPE_TILES)
+			if((Render || IsGameLayer) && pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				int DataIndex = 0;
 				unsigned int TileSize = 0;
 				int TileLayerAndOverlayCount = 0;
-				if (IsFrontLayer)
+				if(IsFrontLayer)
 				{
 					DataIndex = pTMap->m_Front;
 					TileSize = sizeof(CTile);
 					TileLayerAndOverlayCount = 1;
 				}
-				else if (IsSwitchLayer)
+				else if(IsSwitchLayer)
 				{
 					DataIndex = pTMap->m_Switch;
 					TileSize = sizeof(CSwitchTile);
 					TileLayerAndOverlayCount = 3;
 				}
-				else if (IsTeleLayer)
+				else if(IsTeleLayer)
 				{
 					DataIndex = pTMap->m_Tele;
 					TileSize = sizeof(CTeleTile);
 					TileLayerAndOverlayCount = 2;
 				}
-				else if (IsSpeedupLayer)
+				else if(IsSpeedupLayer)
 				{
 					DataIndex = pTMap->m_Speedup;
 					TileSize = sizeof(CSpeedupTile);
 					TileLayerAndOverlayCount = 3;
 				}
-				else if (IsTuneLayer)
+				else if(IsTuneLayer)
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
@@ -1371,14 +1370,14 @@ void CMapLayers::OnRender()
 				}
 
 				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-				if (Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
+				if(Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
 				{
 					TileLayerCounter += TileLayerAndOverlayCount;
 				}
 			}
 
 			// skip rendering if detail layers if not wanted, or is entity layer and we are a background map
-			if ((pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer))
+			if((pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer))
 				continue;
 			
 			if((Render && g_Config.m_ClOverlayEntities < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (g_Config.m_ClOverlayEntities && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
@@ -1399,7 +1398,7 @@ void CMapLayers::OnRender()
 					CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
 					unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
 
-					if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
+					if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 					{
 						vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
 						if(IsGameLayer && g_Config.m_ClOverlayEntities)
@@ -1433,7 +1432,7 @@ void CMapLayers::OnRender()
 						{
 							Graphics()->BlendNormal();
 							// draw kill tiles outside the entity clipping rectangle
-							if (IsGameLayer)
+							if(IsGameLayer)
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
@@ -1481,7 +1480,7 @@ void CMapLayers::OnRender()
 				CTile *pFrontTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Front);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Front);
 
-				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
+				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 				{
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);						
 					if(!Graphics()->IsBufferingEnabled())
@@ -1508,7 +1507,7 @@ void CMapLayers::OnRender()
 				CSwitchTile *pSwitchTiles = (CSwitchTile *)m_pLayers->Map()->GetData(pTMap->m_Switch);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Switch);
 
-				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSwitchTile))
+				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSwitchTile))
 				{
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
@@ -1541,7 +1540,7 @@ void CMapLayers::OnRender()
 				CTeleTile *pTeleTiles = (CTeleTile *)m_pLayers->Map()->GetData(pTMap->m_Tele);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tele);
 
-				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTeleTile))
+				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTeleTile))
 				{
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
@@ -1572,7 +1571,7 @@ void CMapLayers::OnRender()
 				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)m_pLayers->Map()->GetData(pTMap->m_Speedup);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Speedup);
 
-				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSpeedupTile))
+				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSpeedupTile))
 				{
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
@@ -1610,7 +1609,7 @@ void CMapLayers::OnRender()
 				CTuneTile *pTuneTiles = (CTuneTile *)m_pLayers->Map()->GetData(pTMap->m_Tune);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tune);
 
-				if (Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTuneTile))
+				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTuneTile))
 				{
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
