@@ -52,6 +52,17 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
 endif()
 
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckSymbolExists)
+
+check_symbol_exists(__i386 "" TARGET_ARCH_X86_i386)
+if(TARGET_ARCH_X86_i386)
+  set(TARGET_ARCH x86)
+else()
+  set(TARGET_ARCH)
+endif()
+
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
 if(TARGET_OS STREQUAL "windows")
   set(AUTO_DEPENDENCIES_DEFAULT ON)
@@ -68,16 +79,6 @@ if(NOT(CMAKE_BUILD_TYPE))
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
-  if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    if(CMAKE_CXX_FLAGS)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-    else()
-      set(CMAKE_CXX_FLAGS -std=gnu++11)
-    endif()
-  endif()
-endif()
-
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
@@ -86,6 +87,69 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
+
+########################################################################
+# Compiler flags
+########################################################################
+
+function(add_c_compiler_flag_if_supported VARIABLE FLAG)
+  if(ARGC GREATER 2)
+    set(CHECKED_FLAG "${ARGV2}")
+  else()
+    set(CHECKED_FLAG "${FLAG}")
+  endif()
+  string(REGEX REPLACE "[^A-Za-z0-9]" "_" CONFIG_VARIABLE "FLAG_SUPPORTED${CHECKED_FLAG}")
+  check_c_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
+  if(${CONFIG_VARIABLE})
+    if(${VARIABLE})
+      set("${VARIABLE}" "${${VARIABLE}};${FLAG}" PARENT_SCOPE)
+    else()
+      set("${VARIABLE}" "${FLAG}" PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
+if(NOT MSVC)
+  if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
+    check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
+    if(FLAG_SUPPORTED_std_gnu__11)
+      if(CMAKE_CXX_FLAGS)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+      else()
+        set(CMAKE_CXX_FLAGS -std=gnu++11)
+      endif()
+    endif()
+  endif()
+
+  # Protect the stack pointer.
+  # -fstack-protector-all doesn't work on MinGW.
+  add_c_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
+
+  # Inaccurate floating point numbers cause problems on mingw-w64-gcc when
+  # compiling for x86, might cause problems elsewhere. So don't store floats
+  # in registers but keep them at higher accuracy.
+
+  if(TARGET_ARCH STREQUAL "x86")
+    add_c_compiler_flag_if_supported(OUR_FLAGS -ffloat-store)
+  endif()
+
+  if(TARGET_OS STREQUAL "mac")
+    add_c_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
+    add_c_compiler_flag_if_supported(OUR_FLAGS -mmacosx-version-min=10.7)
+  endif()
+
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
+  if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
+    add_c_compiler_flag_if_supported(OUR_FLAGS_OWN
+      $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>
+      -Wdeclaration-after-statement
+    )
+  endif()
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wextra)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
+endif()
 
 ########################################################################
 # DEPENDENCIES
@@ -286,10 +350,8 @@ else()
   endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
-  include(CheckCCompilerFlag)
+if(NOT MSVC)
   check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
-  check_c_compiler_flag("-fstack-protector-all" ENABLE_STACK_PROTECTOR) # -fstack-protector-all doesn't work on MinGW.
 endif()
 
 ########################################################################
@@ -1444,21 +1506,12 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
-  elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    if(ENABLE_STACK_PROTECTOR)
-      target_compile_options(${target} PRIVATE -fstack-protector-all) # Protect the stack pointer.
-    endif()
-    if(DEFINE_FORTIFY_SOURCE)
-      target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
-    endif()
-    # Inaccurate floating point numbers cause problems on mingw-w64-gcc when
-    # compiling for x86, might cause problems elsewhere. So don't store floats
-    # in registers but keep them at higher accuracy.
-    target_compile_options(${target} PRIVATE -ffloat-store)
   endif()
-  if(TARGET_OS STREQUAL "mac")
-    target_compile_options(${target} PRIVATE -stdlib=libc++)
-    target_compile_options(${target} PRIVATE -mmacosx-version-min=10.7)
+  if(OUR_FLAGS)
+    target_compile_options(${target} PRIVATE ${OUR_FLAGS})
+  endif()
+  if(DEFINE_FORTIFY_SOURCE)
+    target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
   endif()
 endforeach()
 
@@ -1489,15 +1542,9 @@ foreach(target ${TARGETS_OWN})
     target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
     target_compile_options(${target} PRIVATE /wd4267) # Possible loss of data (size_t - int on win64).
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
-  elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    target_compile_options(${target} PRIVATE -Wall)
-    if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
-      target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>)
-    endif()
-    target_compile_options(${target} PRIVATE -Wextra)
-    target_compile_options(${target} PRIVATE -Wno-unused-parameter)
-    target_compile_options(${target} PRIVATE -Wno-missing-field-initializers)
-    target_compile_options(${target} PRIVATE -Wformat=2) # Warn about format strings.
+  endif()
+  if(OUR_FLAGS_OWN)
+    target_compile_options(${target} PRIVATE ${OUR_FLAGS_OWN})
   endif()
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
