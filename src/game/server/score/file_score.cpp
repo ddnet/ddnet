@@ -18,14 +18,14 @@ CFileScore::CPlayerScore::CPlayerScore(const char *pName, float Score,
 {
 	str_copy(m_aName, pName, sizeof(m_aName));
 	m_Score = Score;
-	for (int i = 0; i < NUM_CHECKPOINTS; i++)
+	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		m_aCpTime[i] = aCpTime[i];
 }
 
 CFileScore::CFileScore(CGameContext *pGameServer) :
 				m_pGameServer(pGameServer), m_pServer(pGameServer->Server())
 {
-	if (gs_ScoreLock == 0)
+	if(gs_ScoreLock == 0)
 		gs_ScoreLock = lock_create();
 
 	Init();
@@ -47,7 +47,7 @@ std::string SaveFile()
 	char aBuf[256];
 	str_copy(aBuf, g_Config.m_SvMap, sizeof(aBuf));
 	for(int i = 0; i < 256; i++) if(aBuf[i] == '/') aBuf[i] = '-';
-	if (g_Config.m_SvScoreFolder[0])
+	if(g_Config.m_SvScoreFolder[0])
 		oss << g_Config.m_SvScoreFolder << "/" << aBuf << "_record.dtb";
 	else
 		oss << g_Config.m_SvMap << "_record.dtb";
@@ -70,22 +70,22 @@ void CFileScore::SaveScoreThread(void *pUser)
 	lock_wait(gs_ScoreLock);
 	std::fstream f;
 	f.open(SaveFile().c_str(), std::ios::out);
-	if (!f.fail())
+	if(!f.fail())
 	{
 		int t = 0;
-		for (sorted_array<CPlayerScore>::range r = pSelf->m_Top.all();
+		for(sorted_array<CPlayerScore>::range r = pSelf->m_Top.all();
 				!r.empty(); r.pop_front())
 		{
 			f << r.front().m_aName << std::endl << r.front().m_Score
 					<< std::endl;
-			if (g_Config.m_SvCheckpointSave)
+			if(g_Config.m_SvCheckpointSave)
 			{
-				for (int c = 0; c < NUM_CHECKPOINTS; c++)
+				for(int c = 0; c < NUM_CHECKPOINTS; c++)
 					f << r.front().m_aCpTime[c] << " ";
 				f << std::endl;
 			}
 			t++;
-			if (t % 50 == 0)
+			if(t % 50 == 0)
 				thread_sleep(1);
 		}
 	}
@@ -104,7 +104,7 @@ void CFileScore::Init()
 	lock_wait(gs_ScoreLock);
 
 	// create folder if not exist
-	if (g_Config.m_SvScoreFolder[0])
+	if(g_Config.m_SvScoreFolder[0])
 		fs_makedir(g_Config.m_SvScoreFolder);
 
 	std::fstream f;
@@ -114,12 +114,12 @@ void CFileScore::Init()
 	{
 		std::string TmpName, TmpScore, TmpCpLine;
 		std::getline(f, TmpName);
-		if (!f.eof() && TmpName != "")
+		if(!f.eof() && TmpName != "")
 		{
 			std::getline(f, TmpScore);
 			float aTmpCpTime[NUM_CHECKPOINTS] =
 			{ 0 };
-			if (g_Config.m_SvCheckpointSave)
+			if(g_Config.m_SvCheckpointSave)
 			{
 				std::getline(f, TmpCpLine);
 				char *pTime = strtok((char*) TmpCpLine.c_str(), " ");
@@ -140,7 +140,7 @@ void CFileScore::Init()
 	lock_unlock(gs_ScoreLock);
 
 	// save the current best score
-	if (m_Top.size())
+	if(m_Top.size())
 		((CGameControllerDDRace*) GameServer()->m_pController)->m_CurrentRecord =
 				m_Top[0].m_Score;
 }
@@ -151,26 +151,26 @@ CFileScore::CPlayerScore *CFileScore::SearchName(const char *pName,
 	CPlayerScore *pPlayer = 0;
 	int Pos = 1;
 	int Found = 0;
-	for (sorted_array<CPlayerScore>::range r = m_Top.all(); !r.empty();
+	for(sorted_array<CPlayerScore>::range r = m_Top.all(); !r.empty();
 			r.pop_front())
 	{
-		if (str_find_nocase(r.front().m_aName, pName))
+		if(str_find_nocase(r.front().m_aName, pName))
 		{
-			if (pPosition)
+			if(pPosition)
 				*pPosition = Pos;
-			if (NoCase)
+			if(NoCase)
 			{
 				Found++;
 				pPlayer = &r.front();
 			}
-			if (!strcmp(r.front().m_aName, pName))
+			if(!strcmp(r.front().m_aName, pName))
 				return &r.front();
 		}
 		Pos++;
 	}
-	if (Found > 1)
+	if(Found > 1)
 	{
-		if (pPosition)
+		if(pPosition)
 			*pPosition = -1;
 		return 0;
 	}
@@ -185,9 +185,9 @@ void CFileScore::UpdatePlayer(int ID, float Score,
 	lock_wait(gs_ScoreLock);
 	CPlayerScore *pPlayer = SearchScore(ID, 0);
 
-	if (pPlayer)
+	if(pPlayer)
 	{
-		for (int c = 0; c < NUM_CHECKPOINTS; c++)
+		for(int c = 0; c < NUM_CHECKPOINTS; c++)
 			pPlayer->m_aCpTime[c] = aCpTime[c];
 
 		pPlayer->m_Score = Score;
@@ -210,7 +210,7 @@ void CFileScore::CheckBirthday(int ClientID)
 void CFileScore::LoadScore(int ClientID)
 {
 	CPlayerScore *pPlayer = SearchScore(ClientID, 0);
-	if (pPlayer)
+	if(pPlayer)
 	{
 		lock_wait(gs_ScoreLock);
 		lock_unlock(gs_ScoreLock);
@@ -218,7 +218,7 @@ void CFileScore::LoadScore(int ClientID)
 	}
 
 	// set score
-	if (pPlayer)
+	if(pPlayer)
 	{
 		PlayerData(ClientID)->Set(pPlayer->m_Score, pPlayer->m_aCpTime);
 		GameServer()->m_apPlayers[ClientID]->m_HasFinishScore = true;
@@ -234,7 +234,7 @@ void CFileScore::SaveScore(int ClientID, float Time,
 		float CpTime[NUM_CHECKPOINTS])
 {
 	CConsole* pCon = (CConsole*) GameServer()->Console();
-	if (!pCon->m_Cheated || g_Config.m_SvRankCheats)
+	if(!pCon->m_Cheated || g_Config.m_SvRankCheats)
 		UpdatePlayer(ClientID, Time, CpTime);
 }
 
@@ -244,9 +244,9 @@ void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID,
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	char aBuf[512];
 	pSelf->SendChatTarget(ClientID, "----------- Top 5 -----------");
-	for (int i = 0; i < 5; i++)
+	for(int i = 0; i < 5; i++)
 	{
-		if (i + Debut > m_Top.size())
+		if(i + Debut > m_Top.size())
 			break;
 		CPlayerScore *r = &m_Top[i + Debut - 1];
 		str_format(aBuf, sizeof(aBuf),
@@ -264,18 +264,18 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 	int Pos = -1;
 	char aBuf[512];
 
-	if (!Search)
+	if(!Search)
 		pScore = SearchScore(ClientID, &Pos);
 	else
 		pScore = SearchName(pName, &Pos, 1);
 
-	if (pScore && Pos > -1)
+	if(pScore && Pos > -1)
 	{
 		float Time = pScore->m_Score;
 		char aClientName[128];
 		str_format(aClientName, sizeof(aClientName), " (%s)",
 				Server()->ClientName(ClientID));
-		if (g_Config.m_SvHideScore)
+		if(g_Config.m_SvHideScore)
 			str_format(aBuf, sizeof(aBuf),
 					"Your time: %d minute(s) %5.2f second(s)", (int)Time / 60,
 					Time - ((int)Time / 60 * 60));
@@ -284,13 +284,13 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 					"%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Pos,
 					pScore->m_aName, (int)Time / 60,
 					Time - ((int)Time / 60 * 60), aClientName);
-		if (!Search)
+		if(!Search)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, ClientID);
 		else
 			GameServer()->SendChatTarget(ClientID, aBuf);
 		return;
 	}
-	else if (Pos == -1)
+	else if(Pos == -1)
 		str_format(aBuf, sizeof(aBuf), "Several players were found.");
 	else
 		str_format(aBuf, sizeof(aBuf), "%s is not ranked",

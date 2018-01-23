@@ -61,7 +61,7 @@ vec2 CProjectile::GetPos(float Time)
 	switch(m_Type)
 	{
 		case WEAPON_GRENADE:
-			if (!m_TuneZone)
+			if(!m_TuneZone)
 			{
 				Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
 				Speed = GameServer()->Tuning()->m_GrenadeSpeed;
@@ -75,7 +75,7 @@ vec2 CProjectile::GetPos(float Time)
 			break;
 
 		case WEAPON_SHOTGUN:
-			if (!m_TuneZone)
+			if(!m_TuneZone)
 			{
 				Curvature = GameServer()->Tuning()->m_ShotgunCurvature;
 				Speed = GameServer()->Tuning()->m_ShotgunSpeed;
@@ -89,7 +89,7 @@ vec2 CProjectile::GetPos(float Time)
 			break;
 
 		case WEAPON_GUN:
-			if (!m_TuneZone)
+			if(!m_TuneZone)
 			{
 				Curvature = GameServer()->Tuning()->m_GunCurvature;
 				Speed = GameServer()->Tuning()->m_GunSpeed;
@@ -139,11 +139,11 @@ void CProjectile::Tick()
 			IsWeaponCollide = true;
 			//TeamMask = OwnerChar->Teams()->TeamMask( OwnerChar->Team());
 	}
-	if (pOwnerChar && pOwnerChar->IsAlive())
+	if(pOwnerChar && pOwnerChar->IsAlive())
 	{
 		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
-	else if (m_Owner >= 0)
+	else if(m_Owner >= 0)
 	{
 		GameServer()->m_World.DestroyEntity(this);
 		return;
@@ -164,24 +164,24 @@ void CProjectile::Tick()
 		{
 			m_StartTick = Server()->Tick();
 			m_Pos = NewPos+(-(m_Direction*4));
-			if (m_Bouncing == 1)
+			if(m_Bouncing == 1)
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if (fabs(m_Direction.x) < 1e-6)
+			if(fabs(m_Direction.x) < 1e-6)
 				m_Direction.x = 0;
-			if (fabs(m_Direction.y) < 1e-6)
+			if(fabs(m_Direction.y) < 1e-6)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if (m_Weapon == WEAPON_GUN)
+		else if(m_Weapon == WEAPON_GUN)
 		{
 			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->m_World.DestroyEntity(this);
 			return;
 		}
 		else
-			if (!m_Freeze)
+			if(!m_Freeze)
 			{
 				GameServer()->m_World.DestroyEntity(this);
 				return;
@@ -195,7 +195,7 @@ void CProjectile::Tick()
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
 			int64_t TeamMask = -1LL;
-			if (pOwnerChar && pOwnerChar->IsAlive())
+			if(pOwnerChar && pOwnerChar->IsAlive())
 			{
 					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 			}
@@ -211,11 +211,11 @@ void CProjectile::Tick()
 
 	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
 	int z;
-	if (g_Config.m_SvOldTeleportWeapons)
+	if(g_Config.m_SvOldTeleportWeapons)
 		z = GameServer()->Collision()->IsTeleport(x);
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);
-	if (z && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
+	if(z && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 	{
 		int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size();
 		m_Pos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
@@ -247,7 +247,7 @@ void CProjectile::Snap(int SnappingClient)
 
 	CCharacter* pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%((m_Explosive)?6:20);
-	if (pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
+	if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
 		return;
 
 	CCharacter *pOwnerChar = 0;
@@ -256,7 +256,7 @@ void CProjectile::Snap(int SnappingClient)
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	if (pOwnerChar && pOwnerChar->IsAlive())
+	if(pOwnerChar && pOwnerChar->IsAlive())
 			TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 
 	if(m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))

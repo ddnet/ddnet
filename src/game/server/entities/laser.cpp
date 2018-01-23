@@ -44,12 +44,12 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;
-	if (m_Type == WEAPON_SHOTGUN)
+	if(m_Type == WEAPON_SHOTGUN)
 	{
 		vec2 Temp;
 
 		float Strength;
-		if (!m_TuneZone)
+		if(!m_TuneZone)
 			Strength = GameServer()->Tuning()->m_ShotgunStrength;
 		else
 			Strength = GameServer()->TuningList()[m_TuneZone].m_ShotgunStrength;
@@ -70,7 +70,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			Temp.y = 0;
 		pHit->Core()->m_Vel = Temp;
 	}
-	else if (m_Type == WEAPON_RIFLE)
+	else if(m_Type == WEAPON_RIFLE)
 	{
 		pHit->UnFreeze();
 	}
@@ -92,7 +92,7 @@ void CLaser::DoBounce()
 	int Res;
 	int z;
 
-	if (m_WasTele)
+	if(m_WasTele)
 	{
 		m_PrevPos = m_TelePos;
 		m_Pos = m_TelePos;
@@ -128,12 +128,12 @@ void CLaser::DoBounce()
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
 
-			if (!m_TuneZone)
+			if(!m_TuneZone)
 				m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
 			else
 				m_Energy -= distance(m_From, m_Pos) + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
 
-			if (Res == TILE_TELEINWEAPON && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
+			if(Res == TILE_TELEINWEAPON && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size())
 			{
 				int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1].size();
 				m_TelePos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
@@ -146,7 +146,7 @@ void CLaser::DoBounce()
 			}
 
 			int BounceNum = GameServer()->Tuning()->m_LaserBounceNum;
-			if (m_TuneZone)
+			if(m_TuneZone)
 				BounceNum = GameServer()->TuningList()[m_TuneZone].m_LaserBounceNum;
 
 			if(m_Bounces > BounceNum)
@@ -175,7 +175,7 @@ void CLaser::Reset()
 void CLaser::Tick()
 {
 	float Delay;
-	if (m_TuneZone)
+	if(m_TuneZone)
 		Delay = GameServer()->TuningList()[m_TuneZone].m_LaserBounceDelay;
 	else
 		Delay = GameServer()->Tuning()->m_LaserBounceDelay;
@@ -205,7 +205,7 @@ void CLaser::Snap(int SnappingClient)
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	if (pOwnerChar && pOwnerChar->IsAlive())
+	if(pOwnerChar && pOwnerChar->IsAlive())
 			TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 
 	if(!CmaskIsSet(TeamMask, SnappingClient))

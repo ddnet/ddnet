@@ -140,7 +140,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 //bool IGameController::OnEntity(int Index, vec2 Pos)
 bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
 {
-	if (Index < 0)
+	if(Index < 0)
 		return false;
 
 	int Type = -1;
@@ -171,7 +171,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		for(int i = 0; i < 8;i++)
 		{
-			if (sides[i] >= ENTITY_LASER_SHORT && sides[i] <= ENTITY_LASER_LONG)
+			if(sides[i] >= ENTITY_LASER_SHORT && sides[i] <= ENTITY_LASER_LONG)
 			{
 				new CDoor
 				(
@@ -870,7 +870,7 @@ bool IGameController::CanChangeTeam(CPlayer *pPlayer, int JoinTeam)
 {
 	int aT[2] = {0, 0};
 
-	if (!IsTeamplay() || JoinTeam == TEAM_SPECTATORS || !g_Config.m_SvTeambalanceTime)
+	if(!IsTeamplay() || JoinTeam == TEAM_SPECTATORS || !g_Config.m_SvTeambalanceTime)
 		return true;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -882,14 +882,14 @@ bool IGameController::CanChangeTeam(CPlayer *pPlayer, int JoinTeam)
 
 	// simulate what would happen if changed team
 	aT[JoinTeam]++;
-	if (pPlayer->GetTeam() != TEAM_SPECTATORS)
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 		aT[JoinTeam^1]--;
 
 	// there is a player-difference of at least 2
 	if(absolute(aT[0]-aT[1]) >= 2)
 	{
 		// player wants to join team with less players
-		if ((aT[0] < aT[1] && JoinTeam == TEAM_RED) || (aT[0] > aT[1] && JoinTeam == TEAM_BLUE))
+		if((aT[0] < aT[1] && JoinTeam == TEAM_RED) || (aT[0] > aT[1] && JoinTeam == TEAM_BLUE))
 			return true;
 		else
 			return false;

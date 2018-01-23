@@ -28,13 +28,13 @@ bool CPlasma::HitCharacter()
 	vec2 To2;
 	CCharacter *Hit = GameServer()->m_World.IntersectCharacter(m_Pos,
 			m_Pos + m_Core, 0.0f, To2);
-	if (!Hit)
+	if(!Hit)
 		return false;
 
-	if (Hit->Team() != m_ResponsibleTeam)
+	if(Hit->Team() != m_ResponsibleTeam)
 		return false;
 	m_Freeze ? Hit->Freeze() : Hit->UnFreeze();
-	if (m_Explosive)
+	if(m_Explosive)
 		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true,
 				m_ResponsibleTeam, Hit->Teams()->TeamMask(m_ResponsibleTeam));
 	GameServer()->m_World.DestroyEntity(this);
@@ -54,7 +54,7 @@ void CPlasma::Reset()
 
 void CPlasma::Tick()
 {
-	if (m_LifeTime == 0)
+	if(m_LifeTime == 0)
 	{
 		Reset();
 		return;
@@ -66,9 +66,9 @@ void CPlasma::Tick()
 	int Res = 0;
 	Res = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0,
 			0);
-	if (Res)
+	if(Res)
 	{
-		if (m_Explosive)
+		if(m_Explosive)
 			GameServer()->CreateExplosion(
 					m_Pos,
 					-1,
@@ -84,13 +84,13 @@ void CPlasma::Tick()
 
 void CPlasma::Snap(int SnappingClient)
 {
-	if (NetworkClipped(SnappingClient))
+	if(NetworkClipped(SnappingClient))
 		return;
 	CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	CPlayer* SnapPlayer = SnappingClient > -1 ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 
-	if (SnapChar && SnapChar->IsAlive()
+	if(SnapChar && SnapChar->IsAlive()
 			&& (m_Layer == LAYER_SWITCH
 					&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()])
 			&& (!Tick))
