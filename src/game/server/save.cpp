@@ -178,7 +178,7 @@ int CSaveTee::LoadString(char* String)
 {
 	int Num;
 	Num = sscanf(String, "%[^\t]\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f", m_name, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo, &m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got, &m_aWeapons[1].m_AmmoRegenStart, &m_aWeapons[1].m_Ammo, &m_aWeapons[1].m_Ammocost, &m_aWeapons[1].m_Got, &m_aWeapons[2].m_AmmoRegenStart, &m_aWeapons[2].m_Ammo, &m_aWeapons[2].m_Ammocost, &m_aWeapons[2].m_Got, &m_aWeapons[3].m_AmmoRegenStart, &m_aWeapons[3].m_Ammo, &m_aWeapons[3].m_Ammocost, &m_aWeapons[3].m_Got, &m_aWeapons[4].m_AmmoRegenStart, &m_aWeapons[4].m_Ammo, &m_aWeapons[4].m_Ammocost, &m_aWeapons[4].m_Got, &m_aWeapons[5].m_AmmoRegenStart, &m_aWeapons[5].m_Ammo, &m_aWeapons[5].m_Ammocost, &m_aWeapons[5].m_Got, &m_LastWeapon, &m_QueuedWeapon, &m_SuperJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeTick, &m_DeepFreeze, &m_EndlessHook, &m_DDRaceState, &m_Hit, &m_Collision, &m_TuneZone, &m_TuneZoneOld, &m_Hook, &m_Time, &m_Pos.x, &m_Pos.y, &m_PrevPos.x, &m_PrevPos.y, &m_TeleCheckpoint, &m_LastPenalty, &m_CorePos.x, &m_CorePos.y, &m_Vel.x, &m_Vel.y, &m_ActiveWeapon, &m_Jumped, &m_JumpedTotal, &m_Jumps, &m_HookPos.x, &m_HookPos.y, &m_HookDir.x, &m_HookDir.y, &m_HookTeleBase.x, &m_HookTeleBase.y, &m_HookTick, &m_HookState, &m_CpTime, &m_CpActive, &m_CpLastBroadcast, &m_CpCurrent[0], &m_CpCurrent[1], &m_CpCurrent[2], &m_CpCurrent[3], &m_CpCurrent[4], &m_CpCurrent[5], &m_CpCurrent[6], &m_CpCurrent[7], &m_CpCurrent[8], &m_CpCurrent[9], &m_CpCurrent[10], &m_CpCurrent[11], &m_CpCurrent[12], &m_CpCurrent[13], &m_CpCurrent[14], &m_CpCurrent[15], &m_CpCurrent[16], &m_CpCurrent[17], &m_CpCurrent[18], &m_CpCurrent[19], &m_CpCurrent[20], &m_CpCurrent[21], &m_CpCurrent[22], &m_CpCurrent[23], &m_CpCurrent[24]);
-	if (Num == 96) // Don't forget to update this when you save / load more / less.
+	if(Num == 96) // Don't forget to update this when you save / load more / less.
 		return 0;
 	else
 	{
@@ -227,7 +227,7 @@ int CSaveTeam::save(int Team)
 
 		SavedTees = new CSaveTee[m_MembersCount];
 		int j = 0;
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(Teams->m_Core.Team(i) == Team)
 			{
@@ -271,7 +271,7 @@ int CSaveTeam::load(int Team)
 
 	CCharacter *pChr;
 
-	for (int i = 0; i < m_MembersCount; i++)
+	for(int i = 0; i < m_MembersCount; i++)
 	{
 		int ID = MatchPlayer(SavedTees[i].GetName());
 		if(ID == -1) // first check if team can be loaded / do not load half teams
@@ -291,7 +291,7 @@ int CSaveTeam::load(int Team)
 	pTeams->ChangeTeamState(Team, m_TeamState);
 	pTeams->SetTeamLock(Team, m_TeamLocked);
 
-	for (int i = 0; i < m_MembersCount; i++)
+	for(int i = 0; i < m_MembersCount; i++)
 	{
 		pChr = MatchCharacter(SavedTees[i].GetName(), i);
 		if(pChr)
@@ -313,7 +313,7 @@ int CSaveTeam::load(int Team)
 
 int CSaveTeam::MatchPlayer(char name[16])
 {
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(str_comp(m_pController->Server()->ClientName(i), name) == 0)
 		{
@@ -341,7 +341,7 @@ char* CSaveTeam::GetString()
 {
 	str_format(m_String, sizeof(m_String), "%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked);
 
-	for (int i = 0; i<m_MembersCount; i++)
+	for(int i = 0; i<m_MembersCount; i++)
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "\n%s", SavedTees[i].GetString());
@@ -352,7 +352,7 @@ char* CSaveTeam::GetString()
 		for(int i=1; i < m_NumSwitchers+1; i++)
 		{
 			char aBuf[64];
-			if (m_Switchers)
+			if(m_Switchers)
 			{
 				str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_Switchers[i].m_EndTime, m_Switchers[i].m_Type);
 				str_append(m_String, aBuf, sizeof(m_String));
@@ -417,7 +417,7 @@ int CSaveTeam::LoadString(const char* String)
 	if(m_MembersCount)
 		SavedTees = new CSaveTee[m_MembersCount];
 
-	for (int n = 0; n < m_MembersCount; n++)
+	for(int n = 0; n < m_MembersCount; n++)
 	{
 		while (m_String[Pos] != '\n' && Pos < sizeof(m_String) && m_String[Pos]) // find next \n or \0
 			Pos++;
@@ -463,7 +463,7 @@ int CSaveTeam::LoadString(const char* String)
 	if(m_NumSwitchers)
 		m_Switchers = new SSimpleSwitchers[m_NumSwitchers+1];
 
-	for (int n = 1; n < m_NumSwitchers+1; n++)
+	for(int n = 1; n < m_NumSwitchers+1; n++)
 		{
 			while (m_String[Pos] != '\n' && Pos < sizeof(m_String) && m_String[Pos]) // find next \n or \0
 				Pos++;

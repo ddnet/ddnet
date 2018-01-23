@@ -28,11 +28,11 @@ void CDoor::Open(int Tick, bool ActivatedTeam[])
 
 void CDoor::ResetCollision()
 {
-	for (int i = 0; i < m_Length - 1; i++)
+	for(int i = 0; i < m_Length - 1; i++)
 	{
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
 				m_Pos.y + (m_Direction.y * i));
-		if (GameServer()->Collision()->CheckPoint(CurrentPos)
+		if(GameServer()->Collision()->CheckPoint(CurrentPos)
 				|| GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y)
 				|| GameServer()->Collision()->GetFTile(m_Pos.x, m_Pos.y))
 			break;
@@ -66,14 +66,14 @@ void CDoor::Tick()
 
 void CDoor::Snap(int SnappingClient)
 {
-	if (NetworkClipped(SnappingClient, m_Pos)
+	if(NetworkClipped(SnappingClient, m_Pos)
 			&& NetworkClipped(SnappingClient, m_To))
 		return;
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 			NETOBJTYPE_LASER, m_ID, sizeof(CNetObj_Laser)));
 
-	if (!pObj)
+	if(!pObj)
 		return;
 
 	pObj->m_X = (int)m_Pos.x;
@@ -87,20 +87,20 @@ void CDoor::Snap(int SnappingClient)
 			&& GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	if (Char == 0)
+	if(Char == 0)
 		return;
 
-	if (Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0
+	if(Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0
 			&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
 			&& (!Tick))
 		return;
 
-	if (Char->Team() == TEAM_SUPER)
+	if(Char->Team() == TEAM_SUPER)
 	{
 		pObj->m_FromX = (int)m_Pos.x;
 		pObj->m_FromY = (int)m_Pos.y;
 	}
-	else if (Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0
+	else if(Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0
 		&& GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 	{
 		pObj->m_FromX = (int)m_To.x;

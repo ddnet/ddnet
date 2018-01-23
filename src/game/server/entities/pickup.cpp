@@ -23,7 +23,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int N
 
 void CPickup::Reset()
 {
-	/*if (g_pData->m_aPickups[m_Type].m_Spawndelay > 0)
+	/*if(g_pData->m_aPickups[m_Type].m_Spawndelay > 0)
 		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * g_pData->m_aPickups[m_Type].m_Spawndelay;
 	else
 		m_SpawnTick = -1;*/
@@ -79,7 +79,7 @@ void CPickup::Tick()
 					pChr->SetNinjaActivationDir(vec2(0,0));
 					pChr->SetNinjaActivationTick(-500);
 					pChr->SetNinjaCurrentMoveTime(0);
-					if (Sound)
+					if(Sound)
 					{
 						pChr->SetLastWeapon(WEAPON_GUN);
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
@@ -90,20 +90,20 @@ void CPickup::Tick()
 
 				case POWERUP_WEAPON:
 
-					if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
+					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
 					{
 						pChr->GiveWeapon(m_Subtype);
 
 						//RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
-						if (m_Subtype == WEAPON_GRENADE)
+						if(m_Subtype == WEAPON_GRENADE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
-						else if (m_Subtype == WEAPON_SHOTGUN)
+						else if(m_Subtype == WEAPON_SHOTGUN)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
-						else if (m_Subtype == WEAPON_RIFLE)
+						else if(m_Subtype == WEAPON_RIFLE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
 
-						if (pChr->GetPlayer())
+						if(pChr->GetPlayer())
 							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
 
 					}
@@ -119,7 +119,7 @@ void CPickup::Tick()
 					CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 					for(; pC; pC = (CCharacter *)pC->TypeNext())
 					{
-						if (pC != pChr)
+						if(pC != pChr)
 							pC->SetEmote(EMOTE_SURPRISE, Server()->Tick() + Server()->TickSpeed());
 					}*/
 					break;
@@ -159,7 +159,7 @@ void CPickup::Snap(int SnappingClient)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
-	if (Char && Char->IsAlive() &&
+	if(Char && Char->IsAlive() &&
 			(m_Layer == LAYER_SWITCH &&
 					!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 					&& (!Tick))
@@ -177,11 +177,11 @@ void CPickup::Snap(int SnappingClient)
 
 void CPickup::Move()
 {
-	if (Server()->Tick()%int(Server()->TickSpeed() * 0.15f) == 0)
+	if(Server()->Tick()%int(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
 		int index = GameServer()->Collision()->IsMover(m_Pos.x,m_Pos.y, &Flags);
-		if (index)
+		if(index)
 		{
 			m_Core=GameServer()->Collision()->CpSpeed(index, Flags);
 		}

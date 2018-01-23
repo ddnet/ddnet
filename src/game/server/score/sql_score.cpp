@@ -70,13 +70,13 @@ void CSqlScore::OnShutdown()
 	int i = 0;
 	while (CSqlExecData::ms_InstanceCount != 0)
 	{
-		if (i > 600)  {
+		if(i > 600)  {
 			dbg_msg("sql", "Waited 60 seconds for score-threads to complete, quitting anyway");
 			break;
 		}
 
 		// print a log about every two seconds
-		if (i % 20 == 0)
+		if(i % 20 == 0)
 			dbg_msg("sql", "Waiting for score-threads to complete (%d left)", CSqlExecData::ms_InstanceCount);
 		++i;
 		thread_sleep(100);
@@ -98,7 +98,7 @@ void CSqlScore::ExecSqlFunc(void *pUser)
 		while (!Success && !connector.MaxTriesReached(pData->m_ReadOnly) && connector.ConnectSqlServer(pData->m_ReadOnly))
 		{
 			try {
-				if (pData->m_pFuncPtr(connector.SqlServer(), pData->m_pSqlData, false))
+				if(pData->m_pFuncPtr(connector.SqlServer(), pData->m_pSqlData, false))
 					Success = true;
 			} catch (...) {
 				dbg_msg("sql", "Unexpected exception caught");
@@ -110,7 +110,7 @@ void CSqlScore::ExecSqlFunc(void *pUser)
 
 		// handle failures
 		// eg write inserts to a file and print a nice error message
-		if (!Success)
+		if(!Success)
 			pData->m_pFuncPtr(0, pData->m_pSqlData, true);
 	} catch (...) {
 		dbg_msg("sql", "Unexpected exception caught");
@@ -124,7 +124,7 @@ bool CSqlScore::Init(CSqlServer* pSqlServer, const CSqlData *pGameData, bool Han
 {
 	const CSqlData* pData = pGameData;
 
-	if (HandleFailure)
+	if(HandleFailure)
 	{
 		dbg_msg("sql", "FATAL ERROR: Could not init SqlScore");
 		return true;
@@ -171,7 +171,7 @@ bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGam
 {
 	const CSqlPlayerData *pData = dynamic_cast<const CSqlPlayerData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -224,7 +224,7 @@ bool CSqlScore::LoadScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 {
 	const CSqlPlayerData *pData = dynamic_cast<const CSqlPlayerData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -289,7 +289,7 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 {
 	const CSqlMapData *pData = dynamic_cast<const CSqlMapData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -386,7 +386,7 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 {
 	const CSqlMapData *pData = dynamic_cast<const CSqlMapData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -488,9 +488,9 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 	{
-		if (!g_Config.m_SvSqlFailureFile[0])
+		if(!g_Config.m_SvSqlFailureFile[0])
 			return true;
 
 		lock_wait(ms_FailureFileLock);
@@ -531,7 +531,7 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 			{
 				pSqlServer->GetResults()->next();
 				int points = (int)pSqlServer->GetResults()->getInt("Points");
-				if (points == 1)
+				if(points == 1)
 					str_format(aBuf, sizeof(aBuf), "You earned %d point for finishing this map!", points);
 				else
 					str_format(aBuf, sizeof(aBuf), "You earned %d points for finishing this map!", points);
@@ -585,9 +585,9 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 {
 	const CSqlTeamScoreData *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 	{
-		if (!g_Config.m_SvSqlFailureFile[0])
+		if(!g_Config.m_SvSqlFailureFile[0])
 			return true;
 
 		dbg_msg("sql", "ERROR: Could not save TeamScore, writing insert to a file now...");
@@ -627,7 +627,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 		str_format(aBuf, sizeof(aBuf), "SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_teamrace WHERE Map = '%s' AND Name = '%s') as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY ID;", pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_aNames[0].ClrStr(), pSqlServer->GetPrefix());
 		pSqlServer->executeSqlQuery(aBuf);
 
-		if (pSqlServer->GetResults()->rowsCount() > 0)
+		if(pSqlServer->GetResults()->rowsCount() > 0)
 		{
 			char aID[17];
 			char aID2[17];
@@ -644,11 +644,11 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 				strcpy(aID2, pSqlServer->GetResults()->getString("ID").c_str());
 				strcpy(aName, pSqlServer->GetResults()->getString("Name").c_str());
 				sqlstr::ClearString(aName);
-				if (str_comp(aID, aID2) != 0)
+				if(str_comp(aID, aID2) != 0)
 				{
-					if (ValidNames && Count == pData->m_Size)
+					if(ValidNames && Count == pData->m_Size)
 					{
-						if (pData->m_Time < Time)
+						if(pData->m_Time < Time)
 							strcpy(aUpdateID, aID);
 						else
 							goto end;
@@ -661,14 +661,14 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 					strcpy(aID, aID2);
 				}
 
-				if (!ValidNames)
+				if(!ValidNames)
 					continue;
 
 				ValidNames = false;
 
 				for(unsigned int i = 0; i < pData->m_Size; i++)
 				{
-					if (str_comp(aName, pData->m_aNames[i].ClrStr()) == 0)
+					if(str_comp(aName, pData->m_aNames[i].ClrStr()) == 0)
 					{
 						ValidNames = true;
 						Count++;
@@ -677,16 +677,16 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 				}
 			} while (pSqlServer->GetResults()->next());
 
-			if (ValidNames && Count == pData->m_Size)
+			if(ValidNames && Count == pData->m_Size)
 			{
-				if (pData->m_Time < Time)
+				if(pData->m_Time < Time)
 					strcpy(aUpdateID, aID);
 				else
 					goto end;
 			}
 		}
 
-		if (aUpdateID[0])
+		if(aUpdateID[0])
 		{
 			str_format(aBuf, sizeof(aBuf), "UPDATE %s_teamrace SET Time='%.2f', Timestamp=CURRENT_TIMESTAMP() WHERE ID = '%s';", pSqlServer->GetPrefix(), pData->m_Time, aUpdateID);
 			dbg_msg("sql", "%s", aBuf);
@@ -733,7 +733,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -803,7 +803,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -839,9 +839,9 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 				str_append(aNames, pSqlServer->GetResults()->getString("Name").c_str(), sizeof(aNames));
 				pSqlServer->GetResults()->next();
 
-				if (Row < Rows - 2)
+				if(Row < Rows - 2)
 					str_append(aNames, ", ", sizeof(aNames));
-				else if (Row < Rows - 1)
+				else if(Row < Rows - 1)
 					str_append(aNames, " & ", sizeof(aNames));
 			}
 
@@ -889,7 +889,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	int LimitStart = abs(pData->m_Num-1);
@@ -950,7 +950,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	int LimitStart = abs(pData->m_Num-1);
@@ -973,7 +973,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 
 		int Rows = pSqlServer->GetResults()->rowsCount();
 
-		if (Rows >= 1)
+		if(Rows >= 1)
 		{
 			char aID[17];
 			char aID2[17];
@@ -991,7 +991,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 			for(int Row = 0; Row < Rows; Row++)
 			{
 				strcpy(aID2, pSqlServer->GetResults()->getString("ID").c_str());
-				if (str_comp(aID, aID2) != 0)
+				if(str_comp(aID, aID2) != 0)
 				{
 					strcpy(aID, aID2);
 					aCuts[CutPos++] = Row - 1;
@@ -1006,15 +1006,15 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 			{
 				str_append(aNames, pSqlServer->GetResults()->getString("Name").c_str(), sizeof(aNames));
 
-				if (Row < aCuts[CutPos] - 1)
+				if(Row < aCuts[CutPos] - 1)
 					str_append(aNames, ", ", sizeof(aNames));
-				else if (Row < aCuts[CutPos])
+				else if(Row < aCuts[CutPos])
 					str_append(aNames, " & ", sizeof(aNames));
 
 				Time = (float)pSqlServer->GetResults()->getDouble("Time");
 				Rank = (float)pSqlServer->GetResults()->getInt("Rank");
 
-				if (Row == aCuts[CutPos])
+				if(Row == aCuts[CutPos])
 				{
 					str_format(aBuf, sizeof(aBuf), "%d. %s Team Time: %02d:%05.2f", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60));
 					pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
@@ -1071,7 +1071,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	int LimitStart = abs(pData->m_Num-1);
@@ -1160,7 +1160,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -1217,7 +1217,7 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGam
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	int LimitStart = abs(pData->m_Num-1);
@@ -1275,7 +1275,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -1333,7 +1333,7 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -1408,7 +1408,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	{
 		int Team = pData->m_Team;
 
-		if (HandleFailure)
+		if(HandleFailure)
 			return true;
 
 		char TeamString[65536];
@@ -1443,7 +1443,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		else
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, "You have to be in a team (from 1-63)");
 
-		if (Num)
+		if(Num)
 			return true;
 
 		try
@@ -1454,7 +1454,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			str_format(aBuf, sizeof(aBuf), "select Savegame from %s_saves where Code = '%s' and Map = '%s';",  pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
 			pSqlServer->executeSqlQuery(aBuf);
 
-			if (pSqlServer->GetResults()->rowsCount() == 0)
+			if(pSqlServer->GetResults()->rowsCount() == 0)
 			{
 				char aBuf[65536];
 				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP(), '%s')",  pSqlServer->GetPrefix(), TeamString, pData->m_Map.ClrStr(), pData->m_Code.ClrStr(), pData->m_Server);
@@ -1511,7 +1511,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 {
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 
-	if (HandleFailure)
+	if(HandleFailure)
 		return true;
 
 	try
@@ -1522,7 +1522,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 		str_format(aBuf, sizeof(aBuf), "select Savegame, Server, UNIX_TIMESTAMP(CURRENT_TIMESTAMP)-UNIX_TIMESTAMP(Timestamp) as Ago from %s_saves where Code = '%s' and Map = '%s';", pSqlServer->GetPrefix(), pData->m_Code.ClrStr(), pData->m_Map.ClrStr());
 		pSqlServer->executeSqlQuery(aBuf);
 
-		if (pSqlServer->GetResults()->rowsCount() > 0)
+		if(pSqlServer->GetResults()->rowsCount() > 0)
 		{
 			pSqlServer->GetResults()->first();
 			char ServerName[5];
@@ -1554,7 +1554,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			{
 
 				bool Found = false;
-				for (int i = 0; i < SavedTeam.GetMembersCount(); i++)
+				for(int i = 0; i < SavedTeam.GetMembersCount(); i++)
 				{
 					if(str_comp(SavedTeam.SavedTees[i].GetName(), pData->Server()->ClientName(pData->m_ClientID)) == 0)
 					{

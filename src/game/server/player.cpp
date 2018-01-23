@@ -38,7 +38,7 @@ void CPlayer::Reset()
 {
 	m_DieTick = Server()->Tick();
 	m_JoinTick = Server()->Tick();
-	if (m_pCharacter)
+	if(m_pCharacter)
 		delete m_pCharacter;
 	m_pCharacter = 0;
 	m_KillMe = 0;
@@ -49,7 +49,7 @@ void CPlayer::Reset()
 	m_WeakHookSpawn = false;
 
 	int* idMap = Server()->GetIdMap(m_ClientID);
-	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
+	for(int i = 1;i < VANILLA_MAX_CLIENTS;i++)
 	{
 		idMap[i] = -1;
 	}
@@ -78,17 +78,17 @@ void CPlayer::Reset()
 
 	m_SendVoteIndex = -1;
 
-	if (g_Config.m_SvEvents)
+	if(g_Config.m_SvEvents)
 	{
 		time_t rawtime;
 		struct tm* timeinfo;
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		if ((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 1 && timeinfo->tm_mday == 1))
+		if((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 1 && timeinfo->tm_mday == 1))
 		{ // New Year
 			m_DefEmote = EMOTE_HAPPY;
 		}
-		else if ((timeinfo->tm_mon == 9 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 10 && timeinfo->tm_mday == 1))
+		else if((timeinfo->tm_mon == 9 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 10 && timeinfo->tm_mday == 1))
 		{ // Halloween
 			m_DefEmote = EMOTE_ANGRY;
 			m_Halloween = true;
@@ -149,17 +149,17 @@ void CPlayer::Tick()
 		return;
 	}
 
-	if (m_ChatScore > 0)
+	if(m_ChatScore > 0)
 		m_ChatScore--;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 
-	if (m_Moderating && m_Afk)
+	if(m_Moderating && m_Afk)
 	{
 		m_Moderating = false;
 		GameServer()->SendChatTarget(m_ClientID, "Active moderator mode disabled because you are afk.");
 
-		if (!GameServer()->PlayerModerating())
+		if(!GameServer()->PlayerModerating())
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
 	}
 
@@ -226,7 +226,7 @@ void CPlayer::Tick()
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
-	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
+	if(m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
@@ -270,7 +270,7 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	int id = m_ClientID;
-	if (SnappingClient > -1 && !Server()->Translate(id, SnappingClient)) return;
+	if(SnappingClient > -1 && !Server()->Translate(id, SnappingClient)) return;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
 
@@ -280,7 +280,7 @@ void CPlayer::Snap(int SnappingClient)
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
 	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-	if (m_StolenSkin && SnappingClient != m_ClientID && g_Config.m_SvSkinStealAction == 1)
+	if(m_StolenSkin && SnappingClient != m_ClientID && g_Config.m_SvSkinStealAction == 1)
 	{
 		StrToInts(&pClientInfo->m_Skin0, 6, "pinky");
 		pClientInfo->m_UseCustomColor = 0;
@@ -390,7 +390,7 @@ void CPlayer::OnDisconnect(const char *pReason)
 		// Set this to false, otherwise PlayerModerating() will return true.
 		m_Moderating = false;
 
-		if (!GameServer()->PlayerModerating() && WasModerator)
+		if(!GameServer()->PlayerModerating() && WasModerator)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
 	}
 
@@ -421,7 +421,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
-	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
+	if(AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
 
@@ -744,7 +744,7 @@ bool CPlayer::IsPlaying()
 
 void CPlayer::FindDuplicateSkins()
 {
-	if (m_TeeInfos.m_UseCustomColor == 0 && !m_StolenSkin) return;
+	if(m_TeeInfos.m_UseCustomColor == 0 && !m_StolenSkin) return;
 	m_StolenSkin = 0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
