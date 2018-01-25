@@ -3388,7 +3388,7 @@ bool CGameContext::PlayerModerating()
 void CGameContext::ForceVote(int EnforcerID, bool Success)
 {
 	// check if there is a vote running
-	if(m_VoteCloseTime)
+	if(!m_VoteCloseTime)
 		return;
 	
 	m_VoteEnforce = Success ? CGameContext::VOTE_ENFORCE_YES_ADMIN : CGameContext::VOTE_ENFORCE_NO_ADMIN;
