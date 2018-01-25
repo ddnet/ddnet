@@ -3,7 +3,7 @@
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
 #include "generated/nethash.cpp"
-#define GAME_VERSION "0.6.4, 11.0.2"
+#define GAME_VERSION "11.0.2"
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
 #define GAME_RELEASE_VERSION "11.0.2"
 #define CLIENT_VERSIONNR 11002
