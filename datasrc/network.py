@@ -12,7 +12,7 @@ Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 RawHeader = '''
 
 #include <engine/message.h>
-#include <engine/shared/protocol_ex.h>
+#include <engine/shared/teehistorian_ex.h>
 
 enum
 {

@@ -688,6 +688,9 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
+  teehistorian_ex.cpp
+  teehistorian_ex.h
+  teehistorian_ex_chunks.h
   uuid_manager.cpp
   uuid_manager.h
   websockets.cpp

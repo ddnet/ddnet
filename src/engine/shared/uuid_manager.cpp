@@ -110,6 +110,11 @@ int CUuidManager::LookupUuid(CUuid Uuid) const
 	return UUID_UNKNOWN;
 }
 
+int CUuidManager::NumUuids() const
+{
+	return m_aNames.size();
+}
+
 int CUuidManager::UnpackUuid(CUnpacker *pUnpacker) const
 {
 	CUuid Temp;

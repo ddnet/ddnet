@@ -14,7 +14,7 @@ enum
 	#define UUID(id, name) id,
 	#include "protocol_ex_msgs.h"
 	#undef UUID
-	OFFSET_GAME_UUID,
+	OFFSET_TEEHISTORIAN_UUID,
 
 	UNPACKMESSAGE_ERROR=0,
 	UNPACKMESSAGE_OK,

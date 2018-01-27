@@ -7,6 +7,7 @@
 
 struct CConfiguration;
 class CTuningParams;
+class CUuidManager;
 
 class CTeeHistorian
 {
@@ -29,6 +30,7 @@ public:
 
 		CConfiguration *m_pConfig;
 		CTuningParams *m_pTuning;
+		CUuidManager *m_pUuids;
 	};
 
 	CTeeHistorian();
@@ -51,6 +53,7 @@ public:
 	void RecordPlayerJoin(int ClientID);
 	void RecordPlayerDrop(int ClientID, const char *pReason);
 	void RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
+	void RecordTestExtra();
 	void EndInputs();
 
 	void EndTick();
@@ -59,6 +62,7 @@ public:
 
 private:
 	void WriteHeader(const CGameInfo *pGameInfo);
+	void WriteExtra(CUuid Uuid, const void *pData, int DataSize);
 	void EnsureTickWrittenPlayerData(int ClientID);
 	void EnsureTickWritten();
 	void WriteTick();
