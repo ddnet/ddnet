@@ -97,7 +97,7 @@ Install [osxcross](https://github.com/tpoechtrager/osxcross), then add
 Install `dmg` and `hfsplus` from
 [libdmg-hfsplus](https://github.com/mozilla/libdmg-hfsplus) and `newfs_hfs`
 from
-[diskdev_cmds](http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)
+[diskdev\_cmds](http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)
 to unlock the `package_dmg` target that outputs a macOS disk image.
 
 Importing the official DDNet Database
