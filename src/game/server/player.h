@@ -164,7 +164,6 @@ public:
 	bool IsPlaying();
 	int64 m_Last_KickVote;
 	int64 m_Last_Team;
-	int m_Authed;
 	int m_ClientVersion;
 	bool m_ShowOthers;
 	bool m_ShowAll;
