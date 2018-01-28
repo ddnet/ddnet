@@ -92,7 +92,6 @@ if include_src:
 	for p in ["src", "scripts", "datasrc", "other", "objs"]:
 		os.mkdir(os.path.join(package_dir, p))
 		copydir(p, package_dir)
-	shutil.copy("bam.lua", package_dir)
 	shutil.copy("configure.lua", package_dir)
 
 if use_bundle:

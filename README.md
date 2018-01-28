@@ -120,6 +120,9 @@ sv_use_sql 1
 add_sqlserver r teeworlds record teeworlds "PW2" "localhost" "3306"
 add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
 
-$ bam server_sql_release
+$ mkdir build
+$ cd build
+$ cmake -DMYSQL=ON ..
+$ make
 $ ./DDNet-Server_sql -f mine.cfg
 ```
