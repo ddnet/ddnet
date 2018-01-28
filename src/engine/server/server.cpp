@@ -496,6 +496,16 @@ int CServer::GetAuthedState(int ClientID)
 	return m_aClients[ClientID].m_Authed;
 }
 
+const char *CServer::GetAuthName(int ClientID)
+{
+	int Key = m_aClients[ClientID].m_AuthKey;
+	if(Key == -1)
+	{
+		return 0;
+	}
+	return m_AuthManager.KeyIdent(Key);
+}
+
 int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 {
 	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
@@ -2587,6 +2597,8 @@ void CServer::LogoutClient(int ClientID, const char *pReason)
 
 	m_aClients[ClientID].m_Authed = AUTHED_NO;
 	m_aClients[ClientID].m_AuthKey = -1;
+
+	GameServer()->OnSetAuthed(ClientID, AUTHED_NO);
 
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
