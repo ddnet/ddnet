@@ -124,5 +124,5 @@ $ mkdir build
 $ cd build
 $ cmake -DMYSQL=ON ..
 $ make
-$ ./DDNet-Server_sql -f mine.cfg
+$ ./DDNet-Server -f mine.cfg
 ```
