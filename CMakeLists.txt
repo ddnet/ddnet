@@ -1289,9 +1289,7 @@ set(CPACK_SOURCE_FILES
   CMakeLists.txt
   README.md
   autoexec_server.cfg
-  bam.lua
   cmake/
-  configure.lua
   data/
   datasrc/
   ddnet-libs/
