@@ -21,14 +21,14 @@ To clone this repository with history since we moved the libraries to https://gi
 
     git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
 
-To clone the libraries if you have previously cloned ddnet without them:
+To clone the libraries if you have previously cloned DDNet without them:
 
     git submodule update --init --recursive
 
 Building on Linux and macOS
 ---------------------------
 
-To compile DDNet yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything). Alternatively we also support CMake, so something like this works:
+To compile DDNet yourself, execute the following commands in the source root:
 
     mkdir build
     cd build
