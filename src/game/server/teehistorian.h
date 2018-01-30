@@ -58,6 +58,10 @@ public:
 
 	void EndTick();
 
+	void RecordAuthInitial(int ClientID, int Level, const char *pAuthName);
+	void RecordAuthLogin(int ClientID, int Level, const char *pAuthName);
+	void RecordAuthLogout(int ClientID);
+
 	int m_Debug; // Possible values: 0, 1, 2.
 
 private:

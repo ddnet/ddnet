@@ -2600,6 +2600,15 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_pMapName = aMapName;
 
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			int Level = Server()->GetAuthedState(i);
+			if(Level)
+			{
+				m_TeeHistorian.RecordAuthInitial(i, Level, Server()->GetAuthName(i));
+			}
+		}
 	}
 
 	if(g_Config.m_SvSoloServer)
@@ -3082,6 +3091,17 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "CGameContext", "Aborted vote by admin login.");
+		}
+	}
+	if(m_TeeHistorianActive)
+	{
+		if(Level)
+		{
+			m_TeeHistorian.RecordAuthLogin(ClientID, Level, Server()->GetAuthName(ClientID));
+		}
+		else
+		{
+			m_TeeHistorian.RecordAuthLogout(ClientID);
 		}
 	}
 }

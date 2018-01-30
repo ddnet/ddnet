@@ -100,7 +100,8 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 
 	m_Tick = 0;
 	m_LastWrittenTick = 0;
-	// `m_TickWritten` is initialized in `BeginTick`
+	// Tick 0 is implicit at the start, game starts as tick 1.
+	m_TickWritten = true;
 	m_MaxClientID = MAX_CLIENTS;
 	// `m_PrevMaxClientID` is initialized in `BeginTick`
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -515,6 +516,11 @@ void CTeeHistorian::RecordConsoleCommand(int ClientID, int FlagMask, const char 
 
 void CTeeHistorian::RecordTestExtra()
 {
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "test");
+	}
+
 	WriteExtra(UUID_TEEHISTORIAN_TEST, "", 0);
 }
 
@@ -529,6 +535,52 @@ void CTeeHistorian::EndTick()
 {
 	dbg_assert(m_State == STATE_BEFORE_ENDTICK, "invalid teehistorian state");
 	m_State = STATE_BEFORE_TICK;
+}
+
+void CTeeHistorian::RecordAuthInitial(int ClientID, int Level, const char *pAuthName)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID);
+	Buffer.AddInt(Level);
+	Buffer.AddString(pAuthName, 0);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "auth_init cid=%d level=%d auth_name=%s", ClientID, Level, pAuthName);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_AUTH_INIT, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordAuthLogin(int ClientID, int Level, const char *pAuthName)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID);
+	Buffer.AddInt(Level);
+	Buffer.AddString(pAuthName, 0);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "auth_login cid=%d level=%d auth_name=%s", ClientID, Level, pAuthName);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_AUTH_LOGIN, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordAuthLogout(int ClientID)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "auth_logout cid=%d", ClientID);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_AUTH_LOGOUT, Buffer.Data(), Buffer.Size());
 }
 
 void CTeeHistorian::Finish()

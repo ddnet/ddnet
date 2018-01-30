@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
+#include <engine/server.h>
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
@@ -296,7 +297,7 @@ TEST_F(TeeHistorian, ExtraMessage)
 {
 	const unsigned char EXPECTED[] = {
 		0x41, 0x00, // TICK_SKIP dt=0
-		// EX uuid=6bb8ba88-0f0b-382e-8dae-dbf4052b8b7d data=""
+		// EX uuid=6bb8ba88-0f0b-382e-8dae-dbf4052b8b7d data_len=0
 		0x4a,
 		0x6b, 0xb8, 0xba, 0x88, 0x0f, 0x0b, 0x38, 0x2e,
 		0x8d, 0xae, 0xdb, 0xf4, 0x05, 0x2b, 0x8b, 0x7d,
@@ -304,6 +305,49 @@ TEST_F(TeeHistorian, ExtraMessage)
 		0x40, // FINISH
 	};
 	Tick(1); Inputs(); m_TH.RecordTestExtra();
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, Auth)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=60daba5c-52c4-3aeb-b8ba-b2953fb55a17 data_len=16
+		0x4a,
+		0x60, 0xda, 0xba, 0x5c, 0x52, 0xc4, 0x3a, 0xeb,
+		0xb8, 0xba, 0xb2, 0x95, 0x3f, 0xb5, 0x5a, 0x17,
+		0x10,
+		// (AUTH_INIT) cid=0 level=3 auth_name="default_admin"
+		0x00, 0x03, 'd',  'e',  'f',  'a',  'u',  'l',
+		't',  '_',  'a',  'd',  'm',  'i',  'n',  0x00,
+		// EX uuid=37ecd3b8-9218-3bb9-a71b-a935b86f6a81 data_len=9
+		0x4a,
+		0x37, 0xec, 0xd3, 0xb8, 0x92, 0x18, 0x3b, 0xb9,
+		0xa7, 0x1b, 0xa9, 0x35, 0xb8, 0x6f, 0x6a, 0x81,
+		0x09,
+		// (AUTH_LOGIN) cid=1 level=2 auth_name="foobar"
+		0x01, 0x02, 'f',  'o',  'o',  'b',  'a',  'r',
+		0x00,
+		// EX uuid=37ecd3b8-9218-3bb9-a71b-a935b86f6a81 data_len=7
+		0x4a,
+		0x37, 0xec, 0xd3, 0xb8, 0x92, 0x18, 0x3b, 0xb9,
+		0xa7, 0x1b, 0xa9, 0x35, 0xb8, 0x6f, 0x6a, 0x81,
+		0x07,
+		// (AUTH_LOGIN) cid=1 level=2 auth_name="foobar"
+		0x02, 0x01, 'h',  'e',  'l',  'p',  0x00,
+		// EX uuid=d4f5abe8-edd2-3fb9-abd8-1c8bb84f4a63 data_len=7
+		0x4a,
+		0xd4, 0xf5, 0xab, 0xe8, 0xed, 0xd2, 0x3f, 0xb9,
+		0xab, 0xd8, 0x1c, 0x8b, 0xb8, 0x4f, 0x4a, 0x63,
+		0x01,
+		// (AUTH_LOGOUT) cid=1
+		0x01,
+		0x40, // FINISH
+	};
+	m_TH.RecordAuthInitial(0, IServer::AUTHED_ADMIN, "default_admin");
+	m_TH.RecordAuthLogin(1, IServer::AUTHED_MOD, "foobar");
+	m_TH.RecordAuthLogin(2, IServer::AUTHED_HELPER, "help");
+	m_TH.RecordAuthLogout(1);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
