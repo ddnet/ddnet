@@ -84,7 +84,7 @@ void CPlayer::Reset()
 		struct tm* timeinfo;
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		if ((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 1 && timeinfo->tm_mday == 1))
+		if ((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 0 && timeinfo->tm_mday == 1))
 		{ // New Year
 			m_DefEmote = EMOTE_HAPPY;
 		}
