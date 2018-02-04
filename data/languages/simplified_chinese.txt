@@ -967,7 +967,7 @@ AntiPing
 == ✗
 
 Countries
-== 次数
+== 国家
 
 \n\nReconnect in %d sec
 == \n\n在 %d 秒内重新连接
