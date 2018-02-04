@@ -16,7 +16,7 @@
 
 	Client -> READY -> Server
 		The client has loaded the map and is ready to go,
-		but the mod needs to send it's information aswell.
+		but the mod needs to send it's information as well.
 		modc_connected is called on the client and
 		mods_connected is called on the server.
 		The client should call client_entergame when the

@@ -549,7 +549,7 @@ void CScoreboard::OnRender()
 	if(!Active())
 		return;
 
-	// if the score board is active, then we should clear the motd message aswell
+	// if the score board is active, then we should clear the motd message as well
 	if(m_pClient->m_pMotd->IsActive())
 		m_pClient->m_pMotd->Clear();
 
@@ -623,7 +623,7 @@ void CScoreboard::OnRender()
 
 bool CScoreboard::Active()
 {
-	// if statboard is active dont show scoreboard
+	// if statboard is active don't show scoreboard
 	if(m_pClient->m_pStatboard->IsActive())
 		return false;
 

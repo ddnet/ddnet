@@ -165,16 +165,16 @@ Objects = [
 	]),
 
 	NetObject("ClientInfo", [
-		# 4*4 = 16 charachters
+		# 4*4 = 16 characters
 		NetIntAny("m_Name0"), NetIntAny("m_Name1"), NetIntAny("m_Name2"),
 		NetIntAny("m_Name3"),
 
-		# 4*3 = 12 charachters
+		# 4*3 = 12 characters
 		NetIntAny("m_Clan0"), NetIntAny("m_Clan1"), NetIntAny("m_Clan2"),
 
 		NetIntAny("m_Country"),
 
-		# 4*6 = 24 charachters
+		# 4*6 = 24 characters
 		NetIntAny("m_Skin0"), NetIntAny("m_Skin1"), NetIntAny("m_Skin2"),
 		NetIntAny("m_Skin3"), NetIntAny("m_Skin4"), NetIntAny("m_Skin5"),
 

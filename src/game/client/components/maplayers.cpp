@@ -527,7 +527,7 @@ void CMapLayers::OnMapLoad()
 					int CurOverlay = 0;
 					while(CurOverlay < OverlayCount + 1)
 					{
-						//we can later just count the tile layers to get the idx in the vector
+						// We can later just count the tile layers to get the idx in the vector
 						m_TileLayerVisuals.push_back(new STileLayerVisuals());
 						STileLayerVisuals& Visuals = *m_TileLayerVisuals.back();
 						Visuals.Init(pTMap->m_Width, pTMap->m_Height);
@@ -888,7 +888,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 	
 	if(BorderX0 < 0)
 	{
-		//draw corners on left side
+		// Draw corners on left side
 		if(BorderY0 < 0)
 		{
 			if(Visuals.m_BorderTopLeft.DoDraw())
@@ -900,7 +900,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 				Dir.x = 32.f;
 				Dir.y = 32.f;
 
-				int Count = (absolute(BorderX0)+1) * (absolute(BorderY0)+1) - 1;//dont draw the corner again
+				int Count = (absolute(BorderX0)+1) * (absolute(BorderY0)+1) - 1; // Don't draw the corner again
 
 				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
 			}
@@ -916,12 +916,12 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 				Dir.x = 32.f;
 				Dir.y = -32.f;
 
-				int Count = (absolute(BorderX0)+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1;//dont draw the corner again
+				int Count = (absolute(BorderX0)+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1; // Don't draw the corner again
 
 				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
 			}
 		}
-		//draw left border
+		// Draw left border
 		if(Y0 < pTileLayer->m_Height - 1 && Y1 > 0)
 		{
 			unsigned int DrawNum = ((Visuals.m_BorderLeft[Y1-1].IndexBufferByteOffset() - Visuals.m_BorderLeft[Y0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderLeft[Y1-1].DoDraw() ? 6lu : 0lu);
@@ -935,7 +935,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 	
 	if(BorderX1 >= pTileLayer->m_Width)
 	{
-		//draw corners on right side
+		// Draw corners on right side
 		if(BorderY0 < 0)
 		{
 			if(Visuals.m_BorderTopRight.DoDraw())
@@ -947,7 +947,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 				Dir.x = -32.f;
 				Dir.y = 32.f;
 
-				int Count = (BorderX1-pTileLayer->m_Width+1) * (absolute(BorderY0)+1) - 1;//dont draw the corner again
+				int Count = (BorderX1-pTileLayer->m_Width+1) * (absolute(BorderY0)+1) - 1; // Don't draw the corner again
 
 				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
 			}
@@ -963,12 +963,12 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 				Dir.x = -32.f;
 				Dir.y = -32.f;
 
-				int Count = (BorderX1-pTileLayer->m_Width+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1;//dont draw the corner again
+				int Count = (BorderX1-pTileLayer->m_Width+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1; // Don't draw the corner again
 
 				Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
 			}
 		}		
-		//draw right border
+		// Draw right border
 		if(Y0 < pTileLayer->m_Height - 1 && Y1 > 0)
 		{
 			unsigned int DrawNum = ((Visuals.m_BorderRight[Y1-1].IndexBufferByteOffset() - Visuals.m_BorderRight[Y0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderRight[Y1-1].DoDraw() ? 6lu : 0lu);;
@@ -981,7 +981,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 	}
 	if(BorderY0 < 0)
 	{
-		//draw top border
+		// Draw top border
 		if(X0 < pTileLayer->m_Width - 1 && X1 > 0)
 		{			
 			unsigned int DrawNum = ((Visuals.m_BorderTop[X1-1].IndexBufferByteOffset() - Visuals.m_BorderTop[X0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderTop[X1-1].DoDraw() ? 6lu : 0lu);;
@@ -994,7 +994,7 @@ void CMapLayers::DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilem
 	}
 	if(BorderY1 >= pTileLayer->m_Height)
 	{
-		//draw bottom border
+		// Draw bottom border
 		if(X0 < pTileLayer->m_Width - 1 && X1 > 0)
 		{
 			unsigned int DrawNum = ((Visuals.m_BorderBottom[X1-1].IndexBufferByteOffset() - Visuals.m_BorderBottom[X0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderBottom[X1-1].DoDraw() ? 6lu : 0lu);;
@@ -1041,7 +1041,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 	if(BorderX0 >= pTileLayer->m_Width + 300) BorderX0 = pTileLayer->m_Width + 299;
 	if(BorderY0 >= pTileLayer->m_Height + 300) BorderY0 = pTileLayer->m_Height + 299;	
 	
-	//draw left kill tile border
+	// Draw left kill tile border
 	if(BorderX0 < -201)
 	{
 		vec2 Offset;
@@ -1055,7 +1055,7 @@ void CMapLayers::DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerT
 
 		Graphics()->DrawBorderTile(Visuals.m_VisualObjectsIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (absolute(BorderX0) - 201), Count);
 	}
-	//draw top kill tile border
+	// Draw top kill tile border
 	if(BorderY0 < -201)
 	{
 		vec2 Offset;

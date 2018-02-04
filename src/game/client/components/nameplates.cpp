@@ -72,7 +72,7 @@ void CNamePlates::RenderNameplate(
 			TextRender()->Text(0, Position.x-tw_clan/2.0f, Position.y-FontSize-FontSizeClan-38.0f, FontSizeClan, pClan, -1);
 		}
 
-		if(g_Config.m_Debug) // render client id when in debug aswell
+		if(g_Config.m_Debug) // render client id when in debug as well
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf),"%d", pPlayerInfo->m_ClientID);

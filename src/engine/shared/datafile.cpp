@@ -130,7 +130,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	Size += Header.m_NumItemTypes*sizeof(CDatafileItemType);
 	Size += (Header.m_NumItems+Header.m_NumRawData)*sizeof(int);
 	if(Header.m_Version == 4)
-		Size += Header.m_NumRawData*sizeof(int); // v4 has uncompressed data sizes aswell
+		Size += Header.m_NumRawData*sizeof(int); // v4 has uncompressed data sizes as well
 	Size += Header.m_ItemSize;
 
 	unsigned AllocSize = Size;
@@ -369,7 +369,7 @@ void *CDataFileReader::GetItem(int Index, int *pType, int *pID)
 
 	CDatafileItem *i = (CDatafileItem *)(m_pDataFile->m_Info.m_pItemStart+m_pDataFile->m_Info.m_pItemOffsets[Index]);
 	if(pType)
-		*pType = (i->m_TypeAndID>>16)&0xffff; // remove sign extention
+		*pType = (i->m_TypeAndID>>16)&0xffff; // remove sign extension
 	if(pID)
 		*pID = i->m_TypeAndID&0xffff;
 	return (void *)(i+1);
