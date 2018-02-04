@@ -37,3 +37,4 @@ CPackConfig.cmake
 CPackSourceConfig.cmake
 _CPack_Packages/
 cmake_install.cmake
+/build/
