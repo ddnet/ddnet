@@ -35,7 +35,7 @@ pack_*/
 rules.ninja
 testrunner\[1\]_include.cmake
 
-src/game/generated
+generated
 
 .cproject
 .project
