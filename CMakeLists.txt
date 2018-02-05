@@ -552,16 +552,18 @@ file(COPY ${COPY_FILES} DESTINATION .)
 ########################################################################
 
 function(chash output_file)
-  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} scripts/cmd5.py ${ARGN} > ${output_file}
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} scripts/cmd5.py ${ARGN}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS scripts/cmd5.py ${ARGN}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
 
 function(generate_source output_file script_parameter)
-  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter} > ${output_file}
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/compile.py
       datasrc/content.py
@@ -571,10 +573,10 @@ function(generate_source output_file script_parameter)
   )
 endfunction()
 
-file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/src/game/generated/")
+file(MAKE_DIRECTORY src/game/generated/)
 chash("src/game/generated/nethash.cpp"
   "src/engine/shared/protocol.h"
-  "src/game/generated/protocol.h"
+  "${PROJECT_BINARY_DIR}/src/game/generated/protocol.h"
   "src/game/tuning.h"
   "src/game/gamecore.cpp"
 )
@@ -1348,8 +1350,8 @@ endif()
 set(PACKAGE_TARGETS)
 
 if(DMGTOOLS_FOUND OR HDIUTIL)
-  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/client/")
-  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/server/")
+  file(MAKE_DIRECTORY bundle/client/)
+  file(MAKE_DIRECTORY bundle/server/)
   configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
   configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
 
@@ -1546,6 +1548,7 @@ foreach(target ${TARGETS_OWN})
     target_compile_options(${target} PRIVATE ${OUR_FLAGS_OWN})
   endif()
   target_include_directories(${target} PRIVATE src)
+  target_include_directories(${target} PRIVATE ${CMAKE_BINARY_DIR}/src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDEDIR})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
