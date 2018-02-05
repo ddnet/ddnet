@@ -1,40 +1,74 @@
+# The following three lines exclude all files (not directories) which don't
+# have a period in them. This should exclude executables on non-Windows
+# platforms.
 *
 !**/
 !*.*
+
+# Ignore data-folders outside the root, these are copied around to build
+# directories.
+data/
+!/data/
+
+bundle/
+!/other/bundle/
+
+.ninja_deps
+.ninja_log
+CMakeCache.txt
+CMakeFiles
+CMakeSettings*
+CPackConfig.cmake
+CPackSourceConfig.cmake
+CTestTestfile.cmake
+_CPack_Packages/
+build.ninja
+cmake_install.cmake
+gmock.pc
+gmock_main.pc
+googletest-build/
+googletest-download/
+googletest-src/
+gtest.pc
+gtest_main.pc
+pack_*/
+rules.ninja
+testrunner\[1\]_include.cmake
 
 src/game/generated
 
 .cproject
 .project
-*.exe
+.settings
+cscope.files
+cscope.out
+
+# bam ignores
+/config.lua
+/objs
+
+*.cmd
 *.dll
+*.dmg
 *.dtb
-*.log
-*.res
-*.patch
-*.prefs
+*.exe
+*.filters
 *.lnk
+*.log
+*.opensdf
+*.patch
 *.pdb
+*.prefs
+*.pyc
+*.res
 *.sdf
 *.sln
 *.suo
 *.swp
-*.vs
-*.vcxproj
-*.filters
+*.tar.gz
+*.tar.xz
+*.teehistorian
 *.user
-*.cmd
-.settings
-*.opensdf
-*.pyc
-cscope.out
-cscope.files
-
-CMakeCache.txt
-CMakeSettings*
-CMakeFiles
-CPackConfig.cmake
-CPackSourceConfig.cmake
-_CPack_Packages/
-cmake_install.cmake
-/build/
+*.vcxproj
+*.vs
+*.zip
