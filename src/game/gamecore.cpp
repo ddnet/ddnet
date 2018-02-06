@@ -3,7 +3,7 @@
 #include "gamecore.h"
 
 #include <engine/shared/config.h>
-#include <engine/server/server.h>
+
 const char *CTuningParams::ms_apNames[] =
 {
 	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) #ScriptName,
