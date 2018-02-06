@@ -356,6 +356,10 @@ MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000 , CFGFLAG_SERVER, "if chats core exceeds this, the player will be muted for sv_spam_mute_duration seconds")
 MACRO_CONFIG_INT(SvSpamMuteDuration, sv_spam_mute_duration, 60, 0, 3600 , CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off")
 
+MACRO_CONFIG_INT(SvChatBlacklistBanDuration, sv_chat_blacklist_ban_duration, 3600, 0, 36000, CFGFLAG_SERVER, "how many seconds to ban, if player triggers the chat blacklist")
+MACRO_CONFIG_STR(SvChatBlacklistPhrase, sv_chat_blacklist_phrase, 128, "", CFGFLAG_SERVER, "blacklisted phrase")
+MACRO_CONFIG_STR(SvChatBlacklistBanReason, sv_chat_blacklist_ban_reason, 128, "", CFGFLAG_SERVER, "reason given on ban for a blacklist infringement")
+
 MACRO_CONFIG_INT(SvEvents, sv_events, 1, 0, 1, CFGFLAG_SERVER, "Enable triggering of server events, like the happy eyeemotes on some holidays.")
 MACRO_CONFIG_INT(SvRankCheats, sv_rank_cheats, 0, 0, 1, CFGFLAG_SERVER, "Enable ranks after cheats have been used (file based server only)")
 MACRO_CONFIG_INT(SvShutdownWhenEmpty, sv_shutdown_when_empty, 0, 0, 1, CFGFLAG_SERVER, "Shutdown server as soon as noone is on it anymore")
