@@ -449,6 +449,16 @@ void CServer::Kick(int ClientID, const char *pReason)
 	m_NetServer.Drop(ClientID, pReason);
 }
 
+void CServer::Ban(int ClientID, int Duration, const char *pReason)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CClient::STATE_EMPTY)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid client id to ban");
+		return;
+	}
+	m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientID), Duration, pReason);
+}
+
 /*int CServer::Tick()
 {
 	return m_CurrentGameTick;

@@ -1155,6 +1155,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		if(MsgID == NETMSGTYPE_CL_SAY)
 		{
 			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
+			if(g_Config.m_SvChatBlacklistBanDuration && !str_comp_nocase(pMsg->m_pMessage, g_Config.m_SvChatBlacklistPhrase))
+			{
+				Server()->Ban(ClientID, g_Config.m_SvChatBlacklistBanDuration, g_Config.m_SvChatBlacklistBanReason[0] ? g_Config.m_SvChatBlacklistBanReason : "blacklisted");
+				return;
+			}
+
 			if(!str_utf8_check(pMsg->m_pMessage))
 			{
 				return;
