@@ -68,7 +68,6 @@ class CGameContext : public IGameServer
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
 	ASYNCIO *m_pTeeHistorianFile;
-	CUuid m_GameUuid;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
@@ -126,6 +125,7 @@ public:
 
 	IGameController *m_pController;
 	CGameWorld m_World;
+	CUuid m_GameUuid;
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
