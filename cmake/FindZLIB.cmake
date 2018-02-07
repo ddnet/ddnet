@@ -13,8 +13,6 @@ if(NOT PREFER_BUNDLED_LIBS)
 endif()
 
 if(NOT ZLIB_FOUND)
-  set(ZLIB_FOUND ON)
-  set(ZLIB_BUNDLED ON)
   set_glob(ZLIB_SRC GLOB src/engine/external/zlib
     adler32.c
     compress.c
@@ -49,5 +47,6 @@ if(NOT ZLIB_FOUND)
   list(APPEND TARGETS_DEP zlib)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(ZLIB DEFAULT_MSG)
+  find_package_handle_standard_args(ZLIB DEFAULT_MSG ZLIB_SRC)
+  set(ZLIB_BUNDLED ON)
 endif()

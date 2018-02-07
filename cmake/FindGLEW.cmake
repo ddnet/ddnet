@@ -20,9 +20,7 @@ if(NOT GLEW_FOUND)
   target_compile_definitions(glew-obj PUBLIC GLEW_STATIC)
   list(APPEND TARGETS_DEP glew)
 
-  set(GLEW_FOUND ON)
-  set(GLEW_BUNDLED ON)
-
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(GLEW DEFAULT_MSG)
+  find_package_handle_standard_args(GLEW DEFAULT_MSG GLEW_SRC)
+  set(GLEW_BUNDLED ON)
 endif()

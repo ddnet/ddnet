@@ -50,11 +50,10 @@ if(NOT WAVPACK_FOUND)
   target_include_directories(wavpack INTERFACE ${WAVPACK_INCLUDEDIR})
 
   list(APPEND TARGETS_DEP wavpack)
-  set(WAVPACK_FOUND ON)
-  set(WAVPACK_BUNDLED ON)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Wavpack DEFAULT_MSG)
+  find_package_handle_standard_args(Wavpack DEFAULT_MSG WAVPACK_INCLUDEDIR)
+  set(WAVPACK_BUNDLED ON)
 endif()
 
 set(TMP ${CMAKE_REQUIRED_LIBRARIES})
