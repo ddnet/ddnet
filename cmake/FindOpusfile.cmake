@@ -23,22 +23,31 @@ find_package_handle_standard_args(Opusfile DEFAULT_MSG OPUSFILE_LIBRARY OPUSFILE
 
 mark_as_advanced(OPUSFILE_LIBRARY OPUSFILE_INCLUDEDIR)
 
-set(OPUSFILE_LIBRARIES ${OPUSFILE_LIBRARY})
-set(OPUSFILE_INCLUDE_DIRS ${OPUSFILE_INCLUDEDIR})
+if(OPUSFILE_FOUND)
+  set(OPUSFILE_LIBRARIES ${OPUSFILE_LIBRARY})
+  set(OPUSFILE_INCLUDE_DIRS ${OPUSFILE_INCLUDEDIR})
 
-is_bundled(IS_BUNDLED "${OPUSFILE_LIBRARY}")
-if(IS_BUNDLED AND TARGET_OS STREQUAL "windows")
-  set(OPUSFILE_COPY_FILES
-    "${EXTRA_OPUSFILE_LIBDIR}/libogg.dll"
-    "${EXTRA_OPUSFILE_LIBDIR}/libopus.dll"
-    "${EXTRA_OPUSFILE_LIBDIR}/libopusfile.dll"
-    "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
+  add_library(Deps::Opusfile UNKNOWN IMPORTED)
+  set_target_properties(Deps::Opusfile PROPERTIES
+    IMPORTED_LOCATION "${OPUSFILE_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${OPUSFILE_INCLUDEDIR}"
+    INTERFACE_LINK_LIBRARIES "Deps::Ogg;Deps::Opus"
   )
-  if(TARGET_BITS EQUAL 32)
-    list(APPEND OPUSFILE_COPY_FILES
-      "${EXTRA_OPUSFILE_LIBDIR}/libgcc_s_sjlj-1.dll"
+
+  is_bundled(OPUSFILE_BUNDLED "${OPUSFILE_LIBRARY}")
+  if(OPUSFILE_BUNDLED AND TARGET_OS STREQUAL "windows")
+    set(OPUSFILE_COPY_FILES
+      "${EXTRA_OPUSFILE_LIBDIR}/libogg.dll"
+      "${EXTRA_OPUSFILE_LIBDIR}/libopus.dll"
+      "${EXTRA_OPUSFILE_LIBDIR}/libopusfile.dll"
+      "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
     )
+    if(TARGET_BITS EQUAL 32)
+      list(APPEND OPUSFILE_COPY_FILES
+        "${EXTRA_OPUSFILE_LIBDIR}/libgcc_s_sjlj-1.dll"
+      )
+    endif()
+  else()
+    set(OPUSFILE_COPY_FILES)
   endif()
-else()
-  set(OPUSFILE_COPY_FILES)
 endif()

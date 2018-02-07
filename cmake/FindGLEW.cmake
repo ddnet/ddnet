@@ -1,33 +1,28 @@
-if(NOT CMAKE_CROSSCOMPILING)
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_GLEW libglew)
+if(NOT PREFER_BUNDLED_LIBS)
+  set(CMAKE_MODULE_PATH ${ORIG_CMAKE_MODULE_PATH})
+  find_package(GLEW)
+  set(CMAKE_MODULE_PATH ${OWN_CMAKE_MODULE_PATH})
+  if(GLEW_FOUND)
+    add_library(glew UNKNOWN IMPORTED)
+    set_target_properties(glew PROPERTIES
+      IMPORTED_LOCATION "${GLEW_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${GLEW_INCLUDEDIR}"
+    )
+    set(GLEW_BUNDLED OFF)
+  endif()
 endif()
 
-set_extra_dirs_lib(GLEW glew)
-find_library(GLEW_LIBRARY
-  NAMES GLEW glew32
-  HINTS ${HINTS_GLEW_LIBDIR} ${PC_GLEW_LIBDIR} ${PC_GLEW_LIBRARY_DIRS}
-  PATHS ${PATHS_GLEW_LIBDIR}
-  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
-)
-set_extra_dirs_include(GLEW glew "${GLEW_LIBRARY}")
-find_path(GLEW_INCLUDEDIR GL
-  HINTS ${HINTS_GLEW_INCLUDEDIR} ${PC_GLEW_INCLUDEDIR} ${PC_GLEW_INCLUDE_DIRS}
-  PATHS ${PATHS_GLEW_INCLUDEDIR}
-  ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
-)
+if(NOT GLEW_FOUND)
+  set_glob(GLEW_SRC GLOB src/engine/external/glew glew.c)
+  set_glob(GLEW_INCLUDES GLOB src/engine/external/glew/GL eglew.h glew.h glxew.h wglew.h)
+  add_object_library(glew EXCLUDE_FROM_ALL ${GLEW_SRC} ${GLEW_INCLUDES})
+  #target_include_directories(glew PRIVATE src/engine/external/glew)
+  target_compile_definitions(glew-obj PUBLIC GLEW_STATIC)
+  list(APPEND TARGETS_DEP glew)
 
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(GLEW DEFAULT_MSG GLEW_LIBRARY GLEW_INCLUDEDIR)
+  set(GLEW_FOUND ON)
+  set(GLEW_BUNDLED ON)
 
-mark_as_advanced(GLEW_LIBRARY GLEW_INCLUDEDIR)
-
-set(GLEW_LIBRARIES ${GLEW_LIBRARY})
-set(GLEW_INCLUDE_DIRS ${GLEW_INCLUDEDIR})
-
-is_bundled(IS_BUNDLED "${GLEW_LIBRARY}")
-if(IS_BUNDLED AND TARGET_OS STREQUAL "windows")
-  set(GLEW_COPY_FILES "${EXTRA_GLEW_LIBDIR}/glew32.dll")
-else()
-  set(GLEW_COPY_FILES)
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(GLEW DEFAULT_MSG)
 endif()
