@@ -36,7 +36,7 @@ endif()
 if(NOT PNGLITE_FOUND)
   set_glob(PNGLITE_SRC GLOB src/engine/external/pnglite pnglite.c pnglite.h)
   add_object_library(pnglite EXCLUDE_FROM_ALL ${PNGLITE_SRC})
-  list(APPEND TARGETS_DEP png)
+  list(APPEND TARGETS_DEP pnglite-obj)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Pnglite DEFAULT_MSG PNGLITE_SRC)

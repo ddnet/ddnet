@@ -19,7 +19,7 @@ if(NOT GLEW_FOUND)
   set(GLEW_INCLUDEDIR src/engine/external/glew)
   target_include_directories(glew-obj PUBLIC ${GLEW_INCLUDEDIR})
   target_compile_definitions(glew-obj PUBLIC GLEW_STATIC)
-  list(APPEND TARGETS_DEP glew)
+  list(APPEND TARGETS_DEP glew-obj)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(GLEW DEFAULT_MSG GLEW_SRC)

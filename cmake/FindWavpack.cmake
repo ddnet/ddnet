@@ -49,7 +49,7 @@ if(NOT WAVPACK_FOUND)
   set(WAVPACK_INCLUDE_DIRS ${WAVPACK_INCLUDEDIR})
   target_include_directories(wavpack INTERFACE ${WAVPACK_INCLUDEDIR})
 
-  list(APPEND TARGETS_DEP wavpack)
+  list(APPEND TARGETS_DEP wavpack-obj)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Wavpack DEFAULT_MSG WAVPACK_INCLUDEDIR)

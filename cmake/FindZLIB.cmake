@@ -45,7 +45,7 @@ if(NOT ZLIB_FOUND)
   set(ZLIB_INCLUDEDIR src/engine/external/zlib)
   target_include_directories(zlib INTERFACE ${ZLIB_INCLUDEDIR})
 
-  list(APPEND TARGETS_DEP zlib)
+  list(APPEND TARGETS_DEP zlib-obj)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(ZLIB DEFAULT_MSG ZLIB_INCLUDEDIR)
