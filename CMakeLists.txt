@@ -288,6 +288,9 @@ find_package(PythonInterp)
 find_package(SDL2)
 find_package(Threads)
 find_package(Wavpack)
+if(WEBSOCKETS)
+  find_package(Websockets)
+endif()
 find_package(ZLIB)
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
@@ -346,6 +349,9 @@ show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL2" SDL2)
 show_dependency_status("Wavpack" WAVPACK)
+if(WEBSOCKETS)
+  show_dependency_status("Websockets" WEBSOCKETS)
+endif()
 show_dependency_status("Zlib" ZLIB)
 
 if(NOT(PYTHONINTERP_FOUND))
@@ -682,45 +688,13 @@ add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 list(APPEND TARGETS_DEP md5)
 
-if(WEBSOCKETS)
-  set_glob(DEP_WEBSOCKETS_SRC GLOB src/engine/external/libwebsockets
-    alloc.c
-    base64-decode.c
-    config.h
-    context.c
-    extension-deflate-frame.c
-    extension-deflate-frame.h
-    extension-deflate-stream.c
-    extension-deflate-stream.h
-    extension.c
-    getifaddrs.h
-    handshake.c
-    huftable.h
-    lextable-strings.h
-    lextable.h
-    libwebsockets.c
-    libwebsockets.h
-    lws-plat-unix.c
-    output.c
-    parsers.c
-    pollfd.c
-    private-libwebsockets.h
-    server-handshake.c
-    server.c
-    service.c
-    sha-1.c
-  )
-  add_library(websockets EXCLUDE_FROM_ALL OBJECT ${DEP_WEBSOCKETS_SRC})
-  list(APPEND TARGETS_DEP websockets)
-  set(DEP_WEBSOCKETS $<TARGET_OBJECTS:websockets>)
-else()
-  set(DEP_WEBSOCKETS)
-endif()
-
-set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS})
+set(DEPS ${DEP_MD5})
 
 # Libraries
 set(LIBS Threads::Threads zlib ${PLATFORM_LIBS})
+if(WEBSOCKETS)
+  list(APPEND LIBS Deps::Websockets)
+endif()
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
