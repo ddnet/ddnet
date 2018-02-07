@@ -42,11 +42,12 @@ if(NOT ZLIB_FOUND)
     zutil.h
   )
   add_object_library(zlib EXCLUDE_FROM_ALL ${ZLIB_SRC})
-  target_include_directories(zlib INTERFACE src/engine/external/zlib/)
+  set(ZLIB_INCLUDEDIR src/engine/external/zlib)
+  target_include_directories(zlib INTERFACE ${ZLIB_INCLUDEDIR})
 
   list(APPEND TARGETS_DEP zlib)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(ZLIB DEFAULT_MSG ZLIB_SRC)
+  find_package_handle_standard_args(ZLIB DEFAULT_MSG ZLIB_INCLUDEDIR)
   set(ZLIB_BUNDLED ON)
 endif()

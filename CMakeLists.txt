@@ -199,6 +199,15 @@ function(set_glob VAR GLOBBING DIRECTORY) # ...
 endfunction()
 
 ########################################################################
+# INITALIZE TARGET LISTS
+########################################################################
+
+set(TARGETS_OWN)
+set(TARGETS_DEP)
+
+set(TARGETS_LINK) # Targets with a linking stage.
+
+########################################################################
 # DEPENDENCIES
 ########################################################################
 
@@ -471,15 +480,6 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
     endif()
   endif()
 endif()
-
-########################################################################
-# INITALIZE TARGET LISTS
-########################################################################
-
-set(TARGETS_OWN)
-set(TARGETS_DEP)
-
-set(TARGETS_LINK) # Targets with a linking stage.
 
 ########################################################################
 # DEPENDENCY COMPILATION
