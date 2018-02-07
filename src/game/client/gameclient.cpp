@@ -481,7 +481,7 @@ void CGameClient::OnConnected()
 
 	m_ServerMode = SERVERMODE_PURE;
 
-	// send the inital info
+	// send the initial info
 	SendInfo(true);
 	// we should keep this in for now, because otherwise you can't spectate
 	// people at start as the other info 64 packet is only sent after the first
@@ -1271,7 +1271,7 @@ void CGameClient::OnNewSnapshot()
 	//	}
 	//}
 
-	// sort player infos by DDRace Team (and score inbetween)
+	// sort player infos by DDRace Team (and score between)
 	Index = 0;
 	for(int Team = 0; Team <= MAX_CLIENTS; ++Team)
 	{

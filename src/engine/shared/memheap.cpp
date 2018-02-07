@@ -14,7 +14,7 @@ void CHeap::NewChunk()
 	if(!pMem)
 		return;
 
-	// the chunk structure is located in the begining of the chunk
+	// the chunk structure is located in the beginning of the chunk
 	// init it and return the chunk
 	pChunk = (CChunk*)pMem;
 	pChunk->m_pMemory = (char*)(pChunk+1);

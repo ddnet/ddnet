@@ -530,7 +530,7 @@ const char *CClient::LatestVersion()
 	return m_aVersionStr;
 }
 
-// TODO: OPT: do this alot smarter!
+// TODO: OPT: do this a lot smarter!
 int *CClient::GetInput(int Tick)
 {
 	int Best = -1;

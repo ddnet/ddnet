@@ -300,7 +300,7 @@ int io_seek(IOHANDLE io, int offset, int origin);
 		io - Handle to the file.
 
 	Returns:
-		Returns the current position. -1L if an error occured.
+		Returns the current position. -1L if an error occurred.
 */
 long int io_tell(IOHANDLE io);
 
@@ -312,7 +312,7 @@ long int io_tell(IOHANDLE io);
 		io - Handle to the file.
 
 	Returns:
-		Returns the total size. -1L if an error occured.
+		Returns the total size. -1L if an error occurred.
 */
 long int io_length(IOHANDLE io);
 
@@ -342,7 +342,7 @@ int io_flush(IOHANDLE io);
 
 /*
 	Function: io_error
-		Checks whether an error occured during I/O with the file.
+		Checks whether an error occurred during I/O with the file.
 
 	Parameters:
 		io - Handle to the file.
@@ -454,7 +454,7 @@ void aio_write_newline_unlocked(ASYNCIO *aio);
 
 /*
 	Function: aio_error
-		Checks whether errors have occured during the asynchronous
+		Checks whether errors have occurred during the asynchronous
 		writing.
 
 		Call this function regularly to see if there are errors. Call
@@ -465,7 +465,7 @@ void aio_write_newline_unlocked(ASYNCIO *aio);
 		aio - Handle to the file.
 
 	Returns:
-		Returns 0 if no error occured, and nonzero on error.
+		Returns 0 if no error occurred, and nonzero on error.
 
 */
 int aio_error(ASYNCIO *aio);
@@ -669,7 +669,7 @@ int net_init();
 /*
 	Function: net_host_lookup
 		Does a hostname lookup by name and fills out the passed
-		NETADDR struct with the recieved details.
+		NETADDR struct with the received details.
 
 	Returns:
 		0 on success.
@@ -693,7 +693,7 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b);
 
 /*
 	Function: net_addr_str
-		Turns a network address into a representive string.
+		Turns a network address into a representative string.
 
 	Parameters:
 		addr - Address to turn into a string.
@@ -762,7 +762,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		maxsize - Maximum size to recive.
 
 	Returns:
-		On success it returns the number of bytes recived. Returns -1
+		On success it returns the number of bytes received. Returns -1
 		on error.
 */
 int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize);
@@ -800,7 +800,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr);
 
 	Parameters:
 		sock - Socket to start listen to.
-		backlog - Size of the queue of incomming connections to keep.
+		backlog - Size of the queue of incoming connections to keep.
 
 	Returns:
 		Returns 0 on success.
@@ -938,7 +938,7 @@ void net_unix_close(UNIXSOCKET sock);
 
 	Remarks:
 		- The strings are treated as zero-termineted strings.
-		- Garantees that dst string will contain zero-termination.
+		- Guarantees that dst string will contain zero-termination.
 */
 void str_append(char *dst, const char *src, int dst_size);
 
@@ -953,7 +953,7 @@ void str_append(char *dst, const char *src, int dst_size);
 
 	Remarks:
 		- The strings are treated as zero-termineted strings.
-		- Garantees that dst string will contain zero-termination.
+		- Guarantees that dst string will contain zero-termination.
 */
 void str_copy(char *dst, const char *src, int dst_size);
 
@@ -974,7 +974,7 @@ int str_length(const char *str);
 		Performs printf formating into a buffer.
 
 	Parameters:
-		buffer - Pointer to the buffer to recive the formated string.
+		buffer - Pointer to the buffer to recive the formatted string.
 		buffer_size - Size of the buffer.
 		format - printf formating string.
 		... - Parameters for the formating.
@@ -985,7 +985,7 @@ int str_length(const char *str);
 	Remarks:
 		- See the C manual for syntax for the printf formating string.
 		- The strings are treated as zero-termineted strings.
-		- Garantees that dst string will contain zero-termination.
+		- Guarantees that dst string will contain zero-termination.
 */
 int str_format(char *buffer, int buffer_size, const char *format, ...)
 GNUC_ATTRIBUTE((format(printf, 3, 4)));
@@ -1568,7 +1568,7 @@ int str_utf8_forward(const char *str, int cursor);
 
 	Remarks:
 		- This function will also move the pointer forward.
-		- You may call this function again after an error occured.
+		- You may call this function again after an error occurred.
 */
 int str_utf8_decode(const char **ptr);
 

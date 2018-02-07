@@ -15,7 +15,7 @@ template<typename T>
 static int MakeVersion(int i, const T &v)
 { return (i<<16)+sizeof(T); }
 
-// backwards compatiblity
+// backwards compatibility
 /*
 void editor_load_old(DATAFILE *df, MAP *map)
 {

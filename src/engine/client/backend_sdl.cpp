@@ -486,7 +486,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		switch(State.m_BlendMode)
 		{
 		case CCommandBuffer::BLEND_NONE:
-			//we don't really need this anymore
+			// We don't really need this anymore
 			//glDisable(GL_BLEND);
 			break;
 		case CCommandBuffer::BLEND_ALPHA:
@@ -513,7 +513,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 	}
 	else if(m_LastClipEnable)
 	{
-		//dont disable it always
+		// Don't disable it always
 		glDisable(GL_SCISSOR_TEST);
 		m_LastClipEnable = false;
 	}
@@ -901,7 +901,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		switch(StoreOglformat)
 		{
 			case GL_RGB: StoreOglformat = GL_COMPRESSED_RGB; break;
-			//this needs further checks. it seems on some gpus COMPRESSED_ALPHA isnt in the core profile
+			// This needs further checks. it seems on some gpus COMPRESSED_ALPHA isn't in the core profile
 			case GL_RED: StoreOglformat = GL_COMPRESSED_RGBA; break;
 			case GL_RGBA: StoreOglformat = GL_COMPRESSED_RGBA; break;
 			default: StoreOglformat = GL_COMPRESSED_RGBA;
@@ -952,7 +952,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	
-	//this is the initial value for the wrap modes
+	// This is the initial value for the wrap modes
 	m_aTextures[pCommand->m_Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	// calculate memory usage
@@ -1002,7 +1002,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 		glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, (char*)pCommand->m_pVertices, GL_STREAM_DRAW);
 	else 
 	{
-		//this is better for some iGPUs. Probably due to not initializing a new buffer in the system memory again and again...(driver dependend)
+		// This is better for some iGPUs. Probably due to not initializing a new buffer in the system memory again and again...(driver dependend)
 		void *pData = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(CCommandBuffer::SVertex) * Count, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
 		mem_copy(pData, pCommand->m_pVertices, sizeof(CCommandBuffer::SVertex) * Count);
@@ -1014,7 +1014,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 
 	switch(pCommand->m_PrimType)
 	{
-	//we dont support GL_QUADS due to core profile
+	// We don't support GL_QUADS due to core profile
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
 		break;

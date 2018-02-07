@@ -1970,7 +1970,7 @@ void CCharacter::HandleTuneLayer()
 	else
 		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GameServer()->Tuning();
 
-	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
+	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
 		// send zone msgs
 		SendZoneMsgs();

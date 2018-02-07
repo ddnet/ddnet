@@ -62,7 +62,7 @@ class FilenameExtentionChecker(Checker):
 	def CheckStart(self, checker, filename):
 		ext = os.path.splitext(filename)[1]
 		if not ext in self.allowed:
-			checker.Error("file extention '%s' is not allowed" % ext)
+			checker.Error("file extension '%s' is not allowed" % ext)
 
 class IncludeChecker(Checker):
 	def __init__(self):

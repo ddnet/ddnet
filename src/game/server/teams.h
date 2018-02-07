@@ -62,7 +62,7 @@ public:
 
 	int Count(int Team) const;
 
-	//need to be very carefull using this method
+	//need to be very careful using this method
 	void SetForceCharacterTeam(int id, int Team);
 	void ForceLeaveTeam(int id);
 

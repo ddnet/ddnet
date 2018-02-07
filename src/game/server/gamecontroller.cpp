@@ -792,7 +792,7 @@ void IGameController::Snap(int SnappingClient)
 
 int IGameController::GetAutoTeam(int NotThisID)
 {
-	// this will force the auto balancer to work overtime aswell
+	// this will force the auto balancer to work overtime as well
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 		return 0;
