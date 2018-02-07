@@ -1627,24 +1627,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 #ifdef __ANDROID__
 	*pWidth = *pDesktopWidth;
 	*pHeight = *pDesktopHeight;
-/*
-#elif defined(CONF_FAMILY_WINDOWS)
-	if(*pWidth == 0 || *pHeight == 0)
-	{
-		*pWidth = *pDesktopWidth;
-		*pHeight = *pDesktopHeight;
-	}
-	else
-	{
-		float dpi = -1;
-		SDL_GetDisplayDPI(0, NULL, &dpi, NULL);
-		if(dpi > 0)
-		{
-			*pWidth = *pWidth * 96 / dpi;
-			*pHeight = *pHeight * 96 / dpi;
-		}
-	}
-*/
 #else
 	if(*pWidth == 0 || *pHeight == 0)
 	{
@@ -1654,7 +1636,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 #endif
 
 	// set flags
-	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN;
+	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
 #if defined(SDL_VIDEO_DRIVER_X11)
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
@@ -1663,11 +1645,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		SdlFlags |= SDL_WINDOW_BORDERLESS;
 	if(Flags&IGraphicsBackend::INITFLAG_FULLSCREEN)
 	{
-#if defined(CONF_PLATFORM_MACOSX)	// Todo SDL: remove this when fixed (game freezes when losing focus in fullscreen)
-		SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;	// always use "fake" fullscreen
-		*pWidth = *pDesktopWidth;
-		*pHeight = *pDesktopHeight;
-#else
 		//when we are at fullscreen, we really shouldn't allow window sizes, that aren't supported by the driver
 		bool SupportedResolution = false;
 		SDL_DisplayMode mode;
@@ -1691,7 +1668,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 			SdlFlags |= SDL_WINDOW_FULLSCREEN;
 		else
 			SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-#endif
 	}
 
 	// set gl attributes
