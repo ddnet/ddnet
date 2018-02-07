@@ -533,7 +533,7 @@ function(generate_source output_file script_parameter)
   )
 endfunction()
 
-file(MAKE_DIRECTORY src/game/generated/)
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src/game/generated/)
 chash("src/game/generated/nethash.cpp"
   "src/engine/shared/protocol.h"
   "${PROJECT_BINARY_DIR}/src/game/generated/protocol.h"
@@ -1274,8 +1274,8 @@ endif()
 set(PACKAGE_TARGETS)
 
 if(DMGTOOLS_FOUND OR HDIUTIL)
-  file(MAKE_DIRECTORY bundle/client/)
-  file(MAKE_DIRECTORY bundle/server/)
+  file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/bundle/client/)
+  file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/bundle/server/)
   configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
   configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
 
