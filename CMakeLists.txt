@@ -248,7 +248,6 @@ function(add_object_library TARGET)
       COMPILE_FEATURES
       COMPILE_OPTIONS
       INCLUDE_DIRECTORIES
-      LINK_LIBRARIES
   )
     set_target_properties(${TARGET}-obj PROPERTIES
       ${copied_property} $<TARGET_PROPERTY:${TARGET},INTERFACE_${copied_property}>
