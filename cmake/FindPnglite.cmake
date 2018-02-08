@@ -38,7 +38,9 @@ if(NOT PNGLITE_FOUND)
   add_object_library(pnglite EXCLUDE_FROM_ALL ${PNGLITE_SRC})
   list(APPEND TARGETS_DEP pnglite-obj)
 
-  target_link_libraries(pnglite INTERFACE zlib)
+  set_target_properties(pnglite PROPERTIES
+    INTERFACE_LINK_LIBRARIES "zlib"
+  )
   set(PNGLITE_INCLUDEDIR src/engine/external/pnglite)
   target_include_directories(pnglite INTERFACE ${PNGLITE_INCLUDEDIR})
 
