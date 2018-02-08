@@ -4,8 +4,6 @@
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
-#include <pnglite.h>
-
 bool Process(IStorage *pStorage, char **pMapNames)
 {
 	CDataFileReader Maps[2];
