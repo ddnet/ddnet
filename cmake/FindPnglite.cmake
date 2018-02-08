@@ -38,7 +38,11 @@ if(NOT PNGLITE_FOUND)
   add_object_library(pnglite EXCLUDE_FROM_ALL ${PNGLITE_SRC})
   list(APPEND TARGETS_DEP pnglite-obj)
 
+  target_link_libraries(pnglite INTERFACE zlib)
+  set(PNGLITE_INCLUDEDIR src/engine/external/pnglite)
+  target_include_directories(pnglite INTERFACE ${PNGLITE_INCLUDEDIR})
+
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Pnglite DEFAULT_MSG PNGLITE_SRC)
+  find_package_handle_standard_args(Pnglite DEFAULT_MSG PNGLITE_INCLUDEDIR)
   set(PNGLITE_BUNDLED ON)
 endif()

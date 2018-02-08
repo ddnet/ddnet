@@ -1,9 +1,10 @@
 #include <game/mapitems.h>
 #include <game/gamecore.h>
 #include <base/system.h>
-#include <engine/external/pnglite/pnglite.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
+#include <pnglite.h>
 
 bool Process(IStorage *pStorage, char **pMapNames)
 {
