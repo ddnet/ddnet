@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "engine/external/libwebsockets/libwebsockets.h"
+#include <libwebsockets.h>
 #include "base/system.h"
 #include "protocol.h"
 #include "ringbuffer.h"
@@ -31,7 +31,7 @@ typedef struct
 
 struct per_session_data
 {
-	struct libwebsocket *wsi;
+	struct lws *wsi;
 	int port;
 	sockaddr_in addr;
 	TSendBuffer send_buffer;
@@ -39,7 +39,7 @@ struct per_session_data
 
 struct context_data
 {
-	libwebsocket_context *context;
+	lws_context *context;
 	per_session_data *port_map[WS_CLIENTS];
 	TRecvBuffer recv_buffer;
 	int last_used_port;
@@ -57,10 +57,11 @@ static int receive_chunk(context_data *ctx_data, struct per_session_data *pss, v
 	return 0;
 }
 
-static int websocket_callback(struct libwebsocket_context *context, struct libwebsocket *wsi, enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len)
+static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
 {
 	struct per_session_data *pss = (struct per_session_data *)user;
-	context_data *ctx_data = (context_data *)libwebsocket_context_user(context);
+	lws_context *context = lws_get_context(wsi);
+	context_data *ctx_data = (context_data *)lws_context_user(context);
 
 	switch(reason)
 	{
@@ -85,7 +86,7 @@ static int websocket_callback(struct libwebsocket_context *context, struct libwe
 		}
 		ctx_data->last_used_port = port;
 		pss->wsi = wsi;
-		int fd = libwebsocket_get_socket_fd(wsi);
+		int fd = lws_get_socket_fd(wsi);
 		socklen_t addr_size = sizeof(pss->addr);
 		getpeername(fd, (struct sockaddr *)&pss->addr, &addr_size);
 		int orig_port = ntohs(pss->addr.sin_port);
@@ -117,17 +118,17 @@ static int websocket_callback(struct libwebsocket_context *context, struct libwe
 		if(chunk == NULL)
 			break;
 		int len = chunk->size - chunk->read;
-		int n = libwebsocket_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read], chunk->size - chunk->read, LWS_WRITE_BINARY);
+		int n = lws_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read], chunk->size - chunk->read, LWS_WRITE_BINARY);
 		if(n < 0)
 			return 1;
 		if(n < len)
 		{
 			chunk->read += n;
-			libwebsocket_callback_on_writable(context, wsi);
+			lws_callback_on_writable(wsi);
 			break;
 		}
 		pss->send_buffer.PopFirst();
-		libwebsocket_callback_on_writable(context, wsi);
+		lws_callback_on_writable(wsi);
 	}
 	break;
 
@@ -145,7 +146,7 @@ static int websocket_callback(struct libwebsocket_context *context, struct libwe
 	return 0;
 }
 
-static struct libwebsocket_protocols protocols[] = { {
+static struct lws_protocols protocols[] = { {
 		                                               "binary", /* name */
 		                                               websocket_callback, /* callback */
 		                                               sizeof(struct per_session_data) /* per_session_data_size */
@@ -182,7 +183,7 @@ int websocket_create(const char *addr, int port)
 	context_data *ctx_data = &contexts[first_free];
 	info.user = (void *)ctx_data;
 
-	ctx_data->context = libwebsocket_create_context(&info);
+	ctx_data->context = lws_create_context(&info);
 	if(ctx_data->context == NULL)
 	{
 		return -1;
@@ -195,23 +196,23 @@ int websocket_create(const char *addr, int port)
 
 int websocket_destroy(int socket)
 {
-	libwebsocket_context *context = contexts[socket].context;
+	lws_context *context = contexts[socket].context;
 	if(context == NULL)
 		return -1;
-	libwebsocket_context_destroy(context);
+	lws_context_destroy(context);
 	contexts[socket].context = NULL;
 	return 0;
 }
 
 int websocket_recv(int socket, unsigned char *data, size_t maxsize, struct sockaddr_in *sockaddrbuf, size_t fromLen)
 {
-	libwebsocket_context *context = contexts[socket].context;
+	lws_context *context = contexts[socket].context;
 	if(context == NULL)
 		return -1;
-	int n = libwebsocket_service(context, 0);
+	int n = lws_service(context, 0);
 	if(n < 0)
 		return n;
-	context_data *ctx_data = (context_data *)libwebsocket_context_user(context);
+	context_data *ctx_data = (context_data *)lws_context_user(context);
 	websocket_chunk *chunk = (websocket_chunk *)ctx_data->recv_buffer.First();
 	if(chunk == 0)
 		return 0;
@@ -234,10 +235,10 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize, struct socka
 
 int websocket_send(int socket, const unsigned char *data, size_t size, int port)
 {
-	libwebsocket_context *context = contexts[socket].context;
+	lws_context *context = contexts[socket].context;
 	if(context == NULL)
 		return -1;
-	context_data *ctx_data = (context_data *)libwebsocket_context_user(context);
+	context_data *ctx_data = (context_data *)lws_context_user(context);
 	struct per_session_data *pss = ctx_data->port_map[port];
 	if(pss == NULL)
 		return -1;
@@ -248,23 +249,23 @@ int websocket_send(int socket, const unsigned char *data, size_t size, int port)
 	chunk->read = 0;
 	memcpy(&chunk->addr, &pss->addr, sizeof(sockaddr_in));
 	memcpy(&chunk->data[LWS_SEND_BUFFER_PRE_PADDING], data, size);
-	libwebsocket_callback_on_writable(context, pss->wsi);
+	lws_callback_on_writable(pss->wsi);
 	return size;
 }
 
 int websocket_fd_set(int socket, fd_set *set)
 {
-	libwebsocket_context *context = contexts[socket].context;
+	lws_context *context = contexts[socket].context;
 	if(context == NULL)
 		return -1;
-	context_data *ctx_data = (context_data *)libwebsocket_context_user(context);
+	context_data *ctx_data = (context_data *)lws_context_user(context);
 	int max = 0;
 	for(int i = 0; i < WS_CLIENTS; i++)
 	{
 		per_session_data *pss = ctx_data->port_map[i];
 		if(pss == NULL)
 			continue;
-		int fd = libwebsocket_get_socket_fd(pss->wsi);
+		int fd = lws_get_socket_fd(pss->wsi);
 		if(fd > max)
 			max = fd;
 		FD_SET(fd, set);

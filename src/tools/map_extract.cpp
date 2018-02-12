@@ -1,9 +1,10 @@
 // Adapted from TWMapImagesRecovery by Tardo: https://github.com/Tardo/TWMapImagesRecovery
 #include <game/mapitems.h>
 #include <base/system.h>
-#include <engine/external/pnglite/pnglite.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
+#include <pnglite.h>
 
 bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 {

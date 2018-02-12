@@ -5,10 +5,10 @@
 #include <base/math.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
-#include <engine/external/pnglite/pnglite.h>
 #include <engine/graphics.h>
 #include <game/mapitems.h>
 
+#include <pnglite.h>
 /*
 	Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>
 	Notes: map filepath must be relative to user default teeworlds folder

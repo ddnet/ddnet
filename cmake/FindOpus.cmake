@@ -23,9 +23,23 @@ find_package_handle_standard_args(Opus DEFAULT_MSG OPUS_INCLUDEDIR)
 
 mark_as_advanced(OPUS_INCLUDEDIR OPUS_LIBRARY)
 
-set(OPUS_INCLUDE_DIRS ${OPUS_INCLUDEDIR})
-if(OPUS_LIBRARY)
-  set(OPUS_LIBRARIES ${OPUS_LIBRARY})
-else()
-  set(OPUS_LIBRARIES)
+if(OGG_FOUND)
+  set(OPUS_INCLUDE_DIRS ${OPUS_INCLUDEDIR})
+  if(OPUS_LIBRARY)
+    set(OPUS_LIBRARIES ${OPUS_LIBRARY})
+  else()
+    set(OPUS_LIBRARIES)
+  endif()
+
+  add_library(Deps::Opus UNKNOWN IMPORTED)
+  set_target_properties(Deps::Opus PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${OPUS_INCLUDEDIR}"
+  )
+  if(OPUS_LIBRARY)
+    set_target_properties(Deps::Opus PROPERTIES
+      IMPORTED_LOCATION "${OPUS_LIBRARY}"
+    )
+  endif()
+
+  is_bundled(OPUS_BUNDLED "${OPUS_LIBRARY}")
 endif()

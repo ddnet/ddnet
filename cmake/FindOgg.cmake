@@ -23,9 +23,23 @@ find_package_handle_standard_args(Ogg DEFAULT_MSG OGG_INCLUDEDIR)
 
 mark_as_advanced(OGG_INCLUDEDIR OGG_LIBRARY)
 
-set(OGG_INCLUDE_DIRS ${OGG_INCLUDEDIR})
-if(OGG_LIBRARY)
-  set(OGG_LIBRARIES ${OGG_LIBRARY})
-else()
-  set(OGG_LIBRARIES)
+if(OGG_FOUND)
+  set(OGG_INCLUDE_DIRS ${OGG_INCLUDEDIR})
+  if(OGG_LIBRARY)
+    set(OGG_LIBRARIES ${OGG_LIBRARY})
+  else()
+    set(OGG_LIBRARIES)
+  endif()
+
+  add_library(Deps::Ogg UNKNOWN IMPORTED)
+  set_target_properties(Deps::Ogg PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${OGG_INCLUDEDIR}"
+  )
+  if(OGG_LIBRARY)
+    set_target_properties(Deps::Ogg PROPERTIES
+      IMPORTED_LOCATION "${OGG_LIBRARY}"
+    )
+  endif()
+
+  is_bundled(OGG_BUNDLED "${OGG_LIBRARY}")
 endif()
