@@ -149,6 +149,7 @@ if(NOT MSVC)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
+  add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
 endif()
 
 ########################################################################
@@ -1564,5 +1565,8 @@ endforeach()
 foreach(target ${TARGETS_DEP})
   if(MSVC)
     target_compile_options(${target} PRIVATE /W0)
+  endif()
+  if(OUR_FLAGS_DEP)
+    target_compile_options(${target} PRIVATE ${OUR_FLAGS_DEP})
   endif()
 endforeach()
