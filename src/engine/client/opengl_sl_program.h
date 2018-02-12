@@ -1,6 +1,7 @@
-#pragma once
+#ifndef ENGINE_CLIENT_OPENGL_SL_PROGRAM_H
+#define ENGINE_CLIENT_OPENGL_SL_PROGRAM_H
 
-#include "engine/external/glew/GL/glew.h"
+#include <GL/glew.h>
 
 class CGLSL;
 
@@ -74,3 +75,5 @@ public:
 	int m_LocDir;
 	int m_LocNum;
 };
+
+#endif // ENGINE_CLIENT_OPENGL_SL_PROGRAM_H

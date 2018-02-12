@@ -26,19 +26,21 @@ mark_as_advanced(OPUSFILE_LIBRARY OPUSFILE_INCLUDEDIR)
 set(OPUSFILE_LIBRARIES ${OPUSFILE_LIBRARY})
 set(OPUSFILE_INCLUDE_DIRS ${OPUSFILE_INCLUDEDIR})
 
-is_bundled(IS_BUNDLED "${OPUSFILE_LIBRARY}")
-if(IS_BUNDLED AND TARGET_OS STREQUAL "windows")
-  set(OPUSFILE_COPY_FILES
-    "${EXTRA_OPUSFILE_LIBDIR}/libogg.dll"
-    "${EXTRA_OPUSFILE_LIBDIR}/libopus.dll"
-    "${EXTRA_OPUSFILE_LIBDIR}/libopusfile.dll"
-    "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
-  )
-  if(TARGET_BITS EQUAL 32)
-    list(APPEND OPUSFILE_COPY_FILES
-      "${EXTRA_OPUSFILE_LIBDIR}/libgcc_s_sjlj-1.dll"
+if(OPUSFILE_FOUND)
+  is_bundled(OPUSFILE_BUNDLED "${OPUSFILE_LIBRARY}")
+  if(OPUSFILE_BUNDLED AND TARGET_OS STREQUAL "windows")
+    set(OPUSFILE_COPY_FILES
+      "${EXTRA_OPUSFILE_LIBDIR}/libogg.dll"
+      "${EXTRA_OPUSFILE_LIBDIR}/libopus.dll"
+      "${EXTRA_OPUSFILE_LIBDIR}/libopusfile.dll"
+      "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
     )
+    if(TARGET_BITS EQUAL 32)
+      list(APPEND OPUSFILE_COPY_FILES
+        "${EXTRA_OPUSFILE_LIBDIR}/libgcc_s_sjlj-1.dll"
+      )
+    endif()
+  else()
+    set(OPUSFILE_COPY_FILES)
   endif()
-else()
-  set(OPUSFILE_COPY_FILES)
 endif()

@@ -6,7 +6,7 @@
 	#define WINVER 0x0501
 #endif
 
-#include "engine/external/glew/GL/glew.h"
+#include <GL/glew.h>
 #include <engine/storage.h>
 
 #include <base/detect.h>
