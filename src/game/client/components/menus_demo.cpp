@@ -457,6 +457,7 @@ static int gs_ListBoxNumItems;
 static int gs_ListBoxItemsPerRow;
 static float gs_ListBoxScrollValue;
 static bool gs_ListBoxItemActivated;
+static bool gs_ListBoxClicked;
 
 void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
 								int ItemsPerRow, int SelectedIndex, float ScrollValue)
@@ -497,6 +498,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	gs_ListBoxDoneEvents = 0;
 	gs_ListBoxScrollValue = ScrollValue;
 	gs_ListBoxItemActivated = false;
+	gs_ListBoxClicked = false;
 
 	// do the scrollbar
 	View.HSplitTop(gs_ListBoxRowHeight, &Row, 0);
@@ -591,8 +593,10 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 
 	CListboxItem Item = UiDoListboxNextRow();
 
-	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect))
+	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect)){
+		gs_ListBoxClicked = true;
 		gs_ListBoxNewSelected = ThisItemIndex;
+	}
 
 	// process input, regard selected index
 	if(gs_ListBoxSelectedIndex == ThisItemIndex)
@@ -600,7 +604,6 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		if(!gs_ListBoxDoneEvents)
 		{
 			gs_ListBoxDoneEvents = 1;
-
 
 			if(m_EnterPressed || (UI()->ActiveItem() == pId && Input()->MouseDoubleClick()))
 			{
@@ -661,13 +664,15 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 	return Item;
 }
 
-int CMenus::UiDoListboxEnd(float *pScrollValue, bool *pItemActivated)
+int CMenus::UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive)
 {
 	UI()->ClipDisable();
 	if(pScrollValue)
 		*pScrollValue = gs_ListBoxScrollValue;
 	if(pItemActivated)
 		*pItemActivated = gs_ListBoxItemActivated;
+	if(pListBoxActive)
+		*pListBoxActive = gs_ListBoxClicked;
 	return gs_ListBoxNewSelected;
 }
 
