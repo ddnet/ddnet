@@ -593,7 +593,8 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 
 	CListboxItem Item = UiDoListboxNextRow();
 
-	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect)){
+	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &Item.m_HitRect))
+	{
 		gs_ListBoxClicked = true;
 		gs_ListBoxNewSelected = ThisItemIndex;
 	}
