@@ -198,6 +198,16 @@ function(is_bundled VARIABLE PATH)
   endif()
 endfunction()
 
+macro(bundled_find_package NAME)
+  if(NOT PREFER_BUNDLED_LIBS)
+    find_package(${NAME})
+  else()
+    string(TOUPPER ${NAME}_FOUND __${NAME}_FOUND)
+    set(${__${NAME}_FOUND} OFF)
+    unset(__${NAME}_FOUND)
+  endif()
+endmacro()
+
 if(NOT CMAKE_CROSSCOMPILING)
   # Check for PkgConfig once so all the other `find_package` calls can do it
   # quietly.
@@ -208,7 +218,11 @@ find_package(Freetype)
 if(DOWNLOAD_GTEST)
   find_package(Git)
 endif()
+bundled_find_package(GLEW)
 find_package(GTest)
+if(WEBSOCKETS)
+  bundled_find_package(LibWebSockets)
+endif()
 if(MYSQL)
   find_package(MySQL)
 else()
@@ -217,14 +231,12 @@ endif()
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
+bundled_find_package(PngLite)
 find_package(PythonInterp)
 find_package(SDL2)
 find_package(Threads)
-if(NOT PREFER_BUNDLED_LIBS)
-  find_package(ZLIB)
-else()
-  set(ZLIB_FOUND NO)
-endif()
+bundled_find_package(WavPack)
+bundled_find_package(ZLIB)
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMG dmg)
@@ -248,7 +260,7 @@ message(STATUS "Dependencies:")
 function(show_dependency_status NAME FOUND PATH)
   if(FOUND)
     is_bundled(IS_BUNDLED "${PATH}")
-    if(IS_BUNDLED)
+    if(IS_BUNDLED OR NOT PATH)
       message(STATUS " * ${NAME} not found (using bundled version)")
     else()
       message(STATUS " * ${NAME} found")
@@ -260,15 +272,19 @@ endfunction()
 
 show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-  show_dependency_status("Dmg tools" ${DMGTOOLS_FOUND} "")
+  show_dependency_status("Dmg tools" ${DMGTOOLS_FOUND} ON)
 endif()
 show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
 if(DOWNLOAD_GTEST)
   show_dependency_status("Git" ${GIT_FOUND} "${GIT_EXECUTABLE}")
 endif()
+show_dependency_status("GLEW" ON ${GLEW_FOUND})
 show_dependency_status("GTest" ${GTEST_FOUND} "${GTEST_LIBRARY}")
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-  show_dependency_status("Hdiutil" ${HDIUTIL} "")
+  show_dependency_status("Hdiutil" ${HDIUTIL} ON)
+endif()
+if(WEBSOCKETS)
+  show_dependency_status("LibWebSockets" ON ${LIBWEBSOCKETS_FOUND})
 endif()
 if(MYSQL)
   show_dependency_status("MySQL" ${MYSQL_FOUND} "${MYSQL_LIBRARY}")
@@ -276,13 +292,11 @@ endif()
 show_dependency_status("Ogg" ${OGG_FOUND} "${OGG_INCLUDEDIR}")
 show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_INCLUDEDIR}")
 show_dependency_status("Opusfile" ${OPUSFILE_FOUND} "${OPUSFILE_LIBRARY}")
-show_dependency_status("PythonInterp" ${PYTHONINTERP_FOUND} "")
+show_dependency_status("PngLite" ON ${PNGLITE_FOUND})
+show_dependency_status("PythonInterp" ${PYTHONINTERP_FOUND} ON)
 show_dependency_status("SDL2" ${SDL2_FOUND} "${SDL2_LIBRARY}")
-if(ZLIB_FOUND)
-  message(STATUS " * Zlib found")
-else()
-  message(STATUS " * Zlib not found (using bundled version)")
-endif()
+show_dependency_status("WavPack" ON ${WAVPACK_FOUND})
+show_dependency_status("Zlib" ON ${ZLIB_FOUND})
 
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
@@ -460,7 +474,7 @@ endfunction()
 ########################################################################
 
 if(NOT(ZLIB_FOUND))
-  set(ZLIB_LIBRARIES)
+  set(ZLIB_LIBRARIES "")
   set_glob(ZLIB_SRC GLOB src/engine/external/zlib
     adler32.c
     compress.c
@@ -499,39 +513,57 @@ else()
   set(DEP_ZLIB)
 endif()
 
-set_glob(DEP_PNG_SRC GLOB src/engine/external/pnglite pnglite.c pnglite.h)
-add_library(png OBJECT EXCLUDE_FROM_ALL ${DEP_PNG_SRC})
-target_include_directories(png PRIVATE ${ZLIB_INCLUDEDIR})
+if(NOT(PNGLITE_FOUND))
+  set(PNGLITE_LIBRARIES "")
+  set_glob(DEP_PNG_SRC GLOB src/engine/external/pnglite pnglite.c pnglite.h)
+  add_library(png OBJECT EXCLUDE_FROM_ALL ${DEP_PNG_SRC})
+  target_include_directories(png PRIVATE ${ZLIB_INCLUDEDIR})
 
-set(DEP_PNG $<TARGET_OBJECTS:png>)
-list(APPEND TARGETS_DEP png)
+  set(DEP_PNG $<TARGET_OBJECTS:png>)
+  list(APPEND TARGETS_DEP png)
+else()
+  set(DEP_PNG)
+endif()
 
-set_glob(DEP_GLEW_SRC GLOB src/engine/external/glew glew.c)
-set_glob(DEP_GLEW_INCLUDES GLOB src/engine/external/glew/GL eglew.h glew.h glxew.h wglew.h)
-add_library(glew OBJECT EXCLUDE_FROM_ALL ${DEP_GLEW_SRC} ${DEP_GLEW_INCLUDES})
-target_include_directories(glew PRIVATE src/engine/external/glew)
+if(NOT(GLEW_FOUND))
+  set(GLEW_LIBRARIES "")
+  set_glob(DEP_GLEW_SRC GLOB src/engine/external/glew glew.c)
+  set_glob(DEP_GLEW_INCLUDES GLOB src/engine/external/glew/GL eglew.h glew.h glxew.h wglew.h)
+  add_library(glew OBJECT EXCLUDE_FROM_ALL ${DEP_GLEW_SRC} ${DEP_GLEW_INCLUDES})
+  target_include_directories(glew PRIVATE src/engine/external/glew)
 
-set(DEP_GLEW $<TARGET_OBJECTS:glew>)
-list(APPEND TARGETS_DEP glew)
+  set(DEP_GLEW $<TARGET_OBJECTS:glew>)
+  list(APPEND TARGETS_DEP glew)
+else()
+  set(DEP_GLEW)
+endif()
 
 if(CLIENT)
   # Static dependencies
   set_glob(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
-  set_glob(DEP_WAV_SRC GLOB src/engine/external/wavpack
-    bits.c
-    float.c
-    metadata.c
-    unpack.c
-    wavpack.h
-    words.c
-    wputils.c
-  )
   add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
-  add_library(wav EXCLUDE_FROM_ALL OBJECT ${DEP_WAV_SRC})
 
-  list(APPEND TARGETS_DEP json wav)
   set(DEP_JSON $<TARGET_OBJECTS:json>)
-  set(DEP_WAV $<TARGET_OBJECTS:wav>)
+  list(APPEND TARGETS_DEP json)
+
+  if(NOT(WAVPACK_FOUND))
+    set(WAVPACK_LIBRARIES "")
+    set_glob(DEP_WAV_SRC GLOB src/engine/external/wavpack
+      bits.c
+      float.c
+      metadata.c
+      unpack.c
+      wavpack.h
+      words.c
+      wputils.c
+    )
+    add_library(wav EXCLUDE_FROM_ALL OBJECT ${DEP_WAV_SRC})
+
+    set(DEP_WAV $<TARGET_OBJECTS:wav>)
+    list(APPEND TARGETS_DEP wav)
+  else()
+    set(DEP_WAV)
+  endif()
 endif()
 
 ########################################################################
@@ -726,7 +758,8 @@ add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 list(APPEND TARGETS_DEP md5)
 
-if(WEBSOCKETS)
+if(WEBSOCKETS AND NOT(LIBWEBSOCKETS_FOUND))
+  set(LIBWEBSOCKETS_LIBRARIES "")
   set_glob(DEP_WEBSOCKETS_SRC GLOB src/engine/external/libwebsockets
     alloc.c
     base64-decode.c
@@ -764,7 +797,7 @@ endif()
 set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS} ${DEP_ZLIB})
 
 # Libraries
-set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
+set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${LIBWEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
@@ -913,7 +946,10 @@ if(CLIENT)
     ${LIBS}
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${PNGLITE_LIBRARIES}
     ${SDL2_LIBRARIES}
+    ${WAVPACK_LIBRARIES}
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
@@ -1131,6 +1167,9 @@ foreach(ABS_T ${TOOLS})
       $<TARGET_OBJECTS:engine-shared>
     )
     target_link_libraries(${TOOL} ${LIBS})
+    if(TOOL MATCHES "^(tileset_.*|dilate|map_extract|map_replace_image)$")
+      target_link_libraries(${TOOL} ${PNGLITE_LIBRARIES})
+    endif()
     list(APPEND TARGETS_TOOLS ${TOOL})
   endif()
 endforeach()
