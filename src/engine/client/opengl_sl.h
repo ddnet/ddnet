@@ -1,6 +1,7 @@
-#pragma once
+#ifndef ENGINE_CLIENT_OPENGL_SL_H
+#define ENGINE_CLIENT_OPENGL_SL_H
 
-#include "engine/external/glew/GL/glew.h"
+#include <GL/glew.h>
 
 class CGLSL {
 public:
@@ -17,3 +18,5 @@ private:
 	int m_Type;
 	bool m_IsLoaded;
 };
+
+#endif // ENGINE_CLIENT_OPENGL_SL_H
