@@ -330,6 +330,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			m_NeedSendinfo = true;
 	}
 
+	static bool s_ListBoxUsed = false;
+	if(UI()->ActiveItem() == Clan || UI()->ActiveItem() == Name)
+		s_ListBoxUsed = false;
+
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	static float s_ScrollValue = 0.0f;
@@ -342,7 +346,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		if(pEntry->m_CountryCode == *Country)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i, s_ListBoxUsed);
 		if(Item.m_Visible)
 		{
 			CUIRect Label;
@@ -358,7 +362,11 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		}
 	}
 
-	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+	bool Clicked = false;
+	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0, &Clicked);
+	if(Clicked)
+		s_ListBoxUsed = true;
+
 	if(OldSelected != NewSelected)
 	{
 		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
