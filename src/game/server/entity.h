@@ -165,6 +165,9 @@ public:
 	vec2 m_Pos;
 
 	// DDRace
+	
+	bool GetNearestAirPos(vec2 Pos, vec2* OutPos);
+	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2* OutPos);
 
 	int m_Number;
 	int m_Layer;

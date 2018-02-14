@@ -105,7 +105,6 @@ vec2 CProjectile::GetPos(float Time)
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
-
 void CProjectile::Tick()
 {
 	float Pt = (Server()->Tick()-m_StartTick-1)/(float)Server()->TickSpeed();
@@ -160,6 +159,61 @@ void CProjectile::Tick()
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
+
+		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos))
+		{
+			bool IsTeleValid = false;
+			switch (m_Type)
+			{
+				case WEAPON_GRENADE:
+					{
+						if (pOwnerChar->m_HasTeleGrenade)
+							IsTeleValid = true;
+						break;
+					}
+				case WEAPON_GUN:
+					{
+						if (pOwnerChar->m_HasTeleGun)
+							IsTeleValid = true;
+						break;
+					}
+			}
+
+			if (IsTeleValid)
+			{
+				int MapIndex = GameServer()->Collision()->GetPureMapIndex(round_to_int(pTargetChr ? pTargetChr->m_Pos.x : ColPos.x),
+				round_to_int(pTargetChr ? pTargetChr->m_Pos.y : ColPos.y));
+				int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+				int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+				bool IsTileValid = false;
+				
+				if ((m_Type == WEAPON_GUN || m_Type == WEAPON_GRENADE) && (TileIndex != TILE_NO_TELE_GUN && TileFIndex != TILE_NO_TELE_GUN))
+					IsTileValid = true;
+
+				if (IsTileValid)
+				{
+					bool Found;
+					vec2 PossiblePos;
+
+					if (pTargetChr)
+						Found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
+					else
+						Found = GetNearestAirPos(ColPos, &PossiblePos);
+
+					if (Found && PossiblePos)
+					{
+						GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
+							(m_Owner != -1) ? TeamMask : -1LL);
+						pOwnerChar->Core()->m_Pos = PossiblePos;
+						pOwnerChar->Core()->m_Vel = vec2(0, 0);
+						GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
+						GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
+					}
+				}
+			}
+		}
+
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = Server()->Tick();

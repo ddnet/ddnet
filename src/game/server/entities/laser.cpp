@@ -20,6 +20,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TelePos = vec2(0,0);
 	m_WasTele = false;
 	m_Type = Type;
+	m_TeleportCancelled = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->Teams()->TeamMask(GameServer()->GetPlayerChar(Owner)->Team(), -1, m_Owner) : 0;
 	GameWorld()->InsertEntity(this);
@@ -164,6 +165,52 @@ void CLaser::DoBounce()
 			m_Energy = -1;
 		}
 	}
+
+	if (m_Owner >= 0 && m_Energy <= 0 && m_Pos && !m_TeleportCancelled)
+	{
+		CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+
+		if (pOwnerChar && pOwnerChar->IsAlive() && pOwnerChar->m_HasTeleLaser && m_Type == WEAPON_RIFLE)
+		{
+			int64_t TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+
+			vec2 PossiblePos;
+			bool Found = false;
+
+			bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
+			vec2 At;
+			CCharacter *pHit;
+			if(pOwnerChar ? (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_RIFLE) && m_Type == WEAPON_RIFLE) : g_Config.m_SvHit)
+				pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
+			else
+				pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
+
+			if(pHit)
+				Found = GetNearestAirPosPlayer(pHit->m_Pos, &PossiblePos);
+			else
+				Found = GetNearestAirPos(m_Pos, &PossiblePos);
+
+			if (Found && PossiblePos)
+			{
+				GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
+					(m_Owner != -1) ? TeamMask : -1LL);
+				pOwnerChar->Core()->m_Pos = PossiblePos;
+				pOwnerChar->Core()->m_Vel = vec2(0, 0);
+				GameServer()->CreateDeath(m_Pos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
+			}
+		}
+	}
+	else if(m_Owner >= 0 && m_Pos)
+	{
+		int MapIndex = GameServer()->Collision()->GetPureMapIndex(round_to_int(Coltile.x), round_to_int(Coltile.y));
+		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+		if (m_Type == WEAPON_RIFLE && (TileIndex == TILE_NO_TELE_GUN || TileFIndex == TILE_NO_TELE_GUN))
+			m_TeleportCancelled = true;
+	}
+
 	//m_Owner = -1;
 }
 

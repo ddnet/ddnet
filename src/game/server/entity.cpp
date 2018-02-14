@@ -54,3 +54,48 @@ bool CEntity::GameLayerClipped(vec2 CheckPos)
 	return round_to_int(CheckPos.x)/32 < -200 || round_to_int(CheckPos.x)/32 > GameServer()->Collision()->GetWidth()+200 ||
 			round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > GameServer()->Collision()->GetHeight()+200 ? true : false;
 }
+
+bool CEntity::GetNearestAirPos(vec2 Pos, vec2* pOutPos)
+{
+	vec2 PosInBlock = vec2(round_to_int(Pos.x) % 32, round_to_int(Pos.y) % 32);
+	vec2 BlockCenter = vec2(round_to_int(Pos.x), round_to_int(Pos.y)) - PosInBlock + vec2(16.0f, 16.0f);
+
+	float Size = 31.0f; // A bit less than the tile size
+
+	*pOutPos = vec2(BlockCenter.x + (PosInBlock.x < 16 ? -Size : Size), Pos.y);
+	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
+		return true;
+
+	*pOutPos = vec2(BlockCenter.x + (PosInBlock.x < 16 ? -Size : Size), BlockCenter.y);
+	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
+		return true;
+
+	*pOutPos = vec2(Pos.x, BlockCenter.y + (PosInBlock.y < 16 ? -Size : Size));
+	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
+		return true;
+
+	*pOutPos = vec2(BlockCenter.x, BlockCenter.y + (PosInBlock.y < 16 ? -Size : Size));
+	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
+		return true;
+
+	*pOutPos = vec2(BlockCenter.x + (PosInBlock.x  < 16 ? -Size : Size),
+		BlockCenter.y + (PosInBlock.y < 16 ? -Size : Size));
+	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
+		return true;
+
+	return false;
+}
+
+bool CEntity::GetNearestAirPosPlayer(vec2 PlayerPos, vec2* OutPos)
+{
+	int dist = 5;
+	for (; dist >= -1; dist--)
+	{
+		*OutPos = vec2(PlayerPos.x, PlayerPos.y - dist);
+		if (!GameServer()->Collision()->TestBox(*OutPos, vec2(28.0f, 28.0f)))
+		{
+			return true;
+		}
+	}
+	return false;
+}
