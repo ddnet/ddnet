@@ -38,7 +38,7 @@ if(NOT PNGLITE_FOUND)
 
   set(PNGLITE_DEP $<TARGET_OBJECTS:pnglite>)
   set(PNGLITE_INCLUDE_DIRS ${PNGLITE_INCLUDEDIR})
-  set(PNGLITE_LIBRARIES)
+  set(PNGLITE_LIBRARIES "")
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Pnglite DEFAULT_MSG PNGLITE_INCLUDEDIR)
