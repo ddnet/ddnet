@@ -469,7 +469,7 @@ static int ReadDataOld(void *pBuffer, int Size)
 	return ChunkSize;
 }
 
-#if !defined(CONF_WAVPACK_BUNDLED)
+#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX64)
 static int ReadData(void *pId, void *pBuffer, int Size)
 {
 	(void)pId;
@@ -514,9 +514,7 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	s_WVBufferSize = DataSize;
 	s_WVBufferPosition = 0;
 
-#if defined(CONF_WAVPACK_BUNDLED)
-	pContext = WavpackOpenFileInput(ReadDataOld, aError);
-#else
+#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX64)
 	WavpackStreamReader64 Callback = {0};
 	Callback.can_seek = ReturnFalse;
 	Callback.get_length = GetLength;
@@ -524,6 +522,8 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	Callback.push_back_byte = PushBackByte;
 	Callback.read_bytes = ::ReadData;
 	pContext = WavpackOpenFileInputEx64(&Callback,0, 0, aError, 0, 0);
+#else
+	pContext = WavpackOpenFileInput(ReadDataOld, aError);
 #endif
 	if(pContext)
 	{
