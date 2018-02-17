@@ -469,7 +469,7 @@ static int ReadDataOld(void *pBuffer, int Size)
 	return ChunkSize;
 }
 
-#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX64)
+#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
 static int ReadData(void *pId, void *pBuffer, int Size)
 {
 	(void)pId;
@@ -482,13 +482,13 @@ static int ReturnFalse(void *pId)
 	return 0;
 }
 
-static int64_t GetPos(void *pId)
+static unsigned int GetPos(void *pId)
 {
 	(void)pId;
 	return s_WVBufferPosition;
 }
 
-static int64_t GetLength(void *pId)
+static unsigned int GetLength(void *pId)
 {
 	(void)pId;
 	return s_WVBufferSize;
@@ -514,14 +514,14 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	s_WVBufferSize = DataSize;
 	s_WVBufferPosition = 0;
 
-#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX64)
-	WavpackStreamReader64 Callback = {0};
+#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
+	WavpackStreamReader Callback = {0};
 	Callback.can_seek = ReturnFalse;
 	Callback.get_length = GetLength;
 	Callback.get_pos = GetPos;
 	Callback.push_back_byte = PushBackByte;
-	Callback.read_bytes = ::ReadData;
-	pContext = WavpackOpenFileInputEx64(&Callback,0, 0, aError, 0, 0);
+	Callback.read_bytes = ReadData;
+	pContext = WavpackOpenFileInputEx(&Callback,0, 0, aError, 0, 0);
 #else
 	pContext = WavpackOpenFileInput(ReadDataOld, aError);
 #endif
