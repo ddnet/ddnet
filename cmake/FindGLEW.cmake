@@ -9,7 +9,6 @@ if(NOT PREFER_BUNDLED_LIBS)
 endif()
 
 if(NOT GLEW_FOUND)
-  set(GLEW_FOUND ON)
   set(GLEW_BUNDLED ON)
   set(GLEW_SRC_DIR src/engine/external/glew)
   set_glob(GLEW_SRC GLOB ${GLEW_SRC_DIR} glew.c)
