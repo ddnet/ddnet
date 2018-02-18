@@ -5,9 +5,6 @@
 #include <engine/storage.h>
 #include "linereader.h"
 
-// compiled-in data-dir path
-#define DATA_DIR "data"
-
 class CStorage : public IStorage
 {
 public:
@@ -172,13 +169,19 @@ public:
 			return;
 		}
 
+	#if defined(DATA_DIR)
 		// 2) use compiled-in data-dir if present
 		if(fs_is_dir(DATA_DIR "/mapres"))
 		{
 			str_copy(m_aDatadir, DATA_DIR, sizeof(m_aDatadir));
+		#if defined(BINARY_DIR)
+			str_copy(m_aBinarydir, BINARY_DIR, sizeof(m_aBinarydir));
+		#else
 			str_copy(m_aBinarydir, "", sizeof(m_aBinarydir));
+		#endif
 			return;
 		}
+	#endif
 
 		// 3) check for usable path in argv[0]
 		{
@@ -191,14 +194,13 @@ public:
 			{
 				char aBaseDir[MAX_PATH_LENGTH];
 				str_copy(aBaseDir, pArgv0, Pos+1);
-				str_copy(m_aBinarydir, aBaseDir, sizeof(m_aBinarydir));
-				str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aBaseDir);
 				str_append(aBaseDir, "/data/mapres", sizeof(aBaseDir));
-
 				if(fs_is_dir(aBaseDir))
+				{
+					str_copy(m_aBinarydir, aBaseDir, sizeof(m_aBinarydir));
+					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", aBaseDir);
 					return;
-				else
-					m_aDatadir[0] = 0;
+				}
 			}
 		}
 
