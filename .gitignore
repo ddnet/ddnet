@@ -1,10 +1,3 @@
-# The following three lines exclude all files (not directories) which don't
-# have a period in them. This should exclude executables on non-Windows
-# platforms.
-*
-!**/
-!*.*
-
 # Ignore data-folders outside the root, these are copied around to build
 # directories.
 data/
@@ -31,9 +24,38 @@ googletest-download/
 googletest-src/
 gtest.pc
 gtest_main.pc
+ninja_package
 pack_*/
 rules.ninja
 testrunner\[1\]_include.cmake
+
+# Ignore all the generated executables without extensions (for non-Windows
+# systems).
+DDNet
+DDNet-Server
+DDNet-Server-Launcher
+config_retrieve
+config_store
+confusables
+crapnet
+dilate
+dummy_map
+fake_server
+map_diff
+map_extract
+map_replace_image
+map_resave
+map_version
+mastersrv
+packetgen
+testrunner
+tileset_borderadd
+tileset_borderfix
+tileset_borderrem
+tileset_borderset
+twping
+uuid
+versionsrv
 
 generated
 
@@ -44,6 +66,7 @@ cscope.files
 cscope.out
 
 # bam ignores
+/.bam
 /config.lua
 /objs
 
