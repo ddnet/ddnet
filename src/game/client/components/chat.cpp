@@ -162,10 +162,10 @@ bool CChat::OnInput(IInput::CEvent Event)
 		else if(Input()->KeyPress(KEY_RIGHT) || Input()->KeyPress(KEY_DELETE))
 			SearchDirection = 1;
 
-		int OldOffset = m_Input.GetCursorOffset();
-
 		if(SearchDirection != 0)
 		{
+			int OldOffset = m_Input.GetCursorOffset();
+
 			int FoundAt = SearchDirection > 0 ? m_Input.GetLength() - 1 : 0;
 			for(int i = m_Input.GetCursorOffset() + SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength() - 1 : i > 0; i += SearchDirection)
 			{
@@ -181,6 +181,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 					break;
 				}
 			}
+
 			if(Input()->KeyPress(KEY_BACKSPACE))
 			{
 				if(m_Input.GetCursorOffset() != 0)
@@ -207,9 +208,10 @@ bool CChat::OnInput(IInput::CEvent Event)
 						str_append(aText, m_Input.GetString() + FoundAt, sizeof(aText));
 					
 					m_Input.Set(aText);
+					FoundAt = OldOffset;
 				}
 			}
-			m_Input.SetCursorOffset(Input()->KeyPress(KEY_DELETE) ? OldOffset : FoundAt);
+			m_Input.SetCursorOffset(FoundAt);
 		}
 	}
 
