@@ -281,7 +281,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float NameOffset = TeeOffset+TeeLength, NameLength = 300.0f-TeeLength;
 	float PingOffset = x+610.0f, PingLength = 65.0f;
 	float CountryOffset = PingOffset-(LineHeight-Spacing-TeeSizeMod*5.0f)*2.0f, CountryLength = (LineHeight-Spacing-TeeSizeMod*5.0f)*2.0f;
-	float ClanOffset = x+370.0f, ClanLength = 230.0f-CountryLength;
+	float ClanOffset = x+360.0f, ClanLength = 240.0f-CountryLength;
 
 	// render headlines
 	y += 50.0f;
