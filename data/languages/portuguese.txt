@@ -427,7 +427,7 @@ Server filter
 == Filtro de servidores
 
 Server info
-== Informação de servidor
+== Informação
 
 Server not full
 == Servidor não cheio
