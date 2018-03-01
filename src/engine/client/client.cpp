@@ -2871,7 +2871,7 @@ void CClient::Run()
 			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
 			int64 TimeLastInMicroSeconds = (LastTime * 1000000ll) / time_freq();
 			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRate) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
-			thread_sleep(max(SleepTimeInMicroSeconds / 1000ll, 0));
+			thread_sleep(max(SleepTimeInMicroSeconds / 1000ll, (int64)0));
 			Slept = true;
 		}
 		else if(g_Config.m_ClRefreshRate)
@@ -2879,7 +2879,7 @@ void CClient::Run()
 			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
 			int64 TimeLastInMicroSeconds = (LastTime * 1000000ll) / time_freq();
 			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRate) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
-			net_socket_read_wait(m_NetClient[0].m_Socket, max(SleepTimeInMicroSeconds, 0));
+			net_socket_read_wait(m_NetClient[0].m_Socket, max(SleepTimeInMicroSeconds, (int64)0));
 			Slept = true;
 		}
 		if(Slept)
