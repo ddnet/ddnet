@@ -2803,7 +2803,7 @@ void CClient::Run()
 				m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
-				int64 AdditionalTime = (Now - LastRenderTime) - (int64)((float)time_freq() / (float)g_Config.m_GfxRefreshRate);
+				int64 AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (int64)((float)time_freq() / (float)g_Config.m_GfxRefreshRate)) : 0;
 				// if the value is over a second time loose, reset the additional time (drop the frames we lost already)
 				if(AdditionalTime > time_freq())
 					AdditionalTime = time_freq();
