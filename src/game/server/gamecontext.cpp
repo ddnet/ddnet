@@ -1487,6 +1487,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 				m_VoteKick = true;
 				m_VoteSpec = false;
+				m_VoteVictim = KickID;
 			}
 			else if(str_comp_nocase(pMsg->m_Type, "spectate") == 0)
 			{
@@ -1533,6 +1534,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				m_VoteKick = false;
 				m_VoteSpec = true;
+				m_VoteVictim = SpectateID;
 			}
 
 			if(aCmd[0] && str_comp(aCmd, "info") != 0)
