@@ -4,7 +4,6 @@
 #include <game/server/teams.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
-#include <game/generated/nethash.cpp>
 #if defined(CONF_SQL)
 #include <game/server/score/sql_score.h>
 #endif
