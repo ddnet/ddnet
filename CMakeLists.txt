@@ -501,15 +501,6 @@ file(COPY ${COPY_FILES} DESTINATION .)
 # CODE GENERATION
 ########################################################################
 
-function(chash output_file)
-  add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} scripts/cmd5.py ${ARGN}
-      > "${PROJECT_BINARY_DIR}/${output_file}"
-    DEPENDS scripts/cmd5.py ${ARGN}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  )
-endfunction()
-
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
     COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
@@ -524,11 +515,25 @@ function(generate_source output_file script_parameter)
 endfunction()
 
 file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/game/generated/")
-chash("src/game/generated/nethash.cpp"
-  "src/engine/shared/protocol.h"
-  "${PROJECT_BINARY_DIR}/src/game/generated/protocol.h"
-  "src/game/tuning.h"
-  "src/game/gamecore.cpp"
+execute_process(COMMAND git rev-parse --git-dir
+  ERROR_QUIET
+  OUTPUT_VARIABLE PROJECT_GIT_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE PROJECT_GIT_DIR_ERROR
+)
+if(NOT PROJECT_GIT_DIR_ERROR)
+  set(GIT_REVISION_EXTRA_DEPS
+    ${PROJECT_GIT_DIR}/index
+    ${PROJECT_GIT_DIR}/logs/HEAD
+  )
+endif()
+add_custom_command(OUTPUT src/game/generated/git_revision.cpp
+  COMMAND ${PYTHON_EXECUTABLE}
+    ${PROJECT_SOURCE_DIR}/scripts/git_revision.py
+    > src/game/generated/git_revision.cpp
+  DEPENDS
+    ${GIT_REVISION_EXTRA_DEPS}
+    scripts/git_revision.py
 )
 generate_source("src/game/generated/client_data.cpp" "client_content_source")
 generate_source("src/game/generated/client_data.h" "client_content_header")
@@ -670,7 +675,7 @@ set_glob(GAME_SHARED GLOB src/game
   version.h
   voting.h
 )
-set(GAME_GENERATED_SHARED src/game/generated/nethash.cpp)
+set(GAME_GENERATED_SHARED src/game/generated/git_revision.cpp)
 
 # Static dependencies
 set_glob(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
@@ -1019,8 +1024,6 @@ set(TARGET_TWPING twping)
 add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 
-add_custom_target(generate_nethash DEPENDS src/game/generated/nethash.cpp)
-
 target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
 target_link_libraries(${TARGET_TWPING} ${LIBS})
 
@@ -1093,6 +1096,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
     fs.cpp
+    git_revision.cpp
     jobs.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
