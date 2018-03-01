@@ -2701,6 +2701,7 @@ void CClient::Run()
 	bool LastG = false;
 
 	int64 LastTime = time_get();
+	int64 LastRenderTime = time_get();
 
 	while (1)
 	{
@@ -2789,7 +2790,7 @@ void CClient::Run()
 
 			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen())
 				&& (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle())
-				&& (!g_Config.m_GfxRefreshRate || Now >= m_LastRenderTime + time_freq() / g_Config.m_GfxRefreshRate))
+				&& (!g_Config.m_GfxRefreshRate || ((int64)((float)time_freq() / (float)g_Config.m_GfxRefreshRate)) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
 
@@ -2801,6 +2802,12 @@ void CClient::Run()
 					m_RenderFrameTimeHigh = m_RenderFrameTime;
 				m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
 
+				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
+				int64 AdditionalTime = (Now - LastRenderTime) - (int64)((float)time_freq() / (float)g_Config.m_GfxRefreshRate);
+				// if the value is over a second time loose, reset the additional time (drop the frames we lost already)
+				if(AdditionalTime > time_freq())
+					AdditionalTime = time_freq();
+				LastRenderTime = Now - AdditionalTime;
 				m_LastRenderTime = Now;
 
 #ifdef CONF_DEBUG
@@ -2830,8 +2837,8 @@ void CClient::Run()
 					}
 					m_pGraphics->Swap();
 				}
-				Input()->NextFrame();
 			}
+			Input()->NextFrame();
 			if(Input()->VideoRestartNeeded())
 			{
 				m_pGraphics->Init();
@@ -2853,19 +2860,42 @@ void CClient::Run()
 
 		// beNice
 		int64 Now = time_get();
+		int64 SleepTimeInMicroSeconds = 0;
+		bool Slept = false;
 		if(
 #ifdef CONF_DEBUG
 			g_Config.m_DbgStress ||
 #endif
 			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
 		{
-			thread_sleep(max(1000 * (LastTime + time_freq() / g_Config.m_ClRefreshRateInactive - Now) / time_freq(), (int64)0));
+			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
+			int64 TimeLastInMicroSeconds = (LastTime * 1000000ll) / time_freq();
+			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRate) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
+			thread_sleep(max(SleepTimeInMicroSeconds / 1000ll, 0));
+			Slept = true;
 		}
 		else if(g_Config.m_ClRefreshRate)
 		{
-			net_socket_read_wait(m_NetClient[0].m_Socket, max(1000000 * (LastTime + time_freq() / g_Config.m_ClRefreshRate - Now) / time_freq(), (int64)0));
+			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
+			int64 TimeLastInMicroSeconds = (LastTime * 1000000ll) / time_freq();
+			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRate) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
+			net_socket_read_wait(m_NetClient[0].m_Socket, max(SleepTimeInMicroSeconds, 0));
+			Slept = true;
 		}
-		LastTime = Now;
+		if(Slept)
+		{
+			// look how much we actually slept/waited
+			int64 After = time_get();
+			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
+			int64 TimeAfterInMicroSeconds = (After * 1000000ll) / time_freq();
+			int64 TimeDiff = SleepTimeInMicroSeconds - (TimeAfterInMicroSeconds - TimeNowInMicroSeconds);
+			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
+			if(TimeDiff < -1000000ll)
+				TimeDiff = -1000000ll;
+			LastTime = Now + (TimeDiff * time_freq()) / 1000000ll;
+		}
+		else
+			LastTime = Now;
 
 		if(g_Config.m_DbgHitch)
 		{
