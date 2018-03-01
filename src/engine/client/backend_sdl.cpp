@@ -901,7 +901,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		switch(StoreOglformat)
 		{
 			case GL_RGB: StoreOglformat = GL_COMPRESSED_RGB; break;
-			//this needs further checks. it seems on some gpus COMPRESSED_ALPHA isnt in the core profile
+			// COMPRESSED_ALPHA is deprecated, so use different single channel format.
 			case GL_RED: StoreOglformat = GL_COMPRESSED_RED; break;
 			case GL_RGBA: StoreOglformat = GL_COMPRESSED_RGBA; break;
 			default: StoreOglformat = GL_COMPRESSED_RGBA;
