@@ -239,6 +239,7 @@ public:
 
 	void SetRconCID(int ClientID);
 	int GetAuthedState(int ClientID);
+	const char *GetAuthName(int ClientID);
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, int *pMapCrc);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
@@ -325,7 +326,7 @@ public:
 	void LogoutClient(int ClientID, const char *pReason);
 	void LogoutKey(int Key, const char *pReason);
 
-	void ConchainRconPasswordChangeGeneric(int Level, IConsole::IResult *pResult);
+	void ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult);
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

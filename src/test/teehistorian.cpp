@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
+#include <engine/server.h>
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
+
+void RegisterGameUuids(CUuidManager *pManager);
 
 class TeeHistorian : public ::testing::Test
 {
@@ -11,6 +14,7 @@ protected:
 	CTeeHistorian m_TH;
 	CConfiguration m_Config;
 	CTuningParams m_Tuning;
+	CUuidManager m_UuidManager;
 	CTeeHistorian::CGameInfo m_GameInfo;
 
 	CPacker m_Buffer;
@@ -35,6 +39,10 @@ protected:
 		#undef MACRO_CONFIG_STR
 		#undef MACRO_CONFIG_INT
 
+		RegisterUuids(&m_UuidManager);
+		RegisterTeehistorianUuids(&m_UuidManager);
+		RegisterGameUuids(&m_UuidManager);
+
 		mem_zero(&m_GameInfo, sizeof(m_GameInfo));
 
 		m_GameInfo.m_GameUuid = CalculateUuid("test@ddnet.tw");
@@ -51,6 +59,7 @@ protected:
 
 		m_GameInfo.m_pConfig = &m_Config;
 		m_GameInfo.m_pTuning = &m_Tuning;
+		m_GameInfo.m_pUuids = &m_UuidManager;
 
 		Reset(&m_GameInfo);
 	}
@@ -71,11 +80,12 @@ protected:
 	void Expect(const unsigned char *pOutput, int OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"1\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
-		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_crc\":\"eceaf25c\",\"config\":{},\"tuning\":{}}";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_crc\":\"eceaf25c\",\"config\":{},\"tuning\":{},\"uuids\":[";
+		static const char PREFIX3[] = "]}";
 
 		char aTimeBuf[64];
-		str_timestamp_ex(m_GameInfo.m_StartTime, aTimeBuf, sizeof(aTimeBuf), "%Y-%m-%d %H:%M:%S %z");
+		str_timestamp_ex(m_GameInfo.m_StartTime, aTimeBuf, sizeof(aTimeBuf), "%Y-%m-%dT%H:%M:%S%z");
 
 		CPacker Buffer;
 		Buffer.Reset();
@@ -83,6 +93,15 @@ protected:
 		Buffer.AddRaw(PREFIX1, str_length(PREFIX1));
 		Buffer.AddRaw(aTimeBuf, str_length(aTimeBuf));
 		Buffer.AddRaw(PREFIX2, str_length(PREFIX2));
+		for(int i = 0; i < m_UuidManager.NumUuids(); i++)
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s\"%s\"",
+				i == 0 ? "" : ",",
+				m_UuidManager.GetName(OFFSET_UUID + i));
+			Buffer.AddRaw(aBuf, str_length(aBuf));
+		}
+		Buffer.AddRaw(PREFIX3, str_length(PREFIX3));
 		Buffer.AddRaw("", 1);
 		Buffer.AddRaw(pOutput, OutputSize);
 
@@ -93,13 +112,12 @@ protected:
 
 	void ExpectFull(const unsigned char *pOutput, int OutputSize)
 	{
-		ASSERT_FALSE(m_Buffer.Error());
-
 		const ::testing::TestInfo *pTestInfo =
 			::testing::UnitTest::GetInstance()->current_test_info();
 		const char *pTestName = pTestInfo->name();
 
-		if(m_Buffer.Size() != OutputSize
+		if(m_Buffer.Error()
+			|| m_Buffer.Size() != OutputSize
 			|| mem_comp(m_Buffer.Data(), pOutput, OutputSize) != 0)
 		{
 			char aFilename[64];
@@ -118,6 +136,7 @@ protected:
 			io_close(File);
 		}
 
+		ASSERT_FALSE(m_Buffer.Error());
 		ASSERT_EQ(m_Buffer.Size(), OutputSize);
 		ASSERT_TRUE(mem_comp(m_Buffer.Data(), pOutput, OutputSize) == 0);
 	}
@@ -270,6 +289,65 @@ TEST_F(TeeHistorian, TickExplicitPlayerMessage)
 		0x40, // FINISH
 	};
 	Tick(1); Inputs(); m_TH.RecordPlayerMessage(63, "", 1);
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, ExtraMessage)
+{
+	const unsigned char EXPECTED[] = {
+		0x41, 0x00, // TICK_SKIP dt=0
+		// EX uuid=6bb8ba88-0f0b-382e-8dae-dbf4052b8b7d data_len=0
+		0x4a,
+		0x6b, 0xb8, 0xba, 0x88, 0x0f, 0x0b, 0x38, 0x2e,
+		0x8d, 0xae, 0xdb, 0xf4, 0x05, 0x2b, 0x8b, 0x7d,
+		0x00,
+		0x40, // FINISH
+	};
+	Tick(1); Inputs(); m_TH.RecordTestExtra();
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, Auth)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=60daba5c-52c4-3aeb-b8ba-b2953fb55a17 data_len=16
+		0x4a,
+		0x60, 0xda, 0xba, 0x5c, 0x52, 0xc4, 0x3a, 0xeb,
+		0xb8, 0xba, 0xb2, 0x95, 0x3f, 0xb5, 0x5a, 0x17,
+		0x10,
+		// (AUTH_INIT) cid=0 level=3 auth_name="default_admin"
+		0x00, 0x03, 'd',  'e',  'f',  'a',  'u',  'l',
+		't',  '_',  'a',  'd',  'm',  'i',  'n',  0x00,
+		// EX uuid=37ecd3b8-9218-3bb9-a71b-a935b86f6a81 data_len=9
+		0x4a,
+		0x37, 0xec, 0xd3, 0xb8, 0x92, 0x18, 0x3b, 0xb9,
+		0xa7, 0x1b, 0xa9, 0x35, 0xb8, 0x6f, 0x6a, 0x81,
+		0x09,
+		// (AUTH_LOGIN) cid=1 level=2 auth_name="foobar"
+		0x01, 0x02, 'f',  'o',  'o',  'b',  'a',  'r',
+		0x00,
+		// EX uuid=37ecd3b8-9218-3bb9-a71b-a935b86f6a81 data_len=7
+		0x4a,
+		0x37, 0xec, 0xd3, 0xb8, 0x92, 0x18, 0x3b, 0xb9,
+		0xa7, 0x1b, 0xa9, 0x35, 0xb8, 0x6f, 0x6a, 0x81,
+		0x07,
+		// (AUTH_LOGIN) cid=1 level=2 auth_name="foobar"
+		0x02, 0x01, 'h',  'e',  'l',  'p',  0x00,
+		// EX uuid=d4f5abe8-edd2-3fb9-abd8-1c8bb84f4a63 data_len=7
+		0x4a,
+		0xd4, 0xf5, 0xab, 0xe8, 0xed, 0xd2, 0x3f, 0xb9,
+		0xab, 0xd8, 0x1c, 0x8b, 0xb8, 0x4f, 0x4a, 0x63,
+		0x01,
+		// (AUTH_LOGOUT) cid=1
+		0x01,
+		0x40, // FINISH
+	};
+	m_TH.RecordAuthInitial(0, IServer::AUTHED_ADMIN, "default_admin");
+	m_TH.RecordAuthLogin(1, IServer::AUTHED_MOD, "foobar");
+	m_TH.RecordAuthLogin(2, IServer::AUTHED_HELPER, "help");
+	m_TH.RecordAuthLogout(1);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }

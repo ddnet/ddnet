@@ -239,7 +239,7 @@ public:
 	void DirectInput(int *pInput, int Size);
 	void SendInput();
 
-	// TODO: OPT: do this alot smarter!
+	// TODO: OPT: do this a lot smarter!
 	virtual int *GetInput(int Tick);
 	virtual bool InputExists(int Tick);
 

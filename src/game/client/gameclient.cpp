@@ -39,7 +39,6 @@
 #include "components/damageind.h"
 #include "components/debughud.h"
 #include "components/effects.h"
-#include "components/emojis.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
 #include "components/hud.h"
@@ -71,7 +70,6 @@ CGameClient g_GameClient;
 static CKillMessages gs_KillMessages;
 static CCamera gs_Camera;
 static CChat gs_Chat;
-static CEmojis gs_Emojis;
 static CMotd gs_Motd;
 static CBroadcast gs_Broadcast;
 static CGameConsole gs_GameConsole;
@@ -140,7 +138,6 @@ void CGameClient::OnConsoleInit()
 	m_pSkins = &::gs_Skins;
 	m_pCountryFlags = &::gs_CountryFlags;
 	m_pChat = &::gs_Chat;
-	m_pEmojis = &::gs_Emojis;
 	m_pFlow = &::gs_Flow;
 	m_pCamera = &::gs_Camera;
 	m_pControls = &::gs_Controls;
@@ -193,7 +190,6 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Spectator);
 	m_All.Add(&gs_Emoticon);
 	m_All.Add(&gs_KillMessages);
-	m_All.Add(m_pEmojis);
 	m_All.Add(m_pChat);
 	m_All.Add(&gs_Broadcast);
 	m_All.Add(&gs_DebugHud);
@@ -485,7 +481,7 @@ void CGameClient::OnConnected()
 
 	m_ServerMode = SERVERMODE_PURE;
 
-	// send the inital info
+	// send the initial info
 	SendInfo(true);
 	// we should keep this in for now, because otherwise you can't spectate
 	// people at start as the other info 64 packet is only sent after the first
@@ -1275,7 +1271,7 @@ void CGameClient::OnNewSnapshot()
 	//	}
 	//}
 
-	// sort player infos by DDRace Team (and score inbetween)
+	// sort player infos by DDRace Team (and score between)
 	Index = 0;
 	for(int Team = 0; Team <= MAX_CLIENTS; ++Team)
 	{

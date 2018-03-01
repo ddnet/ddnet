@@ -232,6 +232,7 @@ public:
 	virtual bool IsClientReady(int ClientID);
 	virtual bool IsClientPlayer(int ClientID);
 
+	virtual CUuid GameUuid();
 	virtual const char *GameType();
 	virtual const char *Version();
 	virtual const char *NetVersion();

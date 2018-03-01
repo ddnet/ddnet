@@ -61,7 +61,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			dbg_msg("crapnet", "cfg = %d", n);
 		Lastcfg = n;
 
-		// handle incomming packets
+		// handle incoming packets
 		while(1)
 		{
 			// fetch data

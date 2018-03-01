@@ -84,7 +84,7 @@ void CPlayer::Reset()
 		struct tm* timeinfo;
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		if ((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 1 && timeinfo->tm_mday == 1))
+		if ((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 0 && timeinfo->tm_mday == 1))
 		{ // New Year
 			m_DefEmote = EMOTE_HAPPY;
 		}
@@ -226,7 +226,7 @@ void CPlayer::Tick()
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
-	if (m_TuneZone != m_TuneZoneOld) // dont send tunigs all the time
+	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
@@ -589,7 +589,7 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		returns true if kicked
 	*/
 
-	if(m_Authed)
+	if(Server()->GetAuthedState(m_ClientID))
 		return false; // don't kick admins
 	if(g_Config.m_SvMaxAfkTime == 0)
 		return false; // 0 = disabled

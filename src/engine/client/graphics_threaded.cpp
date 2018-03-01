@@ -10,7 +10,8 @@
 #endif
 
 #include <base/system.h>
-#include <engine/external/pnglite/pnglite.h>
+
+#include <pnglite.h>
 
 #include <engine/shared/config.h>
 #include <engine/graphics.h>
@@ -937,7 +938,7 @@ void CGraphics_Threaded::DrawVisualObject(int VisualObjectIDX, float *pColor, ch
 void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float *pColor, char *pOffset, float *Offset, float *Dir, int JumpIndex, unsigned int DrawNum)
 {
 	if(DrawNum == 0) return;
-	//draw a border tile alot of times
+	// Draw a border tile a lot of times
 	CCommandBuffer::SCommand_RenderBorderTile Cmd;
 	Cmd.m_State = m_State;
 	Cmd.m_DrawNum = DrawNum;
@@ -977,7 +978,7 @@ void CGraphics_Threaded::DrawBorderTile(int VisualObjectIDX, float *pColor, char
 void CGraphics_Threaded::DrawBorderTileLine(int VisualObjectIDX, float *pColor, char *pOffset, float *Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
 {
 	if(IndexDrawNum == 0 || RedrawNum == 0) return;
-	//draw a border tile alot of times
+	// Draw a border tile a lot of times
 	CCommandBuffer::SCommand_RenderBorderTileLine Cmd;
 	Cmd.m_State = m_State;
 	Cmd.m_IndexDrawNum = IndexDrawNum;
@@ -1446,7 +1447,7 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	return RetOk;
 }
 
-// syncronization
+// synchronization
 void CGraphics_Threaded::InsertSignal(semaphore *pSemaphore)
 {
 	CCommandBuffer::SCommand_Signal Cmd;

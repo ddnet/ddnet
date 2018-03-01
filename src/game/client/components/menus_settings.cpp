@@ -58,8 +58,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
 	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
-	MainView.HSplitTop(220.0f, &Game, &Client);
-	Client.HSplitTop(120.0f, &Client, &AutoReconnect);
+	MainView.HSplitTop(180.0f, &Game, &Client);
+	Client.HSplitTop(160.0f, &Client, &AutoReconnect);
 
 	// game
 	{
@@ -73,22 +73,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		// dynamic camera
 		Left.HSplitTop(20.0f, &Button, &Left);
-		static int s_DynamicCameraButton = 0;
-		if(DoButton_CheckBox(&s_DynamicCameraButton, Localize("Dynamic Camera"), g_Config.m_ClMouseDeadzone != 0, &Button))
-		{
-			if(g_Config.m_ClMouseDeadzone)
-			{
-				g_Config.m_ClMouseFollowfactor = 0;
-				g_Config.m_ClMouseMaxDistance = 400;
-				g_Config.m_ClMouseDeadzone = 0;
-			}
-			else
-			{
-				g_Config.m_ClMouseFollowfactor = 60;
-				g_Config.m_ClMouseMaxDistance = 1000;
-				g_Config.m_ClMouseDeadzone = 300;
-			}
-		}
+		if(DoButton_CheckBox(&g_Config.m_ClDyncam, Localize("Dynamic Camera"), g_Config.m_ClDyncam, &Button))
+			g_Config.m_ClDyncam ^= 1;
 
 		// weapon pickup
 		Left.HSplitTop(5.0f, 0, &Left);
@@ -107,21 +93,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClResetWantedWeaponOnDeath, Localize("Reset wanted weapon on death"), g_Config.m_ClResetWantedWeaponOnDeath, &Button))
 			g_Config.m_ClResetWantedWeaponOnDeath ^= 1;
-
-		Left.HSplitTop(5.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowEmotes, Localize("Show tee emotes"), g_Config.m_ClShowEmotes, &Button))
-			g_Config.m_ClShowEmotes ^= 1;
-
-		Left.HSplitTop(5.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowChatEmojis, Localize("Show emojis in chat"), g_Config.m_ClShowChatEmojis, &Button))
-			g_Config.m_ClShowChatEmojis ^= 1;
-
-		Left.HSplitTop(5.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowChatSystem, Localize("Show chat messages by system"), g_Config.m_ClShowChatSystem, &Button))
-			g_Config.m_ClShowChatSystem ^= 1;
 
 		// chat messages
 		Right.HSplitTop(5.0f, 0, &Right);
@@ -345,6 +316,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			m_NeedSendinfo = true;
 	}
 
+	static bool s_ListBoxUsed = false;
+	if(UI()->ActiveItem() == Clan || UI()->ActiveItem() == Name)
+		s_ListBoxUsed = false;
+
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	static float s_ScrollValue = 0.0f;
@@ -357,7 +332,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		if(pEntry->m_CountryCode == *Country)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i, s_ListBoxUsed);
 		if(Item.m_Visible)
 		{
 			CUIRect Label;
@@ -373,7 +348,11 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		}
 	}
 
-	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+	bool Clicked = false;
+	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0, &Clicked);
+	if(Clicked)
+		s_ListBoxUsed = true;
+
 	if(OldSelected != NewSelected)
 	{
 		*Country = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
@@ -1530,13 +1509,6 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		{
 			g_Config.m_ClShowVotesAfterVoting ^= 1;
 		}
-
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClShowNotifications, Localize("Show notifications"), g_Config.m_ClShowNotifications, &Button))
-		{
-			g_Config.m_ClShowNotifications ^= 1;
-		}
-
 		MainView.HSplitTop(170.0f, &Messages, &MainView);
 		Messages.HSplitTop(30.0f, &Label, &Messages);
 		Label.VSplitMid(&Label, &Button);

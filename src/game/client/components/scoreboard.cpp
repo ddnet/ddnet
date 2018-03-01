@@ -281,7 +281,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float NameOffset = TeeOffset+TeeLength, NameLength = 300.0f-TeeLength;
 	float PingOffset = x+610.0f, PingLength = 65.0f;
 	float CountryOffset = PingOffset-(LineHeight-Spacing-TeeSizeMod*5.0f)*2.0f, CountryLength = (LineHeight-Spacing-TeeSizeMod*5.0f)*2.0f;
-	float ClanOffset = x+370.0f, ClanLength = 230.0f-CountryLength;
+	float ClanOffset = x+360.0f, ClanLength = 240.0f-CountryLength;
 
 	// render headlines
 	y += 50.0f;
@@ -549,7 +549,7 @@ void CScoreboard::OnRender()
 	if(!Active())
 		return;
 
-	// if the score board is active, then we should clear the motd message aswell
+	// if the score board is active, then we should clear the motd message as well
 	if(m_pClient->m_pMotd->IsActive())
 		m_pClient->m_pMotd->Clear();
 
@@ -623,7 +623,7 @@ void CScoreboard::OnRender()
 
 bool CScoreboard::Active()
 {
-	// if statboard is active dont show scoreboard
+	// if statboard is active don't show scoreboard
 	if(m_pClient->m_pStatboard->IsActive())
 		return false;
 

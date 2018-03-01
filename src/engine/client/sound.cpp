@@ -12,9 +12,10 @@
 
 #include "sound.h"
 
-extern "C" { // wavpack
-	#include <engine/external/wavpack/wavpack.h>
+extern "C"
+{
 	#include <opusfile.h>
+	#include <wavpack.h>
 }
 #include <math.h>
 
@@ -77,9 +78,9 @@ static int m_NextVoice = 0;
 static int *m_pMixBuffer = 0;	// buffer only used by the thread callback function
 static unsigned m_MaxFrames = 0;
 
-static const void *ms_pWVBuffer = 0x0;
-static int ms_WVBufferPosition = 0;
-static int ms_WVBufferSize = 0;
+static const void *s_pWVBuffer = 0x0;
+static int s_WVBufferPosition = 0;
+static int s_WVBufferSize = 0;
 
 const int DefaultDistance = 1500;
 
@@ -106,7 +107,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 	mem_zero(m_pMixBuffer, m_MaxFrames*2*sizeof(int));
 	Frames = min(Frames, m_MaxFrames);
 
-	// aquire lock while we are mixing
+	// acquire lock while we are mixing
 	lock_wait(m_SoundLock);
 
 	MasterVol = m_SoundVolume;
@@ -414,14 +415,6 @@ void CSound::RateConvert(int SampleID)
 	pSample->m_Rate = m_MixingRate;
 }
 
-int CSound::ReadData(void *pBuffer, int Size)
-{
-	int ChunkSize = min(Size, ms_WVBufferSize - ms_WVBufferPosition);
-	mem_copy(pBuffer, (const char *)ms_pWVBuffer + ms_WVBufferPosition, ChunkSize);
-	ms_WVBufferPosition += ChunkSize;
-	return ChunkSize;
-}
-
 int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 {
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
@@ -468,6 +461,46 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 	return SampleID;
 }
 
+static int ReadDataOld(void *pBuffer, int Size)
+{
+	int ChunkSize = min(Size, s_WVBufferSize - s_WVBufferPosition);
+	mem_copy(pBuffer, (const char *)s_pWVBuffer + s_WVBufferPosition, ChunkSize);
+	s_WVBufferPosition += ChunkSize;
+	return ChunkSize;
+}
+
+#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
+static int ReadData(void *pId, void *pBuffer, int Size)
+{
+	(void)pId;
+	return ReadDataOld(pBuffer, Size);
+}
+
+static int ReturnFalse(void *pId)
+{
+	(void)pId;
+	return 0;
+}
+
+static unsigned int GetPos(void *pId)
+{
+	(void)pId;
+	return s_WVBufferPosition;
+}
+
+static unsigned int GetLength(void *pId)
+{
+	(void)pId;
+	return s_WVBufferSize;
+}
+
+static int PushBackByte(void *pId, int Char)
+{
+	s_WVBufferPosition -= 1;
+	return 0;
+}
+#endif
+
 int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 {
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
@@ -477,12 +510,22 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	char aError[100];
 	WavpackContext *pContext;
 
-	ms_pWVBuffer = pData;
-	ms_WVBufferSize = DataSize;
-	ms_WVBufferPosition = 0;
+	s_pWVBuffer = pData;
+	s_WVBufferSize = DataSize;
+	s_WVBufferPosition = 0;
 
-	pContext = WavpackOpenFileInput(ReadData, aError);
-	if (pContext)
+#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
+	WavpackStreamReader Callback = {0};
+	Callback.can_seek = ReturnFalse;
+	Callback.get_length = GetLength;
+	Callback.get_pos = GetPos;
+	Callback.push_back_byte = PushBackByte;
+	Callback.read_bytes = ReadData;
+	pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, 0, 0);
+#else
+	pContext = WavpackOpenFileInput(ReadDataOld, aError);
+#endif
+	if(pContext)
 	{
 		int NumSamples = WavpackGetNumSamples(pContext);
 		int BitsPerSample = WavpackGetBitsPerSample(pContext);
@@ -548,32 +591,32 @@ int CSound::LoadOpus(const char *pFilename)
 	if(!m_pStorage)
 		return -1;
 
-	ms_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(!ms_File)
+	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
 	{
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
 		return -1;
 	}
 
 	int SampleID = AllocID();
-	int DataSize = io_length(ms_File);
+	int DataSize = io_length(File);
 	if(SampleID < 0 || DataSize <= 0)
 	{
-		io_close(ms_File);
-		ms_File = NULL;
+		io_close(File);
+		File = NULL;
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
 		return -1;
 	}
 
 	// read the whole file into memory
 	char *pData = new char[DataSize];
-	io_read(ms_File, pData, DataSize);
+	io_read(File, pData, DataSize);
 
 	SampleID = DecodeOpus(SampleID, pData, DataSize);
 
 	delete[] pData;
-	io_close(ms_File);
-	ms_File = NULL;
+	io_close(File);
+	File = NULL;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/opus", "loaded %s", pFilename);
@@ -598,32 +641,32 @@ int CSound::LoadWV(const char *pFilename)
 	if(!m_pStorage)
 		return -1;
 
-	ms_File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(!ms_File)
+	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(!File)
 	{
 		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
 		return -1;
 	}
 
 	int SampleID = AllocID();
-	int DataSize = io_length(ms_File);
+	int DataSize = io_length(File);
 	if(SampleID < 0 || DataSize <= 0)
 	{
-		io_close(ms_File);
-		ms_File = NULL;
+		io_close(File);
+		File = NULL;
 		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
 		return -1;
 	}
 
 	// read the whole file into memory
 	char *pData = new char[DataSize];
-	io_read(ms_File, pData, DataSize);
+	io_read(File, pData, DataSize);
 
 	SampleID = DecodeWV(SampleID, pData, DataSize);
 
 	delete[] pData;
-	io_close(ms_File);
-	ms_File = NULL;
+	io_close(File);
+	File = NULL;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
@@ -929,7 +972,5 @@ void CSound::StopVoice(CVoiceHandle Voice)
 	lock_unlock(m_SoundLock);
 }
 
-
-IOHANDLE CSound::ms_File = 0;
 
 IEngineSound *CreateEngineSound() { return new CSound; }

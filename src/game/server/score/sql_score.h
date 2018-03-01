@@ -24,7 +24,7 @@ public:
 // generic implementation to provide gameserver and server
 struct CSqlData
 {
-	CSqlData() : m_Map(ms_pMap)
+	CSqlData() : m_Map(ms_pMap), m_GameUuid(ms_pGameUuid)
 	{
 		m_Instance = ms_Instance;
 	}
@@ -41,6 +41,7 @@ struct CSqlData
 	CPlayerData* PlayerData(int ID) const { return isGameContextVaild() ? &ms_pPlayerData[ID] : throw CGameContextError("[CSqlData]: PlayerData() unavailable."); }
 
 	sqlstr::CSqlString<128> m_Map;
+	sqlstr::CSqlString<UUID_MAXSTRSIZE> m_GameUuid;
 
 	// counter to keep track to which instance of GameServer this object belongs to.
 	int m_Instance;
@@ -49,6 +50,7 @@ struct CSqlData
 	static IServer *ms_pServer;
 	static CPlayerData *ms_pPlayerData;
 	static const char *ms_pMap;
+	static const char *ms_pGameUuid;
 
 	static bool ms_GameContextAvailable;
 	// contains the instancecount of the current GameServer
@@ -144,6 +146,7 @@ class CSqlScore: public IScore
 	static bool Init(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure);
 
 	char m_aMap[64];
+	char m_aGameUuid[UUID_MAXSTRSIZE];
 
 	static LOCK ms_FailureFileLock;
 

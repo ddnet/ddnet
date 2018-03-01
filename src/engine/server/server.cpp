@@ -496,6 +496,16 @@ int CServer::GetAuthedState(int ClientID)
 	return m_aClients[ClientID].m_Authed;
 }
 
+const char *CServer::GetAuthName(int ClientID)
+{
+	int Key = m_aClients[ClientID].m_AuthKey;
+	if(Key == -1)
+	{
+		return 0;
+	}
+	return m_AuthManager.KeyIdent(Key);
+}
+
 int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 {
 	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
@@ -2588,6 +2598,8 @@ void CServer::LogoutClient(int ClientID, const char *pReason)
 	m_aClients[ClientID].m_Authed = AUTHED_NO;
 	m_aClients[ClientID].m_AuthKey = -1;
 
+	GameServer()->OnSetAuthed(ClientID, AUTHED_NO);
+
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
@@ -2598,25 +2610,30 @@ void CServer::LogoutKey(int Key, const char *pReason)
 			LogoutClient(i, pReason);
 }
 
-void CServer::ConchainRconPasswordChangeGeneric(int Level, IConsole::IResult *pResult)
+void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult)
 {
 	if(pResult->NumArguments() == 1)
 	{
 		int KeySlot = m_AuthManager.DefaultKey(Level);
-		if(KeySlot == -1 && pResult->GetString(0)[0])
+		const char *pNew = pResult->GetString(0);
+		if(str_comp(pCurrent, pNew) == 0)
 		{
-			m_AuthManager.AddDefaultKey(Level, pResult->GetString(0));
+			return;
+		}
+		if(KeySlot == -1 && pNew[0])
+		{
+			m_AuthManager.AddDefaultKey(Level, pNew);
 		}
 		else if(KeySlot >= 0)
 		{
-			if(!pResult->GetString(0)[0])
+			if(!pNew[0])
 			{
 				AuthRemoveKey(KeySlot);
 				// Already logs users out.
 			}
 			else
 			{
-				m_AuthManager.UpdateKey(KeySlot, pResult->GetString(0), Level);
+				m_AuthManager.UpdateKey(KeySlot, pNew, Level);
 				LogoutKey(KeySlot, "key update");
 			}
 		}
@@ -2625,20 +2642,20 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, IConsole::IResult *pR
 
 void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_ADMIN, g_Config.m_SvRconPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
-	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_ADMIN, pResult);
 }
 
 void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_MOD, g_Config.m_SvRconModPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
-	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_MOD, pResult);
 }
 
 void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_HELPER, g_Config.m_SvRconHelperPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
-	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_HELPER, pResult);
 }
 
 #if defined(CONF_FAMILY_UNIX)

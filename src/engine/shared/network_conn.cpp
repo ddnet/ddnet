@@ -128,7 +128,7 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 	m_Construct.m_NumChunks++;
 	m_Construct.m_DataSize = (int)(pChunkData-m_Construct.m_aChunkData);
 
-	// set packet flags aswell
+	// set packet flags as well
 
 	if(Flags&NET_CHUNKFLAG_VITAL && !(Flags&NET_CHUNKFLAG_RESEND))
 	{
@@ -443,7 +443,7 @@ int CNetConnection::Update()
 		}
 	}
 
-	// send keep alives if nothing has happend for 250ms
+	// send keep alives if nothing has happened for 250ms
 	if(State() == NET_CONNSTATE_ONLINE)
 	{
 		if(time_get()-m_LastSendTime > time_freq()/2) // flush connection after 500ms if needed

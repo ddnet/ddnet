@@ -157,7 +157,7 @@ public:
 	virtual void Swap() = 0;
 	virtual int GetNumScreens() const = 0;
 
-	// syncronization
+	// synchronization
 	virtual void InsertSignal(class semaphore *pSemaphore) = 0;
 	virtual bool IsIdle() = 0;
 	virtual void WaitForIdle() = 0;

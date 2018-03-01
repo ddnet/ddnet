@@ -4138,7 +4138,7 @@ void CEditor::RenderModebar(CUIRect View)
 		else if(m_Mode == MODE_SOUNDS)
 			pButName = "Sounds";
 
-		int MouseButton = DoButton_Tab(&s_Button, pButName, 0, &Button, 0, "Switch between images, sounds and layers managment.");
+		int MouseButton = DoButton_Tab(&s_Button, pButName, 0, &Button, 0, "Switch between images, sounds and layers management.");
 		if(MouseButton == 2)
 		{
 			if (m_Mode == MODE_LAYERS)
@@ -4726,7 +4726,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						m_ShowEnvelopePreview = 1;
 						ColorMod = 100.0f;
 						Graphics()->SetColor(1,0.75f,0.75f,1);
-						m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point aswell. Right click to delete.";
+						m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point as well. Right click to delete.";
 					}
 
 					if(pID == s_pID && (Input()->KeyIsPressed(KEY_RETURN) || Input()->KeyIsPressed(KEY_KP_ENTER)))

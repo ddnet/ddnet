@@ -6,7 +6,7 @@
 
 #include <new>
 
-void RegisterUuids(class CUuidManager *pManager)
+void RegisterUuids(CUuidManager *pManager)
 {
 	#define UUID(id, name) pManager->RegisterName(id, name);
 	#include "protocol_ex_msgs.h"

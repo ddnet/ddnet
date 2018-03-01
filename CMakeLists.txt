@@ -36,7 +36,11 @@ else()
   endif()
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+set(ORIGINAL_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+set(ORIGINAL_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+set(ORIGINAL_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+set(OWN_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${OWN_CMAKE_MODULE_PATH})
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(TARGET_BITS "64")
@@ -149,7 +153,61 @@ if(NOT MSVC)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
+  add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
 endif()
+
+if(NOT MSVC)
+  check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
+endif()
+
+########################################################################
+# COMMON FUNCTIONS
+########################################################################
+
+function(set_glob VAR GLOBBING DIRECTORY) # ...
+  file(${GLOBBING} GLOB_RESULT "${DIRECTORY}/*.c" "${DIRECTORY}/*.cpp" "${DIRECTORY}/*.h")
+  list(SORT GLOB_RESULT)
+  set(FILES)
+  foreach(file ${ARGN})
+    list(APPEND FILES "${PROJECT_SOURCE_DIR}/${DIRECTORY}/${file}")
+  endforeach()
+
+  if(NOT FILES STREQUAL GLOB_RESULT)
+    message(AUTHOR_WARNING "${VAR} does not contain every file from directory ${DIRECTORY}")
+    set(LIST_BUT_NOT_GLOB)
+    if(POLICY CMP0057)
+      cmake_policy(SET CMP0057 NEW)
+      foreach(file ${FILES})
+        if(NOT file IN_LIST GLOB_RESULT)
+          list(APPEND LIST_BUT_NOT_GLOB ${file})
+        endif()
+      endforeach()
+      if(LIST_BUT_NOT_GLOB)
+        message(AUTHOR_WARNING "Entries only present in ${VAR}: ${LIST_BUT_NOT_GLOB}")
+      endif()
+      set(GLOB_BUT_NOT_LIST)
+      foreach(file ${GLOB_RESULT})
+        if(NOT file IN_LIST FILES)
+          list(APPEND GLOB_BUT_NOT_LIST ${file})
+        endif()
+      endforeach()
+      if(GLOB_BUT_NOT_LIST)
+        message(AUTHOR_WARNING "Entries only present in ${DIRECTORY}: ${GLOB_BUT_NOT_LIST}")
+      endif()
+    endif()
+  endif()
+
+  set(${VAR} ${FILES} PARENT_SCOPE)
+endfunction()
+
+########################################################################
+# INITALIZE TARGET LISTS
+########################################################################
+
+set(TARGETS_OWN)
+set(TARGETS_DEP)
+
+set(TARGETS_LINK) # Targets with a linking stage.
 
 ########################################################################
 # DEPENDENCIES
@@ -203,11 +261,13 @@ if(NOT CMAKE_CROSSCOMPILING)
   # quietly.
   find_package(PkgConfig)
 endif()
+find_package(ZLIB)
 find_package(Curl)
 find_package(Freetype)
 if(DOWNLOAD_GTEST)
   find_package(Git)
 endif()
+find_package(GLEW)
 find_package(GTest)
 if(MYSQL)
   find_package(MySQL)
@@ -217,14 +277,18 @@ endif()
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
+find_package(Pnglite)
 find_package(PythonInterp)
 find_package(SDL2)
 find_package(Threads)
-if(NOT PREFER_BUNDLED_LIBS)
-  find_package(ZLIB)
+find_package(Wavpack)
+if(WEBSOCKETS)
+  find_package(Websockets)
 else()
-  set(ZLIB_FOUND NO)
+  set(WEBSOCKETS_LIBRARIES)
+  set(WEBSOCKETS_INCLUDE_DIRS)
 endif()
+
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMG dmg)
@@ -245,43 +309,44 @@ message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Dependencies:")
-function(show_dependency_status NAME FOUND PATH)
-  if(FOUND)
-    is_bundled(IS_BUNDLED "${PATH}")
-    if(IS_BUNDLED)
-      message(STATUS " * ${NAME} not found (using bundled version)")
+function(show_dependency_status OUTPUT_NAME NAME)
+  if(${NAME}_FOUND)
+    if(${NAME}_BUNDLED)
+      message(STATUS " * ${OUTPUT_NAME} not found (using bundled version)")
     else()
-      message(STATUS " * ${NAME} found")
+      message(STATUS " * ${OUTPUT_NAME} found")
     endif()
   else()
-    message(STATUS " * ${NAME} not found")
+    message(STATUS " * ${OUTPUT_NAME} not found")
   endif()
 endfunction()
 
-show_dependency_status("Curl" ${CURL_FOUND} "${CURL_LIBRARY}")
+show_dependency_status("Curl" CURL)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-  show_dependency_status("Dmg tools" ${DMGTOOLS_FOUND} "")
+  show_dependency_status("Dmg tools" DMGTOOLS)
 endif()
-show_dependency_status("Freetype" ${FREETYPE_FOUND} "${FREETYPE_LIBRARY}")
+show_dependency_status("Freetype" FREETYPE)
 if(DOWNLOAD_GTEST)
-  show_dependency_status("Git" ${GIT_FOUND} "${GIT_EXECUTABLE}")
+  show_dependency_status("Git" GIT)
 endif()
-show_dependency_status("GTest" ${GTEST_FOUND} "${GTEST_LIBRARY}")
+show_dependency_status("Glew" GLEW)
+show_dependency_status("GTest" GTEST)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-  show_dependency_status("Hdiutil" ${HDIUTIL} "")
+  show_dependency_status("Hdiutil" HDIUTIL)
 endif()
 if(MYSQL)
-  show_dependency_status("MySQL" ${MYSQL_FOUND} "${MYSQL_LIBRARY}")
+  show_dependency_status("MySQL" MYSQL)
 endif()
-show_dependency_status("Ogg" ${OGG_FOUND} "${OGG_INCLUDEDIR}")
-show_dependency_status("Opus" ${OPUS_FOUND} "${OPUS_INCLUDEDIR}")
-show_dependency_status("Opusfile" ${OPUSFILE_FOUND} "${OPUSFILE_LIBRARY}")
-show_dependency_status("PythonInterp" ${PYTHONINTERP_FOUND} "")
-show_dependency_status("SDL2" ${SDL2_FOUND} "${SDL2_LIBRARY}")
-if(ZLIB_FOUND)
-  message(STATUS " * Zlib found")
-else()
-  message(STATUS " * Zlib not found (using bundled version)")
+show_dependency_status("Ogg" OGG)
+show_dependency_status("Opus" OPUS)
+show_dependency_status("Opusfile" OPUSFILE)
+show_dependency_status("Pnglite" PNGLITE)
+show_dependency_status("PythonInterp" PYTHONINTERP)
+show_dependency_status("SDL2" SDL2)
+show_dependency_status("Wavpack" WAVPACK)
+show_dependency_status("Zlib" ZLIB)
+if(WEBSOCKETS)
+  show_dependency_status("Websockets" WEBSOCKETS)
 endif()
 
 if(NOT(PYTHONINTERP_FOUND))
@@ -290,6 +355,10 @@ endif()
 
 if(MYSQL AND NOT(MYSQL_FOUND))
   message(SEND_ERROR "You must install MySQL to compile the DDNet server with MySQL support")
+endif()
+
+if(WEBSOCKETS AND NOT(WEBSOCKETS_FOUND))
+  message(SEND_ERROR "You must install libwebsockets to compile the DDNet server with websocket support")
 endif()
 
 if(CLIENT AND NOT(CURL_FOUND))
@@ -350,10 +419,6 @@ else()
   endif()
 endif()
 
-if(NOT MSVC)
-  check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
-endif()
-
 ########################################################################
 # DOWNLOAD GTEST
 ########################################################################
@@ -364,7 +429,7 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
   )
   if(result)
     message(WARNING "CMake step for googletest failed: ${result}")
@@ -372,7 +437,7 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   else()
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
       RESULT_VARIABLE result
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
     )
     if(result)
       message(WARNING "Build step for googletest failed: ${result}")
@@ -383,8 +448,8 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
 
       # Add googletest directly to our build. This defines the gtest target.
       add_subdirectory(
-        ${CMAKE_BINARY_DIR}/googletest-src
-        ${CMAKE_BINARY_DIR}/googletest-build
+        ${PROJECT_BINARY_DIR}/googletest-src
+        ${PROJECT_BINARY_DIR}/googletest-build
         EXCLUDE_FROM_ALL
       )
 
@@ -407,131 +472,16 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
 endif()
 
 ########################################################################
-# INITALIZE TARGET LISTS
-########################################################################
-
-set(TARGETS_OWN)
-set(TARGETS_DEP)
-
-set(TARGETS_LINK) # Targets with a linking stage.
-
-########################################################################
-# COMMON FUNCTIONS
-########################################################################
-
-function(set_glob VAR GLOBBING DIRECTORY) # ...
-  file(${GLOBBING} GLOB_RESULT "${DIRECTORY}/*.c" "${DIRECTORY}/*.cpp" "${DIRECTORY}/*.h")
-  list(SORT GLOB_RESULT)
-  set(FILES)
-  foreach(file ${ARGN})
-    list(APPEND FILES "${PROJECT_SOURCE_DIR}/${DIRECTORY}/${file}")
-  endforeach()
-
-  if(NOT FILES STREQUAL GLOB_RESULT)
-    message(AUTHOR_WARNING "${VAR} does not contain every file from directory ${DIRECTORY}")
-    set(LIST_BUT_NOT_GLOB)
-    if(POLICY CMP0057)
-      cmake_policy(SET CMP0057 NEW)
-      foreach(file ${FILES})
-        if(NOT file IN_LIST GLOB_RESULT)
-          list(APPEND LIST_BUT_NOT_GLOB ${file})
-        endif()
-      endforeach()
-      if(LIST_BUT_NOT_GLOB)
-        message(AUTHOR_WARNING "Entries only present in ${VAR}: ${LIST_BUT_NOT_GLOB}")
-      endif()
-      set(GLOB_BUT_NOT_LIST)
-      foreach(file ${GLOB_RESULT})
-        if(NOT file IN_LIST FILES)
-          list(APPEND GLOB_BUT_NOT_LIST ${file})
-        endif()
-      endforeach()
-      if(GLOB_BUT_NOT_LIST)
-        message(AUTHOR_WARNING "Entries only present in ${DIRECTORY}: ${GLOB_BUT_NOT_LIST}")
-      endif()
-    endif()
-  endif()
-
-  set(${VAR} ${FILES} PARENT_SCOPE)
-endfunction()
-
-########################################################################
 # DEPENDENCY COMPILATION
 ########################################################################
 
-if(NOT(ZLIB_FOUND))
-  set(ZLIB_LIBRARIES)
-  set_glob(ZLIB_SRC GLOB src/engine/external/zlib
-    adler32.c
-    compress.c
-    crc32.c
-    crc32.h
-    deflate.c
-    deflate.h
-    gzclose.c
-    gzguts.h
-    gzlib.c
-    gzread.c
-    gzwrite.c
-    infback.c
-    inffast.c
-    inffast.h
-    inffixed.h
-    inflate.c
-    inflate.h
-    inftrees.c
-    inftrees.h
-    trees.c
-    trees.h
-    uncompr.c
-    zconf.h
-    zlib.h
-    zutil.c
-    zutil.h
-  )
-  add_library(zlib EXCLUDE_FROM_ALL OBJECT ${ZLIB_SRC})
-
-  list(APPEND TARGETS_DEP zlib)
-  set(ZLIB_INCLUDEDIR src/engine/external/zlib/)
-  set(DEP_ZLIB $<TARGET_OBJECTS:zlib>)
-else()
-  set(ZLIB_INCLUDEDIR)
-  set(DEP_ZLIB)
-endif()
-
-set_glob(DEP_PNG_SRC GLOB src/engine/external/pnglite pnglite.c pnglite.h)
-add_library(png OBJECT EXCLUDE_FROM_ALL ${DEP_PNG_SRC})
-target_include_directories(png PRIVATE ${ZLIB_INCLUDEDIR})
-
-set(DEP_PNG $<TARGET_OBJECTS:png>)
-list(APPEND TARGETS_DEP png)
-
-set_glob(DEP_GLEW_SRC GLOB src/engine/external/glew glew.c)
-set_glob(DEP_GLEW_INCLUDES GLOB src/engine/external/glew/GL eglew.h glew.h glxew.h wglew.h)
-add_library(glew OBJECT EXCLUDE_FROM_ALL ${DEP_GLEW_SRC} ${DEP_GLEW_INCLUDES})
-target_include_directories(glew PRIVATE src/engine/external/glew)
-
-set(DEP_GLEW $<TARGET_OBJECTS:glew>)
-list(APPEND TARGETS_DEP glew)
-
 if(CLIENT)
   # Static dependencies
-  set_glob(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
-  set_glob(DEP_WAV_SRC GLOB src/engine/external/wavpack
-    bits.c
-    float.c
-    metadata.c
-    unpack.c
-    wavpack.h
-    words.c
-    wputils.c
-  )
-  add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
-  add_library(wav EXCLUDE_FROM_ALL OBJECT ${DEP_WAV_SRC})
+  set_glob(JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
+  add_library(json EXCLUDE_FROM_ALL OBJECT ${JSON_SRC})
 
-  list(APPEND TARGETS_DEP json wav)
-  set(DEP_JSON $<TARGET_OBJECTS:json>)
-  set(DEP_WAV $<TARGET_OBJECTS:wav>)
+  list(APPEND TARGETS_DEP json)
+  set(JSON_DEP $<TARGET_OBJECTS:json>)
 endif()
 
 ########################################################################
@@ -552,16 +502,18 @@ file(COPY ${COPY_FILES} DESTINATION .)
 ########################################################################
 
 function(chash output_file)
-  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} scripts/cmd5.py ${ARGN} > ${output_file}
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} scripts/cmd5.py ${ARGN}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS scripts/cmd5.py ${ARGN}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
 
 function(generate_source output_file script_parameter)
-  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter} > ${output_file}
+  add_custom_command(OUTPUT ${output_file}
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
+      > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/compile.py
       datasrc/content.py
@@ -571,10 +523,10 @@ function(generate_source output_file script_parameter)
   )
 endfunction()
 
-file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/src/game/generated/")
+file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/game/generated/")
 chash("src/game/generated/nethash.cpp"
   "src/engine/shared/protocol.h"
-  "src/game/generated/protocol.h"
+  "${PROJECT_BINARY_DIR}/src/game/generated/protocol.h"
   "src/game/tuning.h"
   "src/game/gamecore.cpp"
 )
@@ -688,6 +640,9 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
+  teehistorian_ex.cpp
+  teehistorian_ex.h
+  teehistorian_ex_chunks.h
   uuid_manager.cpp
   uuid_manager.h
   websockets.cpp
@@ -723,45 +678,10 @@ add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 list(APPEND TARGETS_DEP md5)
 
-if(WEBSOCKETS)
-  set_glob(DEP_WEBSOCKETS_SRC GLOB src/engine/external/libwebsockets
-    alloc.c
-    base64-decode.c
-    config.h
-    context.c
-    extension-deflate-frame.c
-    extension-deflate-frame.h
-    extension-deflate-stream.c
-    extension-deflate-stream.h
-    extension.c
-    getifaddrs.h
-    handshake.c
-    huftable.h
-    lextable-strings.h
-    lextable.h
-    libwebsockets.c
-    libwebsockets.h
-    lws-plat-unix.c
-    output.c
-    parsers.c
-    pollfd.c
-    private-libwebsockets.h
-    server-handshake.c
-    server.c
-    service.c
-    sha-1.c
-  )
-  add_library(websockets EXCLUDE_FROM_ALL OBJECT ${DEP_WEBSOCKETS_SRC})
-  list(APPEND TARGETS_DEP websockets)
-  set(DEP_WEBSOCKETS $<TARGET_OBJECTS:websockets>)
-else()
-  set(DEP_WEBSOCKETS)
-endif()
-
-set(DEPS ${DEP_MD5} ${DEP_WEBSOCKETS} ${DEP_ZLIB})
+set(DEPS ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
-set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
+set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
@@ -827,8 +747,6 @@ if(CLIENT)
     components/debughud.h
     components/effects.cpp
     components/effects.h
-    components/emojis.cpp
-    components/emojis.h
     components/emoticon.cpp
     components/emoticon.h
     components/flow.cpp
@@ -905,14 +823,17 @@ if(CLIENT)
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
-  set(DEPS_CLIENT ${DEPS} ${DEP_JSON} ${DEP_PNG} ${DEP_WAV} ${DEP_GLEW})
+  set(DEPS_CLIENT ${DEPS} ${GLEW_DEP} ${JSON_DEP} ${PNGLITE_DEP} ${WAVPACK_DEP})
 
   # Libraries
   set(LIBS_CLIENT
     ${LIBS}
     ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${PNGLITE_LIBRARIES}
     ${SDL2_LIBRARIES}
+    ${WAVPACK_LIBRARIES}
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
@@ -949,11 +870,31 @@ if(CLIENT)
   target_include_directories(${TARGET_CLIENT} PRIVATE
     ${CURL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
+    ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
     ${OPUSFILE_INCLUDE_DIRS}
     ${OPUS_INCLUDE_DIRS}
+    ${PNGLITE_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
+    ${WAVPACK_INCLUDE_DIRS}
   )
+
+  set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
+  if(NOT(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS STREQUAL PARAMS))
+    unset(WAVPACK_OPEN_FILE_INPUT_EX CACHE)
+  endif()
+  set(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS "${PARAMS}" CACHE INTERNAL "")
+
+  set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES} ${WAVPACK_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES} ${WAVPACK_LIBRARIES})
+  check_symbol_exists(WavpackOpenFileInputEx wavpack.h WAVPACK_OPEN_FILE_INPUT_EX)
+  set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES})
+  set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES})
+
+  if(WAVPACK_OPEN_FILE_INPUT_EX)
+    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_OPEN_FILE_INPUT_EX)
+  endif()
+
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
   list(APPEND TARGETS_LINK ${TARGET_CLIENT})
 endif()
@@ -1112,10 +1053,13 @@ foreach(ABS_T ${TOOLS})
   file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
   if(T MATCHES "\\.cpp$")
     string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
-    set(EXTRA_TOOL_SRC)
+    set(TOOL_DEPS ${DEPS})
+    set(TOOL_LIBS ${LIBS})
     set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
     if(TOOL MATCHES "^(tileset_.*|dilate|map_extract|map_replace_image)$")
-      list(APPEND EXTRA_TOOL_SRC ${DEP_PNG})
+      list(APPEND TOOL_DEPS ${PNGLITE_DEP})
+      list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
+      list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
     endif()
     if(TOOL MATCHES "^config_")
       list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
@@ -1124,12 +1068,13 @@ foreach(ABS_T ${TOOLS})
       set(EXCLUDE_FROM_ALL)
     endif()
     add_executable(${TOOL} ${EXCLUDE_FROM_ALL}
-      ${DEPS}
+      ${TOOL_DEPS}
       src/tools/${TOOL}.cpp
       ${EXTRA_TOOL_SRC}
       $<TARGET_OBJECTS:engine-shared>
     )
-    target_link_libraries(${TOOL} ${LIBS})
+    target_include_directories(${TOOL} PRIVATE ${TOOL_INCLUDE_DIRS})
+    target_link_libraries(${TOOL} ${TOOL_LIBS})
     list(APPEND TARGETS_TOOLS ${TOOL})
   endif()
 endforeach()
@@ -1288,9 +1233,7 @@ set(CPACK_SOURCE_FILES
   CMakeLists.txt
   README.md
   autoexec_server.cfg
-  bam.lua
   cmake/
-  configure.lua
   data/
   datasrc/
   ddnet-libs/
@@ -1349,8 +1292,8 @@ endif()
 set(PACKAGE_TARGETS)
 
 if(DMGTOOLS_FOUND OR HDIUTIL)
-  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/client/")
-  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/bundle/server/")
+  file(MAKE_DIRECTORY bundle/client/)
+  file(MAKE_DIRECTORY bundle/server/)
   configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
   configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
 
@@ -1404,8 +1347,8 @@ if(DMGTOOLS_FOUND OR HDIUTIL)
       ${TARGET_CLIENT}
       ${TARGET_SERVER_LAUNCHER}
       ${TARGET_SERVER}
-      ${CMAKE_BINARY_DIR}/bundle/client/Info.plist
-      ${CMAKE_BINARY_DIR}/bundle/server/Info.plist
+      ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
+      ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
       data
       other/bundle/client/PkgInfo
       other/bundle/server/PkgInfo
@@ -1546,12 +1489,14 @@ foreach(target ${TARGETS_OWN})
   if(OUR_FLAGS_OWN)
     target_compile_options(${target} PRIVATE ${OUR_FLAGS_OWN})
   endif()
+  target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
-  target_include_directories(${target} PRIVATE ${ZLIB_INCLUDEDIR})
+  target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
+    target_include_directories(${target} PRIVATE ${WEBSOCKETS_INCLUDE_DIRS})
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)
@@ -1562,5 +1507,8 @@ endforeach()
 foreach(target ${TARGETS_DEP})
   if(MSVC)
     target_compile_options(${target} PRIVATE /W0)
+  endif()
+  if(OUR_FLAGS_DEP)
+    target_compile_options(${target} PRIVATE ${OUR_FLAGS_DEP})
   endif()
 endforeach()

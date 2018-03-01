@@ -62,7 +62,7 @@ public:
 
 	int Count(int Team) const;
 
-	//need to be very carefull using this method
+	//need to be very careful using this method
 	void SetForceCharacterTeam(int id, int Team);
 	void ForceLeaveTeam(int id);
 
@@ -80,7 +80,6 @@ public:
 	float *GetCpCurrent(CPlayer* Player);
 	void SetDDRaceState(CPlayer* Player, int DDRaceState);
 	void SetStartTime(CPlayer* Player, int StartTime);
-	void SetRefreshTime(CPlayer* Player, int RefreshTime);
 	void SetCpActive(CPlayer* Player, int CpActive);
 	void OnTeamFinish(CPlayer** Players, unsigned int Size);
 	void OnFinish(CPlayer* Player);

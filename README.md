@@ -21,14 +21,14 @@ To clone this repository with history since we moved the libraries to https://gi
 
     git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
 
-To clone the libraries if you have previously cloned ddnet without them:
+To clone the libraries if you have previously cloned DDNet without them:
 
     git submodule update --init --recursive
 
 Building on Linux and macOS
 ---------------------------
 
-To compile DDNet yourself, you can follow the [instructions for compiling Teeworlds](https://www.teeworlds.com/?page=docs&wiki=compiling_everything). Alternatively we also support CMake, so something like this works:
+To compile DDNet yourself, execute the following commands in the source root:
 
     mkdir build
     cd build
@@ -39,11 +39,11 @@ DDNet requires additional libraries, that are bundled for the most common platfo
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
-    sudo apt install cmake libcurl4-openssl-dev libfreetype6-dev libogg-dev libopus-dev libopusfile-dev libsdl2-dev
+    sudo apt install cmake git libcurl4-openssl-dev libfreetype6-dev libglew-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libwavpack-dev
 
-Or on Arch Linux like this:
+Or on Arch Linux like this (Arch Linux does not package `pnglite`, not even in AUR):
 
-    pacman -S cmake curl freetype2 opusfile sdl2
+    sudo pacman -S --needed cmake curl freetype2 git glew opusfile sdl2 wavpack
 
 If you have the libraries installed, but still want to use the bundled ones instead, you can do so by removing your build directory and re-running CMake with `-DPREFER_BUNDLED_LIBS=ON`, e.g. `cmake -DPREFER_BUNDLED_LIBS=ON ..`.
 
@@ -97,7 +97,7 @@ Install [osxcross](https://github.com/tpoechtrager/osxcross), then add
 Install `dmg` and `hfsplus` from
 [libdmg-hfsplus](https://github.com/mozilla/libdmg-hfsplus) and `newfs_hfs`
 from
-[diskdev_cmds](http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)
+[diskdev\_cmds](http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)
 to unlock the `package_dmg` target that outputs a macOS disk image.
 
 Importing the official DDNet Database
@@ -120,6 +120,9 @@ sv_use_sql 1
 add_sqlserver r teeworlds record teeworlds "PW2" "localhost" "3306"
 add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
 
-$ bam server_sql_release
-$ ./DDNet-Server_sql -f mine.cfg
+$ mkdir build
+$ cd build
+$ cmake -DMYSQL=ON ..
+$ make
+$ ./DDNet-Server -f mine.cfg
 ```

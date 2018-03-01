@@ -70,7 +70,7 @@ public:
 		//
 		CMD_RUNBUFFER,
 
-		// syncronization
+		// synchronization
 		CMD_SIGNAL,
 
 		// texture commands
@@ -598,7 +598,7 @@ public:
 	virtual int GetDesktopScreenWidth() { return m_DesktopScreenWidth; }
 	virtual int GetDesktopScreenHeight() { return m_DesktopScreenHeight; }
 
-	// syncronization
+	// synchronization
 	virtual void InsertSignal(semaphore *pSemaphore);
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
