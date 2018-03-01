@@ -2870,7 +2870,7 @@ void CClient::Run()
 		{
 			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
 			int64 TimeLastInMicroSeconds = (LastTime * 1000000ll) / time_freq();
-			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRate) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
+			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRateInactive) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
 			thread_sleep(max(SleepTimeInMicroSeconds / 1000ll, (int64)0));
 			Slept = true;
 		}
