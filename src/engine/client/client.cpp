@@ -2892,6 +2892,9 @@ void CClient::Run()
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
 			if(TimeDiff < -1000000ll)
 				TimeDiff = -1000000ll;
+			// don't go higher than the game ticks speed, because the network is waking up the client with the server's snapshots anyway
+			else if(TimeDiff > 1000000ll / m_GameTickSpeed)
+				TimeDiff = 1000000ll / m_GameTickSpeed;
 			LastTime = Now + (TimeDiff * time_freq()) / 1000000ll;
 		}
 		else
