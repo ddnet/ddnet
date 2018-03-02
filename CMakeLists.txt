@@ -675,7 +675,10 @@ set_glob(GAME_SHARED GLOB src/game
   version.h
   voting.h
 )
-set(GAME_GENERATED_SHARED src/game/generated/git_revision.cpp)
+set(GAME_GENERATED_SHARED
+  src/game/generated/git_revision.cpp
+  src/game/generated/protocol.h
+)
 
 # Static dependencies
 set_glob(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
