@@ -1077,7 +1077,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Refresh Rate"), "∞");
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	Button.HMargin(2.0f, &Button);
-	g_Config.m_GfxRefreshRate = static_cast<int>(DoScrollbarH(&g_Config.m_GfxRefreshRate, &Button, g_Config.m_GfxRefreshRate/1000.0f)*1000.0f+0.1f);
+	int NewRefreshRate = static_cast<int>(DoScrollbarH(&g_Config.m_GfxRefreshRate, &Button, (min(g_Config.m_GfxRefreshRate, 1000))/1000.0f)*1000.0f+0.1f);
+	if(g_Config.m_GfxRefreshRate <= 1000 || NewRefreshRate < 1000)
+		g_Config.m_GfxRefreshRate = NewRefreshRate;
 
 	CUIRect Text;
 	MainView.HSplitTop(20.0f, 0, &MainView);
