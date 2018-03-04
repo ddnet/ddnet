@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os, imp, sys
 from datatypes import *
 import content

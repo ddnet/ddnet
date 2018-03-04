@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys, os
 
 line_count = 0
