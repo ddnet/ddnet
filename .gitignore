@@ -14,6 +14,8 @@ CMakeSettings*
 CPackConfig.cmake
 CPackSourceConfig.cmake
 CTestTestfile.cmake
+Debug
+Release
 _CPack_Packages/
 build.ninja
 cmake_install.cmake
