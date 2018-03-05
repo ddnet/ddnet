@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import struct, zlib, sys
 
 class image:

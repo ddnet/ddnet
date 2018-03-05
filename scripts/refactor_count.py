@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os, re, sys
 
 alphanum = "0123456789abcdefghijklmnopqrstuvwzyxABCDEFGHIJKLMNOPQRSTUVWXYZ_"

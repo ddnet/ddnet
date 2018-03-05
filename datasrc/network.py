@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from datatypes import *
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]

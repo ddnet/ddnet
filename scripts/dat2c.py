@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 
 data = file(sys.argv[1], "rb").read()

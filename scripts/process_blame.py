@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 user_map = {"kma":"matricks", "teetow":"matricks", "jlha":"matricks", "jdv":"void", "jaf":"serp"}
 users = {}
