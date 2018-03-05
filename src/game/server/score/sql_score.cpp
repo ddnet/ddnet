@@ -895,7 +895,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	if (HandleFailure)
 		return true;
 
-	int LimitStart = abs(pData->m_Num-1);
+	int LimitStart = max(abs(pData->m_Num)-1, 0);
 	const char *pOrder = pData->m_Num >= 0 ? "ASC" : "DESC";
 
 	try
@@ -956,7 +956,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 	if (HandleFailure)
 		return true;
 
-	int LimitStart = abs(pData->m_Num-1);
+	int LimitStart = max(abs(pData->m_Num)-1, 0);
 	const char *pOrder = pData->m_Num >= 0 ? "ASC" : "DESC";
 
 	try
@@ -1077,7 +1077,7 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	if (HandleFailure)
 		return true;
 
-	int LimitStart = abs(pData->m_Num-1);
+	int LimitStart = max(abs(pData->m_Num)-1, 0);
 	const char *pOrder = pData->m_Num >= 0 ? "DESC" : "ASC";
 
 	try
@@ -1223,7 +1223,7 @@ bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGam
 	if (HandleFailure)
 		return true;
 
-	int LimitStart = abs(pData->m_Num-1);
+	int LimitStart = max(abs(pData->m_Num)-1, 0);
 	const char *pOrder = pData->m_Num >= 0 ? "ASC" : "DESC";
 
 	try
