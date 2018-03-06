@@ -26,6 +26,7 @@ googletest-download/
 googletest-src/
 gtest.pc
 gtest_main.pc
+install_manifest_portable.txt
 ninja_package
 pack_*/
 rules.ninja
