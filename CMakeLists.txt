@@ -1298,7 +1298,7 @@ endif()
 
 set(PACKAGE_TARGETS)
 
-if(DMGTOOLS_FOUND OR HDIUTIL)
+if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
   file(MAKE_DIRECTORY bundle/client/)
   file(MAKE_DIRECTORY bundle/server/)
   configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
