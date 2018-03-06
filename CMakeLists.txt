@@ -1101,6 +1101,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     fs.cpp
     git_revision.cpp
     jobs.cpp
+    str.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
     test.cpp

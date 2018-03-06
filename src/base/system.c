@@ -2408,6 +2408,98 @@ int str_comp_filenames(const char *a, const char *b)
 	return *a - *b;
 }
 
+static int min3(int a, int b, int c)
+{
+	int min = a;
+	if(b < min)
+		min = b;
+	if(c < min)
+		min = c;
+	return min;
+}
+
+int str_utf8_dist(const char *a, const char *b)
+{
+	int buf_len = 2 * (str_length(a) + 1 + str_length(b) + 1);
+	int *buf = (int *)mem_alloc(buf_len * sizeof(*buf), 1);
+	int result = str_utf8_dist_buffer(a, b, buf, buf_len);
+	mem_free(buf);
+	return result;
+}
+
+static int str_to_utf32_unchecked(const char *str, int **out)
+{
+	int out_len = 0;
+	while((**out = str_utf8_decode(&str)))
+	{
+		(*out)++;
+		out_len++;
+	}
+	return out_len;
+}
+
+int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int *buf, int buf_len)
+{
+	int i, j;
+	dbg_assert(buf_len >= (a_len + 1) + (b_len + 1), "buffer too small");
+	if(a_len > b_len)
+	{
+		int tmp1 = a_len;
+		const int *tmp2 = a;
+
+		a_len = b_len;
+		a = b;
+
+		b_len = tmp1;
+		b = tmp2;
+	}
+#define B(i, j) buf[((j)&1) * (a_len + 1) + (i)]
+	for(i = 0; i <= a_len; i++)
+	{
+		B(i, 0) = i;
+	}
+	for(j = 1; j <= b_len; j++)
+	{
+		B(0, j) = j;
+		for(i = 1; i <= a_len; i++)
+		{
+			int subst = (a[i - 1] != b[j - 1]);
+			B(i, j) = min3(
+				B(i - 1, j) + 1,
+				B(i, j - 1) + 1,
+				B(i - 1, j - 1) + subst
+			);
+		}
+	}
+	return B(a_len, b_len);
+#undef B
+}
+
+int str_utf8_dist_buffer(const char *a_utf8, const char *b_utf8, int *buf, int buf_len)
+{
+	int a_utf8_len = str_length(a_utf8);
+	int b_utf8_len = str_length(b_utf8);
+	int *a, *b; // UTF-32
+	int a_len, b_len; // UTF-32 length
+	dbg_assert(buf_len >= 2 * (a_utf8_len + 1 + b_utf8_len + 1), "buffer too small");
+	if(a_utf8_len > b_utf8_len)
+	{
+		int tmp1 = a_utf8_len;
+		const char *tmp2 = a_utf8;
+
+		a_utf8_len = b_utf8_len;
+		a_utf8 = b_utf8;
+
+		b_utf8_len = tmp1;
+		b_utf8 = tmp2;
+	}
+	a = buf;
+	a_len = str_to_utf32_unchecked(a_utf8, &buf);
+	b = buf;
+	b_len = str_to_utf32_unchecked(b_utf8, &buf);
+	return str_utf32_dist_buffer(a, a_len, b, b_len, buf, buf_len - b_len - a_len);
+}
+
 const char *str_find_nocase(const char *haystack, const char *needle)
 {
 	while(*haystack) /* native implementation */

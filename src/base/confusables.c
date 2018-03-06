@@ -63,6 +63,23 @@ int str_utf8_skeleton_next(struct SKELETON *skel)
 	return ch;
 }
 
+int str_utf8_to_skeleton(const char *str, int *buf, int buf_len)
+{
+	int i;
+	struct SKELETON skel;
+	str_utf8_skeleton_begin(&skel, str);
+	for(i = 0; i < buf_len; i++)
+	{
+		int ch = str_utf8_skeleton_next(&skel);
+		if(ch == 0)
+		{
+			break;
+		}
+		buf[i] = ch;
+	}
+	return i;
+}
+
 int str_utf8_comp_confusable(const char *str1, const char *str2)
 {
 	struct SKELETON skel1;
