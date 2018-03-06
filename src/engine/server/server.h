@@ -19,6 +19,8 @@
 #include <engine/shared/netban.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <base/tl/array.h>
+
 #include "authmanager.h"
 
 #if defined (CONF_SQL)
@@ -95,6 +97,27 @@ class CServer : public IServer
 	bool m_ConnLoggingSocketCreated;
 	UNIXSOCKET m_ConnLoggingSocket;
 #endif
+
+	enum
+	{
+		MAX_NAME_SKELETON_LENGTH=MAX_NAME_LENGTH*4,
+	};
+
+	class CNameBan
+	{
+	public:
+		CNameBan() {}
+		CNameBan(const char *pName, int Distance) :
+			m_Distance(Distance)
+		{
+			str_copy(m_aName, pName, sizeof(m_aName));
+			m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, sizeof(m_aSkeleton) / sizeof(m_aSkeleton[0]));
+		}
+		char m_aName[MAX_NAME_LENGTH];
+		int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
+		int m_SkeletonLength;
+		int m_Distance;
+	};
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
@@ -217,6 +240,8 @@ public:
 
 	char m_aErrorShutdownReason[128];
 
+	array<CNameBan> m_aNameBans;
+
 	CServer();
 
 	int TrySetClientName(int ClientID, const char *pName);
@@ -307,6 +332,10 @@ public:
 	static void ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthRemove(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthList(IConsole::IResult *pResult, void *pUser);
+
+	static void ConNameBan(IConsole::IResult *pResult, void *pUser);
+	static void ConNameUnban(IConsole::IResult *pResult, void *pUser);
+	static void ConNameBans(IConsole::IResult *pResult, void *pUser);
 
 	static void StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlacklistedOnly);
 

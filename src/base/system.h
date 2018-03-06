@@ -1182,6 +1182,64 @@ int str_comp_num(const char *a, const char *b, const int num);
 int str_comp_filenames(const char *a, const char *b);
 
 /*
+	Function: str_utf8_dist
+		Computes the edit distance between two strings.
+
+	Parameters:
+		a - First string for the edit distance.
+		b - Second string for the edit distance.
+
+	Returns:
+		The edit distance between the both strings.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+int str_utf8_dist(const char *a, const char *b);
+
+/*
+	Function: str_utf8_dist_buffer
+		Computes the edit distance between two strings, allows buffers
+		to be passed in.
+
+	Parameters:
+		a - First string for the edit distance.
+		b - Second string for the edit distance.
+		buf - Buffer for the function.
+		buf_len - Length of the buffer, must be at least as long as
+		          twice the length of both strings combined plus two.
+
+	Returns:
+		The edit distance between the both strings.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+int str_utf8_dist_buffer(const char *a, const char *b, int *buf, int buf_len);
+
+/*
+	Function: str_utf32_dist_buffer
+		Computes the edit distance between two strings, allows buffers
+		to be passed in.
+
+	Parameters:
+		a - First string for the edit distance.
+		a_len - Length of the first string.
+		b - Second string for the edit distance.
+		b_len - Length of the second string.
+		buf - Buffer for the function.
+		buf_len - Length of the buffer, must be at least as long as
+		          the length of both strings combined plus two.
+
+	Returns:
+		The edit distance between the both strings.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int *buf, int buf_len);
+
+/*
 	Function: str_find_nocase
 		Finds a string inside another string case insensitive.
 
@@ -1235,18 +1293,18 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 	Function: str_hex_decode
 		Takes a hex string and returns a byte array.
 
-		Parameters:
-			dst - Buffer for the byte array
-			dst_size - size of the buffer
-			data - String to decode
+	Parameters:
+		dst - Buffer for the byte array
+		dst_size - size of the buffer
+		data - String to decode
 
-		Returns:
-			2 - String doesn't exactly fit the buffer
-			1 - Invalid character in string
-			0 - Success
+	Returns:
+		2 - String doesn't exactly fit the buffer
+		1 - Invalid character in string
+		0 - Success
 
-		Remarks:
-			- The contents of the buffer is only valid on success
+	Remarks:
+		- The contents of the buffer is only valid on success
 */
 int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
 /*
@@ -1503,6 +1561,11 @@ float str_tofloat(const char *str);
 int str_isspace(char c);
 char str_uppercase(char c);
 unsigned str_quickhash(const char *str);
+
+struct SKELETON;
+void str_utf8_skeleton_begin(struct SKELETON *skel, const char *str);
+int str_utf8_skeleton_next(struct SKELETON *skel);
+int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 
 /*
 	Function: str_utf8_comp_confusable
