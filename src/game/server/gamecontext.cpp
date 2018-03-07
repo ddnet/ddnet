@@ -421,7 +421,7 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImporta
 	if (!m_apPlayers[ClientID])
 		return;
 
-	if (!IsImportant && m_apPlayers[ClientID]->m_LastBroadcastImportance && m_apPlayers[ClientID]->m_LastBroadcast > Server()->Tick() - Server()->TickSpeed() * 6)
+	if (!IsImportant && m_apPlayers[ClientID]->m_LastBroadcastImportance && m_apPlayers[ClientID]->m_LastBroadcast > Server()->Tick() - Server()->TickSpeed() * g_Config.m_SvBroadcastDelay)
 		return;
 
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
