@@ -403,13 +403,13 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImporta
 	CNetMsg_Sv_Broadcast Msg;
 	Msg.m_pMessage = pText;
 
-	if (ClientID == -1)
+	if(ClientID == -1)
 	{
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (m_apPlayers[i])
+			if(m_apPlayers[i])
 			{
 				m_apPlayers[i]->m_LastBroadcastImportance = true;
 				m_apPlayers[i]->m_LastBroadcast = Server()->Tick();
@@ -418,10 +418,10 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImporta
 		return;
 	}
 
-	if (!m_apPlayers[ClientID])
+	if(!m_apPlayers[ClientID])
 		return;
 
-	if (!IsImportant && m_apPlayers[ClientID]->m_LastBroadcastImportance && m_apPlayers[ClientID]->m_LastBroadcast > Server()->Tick() - Server()->TickSpeed() * g_Config.m_SvBroadcastDelay)
+	if(!IsImportant && m_apPlayers[ClientID]->m_LastBroadcastImportance && m_apPlayers[ClientID]->m_LastBroadcast > Server()->Tick() - Server()->TickSpeed() * g_Config.m_SvBroadcastDelay)
 		return;
 
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
