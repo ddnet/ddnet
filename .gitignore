@@ -15,6 +15,7 @@ CPackConfig.cmake
 CPackSourceConfig.cmake
 CTestTestfile.cmake
 Debug
+Makefile
 Release
 _CPack_Packages/
 build.ninja
