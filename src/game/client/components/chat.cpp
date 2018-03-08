@@ -79,7 +79,8 @@ void CChat::ConSystem(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf), "executing: %s", pResult->GetString(0));
 	((CChat *)pUserData)->AddLine(-2, 0, aBuf);
-	system(pResult->GetString(0));
+	if(system(pResult->GetString(0)) == -1)
+		((CChat *)pUserData)->AddLine(-2, 0, "system command failed");
 }
 
 void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
