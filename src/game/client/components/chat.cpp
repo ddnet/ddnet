@@ -74,6 +74,15 @@ void CChat::OnStateChange(int NewState, int OldState)
 	}
 }
 
+void CChat::ConSystem(IConsole::IResult *pResult, void *pUserData)
+{
+	char aBuf[1024];
+	str_format(aBuf, sizeof(aBuf), "executing: %s", pResult->GetString(0));
+	((CChat *)pUserData)->AddLine(-2, 0, aBuf);
+	if(system(pResult->GetString(0)) == -1)
+		((CChat *)pUserData)->AddLine(-2, 0, "system command failed");
+}
+
 void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChat*)pUserData)->Say(0, pResult->GetString(0));
@@ -115,6 +124,7 @@ void CChat::OnConsoleInit()
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 	Console()->Register("echo", "r[message]", CFGFLAG_CLIENT, ConEcho, this, "Echo the text in chat window");
+	Console()->Register("system", "r[command]", CFGFLAG_CLIENT, ConSystem, this, "Execute command in your system");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
