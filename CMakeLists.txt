@@ -527,10 +527,11 @@ if(NOT PROJECT_GIT_DIR_ERROR)
     ${PROJECT_GIT_DIR}/logs/HEAD
   )
 endif()
-add_custom_command(OUTPUT src/game/generated/git_revision.cpp
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
   COMMAND ${PYTHON_EXECUTABLE}
-    ${PROJECT_SOURCE_DIR}/scripts/git_revision.py
-    > src/game/generated/git_revision.cpp
+    scripts/git_revision.py
+    > ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   DEPENDS
     ${GIT_REVISION_EXTRA_DEPS}
     scripts/git_revision.py
