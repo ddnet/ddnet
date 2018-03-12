@@ -412,11 +412,11 @@ void CServer::SetClientName(int ClientID, const char *pName)
 			char aBuf[256];
 			if(pBanned->m_aReason[0])
 			{
-				str_format(aBuf, sizeof(aBuf), "Kicked (your name is banned %s)", pBanned->m_aReason);
+				str_format(aBuf, sizeof(aBuf), "Kicked (your name is banned: %s)", pBanned->m_aReason);
 			}
 			else
 			{
-				str_copy(aBuf, "Kicked (your name is banned)", sizeof aBuf);
+				str_copy(aBuf, "Kicked (your name is banned)", sizeof(aBuf));
 			}
 			Kick(ClientID, aBuf);
 		}
