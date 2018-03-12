@@ -394,7 +394,7 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	int Skeleton[MAX_NAME_SKELETON_LENGTH];
 	int SkeletonLength = str_utf8_to_skeleton(pName, Skeleton, sizeof(Skeleton) / sizeof(Skeleton[0]));
 	int Buffer[MAX_NAME_SKELETON_LENGTH * 2 + 2];
-	CNameBan *pBanned = NULL;
+	CNameBan *pBanned = 0;
 	for(int i = 0; i < m_aNameBans.size(); i++)
 	{
 		CNameBan *pBan = &m_aNameBans[i];
@@ -410,7 +410,14 @@ void CServer::SetClientName(int ClientID, const char *pName)
 		if(m_aClients[ClientID].m_State == CClient::STATE_READY)
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pBanned->m_aReason);
+			if(pBanned->m_aReason[0])
+			{
+				str_format(aBuf, sizeof(aBuf), "Kicked (your name is banned %s)", pBanned->m_aReason);
+			}
+			else
+			{
+				str_copy(aBuf, "Kicked (your name is banned)", sizeof aBuf);
+			}
 			Kick(ClientID, aBuf);
 		}
 		return;
@@ -2379,7 +2386,7 @@ void CServer::ConNameBan(IConsole::IResult *pResult, void *pUser)
 		CNameBan *pBan = &pThis->m_aNameBans[i];
 		if(str_comp(pBan->m_aName, pName) == 0)
 		{
-			str_format(aBuf, sizeof(aBuf), "changed name='%s' distance=%d old_distance=%d reason=%s old_reason=%s", pName, Distance, pBan->m_Distance, pReason, pBan->m_aReason);
+			str_format(aBuf, sizeof(aBuf), "changed name='%s' distance=%d old_distance=%d reason='%s' old_reason='%s'", pName, Distance, pBan->m_Distance, pReason, pBan->m_aReason);
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 			pBan->m_Distance = Distance;
 			return;
@@ -2387,7 +2394,7 @@ void CServer::ConNameBan(IConsole::IResult *pResult, void *pUser)
 	}
 
 	pThis->m_aNameBans.add(CNameBan(pName, Distance, pReason));
-	str_format(aBuf, sizeof(aBuf), "added name='%s' distance=%d reason=%s", pName, Distance, pReason);
+	str_format(aBuf, sizeof(aBuf), "added name='%s' distance=%d reason='%s'", pName, Distance, pReason);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 }
 
@@ -2402,7 +2409,7 @@ void CServer::ConNameUnban(IConsole::IResult *pResult, void *pUser)
 		if(str_comp(pBan->m_aName, pName) == 0)
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "removed name='%s' distance=%d reason=%s", pBan->m_aName, pBan->m_Distance, pBan->m_aReason);
+			str_format(aBuf, sizeof(aBuf), "removed name='%s' distance=%d reason='%s'", pBan->m_aName, pBan->m_Distance, pBan->m_aReason);
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 			pThis->m_aNameBans.remove_index(i);
 		}
@@ -2417,7 +2424,7 @@ void CServer::ConNameBans(IConsole::IResult *pResult, void *pUser)
 	{
 		CNameBan *pBan = &pThis->m_aNameBans[i];
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "name='%s' distance=%d reason=%s", pBan->m_aName, pBan->m_Distance, pBan->m_aReason);
+		str_format(aBuf, sizeof(aBuf), "name='%s' distance=%d reason='%s'", pBan->m_aName, pBan->m_Distance, pBan->m_aReason);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 	}
 }
@@ -2812,7 +2819,7 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key");
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 
-	Console()->Register("name_ban", "s[name] ?i[distance] ?s[reason]", CFGFLAG_SERVER, ConNameBan, this, "Ban a certain nick name");
+	Console()->Register("name_ban", "s[name] ?i[distance] ?r[reason]", CFGFLAG_SERVER, ConNameBan, this, "Ban a certain nick name");
 	Console()->Register("name_unban", "s[name]", CFGFLAG_SERVER, ConNameUnban, this, "Unban a certain nick name");
 	Console()->Register("name_bans", "", CFGFLAG_SERVER, ConNameBans, this, "List all name bans");
 

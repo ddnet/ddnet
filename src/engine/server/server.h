@@ -101,7 +101,7 @@ class CServer : public IServer
 	enum
 	{
 		MAX_NAME_SKELETON_LENGTH=MAX_NAME_LENGTH*4,
-		REASON_LENGTH=64
+		MAX_REASON_LENGTH=64
 	};
 
 	class CNameBan
@@ -116,7 +116,7 @@ class CServer : public IServer
 			str_copy(m_aReason, pReason, sizeof(m_aReason));
 		}
 		char m_aName[MAX_NAME_LENGTH];
-		char m_aReason[REASON_LENGTH];
+		char m_aReason[MAX_REASON_LENGTH];
 		int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
 		int m_SkeletonLength;
 		int m_Distance;
