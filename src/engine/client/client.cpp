@@ -2837,8 +2837,10 @@ void CClient::Run()
 					}
 					m_pGraphics->Swap();
 				}
+
+				Input()->NextFrame();
 			}
-			Input()->NextFrame();
+
 			if(Input()->VideoRestartNeeded())
 			{
 				m_pGraphics->Init();
