@@ -409,7 +409,9 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	{
 		if(m_aClients[ClientID].m_State == CClient::STATE_READY)
 		{
-			Kick(ClientID, "Kicked (your name is banned)");
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pBanned->m_aReason);
+			Kick(ClientID, aBuf);
 		}
 		return;
 	}
