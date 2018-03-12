@@ -621,6 +621,15 @@ int64 time_freq();
 */
 int time_timestamp();
 
+/*
+Function: time_get_microseconds
+Fetches a sample from a high resolution timer and converts it in microseconds.
+
+Returns:
+Current value of the timer in microseconds.
+*/
+int64 time_get_microseconds();
+
 /* Group: Network General */
 typedef struct
 {

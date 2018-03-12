@@ -2699,11 +2699,11 @@ void CClient::Run()
 	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
-
-	int64 LastTime = time_get();
+	
+	int64 LastTime = time_get_microseconds();
 	int64 LastRenderTime = time_get();
 
-	while (1)
+	while(1)
 	{
 		set_new_tick();
 
@@ -2804,7 +2804,7 @@ void CClient::Run()
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
 				int64 AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (int64)((float)time_freq() / (float)g_Config.m_GfxRefreshRate)) : 0;
-				// if the value is over a second time loose, reset the additional time (drop the frames we lost already)
+				// if the value is over a second time loose, reset the additional time (drop the frames, that are lost already)
 				if(AdditionalTime > time_freq())
 					AdditionalTime = time_freq();
 				LastRenderTime = Now - AdditionalTime;
@@ -2859,7 +2859,7 @@ void CClient::Run()
 #endif
 
 		// beNice
-		int64 Now = time_get();
+		int64 Now = time_get_microseconds();
 		int64 SleepTimeInMicroSeconds = 0;
 		bool Slept = false;
 		if(
@@ -2868,34 +2868,32 @@ void CClient::Run()
 #endif
 			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
 		{
-			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
-			int64 TimeLastInMicroSeconds = (LastTime * 1000000ll) / time_freq();
-			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRateInactive) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
-			thread_sleep(max(SleepTimeInMicroSeconds / 1000ll, (int64)0));
+			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
+			if (SleepTimeInMicroSeconds / (int64)1000 > (int64)0)
+				thread_sleep(SleepTimeInMicroSeconds / (int64)1000);
 			Slept = true;
 		}
 		else if(g_Config.m_ClRefreshRate)
 		{
-			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
-			int64 TimeLastInMicroSeconds = (LastTime * 1000000ll) / time_freq();
-			SleepTimeInMicroSeconds = (1000000ll / g_Config.m_ClRefreshRate) - (TimeNowInMicroSeconds - TimeLastInMicroSeconds);
-			net_socket_read_wait(m_NetClient[0].m_Socket, max(SleepTimeInMicroSeconds, (int64)0));
+			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRate) - (Now - LastTime);
+			if(SleepTimeInMicroSeconds > (int64)0)
+				net_socket_read_wait(m_NetClient[0].m_Socket, SleepTimeInMicroSeconds);
 			Slept = true;
 		}
 		if(Slept)
 		{
-			// look how much we actually slept/waited
-			int64 After = time_get();
-			int64 TimeNowInMicroSeconds = (Now * 1000000ll) / time_freq();
-			int64 TimeAfterInMicroSeconds = (After * 1000000ll) / time_freq();
-			int64 TimeDiff = SleepTimeInMicroSeconds - (TimeAfterInMicroSeconds - TimeNowInMicroSeconds);
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
-			if(TimeDiff < -1000000ll)
-				TimeDiff = -1000000ll;
+			if(SleepTimeInMicroSeconds < (int64)-1000000)
+				SleepTimeInMicroSeconds = (int64)-1000000;
 			// don't go higher than the game ticks speed, because the network is waking up the client with the server's snapshots anyway
-			else if(TimeDiff > 1000000ll / m_GameTickSpeed)
-				TimeDiff = 1000000ll / m_GameTickSpeed;
-			LastTime = Now + (TimeDiff * time_freq()) / 1000000ll;
+			else if(SleepTimeInMicroSeconds > (int64)1000000 / m_GameTickSpeed)
+				SleepTimeInMicroSeconds = (int64)1000000 / m_GameTickSpeed;
+			// the time diff between the time that was used actually used and the time the thread should sleep/wait
+			// will be calculated in the sleep time of the next update tick by faking the time it should have slept/wait.
+			// so two cases (and the case it slept exactly the time it should):
+			//	- the thread slept/waited too long, then it adjust the time to sleep/wait less in the next update tick
+			//	- the thread slept/waited too less, then it adjust the time to sleep/wait more in the next update tick
+			LastTime = Now + SleepTimeInMicroSeconds;
 		}
 		else
 			LastTime = Now;

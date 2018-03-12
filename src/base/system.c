@@ -1001,6 +1001,48 @@ int64 time_freq()
 #endif
 }
 
+int64 time_get_microseconds()
+{
+	static int64 last = 0;
+	{
+#if defined(CONF_PLATFORM_MACOSX)
+		static int got_timebase = 0;
+		mach_timebase_info_data_t timebase;
+		uint64_t time;
+		uint64_t q;
+		uint64_t r;
+		if (!got_timebase)
+		{
+			mach_timebase_info(&timebase);
+		}
+		time = mach_absolute_time();
+		q = time / timebase.denom;
+		r = time % timebase.denom;
+		last = q * timebase.numer + r * timebase.numer / timebase.denom;
+		return last / (int64)1000;
+#elif defined(CONF_FAMILY_UNIX)
+		struct timespec spec;
+		clock_gettime(CLOCK_MONOTONIC, &spec);
+		last = (int64)spec.tv_sec*(int64)1000000 + (int64)spec.tv_nsec / 1000;
+		return last;
+#elif defined(CONF_FAMILY_WINDOWS)
+		int64 t;
+		QueryPerformanceCounter((PLARGE_INTEGER)&t);
+
+		int64 tf;
+		QueryPerformanceFrequency((PLARGE_INTEGER)&tf);
+
+		t = (t * (int64)1000000) / tf;
+		if(t < last) // for some reason, QPC can return values in the past
+			return last;
+		last = t;
+		return t;
+#else
+#error not implemented
+#endif
+	}
+}
+
 /* -----  network ----- */
 static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 {
