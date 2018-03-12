@@ -1011,9 +1011,9 @@ int64 time_freq()
 int64 time_get_microseconds()
 {
 #if defined(CONF_PLATFORM_MACOSX)
-	return time_get_impl() / (int64)1000;
+	return time_get_impl() / (time_freq() / 1000 / 1000 / 1000);
 #elif defined(CONF_FAMILY_UNIX)
-	return time_get_impl();
+	return time_get_impl() / (time_freq() / 1000 / 1000);
 #elif defined(CONF_FAMILY_WINDOWS)
 	return (time_get_impl() * (int64)1000000) / time_freq();
 #else
