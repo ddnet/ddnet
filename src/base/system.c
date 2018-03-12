@@ -944,14 +944,9 @@ void set_new_tick()
 }
 
 /* -----  time ----- */
-int64 time_get()
+int64 time_get_impl()
 {
 	static int64 last = 0;
-	if(new_tick == 0)
-		return last;
-	if(new_tick != -1)
-		new_tick = 0;
-
 	{
 #if defined(CONF_PLATFORM_MACOSX)
 		static int got_timebase = 0;
@@ -971,7 +966,7 @@ int64 time_get()
 #elif defined(CONF_FAMILY_UNIX)
 		struct timespec spec;
 		clock_gettime(CLOCK_MONOTONIC, &spec);
-		last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
+		last = (int64)spec.tv_sec*(int64)1000000 + (int64)spec.tv_nsec / 1000;
 		return last;
 #elif defined(CONF_FAMILY_WINDOWS)
 		int64 t;
@@ -984,6 +979,17 @@ int64 time_get()
 		#error not implemented
 #endif
 	}
+}
+
+int64 time_get()
+{
+	static int64 last = 0;
+	if(new_tick == 0)
+		return last;
+	if(new_tick != -1)
+		new_tick = 0;
+
+	last = time_get_impl();
 }
 
 int64 time_freq()
@@ -1003,42 +1009,15 @@ int64 time_freq()
 
 int64 time_get_microseconds()
 {
-	static int64 last = 0;
 	{
 #if defined(CONF_PLATFORM_MACOSX)
-		static int got_timebase = 0;
-		mach_timebase_info_data_t timebase;
-		uint64_t time;
-		uint64_t q;
-		uint64_t r;
-		if (!got_timebase)
-		{
-			mach_timebase_info(&timebase);
-		}
-		time = mach_absolute_time();
-		q = time / timebase.denom;
-		r = time % timebase.denom;
-		last = q * timebase.numer + r * timebase.numer / timebase.denom;
-		return last / (int64)1000;
+		return time_get_impl() / (int64)1000;
 #elif defined(CONF_FAMILY_UNIX)
-		struct timespec spec;
-		clock_gettime(CLOCK_MONOTONIC, &spec);
-		last = (int64)spec.tv_sec*(int64)1000000 + (int64)spec.tv_nsec / 1000;
-		return last;
+		return time_get_impl();
 #elif defined(CONF_FAMILY_WINDOWS)
-		int64 t;
-		QueryPerformanceCounter((PLARGE_INTEGER)&t);
-
-		int64 tf;
-		QueryPerformanceFrequency((PLARGE_INTEGER)&tf);
-
-		t = (t * (int64)1000000) / tf;
-		if(t < last) // for some reason, QPC can return values in the past
-			return last;
-		last = t;
-		return t;
+		return (time_get_impl() * (int64)1000000) / time_freq();
 #else
-#error not implemented
+		#error not implemented
 #endif
 	}
 }
