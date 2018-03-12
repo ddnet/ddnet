@@ -343,7 +343,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	m_VersionInfo.m_State = CVersionInfo::STATE_INIT;
 
-	if (g_Config.m_ClDummy == 0)
+	if(g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
 
 	m_ReconnectTime = 0;
@@ -605,7 +605,7 @@ void CClient::OnEnterGame()
 	m_CurGameTick[g_Config.m_ClDummy] = 0;
 	m_PrevGameTick[g_Config.m_ClDummy] = 0;
 
-	if (g_Config.m_ClDummy == 0)
+	if(g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
 
 	GameClient()->OnEnterGame();
@@ -2378,7 +2378,7 @@ void CClient::Update()
 					m_CurGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
 					m_PrevGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 
-					if (m_LastDummy2 == (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+					if(m_LastDummy2 == (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 					{
 						GameClient()->OnNewSnapshot();
 						Repredict = 1;
@@ -2391,7 +2391,7 @@ void CClient::Update()
 				break;
 		}
 
-		if (m_LastDummy2 != (bool)g_Config.m_ClDummy)
+		if(m_LastDummy2 != (bool)g_Config.m_ClDummy)
 		{
 			m_LastDummy2 = g_Config.m_ClDummy;
 		}
@@ -2716,7 +2716,7 @@ void CClient::Run()
 		}
 
 		// progress on dummy connect if security token handshake skipped/passed
-		if (m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
+		if(m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
 		{
 			m_DummySendConnInfo = false;
 
@@ -2790,7 +2790,7 @@ void CClient::Run()
 
 			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen())
 				&& (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle())
-				&& (!g_Config.m_GfxRefreshRate || ((int64)((float)time_freq() / (float)g_Config.m_GfxRefreshRate)) <= Now - LastRenderTime))
+				&& (!g_Config.m_GfxRefreshRate || (time_freq() / (int64)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
 
@@ -2803,7 +2803,7 @@ void CClient::Run()
 				m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
-				int64 AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (int64)((float)time_freq() / (float)g_Config.m_GfxRefreshRate)) : 0;
+				int64 AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64)g_Config.m_GfxRefreshRate)) : 0;
 				// if the value is over a second time loose, reset the additional time (drop the frames, that are lost already)
 				if(AdditionalTime > time_freq())
 					AdditionalTime = time_freq();
@@ -2869,7 +2869,7 @@ void CClient::Run()
 			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
 		{
 			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
-			if (SleepTimeInMicroSeconds / (int64)1000 > (int64)0)
+			if(SleepTimeInMicroSeconds / (int64)1000 > (int64)0)
 				thread_sleep(SleepTimeInMicroSeconds / (int64)1000);
 			Slept = true;
 		}
@@ -2931,7 +2931,7 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 		Last = true;
 		return true;
 	}
-	else if (Last && !Input()->KeyIsPressed(Key))
+	else if(Last && !Input()->KeyIsPressed(Key))
 		Last = false;
 
 	return false;
@@ -3030,15 +3030,15 @@ void CClient::AutoStatScreenshot_Cleanup()
 
 void CClient::AutoCSV_Start()
 {
-	if (g_Config.m_ClAutoCSV)
+	if(g_Config.m_ClAutoCSV)
 		m_AutoCSVRecycle = true;
 }
 
 void CClient::AutoCSV_Cleanup()
 {
-	if (m_AutoCSVRecycle)
+	if(m_AutoCSVRecycle)
 	{
-		if (g_Config.m_ClAutoCSVMax)
+		if(g_Config.m_ClAutoCSVMax)
 		{
 			// clean up auto csvs
 			CFileCollection AutoRecord;
@@ -3114,7 +3114,7 @@ void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
 {
-	if (m_DemoPlayer.IsPlaying())
+	if(m_DemoPlayer.IsPlaying())
 	{
 		const char *pDemoFileName = m_DemoPlayer.GetDemoFileName();
 		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, pfnFilter, pUser);
