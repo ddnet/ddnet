@@ -592,6 +592,18 @@ typedef unsigned long long uint64;
 void set_new_tick();
 
 /*
+	Function: time_get_impl
+		Fetches a sample from a high resolution timer.
+
+	Returns:
+		Current value of the timer.
+
+	Remarks:
+		To know how fast the timer is ticking, see <time_freq>.
+*/
+int64 time_get_impl();
+
+/*
 	Function: time_get
 		Fetches a sample from a high resolution timer.
 
@@ -600,6 +612,7 @@ void set_new_tick();
 
 	Remarks:
 		To know how fast the timer is ticking, see <time_freq>.
+		Uses <time_get_impl> to fetch the sample.
 */
 int64 time_get();
 
@@ -620,6 +633,15 @@ int64 time_freq();
 		The time as a UNIX timestamp
 */
 int time_timestamp();
+
+/*
+Function: time_get_microseconds
+Fetches a sample from a high resolution timer and converts it in microseconds.
+
+Returns:
+Current value of the timer in microseconds.
+*/
+int64 time_get_microseconds();
 
 /* Group: Network General */
 typedef struct

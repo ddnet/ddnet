@@ -901,8 +901,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		switch(StoreOglformat)
 		{
 			case GL_RGB: StoreOglformat = GL_COMPRESSED_RGB; break;
-			// This needs further checks. it seems on some gpus COMPRESSED_ALPHA isn't in the core profile
-			case GL_RED: StoreOglformat = GL_COMPRESSED_RGBA; break;
+			// COMPRESSED_ALPHA is deprecated, so use different single channel format.
+			case GL_RED: StoreOglformat = GL_COMPRESSED_RED; break;
 			case GL_RGBA: StoreOglformat = GL_COMPRESSED_RGBA; break;
 			default: StoreOglformat = GL_COMPRESSED_RGBA;
 		}
@@ -927,7 +927,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 		//Bind the texture 2D.
 		GLint swizzleMask[] = {GL_ONE, GL_ONE, GL_ONE, GL_RED};
 		glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
-		StoreOglformat = GL_RGBA;
+		StoreOglformat = GL_R8;
 	}
 	
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_NOMIPMAPS)

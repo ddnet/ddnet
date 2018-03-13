@@ -343,7 +343,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 
 	m_VersionInfo.m_State = CVersionInfo::STATE_INIT;
 
-	if (g_Config.m_ClDummy == 0)
+	if(g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
 
 	m_ReconnectTime = 0;
@@ -605,7 +605,7 @@ void CClient::OnEnterGame()
 	m_CurGameTick[g_Config.m_ClDummy] = 0;
 	m_PrevGameTick[g_Config.m_ClDummy] = 0;
 
-	if (g_Config.m_ClDummy == 0)
+	if(g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
 
 	GameClient()->OnEnterGame();
@@ -2378,7 +2378,7 @@ void CClient::Update()
 					m_CurGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
 					m_PrevGameTick[g_Config.m_ClDummy] = m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 
-					if (m_LastDummy2 == (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+					if(m_LastDummy2 == (bool)g_Config.m_ClDummy && m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 					{
 						GameClient()->OnNewSnapshot();
 						Repredict = 1;
@@ -2391,7 +2391,7 @@ void CClient::Update()
 				break;
 		}
 
-		if (m_LastDummy2 != (bool)g_Config.m_ClDummy)
+		if(m_LastDummy2 != (bool)g_Config.m_ClDummy)
 		{
 			m_LastDummy2 = g_Config.m_ClDummy;
 		}
@@ -2699,10 +2699,11 @@ void CClient::Run()
 	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
+	
+	int64 LastTime = time_get_microseconds();
+	int64 LastRenderTime = time_get();
 
-	int64 LastTime = time_get();
-
-	while (1)
+	while(1)
 	{
 		set_new_tick();
 
@@ -2715,7 +2716,7 @@ void CClient::Run()
 		}
 
 		// progress on dummy connect if security token handshake skipped/passed
-		if (m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
+		if(m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
 		{
 			m_DummySendConnInfo = false;
 
@@ -2789,7 +2790,7 @@ void CClient::Run()
 
 			if((g_Config.m_GfxBackgroundRender || m_pGraphics->WindowOpen())
 				&& (!g_Config.m_GfxAsyncRenderOld || m_pGraphics->IsIdle())
-				&& (!g_Config.m_GfxRefreshRate || Now >= m_LastRenderTime + time_freq() / g_Config.m_GfxRefreshRate))
+				&& (!g_Config.m_GfxRefreshRate || (time_freq() / (int64)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
 
@@ -2801,6 +2802,12 @@ void CClient::Run()
 					m_RenderFrameTimeHigh = m_RenderFrameTime;
 				m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
 
+				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
+				int64 AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64)g_Config.m_GfxRefreshRate)) : 0;
+				// if the value is over a second time loose, reset the additional time (drop the frames, that are lost already)
+				if(AdditionalTime > time_freq())
+					AdditionalTime = time_freq();
+				LastRenderTime = Now - AdditionalTime;
 				m_LastRenderTime = Now;
 
 #ifdef CONF_DEBUG
@@ -2830,8 +2837,10 @@ void CClient::Run()
 					}
 					m_pGraphics->Swap();
 				}
+
 				Input()->NextFrame();
 			}
+
 			if(Input()->VideoRestartNeeded())
 			{
 				m_pGraphics->Init();
@@ -2852,20 +2861,44 @@ void CClient::Run()
 #endif
 
 		// beNice
-		int64 Now = time_get();
+		int64 Now = time_get_microseconds();
+		int64 SleepTimeInMicroSeconds = 0;
+		bool Slept = false;
 		if(
 #ifdef CONF_DEBUG
 			g_Config.m_DbgStress ||
 #endif
 			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
 		{
-			thread_sleep(max(1000 * (LastTime + time_freq() / g_Config.m_ClRefreshRateInactive - Now) / time_freq(), (int64)0));
+			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
+			if(SleepTimeInMicroSeconds / (int64)1000 > (int64)0)
+				thread_sleep(SleepTimeInMicroSeconds / (int64)1000);
+			Slept = true;
 		}
 		else if(g_Config.m_ClRefreshRate)
 		{
-			net_socket_read_wait(m_NetClient[0].m_Socket, max(1000000 * (LastTime + time_freq() / g_Config.m_ClRefreshRate - Now) / time_freq(), (int64)0));
+			SleepTimeInMicroSeconds = ((int64)1000000 / (int64)g_Config.m_ClRefreshRate) - (Now - LastTime);
+			if(SleepTimeInMicroSeconds > (int64)0)
+				net_socket_read_wait(m_NetClient[0].m_Socket, SleepTimeInMicroSeconds);
+			Slept = true;
 		}
-		LastTime = Now;
+		if(Slept)
+		{
+			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
+			if(SleepTimeInMicroSeconds < (int64)-1000000)
+				SleepTimeInMicroSeconds = (int64)-1000000;
+			// don't go higher than the game ticks speed, because the network is waking up the client with the server's snapshots anyway
+			else if(SleepTimeInMicroSeconds > (int64)1000000 / m_GameTickSpeed)
+				SleepTimeInMicroSeconds = (int64)1000000 / m_GameTickSpeed;
+			// the time diff between the time that was used actually used and the time the thread should sleep/wait
+			// will be calculated in the sleep time of the next update tick by faking the time it should have slept/wait.
+			// so two cases (and the case it slept exactly the time it should):
+			//	- the thread slept/waited too long, then it adjust the time to sleep/wait less in the next update tick
+			//	- the thread slept/waited too less, then it adjust the time to sleep/wait more in the next update tick
+			LastTime = Now + SleepTimeInMicroSeconds;
+		}
+		else
+			LastTime = Now;
 
 		if(g_Config.m_DbgHitch)
 		{
@@ -2900,7 +2933,7 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 		Last = true;
 		return true;
 	}
-	else if (Last && !Input()->KeyIsPressed(Key))
+	else if(Last && !Input()->KeyIsPressed(Key))
 		Last = false;
 
 	return false;
@@ -2999,15 +3032,15 @@ void CClient::AutoStatScreenshot_Cleanup()
 
 void CClient::AutoCSV_Start()
 {
-	if (g_Config.m_ClAutoCSV)
+	if(g_Config.m_ClAutoCSV)
 		m_AutoCSVRecycle = true;
 }
 
 void CClient::AutoCSV_Cleanup()
 {
-	if (m_AutoCSVRecycle)
+	if(m_AutoCSVRecycle)
 	{
-		if (g_Config.m_ClAutoCSVMax)
+		if(g_Config.m_ClAutoCSVMax)
 		{
 			// clean up auto csvs
 			CFileCollection AutoRecord;
@@ -3083,7 +3116,7 @@ void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
 {
-	if (m_DemoPlayer.IsPlaying())
+	if(m_DemoPlayer.IsPlaying())
 	{
 		const char *pDemoFileName = m_DemoPlayer.GetDemoFileName();
 		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, pfnFilter, pUser);

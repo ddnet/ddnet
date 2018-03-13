@@ -944,14 +944,9 @@ void set_new_tick()
 }
 
 /* -----  time ----- */
-int64 time_get()
+int64 time_get_impl()
 {
 	static int64 last = 0;
-	if(new_tick == 0)
-		return last;
-	if(new_tick != -1)
-		new_tick = 0;
-
 	{
 #if defined(CONF_PLATFORM_MACOSX)
 		static int got_timebase = 0;
@@ -971,7 +966,7 @@ int64 time_get()
 #elif defined(CONF_FAMILY_UNIX)
 		struct timespec spec;
 		clock_gettime(CLOCK_MONOTONIC, &spec);
-		last = (int64)spec.tv_sec*(int64)1000000+(int64)spec.tv_nsec/1000;
+		last = (int64)spec.tv_sec*(int64)1000000 + (int64)spec.tv_nsec / 1000;
 		return last;
 #elif defined(CONF_FAMILY_WINDOWS)
 		int64 t;
@@ -986,6 +981,18 @@ int64 time_get()
 	}
 }
 
+int64 time_get()
+{
+	static int64 last = 0;
+	if(new_tick == 0)
+		return last;
+	if(new_tick != -1)
+		new_tick = 0;
+
+	last = time_get_impl();
+	return last;
+}
+
 int64 time_freq()
 {
 #if defined(CONF_PLATFORM_MACOSX)
@@ -998,6 +1005,15 @@ int64 time_freq()
 	return t;
 #else
 	#error not implemented
+#endif
+}
+
+int64 time_get_microseconds()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return (time_get_impl() * (int64)1000000) / time_freq();
+#else
+	return time_get_impl() / (time_freq() / 1000 / 1000);
 #endif
 }
 
