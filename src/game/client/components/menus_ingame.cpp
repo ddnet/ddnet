@@ -615,9 +615,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		{
 			Bottom.VSplitLeft(240.0f, &QuickSearch, &Bottom);
 			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-			const char *pSearchLabel = "⚲";
+			const char *pSearchLabel = "\xEE\xA2\xB6";
+			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
 			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
 			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+			TextRender()->SetRenderFlags(0);
+			TextRender()->SetCurFont(NULL);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 			QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button2);
@@ -786,7 +790,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	static int s_InternetButton=0;
 	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_BL))
 	{
-		if (Page != PAGE_INTERNET)
+		if(Page != PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 		NewPage = PAGE_INTERNET;
 	}
@@ -795,7 +799,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	static int s_LanButton=0;
 	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), Page==PAGE_LAN, &Button, 0))
 	{
-		if (Page != PAGE_LAN)
+		if(Page != PAGE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		NewPage = PAGE_LAN;
 	}
@@ -804,7 +808,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	static int s_FavoritesButton=0;
 	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), Page==PAGE_FAVORITES, &Button, 0))
 	{
-		if (Page != PAGE_FAVORITES)
+		if(Page != PAGE_FAVORITES)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		NewPage  = PAGE_FAVORITES;
 	}
@@ -813,7 +817,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	static int s_DDNetButton=0;
 	if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), Page==PAGE_DDNET, &Button, CUI::CORNER_BR) || Page < PAGE_INTERNET || Page > PAGE_DDNET)
 	{
-		if (Page != PAGE_DDNET)
+		if(Page != PAGE_DDNET)
 		{
 			Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
@@ -1035,7 +1039,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	int NewSelected = -1;
 
-	for (int i = 0; i < NumGhosts; i++)
+	for(int i = 0; i < NumGhosts; i++)
 	{
 		const CGhostItem *pItem = &m_lGhosts[i];
 		CUIRect Row;
@@ -1101,7 +1105,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			else if(Id == COL_NAME)
 			{
 				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
 				TextRender()->TextEx(&Cursor, pItem->m_aPlayer, -1);
@@ -1109,7 +1113,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			else if(Id == COL_TIME)
 			{
 				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, Button.x, Button.y, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[64];

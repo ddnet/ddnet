@@ -202,9 +202,20 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 
 	c.Margin(2.0f, &c);
 	RenderTools()->DrawUIRect(&c, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 3.0f);
-	c.y += 2;
-	UI()->DoLabel(&c, pBoxText, pRect->h*ms_FontmodHeight*0.6f, 0);
-	UI()->DoLabel(&t, pText, pRect->h*ms_FontmodHeight*0.8f, -1);
+
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+	bool CheckAble = *pBoxText == 'X';
+	if(CheckAble)
+	{
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h, 0);
+		TextRender()->SetCurFont(NULL);
+	}
+	else
+		UI()->DoLabel(&c, pBoxText, c.h*ms_FontmodHeight, 0);
+	TextRender()->SetRenderFlags(0);
+	UI()->DoLabel(&t, pText, c.h*ms_FontmodHeight, -1);
+
 	return UI()->DoButtonLogic(pID, pText, 0, pRect);
 }
 
@@ -321,7 +332,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	{
 		if(UI()->MouseButton(0))
 		{
-			if (UI()->LastActiveItem() != pID)
+			if(UI()->LastActiveItem() != pID)
 				JustGotActive = true;
 			UI()->SetActiveItem(pID);
 		}
@@ -369,7 +380,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	{
 		str_copy(aInputing, pStr, sizeof(aInputing));
 		const char *Text = Input()->GetIMECandidate();
-		if (str_length(Text))
+		if(str_length(Text))
 		{
 		int NewTextLen = str_length(Text);
 		int CharsLeft = StrSize - str_length(aInputing) - 1;
@@ -423,7 +434,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		if (str_length(aInputing))
+		if(str_length(aInputing))
 		{
 			float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex + Input()->GetEditingCursor());
 			Textbox = *pRect;
@@ -621,7 +632,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
 		UI()->SetHotItem(pID);
 
 	// draw
-	if (UI()->ActiveItem() == pID && ButtonUsed == 0)
+	if(UI()->ActiveItem() == pID && ButtonUsed == 0)
 		DoButton_KeySelect(pID, "???", 0, pRect);
 	else
 	{
@@ -650,7 +661,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		// offline menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static int s_NewsButton=0;
-		if (DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
+		if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage==PAGE_NEWS, &Button, CUI::CORNER_T))
 		{
 			NewPage = PAGE_NEWS;
 			m_DoubleClickIndex = -1;
@@ -758,30 +769,37 @@ int CMenus::RenderMenubar(CUIRect r)
 	/*
 	box.VSplitRight(110.0f, &box, &button);
 	static int system_button=0;
-	if (UI()->DoButton(&system_button, "System", g_Config.m_UiPage==PAGE_SYSTEM, &button))
+	if(UI()->DoButton(&system_button, "System", g_Config.m_UiPage==PAGE_SYSTEM, &button))
 		g_Config.m_UiPage = PAGE_SYSTEM;
 
 	box.VSplitRight(30.0f, &box, 0);
 	*/
 
-	Box.VSplitRight(30.0f, &Box, &Button);
+	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+
+	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_QuitButton=0;
-	if(DoButton_MenuTab(&s_QuitButton, "×", 0, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T))
 		m_Popup = POPUP_QUIT;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(30.0f, &Box, &Button);
+	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_SettingsButton=0;
-	if(DoButton_MenuTab(&s_SettingsButton, "⚙", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
+	
+	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
-	Box.VSplitRight(30.0f, &Box, &Button);
+	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_EditorButton=0;
-	if(DoButton_MenuTab(&s_EditorButton, "✎", 0, &Button, CUI::CORNER_T))
+	if(DoButton_MenuTab(&s_EditorButton, "\xEE\x8F\x89", 0, &Button, CUI::CORNER_T))
 	{
 		g_Config.m_ClEditor = 1;
 	}
+
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetCurFont(NULL);
 
 	if(NewPage != -1)
 	{
@@ -837,7 +855,7 @@ void CMenus::RenderLoading()
 	r.x = x;
 	r.y = y+20;
 	r.w = w;
-	r.h = h;
+	r.h = h - 130;
 	UI()->DoLabel(&r, pCaption, 48.0f, 0, -1);
 
 	Graphics()->TextureSet(-1);
@@ -863,7 +881,7 @@ void CMenus::RenderNews(CUIRect MainView)
 
 	std::istringstream f(Client()->m_aNews);
 	std::string line;
-	while (std::getline(f, line))
+	while(std::getline(f, line))
 	{
 		if(line.size() > 0 && line.at(0) == '|' && line.at(line.size()-1) == '|')
 		{
@@ -1089,7 +1107,7 @@ int CMenus::Render()
 				pExtraText = "";
 			}
 		}
-		else if (m_Popup == POPUP_DISCONNECTED)
+		else if(m_Popup == POPUP_DISCONNECTED)
 		{
 			pTitle = Localize("Disconnected");
 			pExtraText = Client()->ErrorString();
@@ -1618,7 +1636,7 @@ int CMenus::Render()
 #endif
 
 			Part.VSplitLeft(60.0f, 0, &Part);
-			if (DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)"), g_Config.m_BrIndicateFinished, &Part))
+			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)"), g_Config.m_BrIndicateFinished, &Part))
 				g_Config.m_BrIndicateFinished ^= 1;
 
 #if defined(__ANDROID__)
@@ -1794,7 +1812,7 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	}
 	else if(NewState == IClient::STATE_CONNECTING)
 		m_Popup = POPUP_CONNECTING;
-	else if (NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
+	else if(NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_Popup = POPUP_NONE;
 		SetActive(false);
@@ -2010,15 +2028,14 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-
+	
+	Graphics()->BlendNormal();
 	RenderBackground();
 
 	float w = 700;
 	float h = 200;
 	float x = Screen.w/2-w/2;
 	float y = Screen.h/2-h/2;
-
-	Graphics()->BlendNormal();
 
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
@@ -2033,7 +2050,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	r.h = h;
 	UI()->DoLabel(&r, Localize(pCaption), 32.0f, 0, -1);
 
-	if (total>0)
+	if(total>0)
 	{
 		float Percent = current/(float)total;
 		Graphics()->TextureSet(-1);

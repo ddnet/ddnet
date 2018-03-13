@@ -260,7 +260,7 @@ void CUIRect::HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pTop)
+	if(pTop)
 	{
 		pTop->x = r.x;
 		pTop->y = r.y;
@@ -268,7 +268,7 @@ void CUIRect::HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 		pTop->h = Cut;
 	}
 
-	if (pBottom)
+	if(pBottom)
 	{
 		pBottom->x = r.x;
 		pBottom->y = r.y + Cut;
@@ -282,7 +282,7 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pTop)
+	if(pTop)
 	{
 		pTop->x = r.x;
 		pTop->y = r.y;
@@ -290,7 +290,7 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 		pTop->h = r.h - Cut;
 	}
 
-	if (pBottom)
+	if(pBottom)
 	{
 		pBottom->x = r.x;
 		pBottom->y = r.y + r.h - Cut;
@@ -306,7 +306,7 @@ void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
 	float Cut = r.w/2;
 //	Cut *= Scale();
 
-	if (pLeft)
+	if(pLeft)
 	{
 		pLeft->x = r.x;
 		pLeft->y = r.y;
@@ -314,7 +314,7 @@ void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
 		pLeft->h = r.h;
 	}
 
-	if (pRight)
+	if(pRight)
 	{
 		pRight->x = r.x + Cut;
 		pRight->y = r.y;
@@ -328,7 +328,7 @@ void CUIRect::VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pLeft)
+	if(pLeft)
 	{
 		pLeft->x = r.x;
 		pLeft->y = r.y;
@@ -336,7 +336,7 @@ void CUIRect::VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 		pLeft->h = r.h;
 	}
 
-	if (pRight)
+	if(pRight)
 	{
 		pRight->x = r.x + Cut;
 		pRight->y = r.y;
@@ -350,7 +350,7 @@ void CUIRect::VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 	CUIRect r = *this;
 	Cut *= Scale();
 
-	if (pLeft)
+	if(pLeft)
 	{
 		pLeft->x = r.x;
 		pLeft->y = r.y;
@@ -358,7 +358,7 @@ void CUIRect::VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 		pLeft->h = r.h;
 	}
 
-	if (pRight)
+	if(pRight)
 	{
 		pRight->x = r.x + r.w - Cut;
 		pRight->y = r.y;
@@ -504,19 +504,17 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 
 void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, int MaxWidth)
 {
-	// TODO: FIX ME!!!!
-	//Graphics()->BlendNormal();
 	if(Align == 0)
 	{
 		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + r->w/2-tw/2, r->y - Size/10, Size, pText, MaxWidth);
+		TextRender()->Text(0, r->x + (r->w - tw) / 2.f, r->y + (r->h - Size) / 2.f, Size, pText, MaxWidth);
 	}
 	else if(Align < 0)
-		TextRender()->Text(0, r->x, r->y - Size/10, Size, pText, MaxWidth);
+		TextRender()->Text(0, r->x, r->y + (r->h - Size) / 2.f, Size, pText, MaxWidth);
 	else if(Align > 0)
 	{
 		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
+		TextRender()->Text(0, r->x + r->w-tw, r->y + (r->h - Size) / 2.f, Size, pText, MaxWidth);
 	}
 }
 
