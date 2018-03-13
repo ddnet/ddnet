@@ -9,7 +9,8 @@ noperspective in vec4 vertColor;
 out vec4 FragClr;
 void main()
 {
-	if(isTextured == 1) {
+	if(isTextured == 1)
+	{
 		vec4 tex = texture(textureSampler, texCoord);
 		FragClr = tex * vertColor;
 	}
