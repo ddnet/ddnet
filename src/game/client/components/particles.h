@@ -66,8 +66,9 @@ public:
 
 	virtual void OnReset();
 	virtual void OnRender();
-
+	virtual void OnInit();
 private:
+	int m_ParticleQuadContainerIndex;
 
 	enum
 	{
