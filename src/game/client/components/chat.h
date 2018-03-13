@@ -26,7 +26,13 @@ class CChat : public CComponent
 		char m_aText[512];
 		bool m_Friend;
 		bool m_Highlighted;
+
+		int m_TextContainerIndex;
+		float m_TextYOffset;
 	};
+
+	bool m_PrevScoreBoardShowed;
+	bool m_PrevShowChat;
 
 	CLine m_aLines[MAX_LINES];
 	int m_CurrentLine;
@@ -92,6 +98,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);
 	virtual void OnRender();
+	virtual void OnPrepareLines();
 	virtual void OnRelease();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 	virtual bool OnInput(IInput::CEvent Event);
