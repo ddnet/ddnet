@@ -4,10 +4,42 @@
 #define GAME_CLIENT_COMPONENTS_HUD_H
 #include <game/client/component.h>
 
+struct SScoreInfo
+{
+	SScoreInfo()
+	{
+		Reset();
+	}
+	
+	void Reset()
+	{
+		m_TextRankContainerIndex = m_TextScoreContainerIndex = m_RoundRectQuadContainerIndex = m_OptionalNameTextContainerIndex = -1;
+		m_aScoreText[0] = 0;
+		m_aRankText[0] = 0;
+		m_aPlayerNameText[0] = 0;
+		m_ScoreTextWidth = 0.f;
+		m_Initialized = false;
+	}
+
+	int m_TextRankContainerIndex;
+	int m_TextScoreContainerIndex;
+	float m_ScoreTextWidth;
+	char m_aScoreText[16];
+	char m_aRankText[16];
+	char m_aPlayerNameText[MAX_NAME_LENGTH];
+	int m_RoundRectQuadContainerIndex;
+	int m_OptionalNameTextContainerIndex;
+
+	bool m_Initialized;
+};
+
 class CHud : public CComponent
 {
 	float m_Width, m_Height;
 	float m_FrameTimeAvg;
+
+	int m_HudQuadContainerIndex;
+	SScoreInfo m_aScoreInfo[2];
 
 	void RenderCursor();
 
@@ -15,7 +47,10 @@ class CHud : public CComponent
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
 	void RenderVoting();
+
+	void PrepareHealthAmoQuads();
 	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);
+
 	void RenderGameTimer();
 	void RenderPauseNotification();
 	void RenderSuddenDeath();
@@ -30,6 +65,7 @@ public:
 
 	virtual void OnReset();
 	virtual void OnRender();
+	virtual void OnInit();
 
 	// DDRace
 
