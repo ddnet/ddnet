@@ -160,6 +160,8 @@ void CGameClient::OnConsoleInit()
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
+	gs_NamePlates.SetPlayers(m_pPlayers);
+
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_All.Add(m_pSkins);
 	m_All.Add(m_pCountryFlags);
@@ -288,7 +290,7 @@ void CGameClient::OnInit()
 	static CFont *pDefaultFont = 0;
 	char aFilename[512];
 	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
-	if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+	if(str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
 		str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
 		pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
@@ -340,7 +342,7 @@ void CGameClient::OnInit()
 	{
 		for(unsigned int i = 0; i < 16; i++)
 		{
-			if (rand() % 2)
+			if(rand() % 2)
 				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 97;
 			else
 				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 65;
@@ -351,7 +353,7 @@ void CGameClient::OnInit()
 	{
 		for(unsigned int i = 0; i < 16; i++)
 		{
-			if (rand() % 2)
+			if(rand() % 2)
 				g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 97;
 			else
 				g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 65;
@@ -392,7 +394,7 @@ void CGameClient::OnUpdate()
 
 void CGameClient::OnDummySwap()
 {
-	if (g_Config.m_ClDummyResetOnSwitch)
+	if(g_Config.m_ClDummyResetOnSwitch)
 	{
 		m_pControls->ResetInput(!g_Config.m_ClDummy);
 		m_pControls->m_InputData[!g_Config.m_ClDummy].m_Hook = 0;
@@ -404,7 +406,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 {
 	m_LocalIDs[g_Config.m_ClDummy] = m_Snap.m_LocalClientID;
 
-	if (!Dummy)
+	if(!Dummy)
 	{
 		return m_pControls->SnapInput(pData);
 	}
@@ -539,7 +541,7 @@ void CGameClient::UpdatePositions()
 		{
 			if(!(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 			{
-				if (m_Snap.m_pLocalCharacter)
+				if(m_Snap.m_pLocalCharacter)
 					m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick());
 			}
 	//		else
@@ -553,14 +555,14 @@ void CGameClient::UpdatePositions()
 			vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y), Client()->IntraGameTick());
 	}
 
-	if (AntiPingPlayers())
+	if(AntiPingPlayers())
 	{
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (!m_Snap.m_aCharacters[i].m_Active)
+			if(!m_Snap.m_aCharacters[i].m_Active)
 				continue;
 
-			if (m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter && g_Config.m_ClPredict /* && g_Config.m_AntiPing */ && !(m_Snap.m_LocalClientID == -1 || !m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Active))
+			if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter && g_Config.m_ClPredict /* && g_Config.m_AntiPing */ && !(m_Snap.m_LocalClientID == -1 || !m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Active))
 				m_Snap.m_aCharacters[i].m_Position = mix(m_aClients[i].m_PrevPredicted.m_Pos, m_aClients[i].m_Predicted.m_Pos, Client()->PredIntraGameTick());
 			else
 				m_Snap.m_aCharacters[i].m_Position = mix(vec2(m_Snap.m_aCharacters[i].m_Prev.m_X, m_Snap.m_aCharacters[i].m_Prev.m_Y), vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y), Client()->IntraGameTick());
@@ -797,7 +799,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 	{
 		Client()->EnterGame();
 	}
-	else if (MsgId == NETMSGTYPE_SV_EMOTICON)
+	else if(MsgId == NETMSGTYPE_SV_EMOTICON)
 	{
 		CNetMsg_Sv_Emoticon *pMsg = (CNetMsg_Sv_Emoticon *)pRawMsg;
 
@@ -839,7 +841,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 
 			if(!WentWrong && Team >= 0 && Team < MAX_CLIENTS)
 				m_Teams.Team(i, Team);
-			else if (Team != MAX_CLIENTS)
+			else if(Team != MAX_CLIENTS)
 				WentWrong = true;
 
 			if(WentWrong)
@@ -849,7 +851,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 			}
 		}
 
-		if (i <= 16)
+		if(i <= 16)
 			m_Teams.m_IsDDRace16 = true;
 
 		m_pGhost->m_AllowRestart = true;
@@ -1590,7 +1592,7 @@ void CGameClient::OnPredict()
 									continue;
 
 								vec2 Dir;
-								if (length(pTarget->m_Pos - Pos) > 0.0f)
+								if(length(pTarget->m_Pos - Pos) > 0.0f)
 									Dir = normalize(pTarget->m_Pos - Pos);
 								else
 									Dir = vec2(0.f, -1.f);
@@ -1764,9 +1766,9 @@ void CGameClient::OnPredict()
 		{
 			m_PredictedChar = *World.m_apCharacters[m_Snap.m_LocalClientID];
 
-			if (AntiPingPlayers())
+			if(AntiPingPlayers())
 			{
-				for (int c = 0; c < MAX_CLIENTS; c++)
+				for(int c = 0; c < MAX_CLIENTS; c++)
 				{
 					if(!World.m_apCharacters[c])
 						continue;
@@ -1879,7 +1881,7 @@ void CGameClient::SendSwitchTeam(int Team)
 	Msg.m_Team = Team;
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 
-	if (Team != TEAM_SPECTATORS)
+	if(Team != TEAM_SPECTATORS)
 		m_pCamera->OnReset();
 }
 
@@ -2006,10 +2008,10 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
-	if (!m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
+	if(!m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
 		return ClosestID;
 
-	for (int i=0; i<MAX_CLIENTS; i++)
+	for(int i=0; i<MAX_CLIENTS; i++)
 	{
 		CClientData cData = m_aClients[i];
 		CNetObj_Character Prev = m_Snap.m_aCharacters[i].m_Prev;
@@ -2017,7 +2019,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick());
 
-		if (!cData.m_Active || i == ownID || !m_Teams.SameTeam(i, ownID))
+		if(!cData.m_Active || i == ownID || !m_Teams.SameTeam(i, ownID))
 			continue;
 
 		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
@@ -2045,7 +2047,7 @@ int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2
 	if(!World)
 		return ClosestID;
 
-	for (int i=0; i<MAX_CLIENTS; i++)
+	for(int i=0; i<MAX_CLIENTS; i++)
 	{
 		if(!World->m_apCharacters[i])
 			continue;
@@ -2177,13 +2179,13 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 		{
 			m_StartTick = CurrentTick;
 			m_Pos = NewPos+(-(m_Direction*4));
-			if (m_Bouncing == 1)
+			if(m_Bouncing == 1)
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if (fabs(m_Direction.x) < 1e-6)
+			if(fabs(m_Direction.x) < 1e-6)
 				m_Direction.x = 0;
-			if (fabs(m_Direction.y) < 1e-6)
+			if(fabs(m_Direction.y) < 1e-6)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}

@@ -6,20 +6,33 @@
 
 class CKillMessages : public CComponent
 {
+	int m_SpriteQuadContainerIndex;
 public:
 	// kill messages
 	struct CKillMsg
 	{
+		CKillMsg()
+		{
+			m_KillerTextContainerIndex = m_VictimTextContainerIndex = -1;
+		}
+
 		int m_Weapon;
+
 		int m_VictimID;
 		int m_VictimTeam;
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
+		int m_VictimTextContainerIndex;
+		float m_VitctimTextWidth;
 		CTeeRenderInfo m_VictimRenderInfo;
+
 		int m_KillerID;
 		int m_KillerTeam;
 		char m_aKillerName[64];
+		int m_KillerTextContainerIndex;
+		float m_KillerTextWidth;
 		CTeeRenderInfo m_KillerRenderInfo;
+
 		int m_ModeSpecial; // for CTF, if the guy is carrying a flag for example
 		int m_Tick;
 	};
@@ -35,6 +48,7 @@ public:
 	virtual void OnReset();
 	virtual void OnRender();
 	virtual void OnMessage(int MsgType, void *pRawMsg);
+	virtual void OnInit();
 };
 
 #endif
