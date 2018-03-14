@@ -1603,11 +1603,49 @@ int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 */
 int str_utf8_comp_confusable(const char *a, const char *b);
 
+/*
+	Function: str_utf8_isspace
+		Checks whether the given Unicode codepoint renders as space.
+
+	Parameters:
+		code - Unicode codepoint to check.
+
+	Returns:
+		0 if the codepoint does not render as space, != 0 if it does.
+*/
 int str_utf8_isspace(int code);
 
 int str_utf8_isstart(char c);
 
+/*
+	Function: str_utf8_skip_whitespaces
+		Skips leading characters that render as spaces.
+
+	Parameters:
+		str - Pointer to the string.
+
+	Returns:
+		Pointer to the first non-whitespace character found
+		within the string.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
 const char *str_utf8_skip_whitespaces(const char *str);
+
+/*
+	Function: str_utf8_trim_right
+		Removes trailing characters that render as spaces by modifying
+		the string in-place.
+
+	Parameters:
+		str - Pointer to the string.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- The string is modified in-place.
+*/
+void str_utf8_trim_right(char *str);
 
 /*
 	Function: str_utf8_rewind

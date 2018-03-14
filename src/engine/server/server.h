@@ -22,6 +22,7 @@
 #include <base/tl/array.h>
 
 #include "authmanager.h"
+#include "name_ban.h"
 
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
@@ -97,30 +98,6 @@ class CServer : public IServer
 	bool m_ConnLoggingSocketCreated;
 	UNIXSOCKET m_ConnLoggingSocket;
 #endif
-
-	enum
-	{
-		MAX_NAME_SKELETON_LENGTH=MAX_NAME_LENGTH*4,
-		MAX_REASON_LENGTH=64
-	};
-
-	class CNameBan
-	{
-	public:
-		CNameBan() {}
-		CNameBan(const char *pName, int Distance, const char *pReason) :
-			m_Distance(Distance)
-		{
-			str_copy(m_aName, pName, sizeof(m_aName));
-			m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, sizeof(m_aSkeleton) / sizeof(m_aSkeleton[0]));
-			str_copy(m_aReason, pReason, sizeof(m_aReason));
-		}
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aReason[MAX_REASON_LENGTH];
-		int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
-		int m_SkeletonLength;
-		int m_Distance;
-	};
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }

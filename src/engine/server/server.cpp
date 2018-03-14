@@ -44,43 +44,6 @@
 	#include <windows.h>
 #endif
 
-static const char *StrLtrim(const char *pStr)
-{
-	while(*pStr)
-	{
-		const char *pStrOld = pStr;
-		int Code = str_utf8_decode(&pStr);
-
-		// check if unicode is not empty
-		if(str_utf8_isspace(Code))
-		{
-			return pStrOld;
-		}
-	}
-	return pStr;
-}
-
-static void StrRtrim(char *pStr)
-{
-	const char *p = pStr;
-	const char *pEnd = 0;
-	while(*p)
-	{
-		const char *pStrOld = p;
-		int Code = str_utf8_decode(&p);
-
-		// check if unicode is not empty
-		if(str_utf8_isspace(Code))
-		{
-			pEnd = 0;
-		}
-		else if(pEnd == 0)
-			pEnd = pStrOld;
-	}
-	if(pEnd != 0)
-		*(const_cast<char *>(pEnd)) = 0;
-}
-
 
 CSnapIDPool::CSnapIDPool()
 {
@@ -343,14 +306,13 @@ CServer::CServer()
 	Init();
 }
 
-
 int CServer::TrySetClientName(int ClientID, const char *pName)
 {
 	char aTrimmedName[64];
 
 	// trim the name
-	str_copy(aTrimmedName, StrLtrim(pName), sizeof(aTrimmedName));
-	StrRtrim(aTrimmedName);
+	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pName), sizeof(aTrimmedName));
+	str_utf8_trim_right(aTrimmedName);
 
 	// check for empty names
 	if(!aTrimmedName[0])
@@ -381,8 +343,6 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	return 0;
 }
 
-
-
 void CServer::SetClientName(int ClientID, const char *pName)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
@@ -391,20 +351,7 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	if(!pName)
 		return;
 
-	int Skeleton[MAX_NAME_SKELETON_LENGTH];
-	int SkeletonLength = str_utf8_to_skeleton(pName, Skeleton, sizeof(Skeleton) / sizeof(Skeleton[0]));
-	int Buffer[MAX_NAME_SKELETON_LENGTH * 2 + 2];
-	CNameBan *pBanned = 0;
-	for(int i = 0; i < m_aNameBans.size(); i++)
-	{
-		CNameBan *pBan = &m_aNameBans[i];
-		int Distance = str_utf32_dist_buffer(Skeleton, SkeletonLength, pBan->m_aSkeleton, pBan->m_SkeletonLength, Buffer, sizeof(Buffer) / sizeof(Buffer[0]));
-		if(Distance <= pBan->m_Distance)
-		{
-			pBanned = pBan;
-		}
-	}
-
+	CNameBan *pBanned = IsNameBanned(pName, m_aNameBans.base_ptr(), m_aNameBans.size());
 	if(pBanned)
 	{
 		if(m_aClients[ClientID].m_State == CClient::STATE_READY)

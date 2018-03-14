@@ -2701,11 +2701,11 @@ float str_tofloat(const char *str) { return atof(str); }
 
 int str_utf8_isspace(int code)
 {
-	return code > 0x20 && code != 0xA0 && code != 0x034F && code != 0x2800 &&
+	return !(code > 0x20 && code != 0xA0 && code != 0x034F && code != 0x2800 &&
 		(code < 0x2000 || code > 0x200F) && (code < 0x2028 || code > 0x202F) &&
 		(code < 0x205F || code > 0x2064) && (code < 0x206A || code > 0x206F) &&
 		(code < 0xFE00 || code > 0xFE0F) && code != 0xFEFF &&
-		(code < 0xFFF9 || code > 0xFFFC);
+		(code < 0xFFF9 || code > 0xFFFC));
 }
 
 const char *str_utf8_skip_whitespaces(const char *str)
@@ -2719,13 +2719,38 @@ const char *str_utf8_skip_whitespaces(const char *str)
 		code = str_utf8_decode(&str);
 
 		// check if unicode is not empty
-		if(str_utf8_isspace(code))
+		if(!str_utf8_isspace(code))
 		{
 			return str_old;
 		}
 	}
 
 	return str;
+}
+
+void str_utf8_trim_right(char *param)
+{
+	const char *str = param;
+	char *end = 0;
+	while(*str)
+	{
+		char *str_old = (char *)str;
+		int code = str_utf8_decode(&str);
+
+		// check if unicode is not empty
+		if(!str_utf8_isspace(code))
+		{
+			end = 0;
+		}
+		else if(!end)
+		{
+			end = str_old;
+		}
+	}
+	if(end)
+	{
+		*end = 0;
+	}
 }
 
 int str_utf8_isstart(char c)

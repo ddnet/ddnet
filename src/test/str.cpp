@@ -17,3 +17,23 @@ TEST(Str, Dist)
 	EXPECT_EQ(str_utf8_dist("flaw", "lawn"), 2);
 	EXPECT_EQ(str_utf8_dist("saturday", "sunday"), 3);
 }
+
+TEST(Str, Utf8Isspace)
+{
+	EXPECT_TRUE(str_utf8_isspace(' '));
+	EXPECT_FALSE(str_utf8_isspace('a'));
+}
+
+TEST(Str, Utf8SkipWhitespaces)
+{
+	EXPECT_STREQ(str_utf8_skip_whitespaces("abc"), "abc");
+	EXPECT_STREQ(str_utf8_skip_whitespaces("abc   "), "abc   ");
+	EXPECT_STREQ(str_utf8_skip_whitespaces("    abc"), "abc");
+}
+
+TEST(Str, Utf8TrimRight)
+{
+	char A1[] = "abc"; str_utf8_trim_right(A1); EXPECT_STREQ(A1, "abc");
+	char A2[] = "   abc"; str_utf8_trim_right(A2); EXPECT_STREQ(A2, "   abc");
+	char A3[] = "abc   "; str_utf8_trim_right(A3); EXPECT_STREQ(A3, "abc");
+}

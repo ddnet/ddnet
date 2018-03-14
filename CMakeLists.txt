@@ -917,6 +917,8 @@ endif()
 set_glob(ENGINE_SERVER GLOB src/engine/server
   authmanager.cpp
   authmanager.h
+  name_ban.cpp
+  name_ban.h
   register.cpp
   register.h
   server.cpp
@@ -1102,6 +1104,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     fs.cpp
     git_revision.cpp
     jobs.cpp
+    name_ban.cpp
     str.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
@@ -1111,6 +1114,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     unix.cpp
   )
   set(TESTS_EXTRA
+    src/engine/server/name_ban.cpp
+    src/engine/server/name_ban.h
     src/game/server/teehistorian.cpp
     src/game/server/teehistorian.h
   )
