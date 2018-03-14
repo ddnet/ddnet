@@ -343,8 +343,6 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	return 0;
 }
 
-
-
 void CServer::SetClientName(int ClientID, const char *pName)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
@@ -353,20 +351,7 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	if(!pName)
 		return;
 
-	int Skeleton[MAX_NAME_SKELETON_LENGTH];
-	int SkeletonLength = str_utf8_to_skeleton(pName, Skeleton, sizeof(Skeleton) / sizeof(Skeleton[0]));
-	int Buffer[MAX_NAME_SKELETON_LENGTH * 2 + 2];
-	CNameBan *pBanned = 0;
-	for(int i = 0; i < m_aNameBans.size(); i++)
-	{
-		CNameBan *pBan = &m_aNameBans[i];
-		int Distance = str_utf32_dist_buffer(Skeleton, SkeletonLength, pBan->m_aSkeleton, pBan->m_SkeletonLength, Buffer, sizeof(Buffer) / sizeof(Buffer[0]));
-		if(Distance <= pBan->m_Distance)
-		{
-			pBanned = pBan;
-		}
-	}
-
+	CNameBan *pBanned = IsNameBanned(pName, m_aNameBans.base_ptr(), m_aNameBans.size());
 	if(pBanned)
 	{
 		if(m_aClients[ClientID].m_State == CClient::STATE_READY)
