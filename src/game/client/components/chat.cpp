@@ -462,7 +462,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		int Code = str_utf8_decode(&pStr);
 
 		// check if unicode is not empty
-		if(str_utf8_isspace(Code))
+		if(!str_utf8_isspace(Code))
 		{
 			pEnd = 0;
 		}

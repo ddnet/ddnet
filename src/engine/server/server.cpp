@@ -44,43 +44,6 @@
 	#include <windows.h>
 #endif
 
-static const char *StrLtrim(const char *pStr)
-{
-	while(*pStr)
-	{
-		const char *pStrOld = pStr;
-		int Code = str_utf8_decode(&pStr);
-
-		// check if unicode is not empty
-		if(str_utf8_isspace(Code))
-		{
-			return pStrOld;
-		}
-	}
-	return pStr;
-}
-
-static void StrRtrim(char *pStr)
-{
-	const char *p = pStr;
-	const char *pEnd = 0;
-	while(*p)
-	{
-		const char *pStrOld = p;
-		int Code = str_utf8_decode(&p);
-
-		// check if unicode is not empty
-		if(str_utf8_isspace(Code))
-		{
-			pEnd = 0;
-		}
-		else if(pEnd == 0)
-			pEnd = pStrOld;
-	}
-	if(pEnd != 0)
-		*(const_cast<char *>(pEnd)) = 0;
-}
-
 
 CSnapIDPool::CSnapIDPool()
 {
@@ -343,14 +306,13 @@ CServer::CServer()
 	Init();
 }
 
-
 int CServer::TrySetClientName(int ClientID, const char *pName)
 {
 	char aTrimmedName[64];
 
 	// trim the name
-	str_copy(aTrimmedName, StrLtrim(pName), sizeof(aTrimmedName));
-	StrRtrim(aTrimmedName);
+	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pName), sizeof(aTrimmedName));
+	str_utf8_trim_right(aTrimmedName);
 
 	// check for empty names
 	if(!aTrimmedName[0])

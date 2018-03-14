@@ -1171,7 +1171,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				int Code = str_utf8_decode(&p);
 
 				// check if unicode is not empty
-				if(str_utf8_isspace(Code))
+				if(!str_utf8_isspace(Code))
 				{
 					pEnd = 0;
 				}
