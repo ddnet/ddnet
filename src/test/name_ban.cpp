@@ -15,6 +15,7 @@ TEST(NameBan, Equality)
 	ASSERT_TRUE(IsNameBanned("   abc", &Abc0, 1));
 	ASSERT_TRUE(IsNameBanned("abc   ", &Abc0, 1));
 	ASSERT_TRUE(IsNameBanned("abc                   foo", &Abc0, 1)); // Maximum name length.
+	ASSERT_TRUE(IsNameBanned("äbc", &Abc0, 1)); // Confusables
 	ASSERT_FALSE(IsNameBanned("def", &Abc0, 1));
 	ASSERT_FALSE(IsNameBanned("abcdef", &Abc0, 1));
 }
