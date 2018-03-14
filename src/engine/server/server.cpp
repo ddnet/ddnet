@@ -2048,8 +2048,6 @@ void CServer::StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlac
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	CServer *pThis = static_cast<CServer *>(pUser);
 
-	bool CanSeeAddress = pThis->m_aClients[pResult->m_ClientID].m_Authed > CServer::AUTHED_MOD;
-
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(
@@ -2068,19 +2066,12 @@ void CServer::StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlac
 				if(pThis->m_aClients[i].m_AuthKey >= 0)
 					str_format(aAuthStr, sizeof(aAuthStr), "key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 
-				if(CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
-				else
-					str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d client=%d secure=%s %s", i,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
+					pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
 			}
 			else
 			{
-				if(CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
-				else
-					str_format(aBuf, sizeof(aBuf), "id=%d connecting", i);
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
 			}
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 		}
