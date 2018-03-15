@@ -385,7 +385,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				{
 					str_format(aBuf, sizeof(aBuf),"Team %d", DDTeam);
 					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-					TextRender()->SetCursor(&Cursor, ScoreOffset+w/2.0f-tw/2.0f, y + LineHeight - Spacing/3.0f, FontSize/1.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+					TextRender()->SetCursor(&Cursor, ScoreOffset+w/2.0f-tw/2.0f, y + LineHeight, FontSize/1.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = NameLength+3;
 				}
 				TextRender()->TextEx(&Cursor, aBuf, -1);
