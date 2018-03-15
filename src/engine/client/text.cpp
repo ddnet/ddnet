@@ -776,8 +776,7 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenX, FakeToScreenY;
-		int ActualX, ActualY;
+		float FakeToScreenY;
 
 		int ActualSize;
 		int GotNewLine = 0;
@@ -789,10 +788,7 @@ public:
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		FakeToScreenX = (Graphics()->ScreenWidth()/(ScreenX1-ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight()/(ScreenY1-ScreenY0));
-		ActualX = (int)(pCursor->m_X * FakeToScreenX);
-		ActualY = (int)(pCursor->m_Y * FakeToScreenY);
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
@@ -981,7 +977,7 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenX, FakeToScreenY;
+		float FakeToScreenY;
 
 		int ActualSize;
 
@@ -990,11 +986,7 @@ public:
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
-
-		int ActualX = (int)(pCursor->m_X * FakeToScreenX);
-		int ActualY = (int)(pCursor->m_Y * FakeToScreenY);
 
 		TextContainer.m_X = pCursor->m_X;
 		TextContainer.m_Y = pCursor->m_Y;
@@ -1051,8 +1043,7 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenX, FakeToScreenY;
-		int ActualX, ActualY;
+		float FakeToScreenY;
 
 		int ActualSize;
 		int GotNewLine = 0;
@@ -1064,10 +1055,7 @@ public:
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
-		ActualX = (int)(pCursor->m_X * FakeToScreenX);
-		ActualY = (int)(pCursor->m_Y * FakeToScreenY);
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
@@ -1263,7 +1251,7 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenX, FakeToScreenY;
+		float FakeToScreenY;
 
 		int ActualSize;
 		float DrawX = 0.0f, DrawY = 0.0f;
@@ -1274,7 +1262,6 @@ public:
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
 
 		// same with size
@@ -1510,8 +1497,6 @@ public:
 
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y)
 	{
-		STextContainer& TextContainer = GetTextContainer(TextContainerIndex);
-
 		// remap the current screen, after render revert the change again
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1552,7 +1537,13 @@ public:
 
 				if(NextCharacter)
 				{
-					if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP))
+					FT_Int32 FTFlags = 0;
+#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
+					FTFlags = FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP;
+#else
+					FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
+#endif
+					if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
 					{
 						dbg_msg("pFont", "error loading glyph %d", NextCharacter);
 						pCurrent = pTmp;
