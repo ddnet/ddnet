@@ -112,10 +112,8 @@ struct STextContainer
 	STextString m_StringInfo;
 
 	// keep these values to calculate offsets
-	float m_FakedStartX;
-	float m_FakedStartY;
-	float m_RealStartX;
-	float m_RealStartY;
+	float m_X;
+	float m_Y;
 
 	int m_Flags;
 	int m_LineCount;
@@ -133,7 +131,7 @@ struct STextContainer
 		m_StringInfo.m_QuadNum = 0;
 		m_StringInfo.m_CharacterQuads.clear();
 
-		m_FakedStartX = m_FakedStartY = m_RealStartX = m_RealStartY = 0;
+		m_X = m_Y = 0.f;
 		m_Flags = m_LineCount = m_CharCount = 0;
 		m_MaxLines = -1;
 		m_StartX = m_StartY = 0.f;
@@ -785,20 +783,16 @@ public:
 		int GotNewLine = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
-		float CursorX, CursorY;
 
 		float Size = pCursor->m_FontSize;
 
-		// to correct coords, convert to screen coords, round, and convert back
+		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 		FakeToScreenX = (Graphics()->ScreenWidth()/(ScreenX1-ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight()/(ScreenY1-ScreenY0));
 		ActualX = (int)(pCursor->m_X * FakeToScreenX);
 		ActualY = (int)(pCursor->m_Y * FakeToScreenY);
-
-		CursorX = ActualX / FakeToScreenX;
-		CursorY = ActualY / FakeToScreenY;
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
@@ -824,8 +818,9 @@ public:
 
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent+Length;
-		DrawX = CursorX;
-		DrawY = CursorY;
+
+		DrawX = pCursor->m_X;
+		DrawY = pCursor->m_Y;
 		LineCount = pCursor->m_LineCount;
 
 		if(pCursor->m_Flags&TEXTFLAG_RENDER)
@@ -899,8 +894,7 @@ public:
 				{
 					DrawX = pCursor->m_StartX;
 					DrawY += Size;
-					DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
-					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+
 					++LineCount;
 					if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
 						break;
@@ -939,8 +933,6 @@ public:
 				DrawX = pCursor->m_StartX;
 				DrawY += Size;
 				GotNewLine = 1;
-				DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
-				DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 				++LineCount;
 			}
 		}
@@ -994,7 +986,8 @@ public:
 		int ActualSize;
 
 		float Size = pCursor->m_FontSize;
-		// to correct coords, convert to screen coords, round, and convert back
+
+		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
@@ -1003,13 +996,9 @@ public:
 		int ActualX = (int)(pCursor->m_X * FakeToScreenX);
 		int ActualY = (int)(pCursor->m_Y * FakeToScreenY);
 
-		float FakedX = ActualX / FakeToScreenX;
-		float FakedY = ActualY / FakeToScreenY;
+		TextContainer.m_X = pCursor->m_X;
+		TextContainer.m_Y = pCursor->m_Y;
 
-		TextContainer.m_RealStartX = pCursor->m_X;
-		TextContainer.m_RealStartY = pCursor->m_Y;
-		TextContainer.m_FakedStartX = FakedX;
-		TextContainer.m_FakedStartY = FakedY;
 		TextContainer.m_Flags = pCursor->m_Flags;
 
 		// same with size
@@ -1069,20 +1058,16 @@ public:
 		int GotNewLine = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
-		float CursorX, CursorY;
 
 		float Size = pCursor->m_FontSize;
 
-		// to correct coords, convert to screen coords, round, and convert back
+		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
 		ActualX = (int)(pCursor->m_X * FakeToScreenX);
 		ActualY = (int)(pCursor->m_Y * FakeToScreenY);
-
-		CursorX = ActualX / FakeToScreenX;
-		CursorY = ActualY / FakeToScreenY;
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
@@ -1097,8 +1082,9 @@ public:
 
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent + Length;
-		DrawX = CursorX;
-		DrawY = CursorY;
+
+		DrawX = pCursor->m_X;
+		DrawY = pCursor->m_Y;
 		LineCount = pCursor->m_LineCount;
 		
 		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
@@ -1153,8 +1139,6 @@ public:
 				{
 					DrawX = pCursor->m_StartX;
 					DrawY += Size;
-					DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
-					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 					++LineCount;
 					if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
 						break;
@@ -1226,8 +1210,6 @@ public:
 			{
 				DrawX = pCursor->m_StartX;
 				DrawY += Size;
-				DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
-				DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 				GotNewLine = 1;
 				++LineCount;
 			}
@@ -1289,7 +1271,7 @@ public:
 
 		float Size = TextContainer.m_UnscaledFontSize;
 
-		// to correct coords, convert to screen coords, round, and convert back
+		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
@@ -1312,8 +1294,8 @@ public:
 		const char *pCurrent = (char *)pText;
 		const char *pCurrentLast = (char *)pText;
 		const char *pEnd = pCurrent + Length;
-		DrawX = TextContainer.m_FakedStartX;
-		DrawY = TextContainer.m_FakedStartY;
+		DrawX = TextContainer.m_X;
+		DrawY = TextContainer.m_Y;
 		LineCount = TextContainer.m_LineCount;
 
 		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)
@@ -1387,8 +1369,6 @@ public:
 				{
 					DrawX = TextContainer.m_StartX;
 					DrawY += Size;
-					DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
-					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 					++LineCount;
 					if(TextContainer.m_MaxLines > 0 && LineCount > TextContainer.m_MaxLines)
 						break;
@@ -1429,8 +1409,6 @@ public:
 			{
 				DrawX = TextContainer.m_StartX;
 				DrawY += Size;
-				DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
-				DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
 				++LineCount;
 			}
 		}
@@ -1537,19 +1515,7 @@ public:
 		// remap the current screen, after render revert the change again
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-		float FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
-		float FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
-
-		int ActualX = (int)((TextContainer.m_RealStartX + X) * FakeToScreenX);
-		int ActualY = (int)((TextContainer.m_RealStartY + Y) * FakeToScreenY);
-
-		float FakedX = ActualX / FakeToScreenX;
-		float FakedY = ActualY / FakeToScreenY;
-
-		X = FakedX - TextContainer.m_FakedStartX;
-		Y = FakedY - TextContainer.m_FakedStartY;
-
+		
 		Graphics()->MapScreen(ScreenX0 - X, ScreenY0 - Y, ScreenX1 - X, ScreenY1 - Y);
 		RenderTextContainer(TextContainerIndex, pTextColor, pTextOutlineColor);
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
