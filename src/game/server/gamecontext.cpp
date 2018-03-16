@@ -405,6 +405,7 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImporta
 
 	if(ClientID == -1)
 	{
+        dbg_assert(IsImportant, "broadcast messages to all players must be important");
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
