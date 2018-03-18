@@ -1419,12 +1419,36 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				if(g_Config.m_SvVoteKickMin)
 				{
-					int PlayerNum = 0;
+					char aaAddresses[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}};
+					for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if(m_apPlayers[i])
+						{
+							Server()->GetClientAddr(i, aaAddresses[i], NETADDR_MAXSTRSIZE);
+						}
+					}
+					int NumPlayers = 0;
 					for(int i = 0; i < MAX_CLIENTS; ++i)
+					{
 						if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-							++PlayerNum;
+						{
+							NumPlayers++;
+							for(int j = 0; j < i; j++)
+							{
 
-					if(PlayerNum < g_Config.m_SvVoteKickMin)
+								if(m_apPlayers[j] && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS)
+								{
+									if(str_comp(aaAddresses[i], aaAddresses[j]) == 0)
+									{
+										NumPlayers--;
+										break;
+									}
+								}
+							}
+						}
+					}
+
+					if(NumPlayers < g_Config.m_SvVoteKickMin)
 					{
 						str_format(aChatmsg, sizeof(aChatmsg), "Kick voting requires %d players on the server", g_Config.m_SvVoteKickMin);
 						SendChatTarget(ClientID, aChatmsg);
