@@ -347,6 +347,7 @@ private:
 	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
+	static void ConMods(IConsole::IResult *pResult, void *pUserData);
 	static void ConModerate(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConList(IConsole::IResult *pResult, void *pUserData);
