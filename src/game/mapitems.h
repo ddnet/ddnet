@@ -29,6 +29,8 @@ enum
 	MAPITEMTYPE_LAYER,
 	MAPITEMTYPE_ENVPOINTS,
 	MAPITEMTYPE_SOUND,
+	MAPITEMTYPE_CLIPS,
+	MAPITEMTYPE_TRIGGERS,
 
 
 	CURVETYPE_STEP=0,
@@ -411,6 +413,24 @@ struct CMapItemSound
 	int m_SoundData;
 	int m_SoundDataSize;
 } ;
+
+struct CMapItemClips
+{
+	int m_aName[8];
+	int m_Zone;
+	int m_Trigger;
+	int m_X;
+	int m_Y;
+	int m_W;
+	int m_H;
+	int m_Disable;
+	int m_Rewind;
+};
+struct CMapItemTriggers
+{
+	int m_Group;
+	int m_Trigger;
+};
 
 
 // DDRace

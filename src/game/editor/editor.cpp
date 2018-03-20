@@ -95,6 +95,7 @@ CLayerGroup::CLayerGroup()
 	m_ClipY = 0;
 	m_ClipW = 0;
 	m_ClipH = 0;
+	m_ClipTrigger = 0;
 }
 
 CLayerGroup::~CLayerGroup()
@@ -1579,7 +1580,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				m_Map.m_UndoModified++;
 
 				static int s_QuadPopupID = 0;
-				UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
+				UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 198, PopupQuad);
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -2987,7 +2988,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 
 					static int s_GroupPopupId = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 230, PopupGroup);
+						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 245, PopupGroup);
 
 					if(m_Map.m_lGroups[g]->m_lLayers.size() && Input()->MouseDoubleClick())
 						m_Map.m_lGroups[g]->m_Collapse ^= 1;
@@ -4176,6 +4177,7 @@ void CEditor::RenderStatusbar(CUIRect View)
 	if(MouseButton)
 	{
 		m_ShowServerSettingsEditor = false;
+		m_ShowClipTrigger = false;
 	}
 
 	View.VSplitRight(100.0f, &View, &Button);
@@ -4185,8 +4187,22 @@ void CEditor::RenderStatusbar(CUIRect View)
 	{
 		m_ShowEnvelopeEditor = 0;
 		m_ShowServerSettingsEditor ^= 1;
+		m_ShowClipTrigger = false;
 	}
 
+	if (g_Config.m_ClEditorClipTrigger)
+	{
+		View.VSplitRight(5.0f, &View, &Button);
+		View.VSplitRight(60.0f, &View, &Button);
+		static int s_ClipTriggerButton = 0;
+		if (DoButton_Editor(&s_ClipTriggerButton, "Clip List", m_ShowClipTrigger, &Button, 0, "Toggles the clip/trigger list.")) {
+			m_ShowEnvelopeEditor = 0;
+			m_ShowServerSettingsEditor = false;
+			m_ShowClipTrigger ^= 1;
+		}
+	}
+
+	
 	if (g_Config.m_ClEditorUndo)
 	{
 		View.VSplitRight(5.0f, &View, &Button);
@@ -4908,12 +4924,460 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 			ListBox.HSplitTop(2.0f, 0, &ListBox);
 			Button.VSplitLeft(5.0f, 0, &Button);
 
-			if(DoButton_MenuItem(&m_Map.m_lSettings[i], m_Map.m_lSettings[i].m_aCommand, s_CommandSelectedIndex == i, &Button, 0, 0))
+			if(DoButton_MenuItem(&m_Map.m_lSettings[i], m_Map.m_lSettings[i].m_aCommand, s_CommandSelectedIndex == i, &Button, 0, "Click to highlight. Press Del to delete highlighted. While selected, press NumPad -/+ to reorder "))
 				s_CommandSelectedIndex = i;
 		}
 		ListCur += 17.0f;
 	}
 	UI()->ClipDisable();
+
+	if (s_CommandSelectedIndex > 0 && Input()->KeyPress(KEY_KP_MINUS))
+	{
+		CEditorMap::CSetting temp = m_Map.m_lSettings[s_CommandSelectedIndex];
+		m_Map.m_lSettings[s_CommandSelectedIndex] = m_Map.m_lSettings[s_CommandSelectedIndex - 1];
+		m_Map.m_lSettings[s_CommandSelectedIndex - 1] = temp;
+		s_CommandSelectedIndex--;
+		s_ScrollValue = (float)s_CommandSelectedIndex / m_Map.m_lSettings.size();
+	}
+	if (s_CommandSelectedIndex < m_Map.m_lSettings.size() - 1 && Input()->KeyPress(KEY_KP_PLUS))
+	{
+		CEditorMap::CSetting temp = m_Map.m_lSettings[s_CommandSelectedIndex];
+		m_Map.m_lSettings[s_CommandSelectedIndex] = m_Map.m_lSettings[s_CommandSelectedIndex + 1];
+		m_Map.m_lSettings[s_CommandSelectedIndex + 1] = temp;
+		s_CommandSelectedIndex++;
+		s_ScrollValue = (float)s_CommandSelectedIndex / m_Map.m_lSettings.size();
+	}
+
+}
+
+void CEditor::RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect)
+{
+	static int s_ClipTriggerSelectedIndex = -1;
+	static float s_ScrollValue = 0;
+	bool changeView = false;
+	CUIRect FullPanel, CurrentPanel, Slider, Label, Remains, More, Buttons, Inc, Dec;
+	View.VSplitLeft(200, &FullPanel, &View);
+
+	View.HSplitBottom(17, &View, &Buttons);
+
+	//remove button
+	if (m_Map.m_lClipTriggers.size())
+	{
+		static int s_AddButton = 0;
+		if (DoButton_Editor(&s_AddButton, "Remove", 0, &Buttons, 0, "Delete selected clip/trigger from the list.")
+			|| Input()->KeyPress(KEY_DELETE))
+			if (s_ClipTriggerSelectedIndex > -1 && s_ClipTriggerSelectedIndex < m_Map.m_lClipTriggers.size())
+				m_Map.m_lClipTriggers.remove_index(s_ClipTriggerSelectedIndex);
+	}
+
+
+	FullPanel.VMargin(5, &CurrentPanel);
+
+	// do the Current clipper panel
+	static int s_aIds[15] = { 0 };
+	int buttonID = 0;
+
+	CurrentPanel.HSplitBottom(17, &CurrentPanel, &Buttons);
+
+
+	CurrentPanel.HSplitTop(CurrentPanel.h*.45f, &Slider, &Remains);
+
+	Slider.HSplitTop(15, &Slider, &More);
+	Slider.VSplitMid(&Label, &Slider);
+
+	UI()->DoLabel(&Label, "Name:", 10.0f, -1, -1);
+
+	static float s_ClipNameBox = 0;
+	if (DoEditBox(&s_ClipNameBox, &Slider, m_aClipTrigger.m_aName, sizeof(m_aClipTrigger.m_aName), 10.0f, &s_ClipNameBox))
+	{
+		//m_Map.m_Modified = true;
+		//m_Map.m_UndoModified++;
+	}
+
+	//Tune zone
+	More.HSplitMid(&Slider, &More);
+	Slider.HMargin(2, &Slider);
+	Slider.VSplitMid(&Label, &Slider);
+
+	Slider.VSplitRight(20, &Slider, &Inc);
+	Slider.VSplitLeft(20, &Dec, &Slider);
+	UI()->DoLabel(&Label, "Tune Zone", 13, -1, -1);
+	int newZone = UiDoValueSelector(&s_aIds[buttonID++], &Slider, "", m_aClipTrigger.m_Zone, 0, 255, 1, 1.0f, "Tune zone that triggers this clip. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
+	if (DoButton_ButtonDec(&s_aIds[buttonID++], 0, 0, &Dec, 0, "Decrease"))
+		newZone = clamp(newZone - 1, 0, 255);
+	if (DoButton_ButtonInc(&s_aIds[buttonID++], 0, 0, &Inc, 0, "Increase"))
+		newZone = clamp(newZone + 1, 0, 255);
+
+	//Trigger
+	More.HSplitBottom(2, &More, 0);
+	More.VSplitMid(&Label, &Slider);
+
+	Slider.VSplitRight(20, &Slider, &Inc);
+	Slider.VSplitLeft(20, &Dec, &Slider);
+	UI()->DoLabel(&Label, "Trigger", 13, -1, -1);
+	int newTrigger = UiDoValueSelector(&s_aIds[buttonID++], &Slider, "", m_aClipTrigger.m_Trigger, -2, 255, 1, 1.0f, "Trigger group for this clip. -1 for game layer. -2 for all other triggers. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
+	if (DoButton_ButtonDec(&s_aIds[buttonID++], 0, 0, &Dec, 0, "Decrease"))
+		newTrigger = clamp(newTrigger - 1, -1, 255);
+	if (DoButton_ButtonInc(&s_aIds[buttonID++], 0, 0, &Inc, 0, "Increase"))
+		newTrigger = clamp(newTrigger + 1, -1, 255);
+
+	if (newZone != m_aClipTrigger.m_Zone || newTrigger != m_aClipTrigger.m_Trigger) 
+	{
+		m_aClipTrigger.m_Zone = newZone;
+		m_aClipTrigger.m_Trigger = newTrigger;
+		m_ClipExists = false;
+		for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) {
+			if (m_aClipTrigger == m_Map.m_lClipTriggers[i]) {
+				m_ClipExists = true;
+				s_ClipTriggerSelectedIndex = i;
+				s_ScrollValue = (float)i / m_Map.m_lClipTriggers.size();
+				break;
+			}
+		}
+	}
+
+	//Rewind Animation
+	Remains.HSplitTop(15, &Slider, &Remains);
+	Slider.VSplitMid(&Label, &Slider);
+	UI()->DoLabel(&Label, "Rewind Envelopes", 10, -1, -1);
+
+	Slider.VSplitMid(&Label, &Slider);
+	if (DoButton_ButtonDec(&s_aIds[buttonID++], "No", !m_aClipTrigger.m_Rewind, &Label, 0, "Entering tune zone will rewind all envelopes to the beginning"))
+		m_aClipTrigger.m_Rewind = 0;
+	if (DoButton_ButtonInc(&s_aIds[buttonID++], "Yes", m_aClipTrigger.m_Rewind, &Slider, 0, "Envelopes will not be modified"))
+		m_aClipTrigger.m_Rewind = 1;
+
+	//Disable clipping
+	Remains.HSplitTop(15, &Slider, &Remains);
+	Slider.VSplitMid(&Label, &Slider);
+	UI()->DoLabel(&Label, "Disable (show all)", 10, -1, -1);
+
+	Slider.VSplitMid(&Label, &Slider);
+	if (DoButton_ButtonDec(&s_aIds[buttonID++], "No", !m_aClipTrigger.m_Disable, &Label, 0, "This tune zone does not disable clipping, clip values will be updated on entering zone"))
+		m_aClipTrigger.m_Disable = 0;
+	if (DoButton_ButtonInc(&s_aIds[buttonID++], "Yes", m_aClipTrigger.m_Disable, &Slider, 0, "This tune zone will disable clipping, showing the whole layer"))
+		m_aClipTrigger.m_Disable = 1;
+
+	if (!m_aClipTrigger.m_Disable) 
+	{
+		//Clip X
+		Remains.VSplitMid(&Slider, &Remains);
+		Slider.Margin(2, &Slider);
+		Remains.Margin(2, &Remains);
+		Slider.HSplitMid(&Slider, &More);
+		Slider.VSplitMid(&Label, &Slider);
+		UI()->DoLabel(&Label, "Clip X", 10.0f, -1, -1);
+		int newX = UiDoValueSelector(&s_aIds[buttonID++], &Slider, "", m_aClipTrigger.m_X, -1000000, 1000000, 1, 1.0f, "Clip area X position. Hold shift to be more precise. Rightclick to edit as text.");
+		if (newX != m_aClipTrigger.m_X)
+		{
+			m_aClipTrigger.m_X = newX;
+			changeView = true;
+			s_ClipTriggerSelectedIndex = -1;
+		}
+
+		//Clip Y
+		More.VSplitMid(&Label, &Slider);
+		UI()->DoLabel(&Label, "Clip Y", 10.0f, -1, -1);
+		int newY = UiDoValueSelector(&s_aIds[buttonID++], &Slider, "", m_aClipTrigger.m_Y, -1000000, 1000000, 1, 1.0f, "Clip area Y position. Hold shift to be more precise. Rightclick to edit as text.");
+		if (newY != m_aClipTrigger.m_Y)
+		{
+			m_aClipTrigger.m_Y = newY;
+			changeView = true;
+			s_ClipTriggerSelectedIndex = -1;
+		}
+
+		//Clip W
+		Remains.HSplitMid(&Slider, &More);
+		Slider.VSplitMid(&Label, &Slider);
+		UI()->DoLabel(&Label, "Clip W", 10.0f, -1, -1);
+		int newW = UiDoValueSelector(&s_aIds[buttonID++], &Slider, "", m_aClipTrigger.m_W, -1000000, 1000000, 1, 1.0f, "Clip area width. Hold shift to be more precise. Rightclick to edit as text.");
+		if (newW != m_aClipTrigger.m_W)
+		{
+			m_aClipTrigger.m_W = newW;
+			changeView = true;
+			s_ClipTriggerSelectedIndex = -1;
+		}
+
+		//Clip H
+		More.VSplitMid(&Label, &Slider);
+		UI()->DoLabel(&Label, "Clip H", 10.0f, -1, -1);
+		int newH = UiDoValueSelector(&s_aIds[buttonID++], &Slider, "", m_aClipTrigger.m_H, -1000000, 1000000, 1, 1.0f, "Clip area height. Hold shift to be more precise. Rightclick to edit as text.");
+		if (newH != m_aClipTrigger.m_H)
+		{
+			m_aClipTrigger.m_H = newH;
+			changeView = true;
+			s_ClipTriggerSelectedIndex = -1;
+		}
+	}
+
+
+	if (m_ClipExists)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Update Zone %d Trigger %d clip", m_aClipTrigger.m_Zone, m_aClipTrigger.m_Trigger);
+		if (DoButton_Editor(&s_aIds[buttonID], aBuf, 0, &Buttons, 0, "Modify existing clip area with new clip values."))
+		{
+			for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) {
+				if (m_aClipTrigger == m_Map.m_lClipTriggers[i]) {
+					mem_copy(m_Map.m_lClipTriggers[i].m_aName, m_aClipTrigger.m_aName, sizeof(m_aClipTrigger.m_aName));
+					m_Map.m_lClipTriggers[i].m_X = m_aClipTrigger.m_X;
+					m_Map.m_lClipTriggers[i].m_Y = m_aClipTrigger.m_Y;
+					m_Map.m_lClipTriggers[i].m_W = m_aClipTrigger.m_W;
+					m_Map.m_lClipTriggers[i].m_H = m_aClipTrigger.m_H;
+					m_Map.m_lClipTriggers[i].m_Disable = m_aClipTrigger.m_Disable;
+					m_Map.m_lClipTriggers[i].m_Rewind = m_aClipTrigger.m_Rewind;
+					s_ScrollValue = (float)i / m_Map.m_lClipTriggers.size();
+					s_ClipTriggerSelectedIndex = i;
+					break;
+				}
+			}
+		}
+	}
+	else 
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Add Zone %d Trigger %d clip", m_aClipTrigger.m_Zone, m_aClipTrigger.m_Trigger);
+		if (DoButton_Editor(&s_aIds[buttonID], aBuf, 0, &Buttons, 0, "Add a new clip/trigger."))
+		{
+			//Check for existing clip and dont add
+			for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) 
+			{
+				if (m_aClipTrigger == m_Map.m_lClipTriggers[i])
+				{
+					m_ClipExists = true;
+					s_ClipTriggerSelectedIndex = i;
+					s_ScrollValue = (float)i / m_Map.m_lClipTriggers.size();
+					changeView = true;
+					break;
+				}
+			}
+
+			if (!m_ClipExists)
+			{
+				m_Map.m_lClipTriggers.add(m_aClipTrigger);
+				s_ScrollValue = 1;
+				s_ClipTriggerSelectedIndex = m_Map.m_lClipTriggers.size() - 1;
+				m_ClipExists = true;
+			}
+		}
+	}
+	buttonID++;
+
+	View.HSplitTop(2.0f, 0, &View);
+
+	//Listbox
+	RenderBackground(View, ms_CheckerTexture, 32.0f, 0.1f);
+
+	CUIRect ListBox;
+	View.Margin(1.0f, &ListBox);
+
+	float itemHeight = 17.0f;
+
+	float ListHeight = itemHeight * m_Map.m_lClipTriggers.size(); //size * count
+	static int s_ScrollBar = 0;
+
+	float ScrollDifference = ListHeight - ListBox.h;
+
+	if (ListHeight > ListBox.h)	// Do we even need a scrollbar?
+	{
+		CUIRect Scroll;
+		ListBox.VSplitRight(15.0f, &ListBox, &Scroll);
+		ListBox.VSplitRight(3.0f, &ListBox, 0);	// extra spacing
+		Scroll.HMargin(5.0f, &Scroll);
+		s_ScrollValue = UiDoScrollbarV(&s_ScrollBar, &Scroll, s_ScrollValue);
+
+		if (UI()->MouseInside(&Scroll) || UI()->MouseInside(&ListBox))
+		{
+			int ScrollNum = (int)((ListHeight - ListBox.h) / itemHeight) + 1;
+			if (ScrollNum > 0)
+			{
+				if (Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
+				if (Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
+			}
+			else
+				ScrollNum = 0;
+		}
+	}
+
+	float ListStartAt = ScrollDifference * s_ScrollValue;
+	if (ListStartAt < 0.0f)
+		ListStartAt = 0.0f;
+
+	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
+	float ListCur = 0;
+
+	UI()->ClipEnable(&ListBox);
+	for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++)
+	{
+		if (ListCur > ListStopAt)
+			break;
+
+		if (ListCur >= ListStartAt)
+		{
+			CUIRect Button;
+			ListBox.HSplitTop(itemHeight-2.0f, &Button, &ListBox);
+			ListBox.HSplitTop(2.0f, 0, &ListBox);
+			Button.VSplitLeft(5.0f, 0, &Button);
+
+			char aBuf[128];
+			bool unnamed = str_comp(m_Map.m_lClipTriggers[i].m_aName, "") == 0;
+
+			if (m_Map.m_lClipTriggers[i].m_Disable)
+				str_format(aBuf, sizeof(aBuf), "{ Zone: %d   Trigger: %d   Disables Clipping Area   Rewind? %s }   \"%s\"", m_Map.m_lClipTriggers[i].m_Zone, m_Map.m_lClipTriggers[i].m_Trigger, m_Map.m_lClipTriggers[i].m_Rewind ? "Yes" : "No", unnamed ? "Unnamed Clip" : m_Map.m_lClipTriggers[i].m_aName);
+			else
+				str_format(aBuf, sizeof(aBuf), "{ Zone: %d   Trigger: %d   X: %d   Y: %d   W: %d   H: %d   Rewind? %s }   \"%s\"", m_Map.m_lClipTriggers[i].m_Zone, m_Map.m_lClipTriggers[i].m_Trigger, m_Map.m_lClipTriggers[i].m_X, m_Map.m_lClipTriggers[i].m_Y, m_Map.m_lClipTriggers[i].m_W, m_Map.m_lClipTriggers[i].m_H, m_Map.m_lClipTriggers[i].m_Rewind ? "Yes" : "No", unnamed ? "Unnamed Clip" : m_Map.m_lClipTriggers[i].m_aName);
+
+			if (DoButton_MenuItem(&m_Map.m_lClipTriggers[i], aBuf, s_ClipTriggerSelectedIndex == i, &Button, 0, "Click to highlight clip area. Click twice to copy values into interface. While selected, press NumPad -/+ to reorder")) {
+				changeView = true;
+				if (s_ClipTriggerSelectedIndex == i)
+				{
+					mem_copy(m_aClipTrigger.m_aName, m_Map.m_lClipTriggers[i].m_aName, sizeof(m_Map.m_lClipTriggers[i].m_aName));
+					m_aClipTrigger.m_Zone = m_Map.m_lClipTriggers[i].m_Zone;
+					m_aClipTrigger.m_Trigger = m_Map.m_lClipTriggers[i].m_Trigger;
+					m_aClipTrigger.m_X = m_Map.m_lClipTriggers[i].m_X;
+					m_aClipTrigger.m_Y = m_Map.m_lClipTriggers[i].m_Y;
+					m_aClipTrigger.m_W = m_Map.m_lClipTriggers[i].m_W;
+					m_aClipTrigger.m_H = m_Map.m_lClipTriggers[i].m_H;
+					m_aClipTrigger.m_Disable = m_Map.m_lClipTriggers[i].m_Disable;
+					m_aClipTrigger.m_Rewind = m_Map.m_lClipTriggers[i].m_Rewind;
+					m_ClipExists = true;
+				}
+				else 
+				{
+					s_ClipTriggerSelectedIndex = i;
+				}
+			}
+		}
+		ListCur += itemHeight;
+	}
+	UI()->ClipDisable();
+
+	//Preview the clip areas
+	UI()->ClipEnable(&EditorRect);
+	m_Map.m_pGameGroup->MapScreen();
+	Graphics()->TextureSet(-1);
+
+	if (g_Config.m_ClEditorClipDraw >= 1) 
+	{
+		CEditorMap::CClipTrigger previewClip = m_aClipTrigger;
+		if (!m_aClipTrigger.m_Disable)
+		{
+			if (s_ClipTriggerSelectedIndex == -1)
+				DrawClipBox(previewClip, vec4(0, 1, 0, 1), vec4(0, 0.5f, 0, 0.2f));
+			else
+				DrawClipBox(previewClip, vec4(0, 1, 0, 0.3f), vec4(0, 0.5f, 0, 0.1f));
+		}
+
+		ListCur = 0;
+		for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) 
+		{
+			CEditorMap::CClipTrigger previewClip = m_Map.m_lClipTriggers[i];
+			if (previewClip.m_Disable)continue;
+			//Show hotitem 
+			if (UI()->HotItem() == &m_Map.m_lClipTriggers[i])
+				DrawClipBox(previewClip, vec4(1, 0, 0, 0.5f), vec4(0.3f, 0, 1, 0.1f));
+
+			if (i == s_ClipTriggerSelectedIndex)
+				DrawClipBox(previewClip, vec4(1, 0, 0, 1), vec4(0, 0, 1, 0.2f));
+
+			if (ListCur > ListStopAt && g_Config.m_ClEditorClipDraw == 2)
+				break;
+
+			if (ListCur < ListStartAt && g_Config.m_ClEditorClipDraw == 2) 
+			{
+				ListCur += itemHeight;
+				continue;
+			}
+			ListCur += itemHeight;
+
+			if (g_Config.m_ClEditorClipDraw != 1)
+				DrawClipBox(previewClip, vec4(1, 0, 0, 0.2f), vec4(0, 0, 1, 0.1f));
+		}
+	}
+
+	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	UI()->ClipDisable();
+
+	
+	//Copy selected groups clip into editor panel
+	if (UI()->MouseInside(&FullPanel) && Input()->KeyPress(KEY_C)) 
+	{
+		m_aClipTrigger.m_X = GetSelectedGroup()->m_ClipX;
+		m_aClipTrigger.m_Y = GetSelectedGroup()->m_ClipY;
+		m_aClipTrigger.m_W = GetSelectedGroup()->m_ClipW;
+		m_aClipTrigger.m_H = GetSelectedGroup()->m_ClipH;
+		m_aClipTrigger.m_Trigger = GetSelectedGroup()->m_ClipTrigger;
+		if (m_aClipTrigger.m_W > 1 && m_aClipTrigger.m_H > 1) 
+		{
+			m_WorldOffsetX = m_aClipTrigger.m_X + m_aClipTrigger.m_W / 2;
+			m_WorldOffsetY = m_aClipTrigger.m_Y + m_aClipTrigger.m_H / 2;
+		}
+		m_ClipExists = false;
+		for (int i = 0; i < m_Map.m_lClipTriggers.size(); i++) 
+		{
+			if (m_aClipTrigger == m_Map.m_lClipTriggers[i])
+			{
+				m_ClipExists = true;
+				s_ClipTriggerSelectedIndex = i;
+				s_ScrollValue = (float)i / m_Map.m_lClipTriggers.size();
+				break;
+			}
+		}
+	}
+
+	if (changeView) 
+	{
+		CEditorMap::CClipTrigger previewClip = m_aClipTrigger;
+		if (s_ClipTriggerSelectedIndex != -1)
+			previewClip = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex];
+		if (!previewClip.m_Disable) 
+		{
+			if (previewClip.m_W > 0 && previewClip.m_H > 0)
+			{
+				m_WorldOffsetX = previewClip.m_X + previewClip.m_W / 2;
+				m_WorldOffsetY = previewClip.m_Y + previewClip.m_H / 2;
+			}
+		}
+	}
+	
+	if (s_ClipTriggerSelectedIndex > 0 && Input()->KeyPress(KEY_KP_MINUS)) 
+	{
+		CEditorMap::CClipTrigger temp = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex] = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex - 1];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex - 1] = temp;
+		s_ClipTriggerSelectedIndex--;
+		s_ScrollValue = (float)s_ClipTriggerSelectedIndex / m_Map.m_lClipTriggers.size();
+	}
+	if (s_ClipTriggerSelectedIndex < m_Map.m_lClipTriggers.size() - 1 && Input()->KeyPress(KEY_KP_PLUS))
+	{
+		CEditorMap::CClipTrigger temp = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex] = m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex + 1];
+		m_Map.m_lClipTriggers[s_ClipTriggerSelectedIndex + 1] = temp;
+		s_ClipTriggerSelectedIndex++;
+		s_ScrollValue = (float)s_ClipTriggerSelectedIndex / m_Map.m_lClipTriggers.size();
+	}
+}
+
+void CEditor::DrawClipBox(CEditorMap::CClipTrigger clip, vec4 boxColor, vec4 fillColor) 
+{
+	Graphics()->LinesBegin();
+
+	IGraphics::CLineItem Array[4] = {
+		IGraphics::CLineItem(clip.m_X, clip.m_Y, clip.m_X + clip.m_W, clip.m_Y),
+		IGraphics::CLineItem(clip.m_X + clip.m_W, clip.m_Y, clip.m_X + clip.m_W, clip.m_Y + clip.m_H),
+		IGraphics::CLineItem(clip.m_X + clip.m_W, clip.m_Y + clip.m_H, clip.m_X, clip.m_Y + clip.m_H),
+		IGraphics::CLineItem(clip.m_X, clip.m_Y + clip.m_H, clip.m_X, clip.m_Y) };
+	Graphics()->SetColor(boxColor.r, boxColor.g, boxColor.b, boxColor.a);
+	Graphics()->LinesDraw(Array, 4);
+	Graphics()->LinesEnd();
+
+	Graphics()->QuadsBegin();
+	IGraphics::CQuadItem QuadItem(clip.m_X, clip.m_Y, clip.m_W, clip.m_H);
+	Graphics()->SetColor(fillColor.r, fillColor.g, fillColor.b, fillColor.a);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
 }
 
 int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
@@ -5125,6 +5589,8 @@ void CEditor::Render()
 
 		if(m_ShowServerSettingsEditor && !m_ShowPicker)
 			View.HSplitBottom(250.0f, &View, &ExtraEditor);
+		if (m_ShowClipTrigger && !m_ShowPicker)
+			View.HSplitBottom(140.0f, &View, &ExtraEditor);
 	}
 
 	//	a little hack for now
@@ -5132,9 +5598,9 @@ void CEditor::Render()
 		DoMapEditor(View, ToolBar);
 
 	// do zooming
-	if(Input()->KeyPress(KEY_KP_MINUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
+	if(Input()->KeyPress(KEY_KP_MINUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && !m_ShowClipTrigger && !m_ShowServerSettingsEditor)
 		m_ZoomLevel += 50;
-	if(Input()->KeyPress(KEY_KP_PLUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
+	if(Input()->KeyPress(KEY_KP_PLUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && !m_ShowClipTrigger && !m_ShowServerSettingsEditor)
 		m_ZoomLevel -= 50;
 	if(Input()->KeyPress(KEY_KP_MULTIPLY) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
@@ -5190,7 +5656,7 @@ void CEditor::Render()
 
 	if(m_GuiActive)
 	{
-		if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor)
+		if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor || m_ShowClipTrigger)
 		{
 			RenderBackground(ExtraEditor, ms_BackgroundTexture, 128.0f, Brightness);
 			ExtraEditor.Margin(2.0f, &ExtraEditor);
@@ -5225,6 +5691,8 @@ void CEditor::Render()
 				RenderUndoList(UndoList);
 			if(m_ShowServerSettingsEditor)
 				RenderServerSettingsEditor(ExtraEditor);
+			if (m_ShowClipTrigger)
+				RenderClipTriggerEditor(ExtraEditor, View);
 		}
 	}
 
@@ -5344,6 +5812,9 @@ void CEditor::Reset(bool CreateDefault)
 	m_Map.m_Modified = false;
 	m_Map.m_UndoModified = 0;
 	m_LastUndoUpdateTime = time_get();
+
+	m_aClipTrigger.Reset();
+	m_ClipExists = false;
 }
 
 int CEditor::GetLineDistance()
@@ -5448,6 +5919,7 @@ void CEditorMap::Clean()
 	m_MapInfo.Reset();
 
 	m_lSettings.clear();
+	m_lClipTriggers.clear();
 
 	m_pGameLayer = 0x0;
 	m_pGameGroup = 0x0;
@@ -5618,6 +6090,7 @@ void CEditor::UpdateAndRender()
 		m_OldMouseY = ty;
 #else
 		UI()->ConvertMouseMove(&rx, &ry);
+
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;
 

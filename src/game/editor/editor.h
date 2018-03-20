@@ -188,6 +188,7 @@ public:
 	int m_ClipY;
 	int m_ClipW;
 	int m_ClipH;
+	int m_ClipTrigger;
 
 	char m_aName[12];
 	bool m_GameGroup;
@@ -386,6 +387,37 @@ public:
 		char m_aCommand[64];
 	};
 	array<CSetting> m_lSettings;
+
+	struct CClipTrigger 
+	{
+		char m_aName[32];
+		int m_Zone;
+		int m_Trigger; 
+		int m_X;
+		int m_Y; 
+		int m_W; 
+		int m_H;
+		int m_Disable;
+		int m_Rewind;
+		void Reset() 
+		{
+			mem_zero(&m_aName[0], sizeof(m_aName));
+			m_Zone = 1;
+			m_Trigger = 1;
+			m_X = 0;
+			m_Y = 0;
+			m_W = 128;
+			m_H = 128;
+			m_Disable = 0;
+			m_Rewind = 1;
+
+		}
+		bool operator == (CClipTrigger other) 
+		{
+			return m_Zone == other.m_Zone && m_Trigger == other.m_Trigger;
+		}
+	};
+	array<CClipTrigger> m_lClipTriggers;
 
 	class CLayerGame *m_pGameLayer;
 	CLayerGroup *m_pGameGroup;
@@ -696,6 +728,7 @@ public:
 		m_ShowUndo = 0;
 		m_UndoScrollValue = 0.0f;
 		m_ShowServerSettingsEditor = false;
+		m_ShowClipTrigger = false;
 
 		m_ShowEnvelopePreview = 0;
 		m_SelectedQuadEnvelope = -1;
@@ -875,6 +908,7 @@ public:
 	int m_ShowEnvelopeEditor;
 	int m_ShowEnvelopePreview; //Values: 0-Off|1-Selected Envelope|2-All
 	bool m_ShowServerSettingsEditor;
+	bool m_ShowClipTrigger;
 	bool m_ShowPicker;
 
 	int m_SelectedLayer;
@@ -996,6 +1030,11 @@ public:
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderUndoList(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View);
+	void RenderClipTriggerEditor(CUIRect View, CUIRect EditorRect);
+	void DrawClipBox(CEditorMap::CClipTrigger clip, vec4 boxColor, vec4 fillColor);
+
+	CEditorMap::CClipTrigger m_aClipTrigger;
+	bool m_ClipExists = false;
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();

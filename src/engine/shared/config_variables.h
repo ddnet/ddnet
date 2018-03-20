@@ -19,6 +19,9 @@ MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 480, 0, 10000, CFGFLAG_SAVE|CFG
 MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Refresh rate for updating the game when the window is inactive (in Hz)")
 MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(ClEditorUndo, cl_editorundo, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Undo function in editor")
+MACRO_CONFIG_INT(ClEditorClipDraw, cl_editorclipdraw, 3, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "How man clip areas to draw (0=None, 1=Selected only, 2=Visible in list, 3=All")
+MACRO_CONFIG_INT(ClEditorClipTrigger, cl_editorcliptrigger, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Clip/trigger function in editor")
+
 MACRO_CONFIG_INT(ClLoadCountryFlags, cl_load_country_flags, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Load and show country flags")
 MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Skin filtering string")
 

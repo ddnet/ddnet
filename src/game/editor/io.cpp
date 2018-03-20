@@ -533,6 +533,45 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
 	mem_free(pPoints);
 
+	//Save clips
+	if (m_lClipTriggers.size())
+	{
+		for (int i = 0; i < m_lClipTriggers.size(); i++)
+		{
+			CMapItemClips Item;
+			StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), m_lClipTriggers[i].m_aName);
+			Item.m_Zone = m_lClipTriggers[i].m_Zone;
+			Item.m_Trigger = m_lClipTriggers[i].m_Trigger;
+			Item.m_X = m_lClipTriggers[i].m_X;
+			Item.m_Y = m_lClipTriggers[i].m_Y;
+			Item.m_W = m_lClipTriggers[i].m_W;
+			Item.m_H = m_lClipTriggers[i].m_H;
+			Item.m_Disable = m_lClipTriggers[i].m_Disable;
+			Item.m_Rewind = m_lClipTriggers[i].m_Rewind;
+			df.AddItem(MAPITEMTYPE_CLIPS, i, sizeof(Item), &Item);
+		}
+	}
+
+	//Save Triggers
+	for (int g = 0; g < m_lGroups.size(); g++)
+	{
+		CLayerGroup *pGroup = m_lGroups[g];
+		CMapItemTriggers Item;
+		Item.m_Group = g;
+		if (pGroup->m_GameGroup)
+		{
+			Item.m_Trigger = -1;
+		}
+		else
+		{
+			Item.m_Trigger = pGroup->m_ClipTrigger;
+		}
+		df.AddItem(MAPITEMTYPE_TRIGGERS, g, sizeof(Item), &Item);
+
+		
+	}
+
+	
 	// finish the data file
 	df.Finish();
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving done");
@@ -790,6 +829,18 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					pGroup->m_ClipY = pGItem->m_ClipY;
 					pGroup->m_ClipW = pGItem->m_ClipW;
 					pGroup->m_ClipH = pGItem->m_ClipH;
+
+					int tStart, tNum;
+					DataFile.GetType(MAPITEMTYPE_TRIGGERS, &tStart, &tNum);
+					if (tNum > 0)
+					{
+						CMapItemTriggers *pTrigger = (CMapItemTriggers *)DataFile.GetItem(tStart + g, 0, 0);
+						pGroup->m_ClipTrigger = pTrigger->m_Trigger;
+					}
+					else
+					{
+						pGroup->m_ClipTrigger = 0;
+					}
 				}
 
 				// load group name
@@ -1261,6 +1312,21 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					pEnv->m_Synchronized = pItem->m_Synchronized;
 			}
 		}
+		
+		//Load clips
+		{
+			int Start, Num;
+			DataFile.GetType(MAPITEMTYPE_CLIPS, &Start, &Num);
+			for (int i = 0; i < Num; i++)
+			{
+				CMapItemClips *pItem = (CMapItemClips *)DataFile.GetItem(Start + i, 0, 0);
+				CClipTrigger newClip = {"", pItem->m_Zone, pItem->m_Trigger, pItem->m_X, pItem->m_Y, pItem->m_W, pItem->m_H, pItem->m_Disable, pItem->m_Rewind };
+				IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), newClip.m_aName);
+
+				m_lClipTriggers.add(newClip);
+			}
+		}
+		
 	}
 	else
 		return 0;
@@ -1285,7 +1351,7 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	if(!Err)
 		return Err;
 
-	// modify indecies
+	// modify indicies
 	gs_ModifyAddAmount = m_Map.m_lImages.size();
 	NewMap.ModifyImageIndex(ModifyAdd);
 
@@ -1298,12 +1364,16 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	NewMap.m_lImages.clear();
 
 	// transfer envelopes
-	for(int i = 0; i < NewMap.m_lEnvelopes.size(); i++)
+	for (int i = 0; i < NewMap.m_lEnvelopes.size(); i++)
 		m_Map.m_lEnvelopes.add(NewMap.m_lEnvelopes[i]);
 	NewMap.m_lEnvelopes.clear();
 
-	// transfer groups
+	// transfer clip list
+	for (int i = 0; i < NewMap.m_lClipTriggers.size(); i++)
+		m_Map.m_lClipTriggers.add(NewMap.m_lClipTriggers[i]);
+	NewMap.m_lClipTriggers.clear();
 
+	// transfer groups
 	for(int i = 0; i < NewMap.m_lGroups.size(); i++)
 	{
 		if(NewMap.m_lGroups[i] == NewMap.m_pGameGroup)

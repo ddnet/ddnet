@@ -308,6 +308,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		PROP_CLIP_Y,
 		PROP_CLIP_W,
 		PROP_CLIP_H,
+		PROP_CLIP_TRIGGER,
 		NUM_PROPS,
 	};
 
@@ -323,6 +324,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		{"Clip Y", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Clip W", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipW, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{"Clip H", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipH, PROPTYPE_INT_SCROLL, 0, 1000000},
+		{"Clip Trigger", pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipTrigger, PROPTYPE_INT_STEP, 0, 255},
 		{0},
 	};
 
@@ -352,6 +354,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		else if(Prop == PROP_CLIP_Y) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipY = NewVal;
 		else if(Prop == PROP_CLIP_W) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
 		else if(Prop == PROP_CLIP_H) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+		else if (Prop == PROP_CLIP_TRIGGER) pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_ClipTrigger = NewVal;
 	}
 
 	return 0;
@@ -542,6 +545,63 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		pQuad->m_aPoints[3].x = Right; pQuad->m_aPoints[3].y = Bottom;
 		pEditor->m_Map.m_Modified = true;
 		return 1;
+	}
+	
+	// Order Buttons
+	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_Button1 = 0;
+	static int s_Button2 = 0;
+	static int s_Button3 = 0;
+	static int s_Button4 = 0;
+	CUIRect miniButton;
+
+	Button.VSplitLeft(Button.w / 4, &miniButton, &Button);
+	if (pEditor->DoButton_ButtonDec(&s_Button1, "Back", 0, &miniButton, 0, "Push Quad to the back"))
+	{
+		plain_range<CQuad> pl = plain_range<CQuad>(&pLayer->m_lQuads[0], &pLayer->m_lQuads[pLayer->m_lQuads.size() - 1]);
+		pl.index(0);
+		CQuad *q = &(pLayer->m_lQuads[pEditor->m_SelectedQuad]);
+		CQuad n;
+		n = *q;
+		pLayer->m_lQuads.remove_index(pEditor->m_SelectedQuad);
+		pLayer->m_lQuads.insert(n, pl);
+		pEditor->m_SelectedQuad = 0;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
+	}
+
+	Button.VSplitLeft(Button.w / 3, &miniButton, &Button);
+	if (pEditor->DoButton_Ex(&s_Button2, "-", 0, &miniButton, 0, "Push Quad backwards by 1",0) && pEditor->m_SelectedQuad > 0)
+	{
+		CQuad temp = pLayer->m_lQuads[pEditor->m_SelectedQuad];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad] = pLayer->m_lQuads[pEditor->m_SelectedQuad - 1];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad - 1] = temp;
+		pEditor->m_SelectedQuad--;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
+	}
+
+	Button.VSplitLeft(Button.w / 2, &miniButton, &Button);
+	if (pEditor->DoButton_Ex(&s_Button3, "+", 0, &miniButton, 0, "Bring Quad forwards by 1",0) && pEditor->m_SelectedQuad < pLayer->m_lQuads.size() - 1)
+	{
+		CQuad temp = pLayer->m_lQuads[pEditor->m_SelectedQuad];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad] = pLayer->m_lQuads[pEditor->m_SelectedQuad + 1];
+		pLayer->m_lQuads[pEditor->m_SelectedQuad + 1] = temp;
+		pEditor->m_SelectedQuad++;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
+	}
+
+
+	if (pEditor->DoButton_ButtonInc(&s_Button4, "Front", 0, &Button, 0, "Bring Quad to the front"))
+	{
+		CQuad temp = pLayer->m_lQuads[pEditor->m_SelectedQuad];
+		pLayer->m_lQuads.remove_index(pEditor->m_SelectedQuad);
+		pLayer->m_lQuads.add(temp);
+		pEditor->m_SelectedQuad = pLayer->m_lQuads.size() - 1;
+		pQuad = pEditor->GetSelectedQuad();
+		pEditor->m_Map.m_Modified = true;
 	}
 
 
