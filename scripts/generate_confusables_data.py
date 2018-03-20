@@ -56,6 +56,7 @@ def generate_decompositions():
     # Z: Space
     ignore = category("C") | category("M") | category("Z")
 
+    con[0x006C] = [0x0069] # LATIN SMALL LETTER L -> LATIN SMALL LETTER I
     con[0x2800] = [] # BRAILLE PATTERN BLANK
     con[0xFFFC] = [] # OBJECT REPLACEMENT CHARACTER
 
