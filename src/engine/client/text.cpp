@@ -1720,13 +1720,17 @@ public:
 		for(size_t i = 0; i < m_TextContainers.size(); ++i)
 			if(m_TextContainers[i].m_StringInfo.m_QuadBufferContainerIndex != -1)
 				FoundTextContainer = true;
-		dbg_assert(!FoundTextContainer, "text container was not empty");
+		if (FoundTextContainer)
+		{
+			dbg_msg("text render", "%s", "Found non empty text container");
+			dbg_assert(false, "text container was not empty");
+		}
 
 		for(size_t i = 0; i < m_Fonts.size(); ++i)
 		{
 			// reset the skylines
 			for(int j = 0; j < 2; ++j)
-				for(int k = 0; k < m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn.size(); ++k)
+				for(size_t k = 0; k < m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn.size(); ++k)
 					m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn[k] = 0;
 
 			m_Fonts[i]->InitFontSizes();
