@@ -506,15 +506,21 @@ void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, in
 {
 	if(Align == 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + (r->w - tw) / 2.f, r->y + (r->h - Size) / 2.f, Size, pText, MaxWidth);
+		float AlignedSize = 0;
+		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth, &AlignedSize);
+		TextRender()->Text(0, r->x + (r->w - tw) / 2.f, r->y + (r->h - AlignedSize) / 2.f, Size, pText, MaxWidth);
 	}
 	else if(Align < 0)
-		TextRender()->Text(0, r->x, r->y + (r->h - Size) / 2.f, Size, pText, MaxWidth);
+	{
+		float AlignedSize = 0;
+		TextRender()->TextWidth(0, Size, pText, MaxWidth, &AlignedSize);
+		TextRender()->Text(0, r->x, r->y + (r->h - AlignedSize) / 2.f, Size, pText, MaxWidth);
+	}
 	else if(Align > 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + r->w-tw, r->y + (r->h - Size) / 2.f, Size, pText, MaxWidth);
+		float AlignedSize = 0;
+		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth, &AlignedSize);
+		TextRender()->Text(0, r->x + r->w-tw, r->y + (r->h - AlignedSize) / 2.f, Size, pText, MaxWidth);
 	}
 }
 

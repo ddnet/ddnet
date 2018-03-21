@@ -271,6 +271,8 @@ void CGameClient::OnInit()
 {
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 
+	m_pGraphics->AddWindowResizeListener(OnWindowResizeCB, this);
+
 	// propagate pointers
 	m_UI.SetGraphics(Graphics(), TextRender());
 	m_RenderTools.m_pGraphics = Graphics();
@@ -905,6 +907,20 @@ void CGameClient::OnFlagGrab(int TeamID)
 		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierRed].m_FlagGrabs++;
 	else
 		m_aStats[m_Snap.m_pGameDataObj->m_FlagCarrierBlue].m_FlagGrabs++;
+}
+
+void CGameClient::OnWindowResize()
+{
+	for(int i = 0; i < m_All.m_Num; i++)
+		m_All.m_paComponents[i]->OnWindowResize();
+
+	TextRender()->OnWindowResize();
+}
+
+void CGameClient::OnWindowResizeCB(void *pUser)
+{
+	CGameClient *pClient = (CGameClient*)pUser;
+	pClient->OnWindowResize();
 }
 
 void CGameClient::OnRconType(bool UsernameReq)
