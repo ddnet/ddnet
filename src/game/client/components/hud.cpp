@@ -31,30 +31,30 @@ CHud::CHud()
 
 void CHud::ResetHudContainers()
 {
-	if (m_aScoreInfo[0].m_OptionalNameTextContainerIndex != -1)
+	if(m_aScoreInfo[0].m_OptionalNameTextContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_OptionalNameTextContainerIndex);
-	if (m_aScoreInfo[1].m_OptionalNameTextContainerIndex != -1)
+	if(m_aScoreInfo[1].m_OptionalNameTextContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_OptionalNameTextContainerIndex);
 
-	if (m_aScoreInfo[0].m_TextRankContainerIndex != -1)
+	if(m_aScoreInfo[0].m_TextRankContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextRankContainerIndex);
-	if (m_aScoreInfo[1].m_TextRankContainerIndex != -1)
+	if(m_aScoreInfo[1].m_TextRankContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextRankContainerIndex);
 
-	if (m_aScoreInfo[0].m_TextScoreContainerIndex != -1)
+	if(m_aScoreInfo[0].m_TextScoreContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextScoreContainerIndex);
-	if (m_aScoreInfo[1].m_TextScoreContainerIndex != -1)
+	if(m_aScoreInfo[1].m_TextScoreContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextScoreContainerIndex);
 
-	if (m_aScoreInfo[0].m_RoundRectQuadContainerIndex != -1)
+	if(m_aScoreInfo[0].m_RoundRectQuadContainerIndex != -1)
 		Graphics()->DeleteQuadContainer(m_aScoreInfo[0].m_RoundRectQuadContainerIndex);
-	if (m_aScoreInfo[1].m_RoundRectQuadContainerIndex != -1)
+	if(m_aScoreInfo[1].m_RoundRectQuadContainerIndex != -1)
 		Graphics()->DeleteQuadContainer(m_aScoreInfo[1].m_RoundRectQuadContainerIndex);
 
 	m_aScoreInfo[0].Reset();
 	m_aScoreInfo[1].Reset();
 
-	if (m_FPSTextContainerIndex != -1)
+	if(m_FPSTextContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
 	m_FPSTextContainerIndex = -1;
 }
@@ -365,25 +365,25 @@ void CHud::RenderScoreHud()
 					RecreateRect = true;
 				}
 
-				if (apPlayerInfo[t])
+				if(apPlayerInfo[t])
 				{
 					int ID = apPlayerInfo[t]->m_ClientID;
-					if (ID >= 0 && ID < MAX_CLIENTS)
+					if(ID >= 0 && ID < MAX_CLIENTS)
 					{
 						const char *pName = m_pClient->m_aClients[ID].m_aName;
-						if (str_comp(pName, m_aScoreInfo[t].m_aPlayerNameText) != 0)
+						if(str_comp(pName, m_aScoreInfo[t].m_aPlayerNameText) != 0)
 							RecreateRect = true;
 					}
 				}
 				else
 				{
-					if (m_aScoreInfo[t].m_aPlayerNameText[0] != 0)
+					if(m_aScoreInfo[t].m_aPlayerNameText[0] != 0)
 						RecreateRect = true;
 				}
 
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d.", aPos[t]);
-				if (str_comp(aBuf, m_aScoreInfo[t].m_aRankText) != 0)
+				if(str_comp(aBuf, m_aScoreInfo[t].m_aRankText) != 0)
 					RecreateRect = true;
 			}
 
