@@ -10,10 +10,22 @@
 #include <game/client/animstate.h>
 #include "killmessages.h"
 
+void CKillMessages::OnWindowResize()
+{
+	for(int i = 0; i < MAX_KILLMSGS; i++)
+	{
+		if(m_aKillmsgs[i].m_VictimTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(m_aKillmsgs[i].m_VictimTextContainerIndex);
+		if(m_aKillmsgs[i].m_KillerTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(m_aKillmsgs[i].m_KillerTextContainerIndex);
+		m_aKillmsgs[i].m_VictimTextContainerIndex = m_aKillmsgs[i].m_KillerTextContainerIndex = -1;
+	}
+}
+
 void CKillMessages::OnReset()
 {
 	m_KillmsgCurrent = 0;
-	for(int i = 0; i < MAX_KILLMSGS; i++)
+	for (int i = 0; i < MAX_KILLMSGS; i++)
 	{
 		m_aKillmsgs[i].m_Tick = -100000;
 

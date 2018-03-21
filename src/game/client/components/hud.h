@@ -40,6 +40,7 @@ class CHud : public CComponent
 
 	int m_HudQuadContainerIndex;
 	SScoreInfo m_aScoreInfo[2];
+	int m_FPSTextContainerIndex;
 
 	void RenderCursor();
 
@@ -63,6 +64,8 @@ class CHud : public CComponent
 public:
 	CHud();
 
+	void ResetHudContainers();
+	virtual void OnWindowResize();
 	virtual void OnReset();
 	virtual void OnRender();
 	virtual void OnInit();

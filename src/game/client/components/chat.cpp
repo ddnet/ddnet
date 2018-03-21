@@ -35,6 +35,16 @@ CChat::CChat()
 	OnReset();
 }
 
+void CChat::OnWindowResize()
+{
+	for(int i = 0; i < MAX_LINES; i++)
+	{
+		if(m_aLines[i].m_TextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(m_aLines[i].m_TextContainerIndex);
+		m_aLines[i].m_TextContainerIndex = -1;
+	}
+}
+
 void CChat::OnReset()
 {
 	for(int i = 0; i < MAX_LINES; i++)

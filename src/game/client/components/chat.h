@@ -94,6 +94,7 @@ public:
 
 	void SayChat(const char *pLine);
 
+	virtual void OnWindowResize();
 	virtual void OnReset();
 	virtual void OnConsoleInit();
 	virtual void OnStateChange(int NewState, int OldState);

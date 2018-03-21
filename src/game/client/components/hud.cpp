@@ -25,8 +25,45 @@ CHud::CHud()
 {
 	// won't work if zero
 	m_FrameTimeAvg = 0.0f;
+	m_FPSTextContainerIndex = -1;
 	OnReset();
 }
+
+void CHud::ResetHudContainers()
+{
+	if (m_aScoreInfo[0].m_OptionalNameTextContainerIndex != -1)
+		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_OptionalNameTextContainerIndex);
+	if (m_aScoreInfo[1].m_OptionalNameTextContainerIndex != -1)
+		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_OptionalNameTextContainerIndex);
+
+	if (m_aScoreInfo[0].m_TextRankContainerIndex != -1)
+		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextRankContainerIndex);
+	if (m_aScoreInfo[1].m_TextRankContainerIndex != -1)
+		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextRankContainerIndex);
+
+	if (m_aScoreInfo[0].m_TextScoreContainerIndex != -1)
+		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextScoreContainerIndex);
+	if (m_aScoreInfo[1].m_TextScoreContainerIndex != -1)
+		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextScoreContainerIndex);
+
+	if (m_aScoreInfo[0].m_RoundRectQuadContainerIndex != -1)
+		Graphics()->DeleteQuadContainer(m_aScoreInfo[0].m_RoundRectQuadContainerIndex);
+	if (m_aScoreInfo[1].m_RoundRectQuadContainerIndex != -1)
+		Graphics()->DeleteQuadContainer(m_aScoreInfo[1].m_RoundRectQuadContainerIndex);
+
+	m_aScoreInfo[0].Reset();
+	m_aScoreInfo[1].Reset();
+
+	if (m_FPSTextContainerIndex != -1)
+		TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
+	m_FPSTextContainerIndex = -1;
+}
+
+void CHud::OnWindowResize()
+{
+	ResetHudContainers();
+}
+
 
 void CHud::OnReset()
 {
@@ -40,28 +77,7 @@ void CHud::OnReset()
 	m_ServerRecord = -1.0f;
 	m_PlayerRecord = -1.0f;
 
-	if(m_aScoreInfo[0].m_OptionalNameTextContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_OptionalNameTextContainerIndex);
-	if(m_aScoreInfo[1].m_OptionalNameTextContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_OptionalNameTextContainerIndex);
-
-	if(m_aScoreInfo[0].m_TextRankContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextRankContainerIndex);
-	if(m_aScoreInfo[1].m_TextRankContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextRankContainerIndex);
-
-	if(m_aScoreInfo[0].m_TextScoreContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextScoreContainerIndex);
-	if(m_aScoreInfo[1].m_TextScoreContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextScoreContainerIndex);
-
-	if(m_aScoreInfo[0].m_RoundRectQuadContainerIndex != -1)
-		Graphics()->DeleteQuadContainer(m_aScoreInfo[0].m_RoundRectQuadContainerIndex);
-	if(m_aScoreInfo[1].m_RoundRectQuadContainerIndex != -1)
-		Graphics()->DeleteQuadContainer(m_aScoreInfo[1].m_RoundRectQuadContainerIndex);
-
-	m_aScoreInfo[0].Reset();
-	m_aScoreInfo[1].Reset();
+	ResetHudContainers();
 }
 
 void CHud::OnInit()
@@ -80,7 +96,7 @@ void CHud::OnInit()
 	RenderTools()->SelectSprite(SPRITE_FLAG_RED);
 	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
 	RenderTools()->SelectSprite(SPRITE_FLAG_BLUE);
-	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);	
+	RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 8.f, 16.f);
 }
 
 void CHud::RenderGameTimer()
@@ -348,6 +364,27 @@ void CHud::RenderScoreHud()
 					mem_copy(m_aScoreInfo[t].m_aScoreText, aScore[t], sizeof(m_aScoreInfo[t].m_aScoreText));
 					RecreateRect = true;
 				}
+
+				if (apPlayerInfo[t])
+				{
+					int ID = apPlayerInfo[t]->m_ClientID;
+					if (ID >= 0 && ID < MAX_CLIENTS)
+					{
+						const char *pName = m_pClient->m_aClients[ID].m_aName;
+						if (str_comp(pName, m_aScoreInfo[t].m_aPlayerNameText) != 0)
+							RecreateRect = true;
+					}
+				}
+				else
+				{
+					if (m_aScoreInfo[t].m_aPlayerNameText[0] != 0)
+						RecreateRect = true;
+				}
+
+				char aBuf[16];
+				str_format(aBuf, sizeof(aBuf), "%d.", aPos[t]);
+				if (str_comp(aBuf, m_aScoreInfo[t].m_aRankText) != 0)
+					RecreateRect = true;
 			}
 
 			static float s_TextWidth10 = TextRender()->TextWidth(0, 14.0f, "10", -1);
@@ -398,7 +435,7 @@ void CHud::RenderScoreHud()
 					if(ID >= 0 && ID < MAX_CLIENTS)
 					{
 						const char *pName = m_pClient->m_aClients[ID].m_aName; 
-						if(str_comp(pName, m_aScoreInfo[t].m_aPlayerNameText) != 0 || RecreateRect)
+						if(RecreateRect)
 						{
 							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
 
@@ -427,11 +464,15 @@ void CHud::RenderScoreHud()
 							vec2(Whole-ScoreWidthMax-Info.m_Size/2-Split, StartY+1.0f+Info.m_Size/2+t*20));
 					}
 				}
+				else
+				{
+					m_aScoreInfo[t].m_aPlayerNameText[0] = 0;
+				}
 
 				// draw position
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d.", aPos[t]);
-				if(str_comp(aBuf, m_aScoreInfo[t].m_aRankText) != 0 || RecreateRect)
+				if(RecreateRect)
 				{
 					mem_copy(m_aScoreInfo[t].m_aRankText, aBuf, sizeof(m_aScoreInfo[t].m_aRankText));
 
@@ -501,7 +542,7 @@ void CHud::RenderTextInfo()
 		static float s_TextWidth00000 = TextRender()->TextWidth(0, 12.f, "00000", -1);
 		static float s_TextWidth[5] = { s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000 };
 
-		int DigitIndex = (int)log10(FrameTime);
+		int DigitIndex = (int)log10((FrameTime ? FrameTime : 1));
 		if(DigitIndex > 4)
 			DigitIndex = 4;
 		//TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1), 5, 12, Buf, -1);
@@ -509,8 +550,9 @@ void CHud::RenderTextInfo()
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_TextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
-		static int TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
-		TextRender()->RecreateTextContainerSoft(&Cursor, TextContainerIndex, Buf);
+		if(m_FPSTextContainerIndex == -1)
+			m_FPSTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
+		TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, Buf);
 		STextRenderColor TColor;
 		TColor.m_R = 1.f;
 		TColor.m_G = 1.f;
@@ -521,7 +563,7 @@ void CHud::RenderTextInfo()
 		TOutColor.m_G = 0.f;
 		TOutColor.m_B = 0.f;
 		TOutColor.m_A = 0.3f;
-		TextRender()->RenderTextContainer(TextContainerIndex, &TColor, &TOutColor);
+		TextRender()->RenderTextContainer(m_FPSTextContainerIndex, &TColor, &TOutColor);
 	}
 	if(g_Config.m_ClShowpred)
 	{

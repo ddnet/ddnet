@@ -38,6 +38,7 @@ public:
 	virtual void OnConsoleInit() {};
 	virtual void OnInit() {};
 	virtual void OnReset() {};
+	virtual void OnWindowResize() {}
 	virtual void OnRender() {};
 	virtual void OnRelease() {};
 	virtual void OnMapLoad() {};

@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/textrender.h>
+#include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -9,8 +10,16 @@
 #include <game/client/animstate.h>
 #include "nameplates.h"
 #include "controls.h"
+#include "camera.h"
 
 #include "players.h"
+
+void CNamePlates::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
+{
+	float Points[4];
+	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX / 100.0f, pGroup->m_ParallaxY / 100.0f, pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), 1.0f, Points);
+	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
+}
 
 void CNamePlates::RenderNameplate(
 	const CNetObj_Character *pPrevChar,
@@ -60,7 +69,12 @@ void CNamePlates::RenderNameplate(
 			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
 			Cursor.m_LineWidth = -1;
 
+			// create nameplates at standard zoom
+			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+			MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
 			m_aNamePlates[ClientID].m_NameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
+			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 		}
 
 		if(g_Config.m_ClNameplatesClan)
@@ -80,7 +94,12 @@ void CNamePlates::RenderNameplate(
 				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
 				Cursor.m_LineWidth = -1;
 
+				// create nameplates at standard zoom
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
 				m_aNamePlates[ClientID].m_ClanNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pClan);
+				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 			}
 		}
 
@@ -161,7 +180,7 @@ void CNamePlates::SetPlayers(CPlayers* pPlayers)
 	m_pPlayers = pPlayers;
 }
 
-void CNamePlates::OnInit()
+void CNamePlates::ResetNamePlates()
 {
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -172,4 +191,15 @@ void CNamePlates::OnInit()
 
 		m_aNamePlates[i].Reset();
 	}
+
+}
+
+void CNamePlates::OnWindowResize()
+{
+	ResetNamePlates();
+}
+
+void CNamePlates::OnInit()
+{
+	ResetNamePlates();
 }
