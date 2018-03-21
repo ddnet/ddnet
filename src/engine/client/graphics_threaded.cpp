@@ -2165,6 +2165,14 @@ void CGraphics_Threaded::Resize(int w, int h)
 	// kick the command buffer
 	KickCommandBuffer();
 	WaitForIdle();
+
+	for(size_t i = 0; i < m_ResizeListeners.size(); ++i)
+		m_ResizeListeners[i].m_pFunc(m_ResizeListeners[i].m_pUser);
+}
+
+void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
+{
+	m_ResizeListeners.push_back(SWindowResizeListener(pFunc, pUser));
 }
 
 int CGraphics_Threaded::GetWindowScreen()

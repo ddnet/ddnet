@@ -76,6 +76,9 @@ public:
 	int m_Red, m_Green, m_Blue;
 };
 
+
+typedef void(*WINDOW_RESIZE_FUNC)(void *pUser);
+
 class IGraphics : public IInterface
 {
 	MACRO_INTERFACE("graphics", 0)
@@ -104,6 +107,7 @@ public:
 	virtual bool SetVSync(bool State) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual void Resize(int w, int h) = 0;
+	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) = 0;
 
 	virtual void Clear(float r, float g, float b) = 0;
 

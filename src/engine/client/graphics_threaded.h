@@ -683,6 +683,14 @@ class CGraphics_Threaded : public IEngineGraphics
 	std::vector<SQuadContainer> m_QuadContainers;
 	int m_FirstFreeQuadContainer;
 
+	struct SWindowResizeListener
+	{
+		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) : m_pFunc(pFunc), m_pUser(pUser) {}
+		WINDOW_RESIZE_FUNC m_pFunc;
+		void *m_pUser;
+	};
+	std::vector<SWindowResizeListener> m_ResizeListeners;
+
 	void* AllocCommandBufferData(unsigned AllocSize);
 
 	void AddVertices(int Count);
@@ -794,6 +802,7 @@ public:
 	virtual void SetWindowBordered(bool State);
 	virtual bool SetWindowScreen(int Index);
 	virtual void Resize(int w, int h);
+	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser);
 	virtual int GetWindowScreen();
 
 	virtual int WindowActive();
