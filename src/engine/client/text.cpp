@@ -20,9 +20,6 @@ enum
 #include <vector>
 #include <map>
 
-static int aFontSizes[] = {8,9,10,11,12,13,14,15,16,17,18,19,20,36,50,64};
-#define NUM_FONT_SIZES (sizeof(aFontSizes)/sizeof(int))
-
 struct SFontSizeChar
 {
 	int m_ID;
@@ -76,12 +73,33 @@ struct CFontSizeData
 	
 };
 
+#define MIN_FONT_SIZE 6
+#define MAX_FONT_SIZE 128
+#define NUM_FONT_SIZES MAX_FONT_SIZE - MIN_FONT_SIZE + 1
+
 class CFont
 {
 public:
+	void InitFontSizes()
+	{
+		for(int i = 0; i < NUM_FONT_SIZES; ++i)
+		{
+			m_aFontSizes[i].m_FontSize = i + MIN_FONT_SIZE;
+			m_aFontSizes[i].m_pFace = &this->m_FtFace;
+			m_aFontSizes[i].m_Chars.clear();
+		}
+	}
+	
+	CFontSizeData *GetFontSize(int Pixelsize)
+	{
+		int FontSize = (Pixelsize >= MIN_FONT_SIZE ? (Pixelsize > MAX_FONT_SIZE ? MAX_FONT_SIZE : Pixelsize) : MIN_FONT_SIZE);
+
+		return &m_aFontSizes[FontSize - MIN_FONT_SIZE];
+	}
+
 	char m_aFilename[512];
 	FT_Face m_FtFace;
-	CFontSizeData m_aSizes[NUM_FONT_SIZES];
+	CFontSizeData m_aFontSizes[NUM_FONT_SIZES];
 	
 	int m_aTextures[2];
 	// keep the full texture, because opengl doesn't provide texture copying
@@ -112,6 +130,8 @@ struct STextContainer
 	STextString m_StringInfo;
 
 	// keep these values to calculate offsets
+	float m_AlignedStartX;
+	float m_AlignedStartY;
 	float m_X;
 	float m_Y;
 
@@ -125,18 +145,25 @@ struct STextContainer
 	float m_LineWidth;
 	float m_UnscaledFontSize;
 
+	int m_RenderFlags;
+
 	void Reset()
 	{
+		m_pFont = NULL;
+		m_FontSize = 0;
+
 		m_StringInfo.m_QuadBufferObjectIndex = m_StringInfo.m_QuadBufferContainerIndex = m_StringInfo.m_SelectionQuadContainerIndex = -1;
 		m_StringInfo.m_QuadNum = 0;
 		m_StringInfo.m_CharacterQuads.clear();
 
-		m_X = m_Y = 0.f;
+		m_AlignedStartX = m_AlignedStartY = m_X = m_Y = 0.f;
 		m_Flags = m_LineCount = m_CharCount = 0;
 		m_MaxLines = -1;
 		m_StartX = m_StartY = 0.f;
 		m_LineWidth = -1.f;
 		m_UnscaledFontSize = 0.f;
+
+		m_RenderFlags = 0;
 	}
 };
 
@@ -230,18 +257,7 @@ class CTextRender : public IEngineTextRender
 	{
 		m_RenderFlags = Flags;
 	}
-
-	int GetFontSizeIndex(int Pixelsize)
-	{
-		for(unsigned i = 0; i < NUM_FONT_SIZES; i++)
-		{
-			if(aFontSizes[i] >= Pixelsize)
-				return i;
-		}
-
-		return NUM_FONT_SIZES-1;
-	}
-
+	
 	void Grow(unsigned char *pIn, unsigned char *pOut, int w, int h)
 	{
 		for(int y = 0; y < h; y++)
@@ -315,27 +331,11 @@ class CTextRender : public IEngineTextRender
 
 	int AdjustOutlineThicknessToFontSize(int OutlineThickness, int FontSize)
 	{
-		if(FontSize > 36)
+		if(FontSize > 48)
 			OutlineThickness *= 4;
 		else if(FontSize >= 18)
 			OutlineThickness *= 2;
 		return OutlineThickness;
-	}
-
-	void InitIndex(CFont *pFont, int Index)
-	{
-		CFontSizeData *pSizeData = &pFont->m_aSizes[Index];
-
-		pSizeData->m_FontSize = aFontSizes[Index];
-		pSizeData->m_pFace = &pFont->m_FtFace;
-	}
-
-	CFontSizeData *GetSize(CFont *pFont, int Pixelsize)
-	{
-		int Index = GetFontSizeIndex(Pixelsize);
-		if(pFont->m_aSizes[Index].m_FontSize != aFontSizes[Index])
-			InitIndex(pFont, Index);
-		return &pFont->m_aSizes[Index];
 	}
 
 	void UploadGlyph(CFont *pFont, int TextureIndex, int PosX, int PosY, int Width, int Height, const unsigned char *pData)
@@ -350,9 +350,9 @@ class CTextRender : public IEngineTextRender
 		Graphics()->LoadTextureRawSub(pFont->m_aTextures[TextureIndex], PosX, PosY, Width, Height, CImageInfo::FORMAT_ALPHA, pData);
 	}
 
-	// 32k of data used for rendering glyphs
-	unsigned char ms_aGlyphData[(1024/8) * (1024/8)];
-	unsigned char ms_aGlyphDataOutlined[(1024/8) * (1024/8)];
+	// 128k * 2 of data used for rendering glyphs
+	unsigned char ms_aGlyphData[(1024/4) * (1024/4)];
+	unsigned char ms_aGlyphDataOutlined[(1024/4) * (1024/4)];
 
 
 	bool GetCharacterSpace(CFont *pFont, int TextureIndex, int Width, int Height, int& PosX, int& PosY)
@@ -478,8 +478,6 @@ class CTextRender : public IEngineTextRender
 		if(OutlineThickness == 1)
 		{
 			Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
-			int X = 0;
-			int Y = 0;
 			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
 			{
 				IncreaseFontTexture(pFont, 1);
@@ -493,8 +491,6 @@ class CTextRender : public IEngineTextRender
 				Grow(ms_aGlyphData, ms_aGlyphDataOutlined, Width, Height);
 				Grow(ms_aGlyphDataOutlined, ms_aGlyphData, Width, Height);
 			}
-			int X = 0;
-			int Y = 0;
 			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
 			{
 				IncreaseFontTexture(pFont, 1);
@@ -512,7 +508,7 @@ class CTextRender : public IEngineTextRender
 			pFontchr->m_Height = Height;
 			pFontchr->m_Width = Width;
 			pFontchr->m_OffsetX = (pFont->m_FtFace->glyph->metrics.horiBearingX >> 6); // ignore_convention
-			pFontchr->m_OffsetY = -((pFont->m_FtFace->glyph->metrics.height >> 6) - (pFont->m_FtFace->glyph->metrics.horiBearingY >> 6));// (pSizeData->m_FontSize - pFont->m_FtFace->glyph->bitmap_top);// ((m_pCurFont->m_FtFace->size->metrics.height >> 6) - pSizeData->m_FontSize + pSizeData->m_FontSize - (pFont->m_FtFace->glyph->metrics.horiBearingY >> 6)); // ignore_convention
+			pFontchr->m_OffsetY = -((pFont->m_FtFace->glyph->metrics.height >> 6) - (pFont->m_FtFace->glyph->metrics.horiBearingY >> 6));
 			pFontchr->m_AdvanceX = (pFont->m_FtFace->glyph->advance.x>>6); // ignore_convention
 
 			pFontchr->m_aUVs[0] = X;
@@ -574,6 +570,8 @@ public:
 
 		// GL_LUMINANCE can be good for debugging
 		//m_FontTextureFormat = GL_ALPHA;
+
+		m_RenderFlags = 0;
 	}
 
 	virtual ~CTextRender()
@@ -643,9 +641,6 @@ public:
 			return NULL;
 		}
 
-		for(unsigned i = 0; i < NUM_FONT_SIZES; i++)
-			pFont->m_aSizes[i].m_FontSize = -1;
-
 		dbg_msg("textrender", "loaded pFont from '%s'", pFilename);
 
 		pFont->m_CurTextureDimensions[0] = 256;
@@ -661,6 +656,8 @@ public:
 		pFont->m_TextureSkyline[0].m_CurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[0], 0);
 		pFont->m_TextureSkyline[1].m_CurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[1], 0);
 		
+		pFont->InitFontSizes();
+
 		m_Fonts.push_back(pFont);
 
 		return pFont;
@@ -737,11 +734,13 @@ public:
 		TextEx(&Cursor, pText, -1);
 	}
 
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int Length)
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int Length, float *pAlignedHeight = NULL)
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
 		TextEx(&Cursor, pText, Length);
+		if(pAlignedHeight != NULL)
+			*pAlignedHeight = Cursor.m_AlignedFontSize;
 		return Cursor.m_X;
 	}
 
@@ -776,23 +775,32 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenY;
+		float FakeToScreenX, FakeToScreenY;
 
 		int ActualSize;
 		int GotNewLine = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
+		float CursorX, CursorY;
 
 		float Size = pCursor->m_FontSize;
 
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		FakeToScreenY = (Graphics()->ScreenHeight()/(ScreenY1-ScreenY0));
+		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
+		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
+
+		int ActualX = (int)(pCursor->m_X * FakeToScreenX);
+		int ActualY = (int)(pCursor->m_Y * FakeToScreenY);
+		CursorX = ActualX / FakeToScreenX;
+		CursorY = ActualY / FakeToScreenY;
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
 		Size = ActualSize / FakeToScreenY;
+
+		pCursor->m_AlignedFontSize = Size;
 
 		// fetch pFont data
 		if(!pFont)
@@ -801,7 +809,7 @@ public:
 		if(!pFont)
 			return;
 
-		pSizeData = GetSize(pFont, ActualSize);
+		pSizeData = pFont->GetFontSize(ActualSize);
 				
 		// set length
 		if(Length < 0)
@@ -815,8 +823,17 @@ public:
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent+Length;
 
-		DrawX = pCursor->m_X;
-		DrawY = pCursor->m_Y;
+		if((m_RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) != 0)
+		{
+			DrawX = pCursor->m_X;
+			DrawY = pCursor->m_Y;
+		}
+		else
+		{
+			DrawX = CursorX;
+			DrawY = CursorY;
+		}
+
 		LineCount = pCursor->m_LineCount;
 
 		if(pCursor->m_Flags&TEXTFLAG_RENDER)
@@ -890,7 +907,11 @@ public:
 				{
 					DrawX = pCursor->m_StartX;
 					DrawY += Size;
-
+					if((m_RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+					{
+						DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
+						DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+					}
 					++LineCount;
 					if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
 						break;
@@ -928,6 +949,11 @@ public:
 			{
 				DrawX = pCursor->m_StartX;
 				DrawY += Size;
+				if((m_RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+				{
+					DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
+					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+				}
 				GotNewLine = 1;
 				++LineCount;
 			}
@@ -977,7 +1003,7 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenY;
+		float FakeToScreenX, FakeToScreenY;
 
 		int ActualSize;
 
@@ -986,17 +1012,25 @@ public:
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
+		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
 
+		int ActualX = (int)(pCursor->m_X * FakeToScreenX);
+		int ActualY = (int)(pCursor->m_Y * FakeToScreenY);
+
+		TextContainer.m_AlignedStartX = ActualX / FakeToScreenX;
+		TextContainer.m_AlignedStartY = ActualY / FakeToScreenY;
 		TextContainer.m_X = pCursor->m_X;
 		TextContainer.m_Y = pCursor->m_Y;
 
 		TextContainer.m_Flags = pCursor->m_Flags;
 
+		TextContainer.m_RenderFlags = m_RenderFlags;
+
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
 
-		pSizeData = GetSize(pFont, ActualSize);
+		pSizeData = pFont->GetFontSize(ActualSize);
 		
 		TextContainer.m_FontSize = pSizeData->m_FontSize;
 			
@@ -1043,25 +1077,34 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenY;
+		float FakeToScreenX, FakeToScreenY;
 
 		int ActualSize;
 		int GotNewLine = 0;
 		float DrawX = 0.0f, DrawY = 0.0f;
 		int LineCount = 0;
+		float CursorX, CursorY;
 
 		float Size = pCursor->m_FontSize;
 
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
+		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
+
+		int ActualX = (int)(pCursor->m_X * FakeToScreenX);
+		int ActualY = (int)(pCursor->m_Y * FakeToScreenY);
+		CursorX = ActualX / FakeToScreenX;
+		CursorY = ActualY / FakeToScreenY;
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
 		Size = ActualSize / FakeToScreenY;
 
-		pSizeData = GetSize(TextContainer.m_pFont, TextContainer.m_FontSize);
+		pCursor->m_AlignedFontSize = Size;
+
+		pSizeData = TextContainer.m_pFont->GetFontSize(TextContainer.m_FontSize);
 
 		// string length
 		int Length = str_length(pText);
@@ -1071,8 +1114,19 @@ public:
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent + Length;
 
-		DrawX = pCursor->m_X;
-		DrawY = pCursor->m_Y;
+		int RenderFlags = TextContainer.m_RenderFlags;
+
+		if((RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) != 0)
+		{
+			DrawX = pCursor->m_X;
+			DrawY = pCursor->m_Y;
+		}
+		else
+		{
+			DrawX = CursorX;
+			DrawY = CursorY;
+		}
+
 		LineCount = pCursor->m_LineCount;
 		
 		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
@@ -1127,6 +1181,11 @@ public:
 				{
 					DrawX = pCursor->m_StartX;
 					DrawY += Size;
+					if((RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+					{
+						DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
+						DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+					}
 					++LineCount;
 					if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
 						break;
@@ -1136,7 +1195,7 @@ public:
 				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
 				if(pChr)
 				{
-					float Advance = ((((m_RenderFlags&TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pChr->m_Width) : (pChr->m_AdvanceX + (((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? (-pChr->m_OffsetX) : 0.f))))  * Scale + Kerning(TextContainer.m_pFont, Character, NextCharacter)*Scale;
+					float Advance = ((((RenderFlags&TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pChr->m_Width) : (pChr->m_AdvanceX + (((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? (-pChr->m_OffsetX) : 0.f))))  * Scale + Kerning(TextContainer.m_pFont, Character, NextCharacter)*Scale;
 
 					if(pCursor->m_Flags&TEXTFLAG_STOP_AT_END && DrawX + Advance * Size - pCursor->m_StartX > pCursor->m_LineWidth)
 					{
@@ -1152,8 +1211,8 @@ public:
 						STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads.back();
 
 						float Y = (DrawY + Size);
-						TextCharQuad.m_Vertices[0].m_X = DrawX + (((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size;
-						TextCharQuad.m_Vertices[0].m_Y = Y - (((m_RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size;
+						TextCharQuad.m_Vertices[0].m_X = DrawX + (((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size;
+						TextCharQuad.m_Vertices[0].m_Y = Y - (((RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size;
 						TextCharQuad.m_Vertices[0].m_U = pChr->m_aUVs[0];
 						TextCharQuad.m_Vertices[0].m_V = pChr->m_aUVs[3];
 						TextCharQuad.m_Vertices[0].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
@@ -1161,8 +1220,8 @@ public:
 						TextCharQuad.m_Vertices[0].m_Color.m_B = (unsigned char)(m_TextB * 255.f);
 						TextCharQuad.m_Vertices[0].m_Color.m_A = (unsigned char)(m_TextA * 255.f);
 
-						TextCharQuad.m_Vertices[1].m_X = DrawX + (((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size + pChr->m_Width*Scale*Size;
-						TextCharQuad.m_Vertices[1].m_Y = Y - (((m_RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size;
+						TextCharQuad.m_Vertices[1].m_X = DrawX + (((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size + pChr->m_Width*Scale*Size;
+						TextCharQuad.m_Vertices[1].m_Y = Y - (((RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size;
 						TextCharQuad.m_Vertices[1].m_U = pChr->m_aUVs[2];
 						TextCharQuad.m_Vertices[1].m_V = pChr->m_aUVs[3];
 						TextCharQuad.m_Vertices[1].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
@@ -1170,8 +1229,8 @@ public:
 						TextCharQuad.m_Vertices[1].m_Color.m_B = (unsigned char)(m_TextB * 255.f);
 						TextCharQuad.m_Vertices[1].m_Color.m_A = (unsigned char)(m_TextA * 255.f);
 
-						TextCharQuad.m_Vertices[2].m_X = DrawX + (((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size + pChr->m_Width*Scale*Size;
-						TextCharQuad.m_Vertices[2].m_Y = Y - (((m_RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size - pChr->m_Height*Scale*Size;
+						TextCharQuad.m_Vertices[2].m_X = DrawX + (((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size + pChr->m_Width*Scale*Size;
+						TextCharQuad.m_Vertices[2].m_Y = Y - (((RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size - pChr->m_Height*Scale*Size;
 						TextCharQuad.m_Vertices[2].m_U = pChr->m_aUVs[2];
 						TextCharQuad.m_Vertices[2].m_V = pChr->m_aUVs[1];
 						TextCharQuad.m_Vertices[2].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
@@ -1179,8 +1238,8 @@ public:
 						TextCharQuad.m_Vertices[2].m_Color.m_B = (unsigned char)(m_TextB * 255.f);
 						TextCharQuad.m_Vertices[2].m_Color.m_A = (unsigned char)(m_TextA * 255.f);
 
-						TextCharQuad.m_Vertices[3].m_X = DrawX + (((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size;
-						TextCharQuad.m_Vertices[3].m_Y = Y - (((m_RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size - pChr->m_Height*Scale*Size;
+						TextCharQuad.m_Vertices[3].m_X = DrawX + (((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? 0.f : pChr->m_OffsetX)*Scale*Size;
+						TextCharQuad.m_Vertices[3].m_Y = Y - (((RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : pChr->m_OffsetY)*Scale*Size - pChr->m_Height*Scale*Size;
 						TextCharQuad.m_Vertices[3].m_U = pChr->m_aUVs[0];
 						TextCharQuad.m_Vertices[3].m_V = pChr->m_aUVs[1];
 						TextCharQuad.m_Vertices[3].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
@@ -1198,6 +1257,11 @@ public:
 			{
 				DrawX = pCursor->m_StartX;
 				DrawY += Size;
+				if((RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+				{
+					DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
+					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+				}
 				GotNewLine = 1;
 				++LineCount;
 			}
@@ -1251,7 +1315,7 @@ public:
 		CFontSizeData *pSizeData = NULL;
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float FakeToScreenY;
+		float FakeToScreenX, FakeToScreenY;
 
 		int ActualSize;
 		float DrawX = 0.0f, DrawY = 0.0f;
@@ -1262,13 +1326,14 @@ public:
 		// calculate the font size of the displayed glyphs
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
+		FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
 		FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
 
 		// same with size
 		ActualSize = (int)(Size * FakeToScreenY);
 		Size = ActualSize / FakeToScreenY;
 
-		pSizeData = GetSize(TextContainer.m_pFont, TextContainer.m_FontSize);
+		pSizeData = TextContainer.m_pFont->GetFontSize(TextContainer.m_FontSize);
 
 		FT_Set_Pixel_Sizes(TextContainer.m_pFont->m_FtFace, 0, TextContainer.m_FontSize);
 
@@ -1281,6 +1346,20 @@ public:
 		const char *pCurrent = (char *)pText;
 		const char *pCurrentLast = (char *)pText;
 		const char *pEnd = pCurrent + Length;
+
+		int RenderFlags = TextContainer.m_RenderFlags;
+
+		if((RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) != 0)
+		{
+			DrawX = TextContainer.m_X;
+			DrawY = TextContainer.m_Y;
+		}
+		else
+		{
+			DrawX = TextContainer.m_AlignedStartX;
+			DrawY = TextContainer.m_AlignedStartY;
+		}
+
 		DrawX = TextContainer.m_X;
 		DrawY = TextContainer.m_Y;
 		LineCount = TextContainer.m_LineCount;
@@ -1356,6 +1435,11 @@ public:
 				{
 					DrawX = TextContainer.m_StartX;
 					DrawY += Size;
+					if((RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+					{
+						DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
+						DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+					}
 					++LineCount;
 					if(TextContainer.m_MaxLines > 0 && LineCount > TextContainer.m_MaxLines)
 						break;
@@ -1365,7 +1449,7 @@ public:
 				SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
 				if(pChr)
 				{
-					float Advance = ((((m_RenderFlags&TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pChr->m_Width) : (pChr->m_AdvanceX + (((m_RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? (-pChr->m_OffsetX) : 0.f))))  * Scale + Kerning(TextContainer.m_pFont, Character, NextCharacter)*Scale;
+					float Advance = ((((RenderFlags&TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pChr->m_Width) : (pChr->m_AdvanceX + (((RenderFlags&TEXT_RENDER_FLAG_NO_X_BEARING) != 0) ? (-pChr->m_OffsetX) : 0.f))))  * Scale + Kerning(TextContainer.m_pFont, Character, NextCharacter)*Scale;
 
 					if(TextContainer.m_Flags&TEXTFLAG_STOP_AT_END && DrawX + Advance * Size - TextContainer.m_StartX > TextContainer.m_LineWidth)
 					{
@@ -1396,6 +1480,11 @@ public:
 			{
 				DrawX = TextContainer.m_StartX;
 				DrawY += Size;
+				if((RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+				{
+					DrawX = (int)(DrawX * FakeToScreenX) / FakeToScreenX; // realign
+					DrawY = (int)(DrawY * FakeToScreenY) / FakeToScreenY;
+				}
 				++LineCount;
 			}
 		}
@@ -1497,9 +1586,23 @@ public:
 
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y)
 	{
+		STextContainer& TextContainer = GetTextContainer(TextContainerIndex);
+
 		// remap the current screen, after render revert the change again
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1); 
+		
+		if((TextContainer.m_RenderFlags&TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+		{
+			float FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
+			float FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
+			int ActualX = (int)((TextContainer.m_X + X) * FakeToScreenX);
+			int ActualY = (int)((TextContainer.m_Y + Y) * FakeToScreenY);
+			float AlignedX = ActualX / FakeToScreenX;
+			float AlignedY = ActualY / FakeToScreenY;
+			X = AlignedX - TextContainer.m_AlignedStartX;
+			Y = AlignedY - TextContainer.m_AlignedStartY;
+		}
 		
 		Graphics()->MapScreen(ScreenX0 - X, ScreenY0 - Y, ScreenX1 - X, ScreenY1 - Y);
 		RenderTextContainer(TextContainerIndex, pTextColor, pTextOutlineColor);
@@ -1584,10 +1687,10 @@ public:
 				
 				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
 				
-				int MaxSize = (MaxWidth - WidthLastChars);
-				if(MaxSize > 0)
+				int MaxSizeWidth = (MaxWidth - WidthLastChars);
+				if(MaxSizeWidth > 0)
 				{
-					int SlotW = ((((unsigned int)MaxSize) < (unsigned int)pBitmap->width) ? MaxSize : pBitmap->width);
+					int SlotW = ((((unsigned int)MaxSizeWidth) < (unsigned int)pBitmap->width) ? MaxSizeWidth : pBitmap->width);
 					int SlotH = pBitmap->rows;
 					int SlotSize = SlotW*SlotH;
 					
@@ -1602,21 +1705,31 @@ public:
 								ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
 							}
 					}
-					/*else if(pBitmap->pixel_mode == FT_PIXEL_MODE_MONO) // ignore_convention
-					{
-						for(py = 0; py < (unsigned)pBitmap->rows; py++) // ignore_convention
-							for(px = 0; px < (unsigned)pBitmap->width; px++) // ignore_convention
-							{
-								if(pBitmap->buffer[py*pBitmap->pitch+px/8]&(1<<(7-(px%8)))) // ignore_convention
-									ms_aGlyphData[(py)*SlotW+px] = 255;
-							}
-					}*/
 					
 					Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
 					WidthLastChars += (SlotW + 1);
 				}
 			}
 			pCurrent = pTmp;
+		}
+	}
+
+	virtual void OnWindowResize()
+	{
+		bool FoundTextContainer = false;
+		for(size_t i = 0; i < m_TextContainers.size(); ++i)
+			if(m_TextContainers[i].m_StringInfo.m_QuadBufferContainerIndex != -1)
+				FoundTextContainer = true;
+		dbg_assert(!FoundTextContainer, "text container was not empty");
+
+		for(size_t i = 0; i < m_Fonts.size(); ++i)
+		{
+			// reset the skylines
+			for(int j = 0; j < 2; ++j)
+				for(int k = 0; k < m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn.size(); ++k)
+					m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn[k] = 0;
+
+			m_Fonts[i]->InitFontSizes();
 		}
 	}
 };
