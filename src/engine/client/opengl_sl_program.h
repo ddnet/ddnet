@@ -41,7 +41,10 @@ protected:
 
 class CGLSLTWProgram : public CGLSLProgram {
 public:
-	CGLSLTWProgram() : m_LastTextureSampler(-1), m_LastIsTextured(-1) {}
+	CGLSLTWProgram() : m_LastTextureSampler(-1), m_LastIsTextured(-1)
+	{
+		m_LastScreen[0] = m_LastScreen[1] = m_LastScreen[2] = m_LastScreen[3] = -1.f;
+	}
 
 	int m_LocPos;
 	int m_LocIsTextured;
@@ -49,6 +52,7 @@ public:
 
 	int m_LastTextureSampler;
 	int m_LastIsTextured;
+	float m_LastScreen[4];
 };
 
 class CGLSLTextProgram : public CGLSLTWProgram {
