@@ -123,6 +123,11 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	return m_apPlayers[ClientID]->GetCharacter();
 }
 
+bool CGameContext::EmulateBug(int Bug)
+{
+	return m_MapBugs.Contains(Bug);
+}
+
 void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, int64_t Mask)
 {
 	float a = 3 * 3.14159f / 2 + Angle;
@@ -2521,6 +2526,13 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 
+	char aMapName[128];
+	int MapSize;
+	int MapCrc;
+	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapCrc);
+	m_MapBugs = GetMapBugs(aMapName, MapSize, MapCrc);
+	m_MapBugs.Dump();
+
 	// reset everything here
 	//world = new GAMEWORLD;
 	//players = new CPlayer[MAX_CLIENTS];
@@ -2624,9 +2636,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_pTuning = Tuning();
 		GameInfo.m_pUuids = &g_UuidManager;
 
-		char aMapName[128];
-		Server()->GetMapInfo(aMapName, sizeof(aMapName), &GameInfo.m_MapSize, &GameInfo.m_MapCrc);
 		GameInfo.m_pMapName = aMapName;
+		GameInfo.m_MapSize = MapSize;
+		GameInfo.m_MapCrc = MapCrc;
 
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
 

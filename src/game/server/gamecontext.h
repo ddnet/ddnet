@@ -8,6 +8,7 @@
 #include <engine/shared/memheap.h>
 
 #include <game/layers.h>
+#include <game/mapbugs.h>
 #include <game/voting.h>
 
 #include "eventhandler.h"
@@ -69,6 +70,7 @@ class CGameContext : public IGameServer
 	CTeeHistorian m_TeeHistorian;
 	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
+	CMapBugs m_MapBugs;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
@@ -129,6 +131,7 @@ public:
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
+	bool EmulateBug(int Bug);
 
 	//int m_LockTeams;
 
