@@ -362,10 +362,10 @@ class CTextRender : public IEngineTextRender
 		if(pFont->m_CurTextureDimensions[TextureIndex] < Height)
 			return false;
 
-		//skyline bottom left algorithm
+		// skyline bottom left algorithm
 		std::vector<int>& SkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_CurHeightOfPixelColumn;
 
-		//search a fitting area with less pixel loss
+		// search a fitting area with less pixel loss
 		int SmallestPixelLossAreaX = 0;
 		int SmallestPixelLossAreaY = pFont->m_CurTextureDimensions[TextureIndex] + 1;
 		int SmallestPixelLossCurPixelLoss = pFont->m_CurTextureDimensions[TextureIndex] * pFont->m_CurTextureDimensions[TextureIndex];
@@ -379,9 +379,9 @@ class CTextRender : public IEngineTextRender
 			int AreaWidth = 1;
 			for(size_t n = i + 1; n < i + Width && n < SkylineHeights.size(); ++n)
 			{
+				++AreaWidth;
 				if(SkylineHeights[n] <= CurHeight)
 				{
-					++AreaWidth;
 					CurPixelLoss += CurHeight - SkylineHeights[n];
 				}
 				// if the height changed, we will use that new height and adjust the pixel loss
