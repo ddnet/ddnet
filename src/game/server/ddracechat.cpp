@@ -1404,7 +1404,7 @@ void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
 	// Send the request to all authed clients.
 	for ( int i = 0; i < MAX_CLIENTS; i++ )
 	{
-		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_Authed)
+		if(pSelf->m_apPlayers[i] && pSelf->Server()->ClientAuthed(i))
 		{
 			pSelf->SendChatTarget(pSelf->m_apPlayers[i]->GetCID(), aBuf);
 			pSelf->SendChatTarget(pSelf->m_apPlayers[i]->GetCID(), pResult->GetString(0));

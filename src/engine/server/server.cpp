@@ -543,6 +543,11 @@ bool CServer::ClientIngame(int ClientID)
 	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME;
 }
 
+bool CServer::ClientAuthed(int ClientID)
+{
+	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_Authed;
+}
+
 int CServer::MaxClients() const
 {
 	return m_NetServer.MaxClients();
