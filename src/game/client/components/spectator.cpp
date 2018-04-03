@@ -272,7 +272,7 @@ void CSpectator::OnRender()
 		Selected = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-265.0f, BigFontSize, Localize("Free-View"), -1);
+	TextRender()->Text(0, Width/2.0f-(ObjWidth-60.0f), Height/2.0f-280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
@@ -284,7 +284,7 @@ void CSpectator::OnRender()
 			Selected = true;
 		}
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
-		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-265.0f, BigFontSize, Localize("Follow"), -1);
+		TextRender()->Text(0, Width/2.0f-(ObjWidth-350.0f), Height/2.0f-280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1);
 	}
 
 	float x = -(ObjWidth - 30.0f), y = StartY;
@@ -383,7 +383,7 @@ void CSpectator::OnRender()
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected?1.0f:0.5f);
 			TeeAlpha = 1.0f;
 		}
-		TextRender()->Text(0, Width/2.0f+x+50.0f, Height/2.0f+y+5.0f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_aName, 220.0f);
+		TextRender()->Text(0, Width/2.0f+x+50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_paInfoByDDTeam[i]->m_ClientID].m_aName, 220.0f);
 
 		// flag
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS &&
