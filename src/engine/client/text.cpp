@@ -1570,13 +1570,27 @@ public:
 			Graphics()->TextureSet(pFont->m_aTextures[0]);
 			if(pTextColor->m_A != 0)
 			{
-				STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[0];
-				Graphics()->ChangeColorOfCurrentQuadVertices(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f * pTextColor->m_R, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f * pTextColor->m_G, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f * pTextColor->m_B, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f * pTextColor->m_A);
+				for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
+				{
+					STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
+					unsigned char CR = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_R) * pTextColor->m_R);
+					unsigned char CG = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_G) * pTextColor->m_G);
+					unsigned char CB = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_B) * pTextColor->m_B);
+					unsigned char CA = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_A) * pTextColor->m_A);
+					Graphics()->ChangeColorOfQuadVertices((int)i, CR, CG, CB, CA);
+				}
 			}
 			else
 			{
-				STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[0];
-				Graphics()->ChangeColorOfCurrentQuadVertices(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f);
+				for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
+				{
+					STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
+					unsigned char CR = TextCharQuad.m_Vertices[0].m_Color.m_R;
+					unsigned char CG = TextCharQuad.m_Vertices[0].m_Color.m_G;
+					unsigned char CB = TextCharQuad.m_Vertices[0].m_Color.m_B;
+					unsigned char CA = TextCharQuad.m_Vertices[0].m_Color.m_A;
+					Graphics()->ChangeColorOfQuadVertices((int)i, CR, CG, CB, CA);
+				}
 			}
 
 			// render non outlined

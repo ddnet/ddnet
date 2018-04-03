@@ -695,6 +695,63 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 	}
 }
 
+void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
+	{
+		m_aVertices[QuadOffset * 6].m_Color.r = r;
+		m_aVertices[QuadOffset * 6].m_Color.g = g;
+		m_aVertices[QuadOffset * 6].m_Color.b = b;
+		m_aVertices[QuadOffset * 6].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 6 + 1].m_Color.r = r;
+		m_aVertices[QuadOffset * 6 + 1].m_Color.g = g;
+		m_aVertices[QuadOffset * 6 + 1].m_Color.b = b;
+		m_aVertices[QuadOffset * 6 + 1].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 6 + 2].m_Color.r = r;
+		m_aVertices[QuadOffset * 6 + 2].m_Color.g = g;
+		m_aVertices[QuadOffset * 6 + 2].m_Color.b = b;
+		m_aVertices[QuadOffset * 6 + 2].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 6 + 3].m_Color.r = r;
+		m_aVertices[QuadOffset * 6 + 3].m_Color.g = g;
+		m_aVertices[QuadOffset * 6 + 3].m_Color.b = b;
+		m_aVertices[QuadOffset * 6 + 3].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 6 + 4].m_Color.r = r;
+		m_aVertices[QuadOffset * 6 + 4].m_Color.g = g;
+		m_aVertices[QuadOffset * 6 + 4].m_Color.b = b;
+		m_aVertices[QuadOffset * 6 + 4].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 6 + 5].m_Color.r = r;
+		m_aVertices[QuadOffset * 6 + 5].m_Color.g = g;
+		m_aVertices[QuadOffset * 6 + 5].m_Color.b = b;
+		m_aVertices[QuadOffset * 6 + 5].m_Color.a = a;
+	}
+	else
+	{
+		m_aVertices[QuadOffset * 4].m_Color.r = r;
+		m_aVertices[QuadOffset * 4].m_Color.g = g;
+		m_aVertices[QuadOffset * 4].m_Color.b = b;
+		m_aVertices[QuadOffset * 4].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 4 + 1].m_Color.r = r;
+		m_aVertices[QuadOffset * 4 + 1].m_Color.g = g;
+		m_aVertices[QuadOffset * 4 + 1].m_Color.b = b;
+		m_aVertices[QuadOffset * 4 + 1].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 4 + 2].m_Color.r = r;
+		m_aVertices[QuadOffset * 4 + 2].m_Color.g = g;
+		m_aVertices[QuadOffset * 4 + 2].m_Color.b = b;
+		m_aVertices[QuadOffset * 4 + 2].m_Color.a = a;
+
+		m_aVertices[QuadOffset * 4 + 3].m_Color.r = r;
+		m_aVertices[QuadOffset * 4 + 3].m_Color.g = g;
+		m_aVertices[QuadOffset * 4 + 3].m_Color.b = b;
+		m_aVertices[QuadOffset * 4 + 3].m_Color.a = a;
+	}
+}
+
 void CGraphics_Threaded::SetColor(CCommandBuffer::SVertex *pVertex, int ColorIndex)
 {
 	CCommandBuffer::SVertex *pVert = (CCommandBuffer::SVertex*)pVertex;
