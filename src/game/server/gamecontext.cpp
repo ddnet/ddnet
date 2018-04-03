@@ -398,11 +398,36 @@ void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 }
 
 
-void CGameContext::SendBroadcast(const char *pText, int ClientID)
+void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImportant)
 {
 	CNetMsg_Sv_Broadcast Msg;
 	Msg.m_pMessage = pText;
+
+	if(ClientID == -1)
+	{
+        dbg_assert(IsImportant, "broadcast messages to all players must be important");
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i])
+			{
+				m_apPlayers[i]->m_LastBroadcastImportance = true;
+				m_apPlayers[i]->m_LastBroadcast = Server()->Tick();
+			}
+		}
+		return;
+	}
+
+	if(!m_apPlayers[ClientID])
+		return;
+
+	if(!IsImportant && m_apPlayers[ClientID]->m_LastBroadcastImportance && m_apPlayers[ClientID]->m_LastBroadcast > Server()->Tick() - Server()->TickSpeed() * 10)
+		return;
+
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	m_apPlayers[ClientID]->m_LastBroadcast = Server()->Tick();
+	m_apPlayers[ClientID]->m_LastBroadcastImportance = IsImportant;
 }
 
 void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char *pReason)

@@ -1221,7 +1221,7 @@ void CCharacter::HandleBroadcast()
 		char aBuftime[64];
 		int IntTime = (int)((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
 		str_format(aBuftime, sizeof(aBuftime), "%s%d:%s%d", ((IntTime/60) > 9)?"":"0", IntTime/60, ((IntTime%60) > 9)?"":"0", IntTime%60);
-		GameServer()->SendBroadcast(aBuftime, m_pPlayer->GetCID());
+		GameServer()->SendBroadcast(aBuftime, m_pPlayer->GetCID(), false);
 		m_CpLastBroadcast = m_CpActive;
 		m_LastBroadcast = Server()->Tick();
 	}
