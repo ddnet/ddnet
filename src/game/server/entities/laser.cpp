@@ -177,6 +177,7 @@ void CLaser::DoBounce()
 			vec2 PossiblePos;
 			bool Found = false;
 
+			// Check if the laser hits a player.
 			bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 			vec2 At;
 			CCharacter *pHit;
