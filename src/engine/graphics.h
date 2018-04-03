@@ -76,6 +76,19 @@ public:
 	int m_Red, m_Green, m_Blue;
 };
 
+struct GL_SPoint { float x, y; };
+struct GL_STexCoord { float u, v; };
+struct GL_SColorf { float r, g, b, a; };
+
+//use normalized color values
+struct GL_SColor { unsigned char r, g, b, a; };
+
+struct GL_SVertex
+{
+	GL_SPoint m_Pos;
+	GL_STexCoord m_Tex;
+	GL_SColor m_Color;
+};
 
 typedef void(*WINDOW_RESIZE_FUNC)(void *pUser);
 
@@ -226,6 +239,7 @@ public:
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
+	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 
 	virtual void TakeScreenshot(const char *pFilename) = 0;
 	virtual void TakeCustomScreenshot(const char *pFilename) = 0;

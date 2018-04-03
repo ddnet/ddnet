@@ -152,20 +152,12 @@ public:
 		WRAP_REPEAT = 0,
 		WRAP_CLAMP,
 	};
-	
-	struct SPoint { float x, y; };
-	struct STexCoord { float u, v; };
-	struct SColorf { float r, g, b, a; };
-	
-	//use normalized color values
-	struct SColor { unsigned char r, g, b, a; };
 
-	struct SVertex
-	{
-		SPoint m_Pos;
-		STexCoord m_Tex;
-		SColor m_Color;
-	};
+	typedef GL_SPoint SPoint;
+	typedef GL_STexCoord STexCoord;
+	typedef GL_SColorf SColorf;
+	typedef GL_SColor SColor;
+	typedef GL_SVertex SVertex;
 
 	struct SCommand
 	{
@@ -749,6 +741,7 @@ public:
 
 	// go through all vertices and change their color (only works for quads)
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a);
+	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 	
 	void SetColor(CCommandBuffer::SVertex *pVertex, int ColorIndex);
 
