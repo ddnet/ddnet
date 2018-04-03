@@ -43,6 +43,7 @@ typedef void (*ENVELOPE_EVAL)(float TimeOffset, int Env, float *pChannels, void 
 
 class CRenderTools
 {
+	int m_TeeQuadContainerIndex;
 public:
 	class IGraphics *m_pGraphics;
 	class CUI *m_pUI;
@@ -50,16 +51,23 @@ public:
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class CUI *UI() const { return m_pUI; }
 
+	void Init(class IGraphics *pGraphics, class CUI *pUI);
+
 	//typedef struct SPRITE;
 
 	void SelectSprite(struct CDataSprite *pSprite, int Flags=0, int sx=0, int sy=0);
 	void SelectSprite(int id, int Flags=0, int sx=0, int sy=0);
 
 	void DrawSprite(float x, float y, float size);
+	void QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size, bool DoSpriteScale = true);
+	void QuadContainerAddSprite(int QuadContainerIndex, float size, bool DoSpriteScale = true);
+	void QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
 	// rects
 	void DrawRoundRect(float x, float y, float w, float h, float r);
 	void DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners);
+
+	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
 
 	void DrawUIRect(const CUIRect *pRect, vec4 Color, int Corners, float Rounding);
 

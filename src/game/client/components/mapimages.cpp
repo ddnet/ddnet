@@ -36,7 +36,7 @@ void CMapImages::OnInit()
 			
 			float x = (i%16) * 64;
 			float y = (int)(i/16)* 64;
-			TextRender()->UploadText(m_OverlayBottomTexture, buff, -1, x+1, y + 12 + 32, 20, 64-1);
+			TextRender()->UploadEntityLayerText(m_OverlayBottomTexture, buff, -1, x+1, y + 12 + 32, 20, 64-1);
 		}
 	}
 	if(m_OverlayTopTexture == -1)
@@ -53,7 +53,7 @@ void CMapImages::OnInit()
 			
 			float x = (i%16) * 64;
 			float y = (int)(i/16)* 64;
-			TextRender()->UploadText(m_OverlayTopTexture, buff, -1, x+1, y+1, 20, 64-1);
+			TextRender()->UploadEntityLayerText(m_OverlayTopTexture, buff, -1, x+1, y+1, 20, 64-1);
 		}
 	}
 	if(m_OverlayCenterTexture == -1)
@@ -76,7 +76,7 @@ void CMapImages::OnInit()
 			int OffY = (len == 3 ? 10 : 5);
 			int OffX = (len == 3 ? 5 : 1);
 			
-			TextRender()->UploadText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, -1, 64-(OffX*2), 64, MinSize);
+			TextRender()->UploadEntityLayerText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, -1, 64-(OffX*2), 64, MinSize);
 		}
 	}
 }

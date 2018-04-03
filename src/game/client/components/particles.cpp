@@ -49,7 +49,7 @@ void CParticles::Add(int Group, CParticle *pPart)
 			return;
 	}
 
-	if (m_FirstFree == -1)
+	if(m_FirstFree == -1)
 		return;
 
 	// remove from the free list
@@ -156,34 +156,122 @@ void CParticles::OnRender()
 	LastTime = t;
 }
 
+void CParticles::OnInit()
+{
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+
+	m_ParticleQuadContainerIndex = Graphics()->CreateQuadContainer();
+
+	for(int i = 0; i <= (SPRITE_PART9 - SPRITE_PART_SLICE); ++i)
+	{
+		RenderTools()->SelectSprite(i);
+		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f, false);
+	}
+}
+
 void CParticles::RenderGroup(int Group)
 {
-	Graphics()->BlendNormal();
-	//gfx_blend_additive();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
-	Graphics()->QuadsBegin();
-
-	int i = m_aFirstPart[Group];
-	while(i != -1)
+	
+	// don't use the buffer methods here, else the old renderer gets many draw calls
+	if(Graphics()->IsBufferingEnabled())
 	{
-		RenderTools()->SelectSprite(m_aParticles[i].m_Spr);
-		float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
-		vec2 p = m_aParticles[i].m_Pos;
-		float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
+		int i = m_aFirstPart[Group];
 
-		Graphics()->QuadsSetRotation(m_aParticles[i].m_Rot);
+		static IGraphics::SRenderSpriteInfo s_aParticleRenderInfo[MAX_PARTICLES];
 
-		Graphics()->SetColor(
-			m_aParticles[i].m_Color.r,
-			m_aParticles[i].m_Color.g,
-			m_aParticles[i].m_Color.b,
-			m_aParticles[i].m_Color.a); // pow(a, 0.75f) *
+		int CurParticleRenderCount = 0;
 
-		IGraphics::CQuadItem QuadItem(p.x, p.y, Size, Size);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		// batching makes sense for stuff like ninja particles
+		float LastColor[4];
+		int LastQuadOffset = 0;
 
-		i = m_aParticles[i].m_NextPart;
+		if(i != -1)
+		{
+			LastColor[0] = m_aParticles[i].m_Color.r;
+			LastColor[1] = m_aParticles[i].m_Color.g;
+			LastColor[2] = m_aParticles[i].m_Color.b;
+			LastColor[3] = m_aParticles[i].m_Color.a;
+
+			Graphics()->SetColor(
+				m_aParticles[i].m_Color.r,
+				m_aParticles[i].m_Color.g,
+				m_aParticles[i].m_Color.b,
+				m_aParticles[i].m_Color.a);
+
+			LastQuadOffset = m_aParticles[i].m_Spr;
+		}
+		
+		while(i != -1)
+		{
+			int QuadOffset = m_aParticles[i].m_Spr;
+			float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
+			vec2 p = m_aParticles[i].m_Pos;
+			float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
+			
+			if(LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != m_aParticles[i].m_Color.a || LastQuadOffset != QuadOffset)
+			{
+				Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
+				CurParticleRenderCount = 0;
+				LastQuadOffset = QuadOffset;
+
+				Graphics()->SetColor(
+					m_aParticles[i].m_Color.r,
+					m_aParticles[i].m_Color.g,
+					m_aParticles[i].m_Color.b,
+					m_aParticles[i].m_Color.a);
+
+				LastColor[0] = m_aParticles[i].m_Color.r;
+				LastColor[1] = m_aParticles[i].m_Color.g;
+				LastColor[2] = m_aParticles[i].m_Color.b;
+				LastColor[3] = m_aParticles[i].m_Color.a;
+			}
+
+			s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[0] = p.x;
+			s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[1] = p.y;
+
+			s_aParticleRenderInfo[CurParticleRenderCount].m_Scale = Size;
+			s_aParticleRenderInfo[CurParticleRenderCount].m_Rotation = m_aParticles[i].m_Rot;
+			
+			++CurParticleRenderCount;			
+
+			i = m_aParticles[i].m_NextPart;
+		}
+
+		Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
+
 	}
-	Graphics()->QuadsEnd();
-	Graphics()->BlendNormal();
+	else
+	{
+		int i = m_aFirstPart[Group];
+
+		Graphics()->BlendNormal();
+		//gfx_blend_additive();
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
+		Graphics()->QuadsBegin();
+
+		while(i != -1)
+		{
+			RenderTools()->SelectSprite(m_aParticles[i].m_Spr);
+			float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
+			vec2 p = m_aParticles[i].m_Pos;
+			float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
+
+			Graphics()->QuadsSetRotation(m_aParticles[i].m_Rot);
+
+			Graphics()->SetColor(
+				m_aParticles[i].m_Color.r,
+				m_aParticles[i].m_Color.g,
+				m_aParticles[i].m_Color.b,
+				m_aParticles[i].m_Color.a); // pow(a, 0.75f) *
+
+			IGraphics::CQuadItem QuadItem(p.x, p.y, Size, Size);
+			Graphics()->QuadsDraw(&QuadItem, 1);
+
+			i = m_aParticles[i].m_NextPart;
+		}
+		Graphics()->QuadsEnd();
+		Graphics()->BlendNormal();
+	}
 }

@@ -34,7 +34,7 @@ class CMapLayers : public CComponent
 		{
 			m_Width = 0;
 			m_Height = 0;
-			m_VisualObjectsIndex = -1;
+			m_BufferContainerIndex = -1;
 			m_IsTextured = false;
 		}		
 		
@@ -50,27 +50,27 @@ class CMapLayers : public CComponent
 		public:
 			bool DoDraw() 
 			{
-				return (bool)((m_IndexBufferByteOffset&0x80000000) != 0);
+				return (bool)((m_IndexBufferByteOffset&0x00000001) != 0);
 			}
 
 			void Draw(bool SetDraw) 
 			{
-				m_IndexBufferByteOffset = (SetDraw ? 0x80000000 : 0) | (m_IndexBufferByteOffset & 0x7FFFFFFF);
+				m_IndexBufferByteOffset = (SetDraw ? 0x00000001 : (offset_ptr32)0) | (m_IndexBufferByteOffset & 0xFFFFFFFE);
 			}
 
 			offset_ptr IndexBufferByteOffset()
 			{
-				return ((offset_ptr)(m_IndexBufferByteOffset & 0x7FFFFFFF));
+				return ((offset_ptr)(m_IndexBufferByteOffset & 0xFFFFFFFE));
 			}
 
 			void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
-				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x80000000);
+				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x00000001);
 			}
 
 			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
-				m_IndexBufferByteOffset = (((offset_ptr32)(m_IndexBufferByteOffset & 0x7FFFFFFF)) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x80000000);
+				m_IndexBufferByteOffset = (((offset_ptr32)(m_IndexBufferByteOffset & 0xFFFFFFFE)) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x00000001);
 			}
 		};
 		STileVisual* m_TilesOfLayer;
@@ -89,12 +89,31 @@ class CMapLayers : public CComponent
 		
 		unsigned int m_Width;
 		unsigned int m_Height;
-		int m_VisualObjectsIndex;
+		int m_BufferContainerIndex;
 		bool m_IsTextured;
 	};
 	std::vector<STileLayerVisuals*> m_TileLayerVisuals;
+
+	struct SQuadLayerVisuals
+	{
+		SQuadLayerVisuals() : m_QuadNum(0), m_QuadsOfLayer(NULL), m_BufferContainerIndex(-1), m_IsTextured(false) {}
+
+		struct SQuadVisual
+		{
+			SQuadVisual() : m_IndexBufferByteOffset(0) {}
+
+			offset_ptr m_IndexBufferByteOffset;
+		};
+
+		int m_QuadNum;
+		SQuadVisual* m_QuadsOfLayer;
+
+		int m_BufferContainerIndex;
+		bool m_IsTextured;
+	};
+	std::vector<SQuadLayerVisuals*> m_QuadLayerVisuals;
 	
-	int TileLayersOfGroup(CMapItemGroup* pGroup);
+	void LayersOfGroupCount(CMapItemGroup* pGroup, int& TileLayerCount, int& QuadLayerCount, bool& PassedGameLayer);
 public:
 	enum
 	{
@@ -109,9 +128,10 @@ public:
 	virtual void OnMapLoad();
 	
 	void RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup);
-	void DrawTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1);
-	void DrawKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup);
-	
+	void RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1);
+	void RenderKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup);
+	void RenderQuadLayer(int LayerIndex, CMapItemLayerQuads* pQuadLayer, CMapItemGroup* pGroup, bool ForceRender = false);
+
 	void EnvelopeUpdate();
 
 	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);

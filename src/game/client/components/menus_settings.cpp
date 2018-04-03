@@ -237,7 +237,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, 0, &Right); //
 			Right.HSplitTop(20.0f, 0, &Right); // Make some distance so it looks more natural
 			Right.HSplitTop(20.0f, &Button, &Right);
-			if (DoButton_CheckBox(&g_Config.m_ClAutoCSV,
+			if(DoButton_CheckBox(&g_Config.m_ClAutoCSV,
 				Localize("Automatically create statboard csv"),
 				g_Config.m_ClAutoCSV, &Button))
 			{
@@ -247,7 +247,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(10.0f, 0, &Right);
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Button.VSplitRight(20.0f, &Button, 0);
-			if (g_Config.m_ClAutoCSVMax)
+			if(g_Config.m_ClAutoCSVMax)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max CSVs"), g_Config.m_ClAutoCSVMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max CSVs"), "∞");
@@ -453,7 +453,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(230.0f, &Label, 0);
 	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
-	Label.HSplitTop(15.0f, 0, &Label);
 	Label.VSplitLeft(70.0f, 0, &Label);
 	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
 
@@ -586,7 +585,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
-			Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
 			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
 			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1,Item.m_Rect.w);
 			if(g_Config.m_Debug)
@@ -617,9 +615,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, 0);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-		const char *pSearchLabel = "⚲";
+		const char *pSearchLabel = "\xEE\xA2\xB6";
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
 		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
 		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(NULL);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
@@ -1346,14 +1348,15 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 		static CFont *pDefaultFont = 0;
 		char aFilename[512];
 		const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
-		if (str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+		if(str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
 			str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
 			pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
 		IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
 			io_close(File);
-			pDefaultFont = TextRender()->LoadFont(aFilename);
+			if((pDefaultFont = TextRender()->GetFont(aFilename)) == NULL)
+				pDefaultFont = TextRender()->LoadFont(aFilename);
 			TextRender()->SetDefaultFont(pDefaultFont);
 		}
 		if(!pDefaultFont)
@@ -1465,49 +1468,49 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if (DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), g_Config.m_ClDDRaceScoreBoard, &Button))
 		{
 			g_Config.m_ClDDRaceScoreBoard ^= 1;
 		}
 
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if (DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowIDs, Localize("Show client IDs in Scoreboard"), g_Config.m_ClShowIDs, &Button))
 		{
 			g_Config.m_ClShowIDs ^= 1;
 		}
 
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowhudScore, Localize("Show score"), g_Config.m_ClShowhudScore, &Button))
 		{
 			g_Config.m_ClShowhudScore ^= 1;
 		}
 
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), g_Config.m_ClShowhudHealthAmmo, &Button))
 		{
 			g_Config.m_ClShowhudHealthAmmo ^= 1;
 		}
 
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if (DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
 		{
 			g_Config.m_ClShowChat ^= 1;
 		}
 
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), g_Config.m_ClChatTeamColors, &Button))
 		{
 			g_Config.m_ClChatTeamColors ^= 1;
 		}
 
 		Left.HSplitTop(20.0f, &Button, &Left);
-		if (DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
 		{
 			g_Config.m_ClShowKillMessages ^= 1;
 		}
 
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if (DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), g_Config.m_ClShowVotesAfterVoting, &Button))
 		{
 			g_Config.m_ClShowVotesAfterVoting ^= 1;
 		}
@@ -1526,7 +1529,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("System message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
 					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
 					g_Config.m_ClMessageSystemHue = HSL.h;
@@ -1562,7 +1565,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char name[16];
 			str_copy(name, g_Config.m_PlayerName, sizeof(name));
 			str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
-			while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Label.w)
+			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Label.w)
 			{
 				name[str_length(name) - 1] = 0;
 				str_format(aBuf, sizeof(aBuf), "*** '%s' entered and joined the spectators", name);
@@ -1578,7 +1581,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Highlighted message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
 					vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
 					g_Config.m_ClMessageHighlightHue = HSL.h;
@@ -1619,7 +1622,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			char name[16];
 			str_copy(name, g_Config.m_PlayerName, sizeof(name));
 			str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize ("Look out!"));
-			while (TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Button.w)
+			while(TextRender()->TextWidth(0, 12.0f, aBuf, -1) > Button.w)
 			{
 				name[str_length(name) - 1] = 0;
 				str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize("Look out!"));
@@ -1636,7 +1639,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Team message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
 					vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
 					g_Config.m_ClMessageTeamHue = HSL.h;
@@ -1689,7 +1692,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Friend message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
 					g_Config.m_ClMessageFriendHue = 0;
 					g_Config.m_ClMessageFriendSat = 255;
@@ -1751,7 +1754,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Normal message"), 16.0f, -1);
 			{
 				static int s_DefaultButton = 0;
-				if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
 					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
 					g_Config.m_ClMessageHue = HSL.h;
@@ -1808,7 +1811,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Inner color"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 			{
 				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
 				g_Config.m_ClLaserInnerHue = HSL.h;
@@ -1844,7 +1847,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Outline color"), 16.0f, -1);
 		{
 			static int s_DefaultButton = 0;
-			if (DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
+			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 			{
 				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
 				g_Config.m_ClLaserOutlineHue = HSL.h;
@@ -1945,7 +1948,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	Left.HSplitTop(20.0f, &Label, &Left);
 	Button.VSplitRight(20.0f, &Button, 0);
 	char aBuf[64];
-	if (g_Config.m_ClReconnectTimeout == 1)
+	if(g_Config.m_ClReconnectTimeout == 1)
 	{
 		str_format(aBuf, sizeof(aBuf), "%s %i %s", Localize("Wait before try for"), g_Config.m_ClReconnectTimeout, Localize("second"));
 	}
@@ -1957,7 +1960,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	Left.HSplitTop(20.0f, &Button, 0);
 	Button.HMargin(2.0f, &Button);
 	g_Config.m_ClReconnectTimeout = static_cast<int>(DoScrollbarH(&g_Config.m_ClReconnectTimeout, &Button, g_Config.m_ClReconnectTimeout / 120.0f) * 120.0f);
-	if (g_Config.m_ClReconnectTimeout < 5)
+	if(g_Config.m_ClReconnectTimeout < 5)
 		g_Config.m_ClReconnectTimeout = 5;*/
 }
 

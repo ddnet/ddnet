@@ -318,6 +318,9 @@ public:
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
 
+	void OnWindowResize();
+	static void OnWindowResizeCB(void *pUser);
+
 	virtual const char *GetItemName(int Type);
 	virtual const char *Version();
 	virtual const char *NetVersion();

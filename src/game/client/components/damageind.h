@@ -27,11 +27,13 @@ class CDamageInd : public CComponent
 	CItem *CreateI();
 	void DestroyI(CItem *i);
 
+	int m_DmgIndQuadContainerIndex;
 public:
 	CDamageInd();
 
 	void Create(vec2 Pos, vec2 Dir);
 	void Reset();
 	virtual void OnRender();
+	virtual void OnInit();
 };
 #endif

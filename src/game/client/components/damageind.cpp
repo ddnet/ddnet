@@ -18,7 +18,7 @@ CDamageInd::CDamageInd()
 
 CDamageInd::CItem *CDamageInd::CreateI()
 {
-	if (m_NumItems < MAX_ITEMS)
+	if(m_NumItems < MAX_ITEMS)
 	{
 		CItem *p = &m_aItems[m_NumItems];
 		m_NumItems++;
@@ -36,7 +36,7 @@ void CDamageInd::DestroyI(CDamageInd::CItem *i)
 void CDamageInd::Create(vec2 Pos, vec2 Dir)
 {
 	CItem *i = CreateI();
-	if (i)
+	if(i)
 	{
 		i->m_Pos = Pos;
 		i->m_StartTime = Client()->LocalTime();
@@ -48,7 +48,6 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 void CDamageInd::OnRender()
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->QuadsBegin();
 	static float s_LastLocalTime = Client()->LocalTime();
 	for(int i = 0; i < m_NumItems;)
 	{
@@ -74,13 +73,24 @@ void CDamageInd::OnRender()
 			vec2 Pos = mix(m_aItems[i].m_Pos+m_aItems[i].m_Dir*75.0f, m_aItems[i].m_Pos, clamp((Life-0.60f)/0.15f, 0.0f, 1.0f));
 			Graphics()->SetColor(1.0f,1.0f,1.0f, Life/0.1f);
 			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + Life * 2.0f);
-			RenderTools()->SelectSprite(SPRITE_STAR1);
-			RenderTools()->DrawSprite(Pos.x, Pos.y, 48.0f);
+			Graphics()->RenderQuadContainerAsSprite(m_DmgIndQuadContainerIndex, 0, Pos.x, Pos.y);
 			i++;
 		}
 	}
 	s_LastLocalTime = Client()->LocalTime();
-	Graphics()->QuadsEnd();
+
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+}
+
+void CDamageInd::OnInit()
+{
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+
+	m_DmgIndQuadContainerIndex = Graphics()->CreateQuadContainer();
+	RenderTools()->SelectSprite(SPRITE_STAR1);
+	RenderTools()->QuadContainerAddSprite(m_DmgIndQuadContainerIndex, 48.f);
 }
 
 void CDamageInd::Reset()

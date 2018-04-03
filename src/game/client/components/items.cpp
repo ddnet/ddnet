@@ -57,7 +57,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	int PrevTick = Client()->PrevGameTick();
 
-	if (m_pClient->AntiPingGrenade() && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if(m_pClient->AntiPingGrenade() && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		// calc predicted game tick
 		static int Offset = 0;
@@ -82,9 +82,10 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(pCurrent->m_Type, 0, NUM_WEAPONS-1)].m_pSpriteProj);
+	int QuadOffset = 2 + 4 + NUM_WEAPONS + clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
+
 	vec2 Vel = Pos-PrevPos;
 	//vec2 pos = mix(vec2(prev->x, prev->y), vec2(current->x, current->y), Client()->IntraGameTick());
 
@@ -122,25 +123,23 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	}
 
-	IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 32, 32);
-	Graphics()->QuadsDraw(&QuadItem, 1);
-
-	Graphics()->QuadsSetRotation(0);
-	Graphics()->QuadsEnd();
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 }
 
 void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->QuadsBegin();
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+
+	int QuadOffset = 2;
+
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick());
 	float Angle = 0.0f;
-	float Size = 64.0f;
-	if (pCurrent->m_Type == POWERUP_WEAPON)
+	if(pCurrent->m_Type == POWERUP_WEAPON)
 	{
 		Angle = 0; //-pi/6;//-0.25f * pi * 2.0f;
-		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS-1)].m_pSpriteBody);
-		Size = g_pData->m_Weapons.m_aId[clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS-1)].m_VisualSize;
+		QuadOffset += 4 + clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
 	}
 	else
 	{
@@ -150,12 +149,11 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 			SPRITE_PICKUP_WEAPON,
 			SPRITE_PICKUP_NINJA
 			};
-		RenderTools()->SelectSprite(c[pCurrent->m_Type]);
+		QuadOffset += pCurrent->m_Type;
 
 		if(c[pCurrent->m_Type] == SPRITE_PICKUP_NINJA)
 		{
 			m_pClient->m_pEffects->PowerupShine(Pos, vec2(96,18));
-			Size *= 2.0f;
 			Pos.x -= 10.0f;
 		}
 	}
@@ -179,8 +177,8 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	Pos.x += cosf(s_Time*2.0f+Offset)*2.5f;
 	Pos.y += sinf(s_Time*2.0f+Offset)*2.5f;
 	s_LastLocalTime = Client()->LocalTime();
-	RenderTools()->DrawSprite(Pos.x, Pos.y, Size);
-	Graphics()->QuadsEnd();
+
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 }
 
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
@@ -188,14 +186,13 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 	float Angle = 0.0f;
 	float Size = 42.0f;
 
-	Graphics()->BlendNormal();
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->QuadsBegin();
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	int QuadOffset = 0;
 
-	if(pCurrent->m_Team == TEAM_RED)
-		RenderTools()->SelectSprite(SPRITE_FLAG_RED);
-	else
-		RenderTools()->SelectSprite(SPRITE_FLAG_BLUE);
+	if(pCurrent->m_Team != TEAM_RED)
+		++QuadOffset;
 
 	Graphics()->QuadsSetRotation(Angle);
 
@@ -216,9 +213,7 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 			Pos = m_pClient->m_LocalCharacterPos;
 	}
 
-	IGraphics::CQuadItem QuadItem(Pos.x, Pos.y-Size*0.75f, Size, Size*2);
-	Graphics()->QuadsDraw(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y-Size*0.75f);
 }
 
 
@@ -237,13 +232,9 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent)
 
 	vec2 Out, Border;
 
-	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-
-	//vec4 inner_color(0.15f,0.35f,0.75f,1.0f);
-	//vec4 outer_color(0.65f,0.85f,1.0f,1.0f);
-
+	
 	// do outline
 	RGB = HslToRgb(vec3(g_Config.m_ClLaserOutlineHue / 255.0f, g_Config.m_ClLaserOutlineSat / 255.0f, g_Config.m_ClLaserOutlineLht / 255.0f));
 	vec4 OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
@@ -274,23 +265,15 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent)
 
 	// render head
 	{
-		Graphics()->BlendNormal();
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
-		Graphics()->QuadsBegin();
+		int QuadOffset = 2 + 4 + NUM_WEAPONS * 2 + (Client()->GameTick() % 3);
 
-		int Sprites[] = {SPRITE_PART_SPLAT01, SPRITE_PART_SPLAT02, SPRITE_PART_SPLAT03};
-		RenderTools()->SelectSprite(Sprites[Client()->GameTick()%3]);
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
 		Graphics()->QuadsSetRotation(Client()->GameTick());
 		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
-		IGraphics::CQuadItem QuadItem(Pos.x, Pos.y, 24, 24);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
-		QuadItem = IGraphics::CQuadItem(Pos.x, Pos.y, 20, 20);
-		Graphics()->QuadsDraw(&QuadItem, 1);
-		Graphics()->QuadsEnd();
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, 20.f/24.f, 20.f / 24.f);
 	}
-
-	Graphics()->BlendNormal();
 }
 
 void CItems::OnRender()
@@ -329,7 +312,7 @@ void CItems::OnRender()
 		if(Item.m_Type == NETOBJTYPE_FLAG)
 		{
 			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID);
-			if (pPrev)
+			if(pPrev)
 			{
 				const void *pPrevGameData = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_GAMEDATA, m_pClient->m_Snap.m_GameDataSnapID);
 				RenderFlag(static_cast<const CNetObj_Flag *>(pPrev), static_cast<const CNetObj_Flag *>(pData),
@@ -349,6 +332,51 @@ void CItems::OnRender()
 		else
 			RenderProjectile(&m_aExtraProjectiles[i], 0);
 	}
+
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+}
+
+void CItems::OnInit()
+{
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+
+	m_ItemsQuadContainerIndex = Graphics()->CreateQuadContainer();
+
+	RenderTools()->SelectSprite(SPRITE_FLAG_RED);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, -21.f, -42.f, 42.f, 84.f);
+	RenderTools()->SelectSprite(SPRITE_FLAG_BLUE);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, -21.f, -42.f, 42.f, 84.f);
+
+
+	RenderTools()->SelectSprite(SPRITE_PICKUP_HEALTH);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f);
+	RenderTools()->SelectSprite(SPRITE_PICKUP_ARMOR);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f);
+	RenderTools()->SelectSprite(SPRITE_PICKUP_WEAPON);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f);
+	RenderTools()->SelectSprite(SPRITE_PICKUP_NINJA);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 128.f);
+
+	for(int i = 0; i < NUM_WEAPONS; ++i)
+	{
+		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody);
+		RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize);
+	}
+
+	for(int i = 0; i < NUM_WEAPONS; ++i)
+	{
+		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteProj);
+		RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f, false);
+	}
+
+	RenderTools()->SelectSprite(SPRITE_PART_SPLAT01);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f, false);
+	RenderTools()->SelectSprite(SPRITE_PART_SPLAT02);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f, false);
+	RenderTools()->SelectSprite(SPRITE_PART_SPLAT03);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f, false);
 }
 
 void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)

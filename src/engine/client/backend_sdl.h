@@ -80,10 +80,15 @@ class CCommandProcessorFragment_OpenGL
 	{
 		GLuint m_Tex;
 		int m_MemSize;
+
+		int m_Width;
+		int m_Height;
+		int m_RescaleCount;
 	};
 	CTexture m_aTextures[CCommandBuffer::MAX_TEXTURES];
 	volatile int *m_pTextureMemoryUsage;
 
+	GLint m_MaxTexSize;
 public:
 	enum
 	{
@@ -117,6 +122,9 @@ public:
 	bool RunCommand(const CCommandBuffer::SCommand  *pBaseCommand);
 };
 
+
+#define MAX_STREAM_BUFFER_COUNT 30
+
 class CGLSLProgram;
 class CGLSLTWProgram;
 class CGLSLPrimitiveProgram;
@@ -124,6 +132,9 @@ class CGLSLQuadProgram;
 class CGLSLTileProgram;
 class CGLSLBorderTileProgram;
 class CGLSLBorderTileLineProgram;
+class CGLSLTextProgram;
+class CGLSLSpriteProgram;
+class CGLSLSpriteMultipleProgram;
 // takes care of opengl 3.3 related rendering
 class CCommandProcessorFragment_OpenGL3_3
 {
@@ -136,6 +147,11 @@ class CCommandProcessorFragment_OpenGL3_3
 		GLuint m_Sampler;
 		int m_LastWrapMode;
 		int m_MemSize;
+
+		int m_Width;
+		int m_Height;
+
+		int m_RescaleCount;
 	};
 	CTexture m_aTextures[CCommandBuffer::MAX_TEXTURES];
 	volatile int *m_pTextureMemoryUsage;
@@ -147,10 +163,20 @@ class CCommandProcessorFragment_OpenGL3_3
 	CGLSLBorderTileProgram *m_pBorderTileProgramTextured;
 	CGLSLBorderTileLineProgram *m_pBorderTileLineProgram;
 	CGLSLBorderTileLineProgram *m_pBorderTileLineProgramTextured;
-	
-	GLuint m_PrimitiveDrawVertexID;
-	GLuint m_PrimitiveDrawBufferID;
-	GLuint m_LastIndexBufferBound;
+	CGLSLQuadProgram *m_pQuadProgram;
+	CGLSLQuadProgram *m_pQuadProgramTextured;
+	CGLSLTextProgram *m_pTextProgram;
+	CGLSLSpriteProgram *m_pSpriteProgram;
+	CGLSLSpriteMultipleProgram *m_pSpriteProgramMultiple;
+
+	GLuint m_LastProgramID;
+
+	GLuint m_PrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
+	GLuint m_PrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
+
+	GLuint m_LastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
+
+	int m_LastStreamBuffer;
 	
 	GLuint m_QuadDrawIndexBufferID;
 	unsigned int m_CurrentIndicesInBuffer;
@@ -168,19 +194,20 @@ class CCommandProcessorFragment_OpenGL3_3
 	
 	bool IsAndUpdateTextureSlotBound(int IDX, int Slot);
 	void DestroyTexture(int Slot);
-	void DestroyVisualObjects(int Index);
+	void DestroyBufferContainer(int Index, bool DeleteBOs = true);
 	
 	void AppendIndices(unsigned int NewIndicesCount);
 	
-	struct SVisualObject{
-		SVisualObject() : m_VertArrayID(0), m_VertBufferID(0), m_LastIndexBufferBound(0), m_NumElements(0), m_IsTextured(false) {}
+	struct SBufferContainer
+	{
+		SBufferContainer() : m_VertArrayID(0), m_LastIndexBufferBound(0) {}
 		GLuint m_VertArrayID;
-		GLuint m_VertBufferID;
 		GLuint m_LastIndexBufferBound;
-		int m_NumElements; //vertices and texture coordinates
-		bool m_IsTextured;
+		SBufferContainerInfo m_ContainerInfo;
 	};
-	std::vector<SVisualObject> m_VisualObjects;
+	std::vector<SBufferContainer> m_BufferContainers;
+
+	std::vector<GLuint> m_BufferObjectIndices;
 	
 	CCommandBuffer::SColorf m_ClearColor;
 public:
@@ -206,8 +233,11 @@ private:
 	static int TexFormatToOpenGLFormat(int TexFormat);
 	static unsigned char Sample(int w, int h, const unsigned char *pData, int u, int v, int Offset, int ScaleW, int ScaleH, int Bpp);
 	static void *Rescale(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
-
+	
 	void SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram);
+	void UseProgram(CGLSLTWProgram *pProgram);
+	void UploadStreamBufferData(unsigned int PrimitiveType, const void* pVertices, unsigned int PrimitiveCount);
+	void RenderText(const CCommandBuffer::SState& State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const float* pTextColor, const float* pTextOutlineColor);
 
 	void Cmd_Init(const SCommand_Init *pCommand);
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
@@ -217,15 +247,27 @@ private:
 	void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand);
 	void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand);
 	void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand);
-	
-	void Cmd_CreateVertBuffer(const CCommandBuffer::SCommand_CreateVertexBufferObject *pCommand);
-	void Cmd_AppendVertBuffer(const CCommandBuffer::SCommand_AppendVertexBufferObject *pCommand);
-	void Cmd_CreateVertArray(const CCommandBuffer::SCommand_CreateVertexArrayObject *pCommand);
-	void Cmd_RenderVertexArray(const CCommandBuffer::SCommand_RenderVertexArray *pCommand);
-	void Cmd_DestroyVertexArray(const CCommandBuffer::SCommand_DestroyVisual *pCommand);
-	
+
+	void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand);
+	void Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand);
+	void Cmd_UpdateBufferObject(const CCommandBuffer::SCommand_UpdateBufferObject *pCommand);
+	void Cmd_CopyBufferObject(const CCommandBuffer::SCommand_CopyBufferObject *pCommand);
+	void Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand);
+
+	void Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand);
+	void Cmd_UpdateBufferContainer(const CCommandBuffer::SCommand_UpdateBufferContainer *pCommand);
+	void Cmd_DeleteBufferContainer(const CCommandBuffer::SCommand_DeleteBufferContainer *pCommand);
+	void Cmd_IndicesRequiredNumNotify(const CCommandBuffer::SCommand_IndicesRequiredNumNotify *pCommand);
+		
+	void Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand);	
 	void Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand);
 	void Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand);
+	void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand);
+	void Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand);
+	void Cmd_RenderTextStream(const CCommandBuffer::SCommand_RenderTextStream *pCommand);
+	void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand);
+	void Cmd_RenderQuadContainerAsSprite(const CCommandBuffer::SCommand_RenderQuadContainerAsSprite *pCommand);
+	void Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand);
 public:
 	CCommandProcessorFragment_OpenGL3_3();
 

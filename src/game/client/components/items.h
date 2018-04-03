@@ -19,9 +19,11 @@ class CItems : public CComponent
 	void RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData);
 	void RenderLaser(const struct CNetObj_Laser *pCurrent);
 
+	int m_ItemsQuadContainerIndex;
 public:
 	virtual void OnReset();
 	virtual void OnRender();
+	virtual void OnInit();
 
 	void AddExtraProjectile(CNetObj_Projectile *pProj);
 };
