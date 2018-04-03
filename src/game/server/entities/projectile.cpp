@@ -165,18 +165,18 @@ void CProjectile::Tick()
 			bool IsTeleValid = false;
 			switch (m_Type)
 			{
-				case WEAPON_GRENADE:
-					{
-						if (pOwnerChar->m_HasTeleGrenade)
-							IsTeleValid = true;
-						break;
-					}
-				case WEAPON_GUN:
-					{
-						if (pOwnerChar->m_HasTeleGun)
-							IsTeleValid = true;
-						break;
-					}
+            case WEAPON_GRENADE:
+				{
+					if (pOwnerChar->m_HasTeleGrenade)
+						IsTeleValid = true;
+				}
+				break;
+			case WEAPON_GUN:
+				{
+					if (pOwnerChar->m_HasTeleGun)
+						IsTeleValid = true;
+				}
+				break;
 			}
 
 			if (IsTeleValid)
