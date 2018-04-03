@@ -1006,7 +1006,7 @@ Follow
 == 跟(Follow)
 
 Manual %3d:%02d  
-== 手册 %3d:%02d
+== 手动 %3d:%02d
 
 Automatically create statboard csv
 == 自动创建状态版的纯文本文件(CSV)
