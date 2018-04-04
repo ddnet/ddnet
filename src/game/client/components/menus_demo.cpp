@@ -430,7 +430,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y, Button.h*0.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y + (NameBar.h - (Button.h*0.5f)) / 2.f, Button.h*0.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = MainView.w;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 

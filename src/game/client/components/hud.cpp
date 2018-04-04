@@ -688,7 +688,8 @@ void CHud::RenderVoting()
 	const char *pYesKey = m_pClient->m_pBinds->GetKey("vote yes");
 	const char *pNoKey = m_pClient->m_pBinds->GetKey("vote no");
 	str_format(aBuf, sizeof(aBuf), "%s - %s", pYesKey, Localize("Vote yes"));
-	Base.y += Base.h+1;
+	Base.y += Base.h;
+	Base.h = 11.f;
 	UI()->DoLabel(&Base, aBuf, 6.0f, -1);
 
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), pNoKey);

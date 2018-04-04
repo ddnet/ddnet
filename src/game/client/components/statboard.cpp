@@ -303,7 +303,7 @@ void CStatboard::RenderGlobalStats()
 		char aBuf[128];
 		CTextCursor Cursor;
 		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
-		TextRender()->SetCursor(&Cursor, x+64, y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, x+64, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 220;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 
@@ -313,14 +313,14 @@ void CStatboard::RenderGlobalStats()
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Frags);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// DEATHS
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// SUICIDES
@@ -328,7 +328,7 @@ void CStatboard::RenderGlobalStats()
 			px += 10;
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Suicides);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// RATIO
@@ -338,14 +338,14 @@ void CStatboard::RenderGlobalStats()
 			else
 				str_format(aBuf, sizeof(aBuf), "%.2f", (float)(pStats->m_Frags)/pStats->m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// NET
 		{
 			str_format(aBuf, sizeof(aBuf), "%+d", pStats->m_Frags-pStats->m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// FPM
@@ -353,21 +353,21 @@ void CStatboard::RenderGlobalStats()
 			float Fpm = pStats->GetFPM(Client()->GameTick(), Client()->GameTickSpeed());
 			str_format(aBuf, sizeof(aBuf), "%.1f", Fpm);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// SPREE
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_CurrentSpree);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// BEST SPREE
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_BestSpree);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// GRABS
@@ -375,7 +375,7 @@ void CStatboard::RenderGlobalStats()
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagGrabs);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		// WEAPONS
@@ -387,7 +387,7 @@ void CStatboard::RenderGlobalStats()
 
 			str_format(aBuf, sizeof(aBuf), "%d/%d", pStats->m_aFragsWith[i], pStats->m_aDeathsFrom[i]);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x+px-tw/2, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x+px-tw/2, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 80;
 		}
 		// FLAGS
@@ -395,7 +395,7 @@ void CStatboard::RenderGlobalStats()
 		{
 			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagCaptures);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-			TextRender()->Text(0, x-tw+px, y, FontSize, aBuf, -1);
+			TextRender()->Text(0, x-tw+px, y + (LineHeight*0.95f - FontSize) / 2.f, FontSize, aBuf, -1);
 			px += 85;
 		}
 		y += LineHeight;

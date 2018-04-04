@@ -643,12 +643,12 @@ void CGameConsole::OnRender()
 		char aBuf[128];
 		TextRender()->TextColor(1,1,1,1);
 		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogActPage+1);
-		TextRender()->Text(0, 10.0f, 0.0f, FontSize, aBuf, -1);
+		TextRender()->Text(0, 10.0f, FontSize / 2.f, FontSize, aBuf, -1);
 
 		// render version
 		str_format(aBuf, sizeof(aBuf), "v%s", GAME_VERSION);
 		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-		TextRender()->Text(0, Screen.w-Width-10.0f, 0.0f, FontSize, aBuf, -1);
+		TextRender()->Text(0, Screen.w-Width-10.0f, FontSize / 2.f, FontSize, aBuf, -1);
 	}
 }
 
