@@ -2085,7 +2085,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
+void CEditor::DoMapEditor(CUIRect View)
 {
 	// render all good stuff
 	if(!m_ShowPicker)
@@ -2880,7 +2880,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 	return Change;
 }
 
-void CEditor::RenderLayers(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
+void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 {
 	CUIRect LayersBox = ToolBox;
 
@@ -3389,7 +3389,7 @@ void CEditor::SortImages()
 }
 
 
-void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
+void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 {
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
@@ -3561,7 +3561,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 		InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", "", AddImage, this);
 }
 
-void CEditor::RenderSounds(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
+void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 {
 	static int s_ScrollBar = 0;
 	static float s_ScrollValue = 0;
@@ -5086,7 +5086,6 @@ void CEditor::Render()
 
 	if(m_GuiActive)
 	{
-
 		View.HSplitTop(16.0f, &MenuBar, &View);
 		View.HSplitTop(53.0f, &ToolBar, &View);
 		View.VSplitLeft(100.0f, &ToolBox, &View);
@@ -5112,7 +5111,7 @@ void CEditor::Render()
 
 	//	a little hack for now
 	if(m_Mode == MODE_LAYERS)
-		DoMapEditor(View, ToolBar);
+		DoMapEditor(View);
 
 	// do zooming
 	if(Input()->KeyPress(KEY_KP_MINUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
@@ -5161,18 +5160,11 @@ void CEditor::Render()
 
 		RenderBackground(StatusBar, ms_BackgroundTexture, 128.0f, Brightness);
 		StatusBar.Margin(2.0f, &StatusBar);
-	}
-	else
-	{
-		ToolBar.y = -300;
-	}
 
-	// do the toolbar
-	if(m_Mode == MODE_LAYERS)
-		DoToolbar(ToolBar);
+		// do the toolbar
+		if(m_Mode == MODE_LAYERS)
+			DoToolbar(ToolBar);
 
-	if(m_GuiActive)
-	{
 		if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor)
 		{
 			RenderBackground(ExtraEditor, ms_BackgroundTexture, 128.0f, Brightness);
@@ -5183,15 +5175,14 @@ void CEditor::Render()
 			RenderBackground(UndoList, ms_BackgroundTexture, 128.0f, Brightness);
 			UndoList.Margin(2.0f, &UndoList);
 		}
+
+		if(m_Mode == MODE_LAYERS)
+			RenderLayers(ToolBox, View);
+		else if(m_Mode == MODE_IMAGES)
+			RenderImages(ToolBox, View);
+		else if(m_Mode == MODE_SOUNDS)
+			RenderSounds(ToolBox, View);
 	}
-
-
-	if(m_Mode == MODE_LAYERS)
-		RenderLayers(ToolBox, ToolBar, View);
-	else if(m_Mode == MODE_IMAGES)
-		RenderImages(ToolBox, ToolBar, View);
-	else if(m_Mode == MODE_SOUNDS)
-		RenderSounds(ToolBox, ToolBar, View);
 
 	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 

@@ -977,7 +977,7 @@ public:
 
 	void DoSoundSource(CSoundSource *pSource, int Index);
 
-	void DoMapEditor(CUIRect View, CUIRect Toolbar);
+	void DoMapEditor(CUIRect View);
 	void DoToolbar(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
 	float UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
@@ -988,9 +988,9 @@ public:
 	static void AddImage(const char *pFilename, int StorageType, void *pUser);
 	static void AddSound(const char *pFileName, int StorageType, void *pUser);
 
-	void RenderImages(CUIRect Toolbox, CUIRect Toolbar, CUIRect View);
-	void RenderLayers(CUIRect Toolbox, CUIRect Toolbar, CUIRect View);
-	void RenderSounds(CUIRect Toolbox, CUIRect Toolbar, CUIRect View);
+	void RenderImages(CUIRect Toolbox, CUIRect View);
+	void RenderLayers(CUIRect Toolbox, CUIRect View);
+	void RenderSounds(CUIRect Toolbox, CUIRect View);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
