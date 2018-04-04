@@ -137,7 +137,6 @@ void CProjectile::Tick()
 			)
 	{
 			IsWeaponCollide = true;
-			//TeamMask = OwnerChar->Teams()->TeamMask( OwnerChar->Team());
 	}
 	if (pOwnerChar && pOwnerChar->IsAlive())
 	{

@@ -171,6 +171,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		float Radius = 135.0f;
 		float InnerRadius = 48.0f;
 		int Num = m_World.FindEntities(Pos, Radius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		int64_t TeamMask = -1;
 		for(int i = 0; i < Num; i++)
 		{
 			vec2 Diff = apEnts[i]->m_Pos - Pos;
@@ -195,8 +196,11 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 
 				// Explode at most once per team
 				int PlayerTeam = ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(apEnts[i]->GetPlayer()->GetCID());
-				if(!CmaskIsSet(Mask, PlayerTeam)) continue;
-				Mask = CmaskUnset(Mask, PlayerTeam);
+				if(GetPlayerChar(Owner) ? GetPlayerChar(Owner)->m_Hit&CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
+				{
+					if(!CmaskIsSet(TeamMask, PlayerTeam)) continue;
+					TeamMask = CmaskUnset(TeamMask, PlayerTeam);
+				}
 
 				apEnts[i]->TakeDamage(ForceDir*Dmg*2, (int)Dmg, Owner, Weapon);
 			}
