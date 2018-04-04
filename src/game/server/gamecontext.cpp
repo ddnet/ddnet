@@ -187,14 +187,19 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
 
 			float Dmg = Strength * l;
-			if((int)Dmg)
-				if((GetPlayerChar(Owner) ? !(GetPlayerChar(Owner)->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == apEnts[i]->GetPlayer()->GetCID())
-				{
-					if(Owner != -1 && apEnts[i]->IsAlive() && !apEnts[i]->CanCollide(Owner)) continue;
-					if(Owner == -1 && ActivatedTeam != -1 && apEnts[i]->IsAlive() && apEnts[i]->Team() != ActivatedTeam) continue;
-					apEnts[i]->TakeDamage(ForceDir*Dmg*2, (int)Dmg, Owner, Weapon);
-					if(GetPlayerChar(Owner) ? GetPlayerChar(Owner)->m_Hit&CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage) break;
-				}
+			if(!(int)Dmg) continue;
+
+			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->m_Hit&CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit && !NoDamage) && Owner != apEnts[i]->GetPlayer()->GetCID()) continue;
+
+			if(Owner != -1 && apEnts[i]->IsAlive() && !apEnts[i]->CanCollide(Owner)) continue;
+			if(Owner == -1 && ActivatedTeam != -1 && apEnts[i]->IsAlive() && apEnts[i]->Team() != ActivatedTeam) continue;
+
+			// Explode at most once per team
+			int PlayerTeam = ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(apEnts[i]->GetPlayer()->GetCID());
+			if(!CmaskIsSet(Mask, PlayerTeam)) continue;
+			Mask = CmaskUnset(Mask, PlayerTeam);
+
+			apEnts[i]->TakeDamage(ForceDir*Dmg*2, (int)Dmg, Owner, Weapon);
 		}
 	//}
 }

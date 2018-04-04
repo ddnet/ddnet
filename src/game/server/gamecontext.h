@@ -400,6 +400,7 @@ public:
 
 inline int64_t CmaskAll() { return -1LL; }
 inline int64_t CmaskOne(int ClientID) { return 1LL<<ClientID; }
-inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskAll()^CmaskOne(ClientID); }
+inline int64_t CmaskUnset(int64_t Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
+inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
 inline bool CmaskIsSet(int64_t Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
 #endif
