@@ -249,11 +249,11 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Player.VSplitMid(&Player, &Button);
 		Item.m_Rect.VSplitRight(200.0f, &Button2, &Item.m_Rect);
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, Player.x, Player.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, Player.x, Player.y + (Player.h - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aName, -1);
 
-		TextRender()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, Button.x,Button.y + (Button.h - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
 

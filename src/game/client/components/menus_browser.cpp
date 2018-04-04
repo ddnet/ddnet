@@ -961,19 +961,19 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Row.w;
 		TextRender()->TextEx(&Cursor, pSelectedServer->m_aVersion, -1);
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Row.w;
 		TextRender()->TextEx(&Cursor, pSelectedServer->m_aGameType, -1);
 
 		char aTemp[16];
 		str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_Latency);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Row.w;
 		TextRender()->TextEx(&Cursor, aTemp, -1);
 
