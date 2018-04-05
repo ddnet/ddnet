@@ -262,6 +262,7 @@ void CHud::RenderScoreHud()
 						// draw flag
 						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 						int QuadOffset = NUM_WEAPONS * 10 + 40 + NUM_WEAPONS + t;
+						Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 						Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, Whole - ScoreWidthMax - ImageSize, StartY + 1.0f + t * 20);
 					}
 					else if(FlagCarrier[t] >= 0)
