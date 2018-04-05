@@ -11,6 +11,7 @@ class CConfig : public IConfig
 {
 	IStorage *m_pStorage;
 	IOHANDLE m_ConfigFile;
+	bool m_Failed;
 
 	struct CCallback
 	{
@@ -37,6 +38,7 @@ public:
 	{
 		m_ConfigFile = 0;
 		m_NumCallbacks = 0;
+		m_Failed = false;
 	}
 
 	virtual void Init()
@@ -60,10 +62,13 @@ public:
 	{
 		if(!m_pStorage || !g_Config.m_ClSaveSettings)
 			return;
-		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+
+		m_ConfigFile = m_pStorage->OpenFile(CONFIG_FILE_TMP, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(!m_ConfigFile)
 			return;
+
+		m_Failed = false;
 
 		char aLineBuf[1024*2];
 		char aEscapeBuf[1024*2];
@@ -79,8 +84,19 @@ public:
 		for(int i = 0; i < m_NumCallbacks; i++)
 			m_aCallbacks[i].m_pfnFunc(this, m_aCallbacks[i].m_pUserData);
 
-		io_close(m_ConfigFile);
+		if(io_close(m_ConfigFile) != 0)
+			m_Failed = true;
+
 		m_ConfigFile = 0;
+
+		if(m_Failed)
+		{
+			dbg_msg("config", "ERROR: writing to " CONFIG_FILE_TMP " failed");
+			return;
+		}
+
+		if(!m_pStorage->RenameFile(CONFIG_FILE_TMP, CONFIG_FILE, IStorage::TYPE_SAVE))
+			dbg_msg("config", "ERROR: renaming " CONFIG_FILE_TMP " to " CONFIG_FILE " failed");
 	}
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
@@ -93,10 +109,14 @@ public:
 
 	virtual void WriteLine(const char *pLine)
 	{
-		if(!m_ConfigFile)
-			return;
-		io_write(m_ConfigFile, pLine, str_length(pLine));
-		io_write_newline(m_ConfigFile);
+		if(!m_ConfigFile ||
+			io_write(m_ConfigFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
+#if defined(CONF_FAMILY_WINDOWS)
+			io_write_newline(m_ConfigFile) != 2)
+#else
+			io_write_newline(m_ConfigFile) != 1)
+#endif
+			m_Failed = true;
 	}
 };
 
