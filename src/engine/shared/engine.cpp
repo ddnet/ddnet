@@ -97,7 +97,9 @@ public:
 		if(!m_pConsole || !m_pStorage)
 			return;
 
+#ifdef CONF_DEBUG
 		m_pConsole->Register("dbg_dumpmem", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgDumpmem, this, "Dump the memory");
+#endif
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");
 	}
 

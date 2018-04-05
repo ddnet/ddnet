@@ -260,28 +260,45 @@ typedef struct MEMTAIL
 	int guard;
 } MEMTAIL;
 
+static LOCK mem_lock = (LOCK)0x0;
+static char init_mem_lock = 0;
 static struct MEMHEADER *first = 0;
 static const int MEM_GUARD_VAL = 0xbaadc0de;
 
+void *mem_alloc_impl(unsigned size, unsigned alignment)
+{
+	/* TODO: remove alignment parameter */
+	return malloc(size);
+}
+
 void *mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment)
 {
-	/* TODO: fix alignment */
 	/* TODO: add debugging */
 	MEMTAIL *tail;
-	MEMHEADER *header = (struct MEMHEADER *)malloc(size+sizeof(MEMHEADER)+sizeof(MEMTAIL));
+	MEMHEADER *header = (struct MEMHEADER *)mem_alloc_impl(size+sizeof(MEMHEADER)+sizeof(MEMTAIL), alignment);
+
 	dbg_assert(header != 0, "mem_alloc failure");
 	if(!header)
 		return NULL;
-	tail = (struct MEMTAIL *)(((char*)(header+1))+size);
+
+	tail = (struct MEMTAIL *)(((char*)(header + 1)) + size);
 	header->size = size;
 	header->filename = filename;
 	header->line = line;
+	tail->guard = MEM_GUARD_VAL;
+
+	if(init_mem_lock == 0)
+	{
+		init_mem_lock = 1;
+		mem_lock = lock_create();
+	}
+
+	if(mem_lock)
+		lock_wait(mem_lock);
 
 	memory_stats.allocated += header->size;
 	memory_stats.total_allocations++;
 	memory_stats.active_allocations++;
-
-	tail->guard = MEM_GUARD_VAL;
 
 	header->prev = (MEMHEADER *)0;
 	header->next = first;
@@ -289,16 +306,27 @@ void *mem_alloc_debug(const char *filename, int line, unsigned size, unsigned al
 		first->prev = header;
 	first = header;
 
+	if(mem_lock)
+		lock_unlock(mem_lock);
+
 	/*dbg_msg("mem", "++ %p", header+1); */
 	return header+1;
 }
 
-void mem_free(void *p)
+void mem_free_impl(void *p)
+{
+	free(p);
+}
+
+void mem_free_debug(void *p)
 {
 	if(p)
 	{
 		MEMHEADER *header = (MEMHEADER *)p - 1;
 		MEMTAIL *tail = (MEMTAIL *)(((char*)(header+1))+header->size);
+
+		if(mem_lock)
+			lock_wait(mem_lock);
 
 		if(tail->guard != MEM_GUARD_VAL)
 			dbg_msg("mem", "!! %p", p);
@@ -313,14 +341,23 @@ void mem_free(void *p)
 		if(header->next)
 			header->next->prev = header->prev;
 
-		free(header);
+		if(mem_lock)
+			lock_unlock(mem_lock);
+
+		mem_free_impl(header);
 	}
 }
 
 void mem_debug_dump(IOHANDLE file)
 {
 	char buf[1024];
-	MEMHEADER *header = first;
+	MEMHEADER *header;
+
+	if(mem_lock)
+		lock_wait(mem_lock);
+
+	header = first;
+
 	if(!file)
 		file = io_open("memory.txt", IOFLAG_WRITE);
 
@@ -336,8 +373,10 @@ void mem_debug_dump(IOHANDLE file)
 
 		io_close(file);
 	}
-}
 
+	if(mem_lock)
+		lock_unlock(mem_lock);
+}
 
 void mem_copy(void *dest, const void *source, unsigned size)
 {
@@ -356,7 +395,13 @@ void mem_zero(void *block,unsigned size)
 
 int mem_check_imp()
 {
-	MEMHEADER *header = first;
+	MEMHEADER *header;
+
+	if(mem_lock)
+		lock_wait(mem_lock);
+
+	header = first;
+
 	while(header)
 	{
 		MEMTAIL *tail = (MEMTAIL *)(((char*)(header+1))+header->size);
@@ -367,6 +412,9 @@ int mem_check_imp()
 		}
 		header = header->next;
 	}
+
+	if(mem_lock)
+		lock_unlock(mem_lock);
 
 	return 1;
 }
