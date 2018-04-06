@@ -5,6 +5,7 @@
 #	HeroiAmarelo	2011-07-15 00:35:23
 #	HeroiAmarelo	2012-08-01 15:47:40
 #	HeroiAmarelo	2012-10-18 23:56:32
+#	Rockus			2018-04-06
 ##### /authors #####
 
 ##### translated strings #####
@@ -55,7 +56,7 @@ Are you sure that you want to remove the player from your friends list?
 == Queres mesmo apagar o jogador da tua lista de amigos?
 
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Olá! Pelos vistos é a primeira vez que inicias o jogo, por isso escolhe um Nick Name para ti! Aproveita e vê as configurações antes de entrar num servidor!
+== Olá! Pelos vistos é a primeira vez que inicias o jogo, por isso escolhe um nick name para ti! Aproveita e vê as configurações antes de entrares num servidor!
 
 Automatically record demos
 == Gravar demos automaticamente
@@ -271,19 +272,19 @@ Mouse sens.
 == Sens. do rato
 
 Move left
-== Move-te para a esquerda
+== Mover para a esquerda
 
 Move player to spectators
 == Juntar jogador aos spectators
 
 Move right
-== Move-te para a direita
+== Mover para a direita
 
 Movement
 == Movimento
 
 Mute when not active
-== Fazer mute em estado AFK
+== Silenciar quando inativo
 
 Name
 == Nome
@@ -811,7 +812,7 @@ Manual %3d:%02d
 == 
 
 Automatically create statboard csv
-== 
+== Criar automaticamente csv de statboard
 
 Save the best demo of each race
 == Guardar a melhor demo de cada corrida
@@ -859,7 +860,7 @@ Show other players' key presses
 == 
 
 Automatically take statboard screenshot
-== 
+== Tirar automaticamente screenshot da statboard
 
 System message
 == Mensagem do sistema
@@ -916,7 +917,7 @@ Show client IDs in Scoreboard
 == Mostrar os IDs do cliente na tabela de pontuação
 
 Max CSVs
-== 
+== CSVs máximos
 
 seconds
 == segundos
