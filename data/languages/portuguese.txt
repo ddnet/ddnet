@@ -427,7 +427,7 @@ Server filter
 == Filtro de servidores
 
 Server info
-== Informação
+== Info de servidor
 
 Server not full
 == Servidor não cheio
@@ -688,7 +688,7 @@ Ratio
 == 
 
 Dummy settings
-==  Configurações do Dummy
+== Configurações do Dummy
 
 AntiPing
 == Antiping
@@ -718,7 +718,7 @@ Show kill messages
 == Mostrar mensagens de morte
 
 Show ghost
-== Mostrar fantasma
+== Mostrar ghost
 
 DDNet
 == DDNet
@@ -736,10 +736,10 @@ Show votes window after voting
 == Mostrar janela de voto depois de votar
 
 HUD
-== 
+== HUD
 
 Look out!
-==
+== Cuidado!
 
 Show names in chat in team colors
 == Mostrar nomes no chat com cores da equipa
@@ -796,7 +796,7 @@ Browser
 == Navegador
 
 Follow
-== 
+== Seguir
 
 Enable gun sound
 == Ativar o som da arma
@@ -826,7 +826,7 @@ Types
 == Tipos
 
 Ghost
-== Fantasma
+== Ghost
 
 Remove chat
 == Removar o chat
@@ -841,7 +841,7 @@ Race %3d:%02d
 == 
 
 Background (regular)
-== Plano de fundo (regular)	
+== Plano de fundo (regular)
 
 DDNet %s is out! Download it at DDNet.tw!
 == DDNet %s saiu! Saca-o em DDNet.tw!
@@ -955,10 +955,10 @@ Auto %3d:%02d
 == 
 
 Show clan above name plates
-== Mostrar o nome do clã por cima do nome
+== Mostrar o nome do clã por cima do nick
 
 Save ghost
-== Guardar fantasma
+== Guardar ghost
 
 Exclude
 == Excluir
