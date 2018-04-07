@@ -775,7 +775,7 @@ void CGameContext::OnTick()
 							VetoStop = true;
 					}
 
-					// Check if a active moderator has voted.
+					// Check if an active moderator has voted.
 					if (m_apPlayers[i] && m_apPlayers[i]->m_Vote != 0 && m_apPlayers[i]->m_Moderating)
 					{
 						if (m_apPlayers[i]->m_Vote == 1)
@@ -784,13 +784,13 @@ void CGameContext::OnTick()
 							Console()->ExecuteLine(m_aVoteCommand);
 							Server()->SetRconCID(IServer::RCON_CID_SERV);
 							EndVote();
-							SendChat(-1, CGameContext::CHAT_ALL, "Vote passed enforced by server moderator");
+							SendChat(-1, CGameContext::CHAT_ALL, "Vote passed enforced by authorized player");
 							return;
 						}
 						else if (m_apPlayers[i]->m_Vote == -1)
 						{
 							EndVote();
-							SendChat(-1, CGameContext::CHAT_ALL, "Vote failed enforced by server moderator");
+							SendChat(-1, CGameContext::CHAT_ALL, "Vote failed enforced by authorized player");
 							return;
 						}
 					}
@@ -846,7 +846,7 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by server moderator");
+				str_format(aBuf, sizeof(aBuf),"Vote passed enforced by authorized player");
 				Console()->ExecuteLine(m_aVoteCommand, m_VoteEnforcer);
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				EndVote();
@@ -854,7 +854,7 @@ void CGameContext::OnTick()
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by server moderator");
+				str_format(aBuf, sizeof(aBuf),"Vote failed enforced by authorized player");
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			}
@@ -1509,7 +1509,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				int KickedAuthed = Server()->GetAuthedState(KickID);
 				if(KickedAuthed > 0 && KickedAuthed >= Authed)
 				{
-					SendChatTarget(ClientID, "You can't kick moderators");
+					SendChatTarget(ClientID, "You can't kick authorized players");
 					m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 					char aBufKick[128];
 					str_format(aBufKick, sizeof(aBufKick), "'%s' called for vote to kick you", Server()->ClientName(ClientID));
@@ -2394,7 +2394,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 		{
 			if(str_comp_nocase(pValue, pOption->m_aDescription) == 0)
 			{
-				str_format(aBuf, sizeof(aBuf), "moderator forced server option '%s' (%s)", pValue, pReason);
+				str_format(aBuf, sizeof(aBuf), "authroized player forced server option '%s' (%s)", pValue, pReason);
 				pSelf->SendChatTarget(-1, aBuf);
 				pSelf->Console()->ExecuteLine(pOption->m_aCommand);
 				break;
@@ -3481,7 +3481,7 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 	
 	char aBuf[256];
 	const char *pOption = Success ? "yes" : "no";
-	str_format(aBuf, sizeof(aBuf), "moderator forced vote %s", pOption);
+	str_format(aBuf, sizeof(aBuf), "authorized player forced vote %s", pOption);
 	SendChatTarget(-1, aBuf);
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pOption);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
