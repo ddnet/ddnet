@@ -1596,6 +1596,9 @@ public:
 
 			// render non outlined
 			Graphics()->QuadsDrawCurrentVertices(false);
+
+			// reset
+			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 		}
 	}
 
