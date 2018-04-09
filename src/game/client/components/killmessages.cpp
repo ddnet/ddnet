@@ -205,7 +205,7 @@ void CKillMessages::OnRender()
 					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 
 					int QuadOffset = 2;
-					if(m_aKillmsgs[r].m_VictimTeam == TEAM_RED)
+					if(m_aKillmsgs[r].m_KillerTeam == TEAM_RED)
 						++QuadOffset;
 
 					Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, QuadOffset, x - 56, y - 16);
