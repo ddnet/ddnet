@@ -132,7 +132,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 		}
 
 	Skin.m_ColorTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-	mem_free(Info.m_pData);
+	free(Info.m_pData);
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, min((int)sizeof(Skin.m_aName),l-3));

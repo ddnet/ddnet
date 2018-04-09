@@ -497,7 +497,7 @@ void CDemoPlayer::ScanFile()
 	}
 
 	// copy all the frames to an array instead for fast access
-	m_pKeyFrames = (CKeyFrame*)mem_alloc(m_Info.m_SeekablePoints*sizeof(CKeyFrame), 1);
+	m_pKeyFrames = (CKeyFrame *)calloc(m_Info.m_SeekablePoints, sizeof(CKeyFrame));
 	for(pCurrentKey = pFirstKey, i = 0; pCurrentKey; pCurrentKey = pCurrentKey->m_pNext, i++)
 		m_pKeyFrames[i] = pCurrentKey->m_Frame;
 
@@ -715,7 +715,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	else if(MapSize > 0)
 	{
 		// get map data
-		unsigned char *pMapData = (unsigned char *)mem_alloc(MapSize, 1);
+		unsigned char *pMapData = (unsigned char *)malloc(MapSize);
 		io_read(m_File, pMapData, MapSize);
 
 		// save map
@@ -724,7 +724,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		io_close(MapFile);
 
 		// free data
-		mem_free(pMapData);
+		free(pMapData);
 	}
 
 	// store map inforation
@@ -891,7 +891,7 @@ int CDemoPlayer::Stop()
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Stopped playback");
 	io_close(m_File);
 	m_File = 0;
-	mem_free(m_pKeyFrames);
+	free(m_pKeyFrames);
 	m_pKeyFrames = 0;
 	str_copy(m_aFilename, "", sizeof(m_aFilename));
 	return 0;

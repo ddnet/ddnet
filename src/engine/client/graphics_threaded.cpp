@@ -391,7 +391,7 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 	int MemSize = Width*Height*ImageFormatToPixelSize(Format);
 
 	// copy texture data
-	void *pTmpData = mem_alloc(MemSize, sizeof(void*));
+	void *pTmpData = malloc(MemSize);
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
 	
@@ -437,7 +437,7 @@ int CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const 
 
 	// copy texture data
 	int MemSize = Width*Height*Cmd.m_PixelSize;
-	void *pTmpData = mem_alloc(MemSize, sizeof(void*));
+	void *pTmpData = malloc(MemSize);
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
 
@@ -467,7 +467,7 @@ int CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int 
 			StoreFormat = Img.m_Format;
 
 		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags);
-		mem_free(Img.m_pData);
+		free(Img.m_pData);
 		if(ID != m_InvalidTexture && g_Config.m_Debug)
 			dbg_msg("graphics/texture", "loaded %s", pFilename);
 		return ID;
@@ -510,7 +510,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		return 0;
 	}
 
-	pBuffer = (unsigned char *)mem_alloc(Png.width * Png.height * Png.bpp, 1); // ignore_convention
+	pBuffer = (unsigned char *)malloc(Png.width * Png.height * Png.bpp); // ignore_convention
 	png_get_data(&Png, pBuffer); // ignore_convention
 	png_close_file(&Png); // ignore_convention
 
@@ -566,7 +566,7 @@ void CGraphics_Threaded::ScreenshotDirect()
 		png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR, (unsigned char *)Image.m_pData); // ignore_convention
 		png_close_file(&Png); // ignore_convention
 
-		mem_free(Image.m_pData);
+		free(Image.m_pData);
 	}
 }
 

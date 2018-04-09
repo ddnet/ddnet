@@ -267,7 +267,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				Size += str_length(m_lSettings[i].m_aCommand) + 1;
 			}
 
-			char *pSettings = (char *)mem_alloc(Size, 1);
+			char *pSettings = (char *)malloc(Size);
 			char *pNext = pSettings;
 			for(int i = 0; i < m_lSettings.size(); i++)
 			{
@@ -276,7 +276,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				pNext += Length;
 			}
 			Item.m_Settings = df.AddData(Size, pSettings);
-			mem_free(pSettings);
+			free(pSettings);
 		}
 
 		df.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Item), &Item);
@@ -305,7 +305,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
 			{
 				// Convert to RGBA
-				unsigned char *pDataRGBA = (unsigned char *)mem_alloc(Item.m_Width*Item.m_Height*4, 1);
+				unsigned char *pDataRGBA = (unsigned char *)malloc(Item.m_Width * Item.m_Height * 4);
 				unsigned char *pDataRGB = (unsigned char *)pImg->m_pData;
 				for(int i = 0; i < Item.m_Width*Item.m_Height; i++)
 				{
@@ -316,7 +316,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					pDataRGBA[i*4+3] = 255;
 				}
 				Item.m_ImageData = df.AddData(Item.m_Width*Item.m_Height*4, pDataRGBA);
-				mem_free(pDataRGBA);
+				free(pDataRGBA);
 			}
 			else
 			{
@@ -418,10 +418,10 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 				if (Item.m_Flags && !(pLayer->m_Game))
 				{
-					CTile *pEmptyTiles = (CTile*)mem_alloc(sizeof(CTile)*pLayer->m_Width*pLayer->m_Height, 1);
+					CTile *pEmptyTiles = (CTile *)calloc(pLayer->m_Width*pLayer->m_Height, sizeof(CTile));
 					mem_zero(pEmptyTiles, pLayer->m_Width*pLayer->m_Height*sizeof(CTile));
 					Item.m_Data = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTile), pEmptyTiles);
-					mem_free(pEmptyTiles);
+					free(pEmptyTiles);
 
 					if(pLayer->m_Tele)
 						Item.m_Tele = df.AddData(pLayer->m_Width*pLayer->m_Height*sizeof(CTeleTile), ((CLayerTele *)pLayer)->m_pTeleTile);
@@ -520,7 +520,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 	// save points
 	int TotalSize = sizeof(CEnvPoint) * PointCount;
-	CEnvPoint *pPoints = (CEnvPoint *)mem_alloc(TotalSize, 1);
+	CEnvPoint *pPoints = (CEnvPoint *)calloc(PointCount, sizeof(*pPoints));
 	PointCount = 0;
 
 	for(int e = 0; e < m_lEnvelopes.size(); e++)
@@ -531,7 +531,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	}
 
 	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
-	mem_free(pPoints);
+	free(pPoints);
 
 	// finish the data file
 	df.Finish();
@@ -683,7 +683,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);
-					pImg->m_pData = mem_alloc(pImg->m_Width*pImg->m_Height*4, 1);
+					pImg->m_pData = malloc(pImg->m_Width*pImg->m_Height*4);
 					mem_copy(pImg->m_pData, pData, pImg->m_Width*pImg->m_Height*4);
 					pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
 				}
@@ -730,7 +730,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 						if(pSound->m_DataSize > 0)
 						{
-							pSound->m_pData = mem_alloc(pSound->m_DataSize, 1);
+							pSound->m_pData = malloc(pSound->m_DataSize);
 							io_read(SoundFile, pSound->m_pData, pSound->m_DataSize);
 						}
 						io_close(SoundFile);
@@ -746,7 +746,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 					// copy sample data
 					void *pData = DataFile.GetData(pItem->m_SoundData);
-					pSound->m_pData = mem_alloc(pSound->m_DataSize, 1);
+					pSound->m_pData = malloc(pSound->m_DataSize);
 					mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
 					pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 				}

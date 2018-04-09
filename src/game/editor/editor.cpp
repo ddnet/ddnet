@@ -63,7 +63,7 @@ CEditorImage::~CEditorImage()
 	m_pEditor->Graphics()->UnloadTexture(m_TexID);
 	if(m_pData)
 	{
-		mem_free(m_pData);
+		free(m_pData);
 		m_pData = 0;
 	}
 }
@@ -73,7 +73,7 @@ CEditorSound::~CEditorSound()
 	m_pEditor->Sound()->UnloadSample(m_SoundID);
 	if(m_pData)
 	{
-		mem_free(m_pData);
+		free(m_pData);
 		m_pData = 0x0;
 	}
 }
@@ -3069,7 +3069,7 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 	pEditor->Graphics()->UnloadTexture(pImg->m_TexID);
 	if(pImg->m_pData)
 	{
-		mem_free(pImg->m_pData);
+		free(pImg->m_pData);
 		pImg->m_pData = 0;
 	}
 	*pImg = ImgInfo;
@@ -3155,7 +3155,7 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 		return;
 	}
 
-	void *pData = mem_alloc((unsigned) DataSize, 1);
+	void *pData = malloc((unsigned) DataSize);
 	io_read(SoundFile, pData, (unsigned) DataSize);
 	io_close(SoundFile);
 
@@ -3208,7 +3208,7 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 		return;
 	}
 
-	void *pData = mem_alloc((unsigned) DataSize, 1);
+	void *pData = malloc((unsigned) DataSize);
 	io_read(SoundFile, pData, (unsigned) DataSize);
 	io_close(SoundFile);
 
@@ -3219,7 +3219,7 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	pEditor->Sound()->UnloadSample(pSound->m_SoundID);
 	if(pSound->m_pData)
 	{
-		mem_free(pSound->m_pData);
+		free(pSound->m_pData);
 		pSound->m_pData = 0x0;
 	}
 
@@ -3893,7 +3893,7 @@ void CEditor::RenderFileDialog()
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
 				{
 					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, IGraphics::TEXLOAD_NORESAMPLE);
-					mem_free(m_FilePreviewImageInfo.m_pData);
+					free(m_FilePreviewImageInfo.m_pData);
 				}
 			}
 		}

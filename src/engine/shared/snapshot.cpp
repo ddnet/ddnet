@@ -419,7 +419,7 @@ void CSnapshotStorage::PurgeAll()
 	while(pHolder)
 	{
 		pNext = pHolder->m_pNext;
-		mem_free(pHolder);
+		free(pHolder);
 		pHolder = pNext;
 	}
 
@@ -438,7 +438,7 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 		pNext = pHolder->m_pNext;
 		if(pHolder->m_Tick >= Tick)
 			return; // no more to remove
-		mem_free(pHolder);
+		free(pHolder);
 
 		// did we come to the end of the list?
 		if (!pNext)
@@ -463,7 +463,7 @@ void CSnapshotStorage::Add(int Tick, int64 Tagtime, int DataSize, void *pData, i
 	if(CreateAlt)
 		TotalSize += DataSize;
 
-	CHolder *pHolder = (CHolder *)mem_alloc(TotalSize, 1);
+	CHolder *pHolder = (CHolder *)malloc(TotalSize);
 
 	// set data
 	pHolder->m_Tick = Tick;

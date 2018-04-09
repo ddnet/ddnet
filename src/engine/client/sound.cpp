@@ -322,7 +322,7 @@ int CSound::Init()
 		dbg_msg("client/sound", "sound init successful");
 
 	m_MaxFrames = FormatOut.samples*2;
-	m_pMixBuffer = (int *)mem_alloc(m_MaxFrames*2*sizeof(int), 1);
+	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
 
 	SDL_PauseAudioDevice(m_Device, 0);
 
@@ -359,7 +359,7 @@ int CSound::Shutdown()
 	SDL_CloseAudioDevice(m_Device);
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	lock_destroy(m_SoundLock);
-	mem_free(m_pMixBuffer);
+	free(m_pMixBuffer);
 	m_pMixBuffer = 0;
 	return 0;
 }
@@ -388,7 +388,7 @@ void CSound::RateConvert(int SampleID)
 
 	// allocate new data
 	NumFrames = (int)((pSample->m_NumFrames/(float)pSample->m_Rate)*m_MixingRate);
-	pNewData = (short *)mem_alloc(NumFrames*pSample->m_Channels*sizeof(short), 1);
+	pNewData = (short *)calloc(NumFrames * pSample->m_Channels, sizeof(short));
 
 	for(int i = 0; i < NumFrames; i++)
 	{
@@ -409,7 +409,7 @@ void CSound::RateConvert(int SampleID)
 	}
 
 	// free old data and apply new
-	mem_free(pSample->m_pData);
+	free(pSample->m_pData);
 	pSample->m_pData = pNewData;
 	pSample->m_NumFrames = NumFrames;
 	pSample->m_Rate = m_MixingRate;
@@ -436,7 +436,7 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 			return -1;
 		}
 
-		pSample->m_pData = (short *)mem_alloc(NumSamples * sizeof(short) * NumChannels, 1);
+		pSample->m_pData = (short *)calloc(NumSamples * NumChannels, sizeof(short));
 
 		int Read;
 		int Pos = 0;
@@ -550,17 +550,17 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 			return -1;
 		}
 
-		int *pBuffer = (int *)mem_alloc(4*NumSamples*NumChannels, 1);
+		int *pBuffer = (int *)calloc(NumSamples * NumChannels, sizeof(int));
 		WavpackUnpackSamples(pContext, pBuffer, NumSamples); // TODO: check return value
 		pSrc = pBuffer;
 
-		pSample->m_pData = (short *)mem_alloc(2*NumSamples*NumChannels, 1);
+		pSample->m_pData = (short *)calloc(NumSamples * NumChannels, sizeof(short));
 		pDst = pSample->m_pData;
 
 		for (i = 0; i < NumSamples*NumChannels; i++)
 			*pDst++ = (short)*pSrc++;
 
-		mem_free(pBuffer);
+		free(pBuffer);
 
 		pSample->m_NumFrames = NumSamples;
 		pSample->m_LoopStart = -1;
@@ -731,7 +731,7 @@ void CSound::UnloadSample(int SampleID)
 		return;
 
 	Stop(SampleID);
-	mem_free(m_aSamples[SampleID].m_pData);
+	free(m_aSamples[SampleID].m_pData);
 
 	m_aSamples[SampleID].m_pData = 0x0;
 }

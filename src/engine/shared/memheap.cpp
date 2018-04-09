@@ -10,7 +10,7 @@ void CHeap::NewChunk()
 	char *pMem;
 
 	// allocate memory
-	pMem = (char*)mem_alloc(sizeof(CChunk)+CHUNK_SIZE, 1);
+	pMem = (char *)malloc(sizeof(CChunk) + CHUNK_SIZE);
 	if(!pMem)
 		return;
 
@@ -68,7 +68,7 @@ void CHeap::Clear()
 	while(pChunk)
 	{
 		pNext = pChunk->m_pNext;
-		mem_free(pChunk);
+		free(pChunk);
 		pChunk = pNext;
 	}
 

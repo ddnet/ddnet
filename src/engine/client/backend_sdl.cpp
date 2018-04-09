@@ -166,7 +166,7 @@ void *CCommandProcessorFragment_OpenGL::Rescale(int Width, int Height, int NewWi
 	else if(Format == CCommandBuffer::TEXFORMAT_ALPHA)
 		Bpp = 1;
 
-	pTmpData = (unsigned char *)mem_alloc(NewWidth*NewHeight*Bpp, 1);
+	pTmpData = (unsigned char *)malloc(NewWidth * NewHeight * Bpp);
 
 	int c = 0;
 	for(int y = 0; y < NewHeight; y++)
@@ -265,13 +265,13 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::
 		}
 
 		void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-		mem_free(pTexData);
+		free(pTexData);
 		pTexData = pTmpData;
 	}
 
 	glTexSubImage2D(GL_TEXTURE_2D, 0, X, Y, Width, Height,
 		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pTexData);
-	mem_free(pTexData);
+	free(pTexData);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
@@ -307,7 +307,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 
 			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-			mem_free(pTexData);
+			free(pTexData);
 			pTexData = pTmpData;
 		}
 		else if(pCommand->m_Format != CCommandBuffer::TEXFORMAT_ALPHA && (Width > 16 && Height > 16 && (pCommand->m_Flags&CCommandBuffer::TEXFLAG_QUALITY) == 0))
@@ -317,7 +317,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			++RescaleCount;
 
 			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-			mem_free(pTexData);
+			free(pTexData);
 			pTexData = pTmpData;
 		}
 	}
@@ -368,7 +368,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	}
 	*m_pTextureMemoryUsage += m_aTextures[pCommand->m_Slot].m_MemSize;
 
-	mem_free(pTexData);
+	free(pTexData);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
@@ -419,7 +419,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 	int h = aViewport[3];
 
 	// we allocate one more row to use when we are flipping the texture
-	unsigned char *pPixelData = (unsigned char *)mem_alloc(w*(h+1)*3, 1);
+	unsigned char *pPixelData = (unsigned char *)malloc(w*(h+1)*3);
 	unsigned char *pTempRow = pPixelData+w*h*3;
 
 	// fetch the pixels
@@ -498,7 +498,7 @@ void *CCommandProcessorFragment_OpenGL3_3::Rescale(int Width, int Height, int Ne
 	else if(Format == CCommandBuffer::TEXFORMAT_ALPHA)
 		Bpp = 1;
 
-	pTmpData = (unsigned char *)mem_alloc(NewWidth*NewHeight*Bpp, 1);
+	pTmpData = (unsigned char *)malloc(NewWidth*NewHeight*Bpp);
 
 	int c = 0;
 	for(int y = 0; y < NewHeight; y++)
@@ -1054,13 +1054,13 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffe
 		}
 
 		void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-		mem_free(pTexData);
+		free(pTexData);
 		pTexData = pTmpData;
 	}
 
 	glTexSubImage2D(GL_TEXTURE_2D, 0, X, Y, Width, Height,
 		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pTexData);
-	mem_free(pTexData);
+	free(pTexData);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
@@ -1099,7 +1099,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 
 			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-			mem_free(pTexData);
+			free(pTexData);
 			pTexData = pTmpData;
 		}
 		else if(pCommand->m_Format != CCommandBuffer::TEXFORMAT_ALPHA && (Width > 16 && Height > 16 && (pCommand->m_Flags&CCommandBuffer::TEXFLAG_QUALITY) == 0))
@@ -1109,7 +1109,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			++RescaleCount;
 
 			void *pTmpData = Rescale(pCommand->m_Width, pCommand->m_Height, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pCommand->m_pData));
-			mem_free(pTexData);
+			free(pTexData);
 			pTexData = pTmpData;
 		}
 	}
@@ -1192,7 +1192,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	}
 	*m_pTextureMemoryUsage += m_aTextures[pCommand->m_Slot].m_MemSize;
 	
-	mem_free(pTexData);
+	free(pTexData);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
@@ -1275,7 +1275,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Screenshot(const CCommandBuffer::S
 	int h = aViewport[3];
 
 	// we allocate one more row to use when we are flipping the texture
-	unsigned char *pPixelData = (unsigned char *)mem_alloc(w*(h+1)*3, 1);
+	unsigned char *pPixelData = (unsigned char *)malloc(w*(h+1)*3);
 	unsigned char *pTempRow = pPixelData+w*h*3;
 
 	// fetch the pixels

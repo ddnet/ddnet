@@ -9,7 +9,8 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
-#include "stddef.h"
+#include <stddef.h>
+#include <stdlib.h>
 #include <time.h>
 
 #ifdef CONF_FAMILY_UNIX
@@ -93,82 +94,6 @@ GNUC_ATTRIBUTE((format(printf, 2, 3)));
 /* Group: Memory */
 
 /*
-	Function: mem_alloc_impl
-		Allocates memory.
-
-	Parameters:
-		size - Size of the needed block.
-		alignment - Alignment for the block.
-
-	Returns:
-		Returns a pointer to the newly allocated block. Returns a
-		null pointer if the memory couldn't be allocated.
-
-	Remarks:
-		- Passing 0 to size will allocated the smallest amount possible
-		and return a unique pointer.
-
-	See Also:
-		<mem_free_impl>
-*/
-void *mem_alloc_impl(unsigned size, unsigned alignment);
-
-/*
-	Function: mem_alloc
-		Allocates memory.
-
-	Parameters:
-		size - Size of the needed block.
-		alignment - Alignment for the block.
-
-	Returns:
-		Returns a pointer to the newly allocated block. Returns a
-		null pointer if the memory couldn't be allocated.
-
-	Remarks:
-		- Passing 0 to size will allocated the smallest amount possible
-		and return a unique pointer.
-
-	See Also:
-		<mem_free>, <mem_alloc_impl>
-*/
-void *mem_alloc_debug(const char *filename, int line, unsigned size, unsigned alignment);
-#ifdef CONF_DEBUG
-#define mem_alloc(s,a) mem_alloc_debug(__FILE__, __LINE__, (s), (a))
-#else
-#define mem_alloc(s,a) mem_alloc_impl(s, a)
-#endif
-
-/*
-	Function: mem_free
-		Frees a block allocated through <mem_alloc>.
-
-	Remarks:
-		- Is safe on null pointers.
-
-	See Also:
-		<mem_alloc_impl>
-*/
-void mem_free_impl(void *block);
-
-/*
-	Function: mem_free
-		Frees a block allocated through <mem_alloc>.
-
-	Remarks:
-		- Is safe on null pointers.
-
-	See Also:
-		<mem_alloc>, <mem_free_impl>
-*/
-void mem_free_debug(void *block);
-#ifdef CONF_DEBUG
-#define mem_free(p) mem_free_debug(p)
-#else
-#define mem_free(p) mem_free_impl(p)
-#endif
-
-/*
 	Function: mem_copy
 		Copies a a memory block.
 
@@ -229,14 +154,6 @@ void mem_zero(void *block, unsigned size);
 		>0 - Block a is greater than block b
 */
 int mem_comp(const void *a, const void *b, int size);
-
-/*
-	Function: mem_check
-		Validates the heap
-		Will trigger a assert if memory has failed.
-*/
-int mem_check_imp();
-#define mem_check() dbg_assert_imp(__FILE__, __LINE__, mem_check_imp(), "Memory check failed")
 
 /* Group: File IO */
 enum {
@@ -1586,8 +1503,6 @@ int net_would_block();
 
 int net_socket_read_wait(NETSOCKET sock, int time);
 
-void mem_debug_dump(IOHANDLE file);
-
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 
@@ -1598,15 +1513,6 @@ void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
-
-typedef struct
-{
-	int allocated;
-	int active_allocations;
-	int total_allocations;
-} MEMSTATS;
-
-const MEMSTATS *mem_stats();
 
 typedef struct
 {
