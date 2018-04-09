@@ -28,8 +28,9 @@ public:
 	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
 	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces);
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool Stoppers = false, int Team = -1);
 	bool TestBox(vec2 Pos, vec2 Size);
+	bool TestBoxStopper(vec2 Pos, vec2 Size, vec2 *pVel, int Team);
 
 	// DDRace
 
@@ -56,7 +57,6 @@ public:
 	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0);
 	int GetMapIndex(vec2 Pos);
 	bool TileExists(int Index);
-	bool TileExistsNext(int Index);
 	vec2 GetPos(int Index);
 	int GetTileIndex(int Index);
 	int GetFTileIndex(int Index);

@@ -330,7 +330,79 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size)
 	return false;
 }
 
-void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity)
+bool CCollision::TestBoxStopper(vec2 Pos, vec2 Size, vec2 *pVel, int Team)
+{
+	enum { MAIN, RIGHT, LEFT, DOWN, UP, NUM };
+
+	Size = Size * 0.5f + vec2(4.f, 4.f);
+	vec2 TestPos[NUM] = { Pos, Pos + vec2(Size.x, 0), Pos + vec2(-Size.x, 0), Pos + vec2(0, Size.y), Pos + vec2(0, -Size.y) };
+	int MapIndex[NUM];
+	int Index[3][NUM] = {{0}};
+	int Flags[3][NUM] = {{0}};
+
+	for(int i = 0; i < NUM; i++)
+	{
+		MapIndex[i] = GetPureMapIndex(TestPos[i]);
+		Index[0][i] = GetTileIndex(MapIndex[i]);
+		Flags[0][i] = GetTileFlags(MapIndex[i]);
+		Index[1][i] = GetFTileIndex(MapIndex[i]);
+		Flags[1][i] = GetFTileFlags(MapIndex[i]);
+		if(Team != -1 && m_pSwitchers && m_pSwitchers[GetDTileNumber(MapIndex[i])].m_Status[Team])
+		{
+			Index[2][i] = GetDTileIndex(MapIndex[i]);
+			Flags[2][i] = GetDTileFlags(MapIndex[i]);
+		}
+	}
+
+	bool Stop = false;
+
+	for(int i = 0; i < 3; i++)
+	{
+		int *pIndex = Index[i];
+		int *pFlags = Flags[i];
+
+		if(pVel->x > 0 && ((pIndex[MAIN] == TILE_STOP && pFlags[MAIN] == ROTATION_270) ||
+			(pIndex[RIGHT] == TILE_STOP && pFlags[RIGHT] == ROTATION_270) ||
+			(pIndex[RIGHT] == TILE_STOPS && pFlags[RIGHT] & TILEFLAG_ROTATE) ||
+			pIndex[RIGHT] == TILE_STOPA))
+		{
+			pVel->x = 0;
+			if(GetPos(MapIndex[RIGHT]).x < TestPos[RIGHT].x)
+				Stop = true;
+		}
+		if(pVel->x < 0 && ((pIndex[MAIN] == TILE_STOP && pFlags[MAIN] == ROTATION_90) ||
+			(pIndex[LEFT] == TILE_STOP && pFlags[LEFT] == ROTATION_90) ||
+			(pIndex[LEFT] == TILE_STOPS && pFlags[LEFT] & TILEFLAG_ROTATE) ||
+			pIndex[LEFT] == TILE_STOPA))
+		{
+			pVel->x = 0;
+			if(GetPos(MapIndex[LEFT]).x > TestPos[LEFT].x)
+				Stop = true;
+		}
+		if(pVel->y < 0 && ((pIndex[MAIN] == TILE_STOP && pFlags[MAIN] == ROTATION_180) ||
+			(pIndex[UP] == TILE_STOP && pFlags[UP] == ROTATION_180) ||
+			(pIndex[UP] == TILE_STOPS && !(pFlags[UP] & TILEFLAG_ROTATE)) ||
+			pIndex[UP] == TILE_STOPA))
+		{
+			pVel->y = 0;
+			if(GetPos(MapIndex[UP]).y > TestPos[UP].y)
+				Stop = true;
+		}
+		if(pVel->y > 0 && ((pIndex[MAIN] == TILE_STOP && pFlags[MAIN] == ROTATION_0) ||
+			(pIndex[DOWN] == TILE_STOP && pFlags[DOWN] == ROTATION_0) ||
+			(pIndex[DOWN] == TILE_STOPS && !(pFlags[DOWN] & TILEFLAG_ROTATE)) ||
+			pIndex[DOWN] == TILE_STOPA))
+		{
+			pVel->y = 0;
+			if(GetPos(MapIndex[DOWN]).y < TestPos[DOWN].y)
+				Stop = true;
+		}
+	}
+
+	return Stop;
+}
+
+void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool Stoppers, int Team)
 {
 	// do the move
 	vec2 Pos = *pInoutPos;
@@ -338,6 +410,9 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 	float Distance = length(Vel);
 	int Max = (int)Distance;
+
+	if(Stoppers)
+		TestBoxStopper(Pos, Size, &Vel, Team);
 
 	if(Distance > 0.00001f)
 	{
@@ -350,6 +425,10 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 				//amount = 0;
 
 			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
+
+			vec2 Tmp = Vel;
+			if(Stoppers && TestBoxStopper(NewPos, Size, &Tmp, Team))
+				break;
 
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{
@@ -383,6 +462,9 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 			Pos = NewPos;
 		}
 	}
+
+	if(Stoppers)
+		TestBoxStopper(Pos, Size, &Vel, Team);
 
 	*pInoutPos = Pos;
 	*pInoutVel = Vel;
@@ -695,49 +777,7 @@ bool CCollision::TileExists(int Index)
 	if(m_pSwitch && m_pSwitch[Index].m_Type)
 		return true;
 	if(m_pTune && m_pTune[Index].m_Type)
-			return true;
-	return TileExistsNext(Index);
-}
-
-bool CCollision::TileExistsNext(int Index)
-{
-	if(Index < 0)
-		return false;
-	int TileOnTheLeft = (Index - 1 > 0) ? Index - 1 : Index;
-	int TileOnTheRight = (Index + 1 < m_Width * m_Height) ? Index + 1 : Index;
-	int TileBelow = (Index + m_Width < m_Width * m_Height) ? Index + m_Width : Index;
-	int TileAbove = (Index - m_Width > 0) ? Index - m_Width : Index;
-
-	if((m_pTiles[TileOnTheRight].m_Index == TILE_STOP && m_pTiles[TileOnTheRight].m_Flags == ROTATION_270) || (m_pTiles[TileOnTheLeft].m_Index == TILE_STOP && m_pTiles[TileOnTheLeft].m_Flags == ROTATION_90))
 		return true;
-	if((m_pTiles[TileBelow].m_Index == TILE_STOP && m_pTiles[TileBelow].m_Flags == ROTATION_0) || (m_pTiles[TileAbove].m_Index == TILE_STOP && m_pTiles[TileAbove].m_Flags == ROTATION_180))
-		return true;
-	if(m_pTiles[TileOnTheRight].m_Index == TILE_STOPA || m_pTiles[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pTiles[TileOnTheRight].m_Index == TILE_STOPS || m_pTiles[TileOnTheLeft].m_Index == TILE_STOPS) && m_pTiles[TileOnTheRight].m_Flags|ROTATION_270|ROTATION_90))
-		return true;
-	if(m_pTiles[TileBelow].m_Index == TILE_STOPA || m_pTiles[TileAbove].m_Index == TILE_STOPA || ((m_pTiles[TileBelow].m_Index == TILE_STOPS || m_pTiles[TileAbove].m_Index == TILE_STOPS) && m_pTiles[TileBelow].m_Flags|ROTATION_180|ROTATION_0))
-		return true;
-	if(m_pFront)
-	{
-		if(m_pFront[TileOnTheRight].m_Index == TILE_STOPA || m_pFront[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pFront[TileOnTheRight].m_Index == TILE_STOPS || m_pFront[TileOnTheLeft].m_Index == TILE_STOPS) && m_pFront[TileOnTheRight].m_Flags|ROTATION_270|ROTATION_90))
-			return true;
-		if(m_pFront[TileBelow].m_Index == TILE_STOPA || m_pFront[TileAbove].m_Index == TILE_STOPA || ((m_pFront[TileBelow].m_Index == TILE_STOPS || m_pFront[TileAbove].m_Index == TILE_STOPS) && m_pFront[TileBelow].m_Flags|ROTATION_180|ROTATION_0))
-			return true;
-		if((m_pFront[TileOnTheRight].m_Index == TILE_STOP && m_pFront[TileOnTheRight].m_Flags == ROTATION_270) || (m_pFront[TileOnTheLeft].m_Index == TILE_STOP && m_pFront[TileOnTheLeft].m_Flags == ROTATION_90))
-			return true;
-		if((m_pFront[TileBelow].m_Index == TILE_STOP && m_pFront[TileBelow].m_Flags == ROTATION_0) || (m_pFront[TileAbove].m_Index == TILE_STOP && m_pFront[TileAbove].m_Flags == ROTATION_180))
-			return true;
-	}
-	if(m_pDoor)
-	{
-		if(m_pDoor[TileOnTheRight].m_Index == TILE_STOPA || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pDoor[TileOnTheRight].m_Index == TILE_STOPS || m_pDoor[TileOnTheLeft].m_Index == TILE_STOPS) && m_pDoor[TileOnTheRight].m_Flags|ROTATION_270|ROTATION_90))
-			return true;
-		if(m_pDoor[TileBelow].m_Index == TILE_STOPA || m_pDoor[TileAbove].m_Index == TILE_STOPA || ((m_pDoor[TileBelow].m_Index == TILE_STOPS || m_pDoor[TileAbove].m_Index == TILE_STOPS) && m_pDoor[TileBelow].m_Flags|ROTATION_180|ROTATION_0))
-			return true;
-		if((m_pDoor[TileOnTheRight].m_Index == TILE_STOP && m_pDoor[TileOnTheRight].m_Flags == ROTATION_270) || (m_pDoor[TileOnTheLeft].m_Index == TILE_STOP && m_pDoor[TileOnTheLeft].m_Flags == ROTATION_90))
-			return true;
-		if((m_pDoor[TileBelow].m_Index == TILE_STOP && m_pDoor[TileBelow].m_Flags == ROTATION_0) || (m_pDoor[TileAbove].m_Index == TILE_STOP && m_pDoor[TileAbove].m_Flags == ROTATION_180))
-			return true;
-	}
 	return false;
 }
 

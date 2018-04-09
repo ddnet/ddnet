@@ -36,7 +36,11 @@ public:
 	{
 		return m_IsSolo[ClientID];
 	}
-	;
+
+	bool IsSuper(int ClientId) const
+	{
+		return m_Team[ClientId] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
+	}
 };
 
 #endif
