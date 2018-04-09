@@ -30,7 +30,7 @@ CBinds::~CBinds()
 {
 	for(int i = 0; i < KEY_LAST; i++)
 		if(m_apKeyBindings[i])
-			mem_free(m_apKeyBindings[i]);
+			free(m_apKeyBindings[i]);
 }
 
 void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly)
@@ -43,7 +43,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly)
 
 	if(m_apKeyBindings[KeyID])
 	{
-		mem_free(m_apKeyBindings[KeyID]);
+		free(m_apKeyBindings[KeyID]);
 		m_apKeyBindings[KeyID] = 0;
 	}
 
@@ -54,17 +54,10 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly)
 	}
 	else
 	{
-		int size = str_length(pStr) + 1;
-		m_apKeyBindings[KeyID] = (char *)mem_alloc(size, 1);
-		if(!m_apKeyBindings[KeyID])
-		{
-			str_format(aBuf, sizeof(aBuf), "couldn't bind %s (%d) (bind might be too long)", Input()->KeyName(KeyID), KeyID);
-		}
-		else
-		{
-			str_copy(m_apKeyBindings[KeyID], pStr, size);
-			str_format(aBuf, sizeof(aBuf), "bound %s (%d) = %s", Input()->KeyName(KeyID), KeyID, m_apKeyBindings[KeyID]);
-		}
+		int Size = str_length(pStr) + 1;
+		m_apKeyBindings[KeyID] = (char *)malloc(Size);
+		str_copy(m_apKeyBindings[KeyID], pStr, Size);
+		str_format(aBuf, sizeof(aBuf), "bound %s (%d) = %s", Input()->KeyName(KeyID), KeyID, m_apKeyBindings[KeyID]);
 	}
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 }
@@ -87,7 +80,7 @@ void CBinds::UnbindAll()
 	for(int i = 0; i < KEY_LAST; i++)
 	{
 		if(m_apKeyBindings[i])
-			mem_free(m_apKeyBindings[i]);
+			free(m_apKeyBindings[i]);
 		m_apKeyBindings[i] = 0;
 	}
 }

@@ -166,9 +166,9 @@ void CServerBrowser::Filter()
 	if(m_NumSortedServersCapacity < m_NumServers)
 	{
 		if(m_pSortedServerlist)
-			mem_free(m_pSortedServerlist);
+			free(m_pSortedServerlist);
 		m_NumSortedServersCapacity = m_NumServers;
-		m_pSortedServerlist = (int *)mem_alloc(m_NumSortedServersCapacity*sizeof(int), 1);
+		m_pSortedServerlist = (int *)calloc(m_NumSortedServersCapacity, sizeof(int));
 	}
 
 	// filter the servers
@@ -467,9 +467,9 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	{
 		CServerEntry **ppNewlist;
 		m_NumServerCapacity += 100;
-		ppNewlist = (CServerEntry **)mem_alloc(m_NumServerCapacity*sizeof(CServerEntry*), 1);
+		ppNewlist = (CServerEntry **)calloc(m_NumServerCapacity, sizeof(CServerEntry *));
 		mem_copy(ppNewlist, m_ppServerlist, m_NumServers*sizeof(CServerEntry*));
-		mem_free(m_ppServerlist);
+		free(m_ppServerlist);
 		m_ppServerlist = ppNewlist;
 	}
 
@@ -1093,7 +1093,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 		return;
 	}
 
-	char *pBuf = (char *)mem_alloc(Length, 1);
+	char *pBuf = (char *)malloc(Length);
 	pBuf[0] = '\0';
 
 	io_read(File, pBuf, Length);
@@ -1104,7 +1104,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 
 	m_pDDNetInfo = json_parse(pBuf, Length);
 
-	mem_free(pBuf);
+	free(pBuf);
 
 	if(m_pDDNetInfo && m_pDDNetInfo->type != json_object)
 	{

@@ -57,8 +57,8 @@ int FixFile(const char *pFileName)
 	int w = Png.width;
 	int h = Png.height;
 
-	pBuffer[0] = (CPixel*)mem_alloc(w*h*sizeof(CPixel), 1);
-	pBuffer[1] = (CPixel*)mem_alloc((w+16*4)*(h+16*4)*sizeof(CPixel), 1);
+	pBuffer[0] = (CPixel *)malloc(w * h * sizeof(CPixel));
+	pBuffer[1] = (CPixel *)malloc((w + 16 * 4) * (h + 16 * 4) * sizeof(CPixel));
 	png_get_data(&Png, (unsigned char *)pBuffer[0]);
 	png_close_file(&Png);
 

@@ -863,7 +863,7 @@ CConsole::~CConsole()
 	{
 		CCommand *pNext = pCommand->m_pNext;
 		if(pCommand->m_pfnCallback == Con_Chain)
-			mem_free(static_cast<CChain *>(pCommand->m_pUserData));
+			delete static_cast<CChain *>(pCommand->m_pUserData);
 		delete pCommand;
 		pCommand = pNext;
 	}
@@ -1048,7 +1048,7 @@ void CConsole::Chain(const char *pName, FChainCommandCallback pfnChainFunc, void
 		return;
 	}
 
-	CChain *pChainInfo = (CChain *)mem_alloc(sizeof(CChain), sizeof(void*));
+	CChain *pChainInfo = new CChain();
 
 	// store info
 	pChainInfo->m_pfnChainCallback = pfnChainFunc;

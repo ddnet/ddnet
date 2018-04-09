@@ -419,19 +419,11 @@ void CStatboard::AutoStatCSV()
 
 		FormatStats();
 
-		unsigned int len = str_length(m_pCSVstr);
-		char* buf = (char*)mem_alloc(len, 0);
-		mem_copy(buf, m_pCSVstr, len);
-
-		mem_free(m_pCSVstr);
-
 		if(File)
 		{
-			io_write(File, buf, sizeof(char)*len);
+			io_write(File, m_pCSVstr, str_length(m_pCSVstr));
 			io_close(File);
 		}
-
-		mem_free(buf);
 
 		Client()->AutoCSV_Start();
 	}
@@ -560,8 +552,7 @@ void CStatboard::FormatStats()
 	char aStats[1024*(VANILLA_MAX_CLIENTS+1)];
 	str_format(aStats, sizeof(aStats), "%s\n\n%s", aServerStats, aPlayerStats);
 
-	unsigned int len = str_length(aStats);
-	m_pCSVstr = (char*)mem_alloc(len, 0);
-	mem_zero(m_pCSVstr, len);
-	str_copy(m_pCSVstr, aStats, len);
+	unsigned int Len = str_length(aStats);
+	m_pCSVstr = (char *)malloc(Len);
+	str_copy(m_pCSVstr, aStats, Len);
 }

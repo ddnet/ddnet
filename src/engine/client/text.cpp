@@ -103,7 +103,7 @@ public:
 	
 	int m_aTextures[2];
 	// keep the full texture, because opengl doesn't provide texture copying
-	unsigned char* m_TextureData[2];
+	unsigned char *m_TextureData[2];
 
 	// width and height are the same
 	int m_CurTextureDimensions[2];
@@ -282,21 +282,22 @@ class CTextRender : public IEngineTextRender
 			}
 	}
 
-	int InitTexture(int Width, int Height, void* pUploadData = NULL)
+	int InitTexture(int Width, int Height, void *pUploadData = NULL)
 	{	
 		void *pMem = NULL;
 		if(pUploadData)
+		{
 			pMem = pUploadData;
+		}
 		else
 		{
-			pMem = mem_alloc(Width*Height, 1);
-			mem_zero(pMem, Width*Height);
+			pMem = calloc(Width * Height, 1);
 		}
 
 		int TextureID = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 
 		if(!pUploadData)
-			mem_free(pMem);
+			free(pMem);
 
 		return TextureID;
 	}
@@ -310,7 +311,7 @@ class CTextRender : public IEngineTextRender
 	{
 		int NewDimensions = pFont->m_CurTextureDimensions[TextureIndex] * 2;
 
-		unsigned char* pTmpTexBuffer = new unsigned char[NewDimensions*NewDimensions];
+		unsigned char *pTmpTexBuffer = new unsigned char[NewDimensions*NewDimensions];
 		mem_zero(pTmpTexBuffer, NewDimensions * NewDimensions * sizeof(unsigned char));
 
 		for(int y = 0; y < pFont->m_CurTextureDimensions[TextureIndex]; ++y)

@@ -42,18 +42,15 @@ void CFlow::DbgRender()
 
 void CFlow::Init()
 {
-	if(m_pCells)
-	{
-		mem_free(m_pCells);
-		m_pCells = 0;
-	}
+	free(m_pCells);
+	m_pCells = 0;
 
 	CMapItemLayerTilemap *pTilemap = Layers()->GameLayer();
 	m_Width = pTilemap->m_Width*32/m_Spacing;
 	m_Height = pTilemap->m_Height*32/m_Spacing;
 
 	// allocate and clear
-	m_pCells = (CCell *)mem_alloc(sizeof(CCell)*m_Width*m_Height, 1);
+	m_pCells = (CCell *)calloc(m_Width * m_Height, sizeof(CCell));
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			m_pCells[y*m_Width+x].m_Vel = vec2(0.0f, 0.0f);

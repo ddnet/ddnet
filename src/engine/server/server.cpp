@@ -1705,9 +1705,8 @@ int CServer::LoadMap(const char *pMapName)
 	{
 		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
 		m_CurrentMapSize = (unsigned int)io_length(File);
-		if(m_pCurrentMapData)
-			mem_free(m_pCurrentMapData);
-		m_pCurrentMapData = (unsigned char *)mem_alloc(m_CurrentMapSize, 1);
+		free(m_pCurrentMapData);
+		m_pCurrentMapData = (unsigned char *)malloc(m_CurrentMapSize);
 		io_read(File, m_pCurrentMapData, m_CurrentMapSize);
 		io_close(File);
 	}
@@ -1798,12 +1797,6 @@ int CServer::Run()
 
 		m_Lastheartbeat = 0;
 		m_GameStartTime = time_get();
-
-		if(g_Config.m_Debug)
-		{
-			str_format(aBuf, sizeof(aBuf), "baseline memory usage %dk", mem_stats()->allocated/1024);
-			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
-		}
 
 		while(m_RunServer)
 		{
@@ -2004,8 +1997,7 @@ int CServer::Run()
 	GameServer()->OnShutdown(true);
 	m_pMap->Unload();
 
-	if(m_pCurrentMapData)
-		mem_free(m_pCurrentMapData);
+	free(m_pCurrentMapData);
 
 #if defined (CONF_SQL)
 	for (int i = 0; i < MAX_SQLSERVERS; i++)

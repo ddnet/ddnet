@@ -79,7 +79,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			}
 
 			// create new packet
-			CPacket *p = (CPacket *)mem_alloc(sizeof(CPacket)+Bytes, 1);
+			CPacket *p = (CPacket *)malloc(sizeof(CPacket) + Bytes);
 
 			if(net_addr_comp(&From, &Dest) == 0)
 				p->m_SendTo = Src; // from the server
@@ -198,7 +198,7 @@ void Run(unsigned short Port, NETADDR Dest)
 				}
 
 
-				mem_free(p);
+				free(p);
 			}
 		}
 

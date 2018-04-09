@@ -62,9 +62,9 @@ int DilateFile(const char *pFileName)
 		return 1;
 	}
 
-	pBuffer[0] = (CPixel*)mem_alloc(Png.width*Png.height*sizeof(CPixel), 1);
-	pBuffer[1] = (CPixel*)mem_alloc(Png.width*Png.height*sizeof(CPixel), 1);
-	pBuffer[2] = (CPixel*)mem_alloc(Png.width*Png.height*sizeof(CPixel), 1);
+	pBuffer[0] = (CPixel *)malloc(Png.width * Png.height * sizeof(CPixel));
+	pBuffer[1] = (CPixel *)malloc(Png.width * Png.height * sizeof(CPixel));
+	pBuffer[2] = (CPixel *)malloc(Png.width * Png.height * sizeof(CPixel));
 	png_get_data(&Png, (unsigned char *)pBuffer[0]);
 	png_close_file(&Png);
 
