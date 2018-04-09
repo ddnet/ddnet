@@ -30,3 +30,4 @@ env:
 branches:
   except:
   - staging.tmp
+  - testing.tmp

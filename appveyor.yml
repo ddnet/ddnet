@@ -40,3 +40,4 @@ artifacts:
 branches:
   except:
   - staging.tmp
+  - testing.tmp
