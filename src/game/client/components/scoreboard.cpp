@@ -112,7 +112,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 	// Headline
 	y += 10.0f;
-	TextRender()->Text(0, x+10.0f, y, 28.0f, Localize("Spectators"), w-20.0f);
+	TextRender()->Text(0, x+10.0f, y + (30.f - 28.f) / 2.f, 28.0f, Localize("Spectators"), w-20.0f);
 
 	// spectator names
 	y += 30.0f;
@@ -195,7 +195,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 			pTitle = Localize("Score board");
 	}
-	TextRender()->Text(0, x+20.0f, y, TitleFontsize, pTitle, -1);
+	TextRender()->Text(0, x+20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1);
 
 	char aBuf[128] = {0};
 
@@ -237,7 +237,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	if (!lower16 && !lower32 && !lower24)
 	{
 		tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1);
-		TextRender()->Text(0, x+w-tw-20.0f, y, TitleFontsize, aBuf, -1);
+		TextRender()->Text(0, x+w-tw-20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, aBuf, -1);
 	}
 
 	// calculate measurements
@@ -287,15 +287,15 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float HeadlineFontsize = 22.0f;
 	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Score"), -1);
 	tw = ScoreLength > ScoreWidth ? ScoreLength : ScoreWidth;
-	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y, HeadlineFontsize, Localize("Score"), -1);
+	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Score"), -1);
 
-	TextRender()->Text(0, NameOffset, y, HeadlineFontsize, Localize("Name"), -1);
+	TextRender()->Text(0, NameOffset, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Name"), -1);
 
 	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Clan"), -1);
-	TextRender()->Text(0, ClanOffset+ClanLength/2-tw/2, y, HeadlineFontsize, Localize("Clan"), -1);
+	TextRender()->Text(0, ClanOffset+ClanLength/2-tw/2, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Clan"), -1);
 
 	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Ping"), -1);
-	TextRender()->Text(0, PingOffset+PingLength-tw, y, HeadlineFontsize, Localize("Ping"), -1);
+	TextRender()->Text(0, PingOffset+PingLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize("Ping"), -1);
 
 	// render player entries
 	y += HeadlineFontsize*2.0f;

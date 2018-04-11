@@ -166,7 +166,7 @@ void CKillMessages::OnRender()
 		}
 
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)
-			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, &TColor, &TOutlineColor, x, y);
+			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 		
 		// render victim tee
 		x -= 24.0f;
@@ -221,7 +221,7 @@ void CKillMessages::OnRender()
 			x -= m_aKillmsgs[r].m_KillerTextWidth;
 
 			if(m_aKillmsgs[r].m_KillerTextContainerIndex != -1)
-				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, &TColor, &TOutlineColor, x, y);
+				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 		}
 
 		y += 46.0f;

@@ -439,7 +439,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale-2, my*Scale-4, Scale-5, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale - 3.f, my*Scale, Scale - 5.f, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
@@ -498,13 +498,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					char aBuf[16];
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					UI()->TextRender()->Text(0, mx*Scale, my*Scale+16, Scale-20, aBuf, -1);
+					UI()->TextRender()->Text(0, mx*Scale, (my*Scale) + 16.f + ((16.f - (Scale - 20.f)) / 2.f), Scale - 20.f, aBuf, -1);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					if(MaxSpeed)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-						UI()->TextRender()->Text(0, mx*Scale, my*Scale-2, Scale-20, aBuf, -1);
+						UI()->TextRender()->Text(0, mx*Scale, (my*Scale) + ((16.f - (Scale - 20.f)) / 2.f), Scale - 20.f, aBuf, -1);
 						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					}
 				}
@@ -553,7 +553,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale, my*Scale+16, Scale-20, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale, my*Scale + 16.f + ((16.f - (Scale - 20.f)) / 2.f), Scale - 20.f, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 
@@ -563,7 +563,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale, my*Scale-2, Scale-20, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale, my*Scale + ((16.f - (Scale - 20.f)) / 2.f), Scale - 20.f, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
