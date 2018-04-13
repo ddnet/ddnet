@@ -2379,10 +2379,13 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 		return -1;
 	}
 
-	//support graphic cards that are pretty old(and linux)
-	glewExperimental = GL_TRUE;
-	if(GLEW_OK != glewInit())
-		return -1;
+	if(m_UseOpenGL3_3)
+	{
+		//support graphic cards that are pretty old(and linux)
+		glewExperimental = GL_TRUE;
+		if(GLEW_OK != glewInit())
+			return -1;
+	}
 
 	SDL_GL_GetDrawableSize(m_pWindow, pWidth, pHeight);
 	SDL_GL_SetSwapInterval(Flags&IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
@@ -2467,10 +2470,10 @@ int CGraphicsBackend_SDL_OpenGL::Shutdown()
 	// issue a shutdown command
 	CCommandBuffer CmdBuffer(1024, 512);
 	if(m_UseOpenGL3_3)
-	{		
+	{
 		CCommandProcessorFragment_OpenGL3_3::SCommand_Shutdown Cmd;
 		CmdBuffer.AddCommand(Cmd);
-	}	
+	}
 	CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
 	CmdBuffer.AddCommand(Cmd);
 	RunBuffer(&CmdBuffer);
