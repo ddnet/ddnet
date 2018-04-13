@@ -126,22 +126,3 @@ $ cmake -DMYSQL=ON ..
 $ make
 $ ./DDNet-Server -f mine.cfg
 ```
-
-Importing the official DDNet Database into SQLite using TextQL
---------------------------------------------------------------
-
-```bash
-$ wget https://ddnet.tw/stats/ddnet-stats.zip
-$ unzip ddnet-stats
-$ cd ddnet-stats
-$ go get -u github.com/dinedal/textql/...
-$ textql -console -header maps.csv race.csv teamrace.csv
-sqlite> select sum(Points) from race join maps on race.Map = maps.Map where race.Name = "nameless tee";
-48849
-sqlite> .save ddnet.sqlite
-sqlite> ^D
-$ ls -lha ddnet.sqlite
--rw-r--r-- 1 deen deen 200M Apr 12 23:26 ddnet.sqlite
-$ sqlite3 ddnet.sqlite
-sqlite>
-```
