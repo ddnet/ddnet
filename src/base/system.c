@@ -169,6 +169,15 @@ static void logger_file(const char *line, void *user)
 	aio_unlock(logfile);
 }
 
+#if defined(CONF_FAMILY_WINDOWS)
+static void logger_stdout_sync(const char *line, void *user)
+{
+	(void)user;
+	puts(line);
+	fflush(stdout);
+}
+#endif
+
 static void logger_stdout_finish(void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
@@ -211,7 +220,11 @@ void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
 
 void dbg_logger_stdout()
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	dbg_logger(logger_stdout_sync, 0, 0);
+#else
 	dbg_logger(logger_file, logger_stdout_finish, aio_new(io_stdout()));
+#endif
 }
 
 void dbg_logger_debugger()
