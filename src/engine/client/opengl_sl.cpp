@@ -4,9 +4,11 @@
 #include <vector>
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
 bool CGLSL::LoadShader(IStorage *pStorage, const char *pFile, int Type)
 {
+  std::cout << "here" << std::endl;
 	if (m_IsLoaded)
 		return true;
 	IOHANDLE f = pStorage->OpenFile(pFile, IOFLAG_READ, IStorage::TYPE_ALL);
