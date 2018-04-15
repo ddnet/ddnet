@@ -756,6 +756,7 @@ public:
 	virtual void QuadsText(float x, float y, float Size, const char *pText);
 
 	virtual int CreateQuadContainer();
+	virtual void QuadContainerUpload(int ContainerIndex);
 	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num);
 	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num);
 	virtual void QuadContainerReset(int ContainerIndex);

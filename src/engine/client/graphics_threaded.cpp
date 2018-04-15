@@ -1209,6 +1209,60 @@ int CGraphics_Threaded::CreateQuadContainer()
 	return Index;
 }
 
+void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
+{
+	if(m_UseOpenGL3_3)
+	{
+		SQuadContainer& Container = m_QuadContainers[ContainerIndex];
+		if(Container.m_Quads.size() > 0)
+		{
+			if(Container.m_QuadBufferObjectIndex == -1)
+			{
+				size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
+				Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, &Container.m_Quads[0]);
+			}
+			else
+			{
+				size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
+				RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, &Container.m_Quads[0]);
+			}
+
+			if(Container.m_QuadBufferContainerIndex == -1)
+			{
+				SBufferContainerInfo Info;
+				Info.m_Stride = sizeof(CCommandBuffer::SVertex);
+
+				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				SBufferContainerInfo::SAttribute* pAttr = &Info.m_Attributes.back();
+				pAttr->m_DataTypeCount = 2;
+				pAttr->m_FuncType = 0;
+				pAttr->m_Normalized = false;
+				pAttr->m_pOffset = 0;
+				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
+				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
+				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				pAttr = &Info.m_Attributes.back();
+				pAttr->m_DataTypeCount = 2;
+				pAttr->m_FuncType = 0;
+				pAttr->m_Normalized = false;
+				pAttr->m_pOffset = (void*)(sizeof(float) * 2);
+				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
+				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
+				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				pAttr = &Info.m_Attributes.back();
+				pAttr->m_DataTypeCount = 4;
+				pAttr->m_FuncType = 0;
+				pAttr->m_Normalized = true;
+				pAttr->m_pOffset = (void*)(sizeof(float) * 2 + sizeof(float) * 2);
+				pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
+				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
+
+				Container.m_QuadBufferContainerIndex = CreateBufferContainer(&Info);
+			}
+		}
+	}
+}
+
 void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num)
 {
 	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
@@ -1251,52 +1305,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pA
 		}
 	}
 
-	if(Container.m_Quads.size() > 0)
-	{
-		if(Container.m_QuadBufferObjectIndex == -1)
-		{
-			size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
-			Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, &Container.m_Quads[0]);
-		}
-		else
-		{
-			size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
-			RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, &Container.m_Quads[0]);
-		}
-
-		if(Container.m_QuadBufferContainerIndex == -1)
-		{
-			SBufferContainerInfo Info;
-			Info.m_Stride = sizeof(CCommandBuffer::SVertex);
-
-			Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-			SBufferContainerInfo::SAttribute* pAttr = &Info.m_Attributes.back();
-			pAttr->m_DataTypeCount = 2;
-			pAttr->m_FuncType = 0;
-			pAttr->m_Normalized = false;
-			pAttr->m_pOffset = 0;
-			pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-			pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-			Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-			pAttr = &Info.m_Attributes.back();
-			pAttr->m_DataTypeCount = 2;
-			pAttr->m_FuncType = 0;
-			pAttr->m_Normalized = false;
-			pAttr->m_pOffset = (void*)(sizeof(float) * 2);
-			pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-			pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-			Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-			pAttr = &Info.m_Attributes.back();
-			pAttr->m_DataTypeCount = 4;
-			pAttr->m_FuncType = 0;
-			pAttr->m_Normalized = true;
-			pAttr->m_pOffset = (void*)(sizeof(float) * 2 + sizeof(float) * 2);
-			pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
-			pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-
-			Container.m_QuadBufferContainerIndex = CreateBufferContainer(&Info);
-		}
-	}
+	QuadContainerUpload(ContainerIndex);
 }
 
 void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num)
@@ -1332,59 +1341,17 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 		SetColor(&Quad.m_aVertices[3], 2);
 	}
 
-	if(Container.m_Quads.size() > 0)
-	{
-		if(Container.m_QuadBufferObjectIndex == -1)
-		{
-			size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
-			Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, &Container.m_Quads[0]);
-		}
-		else
-		{
-			size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
-			RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, &Container.m_Quads[0]);
-		}
-
-		if(Container.m_QuadBufferContainerIndex == -1)
-		{
-			SBufferContainerInfo Info;
-			Info.m_Stride = sizeof(CCommandBuffer::SVertex);
-
-			Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-			SBufferContainerInfo::SAttribute* pAttr = &Info.m_Attributes.back();
-			pAttr->m_DataTypeCount = 2;
-			pAttr->m_FuncType = 0;
-			pAttr->m_Normalized = false;
-			pAttr->m_pOffset = 0;
-			pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-			pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-			Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-			pAttr = &Info.m_Attributes.back();
-			pAttr->m_DataTypeCount = 2;
-			pAttr->m_FuncType = 0;
-			pAttr->m_Normalized = false;
-			pAttr->m_pOffset = (void*)(sizeof(float) * 2);
-			pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-			pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-			Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
-			pAttr = &Info.m_Attributes.back();
-			pAttr->m_DataTypeCount = 4;
-			pAttr->m_FuncType = 0;
-			pAttr->m_Normalized = true;
-			pAttr->m_pOffset = (void*)(sizeof(float) * 2 + sizeof(float) * 2);
-			pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
-			pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-
-			Container.m_QuadBufferContainerIndex = CreateBufferContainer(&Info);
-		}
-	}
+	QuadContainerUpload(ContainerIndex);
 }
 
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
 	SQuadContainer& Container = m_QuadContainers[ContainerIndex];
-	if(Container.m_QuadBufferContainerIndex != -1)
-		DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
+	if(m_UseOpenGL3_3)
+	{
+		if(Container.m_QuadBufferContainerIndex != -1)
+			DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
+	}
 	Container.m_Quads.clear();
 	Container.m_QuadBufferContainerIndex = Container.m_QuadBufferObjectIndex = -1;
 }
@@ -1412,12 +1379,12 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 
 	if((int)Container.m_Quads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
 		return;
-
-	if(Container.m_QuadBufferContainerIndex == -1)
-		return;
-
+	
 	if(m_UseOpenGL3_3)
 	{
+		if(Container.m_QuadBufferContainerIndex == -1)
+			return;
+
 		CCommandBuffer::SCommand_RenderQuadContainer Cmd;
 		Cmd.m_State = m_State;
 		Cmd.m_DrawNum = (unsigned int)QuadDrawNum * 6;
@@ -1471,11 +1438,11 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 	if((int)Container.m_Quads.size() < QuadOffset + 1)
 		return;
 
-	if(Container.m_QuadBufferContainerIndex == -1)
-		return;
-
 	if(m_UseOpenGL3_3)
 	{
+		if(Container.m_QuadBufferContainerIndex == -1)
+			return;
+
 		SQuadContainer::SQuad& Quad = Container.m_Quads[QuadOffset];
 		CCommandBuffer::SCommand_RenderQuadContainerAsSprite Cmd;
 
@@ -1597,11 +1564,11 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	if(DrawCount == 0)
 		return;
 
-	if(Container.m_QuadBufferContainerIndex == -1)
-		return;
-
 	if(m_UseOpenGL3_3)
 	{
+		if(Container.m_QuadBufferContainerIndex == -1)
+			return;
+
 		SQuadContainer::SQuad& Quad = Container.m_Quads[0];
 		CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple Cmd;
 

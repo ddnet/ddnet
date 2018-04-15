@@ -209,6 +209,7 @@ public:
 	};
 
 	virtual int CreateQuadContainer() = 0;
+	virtual void QuadContainerUpload(int ContainerIndex) = 0;
 	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) = 0;
 	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadContainerReset(int ContainerIndex) = 0;
