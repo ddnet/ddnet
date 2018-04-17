@@ -1135,6 +1135,11 @@ void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
 		pPlayer->m_ShowAll = pResult->GetInteger(0);
 	else
 		pPlayer->m_ShowAll = !pPlayer->m_ShowAll;
+
+	if (pPlayer->m_ShowAll)
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will now see all tees on this server, no matter the distance");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer see all tees on this server");
 }
 
 void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
