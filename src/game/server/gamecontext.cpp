@@ -53,6 +53,7 @@ void CGameContext::Construct(int Resetting)
 		m_pVoteOptionHeap = new CHeap();
 		m_pScore = 0;
 		m_NumMutes = 0;
+		m_NumVoteBans = 0;
 	}
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
@@ -739,6 +740,17 @@ void CGameContext::OnTick()
 					if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i))
 						continue;
 
+					// don't count vote banned players
+					NETADDR Addr;
+					Server()->GetClientAddr(i, &Addr);
+					Addr.port = 0; // ignore port number
+					int VoteBanned = 0;
+					for (int j = 0; j < m_NumVoteBans && !VoteBanned; j++)
+						if (!net_addr_comp(&Addr, &m_aVoteBans[j].m_Addr))
+							VoteBanned = (m_aVoteBans[j].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+					if (VoteBanned > 0)
+						continue;
+
 					int ActVote = m_apPlayers[i]->m_Vote;
 					int ActVotePos = m_apPlayers[i]->m_VotePos;
 
@@ -1351,6 +1363,21 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
+			NETADDR Addr;
+			Server()->GetClientAddr(ClientID, &Addr);
+			Addr.port = 0; // ignore port number
+			int VoteBanned = 0;
+			for (int i = 0; i < m_NumVoteBans && !VoteBanned; i++)
+				if (!net_addr_comp(&Addr, &m_aVoteBans[i].m_Addr))
+					VoteBanned = (m_aVoteBans[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			if (VoteBanned > 0)
+			{
+				char aChatmsg[64];
+				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteBanned);
+				SendChatTarget(ClientID, aChatmsg);
+				return;
+			}
+
 			char aChatmsg[512] = {0};
 			char aDesc[VOTE_DESC_LENGTH] = {0};
 			char aCmd[VOTE_CMD_LENGTH] = {0};
@@ -1613,6 +1640,21 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
 			if(!pMsg->m_Vote)
 				return;
+
+			NETADDR Addr;
+			Server()->GetClientAddr(ClientID, &Addr);
+			Addr.port = 0; // ignore port number
+			int VoteBanned = 0;
+			for (int i = 0; i < m_NumVoteBans && !VoteBanned; i++)
+				if (!net_addr_comp(&Addr, &m_aVoteBans[i].m_Addr))
+					VoteBanned = (m_aVoteBans[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			if (VoteBanned > 0)
+			{
+				char aChatmsg[64];
+				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteBanned);
+				SendChatTarget(ClientID, aChatmsg);
+				return;
+			}
 
 			pPlayer->m_Vote = pMsg->m_Vote;
 			pPlayer->m_VotePos = ++m_VotePos;

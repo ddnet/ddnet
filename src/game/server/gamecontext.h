@@ -342,6 +342,7 @@ private:
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConVoteBan(IConsole::IResult *pResult, void *pUserData);
 	static void ConMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteID(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData);
@@ -358,8 +359,14 @@ private:
 	enum
 	{
 		MAX_MUTES=32,
+		MAX_VOTE_BANS=32,
 	};
 	struct CMute
+	{
+		NETADDR m_Addr;
+		int m_Expire;
+	};
+	struct CVoteBans
 	{
 		NETADDR m_Addr;
 		int m_Expire;
@@ -367,7 +374,10 @@ private:
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
+	CVoteBans m_aVoteBans[MAX_VOTE_BANS];
+	int m_NumVoteBans;
 	void Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName);
+	void VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName);
 	void Whisper(int ClientID, char *pStr);
 	void WhisperID(int ClientID, int VictimID, char *pMessage);
 	void Converse(int ClientID, char *pStr);
