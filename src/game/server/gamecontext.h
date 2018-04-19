@@ -377,7 +377,7 @@ private:
 	CVoteMute m_aVoteMutes[MAX_VOTE_BANS];
 	int m_NumVoteMutes;
 	void Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName);
-	void VoteMute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName, int AuthedID);
+	void VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);
 	void WhisperID(int ClientID, int VictimID, char *pMessage);
 	void Converse(int ClientID, char *pStr);

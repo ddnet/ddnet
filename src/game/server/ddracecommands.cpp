@@ -345,18 +345,18 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
-void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
+void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs,
 	const char *pDisplayName, int AuthedID)
 {
 	char aBuf[128];
 	int Found = 0;
 
-	Addr->port = 0; // ignore port number for vote mutes
+	pAddr->port = 0; // ignore port number for vote mutes
 
 	// find a matching vote mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumVoteMutes; i++)
 	{
-		if(net_addr_comp(&m_aVoteMutes[i].m_Addr, Addr) == 0)
+		if(net_addr_comp(&m_aVoteMutes[i].m_Addr, pAddr) == 0)
 		{
 			m_aVoteMutes[i].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
@@ -368,7 +368,7 @@ void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 	{
 		if (m_NumVoteMutes < MAX_VOTE_BANS)
 		{
-			m_aVoteMutes[m_NumVoteMutes].m_Addr = *Addr;
+			m_aVoteMutes[m_NumVoteMutes].m_Addr = *pAddr;
 			m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
 			m_NumVoteMutes++;
