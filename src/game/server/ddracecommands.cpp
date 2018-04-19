@@ -346,7 +346,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 }
 
 void CGameContext::VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
-	const char *pDisplayName)
+	const char *pDisplayName, int AuthedID)
 {
 	char aBuf[128];
 	int Found = 0;
@@ -354,9 +354,9 @@ void CGameContext::VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 	Addr->port = 0; // ignore port number for vote bans
 
 					// find a matching vote ban for this ip, update expiration time if found
-	for (int i = 0; i < m_NumVoteBans; i++)
+	for(int i = 0; i < m_NumVoteBans; i++)
 	{
-		if (net_addr_comp(&m_aVoteBans[i].m_Addr, Addr) == 0)
+		if(net_addr_comp(&m_aVoteBans[i].m_Addr, Addr) == 0)
 		{
 			m_aVoteBans[i].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
@@ -364,7 +364,7 @@ void CGameContext::VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 		}
 	}
 
-	if (!Found) // nothing found so far, find a free slot..
+	if(!Found) // nothing found so far, find a free slot..
 	{
 		if (m_NumVoteBans < MAX_VOTE_BANS)
 		{
@@ -375,13 +375,13 @@ void CGameContext::VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 			Found = 1;
 		}
 	}
-	if (Found)
+	if(Found)
 	{
-		if (pDisplayName)
+		if(pDisplayName)
 		{
-			str_format(aBuf, sizeof aBuf, "'%s' has been vote banned for %d seconds.",
-				pDisplayName, Secs);
-			SendChat(-1, CHAT_ALL, aBuf);
+			str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
+				Server()->ClientName(AuthedID), pDisplayName, Secs);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vote-ban", aBuf);
 		}
 	}
 	else // no free slot found
@@ -446,7 +446,7 @@ void CGameContext::ConVoteBan(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
 	pSelf->VoteBan(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
-		pSelf->Server()->ClientName(Victim));
+		pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
 }
 
 void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData)
