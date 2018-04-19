@@ -345,20 +345,20 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
-void CGameContext::VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
+void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 	const char *pDisplayName, int AuthedID)
 {
 	char aBuf[128];
 	int Found = 0;
 
-	Addr->port = 0; // ignore port number for vote bans
+	Addr->port = 0; // ignore port number for vote mutes
 
-					// find a matching vote ban for this ip, update expiration time if found
-	for(int i = 0; i < m_NumVoteBans; i++)
+	// find a matching vote mute for this ip, update expiration time if found
+	for(int i = 0; i < m_NumVoteMutes; i++)
 	{
-		if(net_addr_comp(&m_aVoteBans[i].m_Addr, Addr) == 0)
+		if(net_addr_comp(&m_aVoteMutes[i].m_Addr, Addr) == 0)
 		{
-			m_aVoteBans[i].m_Expire = Server()->Tick()
+			m_aVoteMutes[i].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
 			Found = 1;
 		}
@@ -366,12 +366,12 @@ void CGameContext::VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 
 	if(!Found) // nothing found so far, find a free slot..
 	{
-		if (m_NumVoteBans < MAX_VOTE_BANS)
+		if (m_NumVoteMutes < MAX_VOTE_BANS)
 		{
-			m_aVoteBans[m_NumVoteBans].m_Addr = *Addr;
-			m_aVoteBans[m_NumVoteBans].m_Expire = Server()->Tick()
+			m_aVoteMutes[m_NumVoteMutes].m_Addr = *Addr;
+			m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
-			m_NumVoteBans++;
+			m_NumVoteMutes++;
 			Found = 1;
 		}
 	}
@@ -381,11 +381,11 @@ void CGameContext::VoteBan(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 		{
 			str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
 				Server()->ClientName(AuthedID), pDisplayName, Secs);
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vote-ban", aBuf);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", aBuf);
 		}
 	}
 	else // no free slot found
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vote-ban", "vote ban array is full");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "vote mute array is full");
 }
 
 void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
@@ -431,21 +431,21 @@ void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
 }
 
-void CGameContext::ConVoteBan(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
 	if (Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "vote-ban", "Client id not found.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "Client id not found.");
 		return;
 	}
 
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	pSelf->VoteBan(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
+	pSelf->VoteMute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
 		pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
 }
 

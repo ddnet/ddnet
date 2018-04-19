@@ -53,7 +53,7 @@ void CGameContext::Construct(int Resetting)
 		m_pVoteOptionHeap = new CHeap();
 		m_pScore = 0;
 		m_NumMutes = 0;
-		m_NumVoteBans = 0;
+		m_NumVoteMutes = 0;
 	}
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
@@ -744,11 +744,11 @@ void CGameContext::OnTick()
 					NETADDR Addr;
 					Server()->GetClientAddr(i, &Addr);
 					Addr.port = 0; // ignore port number
-					int VoteBanned = 0;
-					for(int j = 0; j < m_NumVoteBans && !VoteBanned; j++)
-						if(!net_addr_comp(&Addr, &m_aVoteBans[j].m_Addr))
-							VoteBanned = (m_aVoteBans[j].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-					if(VoteBanned > 0)
+					int VoteMuted = 0;
+					for(int j = 0; j < m_NumVoteMutes && !VoteMuted; j++)
+						if(!net_addr_comp(&Addr, &m_aVoteMutes[j].m_Addr))
+							VoteMuted = (m_aVoteMutes[j].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+					if(VoteMuted > 0)
 						continue;
 
 					int ActVote = m_apPlayers[i]->m_Vote;
@@ -1366,14 +1366,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			NETADDR Addr;
 			Server()->GetClientAddr(ClientID, &Addr);
 			Addr.port = 0; // ignore port number
-			int VoteBanned = 0;
-			for(int i = 0; i < m_NumVoteBans && !VoteBanned; i++)
-				if(!net_addr_comp(&Addr, &m_aVoteBans[i].m_Addr))
-					VoteBanned = (m_aVoteBans[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-			if(VoteBanned > 0)
+			int VoteMuted = 0;
+			for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
+				if(!net_addr_comp(&Addr, &m_aVoteMutes[i].m_Addr))
+					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			if(VoteMuted > 0)
 			{
 				char aChatmsg[64];
-				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteBanned);
+				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteMuted);
 				SendChatTarget(ClientID, aChatmsg);
 				return;
 			}
@@ -1644,14 +1644,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			NETADDR Addr;
 			Server()->GetClientAddr(ClientID, &Addr);
 			Addr.port = 0; // ignore port number
-			int VoteBanned = 0;
-			for (int i = 0; i < m_NumVoteBans && !VoteBanned; i++)
-				if (!net_addr_comp(&Addr, &m_aVoteBans[i].m_Addr))
-					VoteBanned = (m_aVoteBans[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-			if (VoteBanned > 0)
+			int VoteMuted = 0;
+			for (int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
+				if (!net_addr_comp(&Addr, &m_aVoteMutes[i].m_Addr))
+					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			if (VoteMuted > 0)
 			{
 				char aChatmsg[64];
-				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteBanned);
+				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteMuted);
 				SendChatTarget(ClientID, aChatmsg);
 				return;
 			}
