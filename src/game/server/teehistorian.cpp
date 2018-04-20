@@ -189,7 +189,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	First = true;
 
 	static const float TicksPerSecond = 50.0f;
-	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) \
+	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Min,Max,Description) \
 	if(pGameInfo->m_pTuning->m_##Name.Get() != (int)((Value)*100)) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \

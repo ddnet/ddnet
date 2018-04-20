@@ -6,7 +6,7 @@
 
 const char *CTuningParams::ms_apNames[] =
 {
-	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) #ScriptName,
+	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Min,Max,Description) #ScriptName,
 	#include "tuning.h"
 	#undef MACRO_TUNING_PARAM
 };
@@ -16,8 +16,7 @@ bool CTuningParams::Set(int Index, float Value)
 {
 	if(Index < 0 || Index >= Num())
 		return false;
-	((CTuneParam *)this)[Index] = Value;
-	return true;
+	return ((CTuneParam *)this)[Index].Set((int)Value * 100.0f);
 }
 
 bool CTuningParams::Get(int Index, float *pValue)
