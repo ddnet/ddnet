@@ -349,7 +349,7 @@ void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs
 	const char *pDisplayName, int AuthedID)
 {
 	char aBuf[128];
-	int Found = 0;
+	bool Found = 0;
 
 	pAddr->port = 0; // ignore port number for vote mutes
 
@@ -361,12 +361,13 @@ void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs
 			m_aVoteMutes[i].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
 			Found = 1;
+			break;
 		}
 	}
 
 	if(!Found) // nothing found so far, find a free slot..
 	{
-		if (m_NumVoteMutes < MAX_VOTE_BANS)
+		if(m_NumVoteMutes < MAX_VOTE_BANS)
 		{
 			m_aVoteMutes[m_NumVoteMutes].m_Addr = *pAddr;
 			m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick()
@@ -436,9 +437,9 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
-	if (Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "Client id not found.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "Client ID not found");
 		return;
 	}
 
