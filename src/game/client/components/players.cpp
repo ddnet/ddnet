@@ -7,6 +7,7 @@
 #include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/serverbrowser.h>
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
 
@@ -546,7 +547,9 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if(ClientID >= 0 && Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && g_Config.m_ClShowHookCollOther) || (Local && g_Config.m_ClShowHookCollOwn)))
+		CServerInfo Info;
+		Client()->GetServerInfo(&Info);
+		if(ClientID >= 0 && Player.m_PlayerFlags&PLAYERFLAG_AIM && ((IsDDRace(&Info) && g_Config.m_ClShowHookCollAlways) || (!Local && g_Config.m_ClShowHookCollOther) || (Local && g_Config.m_ClShowHookCollOwn)))
 		{
 			float Alpha = 1.0f;
 			if(OtherTeam)

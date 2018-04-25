@@ -376,6 +376,7 @@ MACRO_CONFIG_INT(ClPredictDDRace, cl_predict_ddrace, 1, 0, 1, CFGFLAG_CLIENT|CFG
 MACRO_CONFIG_INT(ClShowNinja, cl_show_ninja, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ninja skin")
 MACRO_CONFIG_INT(ClShowHookCollOther, cl_show_hook_coll_other, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show other players' hook collision line")
 MACRO_CONFIG_INT(ClShowHookCollOwn, cl_show_hook_coll_own, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show own players' hook collision line")
+MACRO_CONFIG_INT(ClShowHookCollAlways, cl_show_hook_coll_always, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show every players' hook collision line even if they're not using it")
 MACRO_CONFIG_INT(ClChatTeamColors, cl_chat_teamcolors, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show names in chat in team colors")
 MACRO_CONFIG_INT(ClChatReset, cl_chat_reset, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Reset chat when pressing escape")
 MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show tee direction")
