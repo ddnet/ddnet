@@ -383,7 +383,7 @@ public:
 
 	struct CSetting
 	{
-		char m_aCommand[64];
+		char m_aCommand[256];
 	};
 	array<CSetting> m_lSettings;
 
@@ -905,7 +905,7 @@ public:
 	static void EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser);
 
 	float m_CommandBox;
-	char m_aSettingsCommand[64];
+	char m_aSettingsCommand[256];
 
 	void DoMapBorder();
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
