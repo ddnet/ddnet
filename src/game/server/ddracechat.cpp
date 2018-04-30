@@ -1135,7 +1135,7 @@ void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
 
 	if (pResult->NumArguments())
 	{
-		if (pPlayer->m_ShowAll == pResult->GetInteger(0))
+		if (pPlayer->m_ShowAll == (bool)pResult->GetInteger(0))
 			return;
 
 		pPlayer->m_ShowAll = pResult->GetInteger(0);
