@@ -798,7 +798,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Mouse sens."), g_Config.m_InpMousesens);
 			UI()->DoLabel(&Label, aBuf, 14.0f*UI()->Scale(), -1);
 			Button.HMargin(2.0f, &Button);
-			int NewValue = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (min(g_Config.m_InpMousesens, 500)-5)/500.0f)*500.0f)+5;
+			int NewValue = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (min(g_Config.m_InpMousesens, 500)-1)/500.0f)*500.0f)+1;
 			if(g_Config.m_InpMousesens < 500 || NewValue < 500)
 				g_Config.m_InpMousesens = min(NewValue, 500);
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
@@ -811,7 +811,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
 			UI()->DoLabel(&Label, aBuf, 14.0f*UI()->Scale(), -1);
 			Button.HMargin(2.0f, &Button);
-			int NewValue = (int)(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (min(g_Config.m_UiMousesens, 500)-5)/500.0f)*500.0f)+5;
+			int NewValue = (int)(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (min(g_Config.m_UiMousesens, 500)-1)/500.0f)*500.0f)+1;
 			if(g_Config.m_UiMousesens < 500 || NewValue < 500)
 				g_Config.m_UiMousesens = min(NewValue, 500);
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
