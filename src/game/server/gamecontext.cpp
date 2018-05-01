@@ -740,22 +740,6 @@ void CGameContext::OnTick()
 					if(g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i))
 						continue;
 
-					// don't count vote banned players
-					NETADDR Addr;
-					Server()->GetClientAddr(i, &Addr);
-					Addr.port = 0; // ignore port number
-					bool VoteMuted = 0;
-					for(int j = 0; j < m_NumVoteMutes && !VoteMuted; j++)
-					{
-						if(!net_addr_comp(&Addr, &m_aVoteMutes[j].m_Addr))
-						{
-							VoteMuted = (m_aVoteMutes[j].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-							break;
-						}
-					}
-					if(VoteMuted)
-						continue;
-
 					int ActVote = m_apPlayers[i]->m_Vote;
 					int ActVotePos = m_apPlayers[i]->m_VotePos;
 
@@ -1645,26 +1629,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
 			if(!pMsg->m_Vote)
 				return;
-
-			NETADDR Addr;
-			Server()->GetClientAddr(ClientID, &Addr);
-			Addr.port = 0; // ignore port number
-			int VoteMuted = 0;
-			for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
-			{
-				if(!net_addr_comp(&Addr, &m_aVoteMutes[i].m_Addr))
-				{
-					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-					break;
-				}
-			}
-			if(VoteMuted > 0)
-			{
-				char aChatmsg[64];
-				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds", VoteMuted);
-				SendChatTarget(ClientID, aChatmsg);
-				return;
-			}
 
 			pPlayer->m_Vote = pMsg->m_Vote;
 			pPlayer->m_VotePos = ++m_VotePos;
