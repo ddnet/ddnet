@@ -53,6 +53,7 @@ void CGameContext::Construct(int Resetting)
 		m_pVoteOptionHeap = new CHeap();
 		m_pScore = 0;
 		m_NumMutes = 0;
+		m_NumVoteMutes = 0;
 	}
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
@@ -736,7 +737,7 @@ void CGameContext::OnTick()
 						continue;
 
 					// don't count votes by blacklisted clients
-					if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i))
+					if(g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i))
 						continue;
 
 					int ActVote = m_apPlayers[i]->m_Vote;
@@ -1347,6 +1348,21 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				char aChatmsg[64];
 				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote.", (int)(TimeLeft / TickSpeed) + 1);
+				SendChatTarget(ClientID, aChatmsg);
+				return;
+			}
+
+			NETADDR Addr;
+			Server()->GetClientAddr(ClientID, &Addr);
+			Addr.port = 0; // ignore port number
+			int VoteMuted = 0;
+			for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
+				if(!net_addr_comp(&Addr, &m_aVoteMutes[i].m_Addr))
+					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			if(VoteMuted > 0)
+			{
+				char aChatmsg[64];
+				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteMuted);
 				SendChatTarget(ClientID, aChatmsg);
 				return;
 			}

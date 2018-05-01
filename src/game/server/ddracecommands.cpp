@@ -345,6 +345,50 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
+void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs,
+	const char *pDisplayName, int AuthedID)
+{
+	char aBuf[128];
+	bool Found = 0;
+
+	pAddr->port = 0; // ignore port number for vote mutes
+
+	// find a matching vote mute for this ip, update expiration time if found
+	for(int i = 0; i < m_NumVoteMutes; i++)
+	{
+		if(net_addr_comp(&m_aVoteMutes[i].m_Addr, pAddr) == 0)
+		{
+			m_aVoteMutes[i].m_Expire = Server()->Tick()
+				+ Secs * Server()->TickSpeed();
+			Found = 1;
+			break;
+		}
+	}
+
+	if(!Found) // nothing found so far, find a free slot..
+	{
+		if(m_NumVoteMutes < MAX_VOTE_BANS)
+		{
+			m_aVoteMutes[m_NumVoteMutes].m_Addr = *pAddr;
+			m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick()
+				+ Secs * Server()->TickSpeed();
+			m_NumVoteMutes++;
+			Found = 1;
+		}
+	}
+	if(Found)
+	{
+		if(pDisplayName)
+		{
+			str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
+				Server()->ClientName(AuthedID), pDisplayName, Secs);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", aBuf);
+		}
+	}
+	else // no free slot found
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "vote mute array is full");
+}
+
 void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 		const char *pDisplayName)
 {
@@ -386,6 +430,24 @@ void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 	}
 	else // no free slot found
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
+}
+
+void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+
+	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "Client ID not found");
+		return;
+	}
+
+	NETADDR Addr;
+	pSelf->Server()->GetClientAddr(Victim, &Addr);
+
+	pSelf->VoteMute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
+		pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
 }
 
 void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData)
