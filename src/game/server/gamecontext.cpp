@@ -2027,6 +2027,38 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 	}
 }
 
+void CGameContext::ConMapbug(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pMapBugName = pResult->GetString(0);
+
+	if(pSelf->m_pController)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", "can't add map bugs after the game started");
+		return;
+	}
+
+	switch(pSelf->m_MapBugs.Update(pMapBugName))
+	{
+	case MAPBUGUPDATE_OK:
+		break;
+	case MAPBUGUPDATE_OVERRIDDEN:
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", "map-internal setting overridden by database");
+		break;
+	case MAPBUGUPDATE_NOTFOUND:
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "unknown map bug '%s', ignoring", pMapBugName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", aBuf);
+
+		}
+		break;
+	default:
+		dbg_assert(0, "unreachable");
+	}
+
+}
+
 void CGameContext::ConSwitchOpen(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2479,6 +2511,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("tune_zone_reset", "?i[zone]", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
 	Console()->Register("tune_zone_enter", "i[zone] s[message]", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
 	Console()->Register("tune_zone_leave", "i[zone] s[message]", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
+	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_SERVER|CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doublexplosion@ddnet.tw)");
 	Console()->Register("switch_open", "i['0'|'1']", CFGFLAG_SERVER|CFGFLAG_GAME, ConSwitchOpen, this, "Whether a switch is open by default (otherwise closed)");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
 	Console()->Register("change_map", "?r[map]", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
@@ -2531,7 +2564,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	int MapCrc;
 	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapCrc);
 	m_MapBugs = GetMapBugs(aMapName, MapSize, MapCrc);
-	m_MapBugs.Dump();
 
 	// reset everything here
 	//world = new GAMEWORLD;
@@ -2588,6 +2620,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);
 
 	LoadMapSettings();
+
+	m_MapBugs.Dump();
 
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();

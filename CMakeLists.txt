@@ -669,6 +669,7 @@ set_glob(GAME_SHARED GLOB src/game
   localization.h
   mapbugs.cpp
   mapbugs.h
+  mapbugs_list.h
   mapitems.cpp
   mapitems.h
   teamscore.cpp

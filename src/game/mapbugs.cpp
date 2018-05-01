@@ -43,6 +43,7 @@ CMapBugs GetMapBugs(const char *pName, int Size, int Crc)
 {
 	CMapDescription Map = {pName, Size, Crc};
 	CMapBugs Result;
+	Result.m_Extra = 0;
 	for(unsigned int i = 0; i < sizeof(MAP_BUGS) / sizeof(MAP_BUGS[0]); i++)
 	{
 		if(Map == MAP_BUGS[i].m_Map)
@@ -60,27 +61,59 @@ bool CMapBugs::Contains(int Bug) const
 	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
 	if(!pInternal)
 	{
-		return false;
+		return IsBugFlagSet(Bug, m_Extra);
 	}
 	return IsBugFlagSet(Bug, pInternal->m_BugFlags);
+}
+
+int CMapBugs::Update(const char *pBug)
+{
+	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
+	int Bug = -1;
+	if(false) {}
+#define MAPBUG(constname, string) else if(str_comp(pBug, string) == 0) { Bug = constname; }
+#include "mapbugs_list.h"
+#undef MAPBUG
+	if(Bug == -1)
+	{
+		return MAPBUGUPDATE_NOTFOUND;
+	}
+	if(pInternal)
+	{
+		return MAPBUGUPDATE_OVERRIDDEN;
+	}
+	m_Extra |= BugToFlag(Bug);
+	return MAPBUGUPDATE_OK;
 }
 
 void CMapBugs::Dump() const
 {
 	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
-	if(!pInternal)
+	unsigned int Flags;
+	if(pInternal)
+	{
+		Flags = pInternal->m_BugFlags;
+	}
+	else if(m_Extra)
+	{
+		Flags = m_Extra;
+	}
+	else
 	{
 		return;
 	}
 	char aBugs[NUM_BUGS + 1] = {0};
 	for(int i = 0; i < NUM_BUGS; i++)
 	{
-		aBugs[i] = IsBugFlagSet(i, pInternal->m_BugFlags) ? 'X' : 'O';
+		aBugs[i] = IsBugFlagSet(i, Flags) ? 'X' : 'O';
 	}
 
 	dbg_msg("mapbugs", "enabling map compatibility mode %s", aBugs);
-	dbg_msg("mapbugs", "map='%s' map_size=%d map_crc=%08x",
-		pInternal->m_Map.m_pName,
-		pInternal->m_Map.m_Size,
-		pInternal->m_Map.m_Crc);
+	if(pInternal)
+	{
+		dbg_msg("mapbugs", "map='%s' map_size=%d map_crc=%08x",
+			pInternal->m_Map.m_pName,
+			pInternal->m_Map.m_Size,
+			pInternal->m_Map.m_Crc);
+	}
 }
