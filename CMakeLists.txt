@@ -667,6 +667,9 @@ set_glob(GAME_SHARED GLOB src/game
   layers.h
   localization.cpp
   localization.h
+  mapbugs.cpp
+  mapbugs.h
+  mapbugs_list.h
   mapitems.cpp
   mapitems.h
   teamscore.cpp
@@ -1104,6 +1107,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     fs.cpp
     git_revision.cpp
     jobs.cpp
+    mapbugs.cpp
     name_ban.cpp
     str.cpp
     strip_path_and_extension.cpp

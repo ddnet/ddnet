@@ -8,6 +8,7 @@
 #include <engine/shared/memheap.h>
 
 #include <game/layers.h>
+#include <game/mapbugs.h>
 #include <game/voting.h>
 
 #include "eventhandler.h"
@@ -69,6 +70,7 @@ class CGameContext : public IGameServer
 	CTeeHistorian m_TeeHistorian;
 	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
+	CMapBugs m_MapBugs;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
@@ -81,6 +83,7 @@ class CGameContext : public IGameServer
 	static void ConTuneResetZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUserData);
+	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwitchOpen(IConsole::IResult *pResult, void *pUserData);
 	static void ConPause(IConsole::IResult *pResult, void *pUserData);
 	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
@@ -129,6 +132,7 @@ public:
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
+	bool EmulateBug(int Bug);
 
 	//int m_LockTeams;
 
