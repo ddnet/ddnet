@@ -29,6 +29,7 @@ CProjectile::CProjectile
 	m_Type = Type;
 	m_Pos = Pos;
 	m_Direction = Dir;
+	m_InitialLifeSpan = Span;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
 	m_Force = Force;
@@ -152,10 +153,14 @@ void CProjectile::Tick()
 	{
 		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
 		{
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-			(m_Owner != -1)? TeamMask : -1LL);
-			GameServer()->CreateSound(ColPos, m_SoundImpact,
-			(m_Owner != -1)? TeamMask : -1LL);
+			const int Number = (g_Config.m_SvOldGrenade && m_LifeSpan == -1 && m_InitialLifeSpan == 0) ? 2 : 1;
+			for(int i = 0; i < Number; i++)
+			{
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+				(m_Owner != -1)? TeamMask : -1LL);
+				GameServer()->CreateSound(ColPos, m_SoundImpact,
+				(m_Owner != -1)? TeamMask : -1LL);
+			}
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
@@ -179,12 +184,11 @@ void CProjectile::Tick()
 			GameServer()->m_World.DestroyEntity(this);
 			return;
 		}
-		else
-			if (!m_Freeze)
-			{
-				GameServer()->m_World.DestroyEntity(this);
-				return;
-			}
+		else if (!m_Freeze)
+		{
+			GameServer()->m_World.DestroyEntity(this);
+			return;
+		}
 	}
 	if(m_LifeSpan == -1)
 	{
