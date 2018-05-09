@@ -1555,22 +1555,19 @@ public:
 			{
 				STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
 
-				if(pTextOutlineColor->m_A != 0)
-					Graphics()->SetColor(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f * pTextOutlineColor->m_R, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f * pTextOutlineColor->m_G, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f * pTextOutlineColor->m_B, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f * pTextOutlineColor->m_A);
-				else 
-					Graphics()->SetColor(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f);
-
-
+				Graphics()->SetColor(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f * pTextOutlineColor->m_R, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f * pTextOutlineColor->m_G, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f * pTextOutlineColor->m_B, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f * pTextOutlineColor->m_A);
+				
 				Graphics()->QuadsSetSubset(TextCharQuad.m_Vertices[0].m_U * UVScale, TextCharQuad.m_Vertices[0].m_V * UVScale, TextCharQuad.m_Vertices[2].m_U * UVScale, TextCharQuad.m_Vertices[2].m_V * UVScale);
 				IGraphics::CQuadItem QuadItem(TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[0].m_Y, TextCharQuad.m_Vertices[1].m_X - TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[2].m_Y - TextCharQuad.m_Vertices[0].m_Y);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 			}
-
-			Graphics()->QuadsEndKeepVertices();
-
-			Graphics()->TextureSet(pFont->m_aTextures[0]);
+			
 			if(pTextColor->m_A != 0)
 			{
+				Graphics()->QuadsEndKeepVertices();
+
+				Graphics()->TextureSet(pFont->m_aTextures[0]);
+				
 				for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
 				{
 					STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
@@ -1580,22 +1577,13 @@ public:
 					unsigned char CA = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_A) * pTextColor->m_A);
 					Graphics()->ChangeColorOfQuadVertices((int)i, CR, CG, CB, CA);
 				}
+				
+				// render non outlined
+				Graphics()->QuadsDrawCurrentVertices(false);
 			}
 			else
-			{
-				for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
-				{
-					STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
-					unsigned char CR = TextCharQuad.m_Vertices[0].m_Color.m_R;
-					unsigned char CG = TextCharQuad.m_Vertices[0].m_Color.m_G;
-					unsigned char CB = TextCharQuad.m_Vertices[0].m_Color.m_B;
-					unsigned char CA = TextCharQuad.m_Vertices[0].m_Color.m_A;
-					Graphics()->ChangeColorOfQuadVertices((int)i, CR, CG, CB, CA);
-				}
-			}
+				Graphics()->QuadsEnd();
 
-			// render non outlined
-			Graphics()->QuadsDrawCurrentVertices(false);
 
 			// reset
 			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -1748,8 +1736,13 @@ public:
 		{
 			// reset the skylines
 			for(int j = 0; j < 2; ++j)
+			{
 				for(size_t k = 0; k < m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn.size(); ++k)
 					m_Fonts[i]->m_TextureSkyline[j].m_CurHeightOfPixelColumn[k] = 0;
+
+				mem_zero(m_Fonts[i]->m_TextureData[j], m_Fonts[i]->m_CurTextureDimensions[j] * m_Fonts[i]->m_CurTextureDimensions[j] * sizeof(unsigned char));
+				Graphics()->LoadTextureRawSub(m_Fonts[i]->m_aTextures[j], 0, 0, m_Fonts[i]->m_CurTextureDimensions[j], m_Fonts[i]->m_CurTextureDimensions[j], CImageInfo::FORMAT_ALPHA, m_Fonts[i]->m_TextureData[j]);
+			}
 
 			m_Fonts[i]->InitFontSizes();
 		}
