@@ -629,10 +629,29 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
 	}
 
-	pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
+	char aValidServerNames[sizeof(g_Config.m_SvSqlValidServerNames)];
+	str_copy(aValidServerNames, g_Config.m_SvSqlValidServerNames, sizeof(aValidServerNames));
+	char *p = strtok(aValidServerNames, ",");;
 
-	if(g_Config.m_SvUseSQL)
-		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
+	while(p)
+	{
+		if(str_comp(p, aCountry) == 0)
+		{
+			pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
+
+			if(g_Config.m_SvUseSQL)
+				pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
+
+			return;
+		}
+
+		p = strtok(NULL, ",");
+	}
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
 #endif
 }
 
