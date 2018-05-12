@@ -769,24 +769,21 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 	return 0;
 }
 
-int CServer::NewClientNoAuthCallback(int ClientID, bool Reset, void *pUser)
+int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 
-	if (Reset)
-	{
-		pThis->m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
-		pThis->m_aClients[ClientID].m_aName[0] = 0;
-		pThis->m_aClients[ClientID].m_aClan[0] = 0;
-		pThis->m_aClients[ClientID].m_Country = -1;
-		pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-		pThis->m_aClients[ClientID].m_AuthKey = -1;
-		pThis->m_aClients[ClientID].m_AuthTries = 0;
-		pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
-		pThis->m_aClients[ClientID].Reset();
-	}
+	pThis->m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
+	pThis->m_aClients[ClientID].m_aName[0] = 0;
+	pThis->m_aClients[ClientID].m_aClan[0] = 0;
+	pThis->m_aClients[ClientID].m_Country = -1;
+	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
+	pThis->m_aClients[ClientID].m_AuthKey = -1;
+	pThis->m_aClients[ClientID].m_AuthTries = 0;
+	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].Reset();
 
 	pThis->SendMap(ClientID);
 #if defined(CONF_FAMILY_UNIX)

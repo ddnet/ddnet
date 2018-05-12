@@ -280,7 +280,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 
 
 	if (VanillaAuth)
-		m_pfnNewClientNoAuth(Slot, true, m_UserPtr);
+		m_pfnNewClientNoAuth(Slot, m_UserPtr);
 	else
 		m_pfnNewClient(Slot, m_UserPtr);
 
