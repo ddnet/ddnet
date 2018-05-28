@@ -8,8 +8,8 @@ import sys
 def send_discord(message):
     requests.post("https://discordapp.com/api/webhooks/" + keys.webhook, data={"content": message})
 
-if not len(sys.argv) == 2:
-    print('usage: ' + str(sys.argv[0]) + ' "message"')
+if len(sys.argv) != 2:
+    print('usage: ' + str(sys.argv[0]) + ' message')
     exit()
 
 send_discord(sys.argv[1])
