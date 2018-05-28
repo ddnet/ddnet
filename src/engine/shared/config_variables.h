@@ -15,7 +15,7 @@ MACRO_CONFIG_STR(Logfile, logfile, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_
 MACRO_CONFIG_INT(ConsoleOutputLevel, console_output_level, 0, 0, 2, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Adjusts the amount of information in the console")
 
 MACRO_CONFIG_INT(ClSaveSettings, cl_save_settings, 1, 0, 1, CFGFLAG_CLIENT, "Write the settings file on exit")
-MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 480, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Refresh rate for updating the game (in Hz)")
+MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Refresh rate for updating the game (in Hz)")
 MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Refresh rate for updating the game when the window is inactive (in Hz)")
 MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(ClEditorUndo, cl_editorundo, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Undo function in editor")
