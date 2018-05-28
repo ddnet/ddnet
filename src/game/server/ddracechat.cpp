@@ -1438,6 +1438,39 @@ void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
 			pSelf->Server()->ClientName(pResult->m_ClientID),
 			pResult->m_ClientID);
 
+    // Prepare user data for discord
+    char aHelpMsg[128];
+    char aName[32];
+    str_copy(aName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(aName));
+    str_copy(aHelpMsg, pResult->GetString(0), sizeof(aHelpMsg));
+    for(unsigned int i = 0; i < sizeof(aHelpMsg); i++) // don't escape the discord format
+    {
+        if(aHelpMsg[i] == '\0') { break; }
+        if(aHelpMsg[i] == '`') { aHelpMsg[i] = ' '; }
+    }
+    for(unsigned int i = 0; i < sizeof(aName); i++)
+    {
+        if(aName[i] == '\0') { break; }
+        if(aName[i] == '`') { aName[i] = ' '; }
+    }
+    for(unsigned int i = 0; i < sizeof(aHelpMsg); i++) // don't escape the argument string
+    {
+        if(aHelpMsg[i] == '\0') { break; }
+        if(aHelpMsg[i] == '\'') { aHelpMsg[i] = ' '; }
+    }
+    for(unsigned int i = 0; i < sizeof(aName); i++)
+    {
+        if(aName[i] == '\0') { break; }
+        if(aName[i] == '\'') { aName[i] = ' '; }
+    }
+
+    // Execute discord script
+    char aDiscord[128 + 512];
+    str_format(aDiscord, sizeof(aDiscord), "./ddnet-discord.py '@Moderator\n``Player: %s\nPort: %d\nProblem: %s``'", aName, g_Config.m_SvPort, aHelpMsg);
+    dbg_msg("discord", "sycall: %s", aDiscord);
+    int sys = system(aDiscord);
+    if (!sys) { dbg_msg("discord", "syscall failed with code: %d", sys); }
+
 	// Send the request to all authed clients.
 	for ( int i = 0; i < MAX_CLIENTS; i++ )
 	{
