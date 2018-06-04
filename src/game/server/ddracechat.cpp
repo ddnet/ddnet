@@ -1434,12 +1434,12 @@ void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->m_ModHelpTick = pSelf->Server()->Tick() + g_Config.m_SvModHelpDelay * pSelf->Server()->TickSpeed();
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "Moderator help is requested by %s (ID: %d):",
+	str_format(aBuf, sizeof(aBuf), "Moderator help is requested by '%s' (ID: %d):",
 			pSelf->Server()->ClientName(pResult->m_ClientID),
 			pResult->m_ClientID);
 
 	// Send the request to all authed clients.
-	for ( int i = 0; i < MAX_CLIENTS; i++ )
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(pSelf->m_apPlayers[i] && pSelf->Server()->ClientAuthed(i))
 		{
