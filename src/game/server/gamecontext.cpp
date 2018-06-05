@@ -2632,8 +2632,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	char aMapName[128];
 	int MapSize;
+	SHA256_DIGEST MapSha256;
 	int MapCrc;
-	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapCrc);
+	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapSha256, &MapCrc);
 	m_MapBugs = GetMapBugs(aMapName, MapSize, MapCrc);
 
 	// reset everything here
@@ -2743,6 +2744,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 		GameInfo.m_pMapName = aMapName;
 		GameInfo.m_MapSize = MapSize;
+		GameInfo.m_MapSha256 = MapSha256;
 		GameInfo.m_MapCrc = MapCrc;
 
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);

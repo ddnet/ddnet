@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/hash_ctxt.h>
 #include <base/system.h>
 #include <engine/storage.h>
 #include "datafile.h"
@@ -58,6 +59,7 @@ struct CDatafileInfo
 struct CDatafile
 {
 	IOHANDLE m_File;
+	SHA256_DIGEST m_Sha256;
 	unsigned m_Crc;
 	CDatafileInfo m_Info;
 	CDatafileHeader m_Header;
@@ -80,12 +82,15 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 
 	// take the CRC of the file and store it
 	unsigned Crc = 0;
+	SHA256_DIGEST Sha256;
 	{
 		enum
 		{
 			BUFFER_SIZE = 64*1024
 		};
 
+		SHA256_CTX Sha256Ctxt;
+		sha256_init(&Sha256Ctxt);
 		unsigned char aBuffer[BUFFER_SIZE];
 
 		while(1)
@@ -94,7 +99,9 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 			if(Bytes <= 0)
 				break;
 			Crc = crc32(Crc, aBuffer, Bytes); // ignore_convention
+			sha256_update(&Sha256Ctxt, aBuffer, Bytes);
 		}
+		Sha256 = sha256_finish(&Sha256Ctxt);
 
 		io_seek(File, 0, IOSEEK_START);
 	}
@@ -143,6 +150,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	pTmpDataFile->m_ppDataPtrs = (char **)(pTmpDataFile+1);
 	pTmpDataFile->m_pData = (char *)(pTmpDataFile+1)+Header.m_NumRawData*sizeof(char *);
 	pTmpDataFile->m_File = File;
+	pTmpDataFile->m_Sha256 = Sha256;
 	pTmpDataFile->m_Crc = Crc;
 
 	// clear the data pointers
@@ -223,32 +231,6 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		*/
 	}
 
-	return true;
-}
-
-bool CDataFileReader::GetCrcSize(class IStorage *pStorage, const char *pFilename, int StorageType, unsigned *pCrc, unsigned *pSize)
-{
-	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
-	if(!File)
-		return false;
-
-	// get crc and size
-	unsigned Crc = 0;
-	unsigned Size = 0;
-	unsigned char aBuffer[64*1024];
-	while(1)
-	{
-		unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
-		if(Bytes <= 0)
-			break;
-		Crc = crc32(Crc, aBuffer, Bytes); // ignore_convention
-		Size += Bytes;
-	}
-
-	io_close(File);
-
-	*pCrc = Crc;
-	*pSize = Size;
 	return true;
 }
 
@@ -430,6 +412,20 @@ bool CDataFileReader::Close()
 	free(m_pDataFile);
 	m_pDataFile = 0;
 	return true;
+}
+
+SHA256_DIGEST CDataFileReader::Sha256()
+{
+	if(!m_pDataFile)
+	{
+		SHA256_DIGEST Result;
+		for(unsigned i = 0; i < sizeof(Result.data); i++)
+		{
+			Result.data[i] = 0xff;
+		}
+		return Result;
+	}
+	return m_pDataFile->m_Sha256;
 }
 
 unsigned CDataFileReader::Crc()

@@ -316,9 +316,16 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_pMapdownloadTask = NULL;
 	m_MapdownloadFile = 0;
 	m_MapdownloadChunk = 0;
+	m_MapdownloadSha256Present = false;
+	m_MapdownloadSha256 = SHA256_ZEROED;
 	m_MapdownloadCrc = 0;
 	m_MapdownloadAmount = -1;
 	m_MapdownloadTotalsize = -1;
+
+	m_MapDetailsPresent = false;
+	m_aMapDetailsName[0] = 0;
+	m_MapDetailsSha256 = SHA256_ZEROED;
+	m_MapDetailsCrc = 0;
 
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
@@ -742,6 +749,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 	if(m_MapdownloadFile)
 		io_close(m_MapdownloadFile);
 	m_MapdownloadFile = 0;
+	m_MapdownloadSha256Present = false;
+	m_MapdownloadSha256 = SHA256_ZEROED;
 	m_MapdownloadCrc = 0;
 	m_MapdownloadTotalsize = -1;
 	m_MapdownloadAmount = 0;
@@ -1052,7 +1061,7 @@ vec3 CClient::GetColorV3(int v)
 	return HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
 }
 
-const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)
+const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
 {
 	static char s_aErrorMsg[128];
 
@@ -1061,6 +1070,18 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 	if(!m_pMap->Load(pFilename))
 	{
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' not found", pFilename);
+		return s_aErrorMsg;
+	}
+
+	if(pWantedSha256 && m_pMap->Sha256() != *pWantedSha256)
+	{
+		char aWanted[SHA256_MAXSTRSIZE];
+		char aGot[SHA256_MAXSTRSIZE];
+		sha256_str(*pWantedSha256, aWanted, sizeof(aWanted));
+		sha256_str(m_pMap->Sha256(), aGot, sizeof(aWanted));
+		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %s != %s", aGot, aWanted);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
+		m_pMap->Unload();
 		return s_aErrorMsg;
 	}
 
@@ -1085,28 +1106,37 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned 
 	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
 	str_copy(m_aCurrentMapPath, pFilename, sizeof(m_aCurrentMapPath));
 
-	return 0x0;
+	return 0;
 }
 
-
-
-const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
+const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc)
 {
 	const char *pError = 0;
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted crc=%08x", pMapName, WantedCrc);
+	char aWanted[256];
+	char aWantedSha256[SHA256_MAXSTRSIZE];
+
+	aWanted[0] = 0;
+
+	if(pWantedSha256)
+	{
+		sha256_str(*pWantedSha256, aWantedSha256, sizeof(aWantedSha256));
+		str_format(aWanted, sizeof(aWanted), "sha256=%s ", aWantedSha256);
+	}
+
+	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted%s crc=%08x", pMapName, aWanted, WantedCrc);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 	SetState(IClient::STATE_LOADING);
 
 	// try the normal maps folder
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
-	pError = LoadMap(pMapName, aBuf, WantedCrc);
+	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
 		return pError;
 
 	// try the downloaded maps
 	str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
-	pError = LoadMap(pMapName, aBuf, WantedCrc);
+	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
 		return pError;
 
@@ -1114,7 +1144,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, int WantedCrc)
 	char aFilename[128];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
 	if(Storage()->FindFile(aFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
-		pError = LoadMap(pMapName, aBuf, WantedCrc);
+		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 
 	return pError;
 }
@@ -1428,6 +1458,23 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	#undef GET_INT
 }
 
+static void FormatMapDownloadFilename(const char *pName, SHA256_DIGEST *pSha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
+{
+	char aSha256[SHA256_MAXSTRSIZE + 1];
+	aSha256[0] = 0;
+	if(pSha256)
+	{
+		aSha256[0] = '_';
+		sha256_str(*pSha256, aSha256 + 1, sizeof(aSha256) - 1);
+	}
+
+	str_format(pBuffer, BufferSize, "%s_%08x%s.map%s",
+		pName,
+		Crc,
+		aSha256,
+		Temp ? ".tmp" : "");
+}
+
 void CClient::ProcessServerPacket(CNetChunk *pPacket)
 {
 	CUnpacker Unpacker;
@@ -1452,8 +1499,27 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	if(Sys)
 	{
 		// system message
-		if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
+		if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
 		{
+			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
+			int MapCrc = Unpacker.GetInt();
+
+			if(Unpacker.Error())
+			{
+				return;
+			}
+
+			m_MapDetailsPresent = true;
+			str_copy(m_aMapDetailsName, pMap, sizeof(m_aMapDetailsName));
+			m_MapDetailsSha256 = *pMapSha256;
+			m_MapDetailsCrc = MapCrc;
+		}
+		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
+		{
+			bool MapDetailsWerePresent = m_MapDetailsPresent;
+			m_MapDetailsPresent = false;
+
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			int MapCrc = Unpacker.GetInt();
 			int MapSize = Unpacker.GetInt();
@@ -1478,7 +1544,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				DisconnectWithReason(pError);
 			else
 			{
-				pError = LoadMapSearch(pMap, MapCrc);
+				SHA256_DIGEST *pMapSha256 = 0;
+				if(MapDetailsWerePresent && str_comp(m_aMapDetailsName, pMap) == 0 && m_MapDetailsCrc == MapCrc)
+				{
+					pMapSha256 = &m_MapDetailsSha256;
+				}
+				pError = LoadMapSearch(pMap, pMapSha256, MapCrc);
 
 				if(!pError)
 				{
@@ -1487,7 +1558,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				}
 				else
 				{
-					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s_%08x.map", pMap, MapCrc);
+					char aFilename[256];
+					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, aFilename, sizeof(aFilename));
+					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aFilename);
 
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilename);
@@ -1496,21 +1569,20 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					m_MapdownloadChunk = 0;
 					str_copy(m_aMapdownloadName, pMap, sizeof(m_aMapdownloadName));
 
+					m_MapdownloadSha256Present = (bool)pMapSha256;
+					m_MapdownloadSha256 = pMapSha256 ? *pMapSha256 : SHA256_ZEROED;
 					m_MapdownloadCrc = MapCrc;
 					m_MapdownloadTotalsize = MapSize;
 					m_MapdownloadAmount = 0;
 
 					ResetMapDownload();
 
-					if(g_Config.m_ClHttpMapDownload)
+					if(pMapSha256 && g_Config.m_ClHttpMapDownload)
 					{
 						char aUrl[256];
-						char aFilename[64];
-						char aEscaped[128];
-						str_format(aFilename, sizeof(aFilename), "%s_%08x.map", pMap, MapCrc);
-
+						char aEscaped[256];
 						EscapeUrl(aEscaped, sizeof(aEscaped), aFilename);
-						str_format(aUrl, sizeof(aUrl), "%s/", g_Config.m_ClDDNetMapDownloadUrl);
+						str_format(aUrl, sizeof(aUrl), "%s/%s", g_Config.m_ClDDNetMapDownloadUrl, aEscaped);
 
 						// We only trust our own custom-selected CAs for our own servers.
 						// Other servers can use any CA trusted by the system.
@@ -1519,7 +1591,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 							str_comp_nocase_num("http://maps.ddnet.tw/", aUrl, 21) == 0 ||
 							str_comp_nocase_num("https://maps.ddnet.tw/", aUrl, 22) == 0;
 
-						str_append(aUrl, aEscaped, sizeof(aUrl));
 
 						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
 						Engine()->AddJob(m_pMapdownloadTask);
@@ -2106,9 +2177,20 @@ void CClient::FinishMapDownload()
 
 	int Prev = m_MapdownloadTotalsize;
 	m_MapdownloadTotalsize = -1;
+	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : 0;
+
+	char aTmp[256];
+	char aMapFileTemp[256];
+	char aMapFile[256];
+	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, true, aTmp, sizeof(aTmp));
+	str_format(aMapFileTemp, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
+	FormatMapDownloadFilename(m_aMapdownloadName, pSha256, m_MapdownloadCrc, false, aTmp, sizeof(aTmp));
+	str_format(aMapFile, sizeof(aMapFileTemp), "downloadedmaps/%s", aTmp);
+
+	Storage()->RenameFile(aMapFileTemp, aMapFile, IStorage::TYPE_SAVE);
 
 	// load map
-	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadCrc);
+	pError = LoadMap(m_aMapdownloadName, aMapFile, pSha256, m_MapdownloadCrc);
 	if(!pError)
 	{
 		ResetMapDownload();
@@ -3144,7 +3226,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[1]<<16)|
 		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[2]<<8)|
 		(m_DemoPlayer.Info()->m_Header.m_aMapCrc[3]);
-	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Crc);
+	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, 0, Crc);
 	if(pError)
 	{
 		DisconnectWithReason(pError);
@@ -3221,7 +3303,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		}
 		else
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
-		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
+		m_DemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Sha256(), m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 	}
 }
 
@@ -3652,7 +3734,7 @@ void CClient::RaceRecord_Start(const char *pFilename)
 	if(State() != IClient::STATE_ONLINE)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
 	else
-		m_DemoRecorder[RECORDER_RACE].Start(Storage(), m_pConsole, pFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
+		m_DemoRecorder[RECORDER_RACE].Start(Storage(), m_pConsole, pFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Sha256(), m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 }
 
 void CClient::RaceRecord_Stop()

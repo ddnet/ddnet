@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_DEMO_H
 #define ENGINE_SHARED_DEMO_H
 
+#include <base/hash.h>
+
 #include <engine/demo.h>
 #include <engine/shared/protocol.h>
 
@@ -32,7 +34,7 @@ public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST Sha256, unsigned MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
 	int Stop();
 	void AddDemoMarker();
 
@@ -77,6 +79,7 @@ public:
 	struct CMapInfo
 	{
 		char m_aName[128];
+		SHA256_DIGEST m_Sha256;
 		int m_Crc;
 		int m_Size;
 	};

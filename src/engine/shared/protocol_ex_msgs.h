@@ -22,3 +22,4 @@ UUID(NETMSG_ITIS,         "it-is@ddnet.tw")
 UUID(NETMSG_IDONTKNOW,    "i-dont-know@ddnet.tw")
 
 UUID(NETMSG_RCONTYPE,     "rcon-type@ddnet.tw")
+UUID(NETMSG_MAP_DETAILS,  "map-details@ddnet.tw")

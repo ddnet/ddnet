@@ -2,6 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
+
+#include <base/hash.h>
+
 #include "kernel.h"
 #include "message.h"
 #include <game/generated/protocol.h>
@@ -133,7 +136,7 @@ public:
 		return true;
 	}
 
-	virtual void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, int *pMapCrc) = 0;
+	virtual void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pSha256, int *pMapCrc) = 0;
 
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
