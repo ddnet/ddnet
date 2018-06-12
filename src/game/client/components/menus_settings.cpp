@@ -669,7 +669,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Zoom in", "zoom+", 0 },
 	{ "Zoom out", "zoom-", 0 },
 	{ "Default zoom", "zoom", 0 },
-	{ "Show others", "say /showothers", 0 },
+	{ "Show others", "say /showothersteams", 0 },
 	{ "Show all", "say /showall", 0 },
 	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0 },
 	{ "Toggle dummy", "toggle cl_dummy 0 1", 0 },
