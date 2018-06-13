@@ -1197,7 +1197,7 @@ bool CheckClientID(int ClientID)
 	return true;
 }
 
-void CGameContext::ConShowOthersTeam(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConShowOthersTeams(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if (!CheckClientID(pResult->m_ClientID))

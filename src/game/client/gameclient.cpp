@@ -1348,18 +1348,18 @@ void CGameClient::OnNewSnapshot()
 		m_DDRaceMsgSent[1] = true;
 	}
 
-	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
+	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthersTeams))
 	{
 		// no need to send, default settings
-		//if(!(m_ShowOthers == -1 && g_Config.m_ClShowOthers))
+		//if(!(m_ShowOthers == -1 && g_Config.m_ClShowOthersTeams))
 		{
 			CNetMsg_Cl_ShowOthers Msg;
-			Msg.m_Show = g_Config.m_ClShowOthers;
+			Msg.m_Show = g_Config.m_ClShowOthersTeams;
 			Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 		}
 
 		// update state
-		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
+		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthersTeams;
 	}
 
 	m_pGhost->OnNewSnapshot();
