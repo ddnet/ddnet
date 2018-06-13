@@ -1069,6 +1069,7 @@ void CGameContext::OnClientEnter(int ClientID)
 				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers or /showothersteams.");
 
 			m_apPlayers[ClientID]->m_ShowOthers = true;
+			m_apPlayers[ClientID]->m_SpecTeam = false;
 		}
 	}
 	m_VoteUpdate = true;
@@ -1766,6 +1767,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				CNetMsg_Cl_ShowOthers *pMsg = (CNetMsg_Cl_ShowOthers *)pRawMsg;
 				pPlayer->m_ShowOthers = (bool)pMsg->m_Show;
+				pPlayer->m_SpecTeam = !(bool)pMsg->m_Show;
 			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
