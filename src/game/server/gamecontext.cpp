@@ -54,6 +54,7 @@ void CGameContext::Construct(int Resetting)
 		m_pScore = 0;
 		m_NumMutes = 0;
 		m_NumVoteMutes = 0;
+		m_NumTeamChangeMutes = 0;
 	}
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
@@ -1048,11 +1049,26 @@ void CGameContext::OnClientEnter(int ClientID)
 	Score()->LoadScore(ClientID);
 	Score()->CheckBirthday(ClientID);
 
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	Addr.port = 0; // ignore port number for mutes
+	for(int i = 0; i < m_NumTeamChangeMutes; i++)
+	{
+		if(!net_addr_comp(&Addr, &m_aTeamChangeMutes[i].m_Addr))
+		{
+			m_apPlayers[ClientID]->m_TeamChangeScore = m_aTeamChangeMutes[i].m_Score;
+			break;
+		}
+	}
+
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-		SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		if(!ProcessTeamChangeProtection(ClientID))
+		{
+			str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
+			SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		}
 
 		SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
 		SendChatTarget(ClientID, "please visit DDNet.tw or say /info for more info");
@@ -3276,6 +3292,41 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 	}
 
 	return 0;
+}
+
+bool CGameContext::ProcessTeamChangeProtection(int ClientID)
+{
+	if(!m_apPlayers[ClientID])
+		return false;
+
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	Addr.port = 0; // ignore port number for mutes
+	int Muted = 0;
+
+	for(int i = 0; i < m_NumTeamChangeMutes && !Muted; i++)
+	{
+		if (!net_addr_comp(&Addr, &m_aTeamChangeMutes[i].m_Addr))
+			Muted = (m_aTeamChangeMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+	}
+
+	if(Muted > 0)
+	{
+		/*
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "Your team change message is hidden for the next %d seconds.", Muted);
+		SendChatTarget(ClientID, aBuf);
+		*/
+		return true;
+	}
+
+	if((m_apPlayers[ClientID]->m_TeamChangeScore += g_Config.m_SvTeamChangePenalty) > g_Config.m_SvTeamChangeThreshold)
+	{
+		TeamChangeMute(0, &Addr, g_Config.m_SvTeamChangeMuteDuration, Server()->ClientName(ClientID));
+		return true;
+	}
+	UpdateTeamChangeScore(0, &Addr, m_apPlayers[ClientID]->m_TeamChangeScore);
+	return false;
 }
 
 int CGameContext::GetDDRaceTeam(int ClientID)

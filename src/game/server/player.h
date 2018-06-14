@@ -174,6 +174,7 @@ public:
 	bool m_HasFinishScore;
 
 	int m_ChatScore;
+	int m_TeamChangeScore;
 
 	bool m_Moderating;
 	int m_ModHelpTick;

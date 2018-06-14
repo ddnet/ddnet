@@ -432,6 +432,81 @@ void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
 }
 
+void CGameContext::UpdateTeamChangeScore(IConsole::IResult *pResult, NETADDR * Addr, int Score)
+{
+	int Found = 0;
+
+	Addr->port = 0; // ignore port number for mutes
+
+	// find a matching mute for this ip, update expiration time if found
+	for(int i = 0; i < m_NumTeamChangeMutes; i++)
+	{
+		if(net_addr_comp(&m_aTeamChangeMutes[i].m_Addr, Addr) == 0)
+		{
+			m_aTeamChangeMutes[i].m_Score = Score;
+			Found = 1;
+		}
+	}
+
+	if(!Found) // nothing found so far, find a free slot..
+	{
+		if (m_NumTeamChangeMutes < MAX_TEAM_CHANGE_MUTES)
+		{
+			m_aTeamChangeMutes[m_NumTeamChangeMutes].m_Addr = *Addr;
+			m_aTeamChangeMutes[m_NumTeamChangeMutes].m_Score = Score;
+			m_NumTeamChangeMutes++;
+			Found = 1;
+		}
+	}
+
+	if(!Found)
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "team change array is full");
+}
+
+void CGameContext::TeamChangeMute(IConsole::IResult *pResult, NETADDR *Addr, int Secs,
+	const char *pDisplayName)
+{
+	char aBuf[128];
+	int Found = 0;
+
+	Addr->port = 0; // ignore port number for mutes
+
+	// find a matching mute for this ip, update expiration time if found
+	for(int i = 0; i < m_NumTeamChangeMutes; i++)
+	{
+		if(net_addr_comp(&m_aTeamChangeMutes[i].m_Addr, Addr) == 0)
+		{
+			m_aTeamChangeMutes[i].m_Expire = Server()->Tick()
+				+ Secs * Server()->TickSpeed();
+			Found = 1;
+		}
+	}
+
+	if(!Found) // nothing found so far, find a free slot..
+	{
+		if(m_NumTeamChangeMutes < MAX_TEAM_CHANGE_MUTES)
+		{
+			m_aTeamChangeMutes[m_NumTeamChangeMutes].m_Addr = *Addr;
+			m_aTeamChangeMutes[m_NumTeamChangeMutes].m_Expire = Server()->Tick()
+				+ Secs * Server()->TickSpeed();
+			m_NumTeamChangeMutes++;
+			Found = 1;
+		}
+	}
+
+	if(Found)
+	{
+		if(pDisplayName)
+		{
+			str_format(aBuf, sizeof aBuf, "'%s' has been muted from team changes for %d seconds.",
+				pDisplayName, Secs);
+			SendChat(-1, CHAT_ALL, aBuf);
+		}
+	}
+	else // no free slot found
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "team change array is full");
+}
+
 void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

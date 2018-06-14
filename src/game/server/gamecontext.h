@@ -244,6 +244,7 @@ public:
 	// DDRace
 
 	int ProcessSpamProtection(int ClientID);
+	bool ProcessTeamChangeProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64 m_NonEmptySince;
@@ -364,6 +365,7 @@ private:
 	{
 		MAX_MUTES=32,
 		MAX_VOTE_BANS=32,
+		MAX_TEAM_CHANGE_MUTES=64,
 	};
 	struct CMute
 	{
@@ -375,11 +377,21 @@ private:
 		NETADDR m_Addr;
 		int m_Expire;
 	};
+	struct CTeamChangeMute
+	{
+		NETADDR m_Addr;
+		int m_Expire;
+		int m_Score;
+	};
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
 	CVoteMute m_aVoteMutes[MAX_VOTE_BANS];
 	int m_NumVoteMutes;
+	CTeamChangeMute m_aTeamChangeMutes[MAX_TEAM_CHANGE_MUTES];
+	int m_NumTeamChangeMutes;
+	void UpdateTeamChangeScore(IConsole::IResult *pResult, NETADDR *Addr, int Score);
+	void TeamChangeMute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName);
 	void Mute(IConsole::IResult *pResult, NETADDR *Addr, int Secs, const char *pDisplayName);
 	void VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);

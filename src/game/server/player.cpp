@@ -62,6 +62,7 @@ void CPlayer::Reset()
 	m_Sent1stAfkWarning = 0;
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
+	m_TeamChangeScore = 0;
 	m_Moderating = false;
 	m_EyeEmote = true;
 	m_TimerType = (g_Config.m_SvDefaultTimerType == CPlayer::TIMERTYPE_GAMETIMER || g_Config.m_SvDefaultTimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) ? CPlayer::TIMERTYPE_BROADCAST : g_Config.m_SvDefaultTimerType;
@@ -150,8 +151,10 @@ void CPlayer::Tick()
 		return;
 	}
 
-	if (m_ChatScore > 0)
+	if(m_ChatScore > 0)
 		m_ChatScore--;
+	if(m_TeamChangeScore > 0)
+		m_TeamChangeScore--;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 
@@ -381,7 +384,8 @@ void CPlayer::OnDisconnect(const char *pReason)
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(m_ClientID), pReason);
 		else
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(m_ClientID));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		if(!GameServer()->ProcessTeamChangeProtection(m_ClientID))
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", m_ClientID, Server()->ClientName(m_ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
@@ -516,7 +520,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		return;
 
 	char aBuf[512];
-	if(DoChatMsg)
+	if(DoChatMsg && !GameServer()->ProcessTeamChangeProtection(m_ClientID))
 	{
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
