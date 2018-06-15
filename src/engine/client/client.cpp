@@ -690,7 +690,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
 
-	if(!pPassword)
+	if(m_SendPassword)
+	{
+		str_copy(m_Password, g_Config.m_Password, sizeof(m_Password));
+		m_SendPassword = false;
+	}
+	else if(!pPassword)
 		m_Password[0] = 0;
 	else
 		str_copy(m_Password, pPassword, sizeof(m_Password));
@@ -3054,6 +3059,22 @@ void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Graphics()->TakeScreenshot(0);
 }
 
+void CClient::Con_Password(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pResult->NumArguments() > 0)
+	{
+		str_copy(g_Config.m_Password, pResult->GetString(0), sizeof(g_Config.m_Password));
+		pSelf->m_SendPassword = true;
+	}
+	else
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Value: %s", g_Config.m_Password);
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+	}
+}
+
 void CClient::Con_Rcon(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3402,6 +3423,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot");
+	m_pConsole->Register("password", "?r[password]", CFGFLAG_CLIENT, Con_Password, this, "Password to the server");
 	m_pConsole->Register("rcon", "r[rcon-command]", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon");
 	m_pConsole->Register("rcon_auth", "s[password]", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon");
 	m_pConsole->Register("rcon_login", "s[username] r[password]", CFGFLAG_CLIENT, Con_RconLogin, this, "Authenticate to rcon with a username");
