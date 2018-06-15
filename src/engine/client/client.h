@@ -112,6 +112,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_RconPassword[32];
 	int m_UseTempRconCommands;
 	char m_Password[32];
+	bool m_SendPassword;
 
 	// version-checking
 	char m_aVersionStr[10];
@@ -333,6 +334,7 @@ public:
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Password(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconLogin(IConsole::IResult *pResult, void *pUserData);
