@@ -48,12 +48,12 @@ void CPlayer::Reset()
 	m_LastInvited = 0;
 	m_WeakHookSpawn = false;
 
-	int* idMap = Server()->GetIdMap(m_ClientID);
+	int *pIdMap = Server()->GetIdMap(m_ClientID);
 	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
 	{
-		idMap[i] = -1;
+		pIdMap[i] = -1;
 	}
-	idMap[0] = m_ClientID;
+	pIdMap[0] = m_ClientID;
 
 	// DDRace
 

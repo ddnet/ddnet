@@ -134,8 +134,6 @@ private:
 	int64 m_ForcePauseTime;
 	int64 m_LastPause;
 
-	// DDRace
-
 public:
 	enum
 	{

@@ -2099,7 +2099,7 @@ void CClient::FinishMapDownload()
 	const char *pError;
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
 
-	int prev = m_MapdownloadTotalsize;
+	int Prev = m_MapdownloadTotalsize;
 	m_MapdownloadTotalsize = -1;
 
 	// load map
@@ -2113,7 +2113,7 @@ void CClient::FinishMapDownload()
 	else if(m_pMapdownloadTask) // fallback
 	{
 		ResetMapDownload();
-		m_MapdownloadTotalsize = prev;
+		m_MapdownloadTotalsize = Prev;
 		SendMapRequest();
 	}
 	else
