@@ -693,14 +693,14 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		const char *pString = pResult->GetString(0);
 		if(!str_utf8_check(pString))
 		{
-			char Temp[4];
+			char aTemp[4];
 			int Length = 0;
 			while(*pString)
 			{
-				int Size = str_utf8_encode(Temp, static_cast<const unsigned char>(*pString++));
+				int Size = str_utf8_encode(aTemp, static_cast<unsigned char>(*pString++));
 				if(Length+Size < pData->m_MaxSize)
 				{
-					mem_copy(pData->m_pStr+Length, &Temp, Size);
+					mem_copy(pData->m_pStr+Length, aTemp, Size);
 					Length += Size;
 				}
 				else
