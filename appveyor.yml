@@ -21,8 +21,14 @@ test_script:
   - cmd: cmake --build build64 --config Debug --target run_tests
   - cmd: cmake --build build32 --config Release --target run_tests
   - cmd: cmake --build build64 --config Release --target run_tests
-  - cmd: build32\Release\DDNet-Server shutdown
-  - cmd: build64\Release\DDNet-Server shutdown
+  - cmd: |
+      cd build32
+      Release\DDNet-Server shutdown
+      cd ..
+  - cmd: |
+      cd build64
+      Release\DDNet-Server shutdown
+      cd ..
 
 after_build:
   - cmd: cmake --build build32 --config Release --target package

@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "fetcher.h"
+#include <engine/shared/fetcher.h>
 
 class CGraph
 {
@@ -130,7 +130,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdConnect[256];
 
 	// map download
-	std::shared_ptr<CFetchTask> m_pMapdownloadTask;
+	std::shared_ptr<CGetFile> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadName[256];
 	IOHANDLE m_MapdownloadFile;
@@ -139,7 +139,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadAmount;
 	int m_MapdownloadTotalsize;
 
-	std::shared_ptr<CFetchTask> m_pDDNetInfoTask;
+	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 
 	// time
 	CSmoothTime m_GameTime[2];

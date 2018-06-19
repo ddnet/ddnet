@@ -40,6 +40,7 @@
 #include <engine/shared/compression.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
+#include <engine/shared/fetcher.h>
 #include <engine/shared/filecollection.h>
 #include <engine/shared/ghost.h>
 #include <engine/shared/network.h>
@@ -65,7 +66,6 @@
 
 #include "friends.h"
 #include "serverbrowser.h"
-#include "fetcher.h"
 #include "updater.h"
 #include "client.h"
 
@@ -1516,7 +1516,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 						str_append(aUrl, aEscaped, sizeof(aUrl));
 
-						m_pMapdownloadTask = std::make_shared<CFetchTask>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
+						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -2473,15 +2473,15 @@ void CClient::Update()
 
 	if(m_pMapdownloadTask)
 	{
-		if(m_pMapdownloadTask->State() == CFetchTask::STATE_DONE)
+		if(m_pMapdownloadTask->State() == HTTP_DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ERROR)
+		else if(m_pMapdownloadTask->State() == HTTP_ERROR)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
 			SendMapRequest();
 		}
-		else if(m_pMapdownloadTask->State() == CFetchTask::STATE_ABORTED)
+		else if(m_pMapdownloadTask->State() == HTTP_ABORTED)
 		{
 			m_pMapdownloadTask = NULL;
 		}
@@ -2489,14 +2489,14 @@ void CClient::Update()
 
 	if(m_pDDNetInfoTask)
 	{
-		if(m_pDDNetInfoTask->State() == CFetchTask::STATE_DONE)
+		if(m_pDDNetInfoTask->State() == HTTP_DONE)
 			FinishDDNetInfo();
-		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ERROR)
+		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
 		{
 			dbg_msg("ddnet-info", "download failed");
 			ResetDDNetInfo();
 		}
-		else if(m_pDDNetInfoTask->State() == CFetchTask::STATE_ABORTED)
+		else if(m_pDDNetInfoTask->State() == HTTP_ABORTED)
 		{
 			m_pDDNetInfoTask = NULL;
 		}
@@ -3669,7 +3669,7 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CFetchTask>(Storage(), aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 

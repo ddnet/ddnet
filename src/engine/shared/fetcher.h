@@ -5,7 +5,16 @@
 #include <engine/storage.h>
 #include <engine/kernel.h>
 
-class CFetchTask : public IJob
+enum
+{
+	HTTP_ERROR = -1,
+	HTTP_QUEUED,
+	HTTP_RUNNING,
+	HTTP_DONE,
+	HTTP_ABORTED,
+};
+
+class CGetFile : public IJob
 {
 private:
 	IStorage *m_pStorage;
@@ -19,7 +28,7 @@ private:
 	double m_Size;
 	double m_Current;
 	int m_Progress;
-	int m_State;
+	std::atomic<int> m_State;
 
 	std::atomic<bool> m_Abort;
 
@@ -32,16 +41,7 @@ private:
 	void Run();
 
 public:
-	enum
-	{
-		STATE_ERROR = -1,
-		STATE_QUEUED,
-		STATE_RUNNING,
-		STATE_DONE,
-		STATE_ABORTED,
-	};
-
-	CFetchTask(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true);
+	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, bool UseDDNetCA = false, bool CanTimeout = true);
 
 	double Current() const;
 	double Size() const;
@@ -51,6 +51,24 @@ public:
 	void Abort();
 };
 
+
+class CPostJson : public IJob
+{
+private:
+	char m_aUrl[256];
+	char m_aJson[1024];
+	std::atomic<int> m_State;
+
+	void Run();
+
+	virtual void OnCompletion() { }
+
+public:
+	CPostJson(const char *pUrl, const char *pJson);
+	int State() const;
+};
+
 bool FetcherInit();
-void EscapeUrl(char *pBud, int Size, const char *pStr);
+void EscapeUrl(char *pBuf, int Size, const char *pStr);
+char *EscapeJson(char *pBuffer, int BufferSize, const char *pString);
 #endif

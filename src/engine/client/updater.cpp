@@ -11,7 +11,7 @@
 using std::string;
 using std::map;
 
-class CUpdaterFetchTask : public CFetchTask
+class CUpdaterFetchTask : public CGetFile
 {
 	char m_aBuf[256];
 	char m_aBuf2[256];
@@ -41,7 +41,7 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 }
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
-	CFetchTask(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, true, false),
+	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, true, false),
 	m_pUpdater(pUpdater)
 {
 }
@@ -63,16 +63,16 @@ void CUpdaterFetchTask::OnCompletion()
 	b = b ? b : Dest();
 	if(!str_comp(b, "update.json"))
 	{
-		if(State() == CFetchTask::STATE_DONE)
+		if(State() == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
-		else if(State() == CFetchTask::STATE_ERROR)
+		else if(State() == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
 	else if(!str_comp(b, m_pUpdater->m_aLastFile))
 	{
-		if(State() == CFetchTask::STATE_DONE)
+		if(State() == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
-		else if(State() == CFetchTask::STATE_ERROR)
+		else if(State() == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
 }
