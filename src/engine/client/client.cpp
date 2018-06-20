@@ -690,7 +690,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
 
-	if(!pPassword)
+	if(m_SendPassword)
+	{
+		str_copy(m_Password, g_Config.m_Password, sizeof(m_Password));
+		m_SendPassword = false;
+	}
+	else if(!pPassword)
 		m_Password[0] = 0;
 	else
 		str_copy(m_Password, pPassword, sizeof(m_Password));
@@ -3378,6 +3383,14 @@ void CClient::ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, I
 		pSelf->m_GenerateTimeoutSeed = false;
 }
 
+void CClient::ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() && pSelf->m_LocalStartTime) //won't set m_SendPassword before game has started
+		pSelf->m_SendPassword = true;
+}
+
 void CClient::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -3416,9 +3429,11 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_play", "", CFGFLAG_CLIENT, Con_DemoPlay, this, "Play demo");
 	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
 
-	// used for server browser update
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
-
+	
+	m_pConsole->Chain("password", ConchainPassword, this);
+	
+	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
