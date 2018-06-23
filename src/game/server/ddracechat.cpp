@@ -1437,11 +1437,22 @@ void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
 	}
 	if(g_Config.m_SvModhelpUrl[0])
 	{
+		bool ModeratorPresent = false;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(pSelf->m_apPlayers[i] && pSelf->Server()->ClientAuthed(i))
+			{
+				ModeratorPresent = true;
+				break;
+			}
+		}
+
 		char aJson[512];
 		char aPlayerName[64];
 		char aMessage[128];
-		str_format(aJson, sizeof(aJson), "{\"port\":\"%d\",\"player_id\":\"%d\",\"player_name\":\"%s\",\"message\":\"%s\"}",
+		str_format(aJson, sizeof(aJson), "{\"port\":\"%d\",\"moderator_present\":%s,\"player_id\":\"%d\",\"player_name\":\"%s\",\"message\":\"%s\"}",
 			g_Config.m_SvPort,
+			ModeratorPresent ? "true" : "false",
 			pResult->m_ClientID,
 			EscapeJson(aPlayerName, sizeof(aPlayerName), pSelf->Server()->ClientName(pResult->m_ClientID)),
 			EscapeJson(aMessage, sizeof(aMessage), pResult->GetString(0)));
