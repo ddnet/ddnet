@@ -1450,7 +1450,7 @@ void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
 		char aJson[512];
 		char aPlayerName[64];
 		char aMessage[128];
-		str_format(aJson, sizeof(aJson), "{\"port\":\"%d\",\"moderator_present\":%s,\"player_id\":\"%d\",\"player_name\":\"%s\",\"message\":\"%s\"}",
+		str_format(aJson, sizeof(aJson), "{\"port\":%d,\"moderator_present\":%s,\"player_id\":%d,\"player_name\":\"%s\",\"message\":\"%s\"}",
 			g_Config.m_SvPort,
 			ModeratorPresent ? "true" : "false",
 			pResult->m_ClientID,
