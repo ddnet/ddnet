@@ -25,8 +25,8 @@ script:
 - build/DDNet-Server shutdown
 env:
   global:
-  - CFLAGS="-Wdeclaration-after-statement -Werror -DCONF_CI"
-  - CXXFLAGS="-Werror -DCONF_CI"
+  - CFLAGS="-Wdeclaration-after-statement -Werror"
+  - CXXFLAGS="-Werror"
 branches:
   except:
   - staging.tmp
