@@ -1,4 +1,5 @@
 #include <engine/console.h>
+#include <engine/shared/fetcher.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>

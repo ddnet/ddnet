@@ -50,7 +50,7 @@ CHAT_COMMAND("rescue", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConRescue, this, "Telepo
 
 CHAT_COMMAND("kill", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself")
 
-CHAT_COMMAND("modhelp", "r[message]", CFGFLAG_CHAT|CFGFLAG_SERVER, ConModHelp, this, "Request the help of a moderator with a description of the problem")
+CHAT_COMMAND("modhelp", "r[message]", CFGFLAG_CHAT|CFGFLAG_SERVER, ConModhelp, this, "Request the help of a moderator with a description of the problem")
 
 #if defined(CONF_SQL)
 CHAT_COMMAND("times", "?s[player name] ?i[number of times to skip]", CFGFLAG_CHAT|CFGFLAG_SERVER, ConTimes, this, "/times ?s?i shows last 5 times of the server or of a player beginning with name s starting with time i (i = 1 by default)")

@@ -1,5 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
+#include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/server/teams.h>
@@ -1392,27 +1393,39 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConModhelp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 
-	if (!CheckClientID(pResult->m_ClientID))
+	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
+	if(!pPlayer)
 		return;
 
-	if(pPlayer->m_ModHelpTick > pSelf->Server()->Tick())
+	if(pPlayer->m_pPostJson)
 	{
-		char aBuf[126];
-		str_format(aBuf, sizeof(aBuf), "You must wait %d seconds to execute this command again.",
-				   (pPlayer->m_ModHelpTick - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->SendChatTarget(pResult->m_ClientID, "Your last request hasn't finished processing yet, please slow down");
 		return;
 	}
 
-	pPlayer->m_ModHelpTick = pSelf->Server()->Tick() + g_Config.m_SvModHelpDelay * pSelf->Server()->TickSpeed();
+	int CurTick = pSelf->Server()->Tick();
+	if(pPlayer->m_ModhelpTick != -1)
+	{
+		int TickSpeed = pSelf->Server()->TickSpeed();
+		int NextModhelpTick = pPlayer->m_ModhelpTick + g_Config.m_SvModhelpDelay * TickSpeed;
+		if(NextModhelpTick > CurTick)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before you can execute this command again.",
+				(NextModhelpTick - CurTick) / TickSpeed);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			return;
+		}
+	}
+
+	pPlayer->m_ModhelpTick = CurTick;
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Moderator help is requested by '%s' (ID: %d):",
@@ -1424,9 +1437,32 @@ void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pSelf->m_apPlayers[i] && pSelf->Server()->ClientAuthed(i))
 		{
-			pSelf->SendChatTarget(pSelf->m_apPlayers[i]->GetCID(), aBuf);
-			pSelf->SendChatTarget(pSelf->m_apPlayers[i]->GetCID(), pResult->GetString(0));
+			pSelf->SendChatTarget(i, aBuf);
+			pSelf->SendChatTarget(i, pResult->GetString(0));
 		}
+	}
+	if(g_Config.m_SvModhelpUrl[0])
+	{
+		bool ModeratorPresent = false;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(pSelf->m_apPlayers[i] && pSelf->Server()->ClientAuthed(i))
+			{
+				ModeratorPresent = true;
+				break;
+			}
+		}
+
+		char aJson[512];
+		char aPlayerName[64];
+		char aMessage[128];
+		str_format(aJson, sizeof(aJson), "{\"port\":%d,\"moderator_present\":%s,\"player_id\":%d,\"player_name\":\"%s\",\"message\":\"%s\"}",
+			g_Config.m_SvPort,
+			ModeratorPresent ? "true" : "false",
+			pResult->m_ClientID,
+			EscapeJson(aPlayerName, sizeof(aPlayerName), pSelf->Server()->ClientName(pResult->m_ClientID)),
+			EscapeJson(aMessage, sizeof(aMessage), pResult->GetString(0)));
+		pSelf->Engine()->AddJob(pPlayer->m_pPostJson = std::make_shared<CPostJson>(g_Config.m_SvModhelpUrl, aJson));
 	}
 }
 

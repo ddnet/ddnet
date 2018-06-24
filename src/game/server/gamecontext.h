@@ -53,12 +53,15 @@ enum
 	NUM_TUNEZONES = 256
 };
 
+class IConsole;
+class IEngine;
 class IStorage;
 
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
-	class IConsole *m_pConsole;
+	IConsole *m_pConsole;
+	IEngine *m_pEngine;
 	IStorage *m_pStorage;
 	CLayers m_Layers;
 	CCollision m_Collision;
@@ -113,7 +116,8 @@ class CGameContext : public IGameServer
 	bool m_Resetting;
 public:
 	IServer *Server() const { return m_pServer; }
-	class IConsole *Console() { return m_pConsole; }
+	IConsole *Console() { return m_pConsole; }
+	IEngine *Engine() { return m_pEngine; }
 	IStorage *Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
@@ -353,7 +357,7 @@ private:
 	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
 	static void ConModerate(IConsole::IResult *pResult, void *pUserData);
-	static void ConModHelp(IConsole::IResult *pResult, void *pUserData);
+	static void ConModhelp(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData);

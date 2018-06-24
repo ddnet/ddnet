@@ -7,6 +7,7 @@
 #include <engine/shared/config.h>
 #include <engine/map.h>
 #include <engine/console.h>
+#include <engine/engine.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
@@ -889,6 +890,22 @@ void CGameContext::OnTick()
 		{
 			m_NumMutes--;
 			m_aMutes[i] = m_aMutes[m_NumMutes];
+		}
+	}
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_apPlayers[i] && m_apPlayers[i]->m_pPostJson)
+		{
+			switch(m_apPlayers[i]->m_pPostJson->State())
+			{
+			case HTTP_DONE:
+				m_apPlayers[i]->m_pPostJson = NULL;
+				break;
+			case HTTP_ERROR:
+				dbg_msg("modhelp", "http request failed for cid=%d", i);
+				m_apPlayers[i]->m_pPostJson = NULL;
+				break;
+			}
 		}
 	}
 
@@ -2551,6 +2568,7 @@ void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(0, SendChatResponse, this);
@@ -2593,6 +2611,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);

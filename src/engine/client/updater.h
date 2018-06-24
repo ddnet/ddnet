@@ -2,7 +2,7 @@
 #define ENGINE_CLIENT_UPDATER_H
 
 #include <engine/updater.h>
-#include "fetcher.h"
+#include <engine/shared/fetcher.h>
 #include <map>
 #include <string>
 

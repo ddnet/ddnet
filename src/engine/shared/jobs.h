@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_JOBS_H
 #define ENGINE_SHARED_JOBS_H
 
+#include <base/system.h>
+
 #include <atomic>
 #include <memory>
 

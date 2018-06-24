@@ -6,6 +6,7 @@
 // this include should perhaps be removed
 #include "entities/character.h"
 #include "gamecontext.h"
+#include <engine/shared/fetcher.h>
 
 // player object
 class CPlayer
@@ -174,7 +175,7 @@ public:
 	int m_ChatScore;
 
 	bool m_Moderating;
-	int m_ModHelpTick;
+	int m_ModhelpTick;
 
 	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
 	void AfkVoteTimer(CNetObj_PlayerInput *NewTarget);
@@ -197,6 +198,7 @@ public:
 #if defined(CONF_SQL)
 	int64 m_LastSQLQuery;
 #endif
+	std::shared_ptr<CPostJson> m_pPostJson;
 };
 
 #endif

@@ -349,6 +349,9 @@ if(WEBSOCKETS)
   show_dependency_status("Websockets" WEBSOCKETS)
 endif()
 
+if(NOT(CURL_FOUND))
+  message(SEND_ERROR "You must install Curl to compile the DDNet")
+endif()
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
 endif()
@@ -361,9 +364,6 @@ if(WEBSOCKETS AND NOT(WEBSOCKETS_FOUND))
   message(SEND_ERROR "You must install libwebsockets to compile the DDNet server with websocket support")
 endif()
 
-if(CLIENT AND NOT(CURL_FOUND))
-  message(SEND_ERROR "You must install Curl to compile the DDNet client")
-endif()
 if(CLIENT AND NOT(FREETYPE_FOUND))
   message(SEND_ERROR "You must install Freetype to compile the DDNet client")
 endif()
@@ -606,6 +606,8 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   econ.cpp
   econ.h
   engine.cpp
+  fetcher.cpp
+  fetcher.h
   fifo.cpp
   fifo.h
   filecollection.cpp
@@ -693,7 +695,7 @@ list(APPEND TARGETS_DEP md5)
 set(DEPS ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
-set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
+set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
@@ -712,8 +714,6 @@ if(CLIENT)
     backend_sdl.h
     client.cpp
     client.h
-    fetcher.cpp
-    fetcher.h
     friends.cpp
     friends.h
     graphics_threaded.cpp
@@ -840,7 +840,6 @@ if(CLIENT)
   # Libraries
   set(LIBS_CLIENT
     ${LIBS}
-    ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNGLITE_LIBRARIES}
@@ -880,7 +879,6 @@ if(CLIENT)
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
   target_include_directories(${TARGET_CLIENT} PRIVATE
-    ${CURL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
@@ -1107,6 +1105,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     fs.cpp
     git_revision.cpp
     jobs.cpp
+    json.cpp
     mapbugs.cpp
     name_ban.cpp
     str.cpp
@@ -1476,11 +1475,10 @@ foreach(target ${TARGETS})
   endif()
 endforeach()
 
-if(MSVC)
-  set_property(TARGET ${TARGET_CLIENT} APPEND PROPERTY LINK_FLAGS /SAFESEH:NO) # Disable SafeSEH because the shipped libraries don't support it.
-endif()
-
 foreach(target ${TARGETS_LINK})
+  if(MSVC)
+    set_property(TARGET ${target} APPEND PROPERTY LINK_FLAGS /SAFESEH:NO) # Disable SafeSEH because the shipped libraries don't support it (would cause error LNK2026 otherwise).
+  endif()
   if(TARGET_OS STREQUAL "mac")
     target_link_libraries(${target} -stdlib=libc++)
     target_link_libraries(${target} -mmacosx-version-min=10.7)
@@ -1510,6 +1508,7 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
+  target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(WEBSOCKETS)
