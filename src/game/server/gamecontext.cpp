@@ -823,10 +823,10 @@ void CGameContext::OnTick()
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				if (PlayerModerating() && (m_VoteKick || m_VoteSpec))
+				if(PlayerModerating() && (m_VoteKick || m_VoteSpec))
 				{
 					// Ensure minimum time for vote to end when moderating.
-					if (time_get() > m_VoteCloseTime)
+					if(time_get() > m_VoteCloseTime)
 					{
 						Server()->SetRconCID(IServer::RCON_CID_VOTE);
 						Console()->ExecuteLine(m_aVoteCommand);
@@ -834,7 +834,7 @@ void CGameContext::OnTick()
 						EndVote();
 						SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 
-						if (m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
+						if(m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
 							m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
 					}
 				}
@@ -846,7 +846,7 @@ void CGameContext::OnTick()
 					EndVote();
 					SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 
-					if (m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
+					if(m_apPlayers[m_VoteCreator] && !m_VoteKick && !m_VoteSpec)
 						m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
 				}
 			}
@@ -3517,8 +3517,10 @@ int CGameContext::GetClientVersion(int ClientID) {
 		: 0;
 }
 
-void CGameContext::SetClientVersion(int ClientID, int Version) {
-	if (!m_apPlayers[ClientID]) {
+void CGameContext::SetClientVersion(int ClientID, int Version)
+{
+	if(!m_apPlayers[ClientID])
+	{
 		return;
 	}
 	m_apPlayers[ClientID]->m_ClientVersion = Version;
@@ -3526,9 +3528,9 @@ void CGameContext::SetClientVersion(int ClientID, int Version) {
 
 bool CGameContext::PlayerModerating()
 {
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (m_apPlayers[i] && m_apPlayers[i]->m_Moderating)
+		if(m_apPlayers[i] && m_apPlayers[i]->m_Moderating)
 			return true;
 	}
 	return false;
