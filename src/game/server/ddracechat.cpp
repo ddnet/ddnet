@@ -1393,7 +1393,7 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConModhelp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 
@@ -1410,16 +1410,16 @@ void CGameContext::ConModHelp(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pPlayer->m_ModHelpTick > pSelf->Server()->Tick())
+	if(pPlayer->m_ModhelpTick > pSelf->Server()->Tick())
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "You must wait %d seconds to execute this command again.",
-				   (pPlayer->m_ModHelpTick - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
+				   (pPlayer->m_ModhelpTick - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		return;
 	}
 
-	pPlayer->m_ModHelpTick = pSelf->Server()->Tick() + g_Config.m_SvModhelpDelay * pSelf->Server()->TickSpeed();
+	pPlayer->m_ModhelpTick = pSelf->Server()->Tick() + g_Config.m_SvModhelpDelay * pSelf->Server()->TickSpeed();
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Moderator help is requested by '%s' (ID: %d):",

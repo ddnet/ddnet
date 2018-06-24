@@ -70,7 +70,7 @@ void CPlayer::Reset()
 	m_LastWhisperTo = -1;
 	m_LastSetSpectatorMode = 0;
 	m_TimeoutCode[0] = '\0';
-	m_ModHelpTick = 0;
+	m_ModhelpTick = 0;
 
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
