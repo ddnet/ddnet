@@ -754,6 +754,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_MapdownloadCrc = 0;
 	m_MapdownloadTotalsize = -1;
 	m_MapdownloadAmount = 0;
+	m_MapDetailsPresent = false;
 
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
@@ -1135,6 +1136,15 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 		return pError;
 
 	// try the downloaded maps
+	if(pWantedSha256)
+	{
+		str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x_%s.map", pMapName, WantedCrc, aWantedSha256);
+		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+		if(!pError)
+			return pError;
+	}
+
+	// try the downloaded maps folder without appending the sha256
 	str_format(aBuf, sizeof(aBuf), "downloadedmaps/%s_%08x.map", pMapName, WantedCrc);
 	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
