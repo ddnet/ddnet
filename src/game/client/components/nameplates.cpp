@@ -48,7 +48,7 @@ void CNamePlates::RenderNameplate(
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 	// render name plate
-	if(!pPlayerInfo->m_Local)
+	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
 	{
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
