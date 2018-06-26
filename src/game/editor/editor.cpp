@@ -5108,6 +5108,12 @@ void CEditor::Render()
 		if(m_ShowServerSettingsEditor && !m_ShowPicker)
 			View.HSplitBottom(250.0f, &View, &ExtraEditor);
 	}
+	else
+	{
+		// hack to get keyboard inputs from toolbar even when GUI is not active
+		ToolBar.HSplitTop(53.0f, &ToolBar, 0);
+		ToolBar.Margin(-1000, &ToolBar);
+	}
 
 	//	a little hack for now
 	if(m_Mode == MODE_LAYERS)
@@ -5160,11 +5166,14 @@ void CEditor::Render()
 
 		RenderBackground(StatusBar, ms_BackgroundTexture, 128.0f, Brightness);
 		StatusBar.Margin(2.0f, &StatusBar);
+	}
 
-		// do the toolbar
-		if(m_Mode == MODE_LAYERS)
-			DoToolbar(ToolBar);
+	// do the toolbar
+	if(m_Mode == MODE_LAYERS)
+		DoToolbar(ToolBar);
 
+	if(m_GuiActive)
+	{
 		if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor)
 		{
 			RenderBackground(ExtraEditor, ms_BackgroundTexture, 128.0f, Brightness);
