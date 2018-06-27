@@ -409,8 +409,8 @@ elseif(TARGET_OS STREQUAL "mac")
     src/osxlaunch/client.h
     src/osxlaunch/client.m
   )
-  set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL} ${SECURITY})
-  set(PLATFORM_LIBS ${CARBON})
+  set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
+  set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 else()
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS GL GLU X11)
