@@ -106,7 +106,7 @@ void CPlayer::Reset()
 	m_ClientVersion = VERSION_VANILLA;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
-	m_SpecTeam = 0;
+	m_SpecTeam = !g_Config.m_SvShowOthersDefault;
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSE_NONE;

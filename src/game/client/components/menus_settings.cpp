@@ -669,7 +669,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Zoom in", "zoom+", 0 },
 	{ "Zoom out", "zoom-", 0 },
 	{ "Default zoom", "zoom", 0 },
-	{ "Show others", "say /showothers", 0 },
+	{ "Show others", "say /showothersteams", 0 },
 	{ "Show all", "say /showall", 0 },
 	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0 },
 	{ "Toggle dummy", "toggle cl_dummy 0 1", 0 },
@@ -2035,9 +2035,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
 		g_Config.m_ClShowOthersAlpha = (int)(DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha /100.0f)*100.0f);
 
-		if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers, &LeftLeft))
+		if(DoButton_CheckBox(&g_Config.m_ClShowOthersTeams, Localize("Show others"), g_Config.m_ClShowOthersTeams, &LeftLeft))
 		{
-			g_Config.m_ClShowOthers ^= 1;
+			g_Config.m_ClShowOthersTeams ^= 1;
 		}
 	}
 

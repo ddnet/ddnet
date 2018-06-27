@@ -1179,6 +1179,36 @@ bool CheckClientID(int ClientID)
 	return true;
 }
 
+void CGameContext::ConShowOthersTeams(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (g_Config.m_SvShowOthers)
+	{
+		if (pResult->NumArguments())
+		{
+			pPlayer->m_ShowOthers = pResult->GetInteger(0);
+			pPlayer->m_SpecTeam = !pResult->GetInteger(0);
+		}
+		else
+		{
+			pPlayer->m_SpecTeam = pPlayer->m_ShowOthers;
+			pPlayer->m_ShowOthers = !pPlayer->m_ShowOthers;
+		}
+	}
+	else
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"showotherschat",
+			"Showing players from other teams is disabled by the server admin");
+}
+
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
