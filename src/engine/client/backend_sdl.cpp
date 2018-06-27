@@ -2297,7 +2297,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	*pDesktopHeight = DisplayMode.h;
 
 	// use desktop resolution as default resolution
-#if defined(__ANDROID__) || defined(CONF_PLATFORM_MACOSX)
+#ifdef __ANDROID__
 	*pWidth = *pDesktopWidth;
 	*pHeight = *pDesktopHeight;
 #else
