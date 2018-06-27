@@ -3,6 +3,9 @@
 #ifndef ENGINE_SERVER_SERVER_H
 #define ENGINE_SERVER_SERVER_H
 
+#include <base/hash.h>
+#include <base/math.h>
+
 #include <engine/engine.h>
 #include <engine/server.h>
 
@@ -13,7 +16,6 @@
 #include <engine/shared/network.h>
 #include <engine/server/register.h>
 #include <engine/shared/console.h>
-#include <base/math.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/netban.h>
@@ -140,6 +142,7 @@ public:
 
 		// connection state info
 		int m_State;
+		bool m_SupportsMapSha256;
 		int m_Latency;
 		int m_SnapRate;
 
@@ -204,6 +207,7 @@ public:
 	//static NETADDR4 master_server;
 
 	char m_aCurrentMap[64];
+	SHA256_DIGEST m_CurrentMapSha256;
 	unsigned m_CurrentMapCrc;
 	unsigned char *m_pCurrentMapData;
 	unsigned int m_CurrentMapSize;
@@ -245,7 +249,7 @@ public:
 	void SetRconCID(int ClientID);
 	int GetAuthedState(int ClientID);
 	const char *GetAuthName(int ClientID);
-	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, int *pMapCrc);
+	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
 	const char *ClientName(int ClientID);

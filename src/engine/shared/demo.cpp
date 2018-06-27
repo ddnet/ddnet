@@ -33,7 +33,7 @@ CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapDat
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, SHA256_DIGEST Sha256, unsigned Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	m_pfnFilter = pfnFilter;
 	m_pUser = pUser;
@@ -963,7 +963,12 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 		return;
 
 	const CDemoPlayer::CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
-	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
+	SHA256_DIGEST Fake;
+	for(unsigned i = 0; i < sizeof(Fake.data); i++)
+	{
+		Fake.data[i] = 0xff;
+	}
+	if (m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, Fake, pMapInfo->m_Crc, "client", pMapInfo->m_Size, NULL, NULL, pfnFilter, pUser) == -1)
 		return;
 
 

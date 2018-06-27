@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include <base/hash.h>
 #include <engine/shared/fetcher.h>
 
 class CGraph
@@ -139,6 +140,13 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadCrc;
 	int m_MapdownloadAmount;
 	int m_MapdownloadTotalsize;
+	bool m_MapdownloadSha256Present;
+	SHA256_DIGEST m_MapdownloadSha256;
+
+	bool m_MapDetailsPresent;
+	char m_aMapDetailsName[256];
+	int m_MapDetailsCrc;
+	SHA256_DIGEST m_MapDetailsSha256;
 
 	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
 
@@ -286,8 +294,8 @@ public:
 
 	virtual const char *ErrorString();
 
-	const char *LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc);
-	const char *LoadMapSearch(const char *pMapName, int WantedCrc);
+	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
+	const char *LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc);
 
 	static int PlayerScoreNameComp(const void *a, const void *b);
 

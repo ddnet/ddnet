@@ -262,6 +262,7 @@ if(NOT CMAKE_CROSSCOMPILING)
   find_package(PkgConfig)
 endif()
 find_package(ZLIB)
+find_package(Crypto)
 find_package(Curl)
 find_package(Freetype)
 if(DOWNLOAD_GTEST)
@@ -338,6 +339,7 @@ if(MYSQL)
   show_dependency_status("MySQL" MYSQL)
 endif()
 show_dependency_status("Ogg" OGG)
+show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
 show_dependency_status("Pnglite" PNGLITE)
@@ -554,6 +556,11 @@ set_glob(BASE GLOB_RECURSE src/base
   confusables.c
   confusables_data.h
   detect.h
+  hash.c
+  hash.h
+  hash_ctxt.h
+  hash_libtomcrypt.c
+  hash_openssl.c
   math.h
   system.c
   system.h
@@ -695,7 +702,7 @@ list(APPEND TARGETS_DEP md5)
 set(DEPS ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
-set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
+set(LIBS ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} ${CRYPTO_LIBRARIES} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
@@ -1051,7 +1058,6 @@ set_glob(TOOLS GLOB src/tools
   map_extract.cpp
   map_replace_image.cpp
   map_resave.cpp
-  map_version.cpp
   packetgen.cpp
   tileset_borderadd.cpp
   tileset_borderfix.cpp
@@ -1104,6 +1110,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     aio.cpp
     fs.cpp
     git_revision.cpp
+    hash.cpp
     jobs.cpp
     json.cpp
     mapbugs.cpp
@@ -1511,6 +1518,9 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
+  if(CRYPTO_FOUND)
+    target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
+  endif()
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
     target_include_directories(${target} PRIVATE ${WEBSOCKETS_INCLUDE_DIRS})

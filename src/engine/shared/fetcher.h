@@ -20,7 +20,7 @@ private:
 	IStorage *m_pStorage;
 
 	char m_aUrl[256];
-	char m_aDest[128];
+	char m_aDest[256];
 	int m_StorageType;
 	bool m_UseDDNetCA;
 	bool m_CanTimeout;
