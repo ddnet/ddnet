@@ -98,3 +98,49 @@ Pos 1 1 FULL
 Pos 0 -1 EMPTY
 Pos -1 0 EMPTY
 Pos -1 -1 EMPTY
+
+[Chiller]
+Index 1
+
+#FLY
+Index 1
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+
+#top
+Index 1
+Pos 0 -1 EMPTY
+
+#right
+Index 1
+Pos 1 0 EMPTY
+
+#bottom
+Index 1
+Pos 0 1 EMPTY
+
+#left
+Index 1
+Pos -1 0 EMPTY
+
+#corner top-right
+Index 18 YFLIP
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+
+#corner top-left
+Index 18 YFLIP XFLIP
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+
+#corner bottom-left
+Index 18 XFLIP
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+
+#corner bottom-right
+Index 18 
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
