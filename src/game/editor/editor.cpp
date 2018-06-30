@@ -28,13 +28,48 @@
 #include "auto_map.h"
 #include "editor.h"
 
-const char* vanillaImages[] = {"bg_cloud1", "bg_cloud2", "bg_cloud3",
-	"desert_doodads", "desert_main", "desert_mountains", "desert_mountains2",
-	"desert_sun", "generic_deathtiles", "generic_unhookable", "grass_doodads",
-	"grass_main", "jungle_background", "jungle_deathtiles", "jungle_doodads",
-	"jungle_main", "jungle_midground", "jungle_unhookables", "moon", "mountains",
-	"snow", "stars", "sun", "winter_doodads", "winter_main", "winter_mountains",
-	"winter_mountains2", "winter_mountains3"};
+static const char *VANILLA_IMAGES[] = {
+	"bg_cloud1",
+	"bg_cloud2",
+	"bg_cloud3",
+	"desert_doodads",
+	"desert_main",
+	"desert_mountains",
+	"desert_mountains2",
+	"desert_sun",
+	"generic_deathtiles",
+	"generic_unhookable",
+	"grass_doodads",
+	"grass_main",
+	"jungle_background",
+	"jungle_deathtiles",
+	"jungle_doodads",
+	"jungle_main",
+	"jungle_midground",
+	"jungle_unhookables",
+	"moon",
+	"mountains",
+	"snow",
+	"stars",
+	"sun",
+	"winter_doodads",
+	"winter_main",
+	"winter_mountains",
+	"winter_mountains2",
+	"winter_mountains3"
+};
+
+static bool IsVanillaImage(const char *pImage)
+{
+	for(unsigned i = 0; i < sizeof(VANILLA_IMAGES) / sizeof(VANILLA_IMAGES[0]); i++)
+	{
+		if(str_comp(pImage, VANILLA_IMAGES[i]) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 int CEditor::ms_CheckerTexture;
 int CEditor::ms_BackgroundTexture;
@@ -3107,7 +3142,7 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	*pImg = ImgInfo;
 	pImg->m_TexID = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 	ImgInfo.m_pData = 0;
-	pImg->m_External = 1;	// external by default
+	pImg->m_External = !IsVanillaImage(aBuf);
 	str_copy(pImg->m_aName, aBuf, sizeof(pImg->m_aName));
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_lImages.add(pImg);
@@ -3486,17 +3521,10 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 			done:
 			if(Selected < 2 && e == 1)
 			{
-				bool Found = false;
-				for(unsigned int k = 0; k < sizeof(vanillaImages) / sizeof(vanillaImages[0]); k++)
+				if(!IsVanillaImage(m_Map.m_lImages[i]->m_aName))
 				{
-					if(str_comp(m_Map.m_lImages[i]->m_aName, vanillaImages[k]) == 0)
-					{
-						Found = true;
-						break;
-					}
-				}
-				if(!Found)
 					Selected += 4; // Image should be embedded
+				}
 			}
 
 			float FontSize = 10.0f;
