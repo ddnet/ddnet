@@ -294,10 +294,11 @@ int CControls::SnapInput(int *pData)
 		
 		if(g_Config.m_ClDummyControl){
 			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
-			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
-			//pDummyInput->m_Fire = g_Config.m_ClDummyFire;
-			pDummyInput->m_Fire += g_Config.m_ClDummyFire;
-			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
+			if(g_Config.m_ClDummyJump) pDummyInput->m_Jump = g_Config.m_ClDummyJump;
+			pDummyInput->m_Fire += g_Config.m_ClDummyFire<<1;
+			//only fire one time
+			if(g_Config.m_ClDummyFire) g_Config.m_ClDummyFire=0;
+			if(g_Config.m_ClDummyHook) pDummyInput->m_Hook = g_Config.m_ClDummyHook;
 		}
 
 		// stress testing
