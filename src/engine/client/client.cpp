@@ -1569,8 +1569,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				else
 				{
 					char aFilename[256];
-					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, aFilename, sizeof(aFilename));
-					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aFilename);
+					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, false, aFilename, sizeof(aFilename));
+
+					char aTempFilename[256];
+					FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, aTempFilename, sizeof(aTempFilename));
+
+					str_format(m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename), "downloadedmaps/%s", aTempFilename);
 
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilename);
