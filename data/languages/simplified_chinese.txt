@@ -938,12 +938,6 @@ Show entities
 Show HUD
 == 显示状态信息
 
-Friend message 
-== 好友信息
-
-Friend message
-== 好友信息
-
 ##### I cannot translate this because the game is not identify #####
 
 Vanilla skins only
