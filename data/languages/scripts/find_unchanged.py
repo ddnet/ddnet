@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import twlang
 import sys
 
@@ -8,6 +8,6 @@ if len(sys.argv) < 2:
 infile = sys.argv[1]
 
 trans = twlang.translations(infile)
-for tran, (_, expr, _) in trans.iteritems():
+for tran, (_, expr, _) in trans.items():
     if tran == expr:
         print(tran)
