@@ -12,9 +12,9 @@ bool UseExtraInfo(const CNetObj_Projectile *pProj)
 	return ExtraInfoFlag;
 }
 
-void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel, bool IsDDNet)
+void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel)
 {
-	if(!UseExtraInfo(pProj) || !IsDDNet)
+	if(!UseExtraInfo(pProj))
 	{
 		StartPos->x = pProj->m_X;
 		StartPos->y = pProj->m_Y;

@@ -716,7 +716,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 			{
 				vec2 StartPos;
 				vec2 Direction;
-				ExtractInfo(&Proj, &StartPos, &Direction, 1);
+				ExtractInfo(&Proj, &StartPos, &Direction);
 				if(CWeaponData *pCurrentData = GetWeaponData(Proj.m_StartTick))
 				{
 					if(CWeaponData *pMatchingData = FindWeaponData(Proj.m_StartTick))
@@ -2098,7 +2098,7 @@ void CLocalProjectile::Init(CGameClient *pGameClient, CWorldCore *pWorld, CColli
 	m_Type = pProj->m_Type;
 	m_Weapon = m_Type;
 
-	ExtractInfo(pProj, &m_Pos, &m_Direction, 1);
+	ExtractInfo(pProj, &m_Pos, &m_Direction);
 
 	if(UseExtraInfo(pProj))
 	{
