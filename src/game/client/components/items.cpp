@@ -17,7 +17,6 @@
 #include "items.h"
 #include <stdio.h>
 
-#include <engine/serverbrowser.h>
 void CItems::OnReset()
 {
 	m_NumExtraProjectiles = 0;
