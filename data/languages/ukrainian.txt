@@ -397,9 +397,6 @@ Warmup
 Weapon
 == зброя
 
-Welcome to Teeworlds
-== Ласкаво просимо в Teeworlds!
-
 Yes
 == Так
 
@@ -483,6 +480,9 @@ New name:
 Ratio
 == 
 
+Kitty skins (DDCat)
+== 
+
 Max demos
 == 
 
@@ -492,7 +492,13 @@ Dummy settings
 AntiPing
 == 
 
+Rename demo
+== 
+
 Show quads
+== 
+
+Count players only
 == 
 
 Map sound volume
@@ -501,13 +507,13 @@ Map sound volume
 Show only chat messages from friends
 == 
 
-✗
-== 
-
 Countries
 == 
 
 Crc:
+== 
+
+Inner color
 == 
 
 \n\nReconnect in %d sec
@@ -525,10 +531,16 @@ Show kill messages
 Show ghost
 == 
 
-DDNet
+Auto %3d:%02d  
 == 
 
 No updates available
+== 
+
+Friend message
+== 
+
+Update now
 == 
 
 Enable server message sound
@@ -537,13 +549,19 @@ Enable server message sound
 second
 == 
 
+\xEE\x85\x8B
+== 
+
 Show votes window after voting
 == 
 
-HUD
+Fat skins (DDFat)
 == 
 
 Spectate previous
+== 
+
+AntiPing limit
 == 
 
 Look out!
@@ -561,9 +579,6 @@ Select a name
 Netversion:
 == 
 
-Free-View
-== 
-
 Enable team chat sound
 == 
 
@@ -571,9 +586,6 @@ Show other players' hook collision lines
 == 
 
 Clan
-== 
-
-Server filter
 == 
 
 We will win
@@ -588,6 +600,9 @@ Automatically take game over screenshot
 Deaths
 == 
 
+may cause delay
+== 
+
 Enable game sounds
 == 
 
@@ -597,10 +612,19 @@ DDNet Client needs to be restarted to complete update!
 -Page %d-
 == 
 
+Server address:
+== 
+
+Unfinished map
+== 
+
 Spectator
 == 
 
-Version:
+Deactivate
+== 
+
+Max Screenshots
 == 
 
 Please use a different name
@@ -609,13 +633,10 @@ Please use a different name
 Wait before try for
 == 
 
-Show console window
+Welcome to DDNet
 == 
 
 Kick player
-== 
-
-Show others
 == 
 
 Gameplay
@@ -636,9 +657,6 @@ Old mouse mode
 %i minutes left
 == 
 
-Rename demo
-== 
-
 Browser
 == 
 
@@ -657,7 +675,7 @@ Reset
 Enable gun sound
 == 
 
-Show health + ammo
+Preinit VBO (iGPUs only)
 == 
 
 Team message
@@ -675,7 +693,7 @@ Automatically create statboard csv
 Save the best demo of each race
 == 
 
-Count players only
+Outline color
 == 
 
 Show tiles layers from BG map
@@ -702,19 +720,16 @@ Ghost
 Respawn
 == 
 
-Remove chat
-== 
-
 Threaded sound loading
 == 
 
 Check now
 == 
 
-Server address:
+Race %3d:%02d  
 == 
 
-Race %3d:%02d  
+Activate
 == 
 
 Automatically record demos
@@ -726,10 +741,13 @@ Type:
 Background (regular)
 == 
 
+Show console window
+== 
+
 DDNet %s is out! Download it at DDNet.tw!
 == 
 
-Reset wanted weapon on death
+Multiple texture units (disable for MacOS)
 == 
 
 Frags
@@ -739,6 +757,9 @@ Vote description:
 == 
 
 AntiPing: predict other players
+== 
+
+Use OpenGL 3.3 (experimental)
 == 
 
 Show other players' key presses
@@ -753,9 +774,6 @@ System message
 Enable long pain sound (used when shooting in freeze)
 == 
 
-Show ingame HUD
-== 
-
 Quit anyway?
 == 
 
@@ -763,6 +781,9 @@ DDNet %s is available:
 == 
 
 Updating...
+== 
+
+Show health + ammo
 == 
 
 Overlay entities
@@ -774,10 +795,13 @@ Messages
 Size:
 == 
 
+UI mouse s.
+== 
+
 Remove friend
 == 
 
-Vanilla Skins only
+Show ingame HUD
 == 
 
 %.2f MiB
@@ -801,22 +825,31 @@ Created:
 The audio device couldn't be initialised.
 == 
 
-Spectator mode
-== 
-
 Suicides
 == 
 
 Player country:
 == 
 
-Delete demo
+File already exists, do you want to overwrite it?
 == 
 
 %i second left
 == 
 
+Indicate map finish
+== 
+
+Save ghost
+== 
+
+Clan plates size
+== 
+
 Net
+== 
+
+Save
 == 
 
 Unable to rename the demo
@@ -852,7 +885,13 @@ seconds
 Borderless window
 == 
 
+Show others
+== 
+
 Rename
+== 
+
+Remove chat
 == 
 
 %.2f KiB
@@ -867,6 +906,9 @@ Try fast HTTP map download first
 Use DDRace Scoreboard
 == 
 
+Vanilla skins only
+== 
+
 Best
 == 
 
@@ -879,13 +921,22 @@ Add
 Change settings
 == 
 
+DDNet
+== 
+
 Normal message
+== 
+
+Length:
 == 
 
 Demo details
 == 
 
 Screen
+== 
+
+Date
 == 
 
 Move player to spectators
@@ -903,25 +954,25 @@ Connecting dummy
 Client
 == 
 
-Clan plates size
+Version:
 == 
 
 Map:
 == 
 
-Update now
+Free-View
 == 
 
-Auto %3d:%02d  
+Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
 == 
 
 Show clan above name plates
 == 
 
-Save ghost
+Show friends only
 == 
 
-Show friends only
+Demo
 == 
 
 Exclude
@@ -933,10 +984,7 @@ Enable highlighted chat sound
 Unable to delete the demo
 == 
 
-Max Screenshots
-== 
-
-Hello and welcome
+Delete demo
 == 
 
 AntiPing: predict weapons
@@ -948,10 +996,7 @@ DDNet Client updated!
 Are you sure that you want to remove the player from your friends list?
 == 
 
-High-DPI screen support (experimental)
-== 
-
-Outline color
+Hello and welcome
 == 
 
 Highlighted message
@@ -963,28 +1008,28 @@ Friend
 %s wins!
 == 
 
-Length:
+Reset wanted weapon on death
+== 
+
+Spectator mode
+== 
+
+HUD
 == 
 
 Country
 == 
 
-no limit
+Remove
 == 
 
-Remove
+Reload
 == 
 
 Switch weapon when out of ammo
 == 
 
 AntiPing: predict grenade paths
-== 
-
-Demo
-== 
-
-AntiPing limit
 == 
 
 Vote command:
@@ -996,5 +1041,5 @@ Name plates size
 Parent Folder
 == 
 
-Inner color
+Server filter
 == 

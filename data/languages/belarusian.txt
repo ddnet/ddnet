@@ -538,9 +538,6 @@ Warmup
 Weapon
 == Зброя
 
-Welcome to Teeworlds
-== Сардэчна запрашаем у Teeworlds!
-
 Yes
 == Так
 
@@ -630,9 +627,6 @@ Round
 Lht.
 == Яркасць
 
-no limit
-== Без ліміту
-
 UI Color
 == Колер інтэрфейсу
 
@@ -663,6 +657,9 @@ Type:
 Ratio
 == 
 
+Kitty skins (DDCat)
+== 
+
 Dummy settings
 == 
 
@@ -678,10 +675,10 @@ Map sound volume
 Show only chat messages from friends
 == 
 
-✗
+Countries
 == 
 
-Countries
+Inner color
 == 
 
 \n\nReconnect in %d sec
@@ -699,10 +696,16 @@ Show kill messages
 Show ghost
 == 
 
-DDNet
+Auto %3d:%02d  
 == 
 
 No updates available
+== 
+
+Friend message
+== 
+
+Update now
 == 
 
 Enable server message sound
@@ -711,10 +714,16 @@ Enable server message sound
 second
 == 
 
+\xEE\x85\x8B
+== 
+
 Show votes window after voting
 == 
 
-HUD
+Fat skins (DDFat)
+== 
+
+AntiPing limit
 == 
 
 Look out!
@@ -741,13 +750,22 @@ Hi o/
 Deaths
 == 
 
+may cause delay
+== 
+
 Enable game sounds
 == 
 
 DDNet Client needs to be restarted to complete update!
 == 
 
+Unfinished map
+== 
+
 Spectator
+== 
+
+Deactivate
 == 
 
 Please use a different name
@@ -756,10 +774,7 @@ Please use a different name
 Wait before try for
 == 
 
-Show console window
-== 
-
-Show others
+Welcome to DDNet
 == 
 
 Gameplay
@@ -789,7 +804,7 @@ Reset
 Enable gun sound
 == 
 
-Show health + ammo
+Preinit VBO (iGPUs only)
 == 
 
 Team message
@@ -802,6 +817,9 @@ Automatically create statboard csv
 == 
 
 Save the best demo of each race
+== 
+
+Outline color
 == 
 
 Show tiles layers from BG map
@@ -819,9 +837,6 @@ Ghost
 Respawn
 == 
 
-Remove chat
-== 
-
 Threaded sound loading
 == 
 
@@ -831,19 +846,28 @@ Check now
 Race %3d:%02d  
 == 
 
+Activate
+== 
+
 Background (regular)
+== 
+
+Show console window
 == 
 
 DDNet %s is out! Download it at DDNet.tw!
 == 
 
-Reset wanted weapon on death
+Multiple texture units (disable for MacOS)
 == 
 
 Frags
 == 
 
 AntiPing: predict other players
+== 
+
+Use OpenGL 3.3 (experimental)
 == 
 
 Show other players' key presses
@@ -864,13 +888,16 @@ DDNet %s is available:
 Updating...
 == 
 
+Show health + ammo
+== 
+
 Overlay entities
 == 
 
 Messages
 == 
 
-Vanilla Skins only
+UI mouse s.
 == 
 
 %.2f MiB
@@ -885,7 +912,22 @@ New random timeout code
 Suicides
 == 
 
+File already exists, do you want to overwrite it?
+== 
+
+Indicate map finish
+== 
+
+Save ghost
+== 
+
+Clan plates size
+== 
+
 Net
+== 
+
+Save
 == 
 
 Loading DDNet Client
@@ -915,6 +957,12 @@ seconds
 Borderless window
 == 
 
+Show others
+== 
+
+Remove chat
+== 
+
 %.2f KiB
 == 
 
@@ -924,10 +972,16 @@ Try fast HTTP map download first
 Use DDRace Scoreboard
 == 
 
+Vanilla skins only
+== 
+
 Best
 == 
 
 Enable regular chat sound
+== 
+
+DDNet
 == 
 
 Normal message
@@ -936,25 +990,22 @@ Normal message
 Screen
 == 
 
+Date
+== 
+
 Search
 == 
 
 Connecting dummy
 == 
 
-Clan plates size
-== 
-
-Update now
-== 
-
-Auto %3d:%02d  
+Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
 == 
 
 Show clan above name plates
 == 
 
-Save ghost
+Demo
 == 
 
 Exclude
@@ -963,19 +1014,13 @@ Exclude
 Enable highlighted chat sound
 == 
 
-Hello and welcome
-== 
-
 AntiPing: predict weapons
 == 
 
 DDNet Client updated!
 == 
 
-High-DPI screen support (experimental)
-== 
-
-Outline color
+Hello and welcome
 == 
 
 Highlighted message
@@ -984,17 +1029,17 @@ Highlighted message
 Friend
 == 
 
+Reset wanted weapon on death
+== 
+
+HUD
+== 
+
+Reload
+== 
+
 Switch weapon when out of ammo
 == 
 
 AntiPing: predict grenade paths
-== 
-
-Demo
-== 
-
-AntiPing limit
-== 
-
-Inner color
 == 
