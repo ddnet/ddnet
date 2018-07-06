@@ -295,7 +295,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			m_NeedSendinfo = true;
 	}
 
-	if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Dummy settings"), m_Dummy, &Dummy))
+	if(DoButton_CheckBox(&m_Dummy, Localize("Dummy settings"), m_Dummy, &Dummy))
 	{
 		m_Dummy ^= 1;
 	}
