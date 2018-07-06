@@ -1,7 +1,7 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#ifndef GAME_SERVER_DDRACECOMMANDS_H
-#define GAME_SERVER_DDRACECOMMANDS_H
-#undef GAME_SERVER_DDRACECOMMANDS_H // this file can be included several times
+
+// This file can be included several times.
+
 #ifndef CONSOLE_COMMAND
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help)
 #endif
@@ -52,5 +52,3 @@ CONSOLE_COMMAND("vote_no", "", CFGFLAG_SERVER, ConVoteNo, this, "Same as \"vote 
 CONSOLE_COMMAND("freezehammer", "v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConFreezeHammer, this, "Gives a player Freeze Hammer")
 CONSOLE_COMMAND("unfreezehammer", "v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnFreezeHammer, this, "Removes Freeze Hammer from a player")
 #undef CONSOLE_COMMAND
-
-#endif

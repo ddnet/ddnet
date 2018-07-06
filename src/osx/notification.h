@@ -1,5 +1,5 @@
-#ifndef NOTIFICATION_H
-#define NOTIFICATION_H
+#ifndef OSX_NOTIFICATION_H
+#define OSX_NOTIFICATION_H
 
 class CNotification
 {
@@ -7,4 +7,4 @@ public:
 	static void Notify(const char *pTitle, const char *pMsg);
 };
 
-#endif // NOTIFICATION_H
+#endif // OSX_NOTIFICATION_H

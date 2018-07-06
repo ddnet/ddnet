@@ -1,5 +1,5 @@
-#ifndef ENGINE_SERVER_NAME_BANS_H
-#define ENGINE_SERVER_NAME_BANS_H
+#ifndef ENGINE_SERVER_NAME_BAN_H
+#define ENGINE_SERVER_NAME_BAN_H
 
 #include <base/system.h>
 #include <engine/shared/protocol.h>
@@ -30,4 +30,4 @@ public:
 
 CNameBan *IsNameBanned(const char *pName, CNameBan *pNameBans, int NumNameBans);
 
-#endif // ENGINE_SERVER_NAME_BANS_H
+#endif // ENGINE_SERVER_NAME_BAN_H

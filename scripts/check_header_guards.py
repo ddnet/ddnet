@@ -5,12 +5,18 @@ import sys
 os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])) + "/..")
 
 PATH = "src/"
+EXCEPTIONS = [
+	"src/base/confusables_data.h",
+	"src/tools/config_common.h"
+]
 
 def check_file(filename):
+	if filename in EXCEPTIONS:
+		return False
 	error = False
 	with open(filename) as file:
 		for line in file:
-			if len(line) == 0:
+			if line == "// This file can be included several times.\n":
 				break
 			if line[0] == "/" or line[0] == "*" or line[0] == "\r" or line[0] == "\n" or line[0] == "\t":
 				continue

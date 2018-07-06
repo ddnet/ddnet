@@ -1,7 +1,7 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#ifndef GAME_SERVER_DDRACECOMMANDS_H
-#define GAME_SERVER_DDRACECOMMANDS_H
-#undef GAME_SERVER_DDRACECOMMANDS_H // this file can be included several times
+
+// This file can be included several times.
+
 #ifndef CHAT_COMMAND
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help)
 #endif
@@ -58,5 +58,3 @@ CHAT_COMMAND("points", "?r[player name]", CFGFLAG_CHAT|CFGFLAG_SERVER, ConPoints
 CHAT_COMMAND("top5points", "?i[number]", CFGFLAG_CHAT|CFGFLAG_SERVER, ConTopPoints, this, "Shows five points of the global point ladder beginning with rank i (1 by default)")
 #endif
 #undef CHAT_COMMAND
-
-#endif

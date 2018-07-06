@@ -1,3 +1,6 @@
+#ifndef GAME_CLIENT_COMPONENTS_STATBOARD_H
+#define GAME_CLIENT_COMPONENTS_STATBOARD_H
+
 #include <game/client/component.h>
 
 class CStatboard: public CComponent
@@ -24,3 +27,5 @@ class CStatboard: public CComponent
 		virtual void OnMessage(int MsgType, void *pRawMsg);
 		bool IsActive();
 };
+
+#endif // GAME_CLIENT_COMPONENTS_STATBOARD_H

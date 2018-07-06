@@ -1,6 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#ifndef DDRACE_H
-#define DDRACE_H
+#ifndef GAME_SERVER_GAMEMODES_DDRACE_H
+#define GAME_SERVER_GAMEMODES_DDRACE_H
 #include <game/server/gamecontroller.h>
 #include <game/server/teams.h>
 #include <game/server/entities/door.h>
@@ -23,4 +23,4 @@ public:
 	void InitTeleporter();
 	virtual void Tick();
 };
-#endif
+#endif // GAME_SERVER_GAMEMODES_DDRACE_H

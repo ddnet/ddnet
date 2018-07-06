@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef BASE_TL_THREADING_H
+#define BASE_TL_THREADING_H
 
 #include "../system.h"
 
@@ -107,3 +107,5 @@ public:
 		var->release();
 	}
 };
+
+#endif // BASE_TL_THREADING_H
