@@ -21,8 +21,19 @@
 class CTuneParam
 {
 	int m_Value;
+	int m_Min;
+	int m_Max;
 public:
-	void Set(int v) { m_Value = v; }
+	void SetBounds(int Min, int Max) { m_Min = Min; m_Max = Max; }
+	bool Set(int v)
+	{
+		if(v >= m_Min && v <= m_Max)
+		{
+			m_Value = v;
+			return true;
+		}
+		return false;
+	}
 	int Get() const { return m_Value; }
 	CTuneParam &operator = (int v) { m_Value = (int)(v*100.0f); return *this; }
 	CTuneParam &operator = (float v) { m_Value = (int)(v*100.0f); return *this; }
@@ -35,14 +46,16 @@ public:
 	CTuningParams()
 	{
 		const float TicksPerSecond = 50.0f;
-		#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) m_##Name.Set((int)(Value*100.0f));
+		#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Min,Max,Description) \
+			m_##Name.SetBounds((int)(Min*100.0f), (int)(Max*100.0f)); \
+			m_##Name.Set((int)(Value*100.0f));
 		#include "tuning.h"
 		#undef MACRO_TUNING_PARAM
 	}
 
 	static const char *ms_apNames[];
 
-	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) CTuneParam m_##Name;
+	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Min,Max,Description) CTuneParam m_##Name;
 	#include "tuning.h"
 	#undef MACRO_TUNING_PARAM
 
