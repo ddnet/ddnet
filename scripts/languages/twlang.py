@@ -59,7 +59,7 @@ def check_folder(path):
 
 
 def languages():
-    index = decode(open("../index.txt"), 2)
+    index = decode(open("../../data/languages/index.txt"), 2)
     langs = {"../"+key+".txt" : [key]+elements for key, elements in index.items()}
     return langs
 
@@ -70,5 +70,5 @@ def translations(filename):
 
 
 def localizes():
-    englishlist = list(check_folder("../../../src"))
+    englishlist = list(check_folder("../../src"))
     return englishlist
