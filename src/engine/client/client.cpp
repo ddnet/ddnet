@@ -1877,10 +1877,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
 					unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
 					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
-					CServerInfo Info;
-					GetServerInfo(&Info);
-					if(IsDDNet(&Info))
-						SnapshotRemoveExtraInfo(aExtraInfoRemoved);
+					SnapshotRemoveExtraInfo(aExtraInfoRemoved);
 
 					// add snapshot to demo
 					for(int i = 0; i < RECORDER_MAX; i++)

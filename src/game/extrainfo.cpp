@@ -12,9 +12,9 @@ bool UseExtraInfo(const CNetObj_Projectile *pProj)
 	return ExtraInfoFlag;
 }
 
-void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel, bool IsDDNet)
+void ExtractInfo(const CNetObj_Projectile *pProj, vec2 *StartPos, vec2 *StartVel)
 {
-	if(!UseExtraInfo(pProj) || !IsDDNet)
+	if(!UseExtraInfo(pProj))
 	{
 		StartPos->x = pProj->m_X;
 		StartPos->y = pProj->m_Y;
@@ -61,7 +61,7 @@ void SnapshotRemoveExtraInfo(unsigned char *pData)
 			{
 				vec2 Pos;
 				vec2 Vel;
-				ExtractInfo(pProj, &Pos, &Vel, 1);
+				ExtractInfo(pProj, &Pos, &Vel);
 				pProj->m_X = Pos.x;
 				pProj->m_Y = Pos.y;
 				pProj->m_VelX = (int)(Vel.x*100.0f);

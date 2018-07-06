@@ -17,7 +17,6 @@
 #include "items.h"
 #include <stdio.h>
 
-#include <engine/serverbrowser.h>
 void CItems::OnReset()
 {
 	m_NumExtraProjectiles = 0;
@@ -73,9 +72,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	vec2 StartPos;
 	vec2 StartVel;
 
-	CServerInfo Info;
-	Client()->GetServerInfo(&Info);
-	ExtractInfo(pCurrent, &StartPos, &StartVel, IsDDNet(&Info));
+	ExtractInfo(pCurrent, &StartPos, &StartVel);
 
 	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct-0.001f);
