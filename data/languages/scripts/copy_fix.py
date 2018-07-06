@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import twlang
 import sys
 
@@ -28,7 +28,7 @@ if delete_unused or append_missing:
     local = twlang.localizes()
 if append_missing:
     supported = []
-for tran, (start, expr, end) in trans.iteritems():
+for tran, (start, expr, end) in trans.items():
     if delete_unused and tran not in local:
         content[start:end] = [None]*(end-start)
     if append_missing and tran in local:

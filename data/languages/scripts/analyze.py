@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import twlang
 import sys
 
@@ -13,7 +13,7 @@ for lang in langs:
     empty = 0
     supported = 0
     unused = 0
-    for tran, (_, expr, _) in trans.iteritems():
+    for tran, (_, expr, _) in trans.items():
         if not expr:
             empty += 1
         else:
