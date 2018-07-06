@@ -29,6 +29,7 @@ test_script:
       cd build64
       Release\DDNet-Server shutdown
       cd ..
+  - cmd: scripts\check_header_guards.py
 
 after_build:
   - cmd: cmake --build build32 --config Release --target package

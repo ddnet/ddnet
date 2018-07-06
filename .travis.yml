@@ -23,6 +23,7 @@ script:
 - make run_tests
 - cd ..
 - build/DDNet-Server shutdown
+- python scripts/check_header_guards.py
 env:
   global:
   - CFLAGS="-Wdeclaration-after-statement -Werror"

@@ -26,6 +26,8 @@ test:
         make run_tests
         ./DDNet-Server shutdown
 
+    - python scripts/check_header_guards.py
+
     - |
         cd build
         make package
