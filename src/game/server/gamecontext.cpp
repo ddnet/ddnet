@@ -472,8 +472,11 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 
 void CGameContext::EndVote()
 {
+	if(m_apPlayers[m_VoteVictim])
+		m_apPlayers[m_VoteVictim]->Pause(CPlayer::PAUSE_NONE, false);
 	m_VoteCloseTime = 0;
 	SendVoteSet(-1);
+	m_VoteVictim = -1;
 }
 
 void CGameContext::SendVoteSet(int ClientID)
