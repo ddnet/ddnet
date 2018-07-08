@@ -13,6 +13,8 @@ checkout:
 ## Customize test commands
 compile:
   override:
+    - python scripts/check_header_guards.py
+
     - |
         mkdir build
         cd build
@@ -25,8 +27,6 @@ test:
         cd build
         make run_tests
         ./DDNet-Server shutdown
-
-    - python scripts/check_header_guards.py
 
     - |
         cd build
