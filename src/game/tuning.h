@@ -1,8 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_TUNING_H
-#define GAME_TUNING_H
-#undef GAME_TUNING_H // this file will be included several times
+
+// This file can be included several times.
 
 // physics tuning
 MACRO_TUNING_PARAM(GroundControlSpeed, ground_control_speed, 10.0f, "Max speed the tee can get on ground")
@@ -59,4 +58,3 @@ MACRO_TUNING_PARAM(ShotgunFireDelay, shotgun_fire_delay, 500, "Delay of firing s
 MACRO_TUNING_PARAM(GrenadeFireDelay, grenade_fire_delay, 500, "Delay of firing grenade")
 MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser rifle")
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
-#endif

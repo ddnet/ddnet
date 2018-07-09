@@ -13,6 +13,8 @@ checkout:
 ## Customize test commands
 compile:
   override:
+    - python scripts/check_header_guards.py
+
     - |
         mkdir build
         cd build

@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef GAME_CLIENT_COMPONENTS_MAPSOUNDS_H
+#define GAME_CLIENT_COMPONENTS_MAPSOUNDS_H
 
 #include <base/tl/array.h>
 
@@ -33,3 +33,5 @@ public:
 	virtual void OnRender();
 	virtual void OnStateChange(int NewState, int OldState);
 };
+
+#endif // GAME_CLIENT_COMPONENTS_MAPSOUNDS_H

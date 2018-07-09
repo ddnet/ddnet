@@ -1,3 +1,5 @@
+// This file can be included several times.
+
 UUID(TEEHISTORIAN_TEST,         "teehistorian-test@ddnet.tw")
 UUID(TEEHISTORIAN_AUTH_INIT,    "teehistorian-auth-init@ddnet.tw")
 UUID(TEEHISTORIAN_AUTH_LOGIN,   "teehistorian-auth-login@ddnet.tw")

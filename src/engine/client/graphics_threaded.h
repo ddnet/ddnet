@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ENGINE_CLIENT_GRAPHICS_THREADED_H
+#define ENGINE_CLIENT_GRAPHICS_THREADED_H
 
 #include <engine/graphics.h>
 
@@ -827,3 +828,5 @@ public:
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();
+
+#endif // ENGINE_CLIENT_GRAPHICS_THREADED_H

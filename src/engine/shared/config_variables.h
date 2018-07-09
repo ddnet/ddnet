@@ -1,8 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef ENGINE_SHARED_CONFIG_VARIABLES_H
-#define ENGINE_SHARED_CONFIG_VARIABLES_H
-#undef ENGINE_SHARED_CONFIG_VARIABLES_H // this file will be included several times
+
+// This file can be included several times.
 
 // TODO: remove this
 #include "././game/variables.h"
@@ -409,5 +408,3 @@ MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optim
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #endif
 MACRO_CONFIG_INT(GfxUsePreinitBuffer, gfx_use_preinitialized_buffer, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use only one buffer for data, that is uploaded to the GPU(might help when using an iGPUs).")
-
-#endif

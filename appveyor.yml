@@ -4,6 +4,8 @@ before_build:
 - cmd: |
     git submodule update --init
 
+    scripts\check_header_guards.py
+
     md build32 & cd build32
     cmake -Werror=dev -G "Visual Studio 14 2015" ..
     cd ..

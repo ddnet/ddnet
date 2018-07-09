@@ -1,5 +1,5 @@
-#ifndef ENGINE_SERVER_AUTH_MANAGER_H
-#define ENGINE_SERVER_AUTH_MANAGER_H
+#ifndef ENGINE_SERVER_AUTHMANAGER_H
+#define ENGINE_SERVER_AUTHMANAGER_H
 
 #include <base/tl/array.h>
 
@@ -49,4 +49,4 @@ public:
 	int NumNonDefaultKeys();
 };
 
-#endif //ENGINE_SERVER_AUTH_MANAGER_H
+#endif //ENGINE_SERVER_AUTHMANAGER_H

@@ -1,5 +1,5 @@
-#ifndef SAVE_H
-#define SAVE_H
+#ifndef GAME_SERVER_SAVE_H
+#define GAME_SERVER_SAVE_H
 
 #include "./entities/character.h"
 #include <game/server/gamecontroller.h>
@@ -114,4 +114,4 @@ private:
 	int m_TeamLocked;
 };
 
-#endif
+#endif // GAME_SERVER_SAVE_H

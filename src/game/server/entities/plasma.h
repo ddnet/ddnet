@@ -1,6 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#ifndef PLASMA_TYPE
-#define PLASMA_TYPE
+#ifndef GAME_SERVER_ENTITIES_PLASMA_H
+#define GAME_SERVER_ENTITIES_PLASMA_H
 
 #include <game/server/entity.h>
 
@@ -28,4 +28,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_PLASMA_H

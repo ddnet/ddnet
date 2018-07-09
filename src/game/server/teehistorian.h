@@ -1,3 +1,6 @@
+#ifndef GAME_SERVER_TEEHISTORIAN_H
+#define GAME_SERVER_TEEHISTORIAN_H
+
 #include <base/hash.h>
 #include <engine/console.h>
 #include <engine/shared/fetcher.h>
@@ -109,3 +112,5 @@ private:
 	int m_MaxClientID;
 	CPlayer m_aPrevPlayers[MAX_CLIENTS];
 };
+
+#endif // GAME_SERVER_TEEHISTORIAN_H

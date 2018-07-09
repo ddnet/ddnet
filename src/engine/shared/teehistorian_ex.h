@@ -1,5 +1,5 @@
-#ifndef GAME_TEEHISTORIAN_EX_H
-#define GAME_TEEHISTORIAN_EX_H
+#ifndef ENGINE_SHARED_TEEHISTORIAN_EX_H
+#define ENGINE_SHARED_TEEHISTORIAN_EX_H
 #include "protocol_ex.h"
 
 enum
@@ -12,4 +12,4 @@ enum
 };
 
 void RegisterTeehistorianUuids(class CUuidManager *pManager);
-#endif // GAME_TEEHISTORIAN_EX_H
+#endif // ENGINE_SHARED_TEEHISTORIAN_EX_H

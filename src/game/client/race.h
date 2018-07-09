@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_COMPONENTS_RACE_H
-#define GAME_CLIENT_COMPONENTS_RACE_H
+#ifndef GAME_CLIENT_RACE_H
+#define GAME_CLIENT_RACE_H
 
 #include <base/system.h>
 #include <base/vmath.h>
@@ -17,4 +17,4 @@ public:
 	static bool IsStart(class CGameClient *pClient, vec2 Prev, vec2 Pos);
 };
 
-#endif
+#endif // GAME_CLIENT_RACE_H

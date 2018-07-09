@@ -1,6 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#ifndef GAME_SERVER_ENTITY_DRAGGER_H
-#define GAME_SERVER_ENTITY_DRAGGER_H
+#ifndef GAME_SERVER_ENTITIES_DRAGGER_H
+#define GAME_SERVER_ENTITIES_DRAGGER_H
 
 #include <game/server/entity.h>
 class CCharacter;
@@ -39,4 +39,4 @@ public:
 	//~CDraggerTeam();
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_DRAGGER_H

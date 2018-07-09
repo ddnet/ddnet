@@ -1,5 +1,5 @@
-#ifndef ENGINE_CLIENT_FETCHER_H
-#define ENGINE_CLIENT_FETCHER_H
+#ifndef ENGINE_SHARED_FETCHER_H
+#define ENGINE_SHARED_FETCHER_H
 
 #include <engine/shared/jobs.h>
 #include <engine/storage.h>
@@ -71,4 +71,4 @@ public:
 bool FetcherInit();
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
 char *EscapeJson(char *pBuffer, int BufferSize, const char *pString);
-#endif
+#endif // ENGINE_SHARED_FETCHER_H

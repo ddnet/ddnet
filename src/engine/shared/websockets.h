@@ -1,5 +1,5 @@
-#ifndef WEBSOCKETS_H
-#define WEBSOCKETS_H
+#ifndef ENGINE_SHARED_WEBSOCKETS_H
+#define ENGINE_SHARED_WEBSOCKETS_H
 
 #if !defined(CONF_FAMILY_UNIX)
 	#error websockets only work on unix, sorry
@@ -13,4 +13,4 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize, struct socka
 int websocket_send(int socket, const unsigned char *data, size_t size, int port);
 int websocket_fd_set(int socket, fd_set *set);
 
-#endif
+#endif // ENGINE_SHARED_WEBSOCKETS_H
