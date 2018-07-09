@@ -399,22 +399,27 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 int CNetConnection::Update()
 {
 	int64 Now = time_get();
-
-	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeoutProtection)
+	int64 freq = time_freq();
+	int64 diff = (Now - m_LastRecvTime);
+	int st = State();
+	
+	if (st == NET_CONNSTATE_ERROR && m_TimeoutSituation && 
+	    diff > (freq * g_Config.m_ConnTimeoutProtection)) 
 	{
 		m_TimeoutSituation = false;
 		SetError("Timeout Protection over");
 	}
 
-	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
+	if (st == NET_CONNSTATE_OFFLINE || st == NET_CONNSTATE_ERROR)
 		return 0;
+		
+	int64 d2 = (Now - m_LastSendTime);
+	int64 ftime = (freq * g_Config.m_ConnTimeout);
 
 	m_TimeoutSituation = false;
 
 	// check for timeout
-	if(State() != NET_CONNSTATE_OFFLINE &&
-		State() != NET_CONNSTATE_CONNECT &&
-		(Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeout)
+	if (st != NET_CONNSTATE_OFFLINE && st != NET_CONNSTATE_CONNECT && diff > ftime) 
 	{
 		m_State = NET_CONNSTATE_ERROR;
 		SetError("Timeout");
@@ -422,15 +427,15 @@ int CNetConnection::Update()
 	}
 
 	// fix resends
-	if(m_Buffer.First())
+	CNetChunkResend *pResend = m_Buffer.First();
+	if (pResend) 
 	{
-		CNetChunkResend *pResend = m_Buffer.First();
-
+		int64 d3 = (Now - pResend->m_FirstSendTime);
 		// check if we have some really old stuff laying around and abort if not acked
-		if(Now-pResend->m_FirstSendTime > time_freq()*g_Config.m_ConnTimeout)
+		if (d3 > ftime) 
 		{
 			m_State = NET_CONNSTATE_ERROR;
-			char aBuf[512];
+			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "Too weak connection (not acked for %d seconds)", g_Config.m_ConnTimeout);
 			SetError(aBuf);
 			m_TimeoutSituation = true;
@@ -438,32 +443,31 @@ int CNetConnection::Update()
 		else
 		{
 			// resend packet if we havn't got it acked in 1 second
-			if(Now-pResend->m_LastSendTime > time_freq())
+			if (d3 > freq)
 				ResendChunk(pResend);
 		}
 	}
 
 	// send keep alives if nothing has happened for 250ms
-	if(State() == NET_CONNSTATE_ONLINE)
+	if (st == NET_CONNSTATE_ONLINE) 
 	{
-		if(time_get()-m_LastSendTime > time_freq()/2) // flush connection after 500ms if needed
-		{
+		if (d2 > (freq / 2)) 
+		{ // flush connection after 500ms if needed
 			int NumFlushedChunks = Flush();
-			if(NumFlushedChunks && g_Config.m_Debug)
+			if (NumFlushedChunks && g_Config.m_Debug)
 				dbg_msg("connection", "flushed connection due to timeout. %d chunks.", NumFlushedChunks);
 		}
-
-		if(time_get()-m_LastSendTime > time_freq())
+		if (d2 > freq)
 			SendControl(NET_CTRLMSG_KEEPALIVE, 0, 0);
 	}
-	else if(State() == NET_CONNSTATE_CONNECT)
+	else if (st == NET_CONNSTATE_CONNECT) 
 	{
-		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect every 500ms
+		if (d2 > (freq / 2)) // send a new connect every 500ms
 			SendControl(NET_CTRLMSG_CONNECT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 	}
-	else if(State() == NET_CONNSTATE_PENDING)
+	else if (st == NET_CONNSTATE_PENDING) 
 	{
-		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect/accept every 500ms
+		if (d2 > (freq / 2)) // send a new connect/accept every 500ms
 			SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 	}
 
