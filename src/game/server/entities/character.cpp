@@ -42,6 +42,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastPenalty = false;
 	m_LastBonus = false;
 
+	m_HasTeleGun = false;
+	m_HasTeleLaser = false;
+	m_HasTeleGrenade = false;
+
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
@@ -1620,6 +1624,40 @@ void CCharacter::HandleTiles(int Index)
 	if((m_TileIndex != TILE_REFILL_JUMPS) && (m_TileFIndex != TILE_REFILL_JUMPS))
 	{
 		m_LastRefillJumps = false;
+	}
+
+	// Teleport gun
+	if (((m_TileIndex == TILE_TELE_GUN_ENABLE) || (m_TileFIndex == TILE_TELE_GUN_ENABLE)) && !m_HasTeleGun)
+	{
+		m_HasTeleGun = true;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun enabled");
+	}
+	else if (((m_TileIndex == TILE_TELE_GUN_DISABLE) || (m_TileFIndex == TILE_TELE_GUN_DISABLE)) && m_HasTeleGun)
+	{
+		m_HasTeleGun = false;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun disabled");
+	}
+
+	if (((m_TileIndex == TILE_TELE_GRENADE_ENABLE) || (m_TileFIndex == TILE_TELE_GRENADE_ENABLE)) && !m_HasTeleGrenade)
+	{
+		m_HasTeleGrenade = true;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade enabled");
+	}
+	else if (((m_TileIndex == TILE_TELE_GRENADE_DISABLE) || (m_TileFIndex == TILE_TELE_GRENADE_DISABLE)) && m_HasTeleGrenade)
+	{
+		m_HasTeleGrenade = false;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade disabled");
+	}
+
+	if (((m_TileIndex == TILE_TELE_LASER_ENABLE) || (m_TileFIndex == TILE_TELE_LASER_ENABLE)) && !m_HasTeleLaser)
+	{
+		m_HasTeleLaser = true;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser enabled");
+	}
+	else if (((m_TileIndex == TILE_TELE_LASER_DISABLE) || (m_TileFIndex == TILE_TELE_LASER_DISABLE)) && m_HasTeleLaser)
+	{
+		m_HasTeleLaser = false;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser disabled");
 	}
 
 	// stopper

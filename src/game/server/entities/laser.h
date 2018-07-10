@@ -35,6 +35,7 @@ private:
 	vec2 m_PrevPos;
 	int m_Type;
 	int m_TuneZone;
+	bool m_TeleportCancelled;
 };
 
 #endif
