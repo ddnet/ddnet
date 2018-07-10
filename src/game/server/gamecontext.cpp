@@ -2054,7 +2054,7 @@ void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 		{
 			pSelf->TuningList()[List] = TuningParams;
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Tunezone %d resetted", List);
+			str_format(aBuf, sizeof(aBuf), "Tunezone %d reset", List);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 			pSelf->SendTuningParams(-1, List);
 		}
@@ -2066,7 +2066,7 @@ void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 			*(pSelf->TuningList()+i) = TuningParams;
 			pSelf->SendTuningParams(-1, i);
 		}
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "All Tunezones resetted");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "All Tunezones reset");
 	}
 }
 

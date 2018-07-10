@@ -42,7 +42,7 @@ class CSnapIDPool
 	{
 	public:
 		short m_Next;
-		short m_State; // 0 = free, 1 = alloced, 2 = timed
+		short m_State; // 0 = free, 1 = allocated, 2 = timed
 		int m_Timeout;
 	};
 

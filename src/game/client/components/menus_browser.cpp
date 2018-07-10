@@ -780,7 +780,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					}
 					else if(Button == 3)
 					{
-						// middle click to reset (reenable all)
+						// middle click to reset (re-enable all)
 						g_Config.m_BrFilterExcludeTypes[0] = '\0';
 						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 					}
@@ -861,7 +861,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					}
 					else if(Button == 3)
 					{
-						// middle click to reset (reenable all)
+						// middle click to reset (re-enable all)
 						g_Config.m_BrFilterExcludeCountries[0] = '\0';
 						ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 					}

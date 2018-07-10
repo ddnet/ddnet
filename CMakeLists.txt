@@ -201,7 +201,7 @@ function(set_glob VAR GLOBBING DIRECTORY) # ...
 endfunction()
 
 ########################################################################
-# INITALIZE TARGET LISTS
+# INITIALIZE TARGET LISTS
 ########################################################################
 
 set(TARGETS_OWN)

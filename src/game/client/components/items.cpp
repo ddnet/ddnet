@@ -67,7 +67,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 
 	float Ct = (PrevTick-pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + s_LastGameTickTime;
 	if(Ct < 0)
-		return; // projectile havn't been shot yet
+		return; // projectile haven't been shot yet
 
 	vec2 StartPos;
 	vec2 StartVel;

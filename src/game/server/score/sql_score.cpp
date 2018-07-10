@@ -741,7 +741,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 
 	try
 	{
-		// check sort methode
+		// check sort method
 		char aBuf[600];
 
 		pSqlServer->executeSql("SET @prev := NULL;");
@@ -811,7 +811,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 
 	try
 	{
-		// check sort methode
+		// check sort method
 		char aBuf[2400];
 		char aNames[2300];
 		aNames[0] = '\0';
@@ -900,7 +900,7 @@ bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData
 
 	try
 	{
-		// check sort methode
+		// check sort method
 		char aBuf[512];
 		pSqlServer->executeSql("SET @prev := NULL;");
 		pSqlServer->executeSql("SET @rank := 1;");
@@ -961,7 +961,7 @@ bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGame
 
 	try
 	{
-		// check sort methode
+		// check sort method
 		char aBuf[2400];
 
 		pSqlServer->executeSql("SET @prev := NULL;");

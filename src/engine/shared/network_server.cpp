@@ -378,7 +378,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			// Before we can send NETMSG_SNAPEMPTY, the client needs
 			// to load a map, otherwise it might crash. The map
 			// should be as small as is possible and directly available
-			// to the client. Therefor a dummy map is sent in the same
+			// to the client. Therefore a dummy map is sent in the same
 			// packet. To reduce the traffic we'll fallback to a default
 			// map if there are too many connection attempts at once.
 
@@ -435,7 +435,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 		}
 		else
 		{
-			// accept client directy
+			// accept client directly
 			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, NULL, 0, NET_SECURITY_TOKEN_UNSUPPORTED);
 
 			TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED);

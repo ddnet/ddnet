@@ -1283,7 +1283,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	}
 #endif
 
-	/* set to IPv6 only if thats what we are creating */
+	/* set to IPv6 only if that's what we are creating */
 #if defined(IPV6_V6ONLY)	/* windows sdk 6.1 and higher */
 	if(domain == AF_INET6)
 	{
