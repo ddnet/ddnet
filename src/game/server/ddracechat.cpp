@@ -810,7 +810,7 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 
 	if(!g_Config.m_SvInvite)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Admin has diabled invites");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Admin has disabled invites");
 		return;
 	}
 

@@ -189,7 +189,7 @@ IOHANDLE io_open(const char *filename, int flags);
 
 	Parameters:
 		io - Handle to the file to read data from.
-		buffer - Pointer to the buffer that will recive the data.
+		buffer - Pointer to the buffer that will receive the data.
 		size - Number of bytes to read from the file.
 
 	Returns:
@@ -586,7 +586,7 @@ int64 time_freq();
 
 /*
 	Function: time_timestamp
-		Retrives the current time as a UNIX timestamp
+		Retrieves the current time as a UNIX timestamp
 
 	Returns:
 		The time as a UNIX timestamp
@@ -636,7 +636,7 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
 #endif
 /*
 	Function: net_init
-		Initiates network functionallity.
+		Initiates network functionality.
 
 	Returns:
 		Returns 0 on success,
@@ -734,13 +734,13 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 
 /*
 	Function: net_udp_recv
-		Recives a packet over an UDP socket.
+		Receives a packet over an UDP socket.
 
 	Parameters:
 		sock - Socket to use.
-		addr - Pointer to an NETADDR that will recive the address.
-		data - Pointer to a buffer that will recive the data.
-		maxsize - Maximum size to recive.
+		addr - Pointer to an NETADDR that will receive the address.
+		data - Pointer to a buffer that will receive the data.
+		maxsize - Maximum size to receive.
 
 	Returns:
 		On success it returns the number of bytes received. Returns -1
@@ -928,7 +928,7 @@ void str_append(char *dst, const char *src, int dst_size);
 		Copies a string to another.
 
 	Parameters:
-		dst - Pointer to a buffer that shall recive the string.
+		dst - Pointer to a buffer that shall receive the string.
 		src - String to be copied.
 		dst_size - Size of the buffer dst.
 
@@ -952,19 +952,19 @@ int str_length(const char *str);
 
 /*
 	Function: str_format
-		Performs printf formating into a buffer.
+		Performs printf formatting into a buffer.
 
 	Parameters:
-		buffer - Pointer to the buffer to recive the formatted string.
+		buffer - Pointer to the buffer to receive the formatted string.
 		buffer_size - Size of the buffer.
-		format - printf formating string.
-		... - Parameters for the formating.
+		format - printf formatting string.
+		... - Parameters for the formatting.
 
 	Returns:
 		Length of written string
 
 	Remarks:
-		- See the C manual for syntax for the printf formating string.
+		- See the C manual for syntax for the printf formatting string.
 		- The strings are treated as zero-termineted strings.
 		- Guarantees that dst string will contain zero-termination.
 */
@@ -1266,7 +1266,7 @@ const char *str_find(const char *haystack, const char *needle);
 		data - Size of the data
 
 	Remarks:
-		- The desination buffer will be zero-terminated
+		- The destination buffer will be zero-terminated
 */
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 

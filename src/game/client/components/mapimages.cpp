@@ -21,7 +21,7 @@ CMapImages::CMapImages()
 
 void CMapImages::OnInit()
 {
-	//TODO: improve this a bit -- with better fron sizes etc.
+	//TODO: improve this a bit -- with better from sizes etc.
 	if(m_OverlayBottomTexture == -1)
 	{
 		void *pMem = calloc(1024 * 1024, 1);

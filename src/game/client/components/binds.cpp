@@ -6,7 +6,7 @@
 
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
-	// don't handle invalid events and keys that arn't set to anything
+	// don't handle invalid events and keys that aren't set to anything
 	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) && m_pBinds->m_apKeyBindings[Event.m_Key])
 	{
 		int Stroke = 0;
@@ -64,7 +64,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly)
 
 bool CBinds::OnInput(IInput::CEvent e)
 {
-	// don't handle invalid events and keys that arn't set to anything
+	// don't handle invalid events and keys that aren't set to anything
 	if(e.m_Key <= 0 || e.m_Key >= KEY_LAST || !m_apKeyBindings[e.m_Key])
 		return false;
 

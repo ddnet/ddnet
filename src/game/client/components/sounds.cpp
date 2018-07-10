@@ -112,7 +112,7 @@ void CSounds::OnRender()
 			return;
 	}
 
-	// set listner pos
+	// set listener pos
 	Sound()->SetListenerPos(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y);
 
 	// update volume

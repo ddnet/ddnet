@@ -1205,7 +1205,7 @@ public:
 						break;
 					}
 
-					// don't add text that isnt drawn, the color overwrite is used for that
+					// don't add text that isn't drawn, the color overwrite is used for that
 					if(m_TextA != 0.f)
 					{
 						TextContainer.m_StringInfo.m_CharacterQuads.push_back(STextCharQuad());

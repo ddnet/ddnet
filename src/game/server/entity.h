@@ -88,7 +88,7 @@ public:
 
 	/*
 		Function: destroy
-			Destorys the entity.
+			Destroys the entity.
 	*/
 	virtual void Destroy() { delete this; }
 

@@ -1216,7 +1216,7 @@ bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)
 		p = strtok(NULL, ",");
 	}
 
-	return false; // contry not excluded
+	return false; // country not excluded
 }
 
 void CServerBrowser::DDNetCountryFilterClean()

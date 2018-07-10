@@ -66,7 +66,7 @@
 
 CGameClient g_GameClient;
 
-// instanciate all systems
+// instantiate all systems
 static CKillMessages gs_KillMessages;
 static CCamera gs_Camera;
 static CChat gs_Chat;

@@ -915,7 +915,7 @@ void CMapLayers::OnMapLoad()
 							QuadIDX = 2;
 						if(!Textured)
 						{
-							// ignore the convertion for the position coordinates
+							// ignore the conversion for the position coordinates
 							tmpQuads[i].m_aVertices[j].m_X = (q->m_aPoints[QuadIDX].x);
 							tmpQuads[i].m_aVertices[j].m_Y = (q->m_aPoints[QuadIDX].y);
 							tmpQuads[i].m_aVertices[j].m_CenterX = (q->m_aPoints[4].x);
@@ -927,7 +927,7 @@ void CMapLayers::OnMapLoad()
 						}
 						else
 						{
-							// ignore the convertion for the position coordinates
+							// ignore the conversion for the position coordinates
 							tmpQuadsTextured[i].m_aVertices[j].m_X = (q->m_aPoints[QuadIDX].x);
 							tmpQuadsTextured[i].m_aVertices[j].m_Y = (q->m_aPoints[QuadIDX].y);
 							tmpQuadsTextured[i].m_aVertices[j].m_CenterX = (q->m_aPoints[4].x);

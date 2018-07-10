@@ -18,7 +18,7 @@ CURRENT:
 		unsigned char ack; // 8 bit ack
 		unsigned char num_chunks; // 8 bit chunks
 
-		(unsigned char padding[3])	// 24 bit extra incase it's a connection less packet
+		(unsigned char padding[3])	// 24 bit extra in case it's a connection less packet
 									// this is to make sure that it's compatible with the
 									// old protocol
 

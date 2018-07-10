@@ -727,7 +727,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		free(pMapData);
 	}
 
-	// store map inforation
+	// store map information
 	m_MapInfo.m_Crc = Crc;
 	m_MapInfo.m_Size = MapSize;
 	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName, sizeof(m_MapInfo.m_aName));
@@ -747,7 +747,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		}
 	}
 
-	// scan the file for interessting points
+	// scan the file for interesting points
 	ScanFile();
 
 	// reset slice markers
