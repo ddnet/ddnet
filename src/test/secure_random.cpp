@@ -22,10 +22,10 @@ TEST(SecureRandom, Below1)
 TEST(SecureRandom, Below)
 {
 	int BOUNDS[] = {2, 3, 4, 5, 10, 100, 127, 128, 129};
-	for(int i = 0; i < sizeof(BOUNDS) / sizeof(BOUNDS[0]); i++)
+	for(unsigned i = 0; i < sizeof(BOUNDS) / sizeof(BOUNDS[0]); i++)
 	{
 		int Below = BOUNDS[i];
-		for(int i = 0; i < 10; i++)
+		for(int j = 0; j < 10; j++)
 		{
 			int Random = secure_rand_below(Below);
 			EXPECT_GE(Random, 0);

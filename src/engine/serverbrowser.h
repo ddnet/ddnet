@@ -11,15 +11,21 @@
 
 #define DDNET_INFO "ddnet-info.json"
 
-/*
-	Structure: CServerInfo
-*/
 class CServerInfo
 {
 public:
-	/*
-		Structure: CInfoClient
-	*/
+	enum
+	{
+		LOC_UNKNOWN = 0,
+		LOC_AFRICA,
+		LOC_ASIA,
+		LOC_AUSTRALIA,
+		LOC_EUROPE,
+		LOC_NORTH_AMERICA,
+		LOC_SOUTH_AMERICA,
+		NUM_LOCS,
+	};
+
 	class CClient
 	{
 	public:
@@ -50,6 +56,8 @@ public:
 	int m_Flags;
 	bool m_Favorite;
 	bool m_Official;
+	int m_Location;
+	bool m_LatencyIsEstimated;
 	int m_Latency; // in ms
 	int m_HasRank;
 	char m_aGameType[16];
@@ -63,6 +71,9 @@ public:
 	mutable int m_NumFilteredPlayers;
 
 	mutable CUIElement *m_pUIElement;
+
+	static int EstimateLatency(int Loc1, int Loc2);
+	static bool ParseLocation(int *pResult, const char *pString);
 };
 
 bool IsVanilla(const CServerInfo *pInfo);
@@ -114,6 +125,7 @@ public:
 		SET_DDNET_ADD,
 		SET_KOG_ADD,
 		SET_TOKEN,
+		SET_HTTPINFO,
 
 		NETWORK_DDNET = 0,
 		NETWORK_KOG = 1,
@@ -121,8 +133,8 @@ public:
 	};
 
 	virtual void Refresh(int Type) = 0;
+	virtual bool IsGettingServerlist() const = 0;
 	virtual bool IsRefreshing() const = 0;
-	virtual bool IsRefreshingMasters() const = 0;
 	virtual int LoadingProgression() const = 0;
 
 	virtual int NumServers() const = 0;

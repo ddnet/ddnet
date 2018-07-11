@@ -31,6 +31,26 @@ static const int g_OffsetColPlayers = g_OffsetColMap + 3;
 static const int g_OffsetColPing = g_OffsetColPlayers + 3;
 static const int g_OffsetColVersion = g_OffsetColPing + 3;
 
+void FormatServerbrowserPing(char *pBuffer, int BufferLength, const CServerInfo *pInfo)
+{
+	if(!pInfo->m_LatencyIsEstimated)
+	{
+		str_format(pBuffer, BufferLength, "%d", pInfo->m_Latency);
+		return;
+	}
+	static const char *LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
+		"", // LOC_UNKNOWN
+		"AFR", // LOC_AFRICA // Localize("AFR")
+		"ASI", // LOC_ASIA // Localize("ASI")
+		"AUS", // LOC_AUSTRALIA // Localize("AUS")
+		"EUR", // LOC_EUROPE // Localize("EUR")
+		"NA", // LOC_NORTH_AMERICA // Localize("NA")
+		"SA", // LOC_SOUTH_AMERICA // Localize("SA")
+	};
+	dbg_assert(0 <= pInfo->m_Location && pInfo->m_Location < CServerInfo::NUM_LOCS, "location out of range");
+	str_format(pBuffer, BufferLength, "%s", Localize(LOCATION_NAMES[pInfo->m_Location]));
+}
+
 void CMenus::RenderServerbrowserServerList(CUIRect View)
 {
 	CUIRect Headers;
@@ -157,8 +177,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		CUIRect MsgBox = View;
 
-		if(m_ActivePage == PAGE_INTERNET && ServerBrowser()->IsRefreshingMasters())
-			UI()->DoLabelScaled(&MsgBox, Localize("Refreshing master servers"), 16.0f, 0);
+		if(ServerBrowser()->IsGettingServerlist())
+			UI()->DoLabelScaled(&MsgBox, Localize("Getting serverlist from masterserver"), 16.0f, 0);
 		else if(!ServerBrowser()->NumServers())
 			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, 0);
 		else if(ServerBrowser()->NumServers() && !NumServers)
@@ -405,7 +425,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_PING)
 			{
-				str_format(aTemp, sizeof(aTemp), "%i", pItem->m_Latency);
+				FormatServerbrowserPing(aTemp, sizeof(aTemp), pItem);
 				if(g_Config.m_UiColorizePing)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
@@ -1048,7 +1068,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		TextRender()->TextEx(&Cursor, pSelectedServer->m_aGameType, -1);
 
 		char aTemp[16];
-		str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_Latency);
+		FormatServerbrowserPing(aTemp, sizeof(aTemp), pSelectedServer);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Row.w;

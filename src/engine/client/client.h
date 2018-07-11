@@ -99,7 +99,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IUpdater *m_pUpdater;
 	IDiscord *m_pDiscord;
 	ISteam *m_pSteam;
-	IEngineMasterServer *m_pMasterServer;
 
 	enum
 	{
@@ -276,7 +275,6 @@ public:
 	IEngineInput *Input() { return m_pInput; }
 	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
-	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
 	IStorage *Storage() { return m_pStorage; }

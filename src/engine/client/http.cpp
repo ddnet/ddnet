@@ -186,6 +186,22 @@ int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, doubl
 	return pTask->m_Abort ? -1 : 0;
 }
 
+CHead::CHead(const char *pUrl, CTimeout Timeout) :
+	CRequest(pUrl, Timeout)
+{
+}
+
+CHead::~CHead()
+{
+}
+
+bool CHead::AfterInit(void *pCurl)
+{
+	CURL *pHandle = pCurl;
+	curl_easy_setopt(pHandle, CURLOPT_NOBODY, 1L);
+	return true;
+}
+
 CGet::CGet(const char *pUrl, CTimeout Timeout) :
 	CRequest(pUrl, Timeout),
 	m_BufferSize(0),

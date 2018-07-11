@@ -26,7 +26,6 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/map.h>
-#include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/sound.h>
 #include <engine/steam.h>
@@ -1274,82 +1273,6 @@ bool CClient::PlayerScoreNameLess(const CServerInfo::CClient &p0, const CServerI
 
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 {
-	//server count from master server
-	if(pPacket->m_DataSize == (int)sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
-	{
-		unsigned char *pP = (unsigned char *)pPacket->m_pData;
-		pP += sizeof(SERVERBROWSE_COUNT);
-		int ServerCount = ((*pP) << 8) | *(pP + 1);
-		int ServerID = -1;
-		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
-		{
-			if(!m_pMasterServer->IsValid(i))
-				continue;
-			NETADDR tmp = m_pMasterServer->GetAddr(i);
-			if(net_addr_comp(&pPacket->m_Address, &tmp) == 0)
-			{
-				ServerID = i;
-				break;
-			}
-		}
-		if(ServerCount > -1 && ServerID != -1)
-		{
-			m_pMasterServer->SetCount(ServerID, ServerCount);
-			if(g_Config.m_Debug)
-				dbg_msg("mastercount", "server %d got %d servers", ServerID, ServerCount);
-		}
-	}
-	// server list from master server
-	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_LIST) &&
-		mem_comp(pPacket->m_pData, SERVERBROWSE_LIST, sizeof(SERVERBROWSE_LIST)) == 0)
-	{
-		// check for valid master server address
-		bool Valid = false;
-		for(int i = 0; i < IMasterServer::MAX_MASTERSERVERS; ++i)
-		{
-			if(m_pMasterServer->IsValid(i))
-			{
-				NETADDR Addr = m_pMasterServer->GetAddr(i);
-				if(net_addr_comp(&pPacket->m_Address, &Addr) == 0)
-				{
-					Valid = true;
-					break;
-				}
-			}
-		}
-		if(!Valid)
-			return;
-
-		int Size = pPacket->m_DataSize - sizeof(SERVERBROWSE_LIST);
-		int Num = Size / sizeof(CMastersrvAddr);
-		CMastersrvAddr *pAddrs = (CMastersrvAddr *)((char *)pPacket->m_pData + sizeof(SERVERBROWSE_LIST));
-		for(int i = 0; i < Num; i++)
-		{
-			NETADDR Addr;
-
-			static unsigned char s_IPV4Mapping[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF};
-
-			// copy address
-			if(!mem_comp(s_IPV4Mapping, pAddrs[i].m_aIp, sizeof(s_IPV4Mapping)))
-			{
-				mem_zero(&Addr, sizeof(Addr));
-				Addr.type = NETTYPE_IPV4;
-				Addr.ip[0] = pAddrs[i].m_aIp[12];
-				Addr.ip[1] = pAddrs[i].m_aIp[13];
-				Addr.ip[2] = pAddrs[i].m_aIp[14];
-				Addr.ip[3] = pAddrs[i].m_aIp[15];
-			}
-			else
-			{
-				Addr.type = NETTYPE_IPV6;
-				mem_copy(Addr.ip, pAddrs[i].m_aIp, sizeof(Addr.ip));
-			}
-			Addr.port = (pAddrs[i].m_aPort[0] << 8) | pAddrs[i].m_aPort[1];
-
-			m_ServerBrowser.Set(Addr, IServerBrowser::SET_MASTER_ADD, -1, 0x0);
-		}
-	}
-
 	// server info
 	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_INFO))
 	{
@@ -2930,9 +2853,6 @@ void CClient::Update()
 		}
 	}
 
-	// update the maser server registry
-	MasterServer()->Update();
-
 	// update the server browser
 	m_ServerBrowser.Update(m_ResortServerBrowser);
 	m_ResortServerBrowser = false;
@@ -2983,7 +2903,6 @@ void CClient::InitInterfaces()
 	m_pGameClient = Kernel()->RequestInterface<IGameClient>();
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
-	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	m_pConfig = m_pConfigManager->Values();
 #if defined(CONF_AUTOUPDATE)
@@ -3098,9 +3017,6 @@ void CClient::Run()
 
 	// init the input
 	Input()->Init();
-
-	// start refreshing addresses while we load
-	MasterServer()->RefreshAddresses(m_NetClient[CLIENT_MAIN].NetType());
 
 	// init the editor
 	m_pEditor->Init();
@@ -4307,7 +4223,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pClient->RegisterInterfaces();
 
 	// create the components
-	IEngine *pEngine = CreateEngine("DDNet", Silent, 1);
+	IEngine *pEngine = CreateEngine("DDNet", Silent, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
 	IConfigManager *pConfigManager = CreateConfigManager();
@@ -4315,7 +4231,6 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineInput *pEngineInput = CreateEngineInput();
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
-	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IDiscord *pDiscord = CreateDiscord();
 	ISteam *pSteam = CreateSteam();
 
@@ -4344,9 +4259,6 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMap); // IEngineMap
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMasterServer); // IEngineMasterServer
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer *>(pEngineMasterServer), false);
-
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
@@ -4365,8 +4277,6 @@ int main(int argc, const char **argv) // ignore_convention
 	pEngine->Init();
 	pConfigManager->Init();
 	pConsole->Init();
-	pEngineMasterServer->Init();
-	pEngineMasterServer->Load();
 
 	// register all console commands
 	pClient->RegisterCommands();

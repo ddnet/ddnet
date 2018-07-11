@@ -226,6 +226,12 @@ typedef struct _json_value
             };
          }
 
+         /* DDNet additions */
+         inline operator int () const
+         {
+            return (json_int_t) *this;
+         }
+
          inline operator bool () const
          {  
             if (type != json_boolean)

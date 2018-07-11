@@ -3,12 +3,15 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
+#include <engine/client/http.h>
 #include <engine/config.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
+
+class IServerBrowserHttp;
 
 class CServerBrowser : public IServerBrowser
 {
@@ -79,7 +82,7 @@ public:
 	// interface functions
 	void Refresh(int Type);
 	bool IsRefreshing() const;
-	bool IsRefreshingMasters() const;
+	bool IsGettingServerlist() const;
 	int LoadingProgression() const;
 
 	int NumServers() const { return m_NumServers; }
@@ -134,10 +137,13 @@ public:
 
 private:
 	CNetClient *m_pNetClient;
-	IMasterServer *m_pMasterServer;
 	class IConsole *m_pConsole;
+	class IEngine *m_pEngine;
 	class IFriends *m_pFriends;
 	char m_aNetVersion[128];
+
+	bool m_RefreshingHttp = false;
+	IServerBrowserHttp *m_pHttp = nullptr;
 
 	CHeap m_ServerlistHeap;
 	CServerEntry **m_ppServerlist;
@@ -155,7 +161,6 @@ private:
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;
 	int m_NumRequests;
-	int m_MasterServerCount;
 
 	//used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
@@ -198,6 +203,7 @@ private:
 	void Sort();
 	int SortHash() const;
 
+	void UpdateFromHttp();
 	CServerEntry *Add(const NETADDR &Addr);
 
 	void RemoveRequest(CServerEntry *pEntry);
