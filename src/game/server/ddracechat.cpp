@@ -1406,7 +1406,7 @@ void CGameContext::ConModhelp(IConsole::IResult *pResult, void *pUserData)
 
 	if(pPlayer->m_pPostJson)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Your last request hasn't finished processing yet, please slow down");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Your last request hasn't finished processing yet, please slow down.");
 		return;
 	}
 
@@ -1456,10 +1456,11 @@ void CGameContext::ConModhelp(IConsole::IResult *pResult, void *pUserData)
 		char aJson[512];
 		char aPlayerName[64];
 		char aMessage[128];
-		str_format(aJson, sizeof(aJson), "{\"port\":%d,\"moderator_present\":%s,\"player_id\":%d,\"player_name\":\"%s\",\"message\":\"%s\"}",
+		str_format(aJson, sizeof(aJson), "{\"port\":%d,\"moderator_present\":%s,\"player_id\":%d,\"blacklisted\":%s,\"player_name\":\"%s\",\"message\":\"%s\"}",
 			g_Config.m_SvPort,
 			ModeratorPresent ? "true" : "false",
 			pResult->m_ClientID,
+			!pSelf->Server()->DnsblWhite(pResult->m_ClientID) ? "true" : "false",
 			EscapeJson(aPlayerName, sizeof(aPlayerName), pSelf->Server()->ClientName(pResult->m_ClientID)),
 			EscapeJson(aMessage, sizeof(aMessage), pResult->GetString(0)));
 		pSelf->Engine()->AddJob(pPlayer->m_pPostJson = std::make_shared<CPostJson>(g_Config.m_SvModhelpUrl, aJson));
