@@ -1404,9 +1404,15 @@ void CGameContext::ConModhelp(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+	if(!pSelf->Server()->DnsblWhite(pResult->m_ClientID))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not allowed to make requests from a blacklisted ip.");
+		return;
+	}
+
 	if(pPlayer->m_pPostJson)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Your last request hasn't finished processing yet, please slow down");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Your last request hasn't finished processing yet, please slow down.");
 		return;
 	}
 
