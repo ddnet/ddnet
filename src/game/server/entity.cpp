@@ -63,7 +63,6 @@ bool CEntity::GetNearestAirPos(vec2 Pos, vec2 ColPos, vec2* pOutPos)
 
 	vec2 PosInBlock = vec2(round_to_int(Pos.x) % 32, round_to_int(Pos.y) % 32);
 	vec2 BlockCenter = vec2(round_to_int(Pos.x), round_to_int(Pos.y)) - PosInBlock + vec2(16.0f, 16.0f);
-	//GameServer()->CreateExplosion(BlockCenter, 0, WEAPON_GRENADE, true, -1, -1LL);
 
 	*pOutPos = vec2(BlockCenter.x + (PosInBlock.x < 16 ? -2.0f : 1.0f), Pos.y);
 	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
@@ -78,29 +77,6 @@ bool CEntity::GetNearestAirPos(vec2 Pos, vec2 ColPos, vec2* pOutPos)
 	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
 		return true;
 
-/*	float Size = 31.0f; // A bit less than the tile size
-
-	*pOutPos = vec2(BlockCenter.x + (PosInBlock.x < 16 ? -Size : Size), Pos.y);
-	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
-		return true;
-
-	*pOutPos = vec2(BlockCenter.x + (PosInBlock.x < 16 ? -Size : Size), BlockCenter.y);
-	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
-		return true;
-
-	*pOutPos = vec2(Pos.x, BlockCenter.y + (PosInBlock.y < 16 ? -Size : Size));
-	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
-		return true;
-
-	*pOutPos = vec2(BlockCenter.x, BlockCenter.y + (PosInBlock.y < 16 ? -Size : Size));
-	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
-		return true;
-
-	*pOutPos = vec2(BlockCenter.x + (PosInBlock.x  < 16 ? -Size : Size),
-		BlockCenter.y + (PosInBlock.y < 16 ? -Size : Size));
-	if (!GameServer()->Collision()->TestBox(*pOutPos, vec2(28.0f, 28.0f)))
-		return true;*/
-
 	return false;
 }
 
@@ -108,7 +84,6 @@ bool CEntity::GetNearestAirPosLaser(vec2 Pos, vec2* pOutPos)
 {
 	vec2 PosInBlock = vec2(round_to_int(Pos.x) % 32, round_to_int(Pos.y) % 32);
 	vec2 BlockCenter = vec2(round_to_int(Pos.x), round_to_int(Pos.y)) - PosInBlock + vec2(16.0f, 16.0f);
-	GameServer()->CreateExplosion(BlockCenter, 0, WEAPON_GRENADE, true, -1, -1LL);
 
 	float Size = 31.0f; // A bit less than the tile size
 
