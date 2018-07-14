@@ -120,7 +120,10 @@ void CProjectile::Tick()
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	CCharacter *pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+	CCharacter *pTargetChr = nullptr;
+
+	if(!(pOwnerChar ? (pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit))
+		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -168,56 +171,32 @@ void CProjectile::Tick()
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
 
-		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos))
+		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos) &&
+			((m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun)))
 		{
-			bool IsTeleValid = false;
-			switch (m_Type)
+			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->m_Pos.x : ColPos.x,
+				pTargetChr ? pTargetChr->m_Pos.y : ColPos.y);
+			int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+			if ((m_Type == WEAPON_GUN || m_Type == WEAPON_GRENADE) && (TileIndex != TILE_NO_TELE_GUN && TileFIndex != TILE_NO_TELE_GUN))
 			{
-            case WEAPON_GRENADE:
+				bool Found;
+				vec2 PossiblePos;
+
+				if (!Collide)
+					Found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
+				else
+					Found = GetNearestAirPos(NewPos, CurPos, &PossiblePos);
+
+				if (Found && PossiblePos)
 				{
-					if (pOwnerChar->m_HasTeleGrenade)
-						IsTeleValid = true;
-				}
-				break;
-			case WEAPON_GUN:
-				{
-					if (pOwnerChar->m_HasTeleGun)
-						IsTeleValid = true;
-				}
-				break;
-			}
-
-			if (IsTeleValid)
-			{
-				int MapIndex = GameServer()->Collision()->GetPureMapIndex(round_to_int(pTargetChr ? pTargetChr->m_Pos.x : ColPos.x),
-				round_to_int(pTargetChr ? pTargetChr->m_Pos.y : ColPos.y));
-				int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
-				int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-
-				bool IsTileValid = false;
-				
-				if ((m_Type == WEAPON_GUN || m_Type == WEAPON_GRENADE) && (TileIndex != TILE_NO_TELE_GUN && TileFIndex != TILE_NO_TELE_GUN))
-					IsTileValid = true;
-
-				if (IsTileValid)
-				{
-					bool Found;
-					vec2 PossiblePos;
-
-					if (pTargetChr)
-						Found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
-					else
-						Found = GetNearestAirPos(ColPos, &PossiblePos);
-
-					if (Found && PossiblePos)
-					{
-						GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
-							(m_Owner != -1) ? TeamMask : -1LL);
-						pOwnerChar->Core()->m_Pos = PossiblePos;
-						pOwnerChar->Core()->m_Vel = vec2(0, 0);
-						GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
-						GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
-					}
+					GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
+						(m_Owner != -1) ? TeamMask : -1LL);
+					pOwnerChar->Core()->m_Pos = PossiblePos;
+					pOwnerChar->Core()->m_Vel = vec2(0, 0);
+					GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
+					GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
 				}
 			}
 		}
