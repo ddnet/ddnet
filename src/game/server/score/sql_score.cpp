@@ -1178,7 +1178,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 
 		if(pSqlServer->GetResults()->rowsCount() != 1)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s has not collected any points so far", pData->m_Name.Str());
+			str_format(aBuf, sizeof(aBuf), "'%s' has not collected any points so far", pData->m_Name.Str());
 			pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 		}
 		else
@@ -1186,7 +1186,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 			pSqlServer->GetResults()->next();
 			int count = (int)pSqlServer->GetResults()->getInt("Points");
 			int rank = (int)pSqlServer->GetResults()->getInt("Rank");
-			str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pSqlServer->GetResults()->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
+			str_format(aBuf, sizeof(aBuf), "%d. '%s' Points: %d, requested by '%s'", rank, pSqlServer->GetResults()->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
 			pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 		}
 
