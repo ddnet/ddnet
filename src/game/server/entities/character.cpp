@@ -45,6 +45,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_HasTeleGun = false;
 	m_HasTeleLaser = false;
 	m_HasTeleGrenade = false;
+	m_TeleGunTeleport = false;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
