@@ -187,7 +187,7 @@ void CLaser::DoBounce()
 			if(pHit)
 				Found = GetNearestAirPosPlayer(pHit->m_Pos, &PossiblePos);
 			else
-				Found = GetNearestAirPos(Coltile, m_Pos, &PossiblePos);
+				Found = GetNearestAirPos(m_Pos, m_From, &PossiblePos);
 
 			if (Found && PossiblePos)
 			{
