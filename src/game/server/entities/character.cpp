@@ -2131,6 +2131,17 @@ void CCharacter::DDRacePostCoreTick()
 		HandleTiles(CurrentIndex);
 	}
 
+	// teleport gun
+	if (m_TeleGunTeleport)
+	{
+		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		m_Core.m_Pos = m_TeleGunPos;
+		m_Core.m_Vel = vec2(0, 0);
+		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		m_TeleGunTeleport = false;
+	}
+
 	HandleBroadcast();
 }
 

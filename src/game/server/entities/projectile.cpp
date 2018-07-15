@@ -191,12 +191,8 @@ void CProjectile::Tick()
 
 				if (Found && PossiblePos)
 				{
-					GameServer()->CreateDeath(pOwnerChar->Core()->m_Pos, pOwnerChar->GetPlayer()->GetCID(),
-						(m_Owner != -1) ? TeamMask : -1LL);
-					pOwnerChar->Core()->m_Pos = PossiblePos;
-					pOwnerChar->Core()->m_Vel = vec2(0, 0);
-					GameServer()->CreateDeath(PossiblePos, pOwnerChar->GetPlayer()->GetCID(), (m_Owner != -1) ? TeamMask : -1LL);
-					GameServer()->CreateSound(PossiblePos, SOUND_WEAPON_SPAWN, (m_Owner != -1) ? TeamMask : -1LL);
+					pOwnerChar->m_TeleGunPos = PossiblePos;
+					pOwnerChar->m_TeleGunTeleport = true;
 				}
 			}
 		}

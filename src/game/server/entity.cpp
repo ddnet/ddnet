@@ -55,10 +55,11 @@ bool CEntity::GameLayerClipped(vec2 CheckPos)
 			round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > GameServer()->Collision()->GetHeight()+200 ? true : false;
 }
 
-bool CEntity::GetNearestAirPos(vec2 Pos, vec2 ColPos, vec2* pOutPos)
+bool CEntity::GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2* pOutPos)
 {
-	while (GameServer()->Collision()->CheckPoint(Pos)) {
-		Pos -= normalize(ColPos - Pos);
+	while (GameServer()->Collision()->CheckPoint(Pos))
+	{
+		Pos -= normalize(PrevPos - Pos);
 	}
 
 	vec2 PosInBlock = vec2(round_to_int(Pos.x) % 32, round_to_int(Pos.y) % 32);
