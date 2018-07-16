@@ -83,8 +83,7 @@ bool CEntity::GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2* pOutPos)
 
 bool CEntity::GetNearestAirPosPlayer(vec2 PlayerPos, vec2* OutPos)
 {
-	int dist = 5;
-	for (; dist >= -1; dist--)
+	for (int dist = 5; dist >= -1; dist--)
 	{
 		*OutPos = vec2(PlayerPos.x, PlayerPos.y - dist);
 		if (!GameServer()->Collision()->TestBox(*OutPos, vec2(28.0f, 28.0f)))
