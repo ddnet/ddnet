@@ -42,6 +42,11 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastPenalty = false;
 	m_LastBonus = false;
 
+	m_HasTeleGun = false;
+	m_HasTeleLaser = false;
+	m_HasTeleGrenade = false;
+	m_TeleGunTeleport = false;
+
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
@@ -1622,6 +1627,40 @@ void CCharacter::HandleTiles(int Index)
 		m_LastRefillJumps = false;
 	}
 
+	// Teleport gun
+	if (((m_TileIndex == TILE_TELE_GUN_ENABLE) || (m_TileFIndex == TILE_TELE_GUN_ENABLE)) && !m_HasTeleGun)
+	{
+		m_HasTeleGun = true;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun enabled");
+	}
+	else if (((m_TileIndex == TILE_TELE_GUN_DISABLE) || (m_TileFIndex == TILE_TELE_GUN_DISABLE)) && m_HasTeleGun)
+	{
+		m_HasTeleGun = false;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun disabled");
+	}
+
+	if (((m_TileIndex == TILE_TELE_GRENADE_ENABLE) || (m_TileFIndex == TILE_TELE_GRENADE_ENABLE)) && !m_HasTeleGrenade)
+	{
+		m_HasTeleGrenade = true;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade enabled");
+	}
+	else if (((m_TileIndex == TILE_TELE_GRENADE_DISABLE) || (m_TileFIndex == TILE_TELE_GRENADE_DISABLE)) && m_HasTeleGrenade)
+	{
+		m_HasTeleGrenade = false;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade disabled");
+	}
+
+	if (((m_TileIndex == TILE_TELE_LASER_ENABLE) || (m_TileFIndex == TILE_TELE_LASER_ENABLE)) && !m_HasTeleLaser)
+	{
+		m_HasTeleLaser = true;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser enabled");
+	}
+	else if (((m_TileIndex == TILE_TELE_LASER_DISABLE) || (m_TileFIndex == TILE_TELE_LASER_DISABLE)) && m_HasTeleLaser)
+	{
+		m_HasTeleLaser = false;
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser disabled");
+	}
+
 	// stopper
 	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
 	{
@@ -2091,6 +2130,17 @@ void CCharacter::DDRacePostCoreTick()
 	else
 	{
 		HandleTiles(CurrentIndex);
+	}
+
+	// teleport gun
+	if (m_TeleGunTeleport)
+	{
+		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		m_Core.m_Pos = m_TeleGunPos;
+		m_Core.m_Vel = vec2(0, 0);
+		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		m_TeleGunTeleport = false;
 	}
 
 	HandleBroadcast();

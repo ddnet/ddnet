@@ -20,6 +20,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TelePos = vec2(0,0);
 	m_WasTele = false;
 	m_Type = Type;
+	m_TeleportCancelled = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->Teams()->TeamMask(GameServer()->GetPlayerChar(Owner)->Team(), -1, m_Owner) : 0;
 	GameWorld()->InsertEntity(this);
@@ -164,6 +165,44 @@ void CLaser::DoBounce()
 			m_Energy = -1;
 		}
 	}
+
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if (m_Owner >= 0 && m_Energy <= 0 && m_Pos && !m_TeleportCancelled && pOwnerChar && 
+		pOwnerChar->IsAlive() && pOwnerChar->m_HasTeleLaser && m_Type == WEAPON_RIFLE)
+	{
+		vec2 PossiblePos;
+		bool Found = false;
+
+		// Check if the laser hits a player.
+		bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
+		vec2 At;
+		CCharacter *pHit;
+		if (pOwnerChar ? (!(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_RIFLE) && m_Type == WEAPON_RIFLE) : g_Config.m_SvHit)
+			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
+		else
+			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
+
+		if (pHit)
+			Found = GetNearestAirPosPlayer(pHit->m_Pos, &PossiblePos);
+		else
+			Found = GetNearestAirPos(m_Pos, m_From, &PossiblePos);
+
+		if (Found && PossiblePos)
+		{
+			pOwnerChar->m_TeleGunPos = PossiblePos;
+			pOwnerChar->m_TeleGunTeleport = true;
+		}
+	}
+	else if(m_Owner >= 0 && m_Pos)
+	{
+		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
+		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+		if (m_Type == WEAPON_RIFLE && (TileIndex == TILE_NO_TELE_GUN || TileFIndex == TILE_NO_TELE_GUN))
+			m_TeleportCancelled = true;
+	}
+
 	//m_Owner = -1;
 }
 

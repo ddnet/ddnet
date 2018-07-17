@@ -106,7 +106,6 @@ vec2 CProjectile::GetPos(float Time)
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
 }
 
-
 void CProjectile::Tick()
 {
 	float Pt = (Server()->Tick()-m_StartTick-1)/(float)Server()->TickSpeed();
@@ -121,7 +120,10 @@ void CProjectile::Tick()
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	CCharacter *pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+	CCharacter *pTargetChr = 0;
+
+	if(pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit)
+		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -168,6 +170,32 @@ void CProjectile::Tick()
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
 			pTargetChr->Freeze();
+
+		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos) &&
+			((m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun)))
+		{
+			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->m_Pos : ColPos);
+			int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+			if (TileIndex != TILE_NO_TELE_GUN && TileFIndex != TILE_NO_TELE_GUN)
+			{
+				bool Found;
+				vec2 PossiblePos;
+
+				if (!Collide)
+					Found = GetNearestAirPosPlayer(pTargetChr->m_Pos, &PossiblePos);
+				else
+					Found = GetNearestAirPos(NewPos, CurPos, &PossiblePos);
+
+				if (Found && PossiblePos)
+				{
+					pOwnerChar->m_TeleGunPos = PossiblePos;
+					pOwnerChar->m_TeleGunTeleport = true;
+				}
+			}
+		}
+
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = Server()->Tick();
