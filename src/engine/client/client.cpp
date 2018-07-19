@@ -40,9 +40,9 @@
 #include <engine/shared/compression.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
-#include <engine/shared/fetcher.h>
 #include <engine/shared/filecollection.h>
 #include <engine/shared/ghost.h>
+#include <engine/shared/http.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
@@ -1598,15 +1598,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 						EscapeUrl(aEscaped, sizeof(aEscaped), aFilename);
 						str_format(aUrl, sizeof(aUrl), "%s/%s", g_Config.m_ClDDNetMapDownloadUrl, aEscaped);
 
-						// We only trust our own custom-selected CAs for our own servers.
-						// Other servers can use any CA trusted by the system.
-						bool UseDDNetCA =
-							str_comp_nocase_num("maps.ddnet.tw/", aUrl, 14) == 0 ||
-							str_comp_nocase_num("http://maps.ddnet.tw/", aUrl, 21) == 0 ||
-							str_comp_nocase_num("https://maps.ddnet.tw/", aUrl, 22) == 0;
-
-
-						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, UseDDNetCA, true);
+						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilename, IStorage::TYPE_SAVE, true);
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -2250,7 +2242,7 @@ void CClient::LoadDDNetInfo()
 		return;
 
 	const json_value *pVersion = json_object_get(pDDNetInfo, "version");
-	if(pVersion && pVersion->type == json_string)
+	if(pVersion->type == json_string)
 	{
 		const char *pVersionString = json_string_get(pVersion);
 		if(str_comp(pVersionString, GAME_RELEASE_VERSION))
@@ -2265,7 +2257,7 @@ void CClient::LoadDDNetInfo()
 	}
 
 	const json_value *pNews = json_object_get(pDDNetInfo, "news");
-	if(pNews && pNews->type == json_string)
+	if(pNews->type == json_string)
 	{
 		const char *pNewsString = json_string_get(pNews);
 
@@ -2652,7 +2644,7 @@ void CClient::InitInterfaces()
 
 	m_ServerBrowser.SetBaseInfo(&m_NetClient[2], m_pGameClient->NetVersion());
 
-	FetcherInit();
+	HttpInit(m_pStorage);
 
 #if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
 	m_Updater.Init();
@@ -3777,7 +3769,7 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true, true);
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 

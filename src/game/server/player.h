@@ -6,7 +6,7 @@
 // this include should perhaps be removed
 #include "entities/character.h"
 #include "gamecontext.h"
-#include <engine/shared/fetcher.h>
+#include <engine/shared/http.h>
 
 // player object
 class CPlayer

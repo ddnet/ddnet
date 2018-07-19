@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <base/hash.h>
-#include <engine/shared/fetcher.h>
+#include <engine/shared/http.h>
 
 class CGraph
 {
