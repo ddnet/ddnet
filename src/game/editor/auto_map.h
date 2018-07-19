@@ -38,6 +38,7 @@ class CAutoMapper
 	struct CRun
 	{
 		array<CIndexRule> m_aIndexRules;
+		bool m_AutomapCopy;
 	};
 
 	struct CConfiguration

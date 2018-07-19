@@ -48,6 +48,7 @@ void CAutoMapper::Load(const char* pTileName)
 
 				// add start run
 				CRun NewRun;
+				NewRun.m_AutomapCopy = true;
 				int RunID = pCurrentConf->m_aRuns.add(NewRun);
 				pCurrentRun = &pCurrentConf->m_aRuns[RunID];
 			}
@@ -55,6 +56,7 @@ void CAutoMapper::Load(const char* pTileName)
 			{
 				// add new run
 				CRun NewRun;
+				NewRun.m_AutomapCopy = true;
 				int RunID = pCurrentConf->m_aRuns.add(NewRun);
 				pCurrentRun = &pCurrentConf->m_aRuns[RunID];
 			}
@@ -149,7 +151,7 @@ void CAutoMapper::Load(const char* pTileName)
 
 						CIndexInfo NewIndexInfo;
 						NewIndexInfo.m_ID = ID;
-						NewIndexInfo.m_Flag = 0;
+						NewIndexInfo.m_Flag = -1;
 
 						if(!str_comp(aOrientation1, "OR")) {
 							NewIndexList.add(NewIndexInfo);
@@ -157,11 +159,13 @@ void CAutoMapper::Load(const char* pTileName)
 							continue;
 						} else if(str_length(aOrientation1) > 0) {
 							if(!str_comp(aOrientation1, "XFLIP"))
-								NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
+								NewIndexInfo.m_Flag = 0 | TILEFLAG_VFLIP;
 							else if(!str_comp(aOrientation1, "YFLIP"))
-								NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
+								NewIndexInfo.m_Flag = 0 | TILEFLAG_HFLIP;
 							else if(!str_comp(aOrientation1, "ROTATE"))
-								NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
+								NewIndexInfo.m_Flag = 0 | TILEFLAG_ROTATE;
+							else if(!str_comp(aOrientation1, "NONE"))
+								NewIndexInfo.m_Flag = 0;
 						} else {
 							NewIndexList.add(NewIndexInfo);
 							break;
@@ -171,7 +175,7 @@ void CAutoMapper::Load(const char* pTileName)
 							NewIndexList.add(NewIndexInfo);
 							pWord += 3;
 							continue;
-						} else if(str_length(aOrientation2) > 0) {
+						} else if(str_length(aOrientation2) > 0 && NewIndexInfo.m_Flag != 0) {
 							if(!str_comp(aOrientation2, "XFLIP"))
 								NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
 							else if(!str_comp(aOrientation2, "YFLIP"))
@@ -187,7 +191,7 @@ void CAutoMapper::Load(const char* pTileName)
 							NewIndexList.add(NewIndexInfo);
 							pWord += 4;
 							continue;
-						} else if(str_length(aOrientation3) > 0) {
+						} else if(str_length(aOrientation3) > 0 && NewIndexInfo.m_Flag != 0) {
 							if(!str_comp(aOrientation3, "XFLIP"))
 								NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
 							else if(!str_comp(aOrientation3, "YFLIP"))
@@ -222,6 +226,10 @@ void CAutoMapper::Load(const char* pTileName)
 			else if(!str_comp_num(pLine, "NoDefaultRule", 13) && pCurrentIndex)
 			{
 				pCurrentIndex->m_DefaultRule = false;
+			}
+			else if(!str_comp_num(pLine, "NoLayerCopy", 11))
+			{
+				pCurrentRun->m_AutomapCopy = false;
 			}
 		}
 	}
@@ -279,87 +287,149 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 	CConfiguration *pConf = &m_lConfigs[ConfigID];
 
 	// for every run: copy tiles, automap, overwrite tiles
+	// doesn't make copy if it's requested
 	for(int h = 0; h < pConf->m_aRuns.size(); ++h) {
 		CRun *pRun = &pConf->m_aRuns[h];
-		CLayerTiles newLayer(pLayer->m_Width, pLayer->m_Height);
 
-		// copy tiles
-		for(int y = 0; y < pLayer->m_Height; y++) {
-			for(int x = 0; x < pLayer->m_Width; x++)
-			{
-				CTile *in = &pLayer->m_pTiles[y*pLayer->m_Width+x];
-				CTile *out = &newLayer.m_pTiles[y*pLayer->m_Width+x];
-				out->m_Index = in->m_Index;
-				out->m_Flags = in->m_Flags;
-			}
-		}
+		if (pRun->m_AutomapCopy) {
+			CLayerTiles newLayer(pLayer->m_Width, pLayer->m_Height);
 
-		// auto map
-		for(int y = 0; y < pLayer->m_Height; y++)
-			for(int x = 0; x < pLayer->m_Width; x++)
-			{
-				CTile *pTile = &(newLayer.m_pTiles[y*pLayer->m_Width+x]);
-				m_pEditor->m_Map.m_Modified = true;
-
-				for(int i = 0; i < pRun->m_aIndexRules.size(); ++i)
+			// copy tiles
+			for(int y = 0; y < pLayer->m_Height; y++) {
+				for(int x = 0; x < pLayer->m_Width; x++)
 				{
-					bool RespectRules = true;
-					for(int j = 0; j < pRun->m_aIndexRules[i].m_aRules.size() && RespectRules; ++j)
-					{
-						CPosRule *pRule = &pRun->m_aIndexRules[i].m_aRules[j];
-
-						int CheckIndex, CheckFlags;
-						int CheckX = x + pRule->m_X;
-						int CheckY = y + pRule->m_Y;
-						if(CheckX >= 0 && CheckX < pLayer->m_Width && CheckY >= 0 && CheckY < pLayer->m_Height) {
-							int CheckTile = CheckY * pLayer->m_Width + CheckX;
-							CheckIndex = pLayer->m_pTiles[CheckTile].m_Index;
-							CheckFlags = pLayer->m_pTiles[CheckTile].m_Flags;
-						} else {
-							CheckIndex = -1;
-							CheckFlags = 0;
-						}
-
-	 					 if(pRule->m_Value == CPosRule::INDEX)
-						{
-							bool PosRuleTest = false;
-							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
-								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
-									PosRuleTest = true;
-							}
-							if(!PosRuleTest)
-								RespectRules = false;
-						}
-	 					else if(pRule->m_Value == CPosRule::NOTINDEX)
-						{
-							bool PosRuleTest = true;
-							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
-								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_Flag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
-									PosRuleTest = false;
-							}
-							if(!PosRuleTest)
-								RespectRules = false;
-						}
-					}
-
-					if(RespectRules &&
-						(pRun->m_aIndexRules[i].m_RandomValue <= 1 || (int)((float)rand() / ((float)RAND_MAX + 1) * pRun->m_aIndexRules[i].m_RandomValue) == 1))
-					{
-						pTile->m_Index = pRun->m_aIndexRules[i].m_ID;
-						pTile->m_Flags = pRun->m_aIndexRules[i].m_Flag;
-					}
+					CTile *in = &pLayer->m_pTiles[y*pLayer->m_Width+x];
+					CTile *out = &newLayer.m_pTiles[y*pLayer->m_Width+x];
+					out->m_Index = in->m_Index;
+					out->m_Flags = in->m_Flags;
 				}
 			}
 
-		// overwrite tiles
-		for(int y = 0; y < pLayer->m_Height; y++) {
-			for(int x = 0; x < pLayer->m_Width; x++)
-			{
-				CTile *in = &newLayer.m_pTiles[y*pLayer->m_Width+x];
-				CTile *out = &pLayer->m_pTiles[y*pLayer->m_Width+x];
-				out->m_Index = in->m_Index;
-				out->m_Flags = in->m_Flags;
+			// auto map
+			for(int y = 0; y < pLayer->m_Height; y++)
+				for(int x = 0; x < pLayer->m_Width; x++)
+				{
+					CTile *pTile = &(newLayer.m_pTiles[y*pLayer->m_Width+x]);
+					m_pEditor->m_Map.m_Modified = true;
+
+					for(int i = 0; i < pRun->m_aIndexRules.size(); ++i)
+					{
+						bool RespectRules = true;
+						for(int j = 0; j < pRun->m_aIndexRules[i].m_aRules.size() && RespectRules; ++j)
+						{
+							CPosRule *pRule = &pRun->m_aIndexRules[i].m_aRules[j];
+
+							int CheckIndex, CheckFlags;
+							int CheckX = x + pRule->m_X;
+							int CheckY = y + pRule->m_Y;
+							if(CheckX >= 0 && CheckX < pLayer->m_Width && CheckY >= 0 && CheckY < pLayer->m_Height) {
+								int CheckTile = CheckY * pLayer->m_Width + CheckX;
+								CheckIndex = pLayer->m_pTiles[CheckTile].m_Index;
+								CheckFlags = pLayer->m_pTiles[CheckTile].m_Flags;
+							} else {
+								CheckIndex = -1;
+								CheckFlags = 0;
+							}
+
+	 						 if(pRule->m_Value == CPosRule::INDEX)
+							{
+								bool PosRuleTest = false;
+								for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+									if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+										PosRuleTest = true;
+								}
+								if(!PosRuleTest)
+									RespectRules = false;
+							}
+	 						else if(pRule->m_Value == CPosRule::NOTINDEX)
+							{
+								bool PosRuleTest = true;
+								for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+									if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+										PosRuleTest = false;
+								}
+								if(!PosRuleTest)
+									RespectRules = false;
+							}
+						}
+
+						if(RespectRules &&
+							(pRun->m_aIndexRules[i].m_RandomValue <= 1 || (int)((float)rand() / ((float)RAND_MAX + 1) * pRun->m_aIndexRules[i].m_RandomValue) == 1))
+						{
+							pTile->m_Index = pRun->m_aIndexRules[i].m_ID;
+							pTile->m_Flags = pRun->m_aIndexRules[i].m_Flag == -1 ? 0 : pRun->m_aIndexRules[i].m_Flag;
+						}
+					}
+				}
+
+			// overwrite tiles
+			for(int y = 0; y < pLayer->m_Height; y++) {
+				for(int x = 0; x < pLayer->m_Width; x++)
+				{
+					CTile *in = &newLayer.m_pTiles[y*pLayer->m_Width+x];
+					CTile *out = &pLayer->m_pTiles[y*pLayer->m_Width+x];
+					out->m_Index = in->m_Index;
+					out->m_Flags = in->m_Flags;
+				}
 			}
+		}
+		else {
+			// auto map
+			for(int y = 0; y < pLayer->m_Height; y++)
+				for(int x = 0; x < pLayer->m_Width; x++)
+				{
+					CTile *pTile = &(pLayer->m_pTiles[y*pLayer->m_Width+x]);
+					m_pEditor->m_Map.m_Modified = true;
+
+					for(int i = 0; i < pRun->m_aIndexRules.size(); ++i)
+					{
+						bool RespectRules = true;
+						for(int j = 0; j < pRun->m_aIndexRules[i].m_aRules.size() && RespectRules; ++j)
+						{
+							CPosRule *pRule = &pRun->m_aIndexRules[i].m_aRules[j];
+
+							int CheckIndex, CheckFlags;
+							int CheckX = x + pRule->m_X;
+							int CheckY = y + pRule->m_Y;
+							if(CheckX >= 0 && CheckX < pLayer->m_Width && CheckY >= 0 && CheckY < pLayer->m_Height) {
+								int CheckTile = CheckY * pLayer->m_Width + CheckX;
+								CheckIndex = pLayer->m_pTiles[CheckTile].m_Index;
+								CheckFlags = pLayer->m_pTiles[CheckTile].m_Flags;
+							} else {
+								CheckIndex = -1;
+								CheckFlags = 0;
+							}
+
+	 						if(pRule->m_Value == CPosRule::INDEX)
+							{
+								bool PosRuleTest = false;
+								for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+									if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+										PosRuleTest = true;
+								}
+								if(!PosRuleTest)
+									RespectRules = false;
+							}
+	 						else if(pRule->m_Value == CPosRule::NOTINDEX)
+							{
+								bool PosRuleTest = true;
+								for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+									if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+										PosRuleTest = false;
+								}
+								if(!PosRuleTest)
+									RespectRules = false;
+							}
+						}
+
+						if(RespectRules &&
+							(pRun->m_aIndexRules[i].m_RandomValue <= 1 || (int)((float)rand() / ((float)RAND_MAX + 1) * pRun->m_aIndexRules[i].m_RandomValue) == 1))
+						{
+							pTile->m_Index = pRun->m_aIndexRules[i].m_ID;
+							pTile->m_Flags = pRun->m_aIndexRules[i].m_Flag == -1 ? 0 : pRun->m_aIndexRules[i].m_Flag;
+						}
+					}
+				}
 		}
 	}
 }
