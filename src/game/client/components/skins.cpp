@@ -191,6 +191,20 @@ int CSkins::Find(const char *pName)
 		}
 	}
 
+	if (g_Config.m_ClCoalaSkins)
+	{
+		for (unsigned int i = 0; i < sizeof(s_aaVanillaSkins) / sizeof(s_aaVanillaSkins[0]); i++)
+		{
+			// index 2 and 5 are brownbear and coala
+			if (i != 2 && i != 5 && str_comp_num(pName, s_aaVanillaSkins[i], str_length(s_aaVanillaSkins[i]) - 4) == 0)
+			{
+				str_format(aBuf, sizeof(aBuf), "coala_%s", pName);
+				pName = aBuf;
+				break;
+			}
+		}
+	}
+
 	for(int i = 0; i < m_aSkins.size(); i++)
 	{
 		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
