@@ -367,8 +367,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinPrefix, SkinPrefixLabel;
 
-	bool CheckSettings = false;
-	static int s_ClVanillaSkinsOnly = g_Config.m_ClVanillaSkinsOnly;
 	static float s_ClSkinPrefix = 0.0f;
 
 	static bool s_InitSkinlist = true;
@@ -424,7 +422,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		CheckSettings = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -439,14 +436,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
 	DoEditBox(g_Config.m_ClSkinPrefix, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_ClSkinPrefix);
-
-	if(CheckSettings)
-	{
-		if(s_ClVanillaSkinsOnly == g_Config.m_ClVanillaSkinsOnly)
-			m_NeedRestartSkins = false;
-		else
-			m_NeedRestartSkins = true;
-	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
