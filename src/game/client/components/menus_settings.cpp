@@ -365,10 +365,11 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, ReplaceVanillaSkins, ReplaceVanillaSkinsLabel;
+	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, VanillaSkinsPrefix, VanillaSkinsPrefixLabel;
 
 	bool CheckSettings = false;
 	static int s_ClVanillaSkinsOnly = g_Config.m_ClVanillaSkinsOnly;
+	static float s_ClVanillaSkinsPrefix = 0.0f;
 
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
@@ -406,7 +407,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Label, &MainView);
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
-	Dummy.VSplitLeft(250.0f, &Dummy, &ReplaceVanillaSkins);
+	Dummy.VSplitLeft(250.0f, &Dummy, &VanillaSkinsPrefix);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
@@ -425,35 +426,19 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
 		CheckSettings = true;
 	}
-	
-	ReplaceVanillaSkins.HSplitTop(20.0f, &ReplaceVanillaSkinsLabel, &ReplaceVanillaSkins);
-	static int ReplaceVanillaSkinsKitty;
 
-	if(DoButton_CheckBox(&ReplaceVanillaSkinsKitty, Localize("Kitty skins (DDCat)"), g_Config.m_ClReplaceVanillaSkins==1, &ReplaceVanillaSkinsLabel))
-	{
-		if(g_Config.m_ClReplaceVanillaSkins != 1)
-			g_Config.m_ClReplaceVanillaSkins = 1;
-		else
-			g_Config.m_ClReplaceVanillaSkins = 0;
-	}
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	ReplaceVanillaSkins.HSplitTop(20.0f, &ReplaceVanillaSkinsLabel, &ReplaceVanillaSkins);
-	static int ReplaceVanillaSkinsCoala;
-
-	if(DoButton_CheckBox(&ReplaceVanillaSkinsCoala, Localize("Coala skins (DDCoala)"), g_Config.m_ClReplaceVanillaSkins==2, &ReplaceVanillaSkinsLabel))
-	{
-		if (g_Config.m_ClReplaceVanillaSkins != 2)
-			g_Config.m_ClReplaceVanillaSkins = 2;
-		else
-			g_Config.m_ClReplaceVanillaSkins = 0;
-	}
-
-	ReplaceVanillaSkins.HSplitTop(20.0f, &ReplaceVanillaSkinsLabel, &ReplaceVanillaSkins);
-
-	if(DoButton_CheckBox(&g_Config.m_ClFatSkins, Localize("Fat skins (DDFat)"), g_Config.m_ClFatSkins, &ReplaceVanillaSkinsLabel))
+	if (DoButton_CheckBox(&g_Config.m_ClFatSkins, Localize("Fat skins (DDFat)"), g_Config.m_ClFatSkins, &DummyLabel))
 	{
 		g_Config.m_ClFatSkins ^= 1;
 	}
+	
+	VanillaSkinsPrefix.HSplitTop(20.0f, &VanillaSkinsPrefixLabel, &VanillaSkinsPrefix);
+	UI()->DoLabelScaled(&VanillaSkinsPrefixLabel, Localize("Skin prefix (e.g. kitty, coala, santa)"), 14.0f, -1);
+
+	VanillaSkinsPrefix.HSplitTop(20.0f, &VanillaSkinsPrefixLabel, &VanillaSkinsPrefix);
+	DoEditBox(g_Config.m_ClVanillaSkinsPrefix, &VanillaSkinsPrefixLabel, g_Config.m_ClVanillaSkinsPrefix, sizeof(g_Config.m_ClVanillaSkinsPrefix), 14.0f, &s_ClVanillaSkinsPrefix);
 
 	if(CheckSettings)
 	{
