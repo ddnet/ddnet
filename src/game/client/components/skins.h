@@ -26,11 +26,12 @@ public:
 	vec4 GetColorV4(int v);
 	int Num();
 	const CSkin *Get(int Index);
-	int Find(const char *pName);
+	int Find(const char *pName) const;
 
 private:
 	sorted_array<CSkin> m_aSkins;
 
+	int FindImpl(const char *pName) const;
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };
 #endif
