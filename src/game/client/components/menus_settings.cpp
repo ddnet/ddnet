@@ -427,7 +427,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 	
 	ReplaceVanillaSkins.HSplitTop(20.0f, &ReplaceVanillaSkinsLabel, &ReplaceVanillaSkins);
-	int ReplaceVanillaSkinsKitty;
+	static int ReplaceVanillaSkinsKitty;
 
 	if(DoButton_CheckBox(&ReplaceVanillaSkinsKitty, Localize("Kitty skins (DDCat)"), g_Config.m_ClReplaceVanillaSkins==1, &ReplaceVanillaSkinsLabel))
 	{
@@ -438,7 +438,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	ReplaceVanillaSkins.HSplitTop(20.0f, &ReplaceVanillaSkinsLabel, &ReplaceVanillaSkins);
-	int ReplaceVanillaSkinsCoala;
+	static int ReplaceVanillaSkinsCoala;
 
 	if(DoButton_CheckBox(&ReplaceVanillaSkinsCoala, Localize("Coala skins (DDCoala)"), g_Config.m_ClReplaceVanillaSkins==2, &ReplaceVanillaSkinsLabel))
 	{
