@@ -71,7 +71,7 @@ void CAutoMapper::Load(const char* pTileName)
 				CIndexRule NewIndexRule;
 				NewIndexRule.m_ID = ID;
 				NewIndexRule.m_Flag = 0;
-				NewIndexRule.m_RandomValue = 0;
+				NewIndexRule.m_RandomProbability = 1.0;
 				NewIndexRule.m_DefaultRule = true;
 
 				if(str_length(aOrientation1) > 0)
@@ -217,7 +217,17 @@ void CAutoMapper::Load(const char* pTileName)
 			}
 			else if(!str_comp_num(pLine, "Random", 6) && pCurrentIndex)
 			{
-				sscanf(pLine, "Random %d", &pCurrentIndex->m_RandomValue);
+				float Value;
+				char Specifier = ' ';
+				sscanf(pLine, "Random %f%c", &Value, &Specifier);
+				if(Specifier == '%')
+				{
+					pCurrentIndex->m_RandomProbability = Value / 100.0;
+				}
+				else
+				{
+					pCurrentIndex->m_RandomProbability = 1.0 / Value;
+				}
 			}
 			else if(!str_comp_num(pLine, "NoDefaultRule", 13) && pCurrentIndex)
 			{
@@ -343,7 +353,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 					}
 
 					if(RespectRules &&
-						(pRun->m_aIndexRules[i].m_RandomValue <= 1 || (int)((float)rand() / ((float)RAND_MAX + 1) * pRun->m_aIndexRules[i].m_RandomValue) == 1))
+						(pRun->m_aIndexRules[i].m_RandomProbability >= 1.0 || (float)rand() / ((float)RAND_MAX + 1) < pRun->m_aIndexRules[i].m_RandomProbability))
 					{
 						pTile->m_Index = pRun->m_aIndexRules[i].m_ID;
 						pTile->m_Flags = pRun->m_aIndexRules[i].m_Flag;
