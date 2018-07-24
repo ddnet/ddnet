@@ -40,11 +40,6 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	str_copy(aFilenameWithoutPng, pName, sizeof(aFilenameWithoutPng));
 	aFilenameWithoutPng[str_length(aFilenameWithoutPng) - 4] = 0;
 
-	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(aFilenameWithoutPng))
-	{
-		return 0;
-	}
-
 	// Don't add duplicate skins (one from user's config directory, other from
 	// client itself)
 	for(int i = 0; i < pSelf->Num(); i++)
@@ -204,7 +199,14 @@ int CSkins::FindImpl(const char *pName) const
 	{
 		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
 		{
-			return i;
+			if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(m_aSkins[i].m_aName))
+			{
+				return -1;
+			}
+			else
+			{
+				return i;
+			}
 		}
 	}
 	return -1;
