@@ -11,39 +11,40 @@
 
 #include "skins.h"
 
-static const char* s_aaVanillaSkins[] = {"bluekitty.png", "bluestripe.png", "brownbear.png",
-	"cammo.png", "cammostripes.png", "coala.png", "default.png", "limekitty.png",
-	"pinky.png", "redbopp.png", "redstripe.png", "saddo.png", "toptri.png",
-	"twinbop.png", "twintri.png", "warpaint.png", "x_ninja.png"};
+static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
+	"cammo", "cammostripes", "coala", "default", "limekitty",
+	"pinky", "redbopp", "redstripe", "saddo", "toptri",
+	"twinbop", "twintri", "warpaint", "x_ninja"};
+
+static bool IsVanillaSkin(const char *pName)
+{
+	for(unsigned int i = 0; i < sizeof(VANILLA_SKINS) / sizeof(VANILLA_SKINS[0]); i++)
+	{
+		if(str_comp(pName, VANILLA_SKINS[i]) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	if(g_Config.m_ClVanillaSkinsOnly)
-	{
-		bool Found = false;
-		for(unsigned int i = 0; i < sizeof(s_aaVanillaSkins) / sizeof(s_aaVanillaSkins[0]); i++)
-		{
-			if(str_comp(pName, s_aaVanillaSkins[i]) == 0)
-			{
-				Found = true;
-				break;
-			}
-		}
-		if(!Found)
-			return 0;
-	}
-
 	CSkins *pSelf = (CSkins *)pUser;
 
 	int l = str_length(pName);
 	if(l < 4 || IsDir || str_comp(pName+l-4, ".png") != 0)
 		return 0;
 
+	char aFilenameWithoutPng[128];
+	str_copy(aFilenameWithoutPng, pName, sizeof(aFilenameWithoutPng));
+	aFilenameWithoutPng[str_length(aFilenameWithoutPng) - 4] = 0;
+
 	// Don't add duplicate skins (one from user's config directory, other from
 	// client itself)
 	for(int i = 0; i < pSelf->Num(); i++)
 	{
-		const char* pExName = pSelf->Get(i)->m_aName;
+		const char *pExName = pSelf->Get(i)->m_aName;
 		if(str_comp_num(pExName, pName, l-4) == 0 && str_length(pExName) == l-4)
 			return 0;
 	}
@@ -174,27 +175,39 @@ const CSkins::CSkin *CSkins::Get(int Index)
 	return &m_aSkins[max(0, Index%m_aSkins.size())];
 }
 
-int CSkins::Find(const char *pName)
+int CSkins::Find(const char *pName) const
 {
-	char aBuf[24];
-	if(g_Config.m_ClKittySkins)
+	if(g_Config.m_ClSkinPrefix[0])
 	{
-		for(unsigned int i = 0; i < sizeof(s_aaVanillaSkins) / sizeof(s_aaVanillaSkins[0]); i++)
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
+		// If we find something, use it, otherwise fall back to normal
+		// skins.
+		int Result = FindImpl(aBuf);
+		if(Result != -1)
 		{
-			// index 0 and 7 are bluekitty and limekitty
-			if(i != 0 && i != 7 && str_comp_num(pName, s_aaVanillaSkins[i], str_length(s_aaVanillaSkins[i])-4) == 0)
-			{
-				str_format(aBuf, sizeof(aBuf), "kitty_%s", pName);
-				pName = aBuf;
-				break;
-			}
+			return Result;
 		}
 	}
+	return FindImpl(pName);
 
+}
+
+int CSkins::FindImpl(const char *pName) const
+{
 	for(int i = 0; i < m_aSkins.size(); i++)
 	{
 		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
-			return i;
+		{
+			if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(m_aSkins[i].m_aName))
+			{
+				return -1;
+			}
+			else
+			{
+				return i;
+			}
+		}
 	}
 	return -1;
 }

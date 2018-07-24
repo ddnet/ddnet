@@ -365,10 +365,9 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton;
+	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinPrefix, SkinPrefixLabel;
 
-	bool CheckSettings = false;
-	static int s_ClVanillaSkinsOnly = g_Config.m_ClVanillaSkinsOnly;
+	static float s_ClSkinPrefix = 0.0f;
 
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
@@ -406,6 +405,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Label, &MainView);
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
+	Dummy.VSplitLeft(250.0f, &Dummy, &SkinPrefix);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
@@ -422,30 +422,20 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		CheckSettings = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
-	if(DoButton_CheckBox(&g_Config.m_ClKittySkins, Localize("Kitty skins (DDCat)"), g_Config.m_ClKittySkins, &DummyLabel))
-	{
-		g_Config.m_ClKittySkins ^= 1;
-	}
-
-	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
-
-	if(DoButton_CheckBox(&g_Config.m_ClFatSkins, Localize("Fat skins (DDFat)"), g_Config.m_ClFatSkins, &DummyLabel))
+	if (DoButton_CheckBox(&g_Config.m_ClFatSkins, Localize("Fat skins (DDFat)"), g_Config.m_ClFatSkins, &DummyLabel))
 	{
 		g_Config.m_ClFatSkins ^= 1;
 	}
+	
+	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
+	UI()->DoLabelScaled(&SkinPrefixLabel, Localize("Skin prefix (e.g. kitty, coala, santa)"), 14.0f, -1);
 
-	if(CheckSettings)
-	{
-		if(s_ClVanillaSkinsOnly == g_Config.m_ClVanillaSkinsOnly)
-			m_NeedRestartSkins = false;
-		else
-			m_NeedRestartSkins = true;
-	}
+	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
+	DoEditBox(g_Config.m_ClSkinPrefix, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_ClSkinPrefix);
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
