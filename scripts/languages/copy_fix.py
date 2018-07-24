@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import twlang
+import os
 import sys
+
+os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])) + "/../..")
 
 if len(sys.argv) < 3:
     print("usage: python copy_fix.py <infile> <outfile> [--delete-unused] [--append-missing] [--delete-empty]")
