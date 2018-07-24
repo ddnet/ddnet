@@ -182,10 +182,10 @@ const CSkins::CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName) const
 {
-	if(g_Config.m_ClVanillaSkinsPrefix[0] && IsVanillaSkin(pName))
+	if(g_Config.m_ClSkinPrefix[0])
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClVanillaSkinsPrefix, pName);
+		str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
 		// If we find something, use it, otherwise fall back to normal
 		// skins.
 		int Result = FindImpl(aBuf);
