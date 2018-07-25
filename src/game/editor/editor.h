@@ -767,6 +767,7 @@ public:
 	CLayer *GetSelectedLayer(int Index);
 	CLayerGroup *GetSelectedGroup();
 	CSoundSource *GetSelectedSource();
+	void SelectLayer(int Index);
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 Color = vec4(1,1,1,0.5f));
 
@@ -877,7 +878,7 @@ public:
 	bool m_ShowServerSettingsEditor;
 	bool m_ShowPicker;
 
-	int m_SelectedLayer;
+	array<int> m_lSelectedLayers;
 	int m_SelectedGroup;
 	int m_SelectedQuad;
 	int m_SelectedPoints;

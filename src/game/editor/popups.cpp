@@ -168,7 +168,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 			CLayer *l = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeTeleLayer(l);
 			pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-			pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+			pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 			pEditor->m_Brush.Clear();
 			return 1;
 		}
@@ -185,7 +185,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 			CLayer *l = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSpeedupLayer(l);
 			pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-			pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+			pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 			pEditor->m_Brush.Clear();
 			return 1;
 		}
@@ -202,7 +202,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 				CLayer *l = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 				pEditor->m_Map.MakeTuneLayer(l);
 				pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-				pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+				pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 				pEditor->m_Brush.Clear();
 				return 1;
 			}
@@ -219,7 +219,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 			CLayer *l = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeFrontLayer(l);
 			pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-			pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+			pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 			pEditor->m_Brush.Clear();
 			return 1;
 		}
@@ -236,7 +236,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 			CLayer *l = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSwitchLayer(l);
 			pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-			pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+			pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 			pEditor->m_Brush.Clear();
 			return 1;
 		}
@@ -251,7 +251,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		CLayer *l = new CLayerQuads;
 		l->m_pEditor = pEditor;
 		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-		pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+		pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
 		return 1;
 	}
@@ -265,7 +265,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		CLayer *l = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 		l->m_pEditor = pEditor;
 		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-		pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+		pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
 		return 1;
 	}
@@ -279,7 +279,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		CLayer *l = new CLayerSounds;
 		l->m_pEditor = pEditor;
 		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-		pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1;
+		pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size()-1);
 		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
 		return 1;
 	}
@@ -378,7 +378,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 			pEditor->m_Map.m_pSwitchLayer = 0x0;
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pTuneLayer)
 			pEditor->m_Map.m_pTuneLayer = 0x0;
-		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->DeleteLayer(pEditor->m_SelectedLayer);
+		pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->DeleteLayer(pEditor->m_lSelectedLayers[0]);
 		return 1;
 	}
 
@@ -410,7 +410,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 
 	CProperty aProps[] = {
 		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lGroups.size()-1},
-		{"Order", pEditor->m_SelectedLayer, PROPTYPE_INT_STEP, 0, pCurrentGroup->m_lLayers.size()},
+		{"Order", pEditor->m_lSelectedLayers[0], PROPTYPE_INT_STEP, 0, pCurrentGroup->m_lLayers.size()},
 		{"Detail", pCurrentLayer->m_Flags&LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
 		{0},
 	};
@@ -429,7 +429,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 		pEditor->m_Map.m_Modified = true;
 
 	if(Prop == PROP_ORDER)
-		pEditor->m_SelectedLayer = pCurrentGroup->SwapLayers(pEditor->m_SelectedLayer, NewVal);
+		pEditor->SelectLayer(pCurrentGroup->SwapLayers(pEditor->m_lSelectedLayers[0], NewVal));
 	else if(Prop == PROP_GROUP && pCurrentLayer->m_Type != LAYERTYPE_GAME)
 	{
 		if(NewVal >= 0 && NewVal < pEditor->m_Map.m_lGroups.size())
@@ -437,7 +437,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 			pCurrentGroup->m_lLayers.remove(pCurrentLayer);
 			pEditor->m_Map.m_lGroups[NewVal]->m_lLayers.add(pCurrentLayer);
 			pEditor->m_SelectedGroup = NewVal;
-			pEditor->m_SelectedLayer = pEditor->m_Map.m_lGroups[NewVal]->m_lLayers.size()-1;
+			pEditor->SelectLayer(pEditor->m_Map.m_lGroups[NewVal]->m_lLayers.size()-1);
 		}
 	}
 	else if(Prop == PROP_HQ)
