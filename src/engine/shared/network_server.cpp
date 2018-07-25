@@ -581,6 +581,8 @@ int CNetServer::GetClientSlot(const NETADDR &Addr)
 */
 int CNetServer::Recv(CNetChunk *pChunk)
 {
+	MMSGS m;
+	net_init_mmsgs(&m);
 	while(1)
 	{
 		NETADDR Addr;
@@ -590,7 +592,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			return 1;
 
 		// TODO: empty the recvinfo
-		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE);
+		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE, &m);
 
 		// no more packets for now
 		if(Bytes <= 0)
