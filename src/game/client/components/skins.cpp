@@ -180,6 +180,14 @@ const CSkins::CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName) const
 {
+	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(g_Config.m_ClPlayerSkin))
+	{
+		int Result = FindImpl("default");
+		if (Result != -1)
+		{
+			return Result;
+		}
+	}
 	if(g_Config.m_ClSkinPrefix[0])
 	{
 		char aBuf[64];
