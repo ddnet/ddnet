@@ -3,7 +3,7 @@ import os
 import sys
 import twlang
 
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])) + "/../..")
+os.chdir(os.path.dirname(__file__) + "/../..")
 
 if len(sys.argv) > 1:
     langs = sys.argv[1:]
