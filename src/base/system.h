@@ -745,8 +745,8 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 #define PACKETSIZE 1400
 typedef struct
 {
-#ifdef CONF_PLATFORM_LINUX
 	int pos;
+#ifdef CONF_PLATFORM_LINUX
 	int size;
 	struct mmsghdr msgs[VLEN];
 	struct iovec iovecs[VLEN];
