@@ -61,13 +61,16 @@ void Run(unsigned short Port, NETADDR Dest)
 			dbg_msg("crapnet", "cfg = %d", n);
 		Lastcfg = n;
 
+		MMSGS m;
+		net_init_mmsgs(&m);
+
 		// handle incoming packets
 		while(1)
 		{
 			// fetch data
 			int DataTrash = 0;
 			NETADDR From;
-			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024*2);
+			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024*2, &m);
 			if(Bytes <= 0)
 				break;
 
