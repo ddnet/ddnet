@@ -9,12 +9,21 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
+
+#ifndef __USE_GNU
+#define __USE_GNU
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <time.h>
 
 #ifdef CONF_FAMILY_UNIX
 #include <sys/un.h>
+#endif
+
+#ifdef CONF_PLATFORM_LINUX
+#include <sys/socket.h>
 #endif
 
 #ifdef __cplusplus
@@ -747,6 +756,22 @@ NETSOCKET net_udp_create(NETADDR bindaddr);
 */
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size);
 
+#define VLEN 128
+#define PACKETSIZE 1400
+typedef struct
+{
+#ifdef CONF_PLATFORM_LINUX
+	int pos;
+	int size;
+	struct mmsghdr msgs[VLEN];
+	struct iovec iovecs[VLEN];
+	char bufs[VLEN][PACKETSIZE];
+	char sockaddrs[VLEN][128];
+#endif
+} MMSGS;
+
+void net_init_mmsgs(MMSGS* m);
+
 /*
 	Function: net_udp_recv
 		Receives a packet over an UDP socket.
@@ -761,7 +786,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		On success it returns the number of bytes received. Returns -1
 		on error.
 */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize);
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* m);
 
 /*
 	Function: net_udp_close

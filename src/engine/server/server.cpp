@@ -2031,6 +2031,13 @@ int CServer::Run()
 				int64 t = time_get();
 				int x = (TickStartTime(m_CurrentGameTick+1) - t) * 1000000 / time_freq() + 1;
 
+				if(x > 3000)
+				{
+					// at least sleep 3 ms, reduce number of syscalls in stress situations
+					thread_sleep(3);
+					x = (TickStartTime(m_CurrentGameTick+1) - t) * 1000000 / time_freq() + 1;
+				}
+
 				if(x > 0)
 				{
 					net_socket_read_wait(m_NetServer.Socket(), x);
