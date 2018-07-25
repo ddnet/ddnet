@@ -175,19 +175,18 @@ int CSkins::Num()
 
 const CSkins::CSkin *CSkins::Get(int Index)
 {
-	return &m_aSkins[max(0, Index%m_aSkins.size())];
+	if(Index < 0)
+	{
+		Index = Find("default");
+
+		if (Index < 0)
+			Index = 0;
+	}
+	return &m_aSkins[Index % m_aSkins.size()];
 }
 
 int CSkins::Find(const char *pName) const
 {
-	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(g_Config.m_ClPlayerSkin))
-	{
-		int Result = FindImpl("default");
-		if (Result != -1)
-		{
-			return Result;
-		}
-	}
 	if(g_Config.m_ClSkinPrefix[0])
 	{
 		char aBuf[64];

@@ -354,12 +354,6 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
 	int SkinId = m_pClient->m_pSkins->Find(aSkinName);
-	if(SkinId < 0)
-	{
-		SkinId = m_pClient->m_pSkins->Find("default");
-		if(SkinId < 0)
-			SkinId = 0;
-	}
 
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
