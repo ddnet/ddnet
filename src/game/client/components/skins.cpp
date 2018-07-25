@@ -61,6 +61,8 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 	CSkin Skin;
 	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	
+	Skin.m_IsVanilla = IsVanillaSkin(aFilenameWithoutPng);
 
 	int BodySize = 96; // body size
 	if (BodySize > Info.m_Height)
@@ -157,6 +159,7 @@ void CSkins::OnInit()
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
+		DummySkin.m_IsVanilla = true;
 		DummySkin.m_OrgTexture = -1;
 		DummySkin.m_ColorTexture = -1;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
