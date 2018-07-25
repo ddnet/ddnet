@@ -60,9 +60,8 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	}
 
 	CSkin Skin;
-	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-	
 	Skin.m_IsVanilla = IsVanillaSkin(aFilenameWithoutPng);
+	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 	int BodySize = 96; // body size
 	if (BodySize > Info.m_Height)
@@ -209,7 +208,7 @@ int CSkins::FindImpl(const char *pName) const
 	{
 		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
 		{
-			if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(m_aSkins[i].m_aName))
+			if(g_Config.m_ClVanillaSkinsOnly && !m_aSkins[i].m_IsVanilla)
 			{
 				return -1;
 			}
