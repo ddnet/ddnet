@@ -515,8 +515,8 @@ void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 
 void CGameContext::AbortVoteKickOnDisconnect(int ClientID)
 {
-	if(m_VoteCloseTime && ((!str_comp_num(m_aVoteCommand, "kick ", 5) && str_toint(&m_aVoteCommand[5]) == ClientID) ||
-		(!str_comp_num(m_aVoteCommand, "set_team ", 9) && str_toint(&m_aVoteCommand[9]) == ClientID)))
+	if(m_VoteCloseTime && ((str_startswith(m_aVoteCommand, "kick ") && str_toint(&m_aVoteCommand[5]) == ClientID) ||
+		(str_startswith(m_aVoteCommand, "set_team ") && str_toint(&m_aVoteCommand[9]) == ClientID)))
 		m_VoteCloseTime = -1;
 }
 
@@ -1419,7 +1419,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							SendChatTarget(ClientID, "Invalid option");
 							return;
 						}
-						if(!Authed && (str_comp_num(pOption->m_aCommand, "sv_map ", 7) == 0 || str_comp_num(pOption->m_aCommand, "change_map ", 11) == 0 || str_comp_num(pOption->m_aCommand, "random_map", 10) == 0 || str_comp_num(pOption->m_aCommand, "random_unfinished_map", 21) == 0) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+						if(!Authed && (str_startswith(pOption->m_aCommand, "sv_map ") || str_startswith(pOption->m_aCommand, "change_map ") || str_startswith(pOption->m_aCommand, "random_map") || str_startswith(pOption->m_aCommand, "random_unfinished_map")) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 						{
 							str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second delay between map-votes, please wait %d seconds.", g_Config.m_SvVoteMapTimeDelay, (int)(((m_LastMapVote+(g_Config.m_SvVoteMapTimeDelay * time_freq()))/time_freq())-(time_get()/time_freq())));
 							SendChatTarget(ClientID, aChatmsg);
@@ -1431,10 +1431,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 									pOption->m_aDescription, aReason);
 						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
 
-						if((str_comp_num(pOption->m_aCommand, "random_map", 10) == 0 || str_comp_num(pOption->m_aCommand, "random_unfinished_map", 21) == 0) && str_length(aReason) == 1 && aReason[0] >= '1' && aReason[0] <= '5')
+						if((str_startswith(pOption->m_aCommand, "random_map") || str_startswith(pOption->m_aCommand, "random_unfinished_map")) && str_length(aReason) == 1 && aReason[0] >= '1' && aReason[0] <= '5')
 						{
-							int stars = aReason[0] - '0';
-							str_format(aCmd, sizeof(aCmd), "%s %d", pOption->m_aCommand, stars);
+							int Stars = aReason[0] - '0';
+							str_format(aCmd, sizeof(aCmd), "%s %d", pOption->m_aCommand, Stars);
 						}
 						else
 						{

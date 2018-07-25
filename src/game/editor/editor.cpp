@@ -900,9 +900,8 @@ void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 {
 	CEditor *pEditor = static_cast<CEditor*>(pUser);
 	char aBuf[1024];
-	const int Length = str_length(pFileName);
 	// add map extension
-	if(Length <= 4 || pFileName[Length-4] != '.' || str_comp_nocase(pFileName+Length-3, "map"))
+	if(!str_endswith(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -924,9 +923,8 @@ void CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 {
 	CEditor *pEditor = static_cast<CEditor*>(pUser);
 	char aBuf[1024];
-	const int Length = str_length(pFileName);
 	// add map extension
-	if(Length <= 4 || pFileName[Length-4] != '.' || str_comp_nocase(pFileName+Length-3, "map"))
+	if(!str_endswith(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -3725,9 +3723,9 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 	int Length = str_length(pName);
 	if((pName[0] == '.' && (pName[1] == 0 ||
 		(pName[1] == '.' && pName[2] == 0 && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))) ||
-		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && (Length < 4 || str_comp(pName+Length-4, ".map"))) ||
-		(pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && (Length < 4 || str_comp(pName+Length-4, ".png"))) ||
-		(pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && (Length < 5 || str_comp(pName+Length-5, ".opus"))))))
+		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(pName, ".map")) ||
+		(pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith(pName, ".png")) ||
+		(pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(pName, ".opus")))))
 		return 0;
 
 	CEditor::CFilelistItem Item;
@@ -3912,8 +3910,7 @@ void CEditor::RenderFileDialog()
 
 		if(m_FileDialogFileType == CEditor::FILETYPE_IMG && m_FilePreviewImage == 0 && m_FilesSelectedIndex > -1)
 		{
-			int Length = str_length(m_FileList[m_FilesSelectedIndex].m_aFilename);
-			if(Length >= 4 && !str_comp(m_FileList[m_FilesSelectedIndex].m_aFilename+Length-4, ".png"))
+			if(str_endswith(m_FileList[m_FilesSelectedIndex].m_aFilename, ".png"))
 			{
 				char aBuffer[1024];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_FileList[m_FilesSelectedIndex].m_aFilename);

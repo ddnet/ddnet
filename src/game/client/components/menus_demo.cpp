@@ -126,16 +126,15 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"), sizeof(m_aDemoPlayerPopupHint));
 			else
 			{
-				int len = str_length(m_aCurrentDemoFile);
-				if(len < 5 || str_comp_nocase(&m_aCurrentDemoFile[len-5], ".demo"))
+				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
 					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
 				char aPath[512];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 
 				IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_SAVE);
-				const char* pStr = Localize("File already exists, do you want to overwrite it?");
-				if(DemoFile && str_comp_num(m_aDemoPlayerPopupHint, pStr, sizeof(m_aDemoPlayerPopupHint)) != 0)
+				const char *pStr = Localize("File already exists, do you want to overwrite it?");
+				if(DemoFile && str_comp(m_aDemoPlayerPopupHint, pStr) != 0)
 				{
 					io_close(DemoFile);
 					str_copy(m_aDemoPlayerPopupHint, pStr, sizeof(m_aDemoPlayerPopupHint));
@@ -680,11 +679,12 @@ int CMenus::UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pLis
 int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int StorageType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
-	int Length = str_length(pName);
-	if((pName[0] == '.' && (pName[1] == 0 ||
-		(pName[1] == '.' && pName[2] == 0 && !str_comp(pSelf->m_aCurrentDemoFolder, "demos")))) ||
-		(!IsDir && (Length < 5 || str_comp(pName+Length-5, ".demo"))))
+	if(str_comp(pName, ".") == 0
+		|| (str_comp(pName, "..") == 0 && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0)
+		|| (!IsDir && !str_endswith(pName, ".demo")))
+	{
 		return 0;
+	}
 
 	CDemoItem Item;
 	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
@@ -695,7 +695,7 @@ int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int
 	}
 	else
 	{
-		str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length-4));
+		str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), str_length(pName) - 4));
 		Item.m_InfosLoaded = false;
 		Item.m_Date = Date;
 	}

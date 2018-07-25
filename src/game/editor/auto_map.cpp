@@ -51,14 +51,14 @@ void CAutoMapper::Load(const char* pTileName)
 				int RunID = pCurrentConf->m_aRuns.add(NewRun);
 				pCurrentRun = &pCurrentConf->m_aRuns[RunID];
 			}
-			else if(!str_comp_num(pLine, "NewRun", 6))
+			else if(str_startswith(pLine, "NewRun"))
 			{
 				// add new run
 				CRun NewRun;
 				int RunID = pCurrentConf->m_aRuns.add(NewRun);
 				pCurrentRun = &pCurrentConf->m_aRuns[RunID];
 			}
-			else if(!str_comp_num(pLine, "Index", 5) && pCurrentRun)
+			else if(str_startswith(pLine, "Index") && pCurrentRun)
 			{
 				// new index
 				int ID = 0;
@@ -108,7 +108,7 @@ void CAutoMapper::Load(const char* pTileName)
 				int IndexRuleID = pCurrentRun->m_aIndexRules.add(NewIndexRule);
 				pCurrentIndex = &pCurrentRun->m_aIndexRules[IndexRuleID];
 			}
-			else if(!str_comp_num(pLine, "Pos", 3) && pCurrentIndex)
+			else if(str_startswith(pLine, "Pos") && pCurrentIndex)
 			{
 				int x = 0, y = 0;
 				char aValue[128];
@@ -215,7 +215,7 @@ void CAutoMapper::Load(const char* pTileName)
 					pCurrentIndex->m_aRules.add(NewPosRule);
 				}
 			}
-			else if(!str_comp_num(pLine, "Random", 6) && pCurrentIndex)
+			else if(str_startswith(pLine, "Random") && pCurrentIndex)
 			{
 				float Value;
 				char Specifier = ' ';
@@ -229,7 +229,7 @@ void CAutoMapper::Load(const char* pTileName)
 					pCurrentIndex->m_RandomProbability = 1.0 / Value;
 				}
 			}
-			else if(!str_comp_num(pLine, "NoDefaultRule", 13) && pCurrentIndex)
+			else if(str_startswith(pLine, "NoDefaultRule") && pCurrentIndex)
 			{
 				pCurrentIndex->m_DefaultRule = false;
 			}

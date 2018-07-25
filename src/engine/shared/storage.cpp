@@ -106,8 +106,11 @@ public:
 
 		while((pLine = LineReader.Get()))
 		{
-			if(str_length(pLine) > 9 && !str_comp_num(pLine, "add_path ", 9))
-				AddPath(pLine+9);
+			const char *pLineWithoutPrefix = str_startswith(pLine, "add_path ");
+			if(pLineWithoutPrefix)
+			{
+				AddPath(pLine);
+			}
 		}
 
 		io_close(File);
@@ -290,7 +293,8 @@ public:
 		{
 			return io_open(pFilename, Flags);
 		}
-		if(str_comp_num(pFilename, "mapres/../skins/", 16) == 0) {
+		if(str_startswith(pFilename, "mapres/../skins/"))
+		{
 			pFilename = pFilename + 10; // just start from skins/
 		}
 		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL

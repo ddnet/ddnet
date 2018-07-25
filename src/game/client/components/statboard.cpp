@@ -88,7 +88,7 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 				p += str_length(pLookFor);
 				str_copy(aName, p, sizeof(aName));
 				// remove capture time
-				if(str_comp(aName+str_length(aName)-9, " seconds)") == 0)
+				if(str_endswith(aName, " seconds)"))
 				{
 					char *c = aName+str_length(aName)-10;
 					while(c > aName)

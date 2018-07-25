@@ -175,7 +175,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const char *pName, time_t Date, int IsD
 	CDemoListParam *pParam = (CDemoListParam*) pUser;
 	int Length = str_length(pName);
 	int MapLen = str_length(pParam->pMap);
-	if(IsDir || Length < 5 || str_comp(pName + Length - 5, ".demo") != 0 || str_comp_num(pName, pParam->pMap, MapLen) != 0 || pName[MapLen] != '_')
+	if(IsDir || !str_endswith(pName, ".demo") || !str_startswith(pName, pParam->pMap) || pName[MapLen] != '_')
 		return 0;
 
 	CDemoItem Item;
