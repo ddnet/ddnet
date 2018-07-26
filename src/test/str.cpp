@@ -69,9 +69,9 @@ TEST(Str, Startswith)
 	EXPECT_TRUE(str_startswith("поплавать", "по"));
 	EXPECT_FALSE(str_startswith("плавать", "по"));
 
-	static const char ABCDEF[] = "abcdef";
+	static const char ABCDEFG[] = "abcdefg";
 	static const char ABC[] = "abc";
-	EXPECT_EQ(str_startswith(ABCDEF, ABC) - ABCDEF, str_length(ABC));
+	EXPECT_EQ(str_startswith(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
 }
 
 TEST(Str, Endswith)
@@ -87,4 +87,9 @@ TEST(Str, Endswith)
 
 	EXPECT_TRUE(str_endswith("люди", "юди"));
 	EXPECT_FALSE(str_endswith("люди", "любовь"));
+
+	static const char ABCDEFG[] = "abcdefg";
+	static const char DEFG[] = "defg";
+	EXPECT_EQ(str_endswith(ABCDEFG, DEFG) - ABCDEFG,
+		str_length(ABCDEFG) - str_length(DEFG));
 }
