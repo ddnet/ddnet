@@ -302,14 +302,18 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 
 		// don't make copy if it's requested
 		CLayerTiles *pReadLayer;
-		if (pRun->m_AutomapCopy) {
+		if(pRun->m_AutomapCopy) 
+		{
 			pReadLayer = new CLayerTiles(pLayer->m_Width, pLayer->m_Height);
-		} else {
+		} 
+		else 
+		{
 			pReadLayer = pLayer;
 		}
 
 		// copy tiles
-		if (pRun->m_AutomapCopy) {
+		if (pRun->m_AutomapCopy) 
+		{
 			for(int y = 0; y < pLayer->m_Height; y++) {
 				for(int x = 0; x < pLayer->m_Width; x++)
 				{
@@ -325,7 +329,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		for(int y = 0; y < pLayer->m_Height; y++) {
 			for(int x = 0; x < pLayer->m_Width; x++)
 			{
-				CTile *pTile = &(pReadLayer->m_pTiles[y*pLayer->m_Width+x]);
+				CTile *pTile = &(pLayer->m_pTiles[y*pLayer->m_Width+x]);
 				m_pEditor->m_Map.m_Modified = true;
 
 				for(int i = 0; i < pRun->m_aIndexRules.size(); ++i)
@@ -340,8 +344,8 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 						int CheckY = y + pRule->m_Y;
 						if(CheckX >= 0 && CheckX < pLayer->m_Width && CheckY >= 0 && CheckY < pLayer->m_Height) {
 							int CheckTile = CheckY * pLayer->m_Width + CheckX;
-							CheckIndex = pLayer->m_pTiles[CheckTile].m_Index;
-							CheckFlags = pLayer->m_pTiles[CheckTile].m_Flags;
+							CheckIndex = pReadLayer->m_pTiles[CheckTile].m_Index;
+							CheckFlags = pReadLayer->m_pTiles[CheckTile].m_Flags;
 						} else {
 							CheckIndex = -1;
 							CheckFlags = 0;
@@ -379,21 +383,8 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 			}
 		}
 
-		// overwrite tiles
-		if (pRun->m_AutomapCopy) {
-			for(int y = 0; y < pLayer->m_Height; y++) {
-				for(int x = 0; x < pLayer->m_Width; x++)
-				{
-					CTile *in = &pReadLayer->m_pTiles[y*pLayer->m_Width+x];
-					CTile *out = &pLayer->m_pTiles[y*pLayer->m_Width+x];
-					out->m_Index = in->m_Index;
-					out->m_Flags = in->m_Flags;
-				}
-			}
-		}
-
 		// clean-up
-		if (pRun->m_AutomapCopy)
+		if(pRun->m_AutomapCopy)
 			delete pReadLayer;
 	}
 }
