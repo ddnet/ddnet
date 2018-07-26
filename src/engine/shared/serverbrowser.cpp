@@ -50,6 +50,12 @@ bool IsDDNet(const CServerInfo *pInfo)
 	    || str_find_nocase(pInfo->m_aGameType, "ddnet");
 }
 
+bool IsBlockWorlds(const CServerInfo *pInfo)
+{
+	return (str_comp_nocase_num(pInfo->m_aGameType, "bw", 2) == 0 && str_length(pInfo->m_aGameType) > 3 && pInfo->m_aGameType[2] == ' ' && pInfo->m_aGameType[3] == ' ')
+	    || str_comp_nocase(pInfo->m_aGameType, "bw") == 0;
+}
+
 // other
 
 bool Is64Player(const CServerInfo *pInfo)
