@@ -301,11 +301,11 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		CRun *pRun = &pConf->m_aRuns[h];
 
 		// don't make copy if it's requested
-		CLayerTiles* readLayer;
+		CLayerTiles* pReadLayer;
 		if (pRun->m_AutomapCopy) {
-			readLayer = new CLayerTiles(pLayer->m_Width, pLayer->m_Height);
+			pReadLayer = new CLayerTiles(pLayer->m_Width, pLayer->m_Height);
 		} else {
-			readLayer = pLayer;
+			pReadLayer = pLayer;
 		}
 
 		// copy tiles
@@ -314,7 +314,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 				for(int x = 0; x < pLayer->m_Width; x++)
 				{
 					CTile *in = &pLayer->m_pTiles[y*pLayer->m_Width+x];
-					CTile *out = &readLayer->m_pTiles[y*pLayer->m_Width+x];
+					CTile *out = &pReadLayer->m_pTiles[y*pLayer->m_Width+x];
 					out->m_Index = in->m_Index;
 					out->m_Flags = in->m_Flags;
 				}
@@ -325,7 +325,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		for(int y = 0; y < pLayer->m_Height; y++) {
 			for(int x = 0; x < pLayer->m_Width; x++)
 			{
-				CTile *pTile = &(readLayer->m_pTiles[y*pLayer->m_Width+x]);
+				CTile *pTile = &(pReadLayer->m_pTiles[y*pLayer->m_Width+x]);
 				m_pEditor->m_Map.m_Modified = true;
 
 				for(int i = 0; i < pRun->m_aIndexRules.size(); ++i)
@@ -384,7 +384,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 			for(int y = 0; y < pLayer->m_Height; y++) {
 				for(int x = 0; x < pLayer->m_Width; x++)
 				{
-					CTile *in = &readLayer->m_pTiles[y*pLayer->m_Width+x];
+					CTile *in = &pReadLayer->m_pTiles[y*pLayer->m_Width+x];
 					CTile *out = &pLayer->m_pTiles[y*pLayer->m_Width+x];
 					out->m_Index = in->m_Index;
 					out->m_Flags = in->m_Flags;
@@ -394,6 +394,6 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 
 		// clean-up
 		if (pRun->m_AutomapCopy)
-			delete readLayer;
+			delete pReadLayer;
 	}
 }
