@@ -109,7 +109,7 @@ public:
 			const char *pLineWithoutPrefix = str_startswith(pLine, "add_path ");
 			if(pLineWithoutPrefix)
 			{
-				AddPath(pLine);
+				AddPath(pLineWithoutPrefix);
 			}
 		}
 
