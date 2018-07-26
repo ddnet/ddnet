@@ -58,7 +58,7 @@ void CAutoMapper::Load(const char* pTileName)
 				int RunID = pCurrentConf->m_aRuns.add(NewRun);
 				pCurrentRun = &pCurrentConf->m_aRuns[RunID];
 			}
-			else if(!str_comp_num(pLine, "Index", 5))
+			else if(!str_comp_num(pLine, "Index", 5) && pCurrentRun)
 			{
 				// new index
 				int ID = 0;
