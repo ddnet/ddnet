@@ -312,7 +312,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		}
 
 		// copy tiles
-		if (pRun->m_AutomapCopy) 
+		if(pRun->m_AutomapCopy) 
 		{
 			for(int y = 0; y < pLayer->m_Height; y++) {
 				for(int x = 0; x < pLayer->m_Width; x++)
@@ -354,7 +354,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 	 					if(pRule->m_Value == CPosRule::INDEX)
 						{
 							bool PosRuleTest = false;
-							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+							for(int i = 0; i < pRule->m_aIndexList.size() && !PosRuleTest; ++i) {
 								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
 									PosRuleTest = true;
 							}
@@ -364,7 +364,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 	 					else if(pRule->m_Value == CPosRule::NOTINDEX)
 						{
 							bool PosRuleTest = true;
-							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
+							for(int i = 0; i < pRule->m_aIndexList.size() && PosRuleTest; ++i) {
 								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
 									PosRuleTest = false;
 							}
