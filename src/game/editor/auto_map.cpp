@@ -301,7 +301,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		CRun *pRun = &pConf->m_aRuns[h];
 
 		// don't make copy if it's requested
-		CLayerTiles* pReadLayer;
+		CLayerTiles *pReadLayer;
 		if (pRun->m_AutomapCopy) {
 			pReadLayer = new CLayerTiles(pLayer->m_Width, pLayer->m_Height);
 		} else {
