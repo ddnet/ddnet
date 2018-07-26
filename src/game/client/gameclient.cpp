@@ -1063,12 +1063,6 @@ void CGameClient::OnNewSnapshot()
 
 				// find new skin
 				m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find(m_aClients[ClientID].m_aSkinName);
-				if(m_aClients[ClientID].m_SkinID < 0)
-				{
-					m_aClients[ClientID].m_SkinID = g_GameClient.m_pSkins->Find("default");
-					if(m_aClients[ClientID].m_SkinID < 0)
-						m_aClients[ClientID].m_SkinID = 0;
-				}
 
 				if(m_aClients[ClientID].m_UseCustomColor)
 					m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_ColorTexture;

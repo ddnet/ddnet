@@ -422,6 +422,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
+		s_InitSkinlist = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -533,6 +534,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			// no special skins
 			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_'))
+				continue;
+
+			// vanilla skins only
+			if (g_Config.m_ClVanillaSkinsOnly && !s->m_IsVanilla)
 				continue;
 
 			s_paSkinList.add(s);

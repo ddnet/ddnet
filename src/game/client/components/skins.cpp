@@ -60,6 +60,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	}
 
 	CSkin Skin;
+	Skin.m_IsVanilla = IsVanillaSkin(aFilenameWithoutPng);
 	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 	int BodySize = 96; // body size
@@ -157,6 +158,7 @@ void CSkins::OnInit()
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
+		DummySkin.m_IsVanilla = true;
 		DummySkin.m_OrgTexture = -1;
 		DummySkin.m_ColorTexture = -1;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
@@ -172,7 +174,14 @@ int CSkins::Num()
 
 const CSkins::CSkin *CSkins::Get(int Index)
 {
-	return &m_aSkins[max(0, Index%m_aSkins.size())];
+	if(Index < 0)
+	{
+		Index = Find("default");
+
+		if (Index < 0)
+			Index = 0;
+	}
+	return &m_aSkins[Index % m_aSkins.size()];
 }
 
 int CSkins::Find(const char *pName) const
@@ -199,7 +208,7 @@ int CSkins::FindImpl(const char *pName) const
 	{
 		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
 		{
-			if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(m_aSkins[i].m_aName))
+			if(g_Config.m_ClVanillaSkinsOnly && !m_aSkins[i].m_IsVanilla)
 			{
 				return -1;
 			}

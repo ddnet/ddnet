@@ -12,6 +12,7 @@ public:
 	// do this better and nicer
 	struct CSkin
 	{
+		bool m_IsVanilla;
 		int m_OrgTexture;
 		int m_ColorTexture;
 		char m_aName[24];
