@@ -318,13 +318,11 @@ bool CConsole::LineIsValid(const char *pStr)
 
 void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bool InterpretSemicolons)
 {
-	static const char s_aMulticommandPrefix[] = "mc;";
-	static const int s_PrefixLength = str_length(s_aMulticommandPrefix);
-	if(str_length(pStr) >= s_PrefixLength
-		&& str_comp_num(pStr, s_aMulticommandPrefix, s_PrefixLength) == 0)
+	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
+	if(pWithoutPrefix)
 	{
 		InterpretSemicolons = true;
-		pStr += s_PrefixLength;
+		pStr = pWithoutPrefix;
 	}
 	while(pStr && *pStr)
 	{

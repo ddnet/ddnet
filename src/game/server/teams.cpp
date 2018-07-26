@@ -554,8 +554,7 @@ void CGameTeams::OnFinish(CPlayer* Player)
 	}
 
 	if (CallSaveScore)
-		if (g_Config.m_SvNamelessScore || str_comp_num(Server()->ClientName(Player->GetCID()), "nameless tee",
-				12) != 0)
+		if (g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
 			GameServer()->Score()->SaveScore(Player->GetCID(), Time,
 					GetCpCurrent(Player));
 
@@ -565,8 +564,7 @@ void CGameTeams::OnFinish(CPlayer* Player)
 			|| Time < GameServer()->m_pController->m_CurrentRecord)
 	{
 		// check for nameless
-		if (g_Config.m_SvNamelessScore || str_comp_num(Server()->ClientName(Player->GetCID()), "nameless tee",
-				12) != 0)
+		if (g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
 		{
 			GameServer()->m_pController->m_CurrentRecord = Time;
 			//dbg_msg("character", "Finish");

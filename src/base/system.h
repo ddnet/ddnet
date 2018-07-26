@@ -943,7 +943,7 @@ void net_unix_close(UNIXSOCKET sock);
 		dst_size - Size of the buffer of the dst string.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 		- Guarantees that dst string will contain zero-termination.
 */
 void str_append(char *dst, const char *src, int dst_size);
@@ -958,7 +958,7 @@ void str_append(char *dst, const char *src, int dst_size);
 		dst_size - Size of the buffer dst.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 		- Guarantees that dst string will contain zero-termination.
 */
 void str_copy(char *dst, const char *src, int dst_size);
@@ -990,7 +990,7 @@ int str_length(const char *str);
 
 	Remarks:
 		- See the C manual for syntax for the printf formatting string.
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 		- Guarantees that dst string will contain zero-termination.
 */
 int str_format(char *buffer, int buffer_size, const char *format, ...)
@@ -1008,7 +1008,7 @@ GNUC_ATTRIBUTE((format(printf, 3, 4)));
 		Trimmed string
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 char *str_trim_words(char *str, int words);
 
@@ -1020,7 +1020,7 @@ char *str_trim_words(char *str, int words);
 		str - String to sanitize.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 void str_sanitize_strong(char *str);
 
@@ -1032,7 +1032,7 @@ void str_sanitize_strong(char *str);
 		str - String to sanitize.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 void str_sanitize_cc(char *str);
 
@@ -1045,7 +1045,7 @@ void str_sanitize_cc(char *str);
 		str - String to sanitize.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 void str_sanitize(char *str);
 
@@ -1057,7 +1057,7 @@ void str_sanitize(char *str);
 		str - String to sanitize.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 void str_sanitize_filename(char *str);
 
@@ -1073,7 +1073,7 @@ void str_sanitize_filename(char *str);
 		within the string.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 char *str_skip_to_whitespace(char *str);
 
@@ -1089,7 +1089,7 @@ char *str_skip_to_whitespace(char *str);
 		within the string.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 char *str_skip_whitespaces(char *str);
 
@@ -1108,7 +1108,7 @@ char *str_skip_whitespaces(char *str);
 
 	Remarks:
 		- Only garanted to work with a-z/A-Z.
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 int str_comp_nocase(const char *a, const char *b);
 
@@ -1128,7 +1128,7 @@ int str_comp_nocase(const char *a, const char *b);
 
 	Remarks:
 		- Only garanted to work with a-z/A-Z.
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 int str_comp_nocase_num(const char *a, const char *b, const int num);
 
@@ -1146,7 +1146,7 @@ int str_comp_nocase_num(const char *a, const char *b, const int num);
 		>0 - String a is greater then string b
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 int str_comp(const char *a, const char *b);
 
@@ -1165,7 +1165,7 @@ int str_comp(const char *a, const char *b);
 		>0 - String a is greater then string b
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 int str_comp_num(const char *a, const char *b, const int num);
 
@@ -1183,9 +1183,43 @@ int str_comp_num(const char *a, const char *b, const int num);
 		>0 - String a is greater then string b
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 int str_comp_filenames(const char *a, const char *b);
+
+/*
+	Function: str_startswith
+		Checks whether the string begins with a certain prefix.
+
+	Parameter:
+		str - String to check.
+		prefix - Prefix to look for.
+
+	Returns:
+		A pointer to the string str after the string prefix, or 0 if
+		the string prefix isn't a prefix of the string str.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+const char *str_startswith(const char *str, const char *prefix);
+
+/*
+	Function: str_endswith
+		Checks whether the string ends with a certain suffix.
+
+	Parameter:
+		str - String to check.
+		suffix - Suffix to look for.
+
+	Returns:
+		A pointer to the beginning of the suffix in the string str, or
+		0 if the string suffix isn't a suffix of the string str.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+const char *str_endswith(const char *str, const char *suffix);
 
 /*
 	Function: str_utf8_dist
@@ -1259,7 +1293,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 
 	Remarks:
 		- Only garanted to work with a-z/A-Z.
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 const char *str_find_nocase(const char *haystack, const char *needle);
 
@@ -1276,7 +1310,7 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 		Returns NULL of needle could not be found.
 
 	Remarks:
-		- The strings are treated as zero-termineted strings.
+		- The strings are treated as zero-terminated strings.
 */
 const char *str_find(const char *haystack, const char *needle);
 
@@ -1451,7 +1485,7 @@ char *fs_getcwd(char *buffer, int buffer_size);
 		Returns 0 on success, 1 on failure.
 
 	Remarks:
-		- The string is treated as zero-termineted string.
+		- The string is treated as zero-terminated string.
 */
 int fs_parent_dir(char *path);
 

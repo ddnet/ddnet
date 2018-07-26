@@ -21,7 +21,7 @@ int main(int argc, const char **argv)
 			continue;
 		}
 
-		if(Len < sizeof(".map") || str_comp(argv[i] + Len - sizeof(".map"), ".map") != 0)
+		if(!str_endswith(argv[i], ".map"))
 		{
 			dbg_msg("config_common", "can't process non-map file '%s'", argv[i]);
 			continue;

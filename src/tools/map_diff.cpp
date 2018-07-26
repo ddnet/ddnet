@@ -71,7 +71,7 @@ bool Process(IStorage *pStorage, char **pMapNames)
 			IntsToStr(pTilemap[i]->m_aName, sizeof(pTilemap[i]->m_aName)/sizeof(int), aName[i]);
 		}
 
-		if(str_comp_num(aName[0], aName[1], sizeof(aName[0])) != 0 || pTilemap[0]->m_Width != pTilemap[1]->m_Width || pTilemap[0]->m_Height != pTilemap[1]->m_Height)
+		if(str_comp(aName[0], aName[1]) != 0 || pTilemap[0]->m_Width != pTilemap[1]->m_Width || pTilemap[0]->m_Height != pTilemap[1]->m_Height)
 		{
 			dbg_msg("map_compare", "different tile layers:");
 			for(int i = 0; i < 2; ++i)
