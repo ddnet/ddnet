@@ -186,7 +186,8 @@ void CLayerGroup::Render()
 	{
 		if(m_lLayers[i]->m_Visible)
 		{
-			if(m_lLayers[i]->m_Type == LAYERTYPE_TILES) {
+			if(m_lLayers[i]->m_Type == LAYERTYPE_TILES)
+			{
 				CLayerTiles *pTiles = static_cast<CLayerTiles *>(m_lLayers[i]);
 				if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch)
 					continue;
@@ -1429,11 +1430,14 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		{
 			if(!UI()->MouseButton(1))
 			{
-				m_Map.m_UndoModified++;
+				if(m_lSelectedLayers.size() == 1)
+				{
+					m_Map.m_UndoModified++;
 
-				static int s_SourcePopupID = 0;
-				UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
-				m_LockMouse = false;
+					static int s_SourcePopupID = 0;
+					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
+					m_LockMouse = false;
+				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
 			}
@@ -1622,11 +1626,14 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		{
 			if(!UI()->MouseButton(1))
 			{
-				m_Map.m_UndoModified++;
+				if(m_lSelectedLayers.size() == 1)
+				{
+					m_Map.m_UndoModified++;
 
-				static int s_QuadPopupID = 0;
-				UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
-				m_LockMouse = false;
+					static int s_QuadPopupID = 0;
+					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
+					m_LockMouse = false;
+				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
 			}
@@ -1635,12 +1642,15 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		{
 			if(!UI()->MouseButton(1))
 			{
-				m_Map.m_UndoModified++;
-				m_LockMouse = false;
-				m_Map.m_Modified = true;
-				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-				if(pLayer)
-					pLayer->m_lQuads.remove_index(m_SelectedQuad);
+				if(m_lSelectedLayers.size() == 1)
+				{
+					m_Map.m_UndoModified++;
+					m_LockMouse = false;
+					m_Map.m_Modified = true;
+					CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+					if(pLayer)
+						pLayer->m_lQuads.remove_index(m_SelectedQuad);
+				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
 			}
@@ -1828,10 +1838,13 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		{
 			if(!UI()->MouseButton(1))
 			{
-				m_Map.m_UndoModified++;
+				if(m_lSelectedLayers.size() == 1)
+				{
+					m_Map.m_UndoModified++;
 
-				static int s_PointPopupID = 0;
-				UiInvokePopupMenu(&s_PointPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
+					static int s_PointPopupID = 0;
+					UiInvokePopupMenu(&s_PointPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
+				}
 				UI()->SetActiveItem(0);
 			}
 		}
@@ -2227,7 +2240,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	};
 
 	// remap the screen so it can display the whole tileset
-	if(m_ShowPicker && m_lSelectedLayers.size() == 1)
+	if(m_ShowPicker)
 	{
 		CUIRect Screen = *UI()->Screen();
 		float Size = 32.0*16.0f;
@@ -2274,23 +2287,37 @@ void CEditor::DoMapEditor(CUIRect View)
 	CLayer *pEditLayers[128];
 	int NumEditLayers = 0;
 
-	if(m_ShowPicker && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_TILES && m_lSelectedLayers.size() == 1)
+	if(m_ShowPicker && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_TILES)
 	{
 		pEditLayers[0] = &m_TilesetPicker;
 		NumEditLayers++;
 	}
-	else if(m_ShowPicker && m_lSelectedLayers.size() == 1)
+	else if(m_ShowPicker)
 	{
 		pEditLayers[0] = &m_QuadsetPicker;
 		NumEditLayers++;
 	}
 	else
 	{
-		for (int i = 0; i < m_lSelectedLayers.size() && NumEditLayers < 128; i++) 
+		// pick a type of layers to edit, prefering Tiles layers.
+		int EditingType = -1;
+		for (int i = 0; i < m_lSelectedLayers.size(); i++)
 		{
-			pEditLayers[NumEditLayers] = GetSelectedLayer(i);
+			CLayer *Layer = GetSelectedLayer(i);
+			if(EditingType == -1 || Layer->m_Type == LAYERTYPE_TILES)
+			{
+				EditingType = Layer->m_Type;
+				if(EditingType == LAYERTYPE_TILES)
+					break;
+			}
+		}
+		for (int i = 0; i < m_lSelectedLayers.size() && NumEditLayers < 128; i++)
+		{
+			pEditLayers[NumEditLayers] = GetSelectedLayerType(i, EditingType);
 			if(pEditLayers[NumEditLayers])
+			{
 				NumEditLayers++;
+			}
 		}
 
 		CLayerGroup *g = GetSelectedGroup();
@@ -5174,7 +5201,7 @@ void CEditor::Render()
 	RenderBackground(View, ms_CheckerTexture, 32.0f, 1.0f);
 
 	CUIRect MenuBar, CModeBar, ToolBar, StatusBar, ExtraEditor, UndoList, ToolBox;
-	m_ShowPicker = Input()->KeyIsPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && UI()->LastActiveItem() != &m_CommandBox;
+	m_ShowPicker = Input()->KeyIsPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && UI()->LastActiveItem() != &m_CommandBox && m_lSelectedLayers.size() == 1;
 
 	if(m_GuiActive)
 	{
