@@ -2215,6 +2215,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->MapScreen(x, y, x+w, y+h);
 			m_TilesetPicker.m_Image = t->m_Image;
 			m_TilesetPicker.m_TexID = t->m_TexID;
+			m_TilesetPicker.m_Color = t->m_Color;
 			m_TilesetPicker.Render();
 			if(m_ShowTileInfo)
 				m_TilesetPicker.ShowInfo();
