@@ -353,23 +353,24 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 
 	 					if(pRule->m_Value == CPosRule::INDEX)
 						{
-							bool PosRuleTest = false;
-							for(int i = 0; i < pRule->m_aIndexList.size() && !PosRuleTest; ++i) {
+							RespectRules = false;
+							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
 								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
-									PosRuleTest = true;
+								{
+									RespectRules = true;
+									break;
+								}
 							}
-							if(!PosRuleTest)
-								RespectRules = false;
 						}
 	 					else if(pRule->m_Value == CPosRule::NOTINDEX)
 						{
-							bool PosRuleTest = true;
-							for(int i = 0; i < pRule->m_aIndexList.size() && PosRuleTest; ++i) {
+							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
 								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
-									PosRuleTest = false;
+								{
+									RespectRules = false;
+									break;
+								}
 							}
-							if(!PosRuleTest)
-								RespectRules = false;
 						}
 					}
 
