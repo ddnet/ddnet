@@ -1497,13 +1497,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 void net_init_mmsgs(MMSGS* m)
 {
 #if defined(CONF_PLATFORM_LINUX)
-	int i;
 	m->pos = 0;
 	m->size = 0;
 	mem_zero(m->msgs, sizeof(m->msgs));
 	mem_zero(m->iovecs, sizeof(m->iovecs));
 	mem_zero(m->sockaddrs, sizeof(m->sockaddrs));
-	for(i = 0; i < VLEN; ++i)
+	for(int i = 0; i < VLEN; ++i)
 	{
 		m->iovecs[i].iov_base = m->bufs[i];
 		m->iovecs[i].iov_len = PACKETSIZE;
