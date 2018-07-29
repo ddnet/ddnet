@@ -56,9 +56,6 @@ int CNetClient::ResetErrorString()
 
 int CNetClient::Recv(CNetChunk *pChunk)
 {
-	MMSGS m;
-	net_init_mmsgs(&m);
-
 	while(1)
 	{
 		// check for a chunk
@@ -67,7 +64,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 
 		// TODO: empty the recvinfo
 		NETADDR Addr;
-		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE, &m);
+		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE);
 
 		// no more packets for now
 		if(Bytes <= 0)
