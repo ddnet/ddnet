@@ -2224,7 +2224,8 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	}
 
 	// if OpenGL3 context was tried to be created, but failed, we have to restore the old context attributes
-	if(s_TriedOpenGL3Context && !g_Config.m_GfxOpenGL3) {
+	if(s_TriedOpenGL3Context && !g_Config.m_GfxOpenGL3)
+	{
 		s_TriedOpenGL3Context = false;
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, s_SDLGLContextProfileMask);
