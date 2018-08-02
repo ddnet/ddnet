@@ -21,7 +21,7 @@ struct SBufferContainerInfo
 		int m_DataTypeCount;
 		unsigned int m_Type;
 		bool m_Normalized;
-		void* m_pOffset;
+		void *m_pOffset;
 
 		//0: float, 1:integer
 		unsigned int m_FuncType;
@@ -146,19 +146,19 @@ public:
 	virtual void TextureSet(int TextureID) = 0;
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
-	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float* pOutlineTextColor) = 0;
+	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 
 	// specific render functions
-	virtual void RenderTileLayer(int BufferContainerIndex, float* pColor, char** pOffsets, unsigned int* IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
-	virtual void RenderBorderTiles(int BufferContainerIndex, float* pColor, char* pOffset, float* Offset, float* Dir, int JumpIndex, unsigned int DrawNum) = 0;
-	virtual void RenderBorderTileLines(int BufferContainerIndex, float* pColor, char* pOffset, float* Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
-	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo* pQuadInfo, int QuadNum) = 0;
-	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float* pTextColor, float* pTextoutlineColor) = 0;
+	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
+	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) = 0;
+	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
+	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum) = 0;
+	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
 	
 	// opengl 3.3 functions
-	virtual int CreateBufferObject(size_t UploadDataSize, void* pUploadData) = 0;
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void* pUploadData) = 0;
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void* pUploadData, void* pOffset) = 0;
+	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData) = 0;
+	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) = 0;
+	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset) = 0;
 	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) = 0;
 	virtual void DeleteBufferObject(int BufferIndex) = 0;
 
@@ -183,7 +183,7 @@ public:
 	virtual void QuadsBegin() = 0;
 	virtual void QuadsEnd() = 0;
 	virtual void TextQuadsBegin() = 0;
-	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float* pOutlineTextColor) = 0;
+	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void QuadsEndKeepVertices() = 0;
 	virtual void QuadsDrawCurrentVertices(bool KeepVertices = true) = 0;
 	virtual void QuadsSetRotation(float Angle) = 0;

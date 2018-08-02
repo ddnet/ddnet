@@ -142,6 +142,7 @@ public:
 
 class CGLSLBorderTileLineProgram : public CGLSLTileProgram {
 public:
+	int m_LocOffset;
 	int m_LocDir;
 	int m_LocNum;
 };

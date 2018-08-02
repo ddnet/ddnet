@@ -342,6 +342,7 @@ public:
 		int m_BufferContainerIndex;
 		int m_LOD;
 		
+		float m_Offset[2];
 		float m_Dir[2];
 	};
 
@@ -770,9 +771,9 @@ public:
 	virtual void FlushVertices(bool KeepVertices = false);
 	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor);
 
-	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char** pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet);
-	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pOffset, float *Offset, float *Dir, int JumpIndex, unsigned int DrawNum);
-	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pOffset, float *Dir, unsigned int IndexDrawNum, unsigned int RedrawNum);
+	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet);
+	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum);
+	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum);
 	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo* pQuadInfo, int QuadNum);
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float* pTextColor, float* pTextoutlineColor);
 

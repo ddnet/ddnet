@@ -1019,27 +1019,27 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 	int BorderX0, BorderY0, BorderX1, BorderY1;
 	bool DrawBorder = false;
 	
-	int Y0 = BorderY0 = (int)(ScreenY0/32)-1;
-	int X0 = BorderX0 = (int)(ScreenX0/32)-1;
-	int Y1 = BorderY1 = (int)(ScreenY1/32)+1;
-	int X1 = BorderX1 = (int)(ScreenX1/32)+1;
+	int Y0 = BorderY0 = (int)floorf((ScreenY0)/32);
+	int X0 = BorderX0 = (int)floorf((ScreenX0)/32);
+	int Y1 = BorderY1 = (int)floorf((ScreenY1)/32);
+	int X1 = BorderX1 = (int)floorf((ScreenX1)/32);
 	
-	if(X0 < 0) 
+	if(X0 <= 0) 
 	{
 		X0 = 0;
 		DrawBorder = true;
 	}
-	if(Y0 < 0)
+	if(Y0 <= 0)
 	{
 		Y0 = 0;
 		DrawBorder = true;
 	}
-	if(X1 >= pTileLayer->m_Width)
+	if(X1 >= pTileLayer->m_Width - 1)
 	{
 		X1 = pTileLayer->m_Width - 1;
 		DrawBorder = true;
 	}
-	if(Y1 >= pTileLayer->m_Height)
+	if(Y1 >= pTileLayer->m_Height - 1)
 	{
 		Y1 = pTileLayer->m_Height - 1;
 		DrawBorder = true;
@@ -1095,10 +1095,12 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 			Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, (float*)pColor, &s_IndexOffsets[0], &s_DrawCounts[0], DrawCount);
 		}
 	}
-	if(DrawBorder) RenderTileBorder(LayerIndex, pColor, pTileLayer, pGroup, BorderX0, BorderY0, BorderX1, BorderY1);
+		
+	if(DrawBorder)
+		RenderTileBorder(LayerIndex, pColor, pTileLayer, pGroup, BorderX0, BorderY0, BorderX1, BorderY1, (int)(-floorf((-ScreenX1) / 32.f)) - BorderX0, (int)(-floorf((-ScreenY1) / 32.f)) - BorderY0);
 }
 
-void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1)
+void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount)
 {
 	STileLayerVisuals& Visuals = *m_TileLayerVisuals[LayerIndex];
 	
@@ -1107,6 +1109,9 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 	int Y1 = BorderY1;
 	int X1 = BorderX1;
 	
+	int CountWidth = ScreenWidthTileCount;
+	int CountHeight = ScreenHeightTileCount;
+
 	if(X0 < 1)
 		X0 = 1;
 	if(Y0 < 1)
@@ -1116,10 +1121,10 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 	if(Y1 >= pTileLayer->m_Height - 1)
 		Y1 = pTileLayer->m_Height - 2;
 	
-	if(BorderX0 < 0)
+	if(BorderX0 <= 0)
 	{
 		// Draw corners on left side
-		if(BorderY0 < 0)
+		if(BorderY0 <= 0)
 		{
 			if(Visuals.m_BorderTopLeft.DoDraw())
 			{
@@ -1130,83 +1135,95 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 				Dir.x = 32.f;
 				Dir.y = 32.f;
 
-				int Count = (absolute(BorderX0)+1) * (absolute(BorderY0)+1) - 1; // Don't draw the corner again
+				int Count = min((absolute(BorderX0) + 1) * (absolute(BorderY0) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min(absolute(BorderX0) + 1, CountWidth), Count);
 			}
 		}
-		if(BorderY1 >= pTileLayer->m_Height)
+		if(BorderY1 >= pTileLayer->m_Height - 1)
 		{
 			if(Visuals.m_BorderBottomLeft.DoDraw())
 			{
 				vec2 Offset;
 				Offset.x = BorderX0 * 32.f;
-				Offset.y = (BorderY1-pTileLayer->m_Height) * 32.f;
+				Offset.y = (BorderY1 - (pTileLayer->m_Height - 1)) * 32.f;
 				vec2 Dir;
 				Dir.x = 32.f;
 				Dir.y = -32.f;
 
-				int Count = (absolute(BorderX0)+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1; // Don't draw the corner again
+				int Count = min((absolute(BorderX0) + 1) * ((BorderY1 - (pTileLayer->m_Height - 1)) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, absolute(BorderX0)+1, Count);
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min(absolute(BorderX0) + 1, CountWidth), Count);
 			}
 		}
+	}
+	if(BorderX0 < 0)
+	{
 		// Draw left border
 		if(Y0 < pTileLayer->m_Height - 1 && Y1 > 0)
 		{
-			unsigned int DrawNum = ((Visuals.m_BorderLeft[Y1-1].IndexBufferByteOffset() - Visuals.m_BorderLeft[Y0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderLeft[Y1-1].DoDraw() ? 6lu : 0lu);
+			unsigned int DrawNum = ((Visuals.m_BorderLeft[Y1 - 1].IndexBufferByteOffset() - Visuals.m_BorderLeft[Y0 - 1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderLeft[Y1 - 1].DoDraw() ? 6lu : 0lu);
 			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderLeft[Y0-1].IndexBufferByteOffset();
+			vec2 Offset;
+			Offset.x = 32.f * BorderX0;
+			Offset.y = 0.f;
 			vec2 Dir;
-			Dir.x = -32.f;
+			Dir.x = 32.f;
 			Dir.y = 0.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, absolute(BorderX0));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min(absolute(BorderX0), CountWidth));
 		}
 	}
 	
-	if(BorderX1 >= pTileLayer->m_Width)
+	if(BorderX1 >= pTileLayer->m_Width - 1)
 	{
 		// Draw corners on right side
-		if(BorderY0 < 0)
+		if(BorderY0 <= 0)
 		{
 			if(Visuals.m_BorderTopRight.DoDraw())
 			{
 				vec2 Offset;
-				Offset.x = (BorderX1-pTileLayer->m_Width) * 32.f;
+				Offset.x = (BorderX1 - (pTileLayer->m_Width - 1)) * 32.f;
 				Offset.y = BorderY0 * 32.f;
 				vec2 Dir;
 				Dir.x = -32.f;
 				Dir.y = 32.f;
 
-				int Count = (BorderX1-pTileLayer->m_Width+1) * (absolute(BorderY0)+1) - 1; // Don't draw the corner again
+				int Count = min(((BorderX1 - ((pTileLayer->m_Width - 1))) + 1) * (absolute(BorderY0) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min((BorderX1 - (pTileLayer->m_Width - 1)) + 1, CountWidth), Count);
 			}
 		}
-		if(BorderY1 >= pTileLayer->m_Height)
+		if(BorderY1 >= pTileLayer->m_Height - 1)
 		{
 			if(Visuals.m_BorderBottomRight.DoDraw())
 			{
 				vec2 Offset;
-				Offset.x = (BorderX1-pTileLayer->m_Width) * 32.f;
-				Offset.y = (BorderY1-pTileLayer->m_Height) * 32.f;
+				Offset.x = (BorderX1 - (pTileLayer->m_Width - 1)) * 32.f;
+				Offset.y = (BorderY1 - (pTileLayer->m_Height - 1)) * 32.f;
 				vec2 Dir;
 				Dir.x = -32.f;
 				Dir.y = -32.f;
 
-				int Count = (BorderX1-pTileLayer->m_Width+1) * ((BorderY1-pTileLayer->m_Height)+1) - 1; // Don't draw the corner again
+				int Count = min(((BorderX1 - (pTileLayer->m_Width - 1)) + 1) * ((BorderY1 - (pTileLayer->m_Height - 1)) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, (BorderX1-pTileLayer->m_Width)+1, Count);
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min((BorderX1 - (pTileLayer->m_Width - 1)) + 1, CountWidth), Count);
 			}
-		}		
+		}
+	}
+	if(BorderX1 > pTileLayer->m_Width - 1)
+	{
 		// Draw right border
 		if(Y0 < pTileLayer->m_Height - 1 && Y1 > 0)
 		{
-			unsigned int DrawNum = ((Visuals.m_BorderRight[Y1-1].IndexBufferByteOffset() - Visuals.m_BorderRight[Y0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderRight[Y1-1].DoDraw() ? 6lu : 0lu);;
+			unsigned int DrawNum = ((Visuals.m_BorderRight[Y1 - 1].IndexBufferByteOffset() - Visuals.m_BorderRight[Y0 - 1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderRight[Y1 - 1].DoDraw() ? 6lu : 0lu);
 			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderRight[Y0-1].IndexBufferByteOffset();
+			vec2 Offset;
+			Offset.x = 32.f * (BorderX1 - (pTileLayer->m_Width - 1));
+			Offset.y = 0.f;
 			vec2 Dir;
-			Dir.x = 32.f;
+			Dir.x = -32.f;
 			Dir.y = 0.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, BorderX1 - pTileLayer->m_Width);
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min((BorderX1 - (pTileLayer->m_Width - 1)), CountWidth));
 		}
 	}
 	if(BorderY0 < 0)
@@ -1214,12 +1231,15 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 		// Draw top border
 		if(X0 < pTileLayer->m_Width - 1 && X1 > 0)
 		{			
-			unsigned int DrawNum = ((Visuals.m_BorderTop[X1-1].IndexBufferByteOffset() - Visuals.m_BorderTop[X0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderTop[X1-1].DoDraw() ? 6lu : 0lu);;
+			unsigned int DrawNum = ((Visuals.m_BorderTop[X1 - 1].IndexBufferByteOffset() - Visuals.m_BorderTop[X0 - 1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderTop[X1 - 1].DoDraw() ? 6lu : 0lu);
 			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderTop[X0-1].IndexBufferByteOffset();
+			vec2 Offset;
+			Offset.x = 0.f;
+			Offset.y = 32.f * BorderY0;
 			vec2 Dir;
 			Dir.x = 0.f;
-			Dir.y = -32.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, absolute(BorderY0));			
+			Dir.y = 32.f;
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min(absolute(BorderY0), CountHeight));
 		}
 	}
 	if(BorderY1 >= pTileLayer->m_Height)
@@ -1227,12 +1247,15 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 		// Draw bottom border
 		if(X0 < pTileLayer->m_Width - 1 && X1 > 0)
 		{
-			unsigned int DrawNum = ((Visuals.m_BorderBottom[X1-1].IndexBufferByteOffset() - Visuals.m_BorderBottom[X0-1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderBottom[X1-1].DoDraw() ? 6lu : 0lu);;
+			unsigned int DrawNum = ((Visuals.m_BorderBottom[X1 - 1].IndexBufferByteOffset() - Visuals.m_BorderBottom[X0 - 1].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_BorderBottom[X1 - 1].DoDraw() ? 6lu : 0lu);
 			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderBottom[X0-1].IndexBufferByteOffset();
+			vec2 Offset;
+			Offset.x = 0.f;
+			Offset.y = 32.f * (BorderY1 - (pTileLayer->m_Height - 1));
 			vec2 Dir;
 			Dir.x = 0.f;
-			Dir.y = 32.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Dir, DrawNum, BorderY1 - pTileLayer->m_Height);
+			Dir.y = -32.f;
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min((BorderY1 - (pTileLayer->m_Height - 1)), CountHeight));
 		}
 	}
 }
