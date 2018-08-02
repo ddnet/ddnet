@@ -2210,19 +2210,33 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	SDL_ClearError();
 	const char *pErr = NULL;
 
-	//query default values, since they are platform dependent
+	// Query default values, since they are platform dependent
 	static bool s_InitDefaultParams = false;
 	static int s_SDLGLContextProfileMask, s_SDLGLContextMajorVersion, s_SDLGLContextMinorVersion;
+	static bool s_TriedOpenGL3Context = false;
+
+	if(!s_InitDefaultParams)
+	{
+		SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &s_SDLGLContextProfileMask);
+		SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &s_SDLGLContextMajorVersion);
+		SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &s_SDLGLContextMinorVersion);
+		s_InitDefaultParams = true;
+	}
+
+	// if OpenGL3 context was tried to be created, but failed, we have to restore the old context attributes
+	if(s_TriedOpenGL3Context && !g_Config.m_GfxOpenGL3)
+	{
+		s_TriedOpenGL3Context = false;
+
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, s_SDLGLContextProfileMask);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, s_SDLGLContextMajorVersion);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, s_SDLGLContextMinorVersion);
+	}
+
 	m_UseOpenGL3_3 = false;
 	if(g_Config.m_GfxOpenGL3)
 	{
-		if(!s_InitDefaultParams)
-		{
-			SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &s_SDLGLContextProfileMask);
-			SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &s_SDLGLContextMajorVersion);
-			SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &s_SDLGLContextMinorVersion);
-			s_InitDefaultParams = true;
-		}
+		s_TriedOpenGL3Context = true;
 
 		if(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) == 0)
 		{
