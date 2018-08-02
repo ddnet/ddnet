@@ -2075,7 +2075,6 @@ int CGraphics_Threaded::InitWindow()
 		g_Config.m_GfxOpenGL3 = 0;
 		if(IssueInit() == 0)
 		{
-			g_Config.m_GfxOpenGL3 = 1;
 			return 0;
 		}
 	}
