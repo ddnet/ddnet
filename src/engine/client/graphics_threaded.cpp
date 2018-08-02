@@ -1046,9 +1046,10 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	//todo max indices group check!!
 }
 
-void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pOffset, float *Offset, float *Dir, int JumpIndex, unsigned int DrawNum)
+void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum)
 {
-	if(DrawNum == 0) return;
+	if(DrawNum == 0)
+		return;
 	// Draw a border tile a lot of times
 	CCommandBuffer::SCommand_RenderBorderTile Cmd;
 	Cmd.m_State = m_State;
@@ -1060,17 +1061,19 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
 	//log2 gives us the amount of halving the texture for mipmapping
 	int LOD = (int)log2f(LODFactor);
-	if(LOD > 5) LOD = 5;
-	if(LOD < 0) LOD = 0;
+	if(LOD > 5)
+		LOD = 5;
+	if(LOD < 0)
+		LOD = 0;
 	Cmd.m_LOD = LOD;
 
-	Cmd.m_pIndicesOffset = pOffset;
+	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 	Cmd.m_JumpIndex = JumpIndex;
 	
-	Cmd.m_Offset[0] = Offset[0];
-	Cmd.m_Offset[1] = Offset[1];
-	Cmd.m_Dir[0] = Dir[0];
-	Cmd.m_Dir[1] = Dir[1];
+	Cmd.m_Offset[0] = pOffset[0];
+	Cmd.m_Offset[1] = pOffset[1];
+	Cmd.m_Dir[0] = pDir[0];
+	Cmd.m_Dir[1] = pDir[1];
 
 	// check if we have enough free memory in the commandbuffer
 	if(!m_pCommandBuffer->AddCommand(Cmd))
@@ -1086,9 +1089,10 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	}
 }
 
-void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pOffset, float *Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
+void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum)
 {
-	if(IndexDrawNum == 0 || RedrawNum == 0) return;
+	if(IndexDrawNum == 0 || RedrawNum == 0)
+		return;
 	// Draw a border tile a lot of times
 	CCommandBuffer::SCommand_RenderBorderTileLine Cmd;
 	Cmd.m_State = m_State;
@@ -1101,14 +1105,18 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 	float LODFactor = (64.f / (32.f * ScreenZoomRatio));
 	//log2 gives us the amount of halving the texture for mipmapping
 	int LOD = (int)log2f(LODFactor);
-	if(LOD > 5) LOD = 5;
-	if(LOD < 0) LOD = 0;
+	if(LOD > 5)
+		LOD = 5;
+	if(LOD < 0)
+		LOD = 0;
 	Cmd.m_LOD = LOD;
 
-	Cmd.m_pIndicesOffset = pOffset;
-	
-	Cmd.m_Dir[0] = Dir[0];
-	Cmd.m_Dir[1] = Dir[1];
+	Cmd.m_pIndicesOffset = pIndexBufferOffset;
+
+	Cmd.m_Offset[0] = pOffset[0];
+	Cmd.m_Offset[1] = pOffset[1];
+	Cmd.m_Dir[0] = pDir[0];
+	Cmd.m_Dir[1] = pDir[1];
 
 	// check if we have enough free memory in the commandbuffer
 	if(!m_pCommandBuffer->AddCommand(Cmd))
