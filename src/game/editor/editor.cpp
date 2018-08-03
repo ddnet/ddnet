@@ -2303,7 +2303,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		for (int i = 0; i < m_lSelectedLayers.size(); i++)
 		{
 			CLayer *Layer = GetSelectedLayer(i);
-			if(EditingType == -1 || Layer->m_Type == LAYERTYPE_TILES)
+			if(Layer && (EditingType == -1 || Layer->m_Type == LAYERTYPE_TILES))
 			{
 				EditingType = Layer->m_Type;
 				if(EditingType == LAYERTYPE_TILES)
