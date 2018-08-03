@@ -32,9 +32,16 @@ void CNamePlates::RenderNameplate(
 
 	vec2 Position;
 	if(!m_pClient->AntiPingPlayers())
-		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IntraTick);
+	{
+		if(!pPlayerInfo->m_Local)
+			Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IntraTick);
+		else
+			Position = vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y);
+	}
 	else
+	{
 		Position = m_pPlayers->m_CurPredictedPos[ClientID];
+	}
 
 	bool OtherTeam;
 
@@ -54,7 +61,7 @@ void CNamePlates::RenderNameplate(
 		if(g_Config.m_ClNameplatesAlways == 0)
 			a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
 
-		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName; 
+		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aName;
 		if(str_comp(pName, m_aNamePlates[ClientID].m_aName) != 0 || FontSize != m_aNamePlates[ClientID].m_NameTextFontSize)
 		{
 			mem_copy(m_aNamePlates[ClientID].m_aName, pName, sizeof(m_aNamePlates[ClientID].m_aName));

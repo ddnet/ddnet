@@ -251,12 +251,11 @@ void CPlayers::RenderHook(
 		RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
 	}
 
-	// set size
 	RenderInfo.m_Size = 64.0f;
 
 	if(!AntiPingPlayers)
 	{
-		// use preditect players if needed
+		// use predicted players if needed
 		if(Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
 			if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))

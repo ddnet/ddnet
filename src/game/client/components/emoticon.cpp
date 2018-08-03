@@ -149,11 +149,7 @@ void CEmoticon::OnRender()
 		DrawCircle(Screen.w/2, Screen.h/2, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
-		CTeeRenderInfo *pTeeInfo;
-		if(g_Config.m_ClDummy)
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_RenderInfo;
-		else
-			pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_RenderInfo;
+		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
 
 		Graphics()->TextureSet(pTeeInfo->m_Texture);
 
