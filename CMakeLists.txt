@@ -1123,6 +1123,19 @@ set(EXPECTED_DATA
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
   maps/Gold\ Mine.map
+  maps/ctf1.map
+  maps/ctf2.map
+  maps/ctf3.map
+  maps/ctf4.map
+  maps/ctf5.map
+  maps/ctf6.map
+  maps/ctf7.map
+  maps/dm1.map
+  maps/dm2.map
+  maps/dm6.map
+  maps/dm7.map
+  maps/dm8.map
+  maps/dm9.map
   maps/license.txt
   maps7/Gold\ Mine.map
   maps7/readme.txt
