@@ -351,6 +351,10 @@ MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000 , CFGFLAG_SERVER, "if chats core exceeds this, the player will be muted for sv_spam_mute_duration seconds")
 MACRO_CONFIG_INT(SvSpamMuteDuration, sv_spam_mute_duration, 60, 0, 3600 , CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off")
 
+MACRO_CONFIG_INT(SvTeamChangePenalty, sv_team_change_penalty, 800, 50, 10000, CFGFLAG_SERVER, "team change score will be increased by this on every message, and decremented by 1 on every tick.")
+MACRO_CONFIG_INT(SvTeamChangeThreshold, sv_team_change_threshold, 2500, 50, 100000, CFGFLAG_SERVER, "if team change core exceeds this, the player will be muted for sv_team_change_mute_duration seconds")
+MACRO_CONFIG_INT(SvTeamChangeMuteDuration, sv_team_change_mute_duration, 600, 0, 3600, CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off")
+
 MACRO_CONFIG_INT(SvEvents, sv_events, 1, 0, 1, CFGFLAG_SERVER, "Enable triggering of server events, like the happy eyeemotes on some holidays.")
 MACRO_CONFIG_INT(SvRankCheats, sv_rank_cheats, 0, 0, 1, CFGFLAG_SERVER, "Enable ranks after cheats have been used (file based server only)")
 MACRO_CONFIG_INT(SvShutdownWhenEmpty, sv_shutdown_when_empty, 0, 0, 1, CFGFLAG_SERVER, "Shutdown server as soon as no one is on it anymore")
