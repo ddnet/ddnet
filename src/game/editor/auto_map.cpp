@@ -122,13 +122,13 @@ void CAutoMapper::Load(const char* pTileName)
 				if(!str_comp(aValue, "EMPTY"))
 				{
 					Value = CPosRule::INDEX;
-					CIndexInfo NewIndexInfo = {0, 0};
+					CIndexInfo NewIndexInfo = {0, 0, false};
 					NewIndexList.add(NewIndexInfo);
 				}
 				else if(!str_comp(aValue, "FULL"))
 				{
 					Value = CPosRule::NOTINDEX;
-					CIndexInfo NewIndexInfo1 = {0, 0};
+					CIndexInfo NewIndexInfo1 = {0, 0, false};
 					//CIndexInfo NewIndexInfo2 = {-1, 0};
 					NewIndexList.add(NewIndexInfo1);
 					//NewIndexList.add(NewIndexInfo2);
@@ -151,13 +151,15 @@ void CAutoMapper::Load(const char* pTileName)
 
 						CIndexInfo NewIndexInfo;
 						NewIndexInfo.m_ID = ID;
-						NewIndexInfo.m_Flag = -1;
+						NewIndexInfo.m_Flag = 0;
+						NewIndexInfo.m_TestFlag = false;
 
 						if(!str_comp(aOrientation1, "OR")) {
 							NewIndexList.add(NewIndexInfo);
 							pWord += 2;
 							continue;
 						} else if(str_length(aOrientation1) > 0) {
+							NewIndexInfo.m_TestFlag = true;
 							if(!str_comp(aOrientation1, "XFLIP"))
 								NewIndexInfo.m_Flag = TILEFLAG_VFLIP;
 							else if(!str_comp(aOrientation1, "YFLIP"))
@@ -166,6 +168,8 @@ void CAutoMapper::Load(const char* pTileName)
 								NewIndexInfo.m_Flag = TILEFLAG_ROTATE;
 							else if(!str_comp(aOrientation1, "NONE"))
 								NewIndexInfo.m_Flag = 0;
+							else
+								NewIndexInfo.m_TestFlag = false;
 						} else {
 							NewIndexList.add(NewIndexInfo);
 							break;
@@ -264,7 +268,7 @@ void CAutoMapper::Load(const char* pTileName)
 				if(!Found && m_lConfigs[g].m_aRuns[h].m_aIndexRules[i].m_DefaultRule)
 				{
 					array<CIndexInfo> NewIndexList;
-					CIndexInfo NewIndexInfo = {0, 0};
+					CIndexInfo NewIndexInfo = {0, 0, false};
 					NewIndexList.add(NewIndexInfo);
 					CPosRule NewPosRule = {0, 0, CPosRule::NOTINDEX, NewIndexList};
 					m_lConfigs[g].m_aRuns[h].m_aIndexRules[i].m_aRules.add(NewPosRule);
@@ -355,7 +359,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 						{
 							RespectRules = false;
 							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
-								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_TestFlag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
 								{
 									RespectRules = true;
 									break;
@@ -365,7 +369,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 	 					else if(pRule->m_Value == CPosRule::NOTINDEX)
 						{
 							for(int i = 0; i < pRule->m_aIndexList.size(); ++i) {
-								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (pRule->m_aIndexList[i].m_Flag == -1 || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_TestFlag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
 								{
 									RespectRules = false;
 									break;
