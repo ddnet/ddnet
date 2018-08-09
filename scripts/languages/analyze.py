@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-import twlang
+import os
 import sys
+import twlang
+
+os.chdir(os.path.dirname(__file__) + "/../..")
 
 if len(sys.argv) > 1:
     langs = sys.argv[1:]

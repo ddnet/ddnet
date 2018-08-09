@@ -47,20 +47,18 @@ def check_file(path):
 
 
 def check_folder(path):
-    files = os.listdir(path)
     englishlist = set()
-    for f in files:
-        newpath = os.path.join(path, f)
-        if os.path.isdir(newpath):
-            englishlist.update(check_folder(newpath))
-        elif os.path.isfile(newpath):
-            englishlist.update(check_file(newpath))
+    for path, _, files in os.walk(path):
+        for f in files:
+            if not any(f.endswith(x) for x in ".cpp .c .h".split()):
+                continue
+            englishlist.update(check_file(os.path.join(path, f)))
     return englishlist
 
 
 def languages():
-    index = decode(open("../index.txt"), 2)
-    langs = {"../"+key+".txt" : [key]+elements for key, elements in index.items()}
+    index = decode(open("data/languages/index.txt"), 2)
+    langs = {"data/languages/"+key+".txt" : [key]+elements for key, elements in index.items()}
     return langs
 
 
@@ -70,5 +68,5 @@ def translations(filename):
 
 
 def localizes():
-    englishlist = list(check_folder("../../../src"))
+    englishlist = list(check_folder("src"))
     return englishlist
