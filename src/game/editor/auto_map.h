@@ -9,6 +9,7 @@ class CAutoMapper
 	{
 		int m_ID;
 		int m_Flag;
+		bool m_TestFlag;
 	};
 
 	struct CPosRule
