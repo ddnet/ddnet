@@ -185,57 +185,25 @@ const CSkins::CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName) const
 {
-	if (g_Config.m_ClSkinPrefix[0])
+	if(g_Config.m_ClSkinPrefix[0])
 	{
-		if (g_Config.m_ClVanillaSkinsOnly)
-		{
-			if (IsVanillaSkin(pName))
-			{
-				char aBuf2[64];
-				str_format(aBuf2, sizeof(aBuf2), "%s", pName);
-
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, aBuf2);
-				// If we find something, use it, otherwise fall back to normal skins.
-				int Result = FindImpl(aBuf);
-				if (Result != -1)
-				{
-					return Result;
-				}
-				else if (!IsVanillaSkin(pName))
-				{
-					return FindImpl("default");
-				}
-			}
-			else
-			{
-				char aBuf2[64];
-				str_format(aBuf2, sizeof(aBuf2), "default");
-
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, aBuf2);
-				// If we find something, use it, otherwise fall back to normal skins.
-				int Result = FindImpl(aBuf);
-				if (Result != -1)
-				{
-					return Result;
-				}
-				else if (!IsVanillaSkin(pName))
-				{
-					return FindImpl("default");
-				}
-			}
-		}
-		else
+		if(IsVanillaSkin(pName))
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
-			// If we find something, use it, otherwise fall back to normal skins.
+			// If the skin is vanilla, use the prefix of it, otherwise fall back to default version of prefix skin.
+			// If the skin isn't vanilla, use it, otherwise fall back to normal skins.
 			int Result = FindImpl(aBuf);
-			if (Result != -1)
+			if(Result != -1)
 			{
 				return Result;
 			}
+		}
+		else if (g_Config.m_ClVanillaSkinsOnly)
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s_default", g_Config.m_ClSkinPrefix);
+			return FindImpl(aBuf);
 		}
 	}
 	return FindImpl(pName);
