@@ -191,7 +191,9 @@ int CSkins::Find(const char *pName) const
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
+			// Vanilla skins only + prefix 
 			// If the skin is vanilla, use the prefix of it, otherwise fall back to default version of prefix skin.
+			// Vanilla skins only
 			// If the skin isn't vanilla, use it, otherwise fall back to normal skins.
 			int Result = FindImpl(aBuf);
 			if(Result != -1)
@@ -199,7 +201,7 @@ int CSkins::Find(const char *pName) const
 				return Result;
 			}
 		}
-		else if (g_Config.m_ClVanillaSkinsOnly)
+		else if(g_Config.m_ClVanillaSkinsOnly)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s_default", g_Config.m_ClSkinPrefix);
