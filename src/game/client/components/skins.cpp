@@ -185,16 +185,57 @@ const CSkins::CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName) const
 {
-	if(g_Config.m_ClSkinPrefix[0])
+	if (g_Config.m_ClSkinPrefix[0])
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
-		// If we find something, use it, otherwise fall back to normal
-		// skins.
-		int Result = FindImpl(aBuf);
-		if(Result != -1)
+		if (g_Config.m_ClVanillaSkinsOnly)
 		{
-			return Result;
+			if (IsVanillaSkin(pName))
+			{
+				char aBuf2[64];
+				str_format(aBuf2, sizeof(aBuf2), "%s", pName);
+
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, aBuf2);
+				// If we find something, use it, otherwise fall back to normal skins.
+				int Result = FindImpl(aBuf);
+				if (Result != -1)
+				{
+					return Result;
+				}
+				else if (!IsVanillaSkin(pName))
+				{
+					return FindImpl("default");
+				}
+			}
+			else
+			{
+				char aBuf2[64];
+				str_format(aBuf2, sizeof(aBuf2), "default");
+
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, aBuf2);
+				// If we find something, use it, otherwise fall back to normal skins.
+				int Result = FindImpl(aBuf);
+				if (Result != -1)
+				{
+					return Result;
+				}
+				else if (!IsVanillaSkin(pName))
+				{
+					return FindImpl("default");
+				}
+			}
+		}
+		else
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
+			// If we find something, use it, otherwise fall back to normal skins.
+			int Result = FindImpl(aBuf);
+			if (Result != -1)
+			{
+				return Result;
+			}
 		}
 	}
 	return FindImpl(pName);
@@ -207,7 +248,11 @@ int CSkins::FindImpl(const char *pName) const
 	{
 		if(str_comp(m_aSkins[i].m_aName, pName) == 0)
 		{
-			if(g_Config.m_ClVanillaSkinsOnly && !m_aSkins[i].m_IsVanilla)
+			if(g_Config.m_ClVanillaSkinsOnly && g_Config.m_ClSkinPrefix[0])
+			{
+				return i;
+			}
+			else if(g_Config.m_ClVanillaSkinsOnly && !m_aSkins[i].m_IsVanilla)
 			{
 				return -1;
 			}
