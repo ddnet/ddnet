@@ -881,13 +881,13 @@ CLayer *CEditor::GetSelectedLayerType(int Index, int Type)
 array<CQuad *> CEditor::GetSelectedQuads()
 {
 	CLayerQuads *ql = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-	array<CQuad *> aQuads;
+	array<CQuad *> lQuads;
 	if(!ql)
-		return aQuads;
-	aQuads.set_size(m_lSelectedQuads.size());
+		return lQuads;
+	lQuads.set_size(m_lSelectedQuads.size());
 	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
-		aQuads[i] = &ql->m_lQuads[m_lSelectedQuads[i]];
-	return aQuads;
+		lQuads[i] = &ql->m_lQuads[m_lSelectedQuads[i]];
+	return lQuads;
 }
 
 CSoundSource *CEditor::GetSelectedSource()
