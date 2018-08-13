@@ -1122,7 +1122,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	if(pWantedSha256)
 	{
 		sha256_str(*pWantedSha256, aWantedSha256, sizeof(aWantedSha256));
-		str_format(aWanted, sizeof(aWanted), "sha256=%s ", aWantedSha256);
+		str_format(aWanted, sizeof(aWanted), " sha256=%s", aWantedSha256);
 	}
 
 	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted%s crc=%08x", pMapName, aWanted, WantedCrc);
