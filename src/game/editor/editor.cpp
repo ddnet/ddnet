@@ -878,14 +878,16 @@ CLayer *CEditor::GetSelectedLayerType(int Index, int Type)
 	return 0x0;
 }
 
-CQuad *CEditor::GetSelectedQuad()
+array<CQuad *> CEditor::GetSelectedQuads()
 {
 	CLayerQuads *ql = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+	array<CQuad *> aQuads;
 	if(!ql)
-		return 0;
-	if(m_SelectedQuad >= 0 && m_SelectedQuad < ql->m_lQuads.size())
-		return &ql->m_lQuads[m_SelectedQuad];
-	return 0;
+		return aQuads;
+	aQuads.set_size(m_lSelectedQuads.size());
+	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+		aQuads[i] = &ql->m_lQuads[m_lSelectedQuads[i]];
+	return aQuads;
 }
 
 CSoundSource *CEditor::GetSelectedSource()
@@ -902,6 +904,45 @@ void CEditor::SelectLayer(int Index)
 {
 	m_lSelectedLayers.clear();
 	m_lSelectedLayers.add(Index);
+}
+
+void CEditor::SelectQuad(int Index)
+{
+	m_lSelectedQuads.clear();
+	m_lSelectedQuads.add(Index);
+}
+
+void CEditor::DeleteSelectedQuads()
+{
+	CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+	if(!pLayer)
+		return;
+
+	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+	{
+		pLayer->m_lQuads.remove_index(m_lSelectedQuads[i]);
+		for(int j = i+1; j < m_lSelectedQuads.size(); ++j)
+			if(m_lSelectedQuads[j] > m_lSelectedQuads[i])
+				m_lSelectedQuads[j]--;
+
+		m_lSelectedQuads.remove_index(i--);
+	}
+}
+
+bool CEditor::IsQuadSelected(int Index)
+{
+	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+		if(m_lSelectedQuads[i] == Index)
+			return true;
+	return false;
+}
+
+int CEditor::FindSelectedQuadIndex(int Index)
+{
+	for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+		if(m_lSelectedQuads[i] == Index)
+			return i;
+	return -1;
 }
 
 void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
@@ -1504,7 +1545,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 	// some basic values
 	void *pID = &q->m_aPoints[4]; // use pivot addr as id
-	static CPoint s_RotatePoints[4];
+	static array<array<CPoint>> s_lRotatePoints;
 	static float s_LastWx;
 	static float s_LastWy;
 	static int s_Operation = OP_NONE;
@@ -1528,7 +1569,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		IgnoreGrid = false;
 
 	// draw selection background
-	if(m_SelectedQuad == Index)
+	if(IsQuadSelected(Index))
 	{
 		Graphics()->SetColor(0,0,0,1);
 		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f*m_WorldZoom, 7.0f*m_WorldZoom);
@@ -1568,6 +1609,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 			}
 			else if(s_Operation == OP_MOVE_ALL)
 			{
+				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
 				// move all points including pivot
 				if(m_GridActive && !IgnoreGrid)
 				{
@@ -1584,34 +1626,43 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					else
 						y = (int)((wy-(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
 
-					int OldX = q->m_aPoints[4].x;
-					int OldY = q->m_aPoints[4].y;
-					q->m_aPoints[4].x = f2fx(x);
-					q->m_aPoints[4].y = f2fx(y);
-					int DiffX = q->m_aPoints[4].x - OldX;
-					int DiffY = q->m_aPoints[4].y - OldY;
+					int OffsetX = f2fx(x) - q->m_aPoints[4].x;
+					int OffsetY = f2fx(y) - q->m_aPoints[4].y;
 
-					for(int v = 0; v < 4; v++)
+					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
-						q->m_aPoints[v].x += DiffX;
-						q->m_aPoints[v].y += DiffY;
+						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
+						for(int v = 0; v < 5; v++)
+						{
+							pCurrentQuad->m_aPoints[v].x += OffsetX;
+							pCurrentQuad->m_aPoints[v].y += OffsetY;
+						}
 					}
 				}
 				else
 				{
-					for(int v = 0; v < 5; v++)
+					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
-							q->m_aPoints[v].x += f2fx(wx-s_LastWx);
-							q->m_aPoints[v].y += f2fx(wy-s_LastWy);
+						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
+						for(int v = 0; v < 5; v++)
+						{
+							pCurrentQuad->m_aPoints[v].x += f2fx(wx-s_LastWx);
+							pCurrentQuad->m_aPoints[v].y += f2fx(wy-s_LastWy);
+						}
 					}
 				}
 			}
 			else if(s_Operation == OP_ROTATE)
 			{
-				for(int v = 0; v < 4; v++)
+				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+				for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 				{
-					q->m_aPoints[v] = s_RotatePoints[v];
-					Rotate(&q->m_aPoints[4], &q->m_aPoints[v], s_RotateAngle);
+					CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
+					for(int v = 0; v < 4; v++)
+					{
+						pCurrentQuad->m_aPoints[v] = s_lRotatePoints[i][v];
+						Rotate(&pCurrentQuad->m_aPoints[4], &pCurrentQuad->m_aPoints[v], s_RotateAngle);
+					}
 				}
 			}
 		}
@@ -1627,6 +1678,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				if(m_lSelectedLayers.size() == 1)
 				{
 					m_Map.m_UndoModified++;
+
+					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
 					static int s_QuadPopupID = 0;
 					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
@@ -1645,9 +1698,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					m_Map.m_UndoModified++;
 					m_LockMouse = false;
 					m_Map.m_Modified = true;
-					CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-					if(pLayer)
-						pLayer->m_lQuads.remove_index(m_SelectedQuad);
+					DeleteSelectedQuads();
 				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -1680,24 +1731,43 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		if(UI()->MouseButton(0))
 		{
 			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			{
 				s_Operation = OP_MOVE_PIVOT;
+
+				SelectQuad(Index);
+			}
 			else if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
 			{
 				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
 				s_RotateAngle = 0;
-				s_RotatePoints[0] = q->m_aPoints[0];
-				s_RotatePoints[1] = q->m_aPoints[1];
-				s_RotatePoints[2] = q->m_aPoints[2];
-				s_RotatePoints[3] = q->m_aPoints[3];
+				
+				if(!IsQuadSelected(Index))
+					SelectQuad(Index);
+				
+				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+				s_lRotatePoints.clear();
+				s_lRotatePoints.set_size(m_lSelectedQuads.size());
+				for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+				{
+					CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
+
+					s_lRotatePoints[i].set_size(4);
+					s_lRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
+					s_lRotatePoints[i][1] = pCurrentQuad->m_aPoints[1];
+					s_lRotatePoints[i][2] = pCurrentQuad->m_aPoints[2];
+					s_lRotatePoints[i][3] = pCurrentQuad->m_aPoints[3];
+				}
 			}
 			else
+			{
 				s_Operation = OP_MOVE_ALL;
+				
+				if(!IsQuadSelected(Index))
+					SelectQuad(Index);
+			}
 
 			UI()->SetActiveItem(pID);
-			if(m_SelectedQuad != Index)
-				m_SelectedPoints = 0;
-			m_SelectedQuad = Index;
 			s_LastWx = wx;
 			s_LastWy = wy;
 		}
@@ -1706,18 +1776,20 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		{
 			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 			{
-				if(m_SelectedQuad != Index)
-					m_SelectedPoints = 0;
-				m_SelectedQuad = Index;
 				s_Operation = OP_DELETE;
+
+				if(!IsQuadSelected(Index))
+					SelectQuad(Index);
+
 				UI()->SetActiveItem(pID);
 			}
 			else
 			{
-				if(m_SelectedQuad != Index)
-					m_SelectedPoints = 0;
-				m_SelectedQuad = Index;
 				s_Operation = OP_CONTEXT_MENU;
+
+				if(!IsQuadSelected(Index))
+					SelectQuad(Index);
+
 				UI()->SetActiveItem(pID);
 			}
 		}
@@ -1745,7 +1817,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		UI()->SetHotItem(pID);
 
 	// draw selection background
-	if(m_SelectedQuad == QuadIndex && m_SelectedPoints&(1<<V))
+	if(IsQuadSelected(QuadIndex) && m_SelectedPoints&(1<<V))
 	{
 		Graphics()->SetColor(0,0,0,1);
 		IGraphics::CQuadItem QuadItem(px, py, 7.0f*m_WorldZoom, 7.0f*m_WorldZoom);
@@ -1783,52 +1855,69 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		{
 			if(s_Operation == OP_MOVEPOINT)
 			{
+				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
 				if(m_GridActive && !IgnoreGrid)
 				{
-					for(int m = 0; m < 4; m++)
-						if(m_SelectedPoints&(1<<m))
-						{
-							int LineDistance = GetLineDistance();
+					int LineDistance = GetLineDistance();
 
-							float x = 0.0f;
-							float y = 0.0f;
-							if(wx >= 0)
-								x = (int)((wx+(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
-							else
-								x = (int)((wx-(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
-							if(wy >= 0)
-								y = (int)((wy+(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
-							else
-								y = (int)((wy-(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+					float x = 0.0f;
+					float y = 0.0f;
+					if(wx >= 0)
+						x = (int)((wx+(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+					else
+						x = (int)((wx-(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+					if(wy >= 0)
+						y = (int)((wy+(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
+					else
+						y = (int)((wy-(LineDistance/2)*m_GridFactor)/(LineDistance*m_GridFactor)) * (LineDistance*m_GridFactor);
 
-							pQuad->m_aPoints[m].x = f2fx(x);
-							pQuad->m_aPoints[m].y = f2fx(y);
-						}
+					int OffsetX = f2fx(x) - pQuad->m_aPoints[V].x;
+					int OffsetY = f2fx(y) - pQuad->m_aPoints[V].y;
+
+					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+					{
+						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
+						for(int m = 0; m < 4; m++)
+							if(m_SelectedPoints&(1<<m))
+							{
+								pCurrentQuad->m_aPoints[m].x += OffsetX;
+								pCurrentQuad->m_aPoints[m].y += OffsetY;
+							}
+					}
 				}
 				else
 				{
-					for(int m = 0; m < 4; m++)
-						if(m_SelectedPoints&(1<<m))
-						{
-							pQuad->m_aPoints[m].x += f2fx(dx);
-							pQuad->m_aPoints[m].y += f2fx(dy);
-						}
+					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+					{
+						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
+						for(int m = 0; m < 4; m++)
+							if(m_SelectedPoints&(1<<m))
+							{
+								pCurrentQuad->m_aPoints[m].x += f2fx(dx);
+								pCurrentQuad->m_aPoints[m].y += f2fx(dy);
+							}
+					}
 				}
 			}
 			else if(s_Operation == OP_MOVEUV)
 			{
-				for(int m = 0; m < 4; m++)
-					if(m_SelectedPoints&(1<<m))
-					{
-						// 0,2;1,3 - line x
-						// 0,1;2,3 - line y
+				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+				for(int i = 0; i < m_lSelectedQuads.size(); ++i)
+				{
+					CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
+					for(int m = 0; m < 4; m++)
+						if(m_SelectedPoints&(1<<m))
+						{
+							// 0,2;1,3 - line x
+							// 0,1;2,3 - line y
 
-						pQuad->m_aTexcoords[m].x += f2fx(dx*0.001f);
-						pQuad->m_aTexcoords[(m+2)%4].x += f2fx(dx*0.001f);
+							pCurrentQuad->m_aTexcoords[m].x += f2fx(dx*0.001f);
+							pCurrentQuad->m_aTexcoords[(m+2)%4].x += f2fx(dx*0.001f);
 
-						pQuad->m_aTexcoords[m].y += f2fx(dy*0.001f);
-						pQuad->m_aTexcoords[m^1].y += f2fx(dy*0.001f);
-					}
+							pCurrentQuad->m_aTexcoords[m].y += f2fx(dy*0.001f);
+							pCurrentQuad->m_aTexcoords[m^1].y += f2fx(dy*0.001f);
+						}
+				}
 			}
 		}
 
@@ -1839,6 +1928,9 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				if(m_lSelectedLayers.size() == 1)
 				{
 					m_Map.m_UndoModified++;
+
+					m_SelectedQuadPoint = V;
+					m_SelectedQuadIndex = FindSelectedQuadIndex(QuadIndex);
 
 					static int s_PointPopupID = 0;
 					UiInvokePopupMenu(&s_PointPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
@@ -1895,13 +1987,17 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					m_SelectedPoints = 1<<V;
 				s_Moved = true;
 			}
-
-			m_SelectedQuad = QuadIndex;
+			
+			if(!IsQuadSelected(QuadIndex))
+				SelectQuad(QuadIndex);
 		}
 		else if(UI()->MouseButton(1))
 		{
 			s_Operation = OP_CONTEXT_MENU;
-			m_SelectedQuad = QuadIndex;
+
+			if(!IsQuadSelected(QuadIndex))
+				SelectQuad(QuadIndex);
+
 			UI()->SetActiveItem(pID);
 			if(!(m_SelectedPoints&(1<<V)))
 			{
@@ -2132,17 +2228,20 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 			{
 				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
+
+				SelectQuad(QIndex);
 			}
 			else
+			{
 				s_Operation = OP_MOVE;
+
+				SelectQuad(QIndex);
+			}
 
 			m_SelectedEnvelopePoint = PIndex;
 			m_SelectedQuadEnvelope = pQuad->m_PosEnv;
 
 			UI()->SetActiveItem(pID);
-			if(m_SelectedQuad != QIndex)
-				m_SelectedPoints = 0;
-			m_SelectedQuad = QIndex;
 			s_LastWx = wx;
 			s_LastWy = wy;
 		}
@@ -2374,7 +2473,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		if(UI()->HotItem() == s_pEditorID)
 		{
 			if(m_Brush.IsEmpty())
-				m_pTooltip = "Use left mouse button to drag and create a brush.";
+				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads.";
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
 
@@ -2415,17 +2514,40 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!UI()->MouseButton(0))
 					{
-						// grab brush
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf),"grabbing %f %f %f %f", r.x, r.y, r.w, r.h);
-						Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+						if(Input()->KeyIsPressed(KEY_LSHIFT))
+						{
+							CLayerQuads *t = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+							if(t)
+							{
+								for(int i = 0; i < t->m_lQuads.size(); i++)
+								{
+									CQuad *q = &t->m_lQuads[i];
+									float px = fx2f(q->m_aPoints[4].x);
+									float py = fx2f(q->m_aPoints[4].y);
 
-						// TODO: do all layers
-						int Grabs = 0;
-						for(int k = 0; k < NumEditLayers; k++)
-							Grabs += pEditLayers[k]->BrushGrab(&m_Brush, r);
-						if(Grabs == 0)
-							m_Brush.Clear();
+									if(px > r.x && px < r.x+r.w && py > r.y && py < r.y+r.h)
+										if(!IsQuadSelected(i))
+											m_lSelectedQuads.add(i);
+								}
+							}
+						}
+						else
+						{
+							// grab brush
+							char aBuf[256];
+							str_format(aBuf, sizeof(aBuf),"grabbing %f %f %f %f", r.x, r.y, r.w, r.h);
+							Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+
+							// TODO: do all layers
+							int Grabs = 0;
+							for(int k = 0; k < NumEditLayers; k++)
+								Grabs += pEditLayers[k]->BrushGrab(&m_Brush, r);
+							if(Grabs == 0)
+								m_Brush.Clear();
+
+							m_lSelectedQuads.clear();
+							m_SelectedPoints = 0;
+						}
 					}
 					else
 					{
@@ -5413,8 +5535,8 @@ void CEditor::Reset(bool CreateDefault)
 		m_Map.CreateDefault(ms_EntitiesTexture);
 
 	SelectLayer(0);
+	m_lSelectedQuads.clear();
 	m_SelectedGroup = 0;
-	m_SelectedQuad = -1;
 	m_SelectedPoints = 0;
 	m_SelectedEnvelope = 0;
 	m_SelectedImage = 0;

@@ -452,7 +452,8 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 
 int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 {
-	CQuad *pQuad = pEditor->GetSelectedQuad();
+	array<CQuad *> lQuads = pEditor->GetSelectedQuads();
+	CQuad *pCurrentQuad = lQuads[pEditor->m_SelectedQuadIndex];
 
 	CUIRect Button;
 
@@ -465,8 +466,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		if(pLayer)
 		{
 			pEditor->m_Map.m_Modified = true;
-			pLayer->m_lQuads.remove_index(pEditor->m_SelectedQuad);
-			pEditor->m_SelectedQuad--;
+			pEditor->DeleteSelectedQuads();
 		}
 		return 1;
 	}
@@ -480,24 +480,27 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		static int s_AspectRatioButton = 0;
 		if(pEditor->DoButton_Editor(&s_AspectRatioButton, "Aspect ratio", 0, &Button, 0, "Resizes the current Quad based on the aspect ratio of the image"))
 		{
-			int Top = pQuad->m_aPoints[0].y;
-			int Left = pQuad->m_aPoints[0].x;
-			int Right = pQuad->m_aPoints[0].x;
-
-			for(int k = 1; k < 4; k++)
+			for(int i = 0; i < lQuads.size(); ++i)
 			{
-				if(pQuad->m_aPoints[k].y < Top) Top = pQuad->m_aPoints[k].y;
-				if(pQuad->m_aPoints[k].x < Left) Left = pQuad->m_aPoints[k].x;
-				if(pQuad->m_aPoints[k].x > Right) Right = pQuad->m_aPoints[k].x;
+				int Top = lQuads[i]->m_aPoints[0].y;
+				int Left = lQuads[i]->m_aPoints[0].x;
+				int Right = lQuads[i]->m_aPoints[0].x;
+
+				for(int k = 1; k < 4; k++)
+				{
+					if(lQuads[i]->m_aPoints[k].y < Top) Top = lQuads[i]->m_aPoints[k].y;
+					if(lQuads[i]->m_aPoints[k].x < Left) Left = lQuads[i]->m_aPoints[k].x;
+					if(lQuads[i]->m_aPoints[k].x > Right) Right = lQuads[i]->m_aPoints[k].x;
+				}
+
+				int Height = (Right-Left)*pEditor->m_Map.m_lImages[pLayer->m_Image]->m_Height/pEditor->m_Map.m_lImages[pLayer->m_Image]->m_Width;
+
+				lQuads[i]->m_aPoints[0].x = Left; lQuads[i]->m_aPoints[0].y = Top;
+				lQuads[i]->m_aPoints[1].x = Right; lQuads[i]->m_aPoints[1].y = Top;
+				lQuads[i]->m_aPoints[2].x = Left; lQuads[i]->m_aPoints[2].y = Top+Height;
+				lQuads[i]->m_aPoints[3].x = Right; lQuads[i]->m_aPoints[3].y = Top+Height;
+				pEditor->m_Map.m_Modified = true;
 			}
-
-			int Height = (Right-Left)*pEditor->m_Map.m_lImages[pLayer->m_Image]->m_Height/pEditor->m_Map.m_lImages[pLayer->m_Image]->m_Width;
-
-			pQuad->m_aPoints[0].x = Left; pQuad->m_aPoints[0].y = Top;
-			pQuad->m_aPoints[1].x = Right; pQuad->m_aPoints[1].y = Top;
-			pQuad->m_aPoints[2].x = Left; pQuad->m_aPoints[2].y = Top+Height;
-			pQuad->m_aPoints[3].x = Right; pQuad->m_aPoints[3].y = Top+Height;
-			pEditor->m_Map.m_Modified = true;
 			return 1;
 		}
 	}
@@ -508,12 +511,15 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	static int s_AlignButton = 0;
 	if(pEditor->DoButton_Editor(&s_AlignButton, "Align", 0, &Button, 0, "Aligns coordinates of the quad points"))
 	{
-		for(int k = 1; k < 4; k++)
+		for(int i = 0; i < lQuads.size(); ++i)
 		{
-			pQuad->m_aPoints[k].x = 1000.0f * (int(pQuad->m_aPoints[k].x) / 1000);
-			pQuad->m_aPoints[k].y = 1000.0f * (int(pQuad->m_aPoints[k].y) / 1000);
+			for(int k = 1; k < 4; k++)
+			{
+				lQuads[i]->m_aPoints[k].x = 1000.0f * (int(lQuads[i]->m_aPoints[k].x) / 1000);
+				lQuads[i]->m_aPoints[k].y = 1000.0f * (int(lQuads[i]->m_aPoints[k].y) / 1000);
+			}
+			pEditor->m_Map.m_Modified = true;
 		}
-		pEditor->m_Map.m_Modified = true;
 		return 1;
 	}
 
@@ -523,24 +529,27 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	static int s_Button = 0;
 	if(pEditor->DoButton_Editor(&s_Button, "Square", 0, &Button, 0, "Squares the current quad"))
 	{
-		int Top = pQuad->m_aPoints[0].y;
-		int Left = pQuad->m_aPoints[0].x;
-		int Bottom = pQuad->m_aPoints[0].y;
-		int Right = pQuad->m_aPoints[0].x;
-
-		for(int k = 1; k < 4; k++)
+		for(int i = 0; i < lQuads.size(); ++i)
 		{
-			if(pQuad->m_aPoints[k].y < Top) Top = pQuad->m_aPoints[k].y;
-			if(pQuad->m_aPoints[k].x < Left) Left = pQuad->m_aPoints[k].x;
-			if(pQuad->m_aPoints[k].y > Bottom) Bottom = pQuad->m_aPoints[k].y;
-			if(pQuad->m_aPoints[k].x > Right) Right = pQuad->m_aPoints[k].x;
-		}
+			int Top = lQuads[i]->m_aPoints[0].y;
+			int Left = lQuads[i]->m_aPoints[0].x;
+			int Bottom = lQuads[i]->m_aPoints[0].y;
+			int Right = lQuads[i]->m_aPoints[0].x;
 
-		pQuad->m_aPoints[0].x = Left; pQuad->m_aPoints[0].y = Top;
-		pQuad->m_aPoints[1].x = Right; pQuad->m_aPoints[1].y = Top;
-		pQuad->m_aPoints[2].x = Left; pQuad->m_aPoints[2].y = Bottom;
-		pQuad->m_aPoints[3].x = Right; pQuad->m_aPoints[3].y = Bottom;
-		pEditor->m_Map.m_Modified = true;
+			for(int k = 1; k < 4; k++)
+			{
+				if(lQuads[i]->m_aPoints[k].y < Top) Top = lQuads[i]->m_aPoints[k].y;
+				if(lQuads[i]->m_aPoints[k].x < Left) Left = lQuads[i]->m_aPoints[k].x;
+				if(lQuads[i]->m_aPoints[k].y > Bottom) Bottom = lQuads[i]->m_aPoints[k].y;
+				if(lQuads[i]->m_aPoints[k].x > Right) Right = lQuads[i]->m_aPoints[k].x;
+			}
+
+			lQuads[i]->m_aPoints[0].x = Left; lQuads[i]->m_aPoints[0].y = Top;
+			lQuads[i]->m_aPoints[1].x = Right; lQuads[i]->m_aPoints[1].y = Top;
+			lQuads[i]->m_aPoints[2].x = Left; lQuads[i]->m_aPoints[2].y = Bottom;
+			lQuads[i]->m_aPoints[3].x = Right; lQuads[i]->m_aPoints[3].y = Bottom;
+			pEditor->m_Map.m_Modified = true;
+		}
 		return 1;
 	}
 
@@ -557,12 +566,12 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	};
 
 	CProperty aProps[] = {
-		{"Pos X", pQuad->m_aPoints[4].x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", pQuad->m_aPoints[4].y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos. Env", pQuad->m_PosEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
-		{"Pos. TO", pQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Color Env", pQuad->m_ColorEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
-		{"Color TO", pQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos X", pCurrentQuad->m_aPoints[4].x/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", pCurrentQuad->m_aPoints[4].y/1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos. Env", pCurrentQuad->m_PosEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Color Env", pCurrentQuad->m_ColorEnv+1, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lEnvelopes.size()+1},
+		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{0},
 	};
@@ -573,48 +582,52 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
-	if(Prop == PROP_POS_X)
+	float OffsetX = NewVal*1000-pCurrentQuad->m_aPoints[4].x;
+	float OffsetY = NewVal*1000-pCurrentQuad->m_aPoints[4].y;
+
+	for(int i = 0; i < lQuads.size(); ++i)
 	{
-		float Offset = NewVal*1000-pQuad->m_aPoints[4].x;
-		for(int k = 0; k < 5; ++k)
-			pQuad->m_aPoints[k].x += Offset;
-	}
-	if(Prop == PROP_POS_Y)
-	{
-		float Offset = NewVal*1000-pQuad->m_aPoints[4].y;
-		for(int k = 0; k < 5; ++k)
-			pQuad->m_aPoints[k].y += Offset;
-	}
-	if(Prop == PROP_POS_ENV)
-	{
-		int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
-		int Step = (Index-pQuad->m_PosEnv)%2;
-		if(Step != 0)
+		if(Prop == PROP_POS_X)
 		{
-			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 3)
-				{
-					pQuad->m_PosEnv = Index;
-					break;
-				}
+			for(int k = 0; k < 5; ++k)
+				lQuads[i]->m_aPoints[k].x += OffsetX;
 		}
-	}
-	if(Prop == PROP_POS_ENV_OFFSET) pQuad->m_PosEnvOffset = NewVal;
-	if(Prop == PROP_COLOR_ENV)
-	{
-		int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
-		int Step = (Index-pQuad->m_ColorEnv)%2;
-		if(Step != 0)
+		if(Prop == PROP_POS_Y)
 		{
-			for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 4)
-				{
-					pQuad->m_ColorEnv = Index;
-					break;
-				}
+			for(int k = 0; k < 5; ++k)
+				lQuads[i]->m_aPoints[k].y += OffsetY;
 		}
+		if(Prop == PROP_POS_ENV)
+		{
+			int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
+			int Step = (Index-lQuads[i]->m_PosEnv)%2;
+			if(Step != 0)
+			{
+				for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
+					if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 3)
+					{
+						lQuads[i]->m_PosEnv = Index;
+						break;
+					}
+			}
+		}
+		if(Prop == PROP_POS_ENV_OFFSET) lQuads[i]->m_PosEnvOffset = NewVal;
+		if(Prop == PROP_COLOR_ENV)
+		{
+			int Index = clamp(NewVal-1, -1, pEditor->m_Map.m_lEnvelopes.size()-1);
+			int Step = (Index-lQuads[i]->m_ColorEnv)%2;
+			if(Step != 0)
+			{
+				for(; Index >= -1 && Index < pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
+					if(Index == -1 || pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 4)
+					{
+						lQuads[i]->m_ColorEnv = Index;
+						break;
+					}
+			}
+		}
+		if(Prop == PROP_COLOR_ENV_OFFSET) lQuads[i]->m_ColorEnvOffset = NewVal;
 	}
-	if(Prop == PROP_COLOR_ENV_OFFSET) pQuad->m_ColorEnvOffset = NewVal;
 
 	return 0;
 }
@@ -815,7 +828,8 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View)
 
 int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 {
-	CQuad *pQuad = pEditor->GetSelectedQuad();
+	array<CQuad *> lQuads = pEditor->GetSelectedQuads();
+	CQuad *pCurrentQuad = lQuads[pEditor->m_SelectedQuadIndex];
 
 	enum
 	{
@@ -826,23 +840,13 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 	};
 
 	int Color = 0;
-	int x = 0, y = 0;
+	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].r<<24;
+	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].g<<16;
+	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].b<<8;
+	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].a;
 
-	for(int v = 0; v < 4; v++)
-	{
-		if(pEditor->m_SelectedPoints&(1<<v))
-		{
-			Color = 0;
-			Color |= pQuad->m_aColors[v].r<<24;
-			Color |= pQuad->m_aColors[v].g<<16;
-			Color |= pQuad->m_aColors[v].b<<8;
-			Color |= pQuad->m_aColors[v].a;
-
-			x = pQuad->m_aPoints[v].x/1000;
-			y = pQuad->m_aPoints[v].y/1000;
-		}
-	}
-
+	int x = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x/1000;
+	int y = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y/1000;
 
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -857,28 +861,34 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
-	if(Prop == PROP_POS_X)
+	float OffsetX = NewVal*1000-x*1000;
+	float OffsetY = NewVal*1000-y*1000;
+
+	for(int i = 0; i < lQuads.size(); ++i)
 	{
-		for(int v = 0; v < 4; v++)
-			if(pEditor->m_SelectedPoints&(1<<v))
-				pQuad->m_aPoints[v].x = NewVal*1000;
-	}
-	if(Prop == PROP_POS_Y)
-	{
-		for(int v = 0; v < 4; v++)
-			if(pEditor->m_SelectedPoints&(1<<v))
-				pQuad->m_aPoints[v].y = NewVal*1000;
-	}
-	if(Prop == PROP_COLOR)
-	{
-		for(int v = 0; v < 4; v++)
+		if(Prop == PROP_POS_X)
 		{
-			if(pEditor->m_SelectedPoints&(1<<v))
+			for(int v = 0; v < 4; v++)
+				if(pEditor->m_SelectedPoints&(1<<v))
+					lQuads[i]->m_aPoints[v].x += OffsetX;
+		}
+		if(Prop == PROP_POS_Y)
+		{
+			for(int v = 0; v < 4; v++)
+				if(pEditor->m_SelectedPoints&(1<<v))
+					lQuads[i]->m_aPoints[v].y += OffsetY;
+		}
+		if(Prop == PROP_COLOR)
+		{
+			for(int v = 0; v < 4; v++)
 			{
-				pQuad->m_aColors[v].r = (NewVal>>24)&0xff;
-				pQuad->m_aColors[v].g = (NewVal>>16)&0xff;
-				pQuad->m_aColors[v].b = (NewVal>>8)&0xff;
-				pQuad->m_aColors[v].a = NewVal&0xff;
+				if(pEditor->m_SelectedPoints&(1<<v))
+				{
+					lQuads[i]->m_aColors[v].r = (NewVal>>24)&0xff;
+					lQuads[i]->m_aColors[v].g = (NewVal>>16)&0xff;
+					lQuads[i]->m_aColors[v].b = (NewVal>>8)&0xff;
+					lQuads[i]->m_aColors[v].a = NewVal&0xff;
+				}
 			}
 		}
 	}
