@@ -159,7 +159,7 @@ private:
 
 	// DDRace
 
-
+	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
 	float m_Time;
 	int m_LastBroadcast;
@@ -219,32 +219,9 @@ public:
 	int m_TileFlags;
 	int m_TileFIndex;
 	int m_TileFFlags;
-	int m_TileSIndex;
-	int m_TileSFlags;
-	int m_TileIndexL;
-	int m_TileFlagsL;
-	int m_TileFIndexL;
-	int m_TileFFlagsL;
-	int m_TileSIndexL;
-	int m_TileSFlagsL;
-	int m_TileIndexR;
-	int m_TileFlagsR;
-	int m_TileFIndexR;
-	int m_TileFFlagsR;
-	int m_TileSIndexR;
-	int m_TileSFlagsR;
-	int m_TileIndexT;
-	int m_TileFlagsT;
-	int m_TileFIndexT;
-	int m_TileFFlagsT;
-	int m_TileSIndexT;
-	int m_TileSFlagsT;
-	int m_TileIndexB;
-	int m_TileFlagsB;
-	int m_TileFIndexB;
-	int m_TileFFlagsB;
-	int m_TileSIndexB;
-	int m_TileSFlagsB;
+
+	int m_MoveRestrictions;
+
 	vec2 m_Intersection;
 	int64 m_LastStartWarning;
 	int64 m_LastRescue;
