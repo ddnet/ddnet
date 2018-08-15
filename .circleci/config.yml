@@ -4,6 +4,12 @@ defaults: &defaults
   docker:
     - image: buildpack-deps:stretch
 
+defignore: &defignore
+  filters:
+    branches:
+      ignore:
+        - /.*\.tmp/
+
 jobs:
   pre_test:
     <<: *defaults
@@ -70,10 +76,13 @@ workflows:
     version: 2
     build_and_test:
         jobs:
-            - pre_test
+            - pre_test:
+                <<: *defignore
             - build:
+                <<: *defignore
                 requires:
                     - pre_test
             - test:
+                <<: *defignore
                 requires:
                     - build
