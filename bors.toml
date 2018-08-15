@@ -1,5 +1,7 @@
 status = [
-  "ci/circleci",
+  "ci/circleci: build",
+  "ci/circleci: pre_test",
+  "ci/circleci: test",
   "continuous-integration/appveyor/branch",
   "continuous-integration/travis-ci/push",
 ]
