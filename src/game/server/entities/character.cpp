@@ -755,7 +755,7 @@ void CCharacter::TickDefered()
 		m_ReckoningCore.Init(&TempWorld, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
 		m_ReckoningCore.m_Id = m_pPlayer->GetCID();
 		m_ReckoningCore.Tick(false, false);
-		m_ReckoningCore.Move();
+		m_ReckoningCore.Move(false);
 		m_ReckoningCore.Quantize();
 	}
 
@@ -765,7 +765,7 @@ void CCharacter::TickDefered()
 	bool StuckBefore = GameServer()->Collision()->TestBox(m_Core.m_Pos, vec2(28.0f, 28.0f));
 
 	m_Core.m_Id = m_pPlayer->GetCID();
-	m_Core.Move();
+	m_Core.Move(GameServer()->EmulateBug(BUG_STOPPERS_PASSTHROUGH));
 	bool StuckAfterMove = GameServer()->Collision()->TestBox(m_Core.m_Pos, vec2(28.0f, 28.0f));
 	m_Core.Quantize();
 	bool StuckAfterQuant = GameServer()->Collision()->TestBox(m_Core.m_Pos, vec2(28.0f, 28.0f));
