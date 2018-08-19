@@ -1,6 +1,8 @@
 #ifndef GAME_MAPBUGS_H
 #define GAME_MAPBUGS_H
 
+#include <base/hash.h>
+
 enum
 {
 #define MAPBUG(constname, string) constname,
@@ -18,7 +20,7 @@ enum
 
 class CMapBugs
 {
-	friend CMapBugs GetMapBugs(const char *pName, int Size, int Crc);
+	friend CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc);
 	void *m_pData;
 	unsigned int m_Extra;
 
@@ -28,5 +30,5 @@ public:
 	void Dump() const;
 };
 
-CMapBugs GetMapBugs(const char *pName, int Size, int Crc);
+CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc);
 #endif // GAME_MAPBUGS_H

@@ -93,3 +93,16 @@ TEST(Str, Endswith)
 	EXPECT_EQ(str_endswith(ABCDEFG, DEFG) - ABCDEFG,
 		str_length(ABCDEFG) - str_length(DEFG));
 }
+
+TEST(Str, HexDecode)
+{
+	char aOut[5] = {'a', 'b', 'c', 'd', 0};
+	EXPECT_EQ(str_hex_decode(aOut, 0, ""), 0); EXPECT_STREQ(aOut, "abcd");
+	EXPECT_EQ(str_hex_decode(aOut, 0, " "), 2); EXPECT_STREQ(aOut, "abcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "1"), 2); EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "41"), 0); EXPECT_STREQ(aOut, "Abcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "4x"), 1); EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "x1"), 1); EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 1, "411"), 2); EXPECT_STREQ(aOut + 1, "bcd");
+	EXPECT_EQ(str_hex_decode(aOut, 4, "41424344"), 0); EXPECT_STREQ(aOut, "ABCD");
+}
