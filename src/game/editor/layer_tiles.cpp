@@ -77,7 +77,7 @@ void CLayerTiles::MakePalette()
 			m_pTiles[y*m_Width+x].m_Index = y*16+x;
 }
 
-void CLayerTiles::Render()
+void CLayerTiles::Render(bool Tileset)
 {
 	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
 		m_TexID = m_pEditor->m_Map.m_lImages[m_Image]->m_TexID;
@@ -91,14 +91,17 @@ void CLayerTiles::Render()
 												m_pEditor->EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
 
 	// Render DDRace Layers
-	if(m_Tele)
-		m_pEditor->RenderTools()->RenderTeleOverlay(((CLayerTele*)this)->m_pTeleTile, m_Width, m_Height, 32.0f);
-	if(m_Speedup)
-		m_pEditor->RenderTools()->RenderSpeedupOverlay(((CLayerSpeedup*)this)->m_pSpeedupTile, m_Width, m_Height, 32.0f);
-	if(m_Switch)
-		m_pEditor->RenderTools()->RenderSwitchOverlay(((CLayerSwitch*)this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
-	if(m_Tune)
-		m_pEditor->RenderTools()->RenderTuneOverlay(((CLayerTune*)this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+	if(!Tileset)
+	{
+		if(m_Tele)
+			m_pEditor->RenderTools()->RenderTeleOverlay(((CLayerTele*)this)->m_pTeleTile, m_Width, m_Height, 32.0f);
+		if(m_Speedup)
+			m_pEditor->RenderTools()->RenderSpeedupOverlay(((CLayerSpeedup*)this)->m_pSpeedupTile, m_Width, m_Height, 32.0f);
+		if(m_Switch)
+			m_pEditor->RenderTools()->RenderSwitchOverlay(((CLayerSwitch*)this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
+		if(m_Tune)
+			m_pEditor->RenderTools()->RenderTuneOverlay(((CLayerTune*)this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+	}
 }
 
 int CLayerTiles::ConvertX(float x) const { return (int)(x/32.0f); }
@@ -172,7 +175,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		return 0;
 
 	// create new layers
-	if(this == m_pEditor->m_Map.m_pTeleLayer)
+	if(this->m_Tele)
 	{
 		CLayerTele *pGrabbed = new CLayerTele(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
@@ -201,7 +204,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TeleNum = m_pEditor->m_TeleNumber;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
-	else if(this == m_pEditor->m_Map.m_pSpeedupLayer)
+	else if(this->m_Speedup)
 	{
 		CLayerSpeedup *pGrabbed = new CLayerSpeedup(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
@@ -236,7 +239,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_SpeedupAngle = m_pEditor->m_SpeedupAngle;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
-	else if(this == m_pEditor->m_Map.m_pSwitchLayer)
+	else if(this->m_Switch)
 	{
 		CLayerSwitch *pGrabbed = new CLayerSwitch(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
@@ -270,7 +273,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
 
-	else if(this == m_pEditor->m_Map.m_pTuneLayer)
+	else if(this->m_Tune)
 	{
 		CLayerTune *pGrabbed = new CLayerTune(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;
@@ -301,7 +304,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNum;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
-	else if(this == m_pEditor->m_Map.m_pFrontLayer)
+	else if(this->m_Front)
 	{
 		CLayerFront *pGrabbed = new CLayerFront(r.w, r.h);
 		pGrabbed->m_pEditor = m_pEditor;

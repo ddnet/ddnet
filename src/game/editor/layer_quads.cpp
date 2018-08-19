@@ -21,7 +21,7 @@ CLayerQuads::~CLayerQuads()
 {
 }
 
-void CLayerQuads::Render()
+void CLayerQuads::Render(bool QuadPicker)
 {
 	Graphics()->TextureSet(-1);
 	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())

@@ -152,7 +152,7 @@ public:
 	virtual void BrushFlipY() {}
 	virtual void BrushRotate(float Amount) {}
 
-	virtual void Render() {}
+	virtual void Render(bool Tileset = false) {}
 	virtual int RenderProperties(CUIRect *pToolbox) { return 0; }
 
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) {}
@@ -519,7 +519,7 @@ public:
 	virtual void Shift(int Direction);
 
 	void MakePalette();
-	virtual void Render();
+	virtual void Render(bool Tileset = false);
 
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
@@ -571,7 +571,7 @@ public:
 	CLayerQuads();
 	~CLayerQuads();
 
-	virtual void Render();
+	virtual void Render(bool QuadPicker = false);
 	CQuad *NewQuad();
 
 	virtual void BrushSelecting(CUIRect Rect);
@@ -1129,7 +1129,7 @@ public:
 	CLayerSounds();
 	~CLayerSounds();
 
-	virtual void Render();
+	virtual void Render(bool Tileset = false);
 	CSoundSource *NewSource();
 
 	virtual void BrushSelecting(CUIRect Rect);

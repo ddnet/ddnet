@@ -2256,7 +2256,15 @@ void CEditor::DoMapEditor(CUIRect View)
 			m_TilesetPicker.m_TexID = t->m_TexID;
 			m_TilesetPicker.m_Color = t->m_Color;
 			m_TilesetPicker.m_Color.a = 255;
-			m_TilesetPicker.Render();
+
+			m_TilesetPicker.m_Tele = t->m_Tele;
+			m_TilesetPicker.m_Speedup = t->m_Speedup;
+			m_TilesetPicker.m_Front = t->m_Front;
+			m_TilesetPicker.m_Switch = t->m_Switch;
+			m_TilesetPicker.m_Tune = t->m_Tune;
+
+			m_TilesetPicker.Render(true);
+
 			if(m_ShowTileInfo)
 				m_TilesetPicker.ShowInfo();
 		}

@@ -16,7 +16,7 @@ CLayerSounds::~CLayerSounds()
 {
 }
 
-void CLayerSounds::Render()
+void CLayerSounds::Render(bool Tileset)
 {
 	// TODO: nice texture
 	Graphics()->TextureSet(-1);
