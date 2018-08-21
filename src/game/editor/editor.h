@@ -761,13 +761,18 @@ public:
 	int Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
-
-	CQuad *GetSelectedQuad();
+	
+	array<CQuad *> GetSelectedQuads();
 	CLayer *GetSelectedLayerType(int Index, int Type);
 	CLayer *GetSelectedLayer(int Index);
 	CLayerGroup *GetSelectedGroup();
 	CSoundSource *GetSelectedSource();
 	void SelectLayer(int Index);
+
+	void SelectQuad(int Index);
+	void DeleteSelectedQuads();
+	bool IsQuadSelected(int Index);
+	int FindSelectedQuadIndex(int Index);
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 Color = vec4(1,1,1,0.5f));
 
@@ -879,8 +884,10 @@ public:
 	bool m_ShowPicker;
 
 	array<int> m_lSelectedLayers;
+	array<int> m_lSelectedQuads;
+	int m_SelectedQuadPoint;
+	int m_SelectedQuadIndex;
 	int m_SelectedGroup;
-	int m_SelectedQuad;
 	int m_SelectedPoints;
 	int m_SelectedEnvelope;
 	int m_SelectedEnvelopePoint;
