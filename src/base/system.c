@@ -2561,16 +2561,18 @@ static int byteval(const char *byte, unsigned char *dst)
 	return 0;
 }
 
-int str_hex_decode(unsigned char *dst, int dst_size, const char *src)
+int str_hex_decode(void *dst, int dst_size, const char *src)
 {
-	int len = str_length(src)/2;
+	unsigned char *cdst = dst;
+	int slen = str_length(src);
+	int len = slen / 2;
 	int i;
-	if(len != dst_size)
+	if(slen != dst_size * 2)
 		return 2;
 
 	for(i = 0; i < len && dst_size; i++, dst_size--)
 	{
-		if(byteval(src + i * 2, dst++))
+		if(byteval(src + i * 2, cdst++))
 			return 1;
 	}
 	return 0;

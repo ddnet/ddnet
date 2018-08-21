@@ -2641,7 +2641,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	SHA256_DIGEST MapSha256;
 	int MapCrc;
 	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapSha256, &MapCrc);
-	m_MapBugs = GetMapBugs(aMapName, MapSize, MapCrc);
+	m_MapBugs = GetMapBugs(aMapName, MapSize, MapSha256, MapCrc);
 
 	// reset everything here
 	//world = new GAMEWORLD;

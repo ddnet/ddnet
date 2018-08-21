@@ -6,6 +6,7 @@ struct CMapDescription
 {
 	const char *m_pName;
 	int m_Size;
+	SHA256_DIGEST m_Sha256;
 	int m_Crc;
 
 	bool operator==(const CMapDescription &Other) const
@@ -34,14 +35,21 @@ static unsigned int IsBugFlagSet(int Bug, unsigned int BugFlags)
 	return (BugFlags & BugToFlag(Bug)) != 0;
 }
 
+static SHA256_DIGEST s(const char *pSha256)
+{
+	SHA256_DIGEST Result;
+	dbg_assert(sha256_from_str(&Result, pSha256) == 0, "invalid sha256 in mapbugs");
+	return Result;
+}
+
 static CMapBugsInternal MAP_BUGS[] =
 {
-	{{"Binary", 2022597, 0x0ae3a3d5}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}
+	{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600"), 0x0ae3a3d5}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}
 };
 
-CMapBugs GetMapBugs(const char *pName, int Size, int Crc)
+CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc)
 {
-	CMapDescription Map = {pName, Size, Crc};
+	CMapDescription Map = {pName, Size, Sha256, Crc};
 	CMapBugs Result;
 	Result.m_Extra = 0;
 	for(unsigned int i = 0; i < sizeof(MAP_BUGS) / sizeof(MAP_BUGS[0]); i++)
@@ -111,9 +119,12 @@ void CMapBugs::Dump() const
 	dbg_msg("mapbugs", "enabling map compatibility mode %s", aBugs);
 	if(pInternal)
 	{
-		dbg_msg("mapbugs", "map='%s' map_size=%d map_crc=%08x",
+		char aSha256[SHA256_MAXSTRSIZE];
+		sha256_str(pInternal->m_Map.m_Sha256, aSha256, sizeof(aSha256));
+		dbg_msg("mapbugs", "map='%s' map_size=%d map_sha256=%s map_crc=%08x",
 			pInternal->m_Map.m_pName,
 			pInternal->m_Map.m_Size,
+			aSha256,
 			pInternal->m_Map.m_Crc);
 	}
 }

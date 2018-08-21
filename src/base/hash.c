@@ -35,6 +35,11 @@ void sha256_str(SHA256_DIGEST digest, char *str, size_t max_len)
 	}
 }
 
+int sha256_from_str(SHA256_DIGEST *out, const char *str)
+{
+	return str_hex_decode(out->data, sizeof(out->data), str);
+}
+
 int sha256_comp(SHA256_DIGEST digest1, SHA256_DIGEST digest2)
 {
 	return mem_comp(digest1.data, digest2.data, sizeof(digest1.data));
