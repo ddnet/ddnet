@@ -195,7 +195,7 @@ int CSkins::Find(const char *pName) const
 		str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
 		// If we find something, use it, otherwise fall back to normal skins.
 		int Result = FindImpl(aBuf);
-		if (Result != -1)
+		if(Result != -1)
 		{
 			return Result;
 		}
