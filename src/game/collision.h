@@ -8,6 +8,38 @@
 
 #include <list>
 
+enum
+{
+	CANTMOVE_LEFT=1<<0,
+	CANTMOVE_RIGHT=1<<1,
+	CANTMOVE_UP=1<<2,
+	CANTMOVE_DOWN=1<<3,
+
+	CANTMOVE_DIRECTIONS=0xf,
+
+	// These get set when you can't move in the direction, caused by a
+	// two-way or all-way stopper.
+	CANTMOVE_LEFT_TWOWAY=1<<4,
+	CANTMOVE_RIGHT_TWOWAY=1<<5,
+	CANTMOVE_UP_TWOWAY=1<<6,
+	CANTMOVE_DOWN_TWOWAY=1<<7,
+
+	CANTMOVE_TWOWAY_DIRECTIONS=0xf0,
+
+	// These get set when you can't move in the direction, caused by a
+	// one-way stopper on the tile of the character.
+	CANTMOVE_LEFT_HERE=1<<8,
+	CANTMOVE_RIGHT_HERE=1<<9,
+	CANTMOVE_UP_HERE=1<<10,
+	CANTMOVE_DOWN_HERE=1<<11,
+
+	CANTMOVE_HERE_DIRECTIONS=0xf00,
+};
+
+vec2 ClampVel(int MoveRestriction, vec2 Vel);
+
+typedef bool (*CALLBACK_SWITCHACTIVE)(int Number, void *pUser);
+
 class CCollision
 {
 	class CTile *m_pTiles;
@@ -28,7 +60,11 @@ public:
 	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
 	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr);
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces);
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
+	void MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper);
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper)
+	{
+		MoveBox(0, 0, pInoutPos, pInoutVel, Size, Elasticity, CheckStopper);
+	}
 	bool TestBox(vec2 Pos, vec2 Size);
 
 	// DDRace
@@ -47,6 +83,12 @@ public:
 	int GetIndex(int x, int y);
 	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
+
+	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f);
+	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
+	{
+		return GetMoveRestrictions(0, 0, Pos, Distance);
+	}
 
 	int GetTile(int x, int y);
 	int GetFTile(int x, int y);

@@ -612,7 +612,7 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	{
 		pCharacter->m_Tick++;
 		TempCore.Tick(false, true);
-		TempCore.Move();
+		TempCore.Move(false);
 		TempCore.Quantize();
 	}
 
@@ -1614,7 +1614,7 @@ void CGameClient::OnPredict()
 
 								vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 
-								pTarget->LimitForce(&Temp);
+								pTarget->LimitVel(&Temp);
 
 								Temp -= pTarget->m_Vel;
 								pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
@@ -1708,7 +1708,7 @@ void CGameClient::OnPredict()
 			{
 				if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && IsWeaker[g_Config.m_ClDummy][c])
 				{
-					World.m_apCharacters[c]->Move();
+					World.m_apCharacters[c]->Move(false);
 					World.m_apCharacters[c]->Quantize();
 				}
 			}
@@ -1716,7 +1716,7 @@ void CGameClient::OnPredict()
 			// Us
 			if(World.m_apCharacters[m_Snap.m_LocalClientID])
 			{
-				World.m_apCharacters[m_Snap.m_LocalClientID]->Move();
+				World.m_apCharacters[m_Snap.m_LocalClientID]->Move(false);
 				World.m_apCharacters[m_Snap.m_LocalClientID]->Quantize();
 			}
 
@@ -1725,7 +1725,7 @@ void CGameClient::OnPredict()
 			{
 				if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && !IsWeaker[g_Config.m_ClDummy][c])
 				{
-					World.m_apCharacters[c]->Move();
+					World.m_apCharacters[c]->Move(false);
 					World.m_apCharacters[c]->Quantize();
 				}
 			}
@@ -1736,7 +1736,7 @@ void CGameClient::OnPredict()
 			{
 				if(!World.m_apCharacters[c])
 					continue;
-				World.m_apCharacters[c]->Move();
+				World.m_apCharacters[c]->Move(false);
 				World.m_apCharacters[c]->Quantize();
 			}
 		}
@@ -2307,9 +2307,9 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 					OtherChar.Tick(false, true);
 					LocalChar.Tick(false, true);
 				}
-				LocalChar.Move();
+				LocalChar.Move(false);
 				LocalChar.Quantize();
-				OtherChar.Move();
+				OtherChar.Move(false);
 				OtherChar.Quantize();
 			}
 			PredictErr[dir] = distance(OtherChar.m_Vel, OtherCharCur.m_Vel);

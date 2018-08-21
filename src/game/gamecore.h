@@ -215,7 +215,7 @@ public:
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2> > *pTeleOuts);
 	void Reset();
 	void Tick(bool UseInput, bool IsClient);
-	void Move();
+	void Move(bool BugStoppersPassthrough);
 
 	void Read(const CNetObj_CharacterCore *pObjCore);
 	void Write(CNetObj_CharacterCore *pObjCore);
@@ -231,7 +231,7 @@ public:
 	int m_Colliding;
 	bool m_LeftWall;
 
-	void LimitForce(vec2 *Force);
+	void LimitVel(vec2 *pVel);
 	void ApplyForce(vec2 Force);
 
 private:
@@ -239,35 +239,8 @@ private:
 	CTeamsCore *m_pTeams;
 	int m_TileIndex;
 	int m_TileFlags;
-	int m_TileFIndex;
-	int m_TileFFlags;
-	int m_TileSIndex;
-	int m_TileSFlags;
-	int m_TileIndexL;
-	int m_TileFlagsL;
-	int m_TileFIndexL;
-	int m_TileFFlagsL;
-	int m_TileSIndexL;
-	int m_TileSFlagsL;
-	int m_TileIndexR;
-	int m_TileFlagsR;
-	int m_TileFIndexR;
-	int m_TileFFlagsR;
-	int m_TileSIndexR;
-	int m_TileSFlagsR;
-	int m_TileIndexT;
-	int m_TileFlagsT;
-	int m_TileFIndexT;
-	int m_TileFFlagsT;
-	int m_TileSIndexT;
-	int m_TileSFlagsT;
-	int m_TileIndexB;
-	int m_TileFlagsB;
-	int m_TileFIndexB;
-	int m_TileFFlagsB;
-	int m_TileSIndexB;
-	int m_TileSFlagsB;
-	bool IsRightTeam(int MapIndex);
+	int m_MoveRestrictions;
+	static bool IsSwitchActiveCb(int Number, void *pUser);
 };
 
 //input count
