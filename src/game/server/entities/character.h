@@ -160,7 +160,7 @@ private:
 	// DDRace
 
 	static bool IsSwitchActiveCb(int Number, void *pUser);
-	void HandleTiles(int Index);
+	void HandleTiles(int Index, bool *pStopProcessing);
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
