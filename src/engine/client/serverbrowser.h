@@ -68,6 +68,18 @@ public:
 
 	int NumServers() const { return m_NumServers; }
 
+	int FilteredPlayers(const CServerInfo &Item) const;
+
+	int Players(const CServerInfo &Item) const
+	{
+		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
+	}
+
+	int Max(const CServerInfo &Item) const
+	{
+		return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
+	}
+
 	int NumSortedServers() const { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const;
 

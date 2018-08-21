@@ -112,6 +112,10 @@ public:
 
 	virtual int NumServers() const = 0;
 
+	virtual int FilteredPlayers(const CServerInfo &Item) const = 0;
+	virtual int Players(const CServerInfo &Item) const = 0;
+	virtual int Max(const CServerInfo &Item) const = 0;
+
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
 
