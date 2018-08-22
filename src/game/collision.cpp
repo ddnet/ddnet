@@ -14,21 +14,21 @@
 
 #include <engine/shared/config.h>
 
-vec2 ClampVel(int MoveRestrictions, vec2 Vel)
+vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
-	if(Vel.x > 0 && (MoveRestrictions&CANTMOVE_RIGHT))
+	if(Vel.x > 0 && (MoveRestriction&CANTMOVE_RIGHT))
 	{
 		Vel.x = 0;
 	}
-	if(Vel.x < 0 && (MoveRestrictions&CANTMOVE_LEFT))
+	if(Vel.x < 0 && (MoveRestriction&CANTMOVE_LEFT))
 	{
 		Vel.x = 0;
 	}
-	if(Vel.y > 0 && (MoveRestrictions&CANTMOVE_DOWN))
+	if(Vel.y > 0 && (MoveRestriction&CANTMOVE_DOWN))
 	{
 		Vel.y = 0;
 	}
-	if(Vel.y < 0 && (MoveRestrictions&CANTMOVE_UP))
+	if(Vel.y < 0 && (MoveRestriction&CANTMOVE_UP))
 	{
 		Vel.y = 0;
 	}
@@ -160,91 +160,32 @@ enum
 	NUM_MR_DIRS
 };
 
-static vec2 DirVec(int Direction)
-{
-	switch(Direction)
-	{
-	case MR_DIR_HERE: return vec2(0, 0);
-	case MR_DIR_RIGHT: return vec2(1, 0);
-	case MR_DIR_DOWN: return vec2(0, 1);
-	case MR_DIR_LEFT: return vec2(-1, 0);
-	case MR_DIR_UP: return vec2(0, -1);
-	default: dbg_assert(false, "invalid dir");
-	}
-	return vec2(0, 0);
-}
-
-static int Twoway(int MoveRestrictions)
-{
-	if(MoveRestrictions&CANTMOVE_LEFT)
-	{
-		MoveRestrictions |= CANTMOVE_LEFT_TWOWAY;
-	}
-	if(MoveRestrictions&CANTMOVE_RIGHT)
-	{
-		MoveRestrictions |= CANTMOVE_RIGHT_TWOWAY;
-	}
-	if(MoveRestrictions&CANTMOVE_UP)
-	{
-		MoveRestrictions |= CANTMOVE_UP_TWOWAY;
-	}
-	if(MoveRestrictions&CANTMOVE_DOWN)
-	{
-		MoveRestrictions |= CANTMOVE_DOWN_TWOWAY;
-	}
-	return MoveRestrictions;
-}
-
-static int Here(int MoveRestrictions)
-{
-	if(MoveRestrictions&CANTMOVE_LEFT)
-	{
-		MoveRestrictions |= CANTMOVE_LEFT_HERE;
-	}
-	if(MoveRestrictions&CANTMOVE_RIGHT)
-	{
-		MoveRestrictions |= CANTMOVE_RIGHT_HERE;
-	}
-	if(MoveRestrictions&CANTMOVE_UP)
-	{
-		MoveRestrictions |= CANTMOVE_UP_HERE;
-	}
-	if(MoveRestrictions&CANTMOVE_DOWN)
-	{
-		MoveRestrictions |= CANTMOVE_DOWN_HERE;
-	}
-	return MoveRestrictions;
-}
-
 static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 {
 	switch(Tile)
 	{
 	case TILE_STOP:
+		switch(Flags)
 		{
-			int MoveRestrictions = 0;
-			switch(Flags)
-			{
-			case ROTATION_0: MoveRestrictions = CANTMOVE_DOWN; break;
-			case ROTATION_90: MoveRestrictions = CANTMOVE_LEFT; break;
-			case ROTATION_180: MoveRestrictions = CANTMOVE_UP; break;
-			case ROTATION_270: MoveRestrictions = CANTMOVE_RIGHT; break;
-			}
-			return Direction == MR_DIR_HERE ? Here(MoveRestrictions) : MoveRestrictions;
+		case ROTATION_0: return CANTMOVE_DOWN;
+		case ROTATION_90: return CANTMOVE_LEFT;
+		case ROTATION_180: return CANTMOVE_UP;
+		case ROTATION_270: return CANTMOVE_RIGHT;
 		}
+		break;
 	case TILE_STOPS:
 		switch(Flags)
 		{
 		case ROTATION_0:
 		case ROTATION_180:
-			return Twoway(CANTMOVE_DOWN|CANTMOVE_UP);
+			return CANTMOVE_DOWN|CANTMOVE_UP;
 		case ROTATION_90:
 		case ROTATION_270:
-			return Twoway(CANTMOVE_LEFT|CANTMOVE_RIGHT);
+			return CANTMOVE_LEFT|CANTMOVE_RIGHT;
 		}
 		break;
 	case TILE_STOPA:
-		return Twoway(CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN);
+		return CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN;
 	}
 	return 0;
 }
@@ -254,10 +195,10 @@ static int GetMoveRestrictionsMask(int Direction)
 	switch(Direction)
 	{
 	case MR_DIR_HERE: return 0;
-	case MR_DIR_RIGHT: return Twoway(CANTMOVE_RIGHT);
-	case MR_DIR_DOWN: return Twoway(CANTMOVE_DOWN);
-	case MR_DIR_LEFT: return Twoway(CANTMOVE_LEFT);
-	case MR_DIR_UP: return Twoway(CANTMOVE_UP);
+	case MR_DIR_RIGHT: return CANTMOVE_RIGHT;
+	case MR_DIR_DOWN: return CANTMOVE_DOWN;
+	case MR_DIR_LEFT: return CANTMOVE_LEFT;
+	case MR_DIR_UP: return CANTMOVE_UP;
 	default: dbg_assert(false, "invalid dir");
 	}
 	return 0;
@@ -278,11 +219,19 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags)
 
 int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance)
 {
+	static const vec2 DIRECTIONS[NUM_MR_DIRS] =
+	{
+		vec2(0, 0),
+		vec2(1, 0),
+		vec2(0, 1),
+		vec2(-1, 0),
+		vec2(0, -1)
+	};
 	dbg_assert(0.0f <= Distance && Distance <= 32.0f, "invalid distance");
 	int Restrictions = 0;
 	for(int d = 0; d < NUM_MR_DIRS; d++)
 	{
-		vec2 ModPos = Pos + DirVec(d) * Distance;
+		vec2 ModPos = Pos + DIRECTIONS[d] * Distance;
 		int ModMapIndex = GetPureMapIndex(ModPos);
 		for(int Front = 0; Front < 2; Front++)
 		{
@@ -515,58 +464,7 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size)
 	return false;
 }
 
-static float *DirCoord(int Direction, vec2 *pVec)
-{
-	switch(Direction)
-	{
-	case MR_DIR_RIGHT: case MR_DIR_LEFT: return &pVec->x;
-	case MR_DIR_DOWN: case MR_DIR_UP: return &pVec->y;
-	default: dbg_assert(false, "invalid dir");
-	}
-	return 0;
-}
-
-static int DirTwoway(int Direction)
-{
-	switch(Direction)
-	{
-	case MR_DIR_HERE: return 0;
-	case MR_DIR_RIGHT: return CANTMOVE_RIGHT_TWOWAY;
-	case MR_DIR_DOWN: return CANTMOVE_DOWN_TWOWAY;
-	case MR_DIR_LEFT: return CANTMOVE_LEFT_TWOWAY;
-	case MR_DIR_UP: return CANTMOVE_UP_TWOWAY;
-	default: dbg_assert(false, "invalid dir");
-	}
-	return 0;
-}
-
-static int DirHere(int Direction)
-{
-	switch(Direction)
-	{
-	case MR_DIR_HERE: return 0;
-	case MR_DIR_RIGHT: return CANTMOVE_RIGHT_HERE;
-	case MR_DIR_DOWN: return CANTMOVE_DOWN_HERE;
-	case MR_DIR_LEFT: return CANTMOVE_LEFT_HERE;
-	case MR_DIR_UP: return CANTMOVE_UP_HERE;
-	default: dbg_assert(false, "invalid dir");
-	}
-	return 0;
-}
-
-static int DirSign(int Direction)
-{
-	switch(Direction)
-	{
-	case MR_DIR_HERE: return 0;
-	case MR_DIR_RIGHT: case MR_DIR_DOWN: return 1;
-	case MR_DIR_LEFT: case MR_DIR_UP: return -1;
-	default: dbg_assert(false, "invalid dir");
-	}
-	return 0;
-}
-
-void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStoppers)
+void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity)
 {
 	// do the move
 	vec2 Pos = *pInoutPos;
@@ -613,75 +511,6 @@ void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec
 					Vel.y *= -Elasticity;
 					NewPos.x = Pos.x;
 					Vel.x *= -Elasticity;
-				}
-			}
-
-			if(CheckStoppers)
-			{
-				// Yay. Backward-compatibility. Isn't that fun?
-				//
-				// Since you previously managed to get through
-				// stoppers (or into them) at high speeds, some
-				// maps started using it. A lot of maps
-				// actually. So we have to maintain bug-for-bug
-				// compatibility.
-				//
-				// The strategy for still preventing players to
-				// go through stoppers is as follows: If you're
-				// going so fast that you'd skip a stopper, you
-				// will instead be stopped at the last possible
-				// position where the stopper still has
-				// influence on you.
-				//
-				// We have to differentiate between one-way
-				// stoppers and multiple-way stoppers.
-				//
-				// One-way stoppers affect you until your
-				// center leaves the tile, so we just have to
-				// stop you from exiting the stopper in the
-				// wrong direction.
-				//
-				// Multiple-way stoppers affect you in a more
-				// complicated way: If you're blocked from,
-				// e.g. the right, then you're blocked as long
-				// as the position 18 units to your right is in
-				// that stopper. So we have to stop you from
-				// getting the position 18 units away from you
-				// out of that stopper tile in the wrong
-				// direction.
-				//
-				// Backward-compatibility. \o/
-				static const float OFFSET = 18.0f;
-				int MoveRestrictions = GetMoveRestrictions(pfnSwitchActive, pUser, Pos, OFFSET);
-				for(int d = 1; d < NUM_MR_DIRS; d++)
-				{
-					static const int TILESIZE = 32;
-					float *pPos = DirCoord(d, &Pos);
-					float *pNewPos = DirCoord(d, &NewPos);
-					float *pVel = DirCoord(d, &Vel);
-					int Sign = DirSign(d);
-					// Are we actually going in the
-					// direction we're checking?
-					if(*pVel * Sign <= 0)
-					{
-						continue;
-					}
-					bool Stop = false;
-					if(MoveRestrictions&DirTwoway(d)
-						&& round_to_int(*pPos + OFFSET * Sign) / TILESIZE != round_to_int(*pNewPos + OFFSET * Sign) / TILESIZE)
-					{
-						Stop = true;
-					}
-					if(MoveRestrictions&DirHere(d)
-						&& round_to_int(*pPos) / TILESIZE != round_to_int(*pNewPos) / TILESIZE)
-					{
-						Stop = true;
-					}
-					if(Stop)
-					{
-						*pVel = 0;
-						*pNewPos = *pPos;
-					}
 				}
 			}
 

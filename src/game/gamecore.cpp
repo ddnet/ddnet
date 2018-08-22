@@ -506,7 +506,7 @@ void CCharacterCore::Move()
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(IsSwitchActiveCb, this, &NewPos, &m_Vel, vec2(28.0f, 28.0f), 0.0f, true);
+	m_pCollision->MoveBox(&NewPos, &m_Vel, vec2(28.0f, 28.0f), 0);
 
 	m_Colliding = 0;
 	if(m_Vel.x < 0.001 && m_Vel.x > -0.001)
@@ -610,15 +610,10 @@ void CCharacterCore::Quantize()
 bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
-	if(pThis->m_Id < 0 || !pThis->Collision()->m_pSwitchers)
-	{
-		return false;
-	}
-	if(pThis->m_pTeams->Team(pThis->m_Id) == (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
-	{
-		return false;
-	}
-	return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
+	if(pThis->Collision()->m_pSwitchers)
+		if(pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
+			return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
+	return false;
 }
 
 void CCharacterCore::LimitVel(vec2 *pVel)
