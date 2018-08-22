@@ -13,6 +13,7 @@
 # HeroiAmarelo        2012-08-01 15:50:18
 # Rafael Fontenelle   2014-11-21 13:31:06
 # Rafael Fontenelle   2016-12-12 13:31:06
+# Rafael Fontenelle   2018-08-22
 ##### /authors #####
 
 ##### translated strings #####
@@ -997,3 +998,27 @@ Name plates size
 
 Grabs
 == Pega
+
+Welcome to DDraceNetwork
+== Bem-vindo ao DDraceNetwork
+
+DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay. Help each other play through custom maps. All ranks made on official servers are available worldwide and you can collect points!
+== O DDraceNetwork (DDNet) é uma versão mantida ativamente do DDRace, uma modificação do Teeworlds com uma jogabilidade cooperativa única. Ajudem uns aos outros a jogar através de mapas personalizados. Todas as classificações feitas em servidores oficiais estão disponíveis em todo o mundo e você pode acumular pontos!
+
+Adjust those settings for the best experience on your system.
+== Ajuste essas configurações para obter a melhor experiência no seu sistema.
+
+Borderless window
+== Janela sem janela
+
+Your nickname is displayed ingame, you can change it at any time.
+== Seu apelido é exibido no jogo, você pode alterá-lo a qualquer momento.
+
+Select a server with a low ping (latency)
+== Selecione um servidor com ping baixo (latência)
+
+Start tutorial
+== Começar tutorial
+
+Skip tutorial
+== Ignorar tutorial
