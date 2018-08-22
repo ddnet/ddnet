@@ -497,7 +497,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 		m_Vel = normalize(m_Vel) * 6000;
 }
 
-void CCharacterCore::Move(bool BugStoppersPassthrough)
+void CCharacterCore::Move()
 {
 	float RampValue = VelocityRamp(length(m_Vel)*50, m_pWorld->m_Tuning[g_Config.m_ClDummy].m_VelrampStart, m_pWorld->m_Tuning[g_Config.m_ClDummy].m_VelrampRange, m_pWorld->m_Tuning[g_Config.m_ClDummy].m_VelrampCurvature);
 
@@ -506,7 +506,7 @@ void CCharacterCore::Move(bool BugStoppersPassthrough)
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(IsSwitchActiveCb, this, &NewPos, &m_Vel, vec2(28.0f, 28.0f), 0.0f, !BugStoppersPassthrough);
+	m_pCollision->MoveBox(IsSwitchActiveCb, this, &NewPos, &m_Vel, vec2(28.0f, 28.0f), 0.0f, true);
 
 	m_Colliding = 0;
 	if(m_Vel.x < 0.001 && m_Vel.x > -0.001)
