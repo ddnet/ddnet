@@ -612,7 +612,7 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	{
 		pCharacter->m_Tick++;
 		TempCore.Tick(false, true);
-		TempCore.Move(false);
+		TempCore.Move();
 		TempCore.Quantize();
 	}
 
@@ -1708,7 +1708,7 @@ void CGameClient::OnPredict()
 			{
 				if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && IsWeaker[g_Config.m_ClDummy][c])
 				{
-					World.m_apCharacters[c]->Move(false);
+					World.m_apCharacters[c]->Move();
 					World.m_apCharacters[c]->Quantize();
 				}
 			}
@@ -1716,7 +1716,7 @@ void CGameClient::OnPredict()
 			// Us
 			if(World.m_apCharacters[m_Snap.m_LocalClientID])
 			{
-				World.m_apCharacters[m_Snap.m_LocalClientID]->Move(false);
+				World.m_apCharacters[m_Snap.m_LocalClientID]->Move();
 				World.m_apCharacters[m_Snap.m_LocalClientID]->Quantize();
 			}
 
@@ -1725,7 +1725,7 @@ void CGameClient::OnPredict()
 			{
 				if(c != m_Snap.m_LocalClientID && World.m_apCharacters[c] && !IsWeaker[g_Config.m_ClDummy][c])
 				{
-					World.m_apCharacters[c]->Move(false);
+					World.m_apCharacters[c]->Move();
 					World.m_apCharacters[c]->Quantize();
 				}
 			}
@@ -1736,7 +1736,7 @@ void CGameClient::OnPredict()
 			{
 				if(!World.m_apCharacters[c])
 					continue;
-				World.m_apCharacters[c]->Move(false);
+				World.m_apCharacters[c]->Move();
 				World.m_apCharacters[c]->Quantize();
 			}
 		}
@@ -2307,9 +2307,9 @@ void CGameClient::FindWeaker(bool IsWeaker[2][MAX_CLIENTS])
 					OtherChar.Tick(false, true);
 					LocalChar.Tick(false, true);
 				}
-				LocalChar.Move(false);
+				LocalChar.Move();
 				LocalChar.Quantize();
-				OtherChar.Move(false);
+				OtherChar.Move();
 				OtherChar.Quantize();
 			}
 			PredictErr[dir] = distance(OtherChar.m_Vel, OtherCharCur.m_Vel);
