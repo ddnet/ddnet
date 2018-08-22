@@ -512,6 +512,8 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 				io_close(File);
 				lock_unlock(ms_FailureFileLock);
 
+				pData->GameServer()->SendBroadcast("Database connection failed, score written to a file instead. Admins will add it manually in a few days.", -1);
+
 			return true;
 		}
 		lock_unlock(ms_FailureFileLock);
