@@ -411,36 +411,55 @@ public:
 			return false;
 
 		char aBuffer[MAX_PATH_LENGTH];
-		return !fs_remove(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)));
+		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
+
+		bool success = fs_remove(aBuffer);
+		if(!success)
+			dbg_msg("storage", "failed to remove: %s", aBuffer);
+		return success;
 	}
 
 	virtual bool RemoveBinaryFile(const char *pFilename)
 	{
 		char aBuffer[MAX_PATH_LENGTH];
-		return !fs_remove(GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer)));
+		GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer));
+
+		bool success = !fs_remove(aBuffer);
+		if(!success)
+			dbg_msg("storage", "failed to remove: %s", aBuffer);
+		return success;
 	}
 
 	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type)
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 			return false;
+
 		char aOldBuffer[MAX_PATH_LENGTH];
 		char aNewBuffer[MAX_PATH_LENGTH];
-		return !fs_rename(GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer)), GetPath(Type, pNewFilename, aNewBuffer, sizeof (aNewBuffer)));
+		GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer));
+		GetPath(Type, pNewFilename, aNewBuffer, sizeof(aNewBuffer));
+
+		bool success = !fs_rename(aOldBuffer, aNewBuffer);
+		if(!success)
+			dbg_msg("storage", "failed to rename: %s -> %s", aOldBuffer, aNewBuffer);
+		return success;
 	}
 
 	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename)
 	{
 		char aOldBuffer[MAX_PATH_LENGTH];
 		char aNewBuffer[MAX_PATH_LENGTH];
-
 		GetBinaryPath(pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
 		if(fs_makedir_rec_for(aNewBuffer) < 0)
 			dbg_msg("storage", "cannot create folder for: %s", aNewBuffer);
 
-		return !fs_rename(aOldBuffer, aNewBuffer);
+		bool success = !fs_rename(aOldBuffer, aNewBuffer);
+		if(!success)
+			dbg_msg("storage", "failed to rename: %s -> %s", aOldBuffer, aNewBuffer);
+		return success;
 	}
 
 	virtual bool CreateFolder(const char *pFoldername, int Type)
@@ -449,7 +468,12 @@ public:
 			return false;
 
 		char aBuffer[MAX_PATH_LENGTH];
-		return !fs_makedir(GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer)));
+		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
+
+		bool success = !fs_makedir(aBuffer);
+		if(!success)
+			dbg_msg("storage", "failed to create folder: %s", aBuffer);
+		return success;
 	}
 
 	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
