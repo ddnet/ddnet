@@ -1305,7 +1305,7 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 	return pCollision->m_pSwitchers && pCollision->m_pSwitchers[Number].m_Status[pThis->Team()] && pThis->Team() != TEAM_SUPER;
 }
 
-void CCharacter::HandleTiles(int Index)
+void CCharacter::HandleTiles(int Index, bool *pStopProcessing)
 {
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	int MapIndex = Index;
@@ -1326,6 +1326,7 @@ void CCharacter::HandleTiles(int Index)
 	int FTile2 = GameServer()->Collision()->GetFTileIndex(S2);
 	int FTile3 = GameServer()->Collision()->GetFTileIndex(S3);
 	int FTile4 = GameServer()->Collision()->GetFTileIndex(S4);
+	*pStopProcessing = false;
 	if(Index < 0)
 	{
 		m_LastRefillJumps = false;
@@ -1704,29 +1705,29 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_JUMP)
 	{
-		int newJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		int NewJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
-		if (newJumps != m_Core.m_Jumps)
+		if(NewJumps != m_Core.m_Jumps)
 		{
 			char aBuf[256];
-			if(newJumps == 1)
-				str_format(aBuf, sizeof(aBuf), "You can jump %d time", newJumps);
+			if(NewJumps == 1)
+				str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
 			else
-				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
+				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(),aBuf);
 
-			if (newJumps == 0 && !m_SuperJump)
+			if(NewJumps == 0 && !m_SuperJump)
 			{
 				m_NeededFaketuning |= FAKETUNE_NOJUMP;
 				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 			}
-			else if (m_Core.m_Jumps == 0)
+			else if(m_Core.m_Jumps == 0)
 			{
 				m_NeededFaketuning &= ~FAKETUNE_NOJUMP;
 				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 			}
 
-			m_Core.m_Jumps = newJumps;
+			m_Core.m_Jumps = NewJumps;
 		}
 	}
 	else if(GameServer()->Collision()->IsSwitch(MapIndex) == TILE_PENALTY && !m_LastPenalty)
@@ -1790,13 +1791,21 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = false;
 	}
 
+	if((m_TileIndex == TILE_DEATH) || (m_TileFIndex == TILE_DEATH))
+	{
+		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		*pStopProcessing = true;
+		return;
+	}
+
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z-1].size())
 	{
-		if (m_Super)
+		if(m_Super)
 			return;
 		int Num = Controller->m_TeleOuts[z-1].size();
 		m_Core.m_Pos = Controller->m_TeleOuts[z-1][(!Num)?Num:rand() % Num];
+		*pStopProcessing = true;
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -1814,11 +1823,12 @@ void CCharacter::HandleTiles(int Index)
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	if(evilz && Controller->m_TeleOuts[evilz-1].size())
 	{
-		if (m_Super)
+		if(m_Super)
 			return;
 		int Num = Controller->m_TeleOuts[evilz-1].size();
 		m_Core.m_Pos = Controller->m_TeleOuts[evilz-1][(!Num)?Num:rand() % Num];
-		if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
+		*pStopProcessing = true;
+		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0,0);
 
@@ -1840,15 +1850,16 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
 	{
-		if (m_Super)
+		if(m_Super)
 			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k=m_TeleCheckpoint-1; k >= 0; k--)
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
 			if(Controller->m_TeleCheckOuts[k].size())
 			{
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
+				*pStopProcessing = true;
 				m_Core.m_Vel = vec2(0,0);
 
 				if(!g_Config.m_SvTeleportHoldHook)
@@ -1868,6 +1879,7 @@ void CCharacter::HandleTiles(int Index)
 		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos))
 		{
 			m_Core.m_Pos = SpawnPos;
+			*pStopProcessing = true;
 			m_Core.m_Vel = vec2(0,0);
 
 			if(!g_Config.m_SvTeleportHoldHook)
@@ -1892,6 +1904,7 @@ void CCharacter::HandleTiles(int Index)
 			{
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num)?Num:rand() % Num];
+				*pStopProcessing = true;
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
@@ -1909,6 +1922,7 @@ void CCharacter::HandleTiles(int Index)
 		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos))
 		{
 			m_Core.m_Pos = SpawnPos;
+			*pStopProcessing = true;
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
@@ -2048,13 +2062,23 @@ void CCharacter::DDRacePostCoreTick()
 	HandleSkippableTiles(CurrentIndex);
 
 	// handle Anti-Skip tiles
-	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	std::list<int> Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
-		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-			HandleTiles(*i);
+	{
+		for(std::list<int>::iterator i = Indices.begin(); i != Indices.end(); i++)
+		{
+			bool StopProcessing;
+			HandleTiles(*i, &StopProcessing);
+			if(StopProcessing)
+			{
+				break;
+			}
+		}
+	}
 	else
 	{
-		HandleTiles(CurrentIndex);
+		bool StopProcessing;
+		HandleTiles(CurrentIndex, &StopProcessing);
 	}
 
 	// teleport gun
