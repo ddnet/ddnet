@@ -7,6 +7,9 @@
 
 #include "kernel.h"
 
+#define DDNET_INFO "ddnet-info.json"
+#define DDNET_INFO_TMP DDNET_INFO ".tmp"
+
 /*
 	Structure: CServerInfo
 */

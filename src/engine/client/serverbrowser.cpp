@@ -1105,7 +1105,7 @@ int CServerBrowser::HasRank(const char *pMap)
 void CServerBrowser::LoadDDNetInfoJson()
 {
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-	IOHANDLE File = pStorage->OpenFile("ddnet-info.json", IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE File = pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
 
 	if(!File)
 		return;

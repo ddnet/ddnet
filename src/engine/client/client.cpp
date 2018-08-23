@@ -2230,7 +2230,7 @@ void CClient::ResetDDNetInfo()
 void CClient::FinishDDNetInfo()
 {
 	ResetDDNetInfo();
-	m_pStorage->RenameFile("ddnet-info.json.tmp", "ddnet-info.json", IStorage::TYPE_SAVE);
+	m_pStorage->RenameFile(DDNET_INFO_TMP, DDNET_INFO, IStorage::TYPE_SAVE);
 	LoadDDNetInfo();
 }
 
@@ -2775,7 +2775,7 @@ void CClient::Run()
 	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 #endif
 
-	// loads the existing ddnet-info.json file if it exists
+	// loads the existing ddnet info file if it exists
 	LoadDDNetInfo();
 	// but still request the new one from server
 	if(g_Config.m_ClShowWelcome)
@@ -3769,7 +3769,7 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, "ddnet-info.json.tmp", IStorage::TYPE_SAVE, true);
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, DDNET_INFO_TMP, IStorage::TYPE_SAVE, true);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 
