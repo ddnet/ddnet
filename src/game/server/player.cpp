@@ -38,8 +38,7 @@ void CPlayer::Reset()
 {
 	m_DieTick = Server()->Tick();
 	m_JoinTick = Server()->Tick();
-	if (m_pCharacter)
-		delete m_pCharacter;
+	delete m_pCharacter;
 	m_pCharacter = 0;
 	m_KillMe = 0;
 	m_SpectatorID = SPEC_FREEVIEW;
