@@ -1614,7 +1614,7 @@ void CGameClient::OnPredict()
 
 								vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 
-								pTarget->LimitVel(&Temp);
+								pTarget->LimitForce(&Temp);
 
 								Temp -= pTarget->m_Vel;
 								pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
