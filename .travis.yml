@@ -12,12 +12,13 @@ addons:
     - libsdl2-dev
 script:
 - python scripts/check_header_guards.py
-- if [ "$TRAVIS_OS_NAME" = "osx" ]; then CMAKE_EXTRA_ARGS="-DDOWNLOAD_GTEST=ON"; fi
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then CMAKE_EXTRA_ARGS="-DDOWNLOAD_GTEST=ON -DDEV=ON"; fi
 - if [ "$TRAVIS_OS_NAME" != "osx" ]; then CMAKE_EXTRA_ARGS="-DGTEST_LIBRARY=../gtest_build/libgtest.a -DGTEST_MAIN_LIBRARY=../gtest_build/libgtest_main.a"; mkdir gtest_build; cmake -E chdir gtest_build cmake /usr/src/gtest; cmake --build gtest_build; fi
 - mkdir build; cd build
-- cmake -Werror=dev $CMAKE_EXTRA_ARGS ..
+- cmake -Werror=dev -DCMAKE_INSTALL_PREFIX=/usr $CMAKE_EXTRA_ARGS ..
 - make everything
 - make run_tests
+- if [ "$TRAVIS_OS_NAME" != "osx" ]; then make DESTDIR=install install; test -x install/bin/DDNet; test -x install/bin/DDNet-Server; test -d install/bin/data; test -d install/usr/lib; fi
 - make package_default
 - cd ..; mkdir build_debug; cd build_debug
 - cmake -Werror=dev -DCMAKE_BUILD_TYPE=Debug $CMAKE_EXTRA_ARGS ..
