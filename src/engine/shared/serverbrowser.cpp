@@ -30,7 +30,8 @@ bool IsFNG(const CServerInfo *pInfo)
 bool IsRace(const CServerInfo *pInfo)
 {
 	return str_find_nocase(pInfo->m_aGameType, "race")
-	    || str_find_nocase(pInfo->m_aGameType, "fastcap");
+	    || IsFastCap(pInfo)
+	    || IsDDRace(pInfo);
 }
 
 bool IsFastCap(const CServerInfo *pInfo)
@@ -41,14 +42,15 @@ bool IsFastCap(const CServerInfo *pInfo)
 bool IsDDRace(const CServerInfo *pInfo)
 {
 	return str_find_nocase(pInfo->m_aGameType, "ddrace")
-	    || str_find_nocase(pInfo->m_aGameType, "mkrace");
+	    || str_find_nocase(pInfo->m_aGameType, "mkrace")
+	    || IsDDNet(pInfo);
 }
 
 bool IsDDNet(const CServerInfo *pInfo)
 {
 	return str_find_nocase(pInfo->m_aGameType, "ddracenet")
 	    || str_find_nocase(pInfo->m_aGameType, "ddnet")
-	    || str_comp_nocase(pInfo->m_aGameType, "bw  ") == 0
+	    || str_comp_nocase_num(pInfo->m_aGameType, "bw  ", 4) == 0
 	    || str_comp_nocase(pInfo->m_aGameType, "bw") == 0;
 }
 
