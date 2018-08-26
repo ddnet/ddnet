@@ -7,7 +7,7 @@ struct CMapDescription
 	const char *m_pName;
 	int m_Size;
 	SHA256_DIGEST m_Sha256;
-	int m_Crc;
+	unsigned int m_Crc;
 
 	bool operator==(const CMapDescription &Other) const
 	{
@@ -44,12 +44,13 @@ static SHA256_DIGEST s(const char *pSha256)
 
 static CMapBugsInternal MAP_BUGS[] =
 {
-	{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600"), 0x0ae3a3d5}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}
+	{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600"), 0x0ae3a3d5}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)},
+	{{"GetSpeed2", 471518, s("e9ee31a82c10844ae576dde8587557f25627118ab52c0199e0e9486abe76cd35"), 0x8197b457}, BugToFlag(BUG_STOPPERS_PASSTHROUGH)}
 };
 
 CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256, int Crc)
 {
-	CMapDescription Map = {pName, Size, Sha256, Crc};
+	CMapDescription Map = {pName, Size, Sha256, (unsigned int)Crc};
 	CMapBugs Result;
 	Result.m_Extra = 0;
 	for(unsigned int i = 0; i < sizeof(MAP_BUGS) / sizeof(MAP_BUGS[0]); i++)
