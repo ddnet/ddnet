@@ -10,9 +10,10 @@
 int CSqlServer::ms_NumReadServer = 0;
 int CSqlServer::ms_NumWriteServer = 0;
 
-CSqlServer::CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, bool ReadOnly, bool SetUpDb) :
+CSqlServer::CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, LOCK &GlobalLock, bool ReadOnly, bool SetUpDb) :
 		m_Port(Port),
-		m_SetUpDB(SetUpDb)
+		m_SetUpDB(SetUpDb),
+		m_GlobalLock(GlobalLock)
 {
 	str_copy(m_aDatabase, pDatabase, sizeof(m_aDatabase));
 	str_copy(m_aPrefix, pPrefix, sizeof(m_aPrefix));
@@ -28,6 +29,7 @@ CSqlServer::CSqlServer(const char *pDatabase, const char *pPrefix, const char *p
 	ReadOnly ? ms_NumReadServer++ : ms_NumWriteServer++;
 
 	m_SqlLock = lock_create();
+	m_GlobalLock = GlobalLock;
 }
 
 CSqlServer::~CSqlServer()
@@ -91,8 +93,8 @@ bool CSqlServer::Connect()
 			dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 		}
 
-		dbg_msg("sql", "ERROR: SQL connection failed");
 		UnLock();
+		dbg_msg("sql", "ERROR: SQL connection failed");
 		return false;
 	}
 
@@ -114,7 +116,10 @@ bool CSqlServer::Connect()
 		connection_properties["OPT_CHARSET_NAME"] = sql::SQLString("utf8mb4");
 
 		// Create connection
-		m_pDriver = get_driver_instance();
+		{
+			LockScope globalLock(m_GlobalLock);
+			m_pDriver = get_driver_instance();
+		}
 		m_pConnection = m_pDriver->connect(connection_properties);
 
 		// Create Statement

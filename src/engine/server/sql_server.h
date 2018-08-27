@@ -7,10 +7,28 @@
 #include <cppconn/exception.h>
 #include <cppconn/statement.h>
 
+class LockScope
+{
+public:
+	LockScope(LOCK &Lock) :
+			m_Lock(Lock)
+	{
+		lock_wait(m_Lock);
+	}
+
+	~LockScope()
+	{
+		lock_unlock(m_Lock);
+	}
+
+private:
+	LOCK &m_Lock;
+};
+
 class CSqlServer
 {
 public:
-	CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, bool ReadOnly = true, bool SetUpDb = false);
+	CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, LOCK &GlobalLock, bool ReadOnly = true, bool SetUpDb = false);
 	~CSqlServer();
 
 	bool Connect();
@@ -52,6 +70,7 @@ private:
 	bool m_SetUpDB;
 
 	LOCK m_SqlLock;
+	LOCK &m_GlobalLock;
 };
 
 #endif
