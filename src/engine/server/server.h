@@ -91,7 +91,7 @@ class CServer : public IServer
 	class IStorage *m_pStorage;
 
 #if defined(CONF_SQL)
-	LOCK m_GlobalSqlLock;
+	lock m_GlobalSqlLock;
 	CSqlServer *m_apSqlReadServers[MAX_SQLSERVERS];
 	CSqlServer *m_apSqlWriteServers[MAX_SQLSERVERS];
 #endif
@@ -228,7 +228,6 @@ public:
 	array<CNameBan> m_aNameBans;
 
 	CServer();
-	~CServer();
 
 	int TrySetClientName(int ClientID, const char *pName);
 
