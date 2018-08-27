@@ -1,34 +1,18 @@
 #ifndef ENGINE_SERVER_SQL_SERVER_H
 #define ENGINE_SERVER_SQL_SERVER_H
 
+#include <base/tl/threading.h>
+
 #include <mysql_connection.h>
 
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
 #include <cppconn/statement.h>
 
-class LockScope
-{
-public:
-	LockScope(LOCK &Lock) :
-			m_Lock(Lock)
-	{
-		lock_wait(m_Lock);
-	}
-
-	~LockScope()
-	{
-		lock_unlock(m_Lock);
-	}
-
-private:
-	LOCK &m_Lock;
-};
-
 class CSqlServer
 {
 public:
-	CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, LOCK &GlobalLock, bool ReadOnly = true, bool SetUpDb = false);
+	CSqlServer(const char *pDatabase, const char *pPrefix, const char *pUser, const char *pPass, const char *pIp, int Port, lock *pGlobalLock, bool ReadOnly = true, bool SetUpDb = false);
 	~CSqlServer();
 
 	bool Connect();
@@ -46,9 +30,6 @@ public:
 	const char* GetPass() { return m_aPass; }
 	const char* GetIP() { return m_aIp; }
 	int GetPort() { return m_Port; }
-
-	void Lock() { lock_wait(m_SqlLock); }
-	void UnLock() { lock_unlock(m_SqlLock); }
 
 	static int ms_NumReadServer;
 	static int ms_NumWriteServer;
@@ -69,8 +50,8 @@ private:
 
 	bool m_SetUpDB;
 
-	LOCK m_SqlLock;
-	LOCK &m_GlobalLock;
+	lock m_SqlLock;
+	lock *m_pGlobalLock;
 };
 
 #endif
