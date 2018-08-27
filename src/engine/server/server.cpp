@@ -292,6 +292,8 @@ CServer::CServer()
 #endif
 
 #if defined (CONF_SQL)
+	m_GlobalSqlLock = lock_create();
+
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
 		m_apSqlReadServers[i] = 0;
@@ -305,6 +307,13 @@ CServer::CServer()
 	m_aErrorShutdownReason[0] = 0;
 
 	Init();
+}
+
+CServer::~CServer()
+{
+#if defined (CONF_SQL)
+	lock_destroy(m_GlobalSqlLock);
+#endif
 }
 
 int CServer::TrySetClientName(int ClientID, const char *pName)
@@ -2529,7 +2538,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	{
 		if (!apSqlServers[i])
 		{
-			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), pSelf->m_GlobalSqlLock, ReadOnly, SetUpDb);
 
 			if(SetUpDb)
 			{
