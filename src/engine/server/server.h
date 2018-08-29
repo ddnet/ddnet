@@ -22,6 +22,7 @@
 #include <engine/shared/uuid_manager.h>
 
 #include <base/tl/array.h>
+#include <base/tl/threading.h>
 
 #include "authmanager.h"
 #include "name_ban.h"
@@ -92,6 +93,7 @@ class CServer : public IServer
 
 #if defined(CONF_SQL)
 	lock m_GlobalSqlLock;
+
 	CSqlServer *m_apSqlReadServers[MAX_SQLSERVERS];
 	CSqlServer *m_apSqlWriteServers[MAX_SQLSERVERS];
 #endif

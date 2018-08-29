@@ -292,8 +292,6 @@ CServer::CServer()
 #endif
 
 #if defined (CONF_SQL)
-	m_GlobalSqlLock = lock();
-
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
 		m_apSqlReadServers[i] = 0;
