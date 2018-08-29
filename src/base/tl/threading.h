@@ -67,6 +67,7 @@ class semaphore
 public:
 	semaphore() { sphore_init(&sem); }
 	~semaphore() { sphore_destroy(&sem); }
+	semaphore(const semaphore&) = delete;
 	void wait() { sphore_wait(&sem); }
 	void signal() { sphore_signal(&sem); }
 };
@@ -86,6 +87,8 @@ public:
 		lock_destroy(var);
 	}
 
+	lock(const lock&) = delete;
+
 	void take() { lock_wait(var); }
 	void release() { lock_unlock(var); }
 };
@@ -104,6 +107,8 @@ public:
 	{
 		var->release();
 	}
+
+	scope_lock(const scope_lock&) = delete;
 };
 
 #endif // BASE_TL_THREADING_H
