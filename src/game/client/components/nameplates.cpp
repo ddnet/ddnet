@@ -31,12 +31,13 @@ void CNamePlates::RenderNameplate(
 	int ClientID = pPlayerInfo->m_ClientID;
 
 	vec2 Position;
-	if(!m_pClient->AntiPingPlayers())
+	if((!m_pClient->AntiPingPlayers() && !pPlayerInfo->m_Local) || m_pClient->m_Snap.m_SpecInfo.m_Active)
 	{
-		if(!pPlayerInfo->m_Local)
-			Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IntraTick);
-		else
-			Position = vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y);
+		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IntraTick);
+	}
+	else if(!m_pClient->AntiPingPlayers() && pPlayerInfo->m_Local)
+	{
+		Position = vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y);
 	}
 	else
 	{
