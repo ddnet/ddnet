@@ -22,6 +22,7 @@
 #include <engine/shared/uuid_manager.h>
 
 #include <base/tl/array.h>
+#include <base/tl/threading.h>
 
 #include "authmanager.h"
 #include "name_ban.h"
