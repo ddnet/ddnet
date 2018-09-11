@@ -182,8 +182,11 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
-		pGrabbed->m_Color = m_Color;
-		pGrabbed->m_Color.a = 255;
+		if (m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -211,8 +214,11 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
-		pGrabbed->m_Color = m_Color;
-		pGrabbed->m_Color.a = 255;
+		if (m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -246,8 +252,11 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
-		pGrabbed->m_Color = m_Color;
-		pGrabbed->m_Color.a = 255;
+		if (m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -280,8 +289,11 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
-		pGrabbed->m_Color = m_Color;
-		pGrabbed->m_Color.a = 255;
+		if (m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -311,8 +323,11 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
-		pGrabbed->m_Color = m_Color;
-		pGrabbed->m_Color.a = 255;
+		if (m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -329,8 +344,11 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TexID = m_TexID;
 		pGrabbed->m_Image = m_Image;
 		pGrabbed->m_Game = m_Game;
-		pGrabbed->m_Color = m_Color;
-		pGrabbed->m_Color.a = 255;
+		if (m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
 
 		pBrush->AddLayer(pGrabbed);
 

@@ -642,6 +642,8 @@ public:
 		m_GridActive = false;
 		m_GridFactor = 1;
 
+		m_BrushColorEnabled = true;
+
 		m_aFileName[0] = 0;
 		m_aFileSaveName[0] = 0;
 		m_ValidSaveFilename = false;
@@ -783,6 +785,8 @@ public:
 
 	bool m_GridActive;
 	int m_GridFactor;
+
+	bool m_BrushColorEnabled;
 
 	char m_aFileName[512];
 	char m_aFileSaveName[512];

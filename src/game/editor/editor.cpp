@@ -1129,6 +1129,15 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
 	}
 
+	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+	static int s_ColorBrushButton = 0;
+	if(DoButton_Editor(&s_ColorBrushButton, "Color", m_BrushColorEnabled, &Button, 0, "Toggle brush coloring"))
+	{
+		m_BrushColorEnabled = !m_BrushColorEnabled;
+	}
+
 	TB_Top.VSplitLeft(10.0f, 0, &TB_Top);
 
 	// zoom group
@@ -2353,8 +2362,15 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->MapScreen(x, y, x+w, y+h);
 			m_TilesetPicker.m_Image = t->m_Image;
 			m_TilesetPicker.m_TexID = t->m_TexID;
-			m_TilesetPicker.m_Color = t->m_Color;
-			m_TilesetPicker.m_Color.a = 255;
+			if (m_BrushColorEnabled)
+			{
+				m_TilesetPicker.m_Color = t->m_Color;
+				m_TilesetPicker.m_Color.a = 255;
+			}
+			else
+			{
+				m_TilesetPicker.m_Color = {255, 255, 255, 255};
+			}
 
 			m_TilesetPicker.m_Tele = t->m_Tele;
 			m_TilesetPicker.m_Speedup = t->m_Speedup;
