@@ -78,6 +78,7 @@ option(CLIENT "Compile client" ON)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
+option(PACKAGING "Make binaries suitable for package managers" OFF)
 
 # Set the default build type to Release
 if(NOT(CMAKE_BUILD_TYPE))
@@ -1499,7 +1500,7 @@ foreach(target ${TARGETS_LINK})
     target_link_libraries(${target} -stdlib=libc++)
     target_link_libraries(${target} -mmacosx-version-min=10.7)
   endif()
-  if(MINGW OR TARGET_OS STREQUAL "linux")
+  if((MINGW OR TARGET_OS STREQUAL "linux") AND NOT PACKAGING)
     # Statically link the standard libraries with on MinGW/Linux so we don't
     # have to ship them as DLLs.
     target_link_libraries(${target} -static-libgcc)
