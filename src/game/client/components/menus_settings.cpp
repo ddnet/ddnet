@@ -406,6 +406,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
 	Dummy.VSplitLeft(250.0f, &Dummy, &SkinPrefix);
+	SkinPrefix.VSplitLeft(150.0f, &SkinPrefix, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
@@ -431,12 +432,31 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		g_Config.m_ClFatSkins ^= 1;
 	}
-	
-	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
-	UI()->DoLabelScaled(&SkinPrefixLabel, Localize("Skin prefix (e.g. kitty, coala, santa)"), 14.0f, -1);
 
 	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
-	DoEditBox(g_Config.m_ClSkinPrefix, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_ClSkinPrefix);
+	UI()->DoLabelScaled(&SkinPrefixLabel, Localize("Skin prefix"), 14.0f, -1);
+
+	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
+	{
+		static int s_ClearButton = 0;
+		DoClearableEditBox(g_Config.m_ClSkinPrefix, &s_ClearButton, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_ClSkinPrefix);
+	}
+
+	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
+	{
+		static const char *s_aSkinPrefixes[] = {"kitty", "coala", "santa"};
+		for(unsigned i = 0; i < sizeof(s_aSkinPrefixes) / sizeof(s_aSkinPrefixes[0]); i++)
+		{
+			const char *pPrefix = s_aSkinPrefixes[i];
+			CUIRect Button;
+			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
+			Button.HMargin(2.0f, &Button);
+			if(DoButton_Menu(&s_aSkinPrefixes[i], pPrefix, 0, &Button))
+			{
+				str_copy(g_Config.m_ClSkinPrefix, pPrefix, sizeof(g_Config.m_ClSkinPrefix));
+			}
+		}
+	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
@@ -620,24 +640,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &QuickSearchClearButton);
+		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
 		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
-		if(DoEditBox(&g_Config.m_ClSkinFilterString, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
+		if(DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitSkinlist = true;
-
-		// clear button
-		{
-			static int s_ClearButton = 0;
-			RenderTools()->DrawUIRect(&QuickSearchClearButton, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-			UI()->DoLabel(&QuickSearchClearButton, "×", QuickSearchClearButton.h*ms_FontmodHeight, 0);
-			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &QuickSearchClearButton))
-			{
-				g_Config.m_ClSkinFilterString[0] = 0;
-				UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
-				s_InitSkinlist = true;
-			}
-		}
 	}
 }
 

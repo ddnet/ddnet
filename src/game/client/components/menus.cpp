@@ -456,6 +456,28 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	return ReturnValue;
 }
 
+int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners, const char *pEmptyText)
+{
+	bool ReturnValue = false;
+	CUIRect EditBox;
+	CUIRect ClearButton;
+	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
+	if(DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, Offset, Hidden, Corners&~CUI::CORNER_R, pEmptyText))
+	{
+		ReturnValue = true;
+	}
+
+	RenderTools()->DrawUIRect(&ClearButton, vec4(1, 1, 1, 0.33f) * ButtonColorMul(pClearID), Corners&~CUI::CORNER_L, 3.0f);
+	UI()->DoLabel(&ClearButton, "×", ClearButton.h * ms_FontmodHeight, 0);
+	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
+	{
+		pStr[0] = 0;
+		UI()->SetActiveItem(pID);
+		ReturnValue = true;
+	}
+	return ReturnValue;
+}
+
 float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 {
 	CUIRect Handle;

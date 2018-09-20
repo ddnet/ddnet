@@ -492,7 +492,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 	// render quick search
 	{
-		const char *pLabel = "\xEE\xA2\xB6";
+		const char *pLabel = "\xEE\xA2\xB6"; // U+0e8b6
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
 		UI()->DoLabelScaled(&QuickSearch, pLabel, 16.0f, -1);
@@ -501,30 +501,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		TextRender()->SetCurFont(NULL);
 		QuickSearch.VSplitLeft(w, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-		QuickSearch.VSplitLeft(QuickSearch.w-15.0f, &QuickSearch, &Button);
 		static float Offset = 0.0f;
 		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
-		if(DoEditBox(&g_Config.m_BrFilterString, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_L, Localize("Search")))
-			Client()->ServerBrowserUpdate();
-	}
-
-	// clear button
-	{
 		static int s_ClearButton = 0;
-		RenderTools()->DrawUIRect(&Button, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-		UI()->DoLabel(&Button, "×", Button.h*ms_FontmodHeight, 0);
-		if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button))
-		{
-			g_Config.m_BrFilterString[0] = 0;
-			UI()->SetActiveItem(&g_Config.m_BrFilterString);
+		if(DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			Client()->ServerBrowserUpdate();
-		}
 	}
 
 	// render quick exclude
 	{
-		const char *pLabel = Localize("\xEE\x85\x8B");
+		const char *pLabel = Localize("\xEE\x85\x8B"); // U+0e14b
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
 		UI()->DoLabelScaled(&QuickExclude, pLabel, 16.0f, -1);
@@ -534,24 +521,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickExclude.VSplitLeft(w, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(QuickExclude.w-15.0f, &QuickExclude, &Button);
+		static int s_ClearButton = 0;
 		static float Offset = 0.0f;
 		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
-		if(DoEditBox(&g_Config.m_BrExcludeString, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_L, Localize("Exclude")))
+		if(DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &Offset, false, CUI::CORNER_ALL, Localize("Exclude")))
 			Client()->ServerBrowserUpdate();
-	}
-
-	// clear button
-	{
-		static int s_ClearButton = 0;
-		RenderTools()->DrawUIRect(&Button, vec4(1,1,1,0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
-		UI()->DoLabel(&Button, "×", Button.h*ms_FontmodHeight, 0);
-		if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &Button))
-		{
-			g_Config.m_BrExcludeString[0] = 0;
-			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
-			Client()->ServerBrowserUpdate();
-		}
 	}
 
 	// render status
