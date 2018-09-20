@@ -255,6 +255,7 @@ public:
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
 	const char *ClientName(int ClientID);
+	bool ClientNameReserved(int ClientID);
 	const char *ClientClan(int ClientID);
 	int ClientCountry(int ClientID);
 	bool ClientIngame(int ClientID);

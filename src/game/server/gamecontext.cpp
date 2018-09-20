@@ -899,17 +899,27 @@ void CGameContext::OnTick()
 	}
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_apPlayers[i] && m_apPlayers[i]->m_pPostJson)
+		CPlayer *pPlayer = m_apPlayers[i];
+		if(pPlayer)
 		{
-			switch(m_apPlayers[i]->m_pPostJson->State())
+			if(pPlayer->m_pPostJson)
 			{
-			case HTTP_DONE:
-				m_apPlayers[i]->m_pPostJson = NULL;
-				break;
-			case HTTP_ERROR:
-				dbg_msg("modhelp", "http request failed for cid=%d", i);
-				m_apPlayers[i]->m_pPostJson = NULL;
-				break;
+				switch(pPlayer->m_pPostJson->State())
+				{
+				case HTTP_DONE:
+					pPlayer->m_pPostJson = NULL;
+					break;
+				case HTTP_ERROR:
+					dbg_msg("modhelp", "http request failed for cid=%d", i);
+					pPlayer->m_pPostJson = NULL;
+					break;
+				}
+			}
+
+			if(pPlayer->m_NameReserved && !Server()->ClientAuthed(i) &&
+				Server()->Tick() - max(pPlayer->m_LastChangeInfo, pPlayer->m_LastAuthChange) > g_Config.m_SvReservedNameGrace * Server()->TickSpeed())
+			{
+				Server()->Kick(i, "Using a reserved name");
 			}
 		}
 	}
@@ -1092,6 +1102,13 @@ void CGameContext::OnClientEnter(int ClientID)
 				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers .");
 
 			m_apPlayers[ClientID]->m_ShowOthers = true;
+		}
+
+		if(!Server()->ClientAuthed(ClientID) && m_apPlayers[ClientID]->m_NameReserved)
+		{
+			char aWarning[256];
+			str_format(aWarning, sizeof(aWarning), "'%s' is a reserved name. You will be kicked in %ds if you don't authenticate.", Server()->ClientName(ClientID), g_Config.m_SvReservedNameGrace);
+			SendChatTarget(ClientID, aWarning);
 		}
 	}
 	m_VoteUpdate = true;
@@ -1832,13 +1849,21 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
 				SendChat(-1, CGameContext::CHAT_ALL, aChatText);
 
-				// reload scores
+				m_apPlayers[ClientID]->m_NameReserved = Server()->ClientNameReserved(ClientID);
+				if(!Server()->GetAuthedState(ClientID) && m_apPlayers[ClientID]->m_NameReserved)
+				{
+					char aWarning[256];
+					str_format(aWarning, sizeof(aWarning), "'%s' is a reserved name. You will be kicked in %ds if you don't authenticate.", Server()->ClientName(ClientID), g_Config.m_SvReservedNameGrace);
+					SendChatTarget(ClientID, aWarning);
+				}
 
+				// reload scores
 				Score()->PlayerData(ClientID)->Reset();
 				Score()->LoadScore(ClientID);
 				Score()->PlayerData(ClientID)->m_CurrentTime = Score()->PlayerData(ClientID)->m_BestTime;
 				m_apPlayers[ClientID]->m_Score = (Score()->PlayerData(ClientID)->m_BestTime)?Score()->PlayerData(ClientID)->m_BestTime:-9999;
 			}
+
 			Server()->SetClientClan(ClientID, pMsg->m_pClan);
 			Server()->SetClientCountry(ClientID, pMsg->m_Country);
 			str_copy(pPlayer->m_TeeInfos.m_SkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_SkinName));
@@ -1941,6 +1966,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		// set start infos
 		Server()->SetClientName(ClientID, pMsg->m_pName);
+		m_apPlayers[ClientID]->m_NameReserved = Server()->ClientNameReserved(ClientID);
 		Server()->SetClientClan(ClientID, pMsg->m_pClan);
 		Server()->SetClientCountry(ClientID, pMsg->m_Country);
 		str_copy(pPlayer->m_TeeInfos.m_SkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_SkinName));
@@ -3239,6 +3265,14 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 {
 	if(m_apPlayers[ClientID])
 	{
+		m_apPlayers[ClientID]->m_LastAuthChange = Server()->Tick();
+		if(!Level && m_apPlayers[ClientID]->m_NameReserved)
+		{
+			char aWarning[256];
+			str_format(aWarning, sizeof(aWarning), "'%s' is a reserved name. You will be kicked in %ds if you don't authenticate.", Server()->ClientName(ClientID), g_Config.m_SvReservedNameGrace);
+			SendChatTarget(ClientID, aWarning);
+		}
+
 		char aBuf[512], aIP[NETADDR_MAXSTRSIZE];
 		Server()->GetClientAddr(ClientID, aIP, sizeof(aIP));
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIP, g_Config.m_SvVoteKickBantime);

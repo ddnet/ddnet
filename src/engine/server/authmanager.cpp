@@ -32,7 +32,7 @@ void CAuthManager::Init()
 	}
 }
 
-int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
+int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel, const char *pNick)
 {
 	if(FindKey(pIdent) >= 0)
 		return -1;
@@ -43,10 +43,20 @@ int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, con
 	mem_copy(Key.m_aSalt, pSalt, SALT_BYTES);
 	Key.m_Level = AuthLevel;
 
+	if(pNick)
+	{
+		char aTrimmedNick[64];
+		str_copy(aTrimmedNick, str_utf8_skip_whitespaces(pNick), sizeof(aTrimmedNick));
+		str_utf8_trim_right(aTrimmedNick);
+		str_copy(Key.m_aNick, aTrimmedNick, sizeof(Key.m_aNick));
+	}
+	else
+		Key.m_aNick[0] = '\0';
+
 	return m_aKeys.add(Key);
 }
 
-int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
+int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel, const char *pNick)
 {
 	md5_state_t ctx;
 	unsigned char aHash[MD5_BYTES];
@@ -61,7 +71,7 @@ int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
 	md5_append(&ctx, aSalt, SALT_BYTES);
 	md5_finish(&ctx, aHash);
 
-	return AddKeyHash(pIdent, aHash, aSalt, AuthLevel);
+	return AddKeyHash(pIdent, aHash, aSalt, AuthLevel, pNick);
 }
 
 int CAuthManager::RemoveKey(int Slot)
@@ -128,7 +138,7 @@ const char *CAuthManager::KeyIdent(int Slot)
 	return m_aKeys[Slot].m_aIdent;
 }
 
-void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
+void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel, const char *pNick)
 {
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return;
@@ -137,9 +147,19 @@ void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const uns
 	mem_copy(pKey->m_aPw, pHash, MD5_BYTES);
 	mem_copy(pKey->m_aSalt, pSalt, SALT_BYTES);
 	pKey->m_Level = AuthLevel;
+
+	if(pNick)
+	{
+		char aTrimmedNick[64];
+		str_copy(aTrimmedNick, str_utf8_skip_whitespaces(pNick), sizeof(aTrimmedNick));
+		str_utf8_trim_right(aTrimmedNick);
+		str_copy(pKey->m_aNick, aTrimmedNick, sizeof(pKey->m_aNick));
+	}
+	else
+		pKey->m_aNick[0] = '\0';
 }
 
-void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
+void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel, const char *pNick)
 {
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return;
@@ -157,13 +177,13 @@ void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 	md5_append(&ctx, aSalt, SALT_BYTES);
 	md5_finish(&ctx, aHash);
 
-	UpdateKeyHash(Slot, aHash, aSalt, AuthLevel);
+	UpdateKeyHash(Slot, aHash, aSalt, AuthLevel, pNick);
 }
 
 void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)
 {
 	for(int i = 0; i < m_aKeys.size(); i++)
-		pfnListCallback(m_aKeys[i].m_aIdent, m_aKeys[i].m_Level, pUser);
+		pfnListCallback(m_aKeys[i].m_aIdent, m_aKeys[i].m_Level, m_aKeys[i].m_aNick, pUser);
 }
 
 void CAuthManager::AddDefaultKey(int Level, const char *pPw)
@@ -187,4 +207,17 @@ int CAuthManager::NumNonDefaultKeys()
 {
 	int DefaultCount = (m_aDefault[0] >= 0) + (m_aDefault[1] >= 0) + (m_aDefault[2] >= 0);
 	return m_aKeys.size() - DefaultCount;
+}
+
+bool CAuthManager::CanUseName(const char *pName, int AuthKey)
+{
+	if(AuthKey >= 0)
+		return true;
+
+	// Should probably use str_utf8_to_skeleton or str_utf8_comp_confusable here
+	for(int i = 0; i < m_aKeys.size(); i++)
+		if(!str_comp(m_aKeys[i].m_aNick, pName))
+			return false;
+
+	return true;
 }

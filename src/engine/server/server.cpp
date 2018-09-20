@@ -516,7 +516,15 @@ const char *CServer::ClientName(int ClientID)
 		return m_aClients[ClientID].m_aName;
 	else
 		return "(connecting)";
+}
 
+bool CServer::ClientNameReserved(int ClientID)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
+		return false;
+
+	bool CanUse = m_AuthManager.CanUseName(m_aClients[ClientID].m_aName, m_aClients[ClientID].m_AuthKey);
+	return !CanUse;
 }
 
 const char *CServer::ClientClan(int ClientID)
@@ -2147,6 +2155,7 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 	const char *pIdent = pResult->GetString(0);
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
+	const char *pNick = pResult->NumArguments() > 3 ? pResult->GetString(3) : 0;
 
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
@@ -2156,7 +2165,7 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 	}
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
-	if(pManager->AddKey(pIdent, pPw, Level) < 0)
+	if(pManager->AddKey(pIdent, pPw, Level, pNick) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
@@ -2175,6 +2184,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 	const char *pSalt = pResult->GetString(3);
+	const char *pNick = pResult->NumArguments() > 4 ? pResult->GetString(4) : 0;
 
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
@@ -2199,7 +2209,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 
-	if(pManager->AddKeyHash(pIdent, aHash, aSalt, Level) < 0)
+	if(pManager->AddKeyHash(pIdent, aHash, aSalt, Level, pNick) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
@@ -2217,6 +2227,7 @@ void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
 	const char *pIdent = pResult->GetString(0);
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
+	const char *pNick = pResult->NumArguments() > 3 ? pResult->GetString(3) : 0;
 
 	int KeySlot = pManager->FindKey(pIdent);
 	if(KeySlot == -1)
@@ -2232,7 +2243,7 @@ void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	pManager->UpdateKey(KeySlot, pPw, Level);
+	pManager->UpdateKey(KeySlot, pPw, Level, pNick);
 	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
@@ -2247,6 +2258,7 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 	const char *pSalt = pResult->GetString(3);
+	const char *pNick = pResult->NumArguments() > 4 ? pResult->GetString(4) : 0;
 
 	int KeySlot = pManager->FindKey(pIdent);
 	if(KeySlot == -1)
@@ -2276,7 +2288,7 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	pManager->UpdateKeyHash(KeySlot, aHash, aSalt, Level);
+	pManager->UpdateKeyHash(KeySlot, aHash, aSalt, Level, pNick);
 	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
@@ -2304,12 +2316,12 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key removed, all users logged out");
 }
 
-static void ListKeysCallback(const char *pIdent, int Level, void *pUser)
+static void ListKeysCallback(const char *pIdent, int Level, const char *pNick, void *pUser)
 {
 	static const char LSTRING[][10] = {"helper", "moderator", "admin"};
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s %s", pIdent, LSTRING[Level - 1]);
+	str_format(aBuf, sizeof(aBuf), "%s (key='%s') %s", pNick, pIdent, LSTRING[Level - 1]);
 	((CServer *)pUser)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf);
 }
 
@@ -2773,10 +2785,10 @@ void CServer::RegisterCommands()
 
 	Console()->Register("dnsbl_status", "", CFGFLAG_SERVER, ConDnsblStatus, this, "List blacklisted players");
 
-	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
-	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAddHashed, this, "Add a prehashed rcon key");
-	Console()->Register("auth_change", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdate, this, "Update a rcon key");
-	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data");
+	Console()->Register("auth_add", "s[ident] s[level] s[pw] ?r[nick]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
+	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt] ?r[nick]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAddHashed, this, "Add a prehashed rcon key");
+	Console()->Register("auth_change", "s[ident] s[level] s[pw] ?r[nick]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdate, this, "Update a rcon key");
+	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt] ?r[nick]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data");
 	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key");
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 

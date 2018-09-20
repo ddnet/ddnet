@@ -33,6 +33,7 @@ public:
 
 	virtual int MaxClients() const = 0;
 	virtual const char *ClientName(int ClientID) = 0;
+	virtual bool ClientNameReserved(int ClientID) = 0;
 	virtual const char *ClientClan(int ClientID) = 0;
 	virtual int ClientCountry(int ClientID) = 0;
 	virtual bool ClientIngame(int ClientID) = 0;
