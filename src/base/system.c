@@ -263,7 +263,7 @@ void mem_zero(void *block,unsigned size)
 IOHANDLE io_open(const char *filename, int flags)
 {
 	const char *error;
-	const char *modes;
+	const char *modes = 0;
 	IOHANDLE result = 0x0;
 	
 	if(flags == IOFLAG_READ)
@@ -272,6 +272,9 @@ IOHANDLE io_open(const char *filename, int flags)
 		modes = "wb";
 	if(flags == IOFLAG_APPEND)
 		modes = "ab";
+
+	if(!modes)
+		return 0x0;
 
 	errno = 0;
 	result = (IOHANDLE)fopen(filename, modes);
