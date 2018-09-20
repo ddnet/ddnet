@@ -443,32 +443,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
-		bool Left = true;
-		CUIRect Right;
 		static const char *s_aSkinPrefixes[] = {"kitty", "coala", "santa"};
 		for(unsigned i = 0; i < sizeof(s_aSkinPrefixes) / sizeof(s_aSkinPrefixes[0]); i++)
 		{
 			const char *pPrefix = s_aSkinPrefixes[i];
 			CUIRect Button;
-			if(Left)
-			{
-				SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
-				Button.VSplitMid(&Button, &Right);
-			}
-			else
-			{
-				Button = Right;
-			}
+			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
-			if(Left)
-			{
-				Button.VSplitRight(2.0f, &Button, 0);
-			}
-			else
-			{
-				Button.VSplitLeft(2.0f, 0, &Button);
-			}
-			Left = !Left;
 			if(DoButton_Menu(&s_aSkinPrefixes[i], pPrefix, 0, &Button))
 			{
 				str_copy(g_Config.m_ClSkinPrefix, pPrefix, sizeof(g_Config.m_ClSkinPrefix));
