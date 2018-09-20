@@ -59,4 +59,3 @@ RUN printf '#!/bin/bash\n \
 RUN chmod +x build-all.sh
 RUN mkdir /build
 
-ADD . /ddnet
