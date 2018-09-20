@@ -436,18 +436,19 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	UI()->DoLabelScaled(&SkinPrefixLabel, Localize("Skin prefix"), 14.0f, -1);
 
 	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
-	DoEditBox(g_Config.m_ClSkinPrefix, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_ClSkinPrefix);
+	{
+		static int s_ClearButton = 0;
+		DoClearableEditBox(g_Config.m_ClSkinPrefix, &s_ClearButton, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_ClSkinPrefix);
+	}
 
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
 		bool Left = true;
 		CUIRect Right;
-		static const char *s_aSkinPrefixes[] = {0, "kitty", "coala", "santa"};
+		static const char *s_aSkinPrefixes[] = {"kitty", "coala", "santa"};
 		for(unsigned i = 0; i < sizeof(s_aSkinPrefixes) / sizeof(s_aSkinPrefixes[0]); i++)
 		{
 			const char *pPrefix = s_aSkinPrefixes[i];
-			const char *pLabel = pPrefix ? pPrefix : Localize("none");
-			const char *pText = pPrefix ? pPrefix : "";
 			CUIRect Button;
 			if(Left)
 			{
@@ -468,9 +469,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				Button.VSplitLeft(2.0f, 0, &Button);
 			}
 			Left = !Left;
-			if(DoButton_Menu(&s_aSkinPrefixes[i], pLabel, 0, &Button))
+			if(DoButton_Menu(&s_aSkinPrefixes[i], pPrefix, 0, &Button))
 			{
-				str_copy(g_Config.m_ClSkinPrefix, pText, sizeof(g_Config.m_ClSkinPrefix));
+				str_copy(g_Config.m_ClSkinPrefix, pPrefix, sizeof(g_Config.m_ClSkinPrefix));
 			}
 		}
 	}
