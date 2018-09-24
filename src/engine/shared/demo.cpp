@@ -820,7 +820,7 @@ int CDemoPlayer::SetPos(float Percent)
 
 void CDemoPlayer::SetSpeed(float Speed)
 {
-	m_Info.m_Info.m_Speed = Speed;
+	m_Info.m_Info.m_Speed = clamp(Speed, 0.f, 64.f);
 }
 
 void CDemoPlayer::SetSpeedIndex(int Offset)
