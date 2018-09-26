@@ -366,6 +366,8 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 		return;
+	if(pBrush->m_Type != LAYERTYPE_TILES)
+		return;
 
 	Snap(&Rect);
 
@@ -1015,6 +1017,8 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 		return;
+	if(pBrush->m_Type != LAYERTYPE_TILES)
+		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
 
@@ -1046,13 +1050,13 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			else
 			{
 				m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
-				m_pTeleTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
-				if(m_pTiles[fy*m_Width+fx].m_Index > 0)
+				if(pLt->m_Tele && m_pTiles[fy*m_Width+fx].m_Index > 0)
 				{
 					if((!pLt->m_pTeleTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNum)
 						m_pTeleTile[fy*m_Width+fx].m_Number = m_pEditor->m_TeleNumber;
 					else
 						m_pTeleTile[fy*m_Width+fx].m_Number = pLt->m_pTeleTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number;
+					m_pTeleTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
 				}
 			}
 		}
@@ -1280,6 +1284,8 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 		return;
+	if(pBrush->m_Type != LAYERTYPE_TILES)
+		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
 
@@ -1311,8 +1317,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			else
 			{
 				m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
-				m_pSpeedupTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
-				if(m_pTiles[fy*m_Width+fx].m_Index > 0)
+				if(pLt->m_Speedup && m_pTiles[fy*m_Width+fx].m_Index > 0)
 				{
 					if((!pLt->m_pSpeedupTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Force && m_pEditor->m_SpeedupForce) || m_pEditor->m_SpeedupForce != pLt->m_SpeedupForce)
 						m_pSpeedupTile[fy*m_Width+fx].m_Force = m_pEditor->m_SpeedupForce;
@@ -1326,6 +1331,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 						m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 					else
 						m_pSpeedupTile[fy*m_Width+fx].m_MaxSpeed = pLt->m_pSpeedupTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_MaxSpeed;
+					m_pSpeedupTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
 				}
 			}
 		}
@@ -1557,6 +1563,8 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 		return;
+	if(pBrush->m_Type != LAYERTYPE_TILES)
+		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
 
@@ -1586,11 +1594,11 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				m_pSwitchTile[fy*m_Width+fx].m_Number = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
 			}
-				else
+			else
 			{
 				m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
 				m_pSwitchTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
-				if(m_pEditor->m_SwitchNum && m_pTiles[fy*m_Width+fx].m_Index > 0)
+				if(pLt->m_Switch && m_pEditor->m_SwitchNum && m_pTiles[fy*m_Width+fx].m_Index > 0)
 				{
 					if((!pLt->m_pSwitchTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number) || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
 						m_pSwitchTile[fy*m_Width+fx].m_Number = m_pEditor->m_SwitchNum;
@@ -1819,6 +1827,8 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly)
 			return;
+	if(pBrush->m_Type != LAYERTYPE_TILES)
+		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
 
@@ -1848,13 +1858,13 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				else
 				{
 					m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
-					m_pTuneTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
-					if(m_pTiles[fy*m_Width+fx].m_Index > 0)
+					if(pLt->m_Tune && m_pTiles[fy*m_Width+fx].m_Index > 0)
 					{
 						if((!pLt->m_pTuneTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number && m_pEditor->m_TuningNum) || m_pEditor->m_TuningNum != pLt->m_TuningNumber)
 							m_pTuneTile[fy*m_Width+fx].m_Number = m_pEditor->m_TuningNum;
 						else
 							m_pTuneTile[fy*m_Width+fx].m_Number = pLt->m_pTuneTile[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)].m_Number;
+						m_pTuneTile[fy*m_Width+fx].m_Type = m_pTiles[fy*m_Width+fx].m_Index;
 					}
 				}
 			}
