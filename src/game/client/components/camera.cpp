@@ -27,7 +27,7 @@ void CCamera::OnRender()
 	CServerInfo Info;
 	Client()->GetServerInfo(&Info);
 
-	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || IsBlockWorlds(&Info) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		m_ZoomSet = false;
 		m_Zoom = 1.0;
@@ -108,7 +108,7 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || IsBlockWorlds(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		((CCamera *)pUserData)->m_Zoom *= ZoomStep;
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
@@ -116,7 +116,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	CServerInfo Info;
 	pSelf->Client()->GetServerInfo(&Info);
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || IsBlockWorlds(&Info) || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		if(((CCamera *)pUserData)->m_Zoom < 500.0f/ZoomStep)
 		{
