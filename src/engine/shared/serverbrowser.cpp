@@ -49,7 +49,7 @@ bool IsDDRace(const CServerInfo *pInfo)
 bool IsDDNet(const CServerInfo *pInfo)
 {
 	return str_find_nocase(pInfo->m_aGameType, "ddracenet")
-		|| str_find_nocase(pInfo->m_aGameType, "ddnet");
+	   || str_find_nocase(pInfo->m_aGameType, "ddnet");
 }
 
 bool IsBlockWorlds(const CServerInfo *pInfo)
