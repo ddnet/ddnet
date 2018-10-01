@@ -1418,8 +1418,6 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 
 	void *pID = &pSource->m_Position;
 
-	static float s_LastWx;
-	static float s_LastWy;
 	static int s_Operation = OP_NONE;
 
 	float wx = UI()->MouseWorldX();
@@ -1441,7 +1439,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx*m_MouseDeltaWx+m_MouseDeltaWy*m_MouseDeltaWy > 0.5f)
+		if(m_MouseDeltaWx*m_MouseDeltaWx+m_MouseDeltaWy*m_MouseDeltaWy > 0.05f)
 		{
 			if(s_Operation == OP_MOVE)
 			{
@@ -1465,14 +1463,11 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 				}
 				else
 				{
-					pSource->m_Position.x += f2fx(wx-s_LastWx);
-					pSource->m_Position.y += f2fx(wy-s_LastWy);
+					pSource->m_Position.x = f2fx(wx);
+					pSource->m_Position.y = f2fx(wy);
 				}
 			}
 		}
-
-		s_LastWx = wx;
-		s_LastWy = wy;
 
 		if(s_Operation == OP_CONTEXT_MENU)
 		{
@@ -1520,8 +1515,6 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 
 			UI()->SetActiveItem(pID);
 			m_SelectedSource = Index;
-			s_LastWx = wx;
-			s_LastWy = wy;
 		}
 
 		if(UI()->MouseButton(1))
@@ -1555,8 +1548,6 @@ void CEditor::DoQuad(CQuad *q, int Index)
 	// some basic values
 	void *pID = &q->m_aPoints[4]; // use pivot addr as id
 	static array<array<CPoint>> s_lRotatePoints;
-	static float s_LastWx;
-	static float s_LastWy;
 	static int s_Operation = OP_NONE;
 	static float s_RotateAngle = 0;
 	float wx = UI()->MouseWorldX();
@@ -1587,7 +1578,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		if(m_MouseDeltaWx*m_MouseDeltaWx+m_MouseDeltaWy*m_MouseDeltaWy > 0.5f)
+		if(m_MouseDeltaWx*m_MouseDeltaWx+m_MouseDeltaWy*m_MouseDeltaWy > 0.05f)
 		{
 			// check if we only should move pivot
 			if(s_Operation == OP_MOVE_PIVOT)
@@ -1612,8 +1603,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				}
 				else
 				{
-					q->m_aPoints[4].x += f2fx(wx-s_LastWx);
-					q->m_aPoints[4].y += f2fx(wy-s_LastWy);
+					q->m_aPoints[4].x = f2fx(wx);
+					q->m_aPoints[4].y = f2fx(wy);
 				}
 			}
 			else if(s_Operation == OP_MOVE_ALL)
@@ -1650,13 +1641,16 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				}
 				else
 				{
+					int OffsetX = f2fx(wx) - q->m_aPoints[4].x;
+					int OffsetY = f2fx(wy) - q->m_aPoints[4].y;
+
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
 						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
 						for(int v = 0; v < 5; v++)
 						{
-							pCurrentQuad->m_aPoints[v].x += f2fx(wx-s_LastWx);
-							pCurrentQuad->m_aPoints[v].y += f2fx(wy-s_LastWy);
+							pCurrentQuad->m_aPoints[v].x += OffsetX;
+							pCurrentQuad->m_aPoints[v].y += OffsetY;
 						}
 					}
 				}
@@ -1677,8 +1671,6 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		}
 
 		s_RotateAngle += (m_MouseDeltaX) * 0.002f;
-		s_LastWx = wx;
-		s_LastWy = wy;
 
 		if(s_Operation == OP_CONTEXT_MENU)
 		{
@@ -1777,8 +1769,6 @@ void CEditor::DoQuad(CQuad *q, int Index)
 			}
 
 			UI()->SetActiveItem(pID);
-			s_LastWx = wx;
-			s_LastWy = wy;
 		}
 
 		if(UI()->MouseButton(1))
@@ -1852,11 +1842,9 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 	if(UI()->ActiveItem() == pID)
 	{
-		float dx = m_MouseDeltaWx;
-		float dy = m_MouseDeltaWy;
 		if(!s_Moved)
 		{
-			if(dx*dx+dy*dy > 0.5f)
+			if(m_MouseDeltaWx*m_MouseDeltaWx+m_MouseDeltaWy*m_MouseDeltaWy > 0.05f)
 				s_Moved = true;
 		}
 
@@ -1896,14 +1884,17 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				}
 				else
 				{
+					int OffsetX = f2fx(wx) - pQuad->m_aPoints[V].x;
+					int OffsetY = f2fx(wy) - pQuad->m_aPoints[V].y;
+
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
 						CQuad *pCurrentQuad = &pLayer->m_lQuads[m_lSelectedQuads[i]];
 						for(int m = 0; m < 4; m++)
 							if(m_SelectedPoints&(1<<m))
 							{
-								pCurrentQuad->m_aPoints[m].x += f2fx(dx);
-								pCurrentQuad->m_aPoints[m].y += f2fx(dy);
+								pCurrentQuad->m_aPoints[m].x += OffsetX;
+								pCurrentQuad->m_aPoints[m].y += OffsetY;
 							}
 					}
 				}
@@ -1920,11 +1911,11 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 							// 0,2;1,3 - line x
 							// 0,1;2,3 - line y
 
-							pCurrentQuad->m_aTexcoords[m].x += f2fx(dx*0.001f);
-							pCurrentQuad->m_aTexcoords[(m+2)%4].x += f2fx(dx*0.001f);
+							pCurrentQuad->m_aTexcoords[m].x += f2fx(m_MouseDeltaWx*0.001f);
+							pCurrentQuad->m_aTexcoords[(m+2)%4].x += f2fx(m_MouseDeltaWx*0.001f);
 
-							pCurrentQuad->m_aTexcoords[m].y += f2fx(dy*0.001f);
-							pCurrentQuad->m_aTexcoords[m^1].y += f2fx(dy*0.001f);
+							pCurrentQuad->m_aTexcoords[m].y += f2fx(m_MouseDeltaWy*0.001f);
+							pCurrentQuad->m_aTexcoords[m^1].y += f2fx(m_MouseDeltaWy*0.001f);
 						}
 				}
 			}
@@ -2154,8 +2145,6 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	};
 
 	// some basic values
-	static float s_LastWx;
-	static float s_LastWy;
 	static int s_Operation = OP_NONE;
 	float wx = UI()->MouseWorldX();
 	float wy = UI()->MouseWorldY();
@@ -2205,15 +2194,12 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 			}
 			else
 			{
-				pEnvelope->m_lPoints[PIndex].m_aValues[0] += f2fx(wx-s_LastWx);
-				pEnvelope->m_lPoints[PIndex].m_aValues[1] += f2fx(wy-s_LastWy);
+				pEnvelope->m_lPoints[PIndex].m_aValues[0] = f2fx(wx);
+				pEnvelope->m_lPoints[PIndex].m_aValues[1] = f2fx(wy);
 			}
 		}
 		else if(s_Operation == OP_ROTATE)
 			pEnvelope->m_lPoints[PIndex].m_aValues[2] += 10*m_MouseDeltaX;
-
-		s_LastWx = wx;
-		s_LastWy = wy;
 
 		if(!UI()->MouseButton(0))
 		{
@@ -2251,8 +2237,6 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 			m_SelectedQuadEnvelope = pQuad->m_PosEnv;
 
 			UI()->SetActiveItem(pID);
-			s_LastWx = wx;
-			s_LastWy = wy;
 		}
 		else
 		{
