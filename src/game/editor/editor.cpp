@@ -1138,6 +1138,15 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		m_BrushColorEnabled = !m_BrushColorEnabled;
 	}
 
+	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+	TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
+	if(DoButton_Editor(&Button, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes")) {
+		static int s_EntitiesPopupID = 0;
+		//UiInvokePopupMenu(&s_EntitiesPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupEntities);
+		UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y+18.0f, 100, 100, PopupEntities);
+	}
+
 	TB_Top.VSplitLeft(10.0f, 0, &TB_Top);
 
 	// zoom group
