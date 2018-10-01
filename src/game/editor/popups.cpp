@@ -1675,7 +1675,6 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View)
 		if(pEditor->DoButton_MenuItem(EntitiesChoices[i], EntitiesChoices[i][0], i==g_SelectEntitiesImage, &Button)) {
 			if (i != g_SelectEntitiesImage) {
 				g_SelectEntitiesImage = i;
-				dbg_msg("DBG", "entities: %d", i);
 				pEditor->Graphics()->UnloadTexture(ms_EntitiesTexture);
 				ms_EntitiesTexture = pEditor->Graphics()->LoadTexture(EntitiesChoices[i][1], IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 			}
