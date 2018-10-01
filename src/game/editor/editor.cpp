@@ -641,7 +641,7 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
-	UI()->DoLabel(&t, pText, 10, 0, -1);
+	UI()->DoLabel(&t, pText, 10, -1, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -3543,7 +3543,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View)
 		}
 	}
 
-	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(5.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
 	{
@@ -3551,7 +3551,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View)
 		return 1;
 	}
 
-	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(5.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the image from the map"))
 	{
@@ -3594,7 +3594,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 	}
 
 
-	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(5.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
 	{
@@ -3602,7 +3602,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View)
 		return 1;
 	}
 
-	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(5.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the sound from the map"))
 	{
@@ -3775,7 +3775,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 				static int s_PopupImageID = 0;
 				if(Result == 2)
-					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, 80, PopupImage);
+					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, 60, PopupImage);
 			}
 
 			ToolBox.HSplitTop(2.0f, 0, &ToolBox);
@@ -3929,7 +3929,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 
 				static int s_PopupSoundID = 0;
 				if(Result == 2)
-					UiInvokePopupMenu(&s_PopupSoundID, 0, UI()->MouseX(), UI()->MouseY(), 120, 80, PopupSound);
+					UiInvokePopupMenu(&s_PopupSoundID, 0, UI()->MouseX(), UI()->MouseY(), 120, 60, PopupSound);
 			}
 
 			ToolBox.HSplitTop(2.0f, 0, &ToolBox);
