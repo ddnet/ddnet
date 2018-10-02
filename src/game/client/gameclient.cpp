@@ -1225,20 +1225,17 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
-	// update friend state
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
+        // update friend state
         m_aClients[i].m_Friend = !(i == m_Snap.m_LocalClientID
                 || !m_Snap.m_paPlayerInfos[i]
                 || !Friends()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
-	}
 
-	// update foe state
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
+        // update foe state
         m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientID
-                || !m_Snap.m_paPlayerInfos[i]
-                || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+                                || !m_Snap.m_paPlayerInfos[i]
+                                || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 	}
 
 	// sort player infos by name
