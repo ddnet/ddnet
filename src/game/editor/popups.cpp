@@ -1664,9 +1664,9 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View)
 
 		const char *Name = pEditor->m_SelectEntitiesFiles[i].c_str();
 
-		if(pEditor->DoButton_MenuItem(Name, Name, i==pEditor->m_SelectEntitiesImage, &Button)) {
-			if (i != pEditor->m_SelectEntitiesImage) {
-				pEditor->m_SelectEntitiesImage = i;
+		if(pEditor->DoButton_MenuItem(Name, Name, pEditor->m_SelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage, &Button)) {
+			if (pEditor->m_SelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage) {
+				pEditor->m_SelectEntitiesImage = pEditor->m_SelectEntitiesFiles[i];
 
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);

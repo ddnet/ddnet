@@ -668,6 +668,8 @@ public:
 		m_FilesCur = 0;
 		m_FilesStopAt = 999;
 
+		m_SelectEntitiesImage = "DDNet";
+
 		m_WorldOffsetX = 0;
 		m_WorldOffsetY = 0;
 		m_EditorOffsetX = 0.0f;
@@ -859,7 +861,7 @@ public:
 	int m_FilesStopAt;
 
 	std::vector<std::string> m_SelectEntitiesFiles;
-	int m_SelectEntitiesImage;
+	std::string m_SelectEntitiesImage;
 
 	float m_WorldOffsetX;
 	float m_WorldOffsetY;

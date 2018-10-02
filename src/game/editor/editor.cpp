@@ -1159,11 +1159,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
 		std::sort(m_SelectEntitiesFiles.begin(), m_SelectEntitiesFiles.end());
 
-		for(int i = 0; i < (int)m_SelectEntitiesFiles.size(); i++) {
-			if (m_SelectEntitiesFiles[i] == "DDNet")
-				m_SelectEntitiesImage = i;
-		}
-
 		static int s_EntitiesPopupID = 0;
 		UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y+18.0f,
 		                  250,  m_SelectEntitiesFiles.size()*14 + 10, PopupEntities);
