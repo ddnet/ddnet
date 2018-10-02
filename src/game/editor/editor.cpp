@@ -132,6 +132,28 @@ CLayerGroup::CLayerGroup()
 	m_ClipH = 0;
 }
 
+CLayerGroup::CLayerGroup(const CLayerGroup& rhs)
+{
+	str_copy(m_aName, rhs.m_aName, sizeof m_aName);
+	m_Visible = rhs.m_Visible;
+	m_SaveToMap = rhs.m_SaveToMap;
+	m_Collapse = rhs.m_Collapse;
+	m_GameGroup = rhs.m_GameGroup;
+	m_OffsetX = rhs.m_OffsetX;
+	m_OffsetY = rhs.m_OffsetY;
+	m_ParallaxX = rhs.m_ParallaxX;
+	m_ParallaxY = rhs.m_ParallaxY;
+
+	m_UseClipping = rhs.m_UseClipping;
+	m_ClipX = rhs.m_ClipX;
+	m_ClipY = rhs.m_ClipY;
+	m_ClipW = rhs.m_ClipW;
+	m_ClipH = rhs.m_ClipH;
+
+	m_lLayers = rhs.m_lLayers;
+	m_pMap = rhs.m_pMap;
+}
+
 CLayerGroup::~CLayerGroup()
 {
 	Clear();
@@ -196,7 +218,7 @@ void CLayerGroup::Render()
 				m_lLayers[i]->Render();
 		}
 	}
-	
+
 	for(int i = 0; i < m_lLayers.size(); i++)
 	{
 		if(m_lLayers[i]->m_Visible && m_lLayers[i]->m_Type == LAYERTYPE_TILES && m_lLayers[i] != m_pMap->m_pGameLayer
@@ -859,10 +881,10 @@ CLayer *CEditor::GetSelectedLayer(int Index)
 	CLayerGroup *pGroup = GetSelectedGroup();
 	if(!pGroup)
 		return 0x0;
-	
+
 	if(Index < 0 || Index >= m_lSelectedLayers.size())
 		return 0x0;
-	
+
 	int LayerIndex = m_lSelectedLayers[Index];
 
 	if(LayerIndex >= 0 && LayerIndex < m_Map.m_lGroups[m_SelectedGroup]->m_lLayers.size())
@@ -1742,10 +1764,10 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
 				s_RotateAngle = 0;
-				
+
 				if(!IsQuadSelected(Index))
 					SelectQuad(Index);
-				
+
 				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
 				s_lRotatePoints.clear();
 				s_lRotatePoints.set_size(m_lSelectedQuads.size());
@@ -1763,7 +1785,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 			else
 			{
 				s_Operation = OP_MOVE_ALL;
-				
+
 				if(!IsQuadSelected(Index))
 					SelectQuad(Index);
 			}
@@ -1987,7 +2009,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					m_SelectedPoints = 1<<V;
 				s_Moved = true;
 			}
-			
+
 			if(!IsQuadSelected(QuadIndex))
 				SelectQuad(QuadIndex);
 		}
@@ -2553,6 +2575,9 @@ void CEditor::DoMapEditor(CUIRect View)
 							if(Grabs == 0)
 								m_Brush.Clear();
 
+							for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
+								m_Brush.m_lLayers[i]->m_BrushRefCount = 1;
+
 							m_lSelectedQuads.clear();
 							m_SelectedPoints = 0;
 						}
@@ -2588,7 +2613,14 @@ void CEditor::DoMapEditor(CUIRect View)
 			else
 			{
 				if(UI()->MouseButton(1))
+				{
+					for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
+					{
+						if(m_Brush.m_lLayers[i]->m_BrushRefCount == 1)
+							delete m_Brush.m_lLayers[i];
+					}
 					m_Brush.Clear();
+				}
 
 				if(UI()->MouseButton(0) && s_Operation == OP_NONE)
 				{
@@ -3263,7 +3295,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 						}
 					}
 				}
-				
+
 				if(m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pGameLayer ||
 					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pFrontLayer ||
 					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pSwitchLayer ||
@@ -5378,6 +5410,48 @@ void CEditor::Render()
 		m_EditorOffsetY = 0;
 		m_ZoomLevel = 100;
 	}
+
+	for(int i = KEY_1; i <= KEY_0; i++)
+	{
+		if(m_Dialog != DIALOG_NONE || m_EditBoxActive != 0)
+			break;
+
+		if(Input()->KeyPress(i))
+		{
+			int Slot = i - KEY_1;
+			if((Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && !m_Brush.IsEmpty())
+			{
+				dbg_msg("editor", "saving current brush to %d", Slot);
+				if(m_apSavedBrushes[Slot])
+				{
+					CLayerGroup *pPrev = m_apSavedBrushes[Slot];
+					for(int i = 0; i < pPrev->m_lLayers.size(); i++)
+					{
+						if(pPrev->m_lLayers[i]->m_BrushRefCount == 1)
+							delete pPrev->m_lLayers[i];
+						else
+							pPrev->m_lLayers[i]->m_BrushRefCount--;
+					}
+				}
+				delete m_apSavedBrushes[Slot];
+				m_apSavedBrushes[Slot] = new CLayerGroup(m_Brush);
+
+				for(int i = 0; i < m_apSavedBrushes[Slot]->m_lLayers.size(); i++)
+					m_apSavedBrushes[Slot]->m_lLayers[i]->m_BrushRefCount++;
+			}
+			else if(m_apSavedBrushes[Slot])
+			{
+				dbg_msg("editor", "loading brush from slot %d", Slot);
+
+				CLayerGroup *pNew = m_apSavedBrushes[Slot];
+				for(int i = 0; i < pNew->m_lLayers.size(); i++)
+					pNew->m_lLayers[i]->m_BrushRefCount++;
+
+				m_Brush = *pNew;
+			}
+		}
+	}
+
 	if(m_Dialog == DIALOG_NONE && UI()->MouseInside(&View))
 	{
 		// Determines in which direction to zoom.
@@ -5537,6 +5611,8 @@ void CEditor::Reset(bool CreateDefault)
 	m_pStorage->GetCompletePath(IStorage::TYPE_SAVE, "editor/", aBuffer, sizeof(aBuffer));
 	fs_listdir(aBuffer, UndoStepsListdirCallback, 0, m_pStorage);
 	m_lUndoSteps.clear();
+
+	mem_zero(m_apSavedBrushes, sizeof m_apSavedBrushes);
 
 	// create default layers
 	if(CreateDefault)
