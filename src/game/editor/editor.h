@@ -3,6 +3,8 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
+#include <vector>
+#include <string>
 #include <math.h>
 
 #include <base/math.h>
@@ -855,6 +857,9 @@ public:
 	int m_FilesStartAt;
 	int m_FilesCur;
 	int m_FilesStopAt;
+
+	std::vector<std::string> m_SelectEntitiesFiles;
+	int m_SelectEntitiesImage;
 
 	float m_WorldOffsetX;
 	float m_WorldOffsetY;

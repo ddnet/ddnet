@@ -1655,28 +1655,24 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 	return 0;
 }
 
-static int g_SelectEntitiesImage = 0;
-
 int CEditor::PopupEntities(CEditor *pEditor, CUIRect View)
 {
-	const char *EntitiesChoices[][2] = {
-		{"Standard",      "editor/entities.png"},
-		{"Clear DDNet",   "editor/entities_clear/ddnet.png"},
-		{"Clear DDrace",  "editor/entities_clear/ddrace.png"},
-		{"Clear Race",    "editor/entities_clear/race.png"},
-		{"Clear FNG",     "editor/entities_clear/fng.png"},
-		{"Clear Vanilla", "editor/entities_clear/vanilla.png"}};
-
-	for(int i = 0; i < (int)(sizeof(EntitiesChoices)/sizeof(*EntitiesChoices)); i++)
+	for(int i = 0; i < (int)pEditor->m_SelectEntitiesFiles.size(); i++)
 	{
 		CUIRect Button;
 		View.HSplitTop(14.0f, &Button, &View);
 
-		if(pEditor->DoButton_MenuItem(EntitiesChoices[i], EntitiesChoices[i][0], i==g_SelectEntitiesImage, &Button)) {
-			if (i != g_SelectEntitiesImage) {
-				g_SelectEntitiesImage = i;
+		const char *Name = pEditor->m_SelectEntitiesFiles[i].c_str();
+
+		if(pEditor->DoButton_MenuItem(Name, Name, i==pEditor->m_SelectEntitiesImage, &Button)) {
+			if (i != pEditor->m_SelectEntitiesImage) {
+				pEditor->m_SelectEntitiesImage = i;
+
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
+
 				pEditor->Graphics()->UnloadTexture(ms_EntitiesTexture);
-				ms_EntitiesTexture = pEditor->Graphics()->LoadTexture(EntitiesChoices[i][1], IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+				ms_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 			}
 		}
 	}
