@@ -1514,113 +1514,112 @@ void CGameClient::OnPredict()
 			bool NewPresses = false;
 
 			// handle weapons
-            if(ReloadTimer)
-                break;
-            if(!World.m_apCharacters[m_Snap.m_LocalClientID])
-                break;
-            if(!pInput || !pPrevInput)
-                break;
-            bool FullAuto = false;
-            if(Local->m_ActiveWeapon == WEAPON_GRENADE || Local->m_ActiveWeapon == WEAPON_SHOTGUN || Local->m_ActiveWeapon == WEAPON_RIFLE)
-                FullAuto = true;
-            bool WillFire = false;
-            if(CountInput(PrevInput.m_Fire, Input.m_Fire).m_Presses)
-            {
-                WillFire = true;
-                NewPresses = true;
-            }
-            if(FullAuto && (Input.m_Fire & 1))
-                WillFire = true;
-            if(!WillFire)
-                break;
-            if(!IsRace(&Info) && !m_Snap.m_pLocalCharacter->m_AmmoCount && Local->m_ActiveWeapon != WEAPON_HAMMER)
-                break;
-            int ExpectedStartTick = Tick - 1;
-            ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
-            bool DirectInput = Client()->InputExists(Tick);
-            if(!DirectInput)
-            {
-                ReloadTimer++;
-                ExpectedStartTick++;
-            }
-            switch(Local->m_ActiveWeapon)
-            {
-                case WEAPON_RIFLE:
-                case WEAPON_SHOTGUN:
-                case WEAPON_GUN:
-                    {
-                        WeaponFired = true;
-                    } break;
-                case WEAPON_GRENADE:
-                    {
-                        if(NumProjectiles >= MaxProjectiles)
-                            break;
-                        PredictedProjectiles[NumProjectiles].Init(
-                                this, &World, Collision(),
-                                Direction, //StartDir
-                                ProjStartPos, //StartPos
-                                ExpectedStartTick, //StartTick
-                                WEAPON_GRENADE, //Type
-                                m_Snap.m_LocalClientID, //Owner
-                                WEAPON_GRENADE, //Weapon
-                                1, 0, 0, 1); //Explosive, Bouncing, Freeze, ExtraInfo
-                        NumProjectiles++;
-                        WeaponFired = true;
-                    } break;
-                case WEAPON_HAMMER:
-                    {
-                        vec2 ProjPos = ProjStartPos;
-                        float Radius = ProximityRadius*0.5f;
 
-                        int Hits = 0;
-                        bool OwnerCanProbablyHitOthers = (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
-                        if(!OwnerCanProbablyHitOthers)
-                            break;
-                        for(int i = 0; i < MAX_CLIENTS; i++)
-                        {
-                            if(!World.m_apCharacters[i])
-                                continue;
-                            if(i == m_Snap.m_LocalClientID)
-                                continue;
-                            if(distance(World.m_apCharacters[i]->m_Pos, ProjPos) >= Radius + ProximityRadius)
-                                continue;
+			if(!ReloadTimer && World.m_apCharacters[m_Snap.m_LocalClientID] && (pInput && pPrevInput))
+			{
+				bool FullAuto = false;
+				if(Local->m_ActiveWeapon == WEAPON_GRENADE || Local->m_ActiveWeapon == WEAPON_SHOTGUN || Local->m_ActiveWeapon == WEAPON_RIFLE)
+					FullAuto = true;
 
-                            CCharacterCore *pTarget = World.m_apCharacters[i];
+				bool WillFire = false;
+				if(CountInput(PrevInput.m_Fire, Input.m_Fire).m_Presses)
+				{
+					WillFire = true;
+					NewPresses = true;
+				}
 
-                            if(m_aClients[i].m_Active && !m_Teams.CanCollide(i, m_Snap.m_LocalClientID))
-                                continue;
+				if(FullAuto && (Input.m_Fire & 1))
+					WillFire = true;
 
-                            vec2 Dir;
-                            if(length(pTarget->m_Pos - Pos) > 0.0f)
-                                Dir = normalize(pTarget->m_Pos - Pos);
-                            else
-                                Dir = vec2(0.f, -1.f);
+				if(WillFire && ((IsRace(&Info) || m_Snap.m_pLocalCharacter->m_AmmoCount) || Local->m_ActiveWeapon == WEAPON_HAMMER)) {
+					int ExpectedStartTick = Tick - 1;
+					ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
+					bool DirectInput = Client()->InputExists(Tick);
+					if(!DirectInput)
+					{
+						ReloadTimer++;
+						ExpectedStartTick++;
+					}
+					switch(Local->m_ActiveWeapon)
+					{
+						case WEAPON_RIFLE:
+						case WEAPON_SHOTGUN:
+						case WEAPON_GUN:
+						{
+							WeaponFired = true;
+						} break;
+						case WEAPON_GRENADE:
+						{
+							if(NumProjectiles >= MaxProjectiles)
+								break;
+							PredictedProjectiles[NumProjectiles].Init(
+									this, &World, Collision(),
+									Direction, //StartDir
+									ProjStartPos, //StartPos
+									ExpectedStartTick, //StartTick
+									WEAPON_GRENADE, //Type
+									m_Snap.m_LocalClientID, //Owner
+									WEAPON_GRENADE, //Weapon
+									1, 0, 0, 1); //Explosive, Bouncing, Freeze, ExtraInfo
+							NumProjectiles++;
+							WeaponFired = true;
+						} break;
+						case WEAPON_HAMMER:
+						{
+							vec2 ProjPos = ProjStartPos;
+							float Radius = ProximityRadius*0.5f;
 
-                            float Strength;
-                            Strength = World.m_Tuning[g_Config.m_ClDummy].m_HammerStrength;
+							int Hits = 0;
+							bool OwnerCanProbablyHitOthers = (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+							if(!OwnerCanProbablyHitOthers)
+								break;
+							for(int i = 0; i < MAX_CLIENTS; i++)
+							{
+								if(!World.m_apCharacters[i])
+									continue;
+								if(i == m_Snap.m_LocalClientID)
+									continue;
+								if(distance(World.m_apCharacters[i]->m_Pos, ProjPos) >= Radius + ProximityRadius)
+									continue;
 
-                            vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+								CCharacterCore *pTarget = World.m_apCharacters[i];
 
-                            pTarget->LimitForce(&Temp);
+								if(m_aClients[i].m_Active && !m_Teams.CanCollide(i, m_Snap.m_LocalClientID))
+									continue;
 
-                            Temp -= pTarget->m_Vel;
-                            pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
-                            Hits++;
-                        }
-                        // if we Hit anything, we have to wait for the reload
-                        if(Hits)
-                        {
-                            ReloadTimer = SERVER_TICK_SPEED/3;
-                            WeaponFired = true;
-                        }
-                    } break;
-            }
-            if(!ReloadTimer)
-            {
-                ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
-                if(!DirectInput)
-                    ReloadTimer++;
-            }
+								vec2 Dir;
+								if(length(pTarget->m_Pos - Pos) > 0.0f)
+									Dir = normalize(pTarget->m_Pos - Pos);
+								else
+									Dir = vec2(0.f, -1.f);
+
+								float Strength;
+								Strength = World.m_Tuning[g_Config.m_ClDummy].m_HammerStrength;
+
+								vec2 Temp = pTarget->m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+
+								pTarget->LimitForce(&Temp);
+
+								Temp -= pTarget->m_Vel;
+								pTarget->ApplyForce((vec2(0.f, -1.0f) + Temp) * Strength);
+								Hits++;
+							}
+							// if we Hit anything, we have to wait for the reload
+							if(Hits)
+							{
+								ReloadTimer = SERVER_TICK_SPEED/3;
+								WeaponFired = true;
+							}
+						} break;
+					}
+					if(!ReloadTimer)
+					{
+						ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
+						if(!DirectInput)
+							ReloadTimer++;
+					}
+				}
+			}
 
             if(ReloadTimer)
 				ReloadTimer--;
@@ -1679,7 +1678,7 @@ void CGameClient::OnPredict()
 			{
 				if(!World.m_apCharacters[c])
 					continue;
-                World.m_apCharacters[c]->Tick(m_Snap.m_LocalClientID == c, true);
+				World.m_apCharacters[c]->Tick(m_Snap.m_LocalClientID == c, true);
 			}
 		}
 
