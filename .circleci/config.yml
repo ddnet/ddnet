@@ -52,6 +52,11 @@ jobs:
           cd build
           env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DDOWNLOAD_GTEST=ON ..
           make everything
+      - run: |
+          mkdir build2
+          cd build2
+          env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DAUTOUPDATE=OFF -DDOWNLOAD_GTEST=ON ..
+          make everything
 
       - persist-to-workspace:
           root: ./
@@ -71,6 +76,10 @@ jobs:
           cd build
           make run_tests
           ./DDNet-Server shutdown
+
+      - run: |
+          cd build2
+          make run_tests
 
 workflows:
     version: 2

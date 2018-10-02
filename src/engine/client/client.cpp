@@ -2617,7 +2617,7 @@ void CClient::RegisterInterfaces()
 	Kernel()->RegisterInterface(static_cast<IGhostRecorder*>(&m_GhostRecorder), false);
 	Kernel()->RegisterInterface(static_cast<IGhostLoader*>(&m_GhostLoader), false);
 	Kernel()->RegisterInterface(static_cast<IServerBrowser*>(&m_ServerBrowser), false);
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+#if defined(CONF_AUTOUPDATE)
 	Kernel()->RegisterInterface(static_cast<IUpdater*>(&m_Updater), false);
 #endif
 	Kernel()->RegisterInterface(static_cast<IFriends*>(&m_Friends), false);
@@ -2635,7 +2635,7 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+#if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -2646,7 +2646,7 @@ void CClient::InitInterfaces()
 
 	HttpInit(m_pStorage);
 
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+#if defined(CONF_AUTOUPDATE)
 	m_Updater.Init();
 #endif
 
@@ -2832,7 +2832,7 @@ void CClient::Run()
 		// update input
 		if(Input()->Update())
 			break;	// SDL_QUIT
-#if !defined(CONF_PLATFORM_MACOSX) && !defined(__ANDROID__)
+#if defined(CONF_AUTOUPDATE)
 		Updater()->Update();
 #endif
 
