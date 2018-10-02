@@ -36,6 +36,7 @@
 #include <vector>
 #include <engine/shared/linereader.h>
 #include <game/extrainfo.h>
+#include <game/version.h>
 
 #include "register.h"
 #include "server.h"
@@ -934,6 +935,13 @@ void CServer::SendMap(int ClientID)
 	m_aClients[ClientID].m_NextMapChunk = 0;
 }
 
+void CServer::SendIsDDNet(int ClientID)
+{
+	CMsgPacker Msg(NETMSG_ISDDNET);
+	Msg.AddInt(GAME_VERSIONNR);
+	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, true);
+}
+
 void CServer::SendMapData(int ClientID, int Chunk)
 {
 	unsigned int ChunkSize = 1024-128;
@@ -1113,6 +1121,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 				SendRconType(ClientID, m_AuthManager.NumNonDefaultKeys() > 0);
 				SendMap(ClientID);
+				SendIsDDNet(ClientID);
 			}
 		}
 		else if(Msg == NETMSG_REQUEST_MAP_DATA)

@@ -331,6 +331,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_aNews[0] = '\0';
 
 	m_CurrentServerInfoRequestTime = -1;
+	m_ServerVersion = VERSION_VANILLA;
 
 	m_CurrentInput[0] = 0;
 	m_CurrentInput[1] = 0;
@@ -347,8 +348,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_SnapshotStorage[1].Init();
 	m_ReceivedSnapshots[0] = 0;
 	m_ReceivedSnapshots[1] = 0;
-
-	m_VersionInfo.m_State = CVersionInfo::STATE_INIT;
 
 	if(g_Config.m_ClDummy == 0)
 		m_LastDummyConnectTime = 0;
@@ -759,6 +758,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 	mem_zero(&m_ServerAddress, sizeof(m_ServerAddress));
+	m_ServerVersion = VERSION_VANILLA;
 
 	// clear snapshots
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
@@ -852,6 +852,7 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 void CClient::GetServerInfo(CServerInfo *pServerInfo)
 {
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
+	pServerInfo->m_ServerVersion = m_ServerVersion;
 
 	if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
 		str_copy(pServerInfo->m_aGameType, "DDraceNetwork", 14);
@@ -1911,7 +1912,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 
 					if(m_ReceivedSnapshots[g_Config.m_ClDummy] > 50 && !m_aTimeoutCodeSent[g_Config.m_ClDummy])
 					{
-						if(IsDDNet(&m_CurrentServerInfo))
+						CServerInfo Info;
+						GetServerInfo(&Info);
+
+						if(IsDDNet(&Info))
 						{
 							m_aTimeoutCodeSent[g_Config.m_ClDummy] = true;
 							CNetMsg_Cl_Say Msg;
@@ -1934,6 +1938,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		{
 			bool UsernameReq = Unpacker.GetInt() & 1;
 			GameClient()->OnRconType(UsernameReq);
+		}
+		else if(Msg == NETMSG_ISDDNET)
+		{
+			m_ServerVersion = Unpacker.GetInt();
 		}
 	}
 	else

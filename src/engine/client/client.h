@@ -188,20 +188,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	//
 	class CServerInfo m_CurrentServerInfo;
 	int64 m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
-
-	// version info
-	struct CVersionInfo
-	{
-		enum
-		{
-			STATE_INIT=0,
-			STATE_START,
-			STATE_READY,
-		};
-
-		int m_State;
-		class CHostLookup m_VersionServeraddr;
-	} m_VersionInfo;
+	int m_ServerVersion;
 
 	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }

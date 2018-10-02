@@ -5,6 +5,6 @@
 #define GAME_VERSION "0.6.4, 11.4.4"
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
 #define GAME_RELEASE_VERSION "11.4.4"
-#define CLIENT_VERSIONNR 11044
+#define GAME_VERSIONNR 11044
 extern const char *GIT_SHORTREV_HASH;
 #endif

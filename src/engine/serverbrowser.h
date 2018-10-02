@@ -43,6 +43,8 @@ public:
 	int m_QuickSearchHit;
 	int m_FriendState;
 
+	int m_ServerVersion;
+
 	int m_MaxClients;
 	int m_NumClients;
 	int m_MaxPlayers;

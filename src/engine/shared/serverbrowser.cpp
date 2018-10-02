@@ -48,7 +48,8 @@ bool IsDDRace(const CServerInfo *pInfo)
 
 bool IsDDNet(const CServerInfo *pInfo)
 {
-	return str_find_nocase(pInfo->m_aGameType, "ddracenet")
+	return pInfo->m_ServerVersion >= VERSION_DDNET_OLD
+	    || str_find_nocase(pInfo->m_aGameType, "ddracenet")
 	    || str_find_nocase(pInfo->m_aGameType, "ddnet");
 }
 
