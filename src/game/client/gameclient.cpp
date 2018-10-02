@@ -345,9 +345,9 @@ void CGameClient::OnInit()
 		for(unsigned int i = 0; i < 16; i++)
 		{
 			if(rand() % 2)
-				g_Config.m_ClTimeoutCode[i] = static_cast<char>((rand() % 26) + 97);
+				g_Config.m_ClTimeoutCode[i] =(char)((rand() % 26) + 97);
 			else
-				g_Config.m_ClTimeoutCode[i] = static_cast<char>((rand() % 26) + 65);
+				g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 65);
 		}
 	}
 
@@ -356,9 +356,9 @@ void CGameClient::OnInit()
 		for(unsigned int i = 0; i < 16; i++)
 		{
 			if(rand() % 2)
-				g_Config.m_ClDummyTimeoutCode[i] = static_cast<char>((rand() % 26) + 97);
+				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 97);
 			else
-				g_Config.m_ClDummyTimeoutCode[i] = static_cast<char>((rand() % 26) + 65);
+				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 65);
 		}
 	}
 }
@@ -446,8 +446,8 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		vec2 Main = m_LocalCharacterPos;
 		vec2 Dummy = m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
 		vec2 Dir = Main - Dummy;
-		m_HammerInput.m_TargetX = static_cast<int>(Dir.x);
-		m_HammerInput.m_TargetY = static_cast<int>(Dir.y);
+		m_HammerInput.m_TargetX = (int)(Dir.x);
+		m_HammerInput.m_TargetY = (int)(Dir.y);
 
 		mem_copy(pData, &m_HammerInput, sizeof(m_HammerInput));
 		return sizeof(m_HammerInput);
@@ -1019,7 +1019,7 @@ void CGameClient::OnNewSnapshot()
 			char aMessage[64];
 			int MsgLen = rand()%(sizeof(aMessage)-1);
 			for(int i = 0; i < MsgLen; i++)
-				aMessage[i] = static_cast<char>('a' + (rand() % ('z' - 'a')));
+				aMessage[i] = (char)('a' + (rand() % ('z' - 'a')));
 			aMessage[MsgLen] = 0;
 
 			CNetMsg_Cl_Say Msg;
@@ -1135,7 +1135,7 @@ void CGameClient::OnNewSnapshot()
 				static bool s_GameOver = 0;
 				static bool s_GamePaused = 0;
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
-				bool CurrentTickGameOver = static_cast<bool>(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER);
+				bool CurrentTickGameOver = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER);
 				if(!s_GameOver && CurrentTickGameOver)
 					OnGameOver();
 				else if(s_GameOver && !CurrentTickGameOver)
@@ -1150,7 +1150,7 @@ void CGameClient::OnNewSnapshot()
 					m_pStatboard->OnReset();
 				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_GameOver = CurrentTickGameOver;
-				s_GamePaused = static_cast<bool>(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
+				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
@@ -2191,11 +2191,11 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 	{
 		int Lifetime = 0;
 		if(m_Weapon == WEAPON_GRENADE)
-			Lifetime = static_cast<int>(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED);
+			Lifetime = (int)(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED);
 		else if(m_Weapon == WEAPON_GUN)
-			Lifetime = static_cast<int>(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED);
+			Lifetime = (int)(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED);
 		else if(m_Weapon == WEAPON_SHOTGUN)
-			Lifetime = static_cast<int>(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunLifetime * SERVER_TICK_SPEED);
+			Lifetime = (int)(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunLifetime * SERVER_TICK_SPEED);
 		int LifeSpan = Lifetime - (CurrentTick - m_StartTick);
 		if(LifeSpan == -1)
 		{
