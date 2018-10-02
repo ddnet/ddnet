@@ -262,13 +262,29 @@ void mem_zero(void *block,unsigned size)
 
 IOHANDLE io_open(const char *filename, int flags)
 {
+	const char *error;
+	const char *modes = 0;
+	IOHANDLE result = 0x0;
+	
 	if(flags == IOFLAG_READ)
-		return (IOHANDLE)fopen(filename, "rb");
+		modes = "rb";
 	if(flags == IOFLAG_WRITE)
-		return (IOHANDLE)fopen(filename, "wb");
+		modes = "wb";
 	if(flags == IOFLAG_APPEND)
-		return (IOHANDLE)fopen(filename, "ab");
-	return 0x0;
+		modes = "ab";
+
+	if(!modes)
+		return 0x0;
+
+	errno = 0;
+	result = (IOHANDLE)fopen(filename, modes);
+	if(!result){
+		error = strerror(errno);
+		dbg_msg("io", "Could not open %s: %s", filename, error);
+		return 0x0;
+	}
+
+	return result;
 }
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
