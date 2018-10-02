@@ -1234,8 +1234,8 @@ void CGameClient::OnNewSnapshot()
 
         // update foe state
         m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientID
-                                || !m_Snap.m_paPlayerInfos[i]
-                                || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+                || !m_Snap.m_paPlayerInfos[i]
+                || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 	}
 
 	// sort player infos by name
