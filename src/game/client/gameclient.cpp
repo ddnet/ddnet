@@ -1621,7 +1621,7 @@ void CGameClient::OnPredict()
 				}
 			}
 
-            if(ReloadTimer)
+			if(ReloadTimer)
 				ReloadTimer--;
 
 			if(Tick > Client()->GameTick()+1)
