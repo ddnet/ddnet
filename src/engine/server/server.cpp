@@ -939,7 +939,7 @@ void CServer::SendIsDDNet(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_ISDDNET);
 	Msg.AddInt(GAME_VERSIONNR);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, true);
+	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, false);
 }
 
 void CServer::SendMapData(int ClientID, int Chunk)
@@ -1852,6 +1852,7 @@ int CServer::Run()
 							continue;
 
 						SendMap(ClientID);
+						SendIsDDNet(ClientID);
 						m_aClients[ClientID].Reset();
 						m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 					}
