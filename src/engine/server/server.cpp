@@ -935,13 +935,6 @@ void CServer::SendMap(int ClientID)
 	m_aClients[ClientID].m_NextMapChunk = 0;
 }
 
-void CServer::SendIsDDNet(int ClientID)
-{
-	CMsgPacker Msg(NETMSG_ISDDNET);
-	Msg.AddInt(GAME_VERSIONNR);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, false);
-}
-
 void CServer::SendMapData(int ClientID, int Chunk)
 {
 	unsigned int ChunkSize = 1024-128;
@@ -976,6 +969,10 @@ void CServer::SendMapData(int ClientID, int Chunk)
 
 void CServer::SendConnectionReady(int ClientID)
 {
+	CMsgPacker Msg(NETMSG_ISDDNET);
+	Msg.AddInt(GAME_VERSIONNR);
+	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, false);
+
 	CMsgPacker Msg(NETMSG_CON_READY);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
 }
@@ -1121,7 +1118,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 				SendRconType(ClientID, m_AuthManager.NumNonDefaultKeys() > 0);
 				SendMap(ClientID);
-				SendIsDDNet(ClientID);
 			}
 		}
 		else if(Msg == NETMSG_REQUEST_MAP_DATA)
@@ -1852,7 +1848,6 @@ int CServer::Run()
 							continue;
 
 						SendMap(ClientID);
-						SendIsDDNet(ClientID);
 						m_aClients[ClientID].Reset();
 						m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 					}

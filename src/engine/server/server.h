@@ -274,7 +274,6 @@ public:
 
 	void SendRconType(int ClientID, bool UsernameReq);
 	void SendMap(int ClientID);
-	void SendIsDDNet(int ClientID);
 	void SendMapData(int ClientID, int Chunk);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);

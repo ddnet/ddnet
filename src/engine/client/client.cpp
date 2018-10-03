@@ -758,7 +758,6 @@ void CClient::DisconnectWithReason(const char *pReason)
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 	mem_zero(&m_ServerAddress, sizeof(m_ServerAddress));
-	m_ServerVersion = VERSION_VANILLA;
 
 	// clear snapshots
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
@@ -1531,6 +1530,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			bool MapDetailsWerePresent = m_MapDetailsPresent;
 			m_MapDetailsPresent = false;
 
+			m_ServerVersion = VERSION_VANILLA;
+
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			int MapCrc = Unpacker.GetInt();
 			int MapSize = Unpacker.GetInt();
@@ -1941,7 +1942,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_ISDDNET)
 		{
-			m_ServerVersion = Unpacker.GetInt();
+			int NewServerVersion = Unpacker.GetInt();
+			if(Unpacker.Error())
+				return;
+			m_ServerVersion = NewServerVersion;
 		}
 	}
 	else
