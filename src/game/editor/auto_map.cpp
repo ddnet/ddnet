@@ -1,4 +1,5 @@
 #include <stdio.h>	// sscanf
+#include <inttypes.h>
 
 #include <engine/console.h>
 #include <engine/storage.h>
@@ -6,6 +7,35 @@
 
 #include "auto_map.h"
 #include "editor.h"
+
+// Based on triple32inc from https://github.com/skeeto/hash-prospector/tree/79a6074062a84907df6e45b756134b74e2956760
+static uint32_t HashUInt32(uint32_t Num)
+{
+	Num++;
+	Num ^= Num >> 17;
+	Num *= 0xed5ad4bbu;
+	Num ^= Num >> 11;
+	Num *= 0xac4c1b51u;
+	Num ^= Num >> 15;
+	Num *= 0x31848babu;
+	Num ^= Num >> 14;
+	return Num;
+}
+
+#define HASH_MAX 65536
+
+static int HashLocation(uint32_t Seed, uint32_t Run, uint32_t Rule, uint32_t X, uint32_t Y)
+{
+	const uint32_t Prime = 31;
+	uint32_t Hash = 1;
+	Hash = Hash * Prime + HashUInt32(Seed);
+	Hash = Hash * Prime + HashUInt32(Run);
+	Hash = Hash * Prime + HashUInt32(Rule);
+	Hash = Hash * Prime + HashUInt32(X);
+	Hash = Hash * Prime + HashUInt32(Y);
+	Hash = HashUInt32(Hash * Prime); // Just to double-check that values are well-distributed
+	return Hash % HASH_MAX;
+}
 
 CAutoMapper::CAutoMapper(CEditor *pEditor)
 {
@@ -313,10 +343,13 @@ const char* CAutoMapper::GetConfigName(int Index)
 	return m_lConfigs[Index].m_aName;
 }
 
-void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
+void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed)
 {
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigID < 0 || ConfigID >= m_lConfigs.size())
 		return;
+
+	if(Seed == 0)
+		Seed = rand();
 
 	CConfiguration *pConf = &m_lConfigs[ConfigID];
 
@@ -336,7 +369,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 		}
 
 		// copy tiles
-		if(pRun->m_AutomapCopy) 
+		if(pRun->m_AutomapCopy)
 		{
 			for(int y = 0; y < pLayer->m_Height; y++) {
 				for(int x = 0; x < pLayer->m_Width; x++)
@@ -405,7 +438,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID)
 					}
 
 					if(RespectRules &&
-						(pIndexRule->m_RandomProbability >= 1.0 || (float)rand() / ((float)RAND_MAX + 1) < pIndexRule->m_RandomProbability))
+						(pIndexRule->m_RandomProbability >= 1.0 || HashLocation(Seed, h, i, x, y) < HASH_MAX * pIndexRule->m_RandomProbability))
 					{
 						pTile->m_Index = pIndexRule->m_ID;
 						pTile->m_Flags = pIndexRule->m_Flag;

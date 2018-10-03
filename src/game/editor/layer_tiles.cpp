@@ -36,6 +36,9 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_Front = 0;
 	m_Switch = 0;
 	m_Tune = 0;
+	m_AutoMapperConfig = -1;
+	m_Seed = 0;
+	m_AutoAutoMap = false;
 
 	m_pTiles = new CTile[m_Width*m_Height];
 	mem_zero(m_pTiles, m_Width*m_Height*sizeof(CTile));
@@ -395,6 +398,7 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 		}
 	}
 	m_pEditor->m_Map.m_Modified = true;
+	TryInvokeAutomapper();
 }
 
 void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
@@ -418,6 +422,7 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 			SetTile(fx, fy, l->m_pTiles[y*l->m_Width+x]);
 		}
 	m_pEditor->m_Map.m_Modified = true;
+	TryInvokeAutomapper();
 }
 
 void CLayerTiles::BrushFlipX()
@@ -608,29 +613,11 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	CUIRect Button;
 
 	bool InGameGroup = !find_linear(m_pEditor->m_Map.m_pGameGroup->m_lLayers.all(), this).empty();
-	if(m_pEditor->m_Map.m_pGameLayer != this)
-	{
-		if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size() && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.IsLoaded())
-		{
-			static int s_AutoMapperButton = 0;
-			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
-			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Auto map", 0, &Button, 0, ""))
-				m_pEditor->PopupSelectConfigAutoMapInvoke(m_pEditor->UI()->MouseX(), m_pEditor->UI()->MouseY());
-
-			int Result = m_pEditor->PopupSelectConfigAutoMapResult();
-			if(Result > -1)
-			{
-				m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.Proceed(this, Result);
-				return 1;
-			}
-		}
-	}
-	else if(m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this)
+	if(m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this)
 		InGameGroup = false;
 
 	if(InGameGroup)
 	{
-		pToolBox->HSplitBottom(2.0f, pToolBox, 0);
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_ColclButton = 0;
 		if(m_pEditor->DoButton_Editor(&s_ColclButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
@@ -696,6 +683,33 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			return 1;
 		}
 	}
+	
+	if(m_pEditor->m_Map.m_pGameLayer != this)
+	{
+		if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size() && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.IsLoaded() &&
+			m_AutoMapperConfig != -1)
+		{
+			static int s_AutoMapperButton = 0;
+			static int s_AutoMapperButtonAuto = 0;
+			pToolBox->HSplitBottom(2.0f, pToolBox, 0);
+			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
+			if(m_Seed != 0) {
+				CUIRect ButtonAuto;
+				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
+				Button.VSplitRight(2.0f, &Button, 0);
+				if(m_pEditor->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, 0, "Automatically run automap after modifications."))
+				{
+					m_AutoAutoMap = !m_AutoAutoMap;
+					TryInvokeAutomapper();
+				}
+			}
+			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, 0, "Run the automapper"))
+			{
+				m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
+				return 1;
+			}
+		}
+	}
 
 	enum
 	{
@@ -707,6 +721,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		PROP_COLOR,
 		PROP_COLOR_ENV,
 		PROP_COLOR_ENV_OFFSET,
+		PROP_AUTOMAPPER,
+		PROP_SEED,
 		NUM_PROPS,
 	};
 
@@ -725,20 +741,26 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Color Env", m_ColorEnv+1, PROPTYPE_INT_STEP, 0, m_pEditor->m_Map.m_lEnvelopes.size()+1},
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
+		{"Seed", m_Seed, PROPTYPE_INT_SCROLL, 0, 1000000000},
 		{0},
 	};
 
 	if(m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this) // remove the image and color properties if this is the game/tele/speedup/front/switch layer
 	{
-		aProps[4].m_pName = 0;
-		aProps[5].m_pName = 0;
+		aProps[PROP_IMAGE].m_pName = 0;
+		aProps[PROP_COLOR].m_pName = 0;
+		aProps[PROP_AUTOMAPPER].m_pName = 0;
+	}
+	if(m_Image == -1)
+	{
+		aProps[PROP_AUTOMAPPER].m_pName = 0;
+		aProps[PROP_SEED].m_pName = 0;
 	}
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
 	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != -1)
-		m_pEditor->m_Map.m_Modified = true;
 
 	if(Prop == PROP_WIDTH && NewVal > 1)
 	{
@@ -772,7 +794,10 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_Image = -1;
 		}
 		else
+		{
 			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
+			m_AutoMapperConfig = -1;
+		}
 	}
 	else if(Prop == PROP_COLOR)
 	{
@@ -797,8 +822,30 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	if(Prop == PROP_COLOR_ENV_OFFSET)
 		m_ColorEnvOffset = NewVal;
+	else if(Prop == PROP_SEED)
+	{
+		m_Seed = NewVal;
+	}
+	else if(Prop == PROP_AUTOMAPPER)
+	{
+		if (m_Image >= 0)
+			m_AutoMapperConfig = NewVal%m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum();
+		else
+			m_AutoMapperConfig = -1;
+	}
+	if(Prop != -1) {
+		m_pEditor->m_Map.m_Modified = true;
+		TryInvokeAutomapper();
+	}
 
 	return 0;
+}
+
+void CLayerTiles::TryInvokeAutomapper() {
+	if (m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap) {
+		m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
+		m_pEditor->m_Map.m_Modified = true;
+	}
 }
 
 
@@ -949,6 +996,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 			}
 		}
 	m_pEditor->m_Map.m_Modified = true;
+	TryInvokeAutomapper();
 }
 
 void CLayerTele::BrushFlipX()
@@ -1216,6 +1264,7 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 			}
 		}
 	m_pEditor->m_Map.m_Modified = true;
+	TryInvokeAutomapper();
 }
 
 void CLayerSpeedup::BrushFlipX()
@@ -1404,6 +1453,7 @@ void CLayerFront::BrushDraw(CLayer *pBrush, float wx, float wy)
 			SetTile(fx, fy, l->m_pTiles[y*l->m_Width+x]);
 		}
 	m_pEditor->m_Map.m_Modified = true;
+	TryInvokeAutomapper();
 }
 
 CLayerSwitch::CLayerSwitch(int w, int h)
@@ -1557,6 +1607,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 			}
 		}
 	m_pEditor->m_Map.m_Modified = true;
+	TryInvokeAutomapper();
 }
 
 void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
@@ -1756,7 +1807,8 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 					m_pTiles[fy*m_Width+fx].m_Index = 0;
 				}
 			}
-		m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.m_Modified = true;
+	TryInvokeAutomapper();
 }
 
 

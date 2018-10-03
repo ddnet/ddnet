@@ -54,7 +54,7 @@ public:
 	CAutoMapper(class CEditor *pEditor);
 
 	void Load(const char* pTileName);
-	void Proceed(class CLayerTiles *pLayer, int ConfigID);
+	void Proceed(class CLayerTiles *pLayer, int ConfigID, int Seed=0);
 
 	int ConfigNamesNum() const { return m_lConfigs.size(); }
 	const char* GetConfigName(int Index);

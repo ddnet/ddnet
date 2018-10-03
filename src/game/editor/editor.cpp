@@ -3163,6 +3163,24 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				Change = i;
 			}
 		}
+		else if(pProps[i].m_Type == PROPTYPE_AUTOMAPPER)
+		{
+			char aBuf[64];
+			if(pProps[i].m_Value < 0 || pProps[i].m_Min < 0 || pProps[i].m_Min >= m_Map.m_lImages.size())
+				str_copy(aBuf, "None", sizeof(aBuf));
+			else
+				str_format(aBuf, sizeof(aBuf),"%s", m_Map.m_lImages[pProps[i].m_Min]->m_AutoMapper.GetConfigName(pProps[i].m_Value));
+
+			if(DoButton_Editor(&pIDs[i], aBuf, 0, &Shifter, 0, 0))
+				PopupSelectConfigAutoMapInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
+
+			int r = PopupSelectConfigAutoMapResult();
+			if(r >= -1)
+			{
+				*pNewVal = r;
+				Change = i;
+			}
+		}
 	}
 
 	return Change;
@@ -3346,7 +3364,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					}
 					static int s_LayerPopupID = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_LayerPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 280, PopupLayer);
+						UiInvokePopupMenu(&s_LayerPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 300, PopupLayer);
 				}
 
 				LayerCur += 14.0f;
