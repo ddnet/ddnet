@@ -1506,6 +1506,10 @@ foreach(target ${TARGETS_LINK})
   if(TARGET_OS STREQUAL "mac")
     target_link_libraries(${target} -stdlib=libc++)
     target_link_libraries(${target} -mmacosx-version-min=10.7)
+    # Fixes: Undefined symbols for architecture x86_64:
+    #   "___isOSVersionAtLeast", referenced from:
+    #       _singleipconnect in libcurl.a(libcurl_la-connect.o)
+    target_link_libraries(${target} -Wl,-undefined -Wl,dynamic_lookup)
   endif()
   if((MINGW OR TARGET_OS STREQUAL "linux") AND PREFER_BUNDLED_LIBS)
     # Statically link the standard libraries with on MinGW/Linux so we don't
