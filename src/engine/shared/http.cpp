@@ -152,6 +152,7 @@ void CRequest::Run()
 	dbg_msg("http", "http %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
+	BeforeCompletion();
 	if(Ret != CURLE_OK)
 	{
 		dbg_msg("http", "task failed. libcurl error: %s", aErr);
@@ -165,7 +166,6 @@ void CRequest::Run()
 
 	curl_easy_cleanup(pHandle);
 
-	BeforeCompletion();
 	OnCompletion();
 }
 
