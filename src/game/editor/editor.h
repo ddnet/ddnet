@@ -136,6 +136,7 @@ public:
 		m_SaveToMap = true;
 		m_Flags = 0;
 		m_pEditor = 0;
+		m_BrushRefCount = 0;
 	}
 
 	virtual ~CLayer()
@@ -168,6 +169,8 @@ public:
 	bool m_Readonly;
 	bool m_Visible;
 	bool m_SaveToMap;
+
+	int m_BrushRefCount;
 };
 
 class CLayerGroup
@@ -196,6 +199,7 @@ public:
 	bool m_Collapse;
 
 	CLayerGroup();
+	CLayerGroup(const CLayerGroup& rhs);
 	~CLayerGroup();
 
 	void Convert(CUIRect *pRect);
@@ -250,7 +254,8 @@ public:
 
 	void Clear()
 	{
-		m_lLayers.delete_all();
+		//m_lLayers.delete_all();
+		m_lLayers.clear();
 	}
 
 	void AddLayer(CLayer *l);
@@ -752,6 +757,9 @@ public:
 	bool m_Undo;
 	int m_ShowUndo;
 	float m_UndoScrollValue;
+
+	CLayerGroup *m_apSavedBrushes[10];
+
 	void FilelistPopulate(int StorageType);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 		const char *pBasepath, const char *pDefaultName,
@@ -763,7 +771,7 @@ public:
 	int Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
-	
+
 	array<CQuad *> GetSelectedQuads();
 	CLayer *GetSelectedLayerType(int Index, int Type);
 	CLayer *GetSelectedLayer(int Index);
