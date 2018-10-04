@@ -397,8 +397,7 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				SetTile(fx, fy, pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]);
 		}
 	}
-	m_pEditor->m_Map.m_Modified = true;
-	TryInvokeAutomapper();
+	FlagModified(sx, sy, w, h);
 }
 
 void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
@@ -421,8 +420,7 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			SetTile(fx, fy, l->m_pTiles[y*l->m_Width+x]);
 		}
-	m_pEditor->m_Map.m_Modified = true;
-	TryInvokeAutomapper();
+	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 void CLayerTiles::BrushFlipX()
@@ -700,7 +698,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				if(m_pEditor->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, 0, "Automatically run automap after modifications."))
 				{
 					m_AutoAutoMap = !m_AutoAutoMap;
-					TryInvokeAutomapper();
+					FlagModified(0, 0, m_Width, m_Height);
 				}
 			}
 			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, 0, "Run the automapper"))
@@ -828,23 +826,22 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == PROP_AUTOMAPPER)
 	{
-		if (m_Image >= 0)
+		if (m_Image >= 0 && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0)
 			m_AutoMapperConfig = NewVal%m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum();
 		else
 			m_AutoMapperConfig = -1;
 	}
 	if(Prop != -1) {
-		m_pEditor->m_Map.m_Modified = true;
-		TryInvokeAutomapper();
+		FlagModified(0, 0, m_Width, m_Height);
 	}
 
 	return 0;
 }
 
-void CLayerTiles::TryInvokeAutomapper() {
+void CLayerTiles::FlagModified(int x, int y, int w, int h) {
+	m_pEditor->m_Map.m_Modified = true;
 	if (m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap) {
-		m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
-		m_pEditor->m_Map.m_Modified = true;
+		m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
 	}
 }
 
@@ -995,8 +992,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 			}
 		}
-	m_pEditor->m_Map.m_Modified = true;
-	TryInvokeAutomapper();
+	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 void CLayerTele::BrushFlipX()
@@ -1109,6 +1105,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			}
 		}
 	}
+	FlagModified(sx, sy, w, h);
 }
 
 CLayerSpeedup::CLayerSpeedup(int w, int h)
@@ -1263,8 +1260,7 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 			}
 		}
-	m_pEditor->m_Map.m_Modified = true;
-	TryInvokeAutomapper();
+	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 void CLayerSpeedup::BrushFlipX()
@@ -1385,6 +1381,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			}
 		}
 	}
+	FlagModified(sx, sy, w, h);
 }
 
 CLayerFront::CLayerFront(int w, int h)
@@ -1452,8 +1449,7 @@ void CLayerFront::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			SetTile(fx, fy, l->m_pTiles[y*l->m_Width+x]);
 		}
-	m_pEditor->m_Map.m_Modified = true;
-	TryInvokeAutomapper();
+	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 CLayerSwitch::CLayerSwitch(int w, int h)
@@ -1606,8 +1602,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy*m_Width+fx].m_Delay = 0;
 			}
 		}
-	m_pEditor->m_Map.m_Modified = true;
-	TryInvokeAutomapper();
+	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
@@ -1664,6 +1659,7 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			}
 		}
 	}
+	FlagModified(sx, sy, w, h);
 }
 
 //------------------------------------------------------
@@ -1807,8 +1803,7 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 					m_pTiles[fy*m_Width+fx].m_Index = 0;
 				}
 			}
-	m_pEditor->m_Map.m_Modified = true;
-	TryInvokeAutomapper();
+	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 
@@ -1921,4 +1916,6 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				}
 			}
 		}
+
+	FlagModified(sx, sy, w, h);
 }

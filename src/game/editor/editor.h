@@ -553,7 +553,7 @@ public:
 
 	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
 	
-	void TryInvokeAutomapper();
+	void FlagModified(int x, int y, int w, int h);
 
 	int m_TexID;
 	int m_Game;

@@ -72,6 +72,10 @@ void CAutoMapper::Load(const char* pTileName)
 				// new configuration, get the name
 				pLine++;
 				CConfiguration NewConf;
+				NewConf.m_StartX = 0;
+				NewConf.m_StartY = 0;
+				NewConf.m_EndX = 0;
+				NewConf.m_EndY = 0;
 				int ConfigurationID = m_lConfigs.add(NewConf);
 				pCurrentConf = &m_lConfigs[ConfigurationID];
 				str_copy(pCurrentConf->m_aName, pLine, str_length(pLine));
@@ -254,6 +258,11 @@ void CAutoMapper::Load(const char* pTileName)
 					CPosRule NewPosRule = {x, y, Value, NewIndexList};
 					pCurrentIndex->m_aRules.add(NewPosRule);
 
+					pCurrentConf->m_StartX = min(pCurrentConf->m_StartX, NewPosRule.m_X);
+					pCurrentConf->m_StartY = min(pCurrentConf->m_StartY, NewPosRule.m_Y);
+					pCurrentConf->m_EndX = max(pCurrentConf->m_EndX, NewPosRule.m_X);
+					pCurrentConf->m_EndY = max(pCurrentConf->m_EndY, NewPosRule.m_Y);
+
 					if(x == 0 && y == 0) {
 						for(int i = 0; i < NewIndexList.size(); ++i) 
 						{
@@ -343,7 +352,63 @@ const char* CAutoMapper::GetConfigName(int Index)
 	return m_lConfigs[Index].m_aName;
 }
 
-void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed)
+void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, int X, int Y, int Width, int Height)
+{
+	if(!m_FileLoaded || pLayer->m_Readonly || ConfigID < 0 || ConfigID >= m_lConfigs.size())
+		return;
+
+	if(Width < 0)
+		Width = pLayer->m_Width;
+
+	if(Height < 0)
+		Height = pLayer->m_Height;
+
+	CConfiguration *pConf = &m_lConfigs[ConfigID];
+
+	int CommitFromX = max(X + pConf->m_StartX, 0);
+	int CommitFromY = max(Y + pConf->m_StartY, 0);
+	int CommitToX = min(X + Width + pConf->m_EndX, pLayer->m_Width);
+	int CommitToY = min(Y + Height + pConf->m_EndY, pLayer->m_Height);
+
+	int UpdateFromX = max(X + 3 * pConf->m_StartX, 0);
+	int UpdateFromY = max(Y + 3 * pConf->m_StartY, 0);
+	int UpdateToX = min(X + Width + 3 * pConf->m_EndX, pLayer->m_Width);
+	int UpdateToY = min(Y + Height + 3 * pConf->m_EndY, pLayer->m_Height);
+
+	CLayerTiles *pUpdateLayer;
+	if (UpdateFromX != 0 || UpdateFromY != 0 || UpdateToX != pLayer->m_Width || UpdateToY != pLayer->m_Width)
+	{ // Needs a layer to work on
+		pUpdateLayer = new CLayerTiles(UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+
+		for(int y = UpdateFromY; y < UpdateToY; y++) {
+			for(int x = UpdateFromX; x < UpdateToX; x++)
+			{
+				CTile *in = &pLayer->m_pTiles[y*pLayer->m_Width+x];
+				CTile *out = &pUpdateLayer->m_pTiles[(y-UpdateFromY)*pUpdateLayer->m_Width+x-UpdateFromX];
+				out->m_Index = in->m_Index;
+				out->m_Flags = in->m_Flags;
+			}
+		}
+	}
+	else
+	{
+		pUpdateLayer = pLayer;
+	}
+
+	Proceed(pUpdateLayer, ConfigID, Seed, UpdateFromX, UpdateFromY);
+
+	for(int y = CommitFromY; y < CommitToY; y++) {
+		for(int x = CommitFromX; x < CommitToX; x++)
+		{
+			CTile *in = &pUpdateLayer->m_pTiles[(y-UpdateFromY)*pUpdateLayer->m_Width+x-UpdateFromX];
+			CTile *out = &pLayer->m_pTiles[y*pLayer->m_Width+x];
+			out->m_Index = in->m_Index;
+			out->m_Flags = in->m_Flags;
+		}
+	}
+}
+
+void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedOffsetX, int SeedOffsetY)
 {
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigID < 0 || ConfigID >= m_lConfigs.size())
 		return;
@@ -359,18 +424,10 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed)
 
 		// don't make copy if it's requested
 		CLayerTiles *pReadLayer;
-		if(pRun->m_AutomapCopy) 
-		{
-			pReadLayer = new CLayerTiles(pLayer->m_Width, pLayer->m_Height);
-		} 
-		else 
-		{
-			pReadLayer = pLayer;
-		}
-
-		// copy tiles
 		if(pRun->m_AutomapCopy)
 		{
+			pReadLayer = new CLayerTiles(pLayer->m_Width, pLayer->m_Height);
+
 			for(int y = 0; y < pLayer->m_Height; y++) {
 				for(int x = 0; x < pLayer->m_Width; x++)
 				{
@@ -380,6 +437,10 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed)
 					out->m_Flags = in->m_Flags;
 				}
 			}
+		}
+		else
+		{
+			pReadLayer = pLayer;
 		}
 
 		// auto map
@@ -438,7 +499,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed)
 					}
 
 					if(RespectRules &&
-						(pIndexRule->m_RandomProbability >= 1.0 || HashLocation(Seed, h, i, x, y) < HASH_MAX * pIndexRule->m_RandomProbability))
+						(pIndexRule->m_RandomProbability >= 1.0 || HashLocation(Seed, h, i, x + SeedOffsetX, y + SeedOffsetY) < HASH_MAX * pIndexRule->m_RandomProbability))
 					{
 						pTile->m_Index = pIndexRule->m_ID;
 						pTile->m_Flags = pIndexRule->m_Flag;
