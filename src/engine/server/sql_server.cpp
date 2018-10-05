@@ -98,6 +98,19 @@ bool CSqlServer::Connect()
 		m_pDriver = 0;
 		m_pConnection = 0;
 		m_pStatement = 0;
+		
+#if defined(CONF_FAMILY_WINDOWS)
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "tcp://%s:%d", m_aIp, m_Port);
+		
+		// Create connection
+		{
+			scope_lock GlobalLockScope(m_pGlobalLock);
+			m_pDriver = get_driver_instance();
+		}
+		
+		m_pConnection = m_pDriver->connect(aBuf, m_aUser, m_aPass);
+#else
 
 		sql::ConnectOptionsMap connection_properties;
 		connection_properties["hostName"]      = sql::SQLString(m_aIp);
@@ -116,7 +129,7 @@ bool CSqlServer::Connect()
 			m_pDriver = get_driver_instance();
 		}
 		m_pConnection = m_pDriver->connect(connection_properties);
-
+#endif
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
 

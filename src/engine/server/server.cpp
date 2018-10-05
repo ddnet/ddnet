@@ -2511,8 +2511,12 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	bool ReadOnly;
+	bool SetUpDb;
 	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
+	{
 		ReadOnly = false;
+		SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
+	}
 	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
 		ReadOnly = true;
 	else
@@ -2520,8 +2524,6 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
-
-	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
 	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
 
