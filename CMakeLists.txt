@@ -675,7 +675,6 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   websockets.cpp
   websockets.h
 )
-set(ENGINE_GENERATED_SHARED src/game/generated/protocol.cpp src/game/generated/protocol.h)
 set_glob(GAME_SHARED GLOB src/game
   collision.cpp
   collision.h
@@ -693,6 +692,9 @@ set_glob(GAME_SHARED GLOB src/game
   mapbugs_list.h
   mapitems.cpp
   mapitems.h
+  mapitems_ex.cpp
+  mapitems_ex.h
+  mapitems_ex_types.h
   teamscore.cpp
   teamscore.h
   tuning.h
@@ -700,6 +702,21 @@ set_glob(GAME_SHARED GLOB src/game
   version.h
   voting.h
 )
+# A bit hacky, but these are needed to register all the UUIDs, even for stuff
+# that doesn't link game.
+set(ENGINE_UUID_SHARED
+  src/game/generated/protocol.cpp
+  src/game/generated/protocol.h
+  src/game/mapitems_ex.cpp
+  src/game/mapitems_ex.h
+  src/game/mapitems_ex_types.h
+)
+foreach(s ${GAME_SHARED})
+  if(s MATCHES "mapitems_(ex.cpp|ex.h|ex_types.h)$")
+    list(REMOVE_ITEM GAME_SHARED ${s})
+  endif()
+endforeach()
+list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
@@ -714,7 +731,7 @@ set(LIBS ${CURL_LIBRARIES} ${CRYPTO_LIBRARIES} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LI
 list(APPEND LIBS ${CMAKE_THREAD_LIBS_INIT})
 
 # Targets
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 
@@ -1117,6 +1134,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
+    datafile.cpp
     fs.cpp
     git_revision.cpp
     hash.cpp
