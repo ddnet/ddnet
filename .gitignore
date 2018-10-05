@@ -95,6 +95,7 @@ cscope.out
 *.tar.gz
 *.tar.xz
 *.teehistorian
+*.tmp
 *.user
 *.vcxproj
 *.vs
