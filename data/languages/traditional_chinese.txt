@@ -6,7 +6,7 @@
 ##### translated strings #####
 
 %ds left
-== %ds 離開
+== %ds 離開了
 
 %i minute left
 == 還剩下 %i 分鐘
@@ -21,19 +21,19 @@
 == 還剩下 %i 秒鐘
 
 %s wins!
-== %s 勝利!
+== %s 勝利！
 
 -Page %d-
-== -第 %x 頁-
+== -第 %d 頁-
 
 Abort
-== 退出
+== 取消
 
 Add
-== 添加
+== 新增
 
 Add Friend
-== 添加好友
+== 新增好友
 
 Address
 == 地址
@@ -42,28 +42,28 @@ All
 == 全部
 
 Are you sure that you want to delete the demo?
-== 你確定要刪除這個錄像嗎?
+== 你確定要刪除這個錄像嗎？
 
 Are you sure that you want to quit?
-== 你確定要退出嗎?
+== 你確定要退出嗎？
 
 Are you sure that you want to remove the player from your friends list?
-== 你確定要把這個玩家從好友列表中刪除嗎?
+== 你確定要把這個玩家從好友列表中刪除嗎？
 
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 這是你第一次執行遊戲, 所以請在下面輸入你的暱稱. 建議你在進入一個服務器之前, 先確認一下設置是否符合你的習慣.
+== 這是你第一次執行遊戲，所以請在下面輸入你的暱稱。建議你在進入一個伺服器之前，先確認一下設定是否符合你的習慣。
 
 Automatically record demos
 == 自動記錄錄像
 
 Automatically take game over screenshot
-== 自動截取遊戲結束畫面
+== 自動擷取遊戲結束畫面
 
 Blue team
 == 藍隊
 
 Blue team wins!
-== 藍隊勝利!
+== 藍隊勝利！
 
 Body
 == 身體
@@ -72,7 +72,7 @@ Call vote
 == 發起投票
 
 Change settings
-== 改變設置
+== 改變設定
 
 Chat
 == 聊天
@@ -87,7 +87,7 @@ Close
 == 關閉
 
 Compatible version
-== 兼容的版本
+== 相容的版本
 
 Connect
 == 連接
@@ -117,16 +117,16 @@ Custom colors
 == 自定義顏色
 
 Delete
-== 删除
+== 刪除
 
 Delete demo
 == 刪除錄像
 
 Demo details
-== 錄像詳細信息
+== 錄像詳細資訊
 
 Demofile: %s
-== 錄像檔: %s
+== 錄像檔：%s
 
 Demos
 == 錄像
@@ -144,7 +144,7 @@ Draw!
 == 平局！
 
 Dynamic Camera
-== 動態視角
+== 動態鏡頭
 
 Emoticon
 == 表情
@@ -168,13 +168,13 @@ Feet
 == 腳
 
 Filter
-== 過濾
+== 過濾器
 
 Fire
 == 開火
 
 Folder
-== 文件夾
+== 資料夾
 
 Force vote
 == 強制投票
@@ -186,13 +186,13 @@ Friends
 == 好友
 
 Fullscreen
-== 全屏幕
+== 全螢幕
 
 Game
 == 遊戲
 
 Game info
-== 遊戲信息
+== 遊戲資訊
 
 Game over
 == 遊戲結束
@@ -201,19 +201,19 @@ Game paused
 == 遊戲已暫停
 
 Game type
-== 遊戲類型
+== 遊戲型別
 
 Game types:
-== 遊戲類型:
+== 遊戲型別：
 
 General
-== 一般
+== 常規
 
 Graphics
-== 圖像
+== 影象
 
 Grenade
-== 手榴彈
+== 榴彈
 
 Hammer
 == 錘子
@@ -246,7 +246,7 @@ Language
 == 語言
 
 DDNet Client needs to be restarted to complete update!
-== DDNet客戶端需要重新啟動才能完成更新！
+== DDNet 客戶端需要重新啟動才能完成更新！
 
 MOTD
 == 每日通告
@@ -255,10 +255,10 @@ Map
 == 地圖
 
 Maximum ping:
-== 最大延遲:
+== 最高延遲：
 
 Mouse sens.
-== 滑標靈敏度
+== 滑鼠靈敏度
 
 Move left
 == 向左移動
@@ -282,7 +282,7 @@ Enable gun sound
 == 開啟槍械聲音
 
 Enable server message sound
-== 開啟服務器消息聲音
+== 開啟伺服器訊息聲音
 
 Enable regular chat sound
 == 開啟普通聊天的聲音
@@ -291,10 +291,10 @@ Enable team chat sound
 == 開啟團隊聊天聲音
 
 Enable highlighted chat sound
-== 開啟高亮聊天聲音
+== 開啟高亮(被@)聊天聲音
 
 Threaded sound loading
-== 線程聲音加載
+== 開啟執行緒聲音
 
 Name
 == 名字
@@ -312,16 +312,16 @@ No password
 == 無密碼
 
 No servers found
-== 找不到任何服務器
+== 找不到任何伺服器
 
 No servers match your filter criteria
-== 沒有任何服務器匹配你的過濾
+== 沒有任何伺服器匹配你的過濾器
 
 Ok
 == 確定
 
 Open
-== 打開
+== 開啟
 
 Parent Folder
 == 上級目錄
@@ -348,7 +348,7 @@ Player
 == 玩家
 
 HUD
-== HUD
+== 詳細
 
 Player country:
 == 玩家的國家/地區：
@@ -372,7 +372,7 @@ Quit
 == 退出
 
 Reason:
-== 理由:
+== 理由：
 
 Red team
 == 紅隊
@@ -384,10 +384,10 @@ Refresh
 == 刷新
 
 Refreshing master servers
-== 刷新主服務器中
+== 重新整理主伺服器中
 
 Remote console
-== 遠程控制台
+== 遠端控制台
 
 Remove
 == 移除
@@ -399,10 +399,10 @@ Rename
 == 重新命名
 
 Rename demo
-== 重新命名錄像
+== 重命名錄像
 
 Reset filter
-== 重置過濾
+== 重置過濾器
 
 Respawn
 == 重生
@@ -414,7 +414,7 @@ Score
 == 得分
 
 Score board
-== 得分榜
+== 得分板
 
 Score limit
 == 得分限制
@@ -426,19 +426,19 @@ Screenshot
 == 截圖
 
 Server address:
-== 服務器地址:
+== 伺服器地址：
 
 Server details
-== 服務器詳細信息
+== 伺服器詳細資訊
 
 Server filter
-== 服務器過濾
+== 伺服器過濾器
 
 Server info
-== 服務器信息
+== 伺服器資訊
 
 Server not full
-== 服務器未滿
+== 伺服器未滿
 
 Shotgun
 == 霰彈槍
@@ -450,19 +450,19 @@ Show friends only
 == 只顯示好友
 
 Show ingame HUD
-== 顯示遊戲HUD
+== 顯示遊戲內資訊
 
 Show name plates
 == 顯示名字
 
 Show only chat messages from friends
-== 只顯示好友消息
+== 只顯示好友訊息
 
 Show only supported
-== 只顯示支持的
+== 只顯示支援的
 
 Skins
-== 皮膚
+== 面板
 
 Sound
 == 聲音
@@ -474,7 +474,7 @@ Spectate
 == 旁觀
 
 Spectate next
-== 觀看下一個
+== 觀看後一個
 
 Spectate previous
 == 觀看前一個
@@ -486,7 +486,7 @@ Spectators
 == 旁觀者
 
 Standard gametype
-== 標準遊戲類型
+== 標準遊戲型別
 
 Standard map
 == 標準地圖
@@ -495,7 +495,7 @@ Stop record
 == 停止錄製
 
 Strict gametype filter
-== 嚴格過濾遊戲類型
+== 嚴格過濾遊戲型別
 
 Sudden Death
 == 一槍擊殺
@@ -504,19 +504,19 @@ Switch weapon on pickup
 == 拾取武器時自動裝備
 
 Switch weapon when out of ammo
-== 彈藥用盡時切換武器
+== 切換武器時發射彈藥
 
 Show clan above name plates
-== 名稱上顯示戰隊
+== 顯示戰隊名稱
 
 Clan plates size
 == 戰隊名稱大小
 
 Reset wanted weapon on death
-== 在死亡時重置想要的武器
+== 在死亡時復位被給予的武器
 
 Team
-== 隊伍
+== 團隊
 
 Team chat
 == 團隊聊天
@@ -525,25 +525,25 @@ Texture Compression
 == 紋理壓縮
 
 The audio device couldn't be initialised.
-== 無法初始化音頻設備。
+== 無法初始化音訊裝置。
 
 The server is running a non-standard tuning on a pure game type.
-== 此服務器運行著經過調整的非標準遊戲類型。
+== 此伺服器執行著經過調整的非標準遊戲型別。
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 編輯器中的地圖尚未保存，或許你應該在退出遊戲之前保存一下。
+== 編輯器中的地圖尚未儲存，或許你應該在退出遊戲之前儲存一下。
 
 Time limit
 == 時間限制
 
 Time limit: %d min
-== 時間限制: %d 分鐘
+== 時間限制：%d 分鐘
 
 Try again
 == 重試
 
 Type
-== 類型
+== 型別
 
 Unable to delete the demo
 == 無法刪除這個錄像
@@ -552,10 +552,10 @@ Unable to rename the demo
 == 無法重新命名這個錄像
 
 Use sounds
-== 開啟音效
+== 開啟聲音
 
 Use team colors for name plates
-== 為名字使用團隊顏色
+== 為名字板使用團隊顏色
 
 V-Sync
 == 垂直同步
@@ -564,13 +564,13 @@ Version
 == 版本
 
 Vote command:
-== 投票命令:
+== 投票命令：
 
 Vote description:
-== 投票描述:
+== 投票描述：
 
 Vote no
-== 反對
+== 否決
 
 Vote yes
 == 贊成
@@ -588,27 +588,25 @@ Yes
 == 是
 
 You must restart the game for all settings to take effect.
-== 你必須重啟遊戲才能讓所有設置起效。
-
-##### needs translation #####
+== 你必須重啟遊戲才能讓所有設定起效。
 
 Borderless window
-== 無邊界窗口
+== 無邊界視窗
 
 Demo
 == 錄像
 
 Laser
-== 激光
+== 鐳射
 
 Reset
 == 重置
 
 Screen
-== 屏幕
+== 螢幕
 
 New name:
-== 新名字:
+== 新名字：
 
 Sat.
 == 飽和度
@@ -617,7 +615,7 @@ Miscellaneous
 == 雜項
 
 Internet
-== 互聯網
+== 因特網
 
 Max demos
 == 最大錄像數
@@ -629,10 +627,10 @@ Join game
 == 加入遊戲
 
 FSAA samples
-== 全屏抗鋸齒（FXAA）採樣倍數
+== 全屏抗鋸齒(FSAA)取樣倍數
 
 %d of %d servers, %d players
-== %d / %d 個服務器, %d 個玩家
+== %d / %d 個伺服器，%d 個玩家
 
 Sound volume
 == 音量
@@ -641,28 +639,28 @@ Map sound volume
 == 地圖音量
 
 Created:
-== 已創建:
+== 創建於：
 
 Max Screenshots
 == 最大截圖數
 
 Dummy settings
-== 傀儡設置
+== 傀儡設定
 
 Length:
-== 長度:
+== 長度：
 
 Rifle
-== 激光槍
+== 鐳射槍
 
 Netversion:
-== 網絡版本
+== 網路版本：
 
 Map:
-== 地圖:
+== 地圖：
 
 Info
-== 信息
+== 資訊
 
 Hue
 == 色調
@@ -671,13 +669,13 @@ Record demo
 == 錄製錄像
 
 Your skin
-== 你的皮膚
+== 你的面板
 
 Size:
-== 尺寸:
+== 尺寸：
 
 Reset to defaults
-== 恢復默認設置
+== 恢復預設設定
 
 Quit anyway?
 == 無論如何都要退出嗎？
@@ -686,7 +684,7 @@ Display Modes
 == 顯示模式
 
 Version:
-== 版本:
+== 版本：
 
 Round
 == 回合
@@ -695,40 +693,40 @@ Lht.
 == 亮度
 
 Show console window
-== 顯示控制台窗口
+== 顯示控制台視窗
 
 Automatically take statboard screenshot
 == 自動對狀態版截圖
 
 UI Color
-== 界面顏色
+== 介面顏色
 
 Host address
 == 主機地址
 
 Crc:
-== Crc:
+== Crc校驗碼:
 
 Alpha
 == 透明度
 
 Current version: %s
-== 當前版本: %s
+== 當前版本：%s
 
 LAN
-== 局域網
+== 區域網
 
 Name plates size
-== 名字尺寸
+== 名字板尺寸
 
 Type:
-== 類型:
+== 型別：
 
 Use DDRace Scoreboard
-== 使用DDRace計分板
+== 使用 DDRace 計分板
 
 Show client IDs in Scoreboard
-== 在計分板上顯示客戶端ID
+== 在計分板上顯示客戶端 ID
 
 Show score
 == 顯示比分
@@ -737,37 +735,40 @@ Show health + ammo
 == 顯示生命與彈藥
 
 Show names in chat in team colors
-== 在聊天中名顯示玩家顏色
+== 在聊天中名稱顯示玩家顏色
 
 Show kill messages
-== 顯示Kill信息
+== 顯示 Kill 訊息
 
 Show votes window after voting
-== 在投票時顯示投票窗口
+== 在投票時顯示投票視窗
 
 Messages
-== 信息
+== 資訊
 
 System message
-== 系統信息
+== 系統資訊
 
 Highlighted message
-== 高亮顯示信息
+== 高亮顯示資訊
 
 Look out!
 == 小心!
 
 Team message
-== 團隊信息
+== 團隊資訊
 
 We will win
 == 我們一定會贏
 
 Normal message
-== 普通信息
+== 普通訊息
 
 Hello and welcome
 == 你好,歡迎
+
+Friend message
+== 好友資訊
 
 Inner color
 == 內部顏色
@@ -776,7 +777,7 @@ Outline color
 == 外部顏色
 
 Save the best demo of each race
-== 保存每場競賽的錄像
+== 儲存每場競賽的錄像
 
 Ghost
 == 幽靈
@@ -785,7 +786,7 @@ Show ghost
 == 顯示幽靈
 
 Save ghost
-== 保存幽靈
+== 儲存幽靈
 
 Gameplay
 == 遊戲
@@ -800,19 +801,19 @@ Show quads
 == 顯示背景
 
 Default zoom
-== 默認縮放
+== 預設縮放
 
 AntiPing limit
-== Anti Ping限制
+== AntiPing 限制
 
 AntiPing: predict other players
-== AntiPing:預測其他玩家
+== AntiPing：預測其他玩家
 
 AntiPing: predict weapons
-== AntiPing:預測武器
+== AntiPing：預測武器
 
 AntiPing: predict grenade paths
-== AntiPing:預測榴彈路徑
+== AntiPing：預測榴彈路徑
 
 Show other players' hook collision lines
 == 顯示其他玩家的鉤子線
@@ -827,22 +828,22 @@ Background (entities)
 == 背景(實體)
 
 Show tiles layers from BG map
-== 在BG地圖顯示磚層
+== 在 BG 地圖顯示磚層
 
 Try fast HTTP map download first
-== 首先嘗試下載最快的http地圖
+== 首先嚐試下載較快的 HTTP 地圖
 
 DDNet %s is available:
-== DDnet %s 可用:
+== DDnet %s 可用：
 
 Update now
-== 更新
+== 現在就更新
 
 Updating...
 == 更新中...
 
 DDNet Client updated!
-== DDNet客戶端更新!
+== DDNet 客戶端更新成功！
 
 No updates available
 == 沒有可用的更新
@@ -851,7 +852,7 @@ Check now
 == 檢查更新
 
 Loading DDNet Client
-== 加載DDNet客戶端中...
+== 載入 DDNet 客戶端中...
 
 Browser
 == 瀏覽
@@ -863,181 +864,181 @@ Spectator
 == 旁觀者
 
 Search
-== 搜索
-
-
-##### generated by copy_fix.py, please translate this #####
-
-Ratio
-== 
-
-Kitty skins (DDCat)
-== 
-
-AntiPing
-== 
-
-Countries
-== 
-
-\n\nReconnect in %d sec
-== 
-
-Grabs
-== 
-
-Auto %3d:%02d  
-== 
-
-Friend message
-== 
-
-second
-== 
-
-\xEE\x85\x8B
-== 
-
-Fat skins (DDFat)
-== 
-
-Select a name
-== 
-
-Hi o/
-== 
-
-Deaths
-== 
-
-may cause delay
-== 
-
-Unfinished map
-== 
-
-Deactivate
-== 
-
-Please use a different name
-== 
-
-Wait before try for
-== 
-
-Welcome to DDNet
-== 
-
-Restart
-== 
-
-Old mouse mode
-== 
-
-Follow
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Manual %3d:%02d  
-== 
-
-Automatically create statboard csv
-== 
-
-Are you sure that you want to disconnect?
-== 
-
-Types
-== 
-
-Race %3d:%02d  
-== 
-
-Activate
-== 
-
-DDNet %s is out! Download it at DDNet.tw!
-== 
-
-Multiple texture units (disable for MacOS)
-== 
-
-Frags
-== 
-
-Use OpenGL 3.3 (experimental)
-== 
-
-Enable long pain sound (used when shooting in freeze)
-== 
+== 搜尋
 
 UI mouse s.
-== 
-
-%.2f MiB
-== 
-
-Refresh Rate
-== 
-
-New random timeout code
-== 
-
-Suicides
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Indicate map finish
-== 
-
-Net
-== 
-
-Save
-== 
-
-FPM
-== 
-
-Spree
-== 
-
-Max CSVs
-== 
-
-seconds
-== 
-
-Remove chat
-== 
-
-%.2f KiB
-== 
+== 主頁面靈敏度
 
 Vanilla skins only
-== 
+== 只顯示原版面板
 
-Best
-== 
+Kitty skins (DDCat)
+== 貓耳的面板(DDCat)
+
+Fat skins (DDFat)
+== 胖胖的面板(DDFat)
+
+Ratio
+== 綜合分
+
+##### Ratio的演算法是擊殺除以死亡次數 #####
+
+AntiPing
+== AntiPing
+
+Countries
+== 國家
+
+\n\nReconnect in %d sec
+== \n\n在 %d 秒內重新連接
+
+Grabs
+== 鏈鉤
 
 DDNet
-== 
+== DDNet
 
-Date
-== 
+second
+== 秒
 
-Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== 
+Select a name
+== 設定名字
+
+Hi o/
+== 你好
+
+Deaths
+== 死亡
+
+Please use a different name
+== 請使用另一個名字
+
+Wait before try for
+== 請等待
+
+Restart
+== 重新開始
+
+Old mouse mode
+== 舊的滑鼠模式
+
+Follow
+== 跟(Follow)
+
+Manual %3d:%02d
+== 手動 %3d:%02d
+
+Automatically create statboard csv
+== 自動建立狀態版的純文字檔案(CSV)
+
+Are you sure that you want to disconnect?
+== 你確定要斷開連接嗎？
+
+Types
+== 型別
+
+Remove chat
+== 刪除聊天欄
+
+Race %3d:%02d
+== 比賽 %3d:%02d
+
+DDNet %s is out! Download it at DDNet.tw!
+== DDNet %s 已經更新了！趕緊去 DDNet.tw 下載吧！
+
+Frags
+== 擊殺
+
+Enable long pain sound (used when shooting in freeze)
+== 啟用長時間痛苦的聲音(在凍結時使用)
+
+%.2f MiB
+== %.2f MiB
+
+Refresh Rate
+== 重新整理率
+
+New random timeout code
+== 新隨機超時程式碼
+
+Suicides
+== 自殺
+
+Net
+== 分值
+
+##### Net的演算法是殺人+1被殺-1 #####
+
+FPM
+== 效率
+
+##### 得分速度就是效率FPM #####
+
+Spree
+== 連殺
+
+Max CSVs
+== 最大的狀態版純文字(CSV)儲存數量
+
+seconds
+== 秒
+
+%.2f KiB
+== %.2f KiB
+
+Best
+== 最高
+
+Auto %3d:%02d
+== 自動 %3d:%02d
 
 Exclude
-== 
+== 排除
 
 Friend
-== 
+== 好友
+
+\xEE\x85\x8B
+== \xEE\x85\x8B
+
+may cause delay
+== 可能會產生延遲
+
+Unfinished map
+== 未完成的地圖
+
+Deactivate
+== 停用
+
+Welcome to DDNet
+== 歡迎來到 DDNet
+
+Preinit VBO (iGPUs only)
+== Preinit VBO (僅限 iGPU)
+
+Activate
+== 啟用
+
+Multiple texture units (disable for MacOS)
+== 多重紋理單元(MacOS 上被禁用)
+
+Use OpenGL 3.3 (experimental)
+== 使用 OpenGL 3.3 (實驗性)
+
+File already exists, do you want to overwrite it?
+== 檔案已存在，是否覆蓋？
+
+Indicate map finish
+== 標記已完成地圖
+
+Save
+== 儲存
+
+Date
+== 日期
+
+Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
+== 在伺服器瀏覽器中顯示已完成的 DDNet 地圖\n(將會發送您的玩家名稱到 info.ddnet.tw)
 
 Reload
-== 
+== 刷新

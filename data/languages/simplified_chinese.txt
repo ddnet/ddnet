@@ -4,6 +4,7 @@
 #modified by:
 # 2016.2.5 CarolVlCznYu
 # 2017.7.31 MC_TYH
+# 2018.10.7 Yangfl
 ##### /authors #####
 
 ##### translated strings #####
@@ -45,16 +46,16 @@ All
 == 全部
 
 Are you sure that you want to delete the demo?
-== 你确定要删除这个录像吗?
+== 你确定要删除这个录像吗？
 
 Are you sure that you want to quit?
-== 你确定要退出吗?
+== 你确定要退出吗？
 
 Are you sure that you want to remove the player from your friends list?
-== 你确定要把这个玩家从好友列表中删除吗?
+== 你确定要把这个玩家从好友列表中删除吗？
 
 As this is the first time you launch the game, please enter your nick name below. It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 这是你第一次执行游戏, 所以请在下面输入你的昵称. 建议你在进入一个服务器之前, 先确认一下设置是否符合你的习惯.
+== 这是你第一次执行游戏，所以请在下面输入你的昵称。建议你在进入一个服务器之前，先确认一下设置是否符合你的习惯。
 
 Automatically record demos
 == 自动记录录像
@@ -66,7 +67,7 @@ Blue team
 == 蓝队
 
 Blue team wins!
-== 蓝队胜利!
+== 蓝队胜利！
 
 Body
 == 身体
@@ -129,7 +130,7 @@ Demo details
 == 录像详细信息
 
 Demofile: %s
-== 录像: %s
+== 录像：%s
 
 Demos
 == 录像
@@ -144,7 +145,7 @@ Downloading map
 == 正在下载地图
 
 Draw!
-== 平局!
+== 平局！
 
 Dynamic Camera
 == 动态镜头
@@ -207,7 +208,7 @@ Game type
 == 游戏类型
 
 Game types:
-== 游戏类型:
+== 游戏类型：
 
 General
 == 常规
@@ -249,7 +250,7 @@ Language
 == 语言
 
 DDNet Client needs to be restarted to complete update!
-== DDNet客户端需要重新启动才能完成更新!
+== DDNet 客户端需要重新启动才能完成更新！
 
 MOTD
 == 服务器通告
@@ -258,7 +259,7 @@ Map
 == 地图
 
 Maximum ping:
-== 最高延迟:
+== 最高延迟：
 
 Mouse sens.
 == 鼠标灵敏度
@@ -276,7 +277,7 @@ Movement
 == 移动
 
 Mute when not active
-== 不活动的时候静音
+== 不活动时静音
 
 Enable game sounds
 == 开启游戏声音
@@ -354,7 +355,7 @@ HUD
 == 详细
 
 Player country:
-== 玩家的国家/地区:
+== 玩家的国家/地区：
 
 Player options
 == 玩家选项
@@ -363,7 +364,7 @@ Players
 == 玩家数
 
 Please balance teams!
-== 请平衡队伍的人数!
+== 请平衡队伍人数！
 
 Prev. weapon
 == 上一个武器
@@ -375,13 +376,13 @@ Quit
 == 退出
 
 Reason:
-== 理由:
+== 理由：
 
 Red team
 == 红队
 
 Red team wins!
-== 红队胜利!
+== 红队胜利！
 
 Refresh
 == 刷新
@@ -429,7 +430,7 @@ Screenshot
 == 截图
 
 Server address:
-== 服务器地址:
+== 服务器地址：
 
 Server details
 == 服务器详细信息
@@ -531,16 +532,16 @@ The audio device couldn't be initialised.
 == 无法初始化音频设备。
 
 The server is running a non-standard tuning on a pure game type.
-== 此服务器运行着经过调整的非标准游戏类型.
+== 此服务器运行着经过调整的非标准游戏类型。
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 编辑器中的地图尚未保存, 或许你应该在退出游戏之前保存一下.
+== 编辑器中的地图尚未保存，或许你应该在退出游戏之前保存一下。
 
 Time limit
 == 时间限制
 
 Time limit: %d min
-== 时间限制: %d 分钟
+== 时间限制：%d 分钟
 
 Try again
 == 重试
@@ -567,10 +568,10 @@ Version
 == 版本
 
 Vote command:
-== 投票命令:
+== 投票命令：
 
 Vote description:
-== 投票描述:
+== 投票描述：
 
 Vote no
 == 否决
@@ -591,7 +592,7 @@ Yes
 == 是
 
 You must restart the game for all settings to take effect.
-== 你必须重启游戏才能让所有设置起效.
+== 你必须重启游戏才能让所有设置起效。
 
 Borderless window
 == 无边界窗口
@@ -609,7 +610,7 @@ Screen
 == 屏幕
 
 New name:
-== 新名字:
+== 新名字：
 
 Sat.
 == 饱和度
@@ -633,7 +634,7 @@ FSAA samples
 == 全屏抗锯齿(FSAA)采样倍数
 
 %d of %d servers, %d players
-== %d / %d 个服务器, %d 个玩家
+== %d / %d 个服务器，%d 个玩家
 
 Sound volume
 == 音量
@@ -642,7 +643,7 @@ Map sound volume
 == 地图音量
 
 Created:
-== 已创建:
+== 创建于：
 
 Max Screenshots
 == 最大截图数
@@ -651,16 +652,16 @@ Dummy settings
 == 假人设置
 
 Length:
-== 长度:
+== 长度：
 
 Rifle
 == 激光枪
 
 Netversion:
-== 网络版本
+== 网络版本：
 
 Map:
-== 地图:
+== 地图：
 
 Info
 == 信息
@@ -675,19 +676,19 @@ Your skin
 == 你的皮肤
 
 Size:
-== 尺寸:
+== 尺寸：
 
 Reset to defaults
 == 恢复默认设置
 
 Quit anyway?
-== 无论如何都要退出吗?
+== 无论如何都要退出吗？
 
 Display Modes
 == 显示模式
 
 Version:
-== 版本:
+== 版本：
 
 Round
 == 回合
@@ -714,7 +715,7 @@ Alpha
 == 透明度
 
 Current version: %s
-== 当前版本: %s
+== 当前版本：%s
 
 LAN
 == 局域网
@@ -723,13 +724,13 @@ Name plates size
 == 名字板尺寸
 
 Type:
-== 类型:
+== 类型：
 
 Use DDRace Scoreboard
-== 使用DDRace计分板
+== 使用 DDRace 计分板
 
 Show client IDs in Scoreboard
-== 在计分板上显示客户端ID
+== 在计分板上显示客户端 ID
 
 Show score
 == 显示比分
@@ -738,10 +739,10 @@ Show health + ammo
 == 显示生命与弹药
 
 Show names in chat in team colors
-== 在聊天中名称显示玩家颜色
+== 在聊天中名稱顯示玩家顏色
 
 Show kill messages
-== 显示Kill消息
+== 显示 Kill 消息
 
 Show votes window after voting
 == 在投票时显示投票窗口
@@ -807,16 +808,16 @@ Default zoom
 == 默认缩放
 
 AntiPing limit
-== AntiPing限制
+== AntiPing 限制
 
 AntiPing: predict other players
-== AntiPing:预测其他玩家
+== AntiPing：预测其他玩家
 
 AntiPing: predict weapons
-== AntiPing:预测武器
+== AntiPing：预测武器
 
 AntiPing: predict grenade paths
-== AntiPing:预测榴弹路径
+== AntiPing：预测榴弹路径
 
 Show other players' hook collision lines
 == 显示其他玩家的钩子线
@@ -831,13 +832,13 @@ Background (entities)
 == 背景(实体)
 
 Show tiles layers from BG map
-== 在BG地图显示砖层
+== 在 BG 地图显示砖层
 
 Try fast HTTP map download first
-== 首先尝试下载最快的http地图
+== 首先尝试下载较快的 HTTP 地图
 
 DDNet %s is available:
-== DDnet %s 可用:
+== DDnet %s 可用：
 
 Update now
 == 现在就更新
@@ -846,7 +847,7 @@ Updating...
 == 更新中...
 
 DDNet Client updated!
-== DDNet客户端更新成功!
+== DDNet 客户端更新成功！
 
 No updates available
 == 没有可用的更新
@@ -855,7 +856,7 @@ Check now
 == 检查更新
 
 Loading DDNet Client
-== 加载DDNet客户端中...
+== 加载 DDNet 客户端中...
 
 Browser
 == 浏览
@@ -928,7 +929,7 @@ Old mouse mode
 Follow
 == 跟(Follow)
 
-Manual %3d:%02d  
+Manual %3d:%02d
 == 手动 %3d:%02d
 
 Automatically create statboard csv
@@ -943,11 +944,11 @@ Types
 Remove chat
 == 删除聊天栏
 
-Race %3d:%02d  
+Race %3d:%02d
 == 比赛 %3d:%02d
 
 DDNet %s is out! Download it at DDNet.tw!
-== DDNet %s 已经更新了！赶紧去DDNet.tw下载吧！
+== DDNet %s 已经更新了！赶紧去 DDNet.tw 下载吧！
 
 Frags
 == 击杀
@@ -956,7 +957,7 @@ Enable long pain sound (used when shooting in freeze)
 == 启用长时间痛苦的声音(在冻结时使用)
 
 %.2f MiB
-== %.2f M
+== %.2f MiB
 
 Refresh Rate
 == 刷新率
@@ -970,7 +971,7 @@ Suicides
 Net
 == 分值
 
-##### Net的算法是杀人+1被杀-1 ##### 
+##### Net的算法是杀人+1被杀-1 #####
 
 FPM
 == 效率
@@ -987,12 +988,12 @@ seconds
 == 秒
 
 %.2f KiB
-== %.2f KB
+== %.2f KiB
 
 Best
 == 最高
 
-Auto %3d:%02d  
+Auto %3d:%02d
 == 自动 %3d:%02d
 
 Exclude
@@ -1001,50 +1002,47 @@ Exclude
 Friend
 == 好友
 
-
-##### generated by copy_fix.py, please translate this #####
-
 \xEE\x85\x8B
-== 
+== \xEE\x85\x8B
 
 may cause delay
-== 
+== 可能会产生延迟
 
 Unfinished map
-== 
+== 未完成的地图
 
 Deactivate
-== 
+== 停用
 
 Welcome to DDNet
-== 
+== 欢迎来到 DDNet
 
 Preinit VBO (iGPUs only)
-== 
+== Preinit VBO (仅限 iGPU)
 
 Activate
-== 
+== 启用
 
 Multiple texture units (disable for MacOS)
-== 
+== 多重纹理单元(MacOS 上被禁用)
 
 Use OpenGL 3.3 (experimental)
-== 
+== 使用 OpenGL 3.3 (实验性)
 
 File already exists, do you want to overwrite it?
-== 
+== 文件已存在，是否覆盖？
 
 Indicate map finish
-== 
+== 标记已完成地图
 
 Save
-== 
+== 保存
 
 Date
-== 
+== 日期
 
 Show DDNet map finishes in server browser\n(transmits your player name to info.ddnet.tw)
-== 
+== 在服务器浏览器中显示已完成的 DDNet 地图\n(将会发送您的玩家名称到 info.ddnet.tw)
 
 Reload
-== 
+== 刷新
