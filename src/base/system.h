@@ -673,6 +673,21 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 int net_addr_comp(const NETADDR *a, const NETADDR *b);
 
 /*
+	Function: net_addr_comp_ip
+		Compares two network addresses by ip.
+
+	Parameters:
+		a - Address to compare
+		b - Address to compare to.
+
+	Returns:
+		<0 - Address a is lesser then address b
+		0 - Address a is equal to address b
+		>0 - Address a is greater then address b
+*/
+int net_addr_comp_ip(const NETADDR *a, const NETADDR *b);
+
+/*
 	Function: net_addr_str
 		Turns a network address into a representative string.
 

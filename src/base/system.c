@@ -997,6 +997,11 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b)
 	return mem_comp(a, b, sizeof(NETADDR));
 }
 
+int net_addr_comp_ip(const NETADDR *a, const NETADDR *b)
+{
+	return mem_comp(a->ip, b->ip, sizeof(a->ip));
+}
+
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)
 {
 	if(addr->type == NETTYPE_IPV4 || addr->type == NETTYPE_WEBSOCKET_IPV4)
