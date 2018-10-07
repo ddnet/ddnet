@@ -2859,7 +2859,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IKernel *pKernel = IKernel::Create();
 
 	// create the components
-	IEngine *pEngine = CreateEngine("DDNet", Silent);
+	IEngine *pEngine = CreateEngine("DDNet", Silent, 2);
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER|CFGFLAG_ECON);
