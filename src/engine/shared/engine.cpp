@@ -54,7 +54,7 @@ public:
 		}
 	}
 
-	CEngine(const char *pAppname, bool Silent)
+	CEngine(const char *pAppname, bool Silent, int Jobs)
 	{
 		if(!Silent)
 			dbg_logger_stdout();
@@ -74,7 +74,7 @@ public:
 		net_init();
 		CNetBase::Init();
 
-		m_JobPool.Init(1);
+		m_JobPool.Init(Jobs);
 
 		m_Logging = false;
 	}
@@ -105,4 +105,4 @@ public:
 	}
 };
 
-IEngine *CreateEngine(const char *pAppname, bool Silent) { return new CEngine(pAppname, Silent); }
+IEngine *CreateEngine(const char *pAppname, bool Silent, int Jobs) { return new CEngine(pAppname, Silent, Jobs); }
