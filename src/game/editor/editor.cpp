@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include <algorithm>
+
 #include <base/tl/array.h>
 #include <base/system.h>
 #include <base/color.h>
@@ -1032,6 +1035,16 @@ void CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	pEditor->m_Dialog = DIALOG_NONE;
 }
 
+static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser) {
+	CEditor *pEditor = (CEditor*)pUser;
+	if (!IsDir && str_endswith(pName, ".png")) {
+		std::string Name = pName;
+		pEditor->m_SelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));
+	}
+
+	return 0;
+}
+
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
 	CUIRect TB_Top, TB_Bottom;
@@ -1158,6 +1171,19 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	if(DoButton_Editor(&s_ColorBrushButton, "Color", m_BrushColorEnabled, &Button, 0, "Toggle brush coloring"))
 	{
 		m_BrushColorEnabled = !m_BrushColorEnabled;
+	}
+
+	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
+
+	TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
+	if(DoButton_Editor(&Button, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes")) {
+		m_SelectEntitiesFiles.clear();
+		Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
+		std::sort(m_SelectEntitiesFiles.begin(), m_SelectEntitiesFiles.end());
+
+		static int s_EntitiesPopupID = 0;
+		UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y+18.0f,
+		                  250,  m_SelectEntitiesFiles.size()*14 + 10, PopupEntities);
 	}
 
 	TB_Top.VSplitLeft(10.0f, 0, &TB_Top);
@@ -5819,7 +5845,7 @@ void CEditor::Init()
 	ms_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	ms_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	ms_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	ms_EntitiesTexture = Graphics()->LoadTexture("editor/entities.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	ms_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 	ms_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	ms_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);

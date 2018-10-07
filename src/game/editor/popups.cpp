@@ -1654,3 +1654,28 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 
 	return 0;
 }
+
+int CEditor::PopupEntities(CEditor *pEditor, CUIRect View)
+{
+	for(int i = 0; i < (int)pEditor->m_SelectEntitiesFiles.size(); i++)
+	{
+		CUIRect Button;
+		View.HSplitTop(14.0f, &Button, &View);
+
+		const char *Name = pEditor->m_SelectEntitiesFiles[i].c_str();
+
+		if(pEditor->DoButton_MenuItem(Name, Name, pEditor->m_SelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage, &Button)) {
+			if (pEditor->m_SelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage) {
+				pEditor->m_SelectEntitiesImage = pEditor->m_SelectEntitiesFiles[i];
+
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
+
+				pEditor->Graphics()->UnloadTexture(ms_EntitiesTexture);
+				ms_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+			}
+		}
+	}
+
+	return 0;
+}

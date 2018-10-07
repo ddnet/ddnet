@@ -3,6 +3,8 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
+#include <vector>
+#include <string>
 #include <math.h>
 
 #include <base/math.h>
@@ -671,6 +673,8 @@ public:
 		m_FilesCur = 0;
 		m_FilesStopAt = 999;
 
+		m_SelectEntitiesImage = "DDNet";
+
 		m_WorldOffsetX = 0;
 		m_WorldOffsetY = 0;
 		m_EditorOffsetX = 0.0f;
@@ -864,6 +868,9 @@ public:
 	int m_FilesCur;
 	int m_FilesStopAt;
 
+	std::vector<std::string> m_SelectEntitiesFiles;
+	std::string m_SelectEntitiesImage;
+
 	float m_WorldOffsetX;
 	float m_WorldOffsetY;
 	float m_EditorOffsetX;
@@ -971,6 +978,7 @@ public:
 	static int PopupSound(CEditor *pEditor, CUIRect View);
 	static int PopupSource(CEditor *pEditor, CUIRect View);
 	static int PopupColorPicker(CEditor *pEditor, CUIRect View);
+	static int PopupEntities(CEditor *pEditor, CUIRect View);
 
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
