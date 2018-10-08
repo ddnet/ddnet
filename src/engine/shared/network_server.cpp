@@ -168,11 +168,7 @@ void CNetServer::SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, 
 
 int CNetServer::NumClientsWithAddr(NETADDR Addr)
 {
-	NETADDR ThisAddr = Addr, OtherAddr;
-
 	int FoundAddr = 0;
-	ThisAddr.port = 0;
-
 	for(int i = 0; i < MaxClients(); ++i)
 	{
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE ||
@@ -181,9 +177,7 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 				 !m_aSlots[i].m_Connection.m_TimeoutSituation)))
 			continue;
 
-		OtherAddr = *m_aSlots[i].m_Connection.PeerAddress();
-		OtherAddr.port = 0;
-		if(!net_addr_comp(&ThisAddr, &OtherAddr))
+		if(!net_addr_comp_noport(&Addr, m_aSlots[i].m_Connection.PeerAddress()))
 			FoundAddr++;
 	}
 

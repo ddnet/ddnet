@@ -1382,10 +1382,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			NETADDR Addr;
 			Server()->GetClientAddr(ClientID, &Addr);
-			Addr.port = 0; // ignore port number
 			int VoteMuted = 0;
 			for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
-				if(!net_addr_comp(&Addr, &m_aVoteMutes[i].m_Addr))
+				if(!net_addr_comp_noport(&Addr, &m_aVoteMutes[i].m_Addr))
 					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 			if(VoteMuted > 0)
 			{
@@ -3280,12 +3279,11 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 		m_apPlayers[ClientID]->m_LastChat = Server()->Tick();
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
-	Addr.port = 0; // ignore port number for mutes
 	int Muted = 0;
 
 	for(int i = 0; i < m_NumMutes && !Muted; i++)
 	{
-		if(!net_addr_comp(&Addr, &m_aMutes[i].m_Addr))
+		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
 			Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 	}
 
