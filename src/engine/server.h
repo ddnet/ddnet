@@ -32,6 +32,8 @@ public:
 	int TickSpeed() const { return m_TickSpeed; }
 
 	virtual int MaxClients() const = 0;
+	virtual int ClientCount() = 0;
+	virtual int DistinctClientCount() = 0;
 	virtual const char *ClientName(int ClientID) = 0;
 	virtual const char *ClientClan(int ClientID) = 0;
 	virtual int ClientCountry(int ClientID) = 0;

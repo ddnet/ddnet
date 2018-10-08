@@ -260,6 +260,8 @@ public:
 	bool ClientIngame(int ClientID);
 	bool ClientAuthed(int ClientID);
 	int MaxClients() const;
+	int ClientCount();
+	int DistinctClientCount();
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID);
 	int SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System);

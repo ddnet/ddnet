@@ -1340,7 +1340,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(ClientID))
+			if (g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(ClientID) && Server()->DistinctClientCount() > 1)
 			{
 				// blacklisted by dnsbl
 				SendChatTarget(ClientID, "You are not allowed to vote due to DNSBL.");
@@ -1382,10 +1382,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			NETADDR Addr;
 			Server()->GetClientAddr(ClientID, &Addr);
-			Addr.port = 0; // ignore port number
 			int VoteMuted = 0;
 			for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
-				if(!net_addr_comp(&Addr, &m_aVoteMutes[i].m_Addr))
+				if(!net_addr_comp_noport(&Addr, &m_aVoteMutes[i].m_Addr))
 					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 			if(VoteMuted > 0)
 			{
@@ -3280,12 +3279,11 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 		m_apPlayers[ClientID]->m_LastChat = Server()->Tick();
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
-	Addr.port = 0; // ignore port number for mutes
 	int Muted = 0;
 
 	for(int i = 0; i < m_NumMutes && !Muted; i++)
 	{
-		if(!net_addr_comp(&Addr, &m_aMutes[i].m_Addr))
+		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
 			Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 	}
 
@@ -3299,7 +3297,7 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 
 	if ((m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
 	{
-		Mute(0, &Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
+		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
 		m_apPlayers[ClientID]->m_ChatScore = 0;
 		return 1;
 	}
@@ -3568,10 +3566,10 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 	// check if there is a vote running
 	if(!m_VoteCloseTime)
 		return;
-	
+
 	m_VoteEnforce = Success ? CGameContext::VOTE_ENFORCE_YES_ADMIN : CGameContext::VOTE_ENFORCE_NO_ADMIN;
 	m_VoteEnforcer = EnforcerID;
-	
+
 	char aBuf[256];
 	const char *pOption = Success ? "yes" : "no";
 	str_format(aBuf, sizeof(aBuf), "authorized player forced vote %s", pOption);

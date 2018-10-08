@@ -312,12 +312,8 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 			{
 				if(CtrlMsg == NET_CTRLMSG_CONNECT)
 				{
-					NETADDR nAddr;
-					mem_copy(&nAddr, pAddr, sizeof(nAddr));
-					nAddr.port = 0;
-					m_PeerAddr.port = 0;
 #ifndef FUZZING
-					if(net_addr_comp(&m_PeerAddr, &nAddr) == 0 && time_get() - m_LastUpdateTime < time_freq() * 3)
+					if(net_addr_comp_noport(&m_PeerAddr, pAddr) == 0 && time_get() - m_LastUpdateTime < time_freq() * 3)
 						return 0;
 #endif
 
