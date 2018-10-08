@@ -585,7 +585,7 @@ int CServer::DistinctClientCount()
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
 			ClientCount++;
-			for(int j = 0; j < MAX_CLIENTS; j++)
+			for(int j = 0; j < i; j++)
 			{
 				if(!net_addr_comp_noport(&aAddresses[i], &aAddresses[j]))
 				{
