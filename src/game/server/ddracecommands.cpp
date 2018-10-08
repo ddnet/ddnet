@@ -345,8 +345,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
-void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs,
-	const char *pDisplayName, int AuthedID)
+void CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID)
 {
 	char aBuf[128];
 	bool Found = 0;
@@ -387,8 +386,7 @@ void CGameContext::VoteMute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "vote mute array is full");
 }
 
-void CGameContext::Mute(IConsole::IResult *pResult, NETADDR *pAddr, int Secs,
-		const char *pDisplayName)
+void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName)
 {
 	char aBuf[128];
 	int Found = 0;
@@ -442,7 +440,7 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	pSelf->VoteMute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
+	pSelf->VoteMute(&Addr, clamp(pResult->GetInteger(1), 1, 86400),
 		pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
 }
 
@@ -470,7 +468,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400),
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400),
 			pSelf->Server()->ClientName(Victim));
 }
 
@@ -484,7 +482,7 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 				"Invalid network address to mute");
 	}
-	pSelf->Mute(pResult, &Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL);
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL);
 }
 
 // unmute by mute list index
