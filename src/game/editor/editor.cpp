@@ -4150,7 +4150,17 @@ void CEditor::RenderFileDialog()
 	Scroll.HMargin(5.0f, &Scroll);
 	m_FileDialogScrollValue = UiDoScrollbarV(&ScrollBar, &Scroll, m_FileDialogScrollValue);
 
-	int ScrollNum = m_FileList.size()-Num+1;
+	int ScrollNum = 0;
+	for(int i = 0; i < m_FileList.size(); i++)
+	{
+		if(!m_aFileDialogSearchText[0] || str_find_nocase(m_FileList[i].m_aName, m_aFileDialogSearchText))
+		{
+			AddFileDialogEntry(i, &View);
+			ScrollNum++;
+		}
+	}
+	ScrollNum -= Num - 1;
+
 	if(ScrollNum > 0)
 	{
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
@@ -4160,6 +4170,7 @@ void CEditor::RenderFileDialog()
 	}
 	else
 		ScrollNum = 0;
+
 
 	if(m_FilesSelectedIndex > -1)
 	{
@@ -4253,10 +4264,6 @@ void CEditor::RenderFileDialog()
 
 	// set clipping
 	UI()->ClipEnable(&View);
-
-	for(int i = 0; i < m_FileList.size(); i++)
-		if(!m_aFileDialogSearchText[0] || str_find_nocase (m_FileList[i].m_aName, m_aFileDialogSearchText))
-		AddFileDialogEntry(i, &View);
 
 	// disable clipping again
 	UI()->ClipDisable();
