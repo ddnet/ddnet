@@ -149,7 +149,7 @@ void mem_zero(void *block, unsigned size);
 		size - Size of the data to compare
 
 	Returns:
-		<0 - Block a is lesser then block b
+		<0 - Block a is lesser than block b
 		0 - Block a is equal to block b
 		>0 - Block a is greater than block b
 */
@@ -666,9 +666,9 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 		b - Address to compare to.
 
 	Returns:
-		<0 - Address a is lesser then address b
+		<0 - Address a is lesser than address b
 		0 - Address a is equal to address b
-		>0 - Address a is greater then address b
+		>0 - Address a is greater than address b
 */
 int net_addr_comp(const NETADDR *a, const NETADDR *b);
 
@@ -681,9 +681,9 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b);
 		b - Address to compare to.
 
 	Returns:
-		<0 - Address a is lesser then address b
+		<0 - Address a is lesser than address b
 		0 - Address a is equal to address b
-		>0 - Address a is greater then address b
+		>0 - Address a is greater than address b
 */
 int net_addr_comp_ip(const NETADDR *a, const NETADDR *b);
 
@@ -1092,9 +1092,9 @@ char *str_skip_whitespaces(char *str);
 		b - String to compare.
 
 	Returns:
-		<0 - String a is lesser then string b
+		<0 - String a is lesser than string b
 		0 - String a is equal to string b
-		>0 - String a is greater then string b
+		>0 - String a is greater than string b
 
 	Remarks:
 		- Only garanted to work with a-z/A-Z.
@@ -1131,9 +1131,9 @@ int str_comp_nocase_num(const char *a, const char *b, const int num);
 		b - String to compare.
 
 	Returns:
-		<0 - String a is lesser then string b
+		<0 - String a is lesser than string b
 		0 - String a is equal to string b
-		>0 - String a is greater then string b
+		>0 - String a is greater than string b
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
@@ -1150,9 +1150,9 @@ int str_comp(const char *a, const char *b);
 		num - Maximum characters to compare
 
 	Returns:
-		<0 - String a is lesser then string b
+		<0 - String a is lesser than string b
 		0 - String a is equal to string b
-		>0 - String a is greater then string b
+		>0 - String a is greater than string b
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
@@ -1168,9 +1168,9 @@ int str_comp_num(const char *a, const char *b, const int num);
 		b - String to compare.
 
 	Returns:
-		<0 - String a is lesser then string b
+		<0 - String a is lesser than string b
 		0 - String a is equal to string b
-		>0 - String a is greater then string b
+		>0 - String a is greater than string b
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
