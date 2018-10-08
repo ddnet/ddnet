@@ -997,9 +997,12 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b)
 	return mem_comp(a, b, sizeof(NETADDR));
 }
 
-int net_addr_comp_ip(const NETADDR *a, const NETADDR *b)
+int net_addr_comp_noport(const NETADDR *a, const NETADDR *b)
 {
-	return mem_comp(a->ip, b->ip, sizeof(a->ip));
+	NETADDR ta = *a, tb = *b;
+	ta.port = tb.port = 0;
+
+	return net_addr_comp(&ta, &tb);
 }
 
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)

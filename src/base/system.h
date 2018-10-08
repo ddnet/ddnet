@@ -673,8 +673,8 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 int net_addr_comp(const NETADDR *a, const NETADDR *b);
 
 /*
-	Function: net_addr_comp_ip
-		Compares two network addresses by ip.
+	Function: net_addr_comp_noport
+		Compares two network addresses ignoring port.
 
 	Parameters:
 		a - Address to compare
@@ -685,7 +685,7 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b);
 		0 - Address a is equal to address b
 		>0 - Address a is greater than address b
 */
-int net_addr_comp_ip(const NETADDR *a, const NETADDR *b);
+int net_addr_comp_noport(const NETADDR *a, const NETADDR *b);
 
 /*
 	Function: net_addr_str

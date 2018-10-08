@@ -587,7 +587,7 @@ int CServer::DistinctClientCount()
 			ClientCount++;
 			for(int j = 0; j < MAX_CLIENTS; j++)
 			{
-				if(!net_addr_comp_ip(&aAddresses[i], &aAddresses[j]))
+				if(!net_addr_comp_noport(&aAddresses[i], &aAddresses[j]))
 				{
 					ClientCount--;
 					break;
