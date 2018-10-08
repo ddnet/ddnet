@@ -969,9 +969,9 @@ void CServer::SendMapData(int ClientID, int Chunk)
 
 void CServer::SendConnectionReady(int ClientID)
 {
-	CMsgPacker Msg(NETMSG_ISDDNET);
-	Msg.AddInt(GAME_VERSIONNR);
-	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, false);
+	CMsgPacker aMsg(NETMSG_ISDDNET);
+	aMsg.AddInt(GAME_VERSIONNR);
+	SendMsgEx(&aMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, false);
 
 	CMsgPacker Msg(NETMSG_CON_READY);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
