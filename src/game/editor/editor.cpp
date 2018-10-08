@@ -4126,6 +4126,7 @@ void CEditor::RenderFileDialog()
 
 		static float s_SearchBoxID = 0;
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, -1, -1);
+		str_copy(m_aFileDialogPrevSearchText, m_aFileDialogSearchText, sizeof(m_aFileDialogPrevSearchText));
 		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID,false,CUI::CORNER_L);
 
 		// clearSearchbox button
@@ -4139,6 +4140,9 @@ void CEditor::RenderFileDialog()
 				UI()->SetActiveItem(&s_SearchBoxID);
 			}
 		}
+
+		if(str_comp(m_aFileDialogPrevSearchText, m_aFileDialogSearchText))
+			m_FileDialogScrollValue = 0.0f;
 	}
 
 	int Num = (int)(View.h/17.0f)+1;
