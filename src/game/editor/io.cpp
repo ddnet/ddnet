@@ -9,6 +9,7 @@
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <game/gamecore.h>
+#include <game/mapitems_ex.h>
 #include "editor.h"
 
 template<typename T>
@@ -352,6 +353,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 	// save layers
 	int LayerCount = 0, GroupCount = 0;
+	int AutomapperCount = 0;
 	for(int g = 0; g < m_lGroups.size(); g++)
 	{
 		CLayerGroup *pGroup = m_lGroups[g];
@@ -441,6 +443,17 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				StrToInts(Item.m_aName, sizeof(Item.m_aName)/sizeof(int), pLayer->m_aName);
 
 				df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
+
+				CMapItemAutoMapperConfig ItemAutomapper;
+				ItemAutomapper.m_GroupId = GroupCount;
+				ItemAutomapper.m_LayerId = GItem.m_NumLayers;
+				ItemAutomapper.m_AutomapperConfig = pLayer->m_AutoMapperConfig;
+				ItemAutomapper.m_AutomapperSeed = pLayer->m_Seed;
+				ItemAutomapper.m_Flags = 0;
+				if (pLayer->m_AutoAutoMap) ItemAutomapper.m_Flags |= CMapItemAutoMapperConfig::FLAG_AUTOMATIC;
+
+				df.AddItem(MAPITEMTYPE_AUTOMAPPER_CONFIG, AutomapperCount, sizeof(ItemAutomapper), &ItemAutomapper);
+				AutomapperCount++;
 
 				GItem.m_NumLayers++;
 				LayerCount++;
@@ -1259,6 +1272,26 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				m_lEnvelopes.add(pEnv);
 				if(pItem->m_Version >= 2)
 					pEnv->m_Synchronized = pItem->m_Synchronized;
+			}
+		}
+
+		{
+			int Start, Num;
+			DataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &Start, &Num);
+			for(int i = 0; i < Num; i++)
+			{
+				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(Start+i, 0, 0);
+				if (pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION) {
+					if (pItem->m_GroupId >= 0 && pItem->m_GroupId < m_lGroups.size() &&
+						pItem->m_LayerId >= 0 && pItem->m_LayerId < m_lGroups[pItem->m_GroupId]->m_lLayers.size() &&
+						m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId]->m_Type == LAYERTYPE_TILES) {
+
+						CLayerTiles *pLayer = (CLayerTiles *)m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
+						pLayer->m_AutoMapperConfig = pItem->m_AutomapperConfig;
+						pLayer->m_Seed = pItem->m_AutomapperSeed;
+						pLayer->m_AutoAutoMap = !!(pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC);
+					}
+				}
 			}
 		}
 	}

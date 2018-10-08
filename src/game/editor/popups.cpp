@@ -1352,8 +1352,8 @@ int CEditor::PopupSelectGameTileOpResult()
 	return Result;
 }
 
-static int s_AutoMapConfigSelected = -1;
-static int s_AutoMapConfigCurrent = -1;
+static int s_AutoMapConfigSelected = -100;
+static int s_AutoMapConfigCurrent = -100;
 
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View)
 {

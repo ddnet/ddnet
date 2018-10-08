@@ -821,12 +821,10 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	if(Prop == PROP_COLOR_ENV_OFFSET)
 		m_ColorEnvOffset = NewVal;
 	else if(Prop == PROP_SEED)
-	{
 		m_Seed = NewVal;
-	}
 	else if(Prop == PROP_AUTOMAPPER)
 	{
-		if (m_Image >= 0 && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0)
+		if (m_Image >= 0 && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0 && NewVal >= 0)
 			m_AutoMapperConfig = NewVal%m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum();
 		else
 			m_AutoMapperConfig = -1;
