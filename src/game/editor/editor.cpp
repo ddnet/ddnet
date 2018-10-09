@@ -4647,7 +4647,34 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		Shifter.VSplitLeft(15.0f, &Dec, &Shifter);
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),"%d/%d", m_SelectedEnvelope+1, m_Map.m_lEnvelopes.size());
-		RenderTools()->DrawUIRect(&Shifter, vec4(1,1,1,0.5f), 0, 0.0f);
+
+		vec4 EnvColor = vec4(1, 1, 1, 0.5f);
+		if(m_Map.m_lEnvelopes.size())
+		{
+			bool Found = false;
+			for(int i = 0; !Found && i < m_Map.m_lGroups.size(); ++i)
+			{
+				for(int j = 0; !Found && j < m_Map.m_lGroups[i]->m_lLayers.size(); ++j)
+				{
+					if(m_Map.m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
+					{
+						CLayerQuads *pQuadLayer = (CLayerQuads *)m_Map.m_lGroups[i]->m_lLayers[j];
+						for(int k = 0; !Found && k < pQuadLayer->m_lQuads.size(); k++)
+						{
+							if(pQuadLayer->m_lQuads[k].m_PosEnv == m_SelectedEnvelope
+								|| pQuadLayer->m_lQuads[k].m_ColorEnv == m_SelectedEnvelope)
+							{
+								Found = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+			EnvColor = Found ? vec4(0.7f, 1, 0.7f, 0.5f) : vec4(1, 0.7f, 0.7f, 0.5f);
+		}
+
+		RenderTools()->DrawUIRect(&Shifter, EnvColor, 0, 0.0f);
 		UI()->DoLabel(&Shifter, aBuf, 10.0f, 0, -1);
 
 		static int s_PrevButton = 0;
