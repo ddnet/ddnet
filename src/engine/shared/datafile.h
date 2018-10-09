@@ -3,6 +3,7 @@
 #ifndef ENGINE_SHARED_DATAFILE_H
 #define ENGINE_SHARED_DATAFILE_H
 
+#include <base/system.h>
 #include <base/hash.h>
 
 // raw datafile access
@@ -11,6 +12,10 @@ class CDataFileReader
 	struct CDatafile *m_pDataFile;
 	void *GetDataImpl(int Index, int Swap);
 	int GetFileDataSize(int Index);
+
+	int GetExternalItemType(int InternalType);
+	int GetInternalItemType(int ExternalType);
+
 public:
 	CDataFileReader() : m_pDataFile(0) {}
 	~CDataFileReader() { Close(); }
@@ -27,6 +32,7 @@ public:
 	void *GetItem(int Index, int *pType, int *pID);
 	int GetItemSize(int Index);
 	void GetType(int Type, int *pStart, int *pNum);
+	int FindItemIndex(int Type, int ID);
 	void *FindItem(int Type, int ID);
 	int NumItems();
 	int NumData();
@@ -67,18 +73,23 @@ class CDataFileWriter
 
 	enum
 	{
-		MAX_ITEM_TYPES=0xffff,
+		MAX_ITEM_TYPES=0x10000,
 		MAX_ITEMS=1024,
 		MAX_DATAS=1024,
+		MAX_EXTENDED_ITEM_TYPES=64,
 	};
 
 	IOHANDLE m_File;
 	int m_NumItems;
 	int m_NumDatas;
 	int m_NumItemTypes;
+	int m_NumExtendedItemTypes;
 	CItemTypeInfo *m_pItemTypes;
 	CItemInfo *m_pItems;
 	CDataInfo *m_pDatas;
+	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
+
+	int GetExtendedItemTypeIndex(int Type);
 
 public:
 	CDataFileWriter();

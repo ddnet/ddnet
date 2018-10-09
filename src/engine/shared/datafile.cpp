@@ -1,13 +1,62 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include "datafile.h"
+
 #include <base/math.h>
 #include <base/hash_ctxt.h>
 #include <base/system.h>
 #include <engine/storage.h>
-#include "datafile.h"
+
+#include "uuid_manager.h"
+
 #include <zlib.h>
 
 static const int DEBUG=0;
+
+enum
+{
+	OFFSET_UUID_TYPE=0x8000,
+	ITEMTYPE_EX=0xffff,
+};
+
+struct CItemEx
+{
+	int m_aUuid[sizeof(CUuid) / 4];
+
+	static CItemEx FromUuid(CUuid Uuid)
+	{
+		CItemEx Result;
+		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+		{
+			Result.m_aUuid[i] =
+				(Uuid.m_aData[i * 4 + 0] << 24) |
+				(Uuid.m_aData[i * 4 + 1] << 16) |
+				(Uuid.m_aData[i * 4 + 2] << 8) |
+				(Uuid.m_aData[i * 4 + 3]);
+		}
+		return Result;
+	}
+
+	CUuid ToUuid() const
+	{
+		CUuid Result;
+		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
+		{
+			Result.m_aData[i * 4 + 0] = m_aUuid[i] >> 24;
+			Result.m_aData[i * 4 + 1] = m_aUuid[i] >> 16;
+			Result.m_aData[i * 4 + 2] = m_aUuid[i] >> 8;
+			Result.m_aData[i * 4 + 3] = m_aUuid[i];
+		}
+		return Result;
+	}
+};
+
+static int GetTypeFromIndex(int Index)
+{
+	return ITEMTYPE_EX - Index - 1;
+}
+
 
 struct CDatafileItemType
 {
@@ -345,15 +394,60 @@ int CDataFileReader::GetItemSize(int Index)
 	return m_pDataFile->m_Info.m_pItemOffsets[Index+1]-m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
 }
 
+int CDataFileReader::GetExternalItemType(int InternalType)
+{
+	if(InternalType <= OFFSET_UUID_TYPE || InternalType == ITEMTYPE_EX)
+	{
+		return InternalType;
+	}
+	int TypeIndex = FindItemIndex(ITEMTYPE_EX, InternalType);
+	if(TypeIndex < 0 || GetItemSize(TypeIndex) < (int)sizeof(CItemEx))
+	{
+		return InternalType;
+	}
+	const CItemEx *pItemEx = (const CItemEx *)GetItem(TypeIndex, 0, 0);
+	// Propagate UUID_UNKNOWN, it doesn't hurt.
+	return g_UuidManager.LookupUuid(pItemEx->ToUuid());
+}
+
+int CDataFileReader::GetInternalItemType(int ExternalType)
+{
+	if(ExternalType < OFFSET_UUID)
+	{
+		return ExternalType;
+	}
+	CUuid Uuid = g_UuidManager.GetUuid(ExternalType);
+	int Start, Num;
+	GetType(ITEMTYPE_EX, &Start, &Num);
+	for(int i = Start; i < Start + Num; i++)
+	{
+		if(GetItemSize(i) < (int)sizeof(CItemEx))
+		{
+			continue;
+		}
+		int ID;
+		if(Uuid == ((const CItemEx *)GetItem(i, 0, &ID))->ToUuid())
+		{
+			return ID;
+		}
+	}
+	return -1;
+}
+
 void *CDataFileReader::GetItem(int Index, int *pType, int *pID)
 {
 	if(!m_pDataFile) { if(pType) *pType = 0; if(pID) *pID = 0; return 0; }
 
 	CDatafileItem *i = (CDatafileItem *)(m_pDataFile->m_Info.m_pItemStart+m_pDataFile->m_Info.m_pItemOffsets[Index]);
 	if(pType)
-		*pType = (i->m_TypeAndID>>16)&0xffff; // remove sign extension
+	{
+		// remove sign extension
+		*pType = GetExternalItemType((i->m_TypeAndID>>16)&0xffff);
+	}
 	if(pID)
+	{
 		*pID = i->m_TypeAndID&0xffff;
+	}
 	return (void *)(i+1);
 }
 
@@ -365,6 +459,7 @@ void CDataFileReader::GetType(int Type, int *pStart, int *pNum)
 	if(!m_pDataFile)
 		return;
 
+	Type = GetInternalItemType(Type);
 	for(int i = 0; i < m_pDataFile->m_Header.m_NumItemTypes; i++)
 	{
 		if(m_pDataFile->m_Info.m_pItemTypes[i].m_Type == Type)
@@ -376,20 +471,35 @@ void CDataFileReader::GetType(int Type, int *pStart, int *pNum)
 	}
 }
 
-void *CDataFileReader::FindItem(int Type, int ID)
+int CDataFileReader::FindItemIndex(int Type, int ID)
 {
-	if(!m_pDataFile) return 0;
+	if(!m_pDataFile)
+	{
+		return -1;
+	}
 
 	int Start, Num;
 	GetType(Type, &Start, &Num);
 	for(int i = 0; i < Num; i++)
 	{
 		int ItemID;
-		void *pItem = GetItem(Start+i,0, &ItemID);
+		GetItem(Start + i, 0, &ItemID);
 		if(ID == ItemID)
-			return pItem;
+		{
+			return Start + i;
+		}
 	}
-	return 0;
+	return -1;
+}
+
+void *CDataFileReader::FindItem(int Type, int ID)
+{
+	int Index = FindItemIndex(Type, ID);
+	if(Index < 0)
+	{
+		return 0;
+	}
+	return GetItem(Index, 0, 0);
 }
 
 int CDataFileReader::NumItems()
@@ -478,7 +588,9 @@ void CDataFileWriter::Init()
 	m_NumItems = 0;
 	m_NumDatas = 0;
 	m_NumItemTypes = 0;
+	m_NumExtendedItemTypes = 0;
 	mem_zero(m_pItemTypes, sizeof(CItemTypeInfo) * MAX_ITEM_TYPES);
+	mem_zero(m_aExtendedItemTypes, sizeof(m_aExtendedItemTypes));
 
 	for(int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
@@ -493,11 +605,36 @@ bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename)
 	return OpenFile(pStorage, pFilename);
 }
 
+int CDataFileWriter::GetExtendedItemTypeIndex(int Type)
+{
+	for(int i = 0; i < m_NumExtendedItemTypes; i++)
+	{
+		if(m_aExtendedItemTypes[i] == Type)
+		{
+			return i;
+		}
+	}
+
+	// Type not found, add it.
+	dbg_assert(m_NumExtendedItemTypes < MAX_EXTENDED_ITEM_TYPES, "too many extended item types");
+	int Index = m_NumExtendedItemTypes++;
+	m_aExtendedItemTypes[Index] = Type;
+
+	CItemEx ExtendedType = CItemEx::FromUuid(g_UuidManager.GetUuid(Type));
+	AddItem(ITEMTYPE_EX, GetTypeFromIndex(Index), sizeof(ExtendedType), &ExtendedType);
+	return Index;
+}
+
 int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)
 {
-	dbg_assert(Type >= 0 && Type < 0xFFFF, "incorrect type");
+	dbg_assert((Type >= 0 && Type < MAX_ITEM_TYPES) || Type >= OFFSET_UUID, "incorrect type");
 	dbg_assert(m_NumItems < 1024, "too many items");
 	dbg_assert(Size%sizeof(int) == 0, "incorrect boundary");
+
+	if(Type >= OFFSET_UUID)
+	{
+		Type = GetTypeFromIndex(GetExtendedItemTypeIndex(Type));
+	}
 
 	m_pItems[m_NumItems].m_Type = Type;
 	m_pItems[m_NumItems].m_ID = ID;
@@ -631,7 +768,7 @@ int CDataFileWriter::Finish()
 	}
 
 	// write types
-	for(int i = 0, Count = 0; i < 0xffff; i++)
+	for(int i = 0, Count = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if(m_pItemTypes[i].m_Num)
 		{
@@ -651,7 +788,7 @@ int CDataFileWriter::Finish()
 	}
 
 	// write item offsets
-	for(int i = 0, Offset = 0; i < 0xffff; i++)
+	for(int i = 0, Offset = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if(m_pItemTypes[i].m_Num)
 		{
@@ -700,7 +837,7 @@ int CDataFileWriter::Finish()
 	}
 
 	// write m_pItems
-	for(int i = 0; i < 0xffff; i++)
+	for(int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if(m_pItemTypes[i].m_Num)
 		{
