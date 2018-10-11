@@ -30,11 +30,11 @@
 
 enum
 {
-	NETMSG_EX = 0,
+	NETMSG_EX=0,
 
 	// the first thing sent by the client
 	// contains the version info for the client
-	NETMSG_INFO = 1,
+	NETMSG_INFO=1,
 
 	// sent by server
 	NETMSG_MAP_CHANGE,		// sent when client should switch map
