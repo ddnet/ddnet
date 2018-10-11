@@ -30,11 +30,11 @@
 
 enum
 {
-	NETMSG_EX=0,
+	NETMSG_EX = 0,
 
 	// the first thing sent by the client
 	// contains the version info for the client
-	NETMSG_INFO=1,
+	NETMSG_INFO = 1,
 
 	// sent by server
 	NETMSG_MAP_CHANGE,		// sent when client should switch map
@@ -70,6 +70,8 @@ enum
 	// sent by server (todo: move it up)
 	NETMSG_RCON_CMD_ADD,
 	NETMSG_RCON_CMD_REM,
+
+	NETMSG_DDRACE_SCORE,
 
 	NUM_NETMSGS,
 };
