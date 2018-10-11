@@ -204,6 +204,7 @@ public:
 
 	virtual void OnRconType(bool UsernameReq) = 0;
 	virtual void OnRconLine(const char *pLine) = 0;
+	virtual void OnDDRaceScore(int AllowDDRaceScore) = 0;
 	virtual void OnInit() = 0;
 	virtual void OnNewSnapshot() = 0;
 	virtual void OnEnterGame() = 0;

@@ -1013,6 +1013,10 @@ void CServer::SendMapData(int ClientID, int Chunk)
 
 void CServer::SendConnectionReady(int ClientID)
 {
+	CMsgPacker aMsg(NETMSG_DDRACE_SCORE);
+	aMsg.AddInt(g_Config.m_SvDDRaceScore);
+	SendMsgEx(&aMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID, true);
+
 	CMsgPacker Msg(NETMSG_CON_READY);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
 }

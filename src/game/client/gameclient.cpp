@@ -935,6 +935,11 @@ void CGameClient::OnRconLine(const char *pLine)
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
+void CGameClient::OnDDRaceScore(int AllowDDRaceScore)
+{
+	m_AllowDDRaceScore = AllowDDRaceScore;
+}
+
 void CGameClient::ProcessEvents()
 {
 	if(m_SuppressEvents)
