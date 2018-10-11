@@ -289,7 +289,12 @@ find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
 find_package(Pnglite)
-find_package(PythonInterp)
+find_package(Python COMPONENTS Interpreter)
+if(NOT PYTHON_FOUND)
+  find_package(PythonInterp)
+  set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
+  set(PYTHON_FOUND "${PYTHONINTERP_FOUND}")
+endif()
 find_package(SDL2)
 find_package(Threads)
 find_package(Wavpack)
@@ -353,7 +358,7 @@ show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
 show_dependency_status("Pnglite" PNGLITE)
-show_dependency_status("PythonInterp" PYTHONINTERP)
+show_dependency_status("Python" PYTHON)
 show_dependency_status("SDL2" SDL2)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
@@ -364,7 +369,7 @@ endif()
 if(NOT(CURL_FOUND))
   message(SEND_ERROR "You must install Curl to compile the DDNet")
 endif()
-if(NOT(PYTHONINTERP_FOUND))
+if(NOT(PYTHON_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
 endif()
 
@@ -517,7 +522,7 @@ file(COPY ${COPY_FILES} DESTINATION .)
 
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
+    COMMAND ${Python_EXECUTABLE} datasrc/compile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/compile.py
@@ -542,7 +547,7 @@ if(NOT PROJECT_GIT_DIR_ERROR)
   )
 endif()
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
-  COMMAND ${PYTHON_EXECUTABLE}
+  COMMAND ${Python_EXECUTABLE}
     scripts/git_revision.py
     > ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -1400,7 +1405,7 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_SERVER}> $<TARGET_FILE:${TARGET_SERVER_LAUNCHER}> ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/
 
     # DMG
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
+    COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
 
     DEPENDS
       ${TARGET_CLIENT}
