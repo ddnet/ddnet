@@ -1016,6 +1016,8 @@ public:
 	static void AddImage(const char *pFilename, int StorageType, void *pUser);
 	static void AddSound(const char *pFileName, int StorageType, void *pUser);
 
+	bool IsEnvelopeUsed(int EnvelopeIndex);
+
 	void RenderImages(CUIRect Toolbox, CUIRect View);
 	void RenderLayers(CUIRect Toolbox, CUIRect View);
 	void RenderSounds(CUIRect Toolbox, CUIRect View);

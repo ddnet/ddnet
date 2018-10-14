@@ -4558,6 +4558,47 @@ void CEditor::RenderUndoList(CUIRect View)
 	}
 }
 
+bool CEditor::IsEnvelopeUsed(int EnvelopeIndex)
+{
+	for(int i = 0; i < m_Map.m_lGroups.size(); i++)
+	{
+		for(int j = 0; j < m_Map.m_lGroups[i]->m_lLayers.size(); j++)
+		{
+			if(m_Map.m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
+			{
+				CLayerQuads *pQuadLayer = (CLayerQuads *)m_Map.m_lGroups[i]->m_lLayers[j];
+				for(int k = 0; k < pQuadLayer->m_lQuads.size(); k++)
+				{
+					if(pQuadLayer->m_lQuads[k].m_PosEnv == EnvelopeIndex
+						|| pQuadLayer->m_lQuads[k].m_ColorEnv == EnvelopeIndex)
+					{
+						return true;
+					}
+				}
+			}
+			else if(m_Map.m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_SOUNDS)
+			{
+				CLayerSounds *pSoundLayer = (CLayerSounds *)m_Map.m_lGroups[i]->m_lLayers[j];
+				for(int k = 0; k < pSoundLayer->m_lSources.size(); k++)
+				{
+					if(pSoundLayer->m_lSources[k].m_PosEnv == EnvelopeIndex
+						|| pSoundLayer->m_lSources[k].m_SoundEnv == EnvelopeIndex)
+					{
+						return true;
+					}
+				}
+			}
+			else if(m_Map.m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_TILES)
+			{
+				CLayerTiles *pTileLayer = (CLayerTiles *)m_Map.m_lGroups[i]->m_lLayers[j];
+				if(pTileLayer->m_ColorEnv == EnvelopeIndex)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
 void CEditor::RenderEnvelopeEditor(CUIRect View)
 {
 	if(m_SelectedEnvelope < 0) m_SelectedEnvelope = 0;
@@ -4651,27 +4692,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		vec4 EnvColor = vec4(1, 1, 1, 0.5f);
 		if(m_Map.m_lEnvelopes.size())
 		{
-			bool Found = false;
-			for(int i = 0; !Found && i < m_Map.m_lGroups.size(); ++i)
-			{
-				for(int j = 0; !Found && j < m_Map.m_lGroups[i]->m_lLayers.size(); ++j)
-				{
-					if(m_Map.m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_QUADS)
-					{
-						CLayerQuads *pQuadLayer = (CLayerQuads *)m_Map.m_lGroups[i]->m_lLayers[j];
-						for(int k = 0; !Found && k < pQuadLayer->m_lQuads.size(); k++)
-						{
-							if(pQuadLayer->m_lQuads[k].m_PosEnv == m_SelectedEnvelope
-								|| pQuadLayer->m_lQuads[k].m_ColorEnv == m_SelectedEnvelope)
-							{
-								Found = true;
-								break;
-							}
-						}
-					}
-				}
-			}
-			EnvColor = Found ? vec4(0.7f, 1, 0.7f, 0.5f) : vec4(1, 0.7f, 0.7f, 0.5f);
+			EnvColor = IsEnvelopeUsed(m_SelectedEnvelope) ?
+				vec4(0.7f, 1, 0.7f, 0.5f) :
+				vec4(1, 0.7f, 0.7f, 0.5f);
 		}
 
 		RenderTools()->DrawUIRect(&Shifter, EnvColor, 0, 0.0f);
