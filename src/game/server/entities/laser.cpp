@@ -200,6 +200,15 @@ void CLaser::DoBounce()
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 		bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
 
+		if(IsSwitchTeleGun) {
+			// Delay specifies which weapon the tile should work for.
+			// Delay = 0 means all.
+			int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+
+			if((delay != 3 && delay != 0) && m_Type == WEAPON_RIFLE)
+				IsSwitchTeleGun = false;
+		}
+
 		// Teleport is canceled if the last bounce tile is not a TILE_ALLOW_TELE_GUN.
 		// Teleport also works if laser didn't bounce.
 		m_TeleportCancelled =

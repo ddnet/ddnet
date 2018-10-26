@@ -179,6 +179,19 @@ void CProjectile::Tick()
 			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 			bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
 
+			if(IsSwitchTeleGun) {
+				// Delay specifies which weapon the tile should work for.
+				// Delay = 0 means all.
+				int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+
+				if(delay == 1 && m_Type != WEAPON_GUN)
+					IsSwitchTeleGun = false;
+				if(delay == 2 && m_Type != WEAPON_GRENADE)
+					IsSwitchTeleGun = false;
+				if(delay == 3 && m_Type != WEAPON_RIFLE)
+					IsSwitchTeleGun = false;
+			}
+
 			if (TileIndex == TILE_ALLOW_TELE_GUN
 				|| TileFIndex == TILE_ALLOW_TELE_GUN
 				|| IsSwitchTeleGun
