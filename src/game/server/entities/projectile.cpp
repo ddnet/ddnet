@@ -177,8 +177,12 @@ void CProjectile::Tick()
 			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->m_Pos : ColPos);
 			int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+			bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
 
-			if (TileIndex == TILE_ALLOW_TELE_GUN || TileFIndex == TILE_ALLOW_TELE_GUN || pTargetChr)
+			if (TileIndex == TILE_ALLOW_TELE_GUN
+				|| TileFIndex == TILE_ALLOW_TELE_GUN
+				|| IsSwitchTeleGun
+				|| pTargetChr)
 			{
 				bool Found;
 				vec2 PossiblePos;

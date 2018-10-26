@@ -198,11 +198,12 @@ void CLaser::DoBounce()
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
 		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+		bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
 
 		// Teleport is canceled if the last bounce tile is not a TILE_ALLOW_TELE_GUN.
 		// Teleport also works if laser didn't bounce.
 		m_TeleportCancelled =
-				m_Type == WEAPON_RIFLE && (TileIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_TELE_GUN);
+				m_Type == WEAPON_RIFLE && (TileIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_TELE_GUN && !IsSwitchTeleGun);
 	}
 
 	//m_Owner = -1;

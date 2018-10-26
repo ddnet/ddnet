@@ -75,6 +75,7 @@ bool IsValidSwitchTile(int Index)
 		|| (Index >= TILE_SWITCHTIMEDOPEN && Index <= TILE_SWITCHCLOSE)
 		||  Index == TILE_PENALTY
 		||  Index == TILE_BONUS
+		||  Index == TILE_ALLOW_TELE_GUN
 		||  IsValidEntity(Index)
 	);
 }
