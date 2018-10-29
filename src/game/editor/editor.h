@@ -840,6 +840,7 @@ public:
 	char m_aFileDialogCurrentFolder[MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentLink[MAX_PATH_LENGTH];
 	char m_aFileDialogSearchText[64];
+	char m_aFileDialogPrevSearchText[64];
 	char *m_pFileDialogPath;
 	bool m_aFileDialogActivate;
 	int m_FileDialogFileType;
@@ -858,6 +859,7 @@ public:
 		bool m_IsDir;
 		bool m_IsLink;
 		int m_StorageType;
+		bool m_IsVisible;
 
 		bool operator<(const CFilelistItem &Other) { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
 														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :

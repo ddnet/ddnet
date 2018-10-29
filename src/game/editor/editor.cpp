@@ -4126,6 +4126,7 @@ void CEditor::RenderFileDialog()
 
 		static float s_SearchBoxID = 0;
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, -1, -1);
+		str_copy(m_aFileDialogPrevSearchText, m_aFileDialogSearchText, sizeof(m_aFileDialogPrevSearchText));
 		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID,false,CUI::CORNER_L);
 
 		// clearSearchbox button
@@ -4139,6 +4140,9 @@ void CEditor::RenderFileDialog()
 				UI()->SetActiveItem(&s_SearchBoxID);
 			}
 		}
+
+		if(str_comp(m_aFileDialogPrevSearchText, m_aFileDialogSearchText))
+			m_FileDialogScrollValue = 0.0f;
 	}
 
 	int Num = (int)(View.h/17.0f)+1;
@@ -4146,7 +4150,19 @@ void CEditor::RenderFileDialog()
 	Scroll.HMargin(5.0f, &Scroll);
 	m_FileDialogScrollValue = UiDoScrollbarV(&ScrollBar, &Scroll, m_FileDialogScrollValue);
 
-	int ScrollNum = m_FileList.size()-Num+1;
+	int ScrollNum = 0;
+	for(int i = 0; i < m_FileList.size(); i++)
+	{
+		m_FileList[i].m_IsVisible = false;
+		if(!m_aFileDialogSearchText[0] || str_find_nocase(m_FileList[i].m_aName, m_aFileDialogSearchText))
+		{
+			AddFileDialogEntry(i, &View);
+			m_FileList[i].m_IsVisible = true;
+			ScrollNum++;
+		}
+	}
+	ScrollNum -= Num - 1;
+
 	if(ScrollNum > 0)
 	{
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
@@ -4157,6 +4173,11 @@ void CEditor::RenderFileDialog()
 	else
 		ScrollNum = 0;
 
+	if(!m_FileList[m_FilesSelectedIndex].m_IsVisible)
+	{
+		m_FilesSelectedIndex = 0;
+	}
+
 	if(m_FilesSelectedIndex > -1)
 	{
 		for(int i = 0; i < Input()->NumEvents(); i++)
@@ -4164,8 +4185,24 @@ void CEditor::RenderFileDialog()
 			int NewIndex = -1;
 			if(Input()->GetEvent(i).m_Flags&IInput::FLAG_PRESS)
 			{
-				if(Input()->GetEvent(i).m_Key == KEY_DOWN) NewIndex = m_FilesSelectedIndex + 1;
-				if(Input()->GetEvent(i).m_Key == KEY_UP) NewIndex = m_FilesSelectedIndex - 1;
+				if(Input()->GetEvent(i).m_Key == KEY_DOWN)
+				{
+					for(NewIndex = m_FilesSelectedIndex + 1; NewIndex < m_FileList.size(); NewIndex++)
+					{
+						if(m_FileList[NewIndex].m_IsVisible)
+							break;
+					}
+					dbg_msg("DEBUG", "NewIndex='%d'", NewIndex);
+				}
+				if(Input()->GetEvent(i).m_Key == KEY_UP)
+				{
+					for(NewIndex = m_FilesSelectedIndex - 1; NewIndex >= 0; NewIndex--)
+					{
+						if(m_FileList[NewIndex].m_IsVisible)
+							break;
+					}
+					dbg_msg("DEBUG", "NewIndex='%d'", NewIndex);
+				}
 			}
 			if(NewIndex > -1 && NewIndex < m_FileList.size())
 			{
@@ -4249,10 +4286,6 @@ void CEditor::RenderFileDialog()
 
 	// set clipping
 	UI()->ClipEnable(&View);
-
-	for(int i = 0; i < m_FileList.size(); i++)
-		if(!m_aFileDialogSearchText[0] || str_find_nocase (m_FileList[i].m_aName, m_aFileDialogSearchText))
-		AddFileDialogEntry(i, &View);
 
 	// disable clipping again
 	UI()->ClipDisable();
