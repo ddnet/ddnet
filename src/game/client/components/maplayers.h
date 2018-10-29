@@ -114,6 +114,8 @@ class CMapLayers : public CComponent
 	std::vector<SQuadLayerVisuals*> m_QuadLayerVisuals;
 	
 	void LayersOfGroupCount(CMapItemGroup* pGroup, int& TileLayerCount, int& QuadLayerCount, bool& PassedGameLayer);
+
+	void RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, float *pColor, offset_ptr_size IndexBufferOffset, float *pOffset, float *pDir);
 public:
 	enum
 	{
