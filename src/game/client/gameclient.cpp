@@ -345,9 +345,9 @@ void CGameClient::OnInit()
 		for(unsigned int i = 0; i < 16; i++)
 		{
 			if(rand() % 2)
-				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 97;
+				g_Config.m_ClTimeoutCode[i] =(char)((rand() % 26) + 97);
 			else
-				g_Config.m_ClTimeoutCode[i] = (rand() % 26) + 65;
+				g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 65);
 		}
 	}
 
@@ -356,9 +356,9 @@ void CGameClient::OnInit()
 		for(unsigned int i = 0; i < 16; i++)
 		{
 			if(rand() % 2)
-				g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 97;
+				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 97);
 			else
-				g_Config.m_ClDummyTimeoutCode[i] = (rand() % 26) + 65;
+				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 65);
 		}
 	}
 }
@@ -446,8 +446,8 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		vec2 Main = m_LocalCharacterPos;
 		vec2 Dummy = m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
 		vec2 Dir = Main - Dummy;
-		m_HammerInput.m_TargetX = Dir.x;
-		m_HammerInput.m_TargetY = Dir.y;
+		m_HammerInput.m_TargetX = (int)(Dir.x);
+		m_HammerInput.m_TargetY = (int)(Dir.y);
 
 		mem_copy(pData, &m_HammerInput, sizeof(m_HammerInput));
 		return sizeof(m_HammerInput);
@@ -1019,7 +1019,7 @@ void CGameClient::OnNewSnapshot()
 			char aMessage[64];
 			int MsgLen = rand()%(sizeof(aMessage)-1);
 			for(int i = 0; i < MsgLen; i++)
-				aMessage[i] = 'a'+(rand()%('z'-'a'));
+				aMessage[i] = (char)('a' + (rand() % ('z' - 'a')));
 			aMessage[MsgLen] = 0;
 
 			CNetMsg_Cl_Say Msg;
@@ -1135,7 +1135,7 @@ void CGameClient::OnNewSnapshot()
 				static bool s_GameOver = 0;
 				static bool s_GamePaused = 0;
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
-				bool CurrentTickGameOver = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER;
+				bool CurrentTickGameOver = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER);
 				if(!s_GameOver && CurrentTickGameOver)
 					OnGameOver();
 				else if(s_GameOver && !CurrentTickGameOver)
@@ -1150,7 +1150,7 @@ void CGameClient::OnNewSnapshot()
 					m_pStatboard->OnReset();
 				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_GameOver = CurrentTickGameOver;
-				s_GamePaused = m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED;
+				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
@@ -1225,22 +1225,17 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
-	// update friend state
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(i == m_Snap.m_LocalClientID || !m_Snap.m_paPlayerInfos[i] || !Friends()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true))
-			m_aClients[i].m_Friend = false;
-		else
-			m_aClients[i].m_Friend = true;
-	}
+        // update friend state
+        m_aClients[i].m_Friend = !(i == m_Snap.m_LocalClientID
+                || !m_Snap.m_paPlayerInfos[i]
+                || !Friends()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 
-	// update foe state
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(i == m_Snap.m_LocalClientID || !m_Snap.m_paPlayerInfos[i] || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true))
-			m_aClients[i].m_Foe = false;
-		else
-			m_aClients[i].m_Foe = true;
+        // update foe state
+        m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientID
+                || !m_Snap.m_paPlayerInfos[i]
+                || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 	}
 
 	// sort player infos by name
@@ -1414,7 +1409,6 @@ void CGameClient::OnPredict()
 	class CLocalProjectile PredictedProjectiles[MaxProjectiles];
 	int NumProjectiles = 0;
 	int ReloadTimer = 0;
-	vec2 PrevPos;
 
 	if(AntiPingWeapons())
 	{
@@ -1518,53 +1512,43 @@ void CGameClient::OnPredict()
 
 			bool WeaponFired = false;
 			bool NewPresses = false;
-			// handle weapons
-			do
-			{
-				if(ReloadTimer)
-					break;
-				if(!World.m_apCharacters[m_Snap.m_LocalClientID])
-					break;
-				if(!pInput || !pPrevInput)
-					break;
 
+			// handle weapons
+
+			if(!ReloadTimer && World.m_apCharacters[m_Snap.m_LocalClientID] && (pInput && pPrevInput))
+			{
 				bool FullAuto = false;
 				if(Local->m_ActiveWeapon == WEAPON_GRENADE || Local->m_ActiveWeapon == WEAPON_SHOTGUN || Local->m_ActiveWeapon == WEAPON_RIFLE)
 					FullAuto = true;
 
 				bool WillFire = false;
-
 				if(CountInput(PrevInput.m_Fire, Input.m_Fire).m_Presses)
 				{
 					WillFire = true;
 					NewPresses = true;
 				}
-				if(FullAuto && (Input.m_Fire&1))
+
+				if(FullAuto && (Input.m_Fire & 1))
 					WillFire = true;
-				if(!WillFire)
-					break;
-				if(!IsRace(&Info) && !m_Snap.m_pLocalCharacter->m_AmmoCount && Local->m_ActiveWeapon != WEAPON_HAMMER)
-					break;
 
-				int ExpectedStartTick = Tick-1;
-				ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
-
-				bool DirectInput = Client()->InputExists(Tick);
-				if(!DirectInput)
-				{
-					ReloadTimer++;
-					ExpectedStartTick++;
-				}
-
-				switch(Local->m_ActiveWeapon)
-				{
-					case WEAPON_RIFLE:
-					case WEAPON_SHOTGUN:
-					case WEAPON_GUN:
+				if(WillFire && ((IsRace(&Info) || m_Snap.m_pLocalCharacter->m_AmmoCount) || Local->m_ActiveWeapon == WEAPON_HAMMER)) {
+					int ExpectedStartTick = Tick - 1;
+					ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
+					bool DirectInput = Client()->InputExists(Tick);
+					if(!DirectInput)
+					{
+						ReloadTimer++;
+						ExpectedStartTick++;
+					}
+					switch(Local->m_ActiveWeapon)
+					{
+						case WEAPON_RIFLE:
+						case WEAPON_SHOTGUN:
+						case WEAPON_GUN:
 						{
 							WeaponFired = true;
 						} break;
-					case WEAPON_GRENADE:
+						case WEAPON_GRENADE:
 						{
 							if(NumProjectiles >= MaxProjectiles)
 								break;
@@ -1580,7 +1564,7 @@ void CGameClient::OnPredict()
 							NumProjectiles++;
 							WeaponFired = true;
 						} break;
-					case WEAPON_HAMMER:
+						case WEAPON_HAMMER:
 						{
 							vec2 ProjPos = ProjStartPos;
 							float Radius = ProximityRadius*0.5f;
@@ -1595,7 +1579,7 @@ void CGameClient::OnPredict()
 									continue;
 								if(i == m_Snap.m_LocalClientID)
 									continue;
-								if(!(distance(World.m_apCharacters[i]->m_Pos, ProjPos) < Radius+ProximityRadius))
+								if(distance(World.m_apCharacters[i]->m_Pos, ProjPos) >= Radius + ProximityRadius)
 									continue;
 
 								CCharacterCore *pTarget = World.m_apCharacters[i];
@@ -1627,14 +1611,15 @@ void CGameClient::OnPredict()
 								WeaponFired = true;
 							}
 						} break;
+					}
+					if(!ReloadTimer)
+					{
+						ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
+						if(!DirectInput)
+							ReloadTimer++;
+					}
 				}
-				if(!ReloadTimer)
-				{
-					ReloadTimer = g_pData->m_Weapons.m_aId[Local->m_ActiveWeapon].m_Firedelay * SERVER_TICK_SPEED / 1000;
-					if(!DirectInput)
-						ReloadTimer++;
-				}
-			} while(false);
+			}
 
 			if(ReloadTimer)
 				ReloadTimer--;
@@ -1693,10 +1678,7 @@ void CGameClient::OnPredict()
 			{
 				if(!World.m_apCharacters[c])
 					continue;
-				if(m_Snap.m_LocalClientID == c)
-					World.m_apCharacters[c]->Tick(true, true);
-				else
-					World.m_apCharacters[c]->Tick(false, true);
+				World.m_apCharacters[c]->Tick(m_Snap.m_LocalClientID == c, true);
 			}
 		}
 
@@ -2103,7 +2085,7 @@ void CLocalProjectile::Init(CGameClient *pGameClient, CWorldCore *pWorld, CColli
 	{
 		bool StandardVel = (fabs(1.0f - length(m_Direction)) < 0.015);
 		m_Owner = -1;
-		m_Explosive = ((m_Type == WEAPON_GRENADE && StandardVel) ? true : false);
+		m_Explosive = m_Type == WEAPON_GRENADE && StandardVel;
 		m_Bouncing = 0;
 		m_Freeze = 0;
 		m_ExtraInfo = false;
@@ -2155,8 +2137,8 @@ vec2 CLocalProjectile::GetPos(float Time)
 
 bool CLocalProjectile::GameLayerClipped(vec2 CheckPos)
 {
-	return round_to_int(CheckPos.x)/32 < -200 || round_to_int(CheckPos.x)/32 > m_pCollision->GetWidth()+200 ||
-		round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > m_pCollision->GetHeight()+200 ? true : false;
+	return round_to_int(CheckPos.x) / 32 < -200 || round_to_int(CheckPos.x) / 32 > m_pCollision->GetWidth() + 200 ||
+		round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > m_pCollision->GetHeight()+200;
 }
 
 void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientID)
@@ -2183,7 +2165,7 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 
 	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
 
-	if(((Target >= 0 && (m_Owner >= 0 ? OwnerCanProbablyHitOthers : 1 || Target == m_Owner)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	if(((Target >= 0 && (m_Owner >= 0 ? OwnerCanProbablyHitOthers : true)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
 	{
 		if(m_Explosive && (Target < 0 || (Target >= 0 && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
 			CreateExplosion(ColPos, m_Owner);
@@ -2209,11 +2191,11 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 	{
 		int Lifetime = 0;
 		if(m_Weapon == WEAPON_GRENADE)
-			Lifetime = m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED;
+			Lifetime = (int)(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED);
 		else if(m_Weapon == WEAPON_GUN)
-			Lifetime = m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED;
+			Lifetime = (int)(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_GrenadeLifetime * SERVER_TICK_SPEED);
 		else if(m_Weapon == WEAPON_SHOTGUN)
-			Lifetime = m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunLifetime * SERVER_TICK_SPEED;
+			Lifetime = (int)(m_pGameClient->m_Tuning[g_Config.m_ClDummy].m_ShotgunLifetime * SERVER_TICK_SPEED);
 		int LifeSpan = Lifetime - (CurrentTick - m_StartTick);
 		if(LifeSpan == -1)
 		{
