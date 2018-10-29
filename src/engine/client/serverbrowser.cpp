@@ -147,7 +147,7 @@ bool CServerBrowser::SortCompareNumPlayers(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return FilteredPlayers(a->m_Info) < FilteredPlayers(b->m_Info);
+	return a->m_Info.m_NumFilteredPlayers < b->m_Info.m_NumFilteredPlayers;
 }
 
 bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
@@ -155,32 +155,6 @@ bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
 	return a->m_Info.m_NumClients < b->m_Info.m_NumClients;
-}
-
-int CServerBrowser::FilteredPlayers(const CServerInfo &Item) const
-{
-	int NumPlayers = 0;
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		const CServerInfo::CClient &Client = Item.m_aClients[i];
-
-		if(Client.m_aName[0] == '\0')
-			continue;
-
-		if(g_Config.m_BrFilterSpectators && !Client.m_Player)
-			continue;
-
-		if(g_Config.m_BrFilterFriends && Client.m_FriendState == IFriends::FRIEND_NO)
-			continue;
-
-		if(g_Config.m_BrFilterConnectingPlayers && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0' && Client.m_Country == -1 && Client.m_Score == 0)
-			continue;
-
-		NumPlayers++;
-	}
-
-	return NumPlayers;
 }
 
 void CServerBrowser::Filter()
@@ -202,7 +176,7 @@ void CServerBrowser::Filter()
 	{
 		int Filtered = 0;
 
-		if(g_Config.m_BrFilterEmpty && FilteredPlayers(m_ppServerlist[i]->m_Info) == 0)
+		if(g_Config.m_BrFilterEmpty && m_ppServerlist[i]->m_Info.m_NumFilteredPlayers == 0)
 			Filtered = 1;
 		else if(g_Config.m_BrFilterFull && Players(m_ppServerlist[i]->m_Info) == Max(m_ppServerlist[i]->m_Info))
 			Filtered = 1;
@@ -360,9 +334,36 @@ int CServerBrowser::SortHash() const
 	return i;
 }
 
+void SetFilteredPlayers(const CServerInfo &Item)
+{
+	Item.m_NumFilteredPlayers = 0;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		const CServerInfo::CClient &Client = Item.m_aClients[i];
+
+		if(Client.m_aName[0] == '\0')
+			continue;
+
+		if(g_Config.m_BrFilterSpectators && !Client.m_Player)
+			continue;
+
+		if(g_Config.m_BrFilterConnectingPlayers && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0' && Client.m_Country == -1 && Client.m_Score == 0)
+			continue;
+
+		Item.m_NumFilteredPlayers++;
+	}
+}
+
 void CServerBrowser::Sort()
 {
 	int i;
+
+	// fill m_NumFilteredPlayers
+	for(i = 0; i < m_NumServers; i++)
+	{
+		SetFilteredPlayers(m_ppServerlist[i]->m_Info);
+	}
 
 	// create filtered list
 	Filter();

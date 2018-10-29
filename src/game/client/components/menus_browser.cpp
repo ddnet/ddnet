@@ -243,7 +243,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		int ItemIndex = i;
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
-		NumPlayers += ServerBrowser()->FilteredPlayers(*pItem);
+		NumPlayers += pItem->m_NumFilteredPlayers;
 		CUIRect Row;
 		CUIRect SelectHitBox;
 
@@ -407,7 +407,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Icon);
 				}
 
-				str_format(aTemp, sizeof(aTemp), "%i/%i", ServerBrowser()->FilteredPlayers(*pItem), ServerBrowser()->Max(*pItem));
+				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit&IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f,0.4f,1.0f,1);
 				UI()->DoLabelScaled(&Button, aTemp, 12.0f, 1);

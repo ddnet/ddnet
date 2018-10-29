@@ -68,8 +68,6 @@ public:
 
 	int NumServers() const { return m_NumServers; }
 
-	int FilteredPlayers(const CServerInfo &Item) const;
-
 	int Players(const CServerInfo &Item) const
 	{
 		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
