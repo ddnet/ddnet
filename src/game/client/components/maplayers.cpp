@@ -1135,9 +1135,15 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 				Dir.x = 32.f;
 				Dir.y = 32.f;
 
-				int Count = min((absolute(BorderX0) + 1) * (absolute(BorderY0) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
+				// if border is still in range of the original corner, it doesn't needs to be redrawn
+				bool CornerVisible = (absolute(BorderX0) < CountWidth) && (absolute(BorderY0) < CountHeight);
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min(absolute(BorderX0) + 1, CountWidth), Count);
+				int CountX = min(absolute(BorderX0) + 1, CountWidth);
+				int CountY = min(absolute(BorderY0) + 1, CountHeight);
+
+				int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
+
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, CountX, Count);
 			}
 		}
 		if(BorderY1 >= pTileLayer->m_Height - 1)
@@ -1151,9 +1157,15 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 				Dir.x = 32.f;
 				Dir.y = -32.f;
 
-				int Count = min((absolute(BorderX0) + 1) * ((BorderY1 - (pTileLayer->m_Height - 1)) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
+				// if border is still in range of the original corner, it doesn't needs to be redrawn
+				bool CornerVisible = (absolute(BorderX0) < CountWidth) && ((BorderY1 - (pTileLayer->m_Height - 1)) < CountHeight);
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min(absolute(BorderX0) + 1, CountWidth), Count);
+				int CountX = min(absolute(BorderX0) + 1, CountWidth);
+				int CountY = min((BorderY1 - (pTileLayer->m_Height - 1)) + 1, CountHeight);
+
+				int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
+
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomLeft.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, CountX, Count);
 			}
 		}
 	}
@@ -1188,9 +1200,15 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 				Dir.x = -32.f;
 				Dir.y = 32.f;
 
-				int Count = min(((BorderX1 - ((pTileLayer->m_Width - 1))) + 1) * (absolute(BorderY0) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
+				// if border is still in range of the original corner, it doesn't needs to be redrawn
+				bool CornerVisible = ((BorderX1 - (pTileLayer->m_Width - 1)) < CountWidth) && (absolute(BorderY0) < CountHeight);
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min((BorderX1 - (pTileLayer->m_Width - 1)) + 1, CountWidth), Count);
+				int CountX = min((BorderX1 - (pTileLayer->m_Width - 1)) + 1, CountWidth);
+				int CountY = min(absolute(BorderY0) + 1, CountHeight);
+
+				int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
+
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderTopRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, CountX, Count);
 			}
 		}
 		if(BorderY1 >= pTileLayer->m_Height - 1)
@@ -1204,9 +1222,15 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 				Dir.x = -32.f;
 				Dir.y = -32.f;
 
-				int Count = min(((BorderX1 - (pTileLayer->m_Width - 1)) + 1) * ((BorderY1 - (pTileLayer->m_Height - 1)) + 1) - 1, CountWidth * CountHeight); // Don't draw the corner again
+				// if border is still in range of the original corner, it doesn't needs to be redrawn
+				bool CornerVisible = ((BorderX1 - (pTileLayer->m_Width - 1)) < CountWidth) && ((BorderY1 - (pTileLayer->m_Height - 1)) < CountHeight);
 
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, min((BorderX1 - (pTileLayer->m_Width - 1)) + 1, CountWidth), Count);
+				int CountX = min((BorderX1 - (pTileLayer->m_Width - 1)) + 1, CountWidth);
+				int CountY = min((BorderY1 - (pTileLayer->m_Height - 1)) + 1, CountHeight);
+
+				int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
+
+				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, (float*)pColor, (offset_ptr_size)Visuals.m_BorderBottomRight.IndexBufferByteOffset(), (float*)&Offset, (float*)&Dir, CountX, Count);
 			}
 		}
 	}
