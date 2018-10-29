@@ -1100,16 +1100,17 @@ void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTile
 		RenderTileBorder(LayerIndex, pColor, pTileLayer, pGroup, BorderX0, BorderY0, BorderX1, BorderY1, (int)(-floorf((-ScreenX1) / 32.f)) - BorderX0, (int)(-floorf((-ScreenY1) / 32.f)) - BorderY0);
 }
 
-void CMapLayers::RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, float* pColor, offset_ptr_size IndexBufferOffset, float* pOffset, float* pDir) {
-		// if border is still in range of the original corner, it doesn't needs to be redrawn
-		bool CornerVisible = (WidthOffsetToOrigin - 1 < TileCountWidth) && (HeightOffsetToOrigin - 1 < TileCountHeight);
+void CMapLayers::RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, float* pColor, offset_ptr_size IndexBufferOffset, float* pOffset, float* pDir)
+{
+	// if border is still in range of the original corner, it doesn't needs to be redrawn
+	bool CornerVisible = (WidthOffsetToOrigin - 1 < TileCountWidth) && (HeightOffsetToOrigin - 1 < TileCountHeight);
 
-		int CountX = min(WidthOffsetToOrigin, TileCountWidth);
-		int CountY = min(HeightOffsetToOrigin, TileCountHeight);
+	int CountX = min(WidthOffsetToOrigin, TileCountWidth);
+	int CountY = min(HeightOffsetToOrigin, TileCountHeight);
 
-		int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
+	int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
 
-		Graphics()->RenderBorderTiles(BufferContainerIndex, pColor, IndexBufferOffset, pOffset, pDir, CountX, Count);
+	Graphics()->RenderBorderTiles(BufferContainerIndex, pColor, IndexBufferOffset, pOffset, pDir, CountX, Count);
 }
 
 void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount)
