@@ -364,7 +364,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
-	if(m_Readonly || Empty || pBrush->m_Type != LAYERTYPE_TILES)
+	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
 
 	Snap(&Rect);
@@ -1013,7 +1013,7 @@ void CLayerTele::BrushRotate(float Amount)
 
 void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
-	if(m_Readonly || Empty || pBrush->m_Type != LAYERTYPE_TILES)
+	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
@@ -1278,7 +1278,7 @@ void CLayerSpeedup::BrushRotate(float Amount)
 
 void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
-	if(m_Readonly || Empty || pBrush->m_Type != LAYERTYPE_TILES)
+	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
@@ -1555,7 +1555,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
-	if(m_Readonly || Empty || pBrush->m_Type != LAYERTYPE_TILES)
+	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
@@ -1817,7 +1817,7 @@ void CLayerTune::BrushRotate(float Amount)
 
 void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
-	if(m_Readonly || Empty || pBrush->m_Type != LAYERTYPE_TILES)
+	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
 
 	Snap(&Rect); // corrects Rect; no need of <=
