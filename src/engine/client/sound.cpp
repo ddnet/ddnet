@@ -283,6 +283,9 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 
 int CSound::Init()
 {
+#ifdef CONF_FAMILY_WINDOWS
+	SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
+#endif
 	m_SoundEnabled = 0;
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
