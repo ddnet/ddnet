@@ -284,7 +284,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_JUMP
 						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_PENALTY
 						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_BONUS
-						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_ALLOW_TELE_GUN)
+						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_ALLOW_TELE_GUN
+						|| pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
 					{
 						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Number;
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y*pGrabbed->m_Width+x].m_Delay;
@@ -1535,7 +1536,8 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_JUMP
 				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_PENALTY
 				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_BONUS
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_ALLOW_TELE_GUN)
+				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_ALLOW_TELE_GUN
+				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_ALLOW_BLUE_TELE_GUN)
 			{
 				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
 				{

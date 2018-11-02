@@ -256,6 +256,7 @@ public:
 	bool m_HasTeleLaser;
 	vec2 m_TeleGunPos;
 	bool m_TeleGunTeleport;
+	bool m_IsBlueTeleGunTeleport;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };
