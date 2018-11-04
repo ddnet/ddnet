@@ -198,7 +198,6 @@ void CLaser::DoBounce()
 	else if(m_Owner >= 0 && m_Pos)
 	{
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
-		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 		bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
 		bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
@@ -213,13 +212,15 @@ void CLaser::DoBounce()
 			}
 		}
 
-		m_IsBlueTeleport = TileIndex == TILE_ALLOW_BLUE_TELE_GUN || TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsBlueSwitchTeleGun;
+		m_IsBlueTeleport = TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsBlueSwitchTeleGun;
 
 		// Teleport is canceled if the last bounce tile is not a TILE_ALLOW_TELE_GUN.
 		// Teleport also works if laser didn't bounce.
 		m_TeleportCancelled =
-				m_Type == WEAPON_RIFLE && (TileIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_TELE_GUN &&
-				TileIndex != TILE_ALLOW_BLUE_TELE_GUN && TileFIndex != TILE_ALLOW_BLUE_TELE_GUN && !IsSwitchTeleGun
+				m_Type == WEAPON_RIFLE
+				&& (TileFIndex != TILE_ALLOW_TELE_GUN
+				&& TileFIndex != TILE_ALLOW_BLUE_TELE_GUN
+				&& !IsSwitchTeleGun
 				&& !IsBlueSwitchTeleGun);
 	}
 

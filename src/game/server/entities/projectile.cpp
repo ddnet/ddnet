@@ -175,7 +175,6 @@ void CProjectile::Tick()
 			((m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun)))
 		{
 			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->m_Pos : ColPos);
-			int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 			bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
 			bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
@@ -193,9 +192,7 @@ void CProjectile::Tick()
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 			}
 
-			if (TileIndex == TILE_ALLOW_TELE_GUN
-				|| TileFIndex == TILE_ALLOW_TELE_GUN
-				|| TileIndex == TILE_ALLOW_BLUE_TELE_GUN
+			if (TileFIndex == TILE_ALLOW_TELE_GUN
 				|| TileFIndex == TILE_ALLOW_BLUE_TELE_GUN
 				|| IsSwitchTeleGun
 				|| IsBlueSwitchTeleGun
@@ -213,8 +210,7 @@ void CProjectile::Tick()
 				{
 					pOwnerChar->m_TeleGunPos = PossiblePos;
 					pOwnerChar->m_TeleGunTeleport = true;
-					pOwnerChar->m_IsBlueTeleGunTeleport = TileIndex == TILE_ALLOW_BLUE_TELE_GUN
-														  || TileFIndex == TILE_ALLOW_BLUE_TELE_GUN
+					pOwnerChar->m_IsBlueTeleGunTeleport = TileFIndex == TILE_ALLOW_BLUE_TELE_GUN
 														  || IsBlueSwitchTeleGun;
 				}
 			}
