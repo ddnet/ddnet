@@ -59,14 +59,14 @@ void CLayerTiles::SetTile(int x, int y, CTile tile)
 void CLayerTiles::PrepareForSave()
 {
 	for(int y = 0; y < m_Height; y++)
+	{
 		for(int x = 0; x < m_Width; x++)
+		{
 			m_pTiles[y*m_Width+x].m_Flags &= TILEFLAG_VFLIP|TILEFLAG_HFLIP|TILEFLAG_ROTATE;
 
-	if(m_Image != -1 && m_Color.a == 255)
-	{
-		for(int y = 0; y < m_Height; y++)
-			for(int x = 0; x < m_Width; x++)
+			if(m_Image != -1 && m_Color.a == 255)
 				m_pTiles[y*m_Width+x].m_Flags |= m_pEditor->m_Map.m_lImages[m_Image]->m_aTileFlags[m_pTiles[y*m_Width+x].m_Index];
+		}
 	}
 }
 
