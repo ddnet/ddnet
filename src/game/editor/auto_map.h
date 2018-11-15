@@ -48,13 +48,19 @@ class CAutoMapper
 	{
 		array<CRun> m_aRuns;
 		char m_aName[128];
+		int m_StartX;
+		int m_StartY;
+		int m_EndX;
+		int m_EndY;
 	};
 
 public:
+
 	CAutoMapper(class CEditor *pEditor);
 
 	void Load(const char* pTileName);
-	void Proceed(class CLayerTiles *pLayer, int ConfigID);
+	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigID, int Seed=0, int X=0, int Y=0, int Width=-1, int Height=-1);
+	void Proceed(class CLayerTiles *pLayer, int ConfigID, int Seed=0, int SeedOffsetX=0, int SeedOffsetY=0);
 
 	int ConfigNamesNum() const { return m_lConfigs.size(); }
 	const char* GetConfigName(int Index);

@@ -21,6 +21,20 @@ struct CMapItemTest
 	int m_Field4;
 } ;
 
+struct CMapItemAutoMapperConfig
+{
+	enum { CURRENT_VERSION=1 };
+	enum { FLAG_AUTOMATIC=1 };
+
+	int m_Version;
+	int m_GroupId;
+	int m_LayerId;
+	int m_AutomapperConfig;
+	int m_AutomapperSeed;
+	int m_Flags;
+} ;
+
+
 
 void RegisterMapItemTypeUuids(class CUuidManager *pManager);
 #endif // GAME_MAPITEMS_EX_H

@@ -505,6 +505,7 @@ enum
 	PROPTYPE_ENVELOPE,
 	PROPTYPE_SHIFT,
 	PROPTYPE_SOUND,
+	PROPTYPE_AUTOMAPPER,
 };
 
 typedef struct
@@ -551,6 +552,8 @@ public:
 	void PrepareForSave();
 
 	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
+	
+	void FlagModified(int x, int y, int w, int h);
 
 	int m_TexID;
 	int m_Game;
@@ -564,6 +567,9 @@ public:
 
 	// DDRace
 
+	int m_AutoMapperConfig;
+	int m_Seed;
+	bool m_AutoAutoMap;
 	int m_Tele;
 	int m_Speedup;
 	int m_Front;
@@ -993,7 +999,7 @@ public:
 	void PopupSelectGametileOpInvoke(float x, float y);
 	int PopupSelectGameTileOpResult();
 
-	void PopupSelectConfigAutoMapInvoke(float x, float y);
+	void PopupSelectConfigAutoMapInvoke(int Current, float x, float y);
 	int PopupSelectConfigAutoMapResult();
 
 	void PopupSelectSoundInvoke(int Current, float x, float y);
