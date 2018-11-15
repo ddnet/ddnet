@@ -21,7 +21,8 @@ def auth_add_p_line(username, level, pwhash, salt):
 		print("Warning: level ({}) contains weird symbols, config line is possibly malformed.".format(level), file=sys.stderr)
 	if repr(username) != "'{}'".format(username):
 		print("Warning: username ({}) contains weird symbols, config line is possibly malformed.".format(username), file=sys.stderr)
-	if ' ' in username:
+	username = username.replace('"', '\\"')
+	if ' ' in username or ';' in username:
 		username = '"{}"'.format(username)
 	return "auth_add_p {} {} {} {}".format(username, level, pwhash, salt)
 
