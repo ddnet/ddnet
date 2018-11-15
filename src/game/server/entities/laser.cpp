@@ -21,6 +21,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_WasTele = false;
 	m_Type = Type;
 	m_TeleportCancelled = false;
+	m_IsBlueTeleport = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->Teams()->TeamMask(GameServer()->GetPlayerChar(Owner)->Team(), -1, m_Owner) : 0;
 	GameWorld()->InsertEntity(this);
@@ -191,16 +192,40 @@ void CLaser::DoBounce()
 		{
 			pOwnerChar->m_TeleGunPos = PossiblePos;
 			pOwnerChar->m_TeleGunTeleport = true;
+			pOwnerChar->m_IsBlueTeleGunTeleport = m_IsBlueTeleport;
 		}
 	}
 	else if(m_Owner >= 0 && m_Pos)
 	{
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
-		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+		bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
+		bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
+		int IsTeleInWeapon = GameServer()->Collision()->IsTeleportWeapon(MapIndex);
 
-		if (m_Type == WEAPON_RIFLE && (TileIndex == TILE_NO_TELE_GUN || TileFIndex == TILE_NO_TELE_GUN))
-			m_TeleportCancelled = true;
+		if(!IsTeleInWeapon)
+		{
+			if(IsSwitchTeleGun || IsBlueSwitchTeleGun) {
+				// Delay specifies which weapon the tile should work for.
+				// Delay = 0 means all.
+				int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+
+				if((delay != 3 && delay != 0) && m_Type == WEAPON_RIFLE) {
+					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
+				}
+			}
+
+			m_IsBlueTeleport = TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsBlueSwitchTeleGun;
+
+			// Teleport is canceled if the last bounce tile is not a TILE_ALLOW_TELE_GUN.
+			// Teleport also works if laser didn't bounce.
+			m_TeleportCancelled =
+					m_Type == WEAPON_RIFLE
+					&& (TileFIndex != TILE_ALLOW_TELE_GUN
+						&& TileFIndex != TILE_ALLOW_BLUE_TELE_GUN
+						&& !IsSwitchTeleGun
+						&& !IsBlueSwitchTeleGun);
+		}
 	}
 
 	//m_Owner = -1;
