@@ -4744,8 +4744,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(m_Map.m_lEnvelopes.size())
 		{
 			EnvColor = IsEnvelopeUsed(m_SelectedEnvelope) ?
-				vec4(0.7f, 1, 0.7f, 0.5f) :
-				vec4(1, 0.7f, 0.7f, 0.5f);
+				vec4(1, 0.7f, 0.7f, 0.5f) :
+				vec4(0.7f, 1, 0.7f, 0.5f);
 		}
 
 		RenderTools()->DrawUIRect(&Shifter, EnvColor, 0, 0.0f);
