@@ -59,7 +59,7 @@ CGameConsole::CInstance::CInstance(int Type)
 void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 {
 	m_pGameConsole = pGameConsole;
-};
+}
 
 void CGameConsole::CInstance::ClearBacklog()
 {

@@ -219,14 +219,14 @@ if gen_network_source:
 	lines += ['{']
 	lines += ['\tif(Type < 0 || Type >= NUM_NETOBJTYPES) return "(out of range)";']
 	lines += ['\treturn ms_apObjNames[Type];']
-	lines += ['};']
+	lines += ['}']
 	lines += ['']
 
 	lines += ['int CNetObjHandler::GetObjSize(int Type)']
 	lines += ['{']
 	lines += ['\tif(Type < 0 || Type >= NUM_NETOBJTYPES) return 0;']
 	lines += ['\treturn ms_aObjSizes[Type];']
-	lines += ['};']
+	lines += ['}']
 	lines += ['']
 
 
@@ -234,7 +234,7 @@ if gen_network_source:
 	lines += ['{']
 	lines += ['\tif(Type < 0 || Type >= NUM_NETMSGTYPES) return "(out of range)";']
 	lines += ['\treturn ms_apMsgNames[Type];']
-	lines += ['};']
+	lines += ['}']
 	lines += ['']
 
 
@@ -278,7 +278,7 @@ if gen_network_source:
 		lines += ['\t']
 	lines += ['\t}']
 	lines += ['\treturn -1;']
-	lines += ['};']
+	lines += ['}']
 	lines += ['']
 
  #int Validate(int Type, void *pData, int Size);
@@ -323,7 +323,7 @@ if gen_network_source:
 	lines += ['\t\treturn 0;']
 	lines += ['\tm_pMsgFailedOn = "";']
 	lines += ['\treturn m_aMsgData;']
-	lines += ['};']
+	lines += ['}']
 	lines += ['']
 
 	lines += ['bool CNetObjHandler::TeeHistorianRecordMsg(int Type)']
