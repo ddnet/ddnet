@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+
+#include <limits>
+
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/friends.h>
@@ -62,7 +65,6 @@
 #include <base/system.h>
 #include "components/race_demo.h"
 #include "components/ghost.h"
-#include <base/tl/sorted_array.h>
 
 CGameClient g_GameClient;
 
@@ -1227,61 +1229,48 @@ void CGameClient::OnNewSnapshot()
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-        // update friend state
-        m_aClients[i].m_Friend = !(i == m_Snap.m_LocalClientID
-                || !m_Snap.m_paPlayerInfos[i]
-                || !Friends()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+		// update friend state
+		m_aClients[i].m_Friend = !(i == m_Snap.m_LocalClientID
+			|| !m_Snap.m_paPlayerInfos[i]
+			|| !Friends()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 
-        // update foe state
-        m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientID
-                || !m_Snap.m_paPlayerInfos[i]
-                || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+		// update foe state
+		m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientID
+			|| !m_Snap.m_paPlayerInfos[i]
+			|| !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 	}
 
 	// sort player infos by name
 	mem_copy(m_Snap.m_paInfoByName, m_Snap.m_paPlayerInfos, sizeof(m_Snap.m_paInfoByName));
-	for(int k = 0; k < MAX_CLIENTS-1; k++) // ffs, bubblesort
-	{
-		for(int i = 0; i < MAX_CLIENTS-k-1; i++)
+	std::stable_sort(m_Snap.m_paInfoByName, m_Snap.m_paInfoByName + MAX_CLIENTS,
+		[this](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
 		{
-			if(m_Snap.m_paInfoByName[i+1] && (!m_Snap.m_paInfoByName[i] || str_comp_nocase(m_aClients[m_Snap.m_paInfoByName[i]->m_ClientID].m_aName, m_aClients[m_Snap.m_paInfoByName[i+1]->m_ClientID].m_aName) > 0))
-			{
-				const CNetObj_PlayerInfo *pTmp = m_Snap.m_paInfoByName[i];
-				m_Snap.m_paInfoByName[i] = m_Snap.m_paInfoByName[i+1];
-				m_Snap.m_paInfoByName[i+1] = pTmp;
-			}
-		}
-	}
+			if (!p2)
+				return false;
+			if (!p1)
+				return true;
+			return str_comp_nocase(m_aClients[p1->m_ClientID].m_aName, m_aClients[p2->m_ClientID].m_aName) < 0;
+		});
+
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+	bool IsGameTypeRace = IsRace(&Info);
 
 	// sort player infos by score
 	mem_copy(m_Snap.m_paInfoByScore, m_Snap.m_paInfoByName, sizeof(m_Snap.m_paInfoByScore));
-	for(int k = 0; k < MAX_CLIENTS-1; k++) // ffs, bubblesort
-	{
-		for(int i = 0; i < MAX_CLIENTS-k-1; i++)
+	std::stable_sort(m_Snap.m_paInfoByScore, m_Snap.m_paInfoByScore + MAX_CLIENTS,
+		[IsGameTypeRace](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
 		{
-			if(m_Snap.m_paInfoByScore[i+1] && (!m_Snap.m_paInfoByScore[i] || m_Snap.m_paInfoByScore[i]->m_Score < m_Snap.m_paInfoByScore[i+1]->m_Score))
-			{
-				const CNetObj_PlayerInfo *pTmp = m_Snap.m_paInfoByScore[i];
-				m_Snap.m_paInfoByScore[i] = m_Snap.m_paInfoByScore[i+1];
-				m_Snap.m_paInfoByScore[i+1] = pTmp;
-			}
-		}
-	}
-
-	// sort player infos by team
-	//int Teams[3] = { TEAM_RED, TEAM_BLUE, TEAM_SPECTATORS };
-	int Index = 0;
-	//for(int Team = 0; Team < 3; ++Team)
-	//{
-	//	for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
-	//	{
-	//		if(m_Snap.m_paPlayerInfos[i] && m_Snap.m_paPlayerInfos[i]->m_Team == Teams[Team])
-	//			m_Snap.m_paInfoByTeam[Index++] = m_Snap.m_paPlayerInfos[i];
-	//	}
-	//}
+			if (!p2)
+				return false;
+			if (!p1)
+				return true;
+			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::min() : p1->m_Score) >
+				((IsGameTypeRace && p2->m_Score == -9999) ? std::numeric_limits<int>::min() : p2->m_Score));
+		});
 
 	// sort player infos by DDRace Team (and score between)
-	Index = 0;
+	int Index = 0;
 	for(int Team = 0; Team <= MAX_CLIENTS; ++Team)
 	{
 		for(int i = 0; i < MAX_CLIENTS && Index < MAX_CLIENTS; ++i)
