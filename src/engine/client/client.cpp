@@ -3577,6 +3577,10 @@ int main(int argc, const char **argv) // ignore_convention
 		}
 	}
 
+#if defined(CONF_FAMILY_WINDOWS)
+	SetConsoleOutputCP(65001);
+#endif
+
 	if(secure_random_init() != 0)
 	{
 		RandInitFailed = true;
