@@ -1939,7 +1939,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			bool UsernameReq = Unpacker.GetInt() & 1;
 			GameClient()->OnRconType(UsernameReq);
 		}
-		else if (Msg == NETMSG_DDRACE_SCORE)
+		else if(Msg == NETMSG_DDRACE_SCORE)
 		{
 			int NewDDRaceScore = Unpacker.GetInt();
 			if (Unpacker.Error())
@@ -2169,7 +2169,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 				}
 			}
 		}
-		else if (Msg == NETMSG_DDRACE_SCORE)
+		else if(Msg == NETMSG_DDRACE_SCORE)
 		{
 			int NewDDRaceScore = Unpacker.GetInt();
 			if (Unpacker.Error())
