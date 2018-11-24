@@ -222,7 +222,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 	}
 
-	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
+	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard && ((m_pClient->m_AllowDDRaceScore[0] && !g_Config.m_ClDummy) || (m_pClient->m_AllowDDRaceScore[1] && g_Config.m_ClDummy)))
 	{
 		if (m_ServerRecord > 0)
 		{
@@ -404,7 +404,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// score
-		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
+		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard && ((m_pClient->m_AllowDDRaceScore[0] && !g_Config.m_ClDummy) || (m_pClient->m_AllowDDRaceScore[1] && g_Config.m_ClDummy)))
 		{
 			if (pInfo->m_Score == -9999)
 				aBuf[0] = 0;

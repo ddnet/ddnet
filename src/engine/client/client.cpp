@@ -721,6 +721,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_GametimeMarginGraph.Init(-150.0f, 150.0f);
 
 	GenerateTimeoutCodes();
+
+	GameClient()->OnDDRaceScore(1, false);
 }
 
 void CClient::DisconnectWithReason(const char *pReason)
@@ -806,6 +808,8 @@ void CClient::DummyConnect()
 
 	//connecting to the server
 	m_NetClient[1].Connect(&m_ServerAddress);
+
+	GameClient()->OnDDRaceScore(1, true);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -1935,6 +1939,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			bool UsernameReq = Unpacker.GetInt() & 1;
 			GameClient()->OnRconType(UsernameReq);
 		}
+		else if(Msg == NETMSG_DDRACE_SCORE)
+		{
+			int NewDDRaceScore = Unpacker.GetInt();
+			if (Unpacker.Error())
+				return;
+			if (!g_Config.m_ClDummy)
+				GameClient()->OnDDRaceScore(NewDDRaceScore, false);
+			else
+				GameClient()->OnDDRaceScore(NewDDRaceScore, true);
+		}
 	}
 	else
 	{
@@ -2154,6 +2168,13 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					m_AckGameTick[!g_Config.m_ClDummy] = GameTick;
 				}
 			}
+		}
+		else if(Msg == NETMSG_DDRACE_SCORE)
+		{
+			int NewDDRaceScore = Unpacker.GetInt();
+			if (Unpacker.Error())
+				return;
+			GameClient()->OnDDRaceScore(NewDDRaceScore, true);
 		}
 	}
 	else

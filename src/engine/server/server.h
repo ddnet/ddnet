@@ -306,6 +306,7 @@ public:
 
 	static void ConTestingCommands(IConsole::IResult *pResult, void *pUser);
 	static void ConRescue(IConsole::IResult *pResult, void *pUser);
+	static void ConDDRaceScore(IConsole::IResult *pResult, void *pUser);
 	static void ConKick(IConsole::IResult *pResult, void *pUser);
 	static void ConStatus(IConsole::IResult *pResult, void *pUser);
 	static void ConShutdown(IConsole::IResult *pResult, void *pUser);
