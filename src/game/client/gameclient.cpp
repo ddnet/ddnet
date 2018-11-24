@@ -1246,15 +1246,15 @@ void CGameClient::OnNewSnapshot()
 		[this](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
 		{
 			if (!p2)
-				return false;
-			if (!p1)
 				return true;
+			if (!p1)
+				return false;
 			return str_comp_nocase(m_aClients[p1->m_ClientID].m_aName, m_aClients[p2->m_ClientID].m_aName) < 0;
 		});
 
-	CServerInfo Info;
-	Client()->GetServerInfo(&Info);
-	bool IsGameTypeRace = IsRace(&Info);
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
+	bool IsGameTypeRace = IsRace(&CurrentServerInfo);
 
 	// sort player infos by score
 	mem_copy(m_Snap.m_paInfoByScore, m_Snap.m_paInfoByName, sizeof(m_Snap.m_paInfoByScore));
@@ -1262,9 +1262,9 @@ void CGameClient::OnNewSnapshot()
 		[IsGameTypeRace](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
 		{
 			if (!p2)
-				return false;
-			if (!p1)
 				return true;
+			if (!p1)
+				return false;
 			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::min() : p1->m_Score) >
 				((IsGameTypeRace && p2->m_Score == -9999) ? std::numeric_limits<int>::min() : p2->m_Score));
 		});
@@ -1281,8 +1281,6 @@ void CGameClient::OnNewSnapshot()
 	}
 
 	CTuningParams StandardTuning;
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
 	if(CurrentServerInfo.m_aGameType[0] != '0')
 	{
 		if(str_comp(CurrentServerInfo.m_aGameType, "DM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "TDM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "CTF") != 0)
