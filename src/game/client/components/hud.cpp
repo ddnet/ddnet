@@ -340,7 +340,7 @@ void CHud::RenderScoreHud()
 				{
 					CServerInfo Info;
 					Client()->GetServerInfo(&Info);
-					if (IsRace(&Info) && g_Config.m_ClDDRaceScoreBoard && ((m_pClient->m_AllowDDRaceScore[0] && !g_Config.m_ClDummy) || (m_pClient->m_AllowDDRaceScore[1] && g_Config.m_ClDummy)))
+					if(IsRace(&Info) && g_Config.m_ClDDRaceScoreBoard && ((m_pClient->m_AllowDDRaceScore[0] && !g_Config.m_ClDummy) || (m_pClient->m_AllowDDRaceScore[1] && g_Config.m_ClDummy)))
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
 							str_format(aScore[t], sizeof(aScore[t]), "%02d:%02d", abs(apPlayerInfo[t]->m_Score)/60, abs(apPlayerInfo[t]->m_Score)%60);
