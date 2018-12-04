@@ -2192,7 +2192,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	// Updater
-#if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
+#if defined(CONF_AUTOUPDATE)
 	{
 		Left.HSplitTop(20.0f, &Label, &Left);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
