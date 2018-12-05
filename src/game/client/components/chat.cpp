@@ -101,6 +101,11 @@ void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
 	((CChat*)pUserData)->Say(0, pResult->GetString(0));
 }
 
+void CChat::ConRepeat(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChat*)pUserData)->Say(0, ((CChat*)pUserData)->m_aLines[((CChat*)pUserData)->m_CurrentLine].m_aText+2);
+}
+
 void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	((CChat*)pUserData)->Say(1, pResult->GetString(0));
@@ -137,6 +142,7 @@ void CChat::OnConsoleInit()
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 	Console()->Register("echo", "r[message]", CFGFLAG_CLIENT, ConEcho, this, "Echo the text in chat window");
+	Console()->Register("repeat", "", CFGFLAG_CLIENT, ConRepeat, this, "Repeat the text last one said");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
