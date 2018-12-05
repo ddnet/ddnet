@@ -1296,7 +1296,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		StatusBox.HSplitTop(5.0f, 0, &StatusBox);
 
 		// version note
-#if defined(CONF_AUTO_UPDATE)
+#if defined(CONF_AUTOUPDATE)
 		CUIRect Part;
 		StatusBox.HSplitBottom(15.0f, &StatusBox, &Button);
 		char aBuf[64];
