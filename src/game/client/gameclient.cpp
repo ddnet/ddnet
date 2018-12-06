@@ -1246,7 +1246,7 @@ void CGameClient::OnNewSnapshot()
 		[this](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
 		{
 			if (!p2)
-				return true;
+				return static_cast<bool>(p1);
 			if (!p1)
 				return false;
 			return str_comp_nocase(m_aClients[p1->m_ClientID].m_aName, m_aClients[p2->m_ClientID].m_aName) < 0;
@@ -1262,7 +1262,7 @@ void CGameClient::OnNewSnapshot()
 		[IsGameTypeRace](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
 		{
 			if (!p2)
-				return true;
+				return static_cast<bool>(p1);
 			if (!p1)
 				return false;
 			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::min() : p1->m_Score) >
