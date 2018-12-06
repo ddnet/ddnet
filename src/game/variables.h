@@ -4,6 +4,9 @@
 #define GAME_VARIABLES_H
 #undef GAME_VARIABLES_H // this file will be included several times
 
+// chillerbot-ux
+MACRO_CONFIG_INT(ClRenderPic, cl_render_pic, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render nice thumbnails of players if there are some")
+
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict client movements")
 MACRO_CONFIG_INT(ClAntiPingLimit, cl_antiping_limit, 0, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Antiping limit (0 to disable)")

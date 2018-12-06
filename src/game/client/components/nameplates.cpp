@@ -142,6 +142,10 @@ void CNamePlates::RenderNameplate(
 			float tw_id = TextRender()->TextWidth(0, FontSize, aBuf, -1);
 			TextRender()->Text(0, Position.x-tw_id/2.0f, Position.y-Offset-38.0f, 28.0f, aBuf, -1);
 		}
+		if(g_Config.m_ClRenderPic)
+		{
+			TextRender()->Text(0, Position.x-2.0f, Position.y-38.0f, 28.0f, "nobo", -1);
+		}
 
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
