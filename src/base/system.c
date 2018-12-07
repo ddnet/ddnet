@@ -175,22 +175,25 @@ static void logger_stdout_sync(const char *line, void *user)
 	(void)user;
 
 	size_t length = strlen(line);
-	wchar_t *wide = malloc(length * sizeof *wide);
+	wchar_t *wide = malloc(length * sizeof (*wide));
 	mem_zero(wide, length * sizeof *wide);
 
 	const char *p = line;
-	int i = 0;
-	for(int codepoint = 0; (codepoint = str_utf8_decode(&p)); i++)
+	int wlen = 0;
+	for(int codepoint = 0; (codepoint = str_utf8_decode(&p)); wlen++)
 	{
+		if(codepoint < 0)
+			return;
+
 		char u16[4] = {0};
 		if(str_utf16le_encode(u16, codepoint) != 2)
 			return;
 
-		mem_copy(&wide[i], u16, 2);
+		mem_copy(&wide[wlen], u16, 2);
 	}
 
 	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-	WriteConsoleW(console, wide, i, NULL, NULL);
+	WriteConsoleW(console, wide, wlen, NULL, NULL);
 	WriteConsoleA(console, "\n", 1, NULL, NULL);
 }
 #endif
