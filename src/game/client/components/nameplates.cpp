@@ -158,6 +158,10 @@ void CNamePlates::RenderNameplate(
 				// render player pics
 				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
 				m_pClient->m_pPlayerPics->Render(1, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
+			} else if (!str_comp(pName, "jao")) {
+				// render player pics
+				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+				m_pClient->m_pPlayerPics->Render(2, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
 			}
 		}
 

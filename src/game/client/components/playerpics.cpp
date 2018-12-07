@@ -21,40 +21,82 @@ void CPlayerPics::LoadCountryflagsIndexfile()
 	int CountryCode = 1;
 	str_format(aOrigin, sizeof(aOrigin), "%d", CountryCode);
 
-	// load the graphic file
-	char aBuf[128];
-	CImageInfo Info;
-	if(g_Config.m_ClLoadCountryFlags)
+	// load the graphic files
+
+	// chiller
 	{
-		str_format(aBuf, sizeof(aBuf), "playerpics/ChillerDragon.png");
-		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+		char aBuf[128];
+		CImageInfo Info;
+		if(g_Config.m_ClLoadCountryFlags)
 		{
-			char aMsg[128];
-			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
-			return;
+			str_format(aBuf, sizeof(aBuf), "playerpics/ChillerDragon.png");
+			if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+			{
+				char aMsg[128];
+				str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
+				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
+				return;
+			}
+			else
+				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", "SUCCESSFULLY LOADED ChillerDragon pic");
+		}
+
+		// add entry
+		CPlayerPic CountryFlag;
+		CountryFlag.m_CountryCode = 1;
+		str_copy(CountryFlag.m_aCountryCodeString, aOrigin, sizeof(CountryFlag.m_aCountryCodeString));
+		if(g_Config.m_ClLoadCountryFlags)
+		{
+			CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+			free(Info.m_pData);
 		}
 		else
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", "SUCCESSFULLY LOADED ChillerDragon pic");
+			CountryFlag.m_Texture = -1;
+		if(g_Config.m_Debug)
+		{
+			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aBuf);
+		}
+		m_aCountryFlags.add_unsorted(CountryFlag);
 	}
 
-	// add entry
-	CPlayerPic CountryFlag;
-	CountryFlag.m_CountryCode = CountryCode;
-	str_copy(CountryFlag.m_aCountryCodeString, aOrigin, sizeof(CountryFlag.m_aCountryCodeString));
-	if(g_Config.m_ClLoadCountryFlags)
+	// jao
 	{
-		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-		free(Info.m_pData);
+		char aBuf[128];
+		CImageInfo Info;
+		if(g_Config.m_ClLoadCountryFlags)
+		{
+			str_format(aBuf, sizeof(aBuf), "playerpics/jao.png");
+			if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+			{
+				char aMsg[128];
+				str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
+				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
+				return;
+			}
+			else
+				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", "SUCCESSFULLY LOADED jao pic");
+		}
+
+		// add entry
+		CPlayerPic CountryFlag;
+		CountryFlag.m_CountryCode = 2;
+		str_copy(CountryFlag.m_aCountryCodeString, aOrigin, sizeof(CountryFlag.m_aCountryCodeString));
+		if(g_Config.m_ClLoadCountryFlags)
+		{
+			CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+			free(Info.m_pData);
+		}
+		else
+			CountryFlag.m_Texture = -1;
+		if(g_Config.m_Debug)
+		{
+			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aBuf);
+		}
+		m_aCountryFlags.add_unsorted(CountryFlag);
 	}
-	else
-		CountryFlag.m_Texture = -1;
-	if(g_Config.m_Debug)
-	{
-		str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aBuf);
-	}
-	m_aCountryFlags.add_unsorted(CountryFlag);
+
 
 	m_aCountryFlags.sort_range();
 
