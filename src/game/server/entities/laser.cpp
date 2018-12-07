@@ -244,7 +244,7 @@ void CLaser::Tick()
 	else
 		Delay = GameServer()->Tuning()->m_LaserBounceDelay;
 
-	if(Server()->Tick() > m_EvalTick+(Server()->TickSpeed()*Delay/1000.0f))
+	if((Server()->Tick() - m_EvalTick) > (Server()->TickSpeed()*Delay/1000.0f))
 		DoBounce();
 }
 
