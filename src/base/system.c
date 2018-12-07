@@ -173,8 +173,25 @@ static void logger_file(const char *line, void *user)
 static void logger_stdout_sync(const char *line, void *user)
 {
 	(void)user;
-	puts(line);
-	fflush(stdout);
+
+	size_t length = strlen(line);
+	wchar_t *wide = malloc(length * sizeof *wide);
+	mem_zero(wide, length * sizeof *wide);
+
+	const char *p = line;
+	int i = 0;
+	for(int codepoint = 0; (codepoint = str_utf8_decode(&p)); i++)
+	{
+		char u16[4] = {0};
+		if(str_utf16le_encode(u16, codepoint) != 2)
+			return;
+
+		mem_copy(&wide[i], u16, 2);
+	}
+
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	WriteConsoleW(console, wide, i, NULL, NULL);
+	WriteConsoleA(console, "\n", 1, NULL, NULL);
 }
 #endif
 
@@ -2783,6 +2800,32 @@ int str_utf8_encode(char *ptr, int chr)
 		ptr[1] = 0x80|((chr>>12)&0x3F);
 		ptr[2] = 0x80|((chr>>6)&0x3F);
 		ptr[3] = 0x80|(chr&0x3F);
+		return 4;
+	}
+
+	return 0;
+}
+
+int str_utf16le_encode(char *ptr, int chr)
+{
+	uf(chr < 0x10000)
+	{
+		ptr[0] = chr;
+		ptr[1] = chr >> 0x8;
+		return 2;
+	}
+	else if(chr <= 0x10FFFF)
+	{
+		int U = chr - 0x10000;
+		int W1 = 0xD800, W2 = 0xDC00;
+
+		W1 |= ((U >> 10) & 0x3FF);
+		W2 |= (U & 0x3FF);
+
+		ptr[0] = W1;
+		ptr[1] = W1 >> 0x8;
+		ptr[2] = W2;
+		ptr[3] = W2 >> 0x8;
 		return 4;
 	}
 
