@@ -410,6 +410,7 @@ public:
 	class CMenus *m_pMenus;
 	class CSkins *m_pSkins;
 	class CCountryFlags *m_pCountryFlags;
+	class CPlayerPics *m_pPlayerPics;
 	class CFlow *m_pFlow;
 	class CChat *m_pChat;
 	class CDamageInd *m_pDamageind;

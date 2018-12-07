@@ -39,6 +39,7 @@
 #include "components/console.h"
 #include "components/controls.h"
 #include "components/countryflags.h"
+#include "components/playerpics.h"
 #include "components/damageind.h"
 #include "components/debughud.h"
 #include "components/effects.h"
@@ -80,6 +81,7 @@ static CParticles gs_Particles;
 static CMenus gs_Menus;
 static CSkins gs_Skins;
 static CCountryFlags gs_CountryFlags;
+static CPlayerPics gs_PlayerPics;
 static CFlow gs_Flow;
 static CHud gs_Hud;
 static CDebugHud gs_DebugHud;
@@ -139,6 +141,7 @@ void CGameClient::OnConsoleInit()
 	m_pMenus = &::gs_Menus;
 	m_pSkins = &::gs_Skins;
 	m_pCountryFlags = &::gs_CountryFlags;
+	m_pPlayerPics = &::gs_PlayerPics;
 	m_pChat = &::gs_Chat;
 	m_pFlow = &::gs_Flow;
 	m_pCamera = &::gs_Camera;
@@ -167,6 +170,7 @@ void CGameClient::OnConsoleInit()
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_All.Add(m_pSkins);
 	m_All.Add(m_pCountryFlags);
+	m_All.Add(m_pPlayerPics);
 	m_All.Add(m_pMapimages);
 	m_All.Add(m_pEffects); // doesn't render anything, just updates effects
 	m_All.Add(m_pParticles);

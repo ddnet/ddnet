@@ -8,6 +8,8 @@
 
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
+#include <game/client/components/countryflags.h>
+#include <game/client/components/playerpics.h>
 #include "nameplates.h"
 #include "controls.h"
 #include "camera.h"
@@ -144,7 +146,19 @@ void CNamePlates::RenderNameplate(
 		}
 		if(g_Config.m_ClRenderPic)
 		{
-			TextRender()->Text(0, Position.x-2.0f, Position.y-38.0f, 28.0f, "nobo", -1);
+			if (!str_comp(pName, "ChillerDragon"))
+			{
+				// render text (working but useless)
+				// TextRender()->Text(0, Position.x-2.0f, Position.y-38.0f, 28.0f, "nobo", -1);
+
+				// render big country flag (working but useless xd)
+				// vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+				// m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_Country, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
+
+				// render player pics
+				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+				m_pClient->m_pPlayerPics->Render(1, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
+			}
 		}
 
 		TextRender()->TextColor(1,1,1,1);

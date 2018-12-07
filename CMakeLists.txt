@@ -826,6 +826,8 @@ if(CLIENT)
     components/controls.h
     components/countryflags.cpp
     components/countryflags.h
+    components/playerpics.cpp
+    components/playerpics.h
     components/damageind.cpp
     components/damageind.h
     components/debughud.cpp
