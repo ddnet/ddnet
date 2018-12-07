@@ -2808,7 +2808,7 @@ int str_utf8_encode(char *ptr, int chr)
 
 int str_utf16le_encode(char *ptr, int chr)
 {
-	uf(chr < 0x10000)
+	if(chr < 0x10000)
 	{
 		ptr[0] = chr;
 		ptr[1] = chr >> 0x8;
