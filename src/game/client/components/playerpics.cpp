@@ -13,52 +13,56 @@
 // nobo copy of countryflags.cpp
 #include "playerpics.h"
 
-void CPlayerPics::LoadImageByName(const char * pImgName)
+int CPlayerPics::LoadImageByName(const char *pImgName, int IsDir, int DirType, void *pUser)
 {
+	CPlayerPics *pSelf = (CPlayerPics *)pUser;
+
+	if(IsDir || !str_endswith(pImgName, ".png"))
+		return 0;
+
+	dbg_msg("chiller", "load image '%s'", pImgName);
+
+	// chop .png off
+	char aName[128];
+	str_copy(aName, pImgName, sizeof(aName));
+	aName[str_length(aName) - 4] = 0;
+	// return 0;
+
 	char aBuf[128];
 	CImageInfo Info;
-	if(g_Config.m_ClLoadCountryFlags)
+	str_format(aBuf, sizeof(aBuf), "playerpics/%s.png", aName);
+	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
 	{
-		str_format(aBuf, sizeof(aBuf), "playerpics/%s.png", pImgName);
-		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
-		{
-			char aMsg[128];
-			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
-			return;
-		}
-		else
-		{
-			char aMsg[128];
-			str_format(aMsg, sizeof(aMsg), "SUCCESS loading '%s'", aBuf);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
-		}
+		char aMsg[128];
+		str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
+		return 0;
 	}
+	else
+	{
+		char aMsg[128];
+		str_format(aMsg, sizeof(aMsg), "SUCCESS loading '%s'", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aMsg);
+	}
+
 
 	// add entry
 	CPlayerPic CountryFlag;
-	str_copy(CountryFlag.m_aPlayerName, pImgName, sizeof(CountryFlag.m_aPlayerName));
-	if(g_Config.m_ClLoadCountryFlags)
-	{
-		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-		free(Info.m_pData);
-	}
-	else
-		CountryFlag.m_Texture = -1;
+	str_copy(CountryFlag.m_aPlayerName, aName, sizeof(CountryFlag.m_aPlayerName));
+	CountryFlag.m_Texture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	free(Info.m_pData);
 	if(g_Config.m_Debug)
 	{
 		str_format(aBuf, sizeof(aBuf), "loaded player pic '%s'", pImgName);
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aBuf);
 	}
-	m_aPlayerPics.add_unsorted(CountryFlag);
+	pSelf->m_aPlayerPics.add_unsorted(CountryFlag);
+	return 0;
 }
 
 void CPlayerPics::LoadCountryflagsIndexfile()
 {
-	// load the graphic files
-	LoadImageByName("ChillerDragon");
-	LoadImageByName("jao");
-
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "playerpics", LoadImageByName, this);
 	m_aPlayerPics.sort_range();
 }
 

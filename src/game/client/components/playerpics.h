@@ -35,7 +35,7 @@ private:
 	sorted_array<CPlayerPic> m_aPlayerPics;
 	int m_CodeIndexLUT[CODE_RANGE];
 
-	void LoadImageByName(const char * pImgName);
+	static int LoadImageByName(const char *pImgName, int IsDir, int DirType, void *pUser);
 	void LoadCountryflagsIndexfile();
 };
 #endif
