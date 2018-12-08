@@ -2787,7 +2787,7 @@ void CClient::Run()
 	bool LastQ = false;
 	bool LastE = false;
 	bool LastG = false;
-	
+
 	int64 LastTime = time_get_microseconds();
 	int64 LastRenderTime = time_get();
 
@@ -3515,9 +3515,9 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
-	
+
 	m_pConsole->Chain("password", ConchainPassword, this);
-	
+
 	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
@@ -3576,10 +3576,6 @@ int main(int argc, const char **argv) // ignore_convention
 			break;
 		}
 	}
-
-#if defined(CONF_FAMILY_WINDOWS)
-	SetConsoleOutputCP(65001);
-#endif
 
 	if(secure_random_init() != 0)
 	{
