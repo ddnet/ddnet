@@ -15,6 +15,7 @@ public:
 	CTeeRenderInfo()
 	{
 		m_Texture = -1;
+		m_PlayerPicTexture = -1;
 		m_ColorBody = ColorRGBA(1,1,1);
 		m_ColorFeet = ColorRGBA(1,1,1);
 		m_Size = 1.0f;
@@ -22,6 +23,7 @@ public:
 	};
 
 	int m_Texture;
+	int m_PlayerPicTexture;
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
 	float m_Size;

@@ -12,19 +12,18 @@ class CPlayerPics : public CComponent
 public:
 	struct CPlayerPic
 	{
-		int m_CountryCode;
-		char m_aCountryCodeString[8];
+		char m_aPlayerName[32];
 		int m_Texture;
 
-		bool operator<(const CPlayerPic &Other) { return str_comp(m_aCountryCodeString, Other.m_aCountryCodeString) < 0; }
+		bool operator<(const CPlayerPic &Other) { return str_comp(m_aPlayerName, Other.m_aPlayerName) < 0; }
 	};
 
 	void OnInit();
 
 	int Num() const;
-	const CPlayerPic *GetByCountryCode(int CountryCode) const;
+	const CPlayerPic *GetByName(const char * pName) const;
 	const CPlayerPic *GetByIndex(int Index) const;
-	void Render(int CountryCode, const vec4 *pColor, float x, float y, float w, float h);
+	void Render(const char * pName, const vec4 *pColor, float x, float y, float w, float h);
 
 private:
 	enum
@@ -33,9 +32,10 @@ private:
 		CODE_UB=999,
 		CODE_RANGE=CODE_UB-CODE_LB+1,
 	};
-	sorted_array<CPlayerPic> m_aCountryFlags;
+	sorted_array<CPlayerPic> m_aPlayerPics;
 	int m_CodeIndexLUT[CODE_RANGE];
 
+	void LoadImageByName(const char * pImgName);
 	void LoadCountryflagsIndexfile();
 };
 #endif

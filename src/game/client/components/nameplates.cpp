@@ -146,6 +146,7 @@ void CNamePlates::RenderNameplate(
 		}
 		if(g_Config.m_ClRenderPic)
 		{
+			/*
 			if (!str_comp(pName, "ChillerDragon"))
 			{
 				// render text (working but useless)
@@ -157,12 +158,12 @@ void CNamePlates::RenderNameplate(
 
 				// render player pics
 				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-				m_pClient->m_pPlayerPics->Render(1, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
-			} else if (!str_comp(pName, "jao")) {
-				// render player pics
-				vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-				m_pClient->m_pPlayerPics->Render(2, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
+				m_pClient->m_pPlayerPics->Render("ChillerDragon", &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
 			}
+			*/
+			// render player pics
+			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+			m_pClient->m_pPlayerPics->Render(pName, &Color, Position.x-2.0f, Position.y-38.0f, 250.0f, 250.0f);
 		}
 
 		TextRender()->TextColor(1,1,1,1);
