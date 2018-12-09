@@ -163,7 +163,7 @@ void CNamePlates::RenderNameplate(
 			*/
 			// render player pics
 			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_pPlayerPics->Render(pName, &Color, Position.x-125.0f, Position.y-300.0f, 250.0f, 250.0f);
+			m_pClient->m_pPlayerPics->Render(pName, &Color, Position.x-(g_Config.m_ClRenderPicWidth / 2), Position.y-(g_Config.m_ClRenderPicHeight + 100.0f), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
 		}
 
 		TextRender()->TextColor(1,1,1,1);
