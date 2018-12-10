@@ -311,9 +311,13 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 		str_format(aBuf, sizeof(aBuf), "You are force-paused for %d seconds.", (PauseState - pServ->Tick()) / pServ->TickSpeed());
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
 	}
-	else if(!pSelf->m_VoteCloseTime || (!pSelf->m_VoteKick && !pSelf->m_VoteSpec) || (pPlayer->IsPaused() && pPlayer->m_SpectatorID == pSelf->m_VoteVictim) || pResult->m_ClientID == pSelf->m_VoteVictim)
+	else if(-PauseState == PauseType)
 	{
 		pPlayer->Pause(CPlayer::PAUSE_NONE, false);
+	}
+	else if(!pSelf->m_VoteCloseTime || (!pSelf->m_VoteKick && !pSelf->m_VoteSpec) || (pPlayer->IsPaused() && pPlayer->m_SpectatorID == pSelf->m_VoteVictim) || pResult->m_ClientID == pSelf->m_VoteVictim)
+	{
+		pPlayer->Pause(PauseType, false);
 	}
 	else
 	{
