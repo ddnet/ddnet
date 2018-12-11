@@ -726,6 +726,7 @@ void CGameContext::OnTick()
 					if(m_apPlayers[i])
 						Server()->GetClientAddr(i, aaBuf[i], NETADDR_MAXSTRSIZE);
 				bool aVoteChecked[MAX_CLIENTS] = {0};
+				int64 Now = Server()->Tick();
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
 					//if(!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i])	// don't count in votes by spectators
@@ -741,6 +742,10 @@ void CGameContext::OnTick()
 						continue;
 
 					if(m_apPlayers[i]->m_Afk && i != m_VoteCreator)
+						continue;
+
+					// can't vote in the beginning after joining
+					if(Now < m_apPlayers[i]->m_FirstVoteTick)
 						continue;
 
 					// connecting clients with spoofed ips can clog slots without being ingame
