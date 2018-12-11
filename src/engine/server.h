@@ -4,6 +4,7 @@
 #define ENGINE_SERVER_H
 
 #include <base/hash.h>
+#include <base/math.h>
 
 #include "kernel.h"
 #include "message.h"
@@ -131,6 +132,7 @@ public:
 		GetClientInfo(Client, &Info);
 		if (Info.m_ClientVersion >= VERSION_DDNET_OLD)
 			return true;
+		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS-1);
 		int *pMap = GetIdMap(Client);
 		if (pMap[Target] == -1)
 			return false;
