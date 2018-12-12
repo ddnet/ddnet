@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <engine/shared/http.h>
+#include <engine/shared/json.h>
 
 TEST(Json, Escape)
 {

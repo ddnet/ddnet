@@ -2,6 +2,7 @@
 
 #include <engine/shared/config.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/json.h>
 #include <game/gamecore.h>
 
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";

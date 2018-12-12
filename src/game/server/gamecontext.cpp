@@ -902,22 +902,6 @@ void CGameContext::OnTick()
 			m_aMutes[i] = m_aMutes[m_NumMutes];
 		}
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_apPlayers[i] && m_apPlayers[i]->m_pPostJson)
-		{
-			switch(m_apPlayers[i]->m_pPostJson->State())
-			{
-			case HTTP_DONE:
-				m_apPlayers[i]->m_pPostJson = NULL;
-				break;
-			case HTTP_ERROR:
-				dbg_msg("modhelp", "http request failed for cid=%d", i);
-				m_apPlayers[i]->m_pPostJson = NULL;
-				break;
-			}
-		}
-	}
 
 	if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
 	{

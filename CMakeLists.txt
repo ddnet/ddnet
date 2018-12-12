@@ -361,8 +361,8 @@ if(WEBSOCKETS)
   show_dependency_status("Websockets" WEBSOCKETS)
 endif()
 
-if(NOT(CURL_FOUND))
-  message(SEND_ERROR "You must install Curl to compile the DDNet")
+if(CLIENT AND NOT(CURL_FOUND))
+  message(SEND_ERROR "You must install Curl to compile DDNet")
 endif()
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
@@ -632,12 +632,12 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   ghost.cpp
   ghost.h
   global_uuid_manager.cpp
-  http.cpp
-  http.h
   huffman.cpp
   huffman.h
   jobs.cpp
   jobs.h
+  json.cpp
+  json.h
   kernel.cpp
   linereader.cpp
   linereader.h
@@ -725,7 +725,7 @@ set(GAME_GENERATED_SHARED
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
-set(LIBS ${CURL_LIBRARIES} ${CRYPTO_LIBRARIES} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
+set(LIBS ${CRYPTO_LIBRARIES} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
 # Add pthreads (on non-Windows) at the end, so that other libraries can depend
 # on it.
 list(APPEND LIBS ${CMAKE_THREAD_LIBS_INIT})
@@ -751,6 +751,8 @@ if(CLIENT)
     friends.h
     graphics_threaded.cpp
     graphics_threaded.h
+    http.cpp
+    http.h
     input.cpp
     input.h
     keynames.h
@@ -873,6 +875,7 @@ if(CLIENT)
   # Libraries
   set(LIBS_CLIENT
     ${LIBS}
+    ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNGLITE_LIBRARIES}
@@ -912,6 +915,7 @@ if(CLIENT)
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
   target_include_directories(${TARGET_CLIENT} PRIVATE
+    ${CURL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
@@ -1554,7 +1558,6 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
-  target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(CRYPTO_FOUND)
