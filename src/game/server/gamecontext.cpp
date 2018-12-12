@@ -744,8 +744,8 @@ void CGameContext::OnTick()
 					if(m_apPlayers[i]->m_Afk && i != m_VoteCreator)
 						continue;
 
-					// can't vote in the beginning after joining
-					if(Now < m_apPlayers[i]->m_FirstVoteTick)
+					// can't vote in kick and spec votes in the beginning after joining
+					if((m_VoteKick || m_VoteSpec) && Now < m_apPlayers[i]->m_FirstVoteTick)
 						continue;
 
 					// connecting clients with spoofed ips can clog slots without being ingame
