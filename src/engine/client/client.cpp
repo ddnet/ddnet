@@ -3542,6 +3542,11 @@ static CClient *CreateClient()
 	return new(pClient) CClient;
 }
 
+void CClient::HandleConnectLink(const char *pArg)
+{
+	str_copy(m_aCmdConnect, pArg + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
+}
+
 /*
 	Server Time
 	Client Mirror Time
@@ -3688,7 +3693,9 @@ int main(int argc, const char **argv) // ignore_convention
 	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
-	if(argc > 1) // ignore_convention
+	if(argc == 2 && str_startswith(argv[1], CONNECTLINK))
+		pClient->HandleConnectLink(argv[1]);
+	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
 	pClient->Engine()->InitLogfile();
