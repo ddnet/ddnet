@@ -615,9 +615,9 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			continue;
 		}
 
-		if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
+		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{
-			if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, /* decompress = */ false) == 0)
+			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
 			{
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
 				pChunk->m_ClientID = -1;
@@ -631,24 +631,21 @@ int CNetServer::Recv(CNetChunk *pChunk)
 				}
 				return 1;
 			}
-		}
-		else
-		{
-			// drop invalid ctrl packets
-			if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL &&
-					m_RecvUnpacker.m_Data.m_DataSize == 0)
-				continue;
-
-			// normal packet, find matching slot
-			int Slot = GetClientSlot(Addr);
-
-			if (Slot != -1)
+			else
 			{
-				// found
+				// drop invalid ctrl packets
+				if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL &&
+						m_RecvUnpacker.m_Data.m_DataSize == 0)
+					continue;
 
-				// control
-				if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, /* decompress = */ true) == 0)
+				// normal packet, find matching slot
+				int Slot = GetClientSlot(Addr);
+
+				if (Slot != -1)
 				{
+					// found
+
+					// control
 					if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
 						OnConnCtrlMsg(Addr, Slot, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data);
 
@@ -658,12 +655,10 @@ int CNetServer::Recv(CNetChunk *pChunk)
 							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);
 					}
 				}
-			}
-			else
-			{
-				// not found, client that wants to connect
-				if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, /* decompress = */ true) == 0)
+				else
 				{
+					// not found, client that wants to connect
+
 					if(IsDDNetControlMsg(&m_RecvUnpacker.m_Data))
 						// got ddnet control msg
 						OnTokenCtrlMsg(Addr, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data);

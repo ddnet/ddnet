@@ -175,7 +175,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 }
 
 // TODO: rename this function
-int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool Decompress)
+int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket)
 {
 	// check the size
 	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
@@ -225,10 +225,6 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	{
 		if(pPacket->m_Flags&NET_PACKETFLAG_COMPRESSION)
 		{
-			if(!Decompress)
-			{
-				return -1;
-			}
 			// Don't allow compressed control packets.
 			if(pPacket->m_Flags&NET_PACKETFLAG_CONTROL)
 			{
