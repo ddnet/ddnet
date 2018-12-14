@@ -662,7 +662,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			else
 			{
 				// not found, client that wants to connect
-				if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, /* decompress = */ false) == 0)
+				if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, /* decompress = */ true) == 0)
 				{
 					if(IsDDNetControlMsg(&m_RecvUnpacker.m_Data))
 						// got ddnet control msg
