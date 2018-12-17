@@ -1538,7 +1538,7 @@ void net_init_mmsgs(MMSGS* m)
 		m->msgs[i].msg_hdr.msg_iov = &(m->iovecs[i]);
 		m->msgs[i].msg_hdr.msg_iovlen = 1;
 		m->msgs[i].msg_hdr.msg_name = &(m->sockaddrs[i]);
-		m->msgs[i].msg_hdr.msg_namelen = sizeof(struct sockaddr);
+		m->msgs[i].msg_hdr.msg_namelen = sizeof(m->sockaddrs[i]);
 	}
 #endif
 }
@@ -1570,7 +1570,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* 
 
 	if(m->pos < m->size)
 	{
-		sockaddr_to_netaddr(&(m->sockaddrs[m->pos]), addr);
+		sockaddr_to_netaddr((struct sockaddr *)&(m->sockaddrs[m->pos]), addr);
 		// TODO: network_stats
 		//network_stats.recv_bytes += bytes;
 		//network_stats.recv_packets++;

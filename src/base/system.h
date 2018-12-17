@@ -24,6 +24,7 @@
 
 #ifdef CONF_PLATFORM_LINUX
 #include <sys/socket.h>
+#include <netinet/in.h>
 #endif
 
 #ifdef __cplusplus
@@ -765,8 +766,8 @@ typedef struct
 	int size;
 	struct mmsghdr msgs[VLEN];
 	struct iovec iovecs[VLEN];
-	char bufs[VLEN][PACKETSIZE+1];
-	struct sockaddr sockaddrs[VLEN];
+	char bufs[VLEN][PACKETSIZE];
+	struct sockaddr_in sockaddrs[VLEN];
 #else
 	int dummy;
 #endif
