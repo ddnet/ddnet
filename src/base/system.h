@@ -475,9 +475,9 @@ void aio_free(ASYNCIO *aio);
 		Suspends the current thread for a given period.
 
 	Parameters:
-		milliseconds - Number of milliseconds to sleep.
+		microseconds - Number of microseconds to sleep.
 */
-void thread_sleep(int milliseconds);
+void thread_sleep(int microseconds);
 
 /*
 	Function: thread_init

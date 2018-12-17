@@ -82,7 +82,7 @@ void CSqlScore::OnShutdown()
 		if (i % 20 == 0)
 			dbg_msg("sql", "Waiting for score-threads to complete (%d left)", CSqlExecData::ms_InstanceCount);
 		++i;
-		thread_sleep(100);
+		thread_sleep(100000);
 	}
 
 	lock_destroy(ms_FailureFileLock);

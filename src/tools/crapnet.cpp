@@ -204,7 +204,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			}
 		}
 
-		thread_sleep(1);
+		thread_sleep(1000);
 	}
 }
 

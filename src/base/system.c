@@ -752,12 +752,12 @@ void thread_yield()
 #endif
 }
 
-void thread_sleep(int milliseconds)
+void thread_sleep(int microseconds)
 {
 #if defined(CONF_FAMILY_UNIX)
-	usleep(milliseconds*1000);
+	usleep(microseconds);
 #elif defined(CONF_FAMILY_WINDOWS)
-	Sleep(milliseconds);
+	Sleep(microseconds/1000);
 #else
 	#error not implemented
 #endif
@@ -1538,7 +1538,7 @@ void net_init_mmsgs(MMSGS* m)
 		m->msgs[i].msg_hdr.msg_iov = &m->iovecs[i];
 		m->msgs[i].msg_hdr.msg_iovlen = 1;
 		m->msgs[i].msg_hdr.msg_name = &m->sockaddrs[i];
-		m->msgs[i].msg_hdr.msg_namelen = sizeof(&m->sockaddrs[i]);
+		m->msgs[i].msg_hdr.msg_namelen = sizeof(m->sockaddrs[i]);
 	}
 #endif
 }

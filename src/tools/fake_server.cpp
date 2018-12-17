@@ -144,7 +144,7 @@ static int Run()
 			SendHeartBeats();
 		}
 
-		thread_sleep(100);
+		thread_sleep(100000);
 	}
 }
 

@@ -1707,9 +1707,6 @@ void CServer::PumpNetwork()
 
 	m_ServerBan.Update();
 	m_Econ.Update();
-#if defined(CONF_FAMILY_UNIX)
-	m_Fifo.Update();
-#endif
 }
 
 char *CServer::GetMapName()
@@ -1804,16 +1801,18 @@ int CServer::Run()
 
 	// start server
 	NETADDR BindAddr;
-	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
+	int NetType = g_Config.m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
+
+	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NetType) == 0)
 	{
 		// sweet!
-		BindAddr.type = NETTYPE_ALL;
+		BindAddr.type = NetType;
 		BindAddr.port = g_Config.m_SvPort;
 	}
 	else
 	{
 		mem_zero(&BindAddr, sizeof(BindAddr));
-		BindAddr.type = NETTYPE_ALL;
+		BindAddr.type = NetType;
 		BindAddr.port = g_Config.m_SvPort;
 	}
 
@@ -1989,6 +1988,11 @@ int CServer::Run()
 					DoSnapshot();
 
 				UpdateClientRconCommands();
+
+#if defined(CONF_FAMILY_UNIX)
+				if(m_CurrentGameTick%50 == 0) // Once per second is often enough
+					m_Fifo.Update();
+#endif
 			}
 
 			// master server stuff
@@ -2029,13 +2033,6 @@ int CServer::Run()
 				set_new_tick();
 				int64 t = time_get();
 				int x = (TickStartTime(m_CurrentGameTick+1) - t) * 1000000 / time_freq() + 1;
-
-				if(x > 3000)
-				{
-					// at least sleep 3 ms, reduce number of syscalls in stress situations
-					thread_sleep(3);
-					x = (TickStartTime(m_CurrentGameTick+1) - t) * 1000000 / time_freq() + 1;
-				}
 
 				if(x > 0)
 				{

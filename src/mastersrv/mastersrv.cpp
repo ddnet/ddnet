@@ -534,7 +534,7 @@ int main(int argc, const char **argv) // ignore_convention
 		}
 
 		// be nice to the CPU
-		thread_sleep(1);
+		thread_sleep(1000);
 	}
 
 	return 0;
