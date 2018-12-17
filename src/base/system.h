@@ -768,7 +768,7 @@ typedef struct
 	char bufs[VLEN][PACKETSIZE];
 	char sockaddrs[VLEN][128];
 #else
-	bool dummy;
+	int dummy;
 #endif
 } MMSGS;
 
