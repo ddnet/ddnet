@@ -69,7 +69,8 @@ void Run(unsigned short Port, NETADDR Dest)
 			// fetch data
 			int DataTrash = 0;
 			NETADDR From;
-			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024*2, &m);
+			unsigned char *pData;
+			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024*2, &m, &pData);
 			if(Bytes <= 0)
 				break;
 
@@ -107,7 +108,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			p->m_Timestamp = time_get();
 			p->m_DataSize = Bytes;
 			p->m_ID = ID++;
-			mem_copy(p->m_aData, aBuffer, Bytes);
+			mem_copy(p->m_aData, pData, Bytes);
 
 			if(ID > 20 && Bytes > 6 && DataTrash)
 			{
