@@ -767,6 +767,8 @@ typedef struct
 	struct iovec iovecs[VLEN];
 	char bufs[VLEN][PACKETSIZE];
 	char sockaddrs[VLEN][128];
+#else
+	bool dummy;
 #endif
 } MMSGS;
 
