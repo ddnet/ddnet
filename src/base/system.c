@@ -1547,6 +1547,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* 
 {
 #ifndef FUZZING
 	char sockaddrbuf[128];
+	socklen_t fromlen;
 	int bytes = 0;
 
 #if defined(CONF_PLATFORM_LINUX)
