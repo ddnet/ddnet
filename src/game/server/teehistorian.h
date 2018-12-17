@@ -3,7 +3,6 @@
 
 #include <base/hash.h>
 #include <engine/console.h>
-#include <engine/shared/http.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>

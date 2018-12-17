@@ -1,5 +1,5 @@
-#ifndef ENGINE_SHARED_HTTP_H
-#define ENGINE_SHARED_HTTP_H
+#ifndef ENGINE_CLIENT_HTTP_H
+#define ENGINE_CLIENT_HTTP_H
 
 #include <engine/shared/jobs.h>
 #include <engine/storage.h>
@@ -104,6 +104,4 @@ public:
 
 bool HttpInit(IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
-char *EscapeJson(char *pBuffer, int BufferSize, const char *pString);
-const char *JsonBool(bool Bool);
-#endif // ENGINE_SHARED_HTTP_H
+#endif // ENGINE_CLIENT_HTTP_H
