@@ -1346,7 +1346,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	NETSOCKET sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
-	int recvsize = 65536;
 
 	if(bindaddr.type&NETTYPE_IPV4)
 	{
@@ -1364,9 +1363,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 			/* set broadcast */
 			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
-
-			/* set receive buffer size */
-			setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (char*)&recvsize, sizeof(recvsize));
 
 			{
 				/* set DSCP/TOS */
@@ -1412,9 +1408,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 			/* set broadcast */
 			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
-
-			/* set receive buffer size */
-			setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (char*)&recvsize, sizeof(recvsize));
 
 			{
 				/* set DSCP/TOS */
@@ -1543,7 +1536,7 @@ void net_init_mmsgs(MMSGS* m)
 #endif
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* m)
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS* m, unsigned char **data)
 {
 #ifndef FUZZING
 	char sockaddrbuf[128];
@@ -1575,7 +1568,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* 
 		//network_stats.recv_bytes += bytes;
 		//network_stats.recv_packets++;
 		bytes = m->msgs[m->pos].msg_len;
-		mem_copy(data, m->bufs[m->pos], bytes);
+		*data = (unsigned char*)m->bufs[m->pos];
 		m->pos++;
 		return bytes;
 	}
@@ -1583,13 +1576,15 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* 
 	if(bytes == 0 && sock.ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
-		bytes = recvfrom(sock.ipv4sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		bytes = recvfrom(sock.ipv4sock, (char*)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = buffer;
 	}
 
 	if(bytes <= 0 && sock.ipv6sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
-		bytes = recvfrom(sock.ipv6sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		bytes = recvfrom(sock.ipv6sock, (char*)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = buffer;
 	}
 #endif
 
@@ -1597,7 +1592,8 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* 
 	if(bytes <= 0 && sock.web_ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr);
-		bytes = websocket_recv(sock.web_ipv4sock, data, maxsize, (struct sockaddr_in *)&sockaddrbuf, fromlen);
+		bytes = websocket_recv(sock.web_ipv4sock, buffer, maxsize, (struct sockaddr_in *)&sockaddrbuf, fromlen);
+		*data = buffer;
 		((struct sockaddr_in *)&sockaddrbuf)->sin_family = AF_WEBSOCKET_INET;
 	}
 #endif
@@ -1629,7 +1625,8 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* 
 			break;
 		}
 
-		((unsigned char*)data)[CurrentData] = gs_NetData[gs_NetPosition];
+		((unsigned char*)buffer)[CurrentData] = gs_NetData[gs_NetPosition];
+		*data = buffer;
 		CurrentData++;
 		gs_NetPosition++;
 	}

@@ -600,7 +600,8 @@ int CNetServer::Recv(CNetChunk *pChunk)
 			return 1;
 
 		// TODO: empty the recvinfo
-		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE, &m_MMSGS);
+		unsigned char *pData;
+		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE, &m_MMSGS, &pData);
 
 		// no more packets for now
 		if(Bytes <= 0)
@@ -619,7 +620,7 @@ int CNetServer::Recv(CNetChunk *pChunk)
 		int Slot = GetClientSlot(Addr);
 		bool Decompress = Slot != -1;
 
-		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data, Decompress) == 0)
+		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Decompress) == 0)
 		{
 			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
 			{

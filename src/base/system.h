@@ -782,14 +782,15 @@ void net_init_mmsgs(MMSGS* m);
 	Parameters:
 		sock - Socket to use.
 		addr - Pointer to an NETADDR that will receive the address.
-		data - Pointer to a buffer that will receive the data.
+		buffer - Pointer to a buffer that can be used to receive the data.
 		maxsize - Maximum size to receive.
+		data - Will get set to the actual data, might be the passed buffer or an internal one
 
 	Returns:
 		On success it returns the number of bytes received. Returns -1
 		on error.
 */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize, MMSGS* m);
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS* m, unsigned char **data);
 
 /*
 	Function: net_udp_close
