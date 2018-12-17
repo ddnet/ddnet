@@ -231,7 +231,7 @@ void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
 }
 
 void CFileScore::SaveScore(int ClientID, float Time,
-		float CpTime[NUM_CHECKPOINTS])
+		float CpTime[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole* pCon = (CConsole*) GameServer()->Console();
 	if (!pCon->m_Cheated || g_Config.m_SvRankCheats)

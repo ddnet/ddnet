@@ -131,6 +131,9 @@ void CPlayer::Reset()
 		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
 	else
 		m_FirstVoteTick = Now;
+
+	m_NotEligibleForFinish = false;
+	m_EligibleForFinishCheck = 0;
 }
 
 void CPlayer::Tick()
@@ -513,6 +516,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		return;
 
 	char aBuf[512];
+	DoChatMsg = false;
 	if(DoChatMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));

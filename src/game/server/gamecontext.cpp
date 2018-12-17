@@ -1060,6 +1060,24 @@ void CGameContext::OnClientEnter(int ClientID)
 	Score()->LoadScore(ClientID);
 	Score()->CheckBirthday(ClientID);
 
+	{
+		int Empty = -1;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!Server()->ClientIngame(i))
+			{
+				Empty = i;
+				break;
+			}
+		}
+		CNetMsg_Sv_Chat Msg;
+		Msg.m_Team = 0;
+		Msg.m_ClientID = Empty;
+		Msg.m_pMessage = "Do you know someone who uses a bot? Please report them to the moderators.";
+		m_apPlayers[ClientID]->m_EligibleForFinishCheck = time_get();
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	}
+
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
 		char aBuf[512];
@@ -1209,6 +1227,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
 			if(!str_utf8_check(pMsg->m_pMessage))
 			{
+				return;
+			}
+			bool Check = !pPlayer->m_NotEligibleForFinish && pPlayer->m_EligibleForFinishCheck + 10 * time_freq() >= time_get();
+			if(Check && str_comp(pMsg->m_pMessage, "xd sure chillerbot.png is lyfe") == 0 && pMsg->m_Team == 0)
+			{
+				if(m_TeeHistorianActive)
+				{
+					m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
+				}
+
+				pPlayer->m_NotEligibleForFinish = true;
+				dbg_msg("hack", "bot detected, cid=%d", ClientID);
 				return;
 			}
 			int Team = pMsg->m_Team;

@@ -101,6 +101,7 @@ struct CSqlScoreData : CSqlData
 
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_Name;
 
+	bool m_NotEligible;
 	float m_Time;
 	float m_aCpCurrent[NUM_CHECKPOINTS];
 	int m_Num;
@@ -110,6 +111,7 @@ struct CSqlScoreData : CSqlData
 
 struct CSqlTeamScoreData : CSqlData
 {
+	bool m_NotEligible;
 	unsigned int m_Size;
 	int m_aClientIDs[MAX_CLIENTS];
 	sqlstr::CSqlString<MAX_NAME_LENGTH> m_aNames [MAX_CLIENTS];
@@ -178,7 +180,7 @@ public:
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
-			float CpTime[NUM_CHECKPOINTS]);
+			float CpTime[NUM_CHECKPOINTS], bool NotEligible);
 	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);

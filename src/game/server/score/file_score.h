@@ -67,7 +67,7 @@ public:
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void MapVote(int ClientID, const char* MapName);
 	virtual void SaveScore(int ClientID, float Time,
-			float CpTime[NUM_CHECKPOINTS]);
+			float CpTime[NUM_CHECKPOINTS], bool NotEligible);
 	virtual void SaveTeamScore(int* ClientIDs, unsigned int Size, float Time);
 
 	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID,
