@@ -66,6 +66,8 @@ private:
 	int m_CpLastBroadcast;
 	float m_CpCurrent[25];
 
+	int m_NotEligibleForFinish;
+
 	// Core
 	vec2 m_CorePos;
 	vec2 m_Vel;

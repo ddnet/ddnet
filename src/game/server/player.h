@@ -196,6 +196,8 @@ public:
 #if defined(CONF_SQL)
 	int64 m_LastSQLQuery;
 #endif
+	bool m_NotEligibleForFinish;
+	int64 m_EligibleForFinishCheck;
 };
 
 #endif

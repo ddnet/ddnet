@@ -47,7 +47,7 @@ public:
 	virtual void MapVote(int ClientID, const char *pMapName) = 0;
 	virtual void CheckBirthday(int ClientID) = 0;
 	virtual void LoadScore(int ClientID) = 0;
-	virtual void SaveScore(int ClientID, float Time, float aCpTime[NUM_CHECKPOINTS]) = 0;
+	virtual void SaveScore(int ClientID, float Time, float aCpTime[NUM_CHECKPOINTS], bool NotEligible) = 0;
 
 	virtual void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time) = 0;
 
