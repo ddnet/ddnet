@@ -1413,9 +1413,6 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 	{
 		int Team = pData->m_Team;
 
-		if (HandleFailure)
-			return true;
-
 		char TeamString[65536];
 
 		int Num = -1;
@@ -1450,6 +1447,36 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 
 		if (Num)
 			return true;
+
+		if (HandleFailure)
+		{
+			if (!g_Config.m_SvSqlFailureFile[0])
+				return true;
+
+			lock_wait(ms_FailureFileLock);
+			IOHANDLE File = io_open(g_Config.m_SvSqlFailureFile, IOFLAG_APPEND);
+			if(File)
+			{
+				dbg_msg("sql", "ERROR: Could not save Teamsave, writing insert to a file now...");
+
+				char aTimestamp [20];
+				sqlstr::GetTimeStamp(aTimestamp, sizeof(aTimestamp));
+
+				char aBuf[65536];
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', %s, '%s')", TeamString, pData->m_Map.ClrStr(), pData->m_Code.ClrStr(), aTimestamp, pData->m_Server);
+				io_write(File, aBuf, str_length(aBuf));
+				io_write_newline(File);
+				io_close(File);
+				lock_unlock(ms_FailureFileLock);
+
+				pData->GameServer()->SendBroadcast("Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.", -1);
+
+				return true;
+			}
+			lock_unlock(ms_FailureFileLock);
+			dbg_msg("sql", "ERROR: Could not save Teamsave, NOT even to a file");
+			return false;
+		}
 
 		try
 		{
