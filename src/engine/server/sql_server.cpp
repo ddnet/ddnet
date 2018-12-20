@@ -38,7 +38,10 @@ CSqlServer::~CSqlServer()
 		if (m_pResults)
 			delete m_pResults;
 		if (m_pConnection)
+		{
 			delete m_pConnection;
+			m_pConnection = 0;
+		}
 		dbg_msg("sql", "SQL connection disconnected");
 	}
 	catch (sql::SQLException &e)
