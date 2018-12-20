@@ -79,6 +79,7 @@ class CGameContext : public IGameServer
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
