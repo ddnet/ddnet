@@ -1990,8 +1990,7 @@ int CServer::Run()
 				UpdateClientRconCommands();
 
 #if defined(CONF_FAMILY_UNIX)
-				if(m_CurrentGameTick%50 == 0) // Once per second is often enough
-					m_Fifo.Update();
+				m_Fifo.Update();
 #endif
 			}
 
