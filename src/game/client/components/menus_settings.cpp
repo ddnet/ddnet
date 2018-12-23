@@ -405,8 +405,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Label, &MainView);
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
-	Dummy.VSplitLeft(250.0f, &Dummy, &SkinPrefix);
-	SkinPrefix.VSplitLeft(150.0f, &SkinPrefix, 0);
+	Dummy.VSplitLeft(170.0f, &Dummy, &SkinPrefix);
+	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
