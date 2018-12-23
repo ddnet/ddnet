@@ -150,6 +150,20 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 void CSkins::OnInit()
 {
+	m_EventSkinPrefix[0] = '\0';
+
+	if(g_Config.m_Events)
+	{
+		time_t rawtime;
+		struct tm* timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		if(timeinfo->tm_mon == 11 && timeinfo->tm_mday >= 24 && timeinfo->tm_mday <= 26)
+		{ // Christmas
+			str_copy(m_EventSkinPrefix, "santa", sizeof(m_EventSkinPrefix));
+		}
+	}
+
 	// load skins
 	m_aSkins.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, this);
@@ -185,14 +199,15 @@ const CSkins::CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName) const
 {
+	const char *pSkinPrefix = m_EventSkinPrefix[0] ? m_EventSkinPrefix : g_Config.m_ClSkinPrefix;
 	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
 	{
 		return -1;
 	}
-	else if(g_Config.m_ClSkinPrefix[0])
+	else if(pSkinPrefix)
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s_%s", g_Config.m_ClSkinPrefix, pName);
+		str_format(aBuf, sizeof(aBuf), "%s_%s", pSkinPrefix, pName);
 		// If we find something, use it, otherwise fall back to normal skins.
 		int Result = FindImpl(aBuf);
 		if(Result != -1)

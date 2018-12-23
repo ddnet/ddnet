@@ -77,7 +77,7 @@ void CPlayer::Reset()
 
 	m_SendVoteIndex = -1;
 
-	if (g_Config.m_SvEvents)
+	if(g_Config.m_Events)
 	{
 		time_t rawtime;
 		struct tm* timeinfo;
