@@ -327,10 +327,6 @@ void CGameClient::OnInit()
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
 
-	int64 End = time_get();
-	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
-
 	m_ServerMode = SERVERMODE_PURE;
 
 	m_DDRaceMsgSent[0] = false;
@@ -363,6 +359,10 @@ void CGameClient::OnInit()
 				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 65);
 		}
 	}
+
+	int64 End = time_get();
+	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());
+	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
 }
 
 void CGameClient::OnUpdate()
