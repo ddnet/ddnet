@@ -767,7 +767,7 @@ typedef struct
 	struct mmsghdr msgs[VLEN];
 	struct iovec iovecs[VLEN];
 	char bufs[VLEN][PACKETSIZE];
-	struct sockaddr_in sockaddrs[VLEN];
+	char sockaddrs[VLEN][128];
 #else
 	int dummy;
 #endif
