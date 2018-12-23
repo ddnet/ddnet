@@ -725,7 +725,15 @@ set(GAME_GENERATED_SHARED
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
-set(LIBS ${CRYPTO_LIBRARIES} ${WEBSOCKETS_LIBRARIES} ${ZLIB_LIBRARIES} ${PLATFORM_LIBS})
+set(LIBS
+  ${CRYPTO_LIBRARIES}
+  ${WEBSOCKETS_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${PLATFORM_LIBS}
+  # Add pthreads (on non-Windows) at the end, so that other libraries can depend
+  # on it.
+  ${CMAKE_THREAD_LIBS_INIT}
+)
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
