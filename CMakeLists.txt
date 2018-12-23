@@ -1284,12 +1284,28 @@ if(TARGET_OS AND TARGET_BITS)
     set(CPACK_SYSTEM_NAME "win${TARGET_BITS}")
     set(CPACK_GENERATOR ZIP)
   elseif(TARGET_OS STREQUAL "linux")
-    # Assuming Intel here.
-    if(TARGET_BITS EQUAL 32)
-      set(CPACK_SYSTEM_NAME "linux_x86")
-    elseif(TARGET_BITS EQUAL 64)
-      set(CPACK_SYSTEM_NAME "linux_x86_64")
+    # Let compiler tell its arch
+    # Both gcc and clang support -dumpmachine
+    execute_process(
+      COMMAND ${CMAKE_C_COMPILER} -dumpmachine
+      OUTPUT_VARIABLE ARCHITECTURE_TUPLE
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(NOT ARCHITECTURE_TUPLE)
+      # If you're really using a weird compiler, then assume Intel here.
+      message(WARNING "Your compiler doesn't support -dumpmachine, this is weird")
+      if(TARGET_BITS EQUAL 32)
+        set(ARCHITECTURE "x86")
+      elseif(TARGET_BITS EQUAL 64)
+        set(ARCHITECTURE "x86_64")
+      endif()
+    else()
+      string(REGEX MATCH "^[^-]*" ARCHITECTURE "${ARCHITECTURE_TUPLE}")
+      if(ARCHITECTURE MATCHES "i.86")
+        set(ARCHITECTURE "x86")
+      endif()
     endif()
+    set(CPACK_SYSTEM_NAME "linux_${ARCHITECTURE}")
   elseif(TARGET_OS STREQUAL "mac")
     set(CPACK_SYSTEM_NAME "osx")
     set(CPACK_GENERATOR DMG)
