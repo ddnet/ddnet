@@ -252,6 +252,11 @@ int CControls::SnapInput(int *pData)
 
 		mem_copy(pData, &m_InputData[g_Config.m_ClDummy], sizeof(m_InputData[0]));
 
+		// set the target anyway though so that we can keep seeing our surroundings,
+		// even if chat or menu are activated
+		m_InputData[g_Config.m_ClDummy].m_TargetX = (int)m_MousePos[g_Config.m_ClDummy].x;
+		m_InputData[g_Config.m_ClDummy].m_TargetY = (int)m_MousePos[g_Config.m_ClDummy].y;
+
 		// send once a second just to be sure
 		if(time_get() > LastSendTime + time_freq())
 			Send = true;

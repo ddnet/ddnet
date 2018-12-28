@@ -427,11 +427,14 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
 
+	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW)
+		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
+
 	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
 	// skip the input if chat is active
 		if(m_PlayerFlags&PLAYERFLAG_CHATTING)
-		return;
+			return;
 
 		// reset input
 		if(m_pCharacter)
@@ -453,9 +456,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
 		m_Spawning = true;
-
-	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW)
-		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 
 	// check for activity
 	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
