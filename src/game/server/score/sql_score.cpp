@@ -1476,7 +1476,7 @@ bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 				sqlstr::GetTimeStamp(aTimestamp, sizeof(aTimestamp));
 
 				char aBuf[65536];
-				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', %s, '%s')", TeamString, pData->m_Map.ClrStr(), pData->m_Code.ClrStr(), aTimestamp, pData->m_Server);
+				str_format(aBuf, sizeof(aBuf), "INSERT IGNORE INTO %%s_saves(Savegame, Map, Code, Timestamp, Server) VALUES ('%s', '%s', '%s', '%s', '%s');", TeamString, pData->m_Map.ClrStr(), pData->m_Code.ClrStr(), aTimestamp, pData->m_Server);
 				io_write(File, aBuf, str_length(aBuf));
 				io_write_newline(File);
 				io_close(File);
