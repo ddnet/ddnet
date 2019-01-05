@@ -44,6 +44,8 @@ void CNamePlates::RenderNameplate(
 		Position = m_pPlayers->m_CurPredictedPos[ClientID];
 	}
 
+	Position.x -= 2; // hack to center text, not sure why it's required
+
 	bool OtherTeam;
 
 	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
