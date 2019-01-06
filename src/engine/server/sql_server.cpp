@@ -36,7 +36,15 @@ CSqlServer::~CSqlServer()
 	try
 	{
 		if (m_pResults)
+		{
 			delete m_pResults;
+			m_pResults = 0;
+		}
+		if (m_pStatement)
+		{
+			delete m_pStatement;
+			m_pStatement = 0;
+		}
 		if (m_pConnection)
 		{
 			delete m_pConnection;
@@ -120,7 +128,7 @@ bool CSqlServer::Connect()
 		}
 		m_pConnection = m_pDriver->connect(connection_properties);
 
-		// Create Statement
+		// Create statement
 		m_pStatement = m_pConnection->createStatement();
 
 		if (m_SetUpDB)
@@ -200,16 +208,20 @@ void CSqlServer::CreateTables()
 
 void CSqlServer::executeSql(const char *pCommand)
 {
+	scope_lock LockScope(&m_SqlLock);
 	m_pStatement->execute(pCommand);
 }
 
 void CSqlServer::executeSqlQuery(const char *pQuery)
 {
+	scope_lock LockScope(&m_SqlLock);
 	if (m_pResults)
+	{
 		delete m_pResults;
+		// set it to 0, so exceptions raised from executeQuery can not make m_pResults point to invalid memory
+		m_pResults = 0;
+	}
 
-	// set it to 0, so exceptions raised from executeQuery can not make m_pResults point to invalid memory
-	m_pResults = 0;
 	m_pResults = m_pStatement->executeQuery(pQuery);
 }
 
