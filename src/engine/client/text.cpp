@@ -961,7 +961,8 @@ public:
 						float BearingY = 0.f;
 						BearingY = (((m_RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : (pChr->m_OffsetY*Scale*Size));
 
-						if((m_RenderFlags&TEXT_RENDER_FLAG_NO_OVERSIZE) != 0) {
+						if((m_RenderFlags&TEXT_RENDER_FLAG_NO_OVERSIZE) != 0)
+						{
 							if(pChr->m_Height*Scale*Size + BearingY > Size)
 								BearingY -= pChr->m_Height*Scale*Size - Size;
 						}
@@ -1264,7 +1265,8 @@ public:
 
 						float BearingY = (((RenderFlags&TEXT_RENDER_FLAG_NO_Y_BEARING) != 0) ? 0.f : (pChr->m_OffsetY*Scale*Size));
 
-						if((RenderFlags&TEXT_RENDER_FLAG_NO_OVERSIZE) != 0) {
+						if((RenderFlags&TEXT_RENDER_FLAG_NO_OVERSIZE) != 0)
+						{
 							if(pChr->m_Height*Scale*Size + BearingY > Size)
 								BearingY -= pChr->m_Height*Scale*Size - Size;
 						}
