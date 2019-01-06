@@ -2331,11 +2331,13 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	if(Flags&IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
 #endif
+#if defined(CONF_PLATFORM_MACOSX) // TODO: remove this when fixed in SDL
 	if(Flags&IGraphicsBackend::INITFLAG_BORDERLESS)
 		SdlFlags |= SDL_WINDOW_BORDERLESS;
+#endif
 	if(Flags&IGraphicsBackend::INITFLAG_FULLSCREEN)
 	{
-		//when we are at fullscreen, we really shouldn't allow window sizes, that aren't supported by the driver
+		// when we are at fullscreen, we really shouldn't allow window sizes, that aren't supported by the driver
 		bool SupportedResolution = false;
 		SDL_DisplayMode mode;
 		int maxModes = SDL_GetNumDisplayModes(g_Config.m_GfxScreen);
