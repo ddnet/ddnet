@@ -58,6 +58,7 @@ void CNamePlates::RenderNameplate(
 	// render name plate
 	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
 	{
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
 			a = clamp(1-powf(distance(m_pClient->m_pControls->m_TargetPos[g_Config.m_ClDummy], Position)/200.0f,16.0f), 0.0f, 1.0f);
@@ -157,6 +158,8 @@ void CNamePlates::RenderNameplate(
 
 		TextRender()->TextColor(1,1,1,1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
+
+		TextRender()->SetRenderFlags(0);
 	}
 }
 
