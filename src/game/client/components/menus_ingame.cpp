@@ -617,7 +617,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 			const char *pSearchLabel = "\xEE\xA2\xB6";
 			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
 			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
 			TextRender()->SetRenderFlags(0);
