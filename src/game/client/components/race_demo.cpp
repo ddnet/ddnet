@@ -151,18 +151,21 @@ void CRaceDemo::StopRecord(int Time)
 	if(Client()->RaceRecord_IsRecording())
 		Client()->RaceRecord_Stop();
 
-	if(Time > 0 && CheckDemo(Time))
+	if(m_aTmpFilename[0] != '\0')
 	{
-		// save file
-		char aNewFilename[512];
-		GetPath(aNewFilename, sizeof(aNewFilename), m_Time);
+		if(Time > 0 && CheckDemo(Time))
+		{
+			// save file
+			char aNewFilename[512];
+			GetPath(aNewFilename, sizeof(aNewFilename), m_Time);
 
-		Storage()->RenameFile(m_aTmpFilename, aNewFilename, IStorage::TYPE_SAVE);
+			Storage()->RenameFile(m_aTmpFilename, aNewFilename, IStorage::TYPE_SAVE);
+		}
+		else // no new record
+			Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
+
+		m_aTmpFilename[0] = '\0';
 	}
-	else // no new record
-		Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
-
-	m_aTmpFilename[0] = 0;
 
 	m_Time = 0;
 	m_RaceState = RACE_NONE;
