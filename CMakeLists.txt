@@ -565,8 +565,6 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 # Sources
 set_glob(BASE GLOB_RECURSE src/base
   color.h
-  confusables.c
-  confusables_data.h
   detect.h
   hash.c
   hash.h
@@ -584,6 +582,10 @@ set_glob(BASE GLOB_RECURSE src/base
   tl/sorted_array.h
   tl/string.h
   tl/threading.h
+  unicode/confusables.c
+  unicode/confusables_data.h
+  unicode/tolower.c
+  unicode/tolower_data.h
   vmath.h
 )
 set_glob(ENGINE_INTERFACE GLOB src/engine
@@ -1094,7 +1096,6 @@ set_glob(TOOLS GLOB src/tools
   config_common.h
   config_retrieve.cpp
   config_store.cpp
-  confusables.cpp
   crapnet.cpp
   dilate.cpp
   dummy_map.cpp
@@ -1108,6 +1109,7 @@ set_glob(TOOLS GLOB src/tools
   tileset_borderfix.cpp
   tileset_borderrem.cpp
   tileset_borderset.cpp
+  unicode_confusables.cpp
   uuid.cpp
 )
 foreach(ABS_T ${TOOLS})

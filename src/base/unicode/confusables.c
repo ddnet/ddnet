@@ -1,6 +1,6 @@
 #include "confusables_data.h"
 
-#include "system.h"
+#include "../system.h"
 
 #include <stddef.h>
 

@@ -159,7 +159,7 @@ void mem_zero(void *block, unsigned size);
 		size - Size of the data to compare
 
 	Returns:
-		<0 - Block a is lesser than block b
+		<0 - Block a is less than block b
 		0 - Block a is equal to block b
 		>0 - Block a is greater than block b
 */
@@ -676,7 +676,7 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 		b - Address to compare to.
 
 	Returns:
-		<0 - Address a is lesser than address b
+		<0 - Address a is less than address b
 		0 - Address a is equal to address b
 		>0 - Address a is greater than address b
 */
@@ -691,7 +691,7 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b);
 		b - Address to compare to.
 
 	Returns:
-		<0 - Address a is lesser than address b
+		<0 - Address a is less than address b
 		0 - Address a is equal to address b
 		>0 - Address a is greater than address b
 */
@@ -1114,26 +1114,26 @@ char *str_skip_whitespaces(char *str);
 
 /*
 	Function: str_comp_nocase
-		Compares to strings case insensitive.
+		Compares to strings case insensitively.
 
 	Parameters:
 		a - String to compare.
 		b - String to compare.
 
 	Returns:
-		<0 - String a is lesser than string b
+		<0 - String a is less than string b
 		0 - String a is equal to string b
 		>0 - String a is greater than string b
 
 	Remarks:
-		- Only garanted to work with a-z/A-Z.
+		- Only guaranteed to work with a-z/A-Z.
 		- The strings are treated as zero-terminated strings.
 */
 int str_comp_nocase(const char *a, const char *b);
 
 /*
 	Function: str_comp_nocase_num
-		Compares up to num characters of two strings case insensitive.
+		Compares up to num characters of two strings case insensitively.
 
 	Parameters:
 		a - String to compare.
@@ -1141,15 +1141,16 @@ int str_comp_nocase(const char *a, const char *b);
 		num - Maximum characters to compare
 
 	Returns:
-		<0 - String a is lesser than string b
+		<0 - String a is less than string b
 		0 - String a is equal to string b
 		>0 - String a is greater than string b
 
 	Remarks:
-		- Only garanted to work with a-z/A-Z.
+		- Only guaranteed to work with a-z/A-Z.
+		  (use str_utf8_comp_nocase_num for unicode support)
 		- The strings are treated as zero-terminated strings.
 */
-int str_comp_nocase_num(const char *a, const char *b, const int num);
+int str_comp_nocase_num(const char *a, const char *b, int num);
 
 /*
 	Function: str_comp
@@ -1160,7 +1161,7 @@ int str_comp_nocase_num(const char *a, const char *b, const int num);
 		b - String to compare.
 
 	Returns:
-		<0 - String a is lesser than string b
+		<0 - String a is less than string b
 		0 - String a is equal to string b
 		>0 - String a is greater than string b
 
@@ -1179,14 +1180,14 @@ int str_comp(const char *a, const char *b);
 		num - Maximum characters to compare
 
 	Returns:
-		<0 - String a is lesser than string b
+		<0 - String a is less than string b
 		0 - String a is equal to string b
 		>0 - String a is greater than string b
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 */
-int str_comp_num(const char *a, const char *b, const int num);
+int str_comp_num(const char *a, const char *b, int num);
 
 /*
 	Function: str_comp_filenames
@@ -1197,7 +1198,7 @@ int str_comp_num(const char *a, const char *b, const int num);
 		b - String to compare.
 
 	Returns:
-		<0 - String a is lesser than string b
+		<0 - String a is less than string b
 		0 - String a is equal to string b
 		>0 - String a is greater than string b
 
@@ -1300,7 +1301,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 
 /*
 	Function: str_find_nocase
-		Finds a string inside another string case insensitive.
+		Finds a string inside another string case insensitively.
 
 	Parameters:
 		haystack - String to search in
@@ -1311,7 +1312,8 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 		Returns NULL of needle could not be found.
 
 	Remarks:
-		- Only garanted to work with a-z/A-Z.
+		- Only guaranteed to work with a-z/A-Z.
+		  (use str_utf8_find_nocase for unicode support)
 		- The strings are treated as zero-terminated strings.
 */
 const char *str_find_nocase(const char *haystack, const char *needle);
@@ -1630,6 +1632,66 @@ int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 		!=0 otherwise.
 */
 int str_utf8_comp_confusable(const char *a, const char *b);
+
+/*
+	Function: str_utf8_tolower
+		Converts the given Unicode codepoint to lowercase (locale insensitive).
+
+	Parameters:
+		code - Unicode codepoint to convert.
+
+	Returns:
+		Lowercase codepoint
+*/
+int str_utf8_tolower(int code);
+
+/*
+	Function: str_utf8_comp_nocase
+		Compares two utf8 strings case insensitively.
+
+	Parameters:
+		a - String to compare.
+		b - String to compare.
+
+	Returns:
+		<0 - String a is less than string b
+		0 - String a is equal to string b
+		>0 - String a is greater than string b
+*/
+int str_utf8_comp_nocase(const char *a, const char *b);
+
+/*
+	Function: str_utf8_comp_nocase_num
+		Compares up to num bytes of two utf8 strings case insensitively.
+
+	Parameters:
+		a - String to compare.
+		b - String to compare.
+		num - Maximum characters to compare
+
+	Returns:
+		<0 - String a is less than string b
+		0 - String a is equal to string b
+		>0 - String a is greater than string b
+*/
+int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
+
+/*
+	Function: str_utf8_find_nocase
+		Finds a utf8 string inside another utf8 string case insensitively.
+
+	Parameters:
+		haystack - String to search in
+		needle - String to search for
+
+	Returns:
+		A pointer into haystack where the needle was found.
+		Returns NULL of needle could not be found.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+const char *str_utf8_find_nocase(const char *haystack, const char *needle);
 
 /*
 	Function: str_utf8_isspace

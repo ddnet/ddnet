@@ -40,7 +40,6 @@ DDNet-Server
 DDNet-Server-Launcher
 config_retrieve
 config_store
-confusables
 crapnet
 dilate
 dummy_map
@@ -58,6 +57,7 @@ tileset_borderfix
 tileset_borderrem
 tileset_borderset
 twping
+unicode_confusables
 uuid
 versionsrv
 

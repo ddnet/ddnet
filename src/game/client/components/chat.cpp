@@ -327,11 +327,11 @@ bool CChat::OnInput(IInput::CEvent Event)
 			bool Found = false;
 			if(SearchType == 1)
 			{
-				if(str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
-					str_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
+				if(str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
+					str_utf8_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
 					Found = true;
 			}
-			else if(!str_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
+			else if(!str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
 				Found = true;
 
 			if(Found)
