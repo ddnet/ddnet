@@ -413,7 +413,7 @@ public:
 		char aBuffer[MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool success = fs_remove(aBuffer);
+		bool success = !fs_remove(aBuffer);
 		if(!success)
 			dbg_msg("storage", "failed to remove: %s", aBuffer);
 		return success;
