@@ -135,7 +135,7 @@ public:
 	int SetPos(float Percent);
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const;
-	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader) const;
+	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers) const;
 	const char *GetDemoFileName() { return m_aFilename; };
 	int GetDemoType() const;
 

@@ -152,6 +152,14 @@ class CMenus : public CComponent
 	char m_aFilterString[25];
 
 	// demo
+	enum
+	{
+		SORT_DEMONAME=0,
+		SORT_MARKERS,
+		SORT_LENGTH,
+		SORT_DATE,
+	};
+
 	struct CDemoItem
 	{
 		char m_aFilename[128];
@@ -163,39 +171,51 @@ class CMenus : public CComponent
 		bool m_InfosLoaded;
 		bool m_Valid;
 		CDemoHeader m_Info;
+		CTimelineMarkers m_TimelineMarkers;
 
-		bool operator<(const CDemoItem &Other)
+		int NumMarkers() const
 		{
-			if (g_Config.m_BrDemoSort)
-			{
-				if (g_Config.m_BrDemoSortOrder)
-				{
-					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
-														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														m_Date < Other.m_Date;
-				}
-				else
-				{
-					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
-														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														m_Date > Other.m_Date;
-				}
-			}
-			else
-			{
-				if (g_Config.m_BrDemoSortOrder)
-				{
-					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
-														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_nocase(m_aFilename, Other.m_aFilename) < 0;
-				}
-				else
-				{
-					return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false :
-														m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false :
-														str_comp_nocase(m_aFilename, Other.m_aFilename) > 0;
-				}
-			}
+			return ((m_TimelineMarkers.m_aNumTimelineMarkers[0]<<24)&0xFF000000) | ((m_TimelineMarkers.m_aNumTimelineMarkers[1]<<16)&0xFF0000) |
+				((m_TimelineMarkers.m_aNumTimelineMarkers[2]<<8)&0xFF00) | (m_TimelineMarkers.m_aNumTimelineMarkers[3]&0xFF);
+		}
+
+		int Length() const
+		{
+			return ((m_Info.m_aLength[0]<<24)&0xFF000000) | ((m_Info.m_aLength[1]<<16)&0xFF0000) |
+				((m_Info.m_aLength[2]<<8)&0xFF00) | (m_Info.m_aLength[3]&0xFF);
+		}
+
+		bool operator<(const CDemoItem &Other) const
+		{
+			if(!str_comp(m_aFilename, ".."))
+				return true;
+			if(!str_comp(Other.m_aFilename, ".."))
+				return false;
+			if(m_IsDir && !Other.m_IsDir)
+				return true;
+			if(!m_IsDir && Other.m_IsDir)
+				return false;
+
+			const CDemoItem &Left = g_Config.m_BrDemoSortOrder ? Other : *this;
+			const CDemoItem &Right = g_Config.m_BrDemoSortOrder ? *this : Other;
+
+			if(g_Config.m_BrDemoSort == SORT_DEMONAME)
+				return str_comp_nocase(Left.m_aFilename, Right.m_aFilename) < 0;
+			if(g_Config.m_BrDemoSort == SORT_DATE)
+				return Left.m_Date < Right.m_Date;
+
+			if(!Other.m_InfosLoaded)
+				return m_InfosLoaded;
+			if(!m_InfosLoaded)
+				return !Other.m_InfosLoaded;
+
+			if(g_Config.m_BrDemoSort == SORT_MARKERS)
+				return Left.NumMarkers() < Right.NumMarkers();
+			if(g_Config.m_BrDemoSort == SORT_LENGTH)
+				return Left.Length() < Right.Length();
+
+			// Unknown sort
+			return true;
 		}
 	};
 
@@ -247,6 +267,7 @@ class CMenus : public CComponent
 
 	// found in menus_demo.cpp
 	static bool DemoFilterChat(const void *pData, int Size, void *pUser);
+	bool FetchHeader(CDemoItem &Item);
 	void RenderDemoPlayer(CUIRect MainView);
 	void RenderDemoList(CUIRect MainView);
 
