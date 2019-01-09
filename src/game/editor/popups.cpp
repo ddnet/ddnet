@@ -411,7 +411,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 	CProperty aProps[] = {
 		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, pEditor->m_Map.m_lGroups.size()-1},
 		{"Order", pEditor->m_lSelectedLayers[0], PROPTYPE_INT_STEP, 0, pCurrentGroup->m_lLayers.size()},
-		{"Detail", pCurrentLayer->m_Flags&LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
+		{"Detail", pCurrentLayer && pCurrentLayer->m_Flags&LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
 		{0},
 	};
 
@@ -430,7 +430,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 
 	if(Prop == PROP_ORDER)
 		pEditor->SelectLayer(pCurrentGroup->SwapLayers(pEditor->m_lSelectedLayers[0], NewVal));
-	else if(Prop == PROP_GROUP && pCurrentLayer->m_Type != LAYERTYPE_GAME)
+	else if(Prop == PROP_GROUP && pCurrentLayer && pCurrentLayer->m_Type != LAYERTYPE_GAME)
 	{
 		if(NewVal >= 0 && NewVal < pEditor->m_Map.m_lGroups.size())
 		{
@@ -440,13 +440,15 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View)
 			pEditor->SelectLayer(pEditor->m_Map.m_lGroups[NewVal]->m_lLayers.size()-1);
 		}
 	}
-	else if(Prop == PROP_HQ)
+	else if(Prop == PROP_HQ && pCurrentLayer)
 	{
 		pCurrentLayer->m_Flags &= ~LAYERFLAG_DETAIL;
 		if(NewVal)
 			pCurrentLayer->m_Flags |= LAYERFLAG_DETAIL;
 	}
 
+	if (!pCurrentLayer)
+		return true;
 	return pCurrentLayer->RenderProperties(&View);
 }
 
