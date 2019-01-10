@@ -432,7 +432,8 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			SetTile(fx, fy, l->m_pTiles[y*l->m_Width+x]);
 		}
-	FlagModified(sx, sy, l->m_Width, l->m_Height);
+	if(sx >= 0 && sx + l->m_Width < m_Width && sy >= 0 && sy + l->m_Height < m_Height)
+		FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 void CLayerTiles::BrushFlipX()
