@@ -180,8 +180,8 @@ void CGameTeams::CheckTeamFinished(int Team)
 			if (Time < 0.000001f)
 				return;
 
-			for (auto pPlayer : TeamPlayers)
-				OnFinish(pPlayer, Time);
+			for (unsigned int i = 0; i < PlayersCount; ++i)
+				OnFinish(TeamPlayers[i], Time);
 			ChangeTeamState(Team, TEAMSTATE_FINISHED); //TODO: Make it better
 			//ChangeTeamState(Team, TEAMSTATE_OPEN);
 			OnTeamFinish(TeamPlayers, PlayersCount, Time);
