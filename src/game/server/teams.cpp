@@ -136,7 +136,13 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 	{
 		CPlayer* pPlayer = GetPlayer(ClientID);
 		if (pPlayer && pPlayer->IsPlaying())
-			OnFinish(pPlayer);
+		{
+			float Time = (float)(Server()->Tick() - GetStartTime(pPlayer))
+					/ ((float)Server()->TickSpeed());
+			if (Time < 0.000001f)
+				return;
+			OnFinish(pPlayer, Time);
+		}
 	}
 	else
 	{
@@ -160,7 +166,6 @@ void CGameTeams::CheckTeamFinished(int Team)
 				CPlayer* pPlayer = GetPlayer(i);
 				if (pPlayer && pPlayer->IsPlaying())
 				{
-					OnFinish(pPlayer);
 					m_TeeFinished[i] = false;
 
 					TeamPlayers[PlayersCount++] = pPlayer;
@@ -170,9 +175,16 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 		if (PlayersCount > 0)
 		{
+			float Time = (float)(Server()->Tick() - GetStartTime(TeamPlayers[0]))
+					/ ((float)Server()->TickSpeed());
+			if (Time < 0.000001f)
+				return;
+
+			for (auto pPlayer : TeamPlayers)
+				OnFinish(pPlayer, Time);
 			ChangeTeamState(Team, TEAMSTATE_FINISHED); //TODO: Make it better
 			//ChangeTeamState(Team, TEAMSTATE_OPEN);
-			OnTeamFinish(TeamPlayers, PlayersCount);
+			OnTeamFinish(TeamPlayers, PlayersCount, Time);
 		}
 	}
 }
@@ -443,13 +455,8 @@ float *CGameTeams::GetCpCurrent(CPlayer* Player)
 	return NULL;
 }
 
-void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size)
+void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time)
 {
-	float Time = (float)(Server()->Tick() - GetStartTime(Players[0]))
-			/ ((float)Server()->TickSpeed());
-	if (Time < 0.000001f)
-		return;
-
 	bool CallSaveScore = false;
 
 #if defined(CONF_SQL)
@@ -476,15 +483,11 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size)
 		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, Time);
 }
 
-void CGameTeams::OnFinish(CPlayer* Player)
+void CGameTeams::OnFinish(CPlayer* Player, float Time)
 {
 	if (!Player || !Player->IsPlaying())
 		return;
 	//TODO:DDRace:btd: this ugly
-	float Time = (float)(Server()->Tick() - GetStartTime(Player))
-			/ ((float)Server()->TickSpeed());
-	if (Time < 0.000001f)
-		return;
 	CPlayerData *pData = GameServer()->Score()->PlayerData(Player->GetCID());
 	char aBuf[128];
 	SetCpActive(Player, -2);

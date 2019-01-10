@@ -16,6 +16,11 @@ class CGameTeams
 
 	class CGameContext * m_pGameContext;
 
+	void CheckTeamFinished(int ClientID);
+	bool TeamFinished(int Team);
+	void OnTeamFinish(CPlayer** Players, unsigned int Size, float Time);
+	void OnFinish(CPlayer* Player, float Time);
+
 public:
 	enum
 	{
@@ -50,13 +55,10 @@ public:
 	void OnCharacterSpawn(int ClientID);
 	void OnCharacterDeath(int ClientID, int Weapon);
 
-	void CheckTeamFinished(int ClientID);
 	bool SetCharacterTeam(int ClientID, int Team);
 
 	void ChangeTeamState(int Team, int State);
 	void onChangeTeamState(int Team, int State, int OldState);
-
-	bool TeamFinished(int Team);
 
 	int64_t TeamMask(int Team, int ExceptID = -1, int Asker = -1);
 
@@ -81,8 +83,6 @@ public:
 	void SetDDRaceState(CPlayer* Player, int DDRaceState);
 	void SetStartTime(CPlayer* Player, int StartTime);
 	void SetCpActive(CPlayer* Player, int CpActive);
-	void OnTeamFinish(CPlayer** Players, unsigned int Size);
-	void OnFinish(CPlayer* Player);
 	void KillSavedTeam(int Team);
 
 	bool TeeFinished(int ClientID)
