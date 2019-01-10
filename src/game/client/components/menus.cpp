@@ -1761,10 +1761,8 @@ bool CMenus::OnMouseMove(float x, float y)
 		m_MousePos.y += y;
 	}
 #endif
-	if(m_MousePos.x < 0) m_MousePos.x = 0;
-	if(m_MousePos.y < 0) m_MousePos.y = 0;
-	if(m_MousePos.x > Graphics()->ScreenWidth()) m_MousePos.x = Graphics()->ScreenWidth();
-	if(m_MousePos.y > Graphics()->ScreenHeight()) m_MousePos.y = Graphics()->ScreenHeight();
+	m_MousePos.x = clamp(m_MousePos.x, 0.f, (float)Graphics()->ScreenWidth());
+	m_MousePos.y = clamp(m_MousePos.y, 0.f, (float)Graphics()->ScreenHeight());
 
 	return true;
 }
