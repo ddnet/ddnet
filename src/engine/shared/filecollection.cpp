@@ -197,7 +197,7 @@ int64 CFileCollection::GetTimestamp(const char *pFilename)
 	if(m_aFileDesc[0] == '\0')
 	{
 		int FilenameLength = str_length(pFilename);
-		return ExtractTimestamp(pFilename+FilenameLength-m_FileExtLength-TIMESTAMP_LENGTH);
+		return ExtractTimestamp(pFilename+FilenameLength-m_FileExtLength-TIMESTAMP_LENGTH+1);
 	}
 	else
 	{
