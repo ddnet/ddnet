@@ -164,7 +164,7 @@ public:
 	};
 	int m_ServerMode;
 
-	int m_AllowDDRaceScore[2];
+	int m_AllowTimeScore[2];
 
 	int m_DemoSpecID;
 
@@ -316,7 +316,7 @@ public:
 	virtual void OnEnterGame();
 	virtual void OnRconType(bool UsernameReq);
 	virtual void OnRconLine(const char *pLine);
-	virtual void OnDDRaceScore(int AllowDDRaceScore, bool Dummy);
+	virtual void OnTimeScore(int AllowTimeScore, bool Dummy);
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);

@@ -937,12 +937,9 @@ void CGameClient::OnRconLine(const char *pLine)
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
-void CGameClient::OnDDRaceScore(int AllowDDRaceScore, bool Dummy)
+void CGameClient::OnTimeScore(int AllowTimeScore, bool Dummy)
 {
-	if(!Dummy)
-		m_AllowDDRaceScore[0] = AllowDDRaceScore;
-	else
-		m_AllowDDRaceScore[1] = AllowDDRaceScore;
+	m_AllowTimeScore[Dummy] = AllowTimeScore;
 }
 
 void CGameClient::ProcessEvents()
