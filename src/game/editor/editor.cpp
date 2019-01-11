@@ -3271,6 +3271,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				if(int Result = DoButton_Ex(&m_Map.m_lGroups[g], aBuf, g==m_SelectedGroup, &Slot,
 					BUTTON_CONTEXT, m_Map.m_lGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", 0, FontSize))
 				{
+					m_Brush.Clear();
 					m_SelectedGroup = g;
 					SelectLayer(0);
 					if ((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
@@ -3355,10 +3356,14 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					if ((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
 						if(!m_lSelectedLayers.remove(i))
+						{
+							m_Brush.Clear();
 							m_lSelectedLayers.add(i);
+						}
 					}
 					else
 					{
+						m_Brush.Clear();
 						m_SelectedGroup = g;
 						SelectLayer(i);
 					}
