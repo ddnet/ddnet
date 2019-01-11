@@ -5518,8 +5518,10 @@ void CEditor::Render()
 	else
 	{
 		// hack to get keyboard inputs from toolbar even when GUI is not active
-		ToolBar.HSplitTop(53.0f, &ToolBar, 0);
-		ToolBar.Margin(-1000, &ToolBar);
+		ToolBar.x = -100;
+		ToolBar.y = -100;
+		ToolBar.w = 50;
+		ToolBar.h = 50;
 	}
 
 	//	a little hack for now
