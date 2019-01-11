@@ -6058,17 +6058,19 @@ void CEditor::UpdateAndRender()
 		m_OldMouseY = ty;
 #else
 		UI()->ConvertMouseMove(&rx, &ry);
+
+		// TODO: Why do we have to halve this?
+		rx /= 2;
+		ry /= 2;
+
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;
 
 		if(!m_LockMouse)
 		{
-			s_MouseX += rx;
-			s_MouseY += ry;
+			s_MouseX = clamp(s_MouseX + rx, 0.0f, UI()->Screen()->w);
+			s_MouseY = clamp(s_MouseY + ry, 0.0f, UI()->Screen()->h);
 		}
-
-		s_MouseX = clamp(s_MouseX, 0.0f, UI()->Screen()->w);
-		s_MouseY = clamp(s_MouseY, 0.0f, UI()->Screen()->h);
 #endif
 
 		// update the ui
