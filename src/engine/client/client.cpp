@@ -2165,7 +2165,7 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 				}
 			}
 		}
-		else if(Msg == NETMSG_DDRACE_SCORE)
+		else if(Msg == NETMSG_TIME_SCORE)
 		{
 			int NewTimeScore = Unpacker.GetInt();
 			if (Unpacker.Error())
