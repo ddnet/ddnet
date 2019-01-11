@@ -7,7 +7,7 @@ class CFileCollection
 {
 	enum
 	{
-		MAX_ENTRIES=1000,
+		MAX_ENTRIES=1001,
 		TIMESTAMP_LENGTH=20,	// _YYYY-MM-DD_HH-MM-SS
 	};
 

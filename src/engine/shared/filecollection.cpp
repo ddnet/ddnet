@@ -103,7 +103,9 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 	mem_zero(m_aTimestamps, sizeof(m_aTimestamps));
 	m_NumTimestamps = 0;
 	m_Remove = -1;
-	m_MaxEntries = clamp(MaxEntries, 1, static_cast<int>(MAX_ENTRIES));
+	// MAX_ENTRIES - 1 to make sure that we can insert one entry into the sorted
+	// list and then remove the oldest one
+	m_MaxEntries = clamp(MaxEntries, 1, static_cast<int>(MAX_ENTRIES)-1);
 	str_copy(m_aFileDesc, pFileDesc, sizeof(m_aFileDesc));
 	m_FileDescLength = str_length(m_aFileDesc);
 	str_copy(m_aFileExt, pFileExt, sizeof(m_aFileExt));
@@ -123,40 +125,21 @@ void CFileCollection::AddEntry(int64 Timestamp)
 	}
 	else
 	{
-		// remove old file
-		if(m_NumTimestamps >= m_MaxEntries)
-		{
-			if(m_aFileDesc[0] == '\0') // consider an empty file desc as a wild card
-			{
-				m_Remove = m_aTimestamps[0];
-				m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, RemoveCallback, this);
-			}
-			else
-			{
-				char aBuf[512];
-				char aTimestring[TIMESTAMP_LENGTH];
-				BuildTimestring(m_aTimestamps[0], aTimestring);
-
-				str_format(aBuf, sizeof(aBuf), "%s/%s_%s%s", m_aPath, m_aFileDesc, aTimestring, m_aFileExt);
-				m_pStorage->RemoveFile(aBuf, IStorage::TYPE_SAVE);
-			}
-		}
-
 		// add entry to the sorted list
-		if(m_aTimestamps[0] > Timestamp)
+		if(Timestamp < m_aTimestamps[0])
 		{
 			// first entry
-			if(m_NumTimestamps < m_MaxEntries)
+			if(m_NumTimestamps <= m_MaxEntries)
 			{
 				mem_move(m_aTimestamps+1, m_aTimestamps, m_NumTimestamps*sizeof(int64));
 				m_aTimestamps[0] = Timestamp;
 				++m_NumTimestamps;
 			}
 		}
-		else if(m_aTimestamps[m_NumTimestamps-1] <= Timestamp)
+		else if(Timestamp >= m_aTimestamps[m_NumTimestamps-1])
 		{
 			// last entry
-			if(m_NumTimestamps == m_MaxEntries)
+			if(m_NumTimestamps > m_MaxEntries)
 			{
 				mem_move(m_aTimestamps, m_aTimestamps+1, (m_NumTimestamps-1)*sizeof(int64));
 				m_aTimestamps[m_NumTimestamps-1] = Timestamp;
@@ -177,7 +160,7 @@ void CFileCollection::AddEntry(int64 Timestamp)
 					Left = Mid;
 			}
 
-			if(m_NumTimestamps == m_MaxEntries)
+			if(m_NumTimestamps > m_MaxEntries)
 			{
 				mem_move(m_aTimestamps, m_aTimestamps+1, (Right-1)*sizeof(int64));
 				m_aTimestamps[Right-1] = Timestamp;
@@ -187,6 +170,26 @@ void CFileCollection::AddEntry(int64 Timestamp)
 				mem_move(m_aTimestamps+Right+1, m_aTimestamps+Right, (m_NumTimestamps-Right)*sizeof(int64));
 				m_aTimestamps[Right] = Timestamp;
 				++m_NumTimestamps;
+			}
+		}
+
+		// remove old file only after we inserted the new entry, otherwise we can't
+		// know which one is the oldest
+		if(m_NumTimestamps > m_MaxEntries)
+		{
+			if(m_aFileDesc[0] == '\0') // consider an empty file desc as a wild card
+			{
+				m_Remove = m_aTimestamps[0];
+				m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, RemoveCallback, this);
+			}
+			else
+			{
+				char aBuf[512];
+				char aTimestring[TIMESTAMP_LENGTH];
+				BuildTimestring(m_aTimestamps[0], aTimestring);
+
+				str_format(aBuf, sizeof(aBuf), "%s/%s_%s%s", m_aPath, m_aFileDesc, aTimestring, m_aFileExt);
+				m_pStorage->RemoveFile(aBuf, IStorage::TYPE_SAVE);
 			}
 		}
 	}
