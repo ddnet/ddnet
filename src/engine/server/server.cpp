@@ -1012,10 +1012,6 @@ void CServer::SendMapData(int ClientID, int Chunk)
 
 void CServer::SendConnectionReady(int ClientID)
 {
-	CMsgPacker aMsg(NETMSG_DDRACE_SCORE);
-	aMsg.AddInt(g_Config.m_SvDDRaceScore);
-	SendMsgEx(&aMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID, true);
-
 	CMsgPacker Msg(NETMSG_CON_READY);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID, true);
 }
@@ -2095,13 +2091,6 @@ void CServer::ConRescue(CConsole::IResult *pResult, void *pUser)
 	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
-void CServer::ConDDRaceScore(CConsole::IResult *pResult, void *pUser)
-{
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Value: %d", g_Config.m_SvDDRaceScore);
-	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-}
-
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
 	if(pResult->NumArguments() > 1)
@@ -2974,7 +2963,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze");
-	pConsole->Register("sv_ddrace_score", "", CFGFLAG_SERVER, CServer::ConDDRaceScore, pConsole, "Allows the client to use DDRace scores");
 
 	pEngine->InitLogfile();
 
