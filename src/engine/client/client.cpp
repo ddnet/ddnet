@@ -1943,7 +1943,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			int NewTimeScore = Unpacker.GetInt();
 			if (Unpacker.Error())
 				return;
-			GameClient()->OnTimeScore(NewTimeScore, g_Config.m_ClDummy)
+			GameClient()->OnTimeScore(NewTimeScore, g_Config.m_ClDummy);
 		}
 	}
 	else
