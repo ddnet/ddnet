@@ -71,7 +71,7 @@ void CInput::MouseRelative(float *x, float *y)
 	*y = ny;
 #else
 	int nx = 0, ny = 0;
-	float Sens = ((g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens) ? g_Config.m_ClDyncamMousesens : g_Config.m_InpMousesens) / 100.0f;
+	float Sens = g_Config.m_InpMousesens / 100.0f;
 
 	SDL_GetRelativeMouseState(&nx,&ny);
 

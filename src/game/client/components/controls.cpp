@@ -511,6 +511,11 @@ bool CControls::OnMouseMove(float x, float y)
 		ClampMousePos();
 	}
 #else
+	if(g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens)
+	{
+		x = x * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
+		y = y * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
+	}
 	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
 	ClampMousePos();
 #endif
