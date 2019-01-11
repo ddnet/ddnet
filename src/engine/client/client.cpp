@@ -2937,6 +2937,7 @@ void CClient::Run()
 		}
 
 		AutoScreenshot_Cleanup();
+		AutoStatScreenshot_Cleanup();
 		AutoCSV_Cleanup();
 
 		// check conditions
