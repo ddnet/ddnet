@@ -126,3 +126,8 @@ $ cmake -DMYSQL=ON ..
 $ make
 $ ./DDNet-Server -f mine.cfg
 ```
+
+Repository status
+=================
+
+[![Repository status](https://repology.org/badge/vertical-allrepos/ddnet.svg?header=)](https://repology.org/metapackage/ddnet/versions)
