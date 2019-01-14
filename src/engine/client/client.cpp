@@ -1964,14 +1964,22 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 {
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
+	CMsgPacker Packer(NETMSG_EX);
 
 	// unpack msgid and system flag
-	int Msg = Unpacker.GetInt();
-	int Sys = Msg&1;
-	Msg >>= 1;
+	int Msg;
+	bool Sys;
+	CUuid Uuid;
 
-	if(Unpacker.Error())
+	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	if(Result == UNPACKMESSAGE_ERROR)
+	{
 		return;
+	}
+	else if(Result == UNPACKMESSAGE_ANSWER)
+	{
+		SendMsgEx(&Packer, MSGFLAG_VITAL, true);
+	}
 
 	if(Sys)
 	{
