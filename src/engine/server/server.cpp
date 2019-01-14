@@ -1733,6 +1733,9 @@ int CServer::LoadMap(const char *pMapName)
 	// stop recording when we change map
 	for(int i = 0; i < MAX_CLIENTS+1; i++)
 	{
+		if(!m_aDemoRecorder[i].IsRecording())
+			continue;
+
 		m_aDemoRecorder[i].Stop();
 
 		// remove tmp demos
