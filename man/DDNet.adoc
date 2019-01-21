@@ -1,0 +1,56 @@
+= DDNet(6)
+DDNet Contributors
+v1.0.0
+// User defined variables
+:ddnet-version: 11.7.2
+// man page variables
+:doctype: manpage
+:man manual: DDNet Manual
+:man source: DDNet
+:man version: {ddnet-version}
+:page-layout: base
+:man-linkstyle: pass:[blue R < >]
+
+== NAME
+DDNet - Starts the DDNet client.
+
+== SYNOPSIS
+*DDNet* [_OPTION_]... [-f _CONFIG_FILE_]...
+
+== DESCRIPTION
+DDraceNetwork (DDNet) is an actively maintained version of *DDRace*,
+a *Teeworlds* modification with a unique cooperative gameplay.
+
+== EXAMPLES
+*DDNet* -f myfile.cfg
+
+*DDNet* -f myfile.cfg -f myfile2.cfg
+
+*DDNet* \'cl_showhud 0' \'player_name "nameless tee"'
+
+== Options
+
+=== Configuration file
+*-f* _CONFIGURATION_FILE_::
+Load _CONFIGURATION_FILE_ instead of default _settings_ddnet.cfg_
+
+=== Other options
+All options can be found here: https://ddnet.tw/settingscommands/
+
+== RESOURCES
+- *Website*: https://ddnet.tw/
+- *RSS*: https://ddnet.tw/feed/
+- *Forum*: https://forum.ddnet.tw/
+- *Discord*: https://ddnet.tw/discord
+- *Source*: https://github.com/ddnet/ddnet
+
+== REPORTING BUGS
+Report any issues here: https://github.com/ddnet/ddnet/issues
+
+== CONTRIBUTING
+You can contribute by opening a pull request here: https://github.com/ddnet/ddnet/pulls
+
+== COPYRIGHT
+Free use of this software is granted under the terms of the MIT License.
+
+You can read the license here: https://github.com/ddnet/ddnet/blob/master/license.txt
