@@ -295,7 +295,7 @@ class CTextRender : public IEngineTextRender
 			pMem = calloc(Width * Height, 1);
 		}
 
-		int TextureID = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
+		int TextureID = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS | IGraphics::TEXLOAD_NO_COMPRESSION);
 
 		if(!pUploadData)
 			free(pMem);
