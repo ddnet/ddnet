@@ -4469,7 +4469,7 @@ void CEditor::RenderFileDialog()
 		}
 	}
 
-	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
+	if(g_Config.m_ClSaveMapInfo && m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
 		ButtonBar.VSplitLeft(40.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
@@ -6000,7 +6000,8 @@ void CEditorMap::Clean()
 	m_lImages.delete_all();
 	m_lSounds.delete_all();
 
-	m_MapInfo.Reset();
+	if (g_Config.m_ClSaveMapInfo)
+		m_MapInfo.Reset();
 
 	m_lSettings.clear();
 
