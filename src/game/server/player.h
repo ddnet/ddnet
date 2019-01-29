@@ -37,6 +37,7 @@ public:
 
 	void OnDirectInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
+	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect(const char *pReason);
 
 	void ThreadKillCharacter(int Weapon = WEAPON_GAME);

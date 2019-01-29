@@ -1959,6 +1959,12 @@ int CServer::Run()
 
 			while(t > TickStartTime(m_CurrentGameTick+1))
 			{
+				for(int c = 0; c < MAX_CLIENTS; c++)
+					if(m_aClients[c].m_State == CClient::STATE_INGAME)
+						for(int i = 0; i < 200; i++)
+							if(m_aClients[c].m_aInputs[i].m_GameTick == Tick() + 1)
+								GameServer()->OnClientPredictedEarlyInput(c, m_aClients[c].m_aInputs[i].m_aData);
+
 				m_CurrentGameTick++;
 				NewTicks++;
 
