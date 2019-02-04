@@ -1801,14 +1801,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (((Version >= 15 && Version < 100) || Version == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 				SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
 			//autoban known bot versions
-			if(g_Config.m_SvBotPunishment && isBotVersion(Version))
+			if(g_Config.m_SvBotVersionNumbers != '\0' && IsBotVersion(Version))
 			{
-				char aBuf[128];
-				if(g_Config.m_SvBotPunishment == 1)
-					str_format(aBuf, sizeof(aBuf), "kick %d bot client", ClientID);
-				else
+				if(g_Config.m_SvBotPunishment)
+				{
+					char aBuf[128];
+					NETADDR Addr;
+					Server()->GetClientAddr(ClientID, &Addr);
 					str_format(aBuf, sizeof(aBuf), "ban %d %d %s", ClientID, g_Config.m_SvBotPunishment, "bot client");
-				Console()->ExecuteLine(aBuf);
+					Console()->ExecuteLine(aBuf);
+				}
+				else
+					Server()->Kick(ClientID, "bot client");
 			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
@@ -3560,7 +3564,7 @@ void CGameContext::Converse(int ClientID, char *pStr)
 	}
 }
 
-bool CGameContext::isBotVersion(int Version)
+bool CGameContext::IsBotVersion(int Version)
 {
 	char aVersion[16];
 	str_format(aVersion, sizeof(aVersion), "%d", Version);
