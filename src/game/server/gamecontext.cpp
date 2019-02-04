@@ -1800,6 +1800,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			//tell known bot clients that they're botting and we know it
 			if (((Version >= 15 && Version < 100) || Version == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 				SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
+			//autoban known bot versions
+			if(g_Config.m_SvBotPunishment && isBotVersion(Version))
+			{
+				char aBuf[128];
+				if(g_Config.m_SvBotPunishment == 1)
+					str_format(aBuf, sizeof(aBuf), "kick %d bot client", ClientID);
+				else
+					str_format(aBuf, sizeof(aBuf), "ban %d %d %s", ClientID, g_Config.m_SvBotPunishment, "bot client");
+				Console()->ExecuteLine(aBuf);
+			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
@@ -3548,6 +3558,25 @@ void CGameContext::Converse(int ClientID, char *pStr)
 	{
 		WhisperID(ClientID, pPlayer->m_LastWhisperTo, pStr);
 	}
+}
+
+bool CGameContext::isBotVersion(int Version)
+{
+	char aVersion[16];
+	str_format(aVersion, sizeof(aVersion), "%d", Version);
+	char aVersions[sizeof(g_Config.m_SvBotVersionNumbers)];
+	str_copy(aVersions, g_Config.m_SvBotVersionNumbers, sizeof(aVersions));
+	char *p = strtok(aVersions, ";");;
+
+	while(p)
+	{
+		if(!str_comp(p, aVersion))
+		{
+			return true;
+		}
+		p = strtok(NULL, ";");
+	}
+	return false;
 }
 
 void CGameContext::List(int ClientID, const char *pFilter)
