@@ -1804,13 +1804,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(g_Config.m_SvBotVersionNumbers != '\0' && IsBotVersion(Version))
 			{
 				if(g_Config.m_SvBotPunishment)
-				{
-					char aBuf[128];
-					NETADDR Addr;
-					Server()->GetClientAddr(ClientID, &Addr);
-					str_format(aBuf, sizeof(aBuf), "ban %d %d %s", ClientID, g_Config.m_SvBotPunishment, "bot client");
-					Console()->ExecuteLine(aBuf);
-				}
+					Server()->Ban(ClientID, g_Config.m_SvBotPunishment * 60, "bot client");
 				else
 					Server()->Kick(ClientID, "bot client");
 			}

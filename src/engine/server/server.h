@@ -238,6 +238,7 @@ public:
 	virtual void SetClientScore(int ClientID, int Score);
 
 	void Kick(int ClientID, const char *pReason);
+	void Ban(int ClientID, int seconds, const char *pReason);
 
 	void DemoRecorder_HandleAutoStart();
 	bool DemoRecorder_IsRecording();
