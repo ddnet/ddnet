@@ -1801,7 +1801,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (((Version >= 15 && Version < 100) || Version == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 				SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
 			//autoban known bot versions
-			if(g_Config.m_SvBotVersionNumbers != '\0' && IsBotVersion(Version))
+			if(g_Config.m_SvBotVersionNumbers[0] != '\0' && IsBotVersion(Version))
 			{
 				if(g_Config.m_SvBotPunishment)
 					Server()->Ban(ClientID, g_Config.m_SvBotPunishment * 60, "bot client");
