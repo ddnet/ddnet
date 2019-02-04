@@ -3564,7 +3564,7 @@ bool CGameContext::IsBotVersion(int Version)
 	str_format(aVersion, sizeof(aVersion), "%d", Version);
 	char aVersions[sizeof(g_Config.m_SvBotVersionNumbers)];
 	str_copy(aVersions, g_Config.m_SvBotVersionNumbers, sizeof(aVersions));
-	char *p = strtok(aVersions, ";");;
+	char *p = strtok(aVersions, ",");;
 
 	while(p)
 	{
@@ -3572,7 +3572,7 @@ bool CGameContext::IsBotVersion(int Version)
 		{
 			return true;
 		}
-		p = strtok(NULL, ";");
+		p = strtok(NULL, ",");
 	}
 	return false;
 }
