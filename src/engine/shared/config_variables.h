@@ -359,8 +359,7 @@ MACRO_CONFIG_INT(SvSoloServer, sv_solo_server, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_G
 MACRO_CONFIG_STR(SvClientSuggestion, sv_client_suggestion, 128, "Get DDNet client from DDNet.tw to use all features on DDNet!", CFGFLAG_SERVER, "Broadcast to display to players without DDNet client")
 MACRO_CONFIG_STR(SvClientSuggestionOld, sv_client_suggestion_old, 128, "Your DDNet client is old, update it on DDNet.tw!", CFGFLAG_SERVER, "Broadcast to display to players with an old version of DDNet client")
 MACRO_CONFIG_STR(SvClientSuggestionBot, sv_client_suggestion_bot, 128, "Your client has bots and can be remotely controlled!\nPlease use another client like DDNet client from DDNet.tw", CFGFLAG_SERVER, "Broadcast to display to players with a known botting client")
-MACRO_CONFIG_STR(SvBotVersions, sv_bot_versions, 128, "", CFGFLAG_SERVER, "Comma seperated list of known bot clients to be punished by (sv_bot_punishment)")
-MACRO_CONFIG_INT(SvBotPunishment, sv_bot_punishment, 0, 0, 1024, CFGFLAG_SERVER, "0=kick otherwise ban in minutes")
+MACRO_CONFIG_STR(SvBotVersions, sv_bot_versions, 128, "", CFGFLAG_SERVER, "Comma seperated list of known bot clients to be kicked on join")
 
 // netlimit
 MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 0, 0, 10000, CFGFLAG_SERVER, "Netlimit: Maximum amount of traffic a client is allowed to use (in kb/s)")

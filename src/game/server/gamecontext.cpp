@@ -1803,10 +1803,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			//autoban known bot versions
 			if(g_Config.m_SvBotVersions[0] != '\0' && IsBotVersion(Version))
 			{
-				if(g_Config.m_SvBotPunishment)
-					Server()->Ban(ClientID, g_Config.m_SvBotPunishment * 60, "bot client");
-				else
-					Server()->Kick(ClientID, "bot client");
+				Server()->Kick(ClientID, "bot client");
 			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
