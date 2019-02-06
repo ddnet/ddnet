@@ -1803,7 +1803,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			//autoban known bot versions
 			if(g_Config.m_SvBotVersions[0] != '\0' && IsBotVersion(Version))
 			{
-				Server()->Kick(ClientID, "bot client");
+				Server()->Kick(ClientID, "unsupported client");
 			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
