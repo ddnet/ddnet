@@ -167,7 +167,7 @@ public:
 	virtual int GetAuthedState(int ClientID) = 0;
 	virtual const char *GetAuthName(int ClientID) = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
-	virtual void Ban(int ClientID, int seconds, const char *pReason) = 0;
+	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
 
 
 	virtual void DemoRecorder_HandleAutoStart() = 0;

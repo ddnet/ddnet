@@ -1801,7 +1801,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (((Version >= 15 && Version < 100) || Version == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 				SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
 			//autoban known bot versions
-			if(g_Config.m_SvBotVersionNumbers[0] != '\0' && IsBotVersion(Version))
+			if(g_Config.m_SvBotVersions[0] != '\0' && IsBotVersion(Version))
 			{
 				if(g_Config.m_SvBotPunishment)
 					Server()->Ban(ClientID, g_Config.m_SvBotPunishment * 60, "bot client");
@@ -3562,8 +3562,8 @@ bool CGameContext::IsBotVersion(int Version)
 {
 	char aVersion[16];
 	str_format(aVersion, sizeof(aVersion), "%d", Version);
-	char aVersions[sizeof(g_Config.m_SvBotVersionNumbers)];
-	str_copy(aVersions, g_Config.m_SvBotVersionNumbers, sizeof(aVersions));
+	char aVersions[sizeof(g_Config.m_SvBotVersions)];
+	str_copy(aVersions, g_Config.m_SvBotVersions, sizeof(aVersions));
 	char *p = strtok(aVersions, ",");;
 
 	while(p)
