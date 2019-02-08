@@ -41,7 +41,7 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 			CTile air = {TILE_AIR};
 			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air);
 		}
-		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(tile.m_Index)) {
+		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(tile.m_Index) || m_pEditor->m_SelectEntitiesImage != "DDNet") {
 			CLayerTiles::SetTile(x, y, tile);
 		} else {
 			CTile air = {TILE_AIR};
