@@ -1513,7 +1513,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				}
 
-				if(g_Config.m_SvVoteKickMin)
+				if(g_Config.m_SvVoteKickMin && !GetDDRaceTeam(ClientID))
 				{
 					char aaAddresses[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}};
 					for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1526,13 +1526,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					int NumPlayers = 0;
 					for(int i = 0; i < MAX_CLIENTS; ++i)
 					{
-						if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+						if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !GetDDRaceTeam(i))
 						{
 							NumPlayers++;
 							for(int j = 0; j < i; j++)
 							{
 
-								if(m_apPlayers[j] && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS)
+								if(m_apPlayers[j] && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS && !GetDDRaceTeam(j))
 								{
 									if(str_comp(aaAddresses[i], aaAddresses[j]) == 0)
 									{
@@ -1546,7 +1546,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					if(NumPlayers < g_Config.m_SvVoteKickMin)
 					{
-						str_format(aChatmsg, sizeof(aChatmsg), "Kick voting requires %d players on the server", g_Config.m_SvVoteKickMin);
+						str_format(aChatmsg, sizeof(aChatmsg), "Kick voting requires %d players", g_Config.m_SvVoteKickMin);
 						SendChatTarget(ClientID, aChatmsg);
 						return;
 					}
