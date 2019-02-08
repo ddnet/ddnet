@@ -1074,7 +1074,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View)
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
 		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, -1, Label.w-10.0f);
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
-		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map. If you are mapping for a different gametype you can activate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w-10.0f);
+		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w-10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
@@ -1669,6 +1669,8 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View)
 		if(pEditor->DoButton_MenuItem(Name, Name, pEditor->m_SelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage, &Button)) {
 			if (pEditor->m_SelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage) {
 				pEditor->m_SelectEntitiesImage = pEditor->m_SelectEntitiesFiles[i];
+				pEditor->m_AllowPlaceUnusedTiles = pEditor->m_SelectEntitiesImage == "DDNet" ? 0 : -1;
+				pEditor->m_PreventUnusedTilesWasWarned = false;
 
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
