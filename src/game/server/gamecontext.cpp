@@ -1569,7 +1569,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				}
 				int KickedAuthed = Server()->GetAuthedState(KickID);
-				if(KickedAuthed > 0 && KickedAuthed >= Authed)
+				if(KickedAuthed > Authed)
 				{
 					SendChatTarget(ClientID, "You can't kick authorized players");
 					m_apPlayers[ClientID]->m_Last_KickVote = time_get();
