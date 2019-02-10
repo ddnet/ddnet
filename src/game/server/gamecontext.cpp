@@ -1513,7 +1513,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				}
 
-				if(g_Config.m_SvVoteKickMin)
+				if(g_Config.m_SvVoteKickMin && !GetDDRaceTeam(ClientID))
 				{
 					char aaAddresses[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}};
 					for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1526,13 +1526,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					int NumPlayers = 0;
 					for(int i = 0; i < MAX_CLIENTS; ++i)
 					{
-						if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+						if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !GetDDRaceTeam(i))
 						{
 							NumPlayers++;
 							for(int j = 0; j < i; j++)
 							{
 
-								if(m_apPlayers[j] && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS)
+								if(m_apPlayers[j] && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS && !GetDDRaceTeam(j))
 								{
 									if(str_comp(aaAddresses[i], aaAddresses[j]) == 0)
 									{
@@ -1546,7 +1546,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					if(NumPlayers < g_Config.m_SvVoteKickMin)
 					{
-						str_format(aChatmsg, sizeof(aChatmsg), "Kick voting requires %d players on the server", g_Config.m_SvVoteKickMin);
+						str_format(aChatmsg, sizeof(aChatmsg), "Kick voting requires %d players", g_Config.m_SvVoteKickMin);
 						SendChatTarget(ClientID, aChatmsg);
 						return;
 					}
@@ -1569,7 +1569,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 				}
 				int KickedAuthed = Server()->GetAuthedState(KickID);
-				if(KickedAuthed > 0 && KickedAuthed >= Authed)
+				if(KickedAuthed > Authed)
 				{
 					SendChatTarget(ClientID, "You can't kick authorized players");
 					m_apPlayers[ClientID]->m_Last_KickVote = time_get();
@@ -3296,7 +3296,7 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 		char aBuf[512], aIP[NETADDR_MAXSTRSIZE];
 		Server()->GetClientAddr(ClientID, aIP, sizeof(aIP));
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIP, g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand, aBuf) && Level > 0)
+		if(!str_comp_nocase(m_aVoteCommand, aBuf) && Level > Server()->GetAuthedState(m_VoteCreator))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "CGameContext", "Aborted vote by admin login.");
