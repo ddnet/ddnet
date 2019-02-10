@@ -116,7 +116,7 @@ void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 #if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(pMessage, MessageSize, fmt, args);
+	_vsprintf_p(pMessage, MessageSize, fmt, args);
 #else
 	vsnprintf(pMessage, MessageSize, fmt, args);
 #endif
