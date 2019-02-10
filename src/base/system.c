@@ -2745,14 +2745,14 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 
 	while(*a && *b)
 	{
-		if(a - old_a >= num)
-			return 0;
-
 		code_a = str_utf8_tolower(str_utf8_decode(&a));
 		code_b = str_utf8_tolower(str_utf8_decode(&b));
 
 		if(code_a != code_b)
 			return code_a - code_b;
+
+		if(a - old_a >= num)
+			return 0;
 	}
 
 	return (unsigned char)*a - (unsigned char)*b;
