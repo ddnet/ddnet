@@ -552,7 +552,7 @@ public:
 	void PrepareForSave();
 
 	void GetSize(float *w, float *h) { *w = m_Width*32.0f; *h = m_Height*32.0f; }
-	
+
 	void FlagModified(int x, int y, int w, int h);
 
 	int m_TexID;
@@ -744,7 +744,7 @@ public:
 		m_SpeedupAngle = 0;
 		m_LargeLayerWasWarned = false;
 		m_PreventUnusedTilesWasWarned = false;
-		m_AllowPlaceUnusedTiles = false;
+		m_AllowPlaceUnusedTiles = 0;
 	}
 
 	virtual void Init();
@@ -826,7 +826,7 @@ public:
 	int m_PopupEventWasActivated;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
-	bool m_AllowPlaceUnusedTiles;
+	int m_AllowPlaceUnusedTiles;
 
 	enum
 	{
