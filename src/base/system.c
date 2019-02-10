@@ -2739,6 +2739,9 @@ int str_utf8_comp_nocase(const char *a, const char *b)
 
 int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 {
+	if(num <= 0)
+		return 0;
+
 	int code_a;
 	int code_b;
 	const char *old_a = a;
