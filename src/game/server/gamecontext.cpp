@@ -1801,7 +1801,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (((Version >= 15 && Version < 100) || Version == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 				SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
 			//autoban known bot versions
-			if(g_Config.m_SvBotVersions[0] != '\0' && IsBotVersion(Version))
+			if(g_Config.m_SvBannedVersions[0] != '\0' && IsVersionBanned(Version))
 			{
 				Server()->Kick(ClientID, "unsupported client");
 			}
@@ -3555,23 +3555,12 @@ void CGameContext::Converse(int ClientID, char *pStr)
 	}
 }
 
-bool CGameContext::IsBotVersion(int Version)
+bool CGameContext::IsVersionBanned(int Version)
 {
 	char aVersion[16];
 	str_format(aVersion, sizeof(aVersion), "%d", Version);
-	char aVersions[sizeof(g_Config.m_SvBotVersions)];
-	str_copy(aVersions, g_Config.m_SvBotVersions, sizeof(aVersions));
-	char *p = strtok(aVersions, ",");;
 
-	while(p)
-	{
-		if(!str_comp(p, aVersion))
-		{
-			return true;
-		}
-		p = strtok(NULL, ",");
-	}
-	return false;
+	return str_in_list(g_Config.m_SvBannedVersions, ",", aVersion);
 }
 
 void CGameContext::List(int ClientID, const char *pFilter)

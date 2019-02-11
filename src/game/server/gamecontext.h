@@ -389,7 +389,7 @@ private:
 	void Whisper(int ClientID, char *pStr);
 	void WhisperID(int ClientID, int VictimID, char *pMessage);
 	void Converse(int ClientID, char *pStr);
-	bool IsBotVersion(int Version);
+	bool IsVersionBanned(int Version);
 
 public:
 	CLayers *Layers() { return &m_Layers; }
