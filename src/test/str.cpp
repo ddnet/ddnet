@@ -72,8 +72,8 @@ TEST(Str, Utf8ToLower)
 	EXPECT_TRUE(str_utf8_comp_nocase(a, b) > 0);
 	EXPECT_TRUE(str_utf8_comp_nocase(b, a) < 0);
 
-	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 3) == 0);
-	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 4) != 0);
+	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 5) == 0);
+	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 6) != 0);
 	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 0) == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 1) != 0);
 
