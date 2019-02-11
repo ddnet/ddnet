@@ -446,11 +446,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if(m_pCharacter)
-	{
-		if(m_Paused)
-			m_pCharacter->ResetInput();
-	}
+	if(m_pCharacter && m_Paused)
+		m_pCharacter->ResetInput();
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
 		m_Spawning = true;
