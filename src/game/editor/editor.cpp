@@ -2559,10 +2559,22 @@ void CEditor::DoMapEditor(CUIRect View)
 						// draw with brush
 						for(int k = 0; k < NumEditLayers; k++)
 						{
-							int BrushIndex = k;
-							if(m_Brush.m_lLayers.size() != NumEditLayers) BrushIndex = 0;
+							int BrushIndex = k % m_Brush.m_lLayers.size();
 							if(pEditLayers[k]->m_Type == m_Brush.m_lLayers[BrushIndex]->m_Type)
-								pEditLayers[k]->BrushDraw(m_Brush.m_lLayers[BrushIndex], wx, wy);
+							{
+								if (pEditLayers[k]->m_Type == LAYERTYPE_TILES)
+								{
+									CLayerTiles *l = (CLayerTiles *)pEditLayers[k];
+									CLayerTiles *b = (CLayerTiles *)m_Brush.m_lLayers[BrushIndex];
+
+									if(l->m_Tele <= b->m_Tele && l->m_Speedup <= b->m_Speedup && l->m_Front <= b->m_Front && l->m_Game <= b->m_Game && l->m_Switch <= b->m_Switch && l->m_Tune <= b->m_Tune)
+										l->BrushDraw(b, wx, wy);
+								}
+								else
+								{
+									pEditLayers[k]->BrushDraw(m_Brush.m_lLayers[BrushIndex], wx, wy);
+								}
+							}
 						}
 					}
 				}
