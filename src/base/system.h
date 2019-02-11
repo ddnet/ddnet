@@ -1667,7 +1667,7 @@ int str_utf8_comp_nocase(const char *a, const char *b);
 	Parameters:
 		a - String to compare.
 		b - String to compare.
-		num - Maximum characters to compare
+		num - Maximum bytes to compare
 
 	Returns:
 		<0 - String a is less than string b
