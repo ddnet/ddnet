@@ -3051,27 +3051,6 @@ static const char *str_token_next(const char *str, const char *delim, size_t *le
 	return str;
 }
 
-int str_tokenize(const char *str, const char *delim, const char **state, char *buf, size_t bufsz)
-{
-	const char *ret = NULL;
-	size_t len = 0;
-
-	if((!str && !state) || !buf)
-		return -1;
-
-	str = str ? str : *state;
-
-	if(!(ret = str_token_next(str, delim, &len)))
-		return -1;
-
-	*state = ret + len;
-	len = bufsz > len ? len : bufsz - 1;
-	mem_copy(buf, ret, len);
-	buf[len] = '\0';
-
-	return len;
-}
-
 int str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
