@@ -3041,7 +3041,7 @@ unsigned str_quickhash(const char *str)
 	return hash;
 }
 
-static const char *str_token_next(const char *str, const char *delim, size_t *length)
+static const char *str_token_next(const char *str, const char *delim, int *length)
 {
 	str += strspn(str, delim);
 	if(!*str)
@@ -3054,9 +3054,10 @@ static const char *str_token_next(const char *str, const char *delim, size_t *le
 int str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
-	size_t len = 0, notfound = 1;
+	int len = 0, notfound = 1;
 
-	while(notfound && (tok = str_token_next(tok, delim, &len))){
+	while(notfound && (tok = str_token_next(tok, delim, &len)))
+	{
 		notfound = str_comp_num(tok, needle, len);
 		tok = tok + len;
 	}
