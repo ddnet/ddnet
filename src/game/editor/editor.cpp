@@ -2404,6 +2404,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				m_TilesetPicker.m_Color = {255, 255, 255, 255};
 			}
 
+			m_TilesetPicker.m_Game = t->m_Game;
 			m_TilesetPicker.m_Tele = t->m_Tele;
 			m_TilesetPicker.m_Speedup = t->m_Speedup;
 			m_TilesetPicker.m_Front = t->m_Front;
