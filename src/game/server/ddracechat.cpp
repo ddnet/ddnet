@@ -193,7 +193,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 			{
 				str_format(aBuf, sizeof(aBuf),
 						"Players are banned for %d minute(s) if they get voted off", g_Config.m_SvVoteKickBantime);
-						
+
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
 						g_Config.m_SvVoteKickBantime ?
 								aBuf :
@@ -620,28 +620,19 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 		str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
 	}
 
-	char aValidServerNames[sizeof(g_Config.m_SvSqlValidServerNames)];
-	str_copy(aValidServerNames, g_Config.m_SvSqlValidServerNames, sizeof(aValidServerNames));
-	char *p = strtok(aValidServerNames, ",");;
-
-	while(p)
+	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
 	{
-		if(str_comp(p, aCountry) == 0)
-		{
-			pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
+		pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
 
-			if(g_Config.m_SvUseSQL)
-				pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
-
-			return;
-		}
-
-		p = strtok(NULL, ",");
+		if(g_Config.m_SvUseSQL)
+			pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
 	}
-
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	else
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
 
 #endif
 }

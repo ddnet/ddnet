@@ -1800,6 +1800,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			//tell known bot clients that they're botting and we know it
 			if (((Version >= 15 && Version < 100) || Version == 502) && g_Config.m_SvClientSuggestionBot[0] != '\0')
 				SendBroadcast(g_Config.m_SvClientSuggestionBot, ClientID);
+			//autoban known bot versions
+			if(g_Config.m_SvBannedVersions[0] != '\0' && IsVersionBanned(Version))
+			{
+				Server()->Kick(ClientID, "unsupported client");
+			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SHOWOTHERS)
 		{
@@ -3548,6 +3553,14 @@ void CGameContext::Converse(int ClientID, char *pStr)
 	{
 		WhisperID(ClientID, pPlayer->m_LastWhisperTo, pStr);
 	}
+}
+
+bool CGameContext::IsVersionBanned(int Version)
+{
+	char aVersion[16];
+	str_format(aVersion, sizeof(aVersion), "%d", Version);
+
+	return str_in_list(g_Config.m_SvBannedVersions, ",", aVersion);
 }
 
 void CGameContext::List(int ClientID, const char *pFilter)
