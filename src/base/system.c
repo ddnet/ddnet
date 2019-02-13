@@ -3054,11 +3054,11 @@ static const char *str_token_next(const char *str, const char *delim, int *lengt
 int str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
-	int len = 0, notfound = 1;
+	int len = 0, notfound = 1, needlelen = str_length(needle);
 
 	while(notfound && (tok = str_token_next(tok, delim, &len)))
 	{
-		notfound = str_comp_num(tok, needle, len);
+		notfound = needlelen != len || str_comp_num(tok, needle, len);
 		tok = tok + len;
 	}
 

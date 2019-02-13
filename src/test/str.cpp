@@ -147,4 +147,8 @@ TEST(Str, InList)
 
 	EXPECT_FALSE(str_in_list(aTest, ",", "CHN"));
 	EXPECT_FALSE(str_in_list(aTest, ",", "R,R"));
+
+	EXPECT_FALSE(str_in_list("abc,xyz", ",", "abcdef"));
+	EXPECT_FALSE(str_in_list("", ",", ""));
+	EXPECT_FALSE(str_in_list("", ",", "xyz"));
 }
