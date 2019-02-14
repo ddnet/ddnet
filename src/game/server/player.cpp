@@ -446,13 +446,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if(m_pCharacter)
-	{
-		if(!m_Paused)
-			m_pCharacter->OnDirectInput(NewInput);
-		else
-			m_pCharacter->ResetInput();
-	}
+	if(m_pCharacter && m_Paused)
+		m_pCharacter->ResetInput();
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
 		m_Spawning = true;
@@ -466,6 +461,16 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		m_LatestActivity.m_TargetY = NewInput->m_TargetY;
 		m_LastActionTick = Server()->Tick();
 	}
+}
+
+void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput)
+{
+	// skip the input if chat is active
+	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
+		return;
+
+	if(m_pCharacter && !m_Paused)
+		m_pCharacter->OnDirectInput(NewInput);
 }
 
 CCharacter *CPlayer::GetCharacter()
