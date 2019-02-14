@@ -136,23 +136,6 @@ TEST(Str, HexDecode)
 	EXPECT_EQ(str_hex_decode(aOut, 4, "41424344"), 0); EXPECT_STREQ(aOut, "ABCD");
 }
 
-TEST(Str, Tokenize)
-{
-	char aTest[] = "GER,RUS,ZAF,BRA,CAN";
-	const char *aOut[] = {"GER", "RUS", "ZAF", "BRA", "CAN"};
-	const char *pState;
-	char aBuf[4];
-
-	int n = 0;
-	str_tokenize(aTest, ",", &pState, aBuf, sizeof aBuf);
-	do {
-		EXPECT_STREQ(aOut[n++], aBuf);
-	} while(str_tokenize(NULL, ",", &pState, aBuf, sizeof aBuf) >= 0);
-
-	char aTest2[] = "";
-	EXPECT_EQ(str_tokenize(aTest2, ",", &pState, aBuf, sizeof aBuf), -1);
-}
-
 TEST(Str, InList)
 {
 	char aTest[] = "GER,RUS,ZAF,BRA,CAN";
@@ -164,4 +147,8 @@ TEST(Str, InList)
 
 	EXPECT_FALSE(str_in_list(aTest, ",", "CHN"));
 	EXPECT_FALSE(str_in_list(aTest, ",", "R,R"));
+
+	EXPECT_FALSE(str_in_list("abc,xyz", ",", "abcdef"));
+	EXPECT_FALSE(str_in_list("", ",", ""));
+	EXPECT_FALSE(str_in_list("", ",", "xyz"));
 }
