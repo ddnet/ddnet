@@ -1,7 +1,6 @@
 /* (c) Rajh, Redix and Sushi. */
 
 #include <engine/ghost.h>
-#include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
