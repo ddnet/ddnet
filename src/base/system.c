@@ -2717,6 +2717,17 @@ char str_uppercase(char c)
 	return c;
 }
 
+int str_isallnum(const char *str)
+{
+	while(*str)
+	{
+		if(!(*str >= '0' && *str <= '9'))
+			return 0;
+		str++;
+	}
+	return 1;
+}
+
 int str_toint(const char *str) { return atoi(str); }
 int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
 float str_tofloat(const char *str) { return atof(str); }

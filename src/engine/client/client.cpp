@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <climits>
+#include <tuple>
 
 #include <base/math.h>
 #include <base/vmath.h>
@@ -2259,6 +2260,29 @@ void CClient::FinishDDNetInfo()
 	LoadDDNetInfo();
 }
 
+typedef std::tuple<int, int, int> Version;
+static const Version InvalidVersion = std::make_tuple(-1, -1, -1);
+
+Version ToVersion(char *pStr)
+{
+	int version[3] = {0, 0, 0};
+	const char *p = strtok(pStr, ".");
+
+	for(int i = 0; i < 3 && p; ++i)
+	{
+		if(!str_isallnum(p))
+			return InvalidVersion;
+
+		version[i] = str_toint(p);
+		p = strtok(NULL, ".");
+	}
+
+	if(p)
+		return InvalidVersion;
+
+	return std::make_tuple(version[0], version[1], version[2]);
+}
+
 void CClient::LoadDDNetInfo()
 {
 	const json_value *pDDNetInfo = m_ServerBrowser.LoadDDNetInfo();
@@ -2269,10 +2293,13 @@ void CClient::LoadDDNetInfo()
 	const json_value *pVersion = json_object_get(pDDNetInfo, "version");
 	if(pVersion->type == json_string)
 	{
-		const char *pVersionString = json_string_get(pVersion);
-		if(str_comp(pVersionString, GAME_RELEASE_VERSION))
+		char aNewVersionStr[64];
+		str_copy(aNewVersionStr, json_string_get(pVersion), sizeof(aNewVersionStr));
+		char aCurVersionStr[64];
+		str_copy(aCurVersionStr, GAME_VERSION, sizeof(aCurVersionStr));
+		if(ToVersion(aNewVersionStr) > ToVersion(aCurVersionStr))
 		{
-			str_copy(m_aVersionStr, pVersionString, sizeof(m_aVersionStr));
+			str_copy(m_aVersionStr, json_string_get(pVersion), sizeof(m_aVersionStr));
 		}
 		else
 		{
