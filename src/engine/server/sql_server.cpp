@@ -36,7 +36,15 @@ CSqlServer::~CSqlServer()
 	try
 	{
 		if (m_pResults)
+		{
 			delete m_pResults;
+			m_pResults = 0;
+		}
+		if (m_pStatement)
+		{
+			delete m_pStatement;
+			m_pStatement = 0;
+		}
 		if (m_pConnection)
 		{
 			delete m_pConnection;
@@ -64,7 +72,7 @@ CSqlServer::~CSqlServer()
 
 bool CSqlServer::Connect()
 {
-	m_SqlLock.take();
+	scope_lock LockScope(&m_SqlLock);
 
 	if (m_pDriver != NULL && m_pConnection != NULL)
 	{
@@ -91,7 +99,6 @@ bool CSqlServer::Connect()
 			dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 		}
 
-		m_SqlLock.release();
 		dbg_msg("sql", "ERROR: SQL connection failed");
 		return false;
 	}
@@ -120,7 +127,7 @@ bool CSqlServer::Connect()
 		}
 		m_pConnection = m_pDriver->connect(connection_properties);
 
-		// Create Statement
+		// Create statement
 		m_pStatement = m_pConnection->createStatement();
 
 		if (m_SetUpDB)
@@ -154,13 +161,11 @@ bool CSqlServer::Connect()
 	}
 
 	dbg_msg("sql", "ERROR: sql connection failed");
-	m_SqlLock.release();
 	return false;
 }
 
 void CSqlServer::Disconnect()
 {
-	m_SqlLock.release();
 }
 
 void CSqlServer::CreateTables()
@@ -200,16 +205,20 @@ void CSqlServer::CreateTables()
 
 void CSqlServer::executeSql(const char *pCommand)
 {
+	scope_lock LockScope(&m_SqlLock);
 	m_pStatement->execute(pCommand);
 }
 
 void CSqlServer::executeSqlQuery(const char *pQuery)
 {
+	scope_lock LockScope(&m_SqlLock);
 	if (m_pResults)
+	{
 		delete m_pResults;
+		// set it to 0, so exceptions raised from executeQuery can not make m_pResults point to invalid memory
+		m_pResults = 0;
+	}
 
-	// set it to 0, so exceptions raised from executeQuery can not make m_pResults point to invalid memory
-	m_pResults = 0;
 	m_pResults = m_pStatement->executeQuery(pQuery);
 }
 
