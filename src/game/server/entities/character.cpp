@@ -1456,7 +1456,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
 			{
-				GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Server admin requires you to be in a team and with other tees to start");
+				GameServer()->SendChatTarget(GetPlayer()->GetCID(),"You have to be in a team with other tees to start");
 				m_LastStartWarning = Server()->Tick();
 			}
 			Die(GetPlayer()->GetCID(), WEAPON_WORLD);

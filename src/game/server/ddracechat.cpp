@@ -491,7 +491,7 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 	if (g_Config.m_SvMapVote == 0)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "map",
-				"Admin has disabled /map");
+				"/map is disabled");
 		return;
 	}
 
@@ -806,13 +806,13 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
-				"Admin has disabled teams");
+				"Teams are disabled");
 		return;
 	}
 
 	if(!g_Config.m_SvInvite)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Admin has disabled invites");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Invites are disabled");
 		return;
 	}
 
@@ -885,7 +885,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	else if (g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
-				"Admin has disabled teams");
+				"Teams are disabled");
 		return;
 	}
 	else if (g_Config.m_SvTeam == 2 && pResult->GetInteger(0) == 0 && pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_LastStartWarning < pSelf->Server()->Tick() - 3 * pSelf->Server()->TickSpeed())
@@ -985,7 +985,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
 				"me",
-				"/me is disabled on this server, admin can enable it by using sv_slash_me");
+				"/me is disabled on this server");
 }
 
 void CGameContext::ConConverse(IConsole::IResult *pResult, void *pUserData)
@@ -1037,7 +1037,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	if (g_Config.m_SvEmotionalTees == -1)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "emote",
-				"Server admin disabled emotes.");
+				"Emotes are disabled.");
 		return;
 	}
 
@@ -1127,7 +1127,7 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
 				"showotherschat",
-				"Showing players from other teams is disabled by the server admin");
+				"Showing players from other teams is disabled");
 }
 
 void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
