@@ -72,7 +72,7 @@ CSqlServer::~CSqlServer()
 
 bool CSqlServer::Connect()
 {
-	scope_lock LockScope(&m_SqlLock);
+	m_SqlLock.take();
 
 	if (m_pDriver != NULL && m_pConnection != NULL)
 	{
@@ -99,6 +99,7 @@ bool CSqlServer::Connect()
 			dbg_msg("sql", "Unknown Error cause by the MySQL/C++ Connector");
 		}
 
+		m_SqlLock.release();
 		dbg_msg("sql", "ERROR: SQL connection failed");
 		return false;
 	}
@@ -161,11 +162,13 @@ bool CSqlServer::Connect()
 	}
 
 	dbg_msg("sql", "ERROR: sql connection failed");
+	m_SqlLock.release();
 	return false;
 }
 
 void CSqlServer::Disconnect()
 {
+	m_SqlLock.release();
 }
 
 void CSqlServer::CreateTables()
