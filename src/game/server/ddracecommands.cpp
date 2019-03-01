@@ -587,7 +587,15 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	if(pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED)
 		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_SELF);
 
-	pController->m_Teams.SetForceCharacterTeam(pResult->GetVictim(), Team);
+	pController->m_Teams.SetForceCharacterTeam(Target, Team);
+}
+
+void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
+
+	pController->m_Teams.SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
 }
 
 void CGameContext::ConFreezeHammer(IConsole::IResult *pResult, void *pUserData)
