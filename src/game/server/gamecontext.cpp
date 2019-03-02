@@ -1333,7 +1333,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					int Authed = Server()->GetAuthedState(ClientID);
 					if(Authed)
-						Console()->SetAccessLevel(Authed == IServer::AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == IServer::AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+						Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
 					else
 						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 					Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
@@ -1479,7 +1479,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				if(!pOption)
 				{
-					if(Authed != IServer::AUTHED_ADMIN)  // allow admins to call any vote they want
+					if(Authed != AUTHED_ADMIN)  // allow admins to call any vote they want
 					{
 						str_format(aChatmsg, sizeof(aChatmsg), "'%s' isn't an option on this server", pMsg->m_Value);
 						SendChatTarget(ClientID, aChatmsg);

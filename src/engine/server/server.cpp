@@ -176,7 +176,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			if(Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 				continue;
 
-			if(Server()->m_aClients[i].m_Authed != CServer::AUTHED_NO && NetMatch(pData, Server()->m_NetServer.ClientAddr(i)))
+			if(Server()->m_aClients[i].m_Authed != AUTHED_NO && NetMatch(pData, Server()->m_NetServer.ClientAddr(i)))
 			{
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (command denied)");
 				return -1;
@@ -2125,7 +2125,7 @@ void CServer::StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlac
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	CServer *pThis = static_cast<CServer *>(pUser);
 
-	bool CanSeeAddress = pThis->m_aClients[pResult->m_ClientID].m_Authed > CServer::AUTHED_MOD;
+	bool CanSeeAddress = pThis->m_aClients[pResult->m_ClientID].m_Authed > AUTHED_MOD;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -2137,9 +2137,9 @@ void CServer::StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlac
 			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
 			{
-				const char *pAuthStr = pThis->m_aClients[i].m_Authed == CServer::AUTHED_ADMIN ? "(Admin)" :
-										pThis->m_aClients[i].m_Authed == CServer::AUTHED_MOD ? "(Mod)" :
-										pThis->m_aClients[i].m_Authed == CServer::AUTHED_HELPER ? "(Helper)" : "";
+				const char *pAuthStr = pThis->m_aClients[i].m_Authed == AUTHED_ADMIN ? "(Admin)" :
+										pThis->m_aClients[i].m_Authed == AUTHED_MOD ? "(Mod)" :
+										pThis->m_aClients[i].m_Authed == AUTHED_HELPER ? "(Helper)" : "";
 				char aAuthStr[128];
 				aAuthStr[0] = '\0';
 				if(pThis->m_aClients[i].m_AuthKey >= 0)
@@ -2178,11 +2178,11 @@ static int GetAuthLevel(const char *pLevel)
 {
 	int Level = -1;
 	if(!str_comp_nocase(pLevel, "admin"))
-		Level = CServer::AUTHED_ADMIN;
+		Level = AUTHED_ADMIN;
 	else if(!str_comp_nocase_num(pLevel, "mod", 3))
-		Level = CServer::AUTHED_MOD;
+		Level = AUTHED_MOD;
 	else if(!str_comp_nocase(pLevel, "helper"))
-		Level = CServer::AUTHED_HELPER;
+		Level = AUTHED_HELPER;
 
 	return Level;
 }
@@ -3052,7 +3052,7 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 		return false;
 	}
 	DelClientCallback(OrigID, "Timeout Protection used", this);
-	m_aClients[ClientID].m_Authed = IServer::AUTHED_NO;
+	m_aClients[ClientID].m_Authed = AUTHED_NO;
 	return true;
 }
 

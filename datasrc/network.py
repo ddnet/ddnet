@@ -32,6 +32,14 @@ enum
 	SPEC_FREEVIEW=-1,
 	SPEC_FOLLOW=-2,
 };
+
+enum
+{
+	AUTHED_NO=0,
+	AUTHED_HELPER,
+	AUTHED_MOD,
+	AUTHED_ADMIN,
+};
 '''
 
 RawSource = '''
@@ -192,6 +200,10 @@ Objects = [
 
 	NetObjectEx("MyOwnObject", "my-own-object@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	NetObjectEx("AuthInfo", "auth-info@netobj.ddnet.tw", [
+		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
 
 	## Events

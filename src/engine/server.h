@@ -153,13 +153,7 @@ public:
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
-	enum
-	{
-		AUTHED_NO=0,
-		AUTHED_HELPER,
-		AUTHED_MOD,
-		AUTHED_ADMIN,
-
+	enum {
 		RCON_CID_SERV=-1,
 		RCON_CID_VOTE=-2,
 	};
