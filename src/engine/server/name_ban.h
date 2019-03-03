@@ -14,18 +14,20 @@ class CNameBan
 {
 public:
 	CNameBan() {}
-	CNameBan(const char *pName, int Distance, const char *pReason = "") :
+	CNameBan(const char *pName, int Distance, int Exact, const char *pReason = "") :
 		m_Distance(Distance)
 	{
 		str_copy(m_aName, pName, sizeof(m_aName));
 		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, sizeof(m_aSkeleton) / sizeof(m_aSkeleton[0]));
 		str_copy(m_aReason, pReason, sizeof(m_aReason));
+		m_Exact = Exact;
 	}
 	char m_aName[MAX_NAME_LENGTH];
 	char m_aReason[MAX_NAMEBAN_REASON_LENGTH];
 	int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
 	int m_SkeletonLength;
 	int m_Distance;
+	int m_Exact;
 };
 
 CNameBan *IsNameBanned(const char *pName, CNameBan *pNameBans, int NumNameBans);
