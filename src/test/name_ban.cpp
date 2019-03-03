@@ -10,7 +10,7 @@ TEST(NameBan, Empty)
 
 TEST(NameBan, Equality)
 {
-	CNameBan Abc0("abc", 0);
+	CNameBan Abc0("abc", 0, 0);
 	ASSERT_TRUE(IsNameBanned("abc", &Abc0, 1));
 	ASSERT_TRUE(IsNameBanned("   abc", &Abc0, 1));
 	ASSERT_TRUE(IsNameBanned("abc   ", &Abc0, 1));
