@@ -444,20 +444,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		switch(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel) {
-		case AUTHED_HELPER:
-			TextRender()->TextColor(0.5f, 0.0f, 0.5f, 1.0f);
-			break;
-		case AUTHED_MOD:
-			TextRender()->TextColor(0.2f, 0.2f, 0.8f, 1.0f);
-			break;
-		case AUTHED_ADMIN:
-			TextRender()->TextColor(0.0f, 1.0f, 0.0f, 1.0f);
-			break;
-		case AUTHED_NO:
-		default:
-			;
-		}
+		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
+			TextRender()->TextColor(0.78f, 1.0f, 0.8f, 1.0f);
 
 		if(g_Config.m_ClShowIDs)
 		{
