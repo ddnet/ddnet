@@ -122,14 +122,11 @@ void CFileScore::Init()
 			if (g_Config.m_SvCheckpointSave)
 			{
 				std::getline(f, TmpCpLine);
-				char *pTime = strtok((char*) TmpCpLine.c_str(), " ");
+
+				std::istringstream iss(TmpCpLine);
 				int i = 0;
-				while (pTime != NULL && i < NUM_CHECKPOINTS)
-				{
-					aTmpCpTime[i] = atof(pTime);
-					pTime = strtok(NULL, " ");
-					i++;
-				}
+				for(std::string p; std::getline(iss, p, ' '); i++)
+					aTmpCpTime[i] = std::stof(p, NULL);
 			}
 			m_Top.add(
 					*new CPlayerScore(TmpName.c_str(), atof(TmpScore.c_str()),

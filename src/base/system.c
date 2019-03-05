@@ -3065,6 +3065,27 @@ int str_in_list(const char *list, const char *delim, const char *needle)
 	return !notfound;
 }
 
+int str_tokenize(const char *str, const char *delim, const char **state, char *buf, int bufsz)
+{
+	const char *ret = NULL;
+	int len = 0;
+
+	if((!str && !state) || !buf)
+		return -1;
+
+	str = str ? str : *state;
+
+	if(!(ret = str_token_next(str, delim, &len)))
+		return -1;
+
+	*state = ret + len;
+	len = bufsz > len ? len : bufsz - 1;
+	mem_copy(buf, ret, len);
+	buf[len] = '\0';
+
+	return len;
+}
+
 int pid()
 {
 #if defined(CONF_FAMILY_WINDOWS)

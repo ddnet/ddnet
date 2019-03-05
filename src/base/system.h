@@ -1832,6 +1832,22 @@ int str_utf16le_encode(char *ptr, int chr);
 int str_utf8_check(const char *str);
 
 /*
+	Function: str_tokenize
+		Tokenizes a string.
+	Parameters:
+		str - Pointer to string.
+		delim - Delimiter for tokenization.
+		state - Pointer to remaining string
+		buf - Buffer to store token in.
+		bufsz - Size of the buffer.
+	Returns:
+		The number of characters written to buf or -1 for end of string
+	Remarks:
+		- The token is always null-terminated.
+*/
+int str_tokenize(const char *str, const char *delim, const char **state, char *buf, int bufsz);
+
+/*
 	Function: str_in_list
 		Checks if needle is in list delimited by delim
 
