@@ -252,6 +252,8 @@ public:
 		bool m_Friend;
 		bool m_Foe;
 
+		int m_AuthLevel;
+
 		void UpdateRenderInfo();
 		void Reset();
 
@@ -267,7 +269,7 @@ public:
 		int m_IngameTicks;
 		int m_JoinTick;
 		bool m_Active;
-		
+
 	public:
 		CClientStats();
 
@@ -283,7 +285,7 @@ public:
 		int m_FlagCaptures;
 
 		void Reset();
-		
+
 		bool IsActive() const { return m_Active; }
 		void JoinGame(int Tick) { m_Active = true; m_JoinTick = Tick; };
 		void JoinSpec(int Tick) { m_Active = false; m_IngameTicks += Tick - m_JoinTick; };

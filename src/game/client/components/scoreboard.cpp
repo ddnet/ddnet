@@ -444,13 +444,13 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
+			TextRender()->TextColor(0.78f, 1.0f, 0.8f, 1.0f);
+
 		if(g_Config.m_ClShowIDs)
 		{
 			char aId[64] = "";
-			if (pInfo->m_ClientID >= 10)
-				str_format(aId, sizeof(aId),"%d: ", pInfo->m_ClientID);
-			else
-				str_format(aId, sizeof(aId)," %d: ", pInfo->m_ClientID);
+			str_format(aId, sizeof(aId)," %2d: ", pInfo->m_ClientID);
 			str_append(aId, m_pClient->m_aClients[pInfo->m_ClientID].m_aName,sizeof(aId));
 			Cursor.m_LineWidth = NameLength+8;
 			TextRender()->TextEx(&Cursor, aId, -1);
@@ -460,6 +460,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			Cursor.m_LineWidth = NameLength;
 			TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 		}
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// clan
 		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
