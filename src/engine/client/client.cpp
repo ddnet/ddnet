@@ -2296,7 +2296,7 @@ void CClient::LoadDDNetInfo()
 		char aNewVersionStr[64];
 		str_copy(aNewVersionStr, json_string_get(pVersion), sizeof(aNewVersionStr));
 		char aCurVersionStr[64];
-		str_copy(aCurVersionStr, GAME_VERSION, sizeof(aCurVersionStr));
+		str_copy(aCurVersionStr, GAME_RELEASE_VERSION, sizeof(aCurVersionStr));
 		if(ToVersion(aNewVersionStr) > ToVersion(aCurVersionStr))
 		{
 			str_copy(m_aVersionStr, json_string_get(pVersion), sizeof(m_aVersionStr));
