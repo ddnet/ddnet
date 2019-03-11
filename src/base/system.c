@@ -3041,7 +3041,7 @@ unsigned str_quickhash(const char *str)
 	return hash;
 }
 
-static const char *str_token_next(const char *str, const char *delim, int *length)
+static const char *str_token_get(const char *str, const char *delim, int *length)
 {
 	str += strspn(str, delim);
 	if(!*str)
@@ -3056,7 +3056,7 @@ int str_in_list(const char *list, const char *delim, const char *needle)
 	const char *tok = list;
 	int len = 0, notfound = 1, needlelen = str_length(needle);
 
-	while(notfound && (tok = str_token_next(tok, delim, &len)))
+	while(notfound && (tok = str_token_get(tok, delim, &len)))
 	{
 		notfound = needlelen != len || str_comp_num(tok, needle, len);
 		tok = tok + len;
@@ -3065,25 +3065,18 @@ int str_in_list(const char *list, const char *delim, const char *needle)
 	return !notfound;
 }
 
-int str_tokenize(const char *str, const char *delim, const char **state, char *buf, int bufsz)
+const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size)
 {
-	const char *ret = NULL;
 	int len = 0;
+	const char *tok = str_token_get(str, delim, &len);
+	if(len < 0)
+		return NULL;
 
-	if((!str && !state) || !buf)
-		return -1;
+	len = buffer_size > len ? len : buffer_size - 1;
+	mem_copy(buffer, tok, len);
+	buffer[len] = '\0';
 
-	str = str ? str : *state;
-
-	if(!(ret = str_token_next(str, delim, &len)))
-		return -1;
-
-	*state = ret + len;
-	len = bufsz > len ? len : bufsz - 1;
-	mem_copy(buf, ret, len);
-	buf[len] = '\0';
-
-	return len;
+	return tok + len;
 }
 
 int pid()

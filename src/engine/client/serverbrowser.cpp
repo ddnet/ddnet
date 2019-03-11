@@ -1208,11 +1208,8 @@ void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
 	str_copy(aBuf, pFilter, sizeof(aBuf));
 	pFilter[0] = '\0';
 
-	const char *pState;
 	char aToken[128];
-	str_tokenize(aBuf, ",", &pState, aToken, sizeof(aToken));
-
-	do
+	for(const char *tok = aBuf; (tok = str_next_token(tok, ",", aToken, sizeof (aToken)));)
 	{
 		if(str_comp_nocase(pName, aToken) != 0)
 		{
@@ -1220,7 +1217,7 @@ void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
 			str_format(aBuf2, sizeof(aBuf2), ",%s", aToken);
 			str_append(pFilter, aBuf2, 128);
 		}
-	} while(str_tokenize(NULL, ",", &pState, aToken, sizeof(aToken)) >= 0);
+	}
 }
 
 bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)

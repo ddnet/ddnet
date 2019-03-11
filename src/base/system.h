@@ -1832,20 +1832,19 @@ int str_utf16le_encode(char *ptr, int chr);
 int str_utf8_check(const char *str);
 
 /*
-	Function: str_tokenize
-		Tokenizes a string.
+	Function: str_next_token
+		Writes the next token after str into buf, returns the rest of the string.
 	Parameters:
 		str - Pointer to string.
 		delim - Delimiter for tokenization.
-		state - Pointer to remaining string
-		buf - Buffer to store token in.
-		bufsz - Size of the buffer.
+		buffer - Buffer to store token in.
+		buffer_size - Size of the buffer.
 	Returns:
-		The number of characters written to buf or -1 for end of string
+		Pointer to rest of the string.
 	Remarks:
 		- The token is always null-terminated.
 */
-int str_tokenize(const char *str, const char *delim, const char **state, char *buf, int bufsz);
+const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size);
 
 /*
 	Function: str_in_list

@@ -140,17 +140,14 @@ TEST(Str, Tokenize)
 {
 	char aTest[] = "GER,RUS,ZAF,BRA,CAN";
 	const char *aOut[] = {"GER", "RUS", "ZAF", "BRA", "CAN"};
-	const char *pState;
 	char aBuf[4];
 
 	int n = 0;
-	str_tokenize(aTest, ",", &pState, aBuf, sizeof aBuf);
-	do {
+	for(const char *tok = aTest; (tok = str_next_token(tok, ",", aBuf, sizeof aBuf));)
 		EXPECT_STREQ(aOut[n++], aBuf);
-	} while(str_tokenize(NULL, ",", &pState, aBuf, sizeof aBuf) >= 0);
 
 	char aTest2[] = "";
-	EXPECT_EQ(str_tokenize(aTest2, ",", &pState, aBuf, sizeof aBuf), -1);
+	EXPECT_EQ(str_next_token(aTest2, ",", aBuf, sizeof aBuf), nullptr);
 }
 
 TEST(Str, InList)
