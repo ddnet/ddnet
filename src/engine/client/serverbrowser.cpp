@@ -1209,7 +1209,7 @@ void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
 	pFilter[0] = '\0';
 
 	char aToken[128];
-	for(const char *tok = aBuf; (tok = str_next_token(tok, ",", aToken, sizeof (aToken)));)
+	for(const char *tok = aBuf; (tok = str_next_token(tok, ",", aToken, sizeof(aToken)));)
 	{
 		if(str_comp_nocase(pName, aToken) != 0)
 		{

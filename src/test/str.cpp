@@ -143,11 +143,11 @@ TEST(Str, Tokenize)
 	char aBuf[4];
 
 	int n = 0;
-	for(const char *tok = aTest; (tok = str_next_token(tok, ",", aBuf, sizeof aBuf));)
+	for(const char *tok = aTest; (tok = str_next_token(tok, ",", aBuf, sizeof(aBuf)));)
 		EXPECT_STREQ(aOut[n++], aBuf);
 
 	char aTest2[] = "";
-	EXPECT_EQ(str_next_token(aTest2, ",", aBuf, sizeof aBuf), nullptr);
+	EXPECT_EQ(str_next_token(aTest2, ",", aBuf, sizeof(aBuf)), nullptr);
 }
 
 TEST(Str, InList)
