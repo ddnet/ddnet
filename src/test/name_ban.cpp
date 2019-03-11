@@ -19,3 +19,11 @@ TEST(NameBan, Equality)
 	ASSERT_FALSE(IsNameBanned("def", &Abc0, 1));
 	ASSERT_FALSE(IsNameBanned("abcdef", &Abc0, 1));
 }
+
+TEST(NameBan, Substring)
+{
+	CNameBan Xyz("xyz", 0, 1);
+	ASSERT_TRUE(IsNameBanned("abcxyz", &Xyz, 1));
+	ASSERT_TRUE(IsNameBanned("abcxyzdef", &Xyz, 1));
+	ASSERT_FALSE(IsNameBanned("abcdef", &Xyz, 1));
+}
