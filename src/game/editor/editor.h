@@ -135,7 +135,6 @@ public:
 		str_copy(m_aName, "(invalid)", sizeof(m_aName));
 		m_Visible = true;
 		m_Readonly = false;
-		m_SaveToMap = true;
 		m_Flags = 0;
 		m_pEditor = 0;
 		m_BrushRefCount = 0;
@@ -170,7 +169,6 @@ public:
 
 	bool m_Readonly;
 	bool m_Visible;
-	bool m_SaveToMap;
 
 	int m_BrushRefCount;
 };
@@ -197,7 +195,6 @@ public:
 	char m_aName[12];
 	bool m_GameGroup;
 	bool m_Visible;
-	bool m_SaveToMap;
 	bool m_Collapse;
 
 	CLayerGroup();
