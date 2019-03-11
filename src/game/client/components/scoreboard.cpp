@@ -286,10 +286,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
 	char Score[8];
-	if (m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard && m_pClient->m_AllowTimeScore[g_Config.m_ClDummy])
-		str_format(Score, sizeof(Score), "Time");
-	else
-		str_format(Score, sizeof(Score), "Score");
+	if (m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard && m_pClient->m_AllowTimeScore[g_Config.m_ClDummy] ? str_format(Score, sizeof(Score), "Time") : str_format(Score, sizeof(Score), "Score"));
 	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, Localize(Score), -1);
 	tw = ScoreLength > ScoreWidth ? ScoreLength : ScoreWidth;
 	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, Localize(Score), -1);
