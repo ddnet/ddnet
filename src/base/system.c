@@ -3052,7 +3052,7 @@ unsigned str_quickhash(const char *str)
 	return hash;
 }
 
-static const char *str_token_next(const char *str, const char *delim, int *length)
+static const char *str_token_get(const char *str, const char *delim, int *length)
 {
 	str += strspn(str, delim);
 	if(!*str)
@@ -3067,13 +3067,27 @@ int str_in_list(const char *list, const char *delim, const char *needle)
 	const char *tok = list;
 	int len = 0, notfound = 1, needlelen = str_length(needle);
 
-	while(notfound && (tok = str_token_next(tok, delim, &len)))
+	while(notfound && (tok = str_token_get(tok, delim, &len)))
 	{
 		notfound = needlelen != len || str_comp_num(tok, needle, len);
 		tok = tok + len;
 	}
 
 	return !notfound;
+}
+
+const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size)
+{
+	int len = 0;
+	const char *tok = str_token_get(str, delim, &len);
+	if(len < 0)
+		return NULL;
+
+	len = buffer_size > len ? len : buffer_size - 1;
+	mem_copy(buffer, tok, len);
+	buffer[len] = '\0';
+
+	return tok + len;
 }
 
 int pid()

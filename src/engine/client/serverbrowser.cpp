@@ -286,7 +286,7 @@ void CServerBrowser::Filter()
 				{
 					MatchFound = 1;
 				}
-				
+
 				// match against gametype
 				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrExcludeString))
 				{
@@ -1204,44 +1204,25 @@ void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
 
 	// rewrite exclude/filter list
 	char aBuf[128];
-	char *p;
 
 	str_copy(aBuf, pFilter, sizeof(aBuf));
 	pFilter[0] = '\0';
 
-	p = strtok(aBuf, ",");
-
-	while(p)
+	char aToken[128];
+	for(const char *tok = aBuf; (tok = str_next_token(tok, ",", aToken, sizeof(aToken)));)
 	{
-		if(str_comp_nocase(pName, p) != 0)
+		if(str_comp_nocase(pName, aToken) != 0)
 		{
 			char aBuf2[128];
-			str_format(aBuf2, sizeof(aBuf2), ",%s", p);
+			str_format(aBuf2, sizeof(aBuf2), ",%s", aToken);
 			str_append(pFilter, aBuf2, 128);
 		}
-
-		p = strtok(NULL, ",");
 	}
 }
 
 bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)
 {
-	char aBuf[128];
-	char *p;
-
-	str_copy(aBuf, pFilter, sizeof(aBuf));
-
-	p = strtok(aBuf, ",");
-
-	while(p)
-	{
-		if(str_comp_nocase(pName, p) == 0)
-			return true; // country excluded
-
-		p = strtok(NULL, ",");
-	}
-
-	return false; // country not excluded
+	return str_in_list(pFilter, ",", pName); // country not excluded
 }
 
 void CServerBrowser::DDNetCountryFilterClean()
