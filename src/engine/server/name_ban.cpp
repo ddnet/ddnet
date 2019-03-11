@@ -15,7 +15,7 @@ CNameBan *IsNameBanned(const char *pName, CNameBan *pNameBans, int NumNameBans)
 	{
 		CNameBan *pBan = &pNameBans[i];
 		int Distance = str_utf32_dist_buffer(aSkeleton, SkeletonLength, pBan->m_aSkeleton, pBan->m_SkeletonLength, aBuffer, sizeof(aBuffer) / sizeof(aBuffer[0]));
-		if(Distance <= pBan->m_Distance)
+		if(Distance <= pBan->m_Distance || (pBan->m_IsSubstring == 1 && str_utf8_find_nocase(pName, pBan->m_aName)))
 		{
 			pResult = pBan;
 		}

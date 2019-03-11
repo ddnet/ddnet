@@ -14,8 +14,8 @@ class CNameBan
 {
 public:
 	CNameBan() {}
-	CNameBan(const char *pName, int Distance, const char *pReason = "") :
-		m_Distance(Distance)
+	CNameBan(const char *pName, int Distance, int IsSubstring, const char *pReason = "") :
+		m_Distance(Distance), m_IsSubstring(IsSubstring)
 	{
 		str_copy(m_aName, pName, sizeof(m_aName));
 		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, sizeof(m_aSkeleton) / sizeof(m_aSkeleton[0]));
@@ -26,6 +26,7 @@ public:
 	int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
 	int m_SkeletonLength;
 	int m_Distance;
+	int m_IsSubstring;
 };
 
 CNameBan *IsNameBanned(const char *pName, CNameBan *pNameBans, int NumNameBans);
