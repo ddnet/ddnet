@@ -53,8 +53,8 @@ jobs:
           env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DDOWNLOAD_GTEST=ON ..
           make everything
       - run: |
-          mkdir build2
-          cd build2
+          mkdir noautoupdate
+          cd noautoupdate
           env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DAUTOUPDATE=OFF -DDOWNLOAD_GTEST=ON ..
           make everything
 
@@ -78,7 +78,7 @@ jobs:
           ./DDNet-Server shutdown
 
       - run: |
-          cd build2
+          cd noautoupdate
           make run_tests
 
 workflows:
