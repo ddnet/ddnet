@@ -283,9 +283,6 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 
 int CSound::Init()
 {
-#ifdef CONF_FAMILY_WINDOWS
-	SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
-#endif
 	m_SoundEnabled = 0;
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -314,7 +311,7 @@ int CSound::Init()
 	Format.userdata = NULL; // ignore_convention
 
 	// Open the audio device and start playing sound!
-	m_Device = SDL_OpenAudioDevice(NULL, 0, &Format, &FormatOut, SDL_AUDIO_ALLOW_FORMAT_CHANGE | SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+	m_Device = SDL_OpenAudioDevice(NULL, 0, &Format, &FormatOut, 0);
 
 	if (m_Device == 0)
 	{
@@ -322,7 +319,7 @@ int CSound::Init()
 		return -1;
 	}
 	else
-		dbg_msg("client/sound", "sound init successful");
+		dbg_msg("client/sound", "sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
 
 	m_MaxFrames = FormatOut.samples*2;
 	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
