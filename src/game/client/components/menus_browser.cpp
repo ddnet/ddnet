@@ -984,8 +984,9 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				Client()->ServerBrowserUpdate();
 			}
 
-			vec4 Colour = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ? vec4(1.0f, 1.0f, 1.0f, (i%2+1)*0.05f) :
-																								vec4(0.5f, 1.0f, 0.5f, 0.15f+(i%2+1)*0.05f);
+			vec4 Colour = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ?
+				vec4(1.0f, 1.0f, 1.0f, (i%2+1)*0.05f) :
+				vec4(0.5f, 1.0f, 0.5f, 0.15f+(i%2+1)*0.05f);
 			RenderTools()->DrawUIRect(&Name, Colour, CUI::CORNER_ALL, 4.0f);
 			Name.VSplitLeft(5.0f, 0, &Name);
 			Name.VSplitLeft(34.0f, &Score, &Name);
@@ -1001,7 +1002,9 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			else if(IsRace(pSelectedServer))
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
+				{
 					aTemp[0] = 0;
+				}
 				else
 				{
 					int Time = abs(pSelectedServer->m_aClients[i].m_Score);
