@@ -3106,12 +3106,23 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		else if(pProps[i].m_Type == PROPTYPE_IMAGE)
 		{
 			char aBuf[64];
+			float FontSize = 10.0f;
+
 			if(pProps[i].m_Value < 0)
 				str_copy(aBuf, "None", sizeof(aBuf));
 			else
-				str_format(aBuf, sizeof(aBuf),"%s", m_Map.m_lImages[pProps[i].m_Value]->m_aName);
+			{
+				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lImages[pProps[i].m_Value]->m_aName);
+				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
+				{
+					if(FontSize > 6.0f)
+						FontSize--;
+					else
+						str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+				}
+			}
 
-			if(DoButton_Editor(&pIDs[i], aBuf, 0, &Shifter, 0, 0))
+			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, 0, CUI::CORNER_ALL, FontSize))
 				PopupSelectImageInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
 			int r = PopupSelectImageResult();
