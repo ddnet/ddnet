@@ -383,9 +383,6 @@ Sample rate
 Score
 == Pisteet
 
-Score board
-== Tulostaulu
-
 Score limit
 == Pisteraja
 

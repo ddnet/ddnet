@@ -385,9 +385,6 @@ Sample rate
 Score
 == Skóre
 
-Score board
-== Tabulka výsledků
-
 Score limit
 == Skóre limit
 

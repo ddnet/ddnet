@@ -382,9 +382,6 @@ Sample rate
 Score
 == Точки
 
-Score board
-== Резултат
-
 Score limit
 == Лимит на точките
 

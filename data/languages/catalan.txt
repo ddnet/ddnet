@@ -383,9 +383,6 @@ Sample rate
 Score
 == Punts
 
-Score board
-== Puntuació
-
 Score limit
 == Límit de punts
 

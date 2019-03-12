@@ -382,9 +382,6 @@ Sample rate
 Score
 == Score
 
-Score board
-== Resultatliste
-
 Score limit
 == Score grænse
 

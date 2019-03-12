@@ -401,9 +401,6 @@ Sample rate
 Score
 == Punkte
 
-Score board
-== Punktetafel
-
 Score limit
 == Punktelimit
 

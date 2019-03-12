@@ -382,9 +382,6 @@ Sample rate
 Score
 == Ачкі
 
-Score board
-== Табло
-
 Score limit
 == Ліміт ачкоў
 

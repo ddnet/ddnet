@@ -384,9 +384,6 @@ Sample rate
 Score
 == Rezultat
 
-Score board
-== Bodovi
-
 Score limit
 == Max. bodova
 

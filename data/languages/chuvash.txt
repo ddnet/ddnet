@@ -382,9 +382,6 @@ Sample rate
 Score
 == Паллă
 
-Score board
-== Паллăсен хăмми
-
 Score limit
 == Паллă лимичĕ
 

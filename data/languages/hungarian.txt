@@ -373,9 +373,6 @@ Sample rate
 Score
 == Pontszám
 
-Score board
-== Pontszám tábla
-
 Score limit
 == Ponthatár
 

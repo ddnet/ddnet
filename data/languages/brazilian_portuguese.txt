@@ -400,9 +400,6 @@ Sample rate
 Score
 == Pontos
 
-Score board
-== Placar
-
 Score limit
 == Pontuação máx.
 

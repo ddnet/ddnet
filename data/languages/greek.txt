@@ -388,9 +388,6 @@ Sample rate
 Score
 == Βαθμ.
 
-Score board
-== Πίνακας βαθμ/γίας
-
 Score limit
 == Όριο βαθμολογίας
 
