@@ -30,7 +30,7 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 		if(!m_pEditor->m_Map.m_pFrontLayer) {
 			CLayer *l = new CLayerFront(m_Width, m_Height);
 			m_pEditor->m_Map.MakeFrontLayer(l);
-			m_pEditor->m_Map.m_lGroups[m_pEditor->m_SelectedGroup]->AddLayer(l);
+			m_pEditor->m_Map.m_pGameGroup->AddLayer(l);
 		}
 		CTile nohook = {TILE_NOHOOK};
 		CLayerTiles::SetTile(x, y, nohook);
