@@ -24,6 +24,7 @@
 #include <engine/editor.h>
 #include <engine/graphics.h>
 #include <engine/sound.h>
+#include <engine/storage.h>
 
 #include "auto_map.h"
 
@@ -830,8 +831,6 @@ public:
 		FILETYPE_MAP,
 		FILETYPE_IMG,
 		FILETYPE_SOUND,
-
-		MAX_PATH_LENGTH = 512
 	};
 
 	int m_FileDialogStorageType;

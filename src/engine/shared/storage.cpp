@@ -8,12 +8,6 @@
 class CStorage : public IStorage
 {
 public:
-	enum
-	{
-		MAX_PATHS = 16,
-		MAX_PATH_LENGTH = 512
-	};
-
 	char m_aaStoragePaths[MAX_PATHS][MAX_PATH_LENGTH];
 	int m_NumPaths;
 	char m_aDatadir[MAX_PATH_LENGTH];

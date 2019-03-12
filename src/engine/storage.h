@@ -5,6 +5,12 @@
 
 #include "kernel.h"
 
+enum
+{
+	MAX_PATHS = 16,
+	MAX_PATH_LENGTH = 512
+};
+
 class IStorage : public IInterface
 {
 	MACRO_INTERFACE("storage", 0)
