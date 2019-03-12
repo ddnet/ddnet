@@ -532,7 +532,7 @@ void CLayerTiles::Resize(int NewW, int NewH)
 
 	// resize tune layer if available
 	if(m_Game && m_pEditor->m_Map.m_pTuneLayer && (m_pEditor->m_Map.m_pTuneLayer->m_Width != NewW || m_pEditor->m_Map.m_pTuneLayer->m_Height != NewH))
-			m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
+		m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
 }
 
 void CLayerTiles::Shift(int Direction)
@@ -622,11 +622,19 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
 	CUIRect Button;
 
-	bool InGameGroup = !find_linear(m_pEditor->m_Map.m_pGameGroup->m_lLayers.all(), this).empty();
-	if(m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this)
-		InGameGroup = false;
+	bool IsGameLayer = (
+		m_pEditor->m_Map.m_pGameLayer == this
+		|| m_pEditor->m_Map.m_pTeleLayer == this
+		|| m_pEditor->m_Map.m_pSpeedupLayer == this
+		|| m_pEditor->m_Map.m_pFrontLayer == this
+		|| m_pEditor->m_Map.m_pSwitchLayer == this
+		|| m_pEditor->m_Map.m_pTuneLayer == this
+	);
 
-	if(InGameGroup)
+	CLayerGroup *pGroup = m_pEditor->m_Map.m_lGroups[m_pEditor->m_SelectedGroup];
+
+	// Game tiles can only be constructed if the layer is relative to the game layer
+	if(!IsGameLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
 	{
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_ColclButton = 0;
@@ -661,39 +669,60 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		}
 		if(Result > -1)
 		{
-			if (Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
-			{
-				CLayerTiles *gl = m_pEditor->m_Map.m_pGameLayer;
+			int OffsetX = -pGroup->m_OffsetX / 32;
+			int OffsetY = -pGroup->m_OffsetY / 32;
 
-				int w = min(gl->m_Width, m_Width);
-				int h = min(gl->m_Height, m_Height);
-				for(int y = 0; y < h; y++)
-					for(int x = 0; x < w; x++)
-						if(GetTile(x, y).m_Index) {
-							CTile result_tile = {(unsigned char)Result};
-							gl->SetTile(x, y, result_tile);
+			if(Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
+			{
+				CLayerTiles *pGLayer = m_pEditor->m_Map.m_pGameLayer;
+
+				if(pGLayer->m_Width < m_Width + OffsetX || pGLayer->m_Height < m_Height + OffsetY)
+				{
+					int NewW = pGLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pGLayer->m_Width;
+					int NewH = pGLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pGLayer->m_Height;
+					pGLayer->Resize(NewW, NewH);
+				}
+
+				for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+					for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+						if(GetTile(x, y).m_Index)
+						{
+							CTile ResultTile = {(unsigned char)Result};
+							pGLayer->SetTile(x + OffsetX, y + OffsetY, ResultTile);
 						}
 			}
-			else if (m_pEditor->m_Map.m_pTeleLayer)
+			else
 			{
-				CLayerTele *gl = m_pEditor->m_Map.m_pTeleLayer;
+				if(!m_pEditor->m_Map.m_pTeleLayer)
+				{
+					CLayer *pLayer = new CLayerTele(m_Width, m_Height);
+					m_pEditor->m_Map.MakeTeleLayer(pLayer);
+					m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
+				}
 
-				int w = min(gl->m_Width, m_Width);
-				int h = min(gl->m_Height, m_Height);
-				for(int y = 0; y < h; y++)
-					for(int x = 0; x < w; x++)
-						if(m_pTiles[y*m_Width+x].m_Index)
+				CLayerTele *pTLayer = m_pEditor->m_Map.m_pTeleLayer;
+
+				if(pTLayer->m_Width < m_Width + OffsetX || pTLayer->m_Height < m_Height + OffsetY)
+				{
+					int NewW = pTLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pTLayer->m_Width;
+					int NewH = pTLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pTLayer->m_Height;
+					pTLayer->Resize(NewW, NewH);
+				}
+
+				for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+					for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+						if(GetTile(x, y).m_Index)
 						{
-							gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR+Result;
-							gl->m_pTeleTile[y*gl->m_Width+x].m_Number = 1;
-							gl->m_pTeleTile[y*gl->m_Width+x].m_Type = TILE_AIR+Result;
+							pTLayer->m_pTiles[(y+OffsetY)*pTLayer->m_Width+x+OffsetX].m_Index = TILE_AIR+Result;
+							pTLayer->m_pTeleTile[(y+OffsetY)*pTLayer->m_Width+x+OffsetX].m_Number = 1;
+							pTLayer->m_pTeleTile[(y+OffsetY)*pTLayer->m_Width+x+OffsetX].m_Type = TILE_AIR+Result;
 						}
 			}
 
 			return 1;
 		}
 	}
-	
+
 	if(m_pEditor->m_Map.m_pGameLayer != this)
 	{
 		if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size() && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.IsLoaded() &&
@@ -756,7 +785,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{0},
 	};
 
-	if(m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this) // remove the image and color properties if this is the game/tele/speedup/front/switch layer
+	if(IsGameLayer) // remove the image and color properties if this is a game layer
 	{
 		aProps[PROP_IMAGE].m_pName = 0;
 		aProps[PROP_COLOR].m_pName = 0;
