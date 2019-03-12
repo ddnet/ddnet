@@ -998,7 +998,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			if(!pSelectedServer->m_aClients[i].m_Player)
 				str_copy(aTemp, "SPEC", sizeof(aTemp));
-			else if(IsRace(pSelectedServer))
+			else if(IsRace(pSelectedServer) && g_Config.m_ClDDRaceScoreBoard)
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
 					aTemp[0] = 0;
