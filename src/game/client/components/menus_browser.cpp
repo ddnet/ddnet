@@ -999,7 +999,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			if(!pSelectedServer->m_aClients[i].m_Player)
 				str_copy(aTemp, "SPEC", sizeof(aTemp));
-			else if(IsRace(pSelectedServer))
+			else if(IsRace(pSelectedServer) && g_Config.m_ClDDRaceScoreBoard && m_pClient->m_AllowTimeScore[g_Config.m_ClDummy])
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
 				{
