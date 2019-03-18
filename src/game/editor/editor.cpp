@@ -5648,15 +5648,18 @@ void CEditor::Render()
 
 	if(m_GuiActive)
 	{
-		if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor)
+		if(!m_ShowPicker)
 		{
-			RenderBackground(ExtraEditor, ms_BackgroundTexture, 128.0f, Brightness);
-			ExtraEditor.Margin(2.0f, &ExtraEditor);
-		}
-		if(m_ShowUndo)
-		{
-			RenderBackground(UndoList, ms_BackgroundTexture, 128.0f, Brightness);
-			UndoList.Margin(2.0f, &UndoList);
+			if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor)
+			{
+				RenderBackground(ExtraEditor, ms_BackgroundTexture, 128.0f, Brightness);
+				ExtraEditor.Margin(2.0f, &ExtraEditor);
+			}
+			if(m_ShowUndo)
+			{
+				RenderBackground(UndoList, ms_BackgroundTexture, 128.0f, Brightness);
+				UndoList.Margin(2.0f, &UndoList);
+			}
 		}
 
 		if(m_Mode == MODE_LAYERS)
