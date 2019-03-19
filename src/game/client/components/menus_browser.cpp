@@ -341,7 +341,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			else if(ID == COL_FLAG_OFFICIAL)
 			{
 				if(pItem->m_Official)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_DDNET, &Button);
+					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_CHECK, &Button);
 			}
 			else if(ID == COL_NAME)
 			{
