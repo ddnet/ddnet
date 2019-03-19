@@ -354,6 +354,7 @@ private:
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteMutes(IConsole::IResult *pResult, void *pUserData);
 	static void ConMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteID(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData);

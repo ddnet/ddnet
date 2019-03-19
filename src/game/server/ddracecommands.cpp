@@ -496,6 +496,38 @@ void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConVoteMutes(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+
+	if (pSelf->m_NumVoteMutes <= 0)
+	{
+		// Just to make sure.
+		pSelf->m_NumVoteMutes = 0;
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes",
+								"There are no active vote mutes.");
+		return;
+	}
+
+	char aIpBuf[64];
+	char aBuf[128];
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes",
+							"Active vote mutes:");
+	for (int i = 0; i < pSelf->m_NumVoteMutes; i++)
+	{
+		net_addr_str(&pSelf->m_aVoteMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
+		str_format(
+				aBuf,
+				sizeof aBuf,
+				"%d: \"%s\", %d seconds left",
+				i,
+				aIpBuf,
+				(pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick())
+				/ pSelf->Server()->TickSpeed());
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes", aBuf);
+	}
+}
+
 void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
