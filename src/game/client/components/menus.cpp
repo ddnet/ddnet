@@ -175,7 +175,6 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 }
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
-//void CMenus::ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra)
 {
 	if(Checked)
 		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
@@ -191,7 +190,6 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 }
 
 int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect)
-//void CMenus::ui_draw_checkbox_common(const void *id, const char *text, const char *boxtext, const CUIRect *r, const void *extra)
 {
 	CUIRect c = *pRect;
 	CUIRect t = *pRect;
@@ -468,8 +466,6 @@ int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, 
 	}
 
 	RenderTools()->DrawUIRect(&ClearButton, vec4(1, 1, 1, 0.33f) * ButtonColorMul(pClearID), Corners&~CUI::CORNER_L, 3.0f);
-	// Fix alignment of x inside button
-	ClearButton.x -= 1.0f;
 	UI()->DoLabel(&ClearButton, "×", ClearButton.h * ms_FontmodHeight, 0);
 	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
 	{
@@ -702,7 +698,6 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_DoubleClickIndex = -1;
 		}
 
-		//Box.VSplitLeft(4.0f, 0, &Box);
 		Box.VSplitLeft(60.0f, &Button, &Box);
 		static int s_LanButton=0;
 		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
@@ -713,7 +708,6 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_DoubleClickIndex = -1;
 		}
 
-		//box.VSplitLeft(4.0f, 0, &box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_FavoritesButton=0;
 		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, 0))
@@ -724,7 +718,6 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_DoubleClickIndex = -1;
 		}
 
-		//box.VSplitLeft(4.0f, 0, &box);
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		static int s_DDNetButton=0;
 		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
@@ -789,15 +782,6 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage==PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
 			NewPage = PAGE_CALLVOTE;
 	}
-
-	/*
-	box.VSplitRight(110.0f, &box, &button);
-	static int system_button=0;
-	if(UI()->DoButton(&system_button, "System", g_Config.m_UiPage==PAGE_SYSTEM, &button))
-		g_Config.m_UiPage = PAGE_SYSTEM;
-
-	box.VSplitRight(30.0f, &box, 0);
-	*/
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
@@ -893,9 +877,6 @@ void CMenus::RenderLoading()
 
 void CMenus::RenderNews(CUIRect MainView)
 {
-	// TODO: Like the settings with big fonts
-	// Make it work WITHOUT version updates
-	// Show news once after each version or news update
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
 
 	MainView.HSplitTop(15.0f, 0, &MainView);
@@ -922,50 +903,6 @@ void CMenus::RenderNews(CUIRect MainView)
 
 void CMenus::OnInit()
 {
-
-	/*
-	array<string> my_strings;
-	array<string>::range r2;
-	my_strings.add("4");
-	my_strings.add("6");
-	my_strings.add("1");
-	my_strings.add("3");
-	my_strings.add("7");
-	my_strings.add("5");
-	my_strings.add("2");
-
-	for(array<string>::range r = my_strings.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%s", r.front().cstr());
-
-	sort(my_strings.all());
-
-	dbg_msg("", "after:");
-	for(array<string>::range r = my_strings.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%s", r.front().cstr());
-
-
-	array<int> myarray;
-	myarray.add(4);
-	myarray.add(6);
-	myarray.add(1);
-	myarray.add(3);
-	myarray.add(7);
-	myarray.add(5);
-	myarray.add(2);
-
-	for(array<int>::range r = myarray.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%d", r.front());
-
-	sort(myarray.all());
-	sort_verify(myarray.all());
-
-	dbg_msg("", "after:");
-	for(array<int>::range r = myarray.all(); !r.empty(); r.pop_front())
-		dbg_msg("", "%d", r.front());
-
-	exit(-1);
-	// */
-
 	if(g_Config.m_ClShowWelcome)
 		m_Popup = POPUP_LANGUAGE;
 
@@ -1830,7 +1767,6 @@ void CMenus::OnStateChange(int NewState, int OldState)
 		m_DownloadLastCheckTime = time_get();
 		m_DownloadLastCheckSize = 0;
 		m_DownloadSpeed = 0.0f;
-		//client_serverinfo_request();
 	}
 	else if(NewState == IClient::STATE_CONNECTING)
 		m_Popup = POPUP_CONNECTING;
@@ -1845,23 +1781,6 @@ extern "C" void font_debug_render();
 
 void CMenus::OnRender()
 {
-	/*
-	// text rendering test stuff
-	render_background();
-
-	CTextCursor cursor;
-	TextRender()->SetCursor(&cursor, 10, 10, 20, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
-
-	TextRender()->SetCursor(&cursor, 10, 30, 15, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
-
-	//Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->QuadsDrawTL(60, 60, 5000, 5000);
-	Graphics()->QuadsEnd();
-	return;*/
-
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
@@ -1966,8 +1885,6 @@ static int gs_TextureBlob = -1;
 
 void CMenus::RenderBackground()
 {
-	//Graphics()->Clear(1,1,1);
-	//render_sunrays(0,0);
 	if(gs_TextureBlob == -1)
 		gs_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
@@ -1979,8 +1896,6 @@ void CMenus::RenderBackground()
 	// render background color
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-		//vec4 bottom(gui_color.r*0.3f, gui_color.g*0.3f, gui_color.b*0.3f, 1.0f);
-		//vec4 bottom(0, 0, 0, 1.0f);
 		vec4 Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
 		vec4 Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
 		IGraphics::CColorVertex Array[4] = {
