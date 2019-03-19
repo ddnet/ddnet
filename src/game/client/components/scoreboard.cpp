@@ -15,6 +15,7 @@
 #include <game/client/components/countryflags.h>
 #include <game/client/components/motd.h>
 #include <game/client/components/statboard.h>
+#include <game/client/components/skins.h>
 
 #include "scoreboard.h"
 
@@ -133,7 +134,10 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 			TextRender()->TextEx(&Cursor, ", ", 2);
 
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
-			TextRender()->TextColor(0.78f, 1.0f, 0.8f, 1.0f);
+		{
+			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClAuthedPlayerColor);
+			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+		}
 
 		if(g_Config.m_ClShowIDs)
 		{
@@ -451,7 +455,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
-			TextRender()->TextColor(0.78f, 1.0f, 0.8f, 1.0f);
+		{
+			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClAuthedPlayerColor);
+			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+		}
 
 		if(g_Config.m_ClShowIDs)
 		{
