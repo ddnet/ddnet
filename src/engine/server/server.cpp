@@ -1920,23 +1920,37 @@ int CServer::Run()
 			}
 
 			// handle dnsbl
-			if (g_Config.m_SvDnsbl)
+			if(g_Config.m_SvDnsbl)
 			{
-				for (int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+				for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 				{
-					if (m_aClients[ClientID].m_State == CClient::STATE_EMPTY)
+					if(m_aClients[ClientID].m_State == CClient::STATE_EMPTY)
 						continue;
 
-					if (m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE)
+					if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE)
 					{
-						// initiate dnsbl lookup
-						InitDnsbl(ClientID);
+						bool Whitelisted = false;
+						for(int i = 0; i < m_aDnsblWhitelist.size(); i++)
+						{
+							if(!net_addr_comp_noport(&m_aDnsblWhitelist[i], &m_aClients[ClientID].m_Addr))
+							{
+								// ip is manually whitelisted
+								m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+								Whitelisted = true;
+								break;
+							}
+						}
+						if(!Whitelisted)
+						{
+							// initiate dnsbl lookup
+							InitDnsbl(ClientID);
+						}
 					}
-					else if (m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
+					else if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
 								m_aClients[ClientID].m_pDnsblLookup->Status() == IJob::STATE_DONE)
 					{
 
-						if (m_aClients[ClientID].m_pDnsblLookup->m_Result != 0)
+						if(m_aClients[ClientID].m_pDnsblLookup->m_Result != 0)
 						{
 							// entry not found -> whitelisted
 							m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
@@ -1958,7 +1972,7 @@ int CServer::Run()
 						}
 					}
 
-					if (m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED &&
+					if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED &&
 							g_Config.m_SvDnsblBan)
 						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientID), 60*10, "Blacklisted by DNSBL");
 				}
@@ -2442,6 +2456,108 @@ void CServer::ConNameBans(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+void CServer::ConDnsblWhitelistAdd(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+
+	NETADDR Addr;
+	if(net_addr_from_str(&Addr, pResult->GetString(0)))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", "invalid network address");
+		return;
+	}
+
+	bool Found = false;
+	for(int i = 0; i < pThis->m_aDnsblWhitelist.size(); i++)
+	{
+		if(net_addr_comp_noport(&pThis->m_aDnsblWhitelist[i], &Addr) == 0)
+		{
+			pThis->m_aDnsblWhitelist.add(Addr);
+			Found = true;
+			break;
+		}
+	}
+
+	char aBuf[64];
+	char aIpBuf[64];
+	net_addr_str(&Addr, aIpBuf, sizeof(aIpBuf), false);
+
+	if(!Found)
+	{
+		// update dnsbl state of now whitelisted ips
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(net_addr_comp_noport(&Addr, &pThis->m_aClients[i].m_Addr) == 0)
+				pThis->m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+		}
+		str_format(aBuf, sizeof(aBuf), "added '%s' to whitelist", aIpBuf);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' is already whitelisted", aIpBuf);
+	}
+
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
+}
+
+void CServer::ConDnsblWhitelistRemove(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+
+	NETADDR Addr;
+	if(net_addr_from_str(&Addr, pResult->GetString(0)))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", "invalid network address");
+		return;
+	}
+
+	bool Found = false;
+	for(int i = 0; i < pThis->m_aDnsblWhitelist.size(); i++)
+	{
+		if(net_addr_comp_noport(&pThis->m_aDnsblWhitelist[i], &Addr) == 0)
+		{
+			pThis->m_aDnsblWhitelist.remove_index(i);
+			Found = true;
+			break;
+		}
+	}
+
+	char aBuf[64];
+	char aIpBuf[64];
+	net_addr_str(&Addr, aIpBuf, sizeof(aIpBuf), false);
+
+	if(Found)
+	{
+		// reset dnsbl state of previously whitelisted ips
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(net_addr_comp_noport(&Addr, &pThis->m_aClients[i].m_Addr) == 0)
+				pThis->m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_NONE;
+		}
+		str_format(aBuf, sizeof(aBuf), "removed '%s' from whitelist", aIpBuf);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' is not whitelisted", aIpBuf);
+	}
+
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
+}
+
+void CServer::ConDnsblWhitelist(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+
+	for(int i = 0; i < pThis->m_aDnsblWhitelist.size(); i++)
+	{
+		char aBuf[64];
+		char aIpBuf[64];
+		net_addr_str(&pThis->m_aDnsblWhitelist[i], aIpBuf, sizeof(aIpBuf), false);
+		str_format(aBuf, sizeof(aBuf), "#%d ip='%s'", i, aIpBuf);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
+	}
+}
+
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
 	((CServer *)pUser)->m_RunServer = 0;
@@ -2835,6 +2951,10 @@ void CServer::RegisterCommands()
 	Console()->Register("name_ban", "s[name] ?i[distance] ?i[is_substring] ?r[reason]", CFGFLAG_SERVER, ConNameBan, this, "Ban a certain nick name");
 	Console()->Register("name_unban", "s[name]", CFGFLAG_SERVER, ConNameUnban, this, "Unban a certain nick name");
 	Console()->Register("name_bans", "", CFGFLAG_SERVER, ConNameBans, this, "List all name bans");
+
+	Console()->Register("dnsbl_whitelist_add", "s[ip]", CFGFLAG_SERVER, ConDnsblWhitelistAdd, this, "Add an ip to the whitelist");
+	Console()->Register("dnsbl_whitelist_remove", "s[ip]", CFGFLAG_SERVER, ConDnsblWhitelistRemove, this, "Remove an ip from the whitelist");
+	Console()->Register("dnsbl_whitelist", "", CFGFLAG_SERVER, ConDnsblWhitelist, this, "List all whitelisted ips");
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);

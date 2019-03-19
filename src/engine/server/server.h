@@ -228,6 +228,8 @@ public:
 
 	array<CNameBan> m_aNameBans;
 
+	array<NETADDR> m_aDnsblWhitelist;
+
 	CServer();
 
 	int TrySetClientName(int ClientID, const char *pName);
@@ -326,6 +328,10 @@ public:
 	static void ConNameBan(IConsole::IResult *pResult, void *pUser);
 	static void ConNameUnban(IConsole::IResult *pResult, void *pUser);
 	static void ConNameBans(IConsole::IResult *pResult, void *pUser);
+
+	static void ConDnsblWhitelistAdd(IConsole::IResult *pResult, void *pUser);
+	static void ConDnsblWhitelistRemove(IConsole::IResult *pResult, void *pUser);
+	static void ConDnsblWhitelist(IConsole::IResult *pResult, void *pUser);
 
 	static void StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlacklistedOnly);
 
