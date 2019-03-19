@@ -45,33 +45,33 @@ Or on Arch Linux like this (Arch Linux does not package `pnglite`, not even in A
 
     sudo pacman -S --needed cmake curl freetype2 git glew opusfile sdl2 wavpack python
 
-The following is a non-exhaustive list of build arguments that can be appended to the `cmake` command-line tool in order to enable or disable options in build time:
+The following is a non-exhaustive list of build arguments that can be passed to the `cmake` command-line tool in order to enable or disable options in build time:
 
 * **-DCMAKE_BUILD_TYPE=[Release|Debug|RelWithDebInfo|MinSizeRel]** <br>
 An optional CMake variable for setting the build type. If not set, defaults to "Release" if `-DDEV=ON` is **not** used, and "Debug" if `-DDEV=ON` is used. See `CMAKE_BUILD_TYPE` in CMake Documentation for more information.
 
 * **-DPREFER_BUNDLED_LIBS=[ON|OFF]** <br>
-Enables/disables preference for bundled libraries over system libraries. Setting to ON will make DDNet use third party libraries available in the `ddnet-libs` folder, which is the git-submodule target of the [ddnet-libs](https://github.com/ddnet/ddnet-libs) repository mentioned above. Useful if you do not have those libraries installed and want to avoid building them. Default value is OFF.
+Whether to prefer bundled libraries over system libraries. Setting to ON will make DDNet use third party libraries available in the `ddnet-libs` folder, which is the git-submodule target of the [ddnet-libs](https://github.com/ddnet/ddnet-libs) repository mentioned above -- Useful if you do not have those libraries installed and want to avoid building them. If set to OFF, will only use bundled libraries when system libraries are not found. Default value is OFF.
 
 * **-DWEBSOCKETS=[ON|OFF]** <br>
-Enables/disables WebSocket support for server. Setting to ON requires the `libwebsockets-dev` library installed. Default value is OFF.
+Whether to enable WebSocket support for server. Setting to ON requires the `libwebsockets-dev` library installed. Default value is OFF.
 
 * **-DMYSQL=[ON|OFF]** <br>
-Enables/disables MySQL (or MariaDB) support for server. Setting to ON requires the `libmariadbclient-dev`, `libmysqlcppconn-dev` and `libboost-dev` libraries installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
+Whether to enable MySQL/MariaDB support for server. Setting to ON requires the `libmariadbclient-dev`, `libmysqlcppconn-dev` and `libboost-dev` libraries installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
 
    Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
 * **-DAUTOUPDATE=[ON|OFF]** <br>
-Enables/disables the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
+Whether to enable the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
 
 * **-DCLIENT=[ON|OFF]** <br>
-Enables/disables client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
+Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
 
 * **-DDOWNLOAD_GTEST=[ON|OFF]** <br>
-Enables/disables download and compilation of GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
+Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
 
 * **-DDEV=[ON|OFF]** <br>
-Enables/disables generation of stuff necessary for packaging. Setting to ON will set CMAKE_BUILD_TYPE to Debug by default. Default value is OFF.
+Whether to generate stuff necessary for packaging. Setting to ON will set CMAKE_BUILD_TYPE to Debug by default. Default value is OFF.
 
 Running tests (Debian/Ubuntu)
 -----------------------------
