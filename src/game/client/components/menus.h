@@ -268,6 +268,7 @@ class CMenus : public CComponent
 	// found in menus_demo.cpp
 	static bool DemoFilterChat(const void *pData, int Size, void *pUser);
 	bool FetchHeader(CDemoItem &Item);
+	void FetchAllHeaders();
 	void RenderDemoPlayer(CUIRect MainView);
 	void RenderDemoList(CUIRect MainView);
 

@@ -711,6 +711,10 @@ void CMenus::DemolistPopulate()
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorage::TYPE_ALL;
 	Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
+
+	if(g_Config.m_BrDemoFetchInfo)
+		FetchAllHeaders();
+
 	m_lDemos.sort_range();
 }
 
@@ -755,6 +759,15 @@ bool CMenus::FetchHeader(CDemoItem &Item)
 	return Item.m_Valid;
 }
 
+void CMenus::FetchAllHeaders()
+{
+	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
+	{
+		FetchHeader(r.front());
+	}
+	m_lDemos.sort_range();
+}
+
 void CMenus::RenderDemoList(CUIRect MainView)
 {
 	static int s_Inited = 0;
@@ -786,16 +799,16 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, LabelRect, ListBox;
 	MainView.HSplitBottom(ms_ButtonHeight+5.0f, &MainView, &ButtonBar);
 	ButtonBar.HSplitTop(5.0f, 0, &ButtonBar);
-	ButtonBar.VSplitRight(130.0f, &ButtonBar, &PlayRect);
-	ButtonBar.VSplitLeft(130.0f, &RefreshRect, &ButtonBar);
+	ButtonBar.VSplitRight(110.0f, &ButtonBar, &PlayRect);
+	ButtonBar.VSplitLeft(110.0f, &RefreshRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(130.0f, &FetchRect, &ButtonBar);
+	ButtonBar.VSplitLeft(110.0f, &FetchRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(120.0f, &DeleteRect, &ButtonBar);
+	ButtonBar.VSplitLeft(110.0f, &DeleteRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(120.0f, &RenameRect, &ButtonBar);
+	ButtonBar.VSplitLeft(110.0f, &RenameRect, &ButtonBar);
 	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(120.0f, &LabelRect, &ButtonBar);
+	ButtonBar.VSplitLeft(110.0f, &LabelRect, &ButtonBar);
 	MainView.HSplitBottom(140.0f, &ListBox, &MainView);
 
 	// render demo info
@@ -1173,14 +1186,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		DemolistOnUpdate(false);
 	}
 
-	static int s_FetchButton = 0;
-	if(DoButton_Menu(&s_FetchButton, Localize("Fetch Info"), 0, &FetchRect) || (Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+	if(DoButton_CheckBox(&g_Config.m_BrDemoFetchInfo, Localize("Fetch Info"), g_Config.m_BrDemoFetchInfo, &FetchRect))
 	{
-		for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
-		{
-			FetchHeader(r.front());
-		}
-		m_lDemos.sort_range();
+		g_Config.m_BrDemoFetchInfo ^= 1;
+		if(g_Config.m_BrDemoFetchInfo)
+			FetchAllHeaders();
 	}
 
 	static int s_PlayButton = 0;
