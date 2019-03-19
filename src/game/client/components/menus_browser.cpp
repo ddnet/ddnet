@@ -53,6 +53,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		COL_FLAG_LOCK=0,
 		COL_FLAG_FAV,
+		COL_FLAG_OFFICIAL,
 		COL_NAME,
 		COL_GAMETYPE,
 		COL_MAP,
@@ -65,6 +66,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{-1,			-1,						" ",		-1, 2.0f, 0, {0}, {0}},
 		{COL_FLAG_LOCK,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
 		{COL_FLAG_FAV,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
+		{COL_FLAG_OFFICIAL,	-1,						" ",		-1, 14.0f, 0, {0}, {0}},
 		{COL_NAME,		IServerBrowser::SORT_NAME,		"Name",		0, 50.0f, 0, {0}, {0}},	// Localize - these strings are localized within CLocConstString
 		{COL_GAMETYPE,	IServerBrowser::SORT_GAMETYPE,	"Type",		1, 50.0f, 0, {0}, {0}},
 		{COL_MAP,		IServerBrowser::SORT_MAP,			"Map", 		1, 120.0f + (Headers.w - 480) / 8, 0, {0}, {0}},
@@ -335,6 +337,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				if(pItem->m_Favorite)
 					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Button);
+			}
+			else if(ID == COL_FLAG_OFFICIAL)
+			{
+				if(pItem->m_Official)
+					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_DDNET, &Button);
 			}
 			else if(ID == COL_NAME)
 			{

@@ -48,7 +48,8 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
-	int m_Favorite;
+	bool m_Favorite;
+	bool m_Official;
 	int m_Latency; // in ms
 	int m_HasRank;
 	char m_aGameType[16];
