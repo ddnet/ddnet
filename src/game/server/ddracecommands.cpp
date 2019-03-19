@@ -385,7 +385,7 @@ bool CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplay
 	return Found;
 }
 
-bool CGameContext::VoteUnMute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID)
+bool CGameContext::VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID)
 {
 	for(int i = 0; i < m_NumVoteMutes; i++)
 	{
@@ -472,7 +472,7 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConVoteUnMute(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
@@ -486,7 +486,7 @@ void CGameContext::ConVoteUnMute(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	bool Found = pSelf->VoteUnMute(&Addr, pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
+	bool Found = pSelf->VoteUnmute(&Addr, pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
 	if(Found)
 	{
 		char aBuf[128];

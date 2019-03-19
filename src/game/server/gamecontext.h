@@ -353,7 +353,7 @@ private:
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteUnMute(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteID(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData);
@@ -389,7 +389,7 @@ private:
 	int m_NumVoteMutes;
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
-	bool VoteUnMute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
+	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);
 	void WhisperID(int ClientID, int VictimID, char *pMessage);
 	void Converse(int ClientID, char *pStr);
