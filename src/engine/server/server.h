@@ -333,8 +333,6 @@ public:
 	static void ConDnsblWhitelistRemove(IConsole::IResult *pResult, void *pUser);
 	static void ConDnsblWhitelist(IConsole::IResult *pResult, void *pUser);
 
-	static void StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlacklistedOnly);
-
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
