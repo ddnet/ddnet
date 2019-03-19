@@ -86,6 +86,7 @@ public:
 	void RemoveFavorite(const NETADDR &Addr);
 
 	void LoadDDNetRanks();
+	void RecheckOfficial();
 	void LoadDDNetServers();
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();

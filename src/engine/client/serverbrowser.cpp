@@ -1088,6 +1088,22 @@ void CServerBrowser::LoadDDNetServers()
 	}
 }
 
+void CServerBrowser::RecheckOfficial()
+{
+	for(int i = 0; i < m_NumDDNetCountries; i++)
+	{
+		CDDNetCountry *pCntr = &m_aDDNetCountries[i];
+		for(int j = 0; j < pCntr->m_NumServers; j++)
+		{
+			CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
+			if(pEntry)
+			{
+				pEntry->m_Info.m_Official = true;
+			}
+		}
+	}
+}
+
 void CServerBrowser::LoadDDNetRanks()
 {
 	for(int i = 0; i < m_NumServers; i++)
@@ -1163,9 +1179,14 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 	LoadDDNetServers();
 
 	if(m_NumServers == 0)
+	{
 		Refresh(m_ServerlistType);
+	}
 	else
+	{
+		RecheckOfficial();
 		LoadDDNetRanks();
+	}
 
 	return m_pDDNetInfo;
 }
