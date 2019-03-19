@@ -436,9 +436,11 @@ void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 
 void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 {
-	int Fav = pEntry->m_Info.m_Favorite;
+	bool Fav = pEntry->m_Info.m_Favorite;
+	bool Off = pEntry->m_Info.m_Official;
 	pEntry->m_Info = Info;
 	pEntry->m_Info.m_Favorite = Fav;
+	pEntry->m_Info.m_Official = Off;
 	pEntry->m_Info.m_NetAddr = pEntry->m_Addr;
 
 	// all these are just for nice compatibility
@@ -481,7 +483,24 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	for(i = 0; i < m_NumFavoriteServers; i++)
 	{
 		if(net_addr_comp(&Addr, &m_aFavoriteServers[i]) == 0)
-			pEntry->m_Info.m_Favorite = 1;
+		{
+			pEntry->m_Info.m_Favorite = true;
+			break;
+		}
+	}
+
+	// check if it's an official server
+	for(int i = 0; i < m_NumDDNetCountries; i++)
+	{
+		CDDNetCountry *pCntr = &m_aDDNetCountries[i];
+		for(int j = 0; j < pCntr->m_NumServers; j++)
+		{
+			if(net_addr_comp(&Addr, &pCntr->m_aServers[j]) == 0)
+			{
+				pEntry->m_Info.m_Official = true;
+				break;
+			}
+		}
 	}
 
 	// add to the hash list
@@ -952,7 +971,7 @@ void CServerBrowser::AddFavorite(const NETADDR &Addr)
 	m_aFavoriteServers[m_NumFavoriteServers++] = Addr;
 	pEntry = Find(Addr);
 	if(pEntry)
-		pEntry->m_Info.m_Favorite = 1;
+		pEntry->m_Info.m_Favorite = true;
 
 	if(g_Config.m_Debug)
 	{
@@ -978,7 +997,7 @@ void CServerBrowser::RemoveFavorite(const NETADDR &Addr)
 
 			pEntry = Find(Addr);
 			if(pEntry)
-				pEntry->m_Info.m_Favorite = 0;
+				pEntry->m_Info.m_Favorite = false;
 
 			return;
 		}
@@ -1069,6 +1088,22 @@ void CServerBrowser::LoadDDNetServers()
 	}
 }
 
+void CServerBrowser::RecheckOfficial()
+{
+	for(int i = 0; i < m_NumDDNetCountries; i++)
+	{
+		CDDNetCountry *pCntr = &m_aDDNetCountries[i];
+		for(int j = 0; j < pCntr->m_NumServers; j++)
+		{
+			CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
+			if(pEntry)
+			{
+				pEntry->m_Info.m_Official = true;
+			}
+		}
+	}
+}
+
 void CServerBrowser::LoadDDNetRanks()
 {
 	for(int i = 0; i < m_NumServers; i++)
@@ -1144,9 +1179,14 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 	LoadDDNetServers();
 
 	if(m_NumServers == 0)
+	{
 		Refresh(m_ServerlistType);
+	}
 	else
+	{
+		RecheckOfficial();
 		LoadDDNetRanks();
+	}
 
 	return m_pDDNetInfo;
 }
