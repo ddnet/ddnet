@@ -85,7 +85,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 {
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
-	m_pThread = thread_init(ThreadFunc, this);
+	m_pThread = thread_init(ThreadFunc, this, "CGraphicsBackend_Threaded");
 	m_BufferDone.signal();
 }
 
@@ -93,7 +93,8 @@ void CGraphicsBackend_Threaded::StopProcessor()
 {
 	m_Shutdown = true;
 	m_Activity.signal();
-	thread_wait(m_pThread);
+	if(m_pThread)
+		thread_wait(m_pThread);
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)

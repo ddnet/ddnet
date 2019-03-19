@@ -57,8 +57,7 @@ m_pServer(pGameServer->Server())
 
 	CSqlConnector::ResetReachable();
 
-	void* InitThread = thread_init(ExecSqlFunc, new CSqlExecData(Init, new CSqlData()));
-	thread_detach(InitThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(Init, new CSqlData()), "SqlScore constructor");
 }
 
 
@@ -166,8 +165,7 @@ void CSqlScore::CheckBirthday(int ClientID)
 	CSqlPlayerData *Tmp = new CSqlPlayerData();
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = Server()->ClientName(ClientID);
-	void *CheckThread = thread_init(ExecSqlFunc, new CSqlExecData(CheckBirthdayThread, Tmp));
-	thread_detach(CheckThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(CheckBirthdayThread, Tmp), "birthday check");
 }
 
 bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -218,8 +216,7 @@ void CSqlScore::LoadScore(int ClientID)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = Server()->ClientName(ClientID);
 
-	void *LoadThread = thread_init(ExecSqlFunc, new CSqlExecData(LoadScoreThread, Tmp));
-	thread_detach(LoadThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(LoadScoreThread, Tmp), "load score");
 }
 
 // update stuff
@@ -284,8 +281,7 @@ void CSqlScore::MapVote(int ClientID, const char* MapName)
 	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 
-	void *VoteThread = thread_init(ExecSqlFunc, new CSqlExecData(MapVoteThread, Tmp));
-	thread_detach(VoteThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(MapVoteThread, Tmp), "map vote");
 }
 
 bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -381,8 +377,7 @@ void CSqlScore::MapInfo(int ClientID, const char* MapName)
 	sqlstr::ClearString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 	sqlstr::FuzzyString(Tmp->m_aFuzzyMap, sizeof(Tmp->m_aFuzzyMap));
 
-	void *InfoThread = thread_init(ExecSqlFunc, new CSqlExecData(MapInfoThread, Tmp));
-	thread_detach(InfoThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(MapInfoThread, Tmp), "map info");
 }
 
 bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -484,8 +479,7 @@ void CSqlScore::SaveScore(int ClientID, float Time, float CpTime[NUM_CHECKPOINTS
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		Tmp->m_aCpCurrent[i] = CpTime[i];
 
-	void *SaveThread = thread_init(ExecSqlFunc, new CSqlExecData(SaveScoreThread, Tmp, false));
-	thread_detach(SaveThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(SaveScoreThread, Tmp, false), "save score");
 }
 
 bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -590,8 +584,7 @@ void CSqlScore::SaveTeamScore(int* aClientIDs, unsigned int Size, float Time)
 	Tmp->m_Size = Size;
 	Tmp->m_Time = Time;
 
-	void *SaveTeamThread = thread_init(ExecSqlFunc, new CSqlExecData(SaveTeamScoreThread, Tmp, false));
-	thread_detach(SaveTeamThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(SaveTeamScoreThread, Tmp, false), "save team score");
 }
 
 bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -743,8 +736,7 @@ void CSqlScore::ShowRank(int ClientID, const char* pName, bool Search)
 	Tmp->m_Search = Search;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
-	void *RankThread = thread_init(ExecSqlFunc, new CSqlExecData(ShowRankThread, Tmp));
-	thread_detach(RankThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowRankThread, Tmp), "show rank");
 }
 
 bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -813,8 +805,7 @@ void CSqlScore::ShowTeamRank(int ClientID, const char* pName, bool Search)
 	Tmp->m_Search = Search;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
-	void *TeamRankThread = thread_init(ExecSqlFunc, new CSqlExecData(ShowTeamRankThread, Tmp));
-	thread_detach(TeamRankThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTeamRankThread, Tmp), "show team rank");
 }
 
 bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -899,8 +890,7 @@ void CSqlScore::ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserDa
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 
-	void *Top5Thread = thread_init(ExecSqlFunc, new CSqlExecData(ShowTop5Thread, Tmp));
-	thread_detach(Top5Thread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTop5Thread, Tmp), "show top5");
 }
 
 bool CSqlScore::ShowTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -960,8 +950,7 @@ void CSqlScore::ShowTeamTop5(IConsole::IResult *pResult, int ClientID, void *pUs
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 
-	void *TeamTop5Thread = thread_init(ExecSqlFunc, new CSqlExecData(ShowTeamTop5Thread, Tmp));
-	thread_detach(TeamTop5Thread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTeamTop5Thread, Tmp), "show team top5");
 }
 
 bool CSqlScore::ShowTeamTop5Thread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -1069,8 +1058,7 @@ void CSqlScore::ShowTimes(int ClientID, int Debut)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Search = false;
 
-	void *TimesThread = thread_init(ExecSqlFunc, new CSqlExecData(ShowTimesThread, Tmp));
-	thread_detach(TimesThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTimesThread, Tmp), "show times");
 }
 
 void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
@@ -1081,8 +1069,7 @@ void CSqlScore::ShowTimes(int ClientID, const char* pName, int Debut)
 	Tmp->m_Name = pName;
 	Tmp->m_Search = true;
 
-	void *TimesThread = thread_init(ExecSqlFunc, new CSqlExecData(ShowTimesThread, Tmp));
-	thread_detach(TimesThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTimesThread, Tmp), "show name's times");
 }
 
 bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -1170,8 +1157,7 @@ void CSqlScore::ShowPoints(int ClientID, const char* pName, bool Search)
 	Tmp->m_Search = Search;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
 
-	void *PointsThread = thread_init(ExecSqlFunc, new CSqlExecData(ShowPointsThread, Tmp));
-	thread_detach(PointsThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowPointsThread, Tmp), "show points");
 }
 
 bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -1227,8 +1213,7 @@ void CSqlScore::ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pU
 	Tmp->m_Num = Debut;
 	Tmp->m_ClientID = ClientID;
 
-	void *TopPointsThread = thread_init(ExecSqlFunc, new CSqlExecData(ShowTopPointsThread, Tmp));
-	thread_detach(TopPointsThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(ShowTopPointsThread, Tmp), "show top points");
 }
 
 bool CSqlScore::ShowTopPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -1285,8 +1270,7 @@ void CSqlScore::RandomMap(int ClientID, int stars)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = GameServer()->Server()->ClientName(ClientID);
 
-	void *RandomThread = thread_init(ExecSqlFunc, new CSqlExecData(RandomMapThread, Tmp));
-	thread_detach(RandomThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(RandomMapThread, Tmp), "random map");
 }
 
 bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -1343,8 +1327,7 @@ void CSqlScore::RandomUnfinishedMap(int ClientID, int stars)
 	Tmp->m_ClientID = ClientID;
 	Tmp->m_Name = GameServer()->Server()->ClientName(ClientID);
 
-	void *RandomUnfinishedThread = thread_init(ExecSqlFunc, new CSqlExecData(RandomUnfinishedMapThread, Tmp));
-	thread_detach(RandomUnfinishedThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(RandomUnfinishedMapThread, Tmp), "random unfinished map");
 }
 
 bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -1414,8 +1397,7 @@ void CSqlScore::SaveTeam(int Team, const char* Code, int ClientID, const char* S
 	Tmp->m_Code = Code;
 	str_copy(Tmp->m_Server, Server, sizeof(Tmp->m_Server));
 
-	void *SaveThread = thread_init(ExecSqlFunc, new CSqlExecData(SaveTeamThread, Tmp, false));
-	thread_detach(SaveThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(SaveTeamThread, Tmp, false), "save team");
 }
 
 bool CSqlScore::SaveTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)
@@ -1548,8 +1530,7 @@ void CSqlScore::LoadTeam(const char* Code, int ClientID)
 	Tmp->m_Code = Code;
 	Tmp->m_ClientID = ClientID;
 
-	void *LoadThread = thread_init(ExecSqlFunc, new CSqlExecData(LoadTeamThread, Tmp));
-	thread_detach(LoadThread);
+	thread_init_and_detach(ExecSqlFunc, new CSqlExecData(LoadTeamThread, Tmp), "load team");
 }
 
 bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData, bool HandleFailure)

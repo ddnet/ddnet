@@ -6019,8 +6019,7 @@ void CEditor::DoMapBorder()
 
 void CEditor::CreateUndoStep()
 {
-	void *CreateThread = thread_init(CreateUndoStepThread, this);
-	thread_detach(CreateThread);
+	thread_init_and_detach(CreateUndoStepThread, this, "Editor Undo");
 }
 
 void CEditor::CreateUndoStepThread(void *pUser)
