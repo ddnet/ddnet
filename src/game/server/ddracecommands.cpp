@@ -516,14 +516,8 @@ void CGameContext::ConVoteMutes(IConsole::IResult *pResult, void *pUserData)
 	for (int i = 0; i < pSelf->m_NumVoteMutes; i++)
 	{
 		net_addr_str(&pSelf->m_aVoteMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
-		str_format(
-				aBuf,
-				sizeof aBuf,
-				"%d: \"%s\", %d seconds left",
-				i,
-				aIpBuf,
-				(pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick())
-				/ pSelf->Server()->TickSpeed());
+		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", i,
+				aIpBuf, (pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes", aBuf);
 	}
 }
@@ -609,14 +603,8 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 	for (int i = 0; i < pSelf->m_NumMutes; i++)
 	{
 		net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
-		str_format(
-				aBuf,
-				sizeof aBuf,
-				"%d: \"%s\", %d seconds left",
-				i,
-				aIpBuf,
-				(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick())
-				/ pSelf->Server()->TickSpeed());
+		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", i, aIpBuf,
+				(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
 	}
 }
