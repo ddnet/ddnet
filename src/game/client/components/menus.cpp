@@ -208,7 +208,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	if(CheckAble)
 	{
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h, 0);
+		UI()->DoLabel(&c, "\xEE\x97\x8D", c.h*ms_FontmodHeight, 0);
 		TextRender()->SetCurFont(NULL);
 	}
 	else
