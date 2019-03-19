@@ -468,6 +468,8 @@ int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, 
 	}
 
 	RenderTools()->DrawUIRect(&ClearButton, vec4(1, 1, 1, 0.33f) * ButtonColorMul(pClearID), Corners&~CUI::CORNER_L, 3.0f);
+	// Fix alignment of x inside button
+	ClearButton.x -= 1.0f;
 	UI()->DoLabel(&ClearButton, "×", ClearButton.h * ms_FontmodHeight, 0);
 	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
 	{
