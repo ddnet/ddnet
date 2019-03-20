@@ -1019,7 +1019,7 @@ int str_length(const char *str);
 		... - Parameters for the formatting.
 
 	Returns:
-		Length of written string
+		Length of written string, even if it has been truncated
 
 	Remarks:
 		- See the C manual for syntax for the printf formatting string.
