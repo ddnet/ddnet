@@ -2254,11 +2254,6 @@ void CCharacter::DDRaceInit()
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCID();
-	if(g_Config.m_SvTeam == 2)
-	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Please join a team before you start");
-		m_LastStartWarning = Server()->Tick();
-	}
 	m_TeleCheckpoint = 0;
 	m_EndlessHook = g_Config.m_SvEndlessDrag;
 	m_Hit = g_Config.m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN;
@@ -2284,6 +2279,12 @@ void CCharacter::DDRaceInit()
 				}
 			}
 		}
+	}
+
+	if(g_Config.m_SvTeam == 2 && Team == TEAM_FLOCK)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Please join a team before you start");
+		m_LastStartWarning = Server()->Tick();
 	}
 }
 
