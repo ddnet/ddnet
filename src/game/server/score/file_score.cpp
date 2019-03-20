@@ -95,8 +95,7 @@ void CFileScore::SaveScoreThread(void *pUser)
 
 void CFileScore::Save()
 {
-	void *pSaveThread = thread_init(SaveScoreThread, this);
-	thread_detach(pSaveThread);
+	thread_init_and_detach(SaveScoreThread, this, "FileScore save");
 }
 
 void CFileScore::Init()

@@ -125,7 +125,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	char str[1024*4];
 	int i;
 
-	//str_format(str, sizeof(str), "[%08x][%s]: ", (int)time(0), sys);
 	char timestr[80];
 	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
 
@@ -364,8 +363,7 @@ int io_close(IOHANDLE io)
 
 int io_flush(IOHANDLE io)
 {
-	fflush((FILE*)io);
-	return 0;
+	return fflush((FILE*)io);
 }
 
 
@@ -524,7 +522,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	aio->finish = ASYNCIO_RUNNING;
 	aio->refcount = 2;
 
-	aio->thread = thread_init(aio_thread, aio);
+	aio->thread = thread_init(aio_thread, aio, "aio");
 	if(!aio->thread)
 	{
 		free(aio->buffer);
@@ -706,7 +704,7 @@ static unsigned long __stdcall thread_run(void *user)
 	return 0;
 }
 
-void *thread_init(void (*threadfunc)(void *), void *u)
+void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 {
 	struct THREAD_RUN *data = malloc(sizeof(*data));
 	data->threadfunc = threadfunc;
@@ -714,8 +712,10 @@ void *thread_init(void (*threadfunc)(void *), void *u)
 #if defined(CONF_FAMILY_UNIX)
 	{
 		pthread_t id;
-		if(pthread_create(&id, NULL, thread_run, data) != 0)
+		int result = pthread_create(&id, NULL, thread_run, data);
+		if(result != 0)
 		{
+			dbg_msg("thread", "creating %s thread failed: %d", name, result);
 			return 0;
 		}
 		return (void*)id;
@@ -744,7 +744,9 @@ void thread_wait(void *thread)
 void thread_yield()
 {
 #if defined(CONF_FAMILY_UNIX)
-	sched_yield();
+	int result = sched_yield();
+	if(result != 0)
+		dbg_msg("thread", "yield failed: %d", errno);
 #elif defined(CONF_FAMILY_WINDOWS)
 	Sleep(0);
 #else
@@ -755,7 +757,9 @@ void thread_yield()
 void thread_sleep(int microseconds)
 {
 #if defined(CONF_FAMILY_UNIX)
-	usleep(microseconds);
+	int result = usleep(microseconds);
+	if(result == -1)
+		dbg_msg("thread", "sleep failed: %d", errno);
 #elif defined(CONF_FAMILY_WINDOWS)
 	Sleep(microseconds/1000);
 #else
@@ -766,7 +770,9 @@ void thread_sleep(int microseconds)
 void thread_detach(void *thread)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_detach((pthread_t)(thread));
+	int result = pthread_detach((pthread_t)(thread));
+	if(result != 0)
+		dbg_msg("thread", "detach failed: %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	CloseHandle(thread);
 #else
@@ -774,6 +780,13 @@ void thread_detach(void *thread)
 #endif
 }
 
+void *thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
+{
+	void *thread = thread_init(threadfunc, u, name);
+	if(thread)
+		thread_detach(thread);
+	return thread;
+}
 
 
 
@@ -788,9 +801,20 @@ typedef CRITICAL_SECTION LOCKINTERNAL;
 LOCK lock_create()
 {
 	LOCKINTERNAL *lock = (LOCKINTERNAL *)malloc(sizeof(*lock));
+#if defined(CONF_FAMILY_UNIX)
+	int result;
+#endif
+
+	if(!lock)
+		return 0;
 
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_init(lock, 0x0);
+	result = pthread_mutex_init(lock, 0x0);
+	if(result != 0)
+	{
+		dbg_msg("lock", "init failed: %d", result);
+		return 0;
+	}
 #elif defined(CONF_FAMILY_WINDOWS)
 	InitializeCriticalSection((LPCRITICAL_SECTION)lock);
 #else
@@ -802,7 +826,9 @@ LOCK lock_create()
 void lock_destroy(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_destroy((LOCKINTERNAL *)lock);
+	int result = pthread_mutex_destroy((LOCKINTERNAL *)lock);
+	if(result != 0)
+		dbg_msg("lock", "destroy failed: %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	DeleteCriticalSection((LPCRITICAL_SECTION)lock);
 #else
@@ -825,7 +851,9 @@ int lock_trylock(LOCK lock)
 void lock_wait(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_lock((LOCKINTERNAL *)lock);
+	int result = pthread_mutex_lock((LOCKINTERNAL *)lock);
+	if(result != 0)
+		dbg_msg("lock", "lock failed: %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	EnterCriticalSection((LPCRITICAL_SECTION)lock);
 #else
@@ -836,7 +864,9 @@ void lock_wait(LOCK lock)
 void lock_unlock(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_unlock((LOCKINTERNAL *)lock);
+	int result = pthread_mutex_unlock((LOCKINTERNAL *)lock);
+	if(result != 0)
+		dbg_msg("lock", "unlock failed: %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	LeaveCriticalSection((LPCRITICAL_SECTION)lock);
 #else
@@ -866,10 +896,28 @@ void sphore_destroy(SEMAPHORE *sem)
 	sem_unlink(aBuf);
 }
 #elif defined(CONF_FAMILY_UNIX)
-void sphore_init(SEMAPHORE *sem) { sem_init(sem, 0, 0); }
-void sphore_wait(SEMAPHORE *sem) { sem_wait(sem); }
-void sphore_signal(SEMAPHORE *sem) { sem_post(sem); }
-void sphore_destroy(SEMAPHORE *sem) { sem_destroy(sem); }
+void sphore_init(SEMAPHORE *sem)
+{
+	if(sem_init(sem, 0, 0) != 0)
+		dbg_msg("sphore", "init failed: %d", errno);
+}
+
+void sphore_wait(SEMAPHORE *sem)
+{
+	if(sem_wait(sem) != 0)
+		dbg_msg("sphore", "wait failed: %d", errno);
+}
+
+void sphore_signal(SEMAPHORE *sem)
+{
+	if(sem_post(sem) != 0)
+		dbg_msg("sphore", "post failed: %d", errno);
+}
+void sphore_destroy(SEMAPHORE *sem)
+{
+	if(sem_destroy(sem) != 0)
+		dbg_msg("sphore", "destroy failed: %d", errno);
+}
 #endif
 
 static int new_tick = -1;
@@ -901,7 +949,11 @@ int64 time_get_impl()
 		return last;
 #elif defined(CONF_FAMILY_UNIX)
 		struct timespec spec;
-		clock_gettime(CLOCK_MONOTONIC, &spec);
+		if(clock_gettime(CLOCK_MONOTONIC, &spec) != 0)
+		{
+			dbg_msg("clock", "gettime failed: %d", errno);
+			return 0;
+		}
 		last = (int64)spec.tv_sec*(int64)1000000 + (int64)spec.tv_nsec / 1000;
 		return last;
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -1247,7 +1299,8 @@ static void priv_net_close_socket(int sock)
 #if defined(CONF_FAMILY_WINDOWS)
 	closesocket(sock);
 #else
-	close(sock);
+	if(close(sock) != 0)
+		dbg_msg("socket", "close failed: %d", errno);
 #endif
 }
 
@@ -1307,7 +1360,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	if (domain == AF_INET && type == SOCK_STREAM)
 	{
 		int option = 1;
-		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+		if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) != 0)
+			dbg_msg("socket", "Setting SO_REUSEADDR failed: %d", errno);
 	}
 #endif
 
@@ -1316,7 +1370,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	if(domain == AF_INET6)
 	{
 		int ipv6only = 1;
-		setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&ipv6only, sizeof(ipv6only));
+		if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&ipv6only, sizeof(ipv6only)) != 0)
+			dbg_msg("socket", "Setting V6ONLY failed: %d", errno);
 	}
 #endif
 
@@ -1362,13 +1417,15 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.ipv4sock = socket;
 
 			/* set broadcast */
-			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
+			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) != 0)
+				dbg_msg("socket", "Setting BROADCAST on ipv4 failed: %d", errno);
 
 			{
 				/* set DSCP/TOS */
 				int iptos = 0x10 /* IPTOS_LOWDELAY */;
 				//int iptos = 46; /* High Priority */
-				setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos));
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos)) != 0)
+					dbg_msg("socket", "Setting TOS on ipv4 failed: %d", errno);
 			}
 		}
 	}
@@ -1407,13 +1464,15 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock.ipv6sock = socket;
 
 			/* set broadcast */
-			setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast));
+			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char*)&broadcast, sizeof(broadcast)) != 0)
+					dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", errno);
 
 			{
 				/* set DSCP/TOS */
 				int iptos = 0x10 /* IPTOS_LOWDELAY */;
 				//int iptos = 46; /* High Priority */
-				setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos));
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char*)&iptos, sizeof(iptos)) != 0)
+					dbg_msg("socket", "Setting TOS on ipv6 failed: %d", errno);
 			}
 		}
 	}
@@ -1692,7 +1751,8 @@ int net_set_non_blocking(NETSOCKET sock)
 #if defined(CONF_FAMILY_WINDOWS)
 		ioctlsocket(sock.ipv4sock, FIONBIO, (unsigned long *)&mode);
 #else
-		ioctl(sock.ipv4sock, FIONBIO, (unsigned long *)&mode);
+		if(ioctl(sock.ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
+			dbg_msg("socket", "setting ipv4 non-blocking failed: %d", errno);
 #endif
 	}
 
@@ -1701,7 +1761,8 @@ int net_set_non_blocking(NETSOCKET sock)
 #if defined(CONF_FAMILY_WINDOWS)
 		ioctlsocket(sock.ipv6sock, FIONBIO, (unsigned long *)&mode);
 #else
-		ioctl(sock.ipv6sock, FIONBIO, (unsigned long *)&mode);
+		if(ioctl(sock.ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
+			dbg_msg("socket", "setting ipv6 non-blocking failed: %d", errno);
 #endif
 	}
 
@@ -1716,7 +1777,8 @@ int net_set_blocking(NETSOCKET sock)
 #if defined(CONF_FAMILY_WINDOWS)
 		ioctlsocket(sock.ipv4sock, FIONBIO, (unsigned long *)&mode);
 #else
-		ioctl(sock.ipv4sock, FIONBIO, (unsigned long *)&mode);
+		if(ioctl(sock.ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
+			dbg_msg("socket", "setting ipv4 blocking failed: %d", errno);
 #endif
 	}
 
@@ -1725,7 +1787,8 @@ int net_set_blocking(NETSOCKET sock)
 #if defined(CONF_FAMILY_WINDOWS)
 		ioctlsocket(sock.ipv6sock, FIONBIO, (unsigned long *)&mode);
 #else
-		ioctl(sock.ipv6sock, FIONBIO, (unsigned long *)&mode);
+		if(ioctl(sock.ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
+			dbg_msg("socket", "setting ipv6 blocking failed: %d", errno);
 #endif
 	}
 
