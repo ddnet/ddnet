@@ -91,3 +91,18 @@ bool IsValidEntity(int Index)
 		||  Index == ENTITY_DOOR
 	);
 }
+
+bool IsRotatableTile(int Index)
+{
+	return (
+		    Index == TILE_STOP
+		||  Index == TILE_STOPS
+		||  Index == TILE_CP
+		||  Index == TILE_CP_F
+		||  Index == TILE_THROUGH_DIR
+		||  Index == TILE_ENTITIES_OFF_1
+		||  Index == TILE_ENTITIES_OFF_2
+		||  Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN_EX
+		||  Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN
+	);
+}

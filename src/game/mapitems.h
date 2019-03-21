@@ -472,5 +472,6 @@ bool IsValidTeleTile(int Index);
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
 bool IsValidEntity(int Index);
+bool IsRotatableTile(int Index);
 
 #endif
