@@ -32,7 +32,17 @@ CChat::CChat()
 		// reset the container indices, so the text containers can be deleted on reset
 		m_aLines[i].m_TextContainerIndex = -1;
 	}
+
+	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
+	#include <game/server/ddracechat.h>
+	m_Commands.sort_range();
+
 	OnReset();
+}
+
+void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
+{
+	m_Commands.add_unsorted(CCommand{pName, pParams});
 }
 
 void CChat::OnWindowResize()
@@ -294,81 +304,149 @@ bool CChat::OnInput(IInput::CEvent Event)
 			str_copy(m_aCompletionBuffer, m_Input.GetString()+m_PlaceholderOffset, min(static_cast<int>(sizeof(m_aCompletionBuffer)), m_PlaceholderLength+1));
 		}
 
-		// find next possible name
-		const char *pCompletionString = 0;
+		if(m_aCompletionBuffer[0] == '/')
+		{
+			CCommand *pCompletionCommand = 0;
+
+			const size_t NumCommands = m_Commands.size();
+
+			if(m_ReverseTAB)
+				m_CompletionChosen = (m_CompletionChosen-1 + 2*NumCommands)%(2*NumCommands);
+			else
+				m_CompletionChosen = (m_CompletionChosen+1)%(2*NumCommands);
+
+			const char *pCommandStart = m_aCompletionBuffer+1;
+			for(size_t i = 0; i < 2*NumCommands; ++i)
+			{
+				int SearchType;
+				int Index;
+
+				if(m_ReverseTAB)
+				{
+					SearchType = ((m_CompletionChosen-i +2*NumCommands)%(2*NumCommands))/NumCommands;
+					Index = (m_CompletionChosen-i + NumCommands )%NumCommands;
+				}
+				else
+				{
+					SearchType = ((m_CompletionChosen+i)%(2*NumCommands))/NumCommands;
+					Index = (m_CompletionChosen+i)%NumCommands;
+				}
+
+				auto &Command = m_Commands[Index];
+
+				if(str_comp_nocase_num(Command.pName, pCommandStart, str_length(pCommandStart)) == 0)
+				{
+					pCompletionCommand = &Command;
+					m_CompletionChosen = Index+SearchType*NumCommands;
+					break;
+				}
+			}
+
+			// insert the command
+			if(pCompletionCommand)
+			{
+				char aBuf[256];
+				// add part before the name
+				str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+
+				// add the command
+				str_append(aBuf, "/", sizeof(aBuf));
+				str_append(aBuf, pCompletionCommand->pName, sizeof(aBuf));
+
+				// add separator
+				const char *pSeparator = pCompletionCommand->pParams[0] == '\0' ? "" : " ";
+				str_append(aBuf, pSeparator, sizeof(aBuf));
+				if(*pSeparator)
+					str_append(aBuf, pSeparator, sizeof(aBuf));
+
+				// add part after the name
+				str_append(aBuf, m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength, sizeof(aBuf));
+
+				m_PlaceholderLength = str_length(pSeparator)+str_length(pCompletionCommand->pName)+1;
+				m_OldChatStringLength = m_Input.GetLength();
+				m_Input.Set(aBuf); // TODO: Use Add instead
+				m_Input.SetCursorOffset(m_PlaceholderOffset+m_PlaceholderLength);
+				m_InputUpdate = true;
+			}
+		}
+		else
+		{
+			// find next possible name
+			const char *pCompletionString = 0;
 
 			if(m_ReverseTAB)
 				m_CompletionChosen = (m_CompletionChosen-1 + 2*MAX_CLIENTS)%(2*MAX_CLIENTS);
 			else
 				m_CompletionChosen = (m_CompletionChosen+1)%(2*MAX_CLIENTS);
 
-		for(int i = 0; i < 2*MAX_CLIENTS; ++i)
-		{
-			int SearchType;
-			int Index;
-
-			if(m_ReverseTAB)
+			for(int i = 0; i < 2*MAX_CLIENTS; ++i)
 			{
-				SearchType = ((m_CompletionChosen-i +2*MAX_CLIENTS)%(2*MAX_CLIENTS))/MAX_CLIENTS;
-				Index = (m_CompletionChosen-i + MAX_CLIENTS )%MAX_CLIENTS;
-			}
-			else
-			{
-				SearchType = ((m_CompletionChosen+i)%(2*MAX_CLIENTS))/MAX_CLIENTS;
-				Index = (m_CompletionChosen+i)%MAX_CLIENTS;
-			}
+				int SearchType;
+				int Index;
+
+				if(m_ReverseTAB)
+				{
+					SearchType = ((m_CompletionChosen-i +2*MAX_CLIENTS)%(2*MAX_CLIENTS))/MAX_CLIENTS;
+					Index = (m_CompletionChosen-i + MAX_CLIENTS )%MAX_CLIENTS;
+				}
+				else
+				{
+					SearchType = ((m_CompletionChosen+i)%(2*MAX_CLIENTS))/MAX_CLIENTS;
+					Index = (m_CompletionChosen+i)%MAX_CLIENTS;
+				}
 
 
-			if(!m_pClient->m_Snap.m_paInfoByName[Index])
-				continue;
+				if(!m_pClient->m_Snap.m_paInfoByName[Index])
+					continue;
 
-			int Index2 = m_pClient->m_Snap.m_paInfoByName[Index]->m_ClientID;
+				int Index2 = m_pClient->m_Snap.m_paInfoByName[Index]->m_ClientID;
 
-			bool Found = false;
-			if(SearchType == 1)
-			{
-				if(str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
-					str_utf8_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
+				bool Found = false;
+				if(SearchType == 1)
+				{
+					if(str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
+						str_utf8_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
+						Found = true;
+				}
+				else if(!str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
 					Found = true;
-			}
-			else if(!str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
-				Found = true;
 
-			if(Found)
+				if(Found)
+				{
+					pCompletionString = m_pClient->m_aClients[Index2].m_aName;
+					m_CompletionChosen = Index+SearchType*MAX_CLIENTS;
+					break;
+				}
+			}
+
+			// insert the name
+			if(pCompletionString)
 			{
-				pCompletionString = m_pClient->m_aClients[Index2].m_aName;
-				m_CompletionChosen = Index+SearchType*MAX_CLIENTS;
-				break;
+				char aBuf[256];
+				// add part before the name
+				str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+
+				// add the name
+				str_append(aBuf, pCompletionString, sizeof(aBuf));
+
+				// add separator
+				const char *pSeparator = "";
+				if(*(m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength) != ' ')
+					pSeparator = m_PlaceholderOffset == 0 ? ": " : " ";
+				else if(m_PlaceholderOffset == 0)
+					pSeparator = ":";
+				if(*pSeparator)
+					str_append(aBuf, pSeparator, sizeof(aBuf));
+
+				// add part after the name
+				str_append(aBuf, m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength, sizeof(aBuf));
+
+				m_PlaceholderLength = str_length(pSeparator)+str_length(pCompletionString);
+				m_OldChatStringLength = m_Input.GetLength();
+				m_Input.Set(aBuf); // TODO: Use Add instead
+				m_Input.SetCursorOffset(m_PlaceholderOffset+m_PlaceholderLength);
+				m_InputUpdate = true;
 			}
-		}
-
-		// insert the name
-		if(pCompletionString)
-		{
-			char aBuf[256];
-			// add part before the name
-			str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
-
-			// add the name
-			str_append(aBuf, pCompletionString, sizeof(aBuf));
-
-			// add separator
-			const char *pSeparator = "";
-			if(*(m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength) != ' ')
-				pSeparator = m_PlaceholderOffset == 0 ? ": " : " ";
-			else if(m_PlaceholderOffset == 0)
-				pSeparator = ":";
-			if(*pSeparator)
-				str_append(aBuf, pSeparator, sizeof(aBuf));
-
-			// add part after the name
-			str_append(aBuf, m_Input.GetString()+m_PlaceholderOffset+m_PlaceholderLength, sizeof(aBuf));
-
-			m_PlaceholderLength = str_length(pSeparator)+str_length(pCompletionString);
-			m_OldChatStringLength = m_Input.GetLength();
-			m_Input.Set(aBuf); // TODO: Use Add instead
-			m_Input.SetCursorOffset(m_PlaceholderOffset+m_PlaceholderLength);
-			m_InputUpdate = true;
 		}
 	}
 	else

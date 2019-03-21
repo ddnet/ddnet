@@ -60,6 +60,17 @@ class CChat : public CComponent
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
 
+	struct CCommand
+	{
+		const char *pName;
+		const char *pParams;
+
+		bool operator <(const CCommand &Other) const { return str_comp(pName, Other.pName) < 0; }
+		bool operator <=(const CCommand &Other) const { return str_comp(pName, Other.pName) <= 0; }
+		bool operator ==(const CCommand &Other) const { return str_comp(pName, Other.pName) == 0; }
+	};
+
+	sorted_array<CCommand> m_Commands;
 	bool m_ReverseTAB;
 
 	struct CHistoryEntry
@@ -85,14 +96,11 @@ public:
 	CChat();
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
-
 	void AddLine(int ClientID, int Team, const char *pLine);
-
 	void EnableMode(int Team);
-
 	void Say(int Team, const char *pLine);
-
 	void SayChat(const char *pLine);
+	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
 
 	virtual void OnWindowResize();
 	virtual void OnReset();
