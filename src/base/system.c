@@ -2336,14 +2336,26 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 	va_start(ap, format);
 	ret = _vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
+
+	buffer[buffer_size-1] = 0; /* assure null termination */
+
+	/* _vsnprintf is documented to return negative values on truncation, but
+	 * in practice we didn't see that. let's handle it anyway just in case. */
+	if(ret < 0)
+		ret = buffer_size - 1;
 #else
 	va_list ap;
 	va_start(ap, format);
 	ret = vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
+
+	/* null termination is assured by definition of vsnprintf */
 #endif
 
-	buffer[buffer_size-1] = 0; /* assure null termination */
+	/* a return value of buffer_size or more indicates truncated output */
+	if(ret >= buffer_size)
+		ret = buffer_size - 1;
+
 	return ret;
 }
 

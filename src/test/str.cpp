@@ -166,3 +166,14 @@ TEST(Str, InList)
 	EXPECT_FALSE(str_in_list("", ",", ""));
 	EXPECT_FALSE(str_in_list("", ",", "xyz"));
 }
+
+TEST(Str, StrFormat)
+{
+	char aBuf[4];
+	EXPECT_EQ(str_format(aBuf, 4, "%d:", 9), 2);
+	EXPECT_STREQ(aBuf, "9:");
+	EXPECT_EQ(str_format(aBuf, 4, "%d: ", 9), 3);
+	EXPECT_STREQ(aBuf, "9: ");
+	EXPECT_EQ(str_format(aBuf, 4, "%d: ", 99), 3);
+	EXPECT_STREQ(aBuf, "99:");
+}
