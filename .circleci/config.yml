@@ -52,11 +52,17 @@ jobs:
           cd build
           env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DDOWNLOAD_GTEST=ON ..
           make everything
+          make package_default
+          mkdir -p /tmp/artifacts
+          cp DDNet-*-linux_x86_64.tar.xz /tmp/artifacts
       - run: |
-          mkdir build2
-          cd build2
+          mkdir noautoupdate
+          cd noautoupdate
           env CFLAGS="-Wdeclaration-after-statement -Werror" CXXFLAGS="-Werror" cmake -DAUTOUPDATE=OFF -DDOWNLOAD_GTEST=ON ..
           make everything
+
+      - store_artifacts:
+          path: /tmp/artifacts
 
       - persist-to-workspace:
           root: ./
@@ -78,7 +84,7 @@ jobs:
           ./DDNet-Server shutdown
 
       - run: |
-          cd build2
+          cd noautoupdate
           make run_tests
 
 workflows:
