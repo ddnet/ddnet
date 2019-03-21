@@ -141,7 +141,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 		if(g_Config.m_ClShowIDs)
 		{
-			char aBuffer[4];
+			char aBuffer[5];
 			int size = str_format(aBuffer, sizeof(aBuffer), "%d: ", pInfo->m_ClientID);
 			TextRender()->TextEx(&Cursor, aBuffer, size);
 		}
