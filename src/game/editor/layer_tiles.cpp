@@ -18,7 +18,7 @@
 CLayerTiles::CLayerTiles(int w, int h)
 {
 	m_Type = LAYERTYPE_TILES;
-	str_copy(m_aName, "Tiles", sizeof(m_aName));
+	m_aName[0] = '\0';
 	m_Width = w;
 	m_Height = h;
 	m_Image = -1;
