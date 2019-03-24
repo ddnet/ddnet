@@ -53,9 +53,12 @@ MACRO_CONFIG_INT(BrFilterPureMap, br_filter_pure_map, 0, 0, 1, CFGFLAG_SAVE|CFGF
 MACRO_CONFIG_INT(BrFilterCompatversion, br_filter_compatversion, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out non-compatible servers in browser")
 MACRO_CONFIG_INT(BrFilterUnfinishedMap, br_filter_unfinished_map, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show only servers with unfinished maps")
 
-MACRO_CONFIG_STR(BrFilterExcludeCountries, br_filter_exclude_countries, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out ddnet servers by country")
-MACRO_CONFIG_STR(BrFilterExcludeTypes, br_filter_exclude_types, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out ddnet servers by type (mod)")
-MACRO_CONFIG_INT(BrIndicateFinished, br_indicate_finished, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show whether you have finished a DDNet map (transmits your player name to info.ddnet.tw)")
+MACRO_CONFIG_STR(BrFilterExcludeCountries, br_filter_exclude_countries, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out DDNet servers by country")
+MACRO_CONFIG_STR(BrFilterExcludeTypes, br_filter_exclude_types, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out DDNet servers by type (mod)")
+MACRO_CONFIG_INT(BrIndicateFinished, br_indicate_finished, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Show whether you have finished a DDNet map (transmits your player name to info.ddnet.tw/info)")
+
+MACRO_CONFIG_STR(BrFilterExcludeCountriesKoG, br_filter_exclude_countries_kog, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out kog servers by country")
+MACRO_CONFIG_STR(BrFilterExcludeTypesKoG, br_filter_exclude_types_kog, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT, "Filter out kog servers by type (mod)")
 
 MACRO_CONFIG_INT(BrSort, br_sort, 4, 0, 256, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Sorting column in server browser")
 MACRO_CONFIG_INT(BrSortOrder, br_sort_order, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Sorting order in server browser")
