@@ -758,7 +758,8 @@ void thread_sleep(int microseconds)
 {
 #if defined(CONF_FAMILY_UNIX)
 	int result = usleep(microseconds);
-	if(result == -1)
+	/* ignore signal interruption */
+	if(result == -1 && errno != EINTR)
 		dbg_msg("thread", "sleep failed: %d", errno);
 #elif defined(CONF_FAMILY_WINDOWS)
 	Sleep(microseconds/1000);
