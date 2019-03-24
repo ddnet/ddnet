@@ -3342,11 +3342,27 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible = !m_Map.m_lGroups[g]->m_lLayers[i]->m_Visible;
 
 				if(m_Map.m_lGroups[g]->m_lLayers[i]->m_aName[0])
-					str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_lGroups[g]->m_lLayers[i]->m_aName);
-				else if(m_Map.m_lGroups[g]->m_lLayers[i]->m_Type == LAYERTYPE_TILES)
-					str_copy(aBuf, "Tiles", sizeof(aBuf));
+					str_copy(aBuf, m_Map.m_lGroups[g]->m_lLayers[i]->m_aName, sizeof(aBuf));
 				else
-					str_copy(aBuf, "Quads", sizeof(aBuf));
+				{
+					if(m_Map.m_lGroups[g]->m_lLayers[i]->m_Type == LAYERTYPE_TILES)
+					{
+						CLayerTiles *pTiles = (CLayerTiles *)m_Map.m_lGroups[g]->m_lLayers[i];
+						str_copy(aBuf, pTiles->m_Image >= 0 ? m_Map.m_lImages[pTiles->m_Image]->m_aName : "Tiles", sizeof(aBuf));
+					}
+					else if(m_Map.m_lGroups[g]->m_lLayers[i]->m_Type == LAYERTYPE_QUADS)
+					{
+						CLayerQuads *pQuads = (CLayerQuads *)m_Map.m_lGroups[g]->m_lLayers[i];
+						str_copy(aBuf, pQuads->m_Image >= 0 ? m_Map.m_lImages[pQuads->m_Image]->m_aName : "Quads", sizeof(aBuf));
+					}
+					else if(m_Map.m_lGroups[g]->m_lLayers[i]->m_Type == LAYERTYPE_SOUNDS)
+					{
+						CLayerSounds *pSounds = (CLayerSounds *)m_Map.m_lGroups[g]->m_lLayers[i];
+						str_copy(aBuf, pSounds->m_Sound >= 0 ? m_Map.m_lSounds[pSounds->m_Sound]->m_aName : "Sounds", sizeof(aBuf));
+					}
+					if(str_length(aBuf) > 11)
+						str_format(aBuf, sizeof(aBuf), "%.8s...", aBuf);
+				}
 
 				float FontSize = 10.0f;
 				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Button.w)

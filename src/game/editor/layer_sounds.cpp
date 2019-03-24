@@ -8,7 +8,7 @@ static const float s_SourceVisualSize = 32.0f;
 CLayerSounds::CLayerSounds()
 {
 	m_Type = LAYERTYPE_SOUNDS;
-	str_copy(m_aName, "Sounds", sizeof(m_aName));
+	m_aName[0] = '\0';
 	m_Sound = -1;
 }
 

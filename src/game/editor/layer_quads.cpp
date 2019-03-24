@@ -13,7 +13,7 @@
 CLayerQuads::CLayerQuads()
 {
 	m_Type = LAYERTYPE_QUADS;
-	str_copy(m_aName, "Quads", sizeof(m_aName));
+	m_aName[0] = '\0';
 	m_Image = -1;
 }
 
