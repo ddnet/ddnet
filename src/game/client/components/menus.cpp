@@ -806,7 +806,16 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_QuitButton=0;
 	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T))
-		m_Popup = POPUP_QUIT;
+	{
+		if(m_pClient->Editor()->HasUnsavedData() || Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectQuitTime)
+		{
+			m_Popup = POPUP_QUIT;
+		}
+		else
+		{
+			Client()->Quit();
+		}
+	}
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
@@ -1201,7 +1210,6 @@ int CMenus::Render()
 #endif
 
 			// additional info
-			Box.HSplitTop(10.0f, 0, &Box);
 			Box.VMargin(20.f/UI()->Scale(), &Box);
 			if(m_pClient->Editor()->HasUnsavedData())
 			{

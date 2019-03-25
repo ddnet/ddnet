@@ -263,7 +263,7 @@ void CGhost::OnNewSnapshot()
 {
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
+	if(!IsRace(&ServerInfo) || Client()->State() != IClient::STATE_ONLINE)
 		return;
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
@@ -271,14 +271,18 @@ void CGhost::OnNewSnapshot()
 	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_RACETIME;
 	bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
 
-	if(!ServerControl)
-		CheckStartLocal(false);
-	else
-		CheckStart();
+	if(g_Config.m_ClRaceGhost)
+	{
+		if(!ServerControl)
+			CheckStartLocal(false);
+		else
+			CheckStart();
 
-	if(m_Recording)
-		AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
+		if(m_Recording)
+			AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
+	}
 
+	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnectQuitTime anyway
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 	m_LastRaceTick = RaceFlag ? RaceTick : -1;
 }
@@ -621,4 +625,9 @@ void CGhost::OnMapLoad()
 	UnloadAll();
 	m_pClient->m_pMenus->GhostlistPopulate();
 	m_AllowRestart = false;
+}
+
+int CGhost::GetLastRaceTick()
+{
+	return m_LastRaceTick;
 }

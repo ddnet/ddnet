@@ -397,6 +397,8 @@ public:
 	void GenerateTimeoutSeed();
 	void GenerateTimeoutCodes();
 
+	virtual int GetCurrentRaceTime();
+
 	const char *GetCurrentMap();
 	const char *GetCurrentMapPath();
 	unsigned GetMapCrc();

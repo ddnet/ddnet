@@ -179,6 +179,8 @@ public:
 	virtual const char *GetCurrentMapPath() = 0;
 	virtual unsigned GetMapCrc() = 0;
 
+	virtual int GetCurrentRaceTime() = 0;
+
 	virtual void RaceRecord_Start(const char *pFilename) = 0;
 	virtual void RaceRecord_Stop() = 0;
 	virtual bool RaceRecord_IsRecording() = 0;
@@ -220,6 +222,7 @@ public:
 	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
 	virtual void OnDummySwap() = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
+	virtual int GetLastRaceTick() = 0;
 
 	virtual const char *GetItemName(int Type) = 0;
 	virtual const char *Version() = 0;

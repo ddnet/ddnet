@@ -689,6 +689,11 @@ void CGameClient::OnDummyDisconnect()
 	m_LastNewPredictedTick[1] = -1;
 }
 
+int CGameClient::GetLastRaceTick()
+{
+	return m_pGhost->GetLastRaceTick();
+}
+
 void CGameClient::OnRelease()
 {
 	// release all systems

@@ -54,10 +54,14 @@ void CMenus::RenderGame(CUIRect MainView)
 	static int s_DisconnectButton = 0;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
 	{
-		if(g_Config.m_ClConfirmDisconnect)
+		if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectQuitTime)
+		{
 			m_Popup = POPUP_DISCONNECT;
+		}
 		else
+		{
 			Client()->Disconnect();
+		}
 	}
 
 	static int s_SpectateButton = 0;
@@ -149,7 +153,14 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 		else
 		{
-			Client()->DummyDisconnect(0);
+			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectQuitTime)
+			{
+				m_Popup = POPUP_DISCONNECT;
+			}
+			else
+			{
+				Client()->DummyDisconnect(0);
+			}
 		}
 	}
 }

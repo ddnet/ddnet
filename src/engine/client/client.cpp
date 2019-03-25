@@ -824,6 +824,13 @@ void CClient::DummyDisconnect(const char *pReason)
 	GameClient()->OnDummyDisconnect();
 }
 
+int CClient::GetCurrentRaceTime()
+{
+	if(GameClient()->GetLastRaceTick() < 0)
+		return 0;
+	return (GameTick() - GameClient()->GetLastRaceTick()) / 50;
+}
+
 int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 {
 	CNetChunk Packet;
