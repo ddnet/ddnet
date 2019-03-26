@@ -772,11 +772,10 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 
 	Box.HSplitTop(5.0f, &MainView, &MainView);
 	Box.HSplitTop(24.0f, &Box, &MainView);
-	Box.VMargin(20.0f, &Box);
 
 	Box.VSplitLeft(100.0f, &Button, &Box);
 	static int s_InternetButton=0;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, CUI::CORNER_BL))
+	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page==PAGE_INTERNET, &Button, 0))
 	{
 		if(Page != PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
