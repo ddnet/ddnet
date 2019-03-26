@@ -1184,7 +1184,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		                  250,  m_SelectEntitiesFiles.size()*14 + 10, PopupEntities);
 	}
 
-	TB_Top.VSplitLeft(10.0f, 0, &TB_Top);
+	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
 
 	// zoom group
 	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
@@ -1206,7 +1206,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	if(DoButton_Ex(&s_ZoomInButton, "ZI", 0, &Button, 0, "[NumPad+] Zoom in", CUI::CORNER_R))
 		m_ZoomLevel -= 50;
 
-	TB_Top.VSplitLeft(10.0f, 0, &TB_Top);
+	TB_Top.VSplitLeft(5.0f, 0, &TB_Top);
 
 	// animation speed
 	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
@@ -1227,7 +1227,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			m_AnimateSpeed -= 0.5f;
 	}
 
-	TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
+	TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 
 
 	// brush manipulation
@@ -1252,7 +1252,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		}
 
 		// rotate buttons
-		TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
+		TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_RotationAmount = 90;
@@ -1312,7 +1312,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				DoMapBorder();
 		}
 
-		TB_Bottom.VSplitLeft(10.0f, &Button, &TB_Bottom);
+		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 
 		// do tele/tune/switch/speedup button
 		{
@@ -1364,7 +1364,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		}
 	}
 
-	TB_Bottom.VSplitLeft(10.0f, 0, &TB_Bottom);
+	TB_Bottom.VSplitLeft(5.0f, 0, &TB_Bottom);
 
 	// grid zoom
 	TB_Bottom.VSplitLeft(30.0f, &Button, &TB_Bottom);
@@ -1392,7 +1392,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// sound source manipulation
 	{
 		// do add button
-		TB_Bottom.VSplitLeft(10.0f, &Button, &TB_Bottom);
+		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 		static int s_NewButton = 0;
 
@@ -1417,7 +1417,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// quad manipulation
 	{
 		// do add button
-		TB_Bottom.VSplitLeft(10.0f, &Button, &TB_Bottom);
+		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 		static int s_NewButton = 0;
 
@@ -1443,6 +1443,14 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		}
 	}
 
+	TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+
+	// Brush draw mode button
+	TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
+	static int s_BrushDrawModeButton = 0;
+	if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
+			(Input()->KeyPress(KEY_D) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+		m_BrushDrawDestructive = !m_BrushDrawDestructive;
 }
 
 static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
