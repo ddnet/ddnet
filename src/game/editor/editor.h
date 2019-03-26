@@ -533,6 +533,7 @@ public:
 	void Snap(CUIRect *pRect);
 	void Clamp(RECTi *pRect);
 
+	virtual bool IsEmpty(CLayerTiles *pLayer);
 	virtual void BrushSelecting(CUIRect Rect);
 	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
 	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
@@ -743,6 +744,7 @@ public:
 		m_LargeLayerWasWarned = false;
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
+		m_BrushDrawDestructive = true;
 	}
 
 	virtual void Init();
@@ -825,6 +827,7 @@ public:
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
+	bool m_BrushDrawDestructive;
 
 	enum
 	{
@@ -1084,6 +1087,7 @@ public:
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
+	virtual bool IsEmpty(CLayerTiles *pLayer);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void BrushFlipX();
 	virtual void BrushFlipY();
@@ -1104,6 +1108,7 @@ public:
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
+	virtual bool IsEmpty(CLayerTiles *pLayer);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void BrushFlipX();
 	virtual void BrushFlipY();
@@ -1134,6 +1139,7 @@ public:
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
+	virtual bool IsEmpty(CLayerTiles *pLayer);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void BrushFlipX();
 	virtual void BrushFlipY();
@@ -1152,6 +1158,7 @@ public:
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
+	virtual bool IsEmpty(CLayerTiles *pLayer);
 	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 	virtual void BrushFlipX();
 	virtual void BrushFlipY();

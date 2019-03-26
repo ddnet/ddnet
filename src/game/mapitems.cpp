@@ -81,6 +81,11 @@ bool IsValidSwitchTile(int Index)
 	);
 }
 
+bool IsValidTuneTile(int Index)
+{
+	return Index == TILE_TUNE1;
+}
+
 bool IsValidEntity(int Index)
 {
 	Index -= ENTITY_OFFSET;

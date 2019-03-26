@@ -154,6 +154,32 @@ void CLayerTiles::Clamp(RECTi *pRect)
 		pRect->w = 0;
 }
 
+bool CLayerTiles::IsEmpty(CLayerTiles *pLayer)
+{
+	for(int y = 0; y < pLayer->m_Height; y++)
+		for(int x = 0; x < pLayer->m_Width; x++)
+		{
+			int Index = pLayer->GetTile(x, y).m_Index;
+			if(Index)
+			{
+				if(pLayer->m_Game)
+				{
+					if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(Index))
+						return false;
+				}
+				else if(pLayer->m_Front)
+				{
+					if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(Index))
+						return false;
+				}
+				else
+					return false;
+			}
+		}
+
+	return true;
+}
+
 void CLayerTiles::BrushSelecting(CUIRect Rect)
 {
 	Graphics()->TextureSet(-1);
@@ -393,6 +419,8 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerTiles *pLt = static_cast<CLayerTiles*>(pBrush);
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pLt);
+
 	for(int y = 0; y < h; y++)
 	{
 		for(int x = 0; x < w; x++)
@@ -401,6 +429,9 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			int fy = y+sy;
 
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+				continue;
+
+			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
 			if(Empty)
@@ -422,16 +453,23 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+
 	for(int y = 0; y < l->m_Height; y++)
 		for(int x = 0; x < l->m_Width; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
+
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			SetTile(fx, fy, l->m_pTiles[y*l->m_Width+x]);
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			SetTile(fx, fy, l->GetTile(x, y));
 		}
+
 	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
@@ -1001,6 +1039,16 @@ void CLayerTele::Shift(int Direction)
 	}
 }
 
+bool CLayerTele::IsEmpty(CLayerTiles *pLayer)
+{
+	for(int y = 0; y < pLayer->m_Height; y++)
+		for(int x = 0; x < pLayer->m_Width; x++)
+			if(IsValidTeleTile(pLayer->GetTile(x, y).m_Index))
+				return false;
+
+	return true;
+}
+
 void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
 	if(m_Readonly)
@@ -1012,15 +1060,21 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 	if(str_comp(l->m_aFileName, m_pEditor->m_aFileName))
 		m_pEditor->m_TeleNumber = l->m_TeleNum;
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+
 	for(int y = 0; y < l->m_Height; y++)
 		for(int x = 0; x < l->m_Width; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
+
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEIN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINEVIL || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKINEVIL || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEOUT || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECK || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKOUT || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELECHECKIN || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINWEAPON || l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TELEINHOOK)
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if(IsValidTeleTile(l->m_pTiles[y*l->m_Width+x].m_Index))
 			{
 				if(m_pEditor->m_TeleNumber != l->m_TeleNum)
 				{
@@ -1132,6 +1186,8 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerTele *pLt = static_cast<CLayerTele*>(pBrush);
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pLt);
+
 	for(int y = 0; y < h; y++)
 	{
 		for(int x = 0; x < w; x++)
@@ -1142,7 +1198,10 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(Empty || !(pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index) // air chosen: reset
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if(Empty || !IsValidTeleTile((pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index))
 			{
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pTeleTile[fy*m_Width+fx].m_Type = 0;
@@ -1252,6 +1311,16 @@ void CLayerSpeedup::Shift(int Direction)
 	}
 }
 
+bool CLayerSpeedup::IsEmpty(CLayerTiles *pLayer)
+{
+	for(int y = 0; y < pLayer->m_Height; y++)
+		for(int x = 0; x < pLayer->m_Width; x++)
+			if(IsValidSpeedupTile(pLayer->GetTile(x, y).m_Index))
+				return false;
+
+	return true;
+}
+
 void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
 	if(m_Readonly)
@@ -1267,15 +1336,21 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 		m_pEditor->m_SpeedupMaxSpeed = l->m_SpeedupMaxSpeed;
 	}
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+
 	for(int y = 0; y < l->m_Height; y++)
 		for(int x = 0; x < l->m_Width; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
+
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_BOOST)
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if(IsValidSpeedupTile(l->m_pTiles[y*l->m_Width+x].m_Index))
 			{
 				if(m_pEditor->m_SpeedupAngle != l->m_SpeedupAngle || m_pEditor->m_SpeedupForce != l->m_SpeedupForce || m_pEditor->m_SpeedupMaxSpeed != l->m_SpeedupMaxSpeed)
 				{
@@ -1398,6 +1473,8 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerSpeedup *pLt = static_cast<CLayerSpeedup*>(pBrush);
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pLt);
+
 	for(int y = 0; y < h; y++)
 	{
 		for(int x = 0; x < w; x++)
@@ -1408,7 +1485,10 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(Empty || (pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index != TILE_BOOST) // no speed up tile chosen: reset
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if(Empty || !IsValidSpeedupTile((pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index)) // no speed up tile chosen: reset
 			{
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pSpeedupTile[fy*m_Width+fx].m_Force = 0;
@@ -1494,15 +1574,21 @@ void CLayerFront::BrushDraw(CLayer *pBrush, float wx, float wy)
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+
 	for(int y = 0; y < l->m_Height; y++)
 		for(int x = 0; x < l->m_Width; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
+
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			SetTile(fx, fy, l->m_pTiles[y*l->m_Width+x]);
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			SetTile(fx, fy, l->GetTile(x, y));
 		}
 	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
@@ -1594,6 +1680,16 @@ void CLayerSwitch::Shift(int Direction)
 	}
 }
 
+bool CLayerSwitch::IsEmpty(CLayerTiles *pLayer)
+{
+	for(int y = 0; y < pLayer->m_Height; y++)
+		for(int x = 0; x < pLayer->m_Width; x++)
+			if(IsValidSwitchTile(pLayer->GetTile(x, y).m_Index))
+				return false;
+
+	return true;
+}
+
 void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
 	if(m_Readonly)
@@ -1608,29 +1704,21 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 		m_pEditor->m_SwitchDelay = l->m_SwitchDelay;
 	}
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+
 	for(int y = 0; y < l->m_Height; y++)
 		for(int x = 0; x < l->m_Width; x++)
 		{
 			int fx = x+sx;
 			int fy = y+sy;
+
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if((l->m_pTiles[y*l->m_Width+x].m_Index >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && l->m_pTiles[y*l->m_Width+x].m_Index <= (ENTITY_DOOR + ENTITY_OFFSET))
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_HIT_START
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_HIT_END
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHOPEN
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHCLOSE
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDOPEN
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_SWITCHTIMEDCLOSE
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_FREEZE
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DFREEZE
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_DUNFREEZE
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_JUMP
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_PENALTY
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_BONUS
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_ALLOW_TELE_GUN
-				|| l->m_pTiles[y*l->m_Width+x].m_Index == TILE_ALLOW_BLUE_TELE_GUN)
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if(IsValidSwitchTile(l->m_pTiles[y*l->m_Width+x].m_Index))
 			{
 				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
 				{
@@ -1752,6 +1840,8 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerSwitch *pLt = static_cast<CLayerSwitch*>(pBrush);
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pLt);
+
 	for(int y = 0; y < h; y++)
 	{
 		for(int x = 0; x < w; x++)
@@ -1762,7 +1852,10 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(Empty || !(pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index) // at least reset the tile if air is chosen
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if(Empty || !IsValidSwitchTile((pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index))
 			{
 				m_pTiles[fy*m_Width+fx].m_Index = 0;
 				m_pSwitchTile[fy*m_Width+fx].m_Type = 0;
@@ -1880,6 +1973,16 @@ void CLayerTune::Shift(int Direction)
 	}
 }
 
+bool CLayerTune::IsEmpty(CLayerTiles *pLayer)
+{
+	for(int y = 0; y < pLayer->m_Height; y++)
+		for(int x = 0; x < pLayer->m_Width; x++)
+			if(IsValidTuneTile(pLayer->GetTile(x, y).m_Index))
+				return false;
+
+	return true;
+}
+
 void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
 	if(m_Readonly)
@@ -1893,15 +1996,21 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 		m_pEditor->m_TuningNum = l->m_TuningNumber;
 	}
 
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+
 	for(int y = 0; y < l->m_Height; y++)
 			for(int x = 0; x < l->m_Width; x++)
 			{
 				int fx = x+sx;
 				int fy = y+sy;
+
 				if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 					continue;
 
-				if(l->m_pTiles[y*l->m_Width+x].m_Index == TILE_TUNE1)
+				if(!Destructive && GetTile(fx, fy).m_Index)
+					continue;
+
+				if(IsValidTuneTile(l->m_pTiles[y*l->m_Width+x].m_Index))
 				{
 					if(m_pEditor->m_TuningNum != l->m_TuningNumber)
 					{
@@ -2013,6 +2122,8 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 		CLayerTune *pLt = static_cast<CLayerTune*>(pBrush);
 
+		bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pLt);
+
 		for(int y = 0; y < h; y++)
 		{
 			for(int x = 0; x < w; x++)
@@ -2023,7 +2134,10 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 					continue;
 
-				if(Empty || (pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index != TILE_TUNE1) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here
+				if(!Destructive && GetTile(fx, fy).m_Index)
+					continue;
+
+				if(Empty || !IsValidTuneTile((pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)]).m_Index)) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here
 				{
 					m_pTiles[fy*m_Width+fx].m_Index = 0;
 					m_pTuneTile[fy*m_Width+fx].m_Type = 0;
