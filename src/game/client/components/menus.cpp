@@ -735,9 +735,9 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_DoubleClickIndex = -1;
 		}
 
-		Box.VSplitLeft(100.0f, &Button, &Box);
+		Box.VSplitLeft(80.0f, &Button, &Box);
 		static int s_DDNetButton=0;
-		if(DoButton_MenuTab(&s_DDNetButton, Localize("DDNet"), m_ActivePage==PAGE_DDNET, &Button, CUI::CORNER_TR))
+		if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage==PAGE_DDNET, &Button, 0))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
 			{
@@ -745,6 +745,19 @@ int CMenus::RenderMenubar(CUIRect r)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 			}
 			NewPage = PAGE_DDNET;
+			m_DoubleClickIndex = -1;
+		}
+
+		Box.VSplitLeft(60.0f, &Button, &Box);
+		static int s_KoGButton=0;
+		if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage==PAGE_KOG, &Button, CUI::CORNER_TR))
+		{
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
+			{
+				Client()->RequestDDNetInfo();
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+			}
+			NewPage = PAGE_KOG;
 			m_DoubleClickIndex = -1;
 		}
 
@@ -894,7 +907,7 @@ void CMenus::RenderLoading()
 
 void CMenus::RenderNews(CUIRect MainView)
 {
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	MainView.HSplitTop(15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
@@ -973,6 +986,8 @@ int CMenus::Render()
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		else if(g_Config.m_UiPage == PAGE_DDNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+		else if(g_Config.m_UiPage == PAGE_KOG)
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE)
@@ -1049,11 +1064,12 @@ int CMenus::Render()
 			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_DDNET)
 			RenderServerbrowser(MainView);
+		else if(g_Config.m_UiPage == PAGE_KOG)
+			RenderServerbrowser(MainView);
 		else if(g_Config.m_UiPage == PAGE_SETTINGS)
 			RenderSettings(MainView);
 
 		// do tab bar
-		TabBar.VMargin(20.0f, &TabBar);
 		RenderMenubar(TabBar);
 	}
 	else

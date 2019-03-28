@@ -25,9 +25,8 @@ public:
 		CServerEntry *m_pNextReq;
 	};
 
-	class CDDNetCountry
+	struct CNetworkCountry
 	{
-	public:
 		enum
 		{
 			MAX_SERVERS = 1024
@@ -53,9 +52,19 @@ public:
 	enum
 	{
 		MAX_FAVORITES=2048,
-		MAX_DDNET_COUNTRIES=16,
-		MAX_DDNET_TYPES=32,
+		MAX_COUNTRIES=16,
+		MAX_TYPES=32,
 	};
+
+	struct CNetwork
+	{
+		CNetworkCountry m_aCountries[MAX_COUNTRIES];
+		int m_NumCountries;
+
+		char m_aTypes[MAX_TYPES][32];
+		int m_NumTypes;
+	};
+
 
 	CServerBrowser();
 	virtual ~CServerBrowser();
@@ -91,18 +100,18 @@ public:
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
 	int HasRank(const char *pMap);
-	int NumDDNetCountries() { return m_NumDDNetCountries; };
-	int GetDDNetCountryFlag(int Index) { return m_aDDNetCountries[Index].m_FlagID; };
-	const char *GetDDNetCountryName(int Index) { return m_aDDNetCountries[Index].m_aName; };
+	int NumCountries(int Network) { return m_aNetworks[Network].m_NumCountries; };
+	int GetCountryFlag(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; };
+	const char *GetCountryName(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_aName; };
 
-	int NumDDNetTypes() { return m_NumDDNetTypes; };
-	const char *GetDDNetType(int Index) { return m_aDDNetTypes[Index]; };
+	int NumTypes(int Network) { return m_aNetworks[Network].m_NumTypes; };
+	const char *GetType(int Network, int Index) { return m_aNetworks[Network].m_aTypes[Index]; };
 
 	void DDNetFilterAdd(char *pFilter, const char *pName);
 	void DDNetFilterRem(char *pFilter, const char *pName);
 	bool DDNetFiltered(char *pFilter, const char *pName);
-	void DDNetCountryFilterClean();
-	void DDNetTypeFilterClean();
+	void CountryFilterClean(int Network);
+	void TypeFilterClean(int Network);
 
 	//
 	void Update(bool ForceResort);
@@ -130,11 +139,7 @@ private:
 	NETADDR m_aFavoriteServers[MAX_FAVORITES];
 	int m_NumFavoriteServers;
 
-	CDDNetCountry m_aDDNetCountries[MAX_DDNET_COUNTRIES];
-	int m_NumDDNetCountries;
-
-	char m_aDDNetTypes[MAX_DDNET_TYPES][32];
-	int m_NumDDNetTypes;
+	CNetwork m_aNetworks[NUM_NETWORKS];
 
 	json_value *m_pDDNetInfo;
 
