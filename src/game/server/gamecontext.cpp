@@ -866,6 +866,14 @@ void CGameContext::OnTick()
 			m_aMutes[i] = m_aMutes[m_NumMutes];
 		}
 	}
+	for(int i = 0; i < m_NumVoteMutes; i++)
+	{
+		if(m_aVoteMutes[i].m_Expire <= Server()->Tick())
+		{
+			m_NumVoteMutes--;
+			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
+		}
+	}
 
 	if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
 	{
