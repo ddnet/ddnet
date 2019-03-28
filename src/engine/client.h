@@ -112,6 +112,7 @@ public:
 	virtual void ToggleFullscreen() = 0;
 	virtual void ToggleWindowBordered() = 0;
 	virtual void ToggleWindowVSync() = 0;
+	virtual void LoadFont() = 0;
 
 	// networking
 	virtual void EnterGame() = 0;

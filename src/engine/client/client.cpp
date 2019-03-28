@@ -3508,6 +3508,28 @@ void CClient::ToggleWindowVSync()
 		g_Config.m_GfxVsync ^= 1;
 }
 
+void CClient::LoadFont()
+{
+	static CFont *pDefaultFont = 0;
+	char aFilename[512];
+	const char *pFontFile = "fonts/DejaVuSansCJKName.ttf";
+	if(str_find(g_Config.m_ClLanguagefile, "chinese") != NULL || str_find(g_Config.m_ClLanguagefile, "japanese") != NULL ||
+		str_find(g_Config.m_ClLanguagefile, "korean") != NULL)
+		pFontFile = "fonts/DejavuWenQuanYiMicroHei.ttf";
+	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
+	if(File)
+	{
+		io_close(File);
+		IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+		pDefaultFont = pTextRender->GetFont(aFilename);
+		if(pDefaultFont == NULL)
+			pDefaultFont = pTextRender->LoadFont(aFilename);
+		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);
+	}
+	if(!pDefaultFont)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='%s'", pFontFile);
+}
+
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;

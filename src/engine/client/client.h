@@ -391,6 +391,7 @@ public:
 	void ToggleFullscreen();
 	void ToggleWindowBordered();
 	void ToggleWindowVSync();
+	void LoadFont();
 
 	// DDRace
 
