@@ -1749,7 +1749,8 @@ bool CMenus::OnInput(IInput::CEvent e)
 		if(e.m_Key == KEY_ESCAPE)
 		{
 			m_EscapePressed = true;
-			SetActive(!IsActive());
+			if(m_Popup == POPUP_NONE)
+				SetActive(!IsActive());
 			return true;
 		}
 	}
