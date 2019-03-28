@@ -1389,55 +1389,68 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			m_GridFactor++;
 	}
 
-	// sound source manipulation
+	TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+
+	// do add quad/sound button
+	TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 	{
-		// do add button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_NewButton = 0;
+		const char *pButtonText = "Add Item";
+		const char *pButtonToolTip = "[ctrl+q] Add a new item";
+		int Checked = -1;
 
-		CLayerSounds *pSoundLayer = (CLayerSounds *)GetSelectedLayerType(0, LAYERTYPE_SOUNDS);
-		if(DoButton_Editor(&s_NewButton, "Add Sound", pSoundLayer?0:-1, &Button, 0, "Adds a new sound source"))
+		CLayer *pLayer = GetSelectedLayer(0);
+		if(pLayer)
 		{
-			if(pSoundLayer)
+			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				float Mapping[4];
-				CLayerGroup *g = GetSelectedGroup();
-				g->Mapping(Mapping);
-				int AddX = f2fx(Mapping[0] + (Mapping[2]-Mapping[0])/2);
-				int AddY = f2fx(Mapping[1] + (Mapping[3]-Mapping[1])/2);
-
-				CSoundSource *pSource = pSoundLayer->NewSource();
-				pSource->m_Position.x += AddX;
-				pSource->m_Position.y += AddY;
+				pButtonText = "Add Quad";
+				pButtonToolTip = "[ctrl+q] Add a new quad";
+				Checked = 0;
+			}
+			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			{
+				pButtonText = "Add Sound";
+				pButtonToolTip = "[ctrl+q] Add a new sound source";
+				Checked = 0;
 			}
 		}
-	}
 
-	// quad manipulation
-	{
-		// do add button
-		TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-		static int s_NewButton = 0;
-
-		CLayerQuads *pQLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-		//CLayerTiles *tlayer = (CLayerTiles *)get_selected_layer_type(0, LAYERTYPE_TILES);
-		if(DoButton_Editor(&s_NewButton, "Add Quad", pQLayer?0:-1, &Button, 0, "Adds a new quad"))
+		static int s_AddItemButton = 0;
+		if(DoButton_Editor(&s_AddItemButton, pButtonText, Checked, &Button, 0, pButtonToolTip) ||
+				(Input()->KeyPress(KEY_Q) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
 		{
-			if(pQLayer)
+			if(pLayer)
 			{
-				float Mapping[4];
-				CLayerGroup *g = GetSelectedGroup();
-				g->Mapping(Mapping);
-				int AddX = f2fx(Mapping[0] + (Mapping[2]-Mapping[0])/2);
-				int AddY = f2fx(Mapping[1] + (Mapping[3]-Mapping[1])/2);
+				CLayerGroup *pGroup = GetSelectedGroup();
 
-				CQuad *q = pQLayer->NewQuad();
-				for(int i = 0; i < 5; i++)
+				float Mapping[4];
+				pGroup->Mapping(Mapping);
+				int x = Mapping[0] + (Mapping[2]-Mapping[0]) / 2;
+				int y = Mapping[1] + (Mapping[3]-Mapping[1]) / 2;
+				if(Input()->KeyPress(KEY_Q) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
 				{
-					q->m_aPoints[i].x += AddX;
-					q->m_aPoints[i].y += AddY;
+					x += UI()->MouseWorldX() - (m_WorldOffsetX*pGroup->m_ParallaxX/100) - pGroup->m_OffsetX;
+					y += UI()->MouseWorldY() - (m_WorldOffsetY*pGroup->m_ParallaxY/100) - pGroup->m_OffsetY;
+				}
+
+				if(pLayer->m_Type == LAYERTYPE_QUADS)
+				{
+					CLayerQuads *pQuadLayer = (CLayerQuads *)pLayer;
+
+					int Width = 64;
+					int Height = 64;
+					if(pQuadLayer->m_Image >= 0)
+					{
+						Width = m_Map.m_lImages[pQuadLayer->m_Image]->m_Width;
+						Height = m_Map.m_lImages[pQuadLayer->m_Image]->m_Height;
+					}
+
+					pQuadLayer->NewQuad(x, y, Width, Height);
+				}
+				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+				{
+					CLayerSounds *pSoundLayer = (CLayerSounds *)pLayer;
+					pSoundLayer->NewSource(x, y);
 				}
 			}
 		}
@@ -5955,13 +5968,7 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 	pGroup->m_ParallaxY = 0;
 	CLayerQuads *pLayer = new CLayerQuads;
 	pLayer->m_pEditor = m_pEditor;
-	CQuad *pQuad = pLayer->NewQuad();
-	const int Width = 800000;
-	const int Height = 600000;
-	pQuad->m_aPoints[0].x = pQuad->m_aPoints[2].x = -Width;
-	pQuad->m_aPoints[1].x = pQuad->m_aPoints[3].x = Width;
-	pQuad->m_aPoints[0].y = pQuad->m_aPoints[1].y = -Height;
-	pQuad->m_aPoints[2].y = pQuad->m_aPoints[3].y = Height;
+	CQuad *pQuad = pLayer->NewQuad(0, 0, 1600, 1200);
 	pQuad->m_aColors[0].r = pQuad->m_aColors[1].r = 94;
 	pQuad->m_aColors[0].g = pQuad->m_aColors[1].g = 132;
 	pQuad->m_aColors[0].b = pQuad->m_aColors[1].b = 174;
@@ -6011,7 +6018,7 @@ void CEditor::Init()
 	m_TilesetPicker.m_Readonly = true;
 
 	m_QuadsetPicker.m_pEditor = this;
-	m_QuadsetPicker.NewQuad();
+	m_QuadsetPicker.NewQuad(0, 0, 64, 64);
 	m_QuadsetPicker.m_Readonly = true;
 
 	m_Brush.m_pMap = &m_Map;

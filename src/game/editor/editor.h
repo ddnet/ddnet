@@ -584,7 +584,7 @@ public:
 	~CLayerQuads();
 
 	virtual void Render(bool QuadPicker = false);
-	CQuad *NewQuad();
+	CQuad *NewQuad(int x, int y, int Width, int Height);
 
 	virtual void BrushSelecting(CUIRect Rect);
 	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
@@ -1173,7 +1173,7 @@ public:
 	~CLayerSounds();
 
 	virtual void Render(bool Tileset = false);
-	CSoundSource *NewSource();
+	CSoundSource *NewSource(int x, int y);
 
 	virtual void BrushSelecting(CUIRect Rect);
 	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
