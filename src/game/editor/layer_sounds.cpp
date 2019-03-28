@@ -99,14 +99,14 @@ void CLayerSounds::Render(bool Tileset)
 	Graphics()->QuadsEnd();
 }
 
-CSoundSource *CLayerSounds::NewSource()
+CSoundSource *CLayerSounds::NewSource(int x, int y)
 {
 	m_pEditor->m_Map.m_Modified = true;
 
 	CSoundSource *pSource = &m_lSources[m_lSources.add(CSoundSource())];
 
-	pSource->m_Position.x = 0;
-	pSource->m_Position.y = 0;
+	pSource->m_Position.x = f2fx(x);
+	pSource->m_Position.y = f2fx(y);
 
 	pSource->m_Loop = 1;
 	pSource->m_Pan = 1;

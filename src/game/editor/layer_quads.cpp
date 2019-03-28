@@ -33,7 +33,7 @@ void CLayerQuads::Render(bool QuadPicker)
 	m_pEditor->RenderTools()->ForceRenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
 }
 
-CQuad *CLayerQuads::NewQuad()
+CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 {
 	m_pEditor->m_Map.m_Modified = true;
 
@@ -43,18 +43,20 @@ CQuad *CLayerQuads::NewQuad()
 	q->m_ColorEnv = -1;
 	q->m_PosEnvOffset = 0;
 	q->m_ColorEnvOffset = 0;
-	int x = 0, y = 0;
-	q->m_aPoints[0].x = x;
-	q->m_aPoints[0].y = y;
-	q->m_aPoints[1].x = x+64;
-	q->m_aPoints[1].y = y;
-	q->m_aPoints[2].x = x;
-	q->m_aPoints[2].y = y+64;
-	q->m_aPoints[3].x = x+64;
-	q->m_aPoints[3].y = y+64;
 
-	q->m_aPoints[4].x = x+32; // pivot
-	q->m_aPoints[4].y = y+32;
+	Width /= 2;
+	Height /= 2;
+	q->m_aPoints[0].x = x - Width;
+	q->m_aPoints[0].y = y - Height;
+	q->m_aPoints[1].x = x + Width;
+	q->m_aPoints[1].y = y - Height;
+	q->m_aPoints[2].x = x - Width;
+	q->m_aPoints[2].y = y + Height;
+	q->m_aPoints[3].x = x + Width;
+	q->m_aPoints[3].y = y + Height;
+
+	q->m_aPoints[4].x = x; // pivot
+	q->m_aPoints[4].y = y;
 
 	for(int i = 0; i < 5; i++)
 	{
