@@ -1442,7 +1442,6 @@ void CCharacter::HandleTiles(int Index)
 	// start
 	if(((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team() && g_Config.m_SvTeam != 3)))
 	{
-		bool CanBegin = true;
 		if(g_Config.m_SvResetPickups)
 		{
 			for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; ++i)
@@ -1460,13 +1459,11 @@ void CCharacter::HandleTiles(int Index)
 				m_LastStartWarning = Server()->Tick();
 			}
 			Die(GetPlayer()->GetCID(), WEAPON_WORLD);
-			CanBegin = false;
+			return;
 		}
-		if(CanBegin)
-		{
-			Teams()->OnCharacterStart(m_pPlayer->GetCID());
-			m_CpActive = -2;
-		}
+
+		Teams()->OnCharacterStart(m_pPlayer->GetCID());
+		m_CpActive = -2;
 	}
 
 	// finish
@@ -2118,15 +2115,25 @@ void CCharacter::DDRacePostCoreTick()
 
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
+	if(!m_Alive)
+		return;
 
 	// handle Anti-Skip tiles
 	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
+	{
 		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+		{
 			HandleTiles(*i);
+			if(!m_Alive)
+				return;
+		}
+	}
 	else
 	{
 		HandleTiles(CurrentIndex);
+		if(!m_Alive)
+			return;
 	}
 
 	// teleport gun
