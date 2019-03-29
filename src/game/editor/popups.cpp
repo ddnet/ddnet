@@ -838,6 +838,8 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 		PROP_POS_X=0,
 		PROP_POS_Y,
 		PROP_COLOR,
+		PROP_TEX_U,
+		PROP_TEX_V,
 		NUM_PROPS,
 	};
 
@@ -849,11 +851,15 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 
 	int x = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x/1000;
 	int y = pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y/1000;
+	int tu = pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x/1000 * 1024;
+	int tv = pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y/1000 * 1024;
 
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Color", Color, PROPTYPE_COLOR, -1, pEditor->m_Map.m_lEnvelopes.size()},
+		{"Tex U", tu, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Tex V", tv, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{0},
 	};
 
@@ -865,6 +871,8 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 
 	float OffsetX = NewVal*1000-x*1000;
 	float OffsetY = NewVal*1000-y*1000;
+	float OffsetU = NewVal*1000/1024-tu*1000/1024;
+	float OffsetV = NewVal*1000/1024-tv*1000/1024;
 
 	for(int i = 0; i < lQuads.size(); ++i)
 	{
@@ -892,6 +900,18 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View)
 					lQuads[i]->m_aColors[v].a = NewVal&0xff;
 				}
 			}
+		}
+		if(Prop == PROP_TEX_U)
+		{
+			for(int v = 0; v < 4; v++)
+				if(pEditor->m_SelectedPoints&(1<<v))
+					lQuads[i]->m_aTexcoords[v].x += OffsetU;
+		}
+		if(Prop == PROP_TEX_V)
+		{
+			for(int v = 0; v < 4; v++)
+				if(pEditor->m_SelectedPoints&(1<<v))
+					lQuads[i]->m_aTexcoords[v].y += OffsetV;
 		}
 	}
 
