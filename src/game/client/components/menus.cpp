@@ -820,7 +820,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	static int s_QuitButton=0;
 	if(DoButton_MenuTab(&s_QuitButton, "\xEE\x97\x8D", 0, &Button, CUI::CORNER_T))
 	{
-		if(m_pClient->Editor()->HasUnsavedData() || Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectQuitTime)
+		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
 			m_Popup = POPUP_QUIT;
 		}

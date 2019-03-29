@@ -282,7 +282,7 @@ void CGhost::OnNewSnapshot()
 			AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
 	}
 
-	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnectQuitTime anyway
+	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnect/QuitTime anyway
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 	m_LastRaceTick = RaceFlag ? RaceTick : -1;
 }

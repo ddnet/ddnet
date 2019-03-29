@@ -54,7 +54,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	static int s_DisconnectButton = 0;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
 	{
-		if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectQuitTime)
+		if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 		{
 			m_Popup = POPUP_DISCONNECT;
 		}
@@ -153,7 +153,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 		else
 		{
-			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectQuitTime)
+			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
 				m_Popup = POPUP_DISCONNECT;
 			}
