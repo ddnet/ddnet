@@ -1174,6 +1174,12 @@ int CMenus::Render()
 			pExtraText = Localize("Are you sure that you want to disconnect?");
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_DISCONNECT_DUMMY)
+		{
+			pTitle = Localize("Disconnect Dummy");
+			pExtraText = Localize("Are you sure that you want to disconnect your dummy?");
+			ExtraAlign = -1;
+		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
 			pTitle = Localize("Welcome to DDNet");
@@ -1271,6 +1277,33 @@ int CMenus::Render()
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Disconnect();
+		}
+		else if(m_Popup == POPUP_DISCONNECT_DUMMY)
+		{
+			CUIRect Yes, No;
+			Box.HSplitBottom(20.f, &Box, &Part);
+#if defined(__ANDROID__)
+			Box.HSplitBottom(60.f, &Box, &Part);
+#else
+			Box.HSplitBottom(24.f, &Box, &Part);
+#endif
+
+			// buttons
+			Part.VMargin(80.0f, &Part);
+			Part.VSplitMid(&No, &Yes);
+			Yes.VMargin(20.0f, &Yes);
+			No.VMargin(20.0f, &No);
+
+			static int s_ButtonAbort = 0;
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+				m_Popup = POPUP_NONE;
+
+			static int s_ButtonTryAgain = 0;
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			{
+				Client()->DummyDisconnect(0);
+				m_Popup = POPUP_NONE;
+			}
 		}
 		else if(m_Popup == POPUP_PASSWORD)
 		{

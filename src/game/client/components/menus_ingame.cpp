@@ -155,7 +155,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
-				m_Popup = POPUP_DISCONNECT;
+				m_Popup = POPUP_DISCONNECT_DUMMY;
 			}
 			else
 			{
