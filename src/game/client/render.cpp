@@ -146,7 +146,7 @@ void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size, bo
 void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
 {
 	IGraphics::CQuadItem QuadItem(X, Y, Width, Height);
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);	
+	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)
@@ -334,7 +334,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 
 	//Graphics()->TextureSet(data->images[IMAGE_CHAR_DEFAULT].id);
 	Graphics()->TextureSet(pInfo->m_Texture);
-	
+
 	// first pass we draw the outline
 	// second pass we draw the filling
 	for(int p = 0; p < 2; p++)
@@ -453,8 +453,8 @@ void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float Parallax
 {
 	float Width, Height;
 	CalcScreenParams(1150*1000, 1500, 1050, Aspect, &Width, &Height);
-	CenterX *= ParallaxX;
-	CenterY *= ParallaxY;
+	CenterX *= ParallaxX/100.0f;
+	CenterY *= ParallaxY/100.0f;
 	Width *= Zoom;
 	Height *= Zoom;
 	pPoints[0] = OffsetX+CenterX-Width/2;

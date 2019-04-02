@@ -170,8 +170,7 @@ void CLayerGroup::Mapping(float *pPoints)
 {
 	m_pMap->m_pEditor->RenderTools()->MapscreenToWorld(
 		m_pMap->m_pEditor->m_WorldOffsetX, m_pMap->m_pEditor->m_WorldOffsetY,
-		m_ParallaxX/100.0f, m_ParallaxY/100.0f,
-		m_OffsetX, m_OffsetY,
+		m_ParallaxX, m_ParallaxY, m_OffsetX, m_OffsetY,
 		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->m_WorldZoom, pPoints);
 
 	pPoints[0] += m_pMap->m_pEditor->m_EditorOffsetX;
@@ -2874,7 +2873,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			RenderTools()->MapscreenToWorld(
 				m_WorldOffsetX, m_WorldOffsetY,
-				1.0f, 1.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
+				100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
 
 			if(i == 0)
 			{
@@ -2916,7 +2915,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 				RenderTools()->MapscreenToWorld(
 					m_WorldOffsetX, m_WorldOffsetY,
-					1.0f, 1.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
+					100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
 
 				CUIRect r;
 				r.x = aPoints[0];
@@ -5870,7 +5869,7 @@ void CEditor::ZoomMouseTarget(float ZoomFactor)
 	float aPoints[4];
 	RenderTools()->MapscreenToWorld(
 		m_WorldOffsetX, m_WorldOffsetY,
-		1.0f, 1.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
+		100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
 
 	float WorldWidth = aPoints[2]-aPoints[0];
 	float WorldHeight = aPoints[3]-aPoints[1];
