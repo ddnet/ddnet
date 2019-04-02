@@ -90,7 +90,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aServerAddressStr[256];
 
-	unsigned m_SnapshotParts;
+	unsigned m_SnapshotParts[2];
 	int64 m_LocalStartTime;
 
 	int m_DebugFont;
