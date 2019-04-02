@@ -4,8 +4,7 @@ bool IsValidGameTile(int Index)
 {
 	return (
 		    Index == TILE_AIR
-		|| (Index >= TILE_SOLID && Index <= TILE_NOLASER)
-		||  Index == TILE_THROUGH
+		|| (Index >= TILE_SOLID && Index <= TILE_THROUGH)
 		||  Index == TILE_FREEZE
 		|| (Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE)
 		|| (Index >= TILE_WALLJUMP && Index <= TILE_SOLO_END)
