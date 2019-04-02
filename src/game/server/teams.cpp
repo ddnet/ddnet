@@ -141,7 +141,10 @@ void CGameTeams::OnCharacterFinish(int ClientID)
 					/ ((float)Server()->TickSpeed());
 			if (Time < 0.000001f)
 				return;
-			OnFinish(pPlayer, Time);
+			char aTimestamp[TIMESTAMP_STR_LENGTH];
+			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
+
+			OnFinish(pPlayer, Time, aTimestamp);
 		}
 	}
 	else
@@ -179,12 +182,14 @@ void CGameTeams::CheckTeamFinished(int Team)
 					/ ((float)Server()->TickSpeed());
 			if (Time < 0.000001f)
 				return;
+			char aTimestamp[TIMESTAMP_STR_LENGTH];
+			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
 			for (unsigned int i = 0; i < PlayersCount; ++i)
-				OnFinish(TeamPlayers[i], Time);
+				OnFinish(TeamPlayers[i], Time, aTimestamp);
 			ChangeTeamState(Team, TEAMSTATE_FINISHED); //TODO: Make it better
 			//ChangeTeamState(Team, TEAMSTATE_OPEN);
-			OnTeamFinish(TeamPlayers, PlayersCount, Time);
+			OnTeamFinish(TeamPlayers, PlayersCount, Time, aTimestamp);
 		}
 	}
 }
@@ -455,7 +460,7 @@ float *CGameTeams::GetCpCurrent(CPlayer* Player)
 	return NULL;
 }
 
-void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time)
+void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, const char *pTimestamp)
 {
 	bool CallSaveScore = false;
 
@@ -480,10 +485,10 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time)
 	}
 
 	if (CallSaveScore && Size >= 2)
-		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, Time);
+		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, Time, pTimestamp);
 }
 
-void CGameTeams::OnFinish(CPlayer* Player, float Time)
+void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 {
 	if (!Player || !Player->IsPlaying())
 		return;
@@ -558,7 +563,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time)
 
 	if (CallSaveScore)
 		if (g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
-			GameServer()->Score()->SaveScore(Player->GetCID(), Time,
+			GameServer()->Score()->SaveScore(Player->GetCID(), Time, pTimestamp,
 					GetCpCurrent(Player), Player->m_NotEligibleForFinish);
 
 	bool NeedToSendNewRecord = false;

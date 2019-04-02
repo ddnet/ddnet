@@ -4,7 +4,11 @@
 #include "entities/character.h"
 #include "gamecontext.h"
 
-#define NUM_CHECKPOINTS 25
+enum
+{
+	NUM_CHECKPOINTS = 25,
+	TIMESTAMP_STR_LENGTH = 20, // 2019-04-02 19:38:36
+};
 
 class CPlayerData
 {
@@ -47,9 +51,9 @@ public:
 	virtual void MapVote(int ClientID, const char *pMapName) = 0;
 	virtual void CheckBirthday(int ClientID) = 0;
 	virtual void LoadScore(int ClientID) = 0;
-	virtual void SaveScore(int ClientID, float Time, float aCpTime[NUM_CHECKPOINTS], bool NotEligible) = 0;
+	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp, float aCpTime[NUM_CHECKPOINTS], bool NotEligible) = 0;
 
-	virtual void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time) = 0;
+	virtual void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp) = 0;
 
 	virtual void ShowTop5(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowRank(int ClientID, const char *pName, bool Search=false) = 0;

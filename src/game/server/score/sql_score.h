@@ -103,20 +103,21 @@ struct CSqlScoreData : CSqlData
 
 	bool m_NotEligible;
 	float m_Time;
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
 	float m_aCpCurrent[NUM_CHECKPOINTS];
 	int m_Num;
 	bool m_Search;
-	char m_aRequestingPlayer [MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 };
 
 struct CSqlTeamScoreData : CSqlData
 {
 	bool m_NotEligible;
+	float m_Time;
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
 	unsigned int m_Size;
 	int m_aClientIDs[MAX_CLIENTS];
-	sqlstr::CSqlString<MAX_NAME_LENGTH> m_aNames [MAX_CLIENTS];
-
-	float m_Time;
+	sqlstr::CSqlString<MAX_NAME_LENGTH> m_aNames[MAX_CLIENTS];
 };
 
 struct CSqlTeamSave : CSqlData
@@ -179,9 +180,9 @@ public:
 	virtual void LoadScore(int ClientID);
 	virtual void MapInfo(int ClientID, const char* MapName);
 	virtual void MapVote(int ClientID, const char* MapName);
-	virtual void SaveScore(int ClientID, float Time,
+	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp,
 			float CpTime[NUM_CHECKPOINTS], bool NotEligible);
-	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time);
+	virtual void SaveTeamScore(int* aClientIDs, unsigned int Size, float Time, const char *pTimestamp);
 	virtual void ShowRank(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTeamRank(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTimes(int ClientID, const char* pName, int Debut = 1);
