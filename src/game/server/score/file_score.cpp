@@ -221,12 +221,12 @@ void CFileScore::LoadScore(int ClientID)
 	}
 }
 
-void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time)
+void CFileScore::SaveTeamScore(int* ClientIDs, unsigned int Size, float Time, const char *pTimestamp)
 {
 	dbg_msg("filescore", "saveteamscore not implemented for filescore");
 }
 
-void CFileScore::SaveScore(int ClientID, float Time,
+void CFileScore::SaveScore(int ClientID, float Time, const char *pTimestamp,
 		float CpTime[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole* pCon = (CConsole*) GameServer()->Console();

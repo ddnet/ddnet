@@ -18,8 +18,8 @@ class CGameTeams
 
 	void CheckTeamFinished(int ClientID);
 	bool TeamFinished(int Team);
-	void OnTeamFinish(CPlayer** Players, unsigned int Size, float Time);
-	void OnFinish(CPlayer* Player, float Time);
+	void OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, const char *pTimestamp);
+	void OnFinish(CPlayer* Player, float Time, const char *pTimestamp);
 
 public:
 	enum
