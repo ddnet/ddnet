@@ -256,6 +256,7 @@ void CServer::CClient::Reset()
 	m_SnapRate = CClient::SNAPRATE_INIT;
 	m_Score = 0;
 	m_NextMapChunk = 0;
+	m_Flags = 0;
 }
 
 CServer::CServer()
@@ -405,6 +406,15 @@ void CServer::SetClientScore(int ClientID, int Score)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
 	m_aClients[ClientID].m_Score = Score;
+}
+
+void CServer::SetClientFlags(int ClientID, int Flags)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
+		return;
+
+	if(Flags > m_aClients[ClientID].m_Flags)
+		m_aClients[ClientID].m_Flags = Flags;
 }
 
 void CServer::Kick(int ClientID, const char *pReason)
@@ -2119,59 +2129,52 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 		((CServer *)pUser)->Kick(pResult->GetInteger(0), "Kicked by console");
 }
 
-void CServer::StatusImpl(IConsole::IResult *pResult, void *pUser, bool DnsblBlacklistedOnly)
+void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[1024];
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	CServer *pThis = static_cast<CServer *>(pUser);
 
-	bool CanSeeAddress = pThis->m_aClients[pResult->m_ClientID].m_Authed > AUTHED_MOD;
-
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(
-			pThis->m_aClients[i].m_State != CClient::STATE_EMPTY
-			&& (!DnsblBlacklistedOnly || pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
-		)
+		if(pThis->m_aClients[i].m_State == CClient::STATE_EMPTY)
+			continue;
+
+		net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
+		if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
 		{
-			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
-			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
+			char aDnsblStr[64];
+			aDnsblStr[0] = '\0';
+			if(g_Config.m_SvDnsbl)
+			{
+				const char *pDnsblStr = pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED ? "white" :
+										pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED ? "black" :
+										pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING ? "pending" : "n/a";
+
+				str_format(aDnsblStr, sizeof(aDnsblStr), " dnsbl=%s", pDnsblStr);
+			}
+
+			char aAuthStr[128];
+			aAuthStr[0] = '\0';
+			if(pThis->m_aClients[i].m_AuthKey >= 0)
 			{
 				const char *pAuthStr = pThis->m_aClients[i].m_Authed == AUTHED_ADMIN ? "(Admin)" :
 										pThis->m_aClients[i].m_Authed == AUTHED_MOD ? "(Mod)" :
 										pThis->m_aClients[i].m_Authed == AUTHED_HELPER ? "(Helper)" : "";
-				char aAuthStr[128];
-				aAuthStr[0] = '\0';
-				if(pThis->m_aClients[i].m_AuthKey >= 0)
-					str_format(aAuthStr, sizeof(aAuthStr), "key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 
-				if(CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s name='%s' score=%d client=%d secure=%s %s", i, aAddrStr,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
-				else
-					str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d client=%d secure=%s %s", i,
-						pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pThis->GameServer()->GetClientVersion(i), pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", aAuthStr);
+				str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 			}
-			else
-			{
-				if(CanSeeAddress)
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
-				else
-					str_format(aBuf, sizeof(aBuf), "id=%d connecting", i);
-			}
-			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "id=%d addr='%s' name='%s' client=%d secure=%s flags=%d%s%s",
+				i, aAddrStr, pThis->m_aClients[i].m_aName, pThis->GameServer()->GetClientVersion(i),
+				pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", pThis->m_aClients[i].m_Flags, aDnsblStr, aAuthStr);
 		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
+		}
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 	}
-}
-
-void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
-{
-	StatusImpl(pResult, pUser, false);
-}
-
-void CServer::ConDnsblStatus(IConsole::IResult *pResult, void *pUser)
-{
-	StatusImpl(pResult, pUser, true);
 }
 
 static int GetAuthLevel(const char *pLevel)
@@ -2820,8 +2823,6 @@ void CServer::RegisterCommands()
 	Console()->Register("add_sqlserver", "s['r'|'w'] s[Database] s[Prefix] s[User] s[Password] s[IP] i[Port] ?i[SetUpDatabase ?]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAddSqlServer, this, "add a sqlserver");
 	Console()->Register("dump_sqlservers", "s['r'|'w']", CFGFLAG_SERVER, ConDumpSqlServers, this, "dumps all sqlservers readservers = r, writeservers = w");
 #endif
-
-	Console()->Register("dnsbl_status", "", CFGFLAG_SERVER, ConDnsblStatus, this, "List blacklisted players");
 
 	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key");
 	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAddHashed, this, "Add a prehashed rcon key");
