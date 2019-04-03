@@ -41,9 +41,11 @@ You can install the required libraries on your system, `touch CMakeLists.txt` an
 
     sudo apt install cmake git libcurl4-openssl-dev libfreetype6-dev libglew-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libwavpack-dev python
 
-Or on Arch Linux like this (Arch Linux does not package `pnglite`, not even in AUR):
+Or on Arch Linux like this:
 
     sudo pacman -S --needed cmake curl freetype2 git glew opusfile sdl2 wavpack python
+
+There is an [AUR package for pnglite](https://aur.archlinux.org/packages/pnglite/). For instructions on installing it, see [AUR packages installation instructions on ArchWiki](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages).
 
 The following is a non-exhaustive list of build arguments that can be passed to the `cmake` command-line tool in order to enable or disable options in build time:
 
