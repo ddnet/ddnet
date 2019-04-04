@@ -135,23 +135,26 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 	m_pEngine->AddJob(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
 }
 
-void CUpdater::MoveFile(const char *pFile)
+bool CUpdater::MoveFile(const char *pFile)
 {
 	char aBuf[256];
 	size_t len = str_length(pFile);
+	bool Success = true;
 
 	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
-		m_pStorage->RenameBinaryFile(pFile, aBuf);
+		Success &= m_pStorage->RenameBinaryFile(pFile, aBuf);
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
-		m_pStorage->RenameBinaryFile(aBuf, pFile);
+		Success &= m_pStorage->RenameBinaryFile(aBuf, pFile);
 	}
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "update/%s", pFile);
-		m_pStorage->RenameBinaryFile(aBuf, pFile);
+		Success &= m_pStorage->RenameBinaryFile(aBuf, pFile);
 	}
+
+	return Success;
 }
 
 void CUpdater::Update()
@@ -174,43 +177,53 @@ void CUpdater::AddFileJob(const char *pFile, bool Job)
 	m_FileJobs[string(pFile)] = Job;
 }
 
-void CUpdater::ReplaceClient()
+bool CUpdater::ReplaceClient()
 {
 	dbg_msg("updater", "replacing " PLAT_CLIENT_EXEC);
+	bool Success = true;
 
 	// Replace running executable by renaming twice...
 	if(!m_IsWinXP)
 	{
 		m_pStorage->RemoveBinaryFile("DDNet.old");
-		m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
-		m_pStorage->RenameBinaryFile("update/DDNet.tmp", PLAT_CLIENT_EXEC);
+		Success &= m_pStorage->RenameBinaryFile(PLAT_CLIENT_EXEC, "DDNet.old");
+		Success &= m_pStorage->RenameBinaryFile("update/DDNet.tmp", PLAT_CLIENT_EXEC);
 	}
 	#if !defined(CONF_FAMILY_WINDOWS)
 		char aPath[512];
 		m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-		if (system(aBuf))
+		if(system(aBuf))
+		{
 			dbg_msg("updater", "ERROR: failed to set client executable bit");
+			Success &= false;
+		}
 	#endif
+	return Success;
 }
 
-void CUpdater::ReplaceServer()
+bool CUpdater::ReplaceServer()
 {
 	dbg_msg("updater", "replacing " PLAT_SERVER_EXEC);
+	bool Success = true;
 
 	//Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile("DDNet-Server.old");
-	m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, "DDNet-Server.old");
-	m_pStorage->RenameBinaryFile("update/DDNet-Server.tmp", PLAT_SERVER_EXEC);
+	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, "DDNet-Server.old");
+	Success &= m_pStorage->RenameBinaryFile("update/DDNet-Server.tmp", PLAT_SERVER_EXEC);
 	#if !defined(CONF_FAMILY_WINDOWS)
 		char aPath[512];
 		m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
 		if (system(aBuf))
+		{
 			dbg_msg("updater", "ERROR: failed to set server executable bit");
+			Success &= false;
+		}
 	#endif
+	return Success;
 }
 
 void CUpdater::ParseUpdate()
@@ -323,15 +336,19 @@ void CUpdater::PerformUpdate()
 
 void CUpdater::CommitUpdate()
 {
+	bool Success = true;
+
 	for(map<std::string, bool>::iterator it = m_FileJobs.begin(); it != m_FileJobs.end(); ++it)
 		if(it->second)
-			MoveFile(it->first.c_str());
+			Success &= MoveFile(it->first.c_str());
 
 	if(m_ClientUpdate)
-		ReplaceClient();
+		Success &= ReplaceClient();
 	if(m_ServerUpdate)
-		ReplaceServer();
-	if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
+		Success &= ReplaceServer();
+	if(!Success)
+		m_State = FAIL;
+	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
 		m_State = NEED_RESTART;
 	else
 	{
