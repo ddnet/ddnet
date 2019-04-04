@@ -257,6 +257,7 @@ void CServer::CClient::Reset()
 	m_Score = 0;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
+	m_ShowIps = false;
 }
 
 CServer::CServer()
@@ -931,7 +932,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	net_addr_str(pThis->m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=%s reason='%s'", ClientID, aAddrStr, pReason);
+	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=<{%s}> reason='%s'", ClientID, aAddrStr, pReason);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 
 	// notify the mod about the drop
@@ -1049,10 +1050,36 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighte
 	if(ReentryGuard) return;
 	ReentryGuard++;
 
+	const char *pStart = str_find(pLine, "<{");
+	const char *pEnd = pStart == NULL ? NULL : str_find(pStart + 2, "}>");
+	const char *pLineWithoutIps;
+	char aLine[512];
+	char aLineWithoutIps[512];
+	aLine[0] = '\0';
+	aLineWithoutIps[0] = '\0';
+
+	if(pStart == NULL || pEnd == NULL)
+	{
+		pLineWithoutIps = pLine;
+	}
+	else
+	{
+		str_append(aLine, pLine, pStart - pLine + 1);
+		str_append(aLine, pStart + 2, pStart - pLine + pEnd - pStart - 2);
+		str_append(aLine, pEnd + 2, sizeof(aLine));
+
+		str_append(aLineWithoutIps, pLine, pStart - pLine + 1);
+		str_append(aLineWithoutIps, "XXX", sizeof(aLineWithoutIps));
+		str_append(aLineWithoutIps, pEnd + 2, sizeof(aLineWithoutIps));
+
+		pLine = aLine;
+		pLineWithoutIps = aLineWithoutIps;
+	}
+
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i))
-			pThis->SendRconLine(i, pLine);
+			pThis->SendRconLine(i, pThis->m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
 	}
 
 	ReentryGuard--;
@@ -1206,7 +1233,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=%s secure=%s", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID)?"yes":"no");
+				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=<{%s}> secure=%s", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID)?"yes":"no");
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_READY;
 				GameServer()->OnClientConnected(ClientID);
@@ -1222,7 +1249,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=%s", ClientID, aAddrStr);
+				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				GameServer()->OnClientEnter(ClientID);
@@ -1962,7 +1989,7 @@ int CServer::Run()
 
 							char aBuf[256];
 
-							str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=%s secure=%s blacklisted", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID)?"yes":"no");
+							str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> secure=%s blacklisted", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID)?"yes":"no");
 
 							Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
 						}
@@ -2165,13 +2192,13 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "id=%d addr='%s' name='%s' client=%d secure=%s flags=%d%s%s",
+			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> name='%s' client=%d secure=%s flags=%d%s%s",
 				i, aAddrStr, pThis->m_aClients[i].m_aName, pThis->GameServer()->GetClientVersion(i),
 				pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", pThis->m_aClients[i].m_Flags, aDnsblStr, aAuthStr);
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
+			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);
 		}
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 	}
@@ -2554,6 +2581,26 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	if(pServer->m_RconClientID >= 0 && pServer->m_RconClientID < MAX_CLIENTS &&
+		pServer->m_aClients[pServer->m_RconClientID].m_State != CServer::CClient::STATE_EMPTY)
+	{
+		if(pResult->NumArguments())
+		{
+			pServer->m_aClients[pServer->m_RconClientID].m_ShowIps = pResult->GetInteger(0);
+		}
+		else
+		{
+			char aBuf[9];
+			str_format(aBuf, sizeof(aBuf), "Value: %d", pServer->m_aClients[pServer->m_RconClientID].m_ShowIps);
+			pServer->SendRconLine(pServer->m_RconClientID, aBuf);
+		}
+	}
+}
+
 #if defined (CONF_SQL)
 
 void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
@@ -2591,7 +2638,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 				thread_init(CreateTablesThread, apSqlServers[i], "CreateTables");
 
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
+			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 			return;
 		}
@@ -2620,7 +2667,7 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 		if (apSqlServers[i])
 		{
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
+			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: <{'%s'}> Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
 }
@@ -2813,6 +2860,7 @@ void CServer::RegisterCommands()
 	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players");
 	Console()->Register("shutdown", "", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
+	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
 
 	Console()->Register("record", "?s[file]", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file");
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");
