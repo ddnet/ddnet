@@ -487,7 +487,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 											CountryOffset, y+(Spacing+TeeSizeMod*5.0f)/2.0f, CountryLength, LineHeight-Spacing-TeeSizeMod*5.0f);
 
 		// ping
-		if(g_Config.m_ClEnablePingColor) {
+		if(g_Config.m_ClEnablePingColor)
+		{
 			vec3 rgb = HslToRgb(vec3((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 		}
