@@ -487,11 +487,17 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 											CountryOffset, y+(Spacing+TeeSizeMod*5.0f)/2.0f, CountryLength, LineHeight-Spacing-TeeSizeMod*5.0f);
 
 		// ping
+		if(g_Config.m_ClEnablePingColor) {
+			vec3 rgb = HslToRgb(vec3((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+		}
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 1000));
-		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
+		tw = TextRender()->TextWidth(nullptr, FontSize, aBuf, -1);
 		TextRender()->SetCursor(&Cursor, PingOffset+PingLength-tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
 		TextRender()->TextEx(&Cursor, aBuf, -1);
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		y += LineHeight+Spacing;
 		if (lower32 || upper32) {
