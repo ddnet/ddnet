@@ -42,11 +42,11 @@ void CMenus::RenderGame(CUIRect MainView)
 	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	// button bar
-	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
+	ButtonBar.HSplitTop(10.0f, nullptr, &ButtonBar);
 #if defined(__ANDROID__)
 	ButtonBar.HSplitTop(80.0f, &ButtonBar, 0);
 #else
-	ButtonBar.HSplitTop(25.0f, &ButtonBar, 0);
+	ButtonBar.HSplitTop(25.0f, &ButtonBar, nullptr);
 #endif
 	ButtonBar.VMargin(10.0f, &ButtonBar);
 
@@ -85,7 +85,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				if(!DummyConnecting && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
 				{
@@ -96,7 +96,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_BLUE)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				if(!DummyConnecting && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
 				{
@@ -109,7 +109,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != 0)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
 				{
@@ -182,7 +182,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
-	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(20.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
 	Graphics()->QuadsBegin();
@@ -559,7 +559,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		// render quick search
 		{
 			Bottom.VSplitLeft(240.0f, &QuickSearch, &Bottom);
-			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
+			QuickSearch.HSplitTop(5.0f, nullptr, &QuickSearch);
 			const char *pSearchLabel = "\xEE\xA2\xB6";
 			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 			TextRender()->SetRenderFlags(
@@ -569,11 +569,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					| ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE
 			);
 			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1);
-			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1);
+			float wSearch = TextRender()->TextWidth(nullptr, 14.0f, pSearchLabel, -1);
 			TextRender()->SetRenderFlags(0);
-			TextRender()->SetCurFont(NULL);
-			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
-			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
+			TextRender()->SetCurFont(nullptr);
+			QuickSearch.VSplitLeft(wSearch, nullptr, &QuickSearch);
+			QuickSearch.VSplitLeft(5.0f, nullptr, &QuickSearch);
 			static int s_ClearButton = 0;
 			static float Offset = 0.0f;
 			if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
@@ -1051,23 +1051,19 @@ void CMenus::RenderGhost(CUIRect MainView)
 					Graphics()->QuadsEnd();
 				}
 			}
-			else if(Id == COL_NAME)
-			{
+			else if(Id == COL_NAME || Id == COL_TIME) {
 				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f,
+						12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
-				TextRender()->TextEx(&Cursor, pItem->m_aPlayer, -1);
-			}
-			else if(Id == COL_TIME)
-			{
-				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-				Cursor.m_LineWidth = Button.w;
-
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%02d:%02d.%03d", pItem->m_Time / (60 * 1000), (pItem->m_Time / 1000) % 60, pItem->m_Time % 1000);
-				TextRender()->TextEx(&Cursor, aBuf, -1);
+				if(Id == COL_NAME)
+					TextRender()->TextEx(&Cursor, pItem->m_aPlayer, -1);
+				else if(Id == COL_TIME) {
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "%02d:%02d.%03d", pItem->m_Time / (60 * 1000), (pItem->m_Time / 1000) % 60, pItem->m_Time % 1000);
+					TextRender()->TextEx(&Cursor, aBuf, -1);
+				}
 			}
 		}
 
@@ -1079,7 +1075,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	if(NewSelected != -1)
 		s_SelectedIndex = NewSelected;
 
-	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
+	RenderTools()->DrawUIRect(&Status, vec4(1, 1, 1, 0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
 	CUIRect Button;
