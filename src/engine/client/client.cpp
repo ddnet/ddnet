@@ -2927,6 +2927,7 @@ void CClient::Run()
 				{
 					Input()->MouseModeRelative();
 					GameClient()->OnActivateEditor();
+					m_pEditor->ResetMentions();
 					m_EditorActive = true;
 				}
 			}

@@ -3,6 +3,7 @@
 
 #include <base/tl/string.h>
 
+#include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
@@ -238,7 +239,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 					if(FoundAt != m_Input.GetLength())
 						str_append(aText, m_Input.GetString() + FoundAt, sizeof(aText));
-					
+
 					m_Input.Set(aText);
 					FoundAt = OldOffset;
 				}
@@ -710,6 +711,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			{
 				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
+			}
+
+			if(g_Config.m_ClEditor)
+			{
+				GameClient()->Editor()->UpdateMentions();
 			}
 		}
 	}
