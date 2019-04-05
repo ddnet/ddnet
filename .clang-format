@@ -1,4 +1,3 @@
-# https://webkit.org/code-style-guidelines/
 AccessModifierOffset: -1
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
