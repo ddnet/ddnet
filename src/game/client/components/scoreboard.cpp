@@ -473,13 +473,23 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			Cursor.m_LineWidth = NameLength;
 			TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 		}
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// clan
-		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
-		TextRender()->SetCursor(&Cursor, ClanOffset+ClanLength/2-tw/2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
+				m_pClient->m_aClients[GameClient()->m_LocalIDs[0]].m_aClan) == 0)
+		{
+			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClAuthedPlayerColor);
+			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+		}
+		else
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		tw = TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+		TextRender()->SetCursor(&Cursor, ClanOffset + ClanLength / 2 - tw / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ClanLength;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// country flag
 		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
