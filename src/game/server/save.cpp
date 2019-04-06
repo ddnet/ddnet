@@ -193,6 +193,9 @@ int CSaveTee::LoadString(char* String)
 	if(Num == 96) // Don't forget to update this when you save / load more / less.
 	{
 		m_NotEligibleForFinish = false;
+		m_HasTeleGrenade = 0;
+		m_HasTeleLaser = 0;
+		m_HasTeleGun = 0;
 		return 0;
 	}
 	else if(Num == 97)
