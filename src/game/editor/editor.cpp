@@ -5684,15 +5684,15 @@ void CEditor::Render()
 		char aBuf[16];
 		if(m_Mentions == 1)
 		{
-			str_copy(aBuf, "1 new mention", sizeof(aBuf));
+			str_copy(aBuf, Localize("1 new mention"), sizeof(aBuf));
 		}
 		else if(m_Mentions <= 9)
 		{
-			str_format(aBuf, sizeof(aBuf), "%d new mentions", m_Mentions);
+			str_format(aBuf, sizeof(aBuf), Localize("%d new mentions"), m_Mentions);
 		}
 		else
 		{
-			str_copy(aBuf, "9+ new mentions", sizeof(aBuf));
+			str_copy(aBuf, Localize("9+ new mentions"), sizeof(aBuf));
 		}
 
 		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);

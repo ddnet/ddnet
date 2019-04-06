@@ -1320,7 +1320,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet %s is out!", Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::CLEAN)
@@ -1331,16 +1331,16 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		{
 			char aCurrentFile[64];
 			Updater()->GetCurrentFile(aCurrentFile, sizeof(aCurrentFile));
-			str_format(aBuf, sizeof(aBuf), "Downloading %s:", aCurrentFile);
+			str_format(aBuf, sizeof(aBuf), Localize("Downloading %s:"), aCurrentFile);
 		}
 		else if(State == IUpdater::FAIL)
 		{
-			str_format(aBuf, sizeof(aBuf), "Failed to download a file! Restart client to retry...");
+			str_format(aBuf, sizeof(aBuf), Localize("Update failed! Check log..."));
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::NEED_RESTART)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);
