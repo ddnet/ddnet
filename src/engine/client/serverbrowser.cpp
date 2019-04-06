@@ -92,11 +92,11 @@ const CServerInfo *CServerBrowser::SortedGet(int Index) const
 
 int CServerBrowser::GenerateToken(const NETADDR &Addr) const
 {
-	MD5_CTX Md5;
-	md5_init(&Md5);
-	md5_update(&Md5, m_aTokenSeed, sizeof(m_aTokenSeed));
-	md5_update(&Md5, (unsigned char *)&Addr, sizeof(Addr));
-	MD5_DIGEST Digest = md5_finish(&Md5);
+	SHA256_CTX Sha256;
+	sha256_init(&Sha256);
+	sha256_update(&Sha256, m_aTokenSeed, sizeof(m_aTokenSeed));
+	sha256_update(&Sha256, (unsigned char *)&Addr, sizeof(Addr));
+	SHA256_DIGEST Digest = sha256_finish(&Sha256);
 	return (Digest.data[0] << 16) | (Digest.data[1] << 8) | Digest.data[2];
 }
 
