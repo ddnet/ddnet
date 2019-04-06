@@ -695,7 +695,8 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 	}
 }
 
-void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+{
 	if(g_Config.m_GfxQuadAsTriangle && !m_UseOpenGL3_3)
 	{
 		m_aVertices[QuadOffset * 6].m_Color.r = r;
