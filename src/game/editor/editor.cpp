@@ -5678,6 +5678,28 @@ void CEditor::Render()
 		StatusBar.Margin(2.0f, &StatusBar);
 	}
 
+	// show mentions
+	if(m_GuiActive && m_Mentions)
+	{
+		char aBuf[16];
+		if(m_Mentions == 1)
+		{
+			str_copy(aBuf, "1 new mention", sizeof(aBuf));
+		}
+		else if(m_Mentions <= 9)
+		{
+			str_format(aBuf, sizeof(aBuf), "%d new mentions", m_Mentions);
+		}
+		else
+		{
+			str_copy(aBuf, "9+ new mentions", sizeof(aBuf));
+		}
+
+		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
+		TextRender()->Text(0, 5.0f, 27.0f, 10.0f, aBuf, -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
 	// do the toolbar
 	if(m_Mode == MODE_LAYERS)
 		DoToolbar(ToolBar);
