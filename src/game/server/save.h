@@ -68,6 +68,10 @@ private:
 
 	int m_NotEligibleForFinish;
 
+	bool m_HasTeleGun;
+	bool m_HasTeleGrenade;
+	bool m_HasTeleLaser;
+
 	// Core
 	vec2 m_CorePos;
 	vec2 m_Vel;
