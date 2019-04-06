@@ -27,7 +27,6 @@
 
 #include <base/tl/string.h>
 #include <engine/keys.h>
-#include <engine/graphics.h>
 #include <engine/storage.h>
 #include "ghost.h"
 

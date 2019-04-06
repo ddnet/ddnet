@@ -27,102 +27,100 @@ void CGameTeams::OnCharacterStart(int ClientID)
 {
 	int Tick = Server()->Tick();
 	CCharacter* pStartingChar = Character(ClientID);
-	if (!pStartingChar)
+	if(!pStartingChar)
 		return;
-	if (m_Core.Team(ClientID) != TEAM_FLOCK && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
+	if(m_Core.Team(ClientID) != TEAM_FLOCK && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
 		return;
-	if (m_Core.Team(ClientID) == TEAM_FLOCK
+	if(m_Core.Team(ClientID) == TEAM_FLOCK
 			|| m_Core.Team(ClientID) == TEAM_SUPER)
 	{
 		pStartingChar->m_DDRaceState = DDRACE_STARTED;
 		pStartingChar->m_StartTime = Tick;
+		return;
 	}
-	else
+	bool Waiting = false;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		bool Waiting = false;
-		for (int i = 0; i < MAX_CLIENTS; ++i)
+		if(m_Core.Team(ClientID) != m_Core.Team(i))
+			continue;
+		CPlayer* pPlayer = GetPlayer(i);
+		if(!pPlayer || !pPlayer->IsPlaying())
+			continue;
+		if(GetDDRaceState(pPlayer) != DDRACE_FINISHED)
+			continue;
+
+		Waiting = true;
+		pStartingChar->m_DDRaceState = DDRACE_NONE;
+
+		if(m_LastChat[ClientID] + Server()->TickSpeed()
+				+ g_Config.m_SvChatDelay < Tick)
 		{
-			if (m_Core.Team(ClientID) == m_Core.Team(i))
+			char aBuf[128];
+			str_format(
+					aBuf,
+					sizeof(aBuf),
+					"%s has finished and didn't go through start yet, wait for him or join another team.",
+					Server()->ClientName(i));
+			GameServer()->SendChatTarget(ClientID, aBuf);
+			m_LastChat[ClientID] = Tick;
+		}
+		if(m_LastChat[i] + Server()->TickSpeed()
+				+ g_Config.m_SvChatDelay < Tick)
+		{
+			char aBuf[128];
+			str_format(
+					aBuf,
+					sizeof(aBuf),
+					"%s wants to start a new round, kill or walk to start.",
+					Server()->ClientName(ClientID));
+			GameServer()->SendChatTarget(i, aBuf);
+			m_LastChat[i] = Tick;
+		}
+	}
+
+	if(m_TeamState[m_Core.Team(ClientID)] < TEAMSTATE_STARTED && !Waiting)
+	{
+		ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_STARTED);
+
+		char aBuf[512];
+		str_format(
+				aBuf,
+				sizeof(aBuf),
+				"Team %d started with these %d players: ",
+				m_Core.Team(ClientID),
+				Count(m_Core.Team(ClientID)));
+
+		bool First = true;
+
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(m_Core.Team(ClientID) == m_Core.Team(i))
 			{
 				CPlayer* pPlayer = GetPlayer(i);
-				if (pPlayer && pPlayer->IsPlaying()
-						&& GetDDRaceState(pPlayer) == DDRACE_FINISHED)
+				// TODO: THE PROBLEM IS THAT THERE IS NO CHARACTER SO START TIME CAN'T BE SET!
+				if(pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
 				{
-					Waiting = true;
-					pStartingChar->m_DDRaceState = DDRACE_NONE;
+					SetDDRaceState(pPlayer, DDRACE_STARTED);
+					SetStartTime(pPlayer, Tick);
 
-					if (m_LastChat[ClientID] + Server()->TickSpeed()
-							+ g_Config.m_SvChatDelay < Tick)
-					{
-						char aBuf[128];
-						str_format(
-								aBuf,
-								sizeof(aBuf),
-								"%s has finished and didn't go through start yet, wait for him or join another team.",
-								Server()->ClientName(i));
-						GameServer()->SendChatTarget(ClientID, aBuf);
-						m_LastChat[ClientID] = Tick;
-					}
-					if (m_LastChat[i] + Server()->TickSpeed()
-							+ g_Config.m_SvChatDelay < Tick)
-					{
-						char aBuf[128];
-						str_format(
-								aBuf,
-								sizeof(aBuf),
-								"%s wants to start a new round, kill or walk to start.",
-								Server()->ClientName(ClientID));
-						GameServer()->SendChatTarget(i, aBuf);
-						m_LastChat[i] = Tick;
-					}
+					if(First)
+						First = false;
+					else
+						str_append(aBuf, ", ", sizeof(aBuf));
+
+					str_append(aBuf, GameServer()->Server()->ClientName(i), sizeof(aBuf));
 				}
 			}
 		}
 
-		if (m_TeamState[m_Core.Team(ClientID)] < TEAMSTATE_STARTED && !Waiting)
+		if(g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
 		{
-			ChangeTeamState(m_Core.Team(ClientID), TEAMSTATE_STARTED);
-
-			char aBuf[512];
-			str_format(
-					aBuf,
-					sizeof(aBuf),
-					"Team %d started with these %d players: ",
-					m_Core.Team(ClientID),
-					Count(m_Core.Team(ClientID)));
-
-			bool First = true;
-
-			for (int i = 0; i < MAX_CLIENTS; ++i)
+			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if (m_Core.Team(ClientID) == m_Core.Team(i))
+				CPlayer* pPlayer = GetPlayer(i);
+				if(m_Core.Team(ClientID) == m_Core.Team(i) && pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
 				{
-					CPlayer* pPlayer = GetPlayer(i);
-					// TODO: THE PROBLEM IS THAT THERE IS NO CHARACTER SO START TIME CAN'T BE SET!
-					if (pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
-					{
-						SetDDRaceState(pPlayer, DDRACE_STARTED);
-						SetStartTime(pPlayer, Tick);
-
-						if (First)
-							First = false;
-						else
-							str_append(aBuf, ", ", sizeof(aBuf));
-
-						str_append(aBuf, GameServer()->Server()->ClientName(i), sizeof(aBuf));
-					}
-				}
-			}
-
-			if (g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
-			{
-				for (int i = 0; i < MAX_CLIENTS; ++i)
-				{
-					CPlayer* pPlayer = GetPlayer(i);
-					if (m_Core.Team(ClientID) == m_Core.Team(i) && pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientID))))
-					{
-						GameServer()->SendChatTarget(i, aBuf);
-					}
+					GameServer()->SendChatTarget(i, aBuf);
 				}
 			}
 		}
