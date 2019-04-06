@@ -68,6 +68,10 @@ private:
 
 	int m_NotEligibleForFinish;
 
+	int m_HasTeleGun;
+	int m_HasTeleGrenade;
+	int m_HasTeleLaser;
+
 	// Core
 	vec2 m_CorePos;
 	vec2 m_Vel;
@@ -80,6 +84,8 @@ private:
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
+
+	char aGameUuid[16];
 };
 
 class CSaveTeam
