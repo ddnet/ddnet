@@ -84,6 +84,8 @@ private:
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
+
+	char aGameUuid[16];
 };
 
 class CSaveTeam
