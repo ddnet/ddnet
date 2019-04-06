@@ -63,10 +63,11 @@ versionsrv
 
 generated
 
-.vscode
 .cproject
+.idea
 .project
 .settings
+.vscode
 cscope.files
 cscope.out
 
