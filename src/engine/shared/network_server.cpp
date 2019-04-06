@@ -1,13 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
+#include <base/hash_ctxt.h>
 
 #include <engine/console.h>
 
 #include "config.h"
 #include "netban.h"
 #include "network.h"
-#include <engine/external/md5/md5.h>
 #include <engine/message.h>
 #include <engine/shared/protocol.h>
 
@@ -145,16 +145,12 @@ int CNetServer::Update()
 
 SECURITY_TOKEN CNetServer::GetToken(const NETADDR &Addr)
 {
-	md5_state_t md5;
-	md5_byte_t digest[16];
-	SECURITY_TOKEN SecurityToken;
-	md5_init(&md5);
+	SHA256_CTX Sha256;
+	sha256_init(&Sha256);
+	sha256_update(&Sha256, (unsigned char*)m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
+	sha256_update(&Sha256, (unsigned char*)&Addr, sizeof(Addr));
 
-	md5_append(&md5, (unsigned char*)m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
-	md5_append(&md5, (unsigned char*)&Addr, sizeof(Addr));
-
-	md5_finish(&md5, digest);
-	SecurityToken = ToSecurityToken(digest);
+	SECURITY_TOKEN SecurityToken = ToSecurityToken(sha256_finish(&Sha256).data);
 
 	if (SecurityToken == NET_SECURITY_TOKEN_UNKNOWN ||
 		SecurityToken == NET_SECURITY_TOKEN_UNSUPPORTED)

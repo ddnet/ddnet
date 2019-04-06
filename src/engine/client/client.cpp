@@ -11,6 +11,7 @@
 #include <climits>
 #include <tuple>
 
+#include <base/hash_ctxt.h>
 #include <base/math.h>
 #include <base/vmath.h>
 #include <base/system.h>
@@ -33,8 +34,6 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-
-#include <engine/external/md5/md5.h>
 
 #include <engine/client/http.h>
 #include <engine/shared/config.h>
@@ -637,19 +636,16 @@ void CClient::EnterGame()
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
 {
-	md5_state_t Md5;
-	md5_byte_t aDigest[16];
+	MD5_CTX Md5;
 	md5_init(&Md5);
-
 	const char *pDummy = Dummy ? "dummy" : "normal";
-
-	md5_append(&Md5, (unsigned char *)pDummy, str_length(pDummy) + 1);
-	md5_append(&Md5, (unsigned char *)pSeed, str_length(pSeed) + 1);
-	md5_append(&Md5, (unsigned char *)&Addr, sizeof(Addr));
-	md5_finish(&Md5, aDigest);
+	md5_update(&Md5, (unsigned char *)pDummy, str_length(pDummy) + 1);
+	md5_update(&Md5, (unsigned char *)pSeed, str_length(pSeed) + 1);
+	md5_update(&Md5, (unsigned char *)&Addr, sizeof(Addr));
+	MD5_DIGEST Digest = md5_finish(&Md5);
 
 	unsigned short Random[8];
-	mem_copy(Random, aDigest, sizeof(Random));
+	mem_copy(Random, Digest.data, sizeof(Random));
 	generate_password(pBuffer, Size, Random, 8);
 }
 
