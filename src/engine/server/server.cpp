@@ -2249,10 +2249,10 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	unsigned char aHash[MD5_BYTES];
+	MD5_DIGEST Hash;
 	unsigned char aSalt[SALT_BYTES];
 
-	if(str_hex_decode(aHash, sizeof(aHash), pPw))
+	if(md5_from_str(&Hash, pPw))
 	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
 		return;
@@ -2265,7 +2265,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 
-	if(pManager->AddKeyHash(pIdent, aHash, aSalt, Level) < 0)
+	if(pManager->AddKeyHash(pIdent, Hash, aSalt, Level) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
@@ -2328,10 +2328,10 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	unsigned char aHash[MD5_BYTES];
+	MD5_DIGEST Hash;
 	unsigned char aSalt[SALT_BYTES];
 
-	if(str_hex_decode(aHash, sizeof(aHash), pPw))
+	if(md5_from_str(&Hash, pPw))
 	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
 		return;
@@ -2342,7 +2342,7 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	pManager->UpdateKeyHash(KeySlot, aHash, aSalt, Level);
+	pManager->UpdateKeyHash(KeySlot, Hash, aSalt, Level);
 	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
