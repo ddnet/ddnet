@@ -1163,6 +1163,8 @@ void CCharacter::Snap(int SnappingClient)
 	}
 
 	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
+
+	pCharacter->m_IsSolo = Teams()->m_Core.GetSolo(m_pPlayer->GetCID());
 }
 
 int CCharacter::NetworkClipped(int SnappingClient)
