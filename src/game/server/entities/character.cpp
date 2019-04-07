@@ -103,6 +103,7 @@ void CCharacter::SetWeapon(int W)
 
 void CCharacter::SetSolo(bool Solo)
 {
+	Server()->SetClientSolo(m_pPlayer->GetCID(), Solo);
 	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), Solo);
 
 	if(Solo)

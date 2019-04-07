@@ -1955,6 +1955,15 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				return;
 			GameClient()->OnTimeScore(NewTimeScore, g_Config.m_ClDummy);
 		}
+		else if(Msg == NETMSG_SOLO_PLAYERS)
+		{
+			int max_players = Unpacker.GetInt();
+			const unsigned char *pBytes = Unpacker.GetRaw(8);
+
+			uint64_t SoloPlayers = ((uint64_t)pBytes[0] << 56) | ((uint64_t)pBytes[1] << 48)
+					| ((uint64_t)pBytes[2] << 40) | ((uint64_t)pBytes[3] << 32) | ((uint64_t)pBytes[4] << 24)
+					| ((uint64_t)pBytes[5] << 16) | ((uint64_t)pBytes[6] << 8) | ((uint64_t)pBytes[7]);
+		}
 	}
 	else
 	{
