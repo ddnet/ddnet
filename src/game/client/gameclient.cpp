@@ -2034,7 +2034,7 @@ int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2
 			continue;
 		CClientData cData = m_aClients[i];
 
-		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID))
+		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID) || m_Snap.m_aCharacters[i].m_Cur.m_IsSolo)
 			continue;
 		vec2 Position = World->m_apCharacters[i]->m_Pos;
 		vec2 ClosestPoint = closest_point_on_line(OldPos, NewPos, Position);

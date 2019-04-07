@@ -245,6 +245,9 @@ void CPlayers::RenderHook(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
+	if(!Local && Player.m_IsSolo)
+		OtherTeam = true;
+
 	if(OtherTeam)
 	{
 		RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
@@ -402,6 +405,9 @@ void CPlayers::RenderPlayer(
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+
+	if(!Local && Player.m_IsSolo)
+		OtherTeam = true;
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
