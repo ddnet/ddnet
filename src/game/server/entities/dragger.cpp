@@ -31,7 +31,7 @@ void CDragger::Move()
 {
 	if (m_Target && (!m_Target->IsAlive() || (m_Target->IsAlive()
 			&& (m_Target->m_Super || m_Target->IsPaused()
-					|| (m_Layer == LAYER_SWITCH
+					|| (m_Layer == LAYER_SWITCH && m_Number
 							&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[m_Target->Team()])))))
 		m_Target = 0;
 
@@ -53,7 +53,7 @@ void CDragger::Move()
 			m_SoloEnts[i] = 0;
 			continue;
 		}
-		if (m_Layer == LAYER_SWITCH
+		if (m_Layer == LAYER_SWITCH && m_Number
 				&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
 		{
 			m_SoloEnts[i] = 0;
@@ -326,7 +326,7 @@ void CDragger::Snap(int SnappingClient)
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if (Char && Char->IsAlive()
-				&& (m_Layer == LAYER_SWITCH
+				&& (m_Layer == LAYER_SWITCH && m_Number
 						&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
 						&& (!Tick)))
 			continue;
