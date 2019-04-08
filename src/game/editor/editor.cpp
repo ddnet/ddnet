@@ -2547,7 +2547,26 @@ void CEditor::DoMapEditor(CUIRect View)
 		// brush editing
 		if(UI()->HotItem() == s_pEditorID)
 		{
-			if(m_Brush.IsEmpty())
+			int Layer = NUM_LAYERS;
+			if(m_ShowPicker)
+			{
+				CLayer *pLayer = GetSelectedLayer(0);
+				if(pLayer == m_Map.m_pGameLayer)
+					Layer = LAYER_GAME;
+				else if(pLayer == m_Map.m_pFrontLayer)
+					Layer = LAYER_FRONT;
+				else if(pLayer == m_Map.m_pSwitchLayer)
+					Layer = LAYER_SWITCH;
+				else if(pLayer == m_Map.m_pTeleLayer)
+					Layer = LAYER_TELE;
+				else if(pLayer == m_Map.m_pSpeedupLayer)
+					Layer = LAYER_SPEEDUP;
+				else if(pLayer == m_Map.m_pTuneLayer)
+					Layer = LAYER_TUNE;
+			}
+			if(m_ShowPicker && Layer != NUM_LAYERS)
+				m_pTooltip = Explain((int)wx / 32 + (int)wy / 32 * 16, Layer);
+			else if(m_Brush.IsEmpty())
 				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads.";
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
@@ -4597,14 +4616,23 @@ void CEditor::RenderStatusbar(CUIRect View)
 
 	if(m_pTooltip)
 	{
+		char aBuf[512];
 		if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
-		{
-			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
-			UI()->DoLabel(&View, aBuf, 10.0f, -1, -1);
-		}
 		else
-			UI()->DoLabel(&View, m_pTooltip, 10.0f, -1, -1);
+			str_copy(aBuf, m_pTooltip, sizeof(aBuf));
+
+		float FontSize = 10.0f;
+
+		while(TextRender()->TextWidth(0, FontSize, m_pTooltip, -1) > View.w)
+		{
+			if(FontSize > 6.0f)
+				FontSize--;
+			else
+				str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+		}
+
+		UI()->DoLabel(&View, m_pTooltip, FontSize, -1, View.w);
 	}
 }
 

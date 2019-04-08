@@ -1121,8 +1121,8 @@ int CCollision::IsCheckpoint(int Index)
 		return -1;
 
 	int z = m_pTiles[Index].m_Index;
-	if(z >= 35 && z <= 59)
-		return z-35;
+	if(z >= TILE_CHECKPOINT_FIRST && z <= TILE_CHECKPOINT_LAST)
+		return z - TILE_CHECKPOINT_FIRST;
 	return -1;
 }
 
