@@ -36,7 +36,7 @@ public:
 
 	CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW =
 			false, int Layer = 0, int Number = 0);
-	//~CDraggerTeam();
+	~CDraggerTeam();
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAGGER_H

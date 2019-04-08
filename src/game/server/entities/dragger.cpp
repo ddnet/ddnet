@@ -392,13 +392,14 @@ CDraggerTeam::CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength,
 {
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		m_Draggers[i] = new CDragger(pGameWorld, Pos, Strength, NW, i, Layer,
-				Number);
+		m_Draggers[i] = new CDragger(pGameWorld, Pos, Strength, NW, i, Layer, Number);
 	}
 }
 
-//CDraggerTeam::~CDraggerTeam() {
-//for(int i = 0; i < MAX_CLIENTS; ++i) {
-//	delete m_Draggers[i];
-//}
-//}
+CDraggerTeam::~CDraggerTeam()
+{
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		delete m_Draggers[i];
+	}
+}
