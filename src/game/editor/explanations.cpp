@@ -408,15 +408,42 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "DOOR: Combined with LASER LENGTH creates doors. Doesn't allow to go through it (only with NINJA).";
 		break;
-	// TODO: Explain portal tiles
-	case TILE_TELE_GUN_ENABLE: return "";
-	case TILE_TELE_GUN_DISABLE: return "";
-	case TILE_ALLOW_TELE_GUN: return "";
-	case TILE_ALLOW_BLUE_TELE_GUN: return "";
-	case TILE_TELE_GRENADE_ENABLE: return "";
-	case TILE_TELE_GRENADE_DISABLE: return "";
-	case TILE_TELE_LASER_ENABLE: return "";
-	case TILE_TELE_LASER_DISABLE: return "";
+	case TILE_TELE_GUN_ENABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "TELEGUN: Turn gun on as telegun weapon.";
+		break;
+	case TILE_TELE_GUN_DISABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "TELEGUN: Turn gun off as telegun weapon.";
+		break;
+	case TILE_ALLOW_TELE_GUN:
+		if(Layer == LAYER_FRONT)
+			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, cancels movement.";
+		if(Layer == LAYER_SWITCH)
+			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, cancels movement, for single weapons.";
+		break;
+	case TILE_ALLOW_BLUE_TELE_GUN:
+		if(Layer == LAYER_FRONT)
+			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, preserves movement.";
+		if(Layer == LAYER_SWITCH)
+			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, preserves movement, for single weapons.";
+		break;
+	case TILE_TELE_GRENADE_ENABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "TELEGUN: Turn grenade on as telegun weapon.";
+		break;
+	case TILE_TELE_GRENADE_DISABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "TELEGUN: Turn grenade off as telegun weapon.";
+		break;
+	case TILE_TELE_LASER_ENABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "TELEGUN: Turn laser on as telegun weapon.";
+		break;
+	case TILE_TELE_LASER_DISABLE:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "TELEGUN: Turn laser off as telegun weapon.";
+		break;
 	}
 	if(Tile >= TILE_CHECKPOINT_FIRST && Tile <= TILE_CHECKPOINT_LAST && (Layer == LAYER_GAME || Layer == LAYER_FRONT))
 		return "TIME CHECKPOINT: Compares your current race time with your record to show you whether you are running faster or slower.";
