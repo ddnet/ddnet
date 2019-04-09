@@ -109,48 +109,45 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
 
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL))
+	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_V))
 	{
-		if(m_pGameConsole->Input()->KeyPress(KEY_V))
+		const char *Text = m_pGameConsole->Input()->GetClipboardText();
+		if(Text)
 		{
-			const char *Text = m_pGameConsole->Input()->GetClipboardText();
-			if(Text)
+			char Line[256];
+			int i, Begin = 0;
+			for(i = 0; i < str_length(Text); i++)
 			{
-				char Line[256];
-				int i, Begin = 0;
-				for(i = 0; i < str_length(Text); i++)
+				if(Text[i] == '\n')
 				{
-					if(Text[i] == '\n')
+					if(i == Begin)
 					{
-						if(i == Begin)
-						{
-							Begin++;
-							continue;
-						}
-						int max = min(i - Begin + 1, (int)sizeof(Line));
-						str_copy(Line, Text + Begin, max);
-						Begin = i+1;
-						ExecuteLine(Line);
+						Begin++;
+						continue;
 					}
+					int max = min(i - Begin + 1, (int)sizeof(Line));
+					str_copy(Line, Text + Begin, max);
+					Begin = i+1;
+					ExecuteLine(Line);
 				}
-				int max = min(i - Begin + 1, (int)sizeof(Line));
-				str_copy(Line, Text + Begin, max);
-				Begin = i+1;
-				m_Input.Add(Line);
 			}
+			int max = min(i - Begin + 1, (int)sizeof(Line));
+			str_copy(Line, Text + Begin, max);
+			Begin = i+1;
+			m_Input.Add(Line);
 		}
-		else if(m_pGameConsole->Input()->KeyPress(KEY_C))
-		{
-			m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
-		}
-		else if(m_pGameConsole->Input()->KeyPress(KEY_A))
-		{
-			m_Input.SetCursorOffset(0);
-		}
-		else if(m_pGameConsole->Input()->KeyPress(KEY_E))
-		{
-			m_Input.SetCursorOffset(m_Input.GetLength());
-		}
+	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
+	{
+		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
+	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_A))
+	{
+		m_Input.SetCursorOffset(0);
+	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_E))
+	{
+		m_Input.SetCursorOffset(m_Input.GetLength());
 	}
 
 	if(Event.m_Flags&IInput::FLAG_PRESS)
