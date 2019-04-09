@@ -137,10 +137,17 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			m_Input.Add(Line);
 		}
 	}
-
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
 	{
 		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
+	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_A))
+	{
+		m_Input.SetCursorOffset(0);
+	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_E))
+	{
+		m_Input.SetCursorOffset(m_Input.GetLength());
 	}
 
 	if(Event.m_Flags&IInput::FLAG_PRESS)
