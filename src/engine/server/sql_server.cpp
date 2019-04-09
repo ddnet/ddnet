@@ -112,6 +112,7 @@ bool CSqlServer::Connect()
 		connection_properties["OPT_WRITE_TIMEOUT"] = 20;
 		connection_properties["OPT_RECONNECT"] = true;
 		connection_properties["OPT_CHARSET_NAME"] = sql::SQLString("utf8mb4");
+		connection_properties["OPT_SET_CHARSET_NAME"] = sql::SQLString("utf8mb4");
 
 		// Create connection
 		{
@@ -122,6 +123,9 @@ bool CSqlServer::Connect()
 
 		// Create Statement
 		m_pStatement = m_pConnection->createStatement();
+
+		// Apparently OPT_CHARSET_NAME and OPT_SET_CHARSET_NAME are not enough
+		m_pStatement->execute("SET CHARACTER SET utf8mb4;");
 
 		if (m_SetUpDB)
 		{

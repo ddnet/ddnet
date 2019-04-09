@@ -14,14 +14,14 @@ class CDragger: public CEntity
 	void Drag();
 	CCharacter * m_Target;
 	bool m_NW;
-	int m_CatchedTeam;
+	int m_CaughtTeam;
 
 	CCharacter * m_SoloEnts[MAX_CLIENTS];
 	int m_SoloIDs[MAX_CLIENTS];
 public:
 
 	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
-			int CatchedTeam, int Layer = 0, int Number = 0);
+			int CaughtTeam, int Layer = 0, int Number = 0);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -36,7 +36,7 @@ public:
 
 	CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW =
 			false, int Layer = 0, int Number = 0);
-	//~CDraggerTeam();
+	~CDraggerTeam();
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAGGER_H

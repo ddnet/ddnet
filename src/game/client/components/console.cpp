@@ -227,11 +227,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			if(m_BacklogActPage < 0)
 				m_BacklogActPage = 0;
 		}
-		else if(Event.m_Key == KEY_HOME)
+		// in order not to conflict with CLineInput's handling of Home/End only
+		// react to it when the input is empty
+		else if(Event.m_Key == KEY_HOME && m_Input.GetString()[0] == '\0')
 		{
 			m_BacklogActPage = INT_MAX;
 		}
-		else if(Event.m_Key == KEY_END)
+		else if(Event.m_Key == KEY_END && m_Input.GetString()[0] == '\0')
 		{
 			m_BacklogActPage = 0;
 		}
