@@ -43,7 +43,7 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_TELEINEVIL:
 		if(Layer == LAYER_TELE)
-			return "EVIL TELEPORT: After falling into this tile, tees appear on TO with the same number. Speed and hooks are deleted.";
+			return "RED TELEPORT: After falling into this tile, tees appear on TO with the same number. Speed and hooks are reset.";
 		break;
 	case TILE_DFREEZE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
@@ -59,31 +59,31 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_TELEINHOOK:
 		if(Layer == LAYER_TELE)
-			return "HOOK TELEPORT: Teleports hooks entered into it to TELEPORT TO, where it comes out. Direction, angle and length are kept.";
+			return "HOOK TELEPORT: Teleports hooks entering into it to TELEPORT TO, where it comes out. Direction, angle and length are kept.";
 		break;
 	case TILE_WALLJUMP:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "WALLJUMP: Placed next to a wall. Enables to climb up the wall.";
+			return "WALLJUMP: Placed next to a wall. Enables climbing up the wall.";
 		break;
 	case TILE_EHOOK_START:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "ENDLESS HOOK: Endless hook has been activated.";
+			return "ENDLESS HOOK: Activates endless hook.";
 		break;
 	case TILE_EHOOK_END:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "ENDLESS HOOK: Endless hook has been deactivated.";
+			return "ENDLESS HOOK OFF: Deactivates endless hook.";
 		break;
 	case TILE_HIT_START:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HIT OTHERS: You can hit others.";
 		if(Layer == LAYER_SWITCH)
-			return "HIT OTHERS: You can activate hitting others for single weapons.";
+			return "HIT OTHERS: You can activate hitting others for single weapons, using delay number to select which.";
 		break;
 	case TILE_HIT_END:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HIT OTHERS: You can't hit others.";
 		if(Layer == LAYER_SWITCH)
-			return "HIT OTHERS: You can deactivate hitting others for single weapons.";
+			return "HIT OTHERS: You can deactivate hitting others for single weapons, using delay number to select which.";
 		break;
 	case TILE_SOLO_START:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
@@ -93,11 +93,11 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "SOLO: You are now out of the solo part.";
 		if(Layer == LAYER_SWITCH)
-			return "TIME SWITCH: Activates switch (e.g. closes door) with the same number for set amount of seconds.";
+			return "TIME SWITCH: Activates switch (e.g. closes door) with the same number for a set amount of seconds.";
 		break;
 	case TILE_SWITCHTIMEDCLOSE:
 		if(Layer == LAYER_SWITCH)
-			return "TIME SWITCH: Deactivates switch (e.g. opens door) with the same number for set amount of seconds.";
+			return "TIME SWITCH: Deactivates switch (e.g. opens door) with the same number for a set amount of seconds.";
 		break;
 	case TILE_SWITCHOPEN:
 		if(Layer == LAYER_SWITCH)
@@ -105,15 +105,15 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_SWITCHCLOSE:
 		if(Layer == LAYER_SWITCH)
-			return "SWITCH: Deactivates switch (e.g. closes door) with the same number.";
+			return "SWITCH: Deactivates switch (e.g. opens door) with the same number.";
 		break;
 	case TILE_TELEIN:
 		if(Layer == LAYER_TELE)
-			return "TELEPORT: After falling into this tile, tees appear on TO with the same number. Speed and hook are kept.";
+			return "BLUE TELEPORT: After falling into this tile, tees appear on TO with the same number. Speed and hook are kept.";
 		break;
 	case TILE_TELEOUT:
 		if(Layer == LAYER_TELE)
-			return "TELEPORT: Teleport destination tile for FROMs, WEAPON & HOOK TELEPORTs with the same numbers.";
+			return "TELEPORT TO: Destination tile for FROMs, WEAPON & HOOK TELEPORTs with the same numbers.";
 		break;
 	case TILE_BOOST:
 		if(Layer == LAYER_SPEEDUP)
@@ -125,11 +125,11 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_TELECHECKOUT:
 		if(Layer == LAYER_TELE)
-			return "CHECKPOINT TELEPORT: Here tees will appear after touching TELEPORT CHECKPOINT with the same number and falling into CFROM TELEPORT.";
+			return "CHECKPOINT TELEPORT TO: Tees will appear here after touching TELEPORT CHECKPOINT with the same number and falling into CFROM TELEPORT.";
 		break;
 	case TILE_TELECHECKIN:
 		if(Layer == LAYER_TELE)
-			return "CHECKPOINT TELEPORT: Sends tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are kept.";
+			return "BLUE CHECKPOINT TELEPORT: Sends tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are kept.";
 		break;
 	case TILE_REFILL_JUMPS:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
@@ -157,7 +157,7 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_TELECHECKINEVIL:
 		if(Layer == LAYER_TELE)
-			return "CHECKPOINT EVIL TELE: Send tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are deleted.";
+			return "RED CHECKPOINT TELEPORT: Send tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are reset.";
 		break;
 	case TILE_CP:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
@@ -173,27 +173,27 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_OLDLASER:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "OLD LASER: Shotgun drags others always towards the shooter, even after having bounced. Shooter can't hit themselves. Place only one tile somewhere on the map.";
+			return "GLOBAL OLD SHOTGUN: Shotgun drags others always towards the shooter, even after having bounced. Shooter can't hit themselves. Place only one tile somewhere on the map.";
 		break;
 	case TILE_NPC:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "COLLISION OFF: Nobody can collide with others. Place only one tile somewhere on the map.";
+			return "GLOBAL COLLISION OFF: Nobody can collide with others. Place only one tile somewhere on the map.";
 		break;
 	case TILE_EHOOK:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "ENDLESS HOOK ON: Everyone has endless hook. Place only one tile somewhere on the map.";
+			return "GLOBAL ENDLESS HOOK ON: Everyone has endless hook. Place only one tile somewhere on the map.";
 		break;
 	case TILE_NOHIT:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "HIT OTHERS OFF: Nobody can hit others. Place only one tile somewhere on the map.";
+			return "GLOBAL HIT OTHERS OFF: Nobody can hit others. Place only one tile somewhere on the map.";
 		break;
 	case TILE_NPH:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "HOOK OTHERS OFF: Nobody can hook others. Place only one tile somewhere on the map.";
+			return "GLOBAL HOOK OTHERS OFF: Nobody can hook others. Place only one tile somewhere on the map.";
 		break;
 	case TILE_UNLOCK_TEAM:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move quickly.";
+			return "UNLOCK TEAM: Forces team to be unlocked so that team doesn't get killed when one dies.";
 		break;
 	case TILE_PENALTY:
 		if(Layer == LAYER_SWITCH)
@@ -201,19 +201,19 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_NPC_END:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "COLLISION: You can't collide with others.";
+			return "COLLISION OFF: You can't collide with others.";
 		break;
 	case TILE_SUPER_END:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "SUPER JUMP: You don't have unlimited air jumps.";
+			return "SUPER JUMP OFF: You don't have unlimited air jumps.";
 		break;
 	case TILE_JETPACK_END:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "JETPACK: You lost your jetpack gun.";
+			return "JETPACK OFF: You lose your jetpack gun.";
 		break;
 	case TILE_NPH_END:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "HOOK OTHERS: You can't hook others.";
+			return "HOOK OTHERS OFF: You can't hook others.";
 		break;
 	case TILE_BONUS:
 		if(Layer == LAYER_SWITCH)
@@ -254,11 +254,11 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case ENTITY_OFFSET + ENTITY_SPAWN_RED:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "SPAWN: Not used in DDRace. Here spawn red team members.";
+			return "SPAWN: Red team members spawn here, same as normal spawn in DDRace.";
 		break;
 	case ENTITY_OFFSET + ENTITY_SPAWN_BLUE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "SPAWN: Not used in DDRace. Here spawn blue team members.";
+			return "SPAWN: Blue team members spawn here, same as normal spawn in DDRace.";
 		break;
 	case ENTITY_OFFSET + ENTITY_FLAGSTAND_RED:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
@@ -266,7 +266,7 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case ENTITY_OFFSET + ENTITY_FLAGSTAND_BLUE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "FLAG: Not used in DDRace. Place where red team blue is.";
+			return "FLAG: Not used in DDRace. Place where blue team flag is.";
 		break;
 	case ENTITY_OFFSET + ENTITY_ARMOR_1:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
@@ -290,7 +290,7 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case ENTITY_OFFSET + ENTITY_WEAPON_RIFLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "RIFLE: Unfreezes the tee. Bounces off the walls. Also known as laser.";
+			return "RIFLE: Unfreezes hit tee. Bounces off the walls. Also known as laser.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_FAST_CCW:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
@@ -322,39 +322,39 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_SHORT:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH: Combined with DOOR or SPINNING LASER, makes it 3 tiles long.";
+			return "LASER LENGTH: Put next to DOOR or SPINNING LASER, makes it 3 tiles long.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_MEDIUM:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH: Combined with DOOR or SPINNING LASER, makes it 6 tiles long.";
+			return "LASER LENGTH: Put next to DOOR or SPINNING LASER, makes it 6 tiles long.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_LONG:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH: Combined with DOOR or SPINNING LASER, makes it 9 tiles long.";
+			return "LASER LENGTH: Put next to DOOR or SPINNING LASER, makes it 9 tiles long.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_C_SLOW:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH CHANGE: Combined with LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, slow.";
+			return "LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, slow.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_C_NORMAL:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH CHANGE: Combined with LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, medium speed.";
+			return "LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, medium speed.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_C_FAST:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH CHANGE: Combined with LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, fast.";
+			return "LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, fast.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_O_SLOW:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH CHANGE: Combined with LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, slow.";
+			return "LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, slow.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_O_NORMAL:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH CHANGE: Combined with LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, medium speed.";
+			return "LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, medium speed.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_O_FAST:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER LENGTH CHANGE: Combined with LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, fast.";
+			return "LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, fast.";
 		break;
 	case ENTITY_OFFSET + ENTITY_PLASMAE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
@@ -414,35 +414,35 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_TELE_GUN_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "TELEGUN: Turn gun off as telegun weapon.";
+			return "TELEGUN OFF: Turn gun off as telegun weapon.";
 		break;
 	case TILE_ALLOW_TELE_GUN:
 		if(Layer == LAYER_FRONT)
 			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, cancels movement.";
 		if(Layer == LAYER_SWITCH)
-			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, cancels movement, for single weapons.";
+			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, cancels movement, for single weapons, using delay number to select which.";
 		break;
 	case TILE_ALLOW_BLUE_TELE_GUN:
 		if(Layer == LAYER_FRONT)
 			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, preserves movement.";
 		if(Layer == LAYER_SWITCH)
-			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, preserves movement, for single weapons.";
+			return "TELEGUN: Place on top of a collision tile, activates a spot to teleport to, preserves movement, for single weapons, using delay number to select which.";
 		break;
 	case TILE_TELE_GRENADE_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "TELEGUN: Turn grenade on as telegun weapon.";
+			return "TELEGRENADE: Turn grenade on as telegun weapon.";
 		break;
 	case TILE_TELE_GRENADE_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "TELEGUN: Turn grenade off as telegun weapon.";
+			return "TELEGRENADE OFF: Turn grenade off as telegun weapon.";
 		break;
 	case TILE_TELE_LASER_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "TELEGUN: Turn laser on as telegun weapon.";
+			return "TELELASER: Turn laser on as telegun weapon.";
 		break;
 	case TILE_TELE_LASER_DISABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "TELEGUN: Turn laser off as telegun weapon.";
+			return "TELELASER OFF: Turn laser off as telegun weapon.";
 		break;
 	}
 	if(Tile >= TILE_CHECKPOINT_FIRST && Tile <= TILE_CHECKPOINT_LAST && (Layer == LAYER_GAME || Layer == LAYER_FRONT))
