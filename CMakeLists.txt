@@ -139,10 +139,6 @@ if(NOT MSVC)
     endif()
   endif()
 
-  # Protect the stack pointer.
-  # -fstack-protector-all doesn't work on MinGW.
-  add_c_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
-
   # Inaccurate floating point numbers cause problems on mingw-w64-gcc when
   # compiling for x86, might cause problems elsewhere. So don't store floats
   # in registers but keep them at higher accuracy.
@@ -168,10 +164,6 @@ if(NOT MSVC)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
-endif()
-
-if(NOT MSVC)
-  check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
 endif()
 
 ########################################################################
@@ -1559,9 +1551,6 @@ foreach(target ${TARGETS})
   endif()
   if(OUR_FLAGS)
     target_compile_options(${target} PRIVATE ${OUR_FLAGS})
-  endif()
-  if(DEFINE_FORTIFY_SOURCE)
-    target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
   endif()
 endforeach()
 
