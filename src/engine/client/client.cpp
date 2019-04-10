@@ -2862,7 +2862,9 @@ void CClient::Run()
 		// handle pending demo play
 		if(m_aCmdPlayDemo[0])
 		{
-			DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ABSOLUTE);
+			const char *pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ABSOLUTE);
+			if(pError)
+				dbg_msg("demo_player", "playing passed demo file '%s' failed: %s", m_aCmdPlayDemo, pError);
 			m_aCmdPlayDemo[0] = 0;
 		}
 
@@ -3634,9 +3636,9 @@ void CClient::HandleConnectLink(const char *pLink)
 	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
 }
 
-void CClient::HandleDemoLink(const char *pLink)
+void CClient::HandleDemoPath(const char *pPath)
 {
-	str_copy(m_aCmdPlayDemo, pLink, sizeof(m_aCmdPlayDemo));
+	str_copy(m_aCmdPlayDemo, pPath, sizeof(m_aCmdPlayDemo));
 }
 
 /*
@@ -3787,9 +3789,9 @@ int main(int argc, const char **argv) // ignore_convention
 	// parse the command line arguments
 	if(argc == 2 && str_startswith(argv[1], CONNECTLINK))
 		pClient->HandleConnectLink(argv[1]);
-	if(argc == 2 && str_endswith(argv[1], ".demo"))
-		pClient->HandleDemoLink(argv[1]);
-	if(argc > 1) // ignore_convention
+	else if(argc == 2 && str_endswith(argv[1], ".demo"))
+		pClient->HandleDemoPath(argv[1]);
+	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
 	pClient->Engine()->InitLogfile();

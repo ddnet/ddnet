@@ -386,7 +386,7 @@ public:
 	void ServerBrowserUpdate();
 
 	void HandleConnectLink(const char *pLink);
-	void HandleDemoLink(const char *pLink);
+	void HandleDemoPath(const char *pPath);
 
 	// gfx
 	void SwitchWindowScreen(int Index);
