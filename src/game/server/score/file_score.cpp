@@ -70,7 +70,11 @@ void CFileScore::SaveScoreThread(void *pUser)
 	lock_wait(gs_ScoreLock);
 	std::fstream f;
 	f.open(SaveFile().c_str(), std::ios::out);
-	if (!f.fail())
+	if(f.fail())
+	{
+		dbg_msg("filescore", "opening '%s' for writing failed", SaveFile().c_str());
+	}
+	else
 	{
 		int t = 0;
 		for (sorted_array<CPlayerScore>::range r = pSelf->m_Top.all();
@@ -109,6 +113,10 @@ void CFileScore::Init()
 	std::fstream f;
 	f.open(SaveFile().c_str(), std::ios::in);
 
+	if(f.fail())
+	{
+		dbg_msg("filescore", "opening '%s' for reading failed", SaveFile().c_str());
+	}
 	while (!f.eof() && !f.fail())
 	{
 		std::string TmpName, TmpScore, TmpCpLine;
