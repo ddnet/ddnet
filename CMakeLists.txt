@@ -880,6 +880,7 @@ if(CLIENT)
     auto_map.h
     editor.cpp
     editor.h
+    explanations.cpp
     io.cpp
     layer_game.cpp
     layer_quads.cpp

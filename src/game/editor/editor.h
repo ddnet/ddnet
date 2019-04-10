@@ -1045,6 +1045,7 @@ public:
 
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SortImages();
+	const char *Explain(int Tile, int Layer);
 
 	int GetLineDistance();
 	void ZoomMouseTarget(float ZoomFactor);
