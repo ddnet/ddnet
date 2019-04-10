@@ -219,6 +219,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
 	Console()->Register("color_from_rgb", "s[color]", CFGFLAG_CLIENT, ConColorFromRgb, this, "Convert HEX RGB color (3 or 6 digits) to TW formats");
+	Console()->Register("color_to_rgb", "i[color] ?i[color] ?i[color]", CFGFLAG_CLIENT, ConColorToRgb, this, "Convert TW colors to HEX RGB color format");
 
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
@@ -1994,6 +1995,34 @@ void CGameClient::ConColorFromRgb(IConsole::IResult *pResult, void *pUserData)
 	// limited lightness range to prevent too dark colors for player colors
 	Hsl.l = clamp((Hsl.l - 127.0) * 2.0, 0.0, 255.0);
 	str_format(aBuf, sizeof(aBuf), "%d", ((int)Hsl.h << 16) + ((int)Hsl.s << 8) + (int)Hsl.l);
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", aBuf);
+}
+
+void CGameClient::ConColorToRgb(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pThis = (CGameClient*)pUserData;
+	vec3 Rgb;
+
+	if(pResult->NumArguments() == 1)
+	{
+		const int v = pResult->GetInteger(0);
+		Rgb = HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
+	}
+	else if(pResult->NumArguments() == 3)
+	{
+		const int Hue = pResult->GetInteger(0);
+		const int Sat = pResult->GetInteger(1);
+		const int Lht = pResult->GetInteger(2);
+		Rgb = HslToRgb(vec3(Hue / 255.0f, Sat / 255.0f, Lht / 255.0f));
+	}
+	else
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", "Pass 1 integer in player_color format or 3 ints as hue sat lht");
+		return;
+	}
+
+	char aBuf[32];
+	str_format(aBuf, sizeof(aBuf), "%06X", ((int)(Rgb.r * 255) << 16) + ((int)(Rgb.g * 255) << 8) + (int)(Rgb.b * 255));
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", aBuf);
 }
 
