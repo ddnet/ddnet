@@ -1031,7 +1031,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_apPlayers[ClientID]->Respawn();
 	// init the player
 	Score()->PlayerData(ClientID)->Reset();
-	m_apPlayers[ClientID]->m_Score = -9999;
+	m_apPlayers[ClientID]->m_Score = (Score()->PlayerData(ClientID)->m_BestTime) ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
 
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
