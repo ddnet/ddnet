@@ -1961,7 +1961,7 @@ void CGameClient::ConColorFromRgb(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameClient *pThis = (CGameClient*)pUserData;
 	const char *pString = pResult->GetString(0);
-	const size_t Length = strlen(pString);
+	const size_t Length = str_length(pString);
 	vec3 Hsl;
 	vec3 Rgb;
 
