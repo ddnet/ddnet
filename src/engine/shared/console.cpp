@@ -862,7 +862,9 @@ CConsole::~CConsole()
 		CCommand *pNext = pCommand->m_pNext;
 		if(pCommand->m_pfnCallback == Con_Chain)
 			delete static_cast<CChain *>(pCommand->m_pUserData);
-		delete pCommand;
+		// Temp commands are on m_TempCommands heap, so don't delete them
+		if(!pCommand->m_Temp)
+			delete pCommand;
 		pCommand = pNext;
 	}
 }
