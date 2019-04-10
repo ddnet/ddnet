@@ -15,20 +15,11 @@
 #include <cmath>
 #include "SDL.h"
 #include "SDL_syswm.h"
-#if defined(__ANDROID__)
-	#define GL_GLEXT_PROTOTYPES
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-	#include <GL/glu.h>
-	#define glOrtho glOrthof
+#if defined(CONF_PLATFORM_MACOSX)
+#include "OpenGL/glu.h"
 #else
-
-	#if defined(CONF_PLATFORM_MACOSX)
-	#include "OpenGL/glu.h"
-	#else
-	#include "SDL_opengl.h"
-	#include "GL/glu.h"
-	#endif
+#include "SDL_opengl.h"
+#include "GL/glu.h"
 #endif
 
 #if defined(SDL_VIDEO_DRIVER_X11)
@@ -329,9 +320,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
 	int StoreOglformat = TexFormatToOpenGLFormat(pCommand->m_StoreFormat);
 
-#if defined(__ANDROID__)
-	StoreOglformat = Oglformat;
-#else
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_COMPRESSED)
 	{
 		switch(StoreOglformat)
@@ -342,7 +330,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			default: StoreOglformat = GL_COMPRESSED_RGBA_ARB;
 		}
 	}
-#endif
 	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
 	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 
@@ -392,12 +379,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	switch(pCommand->m_PrimType)
 	{
 	case CCommandBuffer::PRIMTYPE_QUADS:
-#if defined(__ANDROID__)
-		for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
-			glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
-#else
 		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount*4);
-#endif
 		break;
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
@@ -1123,9 +1105,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
 	int StoreOglformat = TexFormatToOpenGLFormat(pCommand->m_StoreFormat);
 
-#if defined(__ANDROID__)
-	StoreOglformat = Oglformat;
-#else
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_COMPRESSED)
 	{
 		switch(StoreOglformat)
@@ -1137,7 +1116,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			default: StoreOglformat = GL_COMPRESSED_RGBA;
 		}
 	}
-#endif
 	int Slot = 0;
 	if(m_UseMultipleTextureUnits)
 	{
@@ -2315,16 +2293,11 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	*pDesktopHeight = DisplayMode.h;
 
 	// use desktop resolution as default resolution
-#ifdef __ANDROID__
-	*pWidth = *pDesktopWidth;
-	*pHeight = *pDesktopHeight;
-#else
 	if(*pWidth == 0 || *pHeight == 0)
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
 	}
-#endif
 
 	// set flags
 	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;

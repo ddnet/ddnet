@@ -33,20 +33,12 @@
 void CMenus::RenderGame(CUIRect MainView)
 {
 	CUIRect Button, ButtonBar;
-#if defined(__ANDROID__)
-	MainView.HSplitTop(100.0f, &ButtonBar, &MainView);
-#else
 	MainView.HSplitTop(45.0f, &ButtonBar, &MainView);
-#endif
 	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	// button bar
 	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
-#if defined(__ANDROID__)
-	ButtonBar.HSplitTop(80.0f, &ButtonBar, 0);
-#else
 	ButtonBar.HSplitTop(25.0f, &ButtonBar, 0);
-#endif
 	ButtonBar.VMargin(10.0f, &ButtonBar);
 
 	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
@@ -219,11 +211,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	static float s_ScrollValue = 0;
 	CUIRect List = Options;
 	//List.HSplitTop(28.0f, 0, &List);
-#if defined(__ANDROID__)
-	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
-#else
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
-#endif
 
 	// options
 	static int s_aPlayerIDs[MAX_CLIENTS][2] = {{0}};
@@ -481,11 +469,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		TotalShown++;
 	}
 
-#if defined(__ANDROID__)
-	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
-#else
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
-#endif
 
 	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_pVoting->m_pFirst; pOption; pOption = pOption->m_pNext)
@@ -536,11 +520,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
-#if defined(__ANDROID__)
-	UiDoListboxStart(&s_VoteList, &List, 50.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
-#else
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
-#endif
 
 	for(int i = 0; i < NumOptions; i++)
 	{
@@ -569,24 +549,12 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// render background
 	CUIRect Bottom, Extended, TabBar, Button;
-#if defined(__ANDROID__)
-	MainView.HSplitTop(50.0f, &Bottom, &MainView);
-#else
 	MainView.HSplitTop(20.0f, &Bottom, &MainView);
-#endif
 	RenderTools()->DrawUIRect(&Bottom, ms_ColorTabbarActive, 0, 10.0f);
-#if defined(__ANDROID__)
-	MainView.HSplitTop(50.0f, &TabBar, &MainView);
-#else
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
-#endif
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
-#if defined(__ANDROID__)
-	MainView.HSplitBottom(10.0f, &MainView, &Extended);
-#else
 	MainView.HSplitBottom(90.0f, &MainView, &Extended);
-#endif
 
 	// tab bar
 	{
