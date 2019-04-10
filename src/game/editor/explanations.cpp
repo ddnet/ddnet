@@ -23,6 +23,15 @@ const char *CEditor::Explain(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "LASER BLOCKER: Doesn't let DRAGGIN & SPINNING LASER and PLASMA TURRET reach tees through it.";
 		break;
+	case TILE_THROUGH_CUT:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "HOOKTRHOUGH: Shortcut for new hookthrough.";
+	case TILE_THROUGH_ALL:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "HOOKTRHOUGH: Combined with collision tile is new hookthrough, otherwise stops hooks, from all directions.";
+	case TILE_THROUGH_DIR:
+		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
+			return "HOOKTRHOUGH: Combined with a collision tile is new hookthrough, otherwise stops hook, from one direction.";
 	case TILE_THROUGH:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HOOKTHROUGH: Combined with (UN)HOOKABLE tiles, allows to hook through the walls.";
