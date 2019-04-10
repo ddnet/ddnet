@@ -218,7 +218,7 @@ void CGameClient::OnConsoleInit()
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
-	Console()->Register("color", "s[color]", CFGFLAG_CLIENT, ConColor, this, "Convert HEX RGB color (3 or 6 digits) to TW format");
+	Console()->Register("color_from_rgb", "s[color]", CFGFLAG_CLIENT, ConColorFromRgb, this, "Convert HEX RGB color (3 or 6 digits) to TW formats");
 
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
@@ -1957,7 +1957,7 @@ void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 	((CGameClient*)pUserData)->SendKill(-1);
 }
 
-void CGameClient::ConColor(IConsole::IResult *pResult, void *pUserData)
+void CGameClient::ConColorFromRgb(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameClient *pThis = (CGameClient*)pUserData;
 	const char *pString = pResult->GetString(0);
