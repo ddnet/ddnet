@@ -2859,6 +2859,15 @@ void CClient::Run()
 			m_aCmdConnect[0] = 0;
 		}
 
+		// handle pending demo play
+		if(m_aCmdPlayDemo[0])
+		{
+			const char *pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ABSOLUTE);
+			if(pError)
+				dbg_msg("demo_player", "playing passed demo file '%s' failed: %s", m_aCmdPlayDemo, pError);
+			m_aCmdPlayDemo[0] = 0;
+		}
+
 		// progress on dummy connect if security token handshake skipped/passed
 		if(m_DummySendConnInfo && !m_NetClient[1].SecurityTokenUnknown())
 		{
@@ -3622,9 +3631,14 @@ static CClient *CreateClient()
 	return new(pClient) CClient;
 }
 
-void CClient::HandleConnectLink(const char *pArg)
+void CClient::HandleConnectLink(const char *pLink)
 {
-	str_copy(m_aCmdConnect, pArg + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
+	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
+}
+
+void CClient::HandleDemoPath(const char *pPath)
+{
+	str_copy(m_aCmdPlayDemo, pPath, sizeof(m_aCmdPlayDemo));
 }
 
 /*
@@ -3775,6 +3789,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// parse the command line arguments
 	if(argc == 2 && str_startswith(argv[1], CONNECTLINK))
 		pClient->HandleConnectLink(argv[1]);
+	else if(argc == 2 && str_endswith(argv[1], ".demo"))
+		pClient->HandleDemoPath(argv[1]);
 	else if(argc > 1) // ignore_convention
 		pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
