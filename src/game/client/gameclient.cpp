@@ -265,6 +265,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
 
 	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
+	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 
 	//
 	m_SuppressEvents = false;
@@ -349,6 +350,8 @@ void CGameClient::OnInit()
 	int64 End = time_get();
 	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
+
+	m_pMapimages->TextureSize(g_Config.m_ClTextEntitiesSize);
 }
 
 void CGameClient::OnUpdate()
@@ -2018,6 +2021,22 @@ void CGameClient::ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserDa
 		if(g_Config.m_ClDummy && !((CGameClient*)pUserData)->Client()->DummyConnected())
 			g_Config.m_ClDummy = 0;
 }
+
+void CGameClient::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+	if (pResult->NumArguments())
+	{
+		CGameClient* GameClient = (CGameClient*)pUserData;
+
+		//if (GameClient->m_pMapimages->GetOverlayCenter() > 0)
+		{
+			GameClient->m_pMapimages->TextureSize(g_Config.m_ClTextEntitiesSize);
+		}
+	}
+}
+
 
 IGameClient *CreateGameClient()
 {
