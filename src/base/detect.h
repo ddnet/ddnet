@@ -50,11 +50,7 @@
 	#define CONF_FAMILY_UNIX 1
 	#define CONF_FAMILY_STRING "unix"
 	#define CONF_PLATFORM_LINUX 1
-	#if defined(__ANDROID__)
-		#define CONF_PLATFORM_STRING "android"
-	#else
-		#define CONF_PLATFORM_STRING "linux"
-	#endif
+	#define CONF_PLATFORM_STRING "linux"
 #endif
 
 #if defined(__GNU__) || defined(__gnu__)

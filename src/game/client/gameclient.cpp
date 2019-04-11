@@ -128,7 +128,7 @@ void CGameClient::OnConsoleInit()
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
-#if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
+#if defined(CONF_FAMILY_WINDOWS) || defined(CONF_PLATFORM_LINUX)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 
@@ -307,10 +307,6 @@ void CGameClient::OnInit()
 		g_GameClient.m_pMenus->RenderLoading();
 	}
 
-#if defined(__ANDROID__)
-	m_pMapimages->OnMapLoad(); // Reload map textures on Android
-#endif
-
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
 
@@ -357,9 +353,7 @@ void CGameClient::OnUpdate()
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
 	Input()->MouseRelative(&x, &y);
-#if !defined(__ANDROID__) // No relative mouse on Android
 	if(x != 0.0f || y != 0.0f)
-#endif
 	{
 		for(int h = 0; h < m_Input.m_Num; h++)
 		{

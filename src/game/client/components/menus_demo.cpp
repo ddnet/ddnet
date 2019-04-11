@@ -80,11 +80,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		CUIRect Box, Part, Part2;
 		Box = Screen;
 		Box.VMargin(150.0f/UI()->Scale(), &Box);
-#if defined(__ANDROID__)
-		Box.HMargin(100.0f/UI()->Scale(), &Box);
-#else
 		Box.HMargin(150.0f/UI()->Scale(), &Box);
-#endif
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
@@ -101,11 +97,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		CUIRect Label, TextBox, Ok, Abort;
 
 		Box.HSplitBottom(20.f, &Box, &Part);
-#if defined(__ANDROID__)
-		Box.HSplitBottom(60.f, &Box, &Part);
-#else
 		Box.HSplitBottom(24.f, &Box, &Part);
-#endif
 		Part.VMargin(80.0f, &Part);
 
 		Part.VSplitMid(&Abort, &Ok);
@@ -149,13 +141,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		Box.HSplitBottom(60.f, &Box, &Part);
 		Box.HSplitBottom(60.f, &Box, &Part2);
-#if defined(__ANDROID__)
-		Box.HSplitBottom(60.f, &Box, &Part2);
-		Box.HSplitBottom(60.f, &Box, &Part);
-#else
 		Box.HSplitBottom(24.f, &Box, &Part2);
 		Box.HSplitBottom(24.f, &Box, &Part);
-#endif
 
 		Part2.VSplitLeft(60.0f, 0, &Label);
 		if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &Label))
@@ -479,11 +466,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.15f), 0, 0);
 
 	// prepare the scroll
-#if defined(__ANDROID__)
-	View.VSplitRight(50, &View, &Scroll);
-#else
 	View.VSplitRight(15, &View, &Scroll);
-#endif
 
 	// setup the variables
 	gs_ListBoxOriginalView = View;
@@ -982,11 +965,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	// scrollbar
 	CUIRect Scroll;
-#if defined(__ANDROID__)
-	ListBox.VSplitRight(50, &ListBox, &Scroll);
-#else
 	ListBox.VSplitRight(15, &ListBox, &Scroll);
-#endif
 
 	int Num = (int)(ListBox.h/s_aCols[0].m_Rect.h) + 1;
 	static int s_ScrollBar = 0;
@@ -1062,9 +1041,6 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	ListBox.y -= s_ScrollValue*ScrollNum*s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
-#if defined(__ANDROID__)
-	int DoubleClicked = 0;
-#endif
 	int ItemIndex = -1;
 
 	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
@@ -1103,11 +1079,6 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				NewSelected = ItemIndex;
 				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
 				DemolistOnUpdate(false);
-#if defined(__ANDROID__)
-				if(NewSelected == m_DoubleClickIndex)
-					DoubleClicked = 1;
-#endif
-
 				m_DoubleClickIndex = NewSelected;
 			}
 		}
@@ -1170,11 +1141,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	bool Activated = false;
 
-#if defined(__ANDROID__)
-	if(m_EnterPressed || (DoubleClicked && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
-#else
 	if(m_EnterPressed || (Input()->MouseDoubleClick() && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
-#endif
 	{
 		UI()->SetActiveItem(0);
 		Activated = true;

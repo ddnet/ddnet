@@ -152,18 +152,8 @@ bool CSpectator::OnMouseMove(float x, float y)
 	if(!m_Active)
 		return false;
 
-#if defined(__ANDROID__) // No relative mouse on Android
-	m_SelectorMouse = vec2(x,y);
-	if( m_OldMouseX != x || m_OldMouseY != y )
-	{
-		m_OldMouseX = x;
-		m_OldMouseY = y;
-		m_SelectorMouse = vec2((x - Graphics()->ScreenWidth()/2), (y - Graphics()->ScreenHeight()/2));
-	}
-#else
 	UI()->ConvertMouseMove(&x, &y);
 	m_SelectorMouse += vec2(x,y);
-#endif
 	return true;
 }
 
