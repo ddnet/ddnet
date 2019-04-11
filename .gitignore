@@ -20,6 +20,7 @@ Release
 _CPack_Packages/
 build.ninja
 cmake_install.cmake
+confusables
 gmock.pc
 gmock_main.pc
 googletest-build/
