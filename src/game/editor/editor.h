@@ -1121,9 +1121,7 @@ public:
 	CLayerFront(int w, int h);
 
 	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
 	virtual void SetTile(int x, int y, CTile tile);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 };
 
 class CLayerSwitch : public CLayerTiles
