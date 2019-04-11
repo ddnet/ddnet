@@ -369,7 +369,7 @@ private:
 	enum
 	{
 		MAX_MUTES=32,
-		MAX_VOTE_BANS=32,
+		MAX_VOTE_MUTES=32,
 	};
 	struct CMute
 	{
@@ -384,7 +384,7 @@ private:
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
-	CVoteMute m_aVoteMutes[MAX_VOTE_BANS];
+	CVoteMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
