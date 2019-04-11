@@ -252,8 +252,8 @@ public:
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
-	virtual int *GetInput(int Tick);
-	virtual bool InputExists(int Tick);
+	virtual int *GetInput(int Tick, int IsDummy);
+	virtual int *GetDirectInput(int Tick, int IsDummy);
 
 	const char *LatestVersion();
 
@@ -417,5 +417,7 @@ public:
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends* Foes() {return &m_Foes; }
+
+	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };
 #endif
