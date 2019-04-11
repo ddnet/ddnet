@@ -73,7 +73,7 @@ long CVariableInt::Decompress(const void *pSrc_, int Size, void *pDst_, int DstS
 		pSrc = CVariableInt::Unpack(pSrc, pDst);
 		pDst++;
 	}
-	return (long)((unsigned char *)pDst-(unsigned char *)pDst_);
+	return (unsigned char *)pDst-(unsigned char *)pDst_;
 }
 
 long CVariableInt::Compress(const void *pSrc_, int Size, void *pDst_, int DstSize)
@@ -90,5 +90,5 @@ long CVariableInt::Compress(const void *pSrc_, int Size, void *pDst_, int DstSiz
 		Size--;
 		pSrc++;
 	}
-	return (long)(pDst-(unsigned char *)pDst_);
+	return pDst-(unsigned char *)pDst_;
 }

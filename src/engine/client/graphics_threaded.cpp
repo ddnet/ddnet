@@ -192,7 +192,7 @@ void CGraphics_Threaded::Rotate(const CCommandBuffer::SPoint &rCenter, CCommandB
 	float x, y;
 	int i;
 	
-	CCommandBuffer::SVertex *pVertices = (CCommandBuffer::SVertex*) pPoints;
+	CCommandBuffer::SVertex *pVertices = pPoints;
 	for(i = 0; i < NumPoints; i++)
 	{
 		x = pVertices[i].m_Pos.x - rCenter.x;
@@ -755,7 +755,7 @@ void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char
 
 void CGraphics_Threaded::SetColor(CCommandBuffer::SVertex *pVertex, int ColorIndex)
 {
-	CCommandBuffer::SVertex *pVert = (CCommandBuffer::SVertex*)pVertex;
+	CCommandBuffer::SVertex *pVert = pVertex;
 	pVert->m_Color.r = m_aColor[ColorIndex].r;
 	pVert->m_Color.g = m_aColor[ColorIndex].g;
 	pVert->m_Color.b = m_aColor[ColorIndex].b;

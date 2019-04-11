@@ -294,8 +294,8 @@ void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *Msgs[], int num)
 		Header.m_Sequence = i+1;
 		pChunkData = Header.Pack(pChunkData);
 		mem_copy(pChunkData, pMsg->Data(), pMsg->Size());
-		*((unsigned char*)pChunkData) <<= 1;
-		*((unsigned char*)pChunkData) |= 1;
+		*pChunkData <<= 1;
+		*pChunkData |= 1;
 		pChunkData += pMsg->Size();
 		m_Construct.m_NumChunks++;
 	}
@@ -417,8 +417,8 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 
 			CMsgPacker SnapEmptyMsg(NETMSG_SNAPEMPTY);
 			SECURITY_TOKEN SecurityToken = GetVanillaToken(Addr);
-			SnapEmptyMsg.AddInt((int)SecurityToken);
-			SnapEmptyMsg.AddInt((int)SecurityToken + 1);
+			SnapEmptyMsg.AddInt(SecurityToken);
+			SnapEmptyMsg.AddInt(SecurityToken + 1);
 
 			// send all chunks/msgs in one packet
 			const CMsgPacker *Msgs[] = {&MapChangeMsg, &MapDataMsg, &ConReadyMsg,

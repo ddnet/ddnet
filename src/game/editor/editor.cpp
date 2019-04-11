@@ -604,7 +604,7 @@ int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Chec
 	}
 
 	if(UI()->HotItem() == pID && pToolTip)
-		m_pTooltip = (const char *)pToolTip;
+		m_pTooltip = pToolTip;
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 
@@ -3781,7 +3781,7 @@ void CEditor::SortImages()
 
 	if(!Sorted)
 	{
-		array<CEditorImage*> lTemp = array<CEditorImage*>(m_Map.m_lImages);
+		array<CEditorImage*> lTemp = m_Map.m_lImages;
 		gs_pSortedIndex = new int[lTemp.size()];
 
 		qsort(m_Map.m_lImages.base_ptr(), m_Map.m_lImages.size(), sizeof(CEditorImage*), CompareImageName);
