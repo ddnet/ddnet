@@ -17,7 +17,7 @@ class CScoreboard : public CComponent
 
 	bool m_Active;
 
-public:
+   public:
 	CScoreboard();
 	virtual void OnReset();
 	virtual void OnConsoleInit();
@@ -30,8 +30,7 @@ public:
 
 	virtual void OnMessage(int MsgType, void *pRawMsg);
 
-private:
-
+   private:
 	bool m_IsGameTypeRace;
 	float m_ServerRecord;
 };
