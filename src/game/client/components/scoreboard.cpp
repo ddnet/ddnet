@@ -474,8 +474,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// clan
-		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
-				m_pClient->m_aClients[GameClient()->m_LocalIDs[0]].m_aClan) == 0)
+		if (str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
+					 m_pClient->m_aClients[GameClient()->m_LocalIDs[0]].m_aClan) == 0)
 		{
 			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClSameClanColor);
 			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
@@ -484,8 +484,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		tw = TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
-		TextRender()->SetCursor(&Cursor, ClanOffset + ClanLength / 2 - tw / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-    
+		TextRender()->SetCursor(&Cursor, ClanOffset + ClanLength / 2 - tw / 2, y + (LineHeight - FontSize) / 2.f,
+								FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+
 		Cursor.m_LineWidth = ClanLength;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
 
@@ -498,7 +499,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 										   LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
-		if(g_Config.m_ClEnablePingColor)
+		if (g_Config.m_ClEnablePingColor)
 		{
 			vec3 rgb = HslToRgb(vec3((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
@@ -506,14 +507,16 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 1000));
 
 		tw = TextRender()->TextWidth(nullptr, FontSize, aBuf, -1);
-		TextRender()->SetCursor(&Cursor, PingOffset+PingLength-tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		TextRender()->SetCursor(&Cursor, PingOffset + PingLength - tw, y + (LineHeight - FontSize) / 2.f, FontSize,
+								TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		y += LineHeight+Spacing;
-		if (lower32 || upper32) {
+		y += LineHeight + Spacing;
+		if (lower32 || upper32)
+		{
 			if (rendered == 32) break;
 		}
 		else if (lower24 || upper24)
