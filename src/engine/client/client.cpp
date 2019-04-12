@@ -1946,13 +1946,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			bool UsernameReq = Unpacker.GetInt() & 1;
 			GameClient()->OnRconType(UsernameReq);
 		}
-		else if(Msg == NETMSG_TIME_SCORE)
-		{
-			int NewTimeScore = Unpacker.GetInt();
-			if (Unpacker.Error())
-				return;
-			GameClient()->OnTimeScore(NewTimeScore, g_Config.m_ClDummy);
-		}
 	}
 	else
 	{
@@ -2180,13 +2173,6 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					m_AckGameTick[!g_Config.m_ClDummy] = GameTick;
 				}
 			}
-		}
-		else if(Msg == NETMSG_TIME_SCORE)
-		{
-			int NewTimeScore = Unpacker.GetInt();
-			if (Unpacker.Error())
-				return;
-			GameClient()->OnTimeScore(NewTimeScore, true);
 		}
 	}
 	else

@@ -758,6 +758,13 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		m_Tuning[IsDummy ? !g_Config.m_ClDummy : g_Config.m_ClDummy] = NewTuning;
 		return;
 	}
+	else if (MsgId == NETMSG_TIME_SCORE)
+	{
+		int NewTimeScore = pUnpacker->GetInt();
+		if (pUnpacker->Error())
+			return;
+		OnTimeScore(NewTimeScore, g_Config.m_ClDummy);
+	}
 
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
