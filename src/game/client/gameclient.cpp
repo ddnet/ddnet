@@ -935,8 +935,7 @@ void CGameClient::OnTimeScore(int AllowTimeScore, bool Dummy)
 void CGameClient::OnSoloPlayer(int ClientID, bool solo)
 {
 	m_aClients[ClientID].m_Solo = solo;
-	World
-	m_aClients[ClientID].m_Predicted
+	m_aClients[ClientID].m_Predicted.m_Solo = solo;
 }
 
 void CGameClient::ProcessEvents()

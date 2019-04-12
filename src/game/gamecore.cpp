@@ -101,6 +101,7 @@ void CCharacterCore::Reset()
 	m_TriggeredEvents = 0;
 	m_Hook = true;
 	m_Collision = true;
+	m_Solo = false;
 }
 
 void CCharacterCore::Tick(bool UseInput, bool IsClient)
@@ -294,7 +295,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
-				if(!pCharCore || pCharCore == this || !m_pTeams->CanCollide(i, m_Id))
+				if(!pCharCore || pCharCore == this || !m_pTeams->CanCollide(i, m_Id) || pCharCore->m_Solo)
 					continue;
 
 				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
@@ -408,7 +409,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			//player *p = (player*)ent;
 			//if(pCharCore == this) // || !(p->flags&FLAG_ALIVE)
 
-			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)))
+			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)) || pCharCore->m_Solo)
 				continue; // make sure that we don't nudge our self
 
 			// handle player <-> player collision
@@ -621,7 +622,10 @@ void CCharacterCore::Move()
 			for(int p = 0; p < MAX_CLIENTS; p++)
 			{
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
-				if(!pCharCore || pCharCore == this || !pCharCore->m_Collision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))
+				if(!pCharCore || pCharCore == this
+					|| !pCharCore->m_Collision
+					|| (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p))
+					|| pCharCore->m_Solo)
 					continue;
 				float D = distance(Pos, pCharCore->m_Pos);
 				if(D < 28.0f && D > 0.0f)

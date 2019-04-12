@@ -106,6 +106,7 @@ void CCharacter::SetWeapon(int W)
 void CCharacter::SetSolo(bool Solo)
 {
 	m_IsSolo = Solo;
+	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()]->m_Solo = Solo;
 	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), Solo);
 
 	if(Solo)
