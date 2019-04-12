@@ -20,13 +20,10 @@ MACRO_CONFIG_INT(ClNameplatesClanSize, cl_nameplates_clan_size, 30, 0, 100, CFGF
 MACRO_CONFIG_INT(ClNameplatesOwn, cl_nameplates_own, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show own name plate (useful for demo recording)")
 MACRO_CONFIG_INT(ClTextEntities, cl_text_entities, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Render textual entity data")
 MACRO_CONFIG_INT(ClAuthedPlayerColor, cl_authed_player_color, 5898183, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Color of name of authenticated player in scoreboard")
-#if defined(__ANDROID__)
-MACRO_CONFIG_INT(ClAutoswitchWeapons, cl_autoswitch_weapons, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Auto switch weapon on pickup")
-MACRO_CONFIG_INT(ClAutoswitchWeaponsOutOfAmmo, cl_autoswitch_weapons_out_of_ammo, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Auto switch weapon when out of ammo")
-#else
+MACRO_CONFIG_INT(ClSameClanColor, cl_same_clan_color, 5898183, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Clan color of players with the same clan as you in scoreboard.")
+MACRO_CONFIG_INT(ClEnablePingColor, cl_enable_ping_color, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether ping is colored in scoreboard.")
 MACRO_CONFIG_INT(ClAutoswitchWeapons, cl_autoswitch_weapons, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Auto switch weapon on pickup")
 MACRO_CONFIG_INT(ClAutoswitchWeaponsOutOfAmmo, cl_autoswitch_weapons_out_of_ammo, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Auto switch weapon when out of ammo")
-#endif
 
 MACRO_CONFIG_INT(ClShowhud, cl_showhud, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame HUD")
 MACRO_CONFIG_INT(ClShowhudHealthAmmo, cl_showhud_healthammo, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show ingame HUD (Health + Ammo)")
@@ -53,9 +50,11 @@ MACRO_CONFIG_INT(ClWarningTeambalance, cl_warning_teambalance, 1, 0, 1, CFGFLAG_
 MACRO_CONFIG_INT(ClMouseDeadzone, cl_mouse_deadzone, 0, 0, 0, CFGFLAG_CLIENT|CFGFLAG_SAVE, "")
 MACRO_CONFIG_INT(ClMouseFollowfactor, cl_mouse_followfactor, 0, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "")
 MACRO_CONFIG_INT(ClMouseMaxDistance, cl_mouse_max_distance, 400, 0, 0, CFGFLAG_CLIENT|CFGFLAG_SAVE, "")
+MACRO_CONFIG_INT(ClMouseMinDistance, cl_mouse_min_distance, 0, 0, 0, CFGFLAG_CLIENT|CFGFLAG_SAVE, "")
 
 MACRO_CONFIG_INT(ClDyncam, cl_dyncam, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Enable dyncam")
-MACRO_CONFIG_INT(ClDyncamMaxDistance, cl_dyncam_max_distance, 1000, 0, 2000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Maximal dynamic camera distance")
+MACRO_CONFIG_INT(ClDyncamMaxDistance, cl_dyncam_max_distance, 1000, 0, 2000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Maximum dynamic camera distance")
+MACRO_CONFIG_INT(ClDyncamMinDistance, cl_dyncam_min_distance, 0, 0, 2000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Minimum dynamic camera distance")
 MACRO_CONFIG_INT(ClDyncamMousesens, cl_dyncam_mousesens, 0, 0, 100000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Mouse sens used when dyncam is toggled on")
 MACRO_CONFIG_INT(ClDyncamDeadzone, cl_dyncam_deadzone, 300, 1, 1300, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dynamic camera dead zone")
 MACRO_CONFIG_INT(ClDyncamFollowFactor, cl_dyncam_follow_factor, 60, 0, 200, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Dynamic camera follow factor")

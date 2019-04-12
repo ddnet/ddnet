@@ -431,7 +431,20 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(!Destructive && GetTile(fx, fy).m_Index)
+			bool HasTile = GetTile(fx, fy).m_Index;
+			if(pLt->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+			{
+				if(m_Game && m_pEditor->m_Map.m_pFrontLayer)
+				{
+					HasTile = HasTile || m_pEditor->m_Map.m_pFrontLayer->GetTile(fx, fy).m_Index;
+				}
+				else if(m_Front)
+				{
+					HasTile = HasTile || m_pEditor->m_Map.m_pGameLayer->GetTile(fx, fy).m_Index;
+				}
+			}
+
+			if(!Destructive && HasTile)
 				continue;
 
 			if(Empty)
@@ -464,7 +477,20 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
 				continue;
 
-			if(!Destructive && GetTile(fx, fy).m_Index)
+			bool HasTile = GetTile(fx, fy).m_Index;
+			if(l->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+			{
+				if(m_Game && m_pEditor->m_Map.m_pFrontLayer)
+				{
+					HasTile = HasTile || m_pEditor->m_Map.m_pFrontLayer->GetTile(fx, fy).m_Index;
+				}
+				else if(m_Front)
+				{
+					HasTile = HasTile || m_pEditor->m_Map.m_pGameLayer->GetTile(fx, fy).m_Index;
+				}
+			}
+
+			if(!Destructive && HasTile)
 				continue;
 
 			SetTile(fx, fy, l->GetTile(x, y));
@@ -1557,40 +1583,6 @@ void CLayerFront::Resize(int NewW, int NewH)
 	// resize gamelayer too
 	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
-}
-
-void CLayerFront::Shift(int Direction)
-{
-	CLayerTiles::Shift(Direction);
-}
-
-void CLayerFront::BrushDraw(CLayer *pBrush, float wx, float wy)
-{
-	if(m_Readonly)
-		return;
-
-	//
-	CLayerTiles *l = (CLayerTiles *)pBrush;
-	int sx = ConvertX(wx);
-	int sy = ConvertY(wy);
-
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
-
-	for(int y = 0; y < l->m_Height; y++)
-		for(int x = 0; x < l->m_Width; x++)
-		{
-			int fx = x+sx;
-			int fy = y+sy;
-
-			if(fx<0 || fx >= m_Width || fy < 0 || fy >= m_Height)
-				continue;
-
-			if(!Destructive && GetTile(fx, fy).m_Index)
-				continue;
-
-			SetTile(fx, fy, l->GetTile(x, y));
-		}
-	FlagModified(sx, sy, l->m_Width, l->m_Height);
 }
 
 CLayerSwitch::CLayerSwitch(int w, int h)

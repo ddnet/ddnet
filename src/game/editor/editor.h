@@ -693,10 +693,6 @@ public:
 		m_MouseDeltaY = 0;
 		m_MouseDeltaWx = 0;
 		m_MouseDeltaWy = 0;
-#if defined(__ANDROID__)
-		m_OldMouseX = 0;
-		m_OldMouseY = 0;
-#endif
 
 		m_GuiActive = true;
 		m_ProofBorders = false;
@@ -745,11 +741,15 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
+
+		m_Mentions = 0;
 	}
 
 	virtual void Init();
 	virtual void UpdateAndRender();
 	virtual bool HasUnsavedData() { return m_Map.m_Modified; }
+	virtual void UpdateMentions() { m_Mentions++; }
+	virtual void ResetMentions() { m_Mentions = 0; }
 
 	int64 m_LastUndoUpdateTime;
 	bool m_UndoRunning;
@@ -829,6 +829,8 @@ public:
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
 
+	int m_Mentions;
+
 	enum
 	{
 		FILETYPE_MAP,
@@ -892,10 +894,6 @@ public:
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
-#if defined(__ANDROID__)
-	float m_OldMouseX;
-	float m_OldMouseY;
-#endif
 
 	bool m_ShowTileInfo;
 	bool m_ShowDetail;
@@ -1039,6 +1037,7 @@ public:
 
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SortImages();
+	const char *Explain(int Tile, int Layer);
 
 	int GetLineDistance();
 	void ZoomMouseTarget(float ZoomFactor);
@@ -1122,9 +1121,7 @@ public:
 	CLayerFront(int w, int h);
 
 	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
 	virtual void SetTile(int x, int y, CTile tile);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
 };
 
 class CLayerSwitch : public CLayerTiles

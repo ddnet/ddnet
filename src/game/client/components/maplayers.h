@@ -50,7 +50,7 @@ class CMapLayers : public CComponent
 		public:
 			bool DoDraw() 
 			{
-				return (bool)((m_IndexBufferByteOffset&0x00000001) != 0);
+				return (m_IndexBufferByteOffset&0x00000001) != 0;
 			}
 
 			void Draw(bool SetDraw) 
@@ -70,7 +70,7 @@ class CMapLayers : public CComponent
 
 			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
-				m_IndexBufferByteOffset = (((offset_ptr32)(m_IndexBufferByteOffset & 0xFFFFFFFE)) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x00000001);
+				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xFFFFFFFE) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x00000001);
 			}
 		};
 		STileVisual* m_TilesOfLayer;

@@ -34,7 +34,7 @@ void CMapImages::OnInit()
 			str_format(buff, 4, "%d", i);
 			
 			float x = (i%16) * 64;
-			float y = (int)(i/16)* 64;
+			float y = (i/16) * 64;
 			TextRender()->UploadEntityLayerText(m_OverlayBottomTexture, buff, -1, x+1, y + 12 + 32, 20, 64-1);
 		}
 	}
@@ -50,7 +50,7 @@ void CMapImages::OnInit()
 			str_format(buff, 4, "%d", i);
 			
 			float x = (i%16) * 64;
-			float y = (int)(i/16)* 64;
+			float y = (i/16) * 64;
 			TextRender()->UploadEntityLayerText(m_OverlayTopTexture, buff, -1, x+1, y+1, 20, 64-1);
 		}
 	}
@@ -67,7 +67,7 @@ void CMapImages::OnInit()
 			int len = str_length(buff);
 			
 			float x = (i%16) * 64;
-			float y = (int)(i/16)* 64;
+			float y = (i/16) * 64;
 			
 			int MinSize = (len == 3 ? 20 : 50);
 			int OffY = (len == 3 ? 10 : 5);

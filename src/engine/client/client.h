@@ -132,6 +132,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	//
 	char m_aCmdConnect[256];
+	char m_aCmdPlayDemo[MAX_PATH_LENGTH];
 
 	// map download
 	std::shared_ptr<CGetFile> m_pMapdownloadTask;
@@ -385,6 +386,7 @@ public:
 	void ServerBrowserUpdate();
 
 	void HandleConnectLink(const char *pLink);
+	void HandleDemoPath(const char *pPath);
 
 	// gfx
 	void SwitchWindowScreen(int Index);

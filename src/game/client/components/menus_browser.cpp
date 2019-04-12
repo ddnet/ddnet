@@ -73,9 +73,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{COL_PLAYERS,	IServerBrowser::SORT_NUMPLAYERS,	"Players",	1, 60.0f, 0, {0}, {0}},
 		{-1,			-1,						" ",		1, 10.0f, 0, {0}, {0}},
 		{COL_PING,		IServerBrowser::SORT_PING,		"Ping",		1, 40.0f, FIXED, {0}, {0}},
-#if defined(__ANDROID__)
-		{-1,			-1,						" ",		1, 50.0f, 0, {0}, {0}}, // Scrollbar
-#endif
 	};
 	// This is just for scripts/update_localization.py to work correctly (all other strings are already Localize()'d somewhere else). Don't remove!
 	// Localize("Type");
@@ -131,11 +128,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.15f), 0, 0);
 
 	CUIRect Scroll;
-#if defined(__ANDROID__)
-	View.VSplitRight(50, &View, &Scroll);
-#else
 	View.VSplitRight(15, &View, &Scroll);
-#endif
 
 	int NumServers = ServerBrowser()->NumSortedServers();
 
@@ -481,11 +474,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		// select the new server
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
 		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
-#if defined(__ANDROID__)
-		if(DoubleClicked)
-#else
 		if(Input()->MouseDoubleClick() && DoubleClicked)
-#endif
 			Client()->Connect(g_Config.m_UiServerAddress);
 	}
 
@@ -1124,11 +1113,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	static float s_ScrollValue = 0;
 	if(m_FriendlistSelectedIndex >= m_lFriends.size())
 		m_FriendlistSelectedIndex = m_lFriends.size()-1;
-#if defined(__ANDROID__)
-	UiDoListboxStart(&m_lFriends, &List, 50.0f, "", "", m_lFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
-#else
 	UiDoListboxStart(&m_lFriends, &List, 30.0f, "", "", m_lFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
-#endif
 
 	m_lFriends.sort_range();
 	for(int i = 0; i < m_lFriends.size(); ++i)
@@ -1320,7 +1305,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		if(State == IUpdater::CLEAN && NeedUpdate)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet %s is out!", Client()->LatestVersion());
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::CLEAN)
@@ -1331,16 +1316,16 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		{
 			char aCurrentFile[64];
 			Updater()->GetCurrentFile(aCurrentFile, sizeof(aCurrentFile));
-			str_format(aBuf, sizeof(aBuf), "Downloading %s:", aCurrentFile);
+			str_format(aBuf, sizeof(aBuf), Localize("Downloading %s:"), aCurrentFile);
 		}
 		else if(State == IUpdater::FAIL)
 		{
-			str_format(aBuf, sizeof(aBuf), "Failed to download a file! Restart client to retry...");
+			str_format(aBuf, sizeof(aBuf), Localize("Update failed! Check log..."));
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		else if(State == IUpdater::NEED_RESTART)
 		{
-			str_format(aBuf, sizeof(aBuf), "DDNet Client updated!");
+			str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 		}
 		UI()->DoLabelScaled(&Button, aBuf, 14.0f, -1);

@@ -233,8 +233,8 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 
 	m_pDataFile->m_Info.m_pItemTypes = (CDatafileItemType *)m_pDataFile->m_pData;
 	m_pDataFile->m_Info.m_pItemOffsets = (int *)&m_pDataFile->m_Info.m_pItemTypes[m_pDataFile->m_Header.m_NumItemTypes];
-	m_pDataFile->m_Info.m_pDataOffsets = (int *)&m_pDataFile->m_Info.m_pItemOffsets[m_pDataFile->m_Header.m_NumItems];
-	m_pDataFile->m_Info.m_pDataSizes = (int *)&m_pDataFile->m_Info.m_pDataOffsets[m_pDataFile->m_Header.m_NumRawData];
+	m_pDataFile->m_Info.m_pDataOffsets = &m_pDataFile->m_Info.m_pItemOffsets[m_pDataFile->m_Header.m_NumItems];
+	m_pDataFile->m_Info.m_pDataSizes = &m_pDataFile->m_Info.m_pDataOffsets[m_pDataFile->m_Header.m_NumRawData];
 
 	if(Header.m_Version == 4)
 		m_pDataFile->m_Info.m_pItemStart = (char *)&m_pDataFile->m_Info.m_pDataSizes[m_pDataFile->m_Header.m_NumRawData];
@@ -314,6 +314,9 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 {
 	if(!m_pDataFile) { return 0; }
 
+	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
+		return 0;
+
 	// load it if needed
 	if(!m_pDataFile->m_ppDataPtrs[Index])
 	{
@@ -377,7 +380,7 @@ void *CDataFileReader::GetDataSwapped(int Index)
 
 void CDataFileReader::UnloadData(int Index)
 {
-	if(Index < 0)
+	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
 		return;
 
 	//

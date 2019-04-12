@@ -168,6 +168,12 @@ if(NOT MSVC)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+  # TODO: Enable for C++ code except gtest
+  #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
 endif()
 
 if(NOT MSVC)
@@ -503,7 +509,10 @@ add_library(md5 EXCLUDE_FROM_ALL OBJECT ${DEP_MD5_SRC})
 
 list(APPEND TARGETS_DEP json md5)
 set(DEP_JSON $<TARGET_OBJECTS:json>)
-set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+set(DEP_MD5)
+if(NOT CRYPTO_FOUND)
+  set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+endif()
 
 ########################################################################
 # COPY DATA AND DLLS
@@ -575,6 +584,7 @@ set_glob(BASE GLOB_RECURSE src/base
   detect.h
   hash.c
   hash.h
+  hash_bundled.c
   hash_ctxt.h
   hash_libtomcrypt.c
   hash_openssl.c
@@ -871,6 +881,7 @@ if(CLIENT)
     auto_map.h
     editor.cpp
     editor.h
+    explanations.cpp
     io.cpp
     layer_game.cpp
     layer_quads.cpp
@@ -1602,6 +1613,7 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(CRYPTO_FOUND)
     target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
+    target_include_directories(${target} PRIVATE ${CRYPTO_INCLUDE_DIRS})
   endif()
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)

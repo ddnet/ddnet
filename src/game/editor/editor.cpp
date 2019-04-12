@@ -604,7 +604,7 @@ int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Chec
 	}
 
 	if(UI()->HotItem() == pID && pToolTip)
-		m_pTooltip = (const char *)pToolTip;
+		m_pTooltip = pToolTip;
 
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 
@@ -2547,7 +2547,26 @@ void CEditor::DoMapEditor(CUIRect View)
 		// brush editing
 		if(UI()->HotItem() == s_pEditorID)
 		{
-			if(m_Brush.IsEmpty())
+			int Layer = NUM_LAYERS;
+			if(m_ShowPicker)
+			{
+				CLayer *pLayer = GetSelectedLayer(0);
+				if(pLayer == m_Map.m_pGameLayer)
+					Layer = LAYER_GAME;
+				else if(pLayer == m_Map.m_pFrontLayer)
+					Layer = LAYER_FRONT;
+				else if(pLayer == m_Map.m_pSwitchLayer)
+					Layer = LAYER_SWITCH;
+				else if(pLayer == m_Map.m_pTeleLayer)
+					Layer = LAYER_TELE;
+				else if(pLayer == m_Map.m_pSpeedupLayer)
+					Layer = LAYER_SPEEDUP;
+				else if(pLayer == m_Map.m_pTuneLayer)
+					Layer = LAYER_TUNE;
+			}
+			if(m_ShowPicker && Layer != NUM_LAYERS)
+				m_pTooltip = Explain((int)wx / 32 + (int)wy / 32 * 16, Layer);
+			else if(m_Brush.IsEmpty())
 				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads.";
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
@@ -3762,7 +3781,7 @@ void CEditor::SortImages()
 
 	if(!Sorted)
 	{
-		array<CEditorImage*> lTemp = array<CEditorImage*>(m_Map.m_lImages);
+		array<CEditorImage*> lTemp = m_Map.m_lImages;
 		gs_pSortedIndex = new int[lTemp.size()];
 
 		qsort(m_Map.m_lImages.base_ptr(), m_Map.m_lImages.size(), sizeof(CEditorImage*), CompareImageName);
@@ -4597,14 +4616,23 @@ void CEditor::RenderStatusbar(CUIRect View)
 
 	if(m_pTooltip)
 	{
+		char aBuf[512];
 		if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
-		{
-			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
-			UI()->DoLabel(&View, aBuf, 10.0f, -1, -1);
-		}
 		else
-			UI()->DoLabel(&View, m_pTooltip, 10.0f, -1, -1);
+			str_copy(aBuf, m_pTooltip, sizeof(aBuf));
+
+		float FontSize = 10.0f;
+
+		while(TextRender()->TextWidth(0, FontSize, m_pTooltip, -1) > View.w)
+		{
+			if(FontSize > 6.0f)
+				FontSize--;
+			else
+				str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+		}
+
+		UI()->DoLabel(&View, m_pTooltip, FontSize, -1, View.w);
 	}
 }
 
@@ -5678,6 +5706,28 @@ void CEditor::Render()
 		StatusBar.Margin(2.0f, &StatusBar);
 	}
 
+	// show mentions
+	if(m_GuiActive && m_Mentions)
+	{
+		char aBuf[16];
+		if(m_Mentions == 1)
+		{
+			str_copy(aBuf, Localize("1 new mention"), sizeof(aBuf));
+		}
+		else if(m_Mentions <= 9)
+		{
+			str_format(aBuf, sizeof(aBuf), Localize("%d new mentions"), m_Mentions);
+		}
+		else
+		{
+			str_copy(aBuf, Localize("9+ new mentions"), sizeof(aBuf));
+		}
+
+		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
+		TextRender()->Text(0, 5.0f, 27.0f, 10.0f, aBuf, -1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
 	// do the toolbar
 	if(m_Mode == MODE_LAYERS)
 		DoToolbar(ToolBar);
@@ -6091,22 +6141,6 @@ void CEditor::UpdateAndRender()
 	float rx, ry;
 	{
 		Input()->MouseRelative(&rx, &ry);
-#if defined(__ANDROID__)
-		float tx, ty;
-		tx = s_MouseX;
-		ty = s_MouseY;
-
-		s_MouseX = (rx / (float)Graphics()->ScreenWidth()) * UI()->Screen()->w;
-		s_MouseY = (ry / (float)Graphics()->ScreenHeight()) * UI()->Screen()->h;
-
-		s_MouseX = clamp(s_MouseX, 0.0f, UI()->Screen()->w);
-		s_MouseY = clamp(s_MouseY, 0.0f, UI()->Screen()->h);
-
-		m_MouseDeltaX = s_MouseX - m_OldMouseX;
-		m_MouseDeltaY = s_MouseY - m_OldMouseY;
-		m_OldMouseX = tx;
-		m_OldMouseY = ty;
-#else
 		UI()->ConvertMouseMove(&rx, &ry);
 
 		// TODO: Why do we have to halve this?
@@ -6121,7 +6155,6 @@ void CEditor::UpdateAndRender()
 			s_MouseX = clamp(s_MouseX + rx, 0.0f, UI()->Screen()->w);
 			s_MouseY = clamp(s_MouseY + ry, 0.0f, UI()->Screen()->h);
 		}
-#endif
 
 		// update the ui
 		mx = s_MouseX;
@@ -6150,14 +6183,7 @@ void CEditor::UpdateAndRender()
 		if(Input()->KeyIsPressed(KEY_MOUSE_2)) Buttons |= 2;
 		if(Input()->KeyIsPressed(KEY_MOUSE_3)) Buttons |= 4;
 
-#if defined(__ANDROID__)
-	static int ButtonsOneFrameDelay = 0; // For Android touch input
-
-	UI()->Update(mx,my,Mwx,Mwy,ButtonsOneFrameDelay);
-	ButtonsOneFrameDelay = Buttons;
-#else
 		UI()->Update(mx,my,Mwx,Mwy,Buttons);
-#endif
 	}
 
 	// toggle gui

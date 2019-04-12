@@ -331,7 +331,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		if (rendered++ < 0) continue;
 
-		int DDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID);
+		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientID);
 		int NextDDTeam = 0;
 
 		for (int j = i + 1; j < MAX_CLIENTS; j++)
@@ -340,7 +340,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 			if (!pInfo2 || pInfo2->m_Team != Team) continue;
 
-			NextDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 			break;
 		}
 
@@ -352,7 +352,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 				if (!pInfo2 || pInfo2->m_Team != Team) continue;
 
-				OldDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 				break;
 			}
 		}
@@ -472,14 +472,24 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			Cursor.m_LineWidth = NameLength;
 			TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 		}
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// clan
-		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
-		TextRender()->SetCursor(&Cursor, ClanOffset + ClanLength / 2 - tw / 2, y + (LineHeight - FontSize) / 2.f,
-								FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
+				m_pClient->m_aClients[GameClient()->m_LocalIDs[0]].m_aClan) == 0)
+		{
+			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClSameClanColor);
+			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+		}
+		else
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		tw = TextRender()->TextWidth(nullptr, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+		TextRender()->SetCursor(&Cursor, ClanOffset + ClanLength / 2 - tw / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+    
 		Cursor.m_LineWidth = ClanLength;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// country flag
 		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
@@ -488,16 +498,22 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 										   LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
+		if(g_Config.m_ClEnablePingColor)
+		{
+			vec3 rgb = HslToRgb(vec3((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+		}
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 1000));
-		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-		TextRender()->SetCursor(&Cursor, PingOffset + PingLength - tw, y + (LineHeight - FontSize) / 2.f, FontSize,
-								TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+
+		tw = TextRender()->TextWidth(nullptr, FontSize, aBuf, -1);
+		TextRender()->SetCursor(&Cursor, PingOffset+PingLength-tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 
-		y += LineHeight + Spacing;
-		if (lower32 || upper32)
-		{
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		y += LineHeight+Spacing;
+		if (lower32 || upper32) {
 			if (rendered == 32) break;
 		}
 		else if (lower24 || upper24)

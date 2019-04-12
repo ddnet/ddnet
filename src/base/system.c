@@ -43,10 +43,6 @@
 		#include <mach/mach_time.h>
 	#endif
 
-	#if defined(__ANDROID__)
-		#include <android/log.h>
-	#endif
-
 #elif defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
 	#undef _WIN32_WINNT
@@ -145,16 +141,12 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 		loggers[i].logger(str, loggers[i].user);
 }
 
-#if defined(CONF_FAMILY_WINDOWS) || defined(__ANDROID__)
+#if defined(CONF_FAMILY_WINDOWS)
 static void logger_debugger(const char *line, void *user)
 {
 	(void)user;
-#if defined(CONF_FAMILY_WINDOWS)
 	OutputDebugString(line);
 	OutputDebugString("\n");
-#elif defined(__ANDROID__)
-	__android_log_print(ANDROID_LOG_INFO, "DDNet", "%s", line);
-#endif
 }
 #endif
 
@@ -171,27 +163,29 @@ static void logger_file(const char *line, void *user)
 #if defined(CONF_FAMILY_WINDOWS)
 static void logger_stdout_sync(const char *line, void *user)
 {
-	(void)user;
-
 	size_t length = strlen(line);
 	wchar_t *wide = malloc(length * sizeof (*wide));
-	mem_zero(wide, length * sizeof *wide);
-
 	const char *p = line;
 	int wlen = 0;
+	HANDLE console;
+
+	(void)user;
+	mem_zero(wide, length * sizeof *wide);
+
 	for(int codepoint = 0; (codepoint = str_utf8_decode(&p)); wlen++)
 	{
+		char u16[4] = {0};
+
 		if(codepoint < 0)
 			return;
 
-		char u16[4] = {0};
 		if(str_utf16le_encode(u16, codepoint) != 2)
 			return;
 
 		mem_copy(&wide[wlen], u16, 2);
 	}
 
-	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	console = GetStdHandle(STD_OUTPUT_HANDLE);
 	WriteConsoleW(console, wide, wlen, NULL, NULL);
 	WriteConsoleA(console, "\n", 1, NULL, NULL);
 }
@@ -248,7 +242,7 @@ void dbg_logger_stdout()
 
 void dbg_logger_debugger()
 {
-#if defined(CONF_FAMILY_WINDOWS) || defined(__ANDROID__)
+#if defined(CONF_FAMILY_WINDOWS)
 	dbg_logger(logger_debugger, 0, 0);
 #endif
 }

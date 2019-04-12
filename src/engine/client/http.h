@@ -6,6 +6,7 @@
 #include <engine/kernel.h>
 
 typedef struct _json_value json_value;
+typedef void CURL;
 
 enum
 {
@@ -21,12 +22,12 @@ class CRequest : public IJob
 	// Abort the request with an error if `BeforeInit()` or `AfterInit()`
 	// returns something nonzero. Also abort the request if `OnData()`
 	// returns something other than `DataSize`.
-	virtual int BeforeInit() { return 0; }
-	virtual int AfterInit(void *pCurl) { return 0; }
+	virtual bool BeforeInit() { return true; }
+	virtual bool AfterInit(void *pCurl) { return true; }
 	virtual size_t OnData(char *pData, size_t DataSize) = 0;
 
 	virtual void OnProgress() { }
-	virtual void BeforeCompletion() { }
+	virtual bool BeforeCompletion() { return true; }
 	virtual void OnCompletion() { }
 
 	char m_aUrl[256];
@@ -43,6 +44,7 @@ class CRequest : public IJob
 	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pUser);
 
 	void Run();
+	int RunImpl(CURL *pHandle);
 
 public:
 	CRequest(const char *pUrl, bool CanTimeout);
@@ -75,8 +77,8 @@ public:
 class CGetFile : public CRequest
 {
 	virtual size_t OnData(char *pData, size_t DataSize);
-	virtual int BeforeInit();
-	virtual void BeforeCompletion();
+	virtual bool BeforeInit();
+	virtual bool BeforeCompletion();
 
 	IStorage *m_pStorage;
 
@@ -94,7 +96,7 @@ public:
 class CPostJson : public CRequest
 {
 	virtual size_t OnData(char *pData, size_t DataSize) { return DataSize; }
-	virtual int AfterInit(void *pCurl);
+	virtual bool AfterInit(void *pCurl);
 
 	char m_aJson[1024];
 

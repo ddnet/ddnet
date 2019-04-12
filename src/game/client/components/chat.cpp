@@ -3,6 +3,7 @@
 
 #include <base/tl/string.h>
 
+#include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/textrender.h>
@@ -238,7 +239,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 					if(FoundAt != m_Input.GetLength())
 						str_append(aText, m_Input.GetString() + FoundAt, sizeof(aText));
-					
+
 					m_Input.Set(aText);
 					FoundAt = OldOffset;
 				}
@@ -513,7 +514,6 @@ void CChat::EnableMode(int Team)
 		Input()->SetIMEState(true);
 		Input()->Clear();
 		m_CompletionChosen = -1;
-		UI()->AndroidShowTextInput("", Team ? Localize("Team chat") : Localize("Chat"));
 	}
 }
 
@@ -711,6 +711,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
+
+			if(g_Config.m_ClEditor)
+			{
+				GameClient()->Editor()->UpdateMentions();
+			}
 		}
 	}
 	else if(Team != 2)
@@ -731,15 +736,7 @@ void CChat::OnPrepareLines()
 {
 	float x = 5.0f;
 	float y = 300.0f - 28.0f;
-#if defined(__ANDROID__)
-	x += 120.0f;
-#endif
-
-#if defined(__ANDROID__)
-	float FontSize = 10.0f;
-#else
 	float FontSize = 6.0f;
-#endif
 
 	bool ForceRecreate = m_pClient->m_pScoreboard->Active() != m_PrevScoreBoardShowed;
 	ForceRecreate |= m_Show != m_PrevShowChat;
@@ -971,9 +968,6 @@ void CChat::OnRender()
 		return;
 
 	y -= 8.0f;
-#if defined(__ANDROID__)
-	x += 120.0f;
-#endif
 
 	OnPrepareLines();
 
@@ -1001,37 +995,6 @@ void CChat::OnRender()
 			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, &Text, &TextOutline, 0, y - m_aLines[r].m_TextYOffset);
 		}
 	}
-
-#if defined(__ANDROID__)
-	static int deferEvent = 0;
-	if( UI()->AndroidTextInputShown() )
-	{
-		if(m_Mode == MODE_NONE)
-		{
-			deferEvent++;
-			if( deferEvent > 2 )
-				EnableMode(0);
-		}
-		else
-			deferEvent = 0;
-	}
-	else
-	{
-		if(m_Mode != MODE_NONE)
-		{
-			deferEvent++;
-			if( deferEvent > 2 )
-			{
-				IInput::CEvent Event;
-				Event.m_Flags = IInput::FLAG_PRESS;
-				Event.m_Key = KEY_RETURN;
-				OnInput(Event);
-			}
-		}
-		else
-			deferEvent = 0;
-	}
-#endif
 }
 
 void CChat::Say(int Team, const char *pLine)

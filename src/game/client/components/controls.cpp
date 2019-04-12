@@ -29,9 +29,7 @@ CControls::CControls()
 	m_LastDummy = 0;
 	m_OtherFire = 0;
 
-#if !defined(__ANDROID__)
 	if (g_Config.m_InpJoystick)
-#endif
 	{
 		SDL_Init(SDL_INIT_JOYSTICK);
 		m_Joystick = SDL_JoystickOpen(0);
@@ -51,14 +49,12 @@ CControls::CControls()
 			m_UsingGamepad = true;
 #endif
 	}
-#if !defined(__ANDROID__)
 	else
 	{
 		m_Joystick = NULL;
 		m_Gamepad = NULL;
 		m_UsingGamepad = false;
 	}
-#endif
 }
 
 void CControls::OnReset()
@@ -456,7 +452,6 @@ void CControls::OnRender()
 
 		if( !m_UsingGamepad && (abs(AimX) > GAMEPAD_DEAD_ZONE || abs(AimY) > GAMEPAD_DEAD_ZONE || abs(RunX) > GAMEPAD_DEAD_ZONE || abs(RunY) > GAMEPAD_DEAD_ZONE) )
 		{
-			UI()->AndroidShowScreenKeys(false);
 			m_UsingGamepad = true;
 		}
 	}
@@ -501,16 +496,6 @@ bool CControls::OnMouseMove(float x, float y)
 	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 		return false;
 
-#if defined(__ANDROID__) // No relative mouse on Android
-	// We're using joystick on Android, mouse is disabled
-	if( m_OldMouseX != x || m_OldMouseY != y )
-	{
-		m_OldMouseX = x;
-		m_OldMouseY = y;
-		m_MousePos[g_Config.m_ClDummy] = vec2((x - Graphics()->Width()/2), (y - Graphics()->Height()/2));
-		ClampMousePos();
-	}
-#else
 	if(g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens)
 	{
 		x = x * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
@@ -518,7 +503,6 @@ bool CControls::OnMouseMove(float x, float y)
 	}
 	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
 	ClampMousePos();
-#endif
 
 	return true;
 }
@@ -533,12 +517,17 @@ void CControls::ClampMousePos()
 	else
 	{
 		float CameraMaxDistance = 200.0f;
+		float CameraMinDistance = 0.0f;
 		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
 		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		float MouseMax = min(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
+		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
+		float MouseMin = min(CameraMinDistance/FollowFactor + DeadZone, MinDistance);
 
 		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
 			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;
+		if(length(m_MousePos[g_Config.m_ClDummy]) < MouseMin)
+			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMin;
 	}
 }

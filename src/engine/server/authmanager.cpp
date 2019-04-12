@@ -1,11 +1,20 @@
-#include <engine/external/md5/md5.h>
-
+#include <base/hash_ctxt.h>
 #include <engine/shared/config.h>
 #include "authmanager.h"
 
 #define ADMIN_IDENT "default_admin"
 #define MOD_IDENT "default_mod"
 #define HELPER_IDENT "default_helper"
+
+static MD5_DIGEST HashPassword(const char *pPassword, const unsigned char aSalt[SALT_BYTES])
+{
+	// Hash the password and the salt
+	MD5_CTX Md5;
+	md5_init(&Md5);
+	md5_update(&Md5, (unsigned char *)pPassword, str_length(pPassword));
+	md5_update(&Md5, aSalt, SALT_BYTES);
+	return md5_finish(&Md5);
+}
 
 CAuthManager::CAuthManager()
 {
@@ -32,14 +41,14 @@ void CAuthManager::Init()
 	}
 }
 
-int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
+int CAuthManager::AddKeyHash(const char *pIdent, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel)
 {
 	if(FindKey(pIdent) >= 0)
 		return -1;
 
 	CKey Key;
 	str_copy(Key.m_aIdent, pIdent, sizeof(Key.m_aIdent));
-	mem_copy(Key.m_aPw, pHash, MD5_BYTES);
+	Key.m_Pw = Hash;
 	mem_copy(Key.m_aSalt, pSalt, SALT_BYTES);
 	Key.m_Level = AuthLevel;
 
@@ -48,20 +57,10 @@ int CAuthManager::AddKeyHash(const char *pIdent, const unsigned char *pHash, con
 
 int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
 {
-	md5_state_t ctx;
-	unsigned char aHash[MD5_BYTES];
-	unsigned char aSalt[SALT_BYTES];
-
 	// Generate random salt
+	unsigned char aSalt[SALT_BYTES];
 	secure_random_fill(aSalt, SALT_BYTES);
-
-	// Hash the password and the salt
-	md5_init(&ctx);
-	md5_append(&ctx, (unsigned char *)pPw, str_length(pPw));
-	md5_append(&ctx, aSalt, SALT_BYTES);
-	md5_finish(&ctx, aHash);
-
-	return AddKeyHash(pIdent, aHash, aSalt, AuthLevel);
+	return AddKeyHash(pIdent, HashPassword(pPw, aSalt), aSalt, AuthLevel);
 }
 
 int CAuthManager::RemoveKey(int Slot)
@@ -94,17 +93,7 @@ bool CAuthManager::CheckKey(int Slot, const char *pPw)
 {
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return false;
-
-	md5_state_t ctx;
-	unsigned char aHash[MD5_BYTES];
-
-	// Hash the password and the salt
-	md5_init(&ctx);
-	md5_append(&ctx, (unsigned char*)pPw, str_length(pPw));
-	md5_append(&ctx, m_aKeys[Slot].m_aSalt, SALT_BYTES);
-	md5_finish(&ctx, aHash);
-
-	return !mem_comp(m_aKeys[Slot].m_aPw, aHash, MD5_BYTES);
+	return m_aKeys[Slot].m_Pw == HashPassword(pPw, m_aKeys[Slot].m_aSalt);
 }
 
 int CAuthManager::DefaultKey(int AuthLevel)
@@ -128,13 +117,13 @@ const char *CAuthManager::KeyIdent(int Slot)
 	return m_aKeys[Slot].m_aIdent;
 }
 
-void CAuthManager::UpdateKeyHash(int Slot, const unsigned char *pHash, const unsigned char *pSalt, int AuthLevel)
+void CAuthManager::UpdateKeyHash(int Slot, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel)
 {
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return;
 
 	CKey *pKey = &m_aKeys[Slot];
-	mem_copy(pKey->m_aPw, pHash, MD5_BYTES);
+	pKey->m_Pw = Hash;
 	mem_copy(pKey->m_aSalt, pSalt, SALT_BYTES);
 	pKey->m_Level = AuthLevel;
 }
@@ -144,20 +133,10 @@ void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 	if(Slot < 0 || Slot >= m_aKeys.size())
 		return;
 
-	md5_state_t ctx;
-	unsigned char aHash[MD5_BYTES];
-	unsigned char aSalt[SALT_BYTES];
-
 	// Generate random salt
+	unsigned char aSalt[SALT_BYTES];
 	secure_random_fill(aSalt, SALT_BYTES);
-
-	// Hash the password and the salt
-	md5_init(&ctx);
-	md5_append(&ctx, (unsigned char *)pPw, str_length(pPw));
-	md5_append(&ctx, aSalt, SALT_BYTES);
-	md5_finish(&ctx, aHash);
-
-	UpdateKeyHash(Slot, aHash, aSalt, AuthLevel);
+	UpdateKeyHash(Slot, HashPassword(pPw, aSalt), aSalt, AuthLevel);
 }
 
 void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)

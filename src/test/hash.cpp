@@ -58,3 +58,56 @@ TEST(Hash, Sha256FromStr)
 	EXPECT_TRUE(sha256_from_str(&Sha256, "012345678901234567890123456789012345678901234567890123456789012x"));
 	EXPECT_TRUE(sha256_from_str(&Sha256, "x123456789012345678901234567890123456789012345678901234567890123"));
 }
+
+static void Expect2(MD5_DIGEST Actual, const char *pWanted)
+{
+	char aActual[MD5_MAXSTRSIZE];
+	md5_str(Actual, aActual, sizeof(aActual));
+	EXPECT_STREQ(aActual, pWanted);
+}
+
+TEST(Hash, Md5)
+{
+	// https://en.wikipedia.org/w/index.php?title=MD5&oldid=889664074#MD5_hashes
+	Expect2(md5("", 0), "d41d8cd98f00b204e9800998ecf8427e");
+	MD5_CTX ctxt;
+
+	md5_init(&ctxt);
+	Expect2(md5_finish(&ctxt), "d41d8cd98f00b204e9800998ecf8427e");
+
+	char QUICK_BROWN_FOX[] = "The quick brown fox jumps over the lazy dog.";
+	Expect2(md5(QUICK_BROWN_FOX, str_length(QUICK_BROWN_FOX)), "e4d909c290d0fb1ca068ffaddf22cbd0");
+
+	md5_init(&ctxt);
+	md5_update(&ctxt, "The ", 4);
+	md5_update(&ctxt, "quick ", 6);
+	md5_update(&ctxt, "brown ", 6);
+	md5_update(&ctxt, "fox ", 4);
+	md5_update(&ctxt, "jumps ", 6);
+	md5_update(&ctxt, "over ", 5);
+	md5_update(&ctxt, "the ", 4);
+	md5_update(&ctxt, "lazy ", 5);
+	md5_update(&ctxt, "dog.", 4);
+	Expect2(md5_finish(&ctxt), "e4d909c290d0fb1ca068ffaddf22cbd0");
+}
+
+TEST(Hash, Md5Eq)
+{
+	EXPECT_EQ(md5("", 0), md5("", 0));
+}
+
+TEST(Hash, Md5FromStr)
+{
+	MD5_DIGEST Expected = {{
+		0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89,
+		0x01, 0x23, 0x45, 0x67, 0x89, 0x01,
+	}};
+	MD5_DIGEST Md5;
+	EXPECT_FALSE(md5_from_str(&Md5, "01234567890123456789012345678901"));
+	EXPECT_EQ(Md5, Expected);
+	EXPECT_TRUE(md5_from_str(&Md5, "0123456789012345678901234567890"));
+	EXPECT_TRUE(md5_from_str(&Md5, "012345678901234567890123456789012"));
+	EXPECT_TRUE(md5_from_str(&Md5, ""));
+	EXPECT_TRUE(md5_from_str(&Md5, "0123456789012345678901234567890x"));
+	EXPECT_TRUE(md5_from_str(&Md5, "x1234567890123456789012345678901"));
+}
