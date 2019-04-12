@@ -54,7 +54,10 @@ void CNamePlates::RenderNameplate(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
-	if(!Local && pPlayerChar->m_IsSolo)
+	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
+		OtherTeam = true;
+
+	if(!Local && m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_Solo)
 		OtherTeam = true;
 
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;

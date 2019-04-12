@@ -447,6 +447,27 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImporta
 	m_apPlayers[ClientID]->m_LastBroadcastImportance = IsImportant;
 }
 
+void CGameContext::SendSoloPlayers(int ClientID)
+{
+	// Send all players that are on solo.
+	// Useful only when a player connects.
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_apPlayers[i] && m_apPlayers[i]->m_IsReady && m_apPlayers[i]->IsPlaying() && m_apPlayers[i]->GetCharacter()->IsSolo())
+		{
+			SendSoloPlayer(ClientID, i);
+		}
+	}
+}
+
+void CGameContext::SendSoloPlayer(int ClientID, int WhoID)
+{
+	CMsgPacker Msg(NETMSG_SOLO_PLAYER);
+	Msg.AddInt(WhoID);
+	Msg.AddInt(m_apPlayers[WhoID]->GetCharacter()->IsSolo());
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
 void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char *pReason)
 {
 	// reset votes
@@ -1078,6 +1099,9 @@ void CGameContext::OnClientEnter(int ClientID)
 
 			m_apPlayers[ClientID]->m_ShowOthers = true;
 		}
+
+		// Send solo players status.
+		SendSoloPlayers(ClientID);
 	}
 	m_VoteUpdate = true;
 

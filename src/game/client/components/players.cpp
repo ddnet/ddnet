@@ -245,7 +245,10 @@ void CPlayers::RenderHook(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
-	if(!Local && Player.m_IsSolo)
+	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
+		OtherTeam = true;
+
+	if(!Local && m_pClient->m_aClients[ClientID].m_Solo)
 		OtherTeam = true;
 
 	if(OtherTeam)
@@ -406,7 +409,10 @@ void CPlayers::RenderPlayer(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
-	if(!Local && Player.m_IsSolo)
+	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
+		OtherTeam = true;
+
+	if(!Local && m_pClient->m_aClients[ClientID].m_Solo)
 		OtherTeam = true;
 
 	// set size

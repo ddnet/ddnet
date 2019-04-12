@@ -201,6 +201,8 @@ public:
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
+	void SendSoloPlayers(int ClientID);
+	void SendSoloPlayer(int ClientID, int WhoID);
 
 	void List(int ClientID, const char* filter);
 

@@ -219,6 +219,7 @@ public:
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, bool IsDummy = 0) = 0;
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
+	virtual void OnSoloPlayer(int ClientID, bool solo) = 0;
 
 	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
 	virtual void OnDummySwap() = 0;

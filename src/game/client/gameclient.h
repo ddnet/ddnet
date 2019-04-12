@@ -240,6 +240,7 @@ public:
 		int m_Team;
 		int m_Emoticon;
 		int m_EmoticonStart;
+		bool m_Solo;
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 
@@ -322,6 +323,7 @@ public:
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
+	virtual void OnSoloPlayer(int ClientID, bool solo);
 
 	void OnWindowResize();
 	static void OnWindowResizeCB(void *pUser);

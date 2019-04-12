@@ -932,6 +932,13 @@ void CGameClient::OnTimeScore(int AllowTimeScore, bool Dummy)
 	m_AllowTimeScore[Dummy] = AllowTimeScore;
 }
 
+void CGameClient::OnSoloPlayer(int ClientID, bool solo)
+{
+	m_aClients[ClientID].m_Solo = solo;
+	World
+	m_aClients[ClientID].m_Predicted
+}
+
 void CGameClient::ProcessEvents()
 {
 	if(m_SuppressEvents)
@@ -1853,6 +1860,7 @@ void CGameClient::CClientData::Reset()
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
 	m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
 	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
+	m_Solo = false;
 	UpdateRenderInfo();
 }
 
@@ -2000,7 +2008,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick());
 
-		if(!cData.m_Active || i == ownID || !m_Teams.SameTeam(i, ownID) || Player.m_IsSolo)
+		if(!cData.m_Active || i == ownID || !m_Teams.SameTeam(i, ownID) || cData.m_Solo)
 			continue;
 
 		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
@@ -2034,7 +2042,7 @@ int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2
 			continue;
 		CClientData cData = m_aClients[i];
 
-		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID) || m_Snap.m_aCharacters[i].m_Cur.m_IsSolo)
+		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID) || cData.m_Solo)
 			continue;
 		vec2 Position = World->m_apCharacters[i]->m_Pos;
 		vec2 ClosestPoint = closest_point_on_line(OldPos, NewPos, Position);

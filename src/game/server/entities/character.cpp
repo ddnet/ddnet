@@ -47,6 +47,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_HasTeleGrenade = false;
 	m_TeleGunTeleport = false;
 	m_IsBlueTeleGunTeleport = false;
+	m_IsSolo = false;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -85,6 +86,7 @@ void CCharacter::Destroy()
 {
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	m_Alive = false;
+	m_IsSolo = false;
 }
 
 void CCharacter::SetWeapon(int W)
@@ -103,7 +105,7 @@ void CCharacter::SetWeapon(int W)
 
 void CCharacter::SetSolo(bool Solo)
 {
-	Server()->SetClientSolo(m_pPlayer->GetCID(), Solo);
+	m_IsSolo = Solo;
 	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), Solo);
 
 	if(Solo)
@@ -112,6 +114,7 @@ void CCharacter::SetSolo(bool Solo)
 		m_NeededFaketuning &= ~FAKETUNE_SOLO;
 
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
+	GameServer()->SendSoloPlayer(-1, m_pPlayer->GetCID());
 }
 
 bool CCharacter::IsGrounded()
@@ -896,6 +899,12 @@ void CCharacter::Die(int Killer, int Weapon)
 	Msg.m_ModeSpecial = ModeSpecial;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
+	// Send solo status.
+	CMsgPacker Msg2(NETMSG_SOLO_PLAYER);
+	Msg2.AddInt(m_pPlayer->GetCID());
+	Msg2.AddInt(0);
+	Server()->SendMsg(&Msg2, MSGFLAG_VITAL, -1);
+
 	// a nice sound
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
@@ -903,6 +912,8 @@ void CCharacter::Die(int Killer, int Weapon)
 	m_pPlayer->m_DieTick = Server()->Tick();
 
 	m_Alive = false;
+	m_IsSolo = false;
+
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -1164,8 +1175,6 @@ void CCharacter::Snap(int SnappingClient)
 	}
 
 	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
-
-	pCharacter->m_IsSolo = Teams()->m_Core.GetSolo(m_pPlayer->GetCID());
 }
 
 int CCharacter::NetworkClipped(int SnappingClient)

@@ -279,8 +279,6 @@ public:
 
 	static int ClientRejoinCallback(int ClientID, void *pUser);
 
-	void GetSolos(unsigned char aPlayerSolos[8]);
-	void SendSoloPlayers(int ClientID, unsigned char aPlayerSolos[8]);
 	void SendRconType(int ClientID, bool UsernameReq);
 	void SendMap(int ClientID);
 	void SendMapData(int ClientID, int Chunk);
@@ -367,7 +365,6 @@ public:
 
 	// DDRace
 
-	void SetClientSolo(int ClientID, bool solo);
 	void GetClientAddr(int ClientID, NETADDR *pAddr);
 	int m_aPrevStates[MAX_CLIENTS];
 	const char *GetAnnouncementLine(char const *FileName);

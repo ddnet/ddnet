@@ -257,6 +257,7 @@ void CServer::CClient::Reset()
 	m_Score = 0;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
+	m_Solo = false;
 }
 
 CServer::CServer()
@@ -958,25 +959,6 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->SendConnLoggingCommand(CLOSE_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
 #endif
 	return 0;
-}
-
-void CServer::GetSolos(unsigned char *aPlayerSolos)
-{
-	for(int i = 8; i > 0; i--) {
-		unsigned char x = 0;
-		for(int j = 8; j >= 0; j--) {
-			x |= m_aClients[64 - (i * 8 + j)].m_Solo << j;
-		}
-		aPlayerSolos[i] = x;
-	}
-}
-
-void CServer::SendSoloPlayers(int ClientID, unsigned char *aPlayerSolos)
-{
-	CMsgPacker Msg(NETMSG_SOLO_PLAYERS);
-	Msg.AddInt(MaxClients());
-	Msg.AddRaw(aPlayerSolos, 8);
-	SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 }
 
 void CServer::SendRconType(int ClientID, bool UsernameReq)
@@ -3001,11 +2983,6 @@ int main(int argc, const char **argv) // ignore_convention
 }
 
 // DDRace
-
-void CServer::SetClientSolo(int ClientID, bool solo)
-{
-	m_aClients[ClientID].m_Solo = solo;
-}
 
 void CServer::GetClientAddr(int ClientID, NETADDR *pAddr)
 {
