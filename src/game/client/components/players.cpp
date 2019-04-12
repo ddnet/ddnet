@@ -730,7 +730,7 @@ void CPlayers::RenderPlayer(
 				int Phase1Tick = (Client()->GameTick() - Player.m_AttackTick);
 				if(Phase1Tick < (g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3))
 				{
-					float t = ((((float)Phase1Tick) + IntraTick)/(float)g_pData->m_Weapons.m_aId[iw].m_Muzzleduration);
+					float t = (((float)Phase1Tick) + IntraTick)/g_pData->m_Weapons.m_aId[iw].m_Muzzleduration;
 					Alpha = mix(2.0f, 0.0f, min(1.0f,max(0.0f,t)));
 				}
 

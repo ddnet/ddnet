@@ -295,7 +295,7 @@ void CSpectator::OnRender()
 		}
 
 		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeam[i];
-		int DDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID);
+		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientID);
 		int NextDDTeam = 0;
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
@@ -305,7 +305,7 @@ void CSpectator::OnRender()
 			if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 				continue;
 
-			NextDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 			break;
 		}
 
@@ -318,7 +318,7 @@ void CSpectator::OnRender()
 				if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 					continue;
 
-				OldDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 				break;
 			}
 		}

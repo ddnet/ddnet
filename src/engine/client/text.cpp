@@ -899,7 +899,7 @@ public:
 					Cutter.m_Flags &= ~TEXTFLAG_RENDER;
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
 
-					TextEx(&Cutter, (const char *)pCurrent, Wlen);
+					TextEx(&Cutter, pCurrent, Wlen);
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
@@ -1204,7 +1204,7 @@ public:
 					Cutter.m_Flags &= ~TEXTFLAG_RENDER;
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
 
-					TextEx(&Cutter, (const char *)pCurrent, Wlen);
+					TextEx(&Cutter, pCurrent, Wlen);
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
@@ -1485,7 +1485,7 @@ public:
 					Cutter.m_Flags &= ~TEXTFLAG_RENDER;
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
 
-					TextEx(&Cutter, (const char *)pCurrent, Wlen);
+					TextEx(&Cutter, pCurrent, Wlen);
 					Wlen = Cutter.m_CharCount;
 					NewLine = 1;
 
@@ -1791,7 +1791,7 @@ public:
 				int MaxSizeWidth = (MaxWidth - WidthLastChars);
 				if(MaxSizeWidth > 0)
 				{
-					int SlotW = ((((unsigned int)MaxSizeWidth) < (unsigned int)pBitmap->width) ? MaxSizeWidth : pBitmap->width);
+					int SlotW = ((((unsigned int)MaxSizeWidth) < pBitmap->width) ? MaxSizeWidth : pBitmap->width);
 					int SlotH = pBitmap->rows;
 					int SlotSize = SlotW*SlotH;
 					

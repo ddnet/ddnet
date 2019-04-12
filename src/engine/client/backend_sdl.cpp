@@ -558,14 +558,14 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		{
 			if(pProgram->m_LastIsTextured != 1)
 			{
-				pProgram->SetUniform(pProgram->m_LocIsTextured, (int)1);
+				pProgram->SetUniform(pProgram->m_LocIsTextured, 1);
 				pProgram->m_LastIsTextured = 1;
 			}
 		}
 
 		if(pProgram->m_LastTextureSampler != Slot)
 		{
-			pProgram->SetUniform(pProgram->m_LocTextureSampler, (int)Slot);
+			pProgram->SetUniform(pProgram->m_LocTextureSampler, Slot);
 			pProgram->m_LastTextureSampler = Slot;
 		}
 
@@ -593,7 +593,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		{
 			if(pProgram->m_LastIsTextured != 0)
 			{
-				pProgram->SetUniform(pProgram->m_LocIsTextured, (int)0);
+				pProgram->SetUniform(pProgram->m_LocIsTextured, 0);
 				pProgram->m_LastIsTextured = 0;
 			}
 		}
@@ -1204,7 +1204,7 @@ void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int Pr
 	glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[m_LastStreamBuffer]);
 
 	if(!m_UsePreinitializedVertexBuffer)
-		glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, (const void*)pVertices, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, pVertices, GL_STREAM_DRAW);
 	else
 	{
 		// This is better for some iGPUs. Probably due to not initializing a new buffer in the system memory again and again...(driver dependent)
@@ -1738,7 +1738,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	float Rotation = pCommand->m_pQuadInfo[0].m_Rotation;
 	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)aColor);
 	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (float*)aOffset);
-	pProgram->SetUniform(pProgram->m_LocRotation, (float)Rotation);
+	pProgram->SetUniform(pProgram->m_LocRotation, Rotation);
 
 	for(int i = 0; i < pCommand->m_QuadNum; ++i)
 	{
@@ -1755,7 +1755,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 		if(Rotation != pCommand->m_pQuadInfo[i].m_Rotation)
 		{
 			Rotation = pCommand->m_pQuadInfo[i].m_Rotation;
-			pProgram->SetUniform(pProgram->m_LocRotation, (float)Rotation);
+			pProgram->SetUniform(pProgram->m_LocRotation, Rotation);
 		}
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int)));
 	}
@@ -1807,13 +1807,13 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 
 	if(m_pTextProgram->m_LastTextSampler != SlotText)
 	{
-		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextSampler, (int)SlotText);
+		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextSampler, SlotText);
 		m_pTextProgram->m_LastTextSampler = SlotText;
 	}
 
 	if(m_pTextProgram->m_LastTextOutlineSampler != SlotTextOutline)
 	{
-		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextOutlineSampler, (int)SlotTextOutline);
+		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextOutlineSampler, SlotTextOutline);
 		m_pTextProgram->m_LastTextOutlineSampler = SlotTextOutline;
 	}
 

@@ -184,7 +184,7 @@ bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGam
 
 		if(pSqlServer->GetResults()->next())
 		{
-			int yearsAgo = (int)pSqlServer->GetResults()->getInt("YearsAgo");
+			int yearsAgo = pSqlServer->GetResults()->getInt("YearsAgo");
 			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday to %s for finishing their first map %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
 			pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 
@@ -400,19 +400,19 @@ bool CSqlScore::MapInfoThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 		else
 		{
 			pSqlServer->GetResults()->next();
-			int points = (int)pSqlServer->GetResults()->getInt("Points");
-			int stars = (int)pSqlServer->GetResults()->getInt("Stars");
-			int finishes = (int)pSqlServer->GetResults()->getInt("Finishes");
-			int finishers = (int)pSqlServer->GetResults()->getInt("Finishers");
-			int average = (int)pSqlServer->GetResults()->getInt("Average");
+			int points = pSqlServer->GetResults()->getInt("Points");
+			int stars = pSqlServer->GetResults()->getInt("Stars");
+			int finishes = pSqlServer->GetResults()->getInt("Finishes");
+			int finishers = pSqlServer->GetResults()->getInt("Finishers");
+			int average = pSqlServer->GetResults()->getInt("Average");
 			char aMap[128];
 			strcpy(aMap, pSqlServer->GetResults()->getString("Map").c_str());
 			char aServer[32];
 			strcpy(aServer, pSqlServer->GetResults()->getString("Server").c_str());
 			char aMapper[128];
 			strcpy(aMapper, pSqlServer->GetResults()->getString("Mapper").c_str());
-			int stamp = (int)pSqlServer->GetResults()->getInt("Stamp");
-			int ago = (int)pSqlServer->GetResults()->getInt("Ago");
+			int stamp = pSqlServer->GetResults()->getInt("Stamp");
+			int ago = pSqlServer->GetResults()->getInt("Ago");
 			float ownTime = (float)pSqlServer->GetResults()->getDouble("OwnTime");
 
 			char pAgoString[40] = "\0";
@@ -533,7 +533,7 @@ bool CSqlScore::SaveScoreThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 			if(pSqlServer->GetResults()->rowsCount() == 1)
 			{
 				pSqlServer->GetResults()->next();
-				int points = (int)pSqlServer->GetResults()->getInt("Points");
+				int points = pSqlServer->GetResults()->getInt("Points");
 				if (points == 1)
 					str_format(aBuf, sizeof(aBuf), "You earned %d point for finishing this map!", points);
 				else
@@ -764,7 +764,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			pSqlServer->GetResults()->next();
 
 			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
-			int Rank = (int)pSqlServer->GetResults()->getInt("Rank");
+			int Rank = pSqlServer->GetResults()->getInt("Rank");
 			if(g_Config.m_SvHideScore)
 			{
 				str_format(aBuf, sizeof(aBuf), "Your time: %02d:%05.2f", (int)(Time/60), Time-((int)Time/60*60));
@@ -837,7 +837,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 			pSqlServer->GetResults()->first();
 
 			float Time = (float)pSqlServer->GetResults()->getDouble("Time");
-			int Rank = (int)pSqlServer->GetResults()->getInt("Rank");
+			int Rank = pSqlServer->GetResults()->getInt("Rank");
 
 			for(int Row = 0; Row < Rows; Row++)
 			{
@@ -1105,8 +1105,8 @@ bool CSqlScore::ShowTimesThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		while(pSqlServer->GetResults()->next())
 		{
 			char pAgoString[40] = "\0";
-			pSince = (int)pSqlServer->GetResults()->getInt("Ago");
-			pStamp = (int)pSqlServer->GetResults()->getInt("Stamp");
+			pSince = pSqlServer->GetResults()->getInt("Ago");
+			pStamp = pSqlServer->GetResults()->getInt("Stamp");
 			pTime = (float)pSqlServer->GetResults()->getDouble("Time");
 
 			sqlstr::AgoTimeToString(pSince,pAgoString);
@@ -1181,8 +1181,8 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 		else
 		{
 			pSqlServer->GetResults()->next();
-			int count = (int)pSqlServer->GetResults()->getInt("Points");
-			int rank = (int)pSqlServer->GetResults()->getInt("Rank");
+			int count = pSqlServer->GetResults()->getInt("Points");
+			int rank = pSqlServer->GetResults()->getInt("Rank");
 			str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pSqlServer->GetResults()->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
 			pData->GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pData->m_ClientID);
 		}
@@ -1554,7 +1554,7 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			}
 
 			pSqlServer->GetResults()->getInt("Ago");
-			int since = (int)pSqlServer->GetResults()->getInt("Ago");
+			int since = pSqlServer->GetResults()->getInt("Ago");
 
 			if(since < g_Config.m_SvSaveGamesDelay)
 			{

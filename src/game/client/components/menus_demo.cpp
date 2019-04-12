@@ -275,7 +275,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			else
 			{
 				static float PrevAmount = 0.0f;
-				float Amount = (UI()->MouseX()-SeekBar.x)/(float)SeekBar.w;
+				float Amount = (UI()->MouseX()-SeekBar.x)/SeekBar.w;
 
 				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{

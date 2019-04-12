@@ -246,7 +246,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 			if(m_aItemSizes[pCurItem->Type()])
 				pItemDataDst = pData+2;
 
-			if(DiffItem((int*)pPastItem->Data(), (int*)pCurItem->Data(), pItemDataDst, ItemSize/4))
+			if(DiffItem(pPastItem->Data(), pCurItem->Data(), pItemDataDst, ItemSize/4))
 			{
 
 				*pData++ = pCurItem->Type();
@@ -385,7 +385,7 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pSrcData
 		if(FromIndex != -1)
 		{
 			// we got an update so we need pTo apply the diff
-			UndiffItem((int *)pFrom->GetItem(FromIndex)->Data(), pData, pNewData, ItemSize/4);
+			UndiffItem(pFrom->GetItem(FromIndex)->Data(), pData, pNewData, ItemSize/4);
 			m_aSnapshotDataUpdates[m_SnapshotCurrent]++;
 		}
 		else // no previous, just copy the pData
@@ -542,7 +542,7 @@ int *CSnapshotBuilder::GetItemData(int Key)
 	for(i = 0; i < m_NumItems; i++)
 	{
 		if(GetItem(i)->Key() == Key)
-			return (int *)GetItem(i)->Data();
+			return GetItem(i)->Data();
 	}
 	return 0;
 }
