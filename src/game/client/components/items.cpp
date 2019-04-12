@@ -314,12 +314,14 @@ void CItems::OnRender()
 			{
 				if(auto *pProj = (CProjectile*) GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData))
 				{
-					if(pProj->m_LastRenderTick <= 0)
-						if(pProj->m_Weapon != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
-							if(pProj->m_Weapon == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
-								if(pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal) // skip locally predicted projectiles
-									if(!Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
-										ReconstructSmokeTrail((const CNetObj_Projectile *)pData, Item.m_ID, pProj->m_DestroyTick, pProj->m_LifeSpan);
+					if(pProj->m_LastRenderTick <= 0
+					&& (pProj->m_Weapon != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
+					&& (pProj->m_Weapon == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
+					&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal) // skip locally predicted projectiles
+					&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
+					{
+						ReconstructSmokeTrail((const CNetObj_Projectile *)pData, Item.m_ID, pProj->m_DestroyTick, pProj->m_LifeSpan);
+					}
 					pProj->m_LastRenderTick = Client()->GameTick();
 					continue;
 				}
@@ -337,9 +339,11 @@ void CItems::OnRender()
 		else if(Item.m_Type == NETOBJTYPE_LASER)
 		{
 			if(UsePredicted)
-				if(auto *pLaser = (CLaser*) GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData))
-					if(pLaser->GetOwner() >= 0 && GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
-						continue;
+			{
+				auto *pLaser = (CLaser*) GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData);
+				if(pLaser && pLaser->GetOwner() >= 0 && GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
+					continue;
+			}
 			RenderLaser((const CNetObj_Laser *)pData);
 		}
 	}
