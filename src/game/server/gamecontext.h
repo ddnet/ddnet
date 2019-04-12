@@ -386,7 +386,9 @@ private:
 	int m_NumMutes;
 	CVoteMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
+	bool TryMute(const NETADDR *pAddr, int Secs);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
+	bool TryVoteMute(const NETADDR *pAddr, int Secs);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);
