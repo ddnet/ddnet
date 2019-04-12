@@ -64,12 +64,6 @@ void CInput::MouseRelative(float *x, float *y)
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return;
 
-#if defined(__ANDROID__) // No relative mouse on Android
-	int nx = 0, ny = 0;
-	SDL_GetMouseState(&nx, &ny);
-	*x = nx;
-	*y = ny;
-#else
 	int nx = 0, ny = 0;
 	float Sens = g_Config.m_InpMousesens / 100.0f;
 
@@ -77,7 +71,6 @@ void CInput::MouseRelative(float *x, float *y)
 
 	*x = nx*Sens;
 	*y = ny*Sens;
-#endif
 }
 
 void CInput::MouseModeAbsolute()
@@ -290,8 +283,6 @@ int CInput::Update()
 						case SDL_WINDOWEVENT_RESIZED:
 #if defined(SDL_VIDEO_DRIVER_X11)
 							Graphics()->Resize(Event.window.data1, Event.window.data2);
-#elif defined(__ANDROID__)
-							m_VideoRestartNeeded = 1;
 #endif
 							break;
 						case SDL_WINDOWEVENT_FOCUS_GAINED:

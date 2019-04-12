@@ -32,7 +32,7 @@ CBackground::~CBackground()
 void CBackground::OnInit()
 {
 	m_pImages->m_pClient = GameClient();
-	Kernel()->ReregisterInterface(static_cast<IEngineMap*>(m_pMap));
+	Kernel()->ReregisterInterface(m_pMap);
 	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, CURRENT))
 		LoadBackground();
 }

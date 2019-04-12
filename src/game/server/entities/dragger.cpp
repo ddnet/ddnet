@@ -9,7 +9,7 @@
 #include "dragger.h"
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
-		int CatchedTeam, int Layer, int Number) :
+		int CaughtTeam, int Layer, int Number) :
 		CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Layer = Layer;
@@ -18,7 +18,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 	m_Strength = Strength;
 	m_EvalTick = Server()->Tick();
 	m_NW = NW;
-	m_CatchedTeam = CatchedTeam;
+	m_CaughtTeam = CaughtTeam;
 	GameWorld()->InsertEntity(this);
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -31,7 +31,7 @@ void CDragger::Move()
 {
 	if (m_Target && (!m_Target->IsAlive() || (m_Target->IsAlive()
 			&& (m_Target->m_Super || m_Target->IsPaused()
-					|| (m_Layer == LAYER_SWITCH
+					|| (m_Layer == LAYER_SWITCH && m_Number
 							&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[m_Target->Team()])))))
 		m_Target = 0;
 
@@ -48,12 +48,12 @@ void CDragger::Move()
 	for (int i = 0; i < Num; i++)
 	{
 		Temp = m_SoloEnts[i];
-		if (Temp->Team() != m_CatchedTeam)
+		if (Temp->Team() != m_CaughtTeam)
 		{
 			m_SoloEnts[i] = 0;
 			continue;
 		}
-		if (m_Layer == LAYER_SWITCH
+		if (m_Layer == LAYER_SWITCH && m_Number
 				&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
 		{
 			m_SoloEnts[i] = 0;
@@ -259,7 +259,7 @@ void CDragger::Reset()
 void CDragger::Tick()
 {
 	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(
-			m_CatchedTeam) == CGameTeams::TEAMSTATE_EMPTY)
+			m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 	if (Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
 	{
@@ -282,7 +282,7 @@ void CDragger::Tick()
 void CDragger::Snap(int SnappingClient)
 {
 	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(
-			m_CatchedTeam) == CGameTeams::TEAMSTATE_EMPTY)
+			m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 
 	CCharacter *Target = m_Target;
@@ -326,19 +326,19 @@ void CDragger::Snap(int SnappingClient)
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if (Char && Char->IsAlive()
-				&& (m_Layer == LAYER_SWITCH
+				&& (m_Layer == LAYER_SWITCH && m_Number
 						&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
 						&& (!Tick)))
 			continue;
 		if (Char && Char->IsAlive())
 		{
-			if (Char->Team() != m_CatchedTeam)
+			if (Char->Team() != m_CaughtTeam)
 				continue;
 		}
 		else
 		{
 			// send to spectators only active draggers and some inactive from team 0
-			if (!((Target && Target->IsAlive()) || m_CatchedTeam == 0))
+			if (!((Target && Target->IsAlive()) || m_CaughtTeam == 0))
 				continue;
 		}
 
@@ -392,13 +392,14 @@ CDraggerTeam::CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength,
 {
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		m_Draggers[i] = new CDragger(pGameWorld, Pos, Strength, NW, i, Layer,
-				Number);
+		m_Draggers[i] = new CDragger(pGameWorld, Pos, Strength, NW, i, Layer, Number);
 	}
 }
 
-//CDraggerTeam::~CDraggerTeam() {
-//for(int i = 0; i < MAX_CLIENTS; ++i) {
-//	delete m_Draggers[i];
-//}
-//}
+CDraggerTeam::~CDraggerTeam()
+{
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		delete m_Draggers[i];
+	}
+}

@@ -56,14 +56,14 @@ class CUpdater : public IUpdater
 
 	void AddFileJob(const char *pFile, bool Job);
 	void FetchFile(const char *pFile, const char *pDestPath = 0);
-	void MoveFile(const char *pFile);
+	bool MoveFile(const char *pFile);
 
 	void ParseUpdate();
 	void PerformUpdate();
 	void CommitUpdate();
 
-	void ReplaceClient();
-	void ReplaceServer();
+	bool ReplaceClient();
+	bool ReplaceServer();
 
 	void SetCurrentState(int NewState);
 

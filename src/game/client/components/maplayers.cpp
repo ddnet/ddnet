@@ -576,7 +576,7 @@ void CMapLayers::OnMapLoad()
 					TileSize = sizeof(CTile);
 				}
 				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-				void* pTiles = (void*)m_pLayers->Map()->GetData(DataIndex);
+				void* pTiles = m_pLayers->Map()->GetData(DataIndex);
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*TileSize)
 				{

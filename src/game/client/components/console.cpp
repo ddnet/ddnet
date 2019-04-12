@@ -137,10 +137,17 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			m_Input.Add(Line);
 		}
 	}
-
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
 	{
 		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
+	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_A))
+	{
+		m_Input.SetCursorOffset(0);
+	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_E))
+	{
+		m_Input.SetCursorOffset(m_Input.GetLength());
 	}
 
 	if(Event.m_Flags&IInput::FLAG_PRESS)
@@ -220,11 +227,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			if(m_BacklogActPage < 0)
 				m_BacklogActPage = 0;
 		}
-		else if(Event.m_Key == KEY_HOME)
+		// in order not to conflict with CLineInput's handling of Home/End only
+		// react to it when the input is empty
+		else if(Event.m_Key == KEY_HOME && m_Input.GetString()[0] == '\0')
 		{
 			m_BacklogActPage = INT_MAX;
 		}
-		else if(Event.m_Key == KEY_END)
+		else if(Event.m_Key == KEY_END && m_Input.GetString()[0] == '\0')
 		{
 			m_BacklogActPage = 0;
 		}
@@ -386,7 +395,7 @@ void CGameConsole::OnRender()
 	float ConsoleMaxHeight = Screen.h*3/5.0f;
 	float ConsoleHeight;
 
-	float Progress = (TimeNow()-(m_StateChangeEnd-m_StateChangeDuration))/float(m_StateChangeDuration);
+	float Progress = (TimeNow()-(m_StateChangeEnd-m_StateChangeDuration))/m_StateChangeDuration;
 
 	if (Progress >= 1.0f)
 	{

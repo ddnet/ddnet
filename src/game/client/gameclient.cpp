@@ -128,7 +128,7 @@ void CGameClient::OnConsoleInit()
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
-#if defined(CONF_FAMILY_WINDOWS) || (defined(CONF_PLATFORM_LINUX) && !defined(__ANDROID__))
+#if defined(CONF_FAMILY_WINDOWS) || defined(CONF_PLATFORM_LINUX)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 
@@ -218,6 +218,8 @@ void CGameClient::OnConsoleInit()
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
+	Console()->Register("color_from_rgb", "s[color]", CFGFLAG_CLIENT, ConColorFromRgb, this, "Convert HEX RGB color (3 or 6 digits) to TW formats");
+	Console()->Register("color_to_rgb", "i[color] ?i[color] ?i[color]", CFGFLAG_CLIENT, ConColorToRgb, this, "Convert TW colors to HEX RGB color format");
 
 	// register server dummy commands for tab completion
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
@@ -305,10 +307,6 @@ void CGameClient::OnInit()
 		g_GameClient.m_pMenus->RenderLoading();
 	}
 
-#if defined(__ANDROID__)
-	m_pMapimages->OnMapLoad(); // Reload map textures on Android
-#endif
-
 	for(int i = 0; i < m_All.m_Num; i++)
 		m_All.m_paComponents[i]->OnReset();
 
@@ -355,9 +353,7 @@ void CGameClient::OnUpdate()
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
 	Input()->MouseRelative(&x, &y);
-#if !defined(__ANDROID__) // No relative mouse on Android
 	if(x != 0.0f || y != 0.0f)
-#endif
 	{
 		for(int h = 0; h < m_Input.m_Num; h++)
 		{
@@ -1961,6 +1957,74 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameClient*)pUserData)->SendKill(-1);
+}
+
+void CGameClient::ConColorFromRgb(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pThis = (CGameClient*)pUserData;
+	const char *pString = pResult->GetString(0);
+	const size_t Length = str_length(pString);
+	vec3 Hsl;
+	vec3 Rgb;
+
+	if(Length == 3)
+	{
+		const int Num = str_toint_base(pString, 16);
+		Rgb.r = (float)(((Num & 0xF00) >> 8) + ((Num & 0xF00) >> 4)) / 255.0f;
+		Rgb.g = (float)(((Num & 0x0F0) >> 4) + ((Num & 0x0F0) >> 0)) / 255.0f;
+		Rgb.b = (float)(((Num & 0x00F) >> 0) + ((Num & 0x00F) << 4)) / 255.0f;
+	}
+	else if(Length == 6)
+	{
+		const int Num = str_toint_base(pString, 16);
+		Rgb.r = (float)((Num & 0xFF0000) >> 16) / 255.0f;
+		Rgb.g = (float)((Num & 0x00FF00) >>  8) / 255.0f;
+		Rgb.b = (float)((Num & 0x0000FF) >>  0) / 255.0f;
+	}
+	else
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", "Unknown color format");
+		return;
+	}
+
+	char aBuf[32];
+	Hsl = RgbToHsl(Rgb);
+	// full lightness range for GUI colors
+	str_format(aBuf, sizeof(aBuf), "Hue: %d, Sat: %d, Lht: %d", (int)Hsl.h, (int)Hsl.s, (int)Hsl.l);
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", aBuf);
+
+	// limited lightness range to prevent too dark colors for player colors
+	Hsl.l = clamp((Hsl.l - 127.0) * 2.0, 0.0, 255.0);
+	str_format(aBuf, sizeof(aBuf), "%d", ((int)Hsl.h << 16) + ((int)Hsl.s << 8) + (int)Hsl.l);
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", aBuf);
+}
+
+void CGameClient::ConColorToRgb(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pThis = (CGameClient*)pUserData;
+	vec3 Rgb;
+
+	if(pResult->NumArguments() == 1)
+	{
+		const int v = pResult->GetInteger(0);
+		Rgb = HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
+	}
+	else if(pResult->NumArguments() == 3)
+	{
+		const int Hue = pResult->GetInteger(0);
+		const int Sat = pResult->GetInteger(1);
+		const int Lht = pResult->GetInteger(2);
+		Rgb = HslToRgb(vec3(Hue / 255.0f, Sat / 255.0f, Lht / 255.0f));
+	}
+	else
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", "Pass 1 integer in player_color format or 3 ints as hue sat lht");
+		return;
+	}
+
+	char aBuf[32];
+	str_format(aBuf, sizeof(aBuf), "%06X", ((int)(Rgb.r * 255) << 16) + ((int)(Rgb.g * 255) << 8) + (int)(Rgb.b * 255));
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", aBuf);
 }
 
 void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

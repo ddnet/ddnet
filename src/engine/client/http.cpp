@@ -83,17 +83,25 @@ CRequest::CRequest(const char *pUrl, bool CanTimeout) :
 
 void CRequest::Run()
 {
-	if(BeforeInit())
+	if(!BeforeInit())
 	{
 		m_State = HTTP_ERROR;
+		OnCompletion();
 		return;
 	}
 
 	CURL *pHandle = curl_easy_init();
+	m_State = RunImpl(pHandle);
+	curl_easy_cleanup(pHandle);
+
+	OnCompletion();
+}
+
+int CRequest::RunImpl(CURL *pHandle)
+{
 	if(!pHandle)
 	{
-		m_State = HTTP_ERROR;
-		return;
+		return HTTP_ERROR;
 	}
 
 	if(g_Config.m_DbgCurl)
@@ -142,31 +150,28 @@ void CRequest::Run()
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 
-	if(AfterInit(pHandle))
+	if(!AfterInit(pHandle))
 	{
-		curl_easy_cleanup(pHandle);
-		m_State = HTTP_ERROR;
-		return;
+		return HTTP_ERROR;
 	}
 
 	dbg_msg("http", "http %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
-	BeforeCompletion();
+	if(!BeforeCompletion())
+	{
+		return HTTP_ERROR;
+	}
 	if(Ret != CURLE_OK)
 	{
 		dbg_msg("http", "task failed. libcurl error: %s", aErr);
-		m_State = (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
+		return (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
 	{
 		dbg_msg("http", "task done %s", m_aUrl);
-		m_State = HTTP_DONE;
+		return HTTP_DONE;
 	}
-
-	curl_easy_cleanup(pHandle);
-
-	OnCompletion();
 }
 
 size_t CRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pUser)
@@ -265,7 +270,7 @@ CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int 
 	str_copy(m_aDest, pDest, sizeof(m_aDest));
 }
 
-int CGetFile::BeforeInit()
+bool CGetFile::BeforeInit()
 {
 	char aPath[512];
 	if(m_StorageType == -2)
@@ -274,15 +279,18 @@ int CGetFile::BeforeInit()
 		m_pStorage->GetCompletePath(m_StorageType, m_aDest, aPath, sizeof(aPath));
 
 	if(fs_makedir_rec_for(aPath) < 0)
+	{
 		dbg_msg("http", "i/o error, cannot create folder for: %s", aPath);
+		return false;
+	}
 
 	m_File = io_open(aPath, IOFLAG_WRITE);
 	if(!m_File)
 	{
 		dbg_msg("http", "i/o error, cannot open file: %s", m_aDest);
-		return 1;
+		return false;
 	}
-	return 0;
+	return true;
 }
 
 size_t CGetFile::OnData(char *pData, size_t DataSize)
@@ -290,9 +298,9 @@ size_t CGetFile::OnData(char *pData, size_t DataSize)
 	return io_write(m_File, pData, DataSize);
 }
 
-void CGetFile::BeforeCompletion()
+bool CGetFile::BeforeCompletion()
 {
-	io_close(m_File);
+	return io_close(m_File) == 0;
 }
 
 CPostJson::CPostJson(const char *pUrl, bool CanTimeout, const char *pJson)
@@ -301,14 +309,14 @@ CPostJson::CPostJson(const char *pUrl, bool CanTimeout, const char *pJson)
 	str_copy(m_aJson, pJson, sizeof(m_aJson));
 }
 
-int CPostJson::AfterInit(void *pCurl)
+bool CPostJson::AfterInit(void *pCurl)
 {
-	CURL *pHandle = (CURL *)pCurl;
+	CURL *pHandle = pCurl;
 
 	curl_slist *pHeaders = NULL;
 	pHeaders = curl_slist_append(pHeaders, "Content-Type: application/json");
 	curl_easy_setopt(pHandle, CURLOPT_HTTPHEADER, pHeaders);
 	curl_easy_setopt(pHandle, CURLOPT_POSTFIELDS, m_aJson);
 
-	return 0;
+	return true;
 }

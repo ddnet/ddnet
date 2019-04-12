@@ -2,10 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <algorithm> // sort  TODO: remove this
 
+#include <base/hash_ctxt.h>
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/external/md5/md5.h>
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
@@ -92,15 +92,12 @@ const CServerInfo *CServerBrowser::SortedGet(int Index) const
 
 int CServerBrowser::GenerateToken(const NETADDR &Addr) const
 {
-	md5_state_t Md5;
-	md5_byte_t aDigest[16];
-
-	md5_init(&Md5);
-	md5_append(&Md5, m_aTokenSeed, sizeof(m_aTokenSeed));
-	md5_append(&Md5, (unsigned char *)&Addr, sizeof(Addr));
-	md5_finish(&Md5, aDigest);
-
-	return (aDigest[0] << 16) | (aDigest[1] << 8) | aDigest[2];
+	SHA256_CTX Sha256;
+	sha256_init(&Sha256);
+	sha256_update(&Sha256, m_aTokenSeed, sizeof(m_aTokenSeed));
+	sha256_update(&Sha256, (unsigned char *)&Addr, sizeof(Addr));
+	SHA256_DIGEST Digest = sha256_finish(&Sha256);
+	return (Digest.data[0] << 16) | (Digest.data[1] << 8) | Digest.data[2];
 }
 
 int CServerBrowser::GetBasicToken(int Token)

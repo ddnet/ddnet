@@ -1,6 +1,6 @@
 #include "uuid_manager.h"
 
-#include <engine/external/md5/md5.h>
+#include <base/hash_ctxt.h>
 #include <engine/shared/packer.h>
 
 #include <stdio.h>
@@ -26,19 +26,17 @@ CUuid RandomUuid()
 
 CUuid CalculateUuid(const char *pName)
 {
-	md5_state_t Md5;
-	md5_byte_t aDigest[16];
+	MD5_CTX Md5;
 	md5_init(&Md5);
-
-	md5_append(&Md5, TEEWORLDS_NAMESPACE.m_aData, sizeof(TEEWORLDS_NAMESPACE.m_aData));
+	md5_update(&Md5, TEEWORLDS_NAMESPACE.m_aData, sizeof(TEEWORLDS_NAMESPACE.m_aData));
 	// Without terminating NUL.
-	md5_append(&Md5, (const unsigned char *)pName, str_length(pName));
-	md5_finish(&Md5, aDigest);
+	md5_update(&Md5, (const unsigned char *)pName, str_length(pName));
+	MD5_DIGEST Digest = md5_finish(&Md5);
 
 	CUuid Result;
 	for(unsigned i = 0; i < sizeof(Result.m_aData); i++)
 	{
-		Result.m_aData[i] = aDigest[i];
+		Result.m_aData[i] = Digest.data[i];
 	}
 
 	Result.m_aData[6] &= 0x0f;

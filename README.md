@@ -33,9 +33,9 @@ To compile DDNet yourself, execute the following commands in the source root:
     mkdir build
     cd build
     cmake ..
-    make
+    make -j8
 
-DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64). The bundled libraries are now in the ddnet-libs submodule.
+Pass the number of threads for compilation to `make -j`. DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64). The bundled libraries are now in the ddnet-libs submodule.
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
@@ -75,6 +75,9 @@ Whether to download and compile GTest. Useful if GTest is not installed and, for
 * **-DDEV=[ON|OFF]** <br>
 Whether to generate stuff necessary for packaging. Setting to ON will set CMAKE_BUILD_TYPE to Debug by default. Default value is OFF.
 
+* **-GNinja** <br>
+Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
+
 Running tests (Debian/Ubuntu)
 -----------------------------
 
@@ -85,7 +88,7 @@ This library isn't compiled, so you have to do it:
 sudo apt install libgtest-dev
 cd /usr/src/gtest
 sudo cmake CMakeLists.txt
-sudo make
+sudo make -j8
  
 # copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
 sudo cp *.a /usr/lib
@@ -147,7 +150,7 @@ add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
 $ mkdir build
 $ cd build
 $ cmake -DMYSQL=ON ..
-$ make
+$ make -j8
 $ ./DDNet-Server -f mine.cfg
 ```
 

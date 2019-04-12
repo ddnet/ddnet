@@ -15,20 +15,11 @@
 #include <cmath>
 #include "SDL.h"
 #include "SDL_syswm.h"
-#if defined(__ANDROID__)
-	#define GL_GLEXT_PROTOTYPES
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-	#include <GL/glu.h>
-	#define glOrtho glOrthof
+#if defined(CONF_PLATFORM_MACOSX)
+#include "OpenGL/glu.h"
 #else
-
-	#if defined(CONF_PLATFORM_MACOSX)
-	#include "OpenGL/glu.h"
-	#else
-	#include "SDL_opengl.h"
-	#include "GL/glu.h"
-	#endif
+#include "SDL_opengl.h"
+#include "GL/glu.h"
 #endif
 
 #if defined(SDL_VIDEO_DRIVER_X11)
@@ -329,9 +320,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
 	int StoreOglformat = TexFormatToOpenGLFormat(pCommand->m_StoreFormat);
 
-#if defined(__ANDROID__)
-	StoreOglformat = Oglformat;
-#else
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_COMPRESSED)
 	{
 		switch(StoreOglformat)
@@ -342,7 +330,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			default: StoreOglformat = GL_COMPRESSED_RGBA_ARB;
 		}
 	}
-#endif
 	glGenTextures(1, &m_aTextures[pCommand->m_Slot].m_Tex);
 	glBindTexture(GL_TEXTURE_2D, m_aTextures[pCommand->m_Slot].m_Tex);
 
@@ -392,12 +379,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 	switch(pCommand->m_PrimType)
 	{
 	case CCommandBuffer::PRIMTYPE_QUADS:
-#if defined(__ANDROID__)
-		for( unsigned i = 0, j = pCommand->m_PrimCount; i < j; i++ )
-			glDrawArrays(GL_TRIANGLE_FAN, i*4, 4);
-#else
 		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount*4);
-#endif
 		break;
 	case CCommandBuffer::PRIMTYPE_LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount*2);
@@ -576,14 +558,14 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		{
 			if(pProgram->m_LastIsTextured != 1)
 			{
-				pProgram->SetUniform(pProgram->m_LocIsTextured, (int)1);
+				pProgram->SetUniform(pProgram->m_LocIsTextured, 1);
 				pProgram->m_LastIsTextured = 1;
 			}
 		}
 
 		if(pProgram->m_LastTextureSampler != Slot)
 		{
-			pProgram->SetUniform(pProgram->m_LocTextureSampler, (int)Slot);
+			pProgram->SetUniform(pProgram->m_LocTextureSampler, Slot);
 			pProgram->m_LastTextureSampler = Slot;
 		}
 
@@ -611,7 +593,7 @@ void CCommandProcessorFragment_OpenGL3_3::SetState(const CCommandBuffer::SState 
 		{
 			if(pProgram->m_LastIsTextured != 0)
 			{
-				pProgram->SetUniform(pProgram->m_LocIsTextured, (int)0);
+				pProgram->SetUniform(pProgram->m_LocIsTextured, 0);
 				pProgram->m_LastIsTextured = 0;
 			}
 		}
@@ -1123,9 +1105,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
 	int StoreOglformat = TexFormatToOpenGLFormat(pCommand->m_StoreFormat);
 
-#if defined(__ANDROID__)
-	StoreOglformat = Oglformat;
-#else
 	if(pCommand->m_Flags&CCommandBuffer::TEXFLAG_COMPRESSED)
 	{
 		switch(StoreOglformat)
@@ -1137,7 +1116,6 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffe
 			default: StoreOglformat = GL_COMPRESSED_RGBA;
 		}
 	}
-#endif
 	int Slot = 0;
 	if(m_UseMultipleTextureUnits)
 	{
@@ -1226,7 +1204,7 @@ void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int Pr
 	glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[m_LastStreamBuffer]);
 
 	if(!m_UsePreinitializedVertexBuffer)
-		glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, (const void*)pVertices, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(CCommandBuffer::SVertex) * Count, pVertices, GL_STREAM_DRAW);
 	else
 	{
 		// This is better for some iGPUs. Probably due to not initializing a new buffer in the system memory again and again...(driver dependent)
@@ -1760,7 +1738,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	float Rotation = pCommand->m_pQuadInfo[0].m_Rotation;
 	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float*)aColor);
 	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (float*)aOffset);
-	pProgram->SetUniform(pProgram->m_LocRotation, (float)Rotation);
+	pProgram->SetUniform(pProgram->m_LocRotation, Rotation);
 
 	for(int i = 0; i < pCommand->m_QuadNum; ++i)
 	{
@@ -1777,7 +1755,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 		if(Rotation != pCommand->m_pQuadInfo[i].m_Rotation)
 		{
 			Rotation = pCommand->m_pQuadInfo[i].m_Rotation;
-			pProgram->SetUniform(pProgram->m_LocRotation, (float)Rotation);
+			pProgram->SetUniform(pProgram->m_LocRotation, Rotation);
 		}
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(unsigned int)));
 	}
@@ -1829,13 +1807,13 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 
 	if(m_pTextProgram->m_LastTextSampler != SlotText)
 	{
-		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextSampler, (int)SlotText);
+		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextSampler, SlotText);
 		m_pTextProgram->m_LastTextSampler = SlotText;
 	}
 
 	if(m_pTextProgram->m_LastTextOutlineSampler != SlotTextOutline)
 	{
-		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextOutlineSampler, (int)SlotTextOutline);
+		m_pTextProgram->SetUniform(m_pTextProgram->m_LocTextOutlineSampler, SlotTextOutline);
 		m_pTextProgram->m_LastTextOutlineSampler = SlotTextOutline;
 	}
 
@@ -2315,16 +2293,11 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *Screen, int *pWidt
 	*pDesktopHeight = DisplayMode.h;
 
 	// use desktop resolution as default resolution
-#ifdef __ANDROID__
-	*pWidth = *pDesktopWidth;
-	*pHeight = *pDesktopHeight;
-#else
 	if(*pWidth == 0 || *pHeight == 0)
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
 	}
-#endif
 
 	// set flags
 	int SdlFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;

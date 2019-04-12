@@ -517,8 +517,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View)
 		{
 			for(int k = 1; k < 4; k++)
 			{
-				lQuads[i]->m_aPoints[k].x = 1000.0f * (int(lQuads[i]->m_aPoints[k].x) / 1000);
-				lQuads[i]->m_aPoints[k].y = 1000.0f * (int(lQuads[i]->m_aPoints[k].y) / 1000);
+				lQuads[i]->m_aPoints[k].x = 1000.0f * (lQuads[i]->m_aPoints[k].x / 1000);
+				lQuads[i]->m_aPoints[k].y = 1000.0f * (lQuads[i]->m_aPoints[k].y / 1000);
 			}
 			pEditor->m_Map.m_Modified = true;
 		}
