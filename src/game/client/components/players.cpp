@@ -480,6 +480,7 @@ void CPlayers::RenderPlayer(
 			{
 				// apply predicted results
 				m_pClient->m_aClients[ClientID].m_Predicted.Write(&Player);
+				m_pClient->m_aClients[ClientID].m_Predicted.m_Solo = m_pClient->m_aClients[ClientID].m_Solo;
 				m_pClient->m_aClients[ClientID].m_PrevPredicted.Write(&Prev);
 
 				IntraTick = Client()->PredIntraGameTick();
