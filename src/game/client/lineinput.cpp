@@ -53,7 +53,7 @@ void CLineInput::Editing(const char *pString, int Cursor)
 
 void CLineInput::Add(const char *pString)
 {
-	if((int)sizeof(m_Str) - m_Len <= (int)str_length(pString))
+	if((int)sizeof(m_Str) - m_Len <= str_length(pString))
 		return;
 	str_copy(m_Str + m_Len, pString, sizeof(m_Str) - m_Len);
 	m_Len = str_length(m_Str);

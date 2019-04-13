@@ -311,7 +311,7 @@ CPostJson::CPostJson(const char *pUrl, bool CanTimeout, const char *pJson)
 
 bool CPostJson::AfterInit(void *pCurl)
 {
-	CURL *pHandle = (CURL *)pCurl;
+	CURL *pHandle = pCurl;
 
 	curl_slist *pHeaders = NULL;
 	pHeaders = curl_slist_append(pHeaders, "Content-Type: application/json");

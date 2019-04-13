@@ -124,24 +124,10 @@ void CBinds::SetDefaults()
 	Bind(KEY_MOUSE_1, "+fire");
 	Bind(KEY_MOUSE_2, "+hook");
 	Bind(KEY_LSHIFT, "+emote");
-#if defined(__ANDROID__)
-	Bind(KEY_RCTRL, "+fire");
-	Bind(KEY_RETURN, "+hook");
-	Bind(KEY_RIGHT, "+right");
-	Bind(KEY_LEFT, "+left");
-	Bind(KEY_UP, "+jump");
-	Bind(KEY_DOWN, "+hook");
-	Bind(KEY_PAGEUP, "+prevweapon");
-	Bind(KEY_PAGEDOWN, "+nextweapon");
-	Bind(KEY_F5, "spectate_previous");
-	Bind(KEY_F6, "spectate_next");
-#else
 	Bind(KEY_RETURN, "+show_chat; chat all");
 	Bind(KEY_RIGHT, "spectate_next");
 	Bind(KEY_LEFT, "spectate_previous");
 	Bind(KEY_RSHIFT, "+spectate");
-#endif
-
 
 	Bind(KEY_1, "+weapon1");
 	Bind(KEY_2, "+weapon2");
@@ -326,10 +312,8 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 	Bind(KEY_M, "emote 5", FreeOnly);
 	Bind(KEY_S, "+showhookcoll", FreeOnly);
 	Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
-#if !defined(__ANDROID__)
 	Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
 	Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
-#endif
 	Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);
 	Bind(KEY_KP_1, "say /emote happy 999999", FreeOnly);
 	Bind(KEY_KP_2, "say /emote angry 999999", FreeOnly);

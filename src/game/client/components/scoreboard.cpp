@@ -335,7 +335,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		if (rendered++ < 0) continue;
 
-		int DDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo->m_ClientID);
+		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientID);
 		int NextDDTeam = 0;
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
@@ -345,7 +345,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			if(!pInfo2 || pInfo2->m_Team != Team)
 				continue;
 
-			NextDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 			break;
 		}
 
@@ -358,7 +358,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				if(!pInfo2 || pInfo2->m_Team != Team)
 					continue;
 
-				OldDDTeam = ((CGameClient *) m_pClient)->m_Teams.Team(pInfo2->m_ClientID);
+				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
 				break;
 			}
 		}
