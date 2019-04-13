@@ -4269,13 +4269,13 @@ void CEditor::RenderFileDialog()
 	else
 		ScrollNum = 0;
 
-	if(!m_FileList[m_FilesSelectedIndex].m_IsVisible)
-	{
-		m_FilesSelectedIndex = 0;
-	}
-
 	if(m_FilesSelectedIndex > -1)
 	{
+		if(!m_FileList[m_FilesSelectedIndex].m_IsVisible)
+		{
+			m_FilesSelectedIndex = 0;
+		}
+
 		for(int i = 0; i < Input()->NumEvents(); i++)
 		{
 			int NewIndex = -1;
