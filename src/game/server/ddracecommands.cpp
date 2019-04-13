@@ -343,11 +343,8 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
-bool CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID)
+bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
 {
-	char aBuf[128];
-	bool Found = false;
-
 	// find a matching vote mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumVoteMutes; i++)
 	{
@@ -355,34 +352,37 @@ bool CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplay
 		{
 			m_aVoteMutes[i].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
-			Found = true;
-			break;
+			return true;
 		}
 	}
 
-	if(!Found) // nothing found so far, find a free slot..
+	// nothing to update create new one
+	if(m_NumVoteMutes < MAX_VOTE_MUTES)
 	{
-		if(m_NumVoteMutes < MAX_VOTE_BANS)
-		{
-			m_aVoteMutes[m_NumVoteMutes].m_Addr = *pAddr;
-			m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick()
-				+ Secs * Server()->TickSpeed();
-			m_NumVoteMutes++;
-			Found = true;
-		}
+		m_aVoteMutes[m_NumVoteMutes].m_Addr = *pAddr;
+		m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick()
+			+ Secs * Server()->TickSpeed();
+		m_NumVoteMutes++;
+		return true;
 	}
-	if(Found)
-	{
-		if(pDisplayName)
-		{
-			str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
-				Server()->ClientName(AuthedID), pDisplayName, Secs);
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", aBuf);
-		}
-	}
-	else // no free slot found
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "vote mute array is full");
-	return Found;
+	// no free slot found
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "vote mute array is full");
+	return false;
+}
+
+bool CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID)
+{
+	if (!TryVoteMute(pAddr, Secs))
+		return false;
+
+	if(!pDisplayName)
+		return true;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
+		Server()->ClientName(AuthedID), pDisplayName, Secs);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", aBuf);
+	return true;
 }
 
 bool CGameContext::VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID)
@@ -406,44 +406,45 @@ bool CGameContext::VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, in
 	return false;
 }
 
-void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName)
+bool CGameContext::TryMute(const NETADDR *pAddr, int Secs)
 {
-	char aBuf[128];
-	int Found = 0;
-
 	// find a matching mute for this ip, update expiration time if found
-	for (int i = 0; i < m_NumMutes; i++)
+	for(int i = 0; i < m_NumMutes; i++)
 	{
-		if (net_addr_comp_noport(&m_aMutes[i].m_Addr, pAddr) == 0)
+		if(net_addr_comp_noport(&m_aMutes[i].m_Addr, pAddr) == 0)
 		{
 			m_aMutes[i].m_Expire = Server()->Tick()
 							+ Secs * Server()->TickSpeed();
-			Found = 1;
+			return true;
 		}
 	}
 
-	if (!Found) // nothing found so far, find a free slot..
+	// nothing to update create new one
+	if(m_NumMutes < MAX_MUTES)
 	{
-		if (m_NumMutes < MAX_MUTES)
-		{
-			m_aMutes[m_NumMutes].m_Addr = *pAddr;
-			m_aMutes[m_NumMutes].m_Expire = Server()->Tick()
-							+ Secs * Server()->TickSpeed();
-			m_NumMutes++;
-			Found = 1;
-		}
+		m_aMutes[m_NumMutes].m_Addr = *pAddr;
+		m_aMutes[m_NumMutes].m_Expire = Server()->Tick()
+						+ Secs * Server()->TickSpeed();
+		m_NumMutes++;
+		return true;
 	}
-	if (Found)
-	{
-		if (pDisplayName)
-		{
-			str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds.",
-					pDisplayName, Secs);
-			SendChat(-1, CHAT_ALL, aBuf);
-		}
-	}
-	else // no free slot found
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
+	// no free slot found
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", "mute array is full");
+	return false;
+}
+
+void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName)
+{
+	if (!TryVoteMute(pAddr, Secs))
+		return;
+
+	if(!pDisplayName)
+		return;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds.",
+			pDisplayName, Secs);
+	SendChat(-1, CHAT_ALL, aBuf);
 }
 
 void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
