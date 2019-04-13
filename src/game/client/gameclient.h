@@ -382,22 +382,23 @@ public:
 	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
 	bool PredictDummy() { return AntiPingPlayers() && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0; }
 
+	CGameWorld m_GameWorld;
+	CGameWorld m_PredictedWorld;
+	CGameWorld m_PrevPredictedWorld;
+
+private:
+	bool m_DDRaceMsgSent[2];
+	int m_ShowOthers[2];
+
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
 
-	CGameWorld m_GameWorld;
-	CGameWorld m_PredictedWorld;
-	CGameWorld m_PrevPredictedWorld;
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
-
-private:
-	bool m_DDRaceMsgSent[2];
-	int m_ShowOthers[2];
 };
 
 

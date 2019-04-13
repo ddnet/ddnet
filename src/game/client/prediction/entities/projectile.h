@@ -10,6 +10,7 @@
 class CProjectile : public CEntity
 {
 	friend class CGameWorld;
+	friend class CItems;
 public:
 	CProjectile
 	(
@@ -33,7 +34,7 @@ public:
 
 	virtual void Tick();
 
-//private:
+private:
 	vec2 m_Direction;
 	int m_LifeSpan;
 	int m_Owner;
