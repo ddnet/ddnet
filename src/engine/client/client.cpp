@@ -511,7 +511,7 @@ void CClient::SendInput()
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT);
 			Msg.AddInt(m_AckGameTick[i]);
-			Msg.AddInt(m_PredTick[g_Config.m_ClDummy]);
+			Msg.AddInt(m_PredTick[i]);
 			Msg.AddInt(Size);
 
 			m_aInputs[i][m_CurrentInput[i]].m_Tick = m_PredTick[g_Config.m_ClDummy];
