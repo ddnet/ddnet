@@ -4501,7 +4501,7 @@ void CEditor::FilelistPopulate(int StorageType)
 	m_FilePreviewImage = 0;
 	m_aFileDialogActivate = false;
 
-	if(m_FilesSelectedIndex >= 0)
+	if(m_FilesSelectedIndex >= 0 && !m_FileList[m_FilesSelectedIndex].m_IsDir)
 		str_copy(m_aFileDialogFileName, m_FileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
 	else
 		m_aFileDialogFileName[0] = 0;
