@@ -34,6 +34,16 @@ public:
 
 	virtual void Tick();
 
+	bool Match(CProjectile *pProj);
+	void SetBouncing(int Value);
+	void FillExtraInfo(CNetObj_Projectile *pProj);
+
+	const vec2 &GetDirection() { return m_Direction; }
+	const int &GetOwner() { return m_Owner; }
+	const int &GetStartTick() { return m_StartTick; }
+	CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj);
+	virtual int NetworkClipped(vec2 ViewPos);
+
 private:
 	vec2 m_Direction;
 	int m_LifeSpan;
@@ -49,18 +59,6 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
-
-public:
-
-	bool Match(CProjectile *pProj);
-	void SetBouncing(int Value);
-	void FillExtraInfo(CNetObj_Projectile *pProj);
-
-	const vec2 &GetDirection() { return m_Direction; }
-	const int &GetOwner() { return m_Owner; }
-	const int &GetStartTick() { return m_StartTick; }
-	CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj);
-	virtual int NetworkClipped(vec2 ViewPos);
 };
 
 #endif

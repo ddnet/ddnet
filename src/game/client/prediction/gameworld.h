@@ -24,15 +24,6 @@ public:
 		NUM_ENTTYPES
 	};
 
-private:
-	void RemoveEntities();
-
-	CEntity *m_pNextTraverseEntity;
-	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
-
-	class CCharacter *m_apCharacters[MAX_CLIENTS];
-
-public:
 	CWorldCore m_Core;
 
 	CGameWorld();
@@ -94,6 +85,14 @@ public:
 	void CopyWorld(CGameWorld *pFrom);
 	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);
 	void Clear();
+
+private:
+	void RemoveEntities();
+
+	CEntity *m_pNextTraverseEntity;
+	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
+
+	class CCharacter *m_apCharacters[MAX_CLIENTS];
 };
 
 class CCharOrder

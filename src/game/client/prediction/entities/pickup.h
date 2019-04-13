@@ -12,8 +12,11 @@ class CPickup : public CEntity
 public:
 	virtual void Tick();
 
-private:
+	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup);
+	void FillInfo(CNetObj_Pickup *pPickup);
+	bool Match(CPickup *pPickup);
 
+private:
 	int m_Type;
 	int m_Subtype;
 
@@ -21,12 +24,6 @@ private:
 
 	void Move();
 	vec2 m_Core;
-
-public:
-
-	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup);
-	void FillInfo(CNetObj_Pickup *pPickup);
-	bool Match(CPickup *pPickup);
 };
 
 #endif

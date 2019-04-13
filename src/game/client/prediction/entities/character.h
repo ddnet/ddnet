@@ -62,56 +62,7 @@ public:
 	bool IsAlive() { return m_Alive; }
 
 	bool m_Alive;
-private:
 
-	// weapon info
-	int m_aHitObjects[10];
-	int m_NumObjectsHit;
-
-	struct WeaponStat
-	{
-		int m_AmmoRegenStart;
-		int m_Ammo;
-		int m_Ammocost;
-		bool m_Got;
-	} m_aWeapons[NUM_WEAPONS];
-
-	int m_LastWeapon;
-	int m_QueuedWeapon;
-
-	int m_ReloadTimer;
-
-	// these are non-heldback inputs
-	CNetObj_PlayerInput m_LatestPrevInput;
-	CNetObj_PlayerInput m_LatestInput;
-
-	// input
-	CNetObj_PlayerInput m_PrevInput;
-	CNetObj_PlayerInput m_Input;
-	CNetObj_PlayerInput m_SavedInput;
-
-	int m_NumInputs;
-
-	// ninja
-	struct NinjaStat
-	{
-		vec2 m_ActivationDir;
-		int m_ActivationTick;
-		int m_CurrentMoveTime;
-		int m_OldVelAmount;
-	} m_Ninja;
-
-	// the player core for the physics
-	CCharacterCore m_Core;
-
-	// DDRace
-
-	void HandleTiles(int Index);
-	void HandleSkippableTiles(int Index);
-	void DDRaceTick();
-	void DDRacePostCoreTick();
-
-public:
 	CTeamsCore* TeamsCore();
 	bool Freeze(int Time);
 	bool Freeze();
@@ -199,6 +150,54 @@ public:
 
 	bool Match(CCharacter *pChar);
 	CCharacter() { m_Alive = false; }
+
+private:
+	// weapon info
+	int m_aHitObjects[10];
+	int m_NumObjectsHit;
+
+	struct WeaponStat
+	{
+		int m_AmmoRegenStart;
+		int m_Ammo;
+		int m_Ammocost;
+		bool m_Got;
+	} m_aWeapons[NUM_WEAPONS];
+
+	int m_LastWeapon;
+	int m_QueuedWeapon;
+
+	int m_ReloadTimer;
+
+	// these are non-heldback inputs
+	CNetObj_PlayerInput m_LatestPrevInput;
+	CNetObj_PlayerInput m_LatestInput;
+
+	// input
+	CNetObj_PlayerInput m_PrevInput;
+	CNetObj_PlayerInput m_Input;
+	CNetObj_PlayerInput m_SavedInput;
+
+	int m_NumInputs;
+
+	// ninja
+	struct NinjaStat
+	{
+		vec2 m_ActivationDir;
+		int m_ActivationTick;
+		int m_CurrentMoveTime;
+		int m_OldVelAmount;
+	} m_Ninja;
+
+	// the player core for the physics
+	CCharacterCore m_Core;
+
+	// DDRace
+
+	void HandleTiles(int Index);
+	void HandleSkippableTiles(int Index);
+	void DDRaceTick();
+	void DDRacePostCoreTick();
 };
 
 enum
