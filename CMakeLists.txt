@@ -127,6 +127,13 @@ function(add_c_compiler_flag_if_supported VARIABLE FLAG)
   endif()
 endfunction()
 
+# Force compiler colors on when using ninja. Ninja filters the colors out when
+# it's not printing to a terminal on its own.
+if(CMAKE_GENERATOR STREQUAL "Ninja")
+  add_c_compiler_flag_if_supported(OUR_FLAGS -fdiagnostics-color=always)
+  add_c_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
+endif()
+
 if(NOT MSVC)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
     check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
