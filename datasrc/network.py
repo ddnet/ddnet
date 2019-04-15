@@ -206,6 +206,10 @@ Objects = [
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
 
+	NetObjectEx("DDNetGameInfo", "ddnet-game-info@netobj.ddnet.tw", [
+		NetIntRange("m_AllowTimeScore", 0, 1),
+	]),
+
 	## Events
 
 	NetEvent("Common", [

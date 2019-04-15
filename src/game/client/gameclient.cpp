@@ -474,6 +474,9 @@ void CGameClient::OnConnected()
 
 	m_ServerMode = SERVERMODE_PURE;
 
+	for (int i = 0; i < 2; i++)
+		m_AllowTimeScore[i] = true;
+
 	// send the initial info
 	SendInfo(true);
 	// we should keep this in for now, because otherwise you can't spectate
@@ -758,13 +761,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		m_Tuning[IsDummy ? !g_Config.m_ClDummy : g_Config.m_ClDummy] = NewTuning;
 		return;
 	}
-	else if (MsgId == NETMSG_TIME_SCORE)
-	{
-		int NewTimeScore = pUnpacker->GetInt();
-		if (pUnpacker->Error())
-			return;
-		OnTimeScore(NewTimeScore, g_Config.m_ClDummy);
-	}
 
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
@@ -932,11 +928,6 @@ void CGameClient::OnRconType(bool UsernameReq)
 void CGameClient::OnRconLine(const char *pLine)
 {
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
-}
-
-void CGameClient::OnTimeScore(int AllowTimeScore, bool Dummy)
-{
-	m_AllowTimeScore[Dummy] = AllowTimeScore;
 }
 
 void CGameClient::ProcessEvents()
@@ -1186,6 +1177,8 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_paFlags[Item.m_ID%2] = (const CNetObj_Flag *)pData;
 			else if(Item.m_Type == NETOBJTYPE_AUTHINFO)
 				m_aClients[Item.m_ID].m_AuthLevel = ((const CNetObj_AuthInfo *)pData)->m_AuthLevel;
+			else if (Item.m_Type == NETOBJTYPE_DDNETGAMEINFO)
+				m_AllowTimeScore[g_Config.m_ClDummy] = ((const CNetObj_DDNetGameInfo *)pData)->m_AllowTimeScore;
 		}
 	}
 

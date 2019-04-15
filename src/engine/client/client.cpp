@@ -721,8 +721,6 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_GametimeMarginGraph.Init(-150.0f, 150.0f);
 
 	GenerateTimeoutCodes();
-
-	GameClient()->OnTimeScore(1, false);
 }
 
 void CClient::DisconnectWithReason(const char *pReason)
@@ -808,8 +806,6 @@ void CClient::DummyConnect()
 
 	//connecting to the server
 	m_NetClient[1].Connect(&m_ServerAddress);
-
-	GameClient()->OnTimeScore(1, true);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
