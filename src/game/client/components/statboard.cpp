@@ -77,32 +77,18 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 		{
 			const char *p;
 			const char *pLookFor = "flag was captured by '";
-			if(str_find(pMsg->m_pMessage, pLookFor) != 0)
+			if((p = str_find(pMsg->m_pMessage, pLookFor)))
 			{
-				// server info
-				CServerInfo CurrentServerInfo;
-				Client()->GetServerInfo(&CurrentServerInfo);
-
-				p = str_find(pMsg->m_pMessage, pLookFor);
-				char aName[64];
+				char aName[MAX_NAME_LENGTH];
 				p += str_length(pLookFor);
 				str_copy(aName, p, sizeof(aName));
-				// remove capture time
-				if(str_endswith(aName, " seconds)"))
-				{
-					char *c = aName+str_length(aName)-10;
-					while(c > aName)
-					{
-						c--;
-						if(*c == '(')
-						{
-							*(c-1) = 0;
-							break;
-						}
-					}
-				}
-				// remove the ' at the end
-				aName[str_length(aName)-1] = 0;
+
+				p = str_find(aName, "'");
+				if(!p)
+					return;
+
+				// Remove the last "'"
+				aName[p - &aName[0]]= '\0';
 
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
