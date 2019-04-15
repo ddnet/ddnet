@@ -61,7 +61,9 @@ public:
 	~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int Offset) = 0;
-	virtual int SetPos(float Percent) = 0;
+	virtual int SeekPercent(float Percent) = 0;
+	virtual int SeekTime(float Seconds) = 0;
+	virtual int SetPos(int WantedTick) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;
 	virtual bool IsPlaying() const = 0;

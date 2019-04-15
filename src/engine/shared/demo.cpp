@@ -778,33 +778,40 @@ int CDemoPlayer::Play()
 	return 0;
 }
 
-int CDemoPlayer::SetPos(float Percent)
+int CDemoPlayer::SeekPercent(float Percent)
 {
-	int Keyframe;
-	int WantedTick;
+	int WantedTick = m_Info.m_Info.m_FirstTick + ((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
+	return SetPos(WantedTick);
+}
+
+int CDemoPlayer::SeekTime(float Seconds)
+{
+	int WantedTick = m_Info.m_Info.m_CurrentTick + (Seconds * SERVER_TICK_SPEED);
+	return SetPos(WantedTick);
+}
+
+int CDemoPlayer::SetPos(int WantedTick)
+{
 	if(!m_File)
 		return -1;
 
 	// -5 because we have to have a current tick and previous tick when we do the playback
-	WantedTick = m_Info.m_Info.m_FirstTick + (int)((m_Info.m_Info.m_LastTick-m_Info.m_Info.m_FirstTick)*Percent) - 5;
-
-	Keyframe = (int)(m_Info.m_SeekablePoints*Percent);
-
-	if(Keyframe < 0 || Keyframe >= m_Info.m_SeekablePoints)
-		return -1;
+	WantedTick = clamp(WantedTick, m_Info.m_Info.m_FirstTick, m_Info.m_Info.m_LastTick) - 5;
 
 	// get correct key frame
-	if(m_pKeyFrames[Keyframe].m_Tick < WantedTick)
-		while(Keyframe < m_Info.m_SeekablePoints-1 && m_pKeyFrames[Keyframe].m_Tick < WantedTick)
-			Keyframe++;
+	int KeyFrame = 0;
+	while(KeyFrame < m_Info.m_SeekablePoints - 1 && m_pKeyFrames[KeyFrame].m_Tick < WantedTick)
+	{
+		KeyFrame++;
+	}
+	while(KeyFrame > 0 && m_pKeyFrames[KeyFrame].m_Tick > WantedTick)
+	{
+		KeyFrame--;
+	}
 
-	while(Keyframe && m_pKeyFrames[Keyframe].m_Tick > WantedTick)
-		Keyframe--;
+	// seek to the correct key frame
+	io_seek(m_File, m_pKeyFrames[KeyFrame].m_Filepos, IOSEEK_START);
 
-	// seek to the correct keyframe
-	io_seek(m_File, m_pKeyFrames[Keyframe].m_Filepos, IOSEEK_START);
-
-	//m_Info.start_tick = -1;
 	m_Info.m_NextTick = -1;
 	m_Info.m_Info.m_CurrentTick = -1;
 	m_Info.m_PreviousTick = -1;
