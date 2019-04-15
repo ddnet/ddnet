@@ -156,7 +156,7 @@ void CProjectile::Tick()
 		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
 		{
 			int Number = 1;
-			if(GameServer()->EmulateBug(BUG_GRENADE_DOUBLEEXPLOSION) && m_LifeSpan == -1 && m_InitialLifeSpan == 0)
+			if(g_Config.m_SvOldGrenadeExplosion && m_LifeSpan == -1 && m_InitialLifeSpan == 0)
 			{
 				Number = 2;
 			}
