@@ -4269,13 +4269,13 @@ void CEditor::RenderFileDialog()
 	else
 		ScrollNum = 0;
 
-	if(!m_FileList[m_FilesSelectedIndex].m_IsVisible)
-	{
-		m_FilesSelectedIndex = 0;
-	}
-
 	if(m_FilesSelectedIndex > -1)
 	{
+		if(!m_FileList[m_FilesSelectedIndex].m_IsVisible)
+		{
+			m_FilesSelectedIndex = 0;
+		}
+
 		for(int i = 0; i < Input()->NumEvents(); i++)
 		{
 			int NewIndex = -1;
@@ -4455,7 +4455,6 @@ void CEditor::RenderFileDialog()
 
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
-		ButtonBar.VSplitLeft(40.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, 0))
 		{
@@ -4502,7 +4501,7 @@ void CEditor::FilelistPopulate(int StorageType)
 	m_FilePreviewImage = 0;
 	m_aFileDialogActivate = false;
 
-	if(m_FilesSelectedIndex >= 0)
+	if(m_FilesSelectedIndex >= 0 && !m_FileList[m_FilesSelectedIndex].m_IsDir)
 		str_copy(m_aFileDialogFileName, m_FileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
 	else
 		m_aFileDialogFileName[0] = 0;
