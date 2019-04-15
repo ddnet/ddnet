@@ -474,8 +474,8 @@ void CGameClient::OnConnected()
 
 	m_ServerMode = SERVERMODE_PURE;
 
-	for (int i = 0; i < 2; i++)
-		m_AllowTimeScore[i] = true;
+	m_AllowTimeScore[0] = true;
+	m_AllowTimeScore[1] = true;
 
 	// send the initial info
 	SendInfo(true);
