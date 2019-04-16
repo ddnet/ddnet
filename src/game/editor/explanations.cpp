@@ -25,15 +25,15 @@ const char *CEditor::Explain(int Tile, int Layer)
 		break;
 	case TILE_THROUGH_CUT:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "HOOKTRHOUGH: Shortcut for new hookthrough.";
+			return "HOOKTHROUGH: Shortcut for new hookthrough.";
 		break;
 	case TILE_THROUGH_ALL:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "HOOKTRHOUGH: Combined with collision tile is new hookthrough, otherwise stops hooks, from all directions.";
+			return "HOOKTHROUGH: Combined with collision tile is new hookthrough, otherwise stops hooks, from all directions.";
 		break;
 	case TILE_THROUGH_DIR:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
-			return "HOOKTRHOUGH: Combined with a collision tile is new hookthrough, otherwise stops hook, from one direction.";
+			return "HOOKTHROUGH: Combined with a collision tile is new hookthrough, otherwise stops hook, from one direction.";
 		break;
 	case TILE_THROUGH:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
