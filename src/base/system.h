@@ -997,20 +997,21 @@ void str_append(char *dst, const char *src, int dst_size);
 void str_copy(char *dst, const char *src, int dst_size);
 
 /*
-	Function: str_num_copy
-		Copies first num characters of a string to another.
+	Function: str_truncate
+		Truncates a string to a given length.
 
 	Parameters:
 		dst - Pointer to a buffer that shall receive the string.
-		src - String to be copied.
-		num - Number of characters to copy.
 		dst_size - Size of the buffer dst.
+		str - String to be truncated.
+		truncation_len - Maximum length of the returned string (not
+		counting the zero termination).
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 		- Guarantees that dst string will contain zero-termination.
 */
-void str_num_copy(char *dst, const char *src, int num, int dst_size);
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
 /*
 	Function: str_length

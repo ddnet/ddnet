@@ -180,16 +180,16 @@ TEST(Str, StrFormat)
 	EXPECT_STREQ(aBuf, "99:");
 }
 
-TEST(Str, StrNumCopy)
+TEST(Str, StrCopyNum)
 {
 	const char *foo = "Foobar";
 	char aBuf[64];
-	str_num_copy(aBuf, foo, 1, 3);
+	str_truncate(aBuf, 3, foo, 1);
 	EXPECT_STREQ(aBuf, "F");
-	str_num_copy(aBuf, foo, 2, 3);
+	str_truncate(aBuf, 3, foo, 2);
 	EXPECT_STREQ(aBuf, "Fo");
-	str_num_copy(aBuf, foo, 3, 3);
+	str_truncate(aBuf, 3, foo, 3);
 	EXPECT_STREQ(aBuf, "Fo");
-	str_num_copy(aBuf, foo, 6, sizeof(aBuf));
+	str_truncate(aBuf, sizeof(aBuf), foo, 6);
 	EXPECT_STREQ(aBuf, "Foobar");
 }

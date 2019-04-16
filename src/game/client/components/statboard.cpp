@@ -85,7 +85,7 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 
 				if(t <= p)
 					return;
-				str_num_copy(aName, p, t - p, sizeof(aName));
+				str_truncate(aName, sizeof(aName), p, t - p);
 
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
