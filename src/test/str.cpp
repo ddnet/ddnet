@@ -179,3 +179,17 @@ TEST(Str, StrFormat)
 	EXPECT_EQ(str_format(aBuf, 4, "%d: ", 99), 3);
 	EXPECT_STREQ(aBuf, "99:");
 }
+
+TEST(Str, StrNumCopy)
+{
+	const char *foo = "Foobar";
+	char aBuf[64];
+	str_num_copy(aBuf, foo, 1, 3);
+	EXPECT_STREQ(aBuf, "F");
+	str_num_copy(aBuf, foo, 2, 3);
+	EXPECT_STREQ(aBuf, "Fo");
+	str_num_copy(aBuf, foo, 3, 3);
+	EXPECT_STREQ(aBuf, "Fo");
+	str_num_copy(aBuf, foo, 6, sizeof(aBuf));
+	EXPECT_STREQ(aBuf, "Foobar");
+}

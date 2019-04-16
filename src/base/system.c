@@ -2318,6 +2318,13 @@ void str_copy(char *dst, const char *src, int dst_size)
 	dst[dst_size-1] = 0; /* assure null termination */
 }
 
+void str_num_copy(char *dst, const char *src, int num, int dst_size)
+{
+	int n = num >= dst_size ? dst_size - 1 : num;
+	strncpy(dst, src, n);
+	dst[n] = '\0';
+}
+
 int str_length(const char *str)
 {
 	return (int)strlen(str);
@@ -2649,6 +2656,11 @@ const char *str_find(const char *haystack, const char *needle)
 	}
 
 	return 0;
+}
+
+const char *str_rchr(const char *haystack, char needle)
+{
+	return strrchr(haystack, needle);
 }
 
 void str_hex(char *dst, int dst_size, const void *data, int data_size)
