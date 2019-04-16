@@ -997,6 +997,22 @@ void str_append(char *dst, const char *src, int dst_size);
 void str_copy(char *dst, const char *src, int dst_size);
 
 /*
+	Function: str_num_copy
+		Copies first num characters of a string to another.
+
+	Parameters:
+		dst - Pointer to a buffer that shall receive the string.
+		src - String to be copied.
+		num - Number of characters to copy.
+		dst_size - Size of the buffer dst.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- Guarantees that dst string will contain zero-termination.
+*/
+void str_num_copy(char *dst, const char *src, int num, int dst_size);
+
+/*
 	Function: str_length
 		Returns the length of a zero terminated string.
 
@@ -1323,7 +1339,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 
 	Returns:
 		A pointer into haystack where the needle was found.
-		Returns NULL of needle could not be found.
+		Returns NULL if needle could not be found.
 
 	Remarks:
 		- Only guaranteed to work with a-z/A-Z.
@@ -1342,12 +1358,29 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 
 	Returns:
 		A pointer into haystack where the needle was found.
-		Returns NULL of needle could not be found.
+		Returns NULL if needle could not be found.
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 */
 const char *str_find(const char *haystack, const char *needle);
+
+/*
+	Function: str_rchr
+		Finds the last occurance of a character
+
+	Parameters:
+		haystack - String to search in
+		needle - Character to search for
+
+	Returns:
+		A pointer into haystack where the needle was found.
+		Returns NULL if needle could not be found.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+const char *str_rchr(const char *haystack, char needle);
 
 /*
 	Function: str_hex
@@ -1701,7 +1734,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 
 	Returns:
 		A pointer into haystack where the needle was found.
-		Returns NULL of needle could not be found.
+		Returns NULL if needle could not be found.
 
 	Remarks:
 		- The strings are treated as zero-terminated strings.
