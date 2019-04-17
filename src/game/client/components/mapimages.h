@@ -30,8 +30,8 @@ public:
 	int GetOverlayTop();
 	int GetOverlayCenter();
 
-	void TextureSize(int Size);
-	int TextureSize();
+	void TextureScale(int Size);
+	int TextureScale();
 	
 private:
 
@@ -39,7 +39,7 @@ private:
 	int m_OverlayBottomTexture;
 	int m_OverlayTopTexture;
 	int m_OverlayCenterTexture;
-	int m_TextureSize;
+	int m_TextureScale;
 	
 	void InitOverlayTextures();
 };

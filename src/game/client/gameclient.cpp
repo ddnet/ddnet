@@ -348,7 +348,7 @@ void CGameClient::OnInit()
 	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
 
-	m_pMapimages->TextureSize(g_Config.m_ClTextEntitiesSize);
+	m_pMapimages->TextureScale(g_Config.m_ClTextEntitiesSize);
 }
 
 void CGameClient::OnUpdate()
@@ -2049,14 +2049,10 @@ void CGameClient::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *p
 {
 	pfnCallback(pResult, pCallbackUserData);
 
-	if (pResult->NumArguments())
+	if(pResult->NumArguments())
 	{
 		CGameClient* GameClient = (CGameClient*)pUserData;
-
-		//if (GameClient->m_pMapimages->GetOverlayCenter() > 0)
-		{
-			GameClient->m_pMapimages->TextureSize(g_Config.m_ClTextEntitiesSize);
-		}
+		GameClient->m_pMapimages->TextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 }
 

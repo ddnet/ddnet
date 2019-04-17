@@ -10,7 +10,7 @@
 
 #include "mapimages.h"
 
-CMapImages::CMapImages() : CMapImages(64)
+CMapImages::CMapImages() : CMapImages(100)
 {
 }
 
@@ -21,7 +21,7 @@ CMapImages::CMapImages(int TextureSize)
 	m_OverlayBottomTexture = -1;
 	m_OverlayTopTexture = -1;
 	m_OverlayCenterTexture = -1;
-	m_TextureSize = TextureSize;
+	m_TextureScale = TextureSize;
 }
 
 void CMapImages::OnInit()
@@ -148,69 +148,70 @@ int CMapImages::GetOverlayCenter()
 	return m_OverlayCenterTexture;
 }
 
-void CMapImages::TextureSize(int Size)
+void CMapImages::TextureScale(int Scale)
 {
-	if (m_TextureSize == Size)
+	if (m_TextureScale == Scale)
 		return;
 
-	m_TextureSize = Size;
+	m_TextureScale = Scale;
 
-	if (Graphics()) // check if component was initialized
+	if(Graphics() && m_OverlayCenterTexture != -1) // check if component was initialized
 	{
 		// reinitialize component
 		Graphics()->UnloadTexture(m_OverlayBottomTexture);
 		Graphics()->UnloadTexture(m_OverlayTopTexture);
 		Graphics()->UnloadTexture(m_OverlayCenterTexture);
-
 		m_OverlayBottomTexture = m_OverlayTopTexture = m_OverlayCenterTexture = -1;
 
 		InitOverlayTextures();
 	}
 }
 
-int CMapImages::TextureSize()
+int CMapImages::TextureScale()
 {
-	return m_TextureSize;
+	return m_TextureScale;
 }
 
 void CMapImages::InitOverlayTextures()
 {
+	int TextureSize = 64 * m_TextureScale / 100;
+
 	//TODO: improve this a bit -- with better from sizes etc.
-	if (m_OverlayBottomTexture == -1)
+	if(m_OverlayBottomTexture == -1)
 	{
 		void *pMem = calloc(1024 * 1024, 1);
 		m_OverlayBottomTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 		free(pMem);
 
-		for (int i = 0; i < 256; ++i)
+		for(int i = 0; i < 256; ++i)
 		{
 			char buff[4];
 			str_format(buff, 4, "%d", i);
 
 			float x = (i % 16) * 64;
 			float y = (i / 16) * 64;
-			TextRender()->UploadEntityLayerText(m_OverlayBottomTexture, buff, -1, x + 1, y + 32, m_TextureSize / 2, 64 - 1);
+			TextRender()->UploadEntityLayerText(m_OverlayBottomTexture, buff, -1, x + 1, y + 32, TextureSize / 2, 64 - 1);
 		}
 	}
 
-	if (m_OverlayTopTexture == -1)
+	if(m_OverlayTopTexture == -1)
 	{
 		void *pMem = calloc(1024 * 1024, 1);
 		m_OverlayTopTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 		free(pMem);
 
-		for (int i = 0; i < 256; ++i)
+		for(int i = 0; i < 256; ++i)
 		{
 			char buff[4];
 			str_format(buff, 4, "%d", i);
 
 			float x = (i % 16) * 64;
 			float y = (i / 16) * 64;
-			TextRender()->UploadEntityLayerText(m_OverlayTopTexture, buff, -1, x + 1, y, m_TextureSize / 2, 64 - 1);
+			TextRender()->UploadEntityLayerText(m_OverlayTopTexture, buff, -1, x + 1, y, TextureSize / 2, 64 - 1);
 		}
 	}
 
-	if (m_OverlayCenterTexture == -1)
+	if(m_OverlayCenterTexture == -1)
 	{
 		void *pMem = calloc(1024 * 1024, 1);
 		m_OverlayCenterTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
@@ -229,7 +230,7 @@ void CMapImages::InitOverlayTextures()
 			int OffY = (len == 3 ? 10 : 5);
 			int OffX = (len == 3 ? 5 : 1);
 
-			TextRender()->UploadEntityLayerText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, -1, 64 - (OffX * 2), m_TextureSize, MinSize);
+			TextRender()->UploadEntityLayerText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, -1, 64 - (OffX * 2), TextureSize, MinSize);
 		}
 	}
 }
