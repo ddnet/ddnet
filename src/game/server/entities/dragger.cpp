@@ -7,7 +7,6 @@
 #include <game/server/teams.h>
 #include <game/server/gamemodes/DDRace.h>
 #include "dragger.h"
-#include <iostream>
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 		int CaughtTeam, int Layer, int Number) :
@@ -391,7 +390,6 @@ void CDragger::Snap(int SnappingClient)
 CDraggerTeam::CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength,
 		bool NW, int Layer, int Number)
 {
-	std::cout << "CREATING" << std::endl;
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		m_Draggers[i] = new CDragger(pGameWorld, Pos, Strength, NW, i, Layer, Number);
@@ -400,7 +398,6 @@ CDraggerTeam::CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength,
 
 //CDraggerTeam::~CDraggerTeam()
 //{
-//	std::cout << "DELETING" << std::endl;
 //	for (int i = 0; i < MAX_CLIENTS; ++i)
 //	{
 //		delete m_Draggers[i];
