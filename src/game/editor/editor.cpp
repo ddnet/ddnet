@@ -392,6 +392,23 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 			int NumChars = Len;
 			ReturnValue |= CLineInput::Manipulate(Input()->GetEvent(i), pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
 		}
+
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+		{
+			const char *pClipboardText = Input()->GetClipboardText();
+			if(pClipboardText)
+			{
+				str_append(pStr, pClipboardText, StrSize);
+				str_sanitize_cc(pStr);
+				s_AtIndex = str_length(pStr);
+				ReturnValue = true;
+			}
+		}
+
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C) && pStr[0] != '\0')
+		{
+			Input()->SetClipboardText(pStr);
+		}
 	}
 
 	bool JustGotActive = false;

@@ -856,10 +856,10 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	Color |= m_Color.a;
 
 	CProperty aProps[] = {
-		{"Width", m_Width, PROPTYPE_INT_SCROLL, 1, 1000000000},
-		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 1000000000},
+		{"Width", m_Width, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 1000000000},
+		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Color Env", m_ColorEnv+1, PROPTYPE_INT_STEP, 0, m_pEditor->m_Map.m_lEnvelopes.size()+1},
