@@ -325,7 +325,6 @@ public:
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
-	virtual void OnSoloPlayer(int ClientID, bool solo);
 
 	void OnWindowResize();
 	static void OnWindowResizeCB(void *pUser);

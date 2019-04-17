@@ -1958,13 +1958,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	}
 	else
 	{
-		if(Msg == NETMSG_SOLO_PLAYER)
-		{
-			int ClientID = Unpacker.GetInt();
-			int IsSolo = Unpacker.GetInt();
-			GameClient()->OnSoloPlayer(ClientID, IsSolo);
-		}
-		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 || Msg == NETMSGTYPE_SV_EXTRAPROJECTILE)
+		if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 || Msg == NETMSGTYPE_SV_EXTRAPROJECTILE)
 		{
 			// game message
 			for(int i = 0; i < RECORDER_MAX; i++)

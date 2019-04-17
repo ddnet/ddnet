@@ -170,8 +170,6 @@ public:
 		int m_Flags;
 		bool m_ShowIps;
 
-		bool m_Solo;
-
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
 		void Reset();

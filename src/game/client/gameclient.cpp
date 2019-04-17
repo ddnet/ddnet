@@ -928,12 +928,6 @@ void CGameClient::OnTimeScore(int AllowTimeScore, bool Dummy)
 	m_AllowTimeScore[Dummy] = AllowTimeScore;
 }
 
-void CGameClient::OnSoloPlayer(int ClientID, bool solo)
-{
-	m_aClients[ClientID].m_Solo = solo;
-	m_aClients[ClientID].m_Predicted.m_Solo = solo;
-}
-
 void CGameClient::ProcessEvents()
 {
 	if(m_SuppressEvents)
@@ -1121,6 +1115,11 @@ void CGameClient::OnNewSnapshot()
 					if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
 				}
+			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTER)
+			{
+				m_aClients[Item.m_ID].m_Solo = m_aClients[Item.m_ID].m_Predicted.m_Solo =
+					((const CNetObj_DDNetCharacter *)pData)->m_Flags & CHARACTERFLAG_SOLO;
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{

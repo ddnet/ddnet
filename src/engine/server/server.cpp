@@ -257,7 +257,6 @@ void CServer::CClient::Reset()
 	m_Score = 0;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
-	m_Solo = false;
 	m_ShowIps = false;
 }
 
@@ -474,7 +473,6 @@ int CServer::Init()
 		m_aClients[i].m_Traffic = 0;
 		m_aClients[i].m_TrafficSince = 0;
 		m_aClients[i].m_AuthKey = -1;
-		m_aClients[i].m_Solo = false;
 	}
 
 	m_CurrentGameTick = 0;

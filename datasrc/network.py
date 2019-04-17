@@ -4,6 +4,7 @@ Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
 GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
+CharacterFlags = ["SOLO"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -56,7 +57,8 @@ Enums = [
 Flags = [
 	Flags("PLAYERFLAG", PlayerFlags),
 	Flags("GAMEFLAG", GameFlags),
-	Flags("GAMESTATEFLAG", GameStateFlags)
+	Flags("GAMESTATEFLAG", GameStateFlags),
+	Flags("CHARACTERFLAG", CharacterFlags)
 ]
 
 Objects = [
@@ -204,6 +206,10 @@ Objects = [
 
 	NetObjectEx("AuthInfo", "auth-info@netobj.ddnet.tw", [
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
+	]),
+
+	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
+		NetIntRange("m_Flags", "min_int", "max_int"),
 	]),
 
 	## Events
