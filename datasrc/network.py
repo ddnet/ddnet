@@ -58,7 +58,7 @@ Flags = [
 	Flags("PLAYERFLAG", PlayerFlags),
 	Flags("GAMEFLAG", GameFlags),
 	Flags("GAMESTATEFLAG", GameStateFlags),
-	Flags("CHARACTERFLAG", CharacterFlags)
+	Flags("CHARACTERFLAG", CharacterFlags),
 ]
 
 Objects = [
@@ -209,7 +209,7 @@ Objects = [
 	]),
 
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
-		NetIntRange("m_Flags", "min_int", "max_int"),
+		NetIntAny("m_Flags"),
 	]),
 
 	## Events
