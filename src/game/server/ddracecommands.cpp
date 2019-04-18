@@ -435,7 +435,7 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs)
 
 void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName)
 {
-	if (!TryVoteMute(pAddr, Secs))
+	if (!TryMute(pAddr, Secs))
 		return;
 
 	if(!pDisplayName)
