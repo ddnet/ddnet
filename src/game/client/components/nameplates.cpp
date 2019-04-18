@@ -29,6 +29,7 @@ void CNamePlates::RenderNameplate(
 {
 	float IntraTick = Client()->IntraGameTick();
 	int ClientID = pPlayerInfo->m_ClientID;
+	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
 
 	vec2 Position;
 	if((!m_pClient->AntiPingPlayers() && !pPlayerInfo->m_Local) || m_pClient->m_Snap.m_SpecInfo.m_Active)
@@ -52,6 +53,12 @@ void CNamePlates::RenderNameplate(
 		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
 	else
 		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+
+	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
+		OtherTeam = true;
+
+	if(!Local && m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_Solo)
+		OtherTeam = true;
 
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;

@@ -230,6 +230,7 @@ public:
 	vec2 m_LastVel;
 	int m_Colliding;
 	bool m_LeftWall;
+	bool m_Solo;
 
 	void LimitForce(vec2 *Force);
 	void ApplyForce(vec2 Force);

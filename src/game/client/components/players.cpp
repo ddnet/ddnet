@@ -245,6 +245,12 @@ void CPlayers::RenderHook(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
+	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
+		OtherTeam = true;
+
+	if(!Local && m_pClient->m_aClients[ClientID].m_Solo)
+		OtherTeam = true;
+
 	if(OtherTeam)
 	{
 		RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
@@ -403,6 +409,12 @@ void CPlayers::RenderPlayer(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
+	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
+		OtherTeam = true;
+
+	if(!Local && m_pClient->m_aClients[ClientID].m_Solo)
+		OtherTeam = true;
+
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
@@ -468,6 +480,7 @@ void CPlayers::RenderPlayer(
 			{
 				// apply predicted results
 				m_pClient->m_aClients[ClientID].m_Predicted.Write(&Player);
+				m_pClient->m_aClients[ClientID].m_Predicted.m_Solo = m_pClient->m_aClients[ClientID].m_Solo;
 				m_pClient->m_aClients[ClientID].m_PrevPredicted.Write(&Prev);
 
 				IntraTick = Client()->PredIntraGameTick();

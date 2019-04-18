@@ -1116,6 +1116,11 @@ void CGameClient::OnNewSnapshot()
 						Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick());
 				}
 			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTER)
+			{
+				m_aClients[Item.m_ID].m_Solo = m_aClients[Item.m_ID].m_Predicted.m_Solo =
+					((const CNetObj_DDNetCharacter *)pData)->m_Flags & CHARACTERFLAG_SOLO;
+			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
 				m_Snap.m_pSpectatorInfo = (const CNetObj_SpectatorInfo *)pData;
@@ -1849,6 +1854,7 @@ void CGameClient::CClientData::Reset()
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
 	m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
 	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
+	m_Solo = false;
 	UpdateRenderInfo();
 }
 
@@ -2064,7 +2070,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick());
 
-		if(!cData.m_Active || i == ownID || !m_Teams.SameTeam(i, ownID))
+		if(!cData.m_Active || i == ownID || !m_Teams.SameTeam(i, ownID) || cData.m_Solo)
 			continue;
 
 		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
@@ -2098,7 +2104,7 @@ int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2
 			continue;
 		CClientData cData = m_aClients[i];
 
-		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID))
+		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID) || cData.m_Solo)
 			continue;
 		vec2 Position = World->m_apCharacters[i]->m_Pos;
 		vec2 ClosestPoint = closest_point_on_line(OldPos, NewPos, Position);

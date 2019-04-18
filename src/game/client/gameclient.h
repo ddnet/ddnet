@@ -242,6 +242,7 @@ public:
 		int m_Team;
 		int m_Emoticon;
 		int m_EmoticonStart;
+		bool m_Solo;
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 
