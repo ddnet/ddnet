@@ -2318,11 +2318,10 @@ void str_copy(char *dst, const char *src, int dst_size)
 	dst[dst_size-1] = 0; /* assure null termination */
 }
 
-void str_num_copy(char *dst, const char *src, int num, int dst_size)
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 {
-	int n = num >= dst_size ? dst_size - 1 : num;
-	strncpy(dst, src, n);
-	dst[n] = '\0';
+	int size = truncation_len >= dst_size ? dst_size : truncation_len + 1;
+	str_copy(dst, src, size);
 }
 
 int str_length(const char *str)
