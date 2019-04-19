@@ -230,7 +230,24 @@ public:
 	vec2 m_LastVel;
 	int m_Colliding;
 	bool m_LeftWall;
+
+	// DDnet Character
 	bool m_Solo;
+	bool m_Jetpack;
+	bool m_NoCollision;
+	bool m_EndlessHook;
+	bool m_EndlessJump;
+	bool m_NoHammerHit;
+	bool m_NoGrenadeHit;
+	bool m_NoRifleHit;
+	bool m_NoShotgunHit;
+	bool m_NoHookHit;
+	bool m_Super;
+	bool m_HasTelegunGun;
+	bool m_HasTelegunGrenade;
+	bool m_HasTelegunLaser;
+	bool m_Frozen;
+	bool m_DeepFrozen;
 
 	void LimitForce(vec2 *Force);
 	void ApplyForce(vec2 Force);
