@@ -1195,7 +1195,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(m_Hit&DISABLE_HIT_SHOTGUN)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_DISABLE_HIT_SHOTGUN;
 	if(IsPaused())
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_IS_SPECTATING;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SPECTATING;
 	if(m_HasTeleGun)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GUN;
 	if(m_HasTeleGrenade)

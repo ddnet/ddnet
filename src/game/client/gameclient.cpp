@@ -1159,7 +1159,7 @@ void CGameClient::OnNewSnapshot()
 						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
 
 				// Other
-				m_aClients[Item.m_ID].m_Spectating = pCharacterData->m_Flags & CHARACTERFLAG_IS_SPECTATING;
+				m_aClients[Item.m_ID].m_Spectating = pCharacterData->m_Flags & CHARACTERFLAG_SPECTATING;
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
