@@ -1178,6 +1178,10 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
+	if(!m_Core.m_Collision)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_COLLISION;
+	if(!m_Core.m_Hook)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
 	if(m_Jetpack || m_NinjaJetpack)
@@ -1187,13 +1191,13 @@ void CCharacter::Snap(int SnappingClient)
 	if(m_DeepFreeze)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_DEEP_FROZEN;
 	if(m_Hit&DISABLE_HIT_GRENADE)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_DISABLE_HIT_GRENADE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_GRENADE_HIT;
 	if(m_Hit&DISABLE_HIT_HAMMER)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_DISABLE_HIT_HAMMER;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HAMMER_HIT;
 	if(m_Hit&DISABLE_HIT_RIFLE)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_DISABLE_HIT_RIFLE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_RIFLE_HIT;
 	if(m_Hit&DISABLE_HIT_SHOTGUN)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_DISABLE_HIT_SHOTGUN;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_SHOTGUN_HIT;
 	if(IsPaused())
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SPECTATING;
 	if(m_HasTeleGun)

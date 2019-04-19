@@ -1126,15 +1126,15 @@ void CGameClient::OnNewSnapshot()
 				m_aClients[Item.m_ID].m_NoCollision = m_aClients[Item.m_ID].m_Predicted.m_NoCollision =
 						pCharacterData->m_Flags & CHARACTERFLAG_NO_COLLISION;
 				m_aClients[Item.m_ID].m_NoHammerHit = m_aClients[Item.m_ID].m_Predicted.m_NoHammerHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_DISABLE_HIT_HAMMER;
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
 				m_aClients[Item.m_ID].m_NoGrenadeHit = m_aClients[Item.m_ID].m_Predicted.m_NoGrenadeHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_DISABLE_HIT_GRENADE;
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
 				m_aClients[Item.m_ID].m_NoRifleHit = m_aClients[Item.m_ID].m_Predicted.m_NoRifleHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_DISABLE_HIT_RIFLE;
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT;
 				m_aClients[Item.m_ID].m_NoShotgunHit = m_aClients[Item.m_ID].m_Predicted.m_NoShotgunHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_DISABLE_HIT_SHOTGUN;
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
 				m_aClients[Item.m_ID].m_NoHookHit = m_aClients[Item.m_ID].m_Predicted.m_NoHookHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_DISABLE_HOOK;
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_HOOK;
 				m_aClients[Item.m_ID].m_Super = m_aClients[Item.m_ID].m_Predicted.m_Super =
 						pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
 
