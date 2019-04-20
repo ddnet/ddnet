@@ -243,6 +243,24 @@ public:
 		int m_Emoticon;
 		int m_EmoticonStart;
 		bool m_Solo;
+		bool m_Jetpack;
+		bool m_NoCollision;
+		bool m_EndlessHook;
+		bool m_EndlessJump;
+		bool m_NoHammerHit;
+		bool m_NoGrenadeHit;
+		bool m_NoRifleHit;
+		bool m_NoShotgunHit;
+		bool m_NoHookHit;
+		bool m_Super;
+		bool m_HasTelegunGun;
+		bool m_HasTelegunGrenade;
+		bool m_HasTelegunLaser;
+		bool m_Frozen;
+		bool m_DeepFrozen;
+		bool m_Spectating;
+
+
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 

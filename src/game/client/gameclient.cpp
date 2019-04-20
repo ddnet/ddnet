@@ -1118,8 +1118,48 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTER)
 			{
+				const CNetObj_DDNetCharacter *pCharacterData = (const CNetObj_DDNetCharacter *)pData;
+
+				// Collision
 				m_aClients[Item.m_ID].m_Solo = m_aClients[Item.m_ID].m_Predicted.m_Solo =
-					((const CNetObj_DDNetCharacter *)pData)->m_Flags & CHARACTERFLAG_SOLO;
+						pCharacterData->m_Flags & CHARACTERFLAG_SOLO;
+				m_aClients[Item.m_ID].m_NoCollision = m_aClients[Item.m_ID].m_Predicted.m_NoCollision =
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_COLLISION;
+				m_aClients[Item.m_ID].m_NoHammerHit = m_aClients[Item.m_ID].m_Predicted.m_NoHammerHit =
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
+				m_aClients[Item.m_ID].m_NoGrenadeHit = m_aClients[Item.m_ID].m_Predicted.m_NoGrenadeHit =
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
+				m_aClients[Item.m_ID].m_NoRifleHit = m_aClients[Item.m_ID].m_Predicted.m_NoRifleHit =
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT;
+				m_aClients[Item.m_ID].m_NoShotgunHit = m_aClients[Item.m_ID].m_Predicted.m_NoShotgunHit =
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
+				m_aClients[Item.m_ID].m_NoHookHit = m_aClients[Item.m_ID].m_Predicted.m_NoHookHit =
+						pCharacterData->m_Flags & CHARACTERFLAG_NO_HOOK;
+				m_aClients[Item.m_ID].m_Super = m_aClients[Item.m_ID].m_Predicted.m_Super =
+						pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
+
+				// Endless
+				m_aClients[Item.m_ID].m_EndlessHook = m_aClients[Item.m_ID].m_Predicted.m_EndlessHook =
+						pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
+				m_aClients[Item.m_ID].m_EndlessJump = m_aClients[Item.m_ID].m_Predicted.m_EndlessJump =
+						pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
+
+				// Freeze
+				m_aClients[Item.m_ID].m_Frozen = m_aClients[Item.m_ID].m_Predicted.m_Frozen =
+						pCharacterData->m_Flags & CHARACTERFLAG_FROZEN;
+				m_aClients[Item.m_ID].m_DeepFrozen = m_aClients[Item.m_ID].m_Predicted.m_DeepFrozen =
+						pCharacterData->m_Flags & CHARACTERFLAG_DEEP_FROZEN;
+
+				// Telegun
+				m_aClients[Item.m_ID].m_HasTelegunGrenade = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunGrenade =
+						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
+				m_aClients[Item.m_ID].m_HasTelegunGun = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunGun =
+						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
+				m_aClients[Item.m_ID].m_HasTelegunLaser = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunLaser =
+						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
+
+				// Other
+				m_aClients[Item.m_ID].m_Spectating = pCharacterData->m_Flags & CHARACTERFLAG_SPECTATING;
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
@@ -1854,7 +1894,26 @@ void CGameClient::CClientData::Reset()
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
 	m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
 	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
+
+	// DDNet Character
 	m_Solo = false;
+	m_Jetpack = false;
+	m_NoCollision = false;
+	m_EndlessHook = false;
+	m_EndlessJump = false;
+	m_NoHammerHit = false;
+	m_NoGrenadeHit = false;
+	m_NoRifleHit = false;
+	m_NoShotgunHit = false;
+	m_NoHookHit = false;
+	m_Super = false;
+	m_HasTelegunGun = false;
+	m_HasTelegunGrenade = false;
+	m_HasTelegunLaser = false;
+	m_Frozen = false;
+	m_DeepFrozen = false;
+	m_Spectating = false;
+
 	UpdateRenderInfo();
 }
 

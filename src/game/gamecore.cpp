@@ -101,7 +101,24 @@ void CCharacterCore::Reset()
 	m_TriggeredEvents = 0;
 	m_Hook = true;
 	m_Collision = true;
+
+	// DDNet Character
 	m_Solo = false;
+	m_Jetpack = false;
+	m_NoCollision = false;
+	m_EndlessHook = false;
+	m_EndlessJump = false;
+	m_NoHammerHit = false;
+	m_NoGrenadeHit = false;
+	m_NoRifleHit = false;
+	m_NoShotgunHit = false;
+	m_NoHookHit = false;
+	m_Super = false;
+	m_HasTelegunGun = false;
+	m_HasTelegunGrenade = false;
+	m_HasTelegunLaser = false;
+	m_Frozen = false;
+	m_DeepFrozen = false;
 }
 
 void CCharacterCore::Tick(bool UseInput, bool IsClient)
