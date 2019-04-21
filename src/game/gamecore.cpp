@@ -312,7 +312,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
-				if(!pCharCore || pCharCore == this || !m_pTeams->CanCollide(i, m_Id) || pCharCore->m_Solo)
+				if(!pCharCore || pCharCore == this || (!m_Super && (!m_pTeams->CanCollide(i, m_Id) || pCharCore->m_Solo || pCharCore->m_NoHookHit)))
 					continue;
 
 				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
@@ -426,13 +426,15 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			//player *p = (player*)ent;
 			//if(pCharCore == this) // || !(p->flags&FLAG_ALIVE)
 
-			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)) || pCharCore->m_Solo)
+			if(pCharCore == this || (m_Id != -1 && (!m_Super && !pCharCore->m_Super) && (!m_pTeams->CanCollide(m_Id, i) || pCharCore->m_Solo)))
 				continue; // make sure that we don't nudge our self
 
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
-			if(pCharCore->m_Collision && this->m_Collision && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision && Distance < PhysSize*1.25f && Distance > 0.0f)
+			if(((m_Super || pCharCore->m_Super) || (pCharCore->m_Collision && this->m_Collision && !pCharCore->m_NoCollision && !this->m_NoCollision && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision))
+				&& Distance < PhysSize*1.25f
+				&& Distance > 0.0f)
 			{
 				float a = (PhysSize*1.45f - Distance);
 				float Velocity = 0.5f;
@@ -447,7 +449,7 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 			}
 
 			// handle hook influence
-			if(m_Hook && m_HookedPlayer == i && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
+			if(m_Hook && !m_NoHookHit && m_HookedPlayer == i && m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
 			{
 				if(Distance > PhysSize*1.50f) // TODO: fix tweakable variable
 				{
