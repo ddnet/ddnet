@@ -2118,10 +2118,12 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
-	if(!m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
+	CClientData OwncData = m_aClients[ownID];
+
+	if(!OwncData.m_Super && !m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
 		return ClosestID;
 
-	for(int i=0; i<MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CClientData cData = m_aClients[i];
 		CNetObj_Character Prev = m_Snap.m_aCharacters[i].m_Prev;
@@ -2129,11 +2131,14 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick());
 
-		if(!cData.m_Active || i == ownID || !m_Teams.SameTeam(i, ownID) || cData.m_Solo)
+		bool IsOneSuper = cData.m_Super || OwncData.m_Super;
+		bool IsOneSolo = cData.m_Solo || OwncData.m_Solo;
+
+		if(!cData.m_Active || i == ownID || (!IsOneSuper && (!m_Teams.SameTeam(i, ownID) || IsOneSolo || OwncData.m_NoHookHit)))
 			continue;
 
 		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
-		if(distance(Position, ClosestPoint) < PhysSize+2.0f)
+		if(distance(Position, ClosestPoint) < PhysSize + 2.0f)
 		{
 			if(ClosestID == -1 || distance(HookPos, Position) < Distance)
 			{
@@ -2157,13 +2162,18 @@ int CGameClient::IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2
 	if(!World)
 		return ClosestID;
 
+	CClientData OwncData = m_aClients[ownID];
+
 	for(int i=0; i<MAX_CLIENTS; i++)
 	{
 		if(!World->m_apCharacters[i])
 			continue;
 		CClientData cData = m_aClients[i];
 
-		if(!cData.m_Active || i == ownID || !m_Teams.CanCollide(i, ownID) || cData.m_Solo)
+		bool IsOneSuper = cData.m_Super || OwncData.m_Super;
+		bool IsOneSolo = cData.m_Solo || OwncData.m_Solo;
+
+		if(!cData.m_Active || i == ownID || (!IsOneSuper && (!m_Teams.CanCollide(i, ownID) || IsOneSolo)))
 			continue;
 		vec2 Position = World->m_apCharacters[i]->m_Pos;
 		vec2 ClosestPoint = closest_point_on_line(OldPos, NewPos, Position);
@@ -2279,7 +2289,10 @@ void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientI
 	if(m_Owner >= 0 && Target >= 0 && m_pGameClient->m_aClients[m_Owner].m_Active && m_pGameClient->m_aClients[Target].m_Active && !m_pGameClient->m_Teams.CanCollide(m_Owner, Target))
 		IsWeaponCollide = true;
 
-	bool OwnerCanProbablyHitOthers = (m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking);
+	bool OwnerCanProbablyHitOthers = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision
+			|| m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking
+			|| m_pGameClient->m_aClients[m_Owner].m_Super
+			|| !m_pGameClient->m_aClients[m_Owner].m_Solo;
 
 	if(((Target >= 0 && (m_Owner >= 0 ? OwnerCanProbablyHitOthers : true)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
 	{

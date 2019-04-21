@@ -599,12 +599,13 @@ void CPlayers::RenderPlayer(
 				int TeleNr = 0;
 				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
 
-				if(!DoBreak && Hit) {
+				if(!DoBreak && Hit)
+				{
 					if(Hit != TILE_NOHOOK)
 						Graphics()->SetColor(130.0f/255.0f, 232.0f/255.0f, 160.0f/255.0f, Alpha);
 				}
 
-				if(m_pClient->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking && m_pClient->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientID) != -1)
+				if(m_pClient->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientID) != -1)
 				{
 					Graphics()->SetColor(1.0f, 1.0f, 0.0f, Alpha);
 					break;
