@@ -391,14 +391,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
-		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
-		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
+		OwnSkinInfo.m_ColorBody = HslToRgb(UnpackColor(*ColorBody));
+		OwnSkinInfo.m_ColorFeet = HslToRgb(UnpackColor(*ColorFeet));
 	}
 	else
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
-		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorBody = vec3(1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = vec3(1.0f, 1.0f, 1.0f);
 	}
 	OwnSkinInfo.m_Size = 50.0f*UI()->Scale();
 
@@ -584,14 +584,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(*UseCustomColor)
 			{
 				Info.m_Texture = s->m_ColorTexture;
-				Info.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
-				Info.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
+				Info.m_ColorBody = HslToRgb(UnpackColor(*ColorBody));
+				Info.m_ColorFeet = HslToRgb(UnpackColor(*ColorFeet));
 			}
 			else
 			{
 				Info.m_Texture = s->m_OrgTexture;
-				Info.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-				Info.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				Info.m_ColorBody = vec3(1.0f, 1.0f, 1.0f);
+				Info.m_ColorFeet = vec3(1.0f, 1.0f, 1.0f);
 			}
 
 			Info.m_Size = UI()->Scale()*50.0f;
@@ -604,7 +604,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1,Item.m_Rect.w);
 			if(g_Config.m_Debug)
 			{
-				vec3 BloodColor = *UseCustomColor ? m_pClient->m_pSkins->GetColorV3(*ColorBody) : s->m_BloodColor;
+				vec3 BloodColor = *UseCustomColor ? HslToRgb(UnpackColor(*ColorBody)) : s->m_BloodColor;
 				Graphics()->TextureSet(-1);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
@@ -1055,7 +1055,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			g_Config.m_GfxEnableTextureUnitOptimization ^= 1;
 		}
 	}
-	
+
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
@@ -1513,7 +1513,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
+					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)) * 255.0f; // default values
 					g_Config.m_ClMessageSystemHue = HSL.h;
 					g_Config.m_ClMessageSystemSat = HSL.s;
 					g_Config.m_ClMessageSystemLht = HSL.l;
@@ -1565,7 +1565,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
+					vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)) * 255.0f; // default values
 					g_Config.m_ClMessageHighlightHue = HSL.h;
 					g_Config.m_ClMessageHighlightSat = HSL.s;
 					g_Config.m_ClMessageHighlightLht = HSL.l;
@@ -1623,7 +1623,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
+					vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)) * 255.0f; // default values
 					g_Config.m_ClMessageTeamHue = HSL.h;
 					g_Config.m_ClMessageTeamSat = HSL.s;
 					g_Config.m_ClMessageTeamLht = HSL.l;
@@ -1738,7 +1738,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
+					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)) * 255.0f; // default values
 					g_Config.m_ClMessageHue = HSL.h;
 					g_Config.m_ClMessageSat = HSL.s;
 					g_Config.m_ClMessageLht = HSL.l;
@@ -1795,7 +1795,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			static int s_DefaultButton = 0;
 			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 			{
-				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
+				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)) * 255.0f; // default values
 				g_Config.m_ClLaserInnerHue = HSL.h;
 				g_Config.m_ClLaserInnerSat = HSL.s;
 				g_Config.m_ClLaserInnerLht = HSL.l;
@@ -1831,7 +1831,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			static int s_DefaultButton = 0;
 			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 			{
-				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
+				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)) * 255.0f; // default values
 				g_Config.m_ClLaserOutlineHue = HSL.h;
 				g_Config.m_ClLaserOutlineSat = HSL.s;
 				g_Config.m_ClLaserOutlineLht = HSL.l;

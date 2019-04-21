@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_GAMECLIENT_H
 #define GAME_CLIENT_GAMECLIENT_H
 
+#include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
 #include <engine/console.h>
@@ -18,15 +19,45 @@
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
 
-#define MIN3(x,y,z)  ((y) <= (z) ? \
-	((x) <= (y) ? (x) : (y)) \
-	: \
-	((x) <= (z) ? (x) : (z)))
+class CGameClient;
 
-#define MAX3(x,y,z)  ((y) >= (z) ? \
-	((x) >= (y) ? (x) : (y)) \
-	: \
-	((x) >= (z) ? (x) : (z)))
+class CWeaponData
+{
+public:
+	int m_Tick;
+	vec2 m_Pos;
+	vec2 m_Direction;
+	vec2 StartPos() { return m_Pos + m_Direction * 28.0f * 0.75f; }
+};
+
+class CLocalProjectile
+{
+public:
+	int m_Active;
+	CGameClient *m_pGameClient;
+	CWorldCore *m_pWorld;
+	CCollision *m_pCollision;
+
+	vec2 m_Direction;
+	vec2 m_Pos;
+	int m_StartTick;
+	int m_Type;
+
+	int m_Owner;
+	int m_Weapon;
+	bool m_Explosive;
+	int m_Bouncing;
+	bool m_Freeze;
+	bool m_ExtraInfo;
+
+	vec2 GetPos(float Time);
+	void CreateExplosion(vec2 Pos, int LocalClientID);
+	void Tick(int CurrentTick, int GameTickSpeed, int LocalClientID);
+	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, const CNetObj_Projectile *pProj);
+	void Init(CGameClient *pGameClient, CWorldCore *pWorld, CCollision *pCollision, vec2 Vel, vec2 Pos, int StartTick, int Type, int Owner, int Weapon, bool Explosive, int Bouncing, bool Freeze, bool ExtraInfo);
+	bool GameLayerClipped(vec2 CheckPos);
+	void Deactivate() { m_Active = 0; }
+};
 
 class CGameClient : public IGameClient
 {
@@ -401,63 +432,6 @@ private:
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 	class CTeamsCore m_TeamsPredicted;
 };
-
-
-inline float HueToRgb(float v1, float v2, float h)
-{
-	if(h < 0.0f) h += 1;
-	if(h > 1.0f) h -= 1;
-	if((6.0f * h) < 1.0f) return v1 + (v2 - v1) * 6.0f * h;
-	if((2.0f * h) < 1.0f) return v2;
-	if((3.0f * h) < 2.0f) return v1 + (v2 - v1) * ((2.0f/3.0f) - h) * 6.0f;
-	return v1;
-}
-
-inline vec3 HslToRgb(vec3 HSL)
-{
-	if(HSL.s == 0.0f)
-		return vec3(HSL.l, HSL.l, HSL.l);
-	else
-	{
-		float v2 = HSL.l < 0.5f ? HSL.l * (1.0f + HSL.s) : (HSL.l+HSL.s) - (HSL.s*HSL.l);
-		float v1 = 2.0f * HSL.l - v2;
-
-		return vec3(HueToRgb(v1, v2, HSL.h + (1.0f/3.0f)), HueToRgb(v1, v2, HSL.h), HueToRgb(v1, v2, HSL.h - (1.0f/3.0f)));
-	}
-}
-
-inline vec3 RgbToHsl(vec3 RGB)
-{
-	vec3 HSL;
-	float MaxColor = MAX3(RGB.r, RGB.g, RGB.b);
-	float MinColor = MIN3(RGB.r, RGB.g, RGB.b);
-	if (MinColor == MaxColor)
-		return vec3(0.0f, 0.0f, RGB.g * 255.0f);
-	else
-	{
-		HSL.l = (MinColor + MaxColor) / 2;
-
-		if (HSL.l < 0.5)
-			HSL.s = (MaxColor - MinColor) / (MaxColor + MinColor);
-		else
-			HSL.s = (MaxColor - MinColor) / (2.0 - MaxColor - MinColor);
-
-		if (RGB.r == MaxColor)
-			HSL.h = (RGB.g - RGB.b) / (MaxColor - MinColor);
-		else if (RGB.g == MaxColor)
-			HSL.h = 2.0 + (RGB.b - RGB.r) / (MaxColor - MinColor);
-		else
-			HSL.h = 4.0 + (RGB.r - RGB.g) / (MaxColor - MinColor);
-
-		HSL.h /= 6; //to bring it to a number between 0 and 1
-		if (HSL.h < 0) HSL.h++;
-	}
-	HSL.h = int(HSL.h * 255.0);
-	HSL.s = int(HSL.s * 255.0);
-	HSL.l = int(HSL.l * 255.0);
-	return HSL;
-
-}
 
 vec3 CalculateNameColor(vec3 TextColorHSL);
 

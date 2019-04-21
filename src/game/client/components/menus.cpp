@@ -799,7 +799,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_SettingsButton=0;
-	
+
 	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
 		NewPage = PAGE_SETTINGS;
 
@@ -1909,7 +1909,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-	
+
 	Graphics()->BlendNormal();
 	RenderBackground();
 

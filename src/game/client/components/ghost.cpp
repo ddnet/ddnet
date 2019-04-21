@@ -361,18 +361,16 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
 		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_ColorTexture;
-		pRenderInfo->m_ColorBody = m_pClient->m_pSkins->GetColorV4(pGhost->m_Skin.m_ColorBody);
-		pRenderInfo->m_ColorFeet = m_pClient->m_pSkins->GetColorV4(pGhost->m_Skin.m_ColorFeet);
+		pRenderInfo->m_ColorBody = HslToRgb(UnpackColor(pGhost->m_Skin.m_ColorBody));
+		pRenderInfo->m_ColorFeet = HslToRgb(UnpackColor(pGhost->m_Skin.m_ColorFeet));
 	}
 	else
 	{
 		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_OrgTexture;
-		pRenderInfo->m_ColorBody = vec4(1, 1, 1, 1);
-		pRenderInfo->m_ColorFeet = vec4(1, 1, 1, 1);
+		pRenderInfo->m_ColorBody = vec3(1, 1, 1);
+		pRenderInfo->m_ColorFeet = vec3(1, 1, 1);
 	}
 
-	pRenderInfo->m_ColorBody.a = 0.5f;
-	pRenderInfo->m_ColorFeet.a = 0.5f;
 	pRenderInfo->m_Size = 64;
 }
 

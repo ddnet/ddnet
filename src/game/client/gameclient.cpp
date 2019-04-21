@@ -1028,8 +1028,8 @@ void CGameClient::OnNewSnapshot()
 				if(m_aClients[ClientID].m_aSkinName[0] == 'x' || m_aClients[ClientID].m_aSkinName[1] == '_')
 					str_copy(m_aClients[ClientID].m_aSkinName, "default", 64);
 
-				m_aClients[ClientID].m_SkinInfo.m_ColorBody = m_pSkins->GetColorV4(m_aClients[ClientID].m_ColorBody);
-				m_aClients[ClientID].m_SkinInfo.m_ColorFeet = m_pSkins->GetColorV4(m_aClients[ClientID].m_ColorFeet);
+				m_aClients[ClientID].m_SkinInfo.m_ColorBody = HslToRgb(UnpackColor(m_aClients[ClientID].m_ColorBody));
+				m_aClients[ClientID].m_SkinInfo.m_ColorFeet = HslToRgb(UnpackColor(m_aClients[ClientID].m_ColorFeet));
 				m_aClients[ClientID].m_SkinInfo.m_Size = 64;
 
 				// find new skin
@@ -1040,8 +1040,8 @@ void CGameClient::OnNewSnapshot()
 				else
 				{
 					m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_OrgTexture;
-					m_aClients[ClientID].m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
-					m_aClients[ClientID].m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
+					m_aClients[ClientID].m_SkinInfo.m_ColorBody = vec3(1,1,1);
+					m_aClients[ClientID].m_SkinInfo.m_ColorFeet = vec3(1,1,1);
 				}
 
 				m_aClients[ClientID].UpdateRenderInfo();
@@ -1618,13 +1618,13 @@ void CGameClient::CClientData::UpdateRenderInfo()
 		const int TeamColors[2] = {65387, 10223467};
 		if(m_Team >= TEAM_RED && m_Team <= TEAM_BLUE)
 		{
-			m_RenderInfo.m_ColorBody = g_GameClient.m_pSkins->GetColorV4(TeamColors[m_Team]);
-			m_RenderInfo.m_ColorFeet = g_GameClient.m_pSkins->GetColorV4(TeamColors[m_Team]);
+			m_RenderInfo.m_ColorBody = HslToRgb(UnpackColor(TeamColors[m_Team]));
+			m_RenderInfo.m_ColorFeet = HslToRgb(UnpackColor(TeamColors[m_Team]));
 		}
 		else
 		{
-			m_RenderInfo.m_ColorBody = g_GameClient.m_pSkins->GetColorV4(12895054);
-			m_RenderInfo.m_ColorFeet = g_GameClient.m_pSkins->GetColorV4(12895054);
+			m_RenderInfo.m_ColorBody = HslToRgb(UnpackColor(12895054));
+			m_RenderInfo.m_ColorFeet = HslToRgb(UnpackColor(12895054));
 		}
 	}
 }
@@ -1645,10 +1645,9 @@ void CGameClient::CClientData::Reset()
 	m_Foe = false;
 	m_AuthLevel = AUTHED_NO;
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
-	m_SkinInfo.m_ColorBody = vec4(1,1,1,1);
-	m_SkinInfo.m_ColorFeet = vec4(1,1,1,1);
+	m_SkinInfo.m_ColorBody = vec3(1,1,1);
+	m_SkinInfo.m_ColorFeet = vec3(1,1,1);
 
-	// DDNet Character
 	m_Solo = false;
 	m_Jetpack = false;
 	m_NoCollision = false;
@@ -1799,7 +1798,7 @@ void CGameClient::ConColorFromRgb(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	char aBuf[32];
-	Hsl = RgbToHsl(Rgb);
+	Hsl = RgbToHsl(Rgb) * 255.0f;
 	// full lightness range for GUI colors
 	str_format(aBuf, sizeof(aBuf), "Hue: %d, Sat: %d, Lht: %d", (int)Hsl.h, (int)Hsl.s, (int)Hsl.l);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "color", aBuf);

@@ -64,7 +64,9 @@ public:
 const float pi = 3.1415926535897932384626433f;
 
 template <typename T> inline T min(T a, T b) { return a<b?a:b; }
+template <typename T> inline T min(T a, T b, T c) { return min(min(a, b), c); }
 template <typename T> inline T max(T a, T b) { return a>b?a:b; }
+template <typename T> inline T max(T a, T b, T c) { return max(max(a, b), c); }
 template <typename T> inline T absolute(T a) { return a<T(0)?-a:a; }
 
 template <typename T> inline T in_range(T a, T lower, T upper) { return lower <= a && a <= upper; }
