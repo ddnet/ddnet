@@ -182,6 +182,9 @@ public:
 			CNetObj_Character m_Prev;
 			CNetObj_Character m_Cur;
 
+			CNetObj_DDNetCharacter m_ExtendedData;
+			bool m_HasExtendedData;
+
 			// interpolated position
 			vec2 m_Position;
 		};
@@ -399,6 +402,7 @@ private:
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
+	class CTeamsCore m_TeamsPredicted;
 };
 
 

@@ -696,7 +696,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// freeze
-	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_DeepFreeze)
+	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
 	{
 		Freeze();
 	}
@@ -706,11 +706,11 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// deep freeze
-	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_DeepFreeze)
+	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
 	{
 		m_DeepFreeze = true;
 	}
-	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && m_DeepFreeze)
+	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
 	{
 		m_DeepFreeze = false;
 	}
@@ -906,17 +906,17 @@ void CCharacter::DDRacePostCoreTick()
 	if (m_EndlessHook)
 		m_Core.m_HookTick = 0;
 
-	if (m_DeepFreeze)
+	if (m_DeepFreeze && !m_Super)
 		Freeze();
 
-	if (m_Core.m_Jumps == 0)
+	if (m_Core.m_Jumps == 0 && !m_Super)
 		m_Core.m_Jumped = 3;
 	else if (m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
 		m_Core.m_Jumped = 3;
 	else if (m_Core.m_JumpedTotal < m_Core.m_Jumps - 1 && m_Core.m_Jumped > 1)
 		m_Core.m_Jumped = 1;
 
-	if (m_SuperJump && m_Core.m_Jumped > 1)
+	if ((m_Super || m_SuperJump) && m_Core.m_Jumped > 1)
 		m_Core.m_Jumped = 1;
 
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
@@ -937,7 +937,7 @@ bool CCharacter::Freeze(int Seconds)
 {
 	if(!GameWorld()->m_WorldConfig.m_PredictFreeze)
 		return false;
-	if ((Seconds <= 0 || m_FreezeTime == -1 || m_FreezeTime > Seconds * GameWorld()->GameTickSpeed()) && Seconds != -1)
+	if ((Seconds <= 0 || m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * GameWorld()->GameTickSpeed()) && Seconds != -1)
 		 return false;
 	if (m_FreezeTick < GameWorld()->GameTick() - GameWorld()->GameTickSpeed() || Seconds == -1)
 	{
@@ -989,7 +989,7 @@ CTeamsCore* CCharacter::TeamsCore()
 	return m_Core.m_pTeams;
 }
 
-CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar)
+CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER)
 {
 	m_ID = ID;
@@ -1023,14 +1023,15 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar)
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
 	m_LastJetpackStrength = 400.0;
+	m_Super = false;
 	m_Alive = true;
 
-	Read(pChar, false);
+	Read(pChar, pExtended, false);
 
 	GameWorld()->InsertEntity(this);
 }
 
-void CCharacter::Read(CNetObj_Character *pChar, bool IsLocal)
+void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
 	vec2 PosBefore = m_Pos;
 
@@ -1070,9 +1071,17 @@ void CCharacter::Read(CNetObj_Character *pChar, bool IsLocal)
 		SetActiveWeapon(pChar->m_Weapon);
 	}
 
-	if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
-		m_DeepFreeze = false;
-	if(!GameWorld()->m_WorldConfig.m_PredictFreeze || pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10)
+	if(!pExtended)
+	{
+		if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
+			m_DeepFreeze = false;
+		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10)
+		{
+			m_DeepFreeze = false;
+			UnFreeze();
+		}
+	}
+	if(!GameWorld()->m_WorldConfig.m_PredictFreeze)
 	{
 		m_DeepFreeze = false;
 		UnFreeze();
@@ -1112,7 +1121,8 @@ void CCharacter::Read(CNetObj_Character *pChar, bool IsLocal)
 		m_EndlessHook = false;
 
 	// reset player collision
-	SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
+	if(!pExtended)
+		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
 	m_Core.m_Collision = Tuning()->m_PlayerCollision;
 	m_Core.m_Hook = Tuning()->m_PlayerHooking;
 
@@ -1128,6 +1138,38 @@ void CCharacter::Read(CNetObj_Character *pChar, bool IsLocal)
 	}
 
 	m_Alive = true;
+
+	if(pExtended)
+	{
+		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
+
+		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
+		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
+		if(m_Super)
+			TeamsCore()->Team(GetCID(), TEAM_SUPER);
+		m_EndlessHook = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
+		m_Core.m_Collision = !(pExtended->m_Flags & CHARACTERFLAG_NO_COLLISION);
+		m_Core.m_Hook = !(pExtended->m_Flags & CHARACTERFLAG_NO_HOOK);
+		m_SuperJump = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
+		m_Jetpack = pExtended->m_Flags & CHARACTERFLAG_JETPACK;
+
+		if(GameWorld()->m_WorldConfig.m_PredictFreeze)
+			m_DeepFreeze = pExtended->m_Flags & CHARACTERFLAG_DEEP_FROZEN;
+
+		bool Frozen = pExtended->m_Flags & CHARACTERFLAG_FROZEN;
+		if(m_FreezeTime > 0 && !Frozen)
+			UnFreeze();
+
+		m_Hit = HIT_ALL;
+		if(pExtended->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT)
+			m_Hit |= DISABLE_HIT_GRENADE;
+		if(pExtended->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT)
+			m_Hit |= DISABLE_HIT_HAMMER;
+		if(pExtended->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT)
+			m_Hit |= DISABLE_HIT_RIFLE;
+		if(pExtended->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT)
+			m_Hit |= DISABLE_HIT_SHOTGUN;
+	}
 }
 
 void CCharacter::SetCoreWorld(CGameWorld *pGameWorld)

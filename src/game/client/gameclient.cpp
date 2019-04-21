@@ -349,7 +349,7 @@ void CGameClient::OnInit()
 
 	m_GameWorld.m_GameTickSpeed = SERVER_TICK_SPEED;
 	m_GameWorld.m_pCollision = Collision();
-	m_GameWorld.m_pTeams = &m_Teams;
+	m_GameWorld.m_pTeams = &m_TeamsPredicted;
 }
 
 void CGameClient::OnUpdate()
@@ -1100,6 +1100,9 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTER)
 			{
 				const CNetObj_DDNetCharacter *pCharacterData = (const CNetObj_DDNetCharacter *)pData;
+
+				m_Snap.m_aCharacters[Item.m_ID].m_ExtendedData = *pCharacterData;
+				m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedData = true;
 
 				// Collision
 				m_aClients[Item.m_ID].m_Solo = m_aClients[Item.m_ID].m_Predicted.m_Solo =
@@ -1929,6 +1932,8 @@ void CGameClient::UpdatePrediction()
 		return;
 	}
 
+	m_TeamsPredicted = m_Teams;
+
 	CServerInfo CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
 
@@ -2033,7 +2038,9 @@ void CGameClient::UpdatePrediction()
 		{
 			bool IsLocal = (i == m_Snap.m_LocalClientID || (PredictDummy() && i == m_PredictedDummyID));
 			int GameTeam = (m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS) ? m_aClients[i].m_Team : i;
-			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur, GameTeam, IsLocal);
+			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
+					m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : 0,
+					GameTeam, IsLocal);
 		}
 	m_GameWorld.NetObjEnd(m_Snap.m_LocalClientID);
 

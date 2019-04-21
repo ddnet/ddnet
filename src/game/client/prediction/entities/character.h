@@ -71,6 +71,7 @@ public:
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
+	bool m_Super;
 	bool m_SuperJump;
 	bool m_Jetpack;
 	int m_FreezeTime;
@@ -139,8 +140,8 @@ public:
 	void SetInput(CNetObj_PlayerInput *pNewInput) { m_LatestInput = m_Input = *pNewInput; };
 	int GetJumped() { return m_Core.m_Jumped; }
 
-	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar);
-	void Read(CNetObj_Character *pChar, bool IsLocal);
+	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
+	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
