@@ -105,6 +105,7 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 	if (pChr && !pChr->m_Super)
 	{
 		pChr->m_Super = true;
+		pSelf->m_World.m_Core.m_apCharacters[pResult->m_ClientID]->m_Super = true;
 		pChr->UnFreeze();
 		pChr->m_TeamBeforeSuper = pChr->Team();
 		pChr->Teams()->SetCharacterTeam(pResult->m_ClientID, TEAM_SUPER);
@@ -121,6 +122,7 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	if (pChr && pChr->m_Super)
 	{
 		pChr->m_Super = false;
+		pSelf->m_World.m_Core.m_apCharacters[pResult->m_ClientID]->m_Super = false;
 		pChr->Teams()->SetForceCharacterTeam(pResult->m_ClientID,
 				pChr->m_TeamBeforeSuper);
 	}
