@@ -514,7 +514,7 @@ void CClient::SendInput()
 			Msg.AddInt(m_PredTick[i]);
 			Msg.AddInt(Size);
 
-			m_aInputs[i][m_CurrentInput[i]].m_Tick = m_PredTick[g_Config.m_ClDummy];
+			m_aInputs[i][m_CurrentInput[i]].m_Tick = m_PredTick[i];
 			m_aInputs[i][m_CurrentInput[i]].m_PredictedTime = m_PredictedTime.Get(Now);
 			m_aInputs[i][m_CurrentInput[i]].m_Time = Now;
 
@@ -541,13 +541,12 @@ const char *CClient::LatestVersion()
 }
 
 // TODO: OPT: do this a lot smarter!
-int *CClient::GetInput(int Tick, int IsDummy)
+int *CClient::GetInput(int Tick)
 {
 	int Best = -1;
-	const int d = IsDummy ^ g_Config.m_ClDummy;
 	for(int i = 0; i < 200; i++)
 	{
-		if(m_aInputs[d][i].m_Tick <= Tick && (Best == -1 || m_aInputs[d][Best].m_Tick < m_aInputs[d][i].m_Tick))
+		if(m_aInputs[g_Config.m_ClDummy][i].m_Tick <= Tick && (Best == -1 || m_aInputs[g_Config.m_ClDummy][Best].m_Tick < m_aInputs[g_Config.m_ClDummy][i].m_Tick))
 			Best = i;
 	}
 
@@ -556,12 +555,11 @@ int *CClient::GetInput(int Tick, int IsDummy)
 	return 0;
 }
 
-int *CClient::GetDirectInput(int Tick, int IsDummy)
+int *CClient::GetDirectInput(int Tick)
 {
-	const int d = IsDummy ^ g_Config.m_ClDummy;
 	for(int i = 0; i < 200; i++)
-		if(m_aInputs[d][i].m_Tick == Tick)
-			return (int *)m_aInputs[d][i].m_aData;
+		if(m_aInputs[g_Config.m_ClDummy][i].m_Tick == Tick)
+			return (int *)m_aInputs[g_Config.m_ClDummy][i].m_aData;
 	return 0;
 }
 

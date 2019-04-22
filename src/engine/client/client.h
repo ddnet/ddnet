@@ -252,8 +252,8 @@ public:
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
-	virtual int *GetInput(int Tick, int IsDummy);
-	virtual int *GetDirectInput(int Tick, int IsDummy);
+	virtual int *GetInput(int Tick);
+	virtual int *GetDirectInput(int Tick);
 
 	const char *LatestVersion();
 
