@@ -2007,52 +2007,9 @@ void CGameClient::UpdatePrediction()
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
 		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData);
 	}
-<<<<<<< HEAD
-	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);
-}
 
-bool CLocalProjectile::GameLayerClipped(vec2 CheckPos)
-{
-	return round_to_int(CheckPos.x) / 32 < -200 || round_to_int(CheckPos.x) / 32 > m_pCollision->GetWidth() + 200 ||
-		round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > m_pCollision->GetHeight()+200;
-}
-
-void CLocalProjectile::Tick(int CurrentTick, int GameTickSpeed, int LocalClientID)
-{
-	if(!m_pWorld)
-		return;
-	if(CurrentTick <= m_StartTick)
-		return;
-	float Pt = (CurrentTick-m_StartTick-1)/(float)GameTickSpeed;
-	float Ct = (CurrentTick-m_StartTick)/(float)GameTickSpeed;
-
-	vec2 PrevPos = GetPos(Pt);
-	vec2 CurPos = GetPos(Ct);
-	vec2 ColPos;
-	vec2 NewPos;
-	int Collide = 0;
-	if(m_pCollision)
-		Collide = m_pCollision->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
-	int Target = m_pGameClient->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, &ColPos, m_Owner, m_pWorld);
-
-	bool IsWeaponCollide = false;
-	if(m_Owner >= 0 && Target >= 0 && m_pGameClient->m_aClients[m_Owner].m_Active && m_pGameClient->m_aClients[Target].m_Active && !m_pGameClient->m_Teams.CanCollide(m_Owner, Target))
-		IsWeaponCollide = true;
-
-	bool OwnerCanProbablyHitOthers = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerCollision
-			|| m_pWorld->m_Tuning[g_Config.m_ClDummy].m_PlayerHooking
-			|| m_pGameClient->m_aClients[m_Owner].m_Super
-			|| !m_pGameClient->m_aClients[m_Owner].m_Solo;
-
-	if(((Target >= 0 && (m_Owner >= 0 ? OwnerCanProbablyHitOthers : true)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
-	{
-		if(m_Explosive && (Target < 0 || (Target >= 0 && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
-			CreateExplosion(ColPos, m_Owner);
-		if(Collide && m_Bouncing != 0)
-=======
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active)
->>>>>>> upstream/master
 		{
 			bool IsLocal = (i == m_Snap.m_LocalClientID);
 			int GameTeam = (m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS) ? m_aClients[i].m_Team : i;
