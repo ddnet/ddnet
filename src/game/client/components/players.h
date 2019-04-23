@@ -15,32 +15,14 @@ class CPlayers : public CComponent
 		const CNetObj_Character *pPlayerChar,
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientID,
-		const vec2 &Position,
 		float Intra = 0.f
-/*		vec2 &PrevPredPos,
-		vec2 &SmoothPos,
-		int &MoveCnt
-*/
 	);
 	void RenderHook(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientID,
-		const vec2 &Position,
-		const vec2 &PositionTo,
 		float Intra = 0.f
-	);
-
-	void Predict(
-		const CNetObj_Character *pPrevChar,
-		const CNetObj_Character *pPlayerChar,
-		const CNetObj_PlayerInfo *pPrevInfo,
-		const CNetObj_PlayerInfo *pPlayerInfo,
-		vec2 &PrevPredPos,
-		vec2 &SmoothPos,
-		int &MoveCnt,
-		vec2 &Position
 	);
 
 	int m_WeaponEmoteQuadContainerIndex;

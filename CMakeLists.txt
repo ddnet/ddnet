@@ -878,6 +878,18 @@ if(CLIENT)
     gameclient.h
     lineinput.cpp
     lineinput.h
+    prediction/entities/character.cpp
+    prediction/entities/character.h
+    prediction/entities/laser.cpp
+    prediction/entities/laser.h
+    prediction/entities/pickup.cpp
+    prediction/entities/pickup.h
+    prediction/entities/projectile.cpp
+    prediction/entities/projectile.h
+    prediction/entity.cpp
+    prediction/entity.h
+    prediction/gameworld.cpp
+    prediction/gameworld.h
     race.cpp
     race.h
     render.cpp

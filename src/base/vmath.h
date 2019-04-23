@@ -42,6 +42,8 @@ public:
 	bool operator !=(const vector2_base &v) const { return x != v.x || y != v.y; }
 
 	operator const T* () { return &x; }
+
+	T &operator[](const int index) { return index ? y : x; }
 };
 
 

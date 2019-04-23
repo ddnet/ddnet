@@ -38,6 +38,8 @@ protected:
 	float m_RenderFrameTime;
 
 	int m_GameTickSpeed;
+
+	float m_FrameTimeAvg;
 public:
 	char m_aNews[3000];
 	int64 m_ReconnectTime;
@@ -84,6 +86,7 @@ public:
 	// other time access
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
 	inline float LocalTime() const { return m_LocalTime; }
+	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
 
 	// actions
 	virtual void Connect(const char *pAddress, const char *pPassword = NULL) = 0;
@@ -124,7 +127,7 @@ public:
 
 	// input
 	virtual int *GetInput(int Tick) = 0;
-	virtual bool InputExists(int Tick) = 0;
+	virtual int *GetDirectInput(int Tick) = 0;
 
 	// remote console
 	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
@@ -196,6 +199,8 @@ public:
 	virtual void GenerateTimeoutSeed() = 0;
 
 	virtual IFriends* Foes() = 0;
+
+	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 };
 
 class IGameClient : public IInterface
