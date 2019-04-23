@@ -1187,10 +1187,6 @@ void CCharacter::Snap(int SnappingClient)
 	if(m_Jetpack || m_NinjaJetpack)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_JETPACK;
 	if(m_FreezeTime > 0)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_FROZEN;
-	if(m_DeepFreeze)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_DEEP_FROZEN;
-	if(m_Hit&DISABLE_HIT_GRENADE)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_GRENADE_HIT;
 	if(m_Hit&DISABLE_HIT_HAMMER)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HAMMER_HIT;
@@ -1198,14 +1194,14 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_RIFLE_HIT;
 	if(m_Hit&DISABLE_HIT_SHOTGUN)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_SHOTGUN_HIT;
-	if(IsPaused())
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SPECTATING;
 	if(m_HasTeleGun)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GUN;
 	if(m_HasTeleGrenade)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_HasTeleLaser)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
+
+	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTick + m_FreezeTime;
 }
 
 int CCharacter::NetworkClipped(int SnappingClient)
