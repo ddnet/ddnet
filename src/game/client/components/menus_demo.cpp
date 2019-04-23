@@ -13,6 +13,7 @@
 
 #include <game/client/render.h>
 #include <game/client/gameclient.h>
+#include <game/client/components/console.h>
 #include <game/localization.h>
 
 #include <game/client/ui.h>
@@ -163,69 +164,71 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle keyboard shortcuts independent of active menu
-
-	// increase/decrease speed
-	if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
+	if(m_pClient->m_pGameConsole->IsClosed())
 	{
-		DemoPlayer()->SetSpeedIndex(+1);
-		LastSpeedChange = time_get();
-	}
-	else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
-	{
-		DemoPlayer()->SetSpeedIndex(-1);
-		LastSpeedChange = time_get();
-	}
-
-	// pause/unpause
-	if(Input()->KeyPress(KEY_SPACE) || Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_K))
-	{
-		if(pInfo->m_Paused)
+		// increase/decrease speed
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
 		{
-			DemoPlayer()->Unpause();
+			DemoPlayer()->SetSpeedIndex(+1);
+			LastSpeedChange = time_get();
 		}
-		else
+		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
 		{
-			DemoPlayer()->Pause();
+			DemoPlayer()->SetSpeedIndex(-1);
+			LastSpeedChange = time_get();
 		}
-	}
 
-	// seek backward/forward 10/5 seconds
-	if(Input()->KeyPress(KEY_J))
-	{
-		DemoPlayer()->SeekTime(-10.0f);
-	}
-	else if(Input()->KeyPress(KEY_L))
-	{
-		DemoPlayer()->SeekTime(10.0f);
-	}
-	else if(Input()->KeyPress(KEY_LEFT))
-	{
-		DemoPlayer()->SeekTime(-5.0f);
-	}
-	else if(Input()->KeyPress(KEY_RIGHT))
-	{
-		DemoPlayer()->SeekTime(5.0f);
-	}
-
-	// seek to 0-90%
-	const int SeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
-	for(unsigned i = 0; i < sizeof(SeekPercentKeys) / sizeof(SeekPercentKeys[0]); i++)
-	{
-		if(Input()->KeyPress(SeekPercentKeys[i]))
+		// pause/unpause
+		if(Input()->KeyPress(KEY_SPACE) || Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_K))
 		{
-			DemoPlayer()->SeekPercent(i * 0.1f);
-			break;
+			if(pInfo->m_Paused)
+			{
+				DemoPlayer()->Unpause();
+			}
+			else
+			{
+				DemoPlayer()->Pause();
+			}
 		}
-	}
 
-	// seek to the beginning/end
-	if(Input()->KeyPress(KEY_HOME))
-	{
-		DemoPlayer()->SeekPercent(0.0f);
-	}
-	else if(Input()->KeyPress(KEY_END))
-	{
-		DemoPlayer()->SeekPercent(1.0f);
+		// seek backward/forward 10/5 seconds
+		if(Input()->KeyPress(KEY_J))
+		{
+			DemoPlayer()->SeekTime(-10.0f);
+		}
+		else if(Input()->KeyPress(KEY_L))
+		{
+			DemoPlayer()->SeekTime(10.0f);
+		}
+		else if(Input()->KeyPress(KEY_LEFT))
+		{
+			DemoPlayer()->SeekTime(-5.0f);
+		}
+		else if(Input()->KeyPress(KEY_RIGHT))
+		{
+			DemoPlayer()->SeekTime(5.0f);
+		}
+
+		// seek to 0-90%
+		const int SeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
+		for(unsigned i = 0; i < sizeof(SeekPercentKeys) / sizeof(SeekPercentKeys[0]); i++)
+		{
+			if(Input()->KeyPress(SeekPercentKeys[i]))
+			{
+				DemoPlayer()->SeekPercent(i * 0.1f);
+				break;
+			}
+		}
+
+		// seek to the beginning/end
+		if(Input()->KeyPress(KEY_HOME))
+		{
+			DemoPlayer()->SeekPercent(0.0f);
+		}
+		else if(Input()->KeyPress(KEY_END))
+		{
+			DemoPlayer()->SeekPercent(1.0f);
+		}
 	}
 
 	TotalHeight = SeekBarHeight+ButtonbarHeight+NameBarHeight+Margins*3;
