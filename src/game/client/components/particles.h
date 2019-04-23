@@ -62,7 +62,7 @@ public:
 
 	CParticles();
 
-	void Add(int Group, CParticle *pPart);
+	void Add(int Group, CParticle *pPart, float TimePassed = 0.f);
 
 	virtual void OnReset();
 	virtual void OnRender();

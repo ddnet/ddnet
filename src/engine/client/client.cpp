@@ -357,6 +357,8 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 	m_ReconnectTime = 0;
 
 	m_GenerateTimeoutSeed = true;
+
+	m_FrameTimeAvg = 0.0001f;
 }
 
 // ----- send functions -----
@@ -553,12 +555,12 @@ int *CClient::GetInput(int Tick)
 	return 0;
 }
 
-bool CClient::InputExists(int Tick)
+int *CClient::GetDirectInput(int Tick)
 {
 	for(int i = 0; i < 200; i++)
 		if(m_aInputs[g_Config.m_ClDummy][i].m_Tick == Tick)
-			return true;
-	return false;
+			return (int *)m_aInputs[g_Config.m_ClDummy][i].m_aData;
+	return 0;
 }
 
 // ------ state handling -----
@@ -2960,6 +2962,8 @@ void CClient::Run()
 					m_RenderFrameTimeHigh = m_RenderFrameTime;
 				m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
 
+				m_FrameTimeAvg = m_FrameTimeAvg*0.9f + m_RenderFrameTime*0.1f;
+
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
 				int64 AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64)g_Config.m_GfxRefreshRate)) : 0;
 				// if the value is over a second time loose, reset the additional time (drop the frames, that are lost already)
@@ -3881,4 +3885,14 @@ int CClient::GetPredictionTime()
 {
 	int64 Now = time_get();
 	return (int)((m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq());
+}
+
+void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount)
+{
+	int64 GameTime = m_GameTime[g_Config.m_ClDummy].Get(time_get());
+	int64 PredTime = m_PredictedTime.Get(time_get());
+	int64 SmoothTime = clamp(GameTime + (int64)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
+
+	*pSmoothTick = (int)(SmoothTime*50/time_freq())+1;
+	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick-1)*time_freq()/50) / (float)(time_freq()/50);
 }

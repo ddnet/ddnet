@@ -43,12 +43,6 @@ enum
 	DIALOG_FILE,
 };
 
-struct CEntity
-{
-	CPoint m_Position;
-	int m_Type;
-};
-
 class CEnvelope
 {
 public:

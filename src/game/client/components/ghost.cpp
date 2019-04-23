@@ -345,8 +345,8 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick() - GhostTick;
 
-		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &pGhost->m_RenderInfo , -2, vec2(), vec2(), IntraTick);
-		m_pClient->m_pPlayers->RenderPlayer(&Prev, &Player, &pGhost->m_RenderInfo, -2, vec2(), IntraTick);
+		m_pClient->m_pPlayers->RenderHook(&Prev, &Player, &pGhost->m_RenderInfo , -2, IntraTick);
+		m_pClient->m_pPlayers->RenderPlayer(&Prev, &Player, &pGhost->m_RenderInfo, -2, IntraTick);
 	}
 }
 

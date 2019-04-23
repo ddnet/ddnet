@@ -35,7 +35,7 @@ void CParticles::OnReset()
 		m_aFirstPart[i] = -1;
 }
 
-void CParticles::Add(int Group, CParticle *pPart)
+void CParticles::Add(int Group, CParticle *pPart, float TimePassed)
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
@@ -69,7 +69,7 @@ void CParticles::Add(int Group, CParticle *pPart)
 	m_aFirstPart[Group] = Id;
 
 	// set some parameters
-	m_aParticles[Id].m_Life = 0;
+	m_aParticles[Id].m_Life = TimePassed;
 }
 
 void CParticles::Update(float TimePassed)

@@ -67,4 +67,7 @@ template <typename T> inline T min(T a, T b) { return a<b?a:b; }
 template <typename T> inline T max(T a, T b) { return a>b?a:b; }
 template <typename T> inline T absolute(T a) { return a<T(0)?-a:a; }
 
+template <typename T> inline T in_range(T a, T lower, T upper) { return lower <= a && a <= upper; }
+template <typename T> inline T in_range(T a, T upper) { return in_range(a, 0, upper); }
+
 #endif // BASE_MATH_H
