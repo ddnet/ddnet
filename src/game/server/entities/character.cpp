@@ -1186,7 +1186,7 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
 	if(m_Jetpack || m_NinjaJetpack)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_JETPACK;
-	if(m_FreezeTime > 0)
+	if(m_Hit&DISABLE_HIT_GRENADE)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_GRENADE_HIT;
 	if(m_Hit&DISABLE_HIT_HAMMER)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HAMMER_HIT;
