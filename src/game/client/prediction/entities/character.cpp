@@ -1071,15 +1071,12 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		SetActiveWeapon(pChar->m_Weapon);
 	}
 
-	if(!pExtended)
+	if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
+		m_DeepFreeze = false;
+	if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10)
 	{
-		if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
-			m_DeepFreeze = false;
-		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10)
-		{
-			m_DeepFreeze = false;
-			UnFreeze();
-		}
+		m_DeepFreeze = false;
+		UnFreeze();
 	}
 	if(!GameWorld()->m_WorldConfig.m_PredictFreeze)
 	{
@@ -1152,13 +1149,6 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_Core.m_Hook = !(pExtended->m_Flags & CHARACTERFLAG_NO_HOOK);
 		m_SuperJump = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
 		m_Jetpack = pExtended->m_Flags & CHARACTERFLAG_JETPACK;
-
-		if(GameWorld()->m_WorldConfig.m_PredictFreeze)
-			m_DeepFreeze = pExtended->m_Flags & CHARACTERFLAG_DEEP_FROZEN;
-
-		bool Frozen = pExtended->m_Flags & CHARACTERFLAG_FROZEN;
-		if(m_FreezeTime > 0 && !Frozen)
-			UnFreeze();
 
 		m_Hit = HIT_ALL;
 		if(pExtended->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT)
