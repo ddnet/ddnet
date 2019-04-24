@@ -58,8 +58,6 @@ CEntity *CGameWorld::FindLast(int Type)
 
 int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type)
 {
-	if(!ppEnts)
-		return 0;
 	if(Type < 0 || Type >= NUM_ENTTYPES)
 		return 0;
 
