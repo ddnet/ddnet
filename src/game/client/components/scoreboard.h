@@ -6,6 +6,7 @@
 
 class CScoreboard : public CComponent
 {
+	int m_SpriteQuadContainerIndex;
 	void RenderGoals(float x, float y, float w);
 	void RenderSpectators(float x, float y, float w);
 	void RenderScoreboard(float x, float y, float w, int Team, const char *pTitle);
@@ -23,6 +24,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnRender();
 	virtual void OnRelease();
+	virtual void OnInit();
 
 	bool Active();
 

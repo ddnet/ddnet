@@ -13,6 +13,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/components/countryflags.h>
+#include <game/client/components/controls.h>
 #include <game/client/components/motd.h>
 #include <game/client/components/statboard.h>
 #include <game/client/components/skins.h>
@@ -43,6 +44,16 @@ void CScoreboard::OnReset()
 	m_ServerRecord = -1.0f;
 }
 
+void CScoreboard::OnInit()
+{
+	m_SpriteQuadContainerIndex = Graphics()->CreateQuadContainer();
+	for(int i = 0; i < NUM_WEAPONS - 1; ++i)
+	{
+		RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[i].m_pSpriteBody);
+		RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 96.f);
+	}
+}
+
 void CScoreboard::OnRelease()
 {
 	m_Active = false;
@@ -66,6 +77,7 @@ void CScoreboard::OnConsoleInit()
 void CScoreboard::RenderGoals(float x, float y, float w)
 {
 	float h = 50.0f;
+	bool rendered = false;
 
 	Graphics()->BlendNormal();
 	Graphics()->TextureSet(-1);
@@ -82,12 +94,14 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit);
 			TextRender()->Text(0, x+10.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1);
+			rendered = true;
 		}
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit);
 			TextRender()->Text(0, x+230.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1);
+			rendered = true;
 		}
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum && m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent)
 		{
@@ -95,6 +109,23 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 			str_format(aBuf, sizeof(aBuf), "%s %d/%d", Localize("Round"), m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent, m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum);
 			float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1);
 			TextRender()->Text(0, x+w-tw-10.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1);
+			rendered = true;
+		}
+	}
+
+	if(rendered)
+		return;
+	// ddrace
+	if(m_pClient->m_Snap.m_pLocalCharacter)
+	{
+		for(int i = 0; i < NUM_WEAPONS - 1; ++i)
+		{
+			if(m_pClient->m_Snap.m_pLocalCharacter->m_Weapon == i)
+				Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+			else
+				Graphics()->SetColor(0.f, 0.f, 0.f, 0.5f);
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+			Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, i, x + (130.0f * i) + 80.0f, y + 25.0f);
 		}
 	}
 }
