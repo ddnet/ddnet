@@ -49,15 +49,35 @@ inline float RgbToHue(vec3 rgb)
 */
 inline vec3 HslToRgb(vec3 HSL)
 {
-	if(HSL.s == 0.0f)
-		return vec3(HSL.l, HSL.l, HSL.l);
-	else
-	{
-		float v2 = HSL.l < 0.5f ? HSL.l * (1.0f + HSL.s) : (HSL.l+HSL.s) - (HSL.s*HSL.l);
-		float v1 = 2.0f * HSL.l - v2;
+	vec3 rgb = vec3(0, 0, 0);
 
-		return vec3(HueToRgb(v1, v2, HSL.h + (1.0f/3.0f)), HueToRgb(v1, v2, HSL.h), HueToRgb(v1, v2, HSL.h - (1.0f/3.0f)));
+	float h1 = HSL.h * 6;
+	float c = (1 - absolute(2 * HSL.l - 1)) * HSL.s;
+	float x = c * (1 - absolute(fmod(h1, 2) - 1));
+
+	switch(round_truncate(h1)) {
+	case 0:
+		rgb.r = c, rgb.g = x;
+		break;
+	case 1:
+		rgb.r = x, rgb.g = c;
+		break;
+	case 2:
+		rgb.g = c, rgb.b = x;
+		break;
+	case 3:
+		rgb.g = x, rgb.b = c;
+		break;
+	case 4:
+		rgb.r = x, rgb.b = c;
+		break;
+	case 5:
+		rgb.r = c, rgb.b = x;
+		break;
 	}
+
+	float m = HSL.l - (c/2);
+	return vec3(rgb.r + m, rgb.g + m, rgb.b + m);
 }
 
 inline vec3 HsvToRgb(vec3 hsv)
@@ -153,7 +173,7 @@ inline vec3 RgbToHsl(vec3 rgb)
 	float c = Max - Min;
 	float h = RgbToHue(rgb);
 	float l = 0.5f * (Max + Min);
-	float s = (l != 1.0f && l != 0.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
+	float s = (Max != 0.0f && Min != 1.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
 
 	return vec3(h, s, l);
 }
@@ -177,7 +197,7 @@ inline vec4 HexToRgba(int hex)
 
 inline vec3 UnpackColor(int v)
 {
-    return vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f);
+    return vec3(fmod(((v>>16)&0xff)/255.0f, 1.0f), ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f);
 }
 
 inline vec4 Color3to4(vec3 col)

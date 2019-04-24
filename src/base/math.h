@@ -27,6 +27,11 @@ inline int round_to_int(float f)
 	return (int)(f-0.5f);
 }
 
+inline int round_truncate(float f)
+{
+	return (int)f;
+}
+
 template<typename T, typename TB>
 inline T mix(const T a, const T b, TB amount)
 {
