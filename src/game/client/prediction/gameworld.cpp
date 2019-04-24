@@ -58,6 +58,8 @@ CEntity *CGameWorld::FindLast(int Type)
 
 int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type)
 {
+	if(!ppEnts)
+		return 0;
 	if(Type < 0 || Type >= NUM_ENTTYPES)
 		return 0;
 
@@ -66,8 +68,7 @@ int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, 
 	{
 		if(distance(pEnt->m_Pos, Pos) < Radius+pEnt->m_ProximityRadius)
 		{
-			if(ppEnts)
-				ppEnts[Num] = pEnt;
+			ppEnts[Num] = pEnt;
 			Num++;
 			if(Num == Max)
 				break;
@@ -296,12 +297,14 @@ CEntity *CGameWorld::GetEntity(int ID, int EntType)
 void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
 {
 	// deal damage
-	CCharacter *apEnts[MAX_CLIENTS];
+	CCharacter *apEnts[MAX_CLIENTS] = {0};
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
 	int Num = FindEntities(Pos, Radius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; i++)
 	{
+		if(!apEnts[i])
+			continue;
 		vec2 Diff = apEnts[i]->m_Pos - Pos;
 		vec2 ForceDir(0,1);
 		float l = length(Diff);
