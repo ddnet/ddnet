@@ -804,7 +804,7 @@ void CChat::OnPrepareLines()
 
 		if(g_Config.m_ClMessageFriend)
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, m_aLines[r].m_Friend ? 1.f : 0.f); //Less ugly hack to align messages
 			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
 		}
@@ -812,17 +812,17 @@ void CChat::OnPrepareLines()
 		// render name
 		if(m_aLines[r].m_ClientID == -1) // system
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 		else if(m_aLines[r].m_ClientID == -2) // client
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageClientHue / 255.0f, g_Config.m_ClMessageClientSat / 255.0f, g_Config.m_ClMessageClientLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 		else if(m_aLines[r].m_Team)
 		{
-			vec3 rgb = CalculateNameColor(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+			ColorRGBA rgb = CalculateNameColor(ColorHSLA(g_Config.m_ClMessageTeamCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f); // team message
 		}
 		else if(m_aLines[r].m_NameColor == TEAM_RED)
@@ -847,27 +847,27 @@ void CChat::OnPrepareLines()
 		// render line
 		if(m_aLines[r].m_ClientID == -1) // system
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 		else if(m_aLines[r].m_ClientID == -2) // client
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageClientHue / 255.0f, g_Config.m_ClMessageClientSat / 255.0f, g_Config.m_ClMessageClientLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 		else if(m_aLines[r].m_Highlighted) // highlighted
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 		else if(m_aLines[r].m_Team) // team message
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 		else // regular message
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageCol));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 

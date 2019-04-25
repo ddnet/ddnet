@@ -10,20 +10,6 @@
 	Title: Color handling
 */
 
-/*
-	Function: HueToRgb
-		Converts Hue to RGB
-*/
-inline float HueToRgb(float v1, float v2, float h)
-{
-	if(h < 0.0f) h += 1;
-	if(h > 1.0f) h -= 1;
-	if((6.0f * h) < 1.0f) return v1 + (v2 - v1) * 6.0f * h;
-	if((2.0f * h) < 1.0f) return v2;
-	if((3.0f * h) < 2.0f) return v1 + (v2 - v1) * ((2.0f/3.0f) - h) * 6.0f;
-	return v1;
-}
-
 inline float RgbToHue(vec3 rgb)
 {
 	float h_min = min(rgb.r, rgb.g, rgb.b);

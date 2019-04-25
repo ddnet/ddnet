@@ -431,6 +431,6 @@ private:
 	class CTeamsCore m_TeamsPredicted;
 };
 
-vec3 CalculateNameColor(vec3 TextColorHSL);
+ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
 
 #endif

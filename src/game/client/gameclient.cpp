@@ -1829,9 +1829,9 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 	return ClosestID;
 }
 
-vec3 CalculateNameColor(vec3 TextColorHSL)
+ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL)
 {
-	return HslToRgb(vec3(TextColorHSL.h, TextColorHSL.s * 0.68f, TextColorHSL.l * 0.81f));
+	return color_cast<ColorRGBA>(ColorHSLA(TextColorHSL.h, TextColorHSL.s * 0.68f, TextColorHSL.l * 0.81f));
 }
 
 void CGameClient::UpdatePrediction()
