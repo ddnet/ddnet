@@ -33,7 +33,7 @@ To compile DDNet yourself, execute the following commands in the source root:
     mkdir build
     cd build
     cmake ..
-    make -j8
+    make -j$(nproc)
 
 Pass the number of threads for compilation to `make -j`. DDNet requires additional libraries, that are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64). The bundled libraries are now in the ddnet-libs submodule.
 
