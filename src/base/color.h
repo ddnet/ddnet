@@ -228,7 +228,11 @@ public:
 class ColorHSLA : public color4_base
 {
 	using color4_base::color4_base;
-	void ClampLighting() { l = 0.5f + l * 0.5f; };
+	void ClampLighting()
+	{
+		if(l < 0.5f)
+			l = 0.5f + l * 0.5f;
+	}
 };
 
 class ColorRGBA : public color4_base
