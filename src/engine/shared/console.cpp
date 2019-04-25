@@ -3,6 +3,8 @@
 #include <new>
 
 #include <base/math.h>
+#include <base/vmath.h>
+#include <base/color.h>
 #include <base/system.h>
 
 #include <engine/storage.h>
@@ -33,6 +35,63 @@ float CConsole::CResult::GetFloat(unsigned Index)
 	if (Index >= m_NumArgs)
 		return 0.0f;
 	return str_tofloat(m_apArgs[Index]);
+}
+
+int CConsole::CResult::GetColor(unsigned Index)
+{
+	if(Index >= m_NumArgs)
+		return -1;
+
+	const char *pStr = m_apArgs[Index];
+	if(str_isallnum(pStr)) // Teeworlds Color (Packed HSL)
+	{
+		return str_toint(pStr);
+	}
+	else if(*pStr == 'r') // Hex RGB
+	{
+		vec3 rgb;
+		int Len = str_length(pStr);
+		if(Len == 4)
+		{
+			unsigned Num = str_toint_base(pStr + 1, 16);
+			rgb.r = ((Num >> 8) & 0x0F + (Num >> 4) & 0xF0) / 255.0f;
+			rgb.g = ((Num >> 4) & 0x0F + (Num >> 0) & 0xF0) / 255.0f;
+			rgb.b = ((Num >> 0) & 0x0F + (Num << 4) & 0xF0) / 255.0f;
+		}
+		else if(Len == 7)
+		{
+			unsigned Num = str_toint_base(pStr + 1, 16);
+			rgb.r = ((Num >> 16) & 0xFF) / 255.0f;
+			rgb.g = ((Num >> 8) & 0xFF) / 255.0f;
+			rgb.b = ((Num >> 0) & 0xFF) / 255.0f;
+		}
+		else
+		{
+			return -1;
+		}
+
+		return PackColor(RgbToHsl(rgb));
+	}
+	else if(!str_comp_nocase(pStr, "red"))
+		return PackColor(vec3(0.0f/6.0f, 1, .5f));
+	else if(!str_comp_nocase(pStr, "yellow"))
+		return PackColor(vec3(1.0f/6.0f, 1, .5f));
+	else if(!str_comp_nocase(pStr, "green"))
+		return PackColor(vec3(2.0f/6.0f, 1, .5f));
+	else if(!str_comp_nocase(pStr, "cyan"))
+		return PackColor(vec3(3.0f/6.0f, 1, .5f));
+	else if(!str_comp_nocase(pStr, "blue"))
+		return PackColor(vec3(4.0f/6.0f, 1, .5f));
+	else if(!str_comp_nocase(pStr, "magenta"))
+		return PackColor(vec3(5.0f/6.0f, 1, .5f));
+	else if(!str_comp_nocase(pStr, "white"))
+		return PackColor(vec3(0, 0, 1));
+	else if(!str_comp_nocase(pStr, "gray"))
+		return PackColor(vec3(0, 0, .5f));
+	else if(!str_comp_nocase(pStr, "black"))
+		return PackColor(vec3(0, 0, 0));
+
+	return -1;
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
@@ -682,6 +741,37 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
+{
+	CIntVariableData *pData = (CIntVariableData *)pUserData;
+
+	if(pResult->NumArguments())
+	{
+		int Val = pResult->GetColor(0);
+
+		// do clamping
+		if(pData->m_Min != pData->m_Max)
+		{
+			if (Val < pData->m_Min)
+				Val = pData->m_Min;
+			if (pData->m_Max != 0 && Val > pData->m_Max)
+				Val = pData->m_Max;
+		}
+
+		*(pData->m_pVariable) = Val;
+		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Val;
+	}
+	else
+	{
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+}
+
+
+
 static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 {
 	CStrVariableData *pData = (CStrVariableData *)pUserData;
@@ -837,6 +927,12 @@ CConsole::CConsole(int FlagMask)
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
 	}
 
+	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+	{ \
+		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def }; \
+		Register(#ScriptName, "?i", Flags, ColVariableCommand, &Data, Desc); \
+	}
+
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
 		static char OldValue[Len] = Def; \
@@ -847,6 +943,7 @@ CConsole::CConsole(int FlagMask)
 	#include "config_variables.h"
 
 	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_COL
 	#undef MACRO_CONFIG_STR
 
 	// DDRace
@@ -1110,6 +1207,8 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
+	#define MACRO_CONFIG_COL(...) MACRO_CONFIG_INT(__VA_ARGS__)
+
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
@@ -1131,6 +1230,7 @@ void CConsole::ResetServerGameSettings()
 	#include "config_variables.h"
 
 	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_COL
 	#undef MACRO_CONFIG_STR
 }
 

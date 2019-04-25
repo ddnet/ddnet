@@ -200,6 +200,11 @@ inline vec3 UnpackColor(int v)
     return vec3(fmod(((v>>16)&0xff)/255.0f, 1.0f), ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f);
 }
 
+inline int PackColor(vec3 hsl)
+{
+	return ((int)(hsl.h * 255.0f) << 16) + ((int)(hsl.s * 255.0f) << 8) + (int)(hsl.l * 255.0f);
+}
+
 inline vec4 Color3to4(vec3 col)
 {
 	return vec4(col[0], col[1], col[2], 1.0f);
