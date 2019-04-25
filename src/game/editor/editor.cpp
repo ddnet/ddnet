@@ -3172,9 +3172,14 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
 				{
 					if(FontSize > 6.0f)
+					{
 						FontSize--;
+					}
 					else
-						str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+					{
+						aBuf[str_length(aBuf) - 4] = '\0';
+						str_append(aBuf, "...", sizeof(aBuf));
+					}
 				}
 			}
 
@@ -3236,9 +3241,14 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
 				{
 					if(FontSize > 6.0f)
+					{
 						FontSize--;
+					}
 					else
-						str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+					{
+						aBuf[str_length(aBuf) - 4] = '\0';
+						str_append(aBuf, "...", sizeof(aBuf));
+					}
 				}
 			}
 
@@ -4640,15 +4650,20 @@ void CEditor::RenderStatusbar(CUIRect View)
 
 		float FontSize = 10.0f;
 
-		while(TextRender()->TextWidth(0, FontSize, m_pTooltip, -1) > View.w)
+		while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > View.w)
 		{
 			if(FontSize > 6.0f)
+			{
 				FontSize--;
+			}
 			else
-				str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+			{
+				aBuf[str_length(aBuf) - 4] = '\0';
+				str_append(aBuf, "...", sizeof(aBuf));
+			}
 		}
 
-		UI()->DoLabel(&View, m_pTooltip, FontSize, -1, View.w);
+		UI()->DoLabel(&View, aBuf, FontSize, -1, View.w);
 	}
 }
 
