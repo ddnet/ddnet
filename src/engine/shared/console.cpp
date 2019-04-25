@@ -37,7 +37,7 @@ float CConsole::CResult::GetFloat(unsigned Index)
 	return str_tofloat(m_apArgs[Index]);
 }
 
-int CConsole::CResult::GetColor(unsigned Index)
+ColorHSLA CConsole::CResult::GetColor(unsigned Index)
 {
 	if(Index >= m_NumArgs)
 		return -1;
@@ -47,9 +47,9 @@ int CConsole::CResult::GetColor(unsigned Index)
 	{
 		return str_toint(pStr);
 	}
-	else if(*pStr == 'r') // Hex RGB
+	else if(*pStr == '$') // Hex RGB
 	{
-		vec3 rgb;
+		ColorRGBA rgb = ColorRGBA(0, 0, 0, 1);
 		int Len = str_length(pStr);
 		if(Len == 4)
 		{
@@ -70,26 +70,26 @@ int CConsole::CResult::GetColor(unsigned Index)
 			return -1;
 		}
 
-		return PackColor(RgbToHsl(rgb));
+		return color_cast<ColorHSLA>(rgb);
 	}
 	else if(!str_comp_nocase(pStr, "red"))
-		return PackColor(vec3(0.0f/6.0f, 1, .5f));
+		return ColorHSLA(0.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "yellow"))
-		return PackColor(vec3(1.0f/6.0f, 1, .5f));
+		return ColorHSLA(1.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "green"))
-		return PackColor(vec3(2.0f/6.0f, 1, .5f));
+		return ColorHSLA(2.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "cyan"))
-		return PackColor(vec3(3.0f/6.0f, 1, .5f));
+		return ColorHSLA(3.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "blue"))
-		return PackColor(vec3(4.0f/6.0f, 1, .5f));
+		return ColorHSLA(4.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "magenta"))
-		return PackColor(vec3(5.0f/6.0f, 1, .5f));
+		return ColorHSLA(5.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "white"))
-		return PackColor(vec3(0, 0, 1));
+		return ColorHSLA(0, 0, 1);
 	else if(!str_comp_nocase(pStr, "gray"))
-		return PackColor(vec3(0, 0, .5f));
+		return ColorHSLA(0, 0, .5f);
 	else if(!str_comp_nocase(pStr, "black"))
-		return PackColor(vec3(0, 0, 0));
+		return ColorHSLA(0, 0, 0);
 
 	return -1;
 }
@@ -747,7 +747,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments())
 	{
-		int Val = pResult->GetColor(0);
+		int Val = pResult->GetColor(0).Pack() & 0xFFFFFF;
 
 		// do clamping
 		if(pData->m_Min != pData->m_Max)
@@ -764,8 +764,12 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		char aBuf[32];
+		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+		ColorHSLA hsl(*(pData->m_pVariable));
+		str_format(aBuf, sizeof(aBuf), "H: %d deg, S: %d, L: %d", round_truncate(hsl.h * 360), round_truncate(hsl.s * 100), round_truncate(hsl.l * 100));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }

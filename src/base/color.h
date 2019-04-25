@@ -2,6 +2,7 @@
 #ifndef BASE_COLOR_H
 #define BASE_COLOR_H
 
+#include <iostream>
 #include "math.h"
 #include "vmath.h"
 
@@ -200,14 +201,103 @@ inline vec3 UnpackColor(int v)
     return vec3(fmod(((v>>16)&0xff)/255.0f, 1.0f), ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f);
 }
 
-inline int PackColor(vec3 hsl)
+class color4_base : public vector3_base<float>
 {
-	return ((int)(hsl.h * 255.0f) << 16) + ((int)(hsl.s * 255.0f) << 8) + (int)(hsl.l * 255.0f);
+public:
+	float a;
+
+	using vector3_base::vector3_base;
+	color4_base(const vec4 &v4)
+	{
+		x = v4.x;
+		y = v4.y;
+		z = v4.z;
+		a = v4.w;
+	}
+
+	color4_base(float nx, float ny, float nz, float na)
+	{
+		x = nx;
+		y = ny;
+		z = nz;
+		a = na;
+	}
+
+	color4_base(int col)
+	{
+		a = ((col >> 24) & 0xFF) / 255.0f;
+		x = ((col >> 16) & 0xFF) / 255.0f;
+		y = ((col >> 8) & 0xFF) / 255.0f;
+		z = ((col >> 0) & 0xFF) / 255.0f;
+	}
+
+	int Pack()
+	{
+		return ((int)(a * 255.0f) << 24) + ((int)(x * 255.0f) << 16) + ((int)(y * 255.0f) << 8) + (int)(z * 255.0f);
+	}
+};
+
+class ColorHSLA : public color4_base
+{
+	using color4_base::color4_base;
+	void ClampLighting() { l = 0.5f + l * 0.5f; };
+};
+
+class ColorRGBA : public color4_base
+{
+	using color4_base::color4_base;
+};
+
+template <typename T, typename F> T color_cast(const F &f);
+template <>
+inline ColorHSLA color_cast(const ColorRGBA &rgb)
+{
+	float Min = min(rgb.r, rgb.g, rgb.b);
+	float Max = max(rgb.r, rgb.g, rgb.b);
+
+	float c = Max - Min;
+	float h = RgbToHue(rgb);
+	float l = 0.5f * (Max + Min);
+	float s = (Max != 0.0f && Min != 1.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
+
+
+	std::cout << "H: " << h << " S: " << s << " L: " << l << " C: " << c << std::endl;
+
+	return ColorHSLA(h, s, l, rgb.a);
 }
 
-inline vec4 Color3to4(vec3 col)
+template <>
+inline ColorRGBA color_cast(const ColorHSLA &hsl)
 {
-	return vec4(col[0], col[1], col[2], 1.0f);
+	vec3 rgb = vec3(0, 0, 0);
+
+	float h1 = hsl.h * 6;
+	float c = (1 - absolute(2 * hsl.l - 1)) * hsl.s;
+	float x = c * (1 - absolute(fmod(h1, 2) - 1));
+
+	switch(round_truncate(h1)) {
+	case 0:
+		rgb.r = c, rgb.g = x;
+		break;
+	case 1:
+		rgb.r = x, rgb.g = c;
+		break;
+	case 2:
+		rgb.g = c, rgb.b = x;
+		break;
+	case 3:
+		rgb.g = x, rgb.b = c;
+		break;
+	case 4:
+		rgb.r = x, rgb.b = c;
+		break;
+	case 5:
+		rgb.r = c, rgb.b = x;
+		break;
+	}
+
+	float m = hsl.l - (c/2);
+	return ColorRGBA(rgb.r + m, rgb.g + m, rgb.b + m, hsl.a);
 }
 
 #endif

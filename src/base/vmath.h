@@ -174,9 +174,9 @@ template<typename T>
 class vector4_base
 {
 public:
-	union { T x,r; };
-	union { T y,g; };
-	union { T z,b; };
+	union { T x,r,h; };
+	union { T y,g,s; };
+	union { T z,b,l; };
 	union { T w,a; };
 
 	vector4_base() {}

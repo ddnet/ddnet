@@ -3,6 +3,7 @@
 #ifndef ENGINE_CONSOLE_H
 #define ENGINE_CONSOLE_H
 
+#include <base/color.h>
 #include <engine/storage.h>
 #include "kernel.h"
 
@@ -45,7 +46,7 @@ public:
 		virtual int GetInteger(unsigned Index) = 0;
 		virtual float GetFloat(unsigned Index) = 0;
 		virtual const char *GetString(unsigned Index) = 0;
-		virtual int GetColor(unsigned Index) = 0;
+		virtual ColorHSLA GetColor(unsigned Index) = 0;
 
 		int NumArguments() const { return m_NumArgs; }
 		int m_ClientID;
