@@ -1215,7 +1215,7 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
-	#define MACRO_CONFIG_COL(...) MACRO_CONFIG_INT(__VA_ARGS__)
+	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Save,Desc) MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc)
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \

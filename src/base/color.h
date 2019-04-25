@@ -193,8 +193,7 @@ public:
 	float a;
 
 	using vector3_base::vector3_base;
-	color4_base()
-	{}
+	color4_base() {}
 
 	color4_base(const vec4 &v4)
 	{

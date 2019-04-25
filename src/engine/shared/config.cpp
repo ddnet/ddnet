@@ -50,7 +50,7 @@ public:
 	virtual void Reset()
 	{
 		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc) g_Config.m_##Name = def;
-		#define MACRO_CONFIG_COL(...) MACRO_CONFIG_INT(__VA_ARGS__)
+		#define MACRO_CONFIG_COL(Name,ScriptName,def,min,max,flags,desc) MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc)
 		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) str_copy(g_Config.m_##Name, def, len);
 
 		#include "config_variables.h"
@@ -76,7 +76,7 @@ public:
 		char aEscapeBuf[1024*2];
 
 		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc) if((flags)&CFGFLAG_SAVE) { str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); WriteLine(aLineBuf); }
-		#define MACRO_CONFIG_COL(...) MACRO_CONFIG_INT(__VA_ARGS__)
+		#define MACRO_CONFIG_COL(Name,ScriptName,def,min,max,flags,desc) MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc)
 		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) if((flags)&CFGFLAG_SAVE) { EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); WriteLine(aLineBuf); }
 
 		#include "config_variables.h"
