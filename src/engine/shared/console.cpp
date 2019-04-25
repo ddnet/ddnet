@@ -54,9 +54,9 @@ int CConsole::CResult::GetColor(unsigned Index)
 		if(Len == 4)
 		{
 			unsigned Num = str_toint_base(pStr + 1, 16);
-			rgb.r = ((Num >> 8) & 0x0F + (Num >> 4) & 0xF0) / 255.0f;
-			rgb.g = ((Num >> 4) & 0x0F + (Num >> 0) & 0xF0) / 255.0f;
-			rgb.b = ((Num >> 0) & 0x0F + (Num << 4) & 0xF0) / 255.0f;
+			rgb.r = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
+			rgb.g = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
+			rgb.b = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
 		}
 		else if(Len == 7)
 		{
@@ -752,9 +752,9 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		// do clamping
 		if(pData->m_Min != pData->m_Max)
 		{
-			if (Val < pData->m_Min)
+			if(Val < pData->m_Min)
 				Val = pData->m_Min;
-			if (pData->m_Max != 0 && Val > pData->m_Max)
+			if(pData->m_Max != 0 && Val > pData->m_Max)
 				Val = pData->m_Max;
 		}
 
