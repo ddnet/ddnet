@@ -103,6 +103,7 @@ class ColorHSLA : public color4_base
 {
 public:
 	using color4_base::color4_base;
+	ColorHSLA() {};
 	ColorHSLA(color4_base b): color4_base(b) {};
 
 	ColorHSLA Lighten()
@@ -117,6 +118,7 @@ class ColorHSVA : public color4_base
 {
 public:
 	using color4_base::color4_base;
+	ColorHSVA() {};
 	ColorHSVA(color4_base b): color4_base(b) {};
 };
 
@@ -124,6 +126,7 @@ class ColorRGBA : public color4_base
 {
 public:
 	using color4_base::color4_base;
+	ColorRGBA() {};
 	ColorRGBA(color4_base b): color4_base(b) {};
 };
 
