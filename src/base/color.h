@@ -2,7 +2,6 @@
 #ifndef BASE_COLOR_H
 #define BASE_COLOR_H
 
-#include <iostream>
 #include "math.h"
 #include "vmath.h"
 
@@ -128,9 +127,6 @@ inline ColorHSLA color_cast(const ColorRGBA &rgb)
 	float h = RgbToHue(rgb);
 	float l = 0.5f * (Max + Min);
 	float s = (Max != 0.0f && Min != 1.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
-
-
-	std::cout << "H: " << h << " S: " << s << " L: " << l << " C: " << c << std::endl;
 
 	return ColorHSLA(h, s, l, rgb.a);
 }
