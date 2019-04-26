@@ -840,9 +840,7 @@ void CMenus::RenderLoading()
 	LastLoadRender = time_get();
 
 	// need up date this here to get correct
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(
-		g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f,
-		g_Config.m_UiColorLht/255.0f, g_Config.m_UiColorAlpha/255.0f));
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
@@ -1760,9 +1758,7 @@ void CMenus::OnRender()
 	}
 
 	// update colors
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(
-		g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f,
-		g_Config.m_UiColorLht/255.0f, g_Config.m_UiColorAlpha/255.0f));
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	ms_ColorTabbarInactiveOutgame = ColorRGBA(0,0,0,0.25f);
 	ms_ColorTabbarActiveOutgame = ColorRGBA(0,0,0,0.5f);
@@ -1906,9 +1902,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	LastLoadRender = time_get();
 
 	// need up date this here to get correct
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(
-		g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f,
-		g_Config.m_UiColorLht/255.0f, g_Config.m_UiColorAlpha/255.0f));
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);

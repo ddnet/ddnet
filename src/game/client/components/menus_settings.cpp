@@ -1092,12 +1092,13 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	//text.VSplitLeft(15.0f, 0, &text);
 	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, -1);
 
+	ColorHSLA UIColor = ColorHSLA(g_Config.m_UiColor, true);
 	const char *paLabels[] = {
 		Localize("Hue"),
 		Localize("Sat."),
 		Localize("Lht."),
 		Localize("Alpha")};
-	int *pColorSlider[4] = {&g_Config.m_UiColorHue, &g_Config.m_UiColorSat, &g_Config.m_UiColorLht, &g_Config.m_UiColorAlpha};
+	float *pColorSlider[4] = {&UIColor.h, &UIColor.s, &UIColor.l, &UIColor.a};
 	for(int s = 0; s < 4; s++)
 	{
 		CUIRect Text;
@@ -1107,11 +1108,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		//Button.VSplitRight(5.0f, &Button, 0);
 		Button.HSplitTop(4.0f, 0, &Button);
 
-		float k = (*pColorSlider[s]) / 255.0f;
-		k = DoScrollbarH(pColorSlider[s], &Button, k);
-		*pColorSlider[s] = (int)(k*255.0f);
+		float *k = pColorSlider[s];
+		*k = DoScrollbarH(k, &Button, *k);
 		UI()->DoLabelScaled(&Text, paLabels[s], 15.0f, -1);
 	}
+	g_Config.m_UiColor = UIColor.Pack();
 }
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
@@ -2131,7 +2132,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 	aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
-	int *pColorSlider[2][3] = {{&g_Config.m_ClBackgroundHue, &g_Config.m_ClBackgroundSat, &g_Config.m_ClBackgroundLht}, {&g_Config.m_ClBackgroundEntitiesHue, &g_Config.m_ClBackgroundEntitiesSat, &g_Config.m_ClBackgroundEntitiesLht}};
+	ColorHSLA Bg = ColorHSLA(g_Config.m_ClBackgroundCol), BgE = ColorHSLA(g_Config.m_ClBackgroundEntitiesCol);
+	float *pColorSlider[2][3] = {{&Bg.h, &Bg.s, &Bg.l}, {&BgE.h, &BgE.s, &BgE.l}};
 
 	const char *paParts[] = {
 		Localize("Background (regular)"),
@@ -2154,12 +2156,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			Label.VSplitLeft(100.0f, &Label, &Button);
 			Button.HMargin(2.0f, &Button);
 
-			float k = (*pColorSlider[i][s]) / 255.0f;
-			k = DoScrollbarH(pColorSlider[i][s], &Button, k);
-			*pColorSlider[i][s] = (int)(k*255.0f);
+			float *k = pColorSlider[i][s];
+			*k = DoScrollbarH(k, &Button, *k);
 			UI()->DoLabelScaled(&Label, paLabels[s], 15.0f, -1);
 		}
 	}
+	g_Config.m_ClBackgroundCol = Bg.Pack();
+	g_Config.m_ClBackgroundEntitiesCol = BgE.Pack();
 
 	{
 		static float s_Map = 0.0f;

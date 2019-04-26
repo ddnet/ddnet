@@ -775,8 +775,8 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
-		ColorHSLA hsl(*(pData->m_pVariable));
-		str_format(aBuf, sizeof(aBuf), "H: %d deg, S: %d, L: %d", round_truncate(hsl.h * 360), round_truncate(hsl.s * 100), round_truncate(hsl.l * 100));
+		ColorHSLA hsl(*(pData->m_pVariable), true);
+		str_format(aBuf, sizeof(aBuf), "H: %d deg, S: %d, L: %d A: %d", round_truncate(hsl.h * 360), round_truncate(hsl.s * 100), round_truncate(hsl.l * 100), round_truncate(hsl.a * 100));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 		ColorRGBA rgb = color_cast<ColorRGBA>(hsl);

@@ -278,12 +278,8 @@ MACRO_CONFIG_INT(ClShowOthersAlpha, cl_show_others_alpha, 40, 0, 100, CFGFLAG_CL
 MACRO_CONFIG_INT(ClOverlayEntities, cl_overlay_entities, 0, 0, 100, CFGFLAG_CLIENT, "Overlay game tiles with a percentage of opacity")
 MACRO_CONFIG_INT(ClShowQuads, cl_show_quads, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show quads")
 MACRO_CONFIG_INT(ClZoomBackgroundLayers, cl_zoom_background_layers, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom background layers")
-MACRO_CONFIG_INT(ClBackgroundHue, cl_background_hue, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color hue")
-MACRO_CONFIG_INT(ClBackgroundSat, cl_background_sat, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color saturation")
-MACRO_CONFIG_INT(ClBackgroundLht, cl_background_lht, 128, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color lightness")
-MACRO_CONFIG_INT(ClBackgroundEntitiesHue, cl_background_entities_hue, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color hue")
-MACRO_CONFIG_INT(ClBackgroundEntitiesSat, cl_background_entities_sat, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color saturation")
-MACRO_CONFIG_INT(ClBackgroundEntitiesLht, cl_background_entities_lht, 128, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color lightness")
+MACRO_CONFIG_COL(ClBackgroundCol, cl_background_col, 128, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color") //0 0 128
+MACRO_CONFIG_COL(ClBackgroundEntitiesCol, cl_background_entities_col, 128, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color") //0 0 128
 MACRO_CONFIG_STR(ClBackgroundEntities, cl_background_entities, 100, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities)")
 MACRO_CONFIG_INT(ClBackgroundShowTilesLayers, cl_background_show_tiles_layers, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether draw tiles layers when using custom background (entities)")
 MACRO_CONFIG_INT(SvShowOthers, sv_show_others, 1, 0, 1, CFGFLAG_SERVER, "Whether players can user the command showothers or not")
