@@ -1282,8 +1282,8 @@ void CGameClient::OnNewSnapshot()
 				return static_cast<bool>(p1);
 			if (!p1)
 				return false;
-			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::minimum() : p1->m_Score) >
-				((IsGameTypeRace && p2->m_Score == -9999) ? std::numeric_limits<int>::minimum() : p2->m_Score));
+			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::min() : p1->m_Score) >
+				((IsGameTypeRace && p2->m_Score == -9999) ? std::numeric_limits<int>::min() : p2->m_Score));
 		});
 
 	// sort player infos by DDRace Team (and score between)
