@@ -944,7 +944,7 @@ CConsole::CConsole(int FlagMask)
 
 	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		static CColVariableData Data = { static_cast<bool>(Flags & CFGFLAG_COLLIGHT), this, &g_Config.m_##Name, Min, Max, Def }; \
+		static CColVariableData Data = { static_cast<bool>((Flags) & CFGFLAG_COLLIGHT), this, &g_Config.m_##Name, Min, Max, Def }; \
 		Register(#ScriptName, "?i", Flags, ColVariableCommand, &Data, Desc); \
 	}
 
