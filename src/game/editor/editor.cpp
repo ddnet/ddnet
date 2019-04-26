@@ -639,7 +639,7 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
-int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, vec3 BaseColor)
+int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA BaseColor)
 {
 	float Bright = Checked ? 1.0f : 0.5f;
 	float Alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
@@ -4906,7 +4906,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int sEnvelopeEditorID = 0;
 		static int s_ActiveChannels = 0xf;
 
-		vec3 aColors[] = {vec3(1,0.2f,0.2f), vec3(0.2f,1,0.2f), vec3(0.2f,0.2f,1), vec3(1,1,0.2f)};
+		ColorRGBA aColors[] = {ColorRGBA(1,0.2f,0.2f), ColorRGBA(0.2f,1,0.2f), ColorRGBA(0.2f,0.2f,1), ColorRGBA(1,1,0.2f)};
 
 		if(pEnvelope)
 		{

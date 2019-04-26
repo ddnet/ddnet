@@ -762,11 +762,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 
-					vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-
-					if(!Active)
-						Color.a = 0.2f;
-					TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
 					UI()->DoLabelScaled(&Rect, pName, FontSize, 0);
 					TextRender()->TextColor(1.0, 1.0, 1.0, 1.0f);
 				}
@@ -776,8 +772,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		{
 			char *pFilterExcludeCountries = Network == IServerBrowser::NETWORK_DDNET ? g_Config.m_BrFilterExcludeCountries : g_Config.m_BrFilterExcludeCountriesKoG;
 			ServerFilter.HSplitTop(17.0f, &ServerFilter, &ServerFilter);
-
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 			const float FlagWidth = 40.0f;
 			const float FlagHeight = 20.0f;
@@ -844,11 +838,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 
-					ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-
-					if(!Active)
-						Color.a = 0.2f;
-
+					ColorRGBA Color(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
 					m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
 				}
 			}

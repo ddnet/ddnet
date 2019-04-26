@@ -1892,7 +1892,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		// do outline
 		RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineCol));
-		vec4 OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
+		ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
 		Graphics()->SetColor(RGB.r, RGB.g, RGB.b, 1.0f); // outline
 		Out = vec2(0.0f, -1.0f) * (3.15f);
 
@@ -1905,7 +1905,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 		// do inner
 		RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerCol));
-		vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
+		ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 		Out = vec2(0.0f, -1.0f) * (2.25f);
 		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
 

@@ -1842,8 +1842,8 @@ void CMenus::RenderBackground()
 	// render background color
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-		vec4 Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
-		vec4 Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
+		ColorRGBA Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
+		ColorRGBA Top(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
 		IGraphics::CColorVertex Array[4] = {
 			IGraphics::CColorVertex(0, Top.r, Top.g, Top.b, Top.a),
 			IGraphics::CColorVertex(1, Top.r, Top.g, Top.b, Top.a),

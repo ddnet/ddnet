@@ -178,7 +178,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 
 void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
                                        unsigned char IndexIn, unsigned char IndexOut,
-                                       float Scale, vec4 Color, int RenderFlags,
+                                       float Scale, ColorRGBA Color, int RenderFlags,
                                        ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -254,7 +254,7 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags,
+void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags,
                                  ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -619,7 +619,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, vec4 Color, int RenderFlags)
+void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -630,7 +630,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ve
 	float FinalTilesetScale = FinalTileSize/TilePixelSize;
 
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+	Graphics()->SetColor(Color);
 
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;
@@ -710,7 +710,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ve
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, float Scale, vec4 Color, int RenderFlags)
+void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	//Graphics()->TextureSet(img_get(tmap->image));
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -723,7 +723,7 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, fl
 	float FinalTilesetScale = FinalTileSize/TilePixelSize;
 
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+	Graphics()->SetColor(Color);
 
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;
@@ -803,7 +803,7 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, fl
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float Scale, vec4 Color, int RenderFlags)
+void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	//Graphics()->TextureSet(img_get(tmap->image));
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -816,7 +816,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 	float FinalTilesetScale = FinalTileSize/TilePixelSize;
 
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+	Graphics()->SetColor(Color);
 
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;
@@ -939,7 +939,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, vec4 Color, int RenderFlags)
+void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -950,7 +950,7 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ve
 	float FinalTilesetScale = FinalTileSize/TilePixelSize;
 
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+	Graphics()->SetColor(Color);
 
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;

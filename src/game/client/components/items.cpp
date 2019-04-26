@@ -226,7 +226,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 
 	// do outline
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineCol));
-	vec4 OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
+	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
 	Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
 	Out = vec2(Dir.y, -Dir.x) * (7.0f*Ia);
 
@@ -239,7 +239,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 
 	// do inner
 	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerCol));
-	vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
+	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 	Out = vec2(Dir.y, -Dir.x) * (5.0f*Ia);
 	Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
 
