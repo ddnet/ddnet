@@ -1049,9 +1049,9 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 		}
 
-		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
+		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(pItem->m_Own)
-			rgb = HslToRgb(vec3(0.33f, 1.0f, 0.75f));
+			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
 
 		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, pItem->HasFile() ? 1.0f : 0.5f);
 

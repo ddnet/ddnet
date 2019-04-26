@@ -1026,8 +1026,8 @@ void CGameClient::OnNewSnapshot()
 				if(m_aClients[ClientID].m_aSkinName[0] == 'x' || m_aClients[ClientID].m_aSkinName[1] == '_')
 					str_copy(m_aClients[ClientID].m_aSkinName, "default", 64);
 
-				m_aClients[ClientID].m_SkinInfo.m_ColorBody = HslToRgb(UnpackColor(m_aClients[ClientID].m_ColorBody));
-				m_aClients[ClientID].m_SkinInfo.m_ColorFeet = HslToRgb(UnpackColor(m_aClients[ClientID].m_ColorFeet));
+				m_aClients[ClientID].m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(m_aClients[ClientID].m_ColorBody));
+				m_aClients[ClientID].m_SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(m_aClients[ClientID].m_ColorFeet));
 				m_aClients[ClientID].m_SkinInfo.m_Size = 64;
 
 				// find new skin
@@ -1038,8 +1038,8 @@ void CGameClient::OnNewSnapshot()
 				else
 				{
 					m_aClients[ClientID].m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(m_aClients[ClientID].m_SkinID)->m_OrgTexture;
-					m_aClients[ClientID].m_SkinInfo.m_ColorBody = vec3(1,1,1);
-					m_aClients[ClientID].m_SkinInfo.m_ColorFeet = vec3(1,1,1);
+					m_aClients[ClientID].m_SkinInfo.m_ColorBody = ColorRGBA(1,1,1);
+					m_aClients[ClientID].m_SkinInfo.m_ColorFeet = ColorRGBA(1,1,1);
 				}
 
 				m_aClients[ClientID].UpdateRenderInfo();
@@ -1616,13 +1616,13 @@ void CGameClient::CClientData::UpdateRenderInfo()
 		const int TeamColors[2] = {65387, 10223467};
 		if(m_Team >= TEAM_RED && m_Team <= TEAM_BLUE)
 		{
-			m_RenderInfo.m_ColorBody = HslToRgb(UnpackColor(TeamColors[m_Team]));
-			m_RenderInfo.m_ColorFeet = HslToRgb(UnpackColor(TeamColors[m_Team]));
+			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(TeamColors[m_Team]));
+			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(TeamColors[m_Team]));
 		}
 		else
 		{
-			m_RenderInfo.m_ColorBody = HslToRgb(UnpackColor(12895054));
-			m_RenderInfo.m_ColorFeet = HslToRgb(UnpackColor(12895054));
+			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12895054));
+			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12895054));
 		}
 	}
 }
@@ -1643,8 +1643,8 @@ void CGameClient::CClientData::Reset()
 	m_Foe = false;
 	m_AuthLevel = AUTHED_NO;
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
-	m_SkinInfo.m_ColorBody = vec3(1,1,1);
-	m_SkinInfo.m_ColorFeet = vec3(1,1,1);
+	m_SkinInfo.m_ColorBody = ColorRGBA(1,1,1);
+	m_SkinInfo.m_ColorFeet = ColorRGBA(1,1,1);
 
 	m_Solo = false;
 	m_Jetpack = false;

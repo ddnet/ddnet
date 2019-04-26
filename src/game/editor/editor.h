@@ -948,7 +948,7 @@ public:
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags=0, const char *pToolTip=0);
 
-	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, vec4 *pColor, const char *pToolTip=0);
+	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip=0);
 
 	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL);
 
@@ -1036,7 +1036,7 @@ public:
 	int GetLineDistance();
 	void ZoomMouseTarget(float ZoomFactor);
 
-	static vec3 ms_PickerColor;
+	static ColorHSVA ms_PickerColor;
 	static int ms_SVPicker;
 	static int ms_HuePicker;
 

@@ -649,8 +649,8 @@ void CPlayers::OnRender()
 				else
 				{
 					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
-					m_aRenderInfo[i].m_ColorBody = vec3(1,1,1);
-					m_aRenderInfo[i].m_ColorFeet = vec3(1,1,1);
+					m_aRenderInfo[i].m_ColorBody = ColorRGBA(1,1,1);
+					m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1,1,1);
 				}
 			}
 		}

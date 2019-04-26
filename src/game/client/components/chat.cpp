@@ -833,7 +833,7 @@ void CChat::OnPrepareLines()
 			TextRender()->TextColor(0.75f, 0.5f, 0.75f, 1.f); // spectator
 		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
 		{
-			vec3 rgb = HslToRgb(vec3(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
 			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
 		}
 		else

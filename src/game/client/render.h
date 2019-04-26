@@ -4,6 +4,7 @@
 #define GAME_CLIENT_RENDER_H
 
 #include <base/vmath.h>
+#include <base/color.h>
 #include <game/mapitems.h>
 #include "ui.h"
 
@@ -14,15 +15,15 @@ public:
 	CTeeRenderInfo()
 	{
 		m_Texture = -1;
-		m_ColorBody = vec3(1,1,1);
-		m_ColorFeet = vec3(1,1,1);
+		m_ColorBody = ColorRGBA(1,1,1);
+		m_ColorFeet = ColorRGBA(1,1,1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
 	};
 
 	int m_Texture;
-	vec3 m_ColorBody;
-	vec3 m_ColorFeet;
+	ColorRGBA m_ColorBody;
+	ColorRGBA m_ColorFeet;
 	float m_Size;
 	int m_GotAirJump;
 };
@@ -69,7 +70,7 @@ public:
 
 	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
 
-	void DrawUIRect(const CUIRect *pRect, vec4 Color, int Corners, float Rounding);
+	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
 
 	void DrawCircle(float x, float y, float r, int Segments);
 

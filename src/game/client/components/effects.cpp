@@ -162,12 +162,12 @@ void CEffects::PlayerSpawn(vec2 Pos)
 
 void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 {
-	vec3 BloodColor(1.0f,1.0f,1.0f);
+	ColorRGBA BloodColor(1.0f,1.0f,1.0f);
 
 	if(ClientID >= 0)
 	{
 		if(m_pClient->m_aClients[ClientID].m_UseCustomColor)
-			BloodColor = HslToRgb(UnpackColor(m_pClient->m_aClients[ClientID].m_ColorBody));
+			BloodColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[ClientID].m_ColorBody));
 		else
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(m_pClient->m_aClients[ClientID].m_SkinID);

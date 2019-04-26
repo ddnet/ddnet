@@ -418,7 +418,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				str_format(aTemp, sizeof(aTemp), "%i", pItem->m_Latency);
 				if(g_Config.m_UiColorizePing)
 				{
-					vec3 rgb = HslToRgb(vec3((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 				}
 
@@ -439,24 +439,24 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 				if(g_Config.m_UiColorizeGametype)
 				{
-					vec3 hsl = vec3(1.0f, 1.0f, 1.0f);
+					ColorHSLA hsl = ColorHSLA(1.0f, 1.0f, 1.0f);
 
 					if(IsVanilla(pItem))
-						hsl = vec3(0.33f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.33f, 1.0f, 0.75f);
 					else if(IsCatch(pItem))
-						hsl = vec3(0.17f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.17f, 1.0f, 0.75f);
 					else if(IsInsta(pItem))
-						hsl = vec3(0.00f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.00f, 1.0f, 0.75f);
 					else if(IsFNG(pItem))
-						hsl = vec3(0.83f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.83f, 1.0f, 0.75f);
 					else if(IsDDNet(pItem))
-						hsl = vec3(0.58f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.58f, 1.0f, 0.75f);
 					else if(IsDDRace(pItem))
-						hsl = vec3(0.75f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.75f, 1.0f, 0.75f);
 					else if(IsRace(pItem))
-						hsl = vec3(0.46f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.46f, 1.0f, 0.75f);
 
-					vec3 rgb = HslToRgb(hsl);
+					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
 					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
 					TextRender()->TextEx(&Cursor, pItem->m_aGameType, -1);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);

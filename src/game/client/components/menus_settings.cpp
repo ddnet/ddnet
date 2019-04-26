@@ -391,14 +391,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
-		OwnSkinInfo.m_ColorBody = HslToRgb(UnpackColor(*ColorBody));
-		OwnSkinInfo.m_ColorFeet = HslToRgb(UnpackColor(*ColorFeet));
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody));
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet));
 	}
 	else
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
-		OwnSkinInfo.m_ColorBody = vec3(1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = vec3(1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
 	}
 	OwnSkinInfo.m_Size = 50.0f*UI()->Scale();
 
@@ -584,14 +584,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(*UseCustomColor)
 			{
 				Info.m_Texture = s->m_ColorTexture;
-				Info.m_ColorBody = HslToRgb(UnpackColor(*ColorBody));
-				Info.m_ColorFeet = HslToRgb(UnpackColor(*ColorFeet));
+				Info.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody));
+				Info.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet));
 			}
 			else
 			{
 				Info.m_Texture = s->m_OrgTexture;
-				Info.m_ColorBody = vec3(1.0f, 1.0f, 1.0f);
-				Info.m_ColorFeet = vec3(1.0f, 1.0f, 1.0f);
+				Info.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+				Info.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
 			}
 
 			Info.m_Size = UI()->Scale()*50.0f;
@@ -604,7 +604,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1,Item.m_Rect.w);
 			if(g_Config.m_Debug)
 			{
-				vec3 BloodColor = *UseCustomColor ? HslToRgb(UnpackColor(*ColorBody)) : s->m_BloodColor;
+				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;
 				Graphics()->TextureSet(-1);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);

@@ -1585,16 +1585,16 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 	pEditor->Graphics()->QuadsBegin();
 
 	// base: white - hue
-	vec3 hsv = pEditor->ms_PickerColor;
+	ColorHSVA hsv = pEditor->ms_PickerColor;
 	IGraphics::CColorVertex ColorArray[4];
 
-	vec3 c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
+	ColorRGBA c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
 	ColorArray[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
+	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
 	ColorArray[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
+	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
 	ColorArray[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
+	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
 	ColorArray[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f);
 
 	pEditor->Graphics()->SetColorVertex(ColorArray, 4);
