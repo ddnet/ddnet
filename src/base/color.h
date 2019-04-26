@@ -159,6 +159,7 @@ inline ColorRGBA color_cast(const ColorHSLA &hsl)
 		rgb.r = x, rgb.b = c;
 		break;
 	case 5:
+	case 6:
 		rgb.r = c, rgb.b = x;
 		break;
 	}
