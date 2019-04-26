@@ -32,23 +32,6 @@ inline float RgbToHue(vec3 rgb)
 	return hue / 6.0f;
 }
 
-/*
-	Function: HexToRgba
-		Converts Hex to Rgba
-
-	Remarks: Hex should be RGBA8
-*/
-inline vec4 HexToRgba(int hex)
-{
-	vec4 c;
-	c.r = ((hex >> 24) & 0xFF) / 255.0f;
-	c.g = ((hex >> 16) & 0xFF) / 255.0f;
-	c.b = ((hex >> 8) & 0xFF) / 255.0f;
-	c.a = (hex & 0xFF) / 255.0f;
-
-	return c;
-}
-
 class color4_base : public vector3_base<float>
 {
 public:
