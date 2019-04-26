@@ -37,13 +37,13 @@
 #include "skins.h"
 #include "controls.h"
 
-vec4 CMenus::ms_GuiColor;
-vec4 CMenus::ms_ColorTabbarInactiveOutgame;
-vec4 CMenus::ms_ColorTabbarActiveOutgame;
-vec4 CMenus::ms_ColorTabbarInactive;
-vec4 CMenus::ms_ColorTabbarActive = vec4(0,0,0,0.5f);
-vec4 CMenus::ms_ColorTabbarInactiveIngame;
-vec4 CMenus::ms_ColorTabbarActiveIngame;
+ColorRGBA CMenus::ms_GuiColor;
+ColorRGBA CMenus::ms_ColorTabbarInactiveOutgame;
+ColorRGBA CMenus::ms_ColorTabbarActiveOutgame;
+ColorRGBA CMenus::ms_ColorTabbarInactive;
+ColorRGBA CMenus::ms_ColorTabbarActive = ColorRGBA(0,0,0,0.5f);
+ColorRGBA CMenus::ms_ColorTabbarInactiveIngame;
+ColorRGBA CMenus::ms_ColorTabbarActiveIngame;
 
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
@@ -84,13 +84,13 @@ CMenus::CMenus()
 	m_Dummy = false;
 }
 
-vec4 CMenus::ButtonColorMul(const void *pID)
+float CMenus::ButtonColorMul(const void *pID)
 {
 	if(UI()->ActiveItem() == pID)
-		return vec4(1,1,1,0.5f);
+		return 0.5f;
 	else if(UI()->HotItem() == pID)
-		return vec4(1,1,1,1.5f);
-	return vec4(1,1,1,1);
+		return 1.5f;
+	return 1;
 }
 
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
@@ -145,7 +145,7 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 
 int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1,0.5f * ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(pRect->h>=20.0f?2.0f:1.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
@@ -154,7 +154,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1,0.5f * ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h*ms_FontmodHeight, 0);
@@ -176,7 +176,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
+		RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1,0.5f), CUI::CORNER_T, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
 	UI()->DoLabel(&t, pText, pRect->h*ms_FontmodHeight, -1);
@@ -193,7 +193,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	t.VSplitLeft(5.0f, 0, &t);
 
 	c.Margin(2.0f, &c);
-	RenderTools()->DrawUIRect(&c, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 3.0f);
+	RenderTools()->DrawUIRect(&c, ColorRGBA(1,1,1,0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 	bool CheckAble = *pBoxText == 'X';
@@ -336,7 +336,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	}
 
 	CUIRect Textbox = *pRect;
-	RenderTools()->DrawUIRect(&Textbox, vec4(1, 1, 1, 0.5f), Corners, 3.0f);
+	RenderTools()->DrawUIRect(&Textbox, ColorRGBA(1, 1, 1, 0.5f), Corners, 3.0f);
 	Textbox.VMargin(2.0f, &Textbox);
 	Textbox.HMargin(2.0f, &Textbox);
 
@@ -452,7 +452,7 @@ int CMenus::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, 
 		ReturnValue = true;
 	}
 
-	RenderTools()->DrawUIRect(&ClearButton, vec4(1, 1, 1, 0.33f) * ButtonColorMul(pClearID), Corners&~CUI::CORNER_L, 3.0f);
+	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * ButtonColorMul(pID)), Corners&~CUI::CORNER_L, 3.0f);
 	UI()->DoLabel(&ClearButton, "×", ClearButton.h * ms_FontmodHeight, 0);
 	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
 	{
@@ -505,17 +505,17 @@ float CMenus::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	// render
 	CUIRect Rail;
 	pRect->VMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, vec4(1,1,1,0.25f), 0, 0.0f);
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1,1,1,0.25f), 0, 0.0f);
 
 	CUIRect Slider = Handle;
 	Slider.w = Rail.x-Slider.x;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_L, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_L, 2.5f);
 	Slider.x = Rail.x+Rail.w;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_R, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_R, 2.5f);
 
 	Slider = Handle;
 	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f*ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
 
 	return ReturnValue;
 }
@@ -564,17 +564,17 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 	// render
 	CUIRect Rail;
 	pRect->HMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, vec4(1,1,1,0.25f), 0, 0.0f);
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1,1,1,0.25f), 0, 0.0f);
 
 	CUIRect Slider = Handle;
 	Slider.h = Rail.y-Slider.y;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_T, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 2.5f);
 	Slider.y = Rail.y+Rail.h;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_B, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_B, 2.5f);
 
 	Slider = Handle;
 	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
 
 	return ReturnValue;
 }
@@ -840,8 +840,9 @@ void CMenus::RenderLoading()
 	LastLoadRender = time_get();
 
 	// need up date this here to get correct
-	ColorRGBA Rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
-	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(
+		g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f,
+		g_Config.m_UiColorLht/255.0f, g_Config.m_UiColorAlpha/255.0f));
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
@@ -1154,7 +1155,7 @@ int CMenus::Render()
 		Box.HMargin(150.0f/UI()->Scale(), &Box);
 
 		// render the box
-		RenderTools()->DrawUIRect(&Box, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
+		RenderTools()->DrawUIRect(&Box, ColorRGBA(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
 
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
@@ -1345,9 +1346,9 @@ int CMenus::Render()
 				Box.HSplitTop(20.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
-				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
 				Part.w = maximum(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
-				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
+				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 			}
 		}
 		else if(m_Popup == POPUP_LANGUAGE)
@@ -1400,7 +1401,7 @@ int CMenus::Render()
 					float OldWidth = Item.m_Rect.w;
 					Item.m_Rect.w = Item.m_Rect.h*2;
 					Item.m_Rect.x += (OldWidth-Item.m_Rect.w)/ 2.0f;
-					vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+					ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 					m_pClient->m_pCountryFlags->Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
 					UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
 				}
@@ -1759,21 +1760,22 @@ void CMenus::OnRender()
 	}
 
 	// update colors
-	ColorRGBA Rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
-	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(
+		g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f,
+		g_Config.m_UiColorLht/255.0f, g_Config.m_UiColorAlpha/255.0f));
 
-	ms_ColorTabbarInactiveOutgame = vec4(0,0,0,0.25f);
-	ms_ColorTabbarActiveOutgame = vec4(0,0,0,0.5f);
+	ms_ColorTabbarInactiveOutgame = ColorRGBA(0,0,0,0.25f);
+	ms_ColorTabbarActiveOutgame = ColorRGBA(0,0,0,0.5f);
 
 	float ColorIngameScaleI = 0.5f;
 	float ColorIngameAcaleA = 0.2f;
-	ms_ColorTabbarInactiveIngame = vec4(
+	ms_ColorTabbarInactiveIngame = ColorRGBA(
 		ms_GuiColor.r*ColorIngameScaleI,
 		ms_GuiColor.g*ColorIngameScaleI,
 		ms_GuiColor.b*ColorIngameScaleI,
 		ms_GuiColor.a*0.8f);
 
-	ms_ColorTabbarActiveIngame = vec4(
+	ms_ColorTabbarActiveIngame = ColorRGBA(
 		ms_GuiColor.r*ColorIngameAcaleA,
 		ms_GuiColor.g*ColorIngameAcaleA,
 		ms_GuiColor.b*ColorIngameAcaleA,
@@ -1904,8 +1906,9 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 	LastLoadRender = time_get();
 
 	// need up date this here to get correct
-	ColorRGBA Rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f, g_Config.m_UiColorLht/255.0f));
-	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(
+		g_Config.m_UiColorHue/255.0f, g_Config.m_UiColorSat/255.0f,
+		g_Config.m_UiColorLht/255.0f, g_Config.m_UiColorAlpha/255.0f));
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);

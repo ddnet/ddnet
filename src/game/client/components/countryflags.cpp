@@ -142,7 +142,7 @@ const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(int Index) const
 	return &m_aCountryFlags[maximum(0, Index%m_aCountryFlags.size())];
 }
 
-void CCountryFlags::Render(int CountryCode, const vec4 *pColor, float x, float y, float w, float h)
+void CCountryFlags::Render(int CountryCode, const ColorRGBA *pColor, float x, float y, float w, float h)
 {
 	const CCountryFlag *pFlag = GetByCountryCode(CountryCode);
 	if(pFlag->m_Texture != -1)

@@ -436,7 +436,7 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 		UI()->SetHotItem(pID);
 
 	CUIRect Textbox = *pRect;
-	RenderTools()->DrawUIRect(&Textbox, vec4(1, 1, 1, 0.5f), Corners, 3.0f);
+	RenderTools()->DrawUIRect(&Textbox, ColorRGBA(1, 1, 1, 0.5f), Corners, 3.0f);
 	Textbox.VMargin(2.0f, &Textbox);
 
 	const char *pDisplayStr = pStr;
@@ -498,13 +498,13 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 	return ReturnValue;
 }
 
-vec4 CEditor::ButtonColorMul(const void *pID)
+float CEditor::ButtonColorMul(const void *pID)
 {
 	if(UI()->ActiveItem() == pID)
-		return vec4(1,1,1,0.5f);
+		return 0.5f;
 	else if(UI()->HotItem() == pID)
-		return vec4(1,1,1,1.5f);
-	return vec4(1,1,1,1);
+		return 1.5f;
+	return 1.0f;
 }
 
 float CEditor::UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
@@ -546,67 +546,67 @@ float CEditor::UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Curre
 	// render
 	CUIRect Rail;
 	pRect->VMargin(5.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, vec4(1,1,1,0.25f), 0, 0.0f);
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1,1,1,0.25f), 0, 0.0f);
 
 	CUIRect Slider = Handle;
 	Slider.w = Rail.x-Slider.x;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_L, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_L, 2.5f);
 	Slider.x = Rail.x+Rail.w;
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f), CUI::CORNER_R, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f), CUI::CORNER_R, 2.5f);
 
 	Slider = Handle;
 	Slider.Margin(5.0f, &Slider);
-	RenderTools()->DrawUIRect(&Slider, vec4(1,1,1,0.25f)*ButtonColorMul(pID), CUI::CORNER_ALL, 2.5f);
+	RenderTools()->DrawUIRect(&Slider, ColorRGBA(1,1,1,0.25f * ButtonColorMul(pID)), CUI::CORNER_ALL, 2.5f);
 
 	return Ret;
 }
 
-vec4 CEditor::GetButtonColor(const void *pID, int Checked)
+ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
 {
 	if(Checked < 0)
-		return vec4(0,0,0,0.5f);
+		return ColorRGBA(0,0,0,0.5f);
 
 	switch(Checked)
 	{
 	case 7: // selected + game layers
 		if(UI()->HotItem() == pID)
-			return vec4(1,0,0,0.4f);
-		return vec4(1,0,0,0.2f);
+			return ColorRGBA(1,0,0,0.4f);
+		return ColorRGBA(1,0,0,0.2f);
 
 	case 6: // game layers
 		if(UI()->HotItem() == pID)
-			return vec4(1,1,1,0.4f);
-		return vec4(1,1,1,0.2f);
+			return ColorRGBA(1,1,1,0.4f);
+		return ColorRGBA(1,1,1,0.2f);
 
 	case 5: // selected + image/sound should be embedded
 		if(UI()->HotItem() == pID)
-			return vec4(1,0,0,0.75f);
-		return vec4(1,0,0,0.5f);
+			return ColorRGBA(1,0,0,0.75f);
+		return ColorRGBA(1,0,0,0.5f);
 
 	case 4: // image/sound should be embedded
 		if(UI()->HotItem() == pID)
-			return vec4(1,0,0,1.0f);
-		return vec4(1,0,0,0.875f);
+			return ColorRGBA(1,0,0,1.0f);
+		return ColorRGBA(1,0,0,0.875f);
 
 	case 3: // selected + unused image/sound
 		if(UI()->HotItem() == pID)
-			return vec4(1,0,1,0.75f);
-		return vec4(1,0,1,0.5f);
+			return ColorRGBA(1,0,1,0.75f);
+		return ColorRGBA(1,0,1,0.5f);
 
 	case 2: // unused image/sound
 		if(UI()->HotItem() == pID)
-			return vec4(0,0,1,0.75f);
-		return vec4(0,0,1,0.5f);
+			return ColorRGBA(0,0,1,0.75f);
+		return ColorRGBA(0,0,1,0.5f);
 
 	case 1: // selected
 		if(UI()->HotItem() == pID)
-			return vec4(1,0,0,0.75f);
-		return vec4(1,0,0,0.5f);
+			return ColorRGBA(1,0,0,0.75f);
+		return ColorRGBA(1,0,0,0.5f);
 
 	default: // regular
 		if(UI()->HotItem() == pID)
-			return vec4(1,1,1,0.75f);
-		return vec4(1,1,1,0.5f);
+			return ColorRGBA(1,1,1,0.75f);
+		return ColorRGBA(1,1,1,0.5f);
 	}
 }
 
@@ -643,7 +643,7 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 {
 	float Bright = Checked ? 1.0f : 0.5f;
 	float Alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
-	vec4 Color = vec4(BaseColor.r*Bright, BaseColor.g*Bright, BaseColor.b*Bright, Alpha);
+	ColorRGBA Color = ColorRGBA(BaseColor.r*Bright, BaseColor.g*Bright, BaseColor.b*Bright, Alpha);
 
 	RenderTools()->DrawUIRect(pRect, Color, CUI::CORNER_ALL, 3.0f);
 	UI()->DoLabel(pRect, pText, 10.f, 0, -1);
@@ -665,7 +665,7 @@ int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, cons
 int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	CUIRect r = *pRect;
-	RenderTools()->DrawUIRect(&r, vec4(0.5f, 0.5f, 0.5f, 1.0f), CUI::CORNER_T, 3.0f);
+	RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), CUI::CORNER_T, 3.0f);
 
 	r = *pRect;
 	r.VMargin(5.0f, &r);
@@ -775,7 +775,7 @@ void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brig
 	Graphics()->QuadsEnd();
 }
 
-int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, vec4* Color)
+int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, ColorRGBA* Color)
 {
 	// logic
 	static float s_Value;
@@ -2998,7 +2998,7 @@ void CEditor::DoMapEditor(CUIRect View)
 }
 
 
-int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 Color)
+int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color)
 {
 	int Change = -1;
 
@@ -3196,11 +3196,11 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Up.VSplitLeft(1.0f, 0, &Up);
 			Left.VSplitLeft(10.0f, &Left, &Shifter);
 			Shifter.VSplitRight(10.0f, &Shifter, &Right);
-			RenderTools()->DrawUIRect(&Shifter, vec4(1,1,1,0.5f), 0, 0.0f);
+			RenderTools()->DrawUIRect(&Shifter, ColorRGBA(1,1,1,0.5f), 0, 0.0f);
 			UI()->DoLabel(&Shifter, "X", 10.0f, 0, -1);
 			Up.VSplitLeft(10.0f, &Up, &Shifter);
 			Shifter.VSplitRight(10.0f, &Shifter, &Down);
-			RenderTools()->DrawUIRect(&Shifter, vec4(1,1,1,0.5f), 0, 0.0f);
+			RenderTools()->DrawUIRect(&Shifter, ColorRGBA(1,1,1,0.5f), 0, 0.0f);
 			UI()->DoLabel(&Shifter, "Y", 10.0f, 0, -1);
 			if(DoButton_ButtonDec(&pIDs[i], "-", 0, &Left, 0, "Left"))
 			{
@@ -4182,10 +4182,10 @@ void CEditor::RenderFileDialog()
 	CUIRect Preview;
 	float Width = View.w, Height = View.h;
 
-	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.25f), 0, 0);
+	RenderTools()->DrawUIRect(&View, ColorRGBA(0,0,0,0.25f), 0, 0);
 	View.VMargin(150.0f, &View);
 	View.HMargin(50.0f, &View);
-	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.75f), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(&View, ColorRGBA(0,0,0,0.75f), CUI::CORNER_ALL, 5.0f);
 	View.Margin(10.0f, &View);
 
 	CUIRect Title, FileBox, FileBoxLabel, ButtonBar, Scroll, PathBox;
@@ -4203,7 +4203,7 @@ void CEditor::RenderFileDialog()
 	View.VSplitRight(15.0f, &View, &Scroll);
 
 	// title
-	RenderTools()->DrawUIRect(&Title, vec4(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
+	RenderTools()->DrawUIRect(&Title, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 	Title.VMargin(10.0f, &Title);
 	UI()->DoLabel(&Title, m_pFileDialogTitle, 12.0f, -1, -1);
 
@@ -4245,7 +4245,7 @@ void CEditor::RenderFileDialog()
 		// clearSearchbox button
 		{
 			static int s_ClearButton = 0;
-			RenderTools()->DrawUIRect(&ClearBox, vec4(1, 1, 1, 0.33f)*ButtonColorMul(&s_ClearButton), CUI::CORNER_R, 3.0f);
+			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f*ButtonColorMul(&s_ClearButton)), CUI::CORNER_R, 3.0f);
 			UI()->DoLabel(&ClearBox, "×", 10.0f, 0);
 			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &ClearBox))
 			{
@@ -4843,12 +4843,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),"%d/%d", m_SelectedEnvelope+1, m_Map.m_lEnvelopes.size());
 
-		vec4 EnvColor = vec4(1, 1, 1, 0.5f);
+		ColorRGBA EnvColor = ColorRGBA(1, 1, 1, 0.5f);
 		if(m_Map.m_lEnvelopes.size())
 		{
 			EnvColor = IsEnvelopeUsed(m_SelectedEnvelope) ?
-				vec4(1, 0.7f, 0.7f, 0.5f) :
-				vec4(0.7f, 1, 0.7f, 0.5f);
+				ColorRGBA(1, 0.7f, 0.7f, 0.5f) :
+				ColorRGBA(0.7f, 1, 0.7f, 0.5f);
 		}
 
 		RenderTools()->DrawUIRect(&Shifter, EnvColor, 0, 0.0f);
@@ -6093,7 +6093,7 @@ void CEditor::Init()
 	m_Map.m_UndoModified = 0;
 	m_LastUndoUpdateTime = time_get();
 
-	ms_PickerColor = vec3(1.0f, 0.0f, 0.0f);
+	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
 }
 
 void CEditor::DoMapBorder()

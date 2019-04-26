@@ -341,7 +341,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			float OldWidth = Item.m_Rect.w;
 			Item.m_Rect.w = Item.m_Rect.h*2;
 			Item.m_Rect.x += (OldWidth-Item.m_Rect.w)/ 2.0f;
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 			m_pClient->m_pCountryFlags->Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
 			if(pEntry->m_Texture != -1)
 				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
@@ -462,7 +462,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
-	RenderTools()->DrawUIRect(&Label, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&Label, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1, 0), vec2(Label.x+30.0f, Label.y+28.0f));
 	Label.VSplitLeft(70.0f, 0, &Label);
 	UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
@@ -787,7 +787,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		MovementSettings.VMargin(5.0f, &MovementSettings);
 		MovementSettings.HSplitTop(515.0f, &MovementSettings, &WeaponSettings);
-		RenderTools()->DrawUIRect(&MovementSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&MovementSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(10.0f, &MovementSettings);
 
 		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Movement"), -1);
@@ -828,7 +828,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		WeaponSettings.HSplitTop(10.0f, 0, &WeaponSettings);
 		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
-		RenderTools()->DrawUIRect(&WeaponSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&WeaponSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		WeaponSettings.VMargin(10.0f, &WeaponSettings);
 
 		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Weapon"), -1);
@@ -841,7 +841,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		ResetButton.HSplitTop(10.0f, 0, &ResetButton);
 		ResetButton.HSplitTop(40.0f, &ResetButton, 0);
-		RenderTools()->DrawUIRect(&ResetButton, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&ResetButton, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		ResetButton.HMargin(10.0f, &ResetButton);
 		ResetButton.VMargin(30.0f, &ResetButton);
 		ResetButton.HSplitTop(20.0f, &ResetButton, 0);
@@ -854,7 +854,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		VotingSettings.VMargin(5.0f, &VotingSettings);
 		VotingSettings.HSplitTop(80.0f, &VotingSettings, &ChatSettings);
-		RenderTools()->DrawUIRect(&VotingSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&VotingSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		VotingSettings.VMargin(10.0f, &VotingSettings);
 
 		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Voting"), -1);
@@ -867,7 +867,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		ChatSettings.HSplitTop(10.0f, 0, &ChatSettings);
 		ChatSettings.HSplitTop(125.0f, &ChatSettings, &MiscSettings);
-		RenderTools()->DrawUIRect(&ChatSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&ChatSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		ChatSettings.VMargin(10.0f, &ChatSettings);
 
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Chat"), -1);
@@ -880,7 +880,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		MiscSettings.HSplitTop(10.0f, 0, &MiscSettings);
 		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
-		RenderTools()->DrawUIRect(&MiscSettings, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+		RenderTools()->DrawUIRect(&MiscSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MiscSettings.VMargin(10.0f, &MiscSettings);
 
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
@@ -1329,7 +1329,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 			Item.m_Rect.VSplitLeft(Item.m_Rect.h*2.0f, &Rect, &Item.m_Rect);
 			Rect.VMargin(6.0f, &Rect);
 			Rect.HMargin(3.0f, &Rect);
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
+			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 			m_pClient->m_pCountryFlags->Render(r.front().m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 			Item.m_Rect.HSplitTop(2.0f, 0, &Item.m_Rect);
 			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name, 16.0f, -1);

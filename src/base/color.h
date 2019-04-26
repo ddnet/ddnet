@@ -12,32 +12,34 @@
 	Function: RgbToHue
 		Determines the hue from RGB values
 */
-inline float RgbToHue(vec3 rgb)
+inline float RgbToHue(float r, float g, float b)
 {
-	float h_min = minimum(rgb.r, rgb.g, rgb.b);
-	float h_max = maximum(rgb.r, rgb.g, rgb.b);
+	float h_min = minimum(r, g, b);
+	float h_max = maximum(r, g, b);
 
 	float hue = 0.0f;
 	if(h_max != h_min)
 	{
 		float c = h_max - h_min;
-		if(h_max == rgb.r)
-			hue = (rgb.g - rgb.b) / c + (rgb.g < rgb.b ? 6 : 0);
-		else if(h_max == rgb.g)
-			hue = (rgb.b - rgb.r) / c + 2;
+		if(h_max == r)
+			hue = (g - b) / c + (g < b ? 6 : 0);
+		else if(h_max == g)
+			hue = (b - r) / c + 2;
 		else
-			hue = (rgb.r - rgb.g) / c + 4;
+			hue = (r - g) / c + 4;
 	}
 
 	return hue / 6.0f;
 }
 
-class color4_base : public vector3_base<float>
+class color4_base
 {
 public:
-	float a;
+	union { float x, r, h; };
+	union { float y, g, s; };
+	union { float z, b, l, v; };
+	union { float w, a; };
 
-	using vector3_base::vector3_base;
 	color4_base() {}
 
 	color4_base(const vec4 &v4)
@@ -64,6 +66,14 @@ public:
 		a = na;
 	}
 
+	color4_base(float nx, float ny, float nz)
+	{
+		x = nx;
+		y = ny;
+		z = nz;
+		a = 1.0f;
+	}
+
 	color4_base(unsigned col)
 	{
 		a = ((col >> 24) & 0xFF) / 255.0f;
@@ -72,16 +82,29 @@ public:
 		z = ((col >> 0) & 0xFF) / 255.0f;
 	}
 
+	vec4 v4() { return vec4(x, y, z, a); };
+
 	unsigned Pack()
 	{
 		return ((unsigned)(a * 255.0f) << 24) + ((unsigned)(x * 255.0f) << 16) + ((unsigned)(y * 255.0f) << 8) + (unsigned)(z * 255.0f);
 	}
+
+	color4_base SetAlpha(float alpha)
+	{
+		color4_base col;
+		col = *this;
+		col.a = alpha;
+		return col;
+	}
+
 };
 
 class ColorHSLA : public color4_base
 {
 public:
 	using color4_base::color4_base;
+	ColorHSLA(color4_base b): color4_base(b) {};
+
 	ColorHSLA Lighten()
 	{
 		ColorHSLA col = *this;
@@ -92,12 +115,16 @@ public:
 
 class ColorHSVA : public color4_base
 {
+public:
 	using color4_base::color4_base;
+	ColorHSVA(color4_base b): color4_base(b) {};
 };
 
 class ColorRGBA : public color4_base
 {
+public:
 	using color4_base::color4_base;
+	ColorRGBA(color4_base b): color4_base(b) {};
 };
 
 template <typename T, typename F> T color_cast(const F &f) = delete;
@@ -109,7 +136,7 @@ inline ColorHSLA color_cast(const ColorRGBA &rgb)
 	float Max = maximum(rgb.r, rgb.g, rgb.b);
 
 	float c = Max - Min;
-	float h = RgbToHue(rgb);
+	float h = RgbToHue(rgb.r, rgb.g, rgb.b);
 	float l = 0.5f * (Max + Min);
 	float s = (Max != 0.0f && Min != 1.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
 
@@ -175,6 +202,12 @@ template <>
 inline ColorHSVA color_cast(const ColorRGBA &rgb)
 {
 	return color_cast<ColorHSVA>(color_cast<ColorHSLA>(rgb));
+}
+
+template <typename T>
+T color_scale(const color4_base &col, float s)
+{
+	return T(col.x * s, col.y * s, col.z * s, col.a * s);
 }
 
 #endif
