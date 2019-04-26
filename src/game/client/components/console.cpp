@@ -600,7 +600,7 @@ void CGameConsole::OnRender()
 			while(pEntry)
 			{
 				if(pEntry->m_Highlighted)
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
+					TextRender()->TextColor(rgb);
 				else
 					TextRender()->TextColor(1,1,1,1);
 

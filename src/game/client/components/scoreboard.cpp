@@ -136,7 +136,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
-			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
+			TextRender()->TextColor(Color);
 		}
 
 		if(g_Config.m_ClShowIDs)
@@ -457,7 +457,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
-			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
+			TextRender()->TextColor(Color);
 		}
 
 		if(g_Config.m_ClShowIDs)
@@ -479,7 +479,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				m_pClient->m_aClients[GameClient()->m_LocalIDs[0]].m_aClan) == 0)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor));
-			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
+			TextRender()->TextColor(Color);
 		}
 		else
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -500,7 +500,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(g_Config.m_ClEnablePingColor)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			TextRender()->TextColor(rgb);
 		}
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 1000));
 		tw = TextRender()->TextWidth(nullptr, FontSize, aBuf, -1);

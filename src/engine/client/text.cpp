@@ -240,16 +240,8 @@ class CTextRender : public IEngineTextRender
 		}
 	}
 
-	float m_TextR;
-	float m_TextG;
-	float m_TextB;
-	float m_TextA;
-
-	float m_TextOutlineR;
-	float m_TextOutlineG;
-	float m_TextOutlineB;
-	float m_TextOutlineA;
-
+	ColorRGBA m_Color;
+	ColorRGBA m_OutlineColor;
 	CFont *m_pDefaultFont;
 
 	FT_Library m_FTLibrary;
@@ -572,14 +564,8 @@ public:
 	{
 		m_pGraphics = 0;
 
-		m_TextR = 1.0f;
-		m_TextG = 1.0f;
-		m_TextB = 1.0f;
-		m_TextA = 1.0f;
-		m_TextOutlineR = 0.0f;
-		m_TextOutlineG = 0.0f;
-		m_TextOutlineB = 0.0f;
-		m_TextOutlineA = 0.3f;
+		m_Color = ColorRGBA(1,1,1,1);
+		m_OutlineColor = ColorRGBA(0, 0, 0, 0.3f);
 
 		m_pCurFont = 0;
 		m_pDefaultFont = 0;
@@ -772,19 +758,21 @@ public:
 
 	virtual void TextColor(float r, float g, float b, float a)
 	{
-		m_TextR = r;
-		m_TextG = g;
-		m_TextB = b;
-		m_TextA = a;
+		m_Color.r = r;
+		m_Color.g = g;
+		m_Color.b = b;
+		m_Color.a = a;
 	}
+	virtual void TextColor(ColorRGBA rgb) { m_Color = rgb; };
 
 	virtual void TextOutlineColor(float r, float g, float b, float a)
 	{
-		m_TextOutlineR = r;
-		m_TextOutlineG = g;
-		m_TextOutlineB = b;
-		m_TextOutlineA = a;
+		m_OutlineColor.r = r;
+		m_OutlineColor.g = g;
+		m_OutlineColor.b = b;
+		m_OutlineColor.a = a;
 	}
+	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; };
 
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
@@ -862,13 +850,13 @@ public:
 			{
 				Graphics()->TextureSet(-1);
 				Graphics()->TextQuadsBegin();
-				Graphics()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
+				Graphics()->SetColor(m_Color);
 			}
 			else
 			{
 				Graphics()->TextureSet(pFont->m_aTextures[1]);
 				Graphics()->QuadsBegin();
-				Graphics()->SetColor(m_TextOutlineR, m_TextOutlineG, m_TextOutlineB, m_TextOutlineA*m_TextA);
+				Graphics()->SetColor(m_OutlineColor.r, m_OutlineColor.g, m_OutlineColor.b, m_OutlineColor.a*m_Color.a);
 			}
 		}
 
@@ -962,7 +950,7 @@ public:
 					float BearingX = (!ApplyBearingX ? 0.f : pChr->m_OffsetX)*Scale*Size;
 					float CharWidth = pChr->m_Width*Scale*Size;
 
-					if(pCursor->m_Flags&TEXTFLAG_RENDER && m_TextA != 0.f)
+					if(pCursor->m_Flags&TEXTFLAG_RENDER && m_Color.a != 0.f)
 					{
 						if(Graphics()->IsBufferingEnabled())
 							Graphics()->QuadsSetSubset(pChr->m_aUVs[0], pChr->m_aUVs[3], pChr->m_aUVs[2], pChr->m_aUVs[1]);
@@ -1011,7 +999,7 @@ public:
 		{
 			if(Graphics()->IsBufferingEnabled())
 			{
-				float OutlineColor[4] = { m_TextOutlineR, m_TextOutlineG, m_TextOutlineB, m_TextOutlineA*m_TextA };
+				float OutlineColor[4] = { m_OutlineColor.r, m_OutlineColor.g, m_OutlineColor.b, m_OutlineColor.a*m_Color.a };
 				Graphics()->TextQuadsEnd(pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0], pFont->m_aTextures[1], OutlineColor);
 			}
 			else
@@ -1019,7 +1007,7 @@ public:
 				Graphics()->QuadsEndKeepVertices();
 
 				Graphics()->TextureSet(pFont->m_aTextures[0]);
-				Graphics()->ChangeColorOfCurrentQuadVertices(m_TextR, m_TextG, m_TextB, m_TextA);
+				Graphics()->ChangeColorOfCurrentQuadVertices(m_Color.r, m_Color.g, m_Color.b, m_Color.a);
 
 				// render non outlined
 				Graphics()->QuadsDrawCurrentVertices(false);
@@ -1268,7 +1256,7 @@ public:
 					float CharWidth = pChr->m_Width*Scale*Size;
 
 					// don't add text that isn't drawn, the color overwrite is used for that
-					if(m_TextA != 0.f)
+					if(m_Color.a != 0.f)
 					{
 						TextContainer.m_StringInfo.m_CharacterQuads.push_back(STextCharQuad());
 						STextCharQuad& TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads.back();
@@ -1287,37 +1275,37 @@ public:
 						TextCharQuad.m_Vertices[0].m_Y = Y - BearingY;
 						TextCharQuad.m_Vertices[0].m_U = pChr->m_aUVs[0];
 						TextCharQuad.m_Vertices[0].m_V = pChr->m_aUVs[3];
-						TextCharQuad.m_Vertices[0].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
-						TextCharQuad.m_Vertices[0].m_Color.m_G = (unsigned char)(m_TextG * 255.f);
-						TextCharQuad.m_Vertices[0].m_Color.m_B = (unsigned char)(m_TextB * 255.f);
-						TextCharQuad.m_Vertices[0].m_Color.m_A = (unsigned char)(m_TextA * 255.f);
+						TextCharQuad.m_Vertices[0].m_Color.m_R = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_Vertices[0].m_Color.m_G = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_Vertices[0].m_Color.m_B = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_Vertices[0].m_Color.m_A = (unsigned char)(m_Color.a * 255.f);
 
 						TextCharQuad.m_Vertices[1].m_X = (DrawX + CharKerning) + BearingX + CharWidth;
 						TextCharQuad.m_Vertices[1].m_Y = Y - BearingY;
 						TextCharQuad.m_Vertices[1].m_U = pChr->m_aUVs[2];
 						TextCharQuad.m_Vertices[1].m_V = pChr->m_aUVs[3];
-						TextCharQuad.m_Vertices[1].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
-						TextCharQuad.m_Vertices[1].m_Color.m_G = (unsigned char)(m_TextG * 255.f);
-						TextCharQuad.m_Vertices[1].m_Color.m_B = (unsigned char)(m_TextB * 255.f);
-						TextCharQuad.m_Vertices[1].m_Color.m_A = (unsigned char)(m_TextA * 255.f);
+						TextCharQuad.m_Vertices[1].m_Color.m_R = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_Vertices[1].m_Color.m_G = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_Vertices[1].m_Color.m_B = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_Vertices[1].m_Color.m_A = (unsigned char)(m_Color.a * 255.f);
 
 						TextCharQuad.m_Vertices[2].m_X = (DrawX + CharKerning) + BearingX + CharWidth;
 						TextCharQuad.m_Vertices[2].m_Y = Y - BearingY - pChr->m_Height*Scale*Size;
 						TextCharQuad.m_Vertices[2].m_U = pChr->m_aUVs[2];
 						TextCharQuad.m_Vertices[2].m_V = pChr->m_aUVs[1];
-						TextCharQuad.m_Vertices[2].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
-						TextCharQuad.m_Vertices[2].m_Color.m_G = (unsigned char)(m_TextG * 255.f);
-						TextCharQuad.m_Vertices[2].m_Color.m_B = (unsigned char)(m_TextB * 255.f);
-						TextCharQuad.m_Vertices[2].m_Color.m_A = (unsigned char)(m_TextA * 255.f);
+						TextCharQuad.m_Vertices[2].m_Color.m_R = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_Vertices[2].m_Color.m_G = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_Vertices[2].m_Color.m_B = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_Vertices[2].m_Color.m_A = (unsigned char)(m_Color.a * 255.f);
 
 						TextCharQuad.m_Vertices[3].m_X = (DrawX + CharKerning) + BearingX;
 						TextCharQuad.m_Vertices[3].m_Y = Y - BearingY - pChr->m_Height*Scale*Size;
 						TextCharQuad.m_Vertices[3].m_U = pChr->m_aUVs[0];
 						TextCharQuad.m_Vertices[3].m_V = pChr->m_aUVs[1];
-						TextCharQuad.m_Vertices[3].m_Color.m_R = (unsigned char)(m_TextR * 255.f);
-						TextCharQuad.m_Vertices[3].m_Color.m_G = (unsigned char)(m_TextG * 255.f);
-						TextCharQuad.m_Vertices[3].m_Color.m_B = (unsigned char)(m_TextB * 255.f);
-						TextCharQuad.m_Vertices[3].m_Color.m_A = (unsigned char)(m_TextA * 255.f);
+						TextCharQuad.m_Vertices[3].m_Color.m_R = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_Vertices[3].m_Color.m_G = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_Vertices[3].m_Color.m_B = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_Vertices[3].m_Color.m_A = (unsigned char)(m_Color.a * 255.f);
 					}
 
 					if(NextCharacter == 0 && (RenderFlags&TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0)

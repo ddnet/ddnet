@@ -74,9 +74,9 @@ public:
 		a = 1.0f;
 	}
 
-	color4_base(unsigned col)
+	color4_base(unsigned col, bool alpha = false)
 	{
-		a = ((col >> 24) & 0xFF) / 255.0f;
+		a = alpha ? ((col >> 24) & 0xFF) / 255.0f : 1.0f;
 		x = ((col >> 16) & 0xFF) / 255.0f;
 		y = ((col >> 8) & 0xFF) / 255.0f;
 		z = ((col >> 0) & 0xFF) / 255.0f;

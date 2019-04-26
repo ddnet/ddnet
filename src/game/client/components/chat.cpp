@@ -805,7 +805,7 @@ void CChat::OnPrepareLines()
 		if(g_Config.m_ClMessageFriend)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, m_aLines[r].m_Friend ? 1.f : 0.f); //Less ugly hack to align messages
+			TextRender()->TextColor(rgb.SetAlpha(m_aLines[r].m_Friend ? 1.f : 0.f)); //Less ugly hack to align messages
 			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
 		}
 
@@ -813,17 +813,17 @@ void CChat::OnPrepareLines()
 		if(m_aLines[r].m_ClientID == -1) // system
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_ClientID == -2) // client
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_Team)
 		{
 			ColorRGBA rgb = CalculateNameColor(ColorHSLA(g_Config.m_ClMessageTeamCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f); // team message
+			TextRender()->TextColor(rgb); // team message
 		}
 		else if(m_aLines[r].m_NameColor == TEAM_RED)
 			TextRender()->TextColor(1.0f, 0.5f, 0.5f, 1.f); // red
@@ -834,7 +834,7 @@ void CChat::OnPrepareLines()
 		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 		else
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.f);
@@ -848,27 +848,27 @@ void CChat::OnPrepareLines()
 		if(m_aLines[r].m_ClientID == -1) // system
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_ClientID == -2) // client
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_Highlighted) // highlighted
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_Team) // team message
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 		else // regular message
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			TextRender()->TextColor(rgb);
 		}
 
 		if(m_aLines[r].m_TextContainerIndex == -1)

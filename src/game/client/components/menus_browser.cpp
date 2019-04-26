@@ -419,7 +419,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(g_Config.m_UiColorizePing)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					TextRender()->TextColor(rgb);
 				}
 
 				UI()->DoLabelScaled(&Button, aTemp, 12.0f, 1);
@@ -457,7 +457,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						hsl = ColorHSLA(0.46f, 1.0f, 0.75f);
 
 					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					TextRender()->TextColor(rgb);
 					TextRender()->TextEx(&Cursor, pItem->m_aGameType, -1);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 				}

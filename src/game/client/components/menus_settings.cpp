@@ -1546,7 +1546,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Left.HSplitTop(10.0f, &Label, &Left);
 
 			ColorRGBA rgb = color_cast<ColorRGBA>(SMColor);
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			TextRender()->TextColor(rgb);
 
 
 			char name[16];
@@ -1607,7 +1607,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Spectator"), 12.0f, -1);
 
 			ColorRGBA rgb = color_cast<ColorRGBA>(HMColor);
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			TextRender()->TextColor(rgb);
 			char name[16];
 			str_copy(name, g_Config.m_PlayerName, sizeof(name));
 			str_format(aBuf, sizeof(aBuf), ": %s: %s", name, Localize ("Look out!"));
@@ -1662,13 +1662,13 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Left.HSplitTop(10.0f, &Label, &Left);
 
 			ColorRGBA rgbn = CalculateNameColor(TMColor);
-			TextRender()->TextColor(rgbn.r, rgbn.g, rgbn.b, 1.0f);
+			TextRender()->TextColor(rgbn);
 			float tw = TextRender()->TextWidth(0, 12.0f, Localize("Player"), -1);
 			Label.VSplitLeft(tw, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
 
 			ColorRGBA rgb = color_cast<ColorRGBA>(TMColor);
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			TextRender()->TextColor(rgb);
 			str_format(aBuf, sizeof(aBuf), ": %s!",  Localize("We will win"));
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
@@ -1721,7 +1721,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			Right.HSplitTop(10.0f, &Label, &Right);
 
 			ColorRGBA rgbf = color_cast<ColorRGBA>(FMColor);
-			TextRender()->TextColor(rgbf.r, rgbf.g, rgbf.b, 1.0f);
+			TextRender()->TextColor(rgbf);
 			float hw = TextRender()->TextWidth(0, 12.0f, "♥ ", -1);
 			Label.VSplitLeft(hw, &Heart, &Label);
 			UI()->DoLabelScaled(&Heart, "♥ ", 12.0f, -1);
@@ -1732,7 +1732,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Friend"), 12.0f, -1);
 
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageCol));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			TextRender()->TextColor(rgb);
 			str_format(aBuf, sizeof(aBuf), ": %s", Localize("Hi o/"));
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
@@ -1785,7 +1785,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, Localize("Player"), 12.0f, -1);
 
 			ColorRGBA rgb = color_cast<ColorRGBA>(MColor);
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			TextRender()->TextColor(rgb);
 			str_format(aBuf, sizeof(aBuf), ": %s :D", Localize("Hello and welcome"));
 			UI()->DoLabelScaled(&Button, aBuf, 12.0f, -1);
 
