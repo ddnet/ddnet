@@ -37,10 +37,11 @@ float CConsole::CResult::GetFloat(unsigned Index)
 	return str_tofloat(m_apArgs[Index]);
 }
 
-ColorHSLA CConsole::CResult::GetColor(unsigned Index)
+ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 {
+	ColorHSLA hsl = ColorHSLA(0, 0, 0).Lighten();
 	if(Index >= m_NumArgs)
-		return -1;
+		return hsl;
 
 	const char *pStr = m_apArgs[Index];
 	if(str_isallnum(pStr)) // Teeworlds Color (Packed HSL)
@@ -67,31 +68,31 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index)
 		}
 		else
 		{
-			return -1;
+			return hsl;
 		}
 
-		return color_cast<ColorHSLA>(rgb);
+		hsl = color_cast<ColorHSLA>(rgb);
 	}
 	else if(!str_comp_nocase(pStr, "red"))
-		return ColorHSLA(0.0f/6.0f, 1, .5f);
+		hsl = ColorHSLA(0.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "yellow"))
-		return ColorHSLA(1.0f/6.0f, 1, .5f);
+		hsl = ColorHSLA(1.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "green"))
-		return ColorHSLA(2.0f/6.0f, 1, .5f);
+		hsl = ColorHSLA(2.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "cyan"))
-		return ColorHSLA(3.0f/6.0f, 1, .5f);
+		hsl = ColorHSLA(3.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "blue"))
-		return ColorHSLA(4.0f/6.0f, 1, .5f);
+		hsl = ColorHSLA(4.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "magenta"))
-		return ColorHSLA(5.0f/6.0f, 1, .5f);
+		hsl = ColorHSLA(5.0f/6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "white"))
-		return ColorHSLA(0, 0, 1);
+		hsl = ColorHSLA(0, 0, 1);
 	else if(!str_comp_nocase(pStr, "gray"))
-		return ColorHSLA(0, 0, .5f);
+		hsl = ColorHSLA(0, 0, .5f);
 	else if(!str_comp_nocase(pStr, "black"))
-		return ColorHSLA(0, 0, 0);
+		hsl = ColorHSLA(0, 0, 0);
 
-	return -1;
+	return hsl.Lighten();
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
@@ -704,6 +705,12 @@ struct CIntVariableData
 	int m_OldValue;
 };
 
+struct CColVariableData : public CIntVariableData
+{
+	template<class... T> CColVariableData(bool b, T... t) : CIntVariableData{t...}, m_Light(b) {}
+	bool m_Light;
+};
+
 struct CStrVariableData
 {
 	IConsole *m_pConsole;
@@ -743,11 +750,11 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 {
-	CIntVariableData *pData = (CIntVariableData *)pUserData;
+	CColVariableData *pData = (CColVariableData *)pUserData;
 
 	if(pResult->NumArguments())
 	{
-		int Val = pResult->GetColor(0).Pack() & 0xFFFFFF;
+		int Val = pResult->GetColor(0, pData->m_Light).Pack() & 0xFFFFFF;
 
 		// do clamping
 		if(pData->m_Min != pData->m_Max)
@@ -937,7 +944,7 @@ CConsole::CConsole(int FlagMask)
 
 	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def }; \
+		static CColVariableData Data = { static_cast<bool>(Flags & CFGFLAG_COLLIGHT), this, &g_Config.m_##Name, Min, Max, Def }; \
 		Register(#ScriptName, "?i", Flags, ColVariableCommand, &Data, Desc); \
 	}
 

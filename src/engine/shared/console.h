@@ -119,7 +119,7 @@ class CConsole : public IConsole
 		virtual const char *GetString(unsigned Index);
 		virtual int GetInteger(unsigned Index);
 		virtual float GetFloat(unsigned Index);
-		virtual ColorHSLA GetColor(unsigned Index);
+		virtual ColorHSLA GetColor(unsigned Index, bool Light = false);
 
 		// DDRace
 

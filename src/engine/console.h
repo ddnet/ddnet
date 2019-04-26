@@ -46,7 +46,7 @@ public:
 		virtual int GetInteger(unsigned Index) = 0;
 		virtual float GetFloat(unsigned Index) = 0;
 		virtual const char *GetString(unsigned Index) = 0;
-		virtual ColorHSLA GetColor(unsigned Index) = 0;
+		virtual ColorHSLA GetColor(unsigned Index, bool Light) = 0;
 
 		int NumArguments() const { return m_NumArgs; }
 		int m_ClientID;

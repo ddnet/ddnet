@@ -97,12 +97,14 @@ public:
 
 class ColorHSLA : public color4_base
 {
+public:
 	using color4_base::color4_base;
-	void ClampLighting()
+	ColorHSLA Lighten()
 	{
-		if(l < 0.5f)
-			l = 0.5f + l * 0.5f;
-	}
+		ColorHSLA col = *this;
+		col.l = 0.5f + l * 0.5f;
+		return col;
+	};
 };
 
 class ColorHSVA : public color4_base
