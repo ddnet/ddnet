@@ -1105,8 +1105,8 @@ void CMapLayers::RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int Height
 	// if border is still in range of the original corner, it doesn't needs to be redrawn
 	bool CornerVisible = (WidthOffsetToOrigin - 1 < TileCountWidth) && (HeightOffsetToOrigin - 1 < TileCountHeight);
 
-	int CountX = min(WidthOffsetToOrigin, TileCountWidth);
-	int CountY = min(HeightOffsetToOrigin, TileCountHeight);
+	int CountX = minimum(WidthOffsetToOrigin, TileCountWidth);
+	int CountY = minimum(HeightOffsetToOrigin, TileCountHeight);
 
 	int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
 
@@ -1179,7 +1179,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = 32.f;
 			Dir.y = 0.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min(absolute(BorderX0), CountWidth));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum(absolute(BorderX0), CountWidth));
 		}
 	}
 
@@ -1228,7 +1228,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = -32.f;
 			Dir.y = 0.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min((BorderX1 - (pTileLayer->m_Width - 1)), CountWidth));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum((BorderX1 - (pTileLayer->m_Width - 1)), CountWidth));
 		}
 	}
 	if(BorderY0 < 0)
@@ -1244,7 +1244,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = 0.f;
 			Dir.y = 32.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min(absolute(BorderY0), CountHeight));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum(absolute(BorderY0), CountHeight));
 		}
 	}
 	if(BorderY1 >= pTileLayer->m_Height)
@@ -1260,7 +1260,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = 0.f;
 			Dir.y = -32.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min((BorderY1 - (pTileLayer->m_Height - 1)), CountHeight));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum((BorderY1 - (pTileLayer->m_Height - 1)), CountHeight));
 		}
 	}
 }

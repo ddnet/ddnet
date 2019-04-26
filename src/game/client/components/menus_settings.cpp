@@ -801,9 +801,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Mouse sens."), g_Config.m_InpMousesens);
 			UI()->DoLabel(&Label, aBuf, 14.0f*UI()->Scale(), -1);
 			Button.HMargin(2.0f, &Button);
-			int NewValue = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (min(g_Config.m_InpMousesens, 500)-1)/500.0f)*500.0f)+1;
+			int NewValue = (int)(DoScrollbarH(&g_Config.m_InpMousesens, &Button, (minimum(g_Config.m_InpMousesens, 500)-1)/500.0f)*500.0f)+1;
 			if(g_Config.m_InpMousesens < 500 || NewValue < 500)
-				g_Config.m_InpMousesens = min(NewValue, 500);
+				g_Config.m_InpMousesens = minimum(NewValue, 500);
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
@@ -814,9 +814,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
 			UI()->DoLabel(&Label, aBuf, 14.0f*UI()->Scale(), -1);
 			Button.HMargin(2.0f, &Button);
-			int NewValue = (int)(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (min(g_Config.m_UiMousesens, 500)-1)/500.0f)*500.0f)+1;
+			int NewValue = (int)(DoScrollbarH(&g_Config.m_UiMousesens, &Button, (minimum(g_Config.m_UiMousesens, 500)-1)/500.0f)*500.0f)+1;
 			if(g_Config.m_UiMousesens < 500 || NewValue < 500)
-				g_Config.m_UiMousesens = min(NewValue, 500);
+				g_Config.m_UiMousesens = minimum(NewValue, 500);
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
@@ -1082,7 +1082,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Refresh Rate"), "∞");
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	Button.HMargin(2.0f, &Button);
-	int NewRefreshRate = static_cast<int>(DoScrollbarH(&g_Config.m_GfxRefreshRate, &Button, (min(g_Config.m_GfxRefreshRate, 1000))/1000.0f)*1000.0f+0.1f);
+	int NewRefreshRate = static_cast<int>(DoScrollbarH(&g_Config.m_GfxRefreshRate, &Button, (minimum(g_Config.m_GfxRefreshRate, 1000))/1000.0f)*1000.0f+0.1f);
 	if(g_Config.m_GfxRefreshRate <= 1000 || NewRefreshRate < 1000)
 		g_Config.m_GfxRefreshRate = NewRefreshRate;
 
@@ -1196,7 +1196,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		Button.VSplitLeft(190.0f, 0, &Button);
 		static float Offset = 0.0f;
 		DoEditBox(&g_Config.m_SndRate, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
-		g_Config.m_SndRate = max(1, str_toint(aBuf));
+		g_Config.m_SndRate = maximum(1, str_toint(aBuf));
 		m_NeedRestartSound = !s_SndEnable || s_SndRate != g_Config.m_SndRate;
 	}
 

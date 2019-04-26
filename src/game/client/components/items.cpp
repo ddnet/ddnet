@@ -476,11 +476,11 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 
 	float T = Pt;
 	if(DestroyTick >= 0)
-		T = min(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED);
-	T = min(T, LifeSpan/(float)SERVER_TICK_SPEED);
+		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED);
+	T = minimum(T, LifeSpan/(float)SERVER_TICK_SPEED);
 
 	float MinTrailSpan = 0.4f * ((pCurrent->m_Type == WEAPON_GRENADE) ? 0.5f : 0.25f);
-	float Step = max(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
+	float Step = maximum(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
 	for(int i = 1+(int)(Gt/Step); i < (int)(T/Step); i++)
 	{
 		float t = Step * (float)i + 0.4f * Step * (frandom() - 0.5f);
@@ -489,7 +489,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 		vec2 Vel = Pos-PrevPos;
 		float TimePassed = Pt-t;
 		if(Pt - MinTrailSpan > 0.01f)
-			TimePassed = min(TimePassed, (TimePassed-MinTrailSpan)/(Pt - MinTrailSpan)*(MinTrailSpan * 0.5f) + MinTrailSpan);
+			TimePassed = minimum(TimePassed, (TimePassed-MinTrailSpan)/(Pt - MinTrailSpan)*(MinTrailSpan * 0.5f) + MinTrailSpan);
 		// add particle for this projectile
 		if(pCurrent->m_Type == WEAPON_GRENADE)
 			m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1, TimePassed);

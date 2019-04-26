@@ -168,14 +168,14 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				if(Text[i] == '\n')
 				{
-					int max = min(i - Begin + 1, (int)sizeof(Line));
+					int max = minimum(i - Begin + 1, (int)sizeof(Line));
 					str_copy(Line, Text + Begin, max);
 					Begin = i+1;
 					SayChat(Line);
 					while(Text[i] == '\n') i++;
 				}
 			}
-			int max = min(i - Begin + 1, (int)sizeof(Line));
+			int max = minimum(i - Begin + 1, (int)sizeof(Line));
 			str_copy(Line, Text + Begin, max);
 			Begin = i+1;
 			m_Input.Add(Line);
@@ -302,7 +302,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			for(m_PlaceholderLength = 0; *pCursor && *pCursor != ' '; ++pCursor)
 				++m_PlaceholderLength;
 
-			str_copy(m_aCompletionBuffer, m_Input.GetString()+m_PlaceholderOffset, min(static_cast<int>(sizeof(m_aCompletionBuffer)), m_PlaceholderLength+1));
+			str_copy(m_aCompletionBuffer, m_Input.GetString()+m_PlaceholderOffset, minimum(static_cast<int>(sizeof(m_aCompletionBuffer)), m_PlaceholderLength+1));
 		}
 
 		if(m_aCompletionBuffer[0] == '/')
@@ -348,7 +348,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				char aBuf[256];
 				// add part before the name
-				str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+				str_copy(aBuf, m_Input.GetString(), minimum(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
 
 				// add the command
 				str_append(aBuf, "/", sizeof(aBuf));
@@ -425,7 +425,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				char aBuf[256];
 				// add part before the name
-				str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+				str_copy(aBuf, m_Input.GetString(), minimum(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
 
 				// add the name
 				str_append(aBuf, pCompletionString, sizeof(aBuf));
@@ -934,7 +934,7 @@ void CChat::OnRender()
 		if(m_InputUpdate)
 		{
 			if(m_ChatStringOffset > 0 && m_Input.GetLength(Editing) < m_OldChatStringLength)
-				m_ChatStringOffset = max(0, m_ChatStringOffset-(m_OldChatStringLength-m_Input.GetLength(Editing)));
+				m_ChatStringOffset = maximum(0, m_ChatStringOffset-(m_OldChatStringLength-m_Input.GetLength(Editing)));
 
 			if(m_ChatStringOffset > m_Input.GetCursorOffset(Editing))
 				m_ChatStringOffset -= m_ChatStringOffset-m_Input.GetCursorOffset(Editing);

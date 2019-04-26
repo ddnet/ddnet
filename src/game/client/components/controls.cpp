@@ -292,7 +292,7 @@ int CControls::SnapInput(int *pData)
 
 			m_InputData[!g_Config.m_ClDummy] = *pDummyInput;
 		}
-		
+
 		if(g_Config.m_ClDummyControl){
 			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
 			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
@@ -521,9 +521,9 @@ void CControls::ClampMousePos()
 		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
 		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		float MouseMax = min(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
+		float MouseMax = minimum(CameraMaxDistance/FollowFactor + DeadZone, MaxDistance);
 		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
-		float MouseMin = min(CameraMinDistance/FollowFactor + DeadZone, MinDistance);
+		float MouseMin = minimum(CameraMinDistance/FollowFactor + DeadZone, MinDistance);
 
 		if(length(m_MousePos[g_Config.m_ClDummy]) > MouseMax)
 			m_MousePos[g_Config.m_ClDummy] = normalize(m_MousePos[g_Config.m_ClDummy])*MouseMax;

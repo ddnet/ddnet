@@ -14,8 +14,8 @@
 */
 inline float RgbToHue(vec3 rgb)
 {
-	float h_min = min(rgb.r, rgb.g, rgb.b);
-	float h_max = max(rgb.r, rgb.g, rgb.b);
+	float h_min = minimum(rgb.r, rgb.g, rgb.b);
+	float h_max = maximum(rgb.r, rgb.g, rgb.b);
 
 	float hue = 0.0f;
 	if(h_max != h_min)
@@ -122,8 +122,8 @@ template <typename T, typename F> T color_cast(const F &f) = delete;
 template <>
 inline ColorHSLA color_cast(const ColorRGBA &rgb)
 {
-	float Min = min(rgb.r, rgb.g, rgb.b);
-	float Max = max(rgb.r, rgb.g, rgb.b);
+	float Min = minimum(rgb.r, rgb.g, rgb.b);
+	float Max = maximum(rgb.r, rgb.g, rgb.b);
 
 	float c = Max - Min;
 	float h = RgbToHue(rgb);
@@ -172,13 +172,13 @@ template <>
 inline ColorHSLA color_cast(const ColorHSVA &hsv)
 {
 	float l = hsv.v * (1 - hsv.s * 0.5f);
-	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l)/min(l, 1 - l), l);
+	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l)/minimum(l, 1 - l), l);
 }
 
 template <>
 inline ColorHSVA color_cast(const ColorHSLA &hsl)
 {
-	float v = hsl.l + hsl.s * min(hsl.l, 1 - hsl.l);
+	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
 	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v);
 }
 

@@ -105,7 +105,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 {
 	int MasterVol;
 	mem_zero(m_pMixBuffer, m_MaxFrames*2*sizeof(int));
-	Frames = min(Frames, m_MaxFrames);
+	Frames = minimum(Frames, m_MaxFrames);
 
 	// acquire lock while we are mixing
 	lock_wait(m_SoundLock);
@@ -463,7 +463,7 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 
 static int ReadDataOld(void *pBuffer, int Size)
 {
-	int ChunkSize = min(Size, s_WVBufferSize - s_WVBufferPosition);
+	int ChunkSize = minimum(Size, s_WVBufferSize - s_WVBufferPosition);
 	mem_copy(pBuffer, (const char *)s_pWVBuffer + s_WVBufferPosition, ChunkSize);
 	s_WVBufferPosition += ChunkSize;
 	return ChunkSize;
@@ -815,11 +815,11 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 				Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceID].m_pSample->m_NumFrames);
 
 			// at least 200msec off, else depend on buffer size
-			float Threshold = max(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
+			float Threshold = maximum(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
 			if(abs(m_aVoices[VoiceID].m_Tick-Tick) > Threshold)
 			{
 				// take care of looping (modulo!)
-				if( !(IsLooping && (min(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - max(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))
+				if( !(IsLooping && (minimum(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))
 				{
 					m_aVoices[VoiceID].m_Tick = Tick;
 				}
@@ -840,7 +840,7 @@ void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
 		return;
 
 	m_aVoices[VoiceID].m_Shape = ISound::SHAPE_CIRCLE;
-	m_aVoices[VoiceID].m_Circle.m_Radius = max(0.0f, Radius);
+	m_aVoices[VoiceID].m_Circle.m_Radius = maximum(0.0f, Radius);
 }
 
 void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
@@ -854,8 +854,8 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 		return;
 
 	m_aVoices[VoiceID].m_Shape = ISound::SHAPE_RECTANGLE;
-	m_aVoices[VoiceID].m_Rectangle.m_Width = max(0.0f, Width);
-	m_aVoices[VoiceID].m_Rectangle.m_Height = max(0.0f, Height);
+	m_aVoices[VoiceID].m_Rectangle.m_Width = maximum(0.0f, Width);
+	m_aVoices[VoiceID].m_Rectangle.m_Height = maximum(0.0f, Height);
 }
 
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)

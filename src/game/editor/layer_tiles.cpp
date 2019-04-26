@@ -589,8 +589,8 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	mem_zero(pNewData, NewW*NewH*sizeof(CTile));
 
 	// copy old data
-	for(int y = 0; y < min(NewH, m_Height); y++)
-		mem_copy(&pNewData[y*NewW], &m_pTiles[y*m_Width], min(m_Width, NewW)*sizeof(CTile));
+	for(int y = 0; y < minimum(NewH, m_Height); y++)
+		mem_copy(&pNewData[y*NewW], &m_pTiles[y*m_Width], minimum(m_Width, NewW)*sizeof(CTile));
 
 	// replace old
 	delete [] m_pTiles;
@@ -674,10 +674,10 @@ void CLayerTiles::ShowInfo()
 	Graphics()->TextureSet(m_pEditor->Client()->GetDebugFont());
 	Graphics()->QuadsBegin();
 
-	int StartY = max(0, (int)(ScreenY0/32.0f)-1);
-	int StartX = max(0, (int)(ScreenX0/32.0f)-1);
-	int EndY = min((int)(ScreenY1/32.0f)+1, m_Height);
-	int EndX = min((int)(ScreenX1/32.0f)+1, m_Width);
+	int StartY = maximum(0, (int)(ScreenY0/32.0f)-1);
+	int StartX = maximum(0, (int)(ScreenX0/32.0f)-1);
+	int EndY = minimum((int)(ScreenY1/32.0f)+1, m_Height);
+	int EndX = minimum((int)(ScreenX1/32.0f)+1, m_Width);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -1001,8 +1001,8 @@ void CLayerTele::Resize(int NewW, int NewH)
 	mem_zero(pNewTeleData, NewW*NewH*sizeof(CTeleTile));
 
 	// copy old data
-	for(int y = 0; y < min(NewH, m_Height); y++)
-		mem_copy(&pNewTeleData[y*NewW], &m_pTeleTile[y*m_Width], min(m_Width, NewW)*sizeof(CTeleTile));
+	for(int y = 0; y < minimum(NewH, m_Height); y++)
+		mem_copy(&pNewTeleData[y*NewW], &m_pTeleTile[y*m_Width], minimum(m_Width, NewW)*sizeof(CTeleTile));
 
 	// replace old
 	delete [] m_pTeleTile;
@@ -1273,8 +1273,8 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 	mem_zero(pNewSpeedupData, NewW*NewH*sizeof(CSpeedupTile));
 
 	// copy old data
-	for(int y = 0; y < min(NewH, m_Height); y++)
-		mem_copy(&pNewSpeedupData[y*NewW], &m_pSpeedupTile[y*m_Width], min(m_Width, NewW)*sizeof(CSpeedupTile));
+	for(int y = 0; y < minimum(NewH, m_Height); y++)
+		mem_copy(&pNewSpeedupData[y*NewW], &m_pSpeedupTile[y*m_Width], minimum(m_Width, NewW)*sizeof(CSpeedupTile));
 
 	// replace old
 	delete [] m_pSpeedupTile;
@@ -1608,8 +1608,8 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 	mem_zero(pNewSwitchData, NewW*NewH*sizeof(CSwitchTile));
 
 	// copy old data
-	for(int y = 0; y < min(NewH, m_Height); y++)
-		mem_copy(&pNewSwitchData[y*NewW], &m_pSwitchTile[y*m_Width], min(m_Width, NewW)*sizeof(CSwitchTile));
+	for(int y = 0; y < minimum(NewH, m_Height); y++)
+		mem_copy(&pNewSwitchData[y*NewW], &m_pSwitchTile[y*m_Width], minimum(m_Width, NewW)*sizeof(CSwitchTile));
 
 	// replace old
 	delete [] m_pSwitchTile;
@@ -1901,8 +1901,8 @@ void CLayerTune::Resize(int NewW, int NewH)
 	mem_zero(pNewTuneData, NewW*NewH*sizeof(CTuneTile));
 
 	// copy old data
-	for(int y = 0; y < min(NewH, m_Height); y++)
-		mem_copy(&pNewTuneData[y*NewW], &m_pTuneTile[y*m_Width], min(m_Width, NewW)*sizeof(CTuneTile));
+	for(int y = 0; y < minimum(NewH, m_Height); y++)
+		mem_copy(&pNewTuneData[y*NewW], &m_pTuneTile[y*m_Width], minimum(m_Width, NewW)*sizeof(CTuneTile));
 
 	// replace old
 	delete [] m_pTuneTile;

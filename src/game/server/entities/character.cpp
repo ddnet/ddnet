@@ -642,7 +642,7 @@ void CCharacter::HandleWeapons()
 			if ((Server()->Tick() - m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
 			{
 				// Add some ammo
-				m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = min(m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1, 10);
+				m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = minimum(m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1, 10);
 				m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 			}
 		}
@@ -923,7 +923,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 	// m_pPlayer only inflicts half damage on self
 	if(From == m_pPlayer->GetCID())
-		Dmg = max(1, Dmg/2);
+		Dmg = maximum(1, Dmg/2);
 
 	m_DamageTaken++;
 

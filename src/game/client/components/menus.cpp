@@ -289,13 +289,13 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			// do scrolling
 			if(UI()->MouseX() < pRect->x && s_ScrollStart-UI()->MouseX() > 10.0f)
 			{
-				s_AtIndex = max(0, s_AtIndex-1);
+				s_AtIndex = maximum(0, s_AtIndex-1);
 				s_ScrollStart = UI()->MouseX();
 				UpdateOffset = true;
 			}
 			else if(UI()->MouseX() > pRect->x+pRect->w && UI()->MouseX()-s_ScrollStart > 10.0f)
 			{
-				s_AtIndex = min(Len, s_AtIndex+1);
+				s_AtIndex = minimum(Len, s_AtIndex+1);
 				s_ScrollStart = UI()->MouseX();
 				UpdateOffset = true;
 			}
@@ -315,7 +315,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	{
 		if(!UI()->MouseButton(0))
 		{
-			s_AtIndex = min(s_AtIndex, str_length(pStr));
+			s_AtIndex = minimum(s_AtIndex, str_length(pStr));
 			s_DoScroll = false;
 			UI()->SetActiveItem(0);
 		}
@@ -369,7 +369,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 		{
 		int NewTextLen = str_length(Text);
 		int CharsLeft = StrSize - str_length(aInputing) - 1;
-		int FillCharLen = min(NewTextLen, CharsLeft);
+		int FillCharLen = minimum(NewTextLen, CharsLeft);
 		//Push Char Backward
 		for(int i = str_length(aInputing); i >= s_AtIndex ; i--)
 			aInputing[i+FillCharLen] = aInputing[i];
@@ -395,7 +395,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1);
 			do
 			{
-				*Offset += min(wt-*Offset-Textbox.w, Textbox.w/3);
+				*Offset += minimum(wt-*Offset-Textbox.w, Textbox.w/3);
 			}
 			while(w-*Offset > Textbox.w);
 		}
@@ -404,7 +404,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 			// move to the right
 			do
 			{
-				*Offset = max(0.0f, *Offset-Textbox.w/3);
+				*Offset = maximum(0.0f, *Offset-Textbox.w/3);
 			}
 			while(w-*Offset < 0.0f);
 		}
@@ -1327,7 +1327,7 @@ int CMenus::Render()
 				UI()->DoLabel(&Part, aBuf, 20.f, 0, -1);
 
 				// time left
-				int TimeLeft = max(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize()-Client()->MapDownloadAmount())/m_DownloadSpeed) : 1);
+				int TimeLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize()-Client()->MapDownloadAmount())/m_DownloadSpeed) : 1);
 				if(TimeLeft >= 60)
 				{
 					TimeLeft /= 60;
@@ -1346,7 +1346,7 @@ int CMenus::Render()
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-				Part.w = max(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
+				Part.w = maximum(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 			}
 		}

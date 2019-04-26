@@ -330,7 +330,7 @@ void CGhost::OnRender()
 			continue;
 
 		int CurPos = pGhost->m_PlaybackPos;
-		int PrevPos = max(0, CurPos - 1);
+		int PrevPos = maximum(0, CurPos - 1);
 		if(pGhost->m_Path.Get(PrevPos)->m_Tick > GhostTick)
 			continue;
 

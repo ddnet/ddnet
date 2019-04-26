@@ -69,7 +69,7 @@ void CCamera::OnRender()
 		{
 			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
 			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-			float OffsetAmount = max(l-DeadZone, 0.0f) * FollowFactor;
+			float OffsetAmount = maximum(l-DeadZone, 0.0f) * FollowFactor;
 
 			CameraOffset = normalize(m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy])*OffsetAmount;
 		}

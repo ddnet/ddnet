@@ -659,8 +659,8 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 					{
 						if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = gs_ListBoxNewSelected + 1;
 						else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = gs_ListBoxNewSelected - 1;
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = max(gs_ListBoxNewSelected - 20, 0);
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = min(gs_ListBoxNewSelected + 20, gs_ListBoxNumItems - 1);
+						else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = maximum(gs_ListBoxNewSelected - 20, 0);
+						else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = minimum(gs_ListBoxNewSelected + 20, gs_ListBoxNumItems - 1);
 						else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
 						else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = gs_ListBoxNumItems - 1;
 					}
@@ -736,7 +736,7 @@ int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int
 	}
 	else
 	{
-		str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), str_length(pName) - 4));
+		str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), str_length(pName) - 4));
 		Item.m_InfosLoaded = false;
 		Item.m_Date = Date;
 	}
@@ -1057,8 +1057,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_DemolistSelectedIndex + 1;
 				else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_DemolistSelectedIndex - 1;
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = max(m_DemolistSelectedIndex - 20, 0);
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = min(m_DemolistSelectedIndex + 20, m_lDemos.size() - 1);
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = maximum(m_DemolistSelectedIndex - 20, 0);
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = minimum(m_DemolistSelectedIndex + 20, m_lDemos.size() - 1);
 				else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
 				else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = m_lDemos.size() - 1;
 			}

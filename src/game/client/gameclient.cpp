@@ -1282,8 +1282,8 @@ void CGameClient::OnNewSnapshot()
 				return static_cast<bool>(p1);
 			if (!p1)
 				return false;
-			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::min() : p1->m_Score) >
-				((IsGameTypeRace && p2->m_Score == -9999) ? std::numeric_limits<int>::min() : p2->m_Score));
+			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::minimum() : p1->m_Score) >
+				((IsGameTypeRace && p2->m_Score == -9999) ? std::numeric_limits<int>::minimum() : p2->m_Score));
 		});
 
 	// sort player infos by DDRace Team (and score between)
@@ -1492,7 +1492,7 @@ void CGameClient::OnPredict()
 			if(!m_Snap.m_aCharacters[i].m_Active || i == m_Snap.m_LocalClientID || !s_aLastActive[i])
 				continue;
 			vec2 NewPos = (m_PredictedTick == Client()->PredGameTick()) ? m_aClients[i].m_Predicted.m_Pos : m_aClients[i].m_PrevPredicted.m_Pos;
-			vec2 PredErr = (s_aLastPos[i] - NewPos)/(float)min(Client()->GetPredictionTime(), 200);
+			vec2 PredErr = (s_aLastPos[i] - NewPos)/(float)minimum(Client()->GetPredictionTime(), 200);
 			if(in_range(length(PredErr), 0.05f, 5.f))
 			{
 				vec2 PredPos = mix(m_aClients[i].m_PrevPredicted.m_Pos, m_aClients[i].m_Predicted.m_Pos, Client()->PredIntraGameTick());
@@ -1518,7 +1518,7 @@ void CGameClient::OnPredict()
 					}
 					int64 TimePassed = time_get() - m_aClients[i].m_SmoothStart[j];
 					if(in_range(TimePassed, (int64)0, Len-1))
-						MixAmount[j] = min(MixAmount[j], (float)(TimePassed/(double)Len));
+						MixAmount[j] = minimum(MixAmount[j], (float)(TimePassed/(double)Len));
 
 				}
 				for(int j = 0; j < 2; j++)
@@ -1526,7 +1526,7 @@ void CGameClient::OnPredict()
 						MixAmount[j] = MixAmount[j^1];
 				for(int j = 0; j < 2; j++)
 				{
-					int64 Remaining = min((1.f-MixAmount[j])*Len, min(time_freq()*0.700f, (1.f-MixAmount[j^1])*Len + time_freq()*0.300f)); // don't smooth for longer than 700ms, or more than 300ms longer along one axis than the other axis
+					int64 Remaining = minimum((1.f-MixAmount[j])*Len, minimum(time_freq()*0.700f, (1.f-MixAmount[j^1])*Len + time_freq()*0.300f)); // don't smooth for longer than 700ms, or more than 300ms longer along one axis than the other axis
 					int64 Start = time_get() - (Len - Remaining);
 					if(!in_range(Start + Len, m_aClients[i].m_SmoothStart[j], m_aClients[i].m_SmoothStart[j] + Len))
 					{
@@ -2008,7 +2008,7 @@ void CGameClient::DetectStrongHook()
 		int ToPlayer = m_Snap.m_aCharacters[FromPlayer].m_Prev.m_HookedPlayer;
 		if(ToPlayer < 0 || ToPlayer >= MAX_CLIENTS || !m_Snap.m_aCharacters[ToPlayer].m_Active || ToPlayer != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_HookedPlayer)
 			continue;
-		if(abs(min(s_LastUpdateTick[ToPlayer], s_LastUpdateTick[FromPlayer]) - Client()->GameTick()) < SERVER_TICK_SPEED/4)
+		if(abs(minimum(s_LastUpdateTick[ToPlayer], s_LastUpdateTick[FromPlayer]) - Client()->GameTick()) < SERVER_TICK_SPEED/4)
 			continue;
 		if(m_Snap.m_aCharacters[FromPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_Direction
 				|| m_Snap.m_aCharacters[ToPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[ToPlayer].m_Cur.m_Direction)
