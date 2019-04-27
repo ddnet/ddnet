@@ -6,8 +6,7 @@ GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
 CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
 				  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_RIFLE_HIT", "NO_HOOK",
-				  "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
-				  "FROZEN", "DEEP_FROZEN", "SPECTATING"]
+				  "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -213,6 +212,7 @@ Objects = [
 
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
+		NetTick("m_FreezeEnd"),
 	]),
 
 	## Events

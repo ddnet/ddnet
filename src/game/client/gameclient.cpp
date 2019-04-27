@@ -1126,10 +1126,10 @@ void CGameClient::OnNewSnapshot()
 						pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
 
 				// Freeze
-				m_aClients[Item.m_ID].m_Frozen = m_aClients[Item.m_ID].m_Predicted.m_Frozen =
-						pCharacterData->m_Flags & CHARACTERFLAG_FROZEN;
+				m_aClients[Item.m_ID].m_FreezeEnd = m_aClients[Item.m_ID].m_Predicted.m_FreezeEnd =
+						pCharacterData->m_FreezeEnd;
 				m_aClients[Item.m_ID].m_DeepFrozen = m_aClients[Item.m_ID].m_Predicted.m_DeepFrozen =
-						pCharacterData->m_Flags & CHARACTERFLAG_DEEP_FROZEN;
+						pCharacterData->m_FreezeEnd == -1;
 
 				// Telegun
 				m_aClients[Item.m_ID].m_HasTelegunGrenade = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunGrenade =
@@ -1138,9 +1138,6 @@ void CGameClient::OnNewSnapshot()
 						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
 				m_aClients[Item.m_ID].m_HasTelegunLaser = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunLaser =
 						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
-
-				// Other
-				m_aClients[Item.m_ID].m_Spectating = pCharacterData->m_Flags & CHARACTERFLAG_SPECTATING;
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
@@ -1663,9 +1660,8 @@ void CGameClient::CClientData::Reset()
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
-	m_Frozen = false;
+	m_FreezeEnd = 0;
 	m_DeepFrozen = false;
-	m_Spectating = false;
 
 	UpdateRenderInfo();
 }

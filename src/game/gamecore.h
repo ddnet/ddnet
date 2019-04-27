@@ -246,7 +246,7 @@ public:
 	bool m_HasTelegunGun;
 	bool m_HasTelegunGrenade;
 	bool m_HasTelegunLaser;
-	bool m_Frozen;
+	int m_FreezeEnd;
 	bool m_DeepFrozen;
 
 	void LimitForce(vec2 *Force);
