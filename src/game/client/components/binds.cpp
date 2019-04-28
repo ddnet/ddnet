@@ -133,6 +133,10 @@ bool CBinds::OnInput(IInput::CEvent e)
 	if(!Mask)
 		Mask = 1 << MODIFIER_NONE;
 
+	if(Mask == ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)))
+		return true;
+
+
 	bool ret = false;
 	for(int Mod = 0; Mod < MODIFIER_COUNT; Mod++)
 	{
