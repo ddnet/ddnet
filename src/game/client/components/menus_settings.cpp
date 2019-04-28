@@ -657,57 +657,58 @@ typedef struct
 	CLocConstString m_Name;
 	const char *m_pCommand;
 	int m_KeyId;
+	int m_Modifier;
 } CKeyInfo;
 
 static CKeyInfo gs_aKeys[] =
 {
-	{ "Move left", "+left", 0}, // Localize - these strings are localized within CLocConstString
-	{ "Move right", "+right", 0 },
-	{ "Jump", "+jump", 0 },
-	{ "Fire", "+fire", 0 },
-	{ "Hook", "+hook", 0 },
-	{ "Hook collisions", "+showhookcoll", 0 },
-	{ "Pause", "say /pause", 0 },
-	{ "Kill", "kill", 0 },
-	{ "Zoom in", "zoom+", 0 },
-	{ "Zoom out", "zoom-", 0 },
-	{ "Default zoom", "zoom", 0 },
-	{ "Show others", "say /showothers", 0 },
-	{ "Show all", "say /showall", 0 },
-	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0 },
-	{ "Toggle dummy", "toggle cl_dummy 0 1", 0 },
-	{ "Toggle ghost", "toggle cl_race_show_ghost 0 1", 0 },
-	{ "Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0 },
-	{ "Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0 },
+	{ "Move left", "+left", 0, 0 }, // Localize - these strings are localized within CLocConstString
+	{ "Move right", "+right", 0, 0 },
+	{ "Jump", "+jump", 0, 0 },
+	{ "Fire", "+fire", 0, 0 },
+	{ "Hook", "+hook", 0, 0 },
+	{ "Hook collisions", "+showhookcoll", 0, 0 },
+	{ "Pause", "say /pause", 0, 0 },
+	{ "Kill", "kill", 0, 0 },
+	{ "Zoom in", "zoom+", 0, 0 },
+	{ "Zoom out", "zoom-", 0, 0 },
+	{ "Default zoom", "zoom", 0, 0 },
+	{ "Show others", "say /showothers", 0, 0 },
+	{ "Show all", "say /showall", 0, 0 },
+	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0, 0 },
+	{ "Toggle dummy", "toggle cl_dummy 0 1", 0, 0 },
+	{ "Toggle ghost", "toggle cl_race_show_ghost 0 1", 0, 0 },
+	{ "Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0, 0 },
+	{ "Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0 },
 
-	{ "Hammer", "+weapon1", 0 },
-	{ "Pistol", "+weapon2", 0 },
-	{ "Shotgun", "+weapon3", 0 },
-	{ "Grenade", "+weapon4", 0 },
-	{ "Rifle", "+weapon5", 0 },
-	{ "Next weapon", "+nextweapon", 0 },
-	{ "Prev. weapon", "+prevweapon", 0 },
+	{ "Hammer", "+weapon1", 0, 0 },
+	{ "Pistol", "+weapon2", 0, 0 },
+	{ "Shotgun", "+weapon3", 0, 0 },
+	{ "Grenade", "+weapon4", 0, 0 },
+	{ "Rifle", "+weapon5", 0, 0 },
+	{ "Next weapon", "+nextweapon", 0, 0 },
+	{ "Prev. weapon", "+prevweapon", 0, 0 },
 
-	{ "Vote yes", "vote yes", 0 },
-	{ "Vote no", "vote no", 0 },
+	{ "Vote yes", "vote yes", 0, 0 },
+	{ "Vote no", "vote no", 0, 0 },
 
-	{ "Chat", "+show_chat; chat all", 0 },
-	{ "Team chat", "+show_chat; chat team", 0 },
-	{ "Converse", "+show_chat; chat all /c ", 0 },
-	{ "Show chat", "+show_chat", 0 },
+	{ "Chat", "+show_chat; chat all", 0, 0 },
+	{ "Team chat", "+show_chat; chat team", 0, 0 },
+	{ "Converse", "+show_chat; chat all /c ", 0, 0 },
+	{ "Show chat", "+show_chat", 0, 0 },
 
-	{ "Emoticon", "+emote", 0 },
-	{ "Spectator mode", "+spectate", 0 },
-	{ "Spectate next", "spectate_next", 0 },
-	{ "Spectate previous", "spectate_previous", 0 },
-	{ "Console", "toggle_local_console", 0 },
-	{ "Remote console", "toggle_remote_console", 0 },
-	{ "Screenshot", "screenshot", 0 },
-	{ "Scoreboard", "+scoreboard", 0 },
-	{ "Statboard", "+statboard", 0 },
-	{ "Lock team", "say /lock", 0 },
-	{ "Show entities", "toggle cl_overlay_entities 0 100", 0 },
-	{ "Show HUD", "toggle cl_showhud 0 1", 0 },
+	{ "Emoticon", "+emote", 0, 0 },
+	{ "Spectator mode", "+spectate", 0, 0 },
+	{ "Spectate next", "spectate_next", 0, 0 },
+	{ "Spectate previous", "spectate_previous", 0, 0 },
+	{ "Console", "toggle_local_console", 0, 0 },
+	{ "Remote console", "toggle_remote_console", 0, 0 },
+	{ "Screenshot", "screenshot", 0, 0 },
+	{ "Scoreboard", "+scoreboard", 0, 0 },
+	{ "Statboard", "+statboard", 0, 0 },
+	{ "Lock team", "say /lock", 0, 0 },
+	{ "Show entities", "toggle cl_overlay_entities 0 100", 0, 0 },
+	{ "Show HUD", "toggle cl_showhud 0 1", 0, 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
@@ -755,20 +756,24 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 	// this is kinda slow, but whatever
 	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = 0;
+		gs_aKeys[i].m_KeyId = gs_aKeys[i].m_Modifier = 0;
 
-	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+	for(int Mod = 0; Mod < CBinds::MODIFIER_COUNT; Mod++)
 	{
-		const char *pBind = m_pClient->m_pBinds->Get(KeyId);
-		if(!pBind[0])
-			continue;
+		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		{
+			const char *pBind = m_pClient->m_pBinds->Get(KeyId, Mod);
+			if(!pBind[0])
+				continue;
 
-		for(int i = 0; i < g_KeyCount; i++)
-			if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
-			{
-				gs_aKeys[i].m_KeyId = KeyId;
-				break;
-			}
+			for(int i = 0; i < g_KeyCount; i++)
+				if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
+				{
+					gs_aKeys[i].m_KeyId = KeyId;
+					gs_aKeys[i].m_Modifier = Mod;
+					break;
+				}
+		}
 	}
 
 	// controls in a scrollable listbox

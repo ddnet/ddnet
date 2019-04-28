@@ -150,6 +150,10 @@ TEST(Str, Tokenize)
 
 	char aTest2[] = "";
 	EXPECT_EQ(str_next_token(aTest2, ",", aBuf, sizeof(aBuf)), nullptr);
+
+	char aTest3[] = "+b";
+	str_next_token(aTest3, "+", aBuf, sizeof(aBuf));
+	EXPECT_STREQ(aBuf, "b");
 }
 
 TEST(Str, InList)
