@@ -9,7 +9,7 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 	// only handle F and composed F binds
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 	{
-		int Mask = m_pBinds->GetModifierMask(m_pBinds->Input());
+		int Mask = m_pBinds->GetModifierMask(Input());
 
 		bool ret = false;
 		for(int Mod = 0; Mod < MODIFIER_COUNT; Mod++)
