@@ -52,6 +52,10 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 		m_aapKeyBindings[Modifier][KeyID] = 0;
 	}
 
+	// skip modifiers for +xxx binds
+	if(pStr[0] == '+')
+		Modifier = 0;
+
 	char aBuf[256];
 	if(!pStr[0])
 	{
@@ -132,7 +136,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 	bool ret = false;
 	for(int Mod = 0; Mod < MODIFIER_COUNT; Mod++)
 	{
-		if(Mask & (1 << Mod) && m_aapKeyBindings[Mod][e.m_Key])
+		if(m_aapKeyBindings[Mod][e.m_Key] && (((Mask&(1 << Mod)) || (Mod == 0 && m_aapKeyBindings[0][e.m_Key][0] == '+'))))	// always trigger +xxx binds despite any modifier
 		{
 			if(e.m_Flags&IInput::FLAG_PRESS)
 				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mod][e.m_Key]);
