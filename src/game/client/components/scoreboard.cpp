@@ -476,7 +476,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// clan
 		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
-				m_pClient->m_aClients[GameClient()->m_LocalIDs[0]].m_aClan) == 0)
+				m_pClient->m_aClients[GameClient()->m_LocalIDs[g_Config.m_ClDummy]].m_aClan) == 0)
 		{
 			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClSameClanColor);
 			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
