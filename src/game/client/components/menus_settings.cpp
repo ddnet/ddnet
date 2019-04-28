@@ -36,17 +36,29 @@ CMenusKeyBinder::CMenusKeyBinder()
 {
 	m_TakeKey = false;
 	m_GotKey = false;
+	m_Modifier = 0;
 }
 
 bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 {
 	if(m_TakeKey)
 	{
-		if(Event.m_Flags&IInput::FLAG_PRESS)
+		int TriggeringEvent = (Event.m_Key == KEY_MOUSE_1) ? IInput::FLAG_PRESS : IInput::FLAG_RELEASE;
+		if(Event.m_Flags&TriggeringEvent)
 		{
 			m_Key = Event;
 			m_GotKey = true;
 			m_TakeKey = false;
+
+			int Mask = CBinds::GetModifierMask(Input());
+			m_Modifier = 0;
+			while(!(Mask&1))
+			{
+				Mask >>= 1;
+				m_Modifier++;
+			}
+			if(CBinds::ModifierMatchesKey(m_Modifier, Event.m_Key))
+				m_Modifier = 0;
 		}
 		return true;
 	}
@@ -735,14 +747,14 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 			str_format(aBuf, sizeof(aBuf), "%s:", (const char *)Key.m_Name);
 
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			int OldId = Key.m_KeyId;
-			int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId);
-			if(NewId != OldId)
+			int OldId = Key.m_KeyId, OldModifier = Key.m_Modifier, NewModifier;
+			int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId, OldModifier, &NewModifier);
+			if(NewId != OldId || NewModifier != OldModifier)
 			{
 				if(OldId != 0 || NewId == 0)
-					m_pClient->m_pBinds->Bind(OldId, "");
+					m_pClient->m_pBinds->Bind(OldId, "", false, OldModifier);
 				if(NewId != 0)
-					m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand);
+					m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifier);
 			}
 		}
 
@@ -1060,7 +1072,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			g_Config.m_GfxEnableTextureUnitOptimization ^= 1;
 		}
 	}
-	
+
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
