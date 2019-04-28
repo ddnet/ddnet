@@ -62,7 +62,10 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int Modifier)
 		int Size = str_length(pStr) + 1;
 		m_aapKeyBindings[Modifier][KeyID] = (char *)malloc(Size);
 		str_copy(m_aapKeyBindings[Modifier][KeyID], pStr, Size);
-		str_format(aBuf, sizeof(aBuf), "bound %s (%d) = %s", Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[Modifier][KeyID]);
+		if(Modifier)
+			str_format(aBuf, sizeof(aBuf), "bound %s+%s (%d) = %s", GetModifierName(Modifier), Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[Modifier][KeyID]);
+		else
+			str_format(aBuf, sizeof(aBuf), "bound %s (%d) = %s", Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[Modifier][KeyID]);
 	}
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf);
 }
