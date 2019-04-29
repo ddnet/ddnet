@@ -3091,6 +3091,10 @@ int str_utf8_decode(const char **ptr)
 			utf8_code_point = utf8_code_point << (6 * utf8_bytes_needed);
 			continue;
 		}
+		else if(byte == 0x00)
+		{
+			return -1; // Error.
+		}
 		if(!(utf8_lower_boundary <= byte && byte <= utf8_upper_boundary))
 		{
 			// Resetting variables not necessary, will be done when
