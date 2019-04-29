@@ -3135,7 +3135,11 @@ unsigned str_quickhash(const char *str)
 
 static const char *str_token_get(const char *str, const char *delim, int *length)
 {
-	str += strspn(str, delim);
+	size_t len = strspn(str, delim);
+	if(len > 1)
+		str++;
+	else
+		str += len;
 	if(!*str)
 		return NULL;
 
