@@ -28,7 +28,7 @@
 #include "players.h"
 #include <stdio.h>
 
-void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset)
+void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
 	vec2 HandPos = CenterPos + Dir;
 	float Angle = GetAngle(Dir);
@@ -48,7 +48,7 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 
 	//Graphics()->TextureSet(data->m_aImages[IMAGE_CHAR_DEFAULT].id);
 	Graphics()->TextureSet(pInfo->m_Texture);
-	Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
+	Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 
 	// two passes
 	for(int i = 0; i < 2; i++)
@@ -113,11 +113,11 @@ void CPlayers::RenderHook(
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 
-	if(OtherTeam)
-	{
-		RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
-		RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
-	}
+	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
+		OtherTeam = true;
+
+	if(!Local && m_pClient->m_aClients[ClientID].m_Solo)
+		OtherTeam = true;
 
 	RenderInfo.m_Size = 64.0f;
 
@@ -131,7 +131,7 @@ void CPlayers::RenderHook(
 	if(Prev.m_HookState>0 && Player.m_HookState>0)
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-		
+
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		if(ClientID < 0)
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
@@ -173,7 +173,7 @@ void CPlayers::RenderHook(
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		RenderHand(&RenderInfo, Position, normalize(HookPos-Pos), -pi/2, vec2(20, 0));
+		RenderHand(&RenderInfo, Position, normalize(HookPos-Pos), -pi/2, vec2(20, 0), g_Config.m_ClShowOthersAlpha / 100.0f);
 	}
 }
 
@@ -518,17 +518,11 @@ void CPlayers::RenderPlayer(
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
 
-		if(OtherTeam)
-		{
-			RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
-			RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
-		}
-
 		switch (Player.m_Weapon)
 		{
-			case WEAPON_GUN: RenderHand(&RenderInfo, p, Direction, -3*pi/4, vec2(-15, 4)); break;
-			case WEAPON_SHOTGUN: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-5, 4)); break;
-			case WEAPON_GRENADE: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-4, 7)); break;
+			case WEAPON_GUN: RenderHand(&RenderInfo, p, Direction, -3*pi/4, vec2(-15, 4), g_Config.m_ClShowOthersAlpha / 100.0f); break;
+			case WEAPON_SHOTGUN: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-5, 4), g_Config.m_ClShowOthersAlpha / 100.0f); break;
+			case WEAPON_GRENADE: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-4, 7), g_Config.m_ClShowOthersAlpha / 100.0f); break;
 		}
 
 	}
@@ -544,18 +538,10 @@ void CPlayers::RenderPlayer(
 					Client()->IntraGameTick());
 
 		CTeeRenderInfo Ghost = RenderInfo;
-		Ghost.m_ColorBody.a = 0.5f;
-		Ghost.m_ColorFeet.a = 0.5f;
-		RenderTools()->RenderTee(&State, &Ghost, Player.m_Emote, Direction, GhostPosition, true); // render ghost
+		RenderTools()->RenderTee(&State, &Ghost, Player.m_Emote, Direction, GhostPosition, 0.5f); // render ghost
 	}
 
 	RenderInfo.m_Size = 64.0f; // force some settings
-
-	if(OtherTeam)
-	{
-		RenderInfo.m_ColorBody.a = g_Config.m_ClShowOthersAlpha / 100.0f;
-		RenderInfo.m_ColorFeet.a = g_Config.m_ClShowOthersAlpha / 100.0f;
-	}
 
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	Graphics()->QuadsSetRotation(0);
@@ -588,8 +574,11 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, OtherTeam || ClientID < 0);
-	
+	if(OtherTeam || ClientID < 0)
+		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, g_Config.m_ClShowOthersAlpha / 100.0f);
+	else
+		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position);
+
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
@@ -662,8 +651,8 @@ void CPlayers::OnRender()
 				else
 				{
 					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
-					m_aRenderInfo[i].m_ColorBody = vec4(1,1,1,1);
-					m_aRenderInfo[i].m_ColorFeet = vec4(1,1,1,1);
+					m_aRenderInfo[i].m_ColorBody = vec3(1,1,1);
+					m_aRenderInfo[i].m_ColorFeet = vec3(1,1,1);
 				}
 			}
 		}
@@ -744,7 +733,7 @@ void CPlayers::OnInit()
 		RenderTools()->SelectSprite(SPRITE_OOP + i);
 		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 64.f, false);
 	}
-	
+
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
 		m_WeaponSpriteMuzzleQuadContainerIndex[i] = Graphics()->CreateQuadContainer();

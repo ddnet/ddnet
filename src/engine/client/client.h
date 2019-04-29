@@ -209,7 +209,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }
 	void GraphicsThread();
-	vec3 GetColorV3(int v);
 
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
@@ -361,7 +360,7 @@ public:
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	
+
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);

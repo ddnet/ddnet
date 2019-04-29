@@ -327,7 +327,7 @@ void CRenderTools::DrawCircle(float x, float y, float r, int Segments)
 		Graphics()->QuadsDrawFreeform(Array, NumItems);
 }
 
-void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool Alpha)
+void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha)
 {
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
@@ -350,11 +350,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 				Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle*pi*2);
 
 				// draw body
-				if(Alpha)
-					Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
-				else
-					Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, 1.0f);
-
+				Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 				vec2 BodyPos = Position + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y)*AnimScale;
 				float BodySize = g_Config.m_ClFatSkins ? BaseSize * 1.3 : BaseSize;
 				Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, OutLine, BodyPos.x, BodyPos.y, BodySize / 64.f, BodySize / 64.f);
@@ -413,11 +409,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					cs = 0.5f;
 			}
 
-
-			if(Alpha)
-				Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, pInfo->m_ColorFeet.a*cs);
-			else
-				Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, 1.0f);
+			Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, Alpha*cs);
 
 			Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X*AnimScale, Position.y + pFoot->m_Y*AnimScale, w / 64.f, h / 32.f);
 		}

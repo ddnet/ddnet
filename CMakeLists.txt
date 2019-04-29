@@ -1195,6 +1195,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
+    color.cpp
     datafile.cpp
     fs.cpp
     git_revision.cpp

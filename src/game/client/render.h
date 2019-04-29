@@ -14,15 +14,15 @@ public:
 	CTeeRenderInfo()
 	{
 		m_Texture = -1;
-		m_ColorBody = vec4(1,1,1,1);
-		m_ColorFeet = vec4(1,1,1,1);
+		m_ColorBody = vec3(1,1,1);
+		m_ColorFeet = vec3(1,1,1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
 	};
 
 	int m_Texture;
-	vec4 m_ColorBody;
-	vec4 m_ColorFeet;
+	vec3 m_ColorBody;
+	vec3 m_ColorFeet;
 	float m_Size;
 	int m_GotAirJump;
 };
@@ -77,7 +77,7 @@ public:
 	void RenderTilemapGenerateSkip(class CLayers *pLayers);
 
 	// object render methods (gc_render_obj.cpp)
-	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, bool Alpha = false);
+	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f);
 
 	// map render methods (gc_render_map.cpp)
 	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, float Time, float *pResult);

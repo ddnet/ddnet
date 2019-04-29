@@ -26,6 +26,7 @@
 #include <game/generated/protocol.h>
 
 #include <game/generated/client_data.h>
+#include <game/client/components/binds.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
@@ -579,7 +580,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 	return ReturnValue;
 }
 
-int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
+int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier)
 {
 	// process
 	static void *pGrabbedID = 0;
@@ -587,6 +588,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
 	static int ButtonUsed = 0;
 	int Inside = UI()->MouseInside(pRect);
 	int NewKey = Key;
+	*NewModifier = Modifier;
 
 	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pID)
 		MouseReleased = true;
@@ -597,7 +599,10 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
 		{
 			// abort with escape key
 			if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
+			{
 				NewKey = m_Binder.m_Key.m_Key;
+				*NewModifier = m_Binder.m_Modifier;
+			}
 			m_Binder.m_GotKey = false;
 			UI()->SetActiveItem(0);
 			MouseReleased = false;
@@ -639,10 +644,18 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
 		DoButton_KeySelect(pID, "???", 0, pRect);
 	else
 	{
-		if(Key == 0)
-			DoButton_KeySelect(pID, "", 0, pRect);
+		if(Key)
+		{
+			char aBuf[64];
+			if(*NewModifier)
+				str_format(aBuf, sizeof(aBuf), "%s+%s", CBinds::GetModifierName(*NewModifier), Input()->KeyName(Key));
+			else
+				str_format(aBuf, sizeof(aBuf), "%s", Input()->KeyName(Key));
+
+			DoButton_KeySelect(pID, aBuf, 0, pRect);
+		}
 		else
-			DoButton_KeySelect(pID, Input()->KeyName(Key), 0, pRect);
+			DoButton_KeySelect(pID, "", 0, pRect);
 	}
 	return NewKey;
 }
@@ -799,7 +812,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static int s_SettingsButton=0;
-	
+
 	if(DoButton_MenuTab(&s_SettingsButton, "\xEE\xA2\xB8", m_ActivePage==PAGE_SETTINGS, &Button, CUI::CORNER_T))
 		NewPage = PAGE_SETTINGS;
 
@@ -1909,7 +1922,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 
 	CUIRect Screen = *UI()->Screen();
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
-	
+
 	Graphics()->BlendNormal();
 	RenderBackground();
 

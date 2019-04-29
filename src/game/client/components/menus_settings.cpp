@@ -36,17 +36,29 @@ CMenusKeyBinder::CMenusKeyBinder()
 {
 	m_TakeKey = false;
 	m_GotKey = false;
+	m_Modifier = 0;
 }
 
 bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 {
 	if(m_TakeKey)
 	{
-		if(Event.m_Flags&IInput::FLAG_PRESS)
+		int TriggeringEvent = (Event.m_Key == KEY_MOUSE_1) ? IInput::FLAG_PRESS : IInput::FLAG_RELEASE;
+		if(Event.m_Flags&TriggeringEvent)
 		{
 			m_Key = Event;
 			m_GotKey = true;
 			m_TakeKey = false;
+
+			int Mask = CBinds::GetModifierMask(Input());
+			m_Modifier = 0;
+			while(!(Mask&1))
+			{
+				Mask >>= 1;
+				m_Modifier++;
+			}
+			if(CBinds::ModifierMatchesKey(m_Modifier, Event.m_Key))
+				m_Modifier = 0;
 		}
 		return true;
 	}
@@ -391,14 +403,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
-		OwnSkinInfo.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
-		OwnSkinInfo.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
+		OwnSkinInfo.m_ColorBody = HslToRgb(UnpackColor(*ColorBody));
+		OwnSkinInfo.m_ColorFeet = HslToRgb(UnpackColor(*ColorFeet));
 	}
 	else
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_OrgTexture;
-		OwnSkinInfo.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorBody = vec3(1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = vec3(1.0f, 1.0f, 1.0f);
 	}
 	OwnSkinInfo.m_Size = 50.0f*UI()->Scale();
 
@@ -584,14 +596,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(*UseCustomColor)
 			{
 				Info.m_Texture = s->m_ColorTexture;
-				Info.m_ColorBody = m_pClient->m_pSkins->GetColorV4(*ColorBody);
-				Info.m_ColorFeet = m_pClient->m_pSkins->GetColorV4(*ColorFeet);
+				Info.m_ColorBody = HslToRgb(UnpackColor(*ColorBody));
+				Info.m_ColorFeet = HslToRgb(UnpackColor(*ColorFeet));
 			}
 			else
 			{
 				Info.m_Texture = s->m_OrgTexture;
-				Info.m_ColorBody = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-				Info.m_ColorFeet = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				Info.m_ColorBody = vec3(1.0f, 1.0f, 1.0f);
+				Info.m_ColorFeet = vec3(1.0f, 1.0f, 1.0f);
 			}
 
 			Info.m_Size = UI()->Scale()*50.0f;
@@ -604,7 +616,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1,Item.m_Rect.w);
 			if(g_Config.m_Debug)
 			{
-				vec3 BloodColor = *UseCustomColor ? m_pClient->m_pSkins->GetColorV3(*ColorBody) : s->m_BloodColor;
+				vec3 BloodColor = *UseCustomColor ? HslToRgb(UnpackColor(*ColorBody)) : s->m_BloodColor;
 				Graphics()->TextureSet(-1);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
@@ -657,57 +669,58 @@ typedef struct
 	CLocConstString m_Name;
 	const char *m_pCommand;
 	int m_KeyId;
+	int m_Modifier;
 } CKeyInfo;
 
 static CKeyInfo gs_aKeys[] =
 {
-	{ "Move left", "+left", 0}, // Localize - these strings are localized within CLocConstString
-	{ "Move right", "+right", 0 },
-	{ "Jump", "+jump", 0 },
-	{ "Fire", "+fire", 0 },
-	{ "Hook", "+hook", 0 },
-	{ "Hook collisions", "+showhookcoll", 0 },
-	{ "Pause", "say /pause", 0 },
-	{ "Kill", "kill", 0 },
-	{ "Zoom in", "zoom+", 0 },
-	{ "Zoom out", "zoom-", 0 },
-	{ "Default zoom", "zoom", 0 },
-	{ "Show others", "say /showothers", 0 },
-	{ "Show all", "say /showall", 0 },
-	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0 },
-	{ "Toggle dummy", "toggle cl_dummy 0 1", 0 },
-	{ "Toggle ghost", "toggle cl_race_show_ghost 0 1", 0 },
-	{ "Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0 },
-	{ "Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0 },
+	{ "Move left", "+left", 0, 0 }, // Localize - these strings are localized within CLocConstString
+	{ "Move right", "+right", 0, 0 },
+	{ "Jump", "+jump", 0, 0 },
+	{ "Fire", "+fire", 0, 0 },
+	{ "Hook", "+hook", 0, 0 },
+	{ "Hook collisions", "+showhookcoll", 0, 0 },
+	{ "Pause", "say /pause", 0, 0 },
+	{ "Kill", "kill", 0, 0 },
+	{ "Zoom in", "zoom+", 0, 0 },
+	{ "Zoom out", "zoom-", 0, 0 },
+	{ "Default zoom", "zoom", 0, 0 },
+	{ "Show others", "say /showothers", 0, 0 },
+	{ "Show all", "say /showall", 0, 0 },
+	{ "Toggle dyncam", "toggle cl_dyncam 0 1", 0, 0 },
+	{ "Toggle dummy", "toggle cl_dummy 0 1", 0, 0 },
+	{ "Toggle ghost", "toggle cl_race_show_ghost 0 1", 0, 0 },
+	{ "Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0, 0 },
+	{ "Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0 },
 
-	{ "Hammer", "+weapon1", 0 },
-	{ "Pistol", "+weapon2", 0 },
-	{ "Shotgun", "+weapon3", 0 },
-	{ "Grenade", "+weapon4", 0 },
-	{ "Rifle", "+weapon5", 0 },
-	{ "Next weapon", "+nextweapon", 0 },
-	{ "Prev. weapon", "+prevweapon", 0 },
+	{ "Hammer", "+weapon1", 0, 0 },
+	{ "Pistol", "+weapon2", 0, 0 },
+	{ "Shotgun", "+weapon3", 0, 0 },
+	{ "Grenade", "+weapon4", 0, 0 },
+	{ "Rifle", "+weapon5", 0, 0 },
+	{ "Next weapon", "+nextweapon", 0, 0 },
+	{ "Prev. weapon", "+prevweapon", 0, 0 },
 
-	{ "Vote yes", "vote yes", 0 },
-	{ "Vote no", "vote no", 0 },
+	{ "Vote yes", "vote yes", 0, 0 },
+	{ "Vote no", "vote no", 0, 0 },
 
-	{ "Chat", "+show_chat; chat all", 0 },
-	{ "Team chat", "+show_chat; chat team", 0 },
-	{ "Converse", "+show_chat; chat all /c ", 0 },
-	{ "Show chat", "+show_chat", 0 },
+	{ "Chat", "+show_chat; chat all", 0, 0 },
+	{ "Team chat", "+show_chat; chat team", 0, 0 },
+	{ "Converse", "+show_chat; chat all /c ", 0, 0 },
+	{ "Show chat", "+show_chat", 0, 0 },
 
-	{ "Emoticon", "+emote", 0 },
-	{ "Spectator mode", "+spectate", 0 },
-	{ "Spectate next", "spectate_next", 0 },
-	{ "Spectate previous", "spectate_previous", 0 },
-	{ "Console", "toggle_local_console", 0 },
-	{ "Remote console", "toggle_remote_console", 0 },
-	{ "Screenshot", "screenshot", 0 },
-	{ "Scoreboard", "+scoreboard", 0 },
-	{ "Statboard", "+statboard", 0 },
-	{ "Lock team", "say /lock", 0 },
-	{ "Show entities", "toggle cl_overlay_entities 0 100", 0 },
-	{ "Show HUD", "toggle cl_showhud 0 1", 0 },
+	{ "Emoticon", "+emote", 0, 0 },
+	{ "Spectator mode", "+spectate", 0, 0 },
+	{ "Spectate next", "spectate_next", 0, 0 },
+	{ "Spectate previous", "spectate_previous", 0, 0 },
+	{ "Console", "toggle_local_console", 0, 0 },
+	{ "Remote console", "toggle_remote_console", 0, 0 },
+	{ "Screenshot", "screenshot", 0, 0 },
+	{ "Scoreboard", "+scoreboard", 0, 0 },
+	{ "Statboard", "+statboard", 0, 0 },
+	{ "Lock team", "say /lock", 0, 0 },
+	{ "Show entities", "toggle cl_overlay_entities 0 100", 0, 0 },
+	{ "Show HUD", "toggle cl_showhud 0 1", 0, 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
@@ -734,14 +747,14 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 			str_format(aBuf, sizeof(aBuf), "%s:", (const char *)Key.m_Name);
 
 			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			int OldId = Key.m_KeyId;
-			int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId);
-			if(NewId != OldId)
+			int OldId = Key.m_KeyId, OldModifier = Key.m_Modifier, NewModifier;
+			int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId, OldModifier, &NewModifier);
+			if(NewId != OldId || NewModifier != OldModifier)
 			{
 				if(OldId != 0 || NewId == 0)
-					m_pClient->m_pBinds->Bind(OldId, "");
+					m_pClient->m_pBinds->Bind(OldId, "", false, OldModifier);
 				if(NewId != 0)
-					m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand);
+					m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifier);
 			}
 		}
 
@@ -755,20 +768,24 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 	// this is kinda slow, but whatever
 	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = 0;
+		gs_aKeys[i].m_KeyId = gs_aKeys[i].m_Modifier = 0;
 
-	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+	for(int Mod = 0; Mod < CBinds::MODIFIER_COUNT; Mod++)
 	{
-		const char *pBind = m_pClient->m_pBinds->Get(KeyId);
-		if(!pBind[0])
-			continue;
+		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		{
+			const char *pBind = m_pClient->m_pBinds->Get(KeyId, Mod);
+			if(!pBind[0])
+				continue;
 
-		for(int i = 0; i < g_KeyCount; i++)
-			if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
-			{
-				gs_aKeys[i].m_KeyId = KeyId;
-				break;
-			}
+			for(int i = 0; i < g_KeyCount; i++)
+				if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
+				{
+					gs_aKeys[i].m_KeyId = KeyId;
+					gs_aKeys[i].m_Modifier = Mod;
+					break;
+				}
+		}
 	}
 
 	// controls in a scrollable listbox
@@ -1055,7 +1072,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			g_Config.m_GfxEnableTextureUnitOptimization ^= 1;
 		}
 	}
-	
+
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
@@ -1513,7 +1530,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)); // default values
+					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 0.5f)) * 255.0f; // default values
 					g_Config.m_ClMessageSystemHue = HSL.h;
 					g_Config.m_ClMessageSystemSat = HSL.s;
 					g_Config.m_ClMessageSystemLht = HSL.l;
@@ -1565,7 +1582,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)); // default values
+					vec3 HSL = RgbToHsl(vec3(1.0f, 0.5f, 0.5f)) * 255.0f; // default values
 					g_Config.m_ClMessageHighlightHue = HSL.h;
 					g_Config.m_ClMessageHighlightSat = HSL.s;
 					g_Config.m_ClMessageHighlightLht = HSL.l;
@@ -1623,7 +1640,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)); // default values
+					vec3 HSL = RgbToHsl(vec3(0.65f, 1.0f, 0.65f)) * 255.0f; // default values
 					g_Config.m_ClMessageTeamHue = HSL.h;
 					g_Config.m_ClMessageTeamSat = HSL.s;
 					g_Config.m_ClMessageTeamLht = HSL.l;
@@ -1738,7 +1755,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				static int s_DefaultButton = 0;
 				if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 				{
-					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)); // default values
+					vec3 HSL = RgbToHsl(vec3(1.0f, 1.0f, 1.0f)) * 255.0f; // default values
 					g_Config.m_ClMessageHue = HSL.h;
 					g_Config.m_ClMessageSat = HSL.s;
 					g_Config.m_ClMessageLht = HSL.l;
@@ -1795,7 +1812,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			static int s_DefaultButton = 0;
 			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 			{
-				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)); // default values
+				vec3 HSL = RgbToHsl(vec3(0.5f, 0.5f, 1.0f)) * 255.0f; // default values
 				g_Config.m_ClLaserInnerHue = HSL.h;
 				g_Config.m_ClLaserInnerSat = HSL.s;
 				g_Config.m_ClLaserInnerLht = HSL.l;
@@ -1831,7 +1848,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			static int s_DefaultButton = 0;
 			if(DoButton_Menu(&s_DefaultButton, Localize("Reset"), 0, &Button))
 			{
-				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)); // default values
+				vec3 HSL = RgbToHsl(vec3(0.075f, 0.075f, 0.25f)) * 255.0f; // default values
 				g_Config.m_ClLaserOutlineHue = HSL.h;
 				g_Config.m_ClLaserOutlineSat = HSL.s;
 				g_Config.m_ClLaserOutlineLht = HSL.l;

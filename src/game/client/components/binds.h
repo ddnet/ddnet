@@ -7,8 +7,6 @@
 
 class CBinds : public CComponent
 {
-	char *m_apKeyBindings[KEY_LAST];
-
 	int GetKeyID(const char *pKeyName);
 
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
@@ -30,13 +28,26 @@ public:
 		virtual bool OnInput(IInput::CEvent Event);
 	};
 
+	enum {
+		MODIFIER_NONE=0,
+		MODIFIER_SHIFT,
+		MODIFIER_CTRL,
+		MODIFIER_ALT,
+		MODIFIER_COUNT
+	};
+
 	CBindsSpecial m_SpecialBinds;
 
-	void Bind(int KeyID, const char *pStr, bool FreeOnly = false);
+	void Bind(int KeyID, const char *pStr, bool FreeOnly = false, int Modifier = MODIFIER_NONE);
 	void SetDefaults();
 	void UnbindAll();
-	const char *Get(int KeyID);
-	const char *GetKey(const char *pBindStr);
+	const char *Get(int KeyID, int Modifier);
+	void GetKey(const char *pBindStr, char *aBuf, unsigned BufSize);
+	int GetBindSlot(const char *pBindString, int *Modifier);
+	static int GetModifierMask(IInput *i);
+	static int GetModifierMaskOfKey(int Key);
+	static bool ModifierMatchesKey(int Modifier, int Key);
+	static const char *GetModifierName(int Modifier);
 
 	virtual void OnConsoleInit();
 	virtual bool OnInput(IInput::CEvent Event);
@@ -44,5 +55,8 @@ public:
 	// DDRace
 
 	void SetDDRaceBinds(bool FreeOnly);
+
+private:
+	char *m_aapKeyBindings[MODIFIER_COUNT][KEY_LAST];
 };
 #endif
