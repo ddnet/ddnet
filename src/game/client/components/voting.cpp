@@ -282,13 +282,13 @@ void CVoting::OnRender()
 
 void CVoting::RenderBars(CUIRect Bars, bool Text)
 {
-	RenderTools()->DrawUIRect(&Bars, vec4(0.8f,0.8f,0.8f,0.5f), CUI::CORNER_ALL, Bars.h/3);
+	RenderTools()->DrawUIRect(&Bars, ColorRGBA(0.8f,0.8f,0.8f,0.5f), CUI::CORNER_ALL, Bars.h/3);
 
 	CUIRect Splitter = Bars;
 	Splitter.x = Splitter.x+Splitter.w/2;
 	Splitter.w = Splitter.h/2.0f;
 	Splitter.x -= Splitter.w/2;
-	RenderTools()->DrawUIRect(&Splitter, vec4(0.4f,0.4f,0.4f,0.5f), CUI::CORNER_ALL, Splitter.h/4);
+	RenderTools()->DrawUIRect(&Splitter, ColorRGBA(0.4f,0.4f,0.4f,0.5f), CUI::CORNER_ALL, Splitter.h/4);
 
 	if(m_Total)
 	{
@@ -297,7 +297,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		{
 			CUIRect YesArea = Bars;
 			YesArea.w *= m_Yes/(float)m_Total;
-			RenderTools()->DrawUIRect(&YesArea, vec4(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
+			RenderTools()->DrawUIRect(&YesArea, ColorRGBA(0.2f,0.9f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
 
 			if(Text)
 			{
@@ -315,7 +315,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			CUIRect NoArea = Bars;
 			NoArea.w *= m_No/(float)m_Total;
 			NoArea.x = (Bars.x + Bars.w)-NoArea.w;
-			RenderTools()->DrawUIRect(&NoArea, vec4(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
+			RenderTools()->DrawUIRect(&NoArea, ColorRGBA(0.9f,0.2f,0.2f,0.85f), CUI::CORNER_ALL, Bars.h/3);
 
 			if(Text)
 			{

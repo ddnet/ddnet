@@ -330,7 +330,7 @@ void CGhost::OnRender()
 			continue;
 
 		int CurPos = pGhost->m_PlaybackPos;
-		int PrevPos = max(0, CurPos - 1);
+		int PrevPos = maximum(0, CurPos - 1);
 		if(pGhost->m_Path.Get(PrevPos)->m_Tick > GhostTick)
 			continue;
 
@@ -361,14 +361,14 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
 		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_ColorTexture;
-		pRenderInfo->m_ColorBody = HslToRgb(UnpackColor(pGhost->m_Skin.m_ColorBody));
-		pRenderInfo->m_ColorFeet = HslToRgb(UnpackColor(pGhost->m_Skin.m_ColorFeet));
+		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody));
+		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet));
 	}
 	else
 	{
 		pRenderInfo->m_Texture = m_pClient->m_pSkins->Get(SkinId)->m_OrgTexture;
-		pRenderInfo->m_ColorBody = vec3(1, 1, 1);
-		pRenderInfo->m_ColorFeet = vec3(1, 1, 1);
+		pRenderInfo->m_ColorBody = ColorRGBA(1, 1, 1);
+		pRenderInfo->m_ColorFeet = ColorRGBA(1, 1, 1);
 	}
 
 	pRenderInfo->m_Size = 64;

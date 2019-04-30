@@ -107,9 +107,9 @@ void CNamePlates::RenderNameplate(
 		}
 
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
-		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
+		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
-			rgb = HslToRgb(vec3(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
+			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
 
 		STextRenderColor TColor;
 		STextRenderColor TOutlineColor;

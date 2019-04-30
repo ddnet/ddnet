@@ -51,11 +51,11 @@ void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 {
 	if(m_NumVertices == 0)
 		return;
-	
+
 	size_t VertSize = sizeof(CCommandBuffer::SVertex);
 
 	int NumVerts = m_NumVertices;
-	
+
 	if(!KeepVertices)
 		m_NumVertices = 0;
 
@@ -140,7 +140,7 @@ void CGraphics_Threaded::FlushTextVertices(int TextureSize, int TextTextureIndex
 	mem_copy(Cmd.m_aTextOutlineColor, pOutlineTextColor, sizeof(Cmd.m_aTextOutlineColor));
 
 	Cmd.m_QuadNum = NumVerts / 4;
-	
+
 	Cmd.m_pVertices = (CCommandBuffer::SVertex *)m_pCommandBuffer->AllocData(VertSize*NumVerts);
 	if(Cmd.m_pVertices == 0x0)
 	{
@@ -191,7 +191,7 @@ void CGraphics_Threaded::Rotate(const CCommandBuffer::SPoint &rCenter, CCommandB
 	float s = sinf(m_Rotation);
 	float x, y;
 	int i;
-	
+
 	CCommandBuffer::SVertex *pVertices = pPoints;
 	for(i = 0; i < NumPoints; i++)
 	{
@@ -394,14 +394,14 @@ int CGraphics_Threaded::LoadTextureRawSub(int TextureID, int x, int y, int Width
 	void *pTmpData = malloc(MemSize);
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
-	
+
 	// check if we have enough free memory in the commandbuffer
 	if(!m_pCommandBuffer->AddCommand(Cmd))
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
 		m_pCommandBuffer->AddCommand(Cmd);
-	}		
+	}
 	return 0;
 }
 
@@ -668,7 +668,7 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 	g *= 255.f;
 	b *= 255.f;
 	a *= 255.f;
-	
+
 	for(int i = 0; i < 4; ++i)
 	{
 		m_aColor[i].r = (unsigned char)(r);
@@ -676,6 +676,11 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 		m_aColor[i].b = (unsigned char)(b);
 		m_aColor[i].a = (unsigned char)(a);
 	}
+}
+
+void CGraphics_Threaded::SetColor(ColorRGBA rgb)
+{
+	SetColor(rgb.r, rgb.g, rgb.b, rgb.a);
 }
 
 void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a)
@@ -985,7 +990,7 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 {
 	if(NumIndicesOffet == 0)
 		return;
-	
+
 	//add the VertexArrays and draw
 	CCommandBuffer::SCommand_RenderTileLayer Cmd;
 	Cmd.m_State = m_State;
@@ -1007,7 +1012,7 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
-	
+
 		void *Data = m_pCommandBuffer->AllocData((sizeof(char*) + sizeof(unsigned int))*NumIndicesOffet);
 		if(Data == 0x0)
 		{
@@ -1017,7 +1022,7 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	}
 	Cmd.m_pIndicesOffsets = (char**)Data;
 	Cmd.m_pDrawCount = (unsigned int*)(((char*)Data) + (sizeof(char*)*NumIndicesOffet));
-	
+
 	// check if we have enough free memory in the commandbuffer
 	if(!m_pCommandBuffer->AddCommand(Cmd))
 	{
@@ -1040,10 +1045,10 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 		}
 	}
 
-	
+
 	mem_copy(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char*)*NumIndicesOffet);
 	mem_copy(Cmd.m_pDrawCount, IndicedVertexDrawNum, sizeof(unsigned int)*NumIndicesOffet);
-	
+
 	//todo max indices group check!!
 }
 
@@ -1070,7 +1075,7 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 	Cmd.m_JumpIndex = JumpIndex;
-	
+
 	Cmd.m_Offset[0] = pOffset[0];
 	Cmd.m_Offset[1] = pOffset[1];
 	Cmd.m_Dir[0] = pDir[0];
@@ -1160,7 +1165,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 			dbg_msg("graphics", "failed to allocate data for the quad info");
 			return;
 		}
-	
+
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			dbg_msg("graphics", "failed to allocate memory for render quad command");
@@ -1388,7 +1393,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 
 	if((int)Container.m_Quads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
 		return;
-	
+
 	if(m_UseOpenGL3_3)
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
@@ -1644,7 +1649,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 }
 
 void* CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize) {
-	void* pData = m_pCommandBuffer->AllocData(AllocSize); 
+	void* pData = m_pCommandBuffer->AllocData(AllocSize);
 	if(pData == 0x0)
 	{
 		// kick command buffer and try again
@@ -1838,7 +1843,7 @@ void CGraphics_Threaded::CopyBufferObject(int WriteBufferIndex, int ReadBufferIn
 	Cmd.m_pWriteOffset = WriteOffset;
 	Cmd.m_pReadOffset = ReadOffset;
 	Cmd.m_CopySize = CopyDataSize;
-	
+
 	// check if we have enough free memory in the commandbuffer
 	if(!m_pCommandBuffer->AddCommand(Cmd))
 	{
@@ -1938,7 +1943,7 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 	CCommandBuffer::SCommand_DeleteBufferContainer Cmd;
 	Cmd.m_BufferContainerIndex = ContainerIndex;
 	Cmd.m_DestroyAllBO = DestroyAllBO;
-	
+
 	// check if we have enough free memory in the commandbuffer
 	if(!m_pCommandBuffer->AddCommand(Cmd))
 	{
@@ -2028,7 +2033,7 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
-		
+
 		if(!m_pCommandBuffer->AddCommand(Cmd))
 		{
 			dbg_msg("graphics", "failed to allocate memory for indcies required count notify command");
@@ -2069,7 +2074,7 @@ int CGraphics_Threaded::InitWindow()
 		if(IssueInit() == 0)
 			return 0;
 	}
-	
+
 	// try using old opengl context
 	if(g_Config.m_GfxOpenGL3)
 	{

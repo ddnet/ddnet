@@ -482,7 +482,7 @@ void CPlayers::RenderPlayer(
 				if(Phase1Tick < (g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3))
 				{
 					float t = (((float)Phase1Tick) + IntraTick)/g_pData->m_Weapons.m_aId[iw].m_Muzzleduration;
-					Alpha = mix(2.0f, 0.0f, min(1.0f,max(0.0f,t)));
+					Alpha = mix(2.0f, 0.0f, minimum(1.0f,maximum(0.0f,t)));
 				}
 
 				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
@@ -651,8 +651,8 @@ void CPlayers::OnRender()
 				else
 				{
 					m_aRenderInfo[i].m_Texture = m_pClient->m_pSkins->Get(Skin)->m_OrgTexture;
-					m_aRenderInfo[i].m_ColorBody = vec3(1,1,1);
-					m_aRenderInfo[i].m_ColorFeet = vec3(1,1,1);
+					m_aRenderInfo[i].m_ColorBody = ColorRGBA(1,1,1);
+					m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1,1,1);
 				}
 			}
 		}

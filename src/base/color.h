@@ -8,51 +8,151 @@
 /*
 	Title: Color handling
 */
-
 /*
-	Function: HueToRgb
-		Converts Hue to RGB
+	Function: RgbToHue
+		Determines the hue from RGB values
 */
-inline float HueToRgb(float v1, float v2, float h)
+inline float RgbToHue(float r, float g, float b)
 {
-	if(h < 0.0f) h += 1;
-	if(h > 1.0f) h -= 1;
-	if((6.0f * h) < 1.0f) return v1 + (v2 - v1) * 6.0f * h;
-	if((2.0f * h) < 1.0f) return v2;
-	if((3.0f * h) < 2.0f) return v1 + (v2 - v1) * ((2.0f/3.0f) - h) * 6.0f;
-	return v1;
-}
-
-inline float RgbToHue(vec3 rgb)
-{
-	float h_min = min(rgb.r, rgb.g, rgb.b);
-	float h_max = max(rgb.r, rgb.g, rgb.b);
+	float h_min = minimum(r, g, b);
+	float h_max = maximum(r, g, b);
 
 	float hue = 0.0f;
 	if(h_max != h_min)
 	{
 		float c = h_max - h_min;
-		if(h_max == rgb.r)
-			hue = (rgb.g - rgb.b) / c + (rgb.g < rgb.b ? 6 : 0);
-		else if(h_max == rgb.g)
-			hue = (rgb.b - rgb.r) / c + 2;
+		if(h_max == r)
+			hue = (g - b) / c + (g < b ? 6 : 0);
+		else if(h_max == g)
+			hue = (b - r) / c + 2;
 		else
-			hue = (rgb.r - rgb.g) / c + 4;
+			hue = (r - g) / c + 4;
 	}
 
 	return hue / 6.0f;
 }
 
-/*
-	Function: HslToRgb
-		Converts HSL to RGB
-*/
-inline vec3 HslToRgb(vec3 HSL)
+class color4_base
+{
+public:
+	union { float x, r, h; };
+	union { float y, g, s; };
+	union { float z, b, l, v; };
+	union { float w, a; };
+
+	color4_base() {}
+
+	color4_base(const vec4 &v4)
+	{
+		x = v4.x;
+		y = v4.y;
+		z = v4.z;
+		a = v4.w;
+	}
+
+	color4_base(const vec3 &v3)
+	{
+		x = v3.x;
+		y = v3.y;
+		z = v3.z;
+		a = 1.0f;
+	}
+
+	color4_base(float nx, float ny, float nz, float na)
+	{
+		x = nx;
+		y = ny;
+		z = nz;
+		a = na;
+	}
+
+	color4_base(float nx, float ny, float nz)
+	{
+		x = nx;
+		y = ny;
+		z = nz;
+		a = 1.0f;
+	}
+
+	color4_base(unsigned col, bool alpha = false)
+	{
+		a = alpha ? ((col >> 24) & 0xFF) / 255.0f : 1.0f;
+		x = ((col >> 16) & 0xFF) / 255.0f;
+		y = ((col >> 8) & 0xFF) / 255.0f;
+		z = ((col >> 0) & 0xFF) / 255.0f;
+	}
+
+	vec4 v4() { return vec4(x, y, z, a); };
+
+	unsigned Pack()
+	{
+		return ((unsigned)(a * 255.0f) << 24) + ((unsigned)(x * 255.0f) << 16) + ((unsigned)(y * 255.0f) << 8) + (unsigned)(z * 255.0f);
+	}
+
+	color4_base SetAlpha(float alpha)
+	{
+		color4_base col;
+		col = *this;
+		col.a = alpha;
+		return col;
+	}
+
+};
+
+class ColorHSLA : public color4_base
+{
+public:
+	using color4_base::color4_base;
+	ColorHSLA() {};
+	ColorHSLA(color4_base b): color4_base(b) {};
+
+	ColorHSLA Lighten()
+	{
+		ColorHSLA col = *this;
+		col.l = 0.5f + l * 0.5f;
+		return col;
+	};
+};
+
+class ColorHSVA : public color4_base
+{
+public:
+	using color4_base::color4_base;
+	ColorHSVA() {};
+	ColorHSVA(color4_base b): color4_base(b) {};
+};
+
+class ColorRGBA : public color4_base
+{
+public:
+	using color4_base::color4_base;
+	ColorRGBA() {};
+	ColorRGBA(color4_base b): color4_base(b) {};
+};
+
+template <typename T, typename F> T color_cast(const F &f) = delete;
+
+template <>
+inline ColorHSLA color_cast(const ColorRGBA &rgb)
+{
+	float Min = minimum(rgb.r, rgb.g, rgb.b);
+	float Max = maximum(rgb.r, rgb.g, rgb.b);
+
+	float c = Max - Min;
+	float h = RgbToHue(rgb.r, rgb.g, rgb.b);
+	float l = 0.5f * (Max + Min);
+	float s = (Max != 0.0f && Min != 1.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
+
+	return ColorHSLA(h, s, l, rgb.a);
+}
+
+template <>
+inline ColorRGBA color_cast(const ColorHSLA &hsl)
 {
 	vec3 rgb = vec3(0, 0, 0);
 
-	float h1 = HSL.h * 6;
-	float c = (1 - absolute(2 * HSL.l - 1)) * HSL.s;
+	float h1 = hsl.h * 6;
+	float c = (1 - absolute(2 * hsl.l - 1)) * hsl.s;
 	float x = c * (1 - absolute(fmod(h1, 2) - 1));
 
 	switch(round_truncate(h1)) {
@@ -72,137 +172,45 @@ inline vec3 HslToRgb(vec3 HSL)
 		rgb.r = x, rgb.b = c;
 		break;
 	case 5:
+	case 6:
 		rgb.r = c, rgb.b = x;
 		break;
 	}
 
-	float m = HSL.l - (c/2);
-	return vec3(rgb.r + m, rgb.g + m, rgb.b + m);
+	float m = hsl.l - (c/2);
+	return ColorRGBA(rgb.r + m, rgb.g + m, rgb.b + m, hsl.a);
 }
 
-inline vec3 HsvToRgb(vec3 hsv)
+template <>
+inline ColorHSLA color_cast(const ColorHSVA &hsv)
 {
-	int h = int(hsv.x * 6.0f);
-	float f = hsv.x * 6.0f - h;
-	float p = hsv.z * (1.0f - hsv.y);
-	float q = hsv.z * (1.0f - hsv.y * f);
-	float t = hsv.z * (1.0f - hsv.y * (1.0f - f));
-
-	vec3 rgb = vec3(0.0f, 0.0f, 0.0f);
-
-	switch(h % 6)
-	{
-	case 0:
-		rgb.r = hsv.z;
-		rgb.g = t;
-		rgb.b = p;
-		break;
-
-	case 1:
-		rgb.r = q;
-		rgb.g = hsv.z;
-		rgb.b = p;
-		break;
-
-	case 2:
-		rgb.r = p;
-		rgb.g = hsv.z;
-		rgb.b = t;
-		break;
-
-	case 3:
-		rgb.r = p;
-		rgb.g = q;
-		rgb.b = hsv.z;
-		break;
-
-	case 4:
-		rgb.r = t;
-		rgb.g = p;
-		rgb.b = hsv.z;
-		break;
-
-	case 5:
-		rgb.r = hsv.z;
-		rgb.g = p;
-		rgb.b = q;
-		break;
-	}
-
-	return rgb;
+	float l = hsv.v * (1 - hsv.s * 0.5f);
+	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l)/minimum(l, 1 - l), l);
 }
 
-inline vec3 RgbToHsv(vec3 rgb)
+template <>
+inline ColorHSVA color_cast(const ColorHSLA &hsl)
 {
-	float h_min = min(min(rgb.r, rgb.g), rgb.b);
-	float h_max = max(max(rgb.r, rgb.g), rgb.b);
-
-	// hue
-	float hue = 0.0f;
-
-	if(h_max == h_min)
-		hue = 0.0f;
-	else if(h_max == rgb.r)
-		hue = (rgb.g-rgb.b) / (h_max-h_min);
-	else if(h_max == rgb.g)
-		hue = 2.0f + (rgb.b-rgb.r) / (h_max-h_min);
-	else
-		hue = 4.0f + (rgb.r-rgb.g) / (h_max-h_min);
-
-	hue /= 6.0f;
-
-	if(hue < 0.0f)
-		hue += 1.0f;
-
-	// saturation
-	float s = 0.0f;
-	if(h_max != 0.0f)
-		s = (h_max - h_min)/h_max;
-
-	// lightness
-	float l = h_max;
-
-	return vec3(hue, s, l);
+	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
+	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v);
 }
 
-inline vec3 RgbToHsl(vec3 rgb)
+template <>
+inline ColorRGBA color_cast(const ColorHSVA &hsv)
 {
-	float Min = min(rgb.r, rgb.g, rgb.b);
-	float Max = max(rgb.r, rgb.g, rgb.b);
-
-	float c = Max - Min;
-	float h = RgbToHue(rgb);
-	float l = 0.5f * (Max + Min);
-	float s = (Max != 0.0f && Min != 1.0f) ? (c/(1 - (absolute(2 * l - 1)))) : 0;
-
-	return vec3(h, s, l);
+	return color_cast<ColorRGBA>(color_cast<ColorHSLA>(hsv));
 }
 
-/*
-	Function: HexToRgba
-		Converts Hex to Rgba
-
-	Remarks: Hex should be RGBA8
-*/
-inline vec4 HexToRgba(int hex)
+template <>
+inline ColorHSVA color_cast(const ColorRGBA &rgb)
 {
-	vec4 c;
-	c.r = ((hex >> 24) & 0xFF) / 255.0f;
-	c.g = ((hex >> 16) & 0xFF) / 255.0f;
-	c.b = ((hex >> 8) & 0xFF) / 255.0f;
-	c.a = (hex & 0xFF) / 255.0f;
-
-	return c;
+	return color_cast<ColorHSVA>(color_cast<ColorHSLA>(rgb));
 }
 
-inline vec3 UnpackColor(int v)
+template <typename T>
+T color_scale(const color4_base &col, float s)
 {
-    return vec3(fmod(((v>>16)&0xff)/255.0f, 1.0f), ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f);
-}
-
-inline vec4 Color3to4(vec3 col)
-{
-	return vec4(col[0], col[1], col[2], 1.0f);
+	return T(col.x * s, col.y * s, col.z * s, col.a * s);
 }
 
 #endif

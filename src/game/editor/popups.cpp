@@ -75,9 +75,9 @@ void CEditor::UiDoPopupMenu()
 			Corners = CUI::CORNER_R|CUI::CORNER_B;
 
 		CUIRect r = s_UiPopups[i].m_Rect;
-		RenderTools()->DrawUIRect(&r, vec4(0.5f,0.5f,0.5f,0.75f), Corners, 3.0f);
+		RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f,0.5f,0.5f,0.75f), Corners, 3.0f);
 		r.Margin(1.0f, &r);
-		RenderTools()->DrawUIRect(&r, vec4(0,0,0,0.75f), Corners, 3.0f);
+		RenderTools()->DrawUIRect(&r, ColorRGBA(0,0,0,0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
 		if(s_UiPopups[i].m_pfnFunc(this, r))
@@ -112,7 +112,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View)
 		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete group", 0, &Button, 0, "Delete group"))
 		{
 			pEditor->m_Map.DeleteGroup(pEditor->m_SelectedGroup);
-			pEditor->m_SelectedGroup = max(0, pEditor->m_SelectedGroup-1);
+			pEditor->m_SelectedGroup = maximum(0, pEditor->m_SelectedGroup-1);
 			return 1;
 		}
 	}
@@ -1212,7 +1212,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 			ImageView.w = ImageView.h;
 		else
 			ImageView.h = ImageView.w;
-		float Max = (float)(max(pEditor->m_Map.m_lImages[ShowImage]->m_Width, pEditor->m_Map.m_lImages[ShowImage]->m_Height));
+		float Max = (float)(maximum(pEditor->m_Map.m_lImages[ShowImage]->m_Width, pEditor->m_Map.m_lImages[ShowImage]->m_Height));
 		ImageView.w *= pEditor->m_Map.m_lImages[ShowImage]->m_Width/Max;
 		ImageView.h *= pEditor->m_Map.m_lImages[ShowImage]->m_Height/Max;
 		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_TexID);
@@ -1434,7 +1434,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	static vec4 s_color = vec4(1,1,1,0.5f);
+	static ColorRGBA s_color = ColorRGBA(1,1,1,0.5f);
 
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, s_color);
 
@@ -1449,13 +1449,13 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View)
 			{
 				if(gl->m_pTeleTile[y*gl->m_Width+x].m_Number == NewVal)
 				{
-					s_color = vec4(1,0.5f,0.5f,0.5f);
+					s_color = ColorRGBA(1,0.5f,0.5f,0.5f);
 					goto done;
 				}
 			}
 		}
 
-		s_color = vec4(0.5f,1,0.5f,0.5f);
+		s_color = ColorRGBA(0.5f,1,0.5f,0.5f);
 
 		done:
 		pEditor->m_TeleNumber = NewVal;
@@ -1518,7 +1518,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	static vec4 s_color = vec4(1,1,1,0.5f);
+	static ColorRGBA s_color = ColorRGBA(1,1,1,0.5f);
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, s_color);
 
 	if(Prop == PROP_SwitchNumber)
@@ -1532,13 +1532,13 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View)
 			{
 				if(gl->m_pSwitchTile[y*gl->m_Width+x].m_Number == NewVal)
 				{
-					s_color = vec4(1,0.5f,0.5f,0.5f);
+					s_color = ColorRGBA(1,0.5f,0.5f,0.5f);
 					goto done;
 				}
 			}
 		}
 
-		s_color = vec4(0.5f,1,0.5f,0.5f);
+		s_color = ColorRGBA(0.5f,1,0.5f,0.5f);
 
 		done:
 		pEditor->m_SwitchNum = NewVal;
@@ -1585,16 +1585,16 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 	pEditor->Graphics()->QuadsBegin();
 
 	// base: white - hue
-	vec3 hsv = pEditor->ms_PickerColor;
+	ColorHSVA hsv = pEditor->ms_PickerColor;
 	IGraphics::CColorVertex ColorArray[4];
 
-	vec3 c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
+	ColorRGBA c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
 	ColorArray[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
+	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
 	ColorArray[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 1.0f, 1.0f));
+	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
 	ColorArray[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f);
-	c = HsvToRgb(vec3(hsv.x, 0.0f, 1.0f));
+	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
 	ColorArray[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f);
 
 	pEditor->Graphics()->SetColorVertex(ColorArray, 4);
@@ -1644,12 +1644,12 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View)
 	};
 
 	pEditor->Graphics()->QuadsBegin();
-	vec4 ColorTop, ColorBottom;
+	ColorRGBA ColorTop, ColorBottom;
 	float Offset = HuePicker.h/6.0f;
 	for(int j = 0; j < 6; j++)
 	{
-		ColorTop = vec4(s_aColorIndices[j][0], s_aColorIndices[j][1], s_aColorIndices[j][2], 1.0f);
-		ColorBottom = vec4(s_aColorIndices[j+1][0], s_aColorIndices[j+1][1], s_aColorIndices[j+1][2], 1.0f);
+		ColorTop = ColorRGBA(s_aColorIndices[j][0], s_aColorIndices[j][1], s_aColorIndices[j][2], 1.0f);
+		ColorBottom = ColorRGBA(s_aColorIndices[j+1][0], s_aColorIndices[j+1][1], s_aColorIndices[j+1][2], 1.0f);
 
 		ColorArray[0] = IGraphics::CColorVertex(0, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
 		ColorArray[1] = IGraphics::CColorVertex(1, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);

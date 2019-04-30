@@ -738,7 +738,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		// get timeline markers
 		int Num = ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[0]<<24)&0xFF000000) | ((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[1]<<16)&0xFF0000) |
 					((m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[2]<<8)&0xFF00) | (m_Info.m_TimelineMarkers.m_aNumTimelineMarkers[3]&0xFF);
-		m_Info.m_Info.m_NumTimelineMarkers = min(Num, (int)MAX_TIMELINE_MARKERS);
+		m_Info.m_Info.m_NumTimelineMarkers = minimum(Num, (int)MAX_TIMELINE_MARKERS);
 		for(int i = 0; i < m_Info.m_Info.m_NumTimelineMarkers; i++)
 		{
 			char *pTimelineMarker = m_Info.m_TimelineMarkers.m_aTimelineMarkers[i];
@@ -917,7 +917,7 @@ void CDemoPlayer::GetDemoName(char *pBuffer, int BufferSize) const
 			pEnd = pFileName;
 	}
 
-	int Length = pEnd > pExtractedName ? min(BufferSize, (int)(pEnd-pExtractedName+1)) : BufferSize;
+	int Length = pEnd > pExtractedName ? minimum(BufferSize, (int)(pEnd-pExtractedName+1)) : BufferSize;
 	str_copy(pBuffer, pExtractedName, Length);
 }
 

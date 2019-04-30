@@ -23,7 +23,7 @@ public:
 	int Num() const;
 	const CCountryFlag *GetByCountryCode(int CountryCode) const;
 	const CCountryFlag *GetByIndex(int Index) const;
-	void Render(int CountryCode, const vec4 *pColor, float x, float y, float w, float h);
+	void Render(int CountryCode, const ColorRGBA *pColor, float x, float y, float w, float h);
 
 private:
 	enum

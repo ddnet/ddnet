@@ -327,8 +327,8 @@ void CSpectator::OnRender()
 		{
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
-			vec3 rgb = HslToRgb(vec3(DDTeam / 64.0f, 1.0f, 0.5f));
-			Graphics()->SetColor(rgb.r, rgb.g, rgb.b, 0.5f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
+			Graphics()->SetColor(rgb);
 
 			int Corners = 0;
 

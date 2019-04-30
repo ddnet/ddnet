@@ -125,13 +125,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 						Begin++;
 						continue;
 					}
-					int max = min(i - Begin + 1, (int)sizeof(Line));
+					int max = minimum(i - Begin + 1, (int)sizeof(Line));
 					str_copy(Line, Text + Begin, max);
 					Begin = i+1;
 					ExecuteLine(Line);
 				}
 			}
-			int max = min(i - Begin + 1, (int)sizeof(Line));
+			int max = minimum(i - Begin + 1, (int)sizeof(Line));
 			str_copy(Line, Text + Begin, max);
 			Begin = i+1;
 			m_Input.Add(Line);
@@ -588,7 +588,7 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
+		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightCol));
 
 		//	render log (actual page, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
@@ -600,7 +600,7 @@ void CGameConsole::OnRender()
 			while(pEntry)
 			{
 				if(pEntry->m_Highlighted)
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1);
+					TextRender()->TextColor(rgb);
 				else
 					TextRender()->TextColor(1,1,1,1);
 

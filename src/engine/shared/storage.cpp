@@ -519,7 +519,7 @@ void IStorage::StripPathAndExtension(const char *pFilename, char *pBuffer, int B
 		}
 	}
 
-	int Length = min(BufferSize, (int)(pEnd - pExtractedName + 1));
+	int Length = minimum(BufferSize, (int)(pEnd - pExtractedName + 1));
 	str_copy(pBuffer, pExtractedName, Length);
 }
 

@@ -161,13 +161,13 @@ void CKillMessages::OnRender()
 		x -= m_aKillmsgs[r].m_VitctimTextWidth;
 		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
 		{
-			vec3 rgb = HslToRgb(vec3(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
 			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0);
 		}
 
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)
 			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
-		
+
 		// render victim tee
 		x -= 24.0f;
 

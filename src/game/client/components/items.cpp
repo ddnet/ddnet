@@ -204,7 +204,7 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 
 void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 {
-	vec3 RGB;
+	ColorRGBA RGB;
 	vec2 Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
 	vec2 From = vec2(pCurrent->m_FromX, pCurrent->m_FromY);
 	vec2 Dir = normalize(Pos-From);
@@ -223,10 +223,10 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
-	
+
 	// do outline
-	RGB = HslToRgb(vec3(g_Config.m_ClLaserOutlineHue / 255.0f, g_Config.m_ClLaserOutlineSat / 255.0f, g_Config.m_ClLaserOutlineLht / 255.0f));
-	vec4 OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
+	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineCol));
+	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
 	Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
 	Out = vec2(Dir.y, -Dir.x) * (7.0f*Ia);
 
@@ -238,8 +238,8 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
 	// do inner
-	RGB = HslToRgb(vec3(g_Config.m_ClLaserInnerHue / 255.0f, g_Config.m_ClLaserInnerSat / 255.0f, g_Config.m_ClLaserInnerLht / 255.0f));
-	vec4 InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
+	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerCol));
+	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 	Out = vec2(Dir.y, -Dir.x) * (5.0f*Ia);
 	Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
 
@@ -476,11 +476,11 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 
 	float T = Pt;
 	if(DestroyTick >= 0)
-		T = min(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED);
-	T = min(T, LifeSpan/(float)SERVER_TICK_SPEED);
+		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED);
+	T = minimum(T, LifeSpan/(float)SERVER_TICK_SPEED);
 
 	float MinTrailSpan = 0.4f * ((pCurrent->m_Type == WEAPON_GRENADE) ? 0.5f : 0.25f);
-	float Step = max(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
+	float Step = maximum(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
 	for(int i = 1+(int)(Gt/Step); i < (int)(T/Step); i++)
 	{
 		float t = Step * (float)i + 0.4f * Step * (frandom() - 0.5f);
@@ -489,7 +489,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 		vec2 Vel = Pos-PrevPos;
 		float TimePassed = Pt-t;
 		if(Pt - MinTrailSpan > 0.01f)
-			TimePassed = min(TimePassed, (TimePassed-MinTrailSpan)/(Pt - MinTrailSpan)*(MinTrailSpan * 0.5f) + MinTrailSpan);
+			TimePassed = minimum(TimePassed, (TimePassed-MinTrailSpan)/(Pt - MinTrailSpan)*(MinTrailSpan * 0.5f) + MinTrailSpan);
 		// add particle for this projectile
 		if(pCurrent->m_Type == WEAPON_GRENADE)
 			m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1, TimePassed);
