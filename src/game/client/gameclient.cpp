@@ -1026,8 +1026,8 @@ void CGameClient::OnNewSnapshot()
 				if(m_aClients[ClientID].m_aSkinName[0] == 'x' || m_aClients[ClientID].m_aSkinName[1] == '_')
 					str_copy(m_aClients[ClientID].m_aSkinName, "default", 64);
 
-				m_aClients[ClientID].m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(m_aClients[ClientID].m_ColorBody));
-				m_aClients[ClientID].m_SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(m_aClients[ClientID].m_ColorFeet));
+				m_aClients[ClientID].m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(m_aClients[ClientID].m_ColorBody).Lighten());
+				m_aClients[ClientID].m_SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(m_aClients[ClientID].m_ColorFeet).Lighten());
 				m_aClients[ClientID].m_SkinInfo.m_Size = 64;
 
 				// find new skin
