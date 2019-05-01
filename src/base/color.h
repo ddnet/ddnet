@@ -112,6 +112,13 @@ public:
 		col.l = 0.5f + l * 0.5f;
 		return col;
 	};
+
+	int PackLegacy()
+	{
+		ColorHSLA t = *this;
+		t.l = (t.l - 0.5f) * 2;
+		return t.Pack();
+	}
 };
 
 class ColorHSVA : public color4_base

@@ -1685,8 +1685,8 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_Country = g_Config.m_PlayerCountry;
 		Msg.m_pSkin = g_Config.m_ClPlayerSkin;
 		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
-		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
-		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+		Msg.m_ColorBody = ColorHSLA(g_Config.m_ClPlayerColorBody).PackLegacy();
+		Msg.m_ColorFeet = ColorHSLA(g_Config.m_ClPlayerColorFeet).PackLegacy();
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
@@ -1700,8 +1700,8 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_Country = g_Config.m_PlayerCountry;
 		Msg.m_pSkin = g_Config.m_ClPlayerSkin;
 		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
-		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
-		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+		Msg.m_ColorBody = ColorHSLA(g_Config.m_ClPlayerColorBody).PackLegacy();
+		Msg.m_ColorFeet = ColorHSLA(g_Config.m_ClPlayerColorFeet).PackLegacy();
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
@@ -1719,8 +1719,8 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_Country = g_Config.m_ClDummyCountry;
 		Msg.m_pSkin = g_Config.m_ClDummySkin;
 		Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
-		Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
-		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
+		Msg.m_ColorBody = ColorHSLA(g_Config.m_ClDummyColorBody).PackLegacy();
+		Msg.m_ColorFeet = ColorHSLA(g_Config.m_ClDummyColorFeet).PackLegacy();
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 1);
@@ -1734,8 +1734,8 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_Country = g_Config.m_ClDummyCountry;
 		Msg.m_pSkin = g_Config.m_ClDummySkin;
 		Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
-		Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
-		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
+		Msg.m_ColorBody = ColorHSLA(g_Config.m_ClDummyColorBody).PackLegacy();
+		Msg.m_ColorFeet = ColorHSLA(g_Config.m_ClDummyColorFeet).PackLegacy();
 		CMsgPacker Packer(Msg.MsgID());
 		Msg.Pack(&Packer);
 		Client()->SendMsgExY(&Packer, MSGFLAG_VITAL,false, 1);
