@@ -148,7 +148,7 @@ int CMapImages::GetOverlayCenter()
 	return m_OverlayCenterTexture;
 }
 
-void CMapImages::TextureScale(int Scale)
+void CMapImages::SetTextureScale(int Scale)
 {
 	if (m_TextureScale == Scale)
 		return;
@@ -167,7 +167,7 @@ void CMapImages::TextureScale(int Scale)
 	}
 }
 
-int CMapImages::TextureScale()
+int CMapImages::GetTextureScale()
 {
 	return m_TextureScale;
 }
@@ -175,6 +175,7 @@ int CMapImages::TextureScale()
 void CMapImages::InitOverlayTextures()
 {
 	int TextureSize = 64 * m_TextureScale / 100;
+	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
 
 	//TODO: improve this a bit -- with better from sizes etc.
 	if(m_OverlayBottomTexture == -1)
@@ -190,7 +191,7 @@ void CMapImages::InitOverlayTextures()
 
 			float x = (i % 16) * 64;
 			float y = (i / 16) * 64;
-			TextRender()->UploadEntityLayerText(m_OverlayBottomTexture, buff, -1, x + 1, y + 32, TextureSize / 2, 64 - 1);
+			TextRender()->UploadEntityLayerText(m_OverlayBottomTexture, buff, -1, x + 1, y + TextureToVerticalCenterOffset / 2 + 32, TextureSize / 2, 64 - 1);
 		}
 	}
 
@@ -207,7 +208,7 @@ void CMapImages::InitOverlayTextures()
 
 			float x = (i % 16) * 64;
 			float y = (i / 16) * 64;
-			TextRender()->UploadEntityLayerText(m_OverlayTopTexture, buff, -1, x + 1, y, TextureSize / 2, 64 - 1);
+			TextRender()->UploadEntityLayerText(m_OverlayTopTexture, buff, -1, x + 1, y + TextureToVerticalCenterOffset / 2, TextureSize / 2, 64 - 1);
 		}
 	}
 
@@ -230,7 +231,7 @@ void CMapImages::InitOverlayTextures()
 			int OffY = (len == 3 ? 10 : 5);
 			int OffX = (len == 3 ? 5 : 1);
 
-			TextRender()->UploadEntityLayerText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY, -1, 64 - (OffX * 2), TextureSize, MinSize);
+			TextRender()->UploadEntityLayerText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY + TextureToVerticalCenterOffset, -1, 64 - (OffX * 2), TextureSize, MinSize);
 		}
 	}
 }

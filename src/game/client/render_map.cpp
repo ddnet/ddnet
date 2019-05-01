@@ -415,7 +415,8 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
 		return; // its useless to render text at this distance
 
-	float size = g_Config.m_ClTextEntitiesSize / 100.f;
+	float size = g_Config.m_ClTextEntitiesSize/100.f;
+	float toCenterOffset = (1-size)/2.f;
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -441,7 +442,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale - 3.f, my*Scale, size * Scale, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale - 3.f, (my+toCenterOffset)*Scale, size*Scale, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
@@ -463,6 +464,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 		return; // its useless to render text at this distance
 
 	float size = g_Config.m_ClTextEntitiesSize / 100.f;
+	float toCenterOffset = (1-size)/2.f;
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -502,13 +504,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					char aBuf[16];
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					UI()->TextRender()->Text(0, mx*Scale, (my+0.5)*Scale, size * Scale/2.f, aBuf, -1);
+					UI()->TextRender()->Text(0, mx*Scale, (my+0.5+toCenterOffset/2)*Scale, size*Scale/2.f, aBuf, -1);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					if(MaxSpeed)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-						UI()->TextRender()->Text(0, mx*Scale, (my*Scale), size * Scale/2.f, aBuf, -1);
+						UI()->TextRender()->Text(0, mx*Scale, (my+toCenterOffset/2)*Scale, size*Scale/2.f, aBuf, -1);
 						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					}
 				}
@@ -533,7 +535,8 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
 		return; // its useless to render text at this distance
 
-	float size = g_Config.m_ClTextEntitiesSize / 100.f;
+	float size = g_Config.m_ClTextEntitiesSize/100.f;
+	float toCenterOffset = (1-size)/2.f;
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -559,7 +562,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale, my*Scale, size * Scale / 2.f, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale, my*Scale, size*Scale/2.f, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 
@@ -569,7 +572,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale, (my+0.5f)* Scale, size * Scale / 2.f, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale, (my+0.5f)* Scale, size*Scale/2.f, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
@@ -593,7 +596,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
 		return; // its useless to render text at this distance
 
-	float size = g_Config.m_ClTextEntitiesSize * Scale / 100.f;
+	float size = g_Config.m_ClTextEntitiesSize/100.f;
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -619,7 +622,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale+11.f, my*Scale+6.f, size * Scale/1.5f, aBuf, -1); // numbers shouldn't be too big and in the center of the tile
+				UI()->TextRender()->Text(0, mx*Scale+11.f, my*Scale+6.f, size*Scale/1.5f-5.f, aBuf, -1); // numbers shouldn't be too big and in the center of the tile
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
