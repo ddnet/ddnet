@@ -216,6 +216,7 @@ Objects = [
 		NetTick("m_FreezeEnd"),
 		NetIntRange("m_Jumps", 0, 255),
 		NetIntAny("m_TeleCheckpoint"),
+		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
 	]),
 
 	## Events

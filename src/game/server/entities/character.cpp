@@ -24,6 +24,7 @@ CCharacter::CCharacter(CGameWorld *pWorld)
 	m_ProximityRadius = ms_PhysSize;
 	m_Health = 0;
 	m_Armor = 0;
+	m_StrongWeakID = 0;
 }
 
 void CCharacter::Reset()
@@ -1216,6 +1217,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTick + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
+	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
 }
 
 int CCharacter::NetworkClipped(int SnappingClient)
