@@ -89,7 +89,7 @@ MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 64, "localhost:8303", CFGFL
 MACRO_CONFIG_INT(UiScale, ui_scale, 100, 50, 150, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface scale")
 MACRO_CONFIG_INT(UiMousesens, ui_mousesens, 200, 1, 100000, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Mouse sensitivity for menus/editor")
 
-MACRO_CONFIG_COL(UiColor, ui_color, 160, 0, (int)0xFFFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color") // 160 70 175 228 hasalpha
+MACRO_CONFIG_COL(UiColor, ui_color, (int)0xE4A046AF, 0, (int)0xFFFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface color") // 160 70 175 228 hasalpha
 
 MACRO_CONFIG_INT(UiColorizePing, ui_colorize_ping, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight ping")
 MACRO_CONFIG_INT(UiColorizeGametype, ui_colorize_gametype, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Highlight gametype")
