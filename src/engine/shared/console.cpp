@@ -708,8 +708,9 @@ struct CIntVariableData
 
 struct CColVariableData : public CIntVariableData
 {
-	template<class... T> CColVariableData(bool b, T... t) : CIntVariableData{t...}, m_Light(b) {}
+	template<class... T> CColVariableData(bool l, bool a, T... t) : CIntVariableData{t...}, m_Light(l), m_Alpha(a) {}
 	bool m_Light;
+	bool m_Alpha;
 };
 
 struct CStrVariableData
@@ -755,7 +756,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments())
 	{
-		int Val = pResult->GetColor(0, pData->m_Light).Pack() & (pData->m_Light ? 0xFFFFFF : 0xFFFFFFFF);
+		int Val = pResult->GetColor(0, pData->m_Light).Pack() & (pData->m_Alpha ? 0xFFFFFFFF : 0xFFFFFF);
 
 		*(pData->m_pVariable) = Val;
 		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
@@ -936,7 +937,7 @@ CConsole::CConsole(int FlagMask)
 
 	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Flags,Desc) \
 	{ \
-		static CColVariableData Data = { static_cast<bool>((Flags) & CFGFLAG_COLLIGHT), this, &g_Config.m_##Name, Min, Max, Def }; \
+		static CColVariableData Data = { static_cast<bool>((Flags) & CFGFLAG_COLLIGHT), static_cast<bool>((Flags) & CFGFLAG_COLALPHA), this, &g_Config.m_##Name, Min, Max, Def }; \
 		Register(#ScriptName, "?i", Flags, ColVariableCommand, &Data, Desc); \
 	}
 
