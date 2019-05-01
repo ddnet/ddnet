@@ -688,7 +688,7 @@ void CGameContext::OnTick()
 						Server()->GetClientAddr(i, aaBuf[i], NETADDR_MAXSTRSIZE);
 						if(!pIP)
 							pIP = aaBuf[i];
-						else if(!SinglePlayer && str_comp(pIP, aaBuf[i]))
+						else if(SinglePlayer && str_comp(pIP, aaBuf[i]))
 							SinglePlayer = false;
 					}
 				}
