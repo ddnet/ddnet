@@ -403,8 +403,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		OwnSkinInfo.m_Texture = pOwnSkin->m_ColorTexture;
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody));
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet));
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody).Lighten());
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet).Lighten());
 	}
 	else
 	{
@@ -592,24 +592,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		char aBuf[128];
 		if(Item.m_Visible)
 		{
-			CTeeRenderInfo Info;
-			if(*UseCustomColor)
-			{
-				Info.m_Texture = s->m_ColorTexture;
-				Info.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody));
-				Info.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet));
-			}
-			else
-			{
-				Info.m_Texture = s->m_OrgTexture;
-				Info.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-				Info.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-			}
-
-			Info.m_Size = UI()->Scale()*50.0f;
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x+30, Item.m_Rect.y+Item.m_Rect.h/2));
-
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x+30, Item.m_Rect.y+Item.m_Rect.h/2));
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
