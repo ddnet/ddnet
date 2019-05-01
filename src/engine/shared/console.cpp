@@ -44,9 +44,10 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 		return hsl;
 
 	const char *pStr = m_apArgs[Index];
-	if(str_isallnum(pStr)) // Teeworlds Color (Packed HSL)
+	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr+1))) // Teeworlds Color (Packed HSL)
 	{
-		return str_toint(pStr);
+		dbg_msg("DEBUG", "HERE %s %d", pStr, str_toint(pStr));
+		hsl = ColorHSLA(str_toint(pStr), true);
 	}
 	else if(*pStr == '$') // Hex RGB
 	{
@@ -92,7 +93,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
 	else if(!str_comp_nocase(pStr, "black"))
 		hsl = ColorHSLA(0, 0, 0);
 
-	return hsl.Lighten();
+	return Light ? hsl.Lighten() : hsl;
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
@@ -754,16 +755,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments())
 	{
-		int Val = pResult->GetColor(0, pData->m_Light).Pack() & 0xFFFFFF;
-
-		// do clamping
-		if(pData->m_Min != pData->m_Max)
-		{
-			if(Val < pData->m_Min)
-				Val = pData->m_Min;
-			if(pData->m_Max != 0 && Val > pData->m_Max)
-				Val = pData->m_Max;
-		}
+		int Val = pResult->GetColor(0, pData->m_Light).Pack() & (pData->m_Light ? 0xFFFFFF : 0xFFFFFFFF);
 
 		*(pData->m_pVariable) = Val;
 		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
