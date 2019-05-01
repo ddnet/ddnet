@@ -679,10 +679,20 @@ void CGameContext::OnTick()
 			if(m_VoteUpdate)
 			{
 				// count votes
-				char aaBuf[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}};
+				char aaBuf[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}}, *pIP = NULL;
+				bool SinglePlayer = true;
 				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
 					if(m_apPlayers[i])
+					{
 						Server()->GetClientAddr(i, aaBuf[i], NETADDR_MAXSTRSIZE);
+						if(!pIP)
+							pIP = aaBuf[i];
+						else if(!SinglePlayer && str_comp(pIP, aaBuf[i]))
+							SinglePlayer = false;
+					}
+				}
+
 				bool aVoteChecked[MAX_CLIENTS] = {0};
 				int64 Now = Server()->Tick();
 				for(int i = 0; i < MAX_CLIENTS; i++)
@@ -711,7 +721,7 @@ void CGameContext::OnTick()
 						continue;
 
 					// don't count votes by blacklisted clients
-					if(g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i))
+					if(g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i) && !SinglePlayer)
 						continue;
 
 					int ActVote = m_apPlayers[i]->m_Vote;
