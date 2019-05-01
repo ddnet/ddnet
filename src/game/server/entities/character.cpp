@@ -1200,8 +1200,22 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_HasTeleLaser)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
+	if(m_aWeapons[WEAPON_HAMMER].m_Got)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
+	if(m_aWeapons[WEAPON_GUN].m_Got)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
+	if(m_aWeapons[WEAPON_SHOTGUN].m_Got)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
+	if(m_aWeapons[WEAPON_GRENADE].m_Got)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
+	if(m_aWeapons[WEAPON_RIFLE].m_Got)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
+	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
 
 	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTick + m_FreezeTime;
+	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
+	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 }
 
 int CCharacter::NetworkClipped(int SnappingClient)
