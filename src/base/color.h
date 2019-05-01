@@ -102,22 +102,40 @@ public:
 class ColorHSLA : public color4_base
 {
 public:
+	bool m_Lit = false;
+
 	using color4_base::color4_base;
 	ColorHSLA() {};
 	ColorHSLA(color4_base b): color4_base(b) {};
 
 	ColorHSLA Lighten()
 	{
+		if(m_Lit)
+			return *this;
+
 		ColorHSLA col = *this;
 		col.l = 0.5f + l * 0.5f;
+		col.m_Lit = true;
 		return col;
 	};
 
-	int PackLegacy()
+	ColorHSLA Darken()
 	{
-		ColorHSLA t = *this;
-		t.l = (t.l - 0.5f) * 2;
-		return t.Pack();
+		if(!m_Lit)
+			return *this;
+
+		ColorHSLA col = *this;
+		col.l = (l - 0.5f) * 2;
+		col.m_Lit = false;
+		return col;
+	}
+
+	int Pack()
+	{
+		if(m_Lit)
+			return Darken().color4_base::Pack();
+		else
+			return color4_base::Pack();
 	}
 };
 
