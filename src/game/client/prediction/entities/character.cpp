@@ -881,8 +881,6 @@ void CCharacter::HandleTiles(int Index)
 
 void CCharacter::DDRaceTick()
 {
-	if(!GameWorld()->m_WorldConfig.m_PredictTiles || !GameWorld()->m_WorldConfig.m_PredictWeapons)
-		return;
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
 	if(m_FreezeTime > 0 || m_FreezeTime == -1)
 	{
@@ -900,9 +898,6 @@ void CCharacter::DDRaceTick()
 
 void CCharacter::DDRacePostCoreTick()
 {
-	if(!GameWorld()->m_WorldConfig.m_PredictTiles)
-		return;
-
 	if (m_EndlessHook)
 		m_Core.m_HookTick = 0;
 
@@ -919,17 +914,20 @@ void CCharacter::DDRacePostCoreTick()
 	if ((m_Super || m_SuperJump) && m_Core.m_Jumped > 1)
 		m_Core.m_Jumped = 1;
 
-	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
-	HandleSkippableTiles(CurrentIndex);
-
-	// handle Anti-Skip tiles
-	std::list < int > Indices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if(!Indices.empty())
-		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-			HandleTiles(*i);
-	else
+	if(GameWorld()->m_WorldConfig.m_PredictTiles)
 	{
-		HandleTiles(CurrentIndex);
+		int CurrentIndex = Collision()->GetMapIndex(m_Pos);
+		HandleSkippableTiles(CurrentIndex);
+
+		// handle Anti-Skip tiles
+		std::list < int > Indices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+		if(!Indices.empty())
+			for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+				HandleTiles(*i);
+		else
+		{
+			HandleTiles(CurrentIndex);
+		}
 	}
 }
 
