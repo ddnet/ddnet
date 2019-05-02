@@ -4,6 +4,7 @@
 #define GAME_CLIENT_RENDER_H
 
 #include <base/vmath.h>
+#include <base/color.h>
 #include <game/mapitems.h>
 #include "ui.h"
 
@@ -14,15 +15,15 @@ public:
 	CTeeRenderInfo()
 	{
 		m_Texture = -1;
-		m_ColorBody = vec3(1,1,1);
-		m_ColorFeet = vec3(1,1,1);
+		m_ColorBody = ColorRGBA(1,1,1);
+		m_ColorFeet = ColorRGBA(1,1,1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
 	};
 
 	int m_Texture;
-	vec3 m_ColorBody;
-	vec3 m_ColorFeet;
+	ColorRGBA m_ColorBody;
+	ColorRGBA m_ColorFeet;
 	float m_Size;
 	int m_GotAirJump;
 };
@@ -69,7 +70,7 @@ public:
 
 	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
 
-	void DrawUIRect(const CUIRect *pRect, vec4 Color, int Corners, float Rounding);
+	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
 
 	void DrawCircle(float x, float y, float r, int Segments);
 
@@ -83,11 +84,11 @@ public:
 	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, float Time, float *pResult);
 	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser);
 	void ForceRenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha = 1.0f);
-	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
+	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
 
 	// render a rectangle made of IndexIn tiles, over a background made of IndexOut tiles
 	// the rectangle include all tiles in [RectX, RectX+RectW-1] x [RectY, RectY+RectH-1]
-	void RenderTileRectangle(int RectX, int RectY, int RectW, int RectH, unsigned char IndexIn, unsigned char IndexOut, float Scale, vec4 Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
+	void RenderTileRectangle(int RectX, int RectY, int RectW, int RectH, unsigned char IndexIn, unsigned char IndexOut, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
 
 	// helpers
 	void MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
@@ -99,10 +100,10 @@ public:
 	void RenderSpeedupOverlay(CSpeedupTile *pTele, int w, int h, float Scale, float Alpha=1.0f);
 	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha=1.0f);
 	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha=1.0f);
-	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, vec4 Color, int RenderFlags);
-	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale, vec4 Color, int RenderFlags);
-	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, vec4 Color, int RenderFlags);
-	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, vec4 Color, int RenderFlags);
+	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 };
 
 #endif

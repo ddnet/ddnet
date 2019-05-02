@@ -135,8 +135,8 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
-			vec3 Color = HslToRgb(UnpackColor(g_Config.m_ClAuthedPlayerColor));
-			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
+			TextRender()->TextColor(Color);
 		}
 
 		if(g_Config.m_ClShowIDs)
@@ -367,8 +367,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		{
 			Graphics()->TextureSet(-1);
 			Graphics()->QuadsBegin();
-			vec3 rgb = HslToRgb(vec3(DDTeam / 64.0f, 1.0f, 0.5f));
-			Graphics()->SetColor(rgb.r, rgb.g, rgb.b, 0.5f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
+			Graphics()->SetColor(rgb);
 
 			int Corners = 0;
 
@@ -456,8 +456,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
-			vec3 Color = HslToRgb(UnpackColor(g_Config.m_ClAuthedPlayerColor));
-			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
+			TextRender()->TextColor(Color);
 		}
 
 		if(g_Config.m_ClShowIDs)
@@ -478,8 +478,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
 				m_pClient->m_aClients[GameClient()->m_LocalIDs[g_Config.m_ClDummy]].m_aClan) == 0)
 		{
-			vec3 Color = HslToRgb(UnpackColor(g_Config.m_ClSameClanColor));
-			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor));
+			TextRender()->TextColor(Color);
 		}
 		else
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -492,15 +492,15 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// country flag
-		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
+		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
 		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
 											CountryOffset, y+(Spacing+TeeSizeMod*5.0f)/2.0f, CountryLength, LineHeight-Spacing-TeeSizeMod*5.0f);
 
 		// ping
 		if(g_Config.m_ClEnablePingColor)
 		{
-			vec3 rgb = HslToRgb(vec3((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+			TextRender()->TextColor(rgb);
 		}
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 1000));
 		tw = TextRender()->TextWidth(nullptr, FontSize, aBuf, -1);

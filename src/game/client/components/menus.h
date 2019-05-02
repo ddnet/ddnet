@@ -28,15 +28,15 @@ public:
 
 class CMenus : public CComponent
 {
-	static vec4 ms_GuiColor;
-	static vec4 ms_ColorTabbarInactiveOutgame;
-	static vec4 ms_ColorTabbarActiveOutgame;
-	static vec4 ms_ColorTabbarInactiveIngame;
-	static vec4 ms_ColorTabbarActiveIngame;
-	static vec4 ms_ColorTabbarInactive;
-	static vec4 ms_ColorTabbarActive;
+	static ColorRGBA ms_GuiColor;
+	static ColorRGBA ms_ColorTabbarInactiveOutgame;
+	static ColorRGBA ms_ColorTabbarActiveOutgame;
+	static ColorRGBA ms_ColorTabbarInactiveIngame;
+	static ColorRGBA ms_ColorTabbarActiveIngame;
+	static ColorRGBA ms_ColorTabbarInactive;
+	static ColorRGBA ms_ColorTabbarActive;
 
-	vec4 ButtonColorMul(const void *pID);
+	float ButtonColorMul(const void *pID);
 
 
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);

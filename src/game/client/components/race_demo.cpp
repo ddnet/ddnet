@@ -182,7 +182,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const char *pName, time_t Date, int IsD
 		return 0;
 
 	CDemoItem Item;
-	str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), Length - 4));
+	str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), Length - 4));
 
 	const char *pTime = Item.m_aName + MapLen + 1;
 	const char *pTEnd = pTime;

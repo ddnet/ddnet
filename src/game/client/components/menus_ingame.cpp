@@ -163,7 +163,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	// player options
 	MainView.Margin(10.0f, &Options);
-	RenderTools()->DrawUIRect(&Options, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&Options, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 	Options.Margin(10.0f, &Options);
 	Options.HSplitTop(50.0f, &Button, &Options);
 	UI()->DoLabelScaled(&Button, Localize("Player options"), 34.0f, -1);
@@ -234,7 +234,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			continue;
 
 		if(Count%2 == 1)
-			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+			RenderTools()->DrawUIRect(&Item.m_Rect, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 		Item.m_Rect.VSplitRight(300.0f, &Player, &Item.m_Rect);
 
 		// player info
@@ -257,7 +257,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 		//TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		//Cursor.m_LineWidth = Button.w;
-		vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
+		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
 		m_pClient->m_pCountryFlags->Render(m_pClient->m_aClients[Index].m_Country, &Color,
 			Button2.x, Button2.y + Button2.h/2.0f - 0.75*Button2.h/2.0f, 1.5f*Button2.h, 0.75f*Button2.h);
 
@@ -364,7 +364,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	// serverinfo
 	View.HSplitTop(View.h/2/UI()->Scale()-5.0f, &ServerInfo, &Motd);
 	ServerInfo.VSplitLeft(View.w/2/UI()->Scale()-5.0f, &ServerInfo, &GameInfo);
-	RenderTools()->DrawUIRect(&ServerInfo, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&ServerInfo, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 
 	ServerInfo.Margin(5.0f, &ServerInfo);
 
@@ -408,7 +408,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	// gameinfo
 	GameInfo.VSplitLeft(10.0f, 0x0, &GameInfo);
-	RenderTools()->DrawUIRect(&GameInfo, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&GameInfo, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 
 	GameInfo.Margin(5.0f, &GameInfo);
 
@@ -442,7 +442,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	// motd
 	Motd.HSplitTop(10.0f, 0, &Motd);
-	RenderTools()->DrawUIRect(&Motd, vec4(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
+	RenderTools()->DrawUIRect(&Motd, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 	Motd.Margin(5.0f, &Motd);
 	y = 0.0f;
 	x = 5.0f;
@@ -906,7 +906,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.HSplitBottom(28.0f, &View, &Status);
 
 	// split of the scrollbar
-	RenderTools()->DrawUIRect(&Headers, vec4(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
+	RenderTools()->DrawUIRect(&Headers, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
 	Headers.VSplitRight(20.0f, &Headers, 0);
 
 	struct CColumn
@@ -947,7 +947,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	for(int i = 0; i < NumCols; i++)
 		DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, 0, &s_aCols[i].m_Rect);
 
-	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.15f), 0, 0);
+	RenderTools()->DrawUIRect(&View, ColorRGBA(0,0,0,0.15f), 0, 0);
 
 	CUIRect Scroll;
 	View.VSplitRight(15, &View, &Scroll);
@@ -1031,7 +1031,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			{
 				CUIRect r = Row;
 				r.Margin(1.5f, &r);
-				RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+				RenderTools()->DrawUIRect(&r, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
 			// clip the selection
@@ -1049,11 +1049,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 		}
 
-		vec3 rgb = vec3(1.0f, 1.0f, 1.0f);
+		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(pItem->m_Own)
-			rgb = HslToRgb(vec3(0.33f, 1.0f, 0.75f));
+			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
 
-		TextRender()->TextColor(rgb.r, rgb.g, rgb.b, pItem->HasFile() ? 1.0f : 0.5f);
+		TextRender()->TextColor(rgb.SetAlpha(pItem->HasFile() ? 1.0f : 0.5f));
 
 		for(int c = 0; c < NumCols; c++)
 		{
@@ -1106,7 +1106,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	if(NewSelected != -1)
 		s_SelectedIndex = NewSelected;
 
-	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
+	RenderTools()->DrawUIRect(&Status, ColorRGBA(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
 	CUIRect Button;

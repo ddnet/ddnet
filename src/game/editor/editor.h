@@ -788,7 +788,7 @@ public:
 	bool IsQuadSelected(int Index);
 	int FindSelectedQuadIndex(int Index);
 
-	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, vec4 Color = vec4(1,1,1,0.5f));
+	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1,1,1,0.5f));
 
 	int m_Mode;
 	int m_Dialog;
@@ -936,7 +936,7 @@ public:
 	void DoMapBorder();
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, vec3 Color);
+	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color);
 
 	int DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize=10.0f);
@@ -948,7 +948,7 @@ public:
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags=0, const char *pToolTip=0);
 
-	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, vec4 *pColor, const char *pToolTip=0);
+	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip=0);
 
 	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden=false, int Corners=CUI::CORNER_ALL);
 
@@ -959,7 +959,7 @@ public:
 	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra=0);
 	void UiDoPopupMenu();
 
-	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, vec4* Color=0);
+	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree=false, bool IsHex=false, int corners=CUI::CORNER_ALL, ColorRGBA* Color=0);
 
 	static int PopupGroup(CEditor *pEditor, CUIRect View);
 	static int PopupLayer(CEditor *pEditor, CUIRect View);
@@ -996,7 +996,7 @@ public:
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
 
-	vec4 ButtonColorMul(const void *pID);
+	float ButtonColorMul(const void *pID);
 
 	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, int TexID = -1);
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
@@ -1008,7 +1008,7 @@ public:
 	void DoToolbar(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
 	float UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
-	vec4 GetButtonColor(const void *pID, int Checked);
+	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
 	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);
 	static void ReplaceSound(const char *pFileName, int StorageType, void *pUser);
@@ -1036,7 +1036,7 @@ public:
 	int GetLineDistance();
 	void ZoomMouseTarget(float ZoomFactor);
 
-	static vec3 ms_PickerColor;
+	static ColorHSVA ms_PickerColor;
 	static int ms_SVPicker;
 	static int ms_HuePicker;
 

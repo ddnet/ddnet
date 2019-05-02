@@ -85,7 +85,7 @@ public:
 		// rendering
 		CMD_CLEAR,
 		CMD_RENDER,
-		
+
 		//opengl 3.3 commands
 		CMD_CREATE_BUFFER_OBJECT, // create vbo
 		CMD_RECREATE_BUFFER_OBJECT, // recreate vbo
@@ -108,7 +108,7 @@ public:
 		CMD_RENDER_QUAD_CONTAINER, // render a quad buffer container
 		CMD_RENDER_QUAD_CONTAINER_SPRITE, // render a quad buffer container as sprite
 		CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE, // render a quad buffer container as sprite multiple times
-		
+
 		// swap
 		CMD_SWAP,
 
@@ -300,22 +300,22 @@ public:
 
 		unsigned int m_RequiredIndicesNum;
 	};
-		
+
 	struct SCommand_RenderTileLayer : public SCommand
 	{
 		SCommand_RenderTileLayer() : SCommand(CMD_RENDER_TILE_LAYER) {}
 		SState m_State;
 		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
-			
+
 		//the char offset of all indices that should be rendered, and the amount of renders
 		char** m_pIndicesOffsets;
 		unsigned int *m_pDrawCount;
-		
+
 		int m_IndicesDrawNum;
 		int m_BufferContainerIndex;
 		int m_LOD;
 	};
-	
+
 	struct SCommand_RenderBorderTile : public SCommand
 	{
 		SCommand_RenderBorderTile() : SCommand(CMD_RENDER_BORDER_TILE) {}
@@ -325,12 +325,12 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 		int m_LOD;
-		
+
 		float m_Offset[2];
 		float m_Dir[2];
 		int m_JumpIndex;
 	};
-	
+
 	struct SCommand_RenderBorderTileLine : public SCommand
 	{
 		SCommand_RenderBorderTileLine() : SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
@@ -341,7 +341,7 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 		int m_LOD;
-		
+
 		float m_Offset[2];
 		float m_Dir[2];
 	};
@@ -376,7 +376,7 @@ public:
 	{
 		SCommand_RenderTextStream() : SCommand(CMD_RENDER_TEXT_STREAM) {}
 		SState m_State;
-		
+
 		SVertex *m_pVertices;
 		int m_QuadNum;
 
@@ -590,7 +590,7 @@ public:
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
-	
+
 	virtual bool IsOpenGL3_3() { return false; }
 };
 
@@ -740,11 +740,12 @@ public:
 
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num);
 	virtual void SetColor(float r, float g, float b, float a);
+	virtual void SetColor(ColorRGBA rgb);
 
 	// go through all vertices and change their color (only works for quads)
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a);
 	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-	
+
 	void SetColor(CCommandBuffer::SVertex *pVertex, int ColorIndex);
 
 	virtual void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV);
@@ -824,7 +825,7 @@ public:
 	virtual void InsertSignal(semaphore *pSemaphore);
 	virtual bool IsIdle();
 	virtual void WaitForIdle();
-	
+
 	virtual bool IsBufferingEnabled() { return m_UseOpenGL3_3; }
 };
 

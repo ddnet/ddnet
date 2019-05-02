@@ -168,14 +168,14 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				if(Text[i] == '\n')
 				{
-					int max = min(i - Begin + 1, (int)sizeof(Line));
+					int max = minimum(i - Begin + 1, (int)sizeof(Line));
 					str_copy(Line, Text + Begin, max);
 					Begin = i+1;
 					SayChat(Line);
 					while(Text[i] == '\n') i++;
 				}
 			}
-			int max = min(i - Begin + 1, (int)sizeof(Line));
+			int max = minimum(i - Begin + 1, (int)sizeof(Line));
 			str_copy(Line, Text + Begin, max);
 			Begin = i+1;
 			m_Input.Add(Line);
@@ -302,7 +302,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			for(m_PlaceholderLength = 0; *pCursor && *pCursor != ' '; ++pCursor)
 				++m_PlaceholderLength;
 
-			str_copy(m_aCompletionBuffer, m_Input.GetString()+m_PlaceholderOffset, min(static_cast<int>(sizeof(m_aCompletionBuffer)), m_PlaceholderLength+1));
+			str_copy(m_aCompletionBuffer, m_Input.GetString()+m_PlaceholderOffset, minimum(static_cast<int>(sizeof(m_aCompletionBuffer)), m_PlaceholderLength+1));
 		}
 
 		if(m_aCompletionBuffer[0] == '/')
@@ -348,7 +348,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				char aBuf[256];
 				// add part before the name
-				str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+				str_copy(aBuf, m_Input.GetString(), minimum(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
 
 				// add the command
 				str_append(aBuf, "/", sizeof(aBuf));
@@ -425,7 +425,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 			{
 				char aBuf[256];
 				// add part before the name
-				str_copy(aBuf, m_Input.GetString(), min(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
+				str_copy(aBuf, m_Input.GetString(), minimum(static_cast<int>(sizeof(aBuf)), m_PlaceholderOffset+1));
 
 				// add the name
 				str_append(aBuf, pCompletionString, sizeof(aBuf));
@@ -804,26 +804,26 @@ void CChat::OnPrepareLines()
 
 		if(g_Config.m_ClMessageFriend)
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageFriendHue / 255.0f, g_Config.m_ClMessageFriendSat / 255.0f, g_Config.m_ClMessageFriendLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, m_aLines[r].m_Friend ? 1.f : 0.f); //Less ugly hack to align messages
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendCol));
+			TextRender()->TextColor(rgb.SetAlpha(m_aLines[r].m_Friend ? 1.f : 0.f)); //Less ugly hack to align messages
 			m_aLines[r].m_TextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "♥ ");
 		}
 
 		// render name
 		if(m_aLines[r].m_ClientID == -1) // system
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemCol));
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_ClientID == -2) // client
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageClientHue / 255.0f, g_Config.m_ClMessageClientSat / 255.0f, g_Config.m_ClMessageClientLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientCol));
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_Team)
 		{
-			vec3 rgb = CalculateNameColor(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f); // team message
+			ColorRGBA rgb = CalculateNameColor(ColorHSLA(g_Config.m_ClMessageTeamCol));
+			TextRender()->TextColor(rgb); // team message
 		}
 		else if(m_aLines[r].m_NameColor == TEAM_RED)
 			TextRender()->TextColor(1.0f, 0.5f, 0.5f, 1.f); // red
@@ -833,8 +833,8 @@ void CChat::OnPrepareLines()
 			TextRender()->TextColor(0.75f, 0.5f, 0.75f, 1.f); // spectator
 		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
 		{
-			vec3 rgb = HslToRgb(vec3(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
+			TextRender()->TextColor(rgb);
 		}
 		else
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.f);
@@ -847,28 +847,28 @@ void CChat::OnPrepareLines()
 		// render line
 		if(m_aLines[r].m_ClientID == -1) // system
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageSystemHue / 255.0f, g_Config.m_ClMessageSystemSat / 255.0f, g_Config.m_ClMessageSystemLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemCol));
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_ClientID == -2) // client
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageClientHue / 255.0f, g_Config.m_ClMessageClientSat / 255.0f, g_Config.m_ClMessageClientLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientCol));
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_Highlighted) // highlighted
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHighlightHue / 255.0f, g_Config.m_ClMessageHighlightSat / 255.0f, g_Config.m_ClMessageHighlightLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightCol));
+			TextRender()->TextColor(rgb);
 		}
 		else if(m_aLines[r].m_Team) // team message
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageTeamHue / 255.0f, g_Config.m_ClMessageTeamSat / 255.0f, g_Config.m_ClMessageTeamLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamCol));
+			TextRender()->TextColor(rgb);
 		}
 		else // regular message
 		{
-			vec3 rgb = HslToRgb(vec3(g_Config.m_ClMessageHue / 255.0f, g_Config.m_ClMessageSat / 255.0f, g_Config.m_ClMessageLht / 255.0f));
-			TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.f);
+			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageCol));
+			TextRender()->TextColor(rgb);
 		}
 
 		if(m_aLines[r].m_TextContainerIndex == -1)
@@ -934,7 +934,7 @@ void CChat::OnRender()
 		if(m_InputUpdate)
 		{
 			if(m_ChatStringOffset > 0 && m_Input.GetLength(Editing) < m_OldChatStringLength)
-				m_ChatStringOffset = max(0, m_ChatStringOffset-(m_OldChatStringLength-m_Input.GetLength(Editing)));
+				m_ChatStringOffset = maximum(0, m_ChatStringOffset-(m_OldChatStringLength-m_Input.GetLength(Editing)));
 
 			if(m_ChatStringOffset > m_Input.GetCursorOffset(Editing))
 				m_ChatStringOffset -= m_ChatStringOffset-m_Input.GetCursorOffset(Editing);

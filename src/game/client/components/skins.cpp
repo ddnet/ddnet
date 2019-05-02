@@ -82,7 +82,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 				}
 			}
 
-		Skin.m_BloodColor = normalize(vec3(aColors[0], aColors[1], aColors[2]));
+		Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
 	}
 
 	// create colorless version
@@ -175,7 +175,7 @@ void CSkins::OnInit()
 		DummySkin.m_OrgTexture = -1;
 		DummySkin.m_ColorTexture = -1;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
-		DummySkin.m_BloodColor = vec3(1.0f, 1.0f, 1.0f);
+		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 		m_aSkins.add(DummySkin);
 	}
 }

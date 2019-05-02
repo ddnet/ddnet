@@ -19,7 +19,7 @@ struct CParticle
 		m_Gravity = 0;
 		m_Friction = 0;
 		m_FlowAffected = 1.0f;
-		m_Color = vec4(1,1,1,1);
+		m_Color = ColorRGBA(1,1,1,1);
 	}
 
 	vec2 m_Pos;
@@ -40,7 +40,7 @@ struct CParticle
 	float m_Gravity;
 	float m_Friction;
 
-	vec4 m_Color;
+	ColorRGBA m_Color;
 
 	// set by the particle system
 	float m_Life;

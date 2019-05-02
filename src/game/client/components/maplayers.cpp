@@ -996,7 +996,7 @@ void CMapLayers::OnMapLoad()
 	}
 }
 
-void CMapLayers::RenderTileLayer(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup)
+void CMapLayers::RenderTileLayer(int LayerIndex, ColorRGBA* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup)
 {
 	STileLayerVisuals& Visuals = *m_TileLayerVisuals[LayerIndex];
 	if(Visuals.m_BufferContainerIndex == -1)
@@ -1105,15 +1105,15 @@ void CMapLayers::RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int Height
 	// if border is still in range of the original corner, it doesn't needs to be redrawn
 	bool CornerVisible = (WidthOffsetToOrigin - 1 < TileCountWidth) && (HeightOffsetToOrigin - 1 < TileCountHeight);
 
-	int CountX = min(WidthOffsetToOrigin, TileCountWidth);
-	int CountY = min(HeightOffsetToOrigin, TileCountHeight);
+	int CountX = minimum(WidthOffsetToOrigin, TileCountWidth);
+	int CountY = minimum(HeightOffsetToOrigin, TileCountHeight);
 
 	int Count = (CountX * CountY) - (CornerVisible ? 1 : 0); // Don't draw the corner again
 
 	Graphics()->RenderBorderTiles(BufferContainerIndex, pColor, IndexBufferOffset, pOffset, pDir, CountX, Count);
 }
 
-void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount)
+void CMapLayers::RenderTileBorder(int LayerIndex, ColorRGBA* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount)
 {
 	STileLayerVisuals& Visuals = *m_TileLayerVisuals[LayerIndex];
 
@@ -1179,7 +1179,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = 32.f;
 			Dir.y = 0.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min(absolute(BorderX0), CountWidth));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum(absolute(BorderX0), CountWidth));
 		}
 	}
 
@@ -1228,7 +1228,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = -32.f;
 			Dir.y = 0.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min((BorderX1 - (pTileLayer->m_Width - 1)), CountWidth));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum((BorderX1 - (pTileLayer->m_Width - 1)), CountWidth));
 		}
 	}
 	if(BorderY0 < 0)
@@ -1244,7 +1244,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = 0.f;
 			Dir.y = 32.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min(absolute(BorderY0), CountHeight));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum(absolute(BorderY0), CountHeight));
 		}
 	}
 	if(BorderY1 >= pTileLayer->m_Height)
@@ -1260,12 +1260,12 @@ void CMapLayers::RenderTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTil
 			vec2 Dir;
 			Dir.x = 0.f;
 			Dir.y = -32.f;
-			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, min((BorderY1 - (pTileLayer->m_Height - 1)), CountHeight));
+			Graphics()->RenderBorderTileLines(Visuals.m_BufferContainerIndex, (float*)pColor, pOffset, (float*)&Offset, (float*)&Dir, DrawNum, minimum((BorderY1 - (pTileLayer->m_Height - 1)), CountHeight));
 		}
 	}
 }
 
-void CMapLayers::RenderKillTileBorder(int LayerIndex, vec4* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup)
+void CMapLayers::RenderKillTileBorder(int LayerIndex, ColorRGBA* pColor, CMapItemLayerTilemap* pTileLayer, CMapItemGroup* pGroup)
 {
 	STileLayerVisuals& Visuals = *m_TileLayerVisuals[LayerIndex];
 	if(Visuals.m_BufferContainerIndex == -1) return; //no visuals were created
@@ -1729,11 +1729,11 @@ void CMapLayers::OnRender()
 
 					if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 					{
-						vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
+						ColorRGBA Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
 						if(IsGameLayer && g_Config.m_ClOverlayEntities)
-							Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
+							Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 						else if(!IsGameLayer && g_Config.m_ClOverlayEntities && !(m_Type == TYPE_BACKGROUND_FORCE))
-							Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*(100-g_Config.m_ClOverlayEntities)/100.0f);
+							Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*(100-g_Config.m_ClOverlayEntities)/100.0f);
 						if(!Graphics()->IsBufferingEnabled())
 						{
 							Graphics()->BlendNone();
@@ -1747,11 +1747,11 @@ void CMapLayers::OnRender()
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get()/(double)time_freq();
-								vec4 ColorHint = vec4(1.0f, 1.0f, 1.0f, 0.3f + 0.7f*(1.0+sin(2.0f*pi*Seconds/3.f))/2.0f);
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f*(1.0+sin(2.0f*pi*Seconds/3.f))/2.0f);
 
 								RenderTools()->RenderTileRectangle(-201, -201, pTMap->m_Width+402, pTMap->m_Height+402,
 																   0, TILE_DEATH, // display air inside, death outside
-																   32.0f, Color*ColorHint, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
+																   32.0f, Color.v4()*ColorHint.v4(), TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT,
 																   EnvelopeEval, this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 							}
 
@@ -1765,9 +1765,9 @@ void CMapLayers::OnRender()
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
-								vec4 ColorHint = vec4(1.0f, 1.0f, 1.0f, 0.3f + 0.7f*(1.0 + sin(2.0f*pi*Seconds / 3.f)) / 2.0f);
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f*(1.0 + sin(2.0f*pi*Seconds / 3.f)) / 2.0f);
 
-								vec4 ColorKill(Color.x*ColorHint.x,Color.y*ColorHint.y,Color.z*ColorHint.z,Color.w*ColorHint.w);
+								ColorRGBA ColorKill(Color.x*ColorHint.x,Color.y*ColorHint.y,Color.z*ColorHint.z,Color.w*ColorHint.w);
 								RenderKillTileBorder(TileLayerCounter-1, &ColorKill, pTMap, pGroup);
 							}
 							RenderTileLayer(TileLayerCounter-1, &Color, pTMap, pGroup);
@@ -1825,7 +1825,7 @@ void CMapLayers::OnRender()
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTile))
 				{
-					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
+					ColorRGBA Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
 					{
 						Graphics()->BlendNone();
@@ -1852,7 +1852,7 @@ void CMapLayers::OnRender()
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSwitchTile))
 				{
-					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
+					ColorRGBA Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
 					{
 						Graphics()->BlendNone();
@@ -1885,7 +1885,7 @@ void CMapLayers::OnRender()
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTeleTile))
 				{
-					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
+					ColorRGBA Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
 					{
 						Graphics()->BlendNone();
@@ -1916,7 +1916,7 @@ void CMapLayers::OnRender()
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CSpeedupTile))
 				{
-					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
+					ColorRGBA Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
 					{
 						Graphics()->BlendNone();
@@ -1954,7 +1954,7 @@ void CMapLayers::OnRender()
 
 				if(Size >= pTMap->m_Width*pTMap->m_Height*sizeof(CTuneTile))
 				{
-					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
+					ColorRGBA Color = ColorRGBA(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f*g_Config.m_ClOverlayEntities/100.0f);
 					if(!Graphics()->IsBufferingEnabled())
 					{
 						Graphics()->BlendNone();

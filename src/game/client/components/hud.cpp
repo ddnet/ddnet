@@ -213,7 +213,7 @@ void CHud::RenderScoreHud()
 			}
 
 			static float s_TextWidth100 = TextRender()->TextWidth(0, 14.0f, "100", -1);
-			float ScoreWidthMax = max(max(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth100);
+			float ScoreWidthMax = maximum(maximum(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth100);
 			float Split = 3.0f;
 			float ImageSize = GameFlags & GAMEFLAG_FLAGS ? 16.0f : Split;
 			for(int t = 0; t < 2; t++)
@@ -280,7 +280,7 @@ void CHud::RenderScoreHud()
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1);
 
 							CTextCursor Cursor;
-							TextRender()->SetCursor(&Cursor, min(Whole - w - 1.0f, Whole - ScoreWidthMax - ImageSize - 2 * Split), StartY + (t + 1)*20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
+							TextRender()->SetCursor(&Cursor, minimum(Whole - w - 1.0f, Whole - ScoreWidthMax - ImageSize - 2 * Split), StartY + (t + 1)*20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
 							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
 						}
@@ -389,7 +389,7 @@ void CHud::RenderScoreHud()
 			}
 
 			static float s_TextWidth10 = TextRender()->TextWidth(0, 14.0f, "10", -1);
-			float ScoreWidthMax = max(max(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth10);
+			float ScoreWidthMax = maximum(maximum(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth10);
 			float Split = 3.0f, ImageSize = 16.0f, PosSize = 16.0f;
 
 			for(int t = 0; t < 2; t++)
@@ -446,7 +446,7 @@ void CHud::RenderScoreHud()
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1);
 
 							CTextCursor Cursor;
-							TextRender()->SetCursor(&Cursor, min(Whole - w - 1.0f, Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1)*20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
+							TextRender()->SetCursor(&Cursor, minimum(Whole - w - 1.0f, Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1)*20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
 							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
 						}
@@ -716,21 +716,21 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 
 	int QuadOffset = pCharacter->m_Weapon%NUM_WEAPONS * 10;
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, min(pCharacter->m_AmmoCount, 10));
+	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, minimum(pCharacter->m_AmmoCount, 10));
 
 	QuadOffset = NUM_WEAPONS * 10;
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, min(pCharacter->m_Health, 10));
+	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, minimum(pCharacter->m_Health, 10));
 
-	QuadOffset += 10 + min(pCharacter->m_Health, 10);
-	if(min(pCharacter->m_Health, 10) < 10)
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, 10 - min(pCharacter->m_Health, 10));
+	QuadOffset += 10 + minimum(pCharacter->m_Health, 10);
+	if(minimum(pCharacter->m_Health, 10) < 10)
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, 10 - minimum(pCharacter->m_Health, 10));
 
 	QuadOffset = NUM_WEAPONS * 10 + 20;
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, min(pCharacter->m_Armor, 10));
+	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, minimum(pCharacter->m_Armor, 10));
 
-	QuadOffset += 10 + min(pCharacter->m_Armor, 10);
-	if(min(pCharacter->m_Armor, 10) < 10)
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, 10 - min(pCharacter->m_Armor, 10));
+	QuadOffset += 10 + minimum(pCharacter->m_Armor, 10);
+	if(minimum(pCharacter->m_Armor, 10) < 10)
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, QuadOffset, 10 - minimum(pCharacter->m_Armor, 10));
 }
 
 void CHud::RenderSpectatorHud()

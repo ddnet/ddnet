@@ -5,6 +5,8 @@
 
 #include "kernel.h"
 
+#include <base/color.h>
+
 #include <vector>
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
 #define GRAPHICS_TYPE_UNSIGNED_SHORT 0x1403
@@ -155,7 +157,7 @@ public:
 	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
 	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum) = 0;
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
-	
+
 	// opengl 3.3 functions
 	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData) = 0;
 	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData) = 0;
@@ -190,7 +192,7 @@ public:
 	virtual void QuadsSetRotation(float Angle) = 0;
 	virtual void QuadsSetSubset(float TopLeftU, float TopLeftV, float BottomRightU, float BottomRightV) = 0;
 	virtual void QuadsSetSubsetFree(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) = 0;
-	
+
 	struct CQuadItem
 	{
 		float m_X, m_Y, m_Width, m_Height;
@@ -240,6 +242,7 @@ public:
 	};
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
+	virtual void SetColor(ColorRGBA rgb) = 0;
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
 	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 

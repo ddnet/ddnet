@@ -31,7 +31,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	View.HSplitBottom(28.0f, &View, &Status);
 
 	// split of the scrollbar
-	RenderTools()->DrawUIRect(&Headers, vec4(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
+	RenderTools()->DrawUIRect(&Headers, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
 	Headers.VSplitRight(20.0f, &Headers, 0);
 
 	struct CColumn
@@ -125,7 +125,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 	}
 
-	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.15f), 0, 0);
+	RenderTools()->DrawUIRect(&View, ColorRGBA(0,0,0,0.15f), 0, 0);
 
 	CUIRect Scroll;
 	View.VSplitRight(15, &View, &Scroll);
@@ -184,8 +184,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_SelectedIndex + 1;
 				else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_SelectedIndex - 1;
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = max(m_SelectedIndex - 25, 0);
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = min(m_SelectedIndex + 25, NumServers - 1);
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = maximum(m_SelectedIndex - 25, 0);
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = minimum(m_SelectedIndex + 25, NumServers - 1);
 				else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
 				else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = NumServers - 1;
 			}
@@ -280,7 +280,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
-				RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+				RenderTools()->DrawUIRect(&r, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
 			// clip the selection
@@ -418,8 +418,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				str_format(aTemp, sizeof(aTemp), "%i", pItem->m_Latency);
 				if(g_Config.m_UiColorizePing)
 				{
-					vec3 rgb = HslToRgb(vec3((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pItem->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+					TextRender()->TextColor(rgb);
 				}
 
 				UI()->DoLabelScaled(&Button, aTemp, 12.0f, 1);
@@ -439,25 +439,25 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 				if(g_Config.m_UiColorizeGametype)
 				{
-					vec3 hsl = vec3(1.0f, 1.0f, 1.0f);
+					ColorHSLA hsl = ColorHSLA(1.0f, 1.0f, 1.0f);
 
 					if(IsVanilla(pItem))
-						hsl = vec3(0.33f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.33f, 1.0f, 0.75f);
 					else if(IsCatch(pItem))
-						hsl = vec3(0.17f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.17f, 1.0f, 0.75f);
 					else if(IsInsta(pItem))
-						hsl = vec3(0.00f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.00f, 1.0f, 0.75f);
 					else if(IsFNG(pItem))
-						hsl = vec3(0.83f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.83f, 1.0f, 0.75f);
 					else if(IsDDNet(pItem))
-						hsl = vec3(0.58f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.58f, 1.0f, 0.75f);
 					else if(IsDDRace(pItem))
-						hsl = vec3(0.75f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.75f, 1.0f, 0.75f);
 					else if(IsRace(pItem))
-						hsl = vec3(0.46f, 1.0f, 0.75f);
+						hsl = ColorHSLA(0.46f, 1.0f, 0.75f);
 
-					vec3 rgb = HslToRgb(hsl);
-					TextRender()->TextColor(rgb.r, rgb.g, rgb.b, 1.0f);
+					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
+					TextRender()->TextColor(rgb);
 					TextRender()->TextEx(&Cursor, pItem->m_aGameType, -1);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 				}
@@ -478,7 +478,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			Client()->Connect(g_Config.m_UiServerAddress);
 	}
 
-	RenderTools()->DrawUIRect(&Status, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
+	RenderTools()->DrawUIRect(&Status, ColorRGBA(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
 	CUIRect QuickSearch, QuickExclude, Button, Status2, Status3;
@@ -540,8 +540,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	// server filter
 	ServerFilter.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFilter);
-	RenderTools()->DrawUIRect(&FilterHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
-	RenderTools()->DrawUIRect(&ServerFilter, vec4(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
+	RenderTools()->DrawUIRect(&FilterHeader, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
+	RenderTools()->DrawUIRect(&ServerFilter, ColorRGBA(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
 	UI()->DoLabelScaled(&FilterHeader, Localize("Server filter"), FontSize+2.0f, 0);
 	CUIRect Button, Button2;
 
@@ -631,7 +631,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		float OldWidth = Rect.w;
 		Rect.w = Rect.h*2;
 		Rect.x += (OldWidth-Rect.w)/2.0f;
-		vec4 Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry?1.0f: 0.5f);
+		ColorRGBA Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry?1.0f: 0.5f);
 		m_pClient->m_pCountryFlags->Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
 		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
@@ -762,11 +762,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 
-					vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-
-					if(!Active)
-						Color.a = 0.2f;
-					TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
 					UI()->DoLabelScaled(&Rect, pName, FontSize, 0);
 					TextRender()->TextColor(1.0, 1.0, 1.0, 1.0f);
 				}
@@ -776,8 +772,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		{
 			char *pFilterExcludeCountries = Network == IServerBrowser::NETWORK_DDNET ? g_Config.m_BrFilterExcludeCountries : g_Config.m_BrFilterExcludeCountriesKoG;
 			ServerFilter.HSplitTop(17.0f, &ServerFilter, &ServerFilter);
-
-			vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 			const float FlagWidth = 40.0f;
 			const float FlagHeight = 20.0f;
@@ -844,11 +838,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 
-					vec4 Color(1.0f, 1.0f, 1.0f, 1.0f);
-
-					if(!Active)
-						Color.a = 0.2f;
-
+					ColorRGBA Color(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
 					m_pClient->m_pCountryFlags->Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
 				}
 			}
@@ -897,8 +887,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	CTextCursor Cursor;
 	const float FontSize = 12.0f;
 	ServerDetails.HSplitTop(ms_ListheaderHeight, &ServerHeader, &ServerDetails);
-	RenderTools()->DrawUIRect(&ServerHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
-	RenderTools()->DrawUIRect(&ServerDetails, vec4(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
+	RenderTools()->DrawUIRect(&ServerHeader, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
+	RenderTools()->DrawUIRect(&ServerDetails, ColorRGBA(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
 	UI()->DoLabelScaled(&ServerHeader, Localize("Server details"), FontSize+2.0f, 0);
 
 	if(pSelectedServer)
@@ -986,10 +976,10 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				Client()->ServerBrowserUpdate();
 			}
 
-			vec4 Colour = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ?
-				vec4(1.0f, 1.0f, 1.0f, (i%2+1)*0.05f) :
-				vec4(0.5f, 1.0f, 0.5f, 0.15f+(i%2+1)*0.05f);
-			RenderTools()->DrawUIRect(&Name, Colour, CUI::CORNER_ALL, 4.0f);
+			ColorRGBA Color = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ?
+				ColorRGBA(1.0f, 1.0f, 1.0f, (i%2+1)*0.05f) :
+				ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f+(i%2+1)*0.05f);
+			RenderTools()->DrawUIRect(&Name, Color, CUI::CORNER_ALL, 4.0f);
 			Name.VSplitLeft(5.0f, 0, &Name);
 			Name.VSplitLeft(34.0f, &Score, &Name);
 			Name.VSplitRight(34.0f, &Name, &Flag);
@@ -1065,8 +1055,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				TextRender()->TextEx(&Cursor, pClan, -1);
 
 			// flag
-			vec4 Color(1.0f, 1.0f, 1.0f, 0.5f);
-			m_pClient->m_pCountryFlags->Render(pSelectedServer->m_aClients[i].m_Country, &Color, Flag.x, Flag.y, Flag.w, Flag.h);
+			ColorRGBA FColor(1.0f, 1.0f, 1.0f, 0.5f);
+			m_pClient->m_pCountryFlags->Render(pSelectedServer->m_aClients[i].m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
 		}
 
 		UiDoListboxEnd(&s_ScrollValue, 0);
@@ -1100,8 +1090,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 	// header
 	ServerFriends.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFriends);
-	RenderTools()->DrawUIRect(&FilterHeader, vec4(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
-	RenderTools()->DrawUIRect(&ServerFriends, vec4(0,0,0,0.15f), 0, 4.0f);
+	RenderTools()->DrawUIRect(&FilterHeader, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 4.0f);
+	RenderTools()->DrawUIRect(&ServerFriends, ColorRGBA(0,0,0,0.15f), 0, 4.0f);
 	UI()->DoLabelScaled(&FilterHeader, Localize("Friends"), FontSize+4.0f, 0);
 	CUIRect Button, List;
 
@@ -1125,14 +1115,14 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 			Item.m_Rect.Margin(1.5f, &Item.m_Rect);
 			CUIRect OnState;
 			Item.m_Rect.VSplitRight(30.0f, &Item.m_Rect, &OnState);
-			RenderTools()->DrawUIRect(&Item.m_Rect, vec4(1.0f, 1.0f, 1.0f, 0.1f), CUI::CORNER_L, 4.0f);
+			RenderTools()->DrawUIRect(&Item.m_Rect, ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), CUI::CORNER_L, 4.0f);
 
 			Item.m_Rect.VMargin(2.5f, &Item.m_Rect);
 			Item.m_Rect.HSplitTop(12.0f, &Item.m_Rect, &Button);
 			UI()->DoLabelScaled(&Item.m_Rect, m_lFriends[i].m_pFriendInfo->m_aName, FontSize, -1);
 			UI()->DoLabelScaled(&Button, m_lFriends[i].m_pFriendInfo->m_aClan, FontSize, -1);
 
-			RenderTools()->DrawUIRect(&OnState, m_lFriends[i].m_NumFound ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(1.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_R, 4.0f);
+			RenderTools()->DrawUIRect(&OnState, m_lFriends[i].m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_R, 4.0f);
 			OnState.HMargin((OnState.h-FontSize)/3, &OnState);
 			OnState.VMargin(5.0f, &OnState);
 			char aBuf[64];
@@ -1256,10 +1246,10 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		TabBar.HSplitTop(20.0f, &TabButton1, &TabBar);
 		TabBar.HSplitTop(2.5f, 0, &TabBar);
 		TabBar.HSplitTop(20.0f, &TabButton2, 0);
-		vec4 Active = ms_ColorTabbarActive;
-		vec4 InActive = ms_ColorTabbarInactive;
-		ms_ColorTabbarActive = vec4(0.0f, 0.0f, 0.0f, 0.3f);
-		ms_ColorTabbarInactive = vec4(0.0f, 0.0f, 0.0f, 0.15f);
+		ColorRGBA Active = ms_ColorTabbarActive;
+		ColorRGBA InActive = ms_ColorTabbarInactive;
+		ms_ColorTabbarActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
+		ms_ColorTabbarInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);
 
 		static int s_FiltersTab = 0;
 		if(DoButton_MenuTab(&s_FiltersTab, Localize("Filter"), ToolboxPage==0, &TabButton0, CUI::CORNER_L))
@@ -1280,7 +1270,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	// tool box
 	{
-		RenderTools()->DrawUIRect(&ToolBox, vec4(0.0f, 0.0f, 0.0f, 0.15f), CUI::CORNER_T, 4.0f);
+		RenderTools()->DrawUIRect(&ToolBox, ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), CUI::CORNER_T, 4.0f);
 
 
 		if(ToolboxPage == 0)

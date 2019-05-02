@@ -247,38 +247,16 @@ MACRO_CONFIG_INT(SvRejoinTeam0, sv_rejoin_team_0, 1, 0, 1, CFGFLAG_SERVER, "Make
 MACRO_CONFIG_INT(ClReconnectTimeout, cl_reconnect_timeout, 120, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (after timeout, 0 for off)")
 MACRO_CONFIG_INT(ClReconnectFull, cl_reconnect_full, 5, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (when server is full, 0 for off)")
 
-MACRO_CONFIG_INT(ClMessageSystemHue, cl_message_system_hue, 42, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color hue")
-MACRO_CONFIG_INT(ClMessageSystemSat, cl_message_system_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color saturation")
-MACRO_CONFIG_INT(ClMessageSystemLht, cl_message_system_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color lightness")
-
-MACRO_CONFIG_INT(ClMessageClientHue, cl_message_client_hue, 147, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color hue")
-MACRO_CONFIG_INT(ClMessageClientSat, cl_message_client_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color saturation")
-MACRO_CONFIG_INT(ClMessageClientLht, cl_message_client_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color lightness")
-
-MACRO_CONFIG_INT(ClMessageHighlightHue, cl_message_highlight_hue, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color hue")
-MACRO_CONFIG_INT(ClMessageHighlightSat, cl_message_highlight_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color saturation")
-MACRO_CONFIG_INT(ClMessageHighlightLht, cl_message_highlight_lht, 192, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color lightness")
+MACRO_CONFIG_COL(ClMessageSystemCol, cl_message_system_col, 2817983, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color")
+MACRO_CONFIG_COL(ClMessageClientCol, cl_message_client_col, 65472, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color")
+MACRO_CONFIG_COL(ClMessageHighlightCol, cl_message_highlight_col, 65471, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color")
+MACRO_CONFIG_COL(ClMessageTeamCol, cl_message_team_col, 5636050, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color")
+MACRO_CONFIG_COL(ClMessageCol, cl_message_col, 255, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color")
+MACRO_CONFIG_COL(ClLaserInnerCol, cl_laser_inner_col, 11206591, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color")
+MACRO_CONFIG_COL(ClLaserOutlineCol, cl_laser_outline_col, 11176233, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color")
 
 MACRO_CONFIG_INT(ClMessageFriend, cl_message_friend, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable coloring and the heart for friends")
-MACRO_CONFIG_INT(ClMessageFriendHue, cl_message_friend_hue, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color hue")
-MACRO_CONFIG_INT(ClMessageFriendSat, cl_message_friend_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color saturation")
-MACRO_CONFIG_INT(ClMessageFriendLht, cl_message_friend_lht, 145, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color lightness")
-
-MACRO_CONFIG_INT(ClMessageTeamHue, cl_message_team_hue, 85, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color hue")
-MACRO_CONFIG_INT(ClMessageTeamSat, cl_message_team_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color saturation")
-MACRO_CONFIG_INT(ClMessageTeamLht, cl_message_team_lht, 212, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color lightness")
-
-MACRO_CONFIG_INT(ClMessageHue, cl_message_hue, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color hue")
-MACRO_CONFIG_INT(ClMessageSat, cl_message_sat, 0, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color saturation")
-MACRO_CONFIG_INT(ClMessageLht, cl_message_lht, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color lightness")
-
-MACRO_CONFIG_INT(ClLaserInnerHue, cl_laser_inner_hue, 170, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color hue")
-MACRO_CONFIG_INT(ClLaserInnerSat, cl_laser_inner_sat, 255, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color saturation")
-MACRO_CONFIG_INT(ClLaserInnerLht, cl_laser_inner_lht, 191, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color lightness")
-
-MACRO_CONFIG_INT(ClLaserOutlineHue, cl_laser_outline_hue, 170, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color hue")
-MACRO_CONFIG_INT(ClLaserOutlineSat, cl_laser_outline_sat, 137, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color saturation")
-MACRO_CONFIG_INT(ClLaserOutlineLht, cl_laser_outline_lht, 41, 0, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color lightness")
+MACRO_CONFIG_COL(ClMessageFriendCol, cl_message_friend_col, 65425, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color")
 
 MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 100, 5, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout")
 MACRO_CONFIG_INT(ConnTimeoutProtection, conn_timeout_protection, 1000, 5, 10000, CFGFLAG_SERVER, "Network timeout protection")
@@ -300,12 +278,8 @@ MACRO_CONFIG_INT(ClShowOthersAlpha, cl_show_others_alpha, 40, 0, 100, CFGFLAG_CL
 MACRO_CONFIG_INT(ClOverlayEntities, cl_overlay_entities, 0, 0, 100, CFGFLAG_CLIENT, "Overlay game tiles with a percentage of opacity")
 MACRO_CONFIG_INT(ClShowQuads, cl_show_quads, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show quads")
 MACRO_CONFIG_INT(ClZoomBackgroundLayers, cl_zoom_background_layers, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom background layers")
-MACRO_CONFIG_INT(ClBackgroundHue, cl_background_hue, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color hue")
-MACRO_CONFIG_INT(ClBackgroundSat, cl_background_sat, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color saturation")
-MACRO_CONFIG_INT(ClBackgroundLht, cl_background_lht, 128, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color lightness")
-MACRO_CONFIG_INT(ClBackgroundEntitiesHue, cl_background_entities_hue, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color hue")
-MACRO_CONFIG_INT(ClBackgroundEntitiesSat, cl_background_entities_sat, 0, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color saturation")
-MACRO_CONFIG_INT(ClBackgroundEntitiesLht, cl_background_entities_lht, 128, 0, 255, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color lightness")
+MACRO_CONFIG_COL(ClBackgroundCol, cl_background_col, 128, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color") //0 0 128
+MACRO_CONFIG_COL(ClBackgroundEntitiesCol, cl_background_entities_col, 128, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color") //0 0 128
 MACRO_CONFIG_STR(ClBackgroundEntities, cl_background_entities, 100, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities)")
 MACRO_CONFIG_INT(ClBackgroundShowTilesLayers, cl_background_show_tiles_layers, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether draw tiles layers when using custom background (entities)")
 MACRO_CONFIG_INT(SvShowOthers, sv_show_others, 1, 0, 1, CFGFLAG_SERVER, "Whether players can user the command showothers or not")

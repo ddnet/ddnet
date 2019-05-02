@@ -1053,12 +1053,12 @@ void CClient::Render()
 {
 	if(g_Config.m_ClOverlayEntities)
 	{
-		vec3 bg = HslToRgb(vec3(g_Config.m_ClBackgroundEntitiesHue/255.0f, g_Config.m_ClBackgroundEntitiesSat/255.0f, g_Config.m_ClBackgroundEntitiesLht/255.0f));
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundEntitiesCol));
 		Graphics()->Clear(bg.r, bg.g, bg.b);
 	}
 	else
 	{
-		vec3 bg = HslToRgb(vec3(g_Config.m_ClBackgroundHue/255.0f, g_Config.m_ClBackgroundSat/255.0f, g_Config.m_ClBackgroundLht/255.0f));
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundCol));
 		Graphics()->Clear(bg.r, bg.g, bg.b);
 	}
 

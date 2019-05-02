@@ -25,14 +25,14 @@
 
 int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, vec4(1,1,1, Checked ? 0.10f : 0.5f)*ButtonColorMul(pID), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1,1,1, (Checked ? 0.10f : 0.5f)*ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
 	UI()->DoLabel(pRect, pText, 14.0f, 0);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
 int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
 {
-	RenderTools()->DrawUIRect(pRect, Checked ? vec4(1.0f, 1.0f, 1.0f, 0.10f) : vec4(1.0f, 1.0f, 1.0f, 0.5f)*ButtonColorMul(pID), Corners, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f)*ButtonColorMul(pID)), Corners, 5.0f);
 	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
 	Graphics()->QuadsBegin();
 	if(!Checked)
@@ -84,7 +84,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Box.HMargin(150.0f/UI()->Scale(), &Box);
 
 		// render the box
-		RenderTools()->DrawUIRect(&Box, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
+		RenderTools()->DrawUIRect(&Box, ColorRGBA(0,0,0,0.5f), CUI::CORNER_ALL, 15.0f);
 
 		Box.HSplitTop(20.f/UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f/UI()->Scale(), &Part, &Box);
@@ -271,13 +271,13 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		char aBuffer[128];
 
 		// draw seek bar
-		RenderTools()->DrawUIRect(&SeekBar, vec4(0,0,0,0.5f), CUI::CORNER_ALL, 5.0f);
+		RenderTools()->DrawUIRect(&SeekBar, ColorRGBA(0,0,0,0.5f), CUI::CORNER_ALL, 5.0f);
 
 		// draw filled bar
 		float Amount = CurrentTick/(float)TotalTicks;
 		CUIRect FilledBar = SeekBar;
 		FilledBar.w = 10.0f + (FilledBar.w-10.0f)*Amount;
-		RenderTools()->DrawUIRect(&FilledBar, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 5.0f);
+		RenderTools()->DrawUIRect(&FilledBar, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 5.0f);
 
 		// draw markers
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
@@ -511,17 +511,17 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 
 	// draw header
 	View.HSplitTop(ms_ListheaderHeight, &Header, &View);
-	RenderTools()->DrawUIRect(&Header, vec4(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
+	RenderTools()->DrawUIRect(&Header, ColorRGBA(1,1,1,0.25f), CUI::CORNER_T, 5.0f);
 	UI()->DoLabel(&Header, pTitle, Header.h*ms_FontmodHeight, 0);
 
 	// draw footers
 	View.HSplitBottom(ms_ListheaderHeight, &View, &Footer);
-	RenderTools()->DrawUIRect(&Footer, vec4(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
+	RenderTools()->DrawUIRect(&Footer, ColorRGBA(1,1,1,0.25f), CUI::CORNER_B, 5.0f);
 	Footer.VSplitLeft(10.0f, 0, &Footer);
 	UI()->DoLabel(&Footer, pBottomText, Header.h*ms_FontmodHeight, 0);
 
 	// background
-	RenderTools()->DrawUIRect(&View, vec4(0,0,0,0.15f), 0, 0);
+	RenderTools()->DrawUIRect(&View, ColorRGBA(0,0,0,0.15f), 0, 0);
 
 	// prepare the scroll
 	View.VSplitRight(15, &View, &Scroll);
@@ -659,8 +659,8 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 					{
 						if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = gs_ListBoxNewSelected + 1;
 						else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = gs_ListBoxNewSelected - 1;
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = max(gs_ListBoxNewSelected - 20, 0);
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = min(gs_ListBoxNewSelected + 20, gs_ListBoxNumItems - 1);
+						else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = maximum(gs_ListBoxNewSelected - 20, 0);
+						else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = minimum(gs_ListBoxNewSelected + 20, gs_ListBoxNumItems - 1);
 						else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
 						else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = gs_ListBoxNumItems - 1;
 					}
@@ -698,7 +698,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		//selected_index = i;
 		CUIRect r = Item.m_Rect;
 		r.Margin(1.5f, &r);
-		RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+		RenderTools()->DrawUIRect(&r, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
 	}
 
 	return Item;
@@ -736,7 +736,7 @@ int CMenus::DemolistFetchCallback(const char *pName, time_t Date, int IsDir, int
 	}
 	else
 	{
-		str_copy(Item.m_aName, pName, min(static_cast<int>(sizeof(Item.m_aName)), str_length(pName) - 4));
+		str_copy(Item.m_aName, pName, minimum(static_cast<int>(sizeof(Item.m_aName)), str_length(pName) - 4));
 		Item.m_InfosLoaded = false;
 		Item.m_Date = Date;
 	}
@@ -856,7 +856,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	// render demo info
 	MainView.VMargin(5.0f, &MainView);
 	MainView.HSplitBottom(5.0f, &MainView, 0);
-	RenderTools()->DrawUIRect(&MainView, vec4(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
+	RenderTools()->DrawUIRect(&MainView, ColorRGBA(0,0,0,0.15f), CUI::CORNER_B, 4.0f);
 	if(!m_DemolistSelectedIsDir && m_DemolistSelectedIndex >= 0 && m_lDemos[m_DemolistSelectedIndex].m_Valid)
 	{
 		CUIRect Left, Right, Labels;
@@ -967,7 +967,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{COL_DATE,     SORT_DATE,     Localize("Date"),     1, 160.0f, 1, {0}, {0}},
 	};
 
-	RenderTools()->DrawUIRect(&Headers, vec4(0.0f,0,0,0.15f), 0, 0);
+	RenderTools()->DrawUIRect(&Headers, ColorRGBA(0.0f,0,0,0.15f), 0, 0);
 
 	int NumCols = sizeof(s_aCols)/sizeof(CColumn);
 
@@ -1057,8 +1057,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				if(m_aInputEvents[i].m_Key == KEY_DOWN) NewIndex = m_DemolistSelectedIndex + 1;
 				else if(m_aInputEvents[i].m_Key == KEY_UP) NewIndex = m_DemolistSelectedIndex - 1;
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = max(m_DemolistSelectedIndex - 20, 0);
-				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = min(m_DemolistSelectedIndex + 20, m_lDemos.size() - 1);
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEUP) NewIndex = maximum(m_DemolistSelectedIndex - 20, 0);
+				else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN) NewIndex = minimum(m_DemolistSelectedIndex + 20, m_lDemos.size() - 1);
 				else if(m_aInputEvents[i].m_Key == KEY_HOME) NewIndex = 0;
 				else if(m_aInputEvents[i].m_Key == KEY_END) NewIndex = m_lDemos.size() - 1;
 			}
@@ -1120,7 +1120,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				CUIRect r = Row;
 				r.Margin(1.5f, &r);
-				RenderTools()->DrawUIRect(&r, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
+				RenderTools()->DrawUIRect(&r, ColorRGBA(1,1,1,0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
 			// clip the selection

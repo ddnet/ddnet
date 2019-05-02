@@ -284,13 +284,13 @@ void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
 	DrawRoundRectExt(x,y,w,h,r,0xf);
 }
 
-void CRenderTools::DrawUIRect(const CUIRect *r, vec4 Color, int Corners, float Rounding)
+void CRenderTools::DrawUIRect(const CUIRect *r, ColorRGBA Color, int Corners, float Rounding)
 {
 	Graphics()->TextureSet(-1);
 
 	// TODO: FIX US
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+	Graphics()->SetColor(Color);
 	DrawRoundRectExt(r->x,r->y,r->w,r->h,Rounding*UI()->Scale(), Corners);
 	Graphics()->QuadsEnd();
 }

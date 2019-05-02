@@ -62,7 +62,7 @@ void CFriends::Init(bool Foes)
 
 const CFriendInfo *CFriends::GetFriend(int Index) const
 {
-	return &m_aFriends[max(0, Index%m_NumFriends)];
+	return &m_aFriends[maximum(0, Index%m_NumFriends)];
 }
 
 int CFriends::GetFriendState(const char *pName, const char *pClan) const
@@ -126,7 +126,7 @@ void CFriends::RemoveFriend(const char *pName, const char *pClan)
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) && 
+		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) &&
 			((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))))
 		{
 			RemoveFriend(i);

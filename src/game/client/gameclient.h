@@ -114,8 +114,6 @@ class CGameClient : public IGameClient
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
-	static void ConColorFromRgb(IConsole::IResult *pResult, void *pUserData);
-	static void ConColorToRgb(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialDummyInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -433,6 +431,6 @@ private:
 	class CTeamsCore m_TeamsPredicted;
 };
 
-vec3 CalculateNameColor(vec3 TextColorHSL);
+ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
 
 #endif

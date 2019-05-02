@@ -115,6 +115,8 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		First = false; \
 	}
 
+	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Save,Desc) MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc)
+
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && str_comp(pGameInfo->m_pConfig->m_##Name, (Def)) != 0) \
 	{ \
@@ -129,6 +131,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	#include <engine/shared/config_variables.h>
 
 	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_COL
 	#undef MACRO_CONFIG_STR
 
 	str_format(aJson, sizeof(aJson), "},\"tuning\":{");

@@ -116,7 +116,7 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 	p.m_EndSize = 0;
 	p.m_Friction = 0.7f;
 	p.m_Gravity = frandom()*-500.0f;
-	p.m_Color = vec4(0.75f,0.75f,0.75f,1.0f);
+	p.m_Color = ColorRGBA(0.75f,0.75f,0.75f,1.0f);
 	m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
 }
 
@@ -152,7 +152,7 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.m_Rotspeed = frandom();
 		p.m_Gravity = frandom()*-400.0f;
 		p.m_Friction = 0.7f;
-		p.m_Color = vec4(0xb5/255.0f, 0x50/255.0f, 0xcb/255.0f, 1.0f);
+		p.m_Color = ColorRGBA(0xb5/255.0f, 0x50/255.0f, 0xcb/255.0f, 1.0f);
 		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
 
 	}
@@ -162,12 +162,12 @@ void CEffects::PlayerSpawn(vec2 Pos)
 
 void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 {
-	vec3 BloodColor(1.0f,1.0f,1.0f);
+	ColorRGBA BloodColor(1.0f,1.0f,1.0f);
 
 	if(ClientID >= 0)
 	{
 		if(m_pClient->m_aClients[ClientID].m_UseCustomColor)
-			BloodColor = HslToRgb(UnpackColor(m_pClient->m_aClients[ClientID].m_ColorBody));
+			BloodColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[ClientID].m_ColorBody));
 		else
 		{
 			const CSkins::CSkin *s = m_pClient->m_pSkins->Get(m_pClient->m_aClients[ClientID].m_SkinID);
@@ -190,8 +190,8 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.m_Rotspeed = (frandom()-0.5f) * pi;
 		p.m_Gravity = 800.0f;
 		p.m_Friction = 0.8f;
-		vec3 c = BloodColor * (0.75f + frandom()*0.25f);
-		p.m_Color = vec4(c.r, c.g, c.b, 0.75f);
+		ColorRGBA c = BloodColor.v4() * (0.75f + frandom()*0.25f);
+		p.m_Color = ColorRGBA(c.r, c.g, c.b, 0.75f);
 		m_pClient->m_pParticles->Add(CParticles::GROUP_GENERAL, &p);
 	}
 }

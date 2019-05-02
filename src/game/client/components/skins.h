@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
 #include <base/vmath.h>
+#include <base/color.h>
 #include <base/tl/sorted_array.h>
 #include <game/client/component.h>
 
@@ -16,7 +17,7 @@ public:
 		int m_OrgTexture;
 		int m_ColorTexture;
 		char m_aName[24];
-		vec3 m_BloodColor;
+		ColorRGBA m_BloodColor;
 
 		bool operator<(const CSkin &Other) { return str_comp(m_aName, Other.m_aName) < 0; }
 	};

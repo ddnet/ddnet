@@ -3,6 +3,8 @@
 #include <new>
 
 #include <base/math.h>
+#include <base/vmath.h>
+#include <base/color.h>
 #include <base/system.h>
 
 #include <engine/storage.h>
@@ -33,6 +35,64 @@ float CConsole::CResult::GetFloat(unsigned Index)
 	if (Index >= m_NumArgs)
 		return 0.0f;
 	return str_tofloat(m_apArgs[Index]);
+}
+
+ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
+{
+	ColorHSLA hsl = ColorHSLA(0, 0, 0).Lighten();
+	if(Index >= m_NumArgs)
+		return hsl;
+
+	const char *pStr = m_apArgs[Index];
+	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr+1))) // Teeworlds Color (Packed HSL)
+	{
+		hsl = ColorHSLA(str_toint(pStr), true);
+	}
+	else if(*pStr == '$') // Hex RGB
+	{
+		ColorRGBA rgb = ColorRGBA(0, 0, 0, 1);
+		int Len = str_length(pStr);
+		if(Len == 4)
+		{
+			unsigned Num = str_toint_base(pStr + 1, 16);
+			rgb.r = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
+			rgb.g = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
+			rgb.b = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
+		}
+		else if(Len == 7)
+		{
+			unsigned Num = str_toint_base(pStr + 1, 16);
+			rgb.r = ((Num >> 16) & 0xFF) / 255.0f;
+			rgb.g = ((Num >> 8) & 0xFF) / 255.0f;
+			rgb.b = ((Num >> 0) & 0xFF) / 255.0f;
+		}
+		else
+		{
+			return hsl;
+		}
+
+		hsl = color_cast<ColorHSLA>(rgb);
+	}
+	else if(!str_comp_nocase(pStr, "red"))
+		hsl = ColorHSLA(0.0f/6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "yellow"))
+		hsl = ColorHSLA(1.0f/6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "green"))
+		hsl = ColorHSLA(2.0f/6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "cyan"))
+		hsl = ColorHSLA(3.0f/6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "blue"))
+		hsl = ColorHSLA(4.0f/6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "magenta"))
+		hsl = ColorHSLA(5.0f/6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "white"))
+		hsl = ColorHSLA(0, 0, 1);
+	else if(!str_comp_nocase(pStr, "gray"))
+		hsl = ColorHSLA(0, 0, .5f);
+	else if(!str_comp_nocase(pStr, "black"))
+		hsl = ColorHSLA(0, 0, 0);
+
+	return Light ? hsl.Lighten() : hsl;
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
@@ -645,6 +705,13 @@ struct CIntVariableData
 	int m_OldValue;
 };
 
+struct CColVariableData : public CIntVariableData
+{
+	template<class... T> CColVariableData(bool l, bool a, T... t) : CIntVariableData{t...}, m_Light(l), m_Alpha(a) {}
+	bool m_Light;
+	bool m_Alpha;
+};
+
 struct CStrVariableData
 {
 	IConsole *m_pConsole;
@@ -681,6 +748,36 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
+
+static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
+{
+	CColVariableData *pData = (CColVariableData *)pUserData;
+
+	if(pResult->NumArguments())
+	{
+		int Val = pResult->GetColor(0, pData->m_Light).Pack() & (pData->m_Alpha ? 0xFFFFFFFF : 0xFFFFFF);
+
+		*(pData->m_pVariable) = Val;
+		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Val;
+	}
+	else
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+		ColorHSLA hsl(*(pData->m_pVariable), true);
+		str_format(aBuf, sizeof(aBuf), "H: %d deg, S: %d, L: %d A: %d", round_truncate(hsl.h * 360), round_truncate(hsl.s * 100), round_truncate(hsl.l * 100), round_truncate(hsl.a * 100));
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+		ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
+		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d", round_truncate(rgb.r * 255), round_truncate(rgb.g * 255), round_truncate(rgb.b * 255));
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+}
+
+
 
 static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 {
@@ -837,6 +934,12 @@ CConsole::CConsole(int FlagMask)
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
 	}
 
+	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+	{ \
+		static CColVariableData Data = { static_cast<bool>((Flags) & CFGFLAG_COLLIGHT), static_cast<bool>((Flags) & CFGFLAG_COLALPHA), this, &g_Config.m_##Name, Min, Max, Def }; \
+		Register(#ScriptName, "?i", Flags, ColVariableCommand, &Data, Desc); \
+	}
+
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
 		static char OldValue[Len] = Def; \
@@ -847,6 +950,7 @@ CConsole::CConsole(int FlagMask)
 	#include "config_variables.h"
 
 	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_COL
 	#undef MACRO_CONFIG_STR
 
 	// DDRace
@@ -1110,6 +1214,8 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
+	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Save,Desc) MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc)
+
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
@@ -1131,6 +1237,7 @@ void CConsole::ResetServerGameSettings()
 	#include "config_variables.h"
 
 	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_COL
 	#undef MACRO_CONFIG_STR
 }
 

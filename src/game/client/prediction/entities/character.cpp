@@ -490,7 +490,7 @@ bool CCharacter::GiveWeapon(int Weapon, int Ammo)
 	{
 		m_aWeapons[Weapon].m_Got = true;
 		if(!m_FreezeTime)
-			m_aWeapons[Weapon].m_Ammo = min(g_pData->m_Weapons.m_aId[Weapon].m_Maxammo, Ammo);
+			m_aWeapons[Weapon].m_Ammo = minimum(g_pData->m_Weapons.m_aId[Weapon].m_Maxammo, Ammo);
 		return true;
 	}
 	return false;
