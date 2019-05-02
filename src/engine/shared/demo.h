@@ -132,7 +132,9 @@ public:
 	int Stop();
 	void SetSpeed(float Speed);
 	void SetSpeedIndex(int Offset);
-	int SetPos(float Percent);
+	int SeekPercent(float Percent);
+	int SeekTime(float Seconds);
+	int SetPos(int WantedTick);
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const;
 	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers) const;

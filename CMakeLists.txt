@@ -127,6 +127,13 @@ function(add_c_compiler_flag_if_supported VARIABLE FLAG)
   endif()
 endfunction()
 
+# Force compiler colors on when using ninja. Ninja filters the colors out when
+# it's not printing to a terminal on its own.
+if(CMAKE_GENERATOR STREQUAL "Ninja")
+  add_c_compiler_flag_if_supported(OUR_FLAGS -fdiagnostics-color=always)
+  add_c_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
+endif()
+
 if(NOT MSVC)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
     check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
@@ -436,7 +443,10 @@ elseif(TARGET_OS STREQUAL "mac")
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 else()
   set(PLATFORM_CLIENT)
-  set(PLATFORM_CLIENT_LIBS GL GLU X11)
+  find_package(OpenGL)
+  find_package(X11)
+  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${X11_X11_LIB})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH})
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
   else()
@@ -868,6 +878,18 @@ if(CLIENT)
     gameclient.h
     lineinput.cpp
     lineinput.h
+    prediction/entities/character.cpp
+    prediction/entities/character.h
+    prediction/entities/laser.cpp
+    prediction/entities/laser.h
+    prediction/entities/pickup.cpp
+    prediction/entities/pickup.h
+    prediction/entities/projectile.cpp
+    prediction/entities/projectile.h
+    prediction/entity.cpp
+    prediction/entity.h
+    prediction/gameworld.cpp
+    prediction/gameworld.h
     race.cpp
     race.h
     render.cpp
@@ -1173,6 +1195,7 @@ add_custom_target(everything DEPENDS ${TARGETS_OWN})
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_glob(TESTS GLOB src/test
     aio.cpp
+    color.cpp
     datafile.cpp
     fs.cpp
     git_revision.cpp

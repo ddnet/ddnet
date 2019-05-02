@@ -135,8 +135,8 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
-			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClAuthedPlayerColor);
-			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+			vec3 Color = HslToRgb(UnpackColor(g_Config.m_ClAuthedPlayerColor));
+			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
 		}
 
 		if(g_Config.m_ClShowIDs)
@@ -456,8 +456,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
 		{
-			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClAuthedPlayerColor);
-			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+			vec3 Color = HslToRgb(UnpackColor(g_Config.m_ClAuthedPlayerColor));
+			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
 		}
 
 		if(g_Config.m_ClShowIDs)
@@ -476,10 +476,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// clan
 		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
-				m_pClient->m_aClients[GameClient()->m_LocalIDs[0]].m_aClan) == 0)
+				m_pClient->m_aClients[GameClient()->m_LocalIDs[g_Config.m_ClDummy]].m_aClan) == 0)
 		{
-			vec4 Color = m_pClient->m_pSkins->GetColorV4(g_Config.m_ClSameClanColor);
-			TextRender()->TextColor(Color.r, Color.g, Color.b, Color.a);
+			vec3 Color = HslToRgb(UnpackColor(g_Config.m_ClSameClanColor));
+			TextRender()->TextColor(Color.r, Color.g, Color.b, 1.0f);
 		}
 		else
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);

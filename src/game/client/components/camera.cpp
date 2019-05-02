@@ -54,7 +54,10 @@ void CCamera::OnRender()
 	{
 		if(m_CamType != CAMTYPE_PLAYER)
 		{
-			m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_LastPos[g_Config.m_ClDummy];
+			if(m_LastPos[g_Config.m_ClDummy].x < g_Config.m_ClMouseMinDistance)
+				m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy].x = m_LastPos[g_Config.m_ClDummy].x + g_Config.m_ClMouseMinDistance;
+			else
+				m_pClient->m_pControls->m_MousePos[g_Config.m_ClDummy] = m_LastPos[g_Config.m_ClDummy];
 			m_pClient->m_pControls->ClampMousePos();
 			m_CamType = CAMTYPE_PLAYER;
 		}

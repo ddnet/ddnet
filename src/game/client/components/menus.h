@@ -21,6 +21,7 @@ public:
 	bool m_TakeKey;
 	bool m_GotKey;
 	IInput::CEvent m_Key;
+	int m_Modifier;
 	CMenusKeyBinder();
 	virtual bool OnInput(IInput::CEvent Event);
 };
@@ -71,7 +72,7 @@ class CMenus : public CComponent
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current);
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoKeyReader(void *pID, const CUIRect *pRect, int Key);
+	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier);
 
 	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
 	void UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
@@ -366,7 +367,7 @@ public:
 		CGhostItem() : m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
 
 		bool operator<(const CGhostItem &Other) { return m_Time < Other.m_Time; }
-		
+
 		bool Active() const { return m_Slot != -1; }
 		bool HasFile() const { return m_aFilename[0]; }
 	};

@@ -23,7 +23,7 @@ void CSaveTee::save(CCharacter *pChr)
 	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
 	m_TeeFinished = pChr->Teams()->TeeFinished(pChr->m_pPlayer->GetCID());
-	m_IsSolo = pChr->Teams()->m_Core.GetSolo(pChr->m_pPlayer->GetCID());
+	m_IsSolo = pChr->m_Solo;
 
 	for(int i = 0; i< NUM_WEAPONS; i++)
 	{
@@ -101,7 +101,6 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	pChr->m_NeededFaketuning = m_NeededFaketuning;
 
 	pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCID(), Team);
-	pChr->Teams()->m_Core.SetSolo(pChr->m_pPlayer->GetCID(), m_IsSolo);
 	pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCID(), m_TeeFinished);
 
 	for(int i = 0; i< NUM_WEAPONS; i++)
@@ -177,7 +176,7 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 		pChr->m_Core.m_HookState = m_HookState;
 	}
 
-	pChr->GameServer()->SendTuningParams(pChr->m_pPlayer->GetCID(), m_TuneZone);
+	pChr->SetSolo(m_IsSolo);
 }
 
 char* CSaveTee::GetString()

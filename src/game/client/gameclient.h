@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_GAMECLIENT_H
 #define GAME_CLIENT_GAMECLIENT_H
 
+#include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
 #include <engine/console.h>
@@ -13,15 +14,10 @@
 
 #include <game/teamscore.h>
 
-#define MIN3(x,y,z)  ((y) <= (z) ? \
-	((x) <= (y) ? (x) : (y)) \
-	: \
-	((x) <= (z) ? (x) : (z)))
-
-#define MAX3(x,y,z)  ((y) >= (z) ? \
-	((x) >= (y) ? (x) : (y)) \
-	: \
-	((x) >= (z) ? (x) : (z)))
+#include <game/client/prediction/gameworld.h>
+#include <game/client/prediction/entities/character.h>
+#include <game/client/prediction/entities/laser.h>
+#include <game/client/prediction/entities/pickup.h>
 
 class CGameClient;
 
@@ -218,6 +214,9 @@ public:
 			CNetObj_Character m_Prev;
 			CNetObj_Character m_Cur;
 
+			CNetObj_DDNetCharacter m_ExtendedData;
+			bool m_HasExtendedData;
+
 			// interpolated position
 			vec2 m_Position;
 		};
@@ -243,6 +242,24 @@ public:
 		int m_Team;
 		int m_Emoticon;
 		int m_EmoticonStart;
+		bool m_Solo;
+		bool m_Jetpack;
+		bool m_NoCollision;
+		bool m_EndlessHook;
+		bool m_EndlessJump;
+		bool m_NoHammerHit;
+		bool m_NoGrenadeHit;
+		bool m_NoRifleHit;
+		bool m_NoShotgunHit;
+		bool m_NoHookHit;
+		bool m_Super;
+		bool m_HasTelegunGun;
+		bool m_HasTelegunGrenade;
+		bool m_HasTelegunLaser;
+		int m_FreezeEnd;
+		bool m_DeepFrozen;
+
+
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 
@@ -263,6 +280,17 @@ public:
 		// DDRace
 
 		int m_Score;
+
+		// rendered characters
+		CNetObj_Character m_RenderCur;
+		CNetObj_Character m_RenderPrev;
+		vec2 m_RenderPos;
+		bool m_IsPredicted;
+		bool m_IsPredictedLocal;
+		int64 m_SmoothStart[2];
+		int64 m_SmoothLen[2];
+		vec2 m_PredPos[200];
+		int m_PredTick[200];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -379,81 +407,31 @@ public:
 	class CTeamsCore m_Teams;
 
 	int IntersectCharacter(vec2 Pos0, vec2 Pos1, vec2& NewPos, int ownID);
-	int IntersectCharacter(vec2 OldPos, vec2 NewPos, float Radius, vec2* NewPos2, int ownID, CWorldCore *World);
-
-	CWeaponData m_aWeaponData[150];
-	CWeaponData *GetWeaponData(int Tick) { return &m_aWeaponData[((Tick%150)+150)%150]; }
-	CWeaponData *FindWeaponData(int TargetTick);
 
 	virtual int GetLastRaceTick();
-
-	void FindWeaker(bool IsWeaker[2][MAX_CLIENTS]);
 
 	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking); }
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
+	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
+
+	CGameWorld m_GameWorld;
+	CGameWorld m_PredictedWorld;
+	CGameWorld m_PrevPredictedWorld;
 
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];
+
+	void UpdatePrediction();
+	void UpdateRenderedCharacters();
+	void DetectStrongHook();
+	vec2 GetSmoothPos(int ClientID);
+
+	CCharOrder m_CharOrder;
+	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
+	class CTeamsCore m_TeamsPredicted;
 };
-
-
-inline float HueToRgb(float v1, float v2, float h)
-{
-	if(h < 0.0f) h += 1;
-	if(h > 1.0f) h -= 1;
-	if((6.0f * h) < 1.0f) return v1 + (v2 - v1) * 6.0f * h;
-	if((2.0f * h) < 1.0f) return v2;
-	if((3.0f * h) < 2.0f) return v1 + (v2 - v1) * ((2.0f/3.0f) - h) * 6.0f;
-	return v1;
-}
-
-inline vec3 HslToRgb(vec3 HSL)
-{
-	if(HSL.s == 0.0f)
-		return vec3(HSL.l, HSL.l, HSL.l);
-	else
-	{
-		float v2 = HSL.l < 0.5f ? HSL.l * (1.0f + HSL.s) : (HSL.l+HSL.s) - (HSL.s*HSL.l);
-		float v1 = 2.0f * HSL.l - v2;
-
-		return vec3(HueToRgb(v1, v2, HSL.h + (1.0f/3.0f)), HueToRgb(v1, v2, HSL.h), HueToRgb(v1, v2, HSL.h - (1.0f/3.0f)));
-	}
-}
-
-inline vec3 RgbToHsl(vec3 RGB)
-{
-	vec3 HSL;
-	float MaxColor = MAX3(RGB.r, RGB.g, RGB.b);
-	float MinColor = MIN3(RGB.r, RGB.g, RGB.b);
-	if (MinColor == MaxColor)
-		return vec3(0.0f, 0.0f, RGB.g * 255.0f);
-	else
-	{
-		HSL.l = (MinColor + MaxColor) / 2;
-
-		if (HSL.l < 0.5)
-			HSL.s = (MaxColor - MinColor) / (MaxColor + MinColor);
-		else
-			HSL.s = (MaxColor - MinColor) / (2.0 - MaxColor - MinColor);
-
-		if (RGB.r == MaxColor)
-			HSL.h = (RGB.g - RGB.b) / (MaxColor - MinColor);
-		else if (RGB.g == MaxColor)
-			HSL.h = 2.0 + (RGB.b - RGB.r) / (MaxColor - MinColor);
-		else
-			HSL.h = 4.0 + (RGB.r - RGB.g) / (MaxColor - MinColor);
-
-		HSL.h /= 6; //to bring it to a number between 0 and 1
-		if (HSL.h < 0) HSL.h++;
-	}
-	HSL.h = int(HSL.h * 255.0);
-	HSL.s = int(HSL.s * 255.0);
-	HSL.l = int(HSL.l * 255.0);
-	return HSL;
-
-}
 
 vec3 CalculateNameColor(vec3 TextColorHSL);
 

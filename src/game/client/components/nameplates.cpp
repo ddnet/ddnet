@@ -27,22 +27,14 @@ void CNamePlates::RenderNameplate(
 	const CNetObj_PlayerInfo *pPlayerInfo
 	)
 {
-	float IntraTick = Client()->IntraGameTick();
 	int ClientID = pPlayerInfo->m_ClientID;
+	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
 
 	vec2 Position;
-	if((!m_pClient->AntiPingPlayers() && !pPlayerInfo->m_Local) || m_pClient->m_Snap.m_SpecInfo.m_Active)
-	{
-		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IntraTick);
-	}
-	else if(!m_pClient->AntiPingPlayers() && pPlayerInfo->m_Local)
-	{
-		Position = vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y);
-	}
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
-	{
-		Position = m_pPlayers->m_CurPredictedPos[ClientID];
-	}
+		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
 
 	bool OtherTeam;
 
@@ -50,6 +42,8 @@ void CNamePlates::RenderNameplate(
 		OtherTeam = false;
 	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
+	else if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo || m_pClient->m_aClients[ClientID].m_Solo) && !Local)
+		OtherTeam = true;
 	else
 		OtherTeam = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 

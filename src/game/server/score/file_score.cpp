@@ -247,6 +247,7 @@ void CFileScore::ShowTop5(IConsole::IResult *pResult, int ClientID,
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	char aBuf[512];
+	Debut = max(1, Debut < 0 ? m_Top.size() + Debut - 3 : Debut);
 	pSelf->SendChatTarget(ClientID, "----------- Top 5 -----------");
 	for (int i = 0; i < 5; i++)
 	{

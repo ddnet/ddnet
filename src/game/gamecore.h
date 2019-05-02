@@ -214,7 +214,7 @@ public:
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2> > *pTeleOuts);
 	void Reset();
-	void Tick(bool UseInput, bool IsClient);
+	void Tick(bool UseInput);
 	void Move();
 
 	void Read(const CNetObj_CharacterCore *pObjCore);
@@ -230,6 +230,24 @@ public:
 	vec2 m_LastVel;
 	int m_Colliding;
 	bool m_LeftWall;
+
+	// DDnet Character
+	bool m_Solo;
+	bool m_Jetpack;
+	bool m_NoCollision;
+	bool m_EndlessHook;
+	bool m_EndlessJump;
+	bool m_NoHammerHit;
+	bool m_NoGrenadeHit;
+	bool m_NoRifleHit;
+	bool m_NoShotgunHit;
+	bool m_NoHookHit;
+	bool m_Super;
+	bool m_HasTelegunGun;
+	bool m_HasTelegunGrenade;
+	bool m_HasTelegunLaser;
+	int m_FreezeEnd;
+	bool m_DeepFrozen;
 
 	void LimitForce(vec2 *Force);
 	void ApplyForce(vec2 Force);

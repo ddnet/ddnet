@@ -100,9 +100,6 @@ class CGameContext : public IGameServer
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData);
-	//static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
-	//static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
-	//static void ConLockTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
@@ -138,8 +135,6 @@ public:
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
 	bool EmulateBug(int Bug);
-
-	//int m_LockTeams;
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason);
@@ -212,8 +207,6 @@ public:
 	void ProgressVoteOptions(int ClientID);
 
 	//
-	//void SwapTeams();
-
 	void LoadMapSettings();
 
 	// engine events
@@ -369,7 +362,7 @@ private:
 	enum
 	{
 		MAX_MUTES=32,
-		MAX_VOTE_BANS=32,
+		MAX_VOTE_MUTES=32,
 	};
 	struct CMute
 	{
@@ -384,9 +377,11 @@ private:
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
-	CVoteMute m_aVoteMutes[MAX_VOTE_BANS];
+	CVoteMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
+	bool TryMute(const NETADDR *pAddr, int Secs);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
+	bool TryVoteMute(const NETADDR *pAddr, int Secs);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);

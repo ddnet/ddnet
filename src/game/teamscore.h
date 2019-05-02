@@ -36,7 +36,6 @@ public:
 	{
 		return m_IsSolo[ClientID];
 	}
-	;
 };
 
 #endif

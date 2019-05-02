@@ -150,6 +150,10 @@ TEST(Str, Tokenize)
 
 	char aTest2[] = "";
 	EXPECT_EQ(str_next_token(aTest2, ",", aBuf, sizeof(aBuf)), nullptr);
+
+	char aTest3[] = "+b";
+	str_next_token(aTest3, "+", aBuf, sizeof(aBuf));
+	EXPECT_STREQ(aBuf, "b");
 }
 
 TEST(Str, InList)
@@ -178,4 +182,18 @@ TEST(Str, StrFormat)
 	EXPECT_STREQ(aBuf, "9: ");
 	EXPECT_EQ(str_format(aBuf, 4, "%d: ", 99), 3);
 	EXPECT_STREQ(aBuf, "99:");
+}
+
+TEST(Str, StrCopyNum)
+{
+	const char *foo = "Foobar";
+	char aBuf[64];
+	str_truncate(aBuf, 3, foo, 1);
+	EXPECT_STREQ(aBuf, "F");
+	str_truncate(aBuf, 3, foo, 2);
+	EXPECT_STREQ(aBuf, "Fo");
+	str_truncate(aBuf, 3, foo, 3);
+	EXPECT_STREQ(aBuf, "Fo");
+	str_truncate(aBuf, sizeof(aBuf), foo, 6);
+	EXPECT_STREQ(aBuf, "Foobar");
 }

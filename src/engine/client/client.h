@@ -209,7 +209,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	volatile int m_GfxState;
 	static void GraphicsThreadProxy(void *pThis) { ((CClient*)pThis)->GraphicsThread(); }
 	void GraphicsThread();
-	vec3 GetColorV3(int v);
 
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
@@ -253,7 +252,7 @@ public:
 
 	// TODO: OPT: do this a lot smarter!
 	virtual int *GetInput(int Tick);
-	virtual bool InputExists(int Tick);
+	virtual int *GetDirectInput(int Tick);
 
 	const char *LatestVersion();
 
@@ -361,7 +360,7 @@ public:
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	
+
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);
@@ -417,5 +416,7 @@ public:
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends* Foes() {return &m_Foes; }
+
+	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };
 #endif

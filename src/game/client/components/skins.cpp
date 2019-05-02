@@ -229,14 +229,3 @@ int CSkins::FindImpl(const char *pName) const
 	}
 	return -1;
 }
-
-vec3 CSkins::GetColorV3(int v)
-{
-	return HslToRgb(vec3(((v>>16)&0xff)/255.0f, ((v>>8)&0xff)/255.0f, 0.5f+(v&0xff)/255.0f*0.5f));
-}
-
-vec4 CSkins::GetColorV4(int v)
-{
-	vec3 r = GetColorV3(v);
-	return vec4(r.r, r.g, r.b, 1.0f);
-}

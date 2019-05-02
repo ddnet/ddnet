@@ -52,12 +52,17 @@ bool IsBlockInfectionZ(const CServerInfo *pInfo)
 	    || str_find_nocase(pInfo->m_aGameType, "infectionZ");
 }
 
+bool IsBlockWorlds(const CServerInfo *pInfo)
+{
+	return (str_comp_nocase_num(pInfo->m_aGameType, "bw  ", 4) == 0)
+	    || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
+}
+
 bool IsDDNet(const CServerInfo *pInfo)
 {
 	return (str_find_nocase(pInfo->m_aGameType, "ddracenet")
 	    || str_find_nocase(pInfo->m_aGameType, "ddnet")
-	    || (str_comp_nocase_num(pInfo->m_aGameType, "bw  ", 4) == 0)
-	    || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0))
+	    || IsBlockWorlds(pInfo))
 	    && !IsBlockInfectionZ(pInfo);
 }
 

@@ -392,6 +392,23 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 			int NumChars = Len;
 			ReturnValue |= CLineInput::Manipulate(Input()->GetEvent(i), pStr, StrSize, StrSize, &Len, &s_AtIndex, &NumChars);
 		}
+
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+		{
+			const char *pClipboardText = Input()->GetClipboardText();
+			if(pClipboardText)
+			{
+				str_append(pStr, pClipboardText, StrSize);
+				str_sanitize_cc(pStr);
+				s_AtIndex = str_length(pStr);
+				ReturnValue = true;
+			}
+		}
+
+		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C) && pStr[0] != '\0')
+		{
+			Input()->SetClipboardText(pStr);
+		}
 	}
 
 	bool JustGotActive = false;
@@ -3155,9 +3172,14 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
 				{
 					if(FontSize > 6.0f)
+					{
 						FontSize--;
+					}
 					else
-						str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+					{
+						aBuf[str_length(aBuf) - 4] = '\0';
+						str_append(aBuf, "...", sizeof(aBuf));
+					}
 				}
 			}
 
@@ -3219,9 +3241,14 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > Shifter.w)
 				{
 					if(FontSize > 6.0f)
+					{
 						FontSize--;
+					}
 					else
-						str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+					{
+						aBuf[str_length(aBuf) - 4] = '\0';
+						str_append(aBuf, "...", sizeof(aBuf));
+					}
 				}
 			}
 
@@ -4269,13 +4296,13 @@ void CEditor::RenderFileDialog()
 	else
 		ScrollNum = 0;
 
-	if(!m_FileList[m_FilesSelectedIndex].m_IsVisible)
-	{
-		m_FilesSelectedIndex = 0;
-	}
-
 	if(m_FilesSelectedIndex > -1)
 	{
+		if(!m_FileList[m_FilesSelectedIndex].m_IsVisible)
+		{
+			m_FilesSelectedIndex = 0;
+		}
+
 		for(int i = 0; i < Input()->NumEvents(); i++)
 		{
 			int NewIndex = -1;
@@ -4455,7 +4482,6 @@ void CEditor::RenderFileDialog()
 
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
-		ButtonBar.VSplitLeft(40.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, 0))
 		{
@@ -4502,7 +4528,7 @@ void CEditor::FilelistPopulate(int StorageType)
 	m_FilePreviewImage = 0;
 	m_aFileDialogActivate = false;
 
-	if(m_FilesSelectedIndex >= 0)
+	if(m_FilesSelectedIndex >= 0 && !m_FileList[m_FilesSelectedIndex].m_IsDir)
 		str_copy(m_aFileDialogFileName, m_FileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
 	else
 		m_aFileDialogFileName[0] = 0;
@@ -4624,15 +4650,20 @@ void CEditor::RenderStatusbar(CUIRect View)
 
 		float FontSize = 10.0f;
 
-		while(TextRender()->TextWidth(0, FontSize, m_pTooltip, -1) > View.w)
+		while(TextRender()->TextWidth(0, FontSize, aBuf, -1) > View.w)
 		{
 			if(FontSize > 6.0f)
+			{
 				FontSize--;
+			}
 			else
-				str_format(aBuf, sizeof(aBuf), "%.*s...", str_length(aBuf) - 4, aBuf);
+			{
+				aBuf[str_length(aBuf) - 4] = '\0';
+				str_append(aBuf, "...", sizeof(aBuf));
+			}
 		}
 
-		UI()->DoLabel(&View, m_pTooltip, FontSize, -1, View.w);
+		UI()->DoLabel(&View, aBuf, FontSize, -1, View.w);
 	}
 }
 

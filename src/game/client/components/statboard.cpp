@@ -75,34 +75,17 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(pMsg->m_ClientID < 0)
 		{
-			const char *p;
+			const char *p, *t;
 			const char *pLookFor = "flag was captured by '";
-			if(str_find(pMsg->m_pMessage, pLookFor) != 0)
+			if((p = str_find(pMsg->m_pMessage, pLookFor)))
 			{
-				// server info
-				CServerInfo CurrentServerInfo;
-				Client()->GetServerInfo(&CurrentServerInfo);
-
-				p = str_find(pMsg->m_pMessage, pLookFor);
-				char aName[64];
+				char aName[MAX_NAME_LENGTH];
 				p += str_length(pLookFor);
-				str_copy(aName, p, sizeof(aName));
-				// remove capture time
-				if(str_endswith(aName, " seconds)"))
-				{
-					char *c = aName+str_length(aName)-10;
-					while(c > aName)
-					{
-						c--;
-						if(*c == '(')
-						{
-							*(c-1) = 0;
-							break;
-						}
-					}
-				}
-				// remove the ' at the end
-				aName[str_length(aName)-1] = 0;
+				t = str_rchr(p, '\'');
+
+				if(t <= p)
+					return;
+				str_truncate(aName, sizeof(aName), p, t - p);
 
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
