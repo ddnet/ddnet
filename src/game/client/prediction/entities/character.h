@@ -148,6 +148,7 @@ public:
 	int m_LastJetpackStrength;
 	bool m_KeepHooked;
 	int m_GameTeam;
+	bool m_CanMoveInFreeze;
 
 	bool Match(CCharacter *pChar);
 	CCharacter() { m_Alive = false; }

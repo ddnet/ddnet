@@ -1429,6 +1429,10 @@ void CGameClient::OnPredict()
 					m_aClients[i].m_PrevPredicted = pChar->GetCore();
 		}
 
+		// optionally allow some movement in freeze by not predicting freeze the last one to two ticks
+		if(g_Config.m_ClPredictFreeze == 2 && Client()->PredGameTick() - 1 - Client()->PredGameTick()%2 <= Tick)
+			pLocalChar->m_CanMoveInFreeze = true;
+
 		// apply inputs and tick
 		CNetObj_PlayerInput *pInputData = (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick);
 		if(pInputData)

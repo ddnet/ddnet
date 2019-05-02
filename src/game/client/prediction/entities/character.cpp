@@ -888,9 +888,12 @@ void CCharacter::DDRaceTick()
 			m_FreezeTime--;
 		else
 			m_Ninja.m_ActivationTick = GameWorld()->GameTick();
-		m_Input.m_Direction = 0;
-		m_Input.m_Jump = 0;
-		m_Input.m_Hook = 0;
+		if(!m_CanMoveInFreeze)
+		{
+			m_Input.m_Direction = 0;
+			m_Input.m_Jump = 0;
+			m_Input.m_Hook = 0;
+		}
 		if (m_FreezeTime == 1)
 			UnFreeze();
 	}
@@ -1022,6 +1025,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LastRefillJumps = false;
 	m_LastJetpackStrength = 400.0;
 	m_Super = false;
+	m_CanMoveInFreeze = false;
 	m_Alive = true;
 
 	Read(pChar, pExtended, false);

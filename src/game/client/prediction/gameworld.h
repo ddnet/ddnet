@@ -69,7 +69,7 @@ public:
 		bool m_IsFNG;
 		bool m_InfiniteAmmo;
 		bool m_PredictTiles;
-		bool m_PredictFreeze;
+		int m_PredictFreeze;
 		bool m_PredictWeapons;
 	} m_WorldConfig;
 
