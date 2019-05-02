@@ -172,66 +172,51 @@ int CMapImages::GetTextureScale()
 	return m_TextureScale;
 }
 
+int CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
+{	
+	void* pMem = calloc(1024 * 1024, 1);
+	int TextureID = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
+	free(pMem);
+
+	char buff[4];
+	str_format(buff, 4, "%d", 255);
+	int len = str_length(buff);
+
+	int FontSize = TextRender()->AdjustFontSize(buff, len, TextureSize);
+	YOffset += ((TextureSize - FontSize)/2);
+
+	for (int i = 0; i < 256; ++i)
+	{
+		str_format(buff, 4, "%d", i);
+		int len = str_length(buff);
+
+		float x = (i%16)*64;
+		float y = (i/16)*64;
+		
+		TextRender()->UploadEntityLayerText(TextureID, buff, len, x, y + YOffset, FontSize);
+	}
+
+	return TextureID;
+}
+
+
 void CMapImages::InitOverlayTextures()
 {
-	int TextureSize = 64 * m_TextureScale / 100;
-	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
-
-	//TODO: improve this a bit -- with better from sizes etc.
+	int TextureSize = 64*m_TextureScale/100;
+	int TextureToVerticalCenterOffset = (64-TextureSize)/2; // should be used to move texture to the center of 64 pixels area
+	
 	if(m_OverlayBottomTexture == -1)
 	{
-		void *pMem = calloc(1024 * 1024, 1);
-		m_OverlayBottomTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
-		free(pMem);
-
-		for(int i = 0; i < 256; ++i)
-		{
-			char buff[4];
-			str_format(buff, 4, "%d", i);
-
-			float x = (i % 16) * 64;
-			float y = (i / 16) * 64;
-			TextRender()->UploadEntityLayerText(m_OverlayBottomTexture, buff, -1, x + 1, y + TextureToVerticalCenterOffset / 2 + 32, TextureSize / 2, 64 - 1);
-		}
+		m_OverlayBottomTexture = UploadEntityLayerText(TextureSize/2, 32+TextureToVerticalCenterOffset/2);
 	}
 
 	if(m_OverlayTopTexture == -1)
 	{
-		void *pMem = calloc(1024 * 1024, 1);
-		m_OverlayTopTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
-		free(pMem);
-
-		for(int i = 0; i < 256; ++i)
-		{
-			char buff[4];
-			str_format(buff, 4, "%d", i);
-
-			float x = (i % 16) * 64;
-			float y = (i / 16) * 64;
-			TextRender()->UploadEntityLayerText(m_OverlayTopTexture, buff, -1, x + 1, y + TextureToVerticalCenterOffset / 2, TextureSize / 2, 64 - 1);
-		}
+		m_OverlayTopTexture = UploadEntityLayerText(TextureSize/2, TextureToVerticalCenterOffset/2);
 	}
 
 	if(m_OverlayCenterTexture == -1)
 	{
-		void *pMem = calloc(1024 * 1024, 1);
-		m_OverlayCenterTexture = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
-		free(pMem);
-
-		for (int i = 0; i < 256; ++i)
-		{
-			char buff[4];
-			str_format(buff, 4, "%d", i);
-			int len = str_length(buff);
-
-			float x = (i % 16) * 64;
-			float y = (i / 16) * 64;
-
-			int MinSize = (len == 3 ? 20 : 50);
-			int OffY = (len == 3 ? 10 : 5);
-			int OffX = (len == 3 ? 5 : 1);
-
-			TextRender()->UploadEntityLayerText(m_OverlayCenterTexture, buff, -1, x + OffX, y + OffY + TextureToVerticalCenterOffset, -1, 64 - (OffX * 2), TextureSize, MinSize);
-		}
+		m_OverlayCenterTexture = UploadEntityLayerText(TextureSize, TextureToVerticalCenterOffset);
 	}
 }

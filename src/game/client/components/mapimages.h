@@ -32,7 +32,7 @@ public:
 
 	void SetTextureScale(int Size);
 	int GetTextureScale();
-	
+
 private:
 
 	int m_EntitiesTextures;
@@ -42,6 +42,7 @@ private:
 	int m_TextureScale;
 	
 	void InitOverlayTextures();
+	int UploadEntityLayerText(int TextureSize, int YOffset);
 };
 
 #endif
