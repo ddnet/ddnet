@@ -1775,7 +1775,7 @@ public:
 			const char* pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 
-			if (NextCharacter)
+			if(NextCharacter)
 			{
 				FT_Int32 FTFlags = 0;
 #if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
@@ -1783,7 +1783,7 @@ public:
 #else
 				FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
 #endif
-				if (FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
+				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
 				{
 					dbg_msg("pFont", "error loading glyph %d", NextCharacter);
 					pCurrent = pTmp;

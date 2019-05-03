@@ -150,7 +150,7 @@ int CMapImages::GetOverlayCenter()
 
 void CMapImages::SetTextureScale(int Scale)
 {
-	if (m_TextureScale == Scale)
+	if(m_TextureScale == Scale)
 		return;
 
 	m_TextureScale = Scale;
@@ -174,26 +174,24 @@ int CMapImages::GetTextureScale()
 
 int CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 {	
-	void* pMem = calloc(1024 * 1024, 1);
+	void *pMem = calloc(1024 * 1024, 1);
 	int TextureID = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 	free(pMem);
 
-	char buff[4];
-	str_format(buff, 4, "%d", 255);
-	int len = str_length(buff);
+	char aBuf[4];
+	int Len = str_format(aBuf, 4, "%d", 255);
 
 	int FontSize = TextRender()->AdjustFontSize(buff, len, TextureSize);
 	YOffset += ((TextureSize - FontSize)/2);
 
-	for (int i = 0; i < 256; ++i)
+	for(int i = 0; i < 256; ++i)
 	{
-		str_format(buff, 4, "%d", i);
-		int len = str_length(buff);
+		int Len = str_format(aBuf, 4, "%d", i);
 
 		float x = (i%16)*64;
 		float y = (i/16)*64;
 		
-		TextRender()->UploadEntityLayerText(TextureID, buff, len, x, y + YOffset, FontSize);
+		TextRender()->UploadEntityLayerText(TextureID, aBuf, Len, x, y + YOffset, FontSize);
 	}
 
 	return TextureID;

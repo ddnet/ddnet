@@ -415,8 +415,8 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
 		return; // its useless to render text at this distance
 
-	float size = g_Config.m_ClTextEntitiesSize/100.f;
-	float toCenterOffset = (1-size)/2.f;
+	float Size = g_Config.m_ClTextEntitiesSize/100.f;
+	float ToCenterOffset = (1-size)/2.f;
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -442,7 +442,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale - 3.f, (my+toCenterOffset)*Scale, size*Scale, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale - 3.f, (my+ToCenterOffset)*Scale, Size*Scale, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}

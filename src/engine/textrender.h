@@ -98,7 +98,7 @@ public:
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor) = 0;
 	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y) = 0;
 
-	virtual void UploadEntityLayerText(int TextureID, const char* pText, int Length, float x, float y, int FontHeight) = 0;
+	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int FontHeight) = 0;
 	virtual int AdjustFontSize(const char* pText, int TextLength, int MaxSize = -1) = 0;
 
 	// old foolish interface
