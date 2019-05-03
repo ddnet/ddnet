@@ -1764,7 +1764,7 @@ public:
 
 	virtual int CalculateTextWidth(const char* pText, int TextLength, int FontWidth, int FontHeight)
 	{
-		CFont* pFont = m_pDefaultFont;
+		CFont *pFont = m_pDefaultFont;
 		const char* pCurrent = (char*)pText;
 		const char* pEnd = pCurrent + TextLength;
 
