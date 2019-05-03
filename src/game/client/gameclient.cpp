@@ -1858,6 +1858,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_IsVanilla = IsVanilla(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_IsDDRace = IsDDRace(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_IsFNG = IsFNG(&CurrentServerInfo);
+	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
 	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameWorld.m_WorldConfig.m_IsDDRace && !IsBlockWorlds(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
