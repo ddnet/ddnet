@@ -1149,7 +1149,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
 		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
 		if(m_Super)
-			TeamsCore()->Team(GetCID(), TEAM_SUPER);
+			TeamsCore()->Team(GetCID(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
 		m_EndlessHook = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
 		m_Core.m_Collision = !(pExtended->m_Flags & CHARACTERFLAG_NO_COLLISION);
 		m_Core.m_Hook = !(pExtended->m_Flags & CHARACTERFLAG_NO_HOOK);
