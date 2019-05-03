@@ -1707,7 +1707,7 @@ public:
 		int WidthLastChars = 0;
 
 		while(pCurrent < pEnd)
-		{			
+		{
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 			
