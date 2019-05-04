@@ -1007,24 +1007,12 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
-	SetSolo(false);
-	m_EndlessHook = false;
-	m_Hit = HIT_ALL;
-	m_SuperJump = false;
-	m_Jetpack = false;
-	m_Core.m_Jumps = 2;
 	mem_zero(&m_Ninja, sizeof(m_Ninja));
 	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
 	m_ProximityRadius = ms_PhysSize;
 	m_Core.m_LeftWall = 1;
-	m_NumInputs = 0;
-	m_FreezeTime = 0;
-	m_FreezeTick = 0;
-	m_DeepFreeze = 0;
 	m_ReloadTimer = 0;
-	//GiveAllWeapons();
-	//GiveWeapon(WEAPON_HAMMER, -1);
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
 	m_LastJetpackStrength = 400.0;
@@ -1032,9 +1020,27 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_CanMoveInFreeze = false;
 	m_Alive = true;
 
+	ResetPrediction();
 	Read(pChar, pExtended, false);
 
 	GameWorld()->InsertEntity(this);
+}
+
+void CCharacter::ResetPrediction()
+{
+	SetSolo(false);
+	m_EndlessHook = false;
+	m_Hit = HIT_ALL;
+	m_SuperJump = false;
+	m_Jetpack = false;
+	m_Core.m_Jumps = 2;
+	m_NumInputs = 0;
+	m_FreezeTime = 0;
+	m_FreezeTick = 0;
+	m_DeepFreeze = 0;
+	m_Super = false;
+	for(int w = 0; w < NUM_WEAPONS; w++)
+		SetWeaponGot(w, false);
 }
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)

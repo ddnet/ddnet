@@ -829,6 +829,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		{
 			m_CharOrder.GiveWeak(pMsg->m_Victim);
 			m_aLastWorldCharacters[pMsg->m_Victim].m_Alive = false;
+			if(CCharacter *pChar = m_GameWorld.GetCharacterByID(pMsg->m_Victim))
+				pChar->ResetPrediction();
 			m_GameWorld.ReleaseHooked(pMsg->m_Victim);
 		}
 	}

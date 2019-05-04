@@ -151,6 +151,7 @@ public:
 	bool m_CanMoveInFreeze;
 
 	bool Match(CCharacter *pChar);
+	void ResetPrediction();
 	CCharacter() { m_Alive = false; }
 
 private:
