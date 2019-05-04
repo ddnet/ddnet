@@ -457,6 +457,8 @@ void CCharacter::FireWeapon()
 
 	}
 
+	m_AttackTick = GameWorld()->GameTick();
+
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
@@ -1049,6 +1051,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 	m_Core.Read((CNetObj_CharacterCore*) pChar);
 	m_Pos = m_Core.m_Pos;
+	m_AttackTick = pChar->m_AttackTick;
 
 	if(distance(PosBefore, m_Pos) > 2.f) // misprediction, don't use prevpos
 		m_PrevPos = m_Pos;

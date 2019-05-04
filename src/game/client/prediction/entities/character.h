@@ -139,6 +139,7 @@ public:
 	int GetCID() { return m_ID; }
 	void SetInput(CNetObj_PlayerInput *pNewInput) { m_LatestInput = m_Input = *pNewInput; };
 	int GetJumped() { return m_Core.m_Jumped; }
+	int GetAttackTick() { return m_AttackTick; }
 
 	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
@@ -171,6 +172,7 @@ private:
 	int m_QueuedWeapon;
 
 	int m_ReloadTimer;
+	int m_AttackTick;
 
 	// these are non-heldback inputs
 	CNetObj_PlayerInput m_LatestPrevInput;
