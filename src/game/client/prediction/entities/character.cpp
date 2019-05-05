@@ -1043,6 +1043,11 @@ void CCharacter::ResetPrediction()
 	m_Super = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)
 		SetWeaponGot(w, false);
+	if(m_Core.m_HookedPlayer >= 0)
+	{
+		m_Core.m_HookedPlayer = -1;
+		m_Core.m_HookState = HOOK_IDLE;
+	}
 }
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
