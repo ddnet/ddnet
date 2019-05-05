@@ -1700,10 +1700,10 @@ public:
 
 	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int FontSize)
 	{
-		const char* pCurrent = (char*)pText;
-		const char* pEnd = pCurrent + Length;
-		CFont* pFont = m_pDefaultFont;
-		FT_Bitmap* pBitmap;
+		const char  pCurrent = (char *)pText;
+		const char *pEnd = pCurrent + Length;
+		CFont *pFont = m_pDefaultFont;
+		FT_Bitmap *pBitmap;
 		int WidthLastChars = 0;
 
 		while(pCurrent < pEnd)
@@ -1750,7 +1750,7 @@ public:
 		}
 	}
 	
-	virtual int AdjustFontSize(const char* pText, int TextLength, int MaxSize = -1)
+	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize = -1)
 	{
 		int WidthOfText = CalculateTextWidth(pText, TextLength, 0, 100);
 
@@ -1762,17 +1762,17 @@ public:
 		return FontSize;
 	}
 
-	virtual int CalculateTextWidth(const char* pText, int TextLength, int FontWidth, int FontHeight)
+	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight)
 	{
 		CFont *pFont = m_pDefaultFont;
-		const char* pCurrent = (char*)pText;
-		const char* pEnd = pCurrent + TextLength;
+		const char *pCurrent = (char *)pText;
+		const char *pEnd = pCurrent + TextLength;
 
 		int WidthOfText = 0;
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, FontWidth, FontHeight);
 		while (pCurrent < pEnd)
 		{
-			const char* pTmp = pCurrent;
+			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 
 			if(NextCharacter)

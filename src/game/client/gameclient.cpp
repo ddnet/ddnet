@@ -1796,11 +1796,10 @@ void CGameClient::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *p
 
 	if(pResult->NumArguments())
 	{
-		CGameClient* GameClient = (CGameClient*)pUserData;
-		GameClient->m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
+		CGameClient *pGameClient = (CGameClient*)pUserData;
+		pGameClient->m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 }
-
 
 IGameClient *CreateGameClient()
 {
