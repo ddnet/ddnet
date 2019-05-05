@@ -14,6 +14,8 @@ void CPickup::Tick()
 		CCharacter * pChr = apEnts[i];
 		if(pChr && pChr->IsAlive())
 		{
+			if(GameWorld()->m_WorldConfig.m_IsVanilla && distance(m_Pos, pChr->m_Pos) >= 20.0f*2) // pickup distance is shorter on vanilla due to using ClosestEntity
+				continue;
 			if(m_Layer == LAYER_SWITCH && !Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
 			bool sound = false;
 			// player picked us up, is someone was hooking us, let them go
@@ -24,7 +26,10 @@ void CPickup::Tick()
 					break;
 
 				case POWERUP_ARMOR:
-					if(pChr->Team() == TEAM_SUPER) continue;
+					if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+						continue;
+					if(pChr->m_Super)
+						continue;
 					for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
 					{
 						if(pChr->GetWeaponGot(i))
@@ -47,17 +52,17 @@ void CPickup::Tick()
 					break;
 
 				case POWERUP_WEAPON:
-
 					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && !pChr->m_FreezeTime)))
 						pChr->GiveWeapon(m_Subtype, -1);
 					break;
 
-			case POWERUP_NINJA:
-				{
-					// activate ninja on target player
-					pChr->GiveNinja();
-					break;
-				}
+				case POWERUP_NINJA:
+					{
+						// activate ninja on target player
+						pChr->GiveNinja();
+						break;
+					}
+
 				default:
 					break;
 			};

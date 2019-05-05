@@ -457,6 +457,8 @@ void CCharacter::FireWeapon()
 
 	}
 
+	m_AttackTick = GameWorld()->GameTick();
+
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
@@ -689,6 +691,42 @@ void CCharacter::HandleTiles(int Index)
 	m_TileSFlagsB = (Collision()->m_pSwitchers && Collision()->m_pSwitchers[Collision()->GetDTileNumber(MapIndexB)].m_Status[Team()])?(Team() != TEAM_SUPER)? Collision()->GetDTileFlags(MapIndexB) : 0 : 0;
 	m_TileSIndexT = (Collision()->m_pSwitchers && Collision()->m_pSwitchers[Collision()->GetDTileNumber(MapIndexT)].m_Status[Team()])?(Team() != TEAM_SUPER)? Collision()->GetDTileIndex(MapIndexT) : 0 : 0;
 	m_TileSFlagsT = (Collision()->m_pSwitchers && Collision()->m_pSwitchers[Collision()->GetDTileNumber(MapIndexT)].m_Status[Team()])?(Team() != TEAM_SUPER)? Collision()->GetDTileFlags(MapIndexT) : 0 : 0;
+
+	// stopper
+	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
+	{
+		if((int)Collision()->GetPos(MapIndexL).x)
+			if((int)Collision()->GetPos(MapIndexL).x < (int)m_Core.m_Pos.x)
+				m_Core.m_Pos = m_PrevPos;
+		m_Core.m_Vel.x = 0;
+	}
+	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)) && m_Core.m_Vel.x < 0)
+	{
+		if((int)Collision()->GetPos(MapIndexR).x)
+			if((int)Collision()->GetPos(MapIndexR).x > (int)m_Core.m_Pos.x)
+				m_Core.m_Pos = m_PrevPos;
+		m_Core.m_Vel.x = 0;
+	}
+	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)) && m_Core.m_Vel.y < 0)
+	{
+		if((int)Collision()->GetPos(MapIndexB).y)
+			if((int)Collision()->GetPos(MapIndexB).y > (int)m_Core.m_Pos.y)
+				m_Core.m_Pos = m_PrevPos;
+		m_Core.m_Vel.y = 0;
+	}
+	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)) && m_Core.m_Vel.y > 0)
+	{
+		if((int)Collision()->GetPos(MapIndexT).y)
+			if((int)Collision()->GetPos(MapIndexT).y < (int)m_Core.m_Pos.y)
+				m_Core.m_Pos = m_PrevPos;
+		m_Core.m_Vel.y = 0;
+		m_Core.m_Jumped = 0;
+		m_Core.m_JumpedTotal = 0;
+	}
+
+	if(!GameWorld()->m_WorldConfig.m_PredictTiles)
+		return;
+
 	if(Index < 0)
 	{
 		m_LastRefillJumps = false;
@@ -798,38 +836,6 @@ void CCharacter::HandleTiles(int Index)
 		m_LastRefillJumps = false;
 	}
 
-	// stopper
-	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_270) || (m_TileIndexL == TILE_STOP && m_TileFlagsL == ROTATION_270) || (m_TileIndexL == TILE_STOPS && (m_TileFlagsL == ROTATION_90 || m_TileFlagsL ==ROTATION_270)) || (m_TileIndexL == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_270) || (m_TileFIndexL == TILE_STOP && m_TileFFlagsL == ROTATION_270) || (m_TileFIndexL == TILE_STOPS && (m_TileFFlagsL == ROTATION_90 || m_TileFFlagsL == ROTATION_270)) || (m_TileFIndexL == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_270) || (m_TileSIndexL == TILE_STOP && m_TileSFlagsL == ROTATION_270) || (m_TileSIndexL == TILE_STOPS && (m_TileSFlagsL == ROTATION_90 || m_TileSFlagsL == ROTATION_270)) || (m_TileSIndexL == TILE_STOPA)) && m_Core.m_Vel.x > 0)
-	{
-		if((int)Collision()->GetPos(MapIndexL).x)
-			if((int)Collision()->GetPos(MapIndexL).x < (int)m_Core.m_Pos.x)
-				m_Core.m_Pos = m_PrevPos;
-		m_Core.m_Vel.x = 0;
-	}
-	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_90) || (m_TileIndexR == TILE_STOP && m_TileFlagsR == ROTATION_90) || (m_TileIndexR == TILE_STOPS && (m_TileFlagsR == ROTATION_90 || m_TileFlagsR == ROTATION_270)) || (m_TileIndexR == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_90) || (m_TileFIndexR == TILE_STOP && m_TileFFlagsR == ROTATION_90) || (m_TileFIndexR == TILE_STOPS && (m_TileFFlagsR == ROTATION_90 || m_TileFFlagsR == ROTATION_270)) || (m_TileFIndexR == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_90) || (m_TileSIndexR == TILE_STOP && m_TileSFlagsR == ROTATION_90) || (m_TileSIndexR == TILE_STOPS && (m_TileSFlagsR == ROTATION_90 || m_TileSFlagsR == ROTATION_270)) || (m_TileSIndexR == TILE_STOPA)) && m_Core.m_Vel.x < 0)
-	{
-		if((int)Collision()->GetPos(MapIndexR).x)
-			if((int)Collision()->GetPos(MapIndexR).x > (int)m_Core.m_Pos.x)
-				m_Core.m_Pos = m_PrevPos;
-		m_Core.m_Vel.x = 0;
-	}
-	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_180) || (m_TileIndexB == TILE_STOP && m_TileFlagsB == ROTATION_180) || (m_TileIndexB == TILE_STOPS && (m_TileFlagsB == ROTATION_0 || m_TileFlagsB == ROTATION_180)) || (m_TileIndexB == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_180) || (m_TileFIndexB == TILE_STOP && m_TileFFlagsB == ROTATION_180) || (m_TileFIndexB == TILE_STOPS && (m_TileFFlagsB == ROTATION_0 || m_TileFFlagsB == ROTATION_180)) || (m_TileFIndexB == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_180) || (m_TileSIndexB == TILE_STOP && m_TileSFlagsB == ROTATION_180) || (m_TileSIndexB == TILE_STOPS && (m_TileSFlagsB == ROTATION_0 || m_TileSFlagsB == ROTATION_180)) || (m_TileSIndexB == TILE_STOPA)) && m_Core.m_Vel.y < 0)
-	{
-		if((int)Collision()->GetPos(MapIndexB).y)
-			if((int)Collision()->GetPos(MapIndexB).y > (int)m_Core.m_Pos.y)
-				m_Core.m_Pos = m_PrevPos;
-		m_Core.m_Vel.y = 0;
-	}
-	if(((m_TileIndex == TILE_STOP && m_TileFlags == ROTATION_0) || (m_TileIndexT == TILE_STOP && m_TileFlagsT == ROTATION_0) || (m_TileIndexT == TILE_STOPS && (m_TileFlagsT == ROTATION_0 || m_TileFlagsT == ROTATION_180)) || (m_TileIndexT == TILE_STOPA) || (m_TileFIndex == TILE_STOP && m_TileFFlags == ROTATION_0) || (m_TileFIndexT == TILE_STOP && m_TileFFlagsT == ROTATION_0) || (m_TileFIndexT == TILE_STOPS && (m_TileFFlagsT == ROTATION_0 || m_TileFFlagsT == ROTATION_180)) || (m_TileFIndexT == TILE_STOPA) || (m_TileSIndex == TILE_STOP && m_TileSFlags == ROTATION_0) || (m_TileSIndexT == TILE_STOP && m_TileSFlagsT == ROTATION_0) || (m_TileSIndexT == TILE_STOPS && (m_TileSFlagsT == ROTATION_0 || m_TileSFlagsT == ROTATION_180)) || (m_TileSIndexT == TILE_STOPA)) && m_Core.m_Vel.y > 0)
-	{
-		if((int)Collision()->GetPos(MapIndexT).y)
-			if((int)Collision()->GetPos(MapIndexT).y < (int)m_Core.m_Pos.y)
-				m_Core.m_Pos = m_PrevPos;
-		m_Core.m_Vel.y = 0;
-		m_Core.m_Jumped = 0;
-		m_Core.m_JumpedTotal = 0;
-	}
-
 	// handle switch tiles
 	if(Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER)
 	{
@@ -881,8 +887,6 @@ void CCharacter::HandleTiles(int Index)
 
 void CCharacter::DDRaceTick()
 {
-	if(!GameWorld()->m_WorldConfig.m_PredictTiles || !GameWorld()->m_WorldConfig.m_PredictWeapons)
-		return;
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
 	if(m_FreezeTime > 0 || m_FreezeTime == -1)
 	{
@@ -890,9 +894,12 @@ void CCharacter::DDRaceTick()
 			m_FreezeTime--;
 		else
 			m_Ninja.m_ActivationTick = GameWorld()->GameTick();
-		m_Input.m_Direction = 0;
-		m_Input.m_Jump = 0;
-		m_Input.m_Hook = 0;
+		if(!m_CanMoveInFreeze)
+		{
+			m_Input.m_Direction = 0;
+			m_Input.m_Jump = 0;
+			m_Input.m_Hook = 0;
+		}
 		if (m_FreezeTime == 1)
 			UnFreeze();
 	}
@@ -900,7 +907,7 @@ void CCharacter::DDRaceTick()
 
 void CCharacter::DDRacePostCoreTick()
 {
-	if(!GameWorld()->m_WorldConfig.m_PredictTiles)
+	if(!GameWorld()->m_WorldConfig.m_PredictDDRace)
 		return;
 
 	if (m_EndlessHook)
@@ -1002,33 +1009,45 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
+	mem_zero(&m_Ninja, sizeof(m_Ninja));
+	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
+	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
+	m_ProximityRadius = ms_PhysSize;
+	m_Core.m_LeftWall = 1;
+	m_ReloadTimer = 0;
+	m_NumObjectsHit = 0;
+	m_LastRefillJumps = false;
+	m_LastJetpackStrength = 400.0;
+	m_Super = false;
+	m_CanMoveInFreeze = false;
+	m_Alive = true;
+
+	ResetPrediction();
+	Read(pChar, pExtended, false);
+
+	GameWorld()->InsertEntity(this);
+}
+
+void CCharacter::ResetPrediction()
+{
 	SetSolo(false);
 	m_EndlessHook = false;
 	m_Hit = HIT_ALL;
 	m_SuperJump = false;
 	m_Jetpack = false;
 	m_Core.m_Jumps = 2;
-	mem_zero(&m_Ninja, sizeof(m_Ninja));
-	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
-	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
-	m_ProximityRadius = ms_PhysSize;
-	m_Core.m_LeftWall = 1;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
 	m_FreezeTick = 0;
 	m_DeepFreeze = 0;
-	m_ReloadTimer = 0;
-	//GiveAllWeapons();
-	//GiveWeapon(WEAPON_HAMMER, -1);
-	m_NumObjectsHit = 0;
-	m_LastRefillJumps = false;
-	m_LastJetpackStrength = 400.0;
 	m_Super = false;
-	m_Alive = true;
-
-	Read(pChar, pExtended, false);
-
-	GameWorld()->InsertEntity(this);
+	for(int w = 0; w < NUM_WEAPONS; w++)
+		SetWeaponGot(w, false);
+	if(m_Core.m_HookedPlayer >= 0)
+	{
+		m_Core.m_HookedPlayer = -1;
+		m_Core.m_HookState = HOOK_IDLE;
+	}
 }
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
@@ -1037,6 +1056,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 	m_Core.Read((CNetObj_CharacterCore*) pChar);
 	m_Pos = m_Core.m_Pos;
+	m_AttackTick = pChar->m_AttackTick;
 
 	if(distance(PosBefore, m_Pos) > 2.f) // misprediction, don't use prevpos
 		m_PrevPos = m_Pos;
@@ -1143,7 +1163,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
 		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
 		if(m_Super)
-			TeamsCore()->Team(GetCID(), TEAM_SUPER);
+			TeamsCore()->Team(GetCID(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
 		m_EndlessHook = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
 		m_Core.m_Collision = !(pExtended->m_Flags & CHARACTERFLAG_NO_COLLISION);
 		m_Core.m_Hook = !(pExtended->m_Flags & CHARACTERFLAG_NO_HOOK);

@@ -829,6 +829,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, bool IsDummy)
 		{
 			m_CharOrder.GiveWeak(pMsg->m_Victim);
 			m_aLastWorldCharacters[pMsg->m_Victim].m_Alive = false;
+			if(CCharacter *pChar = m_GameWorld.GetCharacterByID(pMsg->m_Victim))
+				pChar->ResetPrediction();
 			m_GameWorld.ReleaseHooked(pMsg->m_Victim);
 		}
 	}
@@ -1429,6 +1431,10 @@ void CGameClient::OnPredict()
 					m_aClients[i].m_PrevPredicted = pChar->GetCore();
 		}
 
+		// optionally allow some movement in freeze by not predicting freeze the last one to two ticks
+		if(g_Config.m_ClPredictFreeze == 2 && Client()->PredGameTick() - 1 - Client()->PredGameTick()%2 <= Tick)
+			pLocalChar->m_CanMoveInFreeze = true;
+
 		// apply inputs and tick
 		CNetObj_PlayerInput *pInputData = (CNetObj_PlayerInput*) Client()->GetDirectInput(Tick);
 		if(pInputData)
@@ -1854,6 +1860,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_IsVanilla = IsVanilla(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_IsDDRace = IsDDRace(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_IsFNG = IsFNG(&CurrentServerInfo);
+	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
 	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameWorld.m_WorldConfig.m_IsDDRace && !IsBlockWorlds(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
@@ -1974,7 +1981,9 @@ void CGameClient::UpdateRenderedCharacters()
 		{
 			m_aClients[i].m_Predicted.Write(&m_aClients[i].m_RenderCur);
 			m_aClients[i].m_PrevPredicted.Write(&m_aClients[i].m_RenderPrev);
+
 			m_aClients[i].m_IsPredicted = true;
+
 			Pos = mix(
 					vec2(m_aClients[i].m_RenderPrev.m_X, m_aClients[i].m_RenderPrev.m_Y),
 					vec2(m_aClients[i].m_RenderCur.m_X, m_aClients[i].m_RenderCur.m_Y),
@@ -1986,13 +1995,19 @@ void CGameClient::UpdateRenderedCharacters()
 			{
 				// use unpredicted values for other players
 				m_aClients[i].m_RenderPrev.m_Angle = m_Snap.m_aCharacters[i].m_Prev.m_Angle;
-				m_aClients[i].m_RenderPrev.m_AttackTick = m_Snap.m_aCharacters[i].m_Prev.m_AttackTick;
 				m_aClients[i].m_RenderCur.m_Angle = m_Snap.m_aCharacters[i].m_Cur.m_Angle;
-				m_aClients[i].m_RenderCur.m_AttackTick = m_Snap.m_aCharacters[i].m_Cur.m_AttackTick;
 
 				if(g_Config.m_ClAntiPingSmooth)
 					Pos = GetSmoothPos(i);
 			}
+
+			if(AntiPingWeapons() && AntiPingGrenade() && m_aClients[i].m_IsPredictedLocal && (m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
+			{
+				m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
+				if(CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i))
+					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
+			}
+
 		}
 		m_Snap.m_aCharacters[i].m_Position = Pos;
 		m_aClients[i].m_RenderPos = Pos;
