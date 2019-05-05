@@ -280,6 +280,14 @@ void CGameWorld::Tick()
 	RemoveEntities();
 
 	UpdatePlayerMaps();
+
+	// find the characters' strong/weak id
+	int StrongWeakID = 0;
+	for(CCharacter *pChar = (CCharacter*) FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter*) pChar->TypeNext())
+	{
+		pChar->m_StrongWeakID = StrongWeakID;
+		StrongWeakID++;
+	}
 }
 
 // TODO: should be more general
