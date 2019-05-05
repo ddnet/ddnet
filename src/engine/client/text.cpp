@@ -1700,7 +1700,7 @@ public:
 
 	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int FontSize)
 	{
-		const char  pCurrent = (char *)pText;
+		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent + Length;
 		CFont *pFont = m_pDefaultFont;
 		FT_Bitmap *pBitmap;
@@ -1710,7 +1710,7 @@ public:
 		{
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
-			
+
 			if(NextCharacter)
 			{
 				unsigned int px, py;

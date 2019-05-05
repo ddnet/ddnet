@@ -464,7 +464,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 		return; // its useless to render text at this distance
 
 	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
-	float toCenterOffset = (1-Size)/2.f;
+	float ToCenterOffset = (1-Size)/2.f;
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -504,13 +504,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					char aBuf[16];
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					UI()->TextRender()->Text(0, mx*Scale, (my+0.5+toCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
+					UI()->TextRender()->Text(0, mx*Scale, (my+0.5+ToCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					if(MaxSpeed)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-						UI()->TextRender()->Text(0, mx*Scale, (my+toCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
+						UI()->TextRender()->Text(0, mx*Scale, (my+ToCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
 						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					}
 				}
@@ -536,7 +536,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 		return; // its useless to render text at this distance
 
 	float Size = g_Config.m_ClTextEntitiesSize/100.f;
-	float toCenterOffset = (1-Size)/2.f;
+	float ToCenterOffset = (1-Size)/2.f;
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -562,7 +562,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale, (my+toCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale, (my+ToCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 
@@ -572,7 +572,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx*Scale, (my+0.5f+toCenterOffset/2)* Scale, Size*Scale/2.f, aBuf, -1);
+				UI()->TextRender()->Text(0, mx*Scale, (my+0.5f+ToCenterOffset/2)* Scale, Size*Scale/2.f, aBuf, -1);
 				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
