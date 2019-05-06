@@ -1698,63 +1698,13 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int Size, int MaxWidth, int MaxSize = -1, int MinSize = -1)
+	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int FontSize)
 	{
+		const char *pCurrent = (char *)pText;
+		const char *pEnd = pCurrent + Length;
 		CFont *pFont = m_pDefaultFont;
 		FT_Bitmap *pBitmap;
-
-		if(!pFont)
-			return;
-
-		// set length
-		if(Length < 0)
-			Length = str_length(pText);
-
-		const char *pCurrent = (char *)pText;
-		const char *pEnd = pCurrent+Length;
-
 		int WidthLastChars = 0;
-
-		int FontSize = Size;
-
-		//adjust font size by the full space
-		if(Size == -1)
-		{
-			int WidthOfText = 0;
-			FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, 100);
-			while(pCurrent < pEnd)
-			{
-				const char *pTmp = pCurrent;
-				int NextCharacter = str_utf8_decode(&pTmp);
-
-				if(NextCharacter)
-				{
-					FT_Int32 FTFlags = 0;
-#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
-					FTFlags = FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP;
-#else
-					FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
-#endif
-					if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
-					{
-						dbg_msg("pFont", "error loading glyph %d", NextCharacter);
-						pCurrent = pTmp;
-						continue;
-					}
-
-					WidthOfText += (pFont->m_FtFace->glyph->metrics.width >> 6) + 1;
-				}
-				pCurrent = pTmp;
-			}
-
-			FontSize = 100.f / ((float)WidthOfText / (float)MaxWidth);
-			if(FontSize > MaxSize)
-				FontSize = MaxSize;
-
-			pCurrent = (char *)pText;
-			pEnd = pCurrent + Length;
-		}
-
 
 		while(pCurrent < pEnd)
 		{
@@ -1775,18 +1725,15 @@ public:
 				}
 
 				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
+				
+				int SlotW = pBitmap->width;
+				int SlotH = pBitmap->rows;
+				int SlotSize = SlotW*SlotH;
+				
+				// prepare glyph data
+				mem_zero(ms_aGlyphData, SlotSize);
 
-				int MaxSizeWidth = (MaxWidth - WidthLastChars);
-				if(MaxSizeWidth > 0)
-				{
-					int SlotW = ((((unsigned int)MaxSizeWidth) < pBitmap->width) ? MaxSizeWidth : pBitmap->width);
-					int SlotH = pBitmap->rows;
-					int SlotSize = SlotW*SlotH;
-
-					// prepare glyph data
-					mem_zero(ms_aGlyphData, SlotSize);
-
-					if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
+				if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
 					{
 						for(py = 0; py < (unsigned)SlotH; py++) // ignore_convention
 							for(px = 0; px < (unsigned)SlotW; px++)
@@ -1794,15 +1741,63 @@ public:
 								ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py*pBitmap->width + px]; // ignore_convention
 							}
 					}
-
-					Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
-					WidthLastChars += (SlotW + 1);
-				}
+				
+				Graphics()->LoadTextureRawSub(TextureID, x + WidthLastChars, y, SlotW, SlotH, CImageInfo::FORMAT_ALPHA, ms_aGlyphData);
+				WidthLastChars += (SlotW + 1);
+				
 			}
 			pCurrent = pTmp;
 		}
 	}
+	
+	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize = -1)
+	{
+		int WidthOfText = CalculateTextWidth(pText, TextLength, 0, 100);
 
+		int FontSize = 100.f / ((float)WidthOfText / (float)MaxSize);
+
+		if (MaxSize > 0 && FontSize > MaxSize)
+			FontSize = MaxSize;
+
+		return FontSize;
+	}
+
+	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight)
+	{
+		CFont *pFont = m_pDefaultFont;
+		const char *pCurrent = (char *)pText;
+		const char *pEnd = pCurrent + TextLength;
+
+		int WidthOfText = 0;
+		FT_Set_Pixel_Sizes(pFont->m_FtFace, FontWidth, FontHeight);
+		while (pCurrent < pEnd)
+		{
+			const char *pTmp = pCurrent;
+			int NextCharacter = str_utf8_decode(&pTmp);
+
+			if(NextCharacter)
+			{
+				FT_Int32 FTFlags = 0;
+#if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
+				FTFlags = FT_LOAD_BITMAP_METRICS_ONLY | FT_LOAD_NO_BITMAP;
+#else
+				FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
+#endif
+				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
+				{
+					dbg_msg("pFont", "error loading glyph %d", NextCharacter);
+					pCurrent = pTmp;
+					continue;
+				}
+
+				WidthOfText += (pFont->m_FtFace->glyph->metrics.width >> 6) + 1;
+			}
+			pCurrent = pTmp;
+		}
+
+		return WidthOfText;
+	}
+	
 	virtual void OnWindowResize()
 	{
 		bool FoundTextContainer = false;

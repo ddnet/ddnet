@@ -14,6 +14,7 @@ class CMapImages : public CComponent
 	char m_aEntitiesGameType[16];
 public:
 	CMapImages();
+	CMapImages(int ImageSize);
 
 	int Get(int Index) const { return m_aTextures[Index]; }
 	int Num() const { return m_Count; }
@@ -23,12 +24,14 @@ public:
 	void LoadBackground(class IMap *pMap);
 
 	// DDRace
-
 	int GetEntities();
 	
 	int GetOverlayBottom();
 	int GetOverlayTop();
 	int GetOverlayCenter();
+
+	void SetTextureScale(int Size);
+	int GetTextureScale();
 
 private:
 
@@ -36,6 +39,10 @@ private:
 	int m_OverlayBottomTexture;
 	int m_OverlayTopTexture;
 	int m_OverlayCenterTexture;
+	int m_TextureScale;
+	
+	void InitOverlayTextures();
+	int UploadEntityLayerText(int TextureSize, int YOffset);
 };
 
 #endif

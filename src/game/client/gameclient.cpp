@@ -266,6 +266,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
 
 	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
+	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 
 	//
 	m_SuppressEvents = false;
@@ -350,6 +351,8 @@ void CGameClient::OnInit()
 	m_GameWorld.m_GameTickSpeed = SERVER_TICK_SPEED;
 	m_GameWorld.m_pCollision = Collision();
 	m_GameWorld.m_pTeams = &m_TeamsPredicted;
+
+	m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
 }
 
 void CGameClient::OnUpdate()
@@ -1791,6 +1794,17 @@ void CGameClient::ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserDa
 	if(pResult->NumArguments())
 		if(g_Config.m_ClDummy && !((CGameClient*)pUserData)->Client()->DummyConnected())
 			g_Config.m_ClDummy = 0;
+}
+
+void CGameClient::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+	if(pResult->NumArguments())
+	{
+		CGameClient *pGameClient = (CGameClient*)pUserData;
+		pGameClient->m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
+	}
 }
 
 IGameClient *CreateGameClient()
