@@ -7,7 +7,7 @@
 
 TEST(Color, HRHConv)
 {
-    for(int i = 0; i < 0xFFFFFF; i++){
+    for(int i = 0; i < 0xFFFFFF; i+= 0xFF){
         ColorHSLA hsl = i;
         ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
         ColorHSLA hsl2 = color_cast<ColorHSLA>(rgb);
