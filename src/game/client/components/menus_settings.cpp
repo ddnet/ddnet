@@ -592,8 +592,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		char aBuf[128];
 		if(Item.m_Visible)
 		{
+			CTeeRenderInfo Info = OwnSkinInfo;
+			Info.m_Texture = *UseCustomColor ? s->m_ColorTexture : s->m_OrgTexture;
+
 			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x+30, Item.m_Rect.y+Item.m_Rect.h/2));
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x+30, Item.m_Rect.y+Item.m_Rect.h/2));
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
