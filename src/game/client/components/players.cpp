@@ -173,7 +173,7 @@ void CPlayers::RenderHook(
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		RenderHand(&RenderInfo, Position, normalize(HookPos-Pos), -pi/2, vec2(20, 0), g_Config.m_ClShowOthersAlpha / 100.0f);
+		RenderHand(&RenderInfo, Position, normalize(HookPos-Pos), -pi/2, vec2(20, 0), OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f);
 	}
 }
 
@@ -209,6 +209,8 @@ void CPlayers::RenderPlayer(
 		OtherTeam = true;
 	else
 		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+
+	float Alpha = OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
@@ -305,10 +307,6 @@ void CPlayers::RenderPlayer(
 		Client()->GetServerInfo(&Info);
 		if(ClientID >= 0 && (((IsDDRace(&Info) || IsDDNet(&Info)) && g_Config.m_ClShowHookCollAlways) || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && g_Config.m_ClShowHookCollOther) || (Local && g_Config.m_ClShowHookCollOwn)))))
 		{
-			float Alpha = 1.0f;
-			if(OtherTeam)
-				Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
-
 			vec2 ExDirection = Direction;
 
 			if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -383,8 +381,7 @@ void CPlayers::RenderPlayer(
 		int iw = clamp(Player.m_Weapon, 0, NUM_WEAPONS-1);
 		int QuadOffset = iw * 2 + (Direction.x < 0 ? 1 : 0);
 
-		if(OtherTeam)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
 		vec2 Dir = Direction;
 		float Recoil = 0.0f;
@@ -525,9 +522,9 @@ void CPlayers::RenderPlayer(
 
 		switch (Player.m_Weapon)
 		{
-			case WEAPON_GUN: RenderHand(&RenderInfo, p, Direction, -3*pi/4, vec2(-15, 4), g_Config.m_ClShowOthersAlpha / 100.0f); break;
-			case WEAPON_SHOTGUN: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-5, 4), g_Config.m_ClShowOthersAlpha / 100.0f); break;
-			case WEAPON_GRENADE: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-4, 7), g_Config.m_ClShowOthersAlpha / 100.0f); break;
+			case WEAPON_GUN: RenderHand(&RenderInfo, p, Direction, -3*pi/4, vec2(-15, 4), Alpha); break;
+			case WEAPON_SHOTGUN: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-5, 4), Alpha); break;
+			case WEAPON_GRENADE: RenderHand(&RenderInfo, p, Direction, -pi/2, vec2(-4, 7), Alpha); break;
 		}
 
 	}
@@ -548,30 +545,24 @@ void CPlayers::RenderPlayer(
 
 	RenderInfo.m_Size = 64.0f; // force some settings
 
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->QuadsSetRotation(0);
 	if(g_Config.m_ClShowDirection && ClientID >= 0 && (!Local || DemoPlayer()->IsPlaying()))
 	{
 		if(Player.m_Direction == -1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			if(OtherTeam)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			Graphics()->QuadsSetRotation(pi);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - 30.f, Position.y - 70.f);
 		}
 		else if(Player.m_Direction == 1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			if(OtherTeam)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x + 30.f, Position.y - 70.f);
 		}
 		if(Player.m_Jumped&1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			if(OtherTeam)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 			Graphics()->QuadsSetRotation(pi * 3 / 2);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x, Position.y - 70.f);
 		}
@@ -589,8 +580,7 @@ void CPlayers::RenderPlayer(
 	{
 		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
 		int QuadOffset = QuadOffsetToEmoticon + (SPRITE_DOTDOT - SPRITE_OOP);
-		if(OtherTeam)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -624,9 +614,7 @@ void CPlayers::RenderPlayer(
 
 		Graphics()->QuadsSetRotation(pi/6*WiggleAngle);
 
-		Graphics()->SetColor(1.0f,1.0f,1.0f,a);
-		if(OtherTeam)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, a * (float)g_Config.m_ClShowOthersAlpha / 100.0f);
+		Graphics()->SetColor(1.0f,1.0f,1.0f,a * Alpha);
 		// client_datas::emoticon is an offset from the first emoticon
 		int QuadOffset = QuadOffsetToEmoticon + m_pClient->m_aClients[ClientID].m_Emoticon;
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x, Position.y - 23.f - 32.f * h, 1.f, (64.f*h) / 64.f);
