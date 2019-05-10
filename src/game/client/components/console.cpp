@@ -588,7 +588,7 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightCol));
+		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
 
 		//	render log (actual page, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
