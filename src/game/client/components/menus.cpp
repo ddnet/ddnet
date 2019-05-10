@@ -2,8 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/tl/array.h>
-#include <sstream>
-#include <string>
 
 #include <math.h>
 
@@ -901,19 +899,21 @@ void CMenus::RenderNews(CUIRect MainView)
 
 	CUIRect Label;
 
-	std::istringstream f(Client()->m_aNews);
-	std::string line;
-	while(std::getline(f, line))
+	const char *pStr = Client()->m_aNews;
+	char aLine[256];
+	while((pStr = str_next_token(pStr, "\n", aLine, sizeof(aLine))))
 	{
-		if(line.size() > 0 && line.at(0) == '|' && line.at(line.size()-1) == '|')
+		const int Len = str_length(aLine);
+		if(Len > 0 && aLine[0] == '|' && aLine[Len-1] == '|')
 		{
 			MainView.HSplitTop(30.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, Localize(line.substr(1, line.size()-2).c_str()), 20.0f, -1);
+			aLine[Len-1] = '\0';
+			UI()->DoLabelScaled(&Label, aLine + 1, 20.0f, -1);
 		}
 		else
 		{
 			MainView.HSplitTop(20.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, line.c_str(), 15.f, -1, MainView.w-30.0f);
+			UI()->DoLabelScaled(&Label, aLine, 15.f, -1, MainView.w-30.0f);
 		}
 	}
 }
