@@ -1523,7 +1523,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			ColorHSLA SMColor(g_Config.m_ClMessageSystemCol);
+			static ColorHSLA SMColor;
+			SMColor = g_Config.m_ClMessageSystemCol;
 
 			Left.HSplitTop(20.0f, &Button, &Left);
 			Button.VSplitLeft(15.0f, 0, &Button);
@@ -1580,7 +1581,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			ColorHSLA HMColor(g_Config.m_ClMessageHighlightCol);
+			static ColorHSLA HMColor;
+			HMColor = g_Config.m_ClMessageHighlightCol;
 
 			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.VSplitLeft(15.0f, 0, &Button);
@@ -1640,7 +1642,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			ColorHSLA TMColor(g_Config.m_ClMessageTeamCol);
+			static ColorHSLA TMColor;
+			TMColor = g_Config.m_ClMessageTeamCol;
 
 			Left.HSplitTop(20.0f, &Button, &Left);
 			Button.VSplitLeft(15.0f, 0, &Button);
@@ -1699,7 +1702,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				g_Config.m_ClMessageFriend ^= 1;
 			}
 
-			ColorHSLA FMColor(g_Config.m_ClMessageFriendCol);
+			static ColorHSLA FMColor;
+			FMColor = g_Config.m_ClMessageFriendCol;
 
 			Right.HSplitTop(20.0f, &Button, &Right);
 			Button.VSplitLeft(15.0f, 0, &Button);
@@ -1758,7 +1762,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 				}
 			}
 
-			ColorHSLA MColor(g_Config.m_ClMessageCol);
+			static ColorHSLA MColor;
+			MColor = g_Config.m_ClMessageCol;
 
 			Left.HSplitTop(20.0f, &Button, &Left);
 			Button.VSplitLeft(15.0f, 0, &Button);
