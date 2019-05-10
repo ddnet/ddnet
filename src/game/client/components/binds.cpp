@@ -136,11 +136,10 @@ bool CBinds::OnInput(IInput::CEvent e)
 	if(Mask == ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)))
 		return true;
 
-
 	bool ret = false;
-	for(int Mod = 0; Mod < MODIFIER_COUNT; Mod++)
+	for(int Mod = 1; Mod < MODIFIER_COUNT; Mod++)
 	{
-		if(m_aapKeyBindings[Mod][e.m_Key] && (((Mask&(1 << Mod)) || (Mod == 0 && m_aapKeyBindings[0][e.m_Key][0] == '+'))))	// always trigger +xxx binds despite any modifier
+		if(m_aapKeyBindings[Mod][e.m_Key] && Mask & (1 << Mod))	// always trigger +xxx binds despite any modifier
 		{
 			if(e.m_Flags&IInput::FLAG_PRESS)
 				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mod][e.m_Key]);
@@ -149,6 +148,16 @@ bool CBinds::OnInput(IInput::CEvent e)
 			ret = true;
 		}
 	}
+
+	if(m_aapKeyBindings[0][e.m_Key] && (!ret || m_aapKeyBindings[0][e.m_Key][0] == '+'))
+	{
+		if(e.m_Flags&IInput::FLAG_PRESS)
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
+		if(e.m_Flags&IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
+		ret = true;
+	}
+
 	return ret;
 }
 
