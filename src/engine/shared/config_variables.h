@@ -247,8 +247,9 @@ MACRO_CONFIG_INT(SvRejoinTeam0, sv_rejoin_team_0, 1, 0, 1, CFGFLAG_SERVER, "Make
 MACRO_CONFIG_INT(ClReconnectTimeout, cl_reconnect_timeout, 120, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (after timeout, 0 for off)")
 MACRO_CONFIG_INT(ClReconnectFull, cl_reconnect_full, 5, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (when server is full, 0 for off)")
 
+
 MACRO_CONFIG_COL(ClMessageSystemColor, cl_message_system_color, 2817983, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color")
-MACRO_CONFIG_COL(ClMessageClientColor, cl_message_client_color, 65472, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color")
+MACRO_CONFIG_COL(ClMessageClientColor, cl_message_client_color, 9633471, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color")
 MACRO_CONFIG_COL(ClMessageHighlightColor, cl_message_highlight_color, 65471, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color")
 MACRO_CONFIG_COL(ClMessageTeamColor, cl_message_team_color, 5636050, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color")
 MACRO_CONFIG_COL(ClMessageColor, cl_message_color, 255, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color")
