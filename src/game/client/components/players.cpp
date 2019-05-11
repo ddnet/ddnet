@@ -196,11 +196,6 @@ void CPlayers::RenderPlayer(
 
 	bool OtherTeam;
 
-	int AttackTime = Client()->GameTick() - Player.m_AttackTick;
-	if(m_pClient->AntiPingWeapons() && m_pClient->AntiPingGrenade() && ClientID >= 0 && m_pClient->m_aClients[ClientID].m_IsPredicted)
-		AttackTime = Client()->PredGameTick() - Player.m_AttackTick;
-	int AttackTimePrev = AttackTime - Client()->GameTick() + Client()->PrevGameTick();
-
 	if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW) || ClientID < 0)
 		OtherTeam = false;
 	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
@@ -218,6 +213,23 @@ void CPlayers::RenderPlayer(
 	float IntraTick = Intra;
 	if(ClientID >= 0)
 		IntraTick = m_pClient->m_aClients[ClientID].m_IsPredicted ? Client()->PredIntraGameTick() : Client()->IntraGameTick();
+
+	static float s_LastGameTickTime = Client()->GameTickTime();
+	static float s_LastPredIntraTick = Client()->PredIntraGameTick();
+	if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
+	{
+		s_LastGameTickTime = Client()->GameTickTime();
+		s_LastPredIntraTick = Client()->PredIntraGameTick();
+	}
+
+	float AttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime();
+	float LastAttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
+	if(Local && m_pClient->m_aClients[ClientID].m_IsPredicted && m_pClient->AntiPingWeapons() && m_pClient->AntiPingGrenade())
+	{
+		AttackTime = (Client()->PredIntraGameTick() + (Client()->PredGameTick() - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
+		LastAttackTime = (s_LastPredIntraTick + (Client()->PredGameTick() - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
+	}
+	float AttackTicksPassed = AttackTime*SERVER_TICK_SPEED;
 
 	float Angle;
 	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -270,19 +282,10 @@ void CPlayers::RenderPlayer(
 	else if(!WantOtherDir)
 		State.Add(&g_pData->m_aAnimations[ANIM_WALK], WalkTime, 1.0f);
 
-	static float s_LastGameTickTime = Client()->GameTickTime();
-	if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
-		s_LastGameTickTime = Client()->GameTickTime();
 	if(Player.m_Weapon == WEAPON_HAMMER)
-	{
-		float ct = AttackTimePrev/(float)SERVER_TICK_SPEED + s_LastGameTickTime;
-		State.Add(&g_pData->m_aAnimations[ANIM_HAMMER_SWING], clamp(ct*5.0f,0.0f,1.0f), 1.0f);
-	}
+		State.Add(&g_pData->m_aAnimations[ANIM_HAMMER_SWING], clamp(LastAttackTime*5.0f,0.0f,1.0f), 1.0f);
 	if(Player.m_Weapon == WEAPON_NINJA)
-	{
-		float ct = AttackTimePrev/(float)SERVER_TICK_SPEED + s_LastGameTickTime;
-		State.Add(&g_pData->m_aAnimations[ANIM_NINJA_SWING], clamp(ct*2.0f,0.0f,1.0f), 1.0f);
-	}
+		State.Add(&g_pData->m_aAnimations[ANIM_NINJA_SWING], clamp(LastAttackTime*2.0f,0.0f,1.0f), 1.0f);
 
 	// do skidding
 	if(!InAir && WantOtherDir && length(Vel*50) > 500.0f)
@@ -422,7 +425,7 @@ void CPlayers::RenderPlayer(
 			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, p.x, p.y);
 
 			// HADOKEN
-			if(AttackTime <= (SERVER_TICK_SPEED / 6) && g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)
+			if(AttackTime <= 1/6.f && g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)
 			{
 				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
 				static int s_LastIteX = IteX;
@@ -460,11 +463,7 @@ void CPlayers::RenderPlayer(
 		{
 			// TODO: should be an animation
 			Recoil = 0;
-			static float s_LastIntraTick = IntraTick;
-			if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
-				s_LastIntraTick = IntraTick;
-
-			float a = (AttackTime+s_LastIntraTick)/5.0f;
+			float a = AttackTicksPassed/5.0f;
 			if(a < 1)
 				Recoil = sinf(a*pi);
 			p = Position + Dir * g_pData->m_Weapons.m_aId[iw].m_Offsetx - Dir*Recoil*10.0f;
@@ -480,10 +479,9 @@ void CPlayers::RenderPlayer(
 			if(g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)//prev.attackticks)
 			{
 				float Alpha = 0.0f;
-				int Phase1Tick = AttackTime;
-				if(Phase1Tick < (g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3))
+				if(AttackTicksPassed < g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3)
 				{
-					float t = (((float)Phase1Tick) + IntraTick)/g_pData->m_Weapons.m_aId[iw].m_Muzzleduration;
+					float t = AttackTicksPassed/g_pData->m_Weapons.m_aId[iw].m_Muzzleduration;
 					Alpha = mix(2.0f, 0.0f, minimum(1.0f,maximum(0.0f,t)));
 				}
 
