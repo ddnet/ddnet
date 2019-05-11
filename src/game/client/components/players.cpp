@@ -222,10 +222,12 @@ void CPlayers::RenderPlayer(
 		s_LastPredIntraTick = Client()->PredIntraGameTick();
 	}
 
+	bool PredictLocalWeapons = false;
 	float AttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime();
 	float LastAttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
 	if(Local && m_pClient->m_aClients[ClientID].m_IsPredicted && m_pClient->AntiPingWeapons() && m_pClient->AntiPingGrenade())
 	{
+		PredictLocalWeapons = true;
 		AttackTime = (Client()->PredIntraGameTick() + (Client()->PredGameTick() - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
 		LastAttackTime = (s_LastPredIntraTick + (Client()->PredGameTick() - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;
 	}
@@ -446,7 +448,11 @@ void CPlayers::RenderPlayer(
 				}
 				if(g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
-					vec2 Dir = vec2(pPlayerChar->m_X,pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
+					vec2 Dir;
+					if(PredictLocalWeapons)
+						Dir = vec2(pPlayerChar->m_X,pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
+					else
+						Dir = vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Y) - vec2(m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev.m_Y);
 					Dir = normalize(Dir);
 					float HadOkenAngle = GetAngle(Dir);
 					Graphics()->QuadsSetRotation(HadOkenAngle);
