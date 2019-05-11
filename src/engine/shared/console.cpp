@@ -772,7 +772,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 		ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
-		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d", round_truncate(rgb.r * 255), round_truncate(rgb.g * 255), round_truncate(rgb.b * 255));
+		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d, #%06X", round_truncate(rgb.r * 255), round_truncate(rgb.g * 255), round_truncate(rgb.b * 255), rgb.Pack() & 0xFFFFFF);
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 		if(pData->m_Alpha)
