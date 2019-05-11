@@ -765,7 +765,7 @@ void CChat::OnPrepareLines()
 		m_aLines[r].m_TextContainerIndex = -1;
 
 		char aName[64] = "";
-		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID != -1 && m_aLines[r].m_aName[0] != '\0')
+		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
 			if(m_aLines[r].m_ClientID >= 10)
 				str_format(aName, sizeof(aName), "%d: ", m_aLines[r].m_ClientID);
