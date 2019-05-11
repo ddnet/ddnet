@@ -1621,7 +1621,7 @@ void CGameClient::CClientData::UpdateRenderInfo()
 	if(g_GameClient.m_Snap.m_pGameInfoObj && g_GameClient.m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 	{
 		m_RenderInfo.m_Texture = g_GameClient.m_pSkins->Get(m_SkinID)->m_ColorTexture;
-		const int TeamColors[2] = {65387, 10223467};
+		const int TeamColors[2] = {65461, 10223541};
 		if(m_Team >= TEAM_RED && m_Team <= TEAM_BLUE)
 		{
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(TeamColors[m_Team]));
@@ -1629,8 +1629,8 @@ void CGameClient::CClientData::UpdateRenderInfo()
 		}
 		else
 		{
-			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12895054));
-			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12895054));
+			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12829350));
+			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12829350));
 		}
 	}
 }
