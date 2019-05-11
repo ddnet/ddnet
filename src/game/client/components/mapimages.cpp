@@ -182,6 +182,13 @@ int CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 	int Len = str_format(aBuf, 4, "%d", 255);
 
 	int FontSize = TextRender()->AdjustFontSize(aBuf, Len, TextureSize);
+
+	if (FontSize < 1)
+	{
+		dbg_msg("pFont", "texture with id '%d' will not be loaded. Reason - font is too small", TextureID);
+		return TextureID;
+	}
+
 	YOffset += ((TextureSize - FontSize)/2);
 
 	for(int i = 0; i < 256; ++i)
