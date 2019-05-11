@@ -295,6 +295,9 @@ CEntity *CGameWorld::GetEntity(int ID, int EntType)
 
 void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
 {
+	if(Owner < 0 && m_WorldConfig.m_IsSolo && !(Weapon == WEAPON_SHOTGUN && m_WorldConfig.m_IsDDRace))
+		return;
+
 	// deal damage
 	CCharacter *apEnts[MAX_CLIENTS] = {0};
 	float Radius = 135.0f;
@@ -375,17 +378,42 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 				return;
 			}
 		}
-		for(CProjectile *pProj = (CProjectile*) FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile*) pProj->TypeNext())
+		if(!UseExtraInfo((CNetObj_Projectile*)pObjData))
 		{
-			if(pProj->m_ID == -1 && NetProj.GetOwner() < 0 && NetProj.Match(pProj))
+			// try to match the newly received (unrecognized) projectile with a locally fired one
+			for(CProjectile *pProj = (CProjectile*) FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile*) pProj->TypeNext())
 			{
-				pProj->m_ID = ObjID;
-				pProj->Keep();
-				return;
+				if(pProj->m_ID == -1 && NetProj.Match(pProj))
+				{
+					pProj->m_ID = ObjID;
+					pProj->Keep();
+					return;
+				}
+			}
+			// otherwise try to determine its owner by checking if there is only one player nearby
+			if(NetProj.m_StartTick >= GameTick()-4)
+			{
+				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction)*28.0*0.75;
+				const bool Prev = (GameTick()-NetProj.m_StartTick) > 1;
+				float First = 200.0, Second = 200.0;
+				CCharacter *pClosest = 0;
+				for(CCharacter *pChar = (CCharacter*) FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *) pChar->TypeNext())
+				{
+					float Dist = distance(Prev ? pChar->m_PrevPrevPos : pChar->m_PrevPos, NetPos);
+					if(Dist < First)
+					{
+						pClosest = pChar;
+						First = Dist;
+					}
+					else if(Dist < Second)
+						Second = Dist;
+				}
+				if(pClosest && maximum(First, 2.f)*1.2f < Second)
+					NetProj.m_Owner = pClosest->m_ID;
 			}
 		}
-		CEntity *pEnt = new CProjectile(NetProj);
-		InsertEntity(pEnt);
+		CProjectile *pProj = new CProjectile(NetProj);
+		InsertEntity((CEntity*)pProj);
 	}
 	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
 	{

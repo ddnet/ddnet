@@ -72,6 +72,7 @@ public:
 		int m_PredictFreeze;
 		bool m_PredictWeapons;
 		bool m_PredictDDRace;
+		bool m_IsSolo;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;

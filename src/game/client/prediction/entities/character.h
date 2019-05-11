@@ -88,6 +88,7 @@ public:
 	};
 	int m_Hit;
 	vec2 m_PrevPos;
+	vec2 m_PrevPrevPos;
 
 	int m_TileIndex;
 	int m_TileFlags;
