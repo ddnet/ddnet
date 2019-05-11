@@ -1700,6 +1700,12 @@ public:
 
 	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int FontSize)
 	{
+		if (FontSize < 1)
+		{
+			dbg_msg("pFont", "texture with id '%d' will not be updated. Reason - font is too small", TextureID);
+			return;
+		}
+
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent + Length;
 		CFont *pFont = m_pDefaultFont;
@@ -1715,7 +1721,7 @@ public:
 			{
 				unsigned int px, py;
 
-				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize-1);
+				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
 
 				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER|FT_LOAD_NO_BITMAP))
 				{
