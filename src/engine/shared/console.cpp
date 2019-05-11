@@ -777,7 +777,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 		if(pData->m_Alpha)
 		{
-			str_format(aBuf, sizeof(aBuf), "Alpha: %d%%", round_truncate(hsl.a * 100));
+			str_format(aBuf, sizeof(aBuf), "A: %d%%", round_truncate(hsl.a * 100));
 			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 	}
