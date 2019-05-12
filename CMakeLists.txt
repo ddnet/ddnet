@@ -84,6 +84,8 @@ option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
+set(OpenGL_GL_PREFERENCE LEGACY)
+
 # Set the default build type to Release
 if(NOT(CMAKE_BUILD_TYPE))
   if(NOT(DEV))
@@ -294,7 +296,7 @@ endif()
 find_package(ZLIB)
 find_package(Crypto)
 find_package(Curl)
-find_package(Freetype)
+find_package(OwnFreetype)
 if(DOWNLOAD_GTEST)
   find_package(Git)
 endif()
