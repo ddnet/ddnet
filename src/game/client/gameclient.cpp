@@ -1986,6 +1986,7 @@ void CGameClient::UpdateRenderedCharacters()
 		m_aClients[i].m_RenderCur = m_Snap.m_aCharacters[i].m_Cur;
 		m_aClients[i].m_RenderPrev = m_Snap.m_aCharacters[i].m_Prev;
 		m_aClients[i].m_IsPredicted = false;
+		m_aClients[i].m_IsPredictedLocal = false;
 		vec2 UnpredPos = mix(
 				vec2(m_Snap.m_aCharacters[i].m_Prev.m_X, m_Snap.m_aCharacters[i].m_Prev.m_Y),
 				vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y),
@@ -2005,7 +2006,16 @@ void CGameClient::UpdateRenderedCharacters()
 					m_aClients[i].m_IsPredicted ? Client()->PredIntraGameTick() : Client()->IntraGameTick());
 
 			if(i == m_Snap.m_LocalClientID)
+			{
 				m_aClients[i].m_IsPredictedLocal = true;
+				CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i);
+				if(pChar && AntiPingWeapons() && AntiPingGrenade() && ((pChar->m_NinjaJetpack && pChar->m_FreezeTime == 0) || m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
+				{
+					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
+					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && !(pChar->m_NinjaJetpack && pChar->Core()->m_ActiveWeapon == WEAPON_GUN))
+						m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
+				}
+			}
 			else
 			{
 				// use unpredicted values for other players
@@ -2014,13 +2024,6 @@ void CGameClient::UpdateRenderedCharacters()
 
 				if(g_Config.m_ClAntiPingSmooth)
 					Pos = GetSmoothPos(i);
-			}
-
-			if(AntiPingWeapons() && AntiPingGrenade() && m_aClients[i].m_IsPredictedLocal && (m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
-			{
-				m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
-				if(CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i))
-					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
 			}
 
 		}

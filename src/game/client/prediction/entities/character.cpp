@@ -1035,6 +1035,7 @@ void CCharacter::ResetPrediction()
 	m_Hit = HIT_ALL;
 	m_SuperJump = false;
 	m_Jetpack = false;
+	m_NinjaJetpack = false;
 	m_Core.m_Jumps = 2;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
@@ -1108,6 +1109,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	{
 		m_LastJetpackStrength = Tuning()->m_JetpackStrength;
 		m_Jetpack = true;
+		m_aWeapons[WEAPON_GUN].m_Got = true;
+		m_aWeapons[WEAPON_GUN].m_Ammo = -1;
+		m_NinjaJetpack = pChar->m_Weapon == WEAPON_NINJA;
 	}
 	else if(pChar->m_Weapon != WEAPON_NINJA)
 		m_Jetpack = false;
