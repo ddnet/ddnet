@@ -9,6 +9,7 @@ class CPlayers : public CComponent
 	friend class CGhost;
 
 	CTeeRenderInfo m_aRenderInfo[MAX_CLIENTS];
+	bool IsOtherTeam(int ClientID);
 	void RenderHand(class CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha = 1.0f);
 	void RenderPlayer(
 		const CNetObj_Character *pPrevChar,
