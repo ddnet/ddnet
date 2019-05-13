@@ -555,6 +555,7 @@ void CCharacter::Tick()
 	// Previnput
 	m_PrevInput = m_Input;
 
+	m_PrevPrevPos = m_PrevPos;
 	m_PrevPos = m_Core.m_Pos;
 	return;
 }
@@ -1004,8 +1005,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
-	m_Pos = vec2(pChar->m_X, pChar->m_Y);
-	m_PrevPos = m_Pos;
+	m_PrevPrevPos = m_PrevPos = m_Pos = vec2(pChar->m_X, pChar->m_Y);
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
@@ -1035,6 +1035,7 @@ void CCharacter::ResetPrediction()
 	m_Hit = HIT_ALL;
 	m_SuperJump = false;
 	m_Jetpack = false;
+	m_NinjaJetpack = false;
 	m_Core.m_Jumps = 2;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
@@ -1108,6 +1109,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	{
 		m_LastJetpackStrength = Tuning()->m_JetpackStrength;
 		m_Jetpack = true;
+		m_aWeapons[WEAPON_GUN].m_Got = true;
+		m_aWeapons[WEAPON_GUN].m_Ammo = -1;
+		m_NinjaJetpack = pChar->m_Weapon == WEAPON_NINJA;
 	}
 	else if(pChar->m_Weapon != WEAPON_NINJA)
 		m_Jetpack = false;

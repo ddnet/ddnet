@@ -1871,16 +1871,18 @@ void CGameClient::UpdatePrediction()
 	CServerInfo CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
 
-	m_GameWorld.m_WorldConfig.m_IsVanilla = IsVanilla(&CurrentServerInfo);
+	m_GameWorld.m_WorldConfig.m_IsVanilla = IsVanilla(&CurrentServerInfo) || IsFastCap(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_IsDDRace = IsDDRace(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_IsFNG = IsFNG(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
 	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameWorld.m_WorldConfig.m_IsDDRace && !IsBlockWorlds(&CurrentServerInfo);
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
-	m_GameWorld.m_Core.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
 	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
 		m_GameWorld.m_WorldConfig.m_InfiniteAmmo = false;
+	m_GameWorld.m_WorldConfig.m_IsSolo = !m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData && !m_Tuning[g_Config.m_ClDummy].m_PlayerCollision && !m_Tuning[g_Config.m_ClDummy].m_PlayerHooking;
+
+	m_GameWorld.m_Core.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
 
 	// restore characters from previously saved ones if they temporarily left the snapshot
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1949,13 +1951,6 @@ void CGameClient::UpdatePrediction()
 	// update the local gameworld with the new snapshot
 	m_GameWorld.NetObjBegin();
 	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
-	for(int Index = 0; Index < Num; Index++)
-	{
-		IClient::CSnapItem Item;
-		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
-		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData);
-	}
-
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
@@ -1965,6 +1960,12 @@ void CGameClient::UpdatePrediction()
 					m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : 0,
 					GameTeam, IsLocal);
 		}
+	for(int Index = 0; Index < Num; Index++)
+	{
+		IClient::CSnapItem Item;
+		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
+		m_GameWorld.NetObjAdd(Item.m_ID, Item.m_Type, pData);
+	}
 	m_GameWorld.NetObjEnd(m_Snap.m_LocalClientID);
 
 	// save the characters that are currently active
@@ -1985,6 +1986,7 @@ void CGameClient::UpdateRenderedCharacters()
 		m_aClients[i].m_RenderCur = m_Snap.m_aCharacters[i].m_Cur;
 		m_aClients[i].m_RenderPrev = m_Snap.m_aCharacters[i].m_Prev;
 		m_aClients[i].m_IsPredicted = false;
+		m_aClients[i].m_IsPredictedLocal = false;
 		vec2 UnpredPos = mix(
 				vec2(m_Snap.m_aCharacters[i].m_Prev.m_X, m_Snap.m_aCharacters[i].m_Prev.m_Y),
 				vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y),
@@ -2004,7 +2006,16 @@ void CGameClient::UpdateRenderedCharacters()
 					m_aClients[i].m_IsPredicted ? Client()->PredIntraGameTick() : Client()->IntraGameTick());
 
 			if(i == m_Snap.m_LocalClientID)
+			{
 				m_aClients[i].m_IsPredictedLocal = true;
+				CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i);
+				if(pChar && AntiPingWeapons() && AntiPingGrenade() && ((pChar->m_NinjaJetpack && pChar->m_FreezeTime == 0) || m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
+				{
+					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
+					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && !(pChar->m_NinjaJetpack && pChar->Core()->m_ActiveWeapon == WEAPON_GUN))
+						m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
+				}
+			}
 			else
 			{
 				// use unpredicted values for other players
@@ -2013,13 +2024,6 @@ void CGameClient::UpdateRenderedCharacters()
 
 				if(g_Config.m_ClAntiPingSmooth)
 					Pos = GetSmoothPos(i);
-			}
-
-			if(AntiPingWeapons() && AntiPingGrenade() && m_aClients[i].m_IsPredictedLocal && (m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
-			{
-				m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
-				if(CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i))
-					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
 			}
 
 		}

@@ -74,6 +74,7 @@ public:
 	bool m_Super;
 	bool m_SuperJump;
 	bool m_Jetpack;
+	bool m_NinjaJetpack;
 	int m_FreezeTime;
 	int m_FreezeTick;
 	bool m_DeepFreeze;
@@ -88,6 +89,7 @@ public:
 	};
 	int m_Hit;
 	vec2 m_PrevPos;
+	vec2 m_PrevPrevPos;
 
 	int m_TileIndex;
 	int m_TileFlags;

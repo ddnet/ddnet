@@ -53,7 +53,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 		s_LastGameTickTime = Client()->GameTickTime();
 
 	float Ct;
-	if(m_pClient->AntiPingGrenade() && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if(m_pClient->Predict() && m_pClient->AntiPingGrenade() && LocalPlayerInGame && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 		Ct = ((float)(Client()->PredGameTick() - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED;
 	else
 		Ct = (Client()->PrevGameTick() - pCurrent->m_StartTick)/(float)SERVER_TICK_SPEED + s_LastGameTickTime;
