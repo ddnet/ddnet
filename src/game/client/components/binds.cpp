@@ -134,7 +134,11 @@ bool CBinds::OnInput(IInput::CEvent e)
 		Mask = 1 << MODIFIER_NONE;
 
 	if(Mask == ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)))
+	{
+		if(m_aapKeyBindings[0][e.m_Key] && e.m_Flags&IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
 		return true;
+	}
 
 	bool ret = false;
 	for(int Mod = 1; Mod < MODIFIER_COUNT; Mod++)
