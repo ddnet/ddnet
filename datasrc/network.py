@@ -12,6 +12,7 @@ CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JU
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
+Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 
 RawHeader = '''
 
@@ -36,14 +37,6 @@ enum
 	SPEC_FREEVIEW=-1,
 	SPEC_FOLLOW=-2,
 };
-
-enum
-{
-	AUTHED_NO=0,
-	AUTHED_HELPER,
-	AUTHED_MOD,
-	AUTHED_ADMIN,
-};
 '''
 
 RawSource = '''
@@ -54,7 +47,8 @@ RawSource = '''
 Enums = [
 	Enum("EMOTE", Emotes),
 	Enum("POWERUP", Powerups),
-	Enum("EMOTICON", Emoticons)
+	Enum("EMOTICON", Emoticons),
+	Enum("AUTHED", Authed),
 ]
 
 Flags = [
