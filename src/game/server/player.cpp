@@ -329,11 +329,11 @@ void CPlayer::Snap(int SnappingClient)
 	else
 		pPlayerInfo->m_Score = abs(m_Score) * -1;
 
-	CNetObj_AuthInfo *pAuthInfo = static_cast<CNetObj_AuthInfo *>(Server()->SnapNewItem(NETOBJTYPE_AUTHINFO, id, sizeof(CNetObj_AuthInfo)));
-	if(!pAuthInfo)
+	CNetObj_DDNetPlayer *pDDNetPlayer = static_cast<CNetObj_DDNetPlayer *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPLAYER, id, sizeof(CNetObj_DDNetPlayer)));
+	if(!pDDNetPlayer)
 		return;
 
-	pAuthInfo->m_AuthLevel = Server()->GetAuthedState(id);
+	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(id);
 }
 
 void CPlayer::FakeSnap()

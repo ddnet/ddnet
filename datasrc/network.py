@@ -201,16 +201,17 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
-	NetObjectEx("AuthInfo", "auth-info@netobj.ddnet.tw", [
-		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
-	]),
-
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetTick("m_FreezeEnd"),
 		NetIntRange("m_Jumps", 0, 255),
 		NetIntAny("m_TeleCheckpoint"),
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
+	]),
+
+	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
+		NetIntAny("m_Flags"),
+		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
 
 	## Events

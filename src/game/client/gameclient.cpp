@@ -1079,6 +1079,11 @@ void CGameClient::OnNewSnapshot()
 					m_aStats[pInfo->m_ClientID].JoinSpec(Client()->GameTick());
 
 			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETPLAYER)
+			{
+				const CNetObj_DDNetPlayer *pInfo = (const CNetObj_DDNetPlayer *)pData;
+				m_aClients[Item.m_ID].m_AuthLevel = pInfo->m_AuthLevel;
+			}
 			else if(Item.m_Type == NETOBJTYPE_CHARACTER)
 			{
 				const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_ID);
@@ -1196,8 +1201,6 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
 				m_Snap.m_paFlags[Item.m_ID%2] = (const CNetObj_Flag *)pData;
-			else if(Item.m_Type == NETOBJTYPE_AUTHINFO)
-				m_aClients[Item.m_ID].m_AuthLevel = ((const CNetObj_AuthInfo *)pData)->m_AuthLevel;
 		}
 	}
 
