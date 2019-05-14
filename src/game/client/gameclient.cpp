@@ -906,11 +906,6 @@ void CGameClient::OnRconLine(const char *pLine)
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
-void CGameClient::OnTimeScore(int AllowTimeScore, bool Dummy)
-{
-	m_AllowTimeScore[Dummy] = AllowTimeScore;
-}
-
 void CGameClient::ProcessEvents()
 {
 	if(m_SuppressEvents)

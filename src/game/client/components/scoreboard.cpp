@@ -231,7 +231,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 	}
 
-	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard && m_pClient->m_AllowTimeScore[g_Config.m_ClDummy])
+	if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 	{
 		if (m_ServerRecord > 0)
 		{
@@ -294,7 +294,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	// render headlines
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
-	const char* pScore = (m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard && m_pClient->m_AllowTimeScore[g_Config.m_ClDummy]) ? Localize("Time") : Localize("Score");
+	const char* pScore = (m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
 	float ScoreWidth = TextRender()->TextWidth(0, HeadlineFontsize, pScore, -1);
 	tw = ScoreLength > ScoreWidth ? ScoreLength : ScoreWidth;
 	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1);
@@ -414,7 +414,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// score
-		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard && m_pClient->m_AllowTimeScore[g_Config.m_ClDummy])
+		if(m_IsGameTypeRace && g_Config.m_ClDDRaceScoreBoard)
 		{
 			if (pInfo->m_Score == -9999)
 				aBuf[0] = 0;

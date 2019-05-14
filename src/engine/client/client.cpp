@@ -725,8 +725,6 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_GametimeMarginGraph.Init(-150.0f, 150.0f);
 
 	GenerateTimeoutCodes();
-
-	GameClient()->OnTimeScore(1, false);
 }
 
 void CClient::DisconnectWithReason(const char *pReason)
@@ -812,8 +810,6 @@ void CClient::DummyConnect()
 
 	//connecting to the server
 	m_NetClient[1].Connect(&m_ServerAddress);
-
-	GameClient()->OnTimeScore(1, true);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -1948,13 +1944,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 			bool UsernameReq = Unpacker.GetInt() & 1;
 			GameClient()->OnRconType(UsernameReq);
 		}
-		else if(Msg == NETMSG_TIME_SCORE)
-		{
-			int NewTimeScore = Unpacker.GetInt();
-			if (Unpacker.Error())
-				return;
-			GameClient()->OnTimeScore(NewTimeScore, g_Config.m_ClDummy);
-		}
 	}
 	else
 	{
@@ -2182,13 +2171,6 @@ void CClient::ProcessServerPacketDummy(CNetChunk *pPacket)
 					m_AckGameTick[!g_Config.m_ClDummy] = GameTick;
 				}
 			}
-		}
-		else if(Msg == NETMSG_TIME_SCORE)
-		{
-			int NewTimeScore = Unpacker.GetInt();
-			if (Unpacker.Error())
-				return;
-			GameClient()->OnTimeScore(NewTimeScore, true);
 		}
 	}
 	else

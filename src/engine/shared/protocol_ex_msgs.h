@@ -25,4 +25,3 @@ UUID(NETMSG_IDONTKNOW,    "i-dont-know@ddnet.tw")
 
 UUID(NETMSG_RCONTYPE,     "rcon-type@ddnet.tw")
 UUID(NETMSG_MAP_DETAILS,  "map-details@ddnet.tw")
-UUID(NETMSG_TIME_SCORE,   "time-score@ddnet.tw")
