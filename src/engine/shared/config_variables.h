@@ -248,16 +248,16 @@ MACRO_CONFIG_INT(ClReconnectTimeout, cl_reconnect_timeout, 120, 0, 600, CFGFLAG_
 MACRO_CONFIG_INT(ClReconnectFull, cl_reconnect_full, 5, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (when server is full, 0 for off)")
 
 
-MACRO_CONFIG_COL(ClMessageSystemColor, cl_message_system_color, 2817983, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color")
-MACRO_CONFIG_COL(ClMessageClientColor, cl_message_client_color, 9633471, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color")
-MACRO_CONFIG_COL(ClMessageHighlightColor, cl_message_highlight_color, 65471, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color")
-MACRO_CONFIG_COL(ClMessageTeamColor, cl_message_team_color, 5636050, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color")
-MACRO_CONFIG_COL(ClMessageColor, cl_message_color, 255, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color")
-MACRO_CONFIG_COL(ClLaserInnerColor, cl_laser_inner_color, 11206591, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color")
-MACRO_CONFIG_COL(ClLaserOutlineColor, cl_laser_outline_color, 11176233, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color")
+MACRO_CONFIG_COL(ClMessageSystemColor, cl_message_system_color, 2817983, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color")
+MACRO_CONFIG_COL(ClMessageClientColor, cl_message_client_color, 9633471, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client message color")
+MACRO_CONFIG_COL(ClMessageHighlightColor, cl_message_highlight_color, 65471, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Highlighted message color")
+MACRO_CONFIG_COL(ClMessageTeamColor, cl_message_team_color, 5636050, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Team message color")
+MACRO_CONFIG_COL(ClMessageColor, cl_message_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color")
+MACRO_CONFIG_COL(ClLaserInnerColor, cl_laser_inner_color, 11206591, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color")
+MACRO_CONFIG_COL(ClLaserOutlineColor, cl_laser_outline_color, 11176233, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color")
 
 MACRO_CONFIG_INT(ClMessageFriend, cl_message_friend, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Enable coloring and the heart for friends")
-MACRO_CONFIG_COL(ClMessageFriendColor, cl_message_friend_color, 65425, 0, 0xFFFFFF, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color")
+MACRO_CONFIG_COL(ClMessageFriendColor, cl_message_friend_color, 65425, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color")
 
 MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 100, 5, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout")
 MACRO_CONFIG_INT(ConnTimeoutProtection, conn_timeout_protection, 1000, 5, 10000, CFGFLAG_SERVER, "Network timeout protection")
@@ -279,8 +279,8 @@ MACRO_CONFIG_INT(ClShowOthersAlpha, cl_show_others_alpha, 40, 0, 100, CFGFLAG_CL
 MACRO_CONFIG_INT(ClOverlayEntities, cl_overlay_entities, 0, 0, 100, CFGFLAG_CLIENT, "Overlay game tiles with a percentage of opacity")
 MACRO_CONFIG_INT(ClShowQuads, cl_show_quads, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show quads")
 MACRO_CONFIG_INT(ClZoomBackgroundLayers, cl_zoom_background_layers, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Zoom background layers")
-MACRO_CONFIG_COL(ClBackgroundColor, cl_background_color, 128, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color") //0 0 128
-MACRO_CONFIG_COL(ClBackgroundEntitiesColor, cl_background_entities_color, 128, 0, 0xFFFFFF, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color") //0 0 128
+MACRO_CONFIG_COL(ClBackgroundColor, cl_background_color, 128, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background color") //0 0 128
+MACRO_CONFIG_COL(ClBackgroundEntitiesColor, cl_background_entities_color, 128, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities) color") //0 0 128
 MACRO_CONFIG_STR(ClBackgroundEntities, cl_background_entities, 100, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Background (entities)")
 MACRO_CONFIG_INT(ClBackgroundShowTilesLayers, cl_background_show_tiles_layers, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether draw tiles layers when using custom background (entities)")
 MACRO_CONFIG_INT(SvShowOthers, sv_show_others, 1, 0, 1, CFGFLAG_SERVER, "Whether players can user the command showothers or not")

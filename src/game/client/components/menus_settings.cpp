@@ -386,8 +386,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	char *Skin = g_Config.m_ClPlayerSkin;
 	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
-	int *ColorBody = &g_Config.m_ClPlayerColorBody;
-	int *ColorFeet = &g_Config.m_ClPlayerColorFeet;
+	unsigned *ColorBody = &g_Config.m_ClPlayerColorBody;
+	unsigned *ColorFeet = &g_Config.m_ClPlayerColorFeet;
 
 	if(m_Dummy)
 	{
@@ -501,7 +501,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
 		aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
 
-		int *paColors[2];
+		unsigned *paColors[2];
 		paColors[0] = ColorBody;
 		paColors[1] = ColorFeet;
 
