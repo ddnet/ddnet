@@ -2811,6 +2811,7 @@ int str_isallnum(const char *str)
 
 int str_toint(const char *str) { return atoi(str); }
 int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
+unsigned long str_toulong_base(const char *str, int base) { return strtoul(str, NULL, base); }
 float str_tofloat(const char *str) { return atof(str); }
 
 int str_utf8_comp_nocase(const char *a, const char *b)
