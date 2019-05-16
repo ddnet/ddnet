@@ -77,6 +77,20 @@ inline float AngularApproach(float Src, float Dst, float Amount)
 	return n;
 }
 
+bool CPlayers::IsOtherTeam(int ClientID)
+{
+	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
+
+	if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW) || ClientID < 0)
+		return false;
+	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		return m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
+	else if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo || m_pClient->m_aClients[ClientID].m_Solo) && !Local)
+		return true;
+
+	return m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+}
+
 void CPlayers::RenderHook(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
@@ -92,8 +106,6 @@ void CPlayers::RenderHook(
 
 	CTeeRenderInfo RenderInfo = *pRenderInfo;
 
-	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
-
 	// don't render hooks to not active character cores
 	if(pPlayerChar->m_HookedPlayer != -1 && !m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Active)
 		return;
@@ -102,22 +114,7 @@ void CPlayers::RenderHook(
 	if(ClientID >= 0)
 		IntraTick = (m_pClient->m_aClients[ClientID].m_IsPredicted) ? Client()->PredIntraGameTick() : Client()->IntraGameTick();
 
-	bool OtherTeam;
-
-	if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW) || ClientID < 0)
-		OtherTeam = false;
-	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
-		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
-	else if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo || m_pClient->m_aClients[ClientID].m_Solo) && !Local)
-		OtherTeam = true;
-	else
-		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
-
-	if(m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo && !Local)
-		OtherTeam = true;
-
-	if(!Local && m_pClient->m_aClients[ClientID].m_Solo)
-		OtherTeam = true;
+	bool OtherTeam = IsOtherTeam(ClientID);
 
 	RenderInfo.m_Size = 64.0f;
 
@@ -193,18 +190,7 @@ void CPlayers::RenderPlayer(
 	CTeeRenderInfo RenderInfo = *pRenderInfo;
 
 	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
-
-	bool OtherTeam;
-
-	if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team == TEAM_SPECTATORS && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW) || ClientID < 0)
-		OtherTeam = false;
-	else if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
-		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID);
-	else if((m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Solo || m_pClient->m_aClients[ClientID].m_Solo) && !Local)
-		OtherTeam = true;
-	else
-		OtherTeam = m_pClient->m_Teams.Team(ClientID) != m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
-
+	bool OtherTeam = IsOtherTeam(ClientID);
 	float Alpha = OtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 
 	// set size
