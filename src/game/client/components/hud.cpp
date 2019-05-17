@@ -766,6 +766,24 @@ void CHud::RenderLocalTime(float x)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 	TextRender()->Text(0, x-25.0f, (12.5f - 5.f) / 2.f, 5.0f, aTimeStr, -1);
+
+	//draw the text
+	char aPlayTimeStr[6];
+	time_t CurrTime;
+	time(&CurrTime);
+	// str_timestamp_ex(m_pClient->GetPlayingTime(CurrTime), aPlayTimeStr, sizeof(aPlayTimeStr), "%H:%M");
+	int Time = m_pClient->GetPlayingTime(CurrTime) / 60;
+	str_format(aPlayTimeStr, sizeof(aPlayTimeStr), "%02d:%02d", Time/60, Time%60);
+
+	Graphics()->BlendNormal();
+	Graphics()->TextureSet(-1);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+	RenderTools()->DrawRoundRectExt(x-95.0f, 0.0f, 30.0f+TextRender()->TextWidth(0, 12, aPlayTimeStr, -1)/2, 12.5f, 3.75f, CUI::CORNER_B);
+	Graphics()->QuadsEnd();
+
+	TextRender()->Text(0, x-70.0f, (12.5f - 5.f) / 2.f, 5.0f, aPlayTimeStr, -1);
+	TextRender()->Text(0, x-90.0f, (12.5f - 5.f) / 2.f, 5.0f, "PLAYED", -1);
 }
 
 void CHud::OnRender()
