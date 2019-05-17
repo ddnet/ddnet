@@ -147,7 +147,7 @@ public:
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
 
-	double GetPlayingTime(time_t Curr){ return difftime(Curr, m_InitTime); };
+	double GetPlayTime(time_t Curr){ return difftime(Curr, m_InitTime); };
 
 	bool m_SuppressEvents;
 	bool m_NewTick;
