@@ -17,6 +17,8 @@
 #include "items.h"
 #include <stdio.h>
 
+#include <engine/serverbrowser.h>
+
 void CItems::OnReset()
 {
 	m_NumExtraProjectiles = 0;
@@ -63,7 +65,9 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	vec2 StartPos;
 	vec2 StartVel;
 
-	ExtractInfo(pCurrent, &StartPos, &StartVel);
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+	ExtractInfo(pCurrent, &StartPos, &StartVel, IsDDNet(&Info));
 
 	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct-0.001f);
@@ -472,7 +476,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 	vec2 StartPos;
 	vec2 StartVel;
 
-	ExtractInfo(pCurrent, &StartPos, &StartVel);
+	ExtractInfo(pCurrent, &StartPos, &StartVel, 1);
 
 	float T = Pt;
 	if(DestroyTick >= 0)
