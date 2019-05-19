@@ -158,7 +158,7 @@ void CProjectile::SetBouncing(int Value)
 CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pProj)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
-	ExtractInfo(pProj, &m_Pos, &m_Direction, 1);
+	ExtractInfo(pProj, &m_Pos, &m_Direction, true);
 	if(UseExtraInfo(pProj))
 		ExtractExtraInfo(pProj, &m_Owner, &m_Explosive, &m_Bouncing, &m_Freeze);
 	else

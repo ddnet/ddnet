@@ -476,7 +476,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 	vec2 StartPos;
 	vec2 StartVel;
 
-	ExtractInfo(pCurrent, &StartPos, &StartVel, 1);
+	ExtractInfo(pCurrent, &StartPos, &StartVel, true);
 
 	float T = Pt;
 	if(DestroyTick >= 0)

@@ -1881,7 +1881,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 					mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
 					CServerInfo Info;
 					GetServerInfo(&Info);
-					if (IsDDNet(&Info))
+					if(IsDDNet(&Info))
 						SnapshotRemoveExtraInfo(aExtraInfoRemoved);
 
 					// add snapshot to demo
