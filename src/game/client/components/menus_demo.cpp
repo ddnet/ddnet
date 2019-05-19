@@ -164,7 +164,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle keyboard shortcuts independent of active menu
-	if(m_pClient->m_pGameConsole->IsClosed())
+	if(m_pClient->m_pGameConsole->IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE)
 	{
 		// increase/decrease speed
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
