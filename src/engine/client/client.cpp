@@ -681,6 +681,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	char aBuf[512];
 	int Port = 8303;
 
+	replayCounter = 0;
+
 	Disconnect();
 
 	str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
@@ -778,6 +780,12 @@ void CClient::Disconnect()
 		DummyDisconnect(0);
 	if(m_State != IClient::STATE_OFFLINE)
 		DisconnectWithReason(0);
+
+	// make sure to remove replay tmp demo
+	if(g_Config.m_ClRaceReplays)
+	{
+		Storage()->RemoveFile((&m_DemoRecorder[RECORDER_AUTO])->GetCurrentFilename(), IStorage::TYPE_SAVE);
+	}
 }
 
 bool CClient::DummyConnected()
@@ -3275,6 +3283,51 @@ void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
 	pSelf->DemoSliceEnd();
 }
 
+void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->SaveReplay();
+}
+
+void CClient::SaveReplay()
+{
+	if (!g_Config.m_ClRaceReplays)
+	{
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enabled it via the configuration");
+	} else {
+		if(!DemoRecorder(RECORDER_AUTO)->IsRecording())
+		{
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
+		}
+		else
+		{
+			//DemoRecorder_HandleAutoStart();
+			DemoRecorder_Stop(RECORDER_AUTO);
+			replayCounter++;
+
+			char aFilename[256];
+
+			char aDate[64];
+			str_timestamp(aDate, sizeof(aDate));
+
+			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
+			char *pSrc = (&m_DemoRecorder[RECORDER_AUTO])->GetCurrentFilename();
+
+
+			// Slice the demo to get only the last 30 seconds
+			m_DemoEditor.Slice(pSrc, aFilename, GameTick() - g_Config.m_ClReplayLength * GameTickSpeed(), GameTick(), NULL, 0);
+
+			Storage()->RemoveFile(pSrc, IStorage::TYPE_SAVE);
+
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s !", aFilename);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
+
+			DemoRecorder_HandleAutoStart();
+		}
+	}
+}
+
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
 {
 	if(m_DemoPlayer.IsPlaying())
@@ -3398,6 +3451,15 @@ void CClient::DemoRecorder_HandleAutoStart()
 			AutoDemos.Init(Storage(), "demos/auto", "" /* empty for wild card */, ".demo", g_Config.m_ClAutoDemoMax);
 		}
 	}
+	else if(g_Config.m_ClRaceReplays)
+	{
+		DemoRecorder_Stop(RECORDER_AUTO);
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "replays/replay-%s", m_aCurrentMap);
+		DemoRecorder_Start(aBuf, true, RECORDER_AUTO);
+	}
+
+	//TODO
 }
 
 void CClient::DemoRecorder_Stop(int Recorder)
@@ -3608,6 +3670,8 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_slice_end", "", CFGFLAG_CLIENT, Con_DemoSliceEnd, this, "");
 	m_pConsole->Register("demo_play", "", CFGFLAG_CLIENT, Con_DemoPlay, this, "Play demo");
 	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
+
+	m_pConsole->Register("save_replay", "", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of 30 seconds");
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 

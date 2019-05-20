@@ -94,6 +94,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64 m_LocalStartTime;
 
 	int m_DebugFont;
+	int replayCounter = 0;
 
 	int64 m_LastRenderTime;
 	float m_RenderFrameTimeLow;
@@ -364,6 +365,7 @@ public:
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);
+	static void Con_SaveReplay(IConsole::IResult *pResult, void *pUserData);
 
 	void RegisterCommands();
 
@@ -412,6 +414,7 @@ public:
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
+	virtual void SaveReplay();
 
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 

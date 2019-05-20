@@ -14,6 +14,7 @@ class CDemoRecorder : public IDemoRecorder
 {
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
+	char m_aCurrentFilename[256];
 	int m_LastTickMarker;
 	int m_LastKeyFrame;
 	int m_FirstTick;
@@ -42,6 +43,9 @@ public:
 	void RecordMessage(const void *pData, int Size);
 
 	bool IsRecording() const { return m_File != 0; }
+	char *GetCurrentFilename() { 
+		return m_aCurrentFilename;
+	}
 
 	int Length() const { return (m_LastTickMarker - m_FirstTick)/SERVER_TICK_SPEED; }
 };

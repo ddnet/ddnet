@@ -1997,6 +1997,20 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		g_Config.m_ClAutoRaceRecord ^= 1;
 	}
 
+	Left.HSplitTop(20.0f, &Button, &Left);
+	if(DoButton_CheckBox(&g_Config.m_ClRaceReplays, Localize("Enable replays"), g_Config.m_ClRaceReplays, &Button))
+	{
+		if(g_Config.m_ClAutoDemoRecord && !g_Config.m_ClRaceReplays) 
+		{
+			m_Popup = POPUP_REPLAY_ENABLING_ERROR;
+		}
+		else 
+		{
+			g_Config.m_ClRaceReplays ^= 1;
+		}
+	}
+
+
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Ghost"), g_Config.m_ClRaceGhost, &Button))
 	{

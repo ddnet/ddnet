@@ -46,6 +46,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for recording", pFilename);
+		dbg_msg("replay", aBuf);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
 		return -1;
 	}
@@ -149,6 +150,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	str_format(aBuf, sizeof(aBuf), "Recording to '%s'", pFilename);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
 	m_File = DemoFile;
+	str_copy(m_aCurrentFilename, pFilename, sizeof(m_aCurrentFilename));
 
 	return 0;
 }
@@ -991,6 +993,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 			break;
 	}
 
+	m_pDemoPlayer->Stop();
 	m_pDemoRecorder->Stop();
 }
 
