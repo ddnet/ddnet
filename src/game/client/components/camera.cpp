@@ -29,7 +29,8 @@ void CCamera::OnRender()
 
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || IsRace(&Info) || IsBlockWorlds(&Info) || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
-		if (!Client()->DummyConnected() && !Client()->DummyConnecting()) {
+		if(!Client()->DummyConnected() && !Client()->DummyConnecting())
+		{
 			m_ZoomSet = false;
 			m_Zoom = 1.0;
 		}
