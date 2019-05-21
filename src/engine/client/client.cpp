@@ -1076,6 +1076,15 @@ void CClient::Render()
 		int64 Now = time_get();
 		g_Config.m_ClAntiPing = (m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq() > g_Config.m_ClAntiPingLimit;
 	}
+
+	if(HasNotification())
+	{
+		int64 Now = time_get();
+		if (CurrentNotification()->m_ExpireTime < Now)
+		{
+			EndNotification();
+		}
+	}
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
@@ -3291,7 +3300,8 @@ void CClient::SaveReplay()
 {
 	if (!g_Config.m_ClRaceReplays)
 	{
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enabled it via the configuration");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enabled it via configuration");
+		Notify(Localize("Replay"), Localize("Replay feature is disabled !"));
 	} else {
 		if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 		{
@@ -3299,6 +3309,8 @@ void CClient::SaveReplay()
 		}
 		else
 		{
+			// First we stop the recorder to slice correctly the demo after
+			DemoRecorder_Stop(RECORDER_REPLAYS);
 			char aFilename[256];
 
 			char aDate[64];
@@ -3308,13 +3320,37 @@ void CClient::SaveReplay()
 			char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
 			// Slice the demo to get only the last cl_replay_length seconds
-			m_DemoEditor.Slice(pSrc, aFilename, GameTick() - g_Config.m_ClReplayLength * GameTickSpeed(), GameTick(), NULL, 0);
+			const int endTick = GameTick();
+			const int startTick = endTick - g_Config.m_ClReplayLength * GameTickSpeed();
+			m_DemoEditor.Slice(pSrc, aFilename, startTick, endTick, NULL, 0);
+
+			const char *pFilename = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
+			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
 
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s !", aFilename);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
+
+			Notify(Localize("Replay"), Localize("Successfully saved the replay !"));
+			// And we restart the recorder
+			DemoRecorder_StartReplayRecorder();
 		}
 	}
+}
+
+void CClient::Notify(const char *pTitle, const char *pMessage)
+{
+	int duration = 3; // Arbitrary value for now
+
+	EndNotification();
+	new CNotification(m_curNotif);
+	m_curNotif.m_pTitle = pTitle;
+	m_curNotif.m_pMessage = pMessage;
+	m_curNotif.m_ExpireTime = time_get() + duration * time_freq();
+}
+
+void CClient::EndNotification() {
+	mem_zero(&m_curNotif, sizeof(m_curNotif));
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
@@ -3440,20 +3476,30 @@ void CClient::DemoRecorder_HandleAutoStart()
 			AutoDemos.Init(Storage(), "demos/auto", "" /* empty for wild card */, ".demo", g_Config.m_ClAutoDemoMax);
 		}
 	}
-	if(g_Config.m_ClRaceReplays)
+	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
+	{
+		DemoRecorder_StartReplayRecorder();
+	}
+}
+
+void CClient::DemoRecorder_StartReplayRecorder()
+{
+	if (g_Config.m_ClRaceReplays)
 	{
 		DemoRecorder_Stop(RECORDER_REPLAYS);
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "replays/replay-%s", m_aCurrentMap);
+		str_format(aBuf, sizeof(aBuf), "replays/replay_tmp-%s", m_aCurrentMap);
 		DemoRecorder_Start(aBuf, true, RECORDER_REPLAYS);
 	}
-
-	//TODO
 }
 
-void CClient::DemoRecorder_Stop(int Recorder)
+void CClient::DemoRecorder_Stop(int Recorder, bool RemoveFile)
 {
 	m_DemoRecorder[Recorder].Stop();
+	if (RemoveFile) {
+		const char *pFilename = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
+		Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
+	}
 }
 
 void CClient::DemoRecorder_AddDemoMarker(int Recorder)

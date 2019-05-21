@@ -2001,6 +2001,16 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClRaceReplays, Localize("Enable replays"), g_Config.m_ClRaceReplays, &Button))
 	{
 		g_Config.m_ClRaceReplays ^= 1;
+		if(!g_Config.m_ClRaceReplays)
+		{
+			// stop recording and remove the tmp demo file
+			Client()->DemoRecorder_Stop(RECORDER_REPLAYS, true);
+		}
+		else
+		{
+			// start recording
+			Client()->DemoRecorder_HandleAutoStart();
+		}
 	}
 
 

@@ -19,12 +19,22 @@ enum
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
+class CNotification
+{
+public:
+	const char *m_pTitle;
+	const char *m_pMessage;
+	int64 m_ExpireTime;
+};
+
 class IClient : public IInterface
 {
 	MACRO_INTERFACE("client", 0)
 protected:
 	// quick access to state of the client
 	int m_State;
+
+	CNotification m_curNotif;
 
 	// quick access to time variables
 	int m_PrevGameTick[2];
@@ -72,6 +82,9 @@ public:
 		STATE_QUITING,
 	};
 
+	inline CNotification *CurrentNotification() { return &m_curNotif; };
+	inline bool HasNotification() { return m_curNotif.m_pTitle; };
+
 	//
 	inline int State() const { return m_State; }
 
@@ -104,7 +117,7 @@ public:
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
-	virtual void DemoRecorder_Stop(int Recorder) = 0;
+	virtual void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) = 0;
 	virtual class IDemoRecorder *DemoRecorder(int Recorder) = 0;
 	virtual void AutoScreenshot_Start() = 0;
 	virtual void AutoStatScreenshot_Start() = 0;
@@ -202,6 +215,7 @@ public:
 	virtual IFriends* Foes() = 0;
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
+
 };
 
 class IGameClient : public IInterface

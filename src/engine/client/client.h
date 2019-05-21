@@ -371,7 +371,8 @@ public:
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType);
 	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder);
 	void DemoRecorder_HandleAutoStart();
-	void DemoRecorder_Stop(int Recorder);
+	void DemoRecorder_StartReplayRecorder();
+	void DemoRecorder_Stop(int Recorder, bool RemoveFile = false);
 	void DemoRecorder_AddDemoMarker(int Recorder);
 	class IDemoRecorder *DemoRecorder(int Recorder);
 
@@ -415,9 +416,12 @@ public:
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
 	virtual void SaveReplay();
 
+	virtual void Notify(const char * pTitle, const char * pMessage);
+
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
 	virtual IFriends* Foes() {return &m_Foes; }
+	virtual void EndNotification();
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };
