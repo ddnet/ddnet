@@ -681,6 +681,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	char aBuf[512];
 	int Port = 8303;
 
+	replayCounter = 0;
+
 	Disconnect();
 
 	str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
@@ -3299,6 +3301,10 @@ void CClient::SaveReplay()
 		}
 		else
 		{
+			//DemoRecorder_HandleAutoStart();
+			//DemoRecorder_Stop(RECORDER_REPLAYS);
+			replayCounter++;
+
 			char aFilename[256];
 
 			char aDate[64];
@@ -3307,12 +3313,17 @@ void CClient::SaveReplay()
 			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
 			char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
-			// Slice the demo to get only the last cl_replay_length seconds
+
+			// Slice the demo to get only the last 30 seconds
 			m_DemoEditor.Slice(pSrc, aFilename, GameTick() - g_Config.m_ClReplayLength * GameTickSpeed(), GameTick(), NULL, 0);
+
+			Storage()->RemoveFile(pSrc, IStorage::TYPE_SAVE);
 
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s !", aFilename);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
+
+			//DemoRecorder_HandleAutoStart();
 		}
 	}
 }

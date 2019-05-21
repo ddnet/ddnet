@@ -13,7 +13,8 @@ enum
 	RECORDER_MANUAL=0,
 	RECORDER_AUTO=1,
 	RECORDER_RACE=2,
-	RECORDER_MAX=3,
+	RECORDER_REPLAYS=3,
+	RECORDER_MAX=4,
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);

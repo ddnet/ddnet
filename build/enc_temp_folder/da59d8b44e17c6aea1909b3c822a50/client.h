@@ -94,6 +94,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64 m_LocalStartTime;
 
 	int m_DebugFont;
+	int replayCounter = 0;
 
 	int64 m_LastRenderTime;
 	float m_RenderFrameTimeLow;

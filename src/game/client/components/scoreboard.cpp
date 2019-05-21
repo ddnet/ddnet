@@ -525,7 +525,8 @@ void CScoreboard::RenderRecordingNotification(float x)
 {
 	if(!m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording() &&
 	   !m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording() &&
-	   !m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
+	   !m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording() &&
+	   !m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
 		return;
 	}
@@ -551,6 +552,12 @@ void CScoreboard::RenderRecordingNotification(float x)
 	{
 		Seconds = m_pClient->DemoRecorder(RECORDER_AUTO)->Length();
 		str_format(aBuf2, sizeof(aBuf2), Localize("Auto %3d:%02d  "), Seconds/60, Seconds%60);
+		str_append(aBuf, aBuf2, sizeof(aBuf));
+	}
+	if (m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
+	{
+		Seconds = m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length();
+		str_format(aBuf2, sizeof(aBuf2), Localize("Replay %3d:%02d  "), Seconds / 60, Seconds % 60);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
 

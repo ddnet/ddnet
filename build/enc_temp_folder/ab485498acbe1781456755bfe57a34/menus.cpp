@@ -1159,6 +1159,12 @@ int CMenus::Render()
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
+		else if(m_Popup == POPUP_REPLAY_ENABLING_ERROR)
+		{
+			pTitle = Localize("Error enabling replays");
+			pExtraText = Localize("As the replay system uses the demo recorder system, no other record options should be used along with replays. Please disable any other option if you want to enable replays.");
+			ExtraAlign = -1;
+		}
 
 		CUIRect Box, Part;
 		Box = Screen;
@@ -1260,6 +1266,18 @@ int CMenus::Render()
 				Client()->DummyDisconnect(0);
 				m_Popup = POPUP_NONE;
 			}
+		}
+		else if (m_Popup == POPUP_REPLAY_ENABLING_ERROR)
+		{
+			CUIRect Ok;
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+
+			Part.VMargin(40.0f, &Ok);
+
+			static int s_ButtonOk = 0;
+			if (DoButton_Menu(&s_ButtonOk, Localize("Got it"), 0, &Ok) || m_EscapePressed)
+				m_Popup = POPUP_NONE;
 		}
 		else if(m_Popup == POPUP_PASSWORD)
 		{
