@@ -8,6 +8,7 @@ CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JU
 				  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_RIFLE_HIT", "NO_HOOK",
 				  "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
 				  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA"]
+GameInfoFlags = ["TIMESCORE"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -56,6 +57,7 @@ Flags = [
 	Flags("GAMEFLAG", GameFlags),
 	Flags("GAMESTATEFLAG", GameStateFlags),
 	Flags("CHARACTERFLAG", CharacterFlags),
+	Flags("GAMEINFOFLAG", GameInfoFlags),
 ]
 
 Objects = [
@@ -212,6 +214,10 @@ Objects = [
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
+	]),
+
+	NetObjectEx("DDNetGameInfo", "gameinfo@netobj.ddnet.tw", [
+		NetIntAny("m_Flags"),
 	]),
 
 	## Events

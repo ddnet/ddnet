@@ -188,6 +188,8 @@ public:
 		//const CNetObj_PlayerInfo *m_paInfoByTeam[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByDDTeam[MAX_CLIENTS];
 
+		const CNetObj_DDNetGameInfo *m_pGameInfoEx;
+
 		int m_LocalClientID;
 		int m_NumPlayers;
 		int m_aTeamSize[2];
@@ -221,6 +223,8 @@ public:
 	};
 
 	CSnapState m_Snap;
+
+	bool TimeScore();
 
 	// client data
 	struct CClientData

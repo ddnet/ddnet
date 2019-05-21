@@ -1173,6 +1173,10 @@ void CGameClient::OnNewSnapshot()
 				s_GameOver = CurrentTickGameOver;
 				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
 			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETGAMEINFO)
+			{
+				m_Snap.m_pGameInfoEx = (const CNetObj_DDNetGameInfo *)pData;
+			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
 				m_Snap.m_pGameDataObj = (const CNetObj_GameData *)pData;
@@ -1973,6 +1977,13 @@ void CGameClient::UpdatePrediction()
 			m_aLastWorldCharacters[i] = *pChar;
 			m_aLastWorldCharacters[i].DetachFromGameWorld();
 		}
+}
+
+bool CGameClient::TimeScore()
+{
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+	return m_Snap.m_pGameInfoEx ? m_Snap.m_pGameInfoEx->m_Flags & GAMEINFOFLAG_TIMESCORE : IsRace(&Info);
 }
 
 void CGameClient::UpdateRenderedCharacters()

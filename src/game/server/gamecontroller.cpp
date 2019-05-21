@@ -536,6 +536,12 @@ void IGameController::Snap(int SnappingClient)
 			pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
 		}
 	}
+
+	CNetObj_DDNetGameInfo *pGameInfoEx = (CNetObj_DDNetGameInfo *)Server()->SnapNewItem(NETOBJTYPE_DDNETGAMEINFO, 0, sizeof(CNetObj_DDNetGameInfo));
+	if(!pGameInfoEx)
+		return;
+
+	pGameInfoEx->m_Flags = GAMEINFOFLAG_TIMESCORE;
 }
 
 int IGameController::GetAutoTeam(int NotThisID)
