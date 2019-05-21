@@ -3343,7 +3343,7 @@ void CClient::Notify(const char *pTitle, const char *pMessage)
 	int duration = 3; // Arbitrary value for now
 
 	EndNotification();
-	new CNotification(m_curNotif);
+	new CHudNotification(m_curNotif);
 	m_curNotif.m_pTitle = pTitle;
 	m_curNotif.m_pMessage = pMessage;
 	m_curNotif.m_ExpireTime = time_get() + duration * time_freq();

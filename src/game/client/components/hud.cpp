@@ -818,7 +818,7 @@ void CHud::RenderNotification()
 	if (Client()->State() == IClient::STATE_DEMOPLAYBACK || !Client()->HasNotification())
 		return;
 
-	const CNotification *pNotif = Client()->CurrentNotification();
+	const CHudNotification *pNotif = Client()->CurrentNotification();
 	const char *pTitle = pNotif->m_pTitle;
 	const char *pMessage = pNotif->m_pMessage;
 

@@ -19,7 +19,7 @@ enum
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
-class CNotification
+class CHudNotification
 {
 public:
 	const char *m_pTitle;
@@ -34,7 +34,7 @@ protected:
 	// quick access to state of the client
 	int m_State;
 
-	CNotification m_curNotif;
+	CHudNotification m_curNotif;
 
 	// quick access to time variables
 	int m_PrevGameTick[2];
@@ -82,7 +82,7 @@ public:
 		STATE_QUITING,
 	};
 
-	inline CNotification *CurrentNotification() { return &m_curNotif; };
+	inline CHudNotification *CurrentNotification() { return &m_curNotif; };
 	inline bool HasNotification() { return m_curNotif.m_pTitle; };
 
 	//
