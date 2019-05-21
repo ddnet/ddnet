@@ -3,6 +3,9 @@
 data/
 !/data/
 
+build/
+!/build/
+
 bundle/
 !/other/bundle/
 
