@@ -56,6 +56,7 @@ enum
 class IConsole;
 class IEngine;
 class IStorage;
+class CRandomMapResult;
 
 class CGameContext : public IGameServer
 {
@@ -74,6 +75,8 @@ class CGameContext : public IGameServer
 	ASYNCIO *m_pTeeHistorianFile;
 	CUuid m_GameUuid;
 	CMapBugs m_MapBugs;
+
+	std::shared_ptr<CRandomMapResult> m_pRandomMapResult;
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);

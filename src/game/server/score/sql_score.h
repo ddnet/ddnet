@@ -136,6 +136,11 @@ struct CSqlTeamLoad : CSqlData
 	int m_ClientID;
 };
 
+struct CSqlRandomMap : CSqlScoreData
+{
+	std::shared_ptr<CRandomMapResult> m_pResult; 
+};
+
 class CSqlScore: public IScore
 {
 	CGameContext *GameServer() { return m_pGameServer; }
@@ -194,8 +199,8 @@ public:
 	virtual void ShowPoints(int ClientID, const char* pName, bool Search = false);
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID,
 			void *pUserData, int Debut = 1);
-	virtual void RandomMap(int ClientID, int stars);
-	virtual void RandomUnfinishedMap(int ClientID, int stars);
+	virtual void RandomMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars);
+	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars);
 	virtual void SaveTeam(int Team, const char* Code, int ClientID, const char* Server);
 	virtual void LoadTeam(const char* Code, int ClientID);
 
