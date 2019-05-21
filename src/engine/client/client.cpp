@@ -1080,7 +1080,7 @@ void CClient::Render()
 	if(HasNotification())
 	{
 		int64 Now = time_get();
-		if (CurrentNotification()->m_ExpireTime < Now)
+		if(CurrentNotification()->m_ExpireTime < Now)
 		{
 			EndNotification();
 		}
@@ -3298,11 +3298,13 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::SaveReplay()
 {
-	if (!g_Config.m_ClRaceReplays)
+	if(!g_Config.m_ClRaceReplays)
 	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enabled it via configuration");
-		Notify(Localize("Replay"), Localize("Replay feature is disabled !"));
-	} else {
+		Notify(Localize("Replay"), Localize("Replay feature is disabled!"));
+	}
+	else
+	{
 		if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 		{
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
@@ -3328,10 +3330,10 @@ void CClient::SaveReplay()
 			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
 
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s !", aFilename);
+			str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", aFilename);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
-			Notify(Localize("Replay"), Localize("Successfully saved the replay !"));
+			Notify(Localize("Replay"), Localize("Successfully saved the replay!"));
 			// And we restart the recorder
 			DemoRecorder_StartReplayRecorder();
 		}
@@ -3349,7 +3351,8 @@ void CClient::Notify(const char *pTitle, const char *pMessage)
 	m_curNotif.m_ExpireTime = time_get() + duration * time_freq();
 }
 
-void CClient::EndNotification() {
+void CClient::EndNotification()
+{
 	mem_zero(&m_curNotif, sizeof(m_curNotif));
 }
 
@@ -3484,7 +3487,7 @@ void CClient::DemoRecorder_HandleAutoStart()
 
 void CClient::DemoRecorder_StartReplayRecorder()
 {
-	if (g_Config.m_ClRaceReplays)
+	if(g_Config.m_ClRaceReplays)
 	{
 		DemoRecorder_Stop(RECORDER_REPLAYS);
 		char aBuf[512];
@@ -3496,7 +3499,8 @@ void CClient::DemoRecorder_StartReplayRecorder()
 void CClient::DemoRecorder_Stop(int Recorder, bool RemoveFile)
 {
 	m_DemoRecorder[Recorder].Stop();
-	if (RemoveFile) {
+	if(RemoveFile)
+	{
 		const char *pFilename = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 		Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
 	}

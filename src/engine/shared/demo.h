@@ -43,9 +43,7 @@ public:
 	void RecordMessage(const void *pData, int Size);
 
 	bool IsRecording() const { return m_File != 0; }
-	char *GetCurrentFilename() { 
-		return m_aCurrentFilename;
-	}
+	char *GetCurrentFilename() { return m_aCurrentFilename; }
 
 	int Length() const { return (m_LastTickMarker - m_FirstTick)/SERVER_TICK_SPEED; }
 };
