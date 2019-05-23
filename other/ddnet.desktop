@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=DDNet
+GenericName=Platform Game
+Exec=DDNet %u
+Icon=ddnet
+Terminal=false
+Keywords=game;multiplayer;
+Categories=Game;ArcadeGame;
+MimeType=x-scheme-handler/ddnet;
+Comment=Launch DDNet
