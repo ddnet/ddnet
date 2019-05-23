@@ -3322,9 +3322,9 @@ void CClient::SaveReplay()
 			char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
 			// Slice the demo to get only the last cl_replay_length seconds
-			const int endTick = GameTick();
-			const int startTick = endTick - g_Config.m_ClReplayLength * GameTickSpeed();
-			m_DemoEditor.Slice(pSrc, aFilename, startTick, endTick, NULL, 0);
+			const int EndTick = GameTick();
+			const int StartTick = EndTick - g_Config.m_ClReplayLength * GameTickSpeed();
+			m_DemoEditor.Slice(pSrc, aFilename, StartTick, EndTick, NULL, 0);
 
 			const char *pFilename = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
@@ -3342,18 +3342,16 @@ void CClient::SaveReplay()
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
 {
-	int duration = 3; // Arbitrary value for now
-
 	EndNotification();
-	new CHudNotification(m_curNotif);
-	m_curNotif.m_pTitle = pTitle;
-	m_curNotif.m_pMessage = pMessage;
-	m_curNotif.m_ExpireTime = time_get() + duration * time_freq();
+	new CHudNotification(m_CurrentNotification);
+	m_CurrentNotification.m_pTitle = pTitle;
+	m_CurrentNotification.m_pMessage = pMessage;
+	m_CurrentNotification.m_ExpireTime = time_get() + g_Config.m_ClNotificationTime * time_freq();
 }
 
 void CClient::EndNotification()
 {
-	mem_zero(&m_curNotif, sizeof(m_curNotif));
+	mem_zero(&m_CurrentNotification, sizeof(m_CurrentNotification));
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
@@ -3711,7 +3709,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_play", "", CFGFLAG_CLIENT, Con_DemoPlay, this, "Play demo");
 	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
 
-	m_pConsole->Register("save_replay", "", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of 30 seconds");
+	m_pConsole->Register("save_replay", "", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 

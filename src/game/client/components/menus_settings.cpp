@@ -2008,11 +2008,11 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), Localize("Length: %d"), g_Config.m_ClReplayLength);
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 
-		int fakeLength = g_Config.m_ClReplayLength - 5; // minimum length is 5 not 0
+		int FakeLength = g_Config.m_ClReplayLength - 5; // minimum length is 5 not 0
 
-		fakeLength = (int)(DoScrollbarH(&fakeLength, &Button, fakeLength / 25.0f)*25.0f);
+		FakeLength = (int)(DoScrollbarH(&FakeLength, &Button, FakeLength / 25.0f)*25.0f);
 
-		g_Config.m_ClReplayLength = fakeLength + 5;
+		g_Config.m_ClReplayLength = FakeLength + 5;
 
 		if(DoButton_CheckBox(&g_Config.m_ClRaceReplays, Localize("Enable replays"), g_Config.m_ClRaceReplays, &LeftLeft))
 		{

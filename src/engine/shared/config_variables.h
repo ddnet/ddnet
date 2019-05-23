@@ -266,6 +266,7 @@ MACRO_CONFIG_INT(ClScoreboardOnDeath, cl_scoreboard_on_death, 1, 0, 1, CFGFLAG_S
 MACRO_CONFIG_INT(ClAutoRaceRecord, cl_auto_race_record, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save the best demo of each race")
 MACRO_CONFIG_INT(ClRaceReplays, cl_race_replays, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable replays")
 MACRO_CONFIG_INT(ClReplayLength, cl_replay_length, 10, 5, 30, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Set the length of the replays")
+MACRO_CONFIG_INT(ClNotificationTime, cl_notification_time, 1, 3, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Set the duration of the notifications (how many seconds they should stay on the screen)")
 MACRO_CONFIG_INT(ClRaceRecordServerControl, cl_race_record_server_control, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Let the server start the race recorder")
 MACRO_CONFIG_INT(ClDemoName, cl_demo_name, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Save the player name within the demo")
 MACRO_CONFIG_INT(ClDemoAssumeRace, cl_demo_assume_race, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Assume that demos are race demos")

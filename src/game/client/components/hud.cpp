@@ -822,24 +822,24 @@ void CHud::RenderNotification()
 	const char *pTitle = pNotif->m_pTitle;
 	const char *pMessage = pNotif->m_pMessage;
 
-	float Width = 120.0f;
+	float TextWidth = 120.0f;
 	float Height = 40.0f;
 
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0, 0, 0, 0.40f);
-	RenderTools()->DrawRoundRect(150.0f*Graphics()->ScreenAspect() - Width / 2.0f, 40, Width, Height, 5.0f);
+	RenderTools()->DrawRoundRect(150.0f*Graphics()->ScreenAspect() - TextWidth / 2.0f, 40, TextWidth, Height, 5.0f);
 	Graphics()->QuadsEnd();
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
 	float FontSize = 9.0f;
 	float w = TextRender()->TextWidth(0, FontSize, pTitle, -1);
-	TextRender()->Text(0, 150.0f*Graphics()->ScreenAspect() - w/2.0f, 50.0f, FontSize, pTitle, Width - 20);
+	TextRender()->Text(0, 150.0f*Graphics()->ScreenAspect() - w/2.0f, 50.0f, FontSize, pTitle, TextWidth - 20);
 
 	FontSize = 6.0f;
 	w = TextRender()->TextWidth(0, FontSize, pMessage, strlen(pMessage));
-	TextRender()->Text(0, 150.0f*Graphics()->ScreenAspect() - w/2.0f, 62.0f, FontSize, pMessage, Width - 20);
+	TextRender()->Text(0, 150.0f*Graphics()->ScreenAspect() - w/2.0f, 62.0f, FontSize, pMessage, TextWidth - 20);
 }
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)

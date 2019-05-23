@@ -34,7 +34,7 @@ protected:
 	// quick access to state of the client
 	int m_State;
 
-	CHudNotification m_curNotif;
+	CHudNotification m_CurrentNotification;
 
 	// quick access to time variables
 	int m_PrevGameTick[2];
@@ -82,8 +82,8 @@ public:
 		STATE_QUITING,
 	};
 
-	inline CHudNotification *CurrentNotification() { return &m_curNotif; };
-	inline bool HasNotification() { return m_curNotif.m_pTitle; };
+	inline CHudNotification *CurrentNotification() { return &m_CurrentNotification; };
+	inline bool HasNotification() { return m_CurrentNotification.m_pTitle; };
 
 	//
 	inline int State() const { return m_State; }
