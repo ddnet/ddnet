@@ -55,7 +55,6 @@ public:
 	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
 };
 
-
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
@@ -425,4 +424,20 @@ public:
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };
+
+class CDemoEdit : public IJob
+{
+	CClient *m_pClient;
+	IConsole *m_pConsole;
+	CDemoEditor *m_pDemoEditor;
+	char m_pDemo[256];
+	char m_pDst[256];
+	int m_StartTick;
+	int m_EndTick;
+
+public:
+	CDemoEdit(CClient *pClient, IConsole *pConsole, CDemoEditor *pDemoEditor, const char *pDemo, const char *pDst, int StartTick, int EndTick);
+	void Run();
+};
+
 #endif

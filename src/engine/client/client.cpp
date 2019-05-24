@@ -3324,18 +3324,10 @@ void CClient::SaveReplay()
 			// Slice the demo to get only the last cl_replay_length seconds
 			const int EndTick = GameTick();
 			const int StartTick = EndTick - g_Config.m_ClReplayLength * GameTickSpeed();
-			m_DemoEditor.Slice(pSrc, aFilename, StartTick, EndTick, NULL, 0);
 
-			const char *pFilename = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
-			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
-
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", aFilename);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
-
-			Notify(Localize("Replay"), Localize("Successfully saved the replay!"));
-			// And we restart the recorder
-			DemoRecorder_StartReplayRecorder();
+			// Create a job to do this slicing in background because it can be a bit long depending on the file size
+			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(this, m_pConsole, &m_DemoEditor, pSrc, aFilename, StartTick, EndTick);
+			Engine()->AddJob(pDemoEditTask);
 		}
 	}
 }
@@ -3995,4 +3987,36 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 
 	*pSmoothTick = (int)(SmoothTime*50/time_freq())+1;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick-1)*time_freq()/50) / (float)(time_freq()/50);
+}
+
+CDemoEdit::CDemoEdit(CClient *pClient, IConsole *pConsole, CDemoEditor *pDemoEditor, const char *pDemo, const char *pDst, int StartTick, int EndTick) : 
+	m_pClient(pClient),
+	m_pConsole(pConsole),
+	m_pDemoEditor(pDemoEditor)
+{
+	str_copy(m_pDemo, pDemo, sizeof(m_pDemo));
+	str_copy(m_pDst, pDst, sizeof(m_pDst));
+	
+	m_StartTick = StartTick;
+	m_EndTick = EndTick;
+}
+
+void CDemoEdit::Run()
+{
+	// Slice the actual demo
+	m_pDemoEditor->Slice(m_pDemo, m_pDst, m_StartTick, m_EndTick, NULL, 0);
+
+	// Notify the player via console and a hud notification
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", m_pDst);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
+
+	m_pClient->Notify(Localize("Replay"), Localize("Successfully saved the replay!"));
+
+	// We remove the temporary demo file
+	const char *pFilename = m_pClient->DemoRecorder(RECORDER_REPLAYS)->GetCurrentFilename();
+	m_pClient->Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
+
+	// And we restart the recorder
+	m_pClient->DemoRecorder_StartReplayRecorder();
 }

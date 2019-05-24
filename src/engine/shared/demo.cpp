@@ -40,6 +40,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	m_MapSize = MapSize;
 	m_pMapData = pMapData;
+	m_pConsole = pConsole;
 
 	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
@@ -56,8 +57,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		io_close(DemoFile);
 		return -1;
 	}
-
-	m_pConsole = pConsole;
 
 	bool CloseMapFile = false;
 

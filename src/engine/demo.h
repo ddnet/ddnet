@@ -81,6 +81,7 @@ public:
 	virtual bool IsRecording() const = 0;
 	virtual int Stop() = 0;
 	virtual int Length() const = 0;
+	virtual char *GetCurrentFilename() = 0;
 };
 
 class IDemoEditor : public IInterface
