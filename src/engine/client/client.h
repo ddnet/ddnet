@@ -437,6 +437,7 @@ class CDemoEdit : public IJob
 
 public:
 	CDemoEdit(CClient *pClient, IConsole *pConsole, CDemoEditor *pDemoEditor, const char *pDemo, const char *pDst, int StartTick, int EndTick);
+	~CDemoEdit();
 	void Run();
 };
 
