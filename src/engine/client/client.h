@@ -429,14 +429,14 @@ class CDemoEdit : public IJob
 {
 	CClient *m_pClient;
 	IConsole *m_pConsole;
-	CDemoEditor *m_pDemoEditor;
+	CDemoEditor m_DemoEditor;
 	char m_pDemo[256];
 	char m_pDst[256];
 	int m_StartTick;
 	int m_EndTick;
 
 public:
-	CDemoEdit(CClient *pClient, IConsole *pConsole, CDemoEditor *pDemoEditor, const char *pDemo, const char *pDst, int StartTick, int EndTick);
+	CDemoEdit(CClient *pClient, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, const char *pDemo, const char *pDst, int StartTick, int EndTick);
 	~CDemoEdit();
 	void Run();
 };

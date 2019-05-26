@@ -3325,12 +3325,8 @@ void CClient::SaveReplay()
 			const int EndTick = GameTick();
 			const int StartTick = EndTick - g_Config.m_ClReplayLength * GameTickSpeed();
 
-			// Create a DemoEditor to do the job
-			CDemoEditor *DemoEditor = new CDemoEditor();
-			DemoEditor->Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
-
 			// Create a job to do this slicing in background because it can be a bit long depending on the file size
-			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(this, m_pConsole, DemoEditor, pSrc, aFilename, StartTick, EndTick);
+			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(this, &m_SnapshotDelta, m_pConsole, pSrc, aFilename, StartTick, EndTick);
 			Engine()->AddJob(pDemoEditTask);
 		}
 	}
@@ -3995,25 +3991,26 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 
 CDemoEdit::~CDemoEdit()
 {
-	delete m_pDemoEditor;
 }
 
-CDemoEdit::CDemoEdit(CClient *pClient, IConsole *pConsole, CDemoEditor *pDemoEditor, const char *pDemo, const char *pDst, int StartTick, int EndTick) : 
+CDemoEdit::CDemoEdit(CClient *pClient, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, const char *pDemo, const char *pDst, int StartTick, int EndTick) :
 	m_pClient(pClient),
-	m_pConsole(pConsole),
-	m_pDemoEditor(pDemoEditor)
+	m_pConsole(pConsole)
 {
 	str_copy(m_pDemo, pDemo, sizeof(m_pDemo));
 	str_copy(m_pDst, pDst, sizeof(m_pDst));
 	
 	m_StartTick = StartTick;
 	m_EndTick = EndTick;
+
+	// Init the demoeditor
+	m_DemoEditor.Init(pClient->GameClient()->NetVersion(), pSnapshotDelta, pConsole, pClient->Storage());
 }
 
 void CDemoEdit::Run()
 {
 	// Slice the actual demo
-	m_pDemoEditor->Slice(m_pDemo, m_pDst, m_StartTick, m_EndTick, NULL, 0);
+	m_DemoEditor.Slice(m_pDemo, m_pDst, m_StartTick, m_EndTick, NULL, 0);
 
 	// Notify the player via console and a hud notification
 	char aBuf[256];
