@@ -1419,6 +1419,7 @@ if(NOT DEV)
   foreach(SIZE 16 32 48 128 256 512)
     install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION share/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
   endforeach()
+  install(CODE "execute_process(COMMAND update-desktop-database -q)")
 endif()
 
 if(DEV)
