@@ -57,9 +57,11 @@ public:
 
 class CDemoEdit : public IJob
 {
-	IStorage *m_pStorage;
 	IConsole *m_pConsole;
+	IStorage *m_pStorage;
+
 	CDemoEditor m_DemoEditor;
+
 	char m_pDemo[256];
 	char m_pDst[256];
 	int m_StartTick;
@@ -67,7 +69,6 @@ class CDemoEdit : public IJob
 
 public:
 	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
-	~CDemoEdit();
 	void Run();
 };
 
