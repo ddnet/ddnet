@@ -55,6 +55,22 @@ public:
 	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
 };
 
+class CDemoEdit : public IJob
+{
+	IStorage *m_pStorage;
+	IConsole *m_pConsole;
+	CDemoEditor m_DemoEditor;
+	char m_pDemo[256];
+	char m_pDst[256];
+	int m_StartTick;
+	int m_EndTick;
+
+public:
+	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
+	~CDemoEdit();
+	void Run();
+};
+
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
@@ -186,6 +202,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
 
 	class CSnapshotDelta m_SnapshotDelta;
+
+	std::list<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
 	//
 	class CServerInfo m_CurrentServerInfo;
@@ -423,22 +441,6 @@ public:
 	virtual void EndNotification();
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
-};
-
-class CDemoEdit : public IJob
-{
-	CClient *m_pClient;
-	IConsole *m_pConsole;
-	CDemoEditor m_DemoEditor;
-	char m_pDemo[256];
-	char m_pDst[256];
-	int m_StartTick;
-	int m_EndTick;
-
-public:
-	CDemoEdit(CClient *pClient, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, const char *pDemo, const char *pDst, int StartTick, int EndTick);
-	~CDemoEdit();
-	void Run();
 };
 
 #endif

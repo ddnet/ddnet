@@ -2668,6 +2668,19 @@ void CClient::Update()
 		}
 	}
 
+	if(State() == IClient::STATE_ONLINE)
+	{
+		if(m_EditJobs.size() > 0)
+		{
+			std::shared_ptr<CDemoEdit> e = m_EditJobs.front();
+			if(e->Status() == IJob::STATE_DONE)
+			{
+				Notify(Localize("Replay"), Localize("Successfully saved the replay!"));
+				m_EditJobs.pop_front();
+			}
+		}
+	}
+
 	// update the maser server registry
 	MasterServer()->Update();
 
@@ -3326,8 +3339,12 @@ void CClient::SaveReplay()
 			const int StartTick = EndTick - g_Config.m_ClReplayLength * GameTickSpeed();
 
 			// Create a job to do this slicing in background because it can be a bit long depending on the file size
-			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(this, &m_SnapshotDelta, m_pConsole, pSrc, aFilename, StartTick, EndTick);
+			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 			Engine()->AddJob(pDemoEditTask);
+			m_EditJobs.push_back(pDemoEditTask);
+
+			// And we restart the recorder
+			DemoRecorder_StartReplayRecorder();
 		}
 	}
 }
@@ -3989,13 +4006,9 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick-1)*time_freq()/50) / (float)(time_freq()/50);
 }
 
-CDemoEdit::~CDemoEdit()
-{
-}
-
-CDemoEdit::CDemoEdit(CClient *pClient, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, const char *pDemo, const char *pDst, int StartTick, int EndTick) :
-	m_pClient(pClient),
-	m_pConsole(pConsole)
+CDemoEdit::CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick) :
+	m_pConsole(pConsole),
+	m_pStorage(pStorage)
 {
 	str_copy(m_pDemo, pDemo, sizeof(m_pDemo));
 	str_copy(m_pDst, pDst, sizeof(m_pDst));
@@ -4004,7 +4017,7 @@ CDemoEdit::CDemoEdit(CClient *pClient, CSnapshotDelta *pSnapshotDelta, IConsole 
 	m_EndTick = EndTick;
 
 	// Init the demoeditor
-	m_DemoEditor.Init(pClient->GameClient()->NetVersion(), pSnapshotDelta, pConsole, pClient->Storage());
+	m_DemoEditor.Init(pNetVersion, pSnapshotDelta, pConsole, pStorage);
 }
 
 void CDemoEdit::Run()
@@ -4017,12 +4030,6 @@ void CDemoEdit::Run()
 	str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", m_pDst);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
-	m_pClient->Notify(Localize("Replay"), Localize("Successfully saved the replay!"));
-
 	// We remove the temporary demo file
-	const char *pFilename = m_pClient->DemoRecorder(RECORDER_REPLAYS)->GetCurrentFilename();
-	m_pClient->Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
-
-	// And we restart the recorder
-	m_pClient->DemoRecorder_StartReplayRecorder();
+	m_pStorage->RemoveFile(m_pDemo, IStorage::TYPE_SAVE);
 }
