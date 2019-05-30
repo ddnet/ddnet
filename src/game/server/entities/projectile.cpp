@@ -173,7 +173,7 @@ void CProjectile::Tick()
 			CCharacter *apEnts[MAX_CLIENTS];
 			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
-				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()])))
+				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[apEnts[i]->Team()])))
 					apEnts[i]->Freeze();
 		}
 
