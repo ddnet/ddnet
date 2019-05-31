@@ -783,6 +783,8 @@ if(CLIENT)
     backend_sdl.h
     client.cpp
     client.h
+	demoedit.cpp
+	demoedit.h
     friends.cpp
     friends.h
     graphics_threaded.cpp

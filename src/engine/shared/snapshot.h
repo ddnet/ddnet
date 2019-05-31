@@ -76,6 +76,7 @@ private:
 public:
 	static int DiffItem(int *pPast, int *pCurrent, int *pOut, int Size);
 	CSnapshotDelta();
+	CSnapshotDelta(const CSnapshotDelta &old);
 	int GetDataRate(int Index) { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, int Size);

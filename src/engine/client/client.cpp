@@ -57,6 +57,7 @@
 #include <mastersrv/mastersrv.h>
 
 #include <engine/client/serverbrowser.h>
+#include <engine/client/demoedit.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -2675,6 +2676,11 @@ void CClient::Update()
 			std::shared_ptr<CDemoEdit> e = m_EditJobs.front();
 			if(e->Status() == IJob::STATE_DONE)
 			{
+				// Notify the player via console and a hud notification
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", e->Destination());
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
+
 				Notify(Localize("Replay"), Localize("Successfully saved the replay!"));
 				m_EditJobs.pop_front();
 			}
@@ -3339,7 +3345,7 @@ void CClient::SaveReplay()
 			const int StartTick = EndTick - g_Config.m_ClReplayLength * GameTickSpeed();
 
 			// Create a job to do this slicing in background because it can be a bit long depending on the file size
-			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 			Engine()->AddJob(pDemoEditTask);
 			m_EditJobs.push_back(pDemoEditTask);
 
@@ -4004,32 +4010,4 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 
 	*pSmoothTick = (int)(SmoothTime*50/time_freq())+1;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick-1)*time_freq()/50) / (float)(time_freq()/50);
-}
-
-CDemoEdit::CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick) :
-	m_pConsole(pConsole),
-	m_pStorage(pStorage)
-{
-	str_copy(m_pDemo, pDemo, sizeof(m_pDemo));
-	str_copy(m_pDst, pDst, sizeof(m_pDst));
-	
-	m_StartTick = StartTick;
-	m_EndTick = EndTick;
-
-	// Init the demoeditor
-	m_DemoEditor.Init(pNetVersion, pSnapshotDelta, pConsole, pStorage);
-}
-
-void CDemoEdit::Run()
-{
-	// Slice the actual demo
-	m_DemoEditor.Slice(m_pDemo, m_pDst, m_StartTick, m_EndTick, NULL, 0);
-
-	// Notify the player via console and a hud notification
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", m_pDst);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
-
-	// We remove the temporary demo file
-	m_pStorage->RemoveFile(m_pDemo, IStorage::TYPE_SAVE);
 }

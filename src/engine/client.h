@@ -82,8 +82,8 @@ public:
 		STATE_QUITING,
 	};
 
-	inline CHudNotification *CurrentNotification() { return &m_CurrentNotification; };
-	inline bool HasNotification() { return m_CurrentNotification.m_pTitle; };
+	CHudNotification *CurrentNotification() { return &m_CurrentNotification; };
+	bool HasNotification() { return m_CurrentNotification.m_pTitle; };
 
 	//
 	inline int State() const { return m_State; }

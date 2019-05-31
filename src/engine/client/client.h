@@ -55,23 +55,6 @@ public:
 	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
 };
 
-class CDemoEdit : public IJob
-{
-	IConsole *m_pConsole;
-	IStorage *m_pStorage;
-
-	CDemoEditor m_DemoEditor;
-
-	char m_pDemo[256];
-	char m_pDst[256];
-	int m_StartTick;
-	int m_EndTick;
-
-public:
-	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IConsole *pConsole, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
-	void Run();
-};
-
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
