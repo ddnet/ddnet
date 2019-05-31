@@ -46,6 +46,7 @@ public:
 
 	void FindDuplicateSkins();
 	void SpectatePlayerName(const char *pName);
+	void SetShowRange(int Range = 10);
 
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player
@@ -166,6 +167,8 @@ public:
 	int m_ClientVersion;
 	bool m_ShowOthers;
 	bool m_ShowAll;
+	float m_ShowRangeX;
+	float m_ShowRangeY;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;

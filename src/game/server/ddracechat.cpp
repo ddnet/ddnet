@@ -1158,6 +1158,25 @@ void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer see all tees on this server");
 }
 
+void CGameContext::ConShowRange(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	const int Range = pResult->GetInteger(0);
+	if (Range < 0)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid range passed");
+	}
+
+	pPlayer->SetShowRange(Range);
+}
+
 void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

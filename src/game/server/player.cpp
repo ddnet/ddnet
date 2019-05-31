@@ -104,6 +104,7 @@ void CPlayer::Reset()
 	m_ClientVersion = VERSION_VANILLA;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
+	SetShowRange();
 	m_SpecTeam = 0;
 	m_NinjaJetpack = false;
 
@@ -793,4 +794,10 @@ void CPlayer::SpectatePlayerName(const char *pName)
 			return;
 		}
 	}
+}
+
+void CPlayer::SetShowRange(const int Range)
+{
+	m_ShowRangeX = 160.0f * Range;
+	m_ShowRangeY = 90.0f * Range;
 }
