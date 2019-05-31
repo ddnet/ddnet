@@ -906,11 +906,6 @@ void CGameClient::OnRconLine(const char *pLine)
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
 }
 
-void CGameClient::OnTimeScore(int AllowTimeScore, bool Dummy)
-{
-	m_AllowTimeScore[Dummy] = AllowTimeScore;
-}
-
 void CGameClient::ProcessEvents()
 {
 	if(m_SuppressEvents)
@@ -1084,6 +1079,11 @@ void CGameClient::OnNewSnapshot()
 					m_aStats[pInfo->m_ClientID].JoinSpec(Client()->GameTick());
 
 			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETPLAYER)
+			{
+				const CNetObj_DDNetPlayer *pInfo = (const CNetObj_DDNetPlayer *)pData;
+				m_aClients[Item.m_ID].m_AuthLevel = pInfo->m_AuthLevel;
+			}
 			else if(Item.m_Type == NETOBJTYPE_CHARACTER)
 			{
 				const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_ID);
@@ -1173,6 +1173,10 @@ void CGameClient::OnNewSnapshot()
 				s_GameOver = CurrentTickGameOver;
 				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
 			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETGAMEINFO)
+			{
+				m_Snap.m_pGameInfoEx = (const CNetObj_DDNetGameInfo *)pData;
+			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
 				m_Snap.m_pGameDataObj = (const CNetObj_GameData *)pData;
@@ -1201,8 +1205,6 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
 				m_Snap.m_paFlags[Item.m_ID%2] = (const CNetObj_Flag *)pData;
-			else if(Item.m_Type == NETOBJTYPE_AUTHINFO)
-				m_aClients[Item.m_ID].m_AuthLevel = ((const CNetObj_AuthInfo *)pData)->m_AuthLevel;
 		}
 	}
 
@@ -1975,6 +1977,13 @@ void CGameClient::UpdatePrediction()
 			m_aLastWorldCharacters[i] = *pChar;
 			m_aLastWorldCharacters[i].DetachFromGameWorld();
 		}
+}
+
+bool CGameClient::TimeScore()
+{
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+	return m_Snap.m_pGameInfoEx ? m_Snap.m_pGameInfoEx->m_Flags & GAMEINFOFLAG_TIMESCORE : IsRace(&Info);
 }
 
 void CGameClient::UpdateRenderedCharacters()

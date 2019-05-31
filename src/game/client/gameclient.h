@@ -161,8 +161,6 @@ public:
 	};
 	int m_ServerMode;
 
-	int m_AllowTimeScore[2];
-
 	int m_DemoSpecID;
 
 	vec2 m_LocalCharacterPos;
@@ -189,6 +187,8 @@ public:
 		const CNetObj_PlayerInfo *m_paInfoByName[MAX_CLIENTS];
 		//const CNetObj_PlayerInfo *m_paInfoByTeam[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByDDTeam[MAX_CLIENTS];
+
+		const CNetObj_DDNetGameInfo *m_pGameInfoEx;
 
 		int m_LocalClientID;
 		int m_NumPlayers;
@@ -223,6 +223,8 @@ public:
 	};
 
 	CSnapState m_Snap;
+
+	bool TimeScore();
 
 	// client data
 	struct CClientData
@@ -347,7 +349,6 @@ public:
 	virtual void OnEnterGame();
 	virtual void OnRconType(bool UsernameReq);
 	virtual void OnRconLine(const char *pLine);
-	virtual void OnTimeScore(int AllowTimeScore, bool Dummy);
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
