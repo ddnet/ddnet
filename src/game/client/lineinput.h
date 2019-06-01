@@ -5,7 +5,7 @@
 
 #include <engine/input.h>
 
-// line input helter
+// line input helper
 class CLineInput
 {
 	enum
