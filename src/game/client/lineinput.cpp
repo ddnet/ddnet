@@ -142,7 +142,7 @@ bool CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize, in
 	return Changes;
 }
 
-void CLineInput::DeleteFromCursor()
+void CLineInput::DeleteUntilCursor()
 {
 	char aBuf[MAX_SIZE];
 	str_copy(aBuf, &m_Str[m_CursorPos], sizeof(aBuf));
