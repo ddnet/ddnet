@@ -109,6 +109,53 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
 
+	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
+	{
+		int SearchDirection = 0;
+		if(m_pGameConsole->Input()->KeyPress(KEY_LEFT))
+			SearchDirection = -1;
+		else if(m_pGameConsole->Input()->KeyPress(KEY_RIGHT) || m_pGameConsole->Input()->KeyPress(KEY_DELETE))
+			SearchDirection = 1;
+
+		if(SearchDirection != 0)
+		{
+			int OldOffset = m_Input.GetCursorOffset();
+
+			int FoundAt = SearchDirection > 0 ? m_Input.GetLength() - 1 : 0;
+			for(int i = m_Input.GetCursorOffset() + SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength() - 1 : i > 0; i += SearchDirection)
+			{
+				int Next = i + SearchDirection;
+				if(	(m_Input.GetString()[Next] == ' ') ||
+					(m_Input.GetString()[Next] >= 32 && m_Input.GetString()[Next] <= 47) ||
+					(m_Input.GetString()[Next] >= 58 && m_Input.GetString()[Next] <= 64) ||
+					(m_Input.GetString()[Next] >= 91 && m_Input.GetString()[Next] <= 96))
+				{
+					FoundAt = i;
+					if(SearchDirection < 0)
+						FoundAt++;
+					break;
+				}
+			}
+
+			if(m_pGameConsole->Input()->KeyPress(KEY_DELETE))
+			{
+				if(m_Input.GetCursorOffset() != m_Input.GetLength())
+				{
+					char aText[512];
+					aText[0] = '\0';
+
+					str_copy(aText, m_Input.GetString(), m_Input.GetCursorOffset() + 1);
+
+					if(FoundAt != m_Input.GetLength())
+						str_append(aText, m_Input.GetString() + FoundAt, sizeof(aText));
+
+					m_Input.Set(aText);
+					FoundAt = OldOffset;
+				}
+			}
+			m_Input.SetCursorOffset(FoundAt);
+		}
+	}
 	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_V))
 	{
 		const char *Text = m_pGameConsole->Input()->GetClipboardText();
