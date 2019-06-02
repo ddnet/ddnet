@@ -20,7 +20,6 @@ CProjectile::CProjectile
 		bool Explosive,
 		float Force,
 		int SoundImpact,
-		int Weapon,
 		int Layer,
 		int Number
 	)
@@ -35,7 +34,6 @@ CProjectile::CProjectile
 	m_Force = Force;
 	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
-	m_Weapon = Weapon;
 	m_StartTick = Server()->Tick();
 	m_Explosive = Explosive;
 
@@ -145,7 +143,7 @@ void CProjectile::Tick()
 	{
 		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
-	else if (m_Owner >= 0 && (m_Weapon != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath))
+	else if (m_Owner >= 0 && (m_Type != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath))
 	{
 		GameServer()->m_World.DestroyEntity(this);
 		return;
@@ -153,7 +151,7 @@ void CProjectile::Tick()
 
 	if( ((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit&CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
 	{
-		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Weapon == WEAPON_SHOTGUN && Collide)))))
+		if(m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
 			int Number = 1;
 			if(GameServer()->EmulateBug(BUG_GRENADE_DOUBLEEXPLOSION) && m_LifeSpan == -1 && m_InitialLifeSpan == 0)
@@ -162,7 +160,7 @@ void CProjectile::Tick()
 			}
 			for(int i = 0; i < Number; i++)
 			{
-				GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
 				(m_Owner != -1)? TeamMask : -1LL);
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
 				(m_Owner != -1)? TeamMask : -1LL);
@@ -235,7 +233,7 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if (m_Weapon == WEAPON_GUN)
+		else if (m_Type == WEAPON_GUN)
 		{
 			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->m_World.DestroyEntity(this);
@@ -263,7 +261,7 @@ void CProjectile::Tick()
 					TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 			}
 
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Weapon, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
+			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
 			(m_Owner != -1)? TeamMask : -1LL);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
 			(m_Owner != -1)? TeamMask : -1LL);

@@ -474,7 +474,6 @@ void CCharacter::FireWeapon()
 						0,//Explosive
 						0,//Force
 						-1,//SoundImpact
-						WEAPON_GUN//Weapon
 						);
 
 				// pack the Projectile and send it to the client Directly
@@ -510,7 +509,7 @@ void CCharacter::FireWeapon()
 					ProjStartPos,
 					vec2(cosf(a), sinf(a))*Speed,
 					(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime),
-					1, 0, 0, -1, WEAPON_SHOTGUN);
+					1, 0, 0, -1);
 
 				// pack the Projectile and send it to the client Directly
 				CNetObj_Projectile p;
@@ -553,7 +552,6 @@ void CCharacter::FireWeapon()
 					true,//Explosive
 					0,//Force
 					SOUND_GRENADE_EXPLODE,//SoundImpact
-					WEAPON_GRENADE//Weapon
 					);//SoundImpact
 
 			// pack the Projectile and send it to the client Directly
