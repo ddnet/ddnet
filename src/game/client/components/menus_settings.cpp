@@ -2010,7 +2010,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 		int FakeLength = g_Config.m_ClReplayLength - 5; // minimum length is 5 not 0
 
-		FakeLength = (int)(DoScrollbarH(&FakeLength, &Button, FakeLength / 25.0f)*25.0f);
+		FakeLength = (int)(DoScrollbarH(&FakeLength, &Button, FakeLength / 55.0f)*55.0f);
 
 		g_Config.m_ClReplayLength = FakeLength + 5;
 

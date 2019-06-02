@@ -415,7 +415,7 @@ public:
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
-	virtual void SaveReplay();
+	virtual void SaveReplay(const int Length);
 
 	virtual void Notify(const char * pTitle, const char * pMessage);
 

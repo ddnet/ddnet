@@ -3312,14 +3312,27 @@ void CClient::Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->SaveReplay();
+	if(pResult->NumArguments())
+	{
+		int Length = pResult->GetInteger(0);
+		if(Length <= 0)
+		{
+			pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: length must be greater than 0 second.");
+		}
+		else
+		{
+			pSelf->SaveReplay(Length);
+		}
+	}
+	else
+		pSelf->SaveReplay(g_Config.m_ClReplayLength);
 }
 
-void CClient::SaveReplay()
+void CClient::SaveReplay(const int Length)
 {
 	if(!g_Config.m_ClRaceReplays)
 	{
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enabled it via configuration");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enable it via configuration.");
 		Notify(Localize("Replay"), Localize("Replay feature is disabled!"));
 	}
 	else
@@ -3342,7 +3355,7 @@ void CClient::SaveReplay()
 
 			// Slice the demo to get only the last cl_replay_length seconds
 			const int EndTick = GameTick();
-			const int StartTick = EndTick - g_Config.m_ClReplayLength * GameTickSpeed();
+			const int StartTick = EndTick - Length * GameTickSpeed();
 
 			// Create a job to do this slicing in background because it can be a bit long depending on the file size
 			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
@@ -3724,7 +3737,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_play", "", CFGFLAG_CLIENT, Con_DemoPlay, this, "Play demo");
 	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
 
-	m_pConsole->Register("save_replay", "", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
+	m_pConsole->Register("save_replay", "?i[length]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 
