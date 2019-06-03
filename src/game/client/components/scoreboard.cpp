@@ -30,10 +30,6 @@ CScoreboard::CScoreboard()
 void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 {
 	CScoreboard *pSelf = (CScoreboard *)pUserData;
-	CServerInfo Info;
-
-	pSelf->Client()->GetServerInfo(&Info);
-	pSelf->m_IsGameTypeRace = IsRace(&Info);
 	pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 

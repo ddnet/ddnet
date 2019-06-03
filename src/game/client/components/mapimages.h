@@ -11,7 +11,7 @@ class CMapImages : public CComponent
 	int m_aTextures[64];
 	int m_Count;
 
-	char m_aEntitiesGameType[16];
+	const char *m_pEntitiesGameType;
 public:
 	CMapImages();
 	CMapImages(int ImageSize);

@@ -473,9 +473,6 @@ void CGameClient::OnConnected()
 		m_All.m_paComponents[i]->OnReset();
 	}
 
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
-
 	m_ServerMode = SERVERMODE_PURE;
 
 	// send the initial info
@@ -953,6 +950,98 @@ void CGameClient::ProcessEvents()
 	}
 }
 
+static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CServerInfo *pFallbackServerInfo)
+{
+	int Version = -1;
+	if(InfoExSize >= 4)
+	{
+		Version = 0;
+	}
+	else if(InfoExSize >= 8)
+	{
+		Version = pInfoEx->m_Version;
+	}
+	int Flags = 0;
+	if(Version >= 0)
+	{
+		Flags = pInfoEx->m_Flags;
+	}
+	bool Race = IsRace(pFallbackServerInfo);
+	bool FastCap = IsFastCap(pFallbackServerInfo);
+	bool FNG = IsFNG(pFallbackServerInfo);
+	bool DDRace = IsDDRace(pFallbackServerInfo);
+	bool DDNet = IsDDNet(pFallbackServerInfo);
+	bool BlockWorlds = IsBlockWorlds(pFallbackServerInfo);
+	bool Vanilla = IsVanilla(pFallbackServerInfo);
+	bool Plus = IsPlus(pFallbackServerInfo);
+	if(Version >= 1)
+	{
+		Race = Flags&GAMEINFOFLAG_GAMETYPE_RACE;
+		FastCap = Flags&GAMEINFOFLAG_GAMETYPE_FASTCAP;
+		FNG = Flags&GAMEINFOFLAG_GAMETYPE_FNG;
+		DDRace = Flags&GAMEINFOFLAG_GAMETYPE_DDRACE;
+		DDNet = Flags&GAMEINFOFLAG_GAMETYPE_DDNET;
+		BlockWorlds = Flags&GAMEINFOFLAG_GAMETYPE_BLOCK_WORLDS;
+		Vanilla = Flags&GAMEINFOFLAG_GAMETYPE_VANILLA;
+		Plus = Flags&GAMEINFOFLAG_GAMETYPE_PLUS;
+
+		DDRace = DDRace || DDNet;
+		Race = Race || FastCap || DDRace;
+	}
+
+	CGameInfo Info;
+	Info.m_FlagStartsRace = FastCap;
+	Info.m_TimeScore = Race;
+	Info.m_UnlimitedAmmo = Race;
+	Info.m_DDRaceRecordMessage = !Race || DDRace; // should be just DDrace
+	Info.m_RaceRecordMessage = Race && !DDRace;
+	Info.m_AllowEyeWheel = DDRace || BlockWorlds || Plus;
+	Info.m_AllowHookColl = DDRace;
+	Info.m_AllowZoom = Race || BlockWorlds;
+	Info.m_BugDDRaceGhost = DDRace;
+	Info.m_BugDDRaceInput = DDRace;
+	Info.m_BugFNGLaserRange = FNG;
+	Info.m_BugVanillaBounce = Vanilla;
+	Info.m_PredictFNG = FNG;
+	Info.m_PredictDDRace = DDRace;
+	Info.m_PredictDDRaceTiles = DDRace && !BlockWorlds;
+	Info.m_PredictVanilla = Vanilla || FastCap;
+	Info.m_EntitiesDDNet = DDNet;
+	Info.m_EntitiesDDRace = DDRace;
+	Info.m_EntitiesRace = Race;
+	Info.m_EntitiesFNG = FNG;
+	Info.m_EntitiesVanilla = Vanilla;
+
+	if(Version >= 0)
+	{
+		Info.m_TimeScore = Flags&GAMEINFOFLAG_TIMESCORE;
+	}
+	if(Version >= 2)
+	{
+		Info.m_FlagStartsRace = Flags&GAMEINFOFLAG_FLAG_STARTS_RACE;
+		Info.m_UnlimitedAmmo = Flags&GAMEINFOFLAG_UNLIMITED_AMMO;
+		Info.m_DDRaceRecordMessage = Flags&GAMEINFOFLAG_DDRACE_RECORD_MESSAGE;
+		Info.m_RaceRecordMessage = Flags&GAMEINFOFLAG_RACE_RECORD_MESSAGE;
+		Info.m_AllowEyeWheel = Flags&GAMEINFOFLAG_ALLOW_EYE_WHEEL;
+		Info.m_AllowHookColl = Flags&GAMEINFOFLAG_ALLOW_HOOK_COLL;
+		Info.m_AllowZoom = Flags&GAMEINFOFLAG_ALLOW_ZOOM;
+		Info.m_BugDDRaceGhost = Flags&GAMEINFOFLAG_BUG_DDRACE_GHOST;
+		Info.m_BugDDRaceInput = Flags&GAMEINFOFLAG_BUG_DDRACE_INPUT;
+		Info.m_BugFNGLaserRange = Flags&GAMEINFOFLAG_BUG_FNG_LASER_RANGE;
+		Info.m_BugVanillaBounce = Flags&GAMEINFOFLAG_BUG_VANILLA_BOUNCE;
+		Info.m_PredictFNG = Flags&GAMEINFOFLAG_PREDICT_FNG;
+		Info.m_PredictDDRace = Flags&GAMEINFOFLAG_PREDICT_DDRACE;
+		Info.m_PredictDDRaceTiles = Flags&GAMEINFOFLAG_PREDICT_DDRACE_TILES;
+		Info.m_PredictVanilla = Flags&GAMEINFOFLAG_PREDICT_VANILLA;
+		Info.m_EntitiesDDNet = Flags&GAMEINFOFLAG_ENTITIES_DDNET;
+		Info.m_EntitiesDDRace = Flags&GAMEINFOFLAG_ENTITIES_DDRACE;
+		Info.m_EntitiesRace = Flags&GAMEINFOFLAG_ENTITIES_RACE;
+		Info.m_EntitiesFNG = Flags&GAMEINFOFLAG_ENTITIES_FNG;
+		Info.m_EntitiesVanilla = Flags&GAMEINFOFLAG_ENTITIES_VANILLA;
+	}
+	return Info;
+}
+
 void CGameClient::OnNewSnapshot()
 {
 	m_NewTick = true;
@@ -1001,6 +1090,8 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 #endif
+
+	bool FoundGameInfoEx = false;
 
 	// go trough all the items in the snapshot and gather the info we want
 	{
@@ -1174,9 +1265,16 @@ void CGameClient::OnNewSnapshot()
 				s_GameOver = CurrentTickGameOver;
 				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
 			}
-			else if(Item.m_Type == NETOBJTYPE_DDNETGAMEINFO)
+			else if(Item.m_Type == NETOBJTYPE_GAMEINFOEX)
 			{
-				m_Snap.m_pGameInfoEx = (const CNetObj_DDNetGameInfo *)pData;
+				if(FoundGameInfoEx)
+				{
+					continue;
+				}
+				FoundGameInfoEx = true;
+				CServerInfo ServerInfo;
+				Client()->GetServerInfo(&ServerInfo);
+				m_GameInfo = GetGameInfo((const CNetObj_GameInfoEx *)pData, Client()->SnapItemSize(IClient::SNAP_CURRENT, i), &ServerInfo);
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{
@@ -1207,6 +1305,13 @@ void CGameClient::OnNewSnapshot()
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
 				m_Snap.m_paFlags[Item.m_ID%2] = (const CNetObj_Flag *)pData;
 		}
+	}
+
+	if(!FoundGameInfoEx)
+	{
+		CServerInfo ServerInfo;
+		Client()->GetServerInfo(&ServerInfo);
+		m_GameInfo = GetGameInfo(0, 0, &ServerInfo);
 	}
 
 	// setup local pointers
@@ -1276,21 +1381,19 @@ void CGameClient::OnNewSnapshot()
 			return str_comp_nocase(m_aClients[p1->m_ClientID].m_aName, m_aClients[p2->m_ClientID].m_aName) < 0;
 		});
 
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
-	bool IsGameTypeRace = IsRace(&CurrentServerInfo);
+	bool TimeScore = m_GameInfo.m_TimeScore;
 
 	// sort player infos by score
 	mem_copy(m_Snap.m_paInfoByScore, m_Snap.m_paInfoByName, sizeof(m_Snap.m_paInfoByScore));
 	std::stable_sort(m_Snap.m_paInfoByScore, m_Snap.m_paInfoByScore + MAX_CLIENTS,
-		[IsGameTypeRace](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
+		[TimeScore](const CNetObj_PlayerInfo* p1, const CNetObj_PlayerInfo* p2) -> bool
 		{
 			if (!p2)
 				return static_cast<bool>(p1);
 			if (!p1)
 				return false;
-			return (((IsGameTypeRace && p1->m_Score == -9999) ? std::numeric_limits<int>::min() : p1->m_Score) >
-				((IsGameTypeRace && p2->m_Score == -9999) ? std::numeric_limits<int>::min() : p2->m_Score));
+			return (((TimeScore && p1->m_Score == -9999) ? std::numeric_limits<int>::min() : p1->m_Score) >
+				((TimeScore && p2->m_Score == -9999) ? std::numeric_limits<int>::min() : p2->m_Score));
 		});
 
 	// sort player infos by DDRace Team (and score between)
@@ -1304,6 +1407,8 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
 	CTuningParams StandardTuning;
 	if(CurrentServerInfo.m_aGameType[0] != '0')
 	{
@@ -1875,14 +1980,11 @@ void CGameClient::UpdatePrediction()
 
 	m_TeamsPredicted = m_Teams;
 
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
-
-	m_GameWorld.m_WorldConfig.m_IsVanilla = IsVanilla(&CurrentServerInfo) || IsFastCap(&CurrentServerInfo);
-	m_GameWorld.m_WorldConfig.m_IsDDRace = IsDDRace(&CurrentServerInfo);
-	m_GameWorld.m_WorldConfig.m_IsFNG = IsFNG(&CurrentServerInfo);
+	m_GameWorld.m_WorldConfig.m_IsVanilla = m_GameInfo.m_PredictVanilla;
+	m_GameWorld.m_WorldConfig.m_IsDDRace = m_GameInfo.m_PredictDDRace;
+	m_GameWorld.m_WorldConfig.m_IsFNG = m_GameInfo.m_PredictFNG;
 	m_GameWorld.m_WorldConfig.m_PredictDDRace = g_Config.m_ClPredictDDRace;
-	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameWorld.m_WorldConfig.m_IsDDRace && !IsBlockWorlds(&CurrentServerInfo);
+	m_GameWorld.m_WorldConfig.m_PredictTiles = g_Config.m_ClPredictDDRace && m_GameInfo.m_PredictDDRaceTiles;
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
@@ -1986,9 +2088,7 @@ void CGameClient::UpdatePrediction()
 
 bool CGameClient::TimeScore()
 {
-	CServerInfo Info;
-	Client()->GetServerInfo(&Info);
-	return m_Snap.m_pGameInfoEx ? m_Snap.m_pGameInfoEx->m_Flags & GAMEINFOFLAG_TIMESCORE : IsRace(&Info);
+	return m_GameInfo.m_TimeScore;
 }
 
 void CGameClient::UpdateRenderedCharacters()

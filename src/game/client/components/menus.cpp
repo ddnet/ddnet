@@ -773,10 +773,8 @@ int CMenus::RenderMenubar(CUIRect r)
 			NewPage = PAGE_NETWORK;
 
 		{
-			CServerInfo Info;
-			Client()->GetServerInfo(&Info);
 			static int s_GhostButton=0;
-			if(IsRace(&Info) || IsDDNet(&Info))
+			if(GameClient()->m_GameInfo.m_Race)
 			{
 				Box.VSplitLeft(70.0f, &Button, &Box);
 				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage==PAGE_GHOST, &Button, 0))

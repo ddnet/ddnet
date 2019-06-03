@@ -105,7 +105,7 @@ void CHud::RenderGameTimer()
 
 	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_SUDDENDEATH))
 	{
-		char Buf[32];
+		char aBuf[32];
 		int Time = 0;
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
 		{
@@ -122,19 +122,16 @@ void CHud::RenderGameTimer()
 		else
 			Time = (Client()->GameTick()-m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick)/Client()->GameTickSpeed();
 
-		CServerInfo Info;
-		Client()->GetServerInfo(&Info);
-
 		if(Time <= 0 && g_Config.m_ClShowDecisecs)
-			str_format(Buf, sizeof(Buf), "00:00.0");
+			str_format(aBuf, sizeof(aBuf), "00:00.0");
 		else if(Time <= 0)
-			str_format(Buf, sizeof(Buf), "00:00");
-		else if(IsRace(&Info) && !IsDDRace(&Info) && m_ServerRecord >= 0)
-			str_format(Buf, sizeof(Buf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
+			str_format(aBuf, sizeof(aBuf), "00:00");
+		else if(GameClient()->m_GameInfo.m_RaceRecordMessage && m_ServerRecord >= 0)
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
 		else if(g_Config.m_ClShowDecisecs)
-			str_format(Buf, sizeof(Buf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
 		else
-			str_format(Buf, sizeof(Buf), "%02d:%02d", Time/60, Time%60);
+			str_format(aBuf, sizeof(aBuf), "%02d:%02d", Time/60, Time%60);
 		float FontSize = 10.0f;
 		float w;
 		if(g_Config.m_ClShowDecisecs)
@@ -147,7 +144,7 @@ void CHud::RenderGameTimer()
 			float Alpha = Time <= 10 && (2*time_get()/time_freq()) % 2 ? 0.5f : 1.0f;
 			TextRender()->TextColor(1.0f, 0.25f, 0.25f, Alpha);
 		}
-		TextRender()->Text(0, Half-w/2, 2, FontSize, Buf, -1);
+		TextRender()->Text(0, Half-w/2, 2, FontSize, aBuf, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
@@ -338,8 +335,6 @@ void CHud::RenderScoreHud()
 			{
 				if(apPlayerInfo[t])
 				{
-					CServerInfo Info;
-					Client()->GetServerInfo(&Info);
 					if(m_pClient->TimeScore() && g_Config.m_ClDDRaceScoreBoard)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
@@ -869,13 +864,10 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 	}
 	else if(MsgType == NETMSGTYPE_SV_RECORD)
 	{
-		CServerInfo Info;
-		Client()->GetServerInfo(&Info);
-
 		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
 
 		// NETMSGTYPE_SV_RACETIME on old race servers
-		if(!IsDDRace(&Info) && IsRace(&Info))
+		if(GameClient()->m_GameInfo.m_DDRaceRecordMessage)
 		{
 			m_DDRaceTimeReceived = true;
 
@@ -890,7 +882,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 				m_CheckpointTick = Client()->GameTick();
 			}
 		}
-		else
+		else if(GameClient()->m_GameInfo.m_RaceRecordMessage)
 		{
 			m_ServerRecord = (float)pMsg->m_ServerTimeBest/100;
 			m_PlayerRecord = (float)pMsg->m_PlayerTimeBest/100;

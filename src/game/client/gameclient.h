@@ -59,6 +59,37 @@ public:
 	void Deactivate() { m_Active = 0; }
 };
 
+class CGameInfo
+{
+public:
+	bool m_FlagStartsRace;
+	bool m_TimeScore;
+	bool m_Race;
+	bool m_UnlimitedAmmo;
+	bool m_DDRaceRecordMessage;
+	bool m_RaceRecordMessage;
+
+	bool m_AllowEyeWheel;
+	bool m_AllowHookColl;
+	bool m_AllowZoom;
+
+	bool m_BugDDRaceGhost;
+	bool m_BugDDRaceInput;
+	bool m_BugFNGLaserRange;
+	bool m_BugVanillaBounce;
+
+	bool m_PredictFNG;
+	bool m_PredictDDRace;
+	bool m_PredictDDRaceTiles;
+	bool m_PredictVanilla;
+
+	bool m_EntitiesDDNet;
+	bool m_EntitiesDDRace;
+	bool m_EntitiesRace;
+	bool m_EntitiesFNG;
+	bool m_EntitiesVanilla;
+};
+
 class CGameClient : public IGameClient
 {
 	class CStack
@@ -164,6 +195,7 @@ public:
 		SERVERMODE_PUREMOD,
 	};
 	int m_ServerMode;
+	CGameInfo m_GameInfo;
 
 	int m_DemoSpecID;
 
@@ -192,7 +224,7 @@ public:
 		//const CNetObj_PlayerInfo *m_paInfoByTeam[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByDDTeam[MAX_CLIENTS];
 
-		const CNetObj_DDNetGameInfo *m_pGameInfoEx;
+		const CNetObj_GameInfoEx *m_pGameInfoEx;
 
 		int m_LocalClientID;
 		int m_NumPlayers;

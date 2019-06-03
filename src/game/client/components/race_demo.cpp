@@ -51,9 +51,7 @@ void CRaceDemo::OnStateChange(int NewState, int OldState)
 
 void CRaceDemo::OnNewSnapshot()
 {
-	CServerInfo ServerInfo;
-	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo) || !g_Config.m_ClAutoRaceRecord || Client()->State() != IClient::STATE_ONLINE)
+	if(!GameClient()->m_GameInfo.m_Race || !g_Config.m_ClAutoRaceRecord || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)

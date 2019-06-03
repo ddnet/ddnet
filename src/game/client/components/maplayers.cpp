@@ -450,9 +450,6 @@ void CMapLayers::OnMapLoad()
 		m_QuadLayerVisuals.clear();
 	}
 
-	CServerInfo Info;
-	Client()->GetServerInfo(&Info);
-
 	bool PassedGameLayer = false;
 	//prepare all visuals for all tile layers
 	std::vector<STmpTile> tmpTiles;
@@ -623,7 +620,7 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
 										Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-										if(IsDDNet(&Info) && !IsValidGameTile(Index))
+										if(GameClient()->m_GameInfo.m_EntitiesDDNet && !IsValidGameTile(Index))
 											Index = 0;
 									}
 									if(IsFrontLayer)
