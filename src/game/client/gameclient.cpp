@@ -274,6 +274,7 @@ void CGameClient::OnConsoleInit()
 
 void CGameClient::OnInit()
 {
+	time(&m_InitTime);
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 
 	m_pGraphics->AddWindowResizeListener(OnWindowResizeCB, this);
