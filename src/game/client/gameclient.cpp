@@ -993,7 +993,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_FlagStartsRace = FastCap;
 	Info.m_TimeScore = Race;
 	Info.m_UnlimitedAmmo = Race;
-	Info.m_DDRaceRecordMessage = !Race || DDRace; // should be just DDrace
+	Info.m_DDRaceRecordMessage = DDRace;
 	Info.m_RaceRecordMessage = Race && !DDRace;
 	Info.m_AllowEyeWheel = DDRace || BlockWorlds || Plus;
 	Info.m_AllowHookColl = DDRace;
