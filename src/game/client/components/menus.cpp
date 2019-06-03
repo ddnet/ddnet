@@ -255,6 +255,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 						pStr[i + Offset] = Text[i];
 				}
 				s_AtIndex = str_length(pStr);
+				ReturnValue = true;
 			}
 		}
 
