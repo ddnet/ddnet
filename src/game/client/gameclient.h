@@ -260,8 +260,6 @@ public:
 
 	CSnapState m_Snap;
 
-	bool TimeScore();
-
 	// client data
 	struct CClientData
 	{

@@ -2086,11 +2086,6 @@ void CGameClient::UpdatePrediction()
 		}
 }
 
-bool CGameClient::TimeScore()
-{
-	return m_GameInfo.m_TimeScore;
-}
-
 void CGameClient::UpdateRenderedCharacters()
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)

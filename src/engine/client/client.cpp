@@ -1572,7 +1572,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		}
 		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
 		{
-			dbg_msg("svcap", "gotpkt");
 			if(m_GotServerCapabilities)
 			{
 				return;
