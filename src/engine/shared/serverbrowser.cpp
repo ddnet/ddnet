@@ -60,8 +60,7 @@ bool IsBlockWorlds(const CServerInfo *pInfo)
 
 bool IsDDNet(const CServerInfo *pInfo)
 {
-	return (pInfo->m_Flags & SERVER_FLAG_ISDDNET
-	    || str_find_nocase(pInfo->m_aGameType, "ddracenet")
+	return (str_find_nocase(pInfo->m_aGameType, "ddracenet")
 	    || str_find_nocase(pInfo->m_aGameType, "ddnet"))
 	    && !IsBlockInfectionZ(pInfo);
 }
