@@ -2000,24 +2000,22 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
-		Button.VSplitMid(&LeftLeft, &Button);
+		Button.VSplitLeft(160.0f, &LeftLeft, &Button);
 
-		Button.VSplitLeft(80.0f, &Label, &Button);
+		Button.VSplitLeft(140.0f, &Label, &Button);
 		Button.HMargin(2.0f, &Button);
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), Localize("Length: %d"), g_Config.m_ClReplayLength);
+		str_format(aBuf, sizeof(aBuf), Localize("Default length: %d"), g_Config.m_ClReplayLength);
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 
-		int FakeLength = g_Config.m_ClReplayLength - 5; // minimum length is 5 not 0
+		int NewValue = (int)(DoScrollbarH(&g_Config.m_ClReplayLength, &Button, (minimum(g_Config.m_ClReplayLength, 600) - 10) / 590.0f)*590.0f) + 10;
+		if(g_Config.m_ClReplayLength < 600 || NewValue < 600)
+			g_Config.m_ClReplayLength = minimum(NewValue, 600);
 
-		FakeLength = (int)(DoScrollbarH(&FakeLength, &Button, FakeLength / 55.0f)*55.0f);
-
-		g_Config.m_ClReplayLength = FakeLength + 5;
-
-		if(DoButton_CheckBox(&g_Config.m_ClRaceReplays, Localize("Enable replays"), g_Config.m_ClRaceReplays, &LeftLeft))
+		if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &LeftLeft))
 		{
-			g_Config.m_ClRaceReplays ^= 1;
-			if(!g_Config.m_ClRaceReplays)
+			g_Config.m_ClReplays ^= 1;
+			if(!g_Config.m_ClReplays)
 			{
 				// stop recording and remove the tmp demo file
 				Client()->DemoRecorder_Stop(RECORDER_REPLAYS, true);

@@ -781,7 +781,7 @@ void CClient::Disconnect()
 		DisconnectWithReason(0);
 
 	// make sure to remove replay tmp demo
-	if(g_Config.m_ClRaceReplays)
+	if(g_Config.m_ClReplays)
 	{
 		Storage()->RemoveFile((&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename(), IStorage::TYPE_SAVE);
 	}
@@ -1076,15 +1076,6 @@ void CClient::Render()
 	{
 		int64 Now = time_get();
 		g_Config.m_ClAntiPing = (m_PredictedTime.Get(Now)-m_GameTime[g_Config.m_ClDummy].Get(Now))*1000/(float)time_freq() > g_Config.m_ClAntiPingLimit;
-	}
-
-	if(HasNotification())
-	{
-		int64 Now = time_get();
-		if(CurrentNotification()->m_ExpireTime < Now)
-		{
-			EndNotification();
-		}
 	}
 }
 
@@ -2676,12 +2667,12 @@ void CClient::Update()
 			std::shared_ptr<CDemoEdit> e = m_EditJobs.front();
 			if(e->Status() == IJob::STATE_DONE)
 			{
-				// Notify the player via console and a hud notification
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", e->Destination());
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
-				Notify(Localize("Replay"), Localize("Successfully saved the replay!"));
+				GameClient()->Echo(Localize("Successfully saved the replay!"));
+
 				m_EditJobs.pop_front();
 			}
 		}
@@ -3330,17 +3321,18 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::SaveReplay(const int Length)
 {
-	if(!g_Config.m_ClRaceReplays)
+	if(!g_Config.m_ClReplays)
 	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enable it via configuration.");
-		Notify(Localize("Replay"), Localize("Replay feature is disabled!"));
+		char aBuf[64];
+		GameClient()->Echo(Localize("Replay feature is disabled!"));
 	}
 	else
 	{
 		if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
-		{
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
-		}
+		else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording for at least 1 second.");
 		else
 		{
 			// First we stop the recorder to slice correctly the demo after
@@ -3357,6 +3349,8 @@ void CClient::SaveReplay(const int Length)
 			const int EndTick = GameTick();
 			const int StartTick = EndTick - Length * GameTickSpeed();
 
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
+
 			// Create a job to do this slicing in background because it can be a bit long depending on the file size
 			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 			Engine()->AddJob(pDemoEditTask);
@@ -3366,20 +3360,6 @@ void CClient::SaveReplay(const int Length)
 			DemoRecorder_StartReplayRecorder();
 		}
 	}
-}
-
-void CClient::Notify(const char *pTitle, const char *pMessage)
-{
-	EndNotification();
-	new CHudNotification(m_CurrentNotification);
-	m_CurrentNotification.m_pTitle = pTitle;
-	m_CurrentNotification.m_pMessage = pMessage;
-	m_CurrentNotification.m_ExpireTime = time_get() + g_Config.m_ClNotificationTime * time_freq();
-}
-
-void CClient::EndNotification()
-{
-	mem_zero(&m_CurrentNotification, sizeof(m_CurrentNotification));
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
@@ -3513,7 +3493,7 @@ void CClient::DemoRecorder_HandleAutoStart()
 
 void CClient::DemoRecorder_StartReplayRecorder()
 {
-	if(g_Config.m_ClRaceReplays)
+	if(g_Config.m_ClReplays)
 	{
 		DemoRecorder_Stop(RECORDER_REPLAYS);
 		char aBuf[512];
@@ -3699,6 +3679,26 @@ void CClient::ConchainPassword(IConsole::IResult *pResult, void *pUserData, ICon
 		pSelf->m_SendPassword = true;
 }
 
+void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		int Status = pResult->GetInteger(0);
+		if(Status == 0)
+		{
+			// stop recording and remove the tmp demo file
+			pSelf->DemoRecorder_Stop(RECORDER_REPLAYS, true);
+		}
+		else
+		{
+			// start recording
+			pSelf->DemoRecorder_HandleAutoStart();
+		}
+	}
+}
+
 void CClient::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -3740,6 +3740,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("save_replay", "?i[length]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
+	m_pConsole->Chain("cl_replays", ConchainReplays, this);
 
 	m_pConsole->Chain("password", ConchainPassword, this);
 

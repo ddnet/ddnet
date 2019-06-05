@@ -101,6 +101,7 @@ public:
 	void Say(int Team, const char *pLine);
 	void SayChat(const char *pLine);
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
+	void Echo(const char *pString);
 
 	virtual void OnWindowResize();
 	virtual void OnReset();

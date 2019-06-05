@@ -19,22 +19,12 @@ enum
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
-class CHudNotification
-{
-public:
-	const char *m_pTitle;
-	const char *m_pMessage;
-	int64 m_ExpireTime;
-};
-
 class IClient : public IInterface
 {
 	MACRO_INTERFACE("client", 0)
 protected:
 	// quick access to state of the client
 	int m_State;
-
-	CHudNotification m_CurrentNotification;
 
 	// quick access to time variables
 	int m_PrevGameTick[2];
@@ -81,9 +71,6 @@ public:
 		STATE_DEMOPLAYBACK,
 		STATE_QUITING,
 	};
-
-	CHudNotification *CurrentNotification() { return &m_CurrentNotification; };
-	bool HasNotification() { return m_CurrentNotification.m_pTitle; };
 
 	//
 	inline int State() const { return m_State; }
@@ -250,6 +237,7 @@ public:
 	virtual const char *NetVersion() = 0;
 
 	virtual void OnDummyDisconnect() = 0;
+	virtual void Echo(const char *pString) = 0;
 };
 
 extern IGameClient *CreateGameClient();

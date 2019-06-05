@@ -68,7 +68,6 @@ public:
 	virtual void OnWindowResize();
 	virtual void OnReset();
 	virtual void OnRender();
-	virtual void RenderNotification();
 	virtual void OnInit();
 
 	// DDRace
