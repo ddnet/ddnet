@@ -554,7 +554,7 @@ void CScoreboard::RenderRecordingNotification(float x)
 		str_format(aBuf2, sizeof(aBuf2), Localize("Auto %3d:%02d  "), Seconds/60, Seconds%60);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
-	if (m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
+	if(m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
 		Seconds = m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length();
 		str_format(aBuf2, sizeof(aBuf2), Localize("Replay %3d:%02d  "), Seconds / 60, Seconds % 60);

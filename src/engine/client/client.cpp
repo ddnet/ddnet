@@ -3306,13 +3306,9 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 	{
 		int Length = pResult->GetInteger(0);
 		if(Length <= 0)
-		{
 			pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: length must be greater than 0 second.");
-		}
 		else
-		{
 			pSelf->SaveReplay(Length);
-		}
 	}
 	else
 		pSelf->SaveReplay(g_Config.m_ClReplayLength);
@@ -3324,40 +3320,40 @@ void CClient::SaveReplay(const int Length)
 	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enable it via configuration.");
 		GameClient()->Echo(Localize("Replay feature is disabled!"));
+		return;
 	}
+	
+	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
+	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording for at least 1 second.");
 	else
 	{
-		if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
-		else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording for at least 1 second.");
-		else
-		{
-			// First we stop the recorder to slice correctly the demo after
-			DemoRecorder_Stop(RECORDER_REPLAYS);
-			char aFilename[256];
+		// First we stop the recorder to slice correctly the demo after
+		DemoRecorder_Stop(RECORDER_REPLAYS);
+		char aFilename[256];
 
-			char aDate[64];
-			str_timestamp(aDate, sizeof(aDate));
+		char aDate[64];
+		str_timestamp(aDate, sizeof(aDate));
 
-			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
-			char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
+		str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
+		char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
-			// Slice the demo to get only the last cl_replay_length seconds
-			const int EndTick = GameTick();
-			const int StartTick = EndTick - Length * GameTickSpeed();
+		// Slice the demo to get only the last cl_replay_length seconds
+		const int EndTick = GameTick();
+		const int StartTick = EndTick - Length * GameTickSpeed();
 
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
-			// Create a job to do this slicing in background because it can be a bit long depending on the file size
-			std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
-			Engine()->AddJob(pDemoEditTask);
-			m_EditJobs.push_back(pDemoEditTask);
+		// Create a job to do this slicing in background because it can be a bit long depending on the file size
+		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+		Engine()->AddJob(pDemoEditTask);
+		m_EditJobs.push_back(pDemoEditTask);
 
-			// And we restart the recorder
-			DemoRecorder_StartReplayRecorder();
-		}
+		// And we restart the recorder
+		DemoRecorder_StartReplayRecorder();
 	}
+	
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
