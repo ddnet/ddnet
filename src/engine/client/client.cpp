@@ -264,9 +264,8 @@ void CSmoothTime::Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustD
 
 CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta)
 {
-	for (int i = 0; i < RECORDER_MAX; i++) {
+	for (int i = 0; i < RECORDER_MAX; i++)
 		m_DemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta);
-	}
 
 	m_pEditor = 0;
 	m_pInput = 0;
@@ -3324,7 +3323,6 @@ void CClient::SaveReplay(const int Length)
 	if(!g_Config.m_ClReplays)
 	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Feature is disabled. Please enable it via configuration.");
-		char aBuf[64];
 		GameClient()->Echo(Localize("Replay feature is disabled!"));
 	}
 	else
