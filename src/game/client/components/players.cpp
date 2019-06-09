@@ -339,7 +339,7 @@ void CPlayers::RenderPlayer(
 
 				if(m_pClient->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientID) != -1)
 				{
-					Graphics()->SetColor(1.0f, 1.0f, 0.0f, Alpha);
+					Graphics()->SetColor(0.0f, 1.0f, 0.0f, Alpha);
 					break;
 				}
 
