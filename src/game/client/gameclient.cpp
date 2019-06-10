@@ -1821,23 +1821,27 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2& NewPos2, in
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
-	CClientData OwncData = m_aClients[ownID];
-
-	if(!OwncData.m_Super && !m_Tuning[g_Config.m_ClDummy].m_PlayerHooking)
-		return ClosestID;
+	CClientData OwnClientData = m_aClients[ownID];
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		if(i == ownID)
+			continue;
+
 		CClientData cData = m_aClients[i];
+
+		if(!cData.m_Active)
+			continue;
+
 		CNetObj_Character Prev = m_Snap.m_aCharacters[i].m_Prev;
 		CNetObj_Character Player = m_Snap.m_aCharacters[i].m_Cur;
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick());
 
-		bool IsOneSuper = cData.m_Super || OwncData.m_Super;
-		bool IsOneSolo = cData.m_Solo || OwncData.m_Solo;
+		bool IsOneSuper = cData.m_Super || OwnClientData.m_Super;
+		bool IsOneSolo = cData.m_Solo || OwnClientData.m_Solo;
 
-		if(!cData.m_Active || i == ownID || (!IsOneSuper && (!m_Teams.SameTeam(i, ownID) || IsOneSolo || OwncData.m_NoHookHit)))
+		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownID) || IsOneSolo || OwnClientData.m_NoHookHit))
 			continue;
 
 		vec2 ClosestPoint = closest_point_on_line(HookPos, NewPos, Position);
