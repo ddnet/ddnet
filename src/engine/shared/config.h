@@ -12,7 +12,7 @@
 struct CConfiguration
 {
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) int m_##Name;
-	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Min,Max,Save,Desc) MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc)
+	#define MACRO_CONFIG_COL(Name,ScriptName,Def,Save,Desc) unsigned m_##Name;
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) char m_##Name[Len]; // Flawfinder: ignore
 	#include "config_variables.h"
 	#undef MACRO_CONFIG_INT

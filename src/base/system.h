@@ -1657,6 +1657,7 @@ void net_stats(NETSTATS *stats);
 
 int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
+unsigned long str_toulong_base(const char *str, int base);
 float str_tofloat(const char *str);
 int str_isspace(char c);
 char str_uppercase(char c);
