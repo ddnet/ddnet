@@ -176,6 +176,15 @@ CSnapshotDelta::CSnapshotDelta()
 	mem_zero(&m_Empty, sizeof(m_Empty));
 }
 
+CSnapshotDelta::CSnapshotDelta(const CSnapshotDelta &old)
+{
+	mem_copy(m_aItemSizes, old.m_aItemSizes, sizeof(m_aItemSizes));
+	mem_copy(m_aSnapshotDataRate, old.m_aSnapshotDataRate, sizeof(m_aSnapshotDataRate));
+	mem_copy(m_aSnapshotDataUpdates, old.m_aSnapshotDataUpdates, sizeof(m_aSnapshotDataUpdates));
+	mem_copy(&m_SnapshotCurrent, &old.m_SnapshotCurrent, sizeof(m_SnapshotCurrent));
+	mem_copy(&m_Empty, &old.m_Empty, sizeof(m_Empty));
+}
+
 void CSnapshotDelta::SetStaticsize(int ItemType, int Size)
 {
 	m_aItemSizes[ItemType] = Size;

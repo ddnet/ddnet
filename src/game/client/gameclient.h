@@ -422,6 +422,8 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
+	void Echo(const char *pString);
+
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];

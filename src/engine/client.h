@@ -13,7 +13,8 @@ enum
 	RECORDER_MANUAL=0,
 	RECORDER_AUTO=1,
 	RECORDER_RACE=2,
-	RECORDER_MAX=3,
+	RECORDER_REPLAYS=3,
+	RECORDER_MAX=4,
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
@@ -103,7 +104,7 @@ public:
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
-	virtual void DemoRecorder_Stop(int Recorder) = 0;
+	virtual void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) = 0;
 	virtual class IDemoRecorder *DemoRecorder(int Recorder) = 0;
 	virtual void AutoScreenshot_Start() = 0;
 	virtual void AutoStatScreenshot_Start() = 0;
@@ -201,6 +202,7 @@ public:
 	virtual IFriends* Foes() = 0;
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
+
 };
 
 class IGameClient : public IInterface
@@ -234,6 +236,7 @@ public:
 	virtual const char *NetVersion() = 0;
 
 	virtual void OnDummyDisconnect() = 0;
+	virtual void Echo(const char *pString) = 0;
 };
 
 extern IGameClient *CreateGameClient();

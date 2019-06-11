@@ -138,7 +138,12 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::ConEcho(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->AddLine(-2, 0, pResult->GetString(0));
+	((CChat *)pUserData)->Echo(pResult->GetString(0));
+}
+
+void CChat::Echo(const char *pString)
+{
+	AddLine(-2, 0, pString);
 }
 
 void CChat::OnConsoleInit()

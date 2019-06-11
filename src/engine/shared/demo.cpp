@@ -40,13 +40,17 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	m_MapSize = MapSize;
 	m_pMapData = pMapData;
+	m_pConsole = pConsole;
 
 	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for recording", pFilename);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+		if(m_pConsole)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for recording", pFilename);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+		}
 		return -1;
 	}
 
@@ -56,8 +60,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		io_close(DemoFile);
 		return -1;
 	}
-
-	m_pConsole = pConsole;
 
 	bool CloseMapFile = false;
 
@@ -87,9 +89,12 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		}
 		if(!MapFile)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Unable to open mapfile '%s'", pMap);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+			if(m_pConsole)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "Unable to open mapfile '%s'", pMap);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+			}
 			return -1;
 		}
 
@@ -145,10 +150,14 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	m_FirstTick = -1;
 	m_NumTimelineMarkers = 0;
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "Recording to '%s'", pFilename);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+	if(m_pConsole)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Recording to '%s'", pFilename);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf);
+	}
 	m_File = DemoFile;
+	str_copy(m_aCurrentFilename, pFilename, sizeof(m_aCurrentFilename));
 
 	return 0;
 }
@@ -343,7 +352,8 @@ int CDemoRecorder::Stop()
 
 	io_close(m_File);
 	m_File = 0;
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Stopped recording");
+	if(m_pConsole)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Stopped recording");
 
 	return 0;
 }
@@ -363,7 +373,8 @@ void CDemoRecorder::AddDemoMarker()
 
 	m_aTimelineMarkers[m_NumTimelineMarkers++] = m_LastTickMarker;
 
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker");
+	if(m_pConsole)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker");
 }
 
 
@@ -524,10 +535,12 @@ void CDemoPlayer::DoTick()
 		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
 		{
 			// stop on error or eof
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
+			if(m_pConsole)
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
 			if(m_Info.m_PreviousTick == -1)
 			{
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "empty demo");
+				if(m_pConsole)
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "empty demo");
 				Stop();
 			}
 			else
@@ -541,7 +554,8 @@ void CDemoPlayer::DoTick()
 			if(io_read(m_File, aCompresseddata, ChunkSize) != (unsigned)ChunkSize)
 			{
 				// stop on error or eof
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error reading chunk");
+				if(m_pConsole)
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error reading chunk");
 				Stop();
 				break;
 			}
@@ -550,7 +564,8 @@ void CDemoPlayer::DoTick()
 			if(DataSize < 0)
 			{
 				// stop on error or eof
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during network decompression");
+				if(m_pConsole)
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during network decompression");
 				Stop();
 				break;
 			}
@@ -559,7 +574,8 @@ void CDemoPlayer::DoTick()
 
 			if(DataSize < 0)
 			{
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during intpack decompression");
+				if(m_pConsole)
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during intpack decompression");
 				Stop();
 				break;
 			}
@@ -584,9 +600,12 @@ void CDemoPlayer::DoTick()
 			}
 			else
 			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "error during unpacking of delta, err=%d", DataSize);
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
+				if(m_pConsole)
+				{
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "error during unpacking of delta, err=%d", DataSize);
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
+				}
 			}
 		}
 		else if(ChunkType == CHUNKTYPE_SNAPSHOT)
@@ -644,9 +663,12 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
 	if(!m_File)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "could not open '%s'", pFilename);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+		if(m_pConsole)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "could not open '%s'", pFilename);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+		}
 		return -1;
 	}
 
@@ -669,9 +691,12 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	io_read(m_File, &m_Info.m_Header, sizeof(m_Info.m_Header));
 	if(mem_comp(m_Info.m_Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "'%s' is not a demo file", pFilename);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+		if(m_pConsole)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "'%s' is not a demo file", pFilename);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+		}
 		io_close(m_File);
 		m_File = 0;
 		return -1;
@@ -679,9 +704,12 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 	if(m_Info.m_Header.m_Version < gs_OldVersion)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "demo version %d is not supported", m_Info.m_Header.m_Version);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+		if(m_pConsole)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "demo version %d is not supported", m_Info.m_Header.m_Version);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+		}
 		io_close(m_File);
 		m_File = 0;
 		return -1;
@@ -880,10 +908,13 @@ int CDemoPlayer::Update(bool RealTime)
 		if(m_Info.m_Info.m_CurrentTick == m_Info.m_PreviousTick ||
 			m_Info.m_Info.m_CurrentTick == m_Info.m_NextTick)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "tick error prev=%d cur=%d next=%d",
-				m_Info.m_PreviousTick, m_Info.m_Info.m_CurrentTick, m_Info.m_NextTick);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
+			if(m_pConsole)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "tick error prev=%d cur=%d next=%d",
+					m_Info.m_PreviousTick, m_Info.m_Info.m_CurrentTick, m_Info.m_NextTick);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
+			}
 		}
 	}
 
@@ -895,7 +926,8 @@ int CDemoPlayer::Stop()
 	if(!m_File)
 		return -1;
 
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Stopped playback");
+	if(m_pConsole)
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Stopped playback");
 	io_close(m_File);
 	m_File = 0;
 	free(m_pKeyFrames);
@@ -991,6 +1023,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 			break;
 	}
 
+	m_pDemoPlayer->Stop();
 	m_pDemoRecorder->Stop();
 }
 

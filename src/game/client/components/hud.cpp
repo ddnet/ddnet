@@ -832,6 +832,7 @@ void CHud::OnRender()
 		RenderVoting();
 		if(g_Config.m_ClShowRecord)
 			RenderRecord();
+
 	}
 	RenderCursor();
 }

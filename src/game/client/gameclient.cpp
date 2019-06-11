@@ -2148,3 +2148,8 @@ vec2 CGameClient::GetSmoothPos(int ClientID)
 	}
 	return Pos;
 }
+
+void CGameClient::Echo(const char *pString)
+{
+	m_pChat->Echo(pString);
+}

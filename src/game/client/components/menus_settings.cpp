@@ -1997,6 +1997,37 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		g_Config.m_ClAutoRaceRecord ^= 1;
 	}
 
+	{
+		CUIRect Button, Label;
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(160.0f, &LeftLeft, &Button);
+
+		Button.VSplitLeft(140.0f, &Label, &Button);
+		Button.HMargin(2.0f, &Button);
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), Localize("Default length: %d"), g_Config.m_ClReplayLength);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+
+		int NewValue = (int)(DoScrollbarH(&g_Config.m_ClReplayLength, &Button, (minimum(g_Config.m_ClReplayLength, 600) - 10) / 590.0f)*590.0f) + 10;
+		if(g_Config.m_ClReplayLength < 600 || NewValue < 600)
+			g_Config.m_ClReplayLength = minimum(NewValue, 600);
+
+		if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &LeftLeft))
+		{
+			g_Config.m_ClReplays ^= 1;
+			if(!g_Config.m_ClReplays)
+			{
+				// stop recording and remove the tmp demo file
+				Client()->DemoRecorder_Stop(RECORDER_REPLAYS, true);
+			}
+			else
+			{
+				// start recording
+				Client()->DemoRecorder_HandleAutoStart();
+			}
+		}
+	}
+
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Ghost"), g_Config.m_ClRaceGhost, &Button))
 	{

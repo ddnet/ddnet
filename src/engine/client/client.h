@@ -55,7 +55,6 @@ public:
 	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
 };
 
-
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
@@ -94,6 +93,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64 m_LocalStartTime;
 
 	int m_DebugFont;
+	int m_DebugSoundIndex = 0;
 
 	int64 m_LastRenderTime;
 	float m_RenderFrameTimeLow;
@@ -187,6 +187,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
 
 	class CSnapshotDelta m_SnapshotDelta;
+
+	std::list<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
 	//
 	class CServerInfo m_CurrentServerInfo;
@@ -360,17 +362,20 @@ public:
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);
+	static void Con_SaveReplay(IConsole::IResult *pResult, void *pUserData);
 
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType);
 	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder);
 	void DemoRecorder_HandleAutoStart();
-	void DemoRecorder_Stop(int Recorder);
+	void DemoRecorder_StartReplayRecorder();
+	void DemoRecorder_Stop(int Recorder, bool RemoveFile = false);
 	void DemoRecorder_AddDemoMarker(int Recorder);
 	class IDemoRecorder *DemoRecorder(int Recorder);
 
@@ -412,6 +417,7 @@ public:
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
+	virtual void SaveReplay(const int Length);
 
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
@@ -419,4 +425,5 @@ public:
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };
+
 #endif
