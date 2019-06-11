@@ -68,13 +68,13 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	{
 		// open mapfile
 		char aMapFilename[128];
-		// try the normal maps folder
-		str_format(aMapFilename, sizeof(aMapFilename), "maps/%s.map", pMap);
+		// try the downloaded maps
+		str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
 		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 		if(!MapFile)
 		{
-			// try the downloaded maps
-			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
+			// try the normal maps folder
+			str_format(aMapFilename, sizeof(aMapFilename), "maps/%s.map", pMap);
 			MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 		}
 		if(!MapFile)
