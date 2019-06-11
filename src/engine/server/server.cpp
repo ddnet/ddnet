@@ -285,7 +285,6 @@ CServer::CServer()
 
 	m_ServerInfoFirstRequest = 0;
 	m_ServerInfoNumRequests = 0;
-	m_ServerInfoHighLoad = false;
 
 #ifdef CONF_FAMILY_UNIX
 	m_ConnLoggingSocketCreated = false;
@@ -1472,20 +1471,24 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 void CServer::SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type)
 {
-	const int MaxRequests = g_Config.m_SvServerInfoPerSecond;
-	int64 Now = Tick();
-	if(Now <= m_ServerInfoFirstRequest + TickSpeed())
+	bool SendClients = true;
+
+	if(g_Config.m_SvServerInfoPerSecond)
 	{
-		m_ServerInfoNumRequests++;
-	}
-	else
-	{
-		m_ServerInfoHighLoad = m_ServerInfoNumRequests > MaxRequests;
-		m_ServerInfoNumRequests = 1;
-		m_ServerInfoFirstRequest = Now;
+		SendClients = m_ServerInfoNumRequests <= g_Config.m_SvServerInfoPerSecond;
+		const int64 Now = Tick();
+
+		if(Now <= m_ServerInfoFirstRequest + TickSpeed())
+		{
+			m_ServerInfoNumRequests++;
+		}
+		else
+		{
+			m_ServerInfoNumRequests = 1;
+			m_ServerInfoFirstRequest = Now;
+		}
 	}
 
-	bool SendClients = m_ServerInfoNumRequests <= MaxRequests && !m_ServerInfoHighLoad;
 	SendServerInfo(pAddr, Token, Type, SendClients);
 }
 

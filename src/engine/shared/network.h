@@ -319,7 +319,6 @@ class CNetServer
 	unsigned char m_SecurityTokenSeed[16];
 
 	// vanilla connect flood detection
-	bool m_VConnHighLoad;
 	int64 m_VConnFirst;
 	int m_VConnNum;
 
