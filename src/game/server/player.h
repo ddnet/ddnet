@@ -92,6 +92,7 @@ public:
 	} m_TeeInfos;
 
 	int m_DieTick;
+	int m_PreviousDieTick;
 	int m_Score;
 	int m_JoinTick;
 	bool m_ForceBalanced;

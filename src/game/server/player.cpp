@@ -12,6 +12,7 @@
 #include "gamemodes/DDRace.h"
 #include <time.h>
 
+#include <algorithm>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -37,6 +38,7 @@ CPlayer::~CPlayer()
 void CPlayer::Reset()
 {
 	m_DieTick = Server()->Tick();
+	m_PreviousDieTick = m_DieTick;
 	m_JoinTick = Server()->Tick();
 	delete m_pCharacter;
 	m_pCharacter = 0;
@@ -196,7 +198,9 @@ void CPlayer::Tick()
 
 	if(!GameServer()->m_World.m_Paused)
 	{
-		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
+		int EarliestRespawnTick = m_PreviousDieTick+Server()->TickSpeed()*3;
+		int RespawnTick = std::max(m_DieTick, EarliestRespawnTick);
+		if(!m_pCharacter && RespawnTick <= Server()->Tick())
 			m_Spawning = true;
 
 		if(m_pCharacter)
@@ -219,6 +223,7 @@ void CPlayer::Tick()
 	else
 	{
 		++m_DieTick;
+		++m_PreviousDieTick;
 		++m_JoinTick;
 		++m_LastActionTick;
 		++m_TeamChangeTick;
