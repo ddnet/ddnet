@@ -71,7 +71,6 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	m_NumConAttempts = 0;
 	m_TimeNumConAttempts = time_get();
 
-	m_VConnHighLoad = false;
 	m_VConnNum = 0;
 	m_VConnFirst = 0;
 
@@ -337,20 +336,24 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 	{
 		if (g_Config.m_SvVanillaAntiSpoof && g_Config.m_Password[0] == '\0')
 		{
-			// detect flooding
-			int64 Now = time_get();
-			if(Now <= m_VConnFirst + time_freq())
-			{
-				m_VConnNum++;
-			}
-			else
-			{
-				m_VConnHighLoad = m_VConnNum > g_Config.m_SvVanConnPerSecond;
-				m_VConnNum = 1;
-				m_VConnFirst = Now;
-			}
+			bool Flooding = false;
 
-			bool Flooding = m_VConnNum > g_Config.m_SvVanConnPerSecond || m_VConnHighLoad;
+			if (g_Config.m_SvVanConnPerSecond)
+			{
+				// detect flooding
+				Flooding = m_VConnNum > g_Config.m_SvVanConnPerSecond;
+				const int64 Now = time_get();
+
+				if(Now <= m_VConnFirst + time_freq())
+				{
+					m_VConnNum++;
+				}
+				else
+				{
+					m_VConnNum = 1;
+					m_VConnFirst = Now;
+				}
+			}
 
 			if (g_Config.m_Debug && Flooding)
 			{

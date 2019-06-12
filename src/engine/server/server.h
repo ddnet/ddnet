@@ -222,7 +222,6 @@ public:
 
 	int m_RconRestrict;
 
-	bool m_ServerInfoHighLoad;
 	int64 m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
 
