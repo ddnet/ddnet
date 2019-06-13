@@ -197,7 +197,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::list<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
 	//
-	bool m_GotServerCapabilities;
+	bool m_CanReceiveServerCapabilities;
 	bool m_ServerSentCapabilities;
 	CServerCapabilities m_ServerCapabilities;
 

@@ -953,28 +953,39 @@ void CGameClient::ProcessEvents()
 static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CServerInfo *pFallbackServerInfo)
 {
 	int Version = -1;
-	if(InfoExSize >= 4)
-	{
-		Version = 0;
-	}
-	else if(InfoExSize >= 8)
+	if(InfoExSize >= 8)
 	{
 		Version = pInfoEx->m_Version;
+	}
+	else if(InfoExSize >= 4)
+	{
+		Version = 0;
 	}
 	int Flags = 0;
 	if(Version >= 0)
 	{
 		Flags = pInfoEx->m_Flags;
 	}
-	bool Race = IsRace(pFallbackServerInfo);
-	bool FastCap = IsFastCap(pFallbackServerInfo);
-	bool FNG = IsFNG(pFallbackServerInfo);
-	bool DDRace = IsDDRace(pFallbackServerInfo);
-	bool DDNet = IsDDNet(pFallbackServerInfo);
-	bool BlockWorlds = IsBlockWorlds(pFallbackServerInfo);
-	bool Vanilla = IsVanilla(pFallbackServerInfo);
-	bool Plus = IsPlus(pFallbackServerInfo);
-	if(Version >= 1)
+	bool Race;
+	bool FastCap;
+	bool FNG;
+	bool DDRace;
+	bool DDNet;
+	bool BlockWorlds;
+	bool Vanilla;
+	bool Plus;
+	if(Version < 1)
+	{
+		Race = IsRace(pFallbackServerInfo);
+		FastCap = IsFastCap(pFallbackServerInfo);
+		FNG = IsFNG(pFallbackServerInfo);
+		DDRace = IsDDRace(pFallbackServerInfo);
+		DDNet = IsDDNet(pFallbackServerInfo);
+		BlockWorlds = IsBlockWorlds(pFallbackServerInfo);
+		Vanilla = IsVanilla(pFallbackServerInfo);
+		Plus = IsPlus(pFallbackServerInfo);
+	}
+	else
 	{
 		Race = Flags&GAMEINFOFLAG_GAMETYPE_RACE;
 		FastCap = Flags&GAMEINFOFLAG_GAMETYPE_FASTCAP;
@@ -985,6 +996,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Vanilla = Flags&GAMEINFOFLAG_GAMETYPE_VANILLA;
 		Plus = Flags&GAMEINFOFLAG_GAMETYPE_PLUS;
 
+		// Ensure invariants upheld by the server info parsing business.
 		DDRace = DDRace || DDNet;
 		Race = Race || FastCap || DDRace;
 	}

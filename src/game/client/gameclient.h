@@ -224,8 +224,6 @@ public:
 		//const CNetObj_PlayerInfo *m_paInfoByTeam[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_paInfoByDDTeam[MAX_CLIENTS];
 
-		const CNetObj_GameInfoEx *m_pGameInfoEx;
-
 		int m_LocalClientID;
 		int m_NumPlayers;
 		int m_aTeamSize[2];

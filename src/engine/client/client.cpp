@@ -740,7 +740,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	//
 	m_RconAuthed[0] = 0;
-	m_GotServerCapabilities = false;
+	m_CanReceiveServerCapabilities = true;
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
@@ -1572,7 +1572,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 		}
 		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
 		{
-			if(m_GotServerCapabilities)
+			if(!m_CanReceiveServerCapabilities)
 			{
 				return;
 			}
@@ -1583,15 +1583,15 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				return;
 			}
 			m_ServerCapabilities = GetServerCapabilities(Version, Flags);
-			m_GotServerCapabilities = true;
+			m_CanReceiveServerCapabilities = false;
 			m_ServerSentCapabilities = true;
 		}
 		else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
 		{
-			if(!m_GotServerCapabilities)
+			if(m_CanReceiveServerCapabilities)
 			{
 				m_ServerCapabilities = GetServerCapabilities(0, 0);
-				m_GotServerCapabilities = true;
+				m_CanReceiveServerCapabilities = false;
 			}
 			bool MapDetailsWerePresent = m_MapDetailsPresent;
 			m_MapDetailsPresent = false;
