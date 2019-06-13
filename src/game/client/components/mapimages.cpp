@@ -103,32 +103,29 @@ void CMapImages::LoadBackground(class IMap *pMap)
 
 int CMapImages::GetEntities()
 {
-	CServerInfo Info;
-	Client()->GetServerInfo(&Info);
-	
-	if(m_EntitiesTextures == -1 || str_comp(m_aEntitiesGameType, Info.m_aGameType))
-	{
-		// DDNet default to prevent delay in seeing entities
-		char file[64] = "ddnet";
-		if(IsDDNet(&Info))
-			str_copy(file, "ddnet", sizeof(file));
-		else if(IsDDRace(&Info))
-			str_copy(file, "ddrace", sizeof(file));
-		else if(IsRace(&Info))
-			str_copy(file, "race", sizeof(file));
-		else if(IsFNG(&Info))
-			str_copy(file, "fng", sizeof(file));
-		else if(IsVanilla(&Info))
-			str_copy(file, "vanilla", sizeof(file));
+	// DDNet default to prevent delay in seeing entities
+	const char *pEntities = "ddnet";
+	if(GameClient()->m_GameInfo.m_EntitiesDDNet)
+		pEntities = "ddnet";
+	else if(GameClient()->m_GameInfo.m_EntitiesDDRace)
+		pEntities = "ddrace";
+	else if(GameClient()->m_GameInfo.m_EntitiesRace)
+		pEntities = "race";
+	else if(GameClient()->m_GameInfo.m_EntitiesFNG)
+		pEntities = "fng";
+	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
+		pEntities = "vanilla";
 
-		char path[64];
-		str_format(path, sizeof(path), "editor/entities_clear/%s.png", file);
-		
+	if(m_EntitiesTextures == -1 || m_pEntitiesGameType != pEntities)
+	{
+		char aPath[64];
+		str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", pEntities);
+
 		if(m_EntitiesTextures >= 0)
 			Graphics()->UnloadTexture(m_EntitiesTextures);
-		m_EntitiesTextures = Graphics()->LoadTexture(path, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		m_EntitiesTextures = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
-		str_copy(m_aEntitiesGameType, Info.m_aGameType, sizeof(m_aEntitiesGameType));
+		m_pEntitiesGameType = pEntities;
 	}
 	return m_EntitiesTextures;
 }

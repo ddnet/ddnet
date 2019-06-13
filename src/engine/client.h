@@ -153,6 +153,7 @@ public:
 	virtual int SnapNumItems(int SnapID) = 0;
 	virtual void *SnapFindItem(int SnapID, int Type, int ID) = 0;
 	virtual void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) = 0;
+	virtual int SnapItemSize(int SnapID, int Index) = 0;
 	virtual void SnapInvalidateItem(int SnapID, int Index) = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;

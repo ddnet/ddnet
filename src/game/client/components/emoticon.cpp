@@ -135,9 +135,7 @@ void CEmoticon::OnRender()
 
 	Graphics()->QuadsEnd();
 
-	CServerInfo pServerInfo;
-	Client()->GetServerInfo(&pServerInfo);
-	if((IsDDRace(&pServerInfo) || IsDDNet(&pServerInfo) || IsBlockWorlds(&pServerInfo) || IsPlus(&pServerInfo)) && g_Config.m_ClEyeWheel)
+	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
 	{
 		Graphics()->TextureSet(-1);
 		Graphics()->QuadsBegin();

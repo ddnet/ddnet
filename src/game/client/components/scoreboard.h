@@ -32,7 +32,6 @@ public:
 
 private:
 
-	bool m_IsGameTypeRace;
 	float m_ServerRecord;
 };
 

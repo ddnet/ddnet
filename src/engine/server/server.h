@@ -278,6 +278,7 @@ public:
 	static int ClientRejoinCallback(int ClientID, void *pUser);
 
 	void SendRconType(int ClientID, bool UsernameReq);
+	void SendCapabilities(int ClientID);
 	void SendMap(int ClientID);
 	void SendMapData(int ClientID, int Chunk);
 	void SendConnectionReady(int ClientID);

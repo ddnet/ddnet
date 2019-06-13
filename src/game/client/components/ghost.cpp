@@ -187,9 +187,7 @@ void CGhost::CheckStart()
 			GhostRecorder()->Stop(0, -1);
 		int StartTick = RaceTick;
 
-		CServerInfo ServerInfo;
-		Client()->GetServerInfo(&ServerInfo);
-		if(IsDDRace(&ServerInfo)) // the client recognizes the start one tick earlier than ddrace servers
+		if(GameClient()->m_GameInfo.m_BugDDRaceGhost) // the client recognizes the start one tick earlier than ddrace servers
 			StartTick--;
 		StartRecord(StartTick);
 		RenderTick = StartTick;
@@ -261,9 +259,7 @@ void CGhost::TryRenderStart(int Tick, bool ServerControl)
 
 void CGhost::OnNewSnapshot()
 {
-	CServerInfo ServerInfo;
-	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo) || Client()->State() != IClient::STATE_ONLINE)
+	if(!GameClient()->m_GameInfo.m_Race || Client()->State() != IClient::STATE_ONLINE)
 		return;
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
@@ -289,9 +285,7 @@ void CGhost::OnNewSnapshot()
 
 void CGhost::OnNewPredictedSnapshot()
 {
-	CServerInfo ServerInfo;
-	Client()->GetServerInfo(&ServerInfo);
-	if(!IsRace(&ServerInfo) || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
+	if(!GameClient()->m_GameInfo.m_Race || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
 		return;
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;

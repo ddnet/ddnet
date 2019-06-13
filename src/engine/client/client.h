@@ -55,6 +55,12 @@ public:
 	void Update(CGraph *pGraph, int64 Target, int TimeLeft, int AdjustDirection);
 };
 
+class CServerCapabilities
+{
+public:
+	bool m_ChatTimeoutCode;
+};
+
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
@@ -191,6 +197,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::list<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
 	//
+	bool m_CanReceiveServerCapabilities;
+	bool m_ServerSentCapabilities;
+	CServerCapabilities m_ServerCapabilities;
+
+	bool ShouldSendChatTimeoutCodeHeuristic();
+
 	class CServerInfo m_CurrentServerInfo;
 	int64 m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 
@@ -285,6 +297,7 @@ public:
 
 	int GetPredictionTime();
 	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem);
+	int SnapItemSize(int SnapID, int Index);
 	void SnapInvalidateItem(int SnapID, int Index);
 	void *SnapFindItem(int SnapID, int Type, int ID);
 	int SnapNumItems(int SnapID);
