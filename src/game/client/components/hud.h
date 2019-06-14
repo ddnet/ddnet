@@ -59,7 +59,6 @@ class CHud : public CComponent
 	void RenderSpectatorHud();
 	void RenderWarmupTimer();
 	void RenderLocalTime(float x);
-	void RenderPlayTime(float x);
 
 	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
 public:
