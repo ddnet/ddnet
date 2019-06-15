@@ -143,8 +143,6 @@ class CGameClient : public IGameClient
 
 	int m_CheckInfo[2];
 
-	time_t m_InitTime;
-
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 
@@ -177,8 +175,6 @@ public:
 
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
-
-	double GetPlayTime(time_t Curr){ return difftime(Curr, m_InitTime); };
 
 	bool m_SuppressEvents;
 	bool m_NewTick;
