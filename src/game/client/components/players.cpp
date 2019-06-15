@@ -294,7 +294,7 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if(ClientID >= 0 && ((GameClient()->m_GameInfo.m_AllowHookColl && g_Config.m_ClShowHookCollAlways) || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && g_Config.m_ClShowHookCollOther) || (Local && g_Config.m_ClShowHookCollOwn)))))
+		if(ClientID >= 0 && GameClient()->m_GameInfo.m_AllowHookColl && (g_Config.m_ClShowHookCollAlways || (Player.m_PlayerFlags&PLAYERFLAG_AIM && ((!Local && g_Config.m_ClShowHookCollOther) || (Local && g_Config.m_ClShowHookCollOwn)))))
 		{
 			vec2 ExDirection = Direction;
 
