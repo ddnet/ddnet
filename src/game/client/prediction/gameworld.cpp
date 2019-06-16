@@ -432,29 +432,32 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 	else if(ObjType == NETOBJTYPE_LASER && m_WorldConfig.m_PredictWeapons)
 	{
 		CLaser NetLaser = CLaser(this, ObjID, (CNetObj_Laser*) pObjData);
+		CLaser *pMatching = 0;
 		if(CLaser *pLaser = (CLaser*) GetEntity(ObjID, ENTTYPE_LASER))
-		{
 			if(NetLaser.Match(pLaser))
+				pMatching = pLaser;
+		if(!pMatching)
+		{
+			for(CLaser *pLaser = (CLaser*) FindFirst(CGameWorld::ENTTYPE_LASER); pLaser; pLaser = (CLaser*) pLaser->TypeNext())
 			{
-				pLaser->Keep();
-				if(distance(pLaser->m_Pos, NetLaser.m_Pos) > 2.f)
+				if(pLaser->m_ID == -1 && NetLaser.Match(pLaser))
 				{
-					pLaser->m_Energy = 0.f;
-					pLaser->m_Pos = NetLaser.m_Pos;
+					pMatching = pLaser;
+					pMatching->m_ID = ObjID;
+					break;
 				}
 			}
 		}
-		for(CLaser *pLaser = (CLaser*) FindFirst(CGameWorld::ENTTYPE_LASER); pLaser; pLaser = (CLaser*) pLaser->TypeNext())
+		if(pMatching)
 		{
-			if(pLaser->m_ID == -1 && NetLaser.Match(pLaser))
+			pMatching->Keep();
+			if(distance(NetLaser.m_From, NetLaser.m_Pos) < distance(pMatching->m_From, pMatching->m_Pos) - 2.f)
 			{
-				pLaser->m_ID = ObjID;
-				pLaser->Keep();
-				return;
+				// if the laser stopped earlier than predicted, set the energy to 0
+				pMatching->m_Energy = 0.f;
+				pMatching->m_Pos = NetLaser.m_Pos;
 			}
 		}
-		CEntity *pEnt = new CLaser(NetLaser);
-		InsertEntity(pEnt, true);
 	}
 }
 
