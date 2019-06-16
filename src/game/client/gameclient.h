@@ -459,7 +459,6 @@ private:
 
 	CCharOrder m_CharOrder;
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
-	class CTeamsCore m_TeamsPredicted;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);

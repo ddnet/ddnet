@@ -21,7 +21,6 @@ CGameWorld::CGameWorld()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_apCharacters[i] = 0;
 	m_pCollision = 0;
-	m_pTeams = 0;
 	m_GameTick = 0;
 	m_pParent = 0;
 	m_pChild = 0;
@@ -517,7 +516,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_WorldConfig = pFrom->m_WorldConfig;
 	for(int i = 0; i < 2; i++)
 		m_Core.m_Tuning[i] = pFrom->m_Core.m_Tuning[i];
-	m_pTeams = pFrom->m_pTeams;
+	m_Teams = pFrom->m_Teams;
 	// delete the previous entities
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		while(m_apFirstEntityTypes[i])

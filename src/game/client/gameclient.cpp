@@ -350,7 +350,6 @@ void CGameClient::OnInit()
 
 	m_GameWorld.m_GameTickSpeed = SERVER_TICK_SPEED;
 	m_GameWorld.m_pCollision = Collision();
-	m_GameWorld.m_pTeams = &m_TeamsPredicted;
 
 	m_pMapimages->SetTextureScale(g_Config.m_ClTextEntitiesSize);
 }
@@ -1989,8 +1988,6 @@ void CGameClient::UpdatePrediction()
 		return;
 	}
 
-	m_TeamsPredicted = m_Teams;
-
 	m_GameWorld.m_WorldConfig.m_IsVanilla = m_GameInfo.m_PredictVanilla;
 	m_GameWorld.m_WorldConfig.m_IsDDRace = m_GameInfo.m_PredictDDRace;
 	m_GameWorld.m_WorldConfig.m_IsFNG = m_GameInfo.m_PredictFNG;
@@ -2069,6 +2066,8 @@ void CGameClient::UpdatePrediction()
 		}
 
 	// update the local gameworld with the new snapshot
+	m_GameWorld.m_Teams = m_Teams;
+
 	m_GameWorld.NetObjBegin();
 	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 	for(int i = 0; i < MAX_CLIENTS; i++)
