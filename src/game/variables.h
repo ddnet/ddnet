@@ -125,6 +125,7 @@ MACRO_CONFIG_INT(ClDummyHook, cl_dummy_hook, 0, 0, 1, CFGFLAG_CLIENT, "Whether d
 MACRO_CONFIG_INT(ClHTTPConnectTimeoutMs, cl_http_connect_timeout_ms, 2000, 0, 100000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "HTTP downloads: timeout for the connect phase in milliseconds (0 to disable)")
 MACRO_CONFIG_INT(ClHTTPLowSpeedLimit, cl_http_low_speed_limit, 500, 0, 100000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "HTTP downloads: Set low speed limit in bytes per second (0 to disable)")
 MACRO_CONFIG_INT(ClHTTPLowSpeedTime, cl_http_low_speed_time, 5, 0, 100000, CFGFLAG_CLIENT|CFGFLAG_SAVE, "HTTP downloads: Set low speed limit time period (0 to disable)")
+MACRO_CONFIG_INT(ClHTTPFakeUserAgent, cl_http_fake_user_agent, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "HTTP downloads: Fake being a Chrome browser")
 
 // server
 MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of seconds to do warmup before round starts")

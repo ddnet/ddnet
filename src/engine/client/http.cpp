@@ -130,7 +130,15 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_FAILONERROR, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_URL, m_aUrl);
 	curl_easy_setopt(pHandle, CURLOPT_NOSIGNAL, 1L);
-	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, "DDNet " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+
+	if(g_Config.m_ClHTTPFakeUserAgent)
+	{
+		curl_easy_setopt(pHandle, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36");
+	}
+	else
+	{
+		curl_easy_setopt(pHandle, CURLOPT_USERAGENT, "DDNet " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+	}
 
 	// We only trust our own custom-selected CAs for our own servers.
 	// Other servers can use any CA trusted by the system.
