@@ -93,6 +93,8 @@ CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup)
 	m_Subtype = pPickup->m_Subtype;
 	m_Core = vec2(0.f, 0.f);
 	m_ID = ID;
+	m_Layer = LAYER_GAME;
+	m_Number = 0;
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

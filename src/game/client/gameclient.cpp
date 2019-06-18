@@ -2170,6 +2170,12 @@ void CGameClient::DetectStrongHook()
 		if(m_Snap.m_aCharacters[FromPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_Direction
 				|| m_Snap.m_aCharacters[ToPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[ToPlayer].m_Cur.m_Direction)
 			continue;
+
+		CCharacter *pFromCharWorld = m_GameWorld.GetCharacterByID(FromPlayer);
+		CCharacter *pToCharWorld = m_GameWorld.GetCharacterByID(ToPlayer);
+		if(!pFromCharWorld || !pToCharWorld)
+			continue;
+
 		s_LastUpdateTick[ToPlayer] = s_LastUpdateTick[FromPlayer] = Client()->GameTick();
 
 		float PredictErr[2];
@@ -2178,14 +2184,15 @@ void CGameClient::DetectStrongHook()
 
 		CWorldCore World;
 		World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
-		CCharacterCore ToChar;
-		CCharacterCore FromChar;
+
 		for(int dir = 0; dir < 2; dir++)
 		{
+			CCharacterCore ToChar = pFromCharWorld->GetCore();
 			ToChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[ToPlayer] = &ToChar;
 			ToChar.Read(&m_Snap.m_aCharacters[ToPlayer].m_Prev);
 
+			CCharacterCore FromChar = pFromCharWorld->GetCore();
 			FromChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[FromPlayer] = &FromChar;
 			FromChar.Read(&m_Snap.m_aCharacters[FromPlayer].m_Prev);
