@@ -63,13 +63,16 @@ versionsrv
 
 generated
 
+# IDE project files
 .cproject
 .idea
 .project
 .settings
+.vs
 .vscode
 cscope.files
 cscope.out
+out
 
 # bam ignores
 /.bam
@@ -100,5 +103,4 @@ cscope.out
 *.tmp
 *.user
 *.vcxproj
-*.vs
 *.zip
