@@ -112,7 +112,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 }
 
-void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent)
+void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 	Graphics()->QuadsSetRotation(0);
@@ -120,7 +120,8 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 
 	int QuadOffset = 2;
 
-	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick());
+	float IntraTick = IsPredicted ? Client()->PredIntraGameTick() : Client()->IntraGameTick();
+	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), IntraTick);
 	float Angle = 0.0f;
 	if(pCurrent->m_Type == POWERUP_WEAPON)
 	{
@@ -297,7 +298,7 @@ void CItems::OnRender()
 				CNetObj_Pickup Data, Prev;
 				pPickup->FillInfo(&Data);
 				pPrev->FillInfo(&Prev);
-				RenderPickup(&Prev, &Data);
+				RenderPickup(&Prev, &Data, true);
 			}
 		}
 	}
