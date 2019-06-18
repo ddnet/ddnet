@@ -153,6 +153,10 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	{
 		m_Input.DeleteUntilCursor();
 	}
+	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_K))
+	{
+		m_Input.DeleteFromCursor();
+	}
 
 	if(Event.m_Flags&IInput::FLAG_PRESS)
 	{

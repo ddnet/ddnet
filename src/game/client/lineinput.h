@@ -42,6 +42,7 @@ public:
 	int GetCursorOffset(bool Editing = false) const { return Editing ? m_FakeCursorPos : m_CursorPos; }
 	void SetCursorOffset(int Offset) { m_CursorPos = Offset > m_Len ? m_Len : Offset < 0 ? 0 : Offset; }
 	void DeleteUntilCursor();
+	void DeleteFromCursor();
 };
 
 #endif
