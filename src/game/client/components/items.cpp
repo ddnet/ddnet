@@ -271,7 +271,7 @@ void CItems::OnRender()
 	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
-	bool UsePredicted = (GameClient()->Predict() && GameClient()->AntiPingWeapons() && GameClient()->AntiPingGrenade());
+	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
 	if(UsePredicted)
 	{
 		for(auto *pProj = (CProjectile*) GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile*) pProj->NextEntity())
@@ -440,7 +440,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 
 	if(m_pClient->m_Snap.m_pLocalInfo)
 		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
-	if(!m_pClient->AntiPingGrenade() || !m_pClient->AntiPingWeapons() || !LocalPlayerInGame)
+	if(!m_pClient->AntiPingGunfire() || !LocalPlayerInGame)
 		return;
 	if(Client()->PredGameTick() == pCurrent->m_StartTick)
 		return;
