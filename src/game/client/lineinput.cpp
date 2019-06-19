@@ -149,6 +149,14 @@ void CLineInput::DeleteUntilCursor()
 	Set(aBuf); SetCursorOffset(0);
 }
 
+void CLineInput::DeleteFromCursor()
+{
+	char aBuf[MAX_SIZE];
+	str_copy(aBuf, m_Str, sizeof(aBuf));
+	aBuf[m_CursorPos] = '\0';
+	Set(aBuf);
+}
+
 void CLineInput::ProcessInput(IInput::CEvent e)
 {
 	Manipulate(e, m_Str, MAX_SIZE, MAX_CHARS, &m_Len, &m_CursorPos, &m_NumChars);
