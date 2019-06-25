@@ -336,9 +336,7 @@ bool CSqlScore::MapVoteThread(CSqlServer* pSqlServer, const CSqlData *pGameData,
 		else
 		{
 			pSqlServer->GetResults()->next();
-			char aMap[128];
 			str_copy(pData->m_pResult->m_aMap, pSqlServer->GetResults()->getString("Map").c_str(), sizeof(pData->m_pResult->m_aMap));
-			char aServer[32];
 			str_copy(pData->m_pResult->m_aServer, pSqlServer->GetResults()->getString("Server").c_str(), sizeof(pData->m_pResult->m_aServer));
 
 			for(char *p = pData->m_pResult->m_aServer; *p; p++)
