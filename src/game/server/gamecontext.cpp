@@ -56,6 +56,9 @@ void CGameContext::Construct(int Resetting)
 	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
+
+	m_pRandomMapResult = nullptr;
+	m_pMapVoteResult = nullptr;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -874,6 +877,23 @@ void CGameContext::OnTick()
 	{
 		str_copy(g_Config.m_SvMap, m_pRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
 		m_pRandomMapResult = NULL;
+	}
+
+	if(m_pMapVoteResult && m_pMapVoteResult->m_Done)
+	{
+		m_VoteKick = false;
+		m_VoteSpec = false;
+		m_LastMapVote = time_get();
+
+		char aCmd[256];
+		str_format(aCmd, sizeof(aCmd), "sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"", m_pMapVoteResult->m_aServer, m_pMapVoteResult->m_aMap);
+
+		char aChatmsg[512];
+		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(m_pMapVoteResult->m_ClientID), m_pMapVoteResult->m_aMap, "/map");
+
+		CallVote(m_pMapVoteResult->m_ClientID, m_pMapVoteResult->m_aMap, aCmd, "/map", aChatmsg);
+
+		m_pMapVoteResult = NULL;
 	}
 
 #ifdef CONF_DEBUG
