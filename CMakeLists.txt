@@ -129,6 +129,17 @@ function(add_c_compiler_flag_if_supported VARIABLE FLAG)
   endif()
 endfunction()
 
+function(add_cxx_compiler_flag_if_supported FLAG)
+  check_cxx_compiler_flag("${FLAG}" FLAG_SUPPORTED${FLAG})
+  if(FLAG_SUPPORTED${FLAG})
+    if(CMAKE_CXX_FLAGS)
+      set(CMAKE_CXX_FLAGS "${${CMAKE_CXX_FLAGS}};${FLAG}" PARENT_SCOPE)
+    else()
+      set(CMAKE_CXX_FLAGS "${FLAG}" PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
 # Force compiler colors on when using ninja. Ninja filters the colors out when
 # it's not printing to a terminal on its own.
 if(CMAKE_GENERATOR STREQUAL "Ninja")
@@ -138,14 +149,7 @@ endif()
 
 if(NOT MSVC)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
-    check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
-    if(FLAG_SUPPORTED_std_gnu__11)
-      if(CMAKE_CXX_FLAGS)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-      else()
-        set(CMAKE_CXX_FLAGS -std=gnu++11)
-      endif()
-    endif()
+    add_cxx_compiler_flag_if_supported(-std=gnu+11)
   endif()
 
   # Protect the stack pointer.
@@ -172,6 +176,7 @@ if(NOT MSVC)
       -Wdeclaration-after-statement
     )
   endif()
+
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wextra)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
@@ -181,6 +186,8 @@ if(NOT MSVC)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+
+  add_cxx_compiler_flag_if_supported(-Wno-deprecated-copy)
   # TODO: Enable for C++ code except gtest
   #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
 endif()
