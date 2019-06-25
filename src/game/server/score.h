@@ -51,6 +51,17 @@ public:
 	CRandomMapResult() : m_Done(false) {}
 };
 
+class CMapVoteResult
+{
+public:
+	bool m_Done;
+	char m_aMap[64];
+	char m_aServer[32];
+	int m_ClientID;
+
+	CMapVoteResult() : m_Done(false) {}
+};
+
 class IScore
 {
 	CPlayerData m_aPlayerData[MAX_CLIENTS];
@@ -61,7 +72,7 @@ public:
 	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
 
 	virtual void MapInfo(int ClientID, const char *pMapName) = 0;
-	virtual void MapVote(int ClientID, const char *pMapName) = 0;
+	virtual void MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char *pMapName) = 0;
 	virtual void CheckBirthday(int ClientID) = 0;
 	virtual void LoadScore(int ClientID) = 0;
 	virtual void SaveScore(int ClientID, float Time, const char *pTimestamp, float aCpTime[NUM_CHECKPOINTS], bool NotEligible) = 0;

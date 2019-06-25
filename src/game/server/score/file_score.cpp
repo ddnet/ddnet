@@ -59,7 +59,7 @@ void CFileScore::MapInfo(int ClientID, const char* MapName)
 	// TODO: implement
 }
 
-void CFileScore::MapVote(int ClientID, const char* MapName)
+void CFileScore::MapVote(std::shared_ptr<CMapVoteResult> *ppResult, int ClientID, const char* MapName)
 {
 	// TODO: implement
 }

@@ -511,7 +511,7 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 			return;
 #endif
 
-	pSelf->Score()->MapVote(pResult->m_ClientID, pResult->GetString(0));
+	pSelf->Score()->MapVote(&pSelf->m_pMapVoteResult, pResult->m_ClientID, pResult->GetString(0));
 
 #if defined(CONF_SQL)
 	if(g_Config.m_SvUseSQL)
