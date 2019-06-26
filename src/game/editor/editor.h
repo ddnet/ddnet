@@ -193,7 +193,6 @@ public:
 	bool m_Collapse;
 
 	CLayerGroup();
-	CLayerGroup(const CLayerGroup& rhs);
 	~CLayerGroup();
 
 	void Convert(CUIRect *pRect);
