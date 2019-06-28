@@ -57,7 +57,7 @@ void CPlayer::Reset()
 	// DDRace
 
 	m_LastCommandPos = 0;
-	m_LastPlaytime = time_get();
+	m_LastPlaytime = time_get()-time_freq()*g_Config.m_SvMaxAfkVoteTime;
 	m_Sent1stAfkWarning = 0;
 	m_Sent2ndAfkWarning = 0;
 	m_ChatScore = 0;
