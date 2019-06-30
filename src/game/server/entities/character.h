@@ -178,7 +178,7 @@ private:
 public:
 	CGameTeams* Teams();
 	void Pause(bool Pause);
-	void CheckMoved(bool Weapon);
+	void CheckMoved();
 	bool Freeze(int Time);
 	bool Freeze();
 	bool UnFreeze();

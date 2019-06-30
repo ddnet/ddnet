@@ -1019,8 +1019,6 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		Temp.y = 0;
 	m_Core.m_Vel = Temp;
 
-	CheckMoved(true);
-
 	return true;
 }
 
@@ -2170,7 +2168,7 @@ void CCharacter::DDRaceTick()
 		}
 	}
 
-	CheckMoved(false);
+	CheckMoved();
 
 	m_Core.m_Id = GetPlayer()->GetCID();
 }
@@ -2413,9 +2411,9 @@ void CCharacter::Rescue()
 	}
 }
 
-void CCharacter::CheckMoved(bool Weapon)
+void CCharacter::CheckMoved()
 {
-	if(!m_pPlayer->m_ResumeMoved || !m_pPlayer->IsPaused() || m_PrevPos == m_Pos || (!IsGrounded() && Weapon))
+	if(!m_pPlayer->m_ResumeMoved || !m_pPlayer->IsPaused() || m_PrevPos == m_Pos)
 		return;
 
 	m_pPlayer->Pause(CPlayer::PAUSE_NONE, false);
