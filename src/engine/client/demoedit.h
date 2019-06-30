@@ -1,7 +1,7 @@
 #ifndef ENGINE_CLIENT_DEMOEDIT_H
 #define ENGINE_CLIENT_DEMOEDIT_H
 
-#include <engine/client/http.h>
+#include <engine/shared/http.h>
 
 #define CONNECTLINK "ddnet:"
 

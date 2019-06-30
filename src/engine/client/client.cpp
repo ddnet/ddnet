@@ -35,7 +35,7 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <engine/client/http.h>
+#include <engine/shared/http.h>
 #include <engine/shared/config.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/datafile.h>
