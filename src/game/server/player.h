@@ -166,6 +166,7 @@ public:
 	bool m_ShowOthers;
 	bool m_ShowAll;
 	bool m_SpecTeam;
+	bool m_ResumeMoved;
 	bool m_NinjaJetpack;
 	bool m_Afk;
 	int m_KillMe;

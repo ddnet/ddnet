@@ -1019,6 +1019,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		Temp.y = 0;
 	m_Core.m_Vel = Temp;
 
+	CheckMoved(true);
+
 	return true;
 }
 
@@ -2168,6 +2170,8 @@ void CCharacter::DDRaceTick()
 		}
 	}
 
+	CheckMoved(false);
+
 	m_Core.m_Id = GetPlayer()->GetCID();
 }
 
@@ -2178,7 +2182,7 @@ void CCharacter::DDRacePostCoreTick()
 
 	if (m_pPlayer->m_DefEmoteReset >= 0 && m_pPlayer->m_DefEmoteReset <= Server()->Tick())
 	{
-	m_pPlayer->m_DefEmoteReset = -1;
+		m_pPlayer->m_DefEmoteReset = -1;
 		m_EmoteType = m_pPlayer->m_DefEmote = EMOTE_NORMAL;
 		m_EmoteStop = -1;
 	}
@@ -2407,4 +2411,12 @@ void CCharacter::Rescue()
 			UnFreeze();
 		}
 	}
+}
+
+void CCharacter::CheckMoved(bool Weapon)
+{
+	if(!m_pPlayer->m_ResumeMoved || !m_pPlayer->IsPaused() || m_PrevPos == m_Pos || (!IsGrounded() && Weapon))
+		return;
+
+	m_pPlayer->Pause(CPlayer::PAUSE_NONE, false);
 }
