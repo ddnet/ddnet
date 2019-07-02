@@ -757,7 +757,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments())
 	{
-		int Val = pResult->GetColor(0, pData->m_Light).Pack() & (pData->m_Alpha ? 0xFFFFFFFF : 0xFFFFFF);
+		int Val = pResult->GetColor(0, pData->m_Light).Pack(pData->m_Alpha);
 
 		*(pData->m_pVariable) = Val;
 		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
@@ -774,7 +774,7 @@ static void ColVariableCommand(IConsole::IResult *pResult, void *pUserData)
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 		ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
-		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d, #%06X", round_truncate(rgb.r * 255), round_truncate(rgb.g * 255), round_truncate(rgb.b * 255), rgb.Pack() & 0xFFFFFF);
+		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d, #%06X", round_truncate(rgb.r * 255), round_truncate(rgb.g * 255), round_truncate(rgb.b * 255), rgb.Pack(false));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 		if(pData->m_Alpha)
@@ -859,6 +859,21 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pStr, aBuf + sizeof(aBuf));
 			str_append(aBuf, "\"", sizeof(aBuf));
+			pConsole->ExecuteLine(aBuf);
+			aBuf[0] = 0;
+		}
+		else if(pfnCallback == ColVariableCommand)
+		{
+			CColVariableData *pData = static_cast<CColVariableData *>(pUserData);
+			bool Light = pData->m_Light;
+			bool Alpha = pData->m_Alpha;
+			unsigned Cur = *pData->m_pVariable;
+			ColorHSLA Val = Cur == pResult->GetColor(1, Light).Pack(Alpha) ? pResult->GetColor(2, Light) : pResult->GetColor(1, Light);
+			if(Light)
+				Val = Val.Lighten();
+
+			dbg_msg("console", "%u %s(%u) %s(%u)", Cur, pResult->GetString(1), pResult->GetColor(1, Light).Pack(Alpha), pResult->GetString(2), pResult->GetColor(2, Light).Pack(Alpha));
+			str_format(aBuf, sizeof(aBuf), "%s %u", pResult->GetString(0), Val.Pack(Alpha));
 			pConsole->ExecuteLine(aBuf);
 			aBuf[0] = 0;
 		}

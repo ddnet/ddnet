@@ -84,9 +84,9 @@ public:
 
 	vec4 v4() { return vec4(x, y, z, a); };
 
-	unsigned Pack()
+	unsigned Pack(bool Alpha = true)
 	{
-		return ((unsigned)(a * 255.0f) << 24) + ((unsigned)(x * 255.0f) << 16) + ((unsigned)(y * 255.0f) << 8) + (unsigned)(z * 255.0f);
+		return (Alpha ? ((unsigned)(a * 255.0f) << 24) : 0) + ((unsigned)(x * 255.0f) << 16) + ((unsigned)(y * 255.0f) << 8) + (unsigned)(z * 255.0f);
 	}
 
 	color4_base SetAlpha(float alpha)
@@ -96,7 +96,6 @@ public:
 		col.a = alpha;
 		return col;
 	}
-
 };
 
 class ColorHSLA : public color4_base
@@ -130,12 +129,12 @@ public:
 		return col;
 	}
 
-	int Pack()
+	unsigned Pack(bool Alpha = true)
 	{
 		if(m_Lit)
-			return Darken().color4_base::Pack();
+			return Darken().color4_base::Pack(Alpha);
 		else
-			return color4_base::Pack();
+			return color4_base::Pack(Alpha);
 	}
 };
 
