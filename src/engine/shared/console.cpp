@@ -872,7 +872,6 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 			if(Light)
 				Val = Val.Lighten();
 
-			dbg_msg("console", "%u %s(%u) %s(%u)", Cur, pResult->GetString(1), pResult->GetColor(1, Light).Pack(Alpha), pResult->GetString(2), pResult->GetColor(2, Light).Pack(Alpha));
 			str_format(aBuf, sizeof(aBuf), "%s %u", pResult->GetString(0), Val.Pack(Alpha));
 			pConsole->ExecuteLine(aBuf);
 			aBuf[0] = 0;
