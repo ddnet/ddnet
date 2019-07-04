@@ -211,7 +211,7 @@ void CPlayers::RenderPlayer(
 	bool PredictLocalWeapons = false;
 	float AttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + Client()->GameTickTime();
 	float LastAttackTime = (Client()->PrevGameTick() - Player.m_AttackTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
-	if(Local && m_pClient->m_aClients[ClientID].m_IsPredicted && m_pClient->AntiPingWeapons() && m_pClient->AntiPingGrenade())
+	if(m_pClient->m_aClients[ClientID].m_IsPredictedLocal && m_pClient->AntiPingGunfire())
 	{
 		PredictLocalWeapons = true;
 		AttackTime = (Client()->PredIntraGameTick() + (Client()->PredGameTick() - 1 - Player.m_AttackTick)) / (float)SERVER_TICK_SPEED;

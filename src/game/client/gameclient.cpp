@@ -1209,42 +1209,29 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedData = true;
 
 				// Collision
-				m_aClients[Item.m_ID].m_Solo = m_aClients[Item.m_ID].m_Predicted.m_Solo =
-						pCharacterData->m_Flags & CHARACTERFLAG_SOLO;
-				m_aClients[Item.m_ID].m_NoCollision = m_aClients[Item.m_ID].m_Predicted.m_NoCollision =
-						pCharacterData->m_Flags & CHARACTERFLAG_NO_COLLISION;
-				m_aClients[Item.m_ID].m_NoHammerHit = m_aClients[Item.m_ID].m_Predicted.m_NoHammerHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
-				m_aClients[Item.m_ID].m_NoGrenadeHit = m_aClients[Item.m_ID].m_Predicted.m_NoGrenadeHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
-				m_aClients[Item.m_ID].m_NoRifleHit = m_aClients[Item.m_ID].m_Predicted.m_NoRifleHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT;
-				m_aClients[Item.m_ID].m_NoShotgunHit = m_aClients[Item.m_ID].m_Predicted.m_NoShotgunHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
-				m_aClients[Item.m_ID].m_NoHookHit = m_aClients[Item.m_ID].m_Predicted.m_NoHookHit =
-						pCharacterData->m_Flags & CHARACTERFLAG_NO_HOOK;
-				m_aClients[Item.m_ID].m_Super = m_aClients[Item.m_ID].m_Predicted.m_Super =
-						pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
+				m_aClients[Item.m_ID].m_Solo = pCharacterData->m_Flags & CHARACTERFLAG_SOLO;
+				m_aClients[Item.m_ID].m_NoCollision = pCharacterData->m_Flags & CHARACTERFLAG_NO_COLLISION;
+				m_aClients[Item.m_ID].m_NoHammerHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
+				m_aClients[Item.m_ID].m_NoGrenadeHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
+				m_aClients[Item.m_ID].m_NoRifleHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT;
+				m_aClients[Item.m_ID].m_NoShotgunHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
+				m_aClients[Item.m_ID].m_NoHookHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_HOOK;
+				m_aClients[Item.m_ID].m_Super = pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
 
 				// Endless
-				m_aClients[Item.m_ID].m_EndlessHook = m_aClients[Item.m_ID].m_Predicted.m_EndlessHook =
-						pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
-				m_aClients[Item.m_ID].m_EndlessJump = m_aClients[Item.m_ID].m_Predicted.m_EndlessJump =
-						pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
+				m_aClients[Item.m_ID].m_EndlessHook = pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
+				m_aClients[Item.m_ID].m_EndlessJump = pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
 
 				// Freeze
-				m_aClients[Item.m_ID].m_FreezeEnd = m_aClients[Item.m_ID].m_Predicted.m_FreezeEnd =
-						pCharacterData->m_FreezeEnd;
-				m_aClients[Item.m_ID].m_DeepFrozen = m_aClients[Item.m_ID].m_Predicted.m_DeepFrozen =
-						pCharacterData->m_FreezeEnd == -1;
+				m_aClients[Item.m_ID].m_FreezeEnd = pCharacterData->m_FreezeEnd;
+				m_aClients[Item.m_ID].m_DeepFrozen = pCharacterData->m_FreezeEnd == -1;
 
 				// Telegun
-				m_aClients[Item.m_ID].m_HasTelegunGrenade = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunGrenade =
-						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
-				m_aClients[Item.m_ID].m_HasTelegunGun = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunGun =
-						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
-				m_aClients[Item.m_ID].m_HasTelegunLaser = m_aClients[Item.m_ID].m_Predicted.m_HasTelegunLaser =
-						pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
+				m_aClients[Item.m_ID].m_HasTelegunGrenade = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
+				m_aClients[Item.m_ID].m_HasTelegunGun = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
+				m_aClients[Item.m_ID].m_HasTelegunLaser = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
+
+				m_aClients[Item.m_ID].m_Predicted.ReadDDNet(pCharacterData);
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECTATORINFO)
 			{
@@ -2020,13 +2007,33 @@ void CGameClient::UpdatePrediction()
 
 	// update strong and weak hook
 	if(pLocalChar && AntiPingPlayers())
-		DetectStrongHook();
-	for(int i : m_CharOrder.m_IDs)
-		if(CCharacter *pChar = m_GameWorld.GetCharacterByID(i))
+	{
+		if(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_HasExtendedData)
 		{
-			m_GameWorld.RemoveEntity(pChar);
-			m_GameWorld.InsertEntity(pChar);
+			int aIDs[MAX_CLIENTS];
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				aIDs[i] = -1;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				if(CCharacter *pChar = m_GameWorld.GetCharacterByID(i))
+					aIDs[pChar->GetStrongWeakID()] = i;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				if(aIDs[i] >= 0)
+					m_CharOrder.GiveStrong(aIDs[i]);
 		}
+		else
+		{
+			// manual detection
+			DetectStrongHook();
+		}
+		for(int i : m_CharOrder.m_IDs)
+		{
+			if(CCharacter *pChar = m_GameWorld.GetCharacterByID(i))
+			{
+				m_GameWorld.RemoveEntity(pChar);
+				m_GameWorld.InsertEntity(pChar);
+			}
+		}
+	}
 
 	// advance the gameworld to the current gametick
 	if(pLocalChar && abs(m_GameWorld.GameTick() - Client()->GameTick()) < SERVER_TICK_SPEED)
@@ -2128,7 +2135,7 @@ void CGameClient::UpdateRenderedCharacters()
 			{
 				m_aClients[i].m_IsPredictedLocal = true;
 				CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i);
-				if(pChar && AntiPingWeapons() && AntiPingGrenade() && ((pChar->m_NinjaJetpack && pChar->m_FreezeTime == 0) || m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
+				if(pChar && AntiPingGunfire() && ((pChar->m_NinjaJetpack && pChar->m_FreezeTime == 0) || m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
 				{
 					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
 					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && !(pChar->m_NinjaJetpack && pChar->Core()->m_ActiveWeapon == WEAPON_GUN))
@@ -2169,6 +2176,12 @@ void CGameClient::DetectStrongHook()
 		if(m_Snap.m_aCharacters[FromPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_Direction
 				|| m_Snap.m_aCharacters[ToPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[ToPlayer].m_Cur.m_Direction)
 			continue;
+
+		CCharacter *pFromCharWorld = m_GameWorld.GetCharacterByID(FromPlayer);
+		CCharacter *pToCharWorld = m_GameWorld.GetCharacterByID(ToPlayer);
+		if(!pFromCharWorld || !pToCharWorld)
+			continue;
+
 		s_LastUpdateTick[ToPlayer] = s_LastUpdateTick[FromPlayer] = Client()->GameTick();
 
 		float PredictErr[2];
@@ -2177,14 +2190,15 @@ void CGameClient::DetectStrongHook()
 
 		CWorldCore World;
 		World.m_Tuning[g_Config.m_ClDummy] = m_Tuning[g_Config.m_ClDummy];
-		CCharacterCore ToChar;
-		CCharacterCore FromChar;
+
 		for(int dir = 0; dir < 2; dir++)
 		{
+			CCharacterCore ToChar = pFromCharWorld->GetCore();
 			ToChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[ToPlayer] = &ToChar;
 			ToChar.Read(&m_Snap.m_aCharacters[ToPlayer].m_Prev);
 
+			CCharacterCore FromChar = pFromCharWorld->GetCore();
 			FromChar.Init(&World, Collision(), &m_Teams);
 			World.m_apCharacters[FromPlayer] = &FromChar;
 			FromChar.Read(&m_Snap.m_aCharacters[FromPlayer].m_Prev);

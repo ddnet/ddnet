@@ -606,6 +606,34 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_Angle = pObjCore->m_Angle;
 }
 
+void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
+{
+	// Collision
+	m_Solo = pObjDDNet->m_Flags & CHARACTERFLAG_SOLO;
+	m_NoCollision = pObjDDNet->m_Flags & CHARACTERFLAG_NO_COLLISION;
+	m_NoHammerHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
+	m_NoGrenadeHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
+	m_NoRifleHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_RIFLE_HIT;
+	m_NoShotgunHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
+	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
+	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
+
+	// Endless
+	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
+	m_EndlessJump = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
+
+	// Freeze
+	m_FreezeEnd = pObjDDNet->m_FreezeEnd;
+	m_DeepFrozen = pObjDDNet->m_FreezeEnd == -1;
+
+	// Telegun
+	m_HasTelegunGrenade = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
+	m_HasTelegunGun = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
+	m_HasTelegunLaser = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
+
+	m_Jumps = pObjDDNet->m_Jumps;
+}
+
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;

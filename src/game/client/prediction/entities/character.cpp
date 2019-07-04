@@ -1021,6 +1021,8 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Super = false;
 	m_CanMoveInFreeze = false;
 	m_Alive = true;
+	m_TeleCheckpoint = 0;
+	m_StrongWeakID = 0;
 
 	ResetPrediction();
 	Read(pChar, pExtended, false);
@@ -1043,7 +1045,10 @@ void CCharacter::ResetPrediction()
 	m_DeepFreeze = 0;
 	m_Super = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)
+	{
 		SetWeaponGot(w, false);
+		SetWeaponAmmo(w, -1);
+	}
 	if(m_Core.m_HookedPlayer >= 0)
 	{
 		m_Core.m_HookedPlayer = -1;
@@ -1053,126 +1058,22 @@ void CCharacter::ResetPrediction()
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
-	vec2 PosBefore = m_Pos;
-
 	m_Core.Read((CNetObj_CharacterCore*) pChar);
-	m_Pos = m_Core.m_Pos;
-	m_AttackTick = pChar->m_AttackTick;
-
-	if(distance(PosBefore, m_Pos) > 2.f) // misprediction, don't use prevpos
-		m_PrevPos = m_Pos;
-
-	if(distance(m_PrevPos, m_Pos) > 10.f * 32.f) // reset prevpos if the distance is high
-		m_PrevPos = m_Pos;
-
-	// remove weapons that are unavailable. if the current weapon is ninja just set ammo to zero in case the player is frozen
-	if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
-	{
-		if(pChar->m_Weapon == WEAPON_NINJA)
-			m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = 0;
-		else
-		{
-			if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
-			{
-				SetNinjaActivationDir(vec2(0,0));
-				SetNinjaActivationTick(-500);
-				SetNinjaCurrentMoveTime(0);
-			}
-			if(pChar->m_Weapon == m_LastSnapWeapon)
-				m_aWeapons[m_Core.m_ActiveWeapon].m_Got = false;
-		}
-	}
-	m_LastSnapWeapon = pChar->m_Weapon;
-
-	// add weapons
-	if(pChar->m_Weapon != WEAPON_NINJA)
-	{
-		m_aWeapons[pChar->m_Weapon].m_Got = true;
-		m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || GameWorld()->m_WorldConfig.m_IsDDRace || pChar->m_Weapon == WEAPON_HAMMER) ? -1 : pChar->m_AmmoCount;
-		SetActiveWeapon(pChar->m_Weapon);
-	}
-
-	if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
-		m_DeepFreeze = false;
-	if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10)
-	{
-		m_DeepFreeze = false;
-		UnFreeze();
-	}
-	if(!GameWorld()->m_WorldConfig.m_PredictFreeze)
-	{
-		m_DeepFreeze = false;
-		UnFreeze();
-	}
-
-	if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength > 0)
-	{
-		m_LastJetpackStrength = Tuning()->m_JetpackStrength;
-		m_Jetpack = true;
-		m_aWeapons[WEAPON_GUN].m_Got = true;
-		m_aWeapons[WEAPON_GUN].m_Ammo = -1;
-		m_NinjaJetpack = pChar->m_Weapon == WEAPON_NINJA;
-	}
-	else if(pChar->m_Weapon != WEAPON_NINJA)
-		m_Jetpack = false;
-
-	if(GameWorld()->m_WorldConfig.m_PredictTiles)
-	{
-		if(pChar->m_Jumped&2)
-		{
-			m_SuperJump = false;
-			if(m_Core.m_Jumps > m_Core.m_JumpedTotal && m_Core.m_JumpedTotal > 0 && m_Core.m_Jumps > 2)
-				m_Core.m_Jumps = m_Core.m_JumpedTotal + 1;
-			else
-				m_Core.m_JumpedTotal = m_Core.m_Jumps;
-		}
-		else
-		{
-			if(m_Core.m_Jumps < 2)
-				m_Core.m_Jumps = m_Core.m_JumpedTotal + 2;
-		}
-		if(Tuning()->m_AirJumpImpulse == 0)
-		{
-			m_Core.m_Jumps = 0;
-			m_Core.m_Jumped = 3;
-		}
-	}
-
-	if(m_Core.m_HookTick != 0)
-		m_EndlessHook = false;
-
-	// reset player collision
-	if(!pExtended)
-		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
-	m_Core.m_Collision = Tuning()->m_PlayerCollision;
-	m_Core.m_Hook = Tuning()->m_PlayerHooking;
-
-	// reset all input except direction and hook for non-local players (as in vanilla prediction)
-	if(!IsLocal)
-	{
-		mem_zero(&m_Input, sizeof(m_Input));
-		mem_zero(&m_SavedInput, sizeof(m_SavedInput));
-		m_Input.m_Direction = m_SavedInput.m_Direction = m_Core.m_Direction;
-		m_Input.m_Hook = m_SavedInput.m_Hook = (m_Core.m_HookState != HOOK_IDLE);
-		m_Input.m_TargetX = cosf(pChar->m_Angle/256.0f);
-		m_Input.m_TargetY = sinf(pChar->m_Angle/256.0f);
-	}
-
-	m_Alive = true;
 
 	if(pExtended)
 	{
-		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
+		m_Core.ReadDDNet(pExtended);
 
 		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
 		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
 		if(m_Super)
 			TeamsCore()->Team(GetCID(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
+
 		m_EndlessHook = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
-		m_Core.m_Collision = !(pExtended->m_Flags & CHARACTERFLAG_NO_COLLISION);
-		m_Core.m_Hook = !(pExtended->m_Flags & CHARACTERFLAG_NO_HOOK);
 		m_SuperJump = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
 		m_Jetpack = pExtended->m_Flags & CHARACTERFLAG_JETPACK;
+		m_TeleCheckpoint = pExtended->m_TeleCheckpoint;
+		m_StrongWeakID = pExtended->m_StrongWeakID;
 
 		m_Hit = HIT_ALL;
 		if(pExtended->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT)
@@ -1183,6 +1084,123 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			m_Hit |= DISABLE_HIT_RIFLE;
 		if(pExtended->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT)
 			m_Hit |= DISABLE_HIT_SHOTGUN;
+
+		m_aWeapons[WEAPON_HAMMER].m_Got = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_HAMMER) != 0;
+		m_aWeapons[WEAPON_GUN].m_Got = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_GUN) != 0;
+		m_aWeapons[WEAPON_SHOTGUN].m_Got = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_SHOTGUN) != 0;
+		m_aWeapons[WEAPON_GRENADE].m_Got = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_GRENADE) != 0;
+		m_aWeapons[WEAPON_RIFLE].m_Got = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_LASER) != 0;
+
+		const bool Ninja = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
+		if(Ninja && m_Core.m_ActiveWeapon != WEAPON_NINJA)
+			GiveNinja();
+		else if(!Ninja && m_Core.m_ActiveWeapon == WEAPON_NINJA)
+			RemoveNinja();
+	}
+	else
+	{
+		// ddnetcharacter is not available, try to get some info from the tunings and the character netobject instead.
+
+		// remove weapons that are unavailable. if the current weapon is ninja just set ammo to zero in case the player is frozen
+		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
+		{
+			if(pChar->m_Weapon == WEAPON_NINJA)
+				m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = 0;
+			else
+			{
+				if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
+				{
+					SetNinjaActivationDir(vec2(0,0));
+					SetNinjaActivationTick(-500);
+					SetNinjaCurrentMoveTime(0);
+				}
+				if(pChar->m_Weapon == m_LastSnapWeapon)
+					m_aWeapons[m_Core.m_ActiveWeapon].m_Got = false;
+			}
+		}
+		// add weapon
+		if(pChar->m_Weapon != WEAPON_NINJA)
+			m_aWeapons[pChar->m_Weapon].m_Got = true;
+
+		// jetpack
+		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength > 0)
+		{
+			m_LastJetpackStrength = Tuning()->m_JetpackStrength;
+			m_Jetpack = true;
+			m_aWeapons[WEAPON_GUN].m_Got = true;
+			m_aWeapons[WEAPON_GUN].m_Ammo = -1;
+			m_NinjaJetpack = pChar->m_Weapon == WEAPON_NINJA;
+		}
+		else if(pChar->m_Weapon != WEAPON_NINJA)
+			m_Jetpack = false;
+
+		// number of jumps
+		if(GameWorld()->m_WorldConfig.m_PredictTiles)
+		{
+			if(pChar->m_Jumped&2)
+			{
+				m_SuperJump = false;
+				if(m_Core.m_Jumps > m_Core.m_JumpedTotal && m_Core.m_JumpedTotal > 0 && m_Core.m_Jumps > 2)
+					m_Core.m_Jumps = m_Core.m_JumpedTotal + 1;
+			}
+			else if(m_Core.m_Jumps < 2)
+				m_Core.m_Jumps = m_Core.m_JumpedTotal + 2;
+			if(Tuning()->m_AirJumpImpulse == 0)
+			{
+				m_Core.m_Jumps = 0;
+				m_Core.m_Jumped = 3;
+			}
+		}
+
+		// set player collision
+		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
+		m_Core.m_Collision = Tuning()->m_PlayerCollision;
+		m_Core.m_Hook = Tuning()->m_PlayerHooking;
+
+		if(m_Core.m_HookTick != 0)
+			m_EndlessHook = false;
+	}
+
+	// detect unfreeze (in case the player was frozen in the tile prediction and not correclty unfrozen)
+	if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
+		m_DeepFreeze = false;
+	if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256*10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
+	{
+		m_DeepFreeze = false;
+		UnFreeze();
+	}
+
+	vec2 PosBefore = m_Pos;
+	m_Pos = m_Core.m_Pos;
+
+	if(distance(PosBefore, m_Pos) > 2.f) // misprediction, don't use prevpos
+		m_PrevPos = m_Pos;
+
+	if(distance(m_PrevPos, m_Pos) > 10.f * 32.f) // reset prevpos if the distance is high
+		m_PrevPos = m_Pos;
+
+	if(pChar->m_Jumped&2)
+		m_Core.m_JumpedTotal = m_Core.m_Jumps;
+	m_AttackTick = pChar->m_AttackTick;
+	m_LastSnapWeapon = pChar->m_Weapon;
+	m_Alive = true;
+
+	// set the current weapon
+	if(pChar->m_Weapon != WEAPON_NINJA)
+	{
+		m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || GameWorld()->m_WorldConfig.m_IsDDRace || pChar->m_Weapon == WEAPON_HAMMER) ? -1 : pChar->m_AmmoCount;
+		SetActiveWeapon(pChar->m_Weapon);
+	}
+
+	// reset all input except direction and hook for non-local players (as in vanilla prediction)
+	if(!IsLocal)
+	{
+		mem_zero(&m_Input, sizeof(m_Input));
+		mem_zero(&m_SavedInput, sizeof(m_SavedInput));
+		m_Input.m_Direction = m_SavedInput.m_Direction = m_Core.m_Direction;
+		m_Input.m_Hook = m_SavedInput.m_Hook = (m_Core.m_HookState != HOOK_IDLE);
+		m_Input.m_TargetX = cosf(pChar->m_Angle/256.0f);
+		m_Input.m_TargetY = sinf(pChar->m_Angle/256.0f);
 	}
 }
 

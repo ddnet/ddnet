@@ -90,6 +90,7 @@ public:
 	int m_Hit;
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
+	int m_TeleCheckpoint;
 
 	int m_TileIndex;
 	int m_TileFlags;
@@ -142,6 +143,7 @@ public:
 	void SetInput(CNetObj_PlayerInput *pNewInput) { m_LatestInput = m_Input = *pNewInput; };
 	int GetJumped() { return m_Core.m_Jumped; }
 	int GetAttackTick() { return m_AttackTick; }
+	int GetStrongWeakID() { return m_StrongWeakID; }
 
 	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
@@ -205,6 +207,8 @@ private:
 	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
 	void DDRacePostCoreTick();
+
+	int m_StrongWeakID;
 };
 
 enum

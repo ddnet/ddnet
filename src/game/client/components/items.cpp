@@ -112,7 +112,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 }
 
-void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent)
+void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 	Graphics()->QuadsSetRotation(0);
@@ -120,7 +120,8 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 
 	int QuadOffset = 2;
 
-	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick());
+	float IntraTick = IsPredicted ? Client()->PredIntraGameTick() : Client()->IntraGameTick();
+	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), IntraTick);
 	float Angle = 0.0f;
 	if(pCurrent->m_Type == POWERUP_WEAPON)
 	{
@@ -270,7 +271,7 @@ void CItems::OnRender()
 	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
-	bool UsePredicted = (GameClient()->Predict() && GameClient()->AntiPingWeapons() && GameClient()->AntiPingGrenade());
+	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
 	if(UsePredicted)
 	{
 		for(auto *pProj = (CProjectile*) GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile*) pProj->NextEntity())
@@ -297,7 +298,7 @@ void CItems::OnRender()
 				CNetObj_Pickup Data, Prev;
 				pPickup->FillInfo(&Data);
 				pPrev->FillInfo(&Prev);
-				RenderPickup(&Prev, &Data);
+				RenderPickup(&Prev, &Data, true);
 			}
 		}
 	}
@@ -439,7 +440,7 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 
 	if(m_pClient->m_Snap.m_pLocalInfo)
 		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
-	if(!m_pClient->AntiPingGrenade() || !m_pClient->AntiPingWeapons() || !LocalPlayerInGame)
+	if(!m_pClient->AntiPingGunfire() || !LocalPlayerInGame)
 		return;
 	if(Client()->PredGameTick() == pCurrent->m_StartTick)
 		return;
