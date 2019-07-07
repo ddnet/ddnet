@@ -826,8 +826,6 @@ if(CLIENT)
     components/controls.h
     components/countryflags.cpp
     components/countryflags.h
-    components/playerpics.cpp
-    components/playerpics.h
     components/damageind.cpp
     components/damageind.h
     components/debughud.cpp
@@ -864,6 +862,8 @@ if(CLIENT)
     components/nameplates.h
     components/particles.cpp
     components/particles.h
+    components/playerpics.cpp
+    components/playerpics.h
     components/players.cpp
     components/players.h
     components/race_demo.cpp
