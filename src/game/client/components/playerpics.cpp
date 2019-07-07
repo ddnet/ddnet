@@ -100,7 +100,7 @@ const CPlayerPics::CPlayerPic *CPlayerPics::GetByName(const char * pName) const
 
 const CPlayerPics::CPlayerPic *CPlayerPics::GetByIndex(int Index) const
 {
-	return &m_aPlayerPics[max(0, Index%m_aPlayerPics.size())];
+	return &m_aPlayerPics[maximum(0, Index%m_aPlayerPics.size())];
 }
 
 void CPlayerPics::Render(const char * pName, const vec4 *pColor, float x, float y, float w, float h)
