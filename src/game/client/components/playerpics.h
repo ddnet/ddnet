@@ -36,6 +36,6 @@ private:
 	int m_CodeIndexLUT[CODE_RANGE];
 
 	static int LoadImageByName(const char *pImgName, int IsDir, int DirType, void *pUser);
-	void LoadCountryflagsIndexfile();
+	void LoadPlayerpicsIndexfile();
 };
 #endif

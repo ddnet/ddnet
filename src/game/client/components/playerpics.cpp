@@ -60,7 +60,7 @@ int CPlayerPics::LoadImageByName(const char *pImgName, int IsDir, int DirType, v
 	return 0;
 }
 
-void CPlayerPics::LoadCountryflagsIndexfile()
+void CPlayerPics::LoadPlayerpicsIndexfile()
 {
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "playerpics", LoadImageByName, this);
 	m_aPlayerPics.sort_range();
@@ -70,10 +70,10 @@ void CPlayerPics::OnInit()
 {
 	// load country flags
 	m_aPlayerPics.clear();
-	LoadCountryflagsIndexfile();
+	LoadPlayerpicsIndexfile();
 	if(!m_aPlayerPics.size())
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "playerpics", "failed to load country flags. folder='playerpics/'");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "playerpics", "failed to load directory 'playerpics/'.");
 		CPlayerPic DummyEntry;
 		DummyEntry.m_Texture = -1;
 		mem_zero(DummyEntry.m_aPlayerName, sizeof(DummyEntry.m_aPlayerName));
