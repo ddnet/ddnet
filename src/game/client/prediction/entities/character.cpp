@@ -1017,7 +1017,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
-	m_LastJetpackStrength = 400.0;
+	m_LastJetpackStrength = 400.0f;
 	m_Super = false;
 	m_CanMoveInFreeze = false;
 	m_Alive = true;

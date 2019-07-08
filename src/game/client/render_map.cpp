@@ -504,7 +504,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					char aBuf[16];
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					UI()->TextRender()->Text(0, mx*Scale, (my+0.5+ToCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
+					UI()->TextRender()->Text(0, mx*Scale, (my+0.5f+ToCenterOffset/2)*Scale, Size*Scale/2.f, aBuf, -1);
 					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					if(MaxSpeed)
 					{

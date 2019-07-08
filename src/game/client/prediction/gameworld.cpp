@@ -394,7 +394,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData)
 			{
 				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction)*28.0*0.75;
 				const bool Prev = (GameTick()-NetProj.m_StartTick) > 1;
-				float First = 200.0, Second = 200.0;
+				float First = 200.0f, Second = 200.0f;
 				CCharacter *pClosest = 0;
 				for(CCharacter *pChar = (CCharacter*) FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *) pChar->TypeNext())
 				{

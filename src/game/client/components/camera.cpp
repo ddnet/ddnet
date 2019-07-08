@@ -19,7 +19,7 @@ CCamera::CCamera()
 {
 	m_CamType = CAMTYPE_UNDEFINED;
 	m_ZoomSet = false;
-	m_Zoom = 1.0;
+	m_Zoom = 1.0f;
 }
 
 void CCamera::OnRender()
@@ -27,7 +27,7 @@ void CCamera::OnRender()
 	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))
 	{
 		m_ZoomSet = false;
-		m_Zoom = 1.0;
+		m_Zoom = 1.0f;
 	}
 	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
 	{

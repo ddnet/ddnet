@@ -352,7 +352,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 				// draw body
 				Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 				vec2 BodyPos = Position + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y)*AnimScale;
-				float BodySize = g_Config.m_ClFatSkins ? BaseSize * 1.3 : BaseSize;
+				float BodySize = g_Config.m_ClFatSkins ? BaseSize * 1.3f : BaseSize;
 				Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, OutLine, BodyPos.x, BodyPos.y, BodySize / 64.f, BodySize / 64.f);
 
 				// draw eyes

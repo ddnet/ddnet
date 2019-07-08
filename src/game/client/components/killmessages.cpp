@@ -162,7 +162,7 @@ void CKillMessages::OnRender()
 		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
-			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0);
+			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0f);
 		}
 
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)

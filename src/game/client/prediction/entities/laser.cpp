@@ -171,7 +171,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser)
 		m_Energy = 800.0f;
 
 	m_Dir = m_Pos - m_From;
-	if(length(m_Pos - m_From) > 0.001)
+	if(length(m_Pos - m_From) > 0.001f)
 		m_Dir = normalize(m_Dir);
 	else
 		m_Energy = 0;
