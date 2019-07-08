@@ -607,6 +607,39 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	TempCore.Write(pCharacter);
 }
 
+void CGameClient::ChillerBotTick()
+{
+	if(!m_Snap.m_pLocalCharacter)
+		return;
+	if(!g_Config.m_ClFinishRename)
+		return;
+	vec2 PrevPos = m_PredictedPrevChar.m_Pos;
+	vec2 Pos = m_PredictedChar.m_Pos;
+	if(CRaceHelper::IsNearFinish(this, Pos))
+	{
+		if(Client()->State() == IClient::STATE_ONLINE && !m_pMenus->IsActive() && g_Config.m_ClEditor == 0)
+		{
+			Graphics()->BlendNormal();
+			Graphics()->TextureSet(-1);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0,0,0,0.5f);
+			RenderTools()->DrawRoundRect(10.0f, 30.0f, 150.0f, 50.0f, 10.0f);
+			Graphics()->QuadsEnd();
+			TextRender()->Text(0, 20.0f, 30.f, 20.0f, "chillerbot-ux", -1);
+			TextRender()->Text(0, 50.0f, 60.f, 10.0f, "finish rename", -1);
+		}
+		if(!m_IsNearFinish)
+		{
+			m_IsNearFinish = true;
+			SendFinishName();
+		}
+	}
+	else
+	{
+		m_IsNearFinish = false;
+	}
+}
+
 void CGameClient::OnRender()
 {
 	// update the local character and spectate position
@@ -666,6 +699,7 @@ void CGameClient::OnRender()
 				m_CheckInfo[1]--;
 		}
 	}
+	ChillerBotTick();
 }
 
 void CGameClient::OnDummyDisconnect()
@@ -1815,6 +1849,22 @@ void CGameClient::SendSwitchTeam(int Team)
 
 	if(Team != TEAM_SPECTATORS)
 		m_pCamera->OnReset();
+}
+
+void CGameClient::SendFinishName()
+{
+	CNetMsg_Cl_ChangeInfo Msg;
+	Msg.m_pName = g_Config.m_ClFinishName;
+	Msg.m_pClan = g_Config.m_PlayerClan;
+	Msg.m_Country = g_Config.m_PlayerCountry;
+	Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+	Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+	Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
+	Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+	CMsgPacker Packer(Msg.MsgID());
+	Msg.Pack(&Packer);
+	Client()->SendMsgExY(&Packer, MSGFLAG_VITAL, false, 0);
+	m_CheckInfo[0] = Client()->GameTickSpeed();
 }
 
 void CGameClient::SendInfo(bool Start)

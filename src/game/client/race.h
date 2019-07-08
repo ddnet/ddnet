@@ -15,6 +15,8 @@ public:
 	static int TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize); // xxx finished in: x minute(s) x.xxx second(s)
 
 	static bool IsStart(class CGameClient *pClient, vec2 Prev, vec2 Pos);
+	static bool IsFinish(class CGameClient *pClient, vec2 Pos1, vec2 Pos2);
+	static bool IsNearFinish(class CGameClient *pClient, vec2 Pos);
 };
 
 #endif // GAME_CLIENT_RACE_H

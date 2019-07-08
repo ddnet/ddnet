@@ -97,3 +97,56 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 	}
 	return false;
 }
+
+bool CRaceHelper::IsFinish(CGameClient *pClient, vec2 Pos1, vec2 Pos2)
+{
+	CCollision *pCollision = pClient->Collision();
+	std::list < int > Indices = pCollision->GetMapIndices(Pos2, Pos1);
+	if(!Indices.empty())
+		for(std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+		{
+			if(pCollision->GetTileIndex(*i) == TILE_END)
+				return true;
+			if(pCollision->GetFTileIndex(*i) == TILE_END)
+				return true;
+		}
+	else
+	{
+		if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_END)
+			return true;
+		if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_END)
+			return true;
+	}
+	return false;
+}
+
+bool CRaceHelper::IsNearFinish(CGameClient *pClient, vec2 Pos)
+{
+	CCollision *pCollision = pClient->Collision();
+	float d = 4 * 32.0f;
+	vec2 TL = Pos;
+	vec2 TR = Pos;
+	vec2 BL = Pos;
+	vec2 BR = Pos;
+	// top left
+	TL.x = clamp(TL.x - d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	TL.y = clamp(TL.y - d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// top right
+	TR.x = clamp(TR.x + d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	TR.y = clamp(TR.y - d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// bottom left
+	BL.x = clamp(BL.x - d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	BL.y = clamp(BL.y + d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// bottom right
+	BR.x = clamp(BR.x + d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	BR.y = clamp(BR.y + d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	if(IsFinish(pClient, TL, TR))
+		return true;
+	if(IsFinish(pClient, BL, BR))
+		return true;
+	if(IsFinish(pClient, TL, BL))
+		return true;
+	if(IsFinish(pClient, TR, BR))
+		return true;
+	return false;
+}
