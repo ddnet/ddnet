@@ -1388,7 +1388,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
-		Localize("DDNet")
+		Localize("DDNet"),
+		("chillerbot")
 	};
 
 	int NumTabs = (int)(sizeof(aTabs)/sizeof(*aTabs));
@@ -1421,6 +1422,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsSound(MainView);
 	else if(s_SettingsPage == 8)
 		RenderSettingsDDNet(MainView);
+	else if(s_SettingsPage == 9)
+		RenderSettingsChillerbot(MainView);
 
 	if(m_NeedRestartUpdate)
 	{
@@ -2286,5 +2289,29 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		{
 			Client()->GenerateTimeoutSeed();
 		}
+	}
+}
+
+void CMenus::RenderSettingsChillerbot(CUIRect MainView)
+{
+	CUIRect Button, Label, Finish;
+	MainView.HSplitTop(10.0f, 0, &MainView);
+
+	char *Name = g_Config.m_ClFinishName;
+
+	// finish name
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(110.0f, &Label, &Button);
+	Button.VSplitLeft(200.0f, &Button, &Finish);
+	Button.VSplitLeft(150.0f, &Button, 0);
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s:", "Finish name");
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	static float s_OffsetName = 0.0f;
+	DoEditBox(Name, &Button, Name, sizeof(g_Config.m_ClFinishName), 14.0f, &s_OffsetName);
+
+	if(DoButton_CheckBox(&g_Config.m_ClFinishRename, "Rename on finish", g_Config.m_ClFinishRename, &Finish))
+	{
+		g_Config.m_ClFinishRename ^= 1;
 	}
 }
