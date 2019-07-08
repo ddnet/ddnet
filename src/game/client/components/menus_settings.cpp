@@ -297,7 +297,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	Button.VSplitLeft(150.0f, &Button, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
-	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	static float s_OffsetName = 0.0f;
 	if(DoEditBox(Name, &Button, Name, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName))
 	{
@@ -318,7 +318,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	Button.VSplitLeft(80.0f, &Label, &Button);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
-	UI()->DoLabelScaled(&Label, aBuf, 14.0, -1);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
 	static float s_OffsetClan = 0.0f;
 	if(DoEditBox(Clan, &Button, Clan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 	{
