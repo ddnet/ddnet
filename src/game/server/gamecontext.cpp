@@ -769,15 +769,15 @@ void CGameContext::OnTick()
 						(m_VoteKick || m_VoteSpec))
 					Total = g_Config.m_SvVoteMaxTotal;
 
-				if((Yes > Total / (100.0 / g_Config.m_SvVoteYesPercentage)) && !Veto)
+				if((Yes > Total / (100.0f / g_Config.m_SvVoteYesPercentage)) && !Veto)
 					m_VoteEnforce = VOTE_ENFORCE_YES;
-				else if(No >= Total - Total / (100.0 / g_Config.m_SvVoteYesPercentage))
+				else if(No >= Total - Total / (100.0f / g_Config.m_SvVoteYesPercentage))
 					m_VoteEnforce = VOTE_ENFORCE_NO;
 
 				if(VetoStop)
 					m_VoteEnforce = VOTE_ENFORCE_NO;
 
-				m_VoteWillPass = Yes > (Yes + No) / (100.0 / g_Config.m_SvVoteYesPercentage);
+				m_VoteWillPass = Yes > (Yes + No) / (100.0f / g_Config.m_SvVoteYesPercentage);
 			}
 
 			if(time_get() > m_VoteCloseTime && !g_Config.m_SvVoteMajority)
@@ -1987,7 +1987,7 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 		return;
 	}
 
-	float NewValue = fabs(OldValue - pResult->GetFloat(1)) < 0.0001
+	float NewValue = fabs(OldValue - pResult->GetFloat(1)) < 0.0001f
 		? pResult->GetFloat(2)
 		: pResult->GetFloat(1);
 
@@ -3157,14 +3157,14 @@ bool CGameContext::PlayerCollision()
 {
 	float Temp;
 	m_Tuning.Get("player_collision", &Temp);
-	return Temp != 0.0;
+	return Temp != 0.0f;
 }
 
 bool CGameContext::PlayerHooking()
 {
 	float Temp;
 	m_Tuning.Get("player_hooking", &Temp);
-	return Temp != 0.0;
+	return Temp != 0.0f;
 }
 
 float CGameContext::PlayerJetpack()

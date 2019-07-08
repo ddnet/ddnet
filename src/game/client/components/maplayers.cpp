@@ -1570,7 +1570,7 @@ void CMapLayers::OnRender()
 
 		if(!g_Config.m_ClZoomBackgroundLayers && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
 		{
-			MapScreenToGroup(Center.x, Center.y, pGroup, 1.0);
+			MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
 		} else
 			MapScreenToGroup(Center.x, Center.y, pGroup, m_pClient->m_pCamera->m_Zoom);
 
@@ -1744,7 +1744,7 @@ void CMapLayers::OnRender()
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get()/(double)time_freq();
-								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f*(1.0+sin(2.0f*pi*Seconds/3.f))/2.0f);
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f*(1.0f+sin(2.0f*pi*Seconds/3.f))/2.0f);
 
 								RenderTools()->RenderTileRectangle(-201, -201, pTMap->m_Width+402, pTMap->m_Height+402,
 																   0, TILE_DEATH, // display air inside, death outside

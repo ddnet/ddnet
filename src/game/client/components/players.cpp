@@ -588,15 +588,15 @@ void CPlayers::RenderPlayer(
 		float a = 1;
 
 		if(FromEnd < Client()->GameTickSpeed() / 5)
-			a = FromEnd / (Client()->GameTickSpeed() / 5.0);
+			a = FromEnd / (Client()->GameTickSpeed() / 5.0f);
 
 		float h = 1;
 		if(SinceStart < Client()->GameTickSpeed() / 10)
-			h = SinceStart / (Client()->GameTickSpeed() / 10.0);
+			h = SinceStart / (Client()->GameTickSpeed() / 10.0f);
 
 		float Wiggle = 0;
 		if(SinceStart < Client()->GameTickSpeed() / 5)
-			Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0);
+			Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0f);
 
 		float WiggleAngle = sinf(5*Wiggle);
 

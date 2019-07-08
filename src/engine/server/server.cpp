@@ -1149,7 +1149,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	{
 		int64 Now = time_get();
 		int64 Diff = Now - m_aClients[ClientID].m_TrafficSince;
-		float Alpha = g_Config.m_SvNetlimitAlpha / 100.0;
+		float Alpha = g_Config.m_SvNetlimitAlpha / 100.0f;
 		float Limit = (float)g_Config.m_SvNetlimit * 1024 / time_freq();
 
 		if (m_aClients[ClientID].m_Traffic > Limit)
@@ -1159,7 +1159,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		if (Diff > 100)
 		{
-			m_aClients[ClientID].m_Traffic = (Alpha * ((float)pPacket->m_DataSize / Diff)) + (1.0 - Alpha) * m_aClients[ClientID].m_Traffic;
+			m_aClients[ClientID].m_Traffic = (Alpha * ((float)pPacket->m_DataSize / Diff)) + (1.0f - Alpha) * m_aClients[ClientID].m_Traffic;
 			m_aClients[ClientID].m_TrafficSince = Now;
 		}
 	}

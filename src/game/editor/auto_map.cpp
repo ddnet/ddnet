@@ -107,7 +107,7 @@ void CAutoMapper::Load(const char* pTileName)
 				CIndexRule NewIndexRule;
 				NewIndexRule.m_ID = ID;
 				NewIndexRule.m_Flag = 0;
-				NewIndexRule.m_RandomProbability = 1.0;
+				NewIndexRule.m_RandomProbability = 1.0f;
 				NewIndexRule.m_DefaultRule = true;
 				NewIndexRule.m_SkipEmpty = false;
 				NewIndexRule.m_SkipFull = false;
@@ -281,11 +281,11 @@ void CAutoMapper::Load(const char* pTileName)
 				sscanf(pLine, "Random %f%c", &Value, &Specifier);
 				if(Specifier == '%')
 				{
-					pCurrentIndex->m_RandomProbability = Value / 100.0;
+					pCurrentIndex->m_RandomProbability = Value / 100.0f;
 				}
 				else
 				{
-					pCurrentIndex->m_RandomProbability = 1.0 / Value;
+					pCurrentIndex->m_RandomProbability = 1.0f / Value;
 				}
 			}
 			else if(str_startswith(pLine, "NoDefaultRule") && pCurrentIndex)
@@ -499,7 +499,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 					}
 
 					if(RespectRules &&
-						(pIndexRule->m_RandomProbability >= 1.0 || HashLocation(Seed, h, i, x + SeedOffsetX, y + SeedOffsetY) < HASH_MAX * pIndexRule->m_RandomProbability))
+						(pIndexRule->m_RandomProbability >= 1.0f || HashLocation(Seed, h, i, x + SeedOffsetX, y + SeedOffsetY) < HASH_MAX * pIndexRule->m_RandomProbability))
 					{
 						pTile->m_Index = pIndexRule->m_ID;
 						pTile->m_Flags = pIndexRule->m_Flag;

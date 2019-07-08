@@ -422,7 +422,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	}
 	else
 	{
-		if((m_DummyFire / 12.5) - (int)(m_DummyFire / 12.5) > 0.01)
+		if((m_DummyFire / 12.5f) - (int)(m_DummyFire / 12.5f) > 0.01f)
 		{
 			m_DummyFire++;
 			return 0;
@@ -1619,10 +1619,10 @@ void CGameClient::OnPredict()
 				float MixAmount[2];
 				for(int j = 0; j < 2; j++)
 				{
-					MixAmount[j] = 1.0;
+					MixAmount[j] = 1.0f;
 					if(fabs(PredErr[j]) > 0.05f)
 					{
-						MixAmount[j] = 0.0;
+						MixAmount[j] = 0.0f;
 						if(fabs(RenderDiff[j]) > 0.01f)
 						{
 							MixAmount[j] = 1.f - clamp(RenderDiff[j] / PredDiff[j], 0.f, 1.f);

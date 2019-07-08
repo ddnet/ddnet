@@ -18,7 +18,7 @@ CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 	m_Freeze = Freeze;
 	m_Explosive = Explosive;
 	m_EvalTick = Server()->Tick();
-	m_LifeTime = Server()->TickSpeed() * 1.5;
+	m_LifeTime = Server()->TickSpeed() * 1.5f;
 	m_ResponsibleTeam = ResponsibleTeam;
 	GameWorld()->InsertEntity(this);
 }
