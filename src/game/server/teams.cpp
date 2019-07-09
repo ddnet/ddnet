@@ -197,7 +197,7 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 {
 	//Check on wrong parameters. +1 for TEAM_SUPER
 	if (ClientID < 0 || ClientID >= MAX_CLIENTS || Team < 0
-			|| Team >= MAX_CLIENTS + 1)
+			|| Team >= DDRACE_MAX_CLIENTS + 1)
 		return false;
 	//You can join to TEAM_SUPER at any time, but any other group you cannot if it started
 	if (Team != TEAM_SUPER && m_TeamState[Team] > TEAMSTATE_OPEN)

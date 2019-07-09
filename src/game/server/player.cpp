@@ -47,8 +47,10 @@ void CPlayer::Reset()
 	m_LastInvited = 0;
 	m_WeakHookSpawn = false;
 
+	m_OldDDNetFix = true;
+
 	int *pIdMap = Server()->GetIdMap(m_ClientID);
-	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
+	for (int i = 1;i < DDRACE_MAX_CLIENTS;i++)
 	{
 		pIdMap[i] = -1;
 	}
@@ -294,12 +296,22 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pPlayerInfo)
 		return;
 
+	m_OldDDNetFix = false;
+	if(m_ClientVersion >= VERSION_DDNET_OLD && m_ClientVersion < VERSION_DDNET_256_PLAYERS)
+	{
+		if(Server()->ClientCount() > DDRACE_MAX_CLIENTS || m_ClientID > DDRACE_MAX_CLIENTS)
+			m_OldDDNetFix = true;
+		else for(int i = 0; i < MAX_CLIENTS; i++)
+			if(i >= DDRACE_MAX_CLIENTS && GameServer()->m_apPlayers[i])
+				m_OldDDNetFix = true;
+	}
+
 	pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || m_ClientVersion >= VERSION_DDNET_OLD));
 	pPlayerInfo->m_ClientID = id;
-	pPlayerInfo->m_Team = (m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
+	pPlayerInfo->m_Team = (m_OldDDNetFix || m_ClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
 
-	if(m_ClientID == SnappingClient && m_Paused == PAUSE_PAUSED && m_ClientVersion < VERSION_DDNET_OLD)
+	if(m_ClientID == SnappingClient && m_Paused == PAUSE_PAUSED && (m_ClientVersion < VERSION_DDNET_OLD || m_OldDDNetFix))
 		pPlayerInfo->m_Team = TEAM_SPECTATORS;
 
 	// send 0 if times of others are not shown
@@ -331,10 +343,10 @@ void CPlayer::FakeSnap()
 	// This is problematic when it's sent before we know whether it's a non-64-player-client
 	// Then we can't spectate players at the start
 
-	if(m_ClientVersion >= VERSION_DDNET_OLD)
+	if(m_ClientVersion >= VERSION_DDNET_OLD && !m_OldDDNetFix)
 		return;
 
-	int FakeID = VANILLA_MAX_CLIENTS - 1;
+	int FakeID = (m_OldDDNetFix ? DDRACE_MAX_CLIENTS : VANILLA_MAX_CLIENTS) - 1;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, FakeID, sizeof(CNetObj_ClientInfo)));
 

@@ -512,6 +512,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo)
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
 		pInfo->m_ClientVersion = GameServer()->GetClientVersion(ClientID);
+		pInfo->m_OldDDNetFix = GameServer()->IsOldDDNetFix(ClientID);
 		return 1;
 	}
 	return 0;
@@ -3094,7 +3095,7 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 
 int *CServer::GetIdMap(int ClientID)
 {
-	return IdMap + VANILLA_MAX_CLIENTS * ClientID;
+	return IdMap + DDRACE_MAX_CLIENTS * ClientID;
 }
 
 bool CServer::SetTimedOut(int ClientID, int OrigID)

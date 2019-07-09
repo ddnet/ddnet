@@ -163,6 +163,9 @@ void CGameWorld::UpdatePlayerMaps()
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (!Server()->ClientIngame(i)) continue;
+
+		int OldMaxClients = GameServer()->m_apPlayers[i]->m_ClientVersion >= VERSION_DDNET_OLD ? DDRACE_MAX_CLIENTS : VANILLA_MAX_CLIENTS;
+
 		int *pMap = Server()->GetIdMap(i);
 
 		// compute distances
@@ -208,34 +211,34 @@ void CGameWorld::UpdatePlayerMaps()
 		{
 			rMap[j] = -1;
 		}
-		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
+		for (int j = 0; j < OldMaxClients; j++)
 		{
 			if (pMap[j] == -1) continue;
 			if (Dist[pMap[j]].first > 5e9) pMap[j] = -1;
 			else rMap[pMap[j]] = j;
 		}
 
-		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
+		std::nth_element(&Dist[0], &Dist[OldMaxClients - 1], &Dist[MAX_CLIENTS], distCompare);
 
 		int Mapc = 0;
 		int Demand = 0;
-		for (int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
+		for (int j = 0; j < OldMaxClients - 1; j++)
 		{
 			int k = Dist[j].second;
 			if (rMap[k] != -1 || Dist[j].first > 5e9) continue;
-			while (Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1) Mapc++;
-			if (Mapc < VANILLA_MAX_CLIENTS - 1)
+			while (Mapc < OldMaxClients && pMap[Mapc] != -1) Mapc++;
+			if (Mapc < OldMaxClients - 1)
 				pMap[Mapc] = k;
 			else
 				Demand++;
 		}
-		for (int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
+		for (int j = MAX_CLIENTS - 1; j > OldMaxClients - 2; j--)
 		{
 			int k = Dist[j].second;
 			if (rMap[k] != -1 && Demand-- > 0)
 				pMap[rMap[k]] = -1;
 		}
-		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
+		pMap[OldMaxClients - 1] = -1; // player with empty name to say chat msgs
 	}
 }
 

@@ -27,6 +27,7 @@ public:
 		const char *m_pName;
 		int m_Latency;
 		int m_ClientVersion;
+		bool m_OldDDNetFix;
 	};
 
 	int Tick() const { return m_CurrentGameTick; }
@@ -83,9 +84,12 @@ public:
 	{
 		if (pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
 		{
+			CClientInfo Info;
+			GetClientInfo(ClientID, &Info);
+
 			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
 			pMsg->m_pMessage = msgbuf;
-			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
+			pMsg->m_ClientID = (Info.m_ClientVersion >= VERSION_DDNET_OLD ? DDRACE_MAX_CLIENTS : VANILLA_MAX_CLIENTS) - 1;
 		}
 		return SendPackMsgOne(pMsg, Flags, ClientID);
 	}
@@ -110,11 +114,11 @@ public:
 	{
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
-		if (Info.m_ClientVersion >= VERSION_DDNET_OLD)
+		if (Info.m_ClientVersion >= VERSION_DDNET_OLD && Info.m_ClientVersion < VERSION_DDNET_256_PLAYERS && !Info.m_OldDDNetFix)
 			return true;
 		int *pMap = GetIdMap(Client);
 		bool Found = false;
-		for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		for (int i = 0; i < DDRACE_MAX_CLIENTS; i++)
 		{
 			if (Target == pMap[i])
 			{
@@ -130,9 +134,9 @@ public:
 	{
 		CClientInfo Info;
 		GetClientInfo(Client, &Info);
-		if (Info.m_ClientVersion >= VERSION_DDNET_OLD)
+		if (Info.m_ClientVersion >= VERSION_DDNET_OLD && Info.m_ClientVersion < VERSION_DDNET_256_PLAYERS && !Info.m_OldDDNetFix)
 			return true;
-		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS-1);
+		Target = clamp(Target, 0, DDRACE_MAX_CLIENTS-1);
 		int *pMap = GetIdMap(Client);
 		if (pMap[Target] == -1)
 			return false;
@@ -227,6 +231,7 @@ public:
 	// DDRace
 
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
+	virtual bool IsOldDDNetFix(int ClientID) = 0;
 	virtual int GetClientVersion(int ClientID) = 0;
 	virtual void SetClientVersion(int ClientID, int Version) = 0;
 	virtual bool PlayerExists(int ClientID) = 0;

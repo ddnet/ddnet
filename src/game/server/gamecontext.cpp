@@ -474,11 +474,16 @@ void CGameContext::SendVoteSet(int ClientID)
 
 void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 {
-	if (Total > VANILLA_MAX_CLIENTS && m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_ClientVersion <= VERSION_DDRACE)
+	if (m_apPlayers[ClientID])
 	{
-		Yes = float(Yes) * VANILLA_MAX_CLIENTS / float(Total);
-		No = float(No) * VANILLA_MAX_CLIENTS / float(Total);
-		Total = VANILLA_MAX_CLIENTS;
+		// BlockDDrace
+		int OldMaxClients = m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_OLD ? DDRACE_MAX_CLIENTS : VANILLA_MAX_CLIENTS;
+		if (OldMaxClients == VANILLA_MAX_CLIENTS || (Total > DDRACE_MAX_CLIENTS && m_apPlayers[ClientID]->m_OldDDNetFix))
+		{
+			Yes = float(Yes) * OldMaxClients / float(Total);
+			No = float(No) * OldMaxClients / float(Total);
+			Total = OldMaxClients;
+		}
 	}
 
 	CNetMsg_Sv_VoteStatus Msg = {0};
@@ -3482,6 +3487,10 @@ void CGameContext::List(int ClientID, const char *pFilter)
 		SendChatTarget(ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
 	SendChatTarget(ClientID, aBuf);
+}
+
+bool CGameContext::IsOldDDNetFix(int ClientID) {
+	return m_apPlayers[ClientID] ? m_apPlayers[ClientID]->m_OldDDNetFix : false;
 }
 
 int CGameContext::GetClientVersion(int ClientID) {
