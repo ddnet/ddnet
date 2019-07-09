@@ -870,8 +870,18 @@ void CMenus::RenderLoading()
 	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
 	Graphics()->QuadsEnd();
 
-
-	const char *pCaption = Localize("Loading DDNet Client");
+	const char *pCaption = "Loading chillerbot-ux";
+	const char *apMsg[] = {
+		"fng > gores",
+		"I was a faithful friend...",
+		"MAPLE MAPLE MAPLE",
+		"you zooz you loose",
+		"I am LIBAN",
+		"das große ßßßßßß",
+		"ddnet++ > ddnet"
+	};
+	static int len = sizeof(apMsg) / sizeof(*apMsg);
+	static int index = rand() % len;
 
 	CUIRect r;
 	r.x = x;
@@ -879,6 +889,8 @@ void CMenus::RenderLoading()
 	r.w = w;
 	r.h = h - 130;
 	UI()->DoLabel(&r, pCaption, 48.0f, 0, -1);
+	r.y += 42;
+	UI()->DoLabel(&r, apMsg[index], 20.0f, 0, -1);
 
 	Graphics()->TextureSet(-1);
 	Graphics()->QuadsBegin();
