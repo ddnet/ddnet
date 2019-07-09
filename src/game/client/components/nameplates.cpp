@@ -114,6 +114,11 @@ void CNamePlates::RenderNameplate(
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
 			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
 
+		if(m_pClient->m_aClients[ClientID].m_Afk)
+			rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkPlayerColor));
+		else if(m_pClient->m_aClients[ClientID].m_PauseState)
+			rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClPausedPlayerColor));
+
 		STextRenderColor TColor;
 		STextRenderColor TOutlineColor;
 

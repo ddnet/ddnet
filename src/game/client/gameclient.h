@@ -301,6 +301,8 @@ public:
 		bool m_Foe;
 
 		int m_AuthLevel;
+		int m_PauseState;
+		bool m_Afk;
 
 		void UpdateRenderInfo();
 		void Reset();
