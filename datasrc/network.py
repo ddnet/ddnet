@@ -229,6 +229,8 @@ Objects = [
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
+                NetIntAny("m_PauseState"),
+                NetBool("m_Afk"),
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
