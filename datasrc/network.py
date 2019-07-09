@@ -24,6 +24,7 @@ Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY",
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
+Pause = ["NONE", "PAUSED", "SPEC"]
 
 RawHeader = '''
 
@@ -65,6 +66,7 @@ Enums = [
 	Enum("POWERUP", Powerups),
 	Enum("EMOTICON", Emoticons),
 	Enum("AUTHED", Authed),
+        Enum("PAUSE", Pause),
 ]
 
 Flags = [
@@ -229,7 +231,7 @@ Objects = [
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
-                NetIntAny("m_PauseState"),
+                NetIntRange("m_PauseState", "PAUSE_NONE", "PAUSE_SPEC"),
                 NetBool("m_Afk"),
 	]),
 
