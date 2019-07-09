@@ -476,7 +476,6 @@ void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 {
 	if (m_apPlayers[ClientID])
 	{
-		// BlockDDrace
 		int OldMaxClients = m_apPlayers[ClientID]->m_ClientVersion >= VERSION_DDNET_OLD ? DDRACE_MAX_CLIENTS : VANILLA_MAX_CLIENTS;
 		if (OldMaxClients == VANILLA_MAX_CLIENTS || (Total > DDRACE_MAX_CLIENTS && m_apPlayers[ClientID]->m_OldDDNetFix))
 		{
