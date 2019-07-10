@@ -110,7 +110,7 @@ void CNamePlates::RenderNameplate(
 			}
 		}
 
-		if(g_Config.m_ClIndicator && (m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_PauseState))
+		if(g_Config.m_ClAfkPauseIndicator && (m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_PauseState))
 		{
 			const char *indicator = "♦";
 			if(str_comp(indicator, m_aNamePlates[ClientID].m_aIndicator) != 0 || FontSizeIndicator != m_aNamePlates[ClientID].m_IndicatorFontSize)
@@ -176,7 +176,7 @@ void CNamePlates::RenderNameplate(
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, Position.y - FontSize - FontSizeClan - 38.0f);
 		}
 
-		if(g_Config.m_ClIndicator && (m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_PauseState))
+		if(g_Config.m_ClAfkPauseIndicator && (m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_PauseState))
 		{
 			if(m_aNamePlates[ClientID].m_IndicatorContainerIndex != -1)
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_IndicatorContainerIndex, &IColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_IndicatorWidth / 2.0f  - m_aNamePlates[ClientID].m_NameTextWidth / 2.0f - 14.0f, Position.y - FontSize - 38.0f);
