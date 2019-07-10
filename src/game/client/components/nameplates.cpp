@@ -50,6 +50,7 @@ void CNamePlates::RenderNameplate(
 
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+	float FontSizeIndicator = FontSize - 2.0f;
 	// render name plate
 	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
 	{
@@ -109,15 +110,41 @@ void CNamePlates::RenderNameplate(
 			}
 		}
 
+		if(g_Config.m_ClIndicator && (m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_PauseState))
+		{
+			const char *indicator = "♦";
+			if(str_comp(indicator, m_aNamePlates[ClientID].m_aIndicator) != 0 || FontSizeIndicator != m_aNamePlates[ClientID].m_IndicatorFontSize)
+			{
+				mem_copy(m_aNamePlates[ClientID].m_aIndicator, indicator, sizeof(m_aNamePlates[ClientID].m_aIndicator));
+				m_aNamePlates[ClientID].m_IndicatorFontSize = FontSizeIndicator;
+
+				if(m_aNamePlates[ClientID].m_IndicatorContainerIndex != -1)
+					TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_IndicatorContainerIndex);
+
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+				Cursor.m_LineWidth = -1;
+
+				// create nameplates at standard zoom
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
+
+				m_aNamePlates[ClientID].m_IndicatorWidth = TextRender()->TextWidth(0, FontSizeIndicator, indicator, -1);
+
+				m_aNamePlates[ClientID].m_IndicatorContainerIndex = TextRender()->CreateTextContainer(&Cursor, indicator);
+				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			}
+		}
+
+		ColorRGBA rgbI = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkPauseIndicatorColor));
+		STextRenderColor IColor;
+		IColor.Set(rgbI.r, rgbI.g, rgbI.b, g_Config.m_ClShowOthersAlpha / 100.0f);
+
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
 		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
 			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
-
-		if(m_pClient->m_aClients[ClientID].m_Afk)
-			rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkPlayerColor));
-		else if(m_pClient->m_aClients[ClientID].m_PauseState)
-			rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClPausedPlayerColor));
 
 		STextRenderColor TColor;
 		STextRenderColor TOutlineColor;
@@ -147,6 +174,12 @@ void CNamePlates::RenderNameplate(
 		{
 			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, Position.y - FontSize - FontSizeClan - 38.0f);
+		}
+
+		if(g_Config.m_ClIndicator && (m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_PauseState))
+		{
+			if(m_aNamePlates[ClientID].m_IndicatorContainerIndex != -1)
+				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_IndicatorContainerIndex, &IColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_IndicatorWidth / 2.0f  - m_aNamePlates[ClientID].m_NameTextWidth / 2.0f - 14.0f, Position.y - FontSize - 38.0f);
 		}
 
 		if(g_Config.m_Debug) // render client id when in debug as well

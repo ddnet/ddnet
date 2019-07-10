@@ -15,6 +15,7 @@ MACRO_CONFIG_INT(ClAntiPingSmooth, cl_antiping_smooth, 0, 0, 1, CFGFLAG_CLIENT|C
 MACRO_CONFIG_INT(ClAntiPingGunfire, cl_antiping_gunfire, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict gunfire and show predicted weapon physics (with cl_antiping_grenade 1 and cl_antiping_weapons 1)")
 
 MACRO_CONFIG_INT(ClNameplates, cl_nameplates, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show name plates")
+MACRO_CONFIG_INT(ClIndicator, cl_indicator, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show indicator to see afk or paused")
 MACRO_CONFIG_INT(ClNameplatesAlways, cl_nameplates_always, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Always show name plates disregarding of distance")
 MACRO_CONFIG_INT(ClNameplatesTeamcolors, cl_nameplates_teamcolors, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use team colors for name plates")
 MACRO_CONFIG_INT(ClNameplatesSize, cl_nameplates_size, 50, 0, 100, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Size of the name plates from 0 to 100%")
@@ -27,8 +28,7 @@ MACRO_CONFIG_INT(ClTextEntitiesSize, cl_text_entities_size, 100, 0, 100, CFGFLAG
 MACRO_CONFIG_COL(ClAuthedPlayerColor, cl_authed_player_color, 5898211, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Color of name of authenticated player in scoreboard")
 MACRO_CONFIG_COL(ClSameClanColor, cl_same_clan_color, 5898211, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Clan color of players with the same clan as you in scoreboard.")
 
-MACRO_CONFIG_COL(ClPausedPlayerColor, cl_paused_player_color, 1572759, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Color of name of paused player on namespace")
-MACRO_CONFIG_COL(ClAfkPlayerColor, cl_afk_player_color, 393087, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Color of name of afk player on namespace")
+MACRO_CONFIG_COL(ClAfkPauseIndicatorColor, cl_afk_pause_indicator_color, 15728506, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Color of indicator of afk or paused player")
 
 MACRO_CONFIG_INT(ClEnablePingColor, cl_enable_ping_color, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Whether ping is colored in scoreboard.")
 MACRO_CONFIG_INT(ClAutoswitchWeapons, cl_autoswitch_weapons, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Auto switch weapon on pickup")
