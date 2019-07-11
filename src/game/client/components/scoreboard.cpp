@@ -191,6 +191,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		RenderTools()->DrawRoundRect(x, y, w, h, 17.0f);
 	Graphics()->QuadsEnd();
 
+	char aBuf[128] = {0};
+
 	// render title
 	float TitleFontsize = 40.0f;
 	if(!pTitle)
@@ -198,11 +200,20 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 			pTitle = Localize("Game over");
 		else
-			pTitle = Localize("Scoreboard");
+		{
+			if(str_length(Client()->GetCurrentMap()) > 16)
+			{
+				str_truncate(aBuf, sizeof(aBuf), Client()->GetCurrentMap(), 16);
+				str_append(aBuf, "...", sizeof(aBuf));
+				pTitle = aBuf;
+			}
+			else
+			{
+				pTitle = Client()->GetCurrentMap();
+			}
+		}
 	}
-	TextRender()->Text(0, x+20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1);
-
-	char aBuf[128] = {0};
+	TextRender()->Text(0, x + 20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1);
 
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
 	{
