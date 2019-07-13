@@ -50,6 +50,8 @@ void CNamePlates::RenderNameplate(
 
 	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+
+	float FontOffsetAfkMark = 2.0f;
 	// render name plate
 	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
 	{
@@ -109,6 +111,37 @@ void CNamePlates::RenderNameplate(
 			}
 		}
 
+		if(g_Config.m_ClAfkMark && m_pClient->m_aClients[ClientID].m_Afk)
+		{
+			const char *afkMark = "!";
+			if(str_comp(afkMark, m_aNamePlates[ClientID].m_aAfkMark) != 0 || (FontSize - FontOffsetAfkMark) != m_aNamePlates[ClientID].m_AfkMarkFontSize)
+			{
+				mem_copy(m_aNamePlates[ClientID].m_aAfkMark, afkMark, sizeof(m_aNamePlates[ClientID].m_aAfkMark));
+				m_aNamePlates[ClientID].m_AfkMarkFontSize = FontSize - FontOffsetAfkMark;
+
+				if(m_aNamePlates[ClientID].m_AfkMarkContainerIndex != -1)
+					TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_AfkMarkContainerIndex);
+
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+				Cursor.m_LineWidth = -1;
+
+				// create nameplates at standard zoom
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
+
+				m_aNamePlates[ClientID].m_AfkMarkWidth = TextRender()->TextWidth(0, FontSize - FontOffsetAfkMark, afkMark, -1);
+
+				m_aNamePlates[ClientID].m_AfkMarkContainerIndex = TextRender()->CreateTextContainer(&Cursor, afkMark);
+				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			}
+		}
+
+		ColorRGBA rgbAfkM = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkMarkColor));
+		STextRenderColor AfkMColor;
+		AfkMColor.Set(rgbAfkM.r, rgbAfkM.g, rgbAfkM.b, g_Config.m_ClShowOthersAlpha / 100.0f);
+
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
 		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
@@ -142,6 +175,12 @@ void CNamePlates::RenderNameplate(
 		{
 			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, Position.y - FontSize - FontSizeClan - 38.0f);
+		}
+
+		if(g_Config.m_ClAfkMark && m_pClient->m_aClients[ClientID].m_Afk)
+		{
+			if(m_aNamePlates[ClientID].m_AfkMarkContainerIndex != -1)
+				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_AfkMarkContainerIndex, &AfkMColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_AfkMarkWidth / 2.0f  - m_aNamePlates[ClientID].m_NameTextWidth / 2.0f - 14.0f, Position.y - FontSize - 38.0f);
 		}
 
 		if(g_Config.m_Debug) // render client id when in debug as well
@@ -196,6 +235,8 @@ void CNamePlates::ResetNamePlates()
 			TextRender()->DeleteTextContainer(m_aNamePlates[i].m_NameTextContainerIndex);
 		if(m_aNamePlates[i].m_ClanNameTextContainerIndex != -1)
 			TextRender()->DeleteTextContainer(m_aNamePlates[i].m_ClanNameTextContainerIndex);
+		if(m_aNamePlates[i].m_AfkMarkContainerIndex != -1)
+			TextRender()->DeleteTextContainer(m_aNamePlates[i].m_AfkMarkContainerIndex);
 
 		m_aNamePlates[i].Reset();
 	}
