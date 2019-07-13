@@ -324,6 +324,7 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(id);
+	pDDNetPlayer->m_Afk = m_Afk;
 }
 
 void CPlayer::FakeSnap()
