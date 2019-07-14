@@ -1430,7 +1430,8 @@ int str_hex_decode(void *dst, int dst_size, const char *src);
 		- Guarantees that buffer string will contain zero-termination.
 */
 void str_timestamp(char *buffer, int buffer_size);
-void str_timestamp_format(char *buffer, int buffer_size, const char *format);
+void str_timestamp_format(char *buffer, int buffer_size, const char *format)
+GNUC_ATTRIBUTE((format(strftime, 3, 0)));
 void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format)
 GNUC_ATTRIBUTE((format(strftime, 4, 0)));
 
