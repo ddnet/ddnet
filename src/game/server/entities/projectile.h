@@ -36,7 +36,6 @@ private:
 	int m_LifeSpan;
 	int m_Owner;
 	int m_Type;
-	//int m_Damage;
 	int m_SoundImpact;
 	float m_Force;
 	int m_StartTick;
@@ -47,6 +46,17 @@ private:
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
+
+	vec2 m_CurPos;
+	vec2 m_LastResetPos;
+	int m_LastResetTick;
+	bool m_CalculatedVel;
+	int m_VelX;
+	int m_VelY;
+
+	virtual void TickDefered();
+	void CalculateVel();
+	void GetOriginalTunings(float *Curvature, float *Speed);
 
 public:
 

@@ -227,14 +227,14 @@ void CPlayer::Tick()
 		++m_TeamChangeTick;
 	}
 
-	m_TuneZoneOld = m_TuneZone; // determine needed tunings with viewpos
+	/*m_TuneZoneOld = m_TuneZone; // determine needed tunings with viewpos
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
 	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
-	}
+	}*/
 }
 
 void CPlayer::PostTick()
