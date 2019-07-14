@@ -11,6 +11,10 @@
 #include "curl/curl.h"
 #include "curl/easy.h"
 
+#if defined(CONF_OPENSSL)
+#include <openssl/ssl.h>
+#endif
+
 static char CA_FILE_PATH[512];
 // TODO: Non-global pls?
 static CURLSH *gs_Share;
@@ -97,6 +101,31 @@ void CRequest::Run()
 	OnCompletion();
 }
 
+static int SSLVerifyCallback(int preverify_ok, X509_STORE_CTX *x509_ctx)
+{
+	X509 *pCert = X509_STORE_CTX_get_current_cert(x509_ctx);
+
+	char aBuf[512];
+	dbg_msg("cert", "preverify %d", preverify_ok);
+	X509_NAME_oneline(X509_get_issuer_name(pCert), aBuf, sizeof(aBuf));
+	dbg_msg("cert", "issuer %s", aBuf);
+	X509_NAME_oneline(X509_get_subject_name(pCert), aBuf, sizeof(aBuf));
+	dbg_msg("cert", "subject %s", aBuf);
+
+	return 1;
+}
+
+static int HandleSSL(CURL *pHandle, void *ssl_ctx, void *pCtx)
+{
+#if defined(CONF_OPENSSL)
+	SSL_CTX *ctx = (SSL_CTX *)ssl_ctx;
+	SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
+	SSL_CTX_set_options(ctx, SSL_OP_NO_TICKET);
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, SSLVerifyCallback);
+#endif
+	return CURLE_OK;
+}
+
 int CRequest::RunImpl(CURL *pHandle)
 {
 	if(!pHandle)
@@ -149,6 +178,13 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_NOPROGRESS, 0L);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
+
+	if(g_Config.m_DbgCurl)
+	{
+		curl_easy_setopt(pHandle, CURLOPT_SSL_SESSIONID_CACHE, 0L);
+		curl_easy_setopt(pHandle, CURLOPT_SSL_CTX_FUNCTION, HandleSSL);
+		curl_easy_setopt(pHandle, CURLOPT_SSL_CTX_DATA, this);
+	}
 
 	if(!AfterInit(pHandle))
 	{
