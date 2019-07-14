@@ -47,6 +47,9 @@ bool HttpInit(IStorage *pStorage)
 	{
 		return true;
 	}
+
+	dbg_msg("curl", "curl version str: %s", curl_version());
+
 	gs_Share = curl_share_init();
 	if(!gs_Share)
 	{
