@@ -285,9 +285,7 @@ void CProjectile::FillInfo(CNetObj_Projectile *pProj)
 
 void CProjectile::Snap(int SnappingClient)
 {
-	float Ct = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
-
-	if(NetworkClipped(SnappingClient, GetPos(Ct)))
+	if(NetworkClipped(SnappingClient, m_CurPos))
 		return;
 
 	CCharacter* pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
