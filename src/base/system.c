@@ -2809,6 +2809,16 @@ int str_isallnum(const char *str)
 	return 1;
 }
 
+int str_isallhex(const char *str)
+{
+	while(*str)
+	{
+		if(!isxdigit(*str++))
+			return 0;
+	}
+	return 1;
+}
+
 int str_toint(const char *str) { return atoi(str); }
 int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
 unsigned long str_toulong_base(const char *str, int base) { return strtoul(str, NULL, base); }
