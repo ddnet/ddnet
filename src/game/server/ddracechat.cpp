@@ -285,7 +285,7 @@ void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 			pPlayer->SpectatePlayerName(pResult->GetString(0));
 		}
 	}
-	else if(-PauseState == PauseType)
+	else if(-PauseState != CPlayer::PAUSE_NONE && PauseType != CPlayer::PAUSE_NONE)
 	{
 		pPlayer->Pause(CPlayer::PAUSE_NONE, false);
 	}
