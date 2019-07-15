@@ -513,7 +513,7 @@ endif()
 ########################################################################
 
 # Static dependencies
-set_glob(DEP_JSON_SRC GLOB src/engine/external/json-parser json.c json.h)
+set_glob(DEP_JSON_SRC GLOB src/engine/external/json json.c json.h)
 add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
 
 set_glob(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)

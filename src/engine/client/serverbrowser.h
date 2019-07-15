@@ -5,7 +5,7 @@
 
 #include <engine/serverbrowser.h>
 #include <engine/shared/memheap.h>
-#include <engine/external/json-parser/json.h>
+#include <engine/external/json/json.h>
 
 class CServerBrowser : public IServerBrowser
 {
