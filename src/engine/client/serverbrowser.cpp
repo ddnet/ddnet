@@ -83,7 +83,7 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
 }
 
-const CServerInfo *CServerBrowser::SortedGet(int Index) const
+const CBrowserEntry *CServerBrowser::SortedGet(int Index) const
 {
 	if(Index < 0 || Index >= m_NumSortedServers)
 		return 0;
@@ -123,7 +123,7 @@ bool CServerBrowser::SortCompareMap(int Index1, int Index2) const
 {
 	CServerEntry *a = m_ppServerlist[Index1];
 	CServerEntry *b = m_ppServerlist[Index2];
-	return str_comp(a->m_Info.m_aMap, b->m_Info.m_aMap) < 0;
+	return str_comp(a->m_Info.m_MapInfo.m_aName, b->m_Info.m_MapInfo.m_aName) < 0;
 }
 
 bool CServerBrowser::SortComparePing(int Index1, int Index2) const
@@ -187,19 +187,19 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 		}
 		else if(g_Config.m_BrFilterPureMap &&
-			!(str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm1") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm2") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm6") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm7") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm8") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "dm9") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf1") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf2") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf3") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf4") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf5") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf6") == 0 ||
-			str_comp(m_ppServerlist[i]->m_Info.m_aMap, "ctf7") == 0)
+			!(str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "dm1") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "dm2") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "dm6") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "dm7") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "dm8") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "dm9") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "ctf1") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "ctf2") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "ctf3") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "ctf4") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "ctf5") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "ctf6") == 0 ||
+			str_comp(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, "ctf7") == 0)
 		)
 		{
 			Filtered = 1;
@@ -258,7 +258,7 @@ void CServerBrowser::Filter()
 				}
 
 				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrFilterString))
+				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, g_Config.m_BrFilterString))
 				{
 					MatchFound = 1;
 					m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
@@ -279,7 +279,7 @@ void CServerBrowser::Filter()
 				}
 
 				// match against map
-				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, g_Config.m_BrExcludeString))
+				if(str_find_nocase(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName, g_Config.m_BrExcludeString))
 				{
 					MatchFound = 1;
 				}
@@ -331,13 +331,13 @@ int CServerBrowser::SortHash() const
 	return i;
 }
 
-void SetFilteredPlayers(const CServerInfo &Item)
+void SetFilteredPlayers(const CBrowserEntry &Item)
 {
 	Item.m_NumFilteredPlayers = 0;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		const CServerInfo::CClient &Client = Item.m_aClients[i];
+		const CBrowserEntry::CClientInfo &Client = Item.m_aClients[i];
 
 		if(Client.m_aName[0] == '\0')
 			continue;
@@ -431,7 +431,7 @@ void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 	m_NumRequests++;
 }
 
-void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
+void CServerBrowser::SetInfo(CServerEntry *pEntry, const CBrowserEntry &Info)
 {
 	bool Fav = pEntry->m_Info.m_Favorite;
 	bool Off = pEntry->m_Info.m_Official;
@@ -525,7 +525,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	return pEntry;
 }
 
-void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo)
+void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CBrowserEntry *pInfo)
 {
 	CServerEntry *pEntry = 0;
 	if(Type == IServerBrowser::SET_MASTER_ADD)
@@ -1148,8 +1148,8 @@ void CServerBrowser::LoadDDNetRanks()
 {
 	for(int i = 0; i < m_NumServers; i++)
 	{
-		if(m_ppServerlist[i]->m_Info.m_aMap[0])
-			m_ppServerlist[i]->m_Info.m_HasRank = HasRank(m_ppServerlist[i]->m_Info.m_aMap);
+		if(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName[0])
+			m_ppServerlist[i]->m_Info.m_HasRank = HasRank(m_ppServerlist[i]->m_Info.m_MapInfo.m_aName);
 	}
 }
 

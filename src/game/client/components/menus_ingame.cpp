@@ -345,7 +345,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		return;
 
 	// fetch server info
-	CServerInfo CurrentServerInfo;
+	CBrowserEntry CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
 
 	// render background
@@ -432,7 +432,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			"\n"
 			"%s: %d/%d\n",
 			Localize("Game type"), CurrentServerInfo.m_aGameType,
-			Localize("Map"), CurrentServerInfo.m_aMap,
+			Localize("Map"), CurrentServerInfo.m_MapInfo.m_aName,
 			Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit,
 			Localize("Time limit"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit,
 			Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients

@@ -869,7 +869,7 @@ int CClient::SendMsgExY(CMsgPacker *pMsg, int Flags, bool System, int NetClient)
 	return 0;
 }
 
-void CClient::GetServerInfo(CServerInfo *pServerInfo)
+void CClient::GetServerInfo(CBrowserEntry *pServerInfo)
 {
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 
@@ -1182,8 +1182,8 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 
 int CClient::PlayerScoreNameComp(const void *a, const void *b)
 {
-	CServerInfo::CClient *p0 = (CServerInfo::CClient *)a;
-	CServerInfo::CClient *p1 = (CServerInfo::CClient *)b;
+	CBrowserEntry::CClientInfo *p0 = (CBrowserEntry::CClientInfo *)a;
+	CBrowserEntry::CClientInfo *p1 = (CBrowserEntry::CClientInfo *)b;
 	if(p0->m_Player && !p1->m_Player)
 		return -1;
 	if(!p0->m_Player && p1->m_Player)
@@ -1307,7 +1307,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 {
 	CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(*pFrom);
 
-	CServerInfo Info = {0};
+	CBrowserEntry Info = {};
 	int SavedType = SavedServerInfoType(RawType);
 	if((SavedType == SERVERINFO_64_LEGACY || SavedType == SERVERINFO_EXTENDED)
 		&& pEntry && pEntry->m_GotInfo && SavedType == pEntry->m_Info.m_Type)
@@ -1334,12 +1334,12 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	{
 		GET_STRING(Info.m_aVersion);
 		GET_STRING(Info.m_aName);
-		GET_STRING(Info.m_aMap);
+		GET_STRING(Info.m_MapInfo.m_aName);
 
 		if(SavedType == SERVERINFO_EXTENDED)
 		{
-			GET_INT(Info.m_MapCrc);
-			GET_INT(Info.m_MapSize);
+			GET_INT(Info.m_MapInfo.m_Crc);
+			GET_INT(Info.m_MapInfo.m_Size);
 		}
 
 		GET_STRING(Info.m_aGameType);
@@ -1348,8 +1348,8 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		GET_INT(Info.m_MaxPlayers);
 		GET_INT(Info.m_NumClients);
 		GET_INT(Info.m_MaxClients);
-		if(Info.m_aMap[0])
-			Info.m_HasRank = m_ServerBrowser.HasRank(Info.m_aMap);
+		if(Info.m_MapInfo.m_aName[0])
+			Info.m_HasRank = m_ServerBrowser.HasRank(Info.m_MapInfo.m_aName);
 
 		// don't add invalid info to the server browser list
 		if(Info.m_NumClients < 0 || Info.m_MaxClients < 0 ||
@@ -1414,7 +1414,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	bool IgnoreError = false;
 	for(int i = Offset; i < MAX_CLIENTS && Info.m_NumReceivedClients < MAX_CLIENTS && !Up.Error(); i++)
 	{
-		CServerInfo::CClient *pClient = &Info.m_aClients[Info.m_NumReceivedClients];
+		CBrowserEntry::CClientInfo *pClient = &Info.m_aClients[Info.m_NumReceivedClients];
 		GET_STRING(pClient->m_aName);
 		if(Up.Error())
 		{

@@ -204,7 +204,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	bool ShouldSendChatTimeoutCodeHeuristic();
 
-	class CServerInfo m_CurrentServerInfo;
+	class CBrowserEntry m_CurrentServerInfo;
 	int64 m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 
 	// version info
@@ -289,7 +289,7 @@ public:
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
 
-	virtual void GetServerInfo(CServerInfo *pServerInfo);
+	virtual void GetServerInfo(CBrowserEntry *pServerInfo);
 	void ServerInfoRequest();
 
 	int LoadData();

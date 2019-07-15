@@ -210,7 +210,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 				m_SelectedIndex = NewIndex;
 
-				const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
+				const CBrowserEntry *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
 				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 			}
 		}
@@ -237,7 +237,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	for(int i = 0; i < NumServers; i++)
 	{
 		int ItemIndex = i;
-		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
+		const CBrowserEntry *pItem = ServerBrowser()->SortedGet(ItemIndex);
 		NumPlayers += pItem->m_NumFilteredPlayers;
 		CUIRect Row;
 		CUIRect SelectHitBox;
@@ -378,23 +378,24 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - FontSize) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
+				const CServerInfo::CMapInfo *pMap = &pItem->m_MapInfo;
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit&IServerBrowser::QUICK_MAPNAME))
 				{
 					// highlight the parts that matches
-					const char *pStr = str_find_nocase(pItem->m_aMap, g_Config.m_BrFilterString);
+					const char *pStr = str_find_nocase(pMap->m_aName, g_Config.m_BrFilterString);
 					if(pStr)
 					{
-						TextRender()->TextEx(&Cursor, pItem->m_aMap, (int)(pStr-pItem->m_aMap));
+						TextRender()->TextEx(&Cursor, pMap->m_aName, (int)(pStr-pMap->m_aName));
 						TextRender()->TextColor(0.4f,0.4f,1.0f,1);
 						TextRender()->TextEx(&Cursor, pStr, str_length(g_Config.m_BrFilterString));
 						TextRender()->TextColor(1,1,1,1);
 						TextRender()->TextEx(&Cursor, pStr+str_length(g_Config.m_BrFilterString), -1);
 					}
 					else
-						TextRender()->TextEx(&Cursor, pItem->m_aMap, -1);
+						TextRender()->TextEx(&Cursor, pMap->m_aName, -1);
 				}
 				else
-					TextRender()->TextEx(&Cursor, pItem->m_aMap, -1);
+					TextRender()->TextEx(&Cursor, pMap->m_aName, -1);
 			}
 			else if(ID == COL_PLAYERS)
 			{
@@ -472,7 +473,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	if(NewSelected != -1)
 	{
 		// select the new server
-		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
+		const CBrowserEntry *pItem = ServerBrowser()->SortedGet(NewSelected);
 		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 		if(Input()->MouseDoubleClick() && DoubleClicked)
 			Client()->Connect(g_Config.m_UiServerAddress);
@@ -877,7 +878,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	CUIRect ServerDetails = View;
 	CUIRect ServerScoreBoard, ServerHeader;
 
-	const CServerInfo *pSelectedServer = ServerBrowser()->SortedGet(m_SelectedIndex);
+	const CBrowserEntry *pSelectedServer = ServerBrowser()->SortedGet(m_SelectedIndex);
 
 	// split off a piece to use for scoreboard
 	ServerDetails.HSplitTop(90.0f, &ServerDetails, &ServerScoreBoard);
@@ -1142,7 +1143,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		for(int i = 0; i < NumServers && !Found; i++)
 		{
 			int ItemIndex = m_SelectedIndex != -1 ? (m_SelectedIndex+i+1)%NumServers : i;
-			const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
+			const CBrowserEntry *pItem = ServerBrowser()->SortedGet(ItemIndex);
 			if(pItem->m_FriendState != IFriends::FRIEND_NO)
 			{
 				for(int j = 0; j < pItem->m_NumReceivedClients && !Found; ++j)

@@ -137,7 +137,7 @@ public:
 	virtual void Rcon(const char *pLine) = 0;
 
 	// server info
-	virtual void GetServerInfo(class CServerInfo *pServerInfo) = 0;
+	virtual void GetServerInfo(class CBrowserEntry *pServerInfo) = 0;
 
 	virtual int GetPredictionTime() = 0;
 

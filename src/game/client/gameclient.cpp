@@ -952,7 +952,7 @@ void CGameClient::ProcessEvents()
 	}
 }
 
-static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CServerInfo *pFallbackServerInfo)
+static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CBrowserEntry *pFallbackServerInfo)
 {
 	int Version = -1;
 	if(InfoExSize >= 8)
@@ -1273,7 +1273,7 @@ void CGameClient::OnNewSnapshot()
 					continue;
 				}
 				FoundGameInfoEx = true;
-				CServerInfo ServerInfo;
+				CBrowserEntry ServerInfo;
 				Client()->GetServerInfo(&ServerInfo);
 				m_GameInfo = GetGameInfo((const CNetObj_GameInfoEx *)pData, Client()->SnapItemSize(IClient::SNAP_CURRENT, i), &ServerInfo);
 			}
@@ -1310,7 +1310,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(!FoundGameInfoEx)
 	{
-		CServerInfo ServerInfo;
+		CBrowserEntry ServerInfo;
 		Client()->GetServerInfo(&ServerInfo);
 		m_GameInfo = GetGameInfo(0, 0, &ServerInfo);
 	}
@@ -1408,7 +1408,7 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
-	CServerInfo CurrentServerInfo;
+	CBrowserEntry CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
 	CTuningParams StandardTuning;
 	if(CurrentServerInfo.m_aGameType[0] != '0')

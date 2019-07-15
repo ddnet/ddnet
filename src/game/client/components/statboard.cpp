@@ -444,10 +444,13 @@ char* CStatboard::ReplaceCommata(char* pStr)
 void CStatboard::FormatStats()
 {
 	// server stats
-	CServerInfo CurrentServerInfo;
+	CBrowserEntry CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
 	char aServerStats[1024];
-	str_format(aServerStats, sizeof(aServerStats), "Servername,Game-type,Map\n%s,%s,%s", ReplaceCommata(CurrentServerInfo.m_aName), CurrentServerInfo.m_aGameType, CurrentServerInfo.m_aMap);
+	str_format(aServerStats, sizeof(aServerStats), "Servername,Game-type,Map\n%s,%s,%s",
+		ReplaceCommata(CurrentServerInfo.m_aName),
+		CurrentServerInfo.m_aGameType,
+		CurrentServerInfo.m_MapInfo.m_aName);
 
 
 	// player stats

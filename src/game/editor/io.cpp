@@ -547,7 +547,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	// send rcon.. if we can
 	if(m_pEditor->Client()->RconAuthed())
 	{
-		CServerInfo CurrentServerInfo;
+		CBrowserEntry CurrentServerInfo;
 		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
 		const unsigned char ipv4Localhost[16] = {127,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0};
 		const unsigned char ipv6Localhost[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
@@ -558,7 +558,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		{
 			char aMapName[128];
 			IStorage::StripPathAndExtension(pFileName, aMapName, sizeof(aMapName));
-			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
+			if(!str_comp(aMapName, CurrentServerInfo.m_MapInfo.m_aName))
 				m_pEditor->Client()->Rcon("reload");
 		}
 	}
