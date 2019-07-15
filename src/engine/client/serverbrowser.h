@@ -7,6 +7,8 @@
 #include <engine/shared/memheap.h>
 #include <engine/external/json/json.h>
 
+#include <engine/client/hhandler.h>
+
 class CServerBrowser : public IServerBrowser
 {
 public:
@@ -130,7 +132,10 @@ private:
 	IMasterServer *m_pMasterServer;
 	class IConsole *m_pConsole;
 	class IFriends *m_pFriends;
+	class IStorage *m_pStorage;
 	char m_aNetVersion[128];
+
+	CHHandler m_HHandler;
 
 	CHeap m_ServerlistHeap;
 	CServerEntry **m_ppServerlist;

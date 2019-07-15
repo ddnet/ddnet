@@ -796,6 +796,8 @@ if(CLIENT)
     friends.h
     graphics_threaded.cpp
     graphics_threaded.h
+    hhandler.cpp
+    hhandler.h
     input.cpp
     input.h
     keynames.h

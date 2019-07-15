@@ -1198,7 +1198,8 @@ int CClient::PlayerScoreNameComp(const void *a, const void *b)
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 {
 	//server count from master server
-	if(pPacket->m_DataSize == (int)sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
+	// TODO: Enable this
+	if(false && pPacket->m_DataSize == (int)sizeof(SERVERBROWSE_COUNT) + 2 && mem_comp(pPacket->m_pData, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT)) == 0)
 	{
 		unsigned char *pP = (unsigned char*) pPacket->m_pData;
 		pP += sizeof(SERVERBROWSE_COUNT);
@@ -1223,7 +1224,8 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 		}
 	}
 	// server list from master server
-	if(pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_LIST) &&
+	// TODO: Enable this
+	if(false && pPacket->m_DataSize >= (int)sizeof(SERVERBROWSE_LIST) &&
 		mem_comp(pPacket->m_pData, SERVERBROWSE_LIST, sizeof(SERVERBROWSE_LIST)) == 0)
 	{
 		// check for valid master server address

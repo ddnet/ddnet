@@ -17,22 +17,28 @@
 class CBrowserEntry : public CServerInfo
 {
 public:
-	int m_SortedIndex;
-	int m_ServerIndex;
+	int m_SortedIndex = {};
+	int m_ServerIndex = {};
 
-	int m_Type;
-	uint64 m_ReceivedPackets;
-	int m_NumReceivedClients;
+	int m_Type = {};
+	uint64 m_ReceivedPackets = {};
+	int m_NumReceivedClients = {};
 
-	int m_QuickSearchHit;
-	int m_FriendState;
+	int m_QuickSearchHit = {};
+	int m_FriendState = {};
 
-	bool m_Favorite;
-	bool m_Official;
-	int m_Latency; // in ms
-	int m_HasRank;
-	char m_aAddress[NETADDR_MAXSTRSIZE];
-	mutable int m_NumFilteredPlayers;
+	bool m_Favorite = {};
+	bool m_Official = {};
+	int m_Latency = {}; // in ms
+	int m_HasRank = {};
+	char m_aAddress[NETADDR_MAXSTRSIZE] = {};
+	mutable int m_NumFilteredPlayers = {};
+
+	CBrowserEntry() = default;
+	CBrowserEntry(const NETADDR *pAddr, const CServerInfo &i) : CServerInfo(i)
+	{
+		net_addr_str(pAddr, m_aAddress, sizeof(m_aAddress), true);
+	};
 };
 
 class IServerBrowser : public IInterface

@@ -13,7 +13,9 @@
 
 #include <engine/config.h>
 #include <engine/console.h>
+#include <engine/engine.h>
 #include <engine/friends.h>
+#include <engine/hmasterserver.h>
 #include <engine/masterserver.h>
 #include <engine/storage.h>
 
@@ -81,6 +83,9 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
 	if(pConfig)
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+
+	m_HHandler.Init(Kernel()->RequestInterface<IEngine>(), Kernel()->RequestInterface<IHMasterServer>(), m_pStorage);
 }
 
 const CBrowserEntry *CServerBrowser::SortedGet(int Index) const
@@ -536,7 +541,10 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CBrowse
 		if(!Find(Addr))
 		{
 			pEntry = Add(Addr);
-			QueueRequest(pEntry);
+			if(!pInfo)
+				QueueRequest(pEntry);
+			else
+				SetInfo(pEntry, *pInfo);
 		}
 	}
 	else if(Type == IServerBrowser::SET_FAV_ADD)
@@ -798,6 +806,15 @@ void CServerBrowser::RequestCurrentServer(const NETADDR &Addr) const
 	RequestImpl(Addr, 0);
 }
 
+static void AddServerCallback(const NETADDR *pAddr, const CServerInfo *pInfo, void *pUser)
+{
+	CServerBrowser *pSelf = (CServerBrowser *)pUser;
+
+	CBrowserEntry Entry(pAddr, *pInfo);
+	Entry.m_NumReceivedClients = pInfo->m_NumClients;
+
+	pSelf->Set(*pAddr, IServerBrowser::SET_MASTER_ADD, -1, &Entry);
+}
 
 void CServerBrowser::Update(bool ForceResort)
 {
@@ -805,6 +822,8 @@ void CServerBrowser::Update(bool ForceResort)
 	int64 Now = time_get();
 	int Count;
 	CServerEntry *pEntry, *pNext;
+
+	m_HHandler.Update();
 
 	// do server list requests
 	if(m_NeedRefresh && !m_pMasterServer->IsRefreshing())
@@ -835,6 +854,8 @@ void CServerBrowser::Update(bool ForceResort)
 				dbg_msg("client_srvbrowse", "count-request sent to %d", i);
 			}
 		}
+
+		m_HHandler.GetServerList(AddServerCallback, this);
 	}
 
 	//Check if all server counts arrived
@@ -1180,8 +1201,7 @@ int CServerBrowser::HasRank(const char *pMap)
 
 void CServerBrowser::LoadDDNetInfoJson()
 {
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-	IOHANDLE File = pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE File = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
 
 	if(!File)
 		return;

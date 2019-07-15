@@ -251,6 +251,11 @@ typedef struct _json_value
             };
          }
 
+         inline operator int () const
+         {
+            return (json_int_t)*this;
+         }
+
    #endif
 
 } json_value;
