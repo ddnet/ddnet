@@ -513,7 +513,7 @@ endif()
 ########################################################################
 
 # Static dependencies
-set_glob(DEP_JSON_SRC GLOB src/engine/external/json json.c json.h)
+set_glob(DEP_JSON_SRC GLOB src/engine/external/json json-builder.c json-builder.h json.c json.h)
 add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
 
 set_glob(DEP_MD5_SRC GLOB src/engine/external/md5 md5.c md5.h)
@@ -699,7 +699,8 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   protocol_ex_msgs.h
   ringbuffer.cpp
   ringbuffer.h
-  serverbrowser.cpp
+  serverinfo.cpp
+  serverinfo.h
   snapshot.cpp
   snapshot.h
   storage.cpp
