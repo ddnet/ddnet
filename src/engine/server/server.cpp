@@ -9,6 +9,7 @@
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/engine.h>
+#include <engine/hmasterserver.h>
 #include <engine/map.h>
 #include <engine/masterserver.h>
 #include <engine/server.h>
@@ -2979,6 +2980,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER|CFGFLAG_ECON);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+	IHMasterServer *pHMasterServer = CreateHMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
 
@@ -2997,6 +2999,7 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMasterServer); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer), false);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pHMasterServer);
 
 		if(RegisterFail)
 		{
@@ -3009,6 +3012,9 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfig->Init();
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
+
+	pHMasterServer->Init(pStorage);
+	pHMasterServer->Load();
 
 	// register all console commands
 	pServer->RegisterCommands();
@@ -3037,6 +3043,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// run the server
 	dbg_msg("server", "starting...");
 	int Ret = pServer->Run();
+
+	pHMasterServer->Save();
 
 	// free
 	delete pKernel;

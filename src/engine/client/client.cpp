@@ -26,6 +26,7 @@
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
+#include <engine/hmasterserver.h>
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/map.h>
@@ -2753,6 +2754,7 @@ void CClient::InitInterfaces()
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
+	m_pHMasterServer = Kernel()->RequestInterface<IHMasterServer>();
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -3355,7 +3357,7 @@ void CClient::SaveReplay(const int Length)
 		GameClient()->Echo(Localize("Replay feature is disabled!"));
 		return;
 	}
-	
+
 	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
 	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
@@ -3386,7 +3388,7 @@ void CClient::SaveReplay(const int Length)
 		// And we restart the recorder
 		DemoRecorder_StartReplayRecorder();
 	}
-	
+
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
@@ -3860,6 +3862,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+	IHMasterServer *pHMasterServer = CreateHMasterServer();
 
 	if(RandInitFailed)
 	{
@@ -3889,6 +3892,8 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMasterServer); // IEngineMasterServer
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer), false);
 
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pHMasterServer);
+
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient(), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
@@ -3906,6 +3911,9 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfig->Init();
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
+
+	pHMasterServer->Init(pStorage);
+	pHMasterServer->Load();
 
 	// register all console commands
 	pClient->RegisterCommands();
@@ -3971,6 +3979,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// write down the config and quit
 	pConfig->Save();
+
+	pHMasterServer->Save();
 
 	delete pKernel;
 	pClient->~CClient();

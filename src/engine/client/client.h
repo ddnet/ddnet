@@ -75,6 +75,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IStorage *m_pStorage;
 	IUpdater *m_pUpdater;
 	IEngineMasterServer *m_pMasterServer;
+	IHMasterServer *m_pHMasterServer;
 
 	enum
 	{

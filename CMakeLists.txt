@@ -627,6 +627,7 @@ set_glob(ENGINE_INTERFACE GLOB src/engine
   friends.h
   ghost.h
   graphics.h
+  hmasterserver.h
   input.h
   kernel.h
   keys.h
@@ -663,6 +664,8 @@ set_glob(ENGINE_SHARED GLOB src/engine/shared
   ghost.cpp
   ghost.h
   global_uuid_manager.cpp
+  hmasterserver.cpp
+  hmasterserver.h
   http.cpp
   http.h
   huffman.cpp
