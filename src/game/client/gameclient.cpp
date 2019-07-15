@@ -430,7 +430,11 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		m_DummyFire++;
 
 		m_HammerInput.m_Fire += 2;
-		m_HammerInput.m_WantedWeapon = 1;
+		m_HammerInput.m_WantedWeapon = WEAPON_HAMMER + 1;
+		if(!g_Config.m_ClDummyRestoreWeapon)
+		{
+			m_DummyInput.m_WantedWeapon = WEAPON_HAMMER + 1;
+		}
 
 		vec2 Main = m_LocalCharacterPos;
 		vec2 Dummy = m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
