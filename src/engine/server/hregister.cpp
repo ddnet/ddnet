@@ -44,7 +44,7 @@ void CHRegister::Update()
         char aUrl[256];
         pMasterInfo->GetEndpoint(aUrl, sizeof(aUrl), "servers");
 
-        pMaster->m_pRegisterTask = std::make_shared<CPostJson>(aUrl, true, pBuf);
+        pMaster->m_pRegisterTask = std::make_shared<CPostJson>(aUrl, true, pBuf, pMaster->m_Beat++ % 2);
         free(pBuf);
         m_pEngine->AddJob(pMaster->m_pRegisterTask);
     }

@@ -71,8 +71,9 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
-CRequest::CRequest(const char *pUrl, bool CanTimeout) :
+CRequest::CRequest(const char *pUrl, bool CanTimeout, bool Forcev6) :
 	m_CanTimeout(CanTimeout),
+	m_Forcev6(Forcev6),
 	m_Size(0),
 	m_Progress(0),
 	m_State(HTTP_QUEUED),
@@ -131,6 +132,9 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_URL, m_aUrl);
 	curl_easy_setopt(pHandle, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, "DDNet " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+
+	if(m_Forcev6)
+		curl_easy_setopt(pHandle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
 
 	// We only trust our own custom-selected CAs for our own servers.
 	// Other servers can use any CA trusted by the system.
@@ -303,8 +307,8 @@ bool CGetFile::BeforeCompletion()
 	return io_close(m_File) == 0;
 }
 
-CPostJson::CPostJson(const char *pUrl, bool CanTimeout, const char *pJson)
-	: CRequest(pUrl, CanTimeout)
+CPostJson::CPostJson(const char *pUrl, bool CanTimeout, const char *pJson, bool Forcev6)
+	: CRequest(pUrl, CanTimeout, Forcev6)
 {
 	str_copy(m_aJson, pJson, sizeof(m_aJson));
 }

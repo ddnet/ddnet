@@ -32,6 +32,7 @@ class CRequest : public IJob
 
 	char m_aUrl[256];
 	bool m_CanTimeout;
+	bool m_Forcev6;
 
 	double m_Size;
 	double m_Current;
@@ -47,7 +48,7 @@ class CRequest : public IJob
 	int RunImpl(CURL *pHandle);
 
 public:
-	CRequest(const char *pUrl, bool CanTimeout);
+	CRequest(const char *pUrl, bool CanTimeout, bool Forcev6 = false);
 
 	double Current() const { return m_Current; }
 	double Size() const { return m_Size; }
@@ -101,7 +102,7 @@ class CPostJson : public CRequest
 	char m_aJson[1024];
 
 public:
-	CPostJson(const char *pUrl, bool CanTimeout, const char *pJson);
+	CPostJson(const char *pUrl, bool CanTimeout, const char *pJson, bool Forcev6);
 };
 
 bool HttpInit(IStorage *pStorage);

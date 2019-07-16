@@ -14,6 +14,7 @@ class CHRegister
     struct CMaster
     {
         int64 m_LastUpdate;
+        int m_Beat;
         std::shared_ptr<CPostJson> m_pRegisterTask;
     };
     CMaster m_aMasters[IHMasterServer::MAX_MASTERSERVERS];
