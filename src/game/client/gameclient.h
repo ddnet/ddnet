@@ -448,6 +448,7 @@ public:
 	CGameWorld m_PrevPredictedWorld;
 
 	void Echo(const char *pString);
+	bool IsOtherTeam(int ClientID);
 
 private:
 	bool m_DDRaceMsgSent[2];

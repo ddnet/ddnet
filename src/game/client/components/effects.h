@@ -13,8 +13,8 @@ public:
 
 	virtual void OnRender();
 
-	void BulletTrail(vec2 Pos, float TimePassed = 0.f);
-	void SmokeTrail(vec2 Pos, vec2 Vel, float TimePassed = 0.f);
+	void BulletTrail(vec2 Pos, float Alpha = 1.f, float TimePassed = 0.f);
+	void SmokeTrail(vec2 Pos, vec2 Vel, float Alpha = 1.f, float TimePassed = 0.f);
 	void SkidTrail(vec2 Pos, vec2 Vel);
 	void Explosion(vec2 Pos);
 	void HammerHit(vec2 Pos);
