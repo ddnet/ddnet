@@ -68,8 +68,17 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	vec2 Pos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(StartPos, StartVel, Curvature, Speed, Ct-0.001f);
 
+	float Alpha = 1.f;
+	if(UseExtraInfo(pCurrent))
+	{
+		int Owner;
+		ExtractExtraInfo(pCurrent, &Owner, 0, 0, 0);
+		if(Owner >= 0 && m_pClient->IsOtherTeam(Owner))
+			Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+	}
+
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 
 	int QuadOffset = 2 + 4 + NUM_WEAPONS + clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
@@ -79,7 +88,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	// add particle for this projectile
 	if(pCurrent->m_Type == WEAPON_GRENADE)
 	{
-		m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1);
+		m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1, Alpha);
 		static float s_Time = 0.0f;
 		static float s_LastLocalTime = Client()->LocalTime();
 
@@ -100,7 +109,7 @@ void CItems::RenderProjectile(const CNetObj_Projectile *pCurrent, int ItemID)
 	}
 	else
 	{
-		m_pClient->m_pEffects->BulletTrail(Pos);
+		m_pClient->m_pEffects->BulletTrail(Pos, Alpha);
 
 		if(length(Vel) > 0.00001f)
 			Graphics()->QuadsSetRotation(GetAngle(Vel));
@@ -475,6 +484,15 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 
 	ExtractInfo(pCurrent, &StartPos, &StartVel);
 
+	float Alpha = 1.f;
+	if(UseExtraInfo(pCurrent))
+	{
+		int Owner;
+		ExtractExtraInfo(pCurrent, &Owner, 0, 0, 0);
+		if(Owner >= 0 && m_pClient->IsOtherTeam(Owner))
+			Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+	}
+
 	float T = Pt;
 	if(DestroyTick >= 0)
 		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick())/(float)SERVER_TICK_SPEED);
@@ -493,8 +511,8 @@ void CItems::ReconstructSmokeTrail(const CNetObj_Projectile *pCurrent, int ItemI
 			TimePassed = minimum(TimePassed, (TimePassed-MinTrailSpan)/(Pt - MinTrailSpan)*(MinTrailSpan * 0.5f) + MinTrailSpan);
 		// add particle for this projectile
 		if(pCurrent->m_Type == WEAPON_GRENADE)
-			m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1, TimePassed);
+			m_pClient->m_pEffects->SmokeTrail(Pos, Vel*-1, Alpha, TimePassed);
 		else
-			m_pClient->m_pEffects->BulletTrail(Pos, TimePassed);
+			m_pClient->m_pEffects->BulletTrail(Pos, Alpha, TimePassed);
 	}
 }
