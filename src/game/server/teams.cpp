@@ -561,22 +561,17 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	}
 
 	if (CallSaveScore)
-		if (g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
-			GameServer()->Score()->SaveScore(Player->GetCID(), Time, pTimestamp,
-					GetCpCurrent(Player), Player->m_NotEligibleForFinish);
+		GameServer()->Score()->SaveScore(Player->GetCID(), Time, pTimestamp,
+				GetCpCurrent(Player), Player->m_NotEligibleForFinish);
 
 	bool NeedToSendNewRecord = false;
 	// update server best time
 	if (GameServer()->m_pController->m_CurrentRecord == 0
 			|| Time < GameServer()->m_pController->m_CurrentRecord)
 	{
-		// check for nameless
-		if (g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
-		{
-			GameServer()->m_pController->m_CurrentRecord = Time;
-			//dbg_msg("character", "Finish");
-			NeedToSendNewRecord = true;
-		}
+		GameServer()->m_pController->m_CurrentRecord = Time;
+		//dbg_msg("character", "Finish");
+		NeedToSendNewRecord = true;
 	}
 
 	SetDDRaceState(Player, DDRACE_FINISHED);
