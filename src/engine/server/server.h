@@ -12,9 +12,11 @@
 #include <engine/map.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/serverinfo.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/network.h>
 #include <engine/server/register.h>
+#include <engine/server/hregister.h>
 #include <engine/shared/console.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
@@ -219,6 +221,7 @@ public:
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS+1];
 	CRegister m_Register;
 	CAuthManager m_AuthManager;
+	CHRegister m_HRegister;
 
 	int m_RconRestrict;
 
@@ -254,7 +257,7 @@ public:
 	void SetRconCID(int ClientID);
 	int GetAuthedState(int ClientID);
 	const char *GetAuthName(int ClientID);
-	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc);
+	void GetMapInfo(CServerInfo::CMapInfo &MapInfo);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
 	const char *ClientName(int ClientID);
@@ -294,6 +297,7 @@ public:
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
 	void UpdateServerInfo();
+	void GetServerInfo(CServerInfo &Info);
 
 	void PumpNetwork();
 

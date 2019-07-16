@@ -1015,6 +1015,8 @@ endif()
 set_glob(ENGINE_SERVER GLOB src/engine/server
   authmanager.cpp
   authmanager.h
+  hregister.cpp
+  hregister.h
   name_ban.cpp
   name_ban.h
   register.cpp

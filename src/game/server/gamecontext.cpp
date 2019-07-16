@@ -2584,12 +2584,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 
-	char aMapName[128];
-	int MapSize;
-	SHA256_DIGEST MapSha256;
-	int MapCrc;
-	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapSha256, &MapCrc);
-	m_MapBugs = GetMapBugs(aMapName, MapSize, MapSha256, MapCrc);
+	CServerInfo::CMapInfo MapInfo;
+	Server()->GetMapInfo(MapInfo);
+	m_MapBugs = GetMapBugs(MapInfo.m_aName, MapInfo.m_Size, MapInfo.m_Sha256, MapInfo.m_Crc);
 
 	// reset everything here
 	//world = new GAMEWORLD;
@@ -2696,10 +2693,10 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		GameInfo.m_pTuning = Tuning();
 		GameInfo.m_pUuids = &g_UuidManager;
 
-		GameInfo.m_pMapName = aMapName;
-		GameInfo.m_MapSize = MapSize;
-		GameInfo.m_MapSha256 = MapSha256;
-		GameInfo.m_MapCrc = MapCrc;
+		GameInfo.m_pMapName = MapInfo.m_aName;
+		GameInfo.m_MapSize = MapInfo.m_Size;
+		GameInfo.m_MapSha256 = MapInfo.m_Sha256;
+		GameInfo.m_MapCrc = MapInfo.m_Crc;
 
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
 

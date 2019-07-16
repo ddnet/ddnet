@@ -26,6 +26,7 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocol_ex.h>
+#include <engine/shared/serverinfo.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/fifo.h>
 
@@ -971,12 +972,12 @@ void CServer::SendRconType(int ClientID, bool UsernameReq)
 	SendMsgEx(&Msg, MSGFLAG_VITAL, ClientID, true);
 }
 
-void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc)
+void CServer::GetMapInfo(CServerInfo::CMapInfo &MapInfo)
 {
-	str_copy(pMapName, GetMapName(), MapNameSize);
-	*pMapSize = m_CurrentMapSize;
-	*pMapSha256 = m_CurrentMapSha256;
-	*pMapCrc = m_CurrentMapCrc;
+	str_copy(MapInfo.m_aName, GetMapName(), sizeof(MapInfo.m_aName));
+	MapInfo.m_Size = m_CurrentMapSize;
+	MapInfo.m_Sha256 = m_CurrentMapSha256;
+	MapInfo.m_Crc = m_CurrentMapCrc;
 }
 
 void CServer::SendCapabilities(int ClientID)
@@ -1710,6 +1711,10 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 
 void CServer::UpdateServerInfo()
 {
+	CServerInfo Info;
+	GetServerInfo(Info);
+	m_HRegister.UpdateServerInfo(&Info);
+
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
@@ -1719,6 +1724,35 @@ void CServer::UpdateServerInfo()
 	}
 }
 
+void CServer::GetServerInfo(CServerInfo &Info)
+{
+	mem_zero(&Info.m_NetAddr, sizeof(Info.m_NetAddr));
+	Info.m_NetAddr.port = g_Config.m_SvPort;
+
+	Info.m_MaxClients = m_NetServer.MaxClients();
+	Info.m_MaxPlayers = Info.m_MaxClients - g_Config.m_SvSpectatorSlots;
+
+	Info.m_Flags = g_Config.m_Password[0] ? SERVER_FLAG_PASSWORD : 0;
+
+	str_copy(Info.m_aVersion, GameServer()->Version(), sizeof(Info.m_aVersion));
+	str_copy(Info.m_aName, g_Config.m_SvName, sizeof(Info.m_aName));
+	str_copy(Info.m_aGameType, GameServer()->GameType(), sizeof(Info.m_aGameType));
+
+	GetMapInfo(Info.m_MapInfo);
+	for(int i = 0, j = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		{
+			CServerInfo::CClientInfo *pSlot = &Info.m_aClients[j++];
+			str_copy(pSlot->m_aName, m_aClients[i].m_aName, sizeof(pSlot->m_aName));
+			str_copy(pSlot->m_aClan, m_aClients[i].m_aClan, sizeof(pSlot->m_aClan));
+			pSlot->m_Country = m_aClients[i].m_Country;
+			pSlot->m_Score = m_aClients[i].m_Score;
+			pSlot->m_Player = GameServer()->IsClientPlayer(i);
+			// TODO: Get team from CGameServer
+		}
+	}
+}
 
 void CServer::PumpNetwork()
 {
@@ -2066,6 +2100,7 @@ int CServer::Run()
 
 			// master server stuff
 			m_Register.RegisterUpdate(m_NetServer.NetType());
+			m_HRegister.Update();
 
 			if(!NonActive)
 				PumpNetwork();
@@ -2867,6 +2902,7 @@ void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *
 
 void CServer::RegisterCommands()
 {
+	// TODO: Move all these
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
@@ -2985,6 +3021,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IConfig *pConfig = CreateConfig();
 
 	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);
+	pServer->m_HRegister.Init(pEngine, pHMasterServer);
 
 	{
 		bool RegisterFail = false;

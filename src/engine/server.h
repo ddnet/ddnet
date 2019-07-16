@@ -10,6 +10,7 @@
 #include "message.h"
 #include <game/generated/protocol.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/serverinfo.h>
 
 class IServer : public IInterface
 {
@@ -140,7 +141,7 @@ public:
 		return true;
 	}
 
-	virtual void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pSha256, int *pMapCrc) = 0;
+	virtual void GetMapInfo(CServerInfo::CMapInfo &MapInfo) = 0;
 
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
