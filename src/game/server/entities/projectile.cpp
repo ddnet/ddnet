@@ -309,7 +309,7 @@ void CProjectile::Snap(int SnappingClient)
 	if(!pProj)
 		return;
 
-	if(SnappingClient > -1 && GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE)
+	if(SnappingClient > -1 && GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[SnappingClient]->m_ClientVersion >= VERSION_DDNET_PREDICT_PROJECTILE)
 		FillExtraInfo(pProj);
 	else
 		FillInfo(pProj);
