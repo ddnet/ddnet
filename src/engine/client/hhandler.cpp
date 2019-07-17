@@ -75,7 +75,11 @@ bool CHHandler::ReadServerList(IOHANDLE File, FServerListCb pfnCallback, void *p
     if(Length <= 0 || io_read(File, pBuf, Length) <= 0)
         return false; // Degenerate file
 
-    json_value Data = *json_parse(pBuf, Length);
+    json_value *t = json_parse(pBuf, Length);
+    if(!t)
+        return false;
+
+    const json_value &Data = *t;
     if(Data.type != json_array)
         return false;
 
@@ -98,5 +102,6 @@ bool CHHandler::ReadServerList(IOHANDLE File, FServerListCb pfnCallback, void *p
         pfnCallback(&Addr, &Info, pCbUser);
     }
 
+    json_value_free(t);
     return true;
 }

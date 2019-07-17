@@ -11,6 +11,7 @@ int CMasterInfo::GetEndpoint(char *aBuf, int BufSize, const char *pEndpoint) con
 
 void CHMasterServer::Init(IStorage *pStorage)
 {
+    dbg_msg("hmasterserver", "initializing");
     m_pStorage = pStorage;
 }
 

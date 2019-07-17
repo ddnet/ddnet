@@ -9,17 +9,26 @@
 #include <engine/engine.h>
 #include <engine/hmasterserver.h>
 
+#define V4 0
+#define V6 1
+#define SECRET_LENGTH 33
+
 class CHRegister
 {
     struct CMaster
     {
-        int64 m_LastUpdate;
+        int64 m_LastTry;
         int m_Beat;
+
+        int m_Failures[2];
+
+        char m_aSecret[SECRET_LENGTH + 1];
         std::shared_ptr<CPostJson> m_pRegisterTask;
     };
     CMaster m_aMasters[IHMasterServer::MAX_MASTERSERVERS];
 
     CServerInfo m_Info;
+    bool m_ForceUpdate;
 
     class IEngine *m_pEngine;
     IHMasterServer *m_pHMasterServer;

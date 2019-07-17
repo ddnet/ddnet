@@ -29,6 +29,7 @@ public:
     virtual bool Load() = 0;
     virtual bool Save() = 0;
 
+    virtual int MasterCount() = 0;
     virtual const CMasterInfo *Get(int ID) = 0;
     virtual void SetState(int ID, int State) = 0;
 };

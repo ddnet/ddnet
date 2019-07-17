@@ -879,6 +879,8 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 
+	pThis->UpdateServerInfo(false);
+
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
 #endif
@@ -1709,17 +1711,20 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	#undef ADD_INT
 }
 
-void CServer::UpdateServerInfo()
+void CServer::UpdateServerInfo(bool Distribute)
 {
-	CServerInfo Info;
+	CServerInfo Info = {};
 	GetServerInfo(Info);
 	m_HRegister.UpdateServerInfo(&Info);
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	if(Distribute)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		for(int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			SendServerInfo(m_NetServer.ClientAddr(i), -1, SERVERINFO_INGAME, false);
+			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+			{
+				SendServerInfo(m_NetServer.ClientAddr(i), -1, SERVERINFO_INGAME, false);
+			}
 		}
 	}
 }
@@ -1739,6 +1744,8 @@ void CServer::GetServerInfo(CServerInfo &Info)
 	str_copy(Info.m_aGameType, GameServer()->GameType(), sizeof(Info.m_aGameType));
 
 	GetMapInfo(Info.m_MapInfo);
+
+	Info.m_NumClients = 0;
 	for(int i = 0, j = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
@@ -1750,6 +1757,7 @@ void CServer::GetServerInfo(CServerInfo &Info)
 			pSlot->m_Score = m_aClients[i].m_Score;
 			pSlot->m_Player = GameServer()->IsClientPlayer(i);
 			// TODO: Get team from CGameServer
+			Info.m_NumClients++;
 		}
 	}
 }
@@ -1949,6 +1957,9 @@ int CServer::Run()
 		dbg_msg("server", "| rcon password: '%s' |", g_Config.m_SvRconPassword);
 		dbg_msg("server", "+-------------------------+");
 	}
+
+	// Mostly to initialize CHRegister
+	UpdateServerInfo();
 
 	// start game
 	{

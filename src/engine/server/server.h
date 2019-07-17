@@ -296,7 +296,7 @@ public:
 
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
-	void UpdateServerInfo();
+	void UpdateServerInfo(bool Distribute = true);
 	void GetServerInfo(CServerInfo &Info);
 
 	void PumpNetwork();

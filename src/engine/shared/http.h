@@ -55,6 +55,7 @@ public:
 	int Progress() const { return m_Progress; }
 	int State() const { return m_State; }
 	void Abort() { m_Abort = true; }
+	bool isV6() { return m_Forcev6; };
 };
 
 class CGet : public CRequest

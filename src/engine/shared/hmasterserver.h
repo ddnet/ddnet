@@ -23,6 +23,7 @@ public:
     bool Load();
     bool Save();
 
+    int MasterCount() { return m_Count; };
     const CMasterInfo *Get(int ID) { return &m_aMasterServers[ID]; };
     void SetState(int ID, int State) { m_aMasterServers[ID].m_State = State; };
 };
