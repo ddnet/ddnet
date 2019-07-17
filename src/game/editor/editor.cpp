@@ -3481,7 +3481,6 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 		return;
 
 	CEditorImage *pImg = pEditor->m_Map.m_lImages[pEditor->m_SelectedImage];
-	int External = pImg->m_External;
 	pEditor->Graphics()->UnloadTexture(pImg->m_TexID);
 	if(pImg->m_pData)
 	{
@@ -3489,8 +3488,8 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 		pImg->m_pData = 0;
 	}
 	*pImg = ImgInfo;
-	pImg->m_External = External;
 	IStorage::StripPathAndExtension(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
+	pImg->m_External = IsVanillaImage(pImg->m_aName);
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pImg->m_TexID = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 	ImgInfo.m_pData = 0;
