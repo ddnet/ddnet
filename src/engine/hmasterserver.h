@@ -1,5 +1,5 @@
-#ifndef ENGINE_SHARED_HMASTERSERVER
-#define ENGINE_SHARED_HMASTERSERVER
+#ifndef ENGINE_HMASTERSERVER_H
+#define ENGINE_HMASTERSERVER_H
 
 #include <engine/kernel.h>
 
@@ -36,4 +36,4 @@ public:
 
 extern IHMasterServer *CreateHMasterServer();
 
-#endif // ENGINE_SHARED_HMASTERSERVER
+#endif // ENGINE_HMASTERSERVER

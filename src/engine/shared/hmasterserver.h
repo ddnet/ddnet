@@ -1,5 +1,5 @@
-#ifndef ENGINE_HMASTERSERVER_H
-#define ENGINE_HMASTERSERVER_H
+#ifndef ENGINE_SHARED_HMASTERSERVER_H
+#define ENGINE_SHARED_HMASTERSERVER_H
 
 #include <engine/hmasterserver.h>
 
@@ -28,4 +28,4 @@ public:
     void SetState(int ID, int State) { m_aMasterServers[ID].m_State = State; };
 };
 
-#endif // ENGINE_HMASTERSERVER_H
+#endif // ENGINE_SHARED_HMASTERSERVER_H

@@ -1,5 +1,5 @@
-#ifndef ENGINE_CLIENT_HHANDLER
-#define ENGINE_CLIENT_HHANDLER
+#ifndef ENGINE_CLIENT_HHANDLER_H
+#define ENGINE_CLIENT_HHANDLER_H
 
 #include <memory>
 
@@ -38,4 +38,4 @@ public:
     static bool ReadServerList(IOHANDLE File, FServerListCb pfnCallback, void *pCbUser);
 };
 
-#endif // ENGINE_CLIENT_HHANDLER
+#endif // ENGINE_CLIENT_HHANDLER_H
