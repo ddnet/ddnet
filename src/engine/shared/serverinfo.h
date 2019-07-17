@@ -21,6 +21,7 @@ public:
 		int m_FriendState;
 
         bool FromJson(json_value j);
+		json_value *ToJson();
 	};
 	CClientInfo m_aClients[MAX_CLIENTS];
 
@@ -33,6 +34,7 @@ public:
         SHA256_DIGEST m_Sha256;
 
         bool FromJson(json_value j);
+		json_value *ToJson();
     };
     CMapInfo m_MapInfo;
 
@@ -48,6 +50,7 @@ public:
 	char m_aVersion[32];
 
     bool FromJson(NETADDR Addr, json_value j);
+	json_value *ToJson();
 };
 
 bool IsVanilla(const CServerInfo *pInfo);

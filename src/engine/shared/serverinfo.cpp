@@ -1,4 +1,5 @@
 #include <engine/serverbrowser.h>
+#include <engine/external/json/json-builder.h>
 #include <base/system.h>
 
 bool CServerInfo::CClientInfo::FromJson(json_value j)
@@ -26,6 +27,19 @@ bool CServerInfo::CClientInfo::FromJson(json_value j)
 	return true;
 }
 
+json_value *CServerInfo::CClientInfo::ToJson()
+{
+	json_value *t = json_object_new(0);
+
+	json_object_push(t, "name", json_string_new(m_aName));
+	json_object_push(t, "clan", json_string_new(m_aClan));
+	json_object_push(t, "country", json_integer_new(m_Country));
+	json_object_push(t, "score", json_integer_new(m_Score));
+	json_object_push(t, "team", json_integer_new(m_Player ? 0 : -1));
+
+	return t;
+}
+
 bool CServerInfo::CMapInfo::FromJson(json_value j)
 {
 	if(j["name"].type != json_string)
@@ -44,6 +58,25 @@ bool CServerInfo::CMapInfo::FromJson(json_value j)
 	m_Size = j["size"];
 
 	return true;
+}
+
+json_value *CServerInfo::CMapInfo::ToJson()
+{
+	json_value *t = json_object_new(0);
+
+	json_object_push(t, "name", json_string_new(m_aName));
+
+	char aCrc[9];
+	str_format(aCrc, sizeof(aCrc), "%08x", m_Crc);
+	json_object_push(t, "crc", json_string_new(aCrc));
+
+	char aSha256[SHA256_MAXSTRSIZE];
+	sha256_str(m_Sha256, aSha256, sizeof(aSha256));
+	json_object_push(t, "sha256", json_string_new(aSha256));
+
+	json_object_push(t, "size", json_integer_new(m_Size));
+
+	return t;
 }
 
 bool CServerInfo::FromJson(NETADDR Addr, json_value j)
@@ -83,7 +116,8 @@ bool CServerInfo::FromJson(NETADDR Addr, json_value j)
 	m_NumClients = json_array_length(&j["clients"]);
 	m_NumPlayers = 0;
 
-	for(int i = 0; i < m_NumClients; i++){
+	for(int i = 0; i < m_NumClients; i++)
+	{
 		if(!m_aClients[i].FromJson(j["clients"][i]))
 			return false;
 
@@ -91,6 +125,25 @@ bool CServerInfo::FromJson(NETADDR Addr, json_value j)
 	}
 
 	return true;
+}
+
+json_value *CServerInfo::ToJson()
+{
+	json_value *t = json_object_new(0);
+
+	json_object_push(t, "name", json_string_new(m_aName));
+	json_object_push(t, "game_type", json_string_new(m_aGameType));
+	json_object_push(t, "version", json_string_new(m_aVersion));
+	json_object_push(t, "passworded", json_boolean_new(m_Flags & SERVER_FLAG_PASSWORD));
+	json_object_push(t, "max_players", json_integer_new(m_MaxPlayers));
+	json_object_push(t, "max_clients", json_integer_new(m_MaxClients));
+	json_object_push(t, "map", m_MapInfo.ToJson());
+
+	json_value *pClients = json_object_push(t, "clients", json_array_new(m_NumClients));
+	for(int i = 0; i < m_NumClients; i++)
+		json_array_push(pClients, m_aClients[i].ToJson());
+
+	return t;
 }
 
 // gametypes
