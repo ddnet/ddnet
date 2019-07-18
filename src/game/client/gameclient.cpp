@@ -317,6 +317,8 @@ void CGameClient::OnInit()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+	m_ShowAll[0] = -1;
+	m_ShowAll[1] = -1;
 
 	// Set free binds to DDRace binds if it's active
 	if(!g_Config.m_ClDDRaceBindsSet && g_Config.m_ClDDRaceBinds)
@@ -512,6 +514,8 @@ void CGameClient::OnReset()
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[0] = -1;
 	m_ShowOthers[1] = -1;
+	m_ShowAll[0] = -1;
+	m_ShowAll[1] = -1;
 }
 
 
@@ -660,6 +664,7 @@ void CGameClient::OnDummyDisconnect()
 {
 	m_DDRaceMsgSent[1] = false;
 	m_ShowOthers[1] = -1;
+	m_ShowAll[1] = -1;
 	m_LastNewPredictedTick[1] = -1;
 }
 
@@ -1475,6 +1480,18 @@ void CGameClient::OnNewSnapshot()
 
 		// update state
 		m_ShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
+	}
+
+	if(m_ShowAll[g_Config.m_ClDummy] == -1 || (m_ShowAll[g_Config.m_ClDummy] != -1 && m_ShowAll[g_Config.m_ClDummy] != g_Config.m_ClShowAll))
+	{
+		{
+			CNetMsg_Cl_ShowAll Msg;
+			Msg.m_Show = g_Config.m_ClShowAll;
+			Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+		}
+
+		// update state
+		m_ShowAll[g_Config.m_ClDummy] = g_Config.m_ClShowAll;
 	}
 
 	m_pGhost->OnNewSnapshot();

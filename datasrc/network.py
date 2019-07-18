@@ -416,9 +416,14 @@ Messages = [
 	NetMessage("Cl_ShowOthers", [
 		NetBool("m_Show"),
 	]),
+
 # Can't add any NetMessages here!
 
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	NetMessageEx("Cl_ShowAll", "showall@ddnet.tw",[
+		NetBool("m_Show"),
 	]),
 ]

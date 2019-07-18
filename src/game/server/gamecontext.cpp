@@ -1772,6 +1772,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_ShowOthers = (bool)pMsg->m_Show;
 			}
 		}
+		else if (MsgID == NETMSGTYPE_CL_SHOWALL)
+		{
+			if (!g_Config.m_SvShowAllDefault)
+			{
+				CNetMsg_Cl_ShowAll *pMsg = (CNetMsg_Cl_ShowAll *)pRawMsg;
+				pPlayer->m_ShowAll = (bool)pMsg->m_Show;
+			}
+		}
 		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
 		{
 			CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;

@@ -2084,6 +2084,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
+	if (DoButton_CheckBox(&g_Config.m_ClShowAll, Localize("Show all"), g_Config.m_ClShowAll, &Button))
+	{
+		g_Config.m_ClShowAll ^= 1;
+	}
+
+	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_ClShowQuads, Localize("Show quads"), g_Config.m_ClShowQuads, &Button))
 	{
 		g_Config.m_ClShowQuads ^= 1;

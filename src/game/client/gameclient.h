@@ -451,6 +451,7 @@ public:
 private:
 	bool m_DDRaceMsgSent[2];
 	int m_ShowOthers[2];
+	int m_ShowAll[2];
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
