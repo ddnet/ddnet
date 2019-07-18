@@ -68,10 +68,12 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
-	char aBuf[128];
+#if defined(CONF_FAMILY_WINDOWS)
 	bool CheckSettings = false;
 	static int s_ClShowConsole = g_Config.m_ClShowConsole;
+#endif
 
+	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
 	MainView.HSplitTop(180.0f, &Game, &Client);
 	Client.HSplitTop(160.0f, &Client, &AutoReconnect);
