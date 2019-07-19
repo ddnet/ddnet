@@ -646,6 +646,8 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 {
+	GameServer()->m_apPlayers[ClientID]->Respawn(); // queue the spawn as kill tiles don't
+
 	m_Core.SetSolo(ClientID, false);
 
 	int Team = m_Core.Team(ClientID);
