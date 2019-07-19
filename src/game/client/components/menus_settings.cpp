@@ -68,6 +68,11 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	bool CheckSettings = false;
+	static int s_ClShowConsole = g_Config.m_ClShowConsole;
+#endif
+
 	char aBuf[128];
 	CUIRect Label, Button, Left, Right, Game, Client, AutoReconnect;
 	MainView.HSplitTop(180.0f, &Game, &Client);
@@ -213,7 +218,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClShowConsole, Localize("Show console window"), g_Config.m_ClShowConsole, &Button))
+		{
 			g_Config.m_ClShowConsole ^= 1;
+			CheckSettings = true;
+		}
+
+		if(CheckSettings)
+			m_NeedRestartGeneral = s_ClShowConsole != g_Config.m_ClShowConsole;
 #endif
 
 		// auto statboard screenshot
@@ -1417,7 +1428,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else if(m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
+	else if(m_NeedRestartGeneral || m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
 }
 
@@ -2157,12 +2168,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	if(CheckSettings)
-	{
-		if(s_InpMouseOld == g_Config.m_InpMouseOld)
-			m_NeedRestartDDNet = false;
-		else
-			m_NeedRestartDDNet = true;
-	}
+		m_NeedRestartDDNet = s_InpMouseOld != g_Config.m_InpMouseOld;
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
