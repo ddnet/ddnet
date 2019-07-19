@@ -223,13 +223,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			CheckSettings = true;
 		}
 
-		if (CheckSettings)
-		{
-			if (s_ClShowConsole == g_Config.m_ClShowConsole)
-				m_NeedRestartGeneral = false;
-			else
-				m_NeedRestartGeneral = true;
-		}
+		if(CheckSettings)
+			m_NeedRestartGeneral = s_ClShowConsole != g_Config.m_ClShowConsole;
 #endif
 
 		// auto statboard screenshot
@@ -2173,12 +2168,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	if(CheckSettings)
-	{
-		if(s_InpMouseOld == g_Config.m_InpMouseOld)
-			m_NeedRestartDDNet = false;
-		else
-			m_NeedRestartDDNet = true;
-	}
+		m_NeedRestartDDNet = s_InpMouseOld != g_Config.m_InpMouseOld;
 
 	CUIRect aRects[2];
 	Left.HSplitTop(5.0f, &Button, &Left);
