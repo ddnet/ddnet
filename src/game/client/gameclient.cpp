@@ -1007,8 +1007,8 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_FlagStartsRace = FastCap;
 	Info.m_TimeScore = Race;
 	Info.m_UnlimitedAmmo = Race;
-	Info.m_DDRaceRecordMessage = DDRace;
-	Info.m_RaceRecordMessage = Race && !DDRace;
+	Info.m_DDRaceRecordMessage = DDRace && !DDNet;
+	Info.m_RaceRecordMessage = DDNet || (Race && !DDRace);
 	Info.m_AllowEyeWheel = DDRace || BlockWorlds || Plus;
 	Info.m_AllowHookColl = DDRace;
 	Info.m_AllowZoom = Race || BlockWorlds;
@@ -1025,7 +1025,8 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_EntitiesRace = Race;
 	Info.m_EntitiesFNG = FNG;
 	Info.m_EntitiesVanilla = Vanilla;
-	Info.m_Race = Race || DDRace;
+	Info.m_Race = Race;
+	Info.m_RaceShowRecord = Race && !DDRace;
 
 	if(Version >= 0)
 	{
@@ -1057,6 +1058,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 3)
 	{
 		Info.m_Race = Flags&GAMEINFOFLAG_RACE;
+		Info.m_RaceShowRecord = Flags&GAMEINFOFLAG_RACE_SHOW_RECORD;
 	}
 	return Info;
 }
