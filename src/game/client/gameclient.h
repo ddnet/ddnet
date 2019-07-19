@@ -89,6 +89,7 @@ public:
 	bool m_EntitiesVanilla;
 
 	bool m_Race;
+	bool m_RaceShowRecord;
 };
 
 class CGameClient : public IGameClient

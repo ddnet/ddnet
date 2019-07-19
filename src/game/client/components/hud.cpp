@@ -126,7 +126,7 @@ void CHud::RenderGameTimer()
 			str_format(aBuf, sizeof(aBuf), "00:00.0");
 		else if(Time <= 0)
 			str_format(aBuf, sizeof(aBuf), "00:00");
-		else if(GameClient()->m_GameInfo.m_RaceRecordMessage && m_ServerRecord >= 0)
+		else if(GameClient()->m_GameInfo.m_RaceShowRecord && GameClient()->m_GameInfo.m_RaceRecordMessage && m_ServerRecord >= 0)
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d", (int)(m_ServerRecord*100)/60, ((int)(m_ServerRecord*100)%60));
 		else if(g_Config.m_ClShowDecisecs)
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", Time/60, Time%60, m_DDRaceTick/10);
