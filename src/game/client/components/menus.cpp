@@ -773,7 +773,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			NewPage = PAGE_NETWORK;
 
 		{
-			static int s_GhostButton=0;
+			static int s_GhostButton = 0;
 			if(GameClient()->m_GameInfo.m_Race)
 			{
 				Box.VSplitLeft(70.0f, &Button, &Box);
