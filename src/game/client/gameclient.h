@@ -64,7 +64,6 @@ class CGameInfo
 public:
 	bool m_FlagStartsRace;
 	bool m_TimeScore;
-	bool m_Race;
 	bool m_UnlimitedAmmo;
 	bool m_DDRaceRecordMessage;
 	bool m_RaceRecordMessage;
@@ -88,6 +87,8 @@ public:
 	bool m_EntitiesRace;
 	bool m_EntitiesFNG;
 	bool m_EntitiesVanilla;
+
+	bool m_Race;
 };
 
 class CGameClient : public IGameClient
