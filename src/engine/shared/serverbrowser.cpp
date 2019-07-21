@@ -49,7 +49,7 @@ bool IsDDRace(const CServerInfo *pInfo)
 bool IsBlockInfectionZ(const CServerInfo *pInfo)
 {
 	return str_find_nocase(pInfo->m_aGameType, "blockZ")
-	    || str_find_nocase(pInfo->m_aGameType, "infectionZ");
+	    || str_find_nocase(pInfo->m_aGameType, "infection");
 }
 
 bool IsBlockWorlds(const CServerInfo *pInfo)
