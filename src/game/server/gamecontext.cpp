@@ -2645,6 +2645,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvTeleportHoldHook = 0;
 		g_Config.m_SvTeam = 1;
 		g_Config.m_SvShowOthersDefault = 0;
+		g_Config.m_SvShowAllDefault = 0;
 
 		if(Collision()->m_NumSwitchers > 0)
 			for (int i = 0; i < Collision()->m_NumSwitchers+1; ++i)
