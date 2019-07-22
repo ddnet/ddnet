@@ -774,9 +774,9 @@ void CHud::OnRender()
 
 	if(g_Config.m_ClShowhud)
 	{
-		if(m_pClient->m_Snap.m_pLocalCharacter && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
+		if(!m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER)
 		{
-			if(g_Config.m_ClShowhudHealthAmmo)
+			if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_pLocalCharacter)
 				RenderHealthAndAmmo(m_pClient->m_Snap.m_pLocalCharacter);
 			RenderDDRaceEffects();
 		}
