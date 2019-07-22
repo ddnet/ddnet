@@ -1026,7 +1026,6 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_EntitiesFNG = FNG;
 	Info.m_EntitiesVanilla = Vanilla;
 	Info.m_Race = Race;
-	Info.m_RaceShowRecord = Race && !DDRace;
 
 	if(Version >= 0)
 	{
@@ -1058,7 +1057,6 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 3)
 	{
 		Info.m_Race = Flags&GAMEINFOFLAG_RACE;
-		Info.m_RaceShowRecord = Flags&GAMEINFOFLAG_RACE_SHOW_RECORD;
 	}
 	return Info;
 }
