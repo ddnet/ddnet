@@ -1526,7 +1526,9 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags&SERVERCAPFLAG_CHATTIMEOUTCODE;
+		Result.m_DDNet = DDNet;
 	}
+
 	return Result;
 }
 
@@ -3355,7 +3357,7 @@ void CClient::SaveReplay(const int Length)
 		GameClient()->Echo(Localize("Replay feature is disabled!"));
 		return;
 	}
-	
+
 	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Error: demorecorder isn't recording. Try to rejoin to fix that.");
 	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
@@ -3386,7 +3388,7 @@ void CClient::SaveReplay(const int Length)
 		// And we restart the recorder
 		DemoRecorder_StartReplayRecorder();
 	}
-	
+
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)

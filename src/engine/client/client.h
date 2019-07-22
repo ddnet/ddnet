@@ -59,6 +59,7 @@ class CServerCapabilities
 {
 public:
 	bool m_ChatTimeoutCode;
+	bool m_DDNet;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
