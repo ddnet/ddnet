@@ -783,6 +783,7 @@ void CHud::OnRender()
 			if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo)
 				RenderHealthAndAmmo(&m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_Cur);
 			RenderSpectatorHud();
+			RenderDDRaceEffects();
 		}
 
 		RenderGameTimer();
