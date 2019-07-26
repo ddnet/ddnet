@@ -113,10 +113,10 @@ void CNamePlates::RenderNameplate(
 
 		if(g_Config.m_ClAfkMark && m_pClient->m_aClients[ClientID].m_Afk)
 		{
-			const char *afkMark = "!";
-			if(str_comp(afkMark, m_aNamePlates[ClientID].m_aAfkMark) != 0 || (FontSize - FontOffsetAfkMark) != m_aNamePlates[ClientID].m_AfkMarkFontSize)
+			const char *AfkMark = "!";
+			if(str_comp(AfkMark, m_aNamePlates[ClientID].m_aAfkMark) != 0 || (FontSize - FontOffsetAfkMark) != m_aNamePlates[ClientID].m_AfkMarkFontSize)
 			{
-				mem_copy(m_aNamePlates[ClientID].m_aAfkMark, afkMark, sizeof(m_aNamePlates[ClientID].m_aAfkMark));
+				mem_copy(m_aNamePlates[ClientID].m_aAfkMark, AfkMark, sizeof(m_aNamePlates[ClientID].m_aAfkMark));
 				m_aNamePlates[ClientID].m_AfkMarkFontSize = FontSize - FontOffsetAfkMark;
 
 				if(m_aNamePlates[ClientID].m_AfkMarkContainerIndex != -1)
@@ -131,16 +131,16 @@ void CNamePlates::RenderNameplate(
 				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 				MapscreenToGroup(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y, Layers()->GameGroup());
 
-				m_aNamePlates[ClientID].m_AfkMarkWidth = TextRender()->TextWidth(0, FontSize - FontOffsetAfkMark, afkMark, -1);
+				m_aNamePlates[ClientID].m_AfkMarkWidth = TextRender()->TextWidth(0, FontSize - FontOffsetAfkMark, AfkMark, -1);
 
-				m_aNamePlates[ClientID].m_AfkMarkContainerIndex = TextRender()->CreateTextContainer(&Cursor, afkMark);
+				m_aNamePlates[ClientID].m_AfkMarkContainerIndex = TextRender()->CreateTextContainer(&Cursor, AfkMark);
 				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 			}
 		}
 
-		ColorRGBA rgbAfkM = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkMarkColor));
+		ColorRGBA RgbAfkM = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkMarkColor));
 		STextRenderColor AfkMColor;
-		AfkMColor.Set(rgbAfkM.r, rgbAfkM.g, rgbAfkM.b, g_Config.m_ClShowOthersAlpha / 100.0f);
+		AfkMColor.Set(RgbAfkM.r, RgbAfkM.g, RgbAfkM.b, g_Config.m_ClShowOthersAlpha / 100.0f);
 
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
 		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
