@@ -1,7 +1,7 @@
 from datatypes import *
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
-PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
+PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM", "AFK"]
 GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
 CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
@@ -229,7 +229,6 @@ Objects = [
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
-                NetBool("m_Afk"),
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
