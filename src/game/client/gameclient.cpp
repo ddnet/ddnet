@@ -1194,6 +1194,7 @@ void CGameClient::OnNewSnapshot()
 			{
 				const CNetObj_DDNetPlayer *pInfo = (const CNetObj_DDNetPlayer *)pData;
 				m_aClients[Item.m_ID].m_AuthLevel = pInfo->m_AuthLevel;
+				m_aClients[Item.m_ID].m_Afk = pInfo->m_Flags & PLAYERFLAG_AFK;
 			}
 			else if(Item.m_Type == NETOBJTYPE_CHARACTER)
 			{
