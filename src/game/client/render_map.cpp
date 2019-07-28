@@ -85,10 +85,10 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 
 void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
 {
-	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
+	if(!g_Config.m_ClShowQuads)
 		return;
-
-	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100-g_Config.m_ClOverlayEntities)/100.0f);
+	if(g_Config.m_ClShowQuads == 2 || g_Config.m_ClOverlayEntities < 100)
+		ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, g_Config.m_ClShowQuads == 2 ? 1 : (100-g_Config.m_ClOverlayEntities)/100.0f);
 }
 
 void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha)

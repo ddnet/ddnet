@@ -1375,7 +1375,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads* pQuadLayer,
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; //no visuals were created
 
-	if(!Force && (!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100))
+	if(!Force && (g_Config.m_ClShowQuads != 2 && g_Config.m_ClOverlayEntities == 100))
 		return;
 
 	CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayer->m_Data);
@@ -1706,7 +1706,7 @@ void CMapLayers::OnRender()
 			if((pLayer->m_Flags&LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer))
 				continue;
 
-			if((Render && g_Config.m_ClOverlayEntities < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (g_Config.m_ClOverlayEntities && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
+			if((Render && (g_Config.m_ClOverlayEntities < 100 || (g_Config.m_ClShowQuads == 2 && pLayer->m_Type == LAYERTYPE_QUADS)) && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (g_Config.m_ClOverlayEntities && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
 			{
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
