@@ -205,7 +205,7 @@ int CControls::SnapInput(int *pData)
 	if(m_pClient->m_pChat->IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
 	else if(m_pClient->m_pMenus->IsActive())
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
+		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING; //we used to broadcast when a player was in menu
 	else
 	{
 		if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags == PLAYERFLAG_CHATTING)
@@ -215,9 +215,6 @@ int CControls::SnapInput(int *pData)
 		}
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
-
-	if(m_pClient->m_pScoreboard->Active())
-		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
 
 	if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)
 		m_JoystickTapTime = 0; // Do not launch hook on first tap
