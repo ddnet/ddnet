@@ -1,7 +1,7 @@
 from datatypes import *
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
-PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM", "AFK"]
+PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
 GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
 CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
@@ -19,6 +19,7 @@ GameInfoFlags = [
 	"ENTITIES_DDNET", "ENTITIES_DDRACE", "ENTITIES_RACE", "ENTITIES_FNG",
 	"ENTITIES_VANILLA",
 ]
+ExPlayerFlags = ["AFK"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -73,6 +74,7 @@ Flags = [
 	Flags("GAMESTATEFLAG", GameStateFlags),
 	Flags("CHARACTERFLAG", CharacterFlags),
 	Flags("GAMEINFOFLAG", GameInfoFlags),
+	Flags("EXPLAYERFLAG", ExPlayerFlags),
 ]
 
 Objects = [
