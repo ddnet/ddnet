@@ -802,6 +802,17 @@ void CHud::OnRender()
 
 	}
 	RenderCursor();
+
+
+	static int LastChangeTick = 0;
+	if (LastChangeTick != Client()->PredGameTick())
+	{
+		m_DDRaceTick += 100 / Client()->GameTickSpeed();
+		LastChangeTick = Client()->PredGameTick();
+	}
+
+	if (m_DDRaceTick >= 100)
+		m_DDRaceTick = 0;
 }
 
 void CHud::OnMessage(int MsgType, void *pRawMsg)
@@ -908,18 +919,6 @@ void CHud::RenderDDRaceEffects()
 			str_format(aBuf, sizeof(aBuf), "%02d:%02d.%d", m_DDRaceTime/60, m_DDRaceTime%60, m_DDRaceTick/10);
 			TextRender()->Text(0, 150*Graphics()->ScreenAspect()-TextRender()->TextWidth(0, 12,"00:00.0",-1)/2, 20, 12, aBuf, -1); // use fixed value for text width so its not shaky
 		}*/
-
-
-
-	static int LastChangeTick = 0;
-	if(LastChangeTick != Client()->PredGameTick())
-	{
-		m_DDRaceTick += 100/Client()->GameTickSpeed();
-		LastChangeTick = Client()->PredGameTick();
-	}
-
-	if(m_DDRaceTick >= 100)
-		m_DDRaceTick = 0;
 }
 
 void CHud::RenderRecord()
