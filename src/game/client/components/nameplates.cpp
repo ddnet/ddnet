@@ -100,7 +100,7 @@ void CNamePlates::RenderNameplate(
 			}
 		}
 
-		if(g_Config.m_ClAfkMark && m_pClient->m_aClients[ClientID].m_Afk)
+		if(g_Config.m_ClAfkMark == 1 && m_pClient->m_aClients[ClientID].m_Afk)
 		{
 			const char *AfkMark = "!";
 			if(str_comp(AfkMark, m_aNamePlates[ClientID].m_aAfkMark) != 0 || (FontSize - FontOffsetAfkMark) != m_aNamePlates[ClientID].m_AfkMarkFontSize)
@@ -166,7 +166,7 @@ void CNamePlates::RenderNameplate(
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, Position.y - FontSize - FontSizeClan - 38.0f);
 		}
 
-		if(g_Config.m_ClAfkMark && m_pClient->m_aClients[ClientID].m_Afk)
+		if(g_Config.m_ClAfkMark == 1 && m_pClient->m_aClients[ClientID].m_Afk)
 		{
 			if(m_aNamePlates[ClientID].m_AfkMarkContainerIndex != -1)
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_AfkMarkContainerIndex, &AfkMColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_AfkMarkWidth / 2.0f  - m_aNamePlates[ClientID].m_NameTextWidth / 2.0f - 14.0f, Position.y - FontSize - 38.0f);
