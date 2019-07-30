@@ -561,6 +561,17 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
+	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Player.m_PlayerFlags&PLAYERFLAG_CHATTING))
+	{
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+		int QuadOffset = QuadOffsetToEmoticon + (SPRITE_ZZZ - SPRITE_OOP);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
+
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(0);
+	}
+
 	if(ClientID < 0)
 		return;
 
