@@ -75,13 +75,17 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
 		str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName, sizeof(Kill.m_aVictimName));
 		Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
+
 		Kill.m_KillerID = pMsg->m_Killer;
 		Kill.m_KillerTeam = m_pClient->m_aClients[Kill.m_KillerID].m_Team;
 		str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName, sizeof(Kill.m_aKillerName));
 		Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
+
 		Kill.m_Weapon = pMsg->m_Weapon;
 		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
 		Kill.m_Tick = Client()->GameTick();
+
+		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
 		Kill.m_VitctimTextWidth = Kill.m_KillerTextWidth = 0.f;
 
@@ -177,7 +181,7 @@ void CKillMessages::OnRender()
 			{
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 				int QuadOffset = 0;
-				if(m_aKillmsgs[r].m_VictimTeam == TEAM_RED)
+				if(m_aKillmsgs[r].m_VictimID == m_aKillmsgs[r].m_FlagCarrierBlue)
 					++QuadOffset;
 
 				Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, QuadOffset, x, y-16);
@@ -205,7 +209,7 @@ void CKillMessages::OnRender()
 					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 
 					int QuadOffset = 2;
-					if(m_aKillmsgs[r].m_KillerTeam == TEAM_RED)
+					if(m_aKillmsgs[r].m_KillerID == m_aKillmsgs[r].m_FlagCarrierBlue)
 						++QuadOffset;
 
 					Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, QuadOffset, x - 56, y - 16);
