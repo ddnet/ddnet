@@ -12,11 +12,10 @@ struct SPlayerNamePlate
 
 	void Reset()
 	{
-		m_NameTextContainerIndex = m_ClanNameTextContainerIndex = m_AfkMarkContainerIndex = -1;
+		m_NameTextContainerIndex = m_ClanNameTextContainerIndex = -1;
 		m_aName[0] = 0;
 		m_aClanName[0] = 0;
-		m_aAfkMark[0] = 0;
-		m_NameTextWidth = m_ClanNameTextWidth = m_AfkMarkWidth = 0.f;
+		m_NameTextWidth = m_ClanNameTextWidth = 0.f;
 		m_NameTextFontSize = m_ClanNameTextFontSize = 0;
 	}
 
@@ -29,11 +28,6 @@ struct SPlayerNamePlate
 	float m_ClanNameTextWidth;
 	int m_ClanNameTextContainerIndex;
 	float m_ClanNameTextFontSize;
-
-	char m_aAfkMark[MAX_NAME_LENGTH];
-	float m_AfkMarkWidth;
-	int m_AfkMarkContainerIndex;
-	float m_AfkMarkFontSize;
 };
 
 class CNamePlates : public CComponent
