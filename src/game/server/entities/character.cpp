@@ -343,6 +343,10 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 	if(m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
+	// allow firing directly after coming out of freeze or being unfrozen
+	// by something
+	if(m_FrozenLastTick)
+		FullAuto = true;
 
 	// don't fire non auto weapons when player is deep and sv_deepfly is disabled
 	if(!g_Config.m_SvDeepfly && !FullAuto && m_DeepFreeze)
@@ -2102,6 +2106,8 @@ void CCharacter::DDRacePostCoreTick()
 	if (m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
 		m_Core.m_HookTick = 0;
 
+	m_FrozenLastTick = false;
+
 	if (m_DeepFreeze && !m_Super)
 		Freeze();
 
@@ -2194,7 +2200,7 @@ bool CCharacter::UnFreeze()
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
-		if (m_Core.m_ActiveWeapon==WEAPON_HAMMER) m_ReloadTimer = 0;
+		m_FrozenLastTick = true;
 		return true;
 	}
 	return false;
