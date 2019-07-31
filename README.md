@@ -73,7 +73,7 @@ Whether to enable client compilation. If set to OFF, DDNet will not depend on Cu
 Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
 
 * **-DDEV=[ON|OFF]** <br>
-Whether to generate stuff necessary for packaging. Setting to ON will set CMAKE_BUILD_TYPE to Debug by default. Default value is OFF.
+Whether to optimize for development, speeding up the compilation process a little. If enabled, don't generate stuff necessary for packaging. Setting to ON will set CMAKE\_BUILD\_TYPE to Debug by default. Default value is OFF.
 
 * **-GNinja** <br>
 Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
