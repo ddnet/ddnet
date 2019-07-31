@@ -292,7 +292,7 @@ void CAutoMapper::Load(const char* pTileName)
 			{
 				pCurrentIndex->m_DefaultRule = false;
 			}
-			else if(!str_comp_num(pLine, "NoLayerCopy", 11) && pCurrentRun)
+			else if(str_startswith(pLine, "NoLayerCopy") && pCurrentRun)
 			{
 				pCurrentRun->m_AutomapCopy = false;
 			}
