@@ -141,6 +141,11 @@ bool CUpdater::MoveFile(const char *pFile)
 	size_t len = str_length(pFile);
 	bool Success = true;
 
+#if !defined(CONF_FAMILY_WINDOWS)
+	if(!str_comp_nocase(pFile + len - 4, ".dll"))
+		return Success;
+#endif
+
 	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
