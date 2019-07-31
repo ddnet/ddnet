@@ -620,21 +620,21 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
 										Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-										if(GameClient()->m_GameInfo.m_EntitiesDDNet && !IsValidGameTile(Index))
+										if(!GameClient()->m_GameInfo.m_EntitiesUnused && !IsValidGameTile(Index))
 											Index = 0;
 									}
 									if(IsFrontLayer)
 									{
 										Index = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Index;
 										Flags = ((CTile*)pTiles)[y*pTMap->m_Width+x].m_Flags;
-										if(!IsValidFrontTile(Index))
+										if(!GameClient()->m_GameInfo.m_EntitiesUnused && !IsValidFrontTile(Index))
 											Index = 0;
 									}
 									if(IsSwitchLayer)
 									{
 										Flags = 0;
 										Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!IsValidSwitchTile(Index))
+										if(!GameClient()->m_GameInfo.m_EntitiesUnused && !IsValidSwitchTile(Index))
 											Index = 0;
 										else if(CurOverlay == 0)
 										{
@@ -650,7 +650,7 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CTeleTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
-										if(!IsValidTeleTile(Index))
+										if(!GameClient()->m_GameInfo.m_EntitiesUnused && !IsValidTeleTile(Index))
 											Index = 0;
 										else if(CurOverlay == 1)
 										{
@@ -664,7 +664,7 @@ void CMapLayers::OnMapLoad()
 										Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
 										AngleRotate = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width + x].m_Angle;
-										if(!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0)
+										if(!GameClient()->m_GameInfo.m_EntitiesUnused && (!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0))
 											Index = 0;
 										else if(CurOverlay == 1)
 											Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force;
@@ -674,7 +674,7 @@ void CMapLayers::OnMapLoad()
 									if(IsTuneLayer)
 									{
 										Index = ((CTuneTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!IsValidTuneTile(Index))
+										if(!GameClient()->m_GameInfo.m_EntitiesUnused && !IsValidTuneTile(Index))
 											Index = 0;
 										Flags = 0;
 									}

@@ -88,6 +88,7 @@ public:
 	bool m_EntitiesFNG;
 	bool m_EntitiesVanilla;
 
+	bool m_EntitiesUnused;
 	bool m_Race;
 };
 
