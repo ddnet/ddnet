@@ -2610,9 +2610,10 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 		}
 		else
 		{
-			char aBuf[9];
-			str_format(aBuf, sizeof(aBuf), "Value: %d", pServer->m_aClients[pServer->m_RconClientID].m_ShowIps);
-			pServer->SendRconLine(pServer->m_RconClientID, aBuf);
+			char aStr[9];
+			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientID].m_ShowIps);
+			char aBuf[32];
+			pServer->SendRconLine(pServer->m_RconClientID, pServer->Console()->Format(aBuf, sizeof(aBuf), "server", aStr));
 		}
 	}
 }
