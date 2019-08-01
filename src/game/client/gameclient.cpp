@@ -1767,6 +1767,7 @@ void CGameClient::CClientData::Reset()
 	m_Friend = false;
 	m_Foe = false;
 	m_AuthLevel = AUTHED_NO;
+	m_Afk = false;
 	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
 	m_SkinInfo.m_ColorBody = ColorRGBA(1,1,1);
 	m_SkinInfo.m_ColorFeet = ColorRGBA(1,1,1);
