@@ -347,6 +347,7 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConDropWeapon(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);

@@ -5,6 +5,7 @@
 
 // this include should perhaps be removed
 #include "entities/character.h"
+#include "entities/weapon.h"
 #include "gamecontext.h"
 
 // player object
@@ -174,6 +175,8 @@ public:
 	int m_ChatScore;
 
 	bool m_Moderating;
+
+	std::vector< std::vector<CWeapon*> > m_vWeaponDrops;
 
 	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
 	void AfkVoteTimer(CNetObj_PlayerInput *NewTarget);

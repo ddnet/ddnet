@@ -260,6 +260,8 @@ public:
 	bool m_IsBlueTeleGunTeleport;
 	int m_StrongWeakID;
 
+	void DropWeapon(int W);
+
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };
 	void SetLastWeapon(int LastWeap) {m_LastWeapon = LastWeap; };

@@ -1395,6 +1395,21 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConDropWeapon(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter* pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	pChr->DropWeapon(pChr->GetActiveWeapon());
+}
+
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {
 #if defined(CONF_SQL)

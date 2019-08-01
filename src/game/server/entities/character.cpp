@@ -8,6 +8,7 @@
 #include "character.h"
 #include "laser.h"
 #include "projectile.h"
+#include "weapon.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -2079,7 +2080,6 @@ void CCharacter::HandleTiles(int Index)
 
 void CCharacter::HandleTuneLayer()
 {
-
 	m_TuneZoneOld = m_TuneZone;
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
@@ -2406,5 +2406,38 @@ void CCharacter::Rescue()
 			m_Core.m_HookPos = m_Core.m_Pos;
 			UnFreeze();
 		}
+	}
+}
+
+void CCharacter::DropWeapon(int W)
+{
+	if(m_FreezeTime || W == WEAPON_HAMMER || W == WEAPON_GUN || W == WEAPON_NINJA || !m_aWeapons[W].m_Got)
+		return;
+
+	if ((!m_TuneZone && !GameServer()->Tuning()->m_DropWeapons) || (m_TuneZone && !GameServer()->TuningList()[m_TuneZone].m_DropWeapons))
+		return;
+
+	if(m_pPlayer->m_vWeaponDrops[W].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
+	{
+		m_pPlayer->m_vWeaponDrops[W][0]->Reset(false);
+		m_pPlayer->m_vWeaponDrops[W].erase(m_pPlayer->m_vWeaponDrops[W].begin());
+	}
+
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	CWeapon *Weapon = new CWeapon(GameWorld(), m_pPlayer->GetCID(), W, m_Input.m_TargetX < 0 ? -1 : 1, W == WEAPON_GUN && m_Jetpack);
+	m_pPlayer->m_vWeaponDrops[W].push_back(Weapon);
+
+	if(W == WEAPON_GUN && m_Jetpack)
+	{
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun");
+		m_Jetpack = false;
+		m_Core.m_Jetpack = false;
+	}
+	else
+	{
+		m_aWeapons[W].m_Got = false;
+		m_aWeapons[W].m_Ammo = 0;
+		if (GetActiveWeapon() >= WEAPON_SHOTGUN)
+			SetActiveWeapon(WEAPON_HAMMER);
 	}
 }

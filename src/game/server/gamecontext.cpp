@@ -2728,6 +2728,15 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 
+	Tuning()->Set("drop_weapons", g_Config.m_SvDropWeapons);
+	for(int i = 0; i < NUM_TUNEZONES; i++)
+	{
+		float Temp;
+		TuningList()[i].Get("drop_weapons", &Temp);
+		if((int)Temp == -1)
+			TuningList()[i].Set("drop_weapons", g_Config.m_SvDropWeapons);
+	}
+
 	// delete old score object
 	if(m_pScore)
 		delete m_pScore;

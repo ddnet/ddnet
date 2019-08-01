@@ -55,4 +55,6 @@ CHAT_COMMAND("rescue", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConRescue, this, "Telepo
 
 CHAT_COMMAND("kill", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself")
 
+CHAT_COMMAND("drop", "", CFGFLAG_CHAT|CFGFLAG_SERVER, ConDropWeapon, this, "Drops the weapon you are holding (except gun and hammer)")
+
 #undef CHAT_COMMAND

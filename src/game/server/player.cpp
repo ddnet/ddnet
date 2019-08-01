@@ -134,6 +134,8 @@ void CPlayer::Reset()
 
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
+
+	m_vWeaponDrops.resize(NUM_WEAPONS);
 }
 
 void CPlayer::Tick()
