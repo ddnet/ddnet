@@ -708,6 +708,7 @@ static CKeyInfo gs_aKeys[] =
 	{ "Lock team", "say /lock", 0, 0 },
 	{ "Show entities", "toggle cl_overlay_entities 0 100", 0, 0 },
 	{ "Show HUD", "toggle cl_showhud 0 1", 0, 0 },
+	{ "Drop weapon", "say /drop", 0, 0 },
 };
 
 /*	This is for scripts/update_localization.py to work, don't remove!
@@ -883,14 +884,14 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// misc settings
 	{
 		MiscSettings.HSplitTop(10.0f, 0, &MiscSettings);
-		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
+		MiscSettings.HSplitTop(325.0f, &MiscSettings, 0);
 		RenderTools()->DrawUIRect(&MiscSettings, ColorRGBA(1,1,1,0.25f), CUI::CORNER_ALL, 10.0f);
 		MiscSettings.VMargin(10.0f, &MiscSettings);
 
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f*UI()->Scale()) / 2.f, 14.0f*UI()->Scale(), Localize("Miscellaneous"), -1);
 
 		MiscSettings.HSplitTop(14.0f+5.0f+10.0f, 0, &MiscSettings);
-		UiDoGetButtons(31, 43, MiscSettings, MainView);
+		UiDoGetButtons(31, 44, MiscSettings, MainView);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
