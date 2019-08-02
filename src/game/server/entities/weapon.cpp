@@ -28,11 +28,11 @@ CWeapon::CWeapon(CGameWorld *pGameWorld, int Owner, int Weapon, int Direction, b
 	GameWorld()->InsertEntity(this);
 }
 
-void CWeapon::Reset(bool EreaseWeapon, bool Picked)
+void CWeapon::Reset(bool Erase, bool Picked)
 {
 	CPlayer* pOwner = GameServer()->m_apPlayers[m_Owner];
 
-	if(EreaseWeapon && pOwner)
+	if(Erase && pOwner)
 	{
 		for(unsigned i = 0; i < pOwner->m_vWeaponDrops[m_Weapon].size(); i++)
 			if(pOwner->m_vWeaponDrops[m_Weapon][i] == this)

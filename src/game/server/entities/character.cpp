@@ -2419,7 +2419,7 @@ void CCharacter::DropWeapon(int W)
 
 	if(m_pPlayer->m_vWeaponDrops[W].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
 	{
-		m_pPlayer->m_vWeaponDrops[W][0]->Reset(false);
+		m_pPlayer->m_vWeaponDrops[W][0]->Reset(false, false);
 		m_pPlayer->m_vWeaponDrops[W].erase(m_pPlayer->m_vWeaponDrops[W].begin());
 	}
 

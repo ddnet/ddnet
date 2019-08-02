@@ -6,9 +6,10 @@
 class CWeapon : public CEntity
 {
 public:
-	CWeapon(CGameWorld *pGameWorld, int Owner, int Weapon, int Direction, bool Jetpack = false);
+	CWeapon(CGameWorld *pGameWorld, int Owner, int Weapon, int Direction, bool Jetpack);
 
-	virtual void Reset(bool EreaseWeapon = true, bool Picked = false);
+	void Reset(bool Erase, bool Picked);
+	virtual void Reset() { Reset(true, false); };
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 

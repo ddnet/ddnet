@@ -2160,13 +2160,6 @@ void CServer::ConRescue(CConsole::IResult *pResult, void *pUser)
 	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
-void CServer::ConDropWeapons(CConsole::IResult *pResult, void *pUser)
-{
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Value: %d", g_Config.m_SvDropWeapons);
-	((CConsole*)pUser)->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-}
-
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
 	if(pResult->NumArguments() > 1)
@@ -3038,7 +3031,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze");
-	pConsole->Register("sv_drop_weapons", "", CFGFLAG_SERVER, CServer::ConDropWeapons, pConsole, "Whether dropping weapons is allowed by default");
 
 	pEngine->InitLogfile();
 
