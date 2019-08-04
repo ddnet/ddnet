@@ -237,6 +237,8 @@ void CWeapon::HandleDropped()
 
 	// tiles
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
+	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
+
 	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!Indices.empty())
 		for (std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
