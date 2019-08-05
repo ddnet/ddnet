@@ -661,7 +661,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	int Target = pResult->GetVictim();
 	int Team = pResult->GetInteger(1);
 
-	if (Team < 0 || Team >= MAX_CLIENTS)
+	if (Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 		return;
 
 	if(pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED)
