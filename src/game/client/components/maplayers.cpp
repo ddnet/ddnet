@@ -634,7 +634,7 @@ void CMapLayers::OnMapLoad()
 									{
 										Flags = 0;
 										Index = ((CSwitchTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!GameClient()->m_GameInfo.m_DontMaskEntities && !IsValidSwitchTile(Index))
+										if(!IsValidSwitchTile(Index))
 											Index = 0;
 										else if(CurOverlay == 0)
 										{
@@ -650,7 +650,7 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CTeleTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
-										if(!GameClient()->m_GameInfo.m_DontMaskEntities && !IsValidTeleTile(Index))
+										if(!IsValidTeleTile(Index))
 											Index = 0;
 										else if(CurOverlay == 1)
 										{
@@ -664,7 +664,7 @@ void CMapLayers::OnMapLoad()
 										Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
 										Flags = 0;
 										AngleRotate = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width + x].m_Angle;
-										if(!GameClient()->m_GameInfo.m_DontMaskEntities && (!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0))
+										if(!IsValidSpeedupTile(Index) || ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force == 0)
 											Index = 0;
 										else if(CurOverlay == 1)
 											Index = ((CSpeedupTile*)pTiles)[y*pTMap->m_Width+x].m_Force;
@@ -674,7 +674,7 @@ void CMapLayers::OnMapLoad()
 									if(IsTuneLayer)
 									{
 										Index = ((CTuneTile*)pTiles)[y*pTMap->m_Width+x].m_Type;
-										if(!GameClient()->m_GameInfo.m_DontMaskEntities && !IsValidTuneTile(Index))
+										if(!IsValidTuneTile(Index))
 											Index = 0;
 										Flags = 0;
 									}
