@@ -21,9 +21,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_pGameServer = pGameServer;
 	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
-	m_pCharacter = 0;
 	m_NumInputs = 0;
-	m_KillMe = 0;
 	Reset();
 }
 
