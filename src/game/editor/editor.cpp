@@ -5290,6 +5290,9 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 	View.HSplitTop(20.0f, &ToolBar, &View);
 	ToolBar.Margin(2.0f, &ToolBar);
 
+	CEditorMap::CSetting *pStart = m_Map.m_lSettings.base_ptr();
+	std::sort(pStart, pStart + m_Map.m_lSettings.size(), &SortCommands);
+		
 	// do the toolbar
 	{
 		CUIRect Button;
@@ -5400,6 +5403,11 @@ void CEditor::RenderServerSettingsEditor(CUIRect View)
 		ListCur += 17.0f;
 	}
 	UI()->ClipDisable();
+}
+
+bool CEditor::SortCommands(CEditorMap::CSetting const& SettingA, CEditorMap::CSetting const& SettingB) {
+	// True if the first is less than the second
+	return strcmp(SettingA.m_aCommand, SettingB.m_aCommand) < 0;
 }
 
 int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)

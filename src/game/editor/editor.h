@@ -789,6 +789,8 @@ public:
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1,1,1,0.5f));
 
+	static bool SortCommands(CEditorMap::CSetting const& SettingA, CEditorMap::CSetting const& SettingB);
+
 	int m_Mode;
 	int m_Dialog;
 	int m_EditBoxActive;
