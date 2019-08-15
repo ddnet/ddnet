@@ -178,7 +178,7 @@ int CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 	char aBuf[4];
 	int Len = str_format(aBuf, 4, "%d", 255);
 
-	int FontSize = TextRender()->AdjustFontSize(aBuf, Len, TextureSize);
+	int FontSize = TextRender()->AdjustFontSize(aBuf, Len, TextureSize)-1;
 
 	if (FontSize < 1)
 	{
@@ -191,11 +191,12 @@ int CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 	for(int i = 0; i < 256; ++i)
 	{
 		int Len = str_format(aBuf, 4, "%d", i);
+		int XOffSet = (64-((TextureSize/3)*Len))/2;
 
 		float x = (i%16)*64;
 		float y = (i/16)*64;
 		
-		TextRender()->UploadEntityLayerText(TextureID, aBuf, Len, x, y + YOffset, FontSize);
+		TextRender()->UploadEntityLayerText(TextureID, aBuf, Len, x+XOffSet, y+YOffset, FontSize);
 	}
 
 	return TextureID;
