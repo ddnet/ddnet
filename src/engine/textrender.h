@@ -100,6 +100,7 @@ public:
 
 	virtual void UploadEntityLayerText(int TextureID, const char *pText, int Length, float x, float y, int FontHeight) = 0;
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize = -1) = 0;
+	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) = 0;
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
