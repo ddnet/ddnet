@@ -43,6 +43,7 @@ private:
 	
 	void InitOverlayTextures();
 	int UploadEntityLayerText(int TextureSize, int YOffset);
+	void UpdateEntityLayerText(int TextureID, int TextureSize, int YOffset, int NumbersPower, int MaxNumber = -1);
 };
 
 #endif

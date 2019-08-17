@@ -175,32 +175,47 @@ int CMapImages::UploadEntityLayerText(int TextureSize, int YOffset)
 	int TextureID = Graphics()->LoadTextureRaw(1024, 1024, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS);
 	free(pMem);
 
-	char aBuf[4];
-	int Len = str_format(aBuf, 4, "%d", 255);
-
-	int FontSize = TextRender()->AdjustFontSize(aBuf, Len, TextureSize);
-
-	if (FontSize < 1)
-	{
-		dbg_msg("pFont", "texture with id '%d' will not be loaded. Reason - font is too small", TextureID);
-		return TextureID;
-	}
-
-	YOffset += ((TextureSize - FontSize)/2);
-
-	for(int i = 0; i < 256; ++i)
-	{
-		int Len = str_format(aBuf, 4, "%d", i);
-
-		float x = (i%16)*64;
-		float y = (i/16)*64;
-		
-		TextRender()->UploadEntityLayerText(TextureID, aBuf, Len, x, y + YOffset, FontSize);
-	}
+	UpdateEntityLayerText(TextureID, TextureSize, YOffset, 0);
+	UpdateEntityLayerText(TextureID, TextureSize, YOffset, 1);
+	UpdateEntityLayerText(TextureID, TextureSize, YOffset, 2, 255);
 
 	return TextureID;
 }
 
+void CMapImages::UpdateEntityLayerText(int TextureID, int TextureSize, int YOffset, int NumbersPower, int MaxNumber)
+{
+	char aBuf[4];
+	int DigitsCount = NumbersPower+1;
+
+	int CurrentNumber = pow(10, NumbersPower);
+	
+	if (MaxNumber == -1)
+		MaxNumber = CurrentNumber*10-1;
+	
+	str_format(aBuf, 4, "%d", CurrentNumber);
+	
+	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize);
+	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize*0.9; // should be smoothed enough to fit any digits combination
+
+	if (UniversalSuitableFontSize < 1)
+	{
+		dbg_msg("pFont", "texture with id '%d' will not be loaded. Reason - font is too small", TextureID);
+	}
+
+	int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
+	int XOffSet = (64-ApproximateTextWidth)/2;
+	YOffset += ((TextureSize - UniversalSuitableFontSize)/2);
+
+	for (; CurrentNumber <= MaxNumber; ++CurrentNumber)
+	{
+		str_format(aBuf, 4, "%d", CurrentNumber);
+
+		float x = (CurrentNumber%16)*64;
+		float y = (CurrentNumber/16)*64;
+
+		TextRender()->UploadEntityLayerText(TextureID, aBuf, DigitsCount, x+XOffSet, y+YOffset, UniversalSuitableFontSize);
+	}
+}
 
 void CMapImages::InitOverlayTextures()
 {
