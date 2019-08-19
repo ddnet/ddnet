@@ -68,9 +68,9 @@ private:
 
 	int m_NotEligibleForFinish;
 
-	int m_HasTeleGun;
-	int m_HasTeleGrenade;
-	int m_HasTeleLaser;
+	int m_HasTelegunGun;
+	int m_HasTelegunGrenade;
+	int m_HasTelegunLaser;
 
 	// Core
 	vec2 m_CorePos;
