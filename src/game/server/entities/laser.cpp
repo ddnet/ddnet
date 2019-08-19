@@ -169,7 +169,7 @@ void CLaser::DoBounce()
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if (m_Owner >= 0 && m_Energy <= 0 && m_Pos && !m_TeleportCancelled && pOwnerChar &&
-		pOwnerChar->IsAlive() && pOwnerChar->m_HasTeleLaser && m_Type == WEAPON_RIFLE)
+		pOwnerChar->IsAlive() && pOwnerChar->HasTelegunLaser() && m_Type == WEAPON_RIFLE)
 	{
 		vec2 PossiblePos;
 		bool Found = false;

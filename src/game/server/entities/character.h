@@ -252,9 +252,6 @@ public:
 	bool m_LastRefillJumps;
 	bool m_LastPenalty;
 	bool m_LastBonus;
-	bool m_HasTeleGun;
-	bool m_HasTeleGrenade;
-	bool m_HasTeleLaser;
 	vec2 m_TeleGunPos;
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
@@ -281,6 +278,10 @@ public:
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
 	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+
+	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; };
+	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; };
+	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; };
 };
 
 enum
