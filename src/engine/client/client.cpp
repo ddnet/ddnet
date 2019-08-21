@@ -1117,7 +1117,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 
 	// stop demo recording if we loaded a new map
 	for(int i = 0; i < RECORDER_MAX; i++)
-		DemoRecorder_Stop(i);
+		DemoRecorder_Stop(i, i == RECORDER_REPLAYS);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
@@ -3534,7 +3534,7 @@ void CClient::DemoRecorder_Stop(int Recorder, bool RemoveFile)
 	m_DemoRecorder[Recorder].Stop();
 	if(RemoveFile)
 	{
-		const char *pFilename = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
+		const char *pFilename = (&m_DemoRecorder[Recorder])->GetCurrentFilename();
 		Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
 	}
 }
