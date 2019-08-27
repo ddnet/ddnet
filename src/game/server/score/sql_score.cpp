@@ -1277,7 +1277,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 	try
 	{
 		char aBuf[512];
-		if(pData->m_Num)
+		if(pData->m_Num >= 0)
 			str_format(aBuf, sizeof(aBuf), "select * from %s_maps where Server = \"%s\" and Map != \"%s\" and Stars = \"%d\" order by RAND() limit 1;", pSqlServer->GetPrefix(), g_Config.m_SvServerType, g_Config.m_SvMap, pData->m_Num);
 		else
 			str_format(aBuf, sizeof(aBuf), "select * from %s_maps where Server = \"%s\" and Map != \"%s\" order by RAND() limit 1;", pSqlServer->GetPrefix(), g_Config.m_SvServerType, g_Config.m_SvMap);
@@ -1335,7 +1335,7 @@ bool CSqlScore::RandomUnfinishedMapThread(CSqlServer* pSqlServer, const CSqlData
 	try
 	{
 		char aBuf[512];
-		if(pData->m_Num)
+		if(pData->m_Num >= 0)
 			str_format(aBuf, sizeof(aBuf), "select * from %s_maps where Server = \"%s\" and Map != \"%s\" and Stars = \"%d\" and not exists (select * from %s_race where Name = \"%s\" and %s_race.Map = %s_maps.Map) order by RAND() limit 1;", pSqlServer->GetPrefix(), g_Config.m_SvServerType, g_Config.m_SvMap, pData->m_Num, pSqlServer->GetPrefix(), pData->m_Name.ClrStr(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 		else
 			str_format(aBuf, sizeof(aBuf), "select * from %s_maps where Server = \"%s\" and Map != \"%s\" and not exists (select * from %s_race where Name = \"%s\" and %s_race.Map = %s_maps.Map) order by RAND() limit 1;", pSqlServer->GetPrefix(), g_Config.m_SvServerType, g_Config.m_SvMap, pSqlServer->GetPrefix(), pData->m_Name.ClrStr(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
