@@ -374,15 +374,10 @@ private:
 		NETADDR m_Addr;
 		int m_Expire;
 	};
-	struct CVoteMute
-	{
-		NETADDR m_Addr;
-		int m_Expire;
-	};
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
-	CVoteMute m_aVoteMutes[MAX_VOTE_MUTES];
+	CMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
 	bool TryMute(const NETADDR *pAddr, int Secs);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
