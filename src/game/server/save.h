@@ -94,7 +94,7 @@ public:
 	CSaveTeam(IGameController* Controller);
 	~CSaveTeam();
 	char* GetString();
-	int GetMembersCount() {return m_MembersCount;}
+	int GetMembersCount() { return m_MembersCount; }
 	int LoadString(const char* String);
 	int save(int Team);
 	int load(int Team);
