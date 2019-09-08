@@ -40,6 +40,7 @@ public:
 
 	class CGameWorld *GameWorld() { return m_pGameWorld; }
 	CTuningParams *Tuning() { return GameWorld()->Tuning(); }
+	CTuningParams *TuningList() { return GameWorld()->TuningList(); }
 	class CCollision *Collision() { return GameWorld()->Collision(); }
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }

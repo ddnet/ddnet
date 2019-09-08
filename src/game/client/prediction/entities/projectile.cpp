@@ -38,6 +38,8 @@ CProjectile::CProjectile
 	m_Number = Number;
 	m_Freeze = Freeze;
 
+	m_TuneZone = Collision()->IsTune(Collision()->GetMapIndex(m_Pos));
+
 	GameWorld()->InsertEntity(this);
 }
 
@@ -49,18 +51,44 @@ vec2 CProjectile::GetPos(float Time)
 	switch(m_Type)
 	{
 		case WEAPON_GRENADE:
-			Curvature = Tuning()->m_GrenadeCurvature;
-			Speed = Tuning()->m_GrenadeSpeed;
+			if(!m_TuneZone)
+			{
+				Curvature = Tuning()->m_GrenadeCurvature;
+				Speed = Tuning()->m_GrenadeSpeed;
+			}
+			else
+			{
+				Curvature = TuningList()[m_TuneZone].m_GrenadeCurvature;
+				Speed = TuningList()[m_TuneZone].m_GrenadeSpeed;
+			}
+
 			break;
 
 		case WEAPON_SHOTGUN:
-			Curvature = Tuning()->m_ShotgunCurvature;
-			Speed = Tuning()->m_ShotgunSpeed;
+			if(!m_TuneZone)
+			{
+				Curvature = Tuning()->m_ShotgunCurvature;
+				Speed = Tuning()->m_ShotgunSpeed;
+			}
+			else
+			{
+				Curvature = TuningList()[m_TuneZone].m_ShotgunCurvature;
+				Speed = TuningList()[m_TuneZone].m_ShotgunSpeed;
+			}
+
 			break;
 
 		case WEAPON_GUN:
-			Curvature = Tuning()->m_GunCurvature;
-			Speed = Tuning()->m_GunSpeed;
+			if(!m_TuneZone)
+			{
+				Curvature = Tuning()->m_GunCurvature;
+				Speed = Tuning()->m_GunSpeed;
+			}
+			else
+			{
+				Curvature = TuningList()[m_TuneZone].m_GunCurvature;
+				Speed = TuningList()[m_TuneZone].m_GunSpeed;
+			}
 			break;
 	}
 
@@ -183,6 +211,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pPr
 		Lifetime = pGameWorld->Tuning()->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_ID = ID;
+	m_TuneZone = Collision()->IsTune(Collision()->GetMapIndex(m_Pos));
 }
 
 void CProjectile::FillInfo(CNetObj_Projectile *pProj)

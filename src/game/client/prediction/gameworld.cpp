@@ -518,7 +518,11 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_pCollision = pFrom->m_pCollision;
 	m_WorldConfig = pFrom->m_WorldConfig;
 	for(int i = 0; i < 2; i++)
+	{
 		m_Core.m_Tuning[i] = pFrom->m_Core.m_Tuning[i];
+		m_Tuning[i] = pFrom->m_Tuning[i];
+	}
+	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
 	// delete the previous entities
 	for(int i = 0; i < NUM_ENTTYPES; i++)

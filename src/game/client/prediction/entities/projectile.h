@@ -59,6 +59,7 @@ private:
 
 	int m_Bouncing;
 	bool m_Freeze;
+	int m_TuneZone;
 };
 
 #endif
