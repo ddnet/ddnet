@@ -434,7 +434,7 @@ public:
 
 	bool EditorHasUnsavedData() { return m_pEditor->HasUnsavedData(); }
 
-	virtual IFriends* Foes() {return &m_Foes; }
+	virtual IFriends* Foes() { return &m_Foes; }
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 };

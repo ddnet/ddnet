@@ -126,11 +126,11 @@ public:
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };
-	void SetLastWeapon(int LastWeap) {m_LastWeapon = LastWeap; };
+	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
 	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; };
-	void SetActiveWeapon(int ActiveWeap) {m_Core.m_ActiveWeapon = ActiveWeap; };
+	void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; };
 	CCharacterCore GetCore() { return m_Core; };
-	void SetCore(CCharacterCore Core) {m_Core = Core; };
+	void SetCore(CCharacterCore Core) { m_Core = Core; };
 	CCharacterCore* Core() { return &m_Core; };
 	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
 	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
