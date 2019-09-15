@@ -87,11 +87,9 @@ void CCharacter::HandleJetpack()
 		{
 			if (m_Jetpack)
 			{
-				float Strength;
+				float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
 				if(!m_TuneZone)
 					Strength = m_LastJetpackStrength;
-				else
-					Strength = TuningList()[m_TuneZone].m_JetpackStrength;
 				TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, GetCID(), m_Core.m_ActiveWeapon);
 			}
 		}
@@ -328,11 +326,7 @@ void CCharacter::FireWeapon()
 				else
 					Dir = vec2(0.f, -1.f);
 
-				float Strength;
-				if (!m_TuneZone)
-					Strength = Tuning()->m_HammerStrength;
-				else
-					Strength = TuningList()[m_TuneZone].m_HammerStrength;
+				float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
 
 				vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 				pTarget->Core()->LimitForce(&Temp);
@@ -373,11 +367,7 @@ void CCharacter::FireWeapon()
 		{
 			if (!m_Jetpack)
 			{
-				int Lifetime;
-				if (!m_TuneZone)
-					Lifetime = (int)(GameWorld()->GameTickSpeed()*Tuning()->m_GunLifetime);
-				else
-					Lifetime = (int)(GameWorld()->GameTickSpeed()*TuningList()[m_TuneZone].m_GunLifetime);
+				int Lifetime = (int)(GameWorld()->GameTickSpeed()*GetTuning(m_TuneZone)->m_GunLifetime);
 
 				new CProjectile
 						(
@@ -400,7 +390,6 @@ void CCharacter::FireWeapon()
 		{
 			if(GameWorld()->m_WorldConfig.m_IsVanilla)
 			{
-
 				int ShotSpread = 2;
 				for(int i = -ShotSpread; i <= ShotSpread; ++i)
 				{
@@ -408,7 +397,7 @@ void CCharacter::FireWeapon()
 					float a = GetAngle(Direction);
 					a += Spreading[i+2];
 					float v = 1-(absolute(i)/(float)ShotSpread);
-					float Speed = mix((float)GameWorld()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
+					float Speed = mix((float)Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
 					new CProjectile
 						(
 						GameWorld(),
@@ -416,7 +405,7 @@ void CCharacter::FireWeapon()
 						GetCID(),//Owner
 						ProjStartPos,//Pos
 						vec2(cosf(a), sinf(a))*Speed,//Dir
-						(int)(GameWorld()->GameTickSpeed()*GameWorld()->Tuning()->m_ShotgunLifetime),//Span
+						(int)(GameWorld()->GameTickSpeed()*Tuning()->m_ShotgunLifetime),//Span
 						0,//Freeze
 						0,//Explosive
 						0,//Force
@@ -427,11 +416,7 @@ void CCharacter::FireWeapon()
 			}
 			else if(GameWorld()->m_WorldConfig.m_IsDDRace)
 			{
-				float LaserReach;
-				if (!m_TuneZone)
-					LaserReach = Tuning()->m_LaserReach;
-				else
-					LaserReach = TuningList()[m_TuneZone].m_LaserReach;
+				float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
 				new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCID(), WEAPON_SHOTGUN);
 			}
@@ -439,11 +424,7 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_GRENADE:
 		{
-			int Lifetime;
-            if (!m_TuneZone)
-				Lifetime = (int)(GameWorld()->GameTickSpeed()*Tuning()->m_GrenadeLifetime);
-            else
-				Lifetime = (int)(GameWorld()->GameTickSpeed()*TuningList()[m_TuneZone].m_GrenadeLifetime);
+			int Lifetime = (int)(GameWorld()->GameTickSpeed()*GetTuning(m_TuneZone)->m_GrenadeLifetime);
 
 			new CProjectile
 					(
@@ -463,11 +444,7 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_RIFLE:
 		{
-			float LaserReach;
-			if(!m_TuneZone)
-				LaserReach = Tuning()->m_LaserReach;
-			else
-				LaserReach = TuningList()[m_TuneZone].m_LaserReach;
+			float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
 			new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCID(), WEAPON_RIFLE);
 		} break;
@@ -489,11 +466,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-
-        if(!m_TuneZone)
-			Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
-        else
-            TuningList()[m_TuneZone].Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 
 		m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 	}
@@ -923,10 +896,7 @@ void CCharacter::HandleTuneLayer()
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
 	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(CurrentIndex) : 0;
 
-	if(m_TuneZone)
-		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
-	else
-		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = GameWorld()->m_Tuning[g_Config.m_ClDummy];
+	m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore
 }
 
 void CCharacter::DDRaceTick()

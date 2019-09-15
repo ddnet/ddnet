@@ -281,7 +281,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 
 CTuningParams *CGameWorld::Tuning()
 {
-	return &m_Core.m_Tuning[g_Config.m_ClDummy];
+	return &m_Tuning[g_Config.m_ClDummy];
 }
 
 CEntity *CGameWorld::GetEntity(int ID, int EntType)
