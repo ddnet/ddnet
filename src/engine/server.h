@@ -188,6 +188,8 @@ public:
 	virtual void SetTimeoutProtected(int ClientID) = 0;
 
 	virtual void SetErrorShutdown(const char *pReason) = 0;
+
+	virtual char *GetMapName() = 0;
 };
 
 class IGameServer : public IInterface
