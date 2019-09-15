@@ -41,16 +41,16 @@ CFileScore::~CFileScore()
 	lock_unlock(gs_ScoreLock);
 }
 
-std::string SaveFile()
+std::string CFileScore::SaveFile()
 {
 	std::ostringstream oss;
 	char aBuf[256];
-	str_copy(aBuf, g_Config.m_SvMap, sizeof(aBuf));
+	str_copy(aBuf, Server()->GetMapName(), sizeof(aBuf));
 	for(int i = 0; i < 256; i++) if(aBuf[i] == '/') aBuf[i] = '-';
 	if (g_Config.m_SvScoreFolder[0])
 		oss << g_Config.m_SvScoreFolder << "/" << aBuf << "_record.dtb";
 	else
-		oss << g_Config.m_SvMap << "_record.dtb";
+		oss << Server()->GetMapName() << "_record.dtb";
 	return oss.str();
 }
 
@@ -69,10 +69,10 @@ void CFileScore::SaveScoreThread(void *pUser)
 	CFileScore *pSelf = (CFileScore *) pUser;
 	lock_wait(gs_ScoreLock);
 	std::fstream f;
-	f.open(SaveFile().c_str(), std::ios::out);
+	f.open(pSelf->SaveFile().c_str(), std::ios::out);
 	if(f.fail())
 	{
-		dbg_msg("filescore", "opening '%s' for writing failed", SaveFile().c_str());
+		dbg_msg("filescore", "opening '%s' for writing failed", pSelf->SaveFile().c_str());
 	}
 	else
 	{

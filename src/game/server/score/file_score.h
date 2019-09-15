@@ -86,6 +86,9 @@ public:
 	virtual void LoadTeam(const char* Code, int ClientID);
 
 	virtual void OnShutdown();
+
+private:
+	std::string SaveFile();
 };
 
 #endif // GAME_SERVER_SCORE_FILE_SCORE_H
