@@ -297,11 +297,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 		Item.m_Width = pImg->m_Width;
 		Item.m_Height = pImg->m_Height;
-		Item.m_External = pImg->m_External;
+		Item.m_External = false;
 		Item.m_ImageName = df.AddData(str_length(pImg->m_aName)+1, pImg->m_aName);
-		if(pImg->m_External)
-			Item.m_ImageData = -1;
-		else
 		{
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
 			{

@@ -4126,6 +4126,15 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 	Item.m_StorageType = StorageType;
 	pEditor->m_FileList.add(Item);
 
+	pEditor->Reset();
+	if(!IsDir)
+	{
+		char aPath[512];
+		str_format(aPath, sizeof(aPath), "maps/%s", pName);
+		pEditor->m_Map.Load(pEditor->Kernel()->RequestInterface<IStorage>(), aPath, StorageType);
+		pEditor->m_Map.Save(pEditor->Kernel()->RequestInterface<IStorage>(), pName);
+	}
+
 	return 0;
 }
 
