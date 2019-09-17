@@ -88,6 +88,11 @@ public:
 	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);
 	void Clear();
 
+	CTuningParams m_Tuning[2];
+	CTuningParams *m_pTuningList;
+	CTuningParams *TuningList() { return m_pTuningList; }
+	CTuningParams *GetTuning(int i) { return i == 0 ? Tuning() : &TuningList()[i]; }
+
 private:
 	void RemoveEntities();
 

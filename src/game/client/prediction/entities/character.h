@@ -88,6 +88,7 @@ public:
 		DISABLE_HIT_RIFLE=8
 	};
 	int m_Hit;
+	int m_TuneZone;
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
 	int m_TeleCheckpoint;
@@ -207,6 +208,7 @@ private:
 	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
 	void DDRacePostCoreTick();
+	void HandleTuneLayer();
 
 	int m_StrongWeakID;
 };

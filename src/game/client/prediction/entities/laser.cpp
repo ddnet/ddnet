@@ -20,6 +20,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TelePos = vec2(0,0);
 	m_WasTele = false;
 	m_Type = Type;
+	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -45,7 +46,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		vec2 Temp;
 
-		float Strength = GameWorld()->Tuning()->m_ShotgunStrength;;
+		float Strength = GetTuning(m_TuneZone)->m_ShotgunStrength;
 
 		if(!g_Config.m_SvOldLaser)
 			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
@@ -119,12 +120,12 @@ void CLaser::DoBounce()
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
 
-			m_Energy -= distance(m_From, m_Pos) + GameWorld()->Tuning()->m_LaserBounceCost;
+			m_Energy -= distance(m_From, m_Pos) + GetTuning(m_TuneZone)->m_LaserBounceCost;
 
 			m_Bounces++;
 			m_WasTele = false;
 
-			int BounceNum = GameWorld()->Tuning()->m_LaserBounceNum;
+			int BounceNum = GetTuning(m_TuneZone)->m_LaserBounceNum;
 
 			if(m_Bounces > BounceNum)
 				m_Energy = -1;
@@ -143,7 +144,7 @@ void CLaser::DoBounce()
 
 void CLaser::Tick()
 {
-	float Delay = GameWorld()->Tuning()->m_LaserBounceDelay;
+	float Delay = GetTuning(m_TuneZone)->m_LaserBounceDelay;
 
 	if(GameWorld()->m_WorldConfig.m_IsVanilla) // predict old physics on vanilla 0.6 servers
 	{
@@ -165,8 +166,9 @@ CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser)
 	m_From.x = pLaser->m_FromX;
 	m_From.y = pLaser->m_FromY;
 	m_EvalTick = pLaser->m_StartTick;
+	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	m_Owner = -2;
-	m_Energy = pGameWorld->Tuning()->m_LaserReach;
+	m_Energy = GetTuning(m_TuneZone)->m_LaserReach;
 	if(pGameWorld->m_WorldConfig.m_IsFNG && m_Energy < 10.f)
 		m_Energy = 800.0f;
 

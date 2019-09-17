@@ -38,6 +38,8 @@ CProjectile::CProjectile
 	m_Number = Number;
 	m_Freeze = Freeze;
 
+	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
+
 	GameWorld()->InsertEntity(this);
 }
 
@@ -45,22 +47,23 @@ vec2 CProjectile::GetPos(float Time)
 {
 	float Curvature = 0;
 	float Speed = 0;
+	CTuningParams *pTuning = GetTuning(m_TuneZone);
 
 	switch(m_Type)
 	{
 		case WEAPON_GRENADE:
-			Curvature = Tuning()->m_GrenadeCurvature;
-			Speed = Tuning()->m_GrenadeSpeed;
+			Curvature = pTuning->m_GrenadeCurvature;
+			Speed = pTuning->m_GrenadeSpeed;
 			break;
 
 		case WEAPON_SHOTGUN:
-			Curvature = Tuning()->m_ShotgunCurvature;
-			Speed = Tuning()->m_ShotgunSpeed;
+			Curvature = pTuning->m_ShotgunCurvature;
+			Speed = pTuning->m_ShotgunSpeed;
 			break;
 
 		case WEAPON_GUN:
-			Curvature = Tuning()->m_GunCurvature;
-			Speed = Tuning()->m_GunSpeed;
+			Curvature = pTuning->m_GunCurvature;
+			Speed = pTuning->m_GunSpeed;
 			break;
 	}
 
@@ -169,18 +172,19 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CNetObj_Projectile *pPr
 	}
 	m_Type = m_Weapon = pProj->m_Type;
 	m_StartTick = pProj->m_StartTick;
+	m_TuneZone = GameWorld()->m_WorldConfig.m_PredictTiles ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
 	int Lifetime = 20 * GameWorld()->GameTickSpeed();
 	m_SoundImpact = -1;
 	if(m_Weapon == WEAPON_GRENADE)
 	{
-		Lifetime = pGameWorld->Tuning()->m_GrenadeLifetime * GameWorld()->GameTickSpeed();
+		Lifetime = GetTuning(m_TuneZone)->m_GrenadeLifetime * GameWorld()->GameTickSpeed();
 		m_SoundImpact = SOUND_GRENADE_EXPLODE;
 	}
 	else if(m_Weapon == WEAPON_GUN)
-		Lifetime = pGameWorld->Tuning()->m_GunLifetime * GameWorld()->GameTickSpeed();
+		Lifetime = GetTuning(m_TuneZone)->m_GunLifetime * GameWorld()->GameTickSpeed();
 	else if(m_Weapon == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
-		Lifetime = pGameWorld->Tuning()->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
+		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_ID = ID;
 }
