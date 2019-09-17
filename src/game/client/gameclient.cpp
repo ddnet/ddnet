@@ -1763,7 +1763,7 @@ void CGameClient::CClientData::Reset()
 	m_aName[0] = 0;
 	m_aClan[0] = 0;
 	m_Country = -1;
-	m_SkinID = 0;
+	m_SkinID = -1;
 	m_Team = 0;
 	m_Angle = 0;
 	m_Emoticon = 0;
@@ -1776,7 +1776,7 @@ void CGameClient::CClientData::Reset()
 	m_Afk = false;
 	m_Paused = false;
 	m_Spec = false;
-	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(0)->m_ColorTexture;
+	m_SkinInfo.m_Texture = g_GameClient.m_pSkins->Get(-1)->m_OrgTexture;
 	m_SkinInfo.m_ColorBody = ColorRGBA(1,1,1);
 	m_SkinInfo.m_ColorFeet = ColorRGBA(1,1,1);
 
