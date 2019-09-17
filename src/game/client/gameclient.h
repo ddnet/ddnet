@@ -476,7 +476,7 @@ private:
 	};
 	void LoadMapSettings();
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	CTuningParams *TuningList() { return &m_aTuningList[0]; }
+	CTuningParams *TuningList() { return m_aTuningList; }
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
