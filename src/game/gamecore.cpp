@@ -601,14 +601,12 @@ bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 	return false;
 }
 
-void CCharacterCore::LimitVel(vec2 *pVel)
+vec2 CCharacterCore::LimitVel(vec2 Vel)
 {
-	*pVel = ClampVel(m_MoveRestrictions, *pVel);
+	return ClampVel(m_MoveRestrictions, Vel);
 }
 
 void CCharacterCore::ApplyForce(vec2 Force)
 {
-	vec2 Temp = m_Vel + Force;
-	LimitVel(&Temp);
-	m_Vel = Temp;
+	m_Vel = LimitVel(m_Vel + Force);
 }

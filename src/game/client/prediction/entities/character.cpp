@@ -325,7 +325,7 @@ void CCharacter::FireWeapon()
 				float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
 
 				vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-				pTarget->Core()->LimitVel(&Temp);
+				Temp = pTarget->Core()->LimitVel(Temp);
 				Temp -= pTarget->m_Core.m_Vel;
 
 				vec2 Force = vec2(0.f, -1.0f) + Temp;
@@ -649,8 +649,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 			}
 			else
 				TempVel += Direction * Force;
-			m_Core.LimitVel(&TempVel);
-			m_Core.m_Vel = TempVel;
+			m_Core.m_Vel = m_Core.LimitVel(TempVel);
 		}
 	}
 }
