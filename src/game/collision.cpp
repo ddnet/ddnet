@@ -164,6 +164,7 @@ enum
 
 static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 {
+	Flags = Flags&(TILEFLAG_VFLIP|TILEFLAG_HFLIP|TILEFLAG_ROTATE);
 	switch(Tile)
 	{
 	case TILE_STOP:
@@ -173,6 +174,11 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		case ROTATION_90: return CANTMOVE_LEFT;
 		case ROTATION_180: return CANTMOVE_UP;
 		case ROTATION_270: return CANTMOVE_RIGHT;
+
+		case TILEFLAG_HFLIP^ROTATION_0: return CANTMOVE_UP;
+		case TILEFLAG_HFLIP^ROTATION_90: return CANTMOVE_RIGHT;
+		case TILEFLAG_HFLIP^ROTATION_180: return CANTMOVE_DOWN;
+		case TILEFLAG_HFLIP^ROTATION_270: return CANTMOVE_LEFT;
 		}
 		break;
 	case TILE_STOPS:
@@ -180,9 +186,13 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		{
 		case ROTATION_0:
 		case ROTATION_180:
+		case TILEFLAG_HFLIP^ROTATION_0:
+		case TILEFLAG_HFLIP^ROTATION_180:
 			return CANTMOVE_DOWN|CANTMOVE_UP;
 		case ROTATION_90:
 		case ROTATION_270:
+		case TILEFLAG_HFLIP^ROTATION_90:
+		case TILEFLAG_HFLIP^ROTATION_270:
 			return CANTMOVE_LEFT|CANTMOVE_RIGHT;
 		}
 		break;
