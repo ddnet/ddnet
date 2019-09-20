@@ -3045,30 +3045,22 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			bool Shift = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+			int Step = Shift ? 1 : 45;
 			int Value = pProps[i].m_Value;
-			const void *activeItem = UI()->ActiveItem();
-			if(!Shift && UI()->MouseButton(0) && (activeItem == &pIDs[i] || activeItem == &pIDs[i]+1 || activeItem == &pIDs[i]+2))
-				Value = (Value / 45) * 45;
-			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", Value, pProps[i].m_Min, Shift ? pProps[i].m_Max : 315, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
-			if(NewValue != pProps[i].m_Value)
-			{
-				*pNewVal = NewValue;
-				Change = i;
-			}
+
+			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", Value, pProps[i].m_Min, pProps[i].m_Max, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
 			if(DoButton_ButtonDec(&pIDs[i]+1, 0, 0, &Dec, 0, "Decrease"))
 			{
-				if(!Shift)
-					*pNewVal = pProps[i].m_Value - 45;
-				else
-					*pNewVal = pProps[i].m_Value - 1;
-				Change = i;
+				NewValue = (round_ceil((pProps[i].m_Value / (float)Step)) - 1) * Step;
+				if(NewValue < 0)
+					NewValue += 360;
 			}
 			if(DoButton_ButtonInc(&pIDs[i]+ 2, 0, 0, &Inc, 0, "Increase"))
+				NewValue = (pProps[i].m_Value + Step) / Step * Step;
+
+			if(NewValue != pProps[i].m_Value)
 			{
-				if(!Shift)
-					*pNewVal = pProps[i].m_Value + 45;
-				else
-					*pNewVal = pProps[i].m_Value + 1;
+				*pNewVal = NewValue % 360;
 				Change = i;
 			}
 		}

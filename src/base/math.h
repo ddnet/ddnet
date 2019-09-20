@@ -3,6 +3,7 @@
 #ifndef BASE_MATH_H
 #define BASE_MATH_H
 
+#include <math.h>
 #include <stdlib.h>
 
 template <typename T>
@@ -30,6 +31,11 @@ inline int round_to_int(float f)
 inline int round_truncate(float f)
 {
 	return (int)f;
+}
+
+inline int round_ceil(float f)
+{
+	return (int)ceilf(f);
 }
 
 template<typename T, typename TB>
