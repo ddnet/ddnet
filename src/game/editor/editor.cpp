@@ -828,6 +828,12 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 					s_Value = fmod(s_Value, Scale);
 					Current += Step*Count;
 					Current = clamp(Current, Min, Max);
+
+					// Constrain to discrete steps
+					if(Count > 0)
+						Current = Current / Step * Step;
+					else
+						Current = round_ceil(Current / (float)Step) * Step;
 				}
 			}
 			if(pToolTip && !s_TextMode)
