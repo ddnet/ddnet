@@ -1094,9 +1094,9 @@ public:
 	~CLayerSpeedup();
 
 	CSpeedupTile *m_pSpeedupTile;
-	unsigned char m_SpeedupForce;
-	unsigned char m_SpeedupMaxSpeed;
-	unsigned char m_SpeedupAngle;
+	int m_SpeedupForce;
+	int m_SpeedupMaxSpeed;
+	int m_SpeedupAngle;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
