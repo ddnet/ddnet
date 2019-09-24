@@ -700,7 +700,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		// No sound yet
 	}
-	else if(Highlighted)
+	else if(Highlighted && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq()*3/10)
 		{
