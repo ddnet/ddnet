@@ -3459,7 +3459,7 @@ void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void 
 	}
 }
 
-const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
+const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType, bool DemoRender)
 {
 	int Crc;
 	const char *pError;
@@ -3505,7 +3505,14 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	// enter demo playback state
 	SetState(IClient::STATE_DEMOPLAYBACK);
 
-	m_DemoPlayer.Play();
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render", DemoRender?"true":"false");
+	if (DemoRender)
+	{
+		m_DemoRender = true;
+		this->CClient::Con_StartVideo(NULL, this);
+	}
+	if(m_DemoPlayer.Play() == 0)
+	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
 	GameClient()->OnEnterGame();
 
 	return 0;
@@ -3514,7 +3521,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
+	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL, false);
 }
 
 void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)
