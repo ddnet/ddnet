@@ -778,6 +778,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 void CClient::Disconnect()
 {
+	m_ButtonRender = false;
 	if(m_DummyConnected)
 		DummyDisconnect(0);
 	if(m_State != IClient::STATE_OFFLINE)
@@ -2515,6 +2516,8 @@ void CClient::Update()
 			IVideo::Current()->nextVideoFrame();
 		}
 	}
+	else if(m_ButtonRender)
+		Disconnect();
 #endif
 
 
@@ -3573,6 +3576,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 
 	// enter demo playback state
 	SetState(IClient::STATE_DEMOPLAYBACK);
+	m_ButtonRender = true;
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();

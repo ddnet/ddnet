@@ -122,6 +122,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_UseTempRconCommands;
 	char m_Password[32];
 	bool m_SendPassword;
+	bool m_ButtonRender=false;
 
 	// version-checking
 	char m_aVersionStr[10];
