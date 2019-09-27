@@ -287,7 +287,6 @@ public:
 	virtual bool DummyConnecting();
 	int m_DummyConnected;
 	int m_LastDummyConnectTime;
-	bool m_DemoRender = false;
 
 	virtual void GetServerInfo(CServerInfo *pServerInfo);
 	void ServerInfoRequest();
@@ -362,6 +361,7 @@ public:
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
 
 #if defined(CONF_VIDEORECORDER)
+	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideName);
 	static void Con_StartVideo(IConsole::IResult *pResult, void *pUserData);
 	static void Con_StopVideo(IConsole::IResult *pResult, void *pUserData);
 #endif
@@ -391,7 +391,8 @@ public:
 
 	void RegisterCommands();
 
-	const char *DemoPlayer_Play(const char *pFilename, int StorageType, bool DemoRender);
+	const char *DemoPlayer_Play(const char *pFilename, int StorageType);
+	const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName);
 	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder);
 	void DemoRecorder_HandleAutoStart();
 	void DemoRecorder_StartReplayRecorder();

@@ -3317,7 +3317,24 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 
 	if (!IVideo::Current())
 	{
-		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight());
+		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), NULL);
+		IVideo::Current()->start();
+	}
+	else
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
+}
+
+void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName)
+{
+	CClient *pSelf = (CClient *)pUserData;
+
+	if (pSelf->State() != IClient::STATE_DEMOPLAYBACK)
+		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Can not start videorecorder outside of demoplayer.");
+
+	//pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render", pVideoName);
+	if (!IVideo::Current())
+	{
+		new CVideo((CGraphics_Threaded*)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
 		IVideo::Current()->start();
 	}
 	else
@@ -3459,7 +3476,7 @@ void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void 
 	}
 }
 
-const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType, bool DemoRender)
+const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
 	int Crc;
 	const char *pError;
@@ -3505,23 +3522,24 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType, boo
 	// enter demo playback state
 	SetState(IClient::STATE_DEMOPLAYBACK);
 
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render", DemoRender?"true":"false");
-	if (DemoRender)
-	{
-		m_DemoRender = true;
-		this->CClient::Con_StartVideo(NULL, this);
-	}
-	if(m_DemoPlayer.Play() == 0)
+	m_DemoPlayer.Play();
 	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
 	GameClient()->OnEnterGame();
 
 	return 0;
 }
 
+const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName)
+{
+	DemoPlayer_Play(pFilename, StorageType);
+	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", pVideoName);
+	this->CClient::StartVideo(NULL, this, pVideoName);
+}
+
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL, false);
+	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
 }
 
 void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)

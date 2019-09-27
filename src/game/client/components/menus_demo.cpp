@@ -1245,7 +1245,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-				const char *pError = Client()->DemoPlayer_Play(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, false);
+				const char *pError = Client()->DemoPlayer_Play(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType);
 				if(pError)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 				else
@@ -1285,14 +1285,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		static int s_RenderButton = 0;
 		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect))
 		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-			const char *pError = Client()->DemoPlayer_Play(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, true);
-			if(pError)
-				PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
-			else
+			if(m_DemolistSelectedIndex >= 0)
 			{
+				//char aBuf[512];
+				//str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
 				UI()->SetActiveItem(0);
+				m_Popup = POPUP_RENDER_DEMO;
+				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 				return;
 			}
 			/*
